@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+<basicConfig>
+    <zstackPkg>$zstackPkg</zstackPkg>
+    <zstackInstallScript>$zstackInstallScript</zstackInstallScript>
+    <zstackInstallPath>$zstackInstallPath</zstackInstallPath>
+	<zstackProperties>$zstackPropertiesPath</zstackProperties>
+	<testAgent testAgentMasterName="$masterName">$zstackTestAgentPkgPath</testAgent>
+	<db>
+		<username>$DBUserName</username>
+	</db>
+    <rabbitmq>
+        <server>$rabbitmqServerIp</server>
+        <password>$hostPassword</password>
+    </rabbitmq>
+</basicConfig>
+<deployerConfig xmlns="http://zstack.org/schema/zstack">
+	<instanceOfferings>
+		<instanceOffering name="$instanceOfferingName_s"
+			description="Test" memoryCapacity="$instanceOfferingMemory_s" cpuNum="$instanceOfferingCpuNum_s" cpuSpeed="$instanceOfferingCpuSpeed_s" />
+	</instanceOfferings>
+
+	<backupStorages>
+		<sftpBackupStorage name="$sftpBackupStorageName"
+			description="Test" url="$sftpBackupStorageUrl" username="$sftpBackupStorageUsername" password="$sftpBackupStoragePassword" hostname="$sftpBackupStorageHostname"/>
+	</backupStorages>
+	
+	<images>
+		<image name="$imageName_s" description="Test" format="$imageFormat" url="$imageUrl_s" hypervisorType="$imageHypervisorType">
+			<backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+		</image>
+	</images>
+
+	<diskOffering name="$rootDiskOfferingName" description="Test"
+		diskSize="$rootDiskOfferingSize" />
+    <diskOffering name="$smallDiskOfferingName" description="Small Disk Offering"
+        diskSize="$smallDiskOfferingSize" />
+
+	<zones>
+		<zone name="$zoneName" description="Test">
+			<clusters>
+				<cluster name="$clusterName" description="Test" hypervisorType="$clusterHypervisorType">
+					<hosts>
+						<host name="$hostName" description="Test"
+							managementIp="$hostIp" username="$hostUsername" password="$hostPassword" />
+					</hosts>
+					<primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
+					<l2NetworkRef>$l2BasicNetworkName</l2NetworkRef>
+				</cluster>
+			</clusters>
+
+			<l2Networks>
+				<l2NoVlanNetwork name="$l2BasicNetworkName" description="Test"
+					physicalInterface="$l2NetworkPhysicalInterface">
+					<l3Networks>
+						<l3BasicNetwork name="$l3PublicNetworkName" description="Test">
+							<ipRange name="$ipRangeName" description="Test" startIp="$ipRangeStartIp"
+								endIp="$ipRangeEndIp" gateway="$ipRangeGateway" netmask="$ipRangeNetmask" />
+						</l3BasicNetwork>
+					</l3Networks>
+				</l2NoVlanNetwork>
+			</l2Networks>
+			
+			<primaryStorages>
+				<nfsPrimaryStorage name="$nfsPrimaryStorageName"
+					description="Test" url="$nfsPrimaryStorageUrl" />
+			</primaryStorages>
+			
+			<backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+		</zone>
+	</zones>
+</deployerConfig>
+</config>

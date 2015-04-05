@@ -1,0 +1,13 @@
+<integrationTest>
+<!--
+    <suite name="virtual router test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" parallel='4'> 
+    <suite name="virtual router test">
+    <suite name="virtual router test" setupCase="suite_setup.py" > 
+        <case>test_guest_vm_dhcp_dns.py</case>
+        <case>test_guest_vm_dhcp_reboot.py</case>
+        <case repeat='1'>test_guest_vm_snat.py</case>
+        <case timeout='600'>test_guest_vm_dhcp_dns.py</case>
+-->
+    <suite name="virtual router test" teardownCase="suite_teardown.py">
+    </suite>
+</integrationTest>

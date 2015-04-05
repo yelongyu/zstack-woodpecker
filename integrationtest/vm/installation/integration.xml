@@ -1,0 +1,7 @@
+<integrationTest>
+    <suite name="zstack installation test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" parallel="2">
+        <case timeout="3600" >test_zstack_installation_on_centos6.py</case>
+        <case timeout="3600" >test_zstack_installation_on_centos7.py</case>
+        <case timeout="3600" >test_zstack_installation_on_ubuntu.py</case>
+    </suite>
+</integrationTest>

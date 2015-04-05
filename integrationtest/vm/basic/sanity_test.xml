@@ -1,0 +1,9 @@
+<integrationTest>
+    <suite name="vm basic sanity test" setupCase="suite_setup.py" teardownCase="suite_teardown.py">
+        <case timeout="100" >test_create_vm.py</case>
+        <case timeout="100" >test_destroy_vm.py</case>
+        <case timeout="100" >test_start_vm.py</case>
+        <case timeout="100" >test_reboot_vm.py</case>
+        <case timeout="100" >test_stop_vm.py</case>
+    </suite>
+</integrationTest>

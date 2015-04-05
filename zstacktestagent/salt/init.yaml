@@ -1,0 +1,36 @@
+{% import 'zstacklib/utils.sls' as utils with context %}
+
+include:
+  - zstacklib
+
+testagent_pkgs:
+  pkg.installed:
+    - pkgs:
+{% if grains['os'] == 'RedHat' or grains['os'] == 'CentOS' or grains['os'] == 'Fedora' %}
+      - openssh-clients
+{% elif grains['os'] == 'Ubuntu' %}
+      - openssh-client
+{% endif %}
+      - openssh-server
+
+{% set egg = '/var/lib/zstack/zstacktestagent/zstacktestagent-0.1.0.tar.gz' %}
+{{egg}}:
+  file.managed:
+    - source: salt://zstacktestagent/zstacktestagent-0.1.0.tar.gz
+
+/etc/init.d/zstack-testagent:
+  file.managed:
+    - source: salt://zstacktestagent/zstack-testagent
+    - mode: 755
+
+{{ utils.pip_install('testagent', file=egg, pkg_name='zstacktestagent') }}
+
+testagent_service:
+  service:
+    - name: zstack-testagent
+    - running
+    - enable: True
+    - watch:
+      - cmd: testagent_install
+      - cmd: testagent_reinstall
+      - file: /etc/init.d/zstack-testagent

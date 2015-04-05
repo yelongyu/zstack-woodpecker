@@ -1,0 +1,82 @@
+<integrationTest>
+    <suite name="virtual router test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
+        <case timeout='800' repeat='1'>novlan/test_create_vm.py</case>
+        <case timeout='800' repeat='1'>novlan/test_reboot_vm.py</case>
+        <case timeout='800' repeat='1'>novlan/test_ping_vms.py</case>
+        <case timeout='800' repeat='1'>vlan/test_create_vm.py</case>
+        <case timeout='800' repeat='1'>vlan/test_reboot_vm.py</case>
+        <case timeout='800' repeat='1'>vlan/test_snat_create.py</case>
+        <case timeout='800' repeat='1'>vlan/test_dnat_reboot.py</case>
+        <case timeout='800' repeat='1'>vlan/test_ping_vms.py</case>
+        <case timeout='800' repeat='1'>vlan/test_create_3vms.py</case>
+        <case timeout='800' repeat='1'>vlan/test_start_vm.py</case>
+        <case timeout='800' repeat='1'>vlan/test_3l3s_vm.py</case>
+        <case timeout='600' repeat='1'>vlan/test_remove_dhcp.py</case>
+        <case timeout='800' repeat='1'>vlan/test_2l3_vm.py</case>
+        <case timeout='800' repeat='1'>vlan/test_crt_vms_with_limited_ips.py</case>
+        <case timeout='800' repeat='2' noparallel='True'>vlan/test_crt_vms_with_limited_ips2.py</case>
+        <case timeout='800' repeat='1'>vlan/test_start_vms_simultaneously.py</case>
+        <case timeout='600' repeat='1'>volume/test_add_volume.py</case>
+        <case timeout='900' repeat='1'>volume/test_add_m_vols.py</case>
+        <case timeout='800' repeat='1'>volume/test_add_volume_vr.py</case>
+        <case timeout='600' repeat='1'>volume/test_crt_vm_volume.py</case>
+        <case timeout='700' repeat='1'>volume/test_crt_vm_2_volumes.py</case>
+        <case timeout='700' repeat='1'>volume/test_crt_vm_24_volumes.py</case>
+        <case timeout='700' repeat='1'>volume/test_volume_ops_on_stopped_vm.py</case>
+        <case timeout='700' repeat='1'>volume/test_crt_vm_from_dvt.py</case>
+        <case timeout='800' repeat='1'>template_image/test_crt_temp_image.py</case>
+        <case timeout='700' repeat='1'>template_image/test_del_temp_image.py</case>
+        <case timeout='1200' repeat='1'>sg/test_ingress.py</case>
+        <case timeout='1200' repeat='1'>sg/test_egress.py</case>
+        <case timeout='1000' repeat='1'>sg/test_icmp.py</case>
+        <case timeout='800'  repeat='1'>sg/test_udp.py</case>
+        <case timeout='1200' repeat='1'>sg/test_stopped_vm.py</case>
+        <case timeout='1200' repeat='1'>sg/test_vm_ops.py</case>
+        <case timeout='1200' repeat='1'>sg/test_2vm_egress.py</case>
+        <case timeout='1200' repeat='1'>sg/test_2vm_ingress.py</case>
+        <case timeout='2000' repeat='1'>sg/test_4vm_complx.py</case>
+        <case timeout='1000' repeat='1' noparallel='True'>sg/test_detach_l3.py</case>
+        <case timeout='800'  repeat='1' noparallel='True'>pf/test_2l3s_pfs.py</case>
+        <case timeout='800'  repeat='1'>pf/test_attach_pf.py</case>
+        <case timeout='800'  repeat='1'>pf/test_delete_pf_after_destroy_vm.py</case>
+        <case timeout='800'  repeat='1'>pf/test_del_vip_before_add_pf_to_vm.py</case>
+        <case timeout='800'  repeat='1' noparallel='True'>pf/test_multi_pfs_sg_tcp.py</case>
+        <case timeout='800'  repeat='1'>pf/test_multi_rules.py</case>
+        <case timeout='800'  repeat='1'>pf/test_pf_after_destroy_vm.py</case>
+        <case timeout='800'  repeat='1' noparallel='True'>pf/test_pf_sg_tcp.py</case>
+        <case timeout='800'  repeat='1' noparallel='True'>pf/test_pfs_tcp_udp_same_vip_ports.py</case>
+        <case timeout='800'  repeat='1' noparallel='True'>pf/test_pfs_tcp_with_same_vip.py</case>
+        <case timeout='800'  repeat='1'>pf/test_tcp.py</case>
+        <case timeout='800'  repeat='1'>pf/test_udp.py</case>
+        <case timeout='800'  repeat='1'>pf/test_vm_ops.py</case>
+        <case timeout='800'  repeat='1'>eip/test_2_eips.py</case>
+        <case timeout='800'  repeat='1' noparallel='True'>eip/test_2l3s_eip_pf.py</case>
+        <case timeout='800'  repeat='1' noparallel='True'>eip/test_2l3s_eips.py</case>
+        <case timeout='800'  repeat='1'>eip/test_attach_eip.py</case>
+        <case timeout='800'  repeat='1'>eip/test_create_eip_vm.py</case>
+        <case timeout='800'  repeat='1'>eip/test_del_vip_before_add_eip_to_vm.py</case>
+        <case timeout='800'  repeat='1' noparallel='True'>eip/test_eip_sg_tcp.py</case>
+        <case timeout='800'  repeat='1'>eip/test_pf_eip_attach.py</case>
+        <case timeout='800'  repeat='1'>eip/test_vm_ops.py</case>
+        <case timeout='800'  repeat='1'>eip/test_vm_ops2.py</case>
+        <case timeout='800'  repeat='1'>snapshot/test_backup_snapshot.py</case>
+        <case timeout='2400' repeat='1' noparallel='True'>snapshot/test_create_100_snapshots.py</case>
+        <case timeout='800'  repeat='1'>snapshot/test_create_snapshot.py</case>
+        <case timeout='800'  repeat='1'>snapshot/test_create_sp_after_delete.py</case>
+        <case timeout='800'  repeat='1'>snapshot/test_create_image_by_snapshot.py</case>
+        <case timeout='800'  repeat='1'>snapshot/test_crt_sp_for_both_root_data_vol.py</case>
+        <case timeout='800'  repeat='1'>snapshot/test_crt_sp_in_stopped_vm2.py</case>
+        <case timeout='800'  repeat='1'>snapshot/test_crt_sp_in_stopped_vm3.py</case>
+        <case timeout='800'  repeat='1'>snapshot/test_crt_sp_in_stopped_vm.py</case>
+        <case timeout='800'  repeat='1'>snapshot/test_delete_snapshot_on_running_vm.py</case>
+        <case timeout='800'  repeat='1'>snapshot/test_crt_sp_in_live_vm.py</case>
+        <case timeout='800'  repeat='1'>snapshot/test_crt_sp_from_vol_crt_from_img.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>snapshot/test_change_max_sp_depth.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>snapshot/test_change_max_sp_depth_live_vm.py</case>
+        <case timeout='400'  repeat='1'>regression/delete_sg_with_2_attached_nics.py</case>
+        <case timeout='400'  repeat='1'>regression/rm_nic_sg_on_stopped_vm.py</case>
+        <case timeout='600'  repeat='1'>regression/test_data_volume_with_vm_ops.py</case>
+        <case timeout='400'  repeat='1' noparallel='True'>vr/test_ping_vms_reboot_vr.py</case>
+        <case timeout='400'  repeat='1' noparallel='True'>vr/test_start_vrs_simultaneously.py</case>
+    </suite>
+</integrationTest>

@@ -1,0 +1,7 @@
+Execution steps:
+
+1. zstack-woodpeck -f start.xml -c test-config-for-simulator.xml
+
+2. zstack-woodpeck -f create_1m_sim_vm.xml
+
+You might need to adjust zstack-woodpecker default case time out from 1800 to 3600 or longer to avoid suite_setup.py timeout .

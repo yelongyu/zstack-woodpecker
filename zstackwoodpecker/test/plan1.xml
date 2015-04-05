@@ -1,0 +1,9 @@
+<plan>
+	<war>~/zstack.war</war>
+	<catalinaHome>~/apache-tomcat-7.0.32</catalinaHome>
+	<deployConfig>deploy.xml</deployConfig>
+	
+	<db>
+		<username>root</username>
+	</db>
+</plan>

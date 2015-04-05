@@ -1,0 +1,4 @@
+<integrationTest>
+    <suite name="test utility" teardownCase="destroy_user_vms.py">
+    </suite>
+</integrationTest>

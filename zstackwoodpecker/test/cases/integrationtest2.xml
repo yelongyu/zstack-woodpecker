@@ -1,0 +1,6 @@
+<integrationTest>
+    <suite name="test suite 2" setupCase="setupcase.py" teardownCase='teardowncase.py' timeout="1000">
+        <case timeout="1000">test1.py</case>
+        <case timeout="1000">test2.py</case>
+    </suite>
+</integrationTest>

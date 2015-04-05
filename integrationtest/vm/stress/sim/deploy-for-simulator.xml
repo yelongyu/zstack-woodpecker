@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+<basicConfig>
+	<war>~/sanitytest/zstack.war</war>
+	<catalinaHome>~/apache-tomcat</catalinaHome>
+	
+	<zstackProperties>~/sanitytest/conf/zstack.properties</zstackProperties>
+	<testAgentPuppet puppetMasterCertname="zstack1">~/sanitytest/zstacktestagent.tar.bz2</testAgentPuppet>
+	
+<!--	
+	<elasticSearch>
+		<home>~/elasticsearch</home>
+		<reindex />
+	</elasticSearch>
+-->	
+	
+	<db>
+		<username>root</username>
+	</db>
+</basicConfig>
+<deployerConfig xmlns="http://zstack.org/schema/zstack">
+	<instanceOfferings>
+		<instanceOffering name="$instanceOfferingName"
+			description="Test" memoryCapacity="$instanceOfferingMemory" cpuNum="$instanceOfferingCpuNum"
+			cpuSpeed="$instanceOfferingCpuSpeed" />
+	</instanceOfferings>
+
+	<backupStorages>
+		<simulatorBackupStorage name="$simulatorBackupStorageName"
+			description="Test" url="$simulatorBackupStorageUrl" 
+            totalCapacity="$simulatorBackupStorageTotalCapacity"
+            usedCapacity="$simulatorBackupStorageUsedCapacity"/>
+	</backupStorages>
+
+	<images>
+		<image name="$imageName" description="Test" format="$imageFormat"
+			url="$imageUrl" hypervisorType="$imageHypervisorType" username="$imageUsername" password="$imagePassword">
+			<backupStorageRef>$simulatorBackupStorageName</backupStorageRef>
+		</image>
+	</images>
+
+	<diskOffering name="$rootDiskOfferingName" description="Test"
+		diskSize="$rootDiskOfferingSize" />
+
+	<diskOffering name="$smallDiskOfferingName" description="Small Disk Offering"
+		diskSize="$smallDiskOfferingSize" /> 
+
+	<zones>
+		<zone name="$zoneName" description="Test" duplication="10">
+			<clusters>
+				<cluster name="$clusterName" description="Test"
+					hypervisorType="$clusterHypervisorType" duplication="100">
+					<hosts>
+						<host name="$hostName" description="Simulator Test Host" managementIp="$hostIp"
+							cpuCapacity="$cpuCapacity" memoryCapacity="$memoryCapacity" duplication="200"/>
+					</hosts>
+					<primaryStorageRef>$simulatorPrimaryStorageName</primaryStorageRef>
+					<l2NetworkRef>$l2BasicNetworkName</l2NetworkRef>
+				</cluster>
+			</clusters>
+
+			<l2Networks>
+				<l2NoVlanNetwork name="$l2BasicNetworkName" description="Basic L2 Test"
+					physicalInterface="$l2NetworkPhysicalInterface">
+					<l3Networks>
+						<l3BasicNetwork name="$l3PublicNetworkName" description="Basic L3 Network without Vlan and no special services">
+							<ipRange name="$ipRangeName" description="Test"
+								startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
+								netmask="$ipRangeNetmask" />
+							<dns>$DNSServer</dns>
+						</l3BasicNetwork>
+					</l3Networks>
+				</l2NoVlanNetwork>
+			</l2Networks>
+
+			<primaryStorages>
+                <simulatorPrimaryStorage name="$simulatorPrimaryStorageName"
+                    description="Test" totalCapacity="100T" usedCapacity="0" url="nfs://test" />
+			</primaryStorages>
+
+			<backupStorageRef>$simulatorBackupStorageName</backupStorageRef>
+		</zone>
+	</zones>
+</deployerConfig>
+</config>

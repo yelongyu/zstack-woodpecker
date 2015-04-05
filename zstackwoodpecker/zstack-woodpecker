@@ -1,0 +1,76 @@
+#!/bin/bash
+
+help (){
+    echo "Usage: $0 [options]
+
+Options:
+  -h,                   show this help message and exit
+  -f TESTCASE.xml, --test-case=TESTCASE.xml
+                        [Required] Define what test cases will run. 
+  -c TESTCONFIG.xml, --test-config=TESTCONFIG.xml
+                        [Optional] Integration test config file. Default config
+                        file will be test-config.xml under test cases folder.
+  -v                    [Optional] Print output to console
+  -n                    [Optional] Do not execute test_cleanup(), when test 
+                        case fails
+  -a, --only-actionlog  [Optional] Only save 'Action' log in test case's action.
+                        log file.
+  -s, --stop-failure    [Optional] Stop when meeting 1st test failure.
+  -t TIMEOUT            [Optional] The default timeout time for test case. If 
+                        providing specific value, the default value is 1800. The
+                        time unit is second. E.g. -t 2000. 
+  -r Test_Failure_Retry_Times
+                        [Optional] Set the max test failure retry check() times.
+"
+    exit 1
+}
+
+[ $# -eq 0 ] && help
+
+test_case_file=' '
+OPTIND=1
+while getopts "f:c:t:rhvnas" Option
+do
+    case $Option in
+        f ) test_case_file=$OPTARG;;
+        c ) test_config_file=$OPTARG;;
+        r );;
+        t );;
+        v );;
+        n );;
+        a );;
+        s );;
+        h ) help;;
+        * ) help;;
+    esac
+done
+OPTIND=1
+
+[ -z $test_case_file ] && help
+[ ! -f $test_case_file ] && echo "$test_case_file is not found" && help
+config_file_dir=`dirname $test_case_file`
+current_dir=`pwd`
+cd $config_file_dir
+virtualenv_file="/var/lib/zstack/virtualenv/woodpecker/bin/activate"
+if [ ! -f $virtualenv_file ];then
+    echo "Not find virutalenv in /var/lib/zstack/virtualenv/woodpecker/. It should be created by virtualenv and install apibinding and zstacklib firstly. The easiest way is to run \`install_woodpecker_env.sh zstacklib.tar.gz apibinding.tar.gz\`"
+    exit 1
+fi
+source $virtualenv_file
+woodpecker_root_dir=`git rev-parse --show-toplevel`
+
+if [ -d "${woodpecker_root_dir}/zstackwoodpecker" ]; then
+    cd ${woodpecker_root_dir}/zstackwoodpecker &>/dev/null
+    bash ./install.sh &>/dev/null
+    if [ $? -eq 0 ]; then
+        echo -e "Woodpecker is correctly installed. Test begins ... \n\n"
+    else
+        echo "Woodpecker installation failure. Please check ... exit ."
+        exit 1
+    fi
+else
+    echo "Your test config is not in zstack-woodpecker folder. If you modify zstack-woodpecker, please make sure install.sh is correctly run."
+fi
+
+cd $current_dir
+python -c "from zstackwoodpecker import woodpecker; woodpecker.main()" $@

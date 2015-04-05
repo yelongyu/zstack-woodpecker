@@ -1,0 +1,20 @@
+<integrationTest>
+    <suite name="multi zones test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
+        <case timeout='300' repeat='4'>test_create_vm.py</case>
+        <case timeout='600' repeat='1'>resource/test_ps_ops.py</case>
+        <case timeout='600' repeat='1'>resource/test_delete_host.py</case>
+        <case timeout='600' repeat='1'>resource/test_delete_ip_range.py</case>
+        <case timeout='600' repeat='1'>resource/test_detach_primary_storage.py</case>
+        <case timeout='600' repeat='1'>resource/test_delete_primary_storage.py</case>
+        <case timeout='300' repeat='1'>resource/test_delete_host_and_ps.py</case>
+        <case timeout='600' repeat='1'>resource/test_delete_cluster.py</case>
+        <case timeout='600' repeat='1'>resource/test_delete_l2.py</case>
+        <case timeout='600' repeat='1'>resource/test_delete_zone.py</case>
+        <case timeout='600' repeat='1'>resource/test_delete_image.py</case>
+        <case timeout='600' repeat='1'>resource/test_detach_l2.py</case>
+        <case timeout='600' repeat='1'>resource/test_migrate_vr_when_del_host.py</case>
+        <case timeout='600' repeat='1'>resource/test_del_host_with_stopped_vm.py</case>
+        <case timeout='600' repeat='1'>resource/test_migrate_vr_when_del_host2.py</case>
+        <case timeout='600' repeat='1'>resource/test_delete_l3.py</case>
+    </suite>
+</integrationTest>

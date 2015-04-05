@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+<basicConfig>
+  <!-- The following configurations are path in test machine. 
+       Even if the ZStack server is not running in test machine,
+       the catalina path and zstack.war should be firstly put in test machine.
+  -->
+  <zstackPkg>$zstackPkg</zstackPkg>
+  <zstackInstallScript>$zstackInstallScript</zstackInstallScript>
+  <zstackInstallPath>$zstackInstallPath</zstackInstallPath>
+  <zstackProperties>$zstackPropertiesPath</zstackProperties>
+  <testAgent>$zstackTestAgentPkgPath</testAgent>
+  <db>
+    <!-- Database server IP address or hostname -->
+    <server>$DBServer</server>
+    <admin>$DBAdminUser</admin>
+    <adminPassword>$DBAdminPassword</adminPassword>
+    <username>$DBUserName</username>
+    <server_root_password>$hostPassword</server_root_password>
+    <!-- <password>$DBPassword</password>
+    <port>$DBPort</port> -->
+  </db>
+  <rabbitmq>
+      <server>$rabbitmqServerIp</server>
+      <password>$hostPassword</password>
+  </rabbitmq>
+</basicConfig>
+
+<deployerConfig xmlns="http://zstack.org/schema/zstack">
+  <nodes description="Woodpecker will send zstack command to the 1st node. 
+      multi nodes support real hosts or docker (if providing dockerImage and 
+      it is found in `docker images`). "> 
+    <node name="$node1Name" ip="$node1Ip"
+      username="$nodeUserName" password="$nodePassword"
+      description="multi nodes have same catalinaHome as node 1"/>
+  </nodes> 
+
+  <instanceOfferings>
+    <instanceOffering name="$instanceOfferingName_s"
+      description="small install offering" 
+      memoryCapacity="$instanceOfferingMemory_s" 
+      cpuNum="$instanceOfferingCpuNum_s" 
+      cpuSpeed="$instanceOfferingCpuSpeed_s" />
+  </instanceOfferings>
+
+  <backupStorages>
+    <sftpBackupStorage name="$sftpBackupStorageName"
+      description="Test" url="$sftpBackupStorageUrl" 
+      username="$sftpBackupStorageUsername" 
+      password="$sftpBackupStoragePassword" 
+      hostname="$sftpBackupStorageHostname"/>
+  </backupStorages>
+  
+  <images>
+    <image name="$imageName_s" description="Test" format="$rootImageFormat" 
+      mediaType="$rootMediaType"
+      url="$imageUrl_s" 
+      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+    </image>
+  </images>
+ 
+  <diskOfferings>
+    <diskOffering name="$rootDiskOfferingName" description="Test"
+      diskSize="$rootDiskOfferingSize" />
+    <diskOffering name="$smallDiskOfferingName" 
+      description="Small Disk Offering"
+      diskSize="$smallDiskOfferingSize" />
+  </diskOfferings>
+
+  <zones>
+    <zone name="$zoneName" description="Test">
+      <clusters>
+        <cluster name="$clusterName" description="Test" 
+          hypervisorType="$clusterHypervisorType">
+          <hosts>
+            <host name="$hostName" description="Test"
+              managementIp="$hostIp" username="$hostUsername" 
+              password="$hostPassword" />
+          </hosts>
+          <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
+          <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
+        </cluster>
+      </clusters>
+
+      <l2Networks>
+        <l2NoVlanNetwork name="$l2PublicNetworkName" description="Test"
+          physicalInterface="$l2NetworkPhysicalInterface">
+          <l3Networks>
+            <l3BasicNetwork name="$l3PublicNetworkName" 
+              description="Test">
+              <ipRange name="$ipRangeName" description="Test" 
+                startIp="$ipRangeStartIp" endIp="$ipRangeEndIp"
+                gateway="$ipRangeGateway" 
+                netmask="$ipRangeNetmask" />
+            </l3BasicNetwork>
+          </l3Networks>
+        </l2NoVlanNetwork>
+      </l2Networks>
+      
+      <primaryStorages>
+        <nfsPrimaryStorage name="$nfsPrimaryStorageName"
+          description="Test" url="$nfsPrimaryStorageUrl" />
+      </primaryStorages>
+      
+      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+    </zone>
+  </zones>
+</deployerConfig>
+</config>

@@ -1,0 +1,4 @@
+<integrationTest>
+    <suite name="ZStack POC Test Deployer" setupCase="suite_setup.py"> 
+    </suite>
+</integrationTest>

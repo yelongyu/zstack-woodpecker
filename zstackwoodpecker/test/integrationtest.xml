@@ -1,0 +1,16 @@
+<integrationTest>
+    <suite name="test suite 1">
+        <case timeout="1000">testcase3.py</case>
+        <case timeout="1000">testcase3.py</case>
+        <case timeout="1000">testcasefail.py</case>
+    </suite>
+    <suite name="test suite 2">
+        <case timeout="1000">testcase3.py</case>
+        <case timeout="1000">testcasefail.py</case>
+    </suite>
+    <suite name="test suite 1">
+        <case timeout="1000">testcase3.py</case>
+        <case timeout="1000">testcase3.py</case>
+        <case timeout="1000">testcase3.py</case>
+    </suite>
+</integrationTest>

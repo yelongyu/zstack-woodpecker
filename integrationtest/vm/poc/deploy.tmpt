@@ -1,0 +1,99 @@
+instanceOfferingName_s = small-vm
+instanceOfferingMemory_s = 512M
+instanceOfferingCpuNum_s = 1
+instanceOfferingCpuSpeed_s = 512
+
+instanceOfferingName_m = medium-vm
+instanceOfferingMemory_m = 1024M
+instanceOfferingCpuNum_m = 2
+instanceOfferingCpuSpeed_m = 512
+
+instanceOfferingName_l = large-vm
+instanceOfferingMemory_l = 2048M
+instanceOfferingCpuNum_l = 4
+instanceOfferingCpuSpeed_l = 512
+
+sftpBackupStorageName = sftp
+sftpBackupStorageUrl = /home/sftpBackupStorage
+sftpBackupStorageUsername = root
+sftpBackupStoragePassword = password
+sftpBackupStorageHostname = zstack
+
+nfsPrimaryStorageName = nfs
+nfsPrimaryStorageUrl = zstack:/home/nfs
+
+imageName_f = fedora 19
+imageUrl_f = http://zstack/image/fedora19.img
+
+imageName_c = centos 6.4
+imageUrl_c = http://zstack/image/centos6.4.img
+
+imageName_u = ubuntu 12.04
+imageUrl_u = http://zstack/image/ubuntu12.04.img
+
+imageFormat = Template
+imageHypervisorType = KVM
+imageUsername = root
+imagePassword = password
+
+rootDiskOfferingName = root-disk
+rootDiskOfferingSize = 10G
+
+diskOfferingName_s = small-disk
+diskOfferingSize_s = 100M
+
+diskOfferingName_m = medium-disk
+diskOfferingSize_m = 500M
+
+diskOfferingName_l = large-disk
+diskOfferingSize_l = 1G
+
+zoneName = zone-1
+
+clusterName = cluster-1
+clusterHypervisorType = KVM
+
+hostName = zstack
+hostIp = 127.0.0.1
+hostUsername = root
+hostPassword = password
+
+l2BasicNetworkName = l2-basic
+l2NetworkPhysicalInterface = eth0
+
+l2VlanNetworkName_1 = l2-vlan10
+l2_vlan_1 = 10
+
+l2VlanNetworkName_2 = l2-vlan11
+l2_vlan_2 = 11
+
+l3PubNetworkName = l3-public
+l3VlanNetworkName_1 = l3-dhcp-dns-snat-1
+l3VlanNetworkName_2 = l3-dhcp-dns-snat-2
+
+#Need Change !!!
+DNSServer = 10.0.101.1
+
+#Need Change !!!
+l3PubIpRangeName = host IP range
+l3PubIpRangeStartIp = 10.0.101.201
+l3PubIpRangeEndIp = 10.0.101.250
+l3PubIpRangeNetmask = 255.255.255.0
+l3PubIpRangeGateway = 10.0.101.1
+
+l3VlanIpRangeName_1 = l3-dhcp-dns-snat-1 IP Range
+l3VlanIpRangeStart_1 = 10.10.0.2
+l3VlanIpRangeEnd_1 = 10.10.127.255
+l3VlanIpRangeGateway_1 = 10.10.0.1
+l3VlanIpRangeNetmask_1 = 255.255.0.0
+
+l3VlanIpRangeName_2 = l3-dhcp-dns-snat-2 IP Range
+l3VlanIpRangeStart_2 = 10.11.0.2
+l3VlanIpRangeEnd_2 = 10.11.127.255
+l3VlanIpRangeGateway_2 = 10.11.0.1
+l3VlanIpRangeNetmask_2 = 255.255.0.0
+
+virtualRouterImageName = Virtual Router CentOS 6.4
+virtualRouterImageUrl = http://zstack/image/vr-centos_500m.img
+vrImageUsername = root
+vrImagePassword = password

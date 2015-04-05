@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+<basicConfig>
+  <!-- The following configurations are path in test machine. 
+        zstackPkg is zstack all in one package tar.gz file.
+        zstackInstallScript is the installation script, which could be 
+    downloaded from zstack website or get from zstack-utility/installation/
+        zstackInstallPath is the path zstackPkg will be installed. It should be
+    carefully set. The contents in this folder will be deleted permanently in 
+    testing. 
+        zstackProperties is optional. It is zstack.properties. Tester could 
+    assign special zstack.properties. If not providing this line, testing will
+    just use zstack default property file. 
+        testAgent is the woodpecker test agent tar.gz package. It will be widely
+    used in woodpecker testing.
+        db.admin is the database admin user. Usually it is root.
+        db.username is the user who will operate zstack database. Usually it is
+    zstack. 
+        db.server_root_password is the root password for the database's host OS.
+    woodpecker uses it to install and config database. 
+        rabbitmq.password is the root password for rabbitmq's host OS. 
+    woodpecker uses it to install and start rabbitmq-server
+
+        This config file could be used to deploy zstack cloud environment by
+    zstack-cli, after zstack server is started. The detailed information could
+    be found in zstack-cli help manual.
+  -->
+  <zstackPkg>$zstackPkg</zstackPkg>
+  <zstackInstallScript>$zstackInstallScript</zstackInstallScript>
+  <zstackInstallPath>$zstackInstallPath</zstackInstallPath>
+  <zstackProperties>$zstackPropertiesPath</zstackProperties>
+  <testAgent>$zstackTestAgentPkgPath</testAgent>
+  <db>
+    <!-- Database server IP address or hostname -->
+    <server>$DBServer</server>
+    <username>$DBUserName</username>
+    <server_root_password>$hostPassword</server_root_password>
+    <!-- <password>$DBPassword</password>
+    <port>$DBPort</port> -->
+  </db>
+  <rabbitmq>
+      <server>$rabbitmqServerIp</server>
+      <password>$hostPassword</password>
+  </rabbitmq>
+</basicConfig>
+<deployerConfig xmlns="http://zstack.org/schema/zstack">
+    <nodes description="Woodpecker will send zstack command to the 1st node. 
+        multi nodes support real hosts or docker (if providing dockerImage and 
+        it is found in `docker images`). "> 
+      <node name="$node1Name" ip="$node1Ip"
+        username="$nodeUserName" password="$nodePassword"
+        description="The default node 1. It could be same as test machine."/>
+      <!-- multi node setting
+      <node name="$node2Name" dockerImage="$node2DockerImage" ip="$node2Ip" 
+        username="$nodeUserName" password="$nodePassword"
+        description="multi nodes will be deployed same catalinaHome as node 1"/>    -->
+    </nodes>
+	<instanceOfferings>
+        <instanceOffering name="$instanceOfferingName_s" 
+            description="Small Size Instance Offering" 
+            memoryCapacity="$instanceOfferingMemory_s" 
+            cpuNum="$instanceOfferingCpuNum_s" 
+            cpuSpeed="$instanceOfferingCpuSpeed_s" />
+        <instanceOffering name="$instanceOfferingName_m" 
+            description="Medium Size Instance Offering" 
+            memoryCapacity="$instanceOfferingMemory_m" 
+            cpuNum="$instanceOfferingCpuNum_m" 
+            cpuSpeed="$instanceOfferingCpuSpeed_m" />
+        <instanceOffering name="$instanceOfferingName_l" 
+            description="Large Size Instance Offering" 
+            memoryCapacity="$instanceOfferingMemory_l" 
+            cpuNum="$instanceOfferingCpuNum_l" 
+            cpuSpeed="$instanceOfferingCpuSpeed_l" />
+		<virtualRouterOffering name="virtualRouterOffering"
+			memoryCapacity="512M" cpuSpeed="512" cpuNum="2" isDefault="true">
+			<zoneRef>$zoneName</zoneRef>
+			<managementL3NetworkRef>$l3PubNetworkName</managementL3NetworkRef>
+			<publicL3NetworkRef>$l3PubNetworkName</publicL3NetworkRef>
+			<imageRef>$virtualRouterImageName</imageRef>
+		</virtualRouterOffering>
+	</instanceOfferings>
+
+	<backupStorages>
+		<sftpBackupStorage name="$sftpBackupStorageName"
+            description="ZStack stress Backup Stroage" url="$sftpBackupStorageUrl"
+            username="$sftpBackupStorageUsername"
+            password="$sftpBackupStoragePassword" 
+            hostname="$sftpBackupStorageHostname" />
+	</backupStorages>
+
+	<images>
+        <image name="$imageName_f" url="$imageUrl_f" 
+            description="Fedora 19 64bit Image" format="$imageFormat" 
+            hypervisorType="$imageHypervisorType" username="$imageUsername" 
+            password="$imagePassword">
+			<backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+		</image>
+        <image name="$imageName_c" url="$imageUrl_c" 
+            description="CentOS 6.4 64bit Image" format="$imageFormat" 
+            hypervisorType="$imageHypervisorType" username="$imageUsername" 
+            password="$imagePassword">
+			<backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+		</image>
+        <image name="$imageName_u" url="$imageUrl_u" 
+            description="Ubuntu 12.04 64bit Image" format="$imageFormat" 
+            hypervisorType="$imageHypervisorType" username="$imageUsername" 
+            password="$imagePassword">
+			<backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+		</image>
+        <image name="$virtualRouterImageName" description="virtual router image"
+            format="$imageFormat" username="$vrImageUsername" 
+            password="$vrImagePassword"	hypervisorType='$imageHypervisorType' 
+            url="$virtualRouterImageUrl">
+			<backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+		</image>
+	</images>
+
+	<diskOffering name="$rootDiskOfferingName" description="Root Disk Offering"
+		diskSize="$rootDiskOfferingSize" />
+
+	<diskOffering name="$diskOfferingName_s" description="ZStack stress Test Small Disk Offering"
+		diskSize="$diskOfferingSize_s" /> 
+
+	<diskOffering name="$diskOfferingName_m" description="ZStack stress Test Medium Disk Offering"
+		diskSize="$diskOfferingSize_m" /> 
+
+	<diskOffering name="$diskOfferingName_l" description="ZStack stress Test Large Disk Offering"
+		diskSize="$diskOfferingSize_l" /> 
+
+	<zones>
+		<zone name="$zoneName" description="ZStack stress Test Zone 1">
+			<clusters>
+				<cluster name="$clusterName" description="ZStack stress Test Cluster 1"
+					hypervisorType="$clusterHypervisorType">
+					<hosts>
+                        <host name="$hostName_1" description="ZStack stress Test Host 1" 
+                            managementIp="$hostIp_1"
+							username="$hostUsername" password="$hostPassword" />
+					</hosts>
+					<primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
+					<l2NetworkRef>$l2BasicNetworkName</l2NetworkRef>
+					<l2NetworkRef>$l2VlanNetworkName_1</l2NetworkRef>
+					<l2NetworkRef>$l2VlanNetworkName_2</l2NetworkRef>
+				</cluster>
+			</clusters>
+
+			<l2Networks>
+				<l2NoVlanNetwork name="$l2BasicNetworkName" description="ZStack stress Test Basic L2 Test"
+					physicalInterface="$l2NetworkPhysicalInterface">
+					<l3Networks>
+                        <l3BasicNetwork name="$l3PubNetworkName" 
+                            description="ZStack stress Test Public L3 Network">
+							<ipRange name="$l3PubIpRangeName" description="Public L3 IP Range"
+                                startIp="$l3PubIpRangeStartIp" 
+                                endIp="$l3PubIpRangeEndIp" 
+                                gateway="$l3PubIpRangeGateway"
+								netmask="$l3PubIpRangeNetmask" />
+							<dns>$DNSServer</dns>
+						</l3BasicNetwork>
+					</l3Networks>
+				</l2NoVlanNetwork>
+				
+                <l2VlanNetwork name="$l2VlanNetworkName_1" 
+                    description="guest l2 vlan 10 network"
+                    physicalInterface="$l2NetworkPhysicalInterface" 
+                    vlan="$l2_vlan_1">
+					<l3Networks>
+                        <l3BasicNetwork name="$l3VlanNetworkName_1" 
+                            description = "ZSTACK stress Test guest test vlan 10 network with DHCP DNS and SNAT">
+                            <ipRange name="$l3VlanIpRangeName_1" 
+                                startIp="$l3VlanIpRangeStart_1" 
+                                endIp="$l3VlanIpRangeEnd_1"
+                                gateway="$l3VlanIpRangeGateway_1" 
+                                netmask="$l3VlanIpRangeNetmask_1"/>
+							<dns>$DNSServer</dns> 
+							<networkService provider="VirtualRouter">
+                                <serviceType>DHCP</serviceType>
+                                <serviceType>DNS</serviceType>
+                                <serviceType>SNAT</serviceType>
+                                <serviceType>PortForwarding</serviceType>
+                            </networkService>
+							<networkService provider="SecurityGroup">
+								<serviceType>SecurityGroup</serviceType>
+							</networkService>
+						</l3BasicNetwork>
+					</l3Networks>
+				</l2VlanNetwork>
+
+                <l2VlanNetwork name="$l2VlanNetworkName_2" 
+                    description="ZStack stress Test guest l2 vlan 11 network for port forwarding"
+                    physicalInterface="$l2NetworkPhysicalInterface" 
+                    vlan="$l2_vlan_2">
+					<l3Networks>
+                        <l3BasicNetwork name="$l3VlanNetworkName_2" 
+                            description = "ZStack stress Test guest test vlan 11 network for port forwarding">
+                            <ipRange name="$l3VlanIpRangeName_2" 
+                                startIp="$l3VlanIpRangeStart_2" 
+                                endIp="$l3VlanIpRangeEnd_2"
+                                gateway="$l3VlanIpRangeGateway_2"
+                                netmask="$l3VlanIpRangeNetmask_2"/>
+							<dns>$DNSServer</dns> 
+							<networkService provider="VirtualRouter">
+                                <serviceType>DHCP</serviceType>
+                                <serviceType>DNS</serviceType>
+                                <serviceType>SNAT</serviceType>
+                                <serviceType>PortForwarding</serviceType>
+                            </networkService>
+							<networkService provider="SecurityGroup">
+								<serviceType>SecurityGroup</serviceType>
+							</networkService>
+						</l3BasicNetwork>
+					</l3Networks>
+				</l2VlanNetwork>
+
+			</l2Networks>
+
+			<primaryStorages>
+				<nfsPrimaryStorage name="$nfsPrimaryStorageName"
+                    description="ZStack stress Test primary storage" 
+                    url="$nfsPrimaryStorageUrl" />
+			</primaryStorages>
+
+			<backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+		</zone>
+	</zones>
+</deployerConfig>
+</config>

@@ -1,0 +1,115 @@
+=======================
+HOWTO
+=======================
+ZStack Performance howto. This could be used for both simulation environment 
+and real physical environment. 
+
+
+=======================
+Test Result Looks Like
+=======================
+#Test general vm operation costing and calculate average value. 
+# The result is lik:
+-----------------------------------------------------------------------------
+RES      Creation   AvgC    Destroy     AvgD    Pass    Fail
+-----------------------------------------------------------------------------
+5000    139.705     .027    46.044      .009    1       0
+10000   324.859     .032    107.224     .010    1       0
+15000   525.342     .035    166.538     .011    1       0
+20000   874.858     .043    255.058     .012    1       0
+25000   1281.648    .051    386.896     .015    1       0
+30000   2371.128    .079    581.691     .019    1       0
+35000   3187.591    .091    1114.230    .031    1       0
+40000   3960.228    .099    1757.158    .043    1       0
+45000   3996.648    .088    1439.685    .031    1       0
+50000   4500.079    .090    2054.014    .041    1       0
+
+
+=======================
+Envrionemnt Preparation
+=======================
+#Before testing, simulation test environment should be setup, e.g. execute
+
+./zstest.py -c simulator/suite_setup.py  
+
+#------------------------------------------------------------------------------
+#If need 'KVM simulation' environment, it needs to do this command (it also extra configurations in zstack.properties): 
+
+./zstest.py -c simulator/suite_setup.py -C WOODPECK_PATH/integrationtest/vm/simulator/test-config-kvm.xml
+
+#------------------------------------------------------------------------------
+#If need to do perf test on both real KVM and simulation environment, it needs to do:
+
+./zstest.py -c simulator/suite_setup.py -C WOODPECK_PATH/integrationtest/vm/simulator/test-config-kvm_with_sim.xml
+
+#------------------------------------------------------------------------------
+#When doing SG and Volume performance test, besides of setup simulation env, it
+# also need to create some VMs, since SG and Volume needs to attach to VMs. The
+# VMs number are depends on later performance parallel threads number. The 
+# following command will quickly create 1000 VMs, which use same L3 VR service.
+
+ZSTACK_TEST_NUM=1000 ./zstest.py -c perf/vm/test_crt_vm_with_vr_by_max_threads.py
+
+#------------------------------------------------------------------------------
+#Current kvm simulator only support 1 KVM host. In order to create multiple 
+# samilar L3VlanNetwork. A special attribution 'duplication=xxx' could be added
+#  into related L2Network field. The duplicated L2 vlan number will be increased
+#  from the based vlan number. So it is needed to avoid of defining duplicated
+#  vlan L2Network in deploy-kvm.xml. After setup multiple samilar L3VlanNetwork
+#  environment, e.g. 1000. We can create 1000 fake VM with 1000 fake VR for each
+#  L3Network. The command is like:
+
+ZSTACK_TEST_NUM=1000 ./zstest.py -c perf/vm/test_crt_vm_with_diff_vr_by_max_threads.py
+
+#------------------------------------------------------------------------------
+#The resource will be created parallely. The default max paralleled threads is 
+# 1000. So if you want to create 2000 VMs, the default perf test will firstly 
+# try to create 1000 VMs at the same time. When 1 creation threads is done, it 
+# will spawn a new thread to do next creation. Well, the max parallel threads 
+# number is related with ZStack config. For example, if ZStack can only server 
+# 100 APIs reqeust in the same time, it means other 900 APIs will be put into 
+# the waiting queue. It is not a big problem for ZStack, as we won't drop any 
+# request. This is some kind of stress test. You can raise the parallelled 
+# threads number higher to increase the stress or lower it.
+
+ZSTACK_THREAD_THRESHOLD=200 ZSTACK_TEST_NUM=10000 ./zstest.py -c  perf/vm/test_crt_vm_with_vr_by_max_threads.py
+
+==================
+Perf Test Example
+==================
+#This command should use VM resource creation test case: test_crt_basic_l3_vm.py
+# The destroy test case could be: virtualrouter/destroy_none_vr_vms.py
+#  or directly call simulator/suite_setup.py to reset the envionment. 
+#  this command will parallelly create required creation test case, e.g. when 
+#  creating 2 vms, it will run 2 vm creation case. This can only be used in 
+#  small resource creation enviornment. Otherwise, too many test case processes
+#  will be created and quickly used out system resource. The advance of this 
+#  method is it could get each test case pass/fail result. 
+
+./cal_avg_vm_create_destroy_time.sh /root/zstack-woodpecker/dailytest/zstest.py perf/vm/test_crt_basic_l3_vm.py virtualrouter/destroy_none_vr_vms.py 2 21 2
+
+#------------------------------------------------------------------------------
+#When doing huge resource creation perf testing, another test script: 
+# ./cal_res_crt_des_time_wo_mul_cases.sh should be used. No matter how many 
+# resource will be created, it will only do it in 1 test process. For parallel
+# creation, it just needs to create multiple threads to do jobs. 
+#
+# It also need to use special test case, which could allow to get required 
+# source number and parallel threads number. 
+#
+#This command should do vm creation/destroy perf testing. It will do 10 rounds
+# VM creation and destroy performance test, starting from 10k VMs to 100k VMs. 
+# Every round, it will increase 10k VMs. In each round, it will parallel
+# creating 1k VMs.
+./cal_res_crt_des_time_wo_mul_cases.sh /root/zstack-woodpecker/dailytest/zstest.py perf/vm/test_crt_vm_with_vr_by_max_threads.py virtualrouter/destroy_none_vr_vms.py 10000 100000 10000 1000
+
+#------------------------------------------------------------------------------
+#This command will do volume creating/attaching/detaching/deleting perf testing.
+# It will do 20 rounds tesing, starting from 2k volumes to 60k volumes. Each
+# round, it will increase 5k volumes. The paraellel creating threads are 1k.
+# To be noticed, there should be 1000 VMs are alived before this test.
+
+./cal_res_crt_des_time_wo_mul_cases.sh /root/zstack-woodpecker/dailytest/zstest.py perf/volume/test_crt_vol_with_max_threads.py perf/volume/delete_data_volumes.py 2000 60000 5000 1000
+
+#------------------------------------------------------------------------------
+

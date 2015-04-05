@@ -1,0 +1,7 @@
+<integrationTest>
+    <suite name="virtual router test" setupCase="suite_setup.py" parallel="2"> 
+        <case timeout='600' repeat='1'>rm_nic_sg_on_stopped_vm.py</case>
+        <case timeout='600' repeat='1'>delete_sg_with_2_attached_nics.py</case>
+        <case timeout='600' repeat='1'>test_data_volume_with_vm_ops.py</case>
+    </suite>
+</integrationTest>

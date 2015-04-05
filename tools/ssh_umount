@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ $# -eq 0 ];then
+    echo Not provide target machine. The Usage is \#$0 TARGET_MACHINE
+    exit 1
+fi
+
+ssh $1 "for fo in \`mount|grep '/opt/zstack/nfsprimarystorage'|awk '{print \$3}'\`;do echo umount \$fo; umount \$fo; done;"
+if [ $? -ne 0 ]; then
+    echo -e "$(tput setaf 1)\t: failed to umount zstack primary storage on $1$(tput sgr0)"
+    exit 1
+else
+    echo -e "$(tput bold) - Successfully umount zstack primary storage on $1 $(tput sgr0)"
+fi

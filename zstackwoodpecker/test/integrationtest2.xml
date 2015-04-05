@@ -1,0 +1,12 @@
+<integrationTest>
+    <suite name="test suite 2" setupCase="cases/setupcase.py" teardownCase='cases/teardowncase.py' timeout="1000" repeat="2">
+        <case timeout="1000" repeat="2" >cases/test1.py</case>
+        <case timeout="1000">cases/test2.py</case>
+    </suite>
+    <suite name="test suite 3" setupCase="cases/setupcase.py" teardownCase='cases/teardowncase.py' timeout="1000" repeat="0">
+        <case timeout="1000" repeat="0" >cases/test1.py</case>
+        <case timeout="1000">cases/test2.py</case>
+        <case timeout="1000">cases/test3.py</case>
+        <case timeout="3">cases/test4.py</case>
+    </suite>
+</integrationTest>

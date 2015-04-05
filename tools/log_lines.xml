@@ -1,0 +1,4 @@
+        <logger name="org.zstack.identity">
+            <level value="DEBUG" />
+        </logger>
+

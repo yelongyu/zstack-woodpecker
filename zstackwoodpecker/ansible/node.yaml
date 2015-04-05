@@ -1,0 +1,72 @@
+---
+- hosts: "{{host}}"
+  vars:
+    - pip_url: "{{pypi_url|default('https://pypi.python.org/simple/')}}"
+    - proxy: "{{http_proxy|default()}}"
+    - sproxy: "{{https_proxy|default()}}"
+    - zstack_war_base: "{{zstack_war | basename }}"
+    - catalina_tar_base: "{{catalina_tar | basename }}"
+    - web_apps: "{{catalina_folder}}/webapps"
+    - zstack_app: "{{web_apps}}/zstack"
+    - dst_zstack_properties: "{{zstack_app}}/WEB-INF/classes/zstack.properties"
+
+  tasks:
+    - name: install dependency packages for RedHat based OS
+      when: ansible_os_family == 'CentOS' or ansible_os_family == 'RedHat' or ansible_os_family == 'Fedora'
+      yum: name="{{item}}"
+      with_items:
+        - python-devel
+        - python-pip
+        - gcc
+        - autoconf
+        - unzip
+        - java-1.7.0-openjdk
+    
+    - name: install dependency packages for Debian based OS
+      when: ansible_os_family == 'Debian'
+      apt: pkg="{{item}}" update_cache=yes
+      with_items:
+        - python-dev
+        - python-pip
+        - gcc
+        - autoconf
+        - unzip
+        - openjdk-7-jdk
+
+    - name: check apache-tomcat root
+      shell: "[ -d {{catalina_root}} ]"
+      register: root_exist
+      ignore_errors: true
+
+    - name: create apache-tomcat root
+      when: root_exist.rc == 1
+      shell: "mkdir -p {{catalina_root}}"
+
+    - name: check apache-tomcat folder
+      shell: "[ -d {{catalina_folder}} ]"
+      register: root_exist
+      ignore_errors: true
+
+    - name: copy apache-tomcat
+      when: root_exist.rc == 1
+      copy: src="{{catalina_tar}}" dest="{{catalina_root}}/{{catalina_tar_base}}"
+
+    - name: untar catalina tar
+      when: root_exist.rc == 1
+      shell: "cd {{catalina_root}}; mkdir {{catalina_folder}}; tar zxf {{catalina_tar_base}} -C {{catalina_folder}} --strip-components 1"
+
+    - name: install ansible 
+      environment:
+        http_proxy: "{{proxy}}"
+        https_proxy: "{{sproxy}}"
+      pip: name=ansible extra_args="-i {{pip_url}}"
+
+    - name: copy zstack war
+      copy: src="{{zstack_war}}" dest="{{web_apps}}/{{zstack_war_base}}"
+
+    - name: unzip zstack war
+      shell: "rm -rf {{zstack_app}};unzip -d {{zstack_app}} {{web_apps}}/{{zstack_war_base}}"
+
+    - name: copy zstack properties
+      copy: src="{{zstack_properties}}" dest="{{dst_zstack_properties}}"
+

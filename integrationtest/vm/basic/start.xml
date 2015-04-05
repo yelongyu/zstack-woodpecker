@@ -1,0 +1,34 @@
+<integrationTest>
+<!--    <suite name="vm basic sanity test" setupCase="suite_setup.py" teardownCase="suite_teardown.py"> 
+        <case timeout="200" >test_add_volume.py</case> 
+        <case timeout="200" >test_add_volume.py</case> 
+        <case timeout="200" >test_add_multi_volumes.py</case> 
+        <case timeout="200" >test_add_volume.py</case> 
+        <case timeout="200" >test_add_multi_volumes.py</case> 
+        <case timeout="200" >test_add_volume_neg.py</case> 
+        <case timeout="200" >test_add_vol_to_stopvm.py</case> 
+        <case timeout="150" repeat="1">test_add_volume.py</case> 
+        <case timeout="150" repeat="3000">test_create_vm.py</case> 
+        <case timeout="200" >test_stop_vm.py</case> 
+        <case timeout="150" repeat="11">test_reboot_vm.py</case> 
+        <case timeout="400" repeat="1">test_add_multi_volumes.py</case> 
+        <case timeout="200" >test_add_volume_negative.py</case> 
+        <case timeout="200" >test_add_volume_reboot_vm.py</case> 
+        <case timeout="200" >test_add_volume_negative.py</case> 
+        <case timeout="200" >test_add_vol_to_stopvm.py</case> 
+    <suite name="vm basic sanity test"  setupCase="suite_setup.py" parallel="4">
+    <suite name="vm basic sanity test"  setupCase="suite_setup.py" parallel="4">
+    <suite name="vm basic sanity test"  setupCase="suite_setup.py" parallel="2">
+        <case timeout="400" >test_vm_securitygroup.py</case> 
+        <case timeout="200" >test_add_volume.py</case> 
+        <case timeout="200" >test_add_multi_volumes.py</case> 
+        <case timeout="200" >test_add_volume_negative.py</case> 
+        <case timeout="200" >test_add_vol_to_stopvm.py</case> 
+        <case timeout="400" >test_vm_securitygroup.py</case> 
+        <case timeout="150" repeat="1">test_add_volume.py</case> 
+    <suite name="vm basic sanity test" parallel="2" >
+        <case timeout="150" repeat="1">test_crt_temp_from_volume.py</case> 
+-->
+    <suite name="vm basic sanity test"  setupCase="suite_setup.py" parallel="2">
+    </suite>
+</integrationTest>

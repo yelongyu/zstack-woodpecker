@@ -1,0 +1,37 @@
+import ../deploy.tmpt
+
+simulatorBackupStorageName = sftp
+simulatorBackupStorageUrl = nfs://fake_url
+simulatorBackupStorageHostname = zstack-fake
+simulatorBackupStorageTotalCapacity = 1T
+simulatorBackupStorageUsedCapacity = 0
+
+simulatorPrimaryStorageName = simulator
+
+imageName = simulator-image
+imageFormat = Template
+imageUrl = http://zstack-sim/fake.img
+imageHypervisorType = Simulator
+imageUsername = root
+imagePassword = password
+
+clusterHypervisorType = Simulator
+
+hostName = zstack-sim
+hostIp = 192.168.0.1
+#160*2600Mhz
+cpuCapacity = 416000
+#1280GB
+memoryCapacity = 1280G
+
+l2BasicNetworkName = noVlan
+l2NetworkPhysicalInterface = eth0
+
+l3PublicNetworkName = basic
+
+ipRangeName = host IP range
+ipRangeStartIp = 11.0.0.2
+ipRangeEndIp = 11.255.255.254
+ipRangeNetmask = 255.0.0.0
+ipRangeGateway = 11.0.0.1
+

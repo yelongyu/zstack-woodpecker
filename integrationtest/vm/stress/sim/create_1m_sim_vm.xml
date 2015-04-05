@@ -1,0 +1,7 @@
+<integrationTest>
+<!--    <suite name="vm basic sanity test" setupCase="suite_setup.py" teardownCase="suite_teardown.py"> 
+-->
+    <suite name="vm basic sanity test" parallel="2" >
+        <case timeout="10000" >test_1m_sim_vm.py</case> 
+    </suite>
+</integrationTest>

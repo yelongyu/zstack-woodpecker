@@ -1,0 +1,8 @@
+<integrationTest>
+    <suite name="virtual router sanity test" setupCase="suite_setup.py" teardownCase="suite_teardown.py"> 
+        <case timeout="600">test_guest_novlan_dhcp_dns.py</case>
+        <case timeout="600">test_guest_vlan_dhcp_dns.py</case>
+        <case timeout='600'>test_guest_vlan_remove_dhcp.py</case>
+        <case timeout="600">test_guest_vlan_add_volume.py</case>
+    </suite>
+</integrationTest>

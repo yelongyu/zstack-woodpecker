@@ -1,0 +1,4 @@
+<integrationTest>
+    <import path="basic/vm_basic_test.xml" />
+    <import path="virtualrouter/virtualrouter_test.xml" />
+</integrationTest>

@@ -1,0 +1,10 @@
+<integrationTest>
+<!--    <suite name="integration test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" parallel="4"> -->
+    <suite name="integration test" setupCase="suite_setup.py" parallel="5">
+        <case timeout="100" repeat="10">test_create_vm.py</case>
+        <case timeout="100" repeat="10">test_destroy_vm.py</case>
+<!--        <case timeout="100" repeat="10">test_stop_vm.py</case> -->
+        <case timeout="100" repeat="10">test_start_vm.py</case>
+        <case timeout="100" repeat="10">test_reboot_vm.py</case>
+    </suite>
+</integrationTest>

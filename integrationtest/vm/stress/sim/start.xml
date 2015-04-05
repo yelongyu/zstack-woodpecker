@@ -1,0 +1,4 @@
+<integrationTest>
+    <suite name="vm basic sanity test"  setupCase="../suite_setup.py" parallel="2">
+    </suite>
+</integrationTest>

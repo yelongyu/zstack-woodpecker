@@ -1,0 +1,21 @@
+import ../deploy.tmpt
+#-----Instance Template-----
+instanceOfferingName_m = medium-vm
+instanceOfferingMemory_m = 2048M
+instanceOfferingCpuNum_m = 2
+instanceOfferingCpuSpeed_m = 512
+
+#-----Image-----
+# the installation image could be created from zstack-utility/virtualrouter/bootstrap/build_test_image.sh
+#imageName_i = centos6-installation-test
+#imageUrl_i = http://zstack/image/centos6-test.qcow2
+
+imageName_i_c6 = centos6-installation-test
+imageUrl_i_c6 = http://zstack/image/centos6-test.qcow2
+
+imageName_i_c7 = centos7-installation-test
+imageUrl_i_c7 = http://zstack/image/centos7-test.qcow2
+
+imageName_i_u14 = ubuntu1404-installation-test
+imageUrl_i_u14 = http://zstack/image/ubuntu-test.qcow2
+~                                                             

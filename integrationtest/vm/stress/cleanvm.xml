@@ -1,0 +1,4 @@
+<integrationTest>
+    <suite name="ZStack POC teardown" teardownCase="suite_teardown.py">
+    </suite>
+</integrationTest>

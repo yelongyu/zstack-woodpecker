@@ -1,0 +1,3 @@
+<integrationTest>
+    <import path="vm/vm_sanity_test.xml" />
+</integrationTest>
