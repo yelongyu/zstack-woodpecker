@@ -101,7 +101,7 @@
               managementIp="$hostIp" username="$hostUsername" 
               password="$hostPassword" />
           </hosts>
-          <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
+          <primaryStorageRef>$iscsiFileSystemBackendPrimaryStorageName</primaryStorageRef>
           <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
         </cluster>
       </clusters>
