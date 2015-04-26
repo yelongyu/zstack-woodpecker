@@ -1,0 +1,4 @@
+<testConfig>
+    <deployConfig>deploy-for-simulator.xml</deployConfig>
+    <deployConfigTemplate>deploy-for-simulator.tmpt</deployConfigTemplate>
+</testConfig>

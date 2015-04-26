@@ -1,0 +1,6 @@
+<testConfig>
+    <deployConfig>deploy.xml</deployConfig>
+    <deployConfigTemplate>deploy.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.yyk.net</pingTestTarget>
+    <zstackInstaller>/home/root/zstack-utility/installation/install.sh</zstackInstaller>
+</testConfig>
