@@ -990,6 +990,18 @@ def lib_find_host_by_vm(vm_inv):
     if hosts:
         return hosts[0]
 
+def lib_find_host_by_iscsi_ps(ps_inv):
+    '''
+    Get host information from deploy.xml for ISCSI filesystem backend.
+    '''
+    ps_name = ps_inv.name
+    iscsi_host = test_util.HostOption()
+    iscsi_host.managementIp = os.environ.get('iscsiHostname')
+    iscsi_host.username = os.environ.get('iscsiUserName')
+    iscsi_host.password = os.environ.get('iscsiPassword')
+    return iscsi_host
+
+
 def lib_find_random_host(vm = None):
     '''
     Return a random host inventory. 
