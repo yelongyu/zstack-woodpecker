@@ -90,6 +90,10 @@ class zstack_kvm_volume_attach_checker(checker_header.TestChecker):
         rspstr = http.json_dump_post(testagent.build_http_path(host.managementIp, vm_plugin.VM_BLK_STATUS), cmd)
         rsp = jsonobject.loads(rspstr)
         output = jsonobject.dumps(rsp.vm_status[vm.uuid])
+        if volume_installPath.startswith('iscsi'):
+            volume_installPath = volume_installPath.split(';')[0].split('/iqn')[1]
+            volume_installPath = 'iqn%s' % volume_installPath
+
         if volume_installPath in output:
             test_util.test_logger('Check result: [volume file:] %s is found in [vm:] %s on [host:] %s .' % (volume.uuid, vm.uuid, host.managementIp))
             return self.judge(True)
