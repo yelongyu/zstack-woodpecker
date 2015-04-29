@@ -57,10 +57,10 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
         rsp = jsonobject.loads(rspstr)
         output = jsonobject.dumps(rsp.stdout)
         if file_exist in output:
-            test_util.test_logger('Check result: [volume:] %s [file:] %s exist on [host name:] %s .' % (volume.uuid, volume_installPath, host.name))
+            test_util.test_logger('Check result: [volume:] %s [file:] %s exist on [host name:] %s .' % (volume.uuid, volume_installPath, host.managementIp))
             return self.judge(True)
         else:
-            test_util.test_logger('Check result: [volume:] %s [file:] %s does not exist on [host name:] %s .' % (volume.uuid, volume_installPath, host.name))
+            test_util.test_logger('Check result: [volume:] %s [file:] %s does not exist on [host name:] %s .' % (volume.uuid, volume_installPath, host.managementIp))
             return self.judge(False)
 
 class zstack_kvm_volume_attach_checker(checker_header.TestChecker):
