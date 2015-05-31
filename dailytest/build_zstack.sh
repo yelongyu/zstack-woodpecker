@@ -4,6 +4,7 @@ ZSTACK_TEST_ROOT=${ZSTACK_TEST_ROOT-'/usr/local/zstack'}
 PULL_ZSTACK="N"
 PULL_ZSTACK_UTILITY="N"
 PULL_ZSTACK_WOODPECKER="N"
+PULL_ZSTACK_DASHBOARD="N"
 
 help (){
     echo "Usage: $0 [options]
@@ -26,7 +27,7 @@ OPTIND=1
 while getopts "r:i:azuwh" Option
 do
     case $Option in
-        a ) PULL_ZSTACK='Y' && PULL_ZSTACK_UTILITY='Y' && PULL_ZSTACK_WOODPECKER='Y'
+        a ) PULL_ZSTACK='Y' && PULL_ZSTACK_UTILITY='Y' && PULL_ZSTACK_WOODPECKER='Y' && PULL_ZSTACK_DASHBOARD='Y'
             ;;
         z ) PULL_ZSTACK='Y' && PULL_FLAG='Y' ;;
         u ) PULL_ZSTACK_UTILITY=='Y' && PULL_FLAG='Y' ;;
@@ -38,11 +39,12 @@ do
     esac
 done
 OPTIND=1
-[ $PULL_FLAG == 'N' ] && PULL_ZSTACK='Y' && PULL_ZSTACK_UTILITY='Y' && PULL_ZSTACK_WOODPECKER='Y'
+[ $PULL_FLAG == 'N' ] && PULL_ZSTACK='Y' && PULL_ZSTACK_UTILITY='Y' && PULL_ZSTACK_WOODPECKER='Y' && PULL_ZSTACK_DASHBOARD='Y'
 
 ZSTACK_FOLDER=$ZSTACK_TEST_ROOT/zstack
 ZSTACK_UTILITY=$ZSTACK_TEST_ROOT/zstack-utility
 ZSTACK_WOODPECKER=$ZSTACK_TEST_ROOT/zstack-woodpecker
+ZSTACK_DASHBOARD=$ZSTACK_TEST_ROOT/zstack-dashboard
 ZSTACK_BUILD=$ZSTACK_UTILITY/zstackbuild
 ZSTACK_ARCHIVE=$ZSTACK_TEST_ROOT/zstack_build_archive
 zstack_build_archive="install.sh zstack-all-in-one-*.tgz woodpecker/zstacktestagent.tar.gz  woodpecker/conf/zstack.properties"
@@ -97,6 +99,19 @@ if [ $PULL_ZSTACK_UTILITY == 'Y' ]; then
     echo_pass
 else
     echo -e "${tab} : Skip pulling zstack-utility\n"
+fi
+
+if [ $PULL_ZSTACK_DASHBOARD == 'Y' ]; then
+    echo -n "${tab} : Pull latest zstack-dashboard"
+    [ ! -d $ZSTACK_DASHBOARD ] && echo_failure "not find zstack dashboard repo folder:  $ZSTACK_DASHBOARD"
+    cd $ZSTACK_DASHBOARD
+    git pull >/dev/null
+    if [ $? -ne 0 ]; then
+        echo_failure "\'git pull\' failure in $ZSTACK_DASHBOARD"
+    fi
+    echo_pass
+else
+    echo -e "${tab} : Skip pulling zstack-dashboard\n"
 fi
 
 echo "${tab} : Build zstack all in one package"

@@ -18,7 +18,7 @@ if [ $# -eq 2 ]; then
     virtualenv_folder="/var/lib/zstack/virtualenv/woodpecker"
     virtualenv_file="${virtualenv_folder}/bin/activate"
     if [ ! -f $virtualenv_file ];then
-        pip install virtualenv
+        pip install -i $ZSTACK_PYPI_URL virtualenv=12.1.1
         virtualenv $virtualenv_folder
     fi
     
