@@ -59,6 +59,8 @@ SANITYTEST_CONF_FOLDER=$SANITYTEST_FOLDER/conf
 ZSTACK_UTILITY=$ZSTACK_TEST_ROOT/zstack-utility
 APIBINDING=$ZSTACK_UTILITY/apibinding
 ZSTACKLIB=$ZSTACK_UTILITY/zstacklib
+ZSTACK_ALL_IN_ONE=zstack-all-in-one.tgz
+ZSTACK_TEST_AGENT=zstacktestagent.tar.gz
 
 tempfolder=`mktemp -d`
 /bin/cp -f $ZSTACK_ARCHIVE/latest $tempfolder
@@ -68,7 +70,7 @@ mkdir -p $SANITYTEST_FOLDER
 /bin/cp -f install.sh $SANITYTEST_FOLDER
 /bin/cp -f zstack-all-in-one*.tgz $SANITYTEST_FOLDER/zstack-all-in-one.tgz
 /bin/cp -f woodpecker/zstacktestagent.tar.gz $SANITYTEST_FOLDER
-echo -e " - Already copy and replace $SANITYTEST_FOLDER/zstack.war $SANITYTEST_FOLDER/zstacktestagent.tar.gz\n"
+echo -e " - Already copy and replace $SANITYTEST_FOLDER/$ZSTACK_ALL_IN_ONE $SANITYTEST_FOLDER/${ZSTACK_TEST_AGENT}\n"
 
 if [ ! -f $SANITYTEST_FOLDER/conf/zstack.properties ];then
     mkdir -p $SANITYTEST_FOLDER/conf/
@@ -129,4 +131,4 @@ if [ -f $USR_LOCAL_POST_BUILD_SCRIPT ]; then
     [ $? -ne 0 ] && echo "Run user local post build script failed. Exit." && exit 1
 fi
 
-echo -e "$(tput setaf 2) - ZStack is successfully installed. Ready for testing\n$(tput sgr0)"
+echo -e "$(tput setaf 2) - ZStack All In Package has been put in $SANITYTEST_FOLDER and woodpecker environment has been successfully installed. Ready for testing.\n$(tput sgr0)"
