@@ -25,9 +25,8 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
             return self.judge(False)
 
         ps_uuid = volume.primaryStorageUuid
-        cond = res_ops.gen_query_conditions('uuid', '=', ps_uuid)
-        ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)[0]
-        if ps.type == inventory.ISCSI_FILE_SYSTEM_BACKEND_PRIMARY_STORAGE_TYPE:
+        ps = test_lib.lib_get_primary_storage_by_uuid(ps_uuid)
+        if test_lib.lib_is_ps_iscsi_backend(ps_uuid):
             self.check_iscsi(volume, volume_installPath, ps)
         elif ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
             self.check_nfs(volume, volume_installPath)

@@ -1001,6 +1001,15 @@ def lib_find_host_by_iscsi_ps(ps_inv):
     iscsi_host.password = os.environ.get('iscsiPassword')
     return iscsi_host
 
+def lib_get_primary_storage_by_uuid(ps_uuid):
+    cond = res_ops.gen_query_conditions('uuid', '=', ps_uuid)
+    return res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)[0]
+
+def lib_is_ps_iscsi_backend(ps_uuid):
+    ps = lib_get_primary_storage_by_uuid(ps_uuid)
+    if ps.type == inventory.ISCSI_FILE_SYSTEM_BACKEND_PRIMARY_STORAGE_TYPE:
+        return True
+    return False
 
 def lib_find_random_host(vm = None):
     '''

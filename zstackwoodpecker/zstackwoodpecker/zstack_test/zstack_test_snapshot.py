@@ -83,7 +83,7 @@ class ZstackVolumeSnapshot(object):
         self.state = None
         self.primary_snapshots = []
         self.backuped_snapshots = []
-        self.volume_type = None
+        self.volume_type = None #Root volume or data volume
 
     def __repr__(self):
         if self.target_volume and self.target_volume.get_volume():
