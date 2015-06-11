@@ -505,6 +505,7 @@ class NodeOption(DataOption):
 class HostOption(DataOption):
     def __init__(self):
         super(HostOption, self).__init__()
+        self.uuid = None
         self.managementIp = None
         self.clusterUuid = None
         self.username = None

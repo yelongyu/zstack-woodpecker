@@ -256,6 +256,32 @@ def add_primary_storage(deployConfig, session_uuid, ps_name = None, \
         return action
 
     def _deploy_primary_storage(zone):
+        if xmlobject.has_element(zone, 'primaryStorages.IscsiFileSystemBackendPrimaryStorage'):
+            zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, \
+                    name=zone.name_)
+            zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
+
+            for pr in xmlobject.safe_list(zone.primaryStorages.IscsiFileSystemBackendPrimaryStorage):
+                if ps_name and ps_name != pr.name_:
+                    continue
+
+                action = api_actions.AddIscsiFileSystemBackendPrimaryStorageAction()
+                action.sessionUuid = session_uuid
+                action.name = pr.name_
+                action.description = pr.description__
+                action.type = 'IscsiFileSystemBackendPrimaryStorage'
+                action.url = pr.url_
+                action.zoneUuid = zinv.uuid
+                action.chapPassword = pr.chapPassword_
+                action.chapUsername = pr.chapUsername_
+                action.sshPassword = pr.sshPassword_
+                action.sshUsername = pr.sshUsername_
+                action.hostname = pr.hostname_
+                action.filesystemType = pr.filesystemType_
+                thread = threading.Thread(target=_thread_for_action, args=(action,))
+                wait_for_thread_queue()
+                thread.start()
+
         if xmlobject.has_element(zone, 'primaryStorages.nfsPrimaryStorage'):
             zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, \
                     name=zone.name_)
