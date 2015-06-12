@@ -82,9 +82,13 @@
 
     - meta: flush_handlers
 
-    - name: enable testagent service
+    - name: enable testagent service 1
       service: name=zstack-testagent enabled=yes state=started
       when: chroot_env == 'false'
+
+    - name: enable testagent service 2
+      service: name=zstack-testagent enabled=yes
+      when: chroot_env == 'true'
 
   handlers:
     - name: install zstacklib
