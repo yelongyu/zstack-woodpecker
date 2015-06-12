@@ -4,6 +4,7 @@
 ZSTACK_LIB_DIR='/var/lib/zstack'
 TA_VIRTUALEVN_ROOT=$ZSTACK_LIB_DIR/virtualenv/testagent
 ZSTACK_PYPI_URL=${ZSTACK_PYPI_URL-'https://pypi.python.org/simple/'}
+current_dir=`dirname $0`
 
 echo_bold(){
     echo -e "$(tput bold) - $1 \n$(tput sgr0)"
@@ -132,6 +133,14 @@ if [ ! -z $BOOT_STRAP_SCRIPT ]; then
     #echo "python /sbin/$bootstrap_basename" >> $MNT/etc/rc.local
 fi
 
+#update yum.conf
+if [ -f $current_dir/yum.repos.d/CentOS-Base.repo ]; then
+    cp -f $current_dir/yum.repos.d/CentOS-Base.repo $MNT/etc/yum.repos.d/
+fi
+if [ -f $current_dir/yum.repos.d/epel.repo ]; then
+    cp -f $current_dir/yum.repos.d/epel.repo $MNT/etc/yum.repos.d/
+fi
+
 ansible_inventory=`mktemp`
 cat > $ansible_inventory << EOF
 [chroot]
@@ -152,18 +161,17 @@ echo_bold "Update Appliance VM service..."
 ansible-playbook appliancevm.yaml -i $ansible_inventory -e "zstack_root=/var/lib/zstack/ pkg_appliancevm=appliancevm-0.6.tar.gz pypi_url=$ZSTACK_PYPI_URL pkg_zstacklib=zstacklib-0.6.tar.gz host=chroot chroot=true" || exception "Update Appliance VM Failed"
 echo_bold "Update Appliance VM Successfully"
 
-#if [ ! -z $ZSTACK_TEST_AGENT_PATH ]; then
-#    echo_bold "Begin to install zstacktestagent"
-#    cat > $MNT/tmp/install_testagent.sh <<EOF
-#export PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin
-#[ -f TA_VIRTUALEVN_ROOT/bin/activate ] || virtualenv $TA_VIRTUALEVN_ROOT
-#. $TA_VIRTUALEVN_ROOT/bin/activate
-#pip install --ignore-installed -i $ZSTACK_PYPI_URL $ZSTACK_LIB_DIR/zstacktestagent/zstacktestagent*.gz
-#EOF
-#    mkdir -p $MNT/var/lib/zstack/zstacktestagent
-#    /bin/cp -f $ZSTACK_TEST_AGENT_PATH $MNT/var/lib/zstack/zstacktestagent/
-#    chroot $MNT /bin/sh /tmp/install_testagent.sh || exception "Fail to install testagent."
-#fi
+if [ ! -z $ZSTACK_TEST_AGENT_PATH ]; then
+    echo_bold "Update Test Agent..."
+    tmpfile=`mktemp`
+    rm -rf $tmpfile
+    mkdir -p $tmpfile
+    tar -zxf $ZSTACK_TEST_AGENT_PATH -C $tmpfile
+    cd $tmpfile/zstacktestagent
+    ansible-playbook testagent.yaml -i $ansible_inventory -e "zstack_root=/var/lib/zstack/ pkg_testagent=zstacktestagent-0.1.0.tar.gz pypi_url=$ZSTACK_PYPI_URL pkg_zstacklib=zstacklib-0.6.tar.gz host=chroot chroot=true" || ( rm -rf $tmpfile && exception "Update Test Agent Failed")
+    rm -rf $tmpfile
+    echo_bold "Update Appliance VM Successfully"
+fi
 
 cleanup
 qcow_img_name=`basename $VR_IMAGE_PATH|awk -F'.' '{print $1}'`.qcow2

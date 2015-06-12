@@ -109,18 +109,18 @@ mkdir -p $tmpdir
 tar zxf $SANITYTEST_FOLDER/zstacktestagent.tar.gz -C $tmpdir
 
 echo -e " - Install zstacklib.\n"
-pip install --ignore-installed -i $ZSTACK_PYPI_URL $tmpdir/zstacktestagent/zstacklib*.tar.gz 
+pip install --force-reinstall -i $ZSTACK_PYPI_URL $tmpdir/zstacktestagent/zstacklib*.tar.gz 
 [ $? -ne 0 ] && echo "Install zstacklib failure. Exit." && /bin/rm -rf $tmpdir && exit 1
 
 echo -e " - Install testagent.\n"
-pip install --ignore-installed -i $ZSTACK_PYPI_URL $tmpdir/zstacktestagent/zstacktestagent*.tar.gz
+pip install --force-reinstall -i $ZSTACK_PYPI_URL $tmpdir/zstacktestagent/zstacktestagent*.tar.gz
 [ $? -ne 0 ] && echo "Install testagent failure. Exit." && /bin/rm -rf $tmpdir && exit 1
 /bin/rm -rf $tmpdir
 
 if [ ! -z $ZSTACK_VR_IMAGE_PATH ]; then
     echo -e " - Update Virtual Router Image.\n"
     set -x
-    $UPDATE_IMAGE_SCRIPT -i $ZSTACK_VR_IMAGE_PATH -b $ZSTACK_UTILITY/virtualrouter/bootstrap/zstack-appliancevm-bootstrap.py -a $ZSTACK_UTILITY/zstackbuild/target/zstack-assemble/WEB-INF/classes/ansible/
+    $UPDATE_IMAGE_SCRIPT -i $ZSTACK_VR_IMAGE_PATH -b $ZSTACK_UTILITY/virtualrouter/bootstrap/zstack-appliancevm-bootstrap.py -a $ZSTACK_UTILITY/zstackbuild/target/zstack-assemble/WEB-INF/classes/ansible/ -t $SANITYTEST_FOLDER/$ZSTACK_TEST_AGENT
     set +x
     [ $? -ne 0 ] && echo "Update VR image failure. Exit." && exit 1
 fi

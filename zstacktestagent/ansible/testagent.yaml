@@ -91,13 +91,13 @@
       environment:
         http_proxy: "{{proxy}}"
         https_proxy: "{{sproxy}}"
-      pip: name="{{test_root}}/{{pkg_zstacklib}}" extra_args="--ignore-installed -i {{pip_url}}" virtualenv="{{virtenv_path}}" virtualenv_site_packages=yes
+      pip: name="{{test_root}}/{{pkg_zstacklib}}" extra_args="--force-reinstall -i {{pip_url}}" virtualenv="{{virtenv_path}}" virtualenv_site_packages=yes
 
     - name: install testagent
       environment:
         http_proxy: "{{proxy}}"
         https_proxy: "{{sproxy}}"
-      pip: name="{{test_root}}/{{pkg_testagent}}" extra_args="--ignore-installed -i {{pip_url}}" virtualenv="{{virtenv_path}}"
+      pip: name="{{test_root}}/{{pkg_testagent}}" extra_args="--force-reinstall -i {{pip_url}}" virtualenv="{{virtenv_path}}"
 
     - name: restart testagent
       service: name=zstack-testagent state=restarted enabled=yes
