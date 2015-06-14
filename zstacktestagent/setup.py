@@ -18,7 +18,6 @@ zstack integration test agent""",
       include_package_data=True,
       zip_safe=True,
       install_requires=[
-          'zstacklib'
           # -*- Extra requirements: -*-
       ],
       entry_points="""
