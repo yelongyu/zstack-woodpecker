@@ -775,6 +775,9 @@ def lib_create_vm(vm_cre_opt=test_util.VmOption(), session_uuid=None):
 
     return vm
 
+def lib_create_static_ip_tag(l3_uuid, ip_address):
+    return ['staticIp::%s::%s' % (l3_uuid, ip_address)]
+
 def lib_vm_random_idel_time(min_stay_time=1, max_stay_time=120):
     random_time_interval = 1
     random_exist_time = random.randrange(min_stay_time, max_stay_time, random_time_interval)

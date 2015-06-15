@@ -39,6 +39,8 @@ def create_vm(vm_create_option):
     else:
         create_vm.type = vm_type
 
+    create_vm.systemTags = vm_create_option.get_system_tags()
+    create_vm.userTags = vm_create_option.get_user_tags()
     timeout = vm_create_option.get_timeout()
     if not timeout:
         create_vm.timeout = 600000

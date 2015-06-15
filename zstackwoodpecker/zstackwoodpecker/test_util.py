@@ -298,6 +298,9 @@ class VmOption(DataOption):
             self.data_disk_uuids = None
             self.default_l3_uuid = None
             #self.root_disk_uuid = None
+            #system tag is an array
+            self.system_tags = None 
+            self.user_tags = None
             super(VmOption, self).__init__()
         else:
             self.l3_uuids = vm_opt.get_l3_uuids()
@@ -313,6 +316,8 @@ class VmOption(DataOption):
             self.set_description(vm_opt.get_description())
             self.set_timeout(vm_opt.get_timeout())
             self.default_l3_uuid = vm_opt.get_default_l3_uuid()
+            self.system_tags = vm_opt.get_system_tags()
+            self.user_tags = vm_opt.get_user_tags()
             super(VmOption, self).__init__()
 
     def set_l3_uuids(self, l3_uuids):
@@ -322,6 +327,22 @@ class VmOption(DataOption):
 
     def get_l3_uuids(self):
         return self.l3_uuids
+
+    def set_system_tags(self, system_tags):
+        if not isinstance(system_tags, list):
+            raise TestError('system_tags is not a list.')
+        self.system_tags = system_tags
+
+    def get_system_tags(self):
+        return self.system_tags
+
+    def set_user_tags(self, user_tags):
+        if not isinstance(user_tags, list):
+            raise TestError('user_tags is not a list.')
+        self.user_tags = user_tags
+
+    def get_user_tags(self):
+        return self.user_tags
 
     def set_default_l3_uuid(self, l3_uuid):
         self.default_l3_uuid = l3_uuid
