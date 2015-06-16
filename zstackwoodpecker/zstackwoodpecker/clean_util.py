@@ -4,9 +4,16 @@ Clean up test case remnants
 
 @author: Youyk
 '''
+import threading
+import time
+import sys
+import os
+import errno
+import traceback
 
 import apibinding.api as api
 import apibinding.inventory as inventory
+import apibinding.api_actions as api_actions
 import zstacklib.utils.http as http
 import zstacklib.utils.jsonobject as jsonobject
 import zstacklib.utils.log as log
@@ -19,15 +26,10 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.header.host as host_header
-import zstackwoodpecker.operations.account_operations as account_operations
-import apibinding.api_actions as api_actions
-
-import os
-import sys
-import errno
-import time
-import traceback
-import threading
+import zstackwoodpecker.operations.config_operations as con_ops
+import zstackwoodpecker.operations.vm_operations as vm_ops
+import zstackwoodpecker.operations.net_operations as net_ops
+import zstackwoodpecker.operations.account_operations as acc_ops
 
 #logger = log.get_logger(__name__)
 
@@ -139,6 +141,7 @@ def umount_primary_storage_violently(host_ip, storage_mount_path):
                 test_util.test_logger("Folder %s is not safely umounted" % storage_mount_path)
 
 def destroy_vm_and_storage_violently(vm, session_uuid):
+    destroy_all_vm_and_vips()
     vm_inv = inventory.VmInstanceInventory()
     vm_inv.evaluate(vm)
     vm_uuid = vm_inv.uuid
@@ -158,7 +161,8 @@ def destroy_vm_and_storage_violently(vm, session_uuid):
     _clean_image_violently(backup_storage_uuid, account_uuid, zone_uuid, host_ip, session_uuid)
 
 def cleanup_all_vms_violently():
-    session_uuid = account_operations.login_as_admin()
+    destroy_all_vm_and_vips()
+    session_uuid = acc_ops.login_as_admin()
     result = res_ops.get_resource(res_ops.VM_INSTANCE, session_uuid)
     for vm in result:
         thread = threading.Thread(target = destroy_vm_and_storage_violently\
@@ -168,7 +172,7 @@ def cleanup_all_vms_violently():
     while threading.active_count() > 1:
         time.sleep(0.1)
 
-    account_operations.logout(session_uuid)
+    acc_ops.logout(session_uuid)
 
 #Find a vm, whose zone use primary_storage. 
 def _get_host_from_primary_storage(primary_storage_uuid, session_uuid):
@@ -179,7 +183,7 @@ def _get_host_from_primary_storage(primary_storage_uuid, session_uuid):
             return host
 
 def cleanup_none_vm_volumes_violently():
-    session_uuid = account_operations.login_as_admin()
+    session_uuid = acc_ops.login_as_admin()
     try:
         priSto_host_list = {}
         result = res_ops.get_resource(res_ops.VOLUME, session_uuid)
@@ -209,10 +213,10 @@ def cleanup_none_vm_volumes_violently():
         traceback.print_exc(file=sys.stdout)
         raise e
     finally:
-        account_operations.logout(session_uuid)
+        acc_ops.logout(session_uuid)
 
 def umount_all_primary_storages_violently():
-    session_uuid = account_operations.login_as_admin()
+    session_uuid = acc_ops.login_as_admin()
     zones = res_ops.query_resource(res_ops.ZONE)
     for zone in zones:
         conditions = res_ops.gen_query_conditions('zoneUuid', '=', zone.uuid)
@@ -234,7 +238,7 @@ def umount_all_primary_storages_violently():
     while threading.active_count() > 1:
         time.sleep(0.1)
 
-    account_operations.logout(session_uuid)
+    acc_ops.logout(session_uuid)
 
 def cleanup_backup_storage():
     cleanup_sftp_backup_storage()
@@ -248,3 +252,78 @@ def cleanup_sftp_backup_storage():
         cmd = 'rm -rf %s/dataVolumeTemplates/*' % storage.url_
         ssh.execute(cmd, storage.hostname_, storage.username_, storage.password_)
 
+
+def do_destroy_vips(vips):
+    for vip in vips:
+        thread = threading.Thread(target=net_ops.delete_vip, args=(vip.uuid,))
+        while threading.active_count() > thread_threshold:
+            time.sleep(0.5)
+        exc = sys.exc_info()
+        if exc[0]:
+            raise info1, None, info2
+        thread.start()
+
+    while threading.activeCount() > 1:
+        exc = sys.exc_info()
+        if exc[0]:
+            raise info1, None, info2
+        time.sleep(0.1)
+
+def do_destroy_vms(vms):
+    for vm in vms:
+        thread = threading.Thread(target=vm_ops.destroy_vm, args=(vm.uuid,))
+        while threading.active_count() > thread_threshold:
+            time.sleep(0.5)
+        exc = sys.exc_info()
+        if exc[0]:
+            raise info1, None, info2
+        thread.start()
+
+    while threading.activeCount() > 1:
+        exc = sys.exc_info()
+        if exc[0]:
+            raise info1, None, info2
+        time.sleep(0.1)
+
+def destroy_all_vm_and_vips(thread_threshold = 1000):
+    session_uuid = acc_ops.login_as_admin()
+    session_to = con_ops.change_global_config('identity', 'session.timeout', '720000')
+    session_mc = con_ops.change_global_config('identity', 'session.maxConcurrent', '10000')
+    cond = []
+    num = res_ops.query_resource_count(res_ops.VM_INSTANCE, cond)
+
+    if num <= thread_threshold:
+        vms = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
+        do_destroy_vms(vms)
+    else:
+        start = 0
+        limit = thread_threshold - 1
+        curr_num = start
+        vms = []
+        while curr_num < num:
+            vms_temp = res_ops.query_resource_fields(res_ops.VM_INSTANCE, \
+                    cond, None, ['uuid'], start, limit)
+            vms.extend(vms_temp)
+            curr_num += limit
+            start += limit
+        do_destroy_vms(vms)
+
+    vip_num = res_ops.query_resource_count(res_ops.VIP, [], session_uuid)
+
+    if vip_num <= thread_threshold:
+        vips = res_ops.query_resource(res_ops.VIP, [], session_uuid)
+        do_destroy_vips(vips)
+    else:
+        start = 0
+        limit = thread_threshold - 1
+        curr_num = start
+        vms = []
+        while curr_num < vip_num:
+            vips_temp = res_ops.query_resource_fields(res_ops.VIP, \
+                    [], session_uuid, ['uuid'], start, limit)
+            vips.extend(vips_temp)
+            curr_num += limit
+            start += limit
+        do_destroy_vips(vips)
+
+    test_util.test_log('vms destroy Success. Destroy %d VMs.' % num)

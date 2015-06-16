@@ -366,3 +366,11 @@ def get_ip_capacity_by_l3s(l3_network_list):
     evt = acc_ops.execute_action_with_session(action, None)
     return evt
     
+def get_free_ip(l3_uuid = None, ip_range = None, limit = None):
+    action = api_actions.GetFreeIpAction()
+    action.l3NetworkUuid = l3_uuid
+    action.ipRangeUuid = ip_range
+    action.limit = limit
+    evt = acc_ops.execute_action_with_session(action, None)
+    return evt
+
