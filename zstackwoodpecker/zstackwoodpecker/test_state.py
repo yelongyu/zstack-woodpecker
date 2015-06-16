@@ -804,6 +804,11 @@ class TestStateDict(object):
     def rm_volume_snapshots_by_rm_volume(self, volume_uuid):
         snapshots = self.get_volume_snapshot(volume_uuid)
         if snapshots:
+            #only hypervisor based snapshots will be deleted, when volume
+            # is removed. 
+            # snapshot.type has 2 options: Hypervisor and Storage
+            if 'Storage' == snapshots.get_snapshot_head().get_snapshot().type:
+                return
             #If no snapshots is backuped, delete volume will remove all SPs.
             if not snapshots.get_backuped_snapshots():
                 self.rm_volume_snapshot(snapshots)
