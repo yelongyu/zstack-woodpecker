@@ -60,7 +60,6 @@ def test():
     volume.attach(vm1)
     snapshots.delete()
     test_obj_dict.rm_volume_snapshot(snapshots)
-    vm1.start()
     volume.check()
     vm.destroy()
     test_obj_dict.rm_vm(vm)
