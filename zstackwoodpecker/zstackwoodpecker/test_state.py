@@ -807,7 +807,8 @@ class TestStateDict(object):
             #only hypervisor based snapshots will be deleted, when volume
             # is removed. 
             # snapshot.type has 2 options: Hypervisor and Storage
-            if 'Storage' == snapshots.get_snapshot_head().get_snapshot().type:
+            snapshot_head = snapshots.get_snapshot_head()
+            if snapshot_head and 'Storage' == snapshot_head.get_snapshot().type:
                 return
             #If no snapshots is backuped, delete volume will remove all SPs.
             if not snapshots.get_backuped_snapshots():

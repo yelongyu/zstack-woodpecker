@@ -253,7 +253,7 @@ def cleanup_sftp_backup_storage():
         ssh.execute(cmd, storage.hostname_, storage.username_, storage.password_)
 
 
-def do_destroy_vips(vips):
+def do_destroy_vips(vips, thread_threshold = 1000):
     for vip in vips:
         thread = threading.Thread(target=net_ops.delete_vip, args=(vip.uuid,))
         while threading.active_count() > thread_threshold:
@@ -269,7 +269,7 @@ def do_destroy_vips(vips):
             raise info1, None, info2
         time.sleep(0.1)
 
-def do_destroy_vms(vms):
+def do_destroy_vms(vms, thread_threshold = 1000):
     for vm in vms:
         thread = threading.Thread(target=vm_ops.destroy_vm, args=(vm.uuid,))
         while threading.active_count() > thread_threshold:
@@ -294,7 +294,7 @@ def destroy_all_vm_and_vips(thread_threshold = 1000):
 
     if num <= thread_threshold:
         vms = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
-        do_destroy_vms(vms)
+        do_destroy_vms(vms, thread_threshold)
     else:
         start = 0
         limit = thread_threshold - 1
@@ -306,13 +306,13 @@ def destroy_all_vm_and_vips(thread_threshold = 1000):
             vms.extend(vms_temp)
             curr_num += limit
             start += limit
-        do_destroy_vms(vms)
+        do_destroy_vms(vms, thread_threshold)
 
     vip_num = res_ops.query_resource_count(res_ops.VIP, [], session_uuid)
 
     if vip_num <= thread_threshold:
         vips = res_ops.query_resource(res_ops.VIP, [], session_uuid)
-        do_destroy_vips(vips)
+        do_destroy_vips(vips, thread_threshold)
     else:
         start = 0
         limit = thread_threshold - 1
@@ -324,6 +324,6 @@ def destroy_all_vm_and_vips(thread_threshold = 1000):
             vips.extend(vips_temp)
             curr_num += limit
             start += limit
-        do_destroy_vips(vips)
+        do_destroy_vips(vips, thread_threshold)
 
-    test_util.test_log('vms destroy Success. Destroy %d VMs.' % num)
+    test_util.test_logger('vms destroy Success. Destroy %d VMs.' % num)
