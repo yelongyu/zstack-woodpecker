@@ -256,6 +256,11 @@ umount %s
         if snapshot in self.backuped_snapshots:
             self.backuped_snapshots.remove(snapshot)
 
+        #only Hypervisor based snapshot will clean child
+        if 'Storage' == snapshot.get_snapshot().type:
+            self._update_delete()
+            return 
+
         sp_list = get_snapshot_family(snapshot)
         for sp in sp_list:
             if sp.get_state() == sp_header.DELETED:

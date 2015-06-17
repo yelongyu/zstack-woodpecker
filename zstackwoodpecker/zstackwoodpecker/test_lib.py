@@ -51,7 +51,7 @@ TestAction = ts_header.TestAction
 SgRule = ts_header.SgRule
 Port = ts_header.Port
 WOODPECKER_MOUNT_POINT = '/tmp/zstack/mnt'
-SSH_TIMEOUT = 40
+SSH_TIMEOUT = 60
 
 class FakeObject(object):
     '''
@@ -408,7 +408,7 @@ def lib_try_http_cmd(http_path, cmd, times=5):
     exception = None
 
     # avoid of too long time wait for impossible connection
-    timeout = time.time() + 40
+    timeout = time.time() + SSH_TIMEOUT
     while current_round <= times and time.time() < timeout:
         try:
             current_round += 1
@@ -587,7 +587,7 @@ def lib_scp_file_to_vm(vm, src_file, dst_file, l3_uuid = None):
 
     return rsp
 
-def lib_execute_shell_script_in_vm(vm_inv, script_file, l3_uuid=None, timeout=40):
+def lib_execute_shell_script_in_vm(vm_inv, script_file, l3_uuid=None, timeout=SSH_TIMEOUT):
     '''
     execute shell script in vm. Will only use vm's host to ssh vm
 
@@ -598,7 +598,7 @@ def lib_execute_shell_script_in_vm(vm_inv, script_file, l3_uuid=None, timeout=40
         target vm.
     l3_uuid: [optional] l3_uuid for target vm's nic. It is used, when VM has 
         multiple nics.
-    timeout: [default:40s] the script should be executed completed in timeout.
+    timeout: [default:60s] the script should be executed completed in timeout.
 
     @return:
         ssh response object: Pass

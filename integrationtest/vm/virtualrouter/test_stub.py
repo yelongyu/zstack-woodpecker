@@ -179,7 +179,7 @@ def create_vr_vm(test_obj_dict, l3_name):
     temp_vm = None
     if not vrs:
         #create temp_vm1 for getting vlan1's vr for test pf_vm portforwarding
-        temp_vm = create_vlan_vm()
+        temp_vm = create_vlan_vm(l3_name)
         test_obj_dict.add_vm(temp_vm)
         vr = test_lib.lib_find_vr_by_vm(temp_vm.vm)[0]
         temp_vm.destroy()
