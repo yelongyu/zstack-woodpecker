@@ -1,0 +1,11 @@
+import ./deploy.tmpt
+
+iscsiFileSystemBackendPrimaryStorageName = iscsi-ps
+iscsiFileSystemBackendPrimaryStorageUrl = /home/btrfs
+iscsiChapUserName = 
+iscsiChapPassword = 
+iscsiFilesystem = btrfs
+iscsiHostname = 10.0.101.1
+iscsiUserName = root
+iscsiPassword = 1
+

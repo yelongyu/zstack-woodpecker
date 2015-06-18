@@ -86,7 +86,7 @@ echo "Step: $step" |tee -a $result_file
 echo "Concurrency: $thread" |tee -a $result_file
 echo "========================================" |tee -a $result_file
 echo "Test case log could be found at: `dirname $zstest`/config_xml/test-result/"
-echo "Test result will be saved in $result_file\n"
+echo "Test result will be saved in $result_file"
 echo "========================================"
 
 result='\nRes\tCreation\tAvgC\tDestroy\t\tAvgD\tCrt_Rst\tDst_Rst\n'
