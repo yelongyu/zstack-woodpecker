@@ -77,14 +77,14 @@ tmp_result=`mktemp`
 create_case=`$zstest -l |grep "\[${res_creation}\]"|awk '{print $3}'`
 destroy_case=`$zstest -l |grep "\[${res_destroy}\]"|awk '{print $3}'`
 
-echo "========================================"
-echo "Create Case: $create_case"
-echo "Destroy Case: $destroy_case"
-echo "Start Number: $start_vm"
-echo "End Number: $max_vm"
-echo "Step: $step"
-echo "Concurrency: $thread"
-echo "========================================"
+echo "========================================" |tee -a $result_file
+echo "Create Case: $create_case" |tee -a $result_file
+echo "Destroy Case: $destroy_case" |tee -a $result_file
+echo "Start Number: $start_vm" |tee -a $result_file
+echo "End Number: $max_vm" |tee -a $result_file
+echo "Step: $step" |tee -a $result_file
+echo "Concurrency: $thread" |tee -a $result_file
+echo "========================================" |tee -a $result_file
 echo "Test case log could be found at: `dirname $zstest`/config_xml/test-result/"
 echo "Test result will be saved in $result_file\n"
 echo "========================================"
