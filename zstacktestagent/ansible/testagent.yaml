@@ -2,7 +2,7 @@
 
 - hosts: "{{host}}"
   vars:
-    - virtenv_path: "/var/lib/zstack/virtualenv/testagent"
+    - virtenv_path: "/var/lib/zstack/virtualenv"
     - test_root: "/var/lib/zstack/testagent"
     - pip_url: "{{pypi_url|default('https://pypi.python.org/simple/')}}"
     - proxy: "{{http_proxy|default()}}"
@@ -60,24 +60,13 @@
         https_proxy: "{{sproxy}}"
       pip: name=virtualenv extra_args="-i {{pip_url}}"
 
-    - name: create virtualenv dirctory
-      shell: "ls {{virtenv_path}}/bin/activate > /dev/null || virtualenv {{virtenv_path}}"
-
-    - name: copy zstacklib
-      copy: src="{{pkg_zstacklib}}" dest="{{test_root}}/{{pkg_zstacklib}}"
-      notify:
-        - install zstacklib
-        - restart testagent
+    - name: copy test agent service file
+      copy: src="zstack-testagent" dest="/etc/init.d/" mode=755
 
     - name: copy test agent
       copy: src="{{pkg_testagent}}" dest="{{test_root}}/{{pkg_testagent}}"
       notify:
         - install testagent
-        - restart testagent
-
-    - name: copy test agent service file
-      copy: src="zstack-testagent" dest="/etc/init.d/" mode=755
-      notify:
         - restart testagent
 
     - meta: flush_handlers
@@ -91,17 +80,8 @@
       when: chroot_env == 'true'
 
   handlers:
-    - name: install zstacklib
-      environment:
-        http_proxy: "{{proxy}}"
-        https_proxy: "{{sproxy}}"
-      pip: name="{{test_root}}/{{pkg_zstacklib}}" extra_args="--ignore-installed -i {{pip_url}}" virtualenv="{{virtenv_path}}" virtualenv_site_packages=yes
-
     - name: install testagent
-      environment:
-        http_proxy: "{{proxy}}"
-        https_proxy: "{{sproxy}}"
-      pip: name="{{test_root}}/{{pkg_testagent}}" extra_args="--ignore-installed -i {{pip_url}}" virtualenv="{{virtenv_path}}"
+      shell: "rm -rf {{virtenv_path}}/testagent; tar jxf {{test_root}}/{{pkg_testagent}} -C {{virtenv_path}}"
 
     - name: restart testagent
       service: name=zstack-testagent state=restarted enabled=yes

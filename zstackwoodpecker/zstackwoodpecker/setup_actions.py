@@ -618,7 +618,7 @@ default one' % self.zstack_properties)
                 for h in self.test_agent_hosts:
                     print('Deploy test agent in host: [%s] \n' % h.managementIp_)
                     ansible_cmd_args = "host=%s \
-                            pkg_testagent=zstacktestagent-0.1.0.tar.gz \
+                            pkg_testagent=testagent-virtualenv.tar.bz \
                             pkg_zstacklib=zstacklib-0.7.tar.gz \
                             pypi_url=%s" % \
                             (h.managementIp_, ENV_PYPI_URL)
