@@ -4,7 +4,7 @@ cd $root_dir
 #install zstacktestagent firstly
 ../zstacktestagent/install.sh
 
-rm -rf build dist zstackwoodpecker.egg-info zstackwoodpecker-*dev/
+rm -rf build dist zstackwoodpecker.egg-info zstackwoodpecker-*dev*/
 python setup.py sdist
 
 pip uninstall -y zstackwoodpecker
