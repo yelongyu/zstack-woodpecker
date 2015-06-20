@@ -54,12 +54,6 @@
       when: ansible_os_family == 'RedHat' and ansible_distribution_version >= '7'
       service: name=firewalld state=stopped enabled=no
 
-    - name: install virtualenv
-      environment:
-        http_proxy: "{{proxy}}"
-        https_proxy: "{{sproxy}}"
-      pip: name=virtualenv extra_args="-i {{pip_url}}"
-
     - name: copy test agent service file
       copy: src="zstack-testagent" dest="/etc/init.d/" mode=755
 
