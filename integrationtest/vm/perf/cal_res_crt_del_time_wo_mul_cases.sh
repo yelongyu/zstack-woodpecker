@@ -97,7 +97,7 @@ echo -e $result |tee $result_file
 cur_vm=$start_vm
 
 while [ $cur_vm -le $max_vm ]; do
-    echo -en $cur_vm'\t'
+    echo -en $cur_vm'\t' |tee -a $result_file
     export ZSTACK_TEST_NUM=$cur_vm
     export ZSTACK_THREAD_THRESHOLD=$thread
     $zstest -c $res_creation -t 72000 >$tmp_result 2>&1
