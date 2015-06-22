@@ -4,6 +4,7 @@
   vars:
     - virtenv_path: "/var/lib/zstack/virtualenv"
     - test_root: "/var/lib/zstack/testagent"
+    - pip_url: "{{pypi_url|default('https://pypi.python.org/simple/')}}"
     - proxy: "{{http_proxy|default()}}"
     - sproxy: "{{https_proxy|default()}}"
     - chroot_env: "{{chroot|default('false')}}"
@@ -56,23 +57,8 @@
     - name: copy test agent service file
       copy: src="zstack-testagent" dest="/etc/init.d/" mode=755
 
-    - name: copy test agent for RedHat OS 6
-      when: ansible_os_family == 'RedHat' and ansible_distribution_version < '7'
-      copy: src="{{pkg_testagent_py26}}" dest="{{test_root}}/{{pkg_testagent}}"
-      notify:
-        - install testagent
-        - restart testagent
-
-    - name: copy test agent for RedHat OS 7
-      when: ansible_os_family == 'RedHat' and ansible_distribution_version >= '7'
-      copy: src="{{pkg_testagent_py27}}" dest="{{test_root}}/{{pkg_testagent}}"
-      notify:
-        - install testagent
-        - restart testagent
-
-    - name: copy test agent for Ubuntu
-      when: ansible_os_family == 'Debian'
-      copy: src="{{pkg_testagent_py27}}" dest="{{test_root}}/{{pkg_testagent}}"
+    - name: copy test agent
+      copy: src="{{pkg_testagent}}" dest="{{test_root}}/{{pkg_testagent}}"
       notify:
         - install testagent
         - restart testagent
