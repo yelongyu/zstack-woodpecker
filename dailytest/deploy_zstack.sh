@@ -7,6 +7,8 @@ ZSTACK_PYPI_URL=${ZSTACK_PYPI_URL-'https://pypi.python.org/simple/'}
 ZSTACK_VR_IMAGE_PATH=''
 #User could define local post script, which will be executed before this deployer script exit. For example, user could copy the update virtual router image to remote http server.
 USR_LOCAL_POST_BUILD_SCRIPT=/root/.zstackwoodpecker/.post_build_script.sh
+ZSTACK_ALL_IN_ONE=zstack-all-in-one.tgz
+ZSTACK_TEST_AGENT=zstacktestagent.tar.bz
 
 help (){
     echo "Usage: $0 [options]
@@ -59,8 +61,6 @@ SANITYTEST_CONF_FOLDER=$SANITYTEST_FOLDER/conf
 ZSTACK_UTILITY=$ZSTACK_TEST_ROOT/zstack-utility
 APIBINDING=$ZSTACK_UTILITY/apibinding
 ZSTACKLIB=$ZSTACK_UTILITY/zstacklib
-ZSTACK_ALL_IN_ONE=zstack-all-in-one.tgz
-ZSTACK_TEST_AGENT=zstacktestagent.tar.gz
 
 tempfolder=`mktemp -d`
 /bin/cp -f $ZSTACK_ARCHIVE/latest $tempfolder
@@ -69,7 +69,7 @@ tar zxf latest
 mkdir -p $SANITYTEST_FOLDER
 /bin/cp -f install.sh $SANITYTEST_FOLDER
 /bin/cp -f zstack-all-in-one*.tgz $SANITYTEST_FOLDER/zstack-all-in-one.tgz
-/bin/cp -f woodpecker/zstacktestagent.tar.gz $SANITYTEST_FOLDER
+/bin/cp -f woodpecker/${ZSTACK_TEST_AGENT} $SANITYTEST_FOLDER
 echo -e " - Already copy and replace $SANITYTEST_FOLDER/$ZSTACK_ALL_IN_ONE $SANITYTEST_FOLDER/${ZSTACK_TEST_AGENT}\n"
 
 if [ ! -f $SANITYTEST_FOLDER/conf/zstack.properties ];then
@@ -106,14 +106,15 @@ which zstack-woodpecker
 tmpdir=`mktemp`
 /bin/rm -rf $tmpdir
 mkdir -p $tmpdir
-tar zxf $SANITYTEST_FOLDER/zstacktestagent.tar.gz -C $tmpdir
+tar jxf $SANITYTEST_FOLDER/${ZSTACK_TEST_AGENT} -C $tmpdir
 
 echo -e " - Install zstacklib.\n"
-pip install --force-reinstall -i $ZSTACK_PYPI_URL $tmpdir/zstacktestagent/zstacklib*.tar.gz 
+set -x
+pip install --ignore-installed --no-index -f file://${tmpdir}/zstacktestagent/pypi $tmpdir/zstacktestagent/zstacklib*.tar.gz 
 [ $? -ne 0 ] && echo "Install zstacklib failure. Exit." && /bin/rm -rf $tmpdir && exit 1
 
 echo -e " - Install testagent.\n"
-pip install --force-reinstall -i $ZSTACK_PYPI_URL $tmpdir/zstacktestagent/zstacktestagent*.tar.gz
+pip install --ignore-installed --no-index -f file://${tmpdir}/zstacktestagent/pypi $tmpdir/zstacktestagent/zstacktestagent*.tar.gz
 [ $? -ne 0 ] && echo "Install testagent failure. Exit." && /bin/rm -rf $tmpdir && exit 1
 /bin/rm -rf $tmpdir
 

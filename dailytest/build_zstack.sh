@@ -47,7 +47,7 @@ ZSTACK_WOODPECKER=$ZSTACK_TEST_ROOT/zstack-woodpecker
 ZSTACK_DASHBOARD=$ZSTACK_TEST_ROOT/zstack-dashboard
 ZSTACK_BUILD=$ZSTACK_UTILITY/zstackbuild
 ZSTACK_ARCHIVE=$ZSTACK_TEST_ROOT/zstack_build_archive
-zstack_build_archive="install.sh zstack-all-in-one-*.tgz woodpecker/zstacktestagent.tar.gz  woodpecker/conf/zstack.properties"
+zstack_build_archive="install.sh zstack-all-in-one-*.tgz woodpecker/zstacktestagent.tar.bz  woodpecker/conf/zstack.properties"
 tab='  '
 
 echo -e "\n - Build zstack.war and all test required packages. -"
