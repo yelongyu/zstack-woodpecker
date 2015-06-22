@@ -70,6 +70,7 @@ mkdir -p $SANITYTEST_FOLDER
 /bin/cp -f install.sh $SANITYTEST_FOLDER
 /bin/cp -f zstack-all-in-one*.tgz $SANITYTEST_FOLDER/zstack-all-in-one.tgz
 /bin/cp -f woodpecker/${ZSTACK_TEST_AGENT} $SANITYTEST_FOLDER
+rm -f $SANITYTEST_FOLDER/zstacktestagent.tar.gz
 echo -e " - Already copy and replace $SANITYTEST_FOLDER/$ZSTACK_ALL_IN_ONE $SANITYTEST_FOLDER/${ZSTACK_TEST_AGENT}\n"
 
 if [ ! -f $SANITYTEST_FOLDER/conf/zstack.properties ];then

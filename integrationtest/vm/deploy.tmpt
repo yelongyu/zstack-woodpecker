@@ -3,7 +3,7 @@ zstackInstallScript = ~/sanitytest/install.sh
 #zstackInstallPath should be carefully set. The contents in this folder will be deleted permanently in testing. 
 zstackInstallPath = /usr/local/zstacktest
 zstackPropertiesPath = ~/sanitytest/conf/zstack.properties
-zstackTestAgentPkgPath = ~/sanitytest/zstacktestagent.tar.gz
+zstackTestAgentPkgPath = ~/sanitytest/zstacktestagent.tar.bz
 DBServer = centos1
 
 DBAdminUser = root

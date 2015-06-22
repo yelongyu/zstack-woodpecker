@@ -595,7 +595,9 @@ default one' % self.zstack_properties)
         try:
             def untar_test_agent():
                 tmpdir = tempfile.mkdtemp()
-                shell.call('tar xzf %s -C %s' % (self.test_agent_path, tmpdir))
+                shell.call('tar jxf %s -C %s' % (self.test_agent_path, tmpdir))
+                shell.call('cd %s/zstacktestagent/; tar jcf pypi.tar.bz pypi' \
+                        % tmpdir)
                 return '%s/zstacktestagent' % tmpdir
 
             def _wait_echo(target_ip):
@@ -620,6 +622,7 @@ default one' % self.zstack_properties)
                     ansible_cmd_args = "host=%s \
                             pkg_testagent=zstacktestagent-0.1.0.tar.gz \
                             pkg_zstacklib=zstacklib-0.7.tar.gz \
+                            pypi_source_tar=pypi.tar.bz \
                             pypi_url=%s" % \
                             (h.managementIp_, ENV_PYPI_URL)
                     if ENV_HTTP_PROXY:
@@ -655,6 +658,7 @@ default one' % self.zstack_properties)
                 ansible_cmd_args = "host=%s \
                         pkg_testagent=zstacktestagent-0.1.0.tar.gz \
                         pkg_zstacklib=zstacklib-0.7.tar.gz \
+                        pypi_source_tar=pypi.tar.bz \
                         pypi_url=%s" % \
                         (target.managementIp, ENV_PYPI_URL)
                 if ENV_HTTP_PROXY:
