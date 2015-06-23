@@ -89,7 +89,7 @@ echo "Concurrency: $thread" |tee -a $result_file
 echo "========================================" |tee -a $result_file
 echo "Test case log could be found at: `dirname $zstest`/config_xml/test-result/" |tee -a $result_file
 echo "Test result will be saved in $result_file" |tee -a $result_file
-echo -ne "Test rehearsal:"
+echo -ne "Test rehearsal time:"
 
 export ZSTACK_TEST_NUM=0
 export ZSTACK_THREAD_THRESHOLD=$thread
@@ -115,7 +115,7 @@ while [ $cur_vm -le $max_vm ]; do
     $zstest -c $res_creation -t 72000 >$tmp_result 2>&1
     [ $? -ne 0 ] && zstest_fail
     creation_time=`cat $tmp_result|grep 'Total test time'|awk -F 'time:' '{print $2}'|awk '{print $2}'|awk -F '(' '{print $2}'|awk -F ')' '{print $1}'`
-    creation_time=`expr $creation_time - $rehearsal_time`
+    creation_time=`echo "$creation_time - $rehearsal_time"|bc`
     creation_time=`echo "scale = 3; $creation_time/1" |bc`
     [ -z $creation_time ] && zstest_fail
     ct_size=${#creation_time}

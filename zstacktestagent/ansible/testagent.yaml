@@ -64,12 +64,10 @@
     - name: install virtualenv
       pip: name=virtualenv extra_args="--no-index -f file://{{pypi_local}}"
 
-    - name: create virtualenv dirctory
-      shell: "ls {{virtenv_path}}/bin/activate > /dev/null || virtualenv {{virtenv_path}}"
-
     - name: copy zstacklib
       copy: src="{{pkg_zstacklib}}" dest="{{test_root}}/{{pkg_zstacklib}}"
       notify:
+        - create virtualenv dirctory
         - install zstacklib
         - restart testagent
 
@@ -95,6 +93,9 @@
       when: chroot_env == 'true'
 
   handlers:
+    - name: create virtualenv dirctory
+      shell: "rm -rf {{virtenv_path}}; virtualenv {{virtenv_path}}"
+
     - name: install zstacklib
       pip: name="{{test_root}}/{{pkg_zstacklib}}" extra_args="--ignore-installed --no-index -f file://{{pypi_local}}" virtualenv="{{virtenv_path}}" 
 
