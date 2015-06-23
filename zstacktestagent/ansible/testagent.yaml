@@ -11,8 +11,6 @@
     - pypi_local: "{{test_root}}/pypi"
 
   tasks:
-    - include: zstacklib.yaml
-
     - name: state epel.repo
       stat: path=/etc/yum.repos.d/epel.repo
       register: epel_repo
@@ -60,6 +58,9 @@
 
     - name: untar pypi source
       shell: "cd {{test_root}}; /bin/rm -rf pypi; tar jxf {{pypi_source_tar}}"
+
+    - name: upgrade pip
+      shell: "easy_install -i file://{{pypi_local}}/simple --upgrade pip"
 
     - name: install virtualenv
       pip: name=virtualenv extra_args="--no-index -f file://{{pypi_local}}"
