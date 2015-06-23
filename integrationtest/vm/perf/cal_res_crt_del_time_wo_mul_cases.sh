@@ -21,7 +21,7 @@ help(){
     option4     Initial VM creation case number, default is 1 [optional]
     Option5     Max VM creation case number, default is 20 [optional]
     Option6     VM creation case number increasing steps, default is 1[optional]
-    Option7     Max parallel VM creation number
+    Option7     Max parallel VM creation number, default is 1000 [optional]
 "
     exit 0
 }
@@ -77,6 +77,8 @@ tmp_result=`mktemp`
 create_case=`$zstest -l |grep "\[${res_creation}\]"|awk '{print $3}'`
 destroy_case=`$zstest -l |grep "\[${res_destroy}\]"|awk '{print $3}'`
 
+echo -e "\n\n" >> $result_file
+echo "`date`" |tee -a $result_file
 echo "========================================" |tee -a $result_file
 echo "Create Case: $create_case" |tee -a $result_file
 echo "Destroy Case: $destroy_case" |tee -a $result_file
@@ -85,14 +87,24 @@ echo "End Number: $max_vm" |tee -a $result_file
 echo "Step: $step" |tee -a $result_file
 echo "Concurrency: $thread" |tee -a $result_file
 echo "========================================" |tee -a $result_file
-echo "Test case log could be found at: `dirname $zstest`/config_xml/test-result/"
-echo "Test result will be saved in $result_file"
-echo "========================================"
+echo "Test case log could be found at: `dirname $zstest`/config_xml/test-result/" |tee -a $result_file
+echo "Test result will be saved in $result_file" |tee -a $result_file
+echo -ne "Test rehearsal:"
+
+export ZSTACK_TEST_NUM=0
+export ZSTACK_THREAD_THRESHOLD=$thread
+$zstest -c $res_creation -t 72000 >$tmp_result 2>&1
+[ $? -ne 0 ] && zstest_fail
+rehearsal_time=`cat $tmp_result|grep 'Total test time'|awk -F 'time:' '{print $2}'|awk '{print $2}'|awk -F '(' '{print $2}'|awk -F ')' '{print $1}'`
+echo "$rehearsal_time"
+
+echo "========================================" |tee -a $result_file
+
 
 result='\nRes\tCreation\tAvgC\tDestroy\t\tAvgD\tCrt_Rst\tDst_Rst\n'
 split='-----------------------------------------------------------------------------'
 result=$split$result$split
-echo -e $result |tee $result_file
+echo -e $result |tee -a $result_file
 
 cur_vm=$start_vm
 
@@ -103,6 +115,7 @@ while [ $cur_vm -le $max_vm ]; do
     $zstest -c $res_creation -t 72000 >$tmp_result 2>&1
     [ $? -ne 0 ] && zstest_fail
     creation_time=`cat $tmp_result|grep 'Total test time'|awk -F 'time:' '{print $2}'|awk '{print $2}'|awk -F '(' '{print $2}'|awk -F ')' '{print $1}'`
+    creation_time=`expr $creation_time - $rehearsal_time`
     creation_time=`echo "scale = 3; $creation_time/1" |bc`
     [ -z $creation_time ] && zstest_fail
     ct_size=${#creation_time}
