@@ -622,9 +622,9 @@ default one' % self.zstack_properties)
                     ansible_cmd_args = "host=%s \
                             pkg_testagent=zstacktestagent-0.1.0.tar.gz \
                             pkg_zstacklib=zstacklib-0.7.tar.gz \
-                            pypi_source_tar=pypi.tar.bz \
-                            pypi_url=%s" % \
-                            (h.managementIp_, ENV_PYPI_URL)
+                            pypi_source_tar=pypi.tar.bz" % \
+                            h.managementIp_
+
                     if ENV_HTTP_PROXY:
                         ansible_cmd_args = "%s http_proxy=%s https_proxy=%s" % \
                             (ansible_cmd_args, ENV_HTTP_PROXY, ENV_HTTPS_PROXY)
@@ -658,9 +658,8 @@ default one' % self.zstack_properties)
                 ansible_cmd_args = "host=%s \
                         pkg_testagent=zstacktestagent-0.1.0.tar.gz \
                         pkg_zstacklib=zstacklib-0.7.tar.gz \
-                        pypi_source_tar=pypi.tar.bz \
-                        pypi_url=%s" % \
-                        (target.managementIp, ENV_PYPI_URL)
+                        pypi_source_tar=pypi.tar.bz" % \
+                        target.managementIp
                 if ENV_HTTP_PROXY:
                     ansible_cmd_args = "%s http_proxy=%s https_proxy=%s" % \
                         (ansible_cmd_args, ENV_HTTP_PROXY, ENV_HTTPS_PROXY)
