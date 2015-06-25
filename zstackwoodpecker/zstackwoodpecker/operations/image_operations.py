@@ -28,6 +28,27 @@ def add_data_volume_template(image_option):
     test_util.test_logger('[volume:] %s is added.' % evt.inventory.uuid)
     return evt.inventory
 
+def add_iso_template(image_creation_option):
+    '''
+    Add iso template
+    '''
+    action = api_actions.AddImageAction()
+    action.name = image_creation_option.get_name()
+    action.guest_os_type = image_creation_option.get_guest_os_type()
+    action.mediaType = 'ISO'
+
+    action.backupStorageUuids = \
+            image_creation_option.get_backup_storage_uuid_list()
+    action.bits = image_creation_option.get_bits()
+    action.description = image_creation_option.get_description()
+    action.format = 'iso'
+    action.url = image_creation_option.get_url()
+    action.timeout = image_creation_option.get_timeout()
+    test_util.action_logger('Add ISO Template from url: %s in [backup Storage:] %s' % (action.url, action.backupStorageUuids))
+    evt = account_operations.execute_action_with_session(action, \
+            image_creation_option.get_session_uuid())
+    return evt.inventory
+
 def add_root_volume_template(image_creation_option):
     '''
     Add root volume template
