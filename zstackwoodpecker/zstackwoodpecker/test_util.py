@@ -668,7 +668,9 @@ def _template_to_dict(template_file_path):
         done.append(path)
         with open(os.path.abspath(path), 'r') as fd:
             content = fd.read()
+            line_num = 0
             for l in content.split('\n'):
+                line_num += 1
                 l = l.strip().strip('\t\n ')
                 if l == "":
                     continue
@@ -694,7 +696,7 @@ def _template_to_dict(template_file_path):
                     (key, val) = l.split('=', 1)
                 except:
                     traceback.print_exc(file=sys.stdout)
-                    err = "parse error for %s" % l
+                    err = "parse error for %s in line: %d in file: %s" % (l, line_num, path)
                     raise Exception(err)
 
                 key = key.strip()

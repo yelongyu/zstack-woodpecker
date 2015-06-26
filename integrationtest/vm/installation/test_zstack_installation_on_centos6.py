@@ -89,9 +89,8 @@ def test():
     ssh.make_ssh_no_password(vm_ip, test_lib.lib_get_vm_username(vm_inv), \
             test_lib.lib_get_vm_password(vm_inv))
 
-    env_var = "ZSTACK_ALL_IN_ONE='%s' ZSTACK_PYPI_URL='%s' WEBSITE='%s'" % \
+    env_var = "ZSTACK_ALL_IN_ONE='%s' WEBSITE='%s'" % \
             (check_str(os.environ.get('ZSTACK_ALL_IN_ONE')), \
-            check_str(os.environ.get('ZSTACK_PYPI_URL')), \
             check_str(os.environ.get('WEBSITE')))
     ssh_cmd = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     cmd = '%s "%s bash %s -d -a"' % (ssh_cmd, env_var, target_file)
