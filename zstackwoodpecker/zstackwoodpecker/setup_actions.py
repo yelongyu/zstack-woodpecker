@@ -496,9 +496,9 @@ default one' % self.zstack_properties)
 
     def _install_local_zstack(self):
         shell.call('rm -rf %s' % self.install_path, False)
-        cmd = 'WEBSITE=localhost bash %s -f %s -r %s -i -R %s' % \
+        cmd = 'WEBSITE=localhost bash %s -f %s -r %s -a' % \
                 (self.zstack_install_script, self.zstack_pkg, \
-                self.install_path, ENV_PYPI_URL)
+                self.install_path)
 
         shell.call(cmd)
         self._deploy_zstack_properties()

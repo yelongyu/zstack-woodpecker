@@ -4,6 +4,7 @@
 ZSTACK_LIB_DIR='/var/lib/zstack'
 TA_VIRTUALEVN_ROOT=$ZSTACK_LIB_DIR/virtualenv/testagent
 ZSTACK_PYPI_URL=${ZSTACK_PYPI_URL-'https://pypi.python.org/simple/'}
+PYPI_TRUSTED_HOST=`echo $ZSTACK_PYPI_URL|awk -F'/' '{print $3}'`
 current_dir=`dirname $0`
 
 echo_bold(){
@@ -148,17 +149,19 @@ $MNT ansible_connection=chroot
 EOF
 
 cp -a $ANSIBLE_DIR/* $NEW_ANSIBLE_DIR/files
+pypi_dir=$ANSIBLE_DIR/../../../static/pypi
+cp $pypi_dir/pip*.tar.gz $NEW_ANSIBLE_DIR/files
 
 cd $NEW_ANSIBLE_DIR
 find . -name *.yaml -exec ln -s {} \;
 
 echo_bold "Update Virtual Router ..."
-ansible-playbook virtualrouter.yaml -i $ansible_inventory -e "gather_facts=No zstack_root=/var/lib/zstack/ pkg_virtualrouter=virtualrouter-0.7.tar.gz pypi_url=$ZSTACK_PYPI_URL pkg_zstacklib=zstacklib-0.7.tar.gz host=chroot chroot=true" || exception "Update Virtual Router Failed"
+ansible-playbook virtualrouter.yaml -i $ansible_inventory -e "gather_facts=No zstack_root=/var/lib/zstack/ pkg_virtualrouter=virtualrouter-0.7.tar.gz pypi_url=$ZSTACK_PYPI_URL trusted_host=$PYPI_TRUSTED_HOST pkg_zstacklib=zstacklib-0.7.tar.gz host=chroot chroot=true" || exception "Update Virtual Router Failed"
 
 echo_bold "Update Virtual Router Successfully"
 
 echo_bold "Update Appliance VM service..."
-ansible-playbook appliancevm.yaml -i $ansible_inventory -e "zstack_root=/var/lib/zstack/ pkg_appliancevm=appliancevm-0.7.tar.gz pypi_url=$ZSTACK_PYPI_URL pkg_zstacklib=zstacklib-0.7.tar.gz host=chroot chroot=true" || exception "Update Appliance VM Failed"
+ansible-playbook appliancevm.yaml -i $ansible_inventory -e "zstack_root=/var/lib/zstack/ pkg_appliancevm=appliancevm-0.7.tar.gz pypi_url=$ZSTACK_PYPI_URL trusted_host=$PYPI_TRUSTED_HOST pkg_zstacklib=zstacklib-0.7.tar.gz host=chroot chroot=true" || exception "Update Appliance VM Failed"
 echo_bold "Update Appliance VM Successfully"
 
 if [ ! -z $ZSTACK_TEST_AGENT_PATH ]; then

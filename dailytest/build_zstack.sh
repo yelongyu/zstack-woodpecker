@@ -124,7 +124,7 @@ which ant
 
 [ $? -ne 0 ] && which apt-get && apt-get install -y ant && apt-get install -y maven
 
-ant all-in-one -Dzstack_build_root=$ZSTACK_TEST_ROOT |tee -a /tmp/zstack/build_log
+ant all-in-one -Dzstack_build_root=$ZSTACK_TEST_ROOT -Dbuild_name=qa |tee -a /tmp/zstack/build_log
 if [ ${PIPESTATUS[0]} -ne 0 ]; then
     echo_failure "build zstack failure"
     exit 1
