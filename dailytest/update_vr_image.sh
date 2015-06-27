@@ -1,5 +1,8 @@
 #!/bin/bash
-# This script should be same with zstack-utility/virtualrouter/bootstrap
+# This script should some preparation before be called.
+# The ZSTACK_PYPI_URL should be exposed in shell environment. 
+#  the pypi url should be an internal http website and including all files 
+#  copied from apache-tomcat/webapps/zstack/static/pypi
 #set -x
 ZSTACK_LIB_DIR='/var/lib/zstack'
 TA_VIRTUALEVN_ROOT=$ZSTACK_LIB_DIR/virtualenv/testagent
