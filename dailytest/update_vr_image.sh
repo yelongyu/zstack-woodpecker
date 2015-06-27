@@ -172,7 +172,7 @@ if [ ! -z $ZSTACK_TEST_AGENT_PATH ]; then
     tar -jxf $ZSTACK_TEST_AGENT_PATH -C $tmpfile
     cd $tmpfile/zstacktestagent
     tar jcf pypi.tar.bz pypi
-    ansible-playbook testagent.yaml -i $ansible_inventory -e "zstack_root=/var/lib/zstack/ pkg_testagent=zstacktestagent-0.1.0.tar.bz pypi_source_tar=pypi.tar.bz pkg_zstacklib=zstacklib-0.7.tar.gz host=chroot chroot=true" || ( rm -rf $tmpfile && exception "Update Test Agent Failed")
+    ansible-playbook testagent.yaml -i $ansible_inventory -e "zstack_root=/var/lib/zstack/ pkg_testagent=zstacktestagent-0.1.0.tar.gz pypi_source_tar=pypi.tar.bz pkg_zstacklib=zstacklib-0.7.tar.gz host=chroot chroot=true" || ( rm -rf $tmpfile && exception "Update Test Agent Failed")
     rm -rf $tmpfile
     echo_bold "Update Appliance VM Successfully"
 fi
