@@ -16,6 +16,8 @@
         <case timeout='800' repeat='1'>vlan/test_crt_vms_with_limited_ips.py</case>
         <case timeout='800' repeat='2' noparallel='True'>vlan/test_crt_vms_with_limited_ips2.py</case>
         <case timeout='800' repeat='1'>vlan/test_start_vms_simultaneously.py</case>
+        <case timeout='800' repeat='1'>vlan/test_crt_static_ip_vm.py</case>
+        <case timeout='800' repeat='1'>vlan/test_crt_vm_with_hostname.py</case>
         <case timeout='600' repeat='1'>volume/test_add_volume.py</case>
         <case timeout='900' repeat='1'>volume/test_add_m_vols.py</case>
         <case timeout='800' repeat='1'>volume/test_add_volume_vr.py</case>
