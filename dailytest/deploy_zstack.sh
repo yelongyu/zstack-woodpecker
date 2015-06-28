@@ -1,5 +1,9 @@
 #!/bin/bash
 # Execute ZStack build and prepare test environment. 
+# It is better to prepare the env by:
+#  1. make sure zstack is buildable by `mvn -DskipTests clean install`
+#  in zstack repo.
+#  2. install system required libs by zstack-install.sh -l 
 
 WOODPECKER_VIRTUALENV=/var/lib/zstack/virtualenv/woodpecker
 ZSTACK_TEST_ROOT=${ZSTACK_TEST_ROOT-'/usr/local/zstack'}
@@ -91,7 +95,7 @@ rm -rf $tempfolder
 if [ ! -d $WOODPECKER_VIRTUALENV ]; then
     rm -rf $WOODPECKER_VIRTUALENV
     mkdir -p `dirname $WOODPECKER_VIRTUALENV`
-    virtualenv $WOODPECKER_VIRTUALENV
+    virtualenv $WOODPECKER_VIRTUALENV --system-site-packages
 fi
 
 #install apibinding and zstacklib in woodpecker virtualenv
