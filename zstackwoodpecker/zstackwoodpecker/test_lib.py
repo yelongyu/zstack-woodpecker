@@ -550,6 +550,14 @@ def lib_scp_file_to_vm(vm, src_file, dst_file, l3_uuid = None):
         scp response object: scp successfully
         False: scp failed
     '''
+    def _full_path(self, path):
+        if path.startswith('~'):
+            return os.path.expanduser(path)
+        elif path.startswith('/'):
+            return path
+        else:
+            return os.path.join(self.config_base_path, path)
+
     lib_set_vm_host_l2_ip(vm)
     host_ip = lib_find_host_by_vm(vm).managementIp
     h_username = os.environ.get('hostUsername')
@@ -558,6 +566,7 @@ def lib_scp_file_to_vm(vm, src_file, dst_file, l3_uuid = None):
     temp_script = '/tmp/%s' % uuid.uuid1().get_hex()
 
     #copy the target script to target host firstly.
+    src_file = _full_path(src_file)
     ssh.scp_file(src_file, temp_script, host_ip, h_username, h_password)
 
     username = lib_get_vm_username(vm)
@@ -604,6 +613,15 @@ def lib_execute_shell_script_in_vm(vm_inv, script_file, l3_uuid=None, timeout=SS
         ssh response object: Pass
         False: ssh fail
     '''
+    def _full_path(self, path):
+        if path.startswith('~'):
+            return os.path.expanduser(path)
+        elif path.startswith('/'):
+            return path
+        else:
+            return os.path.join(self.config_base_path, path)
+    script_file = _full_path(sript_file)
+
     lib_set_vm_host_l2_ip(vm_inv)
     host_ip = lib_find_host_by_vm(vm_inv).managementIp
     h_username = os.environ.get('hostUsername')
