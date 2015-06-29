@@ -64,7 +64,7 @@ def execute_shell_in_process(cmd, tmp_file):
     return process.returncode
 
 def prepare_test_env(vm_inv, aio_target):
-    zstack_install_script = test_lib.test_config.zstackInstaller.text_
+    zstack_install_script = os.environ['zstackInstallScript']
     target_file = '/root/zstack_installer.sh'
     test_lib.lib_scp_file_to_vm(vm_inv, zstack_install_script, target_file)
 
