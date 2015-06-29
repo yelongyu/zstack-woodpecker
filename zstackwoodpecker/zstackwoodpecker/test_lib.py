@@ -550,7 +550,7 @@ def lib_scp_file_to_vm(vm, src_file, dst_file, l3_uuid = None):
         scp response object: scp successfully
         False: scp failed
     '''
-    def _full_path(self, path):
+    def _full_path(path):
         if path.startswith('~'):
             return os.path.expanduser(path)
         elif path.startswith('/'):
@@ -613,15 +613,6 @@ def lib_execute_shell_script_in_vm(vm_inv, script_file, l3_uuid=None, timeout=SS
         ssh response object: Pass
         False: ssh fail
     '''
-    def _full_path(self, path):
-        if path.startswith('~'):
-            return os.path.expanduser(path)
-        elif path.startswith('/'):
-            return path
-        else:
-            return os.path.join(self.config_base_path, path)
-    script_file = _full_path(sript_file)
-
     lib_set_vm_host_l2_ip(vm_inv)
     host_ip = lib_find_host_by_vm(vm_inv).managementIp
     h_username = os.environ.get('hostUsername')
