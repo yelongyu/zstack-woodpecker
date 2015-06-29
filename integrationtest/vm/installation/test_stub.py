@@ -14,7 +14,7 @@ def create_vlan_vm(image_name, l3_name=None, disk_offering_uuids=None):
         l3_name = os.environ.get('l3VlanNetworkName1')
 
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
-    return create_vm([l3_net_uuid], image_uuid, 'zstack_installation_vm', \
+    return create_vm([l3_net_uuid], image_uuid, 'zs_install_%s' % image_name, \
             disk_offering_uuids)
 
 def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
