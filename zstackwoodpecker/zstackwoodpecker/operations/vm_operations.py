@@ -71,10 +71,10 @@ def stop_vm(vm_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def start_vm(vm_uuid, session_uuid=None):
+def start_vm(vm_uuid, session_uuid=None, timeout=120000):
     action = api_actions.StartVmInstanceAction()
     action.uuid = vm_uuid
-    action.timeout = 120000
+    action.timeout = timeout
     test_util.action_logger('Start VM [uuid:] %s' % vm_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
@@ -95,3 +95,12 @@ def migrate_vm(vm_uuid, host_uuid, session_uuid=None):
     test_util.action_logger('Migrate VM [uuid:] %s to Host [uuid:] %s' % (vm_uuid, host_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory 
+
+def reconnect_vr(vr_uuid, session_uuid=None):
+    action = api_actions.ReconnectVirtualRouterAction()
+    action.vmInstanceUuid = vr_uuid
+    action.timeout = 300000
+    test_util.action_logger('Reconnect VR VM [uuid:] %s' % vr_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory 
+

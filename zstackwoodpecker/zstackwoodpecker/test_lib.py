@@ -788,6 +788,7 @@ def lib_create_vm_static_ip_tag(l3_uuid, ip_address):
     return ['staticIp::%s::%s' % (l3_uuid, ip_address)]
 
 def lib_create_vm_hostname_tag(hostname):
+    hostname = '-'.join(hostname.split('_'))
     return ['hostname::%s' % hostname]
 
 def lib_vm_random_idel_time(min_stay_time=1, max_stay_time=120):
