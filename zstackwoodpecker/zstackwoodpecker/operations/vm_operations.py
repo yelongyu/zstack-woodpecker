@@ -48,6 +48,7 @@ def create_vm(vm_create_option):
         create_vm.timeout = timeout
 
     create_vm.dataDiskOfferingUuids = vm_create_option.get_data_disk_uuids()
+    create_vm.rootDiskOfferingUuid = vm_create_option.get_root_disk_uuid()
 
     test_util.action_logger('Create VM: %s with [image:] %s and [l3_network:] %s' % (create_vm.name, create_vm.imageUuid, create_vm.l3NetworkUuids))
     evt = account_operations.execute_action_with_session(create_vm, vm_create_option.get_session_uuid())

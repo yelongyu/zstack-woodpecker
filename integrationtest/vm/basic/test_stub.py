@@ -12,8 +12,10 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm
 import zstackwoodpecker.zstack_test.zstack_test_volume as test_volume
+import zstackwoodpecker.operations.image_operations as img_ops
 
-def create_vm(vm_creation_option=None, volume_uuids=None):
+
+def create_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None, image_uuid=None):
     if not vm_creation_option:
         instance_offering_uuid = res_ops.get_resource(res_ops.INSTANCE_OFFERING, session_uuid=None)[0].uuid
         image_uuid = res_ops.get_resource(res_ops.IMAGE, session_uuid=None)[0].uuid
@@ -28,6 +30,12 @@ def create_vm(vm_creation_option=None, volume_uuids=None):
             vm_creation_option.set_data_disk_uuids(volume_uuids)
         else:
             test_util.test_fail('volume_uuids type: %s is not "list".' % type(volume_uuids))
+
+    if root_disk_uuid:
+        vm_creation_option.set_root_disk_uuid(root_disk_uuid)
+
+    if image_uuid:
+        vm_creation_option.set_image_uuid(image_uuid)
 
     vm = test_vm.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
@@ -52,3 +60,14 @@ def create_vm_with_volume(vm_creation_option=None, data_volume_uuids=None):
         data_volume_uuids = [disk_offering.uuid]
     return create_vm(vm_creation_option, data_volume_uuids)
 
+def create_vm_with_iso(vm_creation_option=None):
+    img_option = test_util.ImageOption()
+    img_option.set_name('iso')
+    root_disk_uuid = test_lib.lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName')).uuid
+    bs_uuid = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, session_uuid=None)[0].uuid
+    img_option.set_backup_storage_uuid_list([bs_uuid])
+    os.system("echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/test.iso" % (os.environ.get('zstackInstallPath')))
+    img_option.set_url('http://%s:8080/zstack/static/test.iso' % (os.environ.get('node1Ip')))
+    image_uuid = img_ops.add_iso_template(img_option).uuid
+
+    return create_vm(vm_creation_option, None, root_disk_uuid, image_uuid)

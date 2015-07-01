@@ -297,7 +297,7 @@ class VmOption(DataOption):
             self.zone_uuid = None
             self.data_disk_uuids = None
             self.default_l3_uuid = None
-            #self.root_disk_uuid = None
+            self.root_disk_uuid = None
             #system tag is an array
             self.system_tags = None
             self.user_tags = None
@@ -311,7 +311,7 @@ class VmOption(DataOption):
             self.cluster_uuid = vm_opt.get_cluster_uuid()
             self.zone_uuid = vm_opt.get_zone_uuid()
             self.data_disk_uuids = vm_opt.get_data_disk_uuids()
-            #self.root_disk_uuid = None
+            self.root_disk_uuid = None
             self.set_name(vm_opt.get_name())
             self.set_description(vm_opt.get_description())
             self.set_timeout(vm_opt.get_timeout())
@@ -357,6 +357,12 @@ class VmOption(DataOption):
 
     def get_default_l3_uuid(self):
         return self.default_l3_uuid
+
+    def set_root_disk_uuid(self, disk_uuid):
+        self.root_disk_uuid = disk_uuid
+
+    def get_root_disk_uuid(self):
+        return self.root_disk_uuid
 
     def set_zone_uuid(self, zone_uuid):
         self.zone_uuid = zone_uuid
