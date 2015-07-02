@@ -114,7 +114,6 @@ mkdir -p $tmpdir
 tar jxf $SANITYTEST_FOLDER/${ZSTACK_TEST_AGENT} -C $tmpdir
 
 echo -e " - Install zstacklib.\n"
-set -x
 easy_install -i file://${tmpdir}/zstacktestagent/pypi/simple --upgrade pip
 pip install --ignore-installed --no-index -f file://${tmpdir}/zstacktestagent/pypi $tmpdir/zstacktestagent/zstacklib*.tar.gz 
 [ $? -ne 0 ] && echo "Install zstacklib failure. Exit." && /bin/rm -rf $tmpdir && exit 1
