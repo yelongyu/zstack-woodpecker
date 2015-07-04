@@ -215,7 +215,7 @@ commit_report(){
     else
         comment_body="#[zstack Test Bot Report]        Comments \n $2"
     fi
-    curl_command="curl -d '{\"body\": \" $comment_body \"}' -i -u zstack:zstack123 -X POST https://api.github.com/repos/zxwing/zstack/commits/$new_commit/comments"
+    curl_command="curl -d '{\"body\": \" $comment_body \"}' -i -u zstack:zstack123 -X POST https://api.github.com/repos/zstackorg/zstack/commits/$new_commit/comments"
     echo $curl_command > $GITHUB_COMMENTS_POST
     [ -f ~/.zstackwoodpecker/.proxyrc ] && source ~/.zstackwoodpecker/.proxyrc
     sh $GITHUB_COMMENTS_POST
