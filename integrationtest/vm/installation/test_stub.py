@@ -63,6 +63,22 @@ def execute_shell_in_process(cmd, tmp_file):
     logfd.close()
     return process.returncode
 
+def copy_id_dsa(vm_inv, ssh_cmd, tmp_file):
+    src_file = '/root/.ssh/id_dsa'
+    target_file = '/root/.ssh/id_dsa'
+    if not os.path.exists(src_file):
+        os.system("ssh-keygen -t dsa -N '' -f %s" % src_file)
+    test_lib.lib_scp_file_to_vm(vm_inv, src_file, target_file)
+    cmd = '%s "chmod 600 /root/.ssh/id_dsa"' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
+
+def copy_id_dsa_pub(vm_inv):
+    src_file = '/root/.ssh/id_dsa.pub'
+    target_file = '/root/.ssh/authorized_keys'
+    if not os.path.exists(src_file):
+        os.system("ssh-keygen -t dsa -N '' -f %s" % src_file)
+    test_lib.lib_scp_file_to_vm(vm_inv, src_file, target_file)
+
 def prepare_test_env(vm_inv, aio_target):
     zstack_install_script = os.environ['zstackInstallScript']
     target_file = '/root/zstack_installer.sh'
@@ -75,11 +91,23 @@ def prepare_test_env(vm_inv, aio_target):
     ssh.make_ssh_no_password(vm_ip, test_lib.lib_get_vm_username(vm_inv), \
             test_lib.lib_get_vm_password(vm_inv))
 
-def execute_install(ssh_cmd, target_file, tmp_file):
+def execute_all_install(ssh_cmd, target_file, tmp_file):
     env_var = "ZSTACK_ALL_IN_ONE='%s' WEBSITE='%s'" % \
             (target_file, 'localhost')
 
     cmd = '%s "%s bash /root/zstack_installer.sh -d -a"' % (ssh_cmd, env_var)
+
+    process_result = execute_shell_in_process(cmd, tmp_file)
+
+    if process_result != 0:
+        cmd = '%s "cat /tmp/zstack_installation.log"' % ssh_cmd
+        execute_shell_in_process(cmd, tmp_file)
+        test_util.test_fail('zstack installation failed')
+
+def only_install_zstack(ssh_cmd, target_file, tmp_file):
+    env_var = "WEBSITE='%s'" % 'localhost'
+
+    cmd = '%s "%s bash /root/zstack_installer.sh -d -i -f %s"' % (ssh_cmd, env_var, target_file)
 
     process_result = execute_shell_in_process(cmd, tmp_file)
 

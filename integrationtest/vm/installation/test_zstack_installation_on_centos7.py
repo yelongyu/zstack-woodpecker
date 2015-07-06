@@ -27,7 +27,7 @@ def test():
     target_file = '/root/zstack-all-in-one.tgz'
     test_stub.prepare_test_env(vm_inv, target_file)
     ssh_cmd = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
-    test_stub.execute_install(ssh_cmd, target_file, tmp_file)
+    test_stub.execute_all_install(ssh_cmd, target_file, tmp_file)
     test_stub.check_installation(ssh_cmd, tmp_file)
 
     os.system('rm -f %s' % tmp_file)
