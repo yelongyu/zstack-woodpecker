@@ -57,7 +57,8 @@ def execute_shell_in_process(cmd, tmp_file, timeout = 3600, no_timeout_excep = F
             else:
                 os.system('rm -f %s' % tmp_file)
                 test_util.test_fail('[shell:] %s timeout, after %d seconds' % (cmd, timeout))
-        print('Installation: %d' % int(test_time))
+        if test_time%10 == 0:
+            print('shell script used: %ds' % int(test_time))
         time.sleep(1)
     logfd.close()
     logfd = open(tmp_file, 'r')

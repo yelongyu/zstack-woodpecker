@@ -58,7 +58,7 @@ def test():
     if process_result != 0:
         test_fail('zstack install rabbitmq failed in vm:%s' % vm1_inv.uuid)
 
-    cmd = '%s "rabbitmqctl add_user zstack zstack123; rabbitmqctl set_user_tags zstack administrator; rabbitmqctl change_password zstack zstack123; rabbitmqctl set_permissions -p / zstack \".*\" \".*\" \".*\""' % ssh_cmd2
+    cmd = '%s "rabbitmqctl add_user zstack zstack123; rabbitmqctl set_user_tags zstack administrator; rabbitmqctl change_password zstack zstack123; rabbitmqctl set_permissions -p / zstack \\\".*\\\" \\\".*\\\" \\\".*\\\""' % ssh_cmd2
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
         test_fail('zstack set rabbitmq username/password failed in vm:%s' % vm2_inv.uuid)
