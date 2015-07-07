@@ -5,6 +5,7 @@
 import os
 import tempfile
 import uuid
+import time
 
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
@@ -16,6 +17,10 @@ tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
 
 
 def test():
+    def test_fail(msg):
+        os.system('rm -f %s' % tmp_file)
+        test_util.test_fail(msg)
+
     test_util.test_dsc('Create 2 ubuntu vm to test zstack installation.')
     image_name = os.environ.get('imageName_i_u14')
     vm1 = test_stub.create_vlan_vm(image_name)
@@ -40,37 +45,47 @@ def test():
     cmd = '%s "zstack-ctl install_db --host=%s"' % (ssh_cmd1, vm2_ip)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
-        test_util.test_fail('zstack install db failed in vm:%s' % vm2_inv.uuid)
+        test_fail('zstack install db failed in vm:%s' % vm2_inv.uuid)
 
     cmd = '%s "zstack-ctl deploydb --host=%s"' % (ssh_cmd1, vm2_ip)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
-        test_util.test_fail('zstack deploy db failed in vm:%s' % vm2_inv.uuid)
+        test_fail('zstack deploy db failed in vm:%s' % vm2_inv.uuid)
 
     cmd = '%s "zstack-ctl install_rabbitmq --host=%s"' % (ssh_cmd1, vm1_ip)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
-        test_util.test_fail('zstack install rabbitmq failed in vm:%s' % vm1_inv.uuid)
+        test_fail('zstack install rabbitmq failed in vm:%s' % vm1_inv.uuid)
 
     cmd = '%s "zstack-ctl install_management_node --remote=%s"' % (ssh_cmd1, vm2_ip)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
-        test_util.test_fail('zstack install mn failed in vm:%s' % vm2_inv.uuid)
+        test_fail('zstack install mn failed in vm:%s' % vm2_inv.uuid)
 
     cmd = '%s "zstack-ctl install_ui --host=%s"' % (ssh_cmd1, vm2_ip)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
-        test_util.test_fail('zstack install ui failed in vm:%s' % vm2_inv.uuid)
+        test_fail('zstack install ui failed in vm:%s' % vm2_inv.uuid)
 
     cmd = '%s "zstack-ctl install_ui --host=%s"' % (ssh_cmd1, vm1_ip)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
-        test_util.test_fail('zstack install ui failed in vm:%s' % vm1_inv.uuid)
+        test_fail('zstack install ui failed in vm:%s' % vm1_inv.uuid)
 
     cmd = '%s "zstack-ctl start_node"' % ssh_cmd1
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
-        test_util.test_fail('start node failed in vm:%s' % vm1_inv.uuid)
+        if 'no management-node-ready message received within' in open(tmp_file).read():
+            times = 10
+            cmd = '%s "zstack-ctl status"' % ssh_cmd1
+            while (times > 0):
+                time.sleep(10)
+                process_result = test_stub.execute_shell_in_process(cmd, tmp_file, 10, True)
+                if process_result == 0:
+                    test_util.test_logger("management node start after extra %d seconds" % (10 - times + 1) * 10 )
+                    break
+            else:
+                test_fail('start node failed in vm:%s' % vm1_inv.uuid)
 
     test_stub.check_installation(ssh_cmd1, tmp_file)
 
