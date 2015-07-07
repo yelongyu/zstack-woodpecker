@@ -53,9 +53,9 @@ def test_warn(msg):
 
 #Record Test Log
 def test_logger(msg):
-    print_msg = '[CASE LOG]:\n%s %s \n%s' % (minus_split, msg, minus_split)
-    print print_msg
     log_time = time.ctime().split()[3]
+    print_msg = '[CASE LOG]: %s\n%s %s \n%s' % (log_time, minus_split, msg, minus_split)
+    print print_msg
     action_msg = '%s %s [%s]\n' % (log_prefix, msg, log_time)
     action_msg = '%s %s [%s]' % (log_prefix, msg, log_time)
     only_action_log = os.environ.get('WOODPECKER_ONLY_ACTION_LOG')

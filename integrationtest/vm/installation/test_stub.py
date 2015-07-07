@@ -53,7 +53,7 @@ def execute_shell_in_process(cmd, tmp_file, timeout = 3600, no_timeout_excep = F
             test_util.test_logger('[shell:] %s [timeout logs:] %s' % (cmd, '\n'.join(logfd.readlines())))
             logfd.close()
             if no_timeout_excep:
-                test_util.test_logger('[shell:] %s timeout, after %d seconds' % (cmd, timeout))
+                test_util.test_logger('[shell:] %s timeout, after %d seconds' % (cmd, test_time))
             else:
                 os.system('rm -f %s' % tmp_file)
                 test_util.test_fail('[shell:] %s timeout, after %d seconds' % (cmd, timeout))
@@ -106,13 +106,14 @@ def execute_all_install(ssh_cmd, target_file, tmp_file):
         cmd = '%s "cat /tmp/zstack_installation.log"' % ssh_cmd
         execute_shell_in_process(cmd, tmp_file)
         if 'no management-node-ready message received within' in open(tmp_file).read():
-            times = 12
+            times = 20
             cmd = '%s "zstack-ctl status"' % ssh_cmd
             while (times > 0):
                 time.sleep(10)
                 process_result = execute_shell_in_process(cmd, tmp_file, 10, True)
+                times -= 0
                 if process_result == 0:
-                    test_util.test_logger("management node start after extra %d seconds" % (10 - times + 1) * 10 )
+                    test_util.test_logger("management node start after extra %d seconds" % (20 - times + 1) * 10 )
                     return 0
                 test_util.test_logger("mn node is still not started up, wait for another 10 seconds...")
             else:

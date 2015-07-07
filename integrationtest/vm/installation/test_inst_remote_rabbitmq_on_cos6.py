@@ -21,7 +21,7 @@ def test():
         os.system('rm -f %s' % tmp_file)
         test_util.test_fail(msg)
 
-    test_util.test_dsc('Create 2 CentOS6 vm to test zstack installation. Rabbitmq server is on different node with zstack management node')
+    test_util.test_dsc('Create 2 CentOS6 vm to test zstack installation. Rabbitmq server is on different node with zstack management node. ZStack management node will also be started in 2 hosts.')
     image_name = os.environ.get('imageName_i_c6')
     vm1 = test_stub.create_vlan_vm(image_name)
     test_obj_dict.add_vm(vm1)
@@ -107,13 +107,14 @@ def test():
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
         if 'no management-node-ready message received within' in open(tmp_file).read():
-            times = 10
+            times = 20
             cmd = '%s "zstack-ctl status"' % ssh_cmd1
             while (times > 0):
                 time.sleep(10)
                 process_result = test_stub.execute_shell_in_process(cmd, tmp_file, 10, True)
+                times -= 1
                 if process_result == 0:
-                    test_util.test_logger("management node1 start after extra %d seconds" % (10 - times + 1) * 10 )
+                    test_util.test_logger("management node1 start after extra %d seconds" % (20 - times + 1) * 10 )
                     break
             else:
                 test_fail('start node failed in vm:%s' % vm1_inv.uuid)
@@ -122,18 +123,20 @@ def test():
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
         if 'no management-node-ready message received within' in open(tmp_file).read():
-            times = 10
+            times = 20
             cmd = '%s "zstack-ctl status"' % ssh_cmd2
             while (times > 0):
                 time.sleep(10)
                 process_result = test_stub.execute_shell_in_process(cmd, tmp_file, 10, True)
+                times -= 1
                 if process_result == 0:
-                    test_util.test_logger("management node2 start after extra %d seconds" % (10 - times + 1) * 10 )
+                    test_util.test_logger("management node2 start after extra %d seconds" % (20 - times + 1) * 10 )
                     break
             else:
                 test_fail('start remote node failed in vm:%s' % vm1_inv.uuid)
 
     test_stub.check_installation(ssh_cmd1, tmp_file)
+    test_stub.check_installation(ssh_cmd2, tmp_file)
 
     os.system('rm -f %s' % tmp_file)
     vm1.destroy()
