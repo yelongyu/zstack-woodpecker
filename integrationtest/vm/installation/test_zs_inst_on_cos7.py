@@ -16,7 +16,7 @@ tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
 
 
 def test():
-    test_util.test_dsc('Create test vm to test zstack installation.')
+    test_util.test_dsc('Create test vm to test zstack all installation in CentOS7.')
     image_name = os.environ.get('imageName_i_c7')
     vm = test_stub.create_vlan_vm(image_name)
     test_obj_dict.add_vm(vm)

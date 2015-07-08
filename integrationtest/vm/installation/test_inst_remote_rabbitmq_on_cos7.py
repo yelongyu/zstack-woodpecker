@@ -21,7 +21,7 @@ def test():
         os.system('rm -f %s' % tmp_file)
         test_util.test_fail(msg)
 
-    test_util.test_dsc('Create 2 CentOS6 vm to test zstack installation. Rabbitmq server is on different node with zstack management node')
+    test_util.test_dsc('Create 2 CentOS7 vm to test zstack installation. Rabbitmq server is on different node with zstack management node')
     image_name = os.environ.get('imageName_i_c7')
     vm1 = test_stub.create_vlan_vm(image_name)
     test_obj_dict.add_vm(vm1)
