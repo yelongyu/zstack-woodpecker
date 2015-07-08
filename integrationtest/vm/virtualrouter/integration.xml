@@ -1,8 +1,10 @@
 <integrationTest>
     <suite name="virtual router test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
+        <case timeout='800' repeat='1' noparallel='True'>host/test_reconnect_host.py</case>
         <case timeout='800' repeat='1'>novlan/test_create_vm.py</case>
         <case timeout='800' repeat='1'>novlan/test_reboot_vm.py</case>
         <case timeout='800' repeat='1'>novlan/test_ping_vms.py</case>
+        <case timeout='800' repeat='1' noparallel='True'>host/test_reconnect_host.py</case>
         <case timeout='800' repeat='1'>vlan/test_create_vm.py</case>
         <case timeout='800' repeat='1'>vlan/test_reboot_vm.py</case>
         <case timeout='800' repeat='1'>vlan/test_snat_create.py</case>
@@ -81,5 +83,6 @@
         <case timeout='400'  repeat='1' noparallel='True'>vr/test_ping_vms_reboot_vr.py</case>
         <case timeout='400'  repeat='1' noparallel='True'>vr/test_reconnect_vr.py</case>
         <case timeout='400'  repeat='1' noparallel='True'>vr/test_start_vrs_simultaneously.py</case>
+        <case timeout='800' repeat='1' noparallel='True'>host/test_reconnect_host.py</case>
     </suite>
 </integrationTest>

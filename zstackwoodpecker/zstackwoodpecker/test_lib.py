@@ -956,6 +956,20 @@ def lib_find_host_tag(host_inv, conditions = None):
     ret = res_ops.query_resource(res_ops.SYSTEM_TAG, condition)
     return ret
 
+def lib_get_cpu_memory_capacity(zone_uuids = None, cluster_uuids = None, \
+        host_uuids = None, session_uuid = None):
+    import apibinding.api_actions as api_actions
+    action = api_actions.GetCpuMemoryCapacityAction()
+    if zone_uuids:
+        action.zoneUuids = zone_uuids
+    if cluster_uuids:
+        action.clusterUuids = host_uuids
+    if host_uuids:
+        action.hostUuids = host_uuids
+
+    ret = acc_ops.execute_action_with_session(action, session_uuid)
+    return ret
+
 def lib_get_host_libvirt_tag(host_inv):
     '''
     find and return given host's libvirt version. 
@@ -2296,10 +2310,13 @@ def lib_get_image_by_desc(img_desc):
             return image
 
 def lib_get_image_by_name(img_name):
-    images = lib_get_images()
-    for image in images:
-        if image.name == img_name:
-            return image
+    cond = res_ops.gen_query_conditions('name', '=', img_name)
+    images = res_ops.query_resource(res_ops.IMAGE, cond)
+    if images:
+        return images[0]
+
+    test_util.test_logger("not find image with name: %s" % img_name)
+    return False
 
 def lib_remove_image_from_list_by_desc(images, img_desc):
     imgs = images
