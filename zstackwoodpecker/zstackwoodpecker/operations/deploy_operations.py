@@ -269,7 +269,7 @@ def add_primary_storage(deployConfig, session_uuid, ps_name = None, \
                 action.sessionUuid = session_uuid
                 action.name = pr.name_
                 action.description = pr.description__
-                action.type = 'IscsiFileSystemBackendPrimaryStorage'
+                action.type = inventory.ISCSI_FILE_SYSTEM_BACKEND_PRIMARY_STORAGE_TYPE
                 action.url = pr.url_
                 action.zoneUuid = zinv.uuid
                 action.chapPassword = pr.chapPassword_
@@ -295,7 +295,7 @@ def add_primary_storage(deployConfig, session_uuid, ps_name = None, \
                 action.sessionUuid = session_uuid
                 action.name = pr.name_
                 action.description = pr.description__
-                action.type = 'Local'
+                action.type = inventory.LOCAL_STORAGE_TYPE
                 action.url = pr.url_
                 action.zoneUuid = zinv.uuid
                 thread = threading.Thread(target=_thread_for_action, args=(action,))

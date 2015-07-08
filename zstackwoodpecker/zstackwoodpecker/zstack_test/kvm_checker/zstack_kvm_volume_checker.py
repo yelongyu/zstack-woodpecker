@@ -30,6 +30,8 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
             self.check_iscsi(volume, volume_installPath, ps)
         elif ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
             self.check_nfs(volume, volume_installPath)
+        elif ps.type == inventory.LOCAL_STORAGE_TYPE:
+            self.check_nfs(volume, volume_installPath)
 
     def check_iscsi(self, volume, volume_installPath, ps):
         host = test_lib.lib_find_host_by_iscsi_ps(ps)

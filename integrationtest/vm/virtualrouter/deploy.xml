@@ -315,7 +315,7 @@
 
       <primaryStorages>
         <nfsPrimaryStorage name="$nfsPrimaryStorageName"
-          description="Test" url="$nfsPrimaryStorageUrl" />
+          description="Test NFS" url="$nfsPrimaryStorageUrl" />
       </primaryStorages>
 
       <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
