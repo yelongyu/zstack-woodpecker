@@ -95,6 +95,31 @@ def prepare_test_env(vm_inv, aio_target):
     ssh.make_ssh_no_password(vm_ip, test_lib.lib_get_vm_username(vm_inv), \
             test_lib.lib_get_vm_password(vm_inv))
 
+def upgrade_zstack(ssh_cmd, target_file, tmp_file):
+    env_var = "WEBSITE='%s'" % 'localhost'
+
+    cmd = '%s "%s bash /root/zstack_installer.sh -u -f %s"' \
+            % (ssh_cmd, env_var, target_file)
+
+    process_result = execute_shell_in_process(cmd, tmp_file)
+
+    if process_result != 0:
+        cmd = '%s "cat /tmp/zstack_installation.log"' % ssh_cmd
+        execute_shell_in_process(cmd, tmp_file)
+        if 'no management-node-ready message received within' in open(tmp_file).read():
+            times = 30
+            cmd = '%s "zstack-ctl status"' % ssh_cmd
+            while (times > 0):
+                time.sleep(10)
+                process_result = execute_shell_in_process(cmd, tmp_file, 10, True)
+                times -= 0
+                if process_result == 0:
+                    test_util.test_logger("management node start after extra %d seconds" % (30 - times + 1) * 10 )
+                    return 0
+                test_util.test_logger("mn node is still not started up, wait for another 10 seconds...")
+            else:
+                test_util.test_fail('zstack upgrade failed')
+
 def execute_all_install(ssh_cmd, target_file, tmp_file):
     env_var = "ZSTACK_ALL_IN_ONE='%s' WEBSITE='%s'" % \
             (target_file, 'localhost')

@@ -9,5 +9,7 @@
         <case timeout="1600" >test_inst_remote_rabbitmq_on_cos6.py</case>
         <case timeout="1600" >test_inst_remote_rabbitmq_on_cos7.py</case>
         <case timeout="1600" >test_inst_remote_rabbitmq_on_ub14.py</case>
+        <case timeout="1600" >upgrade/test_zs_upgd_on_cos6.py</case>
+        <case timeout="1600" >upgrade/test_zs_upgd_on_cos6_2.py</case>
     </suite>
 </integrationTest>

@@ -494,6 +494,14 @@ default one' % self.zstack_properties)
         shell.call('%s %s' % (EXTRA_DEPLOY_SCRIPT, self.catalina_home))
         print('Extra deployment by %s' % EXTRA_DEPLOY_SCRIPT)
 
+    def _upgrade_local_zstack(self):
+        cmd = 'WEBSITE=localhost bash %s -f %s -u -r %s' % \
+                (self.zstack_install_script, self.zstack_pkg, \
+                self.install_path)
+
+        shell.call(cmd)
+        self._extra_deployment()
+
     def _install_local_zstack(self):
         shell.call('rm -rf %s' % self.install_path, False)
         cmd = 'WEBSITE=localhost bash %s -f %s -r %s -a' % \
@@ -541,6 +549,15 @@ default one' % self.zstack_properties)
                 thread.start()
 
         self._wait_for_thread_completion('install remote management node', 600)
+
+    def _upgrade_management_nodes(self):
+        for node in self.nodes:
+            if not linux.is_ip_existing(node.ip_):
+                cmd = 'zstack-ctl upgrade_management_node --host=%s' % node.ip_
+                thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
+                thread.start()
+
+        self._wait_for_thread_completion('upgrade remote management node', 600)
 
     def _start_war(self):
         self.tomcat.start()
@@ -683,32 +700,36 @@ default one' % self.zstack_properties)
         self._start_multi_nodes(restart=True)
 
     def restart_war_on_all_nodes(self):
-        live_nodes_inv = res_ops.query_resource(res_ops.MANAGEMENT_NODE, [])
+        #planed_nodes = []
+        #for node in self.nodes:
+        #    planed_nodes.append(node.ip_)
+
+        #import socket
+        #planed_nodes.append(socket.gethostbyname(socket.gethostname()))
+
+        #live_nodes_inv = res_ops.query_resource(res_ops.MANAGEMENT_NODE, [])
         not_restarted_nodes = []
 
-        planed_nodes = []
-        for node in self.nodes:
-            planed_nodes.append(node.ip_)
-
-        import socket
-        planed_nodes.append(socket.gethostbyname(socket.gethostname()))
-
-        for live_node_inv in live_nodes_inv:
-            if not live_node_inv.hostName in planed_nodes:
-                not_restarted_nodes.append(live_node_inv.hostName)
+        #for live_node_inv in live_nodes_inv:
+        #    if not live_node_inv.hostName in planed_nodes:
+        #        not_restarted_nodes.append(live_node_inv.hostName)
 
         self.deploy_test_agent()
         self._stop_nodes()
-        self._install_local_zstack()
-        self._deploy_db(keep_db = True)
-        self._install_management_nodes()
+        self._upgrade_local_zstack()
+        #self._deploy_db(keep_db = True)
+        self._upgrade_management_nodes()
         self._set_extra_node_config()
         self._start_multi_nodes()
 
         if not_restarted_nodes:
             print('Following node are not restarted, since they are not defined in deploy.xml : %s' % not_restarted_nodes)
         else:
-            print('\nAll nodes have been restarted!\n')
+            nodes_ip = ''
+            for node in self.nodes:
+                nodes_ip = '%s %s' % (nodes_ip, node.ip__)
+
+            print('\nAll nodes:%s have been restarted!\n' % nodes_ip)
 
     def execute_plan(self):
         self.deploy_test_agent()
