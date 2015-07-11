@@ -49,6 +49,7 @@ def test():
     host = test_lib.lib_get_vm_host(vm.get_vm())
     host_uuid = host.uuid
 
+    os.exit(1)
     import time
 
     tot_res1 = test_lib.lib_get_cpu_memory_capacity([zone_uuid])

@@ -39,12 +39,12 @@ class ZstackTestImage(image_header.TestImage):
     def get_creation_option(self):
         return self.image_creation_option
 
-    def create_data_volume(self, ps_uuid, name = None):
+    def create_data_volume(self, ps_uuid, name = None, host_uuid = None):
         import zstackwoodpecker.header.volume as volume_header
         import zstackwoodpecker.zstack_test.zstack_test_volume \
                 as zstack_volume_header
         volume_inv = vol_ops.create_volume_from_template(self.get_image().uuid,\
-                ps_uuid, name)
+                ps_uuid, name, host_uuid)
         volume = zstack_volume_header.ZstackTestVolume()
         volume.set_volume(volume_inv)
         volume.set_state(volume_header.DETACHED)

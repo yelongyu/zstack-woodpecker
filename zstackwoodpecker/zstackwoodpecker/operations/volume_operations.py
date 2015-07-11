@@ -48,7 +48,7 @@ def create_volume_template(volume_uuid, backup_storage_uuid_list, name = None, \
     return evt.inventory
 
 def create_volume_from_template(image_uuid, ps_uuid, name = None, \
-        session_uuid = None):
+        host_uuid = None, session_uuid = None):
     action = api_actions.CreateDataVolumeFromVolumeTemplateAction()
     action.imageUuid = image_uuid
     action.primaryStorageUuid = ps_uuid
@@ -56,6 +56,10 @@ def create_volume_from_template(image_uuid, ps_uuid, name = None, \
         action.name = name
     else:
         action.name = 'new volume from template %s' % image_uuid
+
+    if host_uuid:
+        action.hostUuid = host_uuid
+
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.test_logger('[Volume:] %s is created from [Volume Template:] %s on [Primary Storage:] %s.' % (evt.inventory.uuid, image_uuid, ps_uuid))
     return evt.inventory

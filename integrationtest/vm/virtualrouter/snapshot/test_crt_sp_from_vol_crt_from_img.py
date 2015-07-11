@@ -26,6 +26,7 @@ import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_vol_header
 import zstackwoodpecker.zstack_test.zstack_test_image as zstack_img_header
 import zstackwoodpecker.header.volume as vol_header
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
+import apibinding.inventory as inventory
 
 import os
 import time
@@ -80,11 +81,18 @@ def test():
     test_obj_dict.add_image(vol_tmpt)
 
     #destroy vm
+    host_uuid = test_lib.lib_get_vm_host(vm.get_vm()).uuid
     vm.destroy()
 
     test_util.test_dsc('Create volume from template')
     ps_uuid = vm.get_vm().allVolumes[0].primaryStorageUuid
-    volume = vol_tmpt.create_data_volume(ps_uuid, 'new_data_volume_from_template1')
+    ps = test_lib.lib_get_primary_storage_by_uuid(ps_uuid)
+
+    if ps.type == inventory.LOCAL_STORAGE_TYPE:
+        volume = vol_tmpt.create_data_volume(ps_uuid, 'new_data_volume_from_template1', host_uuid)
+    else:
+        volume = vol_tmpt.create_data_volume(ps_uuid, 'new_data_volume_from_template1')
+
     test_obj_dict.add_volume(volume)
     vol_tmpt.delete()
 
