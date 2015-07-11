@@ -16,6 +16,10 @@ tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
 
 
 def test():
+    def test_fail(msg):
+        os.system('rm -f %s' % tmp_file)
+        test_util.test_fail(msg)
+
     test_util.test_dsc('Create test vm to test zstack all installation in CentOS6.')
     image_name = os.environ.get('imageName_i_c6')
     vm = test_stub.create_vlan_vm(image_name)
@@ -30,7 +34,7 @@ def test():
     test_stub.execute_all_install(ssh_cmd, target_file, tmp_file)
     test_stub.check_installation(ssh_cmd, tmp_file)
 
-    cmd = '%s "zstack-ctl upgrade_management_node --host=%s"' % (ssh_cmd, vm_ip)
+    cmd = '%s "zstack-ctl upgrade_management_node --host=%s --war-file=/usr/local/zstack/zstack.war"' % (ssh_cmd, vm_ip)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
         test_fail('zstack upgrade management node failed in vm:%s' % vm_inv.uuid)
@@ -48,8 +52,8 @@ def test():
             cmd = '%s "zstack-ctl status"' % ssh_cmd
             while (times > 0):
                 time.sleep(10)
-                process_result = test_stub.execute_shell_in_process(cmd, tmp_file, 10, True)
                 times -= 1
+                process_result = test_stub.execute_shell_in_process(cmd, tmp_file, 10, True)
                 if process_result == 0:
                     test_util.test_logger("management node start after extra %d seconds" % (30 - times + 1) * 10 )
                     break
