@@ -25,6 +25,7 @@ test_obj_dict = test_state.TestStateDict()
 host_config = test_util.HostOption()
 l3_name1 = os.environ.get('l3VlanNetworkName1')
 l3_name2 = os.environ.get('l3VlanNetwork2')
+l3_2 = res_ops.get_resource(res_ops.L3_NETWORK, name = l3_name2)[0]
 curr_deploy_conf = None
 
 def test():
@@ -36,7 +37,6 @@ def test():
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     #pick up l3
     l3_1 = res_ops.get_resource(res_ops.L3_NETWORK, name = l3_name1)[0]
-    l3_2 = res_ops.get_resource(res_ops.L3_NETWORK, name = l3_name2)[0]
 
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
@@ -97,8 +97,8 @@ def test():
 def error_cleanup():
     global curr_deploy_conf
     test_lib.lib_error_cleanup(test_obj_dict)
-    l3_2 = res_ops.get_resource(res_ops.L3_NETWORK, name = l3_name2)[0]
-    if not l3_2:
+    l3s = res_ops.get_resource(res_ops.L3_NETWORK, name = l3_name2)
+    if not l3s:
         try:
             net_ops.add_l3_resource(curr_deploy_conf, l3_name = l3_2.name)
         except Exception as e:

@@ -69,6 +69,7 @@ def test():
     test_util.test_dsc('start vm again. vm should remove the deleted l2')
     vm1.start()
 
+    #add l2 resource will also add l3 resource
     net_ops.add_l2_resource(curr_deploy_conf, l2_name = l2_name2)
 
     #update l3_2, since it is readded.
@@ -94,8 +95,8 @@ def error_cleanup():
     global curr_deploy_conf
     global l2_name2
     test_lib.lib_error_cleanup(test_obj_dict)
-    l3_2 = res_ops.get_resource(res_ops.L3_NETWORK, name = l3_name2)[0]
-    if not l3_2:
+    l3s = res_ops.get_resource(res_ops.L3_NETWORK, name = l3_name2)
+    if not l3s:
         try:
             net_ops.add_l2_resource(curr_deploy_conf, l2_name = l2_name2)
         except Exception as e:

@@ -15,10 +15,14 @@ class zstack_vm_db_checker(checker_header.TestChecker):
         conditions = res_ops.gen_query_conditions('uuid', '=', vm.uuid)
         vm_in_db = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)
         if not vm_in_db:
-            test_util.test_logger('Check result: can NOT find [vm:] %s in Database.' % vm.uuid)
-            return self.judge(False)
+            test_util.test_logger('Check result: can NOT find [vm:] %s in Database. It is possibly destroyed.' % vm.uuid)
+            if self.test_obj.state == vm_header.DESTROYED:
+                return self.judge(True)
+            else:
+                return self.judge(False)
+
         if (vm_in_db[0].state == inventory.RUNNING and self.test_obj.state == vm_header.RUNNING) or (vm_in_db[0].state == inventory.STOPPED and self.test_obj.state == vm_header.STOPPED) or (vm_in_db[0].state == inventory.DESTROYED and self.test_obj.state == vm_header.DESTROYED):
-            #vm state sync is default pass. so didn't print the infomation by default
+            #vm state sync is default pass. So didn't print the information by default
             #test_util.test_logger('Check result: [vm:] %s status is synced with Database.' % vm.uuid)
             return self.judge(True)
         else:
@@ -26,7 +30,7 @@ class zstack_vm_db_checker(checker_header.TestChecker):
             return self.judge(False)
 
 class zstack_image_db_checker(checker_header.TestChecker):
-    '''check image existence in database. If it is in db, 
+    '''check image existence in database. If it is in DB, 
         return self.judge(True). If not, return self.judge(False)'''
     def check(self):
         super(zstack_image_db_checker, self).check()

@@ -15,7 +15,7 @@
         <case timeout='600' repeat='1'>resource/test_migrate_vr_when_del_host.py</case>
         <case timeout='600' repeat='1'>resource/test_del_host_with_stopped_vm.py</case>
         <case timeout='600' repeat='1'>resource/test_migrate_vr_when_del_host2.py</case>
-        <case timeout='600' repeat='1'>resource/test_delete_l3.py</case>
-        <case timeout='600' repeat='1'>resource/test_delete_l3_1.py</case>
+        <case timeout='600' repeat='1'>resource/test_delete_vm_2nd_l3.py</case>
+        <case timeout='600' repeat='1'>resource/test_delete_vm_only_l3.py</case>
     </suite>
 </integrationTest>

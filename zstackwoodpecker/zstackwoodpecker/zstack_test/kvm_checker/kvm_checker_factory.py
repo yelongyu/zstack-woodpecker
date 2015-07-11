@@ -76,7 +76,7 @@ class KvmVmCheckerFactory(checker_header.CheckerFactory):
 
         elif test_obj.state == vm_header.DESTROYED:
             #VM destroy will cause vm structure be removed from DB, when VmExpungeInterval is set to 1, so doesn't need to check destroyed state sync in db in most case.
-            checker_dict[db_checker.zstack_vm_db_checker] = False
+            checker_dict[db_checker.zstack_vm_db_checker] = True
             checker_dict[vm_checker.zstack_kvm_vm_destroyed_checker] = True
 
         kvm_vm_checker_chain.add_checker_dict(checker_dict, test_obj)
