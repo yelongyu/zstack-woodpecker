@@ -5,16 +5,25 @@
        Even if the ZStack server is not running in test machine,
        the catalina path and zstack.war should be firstly put in test machine.
   -->
+  <zstackPkg>$zstackPkg</zstackPkg>
+  <zstackInstallScript>$zstackInstallScript</zstackInstallScript>
+  <zstackInstallPath>$zstackInstallPath</zstackInstallPath>
   <zstackProperties>$zstackPropertiesPath</zstackProperties>
   <testAgent>$zstackTestAgentPkgPath</testAgent>
   <db>
     <!-- Database server IP address or hostname -->
     <server>$DBServer</server>
+    <admin>$DBAdminUser</admin>
+    <adminPassword>$DBAdminPassword</adminPassword>
     <username>$DBUserName</username>
+    <server_root_password>$hostPassword</server_root_password>
     <!-- <password>$DBPassword</password>
     <port>$DBPort</port> -->
   </db>
-  <rabbitmqServer>$rabbitmqServerIp</rabbitmqServer>
+  <rabbitmq>
+      <server>$rabbitmqServerIp</server>
+      <password>$hostPassword</password>
+  </rabbitmq>
 </basicConfig>
 <deployerConfig xmlns="http://zstack.org/schema/zstack">
   <nodes description="Woodpecker will send zstack command to the 1st node. 

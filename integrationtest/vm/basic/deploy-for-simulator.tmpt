@@ -1,3 +1,5 @@
+import ../deploy.tmpt
+
 instanceOfferingName = small
 instanceOfferingMemory = 2048M
 instanceOfferingCpuNum = 2
