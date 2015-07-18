@@ -59,4 +59,16 @@ if [ -z $ONLY_XML ]; then
     done
 fi
 
-echo "$(tput bold) - Has completed create local test config file folder in ${local_config_folder}/integrationtest/ . You can edit the deploy.tmpt and deploy.xml to align with local configurations. $(tput sgr0)"
+if [ $COPY_OPTS = '-f' ];then
+    echo "
+$(tput bold) - Has completed create local test config file folder in ${local_config_folder}/integrationtest/ . 
+    You can edit the deploy.tmpt and deploy.xml to align with local configurations. $(tput sgr0)"
+else
+    echo "
+$(tput bold) - Has completed create local test config file folder in ${local_config_folder}/integrationtest/ . 
+
+    The existed config files are not OVERRIDED. 
+    If you want to OVERRIDE existed files, please use \`$0 -f\`. 
+    
+    You can edit the deploy.tmpt and deploy.xml to align with local configurations. $(tput sgr0)"
+fi
