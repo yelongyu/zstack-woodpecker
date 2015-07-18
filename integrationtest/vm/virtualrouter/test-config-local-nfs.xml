@@ -1,0 +1,6 @@
+<!--test local storage as primary storage -->
+<testConfig>
+    <deployConfig>deploy-local-nfs.xml</deployConfig>
+    <deployConfigTemplate>deploy-local-nfs.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
