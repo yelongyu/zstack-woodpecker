@@ -10,6 +10,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.zstack_test.zstack_test_snapshot as zstack_sp_header
+import apibinding.inventory as inventory
 
 import os
 import time
@@ -29,6 +30,15 @@ def test():
     volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
     volume = test_stub.create_volume(volume_creation_option)
     test_obj_dict.add_volume(volume)
+    volume.attach(vm)
+    volume.detach()
+    ps_uuid = volume.get_volume().primaryStorageUuid
+    ps = test_lib.lib_get_primary_storage_by_uuid(ps_uuid)
+    if ps.type == inventory.LOCAL_STORAGE_TYPE:
+        # LOCAL Storage do not support create volume and template from backuped snapshot
+        test_lib.lib_robot_cleanup(test_obj_dict)
+        test_util.test_skip('Skip test create volume from backuped storage, when volume is deleted.')
+
     #make sure utility vm is starting and running
     vm.check()
 

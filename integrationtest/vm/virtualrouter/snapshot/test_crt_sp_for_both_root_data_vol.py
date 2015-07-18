@@ -11,6 +11,7 @@ import zstackwoodpecker.zstack_test.zstack_test_snapshot as zstack_sp_header
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_vol_header
 import zstackwoodpecker.zstack_test.zstack_test_image as zstack_img_header
 import zstackwoodpecker.header.volume as vol_header
+import apibinding.inventory as inventory
 
 import os
 
@@ -97,6 +98,13 @@ def test():
 
     vm2.destroy()
     test_obj_dict.rm_vm(vm2)
+
+    ps_uuid = vm_root_volume_inv.primaryStorageUuid
+    ps = test_lib.lib_get_primary_storage_by_uuid(ps_uuid)
+    if ps.type == inventory.LOCAL_STORAGE_TYPE:
+        # LOCAL Storage do not support create volume and template from backuped snapshot
+        test_lib.lib_robot_cleanup(test_obj_dict)
+        test_util.test_pass('Create image from root volume with creating/destroying Snapshot Success')
 
     #check data snapshots
     snapshots_data.use_snapshot(snapshot1)

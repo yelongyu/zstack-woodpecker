@@ -71,6 +71,9 @@ def test_result(msg):
     write_to_action_log(action_msg)
 
 def test_fail(msg, no_cleanup = False):
+    '''
+    No test case codes will be executed, after calling this function.
+    '''
     test_logger(msg)
     test_result("Failed :(")
     if no_cleanup:
@@ -78,10 +81,17 @@ def test_fail(msg, no_cleanup = False):
     raise TestError(msg)
 
 def test_pass(msg):
+    '''
+    No test case codes will be executed, after calling this function.
+    '''
     test_logger(msg)
     test_result("Pass :)")
+    sys.exit(0)
 
 def test_skip(msg):
+    '''
+    No test case codes will be executed, after calling this function.
+    '''
     test_logger(msg)
     test_result("Skipped")
     sys.exit(2)
