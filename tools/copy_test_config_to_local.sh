@@ -6,9 +6,11 @@ help(){
     echo "Options: 
     -h                      show this message and exit
     -d WOODPECKER_PATH      [Optional] specify the woodpecker folder path. The
-                            default path is the parent folder of this script."
+                            default path is the parent folder of this script.
+    -f                      Override existed config file. Default will not 
+                            override. 
     -x                      only copy xml files. Default will copy both .xml
-                            and .tmpt files.
+                            and .tmpt files."
     exit
 }
 
@@ -17,10 +19,13 @@ local_config_folder='/root/.zstackwoodpecker'
 
 current_folder=`dirname $0`/../
 
+COPY_OPTS='-n'
+
 OPTIND=1
-while getopts "d:hx" Option; do
+while getopts "d:hfx" Option; do
     case $Option in
         d ) current_folder=$OPTARG;;
+        f ) COPY_OPTS='-f';;
         x ) ONLY_XML='y';;
         * ) help;;
     esac
@@ -40,7 +45,7 @@ config_files=`find $current_folder/integrationtest -name '*.xml'`
 for config_file in $config_files;do
     config_folder=${local_config_folder}/integrationtest/`echo $config_file|awk -F 'integrationtest' '{print $2}' | xargs dirname`
     mkdir -p $config_folder
-    /bin/cp -f $config_file $config_folder
+    /bin/cp $COPY_OPTS $config_file $config_folder
     echo "[copy] $config_file [to] $config_folder"
 done
 
@@ -49,7 +54,7 @@ if [ -z $ONLY_XML ]; then
     for config_temp_file in $config_temp_files;do
         config_folder=${local_config_folder}/integrationtest/`echo $config_temp_file|awk -F 'integrationtest' '{print $2}' | xargs dirname`
         mkdir -p $config_folder
-        /bin/cp -f $config_temp_file $config_folder
+        /bin/cp $COPY_OPTS $config_temp_file $config_folder
         echo "[copy] $config_temp_file [to] $config_folder"
     done
 fi
