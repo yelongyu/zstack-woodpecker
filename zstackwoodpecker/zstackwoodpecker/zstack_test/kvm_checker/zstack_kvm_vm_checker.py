@@ -264,7 +264,7 @@ class zstack_kvm_vm_dhcp_checker(checker_header.TestChecker):
 
             test_util.test_logger("Begin to check VM DHCP in VM: %s" % vm.uuid)
             if not vm_cmd_result:
-                vm_command = '/sbin/ifconfig'
+                vm_command = '/sbin/ip a'
                 vm_cmd_result = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, nic.ip, test_lib.lib_get_vm_username(vm), test_lib.lib_get_vm_password(vm), vm_command, self.exp_result)
                 if not vm_cmd_result:
                     test_util.test_logger('Checker result: FAIL to execute test ssh command in test [vm:] %s throught [host:] %s.' % (vm.uuid, host.name))
@@ -286,7 +286,6 @@ class zstack_kvm_vm_dhcp_checker(checker_header.TestChecker):
                     else:
                         test_util.test_logger('vm_cmd_result: %s is not string type. It is: %s .' % (vm_cmd_result, type(vm_cmd_result)))
                     return self.judge(False)
-
 
         return self.judge(True)
 

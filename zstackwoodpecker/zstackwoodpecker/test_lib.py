@@ -442,7 +442,7 @@ def lib_check_mac(vm):
             test_harness_ip = lib_find_vr_mgmt_ip(vr_vm)
             lib_install_testagent_to_vr_with_vr_vm(vr_vm)
 
-        command = '/sbin/ifconfig'
+        command = '/sbin/ip a'
         username = lib_get_vm_username(vm)
         password = lib_get_vm_password(vm)
         rsp = lib_ssh_vm_cmd_by_agent(test_harness_ip, guest_ip, username, \
@@ -1455,6 +1455,24 @@ def lib_get_l3s_uuid_by_vm(vm):
 
     return l3s
 
+def lib_get_vm_first_nic(vm):
+    '''
+    Will return VM's first NIC 
+    '''
+    for nic in vm.vmNics:
+        if nic.deviceId == 0:
+            return nic
+
+def lib_get_vm_last_nic(vm):
+    '''
+    Will return VM's last NIC 
+    '''
+    vmNics = vm.vmNics
+    num = len(vmNics) - 1
+    for nic in vmNics:
+        if nic.deviceId == num:
+            return nic
+
 def lib_get_private_l3s_uuid_by_vm(vm):
     '''
     Will return all l3 uuids, if they are not belonged to public network or 
@@ -1490,6 +1508,42 @@ def lib_get_l3s_service_type(vm):
             svr_type.extend(l3_svr)
 
     return list(set(svr_type))
+
+def lib_check_nic_in_db(vm_inv, l3_uuid):
+    '''
+    Check if VM has NIC in l3_uuid
+    '''
+    nic_inv = lib_get_vm_nic_by_l3(vm_inv, l3_uuid)
+    if not nic_inv:
+        return False
+
+    return True
+
+def lib_restart_vm_network(vm_inv, target_l3_uuid = None):
+    '''
+    will ssh vm and check all available nic, then use dhclient to get ip
+
+    If target_l3_uuid provided, will ssh the IP of NIC on target_l3_uuid
+    If target_l3_uuid is missed, will use Nic of deviceId=0
+    '''
+    if not target_l3_uuid:
+        nic = lib_get_vm_first_nic(vm_inv)
+
+    script = """#!/bin/sh
+pkill -9 dhclient
+
+device_id="0 1 2 3 4 5 6 7 8 9"
+available_devices=''
+for i in $device_id;do
+    ifconfig eth$i >/dev/null 2>&1
+    if [ $? -eq 0 ];then
+        available_devices="$available_devices eth$i"
+    fi
+done
+
+dhclient $available_devices
+"""
+    lib_execute_command_in_vm(vm_inv, script, target_l3_uuid)
 
 def lib_get_l3_by_l2(l2_uuid):
     all_l3s = lib_get_l3s()
