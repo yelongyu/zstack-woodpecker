@@ -78,7 +78,7 @@ if [ -d "${woodpecker_root_dir}/zstackwoodpecker" ]; then
             git show HEAD|head -1 > $git_version_file
         else
             curr_version=`git show HEAD|head -1`
-            grep $curr_version $git_version_file &>/dev/null
+            grep "$curr_version" $git_version_file &>/dev/null
             if [ $? -ne 0 ]; then 
                 bash ./install.sh &>/dev/null
                 git show HEAD|head -1 > $git_version_file
