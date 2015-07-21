@@ -1528,6 +1528,7 @@ def lib_restart_vm_network(vm_inv, target_l3_uuid = None):
     '''
     if not target_l3_uuid:
         nic = lib_get_vm_first_nic(vm_inv)
+        target_l3_uuid = nic.l3NetworkUuid
 
     script = """#!/bin/sh
 pkill -9 dhclient

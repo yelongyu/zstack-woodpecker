@@ -1,4 +1,10 @@
 #!/bin/sh
+virtualenv_file="/var/lib/zstack/virtualenv/woodpecker/bin/activate"
+if [ ! -f $virtualenv_file ];then
+    echo "Not find virutalenv in /var/lib/zstack/virtualenv/woodpecker/. It should be created by virtualenv and install apibinding and zstacklib firstly. The easiest way is to run \`install_woodpecker_env.sh zstacklib.tar.gz apibinding.tar.gz\` or \`./zstest.py -b\`"
+    exit 1
+fi
+source $virtualenv_file
 root_dir=`dirname $0`
 cd $root_dir
 #install zstacktestagent firstly
