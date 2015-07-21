@@ -58,7 +58,7 @@ if [ ! -f $virtualenv_file ];then
 fi
 source $virtualenv_file
 woodpecker_root_dir=`git rev-parse --show-toplevel`
-
+git_version_file=`dirname ${virtualenv_file}`/../woodpecker_version
 if [ -d "${woodpecker_root_dir}/zstackwoodpecker" ]; then
     cd ${woodpecker_root_dir}/zstackwoodpecker &>/dev/null
     git diff |grep '+++' >/dev/null 2>&1
@@ -67,9 +67,23 @@ if [ -d "${woodpecker_root_dir}/zstackwoodpecker" ]; then
         bash ./install.sh &>/dev/null
         if [ $? -eq 0 ]; then
             echo -e "Woodpecker is correctly installed. Test begins ... \n\n"
+            git show HEAD|head -1 > $git_version_file
         else
             echo "Woodpecker installation failure. Please check ... exit ."
             exit 1
+        fi
+    else
+        if [ ! -f $git_version_file ];then
+            bash ./install.sh &>/dev/null
+            git show HEAD|head -1 > $git_version_file
+        else
+            curr_version=`git show HEAD|head -1`
+            grep $curr_version $git_version_file &>/dev/null
+            if [ $? -ne 0 ]; then 
+                bash ./install.sh &>/dev/null
+                git show HEAD|head -1 > $git_version_file
+                echo -e "Woodpecker is correctly updated. Test begins ... \n\n"
+            fi
         fi
     fi
 else
