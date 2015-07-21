@@ -378,19 +378,19 @@ def get_free_ip(l3_uuid = None, ip_range = None, limit = None):
             (l3_uuid, ip_range))
     return evt
 
-def attach_nic(l3_uuid, vm_uuid, session_uuid = None):
-    action = api_actions.AttachNicToVmAction()
+def attach_l3(l3_uuid, vm_uuid, session_uuid = None):
+    action = api_actions.AttachL3NetworkToVmAction()
     action.l3NetworkUuid = l3_uuid
     action.vmInstanceUuid = vm_uuid
-    test_util.action_logger('[Attach Nic] from L3 Network: %s to VM: %s' % \
+    test_util.action_logger('[Attach L3 Network:] %s to [VM:] %s' % \
             (l3_uuid, vm_uuid))
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def detach_nic(nic_uuid, session_uuid = None):
-    action = api_actions.DetachNicFromVmAction()
-    action.nicUuid = nic_uuid
-    test_util.action_logger('[Detach Nic]: %s' % nic_uuid)
+def detach_l3(nic_uuid, session_uuid = None):
+    action = api_actions.DetachL3NetworkFromVmAction()
+    action.vmNicUuid = nic_uuid
+    test_util.action_logger('[Detach L3 Network Nic]: %s' % nic_uuid)
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 

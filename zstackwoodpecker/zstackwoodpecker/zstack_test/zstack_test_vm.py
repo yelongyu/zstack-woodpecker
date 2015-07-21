@@ -81,12 +81,12 @@ class ZstackTestVm(vm_header.TestVm):
         '''
         Add a new NIC device to VM. The NIC device will connect with l3_uuid.
         '''
-        self.vm = net_ops.attach_nic(l3_uuid, self.get_vm().uuid)
+        self.vm = net_ops.attach_l3(l3_uuid, self.get_vm().uuid)
         return self.get_vm()
 
     def remove_nic(self, nic_uuid):
         '''
         Detach a NIC from VM.
         '''
-        self.vm = net_ops.detach_nic(nic_uuid)
+        self.vm = net_ops.detach_l3(nic_uuid)
         return self.get_vm()
