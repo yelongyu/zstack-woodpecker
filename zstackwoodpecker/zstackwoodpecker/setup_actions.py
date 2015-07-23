@@ -547,6 +547,8 @@ default one' % self.zstack_properties)
                         --remote=%s' % node.ip_
                 thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
                 thread.start()
+            else:
+                print "node: %s has been installed zstack" % node.ip_
 
         self._wait_for_thread_completion('install remote management node', 600)
 

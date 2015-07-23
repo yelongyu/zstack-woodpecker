@@ -46,11 +46,10 @@ def test():
     
     vm.start()
     import time
-    time.sleep(5)
+    time.sleep(15)
 
     vm.remove_nic(attached_nic.uuid)
     
-    time.sleep(5)
     vm.add_nic(l3_net_uuid2)
     attached_nic = test_lib.lib_get_vm_last_nic(vm.get_vm())
     if l3_net_uuid2 != attached_nic.l3NetworkUuid:

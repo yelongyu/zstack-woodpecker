@@ -61,6 +61,8 @@ def test():
     volume2.attach(vm)
     vm.start()
     test_util.test_dsc('Detach volume2 from running VM again and check')
+    import time
+    time.sleep(10)
     volume2.detach()
     volume2.check()
 
