@@ -146,7 +146,7 @@
 
 			<l2Networks>
 				<l2NoVlanNetwork name="$l2BasicNetworkName" description="ZStack stress Test Basic L2 Test"
-					physicalInterface="$l2NetworkPhysicalInterface">
+                    physicalInterface="$l2PublicNetworkInterface">
 					<l3Networks>
                         <l3BasicNetwork name="$l3PubNetworkName" 
                             description="ZStack stress Test Public L3 Network">

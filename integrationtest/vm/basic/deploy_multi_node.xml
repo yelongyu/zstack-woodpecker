@@ -84,7 +84,7 @@
 
       <l2Networks>
         <l2NoVlanNetwork name="$l2PublicNetworkName" description="Test"
-          physicalInterface="$l2NetworkPhysicalInterface">
+          physicalInterface="$l2PublicNetworkInterface">
           <l3Networks>
             <l3BasicNetwork name="$l3PublicNetworkName" 
               description="Test">

@@ -78,7 +78,7 @@
 
       <l2Networks>
         <l2NoVlanNetwork name="$l2PublicNetworkName" description="Basic L2 Test"
-          physicalInterface="$l2NetworkPhysicalInterface">
+          physicalInterface="$l2PublicNetworkInterface">
           <l3Networks>
             <l3BasicNetwork name="$l3PublicNetworkName" description="Basic L3 Network without Vlan and no special services">
               <ipRange name="$ipRangeName" description="Test"
