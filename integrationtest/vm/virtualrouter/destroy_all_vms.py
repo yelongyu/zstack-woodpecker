@@ -24,7 +24,7 @@ def test():
     session_to = con_ops.change_global_config('identity', 'session.timeout', '720000')
     session_mc = con_ops.change_global_config('identity', 'session.maxConcurrent', '10000')
     clean_util.destroy_all_vm_and_vips()
-    test_util.test_pass('vms destroy Success. Destroy %d VMs.' % num)
+    test_util.test_pass('vms destroy Success.')
     con_ops.change_global_config('identity', 'session.timeout', session_to)
     con_ops.change_global_config('identity', 'session.maxConcurrent', session_mc)
     acc_ops.logout(session_uuid)
