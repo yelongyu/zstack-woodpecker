@@ -514,7 +514,7 @@ default one' % self.zstack_properties)
 
     def _set_extra_node_config(self):
         for node in self.nodes:
-            cmd = 'zstack-ctl configure --remote=%s management.server.ip=%s' % \
+            cmd = 'zstack-ctl configure --host=%s management.server.ip=%s' % \
                     (node.ip_, node.ip_)
             thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
             thread.start()
@@ -544,7 +544,7 @@ default one' % self.zstack_properties)
         for node in self.nodes:
             if not linux.is_ip_existing(node.ip_):
                 cmd = 'zstack-ctl install_management_node --force-reinstall \
-                        --remote=%s' % node.ip_
+                        --host=%s' % node.ip_
                 thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
                 thread.start()
             else:
@@ -747,7 +747,7 @@ default one' % self.zstack_properties)
 
             if not node.dockerImage__:
                 print 'Deploy node in hosts'
-                cmd = 'zstack-ctl stop_node --remote=%s ; zstack-ctl start_node --remote=%s' % (node.ip_, node.ip_)
+                cmd = 'zstack-ctl stop_node --host=%s ; zstack-ctl start_node --host=%s' % (node.ip_, node.ip_)
                 thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
                 threads.append(thread)
             else:
@@ -805,7 +805,7 @@ default one' % self.zstack_properties)
                 thread.start()
                 docker_node.cleanup()
             else:
-                cmd = 'zstack-ctl stop_node --remote=%s' % node.ip_
+                cmd = 'zstack-ctl stop_node --host=%s' % node.ip_
                 thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
                 thread.start()
 

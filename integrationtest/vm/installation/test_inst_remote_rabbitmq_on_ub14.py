@@ -68,7 +68,7 @@ def test():
     if process_result != 0:
         test_fail('set rabbitmq config failed in vm:%s' % vm1_inv.uuid)
 
-    cmd = '%s "zstack-ctl install_management_node --remote=%s"' % (ssh_cmd1, vm2_ip)
+    cmd = '%s "zstack-ctl install_management_node --host=%s"' % (ssh_cmd1, vm2_ip)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
         test_fail('zstack install mn failed in vm:%s' % vm2_inv.uuid)
@@ -109,7 +109,7 @@ def test():
             else:
                 test_fail('start node failed in vm:%s' % vm1_inv.uuid)
 
-    cmd = '%s "zstack-ctl start_node --remote=%s"' % (ssh_cmd1, vm2_ip)
+    cmd = '%s "zstack-ctl start_node --host=%s"' % (ssh_cmd1, vm2_ip)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
         if 'no management-node-ready message received within' in open(tmp_file).read():
