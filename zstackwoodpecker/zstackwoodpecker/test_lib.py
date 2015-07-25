@@ -2300,9 +2300,10 @@ def lib_get_image_from_plan(image):
         if img.name_ == image.name:
             return img
 
-def lib_get_disk_offering_by_name(do_name):
+def lib_get_disk_offering_by_name(do_name, session_uuid = None):
     conditions = res_ops.gen_query_conditions('name', '=', do_name)
-    disk_offering = res_ops.query_resource(res_ops.DISK_OFFERING, conditions)
+    disk_offering = res_ops.query_resource(res_ops.DISK_OFFERING, conditions, \
+            session_uuid)
     if not disk_offering:
         test_util.test_logger('Could not find disk offering with [name:]%s ' % do_name)
         return None
@@ -2313,20 +2314,20 @@ def lib_get_disk_offering_by_name(do_name):
     #    if disk_offering.name == do_name:
     #        return disk_offering
 
-def lib_get_images():
-    return res_ops.get_resource(res_ops.IMAGE, session_uuid=None)
+def lib_get_images(session_uuid = None):
+    return res_ops.get_resource(res_ops.IMAGE, session_uuid = session_uuid)
 
-def lib_get_root_images():
+def lib_get_root_images(session_uuid = None):
     cond = res_ops.gen_query_conditions('mediaType', '=', 'RootVolumeTemplate')
-    return res_ops.query_resource(res_ops.IMAGE, cond)
+    return res_ops.query_resource(res_ops.IMAGE, cond, session_uuid)
 
-def lib_get_data_images():
+def lib_get_data_images(session_uuid = None):
     cond = res_ops.gen_query_conditions('mediaType', '=', 'DataVolumeTemplate')
-    return res_ops.query_resource(res_ops.IMAGE, cond)
+    return res_ops.query_resource(res_ops.IMAGE, cond, session_uuid)
 
-def lib_get_ISO():
+def lib_get_ISO(session_uuid = None):
     cond = res_ops.gen_query_conditions('mediaType', '=', 'ISO')
-    return res_ops.query_resource(res_ops.IMAGE, cond)
+    return res_ops.query_resource(res_ops.IMAGE, cond, session_uuid)
 
 def lib_get_image_by_uuid(image_uuid, session_uuid = None):
     condition = res_ops.gen_query_conditions('uuid', '=', image_uuid)
@@ -2334,12 +2335,12 @@ def lib_get_image_by_uuid(image_uuid, session_uuid = None):
     if images:
         return images[0]
 
-def lib_get_vm_image(vm_inv):
+def lib_get_vm_image(vm_inv, session_uuid = None):
     '''
     return vm_inv's image template inventory
     '''
     root_volume_inv = lib_get_root_image_from_vm(vm_inv)
-    return lib_get_image_by_uuid(root_volume_inv.rootImageUuid)
+    return lib_get_image_by_uuid(root_volume_inv.rootImageUuid, session_uuid)
 
 def lib_get_not_vr_images():
     '''

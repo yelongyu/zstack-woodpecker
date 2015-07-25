@@ -32,7 +32,7 @@ def test():
     test_obj_dict.add_volume(volume)
     volume.attach(vm)
     import time
-    time.sleep(10)
+    #time.sleep(10)
     volume.detach()
     ps_uuid = volume.get_volume().primaryStorageUuid
     ps = test_lib.lib_get_primary_storage_by_uuid(ps_uuid)

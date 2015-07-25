@@ -24,8 +24,8 @@ class ZstackTestVm(vm_header.TestVm):
         self.vm = vm_ops.create_vm(self.vm_creation_option)
         super(ZstackTestVm, self).create()
 
-    def destroy(self):
-        vm_ops.destroy_vm(self.vm.uuid)
+    def destroy(self, session_uuid = None):
+        vm_ops.destroy_vm(self.vm.uuid, session_uuid)
         super(ZstackTestVm, self).destroy()
 
     def start(self):

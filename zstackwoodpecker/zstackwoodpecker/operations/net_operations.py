@@ -6,8 +6,8 @@ Network Security Group operations for test.
 '''
 
 import apibinding.api_actions as api_actions
-import zstackwoodpecker.test_util as test_util
 import apibinding.inventory as inventory
+import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.operations.deploy_operations as dep_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
@@ -373,10 +373,12 @@ def get_free_ip(l3_uuid = None, ip_range = None, limit = None):
     action.l3NetworkUuid = l3_uuid
     action.ipRangeUuid = ip_range
     action.limit = limit
-    evt = acc_ops.execute_action_with_session(action, None)
     test_util.action_logger('Get a free IP from L3: %s, in IP Range: %s' % \
             (l3_uuid, ip_range))
-    return evt
+    evt = acc_ops.execute_action_with_session(action, None)
+    test_util.test_logger('Get a free IP: %s from L3: %s' % \
+            (evt.inventory.ip, l3_uuid))
+    return evt.inventory
 
 def attach_l3(l3_uuid, vm_uuid, session_uuid = None):
     action = api_actions.AttachL3NetworkToVmAction()
@@ -385,6 +387,8 @@ def attach_l3(l3_uuid, vm_uuid, session_uuid = None):
     test_util.action_logger('[Attach L3 Network:] %s to [VM:] %s' % \
             (l3_uuid, vm_uuid))
     evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.test_logger('[L3 Network:] %s has been attached to [VM:] %s' % \
+            (l3_uuid, vm_uuid))
     return evt.inventory
 
 def detach_l3(nic_uuid, session_uuid = None):
@@ -392,5 +396,6 @@ def detach_l3(nic_uuid, session_uuid = None):
     action.vmNicUuid = nic_uuid
     test_util.action_logger('[Detach L3 Network Nic]: %s' % nic_uuid)
     evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.test_logger('[L3 Network Nic]: %s has been detached'% nic_uuid)
     return evt.inventory
 
