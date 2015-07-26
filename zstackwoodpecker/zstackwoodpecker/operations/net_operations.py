@@ -368,17 +368,21 @@ def get_ip_capacity_by_l3s(l3_network_list, session_uuid = None):
             l3_network_list)
     return evt
     
-def get_free_ip(l3_uuid = None, ip_range = None, limit = None):
+def get_free_ip(l3_uuid = None, ip_range = None, limit = 1, \
+        session_uuid = None):
     action = api_actions.GetFreeIpAction()
     action.l3NetworkUuid = l3_uuid
     action.ipRangeUuid = ip_range
     action.limit = limit
-    test_util.action_logger('Get a free IP from L3: %s, in IP Range: %s' % \
-            (l3_uuid, ip_range))
-    evt = acc_ops.execute_action_with_session(action, None)
+    test_util.action_logger('Get free IP from [L3:] %s, in [IP Range:] %s with [limit:] %d ' % \
+            (l3_uuid, ip_range, limit))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    print evt.ip
+    import time
+    time.sleep(1)
     test_util.test_logger('Get a free IP: %s from L3: %s' % \
-            (evt.inventory.ip, l3_uuid))
-    return evt.inventory
+            (evt.inventories[0].ip, l3_uuid))
+    return evt.inventories
 
 def attach_l3(l3_uuid, vm_uuid, session_uuid = None):
     action = api_actions.AttachL3NetworkToVmAction()
