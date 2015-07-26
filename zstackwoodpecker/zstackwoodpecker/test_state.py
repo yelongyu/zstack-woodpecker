@@ -520,14 +520,19 @@ class TestStateDict(object):
             'vm_uuid2: [vip_test_obj], \
             }"
     volume_snapshot_desc = " volume_snapshot_dict = { \
-            volume_uuid1: volume_snapshots_object \
+            volume_uuid1: volume_snapshots_object, \
             volume_uuid2: volume_snapshots_object \
             }"
 
     #for test facility, like doing snapshot test. SG utility vm is in sg_vm()
     utility_vm_desc = " utility_vm_dict = {\
-            cluster_uuid1: utiltiy_vm_object \
+            cluster_uuid1: utiltiy_vm_object, \
             cluster_uuid2: utiltiy_vm_object \
+            }"
+
+    account_desc = " account_dict = {\
+            'account_uuid': {'account': account_obj, 'user': [user_obj]},\
+            'Deleted': [account_uuid] \
             }"
 
     def __init__(self):
@@ -554,6 +559,7 @@ class TestStateDict(object):
 
         self.volume_snapshot_dict = {}
         self.utility_vm_dict = {}
+        self.account_dict = {'Deleted': []}
     
     def __repr__(self):
         return str({
@@ -564,7 +570,8 @@ class TestStateDict(object):
                 'sg_vm': self.sg_vm,
                 'vip_dict': self.vip_dict,
                 'volume_snapshot_dict': self.volume_snapshot_dict,
-                'utiltiy_vm_dict': self.utility_vm_dict
+                'utiltiy_vm_dict': self.utility_vm_dict,
+                'accout_dict': self.account_dict
         })
 
     def add_vm(self, vm, state=vm_header.RUNNING, create_snapshots = True):
@@ -844,6 +851,40 @@ class TestStateDict(object):
 
     def get_all_utility_vm(self):
         return self.utility_vm_dict.values()
+
+    def add_account(self, account):
+        acc_uuid = account.get_account().uuid
+        if not self.account_dict.has_key(acc_uuid):
+            self.account_dict[acc_uuid] = {'account': account, 'user': [], \
+                    'deleted_user': []}
+            return self.account_dict
+        #else:
+        #    self.account_dict[acc_uuid]['account'] = account
+
+    def rm_account(self, account):
+        acc_uuid = account.get_account().uuid
+        if not acc_uuid in self.account_dict['Deleted']:
+            self.account_dict['Deleted'].append(acc_uuid)
+            return self.account_dict
+
+    def get_all_accounts(self):
+        all_accounts = []
+        for key,value in self.account_dict.iteritems():
+            if key != 'Deleted' and not key in self.account_dict['Deleted']:
+                all_accounts.append(self.account_dict[key]['account'])
+        return all_accounts
+
+    def add_user(self, user):
+        acc_uuid = user.get_user().accountUuid
+        if not user in self.account_dict[acc_uuid]['user']:
+            self.account_dict[acc_uuid]['user'].append(user)
+
+    def rm_user(self, user):
+        acc_uuid = user.get_user().accountUuid
+        if user in self.account_dict[acc_uuid]['user']:
+            self.account_dict[acc_uuid]['user'].remove(user)
+        if not user in self.account_dict[acc_uuid]['deleted_user']:
+            self.account_dict[acc_uuid]['user'].append(user)
 
 class Port(object):
     '''

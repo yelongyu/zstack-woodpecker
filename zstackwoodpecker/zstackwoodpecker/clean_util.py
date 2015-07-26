@@ -285,6 +285,46 @@ def do_destroy_vms(vms, thread_threshold = 1000):
             raise info1, None, info2
         time.sleep(0.1)
 
+def delete_accounts(thread_threshold = 1000):
+    def do_delete_accounts(accounts, session_uuid):
+        for account in accounts:
+            thread = threading.Thread(target=acc_ops.delete_account, \
+                    args=(account.uuid, session_uuid))
+            while threading.active_count() > thread_threshold:
+                time.sleep(0.5)
+            exc = sys.exc_info()
+            if exc[0]:
+                raise info1, None, info2
+            thread.start()
+
+        while threading.activeCount() > 1:
+            exc = sys.exc_info()
+            if exc[0]:
+                raise info1, None, info2
+            time.sleep(0.1)
+
+    session_uuid = acc_ops.login_as_admin()
+    session_to = con_ops.change_global_config('identity', 'session.timeout', '720000')
+    session_mc = con_ops.change_global_config('identity', 'session.maxConcurrent', '10000')
+    cond = []
+    cond = res_ops.gen_query_conditions('name', '!=', 'admin', cond)
+    num = res_ops.query_resource_count(res_ops.ACCOUNT, cond)
+    if num <= thread_threshold:
+        accounts = res_ops.query_resource(res_ops.ACCOUNT, cond)
+        do_delete_accounts(accounts, session_uuid)
+    else:
+        start = 0
+        limit = thread_threshold - 1
+        curr_num = start
+        accs = []
+        while curr_num < num:
+            acc_tmp= res_ops.query_resource_fields(res_ops.ACCOUNT, \
+                    [], session_uuid, ['uuid'], start, limit)
+            accs.extend(acc_temp)
+            curr_num += limit
+            start += limit
+        do_delete_accounts(accs, thread_threshold)
+
 def destroy_all_vm_and_vips(thread_threshold = 1000):
     session_uuid = acc_ops.login_as_admin()
     session_to = con_ops.change_global_config('identity', 'session.timeout', '720000')

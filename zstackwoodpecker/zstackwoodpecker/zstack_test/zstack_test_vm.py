@@ -28,20 +28,20 @@ class ZstackTestVm(vm_header.TestVm):
         vm_ops.destroy_vm(self.vm.uuid, session_uuid)
         super(ZstackTestVm, self).destroy()
 
-    def start(self):
-        self.vm = vm_ops.start_vm(self.vm.uuid)
+    def start(self, session_uuid = None):
+        self.vm = vm_ops.start_vm(self.vm.uuid, session_uuid)
         super(ZstackTestVm, self).start()
 
-    def stop(self):
-        self.vm = vm_ops.stop_vm(self.vm.uuid)
+    def stop(self, session_uuid = None):
+        self.vm = vm_ops.stop_vm(self.vm.uuid, session_uuid)
         super(ZstackTestVm, self).stop()
 
-    def reboot(self):
-        self.vm = vm_ops.reboot_vm(self.vm.uuid)
+    def reboot(self, session_uuid = None):
+        self.vm = vm_ops.reboot_vm(self.vm.uuid, session_uuid)
         super(ZstackTestVm, self).reboot()
 
-    def migrate(self, host_uuid):
-        self.vm = vm_ops.migrate_vm(self.vm.uuid, host_uuid)
+    def migrate(self, host_uuid, session_uuid = None):
+        self.vm = vm_ops.migrate_vm(self.vm.uuid, host_uuid, session_uuid)
         super(ZstackTestVm, self).migrate(host_uuid)
 
     def check(self):

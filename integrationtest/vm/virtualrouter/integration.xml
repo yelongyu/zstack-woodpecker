@@ -1,6 +1,8 @@
 <integrationTest>
     <suite name="virtual router test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
         <case timeout='800' repeat='1' noparallel='True'>host/test_reconnect_host.py</case>
+        <case timeout='1200' repeat='1'>account/test_vm_ops_by_normal_account.py</case>
+        <case timeout='1200' repeat='1'>account/test_multi_accounts_vm_ops.py</case>
         <case timeout='800' repeat='1'>novlan/test_create_vm.py</case>
         <case timeout='800' repeat='1'>novlan/test_reboot_vm.py</case>
         <case timeout='800' repeat='1'>novlan/test_ping_vms.py</case>

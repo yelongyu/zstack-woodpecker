@@ -3189,6 +3189,9 @@ def lib_robot_cleanup(test_dict):
     for vm in test_dict.get_all_utility_vm():
         vm.destroy()
 
+    for account in test_dict.get_all_accounts():
+        account.delete()
+
 def lib_error_cleanup(test_dict):
     test_util.test_logger('- - - Error cleanup: running VM - - -')
     for vm in test_dict.get_vm_list(vm_header.RUNNING):
@@ -3258,6 +3261,13 @@ def lib_error_cleanup(test_dict):
     for vm in test_dict.get_all_utility_vm():
         try:
             vm.destroy()
+        except:
+            pass
+
+    test_util.test_logger('- - - Error cleanup: accounts - - -')
+    for account in test_dict.get_all_accounts():
+        try:
+            account.delete()
         except:
             pass
 

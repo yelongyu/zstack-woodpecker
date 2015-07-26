@@ -4,7 +4,6 @@ zstack node test class
 @author: Youyk
 '''
 import zstackwoodpecker.test_util as test_util
-import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.setup_actions as setup_actions
 import zstackwoodpecker.operations.node_operations as node_ops
 import zstacklib.utils.linux as linux
