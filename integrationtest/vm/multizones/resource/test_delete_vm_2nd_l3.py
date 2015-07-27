@@ -25,11 +25,13 @@ test_obj_dict = test_state.TestStateDict()
 host_config = test_util.HostOption()
 l3_name1 = os.environ.get('l3VlanNetworkName1')
 l3_name2 = os.environ.get('l3VlanNetwork2')
-l3_2 = res_ops.get_resource(res_ops.L3_NETWORK, name = l3_name2)[0]
+l3_2 = None
 curr_deploy_conf = None
 
 def test():
     global curr_deploy_conf
+    global l3_2
+    l3_2 = res_ops.get_resource(res_ops.L3_NETWORK, name = l3_name2)[0]
     curr_deploy_conf = exp_ops.export_zstack_deployment_config(test_lib.deploy_config)
 
     vm_creation_option = test_util.VmOption()
@@ -96,6 +98,7 @@ def test():
 #Will be called only if exception happens in test().
 def error_cleanup():
     global curr_deploy_conf
+    global l3_2
     test_lib.lib_error_cleanup(test_obj_dict)
     l3s = res_ops.get_resource(res_ops.L3_NETWORK, name = l3_name2)
     if not l3s:
