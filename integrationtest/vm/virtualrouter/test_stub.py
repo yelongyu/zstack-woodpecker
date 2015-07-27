@@ -196,7 +196,7 @@ def create_vr_vm(test_obj_dict, l3_name, session_uuid = None):
         test_obj_dict.rm_vm(temp_vm)
     else:
         vr = vrs[0]
-        if not test_lib.lib_is_vm_running(vr, session_uuid = None):
+        if not test_lib.lib_is_vm_running(vr):
             test_lib.lib_robot_cleanup(test_obj_dict)
             test_util.test_skip('vr: %s is not running. Will skip test.' % vr.uuid)
 
