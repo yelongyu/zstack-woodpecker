@@ -74,7 +74,7 @@ def create_vm_with_iso(vm_creation_option = None, session_uuid = None):
     img_option = test_util.ImageOption()
     img_option.set_name('iso')
     root_disk_uuid = test_lib.lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName')).uuid
-    bs_uuid = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, \
+    bs_uuid = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, [], \
             session_uuid)[0].uuid
     img_option.set_backup_storage_uuid_list([bs_uuid])
     os.system("echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/test.iso" % (os.environ.get('zstackInstallPath')))
