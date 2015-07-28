@@ -591,8 +591,10 @@ default one' % self.zstack_properties)
         if not self.db_admin_password:
             cmd = 'zstack-ctl install_db --host=%s' % self.db_server
         else:
-            cmd = 'zstack-ctl install_db --host=%s --login-password=%s' \
-                    % (self.db_server, self.db_admin_password)
+            cmd = 'zstack-ctl install_db --host=%s --root-password=%s \
+                    --login-password=%s' \
+                    % (self.db_server, self.db_admin_password, \
+                    self.db_admin_password)
 
         print('installing db ...')
         shell.call(cmd)
@@ -699,7 +701,7 @@ default one' % self.zstack_properties)
         
     def execute_plan_without_deploy_test_agent(self):
         self._install_local_zstack()
-        self._deploy_db()
+        #self._deploy_db()
         self._deploy_rabbitmq()
         self._install_management_nodes()
         self._set_extra_node_config()
