@@ -702,7 +702,7 @@ default one' % self.zstack_properties)
     def execute_plan_without_deploy_test_agent(self):
         self._install_local_zstack()
         #self._deploy_db()
-        self._deploy_rabbitmq()
+        #self._deploy_rabbitmq()
         self._install_management_nodes()
         self._set_extra_node_config()
         self._start_multi_nodes(restart=True)
