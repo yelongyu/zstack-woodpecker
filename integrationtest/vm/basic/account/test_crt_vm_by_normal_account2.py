@@ -4,6 +4,7 @@ New Integration Test for creating KVM VM with volume by normal account
 
 @author: Youyk
 '''
+import hashlib
 import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
