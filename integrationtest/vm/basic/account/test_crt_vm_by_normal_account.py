@@ -4,6 +4,8 @@ New Integration Test for creating KVM VM by normal account
 
 @author: Youyk
 '''
+import hashlib
+
 import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
@@ -17,11 +19,12 @@ def test():
     global test_account_uuid
     import uuid
     account_name = uuid.uuid1().get_hex()
-    account_pass = uuid.uuid1().get_hex()
-    test_account = acc_ops.create_normal_account(account_name, account_name)
+    #account_pass = uuid.uuid1().get_hex()
+    account_pass = hashlib.sha512(account_name).hexdigest()
+    test_account = acc_ops.create_normal_account(account_name, account_pass)
     test_account_uuid = test_account.uuid
 
-    test_account_session = acc_ops.login_by_account(account_name, account_name)
+    test_account_session = acc_ops.login_by_account(account_name, account_pass)
     
     test_stub.share_admin_resource([test_account_uuid])
     vm = test_stub.create_vm(session_uuid = test_account_session)
