@@ -14,9 +14,9 @@ cd $root_dir
 rm -rf build dist zstackwoodpecker.egg-info zstackwoodpecker-*dev*/
 python setup.py sdist
 
-#pip uninstall -y zstackwoodpecker
-rm -rf $woodpecker_virtualenv/usr/lib/python*/site-packages/zstackwoodpecker*
-pip install dist/*.tar.gz 
+pip uninstall -y zstackwoodpecker
+#rm -rf $woodpecker_virtualenv/usr/lib/python*/site-packages/zstackwoodpecker*
+pip install --no-cache-dir dist/*.tar.gz 
 cp zstack-woodpecker /bin/
 
 [ -d /root/.zstackwoodpecker ] || mkdir -p /root/.zstackwoodpecker

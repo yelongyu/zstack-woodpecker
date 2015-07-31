@@ -953,6 +953,7 @@ def add_virtual_router(deployConfig, session_uuid, l3_name = None, \
         if zone_name and zone_name != i.zoneRef.text_:
             continue 
 
+        print "continue l3_name: %s; zone_name: %s" % (l3_name, zone_name)
         action = api_actions.CreateVirtualRouterOfferingAction()
         action.sessionUuid = session_uuid
         action.name = i.name_

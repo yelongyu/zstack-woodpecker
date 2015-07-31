@@ -67,9 +67,9 @@ def test():
     vm1.check()
     vm2.check()
 
-    test_util.test_dsc('start vm again. vm should remove the deleted l3')
-    vm1.start()
-    vm2.start()
+    #test_util.test_dsc('start vm again. vm should remove the deleted l3')
+    #vm1.start()
+    #vm2.start()
 
     net_ops.add_l3_resource(curr_deploy_conf, l3_name = l3_2.name)
 
