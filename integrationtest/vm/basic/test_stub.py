@@ -20,7 +20,8 @@ def create_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None, \
         image_uuid=None, session_uuid=None):
     if not vm_creation_option:
         instance_offering_uuid = res_ops.get_resource(res_ops.INSTANCE_OFFERING, session_uuid)[0].uuid
-        image_uuid = res_ops.get_resource(res_ops.IMAGE, session_uuid)[0].uuid
+        cond = res_ops.gen_query_conditions('mediaType', '!=', 'ISO')
+        image_uuid = res_ops.query_resource(res_ops.IMAGE, cond, session_uuid)[0].uuid
         l3net_uuid = res_ops.get_resource(res_ops.L3_NETWORK, session_uuid)[0].uuid
         vm_creation_option = test_util.VmOption()
         vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
@@ -86,7 +87,8 @@ def create_vm_with_iso(vm_creation_option = None, session_uuid = None):
 
 def share_admin_resource(account_uuid_list):
     instance_offering_uuid = res_ops.get_resource(res_ops.INSTANCE_OFFERING)[0].uuid
-    image_uuid = res_ops.get_resource(res_ops.IMAGE)[0].uuid
+    cond = res_ops.gen_query_conditions('mediaType', '!=', 'ISO')
+    image_uuid = res_ops.query_resource(res_ops.IMAGE, cond, session_uuid)[0].uuid
     l3net_uuid = res_ops.get_resource(res_ops.L3_NETWORK)[0].uuid
     root_disk_uuid = test_lib.lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName')).uuid
     data_disk_uuid = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName')).uuid

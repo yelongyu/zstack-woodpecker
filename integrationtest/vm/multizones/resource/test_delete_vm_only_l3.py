@@ -34,7 +34,7 @@ def test():
     curr_deploy_conf = exp_ops.export_zstack_deployment_config(test_lib.deploy_config)
 
     vm_creation_option = test_util.VmOption()
-    image_name = os.environ.get('imageName_s')
+    image_name = os.environ.get('imageName_net')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
 
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
@@ -53,11 +53,12 @@ def test():
     test_util.test_dsc('Delete l3_1')
     net_ops.delete_l3(l3_1.uuid)
 
-    test_obj_dict.mv_vm(vm1, vm_header.RUNNING, vm_header.DESTROYED)
-    test_obj_dict.mv_vm(vm2, vm_header.RUNNING, vm_header.DESTROYED)
+    #Since 0.8, delete L3 won't delete VM. It will just detach L3 nic. 
+    #test_obj_dict.mv_vm(vm1, vm_header.RUNNING, vm_header.DESTROYED)
+    #test_obj_dict.mv_vm(vm2, vm_header.RUNNING, vm_header.DESTROYED)
 
-    vm1.set_state(vm_header.DESTROYED)
-    vm2.set_state(vm_header.DESTROYED)
+    #vm1.set_state(vm_header.DESTROYED)
+    #vm2.set_state(vm_header.DESTROYED)
 
     vm1.check()
     vm2.check()

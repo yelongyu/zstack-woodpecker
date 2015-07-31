@@ -68,7 +68,7 @@ def test():
     global cluster_uuid
     global l2_uuid
     vm_creation_option = test_util.VmOption()
-    image_name = os.environ.get('imageName_s')
+    image_name = os.environ.get('imageName_net')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     #pick up l3
     l3_1 = res_ops.get_resource(res_ops.L3_NETWORK, name = l3_name1)[0]

@@ -31,7 +31,7 @@ def test():
     # should be set by woodpecker. 
     curr_deploy_conf = exp_ops.export_zstack_deployment_config(test_lib.deploy_config)
     vm_creation_option = test_util.VmOption()
-    image_name = os.environ.get('imageName_s')
+    image_name = os.environ.get('imageName_net')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     #pick up cluster1
     cluster1 = res_ops.get_resource(res_ops.CLUSTER, name = cluster1_name)[0]

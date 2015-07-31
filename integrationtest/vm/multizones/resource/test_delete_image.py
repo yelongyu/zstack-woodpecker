@@ -29,7 +29,7 @@ def test():
     curr_deploy_conf = exp_ops.export_zstack_deployment_config(test_lib.deploy_config)
 
     vm_creation_option = test_util.VmOption()
-    image_name = os.environ.get('imageName_s')
+    image_name = os.environ.get('imageName_net')
     image_inv = test_lib.lib_get_image_by_name(image_name)
     image_uuid = image_inv.uuid
 
