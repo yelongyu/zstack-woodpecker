@@ -518,8 +518,8 @@ default one' % self.zstack_properties)
 
     def _set_extra_node_config(self):
         for node in self.nodes:
-            cmd = 'zstack-ctl configure --host=%s management.server.ip=%s' % \
-                    (node.ip_, node.ip_)
+            cmd = 'zstack-ctl configure --duplicate-to-remote=%s; zstack-ctl configure --host=%s management.server.ip=%s' % \
+                    (node.ip_, node.ip_, node.ip_)
             thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
             thread.start()
 
