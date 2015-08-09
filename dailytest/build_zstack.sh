@@ -120,7 +120,7 @@ mkdir -p /tmp/zstack/
 
 which ant
 
-[ $? -ne 0 ] && which yum && yum install -y ant && yum install -y maven
+[ $? -ne 0 ] && which yum && yum install -y ant && yum install -y java-1.7.0-openjdk-devel && yum install -y maven
 
 [ $? -ne 0 ] && which apt-get && apt-get install -y ant && apt-get install -y maven
 
