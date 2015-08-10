@@ -77,7 +77,8 @@
 
   <backupStorages>
     <cephBackupStorage name="$cephBackupStorageName"
-      description="Test" url="$cephBackupStorageMonUrls" 
+        description="Test" 
+        monUrls="$cephBackupStorageMonUrls" 
     />
   </backupStorages>
 
