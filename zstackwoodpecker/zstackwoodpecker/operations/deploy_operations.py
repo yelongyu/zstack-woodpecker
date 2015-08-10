@@ -330,10 +330,10 @@ def add_primary_storage(deployConfig, session_uuid, ps_name = None, \
                 action.name = pr.name_
                 action.description = pr.description__
                 action.type = inventory.CEPH_PRIMARY_STORAGE_TYPE
-                action.monUrls = ps.monUrls_
-                action.dataVolumePoolName = ps.dataVolumePoolName__
-                action.rootVolumePoolName = ps.rootVolumePoolName__
-                action.imageCachePoolName = ps.imageCachePoolName__
+                action.monUrls = pr.monUrls_
+                action.dataVolumePoolName = pr.dataVolumePoolName__
+                action.rootVolumePoolName = pr.rootVolumePoolName__
+                action.imageCachePoolName = pr.imageCachePoolName__
                 action.zoneUuid = zinv.uuid
                 thread = threading.Thread(target=_thread_for_action, args=(action,))
                 wait_for_thread_queue()
