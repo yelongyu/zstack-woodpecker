@@ -504,7 +504,7 @@ default one' % self.zstack_properties)
 
     def _install_local_zstack(self):
         shell.call('rm -rf %s' % self.install_path, False)
-        cmd = 'WEBSITE=localhost bash %s -f %s -r %s -a' % \
+        cmd = 'WEBSITE=localhost bash %s -f %s -r %s -a -z' % \
                 (self.zstack_install_script, self.zstack_pkg, \
                 self.install_path)
         if self.db_admin_password:
@@ -706,6 +706,12 @@ default one' % self.zstack_properties)
         self._install_management_nodes()
         self._set_extra_node_config()
         self._start_multi_nodes(restart=True)
+
+    def deploy_db_without_reinstall_zstack(self):
+        self.deploy_test_agent()
+        self._stop_nodes()
+        self._deploy_db()
+        self._start_multi_nodes()
 
     def restart_war_on_all_nodes(self):
         #planed_nodes = []
