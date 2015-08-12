@@ -68,7 +68,7 @@ def add_backup_storage(deployConfig, session_uuid):
             action.sessionUuid = session_uuid
             action.name = bs.name_
             action.description = bs.description__
-            action.monUrls = bs.monUrls_
+            action.monUrls = bs.monUrls_.split(';')
             if bs.poolName__:
                 action.poolName = bs.poolName_
             action.timeout = AddKVMHostTimeOut #for some platform slowly salt execution
@@ -331,7 +331,7 @@ def add_primary_storage(deployConfig, session_uuid, ps_name = None, \
                 action.name = pr.name_
                 action.description = pr.description__
                 action.type = inventory.CEPH_PRIMARY_STORAGE_TYPE
-                action.monUrls = pr.monUrls_
+                action.monUrls = pr.monUrls_.split(';')
                 if pr.dataVolumePoolName__:
                     action.dataVolumePoolName = pr.dataVolumePoolName__
                 if pr.rootVolumePoolName__:
