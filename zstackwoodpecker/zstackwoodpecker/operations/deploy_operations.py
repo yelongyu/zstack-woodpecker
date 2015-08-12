@@ -69,7 +69,8 @@ def add_backup_storage(deployConfig, session_uuid):
             action.name = bs.name_
             action.description = bs.description__
             action.monUrls = bs.monUrls_
-            action.poolName = bs.poolName__
+            if bs.poolName__:
+                action.poolName = bs.poolName_
             action.timeout = AddKVMHostTimeOut #for some platform slowly salt execution
             action.type = inventory.CEPH_BACKUP_STORAGE_TYPE
             thread = threading.Thread(target = _thread_for_action, args = (action, ))
@@ -331,9 +332,12 @@ def add_primary_storage(deployConfig, session_uuid, ps_name = None, \
                 action.description = pr.description__
                 action.type = inventory.CEPH_PRIMARY_STORAGE_TYPE
                 action.monUrls = pr.monUrls_
-                action.dataVolumePoolName = pr.dataVolumePoolName__
-                action.rootVolumePoolName = pr.rootVolumePoolName__
-                action.imageCachePoolName = pr.imageCachePoolName__
+                if pr.dataVolumePoolName__:
+                    action.dataVolumePoolName = pr.dataVolumePoolName__
+                if pr.rootVolumePoolName__:
+                    action.rootVolumePoolName = pr.rootVolumePoolName__
+                if pr.imageCachePoolName__:
+                    action.imageCachePoolName = pr.imageCachePoolName__
                 action.zoneUuid = zinv.uuid
                 thread = threading.Thread(target=_thread_for_action, args=(action,))
                 wait_for_thread_queue()
