@@ -96,6 +96,8 @@ class zstack_kvm_volume_attach_checker(checker_header.TestChecker):
             volume_installPath = volume_installPath.split(';')[0].split('/iqn')[1]
             volume_installPath = 'iqn%s' % volume_installPath
             volume_installPath = volume_installPath[:-2]
+        elif volume_installPath.startswith('ceph'):
+            volume_installPath = volume_installPath.split('ceph://')[1]
 
         if volume_installPath in output:
             test_util.test_logger('Check result: [volume:] %s [file:] %s is found in [vm:] %s on [host:] %s .' % (volume.uuid, volume_installPath, vm.uuid, host.managementIp))

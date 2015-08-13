@@ -61,6 +61,14 @@ echo_pass(){
     echo -e "$(tput setaf 2)${tab} ... ... Success\n$(tput sgr0)"
 }
 
+which git
+[ $? -ne 0 ] && which yum && yum install -y git
+[ $? -ne 0 ] && which apt-get && apt-get install -y git
+
+which bzip2
+[ $? -ne 0 ] && which yum && yum install -y bzip2
+[ $? -ne 0 ] && which apt-get && apt-get install -y bzip2
+
 if [ $PULL_ZSTACK == 'Y' ]; then
     echo -n "${tab} : Pull latest zstack"
     [ ! -d $ZSTACK_FOLDER ] && echo_failure "not find zstack repo folder:  $ZSTACK_FOLDER"
