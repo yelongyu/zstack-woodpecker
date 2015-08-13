@@ -48,12 +48,13 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
     def check_ceph(self, volume, volume_installPath):
         ceph_host, username, password = test_lib.lib_get_ceph_info(os.environ.get('cephPrimaryStorageMonUrls'))
 
-        command = 'rbd info %s/%s' % (volume.dataVolumePoolName, volume.imageCachePoolName)
+        volume_installPath = volume_installPath.split('ceph://')[1]
+        command = 'rbd info %s' % volume_installPath
         if not test_lib.lib_execute_ssh_cmd(ceph_host, username, password, command, 10):
-            test_util.test_logger('Check result: [volume:] %s [file:] %s/%s exist on ceph [host name:] %s .' % (volume.uuid, volume.dataVolumePoolName, volume.imageCachePoolName, ceph_host))
+            test_util.test_logger('Check result: [volume:] %s [file:] %s exist on ceph [host name:] %s .' % (volume.uuid, volume_installPath, ceph_host))
             return self.judge(True)
         else:
-            test_util.test_logger('Check result: [volume:] %s [file:] %s/%s does NOT exist on ceph [host name:] %s .' % (volume.uuid, volume.dataVolumePoolName, volume.imageCachePoolName, ceph_host))
+            test_util.test_logger('Check result: [volume:] %s [file:] %s does NOT exist on ceph [host name:] %s .' % (volume.uuid, volume_installPath, ceph_host))
             return self.judge(False)
 
     def check_nfs(self, volume, volume_installPath):

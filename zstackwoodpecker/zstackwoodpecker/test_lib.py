@@ -267,12 +267,6 @@ def lib_execute_ssh_cmd(host_ip, username, password, command, timeout = 30):
     def ssh_host():
         try:
             ret, output, stderr = ssh.execute(command, host_ip, username, password, False)
-            if ret != 0:
-                rsp.success = False
-                rsp.error = '%s\n%s' % (output, stderr)
-            else:
-                rsp.result = output
-
             ssh_result = 'completion'
             return True
 
