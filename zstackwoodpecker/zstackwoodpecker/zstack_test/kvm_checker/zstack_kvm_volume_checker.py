@@ -46,7 +46,7 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
         self.check_file_exist(volume, volume_file_path, host)
 
     def check_ceph(self, volume, volume_installPath):
-        ceph_host, username, password = test_lib.lib_get_ceph_info(os.environ.get('cephPrimaryStorageMonUrls')
+        ceph_host, username, password = test_lib.lib_get_ceph_info(os.environ.get('cephPrimaryStorageMonUrls'))
 
         command = 'rbd info %s/%s' % (volume.dataVolumePoolName, volume.imageCachePoolName)
         if not test_lib.lib_execute_ssh_cmd(ceph_host, username, password, command, 10):

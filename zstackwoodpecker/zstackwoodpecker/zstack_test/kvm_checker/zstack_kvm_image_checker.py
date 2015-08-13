@@ -26,7 +26,7 @@ class zstack_kvm_image_file_checker(checker_header.TestChecker):
             image_url = backupStorages[0].installPath
             self.judge(test_lib.lib_check_file_exist(host, image_url))
         elif bs.type == inventory.CEPH_BACKUP_STORAGE_TYPE:
-            ceph_host, username, password = test_lib.lib_get_ceph_info(os.environ.get('cephBackupStorageMonUrls')
+            ceph_host, username, password = test_lib.lib_get_ceph_info(os.environ.get('cephBackupStorageMonUrls'))
             image_installPath = bs_one.installPath.split('ceph://')[1]
 
             command = 'rbd info %s' % image_installPath
