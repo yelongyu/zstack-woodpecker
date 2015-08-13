@@ -50,7 +50,7 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
 
         volume_installPath = volume_installPath.split('ceph://')[1]
         command = 'rbd info %s' % volume_installPath
-        if not test_lib.lib_execute_ssh_cmd(ceph_host, username, password, command, 10):
+        if test_lib.lib_execute_ssh_cmd(ceph_host, username, password, command, 10):
             test_util.test_logger('Check result: [volume:] %s [file:] %s exist on ceph [host name:] %s .' % (volume.uuid, volume_installPath, ceph_host))
             return self.judge(True)
         else:

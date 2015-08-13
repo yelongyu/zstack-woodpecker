@@ -263,27 +263,27 @@ def lib_ssh_vm_cmd_by_agent_with_retry(test_agent_ip, vm_ip, username, password,
     return str(rsp.result)
 
 def lib_execute_ssh_cmd(host_ip, username, password, command, timeout = 30):
-    ssh_result = None
     def ssh_host():
         try:
             ret, output, stderr = ssh.execute(command, host_ip, username, password, False)
-            ssh_result = 'completion'
+            ssh_result['result'] = 'completion'
             return True
 
         except Exception as e:
             test_util.test_logger('[SSH] unable to ssh in host[ip:%s], assume its not ready. Exception: %s' % (host_ip, str(e)))
-            ssh_result = 'error'
+            ssh_result['result'] = 'error'
             
         return False
 
+    ssh_result = {'result': None}
     thread = threading.Thread(target = ssh_host)
     thread.start()
-    timeout = time.time() + timeout 
-    while not ssh_result and time.time() < timeout:
+    time_out = time.time() + timeout 
+    while not ssh_result['result'] and time.time() < time_out:
         time.sleep(0.5)
 
-    if ssh_result: 
-        if ssh_result == 'error':
+    if ssh_result['result']: 
+        if ssh_result['result'] == 'error':
             test_util.test_logger('ssh command:%s met exception.' % command)
             return False
     else:

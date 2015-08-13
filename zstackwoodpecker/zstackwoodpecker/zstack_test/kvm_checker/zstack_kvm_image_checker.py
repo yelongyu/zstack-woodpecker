@@ -1,3 +1,4 @@
+import os
 import sys
 import traceback
 
@@ -30,7 +31,7 @@ class zstack_kvm_image_file_checker(checker_header.TestChecker):
             image_installPath = bs_one.installPath.split('ceph://')[1]
 
             command = 'rbd info %s' % image_installPath
-            if not test_lib.lib_execute_ssh_cmd(ceph_host, username, password, command, 10):
+            if test_lib.lib_execute_ssh_cmd(ceph_host, username, password, command, 10):
                 test_util.test_logger('Check result: [image:] %s [file:] %s exist on ceph [host name:] %s .' % (image.uuid, image_installPath, ceph_host))
                 return self.judge(True)
             else:
