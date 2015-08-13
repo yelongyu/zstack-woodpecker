@@ -285,7 +285,7 @@ def lib_execute_ssh_cmd(host_ip, username, password, command, timeout = 30):
     while not ssh_result['result'] and time.time() < time_out:
         time.sleep(0.5)
 
-    if ssh_result['result']: 
+    if ssh_result['result'] != None: 
         if ssh_result['result'] == 'error':
             test_util.test_logger('ssh command:%s met exception.' % command)
             return False
