@@ -107,7 +107,7 @@ HostDefaultEth = 'eth0'
 #It will be saved in /var/lib/zstack/filedb/host_l2_ip.db
 HostL2IpDb = 'host_l2_ip.db'
 
-def lib_install_testagent_to_host(host):
+def lib_install_testagent_to_host(host, username = None, password = None):
     host_pub_ip = host.managementIp
     try:
         #shell.call('echo "quit" | telnet %s 9393|grep "Escape character"' % host_pub_ip)
@@ -116,8 +116,16 @@ def lib_install_testagent_to_host(host):
     except:
         test_host = test_util.HostOption()
         test_host.managementIp = host_pub_ip
-        test_host.username = os.environ.get('hostUsername')
-        test_host.password = os.environ.get('hostPassword')
+        if not username:
+            test_host.username = os.environ.get('hostUsername')
+        else:
+            test_host.username = username
+
+        if not password:
+            test_host.password = os.environ.get('hostPassword')
+        else:
+            test_host.password = password
+
         test_host.uuid = host.uuid
         test_util.test_logger('Testagent is not running on [host:] %s . Will install Testagent.\n' % host.name)
         setup_plan.deploy_test_agent(test_host)
@@ -169,6 +177,31 @@ def lib_install_testagent_to_vr(vm):
     for vr_vm in vr_vms:
         lib_install_testagent_to_vr_with_vr_vm(vr_vm)
     return True
+
+def lib_get_ceph_info(monUrls):
+    '''
+    return 1st ceph_host, username, password
+    '''
+    mons = monUrls.split(';')
+    mon1 = mons[0]
+    user_pass, ceph_host = mon1.split('@')
+    username, password = user_pass.split(':')
+    return ceph_host, username, password
+
+def lib_install_testgent_to_ceph_host(monUrls):
+    ceph_host, username, password = lib_get_ceph_info(monUrls)
+    host = test_util.HostOption()
+    host.managementIp = ceph_host
+    test_util.test_logger('Install test agent to ceph host: %s' % ceph_host)
+    lib_install_testagent_to_host(host, username, password)
+
+def lib_install_testagent_to_ceph_ps():
+    monUrls = os.environ.get('cephPrimaryStorageMonUrls')
+    lib_install_testgent_to_ceph_host(monUrls)
+
+def lib_install_testagent_to_ceph_ps():
+    monUrls = os.environ.get('cephBackupStorageMonUrls')
+    lib_install_testgent_to_ceph_host(monUrls)
 
 #will clean up log files in virtual router to save is hard driver.
 def lib_check_cleanup_vr_logs(vr_vm):
@@ -228,6 +261,43 @@ def lib_ssh_vm_cmd_by_agent_with_retry(test_agent_ip, vm_ip, username, password,
         return True
 
     return str(rsp.result)
+
+def lib_execute_ssh_cmd(host_ip, username, password, command, timeout = 30):
+    ssh_result = None
+    def ssh_host():
+        try:
+            ret, output, stderr = ssh.execute(command, host_ip, username, password, False)
+            if ret != 0:
+                rsp.success = False
+                rsp.error = '%s\n%s' % (output, stderr)
+            else:
+                rsp.result = output
+
+            ssh_result = 'completion'
+            return True
+
+        except Exception as e:
+            test_util.test_logger('[SSH] unable to ssh in host[ip:%s], assume its not ready. Exception: %s' % (host_ip, str(e)))
+            ssh_result = 'error'
+            
+        return False
+
+    thread = threading.Thread(target = ssh_host)
+    thread.start()
+    timeout = time.time() + timeout 
+    while not ssh_result and time.time() < timeout:
+        time.sleep(0.5)
+
+    if ssh_result: 
+        if ssh_result == 'error':
+            test_util.test_logger('ssh command:%s met exception.' % command)
+            return False
+    else:
+        test_util.test_logger('[SSH] ssh in vm[%s] doing %s, timeout after %s seconds' % (host_ip, command, timeout))
+        return False
+
+    test_util.test_logger('[SSH] ssh in vm[%s] doing %s done. result is %s' % (host_ip, command, ssh_result))
+    return True
 
 def lib_execute_sh_cmd_by_agent(test_agent_ip, command):
     shell_cmd = host_plugin.HostShellCmd()
@@ -893,6 +963,13 @@ def lib_get_primary_storage_uuid_list_by_backup_storage(bs_uuid):
             ps_uuids.append(ps.uuid)
 
         return ps_uuids
+
+def lib_get_backup_storage_by_uuid(bs_uuid):
+    cond = res_ops.gen_query_conditions('uuid', '=', bs_uuid)
+    bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)
+    if not bss:
+        test_util.test_logger('can not find bs which uuid is: %s' % bs_uuid)
+    return bss[0]
 
 def lib_get_backup_storage_uuid_list_by_zone(zone_uuid):
     '''

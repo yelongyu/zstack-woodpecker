@@ -1,3 +1,7 @@
+import os
+import sys
+import traceback
+
 import zstackwoodpecker.header.checker as checker_header
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.operations.resource_operations as res_ops
@@ -9,9 +13,6 @@ import zstacktestagent.plugins.vm as vm_plugin
 import zstacktestagent.plugins.host as host_plugin
 import zstacktestagent.testagent as testagent
 import apibinding.inventory as inventory
-
-import sys
-import traceback
 
 class zstack_kvm_volume_file_checker(checker_header.TestChecker):
     '''check kvm volume file existencex . If it is in host, 
@@ -32,6 +33,8 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
             self.check_nfs(volume, volume_installPath)
         elif ps.type == inventory.LOCAL_STORAGE_TYPE:
             self.check_nfs(volume, volume_installPath)
+        elif ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
+            self.check_ceph(volume, volume_installPath)
 
     def check_iscsi(self, volume, volume_installPath, ps):
         host = test_lib.lib_find_host_by_iscsi_ps(ps)
@@ -42,6 +45,16 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
         volume_file_path = volume_installPath.split(';')[1].split('file://')[1]
         self.check_file_exist(volume, volume_file_path, host)
 
+    def check_ceph(self, volume, volume_installPath):
+        ceph_host, username, password = test_lib.lib_get_ceph_info(os.environ.get('cephPrimaryStorageMonUrls')
+
+        command = 'rbd info %s/%s' % (volume.dataVolumePoolName, volume.imageCachePoolName)
+        if not test_lib.lib_execute_ssh_cmd(ceph_host, username, password, command, 10):
+            test_util.test_logger('Check result: [volume:] %s [file:] %s/%s exist on ceph [host name:] %s .' % (volume.uuid, volume.dataVolumePoolName, volume.imageCachePoolName, ceph_host))
+            return self.judge(True)
+        else:
+            test_util.test_logger('Check result: [volume:] %s [file:] %s/%s does NOT exist on ceph [host name:] %s .' % (volume.uuid, volume.dataVolumePoolName, volume.imageCachePoolName, ceph_host))
+            return self.judge(False)
 
     def check_nfs(self, volume, volume_installPath):
         host = test_lib.lib_get_volume_host(volume)
