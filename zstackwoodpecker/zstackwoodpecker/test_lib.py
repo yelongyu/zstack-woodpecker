@@ -266,7 +266,10 @@ def lib_execute_ssh_cmd(host_ip, username, password, command, timeout = 30):
     def ssh_host():
         try:
             ret, output, stderr = ssh.execute(command, host_ip, username, password, False)
-            ssh_result['result'] = 'completion'
+            print("ssh: %s , return value: %d, standard output:%s, standard error: %s" % (command, ret, output, stderr))
+            ssh_result['result'] = ret
+            ssh_result['output'] = output
+            ssh_result['err'] = stderr
             return True
 
         except Exception as e:
@@ -275,7 +278,7 @@ def lib_execute_ssh_cmd(host_ip, username, password, command, timeout = 30):
             
         return False
 
-    ssh_result = {'result': None}
+    ssh_result = {'result': None, 'output': None, 'err': None}
     thread = threading.Thread(target = ssh_host)
     thread.start()
     time_out = time.time() + timeout 
@@ -291,7 +294,9 @@ def lib_execute_ssh_cmd(host_ip, username, password, command, timeout = 30):
         return False
 
     test_util.test_logger('[SSH] ssh in vm[%s] doing %s done. result is %s' % (host_ip, command, ssh_result))
-    return True
+    if ssh_result['result'] == 0:
+        return True
+    return False
 
 def lib_execute_sh_cmd_by_agent(test_agent_ip, command):
     shell_cmd = host_plugin.HostShellCmd()
