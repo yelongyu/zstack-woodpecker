@@ -44,11 +44,11 @@ def test():
     volume2 = snapshot1.create_data_volume('data_volume_for_root')
     test_obj_dict.add_volume(volume2)
 
-    #backup snapshot1
-    snapshots.backup_snapshot(snapshot1)
+    ##backup snapshot1
+    #snapshots.backup_snapshot(snapshot1)
 
-    #delete backuped snapshot1
-    snapshots.delete_backuped_snapshot(snapshot1)
+    ##delete backuped snapshot1
+    #snapshots.delete_backuped_snapshot(snapshot1)
 
     snapshots2 = test_obj_dict.get_volume_snapshot(volume2.get_volume().uuid)
     snapshots2.set_utility_vm(vm1)
@@ -67,8 +67,8 @@ def test():
     #In the bug, this operation will fail, when doing volume attach.
     snapshots2.create_snapshot('create_root_snapshot5')
 
-    snapshots2.backup_snapshot(snapshots2.get_current_snapshot())
-    snapshots2.delete_backuped_snapshot(snapshots2.get_current_snapshot())
+    #snapshots2.backup_snapshot(snapshots2.get_current_snapshot())
+    #snapshots2.delete_backuped_snapshot(snapshots2.get_current_snapshot())
 
     snapshots2.check()
     snapshots.check()

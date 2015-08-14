@@ -42,8 +42,8 @@ def test():
     snapshots2.set_utility_vm(vm1)
     snapshots2.create_snapshot('create_root_snapshot2')
     snapshots2.use_snapshot(snapshots2.get_current_snapshot())
-    snapshots2.backup_snapshot(snapshots2.get_current_snapshot())
-    snapshots2.delete_backuped_snapshot(snapshots2.get_current_snapshot())
+    #snapshots2.backup_snapshot(snapshots2.get_current_snapshot())
+    #snapshots2.delete_backuped_snapshot(snapshots2.get_current_snapshot())
 
     volume2.attach(vm)
     volume2.detach()

@@ -52,10 +52,10 @@ def test():
     snapshots.create_snapshot('create_snapshot4')
     snapshot4 = snapshots.get_current_snapshot()
     snapshots.create_snapshot('create_snapshot5')
-    snapshot4.backup()
-    snapshots.check()
+    #snapshot4.backup()
+    #snapshots.check()
 
-    test_util.test_dsc('use new backuped snapshot4 and delete it later. ')
+    #test_util.test_dsc('use new backuped snapshot4 and delete it later. ')
     snapshots.use_snapshot(snapshot4)
     snapshots.check()
     snapshots.delete_snapshot(snapshot4)

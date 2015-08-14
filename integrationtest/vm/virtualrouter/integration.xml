@@ -68,8 +68,8 @@
         <case timeout='800'  repeat='1'>eip/test_pf_eip_attach.py</case>
         <case timeout='800'  repeat='1'>eip/test_vm_ops.py</case>
         <case timeout='800'  repeat='1'>eip/test_vm_ops2.py</case>
-        <case timeout='800'  repeat='1'>snapshot/test_backup_snapshot.py</case>
-        <!--        <case timeout='2400' repeat='1' noparallel='True'>snapshot/test_create_100_snapshots.py</case> -->
+        <!--<case timeout='800'  repeat='1'>snapshot/test_backup_snapshot.py</case>
+        <case timeout='2400' repeat='1' noparallel='True'>snapshot/test_create_100_snapshots.py</case> -->
         <case timeout='800'  repeat='1'>snapshot/test_create_snapshot.py</case>
         <case timeout='800'  repeat='1'>snapshot/test_create_sp_after_delete.py</case>
         <case timeout='800'  repeat='1'>snapshot/test_create_image_by_snapshot.py</case>

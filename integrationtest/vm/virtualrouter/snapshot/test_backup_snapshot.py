@@ -8,6 +8,7 @@ new volume and doing test.
 '''
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
+import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.zstack_test.zstack_test_snapshot as zstack_sp_header
 import apibinding.inventory as inventory
@@ -20,6 +21,11 @@ test_obj_dict = test_state.TestStateDict()
 
 def test():
     test_util.test_dsc('Create test vm as utility vm')
+    if res_ops.query_resource(res_ops.PRIMARY_STORAGE, [])[0].type \
+            == inventory.CEPH_PRIMARY_STORAGE_TYPE:
+        test_util.test_skip('Ceph primary storage does not support backup volume snapshot, since all volume snapshots are save in same ceph')
+        return
+
     vm = test_stub.create_vlan_vm()
     test_obj_dict.add_vm(vm)
 

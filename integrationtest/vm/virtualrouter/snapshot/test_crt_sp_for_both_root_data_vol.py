@@ -114,10 +114,10 @@ def test():
     test_util.test_dsc('create snapshot4 and finally delete all snapshots_root')
     snapshots_root.create_snapshot('create_snapshot4')
     snapshot4 = snapshots_root.get_current_snapshot()
-    snapshots_root.backup_snapshot(snapshot4)
+    #snapshots_root.backup_snapshot(snapshot4)
     snapshots_root.check()
-    vm.destroy()
-    test_obj_dict.rm_vm(vm)
+    #vm.destroy()
+    #test_obj_dict.rm_vm(vm)
 
     test_util.test_dsc('create image template2 from root snapshot')
     image_option.set_root_volume_uuid(snapshot4.get_snapshot().uuid)
