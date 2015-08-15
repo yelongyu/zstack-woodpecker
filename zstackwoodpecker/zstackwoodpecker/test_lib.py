@@ -209,22 +209,22 @@ def lib_delete_ceph_pool(ceph_host, username, password, poolname):
     lib_execute_ssh_cmd(ceph_host, username, password, command)
 
 def lib_get_ps_ceph_info_by_ps_inventory(ps_inv):
-    mon_one = ps_inv.mons.hostname
+    mon_one = ps_inv.mons[0].hostname
     monUrls = os.environ.get('cephPrimaryStorageMonUrls').split(';')
     for mon in monUrls:
         if mon_one == mon.split('@')[1]:
-            username, password = mon.split('@').split(':')
+            username, password = mon.split('@')[0].split(':')
             return mon_one, username, password
 
     test_util.test_logger('did not find predefined mon url for ps: %s' % \
             ps_inv.uuid)
 
 def lib_get_bs_ceph_info_by_bs_inventory(bs_inv):
-    mon_one = bs_inv.mons.hostname
+    mon_one = bs_inv.mons[0].hostname
     monUrls = os.environ.get('cephBackupStorageMonUrls').split(';')
     for mon in monUrls:
         if mon_one == mon.split('@')[1]:
-            username, password = mon.split('@').split(':')
+            username, password = mon.split('@')[0].split(':')
             return mon_one, username, password
 
     test_util.test_logger('did not find predefined mon url for bs: %s' % \

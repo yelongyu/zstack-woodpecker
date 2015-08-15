@@ -389,12 +389,12 @@ def delete_ps_ceph_pools():
             test_lib.lib_delete_ceph_pool(ceph_host, username, password, \
                     ps.rootVolumePoolName)
 
-def delete_bs_ceph_pools()
+def delete_bs_ceph_pools():
     bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, [])
     for bs in bss:
         if bs.type == inventory.CEPH_BACKUP_STORAGE_TYPE:
             ceph_host, username, password = \
                     test_lib.lib_get_bs_ceph_info_by_bs_inventory(bs)
             test_lib.lib_delete_ceph_pool(ceph_host, username, password, \
-                    bs.poolName
+                    bs.poolName)
 
