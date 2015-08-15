@@ -47,6 +47,7 @@
       yum: name="{{item}}"
       with_items:
         - vconfig
+        - bzip2
 
     - name: disable firewalld in RHEL7 and Centos7
       when: ansible_os_family == 'RedHat' and ansible_distribution_version >= '7'
