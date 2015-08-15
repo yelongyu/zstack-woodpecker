@@ -235,6 +235,7 @@ class zstack_kvm_vm_dhcp_checker(checker_header.TestChecker):
 
         vm_cmd_result = None
         vr_vms = test_lib.lib_find_vr_by_vm(vm)
+        print('find %d vr vms.' % len(vr_vms))
         for vr_vm in vr_vms:
             test_util.test_logger("Begin to check [vm:] %s DHCP binding setting in [VR:] %s" % (vm.uuid, vr_vm.uuid))
             nic = test_lib.lib_get_vm_nic_by_vr(vm, vr_vm)

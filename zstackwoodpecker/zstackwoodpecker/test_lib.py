@@ -212,7 +212,7 @@ def lib_get_ps_ceph_info_by_ps_inventory(ps_inv):
     mon_one = ps_inv.mons.hostname
     monUrls = os.environ.get('cephPrimaryStorageMonUrls').split(';')
     for mon in monUrls:
-        if mon_one == mon.split('@')[1]
+        if mon_one == mon.split('@')[1]:
             username, password = mon.split('@').split(':')
             return mon_one, username, password
 
@@ -223,7 +223,7 @@ def lib_get_bs_ceph_info_by_bs_inventory(bs_inv):
     mon_one = bs_inv.mons.hostname
     monUrls = os.environ.get('cephBackupStorageMonUrls').split(';')
     for mon in monUrls:
-        if mon_one == mon.split('@')[1]
+        if mon_one == mon.split('@')[1]:
             username, password = mon.split('@').split(':')
             return mon_one, username, password
 
