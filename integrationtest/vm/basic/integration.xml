@@ -7,7 +7,7 @@
         <case timeout="200" >test_add_volume.py</case> 
         <case timeout="200" >test_add_vol_to_stopvm.py</case> 
         <case timeout="200" >test_add_volume_reboot_vm.py</case> 
-        <case timeout="400" >test_add_multi_volumes.py</case> 
+        <case timeout="600" >test_add_multi_volumes.py</case> 
         <case timeout="200" >test_add_volume_negative.py</case> 
         <case timeout="400" >test_crt_temp_from_volume.py</case> 
         <case timeout="400" >test_crt_vm_with_volume.py</case> 
