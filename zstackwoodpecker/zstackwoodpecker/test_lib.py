@@ -203,6 +203,33 @@ def lib_install_testagent_to_ceph_ps():
     monUrls = os.environ.get('cephBackupStorageMonUrls')
     lib_install_testgent_to_ceph_host(monUrls)
 
+def lib_delete_ceph_pool(ceph_host, username, password, poolname):
+    command = 'ceph osd pool delete %s %s --yes-i-really-really-mean-it' % \
+            (poolname, poolname)
+    lib_execute_ssh_cmd(ceph_host, username, password, command)
+
+def lib_get_ps_ceph_info_by_ps_inventory(ps_inv):
+    mon_one = ps_inv.mons.hostname
+    monUrls = os.environ.get('cephPrimaryStorageMonUrls').split(';')
+    for mon in monUrls:
+        if mon_one == mon.split('@')[1]
+            username, password = mon.split('@').split(':')
+            return mon_one, username, password
+
+    test_util.test_logger('did not find predefined mon url for ps: %s' % \
+            ps_inv.uuid)
+
+def lib_get_bs_ceph_info_by_bs_inventory(bs_inv):
+    mon_one = bs_inv.mons.hostname
+    monUrls = os.environ.get('cephBackupStorageMonUrls').split(';')
+    for mon in monUrls:
+        if mon_one == mon.split('@')[1]
+            username, password = mon.split('@').split(':')
+            return mon_one, username, password
+
+    test_util.test_logger('did not find predefined mon url for bs: %s' % \
+            bs_inv.uuid)
+
 #will clean up log files in virtual router to save is hard driver.
 def lib_check_cleanup_vr_logs(vr_vm):
     cleanup_cmd = "free_disk=`df --direct /var/log|grep 'var/log'|awk '{print $5}'|awk -F% '{print $1}'`; if [ $free_disk -ge 90 ]; then rm -f /var/log/zstack/*; rm -f /var/log/dnsmasq.log; fi"
@@ -1829,6 +1856,9 @@ def lib_get_vm_nic_by_vr(vm, vr):
             for nic in nics:
                 if nic.l3NetworkUuid == vr_nic.l3NetworkUuid:
                     return nic
+
+    test_util.test_logger("did not find NIC for VM: %s, which is using VR: %s" \
+            % (vm.uuid, vr.uuid))
 
 def lib_get_vm_internal_id(vm):
     cmd = "virsh dumpxml %s|grep internalId|awk -F'>' '{print $2}'|\

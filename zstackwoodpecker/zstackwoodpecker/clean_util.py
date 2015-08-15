@@ -30,6 +30,7 @@ import zstackwoodpecker.operations.config_operations as con_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
+import zstackwoodpecker.operations.zone_operations as zone_ops
 
 #logger = log.get_logger(__name__)
 
@@ -239,9 +240,11 @@ def umount_all_primary_storages_violently():
         time.sleep(0.1)
 
     acc_ops.logout(session_uuid)
+    delete_ps_ceph_pools()
 
 def cleanup_backup_storage():
     cleanup_sftp_backup_storage()
+    delete_bs_ceph_pools()
 
 def cleanup_sftp_backup_storage():
     backup_obj = test_lib.deploy_config.backupStorages
@@ -367,3 +370,31 @@ def destroy_all_vm_and_vips(thread_threshold = 1000):
         do_destroy_vips(vips, thread_threshold)
 
     test_util.test_logger('vms destroy Success. Destroy %d VMs.' % num)
+
+def delete_zones():
+    zones = res_ops.query_resource(res_ops.ZONE, [])
+    for zone in zones:
+        zone_ops.delete_zone(zone.uuid)
+
+def delete_ps_ceph_pools():
+    pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, [])
+    for ps in pss:
+        if ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
+            ceph_host, username, password = \
+                    test_lib.lib_get_ps_ceph_info_by_ps_inventory(ps)
+            test_lib.lib_delete_ceph_pool(ceph_host, username, password, \
+                    ps.dataVolumePoolName)
+            test_lib.lib_delete_ceph_pool(ceph_host, username, password, \
+                    ps.imageCachePoolName)
+            test_lib.lib_delete_ceph_pool(ceph_host, username, password, \
+                    ps.rootVolumePoolName)
+
+def delete_bs_ceph_pools()
+    bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, [])
+    for bs in bss:
+        if bs.type == inventory.CEPH_BACKUP_STORAGE_TYPE:
+            ceph_host, username, password = \
+                    test_lib.lib_get_bs_ceph_info_by_bs_inventory(bs)
+            test_lib.lib_delete_ceph_pool(ceph_host, username, password, \
+                    bs.poolName
+
