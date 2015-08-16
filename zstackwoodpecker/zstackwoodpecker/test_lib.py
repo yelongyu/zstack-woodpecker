@@ -1973,11 +1973,13 @@ def lib_find_vr_by_pri_l3(l3_uuid):
     #use compound query condition
     condition = res_ops.gen_query_conditions('vmNics.l3NetworkUuid', '=', \
             l3_uuid)
-    condition = res_ops.gen_query_conditions('vmNics.metaData', '!=', '1', \
-            condition)
-    condition = res_ops.gen_query_conditions('vmNics.metaData', '!=', '2', \
-            condition)
-    condition = res_ops.gen_query_conditions('vmNics.metaData', '!=', '3', \
+    #condition = res_ops.gen_query_conditions('vmNics.metaData', '!=', '1', \
+    #        condition)
+    #condition = res_ops.gen_query_conditions('vmNics.metaData', '!=', '2', \
+    #        condition)
+    #condition = res_ops.gen_query_conditions('vmNics.metaData', '!=', '3', \
+    #        condition)
+    condition = res_ops.gen_query_conditions('vmNics.metaData', '>', '3', \
             condition)
     vrs = res_ops.query_resource_with_num(res_ops.APPLIANCE_VM, condition, \
             None, 0, 1)
@@ -2134,9 +2136,7 @@ def lib_find_vr_by_vm(vm, session_uuid=None):
 
     cond = res_ops.gen_query_conditions('vmNics.l3NetworkUuid', 'in', \
             ','.join(vm_l3s))
-    cond = res_ops.gen_query_conditions('vmNics.metaData', '!=', '1', cond)
-    cond = res_ops.gen_query_conditions('vmNics.metaData', '!=', '2', cond)
-    cond = res_ops.gen_query_conditions('vmNics.metaData', '!=', '3', cond)
+    cond = res_ops.gen_query_conditions('vmNics.metaData', '>', '3', cond)
     vrs = res_ops.query_resource(res_ops.APPLIANCE_VM, cond, session_uuid)
 
     if not vrs:
