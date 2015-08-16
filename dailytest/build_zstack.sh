@@ -61,13 +61,20 @@ echo_pass(){
     echo -e "$(tput setaf 2)${tab} ... ... Success\n$(tput sgr0)"
 }
 
-which git
-[ $? -ne 0 ] && which yum && yum install -y git
-[ $? -ne 0 ] && which apt-get && apt-get install -y git
+install_pkg(){
+    which $1 &>/dev/null
+    if [ $? -ne 0 ];then 
+        which yum &>/dev/null
+        if [ $? -eq 0 ];then
+            yum install -y $1
+        else
+            which apt-get && apt-get install -y $1
+        fi
+    fi
+}
 
-which bzip2
-[ $? -ne 0 ] && which yum && yum install -y bzip2
-[ $? -ne 0 ] && which apt-get && apt-get install -y bzip2
+install_pkg git
+install_pkg bzip2
 
 if [ $PULL_ZSTACK == 'Y' ]; then
     echo -n "${tab} : Pull latest zstack"
