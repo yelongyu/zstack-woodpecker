@@ -210,7 +210,10 @@ def lib_delete_ceph_pool(ceph_host, username, password, poolname):
 
 def lib_get_ps_ceph_info_by_ps_inventory(ps_inv):
     mon_one = ps_inv.mons[0].hostname
-    monUrls = os.environ.get('cephPrimaryStorageMonUrls').split(';')
+    for key in os.environ.keys():
+        if mon_one in os.environ.get(key):
+           monUrls = os.environ.get(key).split(';')
+
     for mon in monUrls:
         if mon_one == mon.split('@')[1]:
             username, password = mon.split('@')[0].split(':')
@@ -221,7 +224,9 @@ def lib_get_ps_ceph_info_by_ps_inventory(ps_inv):
 
 def lib_get_bs_ceph_info_by_bs_inventory(bs_inv):
     mon_one = bs_inv.mons[0].hostname
-    monUrls = os.environ.get('cephBackupStorageMonUrls').split(';')
+    for key in os.environ.keys():
+        if mon_one in os.environ.get(key):
+           monUrls = os.environ.get(key).split(';')
     for mon in monUrls:
         if mon_one == mon.split('@')[1]:
             username, password = mon.split('@')[0].split(':')

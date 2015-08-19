@@ -6,6 +6,7 @@ Create an unified test_stub to share test operations
 '''
 import os
 import random
+import apibinding.inventory as inventory
 import zstackwoodpecker.test_util  as test_util
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
 import zstackwoodpecker.zstack_test.zstack_test_security_group as zstack_sg_header
@@ -109,14 +110,17 @@ def recover_ps(ps_inv):
         ps_config.set_description(ps_inv.description)
         ps_config.set_zone_uuid(ps_inv.zoneUuid)
         ps_config.set_type(ps_inv.type)
-        ps_config.set_monUrl(ps_inv.Url)
+        for key in os.environ.keys():
+            if ps_inv.mons[0].hostname in os.environ.get(key):
+                ps_config.set_monUrls(os.environ.get(key))
+
         ps_config.set_dataVolumePoolName(ps_inv.dataVolumePoolName)
         ps_config.set_rootVolumePoolName(ps_inv.rootVolumePoolName)
         ps_config.set_imageCachePoolName(ps_inv.imageCachePoolName)
 
         #avoid of ps is already created successfully. 
         cond = res_ops.gen_query_conditions('zoneUuid', '=', ps_inv.zoneUuid)
-        cond = res_ops.gen_query_conditions('monUrls', '=', ps_inv.monUrls, cond)
+        cond = res_ops.gen_query_conditions('name', '=', ps_inv.name, cond)
     curr_ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
     if curr_ps:
         ps = curr_ps[0]
