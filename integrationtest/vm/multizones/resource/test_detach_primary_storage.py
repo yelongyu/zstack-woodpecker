@@ -4,7 +4,9 @@ Detach Primary Storage will stop related VM
 
 @author: Youyk
 '''
-
+import time
+import os
+import apibinding.inventory as inventory
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
@@ -14,8 +16,6 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.export_operations as exp_ops
 import zstackwoodpecker.operations.tag_operations as tag_ops
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
-import time
-import os
 
 _config_ = {
         'timeout' : 1200,
@@ -40,7 +40,14 @@ def test():
     cluster1_name = os.environ.get('clusterName1')
     cluster1 = res_ops.get_resource(res_ops.CLUSTER, name = cluster1_name)[0]
     #pick up primary storage 1 and set system tag for instance offering.
-    ps_name1 = os.environ.get('nfsPrimaryStorageName1')
+    zone_name = os.environ.get('zoneName1')
+    zone_uuid = res_ops.get_resource(res_ops.ZONE, name = zone_name)[0].uuid
+    cond = res_ops.gen_query_conditions('zoneUuid', '=', zone_uuid)
+    ps_inv = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)[0]
+    if ps_inv.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
+        ps_name1 = os.environ.get('nfsPrimaryStorageName1')
+    elif ps_inv.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
+        ps_name1 = os.environ.get('cephPrimaryStorageName1')
     ps_inv = res_ops.get_resource(res_ops.PRIMARY_STORAGE, name = ps_name1)[0]
     ps_uuid = ps_inv.uuid
     cluster_uuid = cluster1.uuid

@@ -5,12 +5,13 @@
 
 import os
 import time
-import zstacklib.utils.xmlobject as xmlobject
 import string
 import sys
 import traceback
 import string
 
+import zstacklib.utils.xmlobject as xmlobject
+import apibinding.inventory as inventory
 import zstackwoodpecker.action_select as action_select
 
 minus_split = '-'*10 + '\n'
@@ -294,6 +295,39 @@ class PrimaryStorageOption(DataOption):
 
     def get_url(self):
         return self.url
+
+class CephPrimaryStorageOption(PrimaryStorageOption):
+    def __init(self):
+        self.monUrls = None
+        self.dataVolumePoolName = None
+        self.rootVolumePoolName = None
+        self.imageCachePoolName = None
+        super(VmOption, self).__init__()
+        self.type = inventory.CEPH_PRIMARY_STORAGE_TYPE
+
+    def set_monUrls(self, monUrls):
+        self.monUrls = monUrls
+
+    def get_monUrls(self):
+        return self.monUrls
+
+    def set_imageCachePoolName(self, imageCachePoolName):
+        self.imageCachePoolName = imageCachePoolName
+
+    def get_imageCachePoolName(self):
+        return self.imageCachePoolName
+
+    def set_dataVolumePoolName(self, dataVolumePoolName):
+        self.dataVolumePoolName = dataVolumePoolName
+
+    def get_dataVolumePoolName(self):
+        return self.dataVolumePoolName
+
+    def set_rootVolumePoolName(self, rootVolumePoolName):
+        self.rootVolumePoolName = rootVolumePoolName
+
+    def get_rootVolumePoolName(self):
+        return self.rootVolumePoolName
 
 class VmOption(DataOption):
     def __init__(self, vm_opt = None):

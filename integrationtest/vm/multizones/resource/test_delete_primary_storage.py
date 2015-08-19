@@ -4,6 +4,9 @@ Delete Primary Storage will destroy VM and delete Volumes.
 
 @author: Youyk
 '''
+import time
+import os
+import apibinding.inventory as inventory
 
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_state as test_state
@@ -14,8 +17,6 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.export_operations as exp_ops
 import zstackwoodpecker.operations.tag_operations as tag_ops
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
-import time
-import os
 
 _config_ = {
         'timeout' : 1200,
@@ -26,28 +27,6 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 ps_inv = None
 tag = None
-
-def recover_ps():
-    global ps_inv
-    ps_config = test_util.PrimaryStorageOption()
-
-    ps_config.set_name(ps_inv.name)
-    ps_config.set_description(ps_inv.description)
-    ps_config.set_zone_uuid(ps_inv.zoneUuid)
-    ps_config.set_type(ps_inv.type)
-    ps_config.set_url(ps_inv.url)
-
-    #avoid of ps is already created successfully. 
-    cond = res_ops.gen_query_conditions('zoneUuid', '=', ps_inv.zoneUuid)
-    cond = res_ops.gen_query_conditions('url', '=', ps_inv.url, cond)
-    curr_ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
-    if curr_ps:
-        ps = curr_ps[0]
-    else:
-        ps = ps_ops.create_nfs_primary_storage(ps_config)
-
-    for cluster_uuid in ps_inv.attachedClusterUuids:
-        ps_ops.attach_primary_storage(ps.uuid, cluster_uuid)
 
 def test():
     global ps_inv
@@ -60,7 +39,15 @@ def test():
     zone1_name = os.environ.get('zoneName1')
     zone1 = res_ops.get_resource(res_ops.ZONE, name = zone1_name)[0]
     #pick up primary storage 1 and set system tag for instance offering.
-    ps_name1 = os.environ.get('nfsPrimaryStorageName1')
+    zone_name = os.environ.get('zoneName1')
+    zone_uuid = res_ops.get_resource(res_ops.ZONE, name = zone_name)[0].uuid
+    cond = res_ops.gen_query_conditions('zoneUuid', '=', zone_uuid)
+    ps_inv = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)[0]
+    if ps_inv.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
+        ps_name1 = os.environ.get('nfsPrimaryStorageName1')
+    elif ps_inv.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
+        ps_name1 = os.environ.get('cephPrimaryStorageName1')
+
     ps_inv = res_ops.get_resource(res_ops.PRIMARY_STORAGE, name = ps_name1)[0]
 
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
@@ -99,7 +86,7 @@ def test():
     test_lib.lib_robot_status_check(test_obj_dict)
 
     test_util.test_dsc("Recover Primary Storage")
-    recover_ps()
+    test_stub.recover_ps(ps_inv)
     test_lib.lib_robot_status_check(test_obj_dict)
 
     #update tag
@@ -131,4 +118,4 @@ def error_cleanup():
         tag_ops.delete_tag(tag.uuid)
     except:
         pass
-    recover_ps()
+    test_stub.recover_ps(ps_inv)

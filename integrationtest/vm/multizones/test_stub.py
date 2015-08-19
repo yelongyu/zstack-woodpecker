@@ -89,3 +89,40 @@ def create_sg(sg_creation_option=None):
     sg.set_creation_option(sg_creation_option)
     sg.create()
     return sg
+
+def recover_ps(ps_inv):
+    if ps_inv.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
+        ps_config = test_util.PrimaryStorageOption()
+        ps_config.set_name(ps_inv.name)
+        ps_config.set_description(ps_inv.description)
+        ps_config.set_zone_uuid(ps_inv.zoneUuid)
+        ps_config.set_type(ps_inv.type)
+        ps_config.set_url(ps_inv.url)
+
+        #avoid of ps is already created successfully. 
+        cond = res_ops.gen_query_conditions('zoneUuid', '=', ps_inv.zoneUuid)
+        cond = res_ops.gen_query_conditions('url', '=', ps_inv.url, cond)
+
+    elif ps_inv.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
+        ps_config = test_util.CephPrimaryStorageOption()
+        ps_config.set_name(ps_inv.name)
+        ps_config.set_description(ps_inv.description)
+        ps_config.set_zone_uuid(ps_inv.zoneUuid)
+        ps_config.set_type(ps_inv.type)
+        ps_config.set_monUrl(ps_inv.Url)
+        ps_config.set_dataVolumePoolName(ps_inv.dataVolumePoolName)
+        ps_config.set_rootVolumePoolName(ps_inv.rootVolumePoolName)
+        ps_config.set_imageCachePoolName(ps_inv.imageCachePoolName)
+
+        #avoid of ps is already created successfully. 
+        cond = res_ops.gen_query_conditions('zoneUuid', '=', ps_inv.zoneUuid)
+        cond = res_ops.gen_query_conditions('monUrls', '=', ps_inv.monUrls, cond)
+    curr_ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
+    if curr_ps:
+        ps = curr_ps[0]
+    else:
+        ps = ps_ops.create_primary_storage(ps_config)
+
+    for cluster_uuid in ps_inv.attachedClusterUuids:
+        ps_ops.attach_primary_storage(ps.uuid, cluster_uuid)
+
