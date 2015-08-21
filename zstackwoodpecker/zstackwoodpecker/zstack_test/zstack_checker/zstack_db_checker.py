@@ -147,3 +147,34 @@ class zstack_sg_db_checker(checker_header.TestChecker):
         for test_sg in self.test_obj.get_all_sgs():
             self._check_sg_exist(test_sg)
 
+class zstack_account_db_checker(checker_header.TestChecker):
+    '''check account existence in database. If it is in DB, 
+        return self.judge(True). If not, return self.judge(False)'''
+    def check(self):
+        super(zstack_account_db_checker, self).check()
+        try:
+            conditions = res_ops.gen_query_conditions('uuid', '=', self.test_obj.account.uuid)
+            account = res_ops.query_resource(res_ops.ACCOUNT, conditions)[0]
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            test_util.test_logger('Check result: [account Inventory uuid:] %s does not exist in database.' % self.test_obj.account.uuid)
+            return self.judge(False)
+
+        test_util.test_logger('Check result: [account Inventory uuid:] %s exist in database.' % account.uuid)
+        return self.judge(True)
+
+class zstack_lb_db_checker(checker_header.TestChecker):
+    '''check load balancer existence in database. If it is in DB, 
+        return self.judge(True). If not, return self.judge(False)'''
+    def check(self):
+        super(zstack_lb_db_checker, self).check()
+        try:
+            conditions = res_ops.gen_query_conditions('uuid', '=', self.test_obj.load_balancer.uuid)
+            lb = res_ops.query_resource(res_ops.LOAD_BALANCER, conditions)[0]
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            test_util.test_logger('Check result: [load_balancer Inventory uuid:] %s does not exist in database.' % self.test_obj.load_balancer.uuid)
+            return self.judge(False)
+
+        test_util.test_logger('Check result: [load_balancer Inventory uuid:] %s exist in database.' % lb.uuid)
+        return self.judge(True)

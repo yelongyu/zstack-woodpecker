@@ -409,7 +409,7 @@ def create_load_balancer(vip_uuid, name, separated_vr = False, \
     action.vipUuid = vip_uuid
     action.name = name
     if separated_vr:
-        action.systemTags = 'separateVirtualRouterVm'
+        action.systemTags = ['separateVirtualRouterVm']
 
     test_util.action_logger('[Create Load Balancer:] %s with [VIP]: %s' %\
             (name, vip_uuid))

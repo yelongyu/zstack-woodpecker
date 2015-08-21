@@ -44,11 +44,17 @@ class ZstackTestLoadBalancer(lb_header.TestLoadBalancer):
         super(ZstackTestLoadBalancer, self).create()
         return self.get_load_balancer()
 
+    def set_separated_vr(self):
+        self.separated_vr = True
+
     def delete(self):
         net_ops.delete_load_balancer(self.get_load_balancer().uuid)
         super(ZstackTestLoadBalancer, self).delete()
 
     def check(self):
+        import zstackwoodpecker.zstack_test.checker_factory as checker_factory
+        checker = checker_factory.CheckerFactory().create_checker(self)
+        checker.check()
         super(ZstackTestLoadBalancer, self).check()
         pass
 
@@ -66,6 +72,7 @@ class ZstackTestLoadBalancer(lb_header.TestLoadBalancer):
 class ZstackTestLoadBalancerListener(lb_header.TestLoadBalancerListener):
     def __init__(self):
         self.creation_option = None
+        self.vm_nics_uuid_list = []
         super(ZstackTestLoadBalancerListener, self).__init__()
 
     def set_creation_option(self, lb_creation_option):
@@ -75,17 +82,17 @@ class ZstackTestLoadBalancerListener(lb_header.TestLoadBalancerListener):
         return self.creation_option
 
     def _rm_system_tag(self, system_tag_key):
-        pre_tag = self.get_creation_option().get_system_tags().split(',')
+        pre_tag = self.get_creation_option().get_system_tags()
         new_tag = []
         for tag in pre_tag:
             if not tag.startswith(system_tag_key):
                 new_tag.append(tag)
 
-        self.get_creation_option().set_system_tags(','.join(new_tag))
+        self.get_creation_option().set_system_tags(new_tag)
 
-    def _add_system_tag(self, tag)：
+    def _add_system_tag(self, tag):
         pre_tag = self.get_creation_option().get_system_tags()
-        self.get_creation_option().set_system_tags('%s,%s' % (pre_tag, tag))
+        self.get_creation_option().set_system_tags(pre_tag.append(tag))
 
     def set_algorithm(self, algorithm):
         self._rm_system_tag('balancerAlgorithm')
@@ -107,11 +114,22 @@ class ZstackTestLoadBalancerListener(lb_header.TestLoadBalancerListener):
                 self.get_load_balancer_listener().uuid,\
                 vm_nics_uuid_list,\
                 session_uuid)
+        
+        for vm_nic_uuid in vm_nics_uuid_list:
+            if not vm_nic_uuid in self.vm_nics_uuid_list:
+                self.vm_nics_uuid_list.append(vm_nic_uuid)
 
+    def get_vm_nics_uuid(self):
+        return self.vm_nics_uuid_list
+    
     def remove_nics(self, vm_nics_uuid_list, session_uuid = None):
         self.load_balancer = \
                 net_ops.remove_nic_from_load_balancer(\
                 self.get_load_balancer_listener().uuid,\
                 vm_nics_uuid_list, \
                 session_uuid)
+
+        for vm_nic_uuid in vm_nics_uuid_list:
+            if vm_nic_uuid in self.vm_nics_uuid_list:
+                self.vm_nics_uuid_list.remove(vm_nic_uuid)
 

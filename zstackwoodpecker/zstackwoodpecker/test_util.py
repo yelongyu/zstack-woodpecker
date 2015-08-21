@@ -641,7 +641,7 @@ class SecurityGroupOption(DataOption):
 
 class LoadBalancerListenerOption(DataOption):
     def __init__(self, lb_uuid = None, instance_port = None, \
-            protocol = None, name = None):
+            protocol = None, name = None, system_tags = None):
         self.load_balancer_uuid = lb_uuid
         self.instance_port = instance_port
         self.protocol = protocol

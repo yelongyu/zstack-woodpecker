@@ -560,7 +560,7 @@ class TestStateDict(object):
         self.volume_snapshot_dict = {}
         self.utility_vm_dict = {}
         self.account_dict = {'Deleted': []}
-        self.load_balancer_dict = {}
+        self.load_balancer_dict = {'Deleted': []}
     
     def __repr__(self):
         return str({
@@ -875,6 +875,13 @@ class TestStateDict(object):
                 all_accounts.append(self.account_dict[key]['account'])
         return all_accounts
 
+    def get_deleted_account(self):
+        all_items = []
+        for item in self.account_dict['Deleted']:
+            all_items.append(self.account_dict[item])
+
+        return all_items
+
     def add_user(self, user):
         acc_uuid = user.get_user().accountUuid
         if not user in self.account_dict[acc_uuid]['user']:
@@ -894,9 +901,23 @@ class TestStateDict(object):
 
     def rm_load_balancer(self, lb):
         lb_uuid = lb.get_load_balancer().uuid
-        if lb_uuid in self.load_balancer_dict.keys():
-            self.load_balancer_dict.pop(lb_uuid)
+        if not lb_uuid in self.load_balancer_dict['Deleted']:
+            self.load_balancer_dict['Deleted'].append(lb_uuid)
+            return self.load_balancer_dict
 
+    def get_all_load_balancers(self):
+        all_items = []
+        for key,value in self.load_balancer_dict.iteritems():
+            if key != 'Deleted' and not key in self.load_balancer_dict['Deleted']:
+                all_items.append(value)
+        return all_items
+
+    def get_deleted_load_balancers(self):
+        all_items = []
+        for item in self.load_balancer_dict['Deleted']:
+            all_items.append(self.load_balancer_dict[item])
+
+        return all_items
 
 class Port(object):
     '''

@@ -17,6 +17,7 @@ import zstackwoodpecker.header.vip as vip_header
 import zstackwoodpecker.header.security_group as sg_header
 import zstackwoodpecker.header.port_forwarding as test_pf_header
 import zstackwoodpecker.header.snapshot as sp_header
+import zstackwoodpecker.header.load_balancer as lb_header
 import zstackwoodpecker.zstack_test.kvm_checker.kvm_checker_factory as kvm_checker
 import zstackwoodpecker.zstack_test.sim_checker.sim_checker_factory as sim_checker
 import zstackwoodpecker.zstack_test.zstack_checker.zstack_checker_factory as zstack_checker
@@ -77,6 +78,10 @@ class CheckerFactory(checker.CheckerFactory):
                 obj_uuid = None
             else:
                 obj_uuid = volume_obj.uuid
+
+        elif isinstance(test_obj, lb_header.TestLoadBalancer):
+            checker_chain = LoadBalancerCheckerFactory().create_checker(test_obj)
+            obj_uuid = test_obj.get_load_balancer().uuid
 
         test_util.test_logger('Add checker for [%s:] %s. Checkers are: %s' % \
                 (test_obj.__class__.__name__, obj_uuid, checker_chain))
@@ -148,3 +153,7 @@ class VipCheckerFactory(checker.CheckerFactory):
 class SnapshotCheckerFactory(checker.CheckerFactory):
     def create_checker(self, test_obj):
         return kvm_checker.SnapshotCheckerFactory().create_checker(test_obj)
+
+class LoadBalancerCheckerFactory(checker.CheckerFactory):
+    def create_checker(self, test_obj):
+        return kvm_checker.LoadBalancerCheckerFactory().create_checker(test_obj)

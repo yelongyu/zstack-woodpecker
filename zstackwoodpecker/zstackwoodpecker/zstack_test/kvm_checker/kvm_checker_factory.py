@@ -12,6 +12,7 @@ import zstackwoodpecker.header.image as image_header
 import zstackwoodpecker.header.security_group as sg_header
 import zstackwoodpecker.header.port_forwarding as pf_header
 import zstackwoodpecker.header.vip as vip_header
+import zstackwoodpecker.header.load_balancer as lb_header
 import zstackwoodpecker.header.checker as checker_header
 import zstackwoodpecker.zstack_test.zstack_checker.zstack_db_checker as db_checker
 import zstackwoodpecker.zstack_test.kvm_checker.zstack_kvm_vm_checker as vm_checker
@@ -23,6 +24,7 @@ import zstackwoodpecker.zstack_test.kvm_checker.zstack_kvm_host_checker as host_
 import zstackwoodpecker.zstack_test.kvm_checker.zstack_kvm_eip_checker as eip_checker
 import zstackwoodpecker.zstack_test.kvm_checker.zstack_kvm_vip_checker as vip_checker
 import zstackwoodpecker.zstack_test.kvm_checker.zstack_kvm_snapshot_checker as sp_checker
+import zstackwoodpecker.zstack_test.kvm_checker.zstack_kvm_load_balancer_checker as lb_checker
 import zstackwoodpecker.test_util as test_util
 import apibinding.inventory as inventory
 
@@ -372,3 +374,15 @@ class SnapshotCheckerFactory(checker_header.CheckerFactory):
                     sp_checker.zstack_kvm_backuped_snapshot_checker(), \
                     True, test_obj)
         return sp_checker_chain
+
+class LoadBalancerCheckerFactory(checker_header.CheckerFactory):
+    def create_checker(self, test_obj):
+        lb_checker_chain = checker_header.CheckerChain()
+        for lbl in test_obj.get_load_balancer_listeners().values():
+            if lbl.get_state() != lb_header.DELETED:
+                checker = lb_checker.zstack_kvm_lbl_checker()
+                checker.set_lbl(lbl)
+                print '---------%s------' % lbl
+                lb_checker_chain.add_checker(checker, True, test_obj)
+                
+        return lb_checker_chain

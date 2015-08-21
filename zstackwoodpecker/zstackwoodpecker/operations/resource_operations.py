@@ -39,6 +39,7 @@ NETWORK_SERVICE_PROVIDER_L3_REF = 'NetworkServiceProviderL3Ref'
 APPLIANCE_VM = 'ApplianceVm'
 DISK_OFFERING = 'DiskOffering'
 ACCOUNT = 'Account'
+USER = 'User'
 PRIMARY_STORAGE = 'PrimaryStorage'
 SECURITY_GROUP = 'SecurityGroup'
 SECURITY_GROUP_RULE = 'SecurityGroupRule'
@@ -329,6 +330,12 @@ def _gen_query_action(resource):
         action = api_actions.QueryVolumeSnapshotTreeAction()
     elif resource == VOLUME_SNAPSHOT:
         action = api_actions.QueryVolumeSnapshotAction()
+    elif resource == USER:
+        action = api_actions.QueryUserAction()
+    elif resource == LOAD_BALANCER:
+        action = api_actions.QueryLoadBalancerAction()
+    elif resource == LOAD_BALANCER_LISTENER:
+        action = api_actions.QueryLoadBalancerListenerAction()
 
     return action
 

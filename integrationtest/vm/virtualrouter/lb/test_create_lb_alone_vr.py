@@ -1,6 +1,5 @@
 '''
-
-Test load balance. 
+Test load balance on separated VR VM. 
 
 Test step:
     1. Create 2 VM with load balance l3 network service.
@@ -48,6 +47,7 @@ def test():
     test_obj_dict.add_vip(vip)
 
     lb = zstack_lb_header.ZstackTestLoadBalancer()
+    lb.set_separated_vr()
     lb.create('create lb test', vip.get_vip().uuid)
     test_obj_dict.add_load_balancer(lb)
 
@@ -63,7 +63,7 @@ def test():
     lb.check()
 
     test_lib.lib_robot_cleanup(test_obj_dict)
-    test_util.test_pass('Create Load Balancer Test Success')
+    test_util.test_pass('Create Load Balancer with alone VR Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():

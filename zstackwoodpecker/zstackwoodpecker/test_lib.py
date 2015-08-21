@@ -327,7 +327,7 @@ def lib_execute_ssh_cmd(host_ip, username, password, command, timeout = 30):
 
     test_util.test_logger('[SSH] ssh in vm[%s] doing %s done. result is %s' % (host_ip, command, ssh_result))
     if ssh_result['result'] == 0:
-        return True
+        return ssh_result['output']
     return False
 
 def lib_execute_sh_cmd_by_agent(test_agent_ip, command):
@@ -3303,6 +3303,9 @@ def lib_robot_cleanup(test_dict):
     for account in test_dict.get_all_accounts():
         account.delete()
 
+    for lb in test_dict.get_all_load_balancers():
+        lb.delete()
+
 def lib_error_cleanup(test_dict):
     test_util.test_logger('- - - Error cleanup: running VM - - -')
     for vm in test_dict.get_vm_list(vm_header.RUNNING):
@@ -3379,6 +3382,13 @@ def lib_error_cleanup(test_dict):
     for account in test_dict.get_all_accounts():
         try:
             account.delete()
+        except:
+            pass
+
+    test_util.test_logger('- - - Error cleanup: load balancers- - -')
+    for lb in test_dict.get_all_load_balancers():
+        try:
+            lb.delete()
         except:
             pass
 
