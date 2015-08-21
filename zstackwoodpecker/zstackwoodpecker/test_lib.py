@@ -3966,3 +3966,16 @@ def lib_create_data_volume_from_image(target_image):
     new_volume = target_image.create_data_volume(ps_uuid_list[0], \
             'new_volume_from_template_%s' % target_image.get_image().uuid)
     return new_volume 
+
+#------- load balance related funciton
+def lib_create_lb_listener_option(lbl_name = 'lb ssh test',\
+        lbl_protocol = 'tcp', lbl_port = 22, lb_uuid = None):
+    '''
+    Create common load balancer listener option. 
+    '''
+    lb_creation_option = test_util.LoadBalancerListenerOption()
+    lb_creation_option.set_name(lbl_name)
+    lb_creation_option.set_protocol(lbl_protocol)
+    lb_creation_option.set_instance_port(lbl_port)
+    lb_creation_option.set_load_balancer_uuid(lb_uuid)
+    return lb_creation_option

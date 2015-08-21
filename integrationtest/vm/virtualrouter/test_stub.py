@@ -45,6 +45,18 @@ def create_vlan_vm(l3_name=None, disk_offering_uuids=None, system_tags=None, ses
     return create_vm([l3_net_uuid], image_uuid, 'vlan_vm', \
             disk_offering_uuids, system_tags=system_tags, session_uuid = session_uuid)
 
+def create_lb_vm(l3_name=None, disk_offering_uuids=None, session_uuid = None):
+    '''
+        Load Balance VM will only use L3VlanNetworkName6
+    '''
+    image_name = os.environ.get('imageName_net')
+    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    if not l3_name:
+        l3_name = os.environ.get('l3VlanNetworkName6')
+
+    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    return create_vm([l3_net_uuid], image_uuid, 'vlan_lb_vm', disk_offering_uuids, session_uuid = session_uuid)
+
 def create_sg_vm(l3_name=None, disk_offering_uuids=None, session_uuid = None):
     '''
         SG test need more network commands in guest. So it needs VR image.
@@ -216,4 +228,16 @@ def share_admin_resource(account_uuid_list):
     resource_list.extend(get_uuid(res_ops.get_resource(res_ops.L3_NETWORK)))
     resource_list.extend(get_uuid(res_ops.get_resource(res_ops.DISK_OFFERING)))
     acc_ops.share_resources(account_uuid_list, resource_list)
+
+def get_vr_by_private_l3_name(l3_name):
+    vr_l3_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    vrs = test_lib.lib_find_vr_by_l3_uuid(vr_l3_uuid)
+    if not vrs:
+        #create temp_vm for getting vlan1's vr 
+        temp_vm = create_vlan_vm(l3_name)
+        vr = test_lib.lib_find_vr_by_vm(temp_vm.vm)[0]
+        temp_vm.destroy()
+    else:
+        vr = vrs[0]
+    return vr
 

@@ -560,6 +560,7 @@ class TestStateDict(object):
         self.volume_snapshot_dict = {}
         self.utility_vm_dict = {}
         self.account_dict = {'Deleted': []}
+        self.load_balancer_dict = {}
     
     def __repr__(self):
         return str({
@@ -885,6 +886,17 @@ class TestStateDict(object):
             self.account_dict[acc_uuid]['user'].remove(user)
         if not user in self.account_dict[acc_uuid]['deleted_user']:
             self.account_dict[acc_uuid]['user'].append(user)
+
+    def add_load_balancer(self, lb):
+        lb_uuid = lb.get_load_balancer().uuid
+        if not lb_uuid in self.load_balancer_dict.keys():
+            self.load_balancer_dict[lb_uuid] = lb
+
+    def rm_load_balancer(self, lb):
+        lb_uuid = lb.get_load_balancer().uuid
+        if lb_uuid in self.load_balancer_dict.keys():
+            self.load_balancer_dict.pop(lb_uuid)
+
 
 class Port(object):
     '''

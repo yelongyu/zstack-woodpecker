@@ -54,6 +54,8 @@ SYSTEM_TAG = 'SystemTag'
 USER_TAG = 'UserTag'
 VOLUME_SNAPSHOT_TREE = 'VolumeSnapshotTree'
 VOLUME_SNAPSHOT = 'VolumeSnapshot'
+LOAD_BALANCER = 'LoadBalancer'
+LOAD_BALANCER_LISTENER = 'LoadBalancerListener'
 
 def find_item_by_uuid(inventories, uuid):
     for item in inventories:

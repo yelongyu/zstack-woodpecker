@@ -108,6 +108,9 @@ l2Vlan4 = 24
 l2VlanNetworkName5 = vlan-test-dhcp-only
 l2Vlan5 = 25
 
+l2VlanNetworkName6 = vlan-test-load-balance
+l2Vlan5 = 26
+
 #L3 network names should be same, test case will rely on name. 
 l3ManagementNetworkName = management network
 l3PublicNetworkName = public network
@@ -118,12 +121,14 @@ l3VlanDNATNetworkName = l3VlanDNATNetwork
 l3VlanNetworkName3 = l3VlanNetwork3
 l3VlanNetworkName4 = l3VlanNetwork4
 l3VlanNetworkName5 = l3VlanNetwork5
+l3VlanNetworkName6 = l3VlanNetwork6-Load-Balance
 
 L3VlanNetworkDomainName1 = zstest-test1.org
 L3VlanNetworkDomainName2 = zstest-test2.org
 L3VlanNetworkDomainName3 = zstest-test3.org
 L3VlanNetworkDomainName4 = zstest-test4.org
 L3VlanNetworkDomainName5 = zstest-test5.org
+L3VlanNetworkDomainName6 = zstest-test6.org
 
 DNSServer = 10.0.101.1
 
@@ -180,6 +185,12 @@ vlanIpRangeStart5 = 10.15.0.2
 vlanIpRangeEnd5 = 10.15.127.255
 vlanIpRangeGateway5 = 10.15.0.1
 vlanIpRangeNetmask5 = 255.255.0.0
+
+vlanIpRangeName6 = guest vlan range for dhcp
+vlanIpRangeStart6 = 10.16.0.2
+vlanIpRangeEnd6 = 10.16.127.255
+vlanIpRangeGateway6 = 10.16.0.1
+vlanIpRangeNetmask6 = 255.255.0.0
 
 virtualRouterImageName = vr
 #virtualRouterImageUrl = http://zstack.yyk.net/image/vr-centos.img

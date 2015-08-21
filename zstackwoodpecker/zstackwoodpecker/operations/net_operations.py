@@ -403,3 +403,82 @@ def detach_l3(nic_uuid, session_uuid = None):
     test_util.test_logger('[L3 Network Nic]: %s has been detached'% nic_uuid)
     return evt.inventory
 
+def create_load_balancer(vip_uuid, name, separated_vr = False, \
+        session_uuid = None):
+    action = api_actions.CreateLoadBalancerAction()
+    action.vipUuid = vip_uuid
+    action.name = name
+    if separated_vr:
+        action.systemTags = 'separateVirtualRouterVm'
+
+    test_util.action_logger('[Create Load Balancer:] %s with [VIP]: %s' %\
+            (name, vip_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.test_logger('[Load Balancer]: %s has been created' % \
+            evt.inventory.uuid)
+    return evt.inventory
+
+def delete_load_balancer(lb_uuid, session_uuid = None):
+    action = api_actions.DeleteLoadBalancerAction()
+    action.uuid = lb_uuid
+    test_util.action_logger('[Delete Load Balancer:] %s' % lb_uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.test_logger('[Load Balancer]: %s has been deleted' % \
+            lb_uuid)
+    return evt
+
+def create_load_balancer_listener(lb_listener_option):
+    action = api_actions.CreateLoadBalancerListenerAction()
+    action.loadBalancerUuid = lb_listener_option.get_load_balancer_uuid()
+    action.name = lb_listener_option.get_name()
+    action.loadBalancerPort = lb_listener_option.get_instance_port()
+    action.systemTags = lb_listener_option.get_system_tags()
+    test_util.action_logger('[Create Load Balancer Listener:] %s with [Port]:\
+%s [Protocol]: %s on [LB]: %s' %\
+            (action.name, action.loadBalancerPort, \
+            action.protocol, action.loadBalancerUuid))
+    evt = acc_ops.execute_action_with_session(action, lb_listener_option.get_session_uuid())
+    test_util.test_logger('[Load Balancer Listener]: %s has been created' % \
+            evt.inventory.uuid)
+    return evt.inventory
+
+def delete_load_balancer_listener(lbl_uuid, session_uuid = None):
+    action = api_actions.DeleteLoadBalancerListenerAction()
+    action.uuid = lbl_uuid
+    test_util.action_logger('[Delete Load Balancer Listener:] %s' % lbl_uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.test_logger('[Load Balancer Listener]: %s has been deleted' % \
+            lbl_uuid)
+    return evt
+
+def add_nic_to_load_balancer(lb_listener_uuid, vm_nics_uuid_list, \
+        session_uuid = None):
+    action = api_actions.AddVmNicToLoadBalancerAction()
+    action.listenerUuid = lb_listener_uuid
+    action.vmNicUuids = vm_nics_uuid_list
+    test_util.action_logger('[Add Nics:] %s to [load balancer listener]: %s '% \
+            (vm_nics_uuid_list, lb_listener_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.test_logger('[Nics]: %s have been added to load balancer listener: %s ' % \
+            (vm_nics_uuid_list, lb_listener_uuid))
+    return evt.inventory
+
+def remove_nic_from_load_balancer(lb_listener_uuid, vm_nics_uuid_list, \
+        session_uuid = None):
+    action = api_actions.RemoveVmNicFromLoadBalancerAction()
+    action.listenerUuid = lb_listener_uuid
+    action.vmNicUuids = vm_nics_uuid_list
+    test_util.action_logger('[Remove Nics:] %s from [load balancer listener]: %s '% \
+            (vm_nics_uuid_list, lb_listener_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.test_logger('[Nics]: %s have been removed from load balancer listener: %s ' % \
+            (vm_nics_uuid_list, lb_listener_uuid))
+    return evt.inventory
+
+def refresh_load_balancer(lb_uuid, session_uuid = None):
+    action = api_actions.RefreshLoadBalancerAction()
+    action.uuid = lb_uuid
+    test_util.action_logger('[Refresh Load Balancer]: %s '%  lb_uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+

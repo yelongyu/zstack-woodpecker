@@ -52,10 +52,10 @@
     <node name="$node1Name" ip="$node1Ip"
       username="$nodeUserName" password="$nodePassword"
       description="The default node 1. It could be same as test machine."/>
-    <!-- multi node setting
     <node name="$node2Name" dockerImage="$node2DockerImage" ip="$node2Ip" 
       username="$nodeUserName" password="$nodePassword"
       description="multi nodes have same catalinaHome as node 1" />
+    <!-- multi node setting
     <node name="$node3Name" dockerImage="$node3DockerImage" ip="$node3Ip" 
       username="$nodeUserName" password="$nodePassword"
       description="multi nodes have same catalinaHome as node 1"
@@ -69,7 +69,8 @@
     <virtualRouterOffering name="$virtualRouterOfferingName_s"
       memoryCapacity="$virtualRouterOfferingMemory_s" cpuSpeed="$virtualRouterOfferingCpuSpeed_s" cpuNum="$virtualRouterOfferingCpuNum_s" isDefault="true">
       <zoneRef>$zoneName</zoneRef>
-      <managementL3NetworkRef>$l3ManagementNetworkName</managementL3NetworkRef>
+      <!--<managementL3NetworkRef>$l3ManagementNetworkName</managementL3NetworkRef>-->
+      <managementL3NetworkRef>$l3PublicNetworkName</managementL3NetworkRef>
       <publicL3NetworkRef>$l3PublicNetworkName</publicL3NetworkRef>
       <imageRef>$virtualRouterImageName</imageRef>
     </virtualRouterOffering>
@@ -126,7 +127,7 @@
           </hosts>
           <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
           <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
-          <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
+          <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
           <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
           <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
           <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
@@ -134,12 +135,13 @@
           <l2NetworkRef>$l2VlanNetworkName3</l2NetworkRef>
           <l2NetworkRef>$l2VlanNetworkName4</l2NetworkRef>
           <l2NetworkRef>$l2VlanNetworkName5</l2NetworkRef>
+          <l2NetworkRef>$l2VlanNetworkName6</l2NetworkRef>
         </cluster>
       </clusters>
 
       <l2Networks>
         <l2NoVlanNetwork name="$l2ManagementNetworkName" description="Basic L2 for management network"
-          physicalInterface="$l2ManagementNetworkInterface">
+          physicalInterface="$l2NetworkPhysicalInterface2">
           <l3Networks>
             <l3BasicNetwork name="$l3ManagementNetworkName" description="Management L3 Network without Vlan and no special services" system="True">
               <ipRange name="$ipRangeManagementName" description="Test"
@@ -155,7 +157,7 @@
         </l2NoVlanNetwork>
 
         <l2NoVlanNetwork name="$l2PublicNetworkName" description="Basic L2 for public network"
-          physicalInterface="$l2PublicNetworkInterface">
+          physicalInterface="$l2NetworkPhysicalInterface">
           <l3Networks>
             <l3BasicNetwork name="$l3PublicNetworkName" description="Basic L3 Network without Vlan for public network">
               <ipRange name="$ipRangeName" description="Test"
@@ -165,6 +167,9 @@
               <networkService provider="VirtualRouter">
                 <serviceType>DHCP</serviceType>
                 <serviceType>DNS</serviceType>
+              </networkService>
+              <networkService provider="SecurityGroup">
+                <serviceType>SecurityGroup</serviceType>
               </networkService>
             </l3BasicNetwork>
           </l3Networks>
@@ -311,11 +316,35 @@
           </l3Networks>
         </l2VlanNetwork>
 
+        <l2VlanNetwork name="$l2VlanNetworkName6" description="vlan network 6 for test load balance service."
+          physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan6">
+          <l3Networks>
+            <l3BasicNetwork name="$l3VlanNetworkName6" description = "guest test vlan network for network load balance" domain_name="$L3VlanNetworkDomainName6">
+              <ipRange name="$vlanIpRangeName6" 
+                startIp="$vlanIpRangeStart6" 
+                endIp="$vlanIpRangeEnd6"
+                gateway="$vlanIpRangeGateway6" 
+                netmask="$vlanIpRangeNetmask6"/>
+              <dns>$DNSServer</dns> 
+              <networkService provider="VirtualRouter">
+                <serviceType>DHCP</serviceType>
+                <serviceType>DNS</serviceType>
+                <serviceType>SNAT</serviceType>
+                <serviceType>PortForwarding</serviceType>
+                <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
+              </networkService>
+              <networkService provider="SecurityGroup">
+                <serviceType>SecurityGroup</serviceType>
+              </networkService>
+            </l3BasicNetwork>
+          </l3Networks>
+        </l2VlanNetwork>
       </l2Networks>
 
       <primaryStorages>
         <nfsPrimaryStorage name="$nfsPrimaryStorageName"
-          description="Test NFS" url="$nfsPrimaryStorageUrl" />
+          description="Test" url="$nfsPrimaryStorageUrl" />
       </primaryStorages>
 
       <backupStorageRef>$sftpBackupStorageName</backupStorageRef>

@@ -302,7 +302,7 @@ class CephPrimaryStorageOption(PrimaryStorageOption):
         self.dataVolumePoolName = None
         self.rootVolumePoolName = None
         self.imageCachePoolName = None
-        super(VmOption, self).__init__()
+        super(CephPrimaryStorageOption, self).__init__()
         self.type = inventory.CEPH_PRIMARY_STORAGE_TYPE
 
     def set_monUrls(self, monUrls):
@@ -638,6 +638,40 @@ class SnapshotOption(DataOption):
 class SecurityGroupOption(DataOption):
     def __init__(self):
         super(SecurityGroupOption, self).__init__()
+
+class LoadBalancerListenerOption(DataOption):
+    def __init__(self, lb_uuid = None, instance_port = None, \
+            protocol = None, name = None):
+        self.load_balancer_uuid = lb_uuid
+        self.instance_port = instance_port
+        self.protocol = protocol
+        self.system_tags = system_tags
+        super(LoadBalancerListenerOption, self).__init__()
+        self.name = name
+
+    def set_load_balancer_uuid(self, load_balancer_uuid):
+        self.load_balancer_uuid = load_balancer_uuid
+
+    def get_load_balancer_uuid(self):
+        return self.load_balancer_uuid
+
+    def set_instance_port(self, instance_port):
+        self.instance_port = instance_port
+
+    def get_instance_port(self):
+        return self.instance_port
+
+    def set_protocol(self, protocol):
+        self.protocol = protocol
+
+    def get_protocol(self):
+        return self.protocol
+
+    def set_system_tags(self, system_tags):
+        self.system_tags = system_tags
+
+    def get_system_tags(self):
+        return self.system_tags
 
 class PortForwardingRuleOption(DataOption):
     def __init__(self, vip_startPort=None, vip_endPort=None, private_startPort=None, private_endPort=None, protocol=None, allowedCidr=None, vip_uuid=None, vm_nic_uuid=None):
