@@ -15,7 +15,7 @@ def test():
     l3_name = os.environ.get('l3VlanNetworkName1')
     vm_hostname = ('test_vm_hostname')
     hostname_tag = test_lib.lib_create_vm_hostname_tag(vm_hostname)
-    vm = test_stub.create_vlan_vm(os.environ.get('l3VlanNetworkName1'), system_tags=hostname_tag)
+    vm = test_stub.create_vlan_vm(os.environ.get('l3VlanNetworkName1'), system_tags=[hostname_tag])
     test_obj_dict.add_vm(vm)
     vm.check()
     #TODO: check vm's hostname

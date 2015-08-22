@@ -40,3 +40,10 @@ def delete_tag(tag_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
+def update_system_tag(tag_uuid, tag, session_uuid = None):
+    action = api_actions.UpdateSystemTagAction()
+    action.uuid = tag_uuid
+    action.tag = tag
+    test_util.action_logger('Update Tag [uuid:] %s to %s' % (tag_uuid, tag))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
