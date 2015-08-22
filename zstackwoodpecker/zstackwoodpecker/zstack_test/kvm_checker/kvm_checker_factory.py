@@ -378,11 +378,16 @@ class SnapshotCheckerFactory(checker_header.CheckerFactory):
 class LoadBalancerCheckerFactory(checker_header.CheckerFactory):
     def create_checker(self, test_obj):
         lb_checker_chain = checker_header.CheckerChain()
-        for lbl in test_obj.get_load_balancer_listeners().values():
-            if lbl.get_state() != lb_header.DELETED:
-                checker = lb_checker.zstack_kvm_lbl_checker()
-                checker.set_lbl(lbl)
-                print '---------%s------' % lbl
-                lb_checker_chain.add_checker(checker, True, test_obj)
-                
+        if test_obj.get_state() != lb_header.DELETED:
+            lb_checker_chain.add_checker(db_checker.zstack_lb_db_checker(), \
+                    True, test_obj)
+            for lbl in test_obj.get_load_balancer_listeners().values():
+                if lbl.get_state() != lb_header.DELETED:
+                    checker = lb_checker.zstack_kvm_lbl_checker()
+                    checker.set_lbl(lbl)
+                    lb_checker_chain.add_checker(checker, True, test_obj)
+        else:
+            lb_checker_chain.add_checker(db_checker.zstack_lb_db_checker(), \
+                    False, test_obj)
+
         return lb_checker_chain

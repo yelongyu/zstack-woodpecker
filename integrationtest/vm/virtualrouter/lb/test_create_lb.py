@@ -61,7 +61,9 @@ def test():
     vm2.check()
 
     lb.check()
-
+    lb.delete()
+    test_obj_dict.rm_load_balancer(lb)
+    lb.check()
     test_lib.lib_robot_cleanup(test_obj_dict)
     test_util.test_pass('Create Load Balancer Test Success')
 

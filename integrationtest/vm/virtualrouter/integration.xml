@@ -68,6 +68,10 @@
         <case timeout='800'  repeat='1'>eip/test_pf_eip_attach.py</case>
         <case timeout='800'  repeat='1'>eip/test_vm_ops.py</case>
         <case timeout='800'  repeat='1'>eip/test_vm_ops2.py</case>
+        <case timeout='800'  repeat='1'>lb/test_create_lb_alone_vr.py</case>
+        <case timeout='800'  repeat='1'>lb/test_create_lb_source.py</case>
+        <case timeout='800'  repeat='1'>lb/test_create_lb.py</case>
+        <case timeout='800'  repeat='1'>lb/test_lb_health_check.py</case>
         <!--<case timeout='800'  repeat='1'>snapshot/test_backup_snapshot.py</case>
         <case timeout='2400' repeat='1' noparallel='True'>snapshot/test_create_100_snapshots.py</case> -->
         <case timeout='1200'  repeat='1'>snapshot/test_create_snapshot.py</case>

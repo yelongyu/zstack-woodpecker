@@ -83,6 +83,9 @@ class ZstackTestLoadBalancerListener(lb_header.TestLoadBalancerListener):
 
     def _rm_system_tag(self, system_tag_key):
         pre_tag = self.get_creation_option().get_system_tags()
+        if not pre_tag:
+            return
+
         new_tag = []
         for tag in pre_tag:
             if not tag.startswith(system_tag_key):
@@ -92,7 +95,11 @@ class ZstackTestLoadBalancerListener(lb_header.TestLoadBalancerListener):
 
     def _add_system_tag(self, tag):
         pre_tag = self.get_creation_option().get_system_tags()
-        self.get_creation_option().set_system_tags(pre_tag.append(tag))
+        if not pre_tag:
+            pre_tag = []
+
+        pre_tag.append(tag)
+        self.get_creation_option().set_system_tags(pre_tag)
 
     def set_algorithm(self, algorithm):
         self._rm_system_tag('balancerAlgorithm')
