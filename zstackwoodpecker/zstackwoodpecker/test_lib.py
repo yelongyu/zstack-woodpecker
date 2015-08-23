@@ -1977,18 +1977,18 @@ def lib_find_vr_by_pri_l3(l3_uuid):
     which has DHCP role. 
     '''
     #use compound query condition
-    condition = res_ops.gen_query_conditions('vmNics.l3NetworkUuid', '=', \
+    cond = res_ops.gen_query_conditions('vmNics.l3NetworkUuid', '=', \
             l3_uuid)
-    #condition = res_ops.gen_query_conditions('vmNics.metaData', '!=', '1', \
-    #        condition)
-    #condition = res_ops.gen_query_conditions('vmNics.metaData', '!=', '2', \
-    #        condition)
-    #condition = res_ops.gen_query_conditions('vmNics.metaData', '!=', '3', \
-    #        condition)
-    condition = res_ops.gen_query_conditions('vmNics.metaData', '>', '3', \
-            condition)
+    #cond = res_ops.gen_query_conditions('vmNics.metaData', '!=', '1', \
+    #        cond)
+    #cond = res_ops.gen_query_conditions('vmNics.metaData', '!=', '2', \
+    #        cond)
+    #cond = res_ops.gen_query_conditions('vmNics.metaData', '!=', '3', \
+    #        cond)
+    cond = res_ops.gen_query_conditions('vmNics.metaData', '>', '3', \
+            cond)
     cond = res_ops.gen_query_conditions('__systemTag__', '=', 'role::DHCP', cond)
-    vrs = res_ops.query_resource_with_num(res_ops.APPLIANCE_VM, condition, \
+    vrs = res_ops.query_resource_with_num(res_ops.APPLIANCE_VM, cond, \
             None, 0, 1)
 
     if vrs:
