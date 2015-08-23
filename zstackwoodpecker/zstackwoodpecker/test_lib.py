@@ -1973,7 +1973,8 @@ def lib_find_vr_private_nic(vm):
 
 def lib_find_vr_by_pri_l3(l3_uuid):
     '''
-    private l3 can only be belonged to 1 VR. So the return should be explicit VR.
+    private l3 might have multi vrs, this function will only return the VR
+    which has DHCP role. 
     '''
     #use compound query condition
     condition = res_ops.gen_query_conditions('vmNics.l3NetworkUuid', '=', \

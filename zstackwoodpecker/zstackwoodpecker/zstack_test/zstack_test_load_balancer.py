@@ -44,6 +44,9 @@ class ZstackTestLoadBalancer(lb_header.TestLoadBalancer):
         super(ZstackTestLoadBalancer, self).create()
         return self.get_load_balancer()
 
+    def is_separated_vr(self):
+        return self.separated_vr
+
     def set_separated_vr(self):
         self.separated_vr = True
 

@@ -37,6 +37,7 @@ HOST = 'Host'
 NETWORK_SERVICE_PROVIDER = 'NetworkServiceProvider'
 NETWORK_SERVICE_PROVIDER_L3_REF = 'NetworkServiceProviderL3Ref'
 APPLIANCE_VM = 'ApplianceVm'
+VIRTUALROUTER_VM = 'VirtualRouterVm'
 DISK_OFFERING = 'DiskOffering'
 ACCOUNT = 'Account'
 USER = 'User'
@@ -298,6 +299,8 @@ def _gen_query_action(resource):
         action = api_actions.QueryNetworkServiceL3NetworkRefAction()
     elif resource == APPLIANCE_VM:
         action = api_actions.QueryApplianceVmAction()
+    elif resource == VIRTUALROUTER_VM:
+        action = api_actions.QueryVirtualRouterVmAction()
     elif resource == DISK_OFFERING:
         action = api_actions.QueryDiskOfferingAction()
     elif resource == ACCOUNT:

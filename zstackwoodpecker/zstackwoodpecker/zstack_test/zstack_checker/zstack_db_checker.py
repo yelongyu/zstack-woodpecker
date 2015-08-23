@@ -3,6 +3,7 @@ import zstackwoodpecker.header.checker as checker_header
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.header.security_group as sg_header
 import zstackwoodpecker.test_util as test_util
+import zstackwoodpecker.test_lib as test_lib
 import apibinding.inventory as inventory
 
 import sys
@@ -178,3 +179,30 @@ class zstack_lb_db_checker(checker_header.TestChecker):
 
         test_util.test_logger('Check result: [load_balancer Inventory uuid:] %s exist in database.' % lb.uuid)
         return self.judge(True)
+
+class zstack_alone_lb_vr_db_checker(checker_header.TestChecker):
+    '''check virtual router separated load balancer existence. 
+        If LB doesn't have any Load balancer listener(LBL), or 
+        LBL doesn't add any VM Nic, LB VR won't be created.
+
+        When LB is deleted, LB VR will be destroyed. 
+    '''
+    def check(self):
+        super(zstack_alone_lb_db_checker, self).check()
+        lb_inv = test_obj.get_load_balancer()
+        cond = res_ops.gen_query_conditions('loadBalancer.name', \
+                '=', lb_inv.name)
+        vr = res_ops.query_resource(res_ops.VIRTUALROUTER_VM, cond)[0]
+        vr_uuid = vr.uuid
+        cond = res_ops.gen_query_conditions('tag', '=', \
+                'role::DHCP')
+        cond = res_ops.gen_query_conditions('resourceUuid', '=', \
+                vr_uuid, cond)
+        system_tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
+        if system_tag:
+            test_util.test_logger("Load Balancer: %s is not in separated VR. Its VR is %s, which is at least shared with DHCP service." % (lb_inv.uuid, vr_uuid))
+            return self.judge(False)
+        test_util.test_logger("Load Balancer: %s is in separated VR %s."\
+                % (lb_inv.uuid, vr_uuid))
+        return self.judge(True)
+
