@@ -297,7 +297,7 @@ class PrimaryStorageOption(DataOption):
         return self.url
 
 class CephPrimaryStorageOption(PrimaryStorageOption):
-    def __init(self):
+    def __init__(self):
         self.monUrls = None
         self.dataVolumePoolName = None
         self.rootVolumePoolName = None
