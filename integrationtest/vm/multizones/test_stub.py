@@ -115,9 +115,9 @@ def recover_ps(ps_inv):
             if ps_inv.mons[0].hostname in os.environ.get(key):
                 ps_config.set_monUrls(os.environ.get(key).split(';'))
 
-        ps_config.set_dataVolumePoolName(ps_inv.dataVolumePoolName)
-        ps_config.set_rootVolumePoolName(ps_inv.rootVolumePoolName)
-        ps_config.set_imageCachePoolName(ps_inv.imageCachePoolName)
+        #ps_config.set_dataVolumePoolName(ps_inv.dataVolumePoolName)
+        #ps_config.set_rootVolumePoolName(ps_inv.rootVolumePoolName)
+        #ps_config.set_imageCachePoolName(ps_inv.imageCachePoolName)
 
         #avoid of ps is already created successfully. 
         cond = res_ops.gen_query_conditions('zoneUuid', '=', ps_inv.zoneUuid)
