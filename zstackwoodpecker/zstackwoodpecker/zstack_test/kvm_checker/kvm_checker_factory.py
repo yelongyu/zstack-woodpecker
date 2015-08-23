@@ -388,7 +388,7 @@ class LoadBalancerCheckerFactory(checker_header.CheckerFactory):
                     lb_checker_chain.add_checker(checker, True, test_obj)
 
             if test_obj.get_load_balancer_listeners():
-                if test_obj.is_separated_vr:
+                if test_obj.is_separated_vr():
                     lb_checker_chain.add_checker(\
                             db_checker.zstack_alone_lb_vr_db_checker(),\
                             True, test_obj)
