@@ -8,6 +8,7 @@ import xml.etree.cElementTree as etree
 import sys
 import traceback
 
+import apibinding.inventory as inventory
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.account_operations as account_operations
@@ -58,7 +59,7 @@ def add_zone_config(root_xml, pre_zone_setting, session_uuid = None):
             if zone.uuid in bs.attachedZoneUuids:
                 add_xml_item_value(zone_xml, 'backupStorageRef', bs.name)
 
-        add_primary_storage_config(zone_xml, zone.uuid, session_uuid)
+        add_primary_storage_config(zone_xml, zone.uuid, pre_zone.primaryStorages, session_uuid)
 
         if pre_zone:
             pre_cluster_setting = pre_zone.clusters
@@ -207,13 +208,26 @@ def add_l2_vlan_network_config(l2s_xml, zone_uuid, session_uuid = None):
         set_xml_item_attr(l2_xml, 'vlan', l2.vlan)
         add_l3_network_config(l2_xml, l2.uuid, session_uuid)
 
-def add_primary_storage_config(zone_xml, zone_uuid, session_uuid = None):
+def add_primary_storage_config(zone_xml, zone_uuid, pre_pss, session_uuid = None):
     pss_xml = etree.SubElement(zone_xml, "primaryStorages")
     cond = res_ops.gen_query_conditions('zoneUuid', '=', zone_uuid)
     pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond, session_uuid)
     for ps in pss:
-        if ps.type == "NFS":
+        if ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
             ps_xml = etree.SubElement(pss_xml, "nfsPrimaryStorage")
+            set_xml_item_attr(ps_xml, 'name', ps.name)
+            set_xml_item_attr(ps_xml, 'description', ps.description)
+            set_xml_item_attr(ps_xml, 'url', ps.url)
+        elif ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
+            ps_xml = etree.SubElement(pss_xml, "cephPrimaryStorage")
+            set_xml_item_attr(ps_xml, 'name', ps.name)
+            set_xml_item_attr(ps_xml, 'description', ps.description)
+            for pre_ps in pre_pss.get_child_node_as_list('cephPrimaryStorage'):
+                if pre_ps.name__ == ps.name:
+                    set_xml_item_attr(ps_xml, 'monUrls', pre_ps.monUrls)
+                    break
+        elif ps.type == inventory.LOCAL_STORAGE_TYPE:
+            ps_xml = etree.SubElement(pss_xml, "localPrimaryStorage")
             set_xml_item_attr(ps_xml, 'name', ps.name)
             set_xml_item_attr(ps_xml, 'description', ps.description)
             set_xml_item_attr(ps_xml, 'url', ps.url)
@@ -268,22 +282,33 @@ def add_sftp_backup_stroage_config(root_xml, bs_original_configs, \
         session_uuid = None):
     bss_xml = etree.SubElement(root_xml, 'backupStorages')
     cond = res_ops.gen_query_conditions('uuid', '!=', '0')
-    bss = res_ops.query_resource(res_ops.SFTP_BACKUP_STORAGE, cond, \
+    bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond, \
             session_uuid)
     for bs in bss:
-        bs_xml = etree.SubElement(bss_xml, 'sftpBackupStorage')
-        set_xml_item_attr(bs_xml, 'name', bs.name)
-        set_xml_item_attr(bs_xml, 'description', bs.description)
-        set_xml_item_attr(bs_xml, 'url', bs.url)
-        set_xml_item_attr(bs_xml, 'hostname', bs.hostname)
-        if bs_original_configs:
-            for bs_o in \
-                bs_original_configs.get_child_node_as_list('sftpBackupStorage'):
-                if bs_o.name_ == bs.name:
-                    #if backstorage names are same, there will be issue.
-                    set_xml_item_attr(bs_xml, 'username', bs_o.username_)
-                    set_xml_item_attr(bs_xml, 'password', bs_o.password_)
-                    break
+        if bs.type == inventory.SFTP_BACKUP_STORAGE_TYPE:
+            bs_xml = etree.SubElement(bss_xml, 'sftpBackupStorage')
+            set_xml_item_attr(bs_xml, 'name', bs.name)
+            set_xml_item_attr(bs_xml, 'description', bs.description)
+            set_xml_item_attr(bs_xml, 'url', bs.url)
+            set_xml_item_attr(bs_xml, 'hostname', bs.hostname)
+            if bs_original_configs:
+                for bs_o in \
+                    bs_original_configs.get_child_node_as_list('sftpBackupStorage'):
+                    if bs_o.name_ == bs.name:
+                        #if backstorage names are same, there will be issue.
+                        set_xml_item_attr(bs_xml, 'username', bs_o.username_)
+                        set_xml_item_attr(bs_xml, 'password', bs_o.password_)
+                        break
+        elif bs.type == inventory.CEPH_BACKUP_STORAGE_TYPE:
+            bs_xml = etree.SubElement(bss_xml, 'cephBackupStorage')
+            set_xml_item_attr(bs_xml, 'name', bs.name)
+            set_xml_item_attr(bs_xml, 'description', bs.description)
+            if bs_original_configs:
+                for bs_o in bs_original_configs.get_child_node_as_list('cephBackupStorage')
+                    if bs_o.name_ == bs.name:
+                        set_xml_item_attr(bs_xml, 'monUrls', bs_o.monUrls_)
+                        break
+
 
 def add_instance_offering_config(root_xml, session_uuid = None):
     ios_xml = etree.SubElement(root_xml, 'instanceOfferings')
