@@ -199,7 +199,7 @@ def lib_install_testagent_to_ceph_ps():
     monUrls = os.environ.get('cephPrimaryStorageMonUrls')
     lib_install_testgent_to_ceph_host(monUrls)
 
-def lib_install_testagent_to_ceph_ps():
+def lib_install_testagent_to_ceph_bs():
     monUrls = os.environ.get('cephBackupStorageMonUrls')
     lib_install_testgent_to_ceph_host(monUrls)
 

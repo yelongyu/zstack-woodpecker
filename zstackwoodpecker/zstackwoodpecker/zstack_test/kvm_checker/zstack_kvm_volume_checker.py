@@ -34,7 +34,7 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
         elif ps.type == inventory.LOCAL_STORAGE_TYPE:
             self.check_nfs(volume, volume_installPath)
         elif ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
-            self.check_ceph(volume, volume_installPath)
+            self.check_ceph(volume, volume_installPath, ps)
 
     def check_iscsi(self, volume, volume_installPath, ps):
         host = test_lib.lib_find_host_by_iscsi_ps(ps)
@@ -45,8 +45,13 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
         volume_file_path = volume_installPath.split(';')[1].split('file://')[1]
         self.check_file_exist(volume, volume_file_path, host)
 
-    def check_ceph(self, volume, volume_installPath):
-        ceph_host, username, password = test_lib.lib_get_ceph_info(os.environ.get('cephPrimaryStorageMonUrls'))
+    def check_ceph(self, volume, volume_installPath, ps):
+        monHost = ps.mons[0].hostname
+        for key in os.environ.keys():
+            if monHost in os.environ.get(key):
+                ceph_host, username, password = \
+                        test_lib.lib_get_ceph_info(os.environ.get(key))
+                break
 
         volume_installPath = volume_installPath.split('ceph://')[1]
         command = 'rbd info %s' % volume_installPath
