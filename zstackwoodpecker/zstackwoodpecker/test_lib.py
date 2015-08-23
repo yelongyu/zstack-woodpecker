@@ -1986,6 +1986,7 @@ def lib_find_vr_by_pri_l3(l3_uuid):
     #        condition)
     condition = res_ops.gen_query_conditions('vmNics.metaData', '>', '3', \
             condition)
+    cond = res_ops.gen_query_conditions('__systemTag__', '=', 'role::DHCP', cond)
     vrs = res_ops.query_resource_with_num(res_ops.APPLIANCE_VM, condition, \
             None, 0, 1)
 
