@@ -224,7 +224,7 @@ def add_primary_storage_config(zone_xml, zone_uuid, pre_pss, session_uuid = None
             set_xml_item_attr(ps_xml, 'description', ps.description)
             for pre_ps in pre_pss.get_child_node_as_list('cephPrimaryStorage'):
                 if pre_ps.name__ == ps.name:
-                    set_xml_item_attr(ps_xml, 'monUrls', pre_ps.monUrls)
+                    set_xml_item_attr(ps_xml, 'monUrls', pre_ps.monUrls_)
                     break
         elif ps.type == inventory.LOCAL_STORAGE_TYPE:
             ps_xml = etree.SubElement(pss_xml, "localPrimaryStorage")
