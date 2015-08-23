@@ -52,9 +52,9 @@ def test():
     cond = res_ops.gen_query_conditions('zoneUuid', '=', zone_uuid)
     ps_inv = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)[0]
     if ps_inv.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
-        ps_name1 = os.environ.get('nfsPrimaryStorageName1')
+        ps_name = os.environ.get('nfsPrimaryStorageName1')
     elif ps_inv.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
-        ps_name1 = os.environ.get('cephPrimaryStorageName1')
+        ps_name = os.environ.get('cephPrimaryStorageName1')
 
     ps_inv = res_ops.get_resource(res_ops.PRIMARY_STORAGE, name = ps_name)[0]
     ps_ops.delete_primary_storage(ps_inv.uuid)
