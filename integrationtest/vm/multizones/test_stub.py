@@ -113,7 +113,7 @@ def recover_ps(ps_inv):
         ps_config.set_type(ps_inv.type)
         for key in os.environ.keys():
             if ps_inv.mons[0].hostname in os.environ.get(key):
-                ps_config.set_monUrls(os.environ.get(key))
+                ps_config.set_monUrls(os.environ.get(key).split(';'))
 
         ps_config.set_dataVolumePoolName(ps_inv.dataVolumePoolName)
         ps_config.set_rootVolumePoolName(ps_inv.rootVolumePoolName)
