@@ -188,8 +188,8 @@ class zstack_alone_lb_vr_db_checker(checker_header.TestChecker):
         When LB is deleted, LB VR will be destroyed. 
     '''
     def check(self):
-        super(zstack_alone_lb_db_checker, self).check()
-        lb_inv = test_obj.get_load_balancer()
+        super(zstack_alone_lb_vr_db_checker, self).check()
+        lb_inv = self.test_obj.get_load_balancer()
         cond = res_ops.gen_query_conditions('loadBalancer.name', \
                 '=', lb_inv.name)
         vr = res_ops.query_resource(res_ops.VIRTUALROUTER_VM, cond)[0]

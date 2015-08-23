@@ -3306,9 +3306,6 @@ def lib_robot_cleanup(test_dict):
     for account in test_dict.get_all_accounts():
         account.delete()
 
-    for lb in test_dict.get_all_load_balancers():
-        lb.delete()
-
 def lib_error_cleanup(test_dict):
     test_util.test_logger('- - - Error cleanup: running VM - - -')
     for vm in test_dict.get_vm_list(vm_header.RUNNING):
@@ -3385,13 +3382,6 @@ def lib_error_cleanup(test_dict):
     for account in test_dict.get_all_accounts():
         try:
             account.delete()
-        except:
-            pass
-
-    test_util.test_logger('- - - Error cleanup: load balancers- - -')
-    for lb in test_dict.get_all_load_balancers():
-        try:
-            lb.delete()
         except:
             pass
 
