@@ -22,9 +22,11 @@ GET_RESOURCE_METHOD = LIST_RESOURCE_METHOD
 
 BACKUP_STORAGE = 'BackupStorage'
 SFTP_BACKUP_STORAGE = 'SftpBackupStorage'
+CEPH_BACKUP_STORAGE = 'CephBackupStorage'
 ZONE = 'Zone'
 CLUSTER = 'Cluster'
 PRIMARY_STORAGE = 'PrimaryStorage'
+CEPH_PRIMARY_STORAGE = 'CephPrimaryStorage'
 L2_NETWORK = 'L2Network'
 L2_VLAN_NETWORK = 'L2VlanNetwork'
 L3_NETWORK = 'L3Network'
@@ -269,6 +271,8 @@ def _gen_query_action(resource):
         action = api_actions.QueryBackupStorageAction()
     elif resource == SFTP_BACKUP_STORAGE:
         action = api_actions.QuerySftpBackupStorageAction()
+    elif resource == CEPH_BACKUP_STORAGE:
+        action = api_actions.QueryCephBackupStorageAction()
     elif resource == ZONE:
         action = api_actions.QueryZoneAction()
     elif resource == PRIMARY_STORAGE:
@@ -307,6 +311,8 @@ def _gen_query_action(resource):
         action = api_actions.QueryAccountAction()
     elif resource == PRIMARY_STORAGE:
         action = api_actions.QueryPrimaryStorageAction()
+    elif resource == CEPH_PRIMARY_STORAGE:
+        action = api_actions.QueryCephPrimaryStorageAction()
     elif resource == SECURITY_GROUP:
         action = api_actions.QuerySecurityGroupAction()
     elif resource == SECURITY_GROUP_RULE:

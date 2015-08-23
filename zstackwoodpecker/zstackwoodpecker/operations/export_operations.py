@@ -304,7 +304,7 @@ def add_sftp_backup_stroage_config(root_xml, bs_original_configs, \
             set_xml_item_attr(bs_xml, 'name', bs.name)
             set_xml_item_attr(bs_xml, 'description', bs.description)
             if bs_original_configs:
-                for bs_o in bs_original_configs.get_child_node_as_list('cephBackupStorage')
+                for bs_o in bs_original_configs.get_child_node_as_list('cephBackupStorage'):
                     if bs_o.name_ == bs.name:
                         set_xml_item_attr(bs_xml, 'monUrls', bs_o.monUrls_)
                         break
