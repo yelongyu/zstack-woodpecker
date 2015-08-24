@@ -85,6 +85,13 @@ def create_vm_with_iso(vm_creation_option = None, session_uuid = None):
     return create_vm(vm_creation_option, None, root_disk_uuid, image_uuid, \
             session_uuid = session_uuid)
 
+def create_vm_with_previous_iso(vm_creation_option = None, session_uuid = None):
+    cond = res_ops.gen_query_conditions('name', '=', 'iso')
+    image_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
+    root_disk_uuid = test_lib.lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName')).uuid
+    return create_vm(vm_creation_option, None, root_disk_uuid, image_uuid, \
+            session_uuid = session_uuid)
+
 def share_admin_resource(account_uuid_list):
     instance_offering_uuid = res_ops.get_resource(res_ops.INSTANCE_OFFERING)[0].uuid
     cond = res_ops.gen_query_conditions('mediaType', '!=', 'ISO')
