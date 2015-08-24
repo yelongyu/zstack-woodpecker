@@ -75,6 +75,7 @@ install_pkg(){
 
 install_pkg git
 install_pkg bzip2
+install_pkg bc
 
 if [ $PULL_ZSTACK == 'Y' ]; then
     echo -n "${tab} : Pull latest zstack"

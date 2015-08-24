@@ -30,28 +30,6 @@ ps_uuid = None
 cluster_uuid = None
 ps_inv = None
 
-def recover_ps():
-    global ps_inv
-    ps_config = test_util.PrimaryStorageOption()
-
-    ps_config.set_name(ps_inv.name)
-    ps_config.set_description(ps_inv.description)
-    ps_config.set_zone_uuid(ps_inv.zoneUuid)
-    ps_config.set_type(ps_inv.type)
-    ps_config.set_url(ps_inv.url)
-
-    #avoid of ps is already created successfully. 
-    cond = res_ops.gen_query_conditions('zoneUuid', '=', ps_inv.zoneUuid)
-    cond = res_ops.gen_query_conditions('url', '=', ps_inv.url, cond)
-    curr_ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
-    if curr_ps:
-        ps = curr_ps[0]
-    else:
-        ps = ps_ops.create_nfs_primary_storage(ps_config)
-
-    for cluster_uuid in ps_inv.attachedClusterUuids:
-        ps_ops.attach_primary_storage(ps.uuid, cluster_uuid)
-
 def test():
     global ps_inv
     global ps_uuid
@@ -128,7 +106,7 @@ def test():
     else:
         test_util.test_fail('Fail: Primary Storage has been deleted. But vm is still created with it.')
 
-    recover_ps()
+    test_stub.recover_ps(ps_inv)
     test_util.test_dsc("Attach Primary Storage")
 
     test_lib.lib_robot_cleanup(test_obj_dict)
@@ -142,7 +120,7 @@ def error_cleanup():
     try:
         ps_ops.attach_primary_storage(ps_uuid, cluster_uuid)
     except:
-        recover_ps()
+        test_stub.recover_ps(ps_inv)
 
     try:
         tag_ops.delete_tag(tag.uuid)
