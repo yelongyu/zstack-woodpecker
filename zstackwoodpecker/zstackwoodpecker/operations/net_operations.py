@@ -432,6 +432,7 @@ def create_load_balancer_listener(lb_listener_option):
     action.loadBalancerUuid = lb_listener_option.get_load_balancer_uuid()
     action.name = lb_listener_option.get_name()
     action.loadBalancerPort = lb_listener_option.get_instance_port()
+    action.protocol = lb_listener_option.get_protocol()
     action.systemTags = lb_listener_option.get_system_tags()
     test_util.action_logger('[Create Load Balancer Listener:] %s with [Port]:\
 %s [Protocol]: %s on [LB]: %s' %\

@@ -190,8 +190,8 @@ class zstack_alone_lb_vr_db_checker(checker_header.TestChecker):
     def check(self):
         super(zstack_alone_lb_vr_db_checker, self).check()
         lb_inv = self.test_obj.get_load_balancer()
-        cond = res_ops.gen_query_conditions('loadBalancer.name', \
-                '=', lb_inv.name)
+        cond = res_ops.gen_query_conditions('loadBalancer.uuid', \
+                '=', lb_inv.uuid)
         vr = res_ops.query_resource(res_ops.VIRTUALROUTER_VM, cond)[0]
         vr_uuid = vr.uuid
         cond = res_ops.gen_query_conditions('tag', '=', \
