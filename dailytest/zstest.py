@@ -422,8 +422,12 @@ class TestLib(object):
                 suite_item = suite_content.find('suite')
                 if parallel:
                     suite_item.set('parallel', parallel)
-                suite_item.set('setupCase', '%s/%s/%s' % (self.test_case_dir, real_suite, suite_item.get('setupCase')))
-                suite_item.set('teardownCase', '%s/%s/%s' % (self.test_case_dir, real_suite, suite_item.get('teardownCase')))
+                if suite_item.get('setupCase'):
+                    suite_item.set('setupCase', \
+                            '%s/%s/%s' % (self.test_case_dir, real_suite, suite_item.get('setupCase')))
+                if suite_item.get('teardownCase'):
+                    suite_item.set('teardownCase', \
+                            '%s/%s/%s' % (self.test_case_dir, real_suite, suite_item.get('teardownCase')))
                 for case_item in suite_item.getchildren():
                     org_case_name = case_item.text
                     case_item.text = '%s/%s/%s' % (self.test_case_dir, real_suite, org_case_name)
