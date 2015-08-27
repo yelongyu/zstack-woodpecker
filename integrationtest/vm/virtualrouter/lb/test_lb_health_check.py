@@ -74,7 +74,7 @@ def test():
     lb.check()
 
     vm3.start()
-    time.sleep(5)
+    time.sleep(60)
     lb.check()
 
     lb.delete()

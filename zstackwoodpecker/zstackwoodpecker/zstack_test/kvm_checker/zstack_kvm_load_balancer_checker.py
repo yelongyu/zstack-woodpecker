@@ -49,7 +49,7 @@ class zstack_kvm_lbl_checker(checker_header.TestChecker):
 
         for key, values in self.vm_ip_test_dict.iteritems():
             if values != 1:
-                test_util.test_logger('Load Balance %s algorithm test failed, since [ip]: %s is not scheduled on [load balancer listener]: %s' % (self.algorithm, key, self.lbl_uuid))
+                test_util.test_logger('Load Balance %s algorithm test failed, since [ip]: %s is not scheduled on [load balancer listener]: %s. The full test result: %s' % (self.algorithm, key, self.lbl_uuid, self.vm_ip_test_dict))
                 return self.judge(False)
 
         tmp_num = lb_num * 2 
