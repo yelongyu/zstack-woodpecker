@@ -437,7 +437,7 @@ class WoodPecker(object):
                 return result
 
             def add_cases_to_suite(xmlobject, s, suite):
-                if s.setupCase__:
+                if s.setupCase_:
                     setupcase = TestCase()
                     setupcase.path = full_path(s.setupCase__)
                     setupcase.name = setupcase.path.split('/')[-1].split('.')[0]
@@ -494,7 +494,7 @@ class WoodPecker(object):
                         case.id = self.total_case_num
                         self.all_cases[case.id] = case
 
-                if s.teardownCase__:
+                if s.teardownCase_:
                     teardowncase = TestCase()
                     teardowncase.path = full_path(s.teardownCase__)
                     teardowncase.name = teardowncase.path.split('/')[-1].split('.')[0]
