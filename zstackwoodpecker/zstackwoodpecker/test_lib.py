@@ -294,10 +294,11 @@ def lib_ssh_vm_cmd_by_agent_with_retry(test_agent_ip, vm_ip, username, password,
 
     return str(rsp.result)
 
-def lib_execute_ssh_cmd(host_ip, username, password, command, timeout = 30):
+def lib_execute_ssh_cmd(host_ip, username, password, command, timeout = 30, \
+        port = 22):
     def ssh_host():
         try:
-            ret, output, stderr = ssh.execute(command, host_ip, username, password, False)
+            ret, output, stderr = ssh.execute(command, host_ip, username, password, False, port)
             print("ssh: %s , return value: %d, standard output:%s, standard error: %s" % (command, ret, output, stderr))
             ssh_result['result'] = ret
             ssh_result['output'] = output
@@ -3972,13 +3973,14 @@ def lib_create_data_volume_from_image(target_image):
 
 #------- load balance related funciton
 def lib_create_lb_listener_option(lbl_name = 'lb ssh test',\
-        lbl_protocol = 'tcp', lbl_port = 22, lb_uuid = None):
+        lbl_protocol = 'tcp', lbl_port = 22, lbi_port = 22, lb_uuid = None):
     '''
     Create common load balancer listener option. 
     '''
     lb_creation_option = test_util.LoadBalancerListenerOption()
     lb_creation_option.set_name(lbl_name)
     lb_creation_option.set_protocol(lbl_protocol)
-    lb_creation_option.set_instance_port(lbl_port)
+    lb_creation_option.set_load_balancer_port(lbl_port)
+    lb_creation_option.set_instance_port(lbi_port)
     lb_creation_option.set_load_balancer_uuid(lb_uuid)
     return lb_creation_option

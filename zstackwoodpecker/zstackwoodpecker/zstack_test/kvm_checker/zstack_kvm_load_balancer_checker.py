@@ -25,10 +25,13 @@ class zstack_kvm_lbl_checker(checker_header.TestChecker):
         vm = self.vm_list[0]
         host = test_lib.lib_get_vm_host(vm)
         vm_command = '/sbin/ip a|grep inet'
+        port = self.lbl.get_creation_option().get_load_balancer_port()
         vm_cmd_result = test_lib.lib_execute_ssh_cmd(self.vip_ip, \
                 test_lib.lib_get_vm_username(vm), \
                 test_lib.lib_get_vm_password(vm), \
-                vm_command)
+                vm_command,\
+                port = port)
+
         if not vm_cmd_result:
             test_util.test_logger('Checker result: FAIL to execute test ssh command in vip: %s for lb: %s.' % (self.vip_ip, self.lbl_uuid))
             return False
@@ -88,6 +91,10 @@ class zstack_kvm_lbl_checker(checker_header.TestChecker):
         self.algorithm = self.lbl.get_algorithm()
         self.vm_list = []
         self.vm_ip_test_dict = {}
+
+        if self.lbl.get_creation_option().get_instance_port() != 22:
+            test_util.test_logger('LBL target port is not 22, skip test.')
+            return self.judge(self.exp_result)
 
         for vm_nic_uuid in self.vm_nic_uuids:
             vm = test_lib.lib_get_vm_by_nic(vm_nic_uuid)

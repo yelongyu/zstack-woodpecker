@@ -61,10 +61,10 @@ class ZstackTestLoadBalancer(lb_header.TestLoadBalancer):
         super(ZstackTestLoadBalancer, self).check()
         pass
 
-    def create_listener(self, lb_creation_option):
+    def create_listener(self, lbl_creation_option):
         listener = ZstackTestLoadBalancerListener()
-        lb_creation_option.set_load_balancer_uuid(self.get_load_balancer().uuid)
-        listener.set_creation_option(lb_creation_option)
+        lbl_creation_option.set_load_balancer_uuid(self.get_load_balancer().uuid)
+        listener.set_creation_option(lbl_creation_option)
         listener.create()
         self.add_load_balancer_listener(listener)
         return listener
