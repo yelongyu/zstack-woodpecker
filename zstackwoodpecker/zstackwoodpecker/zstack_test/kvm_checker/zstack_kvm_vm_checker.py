@@ -222,6 +222,27 @@ class zstack_kvm_vm_dns_checker(checker_header.TestChecker):
 
         return self.judge(True)
 
+class zstack_kvm_vm_ssh_no_vr_checker(checker_header.TestChecker):
+    '''
+    Check special flat network service provider, which doesn't use VR VM.
+    '''
+    def check(self):
+        super(zstack_kvm_vm_ssh_no_vr_checker, self).check()
+        vm = self.test_obj.vm
+        host = test_lib.lib_get_vm_host(vm)
+        test_lib.lib_install_testagent_to_host(host)
+        test_lib.lib_set_vm_host_l2_ip(vm)
+        nic = vm.vmNics[0]
+        ip = nic.ip
+
+        shell_command = 'exit 0'
+        vm_cmd_result = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, ip, test_lib.lib_get_vm_username(vm), test_lib.lib_get_vm_password(vm), shell_command, self.exp_result)
+        if not vm_cmd_result:
+            test_util.test_logger('Checker result: FAIL to execute test ssh command in test [vm:] %s throught [host:] %s.' % (vm.uuid, host.name))
+            return self.judge(False)
+        test_util.test_logger('Checker result: Success to execute test ssh command in test [vm:] %s throught [host:] %s.' % (vm.uuid, host.name))
+        return self.judge(True)
+
 class zstack_kvm_vm_dhcp_checker(checker_header.TestChecker):
     '''check kvm vm dhcp status. If VM's dhcp is set correctly, 
         return self.judge(True). If not, return self.judge(False)'''
@@ -329,3 +350,38 @@ class zstack_kvm_vm_snat_checker(checker_header.TestChecker):
                 test_util.test_logger('Checker result: SUCCEED to ping [target:] %s from [vm:] %s .' % (ping_target, vm.uuid))
                 return self.judge(True)
 
+
+class zstack_kvm_vm_offering_checker(checker_header.TestChecker):
+    '''check kvm vm instance offering config''' 
+    def check(self):
+        def _do_check(value1, value2, key):
+            if value1 != value2:
+                test_util.test_logger(\
+                    '%s comparison failed, vm value: %s; offering value: %s' \
+                    % (key, value1, value2))
+                return False
+            test_util.test_logger('%s comparison pass' % key)
+            return True
+
+        super(zstack_kvm_vm_running_checker, self).check()
+        vm = self.test_obj.vm
+        instance_offering_uuid = self.test_obj.get_instance_offering_uuid() 
+        instance_offering = test_lib.lib_get_instance_offering_by_uuid(instance_offering_uuid)
+        if not instance_offering:
+            test_util.test_skip('not find vm instance offering by uuid: %s. It might because the instance offering is deleted. Skip test.' % vm.uuid)
+            return self.judge(self.exp_result)
+
+        if not _do_check(vm.cpuNum, instance_offering.cpuNum, 'CPU number'):
+            test_util.test_logger('Check result: vm resource is not synced with instance offering .' % vm.uuid)
+            return self.judge(False)
+
+        if not _do_check(vm.cpuSpeed, instance_offering.cpuSpeed, 'CPU speed'):
+            test_util.test_logger('Check result: vm resource is not synced with instance offering .' % vm.uuid)
+            return self.judge(False)
+
+        if not _do_check(vm.memorySize, instance_offering.memorySize, 'memory'):
+            test_util.test_logger('Check result: vm resource is not synced with instance offering .' % vm.uuid)
+            return self.judge(False)
+
+        test_util.test_logger('Check result: Pass. vm resource is synced with instance offering .' % vm.uuid)
+        return self.judge(True)

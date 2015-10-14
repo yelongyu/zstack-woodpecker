@@ -4,12 +4,12 @@ All zstack config operations
 
 @author: Youyk
 '''
+import os
 
 import apibinding.api_actions as api_actions
 import apibinding.inventory as inventory
 import account_operations
-
-import os
+import zstackwoodpecker.test_util as test_util
 
 def get_global_config_value(category, name, session_uuid = None, \
         default_value = None):
@@ -36,6 +36,7 @@ def change_global_config(category, name, value, session_uuid = None):
     action.defaultValue = str(default_value)
     if value:
         action.value = str(value)
+    test_util.action_logger('change global config category: %s, name: %s, to %s' % (category, name, value))
     account_operations.execute_action_with_session(action, session_uuid)
 
     return pre_value

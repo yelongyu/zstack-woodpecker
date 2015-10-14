@@ -44,8 +44,7 @@ class KvmVmCheckerFactory(checker_header.CheckerFactory):
                 #The first DHCP checker will wait for VM start up. 
                 if 'DHCP' in svr_types:
                     checker_dict[vm_checker.zstack_kvm_vm_dhcp_checker] = True
-                    checker_dict[vm_checker.zstack_kvm_vm_network_checker] \
-                            = True
+                    checker_dict[vm_checker.zstack_kvm_vm_network_checker] = True
                     #if guest can't get IP address from DHCP, auto case can
                     # not test DNS feature.
                     if 'DNS' in svr_types:
@@ -66,6 +65,10 @@ class KvmVmCheckerFactory(checker_header.CheckerFactory):
                 #    checker_dict[vm_checker.zstack_kvm_vm_dnat_checker] = True
                 #else:
                 #    checker_dict[vm_checker.zstack_kvm_vm_dnat_checker] = False
+            else:
+                sp_types = test_lib.lib_get_vm_l3_service_provider_types(test_obj.vm)
+                if 'Flat' in sp_types:
+                    checker_dict[vm_checker.zstack_kvm_vm_ssh_no_vr_checker] = True
 
             if test_obj.get_creation_option().get_default_l3_uuid():
                 checker_dict[vm_checker.zstack_kvm_vm_default_l3_checker] = True

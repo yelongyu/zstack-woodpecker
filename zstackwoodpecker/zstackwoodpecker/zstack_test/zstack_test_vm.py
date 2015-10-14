@@ -12,6 +12,7 @@ import zstackwoodpecker.test_lib as test_lib
 class ZstackTestVm(vm_header.TestVm):
     def __init__(self):
         self.vm_creation_option = test_util.VmOption()
+        self.changed_instance_offering_uuid = None
         super(ZstackTestVm, self).__init__()
 
     def __hash__(self):
@@ -19,6 +20,21 @@ class ZstackTestVm(vm_header.TestVm):
 
     def __eq__(self, other):
         return self.vm.uuid == other.vm.uuid
+
+    def change_instance_offering(self, new_instance_offering_uuid, \
+            session_uuid = None):
+        if self.state != vm_header.STOPPED:
+            return False
+
+        vm_ops.change_instance_offering(self.get_vm().vm.uuid, \
+                new_instance_offering_uuid, session_uuid)
+        self.changed_instance_offering_uuid = new_instance_offering_uuid
+
+    def get_instance_offering_uuid(self):
+        if not self.changed_instance_offering_uuid:
+            return self.get_creation_option().get_instance_offering_uuid()
+
+        return self.change_instance_offering_uuid
 
     def create(self):
         self.vm = vm_ops.create_vm(self.vm_creation_option)

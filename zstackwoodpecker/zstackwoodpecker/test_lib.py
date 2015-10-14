@@ -25,6 +25,7 @@ import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.operations.net_operations as net_ops 
 import zstackwoodpecker.operations.tag_operations as tag_ops
 import zstackwoodpecker.operations.node_operations as node_ops
+import zstackwoodpecker.operations.config_operations as conf_ops
 
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.header.volume as vol_header
@@ -1550,6 +1551,24 @@ def lib_get_l3_service_type(l3_uuid):
         service_type.append(service.networkServiceType)
     return service_type
 
+def lib_get_l3_service_providers(l3):
+    service_providers = []
+    for ns in l3.networkServices:
+        sp_uuid = ns.networkServiceProviderUuid
+        sp = lib_get_network_service_provider_by_uuid(sp_uuid)
+        for temp_sp in service_providers:
+            if temp_sp.uuid == sp_uuid:
+                break
+        else:
+            service_providers.append(sp)
+
+    return service_providers
+
+def lib_get_network_service_provider_by_uuid(sp_uuid):
+    cond = res_ops.gen_query_conditions('uuid', '=', sp_uuid)
+    test_util.test_logger('look for service provider: %s ' % sp_uuid)
+    return res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER, cond)[0]
+
 def lib_get_l3_by_uuid(l3_uuid, session_uuid=None):
     conditions = res_ops.gen_query_conditions('uuid', '=', l3_uuid)
     l3 = res_ops.query_resource(res_ops.L3_NETWORK, conditions)
@@ -1617,6 +1636,30 @@ def lib_get_l3s_service_type(vm):
             svr_type.extend(l3_svr)
 
     return list(set(svr_type))
+
+def lib_get_vm_l3_service_providers(vm):
+    l3s = lib_get_l3s_by_vm(vm)
+    if not l3s:
+        test_util.test_logger('Did not find l3 for [vm:] %s' % vm.uuid)
+        return False
+    service_providers = []
+    for l3 in l3s:
+        sps = lib_get_l3_service_providers(l3)
+        for temp_sp1 in sps:
+            for temp_sp2 in service_providers:
+                if temp_sp1.uuid == temp_sp2.uuid:
+                    break
+            else:
+                service_providers.append(temp_sp1)
+
+    return service_providers
+
+def lib_get_vm_l3_service_provider_types(vm):
+    sps = lib_get_vm_l3_service_providers(vm)
+    sps_types = []
+    for sp in sps:
+        sps_types.append(sp.type)
+    return sps_types
 
 def lib_check_nic_in_db(vm_inv, l3_uuid):
     '''
@@ -1827,6 +1870,13 @@ def lib_is_vm_running(vm_inv):
         return True
 
     return False
+
+def lib_get_instance_offering_by_uuid(io_uuid):
+    conditions = res_ops.gen_query_conditions('uuid', '=', io_uuid)
+    offerings = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)
+    if offerings:
+        return offerings[0]
+
 
 def lib_get_vm_by_uuid(vm_uuid):
     conditions = res_ops.gen_query_conditions('uuid', '=', vm_uuid)
@@ -3971,7 +4021,7 @@ def lib_create_data_volume_from_image(target_image):
             'new_volume_from_template_%s' % target_image.get_image().uuid)
     return new_volume 
 
-#------- load balance related funciton
+#------- load balance related function
 def lib_create_lb_listener_option(lbl_name = 'lb ssh test',\
         lbl_protocol = 'tcp', lbl_port = 22, lbi_port = 22, lb_uuid = None):
     '''
@@ -3984,3 +4034,10 @@ def lib_create_lb_listener_option(lbl_name = 'lb ssh test',\
     lb_creation_option.set_instance_port(lbi_port)
     lb_creation_option.set_load_balancer_uuid(lb_uuid)
     return lb_creation_option
+
+#------- over provision function --------
+def lib_set_provision_memory_rate(rate):
+    conf_ops.change_global_config('mevoco', 'overProvisioning.memory', rate)
+
+def lib_set_provision_storage_rate(rate):
+    conf_ops.change_global_config('mevoco', 'overProvisioning.primaryStorage', rate)

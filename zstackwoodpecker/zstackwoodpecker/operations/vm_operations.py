@@ -105,3 +105,11 @@ def reconnect_vr(vr_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory 
 
+def change_instance_offering(vm_uuid, offering_uuid, session_uuid=None):
+    action = api_actions.ChangeInstanceOfferingAction()
+    action.vmInstanceUuid = vm_uuid
+    action.instanceOfferingUuid = offering_uuid
+    test_util.action_logger('Change VM [uuid:] %s Instance Offering to %s '\
+            % (vm_uuid, offering_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
