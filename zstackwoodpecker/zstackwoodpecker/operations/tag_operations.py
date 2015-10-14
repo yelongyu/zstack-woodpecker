@@ -47,3 +47,4 @@ def update_system_tag(tag_uuid, tag, session_uuid = None):
     test_util.action_logger('Update Tag [uuid:] %s to %s' % (tag_uuid, tag))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
+

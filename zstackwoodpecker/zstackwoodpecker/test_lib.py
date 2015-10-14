@@ -4041,3 +4041,26 @@ def lib_set_provision_memory_rate(rate):
 
 def lib_set_provision_storage_rate(rate):
     return conf_ops.change_global_config('mevoco', 'overProvisioning.primaryStorage', rate)
+
+#--------QOS related function ---------
+def lib_limit_volume_total_iops(instance_offering_uuid, iops, \
+        session_uuid = None):
+    return tag_ops.create_system_tag('InstanceOfferingVO', \
+            instance_offering_uuid, \
+            'volumeTotalIops::%d' % iops,\
+            session_uuid)
+
+def lib_limit_volume_bandwidth(instance_offering_uuid, bandwidth, \
+        session_uuid = None):
+    return tag_ops.create_system_tag('InstanceOfferingVO', \
+            instance_offering_uuid, \
+            'volumeTotalBandwidth::%d' % bandwidth,\
+            session_uuid)
+
+def lib_limit_vm_network_bandwidth(instance_offering_uuid, bandwidth, \
+        session_uuid = None):
+    return tag_ops.create_system_tag('InstanceOfferingVO', \
+            instance_offering_uuid, \
+            'networkOutboundBandwidth::%d' % bandwidth,\
+            session_uuid)
+
