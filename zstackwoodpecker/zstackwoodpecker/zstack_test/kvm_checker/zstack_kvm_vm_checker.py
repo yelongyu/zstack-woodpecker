@@ -368,7 +368,7 @@ class zstack_kvm_vm_offering_checker(checker_header.TestChecker):
         instance_offering_uuid = self.test_obj.get_instance_offering_uuid() 
         instance_offering = test_lib.lib_get_instance_offering_by_uuid(instance_offering_uuid)
         if not instance_offering:
-            test_util.test_skip('not find vm instance offering by uuid: %s. It might because the instance offering is deleted. Skip test.' % vm.uuid)
+            test_util.test_logger('Skip Test: not find vm instance offering by uuid: %s. It might because the instance offering is deleted. Skip test.' % vm.uuid)
             return self.judge(self.exp_result)
 
         if not _do_check(vm.cpuNum, instance_offering.cpuNum, 'CPU number'):

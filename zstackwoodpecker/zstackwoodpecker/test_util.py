@@ -329,6 +329,45 @@ class CephPrimaryStorageOption(PrimaryStorageOption):
     def get_rootVolumePoolName(self):
         return self.rootVolumePoolName
 
+class InstanceOfferingOption(DataOption):
+    def __init__(self):
+        self.cpuNum = None
+        self.cpuSpeed = None
+        self.memorySize = None
+        self.allocatorStrategy = None
+        self.type = None
+        super(InstanceOfferingOption, self).__init__()
+
+    def set_cpuNum(self, cpuNum):
+        self.cpuNum = cpuNum
+
+    def get_cpuNum(self):
+        return self.cpuNum
+
+    def set_cpuSpeed(self, cpuSpeed):
+        self.cpuSpeed = cpuSpeed
+
+    def get_cpuSpeed(self):
+        return self.cpuSpeed
+
+    def set_memorySize(self, memorySize):
+        self.memorySize = memorySize
+
+    def get_memorySize(self):
+        return self.memorySize
+
+    def set_allocatorStrategy(self, allocatorStrategy):
+        self.allocatorStrategy = allocatorStrategy
+
+    def get_allocatorStrategy(self):
+        return self.allocatorStrategy
+
+    def set_type(self, type):
+        self.type = type
+
+    def get_type(self):
+        return self.type
+
 class VmOption(DataOption):
     def __init__(self, vm_opt = None):
         if not vm_opt:
