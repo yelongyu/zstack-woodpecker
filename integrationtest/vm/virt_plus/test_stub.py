@@ -9,8 +9,9 @@ import os
 
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
-import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
+import zstackwoodpecker.operations.resource_operations as res_ops
+import zstackwoodpecker.operations.vm_operations as vm_ops
 
 def create_vm(vm_name='virt-vm', \
         image_name = os.environ.get('imageName_s'), \
@@ -36,4 +37,22 @@ def create_vm(vm_name='virt-vm', \
     vm.set_creation_option(vm_creation_option)
     vm.create()
     return vm 
+
+def create_instance_offering(cpuNum = 1, cpuSpeed = 10, \
+        memorySize = 512000000, name = 'new_instance', \
+        volume_iops = None, volume_bandwidth = None, \
+        net_bandwidth = None):
+    new_offering_option = test_util.InstanceOfferingOption()
+    new_offering_option.set_cpuNum(cpuNum)
+    new_offering_option.set_cpuSpeed(cpuSpeed)
+    new_offering_option.set_memorySize(memorySize)
+    new_offering_option.set_name(name)
+    new_offering = vm_ops.create_instance_offering(new_offering_option)
+    if volume_iops:
+        test_lib.lib_limit_volume_total_iops(volume_iops)
+    if volume_bandwidth:
+        test_lib.lib_limit_volume_bandwidth(volume_bandwidth)
+    if net_bandwidth:
+        test_lib.lib_limit_network_bandwidth(net_bandwidth)
+    return new_offering
 

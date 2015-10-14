@@ -44,14 +44,8 @@ def test():
     original_rate = test_lib.lib_set_provision_memory_rate(over_provision_rate)
 
     new_offering_mem = avail_mem / target_vm_num
+    new_offering = test_stub.create_instance_offering(memorySize = new_offering_mem)
 
-    new_offering_option = test_util.InstanceOfferingOption()
-    new_offering_option.set_cpuNum(1)
-    new_offering_option.set_cpuSpeed(10)
-    new_offering_option.set_memorySize(new_offering_mem)
-    new_offering_option.set_name('memory_over_provision_offering')
-
-    new_offering = vm_ops.create_instance_offering(new_offering_option)
     new_offering_uuid = new_offering.uuid
 
     times = 1
