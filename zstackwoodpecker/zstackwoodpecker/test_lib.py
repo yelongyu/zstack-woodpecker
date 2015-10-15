@@ -4074,3 +4074,22 @@ def lib_limit_vm_network_bandwidth(instance_offering_uuid, bandwidth, \
             'networkOutboundBandwidth::%d' % bandwidth,\
             session_uuid)
 
+#--------instance offering--------
+def lib_create_instance_offering(cpuNum = 1, cpuSpeed = 16, \
+        memorySize = 536870912, name = 'new_instance', \
+        volume_iops = None, volume_bandwidth = None, \
+        net_bandwidth = None):
+    new_offering_option = test_util.InstanceOfferingOption()
+    new_offering_option.set_cpuNum(cpuNum)
+    new_offering_option.set_cpuSpeed(cpuSpeed)
+    new_offering_option.set_memorySize(memorySize)
+    new_offering_option.set_name(name)
+    new_offering = vm_ops.create_instance_offering(new_offering_option)
+    if volume_iops:
+        lib_limit_volume_total_iops(new_offering.uuid, volume_iops)
+    if volume_bandwidth:
+        lib_limit_volume_bandwidth(new_offering.uuid, volume_bandwidth)
+    if net_bandwidth:
+        lib_limit_vm_network_bandwidth(new_offering.uuid, net_bandwidth)
+    return new_offering
+

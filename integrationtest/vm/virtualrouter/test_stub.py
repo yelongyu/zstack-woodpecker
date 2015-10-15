@@ -35,7 +35,7 @@ denied_ports = Port.get_denied_ports()
 #test_stub.denied_ports = [101, 4999, 8990, 15000, 30001, 49999]
 target_ports = rule1_ports + rule2_ports + rule3_ports + rule4_ports + rule5_ports + denied_ports
 
-def create_vlan_vm(l3_name=None, disk_offering_uuids=None, system_tags=None, session_uuid = None):
+def create_vlan_vm(l3_name=None, disk_offering_uuids=None, system_tags=None, session_uuid = None, instance_offering_uuid = None):
     image_name = os.environ.get('imageName_net')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     if not l3_name:
@@ -43,7 +43,9 @@ def create_vlan_vm(l3_name=None, disk_offering_uuids=None, system_tags=None, ses
 
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     return create_vm([l3_net_uuid], image_uuid, 'vlan_vm', \
-            disk_offering_uuids, system_tags=system_tags, session_uuid = session_uuid)
+            disk_offering_uuids, system_tags=system_tags, \
+            instance_offering_uuid = instance_offering_uuid,
+            session_uuid = session_uuid)
 
 def create_lb_vm(l3_name=None, disk_offering_uuids=None, session_uuid = None):
     '''
@@ -103,10 +105,11 @@ def create_dnat_vm(disk_offering_uuids=None, session_uuid = None):
 # parameter: vmname; l3_net: l3_net_description, or [l3_net_uuid,]; image_uuid:
 def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
         disk_offering_uuids = None, default_l3_uuid = None, \
-        system_tags = None, session_uuid = None):
+        system_tags = None, instance_offering_uuid = None, session_uuid = None):
     vm_creation_option = test_util.VmOption()
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
-    instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+    if not instance_offering_uuid:
+        instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
     vm_creation_option.set_l3_uuids(l3_uuid_list)
     vm_creation_option.set_image_uuid(image_uuid)

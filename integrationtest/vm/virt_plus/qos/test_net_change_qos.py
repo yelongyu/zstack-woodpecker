@@ -24,7 +24,7 @@ def test():
 
     #unit is KB
     net_bandwidth1 = 1024
-    new_offering1 = test_stub.create_instance_offering(net_bandwidth = net_bandwidth1)
+    new_offering1 = test_lib.lib_create_instance_offering(net_bandwidth = net_bandwidth1)
 
     test_obj_dict.add_instance_offering(new_offering1)
     new_offering_uuid = new_offering1.uuid
@@ -37,7 +37,7 @@ def test():
     vm.stop()
 
     net_bandwidth2 = 512
-    new_offering2 = test_stub.create_instance_offering(net_bandwidth = net_bandwidth2)
+    new_offering2 = test_lib.lib_create_instance_offering(net_bandwidth = net_bandwidth2)
 
     test_obj_dict.add_instance_offering(new_offering2)
     new_offering_uuid = new_offering2.uuid
