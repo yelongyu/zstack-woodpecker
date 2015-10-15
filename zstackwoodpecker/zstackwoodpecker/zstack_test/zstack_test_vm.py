@@ -26,7 +26,7 @@ class ZstackTestVm(vm_header.TestVm):
         if self.state != vm_header.STOPPED:
             return False
 
-        vm_ops.change_instance_offering(self.get_vm().vm.uuid, \
+        vm_ops.change_instance_offering(self.get_vm().uuid, \
                 new_instance_offering_uuid, session_uuid)
         self.changed_instance_offering_uuid = new_instance_offering_uuid
 

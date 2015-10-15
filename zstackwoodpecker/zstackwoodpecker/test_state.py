@@ -535,6 +535,11 @@ class TestStateDict(object):
             'Deleted': [account_uuid] \
             }"
 
+    instance_offering_desc = " instance_offering_dict = {\
+            'instance_offering_uuid': instance_offering_inv, \
+            'Deleted': [instance_offering_inv]\
+            }"
+
     def __init__(self):
         self.vm_dict = {
                 vm_header.RUNNING:[], 
@@ -561,6 +566,7 @@ class TestStateDict(object):
         self.utility_vm_dict = {}
         self.account_dict = {'Deleted': []}
         self.load_balancer_dict = {'Deleted': []}
+        self.instance_offering_dict = {'Deleted': []}
     
     def __repr__(self):
         return str({
@@ -916,6 +922,31 @@ class TestStateDict(object):
         all_items = []
         for item in self.load_balancer_dict['Deleted']:
             all_items.append(self.load_balancer_dict[item])
+
+        return all_items
+
+    def add_instance_offering(self, instance_offering):
+        instance_offering_uuid = instance_offering.uuid
+        if not instance_offering_uuid in self.instance_offering_dict.keys():
+            self.instance_offering_dict[instance_offering_uuid] = instance_offering
+
+    def rm_instance_offering(self, instance_offering):
+        instance_offering_uuid = instance_offering.uuid
+        if not instance_offering_uuid in self.instance_offering_dict['Deleted']:
+            self.instance_offering_dict['Deleted'].append(instance_offering_uuid)
+            return self.instance_offering_dict
+
+    def get_all_instance_offerings(self):
+        all_items = []
+        for key,value in self.instance_offering_dict.iteritems():
+            if key != 'Deleted' and not key in self.instance_offering_dict['Deleted']:
+                all_items.append(value)
+        return all_items
+
+    def get_deleted_instance_offerings(self):
+        all_items = []
+        for item in self.instance_offering_dict['Deleted']:
+            all_items.append(self.instance_offering_dict[item])
 
         return all_items
 

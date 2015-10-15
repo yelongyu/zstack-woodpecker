@@ -96,7 +96,7 @@ def create_test_file(vm_inv, bandwidth):
 
     ssh_cmd = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     cmd = '%s "dd if=/dev/zero of=%s bs=1M count=1 seek=%d"' \
-            % (ssh_cmd, test_file, file_size)
+            % (ssh_cmd, test_file, seek_size)
     if  execute_shell_in_process(cmd, timeout) != 0:
         test_util.test_fail('test file is not created')
 

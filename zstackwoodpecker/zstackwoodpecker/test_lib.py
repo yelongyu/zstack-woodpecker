@@ -3357,6 +3357,9 @@ def lib_robot_cleanup(test_dict):
     for account in test_dict.get_all_accounts():
         account.delete()
 
+    for instance_offering in test_dict.get_all_instance_offerings():
+        vm_ops.delete_instance_offering(instance_offering.uuid)
+
 def lib_error_cleanup(test_dict):
     test_util.test_logger('- - - Error cleanup: running VM - - -')
     for vm in test_dict.get_vm_list(vm_header.RUNNING):
@@ -3433,6 +3436,13 @@ def lib_error_cleanup(test_dict):
     for account in test_dict.get_all_accounts():
         try:
             account.delete()
+        except:
+            pass
+
+    test_util.test_logger('- - - Error cleanup: instance offerings- - -')
+    for instance_offering in test_dict.get_all_instance_offerings():
+        try:
+            vm_ops.delete_instance_offering(instance_offering.uuid)
         except:
             pass
 
