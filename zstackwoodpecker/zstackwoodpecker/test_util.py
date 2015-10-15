@@ -329,6 +329,31 @@ class CephPrimaryStorageOption(PrimaryStorageOption):
     def get_rootVolumePoolName(self):
         return self.rootVolumePoolName
 
+class DiskOfferingOption(DataOption):
+    def __init__(self):
+        self.diskSize = None
+        self.allocatorStrategy = None
+        self.type = None
+        super(DiskOfferingOption, self).__init__()
+
+    def set_diskSize(self, diskSize):
+        self.diskSize = diskSize
+
+    def get_diskSize(self):
+        return self.diskSize
+
+    def set_allocatorStrategy(self, allocatorStrategy):
+        self.allocatorStrategy = allocatorStrategy
+
+    def get_allocatorStrategy(self):
+        return self.allocatorStrategy
+
+    def set_type(self, type):
+        self.type = type
+
+    def get_type(self):
+        return self.type
+
 class InstanceOfferingOption(DataOption):
     def __init__(self):
         self.cpuNum = None

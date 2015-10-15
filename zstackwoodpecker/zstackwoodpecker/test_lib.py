@@ -1080,6 +1080,18 @@ def lib_get_cpu_memory_capacity(zone_uuids = None, cluster_uuids = None, \
     ret = acc_ops.execute_action_with_session(action, session_uuid)
     return ret
 
+def lib_get_storage_capacity(zone_uuids = None, cluster_uuids = None, \
+        session_uuid = None):
+    import apibinding.api_actions as api_actions
+    action = api_actions.GetPrimaryStorageCapacityAction()
+    if zone_uuids:
+        action.zoneUuids = zone_uuids
+    if cluster_uuids:
+        action.clusterUuids = host_uuids
+
+    ret = acc_ops.execute_action_with_session(action, session_uuid)
+    return ret
+
 def lib_get_host_libvirt_tag(host_inv):
     '''
     find and return given host's libvirt version. 
@@ -3360,6 +3372,9 @@ def lib_robot_cleanup(test_dict):
     for instance_offering in test_dict.get_all_instance_offerings():
         vm_ops.delete_instance_offering(instance_offering.uuid)
 
+    for disk_offering in test_dict.get_all_disk_offerings():
+        vol_ops.delete_disk_offering(disk_offering.uuid)
+
 def lib_error_cleanup(test_dict):
     test_util.test_logger('- - - Error cleanup: running VM - - -')
     for vm in test_dict.get_vm_list(vm_header.RUNNING):
@@ -3443,6 +3458,13 @@ def lib_error_cleanup(test_dict):
     for instance_offering in test_dict.get_all_instance_offerings():
         try:
             vm_ops.delete_instance_offering(instance_offering.uuid)
+        except:
+            pass
+
+    test_util.test_logger('- - - Error cleanup: disk offerings- - -')
+    for disk_offering in test_dict.get_all_disk_offerings():
+        try:
+            vol_ops.delete_disk_offering(disk_offering.uuid)
         except:
             pass
 

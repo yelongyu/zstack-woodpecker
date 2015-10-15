@@ -540,6 +540,11 @@ class TestStateDict(object):
             'Deleted': [instance_offering_inv]\
             }"
 
+    disk_offering_desc = " disk_offering_dict = {\
+            'disk_offering_uuid': disk_offering_inv, \
+            'Deleted': [disk_offering_inv]\
+            }"
+
     def __init__(self):
         self.vm_dict = {
                 vm_header.RUNNING:[], 
@@ -567,6 +572,7 @@ class TestStateDict(object):
         self.account_dict = {'Deleted': []}
         self.load_balancer_dict = {'Deleted': []}
         self.instance_offering_dict = {'Deleted': []}
+        self.disk_offering_dict = {'Deleted': []}
     
     def __repr__(self):
         return str({
@@ -947,6 +953,31 @@ class TestStateDict(object):
         all_items = []
         for item in self.instance_offering_dict['Deleted']:
             all_items.append(self.instance_offering_dict[item])
+
+        return all_items
+
+    def add_disk_offering(self, disk_offering):
+        disk_offering_uuid = disk_offering.uuid
+        if not disk_offering_uuid in self.disk_offering_dict.keys():
+            self.disk_offering_dict[disk_offering_uuid] = disk_offering
+
+    def rm_disk_offering(self, disk_offering):
+        disk_offering_uuid = disk_offering.uuid
+        if not disk_offering_uuid in self.disk_offering_dict['Deleted']:
+            self.disk_offering_dict['Deleted'].append(disk_offering_uuid)
+            return self.disk_offering_dict
+
+    def get_all_disk_offerings(self):
+        all_items = []
+        for key,value in self.disk_offering_dict.iteritems():
+            if key != 'Deleted' and not key in self.disk_offering_dict['Deleted']:
+                all_items.append(value)
+        return all_items
+
+    def get_deleted_disk_offerings(self):
+        all_items = []
+        for item in self.disk_offering_dict['Deleted']:
+            all_items.append(self.disk_offering_dict[item])
 
         return all_items
 

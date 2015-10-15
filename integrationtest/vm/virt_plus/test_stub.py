@@ -13,6 +13,7 @@ import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
+import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 
@@ -103,3 +104,17 @@ def test_scp_speed(vm_inv, bandwidth):
         test_util.test_logger('network QOS test file pass, since the scp time: %d is bigger than the expected test time: %d. It means the bandwidth limitation: %d KB/s is effect. ' % (scp_time, test_time, bandwidth))
 
     return True
+
+def create_volume(volume_creation_option=None, session_uuid = None):
+    if not volume_creation_option:
+        disk_offering_uuid = res_ops.query_resource(res_ops.DISK_OFFERING)[0].uuid
+        volume_creation_option = test_util.VolumeOption()
+        volume_creation_option.set_disk_offering_uuid(disk_offering_uuid)
+        volume_creation_option.set_name('vr_test_volume')
+
+    volume_creation_option.set_session_uuid(session_uuid)
+    volume = zstack_volume_header.ZstackTestVolume()
+    volume.set_creation_option(volume_creation_option)
+    volume.create()
+    return volume
+

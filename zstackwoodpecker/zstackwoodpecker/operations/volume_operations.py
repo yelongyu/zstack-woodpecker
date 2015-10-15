@@ -161,3 +161,24 @@ def create_volume_from_snapshot(snapshot_uuid, name=None, ps_uuid=None, \
             volume.primaryStorageUuid))
     return volume
 
+def create_volume_offering(disk_offering_option, \
+        session_uuid=None):
+    action = api_actions.CreateDiskOfferingAction()
+    action.diskSize = disk_offering_option.get_diskSize()
+    action.name = disk_offering_option.get_name()
+    action.description = disk_offering_option.get_description()
+    action.allocatorStrategy = disk_offering_option.get_allocatorStrategy()
+    test_util.action_logger('Create disk offering: name: %s, diskSize: %d' \
+            % (action.name, action.diskSize))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.test_logger('Disk Offering: %s is created' % evt.inventory.uuid)
+    return evt.inventory
+
+def delete_disk_offering(disk_offering_uuid, session_uuid = None):
+    action = api_actions.DeleteDiskOfferingAction()
+    action.uuid = disk_offering_uuid
+    test_util.action_logger('Delete Disk Offering [uuid:] %s' \
+            % disk_offering_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
