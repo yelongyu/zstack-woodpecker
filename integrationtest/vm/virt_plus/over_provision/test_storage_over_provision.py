@@ -65,6 +65,8 @@ def test():
             volume_creation_option.set_name('volume-%d' % times)
             volume = test_stub.create_volume(volume_creation_option)
             test_obj_dict.add_volume(volume)
+            res = test_lib.lib_get_storage_capacity(zone_uuids = [zone_uuid])
+            test_util.test_logger('Current available storage size: %d' % res.availableCapacity)
             volume.attach(vm)
         except Exception as e:
             test_util.test_logger("Unexpected volume Creation Failure in storage over provision test. ")
@@ -78,12 +80,14 @@ def test():
         test_util.test_fail('Available disk size: %d is still bigger than offering disk size: %d , after creating %d volumes.' % (avail_cap2, data_volume_size, target_volume_num))
     
     try:
+        volume_creation_option.set_name('volume-%d' % (times + 1))
         volume = test_stub.create_volume(volume_creation_option)
         test_obj_dict.add_volume(volume)
+        volume.attach(vm)
     except:
         test_util.test_logger("Expected Volume Creation Failure in storage over provision test. ")
     else:
-        test_util.test_fail("The 5th Volume is still created up, which is wrong")
+        test_util.test_fail("The %dth Volume is still attachable, which is wrong"% (target_volume_num + 1))
 
     test_lib.lib_set_provision_storage_rate(original_rate)
     test_lib.lib_robot_cleanup(test_obj_dict)
