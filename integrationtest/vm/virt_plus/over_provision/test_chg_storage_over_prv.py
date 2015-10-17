@@ -22,7 +22,7 @@ original_rate = None
 
 def test():
     global original_rate
-    test_util.test_dsc('Test storage over provision method')
+    test_util.test_dsc('Test change storage over provision rate method')
     zone_uuid = res_ops.query_resource(res_ops.ZONE)[0].uuid
     cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
     cond = res_ops.gen_query_conditions('status', '=', 'Connected', cond)
@@ -32,7 +32,8 @@ def test():
         return True
 
     host = host[0]
-    over_provision_rate = 2.5
+    over_provision_rate1 = 2.5
+    over_provision_rate2 = 1.5
     target_volume_num = 12
     kept_disk_size = 10 * 1024 * 1024
 
@@ -47,8 +48,8 @@ def test():
         test_util.test_skip('available disk capacity:%d is too small, skip test.' % avail_cap)
         return True
 
-    original_rate = test_lib.lib_set_provision_storage_rate(over_provision_rate)
-    data_volume_size = int(over_provision_rate * (avail_cap - kept_disk_size) / target_volume_num)
+    original_rate = test_lib.lib_set_provision_storage_rate(over_provision_rate1)
+    data_volume_size = int(over_provision_rate1 * (avail_cap - kept_disk_size) / target_volume_num)
     disk_offering_option = test_util.DiskOfferingOption()
     disk_offering_option.set_name('storage-over-ps-test')
     disk_offering_option.set_diskSize(data_volume_size)
@@ -58,39 +59,32 @@ def test():
     volume_creation_option = test_util.VolumeOption()
     volume_creation_option.set_disk_offering_uuid(data_volume_offering.uuid)
     
-    times = 1
-    while (times <= target_volume_num):
-        try:
-            volume_creation_option.set_name('volume-%d' % times)
-            volume = test_stub.create_volume(volume_creation_option)
-            test_obj_dict.add_volume(volume)
-            res = test_lib.lib_get_storage_capacity(zone_uuids = [zone_uuid])
-            test_util.test_logger('Current available storage size: %d' % res.availableCapacity)
-            volume.attach(vm)
-        except Exception as e:
-            test_util.test_logger("Unexpected volume Creation Failure in storage over provision test. ")
-            raise e
+    volume_creation_option.set_name('volume-1')
+    volume1 = test_stub.create_volume(volume_creation_option)
+    test_obj_dict.add_volume(volume1)
+    #res = test_lib.lib_get_storage_capacity(zone_uuids = [zone_uuid])
+    #test_util.test_logger('Current available storage size: %d' % res.availableCapacity)
+    volume1.attach(vm)
 
-        times += 1
+    test_lib.lib_set_provision_storage_rate(over_provision_rate2)
+    volume_creation_option.set_name('volume-2')
+    volume2 = test_stub.create_volume(volume_creation_option)
+    test_obj_dict.add_volume(volume2)
+    #res = test_lib.lib_get_storage_capacity(zone_uuids = [zone_uuid])
+    #test_util.test_logger('Current available storage size: %d' % res.availableCapacity)
+    volume2.attach(vm)
+    volume1.delete()
 
-    ps_res2 = test_lib.lib_get_storage_capacity(zone_uuids = [zone_uuid])
-    avail_cap2 = ps_res2.availableCapacity
-    if avail_cap2 > data_volume_size:
-        test_util.test_fail('Available disk size: %d is still bigger than offering disk size: %d , after creating %d volumes.' % (avail_cap2, data_volume_size, target_volume_num))
-    
-    try:
-        volume_creation_option.set_name('volume-%d' % (times + 1))
-        volume = test_stub.create_volume(volume_creation_option)
-        test_obj_dict.add_volume(volume)
-        volume.attach(vm)
-    except:
-        test_util.test_logger("Expected Volume Creation Failure in storage over provision test. ")
-    else:
-        test_util.test_fail("The %dth Volume is still attachable, which is wrong"% (target_volume_num + 1))
+    test_lib.lib_set_provision_storage_rate(over_provision_rate1)
+    volume2.delete()
 
     test_lib.lib_set_provision_storage_rate(original_rate)
+    ps_res2 = test_lib.lib_get_storage_capacity(zone_uuids = [zone_uuid])
+    avail_cap2 = ps_res2.availableCapacity
+    if avail_cap2 != avail_cap:
+        test_util.test_fail('Available disk size: %d is different with original size: %d, after creating volume under different over rate.' % (avail_cap2, avail_cap))
+    
     test_lib.lib_robot_cleanup(test_obj_dict)
-
     test_util.test_pass('Memory Over Provision Test Pass')
 
 #Will be called only if exception happens in test().
