@@ -182,13 +182,16 @@ def delete_disk_offering(disk_offering_uuid, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def get_local_storage_capacity(host_uuid = None, primary_storage_uuid = None,
+def get_local_storage_capacity(host_uuid, primary_storage_uuid, \
         session_uuid = None):
+    '''
+        If host_uuid is None, it will return a list of capacity for every Hosts.
+    '''
     action = api_actions.GetLocalStorageHostDiskCapacityAction()
     action.hostUuid = host_uuid
     action.primaryStorageUuid = primary_storage_uuid
     test_util.action_logger('Get Local Storage Capacity for host: %s, primary storage: %s' \
             % (host_uuid, primary_storage_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt
+    return evt.inventories
 

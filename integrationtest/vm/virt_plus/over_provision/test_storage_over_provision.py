@@ -31,7 +31,13 @@ def test():
         test_util.test_skip('No Enabled/Connected host was found, skip test.' )
         return True
 
+    ps = res_ops.query_resource_with_num(res_ops.PRIMARY_STORAGE, cond, limit = 1)
+    if not ps:
+        test_util.test_skip('No Enabled/Connected primary storage was found, skip test.' )
+        return True
+
     host = host[0]
+    ps = ps[0]
     over_provision_rate = 2.5
     target_volume_num = 12
     kept_disk_size = 10 * 1024 * 1024
@@ -40,15 +46,15 @@ def test():
                     host_uuid = host.uuid)
     test_obj_dict.add_vm(vm)
 
-    host_res = test_lib.lib_get_cpu_memory_capacity(host_uuids = [host.uuid])
-    ps_res = test_lib.lib_get_storage_capacity(zone_uuids = [zone_uuid])
-    avail_cap = ps_res.availableCapacity
+    host_res = vol_ops.get_local_storage_capacity(host.uuid, ps.uuid)[0]
+    avail_cap = host_res.availableCapacity
     if avail_cap < kept_disk_size:
         test_util.test_skip('available disk capacity:%d is too small, skip test.' % avail_cap)
         return True
 
     original_rate = test_lib.lib_set_provision_storage_rate(over_provision_rate)
     data_volume_size = int(over_provision_rate * (avail_cap - kept_disk_size) / target_volume_num)
+    test_util.test_logger('Will create a serial of volume. Each of them will have %d size.' % data_volume_size)
     disk_offering_option = test_util.DiskOfferingOption()
     disk_offering_option.set_name('storage-over-ps-test')
     disk_offering_option.set_diskSize(data_volume_size)
@@ -64,7 +70,7 @@ def test():
             volume_creation_option.set_name('volume-%d' % times)
             volume = test_stub.create_volume(volume_creation_option)
             test_obj_dict.add_volume(volume)
-            res = test_lib.lib_get_storage_capacity(zone_uuids = [zone_uuid])
+            res = vol_ops.get_local_storage_capacity(host.uuid, ps.uuid)[0]
             test_util.test_logger('Current available storage size: %d' % res.availableCapacity)
             volume.attach(vm)
         except Exception as e:
@@ -73,8 +79,8 @@ def test():
 
         times += 1
 
-    ps_res2 = test_lib.lib_get_storage_capacity(zone_uuids = [zone_uuid])
-    avail_cap2 = ps_res2.availableCapacity
+    host_res2 = vol_ops.get_local_storage_capacity(host.uuid, ps.uuid)[0]
+    avail_cap2 = host_res2.availableCapacity
     if avail_cap2 > data_volume_size:
         test_util.test_fail('Available disk size: %d is still bigger than offering disk size: %d , after creating %d volumes.' % (avail_cap2, data_volume_size, target_volume_num))
     

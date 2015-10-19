@@ -43,6 +43,8 @@ def test():
     vm = test_stub.create_vm(image_name = image_name)
     vm.destroy()
     image.delete()
+    if not os.path.exists(test_image):
+        test_util.test_fail('test image disappeared, after add image.')
     os.system('rm -f %s' % test_image)
     test_util.test_pass('Test adding image from local stroage pass.')
 

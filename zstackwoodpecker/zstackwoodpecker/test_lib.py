@@ -2270,7 +2270,7 @@ def lib_retry_when_exception(function, params, times = 5):
     return False
 
 def lib_attach_volume(volume_uuid, vm_uuid, session_uuid=None):
-    result = lib_retry_when_exception(vol_ops.attach_volume, [volume_uuid, vm_uuid, session_uuid])
+    result = lib_retry_when_exception(vol_ops.attach_volume, [volume_uuid, vm_uuid, session_uuid], 1)
     test_util.test_logger('[volume:] uuid: %s is attached to [vm:] %s .' % (volume_uuid, vm_uuid))
     return result
 

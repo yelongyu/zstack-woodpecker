@@ -21,7 +21,7 @@ test_file = '/tmp/test.img'
 test_time = 60
 
 def create_vm(vm_name='virt-vm', \
-        image_name = os.environ.get('imageName_s'), \
+        image_name = os.environ.get('imageName_net'), \
         l3_name = os.environ.get('l3PublicNetworkName'), \
         instance_offering_uuid = None, \
         host_uuid = None,

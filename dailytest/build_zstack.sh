@@ -86,6 +86,8 @@ if [ $PULL_ZSTACK == 'Y' ]; then
     if [ $? -ne 0 ]; then
         echo_failure "\'git pull\' failure in $ZSTACK_FOLDER"
     fi
+
+    [ -d premium ] && cd premium && git pull >/dev/null
     echo_pass
 else
     echo -e "${tab} : Skip pulling zstack\n"
