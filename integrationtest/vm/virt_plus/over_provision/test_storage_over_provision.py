@@ -53,7 +53,7 @@ def test():
         return True
 
     original_rate = test_lib.lib_set_provision_storage_rate(over_provision_rate)
-    data_volume_size = int(over_provision_rate * (avail_cap - kept_disk_size) / target_volume_num / float(original_rate))
+    data_volume_size = int(over_provision_rate * (avail_cap - kept_disk_size) / target_volume_num)
 
     #will change the rate back to check if available capacity is same with original one. This was a bug, that only happened when system create 1 vm.
     test_lib.lib_set_provision_storage_rate(original_rate)
