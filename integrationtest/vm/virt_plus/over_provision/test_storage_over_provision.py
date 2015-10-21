@@ -62,6 +62,7 @@ def test():
     if avail_cap != avail_cap_tmp:
         test_util.test_fail('disk size is not same, between 2 times provision. Before change over rate, 1st cap: %d; 2nd cap: %d' % (avail_cap, avail_cap_tmp))
 
+    test_lib.lib_set_provision_storage_rate(over_provision_rate)
     test_util.test_logger('Will create a serial of volume. Each of them will have %d size.' % data_volume_size)
     disk_offering_option = test_util.DiskOfferingOption()
     disk_offering_option.set_name('storage-over-ps-test')
