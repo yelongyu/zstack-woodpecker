@@ -53,7 +53,15 @@ def test():
         return True
 
     original_rate = test_lib.lib_set_provision_storage_rate(over_provision_rate)
-    data_volume_size = int(over_provision_rate * (avail_cap - kept_disk_size) / target_volume_num)
+    data_volume_size = int(over_provision_rate * (avail_cap - kept_disk_size) / target_volume_num / float(original_rate))
+
+    #will change the rate back to check if available capacity is same with original one. This was a bug, that only happened when system create 1 vm.
+    test_lib.lib_set_provision_storage_rate(original_rate)
+    host_res_tmp = vol_ops.get_local_storage_capacity(host.uuid, ps.uuid)[0]
+    avail_cap_tmp = host_res_tmp.availableCapacity
+    if avail_cap != avail_cap_tmp:
+        test_util.test_fail('disk size is not same, between 2 times provision. Before change over rate, 1st cap: %d; 2nd cap: %d' % (avail_cap, avail_cap_tmp))
+
     test_util.test_logger('Will create a serial of volume. Each of them will have %d size.' % data_volume_size)
     disk_offering_option = test_util.DiskOfferingOption()
     disk_offering_option.set_name('storage-over-ps-test')
