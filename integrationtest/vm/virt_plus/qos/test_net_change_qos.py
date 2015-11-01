@@ -30,7 +30,6 @@ def test():
     new_offering_uuid = new_offering1.uuid
 
     vm = test_stub.create_vm(vm_name = 'vm_net_qos', \
-            image_name = 'test', \
             instance_offering_uuid = new_offering1.uuid)
     test_obj_dict.add_vm(vm)
 
@@ -45,6 +44,8 @@ def test():
     vm.change_instance_offering(new_offering_uuid)
     vm.start()
     vm.check()
+    import time
+    time.sleep(1)
     test_stub.make_ssh_no_password(vm_inv)
     test_stub.create_test_file(vm_inv, net_bandwidth2)
     test_stub.test_scp_speed(vm_inv, net_bandwidth2)

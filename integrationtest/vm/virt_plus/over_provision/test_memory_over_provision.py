@@ -3,6 +3,7 @@ This case can not execute parallelly
 @author: Youyk
 '''
 import os
+import zstacklib.utils.sizeunit as sizeunit
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
@@ -36,10 +37,14 @@ def test():
     target_vm_num = 4
 
     host_res = test_lib.lib_get_cpu_memory_capacity(host_uuids = [host.uuid])
-    avail_mem = host_res.availableMemory * 2
+    real_availableMemory = host_res.availableMemory - \
+            sizeunit.get_size(test_lib.lib_get_reserved_memory())
+    avail_mem = real_availableMemory * over_provision_rate
     if avail_mem <= 1024*1024*1024:
         test_util.test_skip('Available memory is less than 512MB, skip test.')
         return True
+
+    test_util.test_logger('host available memory is: %s' % host_res.availableMemory)
 
     original_rate = test_lib.lib_set_provision_memory_rate(over_provision_rate)
 
@@ -51,12 +56,15 @@ def test():
     times = 1
     while (times <= target_vm_num):
         try:
-            vm = test_stub.create_vm(vm_name = 'mem_over_prs_vm_%d' % times, \
+            vm_name = 'mem_over_prs_vm_%d' % times
+            vm = test_stub.create_vm(vm_name = vm_name, \
                     host_uuid = host.uuid, \
                     instance_offering_uuid = new_offering.uuid)
             test_obj_dict.add_vm(vm)
+            host_res_new = test_lib.lib_get_cpu_memory_capacity(host_uuids = [host.uuid])
+            test_util.test_logger('After create vm: %s, host available memory is: %s' % (vm_name, host_res_new.availableMemory))
         except Exception as e:
-            test_util.test_logger("Unexpected VM Creation Failure in memory over provision test. ")
+            test_util.test_logger("Unexpected VM Creation Failure in memory over provision test. Previous available memory is %s" % host_res_new.availableMemory)
             raise e
 
         times += 1

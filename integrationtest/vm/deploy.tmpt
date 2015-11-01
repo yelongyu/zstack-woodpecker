@@ -1,4 +1,4 @@
-zstackPkg = ~/sanitytest/zstack-all-in-one.tgz
+zstackPkg = ~/sanitytest/zstack-offline-installer-test.bin
 zstackInstallScript = ~/sanitytest/install.sh
 #zstackInstallPath should be carefully set. The contents in this folder will be deleted permanently in testing. 
 zstackInstallPath = /usr/local/zstacktest

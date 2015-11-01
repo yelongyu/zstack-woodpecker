@@ -57,6 +57,8 @@ def test():
     avail_mem2 = host_res2.availableMemory
     if avail_mem2 != avail_mem:
         test_util.test_fail('Available memory: %d is different with original available memory: %d' % (avail_mem2, avail_mem))
+    else:
+        test_util.test_logger('Available memory: %d is same with original available memory.' % avail_mem2)
     
     test_lib.lib_robot_cleanup(test_obj_dict)
     test_util.test_pass('Change Memory Over Provision Test Pass')

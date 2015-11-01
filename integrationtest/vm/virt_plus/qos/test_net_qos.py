@@ -30,7 +30,6 @@ def test():
     new_offering_uuid = new_offering.uuid
 
     vm = test_stub.create_vm(vm_name = 'vm_net_qos', \
-            image_name = 'test', \
             instance_offering_uuid = new_offering.uuid)
     test_obj_dict.add_vm(vm)
 

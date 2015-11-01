@@ -21,11 +21,16 @@ test_file = '/tmp/test.img'
 test_time = 60
 
 def create_vm(vm_name='virt-vm', \
-        image_name = os.environ.get('imageName_net'), \
-        l3_name = os.environ.get('l3PublicNetworkName'), \
+        image_name = None, \
+        l3_name = None, \
         instance_offering_uuid = None, \
         host_uuid = None,
         disk_offering_uuids=None, system_tags=None, session_uuid = None, ):
+
+    if not image_name:
+        image_name = os.environ.get('imageName_net') 
+    if not l3_name:
+        l3_name = os.environ.get('l3PublicNetworkName')
 
     vm_creation_option = test_util.VmOption()
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid

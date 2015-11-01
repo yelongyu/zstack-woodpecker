@@ -47,7 +47,8 @@ ZSTACK_WOODPECKER=$ZSTACK_TEST_ROOT/zstack-woodpecker
 ZSTACK_DASHBOARD=$ZSTACK_TEST_ROOT/zstack-dashboard
 ZSTACK_BUILD=$ZSTACK_UTILITY/zstackbuild
 ZSTACK_ARCHIVE=$ZSTACK_TEST_ROOT/zstack_build_archive
-zstack_build_archive="install.sh zstack-all-in-one-*.tgz woodpecker/zstacktestagent.tar.bz  woodpecker/conf/zstack.properties"
+#zstack_build_archive="install.sh zstack-all-in-one-*.tgz woodpecker/zstacktestagent.tar.bz  woodpecker/conf/zstack.properties"
+zstack_build_archive="mevoco-installer*.bin woodpecker/zstacktestagent.tar.bz  woodpecker/conf/zstack.properties"
 tab='  '
 
 echo -e "\n - Build zstack.war and all test required packages. -"
@@ -142,7 +143,8 @@ which ant
 
 [ $? -ne 0 ] && which apt-get && apt-get install -y ant && apt-get install -y maven
 
-ant all-in-one -Dzstack_build_root=$ZSTACK_TEST_ROOT -Dbuild_name=qa -Dzstackdashboard.build_version=master|tee -a /tmp/zstack/build_log
+#ant all-in-one -Dzstack_build_root=$ZSTACK_TEST_ROOT -Dbuild_name=qa -Dzstackdashboard.build_version=master|tee -a /tmp/zstack/build_log
+ant -Dzstack_build_root=$ZSTACK_TEST_ROOT -Dzstackdashboard.build_version=master offline-centos7 |tee -a /tmp/zstack/build_log
 if [ ${PIPESTATUS[0]} -ne 0 ]; then
     echo_failure "build zstack failure"
     exit 1
@@ -164,9 +166,9 @@ fi
 echo_pass
 
 mkdir -p ${ZSTACK_ARCHIVE}
-zstack_archive_file=${ZSTACK_ARCHIVE}/zstack-all-in-one-`date +%y%m%d-%H%M`.tgz
+zstack_archive_file=${ZSTACK_ARCHIVE}/zstack-all-in-one-`date +%y%m%d-%H%M`.tar
 cd target
-tar zcf $zstack_archive_file $zstack_build_archive
+tar cf $zstack_archive_file $zstack_build_archive
 rm -f ${ZSTACK_ARCHIVE}/latest
 ln -s $zstack_archive_file ${ZSTACK_ARCHIVE}/latest
 echo -e "$(tput setaf 2)\n - Build zstack successfully and saved as $zstack_archive_file - \n$(tput sgr0)"

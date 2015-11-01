@@ -4115,3 +4115,5 @@ def lib_create_instance_offering(cpuNum = 1, cpuSpeed = 16, \
         lib_limit_vm_network_bandwidth(new_offering.uuid, net_bandwidth)
     return new_offering
 
+def lib_get_reserved_memory():
+    return conf_ops.get_global_config_value('kvm', 'reservedMemory')

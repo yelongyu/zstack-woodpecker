@@ -495,18 +495,20 @@ default one' % self.zstack_properties)
         print('Extra deployment by %s' % EXTRA_DEPLOY_SCRIPT)
 
     def _upgrade_local_zstack(self):
-        cmd = 'WEBSITE=localhost bash %s -f %s -u -r %s' % \
-                (self.zstack_install_script, self.zstack_pkg, \
-                self.install_path)
+        #cmd = 'WEBSITE=localhost bash %s -f %s -u -r %s' % \
+        #        (self.zstack_install_script, self.zstack_pkg, \
+        #        self.install_path)
+        cmd = 'bash %s -u' % self.zstack_pkg
 
         shell.call(cmd)
         self._extra_deployment()
 
     def _install_local_zstack(self):
         shell.call('rm -rf %s' % self.install_path, False)
-        cmd = 'WEBSITE=localhost bash %s -f %s -r %s -a -z' % \
-                (self.zstack_install_script, self.zstack_pkg, \
-                self.install_path)
+        #cmd = 'WEBSITE=localhost bash %s -f %s -r %s -a -z' % \
+        #        (self.zstack_install_script, self.zstack_pkg, \
+        #        self.install_path)
+        cmd = 'bash %s -z' % self.zstack_pkg
         if self.db_admin_password:
             cmd = '%s -P %s' % (cmd, self.db_admin_password)
         if self.db_password:
@@ -700,6 +702,11 @@ default one' % self.zstack_properties)
                 shell.call('rm -rf %s' % testagentdir)
         
     def execute_plan_without_deploy_test_agent(self):
+        try:
+            self._stop_nodes()
+        except:
+            pass
+
         self._install_local_zstack()
         self._deploy_db()
         self._deploy_rabbitmq()
@@ -819,7 +826,7 @@ default one' % self.zstack_properties)
                 thread.start()
                 docker_node.cleanup()
             else:
-                cmd = 'zstack-ctl stop_node --host=%s' % node.ip_
+                cmd = 'zstack-ctl stop_node --host=%s -f' % node.ip_
                 thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
                 thread.start()
 
