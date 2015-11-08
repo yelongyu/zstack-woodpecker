@@ -4079,21 +4079,21 @@ def lib_limit_volume_total_iops(instance_offering_uuid, iops, \
         session_uuid = None):
     return tag_ops.create_system_tag('InstanceOfferingVO', \
             instance_offering_uuid, \
-            'volumeTotalIops::%d' % iops,\
+            '%s::%d' % (vm_header.VOLUME_IOPS, iops),\
             session_uuid)
 
 def lib_limit_volume_bandwidth(instance_offering_uuid, bandwidth, \
         session_uuid = None):
     return tag_ops.create_system_tag('InstanceOfferingVO', \
             instance_offering_uuid, \
-            'volumeTotalBandwidth::%d' % bandwidth,\
+            '%s::%d' % (vm_header.VOLUME_BANDWIDTH, bandwidth),\
             session_uuid)
 
 def lib_limit_vm_network_bandwidth(instance_offering_uuid, bandwidth, \
         session_uuid = None):
     return tag_ops.create_system_tag('InstanceOfferingVO', \
             instance_offering_uuid, \
-            'networkOutboundBandwidth::%d' % bandwidth,\
+            '%s::%d' % (vm_header.NETWORK_OUTBOUND_BANDWIDTH, bandwidth),\
             session_uuid)
 
 #--------instance offering--------

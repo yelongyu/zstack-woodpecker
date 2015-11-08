@@ -5,6 +5,10 @@ RUNNING = inventory.RUNNING
 STOPPED = inventory.STOPPED
 DESTROYED = inventory.DESTROYED
 
+VOLUME_BANDWIDTH = 'volumeTotalBandwidth'
+VOLUME_IOPS = 'volumeTotalIops'
+NETWORK_OUTBOUND_BANDWIDTH = 'networkOutboundBandwidth'
+
 class TestVm(zstack_header.ZstackObject):
 
     def __init__(self):

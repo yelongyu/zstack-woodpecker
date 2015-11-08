@@ -52,12 +52,13 @@ node_exception = []
 class ActionError(Exception):
     '''action error'''
 
-def shell_cmd_thread(shell_cmd):
+def shell_cmd_thread(shell_cmd, ignore_exception = False):
     try:
         shell.call(shell_cmd)
     except Exception as e:
         node_exception.append(sys.exc_info())
-        raise e
+        if not ignore_exception:
+            raise e
 
 def restart_zstack_without_deploy_db(test_config_path):
     '''
@@ -827,7 +828,7 @@ default one' % self.zstack_properties)
                 docker_node.cleanup()
             else:
                 cmd = 'zstack-ctl stop_node --host=%s -f' % node.ip_
-                thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
+                thread = threading.Thread(target=shell_cmd_thread, args=(cmd, True))
                 thread.start()
 
         self._wait_for_thread_completion('stop management node', 40)
