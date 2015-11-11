@@ -18,7 +18,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 
 test_file = '/tmp/test.img'
-test_time = 60
+TEST_TIME = 60
 
 def create_vm(vm_name='virt-vm', \
         image_name = None, \
@@ -61,8 +61,8 @@ def execute_shell_in_process(cmd, timeout=10):
     start_time = time.time()
     while process.poll() is None:
         curr_time = time.time()
-        test_time = curr_time - start_time
-        if test_time > timeout:
+        TEST_TIME = curr_time - start_time
+        if TEST_TIME > timeout:
             process.kill()
             test_util.test_logger('[shell:] %s timeout ' % cmd)
             return False
@@ -78,7 +78,7 @@ def create_test_file(vm_inv, bandwidth):
     bandwidth unit is KB.
     '''
     vm_ip = vm_inv.vmNics[0].ip
-    file_size = bandwidth * test_time
+    file_size = bandwidth * TEST_TIME
     seek_size = file_size / 1024 - 1
     timeout = 10
 
@@ -92,7 +92,7 @@ def test_scp_speed(vm_inv, bandwidth):
     '''
     bandwidth unit is KB
     '''
-    timeout = test_time + 30
+    timeout = TEST_TIME + 30
     vm_ip = vm_inv.vmNics[0].ip
     cmd = 'scp -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s:%s /dev/null' \
             % (vm_ip, test_file)
@@ -103,12 +103,22 @@ def test_scp_speed(vm_inv, bandwidth):
     end_time = time.time()
 
     scp_time = end_time - start_time
-    if scp_time < test_time:
-        test_util.test_fail('network QOS test file failed, since the scp time: %d is smaller than the expected test time: %d. It means the bandwidth limitation: %d KB/s is not effect. ' % (scp_time, test_time, bandwidth))
+    if scp_time < TEST_TIME:
+        test_util.test_fail('network QOS test file failed, since the scp time: %d is smaller than the expected test time: %d. It means the bandwidth limitation: %d KB/s is not effect. ' % (scp_time, TEST_TIME, bandwidth))
     else:
-        test_util.test_logger('network QOS test file pass, since the scp time: %d is bigger than the expected test time: %d. It means the bandwidth limitation: %d KB/s is effect. ' % (scp_time, test_time, bandwidth))
+        test_util.test_logger('network QOS test file pass, since the scp time: %d is bigger than the expected test time: %d. It means the bandwidth limitation: %d KB/s is effect. ' % (scp_time, TEST_TIME, bandwidth))
 
     return True
+
+def install_fio(vm_inv):
+    timeout = TEST_TIME + 30 
+    vm_ip = vm_inv.vmNics[0].ip
+
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd = '%s "which fio || yum install -y fio"' \
+            % (ssh_cmd, test_file, seek_size)
+    if  execute_shell_in_process(cmd, timeout) != 0:
+        test_util.test_fail('fio installation failed.')
 
 def create_volume(volume_creation_option=None, session_uuid = None):
     if not volume_creation_option:
