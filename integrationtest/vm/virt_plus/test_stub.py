@@ -8,6 +8,7 @@ Create an unified test_stub to share test operations
 import os
 import subprocess
 import time
+import uuid
 
 import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.test_lib as test_lib
@@ -55,8 +56,11 @@ def make_ssh_no_password(vm_inv):
     ssh.make_ssh_no_password(vm_ip, test_lib.lib_get_vm_username(vm_inv), \
             test_lib.lib_get_vm_password(vm_inv))
 
-def execute_shell_in_process(cmd, timeout=10):
-    process = subprocess.Popen(cmd, executable='/bin/sh', shell=True, universal_newlines=True)
+def execute_shell_in_process(cmd, timeout=10, logfd=None):
+    if not logfd:
+        process = subprocess.Popen(cmd, executable='/bin/sh', shell=True, universal_newlines=True)
+    else:
+        process = subprocess.Popen(cmd, executable='/bin/sh', shell=True, stdout=logfd, stderr=logfd, universal_newlines=True)
 
     start_time = time.time()
     while process.poll() is None:
@@ -116,9 +120,117 @@ def install_fio(vm_inv):
 
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     cmd = '%s "which fio || yum install -y fio"' \
-            % (ssh_cmd, test_file, seek_size)
+            % (ssh_cmd)
     if  execute_shell_in_process(cmd, timeout) != 0:
         test_util.test_fail('fio installation failed.')
+
+def test_fio_iops(vm_inv, iops):
+    def cleanup_log():
+        logfd.close()
+        os.system('rm -f %s' % tmp_file)
+
+    timeout = TEST_TIME + 120
+    vm_ip = vm_inv.vmNics[0].ip
+
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd1 = """%s "fio -ioengine=libaio -bs=4k -direct=1 -thread -rw=write -size=256M -filename=/tmp/test1.img -name='EBS 4k write' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
+            % (ssh_cmd)
+    cmd2 = """%s "fio -ioengine=libaio -bs=4k -direct=1 -thread -rw=write -size=256M -filename=/tmp/test2.img -name='EBS 4k write' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
+            % (ssh_cmd)
+
+
+    tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
+    logfd = open(tmp_file, 'w', 0)
+    #rehearsal
+    execute_shell_in_process(cmd1, timeout)
+
+    if  execute_shell_in_process(cmd2, timeout, logfd) != 0:
+        logfd.close()
+        logfd = open(tmp_file, 'r')
+        test_util.test_logger('test_fio_bandwidth log: %s ' % '\n'.join(logfd.readlines()))
+        cleanup_log()
+        test_util.test_fail('fio test failed.')
+
+    logfd.close()
+    logfd = open(tmp_file, 'r')
+    result_lines = logfd.readlines()
+    test_util.test_logger('test_fio_bandwidth log: %s ' % '\n'.join(result_lines))
+    bw=0
+    for line in result_lines: 
+        if  'iops' in line:
+            test_util.test_logger('test_fio_bandwidth: %s' % line)
+            results = line.split()
+            for result in results:
+                if 'iops=' in result:
+                    bw = int(float(result[5:]))
+
+    #cleanup_log()
+    if bw == 0:
+        test_util.test_fail('Did not get bandwidth for fio test')
+
+    if bw == iops or bw < (iops - 10):
+        test_util.test_logger('disk iops: %s is <= setting: %s' % (bw, iops))
+        return True
+    else:
+        test_util.test_logger('disk iops :%s is not same with %s' % (bw, iops))
+        test_util.test_fail('fio bandwidth test fails')
+        return False
+
+def test_fio_bandwidth(vm_inv, bandwidth):
+    def cleanup_log():
+        logfd.close()
+        os.system('rm -f %s' % tmp_file)
+
+    timeout = TEST_TIME + 120
+    vm_ip = vm_inv.vmNics[0].ip
+
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd1 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=write -size=100M -filename=/tmp/test1.img -name='EBS 1M write' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
+            % (ssh_cmd)
+    cmd2 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=write -size=1G -filename=/tmp/test2.img -name='EBS 1M write' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
+            % (ssh_cmd)
+
+
+    tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
+    logfd = open(tmp_file, 'w', 0)
+    #rehearsal
+    execute_shell_in_process(cmd1, timeout)
+
+    if  execute_shell_in_process(cmd2, timeout, logfd) != 0:
+        logfd.close()
+        logfd = open(tmp_file, 'r')
+        test_util.test_logger('test_fio_bandwidth log: %s ' % '\n'.join(logfd.readlines()))
+        cleanup_log()
+        test_util.test_fail('fio test failed.')
+
+    logfd.close()
+    logfd = open(tmp_file, 'r')
+    result_lines = logfd.readlines()
+    test_util.test_logger('test_fio_bandwidth log: %s ' % '\n'.join(result_lines))
+    bw=0
+    for line in result_lines: 
+        if  'iops' in line:
+            test_util.test_logger('test_fio_bandwidth: %s' % line)
+            results = line.split()
+            for result in results:
+                if 'bw=' in result:
+                    bw = int(float(result[3:].split('KB')[0]))
+
+    #cleanup_log()
+    if bw == 0:
+        test_util.test_fail('Did not get bandwidth for fio test')
+
+    bw_up_limit = bandwidth/1024 + 10240
+    bw_down_limit = bandwidth/1024 - 10240
+    if bw > bw_down_limit and bw < bw_up_limit:
+        test_util.test_logger('disk bandwidth:%s is between %s and %s' \
+                % (bw, bw_down_limit, bw_up_limit))
+        return True
+    else:
+        test_util.test_logger('disk bandwidth:%s is not between %s and %s' \
+                % (bw, bw_down_limit, bw_up_limit))
+        test_util.test_fail('fio bandwidth test fails')
+        return False
 
 def create_volume(volume_creation_option=None, session_uuid = None):
     if not volume_creation_option:

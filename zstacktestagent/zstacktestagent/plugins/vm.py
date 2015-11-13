@@ -20,10 +20,21 @@ class VmStatusCmd(testagent.AgentCommand):
         super(VmStatusCmd, self).__init__()
         self.vm_uuids = None
 
+class VmDevIoStatusCmd(testagent.AgentCommand):
+    def __init__(self):
+        super(VmDevIoStatusCmd, self).__init__()
+        self.vm_uuid = None
+        self.vm_device = None
+
 class VmStatusRsp(testagent.AgentResponse):
     def __init__(self):
         super(VmStatusRsp, self).__init__()
         self.vm_status = {}
+
+class VmDeviceIoRsp(testagent.AgentResponse):
+    def __init__(self):
+        super(VmDeviceIoRsp, self).__init__()
+        self.vm_device_io = None
 
 class DeleteVmCmd(testagent.AgentCommand):
     def __init__(self):
@@ -72,6 +83,7 @@ VM_STATUS = '/vm/vmstatus'
 LIST_ALL_VM = '/vm/listallvm'
 VM_BLK_STATUS = '/vm/vmblkstatus'
 ECHO_PATH = '/host/echo'
+VM_DEVICE_QOS = '/vm/deviceqos'
         
 class VmAgent(testagent.TestAgent):
     VM_STATUS_RUNNING = 'running'
@@ -90,6 +102,7 @@ class VmAgent(testagent.TestAgent):
         testagent.TestAgentServer.http_server.register_sync_uri(LIST_ALL_VM, self.list_all_vms)
         testagent.TestAgentServer.http_server.register_sync_uri(VM_BLK_STATUS, self.get_vm_blk_status)
         testagent.TestAgentServer.http_server.register_sync_uri(ECHO_PATH, self.echo)
+        testagent.TestAgentServer.http_server.register_sync_uri(VM_DEVICE_QOS, self.get_vm_disk_qos)
         shell.logcmd = True
 
     @testagent.replyerror
@@ -99,7 +112,16 @@ class VmAgent(testagent.TestAgent):
     
     def stop(self):
         pass
-    
+
+    def get_vm_disk_qos(self):
+        cmd = jsonobject.loads(req[http.REQUEST_BODY])
+        vm_uuid = cmd.vm_uuid
+        dev = cmd.vm_device
+        output = shell.call('virsh blkdeviotune %s %s' % (vm_uuid, dev))
+        rsp = VmDeviceIoRsp()
+        rsp.vm_device_io = output
+        return jsonobject.dumps(rsp)
+
     def _list_all_vms(self):
         output = shell.call('virsh list --all')
         return output.split('\n')
