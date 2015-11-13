@@ -65,7 +65,7 @@ def create_vr_vm(vm_name, image_name, l3_name):
     return vm
 
 def migrate_vm_to_random_host(vm):
-    test_util.test_dsc("migrate pf_vm to random host")
+    test_util.test_dsc("migrate vm to random host")
     target_host = test_lib.lib_find_random_host(vm.vm)
     current_host = test_lib.lib_find_host_by_vm(vm.vm)
     vm.migrate(target_host.uuid)
@@ -78,7 +78,6 @@ def migrate_vm_to_random_host(vm):
         test_util.test_fail('[vm:] did not migrate from [host:] %s to target [host:] %s, but to [host:] %s' % (vm.vm.uuid, current_host.uuid, target_host.uuid, new_host.uuid))
     else:
         test_util.test_logger('[vm:] %s has been migrated from [host:] %s to [host:] %s' % (vm.vm.uuid, current_host.uuid, target_host.uuid))
-
 
 def create_sg(sg_creation_option=None):
     if not sg_creation_option:

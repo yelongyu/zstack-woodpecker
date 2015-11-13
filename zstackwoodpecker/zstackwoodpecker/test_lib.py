@@ -4117,3 +4117,9 @@ def lib_create_instance_offering(cpuNum = 1, cpuSpeed = 16, \
 
 def lib_get_reserved_memory():
     return conf_ops.get_global_config_value('kvm', 'reservedMemory')
+
+def lib_get_active_host_number():
+    cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
+    cond = res_ops.gen_query_conditions('status', '=', 'Connected', cond)
+    result = res_ops.query_resource_count(res_ops.HOST, cond)
+    return int(result.total)
