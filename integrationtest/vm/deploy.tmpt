@@ -109,7 +109,7 @@ l2VlanNetworkName5 = vlan-test-dhcp-only
 l2Vlan5 = 25
 
 l2VlanNetworkName6 = vlan-test-load-balance
-l2Vlan5 = 26
+l2Vlan6 = 26
 
 #L3 network names should be same, test case will rely on name. 
 l3ManagementNetworkName = management network

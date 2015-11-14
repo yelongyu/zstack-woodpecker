@@ -17,7 +17,7 @@ test_obj_dict = test_state.TestStateDict()
 
 def test():
     test_util.test_dsc('Create test vm as utility vm')
-    vm = test_stub.create_vlan_vm()
+    vm = test_stub.create_vm(vm_name = 'migrate_vm_with_snapshot')
     test_obj_dict.add_vm(vm)
 
     test_util.test_dsc('Create volume for snapshot testing')
