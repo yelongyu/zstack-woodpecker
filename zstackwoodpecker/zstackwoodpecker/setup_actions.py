@@ -499,7 +499,8 @@ default one' % self.zstack_properties)
         #cmd = 'WEBSITE=localhost bash %s -f %s -u -r %s' % \
         #        (self.zstack_install_script, self.zstack_pkg, \
         #        self.install_path)
-        cmd = 'bash %s -u' % self.zstack_pkg
+        #if not add -F, will break db upgrade, since we stop_node by force.
+        cmd = 'bash %s -u -F' % self.zstack_pkg
 
         shell.call(cmd)
         self._extra_deployment()
