@@ -2309,7 +2309,7 @@ def lib_get_volume_host(volume):
                 primaryStorageUuid)
 
         ps_inv = res_ops.query_resource(res_ops.PRIMARY_STORAGE, conditions, None)[0]
-        if ps_inv.type == inventory.LOCAL_STORAGE_TYPE::
+        if ps_inv.type == inventory.LOCAL_STORAGE_TYPE:
            vm = volume.get_target_vm().get_vm()
            host = lib_get_vm_host(vm)
            return host
