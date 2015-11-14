@@ -2298,6 +2298,24 @@ def lib_get_volume_by_uuid(volume_uuid):
     except:
         test_util.test_logger('Did not find volume in database with [uuid:] %s' % volume_uuid)
 
+def lib_get_volume_object_host(volume_obj):
+    volume = volume_obj.get_volume()
+    try:
+        primaryStorageUuid = volume.primaryStorageUuid
+        if not primaryStorageUuid:
+            test_util.test_logger('Did not find any primary storage for [volume:] %s. Can not find [host] for this volume. It mostly means the volume is not attached to any VM yet. ' % volume.uuid)
+            return None
+
+        conditions = res_ops.gen_query_conditions('uuid', '=', \
+                primaryStorageUuid)
+
+        ps_inv = res_ops.query_resource(res_ops.PRIMARY_STORAGE, conditions, None)[0]
+        vm = volume_obj.get_target_vm().get_vm()
+        host = lib_get_vm_host(vm)
+        return host
+    except:
+        test_util.test_logger('Could not find any host for [volume:] %s.' % volume.uuid)
+
 def lib_get_volume_host(volume):
     try:
         primaryStorageUuid = volume.primaryStorageUuid
@@ -2309,10 +2327,6 @@ def lib_get_volume_host(volume):
                 primaryStorageUuid)
 
         ps_inv = res_ops.query_resource(res_ops.PRIMARY_STORAGE, conditions, None)[0]
-        if ps_inv.type == inventory.LOCAL_STORAGE_TYPE:
-           vm = volume.get_target_vm().get_vm()
-           host = lib_get_vm_host(vm)
-           return host
 
         attached_cluster = ','.join(ps_inv.attachedClusterUuids)
         conditions = res_ops.gen_query_conditions('clusterUuid', 'in', \

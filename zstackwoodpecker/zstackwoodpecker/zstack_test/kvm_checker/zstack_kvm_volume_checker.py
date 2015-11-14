@@ -63,7 +63,7 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
             return self.judge(False)
 
     def check_nfs(self, volume, volume_installPath):
-        host = test_lib.lib_get_volume_host(volume)
+        host = test_lib.lib_get_volume_object_host(self.test_obj)
         if not host:
             test_util.test_logger('Check result: can not find Host, who is belonged to same Zone Uuid of [volume uuid: ] %s. Can not check volume file existence' % volume.uuid)
             return self.judge(False)
