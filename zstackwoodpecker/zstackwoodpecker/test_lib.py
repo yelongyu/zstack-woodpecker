@@ -4122,4 +4122,4 @@ def lib_get_active_host_number():
     cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
     cond = res_ops.gen_query_conditions('status', '=', 'Connected', cond)
     result = res_ops.query_resource_count(res_ops.HOST, cond)
-    return int(result.total)
+    return result
