@@ -509,7 +509,7 @@ default one' % self.zstack_properties)
         #cmd = 'WEBSITE=localhost bash %s -f %s -r %s -a -z' % \
         #        (self.zstack_install_script, self.zstack_pkg, \
         #        self.install_path)
-        cmd = 'bash %s -z' % self.zstack_pkg
+        cmd = 'bash %s -z -r %s' % (self.zstack_pkg, self.install_path)
         if self.db_admin_password:
             cmd = '%s -P %s' % (cmd, self.db_admin_password)
         if self.db_password:
@@ -827,6 +827,7 @@ default one' % self.zstack_properties)
                 thread.start()
                 docker_node.cleanup()
             else:
+                #Woodpecker need to set no ssh password for all nodes.
                 cmd = 'zstack-ctl stop_node --host=%s -f' % node.ip_
                 thread = threading.Thread(target=shell_cmd_thread, args=(cmd, True))
                 thread.start()
