@@ -26,7 +26,7 @@ def test():
     snapshots.set_utility_vm(vm)
 
     times = 44
-    for times > 0 :
+    while times > 0 :
         vm.stop()
         snapshot = snapshots.create_snapshot('create_snapshot_%s' % (44 - times))
         vm.start()
