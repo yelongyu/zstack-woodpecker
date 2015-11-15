@@ -39,9 +39,12 @@ def test():
     snapshots.create_snapshot('create_snapshot1')
     snapshots.check()
 
+    #if not attach volume, vm migration won't migrate data volume
+    volume.attach(vm)
     test_util.test_dsc('migrate vm and check snapshot')
     test_stub.migrate_vm_to_random_host(vm)
     vm.check()
+    volume.detach()
     snapshots.check()
 
     snapshot1 = snapshots.get_current_snapshot()
@@ -64,9 +67,11 @@ def test():
     snapshots.create_snapshot('create_snapshot1.2.2')
     snapshots.check()
 
+    volume.attach(vm)
     test_util.test_dsc('migrate vm and check snapshot')
     test_stub.migrate_vm_to_random_host(vm)
     vm.check()
+    volume.detach()
     snapshots.check()
 
     snapshots.use_snapshot(snapshot3)
@@ -74,18 +79,22 @@ def test():
     snapshots.create_snapshot('create_snapshot4')
     snapshots.check()
 
+    volume.attach(vm)
     test_util.test_dsc('migrate vm and check snapshot')
     test_stub.migrate_vm_to_random_host(vm)
     vm.check()
+    volume.detach()
     snapshots.check()
 
     test_util.test_dsc('Delete snapshot, volume and check')
     snapshots.delete_snapshot(snapshot3)
     snapshots.check()
 
+    volume.attach(vm)
     test_util.test_dsc('migrate vm and check snapshot')
     test_stub.migrate_vm_to_random_host(vm)
     vm.check()
+    volume.detach()
     snapshots.check()
 
     snapshots.delete_snapshot(snapshot1_2_1)
