@@ -50,9 +50,9 @@ def test():
     vm.check()
     snapshots.check()
 
+    vm.destroy()
     snapshots.delete()
     test_obj_dict.rm_volume_snapshot(snapshots)
-    vm.destroy()
     test_util.test_pass('Create deep Snapshot chain with VM migration test Success')
 
 #Will be called only if exception happens in test().
