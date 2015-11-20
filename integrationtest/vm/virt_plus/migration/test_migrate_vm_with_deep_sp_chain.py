@@ -25,17 +25,17 @@ def test():
     snapshots = test_obj_dict.get_volume_snapshot(root_volume_uuid)
     snapshots.set_utility_vm(vm)
 
-    times = 44
+    times = 22
     while times > 0 :
         vm.stop()
         snapshot = snapshots.create_snapshot('create_snapshot_%s' % (44 - times))
         vm.start()
-        if times == 22:
+        if times == 11:
             snapshot1 = snapshots.get_current_snapshot()
         times = times - 1
 
     test_util.test_dsc('migrate vm and check snapshot')
-    test_stub.migrate_vm_to_random_host(vm)
+    test_stub.migrate_vm_to_random_host(vm, timeout=1200000)
     vm.check()
     snapshots.check()
 
@@ -46,7 +46,7 @@ def test():
     vm.check()
 
     test_util.test_dsc('migrate vm and check snapshot')
-    test_stub.migrate_vm_to_random_host(vm)
+    test_stub.migrate_vm_to_random_host(vm, timeout=1200000)
     vm.check()
     snapshots.check()
 

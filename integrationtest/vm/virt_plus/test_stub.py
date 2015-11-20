@@ -245,11 +245,11 @@ def create_volume(volume_creation_option=None, session_uuid = None):
     volume.create()
     return volume
 
-def migrate_vm_to_random_host(vm):
+def migrate_vm_to_random_host(vm, timeout = None):
     test_util.test_dsc("migrate vm to random host")
     target_host = test_lib.lib_find_random_host(vm.vm)
     current_host = test_lib.lib_find_host_by_vm(vm.vm)
-    vm.migrate(target_host.uuid)
+    vm.migrate(target_host.uuid, timeout)
 
     new_host = test_lib.lib_get_vm_host(vm.vm)
     if not new_host:
