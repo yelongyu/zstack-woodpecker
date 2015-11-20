@@ -88,7 +88,7 @@ def reboot_vm(vm_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def migrate_vm(vm_uuid, host_uuid, session_uuid=None, timeout=240000):
+def migrate_vm(vm_uuid, host_uuid, timeout = 240000, session_uuid = None):
     action = api_actions.MigrateVmAction()
     action.vmInstanceUuid = vm_uuid
     action.hostUuid = host_uuid
