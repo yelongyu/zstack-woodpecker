@@ -32,6 +32,7 @@ def test():
         vm.start()
         if times == 22:
             snapshot1 = snapshots.get_current_snapshot()
+        times = times - 1
 
     test_util.test_dsc('migrate vm and check snapshot')
     test_stub.migrate_vm_to_random_host(vm)
