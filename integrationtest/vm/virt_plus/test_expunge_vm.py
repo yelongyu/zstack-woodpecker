@@ -13,6 +13,11 @@ import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import time
 import os
 
+_config_ = {
+        'timeout' : 100,
+        'noparallel' : True
+        }
+
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 delete_policy = test_lib.lib_set_delete_policy('vm', 'Delay')
@@ -20,11 +25,10 @@ delete_policy = test_lib.lib_set_delete_policy('vm', 'Delay')
 def test():
     vm = test_stub.create_vm(vm_name = 'basic-test-vm')
     test_obj_dict.add_vm(vm)
-    vm.check()
+    time.sleep(1)
     vm.destroy()
     vm.expunge()
-    test_li
-    test_lib_set_delete_policy('vm', delete_policy)
+    test_lib.lib_set_delete_policy('vm', delete_policy)
     test_util.test_pass('Expunge VM Test Success')
 
 #Will be called only if exception happens in test().
