@@ -4142,3 +4142,16 @@ def lib_get_active_host_number():
     cond = res_ops.gen_query_conditions('status', '=', 'Connected', cond)
     result = res_ops.query_resource_count(res_ops.HOST, cond)
     return result
+
+def lib_get_delete_policy(category = 'vm'):
+    '''
+    category could be vm, volume, image.
+    '''
+    return conf_ops.get_global_config_value(category, 'deletionPolicy')
+
+def lib_set_delete_policy(category = 'vm', value = 'Direct'):
+    '''
+    value could be Direct, Delay, Never
+    category could be vm, image, volume
+    '''
+    return conf_ops.change_global_config(category, 'deletionPolicy', value)

@@ -26,6 +26,7 @@ class ZstackTestVm(vm_header.TestVm):
     def change_instance_offering(self, new_instance_offering_uuid, \
             session_uuid = None):
         if self.state != vm_header.STOPPED:
+            test_util.test_logger('VM: %s state %s is not %s. Can not change template' % self.vm.get_vm().uuid, self.state, vm_header.STOPPED)
             return False
 
         vm_uuid = self.get_vm().uuid
@@ -33,25 +34,25 @@ class ZstackTestVm(vm_header.TestVm):
                 new_instance_offering_uuid, session_uuid)
         self.changed_instance_offering_uuid = new_instance_offering_uuid
 
-        #in current design, QoS changing need to manually change vm system tag.
-        cond = res_ops.gen_query_conditions('resourceUuid', '=', \
-                new_instance_offering_uuid)
-        new_system_tags = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
-        cond_vm = res_ops.gen_query_conditions('resourceUuid', '=', \
-                vm_uuid)
-        for tag in new_system_tags:
-            if vm_header.VOLUME_IOPS in tag.tag or \
-                    vm_header.VOLUME_BANDWIDTH in tag.tag or \
-                    vm_header.NETWORK_OUTBOUND_BANDWIDTH in tag.tag:
-                tag_name = tag.tag.split('::')[0]
-                cond_vm = res_ops.gen_query_conditions('tag', 'like', \
-                        tag_name, cond_vm)
-                old_system_tags = res_ops.query_resource(res_ops.SYSTEM_TAG, \
-                        cond_vm)
-                for old_tag in old_system_tags:
-                    tag_ops.delete_tag(old_tag.uuid)
-                tag_ops.create_system_tag('VmInstanceVO', \
-                        vm_uuid, tag.tag)
+        ##in current design, QoS changing need to manually change vm system tag.
+        #cond = res_ops.gen_query_conditions('resourceUuid', '=', \
+        #        new_instance_offering_uuid)
+        #new_system_tags = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
+        #cond_vm = res_ops.gen_query_conditions('resourceUuid', '=', \
+        #        vm_uuid)
+        #for tag in new_system_tags:
+        #    if vm_header.VOLUME_IOPS in tag.tag or \
+        #            vm_header.VOLUME_BANDWIDTH in tag.tag or \
+        #            vm_header.NETWORK_OUTBOUND_BANDWIDTH in tag.tag:
+        #        tag_name = tag.tag.split('::')[0]
+        #        cond_vm = res_ops.gen_query_conditions('tag', 'like', \
+        #                tag_name, cond_vm)
+        #        old_system_tags = res_ops.query_resource(res_ops.SYSTEM_TAG, \
+        #                cond_vm)
+        #        for old_tag in old_system_tags:
+        #            tag_ops.delete_tag(old_tag.uuid)
+        #        tag_ops.create_system_tag('VmInstanceVO', \
+        #                vm_uuid, tag.tag)
 
     def get_instance_offering_uuid(self):
         if not self.changed_instance_offering_uuid:
@@ -83,6 +84,10 @@ class ZstackTestVm(vm_header.TestVm):
         self.vm = vm_ops.migrate_vm(self.vm.uuid, host_uuid, timeout,\
                 session_uuid)
         super(ZstackTestVm, self).migrate(host_uuid)
+
+    def expunge(self, session_uuid):
+        vm_ops.expunge_vm(self.vm.uuid)
+        super(ZstackTestVm, self).expunge()
 
     def check(self):
         import zstackwoodpecker.zstack_test.checker_factory as checker_factory

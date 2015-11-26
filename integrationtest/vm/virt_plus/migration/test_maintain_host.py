@@ -23,6 +23,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
+import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.zstack_test.zstack_test_kvm_host as test_kvm_host
 import zstackwoodpecker.header.host as host_header
@@ -39,6 +40,7 @@ _config_ = {
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
+host = None
 
 def is_host_connected(host_uuid):
     cond = res_ops.gen_query_conditions('uuid', '=', host_uuid)
@@ -47,6 +49,7 @@ def is_host_connected(host_uuid):
         return True
 
 def test():
+    global host
     if test_lib.lib_get_active_host_number() < 2:
         test_util.test_fail('Not available host to do maintenance, since there are not 2 hosts')
 
@@ -98,6 +101,8 @@ def test():
     #need to update vm's inventory, since they will be changed by maintenace mode
     vm1.update()
     vm2.update()
+    vm1.set_state(vm_header.STOPPED)
+    vm2.set_state(vm_header.STOPPED)
 
     vm1.check()
     vm2.check()
@@ -125,3 +130,5 @@ def test():
 #Will be called only if exception happens in test().
 def error_cleanup():
     test_lib.lib_error_cleanup(test_obj_dict)
+    if host:
+        host.change_state(test_kvm_host.ENABLE_EVENT)
