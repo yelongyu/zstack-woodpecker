@@ -27,7 +27,6 @@ def test():
     time.sleep(1)
     vm.destroy()
     vm.expunge()
-    test_lib.lib_set_delete_policy('vm', delete_policy)
     test_util.test_pass('Expunge VM Test Success')
 
 #Will be called only if exception happens in test().
