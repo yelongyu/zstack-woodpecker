@@ -20,9 +20,11 @@ _config_ = {
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
-delete_policy = test_lib.lib_set_delete_policy('vm', 'Delay')
+delete_policy = None
 
 def test():
+    global delete_policy
+    delete_policy = test_lib.lib_set_delete_policy('vm', 'Delay')
     vm = test_stub.create_vm(vm_name = 'basic-test-vm')
     test_obj_dict.add_vm(vm)
     time.sleep(1)

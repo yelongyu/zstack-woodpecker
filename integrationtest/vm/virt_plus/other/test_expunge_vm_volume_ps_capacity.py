@@ -16,10 +16,14 @@ import os
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
-delete_policy1 = test_lib.lib_set_delete_policy('vm', 'Delay')
-delete_policy2 = test_lib.lib_set_delete_policy('volume', 'Delay')
+delete_policy1 = None
+delete_policy2 = None
 
 def test():
+    global delete_policy1
+    global delete_policy2
+    delete_policy1 = test_lib.lib_set_delete_policy('vm', 'Delay')
+    delete_policy2 = test_lib.lib_set_delete_policy('volume', 'Delay')
     test_util.test_dsc('Test storage capacity when using expunge vm')
     zone_uuid = res_ops.query_resource(res_ops.ZONE)[0].uuid
     cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
