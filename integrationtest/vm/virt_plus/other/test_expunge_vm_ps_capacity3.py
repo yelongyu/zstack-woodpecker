@@ -44,20 +44,20 @@ def test():
 
     avail_cap = ps.availableCapacity
 
-    vm = test_stub.create_vm(vm_name = 'basic-test-vm', host_uuid = host.uuid)
+    vm = test_stub.create_vm(vm_name = 'basic-test-vm')
     test_obj_dict.add_vm(vm)
     ps = res_ops.query_resource_with_num(res_ops.PRIMARY_STORAGE, cond, limit = 1)
     avail_cap1 = ps.availableCapacity
     if avail_cap == avail_cap1:
-        test_util.test_fail('PS capacity is same after create vm on host: %s. Capacity before create vm: %s, after create vm: %s ' % (host.uuid, avail_cap, avail_cap1))
+        test_util.test_fail('PS capacity is same after create vm. Capacity before create vm: %s, after create vm: %s ' % (avail_cap, avail_cap1))
     time.sleep(1)
     vm.destroy()
     vm.expunge()
     ps = res_ops.query_resource_with_num(res_ops.PRIMARY_STORAGE, cond, limit = 1)
     avail_cap2 = ps.availableCapacity
-    avail_cap2 = host_res.availableCapacity
+    avail_cap2 = ps.availableCapacity
     if avail_cap != avail_cap2:
-        test_util.test_fail('PS capacity is not same after create/expunge vm on host: %s. Capacity before create vm: %s, after expunge vm: %s ' % (host.uuid, avail_cap, avail_cap2))
+        test_util.test_fail('PS capacity is not same after create/expunge vm. Capacity before create vm: %s, after expunge vm: %s ' % (avail_cap, avail_cap2))
     test_lib.lib_set_delete_policy('vm', delete_policy)
     test_util.test_pass('Expunge VM Test Success')
 
