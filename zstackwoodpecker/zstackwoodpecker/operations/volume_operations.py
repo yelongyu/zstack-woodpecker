@@ -70,6 +70,14 @@ def delete_volume(volume_uuid, session_uuid=None):
     action.timeout = 120000
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Delete Volume [uuid:] %s' % volume_uuid)
+    return evt.inventory
+
+def expunge_volume(volume_uuid, session_uuid=None):
+    action = api_actions.ExpungeDataVolumeAction()
+    action.uuid = volume_uuid
+    action.timeout = 12000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Expunge Volume [uuid:] %s' % volume_uuid)
     return evt
 
 def attach_volume(volume_uuid, vm_uuid, session_uuid=None):

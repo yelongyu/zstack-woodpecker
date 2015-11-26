@@ -26,7 +26,7 @@ def create_vm(vm_name='virt-vm', \
         l3_name = None, \
         instance_offering_uuid = None, \
         host_uuid = None,
-        disk_offering_uuids=None, system_tags=None, session_uuid = None, ):
+        disk_offering_uuids=None, system_tags=None, session_uuid = None):
 
     if not image_name:
         image_name = os.environ.get('imageName_net') 

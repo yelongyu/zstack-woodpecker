@@ -48,6 +48,10 @@ class ZstackTestVolume(volume_header.TestVolume):
         vol_ops.delete_volume(self.volume.uuid)
         super(ZstackTestVolume, self).delete()
 
+    def expunge(self):
+        vol_ops.expunge_volume(self.volume.uuid)
+        super(ZstackTestVolume, self).expunge()
+
     def check(self):
         import zstackwoodpecker.zstack_test.checker_factory as checker_factory
         self.update()

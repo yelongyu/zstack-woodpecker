@@ -34,4 +34,4 @@ def test():
 #Will be called only if exception happens in test().
 def error_cleanup():
     test_lib.lib_error_cleanup(test_obj_dict)
-    test_libb_set_delete_policy('vm', delete_policy)
+    test_lib.lib_set_delete_policy('vm', delete_policy)

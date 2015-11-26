@@ -3,6 +3,7 @@ CREATED = 'created'
 ATTACHED = 'attached' #in primary storage
 DETACHED = 'detached' #in primary storage
 DELETED = 'deleted'
+EXPUNGED = 'expunged'
 
 ROOT_VOLUME = 'Root'
 DATA_VOLUME = 'Data'
@@ -42,6 +43,10 @@ class TestVolume(zstack_header.ZstackObject):
 
     def delete(self):
         self.state = DELETED
+
+    def expunge(self):
+        #self.state = EXPUNGED
+        pass
 
     def check(self):
         pass
