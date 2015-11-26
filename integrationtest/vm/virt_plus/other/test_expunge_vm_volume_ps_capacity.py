@@ -14,6 +14,11 @@ import zstackwoodpecker.operations.volume_operations as vol_ops
 import time
 import os
 
+_config_ = {
+        'timeout' : 200,
+        'noparallel' : True
+        }
+
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 delete_policy1 = None
