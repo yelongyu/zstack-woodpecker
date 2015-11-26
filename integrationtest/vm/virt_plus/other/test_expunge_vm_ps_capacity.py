@@ -46,7 +46,7 @@ def test():
     host_res2 = vol_ops.get_local_storage_capacity(host.uuid, ps.uuid)[0]
     avail_cap2 = host_res.availableCapacity
     if avail_cap != avail_cap2:
-        test_util.test_fail('PS capacity is not same after create/expunge vm on host: %s. Capacity before create vm: %s, after expunge vm: %s ' % (host.uuid, avail_cap, avail_cap2)
+        test_util.test_fail('PS capacity is not same after create/expunge vm on host: %s. Capacity before create vm: %s, after expunge vm: %s ' % (host.uuid, avail_cap, avail_cap2))
     test_lib.lib_set_delete_policy('vm', delete_policy)
     test_util.test_pass('Expunge VM Test Success')
 
