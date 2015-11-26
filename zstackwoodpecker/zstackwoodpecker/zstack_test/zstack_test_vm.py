@@ -85,8 +85,8 @@ class ZstackTestVm(vm_header.TestVm):
                 session_uuid)
         super(ZstackTestVm, self).migrate(host_uuid)
 
-    def expunge(self, session_uuid):
-        vm_ops.expunge_vm(self.vm.uuid)
+    def expunge(self, session_uuid = None):
+        vm_ops.expunge_vm(self.vm.uuid, session_uuid)
         super(ZstackTestVm, self).expunge()
 
     def check(self):
