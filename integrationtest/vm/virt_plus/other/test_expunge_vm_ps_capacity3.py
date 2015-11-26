@@ -1,6 +1,6 @@
 '''
 
-New Integration Test for expunging KVM VM.
+New Integration Test for expunging KVM VM and check capacity by QueryPrimaryStorage.
 
 @author: Youyk
 '''
@@ -40,22 +40,21 @@ def test():
         test_util.test_skip('No Enabled/Connected primary storage was found, skip test.' )
         return True
 
-    host = host[0]
     ps = ps[0]
 
-    host_res = vol_ops.get_local_storage_capacity(host.uuid, ps.uuid)[0]
-    avail_cap = host_res.availableCapacity
+    avail_cap = ps.availableCapacity
 
     vm = test_stub.create_vm(vm_name = 'basic-test-vm', host_uuid = host.uuid)
     test_obj_dict.add_vm(vm)
-    host_res1 = vol_ops.get_local_storage_capacity(host.uuid, ps.uuid)[0]
-    avail_cap1 = host_res.availableCapacity
+    ps = res_ops.query_resource_with_num(res_ops.PRIMARY_STORAGE, cond, limit = 1)
+    avail_cap1 = ps.availableCapacity
     if avail_cap == avail_cap1:
         test_util.test_fail('PS capacity is same after create vm on host: %s. Capacity before create vm: %s, after create vm: %s ' % (host.uuid, avail_cap, avail_cap1))
     time.sleep(1)
     vm.destroy()
     vm.expunge()
-    host_res2 = vol_ops.get_local_storage_capacity(host.uuid, ps.uuid)[0]
+    ps = res_ops.query_resource_with_num(res_ops.PRIMARY_STORAGE, cond, limit = 1)
+    avail_cap2 = ps.availableCapacity
     avail_cap2 = host_res.availableCapacity
     if avail_cap != avail_cap2:
         test_util.test_fail('PS capacity is not same after create/expunge vm on host: %s. Capacity before create vm: %s, after expunge vm: %s ' % (host.uuid, avail_cap, avail_cap2))
