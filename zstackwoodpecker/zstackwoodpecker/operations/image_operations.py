@@ -110,6 +110,14 @@ def delete_image(image_uuid, backup_storage_uuid_list=None, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
+def expunge_image(image_uuid, backup_storage_uuid_list=None, session_uuid=None):
+    action = api_actions.ExpungeImageAction()
+    action.imageUuid = image_uuid
+    action.backupStorageUuids = backup_storage_uuid_list
+    test_util.action_logger('Expunge [image:] %s' % image_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
 def create_template_from_snapshot(image_creation_option, session_uuid=None):
     action = api_actions.CreateRootVolumeTemplateFromVolumeSnapshotAction()
     action.snapshotUuid = image_creation_option.get_root_volume_uuid()
@@ -137,3 +145,10 @@ def create_template_from_snapshot(image_creation_option, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, image_creation_option.get_session_uuid())
     return evt.inventory
 
+def reconnect_sftp_backup_storage(bs_uuid, session_uuid = None):
+    action = api_actions.ReconnectSftpBackupStorageAction()
+    action.uuid = bs_uuid
+    action.timeout = 120000
+    test_util.action_logger('Reconnect Sftp Backup Storage [uuid:] %s' % bs_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory

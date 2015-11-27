@@ -27,6 +27,10 @@ class ZstackTestImage(image_header.TestImage):
         img_ops.delete_image(self.image.uuid)
         super(ZstackTestImage, self).delete()
 
+    def expunge(self):
+        img_ops.expunge_image(self.image.uuid)
+        super(ZstackTestImage, self).expunge()
+
     def check(self):
         import zstackwoodpecker.zstack_test.checker_factory as checker_factory
         checker = checker_factory.CheckerFactory().create_checker(self)

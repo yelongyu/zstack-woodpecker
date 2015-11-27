@@ -1,6 +1,7 @@
 import zstackwoodpecker.header.header as zstack_header
 CREATED = 'created'
 DELETED = 'deleted'
+EXPUNGED = 'expunged'
 
 class TestImage(zstack_header.ZstackObject):
     def __init__(self):
@@ -29,6 +30,10 @@ class TestImage(zstack_header.ZstackObject):
 
     def delete(self):
         self.state = DELETED
+
+    def expunge(self):
+        #self.state = EXPUNGED
+        pass
 
     def check(self):
         pass

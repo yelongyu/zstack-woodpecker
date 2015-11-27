@@ -4149,9 +4149,19 @@ def lib_get_delete_policy(category = 'vm'):
     '''
     return conf_ops.get_global_config_value(category, 'deletionPolicy')
 
+def lib_get_vm_delete_policy():
+    return lib_get_delete_policy()
+
+def lib_get_volume_delete_policy():
+    return lib_get_delete_policy('volume')
+
+def lib_get_image_delete_policy():
+    return lib_get_delete_policy('image')
+
 def lib_set_delete_policy(category = 'vm', value = 'Direct'):
     '''
     value could be Direct, Delay, Never
     category could be vm, image, volume
     '''
     return conf_ops.change_global_config(category, 'deletionPolicy', value)
+
