@@ -82,7 +82,7 @@ def test():
     if total_cap != total_cap3:
         test_util.test_fail('Backup storage total capacity is not same, after expunging new image: %s. The previous value: %s, the current value: %s' % (image_inv.uuid, total_cap, total_cap3))
 
-    if avail_cap != avail_cap3 :
+    if total_cap > (total_cap3 + 1024000) or total_cap < total_cap3:
         test_util.test_fail('Backup storage available capacity is not correct, after expunging new image when delete policy is Delay: %s. The previous value: %s, the current value: %s' % (image_inv.uuid, avail_cap, avail_cap3))
 
     os.system('rm -f %s' % test_image)
