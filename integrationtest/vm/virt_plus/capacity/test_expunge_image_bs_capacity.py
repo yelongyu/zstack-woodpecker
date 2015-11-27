@@ -32,6 +32,8 @@ def test():
 
     os.system('dd if=/dev/zero of=%s bs=1M count=1 seek=300' % test_image)
     time.sleep(1)
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
+    img_ops.reconnect_sftp_backup_storage(bs.uuid)
     image_name = 'test-image-%s' % time.time()
     image_option = test_util.ImageOption()
     image_option.set_name(image_name)

@@ -40,6 +40,7 @@ def test():
     image_option.set_name(image_name)
     image_option.set_description('test image which is upload from local filesystem.')
     image_option.set_url('file://%s' % test_image)
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
     avail_cap = bs.availableCapacity
     total_cap = bs.totalCapacity
 
