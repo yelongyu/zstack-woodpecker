@@ -69,10 +69,10 @@ def test():
     avail_cap2 = bs.availableCapacity
     total_cap2 = bs.totalCapacity
 
-    if total_cap > (total_cap2 + 3024000) or total_cap < total_cap2:
+    if total_cap != total_cap2 :
         test_util.test_fail('Backup storage total capacity is not same, after deleting new image: %s. The previous value: %s, the current value: %s' % (image_inv.uuid, total_cap, total_cap2))
 
-    if avail_cap != avail_cap2 :
+    if avail_cap > (avail_cap2 + 1024000) or avail_cap < avail_cap2:
         test_util.test_fail('Backup storage available capacity is not correct, after adding and deleting new image: %s. The previous value: %s, the current value: %s' % (image_inv.uuid, avail_cap, avail_cap2))
 
     os.system('rm -f %s' % test_image)
