@@ -72,7 +72,7 @@ def test():
     if avail_cap1 != avail_cap2 :
         test_util.test_fail('Backup storage available capacity is not correct, after deleting new image when delete policy is Delay: %s. The previous value: %s, the current value: %s' % (image_inv.uuid, avail_cap1, avail_cap2))
 
-    image.expunge()
+    image.expunge([bs.uuid])
     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
     avail_cap3 = bs.availableCapacity
     total_cap3 = bs.totalCapacity

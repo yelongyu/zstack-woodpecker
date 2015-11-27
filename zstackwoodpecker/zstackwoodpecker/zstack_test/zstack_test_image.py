@@ -27,8 +27,8 @@ class ZstackTestImage(image_header.TestImage):
         img_ops.delete_image(self.image.uuid)
         super(ZstackTestImage, self).delete()
 
-    def expunge(self):
-        img_ops.expunge_image(self.image.uuid)
+    def expunge(self, bs_uuid_list):
+        img_ops.expunge_image(self.image.uuid, bs_uuid_list)
         super(ZstackTestImage, self).expunge()
 
     def check(self):
