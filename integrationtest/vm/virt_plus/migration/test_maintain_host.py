@@ -60,8 +60,8 @@ def test():
     vm2 = test_stub.create_vm(vm_name = 'maintain_host_vm2')
     test_obj_dict.add_vm(vm2)
 
-    vm1.check()
-    vm2.check()
+    #vm1.check()
+    #vm2.check()
 
     test_util.test_dsc('Create volume and check')
     disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
