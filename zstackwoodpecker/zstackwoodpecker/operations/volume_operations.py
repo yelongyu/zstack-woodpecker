@@ -203,3 +203,11 @@ def get_local_storage_capacity(host_uuid, primary_storage_uuid, \
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventories
 
+def migrate_volume(volume_uuid, host_uuid, session_uuid = None):
+    action = api_actions.LocalStorageMigrateVolumeAction()
+    action.destHostUuid = host_uuid
+    action.volumeUuid = volume_uuid
+    test_util.action_logger('Migrate Local Storage Volume: %s to Host: %s' \
+            % (volume_uuid, host_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+

@@ -1,16 +1,16 @@
 '''
 
-New Integration test for testing vm migration when doing host maintenance
+New Integration test for testing vm migration when doing host maintenance in Local storage.
 
 Test steps:
 
 1. Create 2 VMs and 1 volume.
 2. Attach 1 volume to vm1
 3. migrate 2 VMs to random target_host
-4. change target_host state to maintain
+4. change target_host state to maintain. All vms will be stopped.
 5. check 2 VMs and volume status
 6. Enable maintained host again.
-7. Migrate 2 VMs back to target_host
+7. Migrate 2 stoped VMs volume to new target_host
 8. Check 2 VMs and volume status again.
 
 This case should not be parallely executed with other test case, since it will
@@ -23,6 +23,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
+import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.zstack_test.zstack_test_kvm_host as test_kvm_host
@@ -112,8 +113,23 @@ def test():
     if not linux.wait_callback_success(is_host_connected, host.get_host().uuid, 120):
         test_util.test_fail('host status is not changed to connected, after changing its state to Enable')
 
-    vm1.migrate(target_host.uuid)
-    vm2.migrate(target_host.uuid)
+    volume.detach()
+
+    vm1_root_volume = test_lib.lib_get_root_volume(vm1.get_vm())
+    vm2_root_volume = test_lib.lib_get_root_volume(vm2.get_vm())
+
+    conditions = res_ops.gen_query_conditions('uuid', '!=', target_host.uuid, conditions)
+    rest_hosts = res_ops.query_resource(res_ops.HOST, conditions)
+    new_target_host = random.choice(rest_hosts)
+
+    vol_ops.migrate_volume(vm1_root_volume.uuid, new_target_host.uuid)
+    vol_ops.migrate_volume(vm2_root_volume.uuid, new_target_host.uuid)
+    vol_ops.migrate_volume(volume.get_volume().uuid, new_target_host.uuid)
+
+    volume.attach(vm1)
+
+    vm1.start()
+    vm2.start()
 
     vm1.check()
     vm2.check()

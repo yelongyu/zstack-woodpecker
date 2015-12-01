@@ -21,6 +21,12 @@ class ZstackTestVolume(volume_header.TestVolume):
         self.set_volume(vol_ops.create_volume_from_offering(self.volume_creation_option))
         super(ZstackTestVolume, self).create()
 
+    def migrate(self, host_uuid, session_uuid = None):
+        '''
+        Only valid when volume is in local storage
+        '''
+        vol_ops.migrate_volume(self.get_volume().uuid, host_uuid, session_uuid)
+
     def create_template(self, backup_storage_uuid_list, name = None):
         image_inv = vol_ops.create_volume_template(self.get_volume().uuid, \
                 backup_storage_uuid_list, name)
