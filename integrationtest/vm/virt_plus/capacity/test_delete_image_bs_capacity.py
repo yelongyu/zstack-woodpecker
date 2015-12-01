@@ -30,7 +30,7 @@ def test():
     global delete_policy
     delete_policy = test_lib.lib_set_delete_policy('image', 'Direct')
 
-    os.system('dd if=/dev/zero of=%s bs=1M count=1 seek=300' % test_image)
+    os.system('dd if=/dev/zero of=%s bs=1M count=300' % test_image)
     time.sleep(1)
     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
     img_ops.reconnect_sftp_backup_storage(bs.uuid)
