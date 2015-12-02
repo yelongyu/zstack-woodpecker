@@ -9,9 +9,12 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.zstack_test.zstack_test_snapshot as zstack_sp_header
 import zstackwoodpecker.operations.volume_operations as vol_ops
+import zstackwoodpecker.operations.resource_operations as res_ops
+import zstackwoodpecker.header.host as host_header
 
 import os
 import time
+import random
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
@@ -46,6 +49,8 @@ def test():
 
     vm.stop()
     conditions = res_ops.gen_query_conditions('uuid', '!=', host_uuid)
+    conditions = res_ops.gen_query_conditions('state', '=', host_header.ENABLED, conditions)
+    conditions = res_ops.gen_query_conditions('status', '=', host_header.CONNECTED, conditions)
     rest_hosts = res_ops.query_resource(res_ops.HOST, conditions)
     target_host = random.choice(rest_hosts)
 
@@ -60,54 +65,13 @@ def test():
     snapshot1 = snapshots.get_current_snapshot()
     snapshots.create_snapshot('create_snapshot2')
     snapshots.check()
-    snapshots.create_snapshot('create_snapshot3')
-    snapshots.check()
-    snapshot3 = snapshots.get_current_snapshot()
 
     snapshots.use_snapshot(snapshot1)
     snapshots.create_snapshot('create_snapshot1.1.1')
     snapshots.check()
-    snapshots.create_snapshot('create_snapshot1.1.2')
-    snapshots.check()
 
     snapshots.use_snapshot(snapshot1)
     snapshots.create_snapshot('create_snapshot1.2.1')
-    snapshots.check()
-    snapshot1_2_1 = snapshots.get_current_snapshot()
-    snapshots.create_snapshot('create_snapshot1.2.2')
-    snapshots.check()
-
-    volume.attach(vm)
-    test_util.test_dsc('migrate vm and check snapshot')
-    test_stub.migrate_vm_to_random_host(vm)
-    vm.check()
-    volume.detach()
-    snapshots.check()
-
-    snapshots.use_snapshot(snapshot3)
-    snapshots.check()
-    snapshots.create_snapshot('create_snapshot4')
-    snapshots.check()
-
-    volume.attach(vm)
-    test_util.test_dsc('migrate vm and check snapshot')
-    test_stub.migrate_vm_to_random_host(vm)
-    vm.check()
-    volume.detach()
-    snapshots.check()
-
-    test_util.test_dsc('Delete snapshot, volume and check')
-    snapshots.delete_snapshot(snapshot3)
-    snapshots.check()
-
-    volume.attach(vm)
-    test_util.test_dsc('migrate vm and check snapshot')
-    test_stub.migrate_vm_to_random_host(vm)
-    vm.check()
-    volume.detach()
-    snapshots.check()
-
-    snapshots.delete_snapshot(snapshot1_2_1)
     snapshots.check()
 
     snapshots.delete()
