@@ -66,6 +66,7 @@ def test():
     if (zone_avail_mem1 - zone_avail_mem2) != (host_avail_mem1 - host_avail_mem2):
         test_util.test_fail('available memory change is not correct after change vm template. zone changed value: %s , host changed value: %s' % ((zone_avail_mem1 - zone_avail_mem2), (host_avail_mem1 - host_avail_mem2)))
 
+    test_lib.lib_robot_cleanup(test_obj_dict)
     test_util.test_pass('Test available memory when changing instance offering Pass')
 
 #Will be called only if exception happens in test().
