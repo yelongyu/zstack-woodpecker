@@ -115,6 +115,8 @@ if [ $PULL_ZSTACK_UTILITY == 'Y' ]; then
     if [ $? -ne 0 ]; then
         echo_failure "\'git pull\' failure in $ZSTACK_UTILITY"
     fi
+    cd ..
+    [ -d zstack-agent ] && cd zstack-agent && git pull >/dev/null
     echo_pass
 else
     echo -e "${tab} : Skip pulling zstack-utility\n"
