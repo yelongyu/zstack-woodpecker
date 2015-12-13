@@ -32,7 +32,7 @@ def test():
     host_uuid = host[0].uuid
     zone_uuid = host[0].zoneUuid
     host_avail_mem1 = test_lib.lib_get_cpu_memory_capacity(host_uuids = [host_uuid]).availableMemory
-    zone_avail_mem1 = test_lib.lib_get_cpu_memory_capacity(zone_uuids = [zone_uuid])
+    zone_avail_mem1 = test_lib.lib_get_cpu_memory_capacity(zone_uuids = [zone_uuid]).availableMemory
     #unit is KB
     new_offering1 = test_lib.lib_create_instance_offering(cpuNum = 1, \
             cpuSpeed = 16, memorySize = 536870912, name = 'new_instance1')
@@ -55,7 +55,7 @@ def test():
     vm.change_instance_offering(new_offering_uuid)
     vm.start()
     host_avail_mem2 = test_lib.lib_get_cpu_memory_capacity(host_uuids = [host_uuid]).availableMemory
-    zone_avail_mem2 = test_lib.lib_get_cpu_memory_capacity(zone_uuids = [zone_uuid])
+    zone_avail_mem2 = test_lib.lib_get_cpu_memory_capacity(zone_uuids = [zone_uuid]).availableMemory
 
     if host_avail_mem2 >= host_avail_mem1 :
         test_util.test_fail('Host available memory is not correct after change vm template. Previous value: %s , Current value: %s' % (host_avail_mem1, host_avail_mem2))
