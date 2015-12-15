@@ -510,7 +510,7 @@ default one' % self.zstack_properties)
         #cmd = 'WEBSITE=localhost bash %s -f %s -r %s -a -z' % \
         #        (self.zstack_install_script, self.zstack_pkg, \
         #        self.install_path)
-        cmd = 'bash %s -z -r %s' % (self.zstack_pkg, self.install_path)
+        cmd = 'bash %s -z -r %s -m' % (self.zstack_pkg, self.install_path)
         if self.db_admin_password:
             cmd = '%s -P %s' % (cmd, self.db_admin_password)
         if self.db_password:
