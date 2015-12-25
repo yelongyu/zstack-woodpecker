@@ -332,6 +332,8 @@ def destroy_all_vm_and_vips(thread_threshold = 1000):
     session_uuid = acc_ops.login_as_admin()
     session_to = con_ops.change_global_config('identity', 'session.timeout', '720000')
     session_mc = con_ops.change_global_config('identity', 'session.maxConcurrent', '10000')
+    delete_policy = test_lib.lib_set_delete_policy('vm', 'Direct')
+    test_lib.lib_set_expunge_time('vm', 1)
     cond = []
     num = res_ops.query_resource_count(res_ops.VM_INSTANCE, cond)
 

@@ -4165,3 +4165,9 @@ def lib_set_delete_policy(category = 'vm', value = 'Direct'):
     '''
     return conf_ops.change_global_config(category, 'deletionPolicy', value)
 
+def lib_set_expunge_time(category = 'vm', value = 1):
+    '''
+    value could be 1~N
+    category could be vm, image, volume
+    '''
+    return conf_ops.change_global_config(category, 'expungePeriod', value)

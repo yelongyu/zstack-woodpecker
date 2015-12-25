@@ -457,9 +457,10 @@ class Plan(object):
             self.db_port = basic_config.db.get('port', '3306')
         
         if basic_config.has_element('zstackProperties'):
-            self.zstack_properties = self._full_path(basic_config.zstackProperties.text_)
-            if not os.path.exists(self.zstack_properties):
-                print('unable to find zstackProperties at %s, use \
+            if basic_config.zstackProperties.text_:
+                self.zstack_properties = self._full_path(basic_config.zstackProperties.text_)
+                if not os.path.exists(self.zstack_properties):
+                    print('unable to find zstackProperties at %s, use \
 default one' % self.zstack_properties)
 
         os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = ''
@@ -510,7 +511,7 @@ default one' % self.zstack_properties)
         #cmd = 'WEBSITE=localhost bash %s -f %s -r %s -a -z' % \
         #        (self.zstack_install_script, self.zstack_pkg, \
         #        self.install_path)
-        cmd = 'bash %s -z -r %s -m' % (self.zstack_pkg, self.install_path)
+        cmd = 'bash %s -z -r %s -m -R aliyun' % (self.zstack_pkg, self.install_path)
         if self.db_admin_password:
             cmd = '%s -P %s' % (cmd, self.db_admin_password)
         if self.db_password:
@@ -593,11 +594,11 @@ default one' % self.zstack_properties)
                 self.db_server_root_password)
 
         if not self.db_admin_password:
-            cmd = 'zstack-ctl install_db --host=%s' % self.db_server
+            cmd = 'zstack-ctl install_db --host=%s --login-password=zstack.mysql.password' % self.db_server
         else:
-            cmd = 'zstack-ctl install_db --host=%s --root-password=%s \
+            cmd = 'zstack-ctl install_db --host=%s \
                     --login-password=%s' \
-                    % (self.db_server, self.db_admin_password, \
+                    % (self.db_server, \
                     self.db_admin_password)
 
         print('installing db ...')
@@ -606,6 +607,8 @@ default one' % self.zstack_properties)
         cmd = 'zstack-ctl deploydb %s --host=%s' % (extra_opts, self.db_server)
         if self.db_admin_password:
             cmd = '%s --root-password=%s' % (cmd, self.db_admin_password )
+        else:
+            cmd = '%s --root-password=zstack.mysql.password' % cmd
 
         if self.db_password:
             cmd = '%s --zstack-password=%s' % (cmd, self.db_password)
