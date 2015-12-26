@@ -62,6 +62,7 @@ def test():
     session_to = con_ops.change_global_config('identity', 'session.timeout', '720000', session_uuid)
     session_mc = con_ops.change_global_config('identity', 'session.maxConcurrent', '10000', session_uuid)
     cond = res_ops.gen_query_conditions('type', '=', inventory.USER_VM_TYPE)
+    cond = res_ops.gen_query_conditions('state', '!=', 'Destroyed', cond)
     num = res_ops.query_resource_count(res_ops.VM_INSTANCE, cond, session_uuid)
 
     if num <= thread_threshold:

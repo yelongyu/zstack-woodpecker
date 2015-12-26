@@ -1,12 +1,17 @@
 '''
 This case can not execute parallelly.
 
-This case will try to over create VMs in one host, then delete all successful
-created VM. Finally it will compare the host available memory before creating
-vm and after destroying vm. 
+This case will calculate max available VMs base on 1 host available memory.
+
+The it will try to create all VMs at the same time to see if zstack could 
+handle it. 
 @author: Youyk
 '''
 import os
+import sys
+import threading
+import time
+
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
@@ -15,14 +20,31 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 
 _config_ = {
-        'timeout' : 1000,
-        'noparallel' : True
-        }
+    'timeout' : 1000,
+    'noparallel' : True
+}
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 original_rate = None
 new_offering_uuid = None
+exc_info = []
+
+def parallelly_create_vm(vm_name, host_uuid, instance_offering_uuid):
+    try:
+        vm = test_stub.create_vm(vm_name = vm_name, \
+                host_uuid = host_uuid, \
+                instance_offering_uuid = instance_offering_uuid)
+        test_obj_dict.add_vm(vm)
+    except Exception as e:
+        exc_info.append(sys.exc_info())
+
+def check_thread_exception():
+    if exc_info:
+        info1 = exc_info[0][1]
+        info2 = exc_info[0][2]
+        cleanup_exc_info()
+        raise info1, None, info2
 
 def test():
     global original_rate
@@ -59,17 +81,25 @@ def test():
     rounds = 0
     while (rounds < 3):
         times = 1
-        while (times <= (target_vm_num+3)):
-            try:
-                vm = test_stub.create_vm(vm_name = 'mem_reclaim_vm_%d' % times, \
-                        host_uuid = host.uuid, \
-                        instance_offering_uuid = new_offering.uuid)
-                test_obj_dict.add_vm(vm)
-            except Exception as e:
-                test_util.test_logger("VM Creation Failure in memory reclaiming test. :%s " % e)
-                pass
+        while (times <= (target_vm_num)):
+            thread = threading.Thread(target = parallelly_create_vm, \
+                    args = ('parallel_vm_creating_%d' % times, \
+                        host.uuid, \
+                        new_offering.uuid, ))
+            thread.start()
 
             times += 1
+
+        times = 1
+        print 'Running VM: %s ' % len(test_obj_dict.get_vm_list())
+        while threading.active_count() > 1:
+            check_thread_exception()
+            time.sleep(1)
+            if times > 5:
+                test_util.test_fail('creating vm time exceed 5s')
+            times += 1
+
+        check_thread_exception()
 
         for vm in test_obj_dict.get_all_vm_list():
             try:
@@ -90,7 +120,7 @@ def test():
     vm_ops.delete_instance_offering(new_offering_uuid)
     test_lib.lib_robot_cleanup(test_obj_dict)
 
-    test_util.test_pass('Memory Over Provision Test Pass')
+    test_util.test_pass('Parallel vm creation Test Pass')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
