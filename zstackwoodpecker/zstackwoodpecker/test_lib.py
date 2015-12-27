@@ -2468,10 +2468,10 @@ def lib_destroy_vm_and_data_volumes(vm_inv):
 def lib_destroy_vm_and_data_volumes_objs_update_test_dict(vm_obj, test_obj_dict):
     data_volumes_obj = test_obj_dict.get_volume_list(vm_obj.get_vm().uuid)
     vm_obj.destroy()
-    test_obj_dict.rm(vm_obj)
+    test_obj_dict.rm_vm(vm_obj)
     for data_volume_obj in data_volumes_obj:
         data_volume_obj.delete()
-        test_obj_dict.rm_volume()
+        test_obj_dict.rm_volume(data_volume_obj)
 
 def lib_get_root_volume_uuid(vm):
     return vm.rootVolumeUuid

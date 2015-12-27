@@ -628,7 +628,7 @@ class TestStateDict(object):
             self.rm_volume_snapshots_by_rm_volume(volume_uuid)
 
         #move all attached data volume to free stage.
-        self.mv_volumes(target_vm.vm.uuid, test_stage.free_volume)
+        self.mv_volumes(vm.get_vm().uuid, TestStage.free_volume)
         if state:
             if vm in self.vm_dict[state]:
                 self.vm_dict[state].remove(vm)
@@ -652,6 +652,9 @@ class TestStateDict(object):
         return vm_list
 
     def add_volume(self, volume, state=TestStage.free_volume):
+        if not self.volume_dict.has_key(state):
+            self.volume_dict[state] = []
+
         if not volume in self.volume_dict[state]:
             self.volume_dict[state].append(volume)
             if not self.get_volume_snapshot(volume.get_volume().uuid):

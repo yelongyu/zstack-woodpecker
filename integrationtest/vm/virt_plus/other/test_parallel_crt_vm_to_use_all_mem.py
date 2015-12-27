@@ -107,7 +107,7 @@ def test():
                 test_obj_dict.rm_vm(vm)
             except Exception as e:
                 test_util.test_logger("VM Destroying Failure in memory reclaiming test. :%s " % e)
-                pass
+                raise e
 
         host_res2 = test_lib.lib_get_cpu_memory_capacity(host_uuids = [host.uuid])
         avail_mem2 = host_res2.availableMemory
