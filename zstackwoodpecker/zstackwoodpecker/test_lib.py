@@ -2450,6 +2450,29 @@ def lib_get_root_volume(vm):
         if volume.type == vol_header.ROOT_VOLUME:
             return volume
 
+def lib_get_data_volumes(vm):
+    volumes = vm.allVolumes
+    data_volumes = []
+    for volume in volumes:
+        if volume.type != vol_header.ROOT_VOLUME:
+            data_volumes.append(volume)
+
+    return data_volumes
+
+def lib_destroy_vm_and_data_volumes(vm_inv):
+    data_volumes = lib_get_data_volumes(vm_inv)
+    vm_ops.destroy_vm(vm_inv.uuid)
+    for data_volume in data_volumes:
+        vol_ops.delete_volume(data_volume.uuid)
+
+def lib_destroy_vm_and_data_volumes_objs_update_test_dict(vm_obj, test_obj_dict):
+    data_volumes_obj = test_obj_dict.get_volume_list(vm_obj.get_vm().uuid)
+    vm_obj.destroy()
+    test_obj_dict.rm(vm_obj)
+    for data_volume_obj in data_volumes_obj:
+        data_volume_obj.delete()
+        test_obj_dict.rm_volume()
+
 def lib_get_root_volume_uuid(vm):
     return vm.rootVolumeUuid
 
@@ -3726,7 +3749,6 @@ into robot_test_obj.exclusive_actions_list.')
                 % (next_action, target_vm.get_vm().uuid))
         target_vm.destroy()
         test_dict.mv_vm(target_vm, vm_current_state, vm_header.DESTROYED)
-        test_dict.mv_volumes(target_vm.vm.uuid, test_stage.free_volume)
 
     elif next_action == TestAction.migrate_vm :
         test_util.test_dsc('Robot Action: %s; on VM: %s' \

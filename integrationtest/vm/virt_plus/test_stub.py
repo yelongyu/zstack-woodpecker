@@ -25,7 +25,7 @@ def create_vm(vm_name='virt-vm', \
         image_name = None, \
         l3_name = None, \
         instance_offering_uuid = None, \
-        host_uuid = None,
+        host_uuid = None, \
         disk_offering_uuids=None, system_tags=None, session_uuid = None):
 
     if not image_name:
@@ -44,6 +44,7 @@ def create_vm(vm_name='virt-vm', \
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
     vm_creation_option.set_name(vm_name)
+    vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
     if host_uuid:
         vm_creation_option.set_host_uuid(host_uuid)
     vm = zstack_vm_header.ZstackTestVm()

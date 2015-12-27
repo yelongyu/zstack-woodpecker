@@ -28,6 +28,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.header.host as host_header
 import zstackwoodpecker.operations.config_operations as con_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
+import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.operations.zone_operations as zone_ops
@@ -288,6 +289,22 @@ def do_destroy_vms(vms, thread_threshold = 1000):
             raise info1, None, info2
         time.sleep(0.1)
 
+def do_delete_volumes(volumes, thread_threshold = 1000):
+    for volume in volumes:
+        thread = threading.Thread(target=vol_ops.delete_volume, args=(volume.uuid,))
+        while threading.active_count() > thread_threshold:
+            time.sleep(0.5)
+        exc = sys.exc_info()
+        if exc[0]:
+            raise info1, None, info2
+        thread.start()
+
+    while threading.activeCount() > 1:
+        exc = sys.exc_info()
+        if exc[0]:
+            raise info1, None, info2
+        time.sleep(0.1)
+
 def delete_accounts(thread_threshold = 1000):
     def do_delete_accounts(accounts, session_uuid):
         for account in accounts:
@@ -333,7 +350,7 @@ def destroy_all_vm_and_vips(thread_threshold = 1000):
     session_to = con_ops.change_global_config('identity', 'session.timeout', '720000')
     session_mc = con_ops.change_global_config('identity', 'session.maxConcurrent', '10000')
     delete_policy = test_lib.lib_set_delete_policy('vm', 'Direct')
-    test_lib.lib_set_expunge_time('vm', 1)
+    expunge_time = test_lib.lib_set_expunge_time('vm', 1)
     cond = res_ops.gen_query_conditions('state', '!=', 'Destroyed')
     num = res_ops.query_resource_count(res_ops.VM_INSTANCE, cond)
 
@@ -371,6 +388,8 @@ def destroy_all_vm_and_vips(thread_threshold = 1000):
             start += limit
         do_destroy_vips(vips, thread_threshold)
 
+    test_lib.lib_set_delete_policy('vm', delete_policy)
+    test_lib.lib_set_expunge_time('vm', expunge_time)
     test_util.test_logger('vms destroy Success. Destroy %d VMs.' % num)
 
 def delete_zones():
@@ -400,3 +419,31 @@ def delete_bs_ceph_pools():
             test_lib.lib_delete_ceph_pool(ceph_host, username, password, \
                     bs.poolName)
 
+def delete_all_volumes(thread_threshold = 1000):
+    session_uuid = acc_ops.login_as_admin()
+    session_to = con_ops.change_global_config('identity', 'session.timeout', '720000')
+    session_mc = con_ops.change_global_config('identity', 'session.maxConcurrent', '10000')
+    delete_policy = test_lib.lib_set_delete_policy('volume', 'Direct')
+    expunge_time = test_lib.lib_set_expunge_time('volume', 1)
+    cond = res_ops.gen_query_conditions('status', '!=', 'Deleted')
+    num = res_ops.query_resource_count(res_ops.VOLUME, cond)
+
+    if num <= thread_threshold:
+        volumes = res_ops.query_resource(res_ops.VOLUME, cond)
+        do_delete_volumes(volumes, thread_threshold)
+    else:
+        start = 0
+        limit = thread_threshold - 1
+        curr_num = start
+        volumes = []
+        while curr_num < num:
+            volumes_temp = res_ops.query_resource_fields(res_ops.VOLUME, \
+                    cond, None, ['uuid'], start, limit)
+            volumes.extend(volumes_temp)
+            curr_num += limit
+            start += limit
+        do_delete_volumes(volumes, thread_threshold)
+
+    test_lib.lib_set_delete_policy('volume', delete_policy)
+    test_lib.lib_set_expunge_time('volume', expunge_time)
+    test_util.test_logger('Volumes destroy Success. Destroy %d Volumes.' % num)

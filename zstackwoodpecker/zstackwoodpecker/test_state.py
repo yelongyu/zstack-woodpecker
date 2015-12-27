@@ -588,23 +588,32 @@ class TestStateDict(object):
         })
 
     def add_vm(self, vm, state=vm_header.RUNNING, create_snapshots = True):
-        if not vm in self.vm_dict[state]:
-            self.vm_dict[state].append(vm)
-            import zstackwoodpecker.test_lib as test_lib
-            root_volume = test_lib.lib_get_root_volume(vm.get_vm())
-            if create_snapshots and not self.get_volume_snapshot(root_volume.uuid):
+        def add_vm_root_volume_snapshot(volume, data = True):
+            if create_snapshots and not self.get_volume_snapshot(volume.uuid):
                 import zstackwoodpecker.zstack_test.zstack_test_snapshot \
                         as zstack_sp_header
                 import zstackwoodpecker.zstack_test.zstack_test_volume \
                         as zstack_volume_header
 
                 volume_obj = zstack_volume_header.ZstackTestVolume()
-                volume_obj.set_volume(root_volume)
+                volume_obj.set_volume(volume)
                 volume_obj.set_state(volume_header.ATTACHED)
                 volume_obj.set_target_vm(vm)
-                volume_snapshots = zstack_sp_header.ZstackVolumeSnapshot()
-                volume_snapshots.set_target_volume(volume_obj)
-                self.add_volume_snapshot(volume_snapshots)
+                if data:
+                    self.add_volume(volume_obj, state = vm.get_vm().uuid)
+                else:
+                    volume_snapshots = zstack_sp_header.ZstackVolumeSnapshot()
+                    volume_snapshots.set_target_volume(volume_obj)
+                    self.add_volume_snapshot(volume_snapshots)
+
+        if not vm in self.vm_dict[state]:
+            self.vm_dict[state].append(vm)
+            import zstackwoodpecker.test_lib as test_lib
+            root_volume = test_lib.lib_get_root_volume(vm.get_vm())
+            add_vm_root_volume_snapshot(root_volume, data = False)
+            data_volumes = test_lib.lib_get_data_volumes(vm.get_vm())
+            for data_volume in data_volumes:
+                add_vm_root_volume_snapshot(data_volume)
 
     def mv_vm(self, vm, src_state, dst_state):
         self.rm_vm(vm, src_state)
@@ -613,10 +622,13 @@ class TestStateDict(object):
     def rm_vm(self, vm, state=None):
         if vm.get_state() == vm_header.DESTROYED:
             #Remove the snapshots, which is binded with Root Volume
+            #TODO: not directly rm, should move to deleted stage.
             import zstackwoodpecker.test_lib as test_lib
             volume_uuid = test_lib.lib_get_root_volume(vm.get_vm()).uuid
             self.rm_volume_snapshots_by_rm_volume(volume_uuid)
 
+        #move all attached data volume to free stage.
+        self.mv_volumes(target_vm.vm.uuid, test_stage.free_volume)
         if state:
             if vm in self.vm_dict[state]:
                 self.vm_dict[state].remove(vm)
