@@ -11,7 +11,7 @@ import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
 def create_vlan_vm(image_name, l3_name=None, disk_offering_uuids=None):
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     if not l3_name:
-        l3_name = os.environ.get('l3VlanNetworkName1')
+        l3_name = os.environ.get('l3PublicNetworkName')
 
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     return create_vm([l3_net_uuid], image_uuid, 'zs_install_%s' % image_name, \
@@ -83,6 +83,14 @@ def copy_id_dsa_pub(vm_inv):
         os.system("ssh-keygen -t dsa -N '' -f %s" % src_file)
     test_lib.lib_scp_file_to_vm(vm_inv, src_file, target_file)
 
+def prepare_mevoco_test_env(vm_inv):
+    all_in_one_pkg = os.environ['zstackPkg']
+    test_lib.lib_scp_file_to_vm(vm_inv, all_in_one_pkg, '/root/zizhu.bin')
+
+    vm_ip = vm_inv.vmNics[0].ip
+    ssh.make_ssh_no_password(vm_ip, test_lib.lib_get_vm_username(vm_inv), \
+            test_lib.lib_get_vm_password(vm_inv))
+
 def prepare_test_env(vm_inv, aio_target):
     zstack_install_script = os.environ['zstackInstallScript']
     target_file = '/root/zstack_installer.sh'
@@ -119,6 +127,58 @@ def upgrade_zstack(ssh_cmd, target_file, tmp_file):
                 test_util.test_logger("mn node is still not started up, wait for another 10 seconds...")
             else:
                 test_util.test_fail('zstack upgrade failed')
+
+def execute_mevoco_aliyun_install(ssh_cmd, tmp_file):
+    target_file = '/root/zizhu.bin'
+    env_var = "ZSTACK_ALL_IN_ONE='%s' WEBSITE='%s'" % \
+            (target_file, 'localhost')
+
+    cmd = '%s "%s bash /root/zizhu.bin -R aliyun -m"' % (ssh_cmd, env_var)
+
+    process_result = execute_shell_in_process(cmd, tmp_file)
+
+    if process_result != 0:
+        cmd = '%s "cat /tmp/zstack_installation.log"' % ssh_cmd
+        execute_shell_in_process(cmd, tmp_file)
+        if 'no management-node-ready message received within' in open(tmp_file).read():
+            times = 30
+            cmd = '%s "zstack-ctl status"' % ssh_cmd
+            while (times > 0):
+                time.sleep(10)
+                process_result = execute_shell_in_process(cmd, tmp_file, 10, True)
+                times -= 0
+                if process_result == 0:
+                    test_util.test_logger("management node start after extra %d seconds" % (30 - times + 1) * 10 )
+                    return 0
+                test_util.test_logger("mn node is still not started up, wait for another 10 seconds...")
+            else:
+                test_util.test_fail('zstack installation failed')
+
+def execute_mevoco_online_install(ssh_cmd, tmp_file):
+    target_file = '/root/zizhu.bin'
+    env_var = "ZSTACK_ALL_IN_ONE='%s' WEBSITE='%s'" % \
+            (target_file, 'localhost')
+
+    cmd = '%s "%s bash /root/zizhu.bin -m"' % (ssh_cmd, env_var)
+
+    process_result = execute_shell_in_process(cmd, tmp_file)
+
+    if process_result != 0:
+        cmd = '%s "cat /tmp/zstack_installation.log"' % ssh_cmd
+        execute_shell_in_process(cmd, tmp_file)
+        if 'no management-node-ready message received within' in open(tmp_file).read():
+            times = 30
+            cmd = '%s "zstack-ctl status"' % ssh_cmd
+            while (times > 0):
+                time.sleep(10)
+                process_result = execute_shell_in_process(cmd, tmp_file, 10, True)
+                times -= 0
+                if process_result == 0:
+                    test_util.test_logger("management node start after extra %d seconds" % (30 - times + 1) * 10 )
+                    return 0
+                test_util.test_logger("mn node is still not started up, wait for another 10 seconds...")
+            else:
+                test_util.test_fail('zstack installation failed')
 
 def execute_all_install(ssh_cmd, target_file, tmp_file):
     env_var = "ZSTACK_ALL_IN_ONE='%s' WEBSITE='%s'" % \
@@ -157,18 +217,20 @@ def only_install_zstack(ssh_cmd, target_file, tmp_file):
         execute_shell_in_process(cmd, tmp_file)
         test_util.test_fail('zstack installation failed')
 
-def check_installation(ssh_cmd, tmp_file):
+def check_installation(ssh_cmd, tmp_file, vm_inv):
     cmd = '%s "/usr/bin/zstack-cli LogInByAccount accountName=admin password=password"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
         test_util.test_fail('zstack-cli login failed')
 
-    cmd = '%s "/usr/bin/zstack-cli CreateZone name=zone1 description=zone1"' % ssh_cmd
+    vm_passwd = test_lib.lib_get_vm_password(vm_inv)
+    vm_ip = vm_ip = vm_inv.vmNics[0].ip
+    cmd = '%s "/usr/bin/zstack-cli AddSftpBackupStorage name=bs1 description=bs hostname=%s username=root password=%s url=/home/bs"' % (ssh_cmd, vm_ip, vm_passwd)
     process_result = execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
-        test_util.test_fail('zstack-cli create zone failed')
+        test_util.test_fail('zstack-cli create Backup Storage failed')
 
-    cmd = '%s "/usr/bin/zstack-cli QueryZone name=zone1 description=zone1"' % ssh_cmd
+    cmd = '%s "/usr/bin/zstack-cli QuerySftpBackupStorage name=bs1 description=bs"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
-        test_util.test_fail('zstack-cli Query zone failed')
+        test_util.test_fail('zstack-cli Query Backup Storage failed')

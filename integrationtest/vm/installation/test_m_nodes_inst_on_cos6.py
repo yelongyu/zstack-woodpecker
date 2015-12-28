@@ -89,7 +89,7 @@ def test():
             else:
                 test_fail('start node failed in vm:%s' % vm1_inv.uuid)
 
-    test_stub.check_installation(ssh_cmd1, tmp_file)
+    test_stub.check_installation(ssh_cmd1, tmp_file, vm1_inv)
 
     os.system('rm -f %s' % tmp_file)
     vm1.destroy()

@@ -30,10 +30,10 @@ def test():
     test_stub.copy_id_dsa(vm_inv, ssh_cmd, tmp_file)
     test_stub.copy_id_dsa_pub(vm_inv)
     test_stub.execute_all_install(ssh_cmd, target_file, tmp_file)
-    test_stub.check_installation(ssh_cmd, tmp_file)
+    test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
 
     test_stub.upgrade_zstack(ssh_cmd, target_file, tmp_file)
-    test_stub.check_installation(ssh_cmd, tmp_file)
+    test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
 
     os.system('rm -f %s' % tmp_file)
     vm.destroy()

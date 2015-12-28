@@ -709,6 +709,8 @@ default one' % self.zstack_properties)
     def execute_plan_without_deploy_test_agent(self):
         try:
             self._stop_nodes()
+            shell.call('zstack-ctl kairosdb --stop')
+            shell.call('zstack-ctl cassandra --stop')
         except:
             pass
 

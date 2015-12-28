@@ -16,7 +16,7 @@ tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
 
 
 def test():
-    test_util.test_dsc('Create test vm to test zstack all installation in CentOS6.')
+    test_util.test_dsc('Create test vm to test Mevoco installation in CentOS6.')
     image_name = os.environ.get('imageName_i_c6')
     vm = test_stub.create_vlan_vm(image_name)
     test_obj_dict.add_vm(vm)
@@ -24,15 +24,14 @@ def test():
 
     vm_inv = vm.get_vm()
     vm_ip = vm_inv.vmNics[0].ip
-    target_file = '/root/zstack-all-in-one.tgz'
-    test_stub.prepare_test_env(vm_inv, target_file)
+    test_stub.prepare_mevoco_test_env(vm_inv)
     ssh_cmd = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
-    test_stub.execute_all_install(ssh_cmd, target_file, tmp_file)
+    test_stub.execute_mevoco_aliyun_install(ssh_cmd, tmp_file)
     test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
 
     os.system('rm -f %s' % tmp_file)
     vm.destroy()
-    test_util.test_pass('ZStack installation Test Success')
+    test_util.test_pass('Mevoco installation Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
