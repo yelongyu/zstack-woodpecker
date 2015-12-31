@@ -697,18 +697,18 @@ def add_l3_network(deployConfig, session_uuid, l3_name = None, l2_name = None, \
             else:
                 duplication = int(zone.duplication__)
 
-            if duplication == 1:
-                 _deploy_l3_network(l2, 0, 0)
-            else:
-                for zone_ref in range(duplication):
-                    for cluster in xmlobject.safe_list(zone.clusters.cluster):
-                        if cluster.duplication__ == None:
-                            cluster_duplication = 1
-                        else:
-                            cluster_duplication = int(cluster.duplication__)
+            for zone_ref in range(duplication):
+                for cluster in xmlobject.safe_list(zone.clusters.cluster):
+                    if cluster.duplication__ == None:
+                        cluster_duplication = 1
+                    else:
+                        cluster_duplication = int(cluster.duplication__)
     
-                        for cluster_ref in range(cluster_duplication):
-                            _deploy_l3_network(l2, zone_ref, cluster_ref)
+                    for cluster_ref in range(cluster_duplication):
+                        if zone_ref == 1 and cluster_ref == 1:
+                            zone_ref = 0
+                            cluster_ref = 0
+                        _deploy_l3_network(l2, zone_ref, cluster_ref)
 
     wait_for_thread_done()
     test_util.test_logger('All add L3 Network actions are done.')

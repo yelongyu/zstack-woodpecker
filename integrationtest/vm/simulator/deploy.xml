@@ -73,8 +73,8 @@
   
     <images>
       <image name="$imageName_s" description="Test"
-          mediaType="$rootMediaType" format="$rootImageFormat"
-          url="$imageUrl_s" hypervisorType="$imageHypervisorType" 
+          mediaType="$rootMediaType" format="simulator"
+          url="$imageUrl_s" 
           username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$simulatorBackupStorageName</backupStorageRef>
       </image>

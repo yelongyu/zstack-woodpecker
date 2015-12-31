@@ -43,7 +43,7 @@
     <simulatorBackupStorage name="$simulatorBackupStorageName"
       description="Test" url="$simulatorBackupStorageUrl" 
       totalCapacity="$simulatorBackupStorageTotalCapacity"
-      usedCapacity="$simulatorBackupStorageUsedCapacity"/>
+      availableCapacity="$simulatorBackupStorageAvailableCapacity"/>
   </backupStorages>
 
   <images>
@@ -92,7 +92,7 @@
 
       <primaryStorages>
         <simulatorPrimaryStorage name="$simulatorPrimaryStorageName"
-          description="Test" totalCapacity="1T" usedCapacity="0" url="nfs://test" />
+          description="Test" totalCapacity="100T" availableCapacity="100T" url="nfs://test" />
       </primaryStorages>
 
       <backupStorageRef>$simulatorBackupStorageName</backupStorageRef>

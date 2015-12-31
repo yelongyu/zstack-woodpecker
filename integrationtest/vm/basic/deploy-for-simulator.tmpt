@@ -9,7 +9,7 @@ simulatorBackupStorageName = sftp
 simulatorBackupStorageUrl = nfs://fake_url
 simulatorBackupStorageHostname = zstack-fake
 simulatorBackupStorageTotalCapacity = 100T
-simulatorBackupStorageUsedCapacity = 0
+simulatorBackupStorageAvailableCapacity = 100T
 
 simulatorPrimaryStorageName = simulator
 
@@ -41,71 +41,13 @@ memoryCapacity = 128G
 l2PublicNetworkName = noVlan
 l2NetworkPhysicalInterface = eth0
 
-l2NoVlanNetworkName1 = vlan10
-l2NoVlanNetworkInterface1 = eth0.10
-
-l2NoVlanNetworkName2 = vlan11
-l2NoVlanNetworkInterface2 = eth0.11
-
-l2VlanNetworkName1 = vlan-test-dns-dhcp-snat
-guestL2Vlan1 = 14
-
-l2VlanNetworkName2 = vlan-test-port-forwarding
-guestL2Vlan2 = 15
-
-l2VlanNetworkName3 = vlan-test-dns-dhcp
-guestL2Vlan3 = 16
-
 l3PublicNetworkName = public network
-l3NoVlanNetworkName1 = l3_user_defined_vlan1
-l3NoVlanNetworkName2 = l3_user_defined_vlan2
-l3VlanNetworkName1 = l3VlanNetwork1
-l3VlanDNATNetworkName = l3VlanDNATNetwork
-l3VlanNetworkName3 = l3VlanNetwork3
 
 DNSServer = 10.0.101.1
 
 ipRangeName = host IP range
 ipRangeStartIp = 10.0.101.201
-ipRangeEndIp = 10.0.101.250
-ipRangeNetmask = 255.255.255.0
+ipRangeEndIp = 10.0.255.250
+ipRangeNetmask = 255.255.0.0
 ipRangeGateway = 10.0.101.1
 
-noVlanIpRangeName1 = guest novlan range 1
-noVlanIpRangeStart1 = 10.250.0.2
-noVlanIpRangeEnd1 = 10.250.0.199
-noVlanIpRangeGateway1 = 10.250.0.1
-noVlanIpRangeNetmask1 = 255.255.0.0
-
-noVlanIpRangeName2 = guest novlan range 2
-noVlanIpRangeStart2 = 10.251.1.2
-noVlanIpRangeEnd2 = 10.251.1.199
-noVlanIpRangeGateway2 = 10.251.1.1
-noVlanIpRangeNetmask2 = 255.255.0.0
-
-vlanIpRangeName1 = guest vlan range for dns dhcp and snat
-vlanIpRangeStart1 = 10.10.0.2
-vlanIpRangeEnd1 = 10.10.127.255
-vlanIpRangeGateway1 = 10.10.0.1
-vlanIpRangeNetmask1 = 255.255.0.0
-
-vlanIpRangeName2 = guest vlan range for port forwarding
-vlanIpRangeStart2 = 10.11.0.2
-vlanIpRangeEnd2 = 10.11.127.255
-vlanIpRangeGateway2 = 10.11.0.1
-vlanIpRangeNetmask2 = 255.255.0.0
-
-vlanIpRangeName3 = guest vlan range for dns and dhcp
-vlanIpRangeStart3 = 10.12.0.2
-vlanIpRangeEnd3 = 10.12.127.255
-vlanIpRangeGateway3 = 10.12.0.1
-vlanIpRangeNetmask3 = 255.255.0.0
-
-
-virtualRouterImageName = vr
-#virtualRouterImageUrl = http://zstack.yyk.net/image/vr-centos.img
-#virtualRouterImageUrl = http://zstack.yyk.net/image/centos.img
-#virtualRouterImageUrl = http://zstack.yyk.net/image/vr-centos_500m.img
-virtualRouterImageUrl = http://zstack-sim/sim-fake-vr.img
-vrImageUsername = root
-vrImagePassword = password

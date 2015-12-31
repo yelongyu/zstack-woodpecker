@@ -9,8 +9,8 @@ simulatorBackupStorageUsedCapacity = 0
 simulatorPrimaryStorageName = simulator
 
 imageName = simulator-image
-imageFormat = Template
 imageUrl = http://zstack-sim/fake.img
+rootImageFormat = simulator
 imageHypervisorType = Simulator
 imageUsername = root
 imagePassword = password
