@@ -3,10 +3,12 @@ zstack image test class
 
 @author: Youyk
 '''
+import zstackwoodpecker.header.header as zstack_header
 import zstackwoodpecker.header.image as image_header
 import zstackwoodpecker.operations.image_operations as img_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.test_util as test_util
+import zstackwoodpecker.test_lib as test_lib
 
 class ZstackTestImage(image_header.TestImage):
 

@@ -4200,3 +4200,41 @@ def lib_get_expunge_time(category = 'vm'):
     '''
     return conf_ops.get_global_config_value(category, 'expungePeriod')
 
+def lib_update_test_state_object_delete_policy(category, policy, \
+        test_state_object):
+    '''
+    category could be vm, volume, image.
+    policy could be DIRECT, DELAY, NEVER
+    test_state_object is test_state.TestStageDict
+    '''
+    lib_set_delete_policy(category = category, value = policy)
+    if category == 'vm':
+        test_state_object.update_vm_delete_policy(policy)
+    elif category == 'volume':
+        test_stage_object.update_volume_delete_policy(policy)
+    elif category == 'image':
+        test_stage_object.update_image_delete_policy(policy)
+    else:
+        test_util.test_fail('Category can only be vm, volume or image. But your input is: %s'% category)
+    test_util.test_logger('%s delete policy has been changed to %s' % \
+            (category, policy))
+
+def lib_update_test_state_object_delete_delay_time(category, \
+        delay_time, test_state_object):
+    '''
+    category could be vm, volume, image.
+    delete_delay_time is an int value for seconds.
+    test_state_object is test_state.TestStageDict
+    '''
+    lib_set_expunge_time(category = category, value = delay_time)
+    if category == 'vm':
+        test_state_object.update_vm_delete_delay_time(delay_time)
+    elif category == 'volume':
+        test_state_object.update_volume_delete_delay_time(delay_time)
+    elif category == 'image':
+        test_state_object.update_image_delete_delay_time(delay_time)
+    else:
+        test_util.test_fail('Category can only be vm, volume or image. But your input is: %s'% category)
+    test_util.test_logger('%s delete delay time has been changed to \
+%s' % (category, policy))
+

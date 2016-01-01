@@ -19,8 +19,8 @@ test_obj_dict = test_state.TestStateDict()
 delete_policy = None
 
 def test():
-    if conf_ops.get_global_config_value('vm', 'deletionPolicy') != 'Delay' :
-        test_util.test_skip('vm delete_policy is not Delay, skip test.')
+    if conf_ops.get_global_config_value('vm', 'deletionPolicy') == 'Direct' :
+        test_util.test_skip('vm delete_policy is Direct, skip test.')
         return
     vm = test_stub.create_vm(vm_name = 'basic-test-vm')
     test_obj_dict.add_vm(vm)

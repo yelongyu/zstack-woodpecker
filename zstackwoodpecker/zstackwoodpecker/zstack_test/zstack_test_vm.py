@@ -3,6 +3,7 @@ zstack vm test class
 
 @author: Youyk
 '''
+import zstackwoodpecker.header.header as zstack_header
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.net_operations as net_ops
@@ -146,10 +147,8 @@ class ZstackTestVm(vm_header.TestVm):
         return self.get_vm()
 
     def set_delete_policy(self, policy):
-        test_lib.lib_set_delete_policy(category = 'vm', value = policy)
         super(ZstackTestVm, self).set_delete_policy(policy)
 
     def set_delete_delay_time(self, delay_time):
-        test_lib.lib_set_expunge_time(category = 'vm', value = delay_time)
         super(ZstackTestVm, self).set_delete_delay_time(delay_time)
 

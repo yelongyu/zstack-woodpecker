@@ -41,6 +41,7 @@ def test():
     new_offering_uuid = new_offering1.uuid
 
     vm = test_stub.create_vm(vm_name = 'test_avail_memory', \
+            host_uuid = host_uuid, \
             instance_offering_uuid = new_offering1.uuid)
     test_obj_dict.add_vm(vm)
 
@@ -55,15 +56,20 @@ def test():
     vm.change_instance_offering(new_offering_uuid)
     vm.start()
     host_avail_mem2 = test_lib.lib_get_cpu_memory_capacity(host_uuids = [host_uuid]).availableMemory
-    zone_avail_mem2 = test_lib.lib_get_cpu_memory_capacity(zone_uuids = [zone_uuid]).availableMemory
-
+    host_mem_diff = host_avail_mem1 - host_avail_mem
     if host_avail_mem2 >= host_avail_mem1 :
         test_util.test_fail('Host available memory is not correct after change vm template. Previous value: %s , Current value: %s' % (host_avail_mem1, host_avail_mem2))
+    else:
+        test_util.test_logger('Host available memory before change template: %s , after change template: %s , the difference: %s' % (host_avail_mem1, host_avail_mem2, host_mem_diff))
 
+    zone_avail_mem2 = test_lib.lib_get_cpu_memory_capacity(zone_uuids = [zone_uuid]).availableMemory
+    zone_mem_diff = zone_avail_mem1 - zone_avail_mem2
     if zone_avail_mem2 >= zone_avail_mem1 :
         test_util.test_fail('Zone available memory is not correct after change vm template. Previous value: %s , Current value: %s' % (zone_avail_mem1, zone_avail_mem2))
+    else:
+        test_util.test_logger('Zone available memory before change template: %s , after change template: %s , the difference: %s' % (zone_avail_mem1, zone_avail_mem2, zone_mem_diff))
 
-    if (zone_avail_mem1 - zone_avail_mem2) != (host_avail_mem1 - host_avail_mem2):
+    if zone_mem_diff != host_mem_diff:
         test_util.test_fail('available memory change is not correct after change vm template. zone changed value: %s , host changed value: %s' % ((zone_avail_mem1 - zone_avail_mem2), (host_avail_mem1 - host_avail_mem2)))
 
     test_lib.lib_robot_cleanup(test_obj_dict)

@@ -4,6 +4,7 @@ zstack volume test class
 @author: Youyk
 '''
 import zstackwoodpecker.header.header as zstack_header
+import zstackwoodpecker.header.header as zstack_header
 import zstackwoodpecker.header.volume as volume_header
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.header.image as image_header

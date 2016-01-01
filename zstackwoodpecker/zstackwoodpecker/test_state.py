@@ -11,6 +11,7 @@ import random
 import test_util
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.header.volume as volume_header
+import zstackwoodpecker.header.image as image_header
 import zstackwoodpecker.header.vip as vip_header
 import zstackwoodpecker.header.eip as eip_header
 import zstackwoodpecker.header.port_forwarding as pf_header
@@ -996,22 +997,34 @@ class TestStateDict(object):
         return all_items
 
     def update_vm_delete_policy(self, policy):
-        pass
+        for vm in self.get_all_vm_list():
+            if vm.get_state() != vm_header.EXPUNGED:
+                vm.set_delete_policy(policy)
 
     def update_vm_delete_delay_time(self, delay_time):
-        pass
+        for vm in self.get_all_vm_list():
+            if vm.get_state() != vm_header.EXPUNGED:
+                vm.set_delete_delay_time(delay_time)
 
     def update_volume_delete_policy(self, policy):
-        pass
+        for volume in self.get_all_volume_list():
+            if volume.get_state() != volume_header.EXPUNGED:
+                volume.set_delete_policy(policy)
 
     def update_volume_delete_delay_time(self, delay_time):
-        pass
+        for volume in self.get_all_volume_list():
+            if volume.get_state() != volume_header.EXPUNGED:
+                volume.set_delete_delay_time(delay_time)
 
     def update_image_delete_policy(self, policy):
-        pass
+        for image in self.get_image_list():
+            if image.get_state() != image_header.EXPUNGED:
+                image.set_delete_policy(policy)
 
     def update_image_delete_delay_time(self, delay_time):
-        pass
+        for image in self.get_image_list():
+            if image.get_state() != image_header.EXPUNGED:
+                image.set_delete_delay_time(delay_time)
 
 class Port(object):
     '''
