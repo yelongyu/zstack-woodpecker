@@ -83,6 +83,10 @@ class KvmVmCheckerFactory(checker_header.CheckerFactory):
             #VM destroy will cause vm structure be removed from DB, when VmExpungeInterval is set to 1, so doesn't need to check destroyed state sync in db in most case.
             checker_dict[db_checker.zstack_vm_db_checker] = True
             checker_dict[vm_checker.zstack_kvm_vm_destroyed_checker] = True
+        elif test_obj.state == vm_header.EXPUNGED:
+            checker_dict[db_checker.zstack_vm_db_checker] = True
+            checker_dict[vm_checker.zstack_kvm_vm_destroyed_checker] = True
+
 
         kvm_vm_checker_chain.add_checker_dict(checker_dict, test_obj)
         return kvm_vm_checker_chain
@@ -112,7 +116,9 @@ class KvmVolumeCheckerFactory(checker_header.CheckerFactory):
             checker_dict[volume_checker.zstack_kvm_volume_file_checker] = True
 
         elif test_obj.state == volume_header.DELETED:
-            test_util.test_logger('volume has been deleted: %s' % test_obj.volume.uuid)
+            checker_dict[db_checker.zstack_volume_db_checker] = True
+            checker_dict[volume_checker.zstack_kvm_volume_file_checker] = True
+        else test_obj.state == volume_header.EXPUNGED:
             checker_dict[db_checker.zstack_volume_db_checker] = False
             checker_dict[volume_checker.zstack_kvm_volume_file_checker] = False
 
@@ -128,8 +134,9 @@ class KvmImageCheckerFactory(checker_header.CheckerFactory):
             checker_dict[image_checker.zstack_kvm_image_file_checker] = True
 
         if test_obj.state == image_header.DELETED:
-            #Image db will not deleted, as it might be used by some alive VMs.
-            #checker_dict[db_checker.zstack_image_db_checker] = False
+            checker_dict[db_checker.zstack_image_db_checker] = True
+            checker_dict[image_checker.zstack_kvm_image_file_checker] = True
+        if test_obj.state == image_header.EXPUNGED:
             checker_dict[image_checker.zstack_kvm_image_file_checker] = False
 
         kvm_image_checker_chain.add_checker_dict(checker_dict, test_obj)

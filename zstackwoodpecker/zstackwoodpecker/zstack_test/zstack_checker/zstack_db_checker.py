@@ -16,8 +16,8 @@ class zstack_vm_db_checker(checker_header.TestChecker):
         conditions = res_ops.gen_query_conditions('uuid', '=', vm.uuid)
         vm_in_db = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)
         if not vm_in_db:
-            test_util.test_logger('Check result: can NOT find [vm:] %s in Database. It is possibly destroyed.' % vm.uuid)
-            if self.test_obj.state == vm_header.DESTROYED:
+            test_util.test_logger('Check result: can NOT find [vm:] %s in Database. It is possibly expunged.' % vm.uuid)
+            if self.test_obj.state == vm_header.EXPUNGED:
                 return self.judge(True)
             else:
                 return self.judge(False)
@@ -84,7 +84,8 @@ class zstack_volume_attach_db_checker(checker_header.TestChecker):
 
         if not db_volume.vmInstanceUuid:
             #update self.test_obj, due to vm destroyed. 
-            if self.test_obj.target_vm.state == vm_header.DESTROYED:
+            if self.test_obj.target_vm.state == vm_header.DESTROYED or \
+                    self.test_obj.target_vm.state == vm_header.EXPUNGED:
                 test_util.test_warn('Update test [volume:] %s state, since attached VM was destroyed.' % volume.uuid)
                 self.test_obj.update()
             else:
