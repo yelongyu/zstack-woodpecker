@@ -7,6 +7,8 @@ class TestImage(zstack_header.ZstackObject):
     def __init__(self):
         self.image = None
         self.state = None
+        self.delete_policy = None
+        self.delete_delay_time = None
 
     def __repr__(self):
         if self.image:
@@ -29,11 +31,13 @@ class TestImage(zstack_header.ZstackObject):
         pass
 
     def delete(self):
-        self.state = DELETED
+        if self.delete_policy != zstack_header.DELETE_DIRECT:
+            self.state = DELETED
+        else:
+            self.state = EXPUNGED
 
     def expunge(self):
-        #self.state = EXPUNGED
-        pass
+        self.state = EXPUNGED
 
     def check(self):
         pass
@@ -52,3 +56,15 @@ class TestImage(zstack_header.ZstackObject):
 
     def set_state(self, state):
         self.state = state
+
+    def set_delete_policy(self, policy):
+        self.delete_policy = policy
+
+    def get_delete_policy(self):
+        return self.delete_policy
+
+    def set_delete_delay_time(self, time):
+        self.delete_delay_time = time
+
+    def get_delete_delay_time(self):
+        return self.delete_delay_time

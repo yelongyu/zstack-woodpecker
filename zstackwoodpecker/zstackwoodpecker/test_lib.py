@@ -3379,20 +3379,20 @@ def lib_get_eip_by_uuid(eip_uuid):
 #----------- Robot Library -------------
 def lib_robot_cleanup(test_dict):
     for vm in test_dict.get_vm_list(vm_header.RUNNING):
-        vm.destroy()
+        vm.clean()
         test_dict.mv_volumes(vm.vm.uuid, test_stage.free_volume)
     for vm in test_dict.get_vm_list(vm_header.STOPPED):
-        vm.destroy()
+        vm.clean()
         test_dict.mv_volumes(vm.vm.uuid, test_stage.free_volume)
     for vl in test_dict.get_volume_list():
-        vl.delete()
+        vl.clean()
     for img in test_dict.get_image_list():
-        img.delete()
+        img.clean()
 
     sg_vm = test_dict.get_sg_vm()
     for vm in sg_vm.get_all_stub_vm():
         if vm:
-            vm.destroy()
+            vm.clean()
     for sg in sg_vm.get_all_sgs():
         sg_vm.delete_sg(sg)
 
@@ -3406,7 +3406,7 @@ def lib_robot_cleanup(test_dict):
         sp.delete()
 
     for vm in test_dict.get_all_utility_vm():
-        vm.destroy()
+        vm.clean()
 
     for account in test_dict.get_all_accounts():
         account.delete()
@@ -3421,28 +3421,28 @@ def lib_error_cleanup(test_dict):
     test_util.test_logger('- - - Error cleanup: running VM - - -')
     for vm in test_dict.get_vm_list(vm_header.RUNNING):
         try:
-            vm.destroy()
+            vm.clean()
         except:
             pass
 
     test_util.test_logger('- - - Error cleanup: stopped VM - - -')
     for vm in test_dict.get_vm_list(vm_header.STOPPED):
         try:
-            vm.destroy()
+            vm.clean()
         except:
             pass
 
     test_util.test_logger('- - - Error cleanup: volume - - -')
     for vl in test_dict.get_all_volume_list():
         try:
-            vl.delete()
+            vl.clean()
         except:
             pass
 
     test_util.test_logger('- - - Error cleanup: image - - -')
     for img in test_dict.get_image_list():
         try:
-            img.delete()
+            img.clean()
         except:
             pass
 
@@ -3451,7 +3451,7 @@ def lib_error_cleanup(test_dict):
     for vm in sg_vm.get_all_stub_vm():
         if vm:
             try:
-                vm.destroy()
+                vm.clean()
             except:
                 pass
 
@@ -3485,7 +3485,7 @@ def lib_error_cleanup(test_dict):
     test_util.test_logger('- - - Error cleanup: utiltiy vm - - -')
     for vm in test_dict.get_all_utility_vm():
         try:
-            vm.destroy()
+            vm.clean()
         except:
             pass
 
@@ -4193,3 +4193,10 @@ def lib_set_expunge_time(category = 'vm', value = 1):
     category could be vm, image, volume
     '''
     return conf_ops.change_global_config(category, 'expungePeriod', value)
+
+def lib_get_expunge_time(category = 'vm'):
+    '''
+    category could be vm, volume, image.
+    '''
+    return conf_ops.get_global_config_value(category, 'expungePeriod')
+

@@ -15,6 +15,8 @@ class ZstackTestVm(vm_header.TestVm):
     def __init__(self):
         self.vm_creation_option = test_util.VmOption()
         self.changed_instance_offering_uuid = None
+        self.set_delete_policy(test_lib.lib_get_delete_policy('vm'))
+        self.set_delete_delay_time(test_lib.lib_get_expunge_time('vm'))
         super(ZstackTestVm, self).__init__()
 
     def __hash__(self):
@@ -89,6 +91,13 @@ class ZstackTestVm(vm_header.TestVm):
         vm_ops.expunge_vm(self.vm.uuid, session_uuid)
         super(ZstackTestVm, self).expunge()
 
+    def clean(self):
+        if self.delete_policy != zstack_header.DELETE_DIRECT:
+            self.destroy()
+            self.expunge()
+        else:
+            self.destroy()
+
     def check(self):
         import zstackwoodpecker.zstack_test.checker_factory as checker_factory
         checker = checker_factory.CheckerFactory().create_checker(self)
@@ -110,16 +119,16 @@ class ZstackTestVm(vm_header.TestVm):
         cluster.delete()
         '''
         super(ZstackTestVm, self).update()
-        if self.get_state != vm_header.DESTROYED:
+        if self.get_state != vm_header.EXPUNGED:
             updated_vm = test_lib.lib_get_vm_by_uuid(self.vm.uuid)
             if updated_vm:
                 self.vm = updated_vm
                 #vm state need to chenage to stopped, if host is deleted
                 host = test_lib.lib_find_host_by_vm(updated_vm)
-                if not host and self.vm.state == vm_header.STOPPED:
+                if not host and self.vm.state != vm_header.STOPPED:
                     self.set_state(vm_header.STOPPED)
             else:
-                self.set_state(vm_header.DESTROYED)
+                self.set_state(vm_header.EXPUNGED)
             return self.vm
 
     def add_nic(self, l3_uuid):
@@ -135,3 +144,12 @@ class ZstackTestVm(vm_header.TestVm):
         '''
         self.vm = net_ops.detach_l3(nic_uuid)
         return self.get_vm()
+
+    def set_delete_policy(self, policy):
+        test_lib.lib_set_delete_policy(category = 'vm', value = policy)
+        super(ZstackTestVm, self).set_delete_policy(policy)
+
+    def set_delete_delay_time(self, delay_time):
+        test_lib.lib_set_expunge_time(category = 'vm', value = delay_time)
+        super(ZstackTestVm, self).set_delete_delay_time(delay_time)
+

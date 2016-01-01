@@ -15,6 +15,8 @@ class TestVm(zstack_header.ZstackObject):
     def __init__(self):
         self.vm = None
         self.state = None
+        self.delete_policy = None
+        self.delete_delay_time = None
 
     def __repr__(self):
         if self.vm:
@@ -25,7 +27,10 @@ class TestVm(zstack_header.ZstackObject):
         self.state = RUNNING
 
     def destroy(self):
-        self.state = DESTROYED
+        if self.delete_policy != zstack_header.DELETE_DIRECT:
+            self.state = DESTROYED
+        else:
+            self.state = EXPUNGED
 
     def start(self):
         self.state = RUNNING
@@ -43,7 +48,8 @@ class TestVm(zstack_header.ZstackObject):
         pass
 
     def expunge(self):
-        pass
+        self.state = EXPUNGED
+
     def get_vm(self):
         return self.vm
 
@@ -55,3 +61,15 @@ class TestVm(zstack_header.ZstackObject):
 
     def update(self):
         pass
+
+    def set_delete_policy(self, policy):
+        self.delete_policy = policy
+
+    def get_delete_policy(self):
+        return self.delete_policy
+
+    def set_delete_delay_time(self, time):
+        self.delete_delay_time = time
+
+    def get_delete_delay_time(self):
+        return self.delete_delay_time

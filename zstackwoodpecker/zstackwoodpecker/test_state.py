@@ -993,8 +993,25 @@ class TestStateDict(object):
         all_items = []
         for item in self.disk_offering_dict['Deleted']:
             all_items.append(self.disk_offering_dict[item])
-
         return all_items
+
+    def update_vm_delete_policy(self, policy):
+        pass
+
+    def update_vm_delete_delay_time(self, delay_time):
+        pass
+
+    def update_volume_delete_policy(self, policy):
+        pass
+
+    def update_volume_delete_delay_time(self, delay_time):
+        pass
+
+    def update_image_delete_policy(self, policy):
+        pass
+
+    def update_image_delete_delay_time(self, delay_time):
+        pass
 
 class Port(object):
     '''

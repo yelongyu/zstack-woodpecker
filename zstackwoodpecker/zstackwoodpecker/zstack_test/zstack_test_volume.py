@@ -3,6 +3,7 @@ zstack volume test class
 
 @author: Youyk
 '''
+import zstackwoodpecker.header.header as zstack_header
 import zstackwoodpecker.header.volume as volume_header
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.header.image as image_header
@@ -15,6 +16,8 @@ class ZstackTestVolume(volume_header.TestVolume):
     def __init__(self):
         self.volume_creation_option = test_util.VolumeOption()
         self.original_checking_points = []
+        self.set_delete_policy(test_lib.lib_get_delete_policy('volume'))
+        self.set_delete_delay_time(test_lib.lib_get_expunge_time('volume'))
         super(ZstackTestVolume, self).__init__()
 
     def create(self):
@@ -58,6 +61,13 @@ class ZstackTestVolume(volume_header.TestVolume):
         vol_ops.expunge_volume(self.volume.uuid)
         super(ZstackTestVolume, self).expunge()
 
+    def clean(self):
+        if self.delete_policy != zstack_header.DELETE_DIRECT:
+            self.delete()
+            self.expunge()
+        else:
+            self.delete()
+
     def check(self):
         import zstackwoodpecker.zstack_test.checker_factory as checker_factory
         self.update()
@@ -86,7 +96,7 @@ class ZstackTestVolume(volume_header.TestVolume):
         Called by snapshot actions, since snapshot action will change volume 
         installPath
         '''
-        if self.state != volume_header.DELETED:
+        if self.state != volume_header.EXPUNGED:
             self.set_volume(test_lib.lib_get_volume_by_uuid(self.volume.uuid))
 
     def set_original_checking_points(self, original_checking_points):
@@ -99,3 +109,12 @@ class ZstackTestVolume(volume_header.TestVolume):
 
     def get_original_checking_points(self):
         return self.original_checking_points
+
+    def set_delete_policy(self, policy):
+        test_lib.lib_set_delete_policy(category = 'volume', value = policy)
+        super(ZstackTestVolume, self).set_delete_policy(policy)
+
+    def set_delete_delay_time(self, delay_time):
+        test_lib.lib_set_expunge_time(category = 'volume', value = delay_time)
+        super(ZstackTestVolume, self).set_delete_delay_time(delay_time)
+

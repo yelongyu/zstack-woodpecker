@@ -13,6 +13,8 @@ class ZstackTestImage(image_header.TestImage):
     def __init__(self):
         self.image_creation_option = test_util.ImageOption()
         self.original_checking_points = []
+        self.set_delete_policy(test_lib.lib_get_delete_policy('image'))
+        self.set_delete_delay_time(test_lib.lib_get_expunge_time('image'))
         super(ZstackTestImage, self).__init__()
 
     def create(self):
@@ -30,6 +32,13 @@ class ZstackTestImage(image_header.TestImage):
     def expunge(self, bs_uuid_list):
         img_ops.expunge_image(self.image.uuid, bs_uuid_list)
         super(ZstackTestImage, self).expunge()
+
+    def clean(self):
+        if self.delete_policy != zstack_header.DELETE_DIRECT:
+            self.delete()
+            self.expunge()
+        else:
+            self.delete()
 
     def check(self):
         import zstackwoodpecker.zstack_test.checker_factory as checker_factory
@@ -74,3 +83,12 @@ class ZstackTestImage(image_header.TestImage):
 
     def get_original_checking_points(self):
         return self.original_checking_points
+
+    def set_delete_policy(self, policy):
+        test_lib.lib_set_delete_policy(category = 'image', value = policy)
+        super(ZstackTestImage, self).set_delete_policy(policy)
+
+    def set_delete_delay_time(self, delay_time):
+        test_lib.lib_set_expunge_time(category = 'image', value = delay_time)
+        super(ZstackTestImage, self).set_delete_delay_time(delay_time)
+

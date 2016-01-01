@@ -15,6 +15,8 @@ class TestVolume(zstack_header.ZstackObject):
         self.state = None
         self.storage_state = None
         self.target_vm = None
+        self.delete_policy = None
+        self.delete_delay_time = None
 
     def __repr__(self):
         if self.volume:
@@ -42,11 +44,13 @@ class TestVolume(zstack_header.ZstackObject):
         self.target_vm.update()
 
     def delete(self):
-        self.state = DELETED
+        if self.delete_policy != zstack_header.DELETE_DIRECT:
+            self.state = DELETED
+        else:
+            self.state = EXPUNGED
 
     def expunge(self):
-        #self.state = EXPUNGED
-        pass
+        self.state = EXPUNGED
 
     def check(self):
         pass
@@ -74,3 +78,15 @@ class TestVolume(zstack_header.ZstackObject):
 
     def get_target_vm(self):
         return self.target_vm
+
+    def set_delete_policy(self, policy):
+        self.delete_policy = policy
+
+    def get_delete_policy(self):
+        return self.delete_policy
+
+    def set_delete_delay_time(self, time):
+        self.delete_delay_time = time
+
+    def get_delete_delay_time(self):
+        return self.delete_delay_time
