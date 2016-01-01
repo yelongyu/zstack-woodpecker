@@ -31,11 +31,13 @@ class TestAction(object):
     reboot_vm = 'reboot_vm'
     destroy_vm = 'destroy_vm'
     migrate_vm = 'migrate_vm'
+    expunge_vm = 'expunge_vm'
 
     create_volume = 'create_volume'
     attach_volume = 'attach_volume'
     delete_volume = 'delete_volume'
     detach_volume = 'detach_volume'
+    expunge_volume = 'expunge_volume'
 
     create_data_vol_template_from_volume = \
             'create_data_volume_template_from_volume'
@@ -43,6 +45,7 @@ class TestAction(object):
 
     create_image_from_volume = 'create_image_from_volume'
     delete_image = 'delete_image'
+    expunge_image = 'expunge_image'
 
     create_sg = 'create_security_group'
     delete_sg = 'delete_security_group'
@@ -78,12 +81,14 @@ class TestAction(object):
     detach_primary_storage = 'detach_primary_storage_from_cluster'    
 
     vm_actions = [create_vm, stop_vm, start_vm, reboot_vm, destroy_vm, \
-            migrate_vm]
+            migrate_vm, expunge_vm]
 
     volume_actions = [create_volume, attach_volume, delete_volume, \
-            detach_volume, create_data_vol_template_from_volume]
+            detach_volume, create_data_vol_template_from_volume, expunge_volume]
 
-    image_actions = [create_image_from_volume, delete_image, create_data_volume_from_image]
+    image_actions = [create_image_from_volume, delete_image, \
+            create_data_volume_from_image, expunge_image]
+
     sg_actions = [create_sg, delete_sg, sg_rule_operations]
     vip_actions = [create_vip, delete_vip, vip_operations]
 
@@ -133,9 +138,11 @@ class TestStage(object):
     #all volumes state
     free_volume = 'has_free_volume'
     no_free_volume = 'no_free_volume'
+    deleted_volume = 'deleted_volume'
 
     new_template_image = 'new_created_template_image'
     no_new_template_image = 'no_new_created_template_image'
+    deleted_image = 'deleted_image'
 
     no_sg = 'no_security_group'
     has_sg = 'has_defined_security_group'
@@ -161,7 +168,8 @@ class TestStage(object):
             Any: 1 , 
             vm_header.RUNNING: 2, 
             vm_header.STOPPED: 3, 
-            vm_header.DESTROYED: 4
+            vm_header.DESTROYED: 4,
+            vm_header.EXPUNGED: 5
             }
 
     vm_volume_state_dict = {
@@ -174,13 +182,15 @@ class TestStage(object):
     volume_state_dict = {
             Any: 100, 
             free_volume: 200, 
-            no_free_volume:300
+            no_free_volume: 300,
+            deleted_volume: 400
             }
 
     image_state_dict = {
             Any: 1000, 
             no_new_template_image: 2000, 
-            new_template_image: 3000
+            new_template_image: 3000,
+            deleted_image: 4000
             }
 
     snapshot_state_dict = {
@@ -210,7 +220,8 @@ class TestStage(object):
         Any: [ta.create_vm, ta.create_volume, ta.idel], 
         2: [ta.stop_vm, ta.reboot_vm, ta.destroy_vm, ta.migrate_vm],
         3: [ta.start_vm, ta.destroy_vm, ta.create_image_from_volume, ta.create_data_vol_template_from_volume], 
-        4: [],
+        4: [ta.expunge_vm],
+        5: [],
       211: [ta.delete_volume], 
       222: [ta.attach_volume, ta.delete_volume],
       223: [ta.attach_volume, ta.delete_volume], 
@@ -222,7 +233,9 @@ class TestStage(object):
       333: [ta.detach_volume, ta.delete_volume], 334: [],
       342: [ta.detach_volume, ta.delete_volume], 
       343: [ta.detach_volume, ta.delete_volume], 344: [],
-     3000: [ta.delete_image, ta.create_data_volume_from_image]
+      400: [ta.expunge_volume],
+     3000: [ta.delete_image, ta.create_data_volume_from_image],
+     4000: [ta.expunge_image]
     }
 
     #snapshot state transition table
@@ -482,6 +495,11 @@ class TestStage(object):
         return self._get_normal_actions(self.vm_current_state)
 
     def get_volume_actions(self):
+        #if state is deleted state, will directly return. 
+        delete_state = self._get_normal_actions(self.volume_current_state)
+        if delete_state:
+            return delete_state
+
         state = self.vm_current_state + self.vm_volume_current_state + \
                 self.volume_current_state
 
@@ -500,12 +518,15 @@ class TestStateDict(object):
     vm_dict_desc = "vm_dict = \
             {'running':[vm1_obj,], \
             'stopped':[vm2_obj], \
-            'destroyed':[vm3_obj]\
+            'destroyed':[vm3_obj], \
+            'expunged':[vm4_obj]\
             }"
 
     volume_dict_desc = "volume_dict = \
             {vm_uuid1:[volume1_obj], \
-            vm_uuid2:[], 'free_volume':[], \
+            vm_uuid2:[], \
+            'free_volume':[], \
+            'deleted_volume':[], \
             'new_created_template_image':[]\
             }"
 
@@ -550,11 +571,20 @@ class TestStateDict(object):
         self.vm_dict = {
                 vm_header.RUNNING:[], 
                 vm_header.STOPPED:[], 
-                vm_header.DESTROYED:[]
+                vm_header.DESTROYED:[],
+                vm_header.EXPUNGED:[]
                 }
 
-        self.volume_dict = {TestStage.free_volume:[]}
-        self.image_dict = {TestStage.new_template_image:[]}
+        self.volume_dict = {
+                TestStage.free_volume:[], 
+                TestStage.deleted_volume:[]
+                }
+
+        self.image_dict = {
+                TestStage.new_template_image:[], 
+                TestStage.deleted_image:[]
+                }
+
         #sg_list is deprecated. all sg should be managed in sg_vm.
         self.sg_list = []
         #[Inlined import]
@@ -621,7 +651,12 @@ class TestStateDict(object):
         self.add_vm(vm, dst_state)
 
     def rm_vm(self, vm, state=None):
-        if vm.get_state() == vm_header.DESTROYED:
+        '''
+        Depends on delete policy. Destroy VM and Expunge VM will all call this
+        function to change vm state. So we need to check vm's real status to
+        decide what we need to do. 
+        '''
+        if vm.get_state() == vm_header.EXPUNGED:
             #Remove the snapshots, which is binded with Root Volume
             #TODO: not directly rm, should move to deleted stage.
             import zstackwoodpecker.test_lib as test_lib
@@ -638,8 +673,14 @@ class TestStateDict(object):
 
         for key,values in self.vm_dict.iteritems():
             if vm in values:
-                self.vm_dict[key].remove(vm)
-                return True
+                if vm.get_state() == vm_header.DELETED:
+                    self.vm_dict[key].remove(vm)
+                    self.vm_dict[vm_header.DELETED].append(vm)
+                    return True
+                else:
+                    self.vm_dict[key].remove(vm)
+                    return True
+
         return False
 
     def get_vm_list(self, state=vm_header.RUNNING):
@@ -666,20 +707,32 @@ class TestStateDict(object):
                 self.add_volume_snapshot(volume_snapshots)
 
     def rm_volume(self, volume, state=None):
-        if volume.get_state() == volume_header.DELETED:
-            #need to delete empty snapshots, when volume is deleted. 
+        '''
+        Depends on delete policy. Both delete volume and expunge volume might 
+        call this function to remove volume object from test state.
+        '''
+        if volume.get_state() == volume_header.EXPUNGED:
+            #need to delete empty snapshots, when volume is expunged. 
             self.rm_volume_snapshots_by_rm_volume(volume.get_volume().uuid)
 
         if state:
             if volume in self.volume_dict[state]:
-                self.volume_dict[state].remove(volume)
+                if volume.get_state() == volume_header.DELETED:
+                    self.mv_volume(state, TestStage.deleted_volume)
+                else:
+                    self.volume_dict[state].remove(volume)
+                    self.rm_volume_snapshots_by_rm_volume(volume.get_volume().uuid)
                 return True
             return False
 
         for key,values in self.volume_dict.iteritems():
             if volume in values:
-                self.volume_dict[key].remove(volume)
-                self.rm_volume_snapshots_by_rm_volume(volume.get_volume().uuid)
+                if volume.get_state() == volume_header.EXPUNGED:
+                    self.volume_dict[key].remove(volume)
+                    self.rm_volume_snapshots_by_rm_volume(volume.get_volume().uuid)
+                else:
+                    self.volume_dict[key].remove(volume)
+                    self.volume_dict[TestStage.deleted_volume].append(volume)
                 return True
         else:
             return False
@@ -689,6 +742,9 @@ class TestStateDict(object):
         self.add_volume(volume, dst_state)
 
     def mv_volumes(self, src_state, dst_state):
+        '''
+        move all volumes from source state to destination state.
+        '''
         if self.volume_dict.has_key(src_state):
             if self.volume_dict.has_key(dst_state):
                 self.volume_dict[dst_state].extend(self.get_volume_list(src_state))
@@ -732,13 +788,23 @@ class TestStateDict(object):
     def rm_image(self, image, state=None):
         if state:
             if image in self.image_dict[state]:
-                self.image_dict[state].remove(image)
+                if image.get_state() == image_header.DELETED:
+                    self.image_dict[state].remove(image)
+                    self.image_dict[TestStage.deleted_image].append(image)
+                else:
+                    self.image_dict[state].remove(image)
                 return True
-            return False
         else:
             for state in self.image_dict.iterkeys():
                 if image in self.image_dict[state]:
-                    self.image_dict[state].remove(image)
+                    if image.get_state() == image_header.DELETED:
+                        self.image_dict[state].remove(image)
+                        self.image_dict[TestStage.deleted_image].append(image)
+                        return True
+                    else:
+                        self.image_dict[state].remove(image)
+                        return True
+        return False
 
     def get_sg_list(self):
         return self.sg_vm.get_all_sgs()

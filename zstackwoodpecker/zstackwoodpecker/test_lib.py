@@ -3566,9 +3566,18 @@ def lib_vm_random_operation(robot_test_obj):
 
     #Firstly, choose a target VM state for operation. E.g. Running. 
     if test_dict.get_vm_list(vm_header.STOPPED):
-        target_vm_state = random.choice([vm_header.RUNNING, vm_header.STOPPED])
+        if test_dict.get_vm_list(vm_header.EXPUNGED):
+            target_vm_state = random.choice([vm_header.RUNNING, \
+                    vm_header.STOPPED, vm_header.EXPUNGED])
+        else:
+            target_vm_state = random.choice([vm_header.RUNNING, \
+                    vm_header.STOPPED])
     else:
-        target_vm_state = vm_header.RUNNING 
+        if test_dict.get_vm_list(vm_header.EXPUNGED):
+            target_vm_state = random.choice([vm_header.RUNNING, \
+                    vm_header.EXPUNGED])
+        else:
+            target_vm_state = vm_header.RUNNING 
 
     #Secondly, choose a target VM from target status. 
     target_vm_list = test_dict.get_vm_list(target_vm_state)
@@ -3603,9 +3612,13 @@ def lib_vm_random_operation(robot_test_obj):
 
     #Fourthly, choose a available volume for possibly attach or delete
     avail_volumes = test_dict.get_volume_list(test_stage.free_volume)
+    avail_volumes.append(test_dict.get_volume_list(test_stage.deleted_volume))
     if avail_volumes:
-        test_stage_obj.set_volume_state(test_stage.free_volume)
         ready_volume = random.choice(avail_volumes)
+        if ready_volume.get_state() != vol_header.DELETED:
+            test_stage_obj.set_volume_state(test_stage.free_volume)
+        else:
+            test_stage_obj.set_volume_state(test_stage.deleted_volume)
     else:
         test_stage_obj.set_volume_state(test_stage.no_free_volume)
 
@@ -3622,7 +3635,7 @@ def lib_vm_random_operation(robot_test_obj):
             test_stage_obj.set_snapshot_state(test_stage.no_volume_file)
         else:
             #if volume is not attached to any VM, we assume vm state is stopped
-            # or we think its hypervisor support live snapshot creation
+            # or we assume its hypervisor support live snapshot creation
             if snapshot_volume_obj.get_state() != vol_header.ATTACHED:
                 test_stage_obj.set_snapshot_live_cap(test_stage.snapshot_live_creation)
                 test_stage_obj.set_volume_vm_state(vm_header.STOPPED)
@@ -3639,8 +3652,10 @@ def lib_vm_random_operation(robot_test_obj):
             #random pick up an available snapshot. Firstly choose from primary snapshot.
             target_snapshot = None
 
-            #FIXME: current if volume is deleted, we assume there isn't snapshot in primary storage 
-            if target_volume_snapshots.get_primary_snapshots() and snapshot_volume_obj.get_state() != vol_header.DELETED:
+            #If volume is expunged, there isn't snapshot in primary storage 
+            if target_volume_snapshots.get_primary_snapshots() \
+                    and snapshot_volume_obj.get_state() != vol_header.DELETED\
+                    and snapshot_volume_obj.get_state() != vol_header.EXPUNGED:
                 target_snapshot = random.choice(target_volume_snapshots.get_primary_snapshots())
                 if target_snapshot in target_volume_snapshots.get_backuped_snapshots():
                     if target_snapshot.get_volume_type() \
@@ -3682,8 +3697,13 @@ into robot_test_obj.exclusive_actions_list.')
             vip_available = True
 
     #Add template image actions
-    if test_dict.get_image_list(test_stage.new_template_image):
+    avail_images = test_dict.get_image_list(test_stage.new_template_image)
+    avail_images.append(test_dict.get_image_list(test_stage.deleted_image))
+    target_image = random.choice(avail_image)
+    if avail_image.get_state() != image_header.DELETED:
         test_stage_obj.set_image_state(test_stage.new_template_image)
+    else:
+        test_stage_obj.set_image_state(test_stage.deleted_image)
 
     #Add SG actions
     if test_dict.get_sg_list():
@@ -3750,6 +3770,12 @@ into robot_test_obj.exclusive_actions_list.')
         target_vm.destroy()
         test_dict.mv_vm(target_vm, vm_current_state, vm_header.DESTROYED)
 
+    elif next_action == TestAction.expunge_vm :
+        test_util.test_dsc('Robot Action: %s; on VM: %s' \
+                % (next_action, target_vm.get_vm().uuid))
+        target_vm.expunge()
+        test_dict.mv_vm(target_vm, vm_current_state, vm_header.EXPUNGED)
+
     elif next_action == TestAction.migrate_vm :
         test_util.test_dsc('Robot Action: %s; on VM: %s' \
                 % (next_action, target_vm.get_vm().uuid))
@@ -3793,6 +3819,12 @@ into robot_test_obj.exclusive_actions_list.')
         ready_volume.delete()
         test_dict.rm_volume(ready_volume)
 
+    elif next_action == TestAction.expunge_volume:
+        test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
+            (next_action, ready_volume.get_volume().uuid))
+        ready_volume.expunge()
+        test_dict.rm_volume(ready_volume)
+
     elif next_action == TestAction.idel :
         test_util.test_dsc('Robot Action: %s ' % next_action)
         lib_vm_random_idel_time(1, 5)
@@ -3821,9 +3853,6 @@ into robot_test_obj.exclusive_actions_list.')
         test_dict.add_image(new_data_vol_temp)
 
     elif next_action == TestAction.create_data_volume_from_image:
-        image_list = test_dict.get_image_list(test_stage.new_template_image)
-        target_image = random.choice(image_list)
-
         test_util.test_dsc('Robot Action: %s; on Image: %s' % \
             (next_action, target_image.get_image().uuid))
 
@@ -3834,14 +3863,18 @@ into robot_test_obj.exclusive_actions_list.')
         test_dict.add_volume(new_volume)
 
     elif next_action == TestAction.delete_image:
-        image_list = test_dict.get_image_list(test_stage.new_template_image)
-        target_image = random.choice(image_list)
-
         test_util.test_dsc('Robot Action: %s; on Image: %s' % \
             (next_action, target_image.get_image().uuid))
 
         target_image.delete()
         test_dict.rm_image(target_image, test_stage.new_template_image)
+
+    elif next_action == TestAction.expunge_image:
+        test_util.test_dsc('Robot Action: %s; on Image: %s' % \
+            (next_action, target_image.get_image().uuid))
+
+        target_image.expunge()
+        test_dict.rm_image(target_image, test_stage.deleted_image)
 
     elif next_action == TestAction.create_sg:
         test_util.test_dsc('Robot Action: %s ' % next_action)
