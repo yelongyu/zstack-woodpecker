@@ -1,0 +1,6 @@
+<testConfig>
+    <deployConfig>deploy-flat-network.xml</deployConfig>
+    <deployConfigTemplate>deploy-flat-network.tmpt</deployConfigTemplate>
+    <!-- suite special test variables -->
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
