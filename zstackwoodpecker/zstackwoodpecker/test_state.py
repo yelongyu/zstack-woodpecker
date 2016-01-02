@@ -619,8 +619,8 @@ class TestStateDict(object):
         })
 
     def add_vm(self, vm, state=vm_header.RUNNING, create_snapshots = True):
-        def add_vm_root_volume_snapshot(volume, data = True):
-            if create_snapshots and not self.get_volume_snapshot(volume.uuid):
+        def add_vm_volume_snapshot(volume, data = True):
+            if not self.get_volume_snapshot(volume.uuid):
                 import zstackwoodpecker.zstack_test.zstack_test_snapshot \
                         as zstack_sp_header
                 import zstackwoodpecker.zstack_test.zstack_test_volume \
@@ -630,25 +630,28 @@ class TestStateDict(object):
                 volume_obj.set_volume(volume)
                 volume_obj.set_state(volume_header.ATTACHED)
                 volume_obj.set_target_vm(vm)
+                #TODO: only add data volume so far, we could add root volume
+                # later. Since root volume could be used to create data
+                # volume template.
                 if data:
                     self.add_volume(volume_obj, state = vm.get_vm().uuid)
-                else:
-                    volume_snapshots = zstack_sp_header.ZstackVolumeSnapshot()
-                    volume_snapshots.set_target_volume(volume_obj)
-                    self.add_volume_snapshot(volume_snapshots)
+                volume_snapshots = zstack_sp_header.ZstackVolumeSnapshot()
+                volume_snapshots.set_target_volume(volume_obj)
+                self.add_volume_snapshot(volume_snapshots)
 
         if not vm in self.vm_dict[state]:
             self.vm_dict[state].append(vm)
-            import zstackwoodpecker.test_lib as test_lib
-            root_volume = test_lib.lib_get_root_volume(vm.get_vm())
-            add_vm_root_volume_snapshot(root_volume, data = False)
-            data_volumes = test_lib.lib_get_data_volumes(vm.get_vm())
-            for data_volume in data_volumes:
-                add_vm_root_volume_snapshot(data_volume)
+            if create_snapshots:
+                import zstackwoodpecker.test_lib as test_lib
+                root_volume = test_lib.lib_get_root_volume(vm.get_vm())
+                add_vm_volume_snapshot(root_volume, data = False)
+                data_volumes = test_lib.lib_get_data_volumes(vm.get_vm())
+                for data_volume in data_volumes:
+                    add_vm_volume_snapshot(data_volume)
 
     def mv_vm(self, vm, src_state, dst_state):
         self.rm_vm(vm, src_state)
-        self.add_vm(vm, dst_state)
+        self.add_vm(vm, dst_state, False)
 
     def rm_vm(self, vm, state=None):
         '''
@@ -656,30 +659,39 @@ class TestStateDict(object):
         function to change vm state. So we need to check vm's real status to
         decide what we need to do. 
         '''
-        if vm.get_state() == vm_header.EXPUNGED:
-            #Remove the snapshots, which is binded with Root Volume
-            #TODO: not directly rm, should move to deleted stage.
-            import zstackwoodpecker.test_lib as test_lib
-            volume_uuid = test_lib.lib_get_root_volume(vm.get_vm()).uuid
-            self.rm_volume_snapshots_by_rm_volume(volume_uuid)
-
+        vm_inv = vm.get_vm()
         #move all attached data volume to free stage.
-        self.mv_volumes(vm.get_vm().uuid, TestStage.free_volume)
+        if vm.get_state() == vm_header.EXPUNGED or \
+                vm.get_state() == vm_header.DESTROYED:
+            for volume in self.get_volume_list(vm_inv.uuid):
+                if volume.get_volume().type != volume_header.ROOT_VOLUME:
+                    self.mv_volume(volume, vm_obj.uuid, TestStage.free_volume)
+
+        if vm.get_state() == vm_header.EXPUNGED:
+            import zstackwoodpecker.test_lib as test_lib
+            volume_uuid = test_lib.lib_get_root_volume(vm_inv).uuid
+            self.rm_volume_snapshots_by_rm_volume(volume_uuid)
+            #clean root volume and vm_inv relationship in volume dict.
+            self.volume_dict.pop(vm_inv.uuid)
+
         if state:
             if vm in self.vm_dict[state]:
                 self.vm_dict[state].remove(vm)
+                if vm.get_state() == vm_header.DESTROYED:
+                    self.vm_dict[vm_header.DESTROYED].append(vm)
+                elif vm.get_state() == vm_header.EXPUNGED:
+                    self.vm_dict[vm_header.EXPUNGED].append(vm)
                 return True
             return False
 
         for key,values in self.vm_dict.iteritems():
             if vm in values:
-                if vm.get_state() == vm_header.DELETED:
-                    self.vm_dict[key].remove(vm)
-                    self.vm_dict[vm_header.DELETED].append(vm)
-                    return True
-                else:
-                    self.vm_dict[key].remove(vm)
-                    return True
+                self.vm_dict[key].remove(vm)
+                if vm.get_state() == vm_header.DESTROYED:
+                    self.vm_dict[vm_header.DESTROYED].append(vm)
+                elif vm.get_state() == vm_header.EXPUNGED:
+                    self.vm_dict[vm_header.EXPUNGED].append(vm)
+                return True
 
         return False
 
@@ -717,22 +729,21 @@ class TestStateDict(object):
 
         if state:
             if volume in self.volume_dict[state]:
+                self.volume_dict[state].remove(volume)
                 if volume.get_state() == volume_header.DELETED:
-                    self.mv_volume(state, TestStage.deleted_volume)
-                else:
-                    self.volume_dict[state].remove(volume)
+                    self.add_volume(volume, TestStage.deleted_volume)
+                elif volume.get_state() == volume_header.EXPUNGED:
                     self.rm_volume_snapshots_by_rm_volume(volume.get_volume().uuid)
                 return True
             return False
 
         for key,values in self.volume_dict.iteritems():
             if volume in values:
-                if volume.get_state() == volume_header.EXPUNGED:
-                    self.volume_dict[key].remove(volume)
+                self.volume_dict[key].remove(volume)
+                if volume.get_state() == volume_header.DELETED:
+                    self.add_volume(volume, TestStage.deleted_volume)
+                elif volume.get_state() == volume_header.EXPUNGED:
                     self.rm_volume_snapshots_by_rm_volume(volume.get_volume().uuid)
-                else:
-                    self.volume_dict[key].remove(volume)
-                    self.volume_dict[TestStage.deleted_volume].append(volume)
                 return True
         else:
             return False
@@ -786,11 +797,14 @@ class TestStateDict(object):
         return self.image_dict[state]
 
     def rm_image(self, image, state=None):
+        '''
+        rm_image might be called when delete image. So need to check image state
+        '''
         if state:
             if image in self.image_dict[state]:
                 if image.get_state() == image_header.DELETED:
                     self.image_dict[state].remove(image)
-                    self.image_dict[TestStage.deleted_image].append(image)
+                    self.add_image(image, TestStage.deleted_image)
                 else:
                     self.image_dict[state].remove(image)
                 return True
@@ -799,7 +813,7 @@ class TestStateDict(object):
                 if image in self.image_dict[state]:
                     if image.get_state() == image_header.DELETED:
                         self.image_dict[state].remove(image)
-                        self.image_dict[TestStage.deleted_image].append(image)
+                        self.add_image(image, TestStage.deleted_image)
                         return True
                     else:
                         self.image_dict[state].remove(image)
@@ -916,11 +930,12 @@ class TestStateDict(object):
             if not snapshots.get_backuped_snapshots():
                 self.rm_volume_snapshot(snapshots)
             else:
-                #otherwsie make sure volume is in Delete state, especially for 
+                #otherwsie make sure volume is in Expunge state, especially for 
                 #Root Volume
                 root_volume_obj = snapshots.get_target_volume()
                 root_volume_obj.update_volume()
-                root_volume_obj.set_state(volume_header.DELETED)
+                root_volume_obj.set_state(volume_header.EXPUNGED)
+                self.rm_volume(root_volume_obj)
 
     def get_all_snapshots(self):
         return self.volume_snapshot_dict.values()

@@ -15,8 +15,8 @@ class ZstackTestImage(image_header.TestImage):
     def __init__(self):
         self.image_creation_option = test_util.ImageOption()
         self.original_checking_points = []
-        self.set_delete_policy(test_lib.lib_get_delete_policy('image'))
-        self.set_delete_delay_time(test_lib.lib_get_expunge_time('image'))
+        self.delete_policy = test_lib.lib_get_delete_policy('image')
+        self.delete_delay_time = test_lib.lib_get_expunge_time('image')
         super(ZstackTestImage, self).__init__()
 
     def create(self):
@@ -37,8 +37,13 @@ class ZstackTestImage(image_header.TestImage):
 
     def clean(self):
         if self.delete_policy != zstack_header.DELETE_DIRECT:
-            self.delete()
-            self.expunge()
+            if self.get_state() == image_header.DELETED:
+                self.expunge()
+            elif self.get_state() == volume_header.EXPUNGED:
+                pass
+            else:
+                self.delete()
+                self.expunge()
         else:
             self.delete()
 

@@ -17,6 +17,8 @@ def get_global_config_value(category, name, session_uuid = None, \
     action = api_actions.GetGlobalConfigAction()
     action.category = category
     action.name = name
+    test_util.action_logger('Get global config category: %s, name: %s' \
+            % (category, name))
     result = account_operations.execute_action_with_session(action, \
             session_uuid)
 

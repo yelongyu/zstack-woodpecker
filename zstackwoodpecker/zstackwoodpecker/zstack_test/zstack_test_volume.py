@@ -17,8 +17,8 @@ class ZstackTestVolume(volume_header.TestVolume):
     def __init__(self):
         self.volume_creation_option = test_util.VolumeOption()
         self.original_checking_points = []
-        self.set_delete_policy(test_lib.lib_get_delete_policy('volume'))
-        self.set_delete_delay_time(test_lib.lib_get_expunge_time('volume'))
+        self.delete_policy = test_lib.lib_get_delete_policy('volume')
+        self.delete_delay_time = test_lib.lib_get_expunge_time('volume')
         super(ZstackTestVolume, self).__init__()
 
     def create(self):
@@ -64,8 +64,13 @@ class ZstackTestVolume(volume_header.TestVolume):
 
     def clean(self):
         if self.delete_policy != zstack_header.DELETE_DIRECT:
-            self.delete()
-            self.expunge()
+            if self.get_state() == volume_header.DELETED:
+                self.expunge()
+            elif self.get_state() == volume_header.EXPUNGED:
+                pass
+            else:
+                self.delete()
+                self.expunge()
         else:
             self.delete()
 

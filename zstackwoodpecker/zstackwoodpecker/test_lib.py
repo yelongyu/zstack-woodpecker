@@ -3384,9 +3384,13 @@ def lib_robot_cleanup(test_dict):
     for vm in test_dict.get_vm_list(vm_header.STOPPED):
         vm.clean()
         test_dict.mv_volumes(vm.vm.uuid, test_stage.free_volume)
+    for vm in test_dict.get_vm_list(vm_header.DESTROYED):
+        vm.clean()
     for vl in test_dict.get_volume_list():
         vl.clean()
     for img in test_dict.get_image_list():
+        img.clean()
+    for img in test_dict.get_image_list(test_stage.deleted_image):
         img.clean()
 
     sg_vm = test_dict.get_sg_vm()
@@ -3432,6 +3436,13 @@ def lib_error_cleanup(test_dict):
         except:
             pass
 
+    test_util.test_logger('- - - Error cleanup: destroyed VM - - -')
+    for vm in test_dict.get_vm_list(vm_header.DESTROYED):
+        try:
+            vm.clean()
+        except:
+            pass
+
     test_util.test_logger('- - - Error cleanup: volume - - -')
     for vl in test_dict.get_all_volume_list():
         try:
@@ -3441,6 +3452,12 @@ def lib_error_cleanup(test_dict):
 
     test_util.test_logger('- - - Error cleanup: image - - -')
     for img in test_dict.get_image_list():
+        try:
+            img.clean()
+        except:
+            pass
+
+    for img in test_dict.get_image_list(test_stage.deleted_image):
         try:
             img.clean()
         except:
@@ -3594,6 +3611,8 @@ def lib_vm_random_operation(robot_test_obj):
     
         test_stage_obj.set_vm_state(vm_current_state)
 
+        test_util.test_logger('target vm is : %s' % target_vm.get_vm().uuid)
+        test_util.test_logger('target test obj: %s' % test_dict)
         #Thirdly, check VM's volume status. E.g. if could add a new volume.
         vm_volumes = test_dict.get_volume_list(target_vm.get_vm().uuid)
         vm_volume_number = len(vm_volumes)
@@ -3771,13 +3790,13 @@ into robot_test_obj.exclusive_actions_list.')
         test_util.test_dsc('Robot Action: %s; on VM: %s' \
                 % (next_action, target_vm.get_vm().uuid))
         target_vm.destroy()
-        test_dict.mv_vm(target_vm, vm_current_state, vm_header.DESTROYED)
+        test_dict.rm_vm(target_vm, vm_current_state)
 
     elif next_action == TestAction.expunge_vm :
         test_util.test_dsc('Robot Action: %s; on VM: %s' \
                 % (next_action, target_vm.get_vm().uuid))
         target_vm.expunge()
-        test_dict.mv_vm(target_vm, vm_current_state, vm_header.EXPUNGED)
+        test_dict.rm_vm(target_vm, vm_current_state)
 
     elif next_action == TestAction.migrate_vm :
         test_util.test_dsc('Robot Action: %s; on VM: %s' \
@@ -3870,14 +3889,16 @@ into robot_test_obj.exclusive_actions_list.')
             (next_action, target_image.get_image().uuid))
 
         target_image.delete()
-        test_dict.rm_image(target_image, test_stage.new_template_image)
+        test_dict.rm_image(target_image)
+        #image will be move to deleted state when call rm_image
+        #test_dict.add_image(target_image, test_stage.deleted_image)
 
     elif next_action == TestAction.expunge_image:
         test_util.test_dsc('Robot Action: %s; on Image: %s' % \
             (next_action, target_image.get_image().uuid))
 
         target_image.expunge()
-        test_dict.rm_image(target_image, test_stage.deleted_image)
+        test_dict.rm_image(target_image)
 
     elif next_action == TestAction.create_sg:
         test_util.test_dsc('Robot Action: %s ' % next_action)
@@ -3958,11 +3979,11 @@ into robot_test_obj.exclusive_actions_list.')
         # removed.
         if not target_volume_snapshots.get_backuped_snapshots():
             target_volume_obj = target_volume_snapshots.get_target_volume()
-            if target_volume_obj.get_state == vol_header.DELETED \
+            if target_volume_obj.get_state() == vol_header.EXPUNGED \
                     or (target_volume_snapshots.get_volume_type() == \
                         vol_header.ROOT_VOLUME \
                         and target_volume_obj.get_target_vm().get_state() == \
-                            vm_header.DESTROYED):
+                            vm_header.EXPUNGED):
                 test_dict.rm_volume_snapshot(target_volume_snapshots)
 
     elif next_action == TestAction.use_volume_snapshot:
@@ -3993,11 +4014,11 @@ into robot_test_obj.exclusive_actions_list.')
         # removed.
         if not target_volume_snapshots.get_backuped_snapshots():
             target_volume_obj = target_volume_snapshots.get_target_volume()
-            if target_volume_obj.get_state() == vol_header.DELETED \
+            if target_volume_obj.get_state() == vol_header.EXPUNGED \
                     or (target_volume_snapshots.get_volume_type() == \
                         vol_header.ROOT_VOLUME \
                         and target_volume_obj.get_target_vm().get_state() == \
-                            vm_header.DESTROYED):
+                            vm_header.EXPUNGED):
                 test_dict.rm_volume_snapshot(target_volume_snapshots)
 
     elif next_action == TestAction.create_volume_from_snapshot:
