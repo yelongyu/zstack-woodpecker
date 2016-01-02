@@ -3612,7 +3612,7 @@ def lib_vm_random_operation(robot_test_obj):
 
     #Fourthly, choose a available volume for possibly attach or delete
     avail_volumes = test_dict.get_volume_list(test_stage.free_volume)
-    avail_volumes.append(test_dict.get_volume_list(test_stage.deleted_volume))
+    avail_volumes.extend(test_dict.get_volume_list(test_stage.deleted_volume))
     if avail_volumes:
         ready_volume = random.choice(avail_volumes)
         if ready_volume.get_state() != vol_header.DELETED:
@@ -3698,12 +3698,15 @@ into robot_test_obj.exclusive_actions_list.')
 
     #Add template image actions
     avail_images = test_dict.get_image_list(test_stage.new_template_image)
-    avail_images.append(test_dict.get_image_list(test_stage.deleted_image))
-    target_image = random.choice(avail_image)
-    if avail_image.get_state() != image_header.DELETED:
-        test_stage_obj.set_image_state(test_stage.new_template_image)
+    avail_images.extend(test_dict.get_image_list(test_stage.deleted_image))
+    if avail_images:
+        target_image = random.choice(avail_images)
+        if target_image.get_state() != image_header.DELETED:
+            test_stage_obj.set_image_state(test_stage.new_template_image)
+        else:
+            test_stage_obj.set_image_state(test_stage.deleted_image)
     else:
-        test_stage_obj.set_image_state(test_stage.deleted_image)
+        test_stage_obj.set_image_state(test_stage.Any)
 
     #Add SG actions
     if test_dict.get_sg_list():
