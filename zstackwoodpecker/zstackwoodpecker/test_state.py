@@ -38,6 +38,7 @@ class TestAction(object):
     delete_volume = 'delete_volume'
     detach_volume = 'detach_volume'
     expunge_volume = 'expunge_volume'
+    migrate_volume = 'migrate_volume'
 
     create_data_vol_template_from_volume = \
             'create_data_volume_template_from_volume'
@@ -111,6 +112,8 @@ class TestStage(object):
         self.vm_volume_current_state = 0
         self.volume_current_state = 0
         self.image_current_state = 0
+        self.vm_live_migration_cap = 0
+        self.volume_migration_cap = 0
         self.sg_current_state = 0
         self.vip_current_state = 0
         self.sp_current_state = 0
@@ -143,6 +146,12 @@ class TestStage(object):
     new_template_image = 'new_created_template_image'
     no_new_template_image = 'no_new_created_template_image'
     deleted_image = 'deleted_image'
+
+    vm_live_migration = 'support_vm_live_migration'
+    no_vm_live_migration = 'no_support_vm_live_migration'
+
+    volume_migration = 'support_volume_migration'
+    no_volume_migration = 'no_support_volume_migration'
 
     no_sg = 'no_security_group'
     has_sg = 'has_defined_security_group'
@@ -193,6 +202,20 @@ class TestStage(object):
             deleted_image: 4000
             }
 
+    #If primary storage is local storage and hypervisor is kvm, vm live 
+    # migration is not allowed, otherwise vm might break disk. 
+    vm_live_migration_cap_dict = {
+            Any: 10000,
+            vm_live_migration: 20000,
+            no_vm_live_migration: 30000
+            }
+
+    volume_migration_cap_dict = {
+            Any: 100000,
+            volume_migration: 200000,
+            no_volume_migration: 300000
+            }
+
     snapshot_state_dict = {
             Any: 10,
             data_snapshot_in_ps: 20,
@@ -218,8 +241,10 @@ class TestStage(object):
     #state transition table for vm_state, volume_state and image_state
     normal_action_transition_table = {
         Any: [ta.create_vm, ta.create_volume, ta.idel], 
-        2: [ta.stop_vm, ta.reboot_vm, ta.destroy_vm, ta.migrate_vm],
-        3: [ta.start_vm, ta.destroy_vm, ta.create_image_from_volume, ta.create_data_vol_template_from_volume], 
+    20002: [ta.stop_vm, ta.reboot_vm, ta.destroy_vm, ta.migrate_vm],
+    30002: [ta.stop_vm, ta.reboot_vm, ta.destroy_vm],
+    20003: [ta.start_vm, ta.destroy_vm, ta.create_image_from_volume, ta.create_data_vol_template_from_volume], 
+    30023: [ta.start_vm, ta.destroy_vm, ta.create_image_from_volume, ta.create_data_vol_template_from_volume, ta.migrate_volume], 
         4: [ta.expunge_vm],
         5: [],
       211: [ta.delete_volume], 
@@ -228,11 +253,15 @@ class TestStage(object):
       224: [ta.delete_volume],
       232: [ta.attach_volume, ta.detach_volume, ta.delete_volume],
       233: [ta.attach_volume, ta.detach_volume, ta.delete_volume],
-      234: [ta.delete_volume], 244: [ta.delete_volume], 321: [],
+      234: [ta.delete_volume], 
+      244: [ta.delete_volume], 
+      321: [],
       332: [ta.detach_volume, ta.delete_volume], 
-      333: [ta.detach_volume, ta.delete_volume], 334: [],
+      333: [ta.detach_volume, ta.delete_volume], 
+      334: [],
       342: [ta.detach_volume, ta.delete_volume], 
-      343: [ta.detach_volume, ta.delete_volume], 344: [],
+      343: [ta.detach_volume, ta.delete_volume], 
+      344: [],
       400: [ta.expunge_volume],
      3000: [ta.delete_image, ta.create_data_volume_from_image],
      4000: [ta.expunge_image]
@@ -416,6 +445,12 @@ class TestStage(object):
     def get_vm_volume_state(self):
         return self.vm_volume_current_state
 
+    def set_vm_live_migration_cap(self, state):
+        self.vm_live_migration_cap = self.vm_live_migration_cap_dict[state]
+
+    def get_vm_live_migration_cap(self):
+        return self.vm_live_migration_cap
+
     def set_volume_state(self, state):
         self.volume_current_state = self.volume_state_dict[state]
 
@@ -492,7 +527,10 @@ class TestStage(object):
         return self._get_normal_actions(self.Any)
 
     def get_vm_actions(self):
-        return self._get_normal_actions(self.vm_current_state)
+        vm_action1 = self._get_normal_actions(self.vm_current_state)
+        vm_action2 = self._get_normal_actions(self.vm_current_state + self.vm_live_migration_cap)
+        vm_action2 = self._get_normal_actions(self.vm_current_state + self.vm_live_migration_cap + self.vm_volume_current_state)
+        return vm_action1 + vm_action2
 
     def get_volume_actions(self):
         #if state is deleted state, will directly return. 

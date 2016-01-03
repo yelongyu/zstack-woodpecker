@@ -1123,6 +1123,13 @@ def lib_check_live_snapshot_cap(host_inv):
                 % host_inv.uuid)
         return False
 
+def lib_check_vm_live_migration_cap(vm_inv):
+    root_volume = lib_get_root_volume(vm_inv)
+    ps = lib_get_primary_storage_by_uuid(root_volume.primaryStorageUuid)
+    if ps.type == inventory.LOCAL_STORAGE_TYPE:
+        return False
+    return True
+
 #return host inventory
 def lib_find_host_by_vm(vm_inv):
     '''
@@ -1162,6 +1169,18 @@ def lib_is_ps_iscsi_backend(ps_uuid):
     if ps.type == inventory.ISCSI_FILE_SYSTEM_BACKEND_PRIMARY_STORAGE_TYPE:
         return True
     return False
+
+def lib_find_random_host_by_volume_uuid(volume_uuid):
+    '''
+    Return a random host inventory. 
+    
+    The returned host should not be the host holding current volume_inv. But it 
+    should belong to the same cluster of volume_inv's primary storage.
+    '''
+    avail_hosts = vol_ops.get_volume_migratable_host(volume_uuid)
+    if avail_hosts:
+        return random.choice(avail_hosts)
+    return None
 
 def lib_find_random_host(vm = None):
     '''
@@ -3625,12 +3644,17 @@ def lib_vm_random_operation(robot_test_obj):
             test_stage_obj.set_vm_volume_state(test_stage.vm_volume_att_full)
             attached_volume = random.choice(vm_volumes)
     
+        if lib_check_vm_live_migration_cap(vm):
+            test_stage_obj.set_vm_live_migration_cap(test_stage.vm_live_migration)
+        else:
+            test_stage_obj.set_vm_live_migration_cap(test_stage.no_vm_live_migration)
     else:
         test_stage_obj.set_vm_state(test_stage.Any)
         test_stage_obj.set_vm_volume_state(test_stage.Any)
+        test_stage_obj.set_vm_live_migration_cap(test_stage.Any)
 
     #Fourthly, choose a available volume for possibly attach or delete
-    avail_volumes = test_dict.get_volume_list(test_stage.free_volume)
+    avail_volumes = list(test_dict.get_volume_list(test_stage.free_volume))
     avail_volumes.extend(test_dict.get_volume_list(test_stage.deleted_volume))
     if avail_volumes:
         ready_volume = random.choice(avail_volumes)
@@ -3820,6 +3844,15 @@ into robot_test_obj.exclusive_actions_list.')
             (next_action, ready_volume.get_volume().uuid, \
             target_vm.get_vm().uuid))
 
+        if not lib_check_vm_live_migration_cap(target_vm.vm):
+            ls_ref = lib_get_local_storage_reference_information(ready_volume.get_volume().uuid)
+            if ls_ref:
+                volume_host_uuid = ls_ref[0].hostUuid
+                vm_host_uuid = lib_get_vm_host(target_vm.vm).uuid
+                if vm_host_uuid and volume_host_uuid != vm_host_uuid:
+                    test_util.test_logger('need to migrate volume: %s to host: %s, before attach it to vm: %s' % (ready_volume.get_volume().uuid, vm_host_uuid, target_vm.vm.uuid))
+                    ready_volume.migrate(vm_host_uuid)
+
         ready_volume.attach(target_vm)
         test_dict.mv_volume(ready_volume, test_stage.free_volume, target_vm.vm.uuid)
 
@@ -3846,6 +3879,17 @@ into robot_test_obj.exclusive_actions_list.')
             (next_action, ready_volume.get_volume().uuid))
         ready_volume.expunge()
         test_dict.rm_volume(ready_volume)
+
+    elif next_action == TestAction.migrate_volume :
+        #TODO: add normal initialized data volume into migration target.
+        root_volume_uuid = lib_get_root_volume(target_vm.get_vm()).uuid
+        test_util.test_dsc('Robot Action: %s; on Volume: %s; on VM: %s' \
+                % (next_action, root_volume_uuid, target_vm.get_vm().uuid))
+        target_host = lib_find_random_host_by_volume_uuid(root_volume_uuid)
+        if not target_host:
+            test_util.test_logger('no avaiable host was found for doing vm migration')
+        else:
+            vol_ops.migrate_volume(root_volume_uuid, target_host.uuid)
 
     elif next_action == TestAction.idel :
         test_util.test_dsc('Robot Action: %s ' % next_action)
@@ -4295,3 +4339,7 @@ def lib_update_test_state_object_delete_delay_time(category, \
     test_util.test_logger('%s delete delay time has been changed to \
 %s' % (category, policy))
 
+def lib_get_local_storage_reference_information(volume_uuid):
+    cond = res_ops.gen_query_conditions('volume.uuid', '=', volume_uuid)
+    ls_ref = res_ops.query_resource(res_ops.LOCAL_STORAGE_RESOURCE_REF, cond)
+    return ls_ref

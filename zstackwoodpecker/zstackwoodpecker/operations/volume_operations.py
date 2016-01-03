@@ -211,3 +211,10 @@ def migrate_volume(volume_uuid, host_uuid, session_uuid = None):
             % (volume_uuid, host_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
 
+def get_volume_migratable_host(volume_uuid, session_uuid = None):
+    action = api_actions.LocalStorageGetVolumeMigratableHostsAction()
+    action.volumeUuid = volume_uuid
+    test_util.action_logger('Get Volume: %s Migratable Volume for Local Storage:' % volume_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventories
+

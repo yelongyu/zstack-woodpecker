@@ -60,6 +60,7 @@ VOLUME_SNAPSHOT_TREE = 'VolumeSnapshotTree'
 VOLUME_SNAPSHOT = 'VolumeSnapshot'
 LOAD_BALANCER = 'LoadBalancer'
 LOAD_BALANCER_LISTENER = 'LoadBalancerListener'
+LOCAL_STORAGE_RESOURCE_REF = 'LocalStorageResourceRef'
 
 def find_item_by_uuid(inventories, uuid):
     for item in inventories:
@@ -345,6 +346,8 @@ def _gen_query_action(resource):
         action = api_actions.QueryLoadBalancerAction()
     elif resource == LOAD_BALANCER_LISTENER:
         action = api_actions.QueryLoadBalancerListenerAction()
+    elif resource == LOCAL_STORAGE_RESOURCE_REF:
+        action = api_actions.QueryLocalStorageResourceRefAction()
 
     return action
 

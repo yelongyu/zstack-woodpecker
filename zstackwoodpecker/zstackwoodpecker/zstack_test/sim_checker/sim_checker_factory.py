@@ -24,8 +24,9 @@ class SimVmCheckerFactory(checker_header.CheckerFactory):
         elif test_obj.state == vm_header.STOPPED:
             checker_dict[db_checker.zstack_vm_db_checker] = True
         elif test_obj.state == vm_header.DESTROYED:
-            #checker_dict[db_checker.zstack_vm_db_checker] = True
-            pass
+            checker_dict[db_checker.zstack_vm_db_checker] = True
+        elif test_obj.state == vm_header.EXPUNGED:
+            checker_dict[db_checker.zstack_vm_db_checker] = False
 
         sim_vm_checker_chain.add_checker_dict(checker_dict, test_obj)
         test_util.test_logger('Add checker: %s for [vm:] %s' % (sim_vm_checker_chain, test_obj.vm.uuid))
@@ -49,6 +50,9 @@ class SimVolumeCheckerFactory(checker_header.CheckerFactory):
             checker_dict[db_checker.zstack_volume_attach_db_checker] = False
 
         elif test_obj.state == volume_header.DELETED:
+            checker_dict[db_checker.zstack_volume_db_checker] = True
+
+        elif test_obj.state == volume_header.EXPUNGED:
             checker_dict[db_checker.zstack_volume_db_checker] = False
 
         sim_volume_checker_chain.add_checker_dict(checker_dict, test_obj)
