@@ -529,8 +529,8 @@ class TestStage(object):
     def get_vm_actions(self):
         vm_action1 = self._get_normal_actions(self.vm_current_state)
         vm_action2 = self._get_normal_actions(self.vm_current_state + self.vm_live_migration_cap)
-        vm_action2 = self._get_normal_actions(self.vm_current_state + self.vm_live_migration_cap + self.vm_volume_current_state)
-        return vm_action1 + vm_action2
+        vm_action3 = self._get_normal_actions(self.vm_current_state + self.vm_live_migration_cap + self.vm_volume_current_state)
+        return vm_action1 + vm_action2 + vm_action3
 
     def get_volume_actions(self):
         #if state is deleted state, will directly return. 

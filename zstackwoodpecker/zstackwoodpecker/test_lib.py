@@ -29,6 +29,7 @@ import zstackwoodpecker.operations.config_operations as conf_ops
 
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.header.volume as vol_header
+import zstackwoodpecker.header.image as image_header
 
 import apibinding.api as api
 import zstacklib.utils.http as http
@@ -1148,6 +1149,14 @@ def lib_find_host_by_vm(vm_inv):
             uuid=host_uuid)
     if hosts:
         return hosts[0]
+
+def lib_find_hosts_by_ps_uuid(ps_uuid):
+    '''
+    find all hosts which is using given ps
+    '''
+    cond = res_ops.gen_query_conditions('cluster.primaryStorage.uuid', '=', \
+            ps_uuid)
+    return res_ops.query_resource(res_ops.HOST, cond)
 
 def lib_find_host_by_iscsi_ps(ps_inv):
     '''
@@ -3740,7 +3749,7 @@ into robot_test_obj.exclusive_actions_list.')
             vip_available = True
 
     #Add template image actions
-    avail_images = test_dict.get_image_list(test_stage.new_template_image)
+    avail_images = list(test_dict.get_image_list(test_stage.new_template_image))
     avail_images.extend(test_dict.get_image_list(test_stage.deleted_image))
     if avail_images:
         target_image = random.choice(avail_images)
@@ -3941,7 +3950,11 @@ into robot_test_obj.exclusive_actions_list.')
         test_util.test_dsc('Robot Action: %s; on Image: %s' % \
             (next_action, target_image.get_image().uuid))
 
-        target_image.expunge()
+        bss = target_image.get_image().backupStorageRefs
+        bs_uuid_list = []
+        for bs in bss:
+            bs_uuid_list.append(bs.backupStorageUuid)
+        target_image.expunge(bs_uuid_list)
         test_dict.rm_image(target_image)
 
     elif next_action == TestAction.create_sg:
@@ -4120,7 +4133,6 @@ def lib_get_test_stub():
 #---------------------------------------------------------------
 #Robot actions.
 def lib_create_data_vol_template_from_volume(target_vm, vm_target_vol=None):
-    import zstackwoodpecker.header.image as image_header
     import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
     vm_inv = target_vm.get_vm()
 
@@ -4191,8 +4203,20 @@ def lib_create_data_volume_from_image(target_image):
     bs_uuid = target_image.get_image().backupStorageRefs[0].backupStorageUuid
     ps_uuid_list = \
             lib_get_primary_storage_uuid_list_by_backup_storage(bs_uuid)
+    target_host_uuid = None
+    #TODO: need to consider multiple local storage condition, since zs 1.0 only
+    # support 1 local storage per host.
+    if len(ps_uuid_list) == 1:
+        ps_uuid = ps_uuid_list[0]
+        ps_inv = lib_get_primary_storage_by_uuid(ps_uuid)
+        if ps_inv.type == inventory.LOCAL_STORAGE_TYPE:
+            #local storage, need to assigne a host
+            target_host_uuid = \
+                    random.choice(lib_find_hosts_by_ps_uuid(ps_uuid)).uuid
+
     new_volume = target_image.create_data_volume(ps_uuid_list[0], \
-            'new_volume_from_template_%s' % target_image.get_image().uuid)
+            'new_volume_from_template_%s' % target_image.get_image().uuid, \
+            host_uuid = target_host_uuid)
     return new_volume 
 
 #------- load balance related function
