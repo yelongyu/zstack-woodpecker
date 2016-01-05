@@ -17,6 +17,9 @@ import pprint
 logger = log.get_logger(__name__)
 TESTAGENT_PORT = 9393
 
+class TestAgentError(Exception):
+    ''' test agent failed '''
+
 class TestAgent(plugin.Plugin):
     pass
 
@@ -61,7 +64,7 @@ def replyerror(func):
             rsp.success = False
             rsp.error = err
             logger.warn(err)
-            raise http.HTTPError('500 Internal Server Error\n %s' % err, err)
+            raise TestAgentError('500 Internal Server Error: %s' % err)
     return wrap
 
 class TestAgentDaemon(daemon.Daemon):

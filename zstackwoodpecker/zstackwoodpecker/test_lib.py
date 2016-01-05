@@ -970,6 +970,15 @@ def lib_get_vm_host(vm):
     if not vm_host_uuid:
         vm_host_uuid = vm.lastHostUuid
 
+    #In local storage environment, if VM is stopped or Destroyed, and its root 
+    # volume was migrated to another host. It doesn't have current Host Uuid 
+    # and its lastHostUuid can not reflect its real HostUuid for new start up.
+    # So we need to use root volume to check the real location.
+    if vm.state != inventory.RUNNING and not lib_check_vm_live_migration_cap(vm):
+        root_volume = lib_get_root_volume(vm)
+        ls_ref = lib_get_local_storage_reference_information(root_volume.uuid)[0]
+        vm_host_uuid = ls_ref.hostUuid
+
     hosts = res_ops.get_resource(res_ops.HOST, session_uuid=None, \
             uuid=vm_host_uuid)
 
@@ -2334,10 +2343,6 @@ def lib_get_volume_object_host(volume_obj):
             test_util.test_logger('Did not find any primary storage for [volume:] %s. Can not find [host] for this volume. It mostly means the volume is not attached to any VM yet. ' % volume.uuid)
             return None
 
-        conditions = res_ops.gen_query_conditions('uuid', '=', \
-                primaryStorageUuid)
-
-        ps_inv = res_ops.query_resource(res_ops.PRIMARY_STORAGE, conditions, None)[0]
         vm = volume_obj.get_target_vm().get_vm()
         host = lib_get_vm_host(vm)
         return host
@@ -2566,6 +2571,7 @@ def lib_get_images(session_uuid = None):
 
 def lib_get_root_images(session_uuid = None):
     cond = res_ops.gen_query_conditions('mediaType', '=', 'RootVolumeTemplate')
+    cond = res_ops.gen_query_conditions('status', '!=', 'Deleted', cond)
     return res_ops.query_resource(res_ops.IMAGE, cond, session_uuid)
 
 def lib_get_data_images(session_uuid = None):
@@ -3691,15 +3697,19 @@ def lib_vm_random_operation(robot_test_obj):
             if snapshot_volume_obj.get_state() != vol_header.ATTACHED:
                 test_stage_obj.set_snapshot_live_cap(test_stage.snapshot_live_creation)
                 test_stage_obj.set_volume_vm_state(vm_header.STOPPED)
+            elif snapshot_volume_obj.get_target_vm().get_state() == vm_header.DESTROYED:
+                test_stage_obj.set_snapshot_live_cap(test_stage.Any)
+                test_stage_obj.set_volume_vm_state(vm_header.DESTROYED)
             else:
                 volume_vm = snapshot_volume_obj.get_target_vm()
                 test_stage_obj.set_volume_vm_state(volume_vm.get_state())
                 target_vm_inv = volume_vm.get_vm()
                 host_inv = lib_find_host_by_vm(target_vm_inv)
-                if lib_check_live_snapshot_cap(host_inv):
-                    test_stage_obj.set_snapshot_live_cap(test_stage.snapshot_live_creation)
-                else:
-                    test_stage_obj.set_snapshot_live_cap(test_stage.snapshot_no_live_creation)
+                if host_inv:
+                    if lib_check_live_snapshot_cap(host_inv):
+                        test_stage_obj.set_snapshot_live_cap(test_stage.snapshot_live_creation)
+                    else:
+                        test_stage_obj.set_snapshot_live_cap(test_stage.snapshot_no_live_creation)
 
             #random pick up an available snapshot. Firstly choose from primary snapshot.
             target_snapshot = None
@@ -4367,3 +4377,10 @@ def lib_get_local_storage_reference_information(volume_uuid):
     cond = res_ops.gen_query_conditions('volume.uuid', '=', volume_uuid)
     ls_ref = res_ops.query_resource(res_ops.LOCAL_STORAGE_RESOURCE_REF, cond)
     return ls_ref
+
+def lib_get_local_storage_volume_host(volume_uuid):
+    ls_ref = lib_get_local_storage_reference_information(volume_uuid)
+    if ls_ref:
+        host_uuid = ls_ref[0].hostUuid
+        cond = res_ops.gen_query_conditions('uuid', '=', host_uuid)
+        return res_ops.query_resource(res_ops.HOST, cond)[0]

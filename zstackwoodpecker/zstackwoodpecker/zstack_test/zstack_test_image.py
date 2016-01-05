@@ -39,7 +39,7 @@ class ZstackTestImage(image_header.TestImage):
         if self.delete_policy != zstack_header.DELETE_DIRECT:
             if self.get_state() == image_header.DELETED:
                 self.expunge()
-            elif self.get_state() == volume_header.EXPUNGED:
+            elif self.get_state() == image_header.EXPUNGED:
                 pass
             else:
                 self.delete()

@@ -703,7 +703,7 @@ class TestStateDict(object):
                 vm.get_state() == vm_header.DESTROYED:
             for volume in self.get_volume_list(vm_inv.uuid):
                 if volume.get_volume().type != volume_header.ROOT_VOLUME:
-                    self.mv_volume(volume, vm_obj.uuid, TestStage.free_volume)
+                    self.mv_volume(volume, vm_inv.uuid, TestStage.free_volume)
 
         if vm.get_state() == vm_header.EXPUNGED:
             import zstackwoodpecker.test_lib as test_lib
