@@ -1,6 +1,9 @@
 <integrationTest>
     <suite name="multi hosts test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
         <case timeout='300' repeat='1'>test_create_vm.py</case>
+        <case timeout='300' repeat='1'>test_expunge_vm.py</case>
+        <case timeout='300' repeat='1'>test_expunge_vm_chg_del_policy.py</case>
+        <case timeout='300' repeat='1'>test_change_offering.py</case>
         <case timeout='300' repeat='1'>over_provision/test_change_mem_over_prv.py
         <case timeout='300' repeat='1'>over_provision/test_chg_storage_over_prv.py</case>
         <case timeout='300' repeat='1'>over_provision/test_memory_over_provision.py</case>
@@ -10,5 +13,7 @@
         <case timeout='300' repeat='1'>qos/test_net_qos.py</case>
         <case timeout='300' repeat='1'>other/test_add_local_image.py</case>
         <case timeout='300' repeat='1'>other/test_memory_allocation.py</case>
+        <case timeout='300' repeat='1'>other/test_parallel_crt_vm_to_use_all_disk.py</case>
+        <case timeout='300' repeat='1'>other/test_parallel_crt_vm_to_use_all_mem.py</case>
     </suite>
 </integrationTest>
