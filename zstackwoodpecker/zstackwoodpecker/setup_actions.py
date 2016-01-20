@@ -462,6 +462,7 @@ class Plan(object):
                 if not os.path.exists(self.zstack_properties):
                     print('unable to find zstackProperties at %s, use \
 default one' % self.zstack_properties)
+                    self.zstack_properties = None
 
         os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = ''
         if deploy_config.has_element('nodes') \

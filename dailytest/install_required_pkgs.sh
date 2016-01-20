@@ -16,3 +16,5 @@ if [ $? -ne 0 ]; then
         echo "failed to install ansible" && exit 1
     fi
 fi
+
+yum install -y vconfig
