@@ -4,7 +4,7 @@ zstackInstallScript = ~/sanitytest/install.sh
 zstackInstallPath = /usr/local/zstacktest
 zstackPropertiesPath = ~/sanitytest/conf/zstack.properties
 zstackTestAgentPkgPath = ~/sanitytest/zstacktestagent.tar.bz
-DBServer = centos1
+DBServer = 10.1.101.40
 
 DBAdminUser = root
 DBAdminPassword = 
@@ -42,21 +42,21 @@ sftpBackupStorageName = sftp
 sftpBackupStorageUrl = /home/sftpBackupStorage
 sftpBackupStorageUsername = root
 sftpBackupStoragePassword = 1
-sftpBackupStorageHostname = centos1
+sftpBackupStorageHostname = 10.1.101.40
 
 nfsPrimaryStorageName = nfs
-nfsPrimaryStorageUrl = zstack:/home/nfs
+nfsPrimaryStorageUrl = 10.1.101.1:/home/nfs
 
-imageName_s = ttylinux
+imageName_s = f18
 rootImageFormat = raw
 rootMediaType = RootVolumeTemplate
-imageUrl_s = http://zstack.yyk.net/image/f18_200m.img
-#imageUrl = http://zstack.yyk.net/image/centos.img
+imageUrl_s = http://10.1.101.1/image/f18_200m.img
+#imageUrl = http://10.1.101.1/image/centos.img
 imageUsername = root
 imagePassword = password
 
 imageName_net = image_for_sg_test
-imageUrl_net = http://zstack.yyk.net/image/centos_400m_140527.img
+imageUrl_net = http://10.1.101.1/image/centos_400m_140527.img
 
 rootDiskOfferingName = root-disk
 rootDiskOfferingSize = 1G
@@ -193,15 +193,15 @@ vlanIpRangeGateway6 = 10.16.0.1
 vlanIpRangeNetmask6 = 255.255.0.0
 
 virtualRouterImageName = vr
-#virtualRouterImageUrl = http://zstack.yyk.net/image/vr-centos.img
-#virtualRouterImageUrl = http://zstack.yyk.net/image/vr-centos_1.3g_14_2_27.img
-#virtualRouterImageUrl = http://zstack.yyk.net/image/vr-centos_500m_140228.img
-#virtualRouterImageUrl = http://zstack.yyk.net/image/vr-centos_600m_140313.img
-#virtualRouterImageUrl = http://zstack.yyk.net/image/vr-centos_700m_140603.img
-#virtualRouterImageUrl = http://zstack.yyk.net/image/debian-vr.img
-virtualRouterImageUrl = http://zstack.yyk.net/image/zstack-vr.img
-virtualRouterImageUrl = http://zstack.yyk.net/image/zstack-vr.qcow2
-#virtualRouterImageUrl = http://zstack.yyk.net/image/vr-centos_600m_140318.img
-#virtualRouterImageUrl = http://zstack.yyk.net/image/vr-centos_500m.img
+#virtualRouterImageUrl = http://10.1.101.1/image/vr-centos.img
+#virtualRouterImageUrl = http://10.1.101.1/image/vr-centos_1.3g_14_2_27.img
+#virtualRouterImageUrl = http://10.1.101.1/image/vr-centos_500m_140228.img
+#virtualRouterImageUrl = http://10.1.101.1/image/vr-centos_600m_140313.img
+#virtualRouterImageUrl = http://10.1.101.1/image/vr-centos_700m_140603.img
+#virtualRouterImageUrl = http://10.1.101.1/image/debian-vr.img
+virtualRouterImageUrl = http://10.1.101.1/image/zstack-vr.img
+virtualRouterImageUrl = http://10.1.101.1/image/zstack-vr.qcow2
+#virtualRouterImageUrl = http://10.1.101.1/image/vr-centos_600m_140318.img
+#virtualRouterImageUrl = http://10.1.101.1/image/vr-centos_500m.img
 vrImageUsername = root
 vrImagePassword = password

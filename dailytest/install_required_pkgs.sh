@@ -17,4 +17,8 @@ if [ $? -ne 0 ]; then
     fi
 fi
 
-yum install -y vconfig
+which vconfig  >&/dev/null
+if [ $? -ne 0 ]; then
+    echo "Need to install vconfig:"
+    yum install -y vconfig
+fi
