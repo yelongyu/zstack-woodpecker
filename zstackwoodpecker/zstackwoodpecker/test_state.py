@@ -701,9 +701,11 @@ class TestStateDict(object):
         #move all attached data volume to free stage.
         if vm.get_state() == vm_header.EXPUNGED or \
                 vm.get_state() == vm_header.DESTROYED:
-            for volume in self.get_volume_list(vm_inv.uuid):
-                if volume.get_volume().type != volume_header.ROOT_VOLUME:
-                    self.mv_volume(volume, vm_inv.uuid, TestStage.free_volume)
+            #currently we don't add root volume into volume list, so we need this judgment.
+            if self.get_volume_list(vm_inv.uuid):
+                for volume in self.get_volume_list(vm_inv.uuid):
+                    if volume.get_volume().type != volume_header.ROOT_VOLUME:
+                        self.mv_volume(volume, vm_inv.uuid, TestStage.free_volume)
 
         if vm.get_state() == vm_header.EXPUNGED:
             import zstackwoodpecker.test_lib as test_lib
