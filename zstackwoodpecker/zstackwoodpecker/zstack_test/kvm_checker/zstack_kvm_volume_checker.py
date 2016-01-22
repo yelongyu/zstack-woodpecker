@@ -33,6 +33,9 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
             self.check_nfs(volume, volume_installPath)
         elif ps.type == inventory.LOCAL_STORAGE_TYPE:
             host = test_lib.lib_get_local_storage_volume_host(volume.uuid)
+            if not host:
+                return self.judge(False)
+
             self.check_file_exist(volume, volume_installPath, host)
         elif ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
             self.check_ceph(volume, volume_installPath, ps)

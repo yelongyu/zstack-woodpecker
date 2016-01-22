@@ -137,7 +137,9 @@ class KvmImageCheckerFactory(checker_header.CheckerFactory):
         if test_obj.state == image_header.DELETED:
             checker_dict[db_checker.zstack_image_db_checker] = True
             checker_dict[image_checker.zstack_kvm_image_file_checker] = True
+
         if test_obj.state == image_header.EXPUNGED:
+            checker_dict[db_checker.zstack_image_db_checker] = False
             checker_dict[image_checker.zstack_kvm_image_file_checker] = False
 
         kvm_image_checker_chain.add_checker_dict(checker_dict, test_obj)

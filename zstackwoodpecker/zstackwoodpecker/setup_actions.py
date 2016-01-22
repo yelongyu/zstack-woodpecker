@@ -512,7 +512,8 @@ default one' % self.zstack_properties)
         #cmd = 'WEBSITE=localhost bash %s -f %s -r %s -a -z' % \
         #        (self.zstack_install_script, self.zstack_pkg, \
         #        self.install_path)
-        cmd = 'bash %s -D -z -r %s -m -R aliyun' % (self.zstack_pkg, self.install_path)
+        #cmd = 'bash %s -D -z -r %s -m -R aliyun' % (self.zstack_pkg, self.install_path)
+        cmd = 'bash %s -D -z -r %s -R aliyun' % (self.zstack_pkg, self.install_path)
         if self.db_admin_password:
             cmd = '%s -P %s' % (cmd, self.db_admin_password)
         if self.db_password:
@@ -531,13 +532,13 @@ default one' % self.zstack_properties)
 
         self._wait_for_thread_completion('set extra management node config', 10)
 
-    def _wait_for_thread_completion(self, msg, wait_time):
+    def _wait_for_thread_completion(self, msg, wait_time, raise_exception = True):
         end_time = wait_time
         while end_time > 0:
             if threading.active_count() == 1:
                 break
 
-            if node_exception:
+            if node_exception and raise_exception:
                 print 'Meet exception when: %s :' % msg
                 info1 = node_exception[0][1]
                 info2 = node_exception[0][2]
@@ -839,7 +840,8 @@ default one' % self.zstack_properties)
                 thread = threading.Thread(target=shell_cmd_thread, args=(cmd, True))
                 thread.start()
 
-        self._wait_for_thread_completion('stop management node', 40)
+        self._wait_for_thread_completion('stop management node', 40, \
+                raise_exception = False)
 
     def disable_db_deployment(self):
         self.need_deploy_db = False
