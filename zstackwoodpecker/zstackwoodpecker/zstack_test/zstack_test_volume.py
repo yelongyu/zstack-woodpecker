@@ -15,11 +15,11 @@ import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
 
 class ZstackTestVolume(volume_header.TestVolume):
     def __init__(self):
+        super(ZstackTestVolume, self).__init__()
         self.volume_creation_option = test_util.VolumeOption()
         self.original_checking_points = []
         self.delete_policy = test_lib.lib_get_delete_policy('volume')
         self.delete_delay_time = test_lib.lib_get_expunge_time('volume')
-        super(ZstackTestVolume, self).__init__()
 
     def create(self):
         self.set_volume(vol_ops.create_volume_from_offering(self.volume_creation_option))

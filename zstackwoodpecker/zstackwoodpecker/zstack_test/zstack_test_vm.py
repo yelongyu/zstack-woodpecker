@@ -14,11 +14,11 @@ import zstackwoodpecker.test_lib as test_lib
 
 class ZstackTestVm(vm_header.TestVm):
     def __init__(self):
+        super(ZstackTestVm, self).__init__()
         self.vm_creation_option = test_util.VmOption()
         self.changed_instance_offering_uuid = None
         self.delete_policy = test_lib.lib_get_delete_policy('vm')
         self.delete_delay_time = test_lib.lib_get_expunge_time('vm')
-        super(ZstackTestVm, self).__init__()
 
     def __hash__(self):
         return hash(self.vm.uuid)

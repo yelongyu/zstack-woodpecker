@@ -13,11 +13,11 @@ import zstackwoodpecker.test_lib as test_lib
 class ZstackTestImage(image_header.TestImage):
 
     def __init__(self):
+        super(ZstackTestImage, self).__init__()
         self.image_creation_option = test_util.ImageOption()
         self.original_checking_points = []
         self.delete_policy = test_lib.lib_get_delete_policy('image')
         self.delete_delay_time = test_lib.lib_get_expunge_time('image')
-        super(ZstackTestImage, self).__init__()
 
     def create(self):
         '''
