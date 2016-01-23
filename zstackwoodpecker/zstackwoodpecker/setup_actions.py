@@ -738,6 +738,10 @@ default one' % self.zstack_properties)
         #planed_nodes.append(socket.gethostbyname(socket.gethostname()))
 
         #live_nodes_inv = res_ops.query_resource(res_ops.MANAGEMENT_NODE, [])
+
+        #set ZSTACK_HOME, which will be used by zstack-ctl
+        os.environ['ZSTACK_HOME'] = '%s/apache-tomcat/webapps/zstack/' % \
+                self.install_path
         not_restarted_nodes = []
 
         #for live_node_inv in live_nodes_inv:
@@ -819,6 +823,10 @@ default one' % self.zstack_properties)
                     node.ip_, timeout=new_timeout, interval=0.5):
                 raise ActionError('multi node does not startup on host: %s' \
                         % node.ip_)
+
+        zstack_home = '%s/apache-tomcat/webapps/zstack/' % self.install_path
+        cmd = 'zstack-ctl setenv ZSTACK_HOME=%s' % zstack_home
+        shell.call(cmd)
 
     def stop_node(self):
         print 'Begin to stop node ...'
