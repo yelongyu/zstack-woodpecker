@@ -712,7 +712,8 @@ class TestStateDict(object):
             volume_uuid = test_lib.lib_get_root_volume(vm_inv).uuid
             self.rm_volume_snapshots_by_rm_volume(volume_uuid)
             #clean root volume and vm_inv relationship in volume dict.
-            self.volume_dict.pop(vm_inv.uuid)
+            if self.volume_dict.has_key(vm_inv.uuid):
+                self.volume_dict.pop(vm_inv.uuid)
 
         if state:
             if vm in self.vm_dict[state]:
