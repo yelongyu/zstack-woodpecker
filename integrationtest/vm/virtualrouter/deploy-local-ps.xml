@@ -311,6 +311,30 @@
           </l3Networks>
         </l2VlanNetwork>
 
+        <l2VlanNetwork name="$l2VlanNetworkName6" description="vlan network 6 for test load balance service."
+          physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan6">
+          <l3Networks>
+            <l3BasicNetwork name="$l3VlanNetworkName6" description = "guest test vlan network for network load balance" domain_name="$L3VlanNetworkDomainName6">
+              <ipRange name="$vlanIpRangeName6" 
+                startIp="$vlanIpRangeStart6" 
+                endIp="$vlanIpRangeEnd6"
+                gateway="$vlanIpRangeGateway6" 
+                netmask="$vlanIpRangeNetmask6"/>
+              <dns>$DNSServer</dns> 
+              <networkService provider="VirtualRouter">
+                <serviceType>DHCP</serviceType>
+                <serviceType>DNS</serviceType>
+                <serviceType>SNAT</serviceType>
+                <serviceType>PortForwarding</serviceType>
+                <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
+              </networkService>
+              <networkService provider="SecurityGroup">
+                <serviceType>SecurityGroup</serviceType>
+              </networkService>
+            </l3BasicNetwork>
+          </l3Networks>
+        </l2VlanNetwork>
       </l2Networks>
 
       <primaryStorages>
