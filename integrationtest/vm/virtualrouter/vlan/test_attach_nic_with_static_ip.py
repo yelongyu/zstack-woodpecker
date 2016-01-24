@@ -35,8 +35,10 @@ def test():
     vm = test_stub.create_vm(l3_net_list, image_uuid, 'attach_nic_vm', \
             default_l3_uuid = l3_net_uuid)
     test_obj_dict.add_vm(vm)
-    vm.check()
+    #vm.check()
 
+    #change static IP need to stop VM firstly.
+    vm.stop()
     ip_address2 = net_ops.get_free_ip(l3_net_uuid2)[0].ip
     static_ip_system_tag2 = test_lib.lib_create_vm_static_ip_tag(\
             l3_net_uuid2, \
