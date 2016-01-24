@@ -28,7 +28,7 @@ def test():
     l3_name = os.environ.get('l3VlanNetworkName1')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     l3_net_list = [l3_net_uuid]
-    l3_name = os.environ.get('l3VlanNetworkName1')
+    l3_name = os.environ.get('l3VlanNetworkName3')
     l3_net_uuid2 = test_lib.lib_get_l3_by_name(l3_name).uuid
 
     vm = test_stub.create_vm(l3_net_list, image_uuid, 'attach_nic_vm', \
@@ -38,17 +38,18 @@ def test():
 
     #change static IP need to stop VM firstly.
     vm.stop()
+    vm.add_nic(l3_net_uuid2)
     ip_address2 = net_ops.get_free_ip(l3_net_uuid2)[0].ip
     static_ip_system_tag2 = test_lib.lib_create_vm_static_ip_tag(\
             l3_net_uuid2, \
             ip_address2)
     tag_ops.create_system_tag('VmInstanceVO', vm.get_vm().uuid, \
             static_ip_system_tag2)
-    vm.add_nic(l3_net_uuid2)
+
+    vm.start()
     attached_nic = test_lib.lib_get_vm_last_nic(vm.get_vm())
     if l3_net_uuid2 != attached_nic.l3NetworkUuid:
         test_util.test_fail("After attach a nic, VM:%s last nic is not belong l3: %s" % (vm.get_vm().uuid, l3_net_uuid2))
-
     test_lib.lib_restart_vm_network(vm.get_vm())
 
     if attached_nic.ip != ip_address2:
