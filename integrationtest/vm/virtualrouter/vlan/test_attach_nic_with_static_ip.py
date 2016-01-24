@@ -25,8 +25,7 @@ def test():
     ''')
     image_name = os.environ.get('imageName_net')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
-    #l3_name = os.environ.get('l3VlanNetworkName1')
-    l3_name = os.environ.get('l3VlanDNATNetworkName')
+    l3_name = os.environ.get('l3VlanNetworkName1')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     l3_net_list = [l3_net_uuid]
     l3_name = os.environ.get('l3VlanNetworkName1')
