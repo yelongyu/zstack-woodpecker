@@ -135,6 +135,7 @@
           <l2NetworkRef>$l2VlanNetworkName3</l2NetworkRef>
           <l2NetworkRef>$l2VlanNetworkName4</l2NetworkRef>
           <l2NetworkRef>$l2VlanNetworkName5</l2NetworkRef>
+          <l2NetworkRef>$l2VlanNetworkName6</l2NetworkRef>
         </cluster>
       </clusters>
 
