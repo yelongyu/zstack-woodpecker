@@ -90,7 +90,7 @@ class ZstackTestSecurityGroup(sg_header.TestSecurityGroup):
     #When test vm is destroyed, the update action is similar with detach()
     #def update(self):
     #    for test_vm in self.test_vm_list:
-    #        if test_vm.state == vm_header.DESTROYED:
+    #        if test_vm.state == vm_header.DESTROYED or test_vm.state == vm_header.EXPUNGED:
     #            self.delete_vm(test_vm)
 
     def delete_vm(self, test_vm):

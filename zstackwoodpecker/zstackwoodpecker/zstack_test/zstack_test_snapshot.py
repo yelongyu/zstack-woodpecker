@@ -219,7 +219,8 @@ umount %s
         return snapshot
 
     def use_snapshot(self, snapshot):
-        if self.target_volume.get_state() == volume_header.DELETED:
+        if self.target_volume.get_state() == volume_header.DELETED \
+                or self.target_volume.get_state() == volume_header.EXPUNGED:
             test_util.test_fail(
             'Can not use [snapshot:] %s, as [target_volume:] %s is deleted' \
                     % (snapshot.get_snapshot().uuid, \
@@ -598,7 +599,8 @@ not be created to a new template' % \
         self.child_list.remove(snapshot)
 
     def update(self):
-        if self.get_target_volume().state == volume_header.DELETED:
+        if self.get_target_volume().state == volume_header.DELETED \
+                or self.get_target_volume().state == volume_header.EXPUNGED:
             super(ZstackTestSnapshot, self).delete_from_primary_storage()
 
     def check(self):

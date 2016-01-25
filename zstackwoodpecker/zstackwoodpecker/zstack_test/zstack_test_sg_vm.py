@@ -217,7 +217,8 @@ class ZstackTestSgVm(sg_header.TestSecurityGroupVm):
 
     def _check_vm_destroyed(self):
         for vm in self.vm_nic_dict.keys():
-            if vm.state == vm_header.DESTROYED:
+            if vm.state == vm_header.DESTROYED \
+                    or vm.state == vm_header.EXPUNGED:
                 nic_list = self.get_nic_list_by_vm(vm)
                 for nic in nic_list:
                     sg_list = self.get_sg_list_by_nic(nic)

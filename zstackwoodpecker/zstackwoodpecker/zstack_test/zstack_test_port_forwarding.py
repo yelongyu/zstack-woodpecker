@@ -88,7 +88,9 @@ class ZstackTestPortForwarding(pf_header.TestPortForwarding):
         super(ZstackTestPortForwarding, self).check()
 
     def update(self):
-        if self.state == pf_header.ATTACHED and self.target_vm.state == vm_header.DESTROYED:
+        if self.state == pf_header.ATTACHED \
+                and (self.target_vm.state == vm_header.DESTROYED \
+                or self.target_vm.state == vm_header.EXPUNGED):
             self.state = pf_header.DETACHED
             self.target_vm = None
 

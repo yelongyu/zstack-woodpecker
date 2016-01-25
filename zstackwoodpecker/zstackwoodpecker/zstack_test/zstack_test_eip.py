@@ -56,7 +56,9 @@ class ZstackTestEip(eip_header.TestEIP):
 
     def update(self):
         if self.target_vm:
-            if self.target_vm.state == vm_header.DESTROYED and self.state == eip_header.ATTACHED:
+            if (self.target_vm.state == vm_header.DESTROYED or \
+                    self.target_vm.state == vm_header.EXPUNGED) \
+                    and self.state == eip_header.ATTACHED:
                 self.state = eip_header.DETACHED
 
     def set_creation_option(self, eip_creation_option):
