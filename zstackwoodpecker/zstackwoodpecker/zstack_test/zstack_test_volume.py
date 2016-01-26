@@ -90,7 +90,10 @@ class ZstackTestVolume(volume_header.TestVolume):
     def update(self):
         if self.state == volume_header.ATTACHED \
                 and self.get_target_vm() \
-                and self.get_target_vm().get_state() == vm_header.DESTROYED:
+                and (self.get_target_vm().get_state() \
+                    == vm_header.DESTROYED \
+                    or self.get_target_vm().get_state() \
+                    == vm_header.EXPUNGED):
             if self.get_volume().type != 'Root':
                 self.set_volume(test_lib.lib_get_volume_by_uuid(self.get_volume().uuid))
                 super(ZstackTestVolume, self).detach()
