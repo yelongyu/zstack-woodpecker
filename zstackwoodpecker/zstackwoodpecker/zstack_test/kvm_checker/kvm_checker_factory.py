@@ -85,8 +85,6 @@ class KvmVmCheckerFactory(checker_header.CheckerFactory):
             checker_dict[vm_checker.zstack_kvm_vm_destroyed_checker] = True
         elif test_obj.state == vm_header.EXPUNGED:
             checker_dict[db_checker.zstack_vm_db_checker] = True
-            checker_dict[vm_checker.zstack_kvm_vm_destroyed_checker] = True
-
 
         kvm_vm_checker_chain.add_checker_dict(checker_dict, test_obj)
         return kvm_vm_checker_chain
