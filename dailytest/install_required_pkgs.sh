@@ -45,4 +45,10 @@ if [ $? -ne 0 ]; then
 fi
 
 rpm -q python-devel >&/dev/null
-[ $? -ne 0 ] && yum install python-devel
+if [ $? -ne 0 ]; then
+    echo "Need to install python-devel:"
+    yum install python-devel
+    if [ $? -ne 0 ]; then
+        echo "failed to install python-devel" && exit 1
+    fi
+fi
