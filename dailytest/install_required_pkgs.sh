@@ -22,3 +22,27 @@ if [ $? -ne 0 ]; then
     echo "Need to install vconfig:"
     yum install -y vconfig
 fi
+
+which virtualenv >& /dev/null
+[ $? -ne 0 ] && pip install virtualenv==12.1.1
+
+which autoconf >& /dev/null
+if [ $? -ne 0 ]; then
+    echo "Need to install autoconf:"
+    yum install -y autoconf
+    if [ $? -ne 0 ]; then
+        echo "failed to install autoconf" && exit 1
+    fi
+fi
+
+which gcc >& /dev/null
+if [ $? -ne 0 ]; then
+    echo "Need to install gcc:"
+    yum install -y gcc
+    if [ $? -ne 0 ]; then
+        echo "failed to install gcc" && exit 1
+    fi
+fi
+
+rpm -q python-devel >&/dev/null
+[ $? -ne 0 ] && yum install python-devel
