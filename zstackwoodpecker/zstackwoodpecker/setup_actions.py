@@ -56,8 +56,8 @@ def shell_cmd_thread(shell_cmd, ignore_exception = False):
     try:
         shell.call(shell_cmd)
     except Exception as e:
-        node_exception.append(sys.exc_info())
         if not ignore_exception:
+            node_exception.append(sys.exc_info())
             raise e
 
 def restart_zstack_without_deploy_db(test_config_path):
@@ -782,7 +782,7 @@ default one' % self.zstack_properties)
                 #consider some zstack-server is running in vm, the server 
                 # startup speed is slow. Increase timeout to 180s.
                 cmd = 'zstack-ctl stop_node --host=%s ; zstack-ctl start_node --host=%s --timeout=180' % (node.ip_, node.ip_)
-                thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
+                thread = threading.Thread(target=shell_cmd_thread, args=(cmd, True, ))
                 threads.append(thread)
             else:
                 print 'Deploy node in docker'
