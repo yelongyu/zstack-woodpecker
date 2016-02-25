@@ -2864,6 +2864,11 @@ def lib_open_vm_listen_ports(vm, ports, l3_uuid=None):
             test_util.test_fail("Can not find [vm:] %s IP for [l3 uuid:] %s. Can not open ports for it." % (vm.uuid, l3_uuid))
 
     lib_check_nc_exist(vm, l3_uuid)
+    flush_iptables_cmd = 'iptables -F; iptables -F -t nat'
+
+    test_util.test_logger("Flush iptables rules")
+    test_result = lib_execute_command_in_vm(vm, flush_iptables_cmd)
+
     target_ports = ' '.join(str(port) for port in ports)
     port_checking_cmd = 'result=""; for port in `echo %s`; do echo "hello" | nc -w1 %s $port >/dev/null 2>&1; if [ $? -eq 0 ]; then result="${result}0";else result="${result}1"; (nohup nc -k -l %s $port >/dev/null 2>&1 </dev/null &); fi ; done; echo $result' % (target_ports, target_ip, target_ip)
 
