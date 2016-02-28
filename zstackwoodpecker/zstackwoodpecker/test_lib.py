@@ -2707,7 +2707,7 @@ def lib_mkfs_for_volume(volume_uuid, vm_inv):
     script_file = tempfile.NamedTemporaryFile(delete=False)
     script_file.write('''
 mkdir -p %s
-device=`fdisk -l|grep Disk|tail -2|head -1|awk '{print $2}'|awk -F: '{print $1}'`
+device="/dev/`ls -ltr --file-type /dev | grep disk | awk '{print $NF}' | grep -v '[[:digit:]]' | tail -1`"
 mount ${device}1 %s
 if [ $? -ne 0 ]; then
     fdisk $device <<EOF
@@ -2718,7 +2718,7 @@ p
 
 w
 EOF
-    mkfs.ext3 ${device}1
+    mkfs.vfat ${device}1
 else
     umount %s
 fi

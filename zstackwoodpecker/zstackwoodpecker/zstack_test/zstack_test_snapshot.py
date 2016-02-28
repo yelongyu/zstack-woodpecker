@@ -151,7 +151,7 @@ class ZstackVolumeSnapshot(object):
         import tempfile
         with tempfile.NamedTemporaryFile() as script:
             script.write('''
-device=`fdisk -l|grep Disk|tail -2|head -1|awk '{print $2}'|awk -F: '{print $1}'`1
+device=/dev/`ls -ltr --file-type /dev | grep disk | awk '{print $NF}' | grep -v '[[:digit:]]' | tail -1`1
 mkdir -p %s
 mount $device %s || exit 1
 /bin/rm -rf %s
@@ -433,7 +433,7 @@ class ZstackTestSnapshot(sp_header.TestSnapshot):
         import tempfile
         with tempfile.NamedTemporaryFile() as script:
             script.write('''
-device=`fdisk -l|grep Disk|tail -2|head -1|awk '{print $2}'|awk -F: '{print $1}'`1
+device=/dev/`ls -ltr --file-type /dev | grep disk | awk '{print $NF}' | grep -v '[[:digit:]]' | tail -1`1
 mkdir -p %s
 mount $device %s
 mkdir -p %s

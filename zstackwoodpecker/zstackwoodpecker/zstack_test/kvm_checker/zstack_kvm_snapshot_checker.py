@@ -74,7 +74,7 @@ class zstack_kvm_snapshot_checker(checker_header.TestChecker):
         import tempfile
         with tempfile.NamedTemporaryFile() as script:
             script.write('''
-device=`fdisk -l|grep Disk|tail -2|head -1|awk '{print $2}'|awk -F: '{print $1}'`1
+device=/dev/`ls -ltr --file-type /dev | grep disk | awk '{print $NF}' | grep -v '[[:digit:]]' | tail -1`1
 mkdir -p %s >/dev/null
 mount $device %s >/dev/null
 mkdir -p %s >/dev/null
