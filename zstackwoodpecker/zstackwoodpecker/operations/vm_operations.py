@@ -99,6 +99,15 @@ def migrate_vm(vm_uuid, host_uuid, timeout = 240000, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory 
 
+def change_vm_static_ip(vm_uuid, l3NetworkUuid, ip, session_uuid = None):
+    action = api_actions.SetVmStaticIpAction()
+    action.vmInstanceUuid = vm_uuid
+    action.l3NetworkUuid = l3NetworkUuid
+    action.ip = ip
+    test_util.action_logger('Change VM static IP to %s [uuid:] %s' % (ip, vm_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
 def reconnect_vr(vr_uuid, session_uuid=None):
     action = api_actions.ReconnectVirtualRouterAction()
     action.vmInstanceUuid = vr_uuid
