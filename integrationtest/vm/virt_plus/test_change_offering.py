@@ -56,7 +56,7 @@ def test():
     vm.change_instance_offering(new_offering_uuid)
     vm.start()
     host_avail_mem2 = test_lib.lib_get_cpu_memory_capacity(host_uuids = [host_uuid]).availableMemory
-    host_mem_diff = host_avail_mem1 - host_avail_mem
+    host_mem_diff = host_avail_mem1 - host_avail_mem2
     if host_avail_mem2 >= host_avail_mem1 :
         test_util.test_fail('Host available memory is not correct after change vm template. Previous value: %s , Current value: %s' % (host_avail_mem1, host_avail_mem2))
     else:
