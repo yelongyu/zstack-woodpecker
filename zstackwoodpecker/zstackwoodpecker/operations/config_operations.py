@@ -14,16 +14,19 @@ import zstackwoodpecker.test_util as test_util
 def get_global_config_value(category, name, session_uuid = None, \
         default_value = None):
     value = None
-    action = api_actions.GetGlobalConfigAction()
+    action = api_actions.QueryGlobalConfigAction()
     action.category = category
-    action.name = name
+    action.conditions = [{'name': 'name', 'op': '=', 'value': name}]
     test_util.action_logger('Get global config category: %s, name: %s' \
             % (category, name))
     result = account_operations.execute_action_with_session(action, \
             session_uuid)
 
     if result:
-        return result.inventory.value
+        if default_value != None and default_value:
+            return result[0].defaultValue
+        else:
+            return result[0].value
 
 def get_global_config_default_value(category, name, session_uuid = None):
     value = None
