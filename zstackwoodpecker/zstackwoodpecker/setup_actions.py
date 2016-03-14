@@ -520,7 +520,7 @@ default one' % self.zstack_properties)
             cmd = '%s -p %s' % (cmd, self.db_password)
 
         shell.call(cmd)
-        self._deploy_zstack_properties()
+        #self._deploy_zstack_properties()
         self._extra_deployment()
 
     def _set_extra_node_config(self):
