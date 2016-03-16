@@ -12,6 +12,7 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.zstack_test.zstack_test_snapshot as zstack_sp_header
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_vol_header
 import zstackwoodpecker.header.volume as vol_header
+import zstackwoodpecker.operations.config_operations as conf_ops
 
 import os
 import time
