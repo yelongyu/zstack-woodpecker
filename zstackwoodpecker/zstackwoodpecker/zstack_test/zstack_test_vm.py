@@ -71,6 +71,10 @@ class ZstackTestVm(vm_header.TestVm):
         vm_ops.destroy_vm(self.vm.uuid, session_uuid)
         super(ZstackTestVm, self).destroy()
 
+    def recover(self, session_uuid = None):
+        vm_ops.recover_vm(self.vm.uuid, session_uuid)
+        super(ZstackTestVm, self).recover()
+
     def start(self, session_uuid = None):
         self.vm = vm_ops.start_vm(self.vm.uuid, session_uuid)
         super(ZstackTestVm, self).start()

@@ -50,6 +50,9 @@ class TestVm(zstack_header.ZstackObject):
     def expunge(self):
         self.state = EXPUNGED
 
+    def recover(self):
+        self.state = STOPPED
+
     def get_vm(self):
         return self.vm
 

@@ -157,3 +157,10 @@ def expunge_vm(vm_uuid, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory 
 
+def recover_vm(vm_uuid, session_uuid = None):
+    action = api_actions.RecoverVmInstanceAction()
+    action.uuid = vm_uuid
+    action.timeout = 20000
+    test_util.action_logger('Recover VM [uuid:] %s ' % vm_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory 
