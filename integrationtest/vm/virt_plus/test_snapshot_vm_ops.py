@@ -35,6 +35,7 @@ def test():
     test_util.test_dsc('create snapshot and check')
     snapshots = test_obj_dict.get_volume_snapshot(root_volume_uuid)
 
+    snapshots.set_utility_vm(vm)
     snapshots.create_snapshot('create_root_snapshot1')
     test_util.test_dsc('start vm')
     vm.destroy()
