@@ -74,9 +74,11 @@ def test():
     #test_util.test_logger('Current available storage size: %d' % res.availableCapacity)
     volume2.attach(vm)
     volume1.delete()
+    volume1.expunge()
 
     test_lib.lib_set_provision_storage_rate(over_provision_rate1)
     volume2.delete()
+    volume2.expunge()
 
     test_lib.lib_set_provision_storage_rate(original_rate)
     ps_res2 = test_lib.lib_get_storage_capacity(zone_uuids = [zone_uuid])
