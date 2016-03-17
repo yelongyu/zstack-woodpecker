@@ -43,6 +43,7 @@ def test():
     vm.start()
     vm.destroy()
     vm.expunge()
+    test_obj_dict.rm_vm(vm)
     test_lib.lib_robot_cleanup(test_obj_dict)
     test_util.test_pass('Do snapshot ops on VM root volume with VM ops successfully')
 
