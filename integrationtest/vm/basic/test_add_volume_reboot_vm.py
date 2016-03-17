@@ -6,6 +6,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import test_stub
 import zstackwoodpecker.test_state as test_state
+import time
 
 test_obj_dict = test_state.TestStateDict()
 
@@ -27,6 +28,7 @@ def test():
     vm.reboot()
     vm.check()
     volume.check()
+    time.sleep(60)
 
     volume.detach()
     volume.check()
