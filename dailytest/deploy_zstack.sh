@@ -93,11 +93,9 @@ fi
 cd -
 rm -rf $tempfolder
 
-if [ ! -d $WOODPECKER_VIRTUALENV ]; then
-    rm -rf $WOODPECKER_VIRTUALENV
-    mkdir -p `dirname $WOODPECKER_VIRTUALENV`
-    virtualenv $WOODPECKER_VIRTUALENV --system-site-packages
-fi
+rm -rf $WOODPECKER_VIRTUALENV
+mkdir -p `dirname $WOODPECKER_VIRTUALENV`
+virtualenv $WOODPECKER_VIRTUALENV --system-site-packages
 
 #install apibinding and zstacklib in woodpecker virtualenv
 . $WOODPECKER_VIRTUALENV/bin/activate
