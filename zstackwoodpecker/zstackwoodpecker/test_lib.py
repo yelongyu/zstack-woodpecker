@@ -112,8 +112,8 @@ HostL2IpDb = 'host_l2_ip.db'
 def lib_install_testagent_to_host(host, username = None, password = None):
     host_pub_ip = host.managementIp
     try:
-        #shell.call('echo "quit" | telnet %s 9393|grep "Escape character"' % host_pub_ip)
-        shell.call('nc -w1 %s 9393' % host_pub_ip)
+        shell.call('echo "quit" | telnet %s 9393|grep "Escape character"' % host_pub_ip)
+        #shell.call('nc -w1 %s 9393' % host_pub_ip)
         test_util.test_logger('Testagent is running on Host: %s . Skip testagent installation.' % host.name)
     except:
         test_host = test_util.HostOption()
@@ -154,11 +154,11 @@ def lib_install_testagent_to_vr_with_vr_vm(vr_vm):
     vr = test_util.HostOption()
     test_util.test_logger("Begin to install testagent to VR: %s" % vr_vm.uuid)
     vr.managementIp = lib_find_vr_mgmt_ip(vr_vm)
-    #lib_check_system_cmd('telnet')
-    lib_check_system_cmd('nc')
+    lib_check_system_cmd('telnet')
+    #lib_check_system_cmd('nc')
     try:
-        #shell.call('echo "quit" | telnet %s 9393|grep "Escape character"' % vr.managementIp)
-        shell.call('nc -w1 %s 9393' % vr.managementIp)
+        shell.call('echo "quit" | telnet %s 9393|grep "Escape character"' % vr.managementIp)
+        #shell.call('nc -w1 %s 9393' % vr.managementIp)
         test_util.test_logger('Testagent is running on VR: %s . Skip testagent installation.' % vr.managementIp)
     except:
         vr.username = lib_get_vm_username(vr_vm)
@@ -1495,13 +1495,13 @@ def lib_network_check(target_ip, target_port, expect_result=True):
     '''
     check target machine's target port connectibility
     '''
-    #if not lib_check_system_cmd('telnet'):
-    if not lib_check_system_cmd('nc'):
+    if not lib_check_system_cmd('telnet'):
+    #if not lib_check_system_cmd('nc'):
         return False == expect_result
 
     try:
-        #shell.call('echo "quit" | telnet %s %s|grep "Escape character"' % (target_ip, target_port))
-        shell.call('nc -w1 %s %s' % (target_ip, target_port))
+        shell.call('echo "quit" | telnet %s %s|grep "Escape character"' % (target_ip, target_port))
+        #shell.call('nc -w1 %s %s' % (target_ip, target_port))
         test_util.test_logger('check target: %s port: %s connection success')
         return True == expect_result
     except:
@@ -2926,8 +2926,8 @@ def lib_check_vm_port(src_vm, dst_vm, port):
     vr_vm = lib_find_vr_by_vm(src_vm)
     target_ip = dst_vm.vmNics[0].ip
     #telnet might wait 1 mins time out.
-    #cmd = 'echo "quit" | telnet %s %s|grep "Escape character"' % (target_ip, port)
-    cmd = 'echo "hello"|nc -w 1 %s %s' % (target_ip, port)
+    cmd = 'echo "quit" | telnet %s %s|grep "Escape character"' % (target_ip, port)
+    #cmd = 'echo "hello"|nc -w 1 %s %s' % (target_ip, port)
     ret = True
     if vr_vm[0].uuid == src_vm.uuid:
         try:
