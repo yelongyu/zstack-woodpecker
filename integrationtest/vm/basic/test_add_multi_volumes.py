@@ -6,6 +6,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import test_stub
 import zstackwoodpecker.test_state as test_state
+import time
 
 test_obj_dict = test_state.TestStateDict()
 vol_num = 24
@@ -27,6 +28,7 @@ def test():
 
     for i in range(vol_num):
         volume_list[i].check()
+    time.sleep(60)
 
     test_util.test_dsc('Test attach/detach 24 volumes operations.')
     for i in range(vol_num):
