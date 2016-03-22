@@ -513,7 +513,7 @@ default one' % self.zstack_properties)
         #        (self.zstack_install_script, self.zstack_pkg, \
         #        self.install_path)
         #cmd = 'bash %s -D -z -r %s -m -R aliyun' % (self.zstack_pkg, self.install_path)
-        cmd = 'bash %s -d -D -z -r %s -R aliyun' % (self.zstack_pkg, self.install_path)
+        cmd = 'bash %s -D -z -r %s -R aliyun' % (self.zstack_pkg, self.install_path)
         if self.db_admin_password:
             cmd = '%s -P %s' % (cmd, self.db_admin_password)
         if self.db_password:
