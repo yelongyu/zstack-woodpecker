@@ -26,6 +26,7 @@ import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.operations.tag_operations as tag_ops
 import zstackwoodpecker.operations.node_operations as node_ops
 import zstackwoodpecker.operations.config_operations as conf_ops
+import zstackwoodpecker.operations.console_operations as cons_ops
 
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.header.volume as vol_header
@@ -4389,3 +4390,6 @@ def lib_get_local_storage_volume_host(volume_uuid):
         host_uuid = ls_ref[0].hostUuid
         cond = res_ops.gen_query_conditions('uuid', '=', host_uuid)
         return res_ops.query_resource(res_ops.HOST, cond)[0]
+
+def lib_request_console_access(vm_uuid):
+    return cons_ops.request_console_access(vm_uuid)
