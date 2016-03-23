@@ -7,7 +7,7 @@
         <case timeout="200" >test_add_volume.py</case> 
         <case timeout="200" >test_add_vol_to_stopvm.py</case> 
         <case timeout="200" >test_add_volume_reboot_vm.py</case> 
-        <case timeout="600" >test_add_multi_volumes.py</case> 
+        <case timeout="700" >test_add_multi_volumes.py</case> 
         <case timeout="200" >test_add_volume_negative.py</case> 
         <case timeout="400" >test_crt_temp_from_volume.py</case> 
         <case timeout="400" >test_crt_vm_with_volume.py</case> 
@@ -18,6 +18,6 @@
         <case timeout="120" >account/test_vm_ops_by_normal_account.py</case>
         <case timeout="120" >account/test_multi_accounts_vm_ops.py</case>
         <case timeout="120" >test_request_vm_console_access.py</case>
-        <case timeout="220" >test_request_multi_vm_console_access.py</case>
+        <case timeout="320" >test_request_multi_vm_console_access.py</case>
     </suite>
 </integrationTest>
