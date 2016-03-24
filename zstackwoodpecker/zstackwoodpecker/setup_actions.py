@@ -596,9 +596,9 @@ default one' % self.zstack_properties)
                 self.db_server_root_password)
 
         if not self.db_admin_password:
-            cmd = 'zstack-ctl install_db --host=%s --login-password=zstack.mysql.password' % self.db_server
+            cmd = 'zstack-ctl install_db --debug --host=%s --login-password=zstack.mysql.password' % self.db_server
         else:
-            cmd = 'zstack-ctl install_db --host=%s \
+            cmd = 'zstack-ctl install_db --debug --host=%s \
                     --login-password=%s' \
                     % (self.db_server, \
                     self.db_admin_password)
