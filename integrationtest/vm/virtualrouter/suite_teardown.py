@@ -19,7 +19,6 @@ def test():
     clean_util.cleanup_none_vm_volumes_violently()
     clean_util.umount_all_primary_storages_violently()
     clean_util.cleanup_backup_storage()
-    test_lib.setup_plan.stop_node()
     #linux.remove_vlan_eth("eth0", 10)
     #linux.remove_vlan_eth("eth0", 11)
     cmd = host_plugin.DeleteVlanDeviceCmd()
@@ -35,5 +34,6 @@ def test():
     for host in hosts:
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.DELETE_VLAN_DEVICE_PATH), cmd)
 
+    test_lib.setup_plan.stop_node()
     test_lib.lib_cleanup_host_ip_dict()
     test_util.test_pass('VirtualRouter Teardown Success')
