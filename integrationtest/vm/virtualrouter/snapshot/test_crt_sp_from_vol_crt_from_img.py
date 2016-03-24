@@ -24,6 +24,7 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.zstack_test.zstack_test_snapshot as zstack_sp_header
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_vol_header
 import zstackwoodpecker.zstack_test.zstack_test_image as zstack_img_header
+import zstackwoodpecker.header.header as zstack_header
 import zstackwoodpecker.header.volume as vol_header
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
 import apibinding.inventory as inventory
@@ -67,7 +68,8 @@ def test():
     image = zstack_img_header.ZstackTestImage()
     image.set_creation_option(image_option)
     image.create()
-    test_obj_dict.add_image(image)
+    if test_lib.lib_get_delete_policy('image') != zstack_header.DELETE_DIRECT:
+        test_obj_dict.add_image(image)
     image.delete()
 
     test_util.test_dsc('Construct volume obj.')
@@ -78,7 +80,8 @@ def test():
     test_util.test_dsc('Create volume template')
     bs_list = test_lib.lib_get_backup_storage_list_by_vm(vm.get_vm())
     vol_tmpt = r_volume.create_template([bs_list[0].uuid], 'new_data_template_by_root_volume')
-    test_obj_dict.add_image(vol_tmpt)
+    if test_lib.lib_get_delete_policy('image') != zstack_header.DELETE_DIRECT:
+        test_obj_dict.add_image(vol_tmpt)
 
     #destroy vm
     host_uuid = test_lib.lib_get_vm_host(vm.get_vm()).uuid
