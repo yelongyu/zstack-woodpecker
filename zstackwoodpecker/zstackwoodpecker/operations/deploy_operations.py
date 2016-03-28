@@ -385,6 +385,25 @@ def add_primary_storage(deployConfig, session_uuid, ps_name = None, \
                                     wait_for_thread_queue()
                                     thread.start()
 
+        if xmlobject.has_element(zone, 'primaryStorages.sharedMountPointPrimaryStorage'):
+            zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, \
+                    name=zone.name_)
+            zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
+
+            for pr in xmlobject.safe_list(zone.primaryStorages.sharedMountPointPrimaryStorage):
+                if ps_name and ps_name != pr.name_:
+                    continue
+
+                action = api_actions.AddSharedMountPointPrimaryStorageAction()
+                action.sessionUuid = session_uuid
+                action.name = pr.name_
+                action.description = pr.description__
+                action.url = pr.url_
+                action.zoneUuid = zinv.uuid
+                thread = threading.Thread(target=_thread_for_action, args=(action,))
+                wait_for_thread_queue()
+                thread.start()
+
     for zone in xmlobject.safe_list(deployConfig.zones.zone):
         if zone_name and zone.name_ != zone_name:
             continue
