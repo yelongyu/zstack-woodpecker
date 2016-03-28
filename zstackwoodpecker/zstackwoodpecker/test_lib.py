@@ -162,8 +162,8 @@ def lib_install_testagent_to_vr_with_vr_vm(vr_vm):
         #shell.call('nc -w1 %s 9393' % vr.managementIp)
         test_util.test_logger('Testagent is running on VR: %s . Skip testagent installation.' % vr.managementIp)
     except:
-        vr.username = lib_get_vm_username(vr_vm)
-        vr.password = lib_get_vm_password(vr_vm)
+        vr.username = lib_get_vr_image_username(vr_vm)
+        vr.password = lib_get_vr_image_password(vr_vm)
         vr.uuid = vr_vm.uuid
         vr.machine_id = vr_vm.uuid
         test_util.test_logger('Testagent is not running on [VR:] %s . Will install Testagent.\n' % vr.managementIp)
@@ -818,8 +818,8 @@ def lib_execute_command_in_vm(vm, cmd, l3_uuid=None):
         else:
             vm_ip = lib_get_vm_nic_by_l3(vm, l3_uuid).ip
 
-    username = lib_get_vr_image_username(vr_vm)
-    password = lib_get_vr_image_password(vr_vm)
+    username = lib_get_vm_username(vm)
+    password = lib_get_vm_password(vm)
     test_util.test_logger("Do testing through test agent: %s to ssh vm: %s, ip: %s, with cmd: %s" % (test_harness_ip, vm.uuid, vm_ip, cmd))
     rsp = lib_ssh_vm_cmd_by_agent(test_harness_ip, vm_ip, username, \
             password, cmd)
