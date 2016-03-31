@@ -1,0 +1,4 @@
+import ../deploy.tmpt
+
+timeout150MinImageUrl = http://172.20.12.222/centos7-test-150min-download.qcow2
+timeout240MinImageUrl = http://172.20.12.222/centos7-test-240min-download.qcow2

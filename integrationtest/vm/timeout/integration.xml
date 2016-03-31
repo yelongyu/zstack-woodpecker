@@ -1,0 +1,6 @@
+<integrationTest>
+    <suite name="timeout test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" parallel="4">
+        <case timeout="9500" >test_add_image_150min.py</case>
+        <case timeout="11000" >test_add_image_240min.py</case>
+    </suite>
+</integrationTest>
