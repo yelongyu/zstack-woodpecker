@@ -76,9 +76,11 @@
   </instanceOfferings>
 
   <backupStorages>
-    <cephBackupStorage name="$cephBackupStorageName"
-        description="Test" 
-        monUrls="$cephBackupStorageMonUrls" 
+    <sftpBackupStorage name="$sftpBackupStorageName"
+        description="Test" url="$sftpBackupStorageUrl"
+	username="$sftpBackupStorageUsername"
+	password="$sftpBackupStoragePassword"
+	hostname="$sftpBackupStorageHostname"/>
     />
   </backupStorages>
 
@@ -88,21 +90,21 @@
       mediaType="$rootMediaType" format="$rootImageFormat"
       url="$imageUrl_s" 
       username="$imageUsername" password="$imagePassword">
-      <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
     </image>
     <image name="$imageName_net" 
       description="Test Image Template for network test" 
       mediaType="$rootMediaType" format="$rootImageFormat"
       url="$imageUrl_net" 
       username="$imageUsername" password="$imagePassword">
-      <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
     </image>
     <image name="$virtualRouterImageName" 
       description="virtual router image" 
       mediaType="$rootMediaType" format="$rootImageFormat" 
       username="$vrImageUsername" password="$vrImagePassword"
       url="$virtualRouterImageUrl">
-      <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
     </image>
   </images>
 
@@ -341,11 +343,11 @@
 
       <primaryStorages>
         <sharedMountPointPrimaryStorage name="$sharedMountPointPrimaryStorageName"
-            description="Test Ceph PS" 
+            description="Test SMP PS" 
             url="$sharedMountPointPrimaryStorageUrl" />
       </primaryStorages>
 
-      <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
     </zone>
   </zones>
 </deployerConfig>
