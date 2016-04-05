@@ -28,7 +28,7 @@ def login_by_account(name, password, timeout = 60000):
 
 def logout(session_uuid):
     logout = api_actions.LogOutAction()
-    logout.timeout = 15000
+    logout.timeout = 60000
     logout.sessionUuid = session_uuid
     logout.run()
 
