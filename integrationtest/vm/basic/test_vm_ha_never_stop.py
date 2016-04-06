@@ -17,7 +17,7 @@ def test():
     global vm
     vm = test_stub.create_vm()
     vm.check()
-    ha_ops.set_vm_instance_ha_level(vm.uuid, "NeverStop")
+    ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
     vm.stop()
     time.sleep(60)
     vm.set_state(test_vm_header.RUNNING)
