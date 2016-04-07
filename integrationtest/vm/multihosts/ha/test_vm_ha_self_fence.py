@@ -67,5 +67,3 @@ def error_cleanup():
             vm.destroy()
         except:
             pass
-
-test()
