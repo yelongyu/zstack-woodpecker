@@ -20,7 +20,7 @@ def test():
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
     vm.stop()
     time.sleep(60)
-    vm.set_state(test_vm_header.RUNNING)
+    vm.set_state(vm_header.RUNNING)
     vm.check()
     vm.destroy()
     vm.check()
