@@ -20,5 +20,6 @@
         <case timeout="120" >test_request_vm_console_access.py</case>
         <case timeout="320" >test_request_multi_vm_console_access.py</case>
         <case timeout="220" >test_vm_ha_never_stop.py</case>
+        <case timeout="220" >test_vm_ha_never_stop_del_recover.py</case>
     </suite>
 </integrationTest>
