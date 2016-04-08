@@ -4399,3 +4399,9 @@ def lib_get_ha_enable():
 
 def lib_set_ha_enable(value):
     return conf_ops.change_global_config('ha', 'enable', value)
+
+def lib_get_ha_selffencer_maxattempts():
+    return conf_ops.get_global_config_value('ha', 'host.selfFencer.maxAttempts')
+
+def lib_set_ha_selffencer_maxattempts(value):
+    return conf_ops.change_global_config('ha', 'host.selfFencer.maxAttempts', value)

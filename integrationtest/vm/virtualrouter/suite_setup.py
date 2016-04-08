@@ -49,5 +49,6 @@ def test():
     delete_policy = test_lib.lib_set_delete_policy('vm', 'Direct')
     delete_policy = test_lib.lib_set_delete_policy('volume', 'Direct')
     delete_policy = test_lib.lib_set_delete_policy('image', 'Direct')
+    test_lib.lib_set_ha_selffencer_maxattempts('60')
     test_util.test_pass('Suite Setup Success')
 
