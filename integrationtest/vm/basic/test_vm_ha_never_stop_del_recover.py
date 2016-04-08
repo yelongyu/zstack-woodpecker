@@ -17,23 +17,24 @@ delete_policy = None
 
 def test():
     global vm
+    delete_policy = test_lib.lib_get_delete_policy('vm')
     vm = test_stub.create_vm()
+    vm.set_delete_policy('Delay')
     vm.check()
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
-    delete_policy = test_lib.lib_set_delete_policy('vm', 'Delay')
     vm.destroy()
     vm.recover()
     time.sleep(60)
     vm.set_state(vm_header.RUNNING)
     vm.check()
     vm.destroy()
-    test_lib.lib_set_delete_policy('vm', delete_policy)
+    vm.set_delete_policy(delete_policy)
     test_util.test_pass('VM ha never stop with delete and recover Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     global delete_policy
-    test_lib.lib_set_delete_policy('vm', delete_policy)
     global vm
+    vm.set_delete_policy(delete_policy)
     if vm:
         vm.destroy()
