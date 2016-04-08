@@ -17,6 +17,9 @@ delete_policy = None
 
 def test():
     global vm
+    if test_lib.lib_get_ha_enable() != 'true':
+        test_util.test_skip("vm ha not enabled. Skip test")
+
     delete_policy = test_lib.lib_get_delete_policy('vm')
     vm = test_stub.create_vm()
     vm.set_delete_policy('Delay')

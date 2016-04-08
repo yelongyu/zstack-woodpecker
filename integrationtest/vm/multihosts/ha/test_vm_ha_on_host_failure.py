@@ -19,6 +19,9 @@ vm = None
 
 def test():
     global vm
+    if test_lib.lib_get_ha_enable() != 'true':
+        test_util.test_skip("vm ha not enabled. Skip test")
+
     vm_creation_option = test_util.VmOption()
     image_name = os.environ.get('imageName_s')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid

@@ -4393,3 +4393,6 @@ def lib_get_local_storage_volume_host(volume_uuid):
 
 def lib_request_console_access(vm_uuid):
     return cons_ops.request_console_access(vm_uuid)
+
+def lib_get_ha_enable():
+    return conf_ops.get_global_config_value('ha', 'enable')
