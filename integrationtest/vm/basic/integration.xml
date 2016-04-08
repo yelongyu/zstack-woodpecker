@@ -23,5 +23,6 @@
         <case timeout="220" >test_vm_ha_never_stop_del_recover.py</case>
         <case timeout="220" >test_vm_ha_never_stop_del_ha.py</case>
         <case timeout="220" >test_vm_del_ha_never_stop_recover_auto_start.py</case>
+        <case timeout="220" >test_vm_ha_never_stop_disable_ha.py</case>
     </suite>
 </integrationTest>

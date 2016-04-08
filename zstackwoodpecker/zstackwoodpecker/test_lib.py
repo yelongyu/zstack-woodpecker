@@ -4396,3 +4396,6 @@ def lib_request_console_access(vm_uuid):
 
 def lib_get_ha_enable():
     return conf_ops.get_global_config_value('ha', 'enable')
+
+def lib_set_ha_enable(value):
+    return conf_ops.change_global_config('ha', 'enable', value)
