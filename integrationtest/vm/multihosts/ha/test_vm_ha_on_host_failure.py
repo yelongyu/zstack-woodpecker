@@ -9,6 +9,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
+import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.operations.ha_operations as ha_ops
@@ -16,9 +17,13 @@ import time
 import os
 
 vm = None
+host_uuid = None
+host_ip = None
 
 def test():
     global vm
+    global host_uuid
+    global host_ip
     if test_lib.lib_get_ha_enable() != 'true':
         test_util.test_skip("vm ha not enabled. Skip test")
 
@@ -59,14 +64,19 @@ def test():
     vm.set_state(vm_header.RUNNING)
     vm.check()
     vm.destroy()
-
+    os.system('bash -ex %s %s' % (os.environ.get('hostRecoverScript'), host_ip))
+    host_ops.reconnect_host(host_uuid)
     test_util.test_pass('Test VM ha on host failure Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     global vm
+    global host_uuid
+    global host_ip
     if vm:
         try:
             vm.destroy()
         except:
             pass
+    os.system('bash -ex %s %s' % (os.environ.get('hostRecoverScript'), host_ip))
+    host_ops.reconnect_host(host_uuid)

@@ -186,3 +186,4 @@ vlanIpRangeEnd20 = 10.30.127.255
 vlanIpRangeGateway20 = 10.30.0.1
 vlanIpRangeNetmask20 = 255.255.0.0
 
+hostRecoverScript = /home/host_recover_script.sh
