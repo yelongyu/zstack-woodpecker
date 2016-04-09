@@ -24,5 +24,6 @@ def test():
         os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
     if test_lib.lib_get_ha_selffencer_maxattempts() != None:
         test_lib.lib_set_ha_selffencer_maxattempts('60')
+	test_lib.lib_set_ha_selffencer_storagechecker_timeout('60')
     test_util.test_pass('Suite Setup Success')
 

@@ -4405,3 +4405,9 @@ def lib_get_ha_selffencer_maxattempts():
 
 def lib_set_ha_selffencer_maxattempts(value):
     return conf_ops.change_global_config('ha', 'host.selfFencer.maxAttempts', value)
+
+def lib_get_ha_selffencer_storagechecker_timeout():
+    return conf_ops.get_global_config_value('ha', 'host.selfFencer.storageChecker.timeout')
+
+def lib_set_ha_selffencer_storagechecker_timeout(value):
+    return conf_ops.change_global_config('ha', 'host.selfFencer.storageChecker.timeout', value)
