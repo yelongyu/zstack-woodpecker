@@ -19,13 +19,23 @@ import os
 vm = None
 host_uuid = None
 host_ip = None
+max_attempts = None
+storagechecker_timeout = None
 
 def test():
     global vm
     global host_uuid
     global host_ip
+    global max_attempts
+    global storagechecker_timeout
+
     if test_lib.lib_get_ha_enable() != 'true':
         test_util.test_skip("vm ha not enabled. Skip test")
+
+    max_attempts = test_lib.lib_get_ha_selffencer_maxattempts()
+    test_lib.lib_set_ha_selffencer_maxattempts('12')
+    storagechecker_timeout = test_lib.lib_get_ha_selffencer_storagechecker_timeout()
+    test_lib.lib_set_ha_selffencer_storagechecker_timeout('15')
 
     vm_creation_option = test_util.VmOption()
     image_name = os.environ.get('imageName_s')
@@ -50,20 +60,27 @@ def test():
     #vm.check()
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "OnHostFailure")
     l2_network_interface = os.environ.get('l2ManagementNetworkInterface')
+
+    host_username = os.environ.get('hostUsername')
+    host_password = os.environ.get('hostPassword')
     cmd = "ifdown %s && sleep 120 && ifup %s" % (l2_network_interface, l2_network_interface)
     try:
-        rsp = test_lib.lib_execute_sh_cmd_by_agent(host_ip, cmd)
+	rsp = test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd)
 	test_util.test_fail("host is expected to shutdown after its network down for a while")
     except:
         test_util.test_logger("host may have been shutdown")
+
     cmd = "date"
     try:
-        rsp = test_lib.lib_execute_sh_cmd_by_agent(host_ip, cmd)
+	rsp = test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd)
 	test_util.test_fail("host is expected to shutdown after its network down for a while")
     except:
         test_util.test_logger("host have been shutdown")
 
     vm.destroy()
+
+    test_lib.lib_set_ha_selffencer_maxattempts(max_attempts)
+    test_lib.lib_set_ha_selffencer_storagechecker_timeout(storagechecker_timeout)
     os.system('bash -ex %s %s' % (os.environ.get('hostRecoverScript'), host_ip))
     host_ops.reconnect_host(host_uuid)
 
@@ -75,10 +92,17 @@ def error_cleanup():
     global vm
     global host_ip
     global host_uuid
+    global max_attempts
+    global storagechecker_timeout
+
     if vm:
         try:
             vm.destroy()
         except:
             pass
+
+    test_lib.lib_set_ha_selffencer_maxattempts(max_attempts)
+    test_lib.lib_set_ha_selffencer_storagechecker_timeout(storagechecker_timeout)
+
     os.system('bash -ex %s %s' % (os.environ.get('hostRecoverScript'), host_ip))
     host_ops.reconnect_host(host_uuid)
