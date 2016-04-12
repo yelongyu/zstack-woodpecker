@@ -77,7 +77,10 @@ def test():
     except:
         test_util.test_logger("host have been shutdown")
 
-    vm.destroy()
+    try:
+        vm.destroy()
+    except:
+	test_util.test_logger("destroy vm may time out since host is down")
 
     test_lib.lib_set_ha_selffencer_maxattempts(max_attempts)
     test_lib.lib_set_ha_selffencer_storagechecker_timeout(storagechecker_timeout)
