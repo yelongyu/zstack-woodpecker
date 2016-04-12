@@ -9,5 +9,6 @@
 	<case timeout='600' repeat='1' noparallel='True'>ha/test_vm_ha_self_fence_no_shutdown.py</case>
 	<case timeout='600' repeat='1' noparallel='True'>ha/test_vm_ha_self_fence.py</case>
 	<case timeout='800' repeat='1' noparallel='True'>ha/test_vm_ha_on_host_failure.py</case>
+	<case timeout='800' repeat='1' noparallel='True'>ha/test_vm_ha_never_stop.py</case>
     </suite>
 </integrationTest>
