@@ -45,10 +45,6 @@ def test():
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
-    host_ip = os.environ.get('hostIp3')
-    conditions = res_ops.gen_query_conditions('managementIp', '=', host_ip)
-    host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].uuid
-    vm_creation_option.set_host_uuid(host_uuid)
     vm_creation_option.set_l3_uuids([l3_net_uuid])
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
@@ -57,6 +53,8 @@ def test():
     vm.set_creation_option(vm_creation_option)
     vm.create()
     #vm.check()
+    host_id = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
+    host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "OnHostFailure")
     l2_network_interface = os.environ.get('l2ManagementNetworkInterface')
     cmd = "ifdown %s && sleep 120 && ifup %s" % (l2_network_interface, l2_network_interface)
