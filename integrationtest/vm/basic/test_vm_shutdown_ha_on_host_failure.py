@@ -22,7 +22,7 @@ def test():
     vm = test_stub.create_vm()
     vm.check()
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "OnHostFailure")
-    test_lib.lib_execute_command_in_vm(vm.get_vm(), "init 0")
+    rsp = test_lib.lib_execute_ssh_cmd(vm.get_vm().vmNics[0].ip, test_lib.lib_get_vm_username(vm.get_vm()), test_lib.lib_get_vm_password(vm.get_vm()), 'init 0')
     time.sleep(60)
     vm.check()
     vm.destroy()
