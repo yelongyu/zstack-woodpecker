@@ -57,7 +57,7 @@ def test():
     vm.set_creation_option(vm_creation_option)
     vm.create()
     #vm.check()
-    host_id = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
+    host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
     host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
     l2_network_interface = os.environ.get('l2ManagementNetworkInterface')
