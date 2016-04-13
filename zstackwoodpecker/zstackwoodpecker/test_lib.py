@@ -316,6 +316,7 @@ def lib_execute_ssh_cmd(host_ip, username, password, command, timeout = 30, \
 
     ssh_result = {'result': None, 'output': None, 'err': None}
     thread = threading.Thread(target = ssh_host)
+    thread.daemon = True
     thread.start()
     time_out = time.time() + timeout 
     while ssh_result['result'] == None and time.time() < time_out:
