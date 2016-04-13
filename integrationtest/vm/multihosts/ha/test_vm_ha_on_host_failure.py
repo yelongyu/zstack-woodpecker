@@ -45,6 +45,11 @@ def test():
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+    conditions = res_ops.gen_query_conditions('state', '=', 'Enabled')
+    conditions = res_ops.gen_query_conditions('status', '=', 'Connected', conditions)
+    conditions = res_ops.gen_query_conditions('managementIp', '!=', os.environ.get('hostIp'), conditions)
+    host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].uuid
+    vm_creation_option.set_host_uuid(host_uuid)
     vm_creation_option.set_l3_uuids([l3_net_uuid])
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
