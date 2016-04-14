@@ -13,6 +13,7 @@ import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.operations.ha_operations as ha_ops
+import zstackwoodpecker.operations.vm_operations as vm_ops
 import time
 import os
 
