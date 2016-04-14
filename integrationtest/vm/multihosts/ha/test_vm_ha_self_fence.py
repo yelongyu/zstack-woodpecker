@@ -70,26 +70,18 @@ def test():
     host_username = os.environ.get('hostUsername')
     host_password = os.environ.get('hostPassword')
     cmd = "ifdown %s && sleep 180 && ifup %s" % (l2_network_interface, l2_network_interface)
-    exception_caught = False
-    try:
-	rsp = test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd, 180)
-    except:
-	exception_caught = True
+    rsp = test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd, 180)
+    if rsp:
+	test_util.test_fail("host is expected to shutdown after its network down for a while")
+    else:
         test_util.test_logger("host may have been shutdown")
 
-    if not exception_caught:
-	test_util.test_fail("host is expected to shutdown after its network down for a while")
-
     cmd = "date"
-    exception_caught = False
-    try:
-	rsp = test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd)
-    except:
-	exception_caught = True
-        test_util.test_logger("host have been shutdown")
-
-    if not exception_caught:
+    rsp = test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd)
+    if rsp:
 	test_util.test_fail("host is expected to shutdown after its network down for a while")
+    else:
+        test_util.test_logger("host have been shutdown")
 
     try:
         vm.destroy()
