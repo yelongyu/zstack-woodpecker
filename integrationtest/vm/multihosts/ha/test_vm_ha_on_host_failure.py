@@ -66,16 +66,18 @@ def test():
     host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "OnHostFailure")
     l2_network_interface = os.environ.get('l2ManagementNetworkInterface')
-    cmd = "ifdown %s && sleep 120 && ifup %s" % (l2_network_interface, l2_network_interface)
+    cmd = "ifdown %s && sleep 180 && ifup %s" % (l2_network_interface, l2_network_interface)
+    exception_caught = False
     try:
     	host_username = os.environ.get('hostUsername')
-    	host_username = 'root'
     	host_password = os.environ.get('hostPassword')
-    	host_password = 'password'
-	rsp = test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd)
-	test_util.test_fail("host is expected to shutdown after its network down for a while")
+	rsp = test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd, 180)
     except:
+	exception_caught = True
         test_util.test_logger("host may have been shutdown")
+
+    if not exception_caught:
+	test_util.test_fail("host is expected to shutdown after its network down for a while")
 
     test_util.test_logger("wait for 600 seconds")
     time.sleep(600)
