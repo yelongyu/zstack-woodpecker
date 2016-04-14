@@ -86,6 +86,7 @@ def test():
     test_lib.lib_set_ha_selffencer_maxattempts(max_attempts)
     test_lib.lib_set_ha_selffencer_storagechecker_timeout(storagechecker_timeout)
 
+    time.sleep(60)
     test_util.test_pass('Test Host Self fence Success')
 
 #Will be called only if exception happens in test().
