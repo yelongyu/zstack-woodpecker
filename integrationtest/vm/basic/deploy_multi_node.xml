@@ -55,6 +55,7 @@
     <image name="$imageName_s" description="Test" format="$rootImageFormat" 
       mediaType="$rootMediaType"
       url="$imageUrl_s" 
+      username="$imageUsername" password="$imagePassword">
       <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
     </image>
   </images>

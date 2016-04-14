@@ -78,7 +78,8 @@
   
   <images>
     <image name="$imageName_s" description="Test" format="$rootImageFormat" 
-        url="$imageUrl_s" mediaType="$rootMediaType">
+        url="$imageUrl_s" mediaType="$rootMediaType"
+	username="$imageUsername" password="$imagePassword">
       <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
     </image>
   </images>
