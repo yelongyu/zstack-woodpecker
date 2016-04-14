@@ -41,8 +41,12 @@ def test():
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     #l3_name = os.environ.get('l3NoVlanNetworkName1')
     l3_name = os.environ.get('l3VlanNetworkName1')
-
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    vrs = test_lib.lib_find_vr_by_l3_uuid(l3_net_uuid)
+    for vr in vrs:
+	vm_ops.start_vm(vr.uuid)
+    time.sleep(60)
+
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
     conditions = res_ops.gen_query_conditions('state', '=', 'Enabled')
@@ -58,10 +62,6 @@ def test():
     vm.set_creation_option(vm_creation_option)
     vm.create()
     #vm.check()
-    vr_vms = test_lib.lib_find_vr_by_vm(vm.get_vm())
-    for vv in vr_vms:
-        ha_ops.set_vm_instance_ha_level(vv.uuid, "NeverStop")
-
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
     host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "OnHostFailure")
