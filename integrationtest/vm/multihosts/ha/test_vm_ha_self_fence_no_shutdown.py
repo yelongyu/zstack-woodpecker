@@ -67,7 +67,7 @@ def test():
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "OnHostFailure")
     l2_network_interface = os.environ.get('l2ManagementNetworkInterface')
 
-    cmd = "ifdown %s && sleep 60 && ifup %s" % (l2_network_interface, l2_network_interface)
+    cmd = "ifdown %s && sleep 30 && ifup %s" % (l2_network_interface, l2_network_interface)
     try:
 	rsp = test_lib.lib_execute_sh_cmd_by_agent(host_ip, cmd)
 	test_util.test_logger("host is not expected to shutdown after its network down just for a little while")
