@@ -59,6 +59,9 @@ def test():
     vm.set_creation_option(vm_creation_option)
     vm.create()
     #vm.check()
+    vr_vms = test_lib.lib_find_vr_by_vm(vm.get_vm())
+    for vv in vr_vms:
+        ha_ops.set_vm_instance_ha_level(vv.uuid, "NeverStop")
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
     host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "OnHostFailure")
