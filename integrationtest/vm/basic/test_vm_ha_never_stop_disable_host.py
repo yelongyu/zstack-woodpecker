@@ -31,6 +31,7 @@ def test():
     vm.check()
     vm.destroy()
     vm.check()
+    host_ops.change_host_state(host_uuid, "enable")
     test_util.test_pass('VM ha never stop Test Success')
 
 #Will be called only if exception happens in test().
