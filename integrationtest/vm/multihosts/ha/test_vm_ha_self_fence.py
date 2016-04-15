@@ -46,7 +46,8 @@ def test():
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     vrs = test_lib.lib_find_vr_by_l3_uuid(l3_net_uuid)
     for vr in vrs:
-	vm_ops.start_vm(vr.uuid)
+	if test_lib.lib_is_vm_running(vr) == True:
+	    vm_ops.start_vm(vr.uuid)
     time.sleep(60)
 
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
