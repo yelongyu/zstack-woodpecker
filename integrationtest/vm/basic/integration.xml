@@ -20,7 +20,7 @@
         <case timeout="120" >test_request_vm_console_access.py</case>
         <case timeout="320" >test_request_multi_vm_console_access.py</case>
         <case timeout="220" >test_vm_ha_never_stop.py</case>
-	<case timeout="220" >test_vm_ha_never_stop_disable_host.py</case>
+	<case timeout="220" noparallel='True'>test_vm_ha_never_stop_disable_host.py</case>
         <case timeout="220" >test_vm_stop_ha_on_host_failure.py</case>
         <case timeout="220" >test_vm_ha_never_stop_disable_ha.py</case>
         <case timeout="220" >test_vm_ha_never_stop_shutdown.py</case>
