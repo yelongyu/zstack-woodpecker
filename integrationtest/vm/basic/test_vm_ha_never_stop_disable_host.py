@@ -24,10 +24,10 @@ def test():
     vm.check()
     host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid
     host_ops.change_host_state(host_uuid, "disable")
+    time.sleep(10)
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
     vm.stop()
     time.sleep(60)
-    vm.set_state(vm_header.RUNNING)
     vm.check()
     vm.destroy()
     vm.check()
