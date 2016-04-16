@@ -22,7 +22,7 @@
         <case timeout="220" >test_vm_ha_never_stop.py</case>
 	<case timeout="220" noparallel='True'>test_vm_ha_never_stop_disable_host.py</case>
         <case timeout="220" >test_vm_stop_ha_on_host_failure.py</case>
-        <case timeout="220" >test_vm_ha_never_stop_disable_ha.py</case>
+        <case timeout="220" noparallel='True'>test_vm_ha_never_stop_disable_ha.py</case>
         <case timeout="220" >test_vm_ha_never_stop_shutdown.py</case>
         <case timeout="220" >test_vm_shutdown_ha_on_host_failure.py</case>
         <case timeout="220" noparallel='True'>test_vm_ha_never_stop_del_recover.py</case>
