@@ -30,7 +30,7 @@ def test():
     image_option.set_mediaType('RootVolumeTemplate')
     image_option.set_url(os.environ.get('timeout150MinImageUrl'))
     image_option.set_backup_storage_uuid_list([bss[0].uuid])
-    image_option.set_timeout(12000)
+    image_option.set_timeout(12000*1000)
 
     new_image = zstack_image_header.ZstackTestImage()
     new_image.set_creation_option(image_option)
