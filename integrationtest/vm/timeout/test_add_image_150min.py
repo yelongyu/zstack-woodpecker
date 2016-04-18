@@ -45,7 +45,7 @@ def test():
 %s, which does not meet the test criterial.' % cost_time)
 
     new_image.delete()
-    new_image.expunge([bss[0].uuid])
+    #new_image.expunge([bss[0].uuid])
     test_util.test_pass('Add Image with 150 mins Pass.')
 
 #Will be called only if exception happens in test().
