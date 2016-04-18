@@ -528,7 +528,7 @@ default one' % self.zstack_properties)
         #self._deploy_zstack_properties()
         self._extra_deployment()
 
-    def execute_sh_cmd_by_agent(test_agent_ip, command):
+    def execute_sh_cmd_by_agent(self, test_agent_ip, command):
         shell_cmd = host_plugin.HostShellCmd()
         shell_cmd.command = command
 	try:
