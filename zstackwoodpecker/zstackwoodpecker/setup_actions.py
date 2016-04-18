@@ -464,6 +464,11 @@ class Plan(object):
 default one' % self.zstack_properties)
                     self.zstack_properties = None
 
+        if basic_config.has_element('zstackHaVip'):
+	    self.zstack_ha_vip = basic_config.zstackHaVip.text_
+	else:
+            self.zstack_ha_vip = None
+
         os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = ''
         if deploy_config.has_element('nodes') \
             and deploy_config.nodes.has_element('node'):
@@ -522,6 +527,19 @@ default one' % self.zstack_properties)
         shell.call(cmd)
         #self._deploy_zstack_properties()
         self._extra_deployment()
+
+    def _install_zstack_nodes_ha(self):
+        for node in self.nodes:
+	    cmd = "/root/scripts/network-setting -b %s %s %s %s %s" % (node.ip_, node.netmask_, node.gateway_, node.nic_, node.bridge_)
+	    test_lib.lib_execute_sh_cmd_by_agent(node.ip_, cmd)
+	    cmd = "bash %s -o -i -I %s" % (self.zstack_pkg, node.bridge_)
+	    test_lib.lib_execute_sh_cmd_by_agent(node.ip_, cmd)
+
+    def _install_zstack_ha(self):
+	node1 = self.nodes[0]
+	node2 = self.nodes[1]
+	cmd = "zstack-ctl install_ha --host1-info %s:%s@%s --host2-info %s:%s@%s --vip %s" % (node1.username_, node1.password_, node2.username_, node2.password_, self.zstack_ha_vip)
+	test_lib.lib_execute_sh_cmd_by_agent(node1.ip_, cmd)
 
     def _set_extra_node_config(self):
         for node in self.nodes:
@@ -722,6 +740,15 @@ default one' % self.zstack_properties)
         self._install_management_nodes()
         self._set_extra_node_config()
         self._start_multi_nodes(restart=True)
+
+    def execute_plan_ha(self):
+	self.deploy_test_agent()
+	try:
+            self._stop_nodes()
+	except:
+            pass
+	self._install_zstack_nodes_ha()
+	self._install_zstack_ha()
 
     def deploy_db_without_reinstall_zstack(self):
         self.deploy_test_agent()
