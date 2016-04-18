@@ -542,15 +542,15 @@ default one' % self.zstack_properties)
     def _install_zstack_nodes_ha(self):
         for node in self.nodes:
 	    cmd = "/root/scripts/network-setting -b %s %s %s %s %s" % (node.ip_, node.netmask_, node.gateway_, node.nic_, node.bridge_)
-	    execute_sh_cmd_by_agent(node.ip_, cmd)
+	    self.execute_sh_cmd_by_agent(node.ip_, cmd)
 	    cmd = "bash %s -o -i -I %s" % (self.zstack_pkg, node.bridge_)
-	    execute_sh_cmd_by_agent(node.ip_, cmd)
+	    self.execute_sh_cmd_by_agent(node.ip_, cmd)
 
     def _install_zstack_ha(self):
 	node1 = self.nodes[0]
 	node2 = self.nodes[1]
 	cmd = "zstack-ctl install_ha --host1-info %s:%s@%s --host2-info %s:%s@%s --vip %s" % (node1.username_, node1.password_, node2.username_, node2.password_, self.zstack_ha_vip)
-	execute_sh_cmd_by_agent(node1.ip_, cmd)
+	self.execute_sh_cmd_by_agent(node1.ip_, cmd)
 
     def _set_extra_node_config(self):
         for node in self.nodes:
