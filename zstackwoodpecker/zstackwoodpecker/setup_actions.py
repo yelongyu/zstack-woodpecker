@@ -10,6 +10,7 @@ import zstacklib.utils.log as log
 import zstacklib.utils.lock as lock
 import zstacklib.utils.ssh as ssh
 import zstacklib.utils.http as http
+import zstacklib.utils.jsonobject as jsonobject
 import apibinding.api as api
 import apibinding.inventory as inventory
 import socket
