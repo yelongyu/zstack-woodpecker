@@ -471,7 +471,9 @@ default one' % self.zstack_properties)
             self.zstack_ha_vip = None
 
         os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = ''
-        if deploy_config.has_element('nodes') \
+	if self.zstack_ha_vip != None:
+            os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = self.zstack_ha_vip
+        elif deploy_config.has_element('nodes') \
             and deploy_config.nodes.has_element('node'):
             for node in deploy_config.nodes.get_child_node_as_list('node'):
                 node.ip_
