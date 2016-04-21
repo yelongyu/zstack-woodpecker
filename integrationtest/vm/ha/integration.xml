@@ -4,5 +4,6 @@
         <case timeout="720" >migrate/test_migrate_vm_ops.py</case>
         <case timeout='3600' repeat='1'>vms/test_4vm_vm_ops.py</case>
         <case timeout='720' noparallel='True'>test_one_node_shutdown_create_vm.py</case>
+        <case timeout='720' noparallel='True'>test_one_node_recovery_create_vm.py</case>
     </suite>
 </integrationTest>
