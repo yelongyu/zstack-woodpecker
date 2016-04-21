@@ -1,4 +1,7 @@
 <integrationTest>
     <suite name="ha test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
+        <case timeout="120" >test_create_vm.py</case>
+        <case timeout="720" >migrate/test_migrate_vm_ops.py</case>
+        <case timeout='3600' repeat='1'>vms/test_4vm_vm_ops.py</case>
     </suite>
 </integrationTest>
