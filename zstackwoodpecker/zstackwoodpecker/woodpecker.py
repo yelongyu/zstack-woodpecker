@@ -317,20 +317,25 @@ class WoodPecker(object):
                         case.success[suite_repeat][case_repeat] = TestCase.PASS
                         #ret = ' [ \033[92msuccess\033[0m ]'
                         ret = ' [ \033[92msuccess %s\033[0m ]' % test_time2
-                        brief = "%s %s %s\n" % (suite, case, "PASS")
+			result = "PASS"
                     elif process.returncode == 2:
                         case.success[suite_repeat][case_repeat] = TestCase.SKIP
                         #ret = ' [ \033[93mskipped\033[0m ]'
                         ret = ' [ \033[93mskipped 0:00:00\033[0m ]'
-                        brief = "%s %s %s\n" % (suite, case, "SKIP")
+			result = "SKIP"
                     else:
                         case.success[suite_repeat][case_repeat] = TestCase.FAIL
                         #ret = ' [ \033[91mfailed\033[0m  ]'
                         ret = ' [ \033[91mfailed %s\033[0m  ]' % test_time2
                         self.case_failure = True
-                        brief = "%s %s %s\n" % (suite.name, case.name, "FAIL")
+			result = "FAIL"
                 else:
-                        brief = "%s %s %s\n" % (suite.name, case.name, "TIMEOUT")
+			result = "TIMEOUT"
+
+                if case_repeat == 0:
+                        brief = "%s %s.%s %s\n" % (suite.name, case.name, case_repeat, result)
+                else:
+                        brief = "%s %s %s\n" % (suite.name, case.name, result)
 
                 self.write_file_a(self.brief_path, brief)
                 if not self.verbose:
