@@ -32,7 +32,7 @@ pipelining = True
     if not os.path.exists(os.path.dirname(ansible_config)):
         os.system('mkdir -p %s' % os.path.dirname(ansible_config))
     if not os.path.exists(ansible_config):
-        open(ansible_config).write(ansible_config_content)
+        open(ansible_config, 'w').write(ansible_config_content)
 
     shell.call(add_host_cmd)
     print('Create no ssh password for: %s ' % target)
