@@ -138,8 +138,10 @@
         <primaryStorages>
           <nfsPrimaryStorage name="$nfsPrimaryStorageName"
             description="NFSTest1" url="$nfsPrimaryStorageUrl" />
+          <!--
           <nfsPrimaryStorage name="$nfsPrimaryStorageName2"
-            description="NFSTest2" url="$nfsPrimaryStorageUrl2" />
+	    description="NFSTest2" url="$nfsPrimaryStorageUrl2" />
+          -->
         </primaryStorages>
   
         <clusters>
