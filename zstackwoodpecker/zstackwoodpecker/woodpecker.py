@@ -116,6 +116,7 @@ class WoodPecker(object):
         current_time = time.strftime("%y%m%d-%H%M%S", time.localtime())
         self.result_dir = os.path.join(self.test_root_path, 'test-result', current_time)
         self.summary_path = os.path.join(self.result_dir, 'summary')
+        self.brief_path = os.path.join(self.result_dir, 'brief')
         self.err_list_path = os.path.join(self.result_dir, 'err_log_list')
         self.log_dir = os.path.join(self.result_dir, 'logs')
         self.action_log_dir = os.path.join(self.result_dir, 'action_logs')
@@ -316,16 +317,20 @@ class WoodPecker(object):
                         case.success[suite_repeat][case_repeat] = TestCase.PASS
                         #ret = ' [ \033[92msuccess\033[0m ]'
                         ret = ' [ \033[92msuccess %s\033[0m ]' % test_time2
+                        brief = "%s %s %s\n" % (suite, case, "PASS")
                     elif process.returncode == 2:
                         case.success[suite_repeat][case_repeat] = TestCase.SKIP
                         #ret = ' [ \033[93mskipped\033[0m ]'
                         ret = ' [ \033[93mskipped 0:00:00\033[0m ]'
+                        brief = "%s %s %s\n" % (suite, case, "SKIP")
                     else:
                         case.success[suite_repeat][case_repeat] = TestCase.FAIL
                         #ret = ' [ \033[91mfailed\033[0m  ]'
                         ret = ' [ \033[91mfailed %s\033[0m  ]' % test_time2
                         self.case_failure = True
+                        brief = "%s %s %s\n" % (suite.name, case.name, "FAIL")
 
+                self.write_file_a(self.brief_path, brief)
                 if not self.verbose:
                     dot_width = terminal_width - max_case_name_len - 13 - len(test_time2) - 1
                     fmt = '\r%s ' + repeat_char('.', dot_width)
