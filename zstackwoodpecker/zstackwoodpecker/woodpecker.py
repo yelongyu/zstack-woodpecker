@@ -329,6 +329,8 @@ class WoodPecker(object):
                         ret = ' [ \033[91mfailed %s\033[0m  ]' % test_time2
                         self.case_failure = True
                         brief = "%s %s %s\n" % (suite.name, case.name, "FAIL")
+                else:
+                        brief = "%s %s %s\n" % (suite.name, case.name, "TIMEOUT")
 
                 self.write_file_a(self.brief_path, brief)
                 if not self.verbose:
