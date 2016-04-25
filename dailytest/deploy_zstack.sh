@@ -137,3 +137,5 @@ if [ -f $USR_LOCAL_POST_BUILD_SCRIPT ]; then
 fi
 
 echo -e "$(tput setaf 2) - ZStack All In Package has been put in $SANITYTEST_FOLDER and woodpecker environment has been successfully installed. Ready for testing.\n$(tput sgr0)"
+
+deactivate

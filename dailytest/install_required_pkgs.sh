@@ -11,7 +11,7 @@ fi
 which ansible-playbook >&/dev/null
 if [ $? -ne 0 ]; then
     echo "Need to install ansible:"
-    yum install -y ansible
+    pip install ansible==1.8.2
     if [ $? -ne 0 ]; then
         echo "failed to install ansible" && exit 1
     fi
