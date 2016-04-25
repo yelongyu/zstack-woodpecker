@@ -332,7 +332,7 @@ class WoodPecker(object):
                 else:
 			result = "TIMEOUT"
 
-                if case_repeat == 0:
+                if case_repeat != 0:
                         brief = "%s %s.%s %s\n" % (suite.name, case.name, case_repeat, result)
                 else:
                         brief = "%s %s %s\n" % (suite.name, case.name, result)
