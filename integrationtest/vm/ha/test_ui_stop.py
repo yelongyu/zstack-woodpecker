@@ -1,6 +1,6 @@
 '''
 
-Integration Test for creating KVM VM in HA mode with UI stop on one node.
+Integration Test for HA mode with UI stop on one node.
 
 @author: Quarkonics
 '''

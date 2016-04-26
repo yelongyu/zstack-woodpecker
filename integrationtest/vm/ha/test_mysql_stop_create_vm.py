@@ -10,6 +10,7 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
+import test_stub
 import time
 import os
 
@@ -19,6 +20,7 @@ node_ip = None
 def test():
     global vm
     global node_ip
+    vm = test_stub.create_vm()
     node_ip = os.environ.get('node1Ip')
     test_util.test_logger("stop mysql on node: %s" % (node_ip))
     cmd = "service mysql stop"
