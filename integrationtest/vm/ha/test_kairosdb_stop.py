@@ -25,8 +25,8 @@ def test():
     rsp = test_lib.lib_execute_ssh_cmd(node_ip, host_username, host_password, cmd, 180)
     test_util.test_logger("check if it still works")
     zstack_ha_vip = os.environ.get('zstackHaVip')
-    if not test_lib.lib_network_check(zstack_ha_vip, 18080):
-        test_util.test_fail('Could not access UI through VIP: %s, port: 18080' % (zstack_ha_vip))
+    if not test_lib.lib_network_check(zstack_ha_vip, 58080):
+        test_util.test_fail('Could not access UI through VIP: %s, port: 58080' % (zstack_ha_vip))
     cmd = "zstack-ctl kairosdb start"
     rsp = test_lib.lib_execute_ssh_cmd(node_ip, host_username, host_password, cmd, 180)
 
