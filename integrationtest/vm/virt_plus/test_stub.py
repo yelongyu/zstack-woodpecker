@@ -19,7 +19,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 
 test_file = '/tmp/test.img'
-TEST_TIME = 60
+TEST_TIME = 120
 
 def create_vm(vm_name='virt-vm', \
         image_name = None, \
