@@ -30,6 +30,7 @@ def test():
     host_password = os.environ.get('nodePassword')
     rsp = test_lib.lib_execute_ssh_cmd(node_ip, host_username, host_password, cmd, 180)
     time.sleep(120)
+    test_stub.exercise_connection(1200)
     test_util.test_logger("create vm to check if it still works")
     vm1.check()
     vm1.destroy()
@@ -39,6 +40,7 @@ def test():
     cmd = "rabbitmqctl start_app"
     rsp = test_lib.lib_execute_ssh_cmd(node_ip, host_username, host_password, cmd, 180)
     time.sleep(60)
+    test_stub.exercise_connection(1200)
 
     test_util.test_pass('Create VM Test Rabbitmq Stop on one node Success')
 
@@ -52,6 +54,7 @@ def error_cleanup():
     host_password = os.environ.get('nodePassword')
     rsp = test_lib.lib_execute_ssh_cmd(node_ip, host_username, host_password, cmd, 180)
     time.sleep(60)
+    test_stub.exercise_connection(1200)
 
     if vm1:
         try:

@@ -28,6 +28,7 @@ def test():
     rsp = test_lib.lib_execute_ssh_cmd(node_ip, host_username, host_password, cmd, 180)
     test_util.test_logger("wait for 2 minutes to see if http api still works well")
     time.sleep(180)
+    test_stub.exercise_connection(1200)
 
     vm = test_stub.create_basic_vm()
     vm.check()
@@ -36,6 +37,7 @@ def test():
     test_util.test_logger("recover node: %s" % (node_ip))
     os.system('bash -ex %s %s' % (os.environ.get('nodeRecoverScript'), node_ip))
     time.sleep(180)
+    test_stub.exercise_connection(1200)
 
     test_util.test_pass('Create VM Test Success')
 
@@ -50,3 +52,4 @@ def error_cleanup():
     test_util.test_logger("recover node: %s" % (node_ip))
     os.system('bash -ex %s %s' % (os.environ.get('nodeRecoverScript'), node_ip))
     time.sleep(180)
+    test_stub.exercise_connection(1200)

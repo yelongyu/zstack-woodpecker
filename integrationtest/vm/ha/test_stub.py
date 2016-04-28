@@ -5,6 +5,7 @@ Create an unified test_stub to share test operations
 @author: Youyk
 '''
 import os
+import sys
 import random
 import zstackwoodpecker.test_util  as test_util
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
@@ -13,6 +14,8 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.header.host as host_header
+import threading
+import time
 #import traceback
 #import sys
 
@@ -118,3 +121,15 @@ def create_sg(sg_creation_option=None):
     sg.set_creation_option(sg_creation_option)
     sg.create()
     return sg
+
+def exercise_connection(ops_num=1200, thread_threshold=10):
+    for ops_id in range(ops_num):
+        thread = threading.Thread(target=test_lib.lib_get_ha_enable)
+        while threading.active_count() > thread_threshold:
+            time.sleep(0.5)
+        exc = sys.exc_info()
+        thread.start()
+
+    while threading.activeCount() > 1:
+        exc = sys.exc_info()
+        time.sleep(0.1)

@@ -31,6 +31,7 @@ def test():
     cmd = "service mysql start"
     rsp = test_lib.lib_execute_ssh_cmd(node_ip, host_username, host_password, cmd, 180)
 
+    test_stub.exercise_connection(1200)
     test_util.test_logger("check create vm")
     vm = test_stub.create_basic_vm()
     vm.check()
