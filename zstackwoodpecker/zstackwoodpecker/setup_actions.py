@@ -545,7 +545,7 @@ default one' % self.zstack_properties)
 	host_info = ""
         host_id = 1
         for node in self.nodes:
-            host_info += "--host%s-info %s:%s@%s " % (host_id, node.username, node.password, node.ip_)
+            host_info += "--host%s-info %s:%s@%s " % (host_id, node.username_, node.password_, node.ip_)
 	    host_id += 1
         cmd = "zstack-ctl install_ha %s --vip %s" % (host_info, self.zstack_ha_vip)
         ssh.execute(cmd, node1.ip_, node1.username_, node1.password_)
