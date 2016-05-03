@@ -146,4 +146,3 @@ def exercise_connection(ops_num=120, thread_threshold=10):
         exc = sys.exc_info()
         time.sleep(0.1)
     acc_ops.logout(session_uuid)
-exercise_connection(1200)
