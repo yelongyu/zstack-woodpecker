@@ -27,7 +27,7 @@ def test():
     pri_l3_uuid = test_lib.lib_get_l3_by_name(pri_l3_name).uuid
 
     pub_l3_name = os.environ.get('l3PublicNetworkName')
-    pub_l3_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    pub_l3_uuid = test_lib.lib_get_l3_by_name(pub_l3_name).uuid
 
     vm_nic = vm.vm.vmNics[0]
     vm_nic_uuid = vm_nic.uuid
@@ -38,11 +38,11 @@ def test():
     vip.attach_eip(eip)
     
     vm.check()
-    if not test_lib.lib_check_directly_ping(vip.ip):
+    if not test_lib.lib_check_directly_ping(vip.get_vip().ip):
         test_util.test_fail('expected to be able to ping vip while it fail')
     vm.destroy()
     test_obj_dict.rm_vm(vm)
-    if test_lib.lib_check_directly_ping(vip.ip):
+    if test_lib.lib_check_directly_ping(vip.get_vip().ip):
         test_util.test_fail('not expected to be able to ping vip while it succeed')
 
     eip.delete()

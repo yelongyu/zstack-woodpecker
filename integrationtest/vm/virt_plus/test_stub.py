@@ -15,6 +15,8 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
+import zstackwoodpecker.zstack_test.zstack_test_eip as zstack_eip_header
+import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 
@@ -23,13 +25,11 @@ TEST_TIME = 120
 
 def create_vlan_vm(l3_name=None, disk_offering_uuids=None, system_tags=None, session_uuid = None, instance_offering_uuid = None):
     image_name = os.environ.get('imageName_net')
-    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     if not l3_name:
         l3_name = os.environ.get('l3VlanNetworkName1')
 
-    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
-    return create_vm([l3_net_uuid], image_uuid, 'vlan_vm', \
-            disk_offering_uuids, system_tags=system_tags, \
+    return create_vm('vlan_vm', image_name, l3_name, \
+            disk_offering_uuids=disk_offering_uuids, system_tags=system_tags, \
             instance_offering_uuid = instance_offering_uuid,
             session_uuid = session_uuid)
 
@@ -272,3 +272,40 @@ def migrate_vm_to_random_host(vm, timeout = None):
         test_util.test_fail('[vm:] did not migrate from [host:] %s to target [host:] %s, but to [host:] %s' % (vm.vm.uuid, current_host.uuid, target_host.uuid, new_host.uuid))
     else:
         test_util.test_logger('[vm:] %s has been migrated from [host:] %s to [host:] %s' % (vm.vm.uuid, current_host.uuid, target_host.uuid))
+
+def create_eip(eip_name=None, vip_uuid=None, vnic_uuid=None, vm_obj=None, \
+        session_uuid = None):
+    if not vip_uuid:
+        l3_name = os.environ.get('l3PublicNetworkName')
+        l3_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+        vip_uuid = net_ops.acquire_vip(l3_uuid).uuid
+
+    eip_option = test_util.EipOption()
+    eip_option.set_name(eip_name)
+    eip_option.set_vip_uuid(vip_uuid)
+    eip_option.set_vm_nic_uuid(vnic_uuid)
+    eip_option.set_session_uuid(session_uuid)
+    eip = zstack_eip_header.ZstackTestEip()
+    eip.set_creation_option(eip_option)
+    if vnic_uuid and not vm_obj:
+        test_util.test_fail('vm_obj can not be None in create_eip() API, when setting vm_nic_uuid.')
+    eip.create(vm_obj)
+    return eip
+
+def create_vip(vip_name=None, l3_uuid=None, session_uuid = None):
+    if not vip_name:
+        vip_name = 'test vip'
+    if not l3_uuid:
+        l3_name = os.environ.get('l3PublicNetworkName')
+        l3_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+
+    vip_creation_option = test_util.VipOption()
+    vip_creation_option.set_name(vip_name)
+    vip_creation_option.set_l3_uuid(l3_uuid)
+    vip_creation_option.set_session_uuid(session_uuid)
+
+    vip = zstack_vip_header.ZstackTestVip()
+    vip.set_creation_option(vip_creation_option)
+    vip.create()
+
+    return vip
