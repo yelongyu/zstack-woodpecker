@@ -23,7 +23,7 @@ def test():
     node_ip = os.environ.get('node1Ip')
     test_util.test_logger("shutdown node network for a small while: %s" % (node_ip))
     l2_network_interface = os.environ.get('l2ManagementNetworkInterface')
-    cmd = "ifdown %s && sleep 30 && ifup %s" % (l2_network_interface, l2_network_interface)
+    cmd = "ifdown %s && sleep 10 && ifup %s" % (l2_network_interface, l2_network_interface)
     host_username = os.environ.get('nodeUserName')
     host_password = os.environ.get('nodePassword')
     rsp = test_lib.lib_execute_ssh_cmd(node_ip, host_username, host_password, cmd, 180)
