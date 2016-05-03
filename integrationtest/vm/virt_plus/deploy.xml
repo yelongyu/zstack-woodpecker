@@ -163,6 +163,21 @@
             </l3Networks>
           </l2NoVlanNetwork>
         </l2Networks>
+
+        <l2VlanNetwork name="$l2VlanNetworkName1" description="guest l2 vlan network"
+          physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan1">
+          <l3Networks>
+            <l3BasicNetwork name="$l3VlanNetworkName1" description = "guest test vlan network with DHCP Userdata and Eip" domain_name="$L3VlanNetworkDomainName1">
+              <ipRange name="$vlanIpRangeName1" startIp="$vlanIpRangeStart1" endIp="$vlanIpRangeEnd1"
+               gateway="$vlanIpRangeGateway1" netmask="$vlanIpRangeNetmask1"/>
+              <networkService provider="VirtualRouter">
+                <serviceType>DHCP</serviceType>
+                <serviceType>Userdata</serviceType>
+                <serviceType>Eip</serviceType> 
+              </networkService>
+            </l3BasicNetwork>
+          </l3Networks>
+        </l2VlanNetwork>
       </zone>
     </zones>
   </deployerConfig>

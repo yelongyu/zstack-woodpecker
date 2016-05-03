@@ -21,6 +21,18 @@ import zstackwoodpecker.operations.vm_operations as vm_ops
 test_file = '/tmp/test.img'
 TEST_TIME = 120
 
+def create_vlan_vm(l3_name=None, disk_offering_uuids=None, system_tags=None, session_uuid = None, instance_offering_uuid = None):
+    image_name = os.environ.get('imageName_net')
+    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    if not l3_name:
+        l3_name = os.environ.get('l3VlanNetworkName1')
+
+    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    return create_vm([l3_net_uuid], image_uuid, 'vlan_vm', \
+            disk_offering_uuids, system_tags=system_tags, \
+            instance_offering_uuid = instance_offering_uuid,
+            session_uuid = session_uuid)
+
 def create_vm(vm_name='virt-vm', \
         image_name = None, \
         l3_name = None, \
