@@ -181,10 +181,9 @@ def execute_mevoco_online_install(ssh_cmd, tmp_file):
                 test_util.test_fail('zstack installation failed')
 
 def execute_all_install(ssh_cmd, target_file, tmp_file):
-    env_var = "ZSTACK_ALL_IN_ONE='%s' WEBSITE='%s'" % \
-            (target_file, 'localhost')
+    env_var = " WEBSITE='%s'" % ('localhost')
 
-    cmd = '%s "%s bash /root/zstack_installer.sh -d -a"' % (ssh_cmd, env_var)
+    cmd = '%s "%s bash %s"' % (ssh_cmd, env_var, target_file)
 
     process_result = execute_shell_in_process(cmd, tmp_file)
 
