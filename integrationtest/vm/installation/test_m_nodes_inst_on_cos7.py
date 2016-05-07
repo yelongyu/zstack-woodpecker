@@ -26,8 +26,9 @@ def test():
     test_obj_dict.add_vm(vm1)
     vm2 = test_stub.create_vlan_vm(image_name)
     test_obj_dict.add_vm(vm2)
-    vm1.check()
-    vm2.check()
+    if os.environ.get('zstackManagementIp') == None:
+        vm1.check()
+        vm2.check()
 
     vm1_inv = vm1.get_vm()
     vm1_ip = vm1_inv.vmNics[0].ip

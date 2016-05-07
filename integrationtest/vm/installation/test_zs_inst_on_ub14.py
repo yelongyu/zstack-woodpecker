@@ -20,7 +20,8 @@ def test():
     image_name = os.environ.get('imageName_i_u14')
     vm = test_stub.create_vlan_vm(image_name)
     test_obj_dict.add_vm(vm)
-    vm.check()
+    if os.environ.get('zstackManagementIp') == None:
+        vm.check()
 
     vm_inv = vm.get_vm()
     vm_ip = vm_inv.vmNics[0].ip
