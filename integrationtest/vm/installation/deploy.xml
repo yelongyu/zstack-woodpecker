@@ -30,6 +30,7 @@
     <zstackInstallPath>$zstackInstallPath</zstackInstallPath>
     <zstackProperties>$zstackPropertiesPath</zstackProperties>
     <testAgent>$zstackTestAgentPkgPath</testAgent>
+    <zstackManagementIp>$zstackManagementIp</zstackManagementIp>
     <db>
       <!-- Database server IP address or hostname -->
       <server>$DBServer</server>

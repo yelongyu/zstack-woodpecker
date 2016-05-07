@@ -470,6 +470,11 @@ default one' % self.zstack_properties)
 	else:
             self.zstack_ha_vip = None
 
+        if basic_config.has_element('zstackManagementIp'):
+	    self.zstack_management_ip = basic_config.zstackManagementIp.text_
+	else:
+            self.zstack_management_ip = None
+
         os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = ''
         if deploy_config.has_element('nodes') \
             and deploy_config.nodes.has_element('node'):
@@ -485,6 +490,9 @@ default one' % self.zstack_properties)
 
         if self.zstack_ha_vip != None:
             os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = self.zstack_ha_vip
+
+        if self.zstack_management_ip != None:
+            os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = self.zstack_management_ip
 
         if not os.environ.get('ZSTACK_BUILT_IN_HTTP_SERVER_IP'):
             raise ActionError('deploy.xml setting error. No deployerConfig.nodes.node.ip is defined. ')

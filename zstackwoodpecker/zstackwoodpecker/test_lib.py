@@ -664,7 +664,8 @@ def lib_scp_file_to_vm(vm, src_file, dst_file, l3_uuid = None):
         else:
             return os.path.join(self.config_base_path, path)
 
-    lib_set_vm_host_l2_ip(vm)
+    if os.environ.get('zstackManagementIp') == None:
+        lib_set_vm_host_l2_ip(vm)
     host_ip = lib_find_host_by_vm(vm).managementIp
     h_username = os.environ.get('hostUsername')
     h_password = os.environ.get('hostPassword')
