@@ -207,7 +207,7 @@ def execute_all_install(ssh_cmd, target_file, tmp_file):
 def only_install_zstack(ssh_cmd, target_file, tmp_file):
     env_var = "WEBSITE='%s'" % 'localhost'
 
-    cmd = '%s "%s bash /root/zstack_installer.sh -d -i -f %s"' % (ssh_cmd, env_var, target_file)
+    cmd = '%s "%s bash %s -d -i"' % (ssh_cmd, env_var, target_file)
 
     process_result = execute_shell_in_process(cmd, tmp_file)
 
