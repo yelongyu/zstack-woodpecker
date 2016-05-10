@@ -38,9 +38,10 @@ def test():
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd2)
 
     test_lib.setup_plan.execute_plan_without_deploy_test_agent()
-    deploy_operations.deploy_initial_database(test_lib.deploy_config)
     if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
+
+    deploy_operations.deploy_initial_database(test_lib.deploy_config)
     if test_lib.lib_get_ha_selffencer_maxattempts() != None:
         test_lib.lib_set_ha_selffencer_maxattempts('60')
 	test_lib.lib_set_ha_selffencer_storagechecker_timeout('60')
