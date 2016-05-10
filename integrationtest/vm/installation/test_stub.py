@@ -67,6 +67,37 @@ def execute_shell_in_process(cmd, tmp_file, timeout = 1200, no_timeout_excep = F
     logfd.close()
     return process.returncode
 
+def execute_shell_in_process_stdout(cmd, tmp_file, timeout = 1200, no_timeout_excep = False):
+    logfd = open(tmp_file, 'w', 0)
+    process = subprocess.Popen(cmd, executable='/bin/sh', shell=True, stdout=logfd, universal_newlines=True)
+
+    start_time = time.time()
+    while process.poll() is None:
+        curr_time = time.time()
+        test_time = curr_time - start_time
+        if test_time > timeout:
+            process.kill()
+            logfd.close()
+            logfd = open(tmp_file, 'r')
+            test_util.test_logger('[shell:] %s [timeout logs:] %s' % (cmd, '\n'.join(logfd.readlines())))
+            logfd.close()
+            if no_timeout_excep:
+                test_util.test_logger('[shell:] %s timeout, after %d seconds' % (cmd, test_time))
+                return 1
+            else:
+                os.system('rm -f %s' % tmp_file)
+                test_util.test_fail('[shell:] %s timeout, after %d seconds' % (cmd, timeout))
+        if test_time%10 == 0:
+            print('shell script used: %ds' % int(test_time))
+        time.sleep(1)
+    logfd.close()
+    logfd = open(tmp_file, 'r')
+    stdout = '\n'.join(logfd.readlines())
+    logfd.close()
+    test_util.test_logger('[shell:] %s [logs]: %s' % (cmd, stdout))
+    return (process.returncode, stdout)
+
+
 def copy_id_dsa(vm_inv, ssh_cmd, tmp_file):
     src_file = '/root/.ssh/id_dsa'
     target_file = '/root/.ssh/id_dsa'
@@ -106,8 +137,7 @@ def prepare_test_env(vm_inv, aio_target):
 def upgrade_zstack(ssh_cmd, target_file, tmp_file):
     env_var = "WEBSITE='%s'" % 'localhost'
 
-    cmd = '%s "%s bash /root/zstack_installer.sh -u -f %s"' \
-            % (ssh_cmd, env_var, target_file)
+    cmd = '%s "%s bash %s -u"' % (ssh_cmd, env_var, target_file)
 
     process_result = execute_shell_in_process(cmd, tmp_file)
 
@@ -229,7 +259,17 @@ def check_installation(ssh_cmd, tmp_file, vm_inv):
     if process_result != 0:
         test_util.test_fail('zstack-cli create Backup Storage failed')
 
-    cmd = '%s "/usr/bin/zstack-cli QuerySftpBackupStorage name=bs1 description=bs"' % ssh_cmd
+    cmd = '%s "/usr/bin/zstack-cli QuerySftpBackupStorage name=bs1"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
         test_util.test_fail('zstack-cli Query Backup Storage failed')
+    cmd = '%s "/usr/bin/zstack-cli QuerySftpBackupStorage name=bs1 fields=uuid" | grep uuid | awk \'{print $2}\'' % ssh_cmd
+    (process_result, bs_uuid) = execute_shell_in_process_stdout(cmd, tmp_file)
+    if process_result != 0:
+        test_util.test_fail('zstack-cli Query Backup Storage failed')
+
+    cmd = '%s "/usr/bin/zstack-cli DeleteBackupStorage uuid=%s"' % (ssh_cmd, bs_uuid.split('"')[1])
+    process_result = execute_shell_in_process(cmd, tmp_file)
+    if process_result != 0:
+        test_util.test_fail('zstack-cli Delete Backup Storage failed')
+
