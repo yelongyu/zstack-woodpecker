@@ -131,6 +131,7 @@ class WoodPecker(object):
         os.makedirs(self.err_log_dir, 0755)
         self.current_cmd_string = linux.get_command_by_pid(os.getpid())
         self.stop_when_fail = options.stopWhenFail
+        self.stop_when_fail_match = options.stopWhenFailMatch
         self.case_failure = False
         if options.testFailureRetry and options.testFailureRetry.isdigit():
             os.environ['WOODPECKER_TEST_FAILURE_RETRY'] = options.testFailureRetry
@@ -347,6 +348,14 @@ class WoodPecker(object):
                     
             finally:
                 logfd.close()
+
+            if self.stop_when_fail_match:
+                logfd = open(case_log_path, 'r')
+		for line in logfd:
+                    if self.stop_when_fail_match in line:
+		        self.stop_when_fail = True
+			break
+		logfd.close()
         
         def run_suite(suite):
             def wait_for_queue(parallel=0):
@@ -683,6 +692,7 @@ def main():
     parser.add_option("-v", "--verbose", action='store_true', dest="verbose", help="[Optional] print output to console")
     parser.add_option("-n", "--no-cleanup", action='store_true', dest="noCleanup", default=False, help="[Optional] do not execute error_cleanup(), when test case fails")
     parser.add_option("-s", "--stop-failure", action='store_true', dest="stopWhenFail", default=False, help="[Optional] Stop testing, when there is test case failure. Used to work with -n option")
+    parser.add_option("-m", "--stop-failure-match", action='store', dest="stopWhenFailMatch", default=None, help="[Optional] Stop testing, when there is test case failure and test log match given string. Used to work with -n option")
     parser.add_option("-a", "--action-log", action='store_true', dest="onlyActionLog", default=False, help="[Optional] only save 'Action' log by test_util.action_logger(). test_util.test_logger() will not be saved in test case's action.log file.")
     parser.add_option("-t", "--case-timeout", action='store', dest="defaultTestCaseTimeout", default='1800', help="[Optional] test case timeout, if test case doesn't set one. The default timeout is 1800s.")
     parser.add_option("-r", "--test-failure-retry", action='store', dest="testFailureRetry", default=None, help="[Optional] Set the max retry times, when test checker is failed. ")

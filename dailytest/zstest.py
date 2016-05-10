@@ -465,6 +465,10 @@ def parse_test_args(options):
     if options.stopFailure:
         test_args.append('-s')
 
+    if options.stopFailureMatch:
+        test_args.append('-m')
+        test_args.append(options.stopFailureMatch)
+
     if options.caseTimeOut:
         test_args.append('-t')
         test_args.append(options.caseTimeOut)
@@ -635,6 +639,13 @@ def main():
             default=None, 
             action='store_true', 
             help="[Optional] stop testing, when meet 1st failure. It is useful to debug test failure in a serial test case execution. E.g. `zstest -s basic -S`")
+
+    option_group.add_option(
+            "-m", "--stop-when-failure-match", 
+            dest="stopFailureMatch", 
+            default=None, 
+            action='store', 
+            help="[Optional] stop testing, when meet 1st failure test log match given string. It is useful to debug test failure in a serial test case execution. E.g. `zstest -s basic -m refused`")
 
     option_group.add_option(
             "-C", "--config",
