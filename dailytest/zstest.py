@@ -467,7 +467,7 @@ def parse_test_args(options):
 
     if options.stopFailureMatch:
         test_args.append('-m')
-        test_args.append(options.stopFailureMatch)
+        test_args.append('"%s"' % options.stopFailureMatch)
 
     if options.caseTimeOut:
         test_args.append('-t')

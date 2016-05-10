@@ -16,6 +16,7 @@ Options:
   -a, --only-actionlog  [Optional] Only save 'Action' log in test case's action.
                         log file.
   -s, --stop-failure    [Optional] Stop when meeting 1st test failure.
+  -m, --stop-failure-match    [Optional] Stop when meeting 1st test failure match
   -t TIMEOUT            [Optional] The default timeout time for test case. If 
                         providing specific value, the default value is 1800. The
                         time unit is second. E.g. -t 2000. 
@@ -29,7 +30,7 @@ Options:
 
 test_case_file=' '
 OPTIND=1
-while getopts "f:c:t:rhvnas" Option
+while getopts "f:c:t:rhvnasm" Option
 do
     case $Option in
         f ) test_case_file=$OPTARG;;
@@ -40,6 +41,7 @@ do
         n );;
         a );;
         s );;
+        m ) stop_failure_match=$OPTARG;;
         h ) help;;
         * ) help;;
     esac
@@ -91,4 +93,4 @@ else
 fi
 
 cd $current_dir
-python -c "from zstackwoodpecker import woodpecker; woodpecker.main()" $@
+python -c "from zstackwoodpecker import woodpecker; woodpecker.main()" "$@"
