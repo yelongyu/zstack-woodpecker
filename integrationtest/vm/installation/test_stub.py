@@ -215,7 +215,7 @@ def execute_all_install(ssh_cmd, target_file, tmp_file):
 
     cmd = '%s "%s bash %s"' % (ssh_cmd, env_var, target_file)
 
-    process_result = execute_shell_in_process(cmd, tmp_file)
+    process_result = execute_shell_in_process(cmd, tmp_file, 2400)
 
     if process_result != 0:
         cmd = '%s "cat /tmp/zstack_installation.log"' % ssh_cmd
