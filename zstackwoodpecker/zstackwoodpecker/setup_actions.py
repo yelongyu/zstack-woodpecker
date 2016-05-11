@@ -542,7 +542,7 @@ default one' % self.zstack_properties)
 
     def _install_zstack_nodes_ha(self):
         for node in self.nodes:
-            cmd = "/root/scripts/network-setting -b %s %s %s %s %s" % (node.ip_, node.netmask_, node.gateway_, node.nic_, node.bridge_)
+            cmd = "/usr/local/bin/zs-network-setting -b %s %s %s %s" % (node.ip_, node.netmask_, node.gateway_, node.nic_)
             ssh.execute(cmd, node.ip_, node.username_, node.password_)
             ssh.scp_file(self.zstack_pkg, "/root/zstack-installer.bin", node.ip_, node.username_, node.password_)
             cmd = "deactivate; which python; bash %s -o -i -I %s" % ("/root/zstack-installer.bin", node.bridge_)
