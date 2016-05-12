@@ -24,7 +24,7 @@ import zstacklib.utils.linux as linux
 import zstacklib.utils.shell as shell
 import zstacklib.utils.log as log
 import zstacklib.utils.debug as debug
-import os.path
+import os
 import sys
 import optparse
 import shutil
@@ -49,6 +49,9 @@ DEFAULT_TEST_CONFIG = 'DEFAULT_TEST_CONFIG'
 LOCAL_WOODPECKER_FOLDER = os.path.join(os.path.expanduser('~'), '.zstackwoodpecker/integrationtest')
 TEST_CONFIG_FILE = 'test-config.xml'
 sig_flag = False
+USER_PATH = os.path.expanduser('~')
+POST_TEST_CASE_SCRIPT = '%s/.zstackwoodpecker/post_test_case_script.sh' % USER_PATH
+
 
 class TestError(Exception):
     ''' test error '''
@@ -345,6 +348,10 @@ class WoodPecker(object):
 
                     msg = fmt % case_name.ljust(max_case_name_len) + ret
                     self.info(msg)
+
+                if os.path.exists(POST_TEST_CASE_SCRIPT):
+                    os.system("bash %s" % POST_TEST_CASE_SCRIPT)
+
                     
             finally:
                 logfd.close()
