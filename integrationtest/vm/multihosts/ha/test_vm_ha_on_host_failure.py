@@ -33,9 +33,9 @@ def test():
         test_util.test_skip("vm ha not enabled. Skip test")
 
     max_attempts = test_lib.lib_get_ha_selffencer_maxattempts()
-    test_lib.lib_set_ha_selffencer_maxattempts('12')
+    test_lib.lib_set_ha_selffencer_maxattempts('3')
     storagechecker_timeout = test_lib.lib_get_ha_selffencer_storagechecker_timeout()
-    test_lib.lib_set_ha_selffencer_storagechecker_timeout('15')
+    test_lib.lib_set_ha_selffencer_storagechecker_timeout('5')
 
     vm_creation_option = test_util.VmOption()
     image_name = os.environ.get('imageName_s')
