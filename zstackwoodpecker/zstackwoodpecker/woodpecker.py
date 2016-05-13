@@ -128,7 +128,7 @@ class WoodPecker(object):
         shell.call('rm -rf %s' % latest_log)
         shell.call('rm -rf %s' % self.result_dir)
         os.makedirs(self.result_dir, 0755)
-        shell.call('ln -s %s %s' % (self.result_dir, latest_log))
+        shell.call('ln -s %s %s' % (current_time, latest_log))
         os.makedirs(self.log_dir, 0755)
         os.makedirs(self.action_log_dir, 0755)
         os.makedirs(self.err_log_dir, 0755)
