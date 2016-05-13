@@ -669,7 +669,7 @@ class WoodPecker(object):
                 link = ['ln -s']
                 log_name = os.path.basename(ec)
                 suite_name = os.path.dirname(ec[len(self.log_dir):]).replace('/', '_')
-                link.append(ec)
+                link.append(os.path.join("../", ec[len(self.result_dir)+1:]))
                 err_log_link = os.path.join(self.err_log_dir, suite_name + '-' + log_name)
                 link.append(err_log_link)
                 shell.call(' '.join(link))
