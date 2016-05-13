@@ -22,6 +22,7 @@ host_uuid = None
 host_ip = None
 max_attempts = None
 storagechecker_timeout = None
+test_stub = test_lib.lib_get_test_stub()
 
 def test():
     global vm
@@ -83,6 +84,8 @@ def test():
         test_util.test_logger("host is still alive")
     except:
 	test_util.test_fail("host is not expected to shutdown after its network down just for a little while")
+
+    test_stub.exercise_connection(100, 10)
 
     vm.destroy()
 

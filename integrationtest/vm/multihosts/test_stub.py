@@ -11,8 +11,11 @@ import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
 import zstackwoodpecker.zstack_test.zstack_test_security_group as zstack_sg_header
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
+import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.header.host as host_header
+import threading
+import time
 #import traceback
 #import sys
 
@@ -89,3 +92,27 @@ def create_sg(sg_creation_option=None):
     sg.set_creation_option(sg_creation_option)
     sg.create()
     return sg
+
+def create_delete_account(account_name='test', session_uuid=None):
+    try:
+        account_inv = acc_ops.create_normal_account(account_name, 'password', session_uuid)
+    except:
+	test_util.test_logger('ignore exception')
+    try:
+        acc_ops.delete_account(account_inv.uuid, session_uuid)
+    except:
+        test_util.test_logger('ignore exception')
+
+def exercise_connection(ops_num=120, thread_threshold=10):
+    session_uuid = acc_ops.login_as_admin()
+    for ops_id in range(ops_num):
+        thread = threading.Thread(target=create_delete_account, args=(ops_id, session_uuid, ))
+        while threading.active_count() > thread_threshold:
+            time.sleep(0.5)
+        exc = sys.exc_info()
+        thread.start()
+
+    while threading.activeCount() > 1:
+        exc = sys.exc_info()
+        time.sleep(0.1)
+    acc_ops.logout(session_uuid)
