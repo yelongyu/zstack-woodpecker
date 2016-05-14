@@ -676,6 +676,9 @@ class WoodPecker(object):
                 report.append(err_log_link)
 
         self.write_file_a(self.err_list_path, '\n'.join(report))
+        if os.path.exists(POST_TEST_CASE_SCRIPT):
+            os.system("bash %s" % POST_TEST_CASE_SCRIPT)
+
         self.info('\n'.join(report))
         print(summary)
         print('The detailed test results are in %s \n' % self.result_dir)
