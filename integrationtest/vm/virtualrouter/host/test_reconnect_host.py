@@ -63,7 +63,7 @@ def test():
     vm_offering_uuid = vm.get_vm().instanceOfferingUuid
     cond = res_ops.gen_query_conditions('uuid', '=', vm_offering_uuid)
     vm_offering = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond)[0]
-    vm_cpu = vm_offering.cpuNum * vm_offering.cpuSpeed
+    vm_cpu = vm_offering.cpuNum
     vm_memory = vm_offering.memorySize
     
     vm.destroy()
