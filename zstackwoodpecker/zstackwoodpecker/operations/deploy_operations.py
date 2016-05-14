@@ -553,6 +553,8 @@ def add_host(deployConfig, session_uuid, host_ip = None, zone_name = None, \
                     action = api_actions.AddKVMHostAction()
                     action.username = host.username_
                     action.password = host.password_
+		    if hasattr(host, port_):
+			action.port = host.port_
                     action.timeout = AddKVMHostTimeOut
                 elif cluster.hypervisorType_ == inventory.SIMULATOR_HYPERVISOR_TYPE:
                     action = api_actions.AddSimulatorHostAction()
