@@ -1186,9 +1186,9 @@ def lib_get_primary_storage_by_uuid(ps_uuid):
     return res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)[0]
 
 def lib_is_ps_iscsi_backend(ps_uuid):
-    ps = lib_get_primary_storage_by_uuid(ps_uuid)
-    if ps.type == inventory.ISCSI_FILE_SYSTEM_BACKEND_PRIMARY_STORAGE_TYPE:
-        return True
+#    ps = lib_get_primary_storage_by_uuid(ps_uuid)
+#    if ps.type == inventory.ISCSI_FILE_SYSTEM_BACKEND_PRIMARY_STORAGE_TYPE:
+#        return True
     return False
 
 def lib_find_random_host_by_volume_uuid(volume_uuid):
