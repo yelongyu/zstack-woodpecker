@@ -688,11 +688,18 @@ default one' % self.zstack_properties)
                 exc_info = []
                 for h in self.test_agent_hosts:
                     print('Deploy test agent in host: [%s] \n' % h.managementIp_)
-                    ansible_cmd_args = "host=%s \
-                            pkg_testagent=zstacktestagent-1.0.0.tar.gz \
-                            pkg_zstacklib=zstacklib-1.2.tar.gz \
-                            pypi_source_tar=pypi.tar.bz" % \
-                            h.managementIp_
+                    if hasattr(h, 'port_'):
+                        ansible_cmd_args = "host=%s:%s \
+                                pkg_testagent=zstacktestagent-1.0.0.tar.gz \
+                                pkg_zstacklib=zstacklib-1.2.tar.gz \
+                                pypi_source_tar=pypi.tar.bz" % \
+                                (h.managementIp_, h.port_)
+                    else:
+                        ansible_cmd_args = "host=%s \
+                                pkg_testagent=zstacktestagent-1.0.0.tar.gz \
+                                pkg_zstacklib=zstacklib-1.2.tar.gz \
+                                pypi_source_tar=pypi.tar.bz" % \
+                                h.managementIp_
 
                     if ENV_HTTP_PROXY:
                         ansible_cmd_args = "%s http_proxy=%s https_proxy=%s" % \
