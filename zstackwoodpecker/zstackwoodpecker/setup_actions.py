@@ -702,11 +702,11 @@ default one' % self.zstack_properties)
 
                     if hasattr(h, 'port_'):
                         thread = threading.Thread(target=ansible.execute_ansible,\
-                            args=(h.managementIp_, h.username_, h.password_,\
+                            args=('%s:%s' % (h.managementIp_, h.port_), h.username_, h.password_,\
                             testagentdir, ansible_cmd, lib_files, exc_info))
                     else:
                         thread = threading.Thread(target=ansible.execute_ansible,\
-                            args=('%s:%s' % (h.managementIp_, h.port_), h.username_, h.password_,\
+                            args=(h.managementIp_, h.username_, h.password_,\
                             testagentdir, ansible_cmd, lib_files, exc_info))
 
                     # Wrap up old zstack logs in /var/log/zstack/
