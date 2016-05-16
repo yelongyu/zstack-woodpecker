@@ -56,6 +56,8 @@ def add_backup_storage(deployConfig, session_uuid):
             action.username = bs.username_
             action.password = bs.password_
             action.hostname = bs.hostname_
+	    if hasattr(bs, 'port_'):
+                action.port = bs.port_
             action.timeout = AddKVMHostTimeOut #for some platform slowly salt execution
             action.type = inventory.SFTP_BACKUP_STORAGE_TYPE
             thread = threading.Thread(target = _thread_for_action, args = (action, ))

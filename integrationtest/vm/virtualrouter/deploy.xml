@@ -79,7 +79,7 @@
   <backupStorages>
     <sftpBackupStorage name="$sftpBackupStorageName"
       description="Test" url="$sftpBackupStorageUrl" username="$sftpBackupStorageUsername"
-      password="$sftpBackupStoragePassword" hostname="$sftpBackupStorageHostname" />
+      password="$sftpBackupStoragePassword" hostname="$sftpBackupStorageHostname" port="22"/>
   </backupStorages>
 
   <images>
