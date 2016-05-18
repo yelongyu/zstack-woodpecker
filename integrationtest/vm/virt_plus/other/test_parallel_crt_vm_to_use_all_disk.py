@@ -20,6 +20,7 @@ import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
+import zstacklib.utils.sizeunit as sizeunit
 
 _config_ = {
     'timeout' : 1000,
@@ -78,7 +79,8 @@ def test():
     image_size = image.size
 
     original_rate = test_lib.lib_set_provision_storage_rate(over_provision_rate)
-    data_volume_size = int(over_provision_rate * (avail_cap - image_size * target_vm_num) / target_vm_num)
+    reserved_ps_size = sizeunit.get_size(test_lib.lib_get_reserved_primary_storage())
+    data_volume_size = int(over_provision_rate * (avail_cap - reserved_ps_size - image_size * target_vm_num) / target_vm_num)
     if data_volume_size < 0:
         test_util.test_skip('Do not have enough disk space to do test')
         return True

@@ -4413,3 +4413,6 @@ def lib_get_ha_selffencer_storagechecker_timeout():
 
 def lib_set_ha_selffencer_storagechecker_timeout(value):
     return conf_ops.change_global_config('ha', 'host.selfFencer.storageChecker.timeout', value)
+
+def lib_get_reserved_primary_storage():
+    return conf_ops.get_global_config_value('primaryStrorage', 'reservedCapacity')
