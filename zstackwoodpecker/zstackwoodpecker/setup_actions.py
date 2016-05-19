@@ -688,11 +688,23 @@ default one' % self.zstack_properties)
                 exc_info = []
                 for h in self.test_agent_hosts:
                     print('Deploy test agent in host: [%s] \n' % h.managementIp_)
-                    ansible_cmd_args = "host=%s \
-                            pkg_testagent=zstacktestagent-1.0.0.tar.gz \
-                            pkg_zstacklib=zstacklib-1.2.tar.gz \
-                            pypi_source_tar=pypi.tar.bz" % \
-                            h.managementIp_
+                    if hasattr(h, 'port_'):
+                        ansible_cmd_args = "host=%s \
+                                ansible_ssh_user=%s \
+                                ansible_ssh_pass=%s \
+                                ansible_ssh_port=%s \
+                                pkg_testagent=zstacktestagent-1.0.0.tar.gz \
+                                pkg_zstacklib=zstacklib-1.2.tar.gz \
+                                pypi_source_tar=pypi.tar.bz" % \
+                                (h.managementIp_, h.username_, h.password_, h.port_)
+                    else:
+                        ansible_cmd_args = "host=%s \
+                                ansible_ssh_user=%s \
+                                ansible_ssh_pass=%s \
+                                pkg_testagent=zstacktestagent-1.0.0.tar.gz \
+                                pkg_zstacklib=zstacklib-1.2.tar.gz \
+                                pypi_source_tar=pypi.tar.bz" % \
+                                (h.managementIp_, h.username_, h.password_)
 
                     if ENV_HTTP_PROXY:
                         ansible_cmd_args = "%s http_proxy=%s https_proxy=%s" % \
@@ -700,14 +712,9 @@ default one' % self.zstack_properties)
 
                     ansible_cmd = "testagent.yaml -e '%s'" % ansible_cmd_args
 
-                    if hasattr(h, 'port_'):
-                        thread = threading.Thread(target=ansible.execute_ansible,\
-                            args=('%s:%s' % (h.managementIp_, h.port_), h.username_, h.password_,\
-                            testagentdir, ansible_cmd, lib_files, exc_info))
-                    else:
-                        thread = threading.Thread(target=ansible.execute_ansible,\
-                            args=(h.managementIp_, h.username_, h.password_,\
-                            testagentdir, ansible_cmd, lib_files, exc_info))
+                    thread = threading.Thread(target=ansible.execute_ansible,\
+                        args=(h.managementIp_, h.username_, h.password_,\
+                        testagentdir, ansible_cmd, lib_files, exc_info))
 
                     # Wrap up old zstack logs in /var/log/zstack/
                     print('archive test log on host: [%s] \n' % h.managementIp_)
