@@ -79,8 +79,7 @@ def test():
     image_size = image.size
 
     original_rate = test_lib.lib_set_provision_storage_rate(over_provision_rate)
-    reserved_ps_size = sizeunit.get_size(test_lib.lib_get_reserved_primary_storage())
-    data_volume_size = int(over_provision_rate * (avail_cap - reserved_ps_size - image_size * target_vm_num) / target_vm_num)
+    data_volume_size = int(avail_cap / target_vm_num * over_provision_rate - image_size)
     if data_volume_size < 0:
         test_util.test_skip('Do not have enough disk space to do test')
         return True
@@ -116,8 +115,8 @@ def test():
         while threading.active_count() > 1:
             check_thread_exception()
             time.sleep(1)
-            if times > 10:
-                test_util.test_fail('creating vm time exceed 10s')
+            if times > 30:
+                test_util.test_fail('creating vm time exceed 30s')
             times += 1
 
         check_thread_exception()
