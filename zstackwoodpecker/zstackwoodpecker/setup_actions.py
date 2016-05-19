@@ -717,15 +717,15 @@ default one' % self.zstack_properties)
                         testagentdir, ansible_cmd, lib_files, exc_info))
 
                     # Wrap up old zstack logs in /var/log/zstack/
-                    print('archive test log on host: [%s] \n' % h.managementIp_)
-                    try:
-                        if hasattr(h, 'port_'):
-                            log.cleanup_log(h.managementIp_, h.username_, h.password_, h.port_)
-                        else:
-                            log.cleanup_log(h.managementIp_, h.username_, h.password_)
-                    except Exception as e:
-                        print "clean up old testing logs meet execption on management node: %s" % h.managementIp_
-                        raise e
+                    #print('archive test log on host: [%s] \n' % h.managementIp_)
+                    #try:
+                    #    if hasattr(h, 'port_'):
+                    #        log.cleanup_log(h.managementIp_, h.username_, h.password_, h.port_)
+                    #    else:
+                    #        log.cleanup_log(h.managementIp_, h.username_, h.password_)
+                    #except Exception as e:
+                    #    print "clean up old testing logs meet execption on management node: %s" % h.managementIp_
+                    #    raise e
 
                     thread.start()
                 #if localhost is not in hosts, should do log archive for zstack
