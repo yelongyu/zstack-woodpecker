@@ -21,11 +21,11 @@ new_offering_uuid = None
 
 def test():
     global new_offering_uuid
-    test_util.test_dsc('Test VM network bandwidth QoS by 1MB')
+    test_util.test_dsc('Test VM network inbound bandwidth QoS by 1MB')
 
     #unit is KB
     net_bandwidth = 1024
-    new_offering = test_lib.lib_create_instance_offering(net_bandwidth = net_bandwidth)
+    new_offering = test_lib.lib_create_instance_offering(net_inbound_bandwidth = net_bandwidth)
 
     new_offering_uuid = new_offering.uuid
 
@@ -36,12 +36,11 @@ def test():
     vm.check()
     vm_inv = vm.get_vm()
     test_stub.make_ssh_no_password(vm_inv)
-    test_stub.create_test_file(vm_inv, net_bandwidth)
-    test_stub.test_scp_vm_outbound_speed(vm_inv, net_bandwidth)
+    test_stub.test_scp_vm_inbound_speed(vm_inv, net_bandwidth)
     vm_ops.delete_instance_offering(new_offering_uuid)
     test_lib.lib_robot_cleanup(test_obj_dict)
 
-    test_util.test_pass('VM Network QoS Test Pass')
+    test_util.test_pass('VM Network Inbound QoS Test Pass')
 
 #Will be called only if exception happens in test().
 def error_cleanup():

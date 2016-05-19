@@ -121,9 +121,37 @@ def test_scp_vm_outbound_speed(vm_inv, bandwidth):
 
     scp_time = end_time - start_time
     if scp_time < TEST_TIME:
-        test_util.test_fail('network QOS test file failed, since the scp time: %d is smaller than the expected test time: %d. It means the bandwidth limitation: %d KB/s is not effect. ' % (scp_time, TEST_TIME, bandwidth))
+        test_util.test_fail('network outbound QOS test file failed, since the scp time: %d is smaller than the expected test time: %d. It means the bandwidth limitation: %d KB/s is not effect. ' % (scp_time, TEST_TIME, bandwidth))
     else:
-        test_util.test_logger('network QOS test file pass, since the scp time: %d is bigger than the expected test time: %d. It means the bandwidth limitation: %d KB/s is effect. ' % (scp_time, TEST_TIME, bandwidth))
+        test_util.test_logger('network outbound QOS test file pass, since the scp time: %d is bigger than the expected test time: %d. It means the bandwidth limitation: %d KB/s is effect. ' % (scp_time, TEST_TIME, bandwidth))
+
+    return True
+
+def test_scp_vm_inbound_speed(vm_inv, bandwidth):
+    '''
+    bandwidth unit is KB
+    '''
+    timeout = TEST_TIME + 30
+    vm_ip = vm_inv.vmNics[0].ip
+    file_size = bandwidth * TEST_TIME
+    seek_size = file_size / 1024 - 1
+    cmd = 'dd if=/dev/zero of=%s bs=1M count=1 seek=%d' \
+            % (test_file, seek_size)
+    os.system(cmd)
+    cmd = 'scp -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s %s:/dev/null' \
+            % (test_file, vm_ip)
+    start_time = time.time()
+    if execute_shell_in_process(cmd, timeout) != 0:
+        test_util.test_fail('scp test file failed')
+
+    end_time = time.time()
+    os.system('rm -f %s' % test_file)
+
+    scp_time = end_time - start_time
+    if scp_time < TEST_TIME:
+        test_util.test_fail('network inbound QOS test file failed, since the scp time: %d is smaller than the expected test time: %d. It means the bandwidth limitation: %d KB/s is not effect. ' % (scp_time, TEST_TIME, bandwidth))
+    else:
+        test_util.test_logger('network inbound QOS test file pass, since the scp time: %d is bigger than the expected test time: %d. It means the bandwidth limitation: %d KB/s is effect. ' % (scp_time, TEST_TIME, bandwidth))
 
     return True
 

@@ -10,8 +10,10 @@
         <case timeout='300' repeat='1'>over_provision/test_memory_over_provision.py</case>
         <case timeout='300' repeat='1'>over_provision/test_storage_over_provision.py</case>
         <!--<case timeout='300' repeat='1'>qos/test_disk_qos.py</case>-->
-        <case timeout='300' repeat='1'>qos/test_net_change_qos.py</case>
-        <case timeout='300' repeat='1'>qos/test_net_qos.py</case>
+        <case timeout='300' repeat='1'>qos/test_net_change_outbound_qos.py</case>
+        <case timeout='300' repeat='1'>qos/test_net_outbound_qos.py</case>
+        <case timeout='300' repeat='1'>qos/test_net_inbound_qos.py</case>
+        <case timeout='600' repeat='1'>qos/test_net_outbound_inbound_qos.py</case>
         <case timeout='300' repeat='1'>other/test_add_local_image.py</case>
         <case timeout='300' repeat='1'>other/test_memory_allocation.py</case>
         <case timeout='800' repeat='1'>eip/test_create_eip_vm.py</case>
