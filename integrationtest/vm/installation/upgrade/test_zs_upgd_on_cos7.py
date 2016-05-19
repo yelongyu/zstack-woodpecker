@@ -5,6 +5,7 @@
 import os
 import tempfile
 import uuid
+import time
 
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
@@ -22,6 +23,8 @@ def test():
     test_obj_dict.add_vm(vm)
     if os.environ.get('zstackManagementIp') == None:
         vm.check()
+    else:
+        time.sleep(60)
 
     vm_inv = vm.get_vm()
     vm_ip = vm_inv.vmNics[0].ip

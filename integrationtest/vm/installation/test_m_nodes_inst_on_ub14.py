@@ -30,6 +30,8 @@ def test():
     if os.environ.get('zstackManagementIp') == None:
         vm1.check()
         vm2.check()
+    else:
+        time.sleep(60)
 
     vm1_inv = vm1.get_vm()
     vm1_ip = vm1_inv.vmNics[0].ip
