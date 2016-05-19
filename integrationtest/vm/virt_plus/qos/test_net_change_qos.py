@@ -24,7 +24,7 @@ def test():
 
     #unit is KB
     net_bandwidth1 = 1024
-    new_offering1 = test_lib.lib_create_instance_offering(net_bandwidth = net_bandwidth1)
+    new_offering1 = test_lib.lib_create_instance_offering(net_outbound_bandwidth = net_bandwidth1)
 
     test_obj_dict.add_instance_offering(new_offering1)
     new_offering_uuid = new_offering1.uuid
@@ -36,7 +36,7 @@ def test():
     vm.stop()
 
     net_bandwidth2 = 512
-    new_offering2 = test_lib.lib_create_instance_offering(net_bandwidth = net_bandwidth2)
+    new_offering2 = test_lib.lib_create_instance_offering(net_outbound_bandwidth = net_bandwidth2)
 
     test_obj_dict.add_instance_offering(new_offering2)
     new_offering_uuid = new_offering2.uuid
@@ -48,7 +48,7 @@ def test():
     time.sleep(1)
     test_stub.make_ssh_no_password(vm_inv)
     test_stub.create_test_file(vm_inv, net_bandwidth2)
-    test_stub.test_scp_speed(vm_inv, net_bandwidth2)
+    test_stub.test_scp_vm_outbound_speed(vm_inv, net_bandwidth2)
     test_lib.lib_robot_cleanup(test_obj_dict)
 
     test_util.test_pass('VM Network QoS change instance offering Test Pass')

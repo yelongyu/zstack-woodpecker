@@ -9,6 +9,7 @@ EXPUNGED = 'EXPUNGED'
 VOLUME_BANDWIDTH = 'volumeTotalBandwidth'
 VOLUME_IOPS = 'volumeTotalIops'
 NETWORK_OUTBOUND_BANDWIDTH = 'networkOutboundBandwidth'
+NETWORK_INBOUND_BANDWIDTH = 'networkInboundBandwidth'
 
 class TestVm(zstack_header.ZstackObject):
 

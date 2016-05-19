@@ -105,7 +105,7 @@ def create_test_file(vm_inv, bandwidth):
     if  execute_shell_in_process(cmd, timeout) != 0:
         test_util.test_fail('test file is not created')
 
-def test_scp_speed(vm_inv, bandwidth):
+def test_scp_vm_outbound_speed(vm_inv, bandwidth):
     '''
     bandwidth unit is KB
     '''

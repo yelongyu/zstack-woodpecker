@@ -4274,17 +4274,24 @@ def lib_limit_volume_bandwidth(instance_offering_uuid, bandwidth, \
             session_uuid)
 
 def lib_limit_vm_network_bandwidth(instance_offering_uuid, bandwidth, \
-        session_uuid = None):
-    return tag_ops.create_system_tag('InstanceOfferingVO', \
-            instance_offering_uuid, \
-            '%s::%d' % (vm_header.NETWORK_OUTBOUND_BANDWIDTH, bandwidth),\
-            session_uuid)
+        outbound = True, session_uuid = None):
+    if outbound:
+        return tag_ops.create_system_tag('InstanceOfferingVO', \
+                instance_offering_uuid, \
+                '%s::%d' % (vm_header.NETWORK_OUTBOUND_BANDWIDTH, bandwidth),\
+                session_uuid)
+    else:
+        return tag_ops.create_system_tag('InstanceOfferingVO', \
+                instance_offering_uuid, \
+                '%s::%d' % (vm_header.NETWORK_INBOUND_BANDWIDTH, bandwidth),\
+                session_uuid)
+
 
 #--------instance offering--------
 def lib_create_instance_offering(cpuNum = 1, cpuSpeed = 16, \
         memorySize = 536870912, name = 'new_instance', \
         volume_iops = None, volume_bandwidth = None, \
-        net_bandwidth = None):
+        net_outbound_bandwidth = None, net_inbound_bandwidth = None):
     new_offering_option = test_util.InstanceOfferingOption()
     new_offering_option.set_cpuNum(cpuNum)
     new_offering_option.set_cpuSpeed(cpuSpeed)
@@ -4295,8 +4302,10 @@ def lib_create_instance_offering(cpuNum = 1, cpuSpeed = 16, \
         lib_limit_volume_total_iops(new_offering.uuid, volume_iops)
     if volume_bandwidth:
         lib_limit_volume_bandwidth(new_offering.uuid, volume_bandwidth)
-    if net_bandwidth:
-        lib_limit_vm_network_bandwidth(new_offering.uuid, net_bandwidth)
+    if net_outbound_bandwidth:
+        lib_limit_vm_network_bandwidth(new_offering.uuid, net_outbound_bandwidth, outbound = True)
+    if net_inbound_bandwidth:
+        lib_limit_vm_network_bandwidth(new_offering.uuid, net_inbound_bandwidth, outbound = False)
     return new_offering
 
 def lib_get_reserved_memory():
