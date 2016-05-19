@@ -23,7 +23,7 @@ def test():
     if test_lib.lib_network_check(console.hostname, console.port):
         test_util.test_fail('[vm:] %s console on %s:%s is connectable, while already logout' % (vm.get_vm().uuid, console.hostname, console.port))
     else:
-        test_util.test_log('[vm:] %s console on %s:%s is not connectable' % (vm.get_vm().uuid, console.hostname, console.port))
+        test_util.test_logger('[vm:] %s console on %s:%s is not connectable' % (vm.get_vm().uuid, console.hostname, console.port))
     vm.destroy()
     vm.check()
 
