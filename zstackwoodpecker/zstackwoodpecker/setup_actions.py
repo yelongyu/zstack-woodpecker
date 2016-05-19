@@ -681,7 +681,7 @@ default one' % self.zstack_properties)
             ansible.check_and_install_ansible()
 
             lib_files = ['testagent/zstacktestagent-1.0.0.tar.gz', \
-                    'testagent/zstacklib-1.2.tar.gz' ]
+                    'testagent/zstacklib-1.3.tar.gz' ]
 
             if not target:
                 #default will deploy all test hosts.
@@ -694,7 +694,7 @@ default one' % self.zstack_properties)
                                 ansible_ssh_pass=%s \
                                 ansible_ssh_port=%s \
                                 pkg_testagent=zstacktestagent-1.0.0.tar.gz \
-                                pkg_zstacklib=zstacklib-1.2.tar.gz \
+                                pkg_zstacklib=zstacklib-1.3.tar.gz \
                                 pypi_source_tar=pypi.tar.bz" % \
                                 (h.managementIp_, h.username_, h.password_, h.port_)
                     else:
@@ -702,7 +702,7 @@ default one' % self.zstack_properties)
                                 ansible_ssh_user=%s \
                                 ansible_ssh_pass=%s \
                                 pkg_testagent=zstacktestagent-1.0.0.tar.gz \
-                                pkg_zstacklib=zstacklib-1.2.tar.gz \
+                                pkg_zstacklib=zstacklib-1.3.tar.gz \
                                 pypi_source_tar=pypi.tar.bz" % \
                                 (h.managementIp_, h.username_, h.password_)
 
@@ -741,7 +741,7 @@ default one' % self.zstack_properties)
                 print('Deploy test agent in host: %s \n' % target.managementIp)
                 ansible_cmd_args = "host=%s \
                         pkg_testagent=zstacktestagent-1.0.0.tar.gz \
-                        pkg_zstacklib=zstacklib-1.2.tar.gz \
+                        pkg_zstacklib=zstacklib-1.3.tar.gz \
                         pypi_source_tar=pypi.tar.bz" % \
                         target.managementIp
                 if ENV_HTTP_PROXY:
