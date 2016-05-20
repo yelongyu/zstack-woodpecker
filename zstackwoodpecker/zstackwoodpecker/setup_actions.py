@@ -693,18 +693,24 @@ default one' % self.zstack_properties)
                                 ansible_ssh_user=%s \
                                 ansible_ssh_pass=%s \
                                 ansible_ssh_port=%s \
+                                ansible_become=yes \
+                                become_user=root \
+                                ansible_become_pass=%s \
                                 pkg_testagent=zstacktestagent-1.0.0.tar.gz \
                                 pkg_zstacklib=zstacklib-1.3.tar.gz \
                                 pypi_source_tar=pypi.tar.bz" % \
-                                (h.managementIp_, h.username_, h.password_, h.port_)
+                                (h.managementIp_, h.username_, h.password_, h.port_, h.password_)
                     else:
                         ansible_cmd_args = "host=%s \
                                 ansible_ssh_user=%s \
                                 ansible_ssh_pass=%s \
+                                ansible_become=yes \
+                                become_user=root \
+                                ansible_become_pass=%s \
                                 pkg_testagent=zstacktestagent-1.0.0.tar.gz \
                                 pkg_zstacklib=zstacklib-1.3.tar.gz \
                                 pypi_source_tar=pypi.tar.bz" % \
-                                (h.managementIp_, h.username_, h.password_)
+                                (h.managementIp_, h.username_, h.password_, h.password_)
 
                     if ENV_HTTP_PROXY:
                         ansible_cmd_args = "%s http_proxy=%s https_proxy=%s" % \
