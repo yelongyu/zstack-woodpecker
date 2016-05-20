@@ -19,6 +19,7 @@ def test():
     test_lib.setup_plan.execute_plan_ha()
     if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
+    test_util.test_logger('ha deploy done')
     deploy_operations.deploy_initial_database(test_lib.deploy_config)
     if test_lib.lib_get_ha_selffencer_maxattempts() != None:
         test_lib.lib_set_ha_selffencer_maxattempts('60')
