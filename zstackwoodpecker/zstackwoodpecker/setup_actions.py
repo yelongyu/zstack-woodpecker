@@ -718,9 +718,14 @@ default one' % self.zstack_properties)
 
                     ansible_cmd = "testagent.yaml -e '%s'" % ansible_cmd_args
 
-                    thread = threading.Thread(target=ansible.execute_ansible,\
-                        args=(h.managementIp_, h.username_, h.password_,\
-                        testagentdir, ansible_cmd, lib_files, exc_info))
+                    if hasattr(h, 'port_'):
+                        thread = threading.Thread(target=ansible.execute_ansible,\
+                            args=(h.managementIp_, h.username_, h.password_,\
+                            testagentdir, ansible_cmd, lib_files, exc_info, h.port_))
+                    else:
+                        thread = threading.Thread(target=ansible.execute_ansible,\
+                            args=(h.managementIp_, h.username_, h.password_,\
+                            testagentdir, ansible_cmd, lib_files, exc_info))
 
                     # Wrap up old zstack logs in /var/log/zstack/
                     #print('archive test log on host: [%s] \n' % h.managementIp_)

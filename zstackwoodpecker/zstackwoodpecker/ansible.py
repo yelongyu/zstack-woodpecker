@@ -18,7 +18,7 @@ def check_and_install_ansible():
         shell.call(cmd)
         print('ansible is installed successfully')
 
-def enable_ansible_connection(target, username, password, exc_info): 
+def enable_ansible_connection(target, username, password, exc_info, port): 
     ansible_config = '/etc/ansible/ansible.cfg'
     host_config = '/etc/ansible/hosts'
     ansible_config_content='''
@@ -37,7 +37,7 @@ pipelining = True
     shell.call(add_host_cmd)
     print('Create no ssh password for: %s ' % target)
     try:
-        ssh.make_ssh_no_password(target, username, password)
+        ssh.make_ssh_no_password(target, username, password, port)
     except Exception as e:
         exc_info.append(sys.exc_info())
         raise e
@@ -61,11 +61,11 @@ def do_ansible(ansible_dir, ansible_cmd, lib_files, exc_info):
 
     print('Execute ansible command successfully: ansible-playbook %s ' % ansible_cmd)
 
-def execute_ansible(target, username, password, ansible_dir, ansible_cmd, lib_files = [], exc_info = []):
+def execute_ansible(target, username, password, ansible_dir, ansible_cmd, lib_files = [], exc_info = [], port=22):
     '''
     lib_files is a list includes the file will be copied to target machine by
     ansible. It is usually a file with its parent folder under /var/lib/zstack.
     e.g. [ 'testagent/zstacklib-0.1.0.tar.gz' ]
     '''
-    enable_ansible_connection(target, username, password, exc_info)
+    enable_ansible_connection(target, username, password, exc_info, port)
     do_ansible(ansible_dir, ansible_cmd, lib_files, exc_info)
