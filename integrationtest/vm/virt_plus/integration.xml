@@ -5,10 +5,10 @@
         <case timeout='300' repeat='1'>test_expunge_vm_chg_del_policy.py</case>
         <case timeout='300' repeat='1'>test_snapshot_vm_ops.py</case>
         <case timeout='300' repeat='1'>test_change_offering.py</case>
-	<case timeout='300' repeat='1'>over_provision/test_change_mem_over_prv.py</case>
-        <case timeout='300' repeat='1'>over_provision/test_chg_storage_over_prv.py</case>
-        <case timeout='300' repeat='1'>over_provision/test_memory_over_provision.py</case>
-        <case timeout='300' repeat='1'>over_provision/test_storage_over_provision.py</case>
+	<case timeout='300' repeat='1' noparallel='True'>over_provision/test_change_mem_over_prv.py</case>
+        <case timeout='300' repeat='1' noparallel='True'>over_provision/test_chg_storage_over_prv.py</case>
+        <case timeout='300' repeat='1' noparallel='True'>over_provision/test_memory_over_provision.py</case>
+        <case timeout='300' repeat='1' noparallel='True'>over_provision/test_storage_over_provision.py</case>
         <!--<case timeout='300' repeat='1'>qos/test_disk_qos.py</case>-->
         <case timeout='300' repeat='1'>qos/test_net_change_outbound_qos.py</case>
         <case timeout='300' repeat='1'>qos/test_net_outbound_qos.py</case>
@@ -17,7 +17,7 @@
         <case timeout='300' repeat='1'>other/test_add_local_image.py</case>
         <case timeout='300' repeat='1'>other/test_memory_allocation.py</case>
         <case timeout='800' repeat='1'>eip/test_create_eip_vm.py</case>
-        <case timeout='360' repeat='1'>other/test_parallel_crt_vm_to_use_all_disk.py</case>
-        <case timeout='360' repeat='1'>other/test_parallel_crt_vm_to_use_all_mem.py</case>
+        <case timeout='360' repeat='1' noparallel='True'>other/test_parallel_crt_vm_to_use_all_disk.py</case>
+        <case timeout='360' repeat='1' noparallel='True'>other/test_parallel_crt_vm_to_use_all_mem.py</case>
     </suite>
 </integrationTest>
