@@ -37,7 +37,7 @@ pipelining = True
     shell.call(add_host_cmd)
     print('Create no ssh password for: %s ' % target)
     try:
-        ssh.make_ssh_no_password(target, username, password, port)
+        ssh.make_ssh_no_password(target, username, password, int(port))
     except Exception as e:
         exc_info.append(sys.exc_info())
         raise e
