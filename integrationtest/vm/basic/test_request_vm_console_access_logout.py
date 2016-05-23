@@ -10,6 +10,7 @@ import zstackwoodpecker.test_lib as test_lib
 import zstacklib.utils.shell as shell
 import test_stub
 import zstackwoodpecker.operations.account_operations as acc_ops
+import time
 
 vm = None
 
@@ -20,6 +21,7 @@ def test():
     session_uuid = acc_ops.login_as_admin()
     console = test_lib.lib_request_console_access(vm.get_vm().uuid, session_uuid)
     acc_ops.logout(session_uuid)
+    time.sleep(5)
     if test_lib.lib_network_check(console.hostname, console.port):
         test_util.test_fail('[vm:] %s console on %s:%s is connectable, while already logout' % (vm.get_vm().uuid, console.hostname, console.port))
     else:
