@@ -10,6 +10,7 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.zstack_test.zstack_test_image as test_image
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm
 import zstackwoodpecker.operations.config_operations as conf_ops
+import time
 
 test_stub = test_lib.lib_get_test_stub()
 #test_obj_dict is to track test resource. They will be cleanup if there will be any exception in testing.
