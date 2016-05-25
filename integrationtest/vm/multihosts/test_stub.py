@@ -16,8 +16,8 @@ import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.header.host as host_header
 import threading
 import time
+import sys
 #import traceback
-#import sys
 
 import zstackwoodpecker.test_state as test_state
 Port = test_state.Port
