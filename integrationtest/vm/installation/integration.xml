@@ -6,7 +6,7 @@
         <case timeout="2400" >upgrade/test_zs_upgd_on_ub14.py</case>
         <case timeout="1600" >test_m_nodes_inst_on_cos7.py</case>
         <case timeout="2400" >test_m_nodes_inst_on_ub14.py</case>
-        <case timeout="1600" >test_inst_remote_rabbitmq_on_cos7.py</case>
+        <case timeout="2400" >test_inst_remote_rabbitmq_on_cos7.py</case>
         <case timeout="2400" >test_inst_remote_rabbitmq_on_ub14.py</case>
     </suite>
 </integrationTest>
