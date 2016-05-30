@@ -90,6 +90,12 @@
         password="$sftpBackupStoragePassword" 
         hostname="$sftpBackupStorageHostname"
         port="$sftpBackupStoragePort" />
+      <sftpBackupStorage name="$sftpBackupStorageName2"
+        description="Test2" url="$sftpBackupStorageUrl2" 
+        username="$sftpBackupStorageUsername2" 
+        password="$sftpBackupStoragePassword2" 
+        hostname="$sftpBackupStorageHostname2"
+        port="$sftpBackupStoragePort2" />
     </backupStorages>
   
     <images>
@@ -103,7 +109,7 @@
         format="$rootImageFormat" url="$imageUrl_net" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
       </image>
       <image name="$imageName3" description="Test Image3" 
         format="$rootImageFormat" url="$imageUrl3" 
@@ -116,7 +122,7 @@
         username="$vrImageUsername" password="$vrImagePassword"
         mediaType="$rootMediaType"
         hypervisorType='KVM' url="$virtualRouterImageUrl">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
       </image>
     </images>
   

@@ -45,6 +45,13 @@ sftpBackupStoragePassword = 1
 sftpBackupStorageHostname = 10.1.101.40
 sftpBackupStoragePort = 22
 
+sftpBackupStorageName2 = sftp2
+sftpBackupStorageUrl2 = /home/sftpBackupStorage
+sftpBackupStorageUsername2 = root
+sftpBackupStoragePassword2 = 1
+sftpBackupStorageHostname2 = 10.1.101.41
+sftpBackupStoragePort2 = 22
+
 nfsPrimaryStorageName = nfs
 nfsPrimaryStorageUrl = 10.1.101.1:/home/nfs
 
