@@ -113,6 +113,7 @@ class TestLib(object):
         self.current_dir = None
         self.test_case_dir = None
         self.test_case_lib = {}
+        self.exclude_case_list = []
         self.target_case_list = []
         self.suite_list = []
         self.test_xml = None
@@ -181,14 +182,42 @@ class TestLib(object):
         _new_find_cases(self.test_case_dir)
         test_case_num = 1
         for case in test_case_list:
-            self.test_case_lib[test_case_num] = case
+            if str(test_case_num) not in self.exclude_case_list and case.get_name_with_suite() not in self.exclude_case_list:
+                self.test_case_lib[test_case_num] = case
+                self.all_cases_name.append(case.get_name_with_suite())
             test_case_num += 1
-            self.all_cases_name.append(case.get_name_with_suite())
     
     def _find_case_num(self, case_name):
         for num, case in self.test_case_lib.iteritems():
             if case_name == case.get_name_with_suite():
                 return num
+    def analyze_exclude_case_list(self, case_list):
+        def _parase_case_range(case_num_list):
+            try:
+                case_start_num = int(case_num_list[0])
+                case_end_num = int(case_num_list[1])
+            except:
+                raise TestExc("Detect to use case range '~' to set exclude cases. But the case number is not correct. It should be '-x Case_Start_Num~Case_End_Num'. Your input is: '-x %s' " % case_list)
+            if case_start_num > case_end_num:
+                raise TestExc("The StartNum should be smaller than EndNum, when use case range: '-x Case_Start_Num~Case_End_Num'. But your input is '-x %s'" % case_list)
+            new_cases = []
+            while case_start_num <= case_end_num:
+                new_cases.append(str(case_start_num))
+                case_start_num += 1
+
+            return new_cases
+
+        if case_list and ',' in case_list:
+            temp_cases = case_list.split(',')
+            for case in temp_cases:
+                if '~' in case:
+                    self.exclude_case_list.extend(_parase_case_range(case.split('~')))
+                else:
+                    self.exclude_case_list.append(case)
+        elif case_list and '~' in case_list:
+            self.exclude_case_list = list(_parase_case_range(case_list.split('~')))
+        else:
+            self.exclude_case_list = [case_list]
 
     def _analyze_case_list(self, case_list):
         def _parase_case_range(case_num_list):
@@ -521,6 +550,13 @@ def main():
             help="[Optional] test cases need to be run. User can use test case number. e.g. -c 1,2,3,4. or use test case name, like -c basic/suite_setup.py,basic/test_create_vm.py,basic/suite_teardown.py. This option could be combined used with other options, like -b, -a, -l etc. For example: `zstest.py -c 3,4,5 -b -a`. It also supports a cases range by '~', for example: `zstest.py -c 30~50`, `zstest.py -c 30~50,60~65`")
 
     parser.add_option(
+            "-x", "--exclude-test-case", 
+            dest="excludeCaseList", 
+            default=None, 
+            action='store', 
+            help="[Optional] test cases need to be excluded. User can use test case number. e.g. -x 1,2,3,4. or use test case name, like -x basic/suite_setup.py,basic/test_create_vm.py,basic/suite_teardown.py. This option could be combined used with other options, like -b, -a, -l etc. For example: `zstest.py -x 3,4,5 -b -a`. It also supports a cases range by '~', for example: `zstest.py -x 30~50`, `zstest.py -x 30~50,60~65`")
+
+    parser.add_option(
             "-d", "--debug", 
             dest="debug", 
             default=None, 
@@ -684,6 +720,7 @@ def main():
     woodpecker_root = os.path.join(test_root, 'zstack-woodpecker')
 
     test_lib.set_test_dir(woodpecker_root)
+    test_lib.analyze_exclude_case_list(options.excludeCaseList)
     test_lib.find_test_case()
 
     if options.listCase:
