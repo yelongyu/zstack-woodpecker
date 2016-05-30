@@ -192,30 +192,10 @@ class TestLib(object):
             if case_name == case.get_name_with_suite():
                 return num
     def analyze_exclude_case_list(self, case_list):
-        def _parase_case_range(case_num_list):
-            try:
-                case_start_num = int(case_num_list[0])
-                case_end_num = int(case_num_list[1])
-            except:
-                raise TestExc("Detect to use case range '~' to set exclude cases. But the case number is not correct. It should be '-x Case_Start_Num~Case_End_Num'. Your input is: '-x %s' " % case_list)
-            if case_start_num > case_end_num:
-                raise TestExc("The StartNum should be smaller than EndNum, when use case range: '-x Case_Start_Num~Case_End_Num'. But your input is '-x %s'" % case_list)
-            new_cases = []
-            while case_start_num <= case_end_num:
-                new_cases.append(str(case_start_num))
-                case_start_num += 1
-
-            return new_cases
-
         if case_list and ',' in case_list:
             temp_cases = case_list.split(',')
             for case in temp_cases:
-                if '~' in case:
-                    self.exclude_case_list.extend(_parase_case_range(case.split('~')))
-                else:
-                    self.exclude_case_list.append(case)
-        elif case_list and '~' in case_list:
-            self.exclude_case_list = list(_parase_case_range(case_list.split('~')))
+                self.exclude_case_list.append(case)
         else:
             self.exclude_case_list = [case_list]
 
@@ -458,6 +438,8 @@ class TestLib(object):
                     suite_item.set('teardownCase', \
                             '%s/%s/%s' % (self.test_case_dir, real_suite, suite_item.get('teardownCase')))
                 for case_item in suite_item.getchildren():
+                    if "%s/%s" % (real_suite, case_item.text) in self.exclude_case_list:
+                        suite_item.remove(case_item)
                     org_case_name = case_item.text
                     case_item.text = '%s/%s/%s' % (self.test_case_dir, real_suite, org_case_name)
                 suite_content.write(new_suite_config)
@@ -554,7 +536,7 @@ def main():
             dest="excludeCaseList", 
             default=None, 
             action='store', 
-            help="[Optional] test cases need to be excluded. User can use test case number. e.g. -x 1,2,3,4. or use test case name, like -x basic/suite_setup.py,basic/test_create_vm.py,basic/suite_teardown.py. This option could be combined used with other options, like -b, -a, -l etc. For example: `zstest.py -x 3,4,5 -b -a`. It also supports a cases range by '~', for example: `zstest.py -x 30~50`, `zstest.py -x 30~50,60~65`")
+            help="[Optional] test cases need to be excluded. User must use test case name. e.g. like -x basic/suite_setup.py,basic/test_create_vm.py,basic/suite_teardown.py. This option could be combined used with other options")
 
     parser.add_option(
             "-d", "--debug", 
