@@ -143,6 +143,7 @@
     <zones>
       <zone name="$zoneName" description="Test">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
         <primaryStorages>
           <nfsPrimaryStorage name="$nfsPrimaryStorageName"
             description="NFSTest1" url="$nfsPrimaryStorageUrl" />

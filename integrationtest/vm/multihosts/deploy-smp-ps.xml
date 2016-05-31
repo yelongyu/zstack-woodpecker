@@ -146,6 +146,7 @@
     <zones>
       <zone name="$zoneName" description="Test">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
         <primaryStorages>
 	  <sharedMountPointPrimaryStorage name="$sharedMountPointPrimaryStorageName"
             description="Test SMP PS"
