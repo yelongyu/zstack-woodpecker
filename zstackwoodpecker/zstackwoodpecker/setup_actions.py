@@ -60,6 +60,8 @@ def shell_cmd_thread(shell_cmd, ignore_exception = False):
         if not ignore_exception:
             node_exception.append(sys.exc_info())
             raise e
+        else:
+            print sys.exc_info()
 
 def restart_zstack_without_deploy_db(test_config_path):
     '''
