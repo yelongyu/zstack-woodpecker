@@ -1067,7 +1067,7 @@ def lib_find_host_by_zone(zone_uuid):
 def lib_find_host_tag(host_inv, conditions = None):
     '''
     conditions is res_ops.gen_query_conditions(), it will include a special 
-    condition, like {'name':'tag', 'op':'=', 'value':'capability:liveSnapshot'}
+    condition, like {'name':'tag', 'op':'=', 'value':'capability::liveSnapshot'}
 
     return Tag_inv
     '''
@@ -1126,7 +1126,7 @@ def lib_check_live_snapshot_cap(host_inv):
     check if host support live snapshot operations.
     '''
     conditions = res_ops.gen_query_conditions('tag', '=', \
-            'capability:liveSnapshot')
+            'capability::liveSnapshot')
     tag_info = lib_find_host_tag(host_inv, conditions)
     if tag_info:
         test_util.test_logger('host: %s support live snapshot' % host_inv.uuid)
