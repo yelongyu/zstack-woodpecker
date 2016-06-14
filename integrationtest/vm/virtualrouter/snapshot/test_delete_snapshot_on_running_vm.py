@@ -28,11 +28,11 @@ def test():
         test_obj_dict.rm_vm(vm)
         test_util.test_skip('Skip test, since [host:] %s does not support live snapshot.')
 
-    libvirt_ver = test_lib.lib_get_host_libvirt_tag(host_inv)
-    if not libvirt_ver or libvirt_ver < '1.2.7':
-        vm.destroy()
-        test_obj_dict.rm_vm(vm)
-        test_util.test_skip("Skip test, since [host:] %s libvert version: %s is lower than 1.2.7, which doesn't support live merge, when doing snapshot deleting." % (host_inv.uuid, libvirt_ver))
+    #libvirt_ver = test_lib.lib_get_host_libvirt_tag(host_inv)
+    #if not libvirt_ver or libvirt_ver < '1.2.7':
+    #    vm.destroy()
+    #    test_obj_dict.rm_vm(vm)
+    #    test_util.test_skip("Skip test, since [host:] %s libvert version: %s is lower than 1.2.7, which doesn't support live merge, when doing snapshot deleting." % (host_inv.uuid, libvirt_ver))
 
     vm1 = test_stub.create_vlan_vm()
     test_obj_dict.add_vm(vm1)
