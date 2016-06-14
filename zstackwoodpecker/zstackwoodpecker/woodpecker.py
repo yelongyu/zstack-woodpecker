@@ -135,6 +135,7 @@ class WoodPecker(object):
         self.current_cmd_string = linux.get_command_by_pid(os.getpid())
         self.stop_when_fail = options.stopWhenFail
         self.stop_when_fail_match = options.stopWhenFailMatch
+        self.dry_run = options.dryRun
         self.case_failure = False
         if options.testFailureRetry and options.testFailureRetry.isdigit():
             os.environ['WOODPECKER_TEST_FAILURE_RETRY'] = options.testFailureRetry
@@ -224,6 +225,8 @@ class WoodPecker(object):
             
         def run_case(suite, case, suite_repeat, case_repeat, parallel=0):
             global sig_flag
+            if self.dry_run:
+                return
             case_log_path = self.get_case_log_path(case, suite_repeat, case_repeat)
             case_action_log_path = self.get_case_action_log_path(case, suite_repeat, case_repeat)
             max_case_name_len = self.case_name_max_len
@@ -700,6 +703,7 @@ def main():
     parser.add_option("-f", "--test-case", dest="testCaseList", default=None, help="[Required] Define what test cases will run.")
     parser.add_option("-c", "--test-config", dest="testConfig", default=DEFAULT_TEST_CONFIG, help="[Optional] Integration test config file. Default config file will be test-config.xml under test cases folder.")
     parser.add_option("-v", "--verbose", action='store_true', dest="verbose", help="[Optional] print output to console")
+    parser.add_option("-u", "--dry-run", action='store_true', dest="dryRun", help="[Optional] Dry run test case")
     parser.add_option("-n", "--no-cleanup", action='store_true', dest="noCleanup", default=False, help="[Optional] do not execute error_cleanup(), when test case fails")
     parser.add_option("-s", "--stop-failure", action='store_true', dest="stopWhenFail", default=False, help="[Optional] Stop testing, when there is test case failure. Used to work with -n option")
     parser.add_option("-m", "--stop-failure-match", action='store', dest="stopWhenFailMatch", default=None, help="[Optional] Stop testing, when there is test case failure and test log match given string. Used to work with -n option")

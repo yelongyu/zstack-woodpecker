@@ -11,6 +11,7 @@ Options:
                         [Optional] Integration test config file. Default config
                         file will be test-config.xml under test cases folder.
   -v                    [Optional] Print output to console
+  -u                    [Optional] Dry run test case
   -n                    [Optional] Do not execute test_cleanup(), when test 
                         case fails
   -a, --only-actionlog  [Optional] Only save 'Action' log in test case's action.
@@ -30,7 +31,7 @@ Options:
 
 test_case_file=' '
 OPTIND=1
-while getopts "f:c:t:rhvnasm" Option
+while getopts "f:c:t:rhvunasm" Option
 do
     case $Option in
         f ) test_case_file=$OPTARG;;
@@ -38,6 +39,7 @@ do
         r );;
         t );;
         v );;
+        u );;
         n );;
         a );;
         s );;

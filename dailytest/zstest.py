@@ -487,6 +487,9 @@ def parse_test_args(options):
     if options.verbose:
         test_args.append('-v')
 
+    if options.dryRun:
+        test_args.append('-u')
+
     if options.noCleanup:
         test_args.append('-n')
 
@@ -678,6 +681,13 @@ def main():
             default=None, 
             action='store_true', 
             help="[Optional] print test execution log, instead of dot status bar. E.g. `zstest -s basic -S -v`")
+
+    option_group.add_option(
+            "--dry-run", 
+            dest="dryRun", 
+            default=None, 
+            action='store_true', 
+            help="[Optional] Dry run test case. E.g. `zstest -s basic --dry-run`")
 
     parser.add_option_group(option_group)
     (options, arg) = parser.parse_args()
