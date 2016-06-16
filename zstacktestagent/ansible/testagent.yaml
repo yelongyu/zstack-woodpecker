@@ -107,6 +107,10 @@
       service: name=zstack-testagent enabled=yes
       when: chroot_env == 'true'
 
+    - name: enable iptables 9393 port
+      shell: "iptables-save|grep 9393 || iptables -A INPUT -p tcp -m tcp --dport 9393 -j ACCEPT"
+      when: chroot_env == 'false'
+
   handlers:
     - name: create virtualenv dirctory
       shell: "rm -rf {{virtenv_path}}; virtualenv {{virtenv_path}}"
