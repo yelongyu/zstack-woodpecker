@@ -111,6 +111,7 @@ class WoodPecker(object):
         if options.onlyActionLog:
             self.onlyActionLog = 'onlyActionLog'
         self.verbose = options.verbose
+        self.startDebugger = options.startDebugger
         self.suites = {}
         self.all_cases = {}
         self.total_case_num = 0
@@ -255,7 +256,10 @@ class WoodPecker(object):
             logfd = open(case_log_path, 'w', 0)
 
             try:
-                test_env_variables = 'WOODPECKER_TEST_CONFIG_FILE=%s WOODPECKER_CASE_ACTION_LOG_PATH=%s WOODPECKER_NO_ERROR_CLEANUP=%s WOODPECKER_ONLY_ACTION_LOG=%s' % (self._check_test_config(suite.test_config, case.path), case_action_log_path, self.noCleanup, self.onlyActionLog)
+                if case_name == 'suite_setup':
+                    test_env_variables = 'WOODPECKER_TEST_CONFIG_FILE=%s WOODPECKER_CASE_ACTION_LOG_PATH=%s WOODPECKER_NO_ERROR_CLEANUP=%s WOODPECKER_ONLY_ACTION_LOG=%s' % (self._check_test_config(suite.test_config, case.path), case_action_log_path, self.noCleanup, self.onlyActionLog)
+                else:
+                    test_env_variables = 'WOODPECKER_TEST_CONFIG_FILE=%s WOODPECKER_CASE_ACTION_LOG_PATH=%s WOODPECKER_NO_ERROR_CLEANUP=%s WOODPECKER_ONLY_ACTION_LOG=%s WOODPECKER_START_DEBUGGER=%s' % (self._check_test_config(suite.test_config, case.path), case_action_log_path, self.noCleanup, self.onlyActionLog, self.startDebugger)
                 #self.info('\n test environment variables: %s \n' % test_env_variables)
                 #cmd = '%s /usr/bin/nosetests -s --exe %s 2>&1' % (test_env_variables, case.path)
                 case_dir = os.path.dirname(case.path)
@@ -708,6 +712,7 @@ def main():
     parser.add_option("-s", "--stop-failure", action='store_true', dest="stopWhenFail", default=False, help="[Optional] Stop testing, when there is test case failure. Used to work with -n option")
     parser.add_option("-m", "--stop-failure-match", action='store', dest="stopWhenFailMatch", default=None, help="[Optional] Stop testing, when there is test case failure and test log match given string. Used to work with -n option")
     parser.add_option("-a", "--action-log", action='store_true', dest="onlyActionLog", default=False, help="[Optional] only save 'Action' log by test_util.action_logger(). test_util.test_logger() will not be saved in test case's action.log file.")
+    parser.add_option("-d", "--start-debugger", action='store_true', dest="startDebugger", default=False, help="[Optional] start remote debugger with rpdb (default port 4444) at the time of exception.")
     parser.add_option("-t", "--case-timeout", action='store', dest="defaultTestCaseTimeout", default='1800', help="[Optional] test case timeout, if test case doesn't set one. The default timeout is 1800s.")
     parser.add_option("-r", "--test-failure-retry", action='store', dest="testFailureRetry", default=None, help="[Optional] Set the max retry times, when test checker is failed. ")
     (options, arg) = parser.parse_args()

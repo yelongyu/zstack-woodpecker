@@ -31,7 +31,7 @@ Options:
 
 test_case_file=' '
 OPTIND=1
-while getopts "f:c:t:rhvunasm" Option
+while getopts "f:c:t:rhvdunasm" Option
 do
     case $Option in
         f ) test_case_file=$OPTARG;;
@@ -39,6 +39,7 @@ do
         r );;
         t );;
         v );;
+        d );;
         u );;
         n );;
         a );;

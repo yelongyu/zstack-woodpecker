@@ -59,6 +59,9 @@ def main(argv):
         else:
             cleanup(test_case)
     except Exception as e:
+        if os.environ.get('WOODPECKER_START_DEBUGGER'):
+            import rpdb
+            rpdb.set_trace()
         traceback.print_exc(file=sys.stdout)
         cleanup(test_case)
 

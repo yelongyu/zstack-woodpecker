@@ -490,6 +490,9 @@ def parse_test_args(options):
     if options.dryRun:
         test_args.append('-u')
 
+    if options.startDebugger:
+        test_args.append('-d')
+
     if options.noCleanup:
         test_args.append('-n')
 
@@ -688,6 +691,13 @@ def main():
             default=None, 
             action='store_true', 
             help="[Optional] Dry run test case. E.g. `zstest -s basic --dry-run`")
+
+    option_group.add_option(
+            "--start-debugger", 
+            dest="startDebugger", 
+            default=None, 
+            action='store_true', 
+	    help="[Optional] Start remote debugger with rpdb when exception happens. E.g. `zstest -s basic --start-debugger`")
 
     parser.add_option_group(option_group)
     (options, arg) = parser.parse_args()
