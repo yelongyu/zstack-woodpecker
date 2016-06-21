@@ -26,6 +26,7 @@ import zstackwoodpecker.operations.node_operations as node_ops
 import zstackwoodpecker.ansible as ansible
 import zstacktestagent.plugins.host as host_plugin
 import zstacktestagent.testagent as testagent
+import glob
 
 logger = log.get_logger(__name__)
 #This path should be aligned with Dockerfile
@@ -682,11 +683,19 @@ default one' % self.zstack_properties)
                     return False
                 return True
 
+            def find_zstacklib(search_path):
+                match = glob.glob(os.path.join(search_path, 'zstacklib-*.tar.gz'))
+                try:
+                    return os.path.basename(match[0])
+                except:
+                    return 'zstacklib-1.4.tar.gz'
+
             testagentdir = untar_test_agent()
+            pkg_zstacklib = find_zstacklib(testagentdir)
             ansible.check_and_install_ansible()
 
             lib_files = ['testagent/zstacktestagent-1.0.0.tar.gz', \
-                    'testagent/zstacklib-1.4.tar.gz' ]
+                    'testagent/%s' % (pkg_zstacklib) ]
 
             if not target:
                 #default will deploy all test hosts.
@@ -709,9 +718,9 @@ default one' % self.zstack_properties)
                             %s \
                             %s \
                             pkg_testagent=zstacktestagent-1.0.0.tar.gz \
-                            pkg_zstacklib=zstacklib-1.4.tar.gz \
+                            pkg_zstacklib=%s \
                             pypi_source_tar=pypi.tar.bz" % \
-                            (h.managementIp_, h.username_, h.password_, ansible_become_args, ansible_port_args)
+                            (h.managementIp_, h.username_, h.password_, ansible_become_args, ansible_port_args, pkg_zstacklib)
 
                     if ENV_HTTP_PROXY:
                         ansible_cmd_args = "%s http_proxy=%s https_proxy=%s" % \
@@ -753,9 +762,9 @@ default one' % self.zstack_properties)
                 print('Deploy test agent in host: %s \n' % target.managementIp)
                 ansible_cmd_args = "host=%s \
                         pkg_testagent=zstacktestagent-1.0.0.tar.gz \
-                        pkg_zstacklib=zstacklib-1.4.tar.gz \
+                        pkg_zstacklib=%s \
                         pypi_source_tar=pypi.tar.bz" % \
-                        target.managementIp
+                        (target.managementIp, pkg_zstacklib)
                 if ENV_HTTP_PROXY:
                     ansible_cmd_args = "%s http_proxy=%s https_proxy=%s" % \
                         (ansible_cmd_args, ENV_HTTP_PROXY, ENV_HTTPS_PROXY)
