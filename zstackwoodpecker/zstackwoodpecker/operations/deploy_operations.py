@@ -924,6 +924,9 @@ def add_image(deployConfig, session_uuid):
             action.guestOsType = i.guestOsType__
             if not action.guestOsType:
                 action.guestOsType = 'unknown'
+            action.platform = i.platform__
+            if not action.platform:
+                action.platform = 'Linux'
             action.hypervisorType = i.hypervisorType__
             action.name = i.name_
             action.url = i.url_

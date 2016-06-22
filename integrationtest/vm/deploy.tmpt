@@ -66,6 +66,9 @@ imagePassword = password
 imageName_net = image_for_sg_test
 imageUrl_net = http://10.1.101.1/image/centos_400m_140527.img
 
+imageName_windows = windows
+imageName_other = other
+
 rootDiskOfferingName = root-disk
 rootDiskOfferingSize = 1G
 
