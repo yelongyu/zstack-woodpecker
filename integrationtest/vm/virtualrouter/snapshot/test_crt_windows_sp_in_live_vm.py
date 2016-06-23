@@ -41,9 +41,6 @@ def test():
         test_obj_dict.rm_vm(vm1)
         test_util.test_skip("Skip test, since [host:] %s libvert version: %s is lower than 1.2.7, which doesn't support live merge, when doing snapshot deleting." % (host_inv.uuid, libvirt_ver))
 
-    vm = test_stub.create_vlan_vm()
-    test_obj_dict.add_vm(vm)
-
     test_util.test_dsc('Create volume for snapshot testing')
     disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
     volume_creation_option = test_util.VolumeOption()
@@ -52,7 +49,6 @@ def test():
     volume = test_stub.create_volume(volume_creation_option)
     test_obj_dict.add_volume(volume)
     #make sure utility vm is starting and running
-    vm.check()
 
     vm1.stop()
     volume.attach(vm1)
@@ -60,8 +56,7 @@ def test():
 
     test_util.test_dsc('create snapshot')
     snapshots = test_obj_dict.get_volume_snapshot(volume.get_volume().uuid)
-    snapshots.set_utility_vm(vm)
-    snapshots.create_snapshot('create_snapshot1')
+    snapshots.create_snapshot('create_snapshot1', False)
 #    snapshots.check()
 
     test_lib.lib_robot_cleanup(test_obj_dict)

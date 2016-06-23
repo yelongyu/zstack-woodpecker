@@ -197,12 +197,12 @@ umount %s
         self._remove_checking_file()
         volume_obj.detach()
 
-    def create_snapshot(self, name = None):
+    def create_snapshot(self, name = None, add_check = True):
         if not self.target_volume:
             test_util.test_fail(
                     'Can not create snapshot, before set target_volume')
 
-        if not self.utility_vm:
+        if add_check and not self.utility_vm:
             test_util.test_fail(
 'Can not create snapshot, before set utility_vm, which will be used for doing \
         snapshot checking.')
@@ -214,7 +214,7 @@ umount %s
         snapshot.set_snapshot_creation_option(sp_option)
         snapshot.set_utility_vm(self.utility_vm)
         snapshot.set_target_volume(self.target_volume)
-        snapshot.create()
+        snapshot.create(add_check)
         self.add_snapshot(snapshot)
         return snapshot
 
@@ -383,7 +383,7 @@ class ZstackTestSnapshot(sp_header.TestSnapshot):
 
         return True
 
-    def create(self):
+    def create(self, add_check = True):
         '''
         Not recommended to be called by test case directly. Test case needs to
         call ZstackVolumeSnapshot.create_snapshot()
@@ -391,10 +391,12 @@ class ZstackTestSnapshot(sp_header.TestSnapshot):
         super(ZstackTestSnapshot, self).create()
         if not self.target_volume:
             test_util.test_fail('Can not create snapshot, before set target_volume')
-        if not self.utility_vm:
-            test_util.test_fail('Can not create snapshot, before set utility_vm, which will be used for doing snapshot checking. utiltiy_vm is mostly like a VR vm.')
-        #self._live_snapshot_cap_check()
-        self.add_checking_point()
+        if add_check:
+            if not self.utility_vm:
+                test_util.test_fail('Can not create snapshot, before set utility_vm, which will be used for doing snapshot checking. utiltiy_vm is mostly like a VR vm.')
+            #self._live_snapshot_cap_check()
+            self.add_checking_point()
+
         self.snapshot = vol_ops.create_snapshot(self.snapshot_option)
         self.target_volume.update_volume()
 
