@@ -36,7 +36,7 @@ import os
 import time
 
 _config_ = {
-        'timeout' : 3600,
+        'timeout' : 9000,
         'noparallel' : True
         }
 
