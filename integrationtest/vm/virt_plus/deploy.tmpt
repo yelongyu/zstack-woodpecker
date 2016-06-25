@@ -25,3 +25,5 @@ hostIp4 = 10.0.101.23
 
 l2PublicNetworkName = l2-public
 l2PublicNetworkInterface = ens32
+
+l3VlanNetworkName2 = l3VlanNetwork2
