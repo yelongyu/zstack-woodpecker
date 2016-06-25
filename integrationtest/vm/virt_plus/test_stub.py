@@ -217,7 +217,7 @@ def test_fio_iops(vm_inv, iops):
         test_util.test_fail('fio bandwidth test fails')
         return False
 
-def test_fio_bandwidth(vm_inv, bandwidth):
+def test_fio_bandwidth(vm_inv, bandwidth, path = '/tmp'):
     def cleanup_log():
         logfd.close()
         os.system('rm -f %s' % tmp_file)
@@ -226,10 +226,10 @@ def test_fio_bandwidth(vm_inv, bandwidth):
     vm_ip = vm_inv.vmNics[0].ip
 
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
-    cmd1 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=write -size=100M -filename=/tmp/test1.img -name='EBS 1M write' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
-            % (ssh_cmd)
-    cmd2 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=write -size=1G -filename=/tmp/test2.img -name='EBS 1M write' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
-            % (ssh_cmd)
+    cmd1 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=write -size=100M -filename=%s/test1.img -name='EBS 1M write' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
+            % (ssh_cmd, path)
+    cmd2 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=write -size=900G -filename=%s/test2.img -name='EBS 1M write' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
+            % (ssh_cmd, path)
 
 
     tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
@@ -337,3 +337,20 @@ def create_vip(vip_name=None, l3_uuid=None, session_uuid = None):
     vip.create()
 
     return vip
+
+def attach_mount_volume(volume, vm, mount_point):
+    volume.attach(vm)
+    import tempfile
+    script_file = tempfile.NamedTemporaryFile(delete=False)
+    script_file.write('''
+mkdir -p %s
+device="/dev/`ls -ltr --file-type /dev | grep disk | awk '{print $NF}' | grep -v '[[:digit:]]' | tail -1`"
+mount ${device}1 %s
+''' % (mount_point, mount_point))
+    script_file.close()
+
+    vm_inv = vm.get_vm()
+    if not test_lib.lib_execute_shell_script_in_vm(vm_inv, script_file.name):
+        test_util.test_fail("mount operation failed in [volume:] %s in [vm:] %s" % (volume.get_volume().uuid, vm_inv.uuid))
+
+        os.unlink(script_file.name)

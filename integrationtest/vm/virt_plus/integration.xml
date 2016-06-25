@@ -10,6 +10,7 @@
         <case timeout='300' repeat='1' noparallel='True'>over_provision/test_memory_over_provision.py</case>
         <case timeout='300' repeat='1' noparallel='True'>over_provision/test_storage_over_provision.py</case>
         <case timeout='300' repeat='1'>qos/test_disk_qos.py</case>
+        <case timeout='600' repeat='1'>qos/test_disk_qos2.py</case>
         <case timeout='300' repeat='1'>qos/test_net_change_outbound_qos.py</case>
         <case timeout='300' repeat='1'>qos/test_net_outbound_qos.py</case>
         <case timeout='300' repeat='1'>qos/test_net_inbound_qos.py</case>
