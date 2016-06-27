@@ -1296,9 +1296,9 @@ def lib_set_vm_host_l2_ip(vm):
         test_util.test_logger('Not find host: %s for VM: %s. Skip host IP assignment.' % (vm.hostUuid, vm.uuid))
         return False
     l2s = lib_get_private_l2s_by_vm(vm)
-    l3s = lib_get_l3s_by_vm(vm)
     for l2 in l2s: 
-        lib_assign_host_l2_ip(host, l2, l3s[0])
+        l3 = lib_get_l3_by_l2(l2.uuid)[0]
+        lib_assign_host_l2_ip(host, l2, l3)
 
 def lib_assign_host_l2_ip(host, l2, l3):
     '''
