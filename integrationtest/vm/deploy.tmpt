@@ -128,6 +128,7 @@ l3PublicNetworkName = public network
 l3NoVlanNetworkName1 = l3_user_defined_vlan1
 l3NoVlanNetworkName2 = l3_user_defined_vlan2
 l3VlanNetworkName1 = l3VlanNetwork1
+l3VlanNetworkName2 = l3VlanNetwork2
 l3VlanDNATNetworkName = l3VlanDNATNetwork
 l3VlanNetworkName3 = l3VlanNetwork3
 l3VlanNetworkName4 = l3VlanNetwork4
@@ -197,7 +198,7 @@ vlanIpRangeEnd5 = 10.15.127.255
 vlanIpRangeGateway5 = 10.15.0.1
 vlanIpRangeNetmask5 = 255.255.0.0
 
-vlanIpRangeName6 = guest vlan range for dhcp
+vlanIpRangeName6 = guest vlan range2 for dhcp
 vlanIpRangeStart6 = 10.16.0.2
 vlanIpRangeEnd6 = 10.16.127.255
 vlanIpRangeGateway6 = 10.16.0.1
