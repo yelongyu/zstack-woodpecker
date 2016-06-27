@@ -38,7 +38,9 @@ def test():
     vm2_ip = vm2_inv.vmNics[0].ip
     target_file = '/root/zstack-all-in-one.tgz'
     test_stub.prepare_test_env(vm1_inv, target_file)
+    test_stub.prepare_test_env(vm2_inv, target_file)
     ssh_cmd1 = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm1_ip
+    ssh_cmd2 = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm2_ip
     test_stub.only_install_zstack(ssh_cmd1, target_file, tmp_file)
 
     test_stub.copy_id_dsa(vm1_inv, ssh_cmd1, tmp_file)
@@ -65,6 +67,16 @@ def test():
     if process_result != 0:
         test_fail('zstack install mn failed in vm:%s' % vm2_inv.uuid)
 
+    cmd = '''%s 'zstack-ctl install_cassandra "{\"rpc_address\":\"%s\", \"listen_address\":\"%s\"}"' ''' % (ssh_cmd1, vm1_ip, vm1_ip)
+    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+    if process_result = 1:
+        cmd = '%s "zstack-ctl cassandra --start --wait-timeout=180"' % ssh_cmd1
+        process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+        cmd = '%s "zstack-ctl deploy_cassandra_db"' % ssh_cmd1
+        process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+        cmd = '%s "zstack-ctl install_kairosdb --listen-address %s"' % (ssh_cmd1, vm1_ip)
+        process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+
     cmd = '%s "zstack-ctl install_ui --host=%s"' % (ssh_cmd1, vm2_ip)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
@@ -75,7 +87,7 @@ def test():
     if process_result != 0:
         test_fail('zstack install ui failed in vm:%s' % vm1_inv.uuid)
 
-    cmd = '%s "zstack-ctl start_node"' % ssh_cmd1
+    cmd = '%s "zstack-ctl start"' % ssh_cmd1
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
         if 'no management-node-ready message received within' in open(tmp_file).read():
@@ -90,6 +102,11 @@ def test():
                     break
             else:
                 test_fail('start node failed in vm:%s' % vm1_inv.uuid)
+
+    cmd = '%s "zstack-ctl configure --duplicate-to-remote root@%s"' % (ssh_cm1, vm2_ip)
+    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+    cmd = '%s "zstack-ctl start"' % ssh_cmd2
+    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
 
     test_stub.check_installation(ssh_cmd1, tmp_file, vm1_inv)
 
