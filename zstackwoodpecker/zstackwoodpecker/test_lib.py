@@ -1296,10 +1296,11 @@ def lib_set_vm_host_l2_ip(vm):
         test_util.test_logger('Not find host: %s for VM: %s. Skip host IP assignment.' % (vm.hostUuid, vm.uuid))
         return False
     l2s = lib_get_private_l2s_by_vm(vm)
+    l3s = lib_get_l3s_by_vm(vm)
     for l2 in l2s: 
-        lib_assign_host_l2_ip(host, l2)
+        lib_assign_host_l2_ip(host, l2, l3s[0])
 
-def lib_assign_host_l2_ip(host, l2):
+def lib_assign_host_l2_ip(host, l2, l3):
     '''
     Assign an IP address for Host L2 bridge dev. It is for test connection.
     
@@ -1378,7 +1379,7 @@ def lib_assign_host_l2_ip(host, l2):
             test_util.test_warn('Dangours: should not change host default network interface config for %s' % br_dev)
             return
 
-        next_avail_ip = _generate_and_save_host_l2_ip(host_pub_ip, br_ethname)
+        next_avail_ip = _generate_and_save_host_l2_ip(host_pub_ip, br_ethname+l3.uuid)
         #if ip has been set to other host, following code will do something wrong.
         #if lib_check_directly_ping(next_avail_ip):
         #    test_util.test_logger("[host:] %s [bridge IP:] %s is connectable. Skip setting IP." % (host_pub_ip, next_avail_ip))
@@ -1405,7 +1406,7 @@ def lib_assign_host_l2_ip(host, l2):
         else:
             l2_vlan = str(l2_vlan)
     
-        l3 = lib_get_l3_by_l2(l2.uuid)[0]
+        #l3 = lib_get_l3_by_l2(l2.uuid)[0]
         if l3.system:
             test_util.test_logger('will not change system management network l3: %s' % l3.name)
             return 
@@ -1447,7 +1448,7 @@ def lib_assign_host_l2_ip(host, l2):
                 return
 
             next_avail_ip = _generate_and_save_host_l2_ip(current_host_ip, \
-                    br_dev)
+                    br_dev+l3.uuid)
 
             if not linux.is_ip_existing(next_avail_ip):
                 if l2_vlan:
