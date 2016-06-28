@@ -103,7 +103,7 @@ def test():
             else:
                 test_fail('start node failed in vm:%s' % vm1_inv.uuid)
 
-    cmd = '%s "zstack-ctl configure --duplicate-to-remote root@%s"' % (ssh_cm1, vm2_ip)
+    cmd = '%s "zstack-ctl configure --duplicate-to-remote root@%s"' % (ssh_cmd1, vm2_ip)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     cmd = '%s "zstack-ctl start"' % ssh_cmd2
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
