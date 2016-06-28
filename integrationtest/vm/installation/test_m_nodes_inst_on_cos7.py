@@ -62,7 +62,7 @@ def test():
     if process_result != 0:
         test_fail('zstack install rabbitmq failed in vm:%s' % vm1_inv.uuid)
 
-    cmd = '%s "zstack-ctl install_management_node --host=%s"' % (ssh_cmd1, vm2_ip)
+    cmd = '%s "zstack-ctl install_management_node --host=%s --install-path=/usr/local/zstack"' % (ssh_cmd1, vm2_ip)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
         test_fail('zstack install mn failed in vm:%s' % vm2_inv.uuid)
