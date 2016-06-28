@@ -67,7 +67,7 @@ def test():
     if process_result != 0:
         test_fail('zstack install mn failed in vm:%s' % vm2_inv.uuid)
 
-    cmd = '''%s 'zstack-ctl install_cassandra "{\"rpc_address\":\"%s\", \"listen_address\":\"%s\"}"' ''' % (ssh_cmd1, vm1_ip, vm1_ip)
+    cmd = '''%s 'zstack-ctl install_cassandra "{\\"rpc_address\\":\\"%s\\", \\"listen_address\\":\\"%s\\"}"' ''' % (ssh_cmd1, vm1_ip, vm1_ip)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     if process_result == 1:
         cmd = '%s "zstack-ctl cassandra --start --wait-timeout=180"' % ssh_cmd1
