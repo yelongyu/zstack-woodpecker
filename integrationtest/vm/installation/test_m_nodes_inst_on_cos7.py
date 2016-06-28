@@ -69,7 +69,7 @@ def test():
 
     cmd = '''%s 'zstack-ctl install_cassandra "{\\"rpc_address\\":\\"%s\\", \\"listen_address\\":\\"%s\\"}"' ''' % (ssh_cmd1, vm1_ip, vm1_ip)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
-    if process_result == 1:
+    if process_result == 0:
         cmd = '%s "zstack-ctl cassandra --start --wait-timeout=180"' % ssh_cmd1
         process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
         cmd = '%s "zstack-ctl deploy_cassandra_db"' % ssh_cmd1
