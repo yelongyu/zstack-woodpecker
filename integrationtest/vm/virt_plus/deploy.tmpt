@@ -27,3 +27,8 @@ l2PublicNetworkName = l2-public
 l2PublicNetworkInterface = ens32
 
 l3VlanNetworkName2 = l3VlanNetwork2
+
+sshkeyImageName = vr
+sshkeyImageUrl = http://10.1.101.1/image/zstack-cloudinit.img
+sshkeyPubKey = 
+sshkeyPriKey_file = 
