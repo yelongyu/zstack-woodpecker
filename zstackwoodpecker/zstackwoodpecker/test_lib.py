@@ -1930,6 +1930,13 @@ def lib_get_instance_offering_by_uuid(io_uuid):
     if offerings:
         return offerings[0]
 
+def lib_get_instance_offering_by_name(ins_name):
+    cond = res_ops.gen_query_conditions('name', '=', ins_name)
+    ins_offerings = res_ops.query_resource_with_num(res_ops.INSTANCE_OFFERING, cond, None, 0, 1)
+    if ins_offerings:
+        return ins_offerings[0]
+    test_util.test_logger("Did not find instance offering by [instance offering name:] %s" % ins_name)
+
 
 def lib_get_vm_by_uuid(vm_uuid):
     conditions = res_ops.gen_query_conditions('uuid', '=', vm_uuid)
@@ -4426,3 +4433,10 @@ def lib_set_ha_selffencer_storagechecker_timeout(value):
 
 def lib_get_reserved_primary_storage():
     return conf_ops.get_global_config_value('primaryStrorage', 'reservedCapacity')
+
+def lib_add_vm_sshkey(vm_uuid, sshkey, session_uuid = None):
+    return tag_ops.create_system_tag('VmInstanceVO', \
+            vm_uuid, \
+            '%s::%s' % (vm_header.SSHKEY, sshkey),\
+            session_uuid)
+

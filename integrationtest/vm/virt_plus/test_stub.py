@@ -48,14 +48,15 @@ def create_vm(vm_name='virt-vm', \
     vm_creation_option = test_util.VmOption()
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
-    conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     if not instance_offering_uuid:
-        instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+	instance_offering_name = os.environ.get('instanceOfferingName_s')
+        instance_offering_uuid = lib_get_instance_offering_by_name(instance_offering_name).uuid
 
     vm_creation_option.set_l3_uuids([l3_net_uuid])
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
     vm_creation_option.set_name(vm_name)
+    vm_creation_option.set_system_tags(system_tags)
     vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
     if host_uuid:
         vm_creation_option.set_host_uuid(host_uuid)
