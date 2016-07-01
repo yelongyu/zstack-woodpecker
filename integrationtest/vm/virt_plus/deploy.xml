@@ -97,7 +97,7 @@
       </image>
       <image name="$sshkeyImageName" description="Test Image3" 
         format="$rootImageFormat" url="$sshkeyImageUrl" 
-        mediaType="$rootMediaType"
+	mediaType="$rootMediaType">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
     </images>
