@@ -185,6 +185,7 @@
                   <serviceType>Eip</serviceType> 
                 </networkService>
               </l3BasicNetwork>
+              <!--
               <l3BasicNetwork name="$l3VlanNetworkName2" description = "guest test vlan network with DHCP Userdata and Eip" domain_name="$L3VlanNetworkDomainName2">
                 <ipRange name="$vlanIpRangeName2" startIp="$vlanIpRangeStart2" endIp="$vlanIpRangeEnd2"
                  gateway="$vlanIpRangeGateway2" netmask="$vlanIpRangeNetmask2"/>
@@ -194,6 +195,7 @@
                   <serviceType>Eip</serviceType> 
                 </networkService>
               </l3BasicNetwork>
+              -->
             </l3Networks>
           </l2VlanNetwork>
         </l2Networks>
