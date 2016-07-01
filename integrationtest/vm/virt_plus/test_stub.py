@@ -23,6 +23,17 @@ import zstackwoodpecker.operations.vm_operations as vm_ops
 test_file = '/tmp/test.img'
 TEST_TIME = 120
 
+def create_vlan_vm_with_volume(l3_name=None, disk_offering_uuids=None, disk_number=None, session_uuid = None):
+    if not disk_offering_uuids:
+        disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
+        disk_offering_uuids = [disk_offering.uuid]
+        if disk_number:
+            for i in range(disk_number - 1):
+                disk_offering_uuids.append(disk_offering.uuid)
+
+    return create_vlan_vm(l3_name, disk_offering_uuids, \
+            session_uuid = session_uuid)
+
 def create_vlan_vm(l3_name=None, disk_offering_uuids=None, system_tags=None, session_uuid = None, instance_offering_uuid = None):
     image_name = os.environ.get('imageName_net')
     if not l3_name:
@@ -64,6 +75,20 @@ def create_vm(vm_name='virt-vm', \
     vm.set_creation_option(vm_creation_option)
     vm.create()
     return vm 
+
+
+def create_volume(volume_creation_option=None, session_uuid = None):
+    if not volume_creation_option:
+        disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
+        volume_creation_option = test_util.VolumeOption()
+        volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
+        volume_creation_option.set_name('vr_test_volume')
+
+    volume_creation_option.set_session_uuid(session_uuid)
+    volume = zstack_volume_header.ZstackTestVolume()
+    volume.set_creation_option(volume_creation_option)
+    volume.create()
+    return volume
 
 def make_ssh_no_password(vm_inv):
     vm_ip = vm_inv.vmNics[0].ip

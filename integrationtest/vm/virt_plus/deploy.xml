@@ -108,6 +108,10 @@
     </images>
   
     <diskOfferings>
+      <diskOffering name="$rootDiskOfferingName" 
+        description="Root Disk Offering"
+        diskSize="$rootDiskOfferingSize" />
+
       <diskOffering name="$largeDiskOfferingName" 
         description="large Disk Offering" 
         diskSize="$largeDiskOfferingSize" />
