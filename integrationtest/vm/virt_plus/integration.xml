@@ -25,7 +25,6 @@
         <case timeout='360' repeat='1' noparallel='True'>other/test_parallel_crt_vm_to_use_all_mem.py</case>
         <case timeout='600' repeat='1'>volume/test_add_volume.py</case>
         <case timeout='900' repeat='1'>volume/test_add_m_vols.py</case>
-        <case timeout='800' repeat='1'>volume/test_add_volume_vr.py</case>
         <case timeout='600' repeat='1'>volume/test_crt_vm_volume.py</case>
         <case timeout='700' repeat='1'>volume/test_crt_vm_2_volumes.py</case>
         <case timeout='700' repeat='1'>volume/test_crt_vm_24_volumes.py</case>
