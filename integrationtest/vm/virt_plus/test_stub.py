@@ -61,7 +61,7 @@ def create_vm(vm_name='virt-vm', \
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     if not instance_offering_uuid:
 	instance_offering_name = os.environ.get('instanceOfferingName_s')
-        instance_offering_uuid = lib_get_instance_offering_by_name(instance_offering_name).uuid
+        instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(instance_offering_name).uuid
 
     vm_creation_option.set_l3_uuids([l3_net_uuid])
     vm_creation_option.set_image_uuid(image_uuid)
