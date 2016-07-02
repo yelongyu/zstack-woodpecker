@@ -98,6 +98,11 @@
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
+      <image name="$sshkeyImageName" description="Test Image3" 
+        format="$rootImageFormat" url="$sshkeyImageUrl" 
+	mediaType="$rootMediaType">
+        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+      </image>
     </images>
   
     <diskOfferings>
