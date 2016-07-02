@@ -3,6 +3,11 @@ import ../deploy.tmpt
 localPrimaryStorageName = local-ps
 localPrimaryStorageUrl = /home/local-ps
 
+instanceOfferingName_m = medium-vm
+instanceOfferingMemory_m = 1024M
+instanceOfferingCpuNum_m = 2
+instanceOfferingCpuSpeed_m = 512
+
 largeDiskOfferingName = largeDiskOffering
 largeDiskOfferingSize = 1G
 
