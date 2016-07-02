@@ -102,7 +102,7 @@
       <image name="$sshkeyImageName" description="Test Image3" 
         format="$rootImageFormat" url="$sshkeyImageUrl" 
 	mediaType="$rootMediaType">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
       </image>
     </images>
   
