@@ -21,6 +21,10 @@ test_obj_dict = test_state.TestStateDict()
 test_image = '/tmp/zstack_wp_test_local_uri.img'
 
 def test():
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
+    if bs.type == "Ceph":
+        test_util.test_skip('bs: %s is ceph backup storage. Will skip test.' % bs.uuid)
+
     os.system('dd if=/dev/zero of=%s bs=1M count=1 seek=300' % test_image)
     time.sleep(10)
     image_name = 'test-image-%s' % time.time()
@@ -28,7 +32,6 @@ def test():
     image_option.set_name(image_name)
     image_option.set_description('test image which is upload from local filesystem.')
     image_option.set_url('file://%s' % test_image)
-    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
     image_option.set_backup_storage_uuid_list([bs.uuid])
     image_option.set_format('raw')
     image_option.set_mediaType('RootVolumeTemplate')
