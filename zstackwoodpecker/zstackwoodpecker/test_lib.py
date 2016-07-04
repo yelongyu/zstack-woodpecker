@@ -1100,7 +1100,7 @@ def lib_get_storage_capacity(zone_uuids = None, cluster_uuids = None, \
     if zone_uuids:
         action.zoneUuids = zone_uuids
     if cluster_uuids:
-        action.clusterUuids = host_uuids
+        action.clusterUuids = cluster_uuids
 
     ret = acc_ops.execute_action_with_session(action, session_uuid)
     return ret
