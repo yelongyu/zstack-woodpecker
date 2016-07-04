@@ -38,6 +38,9 @@ def test():
 
     host = host[0]
     ps = ps[0]
+    if ps.type != 'LocalStorage':
+        test_util.test_skip('Only test with local primary storage, skip test.')
+
     over_provision_rate = 2.5
     target_volume_num = 12
     kept_disk_size = 10 * 1024 * 1024
