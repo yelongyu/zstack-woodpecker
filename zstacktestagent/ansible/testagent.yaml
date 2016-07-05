@@ -52,6 +52,7 @@
         - gcc
         - autoconf
         - libselinux-python
+        - python-setuptools
 
     - name: install dependency packages for Debian based OS
       when: ansible_os_family == 'Debian'

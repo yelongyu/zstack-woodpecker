@@ -531,6 +531,13 @@ def main():
             help="[Optional] build and deploy zstack before test. The zstack.war will be deployed to TESTROOT/sanitytest/")
 
     parser.add_option(
+            "-B", 
+            dest="needBuildPremium", 
+            default=None, 
+            action='store_true', 
+            help="[Optional] build and deploy zstack premium before test. The zstack.war will be deployed to TESTROOT/sanitytest/")
+
+    parser.add_option(
             "-c", "--test-case", 
             dest="caseList", 
             default=None, 
@@ -747,7 +754,7 @@ def main():
     if options.showLog:
         print_runtime_test_log(current_folder)
 
-    if options.needBuild:
+    if options.needBuild or options.needBuildPremium:
         if options.vrImagePath:
             image_path = options.vrImagePath
         elif os.environ.get('ZSTACK_VR_IMAGE_PATH'):
@@ -755,11 +762,15 @@ def main():
         else:
             image_path = ''
 
+        extra_option = ''
+        if options.needBuildPremium:
+            extra_option = '-m'
+
         build_script = os.path.join(current_folder, DEPLOYER_SCRIPT)
         if image_path:
-            ret = os.system('%s -r %s -i %s' % (build_script, test_root, image_path))
+            ret = os.system('%s -r %s -i %s %s' % (build_script, test_root, image_path, extra_option))
         else:
-            ret = os.system('%s -r %s' % (build_script, test_root))
+            ret = os.system('%s -r %s %s' % (build_script, test_root, extra_option))
 
         if ret != 0:
             raise TestExc('Build ZStack Failure, can not continue testing. Exit code: %s' % ret)

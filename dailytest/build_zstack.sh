@@ -5,6 +5,7 @@ PULL_ZSTACK="N"
 PULL_ZSTACK_UTILITY="N"
 PULL_ZSTACK_WOODPECKER="N"
 PULL_ZSTACK_DASHBOARD="N"
+PREMIUM='N'
 
 help (){
     echo "Usage: $0 [options]
@@ -14,6 +15,7 @@ Options:
   -a            equal to -zuw
   -h            show this help message and exit
   -r            set zstack 'root' path, default is '/root'
+  -m            build premium
   -u            pull zstack-utility
   -w            pull zstack-woodpecker
   -z            pull zstack 
@@ -24,7 +26,7 @@ Options:
 PULL_FLAG='N'
 
 OPTIND=1
-while getopts "r:i:azuwh" Option
+while getopts "r:i:azuwhm" Option
 do
     case $Option in
         a ) PULL_ZSTACK='Y' && PULL_ZSTACK_UTILITY='Y' && PULL_ZSTACK_WOODPECKER='Y' && PULL_ZSTACK_DASHBOARD='Y'
@@ -33,6 +35,7 @@ do
         u ) PULL_ZSTACK_UTILITY=='Y' && PULL_FLAG='Y' ;;
         w ) PULL_ZSTACK_WOODPECKER='Y' && PULL_FLAG='Y' ;;
         r ) ZSTACK_TEST_ROOT=$OPTARG;;
+        m ) PREMIUM='Y';;
         i) ;;
         h ) help;;
         * ) help;;
@@ -145,8 +148,11 @@ which ant
 
 [ $? -ne 0 ] && which apt-get && apt-get install -y ant && apt-get install -y maven
 
-ant all-in-one -Dzstack_build_root=$ZSTACK_TEST_ROOT -Dbuild_name=qa -Dzstackdashboard.build_version=master|tee -a /tmp/zstack/build_log
-#ant -Dzstack_build_root=$ZSTACK_TEST_ROOT -Dzstackdashboard.build_version=master -Dproduct.version=qa -Dbuild_war_flag=premium all-in-one |tee -a /tmp/zstack/build_log
+if [ $PREMIUM != 'Y' ] ; then
+    ant all-in-one -Dzstack_build_root=$ZSTACK_TEST_ROOT -Dbuild_name=qa -Dzstackdashboard.build_version=master|tee -a /tmp/zstack/build_log
+else
+    ant -Dzstack_build_root=$ZSTACK_TEST_ROOT -Dzstackdashboard.build_version=master -Dproduct.version=qa -Dbuild_war_flag=premium all-in-one |tee -a /tmp/zstack/build_log
+fi
 if [ ${PIPESTATUS[0]} -ne 0 ]; then
     echo_failure "build zstack failure"
     exit 1

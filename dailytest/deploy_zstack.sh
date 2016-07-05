@@ -21,6 +21,7 @@ help (){
 Options:
   -a            equal to -zuw
   -h            show this help message and exit
+  -m            build zstack premium
   -r            set zstack 'root' path, default is '/usr/local/zstack'
   -u            pull zstack-utility
   -w            pull zstack-woodpecker
@@ -32,13 +33,14 @@ Options:
 }
 
 OPTIND=1
-while getopts "r:i:azuwh" Option
+while getopts "r:i:azuwhm" Option
 do
     case $Option in
         a ) ;;
         z ) ;;
         u ) ;;
         w ) ;;
+        m ) ;;
         r ) ZSTACK_TEST_ROOT=$OPTARG;;
         i ) ZSTACK_VR_IMAGE_PATH=$OPTARG;;
         h ) help;;

@@ -66,9 +66,9 @@ def add_backup_storage(deployConfig, session_uuid):
             wait_for_thread_queue()
             thread.start()
 
-    if xmlobject.has_element(deployConfig, 'backupStorages.imageStorBackupStorage'):
-        for bs in xmlobject.safe_list(deployConfig.backupStorages.imageStorBackupStorage):
-            action = api_actions.AddImageStorBackupStorageAction()
+    if xmlobject.has_element(deployConfig, 'backupStorages.imageStoreBackupStorage'):
+        for bs in xmlobject.safe_list(deployConfig.backupStorages.imageStoreBackupStorage):
+            action = api_actions.AddImageStoreBackupStorageAction()
             action.sessionUuid = session_uuid
             action.name = bs.name_
             action.description = bs.description__
@@ -81,7 +81,7 @@ def add_backup_storage(deployConfig, session_uuid):
                 action.sshport = bs.port_
                 action.sshPort = bs.port_
             action.timeout = AddKVMHostTimeOut #for some platform slowly salt execution
-            action.type = inventory.IMAGE_STOR_BACKUP_STORAGE_TYPE
+            action.type = inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE
             thread = threading.Thread(target = _thread_for_action, args = (action, ))
             wait_for_thread_queue()
             thread.start()

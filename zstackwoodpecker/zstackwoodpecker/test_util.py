@@ -448,13 +448,13 @@ class SftpBackupStorageOption(PrimaryStorageOption):
     def get_sshPort(self):
         return self.sshPort
 
-class ImageStorBackupStorageOption(BackupStorageOption):
+class ImageStoreBackupStorageOption(BackupStorageOption):
     def __init__(self):
         self.username = None
         self.hostname = None
         self.password = None
         self.sshPort = None
-        super(ImageStorBackupStorageOption, self).__init__()
+        super(ImageStoreBackupStorageOption, self).__init__()
         self.type = inventory.SFTP_BACKUP_STORAGE_TYPE
 
     def set_hostname(self, ip):
