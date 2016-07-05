@@ -171,6 +171,11 @@ class DataOption(object):
         self.timeout = 300000   #5 mins
         self.name = None
         self.description = None
+        self.resourceUUID = None
+        #system tag is an array
+        self.system_tags = None
+        self.user_tags = None
+        self.session_uuid = None
 
     def set_session_uuid(self, session_uuid):
         self.session_uuid = session_uuid
@@ -195,6 +200,36 @@ class DataOption(object):
 
     def get_timeout(self):
         return self.timeout
+
+    def set_resource_uuid(self, resourceUUID):
+        self.resourceUUID = resourceUUID
+
+    def get_resource_uuid(self):
+        return self.resourceUUID
+
+    def set_system_tags(self, system_tags):
+        if not system_tags:
+            self.system_tags = []
+            return 
+
+        if not isinstance(system_tags, list):
+            raise TestError('system_tags is not a list.')
+        self.system_tags = system_tags
+
+    def get_system_tags(self):
+        return self.system_tags
+
+    def set_user_tags(self, user_tags):
+        if not user_tags:
+            self.user_tags = []
+            return 
+
+        if not isinstance(user_tags, list):
+            raise TestError('user_tags is not a list.')
+        self.user_tags = user_tags
+
+    def get_user_tags(self):
+        return self.user_tags
 
 class ClusterOption(DataOption):
     def __init__(self):
@@ -329,6 +364,123 @@ class CephPrimaryStorageOption(PrimaryStorageOption):
     def get_rootVolumePoolName(self):
         return self.rootVolumePoolName
 
+class BackupStorageOption(DataOption):
+    def __init__(self):
+        self.type = None
+        self.url = None
+        super(BackupStorageOption, self).__init__()
+
+    def set_type(self, type):
+        self.type = type
+
+    def get_type(self):
+        return self.type
+
+    def set_url(self, url):
+        self.url = url
+
+    def get_url(self):
+        return self.url
+
+class CephBackupStorageOption(PrimaryStorageOption):
+    def __init__(self):
+        self.monUrls = None
+        self.dataVolumePoolName = None
+        self.rootVolumePoolName = None
+        self.imageCachePoolName = None
+        super(CephBackupStorageOption, self).__init__()
+        self.type = inventory.CEPH_BACKUP_STORAGE_TYPE
+
+    def set_monUrls(self, monUrls):
+        self.monUrls = monUrls
+
+    def get_monUrls(self):
+        return self.monUrls
+
+    def set_imageCachePoolName(self, imageCachePoolName):
+        self.imageCachePoolName = imageCachePoolName
+
+    def get_imageCachePoolName(self):
+        return self.imageCachePoolName
+
+    def set_dataVolumePoolName(self, dataVolumePoolName):
+        self.dataVolumePoolName = dataVolumePoolName
+
+    def get_dataVolumePoolName(self):
+        return self.dataVolumePoolName
+
+    def set_rootVolumePoolName(self, rootVolumePoolName):
+        self.rootVolumePoolName = rootVolumePoolName
+
+    def get_rootVolumePoolName(self):
+        return self.rootVolumePoolName
+
+class SftpBackupStorageOption(PrimaryStorageOption):
+    def __init__(self):
+        self.username = None
+        self.hostname = None
+        self.password = None
+        self.sshPort = None
+        super(SftpBackupStorageOption, self).__init__()
+        self.type = inventory.SFTP_BACKUP_STORAGE_TYPE
+
+    def set_hostname(self, ip):
+        self.hostname = ip
+    
+    def get_hostname(self):
+        return self.hostname
+    
+    def set_username(self, username):
+        self.username = username
+
+    def get_username(self):
+        return self.username
+
+    def set_password(self, password):
+        self.password = password
+
+    def get_password(self):
+        return self.password
+
+    def set_sshPort(self, port):
+        self.sshPort = port
+
+    def get_sshPort(self):
+        return self.sshPort
+
+class ImageStorBackupStorageOption(BackupStorageOption):
+    def __init__(self):
+        self.username = None
+        self.hostname = None
+        self.password = None
+        self.sshPort = None
+        super(ImageStorBackupStorageOption, self).__init__()
+        self.type = inventory.SFTP_BACKUP_STORAGE_TYPE
+
+    def set_hostname(self, ip):
+        self.hostname = ip
+    
+    def get_hostname(self):
+        return self.hostname
+    
+    def set_username(self, username):
+        self.username = username
+
+    def get_username(self):
+        return self.username
+
+    def set_password(self, password):
+        self.password = password
+
+    def get_password(self):
+        return self.password
+
+    def set_sshPort(self, port):
+        self.sshPort = port
+
+    def get_sshPort(self):
+        return self.sshPort
+
 class DiskOfferingOption(DataOption):
     def __init__(self):
         self.diskSize = None
@@ -406,8 +558,6 @@ class VmOption(DataOption):
             self.data_disk_uuids = None
             self.default_l3_uuid = None
             self.root_disk_uuid = None
-            #system tag is an array
-            self.system_tags = None
             self.user_tags = None
             super(VmOption, self).__init__()
         else:
@@ -435,18 +585,6 @@ class VmOption(DataOption):
 
     def get_l3_uuids(self):
         return self.l3_uuids
-
-    def set_system_tags(self, system_tags):
-        if not system_tags:
-            self.system_tags = []
-            return 
-
-        if not isinstance(system_tags, list):
-            raise TestError('system_tags is not a list.')
-        self.system_tags = system_tags
-
-    def get_system_tags(self):
-        return self.system_tags
 
     def set_user_tags(self, user_tags):
         if not user_tages:
@@ -654,9 +792,16 @@ class HostOption(DataOption):
         self.username = None
         self.password = None
         self.hostTags = None
+        self.sshPort = None
         #for salt minion specific id, which is not /etc/machine_id. e.g. VMs, 
         # which use same test image template and have same machine_id. 
         #self.machine_id = None
+
+    def set_sshPort(self, port):
+        self.sshPort = port
+
+    def get_sshPort(self):
+        return self.sshPort
 
     def set_management_ip(self, ip):
         self.managementIp = ip
@@ -742,12 +887,6 @@ class LoadBalancerListenerOption(DataOption):
 
     def get_protocol(self):
         return self.protocol
-
-    def set_system_tags(self, system_tags):
-        self.system_tags = system_tags
-
-    def get_system_tags(self):
-        return self.system_tags
 
 class PortForwardingRuleOption(DataOption):
     def __init__(self, vip_startPort=None, vip_endPort=None, private_startPort=None, private_endPort=None, protocol=None, allowedCidr=None, vip_uuid=None, vm_nic_uuid=None):

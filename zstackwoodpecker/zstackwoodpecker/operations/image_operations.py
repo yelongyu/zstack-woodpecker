@@ -152,3 +152,23 @@ def reconnect_sftp_backup_storage(bs_uuid, session_uuid = None):
     test_util.action_logger('Reconnect Sftp Backup Storage [uuid:] %s' % bs_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
+
+def commit_volume_as_image(volume_uuid, image_creation_option, session_uuid = None):
+    action = api_actions.CommitVolumeAsImageAction()
+    action.name = image_creation_option.get_name()
+    action.volumeUuid = volume_uuid
+    action.backupStorageUuids = image_creation_option.get_backup_storage_uuid_list()
+    action.guestOsType = image_creation_option.get_guest_os_type()
+    action.system = image_creation_option.get_system()
+    action.platform = image_creation_option.get_platform()
+
+    description = image_creation_option.get_description()
+    if not description:
+        action.description = "test commit volume as image"
+    else:
+        action.description = description
+
+    test_util.action_logger('Commit Image Template from [Volume:] %s in [backup Storage:] %s' % (action.volumeUuid, action.backupStorageUuids))
+    evt = account_operations.execute_action_with_session(action, image_creation_option.get_session_uuid())
+    return evt.inventory
+
