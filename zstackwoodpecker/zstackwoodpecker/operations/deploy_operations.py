@@ -66,6 +66,26 @@ def add_backup_storage(deployConfig, session_uuid):
             wait_for_thread_queue()
             thread.start()
 
+    if xmlobject.has_element(deployConfig, 'backupStorages.imageStorBackupStorage'):
+        for bs in xmlobject.safe_list(deployConfig.backupStorages.imageStorBackupStorage):
+            action = api_actions.AddImageStorBackupStorageAction()
+            action.sessionUuid = session_uuid
+            action.name = bs.name_
+            action.description = bs.description__
+            action.url = bs.url_
+            action.username = bs.username_
+            action.password = bs.password_
+            action.hostname = bs.hostname_
+	    if hasattr(bs, 'port_'):
+                action.port = bs.port_
+                action.sshport = bs.port_
+                action.sshPort = bs.port_
+            action.timeout = AddKVMHostTimeOut #for some platform slowly salt execution
+            action.type = inventory.IMAGE_STOR_BACKUP_STORAGE_TYPE
+            thread = threading.Thread(target = _thread_for_action, args = (action, ))
+            wait_for_thread_queue()
+            thread.start()
+
     if xmlobject.has_element(deployConfig, 'backupStorages.cephBackupStorage'):
         for bs in xmlobject.safe_list(deployConfig.backupStorages.cephBackupStorage):
             action = api_actions.AddCephBackupStorageAction()
