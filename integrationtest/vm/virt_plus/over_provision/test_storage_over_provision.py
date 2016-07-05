@@ -38,8 +38,10 @@ def test():
 
     host = host[0]
     ps = ps[0]
-    if ps.type != 'LocalStorage':
-        test_util.test_skip('Only test with local primary storage, skip test.')
+    ps_type = ps.type
+    #TODO: Fix ceph testing
+    if ps_type == 'Ceph':
+        test_util.test_skip('skip test for ceph.')
 
     over_provision_rate = 2.5
     target_volume_num = 12
@@ -49,8 +51,7 @@ def test():
                     host_uuid = host.uuid)
     test_obj_dict.add_vm(vm)
 
-    host_res = vol_ops.get_local_storage_capacity(host.uuid, ps.uuid)[0]
-    avail_cap = host_res.availableCapacity
+    avail_cap = get_storage_capacity(ps_type, host.uuid, ps.uuid)
     if avail_cap < kept_disk_size:
         test_util.test_skip('available disk capacity:%d is too small, skip test.' % avail_cap)
         return True
@@ -60,8 +61,7 @@ def test():
 
     #will change the rate back to check if available capacity is same with original one. This was a bug, that only happened when system create 1 vm.
     test_lib.lib_set_provision_storage_rate(original_rate)
-    host_res_tmp = vol_ops.get_local_storage_capacity(host.uuid, ps.uuid)[0]
-    avail_cap_tmp = host_res_tmp.availableCapacity
+    avail_cap_tmp = get_storage_capacity(ps_type, host.uuid, ps.uuid)
     if avail_cap != avail_cap_tmp:
         test_util.test_fail('disk size is not same, between 2 times provision. Before change over rate, 1st cap: %d; 2nd cap: %d' % (avail_cap, avail_cap_tmp))
 
@@ -82,8 +82,7 @@ def test():
             volume_creation_option.set_name('volume-%d' % times)
             volume = test_stub.create_volume(volume_creation_option)
             test_obj_dict.add_volume(volume)
-            res = vol_ops.get_local_storage_capacity(host.uuid, ps.uuid)[0]
-            test_util.test_logger('Current available storage size: %d' % res.availableCapacity)
+            test_util.test_logger('Current available storage size: %d' % get_storage_capacity(ps_type, host.uuid, ps.uuid))
             volume.attach(vm)
         except Exception as e:
             test_util.test_logger("Unexpected volume Creation Failure in storage over provision test. ")
@@ -91,8 +90,7 @@ def test():
 
         times += 1
 
-    host_res2 = vol_ops.get_local_storage_capacity(host.uuid, ps.uuid)[0]
-    avail_cap2 = host_res2.availableCapacity
+    avail_cap2 = get_storage_capacity(ps_type, host.uuid, ps.uuid)
     if avail_cap2 > data_volume_size:
         test_util.test_fail('Available disk size: %d is still bigger than offering disk size: %d , after creating %d volumes.' % (avail_cap2, data_volume_size, target_volume_num))
     
@@ -110,6 +108,13 @@ def test():
     test_lib.lib_robot_cleanup(test_obj_dict)
 
     test_util.test_pass('Memory Over Provision Test Pass')
+
+def get_storage_capacity(ps_type, host_uuid, ps_uuid):
+    if ps_type == 'LocalStorage':
+        host_res = vol_ops.get_local_storage_capacity(host_uuid, ps_uuid)[0]
+    else:
+        host_res = test_lib.lib_get_storage_capacity(ps_uuids=[ps_uuid])
+    return host_res.availableCapacity
 
 #Will be called only if exception happens in test().
 def error_cleanup():

@@ -1094,13 +1094,15 @@ def lib_get_cpu_memory_capacity(zone_uuids = None, cluster_uuids = None, \
     return ret
 
 def lib_get_storage_capacity(zone_uuids = None, cluster_uuids = None, \
-        session_uuid = None):
+        ps_uuids = None, session_uuid = None):
     import apibinding.api_actions as api_actions
     action = api_actions.GetPrimaryStorageCapacityAction()
     if zone_uuids:
         action.zoneUuids = zone_uuids
     if cluster_uuids:
         action.clusterUuids = cluster_uuids
+    if ps_uuids:
+        actoin.primaryStorageUuids = ps_uuids
 
     ret = acc_ops.execute_action_with_session(action, session_uuid)
     return ret
