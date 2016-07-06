@@ -1,0 +1,1 @@
+../../virtualrouter/template_image/test_crt_temp_image.py

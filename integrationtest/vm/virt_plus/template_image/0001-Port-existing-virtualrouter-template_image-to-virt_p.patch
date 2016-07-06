@@ -1,0 +1,44 @@
+From c479cc96dd196d197a1252e6e55ff7b5b5ad9e10 Mon Sep 17 00:00:00 2001
+From: quarkonics <quarkonics@gmail.com>
+Date: Wed, 6 Jul 2016 13:30:11 +0800
+Subject: [PATCH] Port existing virtualrouter/template_image to virt_plus
+
+---
+ integrationtest/vm/virt_plus/integration.xml                       | 2 ++
+ integrationtest/vm/virt_plus/template_image/test_crt_temp_image.py | 1 +
+ integrationtest/vm/virt_plus/template_image/test_del_temp_image.py | 1 +
+ 3 files changed, 4 insertions(+)
+ create mode 120000 integrationtest/vm/virt_plus/template_image/test_crt_temp_image.py
+ create mode 120000 integrationtest/vm/virt_plus/template_image/test_del_temp_image.py
+
+diff --git a/integrationtest/vm/virt_plus/integration.xml b/integrationtest/vm/virt_plus/integration.xml
+index 05c392a..9f31cd5 100755
+--- a/integrationtest/vm/virt_plus/integration.xml
++++ b/integrationtest/vm/virt_plus/integration.xml
+@@ -44,5 +44,7 @@
+         <case timeout='1800'  repeat='1'>snapshot/test_crt_sp_from_vol_crt_from_img.py</case>
+         <!--<case timeout='2200' repeat='1' noparallel='True'>snapshot/test_change_max_sp_depth.py</case> -->
+         <case timeout='9000' repeat='1' noparallel='True'>snapshot/test_change_max_sp_depth_live_vm.py</case>
++        <case timeout='800' repeat='1'>template_image/test_crt_temp_image.py</case>
++        <case timeout='700' repeat='1'>template_image/test_del_temp_image.py</case>
+     </suite>
+ </integrationTest>
+diff --git a/integrationtest/vm/virt_plus/template_image/test_crt_temp_image.py b/integrationtest/vm/virt_plus/template_image/test_crt_temp_image.py
+new file mode 120000
+index 0000000..4b3f75c
+--- /dev/null
++++ b/integrationtest/vm/virt_plus/template_image/test_crt_temp_image.py
+@@ -0,0 +1 @@
++../../virtualrouter/template_image/test_crt_temp_image.py
+\ No newline at end of file
+diff --git a/integrationtest/vm/virt_plus/template_image/test_del_temp_image.py b/integrationtest/vm/virt_plus/template_image/test_del_temp_image.py
+new file mode 120000
+index 0000000..557b603
+--- /dev/null
++++ b/integrationtest/vm/virt_plus/template_image/test_del_temp_image.py
+@@ -0,0 +1 @@
++../../virtualrouter/template_image/test_del_temp_image.py
+\ No newline at end of file
+-- 
+1.8.3.1
+
