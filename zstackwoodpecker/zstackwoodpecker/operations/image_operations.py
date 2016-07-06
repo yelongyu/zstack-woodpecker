@@ -133,7 +133,6 @@ def create_template_from_snapshot(image_creation_option, session_uuid=None):
     else:
         action.name = name
 
-
     description = image_creation_option.get_description()
     if not description:
         action.description = "test create template from snapshot: %s" % \
@@ -153,10 +152,10 @@ def reconnect_sftp_backup_storage(bs_uuid, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def commit_volume_as_image(volume_uuid, image_creation_option, session_uuid = None):
+def commit_volume_as_image(image_creation_option, session_uuid = None):
     action = api_actions.CommitVolumeAsImageAction()
     action.name = image_creation_option.get_name()
-    action.volumeUuid = volume_uuid
+    action.volumeUuid = image_creation_option.get_root_volume_uuid()
     action.backupStorageUuids = image_creation_option.get_backup_storage_uuid_list()
     action.guestOsType = image_creation_option.get_guest_os_type()
     action.system = image_creation_option.get_system()

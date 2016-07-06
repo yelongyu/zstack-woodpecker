@@ -2659,9 +2659,21 @@ def lib_check_image_db_exist(image):
 
 #Should depend on backup storage uuid to get host info
 def lib_check_backup_storage_image_file(image):
-    image_url = image.url
-    host = lib_get_backup_storage_host(image.backupStorageUuid)
-    return lib_check_file_exist(host, image_url)
+    backupStorages = image.backupStorageRefs
+    bs_one = backupStorages[0]
+    bs = lib_get_backup_storage_by_uuid(bs_one.backupStorageUuid)
+    image_url = bs_one.installPath
+    host = lib_get_backup_storage_host(bs.uuid)
+    if bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+        image_info = image_url.split('://')[1].split('/')
+        image_url = '%s/registry/v1/repos/public/%s/manifests/revisions/%s' \
+                % (bs.url, image_info[0], image_info[1])
+        return lib_check_file_exist(host, image_url)
+
+    elif bs.type == inventory.SFTP_BACKUP_STORAGE_TYPE:
+        return lib_check_file_exist(host, image_url)
+
+    test_util.test_logger('Did not find suiteable checker for bs: %s, whose type is: %s ' % (bs.uuid, bs.type))
 
 def lib_check_file_exist(host, file_path):
     command = 'ls -l %s' % file_path

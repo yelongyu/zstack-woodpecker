@@ -3,6 +3,7 @@ zstack image test class
 
 @author: Youyk
 '''
+import apibinding.inventory as inventory 
 import zstackwoodpecker.header.header as zstack_header
 import zstackwoodpecker.header.image as image_header
 import zstackwoodpecker.operations.image_operations as img_ops
@@ -23,8 +24,14 @@ class ZstackTestImage(image_header.TestImage):
         '''
         Create image template from Root Volume
         '''
-        self.image = \
-                img_ops.create_root_volume_template(self.image_creation_option)
+        bs_uuid = self.image_creation_option.get_backup_storage_uuid_list()[0]
+        bs = test_lib.lib_get_backup_storage_by_uuid(bs_uuid)
+        if bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE :
+            self.image = \
+                    img_ops.commit_volume_as_image(self.image_creation_option)
+        else:
+            self.image = \
+                    img_ops.create_root_volume_template(self.image_creation_option)
         super(ZstackTestImage, self).create()
 
     def delete(self):

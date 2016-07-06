@@ -24,9 +24,14 @@ class zstack_kvm_image_file_checker(checker_header.TestChecker):
         bs_one = backupStorages[0]
         bs = test_lib.lib_get_backup_storage_by_uuid(bs_one.backupStorageUuid)
         if bs.type == inventory.SFTP_BACKUP_STORAGE_TYPE:
-            host = test_lib.lib_get_backup_storage_host(bs_one.backupStorageUuid)
-            image_url = backupStorages[0].installPath
-            self.judge(test_lib.lib_check_file_exist(host, image_url))
+            self.judge(test_lib.lib_check_backup_storage_image_file(image))
+
+        elif bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+            if self.test_obj.state == image_header.DELETED:
+                test_util.test_logger("skip image store image delete check, since the image won't be deleted until no vms refer to it.")
+                return self.judge(self.exp_result)
+            self.judge(test_lib.lib_check_backup_storage_image_file(image))
+
         elif bs.type == inventory.CEPH_BACKUP_STORAGE_TYPE:
             if self.test_obj.state == image_header.DELETED:
                 #https://github.com/zstackorg/zstack/issues/93#issuecomment-130935998
