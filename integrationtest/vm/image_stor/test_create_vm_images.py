@@ -34,7 +34,7 @@ def test():
 
     image_creation_option.set_root_volume_uuid(vm1.vm.rootVolumeUuid)
     image_creation_option.set_name('test_create_vim_images_vm3')
-    image_creation_option.set_platform('Linux')
+    #image_creation_option.set_platform('Linux')
     bs_type = backup_storage_list[0].type
     if bs_type == 'Ceph':
         origin_interval = conf_ops.change_global_config('ceph', 'imageCache.cleanup.interval', '1')

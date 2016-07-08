@@ -42,12 +42,14 @@ do
     esac
 done
 OPTIND=1
-[ $PULL_FLAG == 'N' ] && PULL_ZSTACK='Y' && PULL_ZSTACK_UTILITY='Y' && PULL_ZSTACK_WOODPECKER='Y' && PULL_ZSTACK_DASHBOARD='Y'
+[ $PULL_FLAG = 'N' ] && PULL_ZSTACK='Y' && PULL_ZSTACK_UTILITY='Y' && PULL_ZSTACK_WOODPECKER='Y' && PULL_ZSTACK_DASHBOARD='Y'
 
 ZSTACK_FOLDER=$ZSTACK_TEST_ROOT/zstack
 ZSTACK_UTILITY=$ZSTACK_TEST_ROOT/zstack-utility
 ZSTACK_WOODPECKER=$ZSTACK_TEST_ROOT/zstack-woodpecker
 ZSTACK_DASHBOARD=$ZSTACK_TEST_ROOT/zstack-dashboard
+MEVOCO_UI=$ZSTACK_TEST_ROOT/mevoco-ui
+ZSTACK_STORE=$ZSTACK_TEST_ROOT/zstack-store
 ZSTACK_BUILD=$ZSTACK_UTILITY/zstackbuild
 ZSTACK_ARCHIVE=$ZSTACK_TEST_ROOT/zstack_build_archive
 #zstack_build_archive="install.sh zstack-all-in-one-*.tgz woodpecker/zstacktestagent.tar.bz  woodpecker/conf/zstack.properties"
@@ -81,7 +83,7 @@ install_pkg git
 install_pkg bzip2
 install_pkg bc
 
-if [ $PULL_ZSTACK == 'Y' ]; then
+if [ $PULL_ZSTACK = 'Y' ]; then
     echo -n "${tab} : Pull latest zstack"
     [ ! -d $ZSTACK_FOLDER ] && echo_failure "not find zstack repo folder:  $ZSTACK_FOLDER"
     cd $ZSTACK_FOLDER
@@ -97,7 +99,7 @@ else
     echo -e "${tab} : Skip pulling zstack\n"
 fi
 
-if [ $PULL_ZSTACK_WOODPECKER == 'Y' ]; then
+if [ $PULL_ZSTACK_WOODPECKER = 'Y' ]; then
     echo -n "${tab} : Pull latest zstack-woodpecker"
     [ ! -d $ZSTACK_WOODPECKER ] && echo_failure "not find zstack woodpecker repo folder:  $ZSTACK_WOODPECKER"
     cd $ZSTACK_WOODPECKER
@@ -110,7 +112,7 @@ else
     echo -e "${tab} : Skip pulling zstack-woodpecker\n"
 fi
 
-if [ $PULL_ZSTACK_UTILITY == 'Y' ]; then
+if [ $PULL_ZSTACK_UTILITY = 'Y' ]; then
     echo -n "${tab} : Pull latest zstack-utility"
     [ ! -d $ZSTACK_UTILITY ] && echo_failure "not find zstack utility repo folder:  $ZSTACK_UTILTIY"
     cd $ZSTACK_UTILITY
@@ -125,17 +127,35 @@ else
     echo -e "${tab} : Skip pulling zstack-utility\n"
 fi
 
-if [ $PULL_ZSTACK_DASHBOARD == 'Y' ]; then
-    echo -n "${tab} : Pull latest zstack-dashboard"
-    [ ! -d $ZSTACK_DASHBOARD ] && echo_failure "not find zstack dashboard repo folder:  $ZSTACK_DASHBOARD"
-    cd $ZSTACK_DASHBOARD
+if [ $PREMIUM = 'Y' ]; then
+    echo -n "${tab} : Pull latest mevoco-ui"
+    [ ! -d $MEVOCO_UI ] && echo_failure "not find zstack dashboard repo folder:  $MEVOCO_UI"
+    cd $MEVOCO_UI
     git pull >/dev/null
     if [ $? -ne 0 ]; then
-        echo_failure "\'git pull\' failure in $ZSTACK_DASHBOARD"
+        echo_failure "\'git pull\' failure in $MEVOCO_UI"
     fi
-    echo_pass
+    echo -n "${tab} : Pull latest zstack-store"
+    [ ! -d $ZSTACK_STORE ] && echo_failure "not find zstack dashboard repo folder:  $ZSTACK_STORE"
+    cd $ZSTACK_STORE
+    git pull >/dev/null
+    if [ $? -ne 0 ]; then
+        echo_failure "\'git pull\' failure in $ZSTACK_STORE"
+    fi
+
 else
-    echo -e "${tab} : Skip pulling zstack-dashboard\n"
+    if [ $PULL_ZSTACK_DASHBOARD = 'Y' ]; then
+        echo -n "${tab} : Pull latest zstack-dashboard"
+        [ ! -d $ZSTACK_DASHBOARD ] && echo_failure "not find zstack dashboard repo folder:  $ZSTACK_DASHBOARD"
+        cd $ZSTACK_DASHBOARD
+        git pull >/dev/null
+        if [ $? -ne 0 ]; then
+            echo_failure "\'git pull\' failure in $ZSTACK_DASHBOARD"
+        fi
+        echo_pass
+    else
+        echo -e "${tab} : Skip pulling zstack-dashboard\n"
+    fi
 fi
 
 echo "${tab} : Build zstack all in one package"
