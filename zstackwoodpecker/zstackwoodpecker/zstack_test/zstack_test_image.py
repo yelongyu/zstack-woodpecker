@@ -26,7 +26,7 @@ class ZstackTestImage(image_header.TestImage):
         '''
         bs_uuid = self.image_creation_option.get_backup_storage_uuid_list()[0]
         bs = test_lib.lib_get_backup_storage_by_uuid(bs_uuid)
-        if bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE :
+        if hasattr(inventory, 'IMAGE_STORE_BACKUP_STORAGE_TYPE') and bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
             self.image = \
                     img_ops.commit_volume_as_image(self.image_creation_option)
         else:

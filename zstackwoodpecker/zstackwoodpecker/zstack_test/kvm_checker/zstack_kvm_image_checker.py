@@ -26,7 +26,7 @@ class zstack_kvm_image_file_checker(checker_header.TestChecker):
         if bs.type == inventory.SFTP_BACKUP_STORAGE_TYPE:
             self.judge(test_lib.lib_check_backup_storage_image_file(image))
 
-        elif bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+        elif hasattr(inventory, 'IMAGE_STORE_BACKUP_STORAGE_TYPE') and bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
             if self.test_obj.state == image_header.DELETED:
                 test_util.test_logger("skip image store image delete check, since the image won't be deleted until no vms refer to it.")
                 return self.judge(self.exp_result)

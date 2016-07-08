@@ -13,7 +13,7 @@ import apibinding.inventory as inventory
 def create_backup_storage(backup_storage_option, session_uuid=None):
     if backup_storage_option.type == inventory.CEPH_BACKUP_STORAGE_TYPE:
         return create_ceph_backup_storage(backup_storage_option, session_uuid=None)
-    elif backup_storage_option.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+    elif hasattr(inventory, 'IMAGE_STORE_BACKUP_STORAGE_TYPE') and backup_storage_option.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
         return create_image_store_backup_storage(backup_storage_option, session_uuid = None)
     elif backup_storage_option.type == inventory.SFTP_BACKUP_STORAGE_TYPE:
         return create_sftp_backup_storage(backup_storage_option, session_uuid=None)

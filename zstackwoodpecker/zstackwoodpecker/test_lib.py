@@ -2664,7 +2664,7 @@ def lib_check_backup_storage_image_file(image):
     bs = lib_get_backup_storage_by_uuid(bs_one.backupStorageUuid)
     image_url = bs_one.installPath
     host = lib_get_backup_storage_host(bs.uuid)
-    if bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+    if hasattr(inventory, 'IMAGE_STORE_BACKUP_STORAGE_TYPE') and bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
         image_info = image_url.split('://')[1].split('/')
         image_url = '%s/registry/v1/repos/public/%s/manifests/revisions/%s' \
                 % (bs.url, image_info[0], image_info[1])
