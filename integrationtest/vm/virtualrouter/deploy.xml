@@ -52,10 +52,10 @@
     <node name="$node1Name" ip="$node1Ip"
       username="$nodeUserName" password="$nodePassword"
       description="The default node 1. It could be same as test machine."/>
+    <!-- multi node setting
     <node name="$node2Name" dockerImage="$node2DockerImage" ip="$node2Ip" 
       username="$nodeUserName" password="$nodePassword"
       description="multi nodes have same catalinaHome as node 1" />
-    <!-- multi node setting
     <node name="$node3Name" dockerImage="$node3DockerImage" ip="$node3Ip" 
       username="$nodeUserName" password="$nodePassword"
       description="multi nodes have same catalinaHome as node 1"
