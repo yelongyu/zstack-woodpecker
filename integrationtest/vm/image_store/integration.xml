@@ -1,0 +1,6 @@
+<integrationTest>
+    <suite name="image store test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
+        <case timeout='300' repeat='4'>test_create_vm.py</case>
+        <case timeout='300' repeat='4'>test_create_vm_images.py</case>
+    </suite>
+</integrationTest>
