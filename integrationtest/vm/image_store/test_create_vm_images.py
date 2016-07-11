@@ -22,7 +22,7 @@ test_obj_dict = test_state.TestStateDict()
 def test():
     vm1 = test_stub.create_vm(vm_name = 'basic-test-vm')
     test_obj_dict.add_vm(vm1)
-    vm1.check()
+    #vm1.check()
     image_creation_option = test_util.ImageOption()
     backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm1.vm)
     for bs in backup_storage_list:
@@ -33,7 +33,7 @@ def test():
         test_util.test_skip('Not find image store type backup storage.')
 
     image_creation_option.set_root_volume_uuid(vm1.vm.rootVolumeUuid)
-    image_creation_option.set_name('test_create_vim_images_vm3')
+    image_creation_option.set_name('test_create_vm_images_vm1')
     #image_creation_option.set_platform('Linux')
     bs_type = backup_storage_list[0].type
     if bs_type == 'Ceph':
@@ -44,16 +44,16 @@ def test():
     image1.create()
     image1.check()
     test_obj_dict.add_image(image1)
-    vm2 = test_stub.create_vm(image_name = 'test_create_vim_images_vm3')
+    vm2 = test_stub.create_vm(image_name = 'test_create_vm_images_vm1')
     test_obj_dict.add_vm(vm2)
     image_creation_option.set_root_volume_uuid(vm2.vm.rootVolumeUuid)
-    image_creation_option.set_name('test_create_vim_images_vm4')
+    image_creation_option.set_name('test_create_vm_images_vm2')
     image2 = test_image.ZstackTestImage()
     image2.set_creation_option(image_creation_option)
     image2.create()
     test_obj_dict.add_image(image2)
     image2.check()
-    vm3 = test_stub.create_vm(image_name = 'test_create_vim_images_vm4')
+    vm3 = test_stub.create_vm(image_name = 'test_create_vm_images_vm2')
     test_obj_dict.add_vm(vm3)
     vm2.check()
     vm3.check()
