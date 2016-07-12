@@ -118,6 +118,7 @@ class TestStage(object):
         self.vip_current_state = 0
         self.sp_current_state = 0
         self.snapshot_live_cap = 0
+        self.vm_live_snapshot_cap = 0
         #the volume snapshot target VM might be not the VM testing picks up.
         #so we need to define a new VM state, which is for volume snapshot. 
         self.volume_vm_current_state = 0 
@@ -131,6 +132,7 @@ class TestStage(object):
     vip_state = 'vip_state'
     sp_state = 'sp_state'
     sp_live_cap = 'sp_live_cap'
+    vm_live_sp_cap = 'vm_live_sp_cap'
     volume_vm_state = 'volume_vm_state'
 
     Any = 'Any'
@@ -216,6 +218,12 @@ class TestStage(object):
             no_volume_migration: 300000
             }
 
+    vm_live_snapshot_cap_dict = {
+            Any: 1000000,
+            snapshot_live_creation: 2000000,
+            snapshot_no_live_creation: 3000000
+            }
+
     snapshot_state_dict = {
             Any: 10,
             data_snapshot_in_ps: 20,
@@ -243,8 +251,11 @@ class TestStage(object):
         Any: [ta.create_vm, ta.create_volume, ta.idel], 
     20002: [ta.stop_vm, ta.reboot_vm, ta.destroy_vm, ta.migrate_vm],
     30002: [ta.stop_vm, ta.reboot_vm, ta.destroy_vm],
-    20003: [ta.start_vm, ta.destroy_vm, ta.create_image_from_volume, ta.create_data_vol_template_from_volume], 
-    30023: [ta.start_vm, ta.destroy_vm, ta.create_image_from_volume, ta.create_data_vol_template_from_volume, ta.migrate_volume], 
+    20003: [ta.start_vm, ta.destroy_vm, ta.create_data_vol_template_from_volume], 
+    30023: [ta.start_vm, ta.destroy_vm, ta.create_data_vol_template_from_volume, ta.migrate_volume], 
+  2000002: [ta.create_image_from_volume],
+  2000003: [ta.create_image_from_volume],
+  3000003: [ta.create_image_from_volume],
         4: [ta.expunge_vm],
         5: [],
       211: [ta.delete_volume], 
@@ -421,6 +432,7 @@ class TestStage(object):
                 %s: %s; \
                 %s: %s; \
                 %s: %s; \
+                %s: %s; \
                 %s: %s' % \
                 (self.vm_state, self.vm_current_state, \
                 self.vm_volume_state, self.vm_volume_current_state, \
@@ -430,6 +442,7 @@ class TestStage(object):
                 self.vip_state, self.vip_current_state, \
                 self.sp_state, self.sp_current_state, \
                 self.sp_live_cap, self.snapshot_live_cap, \
+                self.vm_live_sp_cap, self.vm_live_snapshot_cap, \
                 self.volume_vm_state, self.volume_vm_current_state)
         return state
 
@@ -487,6 +500,12 @@ class TestStage(object):
     def get_snapshot_live_cap(self):
         return self.snapshot_live_cap
 
+    def set_vm_live_snapshot_cap(self, state)
+        self.vm_live_snapshot_cap = self.vm_live_snapshot_cap_dict[state]
+
+    def get_vm_live_snapshot_cap(self):
+        return self.vm_live_snapshot_cap
+
     def set_volume_vm_state(self, state):
         self.volume_vm_current_state  = self.vm_state_dict[state]
 
@@ -530,7 +549,8 @@ class TestStage(object):
         vm_action1 = self._get_normal_actions(self.vm_current_state)
         vm_action2 = self._get_normal_actions(self.vm_current_state + self.vm_live_migration_cap)
         vm_action3 = self._get_normal_actions(self.vm_current_state + self.vm_live_migration_cap + self.vm_volume_current_state)
-        return vm_action1 + vm_action2 + vm_action3
+        vm_action4 = self._get_normal_actions(self.vm_current_state + self.vm_live_snapshot_cap)
+        return vm_action1 + vm_action2 + vm_action3 + vm_action4
 
     def get_volume_actions(self):
         #if state is deleted state, will directly return. 

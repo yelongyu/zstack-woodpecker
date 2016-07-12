@@ -3677,6 +3677,14 @@ def lib_vm_random_operation(robot_test_obj):
 
         test_util.test_logger('target vm is : %s' % target_vm.get_vm().uuid)
         test_util.test_logger('target test obj: %s' % test_dict)
+
+        host_inv = lib_find_host_by_vm(vm)
+        if host_inv:
+            if lib_check_live_snapshot_cap(host_inv):
+                test_stage_obj.set_vm_live_snapshot_cap(test_stage.snapshot_live_creation)
+            else:
+                test_stage_obj.set_vm_live_snapshot_cap(test_stage.snapshot_no_live_creation)
+
         #Thirdly, check VM's volume status. E.g. if could add a new volume.
         vm_volumes = test_dict.get_volume_list(target_vm.get_vm().uuid)
         vm_volume_number = len(vm_volumes)
