@@ -500,7 +500,7 @@ class TestStage(object):
     def get_snapshot_live_cap(self):
         return self.snapshot_live_cap
 
-    def set_vm_live_snapshot_cap(self, state)
+    def set_vm_live_snapshot_cap(self, state):
         self.vm_live_snapshot_cap = self.vm_live_snapshot_cap_dict[state]
 
     def get_vm_live_snapshot_cap(self):

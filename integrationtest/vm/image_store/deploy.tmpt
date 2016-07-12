@@ -39,3 +39,7 @@ sshkeyImageName = vr
 sshkeyImageUrl = http://10.1.101.1/image/zstack-cloudinit.img
 sshkeyPubKey = 
 sshkeyPriKey_file = 
+
+imageName_windows = windows-test-img
+imageName_other = other-image-type
+
