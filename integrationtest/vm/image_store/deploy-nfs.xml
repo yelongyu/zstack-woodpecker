@@ -156,7 +156,6 @@
                 username="$hostUsername" password="$hostPassword" />
             -->
             </hosts>
-            <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
             <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
