@@ -1,6 +1,6 @@
 '''
 
-New Integration Test for creating image after doing volume snapshot
+New Integration Test for export image from image store, after doing some snapshot and commit image ops.
 
 @author: Youyk
 '''
@@ -18,6 +18,8 @@ import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
+exported_image_name1 = 'add_exported_image1'
+exported_image_name2 = 'add_exported_image2'
 
 def test():
     vm = test_stub.create_vm(vm_name = 'basic-test-vm', image_name = 'image_for_sg_test')
@@ -36,49 +38,52 @@ def test():
 
     #vm1.check()
     vm_root_volume_inv = test_lib.lib_get_root_volume(vm1.get_vm())
-    root_image_uuid = vm_root_volume_inv.rootImageUuid
-    vm_img_inv = test_lib.lib_get_image_by_uuid(root_image_uuid)
+    root_volume_uuid = vm_root_volume_inv.uuid
     test_util.test_dsc('create snapshot and check')
-    snapshots = test_obj_dict.get_volume_snapshot(vm_root_volume_inv.uuid)
+    snapshots = test_obj_dict.get_volume_snapshot(root_volume_uuid)
     snapshots.set_utility_vm(vm)
-    snapshots.create_snapshot('create_root_snapshot1')
-    snapshot1 = snapshots.get_current_snapshot()
-    snapshots.create_snapshot('create_root_snapshot2')
+    times = 1
+    #create 20 snapshots.
+    while (times < 21):
+        snapshots.create_snapshot('create_root_snapshot_%s' % times)
+        times += 1
 
-    image_creation_option.set_root_volume_uuid(root_image_uuid)
+    image_creation_option.set_root_volume_uuid(root_volume_uuid)
     image_creation_option.set_name('test_create_vm_images_vm1')
+    image_creation_option.set_format('qcow2')
     #image_creation_option.set_platform('Linux')
     bs_type = backup_storage_list[0].type
-    if bs_type == 'Ceph':
-        origin_interval = conf_ops.change_global_config('ceph', 'imageCache.cleanup.interval', '1')
 
     image1 = test_image.ZstackTestImage()
     image1.set_creation_option(image_creation_option)
     image1.create()
     test_obj_dict.add_image(image1)
-    image1.check()
-    vm2 = test_stub.create_vm(image_name = 'test_create_vm_images_vm1')
-    test_obj_dict.add_vm(vm2)
+    image1_url = image1.export()
 
-    #do vm check before snapshot check
-    vm.check()
-    snapshots.check()
-    snapshots.use_snapshot(snapshot1)
-    snapshots.create_snapshot('create_root_snapshot1.1')
-    
-    image_creation_option.set_name('test_create_vm_images_vm2')
+    image_creation_option.set_url(image1_url)
+    image_creation_option.set_name(exported_image_name1)
     image2 = test_image.ZstackTestImage()
     image2.set_creation_option(image_creation_option)
-    image2.create()
+    image2.add_root_volume_template()
     test_obj_dict.add_image(image2)
-    image2.check()
-    vm3 = test_stub.create_vm(image_name = 'test_create_vm_images_vm2')
+    image2_url = image2.export()
+
+    vm2 = test_stub.create_vm(image_name = exported_image_name1)
+    test_obj_dict.add_vm(vm2)
+    image_creation_option.set_url(image2_url)
+    image_creation_option.set_name(exported_image_name2)
+    image2 = test_image.ZstackTestImage()
+    image2.set_creation_option(image_creation_option)
+    image2.add_root_volume_template()
+
+    vm3 = test_stub.create_vm(image_name = exported_image_name2)
     test_obj_dict.add_vm(vm3)
-    snapshots.check()
+
+    #do vm check before snapshot check
     vm2.check()
     vm3.check()
     test_lib.lib_robot_cleanup(test_obj_dict)
-    test_util.test_pass('Create VM Image in Image Store Success')
+    test_util.test_pass('Expose Image Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
