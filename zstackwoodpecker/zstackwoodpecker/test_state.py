@@ -118,7 +118,7 @@ class TestStage(object):
         self.vip_current_state = 0
         self.sp_current_state = 0
         self.snapshot_live_cap = 0
-        self.vm_live_snapshot_cap = 0
+        self.vm_live_template_cap = 0
         #the volume snapshot target VM might be not the VM testing picks up.
         #so we need to define a new VM state, which is for volume snapshot. 
         self.volume_vm_current_state = 0 
@@ -151,6 +151,9 @@ class TestStage(object):
 
     vm_live_migration = 'support_vm_live_migration'
     no_vm_live_migration = 'no_support_vm_live_migration'
+
+    template_live_creation = 'template_supports_live_creation'
+    template_no_live_creation = 'template_does_not_support_live_creation'
 
     volume_migration = 'support_volume_migration'
     no_volume_migration = 'no_support_volume_migration'
@@ -218,10 +221,10 @@ class TestStage(object):
             no_volume_migration: 300000
             }
 
-    vm_live_snapshot_cap_dict = {
+    vm_live_template_cap_dict = {
             Any: 1000000,
-            snapshot_live_creation: 2000000,
-            snapshot_no_live_creation: 3000000
+            template_live_creation: 2000000,
+            template_no_live_creation: 3000000
             }
 
     snapshot_state_dict = {
@@ -442,7 +445,7 @@ class TestStage(object):
                 self.vip_state, self.vip_current_state, \
                 self.sp_state, self.sp_current_state, \
                 self.sp_live_cap, self.snapshot_live_cap, \
-                self.vm_live_sp_cap, self.vm_live_snapshot_cap, \
+                self.vm_live_sp_cap, self.vm_live_template_cap, \
                 self.volume_vm_state, self.volume_vm_current_state)
         return state
 
@@ -500,11 +503,11 @@ class TestStage(object):
     def get_snapshot_live_cap(self):
         return self.snapshot_live_cap
 
-    def set_vm_live_snapshot_cap(self, state):
-        self.vm_live_snapshot_cap = self.vm_live_snapshot_cap_dict[state]
+    def set_vm_live_template_cap(self, state):
+        self.vm_live_template_cap = self.vm_live_template_cap_dict[state]
 
-    def get_vm_live_snapshot_cap(self):
-        return self.vm_live_snapshot_cap
+    def get_vm_live_template_cap(self):
+        return self.vm_live_template_cap
 
     def set_volume_vm_state(self, state):
         self.volume_vm_current_state  = self.vm_state_dict[state]
@@ -549,7 +552,7 @@ class TestStage(object):
         vm_action1 = self._get_normal_actions(self.vm_current_state)
         vm_action2 = self._get_normal_actions(self.vm_current_state + self.vm_live_migration_cap)
         vm_action3 = self._get_normal_actions(self.vm_current_state + self.vm_live_migration_cap + self.vm_volume_current_state)
-        vm_action4 = self._get_normal_actions(self.vm_current_state + self.vm_live_snapshot_cap)
+        vm_action4 = self._get_normal_actions(self.vm_current_state + self.vm_live_template_cap)
         return vm_action1 + vm_action2 + vm_action3 + vm_action4
 
     def get_volume_actions(self):

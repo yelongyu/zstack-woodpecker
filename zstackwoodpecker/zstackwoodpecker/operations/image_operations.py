@@ -171,3 +171,14 @@ def commit_volume_as_image(image_creation_option, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, image_creation_option.get_session_uuid())
     return evt.inventory
 
+def export_image_from_backup_storage(image_uuid, bs_uuid, session_uuid = None):
+    action = api_actions.ExportImageFromBackupStorageAction()
+    action.imageUuid = image_uuid
+    action.backupStorageUuid = bs_uuid
+    #export image need to compose snapshots. This action is costing. 
+    action.timeout = 600000
+    test_util.action_logger('Export [image:] %s from [Backup Storage:] %s' % (image_uuid, bs_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_logger.test_logger('[Image:] % was exported as [url:] %s' %(image_uuid, evt.imageUrl))
+    return evt.imageUrl
+

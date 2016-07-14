@@ -54,6 +54,10 @@ class ZstackTestImage(image_header.TestImage):
         else:
             self.delete()
 
+    def export(self):
+        bs_uuid = self.image_creation_option.get_backup_storage_uuid_list()[0]
+        return img_ops.export_image_from_backup_storage(self.image.uuid, bs_uuid)
+
     def check(self):
         import zstackwoodpecker.zstack_test.checker_factory as checker_factory
         checker = checker_factory.CheckerFactory().create_checker(self)
