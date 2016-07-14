@@ -45,7 +45,7 @@ def test():
     snapshot1 = snapshots.get_current_snapshot()
     snapshots.create_snapshot('create_root_snapshot2')
 
-    image_creation_option.set_root_volume_uuid(root_image_uuid)
+    image_creation_option.set_root_volume_uuid(vm_root_volume_inv.uuid)
     image_creation_option.set_name('test_create_vm_images_vm1')
     #image_creation_option.set_platform('Linux')
     bs_type = backup_storage_list[0].type
@@ -62,8 +62,10 @@ def test():
 
     #do vm check before snapshot check
     vm.check()
+    vm1.stop()
     snapshots.check()
     snapshots.use_snapshot(snapshot1)
+    vm1.start()
     snapshots.create_snapshot('create_root_snapshot1.1')
     
     image_creation_option.set_name('test_create_vm_images_vm2')
