@@ -38,15 +38,14 @@ def test():
     image_creation_option.set_root_volume_uuid(vm1.vm.rootVolumeUuid)
     image_creation_option.set_name('test_create_vm_images_with_same_name')
     #image_creation_option.set_platform('Linux')
-    bs_type = backup_storage_list[0].type
-    if bs_type == 'Ceph':
-        origin_interval = conf_ops.change_global_config('ceph', 'imageCache.cleanup.interval', '1')
 
     image1 = test_image.ZstackTestImage()
     image1.set_creation_option(image_creation_option)
     image1.create()
     test_obj_dict.add_image(image1)
     image1.check()
+
+    vm1.destroy()
 
     image_creation_option.set_root_volume_uuid(vm2.vm.rootVolumeUuid)
     image_creation_option.set_name('test_create_vm_images_with_same_name')

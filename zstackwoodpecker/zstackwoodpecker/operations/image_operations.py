@@ -179,6 +179,6 @@ def export_image_from_backup_storage(image_uuid, bs_uuid, session_uuid = None):
     action.timeout = 600000
     test_util.action_logger('Export [image:] %s from [Backup Storage:] %s' % (image_uuid, bs_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    test_logger.test_logger('[Image:] % was exported as [url:] %s' %(image_uuid, evt.imageUrl))
+    test_util.test_logger('[Image:] %s was exported as [url:] %s' %(image_uuid, evt.imageUrl))
     return evt.imageUrl
 

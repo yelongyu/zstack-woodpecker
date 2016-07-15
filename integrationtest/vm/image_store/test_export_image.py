@@ -18,8 +18,8 @@ import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
-exported_image_name1 = 'add_exported_image1'
-exported_image_name2 = 'add_exported_image2'
+exported_image_name1 = 'add_exported_image3'
+exported_image_name2 = 'add_exported_image4'
 
 def test():
     vm = test_stub.create_vm(vm_name = 'basic-test-vm', image_name = 'image_for_sg_test')
