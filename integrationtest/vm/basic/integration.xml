@@ -19,7 +19,6 @@
         <case timeout="120" >account/test_multi_accounts_vm_ops.py</case>
         <case timeout="120" >test_get_vm_console_address.py</case>
         <case timeout="480" >test_get_multi_vm_console_address.py</case>
-        <case timeout="120" >test_get_vm_console_address_logout.py</case>
         <case timeout="220" >test_vm_ha_never_stop.py</case>
 	<case timeout="220" noparallel='True'>test_vm_ha_never_stop_disable_host.py</case>
         <case timeout="220" noparallel='True'>test_vm_ha_never_stop_disable_ha.py</case>
