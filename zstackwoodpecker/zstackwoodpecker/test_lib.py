@@ -4437,6 +4437,9 @@ def lib_get_local_storage_volume_host(volume_uuid):
 def lib_request_console_access(vm_uuid, session_uuid=None):
     return cons_ops.request_console_access(vm_uuid, session_uuid)
 
+def lib_get_vm_console_address(vm_uuid, session_uuid=None):
+    return cons_ops.get_vm_console_address(vm_uuid, session_uuid)
+
 def lib_get_ha_enable():
     return conf_ops.get_global_config_value('ha', 'enable')
 
