@@ -145,9 +145,8 @@
         <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
         <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
         <primaryStorages>
-	  <sharedMountPointPrimaryStorage name="$sharedMountPointPrimaryStorageName"
-            description="Test SMP PS"
-            url="$sharedMountPointPrimaryStorageUrl" />
+          <nfsPrimaryStorage name="$nfsPrimaryStorageName"
+            description="NFSTest1" url="$nfsPrimaryStorageUrl" />
         </primaryStorages>
   
         <clusters>
@@ -163,7 +162,7 @@
               <host name="$hostName4" description="Test4" managementIp="$hostIp4"
                 username="$hostUsername4" password="$hostPassword4" port="$hostPort4"/>
             </hosts>
-            <primaryStorageRef>$sharedMountPointPrimaryStorageName</primaryStorageRef>
+            <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
             <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
