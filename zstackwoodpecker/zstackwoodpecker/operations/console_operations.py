@@ -31,5 +31,5 @@ def get_vm_console_address(uuid, session_uuid=None):
     action.uuid = uuid
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Get VM Console Address [hostname:] %s [port:] %s' % \
-            (evt.inventory.hostIp, evt.inventory.port))
-    return evt.inventory
+            (evt.hostIp, evt.port))
+    return evt
