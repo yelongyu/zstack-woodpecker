@@ -21,6 +21,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstacklib.utils.sizeunit as sizeunit
+import apibinding.inventory as inventory
 
 _config_ = {
     'timeout' : 1000,
@@ -64,6 +65,10 @@ def test():
     ps = res_ops.query_resource_with_num(res_ops.PRIMARY_STORAGE, cond, limit = 1)
     if not ps:
         test_util.test_skip('No Enabled/Connected primary storage was found, skip test.' )
+        return True
+
+    if ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
+        test_util.test_skip('skip test on ceph.' )
         return True
 
     host = random.choice(hosts)
