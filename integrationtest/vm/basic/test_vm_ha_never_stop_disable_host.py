@@ -32,11 +32,13 @@ def test():
     vm.destroy()
     vm.check()
     host_ops.change_host_state(host_uuid, "enable")
+    time.sleep(60)
     test_util.test_pass('VM ha never stop Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     host_ops.change_host_state(host_uuid, "enable")
+    time.sleep(60)
     global vm
     if vm:
         vm.destroy()
