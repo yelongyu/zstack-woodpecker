@@ -33,7 +33,9 @@ def test():
     robot_test_obj.set_exclusive_actions_list(\
             test_state.TestAction.sg_actions \
             + test_state.TestAction.vip_actions \
-            + test_state.TestAction.snapshot_actions)
+            + test_state.TestAction.snapshot_actions \
+            + test_state.create_data_vol_template_from_volume \
+            + test_state.create_image_from_volume)
     priority_actions = test_state.TestAction.volume_actions * 4
     priority_action_obj = action_select.ActionPriority()
     priority_action_obj.add_priority_action_list(priority_actions)
