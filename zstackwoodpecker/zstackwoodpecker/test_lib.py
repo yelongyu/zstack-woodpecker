@@ -4434,6 +4434,12 @@ def lib_get_local_storage_volume_host(volume_uuid):
         cond = res_ops.gen_query_conditions('uuid', '=', host_uuid)
         return res_ops.query_resource(res_ops.HOST, cond)[0]
 
+def lib_get_image_store_backup_storage():
+    for zone in res_ops.query_resource(res_ops.ZONE):
+        bs = lib_get_backup_storage_uuid_list_by_zone(zone.uuid)
+        if bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+            return bs
+
 def lib_request_console_access(vm_uuid, session_uuid=None):
     return cons_ops.request_console_access(vm_uuid, session_uuid)
 

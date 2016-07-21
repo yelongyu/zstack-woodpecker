@@ -30,12 +30,16 @@ def test():
     test_util.test_dsc('Random Test Begin. Test target: 4 coexisting running VM (not include VR).')
     robot_test_obj = test_util.Robot_Test_Object()
     robot_test_obj.set_test_dict(test_dict)
+    extra_exclusive_actions = []
+    if test_lib.lib_get_image_store_backup_storage() != None:
+        extra_exclusive_actions = [test_state.TestAction.create_data_vol_template_from_volume,
+                                   test_state.TestAction.create_image_from_volume]
+
     robot_test_obj.set_exclusive_actions_list(\
             test_state.TestAction.sg_actions \
             + test_state.TestAction.vip_actions \
             + test_state.TestAction.snapshot_actions \
-            + test_state.TestAction.create_data_vol_template_from_volume \
-            + test_state.TestAction.create_image_from_volume)
+            + extra_exclusive_actions)
     priority_actions = test_state.TestAction.volume_actions * 4
     priority_action_obj = action_select.ActionPriority()
     priority_action_obj.add_priority_action_list(priority_actions)
