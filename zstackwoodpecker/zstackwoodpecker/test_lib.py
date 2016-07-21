@@ -4436,9 +4436,10 @@ def lib_get_local_storage_volume_host(volume_uuid):
 
 def lib_get_image_store_backup_storage():
     for zone in res_ops.query_resource(res_ops.ZONE):
-        bs = lib_get_backup_storage_uuid_list_by_zone(zone.uuid)
-        if bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
-            return bs
+        for bs_uuid in lib_get_backup_storage_uuid_list_by_zone(zone.uuid):
+            bs = lib_get_backup_storage_by_uuid(bs_uuid)
+            if bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+                return bs
 
 def lib_request_console_access(vm_uuid, session_uuid=None):
     return cons_ops.request_console_access(vm_uuid, session_uuid)
@@ -4472,4 +4473,3 @@ def lib_add_vm_sshkey(vm_uuid, sshkey, session_uuid = None):
             vm_uuid, \
             '%s::%s' % (vm_header.SSHKEY, sshkey),\
             session_uuid)
-
