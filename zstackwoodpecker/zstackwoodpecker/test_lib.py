@@ -4468,6 +4468,9 @@ def lib_set_ha_selffencer_storagechecker_timeout(value):
 def lib_get_reserved_primary_storage():
     return conf_ops.get_global_config_value('primaryStrorage', 'reservedCapacity')
 
+def lib_set_primary_storage_imagecache_gc_interval(value):
+    return conf_ops.change_global_config('primaryStorage', 'imageCache.garbageCollector.interval', value)
+
 def lib_add_vm_sshkey(vm_uuid, sshkey, session_uuid = None):
     return tag_ops.create_system_tag('VmInstanceVO', \
             vm_uuid, \
