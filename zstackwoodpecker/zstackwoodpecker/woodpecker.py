@@ -342,6 +342,15 @@ class WoodPecker(object):
 			result = "FAIL"
                 else:
 			result = "TIMEOUT"
+		
+		if result == "FAIL" or result == "TIMEOUT":
+                    link = ['ln -s']
+                    log_name = os.path.basename(case_log_path)
+                    suite_name = os.path.dirname(case_log_path[len(self.log_dir):]).replace('/', '_')
+                    link.append(os.path.join("../", case_log_path[len(self.result_dir)+1:]))
+                    err_log_link = os.path.join(self.err_log_dir, suite_name + '-' + log_name)
+                    link.append(err_log_link)
+                    shell.call(' '.join(link))
 
                 if case_repeat != 0:
                         brief = "%s %s.%s %s\n" % (suite.name, case.name, case_repeat, result)
@@ -673,7 +682,7 @@ class WoodPecker(object):
             report.append('Logs of error cases:')
             report.append(equal_sign)
             for ec in err_case:
-                link = ['ln -s']
+                link = ['ln -sf']
                 log_name = os.path.basename(ec)
                 suite_name = os.path.dirname(ec[len(self.log_dir):]).replace('/', '_')
                 link.append(os.path.join("../", ec[len(self.result_dir)+1:]))
