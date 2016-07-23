@@ -67,8 +67,8 @@ def test():
         test_util.test_skip('No Enabled/Connected primary storage was found, skip test.' )
         return True
 
-    if ps[0].type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
-        test_util.test_skip('skip test on ceph.' )
+    if ps[0].type == inventory.CEPH_PRIMARY_STORAGE_TYPE or ps[0].type == 'SharedMountPoint':
+        test_util.test_skip('skip test on ceph and smp.' )
         return True
 
     host = random.choice(hosts)
