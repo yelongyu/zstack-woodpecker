@@ -71,10 +71,8 @@ def test():
     host_username = os.environ.get('hostUsername')
     host_password = os.environ.get('hostPassword')
     rsp = test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd, 180)
-    if rsp:
-        test_util.test_logger("host may have been shutdown")
-    else:
-	test_util.test_fail("host is expected to shutdown after its network down for a while")
+    if not rsp:
+	test_util.test_logger("host is expected to shutdown after its network down for a while")
 
     test_util.test_logger("wait for 600 seconds")
     time.sleep(600)
