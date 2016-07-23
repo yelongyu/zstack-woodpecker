@@ -68,7 +68,7 @@ def test():
     image.check()
 
     if bs_type == 'Ceph':
-        conf_ops.change_global_config('ceph', 'imageCache.cleanup.interval', origin_internal)
+        conf_ops.change_global_config('ceph', 'imageCache.cleanup.interval', origin_interval)
 
     test_util.test_pass('Create Image Template Test Success')
 
