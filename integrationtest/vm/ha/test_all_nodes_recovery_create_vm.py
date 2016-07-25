@@ -38,7 +38,7 @@ def test():
             (host_username, host_password, node1_ip, host_username, host_password, node2_ip, zstack_ha_vip)
     rsp = test_lib.lib_execute_ssh_cmd(node1_ip, host_username, host_password, cmd, 180)
     time.sleep(180)
-    test_stub.exercise_connection(1200)
+    test_stub.exercise_connection(600)
 
     vm = test_stub.create_basic_vm()
     vm.check()
