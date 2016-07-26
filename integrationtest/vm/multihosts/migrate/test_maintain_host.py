@@ -55,6 +55,8 @@ def test():
 
     vm1.check()
     vm2.check()
+    if not test_lib.lib_check_vm_live_migration_cap(vm1.vm) or not test_lib.lib_check_vm_live_migration_cap(vm2.vm):
+        test_util.test_skip('skip migrate if live migrate not supported')
 
     test_util.test_dsc('Create volume and check')
     disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
