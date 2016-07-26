@@ -69,6 +69,8 @@ def create_vr_vm(vm_name, image_name, l3_name):
 
 def migrate_vm_to_random_host(vm):
     test_util.test_dsc("migrate vm to random host")
+    if not test_lib.lib_check_vm_live_migration_cap(vm.vm):
+        test_util.test_skip('skip migrate if live migrate not supported')
     target_host = test_lib.lib_find_random_host(vm.vm)
     current_host = test_lib.lib_find_host_by_vm(vm.vm)
     vm.migrate(target_host.uuid)
