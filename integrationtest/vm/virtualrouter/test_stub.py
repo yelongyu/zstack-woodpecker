@@ -270,3 +270,14 @@ def get_vr_by_private_l3_name(l3_name):
         vr = vrs[0]
     return vr
 
+def exercise_parallel(func, ops_num=10, thread_threshold=3):
+    for ops_id in range(ops_num):
+        thread = threading.Thread(target=func, args=(ops_id, ))
+        while threading.active_count() > thread_threshold:
+            time.sleep(0.5)
+        exc = sys.exc_info()
+        thread.start()
+
+    while threading.activeCount() > 1:
+        exc = sys.exc_info()
+        time.sleep(0.1)
