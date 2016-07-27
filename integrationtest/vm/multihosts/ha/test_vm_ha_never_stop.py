@@ -14,6 +14,7 @@ import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.operations.ha_operations as ha_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
+import apibinding.inventory as inventory
 import time
 import os
 
@@ -31,6 +32,9 @@ def test():
     global storagechecker_timeout
     if test_lib.lib_get_ha_enable() != 'true':
         test_util.test_skip("vm ha not enabled. Skip test")
+
+    if not test_lib.lib_check_vm_live_migration_cap(vm.vm):
+        test_util.test_skip('skip ha if live migrate not supported')
 
     max_attempts = test_lib.lib_get_ha_selffencer_maxattempts()
     test_lib.lib_set_ha_selffencer_maxattempts('3')
@@ -62,6 +66,10 @@ def test():
     vm = test_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
     vm.create()
+    ps = test_lib.lib_get_primary_storage_by_uuid(vm.get_vm().allVolumes[0].primaryStorageUuid)
+    if ps.type == inventory.LOCAL_STORAGE_TYPE:
+        test_util.test_skip('Skip test on localstorage')
+
     #vm.check()
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
     host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid
