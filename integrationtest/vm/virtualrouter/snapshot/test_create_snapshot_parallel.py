@@ -42,34 +42,15 @@ def test_create_snapshot(ops_id):
 
     snapshot1 = snapshots.get_current_snapshot()
     snapshots.create_snapshot('create_snapshot2')
+    snapshot2 = snapshots.get_current_snapshot()
     snapshots.check()
-    snapshots.create_snapshot('create_snapshot3')
-    snapshots.check()
-    snapshot3 = snapshots.get_current_snapshot()
 
     snapshots.use_snapshot(snapshot1)
     snapshots.create_snapshot('create_snapshot1.1.1')
     snapshots.check()
-    snapshots.create_snapshot('create_snapshot1.1.2')
-    snapshots.check()
-
-    snapshots.use_snapshot(snapshot1)
-    snapshots.create_snapshot('create_snapshot1.2.1')
-    snapshots.check()
-    snapshot1_2_1 = snapshots.get_current_snapshot()
-    snapshots.create_snapshot('create_snapshot1.2.2')
-    snapshots.check()
-
-    snapshots.use_snapshot(snapshot3)
-    snapshots.check()
-    snapshots.create_snapshot('create_snapshot4')
-    snapshots.check()
 
     test_util.test_dsc('<%s>Delete snapshot, volume and check' % (ops_id))
-    snapshots.delete_snapshot(snapshot3)
-    snapshots.check()
-
-    snapshots.delete_snapshot(snapshot1_2_1)
+    snapshots.delete_snapshot(snapshot2)
     snapshots.check()
 
     snapshots.delete()
@@ -81,7 +62,7 @@ def test_create_snapshot(ops_id):
     vm.destroy()
 
 def test():
-    test_stub.exercise_parallel(test_create_snapshot, 10, 2)
+    test_stub.exercise_parallel(test_create_snapshot, 6, 2)
     test_util.test_pass('Parallel Create Snapshot test Success')
 
 #Will be called only if exception happens in test().
