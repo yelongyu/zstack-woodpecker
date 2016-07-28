@@ -40,8 +40,8 @@ def test():
     ps = ps[0]
     ps_type = ps.type
     #TODO: Fix ceph testing
-    if ps_type == 'Ceph':
-        test_util.test_skip('skip test for ceph.')
+    if ps_type == 'Ceph' or ps_type == 'SharedMountPoint':
+        test_util.test_skip('skip test for ceph and smp.')
 
     over_provision_rate = 2.5
     target_volume_num = 12

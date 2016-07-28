@@ -48,6 +48,11 @@ def test():
         test_util.test_skip('available disk capacity:%d is too small, skip test.' % avail_cap)
         return True
 
+    pss = res_ops.query_resource_with_num(res_ops.PRIMARY_STORAGE, cond)
+    for ps in pss:
+        if ps[0].type == inventory.CEPH_PRIMARY_STORAGE_TYPE or ps[0].type == 'SharedMountPoint':
+            test_util.test_skip('skip test on ceph and smp.' )
+
     original_rate = test_lib.lib_set_provision_storage_rate(over_provision_rate1)
     data_volume_size = int(over_provision_rate1 * (avail_cap - kept_disk_size) / target_volume_num)
     disk_offering_option = test_util.DiskOfferingOption()
