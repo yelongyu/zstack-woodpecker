@@ -125,14 +125,15 @@ def prepare_mevoco_test_env(vm_inv):
 def prepare_test_env(vm_inv, aio_target):
     zstack_install_script = os.environ['zstackInstallScript']
     target_file = '/root/zstack_installer.sh'
-    test_lib.lib_scp_file_to_vm(vm_inv, zstack_install_script, target_file)
+    vm_ip = vm_inv.vmNics[0].ip
+    vm_username = test_lib.lib_get_vm_username(vm_inv)
+    vm_password = test_lib.lib_get_vm_password(vm_inv)
+    ssh.scp_file(zstack_install_script, target_file, vm_ip, vm_username, vm_password)
 
     all_in_one_pkg = os.environ['zstackPkg']
-    test_lib.lib_scp_file_to_vm(vm_inv, all_in_one_pkg, aio_target)
+    ssh.scp_file(all_in_one_pkg, aio_target, vm_ip, vm_username, vm_password)
 
-    vm_ip = vm_inv.vmNics[0].ip
-    ssh.make_ssh_no_password(vm_ip, test_lib.lib_get_vm_username(vm_inv), \
-            test_lib.lib_get_vm_password(vm_inv))
+    ssh.make_ssh_no_password(vm_ip, vm_username, vm_password)
 
 def upgrade_zstack(ssh_cmd, target_file, tmp_file):
     env_var = "WEBSITE='%s'" % 'localhost'
