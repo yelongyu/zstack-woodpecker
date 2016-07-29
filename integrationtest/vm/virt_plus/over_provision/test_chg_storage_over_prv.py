@@ -10,6 +10,7 @@ import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
+import apibinding.inventory as inventory
 
 _config_ = {
         'timeout' : 1000,
@@ -50,7 +51,7 @@ def test():
 
     pss = res_ops.query_resource_with_num(res_ops.PRIMARY_STORAGE, cond)
     for ps in pss:
-        if ps[0].type == inventory.CEPH_PRIMARY_STORAGE_TYPE or ps[0].type == 'SharedMountPoint':
+        if ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE or ps.type == 'SharedMountPoint':
             test_util.test_skip('skip test on ceph and smp.' )
 
     original_rate = test_lib.lib_set_provision_storage_rate(over_provision_rate1)
