@@ -30,20 +30,20 @@
         <case timeout='700' repeat='1'>volume/test_crt_vm_24_volumes.py</case>
         <case timeout='700' repeat='1'>volume/test_volume_ops_on_stopped_vm.py</case>
         <case timeout='700' repeat='1'>volume/test_crt_vm_from_dvt.py</case>
-        <case timeout='3600'  repeat='1'>snapshot/test_create_snapshot.py</case>
-        <case timeout='1800'  repeat='1'>snapshot/test_create_sp_after_delete.py</case>
-        <case timeout='1800'  repeat='1'>snapshot/test_create_image_by_snapshot.py</case>
+        <case timeout='1200'  repeat='1'>snapshot/test_crt_windows_sp_in_live_vm.py</case>
+        <case timeout='1200'  repeat='1'>snapshot/test_crt_other_sp_in_live_vm.py</case>
+        <!--<case timeout='2200' repeat='1' noparallel='True'>snapshot/test_change_max_sp_depth.py</case> -->
+        <case timeout='1000' repeat='1' noparallel='True'>host/test_reconnect_host.py</case>
         <case timeout='1800'  repeat='1'>snapshot/test_crt_sp_for_both_root_data_vol.py</case>
+        <case timeout='1800'  repeat='1'>snapshot/test_create_image_by_snapshot.py</case>
+        <case timeout='1800'  repeat='1'>snapshot/test_create_sp_after_delete.py</case>
+        <case timeout='1800'  repeat='1'>snapshot/test_crt_sp_from_vol_crt_from_img.py</case>
+        <case timeout='3600'  repeat='1'>snapshot/test_crt_sp_in_live_vm.py</case>
         <case timeout='2400'  repeat='1'>snapshot/test_crt_sp_in_stopped_vm2.py</case>
         <case timeout='2200'  repeat='1'>snapshot/test_crt_sp_in_stopped_vm3.py</case>
         <case timeout='2200'  repeat='1'>snapshot/test_crt_sp_in_stopped_vm.py</case>
+        <case timeout='3600'  repeat='1'>snapshot/test_create_snapshot.py</case>
         <case timeout='1800'  repeat='1'>snapshot/test_delete_snapshot_on_running_vm.py</case>
-        <case timeout='3600'  repeat='1'>snapshot/test_crt_sp_in_live_vm.py</case>
-        <case timeout='1200'  repeat='1'>snapshot/test_crt_windows_sp_in_live_vm.py</case>
-        <case timeout='1200'  repeat='1'>snapshot/test_crt_other_sp_in_live_vm.py</case>
-        <case timeout='1800'  repeat='1'>snapshot/test_crt_sp_from_vol_crt_from_img.py</case>
-        <!--<case timeout='2200' repeat='1' noparallel='True'>snapshot/test_change_max_sp_depth.py</case> -->
         <case timeout='9000' repeat='1' noparallel='True'>snapshot/test_change_max_sp_depth_live_vm.py</case>
-        <case timeout='1000' repeat='1' noparallel='True'>host/test_reconnect_host.py</case>
     </suite>
 </integrationTest>
