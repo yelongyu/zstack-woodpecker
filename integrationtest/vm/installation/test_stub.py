@@ -97,13 +97,19 @@ def execute_shell_in_process_stdout(cmd, tmp_file, timeout = 1200, no_timeout_ex
     test_util.test_logger('[shell:] %s [logs]: %s' % (cmd, stdout))
     return (process.returncode, stdout)
 
+def scp_file_to_vm(vm_inv, src_file, target_file):
+    vm_ip = vm_inv.vmNics[0].ip
+    vm_username = test_lib.lib_get_vm_username(vm_inv)
+    vm_password = test_lib.lib_get_vm_password(vm_inv)
+    ssh.scp_file(src_file, target_file, vm_ip, vm_username, vm_password)
 
 def copy_id_dsa(vm_inv, ssh_cmd, tmp_file):
     src_file = '/root/.ssh/id_dsa'
     target_file = '/root/.ssh/id_dsa'
     if not os.path.exists(src_file):
         os.system("ssh-keygen -t dsa -N '' -f %s" % src_file)
-    test_lib.lib_scp_file_to_vm(vm_inv, src_file, target_file)
+
+    scp_file_to_vm(vm_inv, src_file, target_file)
     cmd = '%s "chmod 600 /root/.ssh/id_dsa"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
 
@@ -112,11 +118,12 @@ def copy_id_dsa_pub(vm_inv):
     target_file = '/root/.ssh/authorized_keys'
     if not os.path.exists(src_file):
         os.system("ssh-keygen -t dsa -N '' -f %s" % src_file)
-    test_lib.lib_scp_file_to_vm(vm_inv, src_file, target_file)
+    scp_file_to_vm(vm_inv, src_file, target_file)
+
 
 def prepare_mevoco_test_env(vm_inv):
     all_in_one_pkg = os.environ['zstackPkg']
-    test_lib.lib_scp_file_to_vm(vm_inv, all_in_one_pkg, '/root/zizhu.bin')
+    scp_file_to_vm(vm_inv, all_in_one_pkg, '/root/zizhu.bin')
 
     vm_ip = vm_inv.vmNics[0].ip
     ssh.make_ssh_no_password(vm_ip, test_lib.lib_get_vm_username(vm_inv), \
@@ -128,10 +135,10 @@ def prepare_test_env(vm_inv, aio_target):
     vm_ip = vm_inv.vmNics[0].ip
     vm_username = test_lib.lib_get_vm_username(vm_inv)
     vm_password = test_lib.lib_get_vm_password(vm_inv)
-    ssh.scp_file(zstack_install_script, target_file, vm_ip, vm_username, vm_password)
+    scp_file_to_vm(vm_inv, zstack_install_script, target_file)
 
     all_in_one_pkg = os.environ['zstackPkg']
-    ssh.scp_file(all_in_one_pkg, aio_target, vm_ip, vm_username, vm_password)
+    scp_file_to_vm(vm_inv, all_in_one_pkg, aio_target)
 
     ssh.make_ssh_no_password(vm_ip, vm_username, vm_password)
 
