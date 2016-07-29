@@ -33,9 +33,6 @@ def test():
     if test_lib.lib_get_ha_enable() != 'true':
         test_util.test_skip("vm ha not enabled. Skip test")
 
-    if not test_lib.lib_check_vm_live_migration_cap(vm.vm):
-        test_util.test_skip('skip ha if live migrate not supported')
-
     max_attempts = test_lib.lib_get_ha_selffencer_maxattempts()
     test_lib.lib_set_ha_selffencer_maxattempts('3')
     storagechecker_timeout = test_lib.lib_get_ha_selffencer_storagechecker_timeout()
@@ -66,6 +63,9 @@ def test():
     vm = test_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
     vm.create()
+    if not test_lib.lib_check_vm_live_migration_cap(vm.vm):
+        test_util.test_skip('skip ha if live migrate not supported')
+
     ps = test_lib.lib_get_primary_storage_by_uuid(vm.get_vm().allVolumes[0].primaryStorageUuid)
     if ps.type == inventory.LOCAL_STORAGE_TYPE:
         test_util.test_skip('Skip test on localstorage')
