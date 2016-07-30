@@ -37,6 +37,8 @@ def test():
     cmd = "zstack-ctl install_ha --host1-info %s:%s@%s --host2-info %s:%s@%s --vip %s --recovery-from-this-host" % \
             (host_username, host_password, node1_ip, host_username, host_password, node2_ip, zstack_ha_vip)
     rsp = test_lib.lib_execute_ssh_cmd(node1_ip, host_username, host_password, cmd, 180)
+    if not rsp:
+        rsp = test_lib.lib_execute_ssh_cmd(node2_ip, host_username, host_password, cmd, 180)
     time.sleep(180)
     test_stub.exercise_connection(600)
 
