@@ -341,6 +341,7 @@ class WoodPecker(object):
                         self.case_failure = True
 			result = "FAIL"
                 else:
+                        self.case_failure = True
 			result = "TIMEOUT"
 		
 		if result == "FAIL" or result == "TIMEOUT":
