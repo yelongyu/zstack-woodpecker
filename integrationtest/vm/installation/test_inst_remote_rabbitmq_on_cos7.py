@@ -97,7 +97,7 @@ def test():
     if process_result != 0:
         test_fail('zstack install ui failed in vm:%s' % vm1_inv.uuid)
 
-    cmd = '%s "zstack-ctl start_node"' % ssh_cmd1
+    cmd = '%s "zstack-ctl start"' % ssh_cmd1
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
         if 'no management-node-ready message received within' in open(tmp_file).read():
