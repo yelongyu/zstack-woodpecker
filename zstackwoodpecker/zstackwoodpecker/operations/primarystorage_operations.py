@@ -91,3 +91,12 @@ def change_primary_storage_state(primary_storage_uuid, state, session_uuid=None)
             % (primary_storage_uuid, state))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
+
+def cleanup_imagecache_on_primary_storage(primary_storage_uuid, session_uuid=None):
+    action = api_actions.CleanUpImageCacheOnPrimaryStorageAction()
+    action.uuid = primary_storage_uuid
+    action.timeout = 300000
+    test_util.action_logger('Cleanup Imagecache on Primary Storage [uuid:] %s' \
+            % (primary_storage_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
