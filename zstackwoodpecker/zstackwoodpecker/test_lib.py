@@ -2679,7 +2679,7 @@ def lib_check_file_exist(host, file_path):
     command = 'ls -l %s' % file_path
     eout = ''
     try:
-        (ret, out, eout) = ssh.execute(command, host.managementIp, host.username, host.password)
+        (ret, out, eout) = ssh.execute(command, host.managementIp, host.username, host.password, port=host.sshPort)
         test_util.test_logger('[file:] %s was found in [host:] %s' % (file_path, host.managementIp))
         return True
     except:
