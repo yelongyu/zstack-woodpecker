@@ -53,8 +53,10 @@ def test():
     ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
 
     vm.destroy()
+    vm.expunge()
 
     new_image.delete()
+    new_image.expunge()
     ps_ops.cleanup_imagecache_on_primary_storage(ps.uuid)
     if ps.type == inventory.LOCAL_STORAGE_TYPE:
         image_cache_path = "%s/imagecache/template/%s/%s.qcow2" % (ps.mountPath, new_image.image.uuid, new_image.image.uuid)
