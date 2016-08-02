@@ -97,6 +97,7 @@ def test():
 
     vm2.destroy()
     vm2.expunge()
+    ps_ops.cleanup_imagecache_on_primary_storage(ps.uuid)
     if ps.type == inventory.LOCAL_STORAGE_TYPE:
         image_cache_path = "%s/imagecache/template/%s/%s.qcow2" % (ps.mountPath, new_image.image.uuid, new_image.image.uuid)
         if test_lib.lib_check_file_exist(host2, image_cache_path):
