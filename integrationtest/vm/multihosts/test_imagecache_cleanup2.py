@@ -78,6 +78,8 @@ def test():
     vm2 = test_vm_header.ZstackTestVm()
     vm2.set_creation_option(vm_creation_option)
     vm2.create()
+    host2 = test_lib.lib_find_host_by_vm(vm2.get_vm())
+    test_obj_dict.add_vm(vm2)
 
     new_image.delete()
     new_image.expunge()
@@ -90,10 +92,19 @@ def test():
     ps_ops.cleanup_imagecache_on_primary_storage(ps.uuid)
     if ps.type == inventory.LOCAL_STORAGE_TYPE:
         image_cache_path = "%s/imagecache/template/%s/%s.qcow2" % (ps.mountPath, new_image.image.uuid, new_image.image.uuid)
-        print host
         if test_lib.lib_check_file_exist(host, image_cache_path):
             test_util.test_fail('image cache is expected to be deleted')
-#    elif ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
+
+    vm2.destroy()
+    vm2.expunge()
+    if ps.type == inventory.LOCAL_STORAGE_TYPE:
+        image_cache_path = "%s/imagecache/template/%s/%s.qcow2" % (ps.mountPath, new_image.image.uuid, new_image.image.uuid)
+        if test_lib.lib_check_file_exist(host2, image_cache_path):
+            test_util.test_fail('image cache is expected to be deleted')
+    elif ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
+        image_cache_path = "%s/imagecache/template/%s/%s.qcow2" % (ps.mountPath, new_image.image.uuid, new_image.image.uuid)
+        if test_lib.lib_check_file_exist(host2, image_cache_path):
+            test_util.test_fail('image cache is expected to be deleted')
 #    elif ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
 #    elif ps.type == 'SharedMountPoint':
 
