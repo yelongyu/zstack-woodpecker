@@ -57,6 +57,11 @@ def test():
 
     new_image.delete()
     new_image.expunge()
+    if ps.type == 'SharedMountPoint':
+        test_util.test_skip('CleanUpImageCacheOnPrimaryStorage not supported on SMP storage, skip test.')
+    elif ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
+        test_util.test_skip('ceph is not directly using image cache, skip test.')
+
     ps_ops.cleanup_imagecache_on_primary_storage(ps.uuid)
     if ps.type == inventory.LOCAL_STORAGE_TYPE:
         image_cache_path = "%s/imagecache/template/%s/%s.qcow2" % (ps.mountPath, new_image.image.uuid, new_image.image.uuid)
