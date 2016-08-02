@@ -53,10 +53,12 @@ def test():
     ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
 
     vm.destroy()
-    vm.expunge()
+    if test_lib.lib_get_vm_delete_policy() != 'Direct':
+        vm.expunge()
 
     new_image.delete()
-    new_image.expunge()
+    if test_lib.lib_get_image_delete_policy() != 'Direct':
+        new_image.expunge()
     if ps.type == 'SharedMountPoint':
         test_util.test_skip('CleanUpImageCacheOnPrimaryStorage not supported on SMP storage, skip test.')
     elif ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
