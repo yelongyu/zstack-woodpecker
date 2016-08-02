@@ -69,7 +69,10 @@ def test():
         image_cache_path = "%s/imagecache/template/%s/%s.qcow2" % (ps.mountPath, new_image.image.uuid, new_image.image.uuid)
         if test_lib.lib_check_file_exist(host, image_cache_path):
             test_util.test_fail('image cache is expected to be deleted')
-#    elif ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
+    elif ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
+        image_cache_path = "%s/imagecache/template/%s/%s.qcow2" % (ps.mountPath, new_image.image.uuid, new_image.image.uuid)
+        if test_lib.lib_check_file_exist(host, image_cache_path):
+            test_util.test_fail('image cache is expected to be deleted')
 #    elif ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
 #    elif ps.type == 'SharedMountPoint':
 
