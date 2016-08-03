@@ -1508,10 +1508,10 @@ def lib_network_check(target_ip, target_port, expect_result=True):
     try:
         shell.call('echo "quit" | telnet %s %s|grep "Escape character"' % (target_ip, target_port))
         #shell.call('nc -w1 %s %s' % (target_ip, target_port))
-        test_util.test_logger('check target: %s port: %s connection success')
+        test_util.test_logger('check target: %s port: %s connection success' % (target_ip, target_port))
         return True == expect_result
     except:
-        test_util.test_logger('check target: %s port: %s connection failed')
+        test_util.test_logger('check target: %s port: %s connection failed' % (target_ip, target_port))
         return False == expect_result
 
 def lib_wait_target_down(target_ip, target_port, timeout=60):
