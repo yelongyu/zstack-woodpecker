@@ -12,6 +12,10 @@
         <case timeout='3600' repeat='2'>vms/test_4vm_vm_ops.py</case>
 	<!--<case timeout='660' repeat='1' noparallel='True'>ha/test_vm_ha_self_fence_no_shutdown.py</case>-->
 	<!--<case timeout='660' repeat='1' noparallel='True'>ha/test_vm_ha_self_fence.py</case>-->
+        <case timeout='600' repeat='1' noparallel='True'>test_imagecache_cleanup.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_imagecache_cleanup2.py</case>
+	<case timeout='600' repeat='1' noparallel='True'>migrate/test_migrate_stopped_vm_imagecache_cleanup.py</case>
+	<case timeout='600' repeat='1' noparallel='True'>migrate/test_migrate_vm_imagecache_cleanup.py</case>
 	<case timeout='1260' repeat='1' noparallel='True'>ha/test_vm_ha_never_stop.py</case>
     </suite>
 </integrationTest>
