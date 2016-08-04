@@ -72,11 +72,37 @@ def stop_vm(vm_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
+def stop_vm_scheduler(vm_uuid, type, name, start_timestamp=None, interval=None, cron=None, session_uuid=None):
+    action = api_actions.StopVmInstanceSchedulerAction()
+    action.vmUuid = vm_uuid
+    action.type = type
+    action.schedulerName = name
+    action.startTimeStamp = start_timestamp
+    action.interval = interval
+    action.cron = cron
+    action.timeout = 120000
+    test_util.action_logger('Stop VM Scheduler [uuid:] %s [type:] %s [startTimeStamp:] %s [interval:] %s [cron:] %s' % (vm_uuid, type, start_timestamp, interval, cron))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
 def start_vm(vm_uuid, session_uuid=None, timeout=120000):
     action = api_actions.StartVmInstanceAction()
     action.uuid = vm_uuid
     action.timeout = timeout
     test_util.action_logger('Start VM [uuid:] %s' % vm_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def start_vm_scheduler(vm_uuid, type, name, start_timestamp=None, interval=None, cron=None, session_uuid=None, timeout=120000):
+    action = api_actions.StartVmInstanceSchedulerAction()
+    action.vmUuid = vm_uuid
+    action.type = type
+    action.schedulerName = name
+    action.startTimeStamp = start_timestamp
+    action.interval = interval
+    action.cron = cron
+    action.timeout = timeout
+    test_util.action_logger('Start VM Scheduler [uuid:] %s [type:] %s [startTimeStamp:] %s [interval:] %s [cron:] %s' % (vm_uuid, type, start_timestamp, interval, cron))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
