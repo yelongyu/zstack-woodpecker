@@ -95,7 +95,7 @@ def start_vm(vm_uuid, session_uuid=None, timeout=120000):
     return evt.inventory
 
 def start_vm_scheduler(vm_uuid, type, name, start_date=None, interval=None, repeatCount=None, cron=None, session_uuid=None, timeout=120000):
-    action = api_actions.StartVmInstanceSchedulerAction()
+    action = api_actions.CreateStartVmInstanceSchedulerAction()
     action.vmUuid = vm_uuid
     action.type = type
     action.schedulerName = name
