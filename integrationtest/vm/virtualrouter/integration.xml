@@ -73,6 +73,7 @@
         <case timeout='800'  repeat='1'>lb/test_create_lb_source.py</case>
         <case timeout='800'  repeat='1'>lb/test_create_lb.py</case>
         <case timeout='800'  repeat='1'>lb/test_lb_health_check.py</case>
+	<case timeout='1800' repeat='1'>scheduler/test_create_start_stop_vm_simple_scheduler.py</case>
         <!--<case timeout='800'  repeat='1'>snapshot/test_backup_snapshot.py</case>
         <case timeout='2400' repeat='1' noparallel='True'>snapshot/test_create_100_snapshots.py</case> -->
         <case timeout='1800'  repeat='1'>snapshot/test_create_image_by_snapshot.py</case>
