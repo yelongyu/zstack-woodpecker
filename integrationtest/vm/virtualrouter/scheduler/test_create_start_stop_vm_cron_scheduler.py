@@ -29,10 +29,10 @@ def test():
     else:
         test_stub.sleep_util((start_date+59)/60*60+60)
         
+    start_date = int(time.time())
     schd1 = vm_ops.stop_vm_scheduler(vm.get_vm().uuid, 'cron', 'cron_stop_vm_scheduler', None, None, None, '0 0/2 * * * ?')
     schd2 = vm_ops.start_vm_scheduler(vm.get_vm().uuid, 'cron', 'cron_start_vm_scheduler', None, None, None, '59 0/2 * * * ?')
 
-    schd2 = vm_ops.start_vm_scheduler(vm.get_vm().uuid, 'simple', 'simple_start_vm_scheduler', start_date+120, 120)
     test_stub.sleep_util(start_date+58)
     vm.update()
     if not test_lib.lib_is_vm_running(vm.get_vm()):
