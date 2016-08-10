@@ -35,7 +35,7 @@ def test():
         test_stub.sleep_util(start_date + 60 + 120*i + 5)
         test_util.test_logger('check VM status at %s, VM is expected to stop' % (start_date + 60 + 120*i + 5))
         vm.update()
-        if vm.get_vm().state != 'Stoping' and vm.get_vm().state != 'Stopped':
+        if vm.get_vm().state != 'Stopping' and vm.get_vm().state != 'Stopped':
             test_util.test_fail('VM is expected to stop')
 
         test_stub.sleep_util(start_date + 60 + 120*i + 65)
