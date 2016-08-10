@@ -9,16 +9,19 @@ import os
 import time
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
+import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.operations.scheduler_operations as schd_ops
+import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 test_stub = test_lib.lib_get_test_stub()
+test_obj_dict = test_state.TestStateDict()
 vm = None
 schd = None
 
 def query_snapshot_number(snapshot_name):
     cond = res_ops.gen_query_conditions('name', '=', snapshot_name)
-    return res_ops.query_resource_count(res_ops.VOLUME_SNAPSHOT, cond, session_uuid)
+    return res_ops.query_resource_count(res_ops.VOLUME_SNAPSHOT, cond)
 
 def test():
     global vm
@@ -41,7 +44,7 @@ def test():
     start_date = int(time.time())
     sp_option = test_util.SnapshotOption()
     sp_option.set_name('simple_schduler_snapshot')
-    sp_option.set_volume_uuid(self.target_volume.get_volume().uuid)
+    sp_option.set_volume_uuid(volume.get_volume().uuid)
 
     schd = vol_ops.create_snapshot_scheduler(sp_option, 'simple', 'simple_create_snapshot_scheduler',  start_date+60, 120)
 
@@ -49,14 +52,14 @@ def test():
     for i in range(0, 3):
         test_util.test_logger('round %s' % (i))
         test_stub.sleep_util(start_date + 60 + 120*i - 2)
-        test_util.test_logger('check volume snapshot number at %s, there should be %s' % (start_date + 60 + 120*i - 2), snapshot_num)
+        test_util.test_logger('check volume snapshot number at %s, there should be %s' % (start_date + 60 + 120*i - 2, snapshot_num))
 	new_snapshot_num = query_snapshot_number('simple_schduler_snapshot')
 	if snapshot_num != new_snapshot_num:
             test_util.test_fail('there sholuld be %s snapshots' % (snapshot_num))
 	snapshot_num += 1
 
         test_stub.sleep_util(start_date + 60 + 120*i + 60)
-        test_util.test_logger('check volume snapshot number at %s, there should be %s' % (start_date + 60 + 120*i + 65), snapshot_num+1)
+        test_util.test_logger('check volume snapshot number at %s, there should be %s' % (start_date + 60 + 120*i + 65, snapshot_num+1))
 	new_snapshot_num = query_snapshot_number('simple_schduler_snapshot')
 	if snapshot_num != new_snapshot_num:
             test_util.test_fail('there sholuld be %s snapshots' % (snapshot_num))
@@ -67,11 +70,9 @@ def test():
 
 #Will be called only if exception happens in test().
 def error_cleanup():
-    global vm
     global schd
 
-    if vm:
-        vm.destroy()
+    test_lib.lib_error_cleanup(test_obj_dict)
 
     if schd:
 	schd_ops.delete_scheduler(schd.uuid)
