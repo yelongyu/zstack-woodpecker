@@ -75,5 +75,3 @@ def error_cleanup():
 
     if schd:
 	schd_ops.delete_scheduler(schd.uuid)
-
-test()
