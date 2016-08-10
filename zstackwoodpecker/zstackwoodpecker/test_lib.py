@@ -4479,3 +4479,9 @@ def lib_add_vm_sshkey(vm_uuid, sshkey, session_uuid = None):
             vm_uuid, \
             '%s::%s' % (vm_header.SSHKEY, sshkey),\
             session_uuid)
+
+def lib_get_local_management_server_log_path():
+    return shell.call('zstack-ctl status | grep "log file:" | awk \'{print $3}\'')
+
+def lib_get_local_management_server_log():
+    return shell.call('cat %s' % (lib_get_local_management_server_log_path()))
