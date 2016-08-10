@@ -38,7 +38,7 @@ def test():
         test_util.test_logger('round %s' % (i))
         test_stub.sleep_util(start_date + 60 + 120*i + 5)
         vm.update()
-        test_util.test_logger('check VM status at %s, VM is expected to stay in state %s' % (start_date + 60 + 120*i + 5), vm_state)
+        test_util.test_logger('check VM status at %s, VM is expected to stay in state %s' % (start_date + 60 + 120*i + 5, vm_state))
         if vm.get_vm().state != vm_state:
             test_util.test_fail('VM is expected to stay in state %s' % (vm_state))
 
