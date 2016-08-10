@@ -62,6 +62,7 @@ LOAD_BALANCER = 'LoadBalancer'
 LOAD_BALANCER_LISTENER = 'LoadBalancerListener'
 LOCAL_STORAGE_RESOURCE_REF = 'LocalStorageResourceRef'
 IMAGE_STORE_BACKUP_STORAGE = 'ImageStoreBackupStorage'
+SCHEDULER = 'Scheduler'
 
 def find_item_by_uuid(inventories, uuid):
     for item in inventories:
@@ -351,6 +352,8 @@ def _gen_query_action(resource):
         action = api_actions.QueryLocalStorageResourceRefAction()
     elif resource == IMAGE_STORE_BACKUP_STORAGE:
         action = api_actions.QueryImageStoreBackupStorageAction()
+    elif resource == SCHEDULER:
+        action = api_actions.QuerySchedulerAction()
 
     return action
 
@@ -442,4 +445,3 @@ def safely_get_resource(res_name, cond = [], session_uuid = None, \
             curr_count += limit
 
     return res_list
-

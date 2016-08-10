@@ -284,3 +284,9 @@ def exercise_parallel(func, ops_num=10, thread_threshold=3):
     while threading.activeCount() > 1:
         exc = sys.exc_info()
         time.sleep(0.1)
+
+def sleep_util(timestamp):
+    while True:
+        if time.time() >= timestamp:
+            break
+        time.sleep(0.5)

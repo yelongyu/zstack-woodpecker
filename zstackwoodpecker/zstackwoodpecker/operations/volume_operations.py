@@ -113,6 +113,28 @@ def create_snapshot(snapshot_option, session_uuid=None):
             (action.name, snapshot.uuid, action.volumeUuid))
     return snapshot
 
+def create_snapshot_scheduler(snapshot_option, type, name, start_date=None, interval=None, repeatCount=None, cron=None, session_uuid=None):
+    action = api_actions.CreateVolumeSnapshotSchedulerAction()
+    action.volumeUuid = snapshot_option.get_volume_uuid()
+    action.snapShotName = snapshot_option.get_name()
+    if not action.snapShotName:
+        action.snapShotName = 'scheduler_snapshot_for_volume_%s' % action.volumeUuid
+    action.description = snapshot_option.get_description()
+    action.type = type
+    action.schedulerName = name
+    action.startDate = start_date
+    action.interval = interval
+    action.repeatCount = repeatCount
+    action.cron = cron
+    action.timeout = 120000
+    if snapshot_option.get_session_uuid():
+        session_uuid = snapshot_option.get_session_uuid()
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    snapshot = evt.inventory
+    test_util.action_logger('Scheduler Create [Snapshot:] %s for [volume:] %s [type:] %s [startDate:] %s [interval:] %s [repeatCount:] %s [cron:] %s' % \
+            (action.snapShotName, action.volumeUuid, type, start_date, interval, repeatCount, cron))
+    return snapshot
+
 def delete_snapshot(snapshot_uuid, session_uuid=None):
     action = api_actions.DeleteVolumeSnapshotAction()
     action.uuid = snapshot_uuid

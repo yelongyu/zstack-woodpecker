@@ -80,6 +80,7 @@ def test():
 
     vm.destroy()
     vm.expunge()
+    ps_ops.cleanup_imagecache_on_primary_storage(ps.uuid)
     if ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
         image_cache_path = "%s/imagecache/template/%s/%s.qcow2" % (ps.mountPath, new_image.image.uuid, new_image.image.uuid)
         if test_lib.lib_check_file_exist(host, image_cache_path):
@@ -87,7 +88,6 @@ def test():
 #    elif ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
 #    elif ps.type == 'SharedMountPoint':
 
-    ps_ops.cleanup_imagecache_on_primary_storage(ps.uuid)
     test_util.test_pass('Migrate VM Test Success')
 
 #Will be called only if exception happens in test().
