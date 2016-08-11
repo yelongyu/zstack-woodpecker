@@ -27,12 +27,12 @@ def update_scheduler(uuid, type, name, start_date=None, interval=None, repeatCou
     action.uuid = uuid
     action.schedulerType = type
     action.schedulerName = name
-    action.startDate = startDate
+    action.startDate = start_date
     action.schedulerInterval = interval
     action.repeatCount = repeatCount
     action.cronScheduler = cron
 
-    test_util.action_logger('Update [Scheduler:] %s [schdulerType:] % [schdulerName:] %s [startDate:] %s [interval:] %s [repeatCount:] %s [cron:] %s' \
+    test_util.action_logger('Update [Scheduler:] %s [schdulerType:] %s [schdulerName:] %s [startDate:] %s [interval:] %s [repeatCount:] %s [cron:] %s' \
                     % (uuid, type, name, start_date, interval, repeatCount, cron))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Scheduler:] %s is updated.' % uuid)
