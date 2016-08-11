@@ -31,19 +31,19 @@ def test():
     stop_msg_mismatch = 0
     start_msg_mismatch = 0
     for i in range(0, 58):
-        if not test_lib.lib_find_in_local_management_server_log(start_date+i, 'StopVmInstanceMsg', vm.get_vm().uuid):
+        if not test_lib.lib_find_in_local_management_server_log(start_date+i, '[msg received]: {"org.zstack.header.vm.StopVmInstanceMsg', vm.get_vm().uuid):
             stop_msg_mismatch += 1
             test_util.test_warn('StopVmInstanceMsg is expected to execute at %s' % (start_date+i))
         if i % 2 == 0:
-            if not test_lib.lib_find_in_local_management_server_log(start_date+i, 'StartVmInstanceMsg', vm.get_vm().uuid):
+            if not test_lib.lib_find_in_local_management_server_log(start_date+i, '[msg received]: {"org.zstack.header.vm.StartVmInstanceMsg', vm.get_vm().uuid):
                 start_msg_mismatch += 1
                 test_util.test_warn('StartVmInstanceMsg is expected to execute at %s' % (start_date+i))
         else:
-            if test_lib.lib_find_in_local_management_server_log(start_date+i, 'StartVmInstanceMsg', vm.get_vm().uuid):
+            if test_lib.lib_find_in_local_management_server_log(start_date+i, '[msg received]: {"org.zstack.header.vm.StartVmInstanceMsg', vm.get_vm().uuid):
                 start_msg_mismatch += 1
                 test_util.test_warn('StartVmInstanceMsg is not expected to execute at %s' % (start_date+i))
 
-    if stop_msg_mismatch > 5:
+    if stop_msg_mismatch > 10:
         test_util.test_fail('%s of 58 StopVmInstanceMsg not executed at expected timestamp' % (stop_msg_mismatch))
 
     if start_msg_mismatch > 5:
@@ -53,12 +53,13 @@ def test():
     start_date = int(time.time())
     schd_ops.update_scheduler(schd1.uuid, 'simple', 'simple_stop_vm_scheduler2', start_date+60, 2, repeatCount=None)
     schd_ops.update_scheduler(schd2.uuid, 'simple', 'simple_start_vm_scheduler2', start_date+60, 1, repeatCount=None)
+    change_date = int(time.time())
     test_stub.sleep_util(start_date+59)
 
-    for i in range(0, 58):
-        if test_lib.lib_find_in_local_management_server_log(start_date+i, 'StopVmInstanceMsg', vm.get_vm().uuid):
+    for i in range(2, 58-change_date+start_date):
+        if test_lib.lib_find_in_local_management_server_log(change_date+i, '[msg received]: {"org.zstack.header.vm.StopVmInstanceMsg', vm.get_vm().uuid):
             test_util.test_fail('StopVmInstanceMsg is not expected to execute at %s' % (start_date+i))
-        if test_lib.lib_find_in_local_management_server_log(start_date+i, 'StartVmInstanceMsg', vm.get_vm().uuid):
+        if test_lib.lib_find_in_local_management_server_log(change_date+i, '[msg received]: {"org.zstack.header.vm.StartVmInstanceMsg', vm.get_vm().uuid):
             test_util.test_fail('StartVmInstanceMsg is not expected to execute at %s' % (start_date+i))
    
     test_stub.sleep_util(start_date+120)
@@ -66,22 +67,22 @@ def test():
     start_msg_mismatch = 0
     for i in range(0, 58):
         if i % 2 == 0:
-            if not test_lib.lib_find_in_local_management_server_log(start_date+60+i, 'StopVmInstanceMsg', vm.get_vm().uuid):
+            if not test_lib.lib_find_in_local_management_server_log(start_date+60+i, '[msg received]: {"org.zstack.header.vm.StopVmInstanceMsg', vm.get_vm().uuid):
                 stop_msg_mismatch += 1
                 test_util.test_warn('StopVmInstanceMsg is expected to execute at %s' % (start_date+60+i))
         else:
-            if test_lib.lib_find_in_local_management_server_log(start_date+60+i, 'StopVmInstanceMsg', vm.get_vm().uuid):
+            if test_lib.lib_find_in_local_management_server_log(start_date+60+i, '[msg received]: {"org.zstack.header.vm.StopVmInstanceMsg', vm.get_vm().uuid):
                 stop_msg_mismatch += 1
                 test_util.test_warn('StopVmInstanceMsg is not expected to execute at %s' % (start_date+60+i))
 
-        if not test_lib.lib_find_in_local_management_server_log(start_date+60+i, 'StartVmInstanceMsg', vm.get_vm().uuid):
+        if not test_lib.lib_find_in_local_management_server_log(start_date+60+i, '[msg received]: {"org.zstack.header.vm.StartVmInstanceMsg', vm.get_vm().uuid):
                 start_msg_mismatch += 1
                 test_util.test_warn('StartVmInstanceMsg is expected to execute at %s' % (start_date+60+i))
 
     if stop_msg_mismatch > 5:
         test_util.test_fail('%s of 58 StopVmInstanceMsg not executed at expected timestamp' % (stop_msg_mismatch))
 
-    if start_msg_mismatch > 5:
+    if start_msg_mismatch > 10:
         test_util.test_fail('%s of 58 StartVmInstanceMsg not executed at expected timestamp' % (start_msg_mismatch))
 
     schd_ops.delete_scheduler(schd1.uuid)

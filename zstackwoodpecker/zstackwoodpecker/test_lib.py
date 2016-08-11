@@ -4489,11 +4489,12 @@ def lib_get_local_management_server_log():
 def lib_find_in_local_management_server_log(timestamp, *keywords):
     datetime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(timestamp))
     cmd = 'grep "%s" %s' % (datetime, lib_get_local_management_server_log_path().strip())
-    for keyword in keywords:
-        cmd += ' | grep %s' % (keyword)
-    print cmd
     try:
-        shell.call(cmd)
+        out = shell.call(cmd)
     except:
         return False
+    for keyword in keywords:
+	if out.find(keyword) < 0:
+        	return False
+
     return True
