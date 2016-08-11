@@ -4485,3 +4485,15 @@ def lib_get_local_management_server_log_path():
 
 def lib_get_local_management_server_log():
     return shell.call('cat %s' % (lib_get_local_management_server_log_path()))
+
+def lib_find_in_local_management_server_log(timestamp, *keywords):
+    datetime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(timestamp))
+    cmd = 'grep "%s" %s' % (datetime, lib_get_local_management_server_log_path().strip())
+    for keyword in keywords:
+        cmd += ' | grep %s' % (keyword)
+    print cmd
+    try:
+        shell.call(cmd)
+    except:
+        return False
+    return True
