@@ -87,7 +87,10 @@ def test():
 
     schd_ops.delete_scheduler(schd1.uuid)
     schd_ops.delete_scheduler(schd2.uuid)
-    vm.destroy()
+    try:
+        vm.destroy()
+    except:
+	test_util.test_logger('expected exception when destroy VM since too many queued task')
     test_util.test_pass('Create Simple VM Stop Start Scheduler Success')
 
 #Will be called only if exception happens in test().
@@ -97,7 +100,10 @@ def error_cleanup():
     global schd2
 
     if vm:
-        vm.destroy()
+        try:
+            vm.destroy()
+	except:
+            test_util.test_logger('expected exception when destroy VM since too many queued task')
 
     if schd1:
 	schd_ops.delete_scheduler(schd1.uuid)
