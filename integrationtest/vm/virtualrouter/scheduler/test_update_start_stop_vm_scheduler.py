@@ -49,7 +49,7 @@ def test():
     if start_msg_mismatch > 5:
         test_util.test_fail('%s of 58 StartVmInstanceMsg not executed at expected timestamp' % (start_msg_mismatch))
 
-    test_util.test_logger('Update stop and start VM scheduler to start after 500 seconds')
+    test_util.test_logger('Update stop and start VM scheduler to start after 60 seconds')
     start_date = int(time.time())
     schd_ops.update_scheduler(schd1.uuid, 'simple', 'simple_stop_vm_scheduler2', start_date+60, 2, repeatCount=None)
     schd_ops.update_scheduler(schd2.uuid, 'simple', 'simple_start_vm_scheduler2', start_date+60, 1, repeatCount=None)
