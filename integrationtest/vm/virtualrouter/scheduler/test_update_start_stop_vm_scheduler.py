@@ -58,9 +58,9 @@ def test():
 
     for i in range(2, 58-change_date+start_date):
         if test_lib.lib_find_in_local_management_server_log(change_date+i, '[msg received]: {"org.zstack.header.vm.StopVmInstanceMsg', vm.get_vm().uuid):
-            test_util.test_fail('StopVmInstanceMsg is not expected to execute at %s' % (start_date+i))
+            test_util.test_fail('StopVmInstanceMsg is not expected to execute at %s' % (change_date+i))
         if test_lib.lib_find_in_local_management_server_log(change_date+i, '[msg received]: {"org.zstack.header.vm.StartVmInstanceMsg', vm.get_vm().uuid):
-            test_util.test_fail('StartVmInstanceMsg is not expected to execute at %s' % (start_date+i))
+            test_util.test_fail('StartVmInstanceMsg is not expected to execute at %s' % (change_date+i))
    
     test_stub.sleep_util(start_date+120)
     stop_msg_mismatch = 0
