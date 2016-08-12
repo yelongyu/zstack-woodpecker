@@ -73,6 +73,7 @@
         <case timeout='800'  repeat='1'>lb/test_create_lb_source.py</case>
         <case timeout='800'  repeat='1'>lb/test_create_lb.py</case>
         <case timeout='800'  repeat='1'>lb/test_lb_health_check.py</case>
+	<case timeout='600' repeat='1'>scheduler/test_create_1000_start_vm_simple_scheduler.py</case>
 	<case timeout='600' repeat='1'>scheduler/test_create_start_vm_scheduler_startdate_0.py</case>
 	<case timeout='600' repeat='1'>scheduler/test_update_start_stop_vm_scheduler.py</case>
 	<case timeout='600' repeat='1'>scheduler/test_update_start_stop_vm_scheduler_type.py</case>
