@@ -4493,8 +4493,33 @@ def lib_find_in_local_management_server_log(timestamp, *keywords):
         out = shell.call(cmd)
     except:
         return False
-    for keyword in keywords:
-	if out.find(keyword) < 0:
-        	return False
 
-    return True
+    for line in out.splitlines():
+        line_match = True
+        for keyword in keywords:
+            if line.find(keyword) < 0:
+                line_match = False
+                break
+        if line_match:
+            return True
+        
+    return False
+
+def lib_count_in_local_management_server_log(timestamp, *keywords):
+    datetime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(timestamp))
+    cmd = 'grep "%s" %s' % (datetime, lib_get_local_management_server_log_path().strip())
+    try:
+        out = shell.call(cmd)
+    except:
+        return 0
+    match = 0
+    for line in out.splitlines():
+        line_match = True
+        for keyword in keywords:
+            if line.find(keyword) < 0:
+                line_match = False
+                break
+        if line_match:
+            match += 1
+        
+    return match
