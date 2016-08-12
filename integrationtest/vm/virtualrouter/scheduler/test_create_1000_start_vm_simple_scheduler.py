@@ -47,7 +47,7 @@ def test():
     start_msg_mismatch = 0
     for i in range(0, 100):
         if not test_lib.lib_find_in_local_management_server_log(start_date+100+i, '[msg send]: {"org.zstack.header.vm.StartVmInstanceMsg', vm.get_vm().uuid):
-            stop_msg_mismatch += 1
+            start_msg_mismatch += 1
             test_util.test_warn('StartVmInstanceMsg is expected to execute at %s' % (start_date+100+i))
 
     if start_msg_mismatch > 5:
