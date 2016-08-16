@@ -23,6 +23,7 @@ image1_name = 'image1_name_%s' % random.random()
 image2_name = 'image2_name_%s' % random.random()
 
 def test():
+    #vm1 = test_stub.create_vm(vm_name = 'basic-test-vm', image_name = 'test-sft')
     vm1 = test_stub.create_vm(vm_name = 'basic-test-vm')
     test_obj_dict.add_vm(vm1)
     #vm1.check()
@@ -44,6 +45,9 @@ def test():
 
     image1 = test_image.ZstackTestImage()
     image1.set_creation_option(image_creation_option)
+
+    #vm1.stop()
+
     image1.create()
     image1.check()
     test_obj_dict.add_image(image1)
@@ -53,6 +57,9 @@ def test():
     image_creation_option.set_name(image2_name)
     image2 = test_image.ZstackTestImage()
     image2.set_creation_option(image_creation_option)
+
+    #vm2.stop()
+
     image2.create()
     test_obj_dict.add_image(image2)
     image2.check()

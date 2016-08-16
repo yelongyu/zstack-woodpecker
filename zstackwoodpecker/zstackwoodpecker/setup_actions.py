@@ -688,7 +688,7 @@ default one' % self.zstack_properties)
                 try:
                     return os.path.basename(match[0])
                 except:
-                    return 'zstacklib-1.5.tar.gz'
+                    return 'zstacklib-1.6.tar.gz'
 
             testagentdir = untar_test_agent()
             pkg_zstacklib = find_zstacklib(testagentdir)

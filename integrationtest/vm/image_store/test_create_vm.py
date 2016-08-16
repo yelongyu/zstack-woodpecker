@@ -19,8 +19,8 @@ test_obj_dict = test_state.TestStateDict()
 def test():
     vm = test_stub.create_vm(vm_name = 'basic-test-vm')
     test_obj_dict.add_vm(vm)
-    vm.check()
-    vm.destroy()
+    #vm.check()
+    #vm.destroy()
     test_util.test_pass('Create VM Test Success')
 
 #Will be called only if exception happens in test().
