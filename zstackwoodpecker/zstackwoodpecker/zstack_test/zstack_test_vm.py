@@ -96,6 +96,9 @@ class ZstackTestVm(vm_header.TestVm):
         vm_ops.expunge_vm(self.vm.uuid, session_uuid)
         super(ZstackTestVm, self).expunge()
 
+    def clone(self, names, session_uuid = None):
+        vm_ops.clone_vm(self.vm.uuid, names)
+
     def clean(self):
         if self.delete_policy != zstack_header.DELETE_DIRECT:
             if self.get_state() == vm_header.DESTROYED:
@@ -162,4 +165,3 @@ class ZstackTestVm(vm_header.TestVm):
     def set_delete_delay_time(self, delay_time):
         test_lib.lib_set_expunge_time(category = 'vm', value = delay_time)
         super(ZstackTestVm, self).set_delete_delay_time(delay_time)
-
