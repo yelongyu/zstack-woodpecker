@@ -32,6 +32,8 @@ def test():
             image_creation_option.set_backup_storage_uuid_list([backup_storage_list[0].uuid])
             break
     else:
+        vm.destroy()
+        vm1.destroy()
         test_util.test_skip('Not find image store type backup storage.')
 
     #vm1.check()

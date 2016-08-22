@@ -55,6 +55,10 @@ class TestVm(zstack_header.ZstackObject):
     def recover(self):
         self.state = STOPPED
 
+    #set vm when vm is not created by def create() function
+    def set_vm(self, vm):
+        self.vm = vm
+
     def get_vm(self):
         return self.vm
 

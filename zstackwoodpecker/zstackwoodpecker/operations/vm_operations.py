@@ -8,8 +8,8 @@ All VM operations for test.
 import apibinding.inventory as inventory
 import apibinding.api_actions as api_actions
 import zstackwoodpecker.test_util as test_util
-import account_operations
-import config_operations
+import zstackwoodpecker.operations.account_operations as account_operations
+import zstackwoodpecker.operations.config_operations as config_operations
 
 import os
 import inspect
@@ -214,5 +214,6 @@ def clone_vm(vm_uuid, vm_names, session_uuid = None):
     action.timeout = 300000
     test_util.action_logger('Clone VM [uuid:] %s to %s' % (vm_uuid, vm_names))
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventory 
+    test_util.test_logger('%s VMs have been cloned from %s' % (evt.result.numberOfClonedVm, vm_uuid))
+    return evt.result.inventories
 
