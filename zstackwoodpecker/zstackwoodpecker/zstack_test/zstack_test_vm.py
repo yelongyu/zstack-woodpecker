@@ -97,7 +97,7 @@ class ZstackTestVm(vm_header.TestVm):
         super(ZstackTestVm, self).expunge()
 
     def clone(self, names, session_uuid = None):
-        vm_ops.clone_vm(self.vm.uuid, names)
+        return vm_ops.clone_vm(self.vm.uuid, names)
 
     def clean(self):
         if self.delete_policy != zstack_header.DELETE_DIRECT:
