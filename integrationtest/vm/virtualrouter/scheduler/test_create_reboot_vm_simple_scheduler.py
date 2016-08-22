@@ -23,7 +23,7 @@ def test():
     start_date = int(time.time())
     schd = vm_ops.stop_vm_scheduler(vm.get_vm().uuid, 'simple', 'simple_reboot_vm_scheduler', start_date+60, 120)
     test_stub.sleep_util(start_date+58)
-    for i in range(0, 58)
+    for i in range(0, 58):
         if test_lib.lib_find_in_local_management_server_log(start_date+i, '[msg received]: {"org.zstack.header.vm.RebootVmInstanceMsg', vm.get_vm().uuid):
             test_util.test_fail('VM is expected to reboot start from %s' (start_date+60))
 
