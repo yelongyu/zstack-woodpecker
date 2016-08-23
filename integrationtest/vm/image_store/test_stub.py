@@ -35,7 +35,7 @@ def create_vlan_vm_with_volume(l3_name=None, disk_offering_uuids=None, disk_numb
             session_uuid = session_uuid)
 
 def create_vlan_vm(l3_name=None, disk_offering_uuids=None, system_tags=None, session_uuid = None, instance_offering_uuid = None):
-    image_name = os.environ.get('imageName_net')
+    image_name = os.environ.get('imageName_s')
     if not l3_name:
         l3_name = os.environ.get('l3VlanNetworkName1')
 
@@ -52,7 +52,7 @@ def create_vm(vm_name='img-stor-vm', \
         disk_offering_uuids=None, system_tags=None, session_uuid = None):
 
     if not image_name:
-        image_name = os.environ.get('imageName_net') 
+        image_name = os.environ.get('imageName_s') 
     if not l3_name:
         l3_name = os.environ.get('l3PublicNetworkName')
 
