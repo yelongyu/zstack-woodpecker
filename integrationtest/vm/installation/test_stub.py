@@ -21,6 +21,7 @@ def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
         disk_offering_uuids = None, default_l3_uuid = None):
     vm_creation_option = test_util.VmOption()
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+    conditions = res_ops.gen_query_conditions('state', '!=', 'Disabled', conditions)
     instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
     vm_creation_option.set_l3_uuids(l3_uuid_list)
