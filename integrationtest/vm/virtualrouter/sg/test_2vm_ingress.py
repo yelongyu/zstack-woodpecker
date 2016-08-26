@@ -95,7 +95,7 @@ def test():
     
     test_util.test_dsc("Add rule1, rule2, rule3 to security group 1.")
     test_util.test_dsc("Allowed ingress ports: %s" % test_stub.target_ports)
-    sg2.add_rule([rule1, rule2, rule3])
+    sg1.add_rule([rule1, rule2, rule3])
     sg_vm.check()
 
     test_util.test_dsc("Add nic to security group 1 again.")
