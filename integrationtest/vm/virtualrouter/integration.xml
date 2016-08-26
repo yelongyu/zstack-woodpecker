@@ -78,8 +78,6 @@
 	<case timeout='600' repeat='1'>scheduler/test_create_1000_start_vm_simple_scheduler2.py</case>
 	<case timeout='600' repeat='1'>scheduler/test_create_start_vm_scheduler_startdate_0.py</case>
 	<case timeout='600' repeat='1'>scheduler/test_update_start_stop_vm_scheduler.py</case>
-	<case timeout='600' repeat='1'>scheduler/test_update_start_stop_vm_scheduler_type.py</case>
-	<case timeout='600' repeat='1'>scheduler/test_update_start_stop_vm_scheduler_type2.py</case>
 	<case timeout='1800' repeat='1'>scheduler/test_create_start_stop_vm_simple_scheduler.py</case>
 	<case timeout='1800' repeat='1'>scheduler/test_create_start_stop_vm_simple_scheduler_past.py</case>
 	<case timeout='1800' repeat='1'>scheduler/test_create_start_stop_vm_simple_repeatcount_scheduler.py</case>
