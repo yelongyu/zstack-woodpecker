@@ -22,7 +22,7 @@ def test():
     start_date = int(time.time())
     test_util.test_logger('Setup stop and start VM scheduler')
     schd = vm_ops.start_vm_scheduler(vm.get_vm().uuid, 'simple', 'simple_start_vm_scheduler', 0, 1)
-    actual_startDate = time.mktime(time.strptime(schd.startDate, '%b %d, %Y %H:%M:%S %p'))
+    actual_startDate = time.mktime(time.strptime(schd.startTime, '%b %d, %Y %H:%M:%S %p'))
     if actual_startDate != start_date and actual_startDate != start_date + 1:
         test_util.test_fail('startDate is expectd to set to now, which should be around %s' % (start_date))
     test_stub.sleep_util(start_date+58)
