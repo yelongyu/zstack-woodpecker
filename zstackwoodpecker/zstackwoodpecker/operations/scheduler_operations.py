@@ -27,7 +27,7 @@ def update_scheduler(uuid, type, name, start_date=None, interval=None, repeatCou
     action.uuid = uuid
     action.schedulerType = type
     action.schedulerName = name
-    action.startDate = start_date
+    action.startTime = start_date
     action.schedulerInterval = interval
     action.repeatCount = repeatCount
     action.cronScheduler = cron
