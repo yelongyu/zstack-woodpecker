@@ -4523,3 +4523,22 @@ def lib_count_in_local_management_server_log(timestamp, *keywords):
             match += 1
         
     return match
+
+def lib_find_in_remote_management_server_log(node_ip, node_username, node_password, timestamp, *keywords):
+    datetime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(timestamp))
+    cmd = 'grep "%s" %s' % (datetime, lib_get_local_management_server_log_path().strip())
+    try:
+        out = lib_execute_ssh_cmd(node_ip, node_username, node_password, cmd, 180)
+    except:
+        return False
+
+    for line in out.splitlines():
+        line_match = True
+        for keyword in keywords:
+            if line.find(keyword) < 0:
+                line_match = False
+                break
+        if line_match:
+            return True
+        
+    return False
