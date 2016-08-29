@@ -27,7 +27,7 @@ def test():
     vm.check()
 
     start_date = int(time.time())
-    schd = vm_ops.reboot_vm_scheduler(vm.get_vm().uuid, 'simple', 'simple_reboot_vm_scheduler', start_date+61, 30)
+    schd = vm_ops.reboot_vm_scheduler(vm.get_vm().uuid, 'simple', 'simple_reboot_vm_scheduler', start_date+60, 30)
 
     node1_ip = os.environ.get('node1Ip')
     node2_ip = os.environ.get('node2Ip')
