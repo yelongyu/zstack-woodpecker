@@ -17,23 +17,25 @@ import time
 import os
 
 vm = None
-node_ip = None
+node1_ip = None
+node2_ip = None
 
 def test():
     global vm
-    global node_ip
+    global node1_ip
     vm = test_stub.create_basic_vm()
     vm.check()
 
     start_date = int(time.time())
     schd = vm_ops.reboot_vm_scheduler(vm.get_vm().uuid, 'simple', 'simple_reboot_vm_scheduler', start_date+61, 30)
 
-    node_ip = os.environ.get('node1Ip')
-    test_util.test_logger("shutdown node: %s" % (node_ip))
+    node1_ip = os.environ.get('node1Ip')
+    node2_ip = os.environ.get('node2Ip')
+    test_util.test_logger("shutdown node: %s" % (node1_ip))
     cmd = "init 0"
     host_username = os.environ.get('nodeUserName')
     host_password = os.environ.get('nodePassword')
-    rsp = test_lib.lib_execute_ssh_cmd(node_ip, host_username, host_password, cmd, 180)
+    rsp = test_lib.lib_execute_ssh_cmd(node1_ip, host_username, host_password, cmd, 180)
     test_util.test_logger("wait for 2 minutes to see if http api still works well")
     time.sleep(180)
     test_stub.exercise_connection(600)
@@ -51,8 +53,8 @@ def test():
     schd_ops.delete_scheduler(schd.uuid)
     vm.destroy()
 
-    test_util.test_logger("recover node: %s" % (node_ip))
-    os.system('bash -ex %s %s' % (os.environ.get('nodeRecoverScript'), node_ip))
+    test_util.test_logger("recover node: %s" % (node1_ip))
+    os.system('bash -ex %s %s' % (os.environ.get('nodeRecoverScript'), node1_ip))
     time.sleep(180)
     test_stub.exercise_connection(600)
 
@@ -61,12 +63,13 @@ def test():
 #Will be called only if exception happens in test().
 def error_cleanup():
     global vm
+    global node1_ip
     if vm:
         try:
             vm.destroy()
         except:
             pass
-    test_util.test_logger("recover node: %s" % (node_ip))
-    os.system('bash -ex %s %s' % (os.environ.get('nodeRecoverScript'), node_ip))
+    test_util.test_logger("recover node: %s" % (node1_ip))
+    os.system('bash -ex %s %s' % (os.environ.get('nodeRecoverScript'), node1_ip))
     time.sleep(180)
     test_stub.exercise_connection(600)
