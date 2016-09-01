@@ -573,6 +573,14 @@ default one' % self.zstack_properties)
 
         self._wait_for_thread_completion('set extra management node config', 60)
 
+    def _change_node_ip(self):
+        node = self.nodes[0]
+        cmd = 'zstack-ctl change_ip --ip=%s' % (node.ip_)
+        thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
+        thread.start()
+
+        self._wait_for_thread_completion('change management node ip', 60)
+
     def _wait_for_thread_completion(self, msg, wait_time, raise_exception = True):
         end_time = wait_time
         while end_time > 0:
@@ -780,18 +788,24 @@ default one' % self.zstack_properties)
                 shell.call('rm -rf %s' % testagentdir)
         
     def execute_plan_without_deploy_test_agent(self):
-        try:
-            self._stop_nodes()
-            shell.call('zstack-ctl kairosdb --stop')
-            shell.call('zstack-ctl cassandra --stop')
-        except:
-            pass
-
-        self._install_local_zstack()
-        self._deploy_db()
-        self._deploy_rabbitmq()
-        self._install_management_nodes()
-        self._set_extra_node_config()
+        if not os.environ.get('ZSTACK_ALREADY_INSTALLED'):
+            try:
+                self._stop_nodes()
+                shell.call('zstack-ctl kairosdb --stop')
+                shell.call('zstack-ctl cassandra --stop')
+            except:
+                pass
+    
+            self._install_local_zstack()
+            self._deploy_db()
+            self._deploy_rabbitmq()
+            self._install_management_nodes()
+            self._set_extra_node_config()
+        else:
+            self._change_node_ip()
+            self._install_management_nodes()
+            self._set_extra_node_config()
+            
         self._start_multi_nodes(restart=True)
 
     def execute_plan_ha(self):
