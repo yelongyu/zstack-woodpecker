@@ -870,7 +870,10 @@ default one' % self.zstack_properties)
                 print 'Deploy node in hosts'
                 #consider some zstack-server is running in vm, the server 
                 # startup speed is slow. Increase timeout to 180s.
-                cmd = 'zstack-ctl stop_node --host=%s ; zstack-ctl start_node --host=%s --timeout=180' % (node.ip_, node.ip_)
+                if linux.is_ip_existing(node.ip_):
+                    cmd = 'zstack-ctl stop; zstack-ctl start' % (node.ip_, node.ip_)
+                else:
+                    cmd = 'zstack-ctl stop_node --host=%s ; zstack-ctl start_node --host=%s --timeout=180' % (node.ip_, node.ip_)
                 thread = threading.Thread(target=shell_cmd_thread, args=(cmd, True, ))
                 threads.append(thread)
             else:
