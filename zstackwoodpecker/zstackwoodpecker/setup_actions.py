@@ -788,7 +788,7 @@ default one' % self.zstack_properties)
                 shell.call('rm -rf %s' % testagentdir)
         
     def execute_plan_without_deploy_test_agent(self):
-        if os.environ.get('ZSTACK_ALREADY_INSTALLED') == "yes":
+        if os.environ.get('ZSTACK_ALREADY_INSTALLED') != "yes":
             try:
                 self._stop_nodes()
                 shell.call('zstack-ctl kairosdb --stop')
