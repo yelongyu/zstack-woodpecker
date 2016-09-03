@@ -28,9 +28,9 @@ def test():
 
     vm_inv = vm.get_vm()
     vm_ip = vm_inv.vmNics[0].ip
-    test_util.test_dsc('Install zstack 1.2')
+    test_util.test_dsc('Install zstack 1.5')
     target_file = '/root/zstack-all-in-one.tgz'
-    install_pkg = os.environ.get('zstackPkg_1.2')
+    install_pkg = os.environ.get('zstackPkg_1.5')
     test_stub.prepare_upgrade_test_env(vm_inv, target_file, install_pkg) 
 
     test_util.test_dsc('Prepare yum file')
@@ -43,8 +43,8 @@ def test():
     test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
 
     num = 0
-    pkg_num = 1.3
-    while num < 4:
+    pkg_num = 1.6
+    while num < 1:
         test_util.test_dsc('Upgrade zstack to %s' % pkg_num)
         upgrade_target_file = '/root/zstack-degrade-all-in-one.tgz'
         upgrade_pkg = os.environ.get('zstackPkg_%s' % pkg_num)

@@ -44,7 +44,7 @@ def test():
 
     num = 0
     pkg_num = 1.4
-    while num < 2:
+    while num < 3:
         test_util.test_dsc('Upgrade zstack to %s' % pkg_num)
         upgrade_target_file = '/root/zstack-degrade-all-in-one.tgz'
         upgrade_pkg = os.environ.get('zstackPkg_%s' % pkg_num)

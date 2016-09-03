@@ -28,31 +28,16 @@ def test():
 
     vm_inv = vm.get_vm()
     vm_ip = vm_inv.vmNics[0].ip
-    test_util.test_dsc('Install zstack 1.2')
+    test_util.test_dsc('Install zstack 1.6')
     target_file = '/root/zstack-all-in-one.tgz'
-    install_pkg = os.environ.get('zstackPkg_1.2')
+    install_pkg = os.environ.get('zstackPkg_1.6')
     test_stub.prepare_upgrade_test_env(vm_inv, target_file, install_pkg) 
-
-    test_util.test_dsc('Prepare yum file')
-    test_stub.prepare_yum_repo(vm_inv)
 
     ssh_cmd = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     test_stub.copy_id_dsa(vm_inv, ssh_cmd, tmp_file)
     test_stub.copy_id_dsa_pub(vm_inv)
     test_stub.execute_all_install(ssh_cmd, target_file, tmp_file)
     test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
-
-    num = 0
-    pkg_num = 1.3
-    while num < 4:
-        test_util.test_dsc('Upgrade zstack to %s' % pkg_num)
-        upgrade_target_file = '/root/zstack-degrade-all-in-one.tgz'
-        upgrade_pkg = os.environ.get('zstackPkg_%s' % pkg_num)
-        test_stub.prepare_upgrade_test_env(vm_inv, upgrade_target_file, install_pkg)
-        test_stub.upgrade_zstack(ssh_cmd, upgrade_target_file, tmp_file)
-        test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
-        pkg_num = pkg_num + 0.1
-        num = num + 1
 
     test_util.test_dsc('Upgrade zstack to latest') 
     upgrade_target_file = '/root/zstack-upgrade-all-in-one.tgz' 
