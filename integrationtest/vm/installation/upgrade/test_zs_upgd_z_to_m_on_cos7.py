@@ -31,7 +31,7 @@ def test():
 
     vm_inv = vm.get_vm()
     vm_ip = vm_inv.vmNics[0].ip
-    test_util.test_dsc('Install zstack 1.6')
+    test_util.test_dsc('Install zstack')
     target_file = '/root/zstack-all-in-one.tgz'
     install_pkg = os.environ.get('zstackOriginPkg_1.6')
     test_stub.prepare_upgrade_test_env(vm_inv, target_file, install_pkg)
@@ -42,10 +42,10 @@ def test():
     test_stub.execute_all_install(ssh_cmd, target_file, tmp_file)
     test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
 
-    test_util.test_dsc('Upgrade zstack 1.6 to mevoco 1.6')
+    test_util.test_dsc('Upgrade zstack to mevoco')
     upgrade_target_file = '/root/mevoco-upgrade-all-in-one.tgz'
     upgrade_pkg = os.environ.get('zstackPkg_1.6')
-    test_stub.prepare_upgrade_test_env(vm_inv, upgrade_target_file, install_pkg)
+    test_stub.prepare_upgrade_test_env(vm_inv, upgrade_target_file, upgrade_pkg)
     test_stub.upgrade_zstack(ssh_cmd, upgrade_target_file, tmp_file)
     test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
 
