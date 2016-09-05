@@ -48,7 +48,7 @@ def test():
         test_util.test_dsc('Upgrade zstack to %s' % pkg_num)
         upgrade_target_file = '/root/zstack-upgrade-all-in-one.tgz'
         upgrade_pkg = os.environ.get('zstackPkg_%s' % pkg_num)
-        test_stub.prepare_upgrade_test_env(vm_inv, upgrade_target_file, install_pkg)
+        test_stub.prepare_upgrade_test_env(vm_inv, upgrade_target_file, upgrade_pkg)
         test_stub.upgrade_zstack(ssh_cmd, upgrade_target_file, tmp_file)
         test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
         pkg_num = pkg_num + 0.1
