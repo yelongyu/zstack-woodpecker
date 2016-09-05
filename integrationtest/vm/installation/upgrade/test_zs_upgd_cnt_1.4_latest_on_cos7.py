@@ -42,9 +42,9 @@ def test():
     test_stub.execute_all_install(ssh_cmd, target_file, tmp_file)
     test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
 
-    num = 0
     pkg_num = 1.5
-    while num < 2:
+    curren_num = float(os.environ.get('releasePkgNum'))
+    while pkg_num <= curren_num:
         test_util.test_dsc('Upgrade zstack to %s' % pkg_num)
         upgrade_target_file = '/root/zstack-degrade-all-in-one.tgz'
         upgrade_pkg = os.environ.get('zstackPkg_%s' % pkg_num)
@@ -52,7 +52,6 @@ def test():
         test_stub.upgrade_zstack(ssh_cmd, upgrade_target_file, tmp_file)
         test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
         pkg_num = pkg_num + 0.1
-        num = num + 1
 
     test_util.test_dsc('Upgrade zstack to latest') 
     upgrade_target_file = '/root/zstack-upgrade-all-in-one.tgz' 
