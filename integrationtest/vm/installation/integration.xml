@@ -20,5 +20,7 @@
 	<case timeout="2400" >upgrade/test_zs_upgd_z_1.2_to_m_latest_on_cos7.py</case>
 	<case timeout="2400" >upgrade/test_zs_upgd_z_1.3_to_m_latest_on_cos7.py</case>
 	<case timeout="2400" >upgrade/test_zs_upgd_z_1.4_to_m_latest_on_cos7.py</case>
+	<case timeout="2400" >upgrade/test_zs_upgd_z_1.5_to_m_latest_on_cos7.py</case>
+	<case timeout="2400" >upgrade/test_zs_upgd_z_1.6_to_m_latest_on_cos7.py</case>
     </suite>
 </integrationTest>
