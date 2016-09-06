@@ -17,6 +17,9 @@ tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
 
 
 def test():
+    if os.path.exists('/home/zstack-package/') != True:
+        test_util.test_skip("current test suite is zstack, but this case is for mevoco. Skip test")
+
     test_util.test_dsc('Create test vm to test zstack upgrade by -u.')
     image_name = os.environ.get('imageName_i_c7')
     vm = test_stub.create_vlan_vm(image_name)
@@ -31,10 +34,6 @@ def test():
     test_util.test_dsc('Install zstack 1.2')
     target_file = '/root/zstack-all-in-one.tgz'
     install_pkg = os.environ.get('zstackOriginPkg_1.2')
-
-    if os.path.exists(install_pkg) != True:
-        test_util.test_skip('current suite is zstack, but this case is for mevoco. Skip test')
-
     test_stub.prepare_upgrade_test_env(vm_inv, target_file, install_pkg) 
 
     test_util.test_dsc('Prepare yum file')
