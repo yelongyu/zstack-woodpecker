@@ -30,8 +30,8 @@ def test():
     time.sleep(60)
     vm.set_state(vm_header.RUNNING)
     vm.check()
-    vm.destroy()
     vm.set_delete_policy(delete_policy)
+    vm.destroy()
     test_util.test_pass('VM ha never stop auto start with recover Test Success')
 
 #Will be called only if exception happens in test().

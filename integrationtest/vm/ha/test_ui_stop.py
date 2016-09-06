@@ -30,7 +30,7 @@ def test():
     cmd = "zstack-ctl start_ui"
     rsp = test_lib.lib_execute_ssh_cmd(node_ip, host_username, host_password, cmd, 180)
 
-    test_util.test_pass('Create VM Test Rabbitmq Stop on one node Success')
+    test_util.test_pass('Create VM Test UI Stop on one node Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():

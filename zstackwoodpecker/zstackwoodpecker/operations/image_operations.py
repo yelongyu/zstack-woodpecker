@@ -182,3 +182,12 @@ def export_image_from_backup_storage(image_uuid, bs_uuid, session_uuid = None):
     test_util.test_logger('[Image:] %s was exported as [url:] %s' %(image_uuid, evt.imageUrl))
     return evt.imageUrl
 
+def delete_exported_image_from_backup_storage(image_uuid, bs_uuid, session_uuid = None):
+    action = api_actions.DeleteExportedImageFromBackupStorageAction()
+    action.imageUuid = image_uuid
+    action.backupStorageUuid = bs_uuid
+    test_util.action_logger('Delete exported [image:] %s from [Backup Storage:] %s' % (image_uuid, bs_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.test_logger('Exported [image:] %s was deleted from [url:] %s' %(image_uuid, evt.imageUrl))
+    return evt
+    

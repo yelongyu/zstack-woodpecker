@@ -147,3 +147,4 @@ def share_resources(account_uuid_list, resource_uuid_list, to_public = None, \
             (resource_uuid_list, account_uuid_list))
     return evt
 
+#result=create_account('c','password','Normal')

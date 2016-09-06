@@ -13,6 +13,7 @@ import zstackwoodpecker.zstack_test.zstack_test_security_group as zstack_sg_head
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
+import zstackwoodpecker.operations.billing_operations as bill_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.header.host as host_header
 import threading
@@ -127,11 +128,31 @@ def create_delete_account(account_name='test', session_uuid=None):
     try:
         account_inv = acc_ops.create_normal_account(account_name, 'password', session_uuid)
     except:
-	test_util.test_logger('ignore exception')
+        test_util.test_logger('ignore exception')
     try:
         acc_ops.delete_account(account_inv.uuid, session_uuid)
     except:
         test_util.test_logger('ignore exception')
+
+def create_price(price='0.01', resource_name='cpu', time_unit='h', resource_unit='m',session_uuid=None):
+    test_util.test_logger('test create resource price')
+    date_in_long=bill_ops.create_resource_price(resource_name, time_unit, price, resource_unit).dateInLong
+    return date_in_long
+
+def delete_price(date_in_long,resource_name='cpu'):
+    test_util.test_logger('test delete resource price')
+    bill_ops.delete_resource_price(resource_name,date_in_long)
+
+def query_price(date_in_long, resource_name='cpu'):
+    #need to be updated
+    #assume just one price in db
+    test_util.test_logger('test query resource price')
+    inuse_date_in_long = bill_ops.query_resource_price(resource_name)[0].dateInLong
+    if inuse_date_in_long == date_in_long:
+        return True
+    else:
+        test_util.test_logger('queried resource %s price isn\'t in db')
+        return False
 
 def exercise_connection(ops_num=120, thread_threshold=10):
     session_uuid = acc_ops.login_as_admin()

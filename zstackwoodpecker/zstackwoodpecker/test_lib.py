@@ -2692,6 +2692,23 @@ def lib_check_file_exist(host, file_path):
         test_util.test_logger(linux.get_exception_stacktrace())
         return False
 
+def lib_check_backup_storage_file_exist(backup_storage, file_path):
+    command = 'ls -l %s' % file_path
+    eout = ''
+    try:
+        if backup_storage.sshPort != None:
+            (ret, out, eout) = ssh.execute(command, backup_storage.hostname, backup_storage.username, backup_storage.password, port=backup_storage.sshPort)
+	else:
+            (ret, out, eout) = ssh.execute(command, backup_storage.hostname, backup_storage.username, backup_storage.password)
+        test_util.test_logger('[file:] %s was found in [host:] %s' % (file_path, backup_storage.hostname))
+        return True
+    except:
+        #traceback.print_exc(file=sys.stdout)
+        test_util.test_logger('Fail to execute: ssh [backup_storage:] %s with [username:] %s and [password:] %s to check [file:] %s . This might be expected behavior.'% (backup_storage.hostname, backup_storage.username, backup_storage.password, file_path))
+        test_util.test_logger('ssh execution stderr output: %s' % eout)
+        test_util.test_logger(linux.get_exception_stacktrace())
+        return False
+
 def lib_check_two_files_md5(host1, file1, host2, file2):
     command1 = "md5sum %s" % file1
     command2 = "md5sum %s" % file2
