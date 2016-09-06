@@ -33,10 +33,10 @@ def delete_host(host_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def reconnect_host(host_uuid, session_uuid=None):
+def reconnect_host(host_uuid, session_uuid=None, timeout=120000):
     action = api_actions.ReconnectHostAction()
     action.uuid = host_uuid
-    action.timeout = 120000
+    action.timeout = timeout
     test_util.action_logger('Reconnect Host [uuid:] %s' % host_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory

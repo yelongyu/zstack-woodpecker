@@ -17,6 +17,9 @@ tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
 
 
 def test():
+    if os.path.exists('/home/zstack-package/') != True:
+        test_util.test_skip("current test suite is zstack, but this case is for mevoco. Skip test")
+
     test_util.test_dsc('Create test vm to test zstack upgrade by -u.')
     image_name = os.environ.get('imageName_i_c7')
     vm = test_stub.create_vlan_vm(image_name)
@@ -25,9 +28,6 @@ def test():
         vm.check()
     else:
         time.sleep(60)
-
-    if os.path.exists('/home/zstack-package/') != True:
-        test_util.test_skip("current test suite is zstack, but this case is for mevoco. Skip test")
 
     vm_inv = vm.get_vm()
     vm_ip = vm_inv.vmNics[0].ip
