@@ -28,9 +28,14 @@ def test():
 
     vm_inv = vm.get_vm()
     vm_ip = vm_inv.vmNics[0].ip
+
     test_util.test_dsc('Install zstack 1.6')
     target_file = '/root/zstack-all-in-one.tgz'
     install_pkg = os.environ.get('zstackOriginPkg_1.6')
+
+    if os.path.exists(install_pkg) != True:
+        test_util.test_skip('current suite is zstack, but this case is for mevoco. Skip test')
+
     test_stub.prepare_upgrade_test_env(vm_inv, target_file, install_pkg) 
 
     test_util.test_dsc('Prepare yum file')
