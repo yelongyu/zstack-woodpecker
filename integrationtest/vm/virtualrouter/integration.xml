@@ -43,6 +43,7 @@
         <case timeout='1000' repeat='1'>sg/test_icmp.py</case>
         <case timeout='800'  repeat='1'>sg/test_udp.py</case>
         <case timeout='800'  repeat='1'>host/test_reconnect_host_time.py</case>
+        <case timeout='800'  repeat='1'>host/test_reconnect_sftp_backup_storage_time.py</case>
         <case timeout='1200' repeat='1'>sg/test_stopped_vm.py</case>
         <case timeout='1200' repeat='1'>sg/test_vm_ops.py</case>
         <case timeout='1200' repeat='1'>sg/test_2vm_egress.py</case>
