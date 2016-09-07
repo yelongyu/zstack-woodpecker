@@ -41,6 +41,14 @@ def reconnect_host(host_uuid, session_uuid=None, timeout=120000):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
+def reconnect_sftp_backup_storage(sftpbs_uuid, session_uuid=None, timeout=120000):
+    action = api_actions.ReconnectSftpBackupStorageAction()
+    action.uuid = sftpbs_uuid
+    action.timeout = timeout
+    test_util.action_logger('Reconnect SFTP Backup Storage [uuid:] %s' % sftpbs_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
 def change_host_state(host_uuid, state, session_uuid=None):
     '''
     If change the state to Enabled, it is needed to check the machine's state
