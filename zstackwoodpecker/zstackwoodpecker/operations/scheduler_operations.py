@@ -37,3 +37,12 @@ def update_scheduler(uuid, type, name, start_date=None, interval=None, repeatCou
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Scheduler:] %s is updated.' % uuid)
     return evt
+
+def query_scheduler(uuid, session_uuid = None):
+    action = api_actions.QuerySchedulerAction()
+    action.uuid = uuid
+    test_util.action_logger('Query [Scheduler:] %s' % uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.test_logger('[Scheduler:] %s is queried.' % uuid)
+    return evt
+#    return evt.inventory
