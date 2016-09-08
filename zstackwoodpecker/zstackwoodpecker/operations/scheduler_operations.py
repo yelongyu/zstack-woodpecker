@@ -37,3 +37,12 @@ def update_scheduler(uuid, type, name, start_date=None, interval=None, repeatCou
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Scheduler:] %s is updated.' % uuid)
     return evt
+
+def change_scheduler_state(uuid, state, session_uuid = None):
+    action = api_actions.ChangeSchedulerStateAction()
+    action.uuid = uuid
+    action.stateEvent = state
+    test_util.action_logger('Change [Scheduler:] %s' % uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.test_logger('[Scheduler:] %s is changed to %s.' % (uuid, state))
+    return evt
