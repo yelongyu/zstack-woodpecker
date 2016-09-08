@@ -27,7 +27,7 @@ def login_by_account(name, password, timeout = 60000):
     return session_uuid
 
 def login_by_ldap(uid, password, timeout = 60000):
-    login = api_actions.LoginByLdapAction()
+    login = api_actions.LogInByLdapAction()
     login.uid = uid
     login.password = password
     #login.timeout = 15000
