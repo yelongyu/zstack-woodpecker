@@ -65,8 +65,6 @@ def test():
         test_util.test_fail('StartVmInstanceJob not executed at expected timestamp range')
 
     vm.destroy()
-    
-    test_stub.sleep_util(20)
 
     current_time = int(time.time())
     except_start_time =  start_date + 20 * (((current_time - start_date) % 20) + 1)
@@ -81,8 +79,6 @@ def test():
         test_util.test_fail('StartVmInstanceJob executed at unexpected timestamp range')
 
     vm.recover()
-
-    test_stub.sleep_util(20)
 
     current_time = int(time.time())
     except_start_time =  start_date + 20 * (((current_time - start_date) % 20) + 1)
