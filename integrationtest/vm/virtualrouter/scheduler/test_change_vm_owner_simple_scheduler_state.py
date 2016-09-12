@@ -60,8 +60,6 @@ def test():
 
     res_ops.change_recource_owner(new_account.uuid, vm.vm.uuid)
 
-    test_stub.sleep_util(20)
-
     current_time = int(time.time())
     except_start_time =  start_date + 20 * (((current_time - start_date) % 20) + 1)
     test_stub.sleep_util(except_start_time + 45)
