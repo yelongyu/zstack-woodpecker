@@ -445,3 +445,10 @@ def safely_get_resource(res_name, cond = [], session_uuid = None, \
             curr_count += limit
 
     return res_list
+
+def change_recource_owner(accountUuid, resourceUuid, session_uuid = None):
+    action = api_actions.ChangeResourceOwnerAction()
+    action.accountUuid = accountUuid
+    action.resourceUuid = resourceUuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
