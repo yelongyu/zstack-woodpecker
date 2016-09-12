@@ -22,11 +22,21 @@ def test():
     conditions = res_ops.gen_query_conditions('type', '=', 'SystemAdmin')
     account = res_ops.query_resource(res_ops.ACCOUNT, conditions)[0]
 
-    ldap_account = ldp_ops.bind_ldap_account(os.environ.get('ldapUid'), account.uuid)
+    get_expected_exception = False
+    try:
+        ldap_account = ldp_ops.bind_ldap_account(os.environ.get('ldapUid'), account.uuid)
+    except:
+	get_expected_exception = True
+    if not get_expected_exception:
+        test_util.test_fail('should not be able to bind ldapuid to admin account')
+
+    new_account = acc_ops.create_account('new_account', 'password', 'Normal')
+    ldap_account = ldp_ops.bind_ldap_account(os.environ.get('ldapUid'), new_account.uuid)
     ldap_account_uuid = ldap_account.inventory.uuid
     session_uuid = acc_ops.login_by_ldap(os.environ.get('ldapUid'), os.environ.get('ldapPassword'))
     acc_ops.logout(session_uuid)
     ldp_ops.unbind_ldap_account(ldap_account_uuid)
+    acc_ops.delete_account(new_account.uuid)
     ldp_ops.delete_ldap_server(ldap_server_uuid)
     test_util.test_pass('Create VM by normal user account Success')
     acc_ops.logout(session_uuid)
