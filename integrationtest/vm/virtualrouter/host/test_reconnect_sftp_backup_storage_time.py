@@ -31,7 +31,7 @@ def test():
 
     conditions = res_ops.gen_query_conditions('state', '=', 'Enabled')
     sftp_backup_storage_uuid = res_ops.query_resource(res_ops.SFTP_BACKUP_STORAGE, conditions)[0].uuid
-    host_ops.reconnect_sftp_backup_storage(sftpbs_uuid, timeout=recnt_timeout) 
+    host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid, timeout=recnt_timeout) 
    
     vm.destroy()
     test_obj_dict.rm_vm(vm)

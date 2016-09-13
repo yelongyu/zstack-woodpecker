@@ -26,6 +26,17 @@ def login_by_account(name, password, timeout = 60000):
     session_uuid = login.run().inventory.uuid
     return session_uuid
 
+def login_by_ldap(uid, password, timeout = 60000):
+    login = api_actions.LogInByLdapAction()
+    login.uid = uid
+    login.password = password
+    #login.timeout = 15000
+    #since system might be hang for a while, when archive system log in 00:00:00
+    #, it is better to increase timeout time to 60000 to avoid of no response
+    login.timeout = timeout
+    session_uuid = login.run().inventory.uuid
+    return session_uuid
+
 def logout(session_uuid):
     logout = api_actions.LogOutAction()
     logout.timeout = 60000
