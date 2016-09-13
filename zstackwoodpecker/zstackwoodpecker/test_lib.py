@@ -4467,6 +4467,15 @@ def lib_request_console_access(vm_uuid, session_uuid=None):
 def lib_get_vm_console_address(vm_uuid, session_uuid=None):
     return cons_ops.get_vm_console_address(vm_uuid, session_uuid)
 
+def lib_set_vm_console_password(vm_uuid, console_password, session_uuid=None):
+    return cons_ops.set_vm_console_password(vm_uuid, console_password, session_uuid)
+
+def lib_delete_vm_console_password(vm_uuid, session_uuid=None):
+    return cons_ops.delete_vm_console_password(vm_uuid, session_uuid)
+
+def lib_get_vm_console_password(vm_uuid, session_uuid=None):
+    return cons_ops.get_vm_console_password(vm_uuid, session_uuid)
+
 def lib_get_ha_enable():
     return conf_ops.get_global_config_value('ha', 'enable')
 

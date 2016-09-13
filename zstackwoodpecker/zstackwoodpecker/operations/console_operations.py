@@ -33,3 +33,31 @@ def get_vm_console_address(uuid, session_uuid=None):
     test_util.action_logger('Get VM Console Address [hostname:] %s [port:] %s' % \
             (evt.hostIp, evt.port))
     return evt
+
+def set_vm_console_password(uuid, console_password, session_uuid=None):
+    action = api_actions.SetVmConsolePasswordAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    action.consolePassword = console_password
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Set VM [uuid:] %s Console Password [%s]' % \
+            (uuid, console_password))
+    return evt
+
+def delete_vm_console_password(uuid, session_uuid=None):
+    action = api_actions.DeleteVmConsolePasswordAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Delete VM [uuid:%s] Console Password' % \
+            (uuid))
+    return evt
+
+def get_vm_console_password(uuid, session_uuid=None):
+    action = api_actions.GetVmConsolePasswordAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Get VM [uuid:] Console Password [%s]' % \
+            (uuid, evt.consolePassword))
+    return evt.consolePassword
