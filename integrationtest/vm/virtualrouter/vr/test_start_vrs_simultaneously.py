@@ -49,7 +49,7 @@ def check_exception():
 
 def stop_vm(vm_uuid):
     try:
-        vm_ops.stop_vm(vm_uuid, session_uuid)
+        vm_ops.stop_vm(vm_uuid, None, session_uuid)
     except:
         exc_info.append(sys.exc_info())
 

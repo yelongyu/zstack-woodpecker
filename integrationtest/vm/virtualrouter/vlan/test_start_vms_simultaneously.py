@@ -37,7 +37,7 @@ def test():
     vms = [vm1, vm2, vm3, vm4]
 
     for vm in vms:
-        thread = threading.Thread(target=vm_ops.stop_vm, args=(vm.get_vm().uuid, session_uuid,))
+        thread = threading.Thread(target=vm_ops.stop_vm, args=(vm.get_vm().uuid, None, session_uuid,))
         thread.start()
 
     while threading.activeCount() > 1:
