@@ -67,7 +67,7 @@ def destroy_vm(vm_uuid, session_uuid=None):
 def stop_vm(vm_uuid, force=None, session_uuid=None):
     action = api_actions.StopVmInstanceAction()
     action.uuid = vm_uuid
-    action.force = force
+    action.type = force
     action.timeout = 120000
     test_util.action_logger('Stop VM [uuid:] %s' % vm_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)

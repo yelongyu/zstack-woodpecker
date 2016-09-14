@@ -19,38 +19,27 @@ import threading
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
-def prevent_vm_stop(vm):
-    test_lib.lib_execute_command_in_vm(vm, 'systemd-inhibit sleep 60')
-
 def test():
     vm = test_stub.create_user_vlan_vm()
     test_obj_dict.add_vm(vm)
     vm.check()
-    thread = threading.Thread(target = prevent_vm_stop)
-    thread.daemon = True
-    thread.start()
 
+    test_lib.lib_execute_command_in_vm(vm.get_vm(), 'nohup systemd-inhibit sleep 60 >/dev/null 2>/dev/null </dev/null &')
     current_time = time.time()
     vm_ops.stop_vm(vm.get_vm().uuid)
     if time.time()-current_time <= 10:
         test_util.test_fail("VM should not shutdown with default grace method in %s seconds" % (time.time()-current_time))
-    while threading.active_count() >= 1:
-        time.sleep(1)
     vm.set_state(vm_header.STOPPED)
     vm.check()
 
     vm.start()
     vm.check()
-    thread = threading.Thread(target = prevent_vm_stop)
-    thread.daemon = True
-    thread.start()
-
+    test_lib.lib_execute_command_in_vm(vm.get_vm(), 'nohup systemd-inhibit sleep 60 >/dev/null 2>/dev/null </dev/null &')
     current_time = time.time()
     vm_ops.stop_vm(vm.get_vm().uuid, force='cold')
     if time.time()-current_time >= 5:
         test_util.test_fail("VM should shutdown immediately with cold method, while it taks %s seconds" % (time.time()-current_time))
-    while threading.active_count() >= 1:
-        time.sleep(1)
+
     vm.set_state(vm_header.STOPPED)
     vm.check()
   
