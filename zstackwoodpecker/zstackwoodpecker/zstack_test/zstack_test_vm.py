@@ -28,9 +28,9 @@ class ZstackTestVm(vm_header.TestVm):
 
     def change_instance_offering(self, new_instance_offering_uuid, \
             session_uuid = None):
-        if self.state != vm_header.STOPPED:
-            test_util.test_logger('VM: %s state %s is not %s. Can not change template' % self.vm.get_vm().uuid, self.state, vm_header.STOPPED)
-            return False
+        #if self.state != vm_header.STOPPED:
+        #    test_util.test_logger('VM: %s state %s is not %s. Can not change template' % self.vm.get_vm().uuid, self.state, vm_header.STOPPED)
+        #    return False
 
         vm_uuid = self.get_vm().uuid
         vm_ops.change_instance_offering(vm_uuid, \
