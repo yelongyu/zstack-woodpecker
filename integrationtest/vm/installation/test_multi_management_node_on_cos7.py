@@ -40,8 +40,8 @@ def test():
     vm1_ip = vm1_inv.vmNics[0].ip
     vm2_inv = vm2.get_vm()
     vm2_ip = vm2_inv.vmNics[0].ip
-    vm3_inv = vm2.get_vm()
-    vm3_ip = vm2_inv.vmNics[0].ip
+    vm3_inv = vm3.get_vm()
+    vm3_ip = vm3_inv.vmNics[0].ip
     target_file = '/root/zstack-all-in-one.tgz'
     test_stub.prepare_test_env(vm1_inv, target_file)
     ssh_cmd1 = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm1_ip
@@ -59,12 +59,18 @@ def test():
     cmd = '%s "zstack-ctl add_multi_management --host-list=%s"' % (ssh_cmd1, host_list)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
 
- #   test_util.test_dsc('Check installation on vm1')
- #   test_stub.check_installation(ssh_cmd1, tmp_file, vm1_inv)
+    test_util.test_dsc('Check installation on vm1')
+    test_stub.check_installation(ssh_cmd1, tmp_file, vm1_inv)
+
     test_util.test_dsc('Check installation on vm2')
+    test_stub.copy_id_dsa(vm2_inv, ssh_cmd2, tmp_file)
+    test_stub.copy_id_dsa_pub(vm2_inv)
     test_stub.check_installation(ssh_cmd2, tmp_file, vm2_inv)
+
     test_util.test_dsc('Check installation on vm3')
-    test_stub.check_installation(ssh_cmd2, tmp_file, vm2_inv)
+    test_stub.copy_id_dsa(vm3_inv, ssh_cmd3, tmp_file)
+    test_stub.copy_id_dsa_pub(vm3_inv)
+    test_stub.check_installation(ssh_cmd3, tmp_file, vm3_inv)
 
     os.system('rm -f %s' % tmp_file)
     vm1.destroy()
