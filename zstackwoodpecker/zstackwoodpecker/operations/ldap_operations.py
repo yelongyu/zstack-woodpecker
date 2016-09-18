@@ -14,7 +14,7 @@ import config_operations
 import os
 import inspect
 
-def add_ldap_server(name, description, url, base, username, password, session_uuid=None):
+def add_ldap_server(name, description, url, base, username, password, encryption=None, session_uuid=None):
     action = api_actions.AddLdapServerAction()
     action.name = name
     action.description = description
@@ -22,6 +22,7 @@ def add_ldap_server(name, description, url, base, username, password, session_uu
     action.base = base
     action.username = username
     action.password = password
+    action.encryption = encryption
     test_util.action_logger('Add [ldap Server:] %s' % url)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[ldap Server:] %s is added.' % url)
