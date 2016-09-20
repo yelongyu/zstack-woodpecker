@@ -14,7 +14,7 @@ import config_operations
 import os
 import inspect
 
-def add_ldap_server(name, description, url, base, username, password, encryption=None, session_uuid=None):
+def add_ldap_server(name, description, url, base, username, password, encryption='None', session_uuid=None):
     action = api_actions.AddLdapServerAction()
     action.name = name
     action.description = description
