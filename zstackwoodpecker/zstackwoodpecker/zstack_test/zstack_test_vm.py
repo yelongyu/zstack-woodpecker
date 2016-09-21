@@ -96,8 +96,8 @@ class ZstackTestVm(vm_header.TestVm):
         vm_ops.expunge_vm(self.vm.uuid, session_uuid)
         super(ZstackTestVm, self).expunge()
 
-    def clone(self, names, session_uuid = None):
-        new_vms = vm_ops.clone_vm(self.vm.uuid, names)
+    def clone(self, names, strategy = None, session_uuid = None):
+        new_vms = vm_ops.clone_vm(self.vm.uuid, names, strategy)
         new_vm_objs = []
         for new_vm in new_vms:
             new_vm = new_vm.inventory
@@ -105,7 +105,7 @@ class ZstackTestVm(vm_header.TestVm):
             new_vm_obj.set_vm(new_vm)
             #Before 1.7 ZStack will only clone out running VM.
             #new_vm_obj.set_state(self.get_state())
-            new_vm_obj.set_state(vm_header.RUNNING)
+            new_vm_obj.set_state(new_vm.state)
             new_vm_obj.set_creation_option(self.get_creation_option())
             new_vm_obj.set_delete_policy(self.get_delete_policy())
             new_vm_obj.set_delete_delay_time(self.get_delete_delay_time())
