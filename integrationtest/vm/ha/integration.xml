@@ -5,7 +5,6 @@
         <case timeout='960' noparallel='True'>test_mysql_stop_create_vm.py</case>
         <case timeout='960' noparallel='True'>test_mysql_stop2_create_vm.py</case>
 	<case timeout='540' noparallel='True'>test_ui_stop.py</case>
-	<case timeout='240' noparallel='True'>test_kairosdb_stop.py</case>
         <case timeout='960' noparallel='True'>test_one_node_shutdown_create_vm.py</case>
         <case timeout='960' noparallel='True'>test_one_node_recovery_create_vm.py</case>
         <case timeout='960' noparallel='True'>test_one_node_network_temp_down_create_vm.py</case>
