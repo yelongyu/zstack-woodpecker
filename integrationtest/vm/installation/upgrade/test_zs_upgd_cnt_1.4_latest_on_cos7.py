@@ -10,6 +10,7 @@ import time
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
+import zstacklib.utils.ssh as ssh
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
@@ -18,7 +19,12 @@ tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
 
 def test():
     test_util.test_dsc('Create test vm to test zstack upgrade by -u.')
-    image_name = os.environ.get('imageName_i_c7')
+
+    if os.path.exists('/home/installation-package/zstack'):
+        image_name = os.environ.get('imageName_i_c7_z_1.4')
+    elif os.path.exists('/home/installation-package/mevoco'):
+        image_name = os.environ.get('imageName_i_c7_m_1.4')
+
     vm = test_stub.create_vlan_vm(image_name)
     test_obj_dict.add_vm(vm)
     if os.environ.get('zstackManagementIp') == None:
@@ -28,18 +34,18 @@ def test():
 
     vm_inv = vm.get_vm()
     vm_ip = vm_inv.vmNics[0].ip
-    test_util.test_dsc('Install zstack 1.4')
-    target_file = '/root/zstack-all-in-one.tgz'
-    install_pkg = os.environ.get('zstackPkg_1.4')
-    test_stub.prepare_upgrade_test_env(vm_inv, target_file, install_pkg) 
-
-    test_util.test_dsc('Prepare yum file')
-    test_stub.prepare_yum_repo(vm_inv)
 
     ssh_cmd = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    ssh.make_ssh_no_password(vm_ip, test_lib.lib_get_vm_username(vm_inv), \
+            test_lib.lib_get_vm_password(vm_inv))
     test_stub.copy_id_dsa(vm_inv, ssh_cmd, tmp_file)
     test_stub.copy_id_dsa_pub(vm_inv)
-    test_stub.execute_all_install(ssh_cmd, target_file, tmp_file)
+
+    test_util.test_dsc('Update MN IP')
+    cmd = '%s "zstack-ctl change_ip --ip="%s ' % (ssh_cmd, vm_ip)
+    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+    cmd = '%s "zstack-ctl start"' % ssh_cmd
+    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
 
     pkg_num = 1.5
