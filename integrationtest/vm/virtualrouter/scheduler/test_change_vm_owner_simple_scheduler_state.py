@@ -43,33 +43,34 @@ def test():
 
     vm = test_stub.create_vlan_vm(os.environ.get('l3VlanNetworkName1'))
     start_date = int(time.time())
-    schd1 = vm_ops.stop_vm_scheduler(vm.get_vm().uuid, 'simple', 'simple_stop_vm_scheduler', start_date+10, 20)
-    schd2 = vm_ops.start_vm_scheduler(vm.get_vm().uuid, 'simple', 'simple_start_vm_scheduler', start_date+20, 20)
+    schd1 = vm_ops.stop_vm_scheduler(vm.get_vm().uuid, 'simple', 'simple_stop_vm_scheduler', start_date+30, 60)
+    schd2 = vm_ops.start_vm_scheduler(vm.get_vm().uuid, 'simple', 'simple_start_vm_scheduler', start_date+60, 60)
 
-    test_stub.sleep_util(start_date+45)
+    test_stub.sleep_util(start_date+130)
 
     test_util.test_dsc('check scheduler state after creating scheduler')
     check_scheduler_state(schd1, 'Enabled')
     check_scheduler_state(schd2, 'Enabled')
-    if not check_scheduler_msg('run scheduler for job: StopVmInstanceJob', start_date+10):
+    if not check_scheduler_msg('run scheduler for job: StopVmInstanceJob', start_date+30):
         test_util.test_fail('StopVmInstanceJob not executed at expected timestamp range')
-    if not check_scheduler_msg('run scheduler for job: StartVmInstanceJob', start_date+20):
+    if not check_scheduler_msg('run scheduler for job: StartVmInstanceJob', start_date+60):
         test_util.test_fail('StartVmInstanceJob not executed at expected timestamp range')
-
+    
+#    vm.check();
     new_account = account_operations.create_account('new_account', 'password', 'Normal')
 
     res_ops.change_recource_owner(new_account.uuid, vm.vm.uuid)
 
     current_time = int(time.time())
-    except_start_time =  start_date + 20 * (((current_time - start_date) % 20) + 1)
-    test_stub.sleep_util(except_start_time + 45)
+    except_start_time =  start_date + 60 * (((current_time - start_date) % 60) + 1)
+    test_stub.sleep_util(except_start_time + 130)
  
     test_util.test_dsc('check scheduler state after changing the owner of vm')
     check_scheduler_state(schd1, 'Disabled')
     check_scheduler_state(schd2, 'Disabled')
-    if check_scheduler_msg('run scheduler for job: StopVmInstanceJob', except_start_time+10):
+    if check_scheduler_msg('run scheduler for job: StopVmInstanceJob', except_start_time+30):
         test_util.test_fail('StopVmInstanceJob executed at unexpected timestamp range')
-    if check_scheduler_msg('run scheduler for job: StartVmInstanceJob', except_start_time+20):
+    if check_scheduler_msg('run scheduler for job: StartVmInstanceJob', except_start_time+60):
         test_util.test_fail('StartVmInstanceJob executed at unexpected timestamp range')
 
     schd_ops.delete_scheduler(schd1.uuid)
