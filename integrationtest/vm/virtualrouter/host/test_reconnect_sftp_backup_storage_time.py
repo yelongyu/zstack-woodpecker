@@ -20,6 +20,12 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
 def test():
+    conditions = res_ops.gen_query_conditions('state', '=', 'Enabled')
+    if res_ops.query_resource(res_ops.SFTP_BACKUP_STORAGE, conditions):
+        sftp_backup_storage_uuid = res_ops.query_resource(res_ops.SFTP_BACKUP_STORAGE, conditions)[0].uuid
+    else:
+        test_util.test_skip("current test suite is for ceph, and there is no sftp. Skip test")
+
     recnt_timeout=5000
     test_util.test_dsc('Test SFTP Backup Storage Reconnect within %s ms' % recnt_timeout)
     vm = test_stub.create_vlan_vm(os.environ.get('l3VlanNetworkName1'))
@@ -29,8 +35,6 @@ def test():
     host = test_lib.lib_get_vm_host(vm.get_vm())
     host_uuid = host.uuid
 
-    conditions = res_ops.gen_query_conditions('state', '=', 'Enabled')
-    sftp_backup_storage_uuid = res_ops.query_resource(res_ops.SFTP_BACKUP_STORAGE, conditions)[0].uuid
     host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid, timeout=recnt_timeout) 
    
     vm.destroy()
