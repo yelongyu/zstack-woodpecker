@@ -43,7 +43,7 @@ def create_vm(vm_create_option):
     create_vm.userTags = vm_create_option.get_user_tags()
     timeout = vm_create_option.get_timeout()
     if not timeout:
-        create_vm.timeout = 600000
+        create_vm.timeout = 1200000
     else:
         create_vm.timeout = timeout
 
@@ -59,7 +59,7 @@ def create_vm(vm_create_option):
 def destroy_vm(vm_uuid, session_uuid=None):
     action = api_actions.DestroyVmInstanceAction()
     action.uuid = vm_uuid
-    action.timeout = 120000
+    action.timeout = 240000
     test_util.action_logger('Destroy VM [uuid:] %s' % vm_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
@@ -68,7 +68,7 @@ def stop_vm(vm_uuid, force=None, session_uuid=None):
     action = api_actions.StopVmInstanceAction()
     action.uuid = vm_uuid
     action.type = force
-    action.timeout = 120000
+    action.timeout = 240000
     test_util.action_logger('Stop VM [uuid:] %s' % vm_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
@@ -82,12 +82,12 @@ def stop_vm_scheduler(vm_uuid, type, name, start_time=None, interval=None, repea
     action.interval = interval
     action.repeatCount = repeatCount
     action.cron = cron
-    action.timeout = 120000
+    action.timeout = 240000
     test_util.action_logger('Create Stop VM Scheduler [uuid:] %s [type:] %s [startTimeStamp:] %s [interval:] %s [repeatCount:] %s [cron:] %s' % (vm_uuid, type, start_time, interval, repeatCount, cron))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def start_vm(vm_uuid, session_uuid=None, timeout=120000):
+def start_vm(vm_uuid, session_uuid=None, timeout=240000):
     action = api_actions.StartVmInstanceAction()
     action.uuid = vm_uuid
     action.timeout = timeout
@@ -95,7 +95,7 @@ def start_vm(vm_uuid, session_uuid=None, timeout=120000):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def start_vm_scheduler(vm_uuid, type, name, start_time=None, interval=None, repeatCount=None, cron=None, session_uuid=None, timeout=120000):
+def start_vm_scheduler(vm_uuid, type, name, start_time=None, interval=None, repeatCount=None, cron=None, session_uuid=None, timeout=240000):
     action = api_actions.CreateStartVmInstanceSchedulerAction()
     action.vmUuid = vm_uuid
     action.type = type
@@ -112,12 +112,12 @@ def start_vm_scheduler(vm_uuid, type, name, start_time=None, interval=None, repe
 def reboot_vm(vm_uuid, session_uuid=None):
     action = api_actions.RebootVmInstanceAction()
     action.uuid = vm_uuid
-    action.timeout = 120000
+    action.timeout = 240000
     test_util.action_logger('Reboot VM [uuid:] %s' % vm_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def reboot_vm_scheduler(vm_uuid, type, name, start_time=None, interval=None, repeatCount=None, cron=None, session_uuid=None, timeout=120000):
+def reboot_vm_scheduler(vm_uuid, type, name, start_time=None, interval=None, repeatCount=None, cron=None, session_uuid=None, timeout=240000):
     action = api_actions.CreateRebootVmInstanceSchedulerAction()
     action.vmUuid = vm_uuid
     action.type = type
@@ -131,12 +131,12 @@ def reboot_vm_scheduler(vm_uuid, type, name, start_time=None, interval=None, rep
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def migrate_vm(vm_uuid, host_uuid, timeout = 240000, session_uuid = None):
+def migrate_vm(vm_uuid, host_uuid, timeout = 480000, session_uuid = None):
     action = api_actions.MigrateVmAction()
     action.vmInstanceUuid = vm_uuid
     action.hostUuid = host_uuid
     if not timeout:
-        timeout = 240000
+        timeout = 480000
     action.timeout = timeout
     test_util.action_logger('Migrate VM [uuid:] %s to Host [uuid:] %s, in timeout: %s' % (vm_uuid, host_uuid, timeout))
     evt = account_operations.execute_action_with_session(action, session_uuid)
@@ -154,7 +154,7 @@ def change_vm_static_ip(vm_uuid, l3NetworkUuid, ip, session_uuid = None):
 def reconnect_vr(vr_uuid, session_uuid=None):
     action = api_actions.ReconnectVirtualRouterAction()
     action.vmInstanceUuid = vr_uuid
-    action.timeout = 300000
+    action.timeout = 600000
     test_util.action_logger('Reconnect VR VM [uuid:] %s' % vr_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory 
@@ -195,7 +195,7 @@ def delete_instance_offering(instance_offering_uuid, session_uuid = None):
 def expunge_vm(vm_uuid, session_uuid = None):
     action = api_actions.ExpungeVmInstanceAction()
     action.uuid = vm_uuid
-    action.timeout = 10000
+    action.timeout = 40000
     test_util.action_logger('Expunge VM [uuid:] %s ' % vm_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory 
@@ -203,7 +203,7 @@ def expunge_vm(vm_uuid, session_uuid = None):
 def recover_vm(vm_uuid, session_uuid = None):
     action = api_actions.RecoverVmInstanceAction()
     action.uuid = vm_uuid
-    action.timeout = 20000
+    action.timeout = 40000
     test_util.action_logger('Recover VM [uuid:] %s ' % vm_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory 
@@ -213,7 +213,7 @@ def clone_vm(vm_uuid, vm_names, strategy, session_uuid = None):
     action.vmInstanceUuid = vm_uuid
     action.names=vm_names
     action.strategy=strategy
-    action.timeout = 1000000
+    action.timeout = 2000000
     test_util.action_logger('Clone VM [uuid:] %s to %s' % (vm_uuid, vm_names))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.test_logger('%s VMs have been cloned from %s' % (evt.result.numberOfClonedVm, vm_uuid))
