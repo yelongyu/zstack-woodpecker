@@ -16,7 +16,7 @@ def create_volume_from_offering(volume_option):
     action.description = volume_option.get_description()
     timeout = volume_option.get_timeout()
     if not timeout:
-        action.timeout = 120000
+        action.timeout = 240000
     else:
         action.timeout = timeout
 
@@ -67,7 +67,7 @@ def create_volume_from_template(image_uuid, ps_uuid, name = None, \
 def delete_volume(volume_uuid, session_uuid=None):
     action = api_actions.DeleteDataVolumeAction()
     action.uuid = volume_uuid
-    action.timeout = 120000
+    action.timeout = 240000
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Delete Volume [uuid:] %s' % volume_uuid)
     return evt.inventory
@@ -75,7 +75,7 @@ def delete_volume(volume_uuid, session_uuid=None):
 def expunge_volume(volume_uuid, session_uuid=None):
     action = api_actions.ExpungeDataVolumeAction()
     action.uuid = volume_uuid
-    action.timeout = 30000
+    action.timeout = 60000
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Expunge Volume [uuid:] %s' % volume_uuid)
     return evt
@@ -84,7 +84,7 @@ def attach_volume(volume_uuid, vm_uuid, session_uuid=None):
     action = api_actions.AttachDataVolumeToVmAction()
     action.vmInstanceUuid = vm_uuid
     action.volumeUuid = volume_uuid
-    action.timeout = 120000
+    action.timeout = 240000
     test_util.action_logger('Attach Data Volume [uuid:] %s to [vm:] %s' % (volume_uuid, vm_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
@@ -92,7 +92,7 @@ def attach_volume(volume_uuid, vm_uuid, session_uuid=None):
 def detach_volume(volume_uuid, session_uuid=None):
     action = api_actions.DetachDataVolumeFromVmAction()
     action.uuid = volume_uuid
-    action.timeout = 120000
+    action.timeout = 240000
     test_util.action_logger('Detach Volume [uuid:] %s' % volume_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
@@ -104,7 +104,7 @@ def create_snapshot(snapshot_option, session_uuid=None):
     if not action.name:
         action.name = 'snapshot_for_volume_%s' % action.volumeUuid
     action.description = snapshot_option.get_description()
-    action.timeout = 120000
+    action.timeout = 240000
     if snapshot_option.get_session_uuid():
         session_uuid = snapshot_option.get_session_uuid()
     evt = account_operations.execute_action_with_session(action, session_uuid)
@@ -126,7 +126,7 @@ def create_snapshot_scheduler(snapshot_option, type, name, start_time=None, inte
     action.interval = interval
     action.repeatCount = repeatCount
     action.cron = cron
-    action.timeout = 120000
+    action.timeout = 240000
     if snapshot_option.get_session_uuid():
         session_uuid = snapshot_option.get_session_uuid()
     evt = account_operations.execute_action_with_session(action, session_uuid)
@@ -138,7 +138,7 @@ def create_snapshot_scheduler(snapshot_option, type, name, start_time=None, inte
 def delete_snapshot(snapshot_uuid, session_uuid=None):
     action = api_actions.DeleteVolumeSnapshotAction()
     action.uuid = snapshot_uuid
-    action.timeout = 120000
+    action.timeout = 240000
     test_util.action_logger('Delete [Snapshot:] %s ' % snapshot_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
@@ -146,7 +146,7 @@ def delete_snapshot(snapshot_uuid, session_uuid=None):
 def use_snapshot(snapshot_uuid, session_uuid=None):
     action = api_actions.RevertVolumeFromSnapshotAction()
     action.uuid = snapshot_uuid
-    action.timeout = 12000
+    action.timeout = 24000
     test_util.action_logger('Revert Volume by [Snapshot:] %s ' % snapshot_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
@@ -168,7 +168,7 @@ def delete_snapshot_from_backupstorage(snapshot_uuid, bs_list=[], \
     action.uuid = snapshot_uuid
     action.backupStorageUuids = bs_list
     action.deleteMode = delete_mode
-    action.timeout = 12000
+    action.timeout = 24000
     test_util.action_logger('Delete [Snapshot:] %s from backup storage: %s' \
             % (snapshot_uuid, bs_list))
     evt = account_operations.execute_action_with_session(action, session_uuid)
