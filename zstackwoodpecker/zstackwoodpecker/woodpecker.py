@@ -373,7 +373,7 @@ class WoodPecker(object):
                     msg = fmt % case_name.ljust(max_case_name_len) + ret
                     self.info(msg)
 
-                if os.path.exists(POST_TEST_CASE_SCRIPT):
+                if not self.dry_run and os.path.exists(POST_TEST_CASE_SCRIPT):
                     os.system("bash %s" % POST_TEST_CASE_SCRIPT)
 
                     
