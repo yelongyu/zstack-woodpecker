@@ -227,6 +227,13 @@ class WoodPecker(object):
         def run_case(suite, case, suite_repeat, case_repeat, parallel=0):
             global sig_flag
             if self.dry_run:
+                if case_repeat != 0:
+                        brief = "%s %s.%s %s\n" % (suite.name, case.name, case_repeat, 'SKIP')
+                else:
+                        brief = "%s %s %s\n" % (suite.name, case.name, 'SKIP')
+
+                self.write_file_a(self.brief_path, brief)
+
                 return
             case_log_path = self.get_case_log_path(case, suite_repeat, case_repeat)
             case_action_log_path = self.get_case_action_log_path(case, suite_repeat, case_repeat)
@@ -398,7 +405,7 @@ class WoodPecker(object):
                         return
                     #self.info('running setup case: %s' % suite.setup_case.name)
                     run_case(suite, suite.setup_case, suite_repeat, 0)
-                    if suite.setup_case.success[suite_repeat][0] != TestCase.PASS:
+                    if suite.setup_case.success[suite_repeat][0] != TestCase.PASS and not self.dry_run:
                         self.info('setup_case[%s] in suite[%s] failed to execute, skipping test cases in this suite' % (suite.setup_case.name, suite.name + "_r" + str(suite_repeat)))
                         return
     
