@@ -41,11 +41,11 @@ class ZstackTestVolume(volume_header.TestVolume):
         return image
 
     def attach(self, target_vm):
-        new_volume = test_lib.lib_retry_when_exception(vol_ops.attach_volume, [self.get_volume().uuid, target_vm.get_vm().uuid])
+	new_volume = vol_ops.attach_volume(self.get_volume().uuid, target_vm.get_vm().uuid)
         if not new_volume:
             test_lib.lib_get_vm_blk_status(target_vm.get_vm())
             #test_util.raise_exeception_no_cleanup('Attach Volume to VM failed with 5 retry.')
-            raise test_util.TestError('Attach Volume to VM failed with 5 retry.')
+            raise test_util.TestError('Attach Volume to VM failed.')
         self.set_volume(new_volume)
         super(ZstackTestVolume, self).attach(target_vm)
 
