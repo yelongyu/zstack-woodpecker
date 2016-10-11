@@ -43,10 +43,11 @@ def test():
 
     scheduler_execution_count = 0
     for i in range(0, 30):
-        if test_lib.lib_find_in_remote_management_server_log(node1_ip, host_username, host_password, start_date+60+30*i, '[msg received]: {"org.zstack.header.vm.RebootVmInstanceMsg', vm.get_vm().uuid):
-            scheduler_execution_count += 1
-        if test_lib.lib_find_in_remote_management_server_log(node2_ip, host_username, host_password, start_date+60+30*i, '[msg received]: {"org.zstack.header.vm.RebootVmInstanceMsg', vm.get_vm().uuid):
-            scheduler_execution_count -= 1
+        for j in range(0, 6):
+            if test_lib.lib_find_in_remote_management_server_log(node1_ip, host_username, host_password, start_date+60+30*i+j, '[msg received]: {"org.zstack.header.vm.RebootVmInstanceMsg', vm.get_vm().uuid):
+                scheduler_execution_count += 1
+            if test_lib.lib_find_in_remote_management_server_log(node2_ip, host_username, host_password, start_date+60+30*i+j, '[msg received]: {"org.zstack.header.vm.RebootVmInstanceMsg', vm.get_vm().uuid):
+                scheduler_execution_count -= 1
 
     if abs(scheduler_execution_count) < 5:
             test_util.test_fail('VM reboot scheduler is expected to executed for more than 5 times, while it only execute %s times' % (scheduler_execution_count))
