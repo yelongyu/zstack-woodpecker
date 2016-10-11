@@ -4556,7 +4556,10 @@ def lib_count_in_local_management_server_log(timestamp, *keywords):
 
 def lib_find_in_remote_management_server_log(node_ip, node_username, node_password, timestamp, *keywords):
     datetime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(timestamp))
-    cmd = 'grep "%s" %s | cat' % (datetime, lib_get_remote_management_server_log_path(node_ip, node_username, node_password).strip())
+    if lib_get_remote_management_server_log_path(node_ip, node_username, node_password) == False:
+        return False
+    else:
+        cmd = 'grep "%s" %s | cat' % (datetime, lib_get_remote_management_server_log_path(node_ip, node_username, node_password).strip())
     try:
         out = lib_execute_ssh_cmd(node_ip, node_username, node_password, cmd, 180)
     except:
