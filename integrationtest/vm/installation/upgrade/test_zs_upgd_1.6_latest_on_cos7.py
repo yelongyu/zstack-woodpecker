@@ -44,6 +44,17 @@ def test():
     test_util.test_dsc('Update MN IP')
     cmd = '%s "zstack-ctl change_ip --ip="%s ' % (ssh_cmd, vm_ip)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+
+    test_util.test_dsc('Update /etc/host/, just for mevoco 1.6')
+    cmd = '%s "sed -i \'3d\' /etc/hosts"' % (ssh_cmd)
+    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+
+    test_util.test_dsc('Reboot kairosdb, just for mevoco 1.6')
+    cmd = '%s "zstack-ctl kairosdb --stop"' % (ssh_cmd)
+    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+    cmd = '%s "zstack-ctl kairosdb --start"' % (ssh_cmd)
+    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+
     cmd = '%s "zstack-ctl start"' % ssh_cmd
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
