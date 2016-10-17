@@ -1,5 +1,5 @@
 import ../deploy.tmpt
 import ./deploy.tmpt
 
-localPrimaryStorageName = local-ps
-localPrimaryStorageUrl = /home/local-ps
+sharedMountPointPrimaryStorageName = sharedMountPoint-ps
+sharedMountPointPrimaryStorageUrl = /home/smp-ps
