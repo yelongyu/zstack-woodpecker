@@ -452,3 +452,17 @@ def change_recource_owner(accountUuid, resourceUuid, session_uuid = None):
     action.resourceUuid = resourceUuid
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
+
+def update_sftp_info(sftpUuid, infoType, infoValue, session_uuid = None):
+    action = api_actions.UpdateSftpBackupStorageAction()
+    action.uuid = sftpUuid
+    if infoType == 'password':
+        action.password = infoValue
+    elif infoType == 'hostname':
+        action.hostname = infoValue
+    elif infoType == 'sshPort':
+        action.sshPort = infoValue
+    elif infoType == 'username':
+        action.username = infoValue
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
