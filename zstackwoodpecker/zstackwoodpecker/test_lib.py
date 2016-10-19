@@ -1033,27 +1033,34 @@ def lib_get_backup_storage_host(bs_uuid):
     '''
     Get host, who has backup storage uuid.
     '''
-    #session_uuid = acc_ops.login_as_admin()
-    #try:
-    #    bss = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid)
-    #finally:
-    #    acc_ops.logout(session_uuid)
-    #
-    #if not bss:
-    #    test_util.test_fail('can not get zstack backup storage inventories.')
+    session_uuid = acc_ops.login_as_admin()
+    try:
+        bss = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid)
+    finally:
+        acc_ops.logout(session_uuid)
+    
+    if not bss:
+        test_util.test_fail('can not get zstack backup storage inventories.')
+
+    name = None
+    for bs in bss:
+        if bs.uuid == bs_uuid:
+            name = bs.name
+            break
+
+    if name == None:
+        test_util.test_fail('can not get zstack backup storage inventories.')
 
     host = test_util.HostOption()
+    for bs in deploy_config.backupStorages.get_child_node_as_list('sftpBackupStorage'):
+        if bs.name_ == name:
+            host.managementIp = bs.hostname_
+            host.username = bs.username_
+            host.password = bs.password_
 
-    #for bs in bss:
-    #    if bs.uuid == bs_uuid:
-    #        host.managementIp = bs.hostname
-    #        host.username = bs.username
-    #        host.password = bs.password
-    #        break
-
-    host.managementIp = os.environ.get('sftpBackupStorageHostname')
-    host.username = os.environ.get('sftpBackupStorageUsername')
-    host.password = os.environ.get('sftpBackupStoragePassword')
+    #host.managementIp = os.environ.get('sftpBackupStorageHostname')
+    #host.username = os.environ.get('sftpBackupStorageUsername')
+    #host.password = os.environ.get('sftpBackupStoragePassword')
     
     return host
 
