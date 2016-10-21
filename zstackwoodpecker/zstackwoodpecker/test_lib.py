@@ -1057,6 +1057,8 @@ def lib_get_backup_storage_host(bs_uuid):
             host.managementIp = bs.hostname_
             host.username = bs.username_
             host.password = bs.password_
+            if hasattr(bs, 'port_'):
+                host.sshPort = bs.port_
 
     #host.managementIp = os.environ.get('sftpBackupStorageHostname')
     #host.username = os.environ.get('sftpBackupStorageUsername')
