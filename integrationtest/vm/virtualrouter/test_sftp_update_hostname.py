@@ -8,6 +8,7 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
+import zstackwoodpecker.operations.backupstorage_operations as bs_ops
 import apibinding.api_actions as api_actions
 import zstackwoodpecker.operations.account_operations as account_operations
 import zstacklib.utils.ssh as ssh
@@ -38,10 +39,8 @@ def test():
     if local_ip != sftp_hostname:
         test_util.test_skip("host of sftp and host of MN are not the same one. Skip test") 
 
-#    recnt_timeout=5000
     test_util.test_dsc('Test SFTP Backup Storage Update Infomation: password, hostname, sshPort, username')
 
-#====================== hostname ======================
     test_util.test_dsc('Update Hostname')
     test_util.test_dsc('Create New VM as Sftp')
     vm = test_stub.create_basic_vm()
@@ -53,16 +52,12 @@ def test():
     vm.check()
     test_lib.lib_execute_command_in_vm(vm.get_vm(), 'mkdir /home/sftpBackupStorage')
 
-    res_ops.update_sftp_info(sftp_backup_storage_uuid, 'hostname', vm_ip)
-#    host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid, timeout=recnt_timeout)
+    bs_ops.update_sftp_backup_stroage_info(sftp_backup_storage_uuid, 'hostname', vm_ip)
     host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid)
 
     test_util.test_dsc('Recover Sftp Hostname')
-    res_ops.update_sftp_info(sftp_backup_storage_uuid, 'hostname', sftp_backup_storage_hostname)
-#    host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid, timeout=recnt_timeout)
+    bs_ops.update_sftp_backup_stroage_info(sftp_backup_storage_uuid, 'hostname', sftp_backup_storage_hostname)
     host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid)
-
-#====================== username ======================
 
     vm.destroy()
     test_obj_dict.rm_vm(vm)
@@ -74,7 +69,6 @@ def error_cleanup():
     global sftp_backup_storage_uuid
     global sftp_backup_storage_hostname
     global recnt_timeout
-    res_ops.update_sftp_info(sftp_backup_storage_uuid, 'hostname', sftp_backup_storage_hostname)
-#    host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid, timeout=recnt_timeout)
+    bs_ops.update_sftp_backup_stroage_info(sftp_backup_storage_uuid, 'hostname', sftp_backup_storage_hostname)
     host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid)
     test_lib.lib_error_cleanup(test_obj_dict)
