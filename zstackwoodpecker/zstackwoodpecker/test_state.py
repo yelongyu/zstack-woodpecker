@@ -604,7 +604,7 @@ class TestStateDict(object):
             }"
     volume_snapshot_desc = " volume_snapshot_dict = { \
             volume_uuid1: volume_snapshots_object, \
-            volume_uuid2: volume_snapshots_object \
+            Deleted': [volume_uuid] \
             }"
 
     #for test facility, like doing snapshot test. SG utility vm is in sg_vm()
@@ -659,7 +659,7 @@ class TestStateDict(object):
                 eip_header.ATTACHED:[]
                 }
 
-        self.volume_snapshot_dict = {}
+        self.volume_snapshot_dict = {'Deleted': []}
         self.utility_vm_dict = {}
         self.account_dict = {'Deleted': []}
         self.load_balancer_dict = {'Deleted': []}
@@ -787,17 +787,14 @@ class TestStateDict(object):
         Depends on delete policy. Both delete volume and expunge volume might 
         call this function to remove volume object from test state.
         '''
-        if volume.get_state() == volume_header.EXPUNGED:
-            #need to delete empty snapshots, when volume is expunged. 
-            self.rm_volume_snapshots_by_rm_volume(volume.get_volume().uuid)
+        #need to delete empty snapshots, when volume is expunged. 
+        self.rm_volume_snapshots_by_rm_volume(volume.get_volume().uuid)
 
         if state:
             if volume in self.volume_dict[state]:
                 self.volume_dict[state].remove(volume)
                 if volume.get_state() == volume_header.DELETED:
                     self.add_volume(volume, TestStage.deleted_volume)
-                elif volume.get_state() == volume_header.EXPUNGED:
-                    self.rm_volume_snapshots_by_rm_volume(volume.get_volume().uuid)
                 return True
             return False
 
@@ -806,8 +803,6 @@ class TestStateDict(object):
                 self.volume_dict[key].remove(volume)
                 if volume.get_state() == volume_header.DELETED:
                     self.add_volume(volume, TestStage.deleted_volume)
-                elif volume.get_state() == volume_header.EXPUNGED:
-                    self.rm_volume_snapshots_by_rm_volume(volume.get_volume().uuid)
                 return True
         else:
             return False
@@ -969,7 +964,10 @@ class TestStateDict(object):
             test_util.test_fail('Can not add volume_snapshot, before setting target_volume for it.')
 
         volume_uuid = snapshots.get_target_volume().get_volume().uuid
-        self.volume_snapshot_dict[volume_uuid] = snapshots
+        if not self.volume_snapshot_dict.has_key(volume_uuid):
+            self.volume_snapshot_dict[volume_uuid] = snapshots
+
+
 
     def rm_volume_snapshot(self, snapshots):
         '''
@@ -978,8 +976,8 @@ class TestStateDict(object):
         if not snapshots.get_target_volume():
             test_util.test_fail('Can not remove volume_snapshot, before setting target_volume for it.')
         volume_uuid = snapshots.get_target_volume().get_volume().uuid
-        if self.volume_snapshot_dict.has_key(volume_uuid):
-            self.volume_snapshot_dict.pop(volume_uuid)
+        if not volume_uuid in self.volume_snapshot_dict['Deleted']:
+            self.volume_snapshot_dict['Deleted'].append(volume_uuid)
 
     def rm_volume_snapshots_by_rm_volume(self, volume_uuid):
         snapshots = self.get_volume_snapshot(volume_uuid)
@@ -1003,6 +1001,13 @@ class TestStateDict(object):
 
     def get_all_snapshots(self):
         return self.volume_snapshot_dict.values()
+
+    def get_all_available_snapshots(self):
+        all_items = []
+        for key,value in self.volume_snapshot_dict.iteritems():
+            if key != 'Deleted' and not key in self.volume_snapshot_dict['Deleted']:
+                all_items.append(value)
+        return all_items
 
     def get_volume_snapshot(self, volume_uuid):
         if self.volume_snapshot_dict.has_key(volume_uuid):

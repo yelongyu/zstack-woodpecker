@@ -3499,7 +3499,7 @@ def lib_robot_cleanup(test_dict):
     for vip in test_dict.get_all_vip_list():
         vip.delete()
 
-    for sp in test_dict.get_all_snapshots():
+    for sp in test_dict.get_all_available_snapshots():
         sp.delete()
 
     for vm in test_dict.get_all_utility_vm():
@@ -3586,7 +3586,7 @@ def lib_error_cleanup(test_dict):
             pass
 
     test_util.test_logger('- - - Error cleanup: snapshots - - -')
-    for sp in test_dict.get_all_snapshots():
+    for sp in test_dict.get_all_available_snapshots():
         try:
             sp.delete()
         except:
@@ -3648,7 +3648,7 @@ def lib_robot_status_check(test_dict):
             vip.check()
 
     test_util.test_logger('- - - check Snapshot  - - -')
-    volume_snapshots = test_dict.get_all_snapshots()
+    volume_snapshots = test_dict.get_all_available_snapshots()
     for snapshots in volume_snapshots:
         snapshots.check()
 
@@ -3750,7 +3750,7 @@ def lib_vm_random_operation(robot_test_obj):
         test_stage_obj.set_volume_state(test_stage.no_free_volume)
 
     #Fifthly, choose a volume for possible snasphot operation 
-    all_volume_snapshots = test_dict.get_all_snapshots()
+    all_volume_snapshots = test_dict.get_all_available_snapshots()
     if all_volume_snapshots:
         target_volume_snapshots = random.choice(all_volume_snapshots)
         snapshot_volume_obj = target_volume_snapshots.get_target_volume()
