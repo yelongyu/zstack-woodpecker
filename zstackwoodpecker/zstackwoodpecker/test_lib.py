@@ -2689,7 +2689,7 @@ def lib_check_file_exist(host, file_path):
     eout = ''
     try:
         if host.sshPort != None:
-            (ret, out, eout) = ssh.execute(command, host.managementIp, host.username, host.password, port=host.sshPort)
+            (ret, out, eout) = ssh.execute(command, host.managementIp, host.username, host.password, port=int(host.sshPort))
 	else:
             (ret, out, eout) = ssh.execute(command, host.managementIp, host.username, host.password)
         test_util.test_logger('[file:] %s was found in [host:] %s' % (file_path, host.managementIp))
