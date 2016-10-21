@@ -90,7 +90,6 @@
         <case timeout='1800' repeat='1'>scheduler/test_change_vm_owner_simple_scheduler_state.py</case>
 	<case timeout='1800' repeat='1'>scheduler/test_change_volume_owner_simple_scheduler_state.py</case>
         <case timeout='1800' repeat='1' noparallel='True'>scheduler/test_delete_vm_check_simple_scheduler_state.py</case>
-        <case timeout='1800' repeat='1' noparallel='True'>test_sftp_update_hostname.py</case>
         <case timeout='1800' repeat='1' noparallel='True'>test_sftp_update_password_sshport.py</case>
         <!--<case timeout='800'  repeat='1'>snapshot/test_backup_snapshot.py</case>
         <case timeout='2400' repeat='1' noparallel='True'>snapshot/test_create_100_snapshots.py</case> -->
