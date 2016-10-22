@@ -8,6 +8,7 @@ import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.header.snapshot as sp_header
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.config_operations as cfg_ops
+import apibinding.inventory as inventory
 
 class zstack_kvm_backuped_snapshot_checker(checker_header.TestChecker):
     def check(self):
@@ -23,6 +24,10 @@ class zstack_kvm_backuped_snapshot_checker(checker_header.TestChecker):
                 sp_path = sp_bs_ref.installPath
                 sp_uuid = sp_bs_ref.volumeSnapshotUuid
                 bs_host = test_lib.lib_get_backup_storage_host(bs_uuid)
+                bs = test_lib.lib_get_backup_storage_by_uuid(sp_bs_ref.backupStorageUuid)
+                if hasattr(inventory, 'IMAGE_STORE_BACKUP_STORAGE_TYPE') and bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+                    sp_info = sp_path.split('://')[1].split('/')
+                    sp_path = '%s/registry/v1/repos/public/%s/manifests/revisions/%s' % (bs.url, sp_info[0], sp_info[1])
                 if test_lib.lib_check_file_exist(bs_host, sp_path):
                     test_util.test_logger('Checker result: backuped snapshot:%s is found in backup storage:%s in path: %s' % (sp_uuid, bs_uuid, sp_path))
                     if self.exp_result == False:
