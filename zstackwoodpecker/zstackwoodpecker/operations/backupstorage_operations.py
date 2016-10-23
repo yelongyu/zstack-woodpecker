@@ -28,7 +28,7 @@ def create_sftp_backup_storage(backup_storage_option, session_uuid=None):
     action.hostname = backup_storage_option.get_hostname()
     action.username = backup_storage_option.get_username()
     action.password = backup_storage_option.get_password()
-    action.sshPort = backup_storage_option.get_sshport()
+    action.sshPort = backup_storage_option.get_sshPort()
     action.resourceUuid = backup_storage_option.get_resource_uuid()
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create Sftp Backup Storage [uuid:] %s [name:] %s' % \
