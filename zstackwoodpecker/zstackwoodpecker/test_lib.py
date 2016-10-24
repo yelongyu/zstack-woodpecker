@@ -3677,16 +3677,16 @@ def lib_vm_random_operation(robot_test_obj):
 
     #Firstly, choose a target VM state for operation. E.g. Running. 
     if test_dict.get_vm_list(vm_header.STOPPED):
-        if test_dict.get_vm_list(vm_header.EXPUNGED):
+        if test_dict.get_vm_list(vm_header.DESTROYED):
             target_vm_state = random.choice([vm_header.RUNNING, \
-                    vm_header.STOPPED, vm_header.EXPUNGED])
+                    vm_header.STOPPED, vm_header.DESTROYED])
         else:
             target_vm_state = random.choice([vm_header.RUNNING, \
                     vm_header.STOPPED])
     else:
-        if test_dict.get_vm_list(vm_header.EXPUNGED):
+        if test_dict.get_vm_list(vm_header.DESTROYED):
             target_vm_state = random.choice([vm_header.RUNNING, \
-                    vm_header.EXPUNGED])
+                    vm_header.DESTROYED])
         else:
             target_vm_state = vm_header.RUNNING 
 
