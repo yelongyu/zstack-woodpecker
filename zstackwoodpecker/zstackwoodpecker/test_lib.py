@@ -4586,3 +4586,32 @@ def lib_find_in_remote_management_server_log(node_ip, node_username, node_passwo
             return True
         
     return False
+
+def lib_update_instance_offering(offering_uuid, cpuNum = None, cpuSpeed = None, \
+        memorySize = None, name = None, \
+        volume_iops = None, volume_bandwidth = None, \
+        net_outbound_bandwidth = None, net_inbound_bandwidth = None):
+
+    systemTags = None
+    updated_offering_option = test_util.InstanceOfferingOption()
+    if cpuNum:
+        updated_offering_option.set_cpuNum(cpuNum)
+    #if cpuSpeed:
+    #    updated_offering_option.set_cpuSpeed(cpuSpeed)
+    if memorySize:
+        updated_offering_option.set_memorySize(memorySize)
+    if name:
+        updated_offering_option.set_name(name)
+    if volume_iops:
+        systemTags += "volumeTotalIops::%d," %(volume_iops)
+    if volume_bandwidth:
+        systemTags += "volumeTotalIops::%d," %(volume_bandwidth)
+    if net_outbound_bandwidth:
+        systemTags += "volumeTotalIops::%d," %(net_outbound_bandwidth)
+    if net_inbound_bandwidth:
+        systemTags += "volumeTotalIops::%d," %(net_inbound_bandwidth)
+
+    if systemTags:
+        systemTags = systemTags.rstrip(',')
+
+    return vm_ops.update_instance_offering(updated_offering_option, offering_uuid, systemTags)

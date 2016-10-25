@@ -184,6 +184,28 @@ def create_instance_offering(instance_offering_option, session_uuid = None):
     test_util.test_logger('Instance Offering: %s is created' % evt.inventory.uuid)
     return evt.inventory
 
+def update_instance_offering(instance_offering_option, offering_uuid, system_tags=None, session_uuid=None):
+    action = api_actions.UpdateInstanceOfferingAction()
+    action.uuid = offering_uuid
+    action.cpuNum = instance_offering_option.get_cpuNum()
+    #action.cpuSpeed = instance_offering_option.get_cpuSpeed()
+    action.memorySize = instance_offering_option.get_memorySize()
+    #action.allocatorStrategy = instance_offering_option.get_allocatorStrategy()
+    #action.type = instance_offering_option.get_type()
+    action.name = instance_offering_option.get_name()
+    action.description = instance_offering_option.get_description()
+    #action.systemTags += instance_offering_option.get_name()
+    if system_tags:
+        action.systemTags = system_tags
+
+    #test_util.action_logger('update instance offering: name: %s cpuNum: %s, cpuSpeed: %s, memorySize: %s, allocatorStrategy: %s, type: %s, systemTags: %s '\
+    #        % (action.name, action.cpuNum, action.cpuSpeed, action.memorySize, action.allocatorStrategy, action.type, action.systemTags))
+    test_util.action_logger('update instance offering: name: %s cpuNum: %s, memorySize: %s, systemTags: %s '\
+            % (action.name, action.cpuNum, action.memorySize, action.systemTags))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.test_logger('Instance Offering: %s is created' % evt.inventory.uuid)
+    return evt.inventory
+
 def delete_instance_offering(instance_offering_uuid, session_uuid = None):
     action = api_actions.DeleteInstanceOfferingAction()
     action.uuid = instance_offering_uuid
