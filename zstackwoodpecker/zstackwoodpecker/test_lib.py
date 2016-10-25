@@ -2484,7 +2484,8 @@ def lib_get_backup_storage_list_by_vm(vm, session_uuid=None):
         return bss
 
 def lib_create_template_from_volume(volume_uuid, session_uuid=None):
-    bs_uuid = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid)[0].uuid
+    bss = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid)
+    bs_uuid = bss[random.randint(0, len(bss)-1)].uuid
     #[Inlined import]
     import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
     image = zstack_image_header.ZstackTestImage()
