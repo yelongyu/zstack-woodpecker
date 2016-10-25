@@ -10,6 +10,7 @@ import zstackwoodpecker.operations.image_operations as img_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
+import random
 
 class ZstackTestImage(image_header.TestImage):
 
@@ -26,7 +27,8 @@ class ZstackTestImage(image_header.TestImage):
         '''
         bs_uuid = self.image_creation_option.get_backup_storage_uuid_list()[0]
         bs = test_lib.lib_get_backup_storage_by_uuid(bs_uuid)
-        if hasattr(inventory, 'IMAGE_STORE_BACKUP_STORAGE_TYPE') and bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+        create_image_operation = random.choice(['create_root_volume_template', 'commit_volume_as_image'])
+        if create_image_operation == 'commit_volume_as_image':
             self.image = \
                     img_ops.commit_volume_as_image(self.image_creation_option)
         else:
