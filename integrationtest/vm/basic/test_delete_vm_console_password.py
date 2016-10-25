@@ -10,13 +10,13 @@ import zstackwoodpecker.test_lib as test_lib
 import zstacklib.utils.shell as shell
 import test_stub
 import zstackwoodpecker.operations.account_operations as acc_ops
-from vncdotool import api
 
 vm1 = None
 vm2 = None
 password1='111111'
 
 def test():
+    from vncdotool import api
     global vm1
     global vm2
 

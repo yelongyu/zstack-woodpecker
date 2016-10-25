@@ -452,3 +452,4 @@ def change_recource_owner(accountUuid, resourceUuid, session_uuid = None):
     action.resourceUuid = resourceUuid
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
+

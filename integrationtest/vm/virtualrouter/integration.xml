@@ -90,6 +90,8 @@
         <case timeout='1800' repeat='1'>scheduler/test_change_vm_owner_simple_scheduler_state.py</case>
 	<case timeout='1800' repeat='1'>scheduler/test_change_volume_owner_simple_scheduler_state.py</case>
         <case timeout='1800' repeat='1' noparallel='True'>scheduler/test_delete_vm_check_simple_scheduler_state.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>test_sftp_update_password_sshport.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>test_sftp_update_hostname.py</case>
         <!--<case timeout='800'  repeat='1'>snapshot/test_backup_snapshot.py</case>
         <case timeout='2400' repeat='1' noparallel='True'>snapshot/test_create_100_snapshots.py</case> -->
         <case timeout='1800'  repeat='1'>snapshot/test_create_image_by_snapshot.py</case>
@@ -108,6 +110,7 @@
         <case timeout='3600'  repeat='1'>snapshot/test_crt_sp_in_live_vm.py</case>
         <case timeout='1800'  repeat='1'>snapshot/test_delete_snapshot_on_running_vm.py</case>
         <case timeout='1800'  repeat='1'>snapshot/test_crt_sp_from_vol_crt_from_img.py</case>
+        <case timeout='1800'  repeat='1'>snapshot/test_crt_root_sp_in_live_vm_and_data.py</case>
         <case timeout='1800'  repeat='1'>snapshot/test_create_sp_after_delete.py</case>
         <case timeout='2200'  repeat='1'>snapshot/test_crt_sp_in_stopped_vm.py</case>
         <case timeout='2400'  repeat='1'>snapshot/test_crt_sp_in_stopped_vm2.py</case>

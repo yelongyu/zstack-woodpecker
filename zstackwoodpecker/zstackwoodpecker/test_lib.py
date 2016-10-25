@@ -1033,27 +1033,37 @@ def lib_get_backup_storage_host(bs_uuid):
     '''
     Get host, who has backup storage uuid.
     '''
-    #session_uuid = acc_ops.login_as_admin()
-    #try:
-    #    bss = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid)
-    #finally:
-    #    acc_ops.logout(session_uuid)
-    #
-    #if not bss:
-    #    test_util.test_fail('can not get zstack backup storage inventories.')
+    session_uuid = acc_ops.login_as_admin()
+    try:
+        bss = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid)
+    finally:
+        acc_ops.logout(session_uuid)
+    
+    if not bss:
+        test_util.test_fail('can not get zstack backup storage inventories.')
+
+    name = None
+    for bs in bss:
+        if bs.uuid == bs_uuid:
+            name = bs.name
+            break
+
+    if name == None:
+        test_util.test_fail('can not get zstack backup storage inventories.')
 
     host = test_util.HostOption()
+    bss = deploy_config.backupStorages.get_child_node_as_list('sftpBackupStorage') + deploy_config.backupStorages.get_child_node_as_list('imageStoreBackupStorage')
+    for bs in bss:
+        if bs.name_ == name:
+            host.managementIp = bs.hostname_
+            host.username = bs.username_
+            host.password = bs.password_
+            if hasattr(bs, 'port_'):
+                host.sshPort = bs.port_
 
-    #for bs in bss:
-    #    if bs.uuid == bs_uuid:
-    #        host.managementIp = bs.hostname
-    #        host.username = bs.username
-    #        host.password = bs.password
-    #        break
-
-    host.managementIp = os.environ.get('sftpBackupStorageHostname')
-    host.username = os.environ.get('sftpBackupStorageUsername')
-    host.password = os.environ.get('sftpBackupStoragePassword')
+    #host.managementIp = os.environ.get('sftpBackupStorageHostname')
+    #host.username = os.environ.get('sftpBackupStorageUsername')
+    #host.password = os.environ.get('sftpBackupStoragePassword')
     
     return host
 
@@ -2474,7 +2484,8 @@ def lib_get_backup_storage_list_by_vm(vm, session_uuid=None):
         return bss
 
 def lib_create_template_from_volume(volume_uuid, session_uuid=None):
-    bs_uuid = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid)[0].uuid
+    bss = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid)
+    bs_uuid = bss[random.randint(0, len(bss)-1)].uuid
     #[Inlined import]
     import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
     image = zstack_image_header.ZstackTestImage()
@@ -2680,7 +2691,7 @@ def lib_check_file_exist(host, file_path):
     eout = ''
     try:
         if host.sshPort != None:
-            (ret, out, eout) = ssh.execute(command, host.managementIp, host.username, host.password, port=host.sshPort)
+            (ret, out, eout) = ssh.execute(command, host.managementIp, host.username, host.password, port=int(host.sshPort))
 	else:
             (ret, out, eout) = ssh.execute(command, host.managementIp, host.username, host.password)
         test_util.test_logger('[file:] %s was found in [host:] %s' % (file_path, host.managementIp))
@@ -3490,7 +3501,7 @@ def lib_robot_cleanup(test_dict):
     for vip in test_dict.get_all_vip_list():
         vip.delete()
 
-    for sp in test_dict.get_all_snapshots():
+    for sp in test_dict.get_all_available_snapshots():
         sp.delete()
 
     for vm in test_dict.get_all_utility_vm():
@@ -3577,7 +3588,7 @@ def lib_error_cleanup(test_dict):
             pass
 
     test_util.test_logger('- - - Error cleanup: snapshots - - -')
-    for sp in test_dict.get_all_snapshots():
+    for sp in test_dict.get_all_available_snapshots():
         try:
             sp.delete()
         except:
@@ -3639,7 +3650,7 @@ def lib_robot_status_check(test_dict):
             vip.check()
 
     test_util.test_logger('- - - check Snapshot  - - -')
-    volume_snapshots = test_dict.get_all_snapshots()
+    volume_snapshots = test_dict.get_all_available_snapshots()
     for snapshots in volume_snapshots:
         snapshots.check()
 
@@ -3667,16 +3678,16 @@ def lib_vm_random_operation(robot_test_obj):
 
     #Firstly, choose a target VM state for operation. E.g. Running. 
     if test_dict.get_vm_list(vm_header.STOPPED):
-        if test_dict.get_vm_list(vm_header.EXPUNGED):
+        if test_dict.get_vm_list(vm_header.DESTROYED):
             target_vm_state = random.choice([vm_header.RUNNING, \
-                    vm_header.STOPPED, vm_header.EXPUNGED])
+                    vm_header.STOPPED, vm_header.DESTROYED])
         else:
             target_vm_state = random.choice([vm_header.RUNNING, \
                     vm_header.STOPPED])
     else:
-        if test_dict.get_vm_list(vm_header.EXPUNGED):
+        if test_dict.get_vm_list(vm_header.DESTROYED):
             target_vm_state = random.choice([vm_header.RUNNING, \
-                    vm_header.EXPUNGED])
+                    vm_header.DESTROYED])
         else:
             target_vm_state = vm_header.RUNNING 
 
@@ -3741,7 +3752,7 @@ def lib_vm_random_operation(robot_test_obj):
         test_stage_obj.set_volume_state(test_stage.no_free_volume)
 
     #Fifthly, choose a volume for possible snasphot operation 
-    all_volume_snapshots = test_dict.get_all_snapshots()
+    all_volume_snapshots = test_dict.get_all_available_snapshots()
     if all_volume_snapshots:
         target_volume_snapshots = random.choice(all_volume_snapshots)
         snapshot_volume_obj = target_volume_snapshots.get_target_volume()
@@ -4575,3 +4586,32 @@ def lib_find_in_remote_management_server_log(node_ip, node_username, node_passwo
             return True
         
     return False
+
+def lib_update_instance_offering(offering_uuid, cpuNum = None, cpuSpeed = None, \
+        memorySize = None, name = None, \
+        volume_iops = None, volume_bandwidth = None, \
+        net_outbound_bandwidth = None, net_inbound_bandwidth = None):
+
+    systemTags = None
+    updated_offering_option = test_util.InstanceOfferingOption()
+    if cpuNum:
+        updated_offering_option.set_cpuNum(cpuNum)
+    #if cpuSpeed:
+    #    updated_offering_option.set_cpuSpeed(cpuSpeed)
+    if memorySize:
+        updated_offering_option.set_memorySize(memorySize)
+    if name:
+        updated_offering_option.set_name(name)
+    if volume_iops:
+        systemTags += "volumeTotalIops::%d," %(volume_iops)
+    if volume_bandwidth:
+        systemTags += "volumeTotalIops::%d," %(volume_bandwidth)
+    if net_outbound_bandwidth:
+        systemTags += "volumeTotalIops::%d," %(net_outbound_bandwidth)
+    if net_inbound_bandwidth:
+        systemTags += "volumeTotalIops::%d," %(net_inbound_bandwidth)
+
+    if systemTags:
+        systemTags = systemTags.rstrip(',')
+
+    return vm_ops.update_instance_offering(updated_offering_option, offering_uuid, systemTags)

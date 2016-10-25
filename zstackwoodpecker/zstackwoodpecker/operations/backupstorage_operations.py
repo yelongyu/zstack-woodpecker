@@ -28,7 +28,7 @@ def create_sftp_backup_storage(backup_storage_option, session_uuid=None):
     action.hostname = backup_storage_option.get_hostname()
     action.username = backup_storage_option.get_username()
     action.password = backup_storage_option.get_password()
-    action.sshPort = backup_storage_option.get_sshport()
+    action.sshPort = backup_storage_option.get_sshPort()
     action.resourceUuid = backup_storage_option.get_resource_uuid()
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create Sftp Backup Storage [uuid:] %s [name:] %s' % \
@@ -103,3 +103,16 @@ def detach_backup_stroage(backup_stroage_uuid, zone_uuid, \
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
+def update_sftp_backup_stroage_info(sftpUuid, infoType, infoValue, session_uuid = None):
+    action = api_actions.UpdateSftpBackupStorageAction()
+    action.uuid = sftpUuid
+    if infoType == 'password':
+        action.password = infoValue
+    elif infoType == 'hostname':
+        action.hostname = infoValue
+    elif infoType == 'sshPort':
+        action.sshPort = infoValue
+    elif infoType == 'username':
+        action.username = infoValue
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt

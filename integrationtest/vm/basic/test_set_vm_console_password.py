@@ -19,6 +19,7 @@ password1='111111'
 password2='123456'
 
 def test():
+    from vncdotool import api
     global vm
     instance_offering_uuid = res_ops.get_resource(res_ops.INSTANCE_OFFERING, session_uuid)[0].uuid
     cond = res_ops.gen_query_conditions('mediaType', '!=', 'ISO')

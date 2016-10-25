@@ -424,6 +424,18 @@ class SftpBackupStorageOption(PrimaryStorageOption):
         super(SftpBackupStorageOption, self).__init__()
         self.type = inventory.SFTP_BACKUP_STORAGE_TYPE
 
+    def set_name(self, name):
+        self.name = name
+
+    def get_name(self):
+        return self.name
+
+    def set_url(self, url):
+        self.url = url
+
+    def get_url(self):
+        return self.url
+
     def set_hostname(self, ip):
         self.hostname = ip
     

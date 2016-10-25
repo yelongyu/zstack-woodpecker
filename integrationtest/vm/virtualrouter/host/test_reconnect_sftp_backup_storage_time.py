@@ -28,19 +28,10 @@ def test():
 
     recnt_timeout=5000
     test_util.test_dsc('Test SFTP Backup Storage Reconnect within %s ms' % recnt_timeout)
-    vm = test_stub.create_vlan_vm(os.environ.get('l3VlanNetworkName1'))
-    test_obj_dict.add_vm(vm)
-
-    zone_uuid = vm.get_vm().zoneUuid
-    host = test_lib.lib_get_vm_host(vm.get_vm())
-    host_uuid = host.uuid
 
     host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid, timeout=recnt_timeout) 
-   
-    vm.destroy()
-    test_obj_dict.rm_vm(vm)
 
-    test_util.test_pass('Reconnect Host within %s ms' % recnt_timeout)
+    test_util.test_pass('Reconnect SFTP Backup Storage within %s ms' % recnt_timeout)
 
 #Will be called only if exception happens in test().
 def error_cleanup():
