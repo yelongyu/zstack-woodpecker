@@ -23,6 +23,7 @@ def test():
     session_uuid = None
     instance_offering_uuid = res_ops.get_resource(res_ops.INSTANCE_OFFERING, session_uuid)[0].uuid
     cond = res_ops.gen_query_conditions('mediaType', '!=', 'ISO')
+    cond = res_ops.gen_query_conditions('platform', '=', 'Linux', cond)
     image_uuid = res_ops.query_resource(res_ops.IMAGE, cond, session_uuid)[0].uuid
     l3net_uuid = res_ops.get_resource(res_ops.L3_NETWORK, session_uuid)[0].uuid
     vm_creation_option = test_util.VmOption()
