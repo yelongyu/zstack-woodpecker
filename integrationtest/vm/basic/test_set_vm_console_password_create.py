@@ -77,6 +77,8 @@ def test():
     except:
         test_util.test_logger('[vm:] %s console on %s:%s is not connectable with password %s' % (vm.get_vm().uuid, console.hostIp, console.port, password1))
 
+    vm.destroy()
+
     test_util.test_pass('Set VM Console Password Test Success')
 
 #Will be called only if exception happens in test().

@@ -39,6 +39,10 @@ def test():
         new_vm.start()
         new_vm.check()
 
+    vm.destroy()
+    for new_vm in new_vms:
+        new_vm.destroy()
+
     test_util.test_pass('Clone KVM VM to Created VM Test Success')
 
 #Will be called only if exception happens in test().
