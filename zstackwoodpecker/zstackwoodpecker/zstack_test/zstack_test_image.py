@@ -23,17 +23,16 @@ class ZstackTestImage(image_header.TestImage):
 
     def create(self):
         '''
-        Create image template from Root Volume
+        Create image template from Root Volume using CommitVolumeAsImage
         '''
-        bs_uuid = self.image_creation_option.get_backup_storage_uuid_list()[0]
-        bs = test_lib.lib_get_backup_storage_by_uuid(bs_uuid)
-        create_image_operation = random.choice(['create_root_volume_template', 'commit_volume_as_image'])
-        if create_image_operation == 'commit_volume_as_image':
-            self.image = \
-                    img_ops.commit_volume_as_image(self.image_creation_option)
-        else:
-            self.image = \
-                    img_ops.create_root_volume_template(self.image_creation_option)
+        self.image = img_ops.commit_volume_as_image(self.image_creation_option)
+        super(ZstackTestImage, self).create()
+
+    def create2(self):
+        '''
+        Create image template from Root Volume using CreateRootVolumeTemplateFromRootVolume
+        '''
+        self.image = img_ops.create_root_volume_template(self.image_creation_option)
         super(ZstackTestImage, self).create()
 
     def delete(self):
