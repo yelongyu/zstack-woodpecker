@@ -12,6 +12,7 @@ import zstacklib.utils.shell as shell
 import test_stub
 import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
+import os
 
 vm = None
 password1='111111'
