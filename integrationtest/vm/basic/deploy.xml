@@ -66,6 +66,11 @@
       memoryCapacity="$instanceOfferingMemory_s" 
       cpuNum="$instanceOfferingCpuNum_s" 
       cpuSpeed="$instanceOfferingCpuSpeed_s" />
+    <instanceOffering name="$instanceOfferingName_win"
+      description="windows instance offering" 
+      memoryCapacity="$instanceOfferingMemory_win" 
+      cpuNum="$instanceOfferingCpuNum_win" 
+      cpuSpeed="$instanceOfferingCpuSpeed_win" />
   </instanceOfferings>
 
   <backupStorages>
@@ -84,7 +89,7 @@
     </image>
     <image name="$imageName_windows" description="Small Test Image Template for windows platform" format="$rootImageFormat"
 	url="$imageUrl_windows" mediaType="$rootMediaType" platform="Windows"
-	username="$imageUsername" password="$imagePassword">
+	username="$winImageUsername" password="$winImagePassword">
       <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
     </image>
   </images>

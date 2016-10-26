@@ -21,7 +21,7 @@ def test():
     from vncdotool import api
     global vm
     session_uuid = None
-    instance_offering_uuid = res_ops.get_resource(res_ops.INSTANCE_OFFERING, session_uuid)[0].uuid
+    instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(os.environ.get('instanceOfferingName_s')).uuid
     cond = res_ops.gen_query_conditions('mediaType', '!=', 'ISO')
     cond = res_ops.gen_query_conditions('platform', '=', 'Linux', cond)
     image_uuid = res_ops.query_resource(res_ops.IMAGE, cond, session_uuid)[0].uuid
