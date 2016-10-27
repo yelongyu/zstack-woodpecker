@@ -438,8 +438,9 @@ class TestLib(object):
                     suite_item.set('teardownCase', \
                             '%s/%s/%s' % (self.test_case_dir, real_suite, suite_item.get('teardownCase')))
                 for case_item in suite_item.getchildren():
-                    if "%s/%s" % (real_suite, case_item.text) in self.exclude_case_list:
-                        suite_item.remove(case_item)
+                    for exclude_case in self.exclude_case_list:
+                        if case_item.text in exclude_case or case_item.text in '%s.py' % (exclude_case):
+                            suite_item.remove(case_item)
                     org_case_name = case_item.text
                     case_item.text = '%s/%s/%s' % (self.test_case_dir, real_suite, org_case_name)
                 suite_content.write(new_suite_config)
