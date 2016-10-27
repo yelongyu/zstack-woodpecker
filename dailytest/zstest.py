@@ -439,6 +439,8 @@ class TestLib(object):
                             '%s/%s/%s' % (self.test_case_dir, real_suite, suite_item.get('teardownCase')))
                 for case_item in suite_item.getchildren():
                     for exclude_case in self.exclude_case_list:
+			if exclude_case == None:
+                            continue
                         if case_item.text in exclude_case or case_item.text in '%s.py' % (exclude_case):
                             suite_item.remove(case_item)
                             break
