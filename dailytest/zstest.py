@@ -441,6 +441,7 @@ class TestLib(object):
                     for exclude_case in self.exclude_case_list:
                         if case_item.text in exclude_case or case_item.text in '%s.py' % (exclude_case):
                             suite_item.remove(case_item)
+                            break
                     org_case_name = case_item.text
                     case_item.text = '%s/%s/%s' % (self.test_case_dir, real_suite, org_case_name)
                 suite_content.write(new_suite_config)
