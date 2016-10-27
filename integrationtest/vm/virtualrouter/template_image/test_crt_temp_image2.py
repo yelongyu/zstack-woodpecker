@@ -33,6 +33,7 @@ def test():
     backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm1.vm)
     image_creation_option.set_backup_storage_uuid_list([backup_storage_list[0].uuid])
     image_creation_option.set_root_volume_uuid(vm1.vm.rootVolumeUuid)
+    image_creation_option.set_name('test_create_image_template')
     bs_type = backup_storage_list[0].type
     if bs_type == 'Ceph':
         origin_interval = conf_ops.change_global_config('ceph', 'imageCache.cleanup.interval', '1')
