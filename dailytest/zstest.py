@@ -118,6 +118,7 @@ class TestLib(object):
         self.suite_list = []
         self.test_xml = None
         self.all_cases_name = []
+        self.all_cases_name_no_exclude = []
 
     def set_test_dir(self, test_dir):
         self.test_case_dir = os.path.join(test_dir, INTEGRATION_TEST_FOLDER)
@@ -182,6 +183,7 @@ class TestLib(object):
         _new_find_cases(self.test_case_dir)
         test_case_num = 1
         for case in test_case_list:
+            self.all_cases_name_no_exclude.append(case.get_name_with_suite())
             if str(test_case_num) not in self.exclude_case_list and case.get_name_with_suite() not in self.exclude_case_list:
                 self.test_case_lib[test_case_num] = case
                 self.all_cases_name.append(case.get_name_with_suite())
@@ -245,7 +247,11 @@ class TestLib(object):
                         self.target_case_list.append(self.test_case_lib[self._find_case_num(real_case_name)])
                         break
                 else:
-                    raise TestExc('Not able to find test case: %s in %s' \
+                    for real_case_name_no_exclude in self.all_cases_name_no_exclude:
+			if case in real_case_name_no_exclude:
+                            break
+                    else:
+                        raise TestExc('Not able to find test case: %s in %s' \
                             % (case, self.test_case_dir))
 
     def print_test_case(self, suiteList=None, caseList=None):
