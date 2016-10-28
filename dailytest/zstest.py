@@ -197,7 +197,8 @@ class TestLib(object):
         if case_list and ',' in case_list:
             temp_cases = case_list.split(',')
             for case in temp_cases:
-                self.exclude_case_list.append(case)
+                if case != '':
+                    self.exclude_case_list.append(case)
         else:
             self.exclude_case_list = [case_list]
 
@@ -221,6 +222,8 @@ class TestLib(object):
             temp_cases = case_list.split(',')
             cases = []
             for case in temp_cases:
+                if case == '':
+                    continue
                 if '~' in case:
                     cases.extend(_parase_case_range(case.split('~')))
                 else:
@@ -285,6 +288,8 @@ class TestLib(object):
         if suiteList:
             suites = suiteList.split(',')
             for suite in suites:
+                if suites == '':
+                    continue
                 suite = suite.strip()
                 if suite in self.suite_list:
                     target_suites.append(suite)
@@ -425,6 +430,8 @@ class TestLib(object):
         suites = suite_list.split(',')
         root = etree.Element("integrationTest")
         for suite in suites:
+            if suite == '':
+                continue
             suite_config = None
             suite = suite.strip()
             real_suite = self.find_real_suite(suite)
