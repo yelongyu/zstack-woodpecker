@@ -57,13 +57,36 @@ def test():
     vm_data_volumes=tn.read_until(vm_username+">")
     tn.close()
 
+    if len(vm_data_volumes.split('\r\n')) != (data_volume_num + 6):
+        test_lib.lib_robot_cleanup(test_obj_dict)
+        test_util.test_fail('Create Windows VM with Multi Data volumes Test Fail')
+
+    try:
+        vm.reboot()
+    except:
+        test_lib.lib_robot_cleanup(test_obj_dict)
+        test_util.test_fail('Reboot Windows VM with Multi Data volumes fail')
+
+    time.sleep(120)
+    vm_ip = vm.get_vm().vmNics[0].ip
+    vm_username = os.environ.get('winImageUsername')
+    vm_password = os.environ.get('winImagePassword')
+    tn=telnetlib.Telnet(vm_ip)
+    tn.read_until("login: ")
+    tn.write(vm_username+"\r\n")
+    tn.read_until("password: ")
+    tn.write(vm_password+"\r\n")
+    tn.read_until(vm_username+">")
+    tn.write("wmic diskdrive\r\n")
+    vm_data_volumes=tn.read_until(vm_username+">")
+    tn.close()
+
     if len(vm_data_volumes.split('\r\n')) == (data_volume_num + 6):
         test_lib.lib_robot_cleanup(test_obj_dict)
         test_util.test_pass('Create Windows VM with Multi Data Volumes Test Success')
     else:
         test_lib.lib_robot_cleanup(test_obj_dict)
         test_util.test_fail('Create Windows VM with Multi Data volumes Test Fail')
-
 #Will be called only if exception happens in test().
 def error_cleanup():
     global vm
