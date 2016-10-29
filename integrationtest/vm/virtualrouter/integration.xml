@@ -119,6 +119,7 @@
         <case timeout='1800'  repeat='1'>snapshot/test_crt_sp_for_both_root_data_vol.py</case>
         <case timeout='3600'  repeat='1'>snapshot/test_create_snapshot.py</case>
         <case timeout='3600'  repeat='1'>snapshot/test_create_snapshot_parallel.py</case>
+        <case timeout='400'  repeat='1'>windows/test_windows_vm_multi_data_volumes.py</case>
         <case timeout='9000' repeat='1' noparallel='True'>snapshot/test_change_max_sp_depth_live_vm.py</case>
     </suite>
 </integrationTest>

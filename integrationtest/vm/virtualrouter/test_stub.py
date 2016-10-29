@@ -88,6 +88,19 @@ def create_windows_vm(l3_name=None, disk_offering_uuids=None, session_uuid = Non
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     return create_vm([l3_net_uuid], image_uuid, 'windows_vm', disk_offering_uuids, session_uuid = session_uuid)
 
+def create_windows_vm_2(l3_name=None, disk_offering_uuids=None, session_uuid = None, instance_offering_uuid = None):
+    '''
+        Create windows platform type vm.
+    '''
+    image_name = os.environ.get('imageName_windows')
+    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    if not l3_name:
+        #l3_name = 'guestL3VlanNetwork1'
+        l3_name = os.environ.get('l3VlanNetworkName1')
+
+    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    return create_vm([l3_net_uuid], image_uuid, 'windows_vm', disk_offering_uuids, instance_offering_uuid = instance_offering_uuid, session_uuid = session_uuid)
+
 def create_other_vm(l3_name=None, disk_offering_uuids=None, session_uuid = None):
     '''
         Create other platform type vm.
