@@ -118,6 +118,7 @@ class TestLib(object):
         self.suite_list = []
         self.test_xml = None
         self.all_cases_name = []
+        self.all_cases_name_no_exclude = []
 
     def set_test_dir(self, test_dir):
         self.test_case_dir = os.path.join(test_dir, INTEGRATION_TEST_FOLDER)
@@ -182,6 +183,7 @@ class TestLib(object):
         _new_find_cases(self.test_case_dir)
         test_case_num = 1
         for case in test_case_list:
+            self.all_cases_name_no_exclude.append(case.get_name_with_suite())
             if str(test_case_num) not in self.exclude_case_list and case.get_name_with_suite() not in self.exclude_case_list:
                 self.test_case_lib[test_case_num] = case
                 self.all_cases_name.append(case.get_name_with_suite())
@@ -195,7 +197,8 @@ class TestLib(object):
         if case_list and ',' in case_list:
             temp_cases = case_list.split(',')
             for case in temp_cases:
-                self.exclude_case_list.append(case)
+                if case != '':
+                    self.exclude_case_list.append(case)
         else:
             self.exclude_case_list = [case_list]
 
@@ -219,6 +222,8 @@ class TestLib(object):
             temp_cases = case_list.split(',')
             cases = []
             for case in temp_cases:
+                if case == '':
+                    continue
                 if '~' in case:
                     cases.extend(_parase_case_range(case.split('~')))
                 else:
@@ -245,7 +250,11 @@ class TestLib(object):
                         self.target_case_list.append(self.test_case_lib[self._find_case_num(real_case_name)])
                         break
                 else:
-                    raise TestExc('Not able to find test case: %s in %s' \
+                    for real_case_name_no_exclude in self.all_cases_name_no_exclude:
+			if case in real_case_name_no_exclude:
+                            break
+                    else:
+                        raise TestExc('Not able to find test case: %s in %s' \
                             % (case, self.test_case_dir))
 
     def print_test_case(self, suiteList=None, caseList=None):
@@ -279,6 +288,8 @@ class TestLib(object):
         if suiteList:
             suites = suiteList.split(',')
             for suite in suites:
+                if suites == '':
+                    continue
                 suite = suite.strip()
                 if suite in self.suite_list:
                     target_suites.append(suite)
@@ -419,6 +430,8 @@ class TestLib(object):
         suites = suite_list.split(',')
         root = etree.Element("integrationTest")
         for suite in suites:
+            if suite == '':
+                continue
             suite_config = None
             suite = suite.strip()
             real_suite = self.find_real_suite(suite)
@@ -438,8 +451,12 @@ class TestLib(object):
                     suite_item.set('teardownCase', \
                             '%s/%s/%s' % (self.test_case_dir, real_suite, suite_item.get('teardownCase')))
                 for case_item in suite_item.getchildren():
-                    if "%s/%s" % (real_suite, case_item.text) in self.exclude_case_list:
-                        suite_item.remove(case_item)
+                    for exclude_case in self.exclude_case_list:
+			if exclude_case == None:
+                            continue
+                        if case_item.text == exclude_case or case_item.text == '%s.py' % (exclude_case) or '/%s.py' % (exclude_case) in case_item.text or '/%s' % (case_item.text) in exclude_case:
+                            suite_item.remove(case_item)
+                            break
                     org_case_name = case_item.text
                     case_item.text = '%s/%s/%s' % (self.test_case_dir, real_suite, org_case_name)
                 suite_content.write(new_suite_config)

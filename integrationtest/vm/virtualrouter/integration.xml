@@ -37,7 +37,6 @@
         <case timeout='700' repeat='1'>volume/test_volume_ops_on_stopped_vm.py</case>
         <case timeout='700' repeat='1'>volume/test_crt_vm_from_dvt.py</case>
         <case timeout='800' repeat='1'>template_image/test_crt_temp_image.py</case>
-        <case timeout='800' repeat='1'>template_image/test_crt_temp_image2.py</case>
         <case timeout='700' repeat='1'>template_image/test_del_temp_image.py</case>
         <case timeout='1200' repeat='1'>sg/test_ingress.py</case>
         <case timeout='1200' repeat='1'>sg/test_egress.py</case>

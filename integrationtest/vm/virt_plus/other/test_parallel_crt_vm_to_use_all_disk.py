@@ -62,13 +62,16 @@ def test():
         test_util.test_skip('No Enabled/Connected host was found, skip test.' )
         return True
 
-    ps = res_ops.query_resource_with_num(res_ops.PRIMARY_STORAGE, cond, limit = 1)
-    if not ps:
+    ps = res_ops.query_resource_with_num(res_ops.PRIMARY_STORAGE, cond)
+    if len(ps) > 1:
+        test_util.test_skip('multiple Enabled/Connected primary storage was found, skip test.' )
+
+    if len(ps) == 0:
         test_util.test_skip('No Enabled/Connected primary storage was found, skip test.' )
         return True
 
-    if ps[0].type == inventory.CEPH_PRIMARY_STORAGE_TYPE or ps[0].type == 'SharedMountPoint':
-        test_util.test_skip('skip test on ceph and smp.' )
+    if ps[0].type != inventory.LOCAL_STORAGE_TYPE:
+        test_util.test_skip('skip test if PS is not local storage.' )
         return True
 
     host = random.choice(hosts)

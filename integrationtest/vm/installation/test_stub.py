@@ -167,7 +167,7 @@ def prepare_yum_repo(vm_inv):
 def upgrade_zstack(ssh_cmd, target_file, tmp_file):
     env_var = "WEBSITE='%s'" % 'localhost'
 
-    cmd = '%s "%s bash %s -u"' % (ssh_cmd, env_var, target_file)
+    cmd = '%s "%s bash %s -u -R aliyun"' % (ssh_cmd, env_var, target_file)
 
     process_result = execute_shell_in_process(cmd, tmp_file)
 

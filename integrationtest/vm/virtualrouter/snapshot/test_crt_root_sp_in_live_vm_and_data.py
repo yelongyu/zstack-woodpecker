@@ -58,7 +58,8 @@ def test():
     #make sure utility vm is starting and running
     vm.check()
 
-    volume.attach(vm1)
+    volume1.attach(vm1)
+    volume2.attach(vm1)
 
     test_util.test_dsc('create snapshot for root')
     vm_root_volume_inv = test_lib.lib_get_root_volume(vm1.get_vm())

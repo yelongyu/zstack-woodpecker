@@ -27,6 +27,7 @@ import zstackwoodpecker.operations.tag_operations as tag_ops
 import zstackwoodpecker.operations.node_operations as node_ops
 import zstackwoodpecker.operations.config_operations as conf_ops
 import zstackwoodpecker.operations.console_operations as cons_ops
+import zstackwoodpecker.operations.license_operations as lic_ops
 
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.header.volume as vol_header
@@ -2523,12 +2524,10 @@ def lib_destroy_vm_and_data_volumes(vm_inv):
         vol_ops.delete_volume(data_volume.uuid)
 
 def lib_destroy_vm_and_data_volumes_objs_update_test_dict(vm_obj, test_obj_dict):
-    data_volumes_obj = test_obj_dict.get_volume_list(vm_obj.get_vm().uuid)
     vm_obj.destroy()
     test_obj_dict.rm_vm(vm_obj)
-    for data_volume_obj in data_volumes_obj:
-        data_volume_obj.delete()
-        test_obj_dict.rm_volume(data_volume_obj)
+    for volume in test_obj_dict.get_volume_list():
+        volume.clean()
 
 def lib_get_root_volume_uuid(vm):
     return vm.rootVolumeUuid
@@ -4615,3 +4614,15 @@ def lib_update_instance_offering(offering_uuid, cpuNum = None, cpuSpeed = None, 
         systemTags = systemTags.rstrip(',')
 
     return vm_ops.update_instance_offering(updated_offering_option, offering_uuid, systemTags)
+
+version_is_mevoco = None
+def lib_check_version_is_mevoco():
+    global version_is_mevoco
+    if version_is_mevoco != None:
+        return version_is_mevoco
+
+    try:
+        lic_ops.get_license_info()
+	version_is_mevoco = True
+    except:
+        version_is_mevoco = False
