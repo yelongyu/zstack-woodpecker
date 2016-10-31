@@ -89,6 +89,13 @@
         url="$imageUrl_s" mediaType="$rootMediaType">
       <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
     </image>
+    <image name="$virtualRouterImageName" 
+      description="virtual router image" 
+      mediaType="$rootMediaType" format="$rootImageFormat" 
+      username="$vrImageUsername" password="$vrImagePassword"
+      url="$virtualRouterImageUrl">
+      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+    </image>
     <image name="$imageName5Hours" description="Test" format="$rootImageFormat" 
         url="$timeout5HoursImageUrl" mediaType="$rootMediaType">
       <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
