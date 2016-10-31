@@ -17,9 +17,11 @@ def test():
     cond = res_ops.gen_query_conditions('status', '=', 'Connected', cond)
     pss = res_ops.query_resource_with_num(res_ops.PRIMARY_STORAGE, cond)
     for ps in pss:
-        vm = test_stub.create_specified_ps_vm(ps.uuid)
+        vm = test_stub.create_specified_ps_vm(ps_uuid = ps.uuid)
         test_obj_dict.add_vm(vm)
         vm.check()
+        if test_lib.lib_get_primary_storage_by_vm(vm.get_vm()).uuid != ps.uuid:
+            test_util.test_pass('[vm:] %s is expected to create on [ps:] %s' % (vm.get_vm().uuid, ps.uuid))
         vm.destroy()
 
     test_util.test_pass('Create VirtualRouter VM on each PS Test Success')
