@@ -120,6 +120,11 @@
                 startIp="$ipRangeStartIp" endIp="$ipRangeEndIp"
                 gateway="$ipRangeGateway" 
                 netmask="$ipRangeNetmask" />
+              <dns>$DNSServer</dns>
+              <networkService provider="VirtualRouter">
+                <serviceType>DHCP</serviceType>
+                <serviceType>DNS</serviceType>
+              </networkService>
             </l3BasicNetwork>
           </l3Networks>
         </l2NoVlanNetwork>
