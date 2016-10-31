@@ -454,7 +454,7 @@ class TestLib(object):
                     for exclude_case in self.exclude_case_list:
 			if exclude_case == None:
                             continue
-                        if case_item.text == exclude_case or case_item.text == '%s.py' % (exclude_case) or '/%s.py' % (exclude_case) in case_item.text or '/%s' % (case_item.text) in exclude_case:
+                        if case_item.text == exclude_case or case_item.text == '%s.py' % (exclude_case) or '/%s.py' % (exclude_case) in case_item.text or '/%s' % (case_item.text) in '%s.py' % (exclude_case):
                             suite_item.remove(case_item)
                             break
                     org_case_name = case_item.text
