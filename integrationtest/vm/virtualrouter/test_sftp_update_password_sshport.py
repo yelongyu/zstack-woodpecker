@@ -38,7 +38,7 @@ def test():
         test_util.test_skip("host of sftp and host of MN are not the same one. Skip test") 
 
     recnt_timeout=5000
-    test_util.test_dsc('Test SFTP Backup Storage Update Infomation: password, hostname, sshPort, username')
+    test_util.test_dsc('Test SFTP Backup Storage Update Infomation: password, sshPort')
 
 #====================== Password ======================
     test_util.test_dsc('Update Password')
@@ -64,7 +64,7 @@ def test():
     cmd = 'echo "password"| passwd --stdin root'
     os.system(cmd)
 
-#====================== Port ======================
+#====================== sshPort ======================
     test_util.test_dsc('Update sshPort')
     bs_ops.update_sftp_backup_stroage_info(sftp_backup_storage_uuid, 'sshPort', '23')
     exception_catch = 0

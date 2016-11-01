@@ -39,7 +39,7 @@ def test():
     if local_ip != sftp_hostname:
         test_util.test_skip("host of sftp and host of MN are not the same one. Skip test") 
 
-    test_util.test_dsc('Test SFTP Backup Storage Update Infomation: password, hostname, sshPort, username')
+    test_util.test_dsc('Test SFTP Backup Storage Update Infomation: hostname')
 
     test_util.test_dsc('Update Hostname')
     test_util.test_dsc('Create New VM as Sftp')
