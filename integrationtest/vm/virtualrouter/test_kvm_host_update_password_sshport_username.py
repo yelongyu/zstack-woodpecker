@@ -30,7 +30,7 @@ def test():
     else:
         test_util.test_skip("There is no host. Skip test")
 
-    test_util.test_dsc('Test KVM Host Infomation: password, sshPort')
+    test_util.test_dsc('Test KVM Host Infomation: password, sshPort, username')
 
 #====================== Password ======================
     test_util.test_dsc('Update Password')

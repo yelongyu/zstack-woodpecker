@@ -38,7 +38,7 @@ def test():
         test_util.test_skip("host of sftp and host of MN are not the same one. Skip test") 
 
     recnt_timeout=5000
-    test_util.test_dsc('Test SFTP Backup Storage Update Infomation: password, sshPort')
+    test_util.test_dsc('Test SFTP Backup Storage Update Infomation: password, sshPort, username')
 
 #====================== Password ======================
     test_util.test_dsc('Update Password')
@@ -92,6 +92,32 @@ def test():
     cmd = 'service sshd restart'
     os.system(cmd)
 
+#====================== username ======================
+    test_util.test_dsc('Update Username')
+    bs_ops.update_sftp_backup_stroage_info(sftp_backup_storage_uuid, 'username', 'test')
+    exception_catch = 0
+    try:
+        host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid, timeout=recnt_timeout)
+    except:
+        exception_catch = 1
+    finally:
+        if exception_catch == 0:
+           test_util.test_fail('not catch the exception, but shuold fail to reconnect sftp after updating the username of sftp')
+        elif exception_catch == 1:
+            test_util.test_dsc('catch the exception, cannot reconnect sftp after updating the username of sftp')
+
+    test_util.test_dsc('Update sftp username')
+    cmd = 'adduser test'
+    os.system(cmd)
+    cmd = 'echo "password"| passwd --stdin test'
+    os.system(cmd)
+    host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid, timeout=recnt_timeout)
+
+    test_util.test_dsc('Recover sftp username')
+    bs_ops.update_sftp_backup_stroage_info(sftp_backup_storage_uuid, 'username', 'root')
+    cmd = 'userdel test'
+    os.system(cmd)
+
     test_util.test_pass('SFTP Backup Storage Update Infomation SUCCESS')
 
 #Will be called only if exception happens in test().
@@ -101,10 +127,16 @@ def error_cleanup():
     bs_ops.update_sftp_backup_stroage_info(sftp_backup_storage_uuid, 'password', 'password')
     cmd = 'echo "password"| passwd --stdin root'
     os.system(cmd)
+
     bs_ops.update_sftp_backup_stroage_info(sftp_backup_storage_uuid, 'sshPort', '22')
     cmd = 'sed -i \'/Port 23/d\' /etc/ssh/sshd_config'
     os.system(cmd)
     cmd = 'service sshd restart'
     os.system(cmd)
+
+    host_ops.host_ops.update_sftp_backup_stroage_info(sftp_backup_storage_uuid, 'username', 'root')
+    cmd = 'userdel test'
+    os.system(cmd)
+
     host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid, timeout=recnt_timeout)
     test_lib.lib_error_cleanup(test_obj_dict)
