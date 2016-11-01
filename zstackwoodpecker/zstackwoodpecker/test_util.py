@@ -572,6 +572,7 @@ class VmOption(DataOption):
             self.root_disk_uuid = None
             self.user_tags = None
             self.console_password = None
+            self.ps_uuid = None
             super(VmOption, self).__init__()
         else:
             self.l3_uuids = vm_opt.get_l3_uuids()
@@ -587,6 +588,7 @@ class VmOption(DataOption):
             self.set_description(vm_opt.get_description())
             self.set_timeout(vm_opt.get_timeout())
             self.set_console_password(vm_opt.get_console_password())
+            self.ps_uuid = vm_opt.get_ps_uuid()
             self.default_l3_uuid = vm_opt.get_default_l3_uuid()
             self.system_tags = vm_opt.get_system_tags()
             self.user_tags = vm_opt.get_user_tags()
@@ -671,6 +673,13 @@ class VmOption(DataOption):
 
     def get_data_disk_uuids(self):
         return self.data_disk_uuids
+
+    def set_ps_uuid(self, ps_uuid):
+        self.ps_uuid = ps_uuid
+
+    def get_ps_uuid(self):
+        return self.ps_uuid
+
 
 class VolumeOption(DataOption):
     def __init__(self):

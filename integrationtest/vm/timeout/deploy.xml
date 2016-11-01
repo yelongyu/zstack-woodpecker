@@ -66,6 +66,14 @@
       memoryCapacity="$instanceOfferingMemory_s" 
       cpuNum="$instanceOfferingCpuNum_s" 
       cpuSpeed="$instanceOfferingCpuSpeed_s" />
+    <virtualRouterOffering name="$virtualRouterOfferingName_s"
+      memoryCapacity="$virtualRouterOfferingMemory_s" cpuSpeed="$virtualRouterOfferingCpuSpeed_s" cpuNum="$virtualRouterOfferingCpuNum_s" isDefault="true">
+      <zoneRef>$zoneName</zoneRef>
+      <!--<managementL3NetworkRef>$l3ManagementNetworkName</managementL3NetworkRef>-->
+      <managementL3NetworkRef>$l3PublicNetworkName</managementL3NetworkRef>
+      <publicL3NetworkRef>$l3PublicNetworkName</publicL3NetworkRef>
+      <imageRef>$virtualRouterImageName</imageRef>
+    </virtualRouterOffering>
   </instanceOfferings>
 
   <backupStorages>
@@ -79,6 +87,17 @@
   <images>
     <image name="$imageName_s" description="Test" format="$rootImageFormat" 
         url="$imageUrl_s" mediaType="$rootMediaType">
+      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+    </image>
+    <image name="$virtualRouterImageName" 
+      description="virtual router image" 
+      mediaType="$rootMediaType" format="$rootImageFormat" 
+      username="$vrImageUsername" password="$vrImagePassword"
+      url="$virtualRouterImageUrl">
+      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+    </image>
+    <image name="$imageName5Hours" description="Test" format="$rootImageFormat" 
+        url="$timeout5HoursImageUrl" mediaType="$rootMediaType">
       <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
     </image>
   </images>
@@ -116,6 +135,11 @@
                 startIp="$ipRangeStartIp" endIp="$ipRangeEndIp"
                 gateway="$ipRangeGateway" 
                 netmask="$ipRangeNetmask" />
+              <dns>$DNSServer</dns>
+              <networkService provider="VirtualRouter">
+                <serviceType>DHCP</serviceType>
+                <serviceType>DNS</serviceType>
+              </networkService>
             </l3BasicNetwork>
           </l3Networks>
         </l2NoVlanNetwork>

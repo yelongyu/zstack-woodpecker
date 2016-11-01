@@ -4626,3 +4626,4 @@ def lib_check_version_is_mevoco():
 	version_is_mevoco = True
     except:
         version_is_mevoco = False
+    return version_is_mevoco

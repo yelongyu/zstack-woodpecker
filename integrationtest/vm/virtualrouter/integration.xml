@@ -4,6 +4,7 @@
         <case timeout='600' repeat='1' noparallel='True'>test_imagecache_cleanup.py</case>
         <case timeout='1200' repeat='1'>account/test_vm_ops_by_normal_account.py</case>
         <case timeout='800' repeat='1'>novlan/test_create_vm.py</case>
+        <case timeout='800' repeat='1'>novlan/test_create_vm_on_specified_ps.py</case>
         <case timeout='800' repeat='1'>novlan/test_stop_vm_force.py</case>
         <case timeout='800' repeat='1'>novlan/test_reboot_vm.py</case>
         <case timeout='800' repeat='1'>novlan/test_ping_vms.py</case>
@@ -102,6 +103,7 @@
         <case timeout='400'  repeat='1'>regression/rm_nic_sg_on_stopped_vm.py</case>
         <case timeout='600'  repeat='1'>regression/test_data_volume_with_vm_ops.py</case>
         <case timeout='1000'  repeat='1' noparallel='True'>vr/test_ping_vms_reboot_vr.py</case>
+        <case timeout='100'  repeat='1'>vr/test_vr_ha.py</case>
         <case timeout='1000'  repeat='1' noparallel='True'>vr/test_reconnect_vr.py</case>
         <case timeout='1000'  repeat='1' noparallel='False'>vr/test_start_vrs_simultaneously.py</case>
         <case timeout='1000' repeat='1' noparallel='True'>host/test_reconnect_host.py</case>
