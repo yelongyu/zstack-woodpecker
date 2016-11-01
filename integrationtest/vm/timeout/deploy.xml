@@ -97,6 +97,7 @@
       <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
     </image>
     <image name="$imageName5Hours" description="Test" format="$rootImageFormat" 
+        username="$timeout5HoursImageUserName" password="$timeout5HoursImagePassword"
         url="$timeout5HoursImageUrl" mediaType="$rootMediaType">
       <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
     </image>
