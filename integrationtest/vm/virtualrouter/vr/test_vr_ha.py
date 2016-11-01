@@ -20,6 +20,9 @@ test_obj_dict = test_state.TestStateDict()
 
 def test():
     test_util.test_dsc('Create test vm1 and check')
+    if test_lib.lib_get_ha_enable() != 'true':
+        test_util.test_skip("vm ha not enabled. Skip test")
+
     vm1 = test_stub.create_vlan_vm()
     test_obj_dict.add_vm(vm1)
 
