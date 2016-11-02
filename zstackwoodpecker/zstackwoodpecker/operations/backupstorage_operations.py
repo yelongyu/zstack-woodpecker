@@ -85,7 +85,7 @@ def delete_backup_storage(backup_storage_uuid, session_uuid=None):
 def attach_backup_storage(backup_storage_uuid, zone_uuid, session_uuid=None):
     action = api_actions.AttachBackupStorageToZoneAction()
     action.zoneUuid = zone_uuid
-    action.primaryStorageUuid = backup_storage_uuid
+    action.backupStorageUuid = backup_storage_uuid
     action.timeout = 30000
     test_util.action_logger('Attach Backup Storage [uuid:] %s to Zone [uuid:] %s' % \
             (backup_storage_uuid, zone_uuid))
@@ -96,7 +96,7 @@ def detach_backup_storage(backup_storage_uuid, zone_uuid, \
         session_uuid=None):
     action = api_actions.DetachBackupStorageFromZoneAction()
     action.zoneUuid = zone_uuid
-    action.primaryStorageUuid = backup_storage_uuid
+    action.backupStorageUuid = backup_storage_uuid
     action.timeout = 300000
     test_util.action_logger('Detach Backup Storage [uuid:] %s from Zone [uuid:] %s' % \
             (backup_storage_uuid, zone_uuid))
