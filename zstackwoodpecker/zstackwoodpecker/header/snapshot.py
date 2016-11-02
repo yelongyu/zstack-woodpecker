@@ -3,7 +3,7 @@ import zstackwoodpecker.header.volume as volume_header
 CREATED = 'created' #just created and only in primary storage
 BACKUPED ='backuped'    #in both primary and backup storage
 DELETED = 'deleted'     #neither in primary storage nor backup storage
-PS_DELETED = 'deleted_from_primary_storage' #only in backup stroage 
+PS_DELETED = 'deleted_from_primary_storage' #only in backup storage 
 
 class TestSnapshot(zstack_header.ZstackObject):
 

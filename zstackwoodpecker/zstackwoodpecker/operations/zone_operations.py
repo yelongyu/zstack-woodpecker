@@ -51,7 +51,7 @@ def add_zone_resource(deploy_config, zone_name):
         test_util.test_dsc('-------add l2 operation-------')
         dep_ops.add_l2_network(deploy_config, session_uuid, \
                 zone_name = zone_name)
-        test_util.test_dsc('-------add primary stroage operation-------')
+        test_util.test_dsc('-------add primary storage operation-------')
         dep_ops.add_primary_storage(deploy_config, session_uuid, \
                 zone_name = zone_name)
         test_util.test_dsc('-------add cluster operation-------')

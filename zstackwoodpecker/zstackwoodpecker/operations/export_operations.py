@@ -54,7 +54,7 @@ def add_zone_config(root_xml, pre_zone_setting, session_uuid = None):
         set_xml_item_attr(zone_xml, 'uuid', zone.uuid)
         set_xml_item_attr(zone_xml, 'description', zone.description)
         
-        #add_backup_stroage_ref(zone_xml, session_uuid)
+        #add_backup_storage_ref(zone_xml, session_uuid)
         for bs in bss:
             if zone.uuid in bs.attachedZoneUuids:
                 add_xml_item_value(zone_xml, 'backupStorageRef', bs.name)
@@ -278,7 +278,7 @@ def add_disk_offering_config(root_xml, session_uuid = None):
                 disk_offering.description)
         set_xml_item_attr(disk_offering_xml, 'diskSize', disk_offering.diskSize)
 
-def add_sftp_backup_stroage_config(root_xml, bs_original_configs, \
+def add_sftp_backup_storage_config(root_xml, bs_original_configs, \
         session_uuid = None):
     bss_xml = etree.SubElement(root_xml, 'backupStorages')
     cond = res_ops.gen_query_conditions('uuid', '!=', '0')
@@ -404,7 +404,7 @@ def dump_zstack_deployment_config(deployConfig = None):
     session_uuid = account_operations.login_as_admin()
     try:
         add_nodes_config(root_xml, deployConfig.nodes__, session_uuid)
-        add_sftp_backup_stroage_config(root_xml, \
+        add_sftp_backup_storage_config(root_xml, \
                 deployConfig.backupStorages__, session_uuid)
         add_instance_offering_config(root_xml, session_uuid)
         add_disk_offering_config(root_xml, session_uuid)

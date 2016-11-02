@@ -42,7 +42,7 @@ def test():
 
 #====================== Password ======================
     test_util.test_dsc('Update Password')
-    bs_ops.update_sftp_backup_stroage_info(sftp_backup_storage_uuid, 'password', 'zstackmevoco')
+    bs_ops.update_sftp_backup_storage_info(sftp_backup_storage_uuid, 'password', 'zstackmevoco')
     exception_catch = 0
     try:
         host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid, timeout=recnt_timeout) 
@@ -60,13 +60,13 @@ def test():
     host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid, timeout=recnt_timeout)   
 
     test_util.test_dsc('Recover Sftp Host Password')
-    bs_ops.update_sftp_backup_stroage_info(sftp_backup_storage_uuid, 'password', 'password')
+    bs_ops.update_sftp_backup_storage_info(sftp_backup_storage_uuid, 'password', 'password')
     cmd = 'echo "password"| passwd --stdin root'
     os.system(cmd)
 
 #====================== sshPort ======================
     test_util.test_dsc('Update sshPort')
-    bs_ops.update_sftp_backup_stroage_info(sftp_backup_storage_uuid, 'sshPort', '23')
+    bs_ops.update_sftp_backup_storage_info(sftp_backup_storage_uuid, 'sshPort', '23')
     exception_catch = 0
     try:
         host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid, timeout=recnt_timeout)
@@ -86,7 +86,7 @@ def test():
     host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid, timeout=recnt_timeout)
 
     test_util.test_dsc('Recover Sftp Host SSH Port')
-    bs_ops.update_sftp_backup_stroage_info(sftp_backup_storage_uuid, 'sshPort', '22')
+    bs_ops.update_sftp_backup_storage_info(sftp_backup_storage_uuid, 'sshPort', '22')
     cmd = 'sed -i \'/Port 23/d\' /etc/ssh/sshd_config'
     os.system(cmd)
     cmd = 'service sshd restart'
@@ -94,7 +94,7 @@ def test():
 
 #====================== username ======================
     test_util.test_dsc('Update Username')
-    bs_ops.update_sftp_backup_stroage_info(sftp_backup_storage_uuid, 'username', 'test')
+    bs_ops.update_sftp_backup_storage_info(sftp_backup_storage_uuid, 'username', 'test')
     exception_catch = 0
     try:
         host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid, timeout=recnt_timeout)
@@ -114,7 +114,7 @@ def test():
     host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid, timeout=recnt_timeout)
 
     test_util.test_dsc('Recover sftp username')
-    bs_ops.update_sftp_backup_stroage_info(sftp_backup_storage_uuid, 'username', 'root')
+    bs_ops.update_sftp_backup_storage_info(sftp_backup_storage_uuid, 'username', 'root')
     cmd = 'userdel test'
     os.system(cmd)
 
@@ -124,17 +124,17 @@ def test():
 def error_cleanup():
     global sftp_backup_storage_uuid
     global recnt_timeout
-    bs_ops.update_sftp_backup_stroage_info(sftp_backup_storage_uuid, 'password', 'password')
+    bs_ops.update_sftp_backup_storage_info(sftp_backup_storage_uuid, 'password', 'password')
     cmd = 'echo "password"| passwd --stdin root'
     os.system(cmd)
 
-    bs_ops.update_sftp_backup_stroage_info(sftp_backup_storage_uuid, 'sshPort', '22')
+    bs_ops.update_sftp_backup_storage_info(sftp_backup_storage_uuid, 'sshPort', '22')
     cmd = 'sed -i \'/Port 23/d\' /etc/ssh/sshd_config'
     os.system(cmd)
     cmd = 'service sshd restart'
     os.system(cmd)
 
-    host_ops.host_ops.update_sftp_backup_stroage_info(sftp_backup_storage_uuid, 'username', 'root')
+    host_ops.host_ops.update_sftp_backup_storage_info(sftp_backup_storage_uuid, 'username', 'root')
     cmd = 'userdel test'
     os.system(cmd)
 

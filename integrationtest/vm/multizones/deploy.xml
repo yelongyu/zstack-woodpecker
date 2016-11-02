@@ -142,7 +142,7 @@
     <zone name="$zoneName1" description="zone 1: including 2 clusters. Cluster1 has 2 hosts. Cluster 2 has 1 host. They shares same L2 and L3.">
       <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       <!-- It is better to use different primary storages for different 
-         zones. But ZStack is okay to assign same primary stroage to 
+         zones. But ZStack is okay to assign same primary storage to 
          different zones.
          -->
       <primaryStorages>
@@ -397,7 +397,7 @@
     <zone name="$zoneName2" description="zone 2 only have 1 cluster and 1 host. It should have different L2 compared with zone1. If using same L2, like management network, they should use different IP Range.">
       <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       <!-- It is better to use different primary storages for different 
-         zones. But ZStack is okay to assign same primary stroage to 
+         zones. But ZStack is okay to assign same primary storage to 
          different zones.
          -->
       <primaryStorages>
