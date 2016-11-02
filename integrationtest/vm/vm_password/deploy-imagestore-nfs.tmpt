@@ -1,0 +1,2 @@
+import ../deploy.tmpt
+import ./deploy.tmpt

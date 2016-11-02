@@ -82,28 +82,28 @@ def delete_backup_storage(backup_storage_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def attach_backup_stroage(backup_stroage_uuid, zone_uuid, session_uuid=None):
+def attach_backup_storage(backup_storage_uuid, zone_uuid, session_uuid=None):
     action = api_actions.AttachBackupStorageToZoneAction()
     action.zoneUuid = zone_uuid
-    action.primaryStorageUuid = backup_stroage_uuid
+    action.primaryStorageUuid = backup_storage_uuid
     action.timeout = 30000
     test_util.action_logger('Attach Backup Storage [uuid:] %s to Zone [uuid:] %s' % \
-            (backup_stroage_uuid, zone_uuid))
+            (backup_storage_uuid, zone_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def detach_backup_stroage(backup_stroage_uuid, zone_uuid, \
+def detach_backup_storage(backup_storage_uuid, zone_uuid, \
         session_uuid=None):
     action = api_actions.DetachBackupStorageFromZoneAction()
     action.zoneUuid = zone_uuid
-    action.primaryStorageUuid = backup_stroage_uuid
+    action.primaryStorageUuid = backup_storage_uuid
     action.timeout = 300000
     test_util.action_logger('Detach Backup Storage [uuid:] %s from Zone [uuid:] %s' % \
-            (backup_stroage_uuid, zone_uuid))
+            (backup_storage_uuid, zone_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def update_sftp_backup_stroage_info(sftpUuid, infoType, infoValue, session_uuid = None):
+def update_sftp_backup_storage_info(sftpUuid, infoType, infoValue, session_uuid = None):
     action = api_actions.UpdateSftpBackupStorageAction()
     action.uuid = sftpUuid
     if infoType == 'password':

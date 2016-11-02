@@ -668,14 +668,28 @@ def lib_scp_file_to_vm(vm, src_file, dst_file, l3_uuid = None):
     if os.environ.get('zstackManagementIp') == None:
         lib_set_vm_host_l2_ip(vm)
     host_ip = lib_find_host_by_vm(vm).managementIp
-    h_username = os.environ.get('hostUsername')
-    h_password = os.environ.get('hostPassword')
+    target_host_in_plan = None
+    for host_in_plan in lib_get_all_hosts_from_plan():
+        if host_in_plan.managementIp_ == host_ip:
+            target_host_in_plan = host_in_plan
+            break
+    if target_host_in_plan != None:
+        h_username = target_host_in_plan.username_
+        h_password = target_host_in_plan.password_
+        if hasattr(target_host_in_plan, 'port_'):
+            h_port = int(target_host_in_plan.port_)
+        else:
+            h_port = 22
+    else:
+        h_username = os.environ.get('hostUsername')
+        h_password = os.environ.get('hostPassword')
+        h_port = 22
 
     temp_script = '/tmp/%s' % uuid.uuid1().get_hex()
 
     #copy the target script to target host firstly.
     src_file = _full_path(src_file)
-    ssh.scp_file(src_file, temp_script, host_ip, h_username, h_password)
+    ssh.scp_file(src_file, temp_script, host_ip, h_username, h_password, port=h_port)
 
     username = lib_get_vm_username(vm)
     password = lib_get_vm_password(vm)
@@ -700,7 +714,7 @@ def lib_scp_file_to_vm(vm, src_file, dst_file, l3_uuid = None):
         return False
 
     #cleanup temporay script in host.
-    ssh.execute('rm -f %s' % temp_script, host_ip, h_username, h_password)
+    ssh.execute('rm -f %s' % temp_script, host_ip, h_username, h_password, port=h_port)
 
     return rsp
 

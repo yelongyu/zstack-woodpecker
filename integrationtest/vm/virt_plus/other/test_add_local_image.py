@@ -49,7 +49,7 @@ def test():
     if not os.path.exists(test_image):
         test_util.test_fail('test image disappeared, after add image.')
     os.system('rm -f %s' % test_image)
-    test_util.test_pass('Test adding image from local stroage pass.')
+    test_util.test_pass('Test adding image from local storage pass.')
 
 #Will be called only if exception happens in test().
 def error_cleanup():

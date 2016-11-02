@@ -39,7 +39,7 @@ def test():
     if local_ip != sftp_hostname:
         test_util.test_skip("host of sftp and host of MN are not the same one. Skip test") 
 
-    test_util.test_dsc('Test SFTP Backup Storage Update Infomation: password, hostname, sshPort, username')
+    test_util.test_dsc('Test SFTP Backup Storage Update Infomation: hostname')
 
     test_util.test_dsc('Update Hostname')
     test_util.test_dsc('Create New VM as Sftp')
@@ -52,11 +52,11 @@ def test():
     vm.check()
     test_lib.lib_execute_command_in_vm(vm.get_vm(), 'mkdir /home/sftpBackupStorage')
 
-    bs_ops.update_sftp_backup_stroage_info(sftp_backup_storage_uuid, 'hostname', vm_ip)
+    bs_ops.update_sftp_backup_storage_info(sftp_backup_storage_uuid, 'hostname', vm_ip)
     host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid)
 
     test_util.test_dsc('Recover Sftp Hostname')
-    bs_ops.update_sftp_backup_stroage_info(sftp_backup_storage_uuid, 'hostname', sftp_backup_storage_hostname)
+    bs_ops.update_sftp_backup_storage_info(sftp_backup_storage_uuid, 'hostname', sftp_backup_storage_hostname)
     host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid)
 
     vm.destroy()
@@ -69,6 +69,6 @@ def error_cleanup():
     global sftp_backup_storage_uuid
     global sftp_backup_storage_hostname
     global recnt_timeout
-    bs_ops.update_sftp_backup_stroage_info(sftp_backup_storage_uuid, 'hostname', sftp_backup_storage_hostname)
+    bs_ops.update_sftp_backup_storage_info(sftp_backup_storage_uuid, 'hostname', sftp_backup_storage_hostname)
     host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid)
     test_lib.lib_error_cleanup(test_obj_dict)

@@ -21,7 +21,7 @@ def add_data_volume_template(image_option):
                 (image_option.get_mediaType(), action.mediaType))
 
     action.format = image_option.get_format()
-    action.backupStorageUuids = image_option.get_backup_stroage_list()
+    action.backupStorageUuids = image_option.get_backup_storage_list()
     test_util.action_logger('Add [Volume:] %s from [url:] %s ' % (action.name, action.url))
     evt = account_operations.execute_action_with_session(action, image_option.get_session_uuid())
 

@@ -62,3 +62,15 @@ def change_host_state(host_uuid, state, session_uuid=None):
     test_util.action_logger('Change Host [uuid:] %s to [state:] %s' % (host_uuid, state))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
+
+def update_kvm_host(hostUuid, infoType, infoValue, session_uuid = None):
+    action = api_actions.UpdateKVMHostAction()
+    action.uuid = hostUuid
+    if infoType == 'password':
+        action.password = infoValue
+    elif infoType == 'sshPort':
+        action.sshPort = infoValue
+    elif infoType == 'username':
+        action.username = infoValue
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
