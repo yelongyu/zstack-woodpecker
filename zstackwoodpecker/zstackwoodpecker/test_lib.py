@@ -854,6 +854,50 @@ def lib_execute_command_in_vm(vm, cmd, l3_uuid=None):
         test_util.test_logger('Fail execute [command:] %s in [vm:] %s' % (cmd, vm_ip))
         return False
 
+
+def lib_check_login_in_vm(vm, username, password, l3_uuid=None):
+    '''
+    Check login with the assigned username and password.
+    '''
+    cmd = "pwd"
+    vr_vm = lib_find_vr_by_vm(vm)
+    ret = True
+
+    vr_vm = vr_vm[0]
+    if TestHarness == TestHarnessHost:
+        #assign host l2 bridge ip.
+        lib_set_vm_host_l2_ip(vm)
+        test_harness_ip = lib_find_host_by_vm(vm).managementIp
+    else:
+        test_harness_ip = lib_find_vr_mgmt_ip(vr_vm)
+        lib_install_testagent_to_vr_with_vr_vm(vr_vm)
+
+    if lib_is_vm_vr(vm):
+        vm_ip = lib_find_vr_mgmt_ip(vm)
+    else:
+        if not l3_uuid:
+            vm_ip = vm.vmNics[0].ip
+        else:
+            vm_ip = lib_get_vm_nic_by_l3(vm, l3_uuid).ip
+
+    test_util.test_logger("Do testing through test agent: %s to ssh vm: %s, ip: %s, with cmd: %s" % (test_harness_ip, vm.uuid, vm_ip, cmd))
+    rsp = lib_ssh_vm_cmd_by_agent(test_harness_ip, vm_ip, username, \
+            password, cmd)
+        
+    if not rsp.success:
+        ret = False
+        test_util.test_logger('ssh error info: %s' % rsp.error)
+    else:
+        ret = str(rsp.result)
+
+    if ret:
+        test_util.test_logger('Successfully execute [command:] >>> %s <<< in [vm:] %s' % (cmd, vm_ip))
+        return ret
+    else:
+        test_util.test_logger('Fail execute [command:] %s in [vm:] %s' % (cmd, vm_ip))
+        return False
+
+
 #-----------VM operations-------------
 def lib_create_vm(vm_cre_opt=test_util.VmOption(), session_uuid=None): 
     '''If not provide vm_cre_opt, it creates random vm '''

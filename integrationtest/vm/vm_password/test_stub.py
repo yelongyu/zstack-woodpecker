@@ -49,10 +49,14 @@ def create_vm(vm_name='virt-vm', \
         l3_name = None, \
         instance_offering_uuid = None, \
         host_uuid = None, \
-        disk_offering_uuids=None, system_tags=None, session_uuid = None):
+        disk_offering_uuids=None, system_tags=None, \
+        root_password=None, session_uuid = None):
+
 
     if not image_name:
         image_name = os.environ.get('imageName_net') 
+    elif image_name == "imageName_i_c7":
+        image_name = os.environ.get("imageName_i_c7")
     if not l3_name:
         l3_name = os.environ.get('l3PublicNetworkName')
 
@@ -69,6 +73,8 @@ def create_vm(vm_name='virt-vm', \
     vm_creation_option.set_name(vm_name)
     vm_creation_option.set_system_tags(system_tags)
     vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
+    if not root_password:
+        vm_creation_option.set_root_password(root_password)
     if host_uuid:
         vm_creation_option.set_host_uuid(host_uuid)
     vm = zstack_vm_header.ZstackTestVm()
