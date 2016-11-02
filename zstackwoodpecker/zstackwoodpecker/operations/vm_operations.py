@@ -243,3 +243,13 @@ def clone_vm(vm_uuid, vm_names, strategy, session_uuid = None):
     test_util.test_logger('%s VMs have been cloned from %s' % (evt.result.numberOfClonedVm, vm_uuid))
     return evt.result.inventories
 
+def change_vm_password(vm_uuid, vm_account, vm_password, skip_stopped_vm = None, session_uuid = None):
+    action = api_actions.ChangeVmPasswordAction()
+    action.uuid = vm_uuid
+    action.account = vm_account
+    action.password = vm_password
+    action.skipstop = skip_stopped_vm
+    action.timeout = 2000000
+    test_util.action_logger('Change VM [uuid:] %s password' % (vm_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.result.inventories
