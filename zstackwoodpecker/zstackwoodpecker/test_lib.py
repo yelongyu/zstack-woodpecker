@@ -855,39 +855,38 @@ def lib_execute_command_in_vm(vm, cmd, l3_uuid=None):
         return False
 
 
-def lib_check_login_in_vm(vm, username, password, l3_uuid=None):
+def lib_check_login_in_vm(vm, username, password, retry_times=5, l3_uuid=None):
     '''
     Check login with the assigned username and password.
     '''
-    cmd = "pwd"
+    cmd = "exit 0"
     ret = True
-
-    #assign host l2 bridge ip.
-    lib_set_vm_host_l2_ip(vm)
-    test_harness_ip = lib_find_host_by_vm(vm).managementIp
+    count = 1
 
     if not l3_uuid:
         vm_ip = vm.vmNics[0].ip
     else:
         vm_ip = lib_get_vm_nic_by_l3(vm, l3_uuid).ip
 
-    test_util.test_logger("Do testing through test agent: %s to ssh vm: %s, ip: %s, with cmd: %s" % (test_harness_ip, vm.uuid, vm_ip, cmd))
-    rsp = lib_ssh_vm_cmd_by_agent(test_harness_ip, vm_ip, username, \
-            password, cmd)
-        
-    if not rsp.success:
-        ret = False
-        test_util.test_logger('ssh error info: %s' % rsp.error)
-    else:
-        ret = str(rsp.result)
+    if not lib_wait_target_up(vm_ip, '22', 120):
+        test_util.test_fail('vm: %s is not startup in 120 seconds. Fail to reboot it. ' % vm.uuid)
 
-    if ret:
-        test_util.test_logger('Successfully execute [command:] >>> %s <<< in [vm:] %s' % (cmd, vm_ip))
-        return ret
-    else:
-        test_util.test_logger('Fail execute [command:] %s in [vm:] %s' % (cmd, vm_ip))
-        return False
+    while(count <= retry_times):
+        test_util.test_logger("retry count:%s, vm_ip:%s, username:%s, password:%s, cmd:%s" %(str(count), str(vm_ip), str(username), str(password), str(cmd)))
+        try:
+            ret, output, stderr = ssh.execute(cmd, vm_ip, username, password, False, 22)
+        except:
+            pass
+        if ret == 0:
+            test_util.test_logger("successfully login vm: %s" %(vm_ip))
+            return True
+        time.sleep(1)
+        count = count + 1
 
+    #if count > retry_times: retry one more time to raise the exception.
+    test_util.test_logger("Failed login vm: %s, retry count bigger than max retry %s times" %(vm_ip, str(retry_times)))
+    ret, output, stderr = ssh.execute(cmd, vm_ip, username, password, False, 22)
+    return False
 
 #-----------VM operations-------------
 def lib_create_vm(vm_cre_opt=test_util.VmOption(), session_uuid=None): 

@@ -20,10 +20,9 @@ def test():
     for root_password in root_password_list:
         test_util.test_dsc("root_password: \"%s\"" %(root_password))
         vm = test_stub.create_vm(vm_name = 'check-login-vm', image_name = "imageName_i_u13", root_password=root_password)
-        vm.check()
 
         if not test_lib.lib_check_login_in_vm(vm.get_vm(), "root", root_password):
-            test_util.test_fail("check login with username:%s, password:%s failed" %("root", root_password))
+            test_util.test_fail("create vm with root password: %s failed", root_password)
 
         vm.destroy()
         vm.check()
