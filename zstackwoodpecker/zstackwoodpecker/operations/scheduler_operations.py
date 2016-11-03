@@ -46,3 +46,9 @@ def change_scheduler_state(uuid, state, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.test_logger('[Scheduler:] %s is changed to %s.' % (uuid, state))
     return evt
+
+def get_current_time(session_uuid = None):
+    action = api_actions.GetCurrentTimeAction()
+    test_util.action_logger('GetCurrentTime')
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    return evt

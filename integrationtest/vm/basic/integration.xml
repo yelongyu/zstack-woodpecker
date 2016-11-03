@@ -1,5 +1,6 @@
 <integrationTest>
     <suite name="basic test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" parallel="2">
+        <case timeout="60" >test_get_current_time.py</case>
         <case timeout="60" >test_nested_virt.py</case>
         <case timeout="120" >test_create_vm.py</case>
         <case timeout="120" >test_create_windows_vm.py</case>
