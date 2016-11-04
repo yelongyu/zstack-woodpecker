@@ -28,13 +28,13 @@ def test():
     vm = test_stub.create_vm(vm_name = 'check-change-password-vm', image_name = "imageName_i_c7")
     vm.check()
 
-    for usr,passwd in zip(users, passwds):
+    for (usr,passwd) in zip(users, passwds):
         if usr not in exist_users:
             test_stub.create_user_in_vm(vm.get(), usr, passwd) 
             exist_users.append(usr)
 
         #When vm is running:
-        inv = vm_ops.change_vm_password(vm.get_vm(), usr, passwd, skip_stopped_vm = None, session_uuid = None)
+        inv = vm_ops.change_vm_password(vm.get_vm().uuid, usr, passwd, skip_stopped_vm = None, session_uuid = None)
         if not inv:
             test_util.test_fail("change vm password failed")
 
@@ -43,7 +43,7 @@ def test():
         
         #When vm is stopped:
         vm.stop()
-        inv = vm_ops.change_vm_password(vm.get_vm(), "root", test_stub.original_root_password)
+        inv = vm_ops.change_vm_password(vm.get_vm().uuid, "root", test_stub.original_root_password)
         if not inv:
             test_util.test_fail("recover vm password failed")
 
