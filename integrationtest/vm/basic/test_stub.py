@@ -107,7 +107,9 @@ def create_vm_with_previous_iso(vm_creation_option = None, session_uuid = None):
             session_uuid = session_uuid)
 
 def share_admin_resource(account_uuid_list):
-    instance_offering_uuid = res_ops.get_resource(res_ops.INSTANCE_OFFERING)[0].uuid
+    instance_offerings = res_ops.get_resource(res_ops.INSTANCE_OFFERING)
+    for instance_offering in instance_offerings:
+        acc_ops.share_resources(account_uuid_list, [instance_offering.uuid])
     cond = res_ops.gen_query_conditions('mediaType', '!=', 'ISO')
     images =  res_ops.query_resource(res_ops.IMAGE, cond)
     for image in images:
@@ -115,5 +117,5 @@ def share_admin_resource(account_uuid_list):
     l3net_uuid = res_ops.get_resource(res_ops.L3_NETWORK)[0].uuid
     root_disk_uuid = test_lib.lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName')).uuid
     data_disk_uuid = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName')).uuid
-    acc_ops.share_resources(account_uuid_list, [instance_offering_uuid, l3net_uuid, root_disk_uuid, data_disk_uuid])
+    acc_ops.share_resources(account_uuid_list, [l3net_uuid, root_disk_uuid, data_disk_uuid])
 
