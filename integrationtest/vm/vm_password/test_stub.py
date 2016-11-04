@@ -22,6 +22,7 @@ import zstackwoodpecker.operations.vm_operations as vm_ops
 
 test_file = '/tmp/test.img'
 TEST_TIME = 120
+original_root_password = "password"
 
 def create_vlan_vm_with_volume(l3_name=None, disk_offering_uuids=None, disk_number=None, session_uuid = None):
     if not disk_offering_uuids:
@@ -81,6 +82,25 @@ def create_vm(vm_name='virt-vm', \
     vm.set_creation_option(vm_creation_option)
     vm.create()
     return vm 
+
+
+def create_user_in_vm(vm, username, password):
+    """
+    create non-root user with password setting
+    """
+    global original_root_password
+
+    vm_ip = vm.vmNics[0].ip
+
+    cmd = "adduser %s" % (username)
+    ret, output, stderr = ssh.execute(cmd, vm_ip, "root", original_root_password, False, 22)
+    if ret != 0:
+        test_util.test_fail("the user created failure")
+
+    cmd = "echo -e \'%s\n%s\' | passwd %s" % (password, password, username)
+    ret, output, stderr = ssh.execute(cmd, vm_ip, "root", original_root_password, False, 22)
+    if ret != 0:
+        test_util.test_fail("set non-root password failure")
 
 
 def create_volume(volume_creation_option=None, session_uuid = None):
