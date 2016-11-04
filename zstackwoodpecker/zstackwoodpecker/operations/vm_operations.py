@@ -252,4 +252,4 @@ def change_vm_password(vm_uuid, vm_account, vm_password, skip_stopped_vm = None,
     action.timeout = 2000000
     test_util.action_logger('Change VM [uuid:] %s password' % (vm_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.result.inventories
+    return evt
