@@ -1,51 +1,6 @@
 <integrationTest>
     <suite name="virt plus test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
-        <case timeout='300' repeat='1'>test_create_vm.py</case>
-        <!--<case timeout='300' repeat='1'>test_create_2vm_2l3_same_l2.py</case>-->
-        <case timeout='300' repeat='1'>test_expunge_vm.py</case>
-        <case timeout='300' repeat='1'>test_expunge_vm_chg_del_policy.py</case>
-        <case timeout='300' repeat='1'>test_snapshot_vm_ops.py</case>
-        <case timeout='300' repeat='1'>test_change_offering.py</case>
-        <case timeout='300' repeat='1'>test_create_vm_sshkey.py</case>
-        <case timeout='300' repeat='1'>test_create_vm_sshkey2.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>test_create_vm_sshkey3.py</case>
-	<case timeout='300' repeat='1' noparallel='True'>over_provision/test_change_mem_over_prv.py</case>
-        <case timeout='300' repeat='1' noparallel='True'>over_provision/test_chg_storage_over_prv.py</case>
-        <case timeout='300' repeat='1' noparallel='True'>over_provision/test_memory_over_provision.py</case>
-        <case timeout='300' repeat='1' noparallel='True'>over_provision/test_storage_over_provision.py</case>
-        <case timeout='300' repeat='1'>qos/test_disk_qos.py</case>
-        <case timeout='600' repeat='1'>qos/test_disk_qos2.py</case>
-        <case timeout='300' repeat='1'>qos/test_net_change_outbound_qos.py</case>
-        <case timeout='300' repeat='1'>qos/test_net_outbound_qos.py</case>
-        <case timeout='300' repeat='1'>qos/test_net_inbound_qos.py</case>
-        <case timeout='600' repeat='1'>qos/test_net_outbound_inbound_qos.py</case>
-        <case timeout='300' repeat='1'>other/test_add_local_image.py</case>
-        <case timeout='300' repeat='1'>other/test_memory_allocation.py</case>
-        <case timeout='800' repeat='1'>eip/test_create_eip_vm.py</case>
-        <case timeout='360' repeat='1' noparallel='True'>other/test_parallel_crt_vm_to_use_all_disk.py</case>
-        <case timeout='360' repeat='1' noparallel='True'>other/test_parallel_crt_vm_to_use_all_mem.py</case>
-        <case timeout='600' repeat='1'>volume/test_add_volume.py</case>
-        <case timeout='900' repeat='1'>volume/test_add_m_vols.py</case>
-        <case timeout='600' repeat='1'>volume/test_crt_vm_volume.py</case>
-        <case timeout='700' repeat='1'>volume/test_crt_vm_2_volumes.py</case>
-        <case timeout='700' repeat='1'>volume/test_crt_vm_24_volumes.py</case>
-        <case timeout='700' repeat='1'>volume/test_volume_ops_on_stopped_vm.py</case>
-        <case timeout='700' repeat='1'>volume/test_crt_vm_from_dvt.py</case>
-        <case timeout='1200'  repeat='1'>snapshot/test_crt_windows_sp_in_live_vm.py</case>
-        <case timeout='1200'  repeat='1'>snapshot/test_crt_other_sp_in_live_vm.py</case>
-        <!--<case timeout='2200' repeat='1' noparallel='True'>snapshot/test_change_max_sp_depth.py</case> -->
-        <case timeout='1000' repeat='1' noparallel='True'>host/test_reconnect_host.py</case>
-        <case timeout='1800'  repeat='1'>snapshot/test_crt_sp_for_both_root_data_vol.py</case>
-        <case timeout='1800'  repeat='1'>snapshot/test_create_image_by_snapshot.py</case>
-        <case timeout='1800'  repeat='1'>snapshot/test_create_sp_after_delete.py</case>
-        <case timeout='1800'  repeat='1'>snapshot/test_crt_sp_from_vol_crt_from_img.py</case>
-        <case timeout='3600'  repeat='1'>snapshot/test_crt_sp_in_live_vm.py</case>
-        <case timeout='2400'  repeat='1'>snapshot/test_crt_sp_in_stopped_vm2.py</case>
-        <case timeout='2200'  repeat='1'>snapshot/test_crt_sp_in_stopped_vm3.py</case>
-        <case timeout='2200'  repeat='1'>snapshot/test_crt_sp_in_stopped_vm.py</case>
-        <case timeout='3600'  repeat='1'>snapshot/test_create_snapshot.py</case>
-        <case timeout='1800'  repeat='1'>snapshot/test_delete_snapshot_on_running_vm.py</case>
-        <case timeout='9000' repeat='1' noparallel='True'>snapshot/test_change_max_sp_depth_live_vm.py</case>
+        <!--<case timeout='9000' repeat='1' noparallel='True'>snapshot/test_change_max_sp_depth_live_vm.py</case>-->
         <case timeout='1200'  repeat='1'>vm_password/test_crt_vm_passwd_c6.py</case>
         <case timeout='1200'  repeat='1'>vm_password/test_crt_vm_passwd_c7.py</case>
         <case timeout='1200'  repeat='1'>vm_password/test_crt_vm_passwd_u12.py</case>
