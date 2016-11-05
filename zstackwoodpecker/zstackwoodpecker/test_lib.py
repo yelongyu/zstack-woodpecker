@@ -1047,13 +1047,16 @@ def lib_get_vm_last_host(vm_inv):
     last_host_uuid = vm_inv.lastHostUuid
 
     if not last_host_uuid:
-        test_util.test_logger("Last Host UUID is None. Can't get Last Host IP address for [vm:] %s" % vm_inv.uuid)
+        test_util.test_logger("Last Host UUID is None. Can't get Last Host Inventory for [vm:] %s" % vm_inv.uuid)
         return None
 
     hosts = res_ops.get_resource(res_ops.HOST, session_uuid=None, \
             uuid=last_host_uuid)
     if hosts:
         return hosts[0]
+    else:
+        test_util.test_logger("Can't get Last Host Inventory for [vm:] %s, maybe the host has been deleted." % vm_inv.uuid)
+        return None
 
 def lib_get_primary_storage_uuid_list_by_backup_storage(bs_uuid):
     '''
