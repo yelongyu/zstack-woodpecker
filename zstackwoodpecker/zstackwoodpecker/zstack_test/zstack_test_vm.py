@@ -83,6 +83,14 @@ class ZstackTestVm(vm_header.TestVm):
         self.vm = vm_ops.stop_vm(self.vm.uuid, None, session_uuid)
         super(ZstackTestVm, self).stop()
 
+    def suspend(self, session_uuid = None):
+        self.vm = vm_ops.suspend_vm(self.vm.uuid, session_uuid)
+        super(ZstackTestVm, self).suspend()
+
+    def resume(self, session_uuid = None):
+        self.vm = vm_ops.resume_vm(self.vm.uuid, session_uuid)
+        super(ZstackTestVm, self).resume()
+
     def reboot(self, session_uuid = None):
         self.vm = vm_ops.reboot_vm(self.vm.uuid, session_uuid)
         super(ZstackTestVm, self).reboot()
