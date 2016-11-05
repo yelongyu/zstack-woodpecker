@@ -89,6 +89,32 @@ class zstack_kvm_vm_stopped_checker(checker_header.TestChecker):
             test_util.test_logger('Check result: [vm:] %s is NOT STOPPED on [host:] %s . ; Expected status: %s ; Actual status: %s' % (vm.uuid, host.name, vm_plugin.VmAgent.VM_STATUS_STOPPED, check_result))
             return self.judge(False)
 
+class zstack_kvm_vm_suspended_checker(checker_header.TestChecker):
+    '''check kvm vm suspended status. If it is suspended, return self.judge(True). 
+        If it is not suspended, return self.judge(False)'''
+    def check(self):
+        super(zstack_kvm_vm_suspended_checker, self).check()
+
+        return self.judge(self.exp_result)
+
+        vm = self.test_obj.vm
+        host = test_lib.lib_get_vm_host(vm)
+        test_lib.lib_install_testagent_to_host(host)
+        test_lib.lib_set_vm_host_l2_ip(vm)
+        cmd = vm_plugin.VmStatusCmd()
+        cmd.vm_uuids = [vm.uuid]
+        test_util.test_logger('Check [vm:] %s suspended status on host [name:] %s [uuid:] %s.' % (vm.uuid, host.name, host.uuid))
+        rspstr = http.json_dump_post(testagent.build_http_path(host.managementIp, vm_plugin.VM_STATUS), cmd)
+        rsp = jsonobject.loads(rspstr)
+        check_result = rsp.vm_status[vm.uuid].strip()
+        if check_result == vm_plugin.VmAgent.VM_STATUS_SUSPENDED:
+            test_util.test_logger('Check result: [vm:] %s is SUSPENDED on [host:] %s .' % (vm.uuid, host.name))
+            return self.judge(True)
+        else:
+            test_util.test_logger('Check result: [vm:] %s is NOT SUSPENDED on [host:] %s . ; Expected status: %s ; Actual status: %s' % (vm.uuid, host.name, vm_plugin.VmAgent.VM_STATUS_SUSPENDED, check_result))
+            return self.judge(False)
+
+
 class zstack_kvm_vm_set_host_vlan_ip(checker_header.TestChecker):
     '''
         This is not a real checker. Its function is to assign an IP address for host vlan device.

@@ -79,6 +79,10 @@ class KvmVmCheckerFactory(checker_header.CheckerFactory):
             #from host.
             #checker_dict[vm_checker.zstack_kvm_vm_stopped_checker] = True
 
+        elif test_obj.state == vm_header.SUSPENDED:
+            checker_dict[db_checker.zstack_vm_db_checker] = True
+            checker_dict[vm_checker.zstack_kvm_vm_suspended_checker] = True
+
         elif test_obj.state == vm_header.DESTROYED:
             #VM destroy will cause vm structure be removed from DB, when VmExpungeInterval is set to 1, so doesn't need to check destroyed state sync in db in most case.
             checker_dict[db_checker.zstack_vm_db_checker] = True
