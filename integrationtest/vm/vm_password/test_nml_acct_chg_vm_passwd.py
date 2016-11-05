@@ -3,6 +3,7 @@ New Integration Test for changing password by normal account
 @author: SyZhao
 '''
 
+import apibinding.inventory as inventory
 import hashlib
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
@@ -36,6 +37,17 @@ def test():
     test_stub.share_admin_resource([test_account_uuid])
 
     vm = test_stub.create_vm(session_uuid = test_account_session)
+    vm.check()
+
+    backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
+    for bs in backup_storage_list:
+        if bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+            break
+        if bs.type == inventory.SFTP_BACKUP_STORAGE_TYPE:
+            break
+    else:
+        vm.destroy()
+        test_util.test_skip('Not find image store type backup storage.')
 
     for (usr,passwd) in zip(users, passwds):
         if usr not in exist_users:

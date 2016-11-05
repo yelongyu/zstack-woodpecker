@@ -3,6 +3,7 @@ Cloned vm change password
 @author: SyZhao
 '''
 
+import apibinding.inventory as inventory
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
@@ -35,6 +36,16 @@ def test():
     vm = test_stub.create_vm(vm_name = '1st-created-vm', image_name = "imageName_i_c7")
     test_obj_dict.add_vm(vm)
     vm.check()
+
+    backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
+    for bs in backup_storage_list:
+        if bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+            break
+        if bs.type == inventory.SFTP_BACKUP_STORAGE_TYPE:
+            break
+    else:
+        vm.destroy()
+        test_util.test_skip('Not find image store type backup storage.')
 
     for (usr,passwd) in zip(users, passwds):
         if usr not in exist_users:
