@@ -75,6 +75,14 @@ def stop_vm(vm_uuid, force=None, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
+def suspend_vm(vm_uuid, session_uuid=None):
+    action = api_actions.SuspendVmInstanceAction()
+    action.uuid = vm_uuid
+    action.timeout = 240000
+    test_util.action_logger('Suspend VM [uuid:] %s' % vm_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
 def stop_vm_scheduler(vm_uuid, type, name, start_time=None, interval=None, repeatCount=None, cron=None, session_uuid=None):
     action = api_actions.CreateStopVmInstanceSchedulerAction()
     action.vmUuid = vm_uuid
@@ -94,6 +102,14 @@ def start_vm(vm_uuid, session_uuid=None, timeout=240000):
     action.uuid = vm_uuid
     action.timeout = timeout
     test_util.action_logger('Start VM [uuid:] %s' % vm_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def resume_vm(vm_uuid, session_uuid=None):
+    action = api_actions.ResumeVmInstanceAction()
+    action.uuid = vm_uuid
+    action.timeout = 240000
+    test_util.action_logger('Resume VM [uuid:] %s' % vm_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
