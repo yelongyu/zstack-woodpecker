@@ -6,10 +6,7 @@ Integration Test for Prometheus Sync in HA mode after one node recover.
 '''
 
 import zstackwoodpecker.test_util as test_util
-import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
-import zstackwoodpecker.operations.resource_operations as res_ops
-import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import test_stub
 import time
 import os
@@ -46,7 +43,7 @@ def test():
     data1 = test_lib.lib_get_host_cpu_prometheus_data(node1_ip, end_time, 200, host_uuid)
     data2 = test_lib.lib_get_host_cpu_prometheus_data(node2_ip, end_time, 200, host_uuid)
     if cmp(data1,data2) != 0:
-        test_util.test_fail('Prometheus Sync Test Success, data on node:%s is [%s], data on node:%s is [%s]' % (node1_ip, data1, node2_ip, data2))
+        test_util.test_fail('Prometheus Sync Test Fail, data on node:%s is [%s], data on node:%s is [%s]' % (node1_ip, data1, node2_ip, data2))
     test_util.test_pass('Prometheus Sync Test Success')
 
 #Will be called only if exception happens in test().
