@@ -19,5 +19,6 @@
 	<case timeout='600' repeat='1' noparallel='True'>migrate/test_migrate_stopped_vm_imagecache_cleanup.py</case>
 	<case timeout='600' repeat='1' noparallel='True'>migrate/test_migrate_vm_imagecache_cleanup.py</case>
 	<case timeout='1260' repeat='1' noparallel='True'>ha/test_vm_ha_never_stop.py</case>
+	<case timeout='720' repeat='1' noparallel='True'>ha/test_vm_ha_last_host.py</case>
     </suite>
 </integrationTest>
