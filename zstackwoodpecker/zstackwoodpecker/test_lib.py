@@ -4675,3 +4675,15 @@ def lib_check_version_is_mevoco():
     except:
         version_is_mevoco = False
     return version_is_mevoco
+
+def lib_get_host_cpu_prometheus_data(mn_ip, end_time, interval, host_uuid):
+    cmd = '/usr/bin/zstack-cli LogInByAccount accountName=admin password=password'
+    if not lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd):
+        test_util.test_fail('zstack-cli login failed')
+
+    cmd = """/usr/bin/zstack-cli PrometheusQueryPassThrough endTime=%s relativeTime=%s expression='collectd:collectd_cpu_percent{hostUuid=\\"%s\\",type=\\"user\\"}'""" % (end_time, interval, host_uuid)
+    rsp = lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd)
+    if not rsp:
+        test_util.test_fail('%s failed' % (cmd))
+    return rsp
+
