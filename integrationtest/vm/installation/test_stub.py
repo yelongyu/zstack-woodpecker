@@ -243,7 +243,7 @@ def execute_mevoco_online_install(ssh_cmd, tmp_file):
 def execute_all_install(ssh_cmd, target_file, tmp_file):
     env_var = " WEBSITE='%s'" % ('localhost')
 
-    cmd = '%s "%s bash %s"' % (ssh_cmd, env_var, target_file)
+    cmd = '%s "%s bash %s -R aliyun"' % (ssh_cmd, env_var, target_file)
 
     process_result = execute_shell_in_process(cmd, tmp_file, 2400)
 
