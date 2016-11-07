@@ -34,6 +34,22 @@ def test():
     test_util.test_logger("recover node: %s" % (node2_ip))
     os.system('bash -ex %s %s' % (os.environ.get('nodeRecoverScript'), node2_ip))
 
+    test_util.test_dsc('Delete /var/lib/zstack/ha/ha.yaml, recover ha with zstack-ctl recover_ha, expect to fail')
+    cmd = "rm /var/lib/zstack/ha/ha.yaml"
+    rsp = test_lib.lib_execute_ssh_cmd(node1_ip, host_username, host_password, cmd, 180)
+    if not rsp:
+        rsp = test_lib.lib_execute_ssh_cmd(node2_ip, host_username, host_password, cmd, 180)
+
+    cmd = "zstack-ctl recover_ha"
+    rsp = test_lib.lib_execute_ssh_cmd(node1_ip, host_username, host_password, cmd, 180)
+    if not rsp:
+        rsp = test_lib.lib_execute_ssh_cmd(node2_ip, host_username, host_password, cmd, 180)
+    if rsp == False:
+        test_util.test_logger("Cannot recover ha without /var/lib/zstack/ha/ha.yaml when use zstack-ctl recover_ha, expect to False")
+    else:
+	test_util.test_fail('Expect to False, but get the different result when recover ha without /var/lib/zstack/ha/ha.yaml by using zstack-ctl recover_ha')
+
+    test_util.test_dsc('Recover with zstack-ctl install_ha, expect to pass')
     cmd = "zstack-ctl install_ha --host1-info %s:%s@%s --host2-info %s:%s@%s --vip %s --recovery-from-this-host" % \
             (host_username, host_password, node1_ip, host_username, host_password, node2_ip, zstack_ha_vip)
     rsp = test_lib.lib_execute_ssh_cmd(node1_ip, host_username, host_password, cmd, 180)
