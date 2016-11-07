@@ -27,7 +27,8 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
 #6*1024*1024*1024=t*125Bps*bw; if 125Bps*bw=50MBps, bw=419430, t=123s; if t=4.5*3600, bw=3182
-vm_outbound_bandwidth = 3182
+#6*1024*1024KB=t*kBps*bw; if Jenkins max bw is 50Mbps(6.25MBps, max value is 6400), t=983s; if t=4.5*3600, bw=388
+vm_outbound_bandwidth = 388
 timeout_value = 16200 #(=4.5*3600)s
 image_uuid = None
 
@@ -113,7 +114,7 @@ def test():
     #the total disk size after dd is 1.0+5=6GB
     import tempfile
     script_file = tempfile.NamedTemporaryFile(delete=False)
-    script_file.write("dd if=/dev/zero of=test1 bs=1M count=5120")
+    script_file.write("dd if=/dev/random of=test1 bs=1M count=5120")
     script_file.close()
     if not test_lib.lib_execute_shell_script_in_vm(vm.get_vm(), script_file.name, timeout=3600):    
         test_util.test_fail("generate 5GB big file failed")
