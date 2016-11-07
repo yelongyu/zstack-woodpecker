@@ -9,6 +9,7 @@
         <case timeout='800' repeat='1'>novlan/test_reboot_vm.py</case>
         <case timeout='800' repeat='1'>novlan/test_ping_vms.py</case>
         <case timeout='800' repeat='1'>novlan/test_reinit_vm.py</case>
+        <case timeout='800' repeat='1'>novlan/test_reinit_vm_raw.py</case>
         <case timeout='800' repeat='1' noparallel='True'>host/test_reconnect_host.py</case>
         <case timeout='800' repeat='1'>vlan/test_create_vm.py</case>
         <case timeout='800' repeat='1'>vlan/test_reboot_vm.py</case>
