@@ -240,3 +240,10 @@ def get_volume_migratable_host(volume_uuid, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventories
 
+def reset_root_volume_from_image(volume_uuid, session_uuid = None):
+    action = api_actions.ResetRootVolumeFromImageAction()
+    action.rootVolumeUuid = volume_uuid
+
+    test_util.action_logger('Reset [Root Volume:] %s' % (volume_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
