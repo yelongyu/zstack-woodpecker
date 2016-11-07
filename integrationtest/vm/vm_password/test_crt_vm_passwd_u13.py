@@ -3,7 +3,6 @@ Creating KVM VM with password set.
 @author: SyZhao
 '''
 
-import apibinding.inventory as inventory
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
@@ -20,8 +19,7 @@ def test():
 
     for root_password in root_password_list:
         test_util.test_dsc("root_password: \"%s\"" %(root_password))
-        vm = test_stub.create_vm(vm_name = 'check-login-vm', image_name = "imageName_i_u13", root_password=root_password)
-		
+        vm = test_stub.create_vm(vm_name = 'u13-vm', image_name = "imageName_i_u13", root_password=root_password)
         backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
         for bs in backup_storage_list:
             if bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:

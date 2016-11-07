@@ -20,7 +20,7 @@ def test():
 
     for root_password in root_password_list:
         test_util.test_dsc("root_password: \"%s\"" %(root_password))
-        vm = test_stub.create_vm(vm_name = 'check-login-vm', image_name = "imageName_i_c7", root_password=root_password)
+        vm = test_stub.create_vm(vm_name = 'c7-vm', image_name = "imageName_i_c7", root_password=root_password)
 
         backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
         for bs in backup_storage_list:
