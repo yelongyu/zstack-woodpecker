@@ -269,3 +269,11 @@ def change_vm_password(vm_uuid, vm_account, vm_password, skip_stopped_vm = None,
     test_util.action_logger('Change VM [uuid:] %s password' % (vm_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
+
+def reinit_vm(vm_uuid, session_uuid = None):
+    action = api_actions.ReInitVmInstanceAction()
+    action.vmInstanceUuid = vm_uuid
+
+    test_util.action_logger('Reinit [Vm:] %s' % (vm_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
