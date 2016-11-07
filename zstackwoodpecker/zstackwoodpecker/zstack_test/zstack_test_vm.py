@@ -104,6 +104,13 @@ class ZstackTestVm(vm_header.TestVm):
         vm_ops.expunge_vm(self.vm.uuid, session_uuid)
         super(ZstackTestVm, self).expunge()
 
+    def reinit(self, session_uuid = None):
+        '''
+        ReInitVmInstance will change VM's root volume uuid
+        which means vm.update() is needed to update vm's infromation. 
+        '''
+        vm_ops.reinit_vm(self.vm.uuid, session_uuid)
+
     def clone(self, names, strategy = None, session_uuid = None):
         new_vms = vm_ops.clone_vm(self.vm.uuid, names, strategy)
         new_vm_objs = []
