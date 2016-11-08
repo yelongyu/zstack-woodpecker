@@ -49,7 +49,7 @@ def test():
 
     for (usr,passwd) in zip(users, passwds):
         if usr not in exist_users:
-            test_stub.create_user_in_vm(vm.get(), usr, passwd) 
+            test_stub.create_user_in_vm(vm.get_vm(), usr, passwd) 
             exist_users.append(usr)
 
         #new vm->cloned new_vm1/new_vm2
