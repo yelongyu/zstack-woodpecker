@@ -36,7 +36,7 @@ def test():
     test_account_session = acc_ops.login_by_account(account_name, account_pass)
     test_stub.share_admin_resource([test_account_uuid])
 
-    vm = test_stub.create_vm(session_uuid = test_account_session)
+    vm = test_stub.create_vm(vm_name = 'c7-vm', image_name = "imageName_i_c7", session_uuid = test_account_session)
     vm.check()
 
     backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
