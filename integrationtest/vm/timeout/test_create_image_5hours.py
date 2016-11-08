@@ -17,6 +17,7 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.backupstorage_operations as bs_ops
 import zstackwoodpecker.operations.image_operations as img_ops
+import zstacklib.utils.ssh as ssh
 
 _config_ = {
         'timeout' : 18000,
@@ -31,6 +32,7 @@ test_obj_dict = test_state.TestStateDict()
 vm_outbound_bandwidth = 388
 timeout_value = 16200 #(=4.5*3600)s
 image_uuid = None
+backup_storage_inventory_uuid = None
 
 
 def set_global_timeout_value():
@@ -59,7 +61,7 @@ def set_global_timeout_value():
 def test():
     """
     """
-    global image_uuid
+    global image_uuid, backup_storage_inventory_uuid
     
 
     test_util.test_dsc('create image check timeout test')
@@ -93,6 +95,8 @@ def test():
     sftp_backup_storage_option.url = "/zstack_bs"
 
     backup_storage_inventory = bs_ops.create_backup_storage(sftp_backup_storage_option)
+    if not backup_storage_inventory.uuid:
+        backup_storage_inventory_uuid = backup_storage_inventory.uuid
 
 
     #create a new vm for creating image step
@@ -112,11 +116,15 @@ def test():
     #populate vm with big files, the max http execute time is 30 mins.
     #the max disk throughput is 50MB/s, use dd to generate 10GB big file will cost ~2400s.
     #the total disk size after dd is 1.0+5=6GB
-    import tempfile
-    script_file = tempfile.NamedTemporaryFile(delete=False)
-    script_file.write("dd if=/dev/random of=test1 bs=1M count=5120")
-    script_file.close()
-    if not test_lib.lib_execute_shell_script_in_vm(vm.get_vm(), script_file.name, timeout=3600):    
+    #import tempfile
+    #script_file = tempfile.NamedTemporaryFile(delete=False)
+    #script_file.write("dd if=/dev/random of=test1 bs=1M count=5120")
+    #script_file.close()
+    #if not test_lib.lib_execute_shell_script_in_vm(vm.get_vm(), script_file.name, timeout=3600):    
+    #    test_util.test_fail("generate 5GB big file failed")
+    cmd = "dd if=/dev/random of=test1 bs=1M count=5120"
+    ret, output, stderr = ssh.execute(cmd, vm.get_vm().vmNics[0].ip, "root", "password", False, 22)
+    if ret != 0:
         test_util.test_fail("generate 5GB big file failed")
     
 
@@ -165,8 +173,10 @@ def test():
 
 #Will be called only if exception happens in test().
 def error_cleanup():
-    global image_uuid
+    global image_uuid, backup_storage_inventory_uuid
     if not image_uuid:
         img_ops.delete_image(image_uuid)
         img_ops.expunge_image(image_uuid)
+    if not backup_storage_inventory_uuid: 
+        bs_ops.delete_backup_storage(backup_storage_inventory_uuid)
     test_lib.lib_error_cleanup(test_obj_dict)
