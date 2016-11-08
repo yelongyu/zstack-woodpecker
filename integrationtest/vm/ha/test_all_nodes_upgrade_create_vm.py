@@ -21,6 +21,9 @@ def test():
     global vm
     global node1_ip
     global node2_ip
+    global host_username
+    global host_password 
+
     host_username = os.environ.get('nodeUserName')
     host_password = os.environ.get('nodePassword')
     zstack_ha_vip = os.environ.get('zstackHaVip')
@@ -29,19 +32,22 @@ def test():
 
     test_util.test_dsc('Prepare upgrade package and iso')
 
-    cmd = "scp 192.168.200.1:/httpd/iso/ZStack-Community-x86_64-DVD-160827.iso /root/" 
-    test_util.test_dsc('scp cmd:%s' % cmd)
+    cmd = "scp 192.168.200.1:/httpd/zstack_iso_centos7/latest/test/ZStack-Community-x86_64-DVD-1.4.0.iso /root/" 
     rsp = test_lib.lib_execute_ssh_cmd(node1_ip, host_username, host_password, cmd, 600)
     rsp = test_lib.lib_execute_ssh_cmd(node2_ip, host_username, host_password, cmd, 600)   
  
     all_in_one_pkg = os.environ['zstackPkg']
     local_ip = os.environ['sftpBackupStorageHostname']
     cmd = "scp %s:%s /root/" % (local_ip, all_in_one_pkg) 
-    test_util.test_dsc('scp cmd:%s' % cmd)
     rsp = test_lib.lib_execute_ssh_cmd(node1_ip, host_username, host_password, cmd, 180)
     rsp = test_lib.lib_execute_ssh_cmd(node2_ip, host_username, host_password, cmd, 180)
 
-    iso_path = "/root/ZStack-Community-x86_64-DVD-160827.iso"
+    test_util.test_dsc('Start MN of node1 and node2')
+    cmd = "zstack-ctl start"
+    rsp = test_lib.lib_execute_ssh_cmd(node1_ip, host_username, host_password, cmd, 600)
+    rsp = test_lib.lib_execute_ssh_cmd(node2_ip, host_username, host_password, cmd, 600)
+
+    iso_path = "/root/ZStack-Community-x86_64-DVD-1.4.0.iso"
     upk_pkg = "/root/zstack-offline-installer-test.bin" 
     test_util.test_dsc('Upgrade HA')
     cmd = "zstack-ctl upgrade_ha --mevoco-installer %s --iso %s" % (upk_pkg, iso_path)
@@ -54,11 +60,11 @@ def test():
     vm.check()
     vm.destroy()
 
-    cmd = "rm %s" % iso_path
+    cmd = "echo 'y' | rm %s" % iso_path
     rsp = test_lib.lib_execute_ssh_cmd(node1_ip, host_username, host_password, cmd, 180)
     rsp = test_lib.lib_execute_ssh_cmd(node2_ip, host_username, host_password, cmd, 180)
 
-    upk_pkg = "rm %s" % upk_pkg
+    cmd = "echo 'y' | rm %s" % upk_pkg
     rsp = test_lib.lib_execute_ssh_cmd(node1_ip, host_username, host_password, cmd, 180)
     rsp = test_lib.lib_execute_ssh_cmd(node2_ip, host_username, host_password, cmd, 180)
 
@@ -69,6 +75,8 @@ def error_cleanup():
     global vm
     global node1_ip
     global node2_ip
+    global host_username
+    global host_password
 
     if vm:
         try:
@@ -76,10 +84,10 @@ def error_cleanup():
         except:
             pass
 
-    cmd = "rm /root/ZStack-Community-x86_64-DVD-160827.iso"
+    cmd = "echo 'y' | rm /root/ZStack-Community-x86_64-DVD-1.4.0.iso"
     rsp = test_lib.lib_execute_ssh_cmd(node1_ip, host_username, host_password, cmd, 180)
     rsp = test_lib.lib_execute_ssh_cmd(node2_ip, host_username, host_password, cmd, 180)
 
-    upk_pkg = "rm /root/zstack-offline-installer-test.bin"
+    cmd = "echo 'y' | rm /root/zstack-offline-installer-test.bin"
     rsp = test_lib.lib_execute_ssh_cmd(node1_ip, host_username, host_password, cmd, 180)
     rsp = test_lib.lib_execute_ssh_cmd(node2_ip, host_username, host_password, cmd, 180)
