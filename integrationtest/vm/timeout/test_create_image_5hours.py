@@ -166,6 +166,7 @@ def test():
 #Will be called only if exception happens in test().
 def error_cleanup():
     global image_uuid
-    img_ops.delete_image(image_uuid)
-    img_ops.expunge_image(image_uuid)
+    if not image_uuid:
+        img_ops.delete_image(image_uuid)
+        img_ops.expunge_image(image_uuid)
     test_lib.lib_error_cleanup(test_obj_dict)
