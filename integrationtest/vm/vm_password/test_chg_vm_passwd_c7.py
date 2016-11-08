@@ -12,15 +12,13 @@ import zstacklib.utils.ssh as ssh
 import test_stub
 
 
-#users   = ["root",     "root",     "root",       "root", "root",                 "a", "aa", " a", "a:@", "???", "."]
-#passwds = ["password", "98765725", "95_aaapcn ", "0",    "9876,*&#$%^&**&()+_=", "0", "a.", " .", ")" ,  "^",  "+"]
 exist_users = ["root"]
 
-users   = ["root",     "root",     "root",       "root", "root",                 "a", "aa"]
-passwds = ["password", "98765725", "95_aaapcn ", "0",    "9876,*&#$%^&**&()+_=", "0", "a."]
+users   = ["root",      "root",       "_a",          "aa"  ]
+passwds = ["password",  "95_aaapcn",  "_0aIGFDFBBN", "a1_" ]
+
 
 vm = None
-
 
 def test():
     global vm, exist_users

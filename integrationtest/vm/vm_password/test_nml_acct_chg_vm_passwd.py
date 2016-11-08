@@ -20,8 +20,8 @@ vm = None
 test_account_uuid = None
 test_account_session = None
 
-users   = ["root",     "root",     "root",       "root", "root",                 "a", "aa"]
-passwds = ["password", "98765725", "95_aaapcn ", "0",    "9876,*&#$%^&**&()+_=", "0", "a."]
+users   = ["root",      "root",       "_a",          "aa"  ]
+passwds = ["password",  "95_aaapcn",  "_0aIGFDFBBN", "a1_" ]
 
 exist_users = ["root"]
 
