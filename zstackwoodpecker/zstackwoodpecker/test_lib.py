@@ -845,7 +845,12 @@ def lib_execute_command_in_vm(vm, cmd, l3_uuid=None):
         ret = False
         test_util.test_logger('ssh error info: %s' % rsp.error)
     else:
-        ret = str(rsp.result)
+        if rsp.result != None:
+            ret = str(rsp.result)
+            if ret == "":
+                ret = "<no stdout output>"
+        else:
+            ret = rsp.result
 
     if ret:
         test_util.test_logger('Successfully execute [command:] >>> %s <<< in [vm:] %s' % (cmd, vm_ip))

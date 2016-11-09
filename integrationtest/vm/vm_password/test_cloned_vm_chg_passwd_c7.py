@@ -10,14 +10,15 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstacklib.utils.ssh as ssh
 import test_stub
+import time
 
 
 #users   = ["root",     "root",     "root",       "root", "root",                 "a", "aa", " a", "a:@", "???", "."]
 #passwds = ["password", "98765725", "95_aaapcn ", "0",    "9876,*&#$%^&**&()+_=", "0", "a.", " .", ")" ,  "^",  "+"]
 exist_users = ["root"]
 
-users   = ["root",     "root",     "root",       "root", "root",                 "a", "aa"]
-passwds = ["password", "98765725", "95_aaapcn ", "0",    "9876,*&#$%^&**&()+_=", "0", "a."]
+users   = ["root",      "root",       "_a",          "aa"  ]
+passwds = ["password",  "95_aaapcn",  "_0aIGFDFBBN", "a1_" ]
 
 vm = None
 
@@ -49,7 +50,7 @@ def test():
 
     for (usr,passwd) in zip(users, passwds):
         if usr not in exist_users:
-            test_stub.create_user_in_vm(vm.get(), usr, passwd) 
+            test_stub.create_user_in_vm(vm.get_vm(), usr, passwd) 
             exist_users.append(usr)
 
         #new vm->cloned new_vm1/new_vm2

@@ -20,8 +20,8 @@ vm = None
 test_account_uuid = None
 test_account_session = None
 
-users   = ["root",     "root",     "root",       "root", "root",                 "a", "aa"]
-passwds = ["password", "98765725", "95_aaapcn ", "0",    "9876,*&#$%^&**&()+_=", "0", "a."]
+users   = ["root",      "root",       "_a",          "aa"  ]
+passwds = ["password",  "95_aaapcn",  "_0aIGFDFBBN", "a1_" ]
 
 exist_users = ["root"]
 
@@ -36,7 +36,7 @@ def test():
     test_account_session = acc_ops.login_by_account(account_name, account_pass)
     test_stub.share_admin_resource([test_account_uuid])
 
-    vm = test_stub.create_vm(session_uuid = test_account_session)
+    vm = test_stub.create_vm(vm_name = 'c7-vm', image_name = "imageName_i_c7", session_uuid = test_account_session)
     vm.check()
 
     backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
@@ -51,7 +51,7 @@ def test():
 
     for (usr,passwd) in zip(users, passwds):
         if usr not in exist_users:
-            test_stub.create_user_in_vm(vm.get(), usr, passwd)
+            test_stub.create_user_in_vm(vm.get_vm(), usr, passwd)
             exist_users.append(usr)
 
         #When vm is running:

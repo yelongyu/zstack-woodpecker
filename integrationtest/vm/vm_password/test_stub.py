@@ -19,6 +19,7 @@ import zstackwoodpecker.zstack_test.zstack_test_eip as zstack_eip_header
 import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
+import zstackwoodpecker.operations.account_operations as acc_ops
 
 test_file = '/tmp/test.img'
 TEST_TIME = 120
