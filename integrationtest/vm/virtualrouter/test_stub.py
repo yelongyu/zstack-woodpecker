@@ -314,3 +314,35 @@ def sleep_util(timestamp):
         if time.time() >= timestamp:
             break
         time.sleep(0.5)
+
+def create_test_file(vm_inv, test_file):
+    '''
+    the bandwidth is for calculate the test file size,
+    since the test time should be finished in 60s.
+    bandwidth unit is KB.
+    '''
+    file_size = 1024 * 2
+    seek_size = file_size / 1024 - 1
+
+    cmd = 'dd if=/dev/zero of=%s bs=1K count=1 seek=%d' \
+           % (test_file, seek_size)
+
+    if not test_lib.lib_execute_command_in_vm(vm_inv, cmd):
+        test_util.test_fail('test file is not created')
+
+def attach_mount_volume(volume, vm, mount_point):
+    volume.attach(vm)
+    import tempfile
+    script_file = tempfile.NamedTemporaryFile(delete=False)
+    script_file.write('''
+mkdir -p %s
+device="/dev/`ls -ltr --file-type /dev | awk '$4~/disk/ {print $NF}' | grep -v '[[:digit:]]' | tail -1`"
+mount ${device}1 %s
+''' % (mount_point, mount_point))
+    script_file.close()
+
+    vm_inv = vm.get_vm()
+    if not test_lib.lib_execute_shell_script_in_vm(vm_inv, script_file.name):
+        test_util.test_fail("mount operation failed in [volume:] %s in [vm:] %s" % (volume.get_volume().uuid, vm_inv.uuid))
+        os.unlink(script_file.name)
+
