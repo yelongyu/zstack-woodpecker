@@ -2833,7 +2833,7 @@ def lib_mkfs_for_volume(volume_uuid, vm_inv):
     script_file = tempfile.NamedTemporaryFile(delete=False)
     script_file.write('''
 mkdir -p %s
-device="/dev/`ls -ltr --file-type /dev | grep disk | awk '{print $NF}' | grep -v '[[:digit:]]' | tail -1`"
+device="/dev/`ls -ltr --file-type /dev | awk '$4~/disk/ {print $NF}' | grep -v '[[:digit:]]' | tail -1`"
 mount ${device}1 %s
 if [ $? -ne 0 ]; then
     fdisk $device <<EOF
