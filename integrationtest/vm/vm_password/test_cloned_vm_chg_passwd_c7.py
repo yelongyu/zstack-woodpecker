@@ -54,6 +54,7 @@ def test():
             exist_users.append(usr)
 
         #new vm->cloned new_vm1/new_vm2
+        test_util.test_logger("1st clone")
         new_vms = vm.clone(vm_names)
 
         if len(new_vms) != len(vm_names):
@@ -64,6 +65,7 @@ def test():
             test_obj_dict.add_vm(new_vm)
 
             #When vm is running:
+            test_util.test_logger("vm running && change 1st cloned vm password:<%s:%s:%s>" %(new_vm, usr, passwd))
             inv = vm_ops.change_vm_password(new_vm.get_vm().uuid, usr, passwd, skip_stopped_vm = None, session_uuid = None)
             if not inv:
                 test_util.test_fail("change cloned vms password failed")
@@ -73,6 +75,7 @@ def test():
 
             #When vm is stopped:
             new_vm.stop()
+            test_util.test_logger("vm stopped && change 1st cloned vm password:<%s:%s:%s>" %(new_vm, usr, passwd))
             inv = vm_ops.change_vm_password(new_vm.get_vm().uuid, "root", test_stub.original_root_password)
             if not inv:
                 test_util.test_fail("recover vm password failed")
@@ -81,6 +84,7 @@ def test():
             new_vm.check()
             
             #test use the cloned vm change password to clone new vm and then change password
+            test_util.test_logger("2nd cloned")
             in_new_vms = new_vm.clone(in_vm_names)
 
             new_vm.destroy()
@@ -92,6 +96,7 @@ def test():
                 in_new_vm.update()
                 test_obj_dict.add_vm(in_new_vm)
 
+                test_util.test_logger("vm running && change 2nd cloned vm password:<%s:%s:%s>" %(new_vm, usr, passwd))
                 inv = vm_ops.change_vm_password(in_new_vm.get_vm().uuid, usr, passwd, skip_stopped_vm = None, session_uuid = None)
                 if not inv:
                     test_util.test_fail("change cloned in_vm password failed")
@@ -101,6 +106,7 @@ def test():
 
                 #When vm is stopped:
                 in_new_vm.stop()
+                test_util.test_logger("vm stopped && change 2nd cloned vm password:<%s:%s:%s>" %(new_vm, usr, passwd))
                 inv = vm_ops.change_vm_password(in_new_vm.get_vm().uuid, "root", test_stub.original_root_password)
                 if not inv:
                     test_util.test_fail("recover vm password failed")
