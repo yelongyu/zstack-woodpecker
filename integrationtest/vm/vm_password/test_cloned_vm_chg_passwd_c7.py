@@ -13,8 +13,8 @@ import test_stub
 import time
 
 
-#users   = ["root",     "root",     "root",       "root", "root",                 "a", "aa", " a", "a:@", "???", "."]
-#passwds = ["password", "98765725", "95_aaapcn ", "0",    "9876,*&#$%^&**&()+_=", "0", "a.", " .", ")" ,  "^",  "+"]
+
+
 exist_users = ["root"]
 
 users   = ["root",      "root",       "_a",          "aa"  ]
@@ -54,6 +54,7 @@ def test():
 
     for (usr,passwd) in zip(users, passwds):
         if usr not in exist_users:
+            test_util.test_logger("find new account: <%s:%s>" %(usr, passwd))
             test_stub.create_user_in_vm(vm.get_vm(), usr, passwd) 
             exist_users.append(usr)
 
@@ -66,6 +67,7 @@ def test():
 
         for new_vm in new_vms:
             new_vm.update()
+            #new_vm.check()
             test_obj_dict.add_vm(new_vm)
 
             #When vm is running:
