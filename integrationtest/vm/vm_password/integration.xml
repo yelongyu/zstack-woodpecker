@@ -15,5 +15,6 @@
         <case timeout='1200'  repeat='1'>test_chg_vm_passwd_u14.py</case>
         <case timeout='1200'  repeat='1'>test_chg_vm_passwd_u15.py</case>
         <case timeout='1200'  repeat='1'>test_chg_vm_passwd_u16.py</case>
+        <case timeout='1200'  repeat='1'>test_invalid_passwd_c7.py</case>
     </suite>
 </integrationTest>
