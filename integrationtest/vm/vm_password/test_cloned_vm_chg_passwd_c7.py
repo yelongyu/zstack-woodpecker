@@ -38,6 +38,10 @@ def test():
     test_obj_dict.add_vm(vm)
     vm.check()
 
+    test_util.test_logger("change vm password for initial created vm")
+    inv = vm_ops.change_vm_password(vm.get_vm().uuid, "root", "password", skip_stopped_vm = None, session_uuid = None)
+    if not inv:
+        test_util.test_fail("change vm password failed")
     backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
     for bs in backup_storage_list:
         if bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
