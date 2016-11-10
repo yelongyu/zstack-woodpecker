@@ -93,6 +93,7 @@ def create_user_in_vm(vm, username, password):
     create non-root user with password setting
     """
     global original_root_password
+    test_util.test_logger("create_user_in_vm: %s:%s" %(username, password))
 
     vm_ip = vm.vmNics[0].ip
 
