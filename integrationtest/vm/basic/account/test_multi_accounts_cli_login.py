@@ -57,6 +57,11 @@ def test():
     if logout_output.find('- >>>') < 0:
         test_util.test_fail('zstack-cli is not display correct after logout: %s' % (login_output))
 
+    test_account1.delete()
+    test_account2.delete()
+    test_obj_dict.rm_account(test_account1)
+    test_obj_dict.rm_account(test_account2)
+
 #Will be called only if exception happens in test().
 def error_cleanup():
     test_lib.lib_error_cleanup(test_obj_dict)
