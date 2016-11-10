@@ -1,5 +1,5 @@
 '''
-Change VM password
+Negative test for changing vm password
 @author: SyZhao
 '''
 
@@ -12,12 +12,10 @@ import zstacklib.utils.ssh as ssh
 import test_stub
 
 
-#users   = ["root",     "root",     "root",       "root", "root",                 "a", "aa", " a", "a:@", "???", "."]
-#passwds = ["password", "98765725", "95_aaapcn ", "0",    "9876,*&#$%^&**&()+_=", "0", "a.", " .", ")" ,  "^",  "+"]
 exist_users = ["root"]
 
-users   = ["root",      "root",      "root",    "root",          "_aa", "bc ", " & a", " "  ]
-passwds = ["*#$",       " ",         "*"*265,   "",              "&ad", " "*265, "aa", "??" ] 
+users   = [ "_aa", "bc",    "123", "root", "root" ]
+passwds = [ "&ad", "x"*265, "??",  "]",    "."    ] 
 
 
 vm = None
@@ -32,14 +30,17 @@ def test():
         test_util.test_dsc("username:%s, password: \"%s\"" %(usr, passwd))
 
         #Create VM API
-        try:
-            vm = test_stub.create_vm(vm_name = passwd +'-c7-vm', image_name = "imageName_i_c7", root_password=root_password)
-            test_util.test_fail("the invaild password: %s successfully be set", passwd)
-        except:
-            pass
+        if usr == "root":
+            try:
+                vm = test_stub.create_vm(vm_name = 'c7-vm', image_name = "imageName_i_c7", root_password=passwd)
+            except:
+                pass
+            else:
+                test_util.test_fail("create vm && the invaild password: %s successfully be set" % (passwd))
 
         #Check bs type
-        vm = test_stub.create_vm(vm_name = passwd +'-c7-vm', image_name = "imageName_i_c7")
+        vm = test_stub.create_vm(vm_name = 'c7-vm', image_name = "imageName_i_c7")
+        vm.check()
         backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
         for bs in backup_storage_list:
             if bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
@@ -51,31 +52,33 @@ def test():
 
         #inject normal account username/password
         if usr not in exist_users:
-            test_stub.create_user_in_vm(vm.get_vm(), usr, passwd) 
+            test_stub.create_user_in_vm(vm.get_vm(), usr, "password") 
             exist_users.append(usr)
 
 
         #Change VM API && Running
         try:
             vm_ops.change_vm_password(vm.get_vm().uuid, usr, passwd, skip_stopped_vm = None, session_uuid = None)
-            test_util.test_fail("the invaild password: %s successfully be set", passwd)
         except:
             pass
-
+        else:
+            test_util.test_fail("vm running && the invaild password: %s successfully be set" %(passwd))
 
         #Change VM API && Stopped
         vm.stop()
         try:
             vm_ops.change_vm_password(vm.get_vm().uuid, usr, passwd, skip_stopped_vm = None, session_uuid = None)
-            test_util.test_fail("the invaild password: %s successfully be set", root_password)
         except:
             pass
+        else:
+            test_util.test_fail("vm stopped && the invaild password: %s successfully be set" %(passwd))
+
+        vm.start()
+        vm.check()
 
         if not test_lib.lib_check_login_in_vm(vm.get_vm(), "root", "password"):
             test_util.test_fail("create vm with root password: \"password\" failed")
 
-        #vm.start()
-        #vm.check()
         vm.destroy()
         vm.expunge()
         vm.check()
