@@ -675,94 +675,94 @@ default one' % self.zstack_properties)
             return
         
         testagentdir = None
-        try:
-            def _wait_echo(target_ip):
-                try:
-                    rspstr = http.json_dump_post(testagent.build_http_path(target_ip, host_plugin.ECHO_PATH))
-                except:
-                    print('zstack-testagent does not startup, will try again ...')
-                    return False
-                return True
 
-            testagentdir = self.test_agent_path
-            ansible.check_and_install_ansible()
+        def _wait_echo(target_ip):
+            try:
+                rspstr = http.json_dump_post(testagent.build_http_path(target_ip, host_plugin.ECHO_PATH))
+            except:
+                print('zstack-testagent does not startup, will try again ...')
+                return False
+            return True
 
-            lib_files = []
+        testagentdir = self.test_agent_path
+        ansible.check_and_install_ansible()
 
-            if not target:
-                #default will deploy all test hosts.
-                exc_info = []
-                for h in self.test_agent_hosts:
-                    print('Deploy test agent in host: [%s] \n' % h.managementIp_)
-                    if h.username_ != 'root':
-                        ansible_become_args = "ansible_become=yes become_user=root ansible_become_pass=%s" % (h.password_)
-                    else:
-                        ansible_become_args = ""
+        lib_files = []
 
-                    if hasattr(h, 'port_'):
-                        ansible_port_args = "ansible_ssh_port=%s" % (h.port_)
-                    else:
-                        ansible_port_args = ""
+        if not target:
+            #default will deploy all test hosts.
+            exc_info = []
+            for h in self.test_agent_hosts:
+                print('Deploy test agent in host: [%s] \n' % h.managementIp_)
+                if h.username_ != 'root':
+                    ansible_become_args = "ansible_become=yes become_user=root ansible_become_pass=%s" % (h.password_)
+                else:
+                    ansible_become_args = ""
 
-                    ansible_cmd_args = "host=%s \
-                            ansible_ssh_user=%s \
-                            ansible_ssh_pass=%s \
-                            %s \
-                            %s \
-                            testagentdir=%s" % \
-                            (h.managementIp_, h.username_, h.password_, ansible_become_args, ansible_port_args, testagentdir)
+                if hasattr(h, 'port_'):
+                    ansible_port_args = "ansible_ssh_port=%s" % (h.port_)
+                else:
+                    ansible_port_args = ""
 
-                    if ENV_HTTP_PROXY:
-                        ansible_cmd_args = "%s http_proxy=%s https_proxy=%s" % \
-                            (ansible_cmd_args, ENV_HTTP_PROXY, ENV_HTTPS_PROXY)
-
-                    ansible_cmd = "testagent.yaml -e '%s'" % ansible_cmd_args
-
-                    if hasattr(h, 'port_'):
-                        thread = threading.Thread(target=ansible.execute_ansible,\
-                            args=(h.managementIp_, h.username_, h.password_,\
-                            testagentdir, ansible_cmd, lib_files, exc_info, h.port_))
-                    else:
-                        thread = threading.Thread(target=ansible.execute_ansible,\
-                            args=(h.managementIp_, h.username_, h.password_,\
-                            testagentdir, ansible_cmd, lib_files, exc_info))
-
-                    # Wrap up old zstack logs in /var/log/zstack/
-                    #print('archive test log on host: [%s] \n' % h.managementIp_)
-                    #try:
-                    #    if hasattr(h, 'port_'):
-                    #        log.cleanup_log(h.managementIp_, h.username_, h.password_, h.port_)
-                    #    else:
-                    #        log.cleanup_log(h.managementIp_, h.username_, h.password_)
-                    #except Exception as e:
-                    #    print "clean up old testing logs meet execption on management node: %s" % h.managementIp_
-                    #    raise e
-
-                    thread.start()
-                #if localhost is not in hosts, should do log archive for zstack
-                log.cleanup_local_log()
-
-                self._wait_for_thread_completion('install test agent', 200)
-
-                for h in self.test_agent_hosts:
-                    if not linux.wait_callback_success(_wait_echo, h.managementIp_, 5, 0.2, True):
-                        raise ActionError('testagent is not start up in 5s on %s, after it is deployed by ansible.' % h.managementIp_)
-
-            else:
-                print('Deploy test agent in host: %s \n' % target.managementIp)
                 ansible_cmd_args = "host=%s \
+                        ansible_ssh_user=%s \
+                        ansible_ssh_pass=%s \
+                        %s \
+                        %s \
                         testagentdir=%s" % \
-                        (target.managementIp, testagentdir)
+                        (h.managementIp_, h.username_, h.password_, ansible_become_args, ansible_port_args, testagentdir)
+
                 if ENV_HTTP_PROXY:
                     ansible_cmd_args = "%s http_proxy=%s https_proxy=%s" % \
                         (ansible_cmd_args, ENV_HTTP_PROXY, ENV_HTTPS_PROXY)
 
                 ansible_cmd = "testagent.yaml -e '%s'" % ansible_cmd_args
-                ansible.execute_ansible(target.managementIp, target.username, \
-                        target.password, testagentdir, ansible_cmd, lib_files)
-                if not linux.wait_callback_success(_wait_echo, target.managementIp, 5, 0.2):
-                    raise ActionError('testagent is not start up in 5s on %s, after it is deployed by ansible.' % target.managementIp)
-                
+
+                if hasattr(h, 'port_'):
+                    thread = threading.Thread(target=ansible.execute_ansible,\
+                        args=(h.managementIp_, h.username_, h.password_,\
+                        testagentdir, ansible_cmd, lib_files, exc_info, h.port_))
+                else:
+                    thread = threading.Thread(target=ansible.execute_ansible,\
+                        args=(h.managementIp_, h.username_, h.password_,\
+                        testagentdir, ansible_cmd, lib_files, exc_info))
+
+                # Wrap up old zstack logs in /var/log/zstack/
+                #print('archive test log on host: [%s] \n' % h.managementIp_)
+                #try:
+                #    if hasattr(h, 'port_'):
+                #        log.cleanup_log(h.managementIp_, h.username_, h.password_, h.port_)
+                #    else:
+                #        log.cleanup_log(h.managementIp_, h.username_, h.password_)
+                #except Exception as e:
+                #    print "clean up old testing logs meet execption on management node: %s" % h.managementIp_
+                #    raise e
+
+                thread.start()
+            #if localhost is not in hosts, should do log archive for zstack
+            log.cleanup_local_log()
+
+            self._wait_for_thread_completion('install test agent', 200)
+
+            for h in self.test_agent_hosts:
+                if not linux.wait_callback_success(_wait_echo, h.managementIp_, 5, 0.2, True):
+                    raise ActionError('testagent is not start up in 5s on %s, after it is deployed by ansible.' % h.managementIp_)
+
+        else:
+            print('Deploy test agent in host: %s \n' % target.managementIp)
+            ansible_cmd_args = "host=%s \
+                    testagentdir=%s" % \
+                    (target.managementIp, testagentdir)
+            if ENV_HTTP_PROXY:
+                ansible_cmd_args = "%s http_proxy=%s https_proxy=%s" % \
+                    (ansible_cmd_args, ENV_HTTP_PROXY, ENV_HTTPS_PROXY)
+
+            ansible_cmd = "testagent.yaml -e '%s'" % ansible_cmd_args
+            ansible.execute_ansible(target.managementIp, target.username, \
+                    target.password, testagentdir, ansible_cmd, lib_files)
+            if not linux.wait_callback_success(_wait_echo, target.managementIp, 5, 0.2):
+                raise ActionError('testagent is not start up in 5s on %s, after it is deployed by ansible.' % target.managementIp)
+            
     def execute_plan_without_deploy_test_agent(self):
         if os.environ.get('ZSTACK_ALREADY_INSTALLED') != "yes":
             try:
