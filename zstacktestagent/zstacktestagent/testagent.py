@@ -76,4 +76,4 @@ class TestAgentDaemon(daemon.Daemon):
         self.agent.start(False)
     
 def build_http_path(ip, path):
-    return 'http://%s:%s/%s' % (ip, str(TESTAGENT_PORT), path)
+    return 'http://%s:%s/%s' % (ip, str(TESTAGENT_PORT), path.lstrip('/'))
