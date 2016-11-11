@@ -763,10 +763,6 @@ default one' % self.zstack_properties)
                 if not linux.wait_callback_success(_wait_echo, target.managementIp, 5, 0.2):
                     raise ActionError('testagent is not start up in 5s on %s, after it is deployed by ansible.' % target.managementIp)
                 
-        finally:
-            if testagentdir:
-                shell.call('rm -rf %s' % testagentdir)
-        
     def execute_plan_without_deploy_test_agent(self):
         if os.environ.get('ZSTACK_ALREADY_INSTALLED') != "yes":
             try:
