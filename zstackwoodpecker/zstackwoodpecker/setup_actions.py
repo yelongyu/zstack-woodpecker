@@ -676,13 +676,6 @@ default one' % self.zstack_properties)
         
         testagentdir = None
         try:
-            def untar_test_agent():
-                tmpdir = tempfile.mkdtemp()
-                shell.call('tar jxf %s -C %s' % (self.test_agent_path, tmpdir))
-                shell.call('cd %s/zstacktestagent/; tar jcf pypi.tar.bz pypi' \
-                        % tmpdir)
-                return '%s/zstacktestagent' % tmpdir
-
             def _wait_echo(target_ip):
                 try:
                     rspstr = http.json_dump_post(testagent.build_http_path(target_ip, host_plugin.ECHO_PATH))
@@ -691,19 +684,10 @@ default one' % self.zstack_properties)
                     return False
                 return True
 
-            def find_zstacklib(search_path):
-                match = glob.glob(os.path.join(search_path, 'zstacklib-*.tar.gz'))
-                try:
-                    return os.path.basename(match[0])
-                except:
-                    return 'zstacklib-1.6.tar.gz'
-
-            testagentdir = untar_test_agent()
-            pkg_zstacklib = find_zstacklib(testagentdir)
+            testagentdir = self.test_agent_path
             ansible.check_and_install_ansible()
 
-            lib_files = ['testagent/zstacktestagent-1.0.0.tar.gz', \
-                    'testagent/%s' % (pkg_zstacklib) ]
+            lib_files = []
 
             if not target:
                 #default will deploy all test hosts.
@@ -725,10 +709,8 @@ default one' % self.zstack_properties)
                             ansible_ssh_pass=%s \
                             %s \
                             %s \
-                            pkg_testagent=zstacktestagent-1.0.0.tar.gz \
-                            pkg_zstacklib=%s \
-                            pypi_source_tar=pypi.tar.bz" % \
-                            (h.managementIp_, h.username_, h.password_, ansible_become_args, ansible_port_args, pkg_zstacklib)
+                            testagentdir=%s" % \
+                            (h.managementIp_, h.username_, h.password_, ansible_become_args, ansible_port_args, testagentdir)
 
                     if ENV_HTTP_PROXY:
                         ansible_cmd_args = "%s http_proxy=%s https_proxy=%s" % \
@@ -769,10 +751,8 @@ default one' % self.zstack_properties)
             else:
                 print('Deploy test agent in host: %s \n' % target.managementIp)
                 ansible_cmd_args = "host=%s \
-                        pkg_testagent=zstacktestagent-1.0.0.tar.gz \
-                        pkg_zstacklib=%s \
-                        pypi_source_tar=pypi.tar.bz" % \
-                        (target.managementIp, pkg_zstacklib)
+                        testagentdir=%s" % \
+                        (target.managementIp, testagentdir)
                 if ENV_HTTP_PROXY:
                     ansible_cmd_args = "%s http_proxy=%s https_proxy=%s" % \
                         (ansible_cmd_args, ENV_HTTP_PROXY, ENV_HTTPS_PROXY)

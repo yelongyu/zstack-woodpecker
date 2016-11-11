@@ -2,99 +2,26 @@
 
 - hosts: "{{host}}"
   vars:
-    - virtenv_path: "/var/lib/zstack/virtualenv/testagent"
     - test_root: "/var/lib/zstack/testagent"
-    - proxy: "{{http_proxy|default()}}"
-    - sproxy: "{{https_proxy|default()}}"
     - chroot_env: "{{chroot|default('false')}}"
-    - pypi_local: "{{test_root}}/pypi"
 
   tasks:
-    - name: state epel.repo
-      stat: path=/etc/yum.repos.d/epel.repo
-      register: epel_repo
-
-    - name: install epel-release yum repo
-      when: ansible_os_family == 'RedHat' and epel_repo.stat.exists != true
-      copy: src=epel-release-source.repo
-            dest=/etc/yum.repos.d/
-            owner=root group=root mode=0644
-    
-    - name: install epel-release
-      when: ansible_os_family == 'RedHat' and epel_repo.stat.exists != true
-      environment:
-        http_proxy: "{{proxy}}"
-        https_proxy: "{{sproxy}}"
-      yum: name=epel-release
-           enablerepo=epel-release-source
-           state=present
-    
-    - name: enable epel repository
-      when: ansible_os_family == 'RedHat'
-      ini_file: dest=/etc/yum.repos.d/epel.repo
-                section=epel
-                option=enabled
-                value=1
-
     - name: create root directories
       shell: "mkdir -p {{item}}"
       with_items:
         - "{{test_root}}"
-        - "{{virtenv_path}}"
-
-    - name: install test related packages on RedHat based OS
-      when: ansible_os_family == 'CentOS' or ansible_os_family == 'RedHat' or ansible_os_family == 'Fedora'
-      yum: name="{{item}}"
-      with_items:
-        - vconfig
-        - bzip2
-        - python-devel
-        - gcc
-        - autoconf
-        - libselinux-python
-        - python-setuptools
-
-    - name: install dependency packages for Debian based OS
-      when: ansible_os_family == 'Debian'
-      apt: pkg="{{item}}" update_cache=yes
-      with_items:
-        - python-dev
-        - python-setuptools
-        - python-pip
-        - gcc
-        - autoconf
 
     - name: disable firewalld in RHEL7 and Centos7
       when: ansible_os_family == 'RedHat' and ansible_distribution_version >= '7'
       service: name=firewalld state=stopped enabled=no
 
-    - name: copy pypi source tar ball
-      copy: src="{{pypi_source_tar}}" dest="{{test_root}}/{{pypi_source_tar}}"
-
-    - name: untar pypi source
-      shell: "cd {{test_root}}; /bin/rm -rf pypi; tar jxf {{pypi_source_tar}}"
-
-    - name: upgrade pip
-      shell: "easy_install -i file://{{pypi_local}}/simple --upgrade pip"
-
-    - name: install virtualenv
-      pip: name=virtualenv extra_args="--no-index -f file://{{pypi_local}}"
-
-    - name: copy zstacklib
-      copy: src="{{pkg_zstacklib}}" dest="{{test_root}}/{{pkg_zstacklib}}"
-      notify:
-        - create virtualenv dirctory
-        - install zstacklib
-        - restart testagent
-
     - name: copy test agent
-      copy: src="{{pkg_testagent}}" dest="{{test_root}}/{{pkg_testagent}}"
+      copy: src="{{testagentdir}}/target/testagent" dest="{{test_root}}/"
       notify:
-        - install testagent
         - restart testagent
 
     - name: copy test agent service file
-      copy: src="zstack-testagent" dest="/etc/init.d/" mode=755
+      copy: src="{{testagentdir}}/scripts/zstack-testagent" dest="/etc/init.d/" mode=755
       notify:
         - restart testagent
 
@@ -113,15 +40,6 @@
       when: chroot_env == 'false'
 
   handlers:
-    - name: create virtualenv dirctory
-      shell: "rm -rf {{virtenv_path}}; virtualenv {{virtenv_path}}"
-
-    - name: install zstacklib
-      pip: name="{{test_root}}/{{pkg_zstacklib}}" extra_args="--ignore-installed --no-index -f file://{{pypi_local}}" virtualenv="{{virtenv_path}}" 
-
-    - name: install testagent
-      pip: name="{{test_root}}/{{pkg_testagent}}" extra_args="--ignore-installed --no-index -f file://{{pypi_local}}" virtualenv="{{virtenv_path}}"
-
     - name: restart testagent
       service: name=zstack-testagent state=restarted enabled=yes
       when: chroot_env == 'false'
