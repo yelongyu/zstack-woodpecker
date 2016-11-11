@@ -16,10 +16,24 @@ def test():
     vm = test_stub.create_user_vlan_vm()
     test_obj_dict.add_vm(vm)
     vm.check()
+    vm_inv = vm.get_vm()
+    vm_ip = vm_inv.vmNics[0].ip 
+
+    cmd = 'touch /root/test-file-for-reinit'
+    rsp = test_lib.lib_execute_ssh_cmd(vm_ip, 'root', 'password', cmd, 180)
+    if rsp == False:
+	test_util.test_fail('Fail to create file in VM')
+
     vm.stop()
     vm.reinit()
     vm.update()
     vm.check()
+
+    cmd = '[ -e filename ] && echo yes || echo no'
+    rsp = test_lib.lib_execute_ssh_cmd(vm_ip, 'root', 'password', cmd, 180)
+    if rsp == 'yes':
+	test_util.test_fail('VM does not be reverted to image used for creating the VM, the later file still exists')
+
     vm.destroy()
     test_util.test_pass('Re-init VM Test Success')
 
