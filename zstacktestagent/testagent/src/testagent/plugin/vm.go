@@ -244,7 +244,7 @@ func vmBlkStatus(uuid string) map[string]string{
 	ret := make(map[string]string)
 	for _, item := range output {
 		if item != "" {
-			blk := strings.Split(item, "")
+			blk := strings.Fields(item)
 			ret[blk[0]] = blk[1]
 		}
 	}
