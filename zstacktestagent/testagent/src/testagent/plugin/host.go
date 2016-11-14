@@ -21,6 +21,7 @@ type HostShellRsp struct {
 	Stderr string `json:"stderr"`
 	Stdout string `json:"stdout"`
 	Command string `json:"command"`
+	Success bool `json:"success"`
 }
 
 type HostCreateVlanDeviceCmd struct {
@@ -210,6 +211,7 @@ func hostShellCmdHandler(ctx *server.CommandContext) interface{} {
 	rsp.ReturnCode, rsp.Stdout, rsp.Stderr, _ = bash.RunWithReturn()
 //	bash.PanicIfError()
 	rsp.Command = cmd.Command
+	rsp.Success = true
 
 	return rsp
 }
