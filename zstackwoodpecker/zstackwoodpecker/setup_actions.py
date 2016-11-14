@@ -753,8 +753,11 @@ default one' % self.zstack_properties)
 	    if target.username != "root":
                 ansible_cmd_args = "host=%s \
                         ansible_ssh_user=%s \
+                        ansible_become=yes \
+                        become_user=root \
+                        ansible_become_pass=%s \
                         testagentdir=%s" % \
-                        (target.managementIp, target.username, testagentdir)
+                        (target.managementIp, target.username, target.password, testagentdir)
             else:
                 ansible_cmd_args = "host=%s \
                         testagentdir=%s" % \

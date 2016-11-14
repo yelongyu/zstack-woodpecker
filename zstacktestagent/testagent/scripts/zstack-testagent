@@ -1,6 +1,8 @@
 #!/bin/bash
 # chkconfig: 345 99 01
 # description: zstack test agent
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
 
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin
 
