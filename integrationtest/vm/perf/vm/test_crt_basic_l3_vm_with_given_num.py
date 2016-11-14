@@ -1,7 +1,7 @@
 '''
 
 New Perf Test for creating KVM VM with basic L3 network.
-The created number will depends on the environment variable: ZSTACK_VM_NUM
+The created number will depend on the environment variable: ZSTACK_VM_NUM
 
 @author: Youyk
 '''

@@ -1,7 +1,7 @@
 '''
 
 New Perf Test for creating KVM VM with SG L3 network.
-The created number will depends on the environment variable: ZSTACK_TEST_NUM
+The created number will depend on the environment variable: ZSTACK_TEST_NUM
 Each VM will use different VR. The max number is based on simulation environment
 
 @author: Youyk

@@ -1,6 +1,6 @@
 '''
 New Perf Test for creating Simulator VM which has VR L3 network.
-The created number will depends on the environment variable: ZSTACK_TEST_NUM
+The created number will depend on the environment variable: ZSTACK_TEST_NUM
 
 This case should use KVM simulator if the real environment doesn't support
 so many resource. 

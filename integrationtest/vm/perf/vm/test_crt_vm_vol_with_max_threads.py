@@ -1,7 +1,7 @@
 '''
 
 New Perf Test for creating sim VM with basic L3 network and extra data volume
-The created number will depends on the environment variable: ZSTACK_TEST_NUM
+The created number will depend on the environment variable: ZSTACK_TEST_NUM
 
 The difference with test_basic_l3_vm_with_given_num.py is this case's max thread
 is 1000, which could be modified by env variable: ZSTACK_THREAD_THRESHOLD

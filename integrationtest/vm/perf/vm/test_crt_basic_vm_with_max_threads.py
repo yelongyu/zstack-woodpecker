@@ -1,7 +1,7 @@
 '''
 
 New Perf Test for creating KVM VM with basic L3 network.
-The created number will depends on the environment variable: ZSTACK_TEST_NUM
+The created number will depend on the environment variable: ZSTACK_TEST_NUM
 
 The difference with test_basic_l3_vm_with_given_num.py is this case's max thread is 1000 
 
