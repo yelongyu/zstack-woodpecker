@@ -100,12 +100,12 @@ def create_user_in_vm(vm, username, password):
     cmd = "adduser %s" % (username)
     ret, output, stderr = ssh.execute(cmd, vm_ip, "root", original_root_password, False, 22)
     if ret != 0:
-        test_util.test_fail("the user created failure")
+        test_util.test_fail("User created failure, cmd[%s], output[%s], stderr[%s]" %(cmd, output, stderr))
 
     cmd = "echo -e \'%s\n%s\' | passwd %s" % (password, password, username)
     ret, output, stderr = ssh.execute(cmd, vm_ip, "root", original_root_password, False, 22)
     if ret != 0:
-        test_util.test_fail("set non-root password failure")
+        test_util.test_fail("set non-root password failure, cmd[%s], output[%s], stderr[%s]" %(cmd, output, stderr))
 
 
 #def create_volume(volume_creation_option=None, session_uuid = None):
