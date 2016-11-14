@@ -750,9 +750,15 @@ default one' % self.zstack_properties)
 
         else:
             print('Deploy test agent in host: %s \n' % target.managementIp)
-            ansible_cmd_args = "host=%s \
-                    testagentdir=%s" % \
-                    (target.managementIp, testagentdir)
+	    if target.username != "root":
+                ansible_cmd_args = "host=%s \
+                        ansible_ssh_user=%s \
+                        testagentdir=%s" % \
+                        (target.managementIp, target.username, testagentdir)
+            else:
+                ansible_cmd_args = "host=%s \
+                        testagentdir=%s" % \
+                        (target.managementIp, testagentdir)
             if ENV_HTTP_PROXY:
                 ansible_cmd_args = "%s http_proxy=%s https_proxy=%s" % \
                     (ansible_cmd_args, ENV_HTTP_PROXY, ENV_HTTPS_PROXY)
