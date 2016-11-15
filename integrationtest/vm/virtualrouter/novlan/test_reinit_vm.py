@@ -28,8 +28,9 @@ def test():
     vm.reinit()
     vm.update()
     vm.check()
+    vm.start()
 
-    cmd = '[ -e filename ] && echo yes || echo no'
+    cmd = '[ -e /root/test-file-for-reinit ] && echo yes || echo no'
     rsp = test_lib.lib_execute_ssh_cmd(vm_ip, 'root', 'password', cmd, 180)
     if rsp == 'yes':
 	test_util.test_fail('VM does not be reverted to image used for creating the VM, the later file still exists')
