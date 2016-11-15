@@ -71,7 +71,8 @@ do_start() {
     if [ $? -eq 0 ]; then
     	chown -R vyos:users $HOMDIR
         chmod a+x $SERVER
-    	su - vyos -c "nohup $SERVER -ip $ETH0_IP -port 9393 -logfile $LOGFILE >$BOOTLOG 2>&1 < /dev/null &"
+        su - vyos -c "nohup $SERVER -ip $ETH0_IP -port 9393 -logfile $LOGFILE >$BOOTLOG 2>&1 < /dev/null &"
+	pid=$!
 	SHELL_API=/opt/vyatta/sbin/my_cli_shell_api
 	session_env=$($SHELL_API getSessionEnv $PPID)
 	eval $session_env
@@ -92,8 +93,10 @@ do_start() {
 	cli-shell-api teardownSession
     else
         chmod a+x $SERVER
-	nohup $SERVER -ip 0.0.0.0 -port 9393 -logfile $LOGFILE >$BOOTLOG 2>&1 < /dev/null &
+        nohup $SERVER -ip 0.0.0.0 -port 9393 -logfile $LOGFILE >$BOOTLOG 2>&1 < /dev/null &
+        pid=$!
     fi
+    echo ${pid} > /var/run/zstack/zstacktestagent.pid
 
     sleep 1
     check_status > /dev/null || err_exit "unable to start zstack test agent"
