@@ -14,9 +14,11 @@ import test_stub
 
 exist_users = ["root"]
 
-users   = ["root",      "root",       "a_",          "aa"  ]
-passwds = ["password",  "95_aaapcn",  "0aIGFDFBB_N", "a1_" ]
+#users   = ["root",      "root",       "a_",          "aa"  ]
+#passwds = ["password",  "95_aaapcn",  "0aIGFDFBB_N", "a1_" ]
 
+users   = ["root",      "root",    ]
+passwds = ["password",  "95_aaapcn"]
 
 vm = None
 
@@ -38,15 +40,15 @@ def test():
         test_util.test_skip('Not find image store type backup storage.')
 
     for (usr,passwd) in zip(users, passwds):
-        if usr not in exist_users:
-            #if the user is not existed, it should report
-            try:
-                vm_ops.change_vm_password(vm.get_vm().uuid, usr, passwd, skip_stopped_vm = None, session_uuid = None)
-            except:
-                test_stub.create_user_in_vm(vm.get_vm(), usr, passwd)
-                exist_users.append(usr)
-            else:
-                test_util.test_fail("user not exist in this OS, but it didn't report user is changing an un-existed account password as expected.")
+        #if usr not in exist_users:
+        #    #if the user is not existed, it should report
+        #    try:
+        #        vm_ops.change_vm_password(vm.get_vm().uuid, usr, passwd, skip_stopped_vm = None, session_uuid = None)
+        #    except:
+        #        test_stub.create_user_in_vm(vm.get_vm(), usr, passwd)
+        #        exist_users.append(usr)
+        #    else:
+        #        test_util.test_fail("user not exist in this OS, but it didn't report user is changing an un-existed account password as expected.")
 
         #When vm is running:
         inv = vm_ops.change_vm_password(vm.get_vm().uuid, usr, passwd, skip_stopped_vm = None, session_uuid = None)
