@@ -11,7 +11,7 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.ha_operations as ha_ops
 
 _config_ = {
-        'timeout' : 100,
+        'timeout' : 600,
         'noparallel' : False
         }
 
