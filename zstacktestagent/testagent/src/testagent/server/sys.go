@@ -50,12 +50,9 @@ trap atexit EXIT SIGHUP SIGINT SIGTERM
 	tmpfile.Close()
 	logrus.Debugf("[Configure VYOS]: %s\n", command)
 	bash := utils.Bash{
-		Command: fmt.Sprintf(`chown vyos:users %s; chmod +x %s; su - vyos -c %v`, tmpfile.Name(), tmpfile.Name(), tmpfile.Name()),
+		Command: fmt.Sprintf(`chown vyos:users %s; chmod +x %s; %v`, tmpfile.Name(), tmpfile.Name(), tmpfile.Name()),
 	}
 	_, o, _, err := bash.RunWithReturn()
-	fmt.Printf("%s\n", o)
-	fmt.Printf("%s\n", err)
-	fmt.Printf("%s\n", err)
 	bash.PanicIfError()
 	return o
 }
