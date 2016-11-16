@@ -26,6 +26,7 @@ type Options struct {
 	ReadTimeout  uint
 	WriteTimeout uint
 	LogFile      string
+	Type	     string
 }
 
 

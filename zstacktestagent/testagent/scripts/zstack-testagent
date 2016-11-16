@@ -71,26 +71,8 @@ do_start() {
     if [ $? -eq 0 ]; then
     	chown -R vyos:users $HOMDIR
         chmod a+x $SERVER
-        su - vyos -c "nohup $SERVER -ip $ETH0_IP -port 9393 -logfile $LOGFILE >$BOOTLOG 2>&1 < /dev/null &"
+        su - vyos -c "nohup $SERVER -type vyos -ip $ETH0_IP -port 9393 -logfile $LOGFILE >$BOOTLOG 2>&1 < /dev/null &"
 	pid=$!
-	SHELL_API=/opt/vyatta/sbin/my_cli_shell_api
-	session_env=$($SHELL_API getSessionEnv $PPID)
-	eval $session_env
-	echo ${session_env}
-	export vyatta_sbindir=/opt/vyatta/sbin/
-	cli-shell-api setupSession
-	cli-shell-api inSession
-	if [ $? -ne 0 ]; then
-		echo "Something went wrong!"
-	fi
-	SET=${vyatta_sbindir}/my_set
-	${SET} firewall name eth0.local rule 9393 action accept
-	${SET} firewall name eth0.local rule 9393 destination address $ETH0_IP
-	${SET} firewall name eth0.local rule 9393 destination port 9393
-	${SET} firewall name eth0.local rule 9393 protocol tcp
-	COMMIT=${vyatta_sbindir}/my_commit
-	${COMMIT}
-	cli-shell-api teardownSession
     else
         chmod a+x $SERVER
         nohup $SERVER -ip 0.0.0.0 -port 9393 -logfile $LOGFILE >$BOOTLOG 2>&1 < /dev/null &

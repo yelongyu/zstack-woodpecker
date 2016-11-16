@@ -52,6 +52,7 @@ const (
 	SET_DEVICE_IP_PATH = "/host/setdeviceip"
 	FLUSH_DEVICE_IP_PATH = "/host/flushdeviceip"
 	HOST_SHELL_CMD_PATH = "/host/shellcmd"
+	HOST_VYOS_CMD_PATH = "/host/vyoscmd"
 //	HOST_ECHO_PATH = "/host/echo"
 )
 
@@ -216,6 +217,20 @@ func hostShellCmdHandler(ctx *server.CommandContext) interface{} {
 	return rsp
 }
 
+func hostVyosCmdHandler(ctx *server.CommandContext) interface{} {
+	cmd := &HostShellCmd{}
+	ctx.GetCommand(cmd)
+	var rsp HostShellRsp
+
+	rsp.Stdout = server.RunVyosScriptAsUserVyos(cmd.Command)
+	rsp.Stderr = ""
+	rsp.ReturnCode = 0
+	rsp.Command = cmd.Command
+	rsp.Success = true
+
+	return rsp
+}
+
 func HostEntryPoint() {
 	server.RegisterSyncCommandHandler(CREATE_VLAN_DEVICE_PATH, hostCreateVlanDeviceHandler)
 	server.RegisterSyncCommandHandler(DELETE_VLAN_DEVICE_PATH, hostDeleteVlanDeviceHandler)
@@ -223,5 +238,6 @@ func HostEntryPoint() {
 	server.RegisterSyncCommandHandler(SET_DEVICE_IP_PATH, hostSetDeviceIpHandler)
 	server.RegisterSyncCommandHandler(FLUSH_DEVICE_IP_PATH, hostFlushDeviceIpHandler)
 	server.RegisterSyncCommandHandler(HOST_SHELL_CMD_PATH, hostShellCmdHandler)
+	server.RegisterSyncCommandHandler(HOST_VYOS_CMD_PATH, hostVyosCmdHandler)
 //	server.RegisterSyncCommandHandler(HOST_ECHO_PATH, hostEchoHandler)
 }
