@@ -131,7 +131,7 @@
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName_i_c6_32" description="Centos6 32bit Test Image1"
-        format="$rootImageFormat" url="$imageName_i_c6_32"
+        format="$rootImageFormat" url="$imageUrl_i_c6_32"
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
