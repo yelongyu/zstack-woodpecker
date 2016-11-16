@@ -294,7 +294,10 @@ class zstack_kvm_vm_dhcp_checker(checker_header.TestChecker):
             guest_ip = nic.ip
             guest_mac = nic.mac
             vr_ip = test_lib.lib_find_vr_mgmt_ip(vr_vm)
-            command = 'cat /etc/hosts.dhcp'
+            if vr_vm.hasattr('applianceVmType') and vr_vm.applianceVmType == 'Vyos':
+                command = '/bin/cli-shell-api showCfg'
+            else:
+                command = 'cat /etc/hosts.dhcp'
             vr_cmd_result = test_lib.lib_execute_sh_cmd_by_agent_with_retry(vr_ip, command, self.exp_result)
             if not vr_cmd_result:
                 test_util.test_logger('Checker result: FAIL to execute shell commaond in [vm:] %s' % vr_vm.uuid)
