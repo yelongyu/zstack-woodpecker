@@ -420,10 +420,16 @@ def share_admin_resource(account_uuid_list):
     images =  res_ops.query_resource(res_ops.IMAGE, cond)
     for image in images:
         acc_ops.share_resources(account_uuid_list, [image.uuid])
-    l3net_uuid = res_ops.get_resource(res_ops.L3_NETWORK)[0].uuid
+
     root_disk_uuid = test_lib.lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName')).uuid
     data_disk_uuid = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName')).uuid
-    acc_ops.share_resources(account_uuid_list, [l3net_uuid, root_disk_uuid, data_disk_uuid])
+
+    share_list = [root_disk_uuid, data_disk_uuid]
+
+    l3net_uuids = res_ops.get_resource(res_ops.L3_NETWORK).uuid
+    for l3net_uuid in l3net_uuids:
+        share_list.append(l3net_uuid)
+    acc_ops.share_resources(account_uuid_list, share_list)
 
 
 
