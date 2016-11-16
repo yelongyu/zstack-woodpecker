@@ -48,6 +48,8 @@ def test():
             break
         #if bs.type == inventory.SFTP_BACKUP_STORAGE_TYPE:
         #    break
+        #if bs.type == inventory.CEPH_BACKUP_STORAGE_TYPE:
+        #    break
     else:
         vm.destroy()
         test_util.test_skip('Not find image store type backup storage.')
