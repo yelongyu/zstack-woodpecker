@@ -34,7 +34,7 @@ def test():
     global vm, exist_users
     test_util.test_dsc('cloned vm change password test')
 
-    vm = test_stub.create_vm(vm_name = '1st-created-vm-c7', image_name = "imageName_i_c7")
+    vm = test_stub.create_vm(vm_name = '1st-created-vm-u13', image_name = "imageName_i_u13")
     test_obj_dict.add_vm(vm)
     vm.check()
 
