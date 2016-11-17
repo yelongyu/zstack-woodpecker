@@ -1,5 +1,5 @@
 '''
-Change VM password
+Change unexisted user password
 @author: SyZhao
 '''
 
@@ -24,7 +24,7 @@ def test():
     global vm, exist_users
     test_util.test_dsc('change VM with assigned password test')
 
-    vm = test_stub.create_vm(vm_name = 'ckvmpswd-c7-64', image_name = "imageName_i_c6")
+    vm = test_stub.create_vm(vm_name = 'cknewusrvmpswd-c6-64', image_name = "imageName_i_c6")
     vm.check()
 
     backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
