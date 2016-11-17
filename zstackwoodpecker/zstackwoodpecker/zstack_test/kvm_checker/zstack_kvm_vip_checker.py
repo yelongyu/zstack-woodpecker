@@ -613,8 +613,12 @@ def _sg_rule_exist(sg_nics, protocol, start_port, end_port, allowed_cidr):
 def _find_denied_vr(cluster_uuid, l3_uuid, allowed_vr_uuid_list):
     conditions = res_ops.gen_query_conditions('clusterUuid', '=', cluster_uuid)
     conditions = res_ops.gen_query_conditions('applianceVmType', '=', 'VirtualRouter', conditions)
-    all_vrs = res_ops.query_resource(res_ops.APPLIANCE_VM, conditions)
-    for vr in all_vrs:
+    all_virtualrouter_vrs = res_ops.query_resource(res_ops.APPLIANCE_VM, conditions)
+    conditions = res_ops.gen_query_conditions('clusterUuid', '=', cluster_uuid)
+    conditions = res_ops.gen_query_conditions('applianceVmType', '=', 'Vyos', conditions)
+    all_vyos_vrs = res_ops.query_resource(res_ops.APPLIANCE_VM, conditions)
+
+    for vr in all_virtualrouter_vrs+all_vyos_vrs:
         if not vr.uuid in allowed_vr_uuid_list:
             for vm_nic in vr.vmNics:
                 if vm_nic.l3NetworkUuid == l3_uuid:
