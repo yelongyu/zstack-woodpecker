@@ -952,7 +952,7 @@ def add_image(deployConfig, session_uuid):
             action.url = i.url_
             action.timeout = 1800000
             if i.hasattr('systemTags_'):
-                action.systemTags = i.systemTags_
+                action.systemTags = i.systemTags_.split(',')
             thread = threading.Thread(target = _add_image, args = (action, ))
             print 'before add image1: %s' % i.url_
             wait_for_image_thread_queue()
