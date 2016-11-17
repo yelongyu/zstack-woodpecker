@@ -190,4 +190,24 @@ def delete_exported_image_from_backup_storage(image_uuid, bs_uuid, session_uuid 
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.test_logger('Exported [image:] %s was deleted from [url:] %s' %(image_uuid, evt.imageUrl))
     return evt
-    
+
+def attach_iso(iso_uuid, vm_uuid, session_uuid = None):
+    '''
+    Attach iso to vm
+    '''
+    action = api_actions.AttachIsoToVmInstanceAction()
+    action.isoUuid = iso_uuid
+    action.vmInstanceUuid = vm_uuid
+    test_util.action_logger('Attach ISO[UUID: %s] to VM[UUID: %s]' % (iso_uuid, vm_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def detach_iso(vm_uuid, session_uuid = None):
+    '''
+    Detach iso from vm
+    '''
+    action = api_actions.DetachIsoFromVmInstanceAction()
+    action.vmInstanceUuid = vm_uuid
+    test_util.action_logger('Detach ISO from VM[UUID: %s]' % (vm_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory    
