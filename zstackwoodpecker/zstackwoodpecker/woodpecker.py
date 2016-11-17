@@ -514,7 +514,7 @@ class WoodPecker(object):
                             case.parallel = False
                         if not case.name:
                             #only keep 1 level folder info for case name
-                            case.name = '/'.join(case.path.split('/')[-2:])[:-3]
+                            case.name = case.path[len(os.path.dirname(suite.setup_case.path))+1:]
                         case.suite = suite
                         case_name_len = len(case.name)
                         if (c.repeat__ and c.repeat__.isdigit() and (string.atoi(c.repeat__) > 0)):
