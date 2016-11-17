@@ -90,55 +90,55 @@
     <images>
       <image name="$imageName_i_c6" description="Centos6 Test Image1" 
         format="$rootImageFormat" url="$imageUrl_i_c6" 
-        mediaType="$rootMediaType"
+        mediaType="$rootMediaType" systemTags="qemuga"
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName_i_c7" description="Centos7 Test Image1" 
         format="$rootImageFormat" url="$imageUrl_i_c7" 
-        mediaType="$rootMediaType"
+        mediaType="$rootMediaType" systemTags="qemuga"
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName_i_u12" description="Ubuntu12.x Test Image1" 
         format="$rootImageFormat" url="$imageUrl_i_u12" 
-        mediaType="$rootMediaType"
+        mediaType="$rootMediaType" systemTags="qemuga"
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName_i_u13" description="Ubuntu13.x Test Image1" 
         format="$rootImageFormat" url="$imageUrl_i_u13" 
-        mediaType="$rootMediaType"
+        mediaType="$rootMediaType" systemTags="qemuga"
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName_i_u14" description="Ubuntu14.x Test Image1" 
         format="$rootImageFormat" url="$imageUrl_i_u14" 
-        mediaType="$rootMediaType"
+        mediaType="$rootMediaType" systemTags="qemuga"
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName_i_u15" description="Ubuntu15.x Test Image1" 
         format="$rootImageFormat" url="$imageUrl_i_u15" 
-        mediaType="$rootMediaType"
+        mediaType="$rootMediaType" systemTags="qemuga"
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName_i_u16" description="Ubuntu16.x Test Image1" 
         format="$rootImageFormat" url="$imageUrl_i_u16" 
-        mediaType="$rootMediaType"
+        mediaType="$rootMediaType" systemTags="qemuga"
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName_i_c6_32" description="Centos6 32bit Test Image1"
         format="$rootImageFormat" url="$imageUrl_i_c6_32"
-        mediaType="$rootMediaType"
+        mediaType="$rootMediaType" systemTags="qemuga"
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName_i_c7_32" description="Centos7 32bit Test Image1"
         format="$rootImageFormat" url="$imageUrl_i_c7_32"
-        mediaType="$rootMediaType"
+        mediaType="$rootMediaType" systemTags="qemuga"
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
