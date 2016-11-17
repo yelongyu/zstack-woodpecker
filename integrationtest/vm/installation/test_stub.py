@@ -397,6 +397,8 @@ def check_installation(ssh_cmd, tmp_file, vm_inv):
     dir_exist = dir_exist[:-1]
     if dir_exist == 'no':
         test_util.test_fail('there is no ZSTACK_HOME')
+    if zstack_home != "/usr/local/zstack/apache-tomcat/webapps/zstack":
+        test_util.test_fail('Expected ZSTACK_HOME:/usr/local/zstack/apache-tomcat/webapps/zstack, but actual ZSTACK_HOME: %s' % zstack_home)
 
     cmd = '%s "/usr/bin/zstack-ctl status" | grep ^zstack.properties | awk \'{print $2}\'' % ssh_cmd
     (process_result, properties_file) = execute_shell_in_process_stdout(cmd, tmp_file)
@@ -410,6 +412,8 @@ def check_installation(ssh_cmd, tmp_file, vm_inv):
     file_exist = file_exist[:-1]
     if file_exist == 'no':
         test_util.test_fail('there is no zstack.properties')
+    if properties_file != "/usr/local/zstack/apache-tomcat/webapps/zstack/WEB-INF/classes/zstack.properties":
+        test_util.test_fail('Expected zstack.properties path:/usr/local/zstack/apache-tomcat/webapps/zstack/WEB-INF/classes/zstack.properties, but actual zstack.properties path: %s' % properties_file)
 
     cmd = '%s "/usr/bin/zstack-ctl status" | grep ^log4j2.xml | awk \'{print $2}\'' % ssh_cmd
     (process_result, properties_file) = execute_shell_in_process_stdout(cmd, tmp_file)
@@ -423,6 +427,8 @@ def check_installation(ssh_cmd, tmp_file, vm_inv):
     file_exist = file_exist[:-1]
     if file_exist == 'no':
         test_util.test_fail('there is no log4j2.xml')
+    if properties_file != "/usr/local/zstack/apache-tomcat/webapps/zstack/WEB-INF/classes/log4j2.xml":
+        test_util.test_fail('Expected log4j2.xml path:/usr/local/zstack/apache-tomcat/webapps/zstack/WEB-INF/classes/log4j2.xml, but actual log4j2.xml path: %s' % properties_file)
 
     cmd = '%s "/usr/bin/zstack-ctl status" | grep ^\'PID file\' | awk \'{print $3}\'' % ssh_cmd
     (process_result, properties_file) = execute_shell_in_process_stdout(cmd, tmp_file)
@@ -436,6 +442,8 @@ def check_installation(ssh_cmd, tmp_file, vm_inv):
     file_exist = file_exist[:-1]
     if file_exist == 'no':
         test_util.test_fail('there is no PID file')
+    if properties_file != "/usr/local/zstack/management-server.pid":
+        test_util.test_fail('Expected PID file path:/usr/local/zstack/management-server.pid, but actual PID file path: %s' % properties_file)
 
     cmd = '%s "/usr/bin/zstack-ctl status" | grep ^\'log file\' | awk \'{print $3}\'' % ssh_cmd
     (process_result, properties_file) = execute_shell_in_process_stdout(cmd, tmp_file)
@@ -449,6 +457,8 @@ def check_installation(ssh_cmd, tmp_file, vm_inv):
     file_exist = file_exist[:-1]
     if file_exist == 'no':
         test_util.test_fail('there is no log file')
+    if properties_file != "/usr/local/zstack/apache-tomcat/logs/management-server.log":
+        test_util.test_fail('Expected log file path:/usr/local/zstack/apache-tomcat/logs/management-server.log, but actual log file path: %s' % properties_file)
 
 def check_zstack_version(ssh_cmd, tmp_file, vm_inv, pkg_version):
     cmd = '%s "/usr/bin/zstack-ctl status" | grep ^version | awk \'{print $2}\'' % ssh_cmd
