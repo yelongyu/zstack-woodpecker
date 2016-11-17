@@ -88,7 +88,7 @@
     </backupStorages>
 
     <images>
-      <image name="$imageName_s" description="Test Image1" 
+<!--      <image name="$imageName_s" description="Test Image1" 
         format="$rootImageFormat" url="$imageUrl_s" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
@@ -118,7 +118,7 @@
         url="$imageUrl_s" platform="Other"
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
-      </image>
+      </image>-->
       <image name="$imageName_i_c6" description="Centos6 Test Image1"
         format="$rootImageFormat" url="$imageUrl_i_c6"
         mediaType="$rootMediaType"
