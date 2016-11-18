@@ -356,6 +356,7 @@ class TestLib(object):
             if not suite_name in suite_dict.keys():
                 suite = etree.SubElement(root, "suite")
                 suite.set("name", "%s" % suite_name)
+                suite.set("path", "%s%s" % (self.test_case_dir, suite_name))
                 if parallel:
                     suite.set("parallel", "%s" % parallel)
                 suite_dict[suite_name] = suite

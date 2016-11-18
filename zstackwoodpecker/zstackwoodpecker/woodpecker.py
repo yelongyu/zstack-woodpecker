@@ -69,6 +69,7 @@ class TestSuite(object):
         self.total_case_num = 0
         self.parallel = 0
         self.test_config = None
+        self.path = None
         
 class TestCase(object):
     SETUP_CASE = 'setup'
@@ -514,7 +515,7 @@ class WoodPecker(object):
                             case.parallel = False
                         if not case.name:
                             #only keep 1 level folder info for case name
-                            case.name = case.path[len(os.path.dirname(suite.setup_case.path))+1:][:-3]
+                            case.name = case.path[len(suite.path)+1:][:-3]
                         case.suite = suite
                         case_name_len = len(case.name)
                         if (c.repeat__ and c.repeat__.isdigit() and (string.atoi(c.repeat__) > 0)):
@@ -578,6 +579,7 @@ class WoodPecker(object):
                 for s in xo.get_child_node_as_list(self.SUITE_TAG):
                     suite = TestSuite()
                     suite.name = s.name_.replace(' ', '_')
+                    suite.path = s.path_
                     suite.id = self.suite_num
                     self.suite_num += 1
                     suite.root_path = os.path.dirname(test_case_list)
