@@ -62,6 +62,7 @@ def test():
 
     img_ops.detach_iso(vm_uuid)
     image.delete()
+    image.expunge()
     test_obj_dict.rm_image(image)
     vm.destroy()
     test_util.test_pass('Migrate Stopped VM Test Success When Attach ISO')
