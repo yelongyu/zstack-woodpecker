@@ -271,7 +271,7 @@ def change_vm_password(vm_uuid, vm_account, vm_password, skip_stopped_vm = None,
     return evt
 
 def reinit_vm(vm_uuid, session_uuid = None):
-    action = api_actions.ReInitVmInstanceAction()
+    action = api_actions.ReimageVmInstanceAction()
     action.vmInstanceUuid = vm_uuid
 
     test_util.action_logger('Reinit [Vm:] %s' % (vm_uuid))
