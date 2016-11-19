@@ -43,17 +43,18 @@ def test():
         if usr not in exist_users:
             test_util.test_logger("un-existed user:%s change vm password" %(usr))
             #if the user is not existed, it should report
-            try:
-                vm_ops.change_vm_password(vm.get_vm().uuid, usr, passwd, skip_stopped_vm = None, session_uuid = None)
-            except Exception,e:
-                test_util.test_logger("unexisted user change vm password exception is %s" %(str(e)))
-                normal_failed_string = "not exist"
-                if normal_failed_string in str(e):
-                    test_util.test_logger("unexisted user return correct, create a the user for it.")
-                    test_stub.create_user_in_vm(vm.get_vm(), usr, passwd)
-                    exist_users.append(usr)
-            else:
-                test_util.test_fail("user not exist in this OS, it should not raise exception, but return a failure.")
+            #try:
+            #    vm_ops.change_vm_password(vm.get_vm().uuid, usr, passwd, skip_stopped_vm = None, session_uuid = None)
+            #except Exception,e:
+            #    test_util.test_logger("unexisted user change vm password exception is %s" %(str(e)))
+            #    normal_failed_string = "not exist"
+            #    if normal_failed_string in str(e):
+            #        test_util.test_logger("unexisted user return correct, create a the user for it.")
+            #else:
+            #    test_util.test_fail("user not exist in this OS, it should not raise exception, but return a failure.")
+
+            test_stub.create_user_in_vm(vm.get_vm(), usr, passwd)
+            exist_users.append(usr)
 
         #When vm is running:
         inv = vm_ops.change_vm_password(vm.get_vm().uuid, usr, passwd, skip_stopped_vm = None, session_uuid = None)
