@@ -451,6 +451,7 @@ class TestLib(object):
                 if suite_item.get('teardownCase'):
                     suite_item.set('teardownCase', \
                             '%s/%s/%s' % (self.test_case_dir, real_suite, suite_item.get('teardownCase')))
+                suite_item.set("path", "%s/%s" % (self.test_case_dir, suite))
                 for case_item in suite_item.getchildren():
                     for exclude_case in self.exclude_case_list:
 			if exclude_case == None:
