@@ -131,5 +131,6 @@
         <case timeout='600'  repeat='1'>snapshot/test_del_revert_sp_simultaneously.py</case>
         <case timeout='400'  repeat='1'>windows/test_windows_vm_multi_data_volumes.py</case>
         <case timeout='9000' repeat='1' noparallel='True'>snapshot/test_change_max_sp_depth_live_vm.py</case>
+        <case timeout='1000' repeat='1' noparallel='True'>vr/test_delete_vr_offering_reboot_vm.py</case>
     </suite>
 </integrationTest>
