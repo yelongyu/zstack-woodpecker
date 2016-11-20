@@ -73,6 +73,7 @@ do_start() {
         chmod a+x $SERVER
         su - vyos -c "nohup $SERVER -type vyos -ip $ETH0_IP -port 9393 -logfile $LOGFILE >$BOOTLOG 2>&1 < /dev/null &"
 	pid=$!
+	iptables -I eth0.local 1 -d $ETH0_IP/32 -p tcp -m comment --comment "eth0.local-testagent" -m tcp --dport 9393 -j RETURN
     else
         chmod a+x $SERVER
         nohup $SERVER -ip 0.0.0.0 -port 9393 -logfile $LOGFILE >$BOOTLOG 2>&1 < /dev/null &

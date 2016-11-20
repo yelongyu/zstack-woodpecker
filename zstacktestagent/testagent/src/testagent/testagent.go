@@ -55,8 +55,8 @@ func main()  {
 	parseCommandOptions()
 	utils.InitLog(options.LogFile, false)
 	loadPlugins()
-	if options.Type == "vyos" {
-		configureFirewall()
-	}
+//	if options.Type == "vyos" {
+//		configureFirewall()
+//	}
 	server.Start()
 }
