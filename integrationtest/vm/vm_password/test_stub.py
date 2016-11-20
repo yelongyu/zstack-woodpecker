@@ -426,8 +426,10 @@ def share_admin_resource(account_uuid_list):
 
     share_list = [root_disk_uuid, data_disk_uuid]
 
-    l3net_uuids = res_ops.get_resource(res_ops.L3_NETWORK).uuid
-    for l3net_uuid in l3net_uuids:
+    #l3net_uuids = res_ops.get_resource(res_ops.L3_NETWORK).uuid
+    l3nets = res_ops.get_resource(res_ops.L3_NETWORK)
+    for l3net in l3nets:
+        l3net_uuid = l3net.uuid
         share_list.append(l3net_uuid)
     acc_ops.share_resources(account_uuid_list, share_list)
 
