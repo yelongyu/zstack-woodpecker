@@ -2560,7 +2560,17 @@ def lib_get_backup_storage_list_by_vm(vm, session_uuid=None):
 
 def lib_create_template_from_volume(volume_uuid, session_uuid=None):
     bss = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid)
-    bs_uuid = bss[random.randint(0, len(bss)-1)].uuid
+    volume = lib_get_volume_by_uuid(volume_uuid)
+    bs_uuid = None
+    if volume.vmInstanceUuid != None:
+        vm = lib_get_vm_by_uuid(volume.vmInstanceUuid)
+        if vm.state == vm_header.RUNNING:
+            for bs in bss:
+                if hasattr(inventory, 'IMAGE_STORE_BACKUP_STORAGE_TYPE') and bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+                    bs_uuid = bs.uuid
+                    break
+    if bs_uuid == None:
+        bs_uuid = bss[random.randint(0, len(bss)-1)].uuid
     #[Inlined import]
     import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
     image = zstack_image_header.ZstackTestImage()
