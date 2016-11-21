@@ -17,8 +17,8 @@ import time
 
 exist_users = ["root"]
 
-users   = ["root",       "_a"            ]
-passwds = ["95_aaapcn",  "_0aIGFDFBBN"   ]
+users   = ["root",       "aa"            ]
+passwds = ["95_aaapcn",  "0_aIGFDFBBN"   ]
 
 vm = None
 
