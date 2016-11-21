@@ -3316,7 +3316,7 @@ def lib_check_vm_pf_rule_exist_in_iptables(pf_rule):
 
     check_string3 = '--dport %s:%s' % (pf_rule.vipPortStart, pf_rule.vipPortEnd)
 
-    check_cmd = "sudo iptables-save| grep -Fe '%s'|grep -Fe '%s'|grep -Fe '%s'" % (check_string1, check_string2, check_string3)
+    check_cmd = "iptables-save| grep -Fe '%s'|grep -Fe '%s'|grep -Fe '%s'" % (check_string1, check_string2, check_string3)
     lib_install_testagent_to_vr_with_vr_vm(vr)
 
     vr_ip = lib_find_vr_mgmt_ip(vr)
