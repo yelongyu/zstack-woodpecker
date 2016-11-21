@@ -25,7 +25,16 @@ class ZstackTestImage(image_header.TestImage):
         '''
         Create image template from Root Volume using CommitVolumeAsImage
         '''
-	if test_lib.lib_check_version_is_mevoco():
+	use_commit = True
+        for bs_uuid in self.image_creation_option.get_backup_storage_uuid_list():
+            bs = lib_get_backup_storage_by_uuid(bs_uuid)
+	    if hasattr(inventory, 'IMAGE_STORE_BACKUP_STORAGE_TYPE'):
+                if bs.type != inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+                    use_commit = False
+            else:
+                    use_commit = False
+
+	if test_lib.lib_check_version_is_mevoco() and use_commit:
             self.image = img_ops.commit_volume_as_image(self.image_creation_option)
         else:
             self.image = img_ops.create_root_volume_template(self.image_creation_option)
