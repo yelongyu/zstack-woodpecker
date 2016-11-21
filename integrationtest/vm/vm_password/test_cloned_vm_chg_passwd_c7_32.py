@@ -17,8 +17,8 @@ import time
 
 exist_users = ["root"]
 
-users   = ["root",      "root",       "_a",          "aa"  ]
-passwds = ["password",  "95_aaapcn",  "_0aIGFDFBBN", "a1_" ]
+users   = ["root",       "_a"           ]
+passwds = ["95_aaapcn",  "_0aIGFDFBBN"  ]
 
 vm = None
 
@@ -30,6 +30,14 @@ vm_names = ['%s-cloned-vm1' % vn_prefix, '%s-cloned-vm2' % vn_prefix]
 in_vm_names = ['%s-twice-cloned-vm1' % vn_prefix, '%s-twice-cloned-vm2' % vn_prefix]
 
 
+def force_vm_auto_boot(vm):
+    cmd = "sed -i \"s/  set timeout=-1/  set timeout=3/g\" /boot/grub2/grub.cfg; sync"
+    ret, output, stderr = ssh.execute(cmd, vm.get_vm().vmNics[0].ip, "root", "password", False, 22)
+    if ret != 0:
+        test_util.test_logger("Force vm auto boot setting failed.")
+
+
+
 def test():
     global vm, exist_users
     test_util.test_dsc('cloned vm change password test')
@@ -37,6 +45,8 @@ def test():
     vm = test_stub.create_vm(vm_name = '1st-created-vm-c7', image_name = "imageName_i_c7_32")
     test_obj_dict.add_vm(vm)
     vm.check()
+
+    force_vm_auto_boot(vm)
 
     test_util.test_logger("change vm password for initial created vm")
     inv = vm_ops.change_vm_password(vm.get_vm().uuid, "root", "password", skip_stopped_vm = None, session_uuid = None)
