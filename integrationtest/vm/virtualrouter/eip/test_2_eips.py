@@ -37,6 +37,8 @@ def test():
         vr1 = test_lib.lib_find_vr_by_vm(temp_vm1.vm)[0]
     else:
         vr1 = vrs[0]
+    if vr1.applianceVmType == "Vyos":
+        test_util.test_skip("Vyos VR does not support single VM multiple EIP")
 
     l3_name = os.environ.get('l3NoVlanNetworkName1')
     vr2_l3_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
@@ -49,6 +51,8 @@ def test():
         vr2 = test_lib.lib_find_vr_by_vm(temp_vm2.vm)[0]
     else:
         vr2 = vrs[0]
+    if vr1.applianceVmType == "Vyos":
+        test_util.test_skip("Vyos VR does not support single VM multiple EIP")
 
     #we do not need temp_vm1 and temp_vm2, since we just use their VRs.
     if temp_vm1:
