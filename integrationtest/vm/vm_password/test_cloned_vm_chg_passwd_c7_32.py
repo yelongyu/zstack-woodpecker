@@ -26,9 +26,11 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
 vn_prefix = 'vm-clone-%s' % time.time()
-vm_names = ['%s-cloned-vm1' % vn_prefix, '%s-cloned-vm2' % vn_prefix]
-in_vm_names = ['%s-twice-cloned-vm1' % vn_prefix, '%s-twice-cloned-vm2' % vn_prefix]
+#vm_names = ['%s-cloned-vm1' % vn_prefix, '%s-cloned-vm2' % vn_prefix]
+#in_vm_names = ['%s-twice-cloned-vm1' % vn_prefix, '%s-twice-cloned-vm2' % vn_prefix]
 
+vm_names = ['%s-cloned-vm1' % vn_prefix]
+in_vm_names = ['%s-twice-cloned-vm1' % vn_prefix]
 
 def force_vm_auto_boot(vm):
     cmd = "sed -i \"s/  set timeout=-1/  set timeout=3/g\" /boot/grub2/grub.cfg; sync"
