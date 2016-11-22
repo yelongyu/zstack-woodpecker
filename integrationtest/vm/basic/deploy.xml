@@ -127,6 +127,9 @@
                 startIp="$ipRangeStartIp" endIp="$ipRangeEndIp"
                 gateway="$ipRangeGateway" 
                 netmask="$ipRangeNetmask" />
+              <networkService provider="SecurityGroup">
+                <serviceType>SecurityGroup</serviceType>
+              </networkService>
             </l3BasicNetwork>
           </l3Networks>
         </l2NoVlanNetwork>
