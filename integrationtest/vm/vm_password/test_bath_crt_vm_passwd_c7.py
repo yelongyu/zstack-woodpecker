@@ -33,7 +33,7 @@ def test():
         
         for i in range(vm_num):
             vm_name = "VM%s" %(str(i))
-            t = threading.Thread(target=create_vm_wrapper, args=('c7-'+vm_name, "imageName_i_c7", root_password))
+            t = threading.Thread(target=create_vm_wrapper, args=('c7-'+vm_name, "batch_test_image", root_password))
             ts.append(t)
             t.start()
 

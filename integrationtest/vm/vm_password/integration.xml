@@ -40,5 +40,7 @@
         <case timeout='2400'  repeat='1' noparallel='True'>test_nml_acct_chg_vm_passwd.py</case>
         <case timeout='2400'  repeat='1' noparallel='True'>test_invalid_passwd_c7.py</case>
         <case timeout='2400'  repeat='1' noparallel='True'>test_add_image_neg_qemuga.py</case>
+        <case timeout='2400'  repeat='1' noparallel='True'>test_bath_crt_vm_passwd_c7.py</case>
+        <case timeout='2400'  repeat='1' noparallel='True'>test_bath_chg_vm_passwd_c7.py</case>
     </suite>
 </integrationTest>

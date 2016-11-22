@@ -67,3 +67,6 @@ imageUrl_i_c7_32 = http://zstack/image/CentOS-7-i386-LiveGNOME-1511.qcow2
 
 test_negative_image = bad-image
 negativeImageUrl = http://zstack/image/zstack-image-1.4.qcow2
+
+batch_test_image = batch-image
+batchImageUrl = http://zstack/image/CentOS7.2_Minimal_40G.qcow2

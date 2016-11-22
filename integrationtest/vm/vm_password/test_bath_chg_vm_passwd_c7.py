@@ -17,7 +17,7 @@ vms  = []
 ts   = []
 invs = []
 
-users   = ["root",      "root",    ]
+users   = ["root",      "root"     ]
 passwds = ["password",  "95_aaapcn"]
 
 
@@ -35,7 +35,7 @@ def test():
         test_util.test_dsc("root_password: \"%s\"" %(root_password))
 
         for i in range(vm_num):
-            vms.append(test_stub.create_vm(vm_name = 'c7-vm', image_name = "imageName_i_c7"))
+            vms.append(test_stub.create_vm(vm_name = 'c7-vm'+str(i), image_name = "batch_test_image"))
         
         for vm in vms:
             t = threading.Thread(target=change_vm_password_wrapper, args=(vm.get_vm().uuid, usr, passwd, skip_stopped_vm = None, session_uuid = None))
