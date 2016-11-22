@@ -64,3 +64,6 @@ imageUrl_i_c6_32 = http://zstack/image/CentOS-6.8-i386-LiveCD.qcow2
 
 imageName_i_c7_32 = centos7-32-installation-test
 imageUrl_i_c7_32 = http://zstack/image/CentOS-7-i386-LiveGNOME-1511.qcow2
+
+test_negative_image = bad-image
+negativeImageUrl = http://zstack/image/zstack-image-1.4.qcow2
