@@ -21,7 +21,12 @@ root_password_list = ["321"]
 
 def create_vm_wrapper(vm_name, image_name, root_password):
     global vms
-    vms.append(test_stub.create_vm(vm_name, image_name, root_password))
+
+    vm = test_stub.create_vm(vm_name=vm_name, image_name=image_name, root_password=root_password)
+    if not vm:
+        test_util.test_fail("failed to create vm")
+    else:
+        vms.append(vm)
 
 
 def test():
@@ -58,6 +63,6 @@ def error_cleanup():
     global vms
 
     for vm in vms:
-    if vm:
-        vm.destroy()
-        vm.expunge()
+        if vm:
+            vm.destroy()
+            vm.expunge()
