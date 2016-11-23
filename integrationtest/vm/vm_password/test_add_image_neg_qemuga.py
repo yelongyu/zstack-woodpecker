@@ -55,7 +55,7 @@ def test():
 
     ret = new_image.add_root_volume_template()
 
-    if !ret:
+    if not ret:
         test_util.test_fail('test add negative image failed.')
     else:
         test_util.test_pass('test add negative image passed.')
