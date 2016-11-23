@@ -61,6 +61,8 @@ def test():
         vr1 = test_lib.lib_find_vr_by_vm(temp_vm1.vm)[0]
     else:
         vr1 = vrs[0]
+    if vr1.applianceVmType == "Vyos":
+        test_util.test_skip("Vyos VR does not support single VM multiple VIP")
 
     #we do not need temp_vm1, since we just use their VRs.
     if temp_vm1:
@@ -77,6 +79,9 @@ def test():
     vm_nic2_uuid = vm_nic2.uuid
     pri_l3_uuid = vm_nic1.l3NetworkUuid
     vr = test_lib.lib_find_vr_by_l3_uuid(pri_l3_uuid)[0]
+    if vr.applianceVmType == "Vyos":
+        test_util.test_skip("Vyos VR does not support single VM multiple VIP")
+
     vr_pub_nic = test_lib.lib_find_vr_pub_nic(vr)
     l3_uuid = vr_pub_nic.l3NetworkUuid
     vip1 = test_stub.create_vip('vip1_2l3s_vm_test', l3_uuid)
