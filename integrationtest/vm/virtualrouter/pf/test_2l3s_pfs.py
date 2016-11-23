@@ -50,6 +50,8 @@ def test():
 
     l3_name = os.environ.get('l3NoVlanNetworkName1')
     vr1 = test_stub.create_vr_vm(test_obj_dict, l3_name)
+    if vr1.applianceVmType == "Vyos":
+        test_util.test_skip("Vyos VR does not support single VM multiple VIP")
 
     vr1_pub_ip = test_lib.lib_find_vr_pub_ip(vr1)
     
@@ -61,6 +63,9 @@ def test():
     vm_nic2_uuid = vm_nic2.uuid
     pri_l3_uuid = vm_nic1.l3NetworkUuid
     vr = test_lib.lib_find_vr_by_l3_uuid(pri_l3_uuid)[0]
+    if vr.applianceVmType == "Vyos":
+        test_util.test_skip("Vyos VR does not support single VM multiple VIP")
+
     vr_pub_nic = test_lib.lib_find_vr_pub_nic(vr)
     l3_uuid = vr_pub_nic.l3NetworkUuid
     vip1 = test_stub.create_vip('vip1_2l3s_vm_test', l3_uuid)
