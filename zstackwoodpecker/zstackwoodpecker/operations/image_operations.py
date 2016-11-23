@@ -67,6 +67,7 @@ def add_root_volume_template(image_creation_option):
     action.bits = image_creation_option.get_bits()
     action.description = image_creation_option.get_description()
     action.format = image_creation_option.get_format()
+    action.systemTags = image_creation_option.get_system_tags().split(',')
     action.url = image_creation_option.get_url()
     action.timeout = image_creation_option.get_timeout()
     test_util.action_logger('Add Root Volume Template from url: %s in [backup Storage:] %s' % (action.url, action.backupStorageUuids))

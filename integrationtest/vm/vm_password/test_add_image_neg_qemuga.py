@@ -26,12 +26,11 @@ def test():
 
     bs_cond = res_ops.gen_query_conditions("status", '=', "Connected")
     bss = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, bs_cond, \
-            None, fields=['uuid'])
+            None)
     if not bss:
         test_util.test_skip("not find available backup storage. Skip test")
 
-    bs_list = test_lib.lib_get_backup_storage_by_uuid(bss[0].uuid)
-    for bs in bs_list:
+    for bs in bss:
         if bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
             break
         if bs.type == inventory.SFTP_BACKUP_STORAGE_TYPE:
@@ -39,12 +38,12 @@ def test():
         if bs.type == inventory.CEPH_BACKUP_STORAGE_TYPE:
             break
     else:
-        vm.destroy()
         test_util.test_skip('Not find image store type backup storage.')
 
     image_option = test_util.ImageOption()
     image_option.set_name('test_negative_image')
     image_option.set_format('qcow2')
+    image_option.set_system_tags('qemuga')
     image_option.set_mediaType('RootVolumeTemplate')
     image_option.set_url(os.environ.get('negativeImageUrl'))
     image_option.set_backup_storage_uuid_list([bss[0].uuid])

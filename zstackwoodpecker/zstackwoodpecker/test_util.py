@@ -732,6 +732,7 @@ class ImageOption(DataOption):
         self.mediaType = None #Template, ISO
         self.format = None #qcow/raw for KVM, simulator, 
         self.system = None #used for system image
+        self.system_tags = None #used for system tags
         super(ImageOption, self).__init__()
 
     def set_root_volume_uuid(self, root_volume_uuid):
@@ -769,6 +770,12 @@ class ImageOption(DataOption):
 
     def get_system(self):
         return self.system
+
+    def set_system_tags(self, system_tags):
+        self.system_tags = system_tags
+
+    def get_system_tags(self):
+        return self.system_tags
 
     def set_url(self, url):
         self.url = url
