@@ -19,9 +19,14 @@ def test():
 
     cmd = 'ntpq -p'
     for host in test_lib.lib_get_all_hosts_from_plan():
-        output = test_lib.lib_execute_ssh_cmd(host.managementIp_, host.username_, host.password_, cmd, timeout=30)
-	if output.find(mn_hostname) < 0:
-            test_util.test_fail('all host expect to use MN ntp service')
+        if host.managementIp_ == mn_hostname:
+            output = test_lib.lib_execute_ssh_cmd(host.managementIp_, host.username_, host.password_, cmd, timeout=30)
+            if output.find(mn_hostname) >= 0:
+                test_util.test_fail('if host and MN are same host, its not expected to use itself')
+        else:
+            output = test_lib.lib_execute_ssh_cmd(host.managementIp_, host.username_, host.password_, cmd, timeout=30)
+            if output.find(mn_hostname) < 0:
+                test_util.test_fail('all host expect to use MN ntp service')
 
     test_util.test_pass('Test Host ntp Pass')
 
