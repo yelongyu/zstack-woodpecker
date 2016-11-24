@@ -45,7 +45,7 @@ def test():
     image_option.set_name('test_negative_qcow2')
     image_option.set_system_tags('qemuga')
     image_option.set_mediaType('RootVolumeTemplate')
-    image_option.set_url(os.environ.get('negativeImageUrl'))
+    image_option.set_url(os.environ.get('negativeQcow2Url'))
     image_option.set_backup_storage_uuid_list([bss[0].uuid])
     image_option.set_timeout(3600*1000)
 
