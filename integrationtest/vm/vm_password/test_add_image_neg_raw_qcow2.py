@@ -52,12 +52,13 @@ def test():
     new_image = zstack_image_header.ZstackTestImage()
     new_image.set_creation_option(image_option)
 
-    ret = new_image.add_root_volume_template()
+    try:
+        new_image.add_root_volume_template()
+    except Exception, e:
+        if "Inject" in str(e):
+            test_util.test_pass('test add negative image passed.')
 
-    if not ret:
-        test_util.test_fail('test add negative image failed.')
-    else:
-        test_util.test_pass('test add negative image passed.')
+    test_util.test_fail('test add negative image failed.')
 
     new_image.delete()
     #new_image.expunge([bss[0].uuid])
