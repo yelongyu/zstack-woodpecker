@@ -4,7 +4,7 @@ import zstackwoodpecker.header.header as zstack_header
 RUNNING = inventory.RUNNING
 STOPPED = inventory.STOPPED
 DESTROYED = inventory.DESTROYED
-SUSPENDED = inventory.SUSPENDED
+SUSPENDED = inventory.PAUSED
 EXPUNGED = 'EXPUNGED'
 
 VOLUME_BANDWIDTH = 'volumeTotalBandwidth'
