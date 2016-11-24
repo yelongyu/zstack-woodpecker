@@ -16,7 +16,7 @@ vm_num = 3
 vms = []
 ts  = []
 
-root_password_list = ["321"]
+root_password_list = ["54321"]
 
 
 def create_vm_wrapper(vm_name, image_name, root_password):
