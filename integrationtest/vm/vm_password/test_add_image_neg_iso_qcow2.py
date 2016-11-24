@@ -41,8 +41,8 @@ def test():
         test_util.test_skip('Not find image store type backup storage.')
 
     image_option = test_util.ImageOption()
-    image_option.set_name('test_negative_image')
-    image_option.set_format('qcow2')
+    image_option.set_format('iso')
+    image_option.set_name('test_negative_qcow2')
     image_option.set_system_tags('qemuga')
     image_option.set_mediaType('RootVolumeTemplate')
     image_option.set_url(os.environ.get('negativeImageUrl'))
@@ -65,5 +65,6 @@ def test():
 #Will be called only if exception happens in test().
 def error_cleanup():
     global new_image
-    #new_image.delete()
+    if new_image:
+        new_image.delete()
     pass

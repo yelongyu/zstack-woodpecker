@@ -68,8 +68,14 @@ imageUrl_i_c6_32 = http://zstack/image/CentOS-6.8-i386-LiveCD.qcow2
 imageName_i_c7_32 = centos7-32-installation-test
 imageUrl_i_c7_32 = http://zstack/image/CentOS-7-i386-LiveGNOME-1511.qcow2
 
-test_negative_image = bad-image
-negativeImageUrl = http://zstack/image/zstack-image-1.4.qcow2
-
 batch_test_image = batch-image
 batchImageUrl = http://zstack/image/CentOS7.2_Minimal_40G.qcow2
+
+test_negative_qcow2 = bad-qcow2
+negativeQcow2Url = http://zstack/image/zstack-image-1.4.qcow2
+
+test_negative_iso = bad-iso
+negativeIsoUrl = http://zstack/image/virtio-win-0.1.126.iso
+
+test_negative_raw = bad-raw
+negativeRawUrl = http://zstack/image/ttylinux.raw
