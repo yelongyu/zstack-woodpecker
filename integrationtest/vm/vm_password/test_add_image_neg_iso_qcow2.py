@@ -1,5 +1,5 @@
 '''
-New Integration Test for adding image with system tag qemuga.
+Negative test for adding image: iso format and qcow2 image
 @author: SyZhao
 '''
 

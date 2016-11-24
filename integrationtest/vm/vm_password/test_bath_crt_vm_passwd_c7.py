@@ -1,5 +1,5 @@
 '''
-Batch creating vm with root password set
+test for batch creating vm with rootpassword set
 @author: SyZhao
 '''
 

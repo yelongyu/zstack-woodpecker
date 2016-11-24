@@ -1,5 +1,5 @@
 '''
-Change VM password
+test for changing vm password
 @author: SyZhao
 '''
 

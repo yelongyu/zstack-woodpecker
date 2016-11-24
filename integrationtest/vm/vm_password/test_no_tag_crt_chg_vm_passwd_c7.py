@@ -1,5 +1,5 @@
 '''
-Test for changing vm password when image without system tag
+test for changing vm password when imported image has no system tag
 @author: SyZhao
 '''
 

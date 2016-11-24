@@ -1,5 +1,5 @@
 '''
-Cloned vm change password
+test for cloned vm changing password
 @author: SyZhao
 '''
 

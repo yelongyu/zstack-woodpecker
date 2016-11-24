@@ -1,5 +1,5 @@
 '''
-Creating KVM VM with password set.
+test for creating vm with password set.
 @author: SyZhao
 '''
 

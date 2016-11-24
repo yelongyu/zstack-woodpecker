@@ -1,5 +1,5 @@
 '''
-Change unexisted user password
+test for changing unexisted user password
 @author: SyZhao
 '''
 

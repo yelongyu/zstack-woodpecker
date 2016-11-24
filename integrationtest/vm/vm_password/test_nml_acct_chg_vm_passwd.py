@@ -1,5 +1,5 @@
 '''
-New Integration Test for changing password by normal account
+test for changing password by normal account
 @author: SyZhao
 '''
 

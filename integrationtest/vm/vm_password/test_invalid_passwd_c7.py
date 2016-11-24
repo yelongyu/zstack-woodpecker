@@ -1,5 +1,5 @@
 '''
-Negative test for changing vm password
+negative test for changing vm password with invalid password
 @author: SyZhao
 '''
 

@@ -1,5 +1,5 @@
 '''
-Creating KVM VM with password set.
+test for batch changing vm password
 @author: SyZhao
 '''
 
