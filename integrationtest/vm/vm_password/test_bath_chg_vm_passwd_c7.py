@@ -40,6 +40,7 @@ def test():
     for (usr,passwd) in zip(users, passwds):
         test_util.test_dsc("user:%s; password:%s" %(usr, passwd))
 
+        vms = []
         for i in range(vm_num):
             vms.append(test_stub.create_vm(vm_name = 'c7-vm'+str(i), image_name = "batch_test_image"))
         
@@ -59,12 +60,13 @@ def test():
             test_util.test_fail("create vm with user:%s password: %s failed", usr, passwd)
 
 
-        vms  = []
         ts   = []
         invs = []
 
         #When vm is stopped:
-        vm.stop()
+        for vm in vms:
+            vm.stop()
+
         for vm in vms:
             t = threading.Thread(target=change_vm_password_wrapper, args=(vm.get_vm().uuid, "root", "password"))
             ts.append(t)
@@ -77,10 +79,10 @@ def test():
             if not inv:
                 test_util.test_fail("Batch change vm password failed")
 
-        vm.start()
-        vm.check()
-
         for vm in vms:
+            vm.start()
+            vm.check()
+
             vm.destroy()
             vm.expunge()
             vm.check()
