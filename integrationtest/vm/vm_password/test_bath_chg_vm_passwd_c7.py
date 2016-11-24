@@ -66,7 +66,7 @@ def test():
         #When vm is stopped:
         vm.stop()
         for vm in vms:
-            t = threading.Thread(target=change_vm_password_wrapper, args=(vm.get_vm().uuid, usr, passwd))
+            t = threading.Thread(target=change_vm_password_wrapper, args=(vm.get_vm().uuid, "root", "password"))
             ts.append(t)
             t.start()
 
