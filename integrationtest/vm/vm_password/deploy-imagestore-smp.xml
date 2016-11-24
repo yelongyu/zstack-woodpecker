@@ -131,6 +131,12 @@
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
+      <image name="$imageName_i_c7_no_tag" description="Centos7 Test Image1 without system tag"
+        format="$rootImageFormat" url="$imageUrl_i_c7"
+        mediaType="$rootMediaType"
+        username="$imageUsername" password="$imagePassword">
+        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+      </image>
       <image name="$imageName_i_u12" description="Ubuntu12.x Test Image1"
         format="$rootImageFormat" url="$imageUrl_i_u12"
         mediaType="$rootMediaType" systemTags="qemuga"

@@ -44,6 +44,7 @@ sshkeyPriKey_file =
 imageName_i_c6 = centos6-installation-test
 imageUrl_i_c6 = http://zstack/image/centos6-test.qcow2
 
+imageName_i_c7_no_tag = centos7-installation-no-system-tag
 imageName_i_c7 = centos7-installation-test
 imageUrl_i_c7 = http://zstack/image/centos7-test.qcow2
 
