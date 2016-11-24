@@ -111,6 +111,7 @@
         <case timeout='600'  repeat='1'>vr/test_vr_ha.py</case>
         <case timeout='100' repeat='1' >host/test_ntp.py</case>
         <case timeout='1000'  repeat='1' noparallel='True'>vr/test_reconnect_vr.py</case>
+	<case timeout='1000'  repeat='1' noparallel='True'>vr/test_stop_start_vr.py</case>
         <case timeout='1000'  repeat='1' noparallel='False'>vr/test_start_vrs_simultaneously.py</case>
         <case timeout='1000' repeat='1' noparallel='True'>host/test_reconnect_host.py</case>
         <case timeout='1200' repeat='1'>account/test_multi_accounts_vm_ops.py</case>
