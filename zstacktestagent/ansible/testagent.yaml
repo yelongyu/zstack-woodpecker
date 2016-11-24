@@ -17,8 +17,6 @@
 
     - name: copy test agent
       copy: src="{{testagentdir}}/target/testagent" dest="{{test_root}}/"
-      notify:
-        - restart testagent
 
     - name: copy test agent service file
       copy: src="{{testagentdir}}/scripts/zstack-testagent" dest="/etc/init.d/" mode=755
