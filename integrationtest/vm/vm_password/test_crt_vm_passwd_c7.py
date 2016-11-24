@@ -12,7 +12,7 @@ import test_stub
 
 vm = None
 
-root_password_list = ["password",  "95_aaapcn",  "_0aIGFDFBBN", "a1_"]
+root_password_list = ["password",  "95_aaapcn",  "_0aIGFDFBBN", "a1_ab"]
 
 def test():
     global vm
