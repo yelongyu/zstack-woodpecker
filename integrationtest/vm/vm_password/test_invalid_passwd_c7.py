@@ -14,8 +14,8 @@ import test_stub
 
 exist_users = ["root"]
 
-users   = [ "_aa", "bc",    "123", "root", "root" ]
-passwds = [ "&ad", "x"*265, "??",  "]",    "."    ] 
+users   = [ "bc",     "root" ]
+passwds = [ "x"*265,  "."    ] 
 
 
 vm = None
