@@ -190,7 +190,12 @@ class Robot(object):
                     robot_vm_uuid = action_obj.get_action()[VM]
                     vm_obj = self.obj_map.get_map(robot_vm_uuid)
                     vm_obj.start()
-                    
+
+#                elif action == TA.migrate_vm:
+#                    robot_vm_uuid = action_obj.get_action()[VM]
+#                    vm_obj = self.obj_map.get_map(robot_vm_uuid)
+#                    vm_obj.migrate()
+                   
                 elif action == TA.reboot_vm:
                     robot_vm_uuid = action_obj.get_action()[VM]
                     vm_obj = self.obj_map.get_map(robot_vm_uuid)
@@ -200,6 +205,11 @@ class Robot(object):
                     robot_vm_uuid = action_obj.get_action()[VM]
                     vm_obj = self.obj_map.get_map(robot_vm_uuid)
                     vm_obj.destroy()
+
+                elif action == TA.expunge_vm:
+                    robot_vm_uuid = action_obj.get_action()[VM]
+                    vm_obj = self.obj_map.get_map(robot_vm_uuid)
+                    vm_obj.expunge()
                     self.test_obj_dict.rm_vm(vm_obj)
 
                 elif action == TA.create_volume:
@@ -233,6 +243,11 @@ class Robot(object):
                     robot_uuid = action_obj.get_action()[IMAGE]
                     obj = self.obj_map.get_map(robot_uuid)
                     obj.delete()
+
+                elif action == TA.expunge_image:
+                    robot_uuid = action_obj.get_action()[IMAGE]
+                    obj = self.obj_map.get_map(robot_uuid)
+                    obj.expunge()
                     self.test_obj_dict.rm_image(obj)
 
                 elif action == TA.attach_volume:
@@ -251,6 +266,11 @@ class Robot(object):
                     robot_volume_uuid = action_obj.get_action()[VOLUME]
                     volume_obj =  self.obj_map.get_map(robot_volume_uuid)
                     volume_obj.delete()
+
+                elif action == TA.expunge_volume:
+                    robot_volume_uuid = action_obj.get_action()[VOLUME]
+                    volume_obj =  self.obj_map.get_map(robot_volume_uuid)
+                    volume_obj.expunge()
                     self.test_obj_dict.rm_volume(volume_obj)
 
                 elif action == TA.create_data_volume_from_image:
