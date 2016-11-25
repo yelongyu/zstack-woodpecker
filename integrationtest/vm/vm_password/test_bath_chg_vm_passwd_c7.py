@@ -64,8 +64,8 @@ def test():
         invs = []
 
         #When vm is stopped:
-        for vm in vms:
-            vm.stop()
+        #for vm in vms:
+        #    vm.stop()
 
         for vm in vms:
             t = threading.Thread(target=change_vm_password_wrapper, args=(vm.get_vm().uuid, "root", "password"))

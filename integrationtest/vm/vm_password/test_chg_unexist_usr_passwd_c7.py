@@ -64,7 +64,7 @@ def test():
             test_util.test_fail("create vm with user:%s password: %s failed", usr, passwd)
         
         #When vm is stopped:
-        vm.stop()
+        #vm.stop()
         inv = vm_ops.change_vm_password(vm.get_vm().uuid, "root", test_stub.original_root_password)
         if not inv:
             test_util.test_fail("recover vm password failed")

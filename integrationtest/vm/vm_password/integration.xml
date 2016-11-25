@@ -1,7 +1,7 @@
 <integrationTest>
     <suite name="vm password test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
         <!--<case timeout='9000' repeat='1' noparallel='True'>snapshot/test_change_max_sp_depth_live_vm.py</case>-->
-        <case timeout='2400'  repeat='1' noparallel='True'>test_crt_vm_passwd_c6.py</case>
+        <!--<case timeout='2400'  repeat='1' noparallel='True'>test_crt_vm_passwd_c6.py</case>
         <case timeout='2400'  repeat='1' noparallel='True'>test_crt_vm_passwd_c7.py</case>
         <case timeout='2400'  repeat='1' noparallel='True'>test_crt_vm_passwd_c6_32.py</case>
         <case timeout='2400'  repeat='1' noparallel='True'>test_crt_vm_passwd_c7_32.py</case>
@@ -9,7 +9,7 @@
         <case timeout='2400'  repeat='1' noparallel='True'>test_crt_vm_passwd_u13.py</case>
         <case timeout='2400'  repeat='1' noparallel='True'>test_crt_vm_passwd_u14.py</case>
         <case timeout='2400'  repeat='1' noparallel='True'>test_crt_vm_passwd_u15.py</case>
-        <case timeout='2400'  repeat='1' noparallel='True'>test_crt_vm_passwd_u16.py</case>
+        <case timeout='2400'  repeat='1' noparallel='True'>test_crt_vm_passwd_u16.py</case>-->
         <case timeout='2400'  repeat='1' noparallel='True'>test_chg_vm_passwd_c6.py</case>
         <case timeout='2400'  repeat='1' noparallel='True'>test_chg_vm_passwd_c7.py</case>
         <case timeout='2400'  repeat='1' noparallel='True'>test_chg_vm_passwd_c6_32.py</case>
@@ -30,8 +30,8 @@
         <case timeout='2400'  repeat='1' noparallel='True'>test_add_image_neg_qcow2_raw.py</case>
         <case timeout='2400'  repeat='1' noparallel='True'>test_add_image_neg_iso_raw.py</case>
         <case timeout='2400'  repeat='1' noparallel='True'>test_add_image_neg_raw_raw.py</case>
-        <case timeout='2400'  repeat='1' noparallel='True'>test_no_tag_crt_chg_vm_passwd_c7.py</case>
-        <case timeout='2400'  repeat='1' noparallel='True'>test_bath_crt_vm_passwd_c7.py</case>
+        <!--<case timeout='2400'  repeat='1' noparallel='True'>test_no_tag_crt_chg_vm_passwd_c7.py</case>
+        <case timeout='2400'  repeat='1' noparallel='True'>test_bath_crt_vm_passwd_c7.py</case>-->
         <case timeout='2400'  repeat='1' noparallel='True'>test_bath_chg_vm_passwd_c7.py</case>
         <case timeout='2400'  repeat='1' noparallel='True'>test_cloned_vm_chg_passwd_c6.py</case>
         <case timeout='2400'  repeat='1' noparallel='True'>test_cloned_vm_chg_passwd_c7.py</case>

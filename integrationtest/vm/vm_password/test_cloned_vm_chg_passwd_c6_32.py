@@ -95,7 +95,7 @@ def test():
                 test_util.test_fail("check login cloned vm with user:%s password: %s failed", usr, passwd)
 
             #When vm is stopped:
-            new_vm.stop()
+            #new_vm.stop()
             test_util.test_logger("vm stopped && change 1st cloned vm password:<%s:%s:%s>" %(new_vm, usr, passwd))
             inv = vm_ops.change_vm_password(new_vm.get_vm().uuid, "root", test_stub.original_root_password)
             if not inv:
@@ -126,7 +126,7 @@ def test():
                     test_util.test_fail("check login cloned in_vm with user:%s password: %s failed", usr, passwd)
 
                 #When vm is stopped:
-                in_new_vm.stop()
+                #in_new_vm.stop()
                 test_util.test_logger("vm stopped && change 2nd cloned vm password:<%s:%s:%s>" %(new_vm, usr, passwd))
                 inv = vm_ops.change_vm_password(in_new_vm.get_vm().uuid, "root", test_stub.original_root_password)
                 if not inv:

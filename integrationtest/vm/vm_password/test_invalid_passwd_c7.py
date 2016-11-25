@@ -67,7 +67,7 @@ def test():
             test_util.test_fail("vm running && the invaild password: %s successfully be set" %(passwd))
 
         #Change VM API && Stopped
-        vm.stop()
+        #vm.stop()
         try:
             vm_ops.change_vm_password(vm.get_vm().uuid, usr, passwd, skip_stopped_vm = None, session_uuid = None)
         except:
