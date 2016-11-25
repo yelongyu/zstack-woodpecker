@@ -76,10 +76,10 @@ def stop_vm(vm_uuid, force=None, session_uuid=None):
     return evt.inventory
 
 def suspend_vm(vm_uuid, session_uuid=None):
-    action = api_actions.SuspendVmInstanceAction()
+    action = api_actions.PauseVmInstanceAction()
     action.uuid = vm_uuid
     action.timeout = 240000
-    test_util.action_logger('Suspend VM [uuid:] %s' % vm_uuid)
+    test_util.action_logger('Pause VM [uuid:] %s' % vm_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
