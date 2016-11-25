@@ -54,7 +54,6 @@
         <case timeout='1200' repeat='1'>sg/test_2vm_egress.py</case>
         <case timeout='1200' repeat='1'>sg/test_2vm_ingress.py</case>
         <case timeout='1000' repeat='1' noparallel='True'>sg/test_detach_l3.py</case>
-        <case timeout='1000'  repeat='1' noparallel='True'>pf/test_2l3s_pfs.py</case>
         <case timeout='800'  repeat='1'>pf/test_attach_pf.py</case>
         <case timeout='800'  repeat='1'>pf/test_delete_pf_after_destroy_vm.py</case>
         <case timeout='800'  repeat='1'>pf/test_del_vip_before_add_pf_to_vm.py</case>
@@ -68,8 +67,6 @@
         <case timeout='800'  repeat='1'>pf/test_udp.py</case>
         <case timeout='800'  repeat='1'>pf/test_vm_ops.py</case>
         <case timeout='800'  repeat='1'>eip/test_2_eips.py</case>
-        <case timeout='1000'  repeat='1' noparallel='True'>eip/test_2l3s_eip_pf.py</case>
-        <case timeout='1000'  repeat='1' noparallel='True'>eip/test_2l3s_eips.py</case>
         <case timeout='800'  repeat='1'>eip/test_attach_eip.py</case>
         <case timeout='800'  repeat='1'>eip/test_create_eip_vm.py</case>
         <case timeout='800'  repeat='1'>eip/test_del_vip_before_add_eip_to_vm.py</case>
