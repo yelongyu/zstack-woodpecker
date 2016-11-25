@@ -75,7 +75,7 @@ def test():
         else:
             test_util.test_fail("vm stopped && the invaild password: %s successfully be set" %(passwd))
 
-        vm.start()
+        #vm.start()
         vm.check()
 
         if not test_lib.lib_check_login_in_vm(vm.get_vm(), "root", "password"):

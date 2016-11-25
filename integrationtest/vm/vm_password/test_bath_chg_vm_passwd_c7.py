@@ -80,7 +80,7 @@ def test():
                 test_util.test_fail("Batch change vm password failed")
 
         for vm in vms:
-            vm.start()
+            #vm.start()
             vm.check()
 
             vm.destroy()

@@ -102,7 +102,7 @@ def test():
             if not inv:
                 test_util.test_fail("recover vm password failed")
 
-            new_vm.start()
+            #new_vm.start()
             new_vm.check()
             
             #test use the cloned vm change password to clone new vm and then change password
@@ -133,7 +133,7 @@ def test():
                 if not inv:
                     test_util.test_fail("recover vm password failed")
 
-                in_new_vm.start()
+                #in_new_vm.start()
                 in_new_vm.check()
                 in_new_vm.destroy()
                 in_new_vm.check()

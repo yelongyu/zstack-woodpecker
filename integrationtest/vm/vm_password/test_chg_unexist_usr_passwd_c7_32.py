@@ -70,7 +70,7 @@ def test():
         if not inv:
             test_util.test_fail("recover vm password failed")
 
-        vm.start()
+        #vm.start()
         vm.check()
 
 
