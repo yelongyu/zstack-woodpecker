@@ -3,6 +3,7 @@ This case can not execute parallelly
 @author: Youyk
 '''
 import os
+import time
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
@@ -88,6 +89,7 @@ def test():
     volume2.expunge()
 
     test_lib.lib_set_provision_storage_rate(original_rate)
+    time.sleep(2)
     ps_res2 = test_lib.lib_get_storage_capacity(zone_uuids = [zone_uuid])
     avail_cap2 = ps_res2.availableCapacity
     if avail_cap2 != avail_cap:
