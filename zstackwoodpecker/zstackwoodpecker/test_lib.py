@@ -4374,15 +4374,14 @@ def lib_create_data_volume_from_image(target_image):
     target_host_uuid = None
     #TODO: need to consider multiple local storage condition, since zs 1.0 only
     # support 1 local storage per host.
-    if len(ps_uuid_list) == 1:
-        ps_uuid = ps_uuid_list[0]
-        ps_inv = lib_get_primary_storage_by_uuid(ps_uuid)
-        if ps_inv.type == inventory.LOCAL_STORAGE_TYPE:
-            #local storage, need to assigne a host
-            target_host_uuid = \
-                    random.choice(lib_find_hosts_by_ps_uuid(ps_uuid)).uuid
+    ps_uuid = random.choice(ps_uuid_list)
+    ps_inv = lib_get_primary_storage_by_uuid(ps_uuid)
+    if ps_inv.type == inventory.LOCAL_STORAGE_TYPE:
+        #local storage, need to assigne a host
+        target_host_uuid = \
+                random.choice(lib_find_hosts_by_ps_uuid(ps_uuid)).uuid
 
-    new_volume = target_image.create_data_volume(ps_uuid_list[0], \
+    new_volume = target_image.create_data_volume(ps_uuid, \
             'new_volume_from_template_%s' % target_image.get_image().uuid, \
             host_uuid = target_host_uuid)
     return new_volume 
