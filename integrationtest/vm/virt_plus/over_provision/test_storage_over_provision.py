@@ -3,6 +3,7 @@ This case can not execute parallelly
 @author: Youyk
 '''
 import os
+import time
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
@@ -91,6 +92,7 @@ def test():
 
         times += 1
 
+    time.sleep(2)
     avail_cap2 = get_storage_capacity(ps_type, host.uuid, ps.uuid)
     if avail_cap2 > data_volume_size:
         test_util.test_fail('Available disk size: %d is still bigger than offering disk size: %d , after creating %d volumes.' % (avail_cap2, data_volume_size, target_volume_num))
