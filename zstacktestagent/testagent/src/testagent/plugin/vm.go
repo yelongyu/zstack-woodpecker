@@ -69,7 +69,7 @@ type VmBlkStatusRsp struct {
 
 const (
 	IS_VM_STOPPED_PATH  = "/vm/isvmstopped"
-	IS_VM_SUSPENDED_PATH  = "/vm/isvmsuspended"
+	IS_VM_PAUSED_PATH  = "/vm/isvmpaused"
 	IS_VM_DESTROYED_PATH  = "/vm/isvmdestroyed"
 	IS_VM_RUNNING_PATH = "/vm/isvmrunning"
 	SSH_GUEST_VM_PATH = "/vm/sshguestvm"
@@ -84,7 +84,7 @@ const (
 const (
 	VM_STATUS_RUNNING = "running"
 	VM_STATUS_STOPPED = "shut off"
-	VM_STATUS_SUSPENDED = "paused"
+	VM_STATUS_PAUSED = "paused"
 	VM_STATUS_DESTROYED = ""
 	VM_EXCEPTION_STATUS = "EXCEPTION_STATUS"
 )
@@ -129,7 +129,7 @@ func vmIsVmSuspendedHandler(ctx *server.CommandContext) interface{} {
 	ctx.GetCommand(cmd)
 	vm_status := make(map[string]bool)
 	for _, uuid := range cmd.Uuids {
-		vm_status[uuid] = isVmStatus(uuid, VM_STATUS_SUSPENDED)
+		vm_status[uuid] = isVmStatus(uuid, VM_STATUS_PAUSED)
 	}
 
 	return VmStatusCheckRsp{ Vm_status: vm_status }
@@ -282,7 +282,7 @@ func vmDeviceQosHandler(ctx *server.CommandContext) interface{} {
 
 func VmEntryPoint() {
 	server.RegisterSyncCommandHandler(IS_VM_STOPPED_PATH, vmIsVmStoppedHandler)
-	server.RegisterSyncCommandHandler(IS_VM_SUSPENDED_PATH, vmIsVmSuspendedHandler)
+	server.RegisterSyncCommandHandler(IS_VM_PAUSED_PATH, vmIsVmSuspendedHandler)
 	server.RegisterSyncCommandHandler(IS_VM_DESTROYED_PATH, vmIsVmDestroyedHandler)
 	server.RegisterSyncCommandHandler(IS_VM_RUNNING_PATH, vmIsVmRunningHandler)
 	server.RegisterSyncCommandHandler(SSH_GUEST_VM_PATH, vmSshGuestVmHandler)

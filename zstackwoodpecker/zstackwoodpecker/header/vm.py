@@ -4,7 +4,7 @@ import zstackwoodpecker.header.header as zstack_header
 RUNNING = inventory.RUNNING
 STOPPED = inventory.STOPPED
 DESTROYED = inventory.DESTROYED
-SUSPENDED = inventory.PAUSED
+PAUSED = inventory.PAUSED
 EXPUNGED = 'EXPUNGED'
 
 VOLUME_BANDWIDTH = 'volumeTotalBandwidth'
@@ -42,7 +42,7 @@ class TestVm(zstack_header.ZstackObject):
         self.state = STOPPED
 
     def suspend(self):
-        self.state = SUSPENDED
+        self.state = PAUSED
 
     def resume(self):
         self.state = RUNNING

@@ -79,7 +79,7 @@ class KvmVmCheckerFactory(checker_header.CheckerFactory):
             #from host.
             #checker_dict[vm_checker.zstack_kvm_vm_stopped_checker] = True
 
-        elif test_obj.state == vm_header.SUSPENDED:
+        elif test_obj.state == vm_header.PAUSED:
             checker_dict[db_checker.zstack_vm_db_checker] = True
             checker_dict[vm_checker.zstack_kvm_vm_suspended_checker] = True
 

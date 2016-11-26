@@ -74,7 +74,7 @@ class ScpInVmRsp(testagent.AgentResponse):
 
          
 IS_VM_STOPPED_PATH = '/vm/isvmstopped'
-IS_VM_SUSPENDED_PATH = '/vm/isvmsuspended'
+IS_VM_PAUSED_PATH = '/vm/isvmpaused'
 IS_VM_DESTROYED_PATH = '/vm/isvmdestroyed'
 IS_VM_RUNNING_PATH = '/vm/isvmrunning'
 DELETE_VM_PATH = '/vm/deletevm'
@@ -89,7 +89,7 @@ VM_DEVICE_QOS = '/vm/deviceqos'
 class VmAgent(testagent.TestAgent):
     VM_STATUS_RUNNING = 'running'
     VM_STATUS_STOPPED = 'shut off'
-    VM_STATUS_SUSPENDED = 'paused'
+    VM_STATUS_PAUSED = 'paused'
     VM_STATUS_DESTROYED = None
     VM_EXCEPTION_STATUS = 'EXCEPTION_STATUS'
     
@@ -97,7 +97,7 @@ class VmAgent(testagent.TestAgent):
         testagent.TestAgentServer.http_server.register_sync_uri(IS_VM_RUNNING_PATH, self.is_vm_running)
         testagent.TestAgentServer.http_server.register_sync_uri(IS_VM_DESTROYED_PATH, self.is_vm_stopped)
         testagent.TestAgentServer.http_server.register_sync_uri(IS_VM_STOPPED_PATH, self.is_vm_stopped)
-        testagent.TestAgentServer.http_server.register_sync_uri(IS_VM_SUSPENDED_PATH, self.is_vm_suspended)
+        testagent.TestAgentServer.http_server.register_sync_uri(IS_VM_PAUSED_PATH, self.is_vm_paused)
         testagent.TestAgentServer.http_server.register_sync_uri(DELETE_VM_PATH, self.delete_vm)
         testagent.TestAgentServer.http_server.register_sync_uri(SSH_GUEST_VM_PATH, self.ssh_in_guest_vm)
         testagent.TestAgentServer.http_server.register_sync_uri(SCP_GUEST_VM_PATH, self.scp_in_guest_vm)
@@ -193,11 +193,11 @@ class VmAgent(testagent.TestAgent):
         return jsonobject.dumps(rsp)
     
     @testagent.replyerror
-    def is_vm_suspended(self, req):
+    def is_vm_paused(self, req):
         cmd = jsonobject.loads(req[http.REQUEST_BODY])
         rsp = VmStatusRsp()
         for uuid in cmd.vm_uuids:
-            rsp.vm_status[uuid] = self._is_vm_status(uuid, self.VM_STATUS_SUSPENDED)
+            rsp.vm_status[uuid] = self._is_vm_status(uuid, self.VM_STATUS_PAUSED)
         return jsonobject.dumps(rsp)
     
     @testagent.replyerror
