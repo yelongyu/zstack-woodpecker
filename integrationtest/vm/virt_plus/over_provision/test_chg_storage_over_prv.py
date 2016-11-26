@@ -40,6 +40,7 @@ def test():
 
     vm = test_stub.create_vm(vm_name = 'storage_over_prs_vm_1', \
                     host_uuid = host.uuid)
+    vm.check()
     test_obj_dict.add_vm(vm)
 
     host_res = test_lib.lib_get_cpu_memory_capacity(host_uuids = [host.uuid])

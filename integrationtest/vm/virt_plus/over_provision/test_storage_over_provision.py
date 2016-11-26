@@ -50,6 +50,7 @@ def test():
     vm = test_stub.create_vm(vm_name = 'storage_over_prs_vm_1', \
                     host_uuid = host.uuid)
     test_obj_dict.add_vm(vm)
+    vm.check()
 
     avail_cap = get_storage_capacity(ps_type, host.uuid, ps.uuid)
     if avail_cap < kept_disk_size:
