@@ -58,7 +58,6 @@
         <case timeout='800'  repeat='1'>pf/test_delete_pf_after_destroy_vm.py</case>
         <case timeout='800'  repeat='1'>pf/test_del_vip_before_add_pf_to_vm.py</case>
         <case timeout='1000'  repeat='1' noparallel='True'>pf/test_multi_pfs_sg_tcp.py</case>
-        <case timeout='800'  repeat='1'>pf/test_multi_rules.py</case>
         <case timeout='800'  repeat='1'>pf/test_pf_after_destroy_vm.py</case>
         <case timeout='1000'  repeat='1' noparallel='True'>pf/test_pf_sg_tcp.py</case>
         <case timeout='1000'  repeat='1' noparallel='True'>pf/test_pfs_tcp_udp_same_vip_ports.py</case>
