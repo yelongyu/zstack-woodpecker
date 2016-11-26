@@ -19,7 +19,7 @@ def test():
     global ldap_server_uuid
     global new_account_uuid
 
-    ldap_server = ldp_ops.add_ldap_server('ldap1', 'ldap for test', os.environ.get('ldapServerUrl2'), os.environ.get('ldapServerBase2'), os.environ.get('ldapServerUsername2'), os.environ.get('ldapServerPassword2'), 'TLS')
+    ldap_server = ldp_ops.add_ldap_server('ldap1', 'ldap for test', os.environ.get('ldapServerUrl'), os.environ.get('ldapServerBase'), os.environ.get('ldapServerUsername'), os.environ.get('ldapServerPassword'), 'TLS')
     ldap_server_uuid = ldap_server.inventory.uuid
     conditions = res_ops.gen_query_conditions('type', '=', 'SystemAdmin')
     account = res_ops.query_resource(res_ops.ACCOUNT, conditions)[0]
@@ -34,14 +34,14 @@ def test():
 
     new_account = acc_ops.create_account('new_account', 'password', 'Normal')
     new_account_uuid = new_account.uuid
-    ldap_account = ldp_ops.bind_ldap_account(os.environ.get('ldapUid2'), new_account.uuid)
+    ldap_account = ldp_ops.bind_ldap_account(os.environ.get('ldapUid'), new_account.uuid)
     ldap_account_uuid = ldap_account.inventory.uuid
-    session_uuid = acc_ops.login_by_ldap(os.environ.get('ldapUid2'), os.environ.get('ldapPassword2'))
+    session_uuid = acc_ops.login_by_ldap(os.environ.get('ldapUid'), os.environ.get('ldapPassword'))
     acc_ops.logout(session_uuid)
 
     get_expected_exception = False
     try:
-        session_uuid = acc_ops.login_by_ldap(os.environ.get('ldapUid2'), os.environ.get('ldapPassword2')+'1')
+        session_uuid = acc_ops.login_by_ldap(os.environ.get('ldapUid'), os.environ.get('ldapPassword')+'1')
         acc_ops.logout(session_uuid)
     except:
         get_excepted_exception = True
@@ -50,7 +50,7 @@ def test():
 
     get_expected_exception = False
     try:
-        session_uuid = acc_ops.login_by_ldap(os.environ.get('ldapUid2'), '')
+        session_uuid = acc_ops.login_by_ldap(os.environ.get('ldapUid'), '')
         acc_ops.logout(session_uuid)
     except:
         get_excepted_exception = True
@@ -59,7 +59,7 @@ def test():
 
     get_expected_exception = False
     try:
-        session_uuid = acc_ops.login_by_ldap(os.environ.get('ldapUid2'), None)
+        session_uuid = acc_ops.login_by_ldap(os.environ.get('ldapUid'), None)
         acc_ops.logout(session_uuid)
     except:
         get_excepted_exception = True
