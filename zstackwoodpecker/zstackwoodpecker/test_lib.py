@@ -3947,8 +3947,16 @@ into robot_test_obj.exclusive_actions_list.')
             test_stage_obj.set_vip_state(test_stage.no_vip_res)
 
     test_util.test_logger("action state_dict: %s" % test_stage_obj.get_state())
-    action_list = ts_header.generate_action_list(test_stage_obj, \
-            excluded_actions_list)
+    if target_image != None and target_image.get_image().mediaType == 'RootVolumeTemplate':
+        if excluded_actions_list == None:
+            excluded_actions_list2 = [TestAction.create_data_vol_template_from_volume]
+        else:
+            excluded_actions_list2 = excluded_actions_list + [TestAction.create_data_vol_template_from_volume]
+        action_list = ts_header.generate_action_list(test_stage_obj, \
+                excluded_actions_list2)
+    else:
+        action_list = ts_header.generate_action_list(test_stage_obj, \
+                excluded_actions_list)
 
     test_util.test_logger('action list: %s' % action_list)
 
