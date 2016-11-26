@@ -19,7 +19,7 @@ def test():
 
     cmd = 'ntpq -p'
     for host in test_lib.lib_get_all_hosts_from_plan():
-        if host.managementIp_ == mn_hostname:
+        if host.managementIp_ == mn.hostName:
             output = test_lib.lib_execute_ssh_cmd(host.managementIp_, host.username_, host.password_, cmd, timeout=30)
             if output.find(mn_hostname) >= 0:
                 test_util.test_fail('if host and MN are same host, its not expected to use itself')
