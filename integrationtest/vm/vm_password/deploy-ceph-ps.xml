@@ -182,7 +182,7 @@
         format="$rootImageFormat" url="$batchImageUrl"
         mediaType="$rootMediaType" systemTags="qemuga"
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
       </image>
     </images>
   
