@@ -115,10 +115,7 @@ class KvmVolumeCheckerFactory(checker_header.CheckerFactory):
             checker_dict[db_checker.zstack_volume_db_checker] = True
             checker_dict[db_checker.zstack_volume_attach_db_checker] = False
             checker_dict[volume_checker.zstack_kvm_volume_attach_checker] = False
-            if test_obj.target_vm == None:
-                checker_dict[volume_checker.zstack_kvm_volume_file_checker] = False
-            else:
-                checker_dict[volume_checker.zstack_kvm_volume_file_checker] = True
+            checker_dict[volume_checker.zstack_kvm_volume_file_checker] = True
 
         elif test_obj.state == volume_header.DELETED:
             checker_dict[db_checker.zstack_volume_db_checker] = True

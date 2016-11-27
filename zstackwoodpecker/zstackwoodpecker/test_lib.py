@@ -4114,7 +4114,11 @@ into robot_test_obj.exclusive_actions_list.')
 
     elif next_action == TestAction.create_data_vol_template_from_volume:
         vm_volumes = target_vm.get_vm().allVolumes
-        vm_target_vol = random.choice(vm_volumes)
+        vm_target_vol_candidates = []
+        for vm_volume in vm_volumes:
+            if vm_volume.status != 'Deleted':
+                vm_target_vol_candidates.append(vm_volume)
+        vm_target_vol = random.choice(vm_target_vol_candidates)
         test_util.test_dsc('Robot Action: %s; on Volume: %s; on VM: %s' % \
             (next_action, vm_target_vol.uuid, target_vm.get_vm().uuid))
         new_data_vol_temp = lib_create_data_vol_template_from_volume(target_vm, vm_target_vol)
