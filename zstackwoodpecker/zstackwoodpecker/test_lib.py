@@ -2441,6 +2441,26 @@ def lib_get_volume_object_host(volume_obj):
             test_util.test_logger('Did not find any primary storage for [volume:] %s. Can not find [host] for this volume. It mostly means the volume is not attached to any VM yet. ' % volume.uuid)
             return None
 
+	if volume.type == 'Data':
+            ps = lib_get_primary_storage_by_uuid(primaryStorageUuid)
+            if ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
+                attached_cluster = ','.join(ps.attachedClusterUuids)
+                conditions = res_ops.gen_query_conditions('clusterUuid', 'in', \
+                        attached_cluster)
+                conditions = res_ops.gen_query_conditions('state', '=', 'Enabled', \
+                        conditions)
+                conditions = res_ops.gen_query_conditions('status', '=', \
+                        'Connected', conditions)
+                
+                host_invs = res_ops.query_resource(res_ops.HOST, conditions)
+        
+                if host_invs:
+                    host = host_invs[0]
+                    test_util.test_logger('Find [host:] %s for volume' % host.uuid)
+                    return host
+                else:
+                    test_util.test_logger('Did not find any host, who attached primary storage: [%s] to hold [volume:] %s.' % (primaryStorageUuid, volume.uuid))
+
         vm = volume_obj.get_target_vm().get_vm()
         host = lib_get_vm_host(vm)
         return host
