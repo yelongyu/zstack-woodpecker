@@ -30,6 +30,9 @@ def test():
 
     vrs = test_lib.lib_find_vr_by_vm(vm1.vm)
     for vr in vrs:
+        if vr.applianceVmType != "Vyos":
+            continue
+
         if ha_ops.get_vm_instance_ha_level(vr.uuid) != "NeverStop":
             test_util.test_fail('vr: %s is not set to HA mode NeverStop.' % vr.uuid)
     vm1.destroy()
