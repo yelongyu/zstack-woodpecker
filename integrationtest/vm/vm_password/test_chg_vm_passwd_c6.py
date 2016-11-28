@@ -14,7 +14,7 @@ import test_stub
 
 exist_users = ["root"]
 
-users   = ["root",      "root",    ]
+users   = ["root",      "root"     ]
 passwds = ["password",  "95_aaapcn"]
 
 vm = None
