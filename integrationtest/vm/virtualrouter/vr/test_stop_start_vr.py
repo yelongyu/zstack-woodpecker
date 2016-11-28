@@ -42,7 +42,7 @@ def test():
         vr1 = vrs[0]
 
     vm_ops.stop_vm(vr1.uuid)
-    if test_lib.lib_get_ha_enable() != 'true':
+    if test_lib.lib_get_ha_enable() != 'true' or vr1.applianceVmType != "Vyos":
         vm_ops.start_vm(vr1.uuid)
 
     vr1_mgmt_ip = test_lib.lib_find_vr_mgmt_ip(vr1)
