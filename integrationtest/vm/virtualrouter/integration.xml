@@ -85,7 +85,6 @@
 	<case timeout='1800' repeat='1'>scheduler/test_create_start_stop_vm_simple_scheduler_past.py</case>
 	<case timeout='1800' repeat='1'>scheduler/test_create_start_stop_vm_simple_repeatcount_scheduler.py</case>
 	<case timeout='1800' repeat='1'>scheduler/test_create_volume_snapshot_simple_scheduler.py</case>
-	<case timeout='1800' repeat='1'>scheduler/test_create_start_stop_vm_cron_scheduler.py</case>
 	<case timeout='1800' repeat='1'>scheduler/test_delete_start_stop_vm_simple_scheduler.py</case>
         <case timeout='1800' repeat='1'>scheduler/test_pause_resume_simple_scheduler_state.py</case>
         <case timeout='1800' repeat='1'>scheduler/test_change_vm_owner_simple_scheduler_state.py</case>
