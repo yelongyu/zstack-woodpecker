@@ -24,11 +24,11 @@ def test():
     vm = test_stub.create_vlan_vm(os.environ.get('l3VlanNetworkName1'))
     start_date = int(time.time())
     schd1 = vm_ops.stop_vm_scheduler(vm.get_vm().uuid, 'simple', 'simple_stop_vm_scheduler', start_date+60, 120, 3)
-    if schd1.stopTime != start_date + 60 + 120 * 3:
-        test_util.test_fail('[scheduler:] %s is expected have stopTime as %s' % (schd1.uuid, start_date + 60 + 120 * 3))
+#    if schd1.stopTime != start_date + 60 + 120 * 3:
+#        test_util.test_fail('[scheduler:] %s is expected have stopTime as %s' % (schd1.uuid, start_date + 60 + 120 * 3))
     schd2 = vm_ops.start_vm_scheduler(vm.get_vm().uuid, 'simple', 'simple_start_vm_scheduler', start_date+120, 120, 2)
-    if schd2.stopTime != start_date + 120 + 120 * 2:
-        test_util.test_fail('[scheduler:] %s is expected have stopTime as %s' % (schd2.uuid, start_date + 120 + 120 * 2))
+#    if schd2.stopTime != start_date + 120 + 120 * 2:
+#        test_util.test_fail('[scheduler:] %s is expected have stopTime as %s' % (schd2.uuid, start_date + 120 + 120 * 2))
 
     test_stub.sleep_util(start_date+58)
     vm.update()
