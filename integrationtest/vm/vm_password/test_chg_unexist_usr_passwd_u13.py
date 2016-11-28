@@ -58,18 +58,14 @@ def test():
 
 
         #When vm is running:
-        inv = vm_ops.change_vm_password(vm.get_vm().uuid, usr, passwd, skip_stopped_vm = None, session_uuid = None)
-        if not inv:
-            test_util.test_fail("change vm password failed")
+        vm_ops.change_vm_password(vm.get_vm().uuid, usr, passwd, skip_stopped_vm = None, session_uuid = None)
 
         if not test_lib.lib_check_login_in_vm(vm.get_vm(), usr, passwd):
             test_util.test_fail("create vm with user:%s password: %s failed", usr, passwd)
         
         #When vm is stopped:
         #vm.stop()
-        inv = vm_ops.change_vm_password(vm.get_vm().uuid, "root", test_stub.original_root_password)
-        if not inv:
-            test_util.test_fail("recover vm password failed")
+        vm_ops.change_vm_password(vm.get_vm().uuid, "root", test_stub.original_root_password)
 
         #vm.start()
         vm.check()

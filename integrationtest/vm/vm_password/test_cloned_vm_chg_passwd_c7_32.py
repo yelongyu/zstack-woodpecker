@@ -51,9 +51,7 @@ def test():
     force_vm_auto_boot(vm)
 
     test_util.test_logger("change vm password for initial created vm")
-    inv = vm_ops.change_vm_password(vm.get_vm().uuid, "root", "password", skip_stopped_vm = None, session_uuid = None)
-    if not inv:
-        test_util.test_fail("change vm password failed")
+    vm_ops.change_vm_password(vm.get_vm().uuid, "root", "password", skip_stopped_vm = None, session_uuid = None)
     backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
     for bs in backup_storage_list:
         if bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
@@ -86,9 +84,7 @@ def test():
 
             #When vm is running:
             test_util.test_logger("vm running && change 1st cloned vm password:<%s:%s:%s>" %(new_vm, usr, passwd))
-            inv = vm_ops.change_vm_password(new_vm.get_vm().uuid, usr, passwd, skip_stopped_vm = None, session_uuid = None)
-            if not inv:
-                test_util.test_fail("change cloned vms password failed")
+            vm_ops.change_vm_password(new_vm.get_vm().uuid, usr, passwd, skip_stopped_vm = None, session_uuid = None)
 
             if not test_lib.lib_check_login_in_vm(new_vm.get_vm(), usr, passwd):
                 test_util.test_fail("check login cloned vm with user:%s password: %s failed", usr, passwd)
@@ -96,9 +92,7 @@ def test():
             #When vm is stopped:
             #new_vm.stop()
             test_util.test_logger("vm stopped && change 1st cloned vm password:<%s:%s:%s>" %(new_vm, usr, passwd))
-            inv = vm_ops.change_vm_password(new_vm.get_vm().uuid, "root", test_stub.original_root_password)
-            if not inv:
-                test_util.test_fail("recover vm password failed")
+            vm_ops.change_vm_password(new_vm.get_vm().uuid, "root", test_stub.original_root_password)
 
             #new_vm.start()
             new_vm.check()
@@ -117,9 +111,7 @@ def test():
                 test_obj_dict.add_vm(in_new_vm)
 
                 test_util.test_logger("vm running && change 2nd cloned vm password:<%s:%s:%s>" %(new_vm, usr, passwd))
-                inv = vm_ops.change_vm_password(in_new_vm.get_vm().uuid, usr, passwd, skip_stopped_vm = None, session_uuid = None)
-                if not inv:
-                    test_util.test_fail("change cloned in_vm password failed")
+                vm_ops.change_vm_password(in_new_vm.get_vm().uuid, usr, passwd, skip_stopped_vm = None, session_uuid = None)
 
                 if not test_lib.lib_check_login_in_vm(in_new_vm.get_vm(), usr, passwd):
                     test_util.test_fail("check login cloned in_vm with user:%s password: %s failed", usr, passwd)
@@ -127,9 +119,7 @@ def test():
                 #When vm is stopped:
                 #in_new_vm.stop()
                 test_util.test_logger("vm stopped && change 2nd cloned vm password:<%s:%s:%s>" %(new_vm, usr, passwd))
-                inv = vm_ops.change_vm_password(in_new_vm.get_vm().uuid, "root", test_stub.original_root_password)
-                if not inv:
-                    test_util.test_fail("recover vm password failed")
+                vm_ops.change_vm_password(in_new_vm.get_vm().uuid, "root", test_stub.original_root_password)
 
                 #in_new_vm.start()
                 in_new_vm.check()

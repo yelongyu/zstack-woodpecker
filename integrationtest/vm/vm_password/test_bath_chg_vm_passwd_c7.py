@@ -26,9 +26,7 @@ def change_vm_password_wrapper(vm_uuid, usr, passwd, skip_stopped_vm = None, ses
     global invs
 
     inv = vm_ops.change_vm_password(vm_uuid, usr, passwd, skip_stopped_vm, session_uuid)
-    if not inv:
-        test_util.test_fail("change vm password failed in wrapper")
-    else:
+    if inv:
         invs.append(inv)
 
 
@@ -52,9 +50,6 @@ def test():
         for t in ts:
             t.join()
 
-        for inv in invs:
-            if not inv:
-                test_util.test_fail("Batch change vm password failed")
 
         if not test_lib.lib_check_login_in_vm(vm.get_vm(), usr, passwd):
             test_util.test_fail("create vm with user:%s password: %s failed", usr, passwd)
@@ -75,9 +70,6 @@ def test():
         for t in ts:
             t.join()
 
-        for inv in invs:
-            if not inv:
-                test_util.test_fail("Batch change vm password failed")
 
         for vm in vms:
             #vm.start()
