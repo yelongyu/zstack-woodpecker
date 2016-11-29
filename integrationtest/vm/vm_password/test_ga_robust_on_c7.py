@@ -58,7 +58,7 @@ def vm_reboot_wrapper(vm, cnt):
 
 def test():
     global vms, ts, invs
-    global ga_process_not_alive_num
+    global ga_process_not_alive_num,keep_vm_num
     test_util.test_dsc('create VM with setting password')
 
     for i in range(vm_num):
