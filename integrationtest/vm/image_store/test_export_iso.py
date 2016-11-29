@@ -26,8 +26,8 @@ def test():
     root_disk_uuid = test_lib.lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName')).uuid                       
     bs_uuid = imagestore_backup_storage.uuid          
     img_option.set_backup_storage_uuid_list([bs_uuid])
-    os.system("echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/test.iso" % (os.environ.get('zstackInstallPath')))
-    img_option.set_url('http://%s:8080/zstack/static/test.iso' % (os.environ.get('node1Ip'))) 
+    os.system("genisoimage -o %s/apache-tomcat/webapps/zstack/static/test.iso /tmp/" % (os.environ.get('zstackInstallPath')))
+    img_option.set_url('http://%s:8080/zstack/static/test.iso' % (os.environ.get('node1Ip')))
     image_inv = img_ops.add_iso_template(img_option)
     image = test_image.ZstackTestImage()
     image.set_image(image_inv)
