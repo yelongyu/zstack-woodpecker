@@ -51,8 +51,9 @@ def test():
             t.join()
 
 
-        if not test_lib.lib_check_login_in_vm(vm.get_vm(), usr, passwd):
-            test_util.test_fail("create vm with user:%s password: %s failed", usr, passwd)
+        for vm in vms:
+            if not test_lib.lib_check_login_in_vm(vm.get_vm(), usr, passwd):
+                test_util.test_fail("create vm with user:%s password: %s failed", usr, passwd)
 
 
         ts   = []
