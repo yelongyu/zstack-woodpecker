@@ -8,6 +8,7 @@ The automated testing framework for project ZStack http://zstack.org
  * `git clone https://github.com/zstackorg/zstack-utility`  
  * `git clone https://github.com/zstackorg/zstack-woodpecker`  
  * `git clone https://github.com/zstackorg/zstack-dashboard`  
+ * `git clone https://github.com/zstackorg/zstack-vyos`  
 
 #2. Manually build ZStack
  * make sure Java JDK and maven are installed.  
