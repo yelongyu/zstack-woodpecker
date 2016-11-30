@@ -43,13 +43,27 @@ def change_vm_password_wrapper(vm_uuid, usr, passwd, skip_stopped_vm = None, ses
 
 
 def vm_reboot_wrapper(vm, cnt):
+    global keep_vm_num
     test_util.test_logger("loop cnt:%d" %(int(cnt)))
     if vm:
-        vm.check()
-        vm.stop()
-        vm.check()
-        vm.start()
-        vm.check()
+        try:
+            vm.check()
+            vm.stop()
+            vm.check()
+            vm.start()
+            vm.check()
+        except:
+            if keep_vm_num >=0:
+                keep_vm_num = keep_vm_num-1
+                vms.remove(vm)
+                vms.append(test_stub.create_vm(vm_name = 'c7-vm-new-'+str(keep_vm_num), image_name = "batch_test_image"))
+                if keep_vm_num >= 0:
+                    continue
+                else:
+                    vm.destroy()
+                    vm.expunge()
+            else:
+                raise
     else:
         test_util.test_logger("vm is null")
 
@@ -87,13 +101,10 @@ def test():
             if check_qemu_ga_is_alive(vm) != 0:
                 keep_vm_num = keep_vm_num-1
                 vms.remove(vm)
-                vms.append(test_stub.create_vm(vm_name = 'c7-vm-new', image_name = "batch_test_image"))
-                if keep_vm_num >= 0:
-                    continue
-                else:
+                vms.append(test_stub.create_vm(vm_name = 'c7-vm-new-'+str(keep_vm_num), image_name = "batch_test_image"))
+                if keep_vm_num < 0:
                     vm.destroy()
                     vm.expunge()
-            
 
     for vm in vms:
         if vm:
