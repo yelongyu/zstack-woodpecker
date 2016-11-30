@@ -1,13 +1,9 @@
 <integrationTest>
     <suite name="zstack installation test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" parallel="1">
         <case timeout="1600" >test_zs_inst_on_cos7.py</case>
-        <case timeout="2400" >test_zs_inst_on_ub14.py</case>
         <case timeout="1600" >upgrade/test_zs_upgd_on_cos7.py</case>
-        <case timeout="2400" >upgrade/test_zs_upgd_on_ub14.py</case>
         <case timeout="1600" >test_m_nodes_inst_on_cos7.py</case>
-        <case timeout="2400" >test_m_nodes_inst_on_ub14.py</case>
         <case timeout="2400" >test_inst_remote_rabbitmq_on_cos7.py</case>
-        <case timeout="2400" >test_inst_remote_rabbitmq_on_ub14.py</case>
         <case timeout="2400" >upgrade/test_zs_upgd_1.2_latest_on_cos7.py</case>
         <case timeout="2400" >upgrade/test_zs_upgd_1.3_latest_on_cos7.py</case>
         <case timeout="2400" >upgrade/test_zs_upgd_1.4_latest_on_cos7.py</case>
