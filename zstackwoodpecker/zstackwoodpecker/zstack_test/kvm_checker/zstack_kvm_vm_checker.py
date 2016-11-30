@@ -294,7 +294,7 @@ class zstack_kvm_vm_dhcp_checker(checker_header.TestChecker):
             guest_ip = nic.ip
             guest_mac = nic.mac
             vr_ip = test_lib.lib_find_vr_mgmt_ip(vr_vm)
-            if vr_vm.hasattr('applianceVmType') and vr_vm.applianceVmType == 'Vyos':
+            if vr_vm.hasattr('applianceVmType') and vr_vm.applianceVmType == 'vrouter':
                 command = '/bin/cli-shell-api showCfg'
             else:
                 command = 'cat /etc/hosts.dhcp'

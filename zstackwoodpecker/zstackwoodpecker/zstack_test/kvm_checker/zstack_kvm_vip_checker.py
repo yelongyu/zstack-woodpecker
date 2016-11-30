@@ -615,7 +615,7 @@ def _find_denied_vr(cluster_uuid, l3_uuid, allowed_vr_uuid_list):
     conditions = res_ops.gen_query_conditions('applianceVmType', '=', 'VirtualRouter', conditions)
     all_virtualrouter_vrs = res_ops.query_resource(res_ops.APPLIANCE_VM, conditions)
     conditions = res_ops.gen_query_conditions('clusterUuid', '=', cluster_uuid)
-    conditions = res_ops.gen_query_conditions('applianceVmType', '=', 'Vyos', conditions)
+    conditions = res_ops.gen_query_conditions('applianceVmType', '=', 'vrouter', conditions)
     all_vyos_vrs = res_ops.query_resource(res_ops.APPLIANCE_VM, conditions)
 
     for vr in all_virtualrouter_vrs+all_vyos_vrs:

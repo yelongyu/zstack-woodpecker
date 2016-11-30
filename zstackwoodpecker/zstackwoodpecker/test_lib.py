@@ -2296,7 +2296,7 @@ def lib_get_all_appliance_vms(session_uuid=None):
 def lib_get_all_vrs(session_uuid=None):
     conditions = res_ops.gen_query_conditions('applianceVmType', '=', 'VirtualRouter')
     vrs_virtualrouter = res_ops.query_resource(res_ops.APPLIANCE_VM, conditions, session_uuid)
-    conditions = res_ops.gen_query_conditions('applianceVmType', '=', 'Vyos')
+    conditions = res_ops.gen_query_conditions('applianceVmType', '=', 'vrouter')
     vrs_vyos = res_ops.query_resource(res_ops.APPLIANCE_VM, conditions, session_uuid)
 
     return vrs_virtualrouter + vrs_vyos
@@ -3345,7 +3345,7 @@ def lib_check_vm_pf_rule_exist_in_iptables(pf_rule):
         check_string2 = '-p udp'
 
 
-    if vr.applianceVmType == 'Vyos':
+    if vr.applianceVmType == 'vrouter':
         check_string3 = '--dports %s:%s' % (pf_rule.vipPortStart, pf_rule.vipPortEnd)
         check_cmd = "sudo iptables-save| grep -Fe '%s'|grep -Fe '%s'|grep -Fe '%s'" % (check_string1, check_string2, check_string3)
     else:

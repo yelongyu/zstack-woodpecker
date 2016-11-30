@@ -162,7 +162,7 @@
                 startIp="$ipRangeManagementStartIp" endIp="$ipRangeManagementEndIp" gateway="$ipRangeManagementGateway"
                 netmask="$ipRangeManagementNetmask" />
               <dns>$DNSServer</dns>
-              <networkService provider="Vyos">
+              <networkService provider="vrouter">
                 <serviceType>DHCP</serviceType>
                 <serviceType>DNS</serviceType>
               </networkService>
@@ -178,7 +178,7 @@
                 startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
                 netmask="$ipRangeNetmask" />
               <dns>$DNSServer</dns>
-              <networkService provider="Vyos">
+              <networkService provider="vrouter">
                 <serviceType>DHCP</serviceType>
                 <serviceType>DNS</serviceType>
               </networkService>
@@ -196,7 +196,7 @@
               <ipRange name="$noVlanIpRangeName1" startIp="$noVlanIpRangeStart1" endIp="$noVlanIpRangeEnd1"
                gateway="$noVlanIpRangeGateway1" netmask="$noVlanIpRangeNetmask1"/>
               <dns>$DNSServer</dns> 
-              <networkService provider="Vyos">
+              <networkService provider="vrouter">
                 <serviceType>DHCP</serviceType>
                 <serviceType>DNS</serviceType>
                 <serviceType>SNAT</serviceType>
@@ -217,7 +217,7 @@
               <ipRange name="$noVlanIpRangeName2" startIp="$noVlanIpRangeStart2" endIp="$noVlanIpRangeEnd2"
                gateway="$noVlanIpRangeGateway2" netmask="$noVlanIpRangeNetmask2"/>
               <dns>$DNSServer</dns> 
-              <networkService provider="Vyos">
+              <networkService provider="vrouter">
                 <serviceType>DHCP</serviceType>
                 <serviceType>DNS</serviceType>
                 <serviceType>SNAT</serviceType>
@@ -233,7 +233,7 @@
               <ipRange name="$vlanIpRangeName1" startIp="$vlanIpRangeStart1" endIp="$vlanIpRangeEnd1"
                gateway="$vlanIpRangeGateway1" netmask="$vlanIpRangeNetmask1"/>
               <dns>$DNSServer</dns> 
-              <networkService provider="Vyos">
+              <networkService provider="vrouter">
                 <serviceType>DHCP</serviceType>
                 <serviceType>DNS</serviceType>
                 <serviceType>SNAT</serviceType>
@@ -254,7 +254,7 @@
               <ipRange name="$vlanIpRangeName2" startIp="$vlanIpRangeStart2" endIp="$vlanIpRangeEnd2"
                gateway="$vlanIpRangeGateway2" netmask="$vlanIpRangeNetmask2"/>
               <dns>$DNSServer</dns> 
-              <networkService provider="Vyos">
+              <networkService provider="vrouter">
                 <serviceType>DHCP</serviceType>
                 <serviceType>DNS</serviceType>
                 <serviceType>SNAT</serviceType>
@@ -275,7 +275,7 @@
               <ipRange name="$vlanIpRangeName3" startIp="$vlanIpRangeStart3" endIp="$vlanIpRangeEnd3"
                gateway="$vlanIpRangeGateway3" netmask="$vlanIpRangeNetmask3"/>
               <dns>$DNSServer</dns> 
-              <networkService provider="Vyos">
+              <networkService provider="vrouter">
                 <serviceType>DHCP</serviceType>
                 <serviceType>DNS</serviceType>
                 <!--<serviceType>SNAT</serviceType>
@@ -296,7 +296,7 @@
               <ipRange name="$vlanIpRangeName4" startIp="$vlanIpRangeStart4" endIp="$vlanIpRangeEnd4"
                gateway="$vlanIpRangeGateway4" netmask="$vlanIpRangeNetmask4"/>
               <dns>$DNSServer</dns> 
-              <networkService provider="Vyos">
+              <networkService provider="vrouter">
                 <serviceType>DHCP</serviceType>
                 <serviceType>DNS</serviceType>
                 <serviceType>SNAT</serviceType>
@@ -320,7 +320,7 @@
                 gateway="$vlanIpRangeGateway5" 
                 netmask="$vlanIpRangeNetmask5"/>
               <dns>$DNSServer</dns> 
-              <networkService provider="Vyos">
+              <networkService provider="vrouter">
                 <serviceType>DHCP</serviceType>
               </networkService>
               <networkService provider="SecurityGroup">
@@ -340,7 +340,7 @@
                 gateway="$vlanIpRangeGateway6" 
                 netmask="$vlanIpRangeNetmask6"/>
               <dns>$DNSServer</dns> 
-              <networkService provider="Vyos">
+              <networkService provider="vrouter">
                 <serviceType>DHCP</serviceType>
                 <serviceType>DNS</serviceType>
                 <serviceType>SNAT</serviceType>
