@@ -53,17 +53,12 @@ def vm_reboot_wrapper(vm, cnt):
             vm.start()
             vm.check()
         except:
-            if keep_vm_num >=0:
-                keep_vm_num = keep_vm_num-1
-                vms.remove(vm)
-                vms.append(test_stub.create_vm(vm_name = 'c7-vm-new-'+str(keep_vm_num), image_name = "batch_test_image"))
-                if keep_vm_num >= 0:
-                    continue
-                else:
-                    vm.destroy()
-                    vm.expunge()
-            else:
-                raise
+            keep_vm_num = keep_vm_num-1
+            vms.remove(vm)
+            vms.append(test_stub.create_vm(vm_name = 'c7-vm-new-'+str(keep_vm_num), image_name = "batch_test_image"))
+            if keep_vm_num < 0:
+                vm.destroy()
+                vm.expunge()
     else:
         test_util.test_logger("vm is null")
 
