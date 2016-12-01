@@ -54,6 +54,7 @@
         <case timeout='1200' repeat='1'>sg/test_2vm_egress.py</case>
         <case timeout='1200' repeat='1'>sg/test_2vm_ingress.py</case>
         <case timeout='1000' repeat='1' noparallel='True'>sg/test_detach_l3.py</case>
+        <case timeout='800'  repeat='1'>pf/test_attach_pf.py</case>
         <case timeout='800'  repeat='1'>pf/test_delete_pf_after_destroy_vm.py</case>
         <case timeout='800'  repeat='1'>pf/test_del_vip_before_add_pf_to_vm.py</case>
         <case timeout='1000'  repeat='1' noparallel='True'>pf/test_multi_pfs_sg_tcp.py</case>
