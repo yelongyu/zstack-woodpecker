@@ -24,6 +24,7 @@ def test():
     test_obj_dict.add_vm(vm)
     vm.check()
 
+    test_lib.lib_execute_command_in_vm(vm.get_vm(), 'systemctl stop qemu-guest-agent')
     test_lib.lib_execute_command_in_vm(vm.get_vm(), 'nohup systemd-inhibit sleep 60 >/dev/null 2>/dev/null </dev/null &')
     current_time = time.time()
     vm_ops.stop_vm(vm.get_vm().uuid)
