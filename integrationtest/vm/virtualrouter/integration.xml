@@ -6,6 +6,7 @@
         <case timeout='800' repeat='1'>novlan/test_create_vm.py</case>
         <case timeout='800' repeat='1'>novlan/test_create_vm_on_specified_ps.py</case>
         <case timeout='800' repeat='1'>novlan/test_stop_vm_force.py</case>
+        <case timeout='800' repeat='1'>novlan/test_stop_vm_qga.py</case>
         <case timeout='800' repeat='1'>novlan/test_reboot_vm.py</case>
         <case timeout='800' repeat='1'>novlan/test_ping_vms.py</case>
         <case timeout='800' repeat='1'>novlan/test_reinit_vm.py</case>
