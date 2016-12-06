@@ -38,9 +38,9 @@ def test():
     vip = test_stub.create_vip('pf_attach_test', l3_uuid)
     test_obj_dict.add_vip(vip)
     vip_uuid = vip.get_vip().uuid
-    
+
     test_util.test_dsc("attach, detach and delete pf for many times")
-    for i in range(1, 450):
+    for i in range(1, 600):
         test_util.test_logger('round %s' % (i))
         starttime = datetime.datetime.now()
         pf_creation_opt1 = PfRule.generate_pf_rule_option(vr1_pub_ip, protocol=inventory.TCP, vip_target_rule=Port.rule5_ports, private_target_rule=Port.rule5_ports, vip_uuid=vip_uuid)
@@ -50,9 +50,17 @@ def test():
         test_pf1.set_creation_option(pf_creation_opt1)
         test_pf1.create()
         vip.attach_pf(test_pf1)
-        test_pf1.attach(vm_nic_uuid1, pf_vm1)
-	test_pf1.detach()
-        test_pf1.delete()
+
+        if i < 201:
+            test_pf1.attach(vm_nic_uuid1, pf_vm1)
+        elif i < 401:
+            test_pf1.attach(vm_nic_uuid1, pf_vm1)
+            test_pf1.detach()
+        else :
+            test_pf1.attach(vm_nic_uuid1, pf_vm1)
+            test_pf1.detach()
+            test_pf1.delete()
+            
         endtime = datetime.datetime.now()
         optime = (endtime - starttime).seconds
         test_util.test_dsc("round %s, pf operation time: %s" % (i, optime))
