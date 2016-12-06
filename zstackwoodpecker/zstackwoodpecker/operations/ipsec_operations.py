@@ -14,7 +14,7 @@ import apibinding.inventory as inventory
 import sys
 import traceback
 
-def create_ipsec_connection(name, l3_uuid, peer_address, auth_key, vip_uuid, policy_mode, description, session_uuid=None):
+def create_ipsec_connection(name, l3_uuid, peer_address, auth_key, vip_uuid, peer_cidrs, policy_mode=None, description=None, session_uuid=None):
     action = api_actions.CreateIPsecConnectionAction()
     action.timeout = 30000
     action.name = name
@@ -22,7 +22,7 @@ def create_ipsec_connection(name, l3_uuid, peer_address, auth_key, vip_uuid, pol
     action.peerAddress = peer_address
     action.authKey = auth_key
     action.vipUuid = vip_uuid
-    action.peerCidrs = peer_address
+    action.peerCidrs = peer_cidrs
     action.policyMode = policy_mode
     action.description = description
     evt = account_operations.execute_action_with_session(action, session_uuid)
