@@ -55,7 +55,21 @@ def test():
     if not test_lib.lib_check_ping(vm1.vm, vm2.vm.vmNics[0].ip):
         test_util.test_fail('vm in mevoco1[MN:%s] could not connect to vm in mevoco2[MN:%s]' % (mevoco1_ip, mevoco2_ip))
 
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
+    if not test_lib.lib_check_ping(vm2.vm, vm1.vm.vmNics[0].ip):
+        test_util.test_fail('vm in mevoco1[MN:%s] could not connect to vm in mevoco2[MN:%s]' % (mevoco2_ip, mevoco1_ip))
+
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco1_ip
     ipsec_ops.delete_ipsec_connection(ipsec1.uuid)
+
+    if test_lib.lib_check_ping(vm1.vm, vm2.vm.vmNics[0].ip, no_exception=True):
+        test_util.test_fail('vm in mevoco1[MN:%s] could still connect to vm in mevoco2[MN:%s] after Ipsec is deleted' % (mevoco1_ip, mevoco2_ip))
+
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
+    if test_lib.lib_check_ping(vm2.vm, vm1.vm.vmNics[0].ip, no_exception=True):
+        test_util.test_fail('vm in mevoco2[MN:%s] could still connect to vm in mevoco1[MN:%s] after Ipsec is deleted' % (mevoco2_ip, mevoco1_ip))
+
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco1_ip
     test_lib.lib_error_cleanup(test_obj_dict1)
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
     ipsec_ops.delete_ipsec_connection(ipsec2.uuid)
