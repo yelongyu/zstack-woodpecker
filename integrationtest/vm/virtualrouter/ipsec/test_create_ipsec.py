@@ -42,6 +42,9 @@ def test():
     test_util.test_dsc('Create ipsec in mevoco2')
     ipsec_ops.create_ipsec_connection('ipsec1', l3_uuid2, vip1.get_vip().ip, '123456', vip2.get_vip().uuid, os.environ['firstZStackCidrs'])
 
+    if not test_lib.lib_check_ping(vm1.vm, vm2.vm.vmNics[0].ip):
+        test_util.test_fail('vm in mevoco1[MN:%s] could not connect to vm in mevoco2[MN:%s]' % (mevoco1_ip, mevoco2_ip))
+
     test_util.test_pass('Create Ipsec Success')
 
 #Will be called only if exception happens in test().
