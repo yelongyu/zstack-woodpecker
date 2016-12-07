@@ -11,14 +11,23 @@ import zstackwoodpecker.operations.ipsec_operations as ipsec_ops
 import os
 
 test_stub = test_lib.lib_get_test_stub()
-test_obj_dict = test_state.TestStateDict()
+test_obj_dict1 = test_state.TestStateDict()
+test_obj_dict2 = test_state.TestStateDict()
+ipsec1 = None
+ipsec2 = None
+mevoco1_ip = None
+mevoco2_ip = None
 
 def test():
+    global mevoco1_ip
+    global mevoco2_ip
+    global ipsec1
+    global ipsec2
     mevoco1_ip = os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP']
     mevoco2_ip = os.environ['secondZStackMnIp']
     test_util.test_dsc('Create test vm in mevoco1')
     vm1 = test_stub.create_vlan_vm(os.environ.get('l3VlanNetworkName1'))
-    test_obj_dict.add_vm(vm1)
+    test_obj_dict1.add_vm(vm1)
     vm1.check()
     pri_l3_uuid1 = vm1.vm.vmNics[0].l3NetworkUuid
     vr1 = test_lib.lib_find_vr_by_l3_uuid(pri_l3_uuid1)[0]
@@ -27,7 +36,7 @@ def test():
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
     test_util.test_dsc('Create test vm in mevoco2')
     vm2 = test_stub.create_vlan_vm(os.environ.get('l3VlanDNATNetworkName'))
-    test_obj_dict.add_vm(vm2)
+    test_obj_dict2.add_vm(vm2)
     vm2.check()
     pri_l3_uuid2 = vm2.vm.vmNics[0].l3NetworkUuid
     vr2 = test_lib.lib_find_vr_by_l3_uuid(pri_l3_uuid2)[0]
@@ -36,18 +45,40 @@ def test():
 
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco1_ip
     test_util.test_dsc('Create ipsec in mevoco1')
-    ipsec_ops.create_ipsec_connection('ipsec1', l3_uuid1, vip2.get_vip().ip, '123456', vip1.get_vip().uuid, os.environ['secondZStackCidrs'])
+    ipsec1 = ipsec_ops.create_ipsec_connection('ipsec1', pri_l3_uuid1, vip2.get_vip().ip, '123456', vip1.get_vip().uuid, [os.environ['secondZStackCidrs']])
 
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
     test_util.test_dsc('Create ipsec in mevoco2')
-    ipsec_ops.create_ipsec_connection('ipsec1', l3_uuid2, vip1.get_vip().ip, '123456', vip2.get_vip().uuid, os.environ['firstZStackCidrs'])
+    ipsec2 = ipsec_ops.create_ipsec_connection('ipsec2', pri_l3_uuid2, vip1.get_vip().ip, '123456', vip2.get_vip().uuid, [os.environ['firstZStackCidrs']])
 
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco1_ip
     if not test_lib.lib_check_ping(vm1.vm, vm2.vm.vmNics[0].ip):
         test_util.test_fail('vm in mevoco1[MN:%s] could not connect to vm in mevoco2[MN:%s]' % (mevoco1_ip, mevoco2_ip))
 
+    ipsec_ops.delete_ipsec_connection(ipsec1.uuid)
+    test_lib.lib_error_cleanup(test_obj_dict1)
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
+    ipsec_ops.delete_ipsec_connection(ipsec2.uuid)
+    test_lib.lib_error_cleanup(test_obj_dict2)
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco1_ip
     test_util.test_pass('Create Ipsec Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
-    global test_obj_dict
-    test_lib.lib_error_cleanup(test_obj_dict)
+    global mevoco1_ip
+    global mevoco2_ip
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco1_ip
+    global test_obj_dict1
+    test_lib.lib_error_cleanup(test_obj_dict1)
+
+    global ipsec1
+    if ipsec1 != None:
+        ipsec_ops.delete_ipsec_connection(ipsec1.uuid)
+
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
+    global test_obj_dict2
+    test_lib.lib_error_cleanup(test_obj_dict2)
+
+    global ipsec2
+    if ipsec2 != None:
+        ipsec_ops.delete_ipsec_connection(ipsec2.uuid)
