@@ -1,0 +1,5 @@
+<integrationTest>
+    <suite name="vm password test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
+        <case timeout='1200'  repeat='1' noparallel='True'>test_chg_vm_passwd_c7.py</case>
+    </suite>
+</integrationTest>
