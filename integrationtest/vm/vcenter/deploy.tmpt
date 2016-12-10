@@ -29,7 +29,7 @@ hostName4 = centos4
 hostIp4 = 10.0.101.23
 
 l2PublicNetworkName = l2-public
-l2PublicNetworkInterface = ens32
+l2PublicNetworkInterface = eth0
 
 l3VlanNetworkName2 = l3VlanNetwork2
 
