@@ -455,3 +455,8 @@ def change_recource_owner(accountUuid, resourceUuid, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
+def get_resource_owner(resourceUuid, session_uuid = None):
+    action = api_actions.GetResourceAccountAction()
+    action.resourceUuids = resourceUuid
+    ret = account_operations.execute_action_with_session(action, session_uuid)
+    return ret.inventories[resourceUuid[0]].uuid
