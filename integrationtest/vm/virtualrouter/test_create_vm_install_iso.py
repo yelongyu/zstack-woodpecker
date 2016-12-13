@@ -80,17 +80,15 @@ def test():
 
     vm.check()
 
-    vm_uuid = vm_inv.uuid
     vm.destroy()
     test_obj_dict.rm_vm(vm)
-    img_ops.detach_iso(vm_uuid)
 
     image.delete()
-#    image.expunge()
     test_obj_dict.rm_image(image)
 
     vol_ops.delete_disk_offering(root_disk_uuid)
     test_obj_dict.rm_disk_offering(data_volume_offering)
+
     vm_ops.delete_instance_offering(new_offering.uuid)
     test_obj_dict.rm_instance_offering(new_offering)
 
