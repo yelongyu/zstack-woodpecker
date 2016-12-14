@@ -9,25 +9,30 @@ The automated testing framework for project ZStack http://zstack.org
  * `git clone https://github.com/zstackorg/zstack-woodpecker`  
  * `git clone https://github.com/zstackorg/zstack-dashboard`  
  * `git clone https://github.com/zstackorg/zstack-vyos`  
+ 
+#2. Install necessary packages and set GOROOT 
+* In CentOS7.2 
+* `yum install java-1.8.0-openjdk-devel.x86_64 java-1.8.0-openjdk.x86_64 ant-1.7.1-13.el6.x86_64  apache-maven-3.2.5 git libffi libffi-devel openssl-devel bc ant sshpass golang -y` 
+* `export GOROOT=/usr/lib/golang`
 
-#2. Manually build ZStack
+#3. Manually build ZStack
  * make sure Java JDK and maven are installed.  
  * `cd /home/zstack; wget -c http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.35/bin/apache-tomcat-7.0.35.zip`  
  * `cd /home/zstack/zstack`  
  * `mvn -DskipTests clean install` (The 1st time build will be a little bitter slow, since it need to download a lot of java libs)  
  * For Mainland developer, please download .m2 packages to /root/.m2/ manually from http://pan.baidu.com/s/1eQvUmWU, before build ZStack
 
-#3. Use woodpecker to build zstack all in one package
+#4. Use woodpecker to build zstack all in one package
  * `cd /home/zstack/zstack-woodpecker/dailytest`  
  * `./zstest.py -b`  
 
-#4. Create local test configuration environment files
+#5. Create local test configuration environment files
  * `cd /home/zstack/zstack-woodpecker/tools/`  
  * `sh copy_test_config_to_local.sh` (it will copy all woodpecker test env configuration files to USER_HOME/.zstackwoodpecker/)  
  * so all local testing configuration (like network, image template url, primary storage nfs root) could be modified locally. It will keep config files uncontaminated in zstack-woodpecker repository
  * edit ~/.zstackwoodpecker/integrationtest/vm/deploy.tmpt and make sure it reflect local environment. Basic and virtualroute test suite will share this config ini file. For detailed config content, it is in every test suite's folder, like ~/.zstackwoodpecker/integrationtest/vm/basic/deploy.xml and ~/.zstackwoodpecker/integrationtest/vm/virtualrouter/deploy.xml . These xml file was not supposed to be changed. The .xml and .tmpt file path was set in test-config.xml file in each test suite's folder, like ~/.zstackwoodpecker/integrationtest/vm/basic/test-config.xml , this file will be used in next step when executing woodpecker test cases. 
 
-#5. Run basic test suite
+#6. Run basic test suite
  * Environment Requirement: 1~2 test machine (1 for mn 1 for host, or mn and host in single machine), step 1~4 on mn, , mysql server and rabbitmq-server should be installed and started up. 
  * `cd /home/zstack/zstack-woodpecker/dailytest`  
  * `./zstest.py -s basic` (or -s b, -s ba, -s basi) (The suite test case list is defined in   `/home/zstack/zstack-woodpecker/integrationtest/vm/basic/integration.xml)`  
@@ -40,17 +45,17 @@ The automated testing framework for project ZStack http://zstack.org
  * In order to test iscsi primary storage, it is needed to edit environment config ini: ~/.zstackwoodpecker/integrationtest/vm/basic/deploy-iscsi-fs.tmpt and when executing basic test suite for iscsi, it is needed to run this command: ./zstest.py -s b -C ~/.zstackwoodpecker/integrationtest/vm/basic/test-config-iscsi-fs-backend.xml
  * for more zstest.py parameters, please using -h option. 
 
-#6. Run virtual route test suite
+#7. Run virtual route test suite
  * Environment Requirement: 1~2 test machine (1 for mn 1 for host, or mn and host in single machine), step 1~4 on mn, mysql server and rabbitmq-server should be installed and started up. 
  * environment config file: ~/.zstackwoodpecker/integrationtest/vm/deploy.tmpt
  * `./zstest.py -s vir`  
 
-#7. Run multi hosts test suite
+#8. Run multi hosts test suite
  * Environment Requirement: 4 or 5 test machines (1 mn + 4 hosts, or 4 hosts with mn on 1 host), execute step 1~4 on mn, mysql server and rabbitmq-server should be installed and started up. 
  * environment config file: ~/.zstackwoodpecker/integrationtest/vm/multihosts/deploy.tmpt
  * `./zstest.py -s multihost`  
 
-#8. Run multi zones test suite
+#9. Run multi zones test suite
  * Environment Requirement: 4 or 5 test machines (1 mn + 4 hosts, or 4 hosts with mn on 1 host), execute step 1~4 on mn, mysql server and rabbitmq-server should be installed and started up. 
  * environment config file: ~/.zstackwoodpecker/integrationtest/vm/multizones/deploy.tmpt
  * `./zstest.py -s multizones`  
