@@ -43,6 +43,7 @@
         <case timeout='700' repeat='1'>volume/test_volume_ops_on_stopped_vm.py</case>
         <case timeout='600' repeat='1'>volume/test_volume_set_wwn.py</case>
         <case timeout='700' repeat='1'>volume/test_crt_vm_from_dvt.py</case>
+        <case timeout='700' repeat='1' noparallel='True'>volume/test_create_large_vm_2_local_ps.py</case>
         <case timeout='800' repeat='1'>template_image/test_crt_temp_image.py</case>
         <case timeout='700' repeat='1'>template_image/test_del_temp_image.py</case>
         <case timeout='1200' repeat='1'>sg/test_ingress.py</case>
