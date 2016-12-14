@@ -41,9 +41,13 @@ def test():
     for vm_name in vms_name:
         vm_list.append(vm_name.name)
 
-    if vm_name_pattern1 not in vm_list and vm_name_pattern2 not in vm_list:
+    test_util.test_logger( ", ".join( [ str(vm_name_tmp) for vm_name_tmp in vm_list ] ) )
+
+    if vm_name_pattern1 not in vm_list:
         test_util.test_fail("newly joined vcenter missing fingerprint vm1, test failed")
 
+    if vm_name_pattern2 not in vm_list:
+        test_util.test_fail("newly joined vcenter missing fingerprint vm2, test failed")
 
     vct_ops.delete_vcenter(vcenter_uuid)
     test_util.test_pass("add && delete vcenter test passed.")
