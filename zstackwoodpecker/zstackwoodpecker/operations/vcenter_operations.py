@@ -21,16 +21,16 @@ def add_vcenter(name, domain_name, username, password, https, zone_uuid, timeout
     action.https = https
     action.zoneUuid = zone_uuid
     action.timeout = timeout
-    test_util.action_logger('Add VCenter [uuid:] %s' % vm_uuid)
+    test_util.action_logger('Add VCenter')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 
 def delete_vcenter(vcenter_uuid, timeout=240000, session_uuid=None):
     action = api_actions.DeleteVCenterAction()
-    action.vcenter_uuid = vcenter_uuid
+    action.uuid = vcenter_uuid
     action.timeout = timeout
-    test_util.action_logger('Delete VCenter [uuid:] %s' % vm_uuid)
+    test_util.action_logger('Delete VCenter [uuid:] %s' % vcenter_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 

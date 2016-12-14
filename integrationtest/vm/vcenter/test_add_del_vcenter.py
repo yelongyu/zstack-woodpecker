@@ -15,7 +15,7 @@ import test_stub
 
 
 vcenter1_name = "VCENTER1"
-vcenter1_domain_name = "172.20.198.211"
+vcenter1_domain_name = "172.20.76.250"
 vcenter1_username = "administrator@vsphere.local"
 vcenter1_password = "Testing%123"
 
@@ -28,10 +28,12 @@ def test():
     global vcenter_uuid
 
     #add vcenter senario1:
-    zone_uuid = res_ops.get_resource(res_ops.ZONE, name = "cluster1")[0].uuid
-    inv = vct_ops.add_vcenter(vcenter1_name, vcenter1_domain_name, vcenter1_username, vcenter1_password, true, zone_uuid)
+    zone_uuid = res_ops.get_resource(res_ops.ZONE)[0].uuid
+    inv = vct_ops.add_vcenter(vcenter1_name, vcenter1_domain_name, vcenter1_username, vcenter1_password, True, zone_uuid)
     vcenter_uuid = inv.uuid
 
+    if vcenter_uuid == None:
+        test_util.test_fail("vcenter_uuid is None")
 
     #insert the basic operations for the newly join in vcenter resourse
     vm_list = []
@@ -41,7 +43,6 @@ def test():
 
     if vm_name_pattern1 not in vm_list and vm_name_pattern2 not in vm_list:
         test_util.test_fail("newly joined vcenter missing fingerprint vm1, test failed")
-
 
 
     vct_ops.delete_vcenter(vcenter_uuid)
