@@ -463,7 +463,7 @@ def get_resource_owner(resourceUuid, session_uuid = None):
 
 def get_task_progress(resourceUuid, processType=None, session_uuid = None):
     action = api_actions.GetTaskProgressAction()
-    action.resourceUuids = resourceUuid
+    action.resourceUuid = resourceUuid
     action.processType = processType
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
