@@ -467,3 +467,11 @@ def get_task_progress(resourceUuid, processType=None, session_uuid = None):
     action.processType = processType
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
+
+def enable_change_vm_password(is_enable, resourceUuid, resourceType, session_uuid = None):
+    action = api_actions.EnableChangeVmPasswordAction()
+    action.enable = is_enable
+    action.resourceUuid = resourceUuid
+    action.resourceType = resourceType
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
