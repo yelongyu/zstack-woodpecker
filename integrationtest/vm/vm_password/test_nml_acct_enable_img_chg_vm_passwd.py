@@ -38,10 +38,10 @@ def test():
     test_account_session = acc_ops.login_by_account(account_name, account_pass)
     test_stub.share_admin_resource([test_account_uuid])
 
-    img_cond = res_ops.gen_query_conditions("name", '=', "imageName_i_c7_no_tag")
+    img_cond = res_ops.gen_query_conditions("name", '=', "centos7-installation-no-system-tag")
     img_inv = res_ops.query_resource_fields(res_ops.IMAGE, img_cond, None)
     image_uuid = img_inv[0].uuid
-    res_ops.enable_change_vm_password(true, image_uuid, 'ImageVO', session_uuid = test_account_session)
+    res_ops.enable_change_vm_password("true", image_uuid, 'ImageVO', session_uuid = test_account_session)
     vm = test_stub.create_vm(vm_name = 'c7-vm-no-sys-tag', image_name = "imageName_i_c7_no_tag", session_uuid = test_account_session)
     vm.check()
 
@@ -71,7 +71,7 @@ def test():
         vm_ops.change_vm_password(vm.get_vm().uuid, "root", test_stub.original_root_password, session_uuid = test_account_session)
         vm.check()
 
-    res_ops.enable_change_vm_password(false, img_inv[0].uuid, 'ImageVO', session_uuid = test_account_session)
+    res_ops.enable_change_vm_password("false", img_inv[0].uuid, 'ImageVO', session_uuid = test_account_session)
     vm.destroy(test_account_session)
     vm.check()
     vm.expunge(test_account_session)
@@ -84,7 +84,7 @@ def test():
 def error_cleanup():
     global vm, test_account_uuid, test_account_session, image_uuid
     if image_uuid:
-        res_ops.enable_change_vm_password(false, image_uuid, 'ImageVO', session_uuid = test_account_session)
+        res_ops.enable_change_vm_password("false", image_uuid, 'ImageVO', session_uuid = test_account_session)
     if vm:
         vm.destroy(test_account_session)
     if test_account_uuid:
