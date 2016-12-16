@@ -9,18 +9,20 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.tag_operations as tag_ops
+import zstackwoodpecker.operations.image_operations as img_ops
 import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
 import test_stub
 
 
 vm = None
 vm2 = None
+image_uuid = None
 
 
 root_password_list = ["ab_0123"]
 
 def test():
-    global vm, vm2
+    global vm, vm2, image_uuid
     test_util.test_dsc('create VM with setting password')
 
     for root_password in root_password_list:
@@ -55,19 +57,31 @@ def test():
         image_option1.set_name('add_tag_vm_to_image')
         image_option1.set_format('qcow2')
         image_option1.set_backup_storage_uuid_list([bs.uuid])
+
+        vm.stop()
         image = img_ops.create_root_volume_template(image_option1)
 
         #create vm by new image
         vm2 = test_stub.create_vm(vm_name = 'c7-vm-add-tag-from-previous-vm', image_name = "add_tag_vm_to_image")
-        vm2.check()
+        if not test_lib.lib_check_login_in_vm(vm2.get_vm(), "root", root_password):
+            test_util.test_fail("create vm with user:%s password: %s failed", "root", root_password)
+
         vm_ops.change_vm_password(vm2.get_vm().uuid, "root", root_password)
+
+        image_uuid = image.uuid
+        if not image_uuid:
+            img_ops.delete_image(image_uuid)
+            img_ops.expunge_image(image_uuid)
+            
 
     test_util.test_pass('add system tag on a no system tag image test passed')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
-    global vm, vm2
-    pass
+    global vm, vm2, image_uuid
+    if not image_uuid:
+        img_ops.delete_image(image_uuid)
+        img_ops.expunge_image(image_uuid)
     if vm:
         vm.destroy()
         vm.expunge()
