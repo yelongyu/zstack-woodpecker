@@ -24,7 +24,7 @@ def test():
     test_util.test_dsc('Test VM disk bandwidth QoS by 20MB')
 
     #unit is KB
-    volume_bandwidth = 25*1024*1024
+    volume_bandwidth = 5*1024*1024
     new_offering = test_lib.lib_create_instance_offering(volume_bandwidth = volume_bandwidth)
 
     new_offering_uuid = new_offering.uuid
