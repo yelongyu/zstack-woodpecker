@@ -113,6 +113,16 @@ def resume_vm(vm_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
+def update_vm(vm_uuid, cpu, memory, session_uuid=None):
+    action = api_actions.UpdateVmInstanceAction()
+    action.uuid = vm_uuid
+    action.cpuCores = cpu
+    action.memory = memory
+    action.timeout = 240000
+    test_util.action_logger('Update VM [uuid:] %s' % vm_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
 def start_vm_scheduler(vm_uuid, type, name, start_time=None, interval=None, repeatCount=None, cron=None, session_uuid=None, timeout=240000):
     action = api_actions.CreateStartVmInstanceSchedulerAction()
     action.vmUuid = vm_uuid
