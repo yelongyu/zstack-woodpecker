@@ -1,6 +1,7 @@
 import os
 import sys
 import traceback
+from pysphere import VIServer
 
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.header.checker as checker_header
@@ -22,21 +23,25 @@ class zstack_vcenter_vm_running_checker(checker_header.TestChecker):
     def check(self):
         super(zstack_vcenter_vm_running_checker, self).check()
         vm = self.test_obj.vm
-        host = test_lib.lib_get_vm_host(vm)
-        test_lib.lib_install_testagent_to_host(host)
-        test_lib.lib_set_vm_host_l2_ip(vm)
-        cmd = vm_plugin.VmStatusCmd()
-        cmd.vm_uuids = [vm.uuid]
-        test_util.test_logger('Check [vm:] %s running status on host [name:] %s [uuid:] %s.' % (vm.uuid, host.name, host.uuid))
-        rspstr = http.json_dump_post(testagent.build_http_path(host.managementIp, vm_plugin.VM_STATUS), cmd)
-        rsp = jsonobject.loads(rspstr)
-        check_result = rsp.vm_status[vm.uuid].strip()
-        if check_result  == vm_plugin.VmAgent.VM_STATUS_RUNNING :
-            test_util.test_logger('Check result: [vm:] %s is RUNNING on [host:] %s .' % (vm.uuid, host.name))
+        host_cond = res_ops.gen_query_conditions("hypervisorType", '=', "ESX")
+        hosts = res_ops.query_resource_fields(res_ops.HOST, host_cond, None)
+        host_ip = hosts[0].managementIp
+        test_util.test_logger('Check [vm:] %s running status on host [name:] %s [uuid:] %s.' % (vm.uuid, hosts[0].name, hosts[0].uuid))
+
+        server = VIServer()
+        server.connect(host_ip, "root", "password")
+        vm_path  = "[datastore1] " + vm.name + "/" + vm.name + ".vmx"
+        #pysf_vm = server.get_vm_by_path("[datastore1] vm-app/vm-app.vmx")
+        pysf_vm = server.get_vm_by_path(vm_path)
+        pysf_vm_real_status = pysf_vm.get_status()
+
+        if pysf_vm_real_status == "POWERED ON" :
+            test_util.test_logger('Check result: [vm:] %s is RUNNING on [host:] %s .' % (vm.uuid, hosts[0].name))
             return self.judge(True)
         else:
-            test_util.test_logger('Check result: [vm:] %s is NOT RUNNING on [host:] %s . ; Expected status: %s ; Actual status: %s' % (vm.uuid, host.name, vm_plugin.VmAgent.VM_STATUS_RUNNING, check_result))
+            test_util.test_logger('Check result: [vm:] %s is NOT RUNNING on [host:] %s . ; Expected status: %s ; Actual status: %s' % (vm.uuid, hosts[0].name, "POWERED ON", pysf_vm_real_status))
             return self.judge(False)
+
 
 class zstack_vcenter_vm_destroyed_checker(checker_header.TestChecker):
     '''check vcenter vm destroyed status. If it is not running and not stopped,
@@ -44,21 +49,26 @@ class zstack_vcenter_vm_destroyed_checker(checker_header.TestChecker):
     def check(self):
         super(zstack_vcenter_vm_destroyed_checker, self).check()
         vm = self.test_obj.vm
-        host = test_lib.lib_get_vm_host(vm)
-        test_lib.lib_install_testagent_to_host(host)
-        test_lib.lib_set_vm_host_l2_ip(vm)
-        cmd = vm_plugin.VmStatusCmd()
-        cmd.vm_uuids = [vm.uuid]
-        test_util.test_logger('Check [vm:] %s status on host [name:] %s [uuid:] %s.' % (vm.uuid, host.name, host.uuid))
-        rspstr = http.json_dump_post(testagent.build_http_path(host.managementIp, vm_plugin.VM_STATUS), cmd)
-        rsp = jsonobject.loads(rspstr)
-        check_result = rsp.vm_status[vm.uuid].strip()
-        if check_result != vm_plugin.VmAgent.VM_STATUS_RUNNING and check_result != vm_plugin.VmAgent.VM_STATUS_STOPPED:
-            test_util.test_logger('Check result: [vm:] %s is DESTROYED on [host:] %s .' % (vm.uuid, host.name))
+        host_cond = res_ops.gen_query_conditions("hypervisorType", '=', "ESX")
+        hosts = res_ops.query_resource_fields(res_ops.HOST, host_cond, None)
+        host_ip = hosts[0].managementIp
+        test_util.test_logger('Check [vm:] %s running status on host [name:] %s [uuid:] %s.' % (vm.uuid, hosts[0].name, hosts[0].uuid))
+
+        server = VIServer()
+        server.connect(host_ip, "root", "password")
+        vm_path  = "[datastore1] " + vm.name + "/" + vm.name + ".vmx"
+        #pysf_vm = server.get_vm_by_path("[datastore1] vm-app/vm-app.vmx")
+        pysf_vm = server.get_vm_by_path(vm_path)
+        pysf_vm_real_status = pysf_vm.get_status()
+
+        #if check_result != vm_plugin.VmAgent.VM_STATUS_RUNNING and check_result != vm_plugin.VmAgent.VM_STATUS_STOPPED:
+        if pysf_vm_real_status == "POWERED OFF" :
+            test_util.test_logger('Check result: [vm:] %s is DESTROYED on [host:] %s .' % (vm.uuid, hosts[0].name))
             return self.judge(True)
         else:
-            test_util.test_logger('Check result: [vm:] %s is NOT DESTROYED on [host:] %s . vm status is: %s' % (vm.uuid, host.name, check_result))
+            test_util.test_logger('Check result: [vm:] %s is NOT DESTROYED on [host:] %s . ; Expected status: %s ; Actual status: %s' % (vm.uuid, hosts[0].name, "POWERED OFF", pysf_vm_real_status))
             return self.judge(False)
+
 
 class zstack_vcenter_vm_stopped_checker(checker_header.TestChecker):
     '''check vcenter vm stopped status. If it is stopped, return self.judge(True). 
@@ -69,50 +79,54 @@ class zstack_vcenter_vm_stopped_checker(checker_header.TestChecker):
         '''
     def check(self):
         super(zstack_vcenter_vm_stopped_checker, self).check()
-
-        return self.judge(self.exp_result)
-
         vm = self.test_obj.vm
-        host = test_lib.lib_get_vm_host(vm)
-        test_lib.lib_install_testagent_to_host(host)
-        test_lib.lib_set_vm_host_l2_ip(vm)
-        cmd = vm_plugin.VmStatusCmd()
-        cmd.vm_uuids = [vm.uuid]
-        test_util.test_logger('Check [vm:] %s stopped status on host [name:] %s [uuid:] %s.' % (vm.uuid, host.name, host.uuid))
-        rspstr = http.json_dump_post(testagent.build_http_path(host.managementIp, vm_plugin.VM_STATUS), cmd)
-        rsp = jsonobject.loads(rspstr)
-        check_result = rsp.vm_status[vm.uuid].strip()
-        if check_result == vm_plugin.VmAgent.VM_STATUS_STOPPED:
-            test_util.test_logger('Check result: [vm:] %s is STOPPED on [host:] %s .' % (vm.uuid, host.name))
+        host_cond = res_ops.gen_query_conditions("hypervisorType", '=', "ESX")
+        hosts = res_ops.query_resource_fields(res_ops.HOST, host_cond, None)
+        host_ip = hosts[0].managementIp
+        test_util.test_logger('Check [vm:] %s running status on host [name:] %s [uuid:] %s.' % (vm.uuid, hosts[0].name, hosts[0].uuid))
+
+        server = VIServer()
+        server.connect(host_ip, "root", "password")
+        vm_path  = "[datastore1] " + vm.name + "/" + vm.name + ".vmx"
+        #pysf_vm = server.get_vm_by_path("[datastore1] vm-app/vm-app.vmx")
+        pysf_vm = server.get_vm_by_path(vm_path)
+        pysf_vm_real_status = pysf_vm.get_status()
+
+        #if check_result == vm_plugin.VmAgent.VM_STATUS_STOPPED:
+        if pysf_vm_real_status == "POWERED OFF" :
+            test_util.test_logger('Check result: [vm:] %s is STOPPED on [host:] %s .' % (vm.uuid, hosts[0].name))
             return self.judge(True)
         else:
-            test_util.test_logger('Check result: [vm:] %s is NOT STOPPED on [host:] %s . ; Expected status: %s ; Actual status: %s' % (vm.uuid, host.name, vm_plugin.VmAgent.VM_STATUS_STOPPED, check_result))
+            test_util.test_logger('Check result: [vm:] %s is NOT STOPPED on [host:] %s . ; Expected status: %s ; Actual status: %s' % (vm.uuid, hosts[0].name, "POWERED OFF", pysf_vm_real_status))
             return self.judge(False)
+
 
 class zstack_vcenter_vm_suspended_checker(checker_header.TestChecker):
     '''check vcenter vm suspended status. If it is suspended, return self.judge(True). 
         If it is not suspended, return self.judge(False)'''
     def check(self):
         super(zstack_vcenter_vm_suspended_checker, self).check()
-
-        return self.judge(self.exp_result)
-
         vm = self.test_obj.vm
-        host = test_lib.lib_get_vm_host(vm)
-        test_lib.lib_install_testagent_to_host(host)
-        test_lib.lib_set_vm_host_l2_ip(vm)
-        cmd = vm_plugin.VmStatusCmd()
-        cmd.vm_uuids = [vm.uuid]
-        test_util.test_logger('Check [vm:] %s suspended status on host [name:] %s [uuid:] %s.' % (vm.uuid, host.name, host.uuid))
-        rspstr = http.json_dump_post(testagent.build_http_path(host.managementIp, vm_plugin.VM_STATUS), cmd)
-        rsp = jsonobject.loads(rspstr)
-        check_result = rsp.vm_status[vm.uuid].strip()
-        if check_result == vm_plugin.VmAgent.VM_STATUS_PAUSED:
-            test_util.test_logger('Check result: [vm:] %s is PAUSED on [host:] %s .' % (vm.uuid, host.name))
+        host_cond = res_ops.gen_query_conditions("hypervisorType", '=', "ESX")
+        hosts = res_ops.query_resource_fields(res_ops.HOST, host_cond, None)
+        host_ip = hosts[0].managementIp
+        test_util.test_logger('Check [vm:] %s running status on host [name:] %s [uuid:] %s.' % (vm.uuid, hosts[0].name, hosts[0].uuid))
+
+        server = VIServer()
+        server.connect(host_ip, "root", "password")
+        vm_path  = "[datastore1] " + vm.name + "/" + vm.name + ".vmx"
+        #pysf_vm = server.get_vm_by_path("[datastore1] vm-app/vm-app.vmx")
+        pysf_vm = server.get_vm_by_path(vm_path)
+        pysf_vm_real_status = pysf_vm.get_status()
+
+        #if check_result == vm_plugin.VmAgent.VM_STATUS_STOPPED:
+        if pysf_vm_real_status == "SUSPENDED" :
+            test_util.test_logger('Check result: [vm:] %s is SUSPENDED on [host:] %s .' % (vm.uuid, hosts[0].name))
             return self.judge(True)
         else:
-            test_util.test_logger('Check result: [vm:] %s is NOT PAUSED on [host:] %s . ; Expected status: %s ; Actual status: %s' % (vm.uuid, host.name, vm_plugin.VmAgent.VM_STATUS_PAUSED, check_result))
+            test_util.test_logger('Check result: [vm:] %s is NOT SUSPENDED on [host:] %s . ; Expected status: %s ; Actual status: %s' % (vm.uuid, hosts[0].name, "SUSPENDED", pysf_vm_real_status))
             return self.judge(False)
+
 
 
 class zstack_vcenter_vm_set_host_vlan_ip(checker_header.TestChecker):
