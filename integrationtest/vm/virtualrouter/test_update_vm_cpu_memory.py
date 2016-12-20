@@ -22,17 +22,17 @@ def test():
     vm_ops.update_vm(vm.get_vm().uuid, None, instance_offering.memorySize * 2)
 
     vm.update()
-    if (vm.get_vm().cpuNum != instance_offering.cpuNum):
-        test_util.test_fail("cpuNum change is not expected to take effect before Vm restart")
-    if (vm.get_vm().memorySize != instance_offering.memorySize):
-        test_util.test_fail("memorySize change is not expected to take effect before Vm restart")
+    if (vm.get_vm().cpuNum != instance_offering.cpuNum * 2):
+        test_util.test_fail("cpuNum is expected to change")
+    if (vm.get_vm().memorySize != instance_offering.memorySize * 2):
+        test_util.test_fail("memorySize is expected to change")
 
     vm.stop()
     vm.update()
-    if (vm.get_vm().cpuNum != instance_offering.cpuNum):
-        test_util.test_fail("cpuNum change is not expected to take effect before Vm restart")
-    if (vm.get_vm().memorySize != instance_offering.memorySize):
-        test_util.test_fail("memorySize change is not expected to take effect before Vm restart")
+    if (vm.get_vm().cpuNum != instance_offering.cpuNum * 2):
+        test_util.test_fail("cpuNum is expected to change")
+    if (vm.get_vm().memorySize != instance_offering.memorySize * 2):
+        test_util.test_fail("memorySize is expected to change")
 
     vm.start()
     if (vm.get_vm().cpuNum != instance_offering.cpuNum * 2):
