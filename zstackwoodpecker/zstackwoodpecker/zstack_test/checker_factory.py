@@ -20,6 +20,7 @@ import zstackwoodpecker.header.snapshot as sp_header
 import zstackwoodpecker.header.load_balancer as lb_header
 import zstackwoodpecker.zstack_test.kvm_checker.kvm_checker_factory as kvm_checker
 import zstackwoodpecker.zstack_test.sim_checker.sim_checker_factory as sim_checker
+import zstackwoodpecker.zstack_test.vcenter_checker.vcenter_checker_factory as vcenter_checker
 import zstackwoodpecker.zstack_test.zstack_checker.zstack_checker_factory as zstack_checker
 import zstackwoodpecker.zstack_test.zstack_test_node as zstack_test_node
 
@@ -98,6 +99,9 @@ class VmCheckerFactory(checker.CheckerFactory):
         if test_lib.lib_is_vm_sim(test_obj.vm):
             return sim_checker.SimVmCheckerFactory().create_checker(test_obj)
 
+        if test_lib.lib_is_vm_vcenter(test_obj.vm):
+            return vcenter_checker.VCenterVmCheckerFactory().create_checker(test_obj)
+
         test_util.test_logger('Did not find checker for Hypervisor type: %s' % test_lib.lib_get_hv_type_of_vm(test_obj.vm))
 
 class VolumeCheckerFactory(checker.CheckerFactory):
@@ -113,6 +117,8 @@ class VolumeCheckerFactory(checker.CheckerFactory):
                 return kvm_checker.KvmVolumeCheckerFactory().create_checker(test_obj)
             if test_lib.lib_is_vm_sim(test_obj.target_vm.vm):
                 return sim_checker.SimVolumeCheckerFactory().create_checker(test_obj)
+            if test_lib.lib_is_vm_vcenter(test_obj.target_vm.vm):
+                return vcenter_checker.VCenterVolumeCheckerFactory().create_checker(test_obj)
 
             test_util.test_logger('Did not find checker for Hypervisor type: %s' % test_lib.lib_get_hv_type_of_vm(test_obj.target_vm.vm))
 
@@ -124,6 +130,9 @@ class ImageCheckerFactory(checker.CheckerFactory):
             return kvm_checker.KvmImageCheckerFactory().create_checker(test_obj)
         if test_lib.lib_is_image_sim(test_obj.image):
             return sim_checker.SimImageCheckerFactory().create_checker(test_obj)
+        if test_lib.lib_is_image_vcenter(test_obj.image):
+            return vcenter_checker.VCenterImageCheckerFactory().create_checker(test_obj)
+
         test_util.test_fail('Did not find checker for Hypervisor type: %s' % test_lib.lib_get_hv_type_of_image(test_obj.image))
 
 class SecurityGroupCheckerFactory(checker.CheckerFactory):

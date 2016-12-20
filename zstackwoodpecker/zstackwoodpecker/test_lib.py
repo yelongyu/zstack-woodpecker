@@ -973,6 +973,12 @@ def lib_is_image_sim(image):
     else:
         return False
 
+def lib_is_image_vcenter(image):
+    if lib_get_hv_type_of_image(image) ==  inventory.HYPERVISOR_TYPE:
+        return True
+    else:
+        return False
+
 #Does VM's hypervisor is KVM.
 def lib_is_vm_kvm(vm):
     if lib_get_hv_type_of_vm(vm) == inventory.KVM_HYPERVISOR_TYPE:
@@ -982,6 +988,12 @@ def lib_is_vm_kvm(vm):
 
 def lib_is_vm_sim(vm):
     if lib_get_hv_type_of_vm(vm) == inventory.SIMULATOR_HYPERVISOR_TYPE:
+        return True
+    else:
+        return False
+
+def lib_is_vm_vcenter(vm):
+    if lib_get_hv_type_of_vm(vm) == inventory.HYPERVISOR_TYPE:
         return True
     else:
         return False
