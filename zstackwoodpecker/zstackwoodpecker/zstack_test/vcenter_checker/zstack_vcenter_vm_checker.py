@@ -1,7 +1,10 @@
 import os
 import sys
 import traceback
-from pysphere import VIServer
+try:
+    from pysphere import VIServer
+except:
+    print 'pysphere not installed'
 
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.header.checker as checker_header
