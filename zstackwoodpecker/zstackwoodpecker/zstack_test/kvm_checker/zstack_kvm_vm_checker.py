@@ -95,8 +95,6 @@ class zstack_kvm_vm_suspended_checker(checker_header.TestChecker):
     def check(self):
         super(zstack_kvm_vm_suspended_checker, self).check()
 
-        return self.judge(self.exp_result)
-
         vm = self.test_obj.vm
         host = test_lib.lib_get_vm_host(vm)
         test_lib.lib_install_testagent_to_host(host)
