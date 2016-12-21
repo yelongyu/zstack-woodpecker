@@ -35,9 +35,10 @@ def create_vm(vm_name='virt-vm', \
 
 
     if not image_name:
-        image_name = os.environ.get('imageName_net') 
-    else:
+        image_name = os.environ.get('imageName_net')
+    elif os.environ.get(image_name):
         image_name = os.environ.get(image_name)
+
     if not l3_name:
         l3_name = os.environ.get('l3PublicNetworkName')
 
@@ -77,9 +78,10 @@ def create_vm_in_vcenter(vm_name='vcenter-vm', \
 
 
     if not image_name:
-        image_name = "MicroCore-Linux.ova" 
-    else:
+        image_name = os.environ.get('imageName_net')
+    elif os.environ.get(image_name):
         image_name = os.environ.get(image_name)
+
     if not l3_name:
         l3_name = os.environ.get('l3PublicNetworkName')
 

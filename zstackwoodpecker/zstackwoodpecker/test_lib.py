@@ -974,7 +974,7 @@ def lib_is_image_sim(image):
         return False
 
 def lib_is_image_vcenter(image):
-    if lib_get_hv_type_of_image(image) ==  inventory.HYPERVISOR_TYPE:
+    if lib_get_hv_type_of_image(image) ==  inventory.VMWARE_HYPERVISOR_TYPE:
         return True
     else:
         return False
@@ -993,7 +993,7 @@ def lib_is_vm_sim(vm):
         return False
 
 def lib_is_vm_vcenter(vm):
-    if lib_get_hv_type_of_vm(vm) == inventory.HYPERVISOR_TYPE:
+    if lib_get_hv_type_of_vm(vm) == inventory.VMWARE_HYPERVISOR_TYPE:
         return True
     else:
         return False
