@@ -5,6 +5,9 @@
         <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_check_exist_template.py</case>
         <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_check_exist_network.py</case>
         <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_vm_create.py</case>
+        <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_vm_suspend.py</case>
+        <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_vm_reboot.py</case>
         <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_vm_start_stop.py</case>
+        <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_vm_delete.py</case>
     </suite>
 </integrationTest>

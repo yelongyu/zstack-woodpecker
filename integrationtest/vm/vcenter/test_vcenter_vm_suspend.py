@@ -1,5 +1,5 @@
 '''
-test for vm start and stop in newly add vcenter
+test for vm suspend in newly add vcenter
 @author: SyZhao
 '''
 
@@ -34,21 +34,17 @@ def test():
     if vcenter_uuid == None:
         test_util.test_fail("vcenter_uuid is None")
 
-    vm = test_stub.create_vm_in_vcenter(vm_name = 'vm-start-stop-test', image_name = "MicroCore-Linux.ova", l3_name = "L3-251-net1")
+    vm = test_stub.create_vm_in_vcenter(vm_name = 'vm-suspend-test', image_name = "MicroCore-Linux.ova", l3_name = "L3-251-net1")
     vm.check()
 
-    vm.stop()
+    vm.suspend()
     vm.check()
 
-    vm.start()
+    vm.resume()
     vm.check()
-
-    vm.destroy()
-    vm.check()
-    vm.expunge()
 
     vct_ops.delete_vcenter(vcenter_uuid)
-    test_util.test_pass("vm start and stop of vcenter test passed.")
+    test_util.test_pass("vm suspend of vcenter test passed.")
 
 
 
