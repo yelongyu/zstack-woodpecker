@@ -20,6 +20,7 @@
         <case timeout="400" >test_crt_vm_with_volume.py</case> 
         <case timeout="400" >test_vm_securitygroup.py</case> 
         <case timeout="120" >test_create_iso_vm.py</case>
+        <case timeout="120" >test_detach_iso_vm.py</case>
         <case timeout="120" >account/test_multi_accounts_cli_login.py</case>
         <case timeout="120" >account/test_multi_users_cli_login.py</case>
         <case timeout="120" >account/test_crt_vm_by_normal_account.py</case>
