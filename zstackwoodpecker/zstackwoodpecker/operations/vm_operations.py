@@ -288,42 +288,38 @@ def reinit_vm(vm_uuid, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def set_vm_nic_qos(vm_uuid, nic_uuid, outboundBandwidth=None, inboundBandwidth=None, session_uuid = None):
+def set_vm_nic_qos(nic_uuid, outboundBandwidth=None, inboundBandwidth=None, session_uuid = None):
     action = api_actions.SetVmNicQosAction()
-    action.vmUuid = vm_uuid
     action.vmNicUuid = nic_uuid
     action.outboundBandwidth = outboundBandwidth
     actoin.inboundBandwidth = inboundBandwidth
 
-    test_util.action_logger('SetVmNicQos [Vm:] %s' % (vm_uuid))
+    test_util.action_logger('SetVmNicQos [nic:] %s' % (nic_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def get_vm_nic_qos(vm_uuid, nic_uuid, session_uuid = None):
+def get_vm_nic_qos(nic_uuid, session_uuid = None):
     action = api_actions.GetVmNicQosAction()
-    action.vmUuid = vm_uuid
     action.vmNicUuid = nic_uuid
 
-    test_util.action_logger('GetVmNicQos [Vm:] %s' % (vm_uuid))
+    test_util.action_logger('GetVmNicQos [nic:] %s' % (nic_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def set_vm_disk_qos(vm_uuid, volume_uuid, volumeBandwidth=None, volumeIOPS=None, session_uuid = None):
+def set_vm_disk_qos(volume_uuid, volumeBandwidth=None, volumeIOPS=None, session_uuid = None):
     action = api_actions.SetVmDiskQosAction()
-    action.vmUuid = vm_uuid
     action.volumeUuid = volume_uuid
     action.volumeBandwidth = volumeBandwidth
     actoin.volumeIOPS = volumeIOPS
 
-    test_util.action_logger('SetVmDiskQos [Vm:] %s' % (vm_uuid))
+    test_util.action_logger('SetVmDiskQos [volume:] %s' % (volume_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def get_vm_disk_qos(vm_uuid, volume_uuid, session_uuid = None):
+def get_vm_disk_qos(volume_uuid, session_uuid = None):
     action = api_actions.GetVmDiskQosAction()
-    action.vmUuid = vm_uuid
     action.volumeUuid = volume_uuid
 
-    test_util.action_logger('GetVmDiskQos [Vm:] %s' % (vm_uuid))
+    test_util.action_logger('GetVmDiskQos [volume:] %s' % (volume_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
