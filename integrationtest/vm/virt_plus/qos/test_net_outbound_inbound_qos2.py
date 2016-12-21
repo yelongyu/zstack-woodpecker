@@ -42,35 +42,20 @@ def test():
             instance_offering_uuid = new_offering.uuid)
     test_obj_dict.add_vm(vm2)
     vm2.check()
-    test_util.test_logger("shuang11")
     vm2_inv = vm2.get_vm()
-    test_util.test_logger("shuang12")
     vm2_ip = vm2_inv.vmNics[0].ip
-    test_util.test_logger("shuang13")
 
     test_stub.make_ssh_no_password(vm2_inv)
-    test_util.test_logger("shuang14")
-    test_util.test_logger("shuang15")
     test_stub.copy_key_file(vm1_inv)
-    test_util.test_logger("shuang16")
     test_stub.copy_key_file(vm2_inv)
-    test_util.test_logger("shuang17")
     test_stub.create_test_file(vm1_inv, net_bandwidth)
-    test_util.test_logger("shuang18")
     test_stub.create_test_file(vm2_inv, net_bandwidth)
-    test_util.test_logger("shuang19")
     l3_name = os.environ.get('l3VlanNetworkName1')
-    test_util.test_logger("shuang20")
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
-    test_util.test_logger("shuang21")
     vm1.add_nic(l3_net_uuid)
-    test_util.test_logger("shuang22")
     vm2.add_nic(l3_net_uuid)
-    test_util.test_logger("shuang23")
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null'
-    test_util.test_logger("shuang24")
     cmd = "pkill dhclient"
-    test_util.test_logger("shuang25")
     os.system("%s %s %s" % (ssh_cmd, vm1_ip, cmd))
     os.system("%s %s %s" % (ssh_cmd, vm2_ip, cmd))
     cmd = "dhclient eth1"
