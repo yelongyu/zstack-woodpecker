@@ -307,3 +307,23 @@ def get_vm_nic_qos(vm_uuid, nic_uuid, session_uuid = None):
     test_util.action_logger('GetVmNicQos [Vm:] %s' % (vm_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
+
+def set_vm_disk_qos(vm_uuid, volume_uuid, volumeBandwidth=None, volumeIOPS=None, session_uuid = None):
+    action = api_actions.SetVmDiskQosAction()
+    action.vmUuid = vm_uuid
+    action.volumeUuid = volume_uuid
+    action.volumeBandwidth = volumeBandwidth
+    actoin.volumeIOPS = volumeIOPS
+
+    test_util.action_logger('SetVmDiskQos [Vm:] %s' % (vm_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def get_vm_disk_qos(vm_uuid, volume_uuid, session_uuid = None):
+    action = api_actions.GetVmDiskQosAction()
+    action.vmUuid = vm_uuid
+    action.volumeUuid = volume_uuid
+
+    test_util.action_logger('GetVmDiskQos [Vm:] %s' % (vm_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
