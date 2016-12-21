@@ -131,7 +131,7 @@ def create_test_file(vm_inv, bandwidth):
     if  execute_shell_in_process(cmd, timeout) != 0:
         test_util.test_fail('test file is not created')
 
-def test_scp_vm_outbound_speed(vm_inv, bandwidth):
+def test_scp_vm_outbound_speed(vm_inv, bandwidth, raise_exception = True):
     '''
     bandwidth unit is KB
     '''
@@ -147,13 +147,16 @@ def test_scp_vm_outbound_speed(vm_inv, bandwidth):
 
     scp_time = end_time - start_time
     if scp_time < TEST_TIME:
+        if not raise_exception:
+            test_util.test_logger('network outbound QOS test file failed, since the scp time: %d is smaller than the expected test time: %d. It means the bandwidth limitation: %d KB/s is not effect. ' % (scp_time, TEST_TIME, bandwidth))
+            return False
         test_util.test_fail('network outbound QOS test file failed, since the scp time: %d is smaller than the expected test time: %d. It means the bandwidth limitation: %d KB/s is not effect. ' % (scp_time, TEST_TIME, bandwidth))
     else:
         test_util.test_logger('network outbound QOS test file pass, since the scp time: %d is bigger than the expected test time: %d. It means the bandwidth limitation: %d KB/s is effect. ' % (scp_time, TEST_TIME, bandwidth))
 
     return True
 
-def test_scp_vm_inbound_speed(vm_inv, bandwidth):
+def test_scp_vm_inbound_speed(vm_inv, bandwidth, raise_exception = True):
     '''
     bandwidth unit is KB
     '''
@@ -175,6 +178,9 @@ def test_scp_vm_inbound_speed(vm_inv, bandwidth):
 
     scp_time = end_time - start_time
     if scp_time < TEST_TIME:
+        if not raise_exception:
+            test_util.test_logger('network inbound QOS test file failed, since the scp time: %d is smaller than the expected test time: %d. It means the bandwidth limitation: %d KB/s is not effect. ' % (scp_time, TEST_TIME, bandwidth))
+            return False
         test_util.test_fail('network inbound QOS test file failed, since the scp time: %d is smaller than the expected test time: %d. It means the bandwidth limitation: %d KB/s is not effect. ' % (scp_time, TEST_TIME, bandwidth))
     else:
         test_util.test_logger('network inbound QOS test file pass, since the scp time: %d is bigger than the expected test time: %d. It means the bandwidth limitation: %d KB/s is effect. ' % (scp_time, TEST_TIME, bandwidth))

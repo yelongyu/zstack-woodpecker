@@ -37,6 +37,9 @@ def test():
     vm_inv = vm.get_vm()
     test_stub.make_ssh_no_password(vm_inv)
     test_stub.test_scp_vm_inbound_speed(vm_inv, net_bandwidth)
+    test_stub.create_test_file(vm_inv, net_bandwidth)
+    if test_stub.test_scp_vm_outbound_speed(vm_inv, net_bandwidth, raise_exception=False):
+        test_util.test_fail('VM network Outbound is not expected to be limited when only inbound qos is set')
     vm_ops.delete_instance_offering(new_offering_uuid)
     test_lib.lib_robot_cleanup(test_obj_dict)
 
