@@ -287,3 +287,23 @@ def reinit_vm(vm_uuid, session_uuid = None):
     test_util.action_logger('Reinit [Vm:] %s' % (vm_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
+
+def set_vm_nic_qos(vm_uuid, nic_uuid, outboundBandwidth=None, inboundBandwidth=None, session_uuid = None):
+    action = api_actions.SetVmNicQosAction()
+    action.vmUuid = vm_uuid
+    action.vmNicUuid = nic_uuid
+    action.outboundBandwidth = outboundBandwidth
+    actoin.inboundBandwidth = inboundBandwidth
+
+    test_util.action_logger('SetVmNicQos [Vm:] %s' % (vm_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def get_vm_nic_qos(vm_uuid, nic_uuid, session_uuid = None):
+    action = api_actions.GetVmNicQosAction()
+    action.vmUuid = vm_uuid
+    action.vmNicUuid = nic_uuid
+
+    test_util.action_logger('GetVmNicQos [Vm:] %s' % (vm_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
