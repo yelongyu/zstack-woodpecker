@@ -38,6 +38,9 @@ def find_mevoco_log_folder_name():
 
 def test():
     global MEVOCO_LOG_FOLDER, MEVOCO_LOG_PATH
+    if not test_lib.lib_check_version_is_mevoco():
+        MEVOCO_LOG_FOLDER = r"collect-log-zstack_*"
+	MEVOCO_LOG_FOLDER_PATTERN = "collect-log-zstack"
 
     #Step1: clean env below TEMPT_FOLDER and run collect log
     retVal = os.system(" cd " + TEMPT_FOLDER  + "; rm -rf " + MEVOCO_LOG_FOLDER + "; zstack-ctl collect_log")
