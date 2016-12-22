@@ -58,12 +58,17 @@ def create_vm(vm_name='virt-vm', \
 
     vm_creation_option = test_util.VmOption()
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
-    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    l3_names = l3_name.split(',')
+    print 'shuang: %s' % (l3_names)
+    l3_net_uuids = []
+    for l3_n in l3_names:
+        l3_net_uuid = test_lib.lib_get_l3_by_name(l3_n).uuid
+        l3_net_uuids.append(l3_net_uuid)
     if not instance_offering_uuid:
 	instance_offering_name = os.environ.get('instanceOfferingName_s')
         instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(instance_offering_name).uuid
 
-    vm_creation_option.set_l3_uuids([l3_net_uuid])
+    vm_creation_option.set_l3_uuids(l3_net_uuids)
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
     vm_creation_option.set_name(vm_name)
