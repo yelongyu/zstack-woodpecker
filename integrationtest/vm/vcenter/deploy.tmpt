@@ -28,6 +28,9 @@ hostIp3 = 10.0.101.22
 hostName4 = centos4
 hostIp4 = 10.0.101.23
 
+serverName2 = mevoco2
+serverIp2 = 10.0.101.25
+
 l2PublicNetworkName = l2-public
 l2PublicNetworkInterface = eth0
 
