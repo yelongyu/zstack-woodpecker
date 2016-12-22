@@ -43,8 +43,8 @@ def test():
         test_lib.lib_robot_cleanup(test_obj_dict)
         test_util.test_fail('Create Windows VM with Multi Data volumes Test Fail')
 
-    time.sleep(120)
     vm_ip = vm.get_vm().vmNics[0].ip
+    test_lib.lib_wait_target_up(vm_ip, '23', 240)
     vm_username = os.environ.get('winImageUsername')
     vm_password = os.environ.get('winImagePassword')
     tn=telnetlib.Telnet(vm_ip)
@@ -67,8 +67,8 @@ def test():
         test_lib.lib_robot_cleanup(test_obj_dict)
         test_util.test_fail('Reboot Windows VM with Multi Data volumes fail')
 
-    time.sleep(120)
     vm_ip = vm.get_vm().vmNics[0].ip
+    test_lib.lib_wait_target_up(vm_ip, '23', 240)
     vm_username = os.environ.get('winImageUsername')
     vm_password = os.environ.get('winImagePassword')
     tn=telnetlib.Telnet(vm_ip)
