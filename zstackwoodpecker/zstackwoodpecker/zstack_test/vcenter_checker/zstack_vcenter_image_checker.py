@@ -13,6 +13,8 @@ import zstacktestagent.plugins.vm as vm_plugin
 import zstacktestagent.plugins.host as host_plugin
 import zstacktestagent.testagent as testagent
 import apibinding.inventory as inventory
+import zstacklib.utils.ssh as ssh
+
 
 class zstack_vcenter_image_file_checker(checker_header.TestChecker):
     '''check vcenter image file existencex . If it is in backup storage, 
@@ -23,6 +25,13 @@ class zstack_vcenter_image_file_checker(checker_header.TestChecker):
         backupStorages = image.backupStorageRefs
         bs_one = backupStorages[0]
         bs = test_lib.lib_get_backup_storage_by_uuid(bs_one.backupStorageUuid)
+
+        #cmd="sshpass -p password ssh root@172.20.198.175 \"ls /vmfs/volumes/datastore1/MicroCore-Linux.ova\""
+        #ret, output, stderr = ssh.execute(cmd, vm.get_vm().vmNics[0].ip, "root", "password", False, 22)
+        #if ret != 0:
+        #    test_util.test_fail("generate 5GB big file failed")
+
+
         if bs.type == inventory.SFTP_BACKUP_STORAGE_TYPE:
             self.judge(test_lib.lib_check_backup_storage_image_file(image))
 

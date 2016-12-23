@@ -1,5 +1,5 @@
 '''
-test for checking if vm exist in newly add vcenter
+test for vcenter sync of vm start and stop
 @author: SyZhao
 '''
 
@@ -20,71 +20,102 @@ vcenter1_domain_name = "172.20.76.251"
 vcenter1_username = "administrator@vsphere.local"
 vcenter1_password = "Testing%123"
 
-vcenter_uuid = None
+vcenter_uuid1 = None
+vcenter_uuid2 = None
 
-def shadow_create_vm():
-    """
-    This function is to execute a create vm on another remote woodpecker, 
-    which also attached the same vcenter.
-    """
+mevoco1_ip = None
+mevoco2_ip = None
 
-    shadow_vm_ip = os.environ.get('serverIp2')
-    cmd = "cd /home/%s/zstack-woodpecker/dailytest/ && python ./zstest.py -c vcenter/remote_vm_create.py" %(shadow_vm_ip)
-    ret, output, stderr = ssh.execute(cmd, shadow_vm_ip, "root", "password", False, 22)
-    if ret != 0:
-        test_util.test_fail("remote create vm failed: output:%s; stderr:%s" %(output, stderr))
-
-
-def shadow_delete_vm():
-    """
-    This function is to execute a delete the vm named "vm-crt-via-rmt-mevoco" on another remote woodpecker, 
-    which also attached the same vcenter.
-    """
-
-    shadow_vm_ip = os.environ.get('serverIp2')
-    cmd = "cd /home/%s/zstack-woodpecker/dailytest/ && python ./zstest.py -c vcenter/remote_vm_delete.py" %(shadow_vm_ip)
-    ret, output, stderr = ssh.execute(cmd, shadow_vm_ip, "root", "password", False, 22)
-    if ret != 0:
-        test_util.test_fail("remote delete vm 'vm-crt-via-rmt-mevoco' failed: output:%s; stderr:%s" %(output, stderr))
-
-
-
-vm_name = "vm-crt-via-rmt-mevoco"
+vm_uuid = None
+sync_vm = "sync-vm-via-rmt-mevoco"
 
 def test():
-    global vcenter_uuid
+    global vcenter_uuid1
+    global vcenter_uuid2
+    global mevoco1_ip
+    global mevoco2_ip
+    global vm_uuid
 
-    #add vcenter senario1:
+    mevoco1_ip = os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP']
+    mevoco2_ip = os.environ['serverIp2']    
+
+
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco1_ip
     zone_uuid = res_ops.get_resource(res_ops.ZONE)[0].uuid
     inv = vct_ops.add_vcenter(vcenter1_name, vcenter1_domain_name, vcenter1_username, vcenter1_password, True, zone_uuid)
-    vcenter_uuid = inv.uuid
-
-    if vcenter_uuid == None:
+    vcenter_uuid1 = inv.uuid
+    if vcenter_uuid1 == None:
         test_util.test_fail("vcenter_uuid is None")
 
 
-    shadow_create_vm()
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
+    zone_uuid = res_ops.get_resource(res_ops.ZONE)[0].uuid
+    inv = vct_ops.add_vcenter(vcenter1_name, vcenter1_domain_name, vcenter1_username, vcenter1_password, True, zone_uuid)
+    vcenter_uuid2 = inv.uuid
+    if vcenter_uuid2 == None:
+        test_util.test_fail("vcenter_uuid is None")
 
-    vm_cond = res_ops.gen_query_conditions("name", '=', vm_name)
-    vm_uuid = res_ops.query_resource_fields(res_ops.VM_INSTANCE, vm_cond, None, fields=['uuid'])[0].uuid
+
+
+    #create vm in remote and check
+    test_util.test_logger("create vm for sync test")
+    vm = test_stub.create_vm_in_vcenter(vm_name = sync_vm, image_name = "MicroCore-Linux.ova", l3_name = "L3-251-net1")
+    vm.check()
+
+
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco1_ip
+    vm_cond = res_ops.gen_query_conditions("name", '=', sync_vm)
+    vm_inv = res_ops.query_resource_fields(res_ops.VM_INSTANCE, vm_cond, None, fields=['uuid', 'state'])[0]
+    vm_uuid = vm_inv.uuid
+    vm_state = vm_inv.state.strip().lower()
     if not vm_uuid:
-        test_util.test_fail("vcenter sync create vm test failed.")
+        test_util.test_fail("local woodpecker vm uuid is null")
+    elif vm_state != "running":
+        test_util.test_fail("vcenter sync vm start failed.")
 
 
-    shadow_delete_vm()
 
-    vm_uuid = res_ops.query_resource_fields(res_ops.VM_INSTANCE, vm_cond, None, fields=['uuid'])[0].uuid
+    #delete vm in remote and check
+    test_util.test_logger("delete vm for sync test")
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
+    vm_inv = res_ops.query_resource_fields(res_ops.VM_INSTANCE, vm_cond, None, fields=['uuid', 'state'])[0]
+    vm_uuid = vm_inv.uuid
+    vm_state = vm_inv.state.strip().lower()
+
+    if not vm_uuid:
+        test_util.test_fail("remote woodpecker vm uuid is null")
+
     if vm_uuid:
-        test_util.test_fail("vcenter sync delete vm test failed.")
+        vm_ops.destroy_vm(vm_uuid)
+        vm_ops.expunge_vm(vm_uuid)
+    
 
-    vct_ops.delete_vcenter(vcenter_uuid)
-    test_util.test_pass("vcenter sync create and delete vm test passed.")
+
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
+    if vcenter_uuid2:
+        vct_ops.delete_vcenter(vcenter_uuid2)
+
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco1_ip
+    if vcenter_uuid1:
+        vct_ops.delete_vcenter(vcenter_uuid1)
+
+    test_util.test_pass("vcenter sync start and stop vm test passed.")
 
 
 
 def error_cleanup():
-    global vcenter_uuid
+    global vcenter_uuid1
+    global vcenter_uuid2
+    global mevoco2_ip
+    global vm_uuid
 
-    shadow_delete_vm()
-    if vcenter_uuid:
-        vct_ops.delete_vcenter(vcenter_uuid)
+    if vm_uuid:
+        vm_ops.destroy_vm(vm_uuid)
+        vm_ops.expunge_vm(vm_uuid)
+
+    if vcenter_uuid1:
+        vct_ops.delete_vcenter(vcenter_uuid1)
+
+    if vcenter_uuid2:
+        os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
+        vct_ops.delete_vcenter(vcenter_uuid2)
