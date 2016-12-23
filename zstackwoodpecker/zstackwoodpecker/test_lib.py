@@ -4770,3 +4770,19 @@ def lib_get_host_cpu_prometheus_data(mn_ip, end_time, interval, host_uuid):
         test_util.test_fail('%s failed' % (cmd))
     return rsp
 
+def lib_get_file_size(host, file_path):
+    command = "du -b %s | awk '{print $1}'" % file_path
+    eout = ''
+    try:
+        if host.sshPort != None:
+            (ret, out, eout) = ssh.execute(command, host.managementIp, host.username, host.password, port=int(host.sshPort))
+	else:
+            (ret, out, eout) = ssh.execute(command, host.managementIp, host.username, host.password)
+        test_util.test_logger('[file:] %s was found in [host:] %s' % (file_path, host.managementIp))
+        return out
+    except:
+        #traceback.print_exc(file=sys.stdout)
+        test_util.test_logger('Fail to execute: ssh [host:] %s with [username:] %s and [password:] %s to get size of [file:] %s . This might be expected behavior.'% (host.managementIp, host.username, host.password, file_path))
+        test_util.test_logger('ssh execution stderr output: %s' % eout)
+        test_util.test_logger(linux.get_exception_stacktrace())
+        return 0
