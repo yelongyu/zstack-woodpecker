@@ -4765,7 +4765,7 @@ def lib_check_version_is_mevoco_1_8():
     if version_is_mevoco_1_8 != None:
         return version_is_mevoco_1_8
 
-    if shell.call('zstack-ctl status').find('version: 1.9') >= 0:
+    if shell.call('zstack-ctl status').find('version: 1.8') >= 0:
 	version_is_mevoco_1_8 = True
     else:
         version_is_mevoco_1_8 = False
