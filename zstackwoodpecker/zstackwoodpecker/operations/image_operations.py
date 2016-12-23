@@ -122,7 +122,7 @@ def expunge_image(image_uuid, backup_storage_uuid_list=None, session_uuid=None):
 
 def sync_image_size(image_uuid, session_uuid=None):
     action = api_actions.SyncImageSizeAction()
-    action.imageUuid = image_uuid
+    action.uuid = image_uuid
     test_util.action_logger('Sync image size [image:] %s' % image_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
