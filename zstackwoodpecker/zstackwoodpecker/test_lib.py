@@ -4759,6 +4759,19 @@ def lib_check_version_is_mevoco():
         version_is_mevoco = False
     return version_is_mevoco
 
+version_is_mevoco_1_8 = None
+def lib_check_version_is_mevoco_1_8():
+    global version_is_mevoco_1_8
+    if version_is_mevoco_1_8 != None:
+        return version_is_mevoco_1_8
+
+    if shell.call('zstack-ctl status').find('version: 1.9') >= 0:
+	version_is_mevoco_1_8 = True
+    else:
+        version_is_mevoco_1_8 = False
+    return version_is_mevoco_1_8
+
+
 def lib_get_host_cpu_prometheus_data(mn_ip, end_time, interval, host_uuid):
     cmd = '/usr/bin/zstack-cli LogInByAccount accountName=admin password=password'
     if not lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd):
