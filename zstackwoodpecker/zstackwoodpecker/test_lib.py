@@ -4784,7 +4784,7 @@ def lib_get_host_cpu_prometheus_data(mn_ip, end_time, interval, host_uuid):
     return rsp
 
 def lib_get_file_size(host, file_path):
-    command = "du -b %s | awk '{print $1}'" % file_path
+    command = "du -sb %s | awk '{print $1}'" % file_path
     eout = ''
     try:
         if host.sshPort != None:
