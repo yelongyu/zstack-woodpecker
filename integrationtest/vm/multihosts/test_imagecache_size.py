@@ -37,10 +37,10 @@ def test():
         test_util.test_skip("Skip test when primary storage is not local or NFS")
 #    elif ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
 
-    test_lib.lib_error_clean_up(test_obj_dict)
+    test_lib.lib_error_cleanup(test_obj_dict)
     test_util.test_pass('imagecache cleanup Pass.')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
-    test_lib.lib_error_clean_up(test_obj_dict)
+    test_lib.lib_error_cleanup(test_obj_dict)
     pass
