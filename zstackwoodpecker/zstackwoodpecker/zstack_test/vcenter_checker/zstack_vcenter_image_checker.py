@@ -1,3 +1,8 @@
+try:
+    from pysphere import VIServer, MORTypes
+except:
+    print 'pysphere not installed'
+
 import os
 import sys
 import traceback
@@ -16,46 +21,32 @@ import apibinding.inventory as inventory
 import zstacklib.utils.ssh as ssh
 
 
+vcenter_ip = "172.20.76.251" 
+sync_image_name = "MicroCore-Linux.ova"
+domain_name = "administrator@vsphere.local"
+password    = "Testing%123"
+
+vm = None
+
 class zstack_vcenter_image_file_checker(checker_header.TestChecker):
-    '''check vcenter image file existencex . If it is in backup storage, 
+    '''check vcenter image file existence. If it is in backup storage, 
         return self.judge(True). If not, return self.judge(False)'''
+
     def check(self):
         super(zstack_vcenter_image_file_checker, self).check()
-        image = self.test_obj.image
-        backupStorages = image.backupStorageRefs
-        bs_one = backupStorages[0]
-        bs = test_lib.lib_get_backup_storage_by_uuid(bs_one.backupStorageUuid)
 
-        #cmd="sshpass -p password ssh root@172.20.198.175 \"ls /vmfs/volumes/datastore1/MicroCore-Linux.ova\""
+        server = VIServer()
+        server.connect(vcenter_ip, domain_name, password)
+        all_vms = server._get_managed_objects(MORTypes.VirtualMachine)
+
+        for mor, name in all_vms.iteritems():
+            if name == sync_image_name:
+                return self.judge(True)
+        else:        
+            return self.judge(False)
+
+        #cmd="sshpass -p password ssh root@ip \"ls /vmfs/volumes/datastore1/MicroCore-Linux.ova\""
         #ret, output, stderr = ssh.execute(cmd, vm.get_vm().vmNics[0].ip, "root", "password", False, 22)
         #if ret != 0:
         #    test_util.test_fail("generate 5GB big file failed")
-
-
-        if bs.type == inventory.SFTP_BACKUP_STORAGE_TYPE:
-            self.judge(test_lib.lib_check_backup_storage_image_file(image))
-
-        elif hasattr(inventory, 'IMAGE_STORE_BACKUP_STORAGE_TYPE') and bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
-            if self.test_obj.state == image_header.DELETED:
-                test_util.test_logger("skip image store image delete check, since the image won't be deleted until no vms refer to it.")
-                return self.judge(self.exp_result)
-            self.judge(test_lib.lib_check_backup_storage_image_file(image))
-
-        elif bs.type == inventory.CEPH_BACKUP_STORAGE_TYPE:
-            if self.test_obj.state == image_header.DELETED:
-                #https://github.com/zstackorg/zstack/issues/93#issuecomment-130935998
-                test_util.test_logger("skip ceph image delete check, since the image won't be deleted until no vms refer to it.")
-                return self.judge(self.exp_result)
-
-            ceph_host, username, password = test_lib.lib_get_ceph_info(os.environ.get('cephBackupStorageMonUrls'))
-            image_installPath = bs_one.installPath.split('ceph://')[1]
-
-            command = 'rbd info %s' % image_installPath
-            if test_lib.lib_execute_ssh_cmd(ceph_host, username, password, command, 10):
-                test_util.test_logger('Check result: [image:] %s [file:] %s exist on ceph [host name:] %s .' % (image.uuid, image_installPath, ceph_host))
-                return self.judge(True)
-            else:
-                test_util.test_logger('Check result: [image:] %s [file:] %s does not exist on ceph [host name:] %s .' % (image.uuid, image_installPath, ceph_host))
-                return self.judge(False)
-
 
