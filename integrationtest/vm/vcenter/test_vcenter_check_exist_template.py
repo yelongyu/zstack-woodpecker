@@ -14,14 +14,15 @@ import zstacklib.utils.ssh as ssh
 import test_stub
 
 
-vcenter1_name = "VCENTER1"
-vcenter1_domain_name = "172.20.76.250"
-vcenter1_username = "administrator@vsphere.local"
-vcenter1_password = "Testing%123"
+vcenter1_name = os.environ['vcenter1_name']
+vcenter1_domain_name = os.environ['vcenter1_ip']
+vcenter1_username = os.environ['vcenter1_domain_name']
+vcenter1_password = os.environ['vcenter1_password']
+ova_template_pattern1 = os.environ['vcenter1_sync_image_name']
+
+
 
 vcenter_uuid = None
-
-ova_template_pattern1 = "MicroCore-Linux.ova"
 
 def test():
     global vcenter_uuid

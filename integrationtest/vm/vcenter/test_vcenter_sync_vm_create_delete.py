@@ -15,10 +15,13 @@ import test_stub
 import os
 
 
-vcenter1_name = "VCENTER1"
-vcenter1_domain_name = "172.20.76.251"
-vcenter1_username = "administrator@vsphere.local"
-vcenter1_password = "Testing%123"
+vcenter1_name = os.environ['vcenter2_name']
+vcenter1_domain_name = os.environ['vcenter2_ip']
+vcenter1_username = os.environ['vcenter2_domain_name']
+vcenter1_password = os.environ['vcenter2_password']
+sync_vm = os.environ['vcenter2_sync_vm_create_delete']
+sync_image_name = os.environ['vcenter2_sync_image_name']
+network_pattern1 = os.environ['vcenter2_network_pattern1']
 
 vcenter_uuid1 = None
 vcenter_uuid2 = None
@@ -27,7 +30,6 @@ mevoco1_ip = None
 mevoco2_ip = None
 
 vm_uuid = None
-sync_vm = "sync-vm-via-rmt-mevoco"
 
 def test():
     global vcenter_uuid1
@@ -59,7 +61,7 @@ def test():
 
     #create vm in remote and check
     test_util.test_logger("create vm for sync test")
-    vm = test_stub.create_vm_in_vcenter(vm_name = sync_vm, image_name = "MicroCore-Linux.ova", l3_name = "L3-251-net1")
+    vm = test_stub.create_vm_in_vcenter(vm_name = sync_vm, image_name = sync_image_name, l3_name = network_pattern1)
     vm.check()
 
 

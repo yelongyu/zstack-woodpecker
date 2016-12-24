@@ -15,10 +15,13 @@ import test_stub
 import os
 
 
-vcenter1_name = "VCENTER1"
-vcenter1_domain_name = "172.20.76.251"
-vcenter1_username = "administrator@vsphere.local"
-vcenter1_password = "Testing%123"
+
+vcenter1_name = os.environ['vcenter2_name']
+vcenter1_domain_name = os.environ['vcenter2_ip']
+vcenter1_username = os.environ['vcenter2_domain_name']
+vcenter1_password = os.environ['vcenter2_password']
+
+vm_name = os.environ['vcenter2_sync_vm_start_stop']
 
 vcenter_uuid1 = None
 vcenter_uuid2 = None
@@ -26,7 +29,6 @@ vcenter_uuid2 = None
 mevoco1_ip = None
 mevoco2_ip = None
 
-vm_name = "sync-vm-start-stop-use"
 
 def test():
     global vcenter_uuid1

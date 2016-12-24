@@ -15,10 +15,11 @@ import test_stub
 import time
 
 
-vcenter1_name = "VCENTER1"
-vcenter1_domain_name = "172.20.76.250"
-vcenter1_username = "administrator@vsphere.local"
-vcenter1_password = "Testing%123"
+
+vcenter1_name = os.environ['vcenter1_name']
+vcenter1_domain_name = os.environ['vcenter1_ip']
+vcenter1_username = os.environ['vcenter1_domain_name']
+vcenter1_password = os.environ['vcenter1_password']
 
 vcenter_uuid = None
 

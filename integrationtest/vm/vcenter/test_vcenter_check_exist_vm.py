@@ -14,15 +14,17 @@ import zstacklib.utils.ssh as ssh
 import test_stub
 
 
-vcenter1_name = "VCENTER1"
-vcenter1_domain_name = "172.20.76.250"
-vcenter1_username = "administrator@vsphere.local"
-vcenter1_password = "Testing%123"
+
+vcenter1_name = os.environ['vcenter1_name']
+vcenter1_domain_name = os.environ['vcenter1_ip']
+vcenter1_username = os.environ['vcenter1_domain_name']
+vcenter1_password = os.environ['vcenter1_password']
+
+vm_name_pattern1 = os.environ['vcenter1_vm_pattern1']  
+vm_name_pattern2 = os.environ['vcenter1_vm_pattern2'] 
 
 vcenter_uuid = None
 
-vm_name_pattern1 = "vm-fingerprint1"
-vm_name_pattern2 = "vm-fingerprint2"
 
 def test():
     global vcenter_uuid
