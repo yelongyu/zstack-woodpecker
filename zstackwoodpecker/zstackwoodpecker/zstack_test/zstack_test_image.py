@@ -26,7 +26,10 @@ class ZstackTestImage(image_header.TestImage):
         Create image template from Root Volume using CreateRootVolumeTemplateFromRootVolume
         '''
         if test_lib.lib_check_version_is_mevoco_1_8():
-            self.image = img_ops.commit_volume_as_image(self.image_creation_option)
+            if test_lib.lib_check_version_is_mevoco():
+                self.image = img_ops.commit_volume_as_image(self.image_creation_option)
+            else:
+                self.image = img_ops.create_root_volume_template(self.image_creation_option)
         else:
             self.image = img_ops.create_root_volume_template(self.image_creation_option)
         super(ZstackTestImage, self).create()
