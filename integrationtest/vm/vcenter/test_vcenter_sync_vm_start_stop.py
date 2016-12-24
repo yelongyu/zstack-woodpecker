@@ -26,7 +26,7 @@ vcenter_uuid2 = None
 mevoco1_ip = None
 mevoco2_ip = None
 
-vm_name = "vm-crt-via-rmt-mevoco"
+vm_name = "sync-vm-start-stop-use"
 
 def test():
     global vcenter_uuid1
