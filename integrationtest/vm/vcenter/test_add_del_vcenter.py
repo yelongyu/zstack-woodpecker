@@ -13,6 +13,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstacklib.utils.ssh as ssh
 import test_stub
 import time
+import os 
 
 
 

@@ -12,6 +12,7 @@ import zstackwoodpecker.operations.vcenter_operations as vct_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstacklib.utils.ssh as ssh
 import test_stub
+import os
 
 
 
