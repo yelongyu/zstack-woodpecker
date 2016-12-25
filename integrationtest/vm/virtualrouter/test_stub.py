@@ -154,6 +154,13 @@ def create_dnat_vm(disk_offering_uuids=None, session_uuid = None):
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     return create_vm([l3_net_uuid], image_uuid, 'vlan_sg_vm', disk_offering_uuids, session_uuid = session_uuid)
 
+def create_vm_with_user_args(system_tags = None, session_uuid = None):
+    image_name = os.environ.get('imageName_net')
+    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    l3_name = os.environ.get('l3PublicNetworkName')
+    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    return create_vm([l3_net_uuid], image_uuid, 'user_args_vm', system_tags = system_tags, session_uuid = session_uuid)
+
 # parameter: vmname; l3_net: l3_net_description, or [l3_net_uuid,]; image_uuid:
 def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
         disk_offering_uuids = None, default_l3_uuid = None, \
