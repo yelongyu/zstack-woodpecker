@@ -14,6 +14,7 @@ def create_volume_from_offering(volume_option):
     action = api_actions.CreateDataVolumeAction()
     action.diskOfferingUuid = volume_option.get_disk_offering_uuid()
     action.description = volume_option.get_description()
+    action.systemTags = volume_option.get_system_tags()
     timeout = volume_option.get_timeout()
     if not timeout:
         action.timeout = 240000

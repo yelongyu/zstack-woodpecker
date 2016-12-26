@@ -702,6 +702,7 @@ class VolumeOption(DataOption):
         self.url = None #used when add volume from url.
         self.volume_type = None #used when add volume from url
         self.backup_storage_uuid_list = [] #used when add volume from url
+        self.system_tags = None
         super(VolumeOption, self).__init__()
 
     def set_disk_offering_uuid(self, disk_offering_uuid):
@@ -727,6 +728,13 @@ class VolumeOption(DataOption):
 
     def get_volume_type(self):
         return self.volume_type
+
+    def set_system_tags(self, system_tags):
+        self.system_tags = system_tags
+
+    def get_system_tags(self):
+        return self.system_tags
+
 
 class ImageOption(DataOption):
     def __init__(self):
