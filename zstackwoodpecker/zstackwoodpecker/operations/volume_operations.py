@@ -90,9 +90,10 @@ def attach_volume(volume_uuid, vm_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def detach_volume(volume_uuid, session_uuid=None):
+def detach_volume(volume_uuid, vm_uuid=None, session_uuid=None):
     action = api_actions.DetachDataVolumeFromVmAction()
     action.uuid = volume_uuid
+    action.vmUuid = vm_uuid
     action.timeout = 240000
     test_util.action_logger('Detach Volume [uuid:] %s' % volume_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
