@@ -368,6 +368,7 @@ class BackupStorageOption(DataOption):
     def __init__(self):
         self.type = None
         self.url = None
+        self.importImages = None
         super(BackupStorageOption, self).__init__()
 
     def set_type(self, type):
@@ -381,6 +382,12 @@ class BackupStorageOption(DataOption):
 
     def get_url(self):
         return self.url
+
+    def set_import_images(self, import_images):
+        self.importImages = import_images
+
+    def get_import_images(self):
+        return self.importImages
 
 class CephBackupStorageOption(PrimaryStorageOption):
     def __init__(self):
