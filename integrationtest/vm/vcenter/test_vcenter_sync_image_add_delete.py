@@ -10,21 +10,15 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.vcenter_operations as vct_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
+import zstackwoodpecker.operations.backupstorage_operations as bs_ops
+import zstackwoodpecker.operations.image_operations as img_ops
+import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
 import zstacklib.utils.ssh as ssh
 import test_stub
 import os
 
 
-vcenter1_name = os.environ['vcenter2_name']
-vcenter1_domain_name = os.environ['vcenter2_ip']
-vcenter1_username = os.environ['vcenter2_domain_name']
-vcenter1_password = os.environ['vcenter2_password']
-sync_image_name = os.environ['vcenter2_sync_image_name']
-network_pattern1 = os.environ['vcenter2_network_pattern1']
-sync_image_url = os.environ['sync-image-url']
 
-
-image_name = "sync-image-test-use"
 img_uuid = None
 
 vcenter_uuid1 = None
@@ -41,6 +35,13 @@ def test():
     global mevoco2_ip
     global img_uuid
 
+    print os.environ
+    vcenter1_name = os.environ['vcenter2_name']
+    vcenter1_domain_name = os.environ['vcenter2_ip']
+    vcenter1_username = os.environ['vcenter2_domain_name']
+    vcenter1_password = os.environ['vcenter2_password']
+    sync_image_url = os.environ['vcenter2_sync_image_url']
+    image_name = os.environ['vcenter2_sync_image_name']
 
     mevoco1_ip = os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP']
     mevoco2_ip = os.environ['serverIp2']
@@ -61,7 +62,8 @@ def test():
     if vcenter_uuid2 == None:
         test_util.test_fail("vcenter_uuid is None")
 
-    bs_cond = res_ops.gen_query_conditions("name", '=', "vCenter[vm-center]")
+    #bs_cond = res_ops.gen_query_conditions("name", '=', "vCenter[vm-center]")
+    bs_cond = res_ops.gen_query_conditions("type", '=', "VCenter")
     bss = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, bs_cond, \
             None, fields=['uuid'])
     if not bss:
@@ -71,39 +73,55 @@ def test():
     image_option = test_util.ImageOption()
     image_option.set_name(image_name)
     #image_option.set_mediaType('RootVolumeTemplate')
-    image_option.set_url(os.environ.get(sync_image_url))
+    image_option.set_format('vmtx')
+    image_option.set_system_tags('vcenter::datacenter::datacenter1')
+    #image_option.set_url(os.environ.get(sync_image_url))
+    image_option.set_url(sync_image_url)
     image_option.set_backup_storage_uuid_list([bss[0].uuid])
 
 
     new_image = zstack_image_header.ZstackTestImage()
     new_image.set_creation_option(image_option)
 
+    #if a error happens here, check whether the image with the same name is already
+    #exist in vcenter, which is also raise exception about can't download on all backup storage
+    test_util.test_logger("add image from url:%s" %(sync_image_url))
     new_image.add_root_volume_template()
 
 
-    #check newly add image in mevoco1
+    #reconnect vcenter and check newly add image in mevoco1
+    test_util.test_logger("check image sync from mevoco1")
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco1_ip
+    bs_cond = res_ops.gen_query_conditions("type", '=', "VCenter")
+    bss = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, bs_cond, None, fields=['uuid'])
+    bs_ops.reconnect_backup_storage(bss[0].uuid)
     image_cond = res_ops.gen_query_conditions("name", '=', image_name)
     img_inv = res_ops.query_resource_fields(res_ops.IMAGE, image_cond, None, fields=['uuid'])[0]
-    img_uuid = vm_inv.uuid
+    img_uuid = img_inv.uuid
     if not img_uuid:
         test_util.test_fail("local woodpecker image uuid is null")
 
 
     #delete image in mevoco2
+    test_util.test_logger("delete image from mevoco2")
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
     image_cond = res_ops.gen_query_conditions("name", '=', image_name)
     img_inv = res_ops.query_resource_fields(res_ops.IMAGE, image_cond, None, fields=['uuid'])[0]
-    img_uuid = vm_inv.uuid
-    delete_image(img_uuid)
+    img_uuid = img_inv.uuid
+    img_ops.delete_image(img_uuid)
+    img_ops.expunge_image(img_uuid)
 
     #check image in mevoco1
+    test_util.test_logger("check image delete sync from mevoco1")
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco1_ip
+    bs_cond = res_ops.gen_query_conditions("type", '=', "VCenter")
+    bss = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, bs_cond, None, fields=['uuid'])
+    bs_ops.reconnect_backup_storage(bss[0].uuid)
     image_cond = res_ops.gen_query_conditions("name", '=', image_name)
     img_inv = res_ops.query_resource_fields(res_ops.IMAGE, image_cond, None, fields=['uuid'])[0]
-    img_uuid = vm_inv.uuid
+    img_uuid = img_inv.uuid
     if img_uuid:
-        test_util.test_fail("local woodpecker image is deleted as expected")
+        test_util.test_fail("local woodpecker image is not deleted as expected")
 
 
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
@@ -125,12 +143,13 @@ def error_cleanup():
     global img_uuid
 
     if img_uuid:
-        delete_image(img_uuid)
+        img_ops.delete_image(img_uuid)
+        img_ops.expunge_image(img_uuid)
 
     if vcenter_uuid1:
-        vct_ops.delete_vcenter(vcenter_uuid)
+        vct_ops.delete_vcenter(vcenter_uuid1)
 
     if vcenter_uuid2:
         os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
-        vct_ops.delete_vcenter(vcenter_uuid)
+        vct_ops.delete_vcenter(vcenter_uuid2)
 

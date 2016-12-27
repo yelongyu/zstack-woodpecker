@@ -119,3 +119,15 @@ def update_sftp_backup_storage_info(sftpUuid, infoType, infoValue, session_uuid 
         action.username = infoValue
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
+
+
+def reconnect_backup_storage(backup_storage_uuid, session_uuid=None):
+    '''
+    Reconnect backup storage
+    '''
+    action = api_actions.ReconnectBackupStorageAction()
+    action.uuid = backup_storage_uuid
+    action.timeout = 6000000
+    test_util.action_logger('Reconnect Backup Storage [uuid:] %s' % backup_storage_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
