@@ -2,6 +2,7 @@
     <suite name="virtual router test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
         <case timeout='800' repeat='1' noparallel='True'>host/test_reconnect_host.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_imagecache_cleanup.py</case>
+        <case timeout='600' repeat='1'>test_ip_spoofing.py</case>
         <case timeout='1200' repeat='1'>account/test_vm_ops_by_normal_account.py</case>
         <case timeout='2400' repeat='1'>test_create_vm_install_iso.py</case>
         <case timeout='800' repeat='1'>novlan/test_create_vm.py</case>

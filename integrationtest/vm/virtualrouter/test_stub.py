@@ -10,6 +10,7 @@ import sys
 import time
 import threading
 
+import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
@@ -375,3 +376,8 @@ mount ${device}1 %s
         test_util.test_fail("mount operation failed in [volume:] %s in [vm:] %s" % (volume.get_volume().uuid, vm_inv.uuid))
         os.unlink(script_file.name)
 
+def scp_file_to_vm(vm_inv, src_file, target_file):
+    vm_ip = vm_inv.vmNics[0].ip
+    vm_username = test_lib.lib_get_vm_username(vm_inv)
+    vm_password = test_lib.lib_get_vm_password(vm_inv)
+    ssh.scp_file(src_file, target_file, vm_ip, vm_username, vm_password)
