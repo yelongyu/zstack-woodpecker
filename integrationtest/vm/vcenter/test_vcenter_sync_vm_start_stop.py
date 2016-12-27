@@ -15,14 +15,6 @@ import test_stub
 import os
 
 
-
-vcenter1_name = os.environ['vcenter2_name']
-vcenter1_domain_name = os.environ['vcenter2_ip']
-vcenter1_username = os.environ['vcenter2_domain_name']
-vcenter1_password = os.environ['vcenter2_password']
-
-vm_name = os.environ['vcenter2_sync_vm_start_stop']
-
 vcenter_uuid1 = None
 vcenter_uuid2 = None
 
@@ -35,6 +27,15 @@ def test():
     global vcenter_uuid2
     global mevoco1_ip
     global mevoco2_ip
+
+
+    vcenter1_name = os.environ['vcenter2_name']
+    vcenter1_domain_name = os.environ['vcenter2_ip']
+    vcenter1_username = os.environ['vcenter2_domain_name']
+    vcenter1_password = os.environ['vcenter2_password']
+    vm_name = os.environ['vcenter2_sync_vm_start_stop']
+
+
 
     mevoco1_ip = os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP']
     mevoco2_ip = os.environ['serverIp2']    

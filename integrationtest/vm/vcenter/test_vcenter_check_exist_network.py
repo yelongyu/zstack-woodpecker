@@ -15,18 +15,17 @@ import test_stub
 import os
 
 
-
-vcenter1_name = os.environ['vcenter1_name']
-vcenter1_domain_name = os.environ['vcenter1_ip']
-vcenter1_username = os.environ['vcenter1_domain_name']
-vcenter1_password = os.environ['vcenter1_password']
-vm_network_pattern1 = os.environ['vcenter1_network_pattern1']
-
 vcenter_uuid = None
-
 
 def test():
     global vcenter_uuid
+
+    vcenter1_name = os.environ['vcenter1_name']
+    vcenter1_domain_name = os.environ['vcenter1_ip']
+    vcenter1_username = os.environ['vcenter1_domain_name']
+    vcenter1_password = os.environ['vcenter1_password']
+    vm_network_pattern1 = os.environ['vcenter1_network_pattern1']
+
 
     #add vcenter senario1:
     zone_uuid = res_ops.get_resource(res_ops.ZONE)[0].uuid

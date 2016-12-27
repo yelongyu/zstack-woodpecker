@@ -14,22 +14,18 @@ import zstacklib.utils.ssh as ssh
 import test_stub
 import os
 
-
-
-vcenter1_name = os.environ['vcenter2_name']
-vcenter1_domain_name = os.environ['vcenter2_ip']
-vcenter1_username = os.environ['vcenter2_domain_name']
-vcenter1_password = os.environ['vcenter2_password']
-sync_image_name = os.environ['vcenter2_sync_image_name']
-network_pattern1 = os.environ['vcenter2_network_pattern1']
-
 vcenter_uuid = None
-
 vm = None
-
 
 def test():
     global vcenter_uuid, vm
+
+    vcenter1_name = os.environ['vcenter2_name']
+    vcenter1_domain_name = os.environ['vcenter2_ip']
+    vcenter1_username = os.environ['vcenter2_domain_name']
+    vcenter1_password = os.environ['vcenter2_password']
+    sync_image_name = os.environ['vcenter2_sync_image_name']
+    network_pattern1 = os.environ['vcenter2_network_pattern1']
 
     zone_uuid = res_ops.get_resource(res_ops.ZONE)[0].uuid
     inv = vct_ops.add_vcenter(vcenter1_name, vcenter1_domain_name, vcenter1_username, vcenter1_password, True, zone_uuid)

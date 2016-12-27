@@ -15,14 +15,6 @@ import test_stub
 import os
 
 
-vcenter1_name = os.environ['vcenter2_name']
-vcenter1_domain_name = os.environ['vcenter2_ip']
-vcenter1_username = os.environ['vcenter2_domain_name']
-vcenter1_password = os.environ['vcenter2_password']
-sync_vm = os.environ['vcenter2_sync_vm_create_delete']
-sync_image_name = os.environ['vcenter2_sync_image_name']
-network_pattern1 = os.environ['vcenter2_network_pattern1']
-
 vcenter_uuid1 = None
 vcenter_uuid2 = None
 
@@ -37,6 +29,17 @@ def test():
     global mevoco1_ip
     global mevoco2_ip
     global vm_uuid
+
+
+    vcenter1_name = os.environ['vcenter2_name']
+    vcenter1_domain_name = os.environ['vcenter2_ip']
+    vcenter1_username = os.environ['vcenter2_domain_name']
+    vcenter1_password = os.environ['vcenter2_password']
+    sync_vm = os.environ['vcenter2_sync_vm_create_delete']
+    sync_image_name = os.environ['vcenter2_sync_image_name']
+    network_pattern1 = os.environ['vcenter2_network_pattern1']
+
+
 
     mevoco1_ip = os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP']
     mevoco2_ip = os.environ['serverIp2']    
