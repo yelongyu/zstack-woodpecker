@@ -27,6 +27,9 @@ vcenter_uuid2 = None
 mevoco1_ip = None
 mevoco2_ip = None
 
+delete_policy1 = None
+delete_policy2 = None
+
 
 def test():
     global vcenter_uuid1
@@ -34,6 +37,8 @@ def test():
     global mevoco1_ip
     global mevoco2_ip
     global img_uuid
+    global delete_policy1
+    global delete_policy2
 
     print os.environ
     vcenter1_name = os.environ['vcenter2_name']
@@ -48,6 +53,7 @@ def test():
 
 
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco1_ip
+    delete_policy1 = test_lib.lib_set_delete_policy('image', 'Delay')
     zone_uuid = res_ops.get_resource(res_ops.ZONE)[0].uuid
     inv = vct_ops.add_vcenter(vcenter1_name, vcenter1_domain_name, vcenter1_username, vcenter1_password, True, zone_uuid)
     vcenter_uuid1 = inv.uuid
@@ -56,6 +62,7 @@ def test():
 
 
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
+    delete_policy2 = test_lib.lib_set_delete_policy('image', 'Delay')
     zone_uuid = res_ops.get_resource(res_ops.ZONE)[0].uuid
     inv = vct_ops.add_vcenter(vcenter1_name, vcenter1_domain_name, vcenter1_username, vcenter1_password, True, zone_uuid)
     vcenter_uuid2 = inv.uuid
@@ -125,10 +132,12 @@ def test():
 
 
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
+    test_lib.lib_set_delete_policy('image', delete_policy2)
     if vcenter_uuid2:
         vct_ops.delete_vcenter(vcenter_uuid2)
 
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco1_ip
+    test_lib.lib_set_delete_policy('image', delete_policy1)
     if vcenter_uuid1:
         vct_ops.delete_vcenter(vcenter_uuid1)
 
@@ -141,7 +150,10 @@ def error_cleanup():
     global vcenter_uuid2
     global mevoco2_ip
     global img_uuid
+    global delete_policy1
+    global delete_policy2
 
+    test_lib.lib_set_delete_policy('image', delete_policy1)
     if img_uuid:
         img_ops.delete_image(img_uuid)
         img_ops.expunge_image(img_uuid)
@@ -151,5 +163,6 @@ def error_cleanup():
 
     if vcenter_uuid2:
         os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
+        test_lib.lib_set_delete_policy('image', delete_policy2)
         vct_ops.delete_vcenter(vcenter_uuid2)
 
