@@ -25,7 +25,7 @@ def test():
     vcenter1_domain_name = os.environ['vcenter1_ip']
     vcenter1_username = os.environ['vcenter1_domain_name']
     vcenter1_password = os.environ['vcenter1_password']
-    ova_template_pattern1 = os.environ['vcenter1_sync_image_name']
+    ova_template_pattern1 = os.environ['vcenter1_template_exist']
 
 
     #add vcenter senario1:
