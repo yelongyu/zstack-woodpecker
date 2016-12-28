@@ -1,5 +1,5 @@
 '''
-New Integration Test for delete BS and import images when add BS.
+New Integration Test for delete sftp BS and import images when add BS.
 
 @author: quarkonics
 '''
@@ -34,10 +34,10 @@ def compare_image(image1, image2):
 
 def test():
     test_util.test_dsc('create image check timeout test')
-    if res_ops.query_resource(res_ops.BACKUP_STORAGE):
-        bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
+    if res_ops.query_resource(res_ops.SFTP_BACKUP_STORAGE):
+        bs = res_ops.query_resource(res_ops.SFTP_BACKUP_STORAGE)[0]
     else:
-        test_util.test_skip("No backupstorage for test. Skip test")
+        test_util.test_skip("No sftp backupstorage for test. Skip test")
     cond = res_ops.gen_query_conditions('backupStorageRef.backupStorage.uuid', '=', bs.uuid)
     images =  res_ops.query_resource(res_ops.IMAGE, cond)
 
