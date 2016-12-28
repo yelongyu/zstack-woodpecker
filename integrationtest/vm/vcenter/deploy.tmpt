@@ -48,6 +48,7 @@ vcenter2_ip = 10.0.0.251
 vcenter2_domain_name = administrator@vsphere.local
 vcenter2_password = abc%123
 vcenter2_sync_image_name = sync-use-image.vmdk
+vcenter2_template_exist = MicroCore-Linux.ova
 vcenter2_network_pattern1 = L3-251-net1
 vcenter2_sync_vm_start_stop = sync-vm-start-stop-use
 vcenter2_sync_vm_create_delete = sync-vm-create-delete-use
