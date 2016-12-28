@@ -24,7 +24,7 @@ def test():
     vcenter1_domain_name = os.environ['vcenter2_ip']
     vcenter1_username = os.environ['vcenter2_domain_name']
     vcenter1_password = os.environ['vcenter2_password']
-    sync_image_name = os.environ['vcenter2_sync_image_name']
+    ova_image_name = os.environ['vcenter2_template_exist']
     network_pattern1 = os.environ['vcenter2_network_pattern1']
 
     zone_uuid = res_ops.get_resource(res_ops.ZONE)[0].uuid
@@ -34,7 +34,7 @@ def test():
     if vcenter_uuid == None:
         test_util.test_fail("vcenter_uuid is None")
 
-    vm = test_stub.create_vm_in_vcenter(vm_name = 'vm-start-stop-test', image_name = sync_image_name, l3_name = network_pattern1)
+    vm = test_stub.create_vm_in_vcenter(vm_name = 'vm-start-stop-test', image_name = ova_image_name, l3_name = network_pattern1)
     vm.check()
 
     vm.stop()
