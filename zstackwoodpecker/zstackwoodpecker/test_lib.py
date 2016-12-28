@@ -1138,10 +1138,14 @@ def lib_get_backup_storage_host(bs_uuid):
     host = test_util.HostOption()
     bss = deploy_config.backupStorages.get_child_node_as_list('sftpBackupStorage') + deploy_config.backupStorages.get_child_node_as_list('imageStoreBackupStorage')
     for bs in bss:
+        print "shuang %s" % bs.name_
+        print "shuang %s" % name
         if bs.name_ == name:
             host.managementIp = bs.hostname_
             host.username = bs.username_
+            print "shuang %s" % (bs.username_)
             host.password = bs.password_
+            print "shuang %s" % (bs.password_)
             if hasattr(bs, 'port_'):
                 host.sshPort = bs.port_
 
