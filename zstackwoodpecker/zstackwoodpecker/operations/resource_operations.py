@@ -64,6 +64,9 @@ LOCAL_STORAGE_RESOURCE_REF = 'LocalStorageResourceRef'
 IMAGE_STORE_BACKUP_STORAGE = 'ImageStoreBackupStorage'
 SCHEDULER = 'Scheduler'
 VCENTER = 'VCenter'
+VCENTER_CLUSTER = 'VCenterCluster'
+VCENTER_BACKUP_STORAGE = 'VCenterBackupStorage'
+VCENTER_PRIMARY_STORAGE = 'VCenterPrimaryStorage'
 
 
 def find_item_by_uuid(inventories, uuid):
@@ -356,6 +359,12 @@ def _gen_query_action(resource):
         action = api_actions.QuerySchedulerAction()
     elif resource == VCENTER:
         action = api_actions.QueryVCenterAction()
+    elif resource == VCENTER_CLUSTER:
+        action = api_actions.QueryVCenterClusterAction()
+    elif resource == VCENTER_BACKUP_STORAGE:
+        action = api_actions.QueryVCenterBackupStorageAction()
+    elif resource == VCENTER_PRIMARY_STORAGE:
+        action = api_actions.QueryVCenterPrimaryStorageAction()
 
     return action
 
