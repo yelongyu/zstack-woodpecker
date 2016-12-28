@@ -389,7 +389,7 @@ class BackupStorageOption(DataOption):
     def get_import_images(self):
         return self.importImages
 
-class CephBackupStorageOption(PrimaryStorageOption):
+class CephBackupStorageOption(BackupStorageOption):
     def __init__(self):
         self.monUrls = None
         self.dataVolumePoolName = None
@@ -422,7 +422,7 @@ class CephBackupStorageOption(PrimaryStorageOption):
     def get_rootVolumePoolName(self):
         return self.rootVolumePoolName
 
-class SftpBackupStorageOption(PrimaryStorageOption):
+class SftpBackupStorageOption(BackupStorageOption):
     def __init__(self):
         self.username = None
         self.hostname = None
