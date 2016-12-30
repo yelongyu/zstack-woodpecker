@@ -20,6 +20,7 @@ import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
+import apibinding.api_actions as api_actions
 
 
 original_root_password = "password"
@@ -66,6 +67,18 @@ def create_vm(vm_name='virt-vm', \
     vm.set_creation_option(vm_creation_option)
     vm.create()
     return vm 
+
+
+
+def start_vm_with_host_uuid(vm_uuid, host_uuid, session_uuid=None, timeout=240000):
+    action = api_actions.StartVmInstanceAction()
+    action.uuid = vm_uuid
+    action.hostUuid = host_uuid
+    action.timeout = timeout
+    test_util.action_logger('Start VM [uuid:] %s; Host [uuid:] %s' % (vm_uuid, host_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
 
 
 def create_vm_in_vcenter(vm_name='vcenter-vm', \
