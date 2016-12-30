@@ -28,8 +28,15 @@ hostIp3 = 10.0.101.22
 hostName4 = centos4
 hostIp4 = 10.0.101.23
 
+
 serverName2 = mevoco2
 serverIp2 = 10.0.101.25
+
+imageName_s = MicroCore-Linux.ova
+imageUrl_s =
+
+imageName_net = MicroCore-Linux.ova
+imageUrl_net =
 
 vcenter1_name = VM-VCENTER1
 vcenter1_ip = 10.0.0.250
@@ -42,7 +49,6 @@ vcenter1_template_exist = MicroCore-Linux.ova
 vcenter1_network_pattern1 = L3-250-net1
 vcenter1_sync_image_url = http://SERVER_NAME/mirror/iso/vmdk-image/sync-vm-start-stop-use-1.vmdk
 
-
 vcenter2_name = VM-VCENTER2
 vcenter2_ip = 10.0.0.251
 vcenter2_domain_name = administrator@vsphere.local
@@ -53,8 +59,6 @@ vcenter2_network_pattern1 = L3-251-net1
 vcenter2_sync_vm_start_stop = sync-vm-start-stop-use
 vcenter2_sync_vm_create_delete = sync-vm-create-delete-use
 vcenter2_sync_image_url = http://SERVER_NAME/mirror/iso/vmdk-image/sync-vm-start-stop-use-1.vmdk
-
-
 
 l2PublicNetworkName = l2-public
 l2PublicNetworkInterface = eth0
