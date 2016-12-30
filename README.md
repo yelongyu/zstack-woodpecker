@@ -16,13 +16,15 @@ The automated testing framework for project ZStack http://zstack.org
  * `cd /home/zstack/zstack`  
  * `mvn -DskipTests clean install` (The 1st time build will be a little bitter slow, since it need to download a lot of java libs)  
  * For Mainland developer, please download .m2 packages to /root/.m2/ manually from http://pan.baidu.com/s/1eQvUmWU, before build ZStack
-* Install pyhton-pip `curl https://bootstrap.pypa.io/get-pip.py | python -`
-* Install Golang `yum install golang` 
-* `export GOROOT=/usr/local/golang #or /usr/lib/golang`
+ * Install pyhton-pip `curl https://bootstrap.pypa.io/get-pip.py | python -`
+ * Install Golang `yum install golang` 
+ * `export GOROOT=/usr/local/golang #or /usr/lib/golang`
+
 #3. Use woodpecker to build zstack all in one package
  * `cd /home/zstack/zstack-woodpecker/dailytest`  
  * `./zstest.py -b`  
-* If error 'pyconfig.h: No such file or directory' occors, please install python-dev first `yum install python-devel`
+ * If error 'pyconfig.h: No such file or directory' occors, please install python-dev first `yum install python-devel`
+ 
 #4. Create local test configuration environment files
  * `cd /home/zstack/zstack-woodpecker/tools/`  
  * `sh copy_test_config_to_local.sh` (it will copy all woodpecker test env configuration files to USER_HOME/.zstackwoodpecker/)  
