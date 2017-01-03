@@ -15,7 +15,7 @@ import test_stub
 import os 
 
 vcenter_uuid = None
-vcenter_primary_storage_name = r"vCenter[vm-vcenter2]"
+vcenter_primary_storage_name = r"vCenter[VM-VCENTER1]"
 
 def test():
     global vcenter_uuid

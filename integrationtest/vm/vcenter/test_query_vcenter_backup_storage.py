@@ -17,7 +17,7 @@ import os
 
 
 vcenter_uuid = None
-vcenter_backup_storage_name = r"vCenter[vm-vcenter2]"
+vcenter_backup_storage_name = r"vCenter[VM-VCENTER1]"
 
 
 def test():
@@ -37,7 +37,6 @@ def test():
         test_util.test_fail("vcenter_uuid is None")
 
 
-    #query vcenter cluster                                                                                                                                                                                                                   
     vcenter_backup_storage_cond = res_ops.gen_query_conditions("name", '=', vcenter_backup_storage_name) 
     vcbs_inv = res_ops.query_resource_fields(res_ops.VCENTER_BACKUP_STORAGE, vcenter_backup_storage_cond, None, fields=['uuid'])[0]
     vcbs_uuid = vcbs_inv.uuid
