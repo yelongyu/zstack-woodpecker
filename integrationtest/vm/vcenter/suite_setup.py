@@ -35,8 +35,8 @@ def test():
 
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
     test_lib.setup_plan.deploy_test_agent()
-    test_lib.setup_plan.execute_plan_without_deploy_test_agent()
-    deploy_operations.deploy_initial_database(test_lib.deploy_config)
+    #test_lib.setup_plan.execute_plan_without_deploy_test_agent()
+    #deploy_operations.deploy_initial_database(test_lib.deploy_config)
     if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
     if test_lib.lib_get_ha_selffencer_maxattempts() != None:
