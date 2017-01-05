@@ -60,6 +60,17 @@ vcenter2_sync_vm_start_stop = sync-vm-start-stop-use
 vcenter2_sync_vm_create_delete = sync-vm-create-delete-use
 vcenter2_sync_image_url = http://SERVER_NAME/mirror/iso/vmdk-image/sync-vm-start-stop-use-1.vmdk
 
+vcenter3_name = VM-VCENTER3
+vcenter3_ip = 10.0.0.252
+vcenter3_domain_name = administrator@vsphere.local
+vcenter3_password = abc%123
+vcenter3_sync_image_name = sync-use-image.vmdk
+vcenter3_template_exist = MicroCore-Linux.ova
+vcenter3_network_pattern1 = L3-252-net1
+vcenter3_sync_vm_start_stop = sync-vm-start-stop-use
+vcenter3_sync_vm_create_delete = sync-vm-create-delete-use
+vcenter3_sync_image_url = http://SERVER_NAME/mirror/iso/vmdk-image/sync-vm-start-stop-use-1.vmdk
+
 l2PublicNetworkName = l2-public
 l2PublicNetworkInterface = eth0
 
