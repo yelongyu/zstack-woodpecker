@@ -16,7 +16,6 @@ import os
 import time
 
 new_image = None
-test_stub = test_lib.lib_get_test_stub()
 
 def add_image():
     global new_image
@@ -48,11 +47,9 @@ def test():
             None, fields=['uuid'])
 
     progress = res_ops.get_task_progress(image[0].uuid)
-    if len(progress.taskProgress) > 1:
-        test_util.test_fail("only 1 progress expected for given uuid")
 
-    if int(progress.taskProgress[0].progress) < 0 or int(progress.taskProgress[0].progress) > 100:
-        test_util.test_fail("Progress of task should be between 0 and 100, while it actually is %s" % (progress.taskProgress[0].progress))
+    if int(progress.progress) < 0 or int(progress.progress) > 100:
+        test_util.test_fail("Progress of task should be between 0 and 100, while it actually is %s" % (progress.progress))
     thread.join()
     new_image.delete()
     if test_lib.lib_get_image_delete_policy() != 'Direct':
