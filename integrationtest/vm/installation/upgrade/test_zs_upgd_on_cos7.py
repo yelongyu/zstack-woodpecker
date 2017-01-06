@@ -18,7 +18,10 @@ tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
 
 def test():
     test_util.test_dsc('Create test vm to test zstack upgrade by -u.')
-    image_name = os.environ.get('imageName_i_c7')
+
+#    image_name = os.environ.get('imageName_i_c7')
+    image_name = os.environ.get('imageName_i_offline')
+
     vm = test_stub.create_vlan_vm(image_name)
     test_obj_dict.add_vm(vm)
     if os.environ.get('zstackManagementIp') == None:

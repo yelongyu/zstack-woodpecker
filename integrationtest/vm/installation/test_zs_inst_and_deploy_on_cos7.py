@@ -33,7 +33,8 @@ def test():
 
     test_util.test_dsc('Create test vm to test zstack all installation in CentOS7.')
 #    image_name = os.environ.get('imageName_i_c7')
-    image_name = "zstack_iso_centos7_141"
+#    image_name = "zstack_iso_centos7_141"
+    image_name = os.environ.get('imageName_i_offline')
     vm = test_stub.create_vlan_vm(image_name)
     test_obj_dict.add_vm(vm)
     if os.environ.get('zstackManagementIp') == None:

@@ -23,7 +23,10 @@ def test():
         test_util.test_fail(msg)
 
     test_util.test_dsc('Create 3 CentOS7 vm to test multi management node installation')
-    image_name = os.environ.get('imageName_i_c7')
+
+#    image_name = os.environ.get('imageName_i_c7')
+    image_name = os.environ.get('imageName_i_offline')
+
     vm1 = test_stub.create_vlan_vm(image_name)
     test_obj_dict.add_vm(vm1)
     vm2 = test_stub.create_vlan_vm(image_name)
