@@ -31,11 +31,9 @@ def test():
     thread.start()
     time.sleep(5)
     progress = res_ops.get_task_progress(vm.get_vm().allVolumes[0].uuid)
-    if len(progress.taskProgress) > 1:
-        test_util.test_fail("only 1 progress expected for given uuid")
 
-    if int(progress.taskProgress[0].progress) < 0 or int(progress.taskProgress[0].progress) > 100:
-        test_util.test_fail("Progress of task should be between 0 and 100, while it actually is %s" % (progress.taskProgress[0].progress))
+    if int(progress.progress) < 0 or int(progress.progress) > 100:
+        test_util.test_fail("Progress of task should be between 0 and 100, while it actually is %s" % (progress.progress))
     thread.join()
 
     vm.destroy()
