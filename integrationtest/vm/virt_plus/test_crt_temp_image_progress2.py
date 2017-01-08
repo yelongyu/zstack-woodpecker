@@ -26,7 +26,7 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 origin_interval = None
 bs_type = None
-threads_num = 10
+threads_num = 20
 vms = [None] * threads_num
 images = [None] * threads_num
 threads = [None] * threads_num
@@ -104,8 +104,8 @@ def test():
     for i in range(0, threads_num):
         vms[i] = test_stub.create_vlan_vm()
         vms[i].check()
-        backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vms[index].vm)
-	if backup_storage_list[0].type != 'ImageStoreBackupStorage'
+        backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vms[i].vm)
+	if backup_storage_list[0].type != 'ImageStoreBackupStorage':
             test_util.test_skip("Requires imagestore BS to test, skip testing")
         if not test_lib.lib_execute_shell_script_in_vm(vms[i].get_vm(), script_file.name):
             test_util.test_fail("fail to create data in [vm:] %s" % (vms[i].get_vm().uuid))
