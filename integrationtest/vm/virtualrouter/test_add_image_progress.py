@@ -14,6 +14,10 @@ import apibinding.inventory as inventory
 import threading
 import os
 import time
+_config_ = {
+        'timeout' : 1800,
+        'noparallel' : True
+        }
 
 new_image = None
 
