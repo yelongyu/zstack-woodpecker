@@ -15,16 +15,22 @@ import os
 import time
 import threading
 import tempfile
+_config_ = {
+        'timeout' : 1800,
+        'noparallel' : False
+        }
+
 
 test_stub = test_lib.lib_get_test_stub()
 #test_obj_dict is to track test resource. They will be cleanup if there will be any exception in testing.
 test_obj_dict = test_state.TestStateDict()
 origin_interval = None
 bs_type = None
-vms = [None] * 3
-images = [None] * 3
-threads = [None] * 3
-checker_threads = [None] * 3
+threads_num = 10
+vms = [None] * threads_num
+images = [None] * threads_num
+threads = [None] * threads_num
+checker_threads = [None] * threads_num
 
 def create_temp_image(index):
     global vms
@@ -92,12 +98,15 @@ def test():
 
     test_util.test_dsc('Create test vm and check')
     script_file = tempfile.NamedTemporaryFile(delete=False)
-    script_file.write('dd if=/dev/zero of=/home/dd bs=1M count=300')
+    script_file.write('dd if=/dev/zero of=/home/dd bs=1M count=100')
     script_file.close()
 
-    for i in range(0, 3):
+    for i in range(0, threads_num):
         vms[i] = test_stub.create_vlan_vm()
         vms[i].check()
+        backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vms[index].vm)
+	if backup_storage_list[0].type != 'ImageStoreBackupStorage'
+            test_util.test_skip("Requires imagestore BS to test, skip testing")
         if not test_lib.lib_execute_shell_script_in_vm(vms[i].get_vm(), script_file.name):
             test_util.test_fail("fail to create data in [vm:] %s" % (vms[i].get_vm().uuid))
         test_obj_dict.add_vm(vms[i])
@@ -105,15 +114,15 @@ def test():
         
     os.unlink(script_file.name)
 
-    for i in range(0, 3):
+    for i in range(0, threads_num):
         threads[i] = threading.Thread(target=create_temp_image, args=(i, ))
         threads[i].start()
 
-    for i in range(0, 3):
+    for i in range(0, threads_num):
         checker_threads[i] = threading.Thread(target=check_create_temp_image_progress, args=(i, ))
         checker_threads[i].start()
 
-    for i in range(0, 3):
+    for i in range(0, threads_num):
         checker_threads[i].join()
         threads[i].join()
         images[i].check()
