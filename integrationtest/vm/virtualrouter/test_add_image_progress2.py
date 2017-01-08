@@ -29,10 +29,10 @@ checker_threads = [None] * threads_num
 def add_image(index):
     global images
     bs_cond = res_ops.gen_query_conditions("status", '=', "Connected")
-    bss = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, bs_cond, \
+    bss = res_ops.query_resource_fields(res_ops.CEPH_BACKUP_STORAGE, bs_cond, \
             None, fields=['uuid'])
     if not bss:
-        test_util.test_skip("not find available backup storage. Skip test")
+        test_util.test_skip("not find available ceph backup storage. Skip test")
 
     image_option = test_util.ImageOption()
     image_option.set_name('test_add_image_progress%s' % (index))
