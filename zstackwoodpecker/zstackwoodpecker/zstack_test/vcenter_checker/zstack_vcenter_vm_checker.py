@@ -33,9 +33,13 @@ class zstack_vcenter_vm_running_checker(checker_header.TestChecker):
 
         server = VIServer()
         server.connect(host_ip, "root", "password")
-        vm_path  = "[datastore1] " + vm.name + "/" + vm.name + ".vmx"
-        #pysf_vm = server.get_vm_by_path("[datastore1] vm-app/vm-app.vmx")
-        pysf_vm = server.get_vm_by_path(vm_path)
+        #if os.environ['DATASTORE_HEAD_FOR_CHECKER']:
+        #    vm_path  = os.environ['DATASTORE_HEAD_FOR_CHECKER'] + " " + vm.name + "/" + vm.name + ".vmx"
+        #else:
+        #    vm_path  = "[datastore1] " + vm.name + "/" + vm.name + ".vmx"
+        #pysf_vm = server.get_vm_by_path(vm_path)
+
+        pysf_vm = server.get_vm_by_name(vm.name)
         pysf_vm_real_status = pysf_vm.get_status()
 
         if pysf_vm_real_status == "POWERED ON" :
@@ -59,9 +63,13 @@ class zstack_vcenter_vm_destroyed_checker(checker_header.TestChecker):
 
         server = VIServer()
         server.connect(host_ip, "root", "password")
-        vm_path  = "[datastore1] " + vm.name + "/" + vm.name + ".vmx"
-        #pysf_vm = server.get_vm_by_path("[datastore1] vm-app/vm-app.vmx")
-        pysf_vm = server.get_vm_by_path(vm_path)
+        #if os.environ['DATASTORE_HEAD_FOR_CHECKER']:
+        #    vm_path  = os.environ['DATASTORE_HEAD_FOR_CHECKER'] + " " + vm.name + "/" + vm.name + ".vmx"
+        #else:
+        #    vm_path  = "[datastore1] " + vm.name + "/" + vm.name + ".vmx"
+        #pysf_vm = server.get_vm_by_path(vm_path)
+
+        pysf_vm = server.get_vm_by_name(vm.name)
         pysf_vm_real_status = pysf_vm.get_status()
 
         #if check_result != vm_plugin.VmAgent.VM_STATUS_RUNNING and check_result != vm_plugin.VmAgent.VM_STATUS_STOPPED:
@@ -90,9 +98,13 @@ class zstack_vcenter_vm_stopped_checker(checker_header.TestChecker):
 
         server = VIServer()
         server.connect(host_ip, "root", "password")
-        vm_path  = "[datastore1] " + vm.name + "/" + vm.name + ".vmx"
-        #pysf_vm = server.get_vm_by_path("[datastore1] vm-app/vm-app.vmx")
-        pysf_vm = server.get_vm_by_path(vm_path)
+        #if os.environ['DATASTORE_HEAD_FOR_CHECKER']:
+        #    vm_path  = os.environ['DATASTORE_HEAD_FOR_CHECKER'] + " " + vm.name + "/" + vm.name + ".vmx"
+        #else:
+        #    vm_path  = "[datastore1] " + vm.name + "/" + vm.name + ".vmx"
+        #pysf_vm = server.get_vm_by_path(vm_path)
+
+        pysf_vm = server.get_vm_by_name(vm.name)
         pysf_vm_real_status = pysf_vm.get_status()
 
         #if check_result == vm_plugin.VmAgent.VM_STATUS_STOPPED:
@@ -117,9 +129,13 @@ class zstack_vcenter_vm_suspended_checker(checker_header.TestChecker):
 
         server = VIServer()
         server.connect(host_ip, "root", "password")
-        vm_path  = "[datastore1] " + vm.name + "/" + vm.name + ".vmx"
-        #pysf_vm = server.get_vm_by_path("[datastore1] vm-app/vm-app.vmx")
-        pysf_vm = server.get_vm_by_path(vm_path)
+        #if os.environ['DATASTORE_HEAD_FOR_CHECKER']:
+        #    vm_path  = os.environ['DATASTORE_HEAD_FOR_CHECKER'] + " " + vm.name + "/" + vm.name + ".vmx"
+        #else:
+        #    vm_path  = "[datastore1] " + vm.name + "/" + vm.name + ".vmx"
+        #pysf_vm = server.get_vm_by_path(vm_path)
+
+        pysf_vm = server.get_vm_by_name(vm.name)
         pysf_vm_real_status = pysf_vm.get_status()
 
         #if check_result == vm_plugin.VmAgent.VM_STATUS_STOPPED:

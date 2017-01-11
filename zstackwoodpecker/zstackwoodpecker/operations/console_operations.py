@@ -64,6 +64,7 @@ def get_vm_console_password(uuid, session_uuid=None):
 
 def get_console_proxy_agent(session_uuid=None):
     action = api_actions.QueryConsoleProxyAgentAction()
+    action.timeout = 30000
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    test_util.action_logger('Query Console Prosy')
+    test_util.action_logger('Query Console Proxy')
     return evt
