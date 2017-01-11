@@ -289,30 +289,6 @@ def execute_all_install(ssh_cmd, target_file, tmp_file):
             else:
                 test_util.test_fail('zstack installation failed')
 
-def execute_install_with_args(ssh_cmd, target_file, tmp_file, args):
-    env_var = " WEBSITE='%s'" % ('localhost')
-
-    cmd = '%s "%s bash %s -R aliyun %s"' % (ssh_cmd, env_var, target_file, args)
-
-    process_result = execute_shell_in_process(cmd, tmp_file, 2400)
-
-    if process_result != 0:
-        cmd = '%s "cat /tmp/zstack_installation.log"' % ssh_cmd
-        execute_shell_in_process(cmd, tmp_file)
-        if 'no management-node-ready message received within' in open(tmp_file).read():
-            times = 30
-            cmd = '%s "zstack-ctl status"' % ssh_cmd
-            while (times > 0):
-                time.sleep(10)
-                process_result = execute_shell_in_process(cmd, tmp_file, 10, True)
-                times -= 0
-                if process_result == 0:
-                    test_util.test_logger("management node start after extra %d seconds" % (30 - times + 1) * 10 )
-                    return 0
-                test_util.test_logger("mn node is still not started up, wait for another 10 seconds...")
-            else:
-                test_util.test_fail('zstack installation failed')
-
 def only_install_zstack(ssh_cmd, target_file, tmp_file):
     env_var = "WEBSITE='%s'" % 'localhost'
 
