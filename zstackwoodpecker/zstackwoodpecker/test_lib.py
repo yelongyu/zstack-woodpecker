@@ -998,6 +998,12 @@ def lib_is_vm_vcenter(vm):
     else:
         return False
 
+def lib_is_sharable_volume(volume):
+    if volume.isShareable.strip().lower() == "true":
+        return True
+    else:
+        return False
+
 def lib_get_hv_type_of_vm(vm):
     #host = lib_get_vm_host(vm)
     #return host.hypervisorType
