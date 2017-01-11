@@ -26,23 +26,15 @@ images = [None] * threads_num
 threads = [None] * threads_num
 checker_threads = [None] * threads_num
 
-def add_image(index):
+def add_image(bs_uuid, index):
     global images
-    bs_cond = res_ops.gen_query_conditions("status", '=', "Connected")
-    bss = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, bs_cond, \
-            None, fields=['uuid'])
-    if not bss:
-        test_util.test_skip("not find available backup storage. Skip test")
-    if bss[0].type != inventory.CEPH_BACKUP_STORAGE_TYPE:
-        if hasattr(inventory, 'IMAGE_STORE_BACKUP_STORAGE_TYPE') and bss[0].type != inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
-            test_util.test_skip("not find available imagestore or ceph backup storage. Skip test")
 
     image_option = test_util.ImageOption()
     image_option.set_name('test_add_image_progress%s' % (index))
     image_option.set_format('qcow2')
     image_option.set_mediaType('RootVolumeTemplate')
     image_option.set_url(os.environ.get('imageUrl_net'))
-    image_option.set_backup_storage_uuid_list([bss[0].uuid])
+    image_option.set_backup_storage_uuid_list([bs_uuid])
 
     images[index] = zstack_image_header.ZstackTestImage()
     images[index].set_creation_option(image_option)
@@ -91,9 +83,17 @@ def check_add_image_progress(index):
 def test():
     global threads
     global checker_threads
+    bs_cond = res_ops.gen_query_conditions("status", '=', "Connected")
+    bss = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, bs_cond, \
+            None, fields=['uuid'])
+    if not bss:
+        test_util.test_skip("not find available backup storage. Skip test")
+    if bss[0].type != inventory.CEPH_BACKUP_STORAGE_TYPE:
+        if hasattr(inventory, 'IMAGE_STORE_BACKUP_STORAGE_TYPE') and bss[0].type != inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+            test_util.test_skip("not find available imagestore or ceph backup storage. Skip test")
 
     for i in range(0, threads_num):
-        threads[i] = threading.Thread(target=add_image, args=(i, ))
+        threads[i] = threading.Thread(target=add_image, args=(bss[0].uuid, i, ))
         threads[i].start()
     for i in range(0, threads_num):
         checker_threads[i] = threading.Thread(target=check_add_image_progress, args=(i, ))
