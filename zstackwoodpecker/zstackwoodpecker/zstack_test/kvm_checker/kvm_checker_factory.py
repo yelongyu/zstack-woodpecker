@@ -128,6 +128,41 @@ class KvmVolumeCheckerFactory(checker_header.CheckerFactory):
         kvm_volume_checker_chain.add_checker_dict(checker_dict, test_obj)
         return kvm_volume_checker_chain
 
+class KvmSharableVolumeCheckerFactory(checker_header.CheckerFactory):
+    def create_checker(self, test_obj): 
+        kvm_volume_checker_chain = checker_header.CheckerChain()
+        checker_dict = {}
+        if test_obj.state == volume_header.CREATED:
+            checker_dict[db_checker.zstack_volume_db_checker] = True
+            checker_dict[volume_checker.zstack_kvm_volume_file_checker] = False
+
+        elif test_obj.state == volume_header.ATTACHED:
+            checker_dict[db_checker.zstack_volume_db_checker] = True
+            checker_dict[volume_checker.zstack_kvm_volume_file_checker] = True
+            if not test_obj.target_vm.state == vm_header.DESTROYED:
+                checker_dict[db_checker.zstack_volume_attach_db_checker] = True
+                if test_obj.target_vm.state == vm_header.RUNNING:
+                    checker_dict[volume_checker.zstack_kvm_volume_attach_checker] = True
+            else:
+                checker_dict[db_checker.zstack_volume_attach_db_checker] = False
+
+        elif test_obj.state == volume_header.DETACHED:
+            checker_dict[db_checker.zstack_volume_db_checker] = True
+            checker_dict[db_checker.zstack_volume_attach_db_checker] = False
+            checker_dict[volume_checker.zstack_kvm_volume_attach_checker] = False
+            checker_dict[volume_checker.zstack_kvm_volume_file_checker] = True
+
+        elif test_obj.state == volume_header.DELETED:
+            checker_dict[db_checker.zstack_volume_db_checker] = True
+            checker_dict[volume_checker.zstack_kvm_volume_file_checker] = True
+
+        elif test_obj.state == volume_header.EXPUNGED:
+            checker_dict[db_checker.zstack_volume_db_checker] = False
+            checker_dict[volume_checker.zstack_kvm_volume_file_checker] = False
+
+        kvm_volume_checker_chain.add_checker_dict(checker_dict, test_obj)
+        return kvm_volume_checker_chain
+
 class KvmImageCheckerFactory(checker_header.CheckerFactory):
     def create_checker(self, test_obj): 
         kvm_image_checker_chain = checker_header.CheckerChain()
