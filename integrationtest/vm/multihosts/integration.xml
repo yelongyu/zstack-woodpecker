@@ -12,7 +12,7 @@
 	<case timeout='720' repeat='1'>migrate/test_migrate_vm_console_access2.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_sg_vm.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_pf_sg_tcp.py</case>
-	<case timeout='600' repeat='1'>migrate/test_migrate_stopped_vm_progress.py</case>
+	<case timeout='600' repeat='1'>migrate/test_migrate_stopped_vm_progress3.py</case>
         <case timeout='600' repeat='1' noparallel='True'>migrate/test_maintain_host.py</case>
 	<case timeout='600' repeat='1'>test_host_active_profile.py</case>
         <case timeout='3600' repeat='1'>vms/test_4vm_vm_ops.py</case>

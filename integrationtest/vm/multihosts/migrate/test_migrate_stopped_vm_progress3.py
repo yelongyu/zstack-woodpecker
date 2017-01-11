@@ -7,12 +7,13 @@ New Integration test for testing stopped vm migration between hosts.
 
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
+import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import apibinding.inventory as inventory
 import threading
 import time
-threads_num = 3
+threads_num = 20
 vms = [None] * threads_num
 threads = [None] * threads_num
 checker_threads = [None] * threads_num
@@ -55,9 +56,9 @@ def check_migrate_volume_progress(volume_uuid, target_host_uuid):
 def test():
     global vms
     for i in range(0, threads_num):
-        vms[i] = test_stub.create_vr_vm('migrate_stopped_vm', 'imageName_s', 'l3VlanNetwork2')
+        vms[i] = test_stub.create_vr_vm('migrate_stopped_vm', 'imageName_net', 'l3VlanNetwork2')
         test_obj_dict.add_vm(vms[i])
-        ps = test_lib.lib_get_primary_storage_by_uuid(vm.get_vm().allVolumes[0].primaryStorageUuid)
+        ps = test_lib.lib_get_primary_storage_by_uuid(vms[i].get_vm().allVolumes[0].primaryStorageUuid)
         if ps.type != inventory.LOCAL_STORAGE_TYPE:
             test_util.test_skip('Skip test on non-localstorage')
 
