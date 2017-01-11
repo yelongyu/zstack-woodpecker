@@ -44,7 +44,7 @@ def test():
         test_util.test_fail('Create Windows VM with Multi Data volumes Test Fail')
 
     vm_ip = vm.get_vm().vmNics[0].ip
-    test_lib.lib_wait_target_up(vm_ip, '23', 240)
+    test_lib.lib_wait_target_up(vm_ip, '23', 360)
     vm_username = os.environ.get('winImageUsername')
     vm_password = os.environ.get('winImagePassword')
     tn=telnetlib.Telnet(vm_ip)
