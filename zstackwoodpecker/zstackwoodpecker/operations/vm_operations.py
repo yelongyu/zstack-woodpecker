@@ -125,8 +125,8 @@ def resume_vm(vm_uuid, session_uuid=None):
 def update_vm(vm_uuid, cpu, memory, session_uuid=None):
     action = api_actions.UpdateVmInstanceAction()
     action.uuid = vm_uuid
-    action.cpuCores = cpu
-    action.memory = memory
+    action.cpuNum = cpu
+    action.memorySize = memory
     action.timeout = 240000
     test_util.action_logger('Update VM [uuid:] %s' % vm_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
