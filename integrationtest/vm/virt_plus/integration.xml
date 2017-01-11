@@ -1,7 +1,6 @@
 <integrationTest>
     <suite name="virt plus test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
         <case timeout='300' repeat='1'>test_create_vm.py</case>
-        <case timeout='300' repeat='1' noparallel='True'>test_add_image_progress.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_add_image_progress2.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_crt_temp_image_progress</case>
         <case timeout='1800' repeat='1' noparallel='True'>test_crt_temp_image_progress2</case>
