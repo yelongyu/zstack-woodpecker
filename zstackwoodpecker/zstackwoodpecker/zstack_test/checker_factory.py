@@ -113,6 +113,8 @@ class VolumeCheckerFactory(checker.CheckerFactory):
             #only check db. 
             return sim_checker.SimVolumeCheckerFactory().create_checker(test_obj)
         else:
+            #if test_lib.lib_is_sharable_volume(test_obj.volume):
+            #    return kvm_checker.KvmSharableVolumeCheckerFactory().create_checker(test_obj)
             if test_lib.lib_is_vm_kvm(test_obj.target_vm.vm):
                 return kvm_checker.KvmVolumeCheckerFactory().create_checker(test_obj)
             if test_lib.lib_is_vm_sim(test_obj.target_vm.vm):
