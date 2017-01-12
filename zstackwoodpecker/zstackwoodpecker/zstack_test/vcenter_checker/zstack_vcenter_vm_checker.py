@@ -71,10 +71,10 @@ class zstack_vcenter_vm_running_checker(checker_header.TestChecker):
         pysf_vm_real_status = get_vcenter_vm_status_by_vm_name(vm.name)
         
         if pysf_vm_real_status == "POWERED ON" :
-            test_util.test_logger('Check result: [vm:] %s is RUNNING on [host:] %s .' % (vm.uuid, hosts[0].name))
+            test_util.test_logger('Check result: [vm:] %s is RUNNING.' % (vm.uuid))
             return self.judge(True)
         else:
-            test_util.test_logger('Check result: [vm:] %s is NOT RUNNING on [host:] %s . ; Expected status: %s ; Actual status: %s' % (vm.uuid, hosts[0].name, "POWERED ON", pysf_vm_real_status))
+            test_util.test_logger('Check result: [vm:] %s is NOT RUNNING. ; Expected status: %s ; Actual status: %s' % (vm.uuid, "POWERED ON", pysf_vm_real_status))
             return self.judge(False)
 
 
@@ -88,10 +88,10 @@ class zstack_vcenter_vm_destroyed_checker(checker_header.TestChecker):
         pysf_vm_real_status = get_vcenter_vm_status_by_vm_name(vm.name)
 
         if pysf_vm_real_status == "POWERED OFF" :
-            test_util.test_logger('Check result: [vm:] %s is DESTROYED on [host:] %s .' % (vm.uuid, hosts[0].name))
+            test_util.test_logger('Check result: [vm:] %s is DESTROYED.' % (vm.uuid))
             return self.judge(True)
         else:
-            test_util.test_logger('Check result: [vm:] %s is NOT DESTROYED on [host:] %s . ; Expected status: %s ; Actual status: %s' % (vm.uuid, hosts[0].name, "POWERED OFF", pysf_vm_real_status))
+            test_util.test_logger('Check result: [vm:] %s is NOT DESTROYED. ; Expected status: %s ; Actual status: %s' % (vm.uuid, "POWERED OFF", pysf_vm_real_status))
             return self.judge(False)
 
 
@@ -110,10 +110,10 @@ class zstack_vcenter_vm_stopped_checker(checker_header.TestChecker):
 
         #if check_result == vm_plugin.VmAgent.VM_STATUS_STOPPED:
         if pysf_vm_real_status == "POWERED OFF" :
-            test_util.test_logger('Check result: [vm:] %s is STOPPED on [host:] %s .' % (vm.uuid, hosts[0].name))
+            test_util.test_logger('Check result: [vm:] %s is STOPPED.' % (vm.uuid))
             return self.judge(True)
         else:
-            test_util.test_logger('Check result: [vm:] %s is NOT STOPPED on [host:] %s . ; Expected status: %s ; Actual status: %s' % (vm.uuid, hosts[0].name, "POWERED OFF", pysf_vm_real_status))
+            test_util.test_logger('Check result: [vm:] %s is NOT STOPPED. ; Expected status: %s ; Actual status: %s' % (vm.uuid, "POWERED OFF", pysf_vm_real_status))
             return self.judge(False)
 
 
@@ -128,10 +128,10 @@ class zstack_vcenter_vm_suspended_checker(checker_header.TestChecker):
 
         #if check_result == vm_plugin.VmAgent.VM_STATUS_STOPPED:
         if pysf_vm_real_status == "SUSPENDED" :
-            test_util.test_logger('Check result: [vm:] %s is SUSPENDED on [host:] %s .' % (vm.uuid, hosts[0].name))
+            test_util.test_logger('Check result: [vm:] %s is SUSPENDED.' % (vm.uuid))
             return self.judge(True)
         else:
-            test_util.test_logger('Check result: [vm:] %s is NOT SUSPENDED on [host:] %s . ; Expected status: %s ; Actual status: %s' % (vm.uuid, hosts[0].name, "SUSPENDED", pysf_vm_real_status))
+            test_util.test_logger('Check result: [vm:] %s is NOT SUSPENDED. ; Expected status: %s ; Actual status: %s' % (vm.uuid, "SUSPENDED", pysf_vm_real_status))
             return self.judge(False)
 
 
