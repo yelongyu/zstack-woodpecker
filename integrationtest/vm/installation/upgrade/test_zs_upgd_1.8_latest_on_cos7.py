@@ -60,7 +60,7 @@ def test():
     test_obj_dict.rm_vm(vm)
     test_util.test_pass("ZStack upgrade Test Success")
 
-def error_clean_up():
+def error_cleanup():
     os.system('rm -rf -%s'%tmp_file)
     test_lib.lib_error_clean_up(test_obj_dict)
 
