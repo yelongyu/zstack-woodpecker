@@ -72,7 +72,7 @@ def test():
     test_util.test_pass('ZStack upgrade Test Success')
 
 #Will be called only if exception happens in test().
-def error_clean_up():
+def error_cleanup():
     os.system('rm -rf -%s'%tmp_file)
     test_lib.lib_error_clean_up(test_obj_dict)
 
