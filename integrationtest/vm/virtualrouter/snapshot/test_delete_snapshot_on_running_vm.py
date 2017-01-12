@@ -9,7 +9,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.zstack_test.zstack_test_snapshot as zstack_sp_header
-from distutils.version import StrictVersion
+from distutils.version import LooseVersion
 
 import os
 import time
@@ -30,7 +30,7 @@ def test():
         test_util.test_skip('Skip test, since [host:] %s does not support live snapshot.')
 
     libvirt_ver = test_lib.lib_get_host_libvirt_tag(host_inv)
-    if not libvirt_ver or StrictVersion(libvirt_ver) < StrictVersion('1.2.7'):
+    if not libvirt_ver or LooseVersion(libvirt_ver) < LooseVersion('1.2.7'):
         vm.destroy()
         test_obj_dict.rm_vm(vm)
         test_util.test_skip("Skip test, since [host:] %s libvert version: %s is lower than 1.2.7, which doesn't support live merge, when doing snapshot deleting." % (host_inv.uuid, libvirt_ver))
