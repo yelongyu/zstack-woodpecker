@@ -38,9 +38,9 @@ def test():
     test_stub.make_ssh_no_password(vm_inv)
     test_stub.install_fio(vm_inv)
     test_stub.test_fio_bandwidth(vm_inv, volume_bandwidth)
-    if vm_ops.get_vm_disk_qos(lib_get_root_volume(vm_inv).uuid).volumeBandwidth/1024 != volume_bandwidth:
+    if vm_ops.get_vm_disk_qos(test_lib.lib_get_root_volume(vm_inv).uuid).volumeBandwidth/1024 != volume_bandwidth:
         test_util.test_fail('Retrieved disk qos not match')
-    vm_ops.set_vm_disk_qos(lib_get_root_volume(vm_inv).uuid, volume_bandwidth/2*1024)
+    vm_ops.set_vm_disk_qos(test_lib.lib_get_root_volume(vm_inv).uuid, volume_bandwidth/2*1024)
     test_stub.test_fio_bandwidth(vm_inv, volume_bandwidth/2)
     vm_ops.delete_instance_offering(new_offering_uuid)
     test_lib.lib_robot_cleanup(test_obj_dict)
