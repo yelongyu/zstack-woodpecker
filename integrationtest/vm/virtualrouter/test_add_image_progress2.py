@@ -21,7 +21,7 @@ _config_ = {
         }
 
 test_obj_dict = test_state.TestStateDict()
-threads_num = 20
+threads_num = 5
 images = [None] * threads_num
 threads = [None] * threads_num
 checker_threads = [None] * threads_num
@@ -56,10 +56,10 @@ def check_add_image_progress(index):
         test_util.test_fail("image is not in creating after 10 seconds")
 
     for i in range(0, 100):
-        try:
-            progress = res_ops.get_task_progress(image[0].uuid)
+        progress = res_ops.get_task_progress(image[0].uuid)
+        if progress.progress != None
             break
-        except:
+        else:
             test_util.test_logger('task progress still not ready')
         time.sleep(0.1)
 
@@ -67,13 +67,13 @@ def check_add_image_progress(index):
         test_util.test_fail("Progress of task should be between 0 and 100, while it actually is %s" % (progress.progress))
 
     for i in range(0, 3600):
-        try:
-            last_progress = progress
-            progress = res_ops.get_task_progress(image[0].uuid)
-            if progress.progress < last_progress.progress:
-                test_util.test_fail("Progress of task is smaller than last time")
-        except:
+        last_progress = progress
+        progress = res_ops.get_task_progress(image[0].uuid)
+	if progress.progress == None:
             break
+        if progress.progress < last_progress.progress:
+            test_util.test_fail("Progress of task is smaller than last time")
+
     image_cond = res_ops.gen_query_conditions("uuid", '=', image_query[0].uuid)
     image_query2 = res_ops.query_resource_fields(res_ops.IMAGE, image_cond, \
                    None, fields=['status'])

@@ -41,12 +41,12 @@ def check_migrate_volume_progress(volume_uuid, target_host_uuid):
 
     for i in range(0, 3600):
         last_progress = progress
-	try:
-	    progress = res_ops.get_task_progress(vms[index].get_vm().allVolumes[0].uuid)
-	    if progress.progress < last_progress.progress:
-                test_util.test_fail("Progress of task is smaller than last time")
-        except:
+        progress = res_ops.get_task_progress(vms[index].get_vm().allVolumes[0].uuid)
+        if progress.progress == None:
             break
+
+        if progress.progress < last_progress.progress:
+            test_util.test_fail("Progress of task is smaller than last time")
         time.sleep(0.1)
 
     vms[index].update()

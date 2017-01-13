@@ -64,23 +64,22 @@ def check_create_temp_image_progress(index):
         test_util.test_fail("image is not in creating after 10 seconds")
 
     for i in range(0, 100):
-        try:
-            progress = res_ops.get_task_progress(image_query[0].uuid)
+        progress = res_ops.get_task_progress(image_query[0].uuid)
+        if progress.progress != None:
             break
-        except:
+        else:
             test_util.test_logger('task progress still not ready')
         time.sleep(0.1)
     if int(progress.progress) < 0 or int(progress.progress) > 100:
         test_util.test_fail("Progress of task should be between 0 and 100, while it actually is %s" % (progress.progress))
 
     for i in range(0, 3600):
-        try:
-            last_progress = progress
-            progress = res_ops.get_task_progress(image_query[0].uuid)
-            if progress.progress < last_progress.progress:
-                test_util.test_fail("Progress of task is smaller than last time")
-        except:
+        last_progress = progress
+        progress = res_ops.get_task_progress(image_query[0].uuid)
+        if progress.progress == None:
             break
+        if progress.progress < last_progress.progress:
+            test_util.test_fail("Progress of task is smaller than last time")
     image_cond = res_ops.gen_query_conditions("uuid", '=', image_query[0].uuid)
     image_query2 = res_ops.query_resource_fields(res_ops.IMAGE, image_cond, \
                    None, fields=['status'])
