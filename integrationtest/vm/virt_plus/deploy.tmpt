@@ -38,8 +38,3 @@ sshkeyImageUrl = http://10.1.101.1/image/zstack-cloudinit.img
 sshkeyPubKey = 
 sshkeyPriKey_file = 
 
-ocfs2-host1-image = ocfs2-host1-image 
-ocfs2-host1-image-url = http://10.1.101.1/image/share-vol-ocfs2-host1.qcow2
-
-ocfs2-host2-image = ocfs2-host2-image 
-ocfs2-host2-image-url = http://10.1.101.1/image/share-vol-ocfs2-host2.qcow2

@@ -10,3 +10,9 @@ cephPrimaryStorageImageCachePoolName =
 cephBackupStorageName = ceph-bs
 cephBackupStorageMonUrls = root:password@ceph01;root:password@ceph02;root:password@ceph03
 cephBackupStoragePoolName =
+
+ocfs2Host1Image = ocfs2-host1-image
+ocfs2Host1ImageUrl = http://10.1.101.1/image/share-vol-ocfs2-host1.qcow2
+
+ocfs2Host2Image = ocfs2-host2-image
+ocfs2Host2ImageUrl = http://10.1.101.1/image/share-vol-ocfs2-host2.qcow2
