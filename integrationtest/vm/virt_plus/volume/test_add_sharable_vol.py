@@ -25,7 +25,7 @@ def ensure_storage_online(vm):
     if ret != 0:
         test_util.test_fail( cmd + " failed")
 
-    if "online" is not in output.lower():
+    if "online" not in output.lower():
         test_util.test_fail("not found storage online")
      
 
