@@ -21,7 +21,7 @@ _config_ = {
         }
 
 test_obj_dict = test_state.TestStateDict()
-threads_num = 3
+threads_num = 20
 images = [None] * threads_num
 threads = [None] * threads_num
 checker_threads = [None] * threads_num
@@ -85,7 +85,7 @@ def test():
     global checker_threads
     bs_cond = res_ops.gen_query_conditions("status", '=', "Connected")
     bss = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, bs_cond, \
-            None, fields=['uuid'])
+            None)
     if not bss:
         test_util.test_skip("not find available backup storage. Skip test")
     if bss[0].type != inventory.CEPH_BACKUP_STORAGE_TYPE:
