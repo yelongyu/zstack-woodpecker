@@ -118,6 +118,18 @@
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$cephBackupStorageName</backupStorageRef>
       </image>
+      <image name="$ocfs2-host1-image" description="ocfs2 host1 image" 
+        format="$rootImageFormat" url="$ocfs2-host1-image-url" 
+        mediaType="$rootMediaType"
+        username="$imageUsername" password="$imagePassword">
+        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+      </image>
+      <image name="$ocfs2-host2-image" description="ocfs2 host2 image" 
+        format="$rootImageFormat" url="$ocfs2-host2-image-url" 
+        mediaType="$rootMediaType"
+        username="$imageUsername" password="$imagePassword">
+        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+      </image>
     </images>
   
     <diskOfferings>
