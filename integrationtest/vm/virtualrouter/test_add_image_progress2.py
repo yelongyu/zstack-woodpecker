@@ -57,7 +57,7 @@ def check_add_image_progress(index):
 
     for i in range(0, 100):
         progress = res_ops.get_task_progress(image[0].uuid)
-        if progress.progress != None
+        if progress.progress != None:
             break
         else:
             test_util.test_logger('task progress still not ready')
