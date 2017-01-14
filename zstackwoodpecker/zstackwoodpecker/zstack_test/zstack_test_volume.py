@@ -49,9 +49,12 @@ class ZstackTestVolume(volume_header.TestVolume):
         self.set_volume(new_volume)
         super(ZstackTestVolume, self).attach(target_vm)
 
-    def detach(self):
+    def detach(self, vm_uuid=None):
         #TODO: remove vm_uuid
-        self.set_volume(vol_ops.detach_volume(self.volume.uuid))
+        if not vm_uuid:
+            self.set_volume(vol_ops.detach_volume(self.volume.uuid))
+        else:
+            self.set_volume(vol_ops.detach_volume(self.volume.uuid, vm_uuid))
         super(ZstackTestVolume, self).detach()
 
     def delete(self):

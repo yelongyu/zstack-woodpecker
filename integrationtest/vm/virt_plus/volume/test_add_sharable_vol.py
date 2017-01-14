@@ -103,10 +103,10 @@ def check_sharable_volume(vm1, vm2):
     This function touch a file named "tag1" in vm1, and then check the tag existence from vm2
     """
 
-    cmd = "touch /tmp/tag1"
+    cmd = "touch /opt/smp/disk1/tag1"
     exec_cmd_in_vm(vm1, cmd, "%s failed" %(cmd))
 
-    cmd = "test -f /tmp/tag1"
+    cmd = "test -f /opt/smp/disk1/tag1"
     exec_cmd_in_vm(vm2, cmd, "%s failed" %(cmd))
     
 
@@ -140,7 +140,8 @@ def test():
     #volume.check()
 
     test_util.test_dsc('Detach volume and check')
-    volume.detach()
+    volume.detach(vm1)
+    volume.detach(vm2)
     #volume.check()
 
     test_util.test_dsc('Delete volume and check')
