@@ -79,7 +79,8 @@ def test():
     target_file = '/root/zstack-all-in-one.tgz'
     test_stub.prepare_test_env(vm_inv, target_file)
     ssh_cmd = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
-    test_stub.execute_install_with_args(ssh_cmd, target_file, tmp_file, "-r /home/zstack-test -I eth0")
+    args = "-r /home/zstack-test -I eth0"
+    test_stub.execute_install_with_args(ssh_cmd, args, target_file, tmp_file)
     ins_path = "/home/zstack-test"
     check_installtion_path(ssh_cmd, ins_path)
     test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
@@ -102,7 +103,8 @@ def test():
         (process_result, cmd_stdout) = test_stub.execute_shell_in_process_stdout(cmd, tmp_file)
         if process_result != 0:
             test_util.test_fail('delete /usr/local/zstack fail')
-    test_stub.execute_install_with_args(ssh_cmd, target_file, tmp_file, "-D")
+    args = "-D"
+    test_stub.execute_install_with_args(ssh_cmd, args, target_file, tmp_file)
     ins_path = "/usr/local/zstack"
     check_installtion_path(ssh_cmd, ins_path)
     test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
