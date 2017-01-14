@@ -87,7 +87,7 @@
     </backupStorages>
 
     <images>
-      <image name="$imageName_s" description="Test Image1" 
+      <!--<image name="$imageName_s" description="Test Image1" 
         format="$rootImageFormat" url="$imageUrl_s" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
@@ -115,6 +115,12 @@
         description="Small Test Image Template for other platform" 
         mediaType="$rootMediaType" format="$rootImageFormat"
         url="$imageUrl_s" platform="Other"
+        username="$imageUsername" password="$imagePassword">
+        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+      </image>-->
+      <image name="$ocfs2HostImage" description="ocfs2 host image" 
+        format="$rootImageFormat" url="$ocfs2HostImageUrl" 
+        mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$cephBackupStorageName</backupStorageRef>
       </image>

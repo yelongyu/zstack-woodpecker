@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-ceph-ps-share-vol.xml</deployConfig>
+    <deployConfigTemplate>deploy-ceph-ps-share-vol.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

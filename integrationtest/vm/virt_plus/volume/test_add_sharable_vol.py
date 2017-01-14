@@ -35,8 +35,7 @@ def mkfs_sharable_volume(vm):
     Notice this fuction is just need to execute once although there are 2 hosts in the cluster.
     """
 
-    cmd = "mkfs.ocfs2 --cluster-stack=o2cb -C 256K -J size=128M -N 16 -L ocfs2-disk1 \
-          --cluster-name=zstackstorage --fs-feature-level=default -T vmstore /dev/sda"
+    cmd = r"mkfs.ocfs2 --cluster-stack=o2cb -C 256K -J size=8M -N 16 -L ocfs2-disk1 --cluster-name=zstackstorage --fs-feature-level=default -T vmstore /dev/sda"
     exec_cmd_in_vm(vm, cmd, "sharable volume mkfs failed")
 
 
@@ -46,16 +45,31 @@ def config_ocfs2_vms(vm1, vm2):
     This function configure the ocfs2 host machine
     """
     cmd = "sed -i \"s:\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}   ocfs2-host1:" + vm1.get_vm().vmNics[0].ip + "   ocfs2-host1:g\" /etc/hosts"
-    exec_cmd_in_vm(vm1, cmd, "change vm1 hostname&ip failed")
+    exec_cmd_in_vm(vm1, cmd, "change vm1 hostname&ip1 failed")
 
     cmd = "sed -i \"s:\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}   ocfs2-host2:" + vm2.get_vm().vmNics[0].ip + "   ocfs2-host2:g\" /etc/hosts"
-    exec_cmd_in_vm(vm2, cmd, "change vm2 hostname&ip failed")
+    exec_cmd_in_vm(vm1, cmd, "change vm1 hostname&ip2 failed")
+
+    cmd = "sed -i \"s:\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}   ocfs2-host1:" + vm1.get_vm().vmNics[0].ip + "   ocfs2-host1:g\" /etc/hosts"
+    exec_cmd_in_vm(vm2, cmd, "change vm2 hostname&ip1 failed")
+
+    cmd = "sed -i \"s:\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}   ocfs2-host2:" + vm2.get_vm().vmNics[0].ip + "   ocfs2-host2:g\" /etc/hosts"
+    exec_cmd_in_vm(vm2, cmd, "change vm2 hostname&ip2 failed")
     
     cmd = "sed -i \"/number = 0/,/name = ocfs2-host1/s/ip_address = \([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}/ip_address = " + vm1.get_vm().vmNics[0].ip + "/g\" /etc/ocfs2/cluster.conf"
     exec_cmd_in_vm(vm1, cmd, "modify ip1 in /etc/ocfs2/cluster.conf failed")
 
     cmd = "sed -i \"/number = 1/,/name = ocfs2-host2/s/ip_address = \([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}/ip_address = " + vm2.get_vm().vmNics[0].ip + "/g\" /etc/ocfs2/cluster.conf"
+    exec_cmd_in_vm(vm1, cmd, "modify ip2 in /etc/ocfs2/cluster.conf failed")
+
+    cmd = "sed -i \"/number = 0/,/name = ocfs2-host1/s/ip_address = \([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}/ip_address = " + vm1.get_vm().vmNics[0].ip + "/g\" /etc/ocfs2/cluster.conf"
+    exec_cmd_in_vm(vm2, cmd, "modify ip1 in /etc/ocfs2/cluster.conf failed")
+
+    cmd = "sed -i \"/number = 1/,/name = ocfs2-host2/s/ip_address = \([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}/ip_address = " + vm2.get_vm().vmNics[0].ip + "/g\" /etc/ocfs2/cluster.conf"
     exec_cmd_in_vm(vm2, cmd, "modify ip2 in /etc/ocfs2/cluster.conf failed")
+
+    cmd = "hostnamectl set-hostname ocfs2-host2"
+    exec_cmd_in_vm(vm2, cmd, "%s failed" %(cmd))
 
     cmd = "systemctl enable o2cb.service"
     exec_cmd_in_vm(vm1, cmd, "%s failed" %(cmd))
@@ -98,10 +112,10 @@ def check_sharable_volume(vm1, vm2):
 
 def test():
     test_util.test_dsc('Create test vm and check')
-    vm1 = test_stub.create_vm(image_name="ocfs2-host1-image")
+    vm1 = test_stub.create_vm(image_name="ocfs2-host-image")
     test_obj_dict.add_vm(vm1)
 
-    vm2 = test_stub.create_vm(image_name="ocfs2-host2-image")
+    vm2 = test_stub.create_vm(image_name="ocfs2-host-image")
     test_obj_dict.add_vm(vm2)
 
     test_util.test_dsc('Create volume and check')
@@ -116,8 +130,10 @@ def test():
 
     test_util.test_dsc('Attach volume and check')
     #mv vm checker later, to save some time.
-    vm.check()
-    volume.attach(vm)
+    vm1.check()
+    vm2.check()
+    volume.attach(vm1)
+    volume.attach(vm2)
 
     config_ocfs2_vms(vm1, vm2)
     check_sharable_volume(vm1, vm2)
