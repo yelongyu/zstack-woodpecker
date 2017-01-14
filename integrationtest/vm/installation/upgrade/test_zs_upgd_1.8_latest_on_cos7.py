@@ -15,6 +15,9 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
 
+node_ip = os.environ.get('node1Ip')
+update_file = "/home/%s/zstack-woodpecker/integrationtest/vm/installation/update_iso.sh" % node_ip
+
 def test():
     test_util.test_dsc('Create test vm to test zstack upgrade by -u.')
 
@@ -39,6 +42,8 @@ def test():
     ssh.make_ssh_no_password(vm_ip,username,password)
     test_stub.copy_id_dsa(vm_inv,ssh_cmd,tmp_file)
     test_stub.copy_id_dsa_pub(vm_inv)
+
+    test_stub.update_iso(ssh_cmd, tmp_file, vm_inv, update_file)
 
     test_util.test_dsc('Update MN IP')
     cmd='%s "zstack-ctl change_ip --ip="%s'%(ssh_cmd,vm_ip)

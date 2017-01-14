@@ -495,3 +495,10 @@ def check_zstack_or_mevoco(ssh_cmd, tmp_file, vm_inv, zom):
     test_util.test_dsc("current version: %s" % version)
     if version != zom:
         test_util.test_fail('try to install %s, but current version is %s' % (zom, version))
+
+def update_iso(ssh_cmd, tmp_file, vm_inv, update_file):
+    scp_file_to_vm(vm_inv, update_file, '/home/update_iso.sh')
+    cmd = '%s chmod +x /home/update_iso.sh' % ssh_cmd
+    (process_result, ouput) = execute_shell_in_process_stdout(cmd, tmp_file)
+    cmd = '%s bash /home/update_iso.sh' % ssh_cmd
+    (process_result, output) = execute_shell_in_process_stdout(cmd, tmp_file)
