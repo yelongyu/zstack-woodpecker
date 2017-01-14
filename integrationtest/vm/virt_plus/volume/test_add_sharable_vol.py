@@ -140,17 +140,22 @@ def test():
     #volume.check()
 
     test_util.test_dsc('Detach volume and check')
-    volume.detach(vm1)
-    volume.detach(vm2)
+    volume.detach(vm1.get_vm().uuid)
+    volume.detach(vm2.get_vm().uuid)
     #volume.check()
 
     test_util.test_dsc('Delete volume and check')
     volume.delete()
+    volume.expunge()
     #volume.check()
     test_obj_dict.rm_volume(volume)
 
-    vm.destroy()
-    vm.check()
+    vm1.destroy()
+    vm2.destroy()
+    vm1.check()
+    vm2.check()
+    vm1.expunge()
+    vm2.expunge()
     test_util.test_pass('Create Data Volume for VM Test Success')
 
 #Will be called only if exception happens in test().
