@@ -482,6 +482,16 @@ def check_zstack_version(ssh_cmd, tmp_file, vm_inv, pkg_version):
     if process_result != 0:
         test_util.test_fail('zstack-ctl get version failed')
     version = version[:-1]
-    test_util.test_dsc("current version: %s" % version)
+    test_util.test_dsc("current version number: %s" % version)
     if version != pkg_version:
         test_util.test_fail('try to install zstack-%s, but current version is zstack-%s' % (pkg_version, version))
+
+def check_zstack_or_mevoco(ssh_cmd, tmp_file, vm_inv, zom):
+    cmd = '%s "/usr/bin/zstack-ctl status" | grep ^version | awk \'{print $3}\'' % ssh_cmd
+    (process_result, version) = execute_shell_in_process_stdout(cmd, tmp_file)
+    if process_result != 0:
+        test_util.test_fail('zstack-ctl get version failed')
+    version = version[1:-1]
+    test_util.test_dsc("current version: %s" % version)
+    if version != zom:
+        test_util.test_fail('try to install %s, but current version is %s' % (zom, version))

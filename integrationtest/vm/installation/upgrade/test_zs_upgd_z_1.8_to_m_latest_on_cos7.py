@@ -22,7 +22,7 @@ def test():
         test_util.test_skip("current test suite is zstack, but this case is for mevoco. Skip test")
 
     test_util.test_dsc('Create test vm to test zstack upgrade by -u.')
-    image_name = os.environ.get('imageName_i_c7_z_1.3')
+    image_name = os.environ.get('imageName_i_c7_z_1.8')
     vm = test_stub.create_vlan_vm(image_name)
     test_obj_dict.add_vm(vm)
     if os.environ.get('zstackManagementIp') == None:
