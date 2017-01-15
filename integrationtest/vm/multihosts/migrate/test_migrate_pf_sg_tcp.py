@@ -35,7 +35,7 @@ def test():
         In this test, will also add SG rules to check the coexistence between
         PF and SG. SG rule will be added onto PF_VM's internal IP.
     '''
-    pf_vm = test_stub.create_vr_vm('migrate_pf_sg_vm1', 'imageName_s', 'l3VlanNetwork2')
+    pf_vm = test_stub.create_vr_vm('migrate_pf_sg_vm1', 'imageName_net', 'l3VlanNetwork2')
     test_obj_dict.add_vm(pf_vm)
 
     l3_name = os.environ.get('l3VlanNetworkName1')
@@ -44,7 +44,7 @@ def test():
     temp_vm1 = None
     if not vrs:
         #create temp_vm1 for getting vlan1's vr for test pf_vm portforwarding
-        temp_vm1 = test_stub.create_vr_vm('migrate_temp_vm1', 'imageName_s', 'l3VlanNetworkName1')
+        temp_vm1 = test_stub.create_vr_vm('migrate_temp_vm1', 'imageName_net', 'l3VlanNetworkName1')
         test_obj_dict.add_vm(temp_vm1)
         vr1 = test_lib.lib_find_vr_by_vm(temp_vm1.vm)[0]
     else:
@@ -56,7 +56,7 @@ def test():
     temp_vm2 = None
     if not vrs:
         #create temp_vm2 for getting novlan's vr for test pf_vm portforwarding
-        temp_vm2 = test_stub.create_vr_vm('migrate_temp_vm2', 'imageName_s', 'l3VlanNetwork3')
+        temp_vm2 = test_stub.create_vr_vm('migrate_temp_vm2', 'imageName_net', 'l3VlanNetwork3')
         test_obj_dict.add_vm(temp_vm2)
         vr2 = test_lib.lib_find_vr_by_vm(temp_vm2.vm)[0]
     else:
