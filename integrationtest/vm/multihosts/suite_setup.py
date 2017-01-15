@@ -15,6 +15,7 @@ import zstackwoodpecker.test_util as test_util
 
 USER_PATH = os.path.expanduser('~')
 EXTRA_SUITE_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_suite_setup_config.sh' % USER_PATH
+EXTRA_HOST_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_host_setup_config.sh' % USER_PATH
 def test():
     #This vlan creation is not a must, if testing is under nested virt env. But it is required on physical host without enough physcial network devices and your test execution machine is not the same one as Host machine. 
     #no matter if current host is a ZStest host, we need to create 2 vlan devs for future testing connection for novlan test cases.
@@ -42,6 +43,9 @@ def test():
         os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
 
     deploy_operations.deploy_initial_database(test_lib.deploy_config)
+    for host in testHosts:
+        os.system("bash %s %s" % (EXTRA_HOST_SETUP_SCRIPT, host.managementIp_))
+
     if test_lib.lib_get_ha_selffencer_maxattempts() != None:
         test_lib.lib_set_ha_selffencer_maxattempts('60')
 	test_lib.lib_set_ha_selffencer_storagechecker_timeout('60')
