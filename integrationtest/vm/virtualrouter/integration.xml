@@ -76,6 +76,7 @@
         <case timeout='800'  repeat='1'>pf/test_udp.py</case>
         <case timeout='800'  repeat='1'>pf/test_vm_ops.py</case>
         <case timeout='800'  repeat='1'>eip/test_2_eips.py</case>
+        <case timeout='800'  repeat='1'>eip/test_2l3s_eips.py</case>
         <case timeout='800'  repeat='1'>eip/test_attach_eip.py</case>
         <case timeout='800'  repeat='1'>eip/test_create_eip_vm.py</case>
         <case timeout='800'  repeat='1'>eip/test_del_vip_before_add_eip_to_vm.py</case>
