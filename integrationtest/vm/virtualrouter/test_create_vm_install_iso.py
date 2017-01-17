@@ -59,13 +59,14 @@ def test():
     test_obj_dict.add_vm(vm)
     
     test_util.test_dsc('wait for iso installation')    
-    time.sleep(1200)    
+    vm_inv = vm.get_vm()
+    vm_ip = vm_inv.vmNics[0].ip
+
+    test_lib.lib_wait_target_up(vm_ip, '22', 2400)
 
     cmd ='[ -e /root ] && echo yes || echo no' 
     ssh_num = 0
     ssh_ok = 0
-    vm_inv = vm.get_vm()
-    vm_ip = vm_inv.vmNics[0].ip
     while ssh_num <= 5 and ssh_ok == 0 :
         rsp = test_lib.lib_execute_ssh_cmd(vm_ip, 'root', 'password', cmd, 180)
         if rsp == False:
