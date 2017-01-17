@@ -381,3 +381,8 @@ def scp_file_to_vm(vm_inv, src_file, target_file):
     vm_username = test_lib.lib_get_vm_username(vm_inv)
     vm_password = test_lib.lib_get_vm_password(vm_inv)
     ssh.scp_file(src_file, target_file, vm_ip, vm_username, vm_password)
+
+def make_ssh_no_password(vm_inv):
+    vm_ip = vm_inv.vmNics[0].ip
+    ssh.make_ssh_no_password(vm_ip, test_lib.lib_get_vm_username(vm_inv), \
+            test_lib.lib_get_vm_password(vm_inv))
