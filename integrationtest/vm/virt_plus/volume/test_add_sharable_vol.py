@@ -112,10 +112,10 @@ def check_sharable_volume(vm1, vm2):
 
 def test():
     test_util.test_dsc('Create test vm and check')
-    vm1 = test_stub.create_vm(image_name="ocfs2-host-image")
+    vm1 = test_stub.create_vm(vm_name="vm1", image_name="ocfs2-host-image")
     test_obj_dict.add_vm(vm1)
 
-    vm2 = test_stub.create_vm(image_name="ocfs2-host-image")
+    vm2 = test_stub.create_vm(vm_name="vm2", image_name="ocfs2-host-image")
     test_obj_dict.add_vm(vm2)
 
     test_util.test_dsc('Create volume and check')

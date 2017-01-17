@@ -999,7 +999,7 @@ def lib_is_vm_vcenter(vm):
         return False
 
 def lib_is_sharable_volume(volume):
-    if volume.isShareable.strip().lower() == "true":
+    if str(volume.isShareable).strip().lower() == "true":
         return True
     else:
         return False
