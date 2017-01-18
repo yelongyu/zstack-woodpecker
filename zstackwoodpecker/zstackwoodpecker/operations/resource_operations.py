@@ -33,6 +33,7 @@ L3_NETWORK = 'L3Network'
 INSTANCE_OFFERING = 'InstanceOffering'
 IMAGE = 'Image'
 VOLUME = 'Volume'
+SHARE_VOLUME = 'ShareVolume'
 VM_INSTANCE = 'VmInstance'
 IP_RANGE = 'IpRange'
 HOST = 'Host'
@@ -299,6 +300,8 @@ def _gen_query_action(resource):
         action = api_actions.QueryImageAction()
     elif resource == VOLUME:
         action = api_actions.QueryVolumeAction()
+    elif resource == SHARE_VOLUME:
+        action = api_actions.QueryShareableVolumeVmInstanceRefAction()
     elif resource == VM_INSTANCE:
         action = api_actions.QueryVmInstanceAction()
     elif resource == IP_RANGE:

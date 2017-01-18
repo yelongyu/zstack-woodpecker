@@ -126,7 +126,7 @@ def test():
 
     volume = test_stub.create_volume(volume_creation_option)
     test_obj_dict.add_volume(volume)
-    #volume.check()
+    volume.check()
 
     test_util.test_dsc('Attach volume and check')
     #mv vm checker later, to save some time.
@@ -137,17 +137,17 @@ def test():
 
     config_ocfs2_vms(vm1, vm2)
     check_sharable_volume(vm1, vm2)
-    #volume.check()
+    volume.check()
 
     test_util.test_dsc('Detach volume and check')
     volume.detach(vm1.get_vm().uuid)
     volume.detach(vm2.get_vm().uuid)
-    #volume.check()
+    volume.check()
 
     test_util.test_dsc('Delete volume and check')
     volume.delete()
     volume.expunge()
-    #volume.check()
+    volume.check()
     test_obj_dict.rm_volume(volume)
 
     vm1.destroy()

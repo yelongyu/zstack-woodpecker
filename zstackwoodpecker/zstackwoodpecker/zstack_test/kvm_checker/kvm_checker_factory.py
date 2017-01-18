@@ -17,6 +17,7 @@ import zstackwoodpecker.header.checker as checker_header
 import zstackwoodpecker.zstack_test.zstack_checker.zstack_db_checker as db_checker
 import zstackwoodpecker.zstack_test.kvm_checker.zstack_kvm_vm_checker as vm_checker
 import zstackwoodpecker.zstack_test.kvm_checker.zstack_kvm_volume_checker as volume_checker
+import zstackwoodpecker.zstack_test.kvm_checker.zstack_kvm_share_volume_checker as share_volume_checker
 import zstackwoodpecker.zstack_test.kvm_checker.zstack_kvm_image_checker as image_checker
 import zstackwoodpecker.zstack_test.kvm_checker.zstack_kvm_security_group_checker as sg_checker
 import zstackwoodpecker.zstack_test.kvm_checker.zstack_kvm_port_forwarding_checker as pf_checker
@@ -134,31 +135,31 @@ class KvmSharableVolumeCheckerFactory(checker_header.CheckerFactory):
         checker_dict = {}
         if test_obj.state == volume_header.CREATED:
             checker_dict[db_checker.zstack_volume_db_checker] = True
-            checker_dict[volume_checker.zstack_kvm_volume_file_checker] = False
+            checker_dict[share_volume_checker.zstack_kvm_share_volume_file_checker] = False
 
         elif test_obj.state == volume_header.ATTACHED:
             checker_dict[db_checker.zstack_volume_db_checker] = True
-            checker_dict[volume_checker.zstack_kvm_volume_file_checker] = True
+            checker_dict[share_volume_checker.zstack_kvm_share_volume_file_checker] = True
             if not test_obj.target_vm.state == vm_header.DESTROYED:
-                checker_dict[db_checker.zstack_volume_attach_db_checker] = True
+                checker_dict[db_checker.zstack_share_volume_attach_db_checker] = True
                 if test_obj.target_vm.state == vm_header.RUNNING:
-                    checker_dict[volume_checker.zstack_kvm_volume_attach_checker] = True
+                    checker_dict[share_volume_checker.zstack_kvm_share_volume_attach_checker] = True
             else:
-                checker_dict[db_checker.zstack_volume_attach_db_checker] = False
+                checker_dict[db_checker.zstack_share_volume_attach_db_checker] = False
 
         elif test_obj.state == volume_header.DETACHED:
             checker_dict[db_checker.zstack_volume_db_checker] = True
-            checker_dict[db_checker.zstack_volume_attach_db_checker] = False
-            checker_dict[volume_checker.zstack_kvm_volume_attach_checker] = False
-            checker_dict[volume_checker.zstack_kvm_volume_file_checker] = True
+            checker_dict[db_checker.zstack_share_volume_attach_db_checker] = False
+            checker_dict[share_volume_checker.zstack_kvm_share_volume_attach_checker] = False
+            checker_dict[share_volume_checker.zstack_kvm_share_volume_file_checker] = True
 
         elif test_obj.state == volume_header.DELETED:
             checker_dict[db_checker.zstack_volume_db_checker] = True
-            checker_dict[volume_checker.zstack_kvm_volume_file_checker] = True
+            checker_dict[share_volume_checker.zstack_kvm_share_volume_file_checker] = True
 
         elif test_obj.state == volume_header.EXPUNGED:
             checker_dict[db_checker.zstack_volume_db_checker] = False
-            checker_dict[volume_checker.zstack_kvm_volume_file_checker] = False
+            checker_dict[share_volume_checker.zstack_kvm_share_volume_file_checker] = False
 
         kvm_volume_checker_chain.add_checker_dict(checker_dict, test_obj)
         return kvm_volume_checker_chain

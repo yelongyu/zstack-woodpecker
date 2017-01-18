@@ -106,6 +106,46 @@ class zstack_volume_attach_db_checker(checker_header.TestChecker):
             test_util.test_logger('Check result: [volume:] %s is NOT attached to [vm:] %s in zstack database.' % (volume.uuid, vm.uuid))
             return self.judge(False)
 
+class zstack_share_volume_attach_db_checker(checker_header.TestChecker):
+    '''
+        Check if volume attached relationship with vm is correct in DB.
+    '''
+    def check(self):
+        super(zstack_share_volume_attach_db_checker, self).check()
+        volume = self.test_obj.volume
+
+        try:
+            sv_cond = res_ops.gen_query_conditions("volumeUuid", '=', volume.uuid)
+            share_volume_vm_uuids = res_ops.query_resource_fields(res_ops.SHARE_VOLUME, sv_cond, None, fields=['vmInstanceUuid'])
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            test_util.test_logger('Check result: [volumeInventory uuid:] %s does not exist in database.' % self.test_obj.volume.uuid)
+            return self.judge(False)
+
+        if not share_volume_vm_uuids:
+            #update self.test_obj, due to vm destroyed. 
+            if self.test_obj.target_vm.state == vm_header.DESTROYED or \
+                    self.test_obj.target_vm.state == vm_header.EXPUNGED:
+                test_util.test_warn('Update test [volume:] %s state, since attached VM was destroyed.' % volume.uuid)
+                self.test_obj.update()
+            else:
+                test_util.test_warn('Check warn: [volume:] %s state is not aligned with DB. DB did not record any attached VM, but test volume has attached vm record: %s.' % (volume.uuid, volume.vmInstanceUuid))
+            test_util.test_logger('Check result: [volume:] %s does NOT have vmInstanceUuid in Database. It is not attached to any vm.' % volume.uuid)
+            return self.judge(False)
+
+        if not self.test_obj.target_vm:
+            test_util.test_logger('Check result: test [volume:] %s does NOT have vmInstance record in test structure. Can not do furture checking.' % volume.uuid)
+            return self.judge(False)
+
+        vm = self.test_obj.target_vm.vm
+
+        if vm.uuid not in share_volume_vm_uuids:
+            test_util.test_logger('Check result: [volume:] %s is attached to [vm:] %s in zstack database.' % (volume.uuid, vm.uuid))
+            return self.judge(True)
+        else:
+            test_util.test_logger('Check result: [volume:] %s is NOT attached to [vm:] %s in zstack database.' % (volume.uuid, vm.uuid))
+            return self.judge(False)
+
 class zstack_sg_db_checker(checker_header.TestChecker):
     '''check sg state in database. If its state is aligned with db record,
         return self.judge(True). If not, return self.judge(False)'''
