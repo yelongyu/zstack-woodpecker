@@ -48,9 +48,9 @@ def test():
     test_util.test_dsc('Update MN IP')
     cmd = '%s "zstack-ctl change_ip --ip="%s ' % (ssh_cmd, vm_ip)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
-    cmd = '%s "zstack-ctl start"' % ssh_cmd
-    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
-    test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
+#    cmd = '%s "zstack-ctl start"' % ssh_cmd
+#    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+#    test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
 
     pkg_num = 1.6
     curren_num = float(os.environ.get('releasePkgNum'))

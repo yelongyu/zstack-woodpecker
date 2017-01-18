@@ -59,9 +59,9 @@ def test():
     cmd = '%s "zstack-ctl kairosdb --start"' % (ssh_cmd)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
 
-    cmd = '%s "zstack-ctl start"' % ssh_cmd
-    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
-    test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
+#    cmd = '%s "zstack-ctl start"' % ssh_cmd
+#    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+#    test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
 
     test_util.test_dsc('Upgrade zstack to latest') 
     upgrade_target_file = '/root/zstack-upgrade-all-in-one.tgz' 

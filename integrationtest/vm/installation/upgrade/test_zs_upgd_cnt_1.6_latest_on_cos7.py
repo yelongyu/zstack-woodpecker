@@ -59,9 +59,9 @@ def test():
     cmd = '%s "zstack-ctl kairosdb --start"' % (ssh_cmd)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
 
-    cmd = '%s "zstack-ctl start"' % ssh_cmd
-    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
-    test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
+#    cmd = '%s "zstack-ctl start"' % ssh_cmd
+#    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+#    test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
 
     pkg_num = 1.7
     curren_num = float(os.environ.get('releasePkgNum'))

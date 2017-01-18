@@ -46,11 +46,11 @@ def test():
     test_stub.update_iso(ssh_cmd, tmp_file, vm_inv, update_file)
 
     test_util.test_dsc('Update MN IP')
-    cmd = '%s "zstack-ctl change_ip --ip="%s ' % (ssh_cmd, vm_ip)
+    cmd = '%s "zstack-ctl change_ip --ip="%s ' % (ssh_cmd, vm_ip
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
-    cmd = '%s "zstack-ctl start"' % ssh_cmd
-    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
-    test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
+#    cmd = '%s "zstack-ctl start"' % ssh_cmd
+#    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+#    test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
 
     test_util.test_dsc('Upgrade zstack to latest') 
     upgrade_target_file = '/root/zstack-upgrade-all-in-one.tgz' 
