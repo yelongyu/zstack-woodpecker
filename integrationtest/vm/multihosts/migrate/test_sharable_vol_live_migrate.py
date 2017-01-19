@@ -15,12 +15,10 @@ test_obj_dict = test_state.TestStateDict()
 
 def test():
     test_util.test_dsc('Create test vm and check')
-    #vm1 = test_stub.create_vm(vm_name="vm1", image_name="ocfs2-host-image")
-    vm1 = test_stub.create_vm(vm_name="vm1")
+    vm1 = test_stub.create_vr_vm('vm1', 'imageName_net', 'l3VlanNetwork3')
     test_obj_dict.add_vm(vm1)
 
-    #vm2 = test_stub.create_vm(vm_name="vm2", image_name="ocfs2-host-image")
-    vm2 = test_stub.create_vm(vm_name="vm2")
+    vm2 = test_stub.create_vr_vm('vm2', 'imageName_net', 'l3VlanNetwork3')
     test_obj_dict.add_vm(vm2)
 
     test_util.test_dsc('Create volume and check')
