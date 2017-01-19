@@ -22,14 +22,14 @@ def test():
     l3_uuid = vm.get_vm().vmNics[0].l3NetworkUuid
     test_obj_dict.add_vm(vm)
 
-    net_bandwidth = 512
-    vm_nic = test_lib.lib_get_vm_nic_by_l3(vm3.vm, l3_uuid)
-    vm_ops.set_vm_nic_qos(vm.get_vm().uuid, vm_nic.uuid, outboundBandwidth=net_bandwidth*1024)
+    net_bandwidth = 512 * 1024
+    vm_nic = test_lib.lib_get_vm_nic_by_l3(vm.vm, l3_uuid)
+    vm_ops.set_vm_nic_qos(vm_nic.uuid, outboundBandwidth=net_bandwidth)
     vm.check()
     time.sleep(1)
-    test_stub.make_ssh_no_password(vm_inv)
-    test_stub.create_test_file(vm_inv, net_bandwidth)
-    test_stub.test_scp_vm_outbound_speed(vm_inv, net_bandwidth)
+    test_stub.make_ssh_no_password(vm.get_vm())
+    test_stub.create_test_file(vm.get_vm(), net_bandwidth)
+    test_stub.test_scp_vm_outbound_speed(vm.get_vm(), net_bandwidth)
     test_lib.lib_robot_cleanup(test_obj_dict)
 
     test_util.test_pass('VM Network QoS change instance offering Test Pass')
