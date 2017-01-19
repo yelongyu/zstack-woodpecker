@@ -125,9 +125,10 @@ def test():
     bss = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, bs_cond, None, fields=['uuid'])
     bs_ops.reconnect_backup_storage(bss[0].uuid)
     image_cond = res_ops.gen_query_conditions("name", '=', image_name)
-    img_inv = res_ops.query_resource_fields(res_ops.IMAGE, image_cond, None, fields=['uuid'])[0]
-    img_uuid = img_inv.uuid
-    if img_uuid:
+    #img_inv = res_ops.query_resource_fields(res_ops.IMAGE, image_cond, None, fields=['uuid'])[0]
+    #img_uuid = img_inv.uuid
+    img_inv = res_ops.query_resource_fields(res_ops.IMAGE, image_cond, None, fields=['uuid'])
+    if img_inv:
         test_util.test_fail("local woodpecker image is not deleted as expected")
 
 
