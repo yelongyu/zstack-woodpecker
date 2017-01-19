@@ -13,10 +13,12 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import apibinding.inventory as inventory
 import threading
 import time
-threads_num = 20
+threads_num = 1
 vms = [None] * threads_num
 threads = [None] * threads_num
+threads_result = [None] * threads_num
 checker_threads = [None] * threads_num
+checker_threads_result = [None] * threads_num
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
@@ -24,8 +26,9 @@ def migrate_volume(index):
     target_host = test_lib.lib_find_random_host(vms[index].get_vm())
     vms[index].stop()
     vol_ops.migrate_volume(vms[index].get_vm().allVolumes[0].uuid, target_host.uuid)
+    threads_result[index] = "Done"
 
-def check_migrate_volume_progress(volume_uuid, target_host_uuid):
+def check_migrate_volume_progress(index):
     for i in range(0, 100):
         vms[index].update()
 	if vms[index].get_vm().allVolumes[0].status == 'Migrating':
@@ -52,6 +55,7 @@ def check_migrate_volume_progress(volume_uuid, target_host_uuid):
     vms[index].update()
     if vms[index].get_vm().allVolumes[0].status != 'Migrating':
         test_util.test_fail("Volume should be ready when no progress anymore")
+    checker_threads_result[index] = "Done"
 
 def test():
     global vms
@@ -73,6 +77,12 @@ def test():
     for i in range(0, threads_num):
         checker_threads[i].join()
         threads[i].join()
+
+    for i in range(0, threads_num):
+        if threads_result[i] != "Done":
+            test_util.test_fail("Exception happened during migrate Volume")
+        if checker_threads_result[i] != "Done":
+            test_util.test_fail("Exception happened during check migrate Volume progress")
 
     for i in range(0, threads_num):
         vms[i].destroy()
