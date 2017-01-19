@@ -301,7 +301,7 @@ def set_vm_nic_qos(nic_uuid, outboundBandwidth=None, inboundBandwidth=None, sess
     action = api_actions.SetNicQosAction()
     action.uuid = nic_uuid
     action.outboundBandwidth = outboundBandwidth
-    actoin.inboundBandwidth = inboundBandwidth
+    action.inboundBandwidth = inboundBandwidth
 
     test_util.action_logger('SetNicQos [nic:] %s' % (nic_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
