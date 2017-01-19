@@ -139,9 +139,9 @@ def test():
     check_sharable_volume(vm1, vm2)
     volume.check()
 
-    vm1.pause()
+    vm1.suspend()
     volume.check()
-    vm2.pause()
+    vm2.suspend()
     volume.check()
     vm1.resume()
     volume.check()
