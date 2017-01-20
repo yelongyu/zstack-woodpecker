@@ -22,7 +22,7 @@ def test():
     test_obj_dict.add_vm(vm2)
 
     test_util.test_dsc('Create volume and check')
-    disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName'))
+    disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('largeDiskOfferingName'))
     volume_creation_option = test_util.VolumeOption()
     volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
     volume_creation_option.set_system_tags(['ephemeral::shareable', 'capability::virtio-scsi'])
