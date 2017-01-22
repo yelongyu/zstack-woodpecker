@@ -1322,10 +1322,13 @@ def lib_find_random_host(vm = None):
         current_host_uuid = current_host.uuid
 
     all_hosts = lib_get_cluster_hosts(cluster_id)
+    # TODO: it should select non-root host for migrate after cold migrate issue is fixed
     for host in all_hosts:
         if host.uuid != current_host_uuid and \
                 host.status == host_header.CONNECTED and \
-                host.state == host_header.ENABLED:
+                host.state == host_header.ENABLED and \
+                host.username == 'root' and \
+                host.sshPort == '22':
             target_hosts.append(host)
 
     if not target_hosts:
