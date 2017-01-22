@@ -347,3 +347,21 @@ def del_vm_disk_qos(volume_uuid, session_uuid = None):
     test_util.action_logger('DeleteVolumeQos [volume:] %s' % (volume_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
+
+def get_vm_qga_enable(vm_uuid, session_uuid = None):
+    action = api_actions.GetVmQgaEnableAction()
+    action.uuid = vm_uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def set_vm_qga_enable(vm_uuid, session_uuid = None):
+    action = api_actions.SetVmQgaEnableAction()
+    action.uuid = vm_uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def set_vm_qga_disable(vm_uuid, session_uuid = None):
+    action = api_actions.SetVmQgaDisableAction()
+    action.uuid = vm_uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt

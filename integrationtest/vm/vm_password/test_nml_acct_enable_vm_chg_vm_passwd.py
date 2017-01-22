@@ -58,7 +58,8 @@ def test():
             exist_users.append(usr)
 
         #When vm is running:
-        res_ops.enable_change_vm_password("true", vm.get_vm().uuid, 'VmInstanceVO', session_uuid = test_account_session)
+        #res_ops.enable_change_vm_password("true", vm.get_vm().uuid, 'VmInstanceVO', session_uuid = test_account_session)
+        vm_ops.set_vm_qga_enable(vm.get_vm().uuid, session_uuid = test_account_session)
         vm_ops.change_vm_password(vm.get_vm().uuid, usr, passwd, skip_stopped_vm = None, session_uuid = test_account_session)
 
         if not test_lib.lib_check_login_in_vm(vm.get_vm(), usr, passwd):

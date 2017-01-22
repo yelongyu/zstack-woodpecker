@@ -8,6 +8,7 @@ import hashlib
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.vm_operations as vm_ops
+import zstackwoodpecker.operations.image_operations as img_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstacklib.utils.ssh as ssh
@@ -41,7 +42,8 @@ def test():
     img_cond = res_ops.gen_query_conditions("name", '=', "centos7-installation-no-system-tag")
     img_inv = res_ops.query_resource_fields(res_ops.IMAGE, img_cond, None)
     image_uuid = img_inv[0].uuid
-    res_ops.enable_change_vm_password("true", image_uuid, 'ImageVO', session_uuid = test_account_session)
+    #res_ops.enable_change_vm_password("true", image_uuid, 'ImageVO', session_uuid = test_account_session)
+    img_ops.set_image_qga_enable(image_uuid, session_uuid = test_account_session)
     vm = test_stub.create_vm(vm_name = 'c7-vm-no-sys-tag', image_name = "imageName_i_c7_no_tag", session_uuid = test_account_session)
     vm.check()
 
@@ -71,7 +73,8 @@ def test():
         vm_ops.change_vm_password(vm.get_vm().uuid, "root", test_stub.original_root_password, session_uuid = test_account_session)
         vm.check()
 
-    res_ops.enable_change_vm_password("false", img_inv[0].uuid, 'ImageVO', session_uuid = test_account_session)
+    #res_ops.enable_change_vm_password("false", img_inv[0].uuid, 'ImageVO', session_uuid = test_account_session)
+    img_ops.set_image_qga_disable(img_inv[0].uuid, session_uuid = test_account_session)
     vm.destroy(test_account_session)
     vm.check()
     vm.expunge(test_account_session)
@@ -84,7 +87,8 @@ def test():
 def error_cleanup():
     global vm, test_account_uuid, test_account_session, image_uuid
     if image_uuid:
-        res_ops.enable_change_vm_password("false", image_uuid, 'ImageVO', session_uuid = test_account_session)
+        #res_ops.enable_change_vm_password("false", image_uuid, 'ImageVO', session_uuid = test_account_session)
+        img_ops.set_image_qga_disable(image_uuid, session_uuid = test_account_session)
     if vm:
         vm.destroy(test_account_session)
     if test_account_uuid:

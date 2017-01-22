@@ -220,3 +220,22 @@ def detach_iso(vm_uuid, session_uuid = None):
     test_util.action_logger('Detach ISO from VM[UUID: %s]' % (vm_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory    
+
+def get_image_qga_enable(img_uuid, session_uuid = None):
+    action = api_actions.GetImageQgaEnableAction()
+    action.uuid = img_uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def set_image_qga_enable(img_uuid, session_uuid = None):
+    action = api_actions.SetImageQgaEnableAction()
+    action.uuid = img_uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def set_image_qga_disable(img_uuid, session_uuid = None):
+    action = api_actions.SetImageQgaDisableAction()
+    action.uuid = img_uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
