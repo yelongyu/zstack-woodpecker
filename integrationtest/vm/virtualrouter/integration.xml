@@ -49,6 +49,7 @@
         <case timeout='700' repeat='1'>volume/test_crt_vm_from_dvt.py</case>
 	<case timeout='700' repeat='1'>volume/test_crt_vm_2_virtio_scsi_volumes.py</case>
 	<case timeout='700' repeat='1'>volume/test_crt_vm_3_virtio_scsi_volumes.py</case>
+	<case timeout='700' repeat='1'>volume/test_crt_vm_24_virtio_scsi_volumes.py</case>
         <case timeout='700' repeat='1' noparallel='True'>volume/test_create_large_vm_2_local_ps.py</case>
         <case timeout='800' repeat='1'>template_image/test_crt_temp_image.py</case>
         <case timeout='700' repeat='1'>template_image/test_del_temp_image.py</case>
