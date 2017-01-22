@@ -67,33 +67,34 @@ def test():
     vm = test_stub.create_vm_in_vcenter(vm_name = sync_vm, image_name = sync_image_name, l3_name = network_pattern1)
     vm.check()
 
-
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco1_ip
     vm_cond = res_ops.gen_query_conditions("name", '=', sync_vm)
-    vm_inv = res_ops.query_resource_fields(res_ops.VM_INSTANCE, vm_cond, None, fields=['uuid', 'state'])[0]
-    vm_uuid = vm_inv.uuid
-    vm_state = vm_inv.state.strip().lower()
+    vm_inv = res_ops.query_resource_fields(res_ops.VM_INSTANCE, vm_cond, None, fields=['uuid', 'state'])
+    if not vm_inv:
+        test_util.test_fail("not found target vm being sync")
+
+    vm_uuid = vm_inv[0].uuid
     if not vm_uuid:
-        test_util.test_fail("local woodpecker vm uuid is null")
-    elif vm_state != "running":
+        test_util.test_fail("remote woodpecker vm uuid is null")
+
+    vm_state = vm_inv[0].state.strip().lower()
+    if vm_state != "running":
         test_util.test_fail("vcenter sync vm start failed.")
 
 
 
     #delete vm in remote and check
     test_util.test_logger("delete vm for sync test")
-    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
-    vm_inv = res_ops.query_resource_fields(res_ops.VM_INSTANCE, vm_cond, None, fields=['uuid', 'state'])[0]
-    vm_uuid = vm_inv.uuid
-    vm_state = vm_inv.state.strip().lower()
-
-    if not vm_uuid:
-        test_util.test_fail("remote woodpecker vm uuid is null")
-
     if vm_uuid:
         vm_ops.destroy_vm(vm_uuid)
         vm_ops.expunge_vm(vm_uuid)
-    
+
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
+    vm_inv = res_ops.query_resource_fields(res_ops.VM_INSTANCE, vm_cond, None, fields=['uuid', 'state'])
+    if vm_inv:
+        test_util.test_fail("found the expected deleted vm")
+
+
 
 
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
