@@ -23,8 +23,8 @@ def test():
     test_util.test_dsc('Test VM network bandwidth QoS by 1MB')
 
     #unit is KB
-    net_bandwidth1 = 1024
-    new_offering1 = test_lib.lib_create_instance_offering(net_outbound_bandwidth = net_bandwidth1)
+    net_bandwidth1 = 2*1024
+    new_offering1 = test_lib.lib_create_instance_offering(net_outbound_bandwidth = net_bandwidth1*1024*8)
 
     test_obj_dict.add_instance_offering(new_offering1)
     new_offering_uuid = new_offering1.uuid
@@ -35,8 +35,8 @@ def test():
 
     vm.stop()
 
-    net_bandwidth2 = 512
-    new_offering2 = test_lib.lib_create_instance_offering(net_outbound_bandwidth = net_bandwidth2)
+    net_bandwidth2 = 1*1024
+    new_offering2 = test_lib.lib_create_instance_offering(net_outbound_bandwidth = net_bandwidth2*1024*8)
 
     test_obj_dict.add_instance_offering(new_offering2)
     new_offering_uuid = new_offering2.uuid
