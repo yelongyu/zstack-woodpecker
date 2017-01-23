@@ -24,7 +24,7 @@ def test():
     test_util.test_dsc('Test VM 2nic outbound & inbound bandwidth QoS by 1MB')
 
     #unit is KB
-    net_bandwidth = 2 * 1024
+    net_bandwidth = 1 * 1024
 
     vm1 = test_stub.create_vm(vm_name = 'vm_net_inbound_outbound_qos', l3_name=os.environ.get('l3PublicNetworkName'))
     l3_net_uuid2 = test_lib.lib_get_l3_by_name(os.environ.get('l3VlanNetworkName1')).uuid
@@ -61,7 +61,7 @@ def test():
 
     # Set a single nic to smaller bandwidth
     vm_nic = test_lib.lib_get_vm_nic_by_l3(vm1.vm, l3_net_uuid2)
-    vm_ops.set_vm_nic_qos(vm_nic.uuid, outboundBandwidth=net_bandwidth/2)
+    vm_ops.set_vm_nic_qos(vm_nic.uuid, outboundBandwidth=net_bandwidth*8*1024/2)
 
     test_stub.test_scp_outbound_speed(vm1_ip, test_lib.lib_get_vm_nic_by_l3(vm2.get_vm(), l3_net_uuid2).ip, net_bandwidth/2)
     #l3_net_uuid = test_lib.lib_get_l3_by_name(os.environ.get('l3PublicNetworkName')).uuid

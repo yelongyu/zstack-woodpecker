@@ -50,7 +50,7 @@ def test():
 
     # Set a single nic to smaller bandwidth
     vm_nic = test_lib.lib_get_vm_nic_by_l3(vm1.vm, l3_net_uuid2)
-    vm_ops.set_vm_nic_qos(vm_nic.uuid, outboundBandwidth=net_bandwidth/2)
+    vm_ops.set_vm_nic_qos(vm_nic.uuid, outboundBandwidth=net_bandwidth*8*1024/2)
     vm1.stop()
     vm2.stop()
     vm1.start()
