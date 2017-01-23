@@ -36,7 +36,7 @@ def test():
     vcenter1_username = os.environ['vcenter2_domain_name']
     vcenter1_password = os.environ['vcenter2_password']
     sync_vm = os.environ['vcenter2_sync_vm_create_delete']
-    sync_image_name = os.environ['vcenter2_sync_image_name']
+    sync_image_name = os.environ['vcenter2_template_exist']
     network_pattern1 = os.environ['vcenter2_network_pattern1']
 
 
