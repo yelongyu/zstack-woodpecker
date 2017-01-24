@@ -29,12 +29,12 @@ def migrate_volume(index):
     threads_result[index] = "Done"
 
 def check_migrate_volume_progress(index):
-    for i in range(0, 100):
+    for i in range(0, 3600):
         if res_ops.get_task_progress(vms[index].get_vm().allVolumes[0].uuid).progress != None :
             break
         time.sleep(0.1)
     if res_ops.get_task_progress(vms[index].get_vm().allVolumes[0].uuid).progress == None :
-        test_util.test_fail("volume not start migrating in 10 seconds")
+        test_util.test_fail("volume not start migrating in 360 seconds")
 
     progress = res_ops.get_task_progress(vms[index].get_vm().allVolumes[0].uuid)
 
@@ -48,7 +48,7 @@ def check_migrate_volume_progress(index):
             break
 
         if progress.progress < last_progress.progress:
-            test_util.test_fail("Progress of task is smaller than last time")
+            test_util.test_fail("Progress of task (%s) is smaller than last time" % (vms[index].get_vm().allVolumes[0].uuid))
         time.sleep(0.1)
 
 #    vms[index].update()
