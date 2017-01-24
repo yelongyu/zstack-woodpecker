@@ -13,7 +13,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import apibinding.inventory as inventory
 import threading
 import time
-threads_num = 1
+threads_num = 20
 vms = [None] * threads_num
 threads = [None] * threads_num
 threads_result = [None] * threads_num
@@ -30,14 +30,13 @@ def migrate_volume(index):
 
 def check_migrate_volume_progress(index):
     for i in range(0, 100):
-        vms[index].update()
-	if vms[index].get_vm().allVolumes[0].status == 'Migrating':
+        if res_ops.get_task_progress(vms[index].get_vm().allVolumes[0].uuid).progress != None :
             break
         time.sleep(0.1)
-    if vms[index].get_vm().allVolumes[0].status != 'Migrating':
+    if res_ops.get_task_progress(vms[index].get_vm().allVolumes[0].uuid).progress == None :
         test_util.test_fail("volume not start migrating in 10 seconds")
 
-    progress = res_ops.get_task_progress(vm.get_vm().allVolumes[0].uuid)
+    progress = res_ops.get_task_progress(vms[index].get_vm().allVolumes[0].uuid)
 
     if int(progress.progress) < 0 or int(progress.progress) > 100:
         test_util.test_fail("Progress of task should be between 0 and 100, while it actually is %s" % (progress.progress))
@@ -52,9 +51,10 @@ def check_migrate_volume_progress(index):
             test_util.test_fail("Progress of task is smaller than last time")
         time.sleep(0.1)
 
-    vms[index].update()
-    if vms[index].get_vm().allVolumes[0].status != 'Migrating':
-        test_util.test_fail("Volume should be ready when no progress anymore")
+#    vms[index].update()
+#    if vms[index].get_vm().allVolumes[0].status != 'Migrating':
+#        test_util.test_fail("Volume should be ready when no progress anymore")
+    vms[index].start()
     checker_threads_result[index] = "Done"
 
 def test():
