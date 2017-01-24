@@ -1328,7 +1328,7 @@ def lib_find_random_host(vm = None):
                 host.status == host_header.CONNECTED and \
                 host.state == host_header.ENABLED and \
                 host.username == 'root' and \
-                host.sshPort == '22':
+                host.sshPort == 22:
             target_hosts.append(host)
 
     if not target_hosts:
