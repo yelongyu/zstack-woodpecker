@@ -233,7 +233,7 @@ def install_fio(vm_inv):
     if  execute_shell_in_process(cmd, timeout) != 0:
         test_util.test_fail('fio installation failed.')
 
-def test_fio_iops(vm_inv, iops):
+def test_fio_iops(vm_inv, iops, raise_exception = True):
     def cleanup_log():
         logfd.close()
         os.system('rm -f %s' % tmp_file)
@@ -258,6 +258,9 @@ def test_fio_iops(vm_inv, iops):
         logfd = open(tmp_file, 'r')
         test_util.test_logger('test_fio_bandwidth log: %s ' % '\n'.join(logfd.readlines()))
         cleanup_log()
+        if not raise_exception:
+            test_util.test_logger('fio test failed.')
+            return False
         test_util.test_fail('fio test failed.')
 
     logfd.close()
@@ -275,6 +278,9 @@ def test_fio_iops(vm_inv, iops):
 
     #cleanup_log()
     if bw == 0:
+        if not raise_exception:
+            test_util.test_logger('Did not get bandwidth for fio test')
+            return False
         test_util.test_fail('Did not get bandwidth for fio test')
 
     if bw == iops or bw < (iops - 10):
@@ -282,10 +288,11 @@ def test_fio_iops(vm_inv, iops):
         return True
     else:
         test_util.test_logger('disk iops :%s is not same with %s' % (bw, iops))
-        test_util.test_fail('fio bandwidth test fails')
+        if raise_exception:
+            test_util.test_fail('fio bandwidth test fails')
         return False
 
-def test_fio_bandwidth(vm_inv, bandwidth, path = '/tmp'):
+def test_fio_bandwidth(vm_inv, bandwidth, path = '/tmp', raise_exception=True):
     def cleanup_log():
         logfd.close()
         os.system('rm -f %s' % tmp_file)
@@ -310,6 +317,9 @@ def test_fio_bandwidth(vm_inv, bandwidth, path = '/tmp'):
         logfd = open(tmp_file, 'r')
         test_util.test_logger('test_fio_bandwidth log: %s ' % '\n'.join(logfd.readlines()))
         cleanup_log()
+        if not raise_exception:
+            test_util.test_logger('fio test failed.')
+            return False
         test_util.test_fail('fio test failed.')
 
     logfd.close()
@@ -327,6 +337,9 @@ def test_fio_bandwidth(vm_inv, bandwidth, path = '/tmp'):
 
     #cleanup_log()
     if bw == 0:
+        if not raise_exception:
+            test_util.test_logger('Did not get bandwidth for fio test')
+            return False
         test_util.test_fail('Did not get bandwidth for fio test')
 
     bw_up_limit = bandwidth/1024 + 10240
@@ -338,7 +351,8 @@ def test_fio_bandwidth(vm_inv, bandwidth, path = '/tmp'):
     else:
         test_util.test_logger('disk bandwidth:%s is not between %s and %s' \
                 % (bw, bw_down_limit, bw_up_limit))
-        test_util.test_fail('fio bandwidth test fails')
+        if raise_exception:
+            test_util.test_fail('fio bandwidth test fails')
         return False
 
 def create_volume(volume_creation_option=None, session_uuid = None):
