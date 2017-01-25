@@ -315,9 +315,10 @@ def get_vm_nic_qos(nic_uuid, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def del_vm_nic_qos(nic_uuid, session_uuid = None):
+def del_vm_nic_qos(nic_uuid, direction, session_uuid = None):
     action = api_actions.DeleteNicQosAction()
     action.uuid = nic_uuid
+    action.direction = direction
 
     test_util.action_logger('DeleteNicQos [nic:] %s' % (nic_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
