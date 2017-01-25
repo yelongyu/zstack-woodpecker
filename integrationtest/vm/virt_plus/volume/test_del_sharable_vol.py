@@ -145,10 +145,26 @@ def test():
     #volume.check()
 
     test_util.test_dsc('Delete volume and check')
+    sv_cond = res_ops.gen_query_conditions("volumeUuid", '=', volume.get_volume().uuid)
+    share_volume_vm_uuid_objs = res_ops.query_resource_fields(res_ops.SHARE_VOLUME, sv_cond, None, fields=['vmInstanceUuid'])
+    share_volume_vm_uuids = []
+    for vm_uuid_obj in share_volume_vm_uuid_objs:
+        share_volume_vm_uuids.append(vm_uuid_obj.vmInstanceUuid)
+
+    if vm1.get_vm().uuid not in share_volume_vm_uuids:
+        test_util.test_fail("target vm uuid: %s; but the attached vm list is %s" %(vm1.get_vm().uuid, str(share_volume_vm_uuids)))
+
     volume.delete()
     volume.expunge()
     volume.check()
     test_obj_dict.rm_volume(volume)
+
+    share_volume_vm_uuid_objs = res_ops.query_resource_fields(res_ops.SHARE_VOLUME, sv_cond, None, fields=['vmInstanceUuid'])
+    share_volume_vm_uuids = []
+    for vm_uuid_obj in share_volume_vm_uuid_objs:
+        share_volume_vm_uuids.append(vm_uuid_obj.vmInstanceUuid)
+    if vm1.get_vm().uuid in share_volume_vm_uuids:
+        test_util.test_fail("deleted vm still have shareable volume attached to it.")
 
     vm1.destroy()
     vm2.destroy()

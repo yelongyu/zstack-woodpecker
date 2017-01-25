@@ -135,6 +135,9 @@ def test():
     volume.attach(vm1)
     volume.attach(vm2)
 
+    vm1.reboot()
+    vm1.check()
+
     config_ocfs2_vms(vm1, vm2)
     check_sharable_volume(vm1, vm2)
     volume.check()
