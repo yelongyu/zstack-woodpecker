@@ -6,6 +6,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstacklib.utils.ssh as ssh
+import zstackwoodpecker.operations.resource_operations as res_ops
 import os
 
 
