@@ -11,6 +11,7 @@ import zstacklib.utils.http as  http
 import zstacktestagent.plugins.host as host_plugin
 import zstacktestagent.testagent as testagent
 
+import zstackwoodpecker.operations.scenario_operations as scenario_operations
 import zstackwoodpecker.operations.deploy_operations as deploy_operations
 import zstackwoodpecker.operations.config_operations as config_operations
 import zstackwoodpecker.test_lib as test_lib
@@ -21,6 +22,10 @@ EXTRA_SUITE_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_suite_setup_config.sh' % 
 EXTRA_HOST_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_host_setup_config.sh' % USER_PATH
 
 def test():
+    if test_lib.scenario_config != None and test_lib.scenario_file != None and not os.path.exists(test_lib.scenario_file):
+        scenario_operations.deploy_scenario(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
+        test_util.test_skip('Suite Setup Success')
+
     #This vlan creation is not a must, if testing is under nested virt env. But it is required on physical host without enough physcial network devices and your test execution machine is not the same one as Host machine. 
     #linux.create_vlan_eth("eth0", 10, "10.0.0.200", "255.255.255.0")
     #linux.create_vlan_eth("eth0", 11, "10.0.1.200", "255.255.255.0")
@@ -43,7 +48,7 @@ def test():
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd)
 
     test_lib.setup_plan.execute_plan_without_deploy_test_agent()
-    deploy_operations.deploy_initial_database(test_lib.deploy_config)
+    deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config)
     if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
     for host in hosts:

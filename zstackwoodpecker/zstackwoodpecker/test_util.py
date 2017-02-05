@@ -165,6 +165,59 @@ class TestConfig(object):
         if self.deploy_config_template_path:
             set_env_var_from_config_template(self.deploy_config_template_path)
 
+class TestScenario(object):
+    def __init__(self, config_path):
+        self.config_path = config_path
+        if not config_path:
+            raise TestError('Test config file (test-config.xml) path is not set')
+        self.config_base_path = os.path.dirname(os.path.abspath(config_path))
+        self.deploy_config_template_path = None
+
+    def _full_path(self, path):
+        if path.startswith('~'):
+            return os.path.expanduser(path)
+        elif path.startswith('/'):
+            return path
+        else:
+            return os.path.join(self.config_base_path, path)
+
+    def get_test_config(self):
+        cfg_path = os.path.abspath(self.config_path)
+        with open(cfg_path, 'r') as fd:
+            xmlstr = fd.read()
+            fd.close()
+            config = xmlobject.loads(xmlstr)
+            return config
+
+    def get_scenario_config(self):
+        config = self.get_test_config()
+
+        scenario_config_template_path = config.get('scenarioConfigTemplate')
+        if scenario_config_template_path:
+            scenario_config_template_path = self._full_path(scenario_config_template_path)
+            if not os.path.exists(scenario_config_template_path):
+                raise TestError('unable to find %s' % scenario_config_template_path)
+            self.scenario_config_template_path = scenario_config_template_path
+        else:
+            raise TestError('not define test scenario config xml file by <scenarioConfigTemplate> in: %s' % self.config_path)
+    
+        scenario_config_path = self._full_path(config.scenarioConfig.text_)
+        if not os.path.exists(scenario_config_path):
+            raise TestError('unable to find %s' % scenario_config_path)
+    
+        if scenario_config_template_path:
+            scenario_config = build_deploy_xmlobject_from_configure(scenario_config_path, scenario_config_template_path)
+            scenario_config.put_attr('scenarioConfigTemplatePath', scenario_config_template_path)
+        else:
+            scenario_config = build_deploy_xmlobject_from_configure(scenario_config_path)
+
+        scenario_config.put_attr('scenarioConfigPath', scenario_config_path)
+        return scenario_config
+
+    def expose_config_variable(self):
+        if self.scenario_config_template_path:
+            set_env_var_from_config_template(self.scenario_config_template_path)
+
 class DataOption(object):
     def __init__(self):
         self.session_uuid = None

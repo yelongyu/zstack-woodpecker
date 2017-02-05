@@ -39,6 +39,8 @@ import signal
 import datetime
 
 import zstackwoodpecker.test_case as test_case
+import zstackwoodpecker.operations.scenario_operations as scenario_operations
+import zstackwoodpecker.test_lib as test_lib
 
 test_start_time = time.time()
 log.configure_log('/var/log/zstack/zstack-woodpecker.log')
@@ -137,6 +139,8 @@ class WoodPecker(object):
         self.current_cmd_string = linux.get_command_by_pid(os.getpid())
         self.stop_when_fail = options.stopWhenFail
         self.stop_when_fail_match = options.stopWhenFailMatch
+        self.scenario_config = options.scenarioConfig
+        self.scenario_file = options.scenarioFile
         self.dry_run = options.dryRun
         self.case_failure = False
         if options.testFailureRetry and options.testFailureRetry.isdigit():
@@ -265,9 +269,9 @@ class WoodPecker(object):
 
             try:
                 if case_name == 'suite_setup' or self.startDebugger == False:
-                    test_env_variables = 'WOODPECKER_TEST_CONFIG_FILE=%s WOODPECKER_CASE_ACTION_LOG_PATH=%s WOODPECKER_NO_ERROR_CLEANUP=%s WOODPECKER_ONLY_ACTION_LOG=%s' % (self._check_test_config(suite.test_config, case.path), case_action_log_path, self.noCleanup, self.onlyActionLog)
+                    test_env_variables = 'WOODPECKER_SCENARIO_CONFIG_FILE=%s WOODPECKER_SCENARIO_FILE=%s WOODPECKER_TEST_CONFIG_FILE=%s WOODPECKER_CASE_ACTION_LOG_PATH=%s WOODPECKER_NO_ERROR_CLEANUP=%s WOODPECKER_ONLY_ACTION_LOG=%s' % (self.scenario_config, self.scenario_file, self._check_test_config(suite.test_config, case.path), case_action_log_path, self.noCleanup, self.onlyActionLog)
                 else:
-                    test_env_variables = 'WOODPECKER_TEST_CONFIG_FILE=%s WOODPECKER_CASE_ACTION_LOG_PATH=%s WOODPECKER_NO_ERROR_CLEANUP=%s WOODPECKER_ONLY_ACTION_LOG=%s WOODPECKER_START_DEBUGGER=%s' % (self._check_test_config(suite.test_config, case.path), case_action_log_path, self.noCleanup, self.onlyActionLog, self.startDebugger)
+                    test_env_variables = 'WOODPECKER_SCENARIO_CONFIG_FILE=%s WOODPECKER_SCENARIO_FILE=%s WOODPECKER_TEST_CONFIG_FILE=%s WOODPECKER_CASE_ACTION_LOG_PATH=%s WOODPECKER_NO_ERROR_CLEANUP=%s WOODPECKER_ONLY_ACTION_LOG=%s WOODPECKER_START_DEBUGGER=%s' % (self.scenario_config, self.scenario_file, self._check_test_config(suite.test_config, case.path), case_action_log_path, self.noCleanup, self.onlyActionLog, self.startDebugger)
                 #self.info('\n test environment variables: %s \n' % test_env_variables)
                 #cmd = '%s /usr/bin/nosetests -s --exe %s 2>&1' % (test_env_variables, case.path)
                 case_dir = os.path.dirname(case.path)
@@ -736,6 +740,8 @@ def main():
     parser.add_option("-n", "--no-cleanup", action='store_true', dest="noCleanup", default=False, help="[Optional] do not execute error_cleanup(), when test case fails")
     parser.add_option("-s", "--stop-failure", action='store_true', dest="stopWhenFail", default=False, help="[Optional] Stop testing, when there is test case failure. Used to work with -n option")
     parser.add_option("-m", "--stop-failure-match", action='store', dest="stopWhenFailMatch", default=None, help="[Optional] Stop testing, when there is test case failure and test log match given string. Used to work with -n option")
+    parser.add_option("-e", "--scenario-config", action='store', dest="scenarioConfig", default=None, help="[Optional] Use first level virtualization to create VM for test scenario. Used together with --scenario-file option")
+    parser.add_option("-g", "--scenario-file", action='store', dest="scenarioFile", default=None, help="[Optional] Use first level virtualization to create VM for test scenario, which is saved in this file. Used together with --scenario-config option")
     parser.add_option("-a", "--action-log", action='store_true', dest="onlyActionLog", default=False, help="[Optional] only save 'Action' log by test_util.action_logger(). test_util.test_logger() will not be saved in test case's action.log file.")
     parser.add_option("-d", "--start-debugger", action='store_true', dest="startDebugger", default=False, help="[Optional] start remote debugger with rpdb (default port 4444) at the time of exception.")
     parser.add_option("-t", "--case-timeout", action='store', dest="defaultTestCaseTimeout", default='1800', help="[Optional] test case timeout, if test case doesn't set one. The default timeout is 1800s.")

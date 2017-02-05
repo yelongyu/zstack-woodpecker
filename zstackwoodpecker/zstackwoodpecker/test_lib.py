@@ -67,6 +67,18 @@ class FakeObject(object):
     def __getattr__(self, name):
         self.__getitem__(name)
 
+scenario_config_path = os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')
+if scenario_config_path:
+    scenario_config_obj = test_util.TestScenario(scenario_config_path)
+    #Special config in test-config.xml, such like test ping target. 
+    scenario_config = scenario_config_obj.get_test_config()
+    #All configs in deploy.xml.
+    all_scenario_config = scenario_config_obj.get_scenario_config()
+    #Detailed zstack deployment information, including zones/cluster/hosts...
+    deploy_scenario_config = all_scenario_config.deployerConfig
+    #setup_scenario_plan = setup_actions.Plan(all_scenario_config)
+
+scenario_file = os.environ.get('WOODPECKER_SCENARIO_FILE')
 #Following lines were not expected to be changed.
 #---------------
 test_config_path = os.environ.get('WOODPECKER_TEST_CONFIG_FILE')
