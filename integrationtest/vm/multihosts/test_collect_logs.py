@@ -69,7 +69,7 @@ def test():
             #hostIP = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, bs_sftp_cond, None, fields=["hostname"])
             hostIP = test_lib.lib_get_backup_storage_host(bs.uuid) 
 
-            sftpLogFolderName = hostIP.managementIp + "-sftp_bs"
+            sftpLogFolderName = "sftp_bs-" + hostIP.managementIp 
             dmesgFilePath             = MEVOCO_LOG_PATH + sftpLogFolderName + "/dmesg"
             hostInfoFilePath          = MEVOCO_LOG_PATH + sftpLogFolderName + "/host_info"
             messagesFilePath          = MEVOCO_LOG_PATH + sftpLogFolderName + "/messages"
