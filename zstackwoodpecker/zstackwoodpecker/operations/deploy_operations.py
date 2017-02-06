@@ -45,7 +45,7 @@ def get_first_item_from_list(list_obj, list_obj_name, list_obj_value, action_nam
     return list_obj[0]
 
 #Add Backup Storage
-def add_backup_storage(scenarioConfig, deployConfig, session_uuid, scenario_config):
+def add_backup_storage(scenarioConfig, deployConfig, session_uuid):
     if xmlobject.has_element(deployConfig, 'backupStorages.sftpBackupStorage'):
         for bs in xmlobject.safe_list(deployConfig.backupStorages.sftpBackupStorage):
             action = api_actions.AddSftpBackupStorageAction()
