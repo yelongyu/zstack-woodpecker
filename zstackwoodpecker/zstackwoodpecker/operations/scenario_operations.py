@@ -14,6 +14,8 @@ import os
 import sys
 import traceback
 import xml.dom.minidom as minidom
+import zstackwoodpecker.test_util as test_util
+import zstackwoodpecker.test_lib as test_lib
 
 def sync_call(http_server_ip, apicmd, session_uuid):
     api_instance = api.Api(host = http_server_ip, port = '8080')
@@ -111,29 +113,94 @@ def setup_primarystorage_vm(vm_config, deploy_config):
                         print 'vm ref ps found'
                         return
 
+def create_vm(http_server_ip, vm_create_option):
+    create_vm = api_actions.CreateVmInstanceAction()
+    name = vm_create_option.get_name()
+    if not name:
+        create_vm.name = 'test_vm_default_name'
+    else:
+        create_vm.name = name
+
+    create_vm.imageUuid = vm_create_option.get_image_uuid()
+    create_vm.zoneUuid = vm_create_option.get_zone_uuid()
+    create_vm.clusterUuid = vm_create_option.get_cluster_uuid()
+    create_vm.hostUuid = vm_create_option.get_host_uuid()
+    create_vm.instanceOfferingUuid = vm_create_option.get_instance_offering_uuid()
+    create_vm.l3NetworkUuids = vm_create_option.get_l3_uuids()
+    create_vm.defaultL3NetworkUuid = vm_create_option.get_default_l3_uuid()
+    #If there are more than 1 network uuid, the 1st one will be the default l3.
+    if len(create_vm.l3NetworkUuids) > 1 and not create_vm.defaultL3NetworkUuid:
+        create_vm.defaultL3NetworkUuid = create_vm.l3NetworkUuids[0]
+
+    vm_type = vm_create_option.get_vm_type()
+    if not vm_type:
+        create_vm.type = 'UserVm'
+    else:
+        create_vm.type = vm_type
+
+    create_vm.systemTags = vm_create_option.get_system_tags()
+    create_vm.userTags = vm_create_option.get_user_tags()
+    timeout = vm_create_option.get_timeout()
+    if not timeout:
+        create_vm.timeout = 1200000
+    else:
+        create_vm.timeout = timeout
+
+    create_vm.dataDiskOfferingUuids = vm_create_option.get_data_disk_uuids()
+    create_vm.rootDiskOfferingUuid = vm_create_option.get_root_disk_uuid()
+    create_vm.consolePassword = vm_create_option.get_console_password()
+    create_vm.primaryStorageUuidForRootVolume = vm_create_option.get_ps_uuid()
+    create_vm.rootPassword = vm_create_option.get_root_password()
+    test_util.action_logger('Create VM: %s with [image:] %s and [l3_network:] %s' % (create_vm.name, create_vm.imageUuid, create_vm.l3NetworkUuids))
+    evt = execute_action_with_session(http_server_ip, create_vm, vm_create_option.get_session_uuid())
+    test_util.test_logger('[vm:] %s is created.' % evt.inventory.uuid)
+    return evt.inventory
+
+#The root volume will not be deleted immediately. It will only be reclaimed by system maintenance checking.
+def destroy_vm(http_server_ip, vm_uuid, session_uuid=None):
+    action = api_actions.DestroyVmInstanceAction()
+    action.uuid = vm_uuid
+    action.timeout = 240000
+    test_util.action_logger('Destroy VM [uuid:] %s' % vm_uuid)
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+
 def deploy_scenario(scenario_config, scenario_file, deploy_config):
-    print scenario_config.basicConfig.zstackManagementIp.text_
-    session_uuid = login_as_admin(scenario_config.basicConfig.zstackManagementIp.text_)
-    logout(scenario_config.basicConfig.zstackManagementIp.text_, session_uuid)
-    action = api_actions.QueryHostAction()
-    action.conditions = []
-    execute_action_with_session(scenario_config.basicConfig.zstackManagementIp.text_, action, None, False)
+    zstack_management_ip = scenario_config.basicConfig.zstackManagementIp.text_
     root_xml = etree.Element("deployerConfig")
     vms_xml = etree.SubElement(root_xml, 'vms')
     for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
         print host.uuid_
         for vm in xmlobject.safe_list(host.vms.vm):
+            vm_creation_option = test_util.VmOption()
+            l3_uuid_list = []
+            default_l3_uuid = None
+            for l3network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                if not default_l3_uuid:
+                    default_l3_uuid = l3network.uuid_
+                l3_uuid_list.append(l3network.uuid_)
+            vm_creation_option.set_instance_offering_uuid(vm.vmInstranceOfferingUuid_)
+            vm_creation_option.set_l3_uuids(l3_uuid_list)
+            vm_creation_option.set_image_uuid(vm.imageUuid_)
+            vm_creation_option.set_name(vm.name_)
+            vm_creation_option.set_host_uuid(host.uuid_)
+            #vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
+            #vm_creation_option.set_default_l3_uuid(default_l3_uuid)
+            #vm_creation_option.set_system_tags(system_tags)
+            #vm_creation_option.set_ps_uuid(ps_uuid)
+            #vm_creation_option.set_session_uuid(session_uuid)
+            vm_inv = create_vm(zstack_management_ip, vm_creation_option)
+            vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, default_l3_uuid).ip
+            test_lib.lib_wait_target_up(vm_ip, '22', 120)
+            destroy_vm(zstack_management_ip, vm_inv.uuid)
+
             vm_xml = etree.SubElement(vms_xml, 'vm')
             vm_xml.set('name', vm.name_)
-            vm_xml.set('ip', '172.20.197.111')
-	    print xmlobject.loads(etree.tostring(root_xml)).dump()
-            print vm.name_, vm.vmInstranceOfferingUuid_, vm.imageUuid_
-	    #create_vm(host.uuid_, vm.name_, vm.vmInstranceOfferingUuid_, vm.imageUuid_)
+            vm_xml.set('ip', vm_ip)
             if xmlobject.has_element(vm, 'nodeRef'):
                 setup_node_vm(vm, deploy_config)
             if xmlobject.has_element(vm, 'hostRef'):
                 setup_host_vm(vm, deploy_config)
-                vm_xml.set('managementIp', '172.20.197.111')
+                vm_xml.set('managementIp', vm_ip)
             if xmlobject.has_element(vm, 'backupStorageRef'):
                 setup_backupstorage_vm(vm, deploy_config)
             if xmlobject.has_element(vm, 'primaryStorageRef'):

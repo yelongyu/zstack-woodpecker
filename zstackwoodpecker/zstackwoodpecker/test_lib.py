@@ -81,7 +81,12 @@ else:
     scenario_config = None
     all_scenario_config = None
 
-scenario_file = os.environ.get('WOODPECKER_SCENARIO_FILE')
+scenario_file_path = os.environ.get('WOODPECKER_SCENARIO_FILE')
+if scenario_file_path != None and scenario_file_path != "":
+    scenario_file = scenario_file_path
+else:
+    scenario_file = None
+
 #Following lines were not expected to be changed.
 #---------------
 test_config_path = os.environ.get('WOODPECKER_TEST_CONFIG_FILE')

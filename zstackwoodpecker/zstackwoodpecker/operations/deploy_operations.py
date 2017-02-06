@@ -45,7 +45,7 @@ def get_first_item_from_list(list_obj, list_obj_name, list_obj_value, action_nam
     return list_obj[0]
 
 #Add Backup Storage
-def add_backup_storage(scenarioConfig, deployConfig, session_uuid):
+def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid):
     if xmlobject.has_element(deployConfig, 'backupStorages.sftpBackupStorage'):
         for bs in xmlobject.safe_list(deployConfig.backupStorages.sftpBackupStorage):
             action = api_actions.AddSftpBackupStorageAction()
@@ -118,7 +118,7 @@ def add_backup_storage(scenarioConfig, deployConfig, session_uuid):
     wait_for_thread_done()
 
 #Add Zones
-def add_zone(scenarioConfig, deployConfig, session_uuid, zone_name = None):
+def add_zone(scenarioConfig, scenarioFile, deployConfig, session_uuid, zone_name = None):
     def _add_zone(zone, zone_duplication):
         action = api_actions.CreateZoneAction()
         action.sessionUuid = session_uuid
@@ -172,7 +172,7 @@ def add_zone(scenarioConfig, deployConfig, session_uuid, zone_name = None):
     wait_for_thread_done()
 
 #Add L2 network
-def add_l2_network(scenarioConfig, deployConfig, session_uuid, l2_name = None, zone_name = None):
+def add_l2_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l2_name = None, zone_name = None):
     '''
     If providing name, it will only add L2 network with the same name.
     '''
@@ -267,7 +267,7 @@ def add_l2_network(scenarioConfig, deployConfig, session_uuid, l2_name = None, z
     wait_for_thread_done()
 
 #Add Primary Storage
-def add_primary_storage(scenarioConfig, deployConfig, session_uuid, ps_name = None, \
+def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid, ps_name = None, \
         zone_name = None):
     if not xmlobject.has_element(deployConfig, 'zones.zone'):
         test_util.test_logger('Not find zones.zone in config, skip primary storage deployment')
@@ -436,7 +436,7 @@ def add_primary_storage(scenarioConfig, deployConfig, session_uuid, ps_name = No
     wait_for_thread_done()
 
 #Add Cluster
-def add_cluster(scenarioConfig, deployConfig, session_uuid, cluster_name = None, \
+def add_cluster(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluster_name = None, \
         zone_name = None):
     if not xmlobject.has_element(deployConfig, "zones.zone"):
         return
@@ -542,7 +542,7 @@ def add_cluster(scenarioConfig, deployConfig, session_uuid, cluster_name = None,
     wait_for_thread_done()
 
 #Add Host
-def add_host(scenarioConfig, deployConfig, session_uuid, host_ip = None, zone_name = None, \
+def add_host(scenarioConfig, scenarioFile, deployConfig, session_uuid, host_ip = None, zone_name = None, \
         cluster_name = None):
     '''
     Base on an xml deploy config object to add hosts. 
@@ -632,7 +632,7 @@ def add_host(scenarioConfig, deployConfig, session_uuid, host_ip = None, zone_na
     test_util.test_logger('All add KVM host actions are done.')
 
 #Add L3 network
-def add_l3_network(scenarioConfig, deployConfig, session_uuid, l3_name = None, l2_name = None, \
+def add_l3_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l3_name = None, l2_name = None, \
         zone_name = None):
     '''
     add_l3_network will add L3 network and also add related DNS, IpRange and 
@@ -912,7 +912,7 @@ def do_add_network_service(net_service_xml_obj, l3_uuid, providers, \
     test_util.test_logger(jsonobject.dumps(evt))
 
 #Add Image
-def add_image(scenarioConfig, deployConfig, session_uuid):
+def add_image(scenarioConfig, scenarioFile, deployConfig, session_uuid):
     def _add_image(action):
         increase_image_thread()
         try:
@@ -965,7 +965,7 @@ def add_image(scenarioConfig, deployConfig, session_uuid):
     print 'all images have been added'
 
 #Add Disk Offering
-def add_disk_offering(scenarioConfig, deployConfig, session_uuid):
+def add_disk_offering(scenarioConfig, scenarioFile, deployConfig, session_uuid):
     def _add_disk_offering(disk_offering_xml_obj, session_uuid):
         action = api_actions.CreateDiskOfferingAction()
         action.sessionUuid = session_uuid
@@ -991,7 +991,7 @@ def add_disk_offering(scenarioConfig, deployConfig, session_uuid):
     wait_for_thread_done()
 
 #Add Instance Offering
-def add_instance_offering(scenarioConfig, deployConfig, session_uuid):
+def add_instance_offering(scenarioConfig, scenarioFile, deployConfig, session_uuid):
     def _add_io(instance_offering_xml_obj, session_uuid):
         action = api_actions.CreateInstanceOfferingAction()
         action.sessionUuid = session_uuid
@@ -1033,7 +1033,7 @@ def _thread_for_action(action):
         exc_info.append(sys.exc_info())
 
 #Add Virtual Router Offering
-def add_virtual_router(scenarioConfig, deployConfig, session_uuid, l3_name = None, \
+def add_virtual_router(scenarioConfig, scenarioFile, deployConfig, session_uuid, l3_name = None, \
         zone_name = None):
 
     if not xmlobject.has_element(deployConfig, 'instanceOfferings.virtualRouterOffering'):
@@ -1094,7 +1094,7 @@ def add_virtual_router(scenarioConfig, deployConfig, session_uuid, l3_name = Non
 
     wait_for_thread_done()
 
-def deploy_initial_database(deploy_config, scenario_config = None):
+def deploy_initial_database(deploy_config, scenario_config = None, scenario_file = None):
     operations = [
             add_backup_storage,
             add_zone,
@@ -1111,7 +1111,7 @@ def deploy_initial_database(deploy_config, scenario_config = None):
     for operation in operations:
         session_uuid = account_operations.login_as_admin()
         try:
-            operation(scenario_config, deploy_config, session_uuid)
+            operation(scenario_config, scenario_file, deploy_config, session_uuid)
         except Exception as e:
             test_util.test_logger('[Error] zstack deployment meets exception when doing: %s . The real exception are:.' % operation.__name__)
             print('----------------------Exception Reason------------------------')

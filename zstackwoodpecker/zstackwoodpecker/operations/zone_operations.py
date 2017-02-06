@@ -47,24 +47,24 @@ def add_zone_resource(deploy_config, zone_name):
     session_uuid = acc_ops.login_as_admin()
     try:
         test_util.test_dsc('-------add zone operation-------')
-        dep_ops.add_zone(None, deploy_config, session_uuid, zone_name = zone_name)
+        dep_ops.add_zone(None, None, deploy_config, session_uuid, zone_name = zone_name)
         test_util.test_dsc('-------add l2 operation-------')
-        dep_ops.add_l2_network(None, deploy_config, session_uuid, \
+        dep_ops.add_l2_network(None, None, deploy_config, session_uuid, \
                 zone_name = zone_name)
         test_util.test_dsc('-------add primary storage operation-------')
-        dep_ops.add_primary_storage(None, deploy_config, session_uuid, \
+        dep_ops.add_primary_storage(None, None, deploy_config, session_uuid, \
                 zone_name = zone_name)
         test_util.test_dsc('-------add cluster operation-------')
-        dep_ops.add_cluster(None, deploy_config, session_uuid, \
+        dep_ops.add_cluster(None, None, deploy_config, session_uuid, \
                 zone_name = zone_name)
         test_util.test_dsc('-------add host operation-------')
-        dep_ops.add_host(None, deploy_config, session_uuid, \
+        dep_ops.add_host(None, None, deploy_config, session_uuid, \
                 zone_name = zone_name)
         test_util.test_dsc('-------add l3 operation-------')
-        dep_ops.add_l3_network(None, deploy_config, session_uuid, \
+        dep_ops.add_l3_network(None, None, deploy_config, session_uuid, \
                 zone_name = zone_name)
         test_util.test_dsc('-------add virtual router offering operation-------')
-        dep_ops.add_virtual_router(None, deploy_config, session_uuid, \
+        dep_ops.add_virtual_router(None, None, deploy_config, session_uuid, \
                 zone_name = zone_name)
         zone = res_ops.get_resource(res_ops.ZONE, session_uuid, \
                 name = zone_name)[0]
