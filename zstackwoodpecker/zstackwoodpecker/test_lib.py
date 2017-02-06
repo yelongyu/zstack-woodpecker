@@ -79,6 +79,7 @@ if scenario_config_path != None and scenario_config_path != "":
     #setup_scenario_plan = setup_actions.Plan(all_scenario_config)
 else:
     scenario_config = None
+    all_scenario_config = None
 
 scenario_file = os.environ.get('WOODPECKER_SCENARIO_FILE')
 #Following lines were not expected to be changed.
