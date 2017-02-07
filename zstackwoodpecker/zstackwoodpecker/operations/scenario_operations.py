@@ -89,7 +89,7 @@ def setup_host_vm(vm_ip, vm_config, deploy_config):
         if l2networkref.hasattr('vlan_'):
             test_util.test_logger('[vm:] %s vlan %s is created.' % (vm_ip, l2networkref.vlan_))
             cmd = 'vconfig add eth0 %s' % (l2networkref.vlan_)
-            ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, False, 22)
+            ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
 def setup_backupstorage_vm(vm_ip, vm_config, deploy_config):
     for backupStorageRef in xmlobject.safe_list(vm_config.backupStorageRef):
@@ -108,6 +108,15 @@ def setup_primarystorage_vm(vm_ip, vm_config, deploy_config):
                 for nfsPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.nfsPrimaryStorage):
                     if primaryStorageRef.text_ == nfsPrimaryStorage.name_:
                         print 'vm ref ps found'
+                        test_util.test_logger('[vm:] %s setup nfs service.' % (vm_ip))
+                        # TODO: multiple NFS PS may refer to same host's different DIR
+                        nfsPath = nfsPrimaryStorage.url_.split(':')[1]
+                        cmd = "echo '%s *(rw,sync,no_root_squash)' > /etc/exports" % (nfsPath)
+                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+                        cmd = "mkdir -p %s && service rpcbind restart && service nfs restart" % (nfsPath)
+                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+                        cmd = "iptables -I INPUT -p tcp -m tcp --dport 2049 -j ACCEPT && iptables -I INPUT -p udp -m udp --dport 2049 -j ACCEPT"
+                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
                         return
 
 def create_vm(http_server_ip, vm_create_option):
