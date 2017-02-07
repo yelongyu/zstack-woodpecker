@@ -18,6 +18,18 @@ def test():
     vm1 = test_stub.create_vr_vm('vm1', 'imageName_net', 'l3VlanNetwork3')
     test_obj_dict.add_vm(vm1)
 
+    backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm1.vm)
+    for bs in backup_storage_list:
+        #if bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+        #    break
+        #if bs.type == inventory.SFTP_BACKUP_STORAGE_TYPE:
+        #    break
+        if bs.type == inventory.CEPH_BACKUP_STORAGE_TYPE:
+            break
+    else:
+        vm1.destroy()
+        test_util.test_skip('Not find ceph type backup storage.')
+
     vm2 = test_stub.create_vr_vm('vm2', 'imageName_net', 'l3VlanNetwork3')
     test_obj_dict.add_vm(vm2)
 
