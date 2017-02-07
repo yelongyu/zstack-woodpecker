@@ -16,6 +16,7 @@ import traceback
 import xml.dom.minidom as minidom
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
+import zstacklib.utils.ssh as ssh
 
 def sync_call(http_server_ip, apicmd, session_uuid):
     api_instance = api.Api(host = http_server_ip, port = '8080')
@@ -79,22 +80,18 @@ def execute_action_with_session(http_server_ip, action, session_uuid, async=True
 
     return evt
 
-def setup_node_vm(vm_config, deploy_config):
+def setup_node_vm(vm_ip, vm_config, deploy_config):
     for nodeRef in xmlobject.safe_list(vm_config.nodeRef):
         print nodeRef.text_
 
-def setup_host_vm(vm_config, deploy_config):
-    for hostRef in xmlobject.safe_list(vm_config.hostRef):
-        print hostRef.text_
-        for zone in xmlobject.safe_list(deploy_config.zones.zone):
-            for cluster in xmlobject.safe_list(zone.clusters.cluster):
-                for host in xmlobject.safe_list(cluster.hosts.host):
-                    print host.name_
-                    if hostRef.text_ == host.name_:
-                        print 'vm ref host found'
-                        return
+def setup_host_vm(vm_ip, vm_config, deploy_config):
+    for l2networkref in xmlobject.safe_list(vm_config.l3Networks.l3Network.l2NetworkRef):
+        if l2networkref.hasattr('vlan_'):
+            test_util.test_logger('[vm:] %s vlan %s is created.' % (vm_ip, l2networkref.vlan_))
+            cmd = 'vconfig add eth0 %s' % (l2networkref.vlan_)
+            ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, False, 22)
 
-def setup_backupstorage_vm(vm_config, deploy_config):
+def setup_backupstorage_vm(vm_ip, vm_config, deploy_config):
     for backupStorageRef in xmlobject.safe_list(vm_config.backupStorageRef):
         print backupStorageRef.text_
         if backupStorageRef.type_ == 'sftp':
@@ -103,7 +100,7 @@ def setup_backupstorage_vm(vm_config, deploy_config):
                     print 'vm ref bs found'
                     return
 
-def setup_primarystorage_vm(vm_config, deploy_config):
+def setup_primarystorage_vm(vm_ip, vm_config, deploy_config):
     for primaryStorageRef in xmlobject.safe_list(vm_config.primaryStorageRef):
         print primaryStorageRef.text_
         if primaryStorageRef.type_ == 'nfs':
@@ -169,7 +166,6 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
     root_xml = etree.Element("deployerConfig")
     vms_xml = etree.SubElement(root_xml, 'vms')
     for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
-        print host.uuid_
         for vm in xmlobject.safe_list(host.vms.vm):
             vm_creation_option = test_util.VmOption()
             l3_uuid_list = []
@@ -191,20 +187,20 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
             vm_inv = create_vm(zstack_management_ip, vm_creation_option)
             vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, default_l3_uuid).ip
             test_lib.lib_wait_target_up(vm_ip, '22', 120)
-            destroy_vm(zstack_management_ip, vm_inv.uuid)
 
             vm_xml = etree.SubElement(vms_xml, 'vm')
             vm_xml.set('name', vm.name_)
             vm_xml.set('ip', vm_ip)
             if xmlobject.has_element(vm, 'nodeRef'):
-                setup_node_vm(vm, deploy_config)
+                setup_node_vm(vm_ip, vm, deploy_config)
             if xmlobject.has_element(vm, 'hostRef'):
-                setup_host_vm(vm, deploy_config)
+                setup_host_vm(vm_ip, vm, deploy_config)
                 vm_xml.set('managementIp', vm_ip)
             if xmlobject.has_element(vm, 'backupStorageRef'):
-                setup_backupstorage_vm(vm, deploy_config)
+                setup_backupstorage_vm(vm_ip, vm, deploy_config)
             if xmlobject.has_element(vm, 'primaryStorageRef'):
-                setup_primarystorage_vm(vm, deploy_config)
+                setup_primarystorage_vm(vm_ip, vm, deploy_config)
+            destroy_vm(zstack_management_ip, vm_inv.uuid)
     xml_string = etree.tostring(root_xml, 'utf-8')
     xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
     open(scenario_file, 'w+').write(xml_string)
