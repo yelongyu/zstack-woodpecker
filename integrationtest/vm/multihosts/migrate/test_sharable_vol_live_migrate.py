@@ -16,6 +16,10 @@ test_obj_dict = test_state.TestStateDict()
 
 def test():
     test_util.test_dsc('Create test vm and check')
+
+    if not test_lib.lib_check_version_is_mevoco():
+        test_util.test_skip("Current version is not mevoco, skip!")
+
     vm1 = test_stub.create_vr_vm('vm1', 'imageName_net', 'l3VlanNetwork3')
     test_obj_dict.add_vm(vm1)
 
