@@ -43,18 +43,18 @@
         <case timeout='2400'  repeat='1' noparallel='True'>test_cloned_vm_chg_passwd_c7_32.py</case>
         <!--<case timeout='28000'  repeat='1' noparallel='True'>test_ga_robust_on_c7.py</case>-->
         <case timeout='2400'  repeat='1' noparallel='True'>test_cloned_vm_chg_passwd_u12.py</case>
-        <case timeout='2400'  repeat='1' noparallel='True'>test_cloned_vm_chg_passwd_u13.py</case>
+        <!--<case timeout='2400'  repeat='1' noparallel='True'>test_cloned_vm_chg_passwd_u13.py</case>
         <case timeout='2400'  repeat='1' noparallel='True'>test_cloned_vm_chg_passwd_u14.py</case>
         <case timeout='2400'  repeat='1' noparallel='True'>test_cloned_vm_chg_passwd_u15.py</case>
-        <case timeout='2400'  repeat='1' noparallel='True'>test_cloned_vm_chg_passwd_u16.py</case>
+        <case timeout='2400'  repeat='1' noparallel='True'>test_cloned_vm_chg_passwd_u16.py</case>-->
         <case timeout='1200'  repeat='1' noparallel='True'>test_chg_unexist_usr_passwd_c6.py</case>
         <case timeout='1200'  repeat='1' noparallel='True'>test_chg_unexist_usr_passwd_c6_32.py</case>
         <case timeout='1200'  repeat='1' noparallel='True'>test_chg_unexist_usr_passwd_c7.py</case>
         <case timeout='1200'  repeat='1' noparallel='True'>test_chg_unexist_usr_passwd_c7_32.py</case>
         <case timeout='1200'  repeat='1' noparallel='True'>test_chg_unexist_usr_passwd_u12.py</case>
-        <case timeout='1200'  repeat='1' noparallel='True'>test_chg_unexist_usr_passwd_u13.py</case>
+        <!--<case timeout='1200'  repeat='1' noparallel='True'>test_chg_unexist_usr_passwd_u13.py</case>
         <case timeout='1200'  repeat='1' noparallel='True'>test_chg_unexist_usr_passwd_u14.py</case>
         <case timeout='1200'  repeat='1' noparallel='True'>test_chg_unexist_usr_passwd_u15.py</case>
-        <case timeout='1200'  repeat='1' noparallel='True'>test_chg_unexist_usr_passwd_u16.py</case>
+        <case timeout='1200'  repeat='1' noparallel='True'>test_chg_unexist_usr_passwd_u16.py</case>-->
     </suite>
 </integrationTest>
