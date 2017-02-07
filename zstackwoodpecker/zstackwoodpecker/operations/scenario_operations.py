@@ -97,7 +97,10 @@ def setup_backupstorage_vm(vm_ip, vm_config, deploy_config):
         if backupStorageRef.type_ == 'sftp':
             for sftpBackupStorage in xmlobject.safe_list(deploy_config.backupStorages.sftpBackupStorage):
                 if backupStorageRef.text_ == sftpBackupStorage.name_:
-                    print 'vm ref bs found'
+                    # TODO: sftp may setup with non-root or non-default user/password port
+                    test_util.test_logger('[vm:] %s setup sftp service.' % (vm_ip))
+                    cmd = "mkdir -p %s" % (sftpBackupStorage.url_)
+                    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
                     return
 
 def setup_primarystorage_vm(vm_ip, vm_config, deploy_config):
@@ -107,7 +110,6 @@ def setup_primarystorage_vm(vm_ip, vm_config, deploy_config):
             for zone in xmlobject.safe_list(deploy_config.zones.zone):
                 for nfsPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.nfsPrimaryStorage):
                     if primaryStorageRef.text_ == nfsPrimaryStorage.name_:
-                        print 'vm ref ps found'
                         test_util.test_logger('[vm:] %s setup nfs service.' % (vm_ip))
                         # TODO: multiple NFS PS may refer to same host's different DIR
                         nfsPath = nfsPrimaryStorage.url_.split(':')[1]
