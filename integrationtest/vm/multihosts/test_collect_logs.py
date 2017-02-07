@@ -88,30 +88,30 @@ def test():
 
 
     #Step4: verify hosts logs are saved
-    conditions = res_ops.gen_query_conditions('state', '=', host_header.ENABLED)
-    conditions = res_ops.gen_query_conditions('status', '=', host_header.CONNECTED, conditions)
-    all_hosts = res_ops.query_resource(res_ops.HOST, conditions)
-    if len(all_hosts) < 1:
-        test_util.test_skip('Not available host to check')
+    #conditions = res_ops.gen_query_conditions('state', '=', host_header.ENABLED)
+    #conditions = res_ops.gen_query_conditions('status', '=', host_header.CONNECTED, conditions)
+    #all_hosts = res_ops.query_resource(res_ops.HOST, conditions)
+    #if len(all_hosts) < 1:
+    #    test_util.test_skip('Not available host to check')
 
-    for host in all_hosts:
-        hostFolderName = host.managementIp
-        dmesgFilePath    = MEVOCO_LOG_PATH + hostFolderName + "/dmesg"
-        hostInfoFilePath = MEVOCO_LOG_PATH + hostFolderName + "/host_info"
-        messagesFilePath = MEVOCO_LOG_PATH + hostFolderName + "/messages"
-        kvmagentFilePath = MEVOCO_LOG_PATH + hostFolderName + "/zstack-kvmagent.log"
-        zstackFilePath   = MEVOCO_LOG_PATH + hostFolderName + "/zstack.log"
+    #for host in all_hosts:
+    #    hostFolderName = host.managementIp
+    #    dmesgFilePath    = MEVOCO_LOG_PATH + hostFolderName + "/dmesg"
+    #    hostInfoFilePath = MEVOCO_LOG_PATH + hostFolderName + "/host_info"
+    #    messagesFilePath = MEVOCO_LOG_PATH + hostFolderName + "/messages"
+    #    kvmagentFilePath = MEVOCO_LOG_PATH + hostFolderName + "/zstack-kvmagent.log"
+    #    zstackFilePath   = MEVOCO_LOG_PATH + hostFolderName + "/zstack.log"
 
-        if not os.path.exists(dmesgFilePath):
-            test_util.test_fail( dmesgFilePath    + ' is not exist.')
-        if not os.path.exists(hostInfoFilePath):
-            test_util.test_fail( hostInfoFilePath + ' is not exist.')
-        if not os.path.exists(messagesFilePath):
-            test_util.test_fail( messagesFilePath + ' is not exist.')
-        if not os.path.exists(kvmagentFilePath):
-            test_util.test_fail( kvmagentFilePath + ' is not exist.')
-        if not os.path.exists(zstackFilePath):
-            test_util.test_fail( zstackFilePath   + 'is not exist.')
+    #    if not os.path.exists(dmesgFilePath):
+    #        test_util.test_fail( dmesgFilePath    + ' is not exist.')
+    #    if not os.path.exists(hostInfoFilePath):
+    #        test_util.test_fail( hostInfoFilePath + ' is not exist.')
+    #    if not os.path.exists(messagesFilePath):
+    #        test_util.test_fail( messagesFilePath + ' is not exist.')
+    #    if not os.path.exists(kvmagentFilePath):
+    #        test_util.test_fail( kvmagentFilePath + ' is not exist.')
+    #    if not os.path.exists(zstackFilePath):
+    #        test_util.test_fail( zstackFilePath   + 'is not exist.')
 
 
     #Step5: verify management node logs are saved
