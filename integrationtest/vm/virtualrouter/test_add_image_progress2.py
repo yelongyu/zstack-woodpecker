@@ -74,9 +74,10 @@ def check_add_image_progress(index):
         if int(progress.progress) < int(last_progress.progress):
             test_util.test_fail("Progress (%s) of task is smaller than last time (%s)" % (progress.progress, last_progress.progress))
 
-    image_cond = res_ops.gen_query_conditions("uuid", '=', image_query[0].uuid)
+    image_cond = res_ops.gen_query_conditions("uuid", '=', image[0].uuid)
     image_query2 = res_ops.query_resource_fields(res_ops.IMAGE, image_cond, \
                    None, fields=['status'])
+    time.sleep(1)
     if image_query2[0].status != "Ready":
         test_util.test_fail("Image should be ready when no progress anymore")
 
