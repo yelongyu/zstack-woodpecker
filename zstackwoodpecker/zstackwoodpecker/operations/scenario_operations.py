@@ -117,7 +117,7 @@ def setup_primarystorage_vm(vm_ip, vm_config, deploy_config):
                         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
                         cmd = "mkdir -p %s && service rpcbind restart && service nfs restart" % (nfsPath)
                         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
-                        cmd = "iptables -I INPUT -p tcp -m tcp --dport 2049 -j ACCEPT && iptables -I INPUT -p udp -m udp --dport 2049 -j ACCEPT"
+                        cmd = "iptables -w 20 -I INPUT -p tcp -m tcp --dport 2049 -j ACCEPT && iptables -w 20 -I INPUT -p udp -m udp --dport 2049 -j ACCEPT"
                         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
                         return
 
@@ -172,6 +172,23 @@ def destroy_vm(http_server_ip, vm_uuid, session_uuid=None):
     test_util.action_logger('Destroy VM [uuid:] %s' % vm_uuid)
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
 
+def stop_vm(http_server_ip, vm_uuid, force=None, session_uuid=None):
+    action = api_actions.StopVmInstanceAction()
+    action.uuid = vm_uuid
+    action.type = force
+    action.timeout = 240000
+    test_util.action_logger('Stop VM [uuid:] %s' % vm_uuid)
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    return evt.inventory
+
+def start_vm(http_server_ip, vm_uuid, session_uuid=None, timeout=240000):
+    action = api_actions.StartVmInstanceAction()
+    action.uuid = vm_uuid
+    action.timeout = timeout
+    test_util.action_logger('Start VM [uuid:] %s' % vm_uuid)
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    return evt.inventory
+
 def deploy_scenario(scenario_config, scenario_file, deploy_config):
     zstack_management_ip = scenario_config.basicConfig.zstackManagementIp.text_
     root_xml = etree.Element("deployerConfig")
@@ -211,6 +228,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 setup_backupstorage_vm(vm_ip, vm, deploy_config)
             if xmlobject.has_element(vm, 'primaryStorageRef'):
                 setup_primarystorage_vm(vm_ip, vm, deploy_config)
+            stop_vm(zstack_management_ip, vm_inv.uuid)
+            start_vm(zstack_management_ip, vm_inv.uuid)
             destroy_vm(zstack_management_ip, vm_inv.uuid)
     xml_string = etree.tostring(root_xml, 'utf-8')
     xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
