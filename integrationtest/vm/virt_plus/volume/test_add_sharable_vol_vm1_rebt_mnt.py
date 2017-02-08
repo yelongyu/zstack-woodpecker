@@ -92,9 +92,6 @@ def config_ocfs2_vms(vm1, vm2):
 
     mkfs_sharable_volume(vm1)
 
-    vm2.reboot()
-    vm2.check()
-
     cmd = "mount.ocfs2 /dev/sda /opt/smp/disk1/"
     exec_cmd_in_vm(vm1, cmd, "%s failed" %(cmd))
     exec_cmd_in_vm(vm2, cmd, "%s failed" %(cmd))
