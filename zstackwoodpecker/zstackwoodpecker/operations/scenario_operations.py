@@ -80,18 +80,46 @@ def execute_action_with_session(http_server_ip, action, session_uuid, async=True
 
     return evt
 
-def setup_node_vm(vm_ip, vm_config, deploy_config):
+def setup_node_vm(vm_inv, vm_config, deploy_config):
     for nodeRef in xmlobject.safe_list(vm_config.nodeRef):
         print nodeRef.text_
 
-def setup_host_vm(vm_ip, vm_config, deploy_config):
+def get_ref_l2_nic_name(l2network_name, deploy_config):
+    for zone in xmlobject.safe_list(deploy_config.zones.zone):
+        for l2novlannetwork in xmlobject.safe_list(zone.l2Networks.l2NoVlanNetwork):
+            if l2novlannetwork.name_ == l2network_name:
+                return l2novlannetwork.physicalInterface_
+        for l2vlannetwork in xmlobject.safe_list(zone.l2Networks.l2VlanNetwork):
+            if l2vlannetwork.name_ == l2network_name:
+                return l2vlannetwork.physicalInterface_
+    return None
+
+def setup_host_vm(vm_inv, vm_config, deploy_config):
+    vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
+    udev_config = ''
+    for l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
+        for vmnic in vm_inv.vmNics:
+            if vmnic.l3NetworkUuid == l3network.uuid_:
+                vmnic_mac = vmnic.mac
+                break
+        for l2networkref in xmlobject.safe_list(l3network.l2NetworkRef):
+            for zone in xmlobject.safe_list(deploy_config.zones.zone):
+                nic_name = get_ref_l2_nic_name(l2networkref.text_, deploy_config)
+            break
+
+        udev_config = udev_config + '\\nACTION=="add", SUBSYSTEM=="net", DRIVERS=="?*", ATTR{type}=="1", ATTR{address}=="%s", NAME="%s"' % (vmnic_mac, nic_name)
+
+    cmd = 'echo %s > /etc/udev/rules.d/70-persistent-net.rules' % (udev_config)
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+
     for l2networkref in xmlobject.safe_list(vm_config.l3Networks.l3Network.l2NetworkRef):
         if l2networkref.hasattr('vlan_'):
             test_util.test_logger('[vm:] %s vlan %s is created.' % (vm_ip, l2networkref.vlan_))
             cmd = 'vconfig add eth0 %s' % (l2networkref.vlan_)
             ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
-def setup_backupstorage_vm(vm_ip, vm_config, deploy_config):
+def setup_backupstorage_vm(vm_inv, vm_config, deploy_config):
+    vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
     for backupStorageRef in xmlobject.safe_list(vm_config.backupStorageRef):
         print backupStorageRef.text_
         if backupStorageRef.type_ == 'sftp':
@@ -103,7 +131,8 @@ def setup_backupstorage_vm(vm_ip, vm_config, deploy_config):
                     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
                     return
 
-def setup_primarystorage_vm(vm_ip, vm_config, deploy_config):
+def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
+    vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
     for primaryStorageRef in xmlobject.safe_list(vm_config.primaryStorageRef):
         print primaryStorageRef.text_
         if primaryStorageRef.type_ == 'nfs':
@@ -220,14 +249,14 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
             vm_xml.set('name', vm.name_)
             vm_xml.set('ip', vm_ip)
             if xmlobject.has_element(vm, 'nodeRef'):
-                setup_node_vm(vm_ip, vm, deploy_config)
+                setup_node_vm(vm_inv, vm, deploy_config)
             if xmlobject.has_element(vm, 'hostRef'):
-                setup_host_vm(vm_ip, vm, deploy_config)
+                setup_host_vm(vm_inv, vm, deploy_config)
                 vm_xml.set('managementIp', vm_ip)
             if xmlobject.has_element(vm, 'backupStorageRef'):
-                setup_backupstorage_vm(vm_ip, vm, deploy_config)
+                setup_backupstorage_vm(vm_inv, vm, deploy_config)
             if xmlobject.has_element(vm, 'primaryStorageRef'):
-                setup_primarystorage_vm(vm_ip, vm, deploy_config)
+                setup_primarystorage_vm(vm_inv, vm, deploy_config)
             stop_vm(zstack_management_ip, vm_inv.uuid)
             start_vm(zstack_management_ip, vm_inv.uuid)
             destroy_vm(zstack_management_ip, vm_inv.uuid)
