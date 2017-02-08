@@ -14,10 +14,12 @@ test_obj_dict = test_state.TestStateDict()
 
 
 
-def exec_cmd_in_vm(vm, cmd, fail_msg):
+def exec_cmd_in_vm(vm, cmd, fail_msg, ignore_fail=False):
     ret, output, stderr = ssh.execute(cmd, vm.get_vm().vmNics[0].ip, "root", "password", False, 22)
-    if ret != 0:
-        test_util.test_fail(fail_msg)
+    if ret != 0 and ignore_fail == False:
+        test_util.test_fail("%s:%s" %(fail_msg, stderr))
+    elif ret != 0 and ignore_fail == True:
+        test_util.test_logger("skip failure: %s" %(stderr))
 
 
 def ensure_storage_online(vm):
@@ -98,6 +100,7 @@ def config_ocfs2_vms(vm1, vm2):
 
 
 
+
 def check_sharable_volume(vm1, vm2):
     """
     This function touch a file named "tag1" in vm1, and then check the tag existence from vm2
@@ -137,7 +140,7 @@ def test():
 
     vm1.reboot()
     vm1.check()
-    volume.detach(vm1)
+    volume.detach(vm1.get_vm().uuid)
     volume.attach(vm1)
 
     config_ocfs2_vms(vm1, vm2)

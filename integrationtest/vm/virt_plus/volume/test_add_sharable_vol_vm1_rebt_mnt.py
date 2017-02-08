@@ -14,10 +14,12 @@ test_obj_dict = test_state.TestStateDict()
 
 
 
-def exec_cmd_in_vm(vm, cmd, fail_msg):
+def exec_cmd_in_vm(vm, cmd, fail_msg, ignore_fail=False):
     ret, output, stderr = ssh.execute(cmd, vm.get_vm().vmNics[0].ip, "root", "password", False, 22)
-    if ret != 0:
-        test_util.test_fail(fail_msg)
+    if ret != 0 and ignore_fail == False:
+        test_util.test_fail("%s:%s" %(fail_msg, stderr))
+    elif ret != 0 and ignore_fail == True:
+        test_util.test_logger("skip failure: %s" %(stderr))
 
 
 def ensure_storage_online(vm):
@@ -91,22 +93,25 @@ def config_ocfs2_vms(vm1, vm2):
     ensure_storage_online(vm2)
 
     mkfs_sharable_volume(vm1)
+    
+    vm2.reboot()
+    vm2.check()
 
     cmd = "mount.ocfs2 /dev/sda /opt/smp/disk1/"
-    exec_cmd_in_vm(vm1, cmd, "%s failed" %(cmd))
-    exec_cmd_in_vm(vm2, cmd, "%s failed" %(cmd))
+    exec_cmd_in_vm(vm1, cmd, "%s failed" %(cmd), ignore_fail=True)
+    exec_cmd_in_vm(vm2, cmd, "%s failed" %(cmd), ignore_fail=True)
+
+    vm2.reboot()
+    vm2.check()
 
 
-
-def check_sharable_volume(vm1, vm2):
+def check_sharable_volume_mount(vm1, vm2):
     """
     This function touch a file named "tag1" in vm1, and then check the tag existence from vm2
     """
 
-    cmd = "touch /opt/smp/disk1/tag1"
+    cmd = "mount|grep sda"
     exec_cmd_in_vm(vm1, cmd, "%s failed" %(cmd))
-
-    cmd = "test -f /opt/smp/disk1/tag1"
     exec_cmd_in_vm(vm2, cmd, "%s failed" %(cmd))
     
 
@@ -139,6 +144,7 @@ def test():
     vm1.check()
 
     config_ocfs2_vms(vm1, vm2)
+    check_sharable_volume_mount(vm1, vm2)
     volume.check()
 
     test_util.test_dsc('Detach volume and check')
