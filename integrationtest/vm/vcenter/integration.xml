@@ -14,6 +14,6 @@
         <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_vm_delete.py</case>
         <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_sync_image_add_delete.py</case>
         <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_sync_vm_start_stop.py</case>
-        <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_sync_vm_create_delete.py</case>
+        <!--<case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_sync_vm_create_delete.py</case>-->
     </suite>
 </integrationTest>
