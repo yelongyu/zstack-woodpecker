@@ -135,8 +135,8 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
     for primaryStorageRef in xmlobject.safe_list(vm_config.primaryStorageRef):
         print primaryStorageRef.text_
-        if primaryStorageRef.type_ == 'nfs':
-            for zone in xmlobject.safe_list(deploy_config.zones.zone):
+        for zone in xmlobject.safe_list(deploy_config.zones.zone):
+            if primaryStorageRef.type_ == 'nfs':
                 for nfsPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.nfsPrimaryStorage):
                     if primaryStorageRef.text_ == nfsPrimaryStorage.name_:
                         test_util.test_logger('[vm:] %s setup nfs service.' % (vm_ip))
@@ -149,6 +149,17 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
                         cmd = "iptables -w 20 -I INPUT -p tcp -m tcp --dport 2049 -j ACCEPT && iptables -w 20 -I INPUT -p udp -m udp --dport 2049 -j ACCEPT"
                         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
                         return
+            elif primaryStorageRef.type_ == 'ceph':
+                for cephPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.cephPrimaryStorage):
+                    if primaryStorageRef.text_ == cephPrimaryStorage.name_:
+                        test_util.test_logger('[vm:] %s setup ceph service.' % (vm_ip))
+                        ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ceph_nodes.sh'), '/tmp/setup_ceph_nodes.sh', vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, port=22)
+                        cmd = "bash -ex /tmp/setup_ceph_nodes.sh"
+                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+
+                        #nfsPath = nfsPrimaryStorage.url_.split(':')[1]
+                        return
+    
 
 def create_vm(http_server_ip, vm_create_option):
     create_vm = api_actions.CreateVmInstanceAction()
@@ -218,6 +229,47 @@ def start_vm(http_server_ip, vm_uuid, session_uuid=None, timeout=240000):
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     return evt.inventory
 
+def create_volume_from_offering(http_server_ip, volume_option, session_uuid=None):
+    action = api_actions.CreateDataVolumeAction()
+    action.diskOfferingUuid = volume_option.get_disk_offering_uuid()
+    action.description = volume_option.get_description()
+    action.systemTags = volume_option.get_system_tags()
+    timeout = volume_option.get_timeout()
+    if not timeout:
+        action.timeout = 240000
+    else:
+        action.timeout = timeout
+
+    name = volume_option.get_name()
+    if not name:
+        action.name = 'test_volume'
+    else:
+        action.name = name
+
+    test_util.action_logger('Create [Volume:] %s with [disk offering:] %s ' % (action.name, action.diskOfferingUuid))
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+
+    test_util.test_logger('[volume:] %s is created.' % evt.inventory.uuid)
+    return evt.inventory
+
+def attach_volume(http_server_ip, volume_uuid, vm_uuid, session_uuid=None):
+    action = api_actions.AttachDataVolumeToVmAction()
+    action.vmInstanceUuid = vm_uuid
+    action.volumeUuid = volume_uuid
+    action.timeout = 240000
+    test_util.action_logger('Attach Data Volume [uuid:] %s to [vm:] %s' % (volume_uuid, vm_uuid))
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    return evt.inventory
+
+def detach_volume(http_server_ip, volume_uuid, vm_uuid=None, session_uuid=None):
+    action = api_actions.DetachDataVolumeFromVmAction()
+    action.uuid = volume_uuid
+    action.vmUuid = vm_uuid
+    action.timeout = 240000
+    test_util.action_logger('Detach Volume [uuid:] %s' % volume_uuid)
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    return evt.inventory
+
 def deploy_scenario(scenario_config, scenario_file, deploy_config):
     zstack_management_ip = scenario_config.basicConfig.zstackManagementIp.text_
     root_xml = etree.Element("deployerConfig")
@@ -254,6 +306,16 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 setup_host_vm(vm_inv, vm, deploy_config)
                 vm_xml.set('managementIp', vm_ip)
             if xmlobject.has_element(vm, 'backupStorageRef'):
+                volume_option = test_util.VolumeOption()
+                volume_option.set_name('debug_scenario')
+                for bs_ref in xmlobject.safe_list(vm.backupStorageRef):
+                    if bs_ref.type_ == 'ceph':
+                        disk_offering_uuid = bs_ref.offering_uuid_
+                        volume_option.set_disk_offering_uuid(disk_offering_uuid)
+                        volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
+                        attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
+                        break
+
                 setup_backupstorage_vm(vm_inv, vm, deploy_config)
             if xmlobject.has_element(vm, 'primaryStorageRef'):
                 setup_primarystorage_vm(vm_inv, vm, deploy_config)

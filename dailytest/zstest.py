@@ -394,12 +394,13 @@ class TestLib(object):
 
     def execute_test(self, test_args):
         #process = subprocess.Popen("zstack-woodpecker -f %s" % self.test_xml, executable='/bin/sh', shell=True, cwd=self.current_dir, universal_newlines=True)
+        woodpecker_root_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
         if test_args:
-            print("export woodpecker_http_proxy=$http_proxy; export woodpecker_https_proxy=$https_proxy; unset http_proxy; unset https_proxy; zstack-woodpecker -f %s %s" % (self.test_xml, test_args))
-            os.system("export woodpecker_http_proxy=$http_proxy; export woodpecker_https_proxy=$https_proxy; unset http_proxy; unset https_proxy; zstack-woodpecker -f %s %s" % (self.test_xml, test_args))
+            print("export woodpecker_root_path=%s woodpecker_http_proxy=$http_proxy; export woodpecker_https_proxy=$https_proxy; unset http_proxy; unset https_proxy; zstack-woodpecker -f %s %s" % (woodpecker_root_path, self.test_xml, test_args))
+            os.system("export woodpecker_root_path=%s woodpecker_http_proxy=$http_proxy; export woodpecker_https_proxy=$https_proxy; unset http_proxy; unset https_proxy; zstack-woodpecker -f %s %s" % (woodpecker_root_path, self.test_xml, test_args))
         else:
-            print ("export woodpecker_http_proxy=$http_proxy; export woodpecker_https_proxy=$https_proxy; unset http_proxy; unset https_proxy; zstack-woodpecker -f %s %s" % (self.test_xml, test_args))
-            os.system("export woodpecker_http_proxy=$http_proxy; export woodpecker_https_proxy=$https_proxy; unset http_proxy; unset https_proxy; zstack-woodpecker -f %s %s" % (self.test_xml, test_args))
+            print ("export woodpecker_root_path=%s woodpecker_http_proxy=$http_proxy; export woodpecker_https_proxy=$https_proxy; unset http_proxy; unset https_proxy; zstack-woodpecker -f %s %s" % (woodpecker_root_path, self.test_xml, test_args))
+            os.system("export woodpecker_root_path=%s woodpecker_http_proxy=$http_proxy; export woodpecker_https_proxy=$https_proxy; unset http_proxy; unset https_proxy; zstack-woodpecker -f %s %s" % (woodpecker_root_path, self.test_xml, test_args))
 
     def find_real_suite(self, suite_shortname):
         for real_suite in self.suite_list:
