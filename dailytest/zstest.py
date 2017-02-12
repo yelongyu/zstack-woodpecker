@@ -532,6 +532,10 @@ def parse_test_args(options):
         test_args.append('-g')
         test_args.append(options.scenarioFile) 
 
+    if options.scenarioDestroy:
+        test_args.append('-x')
+        test_args.append(options.scenarioDestroy) 
+
     return ' '.join(test_args)
 
 def execute_unit_test(test_root):
@@ -747,6 +751,13 @@ def main():
             default=None, 
             action='store', 
 	    help="[Optional] Use first level virtualization to create VM for test scenario, which is saved in this file. Used together with --scenario-config option, E.g. `zstest -s basic --scenario-config scenario-config.xml --scenario-file scenario-file.xml`")
+
+    option_group.add_option(
+            "--scenario-destroy", 
+            dest="scenarioDestroy", 
+            default=None, 
+            action='store', 
+	    help="[Optional] Destroy created VM in first level virtualization for test scenario, which is saved in this file. E.g. `zstest --scenario-file scenario-file.xml`")
 
     parser.add_option_group(option_group)
     (options, arg) = parser.parse_args()

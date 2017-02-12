@@ -141,6 +141,7 @@ class WoodPecker(object):
         self.stop_when_fail_match = options.stopWhenFailMatch
         self.scenario_config = options.scenarioConfig
         self.scenario_file = options.scenarioFile
+        self.scenario_destroy = options.scenarioDestroy
         self.dry_run = options.dryRun
         self.case_failure = False
         if options.testFailureRetry and options.testFailureRetry.isdigit():
@@ -269,9 +270,9 @@ class WoodPecker(object):
 
             try:
                 if case_name == 'suite_setup' or self.startDebugger == False:
-                    test_env_variables = 'WOODPECKER_SCENARIO_CONFIG_FILE=%s WOODPECKER_SCENARIO_FILE=%s WOODPECKER_TEST_CONFIG_FILE=%s WOODPECKER_CASE_ACTION_LOG_PATH=%s WOODPECKER_NO_ERROR_CLEANUP=%s WOODPECKER_ONLY_ACTION_LOG=%s' % (self.scenario_config, self.scenario_file, self._check_test_config(suite.test_config, case.path), case_action_log_path, self.noCleanup, self.onlyActionLog)
+                    test_env_variables = 'WOODPECKER_SCENARIO_CONFIG_FILE=%s WOODPECKER_SCENARIO_FILE=%s WOODPECKER_SCENARIO_DESTROY=%s WOODPECKER_TEST_CONFIG_FILE=%s WOODPECKER_CASE_ACTION_LOG_PATH=%s WOODPECKER_NO_ERROR_CLEANUP=%s WOODPECKER_ONLY_ACTION_LOG=%s' % (self.scenario_config, self.scenario_file, self.scenario_destroy, self._check_test_config(suite.test_config, case.path), case_action_log_path, self.noCleanup, self.onlyActionLog)
                 else:
-                    test_env_variables = 'WOODPECKER_SCENARIO_CONFIG_FILE=%s WOODPECKER_SCENARIO_FILE=%s WOODPECKER_TEST_CONFIG_FILE=%s WOODPECKER_CASE_ACTION_LOG_PATH=%s WOODPECKER_NO_ERROR_CLEANUP=%s WOODPECKER_ONLY_ACTION_LOG=%s WOODPECKER_START_DEBUGGER=%s' % (self.scenario_config, self.scenario_file, self._check_test_config(suite.test_config, case.path), case_action_log_path, self.noCleanup, self.onlyActionLog, self.startDebugger)
+                    test_env_variables = 'WOODPECKER_SCENARIO_CONFIG_FILE=%s WOODPECKER_SCENARIO_FILE=%s WOODPECKER_SCENARIO_DESTROY=%s WOODPECKER_TEST_CONFIG_FILE=%s WOODPECKER_CASE_ACTION_LOG_PATH=%s WOODPECKER_NO_ERROR_CLEANUP=%s WOODPECKER_ONLY_ACTION_LOG=%s WOODPECKER_START_DEBUGGER=%s' % (self.scenario_config, self.scenario_file, self.scenario_destroy, self._check_test_config(suite.test_config, case.path), case_action_log_path, self.noCleanup, self.onlyActionLog, self.startDebugger)
                 #self.info('\n test environment variables: %s \n' % test_env_variables)
                 #cmd = '%s /usr/bin/nosetests -s --exe %s 2>&1' % (test_env_variables, case.path)
                 case_dir = os.path.dirname(case.path)
@@ -742,6 +743,7 @@ def main():
     parser.add_option("-m", "--stop-failure-match", action='store', dest="stopWhenFailMatch", default=None, help="[Optional] Stop testing, when there is test case failure and test log match given string. Used to work with -n option")
     parser.add_option("-e", "--scenario-config", action='store', dest="scenarioConfig", default="", help="[Optional] Use first level virtualization to create VM for test scenario. Used together with --scenario-file option")
     parser.add_option("-g", "--scenario-file", action='store', dest="scenarioFile", default="", help="[Optional] Use first level virtualization to create VM for test scenario, which is saved in this file. Used together with --scenario-config option")
+    parser.add_option("-x", "--scenario-destroy", action='store', dest="scenarioDestroy", default="", help="[Optional] Destroy created VM in first level virtualization for test scenario, which is saved in this file.")
     parser.add_option("-a", "--action-log", action='store_true', dest="onlyActionLog", default=False, help="[Optional] only save 'Action' log by test_util.action_logger(). test_util.test_logger() will not be saved in test case's action.log file.")
     parser.add_option("-d", "--start-debugger", action='store_true', dest="startDebugger", default=False, help="[Optional] start remote debugger with rpdb (default port 4444) at the time of exception.")
     parser.add_option("-t", "--case-timeout", action='store', dest="defaultTestCaseTimeout", default='1800', help="[Optional] test case timeout, if test case doesn't set one. The default timeout is 1800s.")

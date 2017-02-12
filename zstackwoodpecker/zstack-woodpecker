@@ -25,6 +25,7 @@ Options:
                         [Optional] Set the max test failure retry check() times.
   -e                    [Optional] Integration test scenario config file.
   -g                    [Optional] Integration test scenario file.
+  -x                    [Optional] Destroy scenario accoring to integration test scenario file.
 "
     exit 1
 }
@@ -33,7 +34,7 @@ Options:
 
 test_case_file=' '
 OPTIND=1
-while getopts "f:c:t:e:g:rhvdunasm" Option
+while getopts "f:c:t:e:g:x:rhvdunasm" Option
 do
     case $Option in
         f ) test_case_file=$OPTARG;;
@@ -49,6 +50,7 @@ do
         m ) stop_failure_match=$OPTARG;;
         e ) scenario_config=$OPTARG;;
         g ) scenario_file=$OPTARG;;
+        x ) scenario_destroy=$OPTARG;;
         h ) help;;
         * ) help;;
     esac

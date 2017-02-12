@@ -300,6 +300,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
             vm_xml = etree.SubElement(vms_xml, 'vm')
             vm_xml.set('name', vm.name_)
             vm_xml.set('ip', vm_ip)
+            vm_xml.set('uuid', vm_inv.uuid)
             if xmlobject.has_element(vm, 'nodeRef'):
                 setup_node_vm(vm_inv, vm, deploy_config)
             if xmlobject.has_element(vm, 'hostRef'):
@@ -325,3 +326,12 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
     xml_string = etree.tostring(root_xml, 'utf-8')
     xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
     open(scenario_file, 'w+').write(xml_string)
+
+def destroy_scenario(scenario_config, scenario_file):
+    with open(scenario_file, 'r') as fd:
+        xmlstr = fd.read()
+        fd.close()
+        scenario_file = xmlobject.loads(xmlstr)
+        zstack_management_ip = scenario_config.basicConfig.zstackManagementIp.text_
+        for vm in xmlobject.safe_list(scenario_file.vms.vm):
+            destroy_vm(zstack_management_ip, vm.uuid_)

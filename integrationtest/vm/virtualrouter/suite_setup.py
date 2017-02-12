@@ -25,6 +25,8 @@ def test():
     if test_lib.scenario_config != None and test_lib.scenario_file != None and not os.path.exists(test_lib.scenario_file):
         scenario_operations.deploy_scenario(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
         test_util.test_skip('Suite Setup Success')
+    if test_lib.scenario_config != None and test_lib.scenario_destroy != None:
+        scenario_operations.destroy_scenario(test_lib.all_scenario_config, test_lib.scenario_destroy)
 
     #This vlan creation is not a must, if testing is under nested virt env. But it is required on physical host without enough physcial network devices and your test execution machine is not the same one as Host machine. 
     #linux.create_vlan_eth("eth0", 10, "10.0.0.200", "255.255.255.0")
