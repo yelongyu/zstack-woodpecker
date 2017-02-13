@@ -47,8 +47,7 @@ def test():
     vm.set_state(vm_header.STOPPED)
     vm.check()
     vm.destroy()
-    vm.check()
-    vm.expunge()
+    #vm.expunge() maintain mode is not support expunge ops.
     vm.check()
 
     ps_ops.change_primary_storage_state(ps_uuid, 'Enabled')

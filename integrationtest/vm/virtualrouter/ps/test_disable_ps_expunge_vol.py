@@ -1,5 +1,5 @@
 '''
-New Integration Test for delete volume under PS maintain mode.
+New Integration Test for delete volume under PS disable mode.
 
 @author: SyZhao
 '''
@@ -51,21 +51,22 @@ def test():
 
     ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
     ps_uuid = ps.uuid
-    ps_ops.change_primary_storage_state(ps_uuid, 'maintain')
+    ps_ops.change_primary_storage_state(ps_uuid, 'disable')
     if not test_lib.lib_wait_target_down(vm.get_vm().vmNics[0].ip, '22', 90):
-        test_util.test_fail('VM is expected to stop when PS change to maintain state')
+        test_util.test_fail('VM is expected to stop when PS change to disable state')
 
     vm.set_state(vm_header.STOPPED)
     vm.check()
     volume.delete()
-    #volume.expunge() # maintain mode is not support expunge volume
+    volume.check()
+    volume.expunge()
     volume.check()
 
     ps_ops.change_primary_storage_state(ps_uuid, 'Enabled')
     host_ops.reconnect_host(host_uuid)
     vm_ops.reconnect_vr(vr_uuid)
     vm.destroy()
-    test_util.test_pass('Delete volume under PS maintain mode Test Success')
+    test_util.test_pass('Delete volume under PS disable mode Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():

@@ -56,7 +56,7 @@ def test():
     vm.set_state(vm_header.STOPPED)
     vm.check()
     volume.delete()
-    volume.expunge()
+    #volume.expunge()
     volume.check()
 
     ps_ops.change_primary_storage_state(ps_uuid, 'Enabled')

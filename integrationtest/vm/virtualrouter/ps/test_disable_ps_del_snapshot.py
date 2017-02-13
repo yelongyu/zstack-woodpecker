@@ -33,24 +33,36 @@ def test():
     vr = test_lib.lib_find_vr_by_l3_uuid(l3_1.uuid)[0]
     vr_uuid = vr.uuid
     
-    l3_1 = test_lib.lib_get_l3_by_name(l3_1_name)
+    snapshots = test_obj_dict.get_volume_snapshot(volume.get_volume().uuid)
+    snapshots.set_utility_vm(vm)
+    snapshots.create_snapshot('create_snapshot1')
+    snapshots.check()
+    snapshot1 = snapshots.get_current_snapshot()
+
     host = test_lib.lib_get_vm_host(vm.get_vm())
     host_uuid = host.uuid
     test_obj_dict.add_vm(vm)
     vm.check()
     ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
     ps_uuid = ps.uuid
-    ps_ops.change_primary_storage_state(ps_uuid, 'maintain')
+    ps_ops.change_primary_storage_state(ps_uuid, 'disable')
     if not test_lib.lib_wait_target_down(vm.get_vm().vmNics[0].ip, '22', 90):
-        test_util.test_fail('VM is expected to stop when PS change to maintain state')
+        test_util.test_fail('VM is expected to stop when PS change to disable state')
+
 
     vm.set_state(vm_header.STOPPED)
     vm.check()
+
+    test_util.test_dsc('Delete snapshot, volume and check')
+    snapshots.delete_snapshot(snapshot1)
+    snapshots.check()
+
+
     ps_ops.change_primary_storage_state(ps_uuid, 'Enabled')
     host_ops.reconnect_host(host_uuid)
     vm_ops.reconnect_vr(vr_uuid)
     vm.destroy()
-    test_util.test_pass('PS maintain mode Test Success')
+    test_util.test_pass('PS disable mode Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():

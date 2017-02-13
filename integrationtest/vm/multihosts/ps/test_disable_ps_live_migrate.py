@@ -1,5 +1,5 @@
 '''
-New Integration Test for delete volume under PS maintain mode.
+New Integration Test for delete vm under PS disable mode.
 
 @author: SyZhao
 '''
@@ -27,45 +27,44 @@ def test():
     global ps_uuid
     global host_uuid
     global vr_uuid
+
     test_util.test_dsc('Create test vm and check')
-    l3_1_name = os.environ.get('l3VlanNetworkName1')
-    vm = test_stub.create_vlan_vm(l3_name=l3_1_name)
+    vm = test_stub.create_vr_vm('vm1', 'imageName_net', 'l3VlanNetwork3')
+    test_obj_dict.add_vm(vm)
+
+    backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
+    for bs in backup_storage_list:
+        if bs.type == inventory.CEPH_BACKUP_STORAGE_TYPE:
+            break
+    else:
+        vm.destroy()
+        test_util.test_skip('Not find ceph type backup storage.')
+
+    l3_1_name = os.environ.get('l3VlanNetwork3')
+    l3_1 = test_lib.lib_get_l3_by_name(l3_1_name)
     vr = test_lib.lib_find_vr_by_l3_uuid(l3_1.uuid)[0]
     vr_uuid = vr.uuid
     
-    #l3_1 = test_lib.lib_get_l3_by_name(l3_1_name)
     host = test_lib.lib_get_vm_host(vm.get_vm())
     host_uuid = host.uuid
     test_obj_dict.add_vm(vm)
     vm.check()
-
-    disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName'))
-    volume_creation_option = test_util.VolumeOption()
-    volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
-    #volume_creation_option.set_system_tags(['ephemeral::shareable', 'capability::virtio-scsi'])
-    volume = test_stub.create_volume(volume_creation_option)
-    test_obj_dict.add_volume(volume)
-    volume.check()
-
-    #volume.attach(vm1)
-
     ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
     ps_uuid = ps.uuid
-    ps_ops.change_primary_storage_state(ps_uuid, 'maintain')
+    ps_ops.change_primary_storage_state(ps_uuid, 'disable')
     if not test_lib.lib_wait_target_down(vm.get_vm().vmNics[0].ip, '22', 90):
-        test_util.test_fail('VM is expected to stop when PS change to maintain state')
+        test_util.test_fail('VM is expected to stop when PS change to disable state')
 
     vm.set_state(vm_header.STOPPED)
     vm.check()
-    volume.delete()
-    #volume.expunge() # maintain mode is not support expunge volume
+    test_stub.migrate_vm_to_random_host(vm)
+    vm.check()
     volume.check()
 
     ps_ops.change_primary_storage_state(ps_uuid, 'Enabled')
     host_ops.reconnect_host(host_uuid)
     vm_ops.reconnect_vr(vr_uuid)
-    vm.destroy()
-    test_util.test_pass('Delete volume under PS maintain mode Test Success')
+    test_util.test_pass('PS disable mode Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():

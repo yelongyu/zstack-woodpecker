@@ -1,5 +1,5 @@
 '''
-New Integration Test for delete volume under PS maintain mode.
+New Integration Test for attach and remove nic of vm under PS disable mode.
 
 @author: SyZhao
 '''
@@ -27,45 +27,57 @@ def test():
     global ps_uuid
     global host_uuid
     global vr_uuid
+
     test_util.test_dsc('Create test vm and check')
-    l3_1_name = os.environ.get('l3VlanNetworkName1')
-    vm = test_stub.create_vlan_vm(l3_name=l3_1_name)
+    image_name = os.environ.get('imageName_net')
+    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    l3_name = os.environ.get('l3VlanDNATNetworkName')
+    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    l3_net_list = [l3_net_uuid]
+    l3_name = os.environ.get('l3VlanNetworkName1')
+    l3_net_uuid2 = test_lib.lib_get_l3_by_name(l3_name).uuid
+
+    vm = test_stub.create_vm(l3_net_list, image_uuid, 'attach_nic_vm', \
+            default_l3_uuid = l3_net_uuid)
+    test_obj_dict.add_vm(vm)
+    vm.check()
     vr = test_lib.lib_find_vr_by_l3_uuid(l3_1.uuid)[0]
     vr_uuid = vr.uuid
     
-    #l3_1 = test_lib.lib_get_l3_by_name(l3_1_name)
     host = test_lib.lib_get_vm_host(vm.get_vm())
     host_uuid = host.uuid
     test_obj_dict.add_vm(vm)
     vm.check()
-
-    disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName'))
-    volume_creation_option = test_util.VolumeOption()
-    volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
-    #volume_creation_option.set_system_tags(['ephemeral::shareable', 'capability::virtio-scsi'])
-    volume = test_stub.create_volume(volume_creation_option)
-    test_obj_dict.add_volume(volume)
-    volume.check()
-
-    #volume.attach(vm1)
-
     ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
     ps_uuid = ps.uuid
-    ps_ops.change_primary_storage_state(ps_uuid, 'maintain')
-    if not test_lib.lib_wait_target_down(vm.get_vm().vmNics[0].ip, '22', 90):
-        test_util.test_fail('VM is expected to stop when PS change to maintain state')
 
+
+    ps_ops.change_primary_storage_state(ps_uuid, 'disable')
+    if not test_lib.lib_wait_target_down(vm.get_vm().vmNics[0].ip, '22', 90):
+        test_util.test_fail('VM is expected to stop when PS change to disable state')
     vm.set_state(vm_header.STOPPED)
+
+    vm.add_nic(l3_net_uuid2)
+    attached_nic = test_lib.lib_get_vm_last_nic(vm.get_vm())
+    if l3_net_uuid2 != attached_nic.l3NetworkUuid:
+        test_util.test_fail("After attach a nic, VM:%s last nic is not belong l3: %s" % (vm.get_vm().uuid, l3_net_uuid2))
+
+    test_lib.lib_restart_vm_network(vm.get_vm())
     vm.check()
-    volume.delete()
-    #volume.expunge() # maintain mode is not support expunge volume
-    volume.check()
+    vm.remove_nic(attached_nic.uuid)
+    attached_nic = test_lib.lib_get_vm_last_nic(vm.get_vm())
+    if l3_net_uuid != attached_nic.l3NetworkUuid:
+        test_util.test_fail("After detached NIC, VM:%s only nic is not belong l3: %s" % (vm.get_vm().uuid, l3_net_uuid2))
+
 
     ps_ops.change_primary_storage_state(ps_uuid, 'Enabled')
     host_ops.reconnect_host(host_uuid)
     vm_ops.reconnect_vr(vr_uuid)
+    vm.check()
     vm.destroy()
-    test_util.test_pass('Delete volume under PS maintain mode Test Success')
+    vm.check()
+    vm.expunge()
+    test_util.test_pass('PS disable mode Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():

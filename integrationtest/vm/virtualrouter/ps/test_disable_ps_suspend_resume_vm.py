@@ -1,5 +1,5 @@
 '''
-New Integration Test for delete volume under PS maintain mode.
+New Integration Test for delete vm under PS disable mode.
 
 @author: SyZhao
 '''
@@ -33,39 +33,32 @@ def test():
     vr = test_lib.lib_find_vr_by_l3_uuid(l3_1.uuid)[0]
     vr_uuid = vr.uuid
     
-    #l3_1 = test_lib.lib_get_l3_by_name(l3_1_name)
+    l3_1 = test_lib.lib_get_l3_by_name(l3_1_name)
     host = test_lib.lib_get_vm_host(vm.get_vm())
     host_uuid = host.uuid
     test_obj_dict.add_vm(vm)
     vm.check()
-
-    disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName'))
-    volume_creation_option = test_util.VolumeOption()
-    volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
-    #volume_creation_option.set_system_tags(['ephemeral::shareable', 'capability::virtio-scsi'])
-    volume = test_stub.create_volume(volume_creation_option)
-    test_obj_dict.add_volume(volume)
-    volume.check()
-
-    #volume.attach(vm1)
-
     ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
     ps_uuid = ps.uuid
-    ps_ops.change_primary_storage_state(ps_uuid, 'maintain')
+    ps_ops.change_primary_storage_state(ps_uuid, 'disable')
     if not test_lib.lib_wait_target_down(vm.get_vm().vmNics[0].ip, '22', 90):
-        test_util.test_fail('VM is expected to stop when PS change to maintain state')
+        test_util.test_fail('VM is expected to stop when PS change to disable state')
 
     vm.set_state(vm_header.STOPPED)
     vm.check()
-    volume.delete()
-    #volume.expunge() # maintain mode is not support expunge volume
-    volume.check()
+    vm.suspend()
+    vm.check()
+    vm.resume()
+    vm.check()
 
     ps_ops.change_primary_storage_state(ps_uuid, 'Enabled')
     host_ops.reconnect_host(host_uuid)
     vm_ops.reconnect_vr(vr_uuid)
     vm.destroy()
-    test_util.test_pass('Delete volume under PS maintain mode Test Success')
+    vm.check()
+    vm.expunge()
+    vm.check()
+    test_util.test_pass('PS disable mode Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
