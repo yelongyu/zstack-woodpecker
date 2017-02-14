@@ -13,6 +13,7 @@ import zstackwoodpecker.operations.image_operations as img_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_image as test_image
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
+import os
 
 
 _config_ = {
