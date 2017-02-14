@@ -29,6 +29,10 @@ def test():
     global host_uuid
     global vr_uuid
     test_util.test_dsc('Create test vm and check')
+
+    test_lib.lib_set_delete_policy('vm', 'Delay')
+    test_lib.lib_set_delete_policy('volume', 'Delay')
+
     l3_1_name = os.environ.get('l3VlanNetworkName1')
     vm = test_stub.create_vlan_vm(l3_name=l3_1_name)
     l3_1 = test_lib.lib_get_l3_by_name(l3_1_name)
@@ -68,11 +72,17 @@ def test():
     host_ops.reconnect_host(host_uuid)
     vm_ops.reconnect_vr(vr_uuid)
     vm.destroy()
+
+    test_lib.lib_set_delete_policy('vm', 'Direct')
+    test_lib.lib_set_delete_policy('volume', 'Direct')
+
     test_util.test_pass('Delete volume under PS disable mode Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     global ps_uuid
+    test_lib.lib_set_delete_policy('vm', 'Direct')
+    test_lib.lib_set_delete_policy('volume', 'Direct')
     if ps_uuid != None:
         ps_ops.change_primary_storage_state(ps_uuid, 'enable')
     global host_uuid

@@ -73,20 +73,20 @@ def test():
     img_ops.attach_iso(iso_uuid, vm.vm.uuid)
 
 
-    ps_ops.change_primary_storage_state(ps_uuid, 'Enabled')
+    ps_ops.change_primary_storage_state(ps_uuid, 'enable')
     host_ops.reconnect_host(host_uuid)
     vm_ops.reconnect_vr(vr_uuid)
     vm.destroy()
     vm.check()
-    vm.expunge()
-    vm.check()
+    #vm.expunge()
+    #vm.check()
     test_util.test_pass('PS maintain mode Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     global ps_uuid
     if ps_uuid != None:
-        ps_ops.change_primary_storage_state(ps_uuid, 'Enabled')
+        ps_ops.change_primary_storage_state(ps_uuid, 'enable')
     global host_uuid
     if host_uuid != None:
         host_ops.reconnect_host(host_uuid)
