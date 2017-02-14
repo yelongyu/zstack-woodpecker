@@ -35,6 +35,7 @@ def test():
     test_util.test_dsc('Create test vm and check')
     l3_1_name = os.environ.get('l3VlanNetworkName1')
     vm = test_stub.create_vlan_vm(l3_name=l3_1_name)
+    l3_1 = test_lib.lib_get_l3_by_name(l3_1_name)
     vr = test_lib.lib_find_vr_by_l3_uuid(l3_1.uuid)[0]
     vr_uuid = vr.uuid
     
@@ -62,9 +63,9 @@ def test():
     ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
     ps_uuid = ps.uuid
     ps_ops.change_primary_storage_state(ps_uuid, 'disable')
-    if not test_lib.lib_wait_target_down(vm.get_vm().vmNics[0].ip, '22', 90):
-        test_util.test_fail('VM is expected to stop when PS change to disable state')
-    vm.set_state(vm_header.STOPPED)
+    if not test_lib.lib_wait_target_up(vm.get_vm().vmNics[0].ip, '22', 90):
+        test_util.test_fail('VM is expected to running when PS change to disable state')
+    vm.set_state(vm_header.RUNNING)
     vm.check()
 
     test_util.test_dsc('Attach ISO to VM')
@@ -73,7 +74,7 @@ def test():
     img_ops.attach_iso(iso_uuid, vm.vm.uuid)
 
 
-    ps_ops.change_primary_storage_state(ps_uuid, 'Enabled')
+    ps_ops.change_primary_storage_state(ps_uuid, 'enable')
     host_ops.reconnect_host(host_uuid)
     vm_ops.reconnect_vr(vr_uuid)
     vm.destroy()
@@ -86,7 +87,7 @@ def test():
 def error_cleanup():
     global ps_uuid
     if ps_uuid != None:
-        ps_ops.change_primary_storage_state(ps_uuid, 'Enabled')
+        ps_ops.change_primary_storage_state(ps_uuid, 'enable')
     global host_uuid
     if host_uuid != None:
         host_ops.reconnect_host(host_uuid)

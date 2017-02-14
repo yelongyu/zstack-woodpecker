@@ -37,11 +37,13 @@ def test():
     l3_net_list = [l3_net_uuid]
     l3_name = os.environ.get('l3VlanNetworkName1')
     l3_net_uuid2 = test_lib.lib_get_l3_by_name(l3_name).uuid
+    
 
     vm = test_stub.create_vm(l3_net_list, image_uuid, 'attach_nic_vm', \
             default_l3_uuid = l3_net_uuid)
     test_obj_dict.add_vm(vm)
     vm.check()
+    l3_1 = test_lib.lib_get_l3_by_name(l3_name)
     vr = test_lib.lib_find_vr_by_l3_uuid(l3_1.uuid)[0]
     vr_uuid = vr.uuid
     
@@ -54,9 +56,9 @@ def test():
 
 
     ps_ops.change_primary_storage_state(ps_uuid, 'disable')
-    if not test_lib.lib_wait_target_down(vm.get_vm().vmNics[0].ip, '22', 90):
-        test_util.test_fail('VM is expected to stop when PS change to disable state')
-    vm.set_state(vm_header.STOPPED)
+    if not test_lib.lib_wait_target_up(vm.get_vm().vmNics[0].ip, '22', 90):
+        test_util.test_fail('VM is expected to running when PS change to disable state')
+    vm.set_state(vm_header.RUNNING)
 
     vm.add_nic(l3_net_uuid2)
     attached_nic = test_lib.lib_get_vm_last_nic(vm.get_vm())
@@ -71,20 +73,20 @@ def test():
         test_util.test_fail("After detached NIC, VM:%s only nic is not belong l3: %s" % (vm.get_vm().uuid, l3_net_uuid2))
 
 
-    ps_ops.change_primary_storage_state(ps_uuid, 'Enabled')
+    ps_ops.change_primary_storage_state(ps_uuid, 'enable')
     host_ops.reconnect_host(host_uuid)
     vm_ops.reconnect_vr(vr_uuid)
     vm.check()
     vm.destroy()
     vm.check()
-    vm.expunge()
+    #vm.expunge()
     test_util.test_pass('PS disable mode Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     global ps_uuid
     if ps_uuid != None:
-        ps_ops.change_primary_storage_state(ps_uuid, 'Enabled')
+        ps_ops.change_primary_storage_state(ps_uuid, 'enable')
     global host_uuid
     if host_uuid != None:
         host_ops.reconnect_host(host_uuid)
