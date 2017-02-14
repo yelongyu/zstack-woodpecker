@@ -78,8 +78,8 @@ def test():
     host_ops.reconnect_host(host_uuid)
     vm_ops.reconnect_vr(vr_uuid)
     vm.destroy()
-    vm.check()
-    vm.expunge()
+    #vm.check()
+    #vm.expunge()
     vm.check()
     test_util.test_pass('PS disable mode Test Success')
 
