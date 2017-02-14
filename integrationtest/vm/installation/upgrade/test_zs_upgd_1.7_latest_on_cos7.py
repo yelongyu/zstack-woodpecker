@@ -17,7 +17,7 @@ test_obj_dict = test_state.TestStateDict()
 tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
 
 node_ip = os.environ.get('node1Ip')
-update_file = "/home/%s/zstack-woodpecker/integrationtest/vm/installation/update_iso.sh" % node_ip
+update_file = "/home/%s/zstack-woodpecker/integrationtest/vm/installation/mevoco_update_iso.sh" % node_ip
 
 def test():
     test_util.test_dsc('Create test vm to test zstack upgrade by -u.')
