@@ -288,7 +288,7 @@ def add_l2_resource(deploy_config, l2_name, zone_name = None, \
         cond = res_ops.gen_query_conditions('l2NetworkUuid', '=', l2_uuid)
         l3_name = res_ops.query_resource(res_ops.L3_NETWORK, cond, \
                 session_uuid)[0].name
-        dep_ops.add_virtual_router(deploy_config, session_uuid, \
+        dep_ops.add_virtual_router(None, None, deploy_config, session_uuid, \
                 l3_name = l3_name, zone_name = zone_name)
     except Exception as e:
         test_util.test_logger('[Error] zstack deployment meets exception when adding l2 resource .')
@@ -310,7 +310,7 @@ def add_l3_resource(deploy_config, l3_name, l2_name = None, zone_name = None, \
     try:
         dep_ops.add_l3_network(deploy_config, session_uuid, l3_name = l3_name, \
                 l2_name = l2_name, zone_name = zone_name)
-        dep_ops.add_virtual_router(deploy_config, session_uuid, \
+        dep_ops.add_virtual_router(None, None, deploy_config, session_uuid, \
                 l3_name = l3_name, zone_name = zone_name)
         l3_uuid = res_ops.get_resource(res_ops.L3_NETWORK, session_uuid, \
                 name = l3_name)[0].uuid
