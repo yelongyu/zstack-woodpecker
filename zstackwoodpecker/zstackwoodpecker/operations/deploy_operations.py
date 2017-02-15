@@ -52,7 +52,7 @@ def get_backup_storage_from_scenario_file(backupStorageRefName, scenarioConfig, 
         for vm in xmlobject.safe_list(host.vms.vm):
             for backupStorageRef in xmlobject.safe_list(vm.backupStorageRef):
                 if backupStorageRefName == backupStorageRef.text_:
-                    with open(scenario_file, 'r') as fd:
+                    with open(scenarioFile, 'r') as fd:
                         xmlstr = fd.read()
                         fd.close()
                         scenario_file = xmlobject.loads(xmlstr)
@@ -302,7 +302,7 @@ def get_primary_storage_from_scenario_file(primaryStorageRefName, scenarioConfig
         for vm in xmlobject.safe_list(host.vms.vm):
             for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
                 if primaryStorageRef.text_ == primaryStorageRefName:
-                    with open(scenario_file, 'r') as fd:
+                    with open(scenarioFile, 'r') as fd:
                         xmlstr = fd.read()
                         fd.close()
                         scenario_file = xmlobject.loads(xmlstr)
@@ -602,7 +602,7 @@ def get_host_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, deplo
         for vm in xmlobject.safe_list(host.vms.vm):
             for hostRef in xmlobject.safe_list(vm.hostRef):
                 if hostRef.text_ == hostRefName:
-                    with open(scenario_file, 'r') as fd:
+                    with open(scenarioFile, 'r') as fd:
                         xmlstr = fd.read()
                         fd.close()
                         scenario_file = xmlobject.loads(xmlstr)
