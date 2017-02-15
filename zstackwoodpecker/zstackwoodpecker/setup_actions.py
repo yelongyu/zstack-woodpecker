@@ -23,6 +23,7 @@ import threading
 import traceback
 import zstackwoodpecker.operations.resource_operations as res_ops 
 import zstackwoodpecker.operations.node_operations as node_ops
+import zstackwoodpecker.operations.deploy_operations as dpy_ops 
 import zstackwoodpecker.ansible as ansible
 import zstacktestagent.plugins.host as host_plugin
 import zstacktestagent.testagent as testagent
@@ -422,6 +423,10 @@ class Plan(object):
                 for cluster in zone.clusters.get_child_node_as_list('cluster'):
                     if cluster.hypervisorType_ == inventory.KVM_HYPERVISOR_TYPE:
                         for h in cluster.hosts.get_child_node_as_list('host'):
+                            if self.scenario_config != None and self.scenario_file != None:
+                                managementIp = dpy_ops.get_host_from_scenario_file(h.name_, self.scenario_config, self.scenario_file, self.config)
+                                if managementIp != None:
+                                    h.managementIp_ = managementIp
                             h.managementIp_
                             h.username_
                             h.password_
@@ -482,6 +487,9 @@ default one' % self.zstack_properties)
         if deploy_config.has_element('nodes') \
             and deploy_config.nodes.has_element('node'):
             for node in deploy_config.nodes.get_child_node_as_list('node'):
+                ip = dpy_ops.get_node_from_scenario_file(h.name_, self.scenario_config, self.scenario_file, self.config)
+                if ip != None:
+                    node.ip_ = ip
                 node.ip_
                 self.nodes.append(node)
                 if linux.is_ip_existing(node.ip_):
@@ -931,8 +939,10 @@ default one' % self.zstack_properties)
     def disable_db_deployment(self):
         self.need_deploy_db = False
 
-    def __init__(self, plan_config):
+    def __init__(self, plan_config, scenario_config, scenario_file):
         self.config = plan_config
+        self.scenario_config = scenario_config
+        self.scenario_file = scenario_file
         self.zstack_pkg = None
         self.zstack_install_script = None
         self.install_path = None

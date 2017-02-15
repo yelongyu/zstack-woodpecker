@@ -104,7 +104,7 @@ if test_config_path:
     all_config = test_config_obj.get_deploy_config()
     #Detailed zstack deployment information, including zones/cluster/hosts...
     deploy_config = all_config.deployerConfig
-    setup_plan = setup_actions.Plan(all_config)
+    setup_plan = setup_actions.Plan(all_config, all_scenario_config, scenario_file)
     test_config_obj.expose_config_variable()
     #Since ZStack management server might be not the same machine of test 
     #machine, so it needs to set management server ip for apibinding/api.py,

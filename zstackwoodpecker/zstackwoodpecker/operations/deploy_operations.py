@@ -50,15 +50,15 @@ def get_backup_storage_from_scenario_file(backupStorageRefName, scenarioConfig, 
 
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
         for vm in xmlobject.safe_list(host.vms.vm):
-            for backupStorageRef in xmlobject.safe_list(vm.backupStorageRef):
-                if backupStorageRefName == backupStorageRef.text_:
+            if xmlobject.has_element(vm, 'backupStorageRef'):
+                if backupStorageRefName == vm.backupStorageRef.text_:
                     with open(scenarioFile, 'r') as fd:
                         xmlstr = fd.read()
                         fd.close()
                         scenario_file = xmlobject.loads(xmlstr)
-                        for vm in xmlobject.safe_list(scenario_file.vms.vm):
-                            if vm.name_ == backupStorageRefName:
-                                return vm.ip_
+                        for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                            if s_vm.name_ == vm.name_:
+                                return s_vm.ip_
     return None
 
 #Add Backup Storage
@@ -300,15 +300,15 @@ def get_primary_storage_from_scenario_file(primaryStorageRefName, scenarioConfig
 
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
         for vm in xmlobject.safe_list(host.vms.vm):
-            for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
-                if primaryStorageRef.text_ == primaryStorageRefName:
+            if xmlobject.has_element(vm, 'primaryStorageRef'):
+                if vm.primaryStorageRef.text_ == primaryStorageRefName:
                     with open(scenarioFile, 'r') as fd:
                         xmlstr = fd.read()
                         fd.close()
                         scenario_file = xmlobject.loads(xmlstr)
-                        for vm in xmlobject.safe_list(scenario_file.vms.vm):
-                            if vm.name_ == primaryStorageRefName:
-                                return vm.ip_
+                        for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                            if s_vm.name_ == vm.name_:
+                                return s_vm.ip_
     return None
 
 #Add Primary Storage
@@ -594,21 +594,39 @@ def add_cluster(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluste
 
     wait_for_thread_done()
 
+def get_node_from_scenario_file(nodeRefName, scenarioConfig, scenarioFile, deployConfig):
+    if scenarioConfig == None or scenarioFile == None:
+        return None
+
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            if xmlobject.has_element(vm, 'nodeRef'):
+                if vm.nodeRef.text_ == nodeRefName:
+                    with open(scenarioFile, 'r') as fd:
+                        xmlstr = fd.read()
+                        fd.close()
+                        scenario_file = xmlobject.loads(xmlstr)
+                        for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                            if s_vm.name_ == vm.name_:
+                                return s_vm.ip_
+    return None
+
+
 def get_host_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, deployConfig):
     if scenarioConfig == None or scenarioFile == None:
         return None
 
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
         for vm in xmlobject.safe_list(host.vms.vm):
-            for hostRef in xmlobject.safe_list(vm.hostRef):
-                if hostRef.text_ == hostRefName:
+            if xmlobject.has_element(vm, 'hostRef'):
+                if vm.hostRef.text_ == hostRefName:
                     with open(scenarioFile, 'r') as fd:
                         xmlstr = fd.read()
                         fd.close()
                         scenario_file = xmlobject.loads(xmlstr)
-                        for vm in xmlobject.safe_list(scenario_file.vms.vm):
-                            if vm.name_ == hostRefName:
-                                return vm.ip_
+                        for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                            if s_vm.name_ == vm.name_:
+                                return s_vm.ip_
     return None
 
 #Add Host
