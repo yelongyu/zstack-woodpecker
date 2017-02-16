@@ -14,6 +14,7 @@ import zstacklib.utils.jsonobject as jsonobject
 import zstacklib.utils.xmlobject as xmlobject
 import zstacklib.utils.lock as lock
 import apibinding.inventory as inventory
+import os
 import sys
 import traceback
 import threading
