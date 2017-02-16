@@ -58,6 +58,11 @@ def test():
     image.set_creation_option(img_option)
     test_obj_dict.add_image(image)
 
+    test_util.test_dsc('Attach ISO to VM')
+    cond = res_ops.gen_query_conditions('name', '=', 'iso')
+    iso_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
+    img_ops.attach_iso(iso_uuid, vm.vm.uuid)
+    img_ops.detach_iso(vm.vm.uuid)
 
 
     ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
@@ -67,11 +72,8 @@ def test():
         test_util.test_fail('VM is expected to running when PS change to disable state')
     vm.set_state(vm_header.RUNNING)
     vm.check()
-
-    test_util.test_dsc('Attach ISO to VM')
-    cond = res_ops.gen_query_conditions('name', '=', 'iso')
-    iso_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
     img_ops.attach_iso(iso_uuid, vm.vm.uuid)
+
 
 
     ps_ops.change_primary_storage_state(ps_uuid, 'enable')

@@ -11,6 +11,8 @@ import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.header.vm as vm_header
 import os
+import sys
+import time
 
 _config_ = {
         'timeout' : 1000,
@@ -29,22 +31,28 @@ def test():
     global host_uuid
     global vr_uuid
     test_util.test_dsc('Create test vm and check')
+
+
     l3_1_name = os.environ.get('l3VlanNetworkName1')
     vm = test_stub.create_vlan_vm(l3_name=l3_1_name)
     l3_1 = test_lib.lib_get_l3_by_name(l3_1_name)
     vr = test_lib.lib_find_vr_by_l3_uuid(l3_1.uuid)[0]
     vr_uuid = vr.uuid
-    
-    snapshots = test_obj_dict.get_volume_snapshot(volume.get_volume().uuid)
+    test_obj_dict.add_vm(vm)
+    vm.check()
+
+    root_volume_uuid = test_lib.lib_get_root_volume_uuid(vm.get_vm())
+
+    test_util.test_dsc('create snapshot and check')
+    snapshots = test_obj_dict.get_volume_snapshot(root_volume_uuid)
     snapshots.set_utility_vm(vm)
-    snapshots.create_snapshot('create_snapshot1')
+    vm.check()
+    snapshots.create_snapshot('create_root_snapshot1')
     snapshots.check()
     snapshot1 = snapshots.get_current_snapshot()
 
     host = test_lib.lib_get_vm_host(vm.get_vm())
     host_uuid = host.uuid
-    test_obj_dict.add_vm(vm)
-    vm.check()
     ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
     ps_uuid = ps.uuid
     ps_ops.change_primary_storage_state(ps_uuid, 'disable')

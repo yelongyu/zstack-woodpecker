@@ -47,6 +47,8 @@ def test():
     volume = test_stub.create_volume(volume_creation_option)
     test_obj_dict.add_volume(volume)
     volume.check()
+    volume.attach(vm)
+    volume.detach(vm.vm.uuid)
 
     ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
     ps_uuid = ps.uuid
