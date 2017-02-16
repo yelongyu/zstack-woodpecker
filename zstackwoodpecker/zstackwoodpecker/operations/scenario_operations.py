@@ -320,9 +320,6 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 setup_backupstorage_vm(vm_inv, vm, deploy_config)
             if xmlobject.has_element(vm, 'primaryStorageRef'):
                 setup_primarystorage_vm(vm_inv, vm, deploy_config)
-            stop_vm(zstack_management_ip, vm_inv.uuid)
-            start_vm(zstack_management_ip, vm_inv.uuid)
-            destroy_vm(zstack_management_ip, vm_inv.uuid)
     xml_string = etree.tostring(root_xml, 'utf-8')
     xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
     open(scenario_file, 'w+').write(xml_string)
