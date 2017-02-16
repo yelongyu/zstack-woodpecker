@@ -45,7 +45,7 @@ def get_first_item_from_list(list_obj, list_obj_name, list_obj_value, action_nam
     return list_obj[0]
 
 def get_backup_storage_from_scenario_file(backupStorageRefName, scenarioConfig, scenarioFile, deployConfig):
-    if scenarioConfig == None or scenarioFile == None:
+    if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
         return None
 
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
@@ -295,7 +295,7 @@ def add_l2_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l2_
     wait_for_thread_done()
 
 def get_primary_storage_from_scenario_file(primaryStorageRefName, scenarioConfig, scenarioFile, deployConfig):
-    if scenarioConfig == None or scenarioFile == None:
+    if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
         return None
 
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
@@ -595,7 +595,7 @@ def add_cluster(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluste
     wait_for_thread_done()
 
 def get_node_from_scenario_file(nodeRefName, scenarioConfig, scenarioFile, deployConfig):
-    if scenarioConfig == None or scenarioFile == None:
+    if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
         return None
 
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
@@ -613,7 +613,7 @@ def get_node_from_scenario_file(nodeRefName, scenarioConfig, scenarioFile, deplo
 
 
 def get_host_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, deployConfig):
-    if scenarioConfig == None or scenarioFile == None:
+    if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
         return None
 
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
