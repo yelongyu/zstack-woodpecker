@@ -44,22 +44,20 @@ def test():
     test_stub.copy_id_dsa(vm_inv, ssh_cmd, tmp_file)
     test_stub.copy_id_dsa_pub(vm_inv)
 
-    test_stub.update_iso(ssh_cmd, tmp_file, vm_inv, update_file)
-
     test_util.test_dsc('Update MN IP')
     cmd = '%s "zstack-ctl change_ip --ip="%s ' % (ssh_cmd, vm_ip)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
-#    cmd = '%s "zstack-ctl start"' % ssh_cmd
-#    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
-#    test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
+    cmd = '%s "zstack-ctl start"' % ssh_cmd
+    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+    test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
 
     test_util.test_dsc('Upgrade zstack to latest') 
+    test_stub.update_iso(ssh_cmd, tmp_file, vm_inv, update_file)
     upgrade_target_file = '/root/zstack-upgrade-all-in-one.tgz' 
     test_stub.prepare_test_env(vm_inv, upgrade_target_file)
     test_stub.upgrade_zstack(ssh_cmd, upgrade_target_file, tmp_file) 
     zstack_latest_version = os.environ.get('zstackLatestVersion')
     test_stub.check_zstack_version(ssh_cmd, tmp_file, vm_inv, zstack_latest_version)
-
     cmd = '%s "zstack-ctl start"' % ssh_cmd
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
