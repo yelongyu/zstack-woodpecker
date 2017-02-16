@@ -10,7 +10,7 @@ rm -f index.html
 
 wget http://www.mevoco.com/downloads/scripts/zstack-upgrade 2>/dev/null
 sleep 3
-bash -s zstack-upgrade -r $latest_iso 2>/dev/null
+bash zstack-upgrade -r $latest_iso 2>/dev/null
 
 zstack-ctl stop 2>/dev/null
 sleep 20
