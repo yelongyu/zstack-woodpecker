@@ -59,8 +59,6 @@ def test():
     for vr in vrs:
         vm_ops.start_vm(vr.uuid)  
 
-    vm.start()
-    vm.check()
     test_util.test_pass('PS maintain mode Test Success')
 
 #Will be called only if exception happens in test().

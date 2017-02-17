@@ -61,6 +61,8 @@ def test():
 
     vm.set_state(vm_header.RUNNING)
     vm.check()
+    vm.stop()
+    vm.check()
 
     test_util.test_dsc('Use snapshot, volume and check')
     snapshots.use_snapshot(snapshot1)
