@@ -610,7 +610,7 @@ default one' % self.zstack_properties)
 
     def _install_management_nodes(self):
         for node in self.nodes:
-            if not linux.is_ip_existing(node.ip_):
+            if not linux.is_ip_existing(node.ip_) and os.environ.get('ZSTACK_ALREADY_INSTALLED') != "yes":
                 cmd = 'zstack-ctl install_management_node --force-reinstall \
                         --host=%s' % node.ip_
                 thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
