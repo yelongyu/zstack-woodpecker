@@ -582,12 +582,14 @@ default one' % self.zstack_properties)
         self._wait_for_thread_completion('set extra management node config', 60)
 
     def _change_node_ip(self):
-        node = self.nodes[0]
-        cmd = 'zstack-ctl change_ip --ip=%s' % (node.ip_)
-        thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
-        thread.start()
-
-        self._wait_for_thread_completion('change management node ip', 60)
+        for node in self.nodes:
+            cmd = 'zstack-ctl change_ip --ip=%s' % (node.ip_)
+            if not linux.is_ip_existing(node.ip_):
+                ssh.execute(cmd, node.ip_, node.username_, node.password_)
+            else:
+                thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
+                thread.start()
+                self._wait_for_thread_completion('change management node ip', 60)
 
     def _wait_for_thread_completion(self, msg, wait_time, raise_exception = True):
         end_time = wait_time
