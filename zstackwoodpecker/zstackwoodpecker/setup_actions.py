@@ -573,13 +573,16 @@ default one' % self.zstack_properties)
         ssh.execute(cmd, node1.ip_, node1.username_, node1.password_)
 
     def _set_extra_node_config(self):
+        node1 = self.nodes[0]
         for node in self.nodes:
             cmd = 'zstack-ctl configure --duplicate-to-remote=%s; zstack-ctl configure --host=%s management.server.ip=%s' % \
                     (node.ip_, node.ip_, node.ip_)
-            thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
-            thread.start()
-
-        self._wait_for_thread_completion('set extra management node config', 60)
+            if not linux.is_ip_existing(node.ip_):
+                ssh.execute(cmd, node1.ip_, node.username_, node.password_)
+            else:
+                thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
+                thread.start()
+                self._wait_for_thread_completion('set extra management node config', 60)
 
     def _change_node_ip(self):
         for node in self.nodes:
