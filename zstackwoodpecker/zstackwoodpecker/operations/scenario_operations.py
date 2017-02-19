@@ -116,7 +116,7 @@ def setup_host_vm(vm_inv, vm_config, deploy_config):
         nic_name = get_ref_l2_nic_name(l2networkref.text_, deploy_config)
         if nic_name.find('.') >= 0:
             vlan = nic_name.split('.')[1]
-            test_util.test_logger('[vm:] %s %s is created.' % (vm_ip, nic_name)
+            test_util.test_logger('[vm:] %s %s is created.' % (vm_ip, nic_name))
             cmd = 'vconfig add %s %s' % (nic_name.split('.')[0], vlan)
             ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
