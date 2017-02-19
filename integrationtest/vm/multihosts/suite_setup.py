@@ -17,6 +17,12 @@ USER_PATH = os.path.expanduser('~')
 EXTRA_SUITE_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_suite_setup_config.sh' % USER_PATH
 EXTRA_HOST_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_host_setup_config.sh' % USER_PATH
 def test():
+    if test_lib.scenario_config != None and test_lib.scenario_file != None and not os.path.exists(test_lib.scenario_file):
+        scenario_operations.deploy_scenario(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
+        test_util.test_skip('Suite Setup Success')
+    if test_lib.scenario_config != None and test_lib.scenario_destroy != None:
+        scenario_operations.destroy_scenario(test_lib.all_scenario_config, test_lib.scenario_destroy)
+
     #This vlan creation is not a must, if testing is under nested virt env. But it is required on physical host without enough physcial network devices and your test execution machine is not the same one as Host machine. 
     #no matter if current host is a ZStest host, we need to create 2 vlan devs for future testing connection for novlan test cases.
     linux.create_vlan_eth("eth0", 10)
