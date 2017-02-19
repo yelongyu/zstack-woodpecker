@@ -119,7 +119,7 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
             hostname = get_backup_storage_from_scenario_file(bs.name_, scenarioConfig, scenarioFile, deployConfig)
             if hostname != None:
                 # TODO: username and password should be configarable
-                action.monUrls = "root:password@%s" % (hostname)
+                action.monUrls = [ "root:password@%s" % (hostname) ]
             else:
                 action.monUrls = bs.monUrls_.split(';')
             if bs.poolName__:
@@ -403,7 +403,7 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 action.type = inventory.CEPH_PRIMARY_STORAGE_TYPE
                 hostname = get_primary_storage_from_scenario_file(pr.name_, scenarioConfig, scenarioFile, deployConfig)
                 if hostname != None:
-                    action.monUrls = "root:password@%s" % (hostname)
+                    action.monUrls = [ "root:password@%s" % (hostname) ]
                 else:
                     action.monUrls = pr.monUrls_.split(';')
                 if pr.dataVolumePoolName__:
