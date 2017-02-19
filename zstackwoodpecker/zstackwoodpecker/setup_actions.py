@@ -859,6 +859,7 @@ default one' % self.zstack_properties)
     def _start_multi_nodes(self, restart = False):
         nodes = []
         threads = []
+        node1 = self.nodes[0]
         for node in self.nodes:
             #The reserved node is used by test cases. 
             if not restart and node.reserve__:
@@ -870,9 +871,14 @@ default one' % self.zstack_properties)
                 # startup speed is slow. Increase timeout to 180s.
                 if linux.is_ip_existing(node.ip_):
                     cmd = 'zstack-ctl stop; nohup zstack-ctl start'
+                    thread = threading.Thread(target=shell_cmd_thread, args=(cmd, True, ))
+                elif not linux.is_ip_existing(node1.ip_):
+                    # when first node1 ip is not local, it usualy means woodpecker is running on hosts other than MN
+                    cmd = 'zstack-ctl stop_node --host=%s ; zstack-ctl start_node --host=%s --timeout=180' % (node.ip_, node.ip_)
+                    thread = threading.Thread(target=ssh.execute, args=(cmd, node1.ip_, node1.username_, node1.password_, ))
                 else:
                     cmd = 'zstack-ctl stop_node --host=%s ; zstack-ctl start_node --host=%s --timeout=180' % (node.ip_, node.ip_)
-                thread = threading.Thread(target=shell_cmd_thread, args=(cmd, True, ))
+                    thread = threading.Thread(target=shell_cmd_thread, args=(cmd, True, ))
                 threads.append(thread)
             else:
                 print 'Deploy node in docker'
