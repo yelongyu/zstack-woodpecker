@@ -1107,6 +1107,18 @@ def lib_get_vm_last_host(vm_inv):
         test_util.test_logger("Can't get Last Host Inventory for [vm:] %s, maybe the host has been deleted." % vm_inv.uuid)
         return None
 
+def lib_get_host_by_uuid(host_uuid):
+    conditions = res_ops.gen_query_conditions('uuid', '=', host_uuid)
+    hosts = res_ops.query_resource(res_ops.HOST, conditions)
+    if hosts:
+        return hosts[0]
+
+def lib_get_host_by_ip(host_ip):
+    conditions = res_ops.gen_query_conditions('managementIp', '=', host_ip)
+    hosts = res_ops.query_resource(res_ops.HOST, conditions)
+    if hosts:
+        return hosts[0]
+
 def lib_get_primary_storage_uuid_list_by_backup_storage(bs_uuid):
     '''
     Get primary storage uuid list, which belongs to the zone of backup storage
@@ -4834,3 +4846,18 @@ def lib_get_file_size(host, file_path):
         test_util.test_logger('ssh execution stderr output: %s' % eout)
         test_util.test_logger(linux.get_exception_stacktrace())
         return 0
+
+def ip2num(ip):
+    ip=[int(x) for x in ip.split('.')]
+    return ip[0] <<24 | ip[1]<<16 | ip[2]<<8 |ip[3]
+
+def num2ip(num):
+    return '%s.%s.%s.%s' %( (num & 0xff000000) >>24,
+                            (num & 0x00ff0000) >>16,
+                            (num & 0x0000ff00) >>8,
+                            num & 0x000000ff )
+
+def get_ip(start_ip, end_ip):
+    start = ip2num(start_ip)
+    end = ip2num(end_ip)
+    return [ num2ip(num) for num in range(start, end+1) if num & 0xff ]
