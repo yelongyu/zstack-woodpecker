@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-ceph-ps.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-ceph-ps.tmpt</scenarioConfigTemplate>
+</testConfig>
