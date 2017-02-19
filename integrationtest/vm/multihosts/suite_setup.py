@@ -8,6 +8,7 @@ import zstacklib.utils.http as  http
 import zstacktestagent.plugins.host as host_plugin
 import zstacktestagent.testagent as testagent
 
+import zstackwoodpecker.operations.scenario_operations as scenario_operations
 import zstackwoodpecker.operations.deploy_operations as deploy_operations
 import zstackwoodpecker.operations.config_operations as config_operations
 import zstackwoodpecker.test_lib as test_lib
