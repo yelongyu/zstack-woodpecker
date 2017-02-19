@@ -103,9 +103,9 @@ def setup_host_vm(vm_inv, vm_config, deploy_config):
                 vmnic_mac = vmnic.mac
                 break
         for l2networkref in xmlobject.safe_list(l3network.l2NetworkRef):
-            for zone in xmlobject.safe_list(deploy_config.zones.zone):
-                nic_name = get_ref_l2_nic_name(l2networkref.text_, deploy_config)
-            break
+            nic_name = get_ref_l2_nic_name(l2networkref.text_, deploy_config)
+            if nic_name.find('.') < 0:
+                break
 
         udev_config = udev_config + '\\nACTION=="add", SUBSYSTEM=="net", DRIVERS=="?*", ATTR{type}=="1", ATTR{address}=="%s", NAME="%s"' % (vmnic_mac, nic_name)
 
@@ -113,9 +113,11 @@ def setup_host_vm(vm_inv, vm_config, deploy_config):
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
     for l2networkref in xmlobject.safe_list(vm_config.l3Networks.l3Network.l2NetworkRef):
-        if l2networkref.hasattr('vlan_'):
-            test_util.test_logger('[vm:] %s vlan %s is created.' % (vm_ip, l2networkref.vlan_))
-            cmd = 'vconfig add eth0 %s' % (l2networkref.vlan_)
+        nic_name = get_ref_l2_nic_name(l2networkref.text_, deploy_config)
+        if nic_name.find('.') >= 0:
+            vlan = nic_name.split('.')[1]
+            test_util.test_logger('[vm:] %s %s is created.' % (vm_ip, nic_name)
+            cmd = 'vconfig add %s %s' % (nic_name.split('.')[0], vlan)
             ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
 def setup_backupstorage_vm(vm_inv, vm_config, deploy_config):
