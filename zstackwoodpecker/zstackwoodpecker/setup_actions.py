@@ -950,7 +950,7 @@ default one' % self.zstack_properties)
     def disable_db_deployment(self):
         self.need_deploy_db = False
 
-    def __init__(self, plan_config, scenario_config, scenario_file):
+    def __init__(self, plan_config, scenario_config = None, scenario_file = None):
         self.config = plan_config
         self.scenario_config = scenario_config
         self.scenario_file = scenario_file
