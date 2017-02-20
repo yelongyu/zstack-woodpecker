@@ -487,7 +487,7 @@ default one' % self.zstack_properties)
         if deploy_config.has_element('nodes') \
             and deploy_config.nodes.has_element('node'):
             for node in deploy_config.nodes.get_child_node_as_list('node'):
-                ip = dpy_ops.get_node_from_scenario_file(h.name_, self.scenario_config, self.scenario_file, self.config)
+                ip = dpy_ops.get_node_from_scenario_file(node.name_, self.scenario_config, self.scenario_file, self.config)
                 if ip != None:
                     node.ip_ = ip
                 node.ip_
