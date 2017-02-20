@@ -94,6 +94,13 @@ def get_ref_l2_nic_name(l2network_name, deploy_config):
                 return l2vlannetwork.physicalInterface_
     return None
 
+def get_host(vm_config, deploy_config):
+    for zone in xmlobject.safe_list(deploy_config.zones.zone):
+        for cluster in xmlobject.safe_list(zone.clusters.cluster):
+            for host in xmlobject.safe_list(cluster.hosts.host):
+                if host.name_ == vm_config.hostRef.text_:
+                    return host
+
 def setup_host_vm(vm_inv, vm_config, deploy_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
     udev_config = ''
@@ -120,8 +127,19 @@ def setup_host_vm(vm_inv, vm_config, deploy_config):
             cmd = 'vconfig add %s %s' % (nic_name.split('.')[0], vlan)
             ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
+    host = get_host(vm_config, deploy_config)
+    if hasattr(host, 'port_') and host.port_ != '22':
+        cmd = "sed -i 's/#Port 22/Port %s/g' /etc/ssh/sshd_config && iptables -I INPUT -p tcp -m tcp --dport %s -j ACCEPT && service sshd restart" % (host.port_, host.port_)
+        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+    else:
+        host.port_ = '22'
+
 def setup_backupstorage_vm(vm_inv, vm_config, deploy_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
+    host = get_host(vm_config, deploy_config)
+    if not hasattr(host, 'port_') or host.port_ == '22':
+        host.port_ = '22'
+
     for backupStorageRef in xmlobject.safe_list(vm_config.backupStorageRef):
         print backupStorageRef.text_
         if backupStorageRef.type_ == 'sftp':
@@ -130,11 +148,15 @@ def setup_backupstorage_vm(vm_inv, vm_config, deploy_config):
                     # TODO: sftp may setup with non-root or non-default user/password port
                     test_util.test_logger('[vm:] %s setup sftp service.' % (vm_ip))
                     cmd = "mkdir -p %s" % (sftpBackupStorage.url_)
-                    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+                    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host.port_))
                     return
 
 def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
+    host = get_host(vm_config, deploy_config)
+    if not hasattr(host, 'port_') or host.port_ == '22':
+        host.port_ = '22'
+
     for primaryStorageRef in xmlobject.safe_list(vm_config.primaryStorageRef):
         print primaryStorageRef.text_
         for zone in xmlobject.safe_list(deploy_config.zones.zone):
@@ -145,19 +167,19 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
                         # TODO: multiple NFS PS may refer to same host's different DIR
                         nfsPath = nfsPrimaryStorage.url_.split(':')[1]
                         cmd = "echo '%s *(rw,sync,no_root_squash)' > /etc/exports" % (nfsPath)
-                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host.port_))
                         cmd = "mkdir -p %s && service rpcbind restart && service nfs restart" % (nfsPath)
-                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host.port_))
                         cmd = "iptables -w 20 -I INPUT -p tcp -m tcp --dport 2049 -j ACCEPT && iptables -w 20 -I INPUT -p udp -m udp --dport 2049 -j ACCEPT"
-                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host.port_))
                         return
             elif primaryStorageRef.type_ == 'ceph':
                 for cephPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.cephPrimaryStorage):
                     if primaryStorageRef.text_ == cephPrimaryStorage.name_:
                         test_util.test_logger('[vm:] %s setup ceph service.' % (vm_ip))
-                        ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ceph_nodes.sh'), '/tmp/setup_ceph_nodes.sh', vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, port=22)
+                        ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ceph_nodes.sh'), '/tmp/setup_ceph_nodes.sh', vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, port=host.port_)
                         cmd = "bash -ex /tmp/setup_ceph_nodes.sh"
-                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host.port_))
 
                         #nfsPath = nfsPrimaryStorage.url_.split(':')[1]
                         return
