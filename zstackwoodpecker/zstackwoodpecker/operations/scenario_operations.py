@@ -86,12 +86,14 @@ def setup_node_vm(vm_inv, vm_config, deploy_config):
 
 def get_ref_l2_nic_name(l2network_name, deploy_config):
     for zone in xmlobject.safe_list(deploy_config.zones.zone):
-        for l2novlannetwork in xmlobject.safe_list(zone.l2Networks.l2NoVlanNetwork):
-            if l2novlannetwork.name_ == l2network_name:
-                return l2novlannetwork.physicalInterface_
-        for l2vlannetwork in xmlobject.safe_list(zone.l2Networks.l2VlanNetwork):
-            if l2vlannetwork.name_ == l2network_name:
-                return l2vlannetwork.physicalInterface_
+        if hasattr(zone.l2Networks, 'l2NoVlanNetwork'):
+            for l2novlannetwork in xmlobject.safe_list(zone.l2Networks.l2NoVlanNetwork):
+                if l2novlannetwork.name_ == l2network_name:
+                    return l2novlannetwork.physicalInterface_
+        if hasattr(zone.l2Networks, 'l2VlanNetwork'):
+            for l2vlannetwork in xmlobject.safe_list(zone.l2Networks.l2VlanNetwork):
+                if l2vlannetwork.name_ == l2network_name:
+                    return l2vlannetwork.physicalInterface_
     return None
 
 def get_host(vm_config, deploy_config):
