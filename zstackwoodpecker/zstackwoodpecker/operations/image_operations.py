@@ -228,14 +228,16 @@ def get_image_qga_enable(img_uuid, session_uuid = None):
     return evt
 
 def set_image_qga_enable(img_uuid, session_uuid = None):
-    action = api_actions.SetImageQgaEnableAction()
+    action = api_actions.SetImageQgaAction()
     action.uuid = img_uuid
+    action.enable = 'true'
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
 def set_image_qga_disable(img_uuid, session_uuid = None):
-    action = api_actions.SetImageQgaDisableAction()
+    action = api_actions.SetImageQgaAction()
     action.uuid = img_uuid
+    action.enable = 'false'
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 

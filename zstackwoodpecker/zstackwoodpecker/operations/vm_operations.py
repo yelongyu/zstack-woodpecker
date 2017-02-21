@@ -356,13 +356,16 @@ def get_vm_qga_enable(vm_uuid, session_uuid = None):
     return evt
 
 def set_vm_qga_enable(vm_uuid, session_uuid = None):
-    action = api_actions.SetVmQgaEnableAction()
+    action = api_actions.SetVmQgaAction()
     action.uuid = vm_uuid
+    action.enable = 'true'
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
 def set_vm_qga_disable(vm_uuid, session_uuid = None):
-    action = api_actions.SetVmQgaDisableAction()
+    action = api_actions.SetVmQgaAction()
     action.uuid = vm_uuid
+    action.enable = 'false'
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
+
