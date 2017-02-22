@@ -61,6 +61,7 @@
             </l3Network>
           </l3Networks>
           <hostRef>$hostName4</hostRef>
+	  <backupStorageRef type="sftp">$sftpBackupStorageName2</backupStorageRef>
         </vm>
       </vms>
     </host>
