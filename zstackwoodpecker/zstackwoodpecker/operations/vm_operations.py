@@ -370,7 +370,7 @@ def set_vm_qga_disable(vm_uuid, session_uuid = None):
     return evt
 
 def get_vm_capabilities(vm_uuid, session_uuid = None):
-    action = api_action.GetVmCapabilitiesAction()
+    action = api_actions.GetVmCapabilitiesAction()
     action.uuid = vm_uuid
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
