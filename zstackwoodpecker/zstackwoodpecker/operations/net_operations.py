@@ -283,7 +283,7 @@ def add_l2_resource(deploy_config, l2_name, zone_name = None, \
                                 session_uuid, name=cluster.name_)[0].uuid
                         attach_l2(l2_uuid, cluster_uuid, session_uuid)
 
-        dep_ops.add_l3_network(deploy_config, session_uuid, l2_name = l2_name, \
+        dep_ops.add_l3_network(None, None, deploy_config, session_uuid, l2_name = l2_name, \
                 zone_name = zone_name)
         cond = res_ops.gen_query_conditions('l2NetworkUuid', '=', l2_uuid)
         l3_name = res_ops.query_resource(res_ops.L3_NETWORK, cond, \
@@ -308,7 +308,7 @@ def add_l3_resource(deploy_config, l3_name, l2_name = None, zone_name = None, \
         session_uuid = acc_ops.login_as_admin()
         session_uuid_flag = False
     try:
-        dep_ops.add_l3_network(deploy_config, session_uuid, l3_name = l3_name, \
+        dep_ops.add_l3_network(None, None, deploy_config, session_uuid, l3_name = l3_name, \
                 l2_name = l2_name, zone_name = zone_name)
         dep_ops.add_virtual_router(None, None, deploy_config, session_uuid, \
                 l3_name = l3_name, zone_name = zone_name)
