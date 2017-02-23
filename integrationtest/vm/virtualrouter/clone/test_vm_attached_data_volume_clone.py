@@ -19,7 +19,7 @@ vn_prefix = 'vm-clone-%s' % time.time()
 vm_names = ['%s-vm1' % vn_prefix]
 
 def test():
-    vm = test_stub.create_vm(vm_name = vn_prefix)
+    vm = test_stub.create_vlan_vm()
     test_obj_dict.add_vm(vm)
 
     disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName'))
