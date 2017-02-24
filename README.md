@@ -12,7 +12,7 @@ The automated testing framework for project ZStack http://zstack.org
  
 #2. Install necessary packages and set GOROOT 
 * In CentOS7.2 
-* `yum install java-1.8.0-openjdk-devel.x86_64 java-1.8.0-openjdk.x86_64 ant-1.7.1-13.el6.x86_64  apache-maven-3.2.5 git libffi libffi-devel openssl-devel bc ant sshpass golang -y` 
+* `yum install java-1.8.0-openjdk-devel.x86_64 java-1.8.0-openjdk.x86_64 ant  apache-maven git libffi libffi-devel openssl-devel bc ant sshpass golang -y` 
 * `export GOROOT=/usr/lib/golang`
 
 #3. Manually build ZStack
