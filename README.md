@@ -14,6 +14,7 @@ The automated testing framework for project ZStack http://zstack.org
 * In CentOS7.2 
 * `yum install java-1.8.0-openjdk-devel.x86_64 java-1.8.0-openjdk.x86_64 ant  apache-maven git libffi libffi-devel openssl-devel bc ant sshpass golang -y` 
 * `export GOROOT=/usr/lib/golang`
+* `export GO15VENDOREXPERIMENT=1`
 
 #3. Manually build ZStack
  * make sure Java JDK and maven are installed.  
