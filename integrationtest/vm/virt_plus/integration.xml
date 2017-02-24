@@ -57,5 +57,6 @@
         <case timeout='1800'  repeat='1'>snapshot/test_delete_snapshot_on_running_vm.py</case>
         <case timeout='9000' repeat='1' noparallel='True'>snapshot/test_change_max_sp_depth_live_vm.py</case>
         <case timeout='1200' repeat='1'>clone/test_vm_attached_data_volume_clone.py</case>
+        <case timeout='1200' repeat='1'>clone/test_expunge_vm_check_imf2.py</case>
     </suite>
 </integrationTest>
