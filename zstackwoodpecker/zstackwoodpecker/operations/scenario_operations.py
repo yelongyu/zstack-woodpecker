@@ -105,6 +105,9 @@ def get_host(vm_config, deploy_config):
 
 def setup_host_vm(vm_inv, vm_config, deploy_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
+    cmd = 'hostnamectl set-hostname %s' % (vm_ip.replace('.', '-'))
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+
     udev_config = ''
     for l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
         for vmnic in vm_inv.vmNics:
