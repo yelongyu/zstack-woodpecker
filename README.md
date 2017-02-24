@@ -18,10 +18,10 @@ The automated testing framework for project ZStack http://zstack.org
 
 #3. Manually build ZStack
  * make sure Java JDK and maven are installed.  
+ * For Mainland developer, please download repository.tar to /root/.m2/ manually from http://pan.baidu.com/s/1eQvUmWU, before build ZStack. Then run  `cd /root/.m2 ; tar xf repository.tar `
  * `cd /home/zstack; wget -c http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.35/bin/apache-tomcat-7.0.35.zip`  
  * `cd /home/zstack/zstack`  
  * `mvn -DskipTests clean install` (The 1st time build will be a little bitter slow, since it need to download a lot of java libs)  
- * For Mainland developer, please download .m2 packages to /root/.m2/ manually from http://pan.baidu.com/s/1eQvUmWU, before build ZStack
 
 #4. Use woodpecker to build zstack all in one package
  * `cd /home/zstack/zstack-woodpecker/dailytest`  
