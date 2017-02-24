@@ -177,6 +177,5 @@
         <case timeout='1200' repeat='1'>ps/test_maintain_ps.py</case>
         <case timeout='1200' repeat='1'>ps/test_maintain_ps_recover_share_vol.py</case>
         <case timeout='1200' repeat='1'>ps/test_maintain_ps_recover_vol.py</case>
-        <case timeout='1200' repeat='1'>clone/test_vm_attached_data_volume_clone.py</case>
     </suite>
 </integrationTest>

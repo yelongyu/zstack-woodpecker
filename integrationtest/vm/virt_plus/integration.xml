@@ -56,5 +56,6 @@
         <case timeout='3600'  repeat='1'>snapshot/test_create_snapshot.py</case>
         <case timeout='1800'  repeat='1'>snapshot/test_delete_snapshot_on_running_vm.py</case>
         <case timeout='9000' repeat='1' noparallel='True'>snapshot/test_change_max_sp_depth_live_vm.py</case>
+        <case timeout='1200' repeat='1'>clone/test_vm_attached_data_volume_clone.py</case>
     </suite>
 </integrationTest>
