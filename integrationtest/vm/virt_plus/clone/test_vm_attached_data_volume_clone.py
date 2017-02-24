@@ -22,6 +22,18 @@ def test():
     vm = test_stub.create_vlan_vm()
     test_obj_dict.add_vm(vm)
 
+    backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
+    for bs in backup_storage_list:
+        if bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+            break
+        #if bs.type == inventory.SFTP_BACKUP_STORAGE_TYPE:
+        #    break
+        if bs.type == inventory.CEPH_BACKUP_STORAGE_TYPE:
+            break
+    else:
+        vm.destroy()
+        test_util.test_skip('Not find image store type backup storage.')
+
     disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName'))
     volume_creation_option = test_util.VolumeOption()
     volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
