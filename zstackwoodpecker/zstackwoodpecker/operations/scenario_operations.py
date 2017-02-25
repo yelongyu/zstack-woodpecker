@@ -192,9 +192,13 @@ def get_scenario_config_vm(vm_name, scenario_config):
                 return vm
 
 def get_scenario_file_vm(vm_name, scenario_file):
-    for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
-        if s_vm.name_ == vm.name_:
-            return s_vm
+    with open(scenario_file, 'r') as fd:
+        xmlstr = fd.read()
+        fd.close()
+        scenariofile = xmlobject.loads(xmlstr)
+        for s_vm in xmlobject.safe_list(scenariofile.vms.vm):
+            if s_vm.name_ == vm_name:
+                return s_vm
 
 def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
     ceph_storages = dict()
@@ -231,7 +235,7 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
         test_util.test_logger('setup ceph [%s] service.' % (ceph_storage))
 	node1_name = ceph_storages[ceph_storage][0]
 	node1_config = get_scenario_config_vm(node1_name, scenario_config)
-	node1_ip = get_scenario_file_vm(node1_name, scenario_config).ip_
+	node1_ip = get_scenario_file_vm(node1_name, scenario_file).ip_
         node_host = get_deploy_host(node1_config.hostRef.text_, deploy_config)
         if not hasattr(node_host, 'port_') or node_host.port_ == '22':
             node_host.port_ = '22'
@@ -240,7 +244,7 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
         for ceph_node in ceph_storages[ceph_storage]:
             vm = get_scenario_file_vm(ceph_node, scenario_file)
 	    vm_ips += vm.ip_
-        ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ceph_nodes.sh'), '/tmp/setup_ceph_nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=node_host.port_)
+        ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ceph_nodes.sh'), '/tmp/setup_ceph_nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host.port_))
         cmd = "bash -ex /tmp/setup_ceph_nodes.sh %s" % (vm_ips)
         ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
 
@@ -403,10 +407,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 setup_backupstorage_vm(vm_inv, vm, deploy_config)
             if xmlobject.has_element(vm, 'primaryStorageRef'):
                 setup_primarystorage_vm(vm_inv, vm, deploy_config)
-    setup_ceph_storages(scenario_config, root_xml, deploy_config)
     xml_string = etree.tostring(root_xml, 'utf-8')
     xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
     open(scenario_file, 'w+').write(xml_string)
+    setup_ceph_storages(scenario_config, scenario_file, deploy_config)
 
 def destroy_scenario(scenario_config, scenario_file):
     with open(scenario_file, 'r') as fd:
