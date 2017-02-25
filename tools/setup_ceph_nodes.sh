@@ -2,9 +2,13 @@
 set -x
 export PS4='+[#$LINENO ${FUNCNAME[0]}() $BASH_SOURCE] '
 
-#declare -a IP
-#IP[0]=$1
-#IP[1]=$2
+declare -a IP
+IP[0]=$1
+IP[1]=$2
+
+if [ "$1" == "" ]; then
+    CEPH_ONE_NODE=yes
+fi
 
 auto_ssh_copy_id () {
 
@@ -27,43 +31,100 @@ yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install ceph ceph-d
 HOST_IP=`ip addr show eth0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'`
 
 echo " $HOST_IP ceph-1 ">>/etc/hosts
-#echo " ${IP[0]} ceph-2 ">>/etc/hosts
-#echo " ${IP[1]} ceph-3 ">>/etc/hosts
+if [ "${CEPH_ONE_NODE}" != "yes" ]; then
+    echo " ${IP[0]} ceph-2 ">>/etc/hosts
+    echo " ${IP[1]} ceph-3 ">>/etc/hosts
+fi
 cat /etc/hosts | sort -u >/etc/host-tmp
 mv /etc/host-tmp /etc/hosts
 sleep 2
 
 [  -f /root/.ssh/id_rsa ] || gen_ssh_keys
 auto_ssh_copy_id password ceph-1
-#auto_ssh_copy_id password ceph-2
-#auto_ssh_copy_id password ceph-3
+if [ "${CEPH_ONE_NODE}" != "yes" ]; then
+    auto_ssh_copy_id password ceph-2
+    auto_ssh_copy_id password ceph-3
+fi
 
 scp /etc/hosts ceph-1:/etc/hosts
-#scp /etc/hosts ceph-2:/etc/hosts
-#scp /etc/hosts ceph-3:/etc/hosts
+if [ "${CEPH_ONE_NODE}" != "yes" ]; then
+    scp /etc/hosts ceph-2:/etc/hosts
+    scp /etc/hosts ceph-3:/etc/hosts
+fi
 
 ssh  ceph-1 hostnamectl set-hostname ceph-1 && export HOSTNAME=ceph-1
-#ssh  ceph-2 hostnamectl set-hostname ceph-2 && export HOSTNAME=ceph-2
-#ssh  ceph-3 hostnamectl set-hostname ceph-3 && export HOSTNAME=ceph-3
+if [ "${CEPH_ONE_NODE}" != "yes" ]; then
+    ssh  ceph-2 hostnamectl set-hostname ceph-2 && export HOSTNAME=ceph-2
+    ssh  ceph-3 hostnamectl set-hostname ceph-3 && export HOSTNAME=ceph-3
+fi
 
-#ssh  ceph-2 yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install ceph ceph-deploy ntp expect>/dev/null 2>&1
-#ssh  ceph-3 yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install ceph ceph-deploy ntp expect>/dev/null 2>&1
+if [ "${CEPH_ONE_NODE}" != "yes" ]; then 
+    ssh  ceph-2 yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install ceph ceph-deploy ntp expect>/dev/null 2>&1
+    ssh  ceph-3 yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install ceph ceph-deploy ntp expect>/dev/null 2>&1
+fi
 
 ssh ceph-1 "iptables -F && service iptables save && systemctl restart ntpd && systemctl enable ntpd.service"
-#ssh ceph-2 "iptables -F && service iptables save && systemctl restart ntpd && systemctl enable ntpd.service"
-#ssh ceph-3 "iptables -F && service iptables save && systemctl restart ntpd && systemctl enable ntpd.service"
+if [ "${CEPH_ONE_NODE}" != "yes" ]; then 
+    ssh ceph-2 "iptables -F && service iptables save && systemctl restart ntpd && systemctl enable ntpd.service"
+    ssh ceph-3 "iptables -F && service iptables save && systemctl restart ntpd && systemctl enable ntpd.service"
+fi
 
 ssh ceph-1 "systemctl disable firewalld; systemctl stop firewalld"
-#ssh ceph-2 "systemctl disable firewalld; systemctl stop firewalld"
-#ssh ceph-3 "systemctl disable firewalld; systemctl stop firewalld"
+if [ "${CEPH_ONE_NODE}" != "yes" ]; then 
+    ssh ceph-2 "systemctl disable firewalld; systemctl stop firewalld"
+    ssh ceph-3 "systemctl disable firewalld; systemctl stop firewalld"
+fi
 
 ssh ceph-1 "sed -i s'/SELINUX=enforcing/SELINUX=disabled'/g /etc/sysconfig/selinux"
-#ssh ceph-2 "sed -i s'/SELINUX=enforcing/SELINUX=disabled'/g /etc/sysconfig/selinux"
-#ssh ceph-3 "sed -i s'/SELINUX=enforcing/SELINUX=disabled'/g /etc/sysconfig/selinux"
+if [ "${CEPH_ONE_NODE}" != "yes" ]; then 
+    ssh ceph-2 "sed -i s'/SELINUX=enforcing/SELINUX=disabled'/g /etc/sysconfig/selinux"
+    ssh ceph-3 "sed -i s'/SELINUX=enforcing/SELINUX=disabled'/g /etc/sysconfig/selinux"
+fi
 
 
 
 ceph-deploy new ceph-1
+if [ "${CEPH_ONE_NODE}" != "yes" ]; then
+cat >> ceph.conf << EOF
+osd_pool_default_size = 3
+osd_pool_default_min_size = 2
+osd_pool_default_pg_num = 128
+osd_pool_default_pgp_num = 128
+osd_max_backfills = 1
+osd_recovery_max_active = 1
+osd crush update on start = 0
+rbd_default_format = 2
+debug_ms = 0
+debug_osd = 0
+osd_recovery_max_single_start = 1
+filestore_max_sync_interval = 15
+filestore_min_sync_interval = 10
+filestore_queue_max_ops = 65536
+filestore_queue_max_bytes = 536870912
+filestore_queue_committing_max_bytes = 536870912
+filestore_queue_committing_max_ops = 65536
+filestore_wbthrottle_xfs_bytes_start_flusher = 419430400
+filestore_wbthrottle_xfs_bytes_hard_limit = 4194304000
+filestore_wbthrottle_xfs_ios_start_flusher = 5000
+filestore_wbthrottle_xfs_ios_hard_limit = 50000
+filestore_wbthrottle_xfs_inodes_start_flusher = 5000
+filestore_wbthrottle_xfs_inodes_hard_limit = 50000
+journal_max_write_bytes = 1073714824
+journal_max_write_entries = 5000
+journal_queue_max_ops = 65536
+journal_queue_max_bytes = 536870912
+osd_client_message_cap = 65536
+osd_client_message_size_cap = 524288000
+ms_dispatch_throttle_bytes = 536870912
+filestore_fd_cache_size = 4096
+osd_op_threads = 10
+osd_disk_threads = 2
+filestore_op_threads = 6
+osd_client_op_priority = 100
+osd_recovery_op_priority = 5
+osd crush chooseleaf type = 0
+EOF
+else
 cat >> ceph.conf << EOF
 osd_pool_default_size = 1
 osd_pool_default_min_size = 1
@@ -103,6 +164,8 @@ osd_client_op_priority = 100
 osd_recovery_op_priority = 5
 osd crush chooseleaf type = 0
 EOF
+fi
+
 
 for I in `seq 3`; do
 	ceph-deploy --overwrite-conf mon create ceph-1

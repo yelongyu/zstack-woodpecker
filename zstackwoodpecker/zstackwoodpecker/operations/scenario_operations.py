@@ -96,11 +96,11 @@ def get_ref_l2_nic_name(l2network_name, deploy_config):
                     return l2vlannetwork.physicalInterface_
     return None
 
-def get_host(vm_config, deploy_config):
+def get_deploy_host(vm_name, deploy_config):
     for zone in xmlobject.safe_list(deploy_config.zones.zone):
         for cluster in xmlobject.safe_list(zone.clusters.cluster):
             for host in xmlobject.safe_list(cluster.hosts.host):
-                if host.name_ == vm_config.hostRef.text_:
+                if host.name_ == vm_name:
                     return host
 
 def setup_host_vm(vm_inv, vm_config, deploy_config):
@@ -132,7 +132,7 @@ def setup_host_vm(vm_inv, vm_config, deploy_config):
             cmd = 'vconfig add %s %s' % (nic_name.split('.')[0], vlan)
             ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
-    host = get_host(vm_config, deploy_config)
+    host = get_deploy_host(vm_config.hostRef.text_, deploy_config)
     if hasattr(host, 'port_') and host.port_ != '22':
         cmd = "sed -i 's/#Port 22/Port %s/g' /etc/ssh/sshd_config && iptables -I INPUT -p tcp -m tcp --dport %s -j ACCEPT && service sshd restart" % (host.port_, host.port_)
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
@@ -147,7 +147,7 @@ def setup_host_vm(vm_inv, vm_config, deploy_config):
 
 def setup_backupstorage_vm(vm_inv, vm_config, deploy_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
-    host = get_host(vm_config, deploy_config)
+    host = get_deploy_host(vm_config.hostRef.text_, deploy_config)
     if not hasattr(host, 'port_') or host.port_ == '22':
         host.port_ = '22'
 
@@ -164,7 +164,7 @@ def setup_backupstorage_vm(vm_inv, vm_config, deploy_config):
 
 def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
-    host = get_host(vm_config, deploy_config)
+    host = get_deploy_host(vm_config.hostRef.text_, deploy_config)
     if not hasattr(host, 'port_') or host.port_ == '22':
         host.port_ = '22'
 
@@ -184,17 +184,63 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
                         cmd = "iptables -w 20 -I INPUT -p tcp -m tcp --dport 2049 -j ACCEPT && iptables -w 20 -I INPUT -p udp -m udp --dport 2049 -j ACCEPT"
                         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host.port_))
                         return
-            elif primaryStorageRef.type_ == 'ceph':
-                for cephPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.cephPrimaryStorage):
-                    if primaryStorageRef.text_ == cephPrimaryStorage.name_:
-                        test_util.test_logger('[vm:] %s setup ceph service.' % (vm_ip))
-                        ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ceph_nodes.sh'), '/tmp/setup_ceph_nodes.sh', vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, port=host.port_)
-                        cmd = "bash -ex /tmp/setup_ceph_nodes.sh"
-                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host.port_))
 
-                        #nfsPath = nfsPrimaryStorage.url_.split(':')[1]
-                        return
-    
+def get_scenario_config_vm(vm_name, scenario_config):
+    for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            if vm.name_ == vm_name:
+                return vm
+
+def get_scenario_file_vm(vm_name, scenario_file):
+    for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+        if s_vm.name_ == vm.name_:
+            return s_vm
+
+def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
+    ceph_storages = dict()
+    for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            vm_name = vm.name_
+
+            for backupStorageRef in xmlobject.safe_list(vm.backupStorageRef):
+                print backupStorageRef.text_
+                if backupStorageRef.type_ == 'ceph':
+                    if ceph_storages.has_key(backupStorageRef.text_):
+                        if vm_name in ceph_storages[backupStorageRef.text_]:
+                            continue
+                        else:
+                            ceph_storages[backupStorageRef.text_].append(vm_name)
+                    else:
+                        ceph_storages[backupStorageRef.text_] = [ vm_name ]
+
+            for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
+                print primaryStorageRef.text_
+                for zone in xmlobject.safe_list(deploy_config.zones.zone):
+                    if primaryStorageRef.type_ == 'ceph':
+                        if ceph_storages.has_key(backupStorageRef.text_):
+                            if vm_name in ceph_storages[backupStorageRef.text_]:
+                                continue
+                            else:
+                                ceph_storages[backupStorageRef.text_].append(vm_name)
+                        else:
+                            ceph_storages[backupStorageRef.text_] = [ vm_name ]
+
+    for ceph_storage in ceph_storages:
+        test_util.test_logger('setup ceph [%s] service.' % (ceph_storage))
+	node1_name = ceph_storages[ceph_storage][0]
+	node1_config = get_scenario_config_vm(node1_name, scenario_config)
+	node1_ip = get_scenario_file_vm(node1_name, scenario_config).ip_
+        node_host = get_deploy_host(node1_config.hostRef.text_, deploy_config)
+        if not hasattr(node_host, 'port_') or node_host.port_ == '22':
+            node_host.port_ = '22'
+
+        vm_ips = ''
+        for ceph_node in ceph_storages[ceph_storage]:
+            vm = get_scenario_file_vm(ceph_node, scenario_file)
+	    vm_ips += vm.ip_
+        ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ceph_nodes.sh'), '/tmp/setup_ceph_nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=node_host.port_
+        cmd = "bash -ex /tmp/setup_ceph_nodes.sh %s" % (vm_ips)
+        ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
 
 def create_vm(http_server_ip, vm_create_option):
     create_vm = api_actions.CreateVmInstanceAction()
@@ -355,6 +401,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 setup_backupstorage_vm(vm_inv, vm, deploy_config)
             if xmlobject.has_element(vm, 'primaryStorageRef'):
                 setup_primarystorage_vm(vm_inv, vm, deploy_config)
+    setup_ceph_storages(scenario_config, root_xml, deploy_config)
     xml_string = etree.tostring(root_xml, 'utf-8')
     xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
     open(scenario_file, 'w+').write(xml_string)
