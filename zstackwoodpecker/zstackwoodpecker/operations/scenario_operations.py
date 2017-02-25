@@ -202,21 +202,10 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
         for vm in xmlobject.safe_list(host.vms.vm):
             vm_name = vm.name_
 
-            for backupStorageRef in xmlobject.safe_list(vm.backupStorageRef):
-                print backupStorageRef.text_
-                if backupStorageRef.type_ == 'ceph':
-                    if ceph_storages.has_key(backupStorageRef.text_):
-                        if vm_name in ceph_storages[backupStorageRef.text_]:
-                            continue
-                        else:
-                            ceph_storages[backupStorageRef.text_].append(vm_name)
-                    else:
-                        ceph_storages[backupStorageRef.text_] = [ vm_name ]
-
-            for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
-                print primaryStorageRef.text_
-                for zone in xmlobject.safe_list(deploy_config.zones.zone):
-                    if primaryStorageRef.type_ == 'ceph':
+            if hasattr(vm, 'backupStorageRef'):
+                for backupStorageRef in xmlobject.safe_list(vm.backupStorageRef):
+                    print backupStorageRef.text_
+                    if backupStorageRef.type_ == 'ceph':
                         if ceph_storages.has_key(backupStorageRef.text_):
                             if vm_name in ceph_storages[backupStorageRef.text_]:
                                 continue
@@ -224,6 +213,19 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
                                 ceph_storages[backupStorageRef.text_].append(vm_name)
                         else:
                             ceph_storages[backupStorageRef.text_] = [ vm_name ]
+
+            if hasattr(vm, 'primaryStorageRef'):
+                for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
+                    print primaryStorageRef.text_
+                    for zone in xmlobject.safe_list(deploy_config.zones.zone):
+                        if primaryStorageRef.type_ == 'ceph':
+                            if ceph_storages.has_key(backupStorageRef.text_):
+                                if vm_name in ceph_storages[backupStorageRef.text_]:
+                                    continue
+                                else:
+                                    ceph_storages[backupStorageRef.text_].append(vm_name)
+                            else:
+                                ceph_storages[backupStorageRef.text_] = [ vm_name ]
 
     for ceph_storage in ceph_storages:
         test_util.test_logger('setup ceph [%s] service.' % (ceph_storage))
