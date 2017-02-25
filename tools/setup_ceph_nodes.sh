@@ -1,5 +1,6 @@
 #!/bin/bash
 set -x
+set -e
 export PS4='+[#$LINENO ${FUNCNAME[0]}() $BASH_SOURCE] '
 
 declare -a IP
@@ -90,8 +91,8 @@ fi
 
 
 
-ceph-deploy new ceph-1
 if [ "${CEPH_ONE_NODE}" != "yes" ]; then
+ceph-deploy new ceph-1 ceph-2 ceph-3
 cat >> ceph.conf << EOF
 osd_pool_default_size = 3
 osd_pool_default_min_size = 2
@@ -132,6 +133,7 @@ osd_recovery_op_priority = 5
 osd crush chooseleaf type = 0
 EOF
 else
+ceph-deploy new ceph-1
 cat >> ceph.conf << EOF
 osd_pool_default_size = 1
 osd_pool_default_min_size = 1
@@ -173,7 +175,7 @@ osd crush chooseleaf type = 0
 EOF
 fi
 
-
+set +e
 for I in `seq 3`; do
 	if [ "${CEPH_ONE_NODE}" != "yes" ]; then 
 		ceph-deploy --overwrite-conf mon create ceph-1 ceph-2 ceph-3
