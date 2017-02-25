@@ -27,6 +27,7 @@ gen_ssh_keys(){
     chmod go-rwx /root/.ssh/authorized_keys
 }
 
+yum --disablerepo=* --enablerepo=zstack-local install -y iptables-services >/dev/null 2>&1
 yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install ceph ceph-deploy ntp expect>/dev/null 2>&1
 HOST_IP=`ip addr show eth0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'`
 
@@ -62,6 +63,12 @@ if [ "${CEPH_ONE_NODE}" != "yes" ]; then
     ssh  ceph-2 yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install ceph ceph-deploy ntp expect>/dev/null 2>&1
     ssh  ceph-3 yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install ceph ceph-deploy ntp expect>/dev/null 2>&1
 fi
+
+if [ "${CEPH_ONE_NODE}" != "yes" ]; then 
+    ssh  ceph-2 yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install iptables-services>/dev/null 2>&1
+    ssh  ceph-3 yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install iptables-services>/dev/null 2>&1
+fi
+
 
 ssh ceph-1 "iptables -F && service iptables save && systemctl restart ntpd && systemctl enable ntpd.service"
 if [ "${CEPH_ONE_NODE}" != "yes" ]; then 
