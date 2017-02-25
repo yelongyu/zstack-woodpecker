@@ -175,24 +175,63 @@ fi
 
 
 for I in `seq 3`; do
-	ceph-deploy --overwrite-conf mon create ceph-1
+	if [ "${CEPH_ONE_NODE}" != "yes" ]; then 
+		ceph-deploy --overwrite-conf mon create ceph-1 ceph-2 ceph-3
+	else
+		ceph-deploy --overwrite-conf mon create ceph-1
+	fi
 	sleep 3
-	ceph-deploy --overwrite-conf config push ceph-1
+	if [ "${CEPH_ONE_NODE}" != "yes" ]; then 
+		ceph-deploy --overwrite-conf config push ceph-1 ceph-2 ceph-3
+	else
+		ceph-deploy --overwrite-conf config push ceph-1
+	fi
 	sleep 3
-	ceph-deploy gatherkeys ceph-1
+	if [ "${CEPH_ONE_NODE}" != "yes" ]; then 
+		ceph-deploy gatherkeys ceph-1 ceph-2 ceph-3
+	else
+		ceph-deploy gatherkeys ceph-1
+	fi
 	sleep 3
-	ceph-deploy --overwrite-conf osd create ceph-1:/dev/vdb
-	ceph-deploy --overwrite-conf osd activate \
-	ceph-1:/dev/vdb1:/dev/vdb2
+	if [ "${CEPH_ONE_NODE}" != "yes" ]; then 
+		ceph-deploy --overwrite-conf osd create ceph-1:/dev/vdb ceph-2:/dev/vdb ceph-3:/dev/vdb
+	else
+		ceph-deploy --overwrite-conf osd create ceph-1:/dev/vdb
+	fi
+	if [ "${CEPH_ONE_NODE}" != "yes" ]; then
+		ceph-deploy --overwrite-conf osd activate \
+		ceph-1:/dev/vdb1:/dev/vdb2 \
+		ceph-2:/dev/vdb1:/dev/vdb2 \
+		ceph-3:/dev/vdb1:/dev/vdb2 
+	else
+		ceph-deploy --overwrite-conf osd activate \
+		ceph-1:/dev/vdb1:/dev/vdb2 
+	fi
 	
-	ceph-deploy --overwrite-conf config push ceph-1
+	if [ "${CEPH_ONE_NODE}" != "yes" ]; then 
+		ceph-deploy --overwrite-conf config push ceph-1 ceph-2 ceph-3
+	else
+		ceph-deploy --overwrite-conf config push ceph-1
+	fi
 	
 	ceph osd crush add-bucket ceph-1 host
+	if [ "${CEPH_ONE_NODE}" != "yes" ]; then
+		ceph osd crush add-bucket ceph-2 host
+		ceph osd crush add-bucket ceph-3 host
+	fi
 	
 	ceph osd crush move ceph-1 root=default
+	if [ "${CEPH_ONE_NODE}" != "yes" ]; then
+		ceph osd crush move ceph-2 root=default
+		ceph osd crush move ceph-3 root=default
+	fi
 	ceph osd crush create-or-move osd.0 1.0 host=ceph-1 root=default
+	if [ "${CEPH_ONE_NODE}" != "yes" ]; then
+		ceph osd crush create-or-move osd.0 1.0 host=ceph-2 root=default
+		ceph osd crush create-or-move osd.0 1.0 host=ceph-3 root=default
+	fi
 	
-	ceph -s | grep '1 osds: 1 up, 1 in'
+	ceph -s | grep '3 osds: 3 up, 3 in'
 	if [ $? -eq 0 ]; then
 		break
 	fi
