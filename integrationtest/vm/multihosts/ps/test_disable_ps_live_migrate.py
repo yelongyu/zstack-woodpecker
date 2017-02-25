@@ -11,6 +11,7 @@ import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.header.vm as vm_header
 import apibinding.inventory as inventory
+import os
 
 _config_ = {
         'timeout' : 1000,
