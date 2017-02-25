@@ -47,8 +47,9 @@ def get_first_item_from_list(list_obj, list_obj_name, list_obj_value, action_nam
 
 def get_backup_storage_from_scenario_file(backupStorageRefName, scenarioConfig, scenarioFile, deployConfig):
     if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
-        return None
+        return []
 
+    ip_list = []
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
         for vm in xmlobject.safe_list(host.vms.vm):
             if xmlobject.has_element(vm, 'backupStorageRef'):
@@ -59,8 +60,8 @@ def get_backup_storage_from_scenario_file(backupStorageRefName, scenarioConfig, 
                         scenario_file = xmlobject.loads(xmlstr)
                         for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
                             if s_vm.name_ == vm.name_:
-                                return s_vm.ip_
-    return None
+                                ip_list.append(s_vm.ip_)
+    return ip_list
 
 #Add Backup Storage
 def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid):
@@ -73,9 +74,11 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
             action.url = bs.url_
             action.username = bs.username_
             action.password = bs.password_
-            action.hostname = get_backup_storage_from_scenario_file(bs.name_, scenarioConfig, scenarioFile, deployConfig)
-            if action.hostname == None:
+            hostname_list = get_backup_storage_from_scenario_file(bs.name_, scenarioConfig, scenarioFile, deployConfig)
+            if len(hostname_list) == 0:
                 action.hostname = bs.hostname_
+            else:
+                action.hostname = hostname_list[0]
 
 	    if hasattr(bs, 'port_'):
                 action.port = bs.port_
@@ -96,9 +99,11 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
             action.url = bs.url_
             action.username = bs.username_
             action.password = bs.password_
-            action.hostname = get_backup_storage_from_scenario_file(bs.name_, scenarioConfig, scenarioFile, deployConfig)
-            if action.hostname == None:
+            hostname_list = get_backup_storage_from_scenario_file(bs.name_, scenarioConfig, scenarioFile, deployConfig)
+            if len(hostname_list) == 0:
                 action.hostname = bs.hostname_
+            else:
+                action.hostname = hostname_list[0]
 
 	    if hasattr(bs, 'port_'):
                 action.port = bs.port_
@@ -116,10 +121,12 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
             action.sessionUuid = session_uuid
             action.name = bs.name_
             action.description = bs.description__
-            hostname = get_backup_storage_from_scenario_file(bs.name_, scenarioConfig, scenarioFile, deployConfig)
-            if hostname != None:
+            hostname_list = get_backup_storage_from_scenario_file(bs.name_, scenarioConfig, scenarioFile, deployConfig)
+            if len(hostname_list) != 0:
                 # TODO: username and password should be configarable
-                action.monUrls = [ "root:password@%s" % (hostname) ]
+                action.monUrls = []
+                for hostname in hostname_list:
+                    action.monUrls.append("root:password@%s" % (hostname))
             else:
                 action.monUrls = bs.monUrls_.split(';')
             if bs.poolName__:
@@ -297,8 +304,9 @@ def add_l2_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l2_
 
 def get_primary_storage_from_scenario_file(primaryStorageRefName, scenarioConfig, scenarioFile, deployConfig):
     if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
-        return None
+        return []
 
+    ip_list = []
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
         for vm in xmlobject.safe_list(host.vms.vm):
             if xmlobject.has_element(vm, 'primaryStorageRef'):
@@ -309,8 +317,8 @@ def get_primary_storage_from_scenario_file(primaryStorageRefName, scenarioConfig
                         scenario_file = xmlobject.loads(xmlstr)
                         for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
                             if s_vm.name_ == vm.name_:
-                                return s_vm.ip_
-    return None
+                                ip_list.append(s_vm.ip_)
+    return ip_list
 
 #Add Primary Storage
 def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid, ps_name = None, \
@@ -401,9 +409,11 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 action.name = pr.name_
                 action.description = pr.description__
                 action.type = inventory.CEPH_PRIMARY_STORAGE_TYPE
-                hostname = get_primary_storage_from_scenario_file(pr.name_, scenarioConfig, scenarioFile, deployConfig)
-                if hostname != None:
-                    action.monUrls = [ "root:password@%s" % (hostname) ]
+                hostname_list = get_primary_storage_from_scenario_file(pr.name_, scenarioConfig, scenarioFile, deployConfig)
+                if len(hostname_list) != 0:
+                    action.monUrls = []
+                    for hostname in hostname_list:
+                        action.monUrls.append("root:password@%s" % (hostname))
                 else:
                     action.monUrls = pr.monUrls_.split(';')
                 if pr.dataVolumePoolName__:
@@ -431,9 +441,9 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 action.name = pr.name_
                 action.description = pr.description__
                 action.type = inventory.NFS_PRIMARY_STORAGE_TYPE
-                hostname = get_primary_storage_from_scenario_file(pr.name_, scenarioConfig, scenarioFile, deployConfig)
-                if hostname != None:
-                    action.url = "%s:%s" % (hostname, pr.url_.split(':')[1])
+                hostname_list = get_primary_storage_from_scenario_file(pr.name_, scenarioConfig, scenarioFile, deployConfig)
+                if len(hostname_list) != 0:
+                    action.url = "%s:%s" % (hostname_list[0], pr.url_.split(':')[1])
                 else:
                     action.url = pr.url_
                 action.zoneUuid = zinv.uuid
