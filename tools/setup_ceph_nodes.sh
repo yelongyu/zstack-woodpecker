@@ -229,8 +229,8 @@ for I in `seq 3`; do
 	fi
 	ceph osd crush create-or-move osd.0 1.0 host=ceph-1 root=default
 	if [ "${CEPH_ONE_NODE}" != "yes" ]; then
-		ceph osd crush create-or-move osd.0 1.0 host=ceph-2 root=default
-		ceph osd crush create-or-move osd.0 1.0 host=ceph-3 root=default
+		ceph osd crush create-or-move osd.1 1.0 host=ceph-2 root=default
+		ceph osd crush create-or-move osd.2 1.0 host=ceph-3 root=default
 	fi
 	
 	ceph -s | grep '3 osds: 3 up, 3 in'
