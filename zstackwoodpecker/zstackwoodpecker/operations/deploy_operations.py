@@ -45,6 +45,28 @@ def get_first_item_from_list(list_obj, list_obj_name, list_obj_value, action_nam
 
     return list_obj[0]
 
+def get_ceph_storages_mon_nic_id(ceph_name, scenario_config):
+    for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            nic_id = 0
+            for l3network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                if hasattr(l3network, 'backupStorageRef') and hasattr(l3network.backupStorageRef, 'monIp_') and l3network.backupStorageRef.text_ == ceph_name:
+                    return nic_id
+                if hasattr(l3network, 'primaryStorageRef') and hasattr(l3network.primaryStorageRef, 'monIp_') and l3network.primaryStorageRef.text_ == ceph_name:
+                    return nic_id
+                nic_id += 1
+       
+    for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            nic_id = 0
+            for l3network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                if hasattr(l3network, 'backupStorageRef') and l3network.backupStorageRef.text_ == ceph_name:
+                    return nic_id
+                if hasattr(l3network, 'primaryStorageRef') and l3network.primaryStorageRef.text_ == ceph_name:
+                    return nic_id
+                nic_id += 1
+    return None
+
 def get_backup_storage_from_scenario_file(backupStorageRefName, scenarioConfig, scenarioFile, deployConfig):
     if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
         return []
@@ -60,7 +82,12 @@ def get_backup_storage_from_scenario_file(backupStorageRefName, scenarioConfig, 
                         scenario_file = xmlobject.loads(xmlstr)
                         for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
                             if s_vm.name_ == vm.name_:
-                                ip_list.append(s_vm.ip_)
+                                if vm.backupStorageRef.type_ == 'ceph':
+                                    nic_id = get_ceph_storages_mon_nic_id(vm.backupStorageRef.text_, scenarioConfig)
+            	                    ip_list.append(s_vm.ips.ip[nic_id].ip_)
+                                else:
+                                    ip_list.append(s_vm.ip_)
+                                break
     return ip_list
 
 #Add Backup Storage
