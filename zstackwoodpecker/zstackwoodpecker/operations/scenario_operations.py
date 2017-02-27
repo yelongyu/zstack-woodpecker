@@ -109,28 +109,36 @@ def setup_host_vm(vm_inv, vm_config, deploy_config):
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
     udev_config = ''
+    nic_id = 0
     for l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
         for vmnic in vm_inv.vmNics:
             if vmnic.l3NetworkUuid == l3network.uuid_:
                 vmnic_mac = vmnic.mac
                 break
-        for l2networkref in xmlobject.safe_list(l3network.l2NetworkRef):
-            nic_name = get_ref_l2_nic_name(l2networkref.text_, deploy_config)
-            if nic_name.find('.') < 0:
-                break
+        nic_name = None
+        if hasattr(l3network, 'l2NetworkRef'):
+            for l2networkref in xmlobject.safe_list(l3network.l2NetworkRef):
+                nic_name = get_ref_l2_nic_name(l2networkref.text_, deploy_config)
+                if nic_name.find('.') < 0:
+                    break
+        if nic_name == None:
+            nic_name = "eth%s" % (nic_id)
+        nic_id += 1
 
         udev_config = udev_config + '\\nACTION=="add", SUBSYSTEM=="net", DRIVERS=="?*", ATTR{type}=="1", ATTR{address}=="%s", NAME="%s"' % (vmnic_mac, nic_name)
 
     cmd = 'echo %s > /etc/udev/rules.d/70-persistent-net.rules' % (udev_config)
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
-    for l2networkref in xmlobject.safe_list(vm_config.l3Networks.l3Network.l2NetworkRef):
-        nic_name = get_ref_l2_nic_name(l2networkref.text_, deploy_config)
-        if nic_name.find('.') >= 0:
-            vlan = nic_name.split('.')[1]
-            test_util.test_logger('[vm:] %s %s is created.' % (vm_ip, nic_name))
-            cmd = 'vconfig add %s %s' % (nic_name.split('.')[0], vlan)
-            ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+    for l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
+        if hasattr(l3network, 'l2NetworkRef'):
+            for l2networkref in xmlobject.safe_list(l3network.l2NetworkRef):
+                nic_name = get_ref_l2_nic_name(l2networkref.text_, deploy_config)
+                if nic_name.find('.') >= 0:
+                    vlan = nic_name.split('.')[1]
+                    test_util.test_logger('[vm:] %s %s is created.' % (vm_ip, nic_name))
+                    cmd = 'vconfig add %s %s' % (nic_name.split('.')[0], vlan)
+                    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
     host = get_deploy_host(vm_config.hostRef.text_, deploy_config)
     if hasattr(host, 'port_') and host.port_ != '22':
@@ -200,6 +208,28 @@ def get_scenario_file_vm(vm_name, scenario_file):
             if s_vm.name_ == vm_name:
                 return s_vm
 
+def get_ceph_storages_nic_id(ceph_name, scenario_config):
+    for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            nic_id = 0
+            for l3network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                if hasattr(l3network, 'backupStorageRef') and not hasattr(l3network.backupStorageRef, 'monIp_') and l3network.backupStorageRef.text_ == ceph_name:
+                    return nic_id
+                if hasattr(l3network, 'primaryStorageRef') and not hasattr(l3network.primaryStorageRef, 'monIp_') and l3network.primaryStorageRef.text_ == ceph_name:
+                    return nic_id
+                nic_id += 1
+       
+    for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            nic_id = 0
+            for l3network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                if hasattr(l3network, 'backupStorageRef') and l3network.backupStorageRef.text_ == ceph_name:
+                    return nic_id
+                if hasattr(l3network, 'primaryStorageRef') and l3network.primaryStorageRef.text_ == ceph_name:
+                    return nic_id
+                nic_id += 1
+    return None
+
 def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
     ceph_storages = dict()
     for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
@@ -242,10 +272,9 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
 
         vm_ips = ''
         for ceph_node in ceph_storages[ceph_storage]:
+            vm_nic_id = get_ceph_storages_nic_id(ceph_storage, scenario_config)
             vm = get_scenario_file_vm(ceph_node, scenario_file)
-            if vm.ip_ == node1_ip:
-               continue
-	    vm_ips += vm.ip_ + ' '
+	    vm_ips += vm.ips.ip[vm_nic_id].ip_ + ' '
         ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ceph_nodes.sh'), '/tmp/setup_ceph_nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host.port_))
         cmd = "bash -ex /tmp/setup_ceph_nodes.sh %s" % (vm_ips)
         ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
@@ -388,8 +417,13 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 
             vm_xml = etree.SubElement(vms_xml, 'vm')
             vm_xml.set('name', vm.name_)
-            vm_xml.set('ip', vm_ip)
             vm_xml.set('uuid', vm_inv.uuid)
+            vm_xml.set('ip', vm_ip)
+            ips_xml = etree.SubElement(vm_xml, 'ips')
+            for l3_uuid in l3_uuid_list:
+                ip_xml = etree.SubElement(ips_xml, 'ip')
+                ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, l3_uuid).ip
+                ip_xml.set('ip', ip)
             if xmlobject.has_element(vm, 'nodeRef'):
                 setup_node_vm(vm_inv, vm, deploy_config)
             if xmlobject.has_element(vm, 'hostRef'):

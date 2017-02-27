@@ -6,8 +6,9 @@ export PS4='+[#$LINENO ${FUNCNAME[0]}() $BASH_SOURCE] '
 declare -a IP
 IP[0]=$1
 IP[1]=$2
+IP[2]=$3
 
-if [ "$1" == "" ]; then
+if [ "$2" == "" ]; then
     CEPH_ONE_NODE=yes
 fi
 
@@ -30,12 +31,12 @@ gen_ssh_keys(){
 
 yum --disablerepo=* --enablerepo=zstack-local install -y iptables-services >/dev/null 2>&1
 yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install ceph ceph-deploy ntp expect>/dev/null 2>&1
-HOST_IP=`ip addr show eth0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'`
+#HOST_IP=`ip addr show eth0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'`
 
-echo " $HOST_IP ceph-1 ">>/etc/hosts
+echo " ${IP[0]} ceph-1 ">>/etc/hosts
 if [ "${CEPH_ONE_NODE}" != "yes" ]; then
-    echo " ${IP[0]} ceph-2 ">>/etc/hosts
-    echo " ${IP[1]} ceph-3 ">>/etc/hosts
+    echo " ${IP[1]} ceph-2 ">>/etc/hosts
+    echo " ${IP[2]} ceph-3 ">>/etc/hosts
 fi
 cat /etc/hosts | sort -u >/etc/host-tmp
 mv /etc/host-tmp /etc/hosts
