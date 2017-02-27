@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-storage-network-monip.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-storage-network.tmpt</scenarioConfigTemplate>
+</testConfig>
