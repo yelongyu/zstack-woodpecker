@@ -54,8 +54,7 @@
     <nodes description="Woodpecker will send zstack command to the 1st node. 
         multi nodes support real hosts or docker (if providing dockerImage and 
         it is found in `docker images`). "> 
-      <node name="$node1Name" ip="$node1Ip" netmask="$nodeNetMask"
-	gateway="$nodeGateway" nic="$nodeNic" bridge="$nodeBridge"
+      <node name="$node1Name" ip="$node1Ip"
         username="$nodeUserName" password="$nodePassword"
         description="The default node 1. It could be same as test machine."/>
       <!-- multi node setting
