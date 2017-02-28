@@ -59,7 +59,7 @@ def test():
         except:
             test_util.test_fail('%s vm name: %s is not in list: %s' % (new_vm.uuid, new_vm.name, vm_names))
     
-    if test_lib.lib_get_data_volumes(new_vms[0]) != []:
+    if test_lib.lib_get_data_volumes(new_vms[0].vm) != []:
         test_util.test_fail('The cloned vm is still have data volume, the expected behavior is only clone root volume.')
     
 
