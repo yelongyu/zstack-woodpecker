@@ -274,7 +274,10 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
         for ceph_node in ceph_storages[ceph_storage]:
             vm_nic_id = get_ceph_storages_nic_id(ceph_storage, scenario_config)
             vm = get_scenario_file_vm(ceph_node, scenario_file)
-	    vm_ips += vm.ips.ip[vm_nic_id].ip_ + ' '
+            if vm_nic_id == None:
+                vm_ips += vm.ip_ + ' '
+            else:
+	        vm_ips += vm.ips.ip[vm_nic_id].ip_ + ' '
         ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ceph_nodes.sh'), '/tmp/setup_ceph_nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host.port_))
         cmd = "bash -ex /tmp/setup_ceph_nodes.sh %s" % (vm_ips)
         ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
