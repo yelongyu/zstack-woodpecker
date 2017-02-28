@@ -58,12 +58,14 @@ def test():
     check_imf2_cmd = "find /|grep imf|grep %s" % (test_lib.lib_get_root_volume_uuid(vm.get_vm()))
     host = test_lib.lib_find_host_by_vm(vm.get_vm()) 
     ret, output, stderr = ssh.execute(check_imf2_cmd, host.managementIp, "root", "password", False, 22)
-    if ret == 0:
+    test_util.test_logger('expect imf2 exist: %s,%s' % (output, ret))
+    if ret != 0:
         test_util.test_fail('imf2 is expected to exist')
 
     vm.expunge()
     ret, output, stderr = ssh.execute(check_imf2_cmd, host.managementIp, "root", "password", False, 22)
-    if ret != 0:
+    test_util.test_logger('expect imf2 not exist: %s,%s' % (output, ret))
+    if ret == 0:
         test_util.test_fail('imf2 is expected to be deleted')
 
     test_lib.lib_robot_cleanup(test_obj_dict)
