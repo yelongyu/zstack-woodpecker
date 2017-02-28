@@ -22,7 +22,6 @@
             </l3Network>
           </l3Networks>
           <hostRef>$hostName</hostRef>
-          <nodeRef>$nodeName</nodeRef>
 	  <backupStorageRef type="ceph" offering_uuid="$cephStorageOfferingUuid">$cephBackupStorageName</backupStorageRef>
 	  <primaryStorageRef type="ceph">$cephPrimaryStorageName</primaryStorageRef>
         </vm>
