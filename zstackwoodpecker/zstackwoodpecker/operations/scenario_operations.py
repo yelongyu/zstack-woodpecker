@@ -263,9 +263,9 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
 
     for ceph_storage in ceph_storages:
         test_util.test_logger('setup ceph [%s] service.' % (ceph_storage))
-	node1_name = ceph_storages[ceph_storage][0]
-	node1_config = get_scenario_config_vm(node1_name, scenario_config)
-	node1_ip = get_scenario_file_vm(node1_name, scenario_file).ip_
+        node1_name = ceph_storages[ceph_storage][0]
+        node1_config = get_scenario_config_vm(node1_name, scenario_config)
+        node1_ip = get_scenario_file_vm(node1_name, scenario_file).ip_
         node_host = get_deploy_host(node1_config.hostRef.text_, deploy_config)
         if not hasattr(node_host, 'port_') or node_host.port_ == '22':
             node_host.port_ = '22'
@@ -277,9 +277,60 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
             if vm_nic_id == None:
                 vm_ips += vm.ip_ + ' '
             else:
-	        vm_ips += vm.ips.ip[vm_nic_id].ip_ + ' '
+                vm_ips += vm.ips.ip[vm_nic_id].ip_ + ' '
         ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ceph_nodes.sh'), '/tmp/setup_ceph_nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host.port_))
         cmd = "bash -ex /tmp/setup_ceph_nodes.sh %s" % (vm_ips)
+        ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
+
+def setup_fusionstor_storages(scenario_config, scenario_file, deploy_config):
+    fusionstors = dict()
+    fusionstorPkg = os.environ['fusionstorPkg']
+    for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+            vm_name = vm.name_
+
+            if hasattr(vm, 'backupStorageRef'):
+               for backupStorageRef in xmlobject.safe_list(vm.backupStorageRef):
+                   print backupStorageRef.text_
+                   if backupStorageRef.type == 'fusionstor':
+                       if fusionstor_storages.has_key(backupStorageRef.text_):
+                           if vm_name in fusionstor_storages[backupStorageRef.text_]:
+                               continue
+                           else:
+                               fusionstor_storages[backupStorageRef.text_].append(vm_name)
+                       else:
+                           fusionstor_storages[backupStorageRef.text_] = [ vm_name ]
+            if hasattr(vm, 'primaryStorageRef'):
+                for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
+                    print primaryStorageRef.text_
+                    for zone in xmlobject.safe_list(deploy_config.zones.zone):
+                        if primaryStorageRef.type == 'fusionstor':
+                            if fusionstor_storages.has_key(backupStorageRef.text_):
+                                if vm_name in fusionstor_storages[backupStorageRef.text_]:
+                                    continue
+                                else:
+                                    fusionstor_storages[backupStorageRef.text_].append(vm_name)
+                            else:
+                                fusionstor_storages[backupStorageRef.text_] = [ vm_name ]
+    for fusionstor_storage in fusionstor_storages:
+        test_util.test_logger('setup fusionstor [%s] service.') % (fusionstor_storage))
+        node1_name = fusionstor_storages[fusionstor_storage][0]
+        node1_config = get_scenario_config_vm(node1_name, scenario_config)
+        node1_ip = get_scenario_file_vm(node1_name, scenario_file).ip_
+        node_host = get_deploy_host(node_config.hostRef.text_, deploy_config)
+        if not hasattr(node_host, 'port_') or node_host.port_ == '22':
+            node_host.port_ = '22'
+        vm_ips = ''
+        for fusionstor_node in fusionstor_storages[fusionstor_storage]:
+            vm_nic_id = get_fusionstor_storages_nic_id(fusionstor_storage, scenario_config)
+            vm = get_scenario_file_vm(fusionstor_node, scenario_file)
+            if vm_nic_id == None:
+                vm_ips += vm.ip_ + ' '
+            else:
+                vm_ips += vm.ips.ip[vm_nic_id].ip_ + ' '
+
+        ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_fusionstor_nodes.sh'), '/tmp/setup_fusionstor_nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host.port_))
+        cmd = "bash -ex /tmp/setup_fusionstor_nodes.sh %s %s" % ((fusionstorPkg), (vm_ips))
         ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
 
 def create_vm(http_server_ip, vm_create_option):
@@ -443,6 +494,17 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                         attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
                         break
 
+                    if bs_ref.type_ == 'fusionstor':
+                        disk_offering_uuid = bs_ref.offering_uuid_
+                        volume_option.set_disk_offering_uuid(disk_offering_uuid)
+                        volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
+                        volume_inv1 = create_volume_from_offering(zstack_management_ip, volume_option)
+                        volume_inv2 = create_volume_from_offering(zstack_management_ip, volume_option)
+                        attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
+                        attach_volume(zstack_management_ip, volume_inv1.uuid, vm_inv.uuid)
+                        attach_volume(zstack_management_ip, volume_inv2.uuid, vm_inv.uuid)
+                        break
+
                 setup_backupstorage_vm(vm_inv, vm, deploy_config)
             if xmlobject.has_element(vm, 'primaryStorageRef'):
                 setup_primarystorage_vm(vm_inv, vm, deploy_config)
@@ -450,6 +512,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
     xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
     open(scenario_file, 'w+').write(xml_string)
     setup_ceph_storages(scenario_config, scenario_file, deploy_config)
+    setup_fusionstor_storages(scenario_config, scenario_file, deploy_config)
 
 def destroy_scenario(scenario_config, scenario_file):
     with open(scenario_file, 'r') as fd:
