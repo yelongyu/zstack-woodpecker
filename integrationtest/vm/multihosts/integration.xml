@@ -2,6 +2,8 @@
     <suite name="multi hosts test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
         <case timeout='300' repeat='1'>test_create_vm.py</case>
         <case timeout='300' repeat='1'>test_ntp.py</case>
+        <case timeout='300' repeat='1'>test_imagecache_size.py</case>
+        <case timeout='300' repeat='1'>test_imagecache_size2.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_vm.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_stopped_vm.py</case>
 	<case timeout='720' repeat='1'>migrate/test_migrate_stopped_vm_iso.py</case>
@@ -10,6 +12,10 @@
 	<case timeout='720' repeat='1'>migrate/test_migrate_vm_console_access2.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_sg_vm.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_pf_sg_tcp.py</case>
+	<case timeout='600' repeat='1'>migrate/test_migrate_stopped_vm_progress3.py</case>
+	<case timeout='600' repeat='1'>migrate/test_migrate_stopped_vm_snapshots_progress.py</case>
+	<case timeout='600' repeat='1'>migrate/test_sharable_vol_live_migrate.py</case>
+	<case timeout='600' repeat='1'>ps/test_disable_ps_live_migrate.py</case>
         <case timeout='600' repeat='1' noparallel='True'>migrate/test_maintain_host.py</case>
 	<case timeout='600' repeat='1'>test_host_active_profile.py</case>
         <case timeout='3600' repeat='1'>vms/test_4vm_vm_ops.py</case>
@@ -18,6 +24,7 @@
 	<!--<case timeout='660' repeat='1' noparallel='True'>ha/test_vm_ha_self_fence.py</case>-->
         <case timeout='600' repeat='1' noparallel='True'>test_imagecache_cleanup.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_imagecache_cleanup2.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_imagecache_cleanup3.py</case>
 	<case timeout='600' repeat='1' noparallel='True'>migrate/test_migrate_stopped_vm_imagecache_cleanup.py</case>
 	<case timeout='600' repeat='1' noparallel='True'>migrate/test_migrate_vm_imagecache_cleanup.py</case>
 	<case timeout='1260' repeat='1' noparallel='True'>ha/test_vm_ha_never_stop.py</case>

@@ -2,7 +2,6 @@
     <suite name="basic test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" parallel="2">
         <case timeout="60" >test_get_current_time.py</case>
         <case timeout="60" >test_nested_virt.py</case>
-        <case timeout="60" >test_mn_listen_port.py</case>
         <case timeout="120" >test_create_vm.py</case>
         <case timeout="600" >test_create_windows_vm.py</case>
         <case timeout="120" >test_stop_vm.py</case>
@@ -19,7 +18,10 @@
         <case timeout="400" >test_crt_temp_from_volume.py</case> 
         <case timeout="400" >test_crt_vm_with_volume.py</case> 
         <case timeout="400" >test_vm_securitygroup.py</case> 
+        <case timeout="600" >test_MN_examine_vm_state.py</case> 
         <case timeout="120" >test_create_iso_vm.py</case>
+        <case timeout="120" >test_iso_vm_capability.py</case>
+        <case timeout="120" >test_detach_iso_vm.py</case>
         <case timeout="120" >account/test_multi_accounts_cli_login.py</case>
         <case timeout="120" >account/test_multi_users_cli_login.py</case>
         <case timeout="120" >account/test_crt_vm_by_normal_account.py</case>

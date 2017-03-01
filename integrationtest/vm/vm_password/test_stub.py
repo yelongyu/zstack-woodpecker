@@ -37,8 +37,9 @@ def create_vm(vm_name='virt-vm', \
 
     if not image_name:
         image_name = os.environ.get('imageName_net') 
-    else:
+    elif os.environ.get(image_name):
         image_name = os.environ.get(image_name)
+
     if not l3_name:
         l3_name = os.environ.get('l3PublicNetworkName')
 

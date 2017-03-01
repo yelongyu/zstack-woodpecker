@@ -105,11 +105,30 @@ def start_vm(vm_uuid, session_uuid=None, timeout=240000):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
+def start_vm_with_user_args(vm_uuid, system_tags = None, session_uuid=None, timeout=240000):
+    action = api_actions.StartVmInstanceAction()
+    action.uuid = vm_uuid
+    action.systemTags = system_tags
+    action.timeout = timeout
+    test_util.action_logger('Start VM [uuid:] %s' % vm_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
 def resume_vm(vm_uuid, session_uuid=None):
     action = api_actions.ResumeVmInstanceAction()
     action.uuid = vm_uuid
     action.timeout = 240000
     test_util.action_logger('Resume VM [uuid:] %s' % vm_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def update_vm(vm_uuid, cpu, memory, session_uuid=None):
+    action = api_actions.UpdateVmInstanceAction()
+    action.uuid = vm_uuid
+    action.cpuNum = cpu
+    action.memorySize = memory
+    action.timeout = 240000
+    test_util.action_logger('Update VM [uuid:] %s' % vm_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
@@ -277,3 +296,81 @@ def reinit_vm(vm_uuid, session_uuid = None):
     test_util.action_logger('Reinit [Vm:] %s' % (vm_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
+
+def set_vm_nic_qos(nic_uuid, outboundBandwidth=None, inboundBandwidth=None, session_uuid = None):
+    action = api_actions.SetNicQosAction()
+    action.uuid = nic_uuid
+    action.outboundBandwidth = outboundBandwidth
+    action.inboundBandwidth = inboundBandwidth
+
+    test_util.action_logger('SetNicQos [nic:] %s' % (nic_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def get_vm_nic_qos(nic_uuid, session_uuid = None):
+    action = api_actions.GetNicQosAction()
+    action.uuid = nic_uuid
+
+    test_util.action_logger('GetNicQos [nic:] %s' % (nic_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def del_vm_nic_qos(nic_uuid, direction, session_uuid = None):
+    action = api_actions.DeleteNicQosAction()
+    action.uuid = nic_uuid
+    action.direction = direction
+
+    test_util.action_logger('DeleteNicQos [nic:] %s' % (nic_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def set_vm_disk_qos(volume_uuid, volumeBandwidth=None, session_uuid = None):
+    action = api_actions.SetVolumeQosAction()
+    action.uuid = volume_uuid
+    action.volumeBandwidth = volumeBandwidth
+
+    test_util.action_logger('SetVolumeQos [volume:] %s' % (volume_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def get_vm_disk_qos(volume_uuid, session_uuid = None):
+    action = api_actions.GetVolumeQosAction()
+    action.uuid = volume_uuid
+
+    test_util.action_logger('GetVolumeQos [volume:] %s' % (volume_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def del_vm_disk_qos(volume_uuid, session_uuid = None):
+    action = api_actions.DeleteVolumeQosAction()
+    action.uuid = volume_uuid
+
+    test_util.action_logger('DeleteVolumeQos [volume:] %s' % (volume_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def get_vm_qga_enable(vm_uuid, session_uuid = None):
+    action = api_actions.GetVmQgaEnableAction()
+    action.uuid = vm_uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def set_vm_qga_enable(vm_uuid, session_uuid = None):
+    action = api_actions.SetVmQgaAction()
+    action.uuid = vm_uuid
+    action.enable = 'true'
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def set_vm_qga_disable(vm_uuid, session_uuid = None):
+    action = api_actions.SetVmQgaAction()
+    action.uuid = vm_uuid
+    action.enable = 'false'
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def get_vm_capabilities(vm_uuid, session_uuid = None):
+    action = api_actions.GetVmCapabilitiesAction()
+    action.uuid = vm_uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt

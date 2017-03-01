@@ -14,6 +14,7 @@ def create_volume_from_offering(volume_option):
     action = api_actions.CreateDataVolumeAction()
     action.diskOfferingUuid = volume_option.get_disk_offering_uuid()
     action.description = volume_option.get_description()
+    action.systemTags = volume_option.get_system_tags()
     timeout = volume_option.get_timeout()
     if not timeout:
         action.timeout = 240000
@@ -64,6 +65,14 @@ def create_volume_from_template(image_uuid, ps_uuid, name = None, \
     test_util.test_logger('[Volume:] %s is created from [Volume Template:] %s on [Primary Storage:] %s.' % (evt.inventory.uuid, image_uuid, ps_uuid))
     return evt.inventory
 
+def recover_volume(volume_uuid, session_uuid=None):
+    action = api_actions.RecoverDataVolumeAction()
+    action.uuid = volume_uuid
+    action.timeout = 240000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Recover Volume [uuid:] %s' % volume_uuid)
+    return evt.inventory
+
 def delete_volume(volume_uuid, session_uuid=None):
     action = api_actions.DeleteDataVolumeAction()
     action.uuid = volume_uuid
@@ -89,9 +98,10 @@ def attach_volume(volume_uuid, vm_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def detach_volume(volume_uuid, session_uuid=None):
+def detach_volume(volume_uuid, vm_uuid=None, session_uuid=None):
     action = api_actions.DetachDataVolumeFromVmAction()
     action.uuid = volume_uuid
+    action.vmUuid = vm_uuid
     action.timeout = 240000
     test_util.action_logger('Detach Volume [uuid:] %s' % volume_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)

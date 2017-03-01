@@ -50,7 +50,7 @@ def test():
 
     test_util.test_dsc('Create new VR-Offering, same as the former one, stop and start VM')
     session_uuid = acc_ops.login_as_admin()
-    dep_ops.add_virtual_router(deploy_conf, session_uuid) 
+    dep_ops.add_virtual_router(None, None, deploy_conf, session_uuid) 
     vm.reboot()
 
     vm.destroy()

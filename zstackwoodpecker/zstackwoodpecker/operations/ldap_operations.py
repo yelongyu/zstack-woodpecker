@@ -37,7 +37,7 @@ def delete_ldap_server(uuid, session_uuid=None):
     return evt
 
 def bind_ldap_account(ldap_uid, account_uuid, session_uuid=None):
-    action = api_actions.BindLdapAccountAction()
+    action = api_actions.CreateLdapBindingAction()
     action.ldapUid = ldap_uid
     action.accountUuid = account_uuid
     test_util.action_logger('bind [ldapUid:] %s to [accountUuid:] %s' % (ldap_uid, account_uuid))
@@ -45,7 +45,7 @@ def bind_ldap_account(ldap_uid, account_uuid, session_uuid=None):
     return evt
 
 def unbind_ldap_account(uuid, session_uuid=None):
-    action = api_actions.UnbindLdapAccountAction()
+    action = api_actions.DeleteLdapBindingAction()
     action.uuid = uuid
     test_util.action_logger('unbind [ldap account:] %s' % (uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)

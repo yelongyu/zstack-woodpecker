@@ -33,6 +33,7 @@ L3_NETWORK = 'L3Network'
 INSTANCE_OFFERING = 'InstanceOffering'
 IMAGE = 'Image'
 VOLUME = 'Volume'
+SHARE_VOLUME = 'ShareVolume'
 VM_INSTANCE = 'VmInstance'
 IP_RANGE = 'IpRange'
 HOST = 'Host'
@@ -64,6 +65,9 @@ LOCAL_STORAGE_RESOURCE_REF = 'LocalStorageResourceRef'
 IMAGE_STORE_BACKUP_STORAGE = 'ImageStoreBackupStorage'
 SCHEDULER = 'Scheduler'
 VCENTER = 'VCenter'
+VCENTER_CLUSTER = 'VCenterCluster'
+VCENTER_BACKUP_STORAGE = 'VCenterBackupStorage'
+VCENTER_PRIMARY_STORAGE = 'VCenterPrimaryStorage'
 
 
 def find_item_by_uuid(inventories, uuid):
@@ -296,6 +300,8 @@ def _gen_query_action(resource):
         action = api_actions.QueryImageAction()
     elif resource == VOLUME:
         action = api_actions.QueryVolumeAction()
+    elif resource == SHARE_VOLUME:
+        action = api_actions.QueryShareableVolumeVmInstanceRefAction()
     elif resource == VM_INSTANCE:
         action = api_actions.QueryVmInstanceAction()
     elif resource == IP_RANGE:
@@ -356,6 +362,12 @@ def _gen_query_action(resource):
         action = api_actions.QuerySchedulerAction()
     elif resource == VCENTER:
         action = api_actions.QueryVCenterAction()
+    elif resource == VCENTER_CLUSTER:
+        action = api_actions.QueryVCenterClusterAction()
+    elif resource == VCENTER_BACKUP_STORAGE:
+        action = api_actions.QueryVCenterBackupStorageAction()
+    elif resource == VCENTER_PRIMARY_STORAGE:
+        action = api_actions.QueryVCenterPrimaryStorageAction()
 
     return action
 
@@ -455,3 +467,23 @@ def change_recource_owner(accountUuid, resourceUuid, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
+def get_resource_owner(resourceUuid, session_uuid = None):
+    action = api_actions.GetResourceAccountAction()
+    action.resourceUuids = resourceUuid
+    ret = account_operations.execute_action_with_session(action, session_uuid)
+    return ret.inventories[resourceUuid[0]].uuid
+
+def get_task_progress(resourceUuid, processType=None, session_uuid = None):
+    action = api_actions.GetTaskProgressAction()
+    action.resourceUuid = resourceUuid
+    action.processType = processType
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def enable_change_vm_password(is_enable, resourceUuid, resourceType, session_uuid = None):
+    action = api_actions.EnableChangeVmPasswordAction()
+    action.enable = is_enable
+    action.resourceUuid = resourceUuid
+    action.resourceType = resourceType
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt

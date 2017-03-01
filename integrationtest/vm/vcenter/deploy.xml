@@ -88,12 +88,12 @@
     </backupStorages>
   
     <images>
-      <image name="$imageName_i_c7" description="Centos7 Test Image1" 
+      <!--<image name="$imageName_i_c7" description="Centos7 Test Image1" 
         format="$rootImageFormat" url="$imageUrl_i_c7" 
         mediaType="$rootMediaType" systemTags="qemuga"
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
-      </image>
+      </image>-->
     </images>
   
     <diskOfferings>

@@ -17,6 +17,10 @@ USER_PATH = os.path.expanduser('~')
 EXTRA_SUITE_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_suite_setup_config.sh' % USER_PATH
 def test():
     #If test execution machine is not the same one as Host machine, deploy work is needed to separated to 2 steps(deploy_test_agent, execute_plan_without_deploy_test_agent). And it can not directly call SetupAction.run()
+    mevoco1_ip = os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP']
+    mevoco2_ip = os.environ['serverIp2']
+
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco1_ip
     test_lib.setup_plan.deploy_test_agent()
     test_lib.setup_plan.execute_plan_without_deploy_test_agent()
     deploy_operations.deploy_initial_database(test_lib.deploy_config)
@@ -28,5 +32,19 @@ def test():
     test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
     test_lib.lib_set_provision_storage_rate(6)
     test_lib.lib_set_provision_memory_rate(3)
+
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
+    test_lib.setup_plan.deploy_test_agent()
+    #test_lib.setup_plan.execute_plan_without_deploy_test_agent()
+    #deploy_operations.deploy_initial_database(test_lib.deploy_config)
+    if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
+        os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
+    if test_lib.lib_get_ha_selffencer_maxattempts() != None:
+        test_lib.lib_set_ha_selffencer_maxattempts('60')
+	test_lib.lib_set_ha_selffencer_storagechecker_timeout('60')
+    test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
+    test_lib.lib_set_provision_storage_rate(6)
+    test_lib.lib_set_provision_memory_rate(3)
+
     test_util.test_pass('Suite Setup Success')
 

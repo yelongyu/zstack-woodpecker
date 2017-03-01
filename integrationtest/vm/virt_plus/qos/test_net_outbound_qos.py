@@ -24,8 +24,8 @@ def test():
     test_util.test_dsc('Test VM network outbound bandwidth QoS by 1MB')
 
     #unit is KB
-    net_bandwidth = 1024
-    new_offering = test_lib.lib_create_instance_offering(net_outbound_bandwidth = net_bandwidth)
+    net_bandwidth = 1*1024
+    new_offering = test_lib.lib_create_instance_offering(net_outbound_bandwidth = net_bandwidth*8*1024)
 
     new_offering_uuid = new_offering.uuid
 
@@ -38,6 +38,9 @@ def test():
     test_stub.make_ssh_no_password(vm_inv)
     test_stub.create_test_file(vm_inv, net_bandwidth)
     test_stub.test_scp_vm_outbound_speed(vm_inv, net_bandwidth)
+    if test_stub.test_scp_vm_inbound_speed(vm_inv, net_bandwidth, raise_exception=False):
+        test_util.test_fail('VM network inbound is not expected to be limited when only outbound qos is set')
+
     vm_ops.delete_instance_offering(new_offering_uuid)
     test_lib.lib_robot_cleanup(test_obj_dict)
 

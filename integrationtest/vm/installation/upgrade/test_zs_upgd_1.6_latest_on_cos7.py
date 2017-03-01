@@ -16,14 +16,17 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
 
+node_ip = os.environ.get('node1Ip')
 
 def test():
     test_util.test_dsc('Create test vm to test zstack upgrade by -u.')
 
     if os.path.exists('/home/installation-package/zstack'):
         image_name = os.environ.get('imageName_i_c7_z_1.6')
+        update_file = "/home/%s/zstack-woodpecker/integrationtest/vm/installation/zstack_update_iso.sh" % node_ip
     elif os.path.exists('/home/installation-package/mevoco'):
         image_name = os.environ.get('imageName_i_c7_m_1.6')
+        update_file = "/home/%s/zstack-woodpecker/integrationtest/vm/installation/mevoco_update_iso.sh" % node_ip
 
     vm = test_stub.create_vlan_vm(image_name)
     test_obj_dict.add_vm(vm)
@@ -60,9 +63,14 @@ def test():
     test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
 
     test_util.test_dsc('Upgrade zstack to latest') 
+    test_stub.update_iso(ssh_cmd, tmp_file, vm_inv, update_file)
     upgrade_target_file = '/root/zstack-upgrade-all-in-one.tgz' 
     test_stub.prepare_test_env(vm_inv, upgrade_target_file)
     test_stub.upgrade_zstack(ssh_cmd, upgrade_target_file, tmp_file) 
+    zstack_latest_version = os.environ.get('zstackLatestVersion')
+    test_stub.check_zstack_version(ssh_cmd, tmp_file, vm_inv, zstack_latest_version)
+    cmd = '%s "zstack-ctl start"' % ssh_cmd
+    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
 
     os.system('rm -f %s' % tmp_file)

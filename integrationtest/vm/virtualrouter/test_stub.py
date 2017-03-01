@@ -10,6 +10,7 @@ import sys
 import time
 import threading
 
+import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
@@ -154,6 +155,13 @@ def create_dnat_vm(disk_offering_uuids=None, session_uuid = None):
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     return create_vm([l3_net_uuid], image_uuid, 'vlan_sg_vm', disk_offering_uuids, session_uuid = session_uuid)
 
+def create_vm_with_user_args(system_tags = None, session_uuid = None):
+    image_name = os.environ.get('imageName_net')
+    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    l3_name = os.environ.get('l3PublicNetworkName')
+    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    return create_vm([l3_net_uuid], image_uuid, 'user_args_vm', system_tags = system_tags, session_uuid = session_uuid)
+
 # parameter: vmname; l3_net: l3_net_description, or [l3_net_uuid,]; image_uuid:
 def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
         disk_offering_uuids = None, default_l3_uuid = None, \
@@ -166,6 +174,28 @@ def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
     vm_creation_option.set_l3_uuids(l3_uuid_list)
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_name(vm_name)
+    vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
+    vm_creation_option.set_default_l3_uuid(default_l3_uuid)
+    vm_creation_option.set_system_tags(system_tags)
+    vm_creation_option.set_session_uuid(session_uuid)
+    vm_creation_option.set_ps_uuid(ps_uuid)
+    vm = zstack_vm_header.ZstackTestVm()
+    vm.set_creation_option(vm_creation_option)
+    vm.create()
+    return vm
+
+def create_vm_with_iso(l3_uuid_list, image_uuid, vm_name = None, root_disk_uuids = None, instance_offering_uuid = None, \
+                       disk_offering_uuids = None, default_l3_uuid = None, system_tags = None, \
+                       session_uuid = None, ps_uuid=None):
+    vm_creation_option = test_util.VmOption()
+    conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+    if not instance_offering_uuid:
+        instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+    vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+    vm_creation_option.set_l3_uuids(l3_uuid_list)
+    vm_creation_option.set_image_uuid(image_uuid)
+    vm_creation_option.set_name(vm_name)
+    vm_creation_option.set_root_disk_uuid(root_disk_uuids)
     vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
     vm_creation_option.set_default_l3_uuid(default_l3_uuid)
     vm_creation_option.set_system_tags(system_tags)
@@ -346,3 +376,13 @@ mount ${device}1 %s
         test_util.test_fail("mount operation failed in [volume:] %s in [vm:] %s" % (volume.get_volume().uuid, vm_inv.uuid))
         os.unlink(script_file.name)
 
+def scp_file_to_vm(vm_inv, src_file, target_file):
+    vm_ip = vm_inv.vmNics[0].ip
+    vm_username = test_lib.lib_get_vm_username(vm_inv)
+    vm_password = test_lib.lib_get_vm_password(vm_inv)
+    ssh.scp_file(src_file, target_file, vm_ip, vm_username, vm_password)
+
+def make_ssh_no_password(vm_inv):
+    vm_ip = vm_inv.vmNics[0].ip
+    ssh.make_ssh_no_password(vm_ip, test_lib.lib_get_vm_username(vm_inv), \
+            test_lib.lib_get_vm_password(vm_inv))

@@ -49,13 +49,15 @@ def create_volume(volume_creation_option=None):
     return volume
 
 def create_vr_vm(vm_name, image_name, l3_name):
-    vm_creation_option = test_util.VmOption()
     imagename = os.environ.get(image_name)
-    image_uuid = test_lib.lib_get_image_by_name(imagename).uuid
-    #l3_name = os.environ.get('l3NoVlanNetworkName1')
     l3name = os.environ.get(l3_name)
 
-    l3_net_uuid = test_lib.lib_get_l3_by_name(l3name).uuid
+    return create_vm(vm_name, imagename, l3name)
+
+def create_vm(vm_name, image_name, l3_name):
+    vm_creation_option = test_util.VmOption()
+    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
     vm_creation_option.set_l3_uuids([l3_net_uuid])

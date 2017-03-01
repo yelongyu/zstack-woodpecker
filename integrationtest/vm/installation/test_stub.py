@@ -167,7 +167,8 @@ def prepare_yum_repo(vm_inv):
 def upgrade_zstack(ssh_cmd, target_file, tmp_file):
     env_var = "WEBSITE='%s'" % 'localhost'
 
-    cmd = '%s "%s bash %s -u -R aliyun"' % (ssh_cmd, env_var, target_file)
+#    cmd = '%s "%s bash %s -u -R aliyun"' % (ssh_cmd, env_var, target_file)
+    cmd = '%s "%s bash %s -u -o"' % (ssh_cmd, env_var, target_file)
 
     process_result = execute_shell_in_process(cmd, tmp_file)
 
@@ -240,10 +241,10 @@ def execute_mevoco_online_install(ssh_cmd, tmp_file):
             else:
                 test_util.test_fail('zstack installation failed')
 
-def execute_all_install(ssh_cmd, target_file, tmp_file):
+def execute_install_with_args(ssh_cmd, args, target_file, tmp_file):
     env_var = " WEBSITE='%s'" % ('localhost')
 
-    cmd = '%s "%s bash %s -R aliyun"' % (ssh_cmd, env_var, target_file)
+    cmd = '%s "%s bash %s %s"' % (ssh_cmd, env_var, target_file, args)
 
     process_result = execute_shell_in_process(cmd, tmp_file, 2400)
 
@@ -264,10 +265,11 @@ def execute_all_install(ssh_cmd, target_file, tmp_file):
             else:
                 test_util.test_fail('zstack installation failed')
 
-def execute_install_with_args(ssh_cmd, target_file, tmp_file, args):
+def execute_all_install(ssh_cmd, target_file, tmp_file):
     env_var = " WEBSITE='%s'" % ('localhost')
 
-    cmd = '%s "%s bash %s -R aliyun %s"' % (ssh_cmd, env_var, target_file, args)
+#    cmd = '%s "%s bash %s -R aliyun"' % (ssh_cmd, env_var, target_file)
+    cmd = '%s "%s bash %s -o"' % (ssh_cmd, env_var, target_file)
 
     process_result = execute_shell_in_process(cmd, tmp_file, 2400)
 
@@ -480,6 +482,23 @@ def check_zstack_version(ssh_cmd, tmp_file, vm_inv, pkg_version):
     if process_result != 0:
         test_util.test_fail('zstack-ctl get version failed')
     version = version[:-1]
-    test_util.test_dsc("current version: %s" % version)
+    test_util.test_dsc("current version number: %s" % version)
     if version != pkg_version:
         test_util.test_fail('try to install zstack-%s, but current version is zstack-%s' % (pkg_version, version))
+
+def check_zstack_or_mevoco(ssh_cmd, tmp_file, vm_inv, zom):
+    cmd = '%s "/usr/bin/zstack-ctl status" | grep ^version | awk \'{print $3}\'' % ssh_cmd
+    (process_result, version) = execute_shell_in_process_stdout(cmd, tmp_file)
+    if process_result != 0:
+        test_util.test_fail('zstack-ctl get version failed')
+    version = version[1:-1]
+    test_util.test_dsc("current version: %s" % version)
+    if version != zom:
+        test_util.test_fail('try to install %s, but current version is %s' % (zom, version))
+
+def update_iso(ssh_cmd, tmp_file, vm_inv, update_file):
+    scp_file_to_vm(vm_inv, update_file, '/home/update_iso.sh')
+    cmd = '%s chmod +x /home/update_iso.sh' % ssh_cmd
+    (process_result, ouput) = execute_shell_in_process_stdout(cmd, tmp_file)
+    cmd = '%s bash /home/update_iso.sh' % ssh_cmd
+    (process_result, output) = execute_shell_in_process_stdout(cmd, tmp_file)

@@ -30,6 +30,7 @@ def create_sftp_backup_storage(backup_storage_option, session_uuid=None):
     action.password = backup_storage_option.get_password()
     action.sshPort = backup_storage_option.get_sshPort()
     action.resourceUuid = backup_storage_option.get_resource_uuid()
+    action.importImages = backup_storage_option.get_import_images()
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create Sftp Backup Storage [uuid:] %s [name:] %s' % \
             (evt.inventory.uuid, action.name))
@@ -47,6 +48,7 @@ def create_image_store_backup_storage(backup_storage_option, session_uuid=None):
     action.password = backup_storage_option.get_password()
     action.sshPort = backup_storage_option.get_sshport()
     action.resourceUuid = backup_storage_option.get_resource_uuid()
+    action.importImages = backup_storage_option.get_import_images()
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create Sftp Backup Storage [uuid:] %s [name:] %s' % \
             (evt.inventory.uuid, action.name))
@@ -66,6 +68,7 @@ def create_ceph_backup_storage(backup_storage_option, session_uuid=None):
     action.rootVolumePoolName = \
             backup_storage_option.get_rootVolumePoolName()
     action.resourceUuid = backup_storage_option.get_resource_uuid()
+    action.importImages = backup_storage_option.get_import_images()
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create Ceph Backup Storage [uuid:] %s [name:] %s' % \
             (evt.inventory.uuid, action.name))
@@ -116,3 +119,15 @@ def update_sftp_backup_storage_info(sftpUuid, infoType, infoValue, session_uuid 
         action.username = infoValue
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
+
+
+def reconnect_backup_storage(backup_storage_uuid, session_uuid=None):
+    '''
+    Reconnect backup storage
+    '''
+    action = api_actions.ReconnectBackupStorageAction()
+    action.uuid = backup_storage_uuid
+    action.timeout = 6000000
+    test_util.action_logger('Reconnect Backup Storage [uuid:] %s' % backup_storage_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory

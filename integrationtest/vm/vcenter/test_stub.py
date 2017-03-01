@@ -20,6 +20,7 @@ import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
+import apibinding.api_actions as api_actions
 
 
 original_root_password = "password"
@@ -35,9 +36,65 @@ def create_vm(vm_name='virt-vm', \
 
 
     if not image_name:
-        image_name = os.environ.get('imageName_net') 
-    else:
+        image_name = os.environ.get('imageName_net')
+    elif os.environ.get(image_name):
         image_name = os.environ.get(image_name)
+
+    if not l3_name:
+        l3_name = os.environ.get('l3PublicNetworkName')
+
+    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    if not instance_offering_uuid:
+	instance_offering_name = os.environ.get('instanceOfferingName_m')
+        instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(instance_offering_name).uuid
+
+    vm_creation_option = test_util.VmOption()
+    vm_creation_option.set_l3_uuids([l3_net_uuid])
+    vm_creation_option.set_image_uuid(image_uuid)
+    vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+    vm_creation_option.set_name(vm_name)
+    vm_creation_option.set_system_tags(system_tags)
+    vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
+    if root_password:
+        vm_creation_option.set_root_password(root_password)
+    if host_uuid:
+        vm_creation_option.set_host_uuid(host_uuid)
+    if session_uuid:
+        vm_creation_option.set_session_uuid(session_uuid)
+
+    vm = zstack_vm_header.ZstackTestVm()
+    vm.set_creation_option(vm_creation_option)
+    vm.create()
+    return vm 
+
+
+
+def start_vm_with_host_uuid(vm_uuid, host_uuid, session_uuid=None, timeout=240000):
+    action = api_actions.StartVmInstanceAction()
+    action.uuid = vm_uuid
+    action.hostUuid = host_uuid
+    action.timeout = timeout
+    test_util.action_logger('Start VM [uuid:] %s; Host [uuid:] %s' % (vm_uuid, host_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+
+
+def create_vm_in_vcenter(vm_name='vcenter-vm', \
+        image_name = None, \
+        l3_name = None, \
+        instance_offering_uuid = None, \
+        host_uuid = None, \
+        disk_offering_uuids=None, system_tags=None, \
+        root_password=None, session_uuid = None):
+
+
+    if not image_name:
+        image_name = os.environ.get('imageName_net')
+    elif os.environ.get(image_name):
+        image_name = os.environ.get(image_name)
+
     if not l3_name:
         l3_name = os.environ.get('l3PublicNetworkName')
 

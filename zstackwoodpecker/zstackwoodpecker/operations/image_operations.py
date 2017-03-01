@@ -120,6 +120,13 @@ def expunge_image(image_uuid, backup_storage_uuid_list=None, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
+def sync_image_size(image_uuid, session_uuid=None):
+    action = api_actions.SyncImageSizeAction()
+    action.uuid = image_uuid
+    test_util.action_logger('Sync image size [image:] %s' % image_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
 def create_template_from_snapshot(image_creation_option, session_uuid=None):
     action = api_actions.CreateRootVolumeTemplateFromVolumeSnapshotAction()
     action.snapshotUuid = image_creation_option.get_root_volume_uuid()
@@ -213,3 +220,24 @@ def detach_iso(vm_uuid, session_uuid = None):
     test_util.action_logger('Detach ISO from VM[UUID: %s]' % (vm_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory    
+
+def get_image_qga_enable(img_uuid, session_uuid = None):
+    action = api_actions.GetImageQgaEnableAction()
+    action.uuid = img_uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def set_image_qga_enable(img_uuid, session_uuid = None):
+    action = api_actions.SetImageQgaAction()
+    action.uuid = img_uuid
+    action.enable = 'true'
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def set_image_qga_disable(img_uuid, session_uuid = None):
+    action = api_actions.SetImageQgaAction()
+    action.uuid = img_uuid
+    action.enable = 'false'
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+

@@ -10,6 +10,7 @@ import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.header.vm as vm_header
+import os
 
 _config_ = {
         'timeout' : 1000,
@@ -30,10 +31,10 @@ def test():
     test_util.test_dsc('Create test vm and check')
     l3_1_name = os.environ.get('l3VlanNetworkName1')
     vm = test_stub.create_vlan_vm(l3_name=l3_1_name)
-    vr = test_lib.lib_find_vr_by_l3_uuid(l3_1.uuid)[0]
-    vr_uuid = vr.uuid
+    #l3_1 = test_lib.lib_get_l3_by_name(l3_1_name)
+    #vr = test_lib.lib_find_vr_by_l3_uuid(l3_1.uuid)[0]
+    #vr_uuid = vr.uuid
     
-    l3_1 = test_lib.lib_get_l3_by_name(l3_1_name)
     host = test_lib.lib_get_vm_host(vm.get_vm())
     host_uuid = host.uuid
     test_obj_dict.add_vm(vm)
@@ -46,9 +47,15 @@ def test():
 
     vm.set_state(vm_header.STOPPED)
     vm.check()
-    ps_ops.change_primary_storage_state(ps_uuid, 'Enabled')
+    ps_ops.change_primary_storage_state(ps_uuid, 'enable')
     host_ops.reconnect_host(host_uuid)
-    vm_ops.reconnect_vr(vr_uuid)
+    #vm_ops.reconnect_vr(vr_uuid)
+    vrs = test_lib.lib_get_all_vrs()
+    for vr in vrs:
+        vm_ops.start_vm(vr.uuid)  
+
+    vm.start()
+    vm.check()
     vm.destroy()
     test_util.test_pass('PS maintain mode Test Success')
 
@@ -56,12 +63,15 @@ def test():
 def error_cleanup():
     global ps_uuid
     if ps_uuid != None:
-        ps_ops.change_primary_storage_state(ps_uuid, 'Enabled')
+        ps_ops.change_primary_storage_state(ps_uuid, 'enable')
     global host_uuid
     if host_uuid != None:
         host_ops.reconnect_host(host_uuid)
-    global vr_uuid
-    if vr_uuid != None:
-        vm_ops.reconnect_vr(vr_uuid)
+    vrs = test_lib.lib_get_all_vrs()
+    for vr in vrs:
+        vm_ops.start_vm(vr.uuid)  
+    #global vr_uuid
+    #if vr_uuid != None:
+    #    vm_ops.reconnect_vr(vr_uuid)
     global test_obj_dict
     test_lib.lib_error_cleanup(test_obj_dict)

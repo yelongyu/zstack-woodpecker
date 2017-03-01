@@ -394,12 +394,13 @@ class TestLib(object):
 
     def execute_test(self, test_args):
         #process = subprocess.Popen("zstack-woodpecker -f %s" % self.test_xml, executable='/bin/sh', shell=True, cwd=self.current_dir, universal_newlines=True)
+        woodpecker_root_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
         if test_args:
-            print("export woodpecker_http_proxy=$http_proxy; export woodpecker_https_proxy=$https_proxy; unset http_proxy; unset https_proxy; zstack-woodpecker -f %s %s" % (self.test_xml, test_args))
-            os.system("export woodpecker_http_proxy=$http_proxy; export woodpecker_https_proxy=$https_proxy; unset http_proxy; unset https_proxy; zstack-woodpecker -f %s %s" % (self.test_xml, test_args))
+            print("export woodpecker_root_path=%s woodpecker_http_proxy=$http_proxy; export woodpecker_https_proxy=$https_proxy; unset http_proxy; unset https_proxy; zstack-woodpecker -f %s %s" % (woodpecker_root_path, self.test_xml, test_args))
+            os.system("export woodpecker_root_path=%s woodpecker_http_proxy=$http_proxy; export woodpecker_https_proxy=$https_proxy; unset http_proxy; unset https_proxy; zstack-woodpecker -f %s %s" % (woodpecker_root_path, self.test_xml, test_args))
         else:
-            print ("export woodpecker_http_proxy=$http_proxy; export woodpecker_https_proxy=$https_proxy; unset http_proxy; unset https_proxy; zstack-woodpecker -f %s %s" % (self.test_xml, test_args))
-            os.system("export woodpecker_http_proxy=$http_proxy; export woodpecker_https_proxy=$https_proxy; unset http_proxy; unset https_proxy; zstack-woodpecker -f %s %s" % (self.test_xml, test_args))
+            print ("export woodpecker_root_path=%s woodpecker_http_proxy=$http_proxy; export woodpecker_https_proxy=$https_proxy; unset http_proxy; unset https_proxy; zstack-woodpecker -f %s %s" % (woodpecker_root_path, self.test_xml, test_args))
+            os.system("export woodpecker_root_path=%s woodpecker_http_proxy=$http_proxy; export woodpecker_https_proxy=$https_proxy; unset http_proxy; unset https_proxy; zstack-woodpecker -f %s %s" % (woodpecker_root_path, self.test_xml, test_args))
 
     def find_real_suite(self, suite_shortname):
         for real_suite in self.suite_list:
@@ -522,6 +523,18 @@ def parse_test_args(options):
     if options.configFile:
         test_args.append('-c')
         test_args.append(options.configFile) 
+
+    if options.scenarioConfig:
+        test_args.append('-e')
+        test_args.append(options.scenarioConfig) 
+
+    if options.scenarioFile:
+        test_args.append('-g')
+        test_args.append(options.scenarioFile) 
+
+    if options.scenarioDestroy:
+        test_args.append('-x')
+        test_args.append(options.scenarioDestroy) 
 
     return ' '.join(test_args)
 
@@ -724,6 +737,27 @@ def main():
             default=None, 
             action='store_true', 
 	    help="[Optional] Start remote debugger with rpdb when exception happens. E.g. `zstest -s basic --start-debugger`")
+
+    option_group.add_option(
+            "--scenario-config", 
+            dest="scenarioConfig", 
+            default=None, 
+            action='store', 
+	    help="[Optional] Use first level virtualization to create VM for test scenario. Used together with --scenario-file option, E.g. `zstest -s basic --scenario-config scenario-config.xml --scenario-file scenario-file.xml`")
+
+    option_group.add_option(
+            "--scenario-file", 
+            dest="scenarioFile", 
+            default=None, 
+            action='store', 
+	    help="[Optional] Use first level virtualization to create VM for test scenario, which is saved in this file. Used together with --scenario-config option, E.g. `zstest -s basic --scenario-config scenario-config.xml --scenario-file scenario-file.xml`")
+
+    option_group.add_option(
+            "--scenario-destroy", 
+            dest="scenarioDestroy", 
+            default=None, 
+            action='store', 
+	    help="[Optional] Destroy created VM in first level virtualization for test scenario, which is saved in this file. E.g. `zstest --scenario-file scenario-file.xml`")
 
     parser.add_option_group(option_group)
     (options, arg) = parser.parse_args()

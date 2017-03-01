@@ -23,6 +23,7 @@ import threading
 import traceback
 import zstackwoodpecker.operations.resource_operations as res_ops 
 import zstackwoodpecker.operations.node_operations as node_ops
+import zstackwoodpecker.operations.deploy_operations as dpy_ops 
 import zstackwoodpecker.ansible as ansible
 import zstacktestagent.plugins.host as host_plugin
 import zstacktestagent.testagent as testagent
@@ -422,6 +423,10 @@ class Plan(object):
                 for cluster in zone.clusters.get_child_node_as_list('cluster'):
                     if cluster.hypervisorType_ == inventory.KVM_HYPERVISOR_TYPE:
                         for h in cluster.hosts.get_child_node_as_list('host'):
+                            if self.scenario_config != None and self.scenario_file != None:
+                                managementIp = dpy_ops.get_host_from_scenario_file(h.name_, self.scenario_config, self.scenario_file, self.config)
+                                if managementIp != None:
+                                    h.managementIp_ = managementIp
                             h.managementIp_
                             h.username_
                             h.password_
@@ -482,6 +487,9 @@ default one' % self.zstack_properties)
         if deploy_config.has_element('nodes') \
             and deploy_config.nodes.has_element('node'):
             for node in deploy_config.nodes.get_child_node_as_list('node'):
+                ip = dpy_ops.get_node_from_scenario_file(node.name_, self.scenario_config, self.scenario_file, self.config)
+                if ip != None:
+                    node.ip_ = ip
                 node.ip_
                 self.nodes.append(node)
                 if linux.is_ip_existing(node.ip_):
@@ -565,21 +573,26 @@ default one' % self.zstack_properties)
         ssh.execute(cmd, node1.ip_, node1.username_, node1.password_)
 
     def _set_extra_node_config(self):
+        node1 = self.nodes[0]
         for node in self.nodes:
             cmd = 'zstack-ctl configure --duplicate-to-remote=%s; zstack-ctl configure --host=%s management.server.ip=%s' % \
                     (node.ip_, node.ip_, node.ip_)
-            thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
-            thread.start()
-
-        self._wait_for_thread_completion('set extra management node config', 60)
+            if not linux.is_ip_existing(node.ip_):
+                ssh.execute(cmd, node1.ip_, node.username_, node.password_)
+            else:
+                thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
+                thread.start()
+                self._wait_for_thread_completion('set extra management node config', 60)
 
     def _change_node_ip(self):
-        node = self.nodes[0]
-        cmd = 'zstack-ctl change_ip --ip=%s' % (node.ip_)
-        thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
-        thread.start()
-
-        self._wait_for_thread_completion('change management node ip', 60)
+        for node in self.nodes:
+            cmd = 'zstack-ctl change_ip --ip=%s' % (node.ip_)
+            if not linux.is_ip_existing(node.ip_):
+                ssh.execute(cmd, node.ip_, node.username_, node.password_)
+            else:
+                thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
+                thread.start()
+                self._wait_for_thread_completion('change management node ip', 60)
 
     def _wait_for_thread_completion(self, msg, wait_time, raise_exception = True):
         end_time = wait_time
@@ -602,7 +615,7 @@ default one' % self.zstack_properties)
 
     def _install_management_nodes(self):
         for node in self.nodes:
-            if not linux.is_ip_existing(node.ip_):
+            if not linux.is_ip_existing(node.ip_) and os.environ.get('ZSTACK_ALREADY_INSTALLED') != "yes":
                 cmd = 'zstack-ctl install_management_node --force-reinstall \
                         --host=%s' % node.ip_
                 thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
@@ -846,6 +859,7 @@ default one' % self.zstack_properties)
     def _start_multi_nodes(self, restart = False):
         nodes = []
         threads = []
+        node1 = self.nodes[0]
         for node in self.nodes:
             #The reserved node is used by test cases. 
             if not restart and node.reserve__:
@@ -857,9 +871,14 @@ default one' % self.zstack_properties)
                 # startup speed is slow. Increase timeout to 180s.
                 if linux.is_ip_existing(node.ip_):
                     cmd = 'zstack-ctl stop; nohup zstack-ctl start'
+                    thread = threading.Thread(target=shell_cmd_thread, args=(cmd, True, ))
+                elif not linux.is_ip_existing(node1.ip_):
+                    # when first node1 ip is not local, it usualy means woodpecker is running on hosts other than MN
+                    cmd = 'zstack-ctl stop_node --host=%s ; zstack-ctl start_node --host=%s --timeout=180' % (node.ip_, node.ip_)
+                    thread = threading.Thread(target=ssh.execute, args=(cmd, node1.ip_, node1.username_, node1.password_, ))
                 else:
                     cmd = 'zstack-ctl stop_node --host=%s ; zstack-ctl start_node --host=%s --timeout=180' % (node.ip_, node.ip_)
-                thread = threading.Thread(target=shell_cmd_thread, args=(cmd, True, ))
+                    thread = threading.Thread(target=shell_cmd_thread, args=(cmd, True, ))
                 threads.append(thread)
             else:
                 print 'Deploy node in docker'
@@ -931,8 +950,10 @@ default one' % self.zstack_properties)
     def disable_db_deployment(self):
         self.need_deploy_db = False
 
-    def __init__(self, plan_config):
+    def __init__(self, plan_config, scenario_config = None, scenario_file = None):
         self.config = plan_config
+        self.scenario_config = scenario_config
+        self.scenario_file = scenario_file
         self.zstack_pkg = None
         self.zstack_install_script = None
         self.install_path = None

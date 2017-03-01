@@ -1,0 +1,19 @@
+import ./deploy-ceph-ps.tmpt
+zstackPkg = /home/installer.bin
+zstackISO = /home/installer.iso
+zstackManagementIp = 172.0.0.15
+zstackAdminPassword = password
+hostUuid = 123456
+vmName1 = debug_scenario1
+vmName2 = debug_scenario2
+vmName3 = debug_scenario3
+vmName4 = debug_scenario4
+vmInstranceOfferingUuid = 123456
+vmInstranceOfferingUuid2 = 123456
+imageUuid = 123456
+imageUuid2 = 123456
+imageUsername = root
+imagePassword = password
+vmL3Uuid = 123456
+vmStorageL3Uuid = 123456
+cephStorageOfferingUuid = 123456

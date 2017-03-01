@@ -14,6 +14,7 @@ import zstacklib.utils.jsonobject as jsonobject
 import zstacklib.utils.xmlobject as xmlobject
 import zstacklib.utils.lock as lock
 import apibinding.inventory as inventory
+import os
 import sys
 import traceback
 import threading
@@ -44,8 +45,53 @@ def get_first_item_from_list(list_obj, list_obj_name, list_obj_value, action_nam
 
     return list_obj[0]
 
+def get_ceph_storages_mon_nic_id(ceph_name, scenario_config):
+    for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            nic_id = 0
+            for l3network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                if hasattr(l3network, 'backupStorageRef') and hasattr(l3network.backupStorageRef, 'monIp_') and l3network.backupStorageRef.text_ == ceph_name:
+                    return nic_id
+                if hasattr(l3network, 'primaryStorageRef') and hasattr(l3network.primaryStorageRef, 'monIp_') and l3network.primaryStorageRef.text_ == ceph_name:
+                    return nic_id
+                nic_id += 1
+       
+    for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            nic_id = 0
+            for l3network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                if hasattr(l3network, 'backupStorageRef') and l3network.backupStorageRef.text_ == ceph_name:
+                    return nic_id
+                if hasattr(l3network, 'primaryStorageRef') and l3network.primaryStorageRef.text_ == ceph_name:
+                    return nic_id
+                nic_id += 1
+    return None
+
+def get_backup_storage_from_scenario_file(backupStorageRefName, scenarioConfig, scenarioFile, deployConfig):
+    if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
+        return []
+
+    ip_list = []
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            if xmlobject.has_element(vm, 'backupStorageRef'):
+                if backupStorageRefName == vm.backupStorageRef.text_:
+                    with open(scenarioFile, 'r') as fd:
+                        xmlstr = fd.read()
+                        fd.close()
+                        scenario_file = xmlobject.loads(xmlstr)
+                        for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                            if s_vm.name_ == vm.name_:
+                                if vm.backupStorageRef.type_ == 'ceph':
+                                    nic_id = get_ceph_storages_mon_nic_id(vm.backupStorageRef.text_, scenarioConfig)
+            	                    ip_list.append(s_vm.ips.ip[nic_id].ip_)
+                                else:
+                                    ip_list.append(s_vm.ip_)
+                                break
+    return ip_list
+
 #Add Backup Storage
-def add_backup_storage(deployConfig, session_uuid):
+def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid):
     if xmlobject.has_element(deployConfig, 'backupStorages.sftpBackupStorage'):
         for bs in xmlobject.safe_list(deployConfig.backupStorages.sftpBackupStorage):
             action = api_actions.AddSftpBackupStorageAction()
@@ -55,7 +101,12 @@ def add_backup_storage(deployConfig, session_uuid):
             action.url = bs.url_
             action.username = bs.username_
             action.password = bs.password_
-            action.hostname = bs.hostname_
+            hostname_list = get_backup_storage_from_scenario_file(bs.name_, scenarioConfig, scenarioFile, deployConfig)
+            if len(hostname_list) == 0:
+                action.hostname = bs.hostname_
+            else:
+                action.hostname = hostname_list[0]
+
 	    if hasattr(bs, 'port_'):
                 action.port = bs.port_
                 action.sshport = bs.port_
@@ -75,7 +126,12 @@ def add_backup_storage(deployConfig, session_uuid):
             action.url = bs.url_
             action.username = bs.username_
             action.password = bs.password_
-            action.hostname = bs.hostname_
+            hostname_list = get_backup_storage_from_scenario_file(bs.name_, scenarioConfig, scenarioFile, deployConfig)
+            if len(hostname_list) == 0:
+                action.hostname = bs.hostname_
+            else:
+                action.hostname = hostname_list[0]
+
 	    if hasattr(bs, 'port_'):
                 action.port = bs.port_
                 action.sshport = bs.port_
@@ -92,7 +148,14 @@ def add_backup_storage(deployConfig, session_uuid):
             action.sessionUuid = session_uuid
             action.name = bs.name_
             action.description = bs.description__
-            action.monUrls = bs.monUrls_.split(';')
+            hostname_list = get_backup_storage_from_scenario_file(bs.name_, scenarioConfig, scenarioFile, deployConfig)
+            if len(hostname_list) != 0:
+                # TODO: username and password should be configarable
+                action.monUrls = []
+                for hostname in hostname_list:
+                    action.monUrls.append("root:password@%s" % (hostname))
+            else:
+                action.monUrls = bs.monUrls_.split(';')
             if bs.poolName__:
                 action.poolName = bs.poolName_
             action.timeout = AddKVMHostTimeOut #for some platform slowly salt execution
@@ -118,7 +181,7 @@ def add_backup_storage(deployConfig, session_uuid):
     wait_for_thread_done()
 
 #Add Zones
-def add_zone(deployConfig, session_uuid, zone_name = None):
+def add_zone(scenarioConfig, scenarioFile, deployConfig, session_uuid, zone_name = None):
     def _add_zone(zone, zone_duplication):
         action = api_actions.CreateZoneAction()
         action.sessionUuid = session_uuid
@@ -172,7 +235,7 @@ def add_zone(deployConfig, session_uuid, zone_name = None):
     wait_for_thread_done()
 
 #Add L2 network
-def add_l2_network(deployConfig, session_uuid, l2_name = None, zone_name = None):
+def add_l2_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l2_name = None, zone_name = None):
     '''
     If providing name, it will only add L2 network with the same name.
     '''
@@ -266,8 +329,26 @@ def add_l2_network(deployConfig, session_uuid, l2_name = None, zone_name = None)
 
     wait_for_thread_done()
 
+def get_primary_storage_from_scenario_file(primaryStorageRefName, scenarioConfig, scenarioFile, deployConfig):
+    if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
+        return []
+
+    ip_list = []
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            if xmlobject.has_element(vm, 'primaryStorageRef'):
+                if vm.primaryStorageRef.text_ == primaryStorageRefName:
+                    with open(scenarioFile, 'r') as fd:
+                        xmlstr = fd.read()
+                        fd.close()
+                        scenario_file = xmlobject.loads(xmlstr)
+                        for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                            if s_vm.name_ == vm.name_:
+                                ip_list.append(s_vm.ip_)
+    return ip_list
+
 #Add Primary Storage
-def add_primary_storage(deployConfig, session_uuid, ps_name = None, \
+def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid, ps_name = None, \
         zone_name = None):
     if not xmlobject.has_element(deployConfig, 'zones.zone'):
         test_util.test_logger('Not find zones.zone in config, skip primary storage deployment')
@@ -355,7 +436,13 @@ def add_primary_storage(deployConfig, session_uuid, ps_name = None, \
                 action.name = pr.name_
                 action.description = pr.description__
                 action.type = inventory.CEPH_PRIMARY_STORAGE_TYPE
-                action.monUrls = pr.monUrls_.split(';')
+                hostname_list = get_primary_storage_from_scenario_file(pr.name_, scenarioConfig, scenarioFile, deployConfig)
+                if len(hostname_list) != 0:
+                    action.monUrls = []
+                    for hostname in hostname_list:
+                        action.monUrls.append("root:password@%s" % (hostname))
+                else:
+                    action.monUrls = pr.monUrls_.split(';')
                 if pr.dataVolumePoolName__:
                     action.dataVolumePoolName = pr.dataVolumePoolName__
                 if pr.rootVolumePoolName__:
@@ -381,7 +468,11 @@ def add_primary_storage(deployConfig, session_uuid, ps_name = None, \
                 action.name = pr.name_
                 action.description = pr.description__
                 action.type = inventory.NFS_PRIMARY_STORAGE_TYPE
-                action.url = pr.url_
+                hostname_list = get_primary_storage_from_scenario_file(pr.name_, scenarioConfig, scenarioFile, deployConfig)
+                if len(hostname_list) != 0:
+                    action.url = "%s:%s" % (hostname_list[0], pr.url_.split(':')[1])
+                else:
+                    action.url = pr.url_
                 action.zoneUuid = zinv.uuid
                 thread = threading.Thread(target=_thread_for_action, args=(action,))
                 wait_for_thread_queue()
@@ -436,7 +527,7 @@ def add_primary_storage(deployConfig, session_uuid, ps_name = None, \
     wait_for_thread_done()
 
 #Add Cluster
-def add_cluster(deployConfig, session_uuid, cluster_name = None, \
+def add_cluster(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluster_name = None, \
         zone_name = None):
     if not xmlobject.has_element(deployConfig, "zones.zone"):
         return
@@ -541,8 +632,43 @@ def add_cluster(deployConfig, session_uuid, cluster_name = None, \
 
     wait_for_thread_done()
 
+def get_node_from_scenario_file(nodeRefName, scenarioConfig, scenarioFile, deployConfig):
+    if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
+        return None
+
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            if xmlobject.has_element(vm, 'nodeRef'):
+                if vm.nodeRef.text_ == nodeRefName:
+                    with open(scenarioFile, 'r') as fd:
+                        xmlstr = fd.read()
+                        fd.close()
+                        scenario_file = xmlobject.loads(xmlstr)
+                        for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                            if s_vm.name_ == vm.name_:
+                                return s_vm.ip_
+    return None
+
+
+def get_host_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, deployConfig):
+    if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
+        return None
+
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            if xmlobject.has_element(vm, 'hostRef'):
+                if vm.hostRef.text_ == hostRefName:
+                    with open(scenarioFile, 'r') as fd:
+                        xmlstr = fd.read()
+                        fd.close()
+                        scenario_file = xmlobject.loads(xmlstr)
+                        for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                            if s_vm.name_ == vm.name_:
+                                return s_vm.ip_
+    return None
+
 #Add Host
-def add_host(deployConfig, session_uuid, host_ip = None, zone_name = None, \
+def add_host(scenarioConfig, scenarioFile, deployConfig, session_uuid, host_ip = None, zone_name = None, \
         cluster_name = None):
     '''
     Base on an xml deploy config object to add hosts. 
@@ -593,7 +719,11 @@ def add_host(deployConfig, session_uuid, host_ip = None, zone_name = None, \
                 if zone_ref == 0 and cluster_ref == 0 and i == 0:
                     action.name = host.name_
                     action.description = host.description__
-                    action.managementIp = host.managementIp_
+                    managementIp = get_host_from_scenario_file(host.name_, scenarioConfig, scenarioFile, deployConfig)
+                    if managementIp != None:
+                        action.managementIp = managementIp
+                    else:
+                        action.managementIp = host.managementIp_
                 else:
                     action.name = generate_dup_name(generate_dup_name(generate_dup_name(host.name_, zone_ref, 'z'), cluster_ref, 'c'), i, 'h')
                     action.description = generate_dup_name(generate_dup_name(generate_dup_name(host.description__, zone_ref, 'z'), cluster_ref, 'c'), i, 'h')
@@ -632,7 +762,7 @@ def add_host(deployConfig, session_uuid, host_ip = None, zone_name = None, \
     test_util.test_logger('All add KVM host actions are done.')
 
 #Add L3 network
-def add_l3_network(deployConfig, session_uuid, l3_name = None, l2_name = None, \
+def add_l3_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l3_name = None, l2_name = None, \
         zone_name = None):
     '''
     add_l3_network will add L3 network and also add related DNS, IpRange and 
@@ -744,18 +874,21 @@ def add_l3_network(deployConfig, session_uuid, l3_name = None, l2_name = None, \
             else:
                 duplication = int(zone.duplication__)
 
-            for zone_ref in range(duplication):
-                for cluster in xmlobject.safe_list(zone.clusters.cluster):
-                    if cluster.duplication__ == None:
-                        cluster_duplication = 1
-                    else:
-                        cluster_duplication = int(cluster.duplication__)
-    
-                    for cluster_ref in range(cluster_duplication):
-                        if zone_ref == 1 and cluster_ref == 1:
-                            zone_ref = 0
-                            cluster_ref = 0
-                        _deploy_l3_network(l2, zone_ref, cluster_ref)
+            if duplication == 1:
+                _deploy_l3_network(l2, 0, 0)
+            else:
+                for zone_ref in range(duplication):
+                    for cluster in xmlobject.safe_list(zone.clusters.cluster):
+                        if cluster.duplication__ == None:
+                            cluster_duplication = 1
+                        else:
+                            cluster_duplication = int(cluster.duplication__)
+        
+                        for cluster_ref in range(cluster_duplication):
+                            if zone_ref == 1 and cluster_ref == 1:
+                                zone_ref = 0
+                                cluster_ref = 0
+                            _deploy_l3_network(l2, zone_ref, cluster_ref)
 
     wait_for_thread_done()
     test_util.test_logger('All add L3 Network actions are done.')
@@ -912,7 +1045,7 @@ def do_add_network_service(net_service_xml_obj, l3_uuid, providers, \
     test_util.test_logger(jsonobject.dumps(evt))
 
 #Add Image
-def add_image(deployConfig, session_uuid):
+def add_image(scenarioConfig, scenarioFile, deployConfig, session_uuid):
     def _add_image(action):
         increase_image_thread()
         try:
@@ -965,7 +1098,7 @@ def add_image(deployConfig, session_uuid):
     print 'all images have been added'
 
 #Add Disk Offering
-def add_disk_offering(deployConfig, session_uuid):
+def add_disk_offering(scenarioConfig, scenarioFile, deployConfig, session_uuid):
     def _add_disk_offering(disk_offering_xml_obj, session_uuid):
         action = api_actions.CreateDiskOfferingAction()
         action.sessionUuid = session_uuid
@@ -991,7 +1124,7 @@ def add_disk_offering(deployConfig, session_uuid):
     wait_for_thread_done()
 
 #Add Instance Offering
-def add_instance_offering(deployConfig, session_uuid):
+def add_instance_offering(scenarioConfig, scenarioFile, deployConfig, session_uuid):
     def _add_io(instance_offering_xml_obj, session_uuid):
         action = api_actions.CreateInstanceOfferingAction()
         action.sessionUuid = session_uuid
@@ -1033,7 +1166,7 @@ def _thread_for_action(action):
         exc_info.append(sys.exc_info())
 
 #Add Virtual Router Offering
-def add_virtual_router(deployConfig, session_uuid, l3_name = None, \
+def add_virtual_router(scenarioConfig, scenarioFile, deployConfig, session_uuid, l3_name = None, \
         zone_name = None):
 
     if not xmlobject.has_element(deployConfig, 'instanceOfferings.virtualRouterOffering'):
@@ -1094,7 +1227,7 @@ def add_virtual_router(deployConfig, session_uuid, l3_name = None, \
 
     wait_for_thread_done()
 
-def deploy_initial_database(deploy_config):
+def deploy_initial_database(deploy_config, scenario_config = None, scenario_file = None):
     operations = [
             add_backup_storage,
             add_zone,
@@ -1111,7 +1244,7 @@ def deploy_initial_database(deploy_config):
     for operation in operations:
         session_uuid = account_operations.login_as_admin()
         try:
-            operation(deploy_config, session_uuid)
+            operation(scenario_config, scenario_file, deploy_config, session_uuid)
         except Exception as e:
             test_util.test_logger('[Error] zstack deployment meets exception when doing: %s . The real exception are:.' % operation.__name__)
             print('----------------------Exception Reason------------------------')

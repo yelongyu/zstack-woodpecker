@@ -1,6 +1,8 @@
 <integrationTest>
     <suite name="virt plus test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
         <case timeout='300' repeat='1'>test_create_vm.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_add_image_progress2.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>test_crt_temp_image_progress2.py</case>
         <!--<case timeout='300' repeat='1'>test_create_2vm_2l3_same_l2.py</case>-->
         <case timeout='300' repeat='1'>test_expunge_vm.py</case>
         <case timeout='300' repeat='1'>test_expunge_vm_chg_del_policy.py</case>
@@ -19,6 +21,14 @@
         <case timeout='300' repeat='1'>qos/test_net_outbound_qos.py</case>
         <case timeout='300' repeat='1'>qos/test_net_inbound_qos.py</case>
         <case timeout='600' repeat='1'>qos/test_net_outbound_inbound_qos.py</case>
+        <case timeout='600' repeat='1'>qos/test_set_disk_qos.py</case>
+        <case timeout='600' repeat='1'>qos/test_set_outbound_qos2.py</case>
+        <case timeout='600' repeat='1'>qos/test_set_outbound_qos3.py</case>
+	<case timeout='600' repeat='1'>qos/test_set_attached_outbound_qos.py</case>
+	<case timeout='600' repeat='1'>qos/test_set_attached_outbound_qos2.py</case>
+	<case timeout='600' repeat='1'>qos/test_del_outbound_qos.py</case>
+	<case timeout='600' repeat='1'>qos/test_del_disk_qos.py</case>
+	<case timeout='600' repeat='1'>qos/test_del_outbound_qos_reboot.py</case>
         <case timeout='300' repeat='1'>other/test_add_local_image.py</case>
         <case timeout='300' repeat='1'>other/test_memory_allocation.py</case>
         <case timeout='800' repeat='1'>eip/test_create_eip_vm.py</case>
@@ -46,5 +56,7 @@
         <case timeout='3600'  repeat='1'>snapshot/test_create_snapshot.py</case>
         <case timeout='1800'  repeat='1'>snapshot/test_delete_snapshot_on_running_vm.py</case>
         <case timeout='9000' repeat='1' noparallel='True'>snapshot/test_change_max_sp_depth_live_vm.py</case>
+        <case timeout='1200' repeat='1'>clone/test_vm_attached_data_volume_clone.py</case>
+        <case timeout='1200' repeat='1'>clone/test_expunge_vm_check_imf2.py</case>
     </suite>
 </integrationTest>

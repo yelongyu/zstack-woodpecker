@@ -67,6 +67,32 @@ class FakeObject(object):
     def __getattr__(self, name):
         self.__getitem__(name)
 
+scenario_config_path = os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')
+if scenario_config_path != None and scenario_config_path != "":
+    scenario_config_obj = test_util.TestScenario(scenario_config_path)
+    #Special config in test-config.xml, such like test ping target. 
+    scenario_config = scenario_config_obj.get_test_config()
+    #All configs in deploy.xml.
+    all_scenario_config = scenario_config_obj.get_scenario_config()
+    #Detailed zstack deployment information, including zones/cluster/hosts...
+    deploy_scenario_config = all_scenario_config.deployerConfig
+    #setup_scenario_plan = setup_actions.Plan(all_scenario_config)
+else:
+    scenario_config = None
+    all_scenario_config = None
+
+scenario_file_path = os.environ.get('WOODPECKER_SCENARIO_FILE')
+if scenario_file_path != None and scenario_file_path != "":
+    scenario_file = scenario_file_path
+else:
+    scenario_file = None
+
+scenario_destroy_path = os.environ.get('WOODPECKER_SCENARIO_DESTROY')
+if scenario_destroy_path != None and scenario_destroy_path != "":
+    scenario_destroy = scenario_destroy_path
+else:
+    scenario_destroy = None
+
 #Following lines were not expected to be changed.
 #---------------
 test_config_path = os.environ.get('WOODPECKER_TEST_CONFIG_FILE')
@@ -78,7 +104,7 @@ if test_config_path:
     all_config = test_config_obj.get_deploy_config()
     #Detailed zstack deployment information, including zones/cluster/hosts...
     deploy_config = all_config.deployerConfig
-    setup_plan = setup_actions.Plan(all_config)
+    setup_plan = setup_actions.Plan(all_config, all_scenario_config, scenario_file)
     test_config_obj.expose_config_variable()
     #Since ZStack management server might be not the same machine of test 
     #machine, so it needs to set management server ip for apibinding/api.py,
@@ -973,6 +999,12 @@ def lib_is_image_sim(image):
     else:
         return False
 
+def lib_is_image_vcenter(image):
+    if lib_get_hv_type_of_image(image) ==  inventory.VMWARE_HYPERVISOR_TYPE:
+        return True
+    else:
+        return False
+
 #Does VM's hypervisor is KVM.
 def lib_is_vm_kvm(vm):
     if lib_get_hv_type_of_vm(vm) == inventory.KVM_HYPERVISOR_TYPE:
@@ -982,6 +1014,18 @@ def lib_is_vm_kvm(vm):
 
 def lib_is_vm_sim(vm):
     if lib_get_hv_type_of_vm(vm) == inventory.SIMULATOR_HYPERVISOR_TYPE:
+        return True
+    else:
+        return False
+
+def lib_is_vm_vcenter(vm):
+    if lib_get_hv_type_of_vm(vm) == inventory.VMWARE_HYPERVISOR_TYPE:
+        return True
+    else:
+        return False
+
+def lib_is_sharable_volume(volume):
+    if str(volume.isShareable).strip().lower() == "true":
         return True
     else:
         return False
@@ -1062,6 +1106,18 @@ def lib_get_vm_last_host(vm_inv):
     else:
         test_util.test_logger("Can't get Last Host Inventory for [vm:] %s, maybe the host has been deleted." % vm_inv.uuid)
         return None
+
+def lib_get_host_by_uuid(host_uuid):
+    conditions = res_ops.gen_query_conditions('uuid', '=', host_uuid)
+    hosts = res_ops.query_resource(res_ops.HOST, conditions)
+    if hosts:
+        return hosts[0]
+
+def lib_get_host_by_ip(host_ip):
+    conditions = res_ops.gen_query_conditions('managementIp', '=', host_ip)
+    hosts = res_ops.query_resource(res_ops.HOST, conditions)
+    if hosts:
+        return hosts[0]
 
 def lib_get_primary_storage_uuid_list_by_backup_storage(bs_uuid):
     '''
@@ -1304,10 +1360,13 @@ def lib_find_random_host(vm = None):
         current_host_uuid = current_host.uuid
 
     all_hosts = lib_get_cluster_hosts(cluster_id)
+    # TODO: it should select non-root host for migrate after cold migrate issue is fixed
     for host in all_hosts:
         if host.uuid != current_host_uuid and \
                 host.status == host_header.CONNECTED and \
-                host.state == host_header.ENABLED:
+                host.state == host_header.ENABLED and \
+                host.username == 'root' and \
+                host.sshPort == 22:
             target_hosts.append(host)
 
     if not target_hosts:
@@ -4747,6 +4806,19 @@ def lib_check_version_is_mevoco():
         version_is_mevoco = False
     return version_is_mevoco
 
+version_is_mevoco_1_8 = None
+def lib_check_version_is_mevoco_1_8():
+    global version_is_mevoco_1_8
+    if version_is_mevoco_1_8 != None:
+        return version_is_mevoco_1_8
+
+    if shell.call('zstack-ctl status').find('version: 1.8') >= 0:
+	version_is_mevoco_1_8 = True
+    else:
+        version_is_mevoco_1_8 = False
+    return version_is_mevoco_1_8
+
+
 def lib_get_host_cpu_prometheus_data(mn_ip, end_time, interval, host_uuid):
     cmd = '/usr/bin/zstack-cli LogInByAccount accountName=admin password=password'
     if not lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd):
@@ -4758,3 +4830,34 @@ def lib_get_host_cpu_prometheus_data(mn_ip, end_time, interval, host_uuid):
         test_util.test_fail('%s failed' % (cmd))
     return rsp
 
+def lib_get_file_size(host, file_path):
+    command = "du -sb %s | awk '{print $1}'" % file_path
+    eout = ''
+    try:
+        if host.sshPort != None:
+            (ret, out, eout) = ssh.execute(command, host.managementIp, host.username, host.password, port=int(host.sshPort))
+	else:
+            (ret, out, eout) = ssh.execute(command, host.managementIp, host.username, host.password)
+        test_util.test_logger('[file:] %s was found in [host:] %s' % (file_path, host.managementIp))
+        return out
+    except:
+        #traceback.print_exc(file=sys.stdout)
+        test_util.test_logger('Fail to execute: ssh [host:] %s with [username:] %s and [password:] %s to get size of [file:] %s . This might be expected behavior.'% (host.managementIp, host.username, host.password, file_path))
+        test_util.test_logger('ssh execution stderr output: %s' % eout)
+        test_util.test_logger(linux.get_exception_stacktrace())
+        return 0
+
+def ip2num(ip):
+    ip=[int(x) for x in ip.split('.')]
+    return ip[0] <<24 | ip[1]<<16 | ip[2]<<8 |ip[3]
+
+def num2ip(num):
+    return '%s.%s.%s.%s' %( (num & 0xff000000) >>24,
+                            (num & 0x00ff0000) >>16,
+                            (num & 0x0000ff00) >>8,
+                            num & 0x000000ff )
+
+def get_ip(start_ip, end_ip):
+    start = ip2num(start_ip)
+    end = ip2num(end_ip)
+    return [ num2ip(num) for num in range(start, end+1) if num & 0xff ]

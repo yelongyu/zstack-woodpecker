@@ -38,6 +38,9 @@ def find_mevoco_log_folder_name():
 
 def test():
     global MEVOCO_LOG_FOLDER, MEVOCO_LOG_PATH
+    if not test_lib.lib_check_version_is_mevoco():
+        MEVOCO_LOG_FOLDER = r"collect-log-zstack_*"
+	MEVOCO_LOG_FOLDER_PATTERN = "collect-log-zstack"
 
     #Step1: clean env below TEMPT_FOLDER and run collect log
     retVal = os.system(" cd " + TEMPT_FOLDER  + "; rm -rf " + MEVOCO_LOG_FOLDER + "; zstack-ctl collect_log")
@@ -66,7 +69,7 @@ def test():
             #hostIP = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, bs_sftp_cond, None, fields=["hostname"])
             hostIP = test_lib.lib_get_backup_storage_host(bs.uuid) 
 
-            sftpLogFolderName = hostIP.managementIp + "-sftp_bs"
+            sftpLogFolderName = "sftp_bs-" + hostIP.managementIp 
             dmesgFilePath             = MEVOCO_LOG_PATH + sftpLogFolderName + "/dmesg"
             hostInfoFilePath          = MEVOCO_LOG_PATH + sftpLogFolderName + "/host_info"
             messagesFilePath          = MEVOCO_LOG_PATH + sftpLogFolderName + "/messages"
@@ -85,30 +88,30 @@ def test():
 
 
     #Step4: verify hosts logs are saved
-    conditions = res_ops.gen_query_conditions('state', '=', host_header.ENABLED)
-    conditions = res_ops.gen_query_conditions('status', '=', host_header.CONNECTED, conditions)
-    all_hosts = res_ops.query_resource(res_ops.HOST, conditions)
-    if len(all_hosts) < 1:
-        test_util.test_skip('Not available host to check')
+    #conditions = res_ops.gen_query_conditions('state', '=', host_header.ENABLED)
+    #conditions = res_ops.gen_query_conditions('status', '=', host_header.CONNECTED, conditions)
+    #all_hosts = res_ops.query_resource(res_ops.HOST, conditions)
+    #if len(all_hosts) < 1:
+    #    test_util.test_skip('Not available host to check')
 
-    for host in all_hosts:
-        hostFolderName = host.managementIp
-        dmesgFilePath    = MEVOCO_LOG_PATH + hostFolderName + "/dmesg"
-        hostInfoFilePath = MEVOCO_LOG_PATH + hostFolderName + "/host_info"
-        messagesFilePath = MEVOCO_LOG_PATH + hostFolderName + "/messages"
-        kvmagentFilePath = MEVOCO_LOG_PATH + hostFolderName + "/zstack-kvmagent.log"
-        zstackFilePath   = MEVOCO_LOG_PATH + hostFolderName + "/zstack.log"
+    #for host in all_hosts:
+    #    hostFolderName = host.managementIp
+    #    dmesgFilePath    = MEVOCO_LOG_PATH + hostFolderName + "/dmesg"
+    #    hostInfoFilePath = MEVOCO_LOG_PATH + hostFolderName + "/host_info"
+    #    messagesFilePath = MEVOCO_LOG_PATH + hostFolderName + "/messages"
+    #    kvmagentFilePath = MEVOCO_LOG_PATH + hostFolderName + "/zstack-kvmagent.log"
+    #    zstackFilePath   = MEVOCO_LOG_PATH + hostFolderName + "/zstack.log"
 
-        if not os.path.exists(dmesgFilePath):
-            test_util.test_fail( dmesgFilePath    + ' is not exist.')
-        if not os.path.exists(hostInfoFilePath):
-            test_util.test_fail( hostInfoFilePath + ' is not exist.')
-        if not os.path.exists(messagesFilePath):
-            test_util.test_fail( messagesFilePath + ' is not exist.')
-        if not os.path.exists(kvmagentFilePath):
-            test_util.test_fail( kvmagentFilePath + ' is not exist.')
-        if not os.path.exists(zstackFilePath):
-            test_util.test_fail( zstackFilePath   + 'is not exist.')
+    #    if not os.path.exists(dmesgFilePath):
+    #        test_util.test_fail( dmesgFilePath    + ' is not exist.')
+    #    if not os.path.exists(hostInfoFilePath):
+    #        test_util.test_fail( hostInfoFilePath + ' is not exist.')
+    #    if not os.path.exists(messagesFilePath):
+    #        test_util.test_fail( messagesFilePath + ' is not exist.')
+    #    if not os.path.exists(kvmagentFilePath):
+    #        test_util.test_fail( kvmagentFilePath + ' is not exist.')
+    #    if not os.path.exists(zstackFilePath):
+    #        test_util.test_fail( zstackFilePath   + 'is not exist.')
 
 
     #Step5: verify management node logs are saved

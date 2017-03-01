@@ -52,6 +52,8 @@ def test():
     upgrade_target_file = '/root/zstack-upgrade-all-in-one.tgz' 
     test_stub.prepare_test_env(vm_inv, upgrade_target_file)
     test_stub.upgrade_zstack(ssh_cmd, upgrade_target_file, tmp_file) 
+    zstack_latest_version = os.environ.get('zstackLatestVersion')
+    test_stub.check_zstack_version(ssh_cmd, tmp_file, vm_inv, zstack_latest_version)
     test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
 
     os.system('rm -f %s' % tmp_file)

@@ -23,6 +23,14 @@ test_obj_dict = test_state.TestStateDict()
 eip_snatInboundTraffic_default_value = None
 pf_snatInboundTraffic_default_value = None
 
+def update_default_gw(vm_inv, gw, eth_id):
+    cmd = 'ip route del 0/0'
+    if not test_lib.lib_execute_command_in_vm(vm_inv, cmd):
+        test_util.test_fail("fail to set default route for testing in vm")
+    cmd = 'ip route add default via %s dev eth%s' % (gw, eth_id)
+    if not test_lib.lib_execute_command_in_vm(vm_inv, cmd):
+        test_util.test_fail("fail to set default route for testing in vm")
+
 def test():
     global eip_snatInboundTraffic_default_value
     global pf_snatInboundTraffic_default_value
@@ -56,8 +64,6 @@ def test():
         vr1 = test_lib.lib_find_vr_by_vm(temp_vm1.vm)[0]
     else:
         vr1 = vrs[0]
-    if vr1.applianceVmType == "vrouter":
-        test_util.test_skip("vrouter VR does not support single VM multiple EIP")
 
     #we do not need temp_vm1, since we just use their VRs.
     if temp_vm1:
@@ -74,8 +80,8 @@ def test():
     vm_nic2_uuid = vm_nic2.uuid
     pri_l3_uuid = vm_nic1.l3NetworkUuid
     vr = test_lib.lib_find_vr_by_l3_uuid(pri_l3_uuid)[0]
-    if vr.applianceVmType == "vrouter":
-        test_util.test_skip("vrouter VR does not support single VM multiple EIP")
+#    if vr.applianceVmType == "vrouter":
+#        test_util.test_skip("vrouter VR does not support single VM multiple EIP")
 
     vr_pub_nic = test_lib.lib_find_vr_pub_nic(vr)
     l3_uuid = vr_pub_nic.l3NetworkUuid
@@ -90,19 +96,36 @@ def test():
     vip1.attach_eip(eip1)
     vip1.check()
     eip1.attach(vm_nic1_uuid, vm)
+    cmd = 'ip route | grep %s | grep eth0' % (os.environ.get('vlanIpRangeGateway1'))
+    if vr1.applianceVmType == "vrouter":
+        if not test_lib.lib_execute_command_in_vm(vm.get_vm(), cmd):
+           default_eth = 1
+           non_default_eth = 0
+        else:
+           default_eth = 0
+           non_default_eth = 1
+
+        update_default_gw(vm.get_vm(), os.environ.get('vlanIpRangeGateway2'), non_default_eth)
     vip1.check()
 
     eip2 = test_stub.create_eip('2l3 eip test2', vip_uuid=vip2.get_vip().uuid)
     vip2.attach_eip(eip2)
     vip2.check()
     eip2.attach(vm_nic2_uuid, vm)
+    if vr1.applianceVmType == "vrouter":
+        update_default_gw(vm.get_vm(), os.environ.get('vlanIpRangeGateway1'), default_eth)
     vip2.check()
 
     vm.stop()
     vm.start()
 
     vm.check()
+    if vr1.applianceVmType == "vrouter":
+        update_default_gw(vm.get_vm(), os.environ.get('vlanIpRangeGateway2'), non_default_eth)
     vip1.check()
+
+    if vr1.applianceVmType == "vrouter":
+        update_default_gw(vm.get_vm(), os.environ.get('vlanIpRangeGateway1'), default_eth)
     vip2.check()
 
     eip1.detach()

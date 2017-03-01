@@ -17,7 +17,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.zstack_test.zstack_test_snapshot as zstack_sp_header
-from distutils.version import StrictVersion
+from distutils.version import LooseVersion
 
 import os
 import time

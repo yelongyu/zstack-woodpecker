@@ -165,6 +165,59 @@ class TestConfig(object):
         if self.deploy_config_template_path:
             set_env_var_from_config_template(self.deploy_config_template_path)
 
+class TestScenario(object):
+    def __init__(self, config_path):
+        self.config_path = config_path
+        if not config_path:
+            raise TestError('Test config file (test-config.xml) path is not set')
+        self.config_base_path = os.path.dirname(os.path.abspath(config_path))
+        self.deploy_config_template_path = None
+
+    def _full_path(self, path):
+        if path.startswith('~'):
+            return os.path.expanduser(path)
+        elif path.startswith('/'):
+            return path
+        else:
+            return os.path.join(self.config_base_path, path)
+
+    def get_test_config(self):
+        cfg_path = os.path.abspath(self.config_path)
+        with open(cfg_path, 'r') as fd:
+            xmlstr = fd.read()
+            fd.close()
+            config = xmlobject.loads(xmlstr)
+            return config
+
+    def get_scenario_config(self):
+        config = self.get_test_config()
+
+        scenario_config_template_path = config.get('scenarioConfigTemplate')
+        if scenario_config_template_path:
+            scenario_config_template_path = self._full_path(scenario_config_template_path)
+            if not os.path.exists(scenario_config_template_path):
+                raise TestError('unable to find %s' % scenario_config_template_path)
+            self.scenario_config_template_path = scenario_config_template_path
+        else:
+            raise TestError('not define test scenario config xml file by <scenarioConfigTemplate> in: %s' % self.config_path)
+    
+        scenario_config_path = self._full_path(config.scenarioConfig.text_)
+        if not os.path.exists(scenario_config_path):
+            raise TestError('unable to find %s' % scenario_config_path)
+    
+        if scenario_config_template_path:
+            scenario_config = build_deploy_xmlobject_from_configure(scenario_config_path, scenario_config_template_path)
+            scenario_config.put_attr('scenarioConfigTemplatePath', scenario_config_template_path)
+        else:
+            scenario_config = build_deploy_xmlobject_from_configure(scenario_config_path)
+
+        scenario_config.put_attr('scenarioConfigPath', scenario_config_path)
+        return scenario_config
+
+    def expose_config_variable(self):
+        if self.scenario_config_template_path:
+            set_env_var_from_config_template(self.scenario_config_template_path)
+
 class DataOption(object):
     def __init__(self):
         self.session_uuid = None
@@ -368,6 +421,7 @@ class BackupStorageOption(DataOption):
     def __init__(self):
         self.type = None
         self.url = None
+        self.importImages = None
         super(BackupStorageOption, self).__init__()
 
     def set_type(self, type):
@@ -382,7 +436,13 @@ class BackupStorageOption(DataOption):
     def get_url(self):
         return self.url
 
-class CephBackupStorageOption(PrimaryStorageOption):
+    def set_import_images(self, import_images):
+        self.importImages = import_images
+
+    def get_import_images(self):
+        return self.importImages
+
+class CephBackupStorageOption(BackupStorageOption):
     def __init__(self):
         self.monUrls = None
         self.dataVolumePoolName = None
@@ -415,7 +475,7 @@ class CephBackupStorageOption(PrimaryStorageOption):
     def get_rootVolumePoolName(self):
         return self.rootVolumePoolName
 
-class SftpBackupStorageOption(PrimaryStorageOption):
+class SftpBackupStorageOption(BackupStorageOption):
     def __init__(self):
         self.username = None
         self.hostname = None
@@ -695,6 +755,7 @@ class VolumeOption(DataOption):
         self.url = None #used when add volume from url.
         self.volume_type = None #used when add volume from url
         self.backup_storage_uuid_list = [] #used when add volume from url
+        self.system_tags = None
         super(VolumeOption, self).__init__()
 
     def set_disk_offering_uuid(self, disk_offering_uuid):
@@ -720,6 +781,13 @@ class VolumeOption(DataOption):
 
     def get_volume_type(self):
         return self.volume_type
+
+    def set_system_tags(self, system_tags):
+        self.system_tags = system_tags
+
+    def get_system_tags(self):
+        return self.system_tags
+
 
 class ImageOption(DataOption):
     def __init__(self):

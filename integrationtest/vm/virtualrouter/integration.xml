@@ -2,7 +2,12 @@
     <suite name="virtual router test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
         <case timeout='800' repeat='1' noparallel='True'>host/test_reconnect_host.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_imagecache_cleanup.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_add_image_progress2.py</case>
+        <case timeout='600' repeat='1'>test_ip_spoofing.py</case>
+        <case timeout='600' repeat='1'>test_update_vm_cpu_memory.py</case>
+        <case timeout='600' repeat='1'>test_update_vm_cpu_memory2.py</case>
         <case timeout='1200' repeat='1'>account/test_vm_ops_by_normal_account.py</case>
+        <case timeout='2400' repeat='1'>test_create_vm_install_iso.py</case>
         <case timeout='800' repeat='1'>novlan/test_create_vm.py</case>
         <case timeout='800' repeat='1'>novlan/test_create_vm_on_specified_ps.py</case>
         <case timeout='800' repeat='1'>novlan/test_stop_vm_force.py</case>
@@ -42,6 +47,10 @@
         <case timeout='700' repeat='1'>volume/test_volume_ops_on_stopped_vm.py</case>
         <case timeout='600' repeat='1'>volume/test_volume_set_wwn.py</case>
         <case timeout='700' repeat='1'>volume/test_crt_vm_from_dvt.py</case>
+	<case timeout='700' repeat='1'>volume/test_crt_vm_2_virtio_scsi_volumes.py</case>
+	<case timeout='700' repeat='1'>volume/test_crt_vm_3_virtio_scsi_volumes.py</case>
+	<case timeout='700' repeat='1'>volume/test_crt_vm_24_virtio_scsi_volumes.py</case>
+        <case timeout='700' repeat='1' noparallel='True'>volume/test_create_large_vm_2_local_ps.py</case>
         <case timeout='800' repeat='1'>template_image/test_crt_temp_image.py</case>
         <case timeout='700' repeat='1'>template_image/test_del_temp_image.py</case>
         <case timeout='1200' repeat='1'>sg/test_ingress.py</case>
@@ -68,8 +77,10 @@
         <case timeout='800'  repeat='1'>pf/test_udp.py</case>
         <case timeout='800'  repeat='1'>pf/test_vm_ops.py</case>
         <case timeout='800'  repeat='1'>eip/test_2_eips.py</case>
+        <case timeout='800'  repeat='1'>eip/test_2l3s_eips.py</case>
         <case timeout='800'  repeat='1'>eip/test_attach_eip.py</case>
         <case timeout='800'  repeat='1'>eip/test_create_eip_vm.py</case>
+	<case timeout='800'  repeat='1'>eip/test_create_eip_vm2.py</case>
         <case timeout='800'  repeat='1'>eip/test_del_vip_before_add_eip_to_vm.py</case>
         <case timeout='1000'  repeat='1' noparallel='True'>eip/test_eip_sg_tcp.py</case>
         <case timeout='800'  repeat='1'>eip/test_vm_ops.py</case>
@@ -130,5 +141,41 @@
         <case timeout='400'  repeat='1'>windows/test_windows_vm_multi_data_volumes.py</case>
         <case timeout='9000' repeat='1' noparallel='True'>snapshot/test_change_max_sp_depth_live_vm.py</case>
         <case timeout='1000' repeat='1' noparallel='True'>vr/test_delete_vr_offering_reboot_vm.py</case>
+        <case timeout='400' repeat='1' noparallel='True'>delete/test_delete_l3.py</case>
+        <case timeout='1200' repeat='1'>ps/test_disable_ps_attach_iso.py</case>
+        <case timeout='1200' repeat='1'>ps/test_disable_ps_attach_remove_nic.py</case>
+        <case timeout='1200' repeat='1'>ps/test_disable_ps_attach_vol.py</case>
+        <case timeout='1200' repeat='1'>ps/test_disable_ps_crt_share_vol.py</case>
+        <case timeout='1200' repeat='1'>ps/test_disable_ps_crt_vol.py</case>
+        <case timeout='1200' repeat='1'>ps/test_disable_ps_del_attached_share_vol.py</case>
+        <case timeout='1200' repeat='1'>ps/test_disable_ps_del_attached_vol.py</case>
+        <case timeout='1200' repeat='1'>ps/test_disable_ps_del_snapshot.py</case>
+        <case timeout='1200' repeat='1'>ps/test_disable_ps_del_vm.py</case>
+        <case timeout='1200' repeat='1'>ps/test_disable_ps_del_vol.py</case>
+        <case timeout='1200' repeat='1'>ps/test_disable_ps_detach_iso.py</case>
+        <case timeout='1200' repeat='1'>ps/test_disable_ps_detach_share_vol.py</case>
+        <case timeout='1200' repeat='1'>ps/test_disable_ps_detach_vol.py</case>
+        <case timeout='1200' repeat='1'>ps/test_disable_ps_expunge_attached_share_vol.py</case>
+        <case timeout='1200' repeat='1'>ps/test_disable_ps_expunge_attached_vol.py</case>
+        <case timeout='1200' repeat='1'>ps/test_disable_ps_expunge_vm.py</case>
+        <case timeout='1200' repeat='1'>ps/test_disable_ps_expunge_vol.py</case>
+        <case timeout='1200' repeat='1'>ps/test_disable_ps_recover_share_vol.py</case>
+        <case timeout='1200' repeat='1'>ps/test_disable_ps_recover_vol.py</case>
+        <case timeout='1200' repeat='1'>ps/test_disable_ps_suspend_resume_vm.py</case>
+        <case timeout='1200' repeat='1'>ps/test_disable_ps_suspend_vm.py</case>
+        <case timeout='1200' repeat='1'>ps/test_disable_ps_use_snapshot.py</case>
+        <case timeout='1200' repeat='1'>ps/test_maintain_ps_attach_iso.py</case>
+        <case timeout='1200' repeat='1'>ps/test_maintain_ps_crt_share_vol.py</case>
+        <case timeout='1200' repeat='1'>ps/test_maintain_ps_crt_vol.py</case>
+        <case timeout='1200' repeat='1'>ps/test_maintain_ps_del_attached_share_vol.py</case>
+        <case timeout='1200' repeat='1'>ps/test_maintain_ps_del_attached_vol.py</case>
+        <case timeout='1200' repeat='1'>ps/test_maintain_ps_del_vm.py</case>
+        <case timeout='1200' repeat='1'>ps/test_maintain_ps_del_vol.py</case>
+        <case timeout='1200' repeat='1'>ps/test_maintain_ps_detach_iso.py</case>
+        <case timeout='1200' repeat='1'>ps/test_maintain_ps_detach_share_vol.py</case>
+        <case timeout='1200' repeat='1'>ps/test_maintain_ps_detach_vol.py</case>
+        <case timeout='1200' repeat='1'>ps/test_maintain_ps.py</case>
+        <case timeout='1200' repeat='1'>ps/test_maintain_ps_recover_share_vol.py</case>
+        <case timeout='1200' repeat='1'>ps/test_maintain_ps_recover_vol.py</case>
     </suite>
 </integrationTest>
