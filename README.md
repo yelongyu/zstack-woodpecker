@@ -23,11 +23,13 @@ The automated testing framework for project ZStack http://zstack.org
  * `cd /home/zstack/zstack`  
  * `mvn -DskipTests clean install` (The 1st time build will be a little bitter slow, since it need to download a lot of java libs)  
 
+
 #4. Use woodpecker to build zstack all in one package
  * `cd /home/zstack/zstack-woodpecker/dailytest`  
  * `./zstest.py -b`  
 
 #5. Create local test configuration environment files
+
  * `cd /home/zstack/zstack-woodpecker/tools/`  
  * `sh copy_test_config_to_local.sh` (it will copy all woodpecker test env configuration files to USER_HOME/.zstackwoodpecker/)  
  * so all local testing configuration (like network, image template url, primary storage nfs root) could be modified locally. It will keep config files uncontaminated in zstack-woodpecker repository
