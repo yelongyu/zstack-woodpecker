@@ -84,10 +84,12 @@ def get_backup_storage_from_scenario_file(backupStorageRefName, scenarioConfig, 
                             if s_vm.name_ == vm.name_:
                                 if vm.backupStorageRef.type_ == 'ceph':
                                     nic_id = get_ceph_storages_mon_nic_id(vm.backupStorageRef.text_, scenarioConfig)
-            	                    ip_list.append(s_vm.ips.ip[nic_id].ip_)
+                                    if nic_id == None:
+                                        ip_list.append(s_vm.ip_)
+                                    else:
+            	                        ip_list.append(s_vm.ips.ip[nic_id].ip_)
                                 else:
                                     ip_list.append(s_vm.ip_)
-                                break
     return ip_list
 
 #Add Backup Storage
@@ -344,7 +346,14 @@ def get_primary_storage_from_scenario_file(primaryStorageRefName, scenarioConfig
                         scenario_file = xmlobject.loads(xmlstr)
                         for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
                             if s_vm.name_ == vm.name_:
-                                ip_list.append(s_vm.ip_)
+                                if vm.backupStorageRef.type_ == 'ceph':
+                                    nic_id = get_ceph_storages_mon_nic_id(vm.backupStorageRef.text_, scenarioConfig)
+                                    if nic_id == None:
+                                        ip_list.append(s_vm.ip_)
+                                    else:
+            	                        ip_list.append(s_vm.ips.ip[nic_id].ip_)
+                                else:
+                                    ip_list.append(s_vm.ip_)
     return ip_list
 
 #Add Primary Storage
