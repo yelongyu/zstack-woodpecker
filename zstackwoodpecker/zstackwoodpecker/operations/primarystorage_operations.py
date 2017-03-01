@@ -100,3 +100,14 @@ def cleanup_imagecache_on_primary_storage(primary_storage_uuid, session_uuid=Non
             % (primary_storage_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
+
+def reconnect_primary_storage(primary_storage_uuid, session_uuid=None):
+    '''
+    Reconnect primary storage
+    '''
+    action = api_actions.ReconnectPrimaryStorageAction()
+    action.uuid = primary_storage_uuid
+    action.timeout = 6000000
+    test_util.action_logger('Reconnect Primary Storage [uuid:] %s' % primary_storage_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
