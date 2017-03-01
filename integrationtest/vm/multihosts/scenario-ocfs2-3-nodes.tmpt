@@ -15,4 +15,4 @@ imageUuid2 = 123456
 imageUsername = root
 imagePassword = password
 vmL3Uuid = 123456
-cephStorageOfferingUuid = 123456
+#cephStorageOfferingUuid = 123456
