@@ -545,7 +545,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
     xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
     open(scenario_file, 'w+').write(xml_string)
     setup_ceph_storages(scenario_config, scenario_file, deploy_config)
-    #setup_fusionstor_storages(scenario_config, scenario_file, deploy_config)
+    setup_fusionstor_storages(scenario_config, scenario_file, deploy_config)
     setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config)
 
 def destroy_scenario(scenario_config, scenario_file):
