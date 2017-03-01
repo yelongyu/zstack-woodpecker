@@ -284,7 +284,6 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
 
 def setup_fusionstor_storages(scenario_config, scenario_file, deploy_config):
     fusionstors = dict()
-    fusionstorPkg = os.environ['fusionstorPkg']
     for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
         for vm in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
             vm_name = vm.name_
@@ -312,6 +311,11 @@ def setup_fusionstor_storages(scenario_config, scenario_file, deploy_config):
                                     fusionstor_storages[backupStorageRef.text_].append(vm_name)
                             else:
                                 fusionstor_storages[backupStorageRef.text_] = [ vm_name ]
+    if len(fusionstor_storages) > 0:
+        fusionstorPkg = os.environ['fusionstorPkg']
+    else:
+        return
+
     for fusionstor_storage in fusionstor_storages:
         test_util.test_logger('setup fusionstor [%s] service.' % (fusionstor_storage))
         node1_name = fusionstor_storages[fusionstor_storage][0]
@@ -541,7 +545,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
     xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
     open(scenario_file, 'w+').write(xml_string)
     setup_ceph_storages(scenario_config, scenario_file, deploy_config)
-    setup_fusionstor_storages(scenario_config, scenario_file, deploy_config)
+    #setup_fusionstor_storages(scenario_config, scenario_file, deploy_config)
     setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config)
 
 def destroy_scenario(scenario_config, scenario_file):
