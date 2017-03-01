@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-ocfs2-3-nodes.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-ocfs2-3-nodes.tmpt</scenarioConfigTemplate>
+</testConfig>

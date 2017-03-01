@@ -1,0 +1,4 @@
+import ./deploy.tmpt
+
+sharedMountPointPrimaryStorageName = sharedMountPoint-ps
+sharedMountPointPrimaryStorageUrl = /home/smp-ps
