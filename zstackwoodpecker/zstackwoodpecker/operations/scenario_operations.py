@@ -313,7 +313,7 @@ def setup_fusionstor_storages(scenario_config, scenario_file, deploy_config):
                             else:
                                 fusionstor_storages[backupStorageRef.text_] = [ vm_name ]
     for fusionstor_storage in fusionstor_storages:
-        test_util.test_logger('setup fusionstor [%s] service.') % (fusionstor_storage))
+        test_util.test_logger('setup fusionstor [%s] service.' % (fusionstor_storage))
         node1_name = fusionstor_storages[fusionstor_storage][0]
         node1_config = get_scenario_config_vm(node1_name, scenario_config)
         node1_ip = get_scenario_file_vm(node1_name, scenario_file).ip_
