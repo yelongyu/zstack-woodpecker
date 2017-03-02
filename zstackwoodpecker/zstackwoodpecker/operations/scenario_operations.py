@@ -457,29 +457,6 @@ def create_volume_from_offering(http_server_ip, volume_option, session_uuid=None
     test_util.test_logger('[volume:] %s is created.' % evt.inventory.uuid)
     return evt.inventory
 
-def create_shareable_volume_from_offering(http_server_ip, volume_option, session_uuid=None):
-    action = api_actions.CreateDataVolumeAction()
-    action.diskOfferingUuid = volume_option.get_disk_offering_uuid()
-    action.description = volume_option.get_description()
-    action.systemTags = volume_option.set_system_tags(['ephemeral::shareable', 'capability::virtio-scsi'])
-    timeout = volume_option.get_timeout()
-    if not timeout:
-        action.timeout = 240000
-    else:
-        action.timeout = timeout
-
-    name = volume_option.get_name()
-    if not name:
-        action.name = 'test_volume'
-    else:
-        action.name = name
-
-    test_util.action_logger('Create [Volume:] %s with [disk offering:] %s ' % (action.name, action.diskOfferingUuid))
-    evt = execute_action_with_session(http_server_ip, action, session_uuid)
-
-    test_util.test_logger('[volume:] %s is created.' % evt.inventory.uuid)
-    return evt.inventory
-
 def attach_volume(http_server_ip, volume_uuid, vm_uuid, session_uuid=None):
     action = api_actions.AttachDataVolumeToVmAction()
     action.vmInstanceUuid = vm_uuid
@@ -570,7 +547,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                         if ocfs2smp_shareable_volume_is_created == False and hasattr(ps_ref, 'disk_offering_uuid_'):
                             ocfs2smp_disk_offering_uuid = ps_ref.disk_offering_uuid_
                             volume_option.set_disk_offering_uuid(ocfs2smp_disk_offering_uuid)
-                            share_volume_inv = create_shareable_volume_from_offering(zstack_management_ip, volume_option)
+                            volume_option.set_system_tags(['ephemeral::shareable', 'capability::virtio-scsi'])
+                            share_volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
                             ocfs2smp_shareable_volume_is_created = True
                         attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
                 
