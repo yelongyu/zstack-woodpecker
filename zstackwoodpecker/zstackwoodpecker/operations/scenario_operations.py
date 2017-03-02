@@ -291,7 +291,7 @@ def setup_fusionstor_storages(scenario_config, scenario_file, deploy_config):
             if hasattr(vm, 'backupStorageRef'):
                for backupStorageRef in xmlobject.safe_list(vm.backupStorageRef):
                    print backupStorageRef.text_
-                   if backupStorageRef.type == 'fusionstor':
+                   if backupStorageRef.type_ == 'fusionstor':
                        if fusionstor_storages.has_key(backupStorageRef.text_):
                            if vm_name in fusionstor_storages[backupStorageRef.text_]:
                                continue
@@ -303,7 +303,7 @@ def setup_fusionstor_storages(scenario_config, scenario_file, deploy_config):
                 for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
                     print primaryStorageRef.text_
                     for zone in xmlobject.safe_list(deploy_config.zones.zone):
-                        if primaryStorageRef.type == 'fusionstor':
+                        if primaryStorageRef.type_ == 'fusionstor':
                             if fusionstor_storages.has_key(backupStorageRef.text_):
                                 if vm_name in fusionstor_storages[backupStorageRef.text_]:
                                     continue
