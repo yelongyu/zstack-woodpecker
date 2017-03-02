@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-ocfs2smp-ps.xml</deployConfig>
+    <deployConfigTemplate>deploy-ocfs2smp-ps.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
