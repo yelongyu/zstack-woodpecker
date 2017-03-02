@@ -285,7 +285,7 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
 def setup_fusionstor_storages(scenario_config, scenario_file, deploy_config):
     fusionstors = dict()
     for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
-        for vm in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
             vm_name = vm.name_
 
             if hasattr(vm, 'backupStorageRef'):
