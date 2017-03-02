@@ -476,7 +476,7 @@ def detach_volume(http_server_ip, volume_uuid, vm_uuid=None, session_uuid=None):
     return evt.inventory
 
 def deploy_scenario(scenario_config, scenario_file, deploy_config):
-    ocfs2smp_shareable_volume_is_created = false
+    ocfs2smp_shareable_volume_is_created = False
     zstack_management_ip = scenario_config.basicConfig.zstackManagementIp.text_
     root_xml = etree.Element("deployerConfig")
     vms_xml = etree.SubElement(root_xml, 'vms')
@@ -544,11 +544,11 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 setup_primarystorage_vm(vm_inv, vm, deploy_config)
                 for ps_ref in xmlobject.safe_list(vm.primaryStorageRef):
                     if ps_ref.type_ == 'ocfs2smp':
-                        if ocfs2smp_shareable_volume_is_created == false and hasattr(ps_ref, 'disk_offering_uuid_'):
+                        if ocfs2smp_shareable_volume_is_created == False and hasattr(ps_ref, 'disk_offering_uuid_'):
                             ocfs2smp_disk_offering_uuid = ps_ref.disk_offering_uuid_
                             volume_option.set_disk_offering_uuid(ocfs2smp_disk_offering_uuid)
                             share_volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
-                            ocfs2smp_shareable_volume_is_created = true
+                            ocfs2smp_shareable_volume_is_created = True
                         attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
                         
                 
