@@ -476,6 +476,7 @@ def detach_volume(http_server_ip, volume_uuid, vm_uuid=None, session_uuid=None):
     return evt.inventory
 
 def deploy_scenario(scenario_config, scenario_file, deploy_config):
+    ocfs2smp_shareable_volume_is_created = false
     zstack_management_ip = scenario_config.basicConfig.zstackManagementIp.text_
     root_xml = etree.Element("deployerConfig")
     vms_xml = etree.SubElement(root_xml, 'vms')
@@ -541,6 +542,16 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 setup_backupstorage_vm(vm_inv, vm, deploy_config)
             if xmlobject.has_element(vm, 'primaryStorageRef'):
                 setup_primarystorage_vm(vm_inv, vm, deploy_config)
+                for ps_ref in xmlobject.safe_list(vm.primaryStorageRef):
+                    if ps_ref.type_ == 'ocfs2smp':
+                        if ocfs2smp_shareable_volume_is_created == false and hasattr(ps_ref, 'disk_offering_uuid_'):
+                            ocfs2smp_disk_offering_uuid = ps_ref.disk_offering_uuid_
+                            volume_option.set_disk_offering_uuid(ocfs2smp_disk_offering_uuid)
+                            share_volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
+                            ocfs2smp_shareable_volume_is_created = true
+                        attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
+                        
+                
     xml_string = etree.tostring(root_xml, 'utf-8')
     xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
     open(scenario_file, 'w+').write(xml_string)
