@@ -80,9 +80,4 @@ def test():
 #Will be called only if exception happens in test().
 def error_cleanup():
     os.system('rm -rf -%s' % tmp_file)
-    test_lib.lib_error_clean_up(test_obj_dict)
-
-
-
-
-
+    test_lib.lib_error_cleanup(test_obj_dict)
