@@ -14,6 +14,7 @@ import zstackwoodpecker.operations.config_operations as config_operations
 
 import zstackwoodpecker.test_lib as test_lib
 
+USER_PATH = os.path.expanduser('~')
 EXTRA_SUITE_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_suite_setup_config.sh' % USER_PATH
 
 def test():
