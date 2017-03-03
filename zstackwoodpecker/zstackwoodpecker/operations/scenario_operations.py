@@ -283,7 +283,7 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
         ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
 
 def setup_fusionstor_storages(scenario_config, scenario_file, deploy_config):
-    fusionstors = dict()
+    fusionstor_storages = dict()
     for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
         for vm in xmlobject.safe_list(host.vms.vm):
             vm_name = vm.name_
@@ -556,8 +556,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
     xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
     open(scenario_file, 'w+').write(xml_string)
     setup_ceph_storages(scenario_config, scenario_file, deploy_config)
-    setup_fusionstor_storages(scenario_config, scenario_file, deploy_config)
     setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config)
+    setup_fusionstor_storages(scenario_config, scenario_file, deploy_config)
 
 def destroy_scenario(scenario_config, scenario_file):
     with open(scenario_file, 'r') as fd:
