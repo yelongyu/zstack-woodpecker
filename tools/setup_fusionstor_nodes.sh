@@ -34,7 +34,7 @@ gen_ssh_keys(){
 yum --disablerepo=* --enablerepo=zstack-local -y install  ntp expect>/dev/null 2>&1
 yum --disablerepo=* --enablerepo=zstack-local install -y iptables-services >/dev/null 2>&1
 #HOST_IP=`ip addr show eth0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'`
-wget -c $FUSIONSTOR_BIN_URL
+cp $FUSIONSTOR_BIN_URL .
 
 echo " ${IP[0]} fusionstor-1 ">>/etc/hosts
 if [ "${FUSIONSTOR_ONE_NODE}" != "yes" ]; then
@@ -130,10 +130,10 @@ if [ "${FUSIONSTOR_ONE_NODE}" != "yes" ];then
     scp /opt/fusionstack/etc/lich.conf fusionstor-3:/opt/fusionstack/etc/lich.conf
 fi
 
-scp  host-tmp fusionstor-1:/opt/fusionstack/etc/hosts.conf
+scp  /etc/hosts fusionstor-1:/opt/fusionstack/etc/hosts.conf
 if [ "${FUSIONSTOR_ONE_NODE}" != "yes" ];then
-    scp  host-tmp fusionstor-2:/opt/fusionstack/etc/hosts.conf
-    scp  host-tmp fusionstor-3:/opt/fusionstack/etc/hosts.conf
+    scp  /etc/hosts fusionstor-2:/opt/fusionstack/etc/hosts.conf
+    scp  /etc/hosts fusionstor-3:/opt/fusionstack/etc/hosts.conf
 fi
 
 ssh fusionstor-1 "/opt/fusionstack/lich/bin/lich prep ${IP[0]}"
