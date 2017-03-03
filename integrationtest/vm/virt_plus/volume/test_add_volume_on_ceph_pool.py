@@ -18,7 +18,7 @@ def test():
     cond = res_ops.gen_query_conditions('type', '=', inventory.CEPH_PRIMARY_STORAGE_TYPE)
     ps = res_ops.query_resource_with_num(res_ops.PRIMARY_STORAGE, cond, limit = 1)
     if not ps:
-            test_util.test_skip('skip test that ceph ps not found.' )
+        test_util.test_skip('skip test that ceph ps not found.' )
     ps = ps[0]
 
     vm = test_stub.create_vlan_vm()
@@ -41,6 +41,8 @@ def test():
     vm.check()
     volume.attach(vm)
     volume.check()
+    if volume.get_volume().installPath.find('woodpecker'):
+        test_util.test_fail('data volume is expected to create on pool woodpecker, while its %s.' % (volume.get_volume().installPath))
 
     test_util.test_dsc('Detach volume and check')
     volume.detach()
