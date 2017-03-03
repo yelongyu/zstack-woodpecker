@@ -41,7 +41,7 @@ def test():
     vm.check()
     volume.attach(vm)
     volume.check()
-    if volume.get_volume().installPath.find('woodpecker'):
+    if volume.get_volume().installPath.find('woodpecker') < 0:
         test_util.test_fail('data volume is expected to create on pool woodpecker, while its %s.' % (volume.get_volume().installPath))
 
     test_util.test_dsc('Detach volume and check')

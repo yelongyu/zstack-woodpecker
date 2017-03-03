@@ -54,7 +54,7 @@ def create_ceph_primary_storage_pool(primary_storage_uuid, pool_name, session_uu
     action.poolName = pool_name
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create Primary Storage [uuid:] %s Pool [uuid:] %s [name:] %s' % \
-            (action.primaryStorageUuid, evt.inventory.uuid, action.name))
+            (action.primaryStorageUuid, evt.inventory.uuid, action.poolName))
     return evt.inventory
 
 
