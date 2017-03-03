@@ -230,6 +230,28 @@ def get_ceph_storages_nic_id(ceph_name, scenario_config):
                 nic_id += 1
     return None
 
+def get_fusionstor_storages_nic_id(fusionstor_name, scenario_config):
+    for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            nic_id = 0
+            for l3network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                if hasattr(l3network, 'backupStorageRef') and not hasattr(l3network.backupStorageRef, 'monIp_') and l3network.backupStorageRef.text_ == fusionstor_name:
+                    return nic_id
+                if hasattr(l3network, 'primaryStorageRef') and not hasattr(l3network.primaryStorageRef, 'monIp_') and l3network.primaryStorageRef.text_ == fusionstor_name:
+                    return nic_id
+                nic_id += 1
+
+    for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            nic_id = 0
+            for l3network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                if hasattr(l3network, 'backupStorageRef') and l3network.backupStorageRef.text_ == fusionstor_name:
+                    return nic_id
+                if hasattr(l3network, 'primaryStorageRef') and l3network.primaryStorageRef.text_ == fusionstor_name:
+                    return nic_id
+                nic_id += 1
+    return None
+
 def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
     ceph_storages = dict()
     for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
@@ -312,8 +334,10 @@ def setup_fusionstor_storages(scenario_config, scenario_file, deploy_config):
                             else:
                                 fusionstor_storages[backupStorageRef.text_] = [ vm_name ]
     if len(fusionstor_storages) > 0:
+        test_util.test_logger('get fusionstor pkg')
         fusionstorPkg = os.environ['fusionstorPkg']
     else:
+        test_util.test_logger('no fusionstor pkg return here')
         return
 
     for fusionstor_storage in fusionstor_storages:
@@ -321,7 +345,7 @@ def setup_fusionstor_storages(scenario_config, scenario_file, deploy_config):
         node1_name = fusionstor_storages[fusionstor_storage][0]
         node1_config = get_scenario_config_vm(node1_name, scenario_config)
         node1_ip = get_scenario_file_vm(node1_name, scenario_file).ip_
-        node_host = get_deploy_host(node_config.hostRef.text_, deploy_config)
+        node_host = get_deploy_host(node1_config.hostRef.text_, deploy_config)
         if not hasattr(node_host, 'port_') or node_host.port_ == '22':
             node_host.port_ = '22'
         vm_ips = ''
@@ -334,7 +358,9 @@ def setup_fusionstor_storages(scenario_config, scenario_file, deploy_config):
                 vm_ips += vm.ips.ip[vm_nic_id].ip_ + ' '
 
         ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_fusionstor_nodes.sh'), '/tmp/setup_fusionstor_nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host.port_))
+        ssh.scp_file(fusionstorPkg, fusionstorPkg, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host.port_))
         cmd = "bash -ex /tmp/setup_fusionstor_nodes.sh %s %s" % ((fusionstorPkg), (vm_ips))
+        ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
 
 def setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config):
     ocfs2smp_pss = dict()
