@@ -342,8 +342,8 @@ def setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_confi
         for vm in xmlobject.safe_list(host.vms.vm):
             vm_name = vm.name_
             if hasattr(vm, 'primaryStorageRef') and vm.primaryStorageRef.type_ == 'ocfs2smp':
-                if ocfs2smp_pss.has_key(primaryStorageRef.text_):
-                    ocfs2smp_pss[primaryStorageRef.text_].append(vm_name)
+                if ocfs2smp_pss.has_key(vm.primaryStorageRef.text_):
+                    ocfs2smp_pss[vm.primaryStorageRef.text_].append(vm_name)
 
     for ocfs2smp_ps_key in ocfs2smp_pss:
         test_util.test_logger('setup ocfs2 smp: %s.' % (ocfs2smp_ps_key))
