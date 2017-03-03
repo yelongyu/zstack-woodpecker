@@ -363,17 +363,18 @@ def setup_fusionstor_storages(scenario_config, scenario_file, deploy_config):
         ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
 
 def setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config):
-    ocfs2smp_pss = dict()
+    ocfs2smp_pss = []
+    vm_names = []
     for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
         for vm in xmlobject.safe_list(host.vms.vm):
             vm_name = vm.name_
             if hasattr(vm, 'primaryStorageRef') and vm.primaryStorageRef.type_ == 'ocfs2smp':
-                if ocfs2smp_pss.has_key(vm.primaryStorageRef.text_):
-                    ocfs2smp_pss[vm.primaryStorageRef.text_].append(vm_name)
+                ocfs2smp_pss.append(vm.primaryStorageRef.text_)
+                vm_names.append(vm_name)
 
-    for ocfs2smp_ps_key in ocfs2smp_pss:
-        test_util.test_logger('setup ocfs2 smp: %s.' % (ocfs2smp_ps_key))
-	node1_name = ocfs2smp_pss[ocfs2smp_ps_key][0]
+    for ocfs2_ps in ocfs2smp_pss:
+        test_util.test_logger('setup ocfs2 smp: %s.' % (ocfs2_ps))
+	node1_name = vm_names[0]
 	node1_config = get_scenario_config_vm(node1_name, scenario_config)
 	node1_ip = get_scenario_file_vm(node1_name, scenario_file).ip_
         node_host = get_deploy_host(node1_config.hostRef.text_, deploy_config)
@@ -381,9 +382,9 @@ def setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_confi
             node_host.port_ = '22'
 
         vm_ips = ''
-        for ocfs_node in ocfs2smp_pss[ocfs2smp_ps_key]:
-            vm_nic_id = get_ceph_storages_nic_id(ocfs2smp_ps_key, scenario_config)
-            vm = get_scenario_file_vm(ocfs_node, scenario_file)
+        for vm_name in vm_names:
+            vm_nic_id = get_ceph_storages_nic_id(ocfs2_ps, scenario_config)
+            vm = get_scenario_file_vm(vm_name, scenario_file)
             if vm_nic_id == None:
                 vm_ips += vm.ip_ + ' '
             else:
