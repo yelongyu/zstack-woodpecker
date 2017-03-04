@@ -22,6 +22,7 @@
             </l3Network>
           </l3Networks>
           <hostRef>$hostName</hostRef>
+          <mnHostRef>$hostName</mnHostRef>
 	  <backupStorageRef type="ceph" offering_uuid="$cephStorageOfferingUuid">$cephBackupStorageName</backupStorageRef>
 	  <primaryStorageRef type="ceph">$cephPrimaryStorageName</primaryStorageRef>
         </vm>
@@ -36,6 +37,7 @@
             </l3Network>
           </l3Networks>
           <hostRef>$hostName2</hostRef>
+          <mnHostRef>$hostName2</mnHostRef>
 	  <backupStorageRef type="ceph" offering_uuid="$cephStorageOfferingUuid">$cephBackupStorageName</backupStorageRef>
 	  <primaryStorageRef type="ceph">$cephPrimaryStorageName</primaryStorageRef>
         </vm>
@@ -50,6 +52,7 @@
             </l3Network>
           </l3Networks>
           <hostRef>$hostName3</hostRef>
+          <mnHostRef>$hostName3</mnHostRef>
 	  <backupStorageRef type="ceph" offering_uuid="$cephStorageOfferingUuid">$cephBackupStorageName</backupStorageRef>
 	  <primaryStorageRef type="ceph">$cephPrimaryStorageName</primaryStorageRef>
         </vm>

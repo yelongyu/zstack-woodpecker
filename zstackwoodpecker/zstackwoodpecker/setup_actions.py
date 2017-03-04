@@ -490,6 +490,11 @@ default one' % self.zstack_properties)
                 ip = dpy_ops.get_node_from_scenario_file(node.name_, self.scenario_config, self.scenario_file, self.config)
                 if ip != None:
                     node.ip_ = ip
+                else:
+                    if self.zstack_ha_vip != None:
+                        node.ip_ = self.zstack.ha_vip
+                    else:
+                        print("node [%s] does not have IP" % node.name_)
                 node.ip_
                 self.nodes.append(node)
                 if linux.is_ip_existing(node.ip_):

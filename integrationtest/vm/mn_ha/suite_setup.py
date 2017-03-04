@@ -17,6 +17,10 @@ import zstackwoodpecker.test_util as test_util
 USER_PATH = os.path.expanduser('~')
 EXTRA_SUITE_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_suite_setup_config.sh' % USER_PATH
 EXTRA_HOST_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_host_setup_config.sh' % USER_PATH
+CONFIG_JSON = '%s/.zstackwoodpecker/config.json' % USER_PATH
+HA_DEPLOY_TOOL = '%s/.zstackwoodpecker/ZStack-HA-Installer' % USER_PATH
+MN_IMG = '%s/.zstackwoodpecker/mn_vm.qcow2' % USER_PATH
+
 def test():
     if test_lib.scenario_config == None or test_lib.scenario_file ==None:
         test_util.test_fail('Suite Setup Fail without scenario')
@@ -48,7 +52,7 @@ def test():
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd)
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd2)
 
-    test_lib.setup_plan.execute_plan_without_deploy_test_agent()
+    test_stub.deploy_ha_env(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config,CONFIG_JSON, HA_DEPLOY_TOOL, MN_IMG)
     if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
 
@@ -60,5 +64,6 @@ def test():
         test_lib.lib_set_ha_selffencer_maxattempts('60')
 	test_lib.lib_set_ha_selffencer_storagechecker_timeout('60')
     test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
+    test_lib.lib_set_reserved_memory('6G')
     test_util.test_pass('Suite Setup Success')
 
