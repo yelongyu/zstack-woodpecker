@@ -32,17 +32,42 @@ gen_ssh_keys(){
 auto_o2cb_init_cfg () {
 
     expect -c "set timeout -1;
-                spawn ssh root@${1} 'o2cb.init configure';
-                expect {
-                    *(y/n) [y]:* {send -- y\r;exp_continue;}
-                    *[o2cb]:* {send -- \r;exp_continue;}
-                    *[ocfs2]:* {send -- zstackstorage\r;exp_continue;}
-                    *(>=7) [31]:* {send -- 121\r;exp_continue;}
-                    *(>=5000) [30000]:* {send -- 30000\r;exp_continue;}
-                    *(>=1000) [2000]:* {send -- 5000\r;exp_continue;}
-                    *(>=2000) [2000]:* {send -- 4000\r;exp_continue;}
-                    eof        {exit 0;}
-                }";
+                spawn ssh -l root ${1} o2cb.init configure
+                expect *(y/n)*
+                send y\r
+                expect *\[o2cb\]*
+                send \r 
+                expect *\[ocfs2\]*
+                send  zstackstorage\r
+                expect *(>=7)*
+                send 121\r
+                expect *(>=5000)*
+                send 30000\r
+                expect *(>=1000)*
+                send 5000\r
+                expect *(>=2000)*
+                send 4000\r
+                expect eof
+              "
+}
+
+wait_for_machine_boot_up() {
+    count=0
+    while true
+    do
+        ssh $1 pwd
+        if [ $? -eq 0 ]; then
+            break
+        else
+            if (( count > 180 )); then
+               echo "ERR: wait 180s but machine still not alive"
+               exit 1
+            fi
+        fi
+        sleep 1
+        let count++ 
+        echo "already wait for ${count} sec."
+    done
 }
 
 #yum --disablerepo=* --enablerepo=zstack-local install -y iptables-services >/dev/null 2>&1
@@ -113,6 +138,7 @@ fi
 #    ssh ocfs2-host3 "sed -i s'/SELINUX=enforcing/SELINUX=disabled'/g /etc/sysconfig/selinux"
 #fi
 
+set +e
 ssh ${IP[0]} "yum -y --disablerepo=* --enablerepo=zstack-local,uek4-ocfs2 update"
 ssh ${IP[0]} "yum -y --disablerepo=* --enablerepo=zstack-local,uek4-ocfs2 \
 install kernel-uek kernel-uek-devel kernel-uek-doc kernel-uek-firmware \
@@ -120,10 +146,34 @@ dtrace-modules ocfs2-tools ocfs2-tools-devel iscsi-initiator-utils \
 device-mapper-multipath device-mapper-multipath-sysvinit
 "
 ssh ${IP[0]} 'grub2-set-default "CentOS Linux (4.1.12-37.2.2.el7uek.x86_64) 7 (Core)"'
-set +e
-ssh ${IP[0]} 'reboot'
-echo "wait 120s for reboot to switch kernel"
-sleep 120
+ssh ${IP[0]} reboot &
+
+if [ "${OCFS2_ONE_NODE}" != "yes" ]; then
+    ssh ${IP[1]} "yum -y --disablerepo=* --enablerepo=zstack-local,uek4-ocfs2 update"
+    ssh ${IP[1]} "yum -y --disablerepo=* --enablerepo=zstack-local,uek4-ocfs2 \
+    install kernel-uek kernel-uek-devel kernel-uek-doc kernel-uek-firmware \
+    dtrace-modules ocfs2-tools ocfs2-tools-devel iscsi-initiator-utils \
+    device-mapper-multipath device-mapper-multipath-sysvinit
+    "
+    ssh ${IP[1]} 'grub2-set-default "CentOS Linux (4.1.12-37.2.2.el7uek.x86_64) 7 (Core)"'
+    ssh ${IP[1]} reboot &
+    
+    ssh ${IP[2]} "yum -y --disablerepo=* --enablerepo=zstack-local,uek4-ocfs2 update"
+    ssh ${IP[2]} "yum -y --disablerepo=* --enablerepo=zstack-local,uek4-ocfs2 \
+    install kernel-uek kernel-uek-devel kernel-uek-doc kernel-uek-firmware \
+    dtrace-modules ocfs2-tools ocfs2-tools-devel iscsi-initiator-utils \
+    device-mapper-multipath device-mapper-multipath-sysvinit
+    "
+    ssh ${IP[2]} 'grub2-set-default "CentOS Linux (4.1.12-37.2.2.el7uek.x86_64) 7 (Core)"'
+    ssh ${IP[2]} reboot &
+fi
+
+echo "wait for reboot to switch kernel"
+wait_for_machine_boot_up ${IP[0]}
+if [ "${OCFS2_ONE_NODE}" != "yes" ]; then
+    wait_for_machine_boot_up ${IP[1]}
+    wait_for_machine_boot_up ${IP[2]}
+fi
 
 set -e
 ssh ${IP[0]} 'uname -a|grep el7uek' || exit 1
@@ -138,6 +188,7 @@ ssh ${IP[0]} 'mkdir -p /dlm'
 ssh ${IP[1]} 'mkdir -p /dlm'
 ssh ${IP[2]} 'mkdir -p /dlm'
 
+ssh ${IP[0]} 'rm -rf /etc/ocfs2/cluster.conf'
 ssh ${IP[0]} 'o2cb add-cluster zstackstorage'
 ssh ${IP[0]} "o2cb add-node zstackstorage ocfs2-host1 --ip ${IP[0]}"
 ssh ${IP[0]} "o2cb add-node zstackstorage ocfs2-host2 --ip ${IP[1]}"
@@ -179,7 +230,7 @@ ssh ${IP[2]} "systemctl enable o2cb.service"
 ssh ${IP[2]} "systemctl enable ocfs2.service"
 ssh ${IP[2]} "o2cb.init online"
 
-ssh ${IP[0]} "mkfs.ocfs2 --cluster-stack=o2cb -C 256K -J size=128M -N 16 -L ocfs2-disk1 --cluster-name=zstackstorage --fs-feature-level=default -T vmstore /dev/sda mkfs.ocfs2 1.8.6"
+ssh ${IP[0]} "mkfs.ocfs2 --cluster-stack=o2cb -C 256K -J size=128M -N 16 -L ocfs2-disk1 --cluster-name=zstackstorage --fs-feature-level=default -T vmstore /dev/sda"
 ssh ${IP[0]} "mkdir -p /opt/smp/disk1/"
 ssh ${IP[0]} "mount.ocfs2 /dev/sda /opt/smp/disk1/"
 
