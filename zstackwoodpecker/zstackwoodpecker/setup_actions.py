@@ -492,7 +492,7 @@ default one' % self.zstack_properties)
                     node.ip_ = ip
                 else:
                     if self.zstack_ha_vip != None:
-                        node.ip_ = self.zstack.ha_vip
+                        node.ip_ = self.zstack_ha_vip
                     else:
                         print("node [%s] does not have IP" % node.name_)
                 node.ip_
