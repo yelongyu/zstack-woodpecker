@@ -117,7 +117,7 @@ globals {
     solomode   on;
     hsm    on;
     networks {
-        10.0.0.1/8;
+        172.20.0.1/16;
     }
 }
 chunk {
@@ -136,11 +136,16 @@ if [ "${FUSIONSTOR_ONE_NODE}" != "yes" ];then
     scp  /etc/hosts fusionstor-3:/opt/fusionstack/etc/hosts.conf
 fi
 
-ssh fusionstor-1 "/opt/fusionstack/lich/bin/lich prep ${IP[0]}"
-ssh fusionstor-1 "/opt/fusionstack/lich/bin/lich create ${IP[0]}"
 if [ "${FUSIONSTOR_ONE_NODE}" != "yes" ];then
-    ssh fusionstor-1 "/opt/fusionstack/lich/bin/lich prep ${IP[0]} ${IP[1]} ${IP[2]}"
+    ssh fusionstor-1 "echo \"\n\" | /opt/fusionstack/lich/bin/lich prep ${IP[0]} ${IP[1]} ${IP[2]}"
     ssh fusionstor-1 "/opt/fusionstack/lich/bin/lich create ${IP[0]} ${IP[1]} ${IP[2]}"
+else
+    ssh fusionstor-1 "echo \"\n\" | /opt/fusionstack/lich/bin/lich prep ${IP[0]}"
+    ssh fusionstor-1 "/opt/fusionstack/lich/bin/lich create ${IP[0]}"
 fi
 
+
 ssh fusionstor-1 "lich stat"
+if [ $? -ne 0 ];then
+    exit 1
+fi
