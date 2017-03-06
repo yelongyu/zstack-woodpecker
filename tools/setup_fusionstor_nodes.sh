@@ -145,6 +145,12 @@ else
 fi
 
 
+ssh fusionstor-1 "lich list;lich.node --disk_list;lich.node --disk_add /dev/vdb /dev/vdc /dev/vdd --force"
+if [ "${FUSIONSTOR_ONE_NODE}" != "yes" ];then
+    ssh fusionstor-2 "lich list;lich.node --disk_list;lich.node --disk_add /dev/vdb /dev/vdc /dev/vdd --force"
+    ssh fusionstor-3 "lich list;lich.node --disk_list;lich.node --disk_add /dev/vdb /dev/vdc /dev/vdd --force"
+fi
+
 ssh fusionstor-1 "lich stat"
 if [ $? -ne 0 ];then
     exit 1
