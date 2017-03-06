@@ -230,13 +230,18 @@ ssh ${IP[2]} "systemctl enable o2cb.service"
 ssh ${IP[2]} "systemctl enable ocfs2.service"
 ssh ${IP[2]} "o2cb.init online"
 
+if [ -n "$SMP_URL" ]; then
+    OCFS2_MNT_POINT=$SMP_URL
+else
+    OCFS2_MNT_POINT="/opt/smp/disk1/"
+fi
 ssh ${IP[0]} "mkfs.ocfs2 --cluster-stack=o2cb -C 256K -J size=128M -N 16 -L ocfs2-disk1 --cluster-name=zstackstorage --fs-feature-level=default -T vmstore /dev/sda"
-ssh ${IP[0]} "mkdir -p /opt/smp/disk1/"
-ssh ${IP[0]} "mount.ocfs2 /dev/sda /opt/smp/disk1/"
+ssh ${IP[0]} "mkdir -p ${OCFS2_MNT_POINT}"
+ssh ${IP[0]} "mount.ocfs2 /dev/sda ${OCFS2_MNT_POINT}"
 
-ssh ${IP[1]} "mkdir -p /opt/smp/disk1/"
-ssh ${IP[1]} "mount.ocfs2 /dev/sda /opt/smp/disk1/"
+ssh ${IP[1]} "mkdir -p ${OCFS2_MNT_POINT}"
+ssh ${IP[1]} "mount.ocfs2 /dev/sda ${OCFS2_MNT_POINT}"
 
-ssh ${IP[2]} "mkdir -p /opt/smp/disk1/"
-ssh ${IP[2]} "mount.ocfs2 /dev/sda /opt/smp/disk1/"
+ssh ${IP[2]} "mkdir -p ${OCFS2_MNT_POINT}"
+ssh ${IP[2]} "mount.ocfs2 /dev/sda ${OCFS2_MNT_POINT}"
 

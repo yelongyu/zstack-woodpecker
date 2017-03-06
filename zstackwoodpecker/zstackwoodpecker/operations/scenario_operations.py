@@ -365,6 +365,7 @@ def setup_fusionstor_storages(scenario_config, scenario_file, deploy_config):
 
 def setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config):
     ocfs2_storages = dict()
+    smp_url = None
     for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
         for vm in xmlobject.safe_list(host.vms.vm):
             vm_name = vm.name_
@@ -379,6 +380,8 @@ def setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_confi
                                     ocfs2_storages[primaryStorageRef.text_].append(vm_name)
                             else:
                                 ocfs2_storages[primaryStorageRef.text_] = [ vm_name ]
+                                if hasattr(primaryStorageRef, 'url_'):
+                                    smp_url = primaryStorageRef.url_
 
     for ocfs2_storage in ocfs2_storages:
         test_util.test_logger('setup ceph [%s] service.' % (ocfs2_storage))
@@ -399,7 +402,11 @@ def setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_confi
                 vm_ips += vm.ips.ip[vm_nic_id].ip_ + ' '
         #ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ocfs2.sh'), '/tmp/setup_ocfs2.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host.port_))
         woodpecker_ip = socket.gethostbyname(socket.gethostname())
-        cmd = "bash %s/%s %s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ocfs2.sh', vm_ips)
+        if smp_url:
+            cmd = "SMP_URL=%s bash %s/%s %s" % (smp_url, os.environ.get('woodpecker_root_path'), '/tools/setup_ocfs2.sh', vm_ips)
+        else:
+            cmd = "bash %s/%s %s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ocfs2.sh', vm_ips)
+           
         ssh.execute(cmd, woodpecker_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
 
 
