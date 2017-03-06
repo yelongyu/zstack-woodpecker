@@ -212,8 +212,14 @@ ssh ${IP[0]} "echo 'kernel.panic_on_oops = 1' >>/etc/sysctl.conf"
 ssh ${IP[0]} "sysctl -p"
 
 ssh ${IP[1]} "mkdir -p /etc/ocfs2/"
-ssh ${IP[0]} "scp /etc/ocfs2/cluster.conf ocfs2-host2:/etc/ocfs2/"
-ssh ${IP[0]} "scp /etc/sysconfig/o2cb ocfs2-host2:/etc/sysconfig/"
+
+#ssh ${IP[0]} "scp /etc/ocfs2/cluster.conf ocfs2-host2:/etc/ocfs2/"
+scp ${IP[0]}:/etc/ocfs2/cluster.conf /tmp/cluster.conf
+scp /tmp/cluster.conf ocfs2-host2:/etc/ocfs2/
+#ssh ${IP[0]} "scp /etc/sysconfig/o2cb ocfs2-host2:/etc/sysconfig/"
+scp ${IP[0]}:/etc/sysconfig/o2cb /tmp/o2cb
+scp /tmp/o2cb ocfs2-host2:/etc/sysconfig/
+
 ssh ${IP[1]} "systemctl start o2cb.service"
 ssh ${IP[1]} "o2cb.init status"
 
@@ -221,8 +227,10 @@ ssh ${IP[1]} "systemctl enable o2cb.service"
 ssh ${IP[1]} "systemctl enable ocfs2.service"
 ssh ${IP[1]} "o2cb.init online"
 ssh ${IP[2]} "mkdir -p /etc/ocfs2/"
-ssh ${IP[0]} "scp /etc/ocfs2/cluster.conf ocfs2-host3:/etc/ocfs2/"
-ssh ${IP[0]} "scp /etc/sysconfig/o2cb ocfs2-host3:/etc/sysconfig/"
+#ssh ${IP[0]} "scp /etc/ocfs2/cluster.conf ocfs2-host3:/etc/ocfs2/"
+scp /tmp/cluster.conf ocfs2-host3:/etc/ocfs2/
+#ssh ${IP[0]} "scp /etc/sysconfig/o2cb ocfs2-host3:/etc/sysconfig/"
+scp /tmp/o2cb ocfs2-host3:/etc/sysconfig/
 ssh ${IP[1]} "o2cb.init start"
 ssh ${IP[2]} "o2cb.init status"
 
