@@ -17,9 +17,6 @@ import zstackwoodpecker.test_util as test_util
 USER_PATH = os.path.expanduser('~')
 EXTRA_SUITE_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_suite_setup_config.sh' % USER_PATH
 EXTRA_HOST_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_host_setup_config.sh' % USER_PATH
-CONFIG_JSON = '%s/.zstackwoodpecker/config.json' % USER_PATH
-HA_DEPLOY_TOOL = '%s/.zstackwoodpecker/ZStack-HA-Installer' % USER_PATH
-MN_IMG = '%s/.zstackwoodpecker/mn_vm.qcow2' % USER_PATH
 
 def test():
     if test_lib.scenario_config == None or test_lib.scenario_file ==None:
@@ -52,7 +49,10 @@ def test():
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd)
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd2)
 
-    test_stub.deploy_ha_env(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config,CONFIG_JSON, HA_DEPLOY_TOOL, MN_IMG)
+    config_json = os.environ.get('configJson')
+    ha_deploy_tool = os.environ.get('zstackHaInstaller')
+    mn_img = os.environ.get('mnImage')
+    test_stub.deploy_ha_env(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config,config_json, ha_deploy_tool, mn_img)
     if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
 
