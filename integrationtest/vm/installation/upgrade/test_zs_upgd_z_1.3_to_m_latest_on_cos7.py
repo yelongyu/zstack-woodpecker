@@ -17,7 +17,6 @@ test_obj_dict = test_state.TestStateDict()
 tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
 
 node_ip = os.environ.get('node1Ip')
-update_file = "/home/%s/zstack-woodpecker/integrationtest/vm/installation/update_iso.sh" % node_ip
 
 def test():
     if os.path.exists('/home/zstack-package/') != True:
@@ -25,6 +24,8 @@ def test():
 
     test_util.test_dsc('Create test vm to test zstack upgrade by -u.')
     image_name = os.environ.get('imageName_i_c7_z_1.3')
+    update_file = "/home/%s/zstack-woodpecker/integrationtest/vm/installation/mevoco_update_iso.sh" % node_ip
+
     vm = test_stub.create_vlan_vm(image_name)
     test_obj_dict.add_vm(vm)
     if os.environ.get('zstackManagementIp') == None:
@@ -41,19 +42,20 @@ def test():
     test_stub.copy_id_dsa(vm_inv, ssh_cmd, tmp_file)
     test_stub.copy_id_dsa_pub(vm_inv)
 
-    test_stub.update_iso(ssh_cmd, tmp_file, vm_inv, update_file)
-
     test_util.test_dsc('Update MN IP')
     cmd = '%s "zstack-ctl change_ip --ip="%s ' % (ssh_cmd, vm_ip)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
-#    cmd = '%s "zstack-ctl start"' % ssh_cmd
-#    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
-#    test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
+    cmd = '%s "zstack-ctl start"' % ssh_cmd
+    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+    test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
 
     test_util.test_dsc('Upgrade zstack to latest mevoco') 
+    test_stub.update_iso(ssh_cmd, tmp_file, vm_inv, update_file)
     upgrade_target_file = '/root/mevoco-upgrade-all-in-one.tgz' 
     test_stub.prepare_test_env(vm_inv, upgrade_target_file)
     test_stub.upgrade_zstack(ssh_cmd, upgrade_target_file, tmp_file) 
+    cmd = '%s "zstack-ctl start"' % ssh_cmd
+    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     zstack_latest_version = os.environ.get('zstackLatestVersion')
     test_stub.check_zstack_version(ssh_cmd, tmp_file, vm_inv, zstack_latest_version)
     test_stub.check_zstack_or_mevoco(ssh_cmd, tmp_file, vm_inv, 'mevoco')
@@ -61,6 +63,7 @@ def test():
 
     os.system('rm -f %s' % tmp_file)
     vm.destroy()
+    test_obj_dict.rm_vm(vm)
     test_util.test_pass('ZStack upgrade Test Success')
 
 #Will be called only if exception happens in test().
