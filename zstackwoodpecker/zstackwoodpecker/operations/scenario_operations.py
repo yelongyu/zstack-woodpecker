@@ -17,6 +17,7 @@ import xml.dom.minidom as minidom
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstacklib.utils.ssh as ssh
+import socket
 
 def sync_call(http_server_ip, apicmd, session_uuid):
     api_instance = api.Api(host = http_server_ip, port = '8080')
@@ -383,7 +384,7 @@ def setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_confi
         test_util.test_logger('setup ceph [%s] service.' % (ocfs2_storage))
         node1_name = ocfs2_storages[ocfs2_storage][0]
         node1_config = get_scenario_config_vm(node1_name, scenario_config)
-        node1_ip = get_scenario_file_vm(node1_name, scenario_file).ip_
+        #node1_ip = get_scenario_file_vm(node1_name, scenario_file).ip_
         node_host = get_deploy_host(node1_config.hostRef.text_, deploy_config)
         if not hasattr(node_host, 'port_') or node_host.port_ == '22':
             node_host.port_ = '22'
@@ -396,9 +397,10 @@ def setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_confi
                 vm_ips += vm.ip_ + ' '
             else:
                 vm_ips += vm.ips.ip[vm_nic_id].ip_ + ' '
-        ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ocfs2.sh'), '/tmp/setup_ocfs2.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host.port_))
-        cmd = "bash /tmp/setup_ocfs2.sh %s" % (vm_ips)
-        ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
+        #ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ocfs2.sh'), '/tmp/setup_ocfs2.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host.port_))
+        woodpecker_ip = socket.gethostbyname(socket.gethostname())
+        cmd = "bash %s/%s %s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ocfs2.sh', vm_ips)
+        ssh.execute(cmd, woodpecker_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
 
 
 def create_vm(http_server_ip, vm_create_option):
