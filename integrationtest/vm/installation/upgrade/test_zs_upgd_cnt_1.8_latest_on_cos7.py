@@ -22,10 +22,10 @@ def test():
     test_util.test_dsc('Create test vm to test zstack upgrade by -u.')
 
     if os.path.exists('/home/installation-package/zstack'):
-        image_name = os.environ.get('imageName_i_c7_z_1.7')
+        image_name = os.environ.get('imageName_i_c7_z_1.8')
         update_file = "/home/%s/zstack-woodpecker/integrationtest/vm/installation/zstack_update_iso.sh" % node_ip
     elif os.path.exists('/home/installation-package/mevoco'):
-        image_name = os.environ.get('imageName_i_c7_m_1.7')
+        image_name = os.environ.get('imageName_i_c7_m_1.8')
         update_file = "/home/%s/zstack-woodpecker/integrationtest/vm/installation/mevoco_update_iso.sh" % node_ip
 
 #    vm = test_stub.create_vlan_vm(image_name)
