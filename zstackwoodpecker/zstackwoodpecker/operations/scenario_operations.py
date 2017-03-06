@@ -17,7 +17,6 @@ import xml.dom.minidom as minidom
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstacklib.utils.ssh as ssh
-import socket
 
 def sync_call(http_server_ip, apicmd, session_uuid):
     api_instance = api.Api(host = http_server_ip, port = '8080')
@@ -384,7 +383,7 @@ def setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_confi
                                     smp_url = primaryStorageRef.url_
 
     for ocfs2_storage in ocfs2_storages:
-        test_util.test_logger('setup ceph [%s] service.' % (ocfs2_storage))
+        test_util.test_logger('setup ocfs2 [%s] service.' % (ocfs2_storage))
         node1_name = ocfs2_storages[ocfs2_storage][0]
         node1_config = get_scenario_config_vm(node1_name, scenario_config)
         #node1_ip = get_scenario_file_vm(node1_name, scenario_file).ip_
@@ -401,6 +400,7 @@ def setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_confi
             else:
                 vm_ips += vm.ips.ip[vm_nic_id].ip_ + ' '
         #ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ocfs2.sh'), '/tmp/setup_ocfs2.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host.port_))
+        import socket
         woodpecker_ip = socket.gethostbyname(socket.gethostname())
         if smp_url:
             cmd = "SMP_URL=%s bash %s/%s %s" % (smp_url, os.environ.get('woodpecker_root_path'), '/tools/setup_ocfs2.sh', vm_ips)
