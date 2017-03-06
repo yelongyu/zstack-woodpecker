@@ -591,7 +591,7 @@ default one' % self.zstack_properties)
 
     def _change_node_ip(self):
         for node in self.nodes:
-            cmd = 'zstack-ctl change_ip --ip=%s' % (node.ip_)
+            cmd = 'zstack-ctl change_ip --ip=%s --mysql_root_password=%s' % (node.ip_, os.environ.get('DBAdminPassword'))
             if not linux.is_ip_existing(node.ip_):
                 ssh.execute(cmd, node.ip_, node.username_, node.password_)
             else:
