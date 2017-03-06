@@ -400,8 +400,8 @@ def setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_confi
             else:
                 vm_ips += vm.ips.ip[vm_nic_id].ip_ + ' '
         #ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ocfs2.sh'), '/tmp/setup_ocfs2.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host.port_))
-        import socket
-        woodpecker_ip = socket.gethostbyname(socket.gethostname())
+        import commands
+        status, woodpecker_ip = commands.getstatusoutput("ip addr show eth0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'")
         if smp_url:
             cmd = "SMP_URL=%s bash %s/%s %s" % (smp_url, os.environ.get('woodpecker_root_path'), '/tools/setup_ocfs2.sh', vm_ips)
         else:
