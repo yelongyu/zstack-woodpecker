@@ -168,7 +168,7 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
 
     if xmlobject.has_element(deployConfig, 'backupStorages.fusionstorBackupStorage'):
         for bs in xmlobject.safe_list(deployConfig.backupStorages.fusionstorBackupStorage):
-            action = api_actions.AddFusionstorBackupStorage()
+            action = api_actions.AddFusionstorBackupStorageAction()
             action.sessionUuid = session_uuid
             action.name = bs.name_
             action.description = bs.description__
@@ -494,7 +494,7 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 if ps_name and ps_name != pr.name_:
                     continue
 
-                action = api_actions.AddFusionstorPrimaryStorage()
+                action = api_actions.AddFusionstorPrimaryStorageAction()
                 action.sessionUuid = session_uuid
                 action.name = pr.name_
                 action.description = pr.description__
