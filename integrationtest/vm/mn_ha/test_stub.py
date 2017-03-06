@@ -64,7 +64,7 @@ def get_host_by_mn_vm(vm_uuid, scenarioConfig, scenarioFile):
 def get_mn_host(scenarioConfig, scenarioFile):
     mn_host_list = []
 
-    if scenarioConfig == None or scenarioFile = None or not os.path.exists(scenarioFile):
+    if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
         return mn_host_list
 
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
@@ -99,7 +99,7 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
 def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, deploy_tool, mn_img):
     prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json)
     os.system("bash %s -- -I %s" % (deploy_tool, config_json))
-    os.system('bash %s -- -i -a -p %s -c %s' %s (deploy_tool, 'password', config_json))
+    os.system('bash %s -- -i -a -p %s -c %s' % (deploy_tool, 'password', config_json))
 
 def shutdown_host_network(host_vm, scenarioConfig):
     l2network_nic = os.environ.get('l2ManagementNetworkInterface')
@@ -123,7 +123,8 @@ def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
     vm_creation_option.set_system_tags(system_tags)
     vm_creation_option.set_session_uuid(session_uuid)
     vm = test_vm_header.ZstackTestVm()
-    vm.set_creation_option(vm_creation_option)                                       vm.create()
+    vm.set_creation_option(vm_creation_option)
+    vm.create()
     return vm
 
 def create_basic_vm(disk_offering_uuids=None, session_uuid = None):
