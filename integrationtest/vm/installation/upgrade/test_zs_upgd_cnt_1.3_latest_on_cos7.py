@@ -29,7 +29,7 @@ def test():
         update_file = "/home/%s/zstack-woodpecker/integrationtest/vm/installation/mevoco_update_iso.sh" % node_ip
 
 #    vm = test_stub.create_vlan_vm(image_name)
-    vm = test_stub.create_instance_vm(image_name, instanceOfferingUuid);
+    vm = test_stub.create_instance_vm(image_name, os.environ.get('instanceOfferingUuid'));
     test_obj_dict.add_vm(vm)
     if os.environ.get('zstackManagementIp') == None:
         vm.check()
