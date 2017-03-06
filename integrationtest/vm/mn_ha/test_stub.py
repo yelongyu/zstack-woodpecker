@@ -85,11 +85,16 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
         return False
     l2network_name = os.environ.get('l2PublicNetworkName')
     nic_name = sce_ops.get_ref_l2_nic_name(l2network_name, deploy_config)
+    mn_ip = os.environ.get('zstackHaVip')
+    mn_netmask = os.environ.get('nodeNetMask')
+    mn_gateway = os.environ.get('nodeGateway')
     for i in range(len(mn_host_list)):
         os.system('sed -i s/host-%d/%s/g %s' % (i+1, mn_host_list[i].ip_,config_json))
 
     os.system('sed -i s/nic/%s/g %s' % (nic_name,config_json))
-    os.system('sed -i s/mn_ip/%s/g %s' % (os.environ.get('zstackHaVip',config_json))
+    os.system('sed -i s/mn_ip/%s/g %s' % (mn_ip,config_json))
+    os.system('sed -i s/mn_netmask/%s/g %s' % (mn_netmask,config_json))
+    os.system('sed -i s/mn_gateway/%s/g %s' % (mn_gateway,config_json))
 
 def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, deploy_tool, mn_img):
     prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json)
