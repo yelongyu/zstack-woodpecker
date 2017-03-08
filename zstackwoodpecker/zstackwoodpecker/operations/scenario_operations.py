@@ -153,6 +153,14 @@ def setup_host_vm(vm_inv, vm_config, deploy_config):
         cmd = "echo '%s        ALL=(ALL)       NOPASSWD: ALL' >> /etc/sudoers" % (host.username_)
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host.port_))
 
+def setup_mn_host_vm(vm_inv, vm_config):
+    vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
+    vm_nic = os.environ.get('nodeNic')
+    vm_netmask = os.environ.get('nodeNetMask')
+    vm_gateway = os.environ.get('nodeGateway')
+    cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (vm_nic, vm_ip, vm_netmask, vm_gateway)
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+
 def setup_backupstorage_vm(vm_inv, vm_config, deploy_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
     host = get_deploy_host(vm_config.hostRef.text_, deploy_config)
@@ -561,6 +569,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
             if xmlobject.has_element(vm, 'hostRef'):
                 setup_host_vm(vm_inv, vm, deploy_config)
                 vm_xml.set('managementIp', vm_ip)
+            if xmlobject.has_element(vm, 'mnHostRef'):
+                setup_mn_host_vm(inv, vm)
             if xmlobject.has_element(vm, 'backupStorageRef'):
                 volume_option = test_util.VolumeOption()
                 volume_option.set_name(os.environ.get('volumeName'))
