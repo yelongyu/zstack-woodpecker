@@ -153,6 +153,18 @@ def setup_host_vm(vm_inv, vm_config, deploy_config):
         cmd = "echo '%s        ALL=(ALL)       NOPASSWD: ALL' >> /etc/sudoers" % (host.username_)
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host.port_))
 
+def recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config):
+    vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
+    for l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
+        if hasattr(l3network, 'l2NetworkRef'):
+            for l2networkref in xmlobject.safe_list(l3network.l2NetworkRef):
+                nic_name = get_ref_l2_nic_name(l2networkref.text_, deploy_config)
+                if nic_name.find('.') >= 0:
+                    vlan = nic_name.split('.')[1]
+                    test_util.test_logger('[vm:] %s %s is created.' % (vm_ip, nic_name))
+                    cmd = 'vconfig add %s %s' % (nic_name.split('.')[0], vlan)
+                    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+
 def setup_mn_host_vm(vm_inv, vm_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
     vm_nic = os.environ.get('nodeNic')
@@ -370,7 +382,7 @@ def setup_fusionstor_storages(scenario_config, scenario_file, deploy_config):
         cmd = "bash -ex /tmp/setup_fusionstor_nodes.sh %s %s" % ((fusionstorPkg), (vm_ips))
         ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
 
-def setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config):
+def setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst):
     ocfs2_storages = dict()
     smp_url = None
     for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
@@ -416,6 +428,10 @@ def setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_confi
             cmd = "bash %s/%s %s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ocfs2.sh', vm_ips)
            
         ssh.execute(cmd, woodpecker_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
+
+    for vm_inv in vm_inv_lst:
+        for vm_config in vm_cfg_lst:
+            recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
 
 
 def create_vm(http_server_ip, vm_create_option):
@@ -528,6 +544,8 @@ def detach_volume(http_server_ip, volume_uuid, vm_uuid=None, session_uuid=None):
     return evt.inventory
 
 def deploy_scenario(scenario_config, scenario_file, deploy_config):
+    vm_inv_lst = []
+    vm_cfg_lst = []
     ocfs2smp_shareable_volume_is_created = False
     zstack_management_ip = scenario_config.basicConfig.zstackManagementIp.text_
     root_xml = etree.Element("deployerConfig")
@@ -568,6 +586,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 setup_node_vm(vm_inv, vm, deploy_config)
             if xmlobject.has_element(vm, 'hostRef'):
                 setup_host_vm(vm_inv, vm, deploy_config)
+                vm_inv_lst.append(vm_inv)
+                vm_cfg_lst.append(vm)
                 vm_xml.set('managementIp', vm_ip)
             if xmlobject.has_element(vm, 'mnHostRef'):
                 setup_mn_host_vm(vm_inv, vm)
@@ -610,7 +630,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
     xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
     open(scenario_file, 'w+').write(xml_string)
     setup_ceph_storages(scenario_config, scenario_file, deploy_config)
-    setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config)
+    setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst)
     setup_fusionstor_storages(scenario_config, scenario_file, deploy_config)
 
 def destroy_scenario(scenario_config, scenario_file):
