@@ -163,7 +163,10 @@ def recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config):
                     vlan = nic_name.split('.')[1]
                     test_util.test_logger('[vm:] %s %s is created.' % (vm_ip, nic_name))
                     cmd = 'vconfig add %s %s' % (nic_name.split('.')[0], vlan)
-                    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+                    try:
+                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+                    except:
+                        pass
 
 def setup_mn_host_vm(vm_inv, vm_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
