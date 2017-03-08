@@ -205,7 +205,7 @@ ssh ${IP[0]} 'o2cb add-cluster zstackstorage'
 ssh ${IP[0]} "o2cb add-node zstackstorage ocfs2-host1 --ip ${IP[0]}"
 ssh ${IP[0]} "o2cb add-node zstackstorage ocfs2-host2 --ip ${IP[1]}"
 ssh ${IP[0]} "o2cb add-node zstackstorage ocfs2-host3 --ip ${IP[2]}"
-ssh ${IP[0]} "o2cb add-node zstackstorage ocfs2-host3 --ip ${IP[3]}"
+ssh ${IP[0]} "o2cb add-node zstackstorage ocfs2-host4 --ip ${IP[3]}"
 
 ssh ${IP[0]} "o2cb heartbeat-mode zstackstorage local"
 
