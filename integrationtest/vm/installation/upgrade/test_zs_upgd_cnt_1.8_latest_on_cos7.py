@@ -55,7 +55,7 @@ def test():
 
     test_stub.update_iso(ssh_cmd, tmp_file, vm_inv, update_file)
 
-    pkg_num = 1.8
+    pkg_num = 1.9
     curren_num = float(os.environ.get('releasePkgNum'))
     while pkg_num<=curren_num:
         test_util.test_dsc('Upgrade zstack to %s' % pkg_num)
@@ -63,6 +63,8 @@ def test():
         upgrade_pkg = os.environ.get('zstackPkg_%s' % pkg_num)
         test_stub.prepare_upgrade_test_env(vm_inv, upgrade_target_file, upgrade_pkg)
         test_stub.upgrade_zstack(ssh_cmd, upgrade_target_file, tmp_file)
+        cmd = '%s "zstack-ctl start"' % ssh_cmd
+        test_stub.execute_shell_in_process(cmd,tmp_file)        
         test_stub.check_zstack_version(ssh_cmd, tmp_file, vm_inv, str(pkg_num))
         test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
         pkg_num = pkg_num + 0.1

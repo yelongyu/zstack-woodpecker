@@ -62,6 +62,8 @@ def test():
         upgrade_pkg = os.environ.get('zstackPkg_%s' % pkg_num)
         test_stub.prepare_upgrade_test_env(vm_inv, upgrade_target_file, upgrade_pkg)
         test_stub.upgrade_zstack(ssh_cmd, upgrade_target_file, tmp_file)
+        cmd = '%s "zstack-ctl start"' % ssh_cmd
+        test_stub.execute_shell_in_process(cmd,tmp_file)
         test_stub.check_zstack_version(ssh_cmd, tmp_file, vm_inv, str(pkg_num))
         test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
         pkg_num = pkg_num + 0.1
