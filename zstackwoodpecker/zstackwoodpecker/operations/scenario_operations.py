@@ -570,7 +570,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 setup_host_vm(vm_inv, vm, deploy_config)
                 vm_xml.set('managementIp', vm_ip)
             if xmlobject.has_element(vm, 'mnHostRef'):
-                setup_mn_host_vm(inv, vm)
+                setup_mn_host_vm(vm_inv, vm)
             if xmlobject.has_element(vm, 'backupStorageRef'):
                 volume_option = test_util.VolumeOption()
                 volume_option.set_name(os.environ.get('volumeName'))
