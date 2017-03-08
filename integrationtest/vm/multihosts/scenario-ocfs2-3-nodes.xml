@@ -49,7 +49,7 @@
             </l3Network>
           </l3Networks>
           <hostRef>$hostName3</hostRef>
-          <backupStorageRef type="sftp">$sftpBackupStorageName</backupStorageRef>
+          <backupStorageRef type="sftp">$sftpBackupStorageName2</backupStorageRef>
           <primaryStorageRef type="ocfs2smp" disk_offering_uuid="$shareVolumeDiskOfferingUuid" url="$sharedMountPointPrimaryStorageUrl">$sharedMountPointPrimaryStorageName</primaryStorageRef>
         </vm>
         <vm name="$vmName4" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
