@@ -429,8 +429,9 @@ def setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_confi
            
         ssh.execute(cmd, woodpecker_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
 
-    for vm_inv, vm_config in zip(vm_inv_lst, vm_cfg_lst):
-        recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
+    if ocfs2_storages:
+        for vm_inv, vm_config in zip(vm_inv_lst, vm_cfg_lst):
+            recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
 
 
 def create_vm(http_server_ip, vm_create_option):
