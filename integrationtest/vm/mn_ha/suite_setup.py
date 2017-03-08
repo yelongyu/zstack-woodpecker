@@ -65,6 +65,6 @@ def test():
         test_lib.lib_set_ha_selffencer_maxattempts('60')
 	test_lib.lib_set_ha_selffencer_storagechecker_timeout('60')
     test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
-    test_lib.lib_set_reserved_memory('6G')
+    test_lib.lib_set_reserved_memory('8G')
     test_util.test_pass('Suite Setup Success')
 
