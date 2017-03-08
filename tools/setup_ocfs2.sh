@@ -7,6 +7,7 @@ declare -a IP
 IP[0]=$1
 IP[1]=$2
 IP[2]=$3
+IP[3]=$4
 
 if [ "$1" == "" ]; then
     OCFS2_ONE_NODE=yes
@@ -73,32 +74,29 @@ wait_for_machine_boot_up() {
 #yum --disablerepo=* --enablerepo=zstack-local install -y iptables-services >/dev/null 2>&1
 
 echo " ${IP[0]} ocfs2-host1 ">>/etc/hosts
-if [ "${OCFS2_ONE_NODE}" != "yes" ]; then
-    echo " ${IP[1]} ocfs2-host2 ">>/etc/hosts
-    echo " ${IP[2]} ocfs2-host3 ">>/etc/hosts
-fi
+echo " ${IP[1]} ocfs2-host2 ">>/etc/hosts
+echo " ${IP[2]} ocfs2-host3 ">>/etc/hosts
+echo " ${IP[3]} ocfs2-host4 ">>/etc/hosts
+
 cat /etc/hosts | sort -u >/etc/host-tmp
 mv /etc/host-tmp /etc/hosts
 sleep 2
 
 [  -f /root/.ssh/id_rsa ] || gen_ssh_keys
 auto_ssh_copy_id password ocfs2-host1
-if [ "${OCFS2_ONE_NODE}" != "yes" ]; then
-    auto_ssh_copy_id password ocfs2-host2
-    auto_ssh_copy_id password ocfs2-host3
-fi
+auto_ssh_copy_id password ocfs2-host2
+auto_ssh_copy_id password ocfs2-host3
+auto_ssh_copy_id password ocfs2-host4
 
 scp /etc/hosts ocfs2-host1:/etc/hosts
-if [ "${OCFS2_ONE_NODE}" != "yes" ]; then
-    scp /etc/hosts ocfs2-host2:/etc/hosts
-    scp /etc/hosts ocfs2-host3:/etc/hosts
-fi
+scp /etc/hosts ocfs2-host2:/etc/hosts
+scp /etc/hosts ocfs2-host3:/etc/hosts
+scp /etc/hosts ocfs2-host4:/etc/hosts
 
 ssh  ocfs2-host1 hostnamectl set-hostname ocfs2-host1 && export HOSTNAME=ocfs2-host1
-if [ "${OCFS2_ONE_NODE}" != "yes" ]; then
-    ssh  ocfs2-host2 hostnamectl set-hostname ocfs2-host2 && export HOSTNAME=ocfs2-host2
-    ssh  ocfs2-host3 hostnamectl set-hostname ocfs2-host3 && export HOSTNAME=ocfs2-host3
-fi
+ssh  ocfs2-host2 hostnamectl set-hostname ocfs2-host2 && export HOSTNAME=ocfs2-host2
+ssh  ocfs2-host3 hostnamectl set-hostname ocfs2-host3 && export HOSTNAME=ocfs2-host3
+ssh  ocfs2-host4 hostnamectl set-hostname ocfs2-host4 && export HOSTNAME=ocfs2-host4
 
 ssh ${IP[0]} 'yum --disablerepo=* --enablerepo=zstack-local install -y iptables-services >/dev/null 2>&1'
 ssh ${IP[0]} 'test -f /etc/sysconfig/iptables && sed -i "/COMMIT$/d" /etc/sysconfig/iptables'
@@ -106,19 +104,23 @@ ssh ${IP[0]} 'echo "-A INPUT -s 172.20.0.0/16 -j ACCEPT" >>/etc/sysconfig/iptabl
 ssh ${IP[0]} 'echo "COMMIT" >>/etc/sysconfig/iptables'
 ssh ${IP[0]} 'service iptables restart'
 
-if [ "${OCFS2_ONE_NODE}" != "yes" ]; then
-    ssh ${IP[1]} 'yum --disablerepo=* --enablerepo=zstack-local install -y iptables-services >/dev/null 2>&1'
-    ssh ${IP[1]} 'test -f /etc/sysconfig/iptables && sed -i "/COMMIT$/d" /etc/sysconfig/iptables'
-    ssh ${IP[1]} 'echo "-A INPUT -s 172.20.0.0/16 -j ACCEPT" >>/etc/sysconfig/iptables'
-    ssh ${IP[1]} 'echo "COMMIT" >>/etc/sysconfig/iptables'
-    ssh ${IP[1]} 'service iptables restart'
-    
-    ssh ${IP[2]} 'yum --disablerepo=* --enablerepo=zstack-local install -y iptables-services >/dev/null 2>&1'
-    ssh ${IP[2]} 'test -f /etc/sysconfig/iptables && sed -i "/COMMIT$/d" /etc/sysconfig/iptables'
-    ssh ${IP[2]} 'echo "-A INPUT -s 172.20.0.0/16 -j ACCEPT" >>/etc/sysconfig/iptables'
-    ssh ${IP[2]} 'echo "COMMIT" >>/etc/sysconfig/iptables'
-    ssh ${IP[2]} 'service iptables restart'
-fi
+ssh ${IP[1]} 'yum --disablerepo=* --enablerepo=zstack-local install -y iptables-services >/dev/null 2>&1'
+ssh ${IP[1]} 'test -f /etc/sysconfig/iptables && sed -i "/COMMIT$/d" /etc/sysconfig/iptables'
+ssh ${IP[1]} 'echo "-A INPUT -s 172.20.0.0/16 -j ACCEPT" >>/etc/sysconfig/iptables'
+ssh ${IP[1]} 'echo "COMMIT" >>/etc/sysconfig/iptables'
+ssh ${IP[1]} 'service iptables restart'
+
+ssh ${IP[2]} 'yum --disablerepo=* --enablerepo=zstack-local install -y iptables-services >/dev/null 2>&1'
+ssh ${IP[2]} 'test -f /etc/sysconfig/iptables && sed -i "/COMMIT$/d" /etc/sysconfig/iptables'
+ssh ${IP[2]} 'echo "-A INPUT -s 172.20.0.0/16 -j ACCEPT" >>/etc/sysconfig/iptables'
+ssh ${IP[2]} 'echo "COMMIT" >>/etc/sysconfig/iptables'
+ssh ${IP[2]} 'service iptables restart'
+
+ssh ${IP[3]} 'yum --disablerepo=* --enablerepo=zstack-local install -y iptables-services >/dev/null 2>&1'
+ssh ${IP[3]} 'test -f /etc/sysconfig/iptables && sed -i "/COMMIT$/d" /etc/sysconfig/iptables'
+ssh ${IP[3]} 'echo "-A INPUT -s 172.20.0.0/16 -j ACCEPT" >>/etc/sysconfig/iptables'
+ssh ${IP[3]} 'echo "COMMIT" >>/etc/sysconfig/iptables'
+ssh ${IP[3]} 'service iptables restart'
 
 #ssh ocfs2-host1 "iptables -F && service iptables save && systemctl restart ntpd && systemctl enable ntpd.service"
 #if [ "${OCFS2_ONE_NODE}" != "yes" ]; then 
@@ -148,51 +150,62 @@ device-mapper-multipath device-mapper-multipath-sysvinit
 ssh ${IP[0]} 'grub2-set-default "CentOS Linux (4.1.12-37.2.2.el7uek.x86_64) 7 (Core)"'
 ssh ${IP[0]} reboot &
 
-if [ "${OCFS2_ONE_NODE}" != "yes" ]; then
-    ssh ${IP[1]} "yum -y --disablerepo=* --enablerepo=zstack-local,uek4-ocfs2 update"
-    ssh ${IP[1]} "yum -y --disablerepo=* --enablerepo=zstack-local,uek4-ocfs2 \
-    install kernel-uek kernel-uek-devel kernel-uek-doc kernel-uek-firmware \
-    dtrace-modules ocfs2-tools ocfs2-tools-devel iscsi-initiator-utils \
-    device-mapper-multipath device-mapper-multipath-sysvinit
-    "
-    ssh ${IP[1]} 'grub2-set-default "CentOS Linux (4.1.12-37.2.2.el7uek.x86_64) 7 (Core)"'
-    ssh ${IP[1]} reboot &
-    
-    ssh ${IP[2]} "yum -y --disablerepo=* --enablerepo=zstack-local,uek4-ocfs2 update"
-    ssh ${IP[2]} "yum -y --disablerepo=* --enablerepo=zstack-local,uek4-ocfs2 \
-    install kernel-uek kernel-uek-devel kernel-uek-doc kernel-uek-firmware \
-    dtrace-modules ocfs2-tools ocfs2-tools-devel iscsi-initiator-utils \
-    device-mapper-multipath device-mapper-multipath-sysvinit
-    "
-    ssh ${IP[2]} 'grub2-set-default "CentOS Linux (4.1.12-37.2.2.el7uek.x86_64) 7 (Core)"'
-    ssh ${IP[2]} reboot &
-fi
+ssh ${IP[1]} "yum -y --disablerepo=* --enablerepo=zstack-local,uek4-ocfs2 update"
+ssh ${IP[1]} "yum -y --disablerepo=* --enablerepo=zstack-local,uek4-ocfs2 \
+install kernel-uek kernel-uek-devel kernel-uek-doc kernel-uek-firmware \
+dtrace-modules ocfs2-tools ocfs2-tools-devel iscsi-initiator-utils \
+device-mapper-multipath device-mapper-multipath-sysvinit
+"
+ssh ${IP[1]} 'grub2-set-default "CentOS Linux (4.1.12-37.2.2.el7uek.x86_64) 7 (Core)"'
+ssh ${IP[1]} reboot &
+
+ssh ${IP[2]} "yum -y --disablerepo=* --enablerepo=zstack-local,uek4-ocfs2 update"
+ssh ${IP[2]} "yum -y --disablerepo=* --enablerepo=zstack-local,uek4-ocfs2 \
+install kernel-uek kernel-uek-devel kernel-uek-doc kernel-uek-firmware \
+dtrace-modules ocfs2-tools ocfs2-tools-devel iscsi-initiator-utils \
+device-mapper-multipath device-mapper-multipath-sysvinit
+"
+ssh ${IP[2]} 'grub2-set-default "CentOS Linux (4.1.12-37.2.2.el7uek.x86_64) 7 (Core)"'
+ssh ${IP[2]} reboot &
+
+ssh ${IP[3]} "yum -y --disablerepo=* --enablerepo=zstack-local,uek4-ocfs2 update"
+ssh ${IP[3]} "yum -y --disablerepo=* --enablerepo=zstack-local,uek4-ocfs2 \
+install kernel-uek kernel-uek-devel kernel-uek-doc kernel-uek-firmware \
+dtrace-modules ocfs2-tools ocfs2-tools-devel iscsi-initiator-utils \
+device-mapper-multipath device-mapper-multipath-sysvinit
+"
+ssh ${IP[3]} 'grub2-set-default "CentOS Linux (4.1.12-37.2.2.el7uek.x86_64) 7 (Core)"'
+ssh ${IP[3]} reboot &
 
 echo "wait for reboot to switch kernel"
 wait_for_machine_boot_up ${IP[0]}
-if [ "${OCFS2_ONE_NODE}" != "yes" ]; then
-    wait_for_machine_boot_up ${IP[1]}
-    wait_for_machine_boot_up ${IP[2]}
-fi
+wait_for_machine_boot_up ${IP[1]}
+wait_for_machine_boot_up ${IP[2]}
+wait_for_machine_boot_up ${IP[3]}
 
 set -e
 ssh ${IP[0]} 'uname -a|grep el7uek' || exit 1
+ssh ${IP[1]} 'uname -a|grep el7uek' || exit 1
+ssh ${IP[2]} 'uname -a|grep el7uek' || exit 1
+ssh ${IP[3]} 'uname -a|grep el7uek' || exit 1
+
 ssh ${IP[0]} 'modprobe dm-multipath'
 ssh ${IP[0]} 'modprobe dm-round-robin' 
 ssh ${IP[0]} 'service multipathd start'
 ssh ${IP[0]} 'mpathconf --enable'
 ssh ${IP[0]} 'multipath -ll'
-ssh ${IP[0]} 'mkdir -p /dlm'
 
 ssh ${IP[0]} 'mkdir -p /dlm'
 ssh ${IP[1]} 'mkdir -p /dlm'
 ssh ${IP[2]} 'mkdir -p /dlm'
+ssh ${IP[3]} 'mkdir -p /dlm'
 
 ssh ${IP[0]} 'rm -rf /etc/ocfs2/cluster.conf'
 ssh ${IP[0]} 'o2cb add-cluster zstackstorage'
 ssh ${IP[0]} "o2cb add-node zstackstorage ocfs2-host1 --ip ${IP[0]}"
 ssh ${IP[0]} "o2cb add-node zstackstorage ocfs2-host2 --ip ${IP[1]}"
 ssh ${IP[0]} "o2cb add-node zstackstorage ocfs2-host3 --ip ${IP[2]}"
+ssh ${IP[0]} "o2cb add-node zstackstorage ocfs2-host3 --ip ${IP[3]}"
 
 ssh ${IP[0]} "o2cb heartbeat-mode zstackstorage local"
 
@@ -211,32 +224,35 @@ ssh ${IP[0]} "echo 'kernel.panic = 30' >>/etc/sysctl.conf"
 ssh ${IP[0]} "echo 'kernel.panic_on_oops = 1' >>/etc/sysctl.conf"
 ssh ${IP[0]} "sysctl -p"
 
-ssh ${IP[1]} "mkdir -p /etc/ocfs2/"
-
-#ssh ${IP[0]} "scp /etc/ocfs2/cluster.conf ocfs2-host2:/etc/ocfs2/"
 scp ${IP[0]}:/etc/ocfs2/cluster.conf /tmp/cluster.conf
-scp /tmp/cluster.conf ocfs2-host2:/etc/ocfs2/
-#ssh ${IP[0]} "scp /etc/sysconfig/o2cb ocfs2-host2:/etc/sysconfig/"
 scp ${IP[0]}:/etc/sysconfig/o2cb /tmp/o2cb
+
+scp /tmp/cluster.conf ocfs2-host2:/etc/ocfs2/
 scp /tmp/o2cb ocfs2-host2:/etc/sysconfig/
-
-ssh ${IP[1]} "systemctl start o2cb.service"
+ssh ${IP[1]} "mkdir -p /etc/ocfs2/"
+#ssh ${IP[1]} "systemctl start o2cb.service"
 ssh ${IP[1]} "o2cb.init status"
-
 ssh ${IP[1]} "systemctl enable o2cb.service"
 ssh ${IP[1]} "systemctl enable ocfs2.service"
 ssh ${IP[1]} "o2cb.init online"
-ssh ${IP[2]} "mkdir -p /etc/ocfs2/"
-#ssh ${IP[0]} "scp /etc/ocfs2/cluster.conf ocfs2-host3:/etc/ocfs2/"
-scp /tmp/cluster.conf ocfs2-host3:/etc/ocfs2/
-#ssh ${IP[0]} "scp /etc/sysconfig/o2cb ocfs2-host3:/etc/sysconfig/"
-scp /tmp/o2cb ocfs2-host3:/etc/sysconfig/
-ssh ${IP[1]} "o2cb.init start"
-ssh ${IP[2]} "o2cb.init status"
+#ssh ${IP[1]} "o2cb.init start"
 
+scp /tmp/cluster.conf ocfs2-host3:/etc/ocfs2/
+scp /tmp/o2cb ocfs2-host3:/etc/sysconfig/
+ssh ${IP[2]} "mkdir -p /etc/ocfs2/"
+ssh ${IP[2]} "o2cb.init status"
 ssh ${IP[2]} "systemctl enable o2cb.service"
 ssh ${IP[2]} "systemctl enable ocfs2.service"
 ssh ${IP[2]} "o2cb.init online"
+
+scp /tmp/cluster.conf ocfs2-host4:/etc/ocfs2/
+scp /tmp/o2cb ocfs2-host4:/etc/sysconfig/
+ssh ${IP[3]} "mkdir -p /etc/ocfs2/"
+ssh ${IP[3]} "o2cb.init status"
+ssh ${IP[3]} "systemctl enable o2cb.service"
+ssh ${IP[3]} "systemctl enable ocfs2.service"
+ssh ${IP[3]} "o2cb.init online"
+
 
 if [ -n "$SMP_URL" ]; then
     OCFS2_MNT_POINT=$SMP_URL
@@ -253,3 +269,5 @@ ssh ${IP[1]} "mount.ocfs2 /dev/sda ${OCFS2_MNT_POINT}"
 ssh ${IP[2]} "mkdir -p ${OCFS2_MNT_POINT}"
 ssh ${IP[2]} "mount.ocfs2 /dev/sda ${OCFS2_MNT_POINT}"
 
+ssh ${IP[3]} "mkdir -p ${OCFS2_MNT_POINT}"
+ssh ${IP[3]} "mount.ocfs2 /dev/sda ${OCFS2_MNT_POINT}"

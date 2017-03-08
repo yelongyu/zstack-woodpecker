@@ -8,6 +8,7 @@ vmName1 = ocfs2_scenario1
 vmName2 = ocfs2_scenario2
 vmName3 = ocfs2_scenario3
 vmName4 = ocfs2_scenario4
+vmName5 = ocfs2_scenario5
 vmInstranceOfferingUuid = 123456
 vmInstranceOfferingUuid2 = 123456
 imageUuid = 123456
