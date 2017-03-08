@@ -33,7 +33,7 @@
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
           </l3Networks>
-          <hostRef>$hostName2</hostRef>
+          <hostRef>$hostName</hostRef>
           <backupStorageRef type="sftp">$sftpBackupStorageName</backupStorageRef>
           <primaryStorageRef type="ocfs2smp" disk_offering_uuid="$shareVolumeDiskOfferingUuid" url="$sharedMountPointPrimaryStorageUrl">$sharedMountPointPrimaryStorageName</primaryStorageRef>
         </vm>
@@ -47,7 +47,7 @@
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
           </l3Networks>
-          <hostRef>$hostName3</hostRef>
+          <hostRef>$hostName2</hostRef>
           <backupStorageRef type="sftp">$sftpBackupStorageName2</backupStorageRef>
           <primaryStorageRef type="ocfs2smp" disk_offering_uuid="$shareVolumeDiskOfferingUuid" url="$sharedMountPointPrimaryStorageUrl">$sharedMountPointPrimaryStorageName</primaryStorageRef>
         </vm>
@@ -61,7 +61,7 @@
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
           </l3Networks>
-          <hostRef>$hostName4</hostRef>
+          <hostRef>$hostName3</hostRef>
           <backupStorageRef type="sftp">$sftpBackupStorageName</backupStorageRef>
           <primaryStorageRef type="ocfs2smp" disk_offering_uuid="$shareVolumeDiskOfferingUuid" url="$sharedMountPointPrimaryStorageUrl">$sharedMountPointPrimaryStorageName</primaryStorageRef>
         </vm>
@@ -75,7 +75,7 @@
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
           </l3Networks>
-          <hostRef>$hostName5</hostRef>
+          <hostRef>$hostName4</hostRef>
           <backupStorageRef type="sftp">$sftpBackupStorageName</backupStorageRef>
           <primaryStorageRef type="ocfs2smp" disk_offering_uuid="$shareVolumeDiskOfferingUuid" url="$sharedMountPointPrimaryStorageUrl">$sharedMountPointPrimaryStorageName</primaryStorageRef>
         </vm>
