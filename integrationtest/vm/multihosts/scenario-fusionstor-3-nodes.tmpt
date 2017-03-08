@@ -16,3 +16,4 @@ imageUsername = root
 imagePassword = password
 vmL3Uuid = 123456
 fusionstorStorageOfferingUuid = 123456
+volumeName = test_volume

@@ -563,7 +563,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 vm_xml.set('managementIp', vm_ip)
             if xmlobject.has_element(vm, 'backupStorageRef'):
                 volume_option = test_util.VolumeOption()
-                volume_option.set_name('debug_scenario')
+                volume_option.set_name(os.environ.get('volumeName'))
                 for bs_ref in xmlobject.safe_list(vm.backupStorageRef):
                     if bs_ref.type_ == 'ceph':
                         disk_offering_uuid = bs_ref.offering_uuid_

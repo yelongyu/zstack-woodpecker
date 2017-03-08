@@ -13,3 +13,4 @@ vmL3Uuid = 123456
 NOVLAN_ID1 = 1234
 NOVLAN_ID2 = 1235
 cephStorageOfferingUuid = 1234
+volumeName = test_volume
