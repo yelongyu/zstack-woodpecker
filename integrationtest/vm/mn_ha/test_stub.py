@@ -84,7 +84,7 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
     if len(mn_host_list) < 1:
         return False
     l2network_name = os.environ.get('l2PublicNetworkName')
-    nic_name = sce_ops.get_ref_l2_nic_name(l2network_name, deploy_config)
+    nic_name = os.environ.get('nodeNic')
     mn_ip = os.environ.get('zstackHaVip')
     mn_netmask = os.environ.get('nodeNetMask')
     mn_gateway = os.environ.get('nodeGateway')
@@ -98,8 +98,17 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
 
 def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, deploy_tool, mn_img):
     prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json)
-    os.system("bash %s -- -I %s" % (deploy_tool, config_json))
-    os.system('bash %s -- -i -a -p %s -c %s' % (deploy_tool, 'password', config_json))
+    test_host = get_mn_host[0]
+    test_host_ip = test_host.ip_
+    test_host_config = sce_ops.get_scenario_config_vm(test_host.name_, scenarioConfig)
+    host_password = test_host_config.imagePassword_
+    ssh.scp_file(deploy_tool, "/tmp/ZStack-HA-Installer", test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_)
+    ssh.scp_file(config_json, "/tmp/config.json", test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_)
+    ssh.scp_file(mn_img, "/tmp/mn.qcow2", test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_)
+    cmd1="bash %s -- -I %s" % ('/tmp/ZStack-HA-Installer', '/tmp/mn.qcow2')
+    cmd2='bash %s -- -i -a -p %s -c %s' % ('/tmp/ZStack-HA-Installer', host_password, '/tmp/config.json')
+    ssh.execute(cmd1, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+    ssh.execute(cmd2, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
 
 def shutdown_host_network(host_vm, scenarioConfig):
     l2network_nic = os.environ.get('l2ManagementNetworkInterface')
