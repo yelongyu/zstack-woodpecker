@@ -5,6 +5,7 @@ Create an unified test_stub to share test operations
 @author: Mirabel
 '''
 import os
+import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 import zstacklib.utils.xmlobject as xmlobject
@@ -56,7 +57,7 @@ def get_host_by_mn_vm(vm_uuid, scenarioConfig, scenarioFile):
     host_list = []
     for host in mn_host_list:
         host_config = sce_ops.get_scenario_config_vm(host.name_, scenarioConfig)
-        cmd = "virsh list | grep MN-VM"
+        cmd = "virsh list | grep \"ZStack Management Node VM\""
         vm_list = test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, vm_config.imagePassword_,cmd)
         if vm_list:
             host_list.append(host)
@@ -98,7 +99,7 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
 
 def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, deploy_tool, mn_img):
     prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json)
-    test_host = get_mn_host[0]
+    test_host = get_mn_host(scenarioConfig,scenarioFile)[0]
     test_host_ip = test_host.ip_
     test_host_config = sce_ops.get_scenario_config_vm(test_host.name_, scenarioConfig)
     host_password = test_host_config.imagePassword_
