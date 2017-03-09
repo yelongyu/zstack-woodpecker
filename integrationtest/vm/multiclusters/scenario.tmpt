@@ -1,17 +1,8 @@
+import ../scenario.tmpt
 import ./deploy.tmpt
-zstackPkg = /home/installer.bin
-zstackISO = /home/installer.iso
-zstackManagementIp = 10.0.0.15
-zstackAdminPassword = password
-hostUuid = 123456
 vmName1 = test_vm1
 vmName2 = test_vm2
 vmName3 = test_vm3
 vmName4 = test_vm4
-vmInstranceOfferingUuid = 123456
 vmInstranceOfferingUuid2 = 234567
-imageUuid = 123456
 imageUuid2 = 234567
-imageUsername = root
-imagePassword = password
-vmL3Uuid = 123456
