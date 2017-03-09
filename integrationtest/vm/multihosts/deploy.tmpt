@@ -96,6 +96,14 @@ l3VlanNetwork18 = l3VlanNetwork18
 l3VlanNetwork19 = l3VlanNetwork19
 l3VlanNetwork20 = l3VlanNetwork20
 
+l2NoVlanNetworkName3 = vlan12
+l2NoVlanNetworkInterface3 = eth0.12
+noVlanIpRangeName3 = guest novlan range 3
+noVlanIpRangeStart3 = 10.253.1.2
+noVlanIpRangeEnd3 = 10.253.1.199
+noVlanIpRangeGateway3 = 10.253.1.1
+noVlanIpRangeNetmask3 = 255.255.0.0
+
 vlanIpRangeName4 = guest vlan ip range name 4
 vlanIpRangeStart4 = 10.14.0.2
 vlanIpRangeEnd4 = 10.14.127.255

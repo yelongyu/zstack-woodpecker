@@ -3,6 +3,4 @@ import ./deploy.tmpt
 localPrimaryStorageName = local-ps
 localPrimaryStorageUrl = /home/local-ps
 
-l2NoVlanNetworkName3 = vlan12
-l2NoVlanNetworkInterface3 = eth0.12
 
