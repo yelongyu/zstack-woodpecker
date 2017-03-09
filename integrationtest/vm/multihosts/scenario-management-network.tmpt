@@ -6,6 +6,7 @@ vmName3 = debug_scenario3
 vmName4 = debug_scenario4
 vmInstranceOfferingUuid2 = 123456
 imageUuid2 = 123456
+vmManageL3Uuid = 123456
 #vmStorageL3Uuid = 123456
 #cephStorageOfferingUuid = 123456
 #volumeName = test_volume
