@@ -52,7 +52,7 @@
             </l3Network>
           </l3Networks>
           <hostRef>$hostName3</hostRef>
-	  <backupStorageRef type="sftp">$sftpBackupStorageName</backupStorageRef>
+	  <backupStorageRef type="sftp">$sftpBackupStorageName2</backupStorageRef>
 	  <primaryStorageRef type="local" url="$localPrimaryStorageUrl">$localPrimaryStorageName</primaryStorageRef>
         </vm>
         <vm name="$vmName4" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
