@@ -77,8 +77,7 @@
         cpuSpeed="$virtualRouterOfferingCpuSpeed_s" 
         cpuNum="$virtualRouterOfferingCpuNum_s" isDefault="true">
         <zoneRef>$zoneName</zoneRef>
-        <!--<managementL3NetworkRef>$l3ManagementNetworkName</managementL3NetworkRef>-->
-        <managementL3NetworkRef>$l3NoVlanNetworkName3</managementL3NetworkRef>
+        <managementL3NetworkRef>$l3ManagementNetworkName</managementL3NetworkRef>
         <publicL3NetworkRef>$l3PublicNetworkName</publicL3NetworkRef>
         <imageRef>$virtualRouterImageName</imageRef>
       </virtualRouterOffering>
@@ -165,11 +164,10 @@
                 username="$hostUsername4" password="$hostPassword4" port="$hostPort4"/>
             </hosts>
             <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
-            <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
+            <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
-            <l2NetworkRef>$l2NoVlanNetworkName3</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName2</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName3</l2NetworkRef>
@@ -266,30 +264,6 @@
             </l3Networks>
           </l2NoVlanNetwork>
   
-          <l2NoVlanNetwork name="$l2NoVlanNetworkName3" description="guest l2 network3"
-            physicalInterface="$l2NoVlanNetworkInterface3">
-            <l3Networks>
-              <l3BasicNetwork name="$l3NoVlanNetworkName3" description = "guest l3 network3 with user defined vlan">
-                <ipRange name="$noVlanIpRangeName3" 
-                  startIp="$noVlanIpRangeStart3" 
-                  endIp="$noVlanIpRangeEnd3"
-                  gateway="$noVlanIpRangeGateway3" 
-                  netmask="$noVlanIpRangeNetmask3"/>
-                <dns>$DNSServer</dns> 
-                <networkService provider="VirtualRouter">
-                  <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
-                  <serviceType>Eip</serviceType>
-                </networkService>
-                <networkService provider="SecurityGroup">
-                  <serviceType>SecurityGroup</serviceType>
-                </networkService>
-              </l3BasicNetwork>
-            </l3Networks>
-          </l2NoVlanNetwork>
-
           <l2VlanNetwork name="$l2VlanNetworkName1" 
             description="guest l2 vlan network1"
             physicalInterface="$l2NetworkPhysicalInterface" 

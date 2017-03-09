@@ -15,11 +15,12 @@
           imageUuid="$imageUuid" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
             <l3Network uuid="$vmL3Uuid">
-	      <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
               <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
-              <l2NetworkRef>$l2NoVlanNetworkName3</l2NetworkRef>
+            </l3Network>
+            <l3Network uuid="$vmStorageL3Uuid">
+	      <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
             </l3Network>
           </l3Networks>
 	  <nodeRef>$node1Name</nodeRef>
@@ -29,11 +30,12 @@
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
             <l3Network uuid="$vmL3Uuid">
-	      <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
               <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
-              <l2NetworkRef>$l2NoVlanNetworkName3</l2NetworkRef>
+            </l3Network>
+            <l3Network uuid="$vmStorageL3Uuid">
+	      <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
             </l3Network>
           </l3Networks>
           <hostRef>$hostName2</hostRef>
@@ -44,11 +46,12 @@
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
             <l3Network uuid="$vmL3Uuid">
-	      <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
               <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
-              <l2NetworkRef>$l2NoVlanNetworkName3</l2NetworkRef>
+            </l3Network>
+            <l3Network uuid="$vmStorageL3Uuid">
+	      <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
             </l3Network>
           </l3Networks>
           <hostRef>$hostName3</hostRef>
@@ -59,11 +62,12 @@
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
             <l3Network uuid="$vmL3Uuid">
-	      <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
               <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
-              <l2NetworkRef>$l2NoVlanNetworkName3</l2NetworkRef>
+            </l3Network>
+            <l3Network uuid="$vmStorageL3Uuid">
+	      <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
             </l3Network>
           </l3Networks>
           <hostRef>$hostName4</hostRef>
