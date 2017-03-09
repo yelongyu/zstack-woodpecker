@@ -47,12 +47,12 @@ mv /etc/host-tmp /etc/hosts
 
 sleep 2
 
-[  -f /root/.ssh/id_rsa ] || gen_ssh_keys
-auto_ssh_copy_id password fusionstor-1
-if [ "${FUSIONSTOR_ONE_NODE}" != "yes" ]; then
-    auto_ssh_copy_id password fusionstor-2
-    auto_ssh_copy_id password fusionstor-3
-fi
+#[  -f /root/.ssh/id_rsa ] || gen_ssh_keys
+#auto_ssh_copy_id password fusionstor-1
+#if [ "${FUSIONSTOR_ONE_NODE}" != "yes" ]; then
+#    auto_ssh_copy_id password fusionstor-2
+#    auto_ssh_copy_id password fusionstor-3
+#fi
 
 scp /etc/hosts fusionstor-1:/etc/hosts
 if [ "${FUSIONSTOR_ONE_NODE}" != "yes" ]; then

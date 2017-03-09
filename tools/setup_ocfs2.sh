@@ -94,17 +94,17 @@ cat /etc/hosts | sort -u >/etc/host-tmp
 mv /etc/host-tmp /etc/hosts
 sleep 2
 
-[  -f /root/.ssh/id_rsa ] || gen_ssh_keys
-auto_ssh_copy_id password ocfs2-host1
-if [ -n "${IP[1]}" ]; then
-auto_ssh_copy_id password ocfs2-host2
-fi
-if [ -n "${IP[2]}" ]; then
-auto_ssh_copy_id password ocfs2-host3
-fi
-if [ -n "${IP[3]}" ]; then
-auto_ssh_copy_id password ocfs2-host4
-fi
+#[  -f /root/.ssh/id_rsa ] || gen_ssh_keys
+#auto_ssh_copy_id password ocfs2-host1
+#if [ -n "${IP[1]}" ]; then
+#auto_ssh_copy_id password ocfs2-host2
+#fi
+#if [ -n "${IP[2]}" ]; then
+#auto_ssh_copy_id password ocfs2-host3
+#fi
+#if [ -n "${IP[3]}" ]; then
+#auto_ssh_copy_id password ocfs2-host4
+#fi
 
 scp /etc/hosts ocfs2-host1:/etc/hosts
 if [ -n "${IP[1]}" ]; then

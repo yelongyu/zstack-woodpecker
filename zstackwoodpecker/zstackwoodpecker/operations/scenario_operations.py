@@ -103,6 +103,18 @@ def get_deploy_host(vm_name, deploy_config):
                 if host.name_ == vm_name:
                     return host
 
+def setup_vm_no_password(vm_inv, vm_config, deploy_config):
+    vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
+#    ssh.scp_file(os.environ.get('scenarioPriKey'), '/root/.ssh/id_rsa', vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
+#    ssh.scp_file(os.environ.get('scenarioPubKey'), '/root/.ssh/authorized_keys', vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
+    ssh.scp_file('/home/id_rsa', '/root/.ssh/id_rsa', vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
+    ssh.scp_file('/home/id_rsa.pub', '/root/.ssh/authorized_keys', vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
+    cmd = 'chmod go-rwx /root/.ssh/authorized_keys /root/.ssh/id_rsa'
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+    cmd = "sed -i 's/.*StrictHostKeyChecking.*$/StrictHostKeyChecking no/g' /etc/ssh/ssh_config"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+
+
 def setup_host_vm(vm_inv, vm_config, deploy_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
     cmd = 'hostnamectl set-hostname %s' % (vm_ip.replace('.', '-'))
@@ -584,6 +596,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
             vm_xml.set('name', vm.name_)
             vm_xml.set('uuid', vm_inv.uuid)
             vm_xml.set('ip', vm_ip)
+            setup_vm_no_password(vm_inv, vm, deploy_config)
+
             ips_xml = etree.SubElement(vm_xml, 'ips')
             for l3_uuid in l3_uuid_list:
                 ip_xml = etree.SubElement(ips_xml, 'ip')
