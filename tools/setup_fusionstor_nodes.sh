@@ -66,11 +66,13 @@ if [ "${FUSIONSTOR_ONE_NODE}" != "yes" ]; then
     ssh  fusionstor-3 hostnamectl set-hostname fusionstor-3 && export HOSTNAME=fusionstor-3
 fi
 
+ssh  fusionstor-1 yum --disablerepo=* --enablerepo=zstack-local -y install ntp expect>/dev/null 2>&1
 if [ "${FUSIONSTOR_ONE_NODE}" != "yes" ]; then 
     ssh  fusionstor-2 yum --disablerepo=* --enablerepo=zstack-local -y install ntp expect>/dev/null 2>&1
     ssh  fusionstor-3 yum --disablerepo=* --enablerepo=zstack-local -y install ntp expect>/dev/null 2>&1
 fi
 
+ssh  fusionstor-1 yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install iptables-services>/dev/null 2>&1
 if [ "${FUSIONSTOR_ONE_NODE}" != "yes" ]; then 
     ssh  fusionstor-2 yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install iptables-services>/dev/null 2>&1
     ssh  fusionstor-3 yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install iptables-services>/dev/null 2>&1

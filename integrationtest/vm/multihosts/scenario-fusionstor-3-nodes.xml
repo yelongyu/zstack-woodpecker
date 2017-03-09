@@ -11,7 +11,6 @@
   <hosts>
     <host uuid="$hostUuid">
       <vms>
-<!--
         <vm name="$vmName1" vmInstranceOfferingUuid="$vmInstranceOfferingUuid" 
           imageUuid="$imageUuid" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
@@ -26,7 +25,7 @@
           <hostRef>$hostName</hostRef>
 	  <backupStorageRef type="fusionstor" offering_uuid="$fusionstorStorageOfferingUuid">$fusionstorBackupStorageName</backupStorageRef>
 	  <primaryStorageRef type="fusionstor">$fusionstorPrimaryStorageName</primaryStorageRef>
-        </vm>-->
+        </vm>
         <vm name="$vmName2" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
@@ -55,11 +54,12 @@
 	  <backupStorageRef type="fusionstor" offering_uuid="$fusionstorStorageOfferingUuid">$fusionstorBackupStorageName</backupStorageRef>
 	  <primaryStorageRef type="fusionstor">$fusionstorPrimaryStorageName</primaryStorageRef>
         </vm>
+<!--
         <vm name="$vmName4" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
             <l3Network uuid="$vmL3Uuid">
-	      <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
+	      <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
               <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
@@ -69,6 +69,7 @@
 	  <backupStorageRef type="fusionstor" offering_uuid="$fusionstorStorageOfferingUuid">$fusionstorBackupStorageName</backupStorageRef>
 	  <primaryStorageRef type="fusionstor">$fusionstorPrimaryStorageName</primaryStorageRef>
         </vm>
+        -->
       </vms>
     </host>
   </hosts>
