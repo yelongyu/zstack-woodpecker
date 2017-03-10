@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-3-networks-separated-ceph-ps.xml</deployConfig>
+    <deployConfigTemplate>deploy-3-networks-separated-ceph-ps.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
