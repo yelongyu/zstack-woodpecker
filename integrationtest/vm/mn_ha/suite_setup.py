@@ -58,7 +58,7 @@ def test():
     test_stub.deploy_ha_env(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config,config_json, ha_deploy_tool, mn_img)
 
     node_operations.wait_for_management_server_start(300)
-    ssh.scp_file("/home/license-10host-10days-hp.txt", "/home/license-10host-10days-hp.txt", os.environ.get('zstackHaVip', 'root', 'password')
+    ssh.scp_file("/home/license-10host-10days-hp.txt", "/home/license-10host-10days-hp.txt", os.environ.get('zstackHaVip', 'root', 'password'))
     if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
 
