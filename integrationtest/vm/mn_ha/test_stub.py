@@ -106,10 +106,12 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
     ssh.scp_file(deploy_tool, "/tmp/ZStack-HA-Installer", test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_)
     ssh.scp_file(config_json, "/tmp/config.json", test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_)
     ssh.scp_file(mn_img, "/tmp/mn.qcow2", test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_)
-    cmd1="bash %s -- -I %s" % ('/tmp/ZStack-HA-Installer', '/tmp/mn.qcow2')
-    cmd2='bash %s -- -i -a -p %s -c %s' % ('/tmp/ZStack-HA-Installer', host_password, '/tmp/config.json')
+    cmd1="ceph osd pool create mevoco 128"
+    cmd2="qemu-img convert -f qcow2 -O raw /tmp/mn.qcow2 rbd:mevoco/mnvm.img"
+    cmd3='bash %s -- -i -a -p %s -c %s' % ('/tmp/ZStack-HA-Installer', host_password, '/tmp/config.json')
     ssh.execute(cmd1, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
     ssh.execute(cmd2, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+    ssh.execute(cmd3, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
 
 def shutdown_host_network(host_vm, scenarioConfig):
     l2network_nic = os.environ.get('l2ManagementNetworkInterface')

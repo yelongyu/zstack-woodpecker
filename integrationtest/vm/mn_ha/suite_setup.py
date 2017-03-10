@@ -11,6 +11,7 @@ import zstacktestagent.testagent as testagent
 import zstackwoodpecker.operations.scenario_operations as scenario_operations
 import zstackwoodpecker.operations.deploy_operations as deploy_operations
 import zstackwoodpecker.operations.config_operations as config_operations
+import zstackwoodpecker.operations.node_operations as node_operations
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 import test_stub
@@ -54,6 +55,8 @@ def test():
     ha_deploy_tool = os.environ.get('zstackHaInstaller')
     mn_img = os.environ.get('mnImage')
     test_stub.deploy_ha_env(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config,config_json, ha_deploy_tool, mn_img)
+
+    node_operations.wait_for_management_server_start(300)
     if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
 
