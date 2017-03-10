@@ -8,6 +8,7 @@ import apibinding.inventory as inventory
 
 import sys
 import traceback
+import time
 
 class zstack_vm_db_checker(checker_header.TestChecker):
     def check(self):
@@ -22,10 +23,13 @@ class zstack_vm_db_checker(checker_header.TestChecker):
             else:
                 return self.judge(False)
 
-        if (vm_in_db[0].state == inventory.RUNNING and self.test_obj.state == vm_header.RUNNING) or (vm_in_db[0].state == inventory.STOPPED and self.test_obj.state == vm_header.STOPPED) or (vm_in_db[0].state == inventory.DESTROYED and self.test_obj.state == vm_header.DESTROYED) or (vm_in_db[0].state == inventory.PAUSED and self.test_obj.state == vm_header.PAUSED):
-            #vm state sync is default pass. So didn't print the information by default
-            #test_util.test_logger('Check result: [vm:] %s status is synced with Database.' % vm.uuid)
-            return self.judge(True)
+        for i in range(0, 60):
+            if (vm_in_db[0].state == inventory.RUNNING and self.test_obj.state == vm_header.RUNNING) or (vm_in_db[0].state == inventory.STOPPED and self.test_obj.state == vm_header.STOPPED) or (vm_in_db[0].state == inventory.DESTROYED and self.test_obj.state == vm_header.DESTROYED) or (vm_in_db[0].state == inventory.PAUSED and self.test_obj.state == vm_header.PAUSED):
+                #vm state sync is default pass. So didn't print the information by default
+                #test_util.test_logger('Check result: [vm:] %s status is synced with Database.' % vm.uuid)
+                return self.judge(True)
+            test_util.test_logger('@VM STATUS FIND INCONSISTENT, RETRY TIMES: %s @: [vm:] %s [status:] %s is NOT synced with [Database:] %s.' % (i, vm.uuid, self.test_obj.state, vm_in_db[0].state))
+            time.sleep(1)
         else:
             test_util.test_logger('Check result: [vm:] %s [status:] %s is NOT synced with [Database:] %s.' % (vm.uuid, self.test_obj.state, vm_in_db[0].state))
             return self.judge(False)
