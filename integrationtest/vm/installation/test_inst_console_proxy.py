@@ -10,26 +10,45 @@ import time
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
-import zstackwoodpecker.operations.console_operations as cons_ops 
+import zstackwoodpecker.operations.resource_operations as res_ops
+import zstackwoodpecker.operations.console_operations as cons_ops
+import zstackwoodpecker.operations.scenario_operations as sce_ops 
 import zstacklib.utils.ssh as ssh
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
+zstack_management_ip = os.environ.get('zstackManagementIp')
+vm_inv = None
+
+def create_vm(image):
+    l3_name = os.environ.get('l3PublicNetworkName')
+    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    image_uuid = image.uuid
+    vm_name = 'zs_install_%s' % image.name
+    vm_instrance_offering_uuid = os.environ.get('instanceOfferingUuid')
+
+    vm_creation_option = test_util.VmOption()
+    vm_creation_option.set_instance_offering_uuid(vm_instrance_offering_uuid)
+    vm_creation_option.set_l3_uuids([l3_net_uuid])
+    vm_creation_option.set_image_uuid(image_uuid)
+    vm_creation_option.set_name(vm_name)
+    vm_inv = sce_ops.create_vm(zstack_management_ip, vm_creation_option)
+
+    return vm_inv
 
 def test():
+    global vm_inv
+
     test_util.test_dsc('Create test vm to test zstack installation with console proxy.')
 
-    image_name = os.environ.get('imageName_i_offline')
+    conditions = res_ops.gen_query_conditions('name', 'like', os.environ.get('imageNameBase_o'))
+    image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
 
-    vm = test_stub.create_vlan_vm(image_name)
-    test_obj_dict.add_vm(vm)
-    if os.environ.get('zstackManagementIp') == None:
-        vm.check()
-    else:
-        time.sleep(60)
+    vm_inv = create_vm(image) 
 
-    vm_inv = vm.get_vm()
+    time.sleep(60)
+
     vm_ip = vm_inv.vmNics[0].ip
     vip = '172.20.198.1'
     if vip == vm_ip:
@@ -55,10 +74,13 @@ def test():
         test_util.test_fail('Fail to install ZStack with console proxy')
 
     os.system('rm -f %s' % tmp_file)
-    vm.destroy()
+    sce_ops.destroy_vm(zstack_management_ip, vm_inv.uuid)    
     test_util.test_pass('ZStack installation Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
+    global vm_inv
+
     os.system('rm -f %s' % tmp_file)
+    sce_ops.destroy_vm(zstack_management_ip, vm_inv.uuid)
     test_lib.lib_error_cleanup(test_obj_dict)
