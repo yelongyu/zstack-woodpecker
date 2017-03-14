@@ -29,7 +29,7 @@ MEVOCO_LOG_PATH = None
 
 
 def find_mevoco_log_folder_name():
-    global MEVOCO_LOG_FOLDER, MEVOCO_LOG_PATH
+    global MEVOCO_LOG_FOLDER, MEVOCO_LOG_PATH, MEVOCO_LOG_FOLDER_PATTERN
     if not test_lib.lib_check_version_is_mevoco():
         MEVOCO_LOG_FOLDER = r"collect-log-zstack*"
 	MEVOCO_LOG_FOLDER_PATTERN = "collect-log-zstack"
@@ -45,7 +45,7 @@ def find_mevoco_log_folder_name():
             print "MEVOCO_LOG_PATH=%s" %(MEVOCO_LOG_PATH)
 
 def test():
-    global MEVOCO_LOG_FOLDER, MEVOCO_LOG_PATH
+    global MEVOCO_LOG_FOLDER, MEVOCO_LOG_PATH, MEVOCO_LOG_FOLDER_PATTERN
     if not test_lib.lib_check_version_is_mevoco():
         MEVOCO_LOG_FOLDER = r"collect-log-zstack*"
 	MEVOCO_LOG_FOLDER_PATTERN = "collect-log-zstack"
@@ -95,6 +95,8 @@ def test():
                 test_util.test_fail( sftpbackupstorageFilePath + ' is not exist.')
         elif bs.type == "ImageStoreBackupStorage":
             pass
+        else:
+            test_util.test_skip("backup storage is not sftp, skip")
 
 
     #Step4: verify hosts logs are saved
