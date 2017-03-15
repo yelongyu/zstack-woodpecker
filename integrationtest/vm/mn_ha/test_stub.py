@@ -8,6 +8,7 @@ import os
 import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
+import zstacklib.utils.shell as shell
 import zstacklib.utils.xmlobject as xmlobject
 import zstackwoodpecker.operations.scenario_operations as sce_ops
 import zstackwoodpecker.operations.deploy_operations as dpy_ops
@@ -53,14 +54,15 @@ def recover_host(host_vm, scenarioConfig, deploy_config):
 def get_host_by_mn_vm(vm_uuid, scenarioConfig, scenarioFile):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
     if len(mn_host_list) < 1:
-        return None
+        return []
     host_list = []
     for host in mn_host_list:
         host_config = sce_ops.get_scenario_config_vm(host.name_, scenarioConfig)
         cmd = "virsh list | grep \"ZStack Management Node VM\""
-        vm_list = test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, vm_config.imagePassword_,cmd)
+        vm_list = test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
         if vm_list:
             host_list.append(host)
+    return host_list
 
 def get_mn_host(scenarioConfig, scenarioFile):
     mn_host_list = []
@@ -146,3 +148,13 @@ def create_basic_vm(disk_offering_uuids=None, session_uuid = None):
     l3_name = os.environ.get('l3PublicNetworkName')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     return create_vm([l3_net_uuid], image_uuid, 'basic_no_vlan_vm', disk_offering_uuids, session_uuid = session_uuid)
+
+def check_directly_up(target_ip, timeout=1):
+    try:
+        shell.call('ping -c 1 -W %d %s' % (timeout, target_ip)
+    except:
+        test_util.test_logger('ping %s failed' % target_ip)
+        return False
+    else:
+        test_util.test_logger('ping %s successfully' % target_ip)
+        return True
