@@ -57,13 +57,12 @@ def test():
     if not test_lib.lib_wait_target_up(vm.get_vm().vmNics[0].ip, '22', 90):
         test_util.test_fail('VM is expected to running when PS change to disable state')
 
-    vm.set_state(vm_header.STOPPED)
+    #vm.set_state(vm_header.RUNNING)
     vm.check()
     test_stub.migrate_vm_to_random_host(vm)
     vm.check()
-    volume.check()
 
-    ps_ops.change_primary_storage_state(ps_uuid, 'Enabled')
+    ps_ops.change_primary_storage_state(ps_uuid, 'enable')
     host_ops.reconnect_host(host_uuid)
     vm_ops.reconnect_vr(vr_uuid)
     test_util.test_pass('PS disable mode Test Success')
