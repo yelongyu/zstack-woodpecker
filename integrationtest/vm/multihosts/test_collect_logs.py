@@ -93,8 +93,8 @@ def test():
                 test_util.test_fail( messagesFilePath          + ' is not exist.')
             if not os.path.exists(sftpbackupstorageFilePath):
                 test_util.test_fail( sftpbackupstorageFilePath + ' is not exist.')
-        elif bs.type == "ImageStoreBackupStorage":
-            pass
+        #elif bs.type == "ImageStoreBackupStorage":
+        #    pass
         else:
             test_util.test_skip("backup storage is not sftp, skip")
 
