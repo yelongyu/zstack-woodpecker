@@ -1,8 +1,8 @@
 '''
 
-New Integration Test for creating KVM VM.
+New Integration Test for cpu allocator strategy.
 
-@author: Youyk
+@author: SyZhao
 '''
 
 import zstackwoodpecker.test_util as test_util
@@ -19,6 +19,7 @@ vms  = []
 ts   = []
 invs = []
 vm_num = 9
+vm_scenario_lst = [1,3,2,3]
 
 def create_vm_wrapper(vm_obj):
     global invs, vms
@@ -31,19 +32,62 @@ def create_vm_wrapper(vm_obj):
 
 def prepare_host_with_different_cpu_scenario():
     """
-    Prepare 1 vm already in host1
-    Prepare 2 vms already in host2
-    Prepare 2 vms already in host3
+    Prepare vms in hosts
     """
-    pass
+    #pass
+    vm_creation_option = test_util.VmOption()
+    image_name = os.environ.get('imageName_s')
+    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    #l3_name = os.environ.get('l3NoVlanNetworkName1')
+    l3_name = os.environ.get('l3VlanNetworkName1')
+
+    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+    instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+    vm_creation_option.set_l3_uuids([l3_net_uuid])
+    vm_creation_option.set_image_uuid(image_uuid)
+    vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+
+    hosts = test_lib.lib_find_hosts_by_ps_uuid(ps_uuid)
+    for host, i in zip(hosts, vm_scenario_lst):
+        vm_creation_option.set_name('pre-create-vm%s' %(i))
+        vm = test_vm_header.ZstackTestVm()
+        vm_creation_option.set_host_uuid(host.uuid)
+        vm.set_creation_option(vm_creation_option)
+        vm.create()
+        
+
+def get_vm_num_based_cpu_available_on_host(host_uuid, each_vm_cpu_consume):
+    """
+    This function is used to compute available cpu num based on host current have
+    """
+    host_total_cpu = test_lib.lib_get_cpu_memory_capacity(host_uuids = [host_uuid]).totalCpu
+    host_avail_cpu = test_lib.lib_get_cpu_memory_capacity(host_uuids = [host_uuid]).availableCpu
+    #host_total_mem = test_lib.lib_get_cpu_memory_capacity(host_uuids = [host_uuid]).totalMemory
+    #host_avail_mem = test_lib.lib_get_cpu_memory_capacity(host_uuids = [host_uuid]).availableMemory
+
+    return host_avail_cpu / each_vm_cpu_consume
+    
+
+def compute_total_vm_num_based_on_ps(ps_uuid, each_vm_cpu_consume):
+    """
+    """
+    total_vm_num = 0
+    hosts = test_lib.lib_find_hosts_by_ps_uuid(ps_uuid)
+    for host in hosts:
+        total_vm_num += get_vm_num_based_cpu_available_on_host(host.uuid, each_vm_cpu_consume)
+
+    return total_vm_num
 
 
 def clean_host_with_different_cpu_scenario()
     """
     Clean all the vms that generated from prepare function
     """
-    pass
-
+    global vms
+    for vm in vms:
+        vm.destory()
+        vm.expunge()
 
 
 def test():
@@ -67,7 +111,9 @@ def test():
     #create different cpu usage of hosts scenario
     prepare_host_with_different_cpu_scenario()
 
-
+    #ps_uuid = 
+    #each_vm_cpu_consume = 
+    vm_num = compute_total_vm_num_based_on_ps(ps_uuid, each_vm_cpu_consume)
     #trigger vm create
     for i in range(vm_num):
         t = threading.Thread(target=create_vm_wrapper, args=(vm))
