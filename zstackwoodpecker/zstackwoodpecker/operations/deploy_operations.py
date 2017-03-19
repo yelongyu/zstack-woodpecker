@@ -84,10 +84,12 @@ def get_backup_storage_from_scenario_file(backupStorageRefName, scenarioConfig, 
                             if s_vm.name_ == vm.name_:
                                 if vm.backupStorageRef.type_ == 'ceph':
                                     nic_id = get_ceph_storages_mon_nic_id(vm.backupStorageRef.text_, scenarioConfig)
-            	                    ip_list.append(s_vm.ips.ip[nic_id].ip_)
+                                    if nic_id == None:
+                                        ip_list.append(s_vm.ip_)
+                                    else:
+            	                        ip_list.append(s_vm.ips.ip[nic_id].ip_)
                                 else:
                                     ip_list.append(s_vm.ip_)
-                                break
     return ip_list
 
 #Add Backup Storage
@@ -160,6 +162,28 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
                 action.poolName = bs.poolName_
             action.timeout = AddKVMHostTimeOut #for some platform slowly salt execution
             action.type = inventory.CEPH_BACKUP_STORAGE_TYPE
+            thread = threading.Thread(target = _thread_for_action, args = (action, ))
+            wait_for_thread_queue()
+            thread.start()
+
+    if xmlobject.has_element(deployConfig, 'backupStorages.fusionstorBackupStorage'):
+        for bs in xmlobject.safe_list(deployConfig.backupStorages.fusionstorBackupStorage):
+            action = api_actions.AddFusionstorBackupStorageAction()
+            action.sessionUuid = session_uuid
+            action.name = bs.name_
+            action.description = bs.description__
+            hostname_list = get_backup_storage_from_scenario_file(bs.name_, scenarioConfig, scenarioFile, deployConfig)
+            if len(hostname_list) != 0:
+                # TODO: username and password should be configarable
+                action.monUrls = []
+                for hostname in hostname_list:
+                    action.monUrls.append("root:password@%s" % (hostname))
+            else:
+                action.monUrls = bs.monUrls_.split(';')
+            if bs.poolName__:
+                action.poolName = bs.poolName_
+            action.timeout = AddKVMHostTimeOut #for some platform slowly salt execution
+            action.type = inventory.FUSIONSTOR_BACKUP_STORAGE_TYPE
             thread = threading.Thread(target = _thread_for_action, args = (action, ))
             wait_for_thread_queue()
             thread.start()
@@ -344,7 +368,14 @@ def get_primary_storage_from_scenario_file(primaryStorageRefName, scenarioConfig
                         scenario_file = xmlobject.loads(xmlstr)
                         for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
                             if s_vm.name_ == vm.name_:
-                                ip_list.append(s_vm.ip_)
+                                if vm.backupStorageRef.type_ == 'ceph':
+                                    nic_id = get_ceph_storages_mon_nic_id(vm.backupStorageRef.text_, scenarioConfig)
+                                    if nic_id == None:
+                                        ip_list.append(s_vm.ip_)
+                                    else:
+            	                        ip_list.append(s_vm.ips.ip[nic_id].ip_)
+                                else:
+                                    ip_list.append(s_vm.ip_)
     return ip_list
 
 #Add Primary Storage
@@ -436,6 +467,38 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 action.name = pr.name_
                 action.description = pr.description__
                 action.type = inventory.CEPH_PRIMARY_STORAGE_TYPE
+                hostname_list = get_primary_storage_from_scenario_file(pr.name_, scenarioConfig, scenarioFile, deployConfig)
+                if len(hostname_list) != 0:
+                    action.monUrls = []
+                    for hostname in hostname_list:
+                        action.monUrls.append("root:password@%s" % (hostname))
+                else:
+                    action.monUrls = pr.monUrls_.split(';')
+                if pr.dataVolumePoolName__:
+                    action.dataVolumePoolName = pr.dataVolumePoolName__
+                if pr.rootVolumePoolName__:
+                    action.rootVolumePoolName = pr.rootVolumePoolName__
+                if pr.imageCachePoolName__:
+                    action.imageCachePoolName = pr.imageCachePoolName__
+                action.zoneUuid = zinv.uuid
+                thread = threading.Thread(target=_thread_for_action, args=(action,))
+                wait_for_thread_queue()
+                thread.start()
+
+        if xmlobject.has_element(zone, 'primaryStorages.fusionstorPrimaryStorage'):
+            zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, \
+                    name=zone.name_)
+            zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
+
+            for pr in xmlobject.safe_list(zone.primaryStorages.fusionstorPrimaryStorage):
+                if ps_name and ps_name != pr.name_:
+                    continue
+
+                action = api_actions.AddFusionstorPrimaryStorageAction()
+                action.sessionUuid = session_uuid
+                action.name = pr.name_
+                action.description = pr.description__
+                action.type = inventory.FUSIONSTOR_PRIMARY_STORAGE_TYPE
                 hostname_list = get_primary_storage_from_scenario_file(pr.name_, scenarioConfig, scenarioFile, deployConfig)
                 if len(hostname_list) != 0:
                     action.monUrls = []
@@ -665,6 +728,23 @@ def get_host_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, deplo
                         for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
                             if s_vm.name_ == vm.name_:
                                 return s_vm.ip_
+    return None
+
+def get_host_obj_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, deployConfig):
+    if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
+        return None
+
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            if xmlobject.has_element(vm, 'hostRef'):
+                if vm.hostRef.text_ == hostRefName:
+                    with open(scenarioFile, 'r') as fd:
+                        xmlstr = fd.read()
+                        fd.close()
+                        scenario_file = xmlobject.loads(xmlstr)
+                        for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                            if s_vm.name_ == vm.name_:
+                                return s_vm
     return None
 
 #Add Host

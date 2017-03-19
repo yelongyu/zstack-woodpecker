@@ -5,18 +5,22 @@
 import os.path
 import zstacklib.utils.linux as linux
 import zstacklib.utils.http as  http
+import zstacklib.utils.ssh as ssh
 import zstacktestagent.plugins.host as host_plugin
 import zstacktestagent.testagent as testagent
 
 import zstackwoodpecker.operations.scenario_operations as scenario_operations
 import zstackwoodpecker.operations.deploy_operations as deploy_operations
 import zstackwoodpecker.operations.config_operations as config_operations
+import zstackwoodpecker.operations.node_operations as node_operations
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
+import test_stub
 
 USER_PATH = os.path.expanduser('~')
 EXTRA_SUITE_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_suite_setup_config.sh' % USER_PATH
 EXTRA_HOST_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_host_setup_config.sh' % USER_PATH
+
 def test():
     if test_lib.scenario_config == None or test_lib.scenario_file ==None:
         test_util.test_fail('Suite Setup Fail without scenario')
@@ -48,7 +52,13 @@ def test():
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd)
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd2)
 
-    test_lib.setup_plan.execute_plan_without_deploy_test_agent()
+    config_json = os.environ.get('configJson')
+    ha_deploy_tool = os.environ.get('zstackHaInstaller')
+    mn_img = os.environ.get('mnImage')
+    test_stub.deploy_ha_env(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config,config_json, ha_deploy_tool, mn_img)
+
+    node_operations.wait_for_management_server_start(300)
+    ssh.scp_file("/home/license-10host-10days-hp.txt", "/home/license-10host-10days-hp.txt", os.environ.get('zstackHaVip'), 'root', 'password')
     if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
 
@@ -60,5 +70,6 @@ def test():
         test_lib.lib_set_ha_selffencer_maxattempts('60')
 	test_lib.lib_set_ha_selffencer_storagechecker_timeout('60')
     test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
+    test_lib.lib_set_reserved_memory('8G')
     test_util.test_pass('Suite Setup Success')
 

@@ -42,12 +42,12 @@ cat /etc/hosts | sort -u >/etc/host-tmp
 mv /etc/host-tmp /etc/hosts
 sleep 2
 
-[  -f /root/.ssh/id_rsa ] || gen_ssh_keys
-auto_ssh_copy_id password ceph-1
-if [ "${CEPH_ONE_NODE}" != "yes" ]; then
-    auto_ssh_copy_id password ceph-2
-    auto_ssh_copy_id password ceph-3
-fi
+#[  -f /root/.ssh/id_rsa ] || gen_ssh_keys
+#auto_ssh_copy_id password ceph-1
+#if [ "${CEPH_ONE_NODE}" != "yes" ]; then
+#    auto_ssh_copy_id password ceph-2
+#    auto_ssh_copy_id password ceph-3
+#fi
 
 scp /etc/hosts ceph-1:/etc/hosts
 if [ "${CEPH_ONE_NODE}" != "yes" ]; then

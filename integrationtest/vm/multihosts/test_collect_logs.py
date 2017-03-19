@@ -22,24 +22,32 @@ _config_ = {
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 TEMPT_FOLDER = "/tmp/"
-MEVOCO_LOG_FOLDER = r"collect-log-mevoco_*"
+MEVOCO_LOG_FOLDER = r"collect-log-mevoco*"
 MEVOCO_LOG_FOLDER_PATTERN = "collect-log-mevoco"
 MEVOCO_LOG_FOLDER_MASK = ".gz"
 MEVOCO_LOG_PATH = None
 
 
 def find_mevoco_log_folder_name():
-    global MEVOCO_LOG_FOLDER, MEVOCO_LOG_PATH
+    global MEVOCO_LOG_FOLDER, MEVOCO_LOG_PATH, MEVOCO_LOG_FOLDER_PATTERN
+    if not test_lib.lib_check_version_is_mevoco():
+        MEVOCO_LOG_FOLDER = r"collect-log-zstack*"
+	MEVOCO_LOG_FOLDER_PATTERN = "collect-log-zstack"
     temptNameList = os.listdir(TEMPT_FOLDER)
     for folderName in temptNameList:
-        if set(MEVOCO_LOG_FOLDER_PATTERN).issubset(set(folderName)) and not set(MEVOCO_LOG_FOLDER_MASK).issubset(set(folderName)):
+        print "Start"
+        print "folderName=%s" %(folderName)
+        print "MEVOCO_LOG_FOLDER_PATTERN=%s" %(MEVOCO_LOG_FOLDER_PATTERN)
+        print "MEVOCO_LOG_FOLDER_MASK=%s" %(MEVOCO_LOG_FOLDER_MASK)
+        if MEVOCO_LOG_FOLDER_PATTERN in folderName and not MEVOCO_LOG_FOLDER_MASK in folderName:
             MEVOCO_LOG_FOLDER = folderName
             MEVOCO_LOG_PATH = TEMPT_FOLDER + MEVOCO_LOG_FOLDER + "/"
+            print "MEVOCO_LOG_PATH=%s" %(MEVOCO_LOG_PATH)
 
 def test():
-    global MEVOCO_LOG_FOLDER, MEVOCO_LOG_PATH
+    global MEVOCO_LOG_FOLDER, MEVOCO_LOG_PATH, MEVOCO_LOG_FOLDER_PATTERN
     if not test_lib.lib_check_version_is_mevoco():
-        MEVOCO_LOG_FOLDER = r"collect-log-zstack_*"
+        MEVOCO_LOG_FOLDER = r"collect-log-zstack*"
 	MEVOCO_LOG_FOLDER_PATTERN = "collect-log-zstack"
 
     #Step1: clean env below TEMPT_FOLDER and run collect log
@@ -70,6 +78,8 @@ def test():
             hostIP = test_lib.lib_get_backup_storage_host(bs.uuid) 
 
             sftpLogFolderName = "sftp_bs-" + hostIP.managementIp 
+            print "logPath=%s" %(MEVOCO_LOG_PATH)
+            print "sftpLogFolderName=%s" %(sftpLogFolderName)
             dmesgFilePath             = MEVOCO_LOG_PATH + sftpLogFolderName + "/dmesg"
             hostInfoFilePath          = MEVOCO_LOG_PATH + sftpLogFolderName + "/host_info"
             messagesFilePath          = MEVOCO_LOG_PATH + sftpLogFolderName + "/messages"
@@ -83,8 +93,10 @@ def test():
                 test_util.test_fail( messagesFilePath          + ' is not exist.')
             if not os.path.exists(sftpbackupstorageFilePath):
                 test_util.test_fail( sftpbackupstorageFilePath + ' is not exist.')
-        elif bs.type == "ImageStoreBackupStorage":
-            pass
+        #elif bs.type == "ImageStoreBackupStorage":
+        #    pass
+        else:
+            test_util.test_skip("backup storage is not sftp, skip")
 
 
     #Step4: verify hosts logs are saved

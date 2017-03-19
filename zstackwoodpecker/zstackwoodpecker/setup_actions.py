@@ -490,6 +490,11 @@ default one' % self.zstack_properties)
                 ip = dpy_ops.get_node_from_scenario_file(node.name_, self.scenario_config, self.scenario_file, self.config)
                 if ip != None:
                     node.ip_ = ip
+                else:
+                    if self.zstack_ha_vip != None:
+                        node.ip_ = self.zstack_ha_vip
+                    else:
+                        print("node [%s] does not have IP" % node.name_)
                 node.ip_
                 self.nodes.append(node)
                 if linux.is_ip_existing(node.ip_):
@@ -586,7 +591,7 @@ default one' % self.zstack_properties)
 
     def _change_node_ip(self):
         for node in self.nodes:
-            cmd = 'zstack-ctl change_ip --ip=%s' % (node.ip_)
+            cmd = 'zstack-ctl change_ip --ip=%s --mysql_root_password=%s' % (node.ip_, os.environ.get('DBAdminPassword'))
             if not linux.is_ip_existing(node.ip_):
                 ssh.execute(cmd, node.ip_, node.username_, node.password_)
             else:

@@ -754,7 +754,7 @@ class VolumeOption(DataOption):
         self.disk_offering_uuid = None #used when create volume from template
         self.url = None #used when add volume from url.
         self.volume_type = None #used when add volume from url
-        self.backup_storage_uuid_list = [] #used when add volume from url
+        self.primary_storage_uuid = None #used when add volume from url
         self.system_tags = None
         super(VolumeOption, self).__init__()
 
@@ -764,11 +764,11 @@ class VolumeOption(DataOption):
     def get_disk_offering_uuid(self):
         return self.disk_offering_uuid
 
-    def set_backup_storage_uuid_list(self, backup_storage_uuid_list):
-        self.backup_storage_uuid_list = backup_storage_uuid_list
+    def set_primary_storage_uuid(self, primary_storage_uuid):
+        self.primary_storage_uuid = primary_storage_uuid
 
-    def get_backup_storage_uuid_list(self):
-        return self.backup_storage_uuid_list
+    def get_primary_storage_uuid(self):
+        return self.primary_storage_uuid
 
     def set_url(self, url):
         self.url = url

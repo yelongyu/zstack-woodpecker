@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-management-network.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-management-network.tmpt</scenarioConfigTemplate>
+</testConfig>

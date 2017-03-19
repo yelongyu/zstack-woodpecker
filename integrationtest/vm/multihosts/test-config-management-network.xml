@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-management-network-local-ps.xml</deployConfig>
+    <deployConfigTemplate>deploy-management-network-local-ps.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

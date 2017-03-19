@@ -12,6 +12,7 @@ import account_operations
 
 def create_volume_from_offering(volume_option):
     action = api_actions.CreateDataVolumeAction()
+    action.primaryStorageUuid = volume_option.get_primary_storage_uuid()
     action.diskOfferingUuid = volume_option.get_disk_offering_uuid()
     action.description = volume_option.get_description()
     action.systemTags = volume_option.get_system_tags()

@@ -47,6 +47,17 @@ def create_ceph_primary_storage(primary_storage_option, session_uuid=None):
             (evt.inventory.uuid, action.name))
     return evt.inventory
 
+def create_ceph_primary_storage_pool(primary_storage_uuid, pool_name, session_uuid=None):
+    action = api_actions.AddCephPrimaryStoragePoolAction()
+    action.timeout = 300000
+    action.primaryStorageUuid = primary_storage_uuid
+    action.poolName = pool_name
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Create Primary Storage [uuid:] %s Pool [uuid:] %s [name:] %s' % \
+            (action.primaryStorageUuid, evt.inventory.uuid, action.poolName))
+    return evt.inventory
+
+
 def delete_primary_storage(primary_storage_uuid, session_uuid=None):
     '''
     Delete PS will delete all VMs and Volumes using this ps.
@@ -57,6 +68,18 @@ def delete_primary_storage(primary_storage_uuid, session_uuid=None):
     test_util.action_logger('Delete Primary Storage [uuid:] %s' % primary_storage_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
+
+def delete_ceph_primary_storage_pool(primary_storage_pool_uuid, session_uuid=None):
+    '''
+    Delete PS Pool will delete all Volumes using this ps.
+    '''
+    action = api_actions.DeleteCephPrimaryStoragePoolAction()
+    action.uuid = primary_storage_pool_uuid
+    action.timeout = 600000
+    test_util.action_logger('Delete Primary Storage Pool [uuid:] %s' % primary_storage_pool_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
 
 def attach_primary_storage(primary_storage_uuid, cluster_uuid, session_uuid=None):
     action = api_actions.AttachPrimaryStorageToClusterAction()
@@ -98,5 +121,16 @@ def cleanup_imagecache_on_primary_storage(primary_storage_uuid, session_uuid=Non
     action.timeout = 300000
     test_util.action_logger('Cleanup Imagecache on Primary Storage [uuid:] %s' \
             % (primary_storage_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def reconnect_primary_storage(primary_storage_uuid, session_uuid=None):
+    '''
+    Reconnect primary storage
+    '''
+    action = api_actions.ReconnectPrimaryStorageAction()
+    action.uuid = primary_storage_uuid
+    action.timeout = 6000000
+    test_util.action_logger('Reconnect Primary Storage [uuid:] %s' % primary_storage_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory

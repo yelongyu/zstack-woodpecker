@@ -43,6 +43,8 @@ def test():
     test_obj_dict.add_volume(volume)
     volume.check()
     volume.attach(vm)
+    vm.stop()
+    vm.check()
 
     new_vms = vm.clone(vm_names)
     for new_vm in new_vms:

@@ -57,6 +57,7 @@ vcenter2_sync_image_name = sync-img-name
 vcenter2_template_exist = MicroCore-Linux.ova
 vcenter2_network_pattern1 = L3-252-net1
 vcenter2_sync_vm_start_stop = sync-vm-start-stop-use
+vcenter2_no_nic_vm = sync-vm-start-stop-use1
 vcenter2_sync_vm_create_delete = sync-vm-create-delete-use
 vcenter2_sync_image_url = http://SERVER_NAME/mirror/iso/vmdk-image/sync-vm-start-stop-use-1.vmdk
 

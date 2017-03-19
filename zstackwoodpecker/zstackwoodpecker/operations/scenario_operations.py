@@ -103,6 +103,18 @@ def get_deploy_host(vm_name, deploy_config):
                 if host.name_ == vm_name:
                     return host
 
+def setup_vm_no_password(vm_inv, vm_config, deploy_config):
+    vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
+#    ssh.scp_file(os.environ.get('scenarioPriKey'), '/root/.ssh/id_rsa', vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
+#    ssh.scp_file(os.environ.get('scenarioPubKey'), '/root/.ssh/authorized_keys', vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
+    ssh.scp_file('/home/id_rsa', '/root/.ssh/id_rsa', vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
+    ssh.scp_file('/home/id_rsa.pub', '/root/.ssh/authorized_keys', vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
+    cmd = 'chmod go-rwx /root/.ssh/authorized_keys /root/.ssh/id_rsa'
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+    cmd = "sed -i 's/.*StrictHostKeyChecking.*$/StrictHostKeyChecking no/g' /etc/ssh/ssh_config"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+
+
 def setup_host_vm(vm_inv, vm_config, deploy_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
     cmd = 'hostnamectl set-hostname %s' % (vm_ip.replace('.', '-'))
@@ -152,6 +164,29 @@ def setup_host_vm(vm_inv, vm_config, deploy_config):
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host.port_))
         cmd = "echo '%s        ALL=(ALL)       NOPASSWD: ALL' >> /etc/sudoers" % (host.username_)
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host.port_))
+
+def recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config):
+    vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
+    for l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
+        if hasattr(l3network, 'l2NetworkRef'):
+            for l2networkref in xmlobject.safe_list(l3network.l2NetworkRef):
+                nic_name = get_ref_l2_nic_name(l2networkref.text_, deploy_config)
+                if nic_name.find('.') >= 0:
+                    vlan = nic_name.split('.')[1]
+                    test_util.test_logger('[vm:] %s %s is created.' % (vm_ip, nic_name))
+                    cmd = 'vconfig add %s %s' % (nic_name.split('.')[0], vlan)
+                    try:
+                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+                    except:
+                        pass
+
+def setup_mn_host_vm(vm_inv, vm_config):
+    vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
+    vm_nic = os.environ.get('nodeNic')
+    vm_netmask = os.environ.get('nodeNetMask')
+    vm_gateway = os.environ.get('nodeGateway')
+    cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (vm_nic, vm_ip, vm_netmask, vm_gateway)
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
 def setup_backupstorage_vm(vm_inv, vm_config, deploy_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
@@ -230,6 +265,28 @@ def get_ceph_storages_nic_id(ceph_name, scenario_config):
                 nic_id += 1
     return None
 
+def get_fusionstor_storages_nic_id(fusionstor_name, scenario_config):
+    for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            nic_id = 0
+            for l3network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                if hasattr(l3network, 'backupStorageRef') and not hasattr(l3network.backupStorageRef, 'monIp_') and l3network.backupStorageRef.text_ == fusionstor_name:
+                    return nic_id
+                if hasattr(l3network, 'primaryStorageRef') and not hasattr(l3network.primaryStorageRef, 'monIp_') and l3network.primaryStorageRef.text_ == fusionstor_name:
+                    return nic_id
+                nic_id += 1
+
+    for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            nic_id = 0
+            for l3network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                if hasattr(l3network, 'backupStorageRef') and l3network.backupStorageRef.text_ == fusionstor_name:
+                    return nic_id
+                if hasattr(l3network, 'primaryStorageRef') and l3network.primaryStorageRef.text_ == fusionstor_name:
+                    return nic_id
+                nic_id += 1
+    return None
+
 def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
     ceph_storages = dict()
     for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
@@ -263,9 +320,9 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
 
     for ceph_storage in ceph_storages:
         test_util.test_logger('setup ceph [%s] service.' % (ceph_storage))
-	node1_name = ceph_storages[ceph_storage][0]
-	node1_config = get_scenario_config_vm(node1_name, scenario_config)
-	node1_ip = get_scenario_file_vm(node1_name, scenario_file).ip_
+        node1_name = ceph_storages[ceph_storage][0]
+        node1_config = get_scenario_config_vm(node1_name, scenario_config)
+        node1_ip = get_scenario_file_vm(node1_name, scenario_file).ip_
         node_host = get_deploy_host(node1_config.hostRef.text_, deploy_config)
         if not hasattr(node_host, 'port_') or node_host.port_ == '22':
             node_host.port_ = '22'
@@ -277,10 +334,124 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
             if vm_nic_id == None:
                 vm_ips += vm.ip_ + ' '
             else:
-	        vm_ips += vm.ips.ip[vm_nic_id].ip_ + ' '
+                vm_ips += vm.ips.ip[vm_nic_id].ip_ + ' '
         ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ceph_nodes.sh'), '/tmp/setup_ceph_nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host.port_))
         cmd = "bash -ex /tmp/setup_ceph_nodes.sh %s" % (vm_ips)
         ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
+
+def setup_fusionstor_storages(scenario_config, scenario_file, deploy_config):
+    fusionstor_storages = dict()
+    for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            vm_name = vm.name_
+
+            if hasattr(vm, 'backupStorageRef'):
+               for backupStorageRef in xmlobject.safe_list(vm.backupStorageRef):
+                   print backupStorageRef.text_
+                   if backupStorageRef.type_ == 'fusionstor':
+                       if fusionstor_storages.has_key(backupStorageRef.text_):
+                           if vm_name in fusionstor_storages[backupStorageRef.text_]:
+                               continue
+                           else:
+                               fusionstor_storages[backupStorageRef.text_].append(vm_name)
+                       else:
+                           fusionstor_storages[backupStorageRef.text_] = [ vm_name ]
+            if hasattr(vm, 'primaryStorageRef'):
+                for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
+                    print primaryStorageRef.text_
+                    for zone in xmlobject.safe_list(deploy_config.zones.zone):
+                        if primaryStorageRef.type_ == 'fusionstor':
+                            if fusionstor_storages.has_key(backupStorageRef.text_):
+                                if vm_name in fusionstor_storages[backupStorageRef.text_]:
+                                    continue
+                                else:
+                                    fusionstor_storages[backupStorageRef.text_].append(vm_name)
+                            else:
+                                fusionstor_storages[backupStorageRef.text_] = [ vm_name ]
+    if len(fusionstor_storages) > 0:
+        test_util.test_logger('get fusionstor pkg')
+        fusionstorPkg = os.environ['fusionstorPkg']
+    else:
+        test_util.test_logger('no fusionstor pkg return here')
+        return
+
+    for fusionstor_storage in fusionstor_storages:
+        test_util.test_logger('setup fusionstor [%s] service.' % (fusionstor_storage))
+        node1_name = fusionstor_storages[fusionstor_storage][0]
+        node1_config = get_scenario_config_vm(node1_name, scenario_config)
+        node1_ip = get_scenario_file_vm(node1_name, scenario_file).ip_
+        node_host = get_deploy_host(node1_config.hostRef.text_, deploy_config)
+        if not hasattr(node_host, 'port_') or node_host.port_ == '22':
+            node_host.port_ = '22'
+        vm_ips = ''
+        for fusionstor_node in fusionstor_storages[fusionstor_storage]:
+            vm_nic_id = get_fusionstor_storages_nic_id(fusionstor_storage, scenario_config)
+            vm = get_scenario_file_vm(fusionstor_node, scenario_file)
+            if vm_nic_id == None:
+                vm_ips += vm.ip_ + ' '
+            else:
+                vm_ips += vm.ips.ip[vm_nic_id].ip_ + ' '
+
+        ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_fusionstor_nodes.sh'), '/tmp/setup_fusionstor_nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host.port_))
+        ssh.scp_file(fusionstorPkg, fusionstorPkg, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host.port_))
+        cmd = "bash -ex /tmp/setup_fusionstor_nodes.sh %s %s" % ((fusionstorPkg), (vm_ips))
+        try:
+            ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
+        except Exception as e:
+            print str(e)
+        ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
+
+def setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst):
+    ocfs2_storages = dict()
+    smp_url = None
+    for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            vm_name = vm.name_
+            if hasattr(vm, 'primaryStorageRef'):
+                for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
+                    for zone in xmlobject.safe_list(deploy_config.zones.zone):
+                        if primaryStorageRef.type_ == 'ocfs2smp':
+                            if ocfs2_storages.has_key(primaryStorageRef.text_):
+                                if vm_name in ocfs2_storages[primaryStorageRef.text_]:
+                                    continue
+                                else:
+                                    ocfs2_storages[primaryStorageRef.text_].append(vm_name)
+                            else:
+                                ocfs2_storages[primaryStorageRef.text_] = [ vm_name ]
+                                if hasattr(primaryStorageRef, 'url_'):
+                                    smp_url = primaryStorageRef.url_
+
+    for ocfs2_storage in ocfs2_storages:
+        test_util.test_logger('setup ocfs2 [%s] service.' % (ocfs2_storage))
+        node1_name = ocfs2_storages[ocfs2_storage][0]
+        node1_config = get_scenario_config_vm(node1_name, scenario_config)
+        #node1_ip = get_scenario_file_vm(node1_name, scenario_file).ip_
+        node_host = get_deploy_host(node1_config.hostRef.text_, deploy_config)
+        if not hasattr(node_host, 'port_') or node_host.port_ == '22':
+            node_host.port_ = '22'
+
+        vm_ips = ''
+        for ocfs2_node in ocfs2_storages[ocfs2_storage]:
+            vm_nic_id = get_ceph_storages_nic_id(ocfs2_storage, scenario_config)
+            vm = get_scenario_file_vm(ocfs2_node, scenario_file)
+            if vm_nic_id == None:
+                vm_ips += vm.ip_ + ' '
+            else:
+                vm_ips += vm.ips.ip[vm_nic_id].ip_ + ' '
+        #ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ocfs2.sh'), '/tmp/setup_ocfs2.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host.port_))
+        import commands
+        status, woodpecker_ip = commands.getstatusoutput("ip addr show eth0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'")
+        if smp_url:
+            cmd = "SMP_URL=%s bash %s/%s %s" % (smp_url, os.environ.get('woodpecker_root_path'), '/tools/setup_ocfs2.sh', vm_ips)
+        else:
+            cmd = "bash %s/%s %s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ocfs2.sh', vm_ips)
+           
+        ssh.execute(cmd, woodpecker_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
+
+    if ocfs2_storages:
+        for vm_inv, vm_config in zip(vm_inv_lst, vm_cfg_lst):
+            recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
+
 
 def create_vm(http_server_ip, vm_create_option):
     create_vm = api_actions.CreateVmInstanceAction()
@@ -392,6 +563,9 @@ def detach_volume(http_server_ip, volume_uuid, vm_uuid=None, session_uuid=None):
     return evt.inventory
 
 def deploy_scenario(scenario_config, scenario_file, deploy_config):
+    vm_inv_lst = []
+    vm_cfg_lst = []
+    ocfs2smp_shareable_volume_is_created = False
     zstack_management_ip = scenario_config.basicConfig.zstackManagementIp.text_
     root_xml = etree.Element("deployerConfig")
     vms_xml = etree.SubElement(root_xml, 'vms')
@@ -422,6 +596,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
             vm_xml.set('name', vm.name_)
             vm_xml.set('uuid', vm_inv.uuid)
             vm_xml.set('ip', vm_ip)
+            setup_vm_no_password(vm_inv, vm, deploy_config)
+
             ips_xml = etree.SubElement(vm_xml, 'ips')
             for l3_uuid in l3_uuid_list:
                 ip_xml = etree.SubElement(ips_xml, 'ip')
@@ -431,10 +607,14 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 setup_node_vm(vm_inv, vm, deploy_config)
             if xmlobject.has_element(vm, 'hostRef'):
                 setup_host_vm(vm_inv, vm, deploy_config)
+                vm_inv_lst.append(vm_inv)
+                vm_cfg_lst.append(vm)
                 vm_xml.set('managementIp', vm_ip)
+            if xmlobject.has_element(vm, 'mnHostRef'):
+                setup_mn_host_vm(vm_inv, vm)
             if xmlobject.has_element(vm, 'backupStorageRef'):
                 volume_option = test_util.VolumeOption()
-                volume_option.set_name('debug_scenario')
+                volume_option.set_name(os.environ.get('volumeName'))
                 for bs_ref in xmlobject.safe_list(vm.backupStorageRef):
                     if bs_ref.type_ == 'ceph':
                         disk_offering_uuid = bs_ref.offering_uuid_
@@ -443,13 +623,36 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                         attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
                         break
 
+                    if bs_ref.type_ == 'fusionstor':
+                        disk_offering_uuid = bs_ref.offering_uuid_
+                        volume_option.set_disk_offering_uuid(disk_offering_uuid)
+                        volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
+                        volume_inv1 = create_volume_from_offering(zstack_management_ip, volume_option)
+                        volume_inv2 = create_volume_from_offering(zstack_management_ip, volume_option)
+                        attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
+                        attach_volume(zstack_management_ip, volume_inv1.uuid, vm_inv.uuid)
+                        attach_volume(zstack_management_ip, volume_inv2.uuid, vm_inv.uuid)
+                        break
+
                 setup_backupstorage_vm(vm_inv, vm, deploy_config)
             if xmlobject.has_element(vm, 'primaryStorageRef'):
                 setup_primarystorage_vm(vm_inv, vm, deploy_config)
+                for ps_ref in xmlobject.safe_list(vm.primaryStorageRef):
+                    if ps_ref.type_ == 'ocfs2smp':
+                        if ocfs2smp_shareable_volume_is_created == False and hasattr(ps_ref, 'disk_offering_uuid_'):
+                            ocfs2smp_disk_offering_uuid = ps_ref.disk_offering_uuid_
+                            volume_option.set_disk_offering_uuid(ocfs2smp_disk_offering_uuid)
+                            volume_option.set_system_tags(['ephemeral::shareable', 'capability::virtio-scsi'])
+                            share_volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
+                            ocfs2smp_shareable_volume_is_created = True
+                        attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
+                
     xml_string = etree.tostring(root_xml, 'utf-8')
     xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
     open(scenario_file, 'w+').write(xml_string)
     setup_ceph_storages(scenario_config, scenario_file, deploy_config)
+    setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst)
+    setup_fusionstor_storages(scenario_config, scenario_file, deploy_config)
 
 def destroy_scenario(scenario_config, scenario_file):
     with open(scenario_file, 'r') as fd:
