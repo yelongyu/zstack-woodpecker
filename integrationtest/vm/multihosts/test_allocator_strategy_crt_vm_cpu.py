@@ -42,7 +42,7 @@ def prepare_host_with_different_cpu_scenario():
     """
     Prepare vms in hosts
     """
-    #pass
+    global pre_vms
     vm_creation_option = test_util.VmOption()
     image_name = os.environ.get('imageName_s')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
@@ -161,12 +161,19 @@ def test():
 #Will be called only if exception happens in test().
 def error_cleanup():
     global vms
+    global pre_vms
     global test_obj_dict
 
     test_lib.lib_error_cleanup(test_obj_dict)
     clean_host_with_different_cpu_scenario()
 
     for vm in vms:
+        try:
+            vm.destroy()
+        except:
+            pass
+
+    for vm in pre_vms:
         try:
             vm.destroy()
         except:

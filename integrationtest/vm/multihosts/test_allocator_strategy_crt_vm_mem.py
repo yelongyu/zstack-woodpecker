@@ -42,7 +42,8 @@ def prepare_host_with_different_mem_scenario():
     """
     Prepare vms in hosts
     """
-    #pass
+    global pre_vms
+
     vm_creation_option = test_util.VmOption()
     image_name = os.environ.get('imageName_s')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
@@ -98,6 +99,7 @@ def clean_host_with_different_mem_scenario():
     Clean all the vms that generated from prepare function
     """
     global pre_vms
+
     for vm in pre_vms:
         vm.destory()
         vm.expunge()
@@ -161,6 +163,7 @@ def test():
 #Will be called only if exception happens in test().
 def error_cleanup():
     global vms
+    global pre_vms
     global test_obj_dict
 
     test_lib.lib_error_cleanup(test_obj_dict)
@@ -169,5 +172,13 @@ def error_cleanup():
     for vm in vms:
         try:
             vm.destroy()
+            vm.expunge()
+        except:
+            pass
+
+    for vm in pre_vms:
+        try:
+            vm.destroy()
+            vm.expunge()
         except:
             pass
