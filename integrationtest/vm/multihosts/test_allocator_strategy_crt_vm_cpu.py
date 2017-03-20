@@ -10,9 +10,11 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
+import zstackwoodpecker.operations.vm_operations as vm_ops
 import time
 import os
 import threading
+import random
 
 vm = None
 pre_vms = []
@@ -56,6 +58,7 @@ def prepare_host_with_different_cpu_scenario():
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
 
+    ps_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].uuid
     hosts = test_lib.lib_find_hosts_by_ps_uuid(ps_uuid)
     for host in hosts:
         max_vm_num = random.randint(1, 3)
@@ -90,7 +93,7 @@ def compute_total_vm_num_based_on_ps(ps_uuid, each_vm_cpu_consume):
     return total_vm_num
 
 
-def clean_host_with_different_cpu_scenario()
+def clean_host_with_different_cpu_scenario():
     """
     Clean all the vms that generated from prepare function
     """
