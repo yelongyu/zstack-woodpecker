@@ -108,7 +108,7 @@ def test():
     l3_name = os.environ.get('l3VlanNetworkName1')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
 
-    cpuNum = 2
+    cpuNum = 5
     cpuSpeed = 16
     memorySize = 536870912
     name = 'vm-offering-allocator-strategy'
