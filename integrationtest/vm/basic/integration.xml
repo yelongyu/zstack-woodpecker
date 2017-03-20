@@ -39,6 +39,7 @@
 	<case timeout="220" noparallel='True'>vga/test_vm_vga.py</case>
 	<case timeout="220" noparallel='True'>vga/test_vm_qxl.py</case>
 	<case timeout="220" noparallel='True'>vga/test_vm_cirrus.py</case>
+	<case timeout="220" noparallel='True'>vga/test_vm_reboot_vga_mode.py</case>
 	<case timeout="220" noparallel='True'>test_vm_ha_never_stop_disable_host.py</case>
         <case timeout="220" noparallel='True'>test_vm_ha_never_stop_disable_ha.py</case>
         <case timeout="220" >test_vm_ha_never_stop_shutdown.py</case>
