@@ -2134,6 +2134,20 @@ def lib_get_vm_internal_id(vm):
         test_util.test_logger('Can not get [vm:] %s internal ID on [host:] %s' % (vm.uuid, host_ip))
         return None
 
+def lib_get_vm_video_type(vm):
+    cmd = "virsh dumpxml %s |grep vram | awk -F 'type=' '{print $2}' | awk -F \"'\" '{print $2}'" % vm.uuid
+    host_ip = lib_find_host_by_vm(vm).managementIp
+    rsp = lib_execute_sh_cmd_by_agent(host_ip, cmd)
+    if rsp.return_code == 0:
+        ret = rsp.stdout.strip()
+        test_util.test_logger('Find [vm:] %s [internalId:] %s on [host:] %s video type' % (vm.uuid, ret, host_ip))
+        return ret
+    else:
+        test_util.test_logger('shell error info: %s' % rsp.stderr)
+        #test_util.test_logger('shell command: %s' % rsp.command)
+        test_util.test_logger('Can not get [vm:] %s video type on [host:] %s' % (vm.uuid, host_ip))
+        return None
+
 def lib_get_root_image_from_vm(vm):
     for volume in vm.allVolumes:
         if volume.type == vol_header.ROOT_VOLUME:
