@@ -15,19 +15,25 @@ import os
 import threading
 
 vm = None
+pre_vms = []
 vms  = []
 ts   = []
 invs = []
 vm_num = 9
-vm_scenario_lst = [1,3,2,3]
 
-def create_vm_wrapper(vm_obj):
+test_obj_dict = test_state.TestStateDict()
+
+def create_vm_wrapper(i, vm_creation_option):
     global invs, vms
 
-    inv = vm_obj.create()
-    vms.append(vm_obj)
-    if inv:
-        invs.append(inv)
+    vm = test_vm_header.ZstackTestVm()
+    vm_creation_option.set_name("vm-%s" %(i))
+    vm.set_creation_option(vm_creation_option)
+
+    inv = vm.create()
+    vms.append(vm)
+    #if inv:
+    #    invs.append(inv)
 
 
 def prepare_host_with_different_cpu_scenario():
@@ -41,20 +47,24 @@ def prepare_host_with_different_cpu_scenario():
     #l3_name = os.environ.get('l3NoVlanNetworkName1')
     l3_name = os.environ.get('l3VlanNetworkName1')
 
+
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+    #instance_offering_uuid = new_offering.uuid
     vm_creation_option.set_l3_uuids([l3_net_uuid])
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
 
     hosts = test_lib.lib_find_hosts_by_ps_uuid(ps_uuid)
-    for host, i in zip(hosts, vm_scenario_lst):
-        vm_creation_option.set_name('pre-create-vm%s' %(i))
-        vm = test_vm_header.ZstackTestVm()
-        vm_creation_option.set_host_uuid(host.uuid)
-        vm.set_creation_option(vm_creation_option)
-        vm.create()
+    for host in hosts:
+        max_vm_num = random.randint(1, 3)
+        for i in range(max_vm_num):
+            vm_creation_option.set_name('pre-create-vm%s' %(i))
+            vm = test_vm_header.ZstackTestVm()
+            vm_creation_option.set_host_uuid(host.uuid)
+            vm.set_creation_option(vm_creation_option)
+            pre_vms.append(vm.create())
         
 
 def get_vm_num_based_cpu_available_on_host(host_uuid, each_vm_cpu_consume):
@@ -84,53 +94,60 @@ def clean_host_with_different_cpu_scenario()
     """
     Clean all the vms that generated from prepare function
     """
-    global vms
-    for vm in vms:
+    global pre_vms
+    for vm in pre_vms:
         vm.destory()
         vm.expunge()
 
 
 def test():
-    global vm
-    vm_creation_option = test_util.VmOption()
+    global vms
     image_name = os.environ.get('imageName_s')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     #l3_name = os.environ.get('l3NoVlanNetworkName1')
     l3_name = os.environ.get('l3VlanNetworkName1')
-
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
-    conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
-    instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+
+    cpuNum = 2
+    cpuSpeed = 16
+    memorySize = 536870912
+    name = 'vm-offering-allocator-strategy'
+    new_offering_option = test_util.InstanceOfferingOption()
+    new_offering_option.set_cpuNum(cpuNum)
+    new_offering_option.set_cpuSpeed(cpuSpeed)
+    new_offering_option.set_memorySize(memorySize)
+    new_offering_option.set_name(name)
+    new_offering = vm_ops.create_instance_offering(new_offering_option)
+    test_obj_dict.add_instance_offering(new_offering)
+
+    #conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+    #instance_offering_inv = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0]
+    #instance_offering_uuid = instance_offering_inv.uuid
+    instance_offering_uuid = new_offering.uuid
+    each_vm_cpu_consume = cpuNum 
+
+    vm_creation_option = test_util.VmOption()
     vm_creation_option.set_l3_uuids([l3_net_uuid])
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
-    vm_creation_option.set_name('multihost_basic_vm')
-    vm = test_vm_header.ZstackTestVm()
-    vm.set_creation_option(vm_creation_option)
 
     #create different cpu usage of hosts scenario
     prepare_host_with_different_cpu_scenario()
 
-    #ps_uuid = 
-    #each_vm_cpu_consume = 
+    ps_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].uuid
     vm_num = compute_total_vm_num_based_on_ps(ps_uuid, each_vm_cpu_consume)
     #trigger vm create
     for i in range(vm_num):
-        t = threading.Thread(target=create_vm_wrapper, args=(vm))
+        t = threading.Thread(target=create_vm_wrapper, args=(i, vm_creation_option))
         ts.append(t)
         t.start()
 
     for t in ts:
         t.join()
 
-    for vm_inv in invs:
-        if not test_lib.lib_check_login_in_vm(vm_inv.get_vm(), 'root', 'password'):
-            test_util.test_fail("batch creating vm is failed")
-
     for vm in vms:
-        vm.destroy()
-        vm.expunge()
-        vm.check()
+        if not test_lib.lib_check_login_in_vm(vm.get_vm(), 'root', 'password'):
+            test_util.test_fail("batch creating vm is failed")
 
 
     #clean the prepare scenario
@@ -141,7 +158,11 @@ def test():
 #Will be called only if exception happens in test().
 def error_cleanup():
     global vms
+    global test_obj_dict
+
+    test_lib.lib_error_cleanup(test_obj_dict)
     clean_host_with_different_cpu_scenario()
+
     for vm in vms:
         try:
             vm.destroy()
