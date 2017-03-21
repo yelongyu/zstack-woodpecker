@@ -79,6 +79,7 @@ def get_vm_num_based_cpu_available_on_host(host_uuid, each_vm_cpu_consume):
     #host_total_mem = test_lib.lib_get_cpu_memory_capacity(host_uuids = [host_uuid]).totalMemory
     #host_avail_mem = test_lib.lib_get_cpu_memory_capacity(host_uuids = [host_uuid]).availableMemory
 
+    print "total: %s; avail: %s" %(host_total_cpu, host_avail_cpu)
     return host_avail_cpu / each_vm_cpu_consume
     
 
@@ -88,8 +89,11 @@ def compute_total_vm_num_based_on_ps(ps_uuid, each_vm_cpu_consume):
     total_vm_num = 0
     hosts = test_lib.lib_find_hosts_by_ps_uuid(ps_uuid)
     for host in hosts:
-        total_vm_num += get_vm_num_based_cpu_available_on_host(host.uuid, each_vm_cpu_consume)
+        vm_num_on_host = get_vm_num_based_cpu_available_on_host(host.uuid, each_vm_cpu_consume)
+        total_vm_num += vm_num_on_host
+        print "@ALLOCATE: <host uuid: %s; vm num: %s>" %(host.uuid, vm_num_on_host) 
 
+    print "@TOTAL ALLOCATE: <total vm num: %s>" %(total_vm_num)
     return total_vm_num
 
 
