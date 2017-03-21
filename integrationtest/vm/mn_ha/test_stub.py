@@ -151,7 +151,7 @@ def create_basic_vm(disk_offering_uuids=None, session_uuid = None):
 
 def check_directly_up(target_ip, timeout=1):
     try:
-        shell.call('ping -c 1 -W %d %s' % (timeout, target_ip)
+        shell.call('ping -c 1 -W %d %s' % (timeout, target_ip))
     except:
         test_util.test_logger('ping %s failed' % target_ip)
         return False
