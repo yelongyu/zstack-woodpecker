@@ -22,20 +22,31 @@ vms  = []
 ts   = []
 invs = []
 vm_num = 9
+exec_info = []
 
 test_obj_dict = test_state.TestStateDict()
 
 def create_vm_wrapper(i, vm_creation_option):
-    global invs, vms
+    global invs, vms, exec_info
 
-    vm = test_vm_header.ZstackTestVm()
-    vm_creation_option.set_name("vm-%s" %(i))
-    vm.set_creation_option(vm_creation_option)
+    try:
+        vm = test_vm_header.ZstackTestVm()
+        vm_creation_option.set_name("vm-%s" %(i))
+        vm.set_creation_option(vm_creation_option)
+        inv = vm.create()
+        vms.append(vm)
+    except:
+        exec_info.append("vm-%s" %(i))
 
-    inv = vm.create()
-    vms.append(vm)
-    #if inv:
-    #    invs.append(inv)
+
+def check_threads_exception():
+    """
+    """
+    global exec_info
+    
+    if exec_info:
+        issue_vms_string = ' '.join(exec_info)
+        test_util.test_fail("%s is failed to be created." %(issue_vms_string))
 
 
 def prepare_host_with_different_cpu_scenario():
@@ -143,6 +154,7 @@ def test():
 
     ps_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].uuid
     vm_num = compute_total_vm_num_based_on_ps(ps_uuid, each_vm_cpu_consume)
+
     #trigger vm create
     for i in range(vm_num):
         t = threading.Thread(target=create_vm_wrapper, args=(i, vm_creation_option))
@@ -152,10 +164,11 @@ def test():
     for t in ts:
         t.join()
 
+    check_threads_exception()
+
     for vm in vms:
         if not test_lib.lib_check_login_in_vm(vm.get_vm(), 'root', 'password'):
             test_util.test_fail("batch creating vm is failed")
-
 
     #clean the prepare scenario
     clean_host_with_different_cpu_scenario()

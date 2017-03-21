@@ -21,21 +21,34 @@ pre_vms = []
 vms  = []
 ts   = []
 invs = []
+exec_info = []
 vm_num = 9
+
 
 test_obj_dict = test_state.TestStateDict()
 
 def create_vm_wrapper(i, vm_creation_option):
-    global invs, vms
+    global invs, vms, exec_info
 
-    vm = test_vm_header.ZstackTestVm()
-    vm_creation_option.set_name("vm-%s" %(i))
-    vm.set_creation_option(vm_creation_option)
+    try:
+        vm = test_vm_header.ZstackTestVm()
+        vm_creation_option.set_name("vm-%s" %(i))
+        vm.set_creation_option(vm_creation_option)
 
-    inv = vm.create()
-    vms.append(vm)
-    #if inv:
-    #    invs.append(inv)
+        inv = vm.create()
+        vms.append(vm)
+    except:
+        exec_info.append("vm-%s" %(i))
+
+
+def check_threads_exception():
+    """
+    """
+    global exec_info
+    
+    if exec_info:
+        issue_vms_string = ' '.join(exec_info)
+        test_util.test_fail("%s is failed to be created." %(issue_vms_string))
 
 
 def prepare_host_with_different_mem_scenario():
@@ -153,6 +166,8 @@ def test():
 
     for t in ts:
         t.join()
+
+    check_threads_exception()
 
     for vm in vms:
         if not test_lib.lib_check_login_in_vm(vm.get_vm(), 'root', 'password'):
