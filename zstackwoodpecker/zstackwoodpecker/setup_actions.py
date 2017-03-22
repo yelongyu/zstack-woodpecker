@@ -899,6 +899,7 @@ default one' % self.zstack_properties)
             thread.start()
 
         self._wait_for_thread_completion('start management node', 200)
+        time.sleep(10)
 
         if node_exception:
             print 'node start meets exception:'
