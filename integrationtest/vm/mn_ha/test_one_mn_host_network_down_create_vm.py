@@ -26,10 +26,20 @@ def test():
         test_util.test_fail('MN VM is running on %d host(s)' % len(mn_host))
     test_util.test_logger("shutdown host's network [%s] that mn vm is running on" % (mn_host[0].ip_))
     test_stub.shutdown_host_network(mn_host[0], test_lib.all_scenario_config)
-    test_util.test_logger("wait for 2 minutes to see if management node starts again")
+    test_util.test_logger("wait for 20 seconds to see if management node VM starts on another host")
+    time.sleep(20)
+
+    new_mn_host = test_stub.get_host_by_mn_vm(mn_ip, test_lib.all_scenario_config, test_lib.scenario_file)
+    if len(new_mn_host) == 0:
+        test_stub.recover_host(mn_host[0], test_lib.all_scenario_config, test_lib.deploy_config)
+        test_util.test_fail("management node VM does not start after its former host down")
+    elif len(new_mn_host) > 1:
+        test_stub.recover_host(mn_host[0], test_lib.all_scenario_config, test_lib.deploy_config)
+        test_util.test_fail("management node VM starts on more than one host after its former host down")
     try:
-        node_ops.warit_for_management_server_start()
+        node_ops.wait_for_management_server_start()
     except:
+        test_stub.recover_host(mn_host[0], test_lib.all_scenario_config, test_lib.deploy_config)
         test_util.test_fail("management node does not recover after its former host's network down")
 
     vm = test_stub.create_basic_vm()
