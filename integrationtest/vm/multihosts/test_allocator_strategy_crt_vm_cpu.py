@@ -71,14 +71,17 @@ def prepare_host_with_different_cpu_scenario():
 
     ps_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].uuid
     hosts = test_lib.lib_find_hosts_by_ps_uuid(ps_uuid)
-    for host in hosts:
-        max_vm_num = random.randint(1, 3)
+    host_id = 0
+    for host, max_vm_num in zip(hosts,[2,3,1,2]):
+        host_id +=1
         for i in range(max_vm_num):
-            vm_creation_option.set_name('pre-create-vm%s' %(i))
+            print "host_id=%s; i=%s" %(host_id, i)
+            vm_creation_option.set_name('pre-create-vm-%s-%s' %(host_id, i))
             vm = test_vm_header.ZstackTestVm()
             vm_creation_option.set_host_uuid(host.uuid)
             vm.set_creation_option(vm_creation_option)
-            pre_vms.append(vm.create())
+            vm.create()
+            pre_vms.append(vm)
         
 
 def get_vm_num_based_cpu_available_on_host(host_uuid, each_vm_cpu_consume):
@@ -91,7 +94,7 @@ def get_vm_num_based_cpu_available_on_host(host_uuid, each_vm_cpu_consume):
     #host_avail_mem = test_lib.lib_get_cpu_memory_capacity(host_uuids = [host_uuid]).availableMemory
 
     print "total: %s; avail: %s" %(host_total_cpu, host_avail_cpu)
-    return host_avail_cpu / each_vm_cpu_consume
+    return host_avail_cpu / each_vm_cpu_consume - 1
     
 
 def compute_total_vm_num_based_on_ps(ps_uuid, each_vm_cpu_consume):
@@ -122,8 +125,8 @@ def test():
     global vms
     image_name = os.environ.get('imageName_s')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
-    #l3_name = os.environ.get('l3NoVlanNetworkName1')
-    l3_name = os.environ.get('l3PublicNetworkName')
+    l3_name = os.environ.get('l3NoVlanNetworkName1')
+    #l3_name = os.environ.get('l3PublicNetworkName')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
 
     cpuNum = 5
@@ -165,10 +168,6 @@ def test():
         t.join()
 
     check_threads_exception()
-
-    for vm in vms:
-        if not test_lib.lib_check_login_in_vm(vm.get_vm(), 'root', 'password'):
-            test_util.test_fail("batch creating vm is failed")
 
     #clean the prepare scenario
     clean_host_with_different_cpu_scenario()
