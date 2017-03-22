@@ -126,7 +126,7 @@ def shutdown_host_network(host_vm, scenarioConfig):
     l2network_nic = os.environ.get('l2ManagementNetworkInterface')
     host_config = sce_ops.get_scenario_config_vm(host_vm.name_, scenarioConfig)
     cmd = "ifdown %s" % (l2network_nic)
-    test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, vm_config.imagePassword_,cmd)
+    test_lib.lib_execute_ssh_cmd(host_vm.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
 
 def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
               disk_offering_uuids = None, default_l3_uuid = None, \
