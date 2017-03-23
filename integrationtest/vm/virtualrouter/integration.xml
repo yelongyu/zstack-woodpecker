@@ -8,7 +8,7 @@
         <case timeout='600' repeat='1'>test_update_vm_cpu_memory2.py</case>
         <case timeout='1200' repeat='1'>account/test_vm_ops_by_normal_account.py</case>
         <case timeout='2400' repeat='1'>test_create_vm_install_iso.py</case>
-	<case timeout='2400' repeat='1'>test_heartbeat_ceph.py</case>
+        <case timeout='2400' repeat='1'>test_heartbeat_ceph.py</case>
         <case timeout='800' repeat='1'>novlan/test_create_vm.py</case>
         <case timeout='800' repeat='1'>novlan/test_create_vm_on_specified_ps.py</case>
         <case timeout='800' repeat='1'>novlan/test_stop_vm_force.py</case>
@@ -85,8 +85,8 @@
         <case timeout='800'  repeat='1'>eip/test_del_vip_before_add_eip_to_vm.py</case>
         <case timeout='1000'  repeat='1' noparallel='True'>eip/test_eip_sg_tcp.py</case>
         <case timeout='800'  repeat='1'>eip/test_vm_ops.py</case>
-	<case timeout='800'  repeat='1'>eip/test_vm_ops2.py</case>
-	<case timeout='800'  repeat='1'>eip/test_check_download_on_eip_vm.py</case>
+        <case timeout='800'  repeat='1'>eip/test_vm_ops2.py</case>
+        <case timeout='800'  repeat='1'>eip/test_check_download_on_eip_vm.py</case>
         <case timeout='800'  repeat='1'>lb/test_create_lb_alone_vr.py</case>
         <case timeout='800'  repeat='1'>lb/test_create_lb_source.py</case>
         <case timeout='800'  repeat='1'>lb/test_create_lb.py</case>
