@@ -60,8 +60,8 @@ def prepare_host_with_different_mem_scenario():
     vm_creation_option = test_util.VmOption()
     image_name = os.environ.get('imageName_s')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
-    #l3_name = os.environ.get('l3NoVlanNetworkName1')
-    l3_name = os.environ.get('l3PublicNetworkName')
+    l3_name = os.environ.get('l3NoVlanNetworkName1')
+    #l3_name = os.environ.get('l3PublicNetworkName')
 
 
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
@@ -121,8 +121,22 @@ def clean_host_with_different_mem_scenario():
     global pre_vms
 
     for vm in pre_vms:
-        vm.destory()
-        vm.expunge()
+        try:
+            vm.destroy()
+        except:
+            pass
+
+
+def clean_parallel_created_vm():
+    """
+    """
+    global vms
+
+    for vm in vms:
+        try:
+            vm.destroy()
+        except:
+            pass
 
 
 def test():
@@ -174,6 +188,7 @@ def test():
 
     #clean the prepare scenario
     clean_host_with_different_mem_scenario()
+    clean_parallel_created_vm()
 
     test_util.test_pass('Create VM Test Success')
 
@@ -185,17 +200,4 @@ def error_cleanup():
 
     test_lib.lib_error_cleanup(test_obj_dict)
     clean_host_with_different_mem_scenario()
-
-    for vm in vms:
-        try:
-            vm.destroy()
-            vm.expunge()
-        except:
-            pass
-
-    for vm in pre_vms:
-        try:
-            vm.destroy()
-            vm.expunge()
-        except:
-            pass
+    clean_parallel_created_vm()
