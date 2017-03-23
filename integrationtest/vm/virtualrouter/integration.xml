@@ -85,7 +85,8 @@
         <case timeout='800'  repeat='1'>eip/test_del_vip_before_add_eip_to_vm.py</case>
         <case timeout='1000'  repeat='1' noparallel='True'>eip/test_eip_sg_tcp.py</case>
         <case timeout='800'  repeat='1'>eip/test_vm_ops.py</case>
-        <case timeout='800'  repeat='1'>eip/test_vm_ops2.py</case>
+	<case timeout='800'  repeat='1'>eip/test_vm_ops2.py</case>
+	<case timeout='800'  repeat='1'>eip/test_check_download_on_eip_vm.py</case>
         <case timeout='800'  repeat='1'>lb/test_create_lb_alone_vr.py</case>
         <case timeout='800'  repeat='1'>lb/test_create_lb_source.py</case>
         <case timeout='800'  repeat='1'>lb/test_create_lb.py</case>
