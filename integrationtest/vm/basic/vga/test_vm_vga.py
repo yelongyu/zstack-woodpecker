@@ -8,7 +8,7 @@ New Integration Test for VM vga mode.
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.config_operations as conf_ops
 import zstackwoodpecker.test_util as test_util
-import test_stub
+test_stub = test_lib.lib_get_test_stub()
 
 _config_ = {
         'timeout' : 360,
