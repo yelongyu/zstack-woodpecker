@@ -77,6 +77,7 @@ if scenario_config_path != None and scenario_config_path != "":
     #Detailed zstack deployment information, including zones/cluster/hosts...
     deploy_scenario_config = all_scenario_config.deployerConfig
     #setup_scenario_plan = setup_actions.Plan(all_scenario_config)
+    scenario_config_obj.expose_config_variable()
 else:
     scenario_config = None
     all_scenario_config = None
