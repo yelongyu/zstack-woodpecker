@@ -54,7 +54,7 @@ def recover_host(host_vm, scenarioConfig, deploy_config):
                     test_lib.lib_execute_ssh_cmd(host_ip, host_config.imageUsername_, host_config.imagePassword_, cmd)
     return True
 
-def get_host_by_mn_vm(vm_uuid, scenarioConfig, scenarioFile):
+def get_host_by_mn_vm(scenarioConfig, scenarioFile):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
     if len(mn_host_list) < 1:
         return []
@@ -87,6 +87,11 @@ def get_mn_host(scenarioConfig, scenarioFile):
                         if s_vm.name_ == vm.name_:
                             mn_host_list.append(s_vm)
     return mn_host_list
+
+def migrate_mn_vm(target_host, scenarioConfig):
+    cmd = 'z -migrateTo %s' % (target_host.ip_)
+    host_config = sce_ops.get_scenario_config_vm(target_host.name_, scenarioConfig)
+    test_lib.lib_execute_ssh_cmd(target_host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
 
 def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
