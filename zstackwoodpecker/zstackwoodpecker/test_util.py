@@ -442,6 +442,22 @@ class BackupStorageOption(DataOption):
     def get_import_images(self):
         return self.importImages
 
+    def get_hostname(self):
+        return self.hostname
+
+    def get_username(self):
+        return self.username
+
+    def get_password(self):
+        return self.password
+
+    def get_url(self):
+        return self.url
+
+    def get_sshPort(self):
+        return self.sshPort
+
+
 class CephBackupStorageOption(BackupStorageOption):
     def __init__(self):
         self.monUrls = None
