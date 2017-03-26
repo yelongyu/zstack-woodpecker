@@ -17,6 +17,7 @@ import xml.dom.minidom as minidom
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstacklib.utils.ssh as ssh
+import zstackwoodpecker.operations.resource_operations as res_ops
 
 def sync_call(http_server_ip, apicmd, session_uuid):
     api_instance = api.Api(host = http_server_ip, port = '8080')
@@ -452,6 +453,42 @@ def setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_confi
         for vm_inv, vm_config in zip(vm_inv_lst, vm_cfg_lst):
             recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
 
+def create_sftp_backup_storage(http_server_ip, backup_storage_option, session_uuid=None):
+    action = api_actions.AddSftpBackupStorageAction()
+    action.timeout = 300000
+    action.name = backup_storage_option.get_name()
+    action.description = backup_storage_option.get_description()
+    action.type = backup_storage_option.get_type()
+    action.url = backup_storage_option.get_url()
+    action.hostname = backup_storage_option.get_hostname()
+    action.username = backup_storage_option.get_username()
+    action.password = backup_storage_option.get_password()
+    action.sshPort = backup_storage_option.get_sshPort()
+    action.resourceUuid = backup_storage_option.get_resource_uuid()
+    action.importImages = backup_storage_option.get_import_images()
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    test_util.action_logger('Create Sftp Backup Storage [uuid:] %s [name:] %s' % \
+            (evt.inventory.uuid, action.name))
+    return evt.inventory
+
+def delete_backup_storage(http_server_ip, backup_storage_uuid, session_uuid=None):
+    action = api_actions.DeleteBackupStorageAction()
+    action.uuid = backup_storage_uuid
+    action.timeout = 6000000
+    test_util.action_logger('Delete Backup Storage [uuid:] %s' % backup_storage_uuid)
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    return evt.inventory
+
+def create_zone(http_server_ip, zone_option, session_uuid=None):
+    action = api_actions.CreateZoneAction()
+    action.timeout = 30000
+    action.name = zone_option.get_name()
+    action.description = zone_option.get_description()
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    test_util.action_logger('Add Zone [uuid:] %s [name:] %s' % \
+            (evt.uuid, action.name))
+    return evt.inventory
+
 
 def create_vm(http_server_ip, vm_create_option):
     create_vm = api_actions.CreateVmInstanceAction()
@@ -561,6 +598,12 @@ def detach_volume(http_server_ip, volume_uuid, vm_uuid=None, session_uuid=None):
     test_util.action_logger('Detach Volume [uuid:] %s' % volume_uuid)
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     return evt.inventory
+
+def query_resource(http_server_ip, resource, conditions = [], session_uuid=None, count='false'):
+    action = res_ops._gen_query_action(resource)
+    action.conditions = conditions
+    ret = execute_action_with_session(http_server_ip, action, session_uuid)
+    return ret
 
 def deploy_scenario(scenario_config, scenario_file, deploy_config):
     vm_inv_lst = []
