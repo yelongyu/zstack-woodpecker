@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+<basicConfig>
+  <zstackManagementIp>$zstackManagementIp</zstackManagementIp>
+  <zstackAdminPassword>$zstackAdminPassword</zstackAdminPassword>
+  <zstackPkg>$zstackPkg</zstackPkg>
+  <zstackISO>$zstackISO</zstackISO>
+</basicConfig>
+
+<deployerConfig xmlns="http://zstack.org/schema/zstack">
+</deployerConfig>
+</config>
