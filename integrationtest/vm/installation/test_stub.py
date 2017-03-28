@@ -175,6 +175,7 @@ def start_mn(vm_ip, tmp_file):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     cmd = '%s "zstack-ctl start"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
+    time.sleep(10)
 
 def update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
