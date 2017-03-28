@@ -181,6 +181,8 @@ def update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     vm_username = os.environ['imageUsername']
     vm_password = os.environ['imagePassword']
+    cmd = '%s "rm -rf /opt/zstack.iso"' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
     ssh.scp_file(iso_path, '/opt/zstack.iso', vm_ip, vm_username, vm_password)
     ssh.scp_file(upgrade_script_path, '/opt/zstack-upgrade', vm_ip, vm_username, vm_password)
     cmd = '%s "mkdir -p /opt/zstack-dvd"' % ssh_cmd
