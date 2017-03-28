@@ -23,6 +23,7 @@ def test():
     test_util.test_dsc('Create test vm to test zstack upgrade by -u.')
     image_name = os.environ.get('imageName_i_c7_z_1.3')
     iso_path = os.environ.get('iso_path')
+    old_iso_path = os.environ.get('old_iso_path')
     zstack_latest_version = os.environ.get('zstackLatestVersion')
     zstack_latest_path = os.environ.get('zstackLatestInstaller')
     vm_name = os.environ.get('vmName')
@@ -40,13 +41,14 @@ def test():
     test_stub.start_mn(vm_ip, tmp_file)
     test_stub.check_installation(vm_ip, tmp_file)
 
-    test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
+    test_stub.update_iso(vm_ip, tmp_file, old_iso_path, upgrade_script_path)
 
     pkg_num = 1.4
     curren_num = float(os.environ.get('releasePkgNum'))
     while pkg_num <= curren_num:
         test_util.test_logger('Upgrade zstack to %s' % pkg_num)
-        upgrade_target_file = '/root/zstack-upgrade-all-in-one.tgz'
+        if pkg_num == 1.7:
+            test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
         upgrade_pkg = os.environ.get('zstackPkg_%s' % pkg_num)
         test_stub.upgrade_zstack(vm_ip, upgrade_pkg, tmp_file) 
         test_stub.start_mn(vm_ip, tmp_file)
@@ -55,7 +57,6 @@ def test():
         pkg_num = pkg_num + 0.1
 
     test_util.test_dsc('Upgrade zstack to latest') 
-    upgrade_target_file = '/root/zstack-upgrade-all-in-one.tgz' 
 
     test_stub.upgrade_zstack(vm_ip, zstack_latest_path, tmp_file) 
     test_stub.start_mn(vm_ip, tmp_file)
