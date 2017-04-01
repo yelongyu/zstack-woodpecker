@@ -89,7 +89,7 @@ def get_mn_host(scenarioConfig, scenarioFile):
     return mn_host_list
 
 def migrate_mn_vm(target_host, scenarioConfig):
-    cmd = 'z -migrateTo %s' % (target_host.ip_)
+    cmd = 'zs-ha -migrateTo %s' % (target_host.ip_)
     host_config = sce_ops.get_scenario_config_vm(target_host.name_, scenarioConfig)
     test_lib.lib_execute_ssh_cmd(target_host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
 
