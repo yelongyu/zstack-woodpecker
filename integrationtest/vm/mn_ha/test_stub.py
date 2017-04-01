@@ -120,8 +120,8 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
     installer_path = "/home/%s/zs-ha" % test_host_ip
     config_path = "/home/%s/config.json" % test_host_ip
     ssh.scp_file(config_json,config_path, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_)
-    cmd1="ceph osd pool create mevoco 128"
-    cmd2="qemu-img convert -f qcow2 -O raw %s rbd:mevoco/mnvm.img" % mn_image_path
+    cmd1="ceph osd pool create zstack 128"
+    cmd2="qemu-img convert -f qcow2 -O raw %s rbd:zstack/mnvm.img" % mn_image_path
     cmd3='%s -i -a -p %s -c %s' % (installer_path, host_password, config_path)
     ssh.execute(cmd1, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
     ssh.execute(cmd2, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
