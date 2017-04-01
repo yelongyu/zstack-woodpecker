@@ -48,7 +48,7 @@ def test():
 
     vm.set_state(vm_header.RUNNING)
     vm.check()
-    vm.destroy()
+    vm.suspend()
     vm.check()
 
     ps_ops.change_primary_storage_state(ps_uuid, 'enable')
