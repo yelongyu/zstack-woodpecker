@@ -64,6 +64,8 @@ def main(argv):
             rpdb.set_trace()
         traceback.print_exc(file=sys.stdout)
         cleanup(test_case)
+    finally:
+        recover(test_case)
 
 def cleanup(test_case):
     global cleanup_times
@@ -90,6 +92,18 @@ def cleanup(test_case):
             traceback.print_exc(file=sys.stdout)
         finally:
             raise Exception('Test Case Failed. Please look for exception happened early.')
+
+def recover(test_case):
+    test_util.test_dsc('Test Case Env Recover')
+    print '-'*40
+    if not hasattr(test_case, 'env_recover'):
+        print "env_recover 1"
+    test_util.test_dsc('-------------Test Env Recover Function------------------')
+    try:
+        test_case.env_recover()
+    except:
+        print('Just for your information, there is an exception when calling test case env recover function.')
+        traceback.print_exc(file=sys.stdout)
 
 if __name__ == '__main__':
     debug.install_runtime_tracedumper()
