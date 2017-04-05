@@ -14,8 +14,11 @@ import os
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
+delete_policy = None
 
 def test():
+    global test_obj_dict
+    global delete_policy
     delete_policy = test_lib.lib_set_delete_policy('vm', 'Delay')
     vm = test_stub.create_vm(vm_name = 'basic-test-vm')
     test_obj_dict.add_vm(vm)
@@ -26,15 +29,28 @@ def test():
     vm.destroy()
     vm.check()
 
-    vm.resume()
-    vm.check()
-
-    vm.start()
+    vm.recover()
     vm.check()
 
     test_lib.lib_set_delete_policy('vm', delete_policy)
-    test_util.test_pass('Create VM Test Success')
+    try:
+        vm.start()
+    except Exception, e:
+        if "please attach a nic and try again" in str(e):
+            test_util.test_pass('test detach l3 check vm passed.')
+
+    test_util.test_fail('test detach l3 check vm status is not as expected, expected should be not started with error message have not nic.')
+
+
+def env_recover():
+    global test_obj_dict
+    test_lib.lib_error_cleanup(test_obj_dict)
+
+
 
 #Will be called only if exception happens in test().
 def error_cleanup():
+    global test_obj_dict
+    global delete_policy
     test_lib.lib_error_cleanup(test_obj_dict)
+    test_lib.lib_set_delete_policy('vm', delete_policy)
