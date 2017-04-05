@@ -29,7 +29,7 @@ def test():
             target_host = host
             break
     if target_host:
-        test_stub.migrate_mn_vm(target_host, test_lib.all_scenario_config)
+        test_stub.migrate_mn_vm(ori_host, target_host, test_lib.all_scenario_config)
         cur_host = test_stub.get_host_by_mn_vm(test_lib.all_scenario_config, test_lib.scenario_file)
         if len(cur_host) != 1:
             test_util.test_fail('MN VM is running on %d host(s)' % len(cur_host))

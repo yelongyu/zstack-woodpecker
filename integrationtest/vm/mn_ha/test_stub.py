@@ -61,7 +61,7 @@ def get_host_by_mn_vm(scenarioConfig, scenarioFile):
     host_list = []
     for host in mn_host_list:
         host_config = sce_ops.get_scenario_config_vm(host.name_, scenarioConfig)
-        cmd = "virsh list | grep \"ZStack Management Node VM\""
+        cmd = "virsh list | grep -v paused | grep \"ZStack Management Node VM\""
         try:
             vm_list = test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
             if vm_list:
@@ -88,10 +88,10 @@ def get_mn_host(scenarioConfig, scenarioFile):
                             mn_host_list.append(s_vm)
     return mn_host_list
 
-def migrate_mn_vm(target_host, scenarioConfig):
+def migrate_mn_vm(origin_host, target_host, scenarioConfig):
     cmd = 'zs-ha -migrateTo %s' % (target_host.ip_)
-    host_config = sce_ops.get_scenario_config_vm(target_host.name_, scenarioConfig)
-    test_lib.lib_execute_ssh_cmd(target_host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
+    host_config = sce_ops.get_scenario_config_vm(origin_host.name_, scenarioConfig)
+    test_lib.lib_execute_ssh_cmd(origin_host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
 
 def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
