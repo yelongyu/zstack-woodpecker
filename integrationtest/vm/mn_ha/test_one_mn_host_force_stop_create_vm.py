@@ -30,19 +30,15 @@ def test():
     try:
         new_mn_host = test_stub.get_host_by_mn_vm(test_lib.all_scenario_config, test_lib.scenario_file)
         if len(new_mn_host) == 0:
-            test_stub.recover_host(mn_host[0], test_lib.all_scenario_config, test_lib.deploy_config)
             test_util.test_fail("management node VM does not start after its former host down")
         elif len(new_mn_host) > 1:
-            test_stub.recover_host(mn_host[0], test_lib.all_scenario_config, test_lib.deploy_config)
             test_util.test_fail("management node VM starts on more than one host after its former host down")
     except:
-        test_stub.recover_host(mn_host[0], test_lib.all_scenario_config, test_lib.deploy_config)
         test_util.test_fail("management node VM does not start after its former host down")
     test_util.test_logger("wait for 5 minutes to see if management node starts again")
     try:
         node_ops.wait_for_management_server_start(300)
     except:
-        test_stub.recover_host(mn_host[0], test_lib.all_scenario_config, test_lib.deploy_config)
         test_util.test_fail("management node does not recover after its former host down")
 
     test_util.test_logger("try to create vm, timeout is 30s")
@@ -56,15 +52,17 @@ def test():
             time_out -= 1
     if time_out == 0:
         test_util.test_logger("recover host: %s" % (mn_host[0].ip_))
-        test_stub.recover_host(mn_host[0], test_lib.all_scenario_config, test_lib.deploy_config)
         test_util.test_fail('Fail to create vm after mn is ready')
     vm.check()
     vm.destroy()
 
     test_util.test_logger("recover host: %s" % (mn_host[0].ip_))
-    test_stub.recover_host(mn_host[0], test_lib.all_scenario_config, test_lib.deploy_config)
 
     test_util.test_pass('Create VM Test Success')
+
+#Will be called what ever test result is
+def env_recover():
+    test_stub.recover_host(mn_host[0], test_lib.all_scenario_config, test_lib.deploy_config)
 
 #Will be called only if exception happens in test().
 def error_cleanup():
@@ -75,4 +73,3 @@ def error_cleanup():
         except:
             pass
     test_util.test_logger("recover host: %s" % (mn_host[0].ip_))
-    test_stub.recover_host(mn_host[0], test_lib.all_scenario_config, test_lib.deploy_config)
