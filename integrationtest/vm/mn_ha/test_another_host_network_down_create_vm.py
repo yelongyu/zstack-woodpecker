@@ -32,7 +32,7 @@ def test():
         test_util.test_fail('there is only one mn host')
 
     test_util.test_logger("shutdown host's network [%s] that mn vm is not running on" % (test_host.ip_))
-    test_stub.shutdown_host_network(test_host, test_lib.all_scenario_config, 60)
+    test_stub.shutdown_host_network(test_host, test_lib.all_scenario_config)
     test_util.test_logger("wait for 20 seconds to see if management node VM starts on another host")
     time.sleep(20)
     try:
@@ -50,9 +50,9 @@ def test():
             vm = test_stub.create_basic_vm()
             vm.check()
             vm.destroy()
-            test_util.test_pass('Create VM Test Success')
         except:
             test_util.test_fail('Fail to create vm after mn is ready')
+        test_util.test_pass('Create VM Test Success')
 
 #Will be called what ever test result is
 def env_recover():
