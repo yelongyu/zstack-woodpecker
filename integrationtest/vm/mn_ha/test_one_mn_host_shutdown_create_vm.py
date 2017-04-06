@@ -52,16 +52,17 @@ def test():
             time_out -= 1
     if time_out == 0:
         test_util.test_logger("recover host: %s" % (mn_host[0].ip_))
-        test_stub.recover_host(mn_host[0], test_lib.all_scenario_config, test_lib.deploy_config)
         test_util.test_fail('Fail to create vm after mn is ready')
 
     vm.check()
     vm.destroy()
 
     test_util.test_logger("recover host: %s" % (mn_host[0].ip_))
-    test_stub.recover_host(mn_host[0], test_lib.all_scenario_config, test_lib.deploy_config)
-
     test_util.test_pass('Create VM Test Success')
+
+#Will be called what ever test result is
+def env_recover():
+    test_stub.recover_host(mn_host[0], test_lib.all_scenario_config, test_lib.deploy_config)
 
 #Will be called only if exception happens in test().
 def error_cleanup():
@@ -72,4 +73,3 @@ def error_cleanup():
         except:
             pass
     test_util.test_logger("recover host: %s" % (mn_host[0].ip_))
-    test_stub.recover_host(mn_host[0], test_lib.all_scenario_config, test_lib.deploy_config)
