@@ -24,7 +24,7 @@ def test():
     if len(mn_host) != 1:
         test_util.test_fail('MN VM is running on %d host(s)' % len(mn_host))
     test_util.test_logger("shutdown host's network [%s] that mn vm is running on" % (mn_host[0].ip_))
-    test_stub.shutdown_host_network(mn_host[0], test_lib.all_scenario_config, 60)
+    test_stub.shutdown_host_network(mn_host[0], test_lib.all_scenario_config)
     test_util.test_logger("wait for 60 seconds to see if management node VM starts on another host")
     time.sleep(60)
 
@@ -54,6 +54,10 @@ def test():
     vm.destroy()
 
     test_util.test_pass('Create VM Test Success')
+
+#Will be called what ever test result is
+def env_recover():
+    test_stub.recover_host(mn_host[0], test_lib.all_scenario_config, test_lib.deploy_config)
 
 #Will be called only if exception happens in test().
 def error_cleanup():
