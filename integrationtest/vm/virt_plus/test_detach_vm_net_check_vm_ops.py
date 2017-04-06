@@ -9,6 +9,7 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
+import zstackwoodpecker.header.vm as vm_header
 import time
 import os
 
@@ -20,16 +21,23 @@ def test():
     global test_obj_dict
     global delete_policy
     delete_policy = test_lib.lib_set_delete_policy('vm', 'Delay')
-    vm = test_stub.create_vm(vm_name = 'basic-test-vm')
+
+    l3_name = os.environ.get('l3VlanNetworkName1')
+    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    image_name = os.environ.get('imageName_net')
+    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    vm = test_stub.create_vm([l3_net_uuid], image_uuid, 'basic-test-vm')
     test_obj_dict.add_vm(vm)
     vm.check()
     vm_nic_uuid = vm.vm.vmNics[0].uuid
     net_ops.detach_l3(vm_nic_uuid)
 
     vm.destroy()
+    vm.set_state(vm_header.DESTROYED)
     vm.check()
 
     vm.recover()
+    vm.set_state(vm_header.STOPPED)
     vm.check()
 
     test_lib.lib_set_delete_policy('vm', delete_policy)
