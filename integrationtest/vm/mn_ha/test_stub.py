@@ -54,6 +54,21 @@ def recover_host(host_vm, scenarioConfig, deploy_config):
                     test_lib.lib_execute_ssh_cmd(host_ip, host_config.imageUsername_, host_config.imagePassword_, cmd)
     return True
 
+def destroy_mn_vm(mn_host, scenarioConfig):
+    cmd = "virsh destroy \"ZStack Management Node VM\""
+    host_config = sce_ops.get_scenario_config_vm(mn_host.name_, scenarioConfig)
+    test_lib.lib_execute_ssh_cmd(mn_host.ip_, host_config.imageUsername_, host_config.imagePassword_, cmd)
+
+def start_consul(mn_host, scenarioConfig):
+    cmd = "systemctl start consul.service"
+    host_config = sce_ops.get_scenario_config_vm(mn_host.name_, scenarioConfig)
+    test_lib.lib_execute_ssh_cmd(mn_host.ip_, host_config.imageUsername_, host_config.imagePassword_, cmd)
+
+def stop_consul(mn_host, scenarioConfig):
+    cmd = "systemctl stop consul.service"
+    host_config = sce_ops.get_scenario_config_vm(mn_host.name_, scenarioConfig)
+    test_lib.lib_execute_ssh_cmd(mn_host.ip_, host_config.imageUsername_, host_config.imagePassword_, cmd)
+
 def get_host_by_mn_vm(scenarioConfig, scenarioFile):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
     if len(mn_host_list) < 1:
