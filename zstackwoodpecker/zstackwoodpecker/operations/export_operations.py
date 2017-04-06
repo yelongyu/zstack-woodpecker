@@ -173,6 +173,8 @@ def add_ip_range(l3_xml, ip_ranges):
         set_xml_item_attr(ip_range_xml, 'netmask', ip_range.netmask)
 
 def add_dns(l3_xml, dnss):
+    if not dnss:
+        return
     for dns in dnss:
         add_xml_item_value(l3_xml, 'dns', dns)
 

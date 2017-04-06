@@ -40,7 +40,7 @@ def test():
     vm.destroy()
     vm.check()
 
-    vm.resume()
+    vm.recover()
     vm.check()
 
     test_lib.lib_set_delete_policy('vm', delete_policy)
