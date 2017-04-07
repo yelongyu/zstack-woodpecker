@@ -6,6 +6,7 @@ New Integration Test for detaching vm network, migrate and attaching network.
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
+import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
@@ -22,16 +23,24 @@ def test():
     if pss[0].type != "LocalStorage":
         test_util.test_skip("this test is designed to run on localstorage, skip on other ps type.")    
 
-    vm = test_stub.create_vm(vm_name = 'basic-test-vm')
+    vm = test_stub.create_vr_vm('vm1', 'imageName_net', 'l3VlanNetwork3')
     test_obj_dict.add_vm(vm)
     vm.check()
 
     vm_nic_uuid = vm.vm.vmNics[0].uuid
     net_ops.detach_l3(vm_nic_uuid)
 
-    test_stub.migrate_vm_to_random_host(vm)
+    vm.stop()
+    vm.check()
 
-    net_ops.attach_l3(vm_nic_uuid, vm.vm.uuid)
+    #test_stub.migrate_vm_to_random_host(vm)
+    target_host = test_lib.lib_find_random_host(vm.vm)
+    vol_ops.migrate_volume(vm.get_vm().allVolumes[0].uuid, target_host.uuid)
+
+    l3_name = os.environ.get('l3VlanNetwork3')
+    l3_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+
+    net_ops.attach_l3(l3_uuid, vm.vm.uuid)
 
     vm.start()
     vm.check()
