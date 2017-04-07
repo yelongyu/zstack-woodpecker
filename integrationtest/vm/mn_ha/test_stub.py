@@ -132,7 +132,7 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
     test_host_config = sce_ops.get_scenario_config_vm(test_host.name_, scenarioConfig)
     host_password = test_host_config.imagePassword_
     mn_image_path = "/home/%s/mn.qcow2" % test_host_ip
-    installer_path = "/home/%s/zsha" % test_host_ip
+    installer_path = "/home/%s/zs-ha" % test_host_ip
     config_path = "/home/%s/config.json" % test_host_ip
     ssh.scp_file(config_json,config_path, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_)
     cmd1="ceph osd pool create zstack 128"
