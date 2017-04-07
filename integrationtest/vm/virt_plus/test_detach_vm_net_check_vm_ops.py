@@ -23,10 +23,9 @@ def test():
     delete_policy = test_lib.lib_set_delete_policy('vm', 'Delay')
 
     l3_name = os.environ.get('l3VlanNetworkName1')
-    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    #l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     image_name = os.environ.get('imageName_net')
-    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
-    vm = test_stub.create_vm([l3_net_uuid], image_uuid, 'basic-test-vm')
+    vm = test_stub.create_vm(l3_name=l3_name, image_name=image_name, vm_name='basic-test-vm')
     test_obj_dict.add_vm(vm)
     vm.check()
     vm_nic_uuid = vm.vm.vmNics[0].uuid

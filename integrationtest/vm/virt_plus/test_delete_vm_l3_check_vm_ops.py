@@ -10,6 +10,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.operations.export_operations as exp_ops
+import zstackwoodpecker.header.vm as vm_header
 import os
 
 
@@ -38,9 +39,11 @@ def test():
     #net_ops.detach_l3(vm_nic_uuid)
 
     vm.destroy()
+    vm.set_state(vm_header.DESTROYED) 
     vm.check()
 
     vm.recover()
+    vm.set_state(vm_header.STOPPED)
     vm.check()
 
     test_lib.lib_set_delete_policy('vm', delete_policy)
