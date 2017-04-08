@@ -69,6 +69,16 @@ def stop_consul(mn_host, scenarioConfig):
     host_config = sce_ops.get_scenario_config_vm(mn_host.name_, scenarioConfig)
     test_lib.lib_execute_ssh_cmd(mn_host.ip_, host_config.imageUsername_, host_config.imagePassword_, cmd)
 
+def stop_zsha(mn_host, scenarioConfig):
+    cmd = "zsha --stop"       
+    host_config = sce_ops.get_scenario_config_vm(mn_host.name_, scenarioConfig)
+    test_lib.lib_execute_ssh_cmd(mn_host.ip_, host_config.imageUsername_, host_config.imagePassword_, cmd)
+
+def start_zsha(mn_host, scenarioConfig):
+    cmd = "zsha --start"
+    host_config = sce_ops.get_scenario_config_vm(mn_host.name_, scenarioConfig)
+    test_lib.lib_execute_ssh_cmd(mn_host.ip_, host_config.imageUsername_, host_config.imagePassword_, cmd)
+
 def get_host_by_mn_vm(scenarioConfig, scenarioFile):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
     if len(mn_host_list) < 1:
@@ -107,6 +117,13 @@ def migrate_mn_vm(origin_host, target_host, scenarioConfig):
     cmd = 'zsha --migrate %s' % (target_host.ip_)
     host_config = sce_ops.get_scenario_config_vm(origin_host.name_, scenarioConfig)
     test_lib.lib_execute_ssh_cmd(origin_host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
+
+def update_mn_vm_config(mn_vm_host, option, content, scenarioConfig, new_config = "/tmp/zstack-ha-installer/config.json"):
+    cmd1 = 'sed -i "s/\\\"%s\\\": \\\".*\\\"/\\\"%s\\\": \\\"%s\\\"/g" %s' % (option, option, content, new_config)
+    cmd2 = "zsha --import-config %s" % new_config
+    host_config = sce_ops.get_scenario_config_vm(mn_vm_host.name_, scenarioConfig)
+    test_lib.lib_execute_ssh_cmd(mn_vm_host.ip_, host_config.imageUsername_, host_config.imagePassword_, cmd1)
+    test_lib.lib_execute_ssh_cmd(mn_vm_host.ip_, host_config.imageUsername_, host_config.imagePassword_, cmd2)
 
 def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
