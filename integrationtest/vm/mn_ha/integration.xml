@@ -12,5 +12,11 @@
         <case timeout='960' noparallel='True'>test_stop_consul_create_vm.py</case>
         <case timeout='960' noparallel='True'>test_stop_another_consul_create_vm.py</case>
         <case timeout='120' noparallel='True'>test_upgrade_zsha_create_vm.py</case>
+        <case timeout='960' noparallel='True'>test_two_mn_hosts_force_stop_recover_create_vm.py</case>
+        <case timeout='960' noparallel='True'>test_two_mn_hosts_network_down_recover_create_vm.py</case>
+        <case timeout='960' noparallel='True'>test_two_mn_hosts_shutdown_recover_create_vm.py</case>
+        <case timeout='960' noparallel='True'>test_all_mn_hosts_force_stop_recover_create_vm.py</case>
+        <case timeout='960' noparallel='True'>test_all_mn_hosts_network_down_recover_create_vm.py</case>
+        <case timeout='960' noparallel='True'>test_all_mn_hosts_shutdown_recover_create_vm.py</case>
     </suite>
 </integrationTest>
