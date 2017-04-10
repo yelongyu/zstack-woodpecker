@@ -118,6 +118,31 @@ def migrate_mn_vm(origin_host, target_host, scenarioConfig):
     host_config = sce_ops.get_scenario_config_vm(origin_host.name_, scenarioConfig)
     test_lib.lib_execute_ssh_cmd(origin_host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
 
+def upgrade_zsha(scenarioConfig, scenarioFile):
+    host_list = get_mn_host(scenarioConfig, scenarioFile)
+    test_host = host_list[0]
+    test_host_ip = test_host.ip_
+    zsha_path = "/home/%s/zs-ha" % test_host_ip
+    config_path = "/home/%s/config.json" % test_host_ip
+    current_zsha_path = "/tmp/zstack-ha-installer/zsha"
+    check_cmd = "ls -l %s" % current_zsha_path
+    host_config = sce_ops.get_scenario_config_vm(test_host.name_, scenarioConfig)
+    former_time = []
+    for host in host_list:
+        former_zsha = test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, host_config.imagePassword_, check_cmd)
+        print former_zsha
+        former_time.append(former_zsha.split()[7])
+    upgrade_zsha_cmd = "%s -a -p %s -c %s" % (zsha_path, host_config.imagePassword_, config_path)
+    test_lib.lib_execute_ssh_cmd(test_host_ip, host_config.imageUsername_, host_config.imagePassword_, upgrade_zsha_cmd)
+    current_time = []
+    for host in host_list:
+        current_zsha = test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, host_config.imagePassword_, check_cmd)
+        current_time.append(current_zsha.split()[7])
+    for i in range(len(former_time)):
+        if current_time[i] == former_time[i]:
+            return False
+    return True
+
 def update_mn_vm_config(mn_vm_host, option, content, scenarioConfig, new_config = "/tmp/zstack-ha-installer/config.json"):
     cmd1 = 'sed -i "s/\\\"%s\\\": \\\".*\\\"/\\\"%s\\\": \\\"%s\\\"/g" %s' % (option, option, content, new_config)
     cmd2 = "zsha --import-config %s" % new_config

@@ -11,5 +11,6 @@
         <case timeout='960' noparallel='True'>test_destroy_mn_vm_create_vm.py</case>
         <case timeout='960' noparallel='True'>test_stop_consul_create_vm.py</case>
         <case timeout='960' noparallel='True'>test_stop_another_consul_create_vm.py</case>
+        <case timeout='120' noparallel='True'>test_upgrade_zsha_create_vm.py</case>
     </suite>
 </integrationTest>
