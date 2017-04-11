@@ -110,8 +110,33 @@ def setup_vm_console(vm_inv, vm_config, deploy_config):
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
     cmd = "grub2-mkconfig -o /boot/grub2/grub.cfg"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
-    test_lib.lib_wait_target_up(vm_ip, '22', 120)
 
+def execute_in_vm_console(zstack_management_ip, vm_inv, vm_config, deploy_config, cmd):
+    cond = res_ops.gen_query_conditions('uuid', '=', vm_inv.hostUuid)
+    host_inv = query_resource(zstack_management_ip, res_ops.HOST, cond)
+    try:
+        import pexpect
+    except:
+        test_util.test_logger('pexpect not installed')
+        return ''
+    ssh_cmd = "sshpass -p %s ssh -t -t -t %s" % (os.environ.get('scenarioHostPassword'), host_inv.managementIp)
+    child = pexpect.spawn("%s virsh console %s" % (ssh_cmd, vm_inv.uuid))
+    child.send('\n')
+    i = child.expect(['login:', '[#\$] '])
+    if i == 0:
+        test_util.test_logger('login to guest vm')
+        child.send("%s\n" % (vm_config.imageUsername_))
+        child.expect('Password:')
+        child.send("%s\n" % (vm_config.imagePassword_))
+        child.expect('[#\$] ')
+    elif i == 1:
+        test_util.test_logger('already login guest vm')
+    child.send("%s" % (cmd))
+    child.expect('[#\$] ')
+    return pexpect.before
+#    check_ret_cmd = 'echo RET=$?'
+#    pexpect.send(cmd)
+    
 
 def setup_vm_no_password(vm_inv, vm_config, deploy_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
