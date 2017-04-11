@@ -188,10 +188,29 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
     ssh.execute(cmd3, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
 
 def shutdown_host_network(host_vm, scenarioConfig):
+    zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
+    cond = res_ops.gen_query_conditions('vmNics.ip', '=', host_vm.ip_)
+    host_vm_inv = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0]
+    cond = res_ops.gen_query_conditions('uuid', '=', host_vm_inv.hostUuid)
+    host_inv = sce_ops.query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
+
+    host_vm_config = sce_ops.get_scenario_config_vm(host_vm_inv.name_, scenarioConfig)
     l2network_nic = os.environ.get('l2ManagementNetworkInterface')
-    host_config = sce_ops.get_scenario_config_vm(host_vm.name_, scenarioConfig)
     cmd = "ifdown %s" % (l2network_nic)
-    test_lib.lib_execute_ssh_cmd(host_vm.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
+    sce_ops.execute_in_vm_console(zstack_management_ip, host_inv.managementIp, host_vm_inv.uuid, host_vm_config, cmd)
+
+def reopen_host_network(host_vm, scenarioConfig):
+    zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
+    cond = res_ops.gen_query_conditions('vmNics.ip', '=', host_vm.ip_)
+    host_vm_inv = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0]
+    cond = res_ops.gen_query_conditions('uuid', '=', host_vm_inv.hostUuid)
+    host_inv = sce_ops.query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
+
+    host_vm_config = sce_ops.get_scenario_config_vm(host_vm_inv.name_, scenarioConfig)
+    l2network_nic = os.environ.get('l2ManagementNetworkInterface')
+    cmd = "ifup %s" % (l2network_nic)
+    sce_ops.execute_in_vm_console(zstack_management_ip, host_inv.managementIp, host_vm_inv.uuid, host_vm_config, cmd)
+
 
 def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
               disk_offering_uuids = None, default_l3_uuid = None, \

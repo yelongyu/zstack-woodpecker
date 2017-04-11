@@ -111,16 +111,15 @@ def setup_vm_console(vm_inv, vm_config, deploy_config):
     cmd = "grub2-mkconfig -o /boot/grub2/grub.cfg"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
-def execute_in_vm_console(zstack_management_ip, vm_inv, vm_config, deploy_config, cmd):
-    cond = res_ops.gen_query_conditions('uuid', '=', vm_inv.hostUuid)
-    host_inv = query_resource(zstack_management_ip, res_ops.HOST, cond)
+def execute_in_vm_console(zstack_management_ip, host_ip, vm_name, vm_config, cmd):
     try:
         import pexpect
     except:
         test_util.test_logger('pexpect not installed')
         return ''
-    ssh_cmd = "sshpass -p %s ssh -t -t -t %s" % (os.environ.get('scenarioHostPassword'), host_inv.managementIp)
-    child = pexpect.spawn("%s virsh console %s" % (ssh_cmd, vm_inv.uuid))
+    ssh_cmd = "sshpass -p %s ssh -t -t -t %s" % (os.environ.get('scenarioHostPassword'), host_ip)
+    child = pexpect.spawn("%s virsh console %s" % (ssh_cmd, vm_name))
+    child.expect('Escape character is')
     child.send('\n')
     i = child.expect(['login:', '[#\$] '])
     if i == 0:
@@ -131,9 +130,10 @@ def execute_in_vm_console(zstack_management_ip, vm_inv, vm_config, deploy_config
         child.expect('[#\$] ')
     elif i == 1:
         test_util.test_logger('already login guest vm')
-    child.send("%s" % (cmd))
+    child.send("%s\n" % (cmd))
     child.expect('[#\$] ')
-    return pexpect.before
+    child.close()
+    return child.before
 #    check_ret_cmd = 'echo RET=$?'
 #    pexpect.send(cmd)
     

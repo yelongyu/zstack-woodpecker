@@ -57,7 +57,8 @@ def test():
 
 #Will be called what ever test result is
 def env_recover():
-    test_stub.recover_host(mn_host[0], test_lib.all_scenario_config, test_lib.deploy_config)
+    test_stub.reopen_host_network(mn_host[0], test_lib.all_scenario_config)
+    #test_stub.recover_host(mn_host[0], test_lib.all_scenario_config, test_lib.deploy_config)
 
 #Will be called only if exception happens in test().
 def error_cleanup():
