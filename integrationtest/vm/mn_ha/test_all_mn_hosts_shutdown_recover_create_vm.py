@@ -34,6 +34,7 @@ def test():
     need_recover_mn_host_list = range(mn_host_num)
 
     test_util.test_logger("wait 10s for MN VM to stop")
+    time.sleep(10)
     mn_host = test_stub.get_host_by_mn_vm(test_lib.all_scenario_config, test_lib.scenario_file)
     if len(mn_host) != 0:
         test_util.test_fail('MN VM is still running on %d host(s)' % len(mn_host))
