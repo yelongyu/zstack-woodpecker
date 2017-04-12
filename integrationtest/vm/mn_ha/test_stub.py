@@ -70,12 +70,12 @@ def stop_consul(mn_host, scenarioConfig):
     test_lib.lib_execute_ssh_cmd(mn_host.ip_, host_config.imageUsername_, host_config.imagePassword_, cmd)
 
 def stop_zsha(mn_host, scenarioConfig):
-    cmd = "zsha --stop"       
+    cmd = "zsha stop"       
     host_config = sce_ops.get_scenario_config_vm(mn_host.name_, scenarioConfig)
     test_lib.lib_execute_ssh_cmd(mn_host.ip_, host_config.imageUsername_, host_config.imagePassword_, cmd)
 
 def start_zsha(mn_host, scenarioConfig):
-    cmd = "zsha --start"
+    cmd = "zsha start"
     host_config = sce_ops.get_scenario_config_vm(mn_host.name_, scenarioConfig)
     test_lib.lib_execute_ssh_cmd(mn_host.ip_, host_config.imageUsername_, host_config.imagePassword_, cmd)
 
@@ -114,7 +114,7 @@ def get_mn_host(scenarioConfig, scenarioFile):
     return mn_host_list
 
 def migrate_mn_vm(origin_host, target_host, scenarioConfig):
-    cmd = 'zsha --migrate %s' % (target_host.ip_)
+    cmd = 'zsha migrate %s' % (target_host.ip_)
     host_config = sce_ops.get_scenario_config_vm(origin_host.name_, scenarioConfig)
     test_lib.lib_execute_ssh_cmd(origin_host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
 
@@ -130,9 +130,8 @@ def upgrade_zsha(scenarioConfig, scenarioFile):
     former_time = []
     for host in host_list:
         former_zsha = test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, host_config.imagePassword_, check_cmd)
-        print former_zsha
         former_time.append(former_zsha.split()[7])
-    upgrade_zsha_cmd = "%s -a -p %s -c %s" % (zsha_path, host_config.imagePassword_, config_path)
+    upgrade_zsha_cmd = "%s install -p %s -c %s" % (zsha_path, host_config.imagePassword_, config_path)
     test_lib.lib_execute_ssh_cmd(test_host_ip, host_config.imageUsername_, host_config.imagePassword_, upgrade_zsha_cmd)
     current_time = []
     for host in host_list:
@@ -145,7 +144,7 @@ def upgrade_zsha(scenarioConfig, scenarioFile):
 
 def update_mn_vm_config(mn_vm_host, option, content, scenarioConfig, new_config = "/tmp/zstack-ha-installer/config.json"):
     cmd1 = 'sed -i "s/\\\"%s\\\": \\\".*\\\"/\\\"%s\\\": \\\"%s\\\"/g" %s' % (option, option, content, new_config)
-    cmd2 = "zsha --import-config %s" % new_config
+    cmd2 = "zsha import-config %s" % new_config
     host_config = sce_ops.get_scenario_config_vm(mn_vm_host.name_, scenarioConfig)
     test_lib.lib_execute_ssh_cmd(mn_vm_host.ip_, host_config.imageUsername_, host_config.imagePassword_, cmd1)
     test_lib.lib_execute_ssh_cmd(mn_vm_host.ip_, host_config.imageUsername_, host_config.imagePassword_, cmd2)
@@ -179,7 +178,7 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
     ssh.scp_file(config_json,config_path, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_)
     cmd1="ceph osd pool create zstack 128"
     cmd2="qemu-img convert -f qcow2 -O raw %s rbd:zstack/mnvm.img" % mn_image_path
-    cmd3='%s -a -p %s -c %s' % (installer_path, host_password, config_path)
+    cmd3='%s install -p %s -c %s' % (installer_path, host_password, config_path)
     test_util.test_logger("[%s] %s" % (test_host_ip, cmd1))
     ssh.execute(cmd1, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
     test_util.test_logger("[%s] %s" % (test_host_ip, cmd2))
