@@ -239,3 +239,6 @@ for I in `seq 3`; do
 		break
 	fi
 done
+ceph osd set noscrub
+ceph osd set noout
+ceph osd set nodeep-scrub
