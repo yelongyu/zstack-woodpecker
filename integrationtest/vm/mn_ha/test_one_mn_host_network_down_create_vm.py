@@ -28,7 +28,7 @@ def test():
     test_util.test_logger("wait for 20 seconds to see if management node VM starts on another host")
     time.sleep(20)
 
-    new_mn_host_ip = test_stub.get_host_by_mn_vm_consul(test_lib.all_scenario_config, test_lib.scenario_file)
+    new_mn_host_ip = test_stub.get_host_by_consul_leader(test_lib.all_scenario_config, test_lib.scenario_file)
     if new_mn_host_ip == "" or new_mn_host_ip == mn_host[0].ip_:
         test_util.test_fail("management node VM not run correctly on [%s] after its former host [%s] down for 20s" % (new_mn_host_ip, mn_host[0].ip_))
 

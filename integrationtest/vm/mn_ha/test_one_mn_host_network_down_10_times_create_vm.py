@@ -27,14 +27,14 @@ def test():
             test_util.test_fail('MN VM is running on %d host(s)' % len(mn_host))
         test_util.test_logger("shutdown host's network [%s] that mn vm is running on" % (mn_host[0].ip_))
         test_stub.shutdown_host_network(mn_host[0], test_lib.all_scenario_config)
-        test_util.test_logger("wait for 60 seconds to see if management node VM starts on another host")
-        time.sleep(70)
+        test_util.test_logger("wait for 20 seconds to see if management node VM starts on another host")
+        time.sleep(20)
     
-        new_mn_host_ip = test_stub.get_host_by_mn_vm_consul(test_lib.all_scenario_config, test_lib.scenario_file)
+        new_mn_host_ip = test_stub.get_host_by_consul_leader(test_lib.all_scenario_config, test_lib.scenario_file)
         if new_mn_host_ip == "" or new_mn_host_ip == mn_host[0].ip_:
-            test_util.test_fail("management node VM not run correctly on [%s] after its former host [%s] down for 70s" % (new_mn_host_ip, mn_host[0].ip_))
+            test_util.test_fail("management node VM not run correctly on [%s] after its former host [%s] down for 20s" % (new_mn_host_ip, mn_host[0].ip_))
         else:
-            test_util.test_logger("management node VM run on [%s] after its former host [%s] down for 70s" % (new_mn_host_ip, mn_host[0].ip_))
+            test_util.test_logger("management node VM run on [%s] after its former host [%s] down for 20s" % (new_mn_host_ip, mn_host[0].ip_))
     
         count = 36
         while count > 0:
