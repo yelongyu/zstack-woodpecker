@@ -119,19 +119,20 @@ def execute_in_vm_console(zstack_management_ip, host_ip, vm_name, vm_config, cmd
         return ''
     ssh_cmd = "sshpass -p %s ssh -t -t -t %s" % (os.environ.get('scenarioHostPassword'), host_ip)
     child = pexpect.spawn("%s virsh console %s" % (ssh_cmd, vm_name))
-    child.expect('Escape character is')
+    child.expect('Escape character is', timeout=20)
     child.send('\n')
-    i = child.expect(['login:', '[#\$] '])
+
+    i = child.expect(['login:', '[#\$] '], timeout=1)
     if i == 0:
         test_util.test_logger('login to guest vm')
         child.send("%s\n" % (vm_config.imageUsername_))
-        child.expect('Password:')
+        child.expect('Password:', timeout=1)
         child.send("%s\n" % (vm_config.imagePassword_))
-        child.expect('[#\$] ')
+        child.expect('[#\$] ', timeout=1)
     elif i == 1:
         test_util.test_logger('already login guest vm')
     child.send("%s\n" % (cmd))
-    child.expect('[#\$] ')
+    child.expect('[#\$] ', timeout=1)
     child.close()
     return child.before
 #    check_ret_cmd = 'echo RET=$?'
