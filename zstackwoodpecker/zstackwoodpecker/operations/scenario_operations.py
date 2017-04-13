@@ -586,8 +586,12 @@ def stop_vm(http_server_ip, vm_uuid, force=None, session_uuid=None):
     return evt.inventory
 
 def start_vm(http_server_ip, vm_uuid, session_uuid=None, timeout=240000):
+    cond = res_ops.gen_query_conditions('uuid', '=', vm_uuid)
+    vm_inv = query_resource(http_server_ip, res_ops.VM_INSTANCE, cond).inventories[0]
+
     action = api_actions.StartVmInstanceAction()
     action.uuid = vm_uuid
+    action.hostUuid = vm_inv.lastHostUuid
     action.timeout = timeout
     test_util.action_logger('Start VM [uuid:] %s' % vm_uuid)
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
