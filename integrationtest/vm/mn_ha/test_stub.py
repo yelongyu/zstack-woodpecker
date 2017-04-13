@@ -79,6 +79,22 @@ def start_zsha(mn_host, scenarioConfig):
     host_config = sce_ops.get_scenario_config_vm(mn_host.name_, scenarioConfig)
     test_lib.lib_execute_ssh_cmd(mn_host.ip_, host_config.imageUsername_, host_config.imagePassword_, cmd)
 
+def get_host_by_consul_leader(scenarioConfig, scenarioFile):
+    mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
+    if len(mn_host_list) < 1:
+        return []
+    host_list = []
+    for host in mn_host_list:
+        host_config = sce_ops.get_scenario_config_vm(host.name_, scenarioConfig)
+        cmd = "consul info |grep -i leader_addr | awk '{print $3}' | awk -F ':' '{print $1}'"
+        try:
+            host_ip = test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
+        except:
+            continue
+        if host_ip != "" and host_ip != False:
+            return host_ip.strip()
+    return ""
+
 def get_host_by_mn_vm_consul(scenarioConfig, scenarioFile):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
     if len(mn_host_list) < 1:
