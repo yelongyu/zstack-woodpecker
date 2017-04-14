@@ -5,6 +5,7 @@ Create an unified test_stub to share test operations
 @author: Mirabel
 '''
 import os
+import time
 import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
@@ -14,6 +15,33 @@ import zstackwoodpecker.operations.scenario_operations as sce_ops
 import zstackwoodpecker.operations.deploy_operations as dpy_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
+
+def wait_for_mn_ha_ready(scenarioConfig, scenarioFile):
+    mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
+    if len(mn_host_list) < 1:
+        return []
+    for i in range(0, 5):
+        for host in mn_host_list:
+            host_config = sce_ops.get_scenario_config_vm(host.name_, scenarioConfig)
+            try:
+                cmd = "zsha status"
+                zsha_status = test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
+                if zsha_status.find('3 osds: 3 up, 3 in') <= 0:
+                    continue
+                if zsha_status.count('alive') < 3:
+                    continue
+                if zsha_status.count(': ceph') < 3:
+                    continue
+                if zsha_status.count(': running') < 1:
+                    continue
+                if zsha_status.count('3 mons at') < 1:
+                    continue
+                return True
+    
+            except:
+                continue
+        time.sleep(10)
+    return False
 
 def stop_host(host_vm, scenarioConfig, force=None):
     host_vm_uuid = host_vm.uuid_
