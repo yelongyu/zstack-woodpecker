@@ -137,6 +137,31 @@ def get_host_by_mn_vm_process(scenarioConfig, scenarioFile):
             continue
     return host_list
 
+def get_host_by_mn_vm_console(scenarioConfig, scenarioFile):
+    zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
+
+    mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
+    if len(mn_host_list) < 1:
+        return []
+    host_vm_inv = dict()
+    host_inv = dict()
+    for host in mn_host_list:
+        cond = res_ops.gen_query_conditions('vmNics.ip', '=', host.ip_)
+        host_vm_inv[host] = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0]
+        cond = res_ops.gen_query_conditions('uuid', '=', host_vm_inv[host].hostUuid)
+        host_inv[host] = sce_ops.query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
+
+    host_list = []
+    for host in mn_host_list:
+        cmd = "virsh list | grep -v paused | grep \"ZStack Management Node VM\""
+        try:
+            query_kvm_process = sce_ops.execute_in_vm_console(zstack_management_ip, host_inv[host].managementIp, host_vm_inv[host].uuid, host, cmd)
+            test_util.test_logger("check mn vm on host %s: %s" % (host.ip_, query_kvm_process))
+            if query_kvm_process.find('running') >= 0:
+                host_list.append(host)
+        except:
+            continue
+    return host_list
 
 def get_host_by_mn_vm(scenarioConfig, scenarioFile):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
