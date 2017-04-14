@@ -46,6 +46,10 @@ def test():
             test_util.test_fail("there is no host for mn vm to migrate to")
     test_util.test_pass('Migrate MN VM Test Success')        
 
+def env_recover():
+    test_util.test_logger("wait for mn ha ready")
+    test_stub.wait_for_mn_ha_ready(test_lib.all_scenario_config, test_lib.scenario_file)
+
 #Will be called only if exception happens in test().
 def error_cleanup():
     global vm
