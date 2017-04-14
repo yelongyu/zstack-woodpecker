@@ -58,6 +58,7 @@ def test():
 def env_recover():
     test_util.test_logger("recover consul on host: %s" % (test_host.ip_))
     test_stub.start_consul(test_host, test_lib.all_scenario_config)
+    test_stub.wait_for_mn_ha_ready(test_lib.all_scenario_config, test_lib.scenario_file)
 
 #Will be called only if exception happens in test().
 def error_cleanup():
