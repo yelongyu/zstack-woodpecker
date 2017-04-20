@@ -15,15 +15,16 @@ class zstack_vm_db_checker(checker_header.TestChecker):
         super(zstack_vm_db_checker, self).check()
         vm = self.test_obj.vm
         conditions = res_ops.gen_query_conditions('uuid', '=', vm.uuid)
-        vm_in_db = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)
-        if not vm_in_db:
-            test_util.test_logger('Check result: can NOT find [vm:] %s in Database. It is possibly expunged.' % vm.uuid)
-            if self.test_obj.state == vm_header.EXPUNGED:
-                return self.judge(True)
-            else:
-                return self.judge(False)
 
         for i in range(0, 60):
+            vm_in_db = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)
+            if not vm_in_db:
+                test_util.test_logger('Check result: can NOT find [vm:] %s in Database. It is possibly expunged.' % vm.uuid)
+                if self.test_obj.state == vm_header.EXPUNGED:
+                    return self.judge(True)
+                else:
+                    return self.judge(False)
+
             if (vm_in_db[0].state == inventory.RUNNING and self.test_obj.state == vm_header.RUNNING) or (vm_in_db[0].state == inventory.STOPPED and self.test_obj.state == vm_header.STOPPED) or (vm_in_db[0].state == inventory.DESTROYED and self.test_obj.state == vm_header.DESTROYED) or (vm_in_db[0].state == inventory.PAUSED and self.test_obj.state == vm_header.PAUSED):
                 #vm state sync is default pass. So didn't print the information by default
                 #test_util.test_logger('Check result: [vm:] %s status is synced with Database.' % vm.uuid)
