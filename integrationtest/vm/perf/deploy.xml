@@ -64,11 +64,10 @@
     </instanceOfferings>
 
     <backupStorages>
-        <sftpBackupStorage name="$sftpBackupStorageName"
-            description="Test" url="$sftpBackupStorageUrl" 
-            username="$sftpBackupStorageUsername" 
-            password="$sftpBackupStoragePassword" 
-            hostname="$sftpBackupStorageHostname" />
+        <cephBackupStorage name="$cephBackupStorageName"
+            description="Test" 
+            monUrls="$cephBackupStorageMonUrls" 
+        />
     </backupStorages>
 
     <images>
@@ -77,21 +76,21 @@
           mediaType="$rootMediaType" format="$rootImageFormat"
           url="$imageUrl_s" 
           username="$imageUsername" password="$imagePassword">
-          <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+          <backupStorageRef>$cephBackupStorageName</backupStorageRef>
         </image>
         <image name="$imageName_net" 
           description="Test Image Template for network test" 
           mediaType="$rootMediaType" format="$rootImageFormat"
           url="$imageUrl_net" 
           username="$imageUsername" password="$imagePassword">
-          <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+          <backupStorageRef>$cephBackupStorageName</backupStorageRef>
         </image>
         <image name="$virtualRouterImageName" 
           description="virtual router image" 
           mediaType="$rootMediaType" format="$rootImageFormat" 
           username="$vrImageUsername" password="$vrImagePassword"
           url="$virtualRouterImageUrl">
-          <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+          <backupStorageRef>$cephBackupStorageName</backupStorageRef>
         </image>
     </images>
 
@@ -111,12 +110,12 @@
 
     <zones>
         <zone name="$zoneName" description="Test">
-			<backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+          <backupStorageRef>$cephBackupStorageName</backupStorageRef>
             <primaryStorages>
-                <nfsPrimaryStorage name="$nfsPrimaryStorageName"
-                    description="Test" url="$nfsPrimaryStorageUrl" />
+              <cephPrimaryStorage name="$cephPrimaryStorageName"
+                  description="Test Ceph PS" 
+                  monUrls="$cephPrimaryStorageMonUrls" />
             </primaryStorages>
-
             <clusters>
                 <cluster name="$clusterName" description="Test"
                     hypervisorType="$clusterHypervisorType">
@@ -127,17 +126,15 @@
                             username="$hostUsername" password="$hostPassword" />
                         <host name="$hostName3" description="Test3" managementIp="$hostIp3"
                             username="$hostUsername" password="$hostPassword" />
-                        <host name="$hostName4" description="Test4" managementIp="$hostIp4"
-                            username="$hostUsername" password="$hostPassword" />
                     </hosts>
-                    <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
+                    <primaryStorageRef>$cephPrimaryStorageName</primaryStorageRef>
                     <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
                     <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
-					<l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
-					<l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
-					<l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
-					<l2NetworkRef>$l2VlanNetworkName2</l2NetworkRef>
-					<l2NetworkRef>$l2VlanNetworkName3</l2NetworkRef>
+                    <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
+                    <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
+                    <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
+                    <l2NetworkRef>$l2VlanNetworkName2</l2NetworkRef>
+                    <l2NetworkRef>$l2VlanNetworkName3</l2NetworkRef>
                     <l2NetworkRef>$l2VlanNetworkName4</l2NetworkRef>
                     <l2NetworkRef>$l2VlanNetworkName5</l2NetworkRef>
                     <l2NetworkRef>$l2VlanNetworkName6</l2NetworkRef>
