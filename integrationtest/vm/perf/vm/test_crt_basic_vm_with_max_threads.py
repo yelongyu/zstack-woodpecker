@@ -49,7 +49,7 @@ def test():
     global session_mc
     vm_num = os.environ.get('ZSTACK_TEST_NUM')
     if not vm_num:
-        vm_num = 0
+        vm_num = 20
     else:
         vm_num = int(vm_num)
 
