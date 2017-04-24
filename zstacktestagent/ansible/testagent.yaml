@@ -34,7 +34,7 @@
       when: chroot_env == 'true'
 
     - name: enable iptables 9393 port
-      shell: "iptables-save|grep 9393 || iptables -A INPUT -p tcp -m tcp --dport 9393 -j ACCEPT"
+      shell: "iptables-save|grep 9393 || iptables -I INPUT -p tcp -m tcp --dport 9393 -j ACCEPT"
       when: chroot_env == 'false'
 
   handlers:
