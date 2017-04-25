@@ -144,6 +144,7 @@ class KvmSharableVolumeCheckerFactory(checker_header.CheckerFactory):
                 checker_dict[db_checker.zstack_share_volume_attach_db_checker] = True
                 if test_obj.target_vm.state == vm_header.RUNNING:
                     checker_dict[share_volume_checker.zstack_kvm_share_volume_attach_checker] = True
+                    checker_dict[share_volume_checker.zstack_kvm_virtioscsi_shareable_checker] = True
             else:
                 checker_dict[db_checker.zstack_share_volume_attach_db_checker] = False
 
