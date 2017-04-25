@@ -14,6 +14,11 @@ import zstacktestagent.plugins.host as host_plugin
 import zstacktestagent.testagent as testagent
 import apibinding.inventory as inventory
 
+try: 
+  import xml.etree.cElementTree as ET 
+except ImportError: 
+  import xml.etree.ElementTree as ET
+
 class zstack_kvm_share_volume_file_checker(checker_header.TestChecker):
     '''check kvm volume file existencex . If it is in host, 
         return self.judge(True). If not, return self.judge(False)'''
@@ -135,3 +140,39 @@ class zstack_kvm_share_volume_attach_checker(checker_header.TestChecker):
         else:
             test_util.test_logger('Check result: [volume:] %s [file:] %s is not found in [vm:] %s on [host:] %s .' % (volume.uuid, volume_installPath, vm.uuid, host.managementIp))
             return self.judge(False)
+
+class zstack_kvm_virtioscsi_shareable_checker(checker_header.TestChecker):
+    '''
+        Check if volume has shareable label attached to vm in libvirt system.
+    '''
+    def check(self):
+        super(zstack_kvm_virtioscsi_shareable_checker, self).check()
+        volume = self.test_obj.volume
+
+        has_volume = False
+        shareable = False
+        check_result = False
+
+        #sv_cond = res_ops.gen_query_conditions("volumeUuid", '=', volume.uuid)
+        #share_volume_vm_uuids = res_ops.query_resource_fields(res_ops.SHARE_VOLUME, sv_cond, None, fields=['vmInstanceUuid'])
+        #test_util.test_logger('share_volume_vm_uuids is %s' %share_volume_vm_uuids)
+        test_util.test_logger('vmInstanceUuid is %s' %volume.vmInstanceUuid)
+        xml = os.popen('virsh dumpxml %s' % volume.vmInstanceUuid)
+        tree = ET.parse(xml)
+        root = tree.getroot()
+        for domain in root:
+            if domain.tag == "devices":
+                for device in domain:
+                    if device.tag == "disk":
+                       for disk in device:
+                           if disk.tag == "source":
+                               if disk.get("name").find(volume.uuid) > 0:
+                                   has_volume = True
+                           if disk.tag == "shareable":
+                                   shareable = True
+                           if has_volume and shareable:
+                               check_result = True
+                               break
+
+        test_util.test_logger('Check result: The result of check VirtioSCSI shareable label is %s' %check_result)
+        return self.judge(check_result)
