@@ -62,6 +62,7 @@ def test():
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     l3_name = os.environ.get('l3PublicNetworkName')
 
+    l3 = test_lib.lib_get_l3_by_name(l3_name)
     l3s = test_lib.lib_get_l3s()
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
@@ -82,7 +83,7 @@ def test():
 
     while vm_num > 0:
         check_thread_exception()
-        vm_creation_option.set_l3_uuids([random.choice(l3s).uuid])
+        vm_creation_option.set_l3_uuids([l3.uuid])
         vm.set_creation_option(vm_creation_option)
         vm_num -= 1
         thread = threading.Thread(target=create_vm, args=(vm,))
@@ -102,6 +103,7 @@ def test():
         test_util.test_pass('Create %d VMs Test Success' % org_num)
     else:
         test_util.test_fail('Create %d VMs Test Failed. Only find %d VMs.' % (org_num, vms))
+
 
 #Will be called only if exception happens in test().
 def error_cleanup():
