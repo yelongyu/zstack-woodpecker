@@ -29,6 +29,7 @@ PRIMARY_STORAGE = 'PrimaryStorage'
 CEPH_PRIMARY_STORAGE = 'CephPrimaryStorage'
 L2_NETWORK = 'L2Network'
 L2_VLAN_NETWORK = 'L2VlanNetwork'
+L2_VXLAN_NETWORK = 'L2VxlanNetwork'
 L3_NETWORK = 'L3Network'
 INSTANCE_OFFERING = 'InstanceOffering'
 IMAGE = 'Image'
@@ -290,6 +291,8 @@ def _gen_query_action(resource):
         action = api_actions.QueryL2NetworkAction()
     elif resource == L2_VLAN_NETWORK:
         action = api_actions.QueryL2VlanNetworkAction()
+    elif resource == L2_VXLAN_NETWORK:
+        action = api_actions.QueryL2VxlanNetworkAction()
     elif resource == CLUSTER:
         action = api_actions.QueryClusterAction()
     elif resource == L3_NETWORK:
