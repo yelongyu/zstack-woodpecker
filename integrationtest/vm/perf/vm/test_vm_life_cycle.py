@@ -33,7 +33,7 @@ session_to = None
 session_mc = None
 thread_threshold = os.environ.get('ZSTACK_THREAD_THRESHOLD')
 if not thread_threshold:
-    thread_threshold = 1000
+    thread_threshold = 700
 else:
     thread_threshold = int(thread_threshold)
 
@@ -263,7 +263,7 @@ def Create():
     global session_mc
     vm_num = os.environ.get('ZSTACK_TEST_NUM')
     if not vm_num:
-        vm_num = 1000
+        vm_num = 700
     else:
         vm_num = int(vm_num)
 
