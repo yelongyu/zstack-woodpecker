@@ -314,7 +314,7 @@ def Create():
     con_ops.change_global_config('identity', 'session.maxConcurrent', session_mc, session_uuid)
     acc_ops.logout(session_uuid)
     if vms == org_num:
-        print 'Create %d VMs Test Success'
+        print 'Create %d VMs Test Success.' % (org_num)
     else:
         test_util.test_fail('Create %d VMs Test Failed. Only find %d VMs.' % (org_num, vms))
 
