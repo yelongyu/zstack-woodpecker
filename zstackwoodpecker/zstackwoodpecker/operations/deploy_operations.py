@@ -266,6 +266,28 @@ def add_l2_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l2_
     if not xmlobject.has_element(deployConfig, "zones.zone"):
         return
 
+    def _deploy_l2_vxlan_network(zone):
+        if not xmlobject.has_element(deployConfig, "l2VxlanNetworkPools"):
+            return
+
+        for l2pool in xmlobject.safe_list(deployConfig.l2VxlanNetworkPools.l2VxlanNetworkPool):
+            zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, name=zone.name_)
+            zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'L2 network')
+
+            action = api_actions.CreateL2VxlanNetworkPoolAction()
+            action.name = l2pool.name_
+            action.zoneUuid = zinv.uuid
+            action.sessionUuid = session_uuid
+            poolinv = action.run().inventory
+            for vnirange in l2pool.vniRanges.vniRange:
+                action = api_actions.CreateVniRangeAction()
+                action.name = vnirange.name_
+                action.startVni = vnirange.startVni_
+                action.endVni = startVni.endVni_
+                action.l2NetworkUuid = poolinv.uuid
+                action.sessionUuid = session_uuid
+                evt = action.run()
+
     def _deploy_l2_network(zone, is_vlan):
         if is_vlan:
             if not xmlobject.has_element(zone, "l2Networks.l2VlanNetwork"):
@@ -350,6 +372,7 @@ def add_l2_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l2_
 
         _deploy_l2_network(zone, False)
         _deploy_l2_network(zone, True)
+        _deploy_l2_vxlan_network(zone)
 
     wait_for_thread_done()
 
@@ -616,6 +639,34 @@ def add_cluster(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluste
                     test_util.test_logger(jsonobject.dumps(evt))
         except:
             exc_info.append(sys.exc_info())
+
+        if xmlobject.has_element(cluster, 'l2VxlanNetworkPoolRef'):
+            for l2vxlanpoolref in xmlobject.safe_list(cluster.l2VxlanNetworkPoolRef):
+                l2_vxlan_pool_name = l2vxlanpoolref.text_
+                poolinvs = res_ops.get_resource(res_ops.L2_VXLAN_NETWORK_POOL, session_uuid, name=l2_vxlan_pool_name)
+                poolinv = get_first_item_from_list(poolinvs, 'L2 Vxlan Network Pool', l2_vxlan_pool_name, 'Cluster')
+
+                l2_vxlan_pool_name = l2vxlanpoolref.text_
+                action_vxlan = api_actions.attachL2NetworkToClusterAction()
+                action_vxlan.l2NetworkUuid = poolinv.uuid
+                action_vxlan.clusterUuid = cinv.uuid
+                action_vxlan.systemTags = ["l2NetworkUuid::%s::clusterUuid::%s::cidr::{%s}" % (poolinv.uuid, cinv.uuid, l2vxlanpoolref.cidr)]
+                action_vxlan.sessionUuid = session_uuid
+                evt = action_vxlan.run()
+
+        for l2_vxlan in zone.l2Networks.l2VxlanNetwork:
+            if xmlobject.has_element(l2_vxlan, 'l2VxlanNetworkPoolRef'):
+                l2_vxlan_invs = res_ops.get_resource(res_ops.L2_VXLAN_NETWORK, session_uuid, name=l2_vxlan.name_)
+                if len(l2_vxlan_invs) > 0:
+                    continue
+                l2_vxlan_pool_name = l2vxlanpoolref.text_
+                poolinvs = res_ops.get_resource(res_ops.L2_VXLAN_NETWORK_POOL, session_uuid, name=l2_vxlan_pool_name)
+                poolinv = get_first_item_from_list(poolinvs, 'L2 Vxlan Network Pool', l2_vxlan_pool_name, 'Cluster')
+                action_vxlan = api_actions.createL2VxlanNetworkAction()
+                action_vxlan.poolUuid = poolinv.uuid
+                action_vxlan.name = l2_vxlan.name_
+                action_vxlan.zoneUuid = action.zoneUuid
+                action_vxlan.sessionUuid = session_uuid
 
         if cluster.allL2NetworkRef__ == 'true':
             #find all L2 network in zone and attach to cluster
