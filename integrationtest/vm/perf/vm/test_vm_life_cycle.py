@@ -1,9 +1,9 @@
 '''
-For KVM VM cycle.
+For KVM VM life  cycle.
 The created number will depend on the environment variable: ZSTACK_TEST_NUM
 This case's max thread is 1000 
 
-@author: @@@
+@author: wjy
 '''
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_state as test_state
@@ -397,28 +397,44 @@ def Expunge_VM():
 
 
 def test():
-    Create()
-    Stop_VM()
-    Start_VM()
-    Reboot_VM()
-    Ha_NeverStop_VM()
-    time.sleep(10)
-    Stop_VM_Simple_Scheduler()
-    time.sleep(40)
-    Cancel_Ha_VM()
-    Stop_VM_Simple_Scheduler()
-    time.sleep(40)
-    Start_VM_Simple_Scheduler()    
-    time.sleep(40)
-    Reboot_VM_Simple_Scheduler()
-    time.sleep(40)
-    Snapshot_VM_Simple_Scheduler()
-    Force_Stop_VM()
-    Destroy_VM()
-    Recover_VM()
-    Destroy_VM()
-    Expunge_VM()
-
+    while True:
+	Create()
+        time.sleep(180)
+        Stop_VM()
+        time.sleep(180)
+        Start_VM()
+        time.sleep(180)
+        Reboot_VM()
+        time.sleep(360)
+        Ha_NeverStop_VM()
+        time.sleep(30)
+        Stop_VM_Simple_Scheduler()
+        time.sleep(180)
+        Cancel_Ha_VM()
+        time.sleep(30)
+        Stop_VM_Simple_Scheduler()
+        time.sleep(180)
+        Start_VM_Simple_Scheduler()    
+        time.sleep(180)
+        Reboot_VM_Simple_Scheduler()
+        time.sleep(180)
+        Snapshot_VM_Simple_Scheduler()
+        time.sleep(30)
+        Force_Stop_VM()
+        time.sleep(180)
+        Destroy_VM()
+        time.sleep(180)
+        Recover_VM()
+        time.sleep(180)
+        Start_VM()
+        time.sleep(180)
+        Destroy_VM()
+        time.sleep(180)
+        Expunge_VM()
+        time.sleep(180)
+    while True:
+        time.sleep(3600)
+    
 #Will be called only if exception happens in test().
 def error_cleanup():
     if session_to:
