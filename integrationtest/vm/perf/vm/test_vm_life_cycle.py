@@ -263,7 +263,7 @@ def Create():
     global session_mc
     vm_num = os.environ.get('ZSTACK_TEST_NUM')
     if not vm_num:
-        vm_num = 20
+        vm_num = 1000
     else:
         vm_num = int(vm_num)
 
@@ -314,7 +314,7 @@ def Create():
     con_ops.change_global_config('identity', 'session.maxConcurrent', session_mc, session_uuid)
     acc_ops.logout(session_uuid)
     if vms == org_num:
-        test_util.test_pass('Create %d VMs Test Success' % org_num)
+        print 'Create %d VMs Test Success'
     else:
         test_util.test_fail('Create %d VMs Test Failed. Only find %d VMs.' % (org_num, vms))
 
