@@ -279,11 +279,11 @@ def add_l2_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l2_
             action.zoneUuid = zinv.uuid
             action.sessionUuid = session_uuid
             poolinv = action.run().inventory
-            for vnirange in l2pool.vniRanges.vniRange:
+            for vnirange in xmlobject.safe_list(l2pool.vniRanges.vniRange):
                 action = api_actions.CreateVniRangeAction()
                 action.name = vnirange.name_
                 action.startVni = vnirange.startVni_
-                action.endVni = startVni.endVni_
+                action.endVni = vnirange.endVni_
                 action.l2NetworkUuid = poolinv.uuid
                 action.sessionUuid = session_uuid
                 evt = action.run()
