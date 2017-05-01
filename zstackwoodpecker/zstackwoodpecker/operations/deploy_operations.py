@@ -647,10 +647,10 @@ def add_cluster(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluste
                 poolinv = get_first_item_from_list(poolinvs, 'L2 Vxlan Network Pool', l2_vxlan_pool_name, 'Cluster')
 
                 l2_vxlan_pool_name = l2vxlanpoolref.text_
-                action_vxlan = api_actions.attachL2NetworkToClusterAction()
+                action_vxlan = api_actions.AttachL2NetworkToClusterAction()
                 action_vxlan.l2NetworkUuid = poolinv.uuid
                 action_vxlan.clusterUuid = cinv.uuid
-                action_vxlan.systemTags = ["l2NetworkUuid::%s::clusterUuid::%s::cidr::{%s}" % (poolinv.uuid, cinv.uuid, l2vxlanpoolref.cidr)]
+                action_vxlan.systemTags = ["l2NetworkUuid::%s::clusterUuid::%s::cidr::{%s}" % (poolinv.uuid, cinv.uuid, l2vxlanpoolref.cidr_)]
                 action_vxlan.sessionUuid = session_uuid
                 evt = action_vxlan.run()
 
