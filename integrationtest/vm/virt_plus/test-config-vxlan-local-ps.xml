@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-vxlan-local-ps.xml</deployConfig>
+    <deployConfigTemplate>deploy-vxlan-local-ps.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
