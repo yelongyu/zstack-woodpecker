@@ -52,15 +52,6 @@
             memoryCapacity="$instanceOfferingMemory_s" 
             cpuNum="$instanceOfferingCpuNum_s"
             cpuSpeed="$instanceOfferingCpuSpeed_s" />
-        <virtualRouterOffering name="$virtualRouterOfferingName_s"
-            memoryCapacity="$virtualRouterOfferingMemory_s" 
-            cpuSpeed="$virtualRouterOfferingCpuSpeed_s" 
-            cpuNum="$virtualRouterOfferingCpuNum_s" isDefault="true">
-            <zoneRef>$zoneName</zoneRef>
-            <managementL3NetworkRef>$l3PublicNetworkName</managementL3NetworkRef>
-            <publicL3NetworkRef>$l3PublicNetworkName</publicL3NetworkRef>
-            <imageRef>$virtualRouterImageName</imageRef>
-        </virtualRouterOffering>
     </instanceOfferings>
 
     <backupStorages>
@@ -83,13 +74,6 @@
           mediaType="$rootMediaType" format="$rootImageFormat"
           url="$imageUrl_net" 
           username="$imageUsername" password="$imagePassword">
-          <backupStorageRef>$cephBackupStorageName</backupStorageRef>
-        </image>
-        <image name="$virtualRouterImageName" 
-          description="virtual router image" 
-          mediaType="$rootMediaType" format="$rootImageFormat" 
-          username="$vrImageUsername" password="$vrImagePassword"
-          url="$virtualRouterImageUrl">
           <backupStorageRef>$cephBackupStorageName</backupStorageRef>
         </image>
     </images>
@@ -129,27 +113,10 @@
                     </hosts>
                     <primaryStorageRef>$cephPrimaryStorageName</primaryStorageRef>
                     <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
-                    <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
                 </cluster>
             </clusters>
 
             <l2Networks>
-                <l2NoVlanNetwork name="$l2ManagementNetworkName" description="Basic L2 for management network"
-                  physicalInterface="$l2ManagementNetworkInterface">
-                  <l3Networks>
-                    <l3BasicNetwork name="$l3ManagementNetworkName" description="Management L3 Network without Vlan and no special services" system="True">
-                      <ipRange name="$ipRangeManagementName" description="Test"
-                        startIp="$ipRangeManagementStartIp" endIp="$ipRangeManagementEndIp" gateway="$ipRangeManagementGateway"
-                        netmask="$ipRangeManagementNetmask" />
-                      <dns>$DNSServer</dns>
-                      <networkService provider="VirtualRouter">
-                        <serviceType>DHCP</serviceType>
-                        <serviceType>DNS</serviceType>
-                      </networkService>
-                    </l3BasicNetwork>
-                  </l3Networks>
-                </l2NoVlanNetwork>
-
                 <l2NoVlanNetwork name="$l2PublicNetworkName" description="Basic L2 for public network"
                   physicalInterface="$l2PublicNetworkInterface">
                   <l3Networks>
@@ -158,9 +125,8 @@
                         startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
                         netmask="$ipRangeNetmask" />
                       <dns>$DNSServer</dns>
-                      <networkService provider="Flat Network">
+                      <networkService provider="Flat Network Service Provider">
                         <serviceType>DHCP</serviceType>
-                        <serviceType>DNS</serviceType>
                       </networkService>
                     </l3BasicNetwork>
                   </l3Networks>

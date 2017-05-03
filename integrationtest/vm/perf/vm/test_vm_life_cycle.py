@@ -33,7 +33,7 @@ session_to = None
 session_mc = None
 thread_threshold = os.environ.get('ZSTACK_THREAD_THRESHOLD')
 if not thread_threshold:
-    thread_threshold = 700
+    thread_threshold = 1000
 else:
     thread_threshold = int(thread_threshold)
 
@@ -263,7 +263,7 @@ def Create():
     global session_mc
     vm_num = os.environ.get('ZSTACK_TEST_NUM')
     if not vm_num:
-        vm_num = 700
+        vm_num = 1000
     else:
         vm_num = int(vm_num)
 
@@ -395,8 +395,16 @@ def Expunge_VM():
     expungevms.parall_test_run()
     expungevms.check_operation_result()
 
+def lib_set_provision_cpu_rate(rate):
+    return con_ops.change_global_config('host', 'cpu.overProvisioning.ratio', rate)
+
 
 def test():
+    os.environ['ZSTACK_THREAD_THRESHOLD']='1000'
+    os.environ['ZSTACK_TEST_NUM']='1000'
+    test_lib.lib_set_provision_memory_rate(20)
+    test_lib.lib_set_provision_storage_rate(20)
+    lib_set_provision_cpu_rate(20)
     while True:
 	Create()
         time.sleep(180)
