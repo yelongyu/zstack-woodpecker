@@ -48,3 +48,11 @@ def create_l2_vxlan_network(name, pool_uuid, zone_uuid, session_uuid=None):
                              %(name, pool_uuid, zone_uuid))
     return evt.inventory
 
+
+def delete_vni_range(uuid, session_uuid=None):
+    action = api_actions.DeleteVniRangeAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Delete vni range uuid=%s' %(uuid))
+    return evt.inventory
