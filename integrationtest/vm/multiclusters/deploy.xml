@@ -77,7 +77,7 @@
         cpuSpeed="$virtualRouterOfferingCpuSpeed_s" 
         cpuNum="$virtualRouterOfferingCpuNum_s" isDefault="true">
         <zoneRef>$zoneName</zoneRef>
-        <managementL3NetworkRef>$l3ManagementNetworkName</managementL3NetworkRef>
+        <managementL3NetworkRef>$l3PublicNetworkName</managementL3NetworkRef>
         <publicL3NetworkRef>$l3PublicNetworkName</publicL3NetworkRef>
         <imageRef>$virtualRouterImageName</imageRef>
       </virtualRouterOffering>
@@ -147,8 +147,8 @@
         <primaryStorages>
           <nfsPrimaryStorage name="$nfsPrimaryStorageName"
             description="NFSTest1" url="$nfsPrimaryStorageUrl" />
-          <nfsPrimaryStorage name="$nfsPrimaryStorageName2"
-            description="NFSTest2" url="$nfsPrimaryStorageUrl2" />
+          <!--<nfsPrimaryStorage name="$nfsPrimaryStorageName2"
+            description="NFSTest2" url="$nfsPrimaryStorageUrl2" />-->
         </primaryStorages>
   
         <clusters>
@@ -161,7 +161,6 @@
                 username="$hostUsername2" password="$hostPassword2" port="$hostPort2"/>
             </hosts>
             <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
-	    <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
@@ -194,7 +193,7 @@
               <host name="$hostName4" description="Test4" managementIp="$hostIp4"
                 username="$hostUsername4" password="$hostPassword4" port="$hostPort4"/>
             </hosts>
-            <primaryStorageRef>$nfsPrimaryStorageName2</primaryStorageRef>
+            <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
@@ -220,7 +219,6 @@
             <l2NetworkRef>$l2VlanNetworkName20</l2NetworkRef>
           </cluster>
         </clusters>
-  
         <l2Networks>
            <l2NoVlanNetwork name="$l2ManagementNetworkName" description="Basic L2 for management network"
              physicalInterface="$l2ManagementNetworkInterface">
