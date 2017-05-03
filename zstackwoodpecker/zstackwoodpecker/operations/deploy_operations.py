@@ -668,6 +668,7 @@ def add_cluster(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluste
                     action_vxlan.name = l2_vxlan.name_
                     action_vxlan.zoneUuid = action.zoneUuid
                     action_vxlan.sessionUuid = session_uuid
+                    evt = action_vxlan.run()
 
         if cluster.allL2NetworkRef__ == 'true':
             #find all L2 network in zone and attach to cluster
