@@ -998,6 +998,9 @@ def add_l3_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l3_
         if xmlobject.has_element(zone, 'l2Networks.l2VlanNetwork'):
             l2networks.extend(xmlobject.safe_list(zone.l2Networks.l2VlanNetwork))
 
+        if xmlobject.has_element(zone, 'l2Networks.l2VxlanNetwork'):
+            l2networks.extend(xmlobject.safe_list(zone.l2Networks.l2VxlanNetwork))
+
         for l2 in l2networks:
             if l2_name and l2_name != l2.name_:
                 continue
