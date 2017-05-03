@@ -655,7 +655,7 @@ def add_cluster(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluste
                 evt = action_vxlan.run()
 
 	if xmlobject.has_element(zone.l2Networks, 'l2VxlanNetwork'):
-            for l2_vxlan in zone.l2Networks.l2VxlanNetwork:
+            for l2_vxlan in xmlobject.safe_list(zone.l2Networks.l2VxlanNetwork):
                 if xmlobject.has_element(l2_vxlan, 'l2VxlanNetworkPoolRef'):
                     l2_vxlan_invs = res_ops.get_resource(res_ops.L2_VXLAN_NETWORK, session_uuid, name=l2_vxlan.name_)
                     if len(l2_vxlan_invs) > 0:
@@ -663,7 +663,7 @@ def add_cluster(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluste
                     l2_vxlan_pool_name = l2vxlanpoolref.text_
                     poolinvs = res_ops.get_resource(res_ops.L2_VXLAN_NETWORK_POOL, session_uuid, name=l2_vxlan_pool_name)
                     poolinv = get_first_item_from_list(poolinvs, 'L2 Vxlan Network Pool', l2_vxlan_pool_name, 'Cluster')
-                    action_vxlan = api_actions.createL2VxlanNetworkAction()
+                    action_vxlan = api_actions.CreateL2VxlanNetworkAction()
                     action_vxlan.poolUuid = poolinv.uuid
                     action_vxlan.name = l2_vxlan.name_
                     action_vxlan.zoneUuid = action.zoneUuid
