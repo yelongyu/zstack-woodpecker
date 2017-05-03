@@ -198,31 +198,8 @@
               </l3BasicNetwork>
             </l3Networks>
           </l2NoVlanNetwork>
-          <l2VlanNetwork name="$l2VlanNetworkName1" description="guest l2 vlan network"
-            physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan1">
-            <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetworkName1" description = "guest test vlan network with DHCP Userdata and Eip" domain_name="$L3VlanNetworkDomainName1">
-                <ipRange name="$vlanIpRangeName1" startIp="$vlanIpRangeStart1" endIp="$vlanIpRangeEnd1"
-                 gateway="$vlanIpRangeGateway1" netmask="$vlanIpRangeNetmask1"/>
-                <networkService provider="Flat Network Service Provider">
-                  <serviceType>DHCP</serviceType>
-                  <serviceType>Userdata</serviceType>
-                  <serviceType>Eip</serviceType> 
-                </networkService>
-              </l3BasicNetwork>
-              <!--
-              <l3BasicNetwork name="$l3VlanNetworkName2" description = "guest test vlan network with DHCP Userdata and Eip" domain_name="$L3VlanNetworkDomainName2">
-                <ipRange name="$vlanIpRangeName2" startIp="$vlanIpRangeStart2" endIp="$vlanIpRangeEnd2"
-                 gateway="$vlanIpRangeGateway2" netmask="$vlanIpRangeNetmask2"/>
-                <networkService provider="Flat Network Service Provider">
-                  <serviceType>DHCP</serviceType>
-                  <serviceType>Userdata</serviceType>
-                  <serviceType>Eip</serviceType> 
-                </networkService>
-              </l3BasicNetwork>
-              -->
-            </l3Networks>
-          </l2VlanNetwork>
+          <!--<l2VlanNetwork name="$l2VlanNetworkName1" description="guest l2 vlan network"
+            physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan1">-->
           <l2VxlanNetwork name="$l2VxlanNetworkName" description="guest L2 Vxlan network">
             <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <l3Networks>
@@ -237,6 +214,7 @@
               </l3BasicNetwork>
             </l3Networks>
           </l2VxlanNetwork>
+          <!--</l2VlanNetwork>-->
         </l2Networks>
       </zone>
     </zones>
