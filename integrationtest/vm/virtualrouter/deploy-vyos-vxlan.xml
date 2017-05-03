@@ -256,8 +256,8 @@
           </l3Networks>
         </l2VxlanNetwork>
 
-        <l2VlanNetwork name="$l2VlanNetworkName2" description="guest l2 vlan network for port forwarding"
-          physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan2">
+        <l2VxlanNetwork name="$l2VxlanNetworkName2" description="guest L2 Vxlan network 2 for port forwarding">
+          <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
           <l3Networks>
             <l3BasicNetwork name="$l3VlanDNATNetworkName" description = "guest test vlan network for port forwarding">
               <ipRange name="$vlanIpRangeName2" startIp="$vlanIpRangeStart2" endIp="$vlanIpRangeEnd2"
@@ -275,10 +275,10 @@
               </networkService>
             </l3BasicNetwork>
           </l3Networks>
-        </l2VlanNetwork>
+        </l2VxlanNetwork>
 
-        <l2VlanNetwork name="$l2VlanNetworkName3" description="guest l2 vlan network3"
-          physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan3">
+        <l2VxlanNetwork name="$l2VxlanNetworkName3" description="guest L2 Vxlan network 3">
+          <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
           <l3Networks>
             <l3BasicNetwork name="$l3VlanNetworkName3" description = "guest test vlan network only has DHCP DNS" domain_name="$L3VlanNetworkDomainName3">
               <ipRange name="$vlanIpRangeName3" startIp="$vlanIpRangeStart3" endIp="$vlanIpRangeEnd3"
@@ -296,10 +296,10 @@
               </networkService> 
             </l3BasicNetwork>
           </l3Networks>
-        </l2VlanNetwork>
+        </l2VxlanNetwork>
 
-        <l2VlanNetwork name="$l2VlanNetworkName4" description="guest l2 vlan network4, it is for test small ip range."
-          physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan4">
+        <l2VxlanNetwork name="$l2VxlanNetworkName4" description="guest L2 Vxlan network 4, it is for test small ip range.">
+          <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
           <l3Networks>
             <l3BasicNetwork name="$l3VlanNetworkName4" description = "guest test vlan network with DHCP DNS with limited ip range" domain_name="$L3VlanNetworkDomainName4">
               <ipRange name="$vlanIpRangeName4" startIp="$vlanIpRangeStart4" endIp="$vlanIpRangeEnd4"
@@ -317,10 +317,10 @@
               </networkService>
             </l3BasicNetwork>
           </l3Networks>
-        </l2VlanNetwork>
+        </l2VxlanNetwork>
 
-        <l2VlanNetwork name="$l2VlanNetworkName5" description="guest l2 vlan network5, it is for test DHCP service."
-          physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan5">
+        <l2VxlanNetwork name="$l2VxlanNetworkName5" description="guest L2 Vxlan network 5, it is for test DHCP service.">
+          <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
           <l3Networks>
             <l3BasicNetwork name="$l3VlanNetworkName5" description = "guest test vlan network only has DHCP " domain_name="$L3VlanNetworkDomainName5">
               <ipRange name="$vlanIpRangeName5" 
@@ -337,10 +337,10 @@
               </networkService>
             </l3BasicNetwork>
           </l3Networks>
-        </l2VlanNetwork>
+        </l2VxlanNetwork>
 
-        <l2VlanNetwork name="$l2VlanNetworkName6" description="vlan network 6 for test load balance service."
-          physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan6">
+        <l2VxlanNetwork name="$l2VxlanNetworkName6" description="guest L2 Vxlan network 6, it is for test load balance">
+          <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
           <l3Networks>
             <l3BasicNetwork name="$l3VlanNetworkName6" description = "guest test vlan network for network load balance" domain_name="$L3VlanNetworkDomainName6">
               <ipRange name="$vlanIpRangeName6" 
@@ -362,7 +362,7 @@
               </networkService>
             </l3BasicNetwork>
           </l3Networks>
-        </l2VlanNetwork>
+        </l2VxlanNetwork>
       </l2Networks>
 
       <primaryStorages>
