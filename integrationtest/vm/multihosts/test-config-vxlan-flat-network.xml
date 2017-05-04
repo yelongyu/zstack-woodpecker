@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-vxlan-flat-network.xml</deployConfig>
+    <deployConfigTemplate>deploy-vxlan-flat-network.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
