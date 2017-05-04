@@ -1749,11 +1749,18 @@ def lib_get_l2_vxlan_vni(l2_uuid, session_uuid=None):
     '''
         return vxlan vni value for L2. If L2 doesn't have vxlan, will return None
     '''
-    l2_vxlan = res_ops.get_resource(res_ops.L2_VXLAN_NETWORK, session_uuid, uuid=l2_uuid)
-    if l2_vxlan:
-        return l2_vxlan[0].vni
-    test_util.test_logger('L2: %s did not have vlan. ' % l2_uuid)
-    return None
+    l2_network = res_ops.get_resource(res_ops.L2_NETWORK, session_uuid, uuid=l2_uuid)
+    if l2_network[0].type != "VxlanNetwork":
+        return None
+    else:
+        test_util.test_logger('Found vxlan L2 network:%s. ' % l2_uuid)
+        return l2_network[0].vni
+            
+    #l2_vxlan = res_ops.get_resource(res_ops.L2_VXLAN_NETWORK, session_uuid, uuid=l2_uuid)
+    #if l2_vxlan:
+    #    return l2_vxlan[0].vni
+    #test_util.test_logger('L2: %s did not have vlan. ' % l2_uuid)
+    #return None
 
 #-----------Get L3 Network resource-------------
 def lib_get_l3_uuid_by_nic(nic_uuid, session_uuid=None):
