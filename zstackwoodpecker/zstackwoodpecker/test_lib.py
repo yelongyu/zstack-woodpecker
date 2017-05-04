@@ -1537,6 +1537,14 @@ def lib_assign_host_l2_ip(host, l2, l3):
         host_pub_ip = host.managementIp
 
         l2_vlan = lib_get_l2_vlan(l2.uuid)
+        l2_vxlan_vni = lib_get_l2_vxlan_vni(l2.uuid)
+        if not l2_vxlan_vni:
+            test_util.test_logger('l2_vxlan_vni is null in l2.uuid:%s' %(l2.uuid))
+        else:
+            l2_vxlan_vni = str(l2_vxlan_vni)
+            br_vxlan_dev = 'br_vxlan_%s' % (l2_vxlan_vni)
+            test_util.test_logger('vxlan bridge name is: %s' %(br_vxlan_dev))
+
         if not l2_vlan:
             l2_vlan = ''
             if l2.physicalInterface == HostDefaultEth:
@@ -1569,7 +1577,12 @@ def lib_assign_host_l2_ip(host, l2, l3):
             #if current host is ZStack host, will set its bridge l2 ip firstly.
             if linux.is_ip_existing(host_ip.managementIp):
                 current_host_ip = host_ip.managementIp
-                _set_host_l2_ip(current_host_ip)
+                if l2_vxlan_vni:
+                    next_avail_ip = _generate_and_save_host_l2_ip(current_host_ip, br_vxlan_dev+l3.uuid)
+                    linux.set_device_ip(br_vxlan_dev, next_avail_ip, l3_ip_ranges.netmask)
+                    test_util.test_logger('vxlan set ip:%s for bridge: %s' % (next_avail_ip, br_vxlan_dev))
+                else:
+                    _set_host_l2_ip(current_host_ip)
                 break
         else:
             test_util.test_logger("Current machine is not in ZStack Hosts. Will directly add vlan device:%s and set ip address." % l2_vlan)
@@ -1729,6 +1742,16 @@ def lib_get_l2_vlan(l2_uuid, session_uuid=None):
     l2_vlan = res_ops.get_resource(res_ops.L2_VLAN_NETWORK, session_uuid, uuid=l2_uuid)
     if l2_vlan:
         return l2_vlan[0].vlan
+    test_util.test_logger('L2: %s did not have vlan. ' % l2_uuid)
+    return None
+
+def lib_get_l2_vxlan_vni(l2_uuid, session_uuid=None):
+    '''
+        return vxlan vni value for L2. If L2 doesn't have vxlan, will return None
+    '''
+    l2_vxlan = res_ops.get_resource(res_ops.L2_VXLAN_NETWORK, session_uuid, uuid=l2_uuid)
+    if l2_vxlan:
+        return l2_vxlan[0].vni
     test_util.test_logger('L2: %s did not have vlan. ' % l2_uuid)
     return None
 
