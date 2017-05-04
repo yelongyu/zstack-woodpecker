@@ -63,6 +63,10 @@ def test():
     os.system("%s %s %s" % (ssh_cmd, vm1_ip, cmd))
     os.system("%s %s %s" % (ssh_cmd, vm2_ip, cmd))
 
+    cmd = '%s %s "ping %s -c 10"' %(ssh_cmd, vm1_ip, test_lib.lib_get_vm_nic_by_l3(vm2.get_vm(), l3_net_uuid2).ip)
+    ping_ret=1
+    while ping_ret:
+        ping_ret = os.system(cmd)
     test_stub.test_scp_outbound_speed(vm1_ip, test_lib.lib_get_vm_nic_by_l3(vm2.get_vm(), l3_net_uuid2).ip, net_bandwidth/2)
 
     #vm_ops.delete_instance_offering(new_offering_uuid)
