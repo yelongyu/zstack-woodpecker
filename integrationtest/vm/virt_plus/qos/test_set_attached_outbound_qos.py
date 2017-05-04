@@ -63,6 +63,11 @@ def test():
     vm_nic = test_lib.lib_get_vm_nic_by_l3(vm1.vm, l3_net_uuid2)
     vm_ops.set_vm_nic_qos(vm_nic.uuid, outboundBandwidth=net_bandwidth*8*1024/2)
 
+    cmd = '%s %s "ping %s -c 10"' %(ssh_cmd, vm1_ip, test_lib.lib_get_vm_nic_by_l3(vm2.get_vm(), l3_net_uuid2).ip)
+    ping_ret=1
+    while ping_ret:
+        ping_ret = os.system(cmd)
+
     test_stub.test_scp_outbound_speed(vm1_ip, test_lib.lib_get_vm_nic_by_l3(vm2.get_vm(), l3_net_uuid2).ip, net_bandwidth/2)
     #l3_net_uuid = test_lib.lib_get_l3_by_name(os.environ.get('l3PublicNetworkName')).uuid
     #test_stub.test_scp_outbound_speed(vm1_ip, test_lib.lib_get_vm_nic_by_l3(vm2.get_vm(), l3_net_uuid2).ip, net_bandwidth)
