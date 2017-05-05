@@ -88,6 +88,12 @@
         username="$sftpBackupStorageUsername" 
         password="$sftpBackupStoragePassword" 
         hostname="$sftpBackupStorageHostname" />
+      <sftpBackupStorage name="$sftpBackupStorageName2"
+        description="Test" url="$sftpBackupStorageUrl2"
+        username="$sftpBackupStorageUsername2"
+        password="$sftpBackupStoragePassword2"
+        hostname="$sftpBackupStorageHostname2"
+        port="$sftpBackupStoragePort2"/>
     </backupStorages>
   
     <images>
@@ -95,12 +101,25 @@
         format="$rootImageFormat" url="$imageUrl_s" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
       </image>
       <image name="$imageName_net" description="Test Image2" 
         format="$rootImageFormat" url="$imageUrl_net" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
+        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+      </image>
+      <image name="$imageName3" description="Test Image3" 
+        format="$rootImageFormat" url="$imageUrl3" 
+        mediaType="$rootMediaType"
+        username="$imageUsername" password="$imagePassword">
+        <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
+      </image>
+      <image name="$virtualRouterImageName" 
+        description="virtual router image" format="$rootImageFormat" 
+        username="$vrImageUsername" password="$vrImagePassword"
+        mediaType="$rootMediaType"
+        hypervisorType='KVM' url="$virtualRouterImageUrl">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
     </images>
@@ -122,6 +141,7 @@
     <zones>
       <zone name="$zoneName" description="Test">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
         <primaryStorages>
           <localPrimaryStorage name="$localPrimaryStorageName"
             description="Test Local Primary Storage" 
