@@ -1608,6 +1608,11 @@ def lib_assign_host_l2_ip(host, l2, l3):
                     br_dev+l3.uuid)
 
             if not linux.is_ip_existing(next_avail_ip):
+                if l2_vxlan_vni:
+                    linux.set_device_ip(br_vxlan_dev, next_avail_ip, l3_ip_ranges.netmask)
+                    test_util.test_logger('vxlan set ip:%s for bridge: %s' % (next_avail_ip, br_vxlan_dev))
+                    return
+
                 if l2_vlan:
                     if not linux.is_network_device_existing(br_dev):
                         linux.create_vlan_eth(l2.physicalInterface, l2_vlan, \
