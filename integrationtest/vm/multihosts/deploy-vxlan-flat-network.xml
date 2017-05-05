@@ -91,6 +91,12 @@
     </backupStorages>
   
     <images>
+      <image name="$imageName_s" description="Test Image1" 
+        format="$rootImageFormat" url="$imageUrl_s" 
+        mediaType="$rootMediaType"
+        username="$imageUsername" password="$imagePassword">
+        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+      </image>
       <image name="$imageName_net" description="Test Image2" 
         format="$rootImageFormat" url="$imageUrl_net" 
         mediaType="$rootMediaType"
