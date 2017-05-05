@@ -173,7 +173,6 @@
             <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
             <l2VxlanNetworkPoolRef cidr="$l2VxlanNetworkCidr">$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
-            <l2NetworkRef>$l2VxlanNetworkName</l2NetworkRef>
           </cluster>
         </clusters>
   

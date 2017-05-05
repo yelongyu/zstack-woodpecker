@@ -140,7 +140,7 @@
             <l2VxlanNetworkPoolRef cidr="$l2VxlanNetworkCidr">$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
-            <l2NetworkRef>$l2VxlanNetworkName</l2NetworkRef>
+            <!--<l2NetworkRef>$l2VxlanNetworkName</l2NetworkRef> no need to attach l2VxlanNetworkName again cause $l2VxlanNetworkPoolName has been attached-->
           </cluster>
         </clusters>
   
