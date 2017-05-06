@@ -226,9 +226,15 @@ def setup_mn_host_vm(vm_inv, vm_config):
 
 def setup_backupstorage_vm(vm_inv, vm_config, deploy_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
-    host = get_deploy_host(vm_config.hostRef.text_, deploy_config)
-    if not hasattr(host, 'port_') or host.port_ == '22':
-        host.port_ = '22'
+    if hasattr(vm_config, 'hostRef'):
+        host = get_deploy_host(vm_config.hostRef.text_, deploy_config)
+        if not hasattr(host, 'port_') or host.port_ == '22':
+            host_port = '22'
+        else:
+            host_port = host.port_
+    else:
+        # TODO: sftp may setup with non-root or non-default user/password port
+        host_port = '22'
 
     for backupStorageRef in xmlobject.safe_list(vm_config.backupStorageRef):
         print backupStorageRef.text_
@@ -238,14 +244,19 @@ def setup_backupstorage_vm(vm_inv, vm_config, deploy_config):
                     # TODO: sftp may setup with non-root or non-default user/password port
                     test_util.test_logger('[vm:] %s setup sftp service.' % (vm_ip))
                     cmd = "mkdir -p %s" % (sftpBackupStorage.url_)
-                    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host.port_))
+                    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
                     return
 
 def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
-    host = get_deploy_host(vm_config.hostRef.text_, deploy_config)
-    if not hasattr(host, 'port_') or host.port_ == '22':
-        host.port_ = '22'
+    if hasattr(vm_config, 'hostRef'):
+        host = get_deploy_host(vm_config.hostRef.text_, deploy_config)
+        if not hasattr(host, 'port_') or host.port_ == '22':
+            host_port = '22'
+        else:
+            host_port = host.port_
+    else:
+        host_port = '22'
 
     for primaryStorageRef in xmlobject.safe_list(vm_config.primaryStorageRef):
         print primaryStorageRef.text_
@@ -257,11 +268,11 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
                         # TODO: multiple NFS PS may refer to same host's different DIR
                         nfsPath = nfsPrimaryStorage.url_.split(':')[1]
                         cmd = "echo '%s *(rw,sync,no_root_squash)' > /etc/exports" % (nfsPath)
-                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host.port_))
+                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
                         cmd = "mkdir -p %s && service rpcbind restart && service nfs restart" % (nfsPath)
-                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host.port_))
+                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
                         cmd = "iptables -w 20 -I INPUT -p tcp -m tcp --dport 2049 -j ACCEPT && iptables -w 20 -I INPUT -p udp -m udp --dport 2049 -j ACCEPT"
-                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host.port_))
+                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
                         return
 
 def get_scenario_config_vm(vm_name, scenario_config):
