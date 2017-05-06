@@ -1517,7 +1517,9 @@ def lib_assign_host_l2_ip(host, l2, l3):
 
     def _set_host_l2_ip(host_pub_ip):
         br_ethname = 'br_%s' % l2.physicalInterface
-        if l2_vlan:
+        if l2_vxlan_vni:
+            br_ethname = 'br_vxlan_%s' % (l2_vxlan_vni)
+        elif l2_vlan:
             br_ethname = '%s_%s' % (br_ethname, l2_vlan)
         if br_ethname == 'br_%s' % HostDefaultEth:
             test_util.test_warn('Dangours: should not change host default network interface config for %s' % br_dev)
@@ -1573,6 +1575,7 @@ def lib_assign_host_l2_ip(host, l2, l3):
         all_hosts_ips = res_ops.query_resource_fields(res_ops.HOST, cond, None, \
                 ['managementIp'])
 
+
         for host_ip in all_hosts_ips:
             #if current host is ZStack host, will set its bridge l2 ip firstly.
             if linux.is_ip_existing(host_ip.managementIp):
@@ -1608,11 +1611,6 @@ def lib_assign_host_l2_ip(host, l2, l3):
                     br_dev+l3.uuid)
 
             if not linux.is_ip_existing(next_avail_ip):
-                if l2_vxlan_vni:
-                    linux.set_device_ip(br_vxlan_dev, next_avail_ip, l3_ip_ranges.netmask)
-                    test_util.test_logger('vxlan set ip:%s for bridge: %s' % (next_avail_ip, br_vxlan_dev))
-                    return
-
                 if l2_vlan:
                     if not linux.is_network_device_existing(br_dev):
                         linux.create_vlan_eth(l2.physicalInterface, l2_vlan, \
