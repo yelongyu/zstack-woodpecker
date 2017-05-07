@@ -765,6 +765,22 @@ def get_node_from_scenario_file(nodeRefName, scenarioConfig, scenarioFile, deplo
                                 return s_vm.ip_
     return None
 
+def get_nodes_from_scenario_file(scenarioConfig, scenarioFile, deployConfig):
+    if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
+        return None
+
+    nodes_ip = ''
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            if xmlobject.has_element(vm, 'nodeRef'):
+                with open(scenarioFile, 'r') as fd:
+                    xmlstr = fd.read()
+                    fd.close()
+                    scenario_file = xmlobject.loads(xmlstr)
+                    for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                        if s_vm.name_ == vm.name_:
+                            nodes_ip += ' %s' % s_vm.ip_
+    return nodes_ip
 
 def get_host_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, deployConfig):
     if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
