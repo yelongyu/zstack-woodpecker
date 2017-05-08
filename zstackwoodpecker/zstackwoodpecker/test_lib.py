@@ -1281,6 +1281,8 @@ def lib_check_vm_live_migration_cap(vm_inv):
     root_volume = lib_get_root_volume(vm_inv)
     ps = lib_get_primary_storage_by_uuid(root_volume.primaryStorageUuid)
     if ps.type == inventory.LOCAL_STORAGE_TYPE:
+        if conf_ops.get_global_config_value('localStoragePrimaryStorage', 'liveMigrationWithStorage.allow') == 'true':
+            return True
         return False
     return True
 
