@@ -51,7 +51,7 @@ def test():
         if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
             os.system("bash %s '%s'" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ips))
     elif os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
-        os.system("bash %s '%s'" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ips))
+        os.system("bash %s" % (EXTRA_SUITE_SETUP_SCRIPT))
 
     deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
     for host in testHosts:
