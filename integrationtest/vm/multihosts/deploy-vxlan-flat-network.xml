@@ -210,9 +210,6 @@
                 <dns>$DNSServer</dns> 
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
@@ -234,9 +231,6 @@
                 <dns>$DNSServer</dns> 
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
@@ -260,9 +254,6 @@
                 <dns>$DNSServer</dns> 
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
@@ -282,9 +273,6 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
@@ -304,9 +292,6 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
@@ -326,9 +311,6 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
@@ -347,9 +329,6 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
@@ -368,9 +347,6 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
@@ -389,9 +365,6 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
@@ -410,9 +383,6 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
@@ -431,9 +401,6 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
@@ -452,9 +419,6 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
@@ -473,9 +437,6 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
@@ -494,9 +455,6 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
@@ -515,9 +473,6 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
@@ -536,9 +491,6 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
@@ -557,9 +509,6 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
@@ -578,9 +527,6 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
@@ -599,9 +545,6 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
@@ -620,9 +563,6 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
@@ -641,9 +581,6 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
@@ -662,8 +599,7 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
+                  <serviceType>Eip</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
