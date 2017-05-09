@@ -211,9 +211,6 @@
                   <serviceType>DHCP</serviceType>
                   <serviceType>Userdata</serviceType>
                   <serviceType>Eip</serviceType> 
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>

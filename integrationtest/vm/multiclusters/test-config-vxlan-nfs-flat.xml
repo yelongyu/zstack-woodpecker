@@ -1,5 +1,5 @@
 <testConfig>
     <deployConfig>deploy-vxlan-nfs-flat.xml</deployConfig>
-    <deployConfigTemplate>deploy-vxlan-nfs-flat.tmpt</deployConfigTemplate>
+    <deployConfigTemplate>deploy-vxlan.tmpt</deployConfigTemplate>
     <pingTestTarget>zstack.org</pingTestTarget>
 </testConfig>
