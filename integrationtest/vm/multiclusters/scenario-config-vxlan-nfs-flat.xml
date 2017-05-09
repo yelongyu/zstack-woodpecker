@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-vxlan-nfs-flat.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-vxlan-nfs-flat.tmpt</scenarioConfigTemplate>
+</testConfig>
