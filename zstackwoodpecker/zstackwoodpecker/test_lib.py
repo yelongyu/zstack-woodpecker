@@ -4741,6 +4741,9 @@ def lib_get_reserved_primary_storage():
 def lib_set_primary_storage_imagecache_gc_interval(value):
     return conf_ops.change_global_config('primaryStorage', 'imageCache.garbageCollector.interval', value)
 
+def lib_set_allow_live_migration_local_storage(value):
+    return conf_ops.change_global_config('localStoragePrimaryStorage', 'liveMigrationWithStorage.allow', value)
+
 def lib_add_vm_sshkey(vm_uuid, sshkey, session_uuid = None):
     return tag_ops.create_system_tag('VmInstanceVO', \
             vm_uuid, \
