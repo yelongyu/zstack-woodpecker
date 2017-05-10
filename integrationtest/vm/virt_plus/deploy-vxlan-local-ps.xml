@@ -362,7 +362,7 @@
             </l3Networks>
           </l2VxlanNetwork>
 
-          <l2VxlanNetwork name="$l2VxlanNetworkName7" description="guest L2 Vxlan network 7">
+          <!--<l2VxlanNetwork name="$l2VxlanNetworkName7" description="guest L2 Vxlan network 7">
             <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <l3Networks>
               <l3BasicNetwork name="$l3VlanNetwork7" 
@@ -612,7 +612,7 @@
                 </networkService>
               </l3BasicNetwork>
             </l3Networks>
-          </l2VxlanNetwork>
+          </l2VxlanNetwork>-->
         </l2Networks>
       </zone>
     </zones>
