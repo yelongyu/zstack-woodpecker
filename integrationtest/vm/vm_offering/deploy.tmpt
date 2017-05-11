@@ -1,0 +1,82 @@
+import ../deploy.tmpt
+
+localPrimaryStorageName = local-ps
+localPrimaryStorageUrl = /home/local-ps
+
+instanceOfferingName_m = medium-vm
+instanceOfferingMemory_m = 1024M
+instanceOfferingCpuNum_m = 2
+instanceOfferingCpuSpeed_m = 512
+
+largeDiskOfferingName = largeDiskOffering
+largeDiskOfferingSize = 1G
+
+mediumDiskOfferingName = mediumDiskOffering
+mediumDiskOfferingSize = 100M
+
+clusterName2 = cluster2
+
+hostName = centos5
+hostIp = 10.0.101.31
+
+hostName2 = centos2
+hostIp2 = 10.0.101.21
+
+hostName3 = centos3
+hostIp3 = 10.0.101.22
+
+hostName4 = centos4
+hostIp4 = 10.0.101.23
+
+l2PublicNetworkName = l2-public
+l2PublicNetworkInterface = ens32
+
+l3VlanNetworkName2 = l3VlanNetwork2
+
+#this var is used to overwrite original raw setting
+rootImageFormat = qcow2
+
+sshkeyImageName = vr
+sshkeyImageUrl = http://10.1.101.1/image/zstack-cloudinit.img
+sshkeyPubKey = 
+sshkeyPriKey_file = 
+
+imageName_i_c6 = centos6-installation-test
+imageUrl_i_c6 = http://zstack/image/centos6-test.qcow2
+
+imageName_i_c7_no_tag = centos7-installation-no-system-tag
+imageName_i_c7 = centos7-installation-test
+imageUrl_i_c7 = http://zstack/image/centos7-test.qcow2
+
+imageName_i_u12 = ubuntu1204-installation-test
+imageUrl_i_u12 = http://zstack/image/ubuntu12-test.qcow2
+
+imageName_i_u13 = ubuntu1304-installation-test
+imageUrl_i_u13 = http://zstack/image/ubuntu13-test.qcow2
+
+imageName_i_u14 = ubuntu1404-installation-test
+imageUrl_i_u14 = http://zstack/image/ubuntu14-test.qcow2
+
+imageName_i_u15 = ubuntu1504-installation-test
+imageUrl_i_u15 = http://zstack/image/ubuntu15-test.qcow2
+
+imageName_i_u16 = ubuntu1604-installation-test
+imageUrl_i_u16 = http://zstack/image/ubuntu16-test.qcow2
+
+imageName_i_c6_32 = centos6-32-installation-test
+imageUrl_i_c6_32 = http://zstack/image/CentOS-6.8-i386-LiveCD.qcow2
+
+imageName_i_c7_32 = centos7-32-installation-test
+imageUrl_i_c7_32 = http://zstack/image/CentOS-7-i386-LiveGNOME-1511.qcow2
+
+batch_test_image = batch-image
+batchImageUrl = http://zstack/image/CentOS7.2_Minimal_40G.qcow2
+
+test_negative_qcow2 = bad-qcow2
+negativeQcow2Url = http://zstack/image/zstack-image-1.4.qcow2
+
+test_negative_iso = bad-iso
+negativeIsoUrl = http://zstack/image/virtio-win-0.1.126.iso
+
+test_negative_raw = bad-raw
+negativeRawUrl = http://zstack/image/ttylinux.raw

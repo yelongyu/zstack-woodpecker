@@ -1,0 +1,4 @@
+<integrationTest>
+    <suite name="vm offering test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
+    </suite>
+</integrationTest>
