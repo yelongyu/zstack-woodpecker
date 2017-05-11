@@ -19,10 +19,9 @@ def create_onlinechange_vm(test_stub=None, test_obj_dict=None):
 
     test_obj_dict.add_instance_offering(test_offering)
     vm = test_stub.create_vm(vm_name='test_update_instance_offering', host_uuid=host.uuid,
-                             instance_offering_uuid=test_offering.uuid,
-                             system_tags="instanceOfferingOnlinechange::true")
-    vm.start()
-    test_obj_dict.add_instance_offering(vm)
+                             instance_offering_uuid=test_offering.uuid)
+    test_obj_dict.add_vm(vm)
+    vm.check()
     return vm
 
 
