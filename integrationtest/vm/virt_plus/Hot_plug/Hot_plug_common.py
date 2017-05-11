@@ -4,7 +4,7 @@
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
-
+import os
 
 def create_onlinechange_vm(test_stub=None, test_obj_dict=None):
     cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
@@ -17,9 +17,13 @@ def create_onlinechange_vm(test_stub=None, test_obj_dict=None):
     test_offering = test_lib.lib_create_instance_offering(cpuNum=1, cpuSpeed=16,
                                                           memorySize=1024 * 1024 * 1024, name='test_offering')
 
+    l3_name = os.environ.get('l3VlanNetworkName1')
+    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    l3_net_list = [l3_net_uuid]
     test_obj_dict.add_instance_offering(test_offering)
     vm = test_stub.create_vm(vm_name='test_update_instance_offering', host_uuid=host.uuid,
-                             instance_offering_uuid=test_offering.uuid)
+                             instance_offering_uuid=test_offering.uuid,
+                             l3_name=l3_net_list)
     test_obj_dict.add_vm(vm)
     vm.check()
     return vm
