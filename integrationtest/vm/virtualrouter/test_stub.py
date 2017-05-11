@@ -118,7 +118,7 @@ def create_other_vm(l3_name=None, disk_offering_uuids=None, session_uuid = None)
 def create_basic_vm(disk_offering_uuids=None, session_uuid = None):
     image_name = os.environ.get('imageName_net')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
-    l3_name = os.environ.get('l3PublicNetworkName')
+    l3_name = os.environ.get('l3VlanNetworkName1')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     return create_vm([l3_net_uuid], image_uuid, 'basic_no_vlan_vm', disk_offering_uuids, session_uuid = session_uuid)
 
@@ -158,7 +158,7 @@ def create_dnat_vm(disk_offering_uuids=None, session_uuid = None):
 def create_vm_with_user_args(system_tags = None, session_uuid = None):
     image_name = os.environ.get('imageName_net')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
-    l3_name = os.environ.get('l3PublicNetworkName')
+    l3_name = os.environ.get('l3VlanNetworkName1')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     return create_vm([l3_net_uuid], image_uuid, 'user_args_vm', system_tags = system_tags, session_uuid = session_uuid)
 
