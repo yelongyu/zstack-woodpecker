@@ -141,3 +141,6 @@ def check_vm_internal_cpu_mem(vm):
     vm_mem = int(res.result.split()[1])
     return vm_cpu, vm_mem
 
+def online_hotplug_cpu_memory(vm):
+    script_file = "%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/online_hotplug_cpu_memory.sh')
+    test_lib.lib_execute_shell_script_in_vm(vm.get_vm(), script_file)
