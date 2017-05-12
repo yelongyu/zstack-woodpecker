@@ -4766,6 +4766,12 @@ def lib_get_remote_management_server_log_path(node_ip, node_username, node_passw
 def lib_get_local_management_server_log():
     return shell.call('cat %s' % (lib_get_local_management_server_log_path()))
 
+def lib_set_vm_numa(value):
+    return conf_ops.change_global_config('vm', 'numa', value)
+
+def lib_get_vm_numa():
+    return conf_ops.get_global_config_value('vm', 'numa')
+
 def lib_find_in_local_management_server_log(timestamp, *keywords):
     datetime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(timestamp))
     cmd = 'grep "%s" %s' % (datetime, lib_get_local_management_server_log_path().strip())
