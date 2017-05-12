@@ -35,6 +35,12 @@ def test():
 
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     l2_net_uuid = test_lib.lib_get_l3_by_name(l3_name).l2NetworkUuid
+    l2_net_type = res_ops.get_resource(res_ops.L2_NETWORK, uuid=l2_net_uuid)[0].type
+
+    test_util.test_logger("l2_network.type@@:%s" %(l2_net_type))
+    if l2_net_type == "VxlanNetwork":
+        test_util.test_skip("Vxlan network not support detach l2 network, therefore, skip the test")
+
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
     vm_creation_option.set_l3_uuids([l3_net_uuid])
