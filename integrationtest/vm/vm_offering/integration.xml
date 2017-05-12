@@ -1,4 +1,5 @@
 <integrationTest>
     <suite name="vm offering test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
+        <case timeout='600' repeat='1' >test_chg_instance_offering_online.py</case>
     </suite>
 </integrationTest>
