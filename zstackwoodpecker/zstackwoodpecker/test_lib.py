@@ -1591,53 +1591,56 @@ def lib_assign_host_l2_ip(host, l2, l3):
                 break
         else:
             test_util.test_logger("Current machine is not in ZStack Hosts. Will directly add vlan device:%s and set ip address." % l2_vlan)
-            any_host_ip = all_hosts_ips[0].managementIp
-            if not linux.is_network_device_existing(l2.physicalInterface):
-                test_util.test_fail("network device: %s is not on current test machine. Test machine needs to have same network connection with KVM Hosts." % l2.physicalInterface)
-
-            current_host_ip = linux.find_route_interface_ip_by_destination_ip(any_host_ip)
-            if not current_host_ip:
-                current_host_ip = '127.0.0.1'
-            if l2_vlan:
-                dev_name = '%s.%s' % (l2.physicalInterface, l2_vlan)
-                br_dev = 'br_%s_%s' % (l2.physicalInterface, l2_vlan)
+            if l2_vxlan_vni:
+                pass
             else:
-                dev_name = l2.physicalInterface
-                br_dev = 'br_%s' % dev_name
+                any_host_ip = all_hosts_ips[0].managementIp
+                if not linux.is_network_device_existing(l2.physicalInterface):
+                    test_util.test_fail("network device: %s is not on current test machine. Test machine needs to have same network connection with KVM Hosts." % l2.physicalInterface)
 
-            if br_dev == 'br_%s' % HostDefaultEth:
-                test_util.test_warn('Dangours: should not change host default network interface config for %s' % br_dev)
-                return
-
-            next_avail_ip = _generate_and_save_host_l2_ip(current_host_ip, \
-                    br_dev+l3.uuid)
-
-            if not linux.is_ip_existing(next_avail_ip):
+                current_host_ip = linux.find_route_interface_ip_by_destination_ip(any_host_ip)
+                if not current_host_ip:
+                    current_host_ip = '127.0.0.1'
                 if l2_vlan:
-                    if not linux.is_network_device_existing(br_dev):
-                        linux.create_vlan_eth(l2.physicalInterface, l2_vlan, \
-                                next_avail_ip, l3_ip_ranges.netmask)
-                        linux.create_bridge(br_dev, dev_name)
-                        test_util.test_logger('create bridge:%s and set ip:%s' % (br_dev, next_avail_ip))
-                    else:
-                        linux.set_device_ip(br_dev, next_avail_ip, \
-                                l3_ip_ranges.netmask)
-                        test_util.test_logger('set ip:%s for bridge: %s' % (next_avail_ip, br_dev))
-
+                    dev_name = '%s.%s' % (l2.physicalInterface, l2_vlan)
+                    br_dev = 'br_%s_%s' % (l2.physicalInterface, l2_vlan)
                 else:
-                    if not linux.is_network_device_existing(dev_name):
-                        test_util.test_warn('l2 dev: %s does not exist' \
-                                % dev_name)
-                    else:
+                    dev_name = l2.physicalInterface
+                    br_dev = 'br_%s' % dev_name
+
+                if br_dev == 'br_%s' % HostDefaultEth:
+                    test_util.test_warn('Dangours: should not change host default network interface config for %s' % br_dev)
+                    return
+
+                next_avail_ip = _generate_and_save_host_l2_ip(current_host_ip, \
+                        br_dev+l3.uuid)
+
+                if not linux.is_ip_existing(next_avail_ip):
+                    if l2_vlan:
                         if not linux.is_network_device_existing(br_dev):
-                            linux.set_device_ip(dev_name, next_avail_ip, \
-                                    l3_ip_ranges.netmask)
+                            linux.create_vlan_eth(l2.physicalInterface, l2_vlan, \
+                                    next_avail_ip, l3_ip_ranges.netmask)
                             linux.create_bridge(br_dev, dev_name)
                             test_util.test_logger('create bridge:%s and set ip:%s' % (br_dev, next_avail_ip))
                         else:
                             linux.set_device_ip(br_dev, next_avail_ip, \
                                     l3_ip_ranges.netmask)
                             test_util.test_logger('set ip:%s for bridge: %s' % (next_avail_ip, br_dev))
+
+                    else:
+                        if not linux.is_network_device_existing(dev_name):
+                            test_util.test_warn('l2 dev: %s does not exist' \
+                                    % dev_name)
+                        else:
+                            if not linux.is_network_device_existing(br_dev):
+                                linux.set_device_ip(dev_name, next_avail_ip, \
+                                        l3_ip_ranges.netmask)
+                                linux.create_bridge(br_dev, dev_name)
+                                test_util.test_logger('create bridge:%s and set ip:%s' % (br_dev, next_avail_ip))
+                            else:
+                                linux.set_device_ip(br_dev, next_avail_ip, \
+                                        l3_ip_ranges.netmask)
+                                test_util.test_logger('set ip:%s for bridge: %s' % (next_avail_ip, br_dev))
 
 
         #set remote host ip address
