@@ -4548,6 +4548,9 @@ def lib_create_lb_listener_option(lbl_name = 'lb ssh test',\
 def lib_set_provision_memory_rate(rate):
     return conf_ops.change_global_config('mevoco', 'overProvisioning.memory', rate)
 
+def lib_get_provision_memory_rate():
+    return conf_ops.get_global_config_value('mevoco', 'overProvisioning.memory')
+
 def lib_set_provision_storage_rate(rate):
     return conf_ops.change_global_config('mevoco', 'overProvisioning.primaryStorage', rate)
 
