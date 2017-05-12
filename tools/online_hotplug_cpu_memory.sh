@@ -26,7 +26,9 @@ do
     echo "${RAM}" | grep offline > /dev/null
     if [ $? -eq 0 ]; then
         echo "Bringing online"
-        echo $RAM | sed "s/:offline$//"|sed "s/^/echo online > /"|source /dev/stdin
+        #echo $RAM | sed "s/:offline$//"|sed "s/^/echo online > /"|source /dev/stdin
+        RAMFILE=$(echo "${RAM}" | awk -F ':' '{print $1}')
+        echo online > "${RAMFILE}"
     else
         echo "Already online"
     fi
