@@ -738,6 +738,12 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
             start_vm(zstack_management_ip, vm_inv.uuid)
             test_lib.lib_wait_target_up(vm_ip, '22', 120)
 
+            ips_xml = etree.SubElement(vm_xml, 'ips')
+            for l3_uuid in l3_uuid_list:
+                ip_xml = etree.SubElement(ips_xml, 'ip')
+                ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, l3_uuid).ip
+                ip_xml.set('ip', ip)
+
             #setup eip
             if xmlobject.has_element(vm, 'eipRef'):
                 vm_nic = vm_inv.vm.vmNics[0]
@@ -748,12 +754,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     eip = test_stub.create_eip(l3network.eipRef.text_, vip_uuid=vip.get_vip().uuid, vnic_uuid=vm_nic_uuid, vm_obj=vm_inv)
                     eip_lst.append(eip)
                     vip.attach_eip(eip)
+                    vm_xml.set('ip', eip.get_eip().vipIp)
 
-            ips_xml = etree.SubElement(vm_xml, 'ips')
-            for l3_uuid in l3_uuid_list:
-                ip_xml = etree.SubElement(ips_xml, 'ip')
-                ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, l3_uuid).ip
-                ip_xml.set('ip', ip)
             if xmlobject.has_element(vm, 'nodeRef'):
                 setup_node_vm(vm_inv, vm, deploy_config)
             if xmlobject.has_element(vm, 'hostRef'):
