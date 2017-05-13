@@ -26,7 +26,7 @@ def test():
     test_obj_dict.add_instance_offering(new_offering)
     new_offering_uuid = new_offering.uuid
 
-    l3_name = os.environ.get('l3PublicNetworkName')
+    l3_name = os.environ.get('l3VlanNetworkName1')
     disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
 
     data_volume_uuids = [disk_offering.uuid,disk_offering.uuid,disk_offering.uuid]
