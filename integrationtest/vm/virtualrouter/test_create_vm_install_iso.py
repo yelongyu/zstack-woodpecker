@@ -52,7 +52,7 @@ def test():
     image.set_creation_option(img_option)
     test_obj_dict.add_image(image)
 
-    l3_name = os.environ.get('l3PublicNetworkName')
+    l3_name = os.environ.get('l3VlanNetworkName1')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     root_disk_uuid = data_volume_offering.uuid
     vm = test_stub.create_vm_with_iso([l3_net_uuid], image_uuid, 'vm-iso', root_disk_uuid, new_offering.uuid)
