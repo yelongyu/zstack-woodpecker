@@ -130,14 +130,14 @@ fi
 
 ssh ${IP[0]} 'yum --disablerepo=* --enablerepo=zstack-local install -y iptables-services >/dev/null 2>&1'
 ssh ${IP[0]} 'test -f /etc/sysconfig/iptables && sed -i "/COMMIT$/d" /etc/sysconfig/iptables'
-ssh ${IP[0]} 'echo "-A INPUT -s 172.20.0.0/16 -j ACCEPT" >>/etc/sysconfig/iptables'
+ssh ${IP[0]} 'echo "-I INPUT -s 172.20.0.0/16 -j ACCEPT" >>/etc/sysconfig/iptables'
 ssh ${IP[0]} 'echo "COMMIT" >>/etc/sysconfig/iptables'
 ssh ${IP[0]} 'service iptables restart'
 
 if [ -n "${IP[1]}" ]; then
 ssh ${IP[1]} 'yum --disablerepo=* --enablerepo=zstack-local install -y iptables-services >/dev/null 2>&1'
 ssh ${IP[1]} 'test -f /etc/sysconfig/iptables && sed -i "/COMMIT$/d" /etc/sysconfig/iptables'
-ssh ${IP[1]} 'echo "-A INPUT -s 172.20.0.0/16 -j ACCEPT" >>/etc/sysconfig/iptables'
+ssh ${IP[1]} 'echo "-I INPUT -s 172.20.0.0/16 -j ACCEPT" >>/etc/sysconfig/iptables'
 ssh ${IP[1]} 'echo "COMMIT" >>/etc/sysconfig/iptables'
 ssh ${IP[1]} 'service iptables restart'
 fi
@@ -145,7 +145,7 @@ fi
 if [ -n "${IP[2]}" ]; then
 ssh ${IP[2]} 'yum --disablerepo=* --enablerepo=zstack-local install -y iptables-services >/dev/null 2>&1'
 ssh ${IP[2]} 'test -f /etc/sysconfig/iptables && sed -i "/COMMIT$/d" /etc/sysconfig/iptables'
-ssh ${IP[2]} 'echo "-A INPUT -s 172.20.0.0/16 -j ACCEPT" >>/etc/sysconfig/iptables'
+ssh ${IP[2]} 'echo "-I INPUT -s 172.20.0.0/16 -j ACCEPT" >>/etc/sysconfig/iptables'
 ssh ${IP[2]} 'echo "COMMIT" >>/etc/sysconfig/iptables'
 ssh ${IP[2]} 'service iptables restart'
 fi
@@ -153,7 +153,7 @@ fi
 if [ -n "${IP[3]}" ]; then
 ssh ${IP[3]} 'yum --disablerepo=* --enablerepo=zstack-local install -y iptables-services >/dev/null 2>&1'
 ssh ${IP[3]} 'test -f /etc/sysconfig/iptables && sed -i "/COMMIT$/d" /etc/sysconfig/iptables'
-ssh ${IP[3]} 'echo "-A INPUT -s 172.20.0.0/16 -j ACCEPT" >>/etc/sysconfig/iptables'
+ssh ${IP[3]} 'echo "-I INPUT -s 172.20.0.0/16 -j ACCEPT" >>/etc/sysconfig/iptables'
 ssh ${IP[3]} 'echo "COMMIT" >>/etc/sysconfig/iptables'
 ssh ${IP[3]} 'service iptables restart'
 fi
