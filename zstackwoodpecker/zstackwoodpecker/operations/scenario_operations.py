@@ -18,6 +18,47 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.operations.resource_operations as res_ops
+import zstackwoodpecker.operations.net_operations as net_ops
+import zstackwoodpecker.zstack_test.zstack_test_eip as zstack_eip_header
+import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
+
+
+def create_eip(eip_name=None, vip_uuid=None, vnic_uuid=None, vm_obj=None, \
+        session_uuid = None):
+    if not vip_uuid:
+        l3_name = os.environ.get('l3PublicNetworkName')
+        l3_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+        vip_uuid = net_ops.acquire_vip(l3_uuid).uuid
+
+    eip_option = test_util.EipOption()
+    eip_option.set_name(eip_name)
+    eip_option.set_vip_uuid(vip_uuid)
+    eip_option.set_vm_nic_uuid(vnic_uuid)
+    eip_option.set_session_uuid(session_uuid)
+    eip = zstack_eip_header.ZstackTestEip()
+    eip.set_creation_option(eip_option)
+    if vnic_uuid and not vm_obj:
+        test_util.test_fail('vm_obj can not be None in create_eip() API, when setting vm_nic_uuid.')
+    eip.create(vm_obj)
+    return eip
+
+def create_vip(vip_name=None, l3_uuid=None, session_uuid = None):
+    if not vip_name:
+        vip_name = 'test vip'
+    if not l3_uuid:
+        l3_name = os.environ.get('l3PublicNetworkName')
+        l3_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+
+    vip_creation_option = test_util.VipOption()
+    vip_creation_option.set_name(vip_name)
+    vip_creation_option.set_l3_uuid(l3_uuid)
+    vip_creation_option.set_session_uuid(session_uuid)
+
+    vip = zstack_vip_header.ZstackTestVip()
+    vip.set_creation_option(vip_creation_option)
+    vip.create()
+
+    return vip
 
 def sync_call(http_server_ip, apicmd, session_uuid):
     api_instance = api.Api(host = http_server_ip, port = '8080')
@@ -658,6 +699,8 @@ def query_resource(http_server_ip, resource, conditions = [], session_uuid=None,
 def deploy_scenario(scenario_config, scenario_file, deploy_config):
     vm_inv_lst = []
     vm_cfg_lst = []
+    eip_lst = []
+    vip_lst = []
     ocfs2smp_shareable_volume_is_created = False
     zstack_management_ip = scenario_config.basicConfig.zstackManagementIp.text_
     root_xml = etree.Element("deployerConfig")
@@ -694,6 +737,17 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
             stop_vm(zstack_management_ip, vm_inv.uuid)
             start_vm(zstack_management_ip, vm_inv.uuid)
             test_lib.lib_wait_target_up(vm_ip, '22', 120)
+
+            #setup eip
+            if xmlobject.has_element(vm, 'eipRef'):
+                vm_nic = vm_inv.vm.vmNics[0]
+                vm_nic_uuid = vm_nic.uuid
+                for l3network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                    vip = test_stub.create_vip('scenario-auto-vip', l3network.uuid_)
+                    vip_lst.append(vip)
+                    eip = test_stub.create_eip(l3network.eipRef.text_, vip_uuid=vip.get_vip().uuid, vnic_uuid=vm_nic_uuid, vm_obj=vm_inv)
+                    eip_lst.append(eip)
+                    vip.attach_eip(eip)
 
             ips_xml = etree.SubElement(vm_xml, 'ips')
             for l3_uuid in l3_uuid_list:
@@ -758,4 +812,11 @@ def destroy_scenario(scenario_config, scenario_file):
         scenario_file = xmlobject.loads(xmlstr)
         zstack_management_ip = scenario_config.basicConfig.zstackManagementIp.text_
         for vm in xmlobject.safe_list(scenario_file.vms.vm):
+            #delete eip
+            if xmlobject.has_element(vm, 'eipRef'):
+                for l3network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                    for eip in eip_lst:
+                        eip.delete()
+                    for vip in vip_lst:
+                        vip.delete()
             destroy_vm(zstack_management_ip, vm.uuid_)

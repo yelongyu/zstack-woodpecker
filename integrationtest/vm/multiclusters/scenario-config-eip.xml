@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-eip.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-eip.tmpt</scenarioConfigTemplate>
+</testConfig>

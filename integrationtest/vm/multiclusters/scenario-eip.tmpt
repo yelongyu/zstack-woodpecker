@@ -1,0 +1,7 @@
+import ../scenario.tmpt
+import ./deploy.tmpt
+import ./scenario.tmpt
+eipName1 = scenario-eip1
+eipName2 = scenario-eip2
+eipName3 = scenario-eip3
+eipName4 = scenario-eip4
