@@ -23,6 +23,16 @@ def test():
     if pss[0].type != "LocalStorage":
         test_util.test_skip("this test is designed to run on localstorage, skip on other ps type.")    
 
+    l3_name = os.environ.get('l3VlanNetwork3')
+    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    l2_net_uuid = test_lib.lib_get_l3_by_name(l3_name).l2NetworkUuid
+    l2_net_type = res_ops.get_resource(res_ops.L2_NETWORK, uuid=l2_net_uuid)[0].type
+
+    test_util.test_logger("l2_network.type@@:%s" %(l2_net_type))
+    if l2_net_type == "VxlanNetwork":
+        test_util.test_skip("Vxlan network not support detach l2 network, therefore, skip the test")
+
+
     vm = test_stub.create_vr_vm('vm1', 'imageName_net', 'l3VlanNetwork3')
     test_obj_dict.add_vm(vm)
     vm.check()
