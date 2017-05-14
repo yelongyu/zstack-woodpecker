@@ -12,6 +12,7 @@ func Connect(host string, port string, username string, password string) (*ssh.C
 		User: username,
 		Auth: []ssh.AuthMethod {
 			ssh.Password(password)},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
 	client, err := ssh.Dial("tcp", fmt.Sprintf("%s:%s", host, port ), config)
