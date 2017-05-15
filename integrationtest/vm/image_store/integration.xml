@@ -11,7 +11,7 @@
         <case timeout='300' repeat='1'>test_clone_vm.py</case>
         <case timeout='400' repeat='1'>test_clone_vm2.py</case>
         <case timeout='500' repeat='1'>test_clone_vm_sp_ops.py</case>
-        <case timeout='500' repeat='1'>test_clone_stopped_vm_created.py</case>
-        <case timeout='500' repeat='1'>test_clone_vm_created.py</case>
+	<!--<case timeout='500' repeat='1'>test_clone_stopped_vm_created.py</case>
+	<case timeout='500' repeat='1'>test_clone_vm_created.py</case>-->
     </suite>
 </integrationTest>
