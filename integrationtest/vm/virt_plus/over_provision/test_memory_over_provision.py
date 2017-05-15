@@ -37,8 +37,7 @@ def test():
     target_vm_num = 4
 
     host_res = test_lib.lib_get_cpu_memory_capacity(host_uuids = [host.uuid])
-    real_availableMemory = host_res.availableMemory - \
-            sizeunit.get_size(test_lib.lib_get_reserved_memory())
+    real_availableMemory = host_res.availableMemory
     avail_mem = real_availableMemory * over_provision_rate
     if avail_mem <= 1024*1024*1024:
         test_util.test_skip('Available memory is less than 512MB, skip test.')
@@ -48,7 +47,9 @@ def test():
 
     original_rate = test_lib.lib_set_provision_memory_rate(over_provision_rate)
 
-    new_offering_mem = avail_mem / target_vm_num
+    new_offering_mem = int((avail_mem - 1) / target_vm_num)
+    if (new_offering_mem % 2) != 0 :
+        new_offering_mem = new_offering_mem - 1 
     new_offering = test_lib.lib_create_instance_offering(memorySize = new_offering_mem)
 
     new_offering_uuid = new_offering.uuid
