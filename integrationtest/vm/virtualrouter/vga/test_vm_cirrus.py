@@ -52,7 +52,7 @@ def test():
     if image.width != 1280 or image.height != 1024:
         test_util.test_fail("VM is expected to work in 1280x1024 while its %sx%s" % (image.width, image.height))
     box = image.getbbox()
-    if box != (0, 18, 359, 80) or box != (0, 18, 359, 79) or box != (0, 18, 359, 81):
+    if box != (0, 18, 359, 80) and box != (0, 18, 359, 79) and box != (0, 18, 359, 81):
         test_util.test_fail("VM is expected to display text in area (0, 18, 359, [79-81]) while it's actually: (%s, %s, %s, %s)" % (box[0], box[1], box[2], box[3]))
 
     vm.destroy()
