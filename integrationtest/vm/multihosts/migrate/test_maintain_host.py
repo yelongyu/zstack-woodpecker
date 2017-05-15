@@ -58,6 +58,14 @@ def test():
     if not test_lib.lib_check_vm_live_migration_cap(vm1.vm) or not test_lib.lib_check_vm_live_migration_cap(vm2.vm):
         test_util.test_skip('skip migrate if live migrate not supported')
 
+    ps = test_lib.lib_get_primary_storage_by_uuid(vm1.get_vm().allVolumes[0].primaryStorageUuid)
+    if ps.type == inventory.LOCAL_STORAGE_TYPE:
+        test_util.test_skip('skip migrate vm with data volume if localstorate is used')
+
+    ps = test_lib.lib_get_primary_storage_by_uuid(vm2.get_vm().allVolumes[0].primaryStorageUuid)
+    if ps.type == inventory.LOCAL_STORAGE_TYPE:
+        test_util.test_skip('skip migrate vm with data volume if localstorate is used')
+
     test_util.test_dsc('Create volume and check')
     disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
     volume_creation_option = test_util.VolumeOption()
