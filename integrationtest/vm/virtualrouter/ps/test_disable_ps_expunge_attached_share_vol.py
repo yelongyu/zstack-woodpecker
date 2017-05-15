@@ -10,6 +10,8 @@ import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.header.vm as vm_header
+import zstackwoodpecker.operations.resource_operations as res_ops
+import apibinding.inventory as inventory
 import os
 
 _config_ = {
@@ -29,6 +31,16 @@ def test():
     global host_uuid
     global vr_uuid
     test_util.test_dsc('Create test vm and check')
+
+    bss = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, bs_cond, \
+            None, fields=['uuid'])
+    if not bss:
+        test_util.test_skip("not find available backup storage. Skip test")
+
+    if bss[0].type != inventory.CEPH_BACKUP_STORAGE_TYPE:
+        if hasattr(inventory, 'IMAGE_STORE_BACKUP_STORAGE_TYPE') and bss[0].type != inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+            test_util.test_skip("not find available imagestore or ceph backup storage. Skip test")
+
     test_lib.lib_set_delete_policy('vm', 'Delay')
     test_lib.lib_set_delete_policy('volume', 'Delay')
     l3_1_name = os.environ.get('l3VlanNetworkName1')
