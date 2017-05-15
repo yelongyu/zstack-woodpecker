@@ -187,6 +187,10 @@
                    startIp="$ipRangeManagementStartIp" endIp="$ipRangeManagementEndIp" gateway="$ipRangeManagementGateway"
                    netmask="$ipRangeManagementNetmask" />
                  <dns>$DNSServer</dns>
+                <networkService provider="Flat Network Service Provider">
+                  <serviceType>DHCP</serviceType>
+                  <serviceType>DNS</serviceType>
+                </networkService>
                </l3BasicNetwork>
              </l3Networks>
           </l2NoVlanNetwork>
@@ -200,6 +204,10 @@
                   startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
                   netmask="$ipRangeNetmask" />
                 <dns>$DNSServer</dns>
+                <networkService provider="Flat Network Service Provider">
+                  <serviceType>DHCP</serviceType>
+                  <serviceType>DNS</serviceType>
+                </networkService>
               </l3BasicNetwork>
             </l3Networks>
           </l2NoVlanNetwork>
