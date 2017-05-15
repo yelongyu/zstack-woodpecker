@@ -18,6 +18,7 @@
 	<case timeout='600' repeat='1'>migrate/test_sharable_vol_live_migrate.py</case>
 	<case timeout='600' repeat='1'>ps/test_disable_ps_live_migrate.py</case>
         <case timeout='600' repeat='1' noparallel='True'>migrate/test_maintain_host.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>migrate/test_maintain_host2.py</case>
 	<case timeout='600' repeat='1'>test_host_active_profile.py</case>
         <case timeout='3600' repeat='1'>vms/test_4vm_vm_ops.py</case>
 	<case timeout='600' repeat='1'>test_collect_logs.py</case>
