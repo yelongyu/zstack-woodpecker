@@ -202,7 +202,6 @@
                  <dns>$DNSServer</dns>
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
                 </networkService>
                </l3BasicNetwork>
              </l3Networks>
@@ -219,7 +218,6 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                  <serviceType>DNS</serviceType>
                 </networkService>
               </l3BasicNetwork>
             </l3Networks>
