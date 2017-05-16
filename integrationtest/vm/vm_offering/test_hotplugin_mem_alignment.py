@@ -24,22 +24,22 @@ def test():
     test_obj_dict.add_vm(vm)
     vm.check()
     mem_aligned_dict = {}
-    mem_aligned_dict['126*1024*1024'] = 128*1024*1024
-    mem_aligned_dict['1*1024*1024'] = 128*1024*1024
-    mem_aligned_dict['63*1024*1024'] = 128*1024*1024
-    mem_aligned_dict['129*1024*1024'] = 128*1024*1024
-    mem_aligned_dict['191*1024*1024'] = 128*1024*1024
-    mem_aligned_dict['192*1024*1024'] = 256*1024*1024
-    mem_aligned_dict['300*1024*1024'] = 256*1024*1024
+    mem_aligned_dict['126'] = 128*1024*1024
+    mem_aligned_dict['1'] = 128*1024*1024
+    mem_aligned_dict['63'] = 128*1024*1024
+    mem_aligned_dict['129'] = 128*1024*1024
+    mem_aligned_dict['191'] = 128*1024*1024
+    mem_aligned_dict['192'] = 256*1024*1024
+    mem_aligned_dict['300'] = 256*1024*1024
+    last_mem = new_offering.memorySize
 
     for memory in mem_aligned_dict:
         (available_cpu_before, available_memory_before, vm_outer_cpu_before, vm_outer_mem_before,
         vm_interal_cpu_before, vm_interal_mem_before) = test_stub.check_cpu_mem(vm)
 
-        vm_instance_offering = test_lib.lib_get_instance_offering_by_uuid(vm.get_vm().instanceOfferingUuid)
-        vm_ops.update_vm(vm.get_vm().uuid, None, vm_instance_offering.memorySize + int(memory))
+        vm_ops.update_vm(vm.get_vm().uuid, None, last_mem + int(memory)*1024*1024)
         vm.update()
-        time.sleep(10)
+        last_mem += mem_aligned_dict[memory]*1024*1024
 
         (available_cpu_after, available_memory_after, vm_outer_cpu_after, vm_outer_mem_after,
         vm_interal_cpu_after, vm_internal_mem_after) = test_stub.check_cpu_mem(vm)
@@ -47,7 +47,7 @@ def test():
 
         assert available_cpu_before == available_cpu_after
         test_util.test_logger("%s %s %s" % (available_memory_before, available_memory_after, AlignedMemChange))
-        assert available_memory_after + AlignedMemChange / int(test_lib.lib_get_provision_memory_rate()) in range(available_memory_before-1, available_memory_before)
+        assert available_memory_after + AlignedMemChange / int(test_lib.lib_get_provision_memory_rate()) in range(available_memory_before-10, available_memory_before+10)
         assert vm_outer_cpu_before == vm_outer_cpu_after
         assert vm_outer_mem_before == vm_outer_mem_after - AlignedMemChange
         assert vm_interal_cpu_before == vm_interal_cpu_after
