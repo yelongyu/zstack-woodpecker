@@ -42,7 +42,7 @@ def test():
     #test_util.test_logger("%s %s %s" % (available_memory_before, available_memory_after, MEMchange))
     assert available_memory_after + AlignedMemChange / int(test_lib.lib_get_provision_memory_rate()) in range(available_memory_before-1, available_memory_before+1)
     assert vm_outer_cpu_before == vm_outer_cpu_after
-    assert vm_outer_mem_before == vm_outer_mem_after - MEMchange
+    assert vm_outer_mem_before == vm_outer_mem_after - AlignedMemChange
     assert vm_interal_cpu_before == vm_interal_cpu_after
     test_util.test_logger("%s %s %s" % (vm_interal_mem_before, vm_internal_mem_after, AlignedMemChange))
     assert vm_interal_mem_before == vm_internal_mem_after - AlignedMemChange/1024/1024
