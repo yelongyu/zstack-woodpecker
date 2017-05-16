@@ -24,20 +24,20 @@ def test():
     test_obj_dict.add_vm(vm)
     vm.check()
     mem_aligned_dict = {}
-    mem_aligned_dict['126*1024*1024'] = '128*1024*1024'
-    mem_aligned_dict['1*1024*1024'] = '128*1024*1024'
-    mem_aligned_dict['63*1024*1024'] = '128*1024*1024'
-    mem_aligned_dict['129*1024*1024'] = '128*1024*1024'
-    mem_aligned_dict['191*1024*1024'] = '128*1024*1024'
-    mem_aligned_dict['192*1024*1024'] = '256*1024*1024'
-    mem_aligned_dict['300*1024*1024'] = '256*1024*1024'
+    mem_aligned_dict['126*1024*1024'] = 128*1024*1024
+    mem_aligned_dict['1*1024*1024'] = 128*1024*1024
+    mem_aligned_dict['63*1024*1024'] = 128*1024*1024
+    mem_aligned_dict['129*1024*1024'] = 128*1024*1024
+    mem_aligned_dict['191*1024*1024'] = 128*1024*1024
+    mem_aligned_dict['192*1024*1024'] = 256*1024*1024
+    mem_aligned_dict['300*1024*1024'] = 256*1024*1024
 
     for memory in mem_aligned_dict:
         (available_cpu_before, available_memory_before, vm_outer_cpu_before, vm_outer_mem_before,
         vm_interal_cpu_before, vm_interal_mem_before) = test_stub.check_cpu_mem(vm)
 
         vm_instance_offering = test_lib.lib_get_instance_offering_by_uuid(vm.get_vm().instanceOfferingUuid)
-        vm_ops.update_vm(vm.get_vm().uuid, None, vm_instance_offering.memorySize + memory)
+        vm_ops.update_vm(vm.get_vm().uuid, None, vm_instance_offering.memorySize + int(memory))
         vm.update()
         time.sleep(10)
 
