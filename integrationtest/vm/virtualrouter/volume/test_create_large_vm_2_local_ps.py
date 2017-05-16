@@ -19,7 +19,7 @@ test_obj_dict = test_state.TestStateDict()
 def test():
     global test_obj_dict
     cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
-    cond = res_ops.gen_query_conditions('type', '=', 'LocalStorage')
+    cond = res_ops.gen_query_conditions('type', '=', 'LocalStorage', cond)
     cond = res_ops.gen_query_conditions('status', '=', 'Connected', cond)
     ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
     if len(ps) < 2:
