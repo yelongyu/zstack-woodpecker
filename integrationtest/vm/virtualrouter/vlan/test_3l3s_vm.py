@@ -32,7 +32,7 @@ def test():
     l3_name = os.environ.get('l3VlanNetworkName3')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     l3_net_list.append(l3_net_uuid)
-    l3_name = os.environ.get('l3PublicNetworkName')
+    l3_name = os.environ.get('l3VlanNetworkName4')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     l3_net_list.append(l3_net_uuid)
 
