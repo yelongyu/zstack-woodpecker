@@ -38,6 +38,7 @@ def test():
     vr = test_lib.lib_find_vr_by_l3_uuid(l3_1.uuid)[0]
     vr_uuid = vr.uuid
 
+    bs_cond = res_ops.gen_query_conditions("status", '=', "Connected")
     bss = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, bs_cond, \
             None, fields=['uuid'])
     if not bss:

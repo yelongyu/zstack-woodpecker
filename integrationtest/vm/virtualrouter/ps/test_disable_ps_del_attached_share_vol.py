@@ -32,6 +32,7 @@ def test():
     global vr_uuid
     test_util.test_dsc('Create test vm and check')
 
+    bs_cond = res_ops.gen_query_conditions("status", '=', "Connected")
     bss = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, bs_cond, \
             None, fields=['uuid'])
     if not bss:
