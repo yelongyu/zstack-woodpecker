@@ -1584,8 +1584,11 @@ def lib_assign_host_l2_ip(host, l2, l3):
                 current_host_ip = host_ip.managementIp
                 if l2_vxlan_vni:
                     next_avail_ip = _generate_and_save_host_l2_ip(current_host_ip, br_vxlan_dev+l3.uuid)
-                    linux.set_device_ip(br_vxlan_dev, next_avail_ip, l3_ip_ranges.netmask)
-                    test_util.test_logger('vxlan set ip:%s for bridge: %s' % (next_avail_ip, br_vxlan_dev))
+                    try:
+                        linux.set_device_ip(br_vxlan_dev, next_avail_ip, l3_ip_ranges.netmask)
+                        test_util.test_logger('vxlan set ip:%s for bridge: %s' % (next_avail_ip, br_vxlan_dev))
+                    except Exception, e:
+                        test_util.test_logger('@@warning: because br_vxlan_xxx now only created when vm that used it has been created, ignore exception %s' % (str(e)))
                 else:
                     _set_host_l2_ip(current_host_ip)
                 break
