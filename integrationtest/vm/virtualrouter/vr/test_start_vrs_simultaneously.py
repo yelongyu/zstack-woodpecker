@@ -109,11 +109,19 @@ def test():
         time.sleep(0.1)
 
     for vr in vrs:
+        cond = res_ops.gen_query_conditions('resourceUuid', '=', vr.uuid)
+        cond = res_ops.gen_query_conditions('tag', '=', "ha::NeverStop", cond)
+        if res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0]:
+            continue
         if not linux.wait_callback_success(check_status, (vr.uuid, 'Stopped'), 10):
             test_util.test_fail('VM: %s is not stopped, after waiting for extra 10s' % vr.uuid)
 
     check_exception()
     for vr in vrs:
+        cond = res_ops.gen_query_conditions('resourceUuid', '=', vr.uuid)
+        cond = res_ops.gen_query_conditions('tag', '=', "ha::NeverStop", cond)
+        if res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0]:
+            continue
         thread = threading.Thread(target=start_vm, args=(vr.uuid,))
         thread.start()
 
