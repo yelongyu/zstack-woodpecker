@@ -30,8 +30,8 @@ def test():
 
     test_stub.sleep_util(start_date+59)
 
-    if not test_lib.lib_wait_target_down(vm.get_vm().vmNics[0].ip, '22', 60):
-        test_util.test_fail('VM: %s is not reboot in 60 seconds. Fail to reboot it with scheduler. ' % vm.get_vm().uuid)
+    if not test_lib.lib_wait_target_down(vm.get_vm().vmNics[0].ip, '22', 120):
+        test_util.test_fail('VM: %s is not reboot in 120 seconds. Fail to reboot it with scheduler. ' % vm.get_vm().uuid)
 
     if not test_lib.lib_find_in_local_management_server_log(start_date+60, '[msg received]: {"org.zstack.header.vm.RebootVmInstanceMsg', vm.get_vm().uuid):
         test_util.test_fail('VM is expected to reboot start from %s' % (start_date+60))
