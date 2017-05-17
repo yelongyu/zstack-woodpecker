@@ -11,6 +11,7 @@ import time
 import uuid
 
 import zstacklib.utils.ssh as ssh
+import zstacklib.utils.shell as shell
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
@@ -20,6 +21,9 @@ import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
+
+shell.logcmd = False
+interval = 0.5
 
 test_file = '/tmp/test.img'
 TEST_TIME = 120
@@ -112,12 +116,12 @@ def share_admin_resource(account_uuid_list):
     acc_ops.share_resources(account_uuid_list, share_list)
 
 
-def check_cpu_mem(vm):
+def check_cpu_mem(vm, shutdown=False):
     zone_uuid = vm.get_vm().zoneUuid
 
     available_cpu, available_memory = check_available_cpu_mem(zone_uuid)
     vm_outer_cpu, vm_outer_mem = vm.get_vm().cpuNum, vm.get_vm().memorySize
-    vm_internal_cpu, vm_internal_mem = check_vm_internal_cpu_mem(vm)
+    vm_internal_cpu, vm_internal_mem = check_vm_internal_cpu_mem(vm, shutdown)
 
     return available_cpu, available_memory, vm_outer_cpu, vm_outer_mem, vm_internal_cpu, vm_internal_mem
 
@@ -128,12 +132,14 @@ def check_available_cpu_mem(zone_uuid):
     return available_cpu, available_memory
 
 
-def check_vm_internal_cpu_mem(vm):
+def check_vm_internal_cpu_mem(vm, shutdown):
     managerip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
     vm_ip = vm.get_vm().vmNics[0].ip
     get_cpu_cmd = "cat /proc/cpuinfo| grep 'processor'| wc -l"
-#     get_mem_cmd = "free -m |grep Mem"
-    get_mem_cmd = "dmidecode -t 17 | grep 'Size:'"
+    if not shutdown:
+        get_mem_cmd = "free -m |grep Mem"
+    else:
+        get_mem_cmd = "dmidecode -t 17 | grep 'Size:'"
     res = test_lib.lib_ssh_vm_cmd_by_agent(managerip, vm_ip, 'root',
                 'password', get_cpu_cmd)
     vm_cpu = int(res.result.strip())
@@ -146,10 +152,19 @@ def online_hotplug_cpu_memory(vm):
     script_file = "%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/online_hotplug_cpu_memory.sh')
     test_lib.lib_execute_shell_script_in_vm(vm.get_vm(), script_file)
 
-def wait_for_certain_vm_state(vm, state='running'):
+def wait_for_certain_vm_state(vm, state='running', timeout=120):
     state = state.lower()
-    for _ in xrange(120):
+    for _ in xrange(timeout):
         if vm.get_vm().state.lower() == state:
             return
         else:
-            time.sleep(0.5)
+            time.sleep(interval)
+
+def wait_until_vm_reachable(vm, timeout=120):
+    vm_ip = vm.get_vm().vmNics[0].ip
+    ping_cmd = "ping %s | grep 'ttl='" % vm_ip
+    for _ in xrange(timeout):
+        if shell.call(ping_cmd):
+            break
+        else:
+            time.sleep(interval)
