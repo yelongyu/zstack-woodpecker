@@ -34,13 +34,12 @@ def test():
 
     bs_cond = res_ops.gen_query_conditions("status", '=', "Connected")
     bss = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, bs_cond, \
-            None, fields=['uuid'])
+            None)
     if not bss:
         test_util.test_skip("not find available backup storage. Skip test")
 
     if bss[0].type != inventory.CEPH_BACKUP_STORAGE_TYPE:
-        if hasattr(inventory, 'IMAGE_STORE_BACKUP_STORAGE_TYPE') and bss[0].type != inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
-            test_util.test_skip("not find available imagestore or ceph backup storage. Skip test")
+        test_util.test_skip("not find available imagestore or ceph backup storage. Skip test")
 
     test_lib.lib_set_delete_policy('vm', 'Delay')
     test_lib.lib_set_delete_policy('volume', 'Delay')
