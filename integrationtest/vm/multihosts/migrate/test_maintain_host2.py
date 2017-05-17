@@ -27,6 +27,7 @@ import zstackwoodpecker.zstack_test.zstack_test_kvm_host as test_kvm_host
 import zstackwoodpecker.header.host as host_header
 import apibinding.inventory as inventory
 import zstacklib.utils.linux as linux
+import zstackwoodpecker.header.vm as vm_header
 import time
 import os
 import random
@@ -86,6 +87,8 @@ def test():
     vm1.update()
     vm2.update()
 
+    vm1.set_state(vm_header.STOPPED)
+    vm2.set_state(vm_header.STOPPED)
     vm1.check()
     vm2.check()
 
