@@ -132,7 +132,8 @@ def check_vm_internal_cpu_mem(vm):
     managerip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
     vm_ip = vm.get_vm().vmNics[0].ip
     get_cpu_cmd = "cat /proc/cpuinfo| grep 'processor'| wc -l"
-    get_mem_cmd = "free -m |grep Mem"
+#     get_mem_cmd = "free -m |grep Mem"
+    get_mem_cmd = "dmidecode -t 17 | grep 'Size:'"
     res = test_lib.lib_ssh_vm_cmd_by_agent(managerip, vm_ip, 'root',
                 'password', get_cpu_cmd)
     vm_cpu = int(res.result.strip())
