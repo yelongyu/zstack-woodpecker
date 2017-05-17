@@ -144,3 +144,11 @@ def check_vm_internal_cpu_mem(vm):
 def online_hotplug_cpu_memory(vm):
     script_file = "%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/online_hotplug_cpu_memory.sh')
     test_lib.lib_execute_shell_script_in_vm(vm.get_vm(), script_file)
+
+def wait_for_certain_vm_state(vm, state='running'):
+    state = state.lower()
+    for _ in xrange(120):
+        if vm.get_vm().state.lower() == state:
+            return
+        else:
+            time.sleep(0.5)

@@ -24,19 +24,16 @@ def test():
     test_obj_dict.add_vm(vm)
     vm.check()
 
-    vm_ops.stop_vm(vm.get_vm().uuid)
-    for _ in xrange(60):
-        if vm.get_vm().state == 'Stopped':
-            break
-        else:
-            time.sleep(interval)
-
     (available_cpu_before, available_memory_before, vm_outer_cpu_before, vm_outer_mem_before,
      vm_interal_cpu_before, vm_interal_mem_before) = test_stub.check_cpu_mem(vm)
+
+    vm_ops.stop_vm(vm.get_vm().uuid)
+    test_stub.wait_for_certain_vm_state(vm, 'stopped')
 
     vm_instance_offering = test_lib.lib_get_instance_offering_by_uuid(vm.get_vm().instanceOfferingUuid)
     AlignedMemChange = 128*1024*1024
     vm_ops.start_vm(vm.get_vm().uuid)
+    test_stub.wait_for_certain_vm_state(vm, 'running')
     vm_ops.update_vm(vm.get_vm().uuid, vm_instance_offering.cpuNum + 1, vm_instance_offering.memorySize + AlignedMemChange)
     vm.update()
     time.sleep(10)

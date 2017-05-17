@@ -36,13 +36,10 @@ def test():
     vm.check()
 
     vm_ops.stop_vm(vm.get_vm().uuid)
-    for _ in xrange(60):
-        if vm.get_vm().state == 'Stopped':
-            break
-        else:
-            time.sleep(interval)
+    test_stub.wait_for_certain_vm_state(vm, 'stopped')
 
     vm_ops.start_vm(vm.get_vm().uuid)
+    test_stub.wait_for_certain_vm_state(vm, 'running')
     vm.check()
 
     (available_cpu_after, available_memory_after, vm_outer_cpu_after, vm_outer_mem_after,
