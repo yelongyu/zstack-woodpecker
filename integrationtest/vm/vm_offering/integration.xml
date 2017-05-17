@@ -17,7 +17,7 @@
         <case timeout='600' repeat='1' >test_hotplugin_cpu_memory_c6.py</case>
         <case timeout='600' repeat='1' >test_hotplugin_cpu_memory_c7.py</case>
         <case timeout='600' repeat='1' >test_hotplugin_cpu_memory_u12.py</case>
-        <case timeout='600' repeat='1' >test_hotplugin_cpu_memory_u13.py</case>
+        <case timeout='600' repeat='1' >test_hotplugin_cpu_mem_5vm_parallel.py</case>
         <case timeout='600' repeat='1' >test_hotplugin_cpu_memory_u14.py</case>
         <case timeout='600' repeat='1' >test_hotplugin_cpu_memory_u15.py</case>
         <case timeout='600' repeat='1' >test_hotplugin_cpu_memory_u16.py</case>
