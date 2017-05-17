@@ -46,8 +46,8 @@ def test():
     thread = threading.Thread(target=vm_ops.reboot_vm, args=(vr.uuid,))
     thread.start()
     #check vr vr service port
-    if not test_lib.lib_wait_target_down(vr_mgmt_ip, '7272', 60):
-        test_util.test_fail('vr: %s is not shutdown in 60 seconds. Fail to reboot it. ' % vr.uuid)
+    if not test_lib.lib_wait_target_down(vr_mgmt_ip, '7272', 120):
+        test_util.test_fail('vr: %s is not shutdown in 120 seconds. Fail to reboot it. ' % vr.uuid)
 
     if not test_lib.lib_wait_target_up(vr_mgmt_ip, '7272', 120):
         test_util.test_fail('vr: %s is not startup in 120 seconds. Fail to reboot it. ' % vr.uuid)
