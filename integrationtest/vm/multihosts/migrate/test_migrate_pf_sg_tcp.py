@@ -46,7 +46,10 @@ def test():
         #create temp_vm1 for getting vlan1's vr for test pf_vm portforwarding
         temp_vm1 = test_stub.create_vr_vm('migrate_temp_vm1', 'imageName_net', 'l3VlanNetworkName1')
         test_obj_dict.add_vm(temp_vm1)
-        vr1 = test_lib.lib_find_vr_by_vm(temp_vm1.vm)[0]
+        if not test_lib.lib_find_vr_by_vm(temp_vm1.vm)[0]:
+            test_util.test_skip("skip for no vr found in test env.")
+        else:
+            vr1 = test_lib.lib_find_vr_by_vm(temp_vm1.vm)[0]
     else:
         vr1 = vrs[0]
 
