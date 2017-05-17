@@ -36,3 +36,5 @@ management-server.log
 test.xml
 test*.xml
 .idea
+.project
+.pydevproject
