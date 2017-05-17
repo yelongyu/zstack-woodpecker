@@ -94,8 +94,7 @@ def test():
     assert wrapped_vm.available_memory_after + 5*AlignedMemChange/int(test_lib.lib_get_provision_memory_rate()) \
            in range(wrapped_vm.available_memory_before-10, wrapped_vm.available_memory_before+10)
 
-
-    #test_lib.lib_error_cleanup(test_obj_dict)
+    test_lib.lib_error_cleanup(test_obj_dict)
     test_util.test_pass('VM online change instance offering Test Pass')
 
 
