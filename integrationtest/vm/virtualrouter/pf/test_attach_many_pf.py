@@ -68,8 +68,9 @@ def test():
         endtime = datetime.datetime.now()
         optime = (endtime - starttime).seconds
         test_util.test_dsc("round %s, pf operation time: %s" % (i, optime))
-        if optime > 60:
-            test_util.test_fail("the pf operation time is %s seconds, more than 60 seconds" % optime)   
+        test_util.test_logger("the pf operation time is %s seconds" % optime)   
+        if optime > 120:
+            test_util.test_fail("the pf operation time is %s seconds, more than 120 seconds" % optime)   
   
     vip.delete()
     test_obj_dict.rm_vip(vip)
