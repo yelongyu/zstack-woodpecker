@@ -123,8 +123,8 @@ def test():
         while threading.active_count() > 1:
             check_thread_exception()
             time.sleep(1)
-            if times > 30:
-                test_util.test_fail('creating vm time exceed 30s')
+            if times > 60:
+                test_util.test_fail('creating vm time exceed 60s')
             times += 1
 
         check_thread_exception()
