@@ -7,8 +7,8 @@
 	<case timeout="220" noparallel='True'>vga/test_vm_qxl.py</case>
 	<case timeout="220" noparallel='True'>vga/test_vm_vga.py</case>
         <case timeout='600' repeat='1'>test_ip_spoofing.py</case>
-        <case timeout='600' repeat='1'>test_update_vm_cpu_memory.py</case>
-        <case timeout='600' repeat='1'>test_update_vm_cpu_memory2.py</case>
+	<!--<case timeout='600' repeat='1'>test_update_vm_cpu_memory.py</case>
+	<case timeout='600' repeat='1'>test_update_vm_cpu_memory2.py</case>-->
         <case timeout='1200' repeat='1'>account/test_vm_ops_by_normal_account.py</case>
         <case timeout='2400' repeat='1'>test_create_vm_install_iso.py</case>
         <case timeout='2400' repeat='1'>test_heartbeat_ceph.py</case>
