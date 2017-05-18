@@ -9,7 +9,7 @@ import time
 
 _config_ = {
         'timeout': 1000,
-        'noparallel' : False
+        'noparallel' : True
         }
 
 test_stub = test_lib.lib_get_test_stub()

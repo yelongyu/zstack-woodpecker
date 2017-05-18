@@ -3,27 +3,27 @@
         <case timeout='600' repeat='1' >test_chg_instance_offering_online.py</case>
         <case timeout='600' repeat='1' >test_chg_instance_offering_cpu_online.py</case>
         <case timeout='600' repeat='1' >test_chg_instance_offering_memory_online.py</case>
-        <case timeout='600' repeat='1' >test_hotplugin_cpu_c6.py</case>
-        <case timeout='600' repeat='1' >test_hotplugin_cpu_c7.py</case>
-        <case timeout='600' repeat='1' >test_hotplugin_cpu_u12.py</case>
-        <case timeout='600' repeat='1' >test_hotplugin_cpu_u13.py</case>
-        <case timeout='600' repeat='1' >test_hotplugin_cpu_u14.py</case>
-        <case timeout='600' repeat='1' >test_hotplugin_cpu_u15.py</case>
-        <case timeout='600' repeat='1' >test_hotplugin_cpu_u16.py</case>
-        <case timeout='600' repeat='1' >test_hotplugin_memory_c6.py</case>
-        <case timeout='600' repeat='1' >test_hotplugin_memory_c7.py</case>
-        <case timeout='600' repeat='1' >test_hotplugin_memory_u12.py</case>
-        <case timeout='600' repeat='1' >test_hotplugin_memory_u16.py</case>
-        <case timeout='600' repeat='1' >test_hotplugin_cpu_memory_c6.py</case>
-        <case timeout='600' repeat='1' >test_hotplugin_cpu_memory_c7.py</case>
-        <case timeout='600' repeat='1' >test_hotplugin_cpu_memory_u12.py</case>
-        <case timeout='600' repeat='1' >test_hotplugin_cpu_mem_5vm_parallel.py</case>
-        <case timeout='600' repeat='1' >test_hotplugin_cpu_memory_u14.py</case>
-        <case timeout='600' repeat='1' >test_hotplugin_cpu_memory_u15.py</case>
-        <case timeout='600' repeat='1' >test_hotplugin_cpu_memory_u16.py</case>
-        <case timeout='600' repeat='1' >test_hotplugin_cpu_continuously.py</case>
-        <case timeout='600' repeat='1' >test_hotplugin_memory_continuously.py</case>
-        <case timeout='600' repeat='1' >test_hotplugin_cpu_memory_continuously.py</case>
-        <case timeout='600' repeat='1' >test_hotplugin_mem_alignment.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_cpu_c6.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_cpu_c7.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_cpu_u12.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_cpu_u13.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_cpu_u14.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_cpu_u15.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_cpu_u16.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_memory_c6.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_memory_c7.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_memory_u12.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_memory_u16.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_cpu_memory_c6.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_cpu_memory_c7.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_cpu_memory_u12.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_hotplugin_cpu_mem_5vm_parallel.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_cpu_memory_u14.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_cpu_memory_u15.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_cpu_memory_u16.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_cpu_continuously.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_memory_continuously.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_cpu_memory_continuously.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_mem_alignment.py</case>
     </suite>
 </integrationTest>
