@@ -39,7 +39,7 @@ def test():
 
         vm_ops.update_vm(vm.get_vm().uuid, None, last_mem + int(memory)*1024*1024)
         vm.update()
-        last_mem += mem_aligned_dict[memory]*1024*1024
+        last_mem += mem_aligned_dict[memory]
 
         (available_cpu_after, available_memory_after, vm_outer_cpu_after, vm_outer_mem_after,
         vm_interal_cpu_after, vm_internal_mem_after) = test_stub.check_cpu_mem(vm)
