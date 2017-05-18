@@ -11,6 +11,7 @@ import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
+import zstacklib.utils.sizeunit as sizeunit
 
 _config_ = {
         'timeout' : 1000,
@@ -22,6 +23,7 @@ test_obj_dict = test_state.TestStateDict()
 original_rate = None
 
 def test():
+    global res
     global original_rate
     test_util.test_dsc('Test storage over provision method')
     zone_uuid = res_ops.query_resource(res_ops.ZONE)[0].uuid
@@ -48,6 +50,7 @@ def test():
     target_volume_num = 12
     kept_disk_size = 10 * 1024 * 1024
 
+    
     vm = test_stub.create_vm(vm_name = 'storage_over_prs_vm_1', \
                     host_uuid = host.uuid)
     test_obj_dict.add_vm(vm)
@@ -57,10 +60,10 @@ def test():
     if avail_cap < kept_disk_size:
         test_util.test_skip('available disk capacity:%d is too small, skip test.' % avail_cap)
         return True
-
+    res = sizeunit.get_size(test_lib.lib_get_reserved_primary_storage())
     original_rate = test_lib.lib_set_provision_storage_rate(over_provision_rate)
-    data_volume_size = int(over_provision_rate * (avail_cap - kept_disk_size) / target_volume_num)
-
+    #data_volume_size = int(over_provision_rate * (avail_cap - kept_disk_size) / target_volume_num)   
+    data_volume_size = int(over_provision_rate * (avail_cap - res )/ target_volume_num)
     #will change the rate back to check if available capacity is same with original one. This was a bug, that only happened when system create 1 vm.
     test_lib.lib_set_provision_storage_rate(original_rate)
     avail_cap_tmp = get_storage_capacity(ps_type, host.uuid, ps.uuid)
@@ -93,7 +96,7 @@ def test():
         times += 1
 
     time.sleep(2)
-    avail_cap2 = get_storage_capacity(ps_type, host.uuid, ps.uuid)
+    avail_cap2 = (get_storage_capacity(ps_type, host.uuid, ps.uuid)-res)
     if avail_cap2 > data_volume_size:
         test_util.test_fail('Available disk size: %d is still bigger than offering disk size: %d , after creating %d volumes.' % (avail_cap2, data_volume_size, target_volume_num))
     
