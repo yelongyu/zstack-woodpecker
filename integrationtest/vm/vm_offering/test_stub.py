@@ -116,14 +116,17 @@ def share_admin_resource(account_uuid_list):
     acc_ops.share_resources(account_uuid_list, share_list)
 
 
-def check_cpu_mem(vm, shutdown=False):
+def check_cpu_mem(vm, is_linux=True, shutdown=False):
     zone_uuid = vm.get_vm().zoneUuid
 
     available_cpu, available_memory = check_available_cpu_mem(zone_uuid)
     vm_outer_cpu, vm_outer_mem = vm.get_vm().cpuNum, vm.get_vm().memorySize
     vm_internal_cpu, vm_internal_mem = check_vm_internal_cpu_mem(vm, shutdown)
 
-    return available_cpu, available_memory, vm_outer_cpu, vm_outer_mem, vm_internal_cpu, vm_internal_mem
+    if is_linux:
+        return available_cpu, available_memory, vm_outer_cpu, vm_outer_mem, vm_internal_cpu, vm_internal_mem
+    else:
+        return available_cpu, available_memory, vm_outer_cpu, vm_outer_mem
 
 
 def check_available_cpu_mem(zone_uuid):
