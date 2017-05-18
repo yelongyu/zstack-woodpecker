@@ -23,6 +23,7 @@ def test():
     global mevoco2_ip
     global ipsec1
     global ipsec2
+    test_util.test_skip('According issue #2720, the similar issue are won\'t fix ')
     mevoco1_ip = os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP']
     mevoco2_ip = os.environ['secondZStackMnIp']
     test_util.test_dsc('Create test vm in mevoco1')
