@@ -86,7 +86,6 @@ def test():
     #need to update vm's inventory, since they will be changed by maintenace mode
     vm1.update()
     vm2.update()
-
     vm1.set_state(vm_header.STOPPED)
     vm2.set_state(vm_header.STOPPED)
     vm1.check()
@@ -95,6 +94,13 @@ def test():
     host.change_state(test_kvm_host.ENABLE_EVENT)
     if not linux.wait_callback_success(is_host_connected, host.get_host().uuid, 120):
         test_util.test_fail('host status is not changed to connected, after changing its state to Enable')
+
+    vm1.start()
+    vm2.start()
+    vm1.set_state(vm_header.RUNNING)
+    vm2.set_state(vm_header.RUNNING)
+    vm1.check()
+    vm2.check()
 
     vm1.migrate(target_host.uuid)
     vm2.migrate(target_host.uuid)
