@@ -25,7 +25,7 @@ def test():
     vm.check()
 
     (available_cpu_before, available_memory_before, vm_outer_cpu_before, vm_outer_mem_before,
-     vm_interal_cpu_before, vm_interal_mem_before) = test_stub.check_cpu_mem(vm, shutdown=True)
+     vm_interal_cpu_before, vm_interal_mem_before) = test_stub.check_cpu_mem(vm)
 
     vm_ops.stop_vm(vm.get_vm().uuid)
     test_stub.wait_for_certain_vm_state(vm, 'stopped')
@@ -42,7 +42,7 @@ def test():
     vm.check()
 
     (available_cpu_after, available_memory_after, vm_outer_cpu_after, vm_outer_mem_after,
-     vm_interal_cpu_after, vm_internal_mem_after) = test_stub.check_cpu_mem(vm, shutdown=True)
+     vm_interal_cpu_after, vm_internal_mem_after) = test_stub.check_cpu_mem(vm)
 
     assert available_cpu_before == available_cpu_after + 1
     assert available_memory_after + AlignedMemChange / int(test_lib.lib_get_provision_memory_rate()) in range(available_memory_before-1, available_memory_before+1)
