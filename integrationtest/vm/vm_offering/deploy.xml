@@ -154,13 +154,6 @@
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
-      <image name="$imageName_i_win2012" 
-        description="Test Image Template for windows platform"
-        format="$rootImageFormat" url="$imageUrl_i_win2012"
-        mediaType="$rootMediaType" systemTags="qemuga"
-        username="$winImageUsername" password="$winImagePassword">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
-      </image>
     </images>
   
     <diskOfferings>

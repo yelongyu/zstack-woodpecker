@@ -75,9 +75,6 @@ batchImageUrl = http://zstack/image/CentOS7.2_Minimal_40G.qcow2
 test_negative_qcow2 = bad-qcow2
 negativeQcow2Url = http://zstack/image/zstack-image-1.4.qcow2
 
-imageName_i_win2012 = windows2012-installation-test
-imageUrl_i_win2012 = http://192.168.200.16/mirror/diskimages/windows-2012-cn-qcow2.qcow2
-
 test_negative_iso = bad-iso
 negativeIsoUrl = http://zstack/image/virtio-win-0.1.126.iso
 
