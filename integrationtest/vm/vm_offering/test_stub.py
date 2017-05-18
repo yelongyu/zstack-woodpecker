@@ -167,7 +167,7 @@ def wait_until_vm_reachable(vm, timeout=120):
     vm_ip = vm.get_vm().vmNics[0].ip
     ping_cmd = "ping %s -c 1 | grep 'ttl='" % vm_ip
     for _ in xrange(timeout):
-        if shell.call(ping_cmd):
+        if shell.call(ping_cmd, exception=False):
             break
         else:
             time.sleep(interval)

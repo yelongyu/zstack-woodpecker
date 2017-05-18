@@ -25,5 +25,7 @@
         <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_memory_continuously.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_cpu_memory_continuously.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_mem_alignment.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_cpu_memory_bootup.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_cpu_memory_shutdown.py</case>
     </suite>
 </integrationTest>
