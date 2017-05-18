@@ -19,9 +19,9 @@ def test():
     #If test execution machine is not the same one as Host machine, deploy work is needed to separated to 2 steps(deploy_test_agent, execute_plan_without_deploy_test_agent). And it can not directly call SetupAction.run()
     test_lib.setup_plan.deploy_test_agent()
     test_lib.setup_plan.execute_plan_without_deploy_test_agent()
-    deploy_operations.deploy_initial_database(test_lib.deploy_config)
     if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
+    deploy_operations.deploy_initial_database(test_lib.deploy_config)
     if test_lib.lib_get_ha_selffencer_maxattempts() != None:
         test_lib.lib_set_ha_selffencer_maxattempts('60')
 	test_lib.lib_set_ha_selffencer_storagechecker_timeout('60')
