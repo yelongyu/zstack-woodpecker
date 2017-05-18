@@ -51,11 +51,12 @@ def test():
 	    vm_ops.start_vm(vr.uuid)
     time.sleep(60)
 
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
     conditions = res_ops.gen_query_conditions('state', '=', 'Enabled')
     conditions = res_ops.gen_query_conditions('status', '=', 'Connected', conditions)
-    conditions = res_ops.gen_query_conditions('managementIp', '!=', os.environ.get('hostIp'), conditions)
+    conditions = res_ops.gen_query_conditions('managementIp', '!=', mn_ip, conditions)
     host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].uuid
     vm_creation_option.set_host_uuid(host_uuid)
     vm_creation_option.set_l3_uuids([l3_net_uuid])
