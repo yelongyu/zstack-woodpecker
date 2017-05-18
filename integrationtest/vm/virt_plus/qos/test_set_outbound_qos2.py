@@ -60,12 +60,6 @@ def test():
 
     l3_name = os.environ.get('l3VlanNetworkName1')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
-
-    cmd = '%s %s "ping %s -c 10"' %(ssh_cmd, vm1_ip, test_lib.lib_get_vm_nic_by_l3(vm2.get_vm(), l3_net_uuid).ip)
-    ping_ret=1
-    while ping_ret:
-        ping_ret = os.system(cmd)
-
     test_stub.test_scp_outbound_speed(vm1_ip, test_lib.lib_get_vm_nic_by_l3(vm2.get_vm(), l3_net_uuid).ip, net_bandwidth)
 
     # Set a single nic to smaller bandwidth

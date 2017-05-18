@@ -74,9 +74,13 @@ def test():
 
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco1_ip
     test_lib.lib_error_cleanup(test_obj_dict1)
+    vip1.delete()
+    test_obj_dict1.rm_vip(vip1)
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
     ipsec_ops.delete_ipsec_connection(ipsec2.uuid)
     test_lib.lib_error_cleanup(test_obj_dict2)
+    vip2.delete()
+    test_obj_dict2.rm_vip(vip2)
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco1_ip
     test_util.test_pass('Create Ipsec Success')
 

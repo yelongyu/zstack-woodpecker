@@ -18,7 +18,7 @@ new_account_uuid = None
 def test():
     global ldap_server_uuid
     global new_account_uuid
-    test_util.action_logger('ldapServerUrl is %s, ldapServerBase is %s, ldapServerUsername is %s, ldapServerPassword is %s' %(ldapServerUrl, ldapServerBase, ldapServerUsername, ldapServerPassword))
+
     ldap_server = ldp_ops.add_ldap_server('ldap1', 'ldap for test', os.environ.get('ldapServerUrl'), os.environ.get('ldapServerBase'), os.environ.get('ldapServerUsername'), os.environ.get('ldapServerPassword'))
     ldap_server_uuid = ldap_server.inventory.uuid
     conditions = res_ops.gen_query_conditions('type', '=', 'SystemAdmin')
