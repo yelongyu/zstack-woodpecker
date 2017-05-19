@@ -206,9 +206,9 @@ def create_ecs_vswtich_remote(vpc_uuid, identity_zone_uuid, name, cidr_block, se
     action.identityZoneUuid = identity_zone_uuid
     action.name = name
     action.cidrBlock = cidr_block
-    test_util.action_logger('Create [Ecs VPC Remote:] %s %s %s' % (datacenter_uuid, name, cidr_block))
+    test_util.action_logger('Create [Ecs VSwitch Remote:] %s %s %s %s' % (vpc_uuid, identity_zone_uuid, name, cidr_block))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    test_util.test_logger('[Ecs VPC Remote:] %s %s %s is created.' % (datacenter_uuid, name, cidr_block))
+    test_util.test_logger('[Ecs VSwitch Remote:] %s %s %s %s is created.' % (vpc_uuid, identity_zone_uuid, name, cidr_block))
     return evt.inventory
 
 def sync_ecs_vswitch_from_remote(identity_zone_uuid, session_uuid=None):
