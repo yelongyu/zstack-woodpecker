@@ -23,7 +23,7 @@ def test():
     datacenter_type = os.getenv('datacenterType')
     ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
     datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
-    region_id = datacenter_list.inventories[0].regionId
+    region_id = datacenter_list[0].regionId
     bucket_inv = hyb_ops.create_oss_bucket_remote(region_id, 'zstack-%s' % region_id, 'created-by-zstack-for-test')
     test_util.test_pass('Create OSS bucket Test Success')
 

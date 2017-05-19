@@ -23,7 +23,7 @@ def test():
     datacenter_type = os.getenv('datacenterType')
     ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
     datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
-    region_id = datacenter_list.inventories[0].regionId
+    region_id = datacenter_list[0].regionId
     datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
     test_util.test_pass('Create VM with ISO Installation Test Success')
 
