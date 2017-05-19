@@ -45,7 +45,8 @@ def test():
 
     l3_uuid = vm1.vm.vmNics[0].l3NetworkUuid
 
-    if not test_lib.lib_find_vr_by_vm(vm1.vm)[0]:
+    if not test_lib.lib_find_vr_by_vm(vm1.vm) or not test_lib.lib_find_vr_by_vm(vm1.vm)[0]:
+        test_lib.lib_error_cleanup(test_obj_dict)
         test_util.test_skip("skip the test for no vr found in the env.")
     vr_vm = test_lib.lib_find_vr_by_vm(vm1.vm)[0]
     vm3_ip = test_lib.lib_get_vm_nic_by_l3(vm3.vm, l3_uuid).ip
