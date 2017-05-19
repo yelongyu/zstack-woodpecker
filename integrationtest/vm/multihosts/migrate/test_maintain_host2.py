@@ -43,7 +43,7 @@ test_obj_dict = test_state.TestStateDict()
 def is_host_connected(host_uuid):
     cond = res_ops.gen_query_conditions('uuid', '=', host_uuid)
     host = res_ops.query_resource(res_ops.HOST, cond)[0]
-    if host.status == 'Connected':
+    if host.status == 'Connected' and host.state == 'Enabled':
         return True
 
 def test():
@@ -96,11 +96,12 @@ def test():
 
     host.change_state(test_kvm_host.ENABLE_EVENT)
     if not linux.wait_callback_success(is_host_connected, host.get_host().uuid, 120):
-        test_util.test_fail('host status is not changed to connected, after changing its state to Enable')
+        test_util.test_fail('host status is not changed to connected or host state is not changed to Enabled within 120s')
 
     if ps.type == inventory.LOCAL_STORAGE_TYPE:
         vm1.start()
         vm2.start()
+
     vm1.set_state(vm_header.RUNNING)
     vm2.set_state(vm_header.RUNNING)
     vm1.check()
