@@ -1,8 +1,8 @@
 '''
 
-New Integration test for data volume migration between hosts.
+New Integration test for data volume's cold migration between hosts.
 
-@author: bingjie.wang
+@author: turnyouon
 '''
 
 import zstackwoodpecker.test_util as test_util
