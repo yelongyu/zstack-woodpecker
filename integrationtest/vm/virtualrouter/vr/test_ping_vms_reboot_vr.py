@@ -11,6 +11,8 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.vm_operations as vm_ops
+import zstacklib.utils.ssh as ssh
+import zstackwoodpecker.operations.resource_operations as res_ops
 import threading
 import time
 
@@ -21,6 +23,16 @@ _config_ = {
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
+
+def check_vr_reboot_record_line(vr_ip):
+    cmd = 'last reboot|grep reboot|wc -l'
+    ret, output, stderr = ssh.execute(cmd, vr_ip, "vyos", "vrouter12#", False, 22)
+    if ret != 0:
+        test_util.test_fail("vr login failed")
+
+    return output
+
+    
 
 def test():
     test_util.test_dsc('Create test vm1 and check')
@@ -39,18 +51,31 @@ def test():
 
     vr = vrs[0]
     vr_mgmt_ip = test_lib.lib_find_vr_mgmt_ip(vr)
+
+    vr_reboot_record_org = check_vr_reboot_record_line(vr_mgmt_ip)
     if not test_lib.lib_check_testagent_status(vr_mgmt_ip):
         test_util.test_fail('vr: %s is not reachable, since can not reach its test agent. Give up test and test failure. ' % vr.uuid)
     test_lib.lib_install_testagent_to_vr_with_vr_vm(vr)
     #Need to put the vr restart into thread. Since vr reboot API is a sync API. 
     thread = threading.Thread(target=vm_ops.reboot_vm, args=(vr.uuid,))
     thread.start()
+
     #check vr vr service port
-    if not test_lib.lib_wait_target_down(vr_mgmt_ip, '7272', 120):
+    cond = res_ops.gen_query_conditions('resourceUuid', '=', vr.uuid)
+    cond = res_ops.gen_query_conditions('tag', '=', "ha::NeverStop", cond)
+    if res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0]:
+        time.sleep(30)
+    elif not test_lib.lib_wait_target_down(vr_mgmt_ip, '7272', 120):
         test_util.test_fail('vr: %s is not shutdown in 120 seconds. Fail to reboot it. ' % vr.uuid)
 
     if not test_lib.lib_wait_target_up(vr_mgmt_ip, '7272', 120):
         test_util.test_fail('vr: %s is not startup in 120 seconds. Fail to reboot it. ' % vr.uuid)
+
+    vr_reboot_record_new = check_vr_reboot_record_line(vr_mgmt_ip)
+
+    if vr_reboot_record_new == vr_reboot_record_org:
+        test_util.test_fail("not find vr reboot record increased.")
+   
 
     #avoid of possible apt conflicting between install testagent and appliancevm
     #time.sleep(60)
