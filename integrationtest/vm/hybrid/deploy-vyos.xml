@@ -77,7 +77,7 @@
   </instanceOfferings>
 
   <backupStorages>
-    <sftpBackupStorage name="$sftpBackupStorageName"
+    <imageStoreBackupStorage name="$sftpBackupStorageName"
       description="Test" url="$sftpBackupStorageUrl" username="$sftpBackupStorageUsername"
       password="$sftpBackupStoragePassword" hostname="$sftpBackupStorageHostname" port="22"/>
   </backupStorages>
