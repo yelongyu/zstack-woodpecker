@@ -191,7 +191,7 @@ class zstack_kvm_vm_default_l3_checker(checker_header.TestChecker):
         test_lib.lib_set_vm_host_l2_ip(vm)
         nic = test_lib.lib_get_vm_nic_by_l3(vm, default_l3_uuid)
 
-        command = 'route|grep default'
+        command = 'route -n |grep ^0.0.0.0'
         cmd_result = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, nic.ip, test_lib.lib_get_vm_username(vm), test_lib.lib_get_vm_password(vm), command, self.exp_result)
         if not cmd_result:
             test_util.test_logger('Checker result: FAIL to execute test ssh command in test [vm:] %s throught [host:] %s.' % (vm.uuid, host.name))
