@@ -9,7 +9,7 @@ Test steps:
 4. change target_host state to maintain
 5. check 2 VMs
 6. Enable maintained host again.
-7. Migrate 2 VMs back to target_host
+7. Migrate 2 VMs back to original_host
 8. Check 2 VMs status again.
 
 This case should not be parallely executed with other test case, since it will
@@ -102,8 +102,8 @@ def test():
     vm1.check()
     vm2.check()
 
-    vm1.migrate(target_host.uuid)
-    vm2.migrate(target_host.uuid)
+    vm1.migrate(current_host1.uuid)
+    vm2.migrate(current_host2.uuid)
 
     vm1.check()
     vm2.check()
