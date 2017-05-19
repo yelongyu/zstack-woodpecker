@@ -74,8 +74,8 @@ def del_oss_file_bucket_name_in_local(uuid, session_uuid=None):
 
 def create_oss_bucket_remote(region_id, bucket_name, description, session_uuid=None):
     action = api_actions.CreateOssBucketRemoteAction()
-    action.regionid = region_id
-    action.BucketName = bucket_name
+    action.regionId = region_id
+    action.bucketName = bucket_name
     action.description = description
     test_util.action_logger('Create [Oss Bucket Name Remote:] %s %s' % (region_id, bucket_name))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
