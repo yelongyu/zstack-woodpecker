@@ -1520,7 +1520,7 @@ def lib_assign_host_l2_ip(host, l2, l3):
     def _set_host_l2_ip(host_pub_ip):
         br_ethname = 'br_%s' % l2.physicalInterface
         if l2_vxlan_vni:
-            br_ethname = 'br_vxlan_%s' % (l2_vxlan_vni)
+            br_ethname = 'br_vx_%s' % (l2_vxlan_vni)
         elif l2_vlan:
             br_ethname = '%s_%s' % (br_ethname, l2_vlan)
         if br_ethname == 'br_%s' % HostDefaultEth:
@@ -1543,10 +1543,10 @@ def lib_assign_host_l2_ip(host, l2, l3):
         l2_vlan = lib_get_l2_vlan(l2.uuid)
         l2_vxlan_vni = lib_get_l2_vxlan_vni(l2.uuid)
         if not l2_vxlan_vni:
-            test_util.test_logger('l2_vxlan_vni is null in l2.uuid:%s' %(l2.uuid))
+            test_util.test_logger('l2_vx_vni is null in l2.uuid:%s' %(l2.uuid))
         else:
             l2_vxlan_vni = str(l2_vxlan_vni)
-            br_vxlan_dev = 'br_vxlan_%s' % (l2_vxlan_vni)
+            br_vxlan_dev = 'br_vx_%s' % (l2_vxlan_vni)
             test_util.test_logger('vxlan bridge name is: %s' %(br_vxlan_dev))
 
         if not l2_vlan:
@@ -1588,7 +1588,7 @@ def lib_assign_host_l2_ip(host, l2, l3):
                         linux.set_device_ip(br_vxlan_dev, next_avail_ip, l3_ip_ranges.netmask)
                         test_util.test_logger('vxlan set ip:%s for bridge: %s' % (next_avail_ip, br_vxlan_dev))
                     except Exception, e:
-                        test_util.test_logger('@@warning: because br_vxlan_xxx now only created when vm that used it has been created, ignore exception %s' % (str(e)))
+                        test_util.test_logger('@@warning: because br_vx_xxx now only created when vm that used it has been created, ignore exception %s' % (str(e)))
                 else:
                     _set_host_l2_ip(current_host_ip)
                 break
