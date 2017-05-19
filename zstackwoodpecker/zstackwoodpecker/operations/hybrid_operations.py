@@ -23,7 +23,7 @@ def add_aliyun_key_secret(name, description, key, secret, session_uuid=None):
     test_util.action_logger('Add [aliyun key secret:] %s' % key)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[aliyun key secret:] %s is added.' % key)
-    return evt
+    return evt.inventory
 
 def del_aliyun_key_secret(uuid, session_uuid=None):
     action = api_actions.DeleteAliyunKeySecretAction()
@@ -62,7 +62,7 @@ def add_oss_file_bucket_name(region_id, oss_bucket_name, session_uuid=None):
     test_util.action_logger('Add [Oss File Bucket Name:] %s %s' % (region_id, oss_bucket_name))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Oss File Bucket Name:] %s %s is added.' % (region_id, oss_bucket_name))
-    return evt
+    return evt.inventory
 
 def del_oss_file_bucket_name_in_local(uuid, session_uuid=None):
     action = api_actions.DeleteOssFileBucketNameInLocalAction()
@@ -80,7 +80,7 @@ def create_oss_bucket_remote(region_id, bucket_name, description, session_uuid=N
     test_util.action_logger('Create [Oss Bucket Name Remote:] %s %s' % (region_id, bucket_name))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Oss Bucket Name Remote:] %s %s is created.' % (region_id, bucket_name))
-    return evt
+    return evt.inventory
 
 def del_oss_bucket_remote(uuid, session_uuid=None):
     action = api_actions.DeleteOssBucketRemoteAction()
@@ -121,7 +121,7 @@ def add_datacenter_from_remote(datacenter_type, region_id, description, session_
     test_util.action_logger('Add [datacenter from remote:] %s %s' % (datacenter_type, region_id))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[datacenter from remote:] %s %s is added.' % (datacenter_type, region_id))
-    return evt
+    return evt.inventory
 
 def del_datacenter_in_local(uuid, session_uuid=None):
     action = api_actions.DeleteDataCenterInLocalAction()
@@ -164,7 +164,7 @@ def add_identity_zone_from_remote(datacenter_type, zone_id, session_uuid=None):
     test_util.action_logger('Add [identity zone from remote:] %s %s' % (datacenter_type, zone_id))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[identity zone from remote:] %s %s is added.' % (datacenter_type, zone_id))
-    return evt
+    return evt.inventory
 
 def del_identity_zone_in_local(uuid, session_uuid=None):
     action = api_actions.DeleteIdentityZoneInLocalAction()
@@ -182,7 +182,7 @@ def create_ecs_vpc_remote(datacenter_uuid, name, cidr_block, session_uuid=None):
     test_util.action_logger('Create [Ecs VPC Remote:] %s %s %s' % (datacenter_uuid, name, cidr_block))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Ecs VPC Remote:] %s %s %s is created.' % (datacenter_uuid, name, cidr_block))
-    return evt
+    return evt.inventory
 
 def sync_ecs_vpc_from_remote(datacenter_uuid, session_uuid=None):
     action = api_actions.SyncEcsVpcFromRemoteAction()
@@ -208,7 +208,7 @@ def create_ecs_vswtich_remote(vpc_uuid, identity_zone_uuid, name, cidr_block, se
     test_util.action_logger('Create [Ecs VPC Remote:] %s %s %s' % (datacenter_uuid, name, cidr_block))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Ecs VPC Remote:] %s %s %s is created.' % (datacenter_uuid, name, cidr_block))
-    return evt
+    return evt.inventory
 
 def sync_ecs_vswitch_from_remote(identity_zone_uuid, session_uuid=None):
     action = api_actions.SyncEcsVSwitchFromRemoteAction()
@@ -258,7 +258,7 @@ def create_vpc_virtualrouter_entry_remote(dest_cidr_block, vrouter_uuid, vrouter
     test_util.action_logger('Create [VPC VirtualRouter Entry Remote:] %s %s %s %s %s' % (dest_cidr_block, vrouter_uuid, vrouter_type, next_hop_type, next_hop_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[VPC VirtualRouter Entry Remote:] %s %s %s %s %s is created.' % (dest_cidr_block, vrouter_uuid, vrouter_type, next_hop_type, next_hop_uuid))
-    return evt
+    return evt.inventory
 
 def del_router_entry_remote(uuid, session_uuid=None):
     action = api_actions.DeleteRouteEntryRemoteAction()
@@ -275,7 +275,7 @@ def create_ecs_security_group_remote(name, vpc_uuid, session_uuid=None):
     test_util.action_logger('Create [Ecs Security Group Remote:] %s %s' % (name, vpc_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('Ecs Security Group Remote:] %s %s is created.' % (name, vpc_uuid))
-    return evt
+    return evt.inventory
 
 def create_ecs_security_group_rule_remote(group_uuid, direction, protocol, port_range, cidr, policy, nic_type, priority, session_uuid=None):
     action = api_actions.CreateEcsSecurityGroupRuleRemoteAction()
@@ -290,7 +290,7 @@ def create_ecs_security_group_rule_remote(group_uuid, direction, protocol, port_
     test_util.action_logger('Create [Ecs Security Group Rule Remote:] %s %s %s %s %s %s %s %s' % (group_uuid, direction, protocol, port_range, cidr, policy, nic_type, priority))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Ecs Security Group Rule Remote:] %s %s %s %s %s %s %s %s is created.' % (group_uuid, direction, protocol, port_range, cidr, policy, nic_type, priority))
-    return evt
+    return evt.inventory
 
 def sync_security_group_from_remote(ecs_vpc_uuid, session_uuid=None):
     action = api_actions.SyncEcsSecurityGroupFromRemoteAction()
@@ -331,7 +331,7 @@ def create_ecs_image_from_local_image(bs_uuid, datacenter_uuid, image_uuid, sess
     test_util.action_logger('Create Ecs Image from [Local image:] %s %s %s' % (bs_uuid, datacenter_uuid, image_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('Ecs Image is created from [Local image:] %s %s %s.' % (bs_uuid, datacenter_uuid, image_uuid))
-    return evt
+    return evt.inventory
 
 def del_ecs_image_in_local(uuid, session_uuid=None):
     action = api_actions.DeleteEcsImageLocalAction()
@@ -364,7 +364,7 @@ def create_ecs_instance_from_local_image(ecs_root_password, bs_uuid, image_uuid,
     test_util.action_logger('Create Ecs Instance from [Local image:] %s %s' % (bs_uuid, image_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('Ecs Instance is created from [Local image:] %s %s.' % (bs_uuid, image_uuid))
-    return evt
+    return evt.inventory
 
 def del_ecs_instance(uuid, session_uuid=None):
     action = api_actions.DeleteEcsInstanceAction()
