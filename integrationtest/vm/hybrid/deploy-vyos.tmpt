@@ -1,4 +1,5 @@
 import ../deploy.tmpt
 
 aliyunKey = 123456
-aliyunSecret = 123456
+aliyunSecret = 1234567
+datacenterType = aliyun
