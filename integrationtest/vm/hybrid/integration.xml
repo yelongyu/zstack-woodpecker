@@ -7,5 +7,6 @@
         <case timeout='600' repeat='1' noparallel='True'>test_create_vpc.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_create_vswitch.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_create_ecs_sg.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_create_ecs_image.py</case>
     </suite>
 </integrationTest>
