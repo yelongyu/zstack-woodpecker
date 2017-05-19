@@ -334,6 +334,14 @@ def create_ecs_image_from_local_image(bs_uuid, datacenter_uuid, image_uuid, sess
     test_util.test_logger('Ecs Image is created from [Local image:] %s %s %s.' % (bs_uuid, datacenter_uuid, image_uuid))
     return evt.inventory
 
+def del_ecs_image_remote(uuid, session_uuid=None):
+    action = api_actions.DeleteEcsImageRemoteAction()
+    action.uuid = uuid
+    test_util.action_logger('Delete [ecs image remote:] %s' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[ecs image remote:] %s is deleted.' % uuid)
+    return evt
+
 def del_ecs_image_in_local(uuid, session_uuid=None):
     action = api_actions.DeleteEcsImageLocalAction()
     action.uuid = uuid
