@@ -53,7 +53,7 @@ def get_oss_bucket_name_from_remote(uuid, session_uuid=None):
     action = api_actions.GetOssBucketNameFromRemoteAction()
     test_util.action_logger('get Oss Bucket Name from Remote')
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    return evt
+    return evt.inventories
 
 def add_oss_file_bucket_name(region_id, oss_bucket_name, session_uuid=None):
     action = api_actions.AddOssFileBucketNameAction()
@@ -104,14 +104,14 @@ def get_oss_bucket_file_from_remote(bucket_uuid, session_uuid=None):
     action.uuid = bucket_uuid
     test_util.action_logger('Get [Oss Bucket File From Remote:] %s' % bucket_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    return evt
+    return evt.inventories
 
 def get_datacenter_from_remote(datacenter_type, session_uuid=None):
     action = api_actions.GetDataCenterFromRemoteAction()
     action.type = datacenter_type
     test_util.action_logger('Get [Datacenter From Remote:] %s' % datacenter_type)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    return evt
+    return evt.inventories
 
 def add_datacenter_from_remote(datacenter_type, region_id, description, session_uuid=None):
     action = api_actions.AddDataCenterFromRemoteAction()
@@ -155,15 +155,16 @@ def get_identity_zone_from_remote(datacenter_type, region_id, session_uuid=None)
     action.regionId = region_id
     test_util.action_logger('Get [Identity zone From Remote:] %s %s' % (datacenter_type, region_id))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    return evt
+    return evt.inventories
 
-def add_identity_zone_from_remote(datacenter_type, zone_id, session_uuid=None):
+def add_identity_zone_from_remote(datacenter_type, datacenter_uuid, zone_id, session_uuid=None):
     action = api_actions.AddIdentityZoneFromRemoteAction()
     action.type = datacenter_type
+    action.dataCenterUuid = datacenter_uuid
     action.zoneId = zone_id
-    test_util.action_logger('Add [identity zone from remote:] %s %s' % (datacenter_type, zone_id))
+    test_util.action_logger('Add [identity zone from remote:] %s %s' % (datacenter_uuid, zone_id))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    test_util.test_logger('[identity zone from remote:] %s %s is added.' % (datacenter_type, zone_id))
+    test_util.test_logger('[identity zone from remote:] %s %s is added.' % (datacenter_uuid, zone_id))
     return evt.inventory
 
 def del_identity_zone_in_local(uuid, session_uuid=None):
