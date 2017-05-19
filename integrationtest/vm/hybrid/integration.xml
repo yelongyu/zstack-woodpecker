@@ -3,5 +3,6 @@
         <case timeout='600' repeat='1' noparallel='True'>test_add_datacenter.py</case>
         <case timeout='600' repeat='1' noparallel='True'>add test_create_oss_bucket.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_create_attach_detach_bucket.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_add_iz.py</case>
     </suite>
 </integrationTest>
