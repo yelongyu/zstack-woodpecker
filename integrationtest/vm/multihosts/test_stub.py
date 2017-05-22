@@ -18,6 +18,7 @@ import zstackwoodpecker.header.host as host_header
 import threading
 import time
 import sys
+import telnetlib
 #import traceback
 
 import zstackwoodpecker.test_state as test_state
@@ -146,3 +147,59 @@ def exercise_connection(ops_num=120, thread_threshold=10):
         exc = sys.exc_info()
         time.sleep(0.1)
     acc_ops.logout(session_uuid)
+
+
+def check_cpu_mem(vm, shutdown=False, window=False):
+    zone_uuid = vm.get_vm().zoneUuid
+
+    available_cpu, available_memory = check_available_cpu_mem(zone_uuid)
+    vm_outer_cpu, vm_outer_mem = vm.get_vm().cpuNum, vm.get_vm().memorySize
+    vm_internal_cpu, vm_internal_mem = check_vm_internal_cpu_mem(vm, shutdown, window)
+
+    return available_cpu, available_memory, vm_outer_cpu, vm_outer_mem, vm_internal_cpu, vm_internal_mem
+
+
+def check_available_cpu_mem(zone_uuid):
+    available_cpu = test_lib.lib_get_cpu_memory_capacity([zone_uuid]).availableCpu
+    available_memory = test_lib.lib_get_cpu_memory_capacity([zone_uuid]).availableMemory
+    return available_cpu, available_memory
+
+
+def check_window_vm_internal_cpu_mem(vm):
+    vm_ip = vm.get_vm().vmNics[0].ip
+    test_lib.lib_wait_target_up(vm_ip, '23', 360)
+    vm_username = os.environ.get('winImageUsername')
+    vm_password = os.environ.get('winImagePassword')
+    tn=telnetlib.Telnet(vm_ip)
+    tn.read_until("login: ")
+    tn.write(vm_username+"\r\n")
+    tn.read_until("password: ")
+    tn.write(vm_password+"\r\n")
+    tn.read_until(vm_username+">")
+    tn.write("wmic cpu get NumberOfCores\r\n")
+    vm_cpuinfo=tn.read_until(vm_username+">")
+    tn.write("wmic computersystem get TotalPhysicalMemory\r\n")
+    vm_meminfo=tn.read_until(vm_username+">")
+    tn.close()
+    test_util.test_logger(vm_cpuinfo.strip().split()[-2])
+    test_util.test_logger(vm_meminfo.strip().split()[-2])
+    return int(vm_cpuinfo.strip().split()[-2]), int(vm_meminfo.strip().split()[-2])/1024/1024
+
+
+def check_vm_internal_cpu_mem(vm, shutdown, window):
+    if window:
+        return check_window_vm_internal_cpu_mem(vm)
+    managerip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
+    vm_ip = vm.get_vm().vmNics[0].ip
+    get_cpu_cmd = "cat /proc/cpuinfo| grep 'processor'| wc -l"
+    if not shutdown:
+        get_mem_cmd = "free -m |grep Mem"
+    else:
+        get_mem_cmd = "dmidecode -t 17 | grep 'Size:'"
+    res = test_lib.lib_ssh_vm_cmd_by_agent(managerip, vm_ip, 'root',
+                'password', get_cpu_cmd)
+    vm_cpu = int(res.result.strip())
+    res = test_lib.lib_ssh_vm_cmd_by_agent(managerip, vm_ip, 'root',
+                'password', get_mem_cmd)
+    vm_mem = int(res.result.split()[1])
+    return vm_cpu, vm_mem

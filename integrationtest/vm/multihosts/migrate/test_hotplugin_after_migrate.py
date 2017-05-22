@@ -17,11 +17,9 @@ test_obj_dict = test_state.TestStateDict()
 
 
 def test():
-    test_lib.lib_set_allow_live_migration_local_storage('true')
-    new_offering = test_lib.lib_create_instance_offering(cpuNum = 1,\
-            cpuSpeed = 111, memorySize = 1024 * 1024 * 1024)
-    test_obj_dict.add_instance_offering(new_offering)
-    vm = test_stub.create_vm(vm_name = 'ckvmoffering-c6-64', image_name = "imageName_i_c6", instance_offering_uuid=new_offering.uuid)
+    test_lib.lib_set_vm_numa('true')
+
+    vm = test_stub.create_vr_vm('migrate_vm', 'imageName_net', 'l3VlanNetwork2')
     test_obj_dict.add_vm(vm)
     vm.check()
 
@@ -29,10 +27,10 @@ def test():
      vm_interal_cpu_before, vm_interal_mem_before) = test_stub.check_cpu_mem(vm)
 
     test_stub.migrate_vm_to_random_host(vm)
-
     vm.check()
 
     vm_instance_offering = test_lib.lib_get_instance_offering_by_uuid(vm.get_vm().instanceOfferingUuid)
+
     MEMchange = 126*1024*1024
     AlignedMemChange = 128*1024*1024
     vm_ops.update_vm(vm.get_vm().uuid, vm_instance_offering.cpuNum + 1, vm_instance_offering.memorySize + MEMchange)
@@ -51,9 +49,9 @@ def test():
     assert vm_interal_cpu_before == vm_interal_cpu_after - 1
     assert vm_interal_mem_before == vm_internal_mem_after - AlignedMemChange/1024/1024
     test_lib.lib_error_cleanup(test_obj_dict)
-    test_util.test_pass('VM online change instance offering Test Pass')
+    test_util.test_pass('VM online change instance offering after migration Test Pass')
 
 
 def error_cleanup():
-    test_lib.lib_set_allow_live_migration_local_storage('false')
+    test_lib.lib_set_vm_numa('false')
     test_lib.lib_error_cleanup(test_obj_dict)

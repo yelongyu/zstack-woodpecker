@@ -118,17 +118,14 @@ def share_admin_resource(account_uuid_list):
     acc_ops.share_resources(account_uuid_list, share_list)
 
 
-def check_cpu_mem(vm, is_linux=True, shutdown=False, window=False):
+def check_cpu_mem(vm, shutdown=False, window=False):
     zone_uuid = vm.get_vm().zoneUuid
 
     available_cpu, available_memory = check_available_cpu_mem(zone_uuid)
     vm_outer_cpu, vm_outer_mem = vm.get_vm().cpuNum, vm.get_vm().memorySize
     vm_internal_cpu, vm_internal_mem = check_vm_internal_cpu_mem(vm, shutdown, window)
 
-    if is_linux:
-        return available_cpu, available_memory, vm_outer_cpu, vm_outer_mem, vm_internal_cpu, vm_internal_mem
-    else:
-        return available_cpu, available_memory, vm_outer_cpu, vm_outer_mem
+    return available_cpu, available_memory, vm_outer_cpu, vm_outer_mem, vm_internal_cpu, vm_internal_mem
 
 
 def check_available_cpu_mem(zone_uuid):
@@ -196,20 +193,3 @@ def wait_until_vm_reachable(vm, timeout=120):
             break
         else:
             time.sleep(interval)
-
-def migrate_vm_to_random_host(vm):
-    test_util.test_dsc("migrate vm to random host")
-    if not test_lib.lib_check_vm_live_migration_cap(vm.vm):
-        test_util.test_skip('skip migrate if live migrate not supported')
-    target_host = test_lib.lib_find_random_host(vm.vm)
-    current_host = test_lib.lib_find_host_by_vm(vm.vm)
-    vm.migrate(target_host.uuid)
-
-    new_host = test_lib.lib_get_vm_host(vm.vm)
-    if not new_host:
-        test_util.test_fail('Not find available Hosts to do migration')
-
-    if new_host.uuid != target_host.uuid:
-        test_util.test_fail('[vm:] did not migrate from [host:] %s to target [host:] %s, but to [host:] %s' % (vm.vm.uuid, current_host.uuid, target_host.uuid, new_host.uuid))
-    else:
-        test_util.test_logger('[vm:] %s has been migrated from [host:] %s to [host:] %s' % (vm.vm.uuid, current_host.uuid, target_host.uuid))
