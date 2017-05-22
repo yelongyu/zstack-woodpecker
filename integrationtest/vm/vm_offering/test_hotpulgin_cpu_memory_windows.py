@@ -33,7 +33,6 @@ def test():
     vm_ops.update_vm(vm.get_vm().uuid, vm_instance_offering.cpuNum + 1, vm_instance_offering.memorySize + MEMchange)
     vm.update()
     time.sleep(10)
-    vm.check()
 
     (available_cpu_after, available_memory_after, vm_outer_cpu_after, vm_outer_mem_after,
      vm_interal_cpu_after, vm_internal_mem_after) = test_stub.check_cpu_mem(vm, window=True)

@@ -148,13 +148,14 @@ def check_window_vm_internal_cpu_mem(vm):
     tn.read_until("password: ")
     tn.write(vm_password+"\r\n")
     tn.read_until(vm_username+">")
-    tn.write("wmic cpu get NumbleOfCores\r\n")
+    tn.write("wmic cpu get NumberOfCores\r\n")
     vm_cpuinfo=tn.read_until(vm_username+">")
     tn.write("wmic computersystem get TotalPhysicalMemory\r\n")
     vm_meminfo=tn.read_until(vm_username+">")
     tn.close()
-    test_util.test_logger(vm_cpuinfo)
-    test_util.test_logger(vm_meminfo)
+    test_util.test_logger(vm_cpuinfo.strip().split()[-2])
+    test_util.test_logger(vm_meminfo.strip().split()[-2])
+    return int(vm_cpuinfo.strip().split()[-2]), int(vm_meminfo.strip().split()[-2])/1024/1024
 
 
 def check_vm_internal_cpu_mem(vm, shutdown, window):
