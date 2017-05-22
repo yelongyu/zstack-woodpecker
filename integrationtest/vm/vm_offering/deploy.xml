@@ -144,8 +144,8 @@
       </image>
       <image name="$imageName_windows" description="Window2012 telnet Test Image1"
         format="$rootImageFormat" url="$imageUrl_windows"
-        mediaType="$rootMediaType" systemTags="qemuga"
-        username="$imageUsername" password="$imagePassword">
+        mediaType="$rootMediaType" systemTags="qemuga" platform="Windows"
+        username="$winImageUsername" password="$winImagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName_i_c7_32" description="Centos7 32bit Test Image1"

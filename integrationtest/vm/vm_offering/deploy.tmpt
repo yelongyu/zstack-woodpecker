@@ -71,6 +71,8 @@ imageUrl_i_c7_32 = http://zstack/image/CentOS-7-i386-LiveGNOME-1511.qcow2
 
 imageName_windows = windows
 imageUrl_windows = http://zstack/image/windows-2012-cn-qcow2.qcow2
+winImageUsername = Administrator
+winImagePassword = linux@123
 
 batch_test_image = batch-image
 batchImageUrl = http://zstack/image/CentOS7.2_Minimal_40G.qcow2
