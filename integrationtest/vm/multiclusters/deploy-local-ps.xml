@@ -77,7 +77,6 @@
         cpuSpeed="$virtualRouterOfferingCpuSpeed_s" 
         cpuNum="$virtualRouterOfferingCpuNum_s" isDefault="true">
         <zoneRef>$zoneName</zoneRef>
-        <!--<managementL3NetworkRef>$l3ManagementNetworkName</managementL3NetworkRef>-->
         <managementL3NetworkRef>$l3PublicNetworkName</managementL3NetworkRef>
         <publicL3NetworkRef>$l3PublicNetworkName</publicL3NetworkRef>
         <imageRef>$virtualRouterImageName</imageRef>
@@ -86,17 +85,17 @@
   
     <backupStorages>
       <sftpBackupStorage name="$sftpBackupStorageName"
-        description="Test" url="$sftpBackupStorageUrl"
-	username="$sftpBackupStorageUsername"
-	password="$sftpBackupStoragePassword"
-	hostname="$sftpBackupStorageHostname"
-	port="$sftpBackupStoragePort"/>
+        description="Test" url="$sftpBackupStorageUrl" 
+        username="$sftpBackupStorageUsername" 
+        password="$sftpBackupStoragePassword" 
+        hostname="$sftpBackupStorageHostname"
+        port="$sftpBackupStoragePort" />
       <sftpBackupStorage name="$sftpBackupStorageName2"
-        description="Test" url="$sftpBackupStorageUrl2"
-	username="$sftpBackupStorageUsername2"
-	password="$sftpBackupStoragePassword2"
-	hostname="$sftpBackupStorageHostname2"
-	port="$sftpBackupStoragePort2"/>
+        description="Test2" url="$sftpBackupStorageUrl2" 
+        username="$sftpBackupStorageUsername2" 
+        password="$sftpBackupStoragePassword2" 
+        hostname="$sftpBackupStorageHostname2"
+        port="$sftpBackupStoragePort2" />
     </backupStorages>
   
     <images>
@@ -104,26 +103,26 @@
         format="$rootImageFormat" url="$imageUrl_s" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
+        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName_net" description="Test Image2" 
         format="$rootImageFormat" url="$imageUrl_net" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
       </image>
       <image name="$imageName3" description="Test Image3" 
         format="$rootImageFormat" url="$imageUrl3" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
+        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
       <image name="$virtualRouterImageName" 
         description="virtual router image" format="$rootImageFormat" 
         username="$vrImageUsername" password="$vrImagePassword"
         mediaType="$rootMediaType"
         hypervisorType='KVM' url="$virtualRouterImageUrl">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
       </image>
     </images>
   
@@ -147,7 +146,7 @@
         <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
         <primaryStorages>
 	  <localPrimaryStorage name="$localPrimaryStorageName"
-            description="Test Local Primary Storage"
+	    description="Test Local Primary Storage"
             url="$localPrimaryStorageUrl" />
         </primaryStorages>
   
@@ -159,13 +158,8 @@
                 username="$hostUsername" password="$hostPassword" />
               <host name="$hostName2" description="Test2" managementIp="$hostIp2"
                 username="$hostUsername2" password="$hostPassword2" port="$hostPort2"/>
-              <host name="$hostName3" description="Test3" managementIp="$hostIp3"
-                username="$hostUsername3" password="$hostPassword3" />
-              <host name="$hostName4" description="Test4" managementIp="$hostIp4"
-                username="$hostUsername4" password="$hostPassword4" port="$hostPort4"/>
             </hosts>
             <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
-            <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
@@ -190,14 +184,15 @@
             <l2NetworkRef>$l2VlanNetworkName19</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName20</l2NetworkRef>
           </cluster>
-          <!--
           <cluster name="$clusterName2" description="Test"
             hypervisorType="$clusterHypervisorType">
             <hosts>
-              <host name="$hostName5" description="Ubuntu" managementIp="$hostIp5"
-                username="$hostUsername" password="$hostPassword" />
+              <host name="$hostName3" description="Test3" managementIp="$hostIp3"
+                username="$hostUsername3" password="$hostPassword3"/>
+              <host name="$hostName4" description="Test4" managementIp="$hostIp4"
+                username="$hostUsername4" password="$hostPassword4" port="$hostPort4"/>
             </hosts>
-            <primaryStorageRef>$nfsPrimaryStorageName2</primaryStorageRef>
+            <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
@@ -222,9 +217,7 @@
             <l2NetworkRef>$l2VlanNetworkName19</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName20</l2NetworkRef>
           </cluster>
--->
         </clusters>
-  
         <l2Networks>
            <l2NoVlanNetwork name="$l2ManagementNetworkName" description="Basic L2 for management network"
              physicalInterface="$l2ManagementNetworkInterface">
@@ -239,7 +232,8 @@
           </l2NoVlanNetwork>
 
           <l2NoVlanNetwork name="$l2PublicNetworkName"
-            description="Test" physicalInterface="$l2PublicNetworkInterface">
+            description="Test" 
+            physicalInterface="$l2PublicNetworkInterface">
             <l3Networks>
               <l3BasicNetwork name="$l3PublicNetworkName" description="Public Network">
                 <ipRange name="$ipRangeName" description="Test"
