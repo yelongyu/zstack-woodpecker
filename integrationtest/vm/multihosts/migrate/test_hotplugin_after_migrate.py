@@ -19,7 +19,7 @@ test_obj_dict = test_state.TestStateDict()
 def test():
     test_lib.lib_set_vm_numa('true')
 
-    vm = test_stub.create_vr_vm('migrate_vm', 'imageName_net', 'l3VlanNetwork2')
+    vm = test_stub.create_vr_vm('migrate_vm', 'imageName3', 'l3VlanNetwork2')
     test_obj_dict.add_vm(vm)
     vm.check()
 
@@ -36,14 +36,13 @@ def test():
     vm_ops.update_vm(vm.get_vm().uuid, vm_instance_offering.cpuNum + 1, vm_instance_offering.memorySize + MEMchange)
     vm.update()
     time.sleep(10)
-    test_stub.online_hotplug_cpu_memory(vm)
     vm.check()
 
     (available_cpu_after, available_memory_after, vm_outer_cpu_after, vm_outer_mem_after,
      vm_interal_cpu_after, vm_internal_mem_after) = test_stub.check_cpu_mem(vm)
 
     assert available_cpu_before == available_cpu_after + 1
-    assert available_memory_after + AlignedMemChange / int(test_lib.lib_get_provision_memory_rate()) in range(available_memory_before-1, available_memory_before+1)
+    assert available_memory_after + AlignedMemChange / float(test_lib.lib_get_provision_memory_rate()) in range(available_memory_before-1, available_memory_before+1)
     assert vm_outer_cpu_before == vm_outer_cpu_after - 1
     assert vm_outer_mem_before == vm_outer_mem_after - AlignedMemChange
     assert vm_interal_cpu_before == vm_interal_cpu_after - 1
