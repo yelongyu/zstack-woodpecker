@@ -59,30 +59,40 @@ def test():
         test_util.test_skip('skip migrate if live migrate not supported')
 
     current_host1 = test_lib.lib_get_vm_host(vm1.vm)
+    current_host2 = test_lib.lib_get_vm_host(vm2.vm)
     conditions = res_ops.gen_query_conditions('clusterUuid', '=', vm1.vm.clusterUuid)
     conditions = res_ops.gen_query_conditions('state', '=', host_header.ENABLED, conditions)
     conditions = res_ops.gen_query_conditions('status', '=', host_header.CONNECTED, conditions)
     all_hosts = res_ops.query_resource(res_ops.HOST, conditions)
     if len(all_hosts) <= 1:
         test_util.test_fail('Not available host to do maintenance, since there is only %s host' % len(all_hosts))
+    vr = test_lib.lib_get_all_vrs()
+    vr_uuid = vr[0].uuid
+    vr_host_uuid = test_lib.lib_get_vm_host(vr[0]).uuid
 
-    target_host = random.choice(all_hosts)
-    if current_host1.uuid != target_host.uuid:
-        vm1.migrate(target_host.uuid)
-
-    current_host2 = test_lib.lib_get_vm_host(vm2.vm)
-    if current_host2.uuid != target_host.uuid:
-        vm2.migrate(target_host.uuid)
-
+    for host_n in all_hosts:
+        print'host_n%s'% (host_n.uuid)
+        if host_n.uuid != current_host1.uuid:
+            if host_n.uuid != current_host2.uuid:
+                if host_n.uuid != vr_host_uuid:
+                    target_host = host_n
+                    print'target_host_uuid%s'%(target_host.uuid)
+                    vm1.migrate(target_host.uuid)
+                    vm2.migrate(target_host.uuid)
+                    break   
+    else:
+        test_util.test_skip('can not find a host to migrate two host')
     new_host = test_lib.lib_get_vm_host(vm1.vm)
     if new_host.uuid != target_host.uuid:
         test_util.test_fail('VM did not migrate to target [host:] %s, but to [host:] %s' % (target_host.uuid, new_host.uuid))
 
+    new_host1 = test_lib.lib_get_vm_host(vm2.vm)
+    if new_host1.uuid != target_host.uuid:
+        test_util.test_fail('VM did not migrate to target [host:] %s, but to [host:] %s' % (target_host.uuid, new_host1.uuid))
+
     host = test_kvm_host.ZstackTestKvmHost()
     host.set_host(target_host)
-
     host.maintain()
-
     #need to update vm's inventory, since they will be changed by maintenace mode
     vm1.update()
     vm2.update()
@@ -93,7 +103,6 @@ def test():
         vm2.set_state(vm_header.STOPPED)
     vm1.check()
     vm2.check()
-
     host.change_state(test_kvm_host.ENABLE_EVENT)
     if not linux.wait_callback_success(is_host_connected, host.get_host().uuid, 120):
         test_util.test_fail('host status is not changed to connected or host state is not changed to Enabled within 120s')
@@ -106,7 +115,7 @@ def test():
     vm2.set_state(vm_header.RUNNING)
     vm1.check()
     vm2.check()
-
+    
     vm1.migrate(current_host1.uuid)
     vm2.migrate(current_host2.uuid)
 
