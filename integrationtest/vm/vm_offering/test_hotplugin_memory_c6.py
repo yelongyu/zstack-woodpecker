@@ -17,34 +17,29 @@ test_obj_dict = test_state.TestStateDict()
 
 
 def test():
-    new_offering = test_lib.lib_create_instance_offering(cpuNum = 1,\
-            cpuSpeed = 111, memorySize = 1024 * 1024 * 1024)
-    test_obj_dict.add_instance_offering(new_offering)
-    vm = test_stub.create_vm(vm_name = 'ckvmoffering-c6-64', image_name = "imageName_i_c6", instance_offering_uuid=new_offering.uuid)
+
+    test_util.test_dsc("STEP1: Ceate vm instance offering")
+    vm_instanc_offering = test_lib.lib_create_instance_offering(cpuNum = 1,
+                                                                cpuSpeed = 111, memorySize = 1024 * 1024 * 1024)
+    test_obj_dict.add_instance_offering(vm_instanc_offering)
+
+    test_util.test_dsc("STEP2: Ceate vm and wait until it up for testing")
+    vm = test_stub.create_vm(vm_name = 'ckvmoffering-c6-64', image_name = "imageName_i_c6",
+                             instance_offering_uuid=vm_instanc_offering.uuid)
     test_obj_dict.add_vm(vm)
     vm.check()
 
-    (available_cpu_before, available_memory_before, vm_outer_cpu_before, vm_outer_mem_before,
-     vm_interal_cpu_before, vm_interal_mem_before) = test_stub.check_cpu_mem(vm)
+    test_util.test_dsc("STEP3: Hot Plugin CPU and Memory and check capacity")
+    cpu_change = 0
+    mem_change = 126*1024*1024
 
-    vm_instance_offering = test_lib.lib_get_instance_offering_by_uuid(vm.get_vm().instanceOfferingUuid)
-    MEMchange = 126*1024*1024
-    vm_ops.update_vm(vm.get_vm().uuid, None, vm_instance_offering.memorySize + MEMchange)
-    vm.update()
-    time.sleep(10)
+    with test_stub.CapacityCheckerContext(vm, cpu_change, mem_change):
+        vm_ops.update_vm(vm.get_vm().uuid, vm_instanc_offering.cpuNum+cpu_change,
+                         vm_instanc_offering.memorySize+mem_change)
+        vm.update()
+        time.sleep(10)
 
-    (available_cpu_after, available_memory_after, vm_outer_cpu_after, vm_outer_mem_after,
-     vm_interal_cpu_after, vm_internal_mem_after) = test_stub.check_cpu_mem(vm)
-    AlignedMemChange = 128*1024*1024
-
-    assert available_cpu_before == available_cpu_after
-    test_util.test_logger("%s %s %s" % (available_memory_before, available_memory_after, AlignedMemChange))
-    assert available_memory_after + AlignedMemChange / int(test_lib.lib_get_provision_memory_rate()) in range(available_memory_before-1, available_memory_before)
-    assert vm_outer_cpu_before == vm_outer_cpu_after
-    assert vm_outer_mem_before == vm_outer_mem_after - AlignedMemChange
-    assert vm_interal_cpu_before == vm_interal_cpu_after
-    #test_util.test_logger("%s %s %s" % (vm_interal_mem_before, vm_internal_mem_after, MEMchange))
-    assert vm_interal_mem_before == vm_internal_mem_after - AlignedMemChange/1024/1024
+    test_util.test_dsc("STEP4: Destroy test object")
     test_lib.lib_error_cleanup(test_obj_dict)
     test_util.test_pass('VM online change instance offering Test Pass')
 

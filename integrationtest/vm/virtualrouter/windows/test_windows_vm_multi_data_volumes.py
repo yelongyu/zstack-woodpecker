@@ -43,8 +43,20 @@ def test():
         test_lib.lib_robot_cleanup(test_obj_dict)
         test_util.test_fail('Create Windows VM with Multi Data volumes Test Fail')
 
+    vm_inv = vm.get_vm()
+    print"vm_uuid:%s"%(vm_inv.uuid)
+    host_inv = test_lib.lib_find_host_by_vm(vm_inv)
+    host_ip = host_inv.managementIp
+    host_username = host_inv.username
+    print"host_username%s"%(host_username)
+    host_password = host_inv.password
+    cmd = "virsh domiflist %s|grep vnic|awk '{print $3}'"% (vm_inv.uuid)
+    br_eth0 = test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd, 60)
+    cmd2 = 'ip a add 10.11.254.254/8 dev %s'% (br_eth0)
+    test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd2, 60)
+
     vm_ip = vm.get_vm().vmNics[0].ip
-    test_lib.lib_wait_target_up(vm_ip, '23', 360)
+    test_lib.lib_wait_target_up(vm_ip, '23', 720)
     vm_username = os.environ.get('winImageUsername')
     vm_password = os.environ.get('winImagePassword')
     tn=telnetlib.Telnet(vm_ip)

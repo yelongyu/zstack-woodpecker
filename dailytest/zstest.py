@@ -266,15 +266,15 @@ class TestLib(object):
             print '-'*int(wt)
 
         if caseList:
-            self._analyze_case_list(cases)
-            for case_num in self.target_case_list:
-                case = self.test_case_lib[case_num]
+            self._analyze_case_list(caseList)
+            for case in self.target_case_list:
+                case_num = self._find_case_num(case.get_name_with_suite())
                 test_case_path = os.path.join(self.test_case_dir, case.get_name_with_suite())
                 sys.path.append(os.path.dirname(test_case_path))
                 test_case = imp.load_source('test_case', test_case_path)
                 print '='*80
                 _print_head()
-                print '  [%s]\t| %s' % (case_num, case.get_name_with_suite())
+                print '  [%s]\t| %s' % (str(case_num), case.get_name_with_suite())
                 print '-'*80
                 print '\t\t\033[1m Description:\033[0m'
                 print '-'*80
