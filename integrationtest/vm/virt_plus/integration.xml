@@ -32,6 +32,7 @@
         <case timeout='300' repeat='1'>other/test_add_local_image.py</case>
         <case timeout='300' repeat='1'>other/test_memory_allocation.py</case>
         <case timeout='800' repeat='1'>eip/test_create_eip_vm.py</case>
+        <case timeout='800' repeat='1'>eip/test_create_eip_reconnect_host.py</case>
         <case timeout='360' repeat='1' noparallel='True'>other/test_parallel_crt_vm_to_use_all_disk.py</case>
         <case timeout='360' repeat='1' noparallel='True'>other/test_parallel_crt_vm_to_use_all_mem.py</case>
         <case timeout='600' repeat='1'>volume/test_add_volume.py</case>
