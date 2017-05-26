@@ -59,9 +59,9 @@
 	<instanceOfferings>
 		<instanceOffering name="$instanceOfferingName_s"
 			description="Test" memoryCapacity="1" cpuNum="1"
-			cpuSpeed="$instanceOfferingCpuSpeed_s" />
+			/>
 		<virtualRouterOffering name="$virtualRouterOfferingName_s"
-			memoryCapacity="1" cpuSpeed="1" cpuNum="1" isDefault="true">
+			memoryCapacity="1" cpuNum="1" isDefault="true">
 			<zoneRef>$zoneName</zoneRef>
 			<managementL3NetworkRef>$l3PublicNetworkName</managementL3NetworkRef>
 			<publicL3NetworkRef>$l3PublicNetworkName</publicL3NetworkRef>

@@ -14,7 +14,7 @@ def create_onlinechange_vm(test_stub=None, test_obj_dict=None):
         test_util.test_skip('No Enabled/Connected host was found, skip test.' )
         return True
     host = host[0]
-    test_offering = test_lib.lib_create_instance_offering(cpuNum=1, cpuSpeed=16,
+    test_offering = test_lib.lib_create_instance_offering(cpuNum=1,
                                                           memorySize=1024 * 1024 * 1024, name='test_offering')
     test_obj_dict.add_instance_offering(test_offering)
     vm = test_stub.create_vm(vm_name='test_update_instance_offering', host_uuid=host.uuid,

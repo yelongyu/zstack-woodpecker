@@ -71,11 +71,10 @@
       description="Test" 
       memoryCapacity="$instanceOfferingMemory_s" 
       cpuNum="$instanceOfferingCpuNum_s"
-      cpuSpeed="$instanceOfferingCpuSpeed_s" />
+      />
     <virtualRouterOffering name="$virtualRouterOfferingName_s1"
       memoryCapacity="$virtualRouterOfferingMemory_s" 
-      cpuSpeed="$virtualRouterOfferingCpuSpeed_s" 
-      cpuNum="$virtualRouterOfferingCpuNum_s" isDefault="true">
+      isDefault="true">
       <zoneRef>$zoneName1</zoneRef>
       <!--<managementL3NetworkRef>$l3ManagementNetworkName</managementL3NetworkRef>-->
       <managementL3NetworkRef>$l3PublicNetworkName</managementL3NetworkRef>

@@ -18,10 +18,9 @@ test_obj_dict = test_state.TestStateDict()
 
 def test():
     cpuNum = 2
-    cpuSpeed = 512
     memorySize = 512 * 1024 * 1024
     new_offering = test_lib.lib_create_instance_offering(cpuNum = cpuNum,\
-            cpuSpeed = cpuSpeed, memorySize = memorySize)
+            memorySize = memorySize)
 
     test_obj_dict.add_instance_offering(new_offering)
     new_offering_uuid = new_offering.uuid

@@ -16,20 +16,18 @@ def test():
     test_util.test_dsc('Test VM online change instance offering')
 
     cpuNum = 1
-    cpuSpeed = 111
     memorySize = 555 * 1024 * 1024
     new_offering = test_lib.lib_create_instance_offering(cpuNum = cpuNum,\
-            cpuSpeed = cpuSpeed, memorySize = memorySize)
+            memorySize = memorySize)
 
     vm = test_stub.create_vm(vm_name = 'ckvmoffering-c7-64', image_name = "imageName_i_c7", instance_offering_uuid=new_offering.uuid)
     vm.check()
     test_obj_dict.add_vm(vm)
     test_obj_dict.add_instance_offering(new_offering)
     cpuNum = 1
-    cpuSpeed = 111
     memorySize = 667 * 1024 * 1024
     new_offering = test_lib.lib_create_instance_offering(cpuNum = cpuNum,\
-            cpuSpeed = cpuSpeed, memorySize = memorySize)
+            memorySize = memorySize)
 
     test_obj_dict.add_instance_offering(new_offering)
     new_offering_uuid = new_offering.uuid

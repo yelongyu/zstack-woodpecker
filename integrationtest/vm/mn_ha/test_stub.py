@@ -43,6 +43,15 @@ def wait_for_mn_ha_ready(scenarioConfig, scenarioFile):
         time.sleep(10)
     return False
 
+def check_vm_running_exist_on_host(vm_uuid, host_ip, scenarioConfig, scenarioFile):
+    mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
+    cmd = "virsh list|grep %s|awk '{print $3}'" %(vm_uuid)
+    host = mn_host_list[0]
+    host_config = sce_ops.get_scenario_config_vm(host.name_, scenarioConfig)
+    vm_is_exist = True if test_lib.lib_execute_ssh_cmd(host_ip, host_config.imageUsername_, host_config.imagePassword_,cmd) else False
+
+    return vm_is_exist
+
 def stop_host(host_vm, scenarioConfig, force=None):
     host_vm_uuid = host_vm.uuid_
     mn_ip = scenarioConfig.basicConfig.zstackManagementIp.text_

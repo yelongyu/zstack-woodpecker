@@ -21,7 +21,7 @@ def test():
 
     test_util.test_dsc("STEP1: Ceate vm instance offering")
     vm_instanc_offering = test_lib.lib_create_instance_offering(cpuNum = 1,
-                                                                cpuSpeed = 111, memorySize = 1024 * 1024 * 1024)
+                                                                memorySize = 1024 * 1024 * 1024)
     test_obj_dict.add_instance_offering(vm_instanc_offering)
 
     test_util.test_dsc("STEP2: Ceate vm and wait until it up for testing")

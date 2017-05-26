@@ -26,19 +26,19 @@
             description="Small Size Instance Offering" 
             memoryCapacity="$instanceOfferingMemory_s" 
             cpuNum="$instanceOfferingCpuNum_s" 
-            cpuSpeed="$instanceOfferingCpuSpeed_s" />
+            />
         <instanceOffering name="$instanceOfferingName_m" 
             description="Medium Size Instance Offering" 
             memoryCapacity="$instanceOfferingMemory_m" 
             cpuNum="$instanceOfferingCpuNum_m" 
-            cpuSpeed="$instanceOfferingCpuSpeed_m" />
+            />
         <instanceOffering name="$instanceOfferingName_l" 
             description="Large Size Instance Offering" 
             memoryCapacity="$instanceOfferingMemory_l" 
             cpuNum="$instanceOfferingCpuNum_l" 
-            cpuSpeed="$instanceOfferingCpuSpeed_l" />
+            />
 		<virtualRouterOffering name="virtualRouterOffering"
-			memoryCapacity="512M" cpuSpeed="512" cpuNum="2" isDefault="true">
+			memoryCapacity="512M" cpuNum="2" isDefault="true">
 			<zoneRef>$zoneName</zoneRef>
 			<managementL3NetworkRef>$l3PubNetworkName</managementL3NetworkRef>
 			<publicL3NetworkRef>$l3PubNetworkName</publicL3NetworkRef>

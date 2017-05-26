@@ -57,7 +57,7 @@ def update_cpu_mem(vm):
 
 def test():
     new_offering = test_lib.lib_create_instance_offering(cpuNum = 1,\
-            cpuSpeed = 111, memorySize = 1024 * 1024 * 1024)
+            memorySize = 1024 * 1024 * 1024)
     test_obj_dict.add_instance_offering(new_offering)
     test_util.test_logger('Create 5 vm for testing')
     wrapped_vm_list = []

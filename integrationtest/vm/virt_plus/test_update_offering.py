@@ -29,7 +29,7 @@ def test():
 
     host_uuid = host[0].uuid
     new_offering = test_lib.lib_create_instance_offering(cpuNum = 1, \
-            cpuSpeed = 16, memorySize = 536870912, name = 'orgin_instance_name')
+            memorySize = 536870912, name = 'orgin_instance_name')
 
     test_obj_dict.add_instance_offering(new_offering)
 
@@ -41,7 +41,7 @@ def test():
     vm.stop()
 
     #These parameters are need to be populated.
-    updated_offering = test_lib.lib_update_instance_offering(new_offering.uuid, cpuNum = 2, cpuSpeed = 16, \
+    updated_offering = test_lib.lib_update_instance_offering(new_offering.uuid, cpuNum = 2, \
         memorySize = 1073741824, name = 'updated_instance_name', \
         volume_iops = None, volume_bandwidth = None, \
         net_outbound_bandwidth = None, net_inbound_bandwidth = None)

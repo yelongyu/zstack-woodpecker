@@ -35,7 +35,7 @@ def test():
     zone_avail_mem1 = test_lib.lib_get_cpu_memory_capacity(zone_uuids = [zone_uuid]).availableMemory
     #unit is KB
     new_offering1 = test_lib.lib_create_instance_offering(cpuNum = 1, \
-            cpuSpeed = 16, memorySize = 536870912, name = 'new_instance1')
+            memorySize = 536870912, name = 'new_instance1')
 
     test_obj_dict.add_instance_offering(new_offering1)
     new_offering_uuid = new_offering1.uuid
@@ -48,7 +48,7 @@ def test():
     vm.stop()
 
     new_offering2 = test_lib.lib_create_instance_offering(cpuNum = 1, \
-            cpuSpeed = 16, memorySize = 1073741824, name = 'new_instance2')
+            memorySize = 1073741824, name = 'new_instance2')
 
     test_obj_dict.add_instance_offering(new_offering2)
     new_offering_uuid = new_offering2.uuid

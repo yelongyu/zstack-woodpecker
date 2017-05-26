@@ -29,12 +29,10 @@ def test():
     test_obj_dict.add_disk_offering(data_volume_offering)
 
     cpuNum = 1
-    cpuSpeed = 16
     memorySize = 536870912
     name = 'vm-offering-iso'
     new_offering_option = test_util.InstanceOfferingOption()
     new_offering_option.set_cpuNum(cpuNum)
-    new_offering_option.set_cpuSpeed(cpuSpeed)
     new_offering_option.set_memorySize(memorySize)
     new_offering_option.set_name(name)
     new_offering = vm_ops.create_instance_offering(new_offering_option)

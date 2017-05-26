@@ -17,7 +17,7 @@
 <deployerConfig xmlns="http://zstack.org/schema/zstack">
 	<instanceOfferings>
 		<instanceOffering name="$instanceOfferingName_s"
-			description="Test" memoryCapacity="$instanceOfferingMemory_s" cpuNum="$instanceOfferingCpuNum_s" cpuSpeed="$instanceOfferingCpuSpeed_s" />
+			description="Test" memoryCapacity="$instanceOfferingMemory_s" cpuNum="$instanceOfferingCpuNum_s" />
 	</instanceOfferings>
 
 	<backupStorages>

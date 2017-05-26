@@ -73,7 +73,7 @@ def test():
 
     #create sftp server vm
     sftp_vm_offering = test_lib.lib_create_instance_offering(cpuNum = 1, \
-            cpuSpeed = 16, memorySize = 536870912, name = 'sftp_vm_instance_name', \
+            memorySize = 536870912, name = 'sftp_vm_instance_name', \
             volume_iops = None, volume_bandwidth = None, \
             net_outbound_bandwidth = vm_outbound_bandwidth, net_inbound_bandwidth = None)
     test_obj_dict.add_instance_offering(sftp_vm_offering)
@@ -101,7 +101,7 @@ def test():
 
     #create a new vm for creating image step
     vm_offering = test_lib.lib_create_instance_offering(cpuNum = 1, \
-            cpuSpeed = 16, memorySize = 536870912, name = 'image_create_test_vm', \
+            memorySize = 536870912, name = 'image_create_test_vm', \
             volume_iops = None, volume_bandwidth = None, \
             net_outbound_bandwidth = None, net_inbound_bandwidth = None)
     test_obj_dict.add_instance_offering(vm_offering)

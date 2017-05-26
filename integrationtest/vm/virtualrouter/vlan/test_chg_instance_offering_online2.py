@@ -21,10 +21,9 @@ def test():
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     l3_net_list = [l3_net_uuid]
     cpuNum = 2
-    cpuSpeed = 222
     memorySize = 666 * 1024 * 1024
     new_offering = test_lib.lib_create_instance_offering(cpuNum = cpuNum,\
-            cpuSpeed = cpuSpeed, memorySize = memorySize)
+            memorySize = memorySize)
     test_obj_dict.add_instance_offering(new_offering)
     new_offering_uuid = new_offering.uuid
 
@@ -34,7 +33,7 @@ def test():
     cpuNum = 1
     memorySize = 222 * 1024 * 1024
     new_offering2 = test_lib.lib_create_instance_offering(cpuNum = cpuNum,\
-            cpuSpeed = cpuSpeed, memorySize = memorySize)
+            memorySize = memorySize)
     test_obj_dict.add_instance_offering(new_offering2)
     new_offering_uuid2 = new_offering2.uuid
 
@@ -43,7 +42,7 @@ def test():
     cpuNum = 1
     memorySize = 444 * 1024 * 1024
     new_offering3 = test_lib.lib_create_instance_offering(cpuNum = cpuNum,\
-            cpuSpeed = cpuSpeed, memorySize = memorySize)
+            memorySize = memorySize)
     test_obj_dict.add_instance_offering(new_offering3)
     new_offering_uuid3 = new_offering3.uuid
     vm.change_instance_offering(new_offering_uuid3)

@@ -18,7 +18,7 @@ interval = 0.5
 
 def test():
     new_offering = test_lib.lib_create_instance_offering(cpuNum = 1,\
-            cpuSpeed = 111, memorySize = 1024 * 1024 * 1024)
+            memorySize = 1024 * 1024 * 1024)
     test_obj_dict.add_instance_offering(new_offering)
     vm = test_stub.create_vm(vm_name = 'ckvmoffering-u16-64', image_name = "imageName_i_u16", instance_offering_uuid=new_offering.uuid)
     test_obj_dict.add_vm(vm)

@@ -64,13 +64,11 @@
     <instanceOffering name="$instanceOfferingName_s"
       description="small install offering" 
       memoryCapacity="$instanceOfferingMemory_s" 
-      cpuNum="$instanceOfferingCpuNum_s" 
-      cpuSpeed="$instanceOfferingCpuSpeed_s" />
+      cpuNum="$instanceOfferingCpuNum_s" />
     <instanceOffering name="$instanceOfferingName_win"
       description="windows instance offering" 
       memoryCapacity="$instanceOfferingMemory_win" 
-      cpuNum="$instanceOfferingCpuNum_win" 
-      cpuSpeed="$instanceOfferingCpuSpeed_win" />
+      cpuNum="$instanceOfferingCpuNum_win" />
   </instanceOfferings>
 
   <backupStorages>

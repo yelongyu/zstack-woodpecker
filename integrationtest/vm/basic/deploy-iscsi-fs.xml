@@ -64,8 +64,7 @@
     <instanceOffering name="$instanceOfferingName_s"
       description="small install offering" 
       memoryCapacity="$instanceOfferingMemory_s" 
-      cpuNum="$instanceOfferingCpuNum_s" 
-      cpuSpeed="$instanceOfferingCpuSpeed_s" />
+      cpuNum="$instanceOfferingCpuNum_s" /> 
   </instanceOfferings>
 
   <backupStorages>

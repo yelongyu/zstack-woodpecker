@@ -35,8 +35,7 @@
   </nodes>
   <instanceOfferings>
     <instanceOffering name="$instanceOfferingName"
-      description="Test" memoryCapacity="$instanceOfferingMemory" cpuNum="$instanceOfferingCpuNum"
-      cpuSpeed="$instanceOfferingCpuSpeed" />
+      description="Test" memoryCapacity="$instanceOfferingMemory" cpuNum="$instanceOfferingCpuNum" />
   </instanceOfferings>
 
   <backupStorages>

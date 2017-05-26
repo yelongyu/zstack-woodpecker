@@ -142,12 +142,12 @@ def test():
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
 
     cpuNum = 5
-    cpuSpeed = 16
+    #cpuSpeed = 16
     memorySize = 536870912
     name = 'vm-offering-allocator-strategy'
     new_offering_option = test_util.InstanceOfferingOption()
     new_offering_option.set_cpuNum(cpuNum)
-    new_offering_option.set_cpuSpeed(cpuSpeed)
+    #new_offering_option.set_cpuSpeed(cpuSpeed)
     new_offering_option.set_memorySize(memorySize)
     new_offering_option.set_name(name)
     new_offering = vm_ops.create_instance_offering(new_offering_option)

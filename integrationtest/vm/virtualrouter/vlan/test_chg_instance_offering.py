@@ -19,10 +19,9 @@ def test():
     test_obj_dict.add_vm(vm)
 
     cpuNum = 2
-    cpuSpeed = 222
     memorySize = 666 * 1024 * 1024
     new_offering = test_lib.lib_create_instance_offering(cpuNum = cpuNum,\
-            cpuSpeed = cpuSpeed, memorySize = memorySize)
+            memorySize = memorySize)
 
     test_obj_dict.add_instance_offering(new_offering)
     new_offering_uuid = new_offering.uuid
@@ -34,10 +33,9 @@ def test():
     vm.reboot()
     vm.check()
     cpuNum = 1
-    cpuSpeed = 111
     memorySize = 555 * 1024 * 1024
     new_offering = test_lib.lib_create_instance_offering(cpuNum = cpuNum,\
-            cpuSpeed = cpuSpeed, memorySize = memorySize)
+            memorySize = memorySize)
 
     test_obj_dict.add_instance_offering(new_offering)
     new_offering_uuid = new_offering.uuid

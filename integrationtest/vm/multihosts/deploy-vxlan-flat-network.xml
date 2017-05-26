@@ -79,7 +79,7 @@
         description="Test" 
         memoryCapacity="$instanceOfferingMemory_s" 
         cpuNum="$instanceOfferingCpuNum_s"
-        cpuSpeed="$instanceOfferingCpuSpeed_s" />
+        />
     </instanceOfferings>
   
     <backupStorages>

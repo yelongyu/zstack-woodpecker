@@ -26,16 +26,15 @@ def test():
 
     vm.check()
     cpuNum = 2
-    cpuSpeed = 222
     memorySize = 666 * 1024 * 1024
     new_offering = test_lib.lib_create_instance_offering(cpuNum = cpuNum,\
-            cpuSpeed = cpuSpeed, memorySize = memorySize)
+            memorySize = memorySize)
 
     test_obj_dict.add_instance_offering(new_offering)
     new_offering_uuid = new_offering.uuid
 
     new_offering2 = test_lib.lib_create_instance_offering(cpuNum = cpuNum,\
-            cpuSpeed = cpuSpeed, memorySize = memorySize)
+            memorySize = memorySize)
     test_obj_dict.add_instance_offering(new_offering2)
     new_offering_uuid2 = new_offering2.uuid
 
