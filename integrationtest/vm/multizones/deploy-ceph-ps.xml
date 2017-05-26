@@ -83,7 +83,6 @@
     </virtualRouterOffering>
     <virtualRouterOffering name="$virtualRouterOfferingName_s2"
       memoryCapacity="$virtualRouterOfferingMemory_s" 
-      cpuSpeed="$virtualRouterOfferingCpuSpeed_s" 
       cpuNum="$virtualRouterOfferingCpuNum_s" isDefault="true">
       <zoneRef>$zoneName2</zoneRef>
       <managementL3NetworkRef>$l3PublicNetworkName2</managementL3NetworkRef>
