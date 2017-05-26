@@ -136,7 +136,7 @@ def check_available_cpu_mem(zone_uuid):
 
 def check_window_vm_internal_cpu_mem(vm):
     vm_ip = vm.get_vm().vmNics[0].ip
-    test_lib.lib_wait_target_up(vm_ip, '23', 360)
+    test_lib.lib_wait_target_up(vm_ip, '23', 720)
     vm_username = os.environ.get('winImageUsername')
     vm_password = os.environ.get('winImagePassword')
     tn=telnetlib.Telnet(vm_ip)
@@ -197,12 +197,16 @@ def wait_until_vm_reachable(vm, timeout=120):
 
 class CapacityCheckerContext(object):
 
-    def __init__(self, vm, cpu_change, mem_change):
+    def __init__(self, vm, cpu_change, mem_change, shutdown=False, window=False):
         self.vm = vm
-        self.cpu_change = cpu_change
         assert cpu_change >= 0
-        self.mem_change = mem_change
         assert mem_change >= 0
+        assert isinstance(shutdown, bool)
+        assert isinstance(window, bool)
+        self.cpu_change = cpu_change
+        self.mem_change = mem_change
+        self.shutdown = shutdown
+        self.window = window
         self.mem_aligned_change = None
         self.available_cpu_before = None
         self.available_memory_before = None
@@ -216,6 +220,7 @@ class CapacityCheckerContext(object):
         self.vm_outer_mem_after = None
         self.vm_internal_cpu_after = None
         self.vm_internal_mem_after = None
+        self.disable_internal_check = False
 
     def __enter__(self):
         test_util.test_logger("CPU_CHANGE={}, MEM_CHANGE={}".format(self.cpu_change, self.mem_change))
@@ -254,8 +259,9 @@ class CapacityCheckerContext(object):
                                      ))
         assert self.vm_outer_cpu_before == self.vm_outer_cpu_after - self.cpu_change
         assert self.vm_outer_mem_before == self.vm_outer_mem_after - self.mem_aligned_change
-        assert self.vm_internal_cpu_before == self.vm_internal_cpu_after - self.cpu_change
-        assert self.vm_internal_mem_before == self.vm_internal_mem_after - self.mem_aligned_change/1024/1024
+        if not self.disable_internal_check:
+            assert self.vm_internal_cpu_before == self.vm_internal_cpu_after - self.cpu_change
+            assert self.vm_internal_mem_before == self.vm_internal_mem_after - self.mem_aligned_change/1024/1024
         assert self.available_cpu_before == self.available_cpu_after + self.cpu_change
         assert self.available_memory_after + int(self.mem_aligned_change/float(test_lib.lib_get_provision_memory_rate())) \
                in range(self.available_memory_before-2, self.available_memory_before+2)
@@ -263,12 +269,14 @@ class CapacityCheckerContext(object):
     def get_capacity_before_action(self):
         (self.available_cpu_before, self.available_memory_before,
          self.vm_outer_cpu_before, self.vm_outer_mem_before,
-         self.vm_internal_cpu_before, self.vm_internal_mem_before) = check_cpu_mem(self.vm)
+         self.vm_internal_cpu_before, self.vm_internal_mem_before) = check_cpu_mem(self.vm, shutdown=self.shutdown,
+                                                                                   window=self.window)
 
     def get_capacity_after_action(self):
         (self.available_cpu_after, self.available_memory_after,
          self.vm_outer_cpu_after, self.vm_outer_mem_after,
-         self.vm_internal_cpu_after, self.vm_internal_mem_after) = check_cpu_mem(self.vm)
+         self.vm_internal_cpu_after, self.vm_internal_mem_after) = check_cpu_mem(self.vm, shutdown=self.shutdown,
+                                                                                 window=self.window)
 
     def calculate_mem_aligned_change(self):
         mem_change = self.mem_change/1024/1024
