@@ -6,6 +6,7 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import time
+import random
 
 _config_ = {
         'timeout' : 1000,
@@ -30,7 +31,7 @@ def test():
 
     test_util.test_dsc("STEP3: Hot Plugin CPU and Memory and check capacity")
     cpu_change = 0
-    mem_change = 126*1024*1024
+    mem_change = random.randint(1,500)*1024*1024
 
     with test_stub.CapacityCheckerContext(vm, cpu_change, mem_change):
         vm_ops.update_vm(vm.get_vm().uuid, vm_instanc_offering.cpuNum+cpu_change,
