@@ -218,6 +218,7 @@ class CapacityCheckerContext(object):
         self.vm_internal_mem_after = None
 
     def __enter__(self):
+        test_util.test_logger("CPU_CHANGE={}, MEM_CHANGE={}".format(self.cpu_change, self.mem_change))
         self.get_capacity_before_action()
         return self
 
@@ -232,6 +233,25 @@ class CapacityCheckerContext(object):
     def check_capacity(self):
         #test_util.test_logger("{},{},{}".format(self.available_memory_before,self.available_memory_after,
         #                                        self.mem_aligned_change))
+        test_util.test_logger("vm_outer_cpu_before={}\n "
+                              "vm_outer_cpu_after={}\n "
+                              "vm_outer_mem_before={}\n "
+                              "vm_outer_mem_after={}\n "
+                              "vm_internal_cpu_before={}\n "
+                              "vm_internal_cpu_after={}\n "
+                              "vm_internal_mem_before={}\n "
+                              "vm_internal_mem_after={}\n "
+                              "available_cpu_before={}\n "
+                              "available_cpu_after={}\n "
+                              "available_memory_before={}\n "
+                              "available_memory_after={}".
+                              format(self.vm_outer_cpu_before, self.vm_outer_cpu_after,
+                                     self.vm_outer_mem_before, self.vm_outer_mem_after,
+                                     self.vm_internal_cpu_before, self.vm_internal_cpu_after,
+                                     self.vm_internal_mem_before, self.vm_internal_mem_after,
+                                     self.available_cpu_before, self.available_cpu_after,
+                                     self.available_memory_before, self.available_memory_after,
+                                     ))
         assert self.vm_outer_cpu_before == self.vm_outer_cpu_after - self.cpu_change
         assert self.vm_outer_mem_before == self.vm_outer_mem_after - self.mem_aligned_change
         assert self.vm_internal_cpu_before == self.vm_internal_cpu_after - self.cpu_change
