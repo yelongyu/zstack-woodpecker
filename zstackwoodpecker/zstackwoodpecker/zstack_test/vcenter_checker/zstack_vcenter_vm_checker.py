@@ -425,9 +425,9 @@ class zstack_vcenter_vm_offering_checker(checker_header.TestChecker):
             test_util.test_logger('Check result: vm resource is not synced with instance offering .' % vm.uuid)
             return self.judge(False)
 
-        if not _do_check(vm.cpuSpeed, instance_offering.cpuSpeed, 'CPU speed'):
-            test_util.test_logger('Check result: vm resource is not synced with instance offering .' % vm.uuid)
-            return self.judge(False)
+        #if not _do_check(vm.cpuSpeed, instance_offering.cpuSpeed, 'CPU speed'):
+        #    test_util.test_logger('Check result: vm resource is not synced with instance offering .' % vm.uuid)
+        #    return self.judge(False)
 
         if not _do_check(vm.memorySize, instance_offering.memorySize, 'memory'):
             test_util.test_logger('Check result: vm resource is not synced with instance offering .' % vm.uuid)

@@ -4587,13 +4587,14 @@ def lib_limit_vm_network_bandwidth(instance_offering_uuid, bandwidth, \
 
 
 #--------instance offering--------
-def lib_create_instance_offering(cpuNum = 1, cpuSpeed = 16, \
+#def lib_create_instance_offering(cpuNum = 1, cpuSpeed = 16, \
+def lib_create_instance_offering(cpuNum = 1, \
         memorySize = 536870912, name = 'new_instance', \
         volume_iops = None, volume_bandwidth = None, \
         net_outbound_bandwidth = None, net_inbound_bandwidth = None):
     new_offering_option = test_util.InstanceOfferingOption()
     new_offering_option.set_cpuNum(cpuNum)
-    new_offering_option.set_cpuSpeed(cpuSpeed)
+    #new_offering_option.set_cpuSpeed(cpuSpeed)
     new_offering_option.set_memorySize(memorySize)
     new_offering_option.set_name(name)
     new_offering = vm_ops.create_instance_offering(new_offering_option)
@@ -4835,7 +4836,8 @@ def lib_find_in_remote_management_server_log(node_ip, node_username, node_passwo
         
     return False
 
-def lib_update_instance_offering(offering_uuid, cpuNum = None, cpuSpeed = None, \
+#def lib_update_instance_offering(offering_uuid, cpuNum = None, cpuSpeed = None, \
+def lib_update_instance_offering(offering_uuid, cpuNum = None, \
         memorySize = None, name = None, \
         volume_iops = None, volume_bandwidth = None, \
         net_outbound_bandwidth = None, net_inbound_bandwidth = None):

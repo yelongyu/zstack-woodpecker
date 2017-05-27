@@ -327,7 +327,7 @@ def add_instance_offering_config(root_xml, session_uuid = None):
         set_xml_item_attr(io_xml, 'description', user_io.description)
         set_xml_item_attr(io_xml, 'memoryCapacity', user_io.memorySize)
         set_xml_item_attr(io_xml, 'cpuNum', user_io.cpuNum)
-        set_xml_item_attr(io_xml, 'cpuSpeed', user_io.cpuSpeed)
+        #set_xml_item_attr(io_xml, 'cpuSpeed', user_io.cpuSpeed)
 
     #add virtual router instance offering
     cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
@@ -338,7 +338,7 @@ def add_instance_offering_config(root_xml, session_uuid = None):
         set_xml_item_attr(io_xml, 'description', vr_io.description)
         set_xml_item_attr(io_xml, 'memoryCapacity', vr_io.memorySize)
         set_xml_item_attr(io_xml, 'cpuNum', vr_io.cpuNum)
-        set_xml_item_attr(io_xml, 'cpuSpeed', vr_io.cpuSpeed)
+        #set_xml_item_attr(io_xml, 'cpuSpeed', vr_io.cpuSpeed)
         set_xml_item_attr(io_xml, 'isDefault', vr_io.isDefault)
         cond = res_ops.gen_query_conditions('uuid', '=', \
                 vr_io.publicNetworkUuid)

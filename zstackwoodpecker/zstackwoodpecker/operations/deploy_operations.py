@@ -1344,7 +1344,7 @@ def add_instance_offering(scenarioConfig, scenarioFile, deployConfig, session_uu
         action.name = instance_offering_xml_obj.name_
         action.description = instance_offering_xml_obj.description__
         action.cpuNum = instance_offering_xml_obj.cpuNum_
-        action.cpuSpeed = instance_offering_xml_obj.cpuSpeed_
+        #action.cpuSpeed = instance_offering_xml_obj.cpuSpeed_
         if instance_offering_xml_obj.memorySize__:
             action.memorySize = sizeunit.get_size(instance_offering_xml_obj.memorySize_)
         elif instance_offering_xml_obj.memoryCapacity_:
@@ -1398,7 +1398,7 @@ def add_virtual_router(scenarioConfig, scenarioFile, deployConfig, session_uuid,
         action.name = i.name_
         action.description = i.description__
         action.cpuNum = i.cpuNum_
-        action.cpuSpeed = i.cpuSpeed_
+        #action.cpuSpeed = i.cpuSpeed_
         if i.memorySize__:
             action.memorySize = sizeunit.get_size(i.memorySize_)
         elif i.memoryCapacity_:

@@ -597,7 +597,7 @@ class DiskOfferingOption(DataOption):
 class InstanceOfferingOption(DataOption):
     def __init__(self):
         self.cpuNum = None
-        self.cpuSpeed = None
+        #self.cpuSpeed = None
         self.memorySize = None
         self.allocatorStrategy = None
         self.type = None
@@ -609,11 +609,11 @@ class InstanceOfferingOption(DataOption):
     def get_cpuNum(self):
         return self.cpuNum
 
-    def set_cpuSpeed(self, cpuSpeed):
-        self.cpuSpeed = cpuSpeed
+    #def set_cpuSpeed(self, cpuSpeed):
+    #    self.cpuSpeed = cpuSpeed
 
-    def get_cpuSpeed(self):
-        return self.cpuSpeed
+    #def get_cpuSpeed(self):
+    #    return self.cpuSpeed
 
     def set_memorySize(self, memorySize):
         self.memorySize = memorySize
