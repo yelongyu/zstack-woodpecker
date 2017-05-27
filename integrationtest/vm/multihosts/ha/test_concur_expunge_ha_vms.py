@@ -9,6 +9,7 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.operations.vm_operations as vm_ops
+import zstackwoodpecker.operations.ha_operations as ha_ops
 import time
 import os
 import threading
@@ -30,6 +31,7 @@ def create_vm_wrapper(i, vm_creation_option):
         vm_creation_option.set_name("vm-%s" %(i))
         vm.set_creation_option(vm_creation_option)
         vm.create()
+        ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
         vms.append(vm)
     except:
         exec_info.append("vm-%s" %(i))
