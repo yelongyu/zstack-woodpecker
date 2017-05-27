@@ -37,6 +37,8 @@
             </l3Network>
           </l3Networks>
           <hostRef>$hostName2</hostRef>
+	  <backupStorageRef type="sftp">$sftpBackupStorageName</backupStorageRef>
+	  <primaryStorageRef type="local" url="$localPrimaryStorageUrl">$localPrimaryStorageName</primaryStorageRef>
         </vm>
         <vm name="$vmName3" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
@@ -48,7 +50,9 @@
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
           </l3Networks>
-          <hostRef>$hostName3</hostRef>
+	  <hostRef>$hostName3</hostRef>
+	  <backupStorageRef type="sftp">$sftpBackupStorageName</backupStorageRef>
+	  <primaryStorageRef type="local" url="$localPrimaryStorageUrl">$localPrimaryStorageName</primaryStorageRef>
         </vm>
         <vm name="$vmName4" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
@@ -61,7 +65,8 @@
             </l3Network>
           </l3Networks>
           <hostRef>$hostName4</hostRef>
-	  <backupStorageRef type="sftp">$sftpBackupStorageName2</backupStorageRef>
+	  <backupStorageRef type="sftp">$sftpBackupStorageName</backupStorageRef>
+	  <primaryStorageRef type="local" url="$localPrimaryStorageUrl">$localPrimaryStorageName</primaryStorageRef>
         </vm>
       </vms>
     </host>
