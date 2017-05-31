@@ -764,8 +764,22 @@ def lib_execute_shell_script_in_vm(vm_inv, script_file, l3_uuid=None, timeout=SS
     '''
     lib_set_vm_host_l2_ip(vm_inv)
     host_ip = lib_find_host_by_vm(vm_inv).managementIp
-    h_username = os.environ.get('hostUsername')
-    h_password = os.environ.get('hostPassword')
+    target_host_in_plan = None
+    for host_in_plan in lib_get_all_hosts_from_plan():
+        if host_in_plan.managementIp_ == host_ip:
+            target_host_in_plan = host_in_plan
+            break
+    if target_host_in_plan != None:
+        h_username = target_host_in_plan.username_
+        h_password = target_host_in_plan.password_
+        if hasattr(target_host_in_plan, 'port_'):
+            h_port = int(target_host_in_plan.port_)
+        else:
+            h_port = 22
+    else:
+        h_username = os.environ.get('hostUsername')
+        h_password = os.environ.get('hostPassword')
+        h_port = 22
 
     temp_script = '/tmp/%s' % uuid.uuid1().get_hex()
     if not lib_scp_file_to_vm(vm_inv, script_file, temp_script, l3_uuid):
@@ -791,7 +805,7 @@ def lib_execute_shell_script_in_vm(vm_inv, script_file, l3_uuid=None, timeout=SS
 
     print rsp.result
     #cleanup temporay script in host.
-    ssh.execute('rm -f %s' % temp_script, host_ip, h_username, h_password)
+    ssh.execute('rm -f %s' % temp_script, host_ip, h_username, h_password, port=h_port)
     return rsp
 
 def lib_execute_command_in_vm(vm, cmd, l3_uuid=None):

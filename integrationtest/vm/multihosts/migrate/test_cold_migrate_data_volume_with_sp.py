@@ -29,7 +29,7 @@ def test():
     volume_uuid = volume.volume.uuid
     
     test_util.test_dsc('Create vm and check')
-    vm = test_stub.create_vr_vm('migrate_volume_vm', 'imageName_s', 'l3VlanNetwork2')
+    vm = test_stub.create_vr_vm('migrate_volume_vm', 'imageName_net', 'l3VlanNetwork2')
     test_obj_dict.add_vm(vm)
     vm.check()
     vm_uuid = vm.vm.uuid
