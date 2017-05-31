@@ -20,6 +20,8 @@ test_stub = test_lib.lib_get_test_stub()
 def test():
     global vm
     vm = test_stub.create_vm('multicluster_basic_vm', os.environ.get('imageName_s'), os.environ.get('l3VlanNetworkName1'))
+
+    test_lib.lib_set_allow_live_migration_local_storage('true')
     test_stub.migrate_vm_to_differnt_cluster(vm)
 
     vm.check()
