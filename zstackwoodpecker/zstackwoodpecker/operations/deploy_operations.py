@@ -426,7 +426,9 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
         action.type = inventory.SIMULATOR_PRIMARY_STORAGE_TYPE
         action.zoneUuid = zinv.uuid
         action.totalCapacity = sizeunit.get_size(pr.totalCapacity_)
+        action.totalPhysicalCapacity = sizeunit.get_size(pr.totalCapacity_)
         action.availableCapacity = sizeunit.get_size(pr.availableCapacity_)
+        action.availablePhysicalCapacity = sizeunit.get_size(pr.availableCapacity_)
         return action
 
     def _deploy_primary_storage(zone):
@@ -791,22 +793,29 @@ def add_cluster(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluste
         if zone_name and zone_name != zone.name_:
             continue 
 
-        zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, name=zone_name)
-        zinv = get_first_item_from_list(zinvs, 'Zone', zone_name, 'Cluster')
+        if zone.duplication__ == None:
+            zone_duplication = 1
+        else:
+            zone_duplication = int(zone.duplication__)
 
-        for cluster in xmlobject.safe_list(zone.clusters.cluster):
-            if cluster_name and cluster_name != cluster.name_:
-                continue
-
-            if cluster.duplication__ == None:
-                cluster_duplication = 1
-            else:
-                cluster_duplication = int(cluster.duplication__)
+        for zone_ref in range(zone_duplication):
+            for cluster in xmlobject.safe_list(zone.clusters.cluster):
+                if cluster_name and cluster_name != cluster.name_:
+                    continue
     
-            for cluster_ref in range(cluster_duplication):
-                cinvs = res_ops.get_resource(res_ops.CLUSTER, session_uuid, name=cluster.name_)
-                cinv = get_first_item_from_list(cinvs, 'Cluster', cluster.name_, '_add_l2VxlanNetwork')
-                _add_l2VxlanNetwork(zinv.uuid, cluster, cinv.uuid)
+                if cluster.duplication__ == None:
+                    cluster_duplication = 1
+                else:
+                    cluster_duplication = int(cluster.duplication__)
+        
+                for cluster_ref in range(cluster_duplication):
+                    zone_name = generate_dup_name(zone.name_, zone_ref, 'z')
+                    zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, name=zone_name)
+                    zinv = get_first_item_from_list(zinvs, 'Zone', zone_name, 'Cluster')
+
+                    cinvs = res_ops.get_resource(res_ops.CLUSTER, session_uuid, name=cluster.name_)
+                    cinv = get_first_item_from_list(cinvs, 'Cluster', cluster.name_, '_add_l2VxlanNetwork')
+                    _add_l2VxlanNetwork(zinv.uuid, cluster, cinv.uuid)
 
 
 def get_node_from_scenario_file(nodeRefName, scenarioConfig, scenarioFile, deployConfig):
