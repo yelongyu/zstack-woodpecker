@@ -7,6 +7,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
+import zstackwoodpecker.operations.image_operations as image_ops
 import apibinding.inventory as inventory
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.header.host as host_header
@@ -32,32 +33,37 @@ def test():
     if not bss:
         test_util.test_skip("not find available backup storage. Skip test")
 
-    image_option = test_util.ImageOption()
-    image_option.set_name('use_crt_data_vol')
-    image_option.set_format('qcow2')
-    image_option.set_mediaType('RootVolumeTemplate')
-    image_option.set_url(os.environ.get('imageUrl_s'))
-    image_option.set_backup_storage_uuid_list([bss[0].uuid])
-    image_obj = zstack_image_header.ZstackTestImage()
-    image_obj.set_creation_option(image_option)
+    volume_creation_option = test_util.VolumeOption()
+    test_util.test_dsc('Create volume and check')
+    disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
+    volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
+    volume1 = test_stub.create_volume(volume_creation_option)
+    test_obj_dict.add_volume(volume1)
+    volume1.check()
+    volume_uuid = volume1.volume.uuid
 
-    volume = test_lib.lib_create_data_volume_from_image(image_obj)
-    test_obj_dict.add_volume(volume)
-    volume.check()
-    volume_uuid = volume.volume.uuid
-    
     test_util.test_dsc('Create vm and check')
     vm = test_stub.create_vr_vm('migrate_volume_vm', 'imageName_net', 'l3VlanNetwork2')
     test_obj_dict.add_vm(vm)
     vm.check()
     vm_uuid = vm.vm.uuid
-    
+
+    volume1.attach(vm)
+    volume1.detach(vm_uuid)
+
+    vm.stop()
+    image_obj = volume1.create_template([bss[0].uuid])
+    vm.start()
+    host_uuid = vm.vm.hostUuid
+    ps = test_lib.lib_get_primary_storage_by_uuid(vm.get_vm().allVolumes[0].primaryStorageUuid)
+    volume2 = image_obj.create_data_volume(ps.uuid, 'volumeName', host_uuid)
+    test_obj_dict.add_volume(volume2)
+    volume2.check()
+    volume_uuid = volume2.volume.uuid
+
     ps = test_lib.lib_get_primary_storage_by_uuid(vm.get_vm().allVolumes[0].primaryStorageUuid)
     if ps.type != inventory.LOCAL_STORAGE_TYPE:
         test_util.test_skip('Skip test on non-localstorage')
-    
-    volume.attach(vm)
-    volume.detach(vm_uuid)
 
     snapshots = test_obj_dict.get_volume_snapshot(volume_uuid)
     snapshots.set_utility_vm(vm)
@@ -72,9 +78,9 @@ def test():
     vol_ops.migrate_volume(volume_uuid, target_host_uuid)
 
     test_lib.lib_error_cleanup(test_obj_dict)
-    test_util.test_pass('Cold migrate Data Volume Test Success')
+    test_util.test_pass('Cold migrate Data Volume from Template with Snapshot Test Success')
 
 #Will be called only if exception happens in test().
-def error_cleanup():
-    global test_obj_dict
-    test_lib.lib_error_cleanup(test_obj_dict)
+    def error_cleanup():
+
+
