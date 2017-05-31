@@ -15,6 +15,8 @@ import zstackwoodpecker.operations.scenario_operations as sce_ops
 import zstackwoodpecker.operations.deploy_operations as dpy_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
+import zstackwoodpecker.operations.ha_operations as ha_ops
+
 
 def wait_for_mn_ha_ready(scenarioConfig, scenarioFile):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
@@ -358,3 +360,8 @@ def create_basic_vm(disk_offering_uuids=None, session_uuid = None):
     l3_name = os.environ.get('l3PublicNetworkName')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     return create_vm([l3_net_uuid], image_uuid, 'basic_no_vlan_vm', disk_offering_uuids, session_uuid = session_uuid)
+
+def create_ha_vm(disk_offering_uuids=None, session_uuid = None):
+    vm = create_basic_vm(disk_offering_uuids=disk_offering_uuids, session_uuid=session_uuid)
+    ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
+    return vm
