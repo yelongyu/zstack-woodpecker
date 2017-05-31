@@ -1,5 +1,7 @@
 '''
+
 New Integration test for cold migration of data volume with snapshot between hosts.
+
 @author: SyZhao
 '''
 
@@ -54,7 +56,7 @@ def test():
     vol_ops.migrate_volume(volume_uuid, target_host_uuid)
 
     test_lib.lib_error_cleanup(test_obj_dict)
-    test_util.test_pass('Cold migrate Data Volume Test Success')
+    test_util.test_pass('Cold migrate Data Volume with Snapshot Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
