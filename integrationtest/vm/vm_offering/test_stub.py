@@ -150,10 +150,10 @@ def check_window_vm_internal_cpu_mem(vm):
     tn.write("wmic computersystem get TotalPhysicalMemory\r\n")
     vm_meminfo=tn.read_until(vm_username+">")
     tn.close()
-    test_util.test_logger(vm_cpuinfo.strip().split()[-2])
-    test_util.test_logger(vm_meminfo.strip().split()[-2])
-    return int(vm_cpuinfo.strip().split()[-2]), int(vm_meminfo.strip().split()[-2])/1024/1024
-
+    number_list = vm_cpuinfo.split('Cores')[-1].split()[:-1]
+    cpu_number = sum(int(item) for item in number_list)
+    memory_size = int(vm_meminfo.strip().split()[-2])/1024/1024
+    return cpu_number, memory_size
 
 def check_vm_internal_cpu_mem(vm, shutdown, window):
     if window:
