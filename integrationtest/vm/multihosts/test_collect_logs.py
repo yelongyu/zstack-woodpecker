@@ -47,6 +47,19 @@ def find_mevoco_log_folder_name():
             print "MEVOCO_LOG_PATH=%s" %(MEVOCO_LOG_PATH)
 
 def test():
+    #str = str(os.listdir('/home'))
+    #if 'scenario' in str:
+    #    test_util.test_skip('Not available environment to run this case')
+
+    path = "/home"
+    pathlist = os.listdir(path)
+    for path in pathlist:
+        if re.findall(r'\d+.\d+.\d+.\d+', path):
+            target_path = path
+
+    if os.path.exists('/home/' + target_path + '/scenario-file.xml'):
+        test_util.test_skip('Not available environment to run this case')
+
     global MEVOCO_LOG_FOLDER, MEVOCO_LOG_PATH, MEVOCO_LOG_FOLDER_PATTERN
     #if not test_lib.lib_check_version_is_mevoco():
     #    MEVOCO_LOG_FOLDER = r"collect-log-zstack*"
