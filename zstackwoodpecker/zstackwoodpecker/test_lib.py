@@ -4181,7 +4181,9 @@ into robot_test_obj.exclusive_actions_list.')
             (next_action, ready_volume.get_volume().uuid, \
             target_vm.get_vm().uuid))
 
-        if not lib_check_vm_live_migration_cap(target_vm.vm):
+        root_volume = lib_get_root_volume(target_vm.get_vm())
+        ps = lib_get_primary_storage_by_uuid(root_volume.primaryStorageUuid)
+        if not lib_check_vm_live_migration_cap(target_vm.vm) or ps.type == inventory.LOCAL_STORAGE_TYPE:
             ls_ref = lib_get_local_storage_reference_information(ready_volume.get_volume().uuid)
             if ls_ref:
                 volume_host_uuid = ls_ref[0].hostUuid
