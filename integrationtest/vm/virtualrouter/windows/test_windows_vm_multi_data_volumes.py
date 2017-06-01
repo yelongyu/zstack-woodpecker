@@ -17,8 +17,8 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
 def test():
-    cpuNum = 2
-    memorySize = 512 * 1024 * 1024
+    cpuNum = 6
+    memorySize = 2048 * 1024 * 1024
     new_offering = test_lib.lib_create_instance_offering(cpuNum = cpuNum,\
             memorySize = memorySize)
 
@@ -79,7 +79,7 @@ def test():
         test_util.test_fail('Reboot Windows VM with Multi Data volumes fail')
 
     vm_ip = vm.get_vm().vmNics[0].ip
-    test_lib.lib_wait_target_up(vm_ip, '23', 360)
+    test_lib.lib_wait_target_up(vm_ip, '23', 720)
     vm_username = os.environ.get('winImageUsername')
     vm_password = os.environ.get('winImagePassword')
     tn=telnetlib.Telnet(vm_ip)
