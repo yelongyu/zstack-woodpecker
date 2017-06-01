@@ -55,7 +55,7 @@ def test():
     test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd2, 60)
 
     vm_ip = vm.get_vm().vmNics[0].ip
-    test_lib.lib_wait_target_up(vm_ip, '23', 720)
+    test_lib.lib_wait_target_up(vm_ip, '23', 1200)
     vm_username = os.environ.get('winImageUsername')
     vm_password = os.environ.get('winImagePassword')
     tn=telnetlib.Telnet(vm_ip)
@@ -79,7 +79,7 @@ def test():
         test_util.test_fail('Reboot Windows VM with Multi Data volumes fail')
 
     vm_ip = vm.get_vm().vmNics[0].ip
-    test_lib.lib_wait_target_up(vm_ip, '23', 720)
+    test_lib.lib_wait_target_up(vm_ip, '23', 1200)
     vm_username = os.environ.get('winImageUsername')
     vm_password = os.environ.get('winImagePassword')
     tn=telnetlib.Telnet(vm_ip)
