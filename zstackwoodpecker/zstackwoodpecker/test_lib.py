@@ -3959,7 +3959,11 @@ def lib_vm_random_operation(robot_test_obj):
 
         #Thirdly, check VM's volume status. E.g. if could add a new volume.
         vm_volumes = test_dict.get_volume_list(target_vm.get_vm().uuid)
-        vm_volume_number = len(vm_volumes)
+        if vm_volumes:
+	    vm_volume_number = len(vm_volumes)
+	else:
+	    vm_volume_number = 0
+
         if vm_volume_number > 0 and vm_volume_number < 24:
             test_stage_obj.set_vm_volume_state(test_stage.vm_volume_att_not_full)
             attached_volume = random.choice(vm_volumes)
