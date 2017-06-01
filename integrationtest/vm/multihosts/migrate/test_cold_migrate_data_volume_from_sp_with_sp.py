@@ -1,5 +1,7 @@
 '''
+
 New Integration test for cold migration of data volume from snapshot with snapshot between hosts.
+
 @author: SyZhao
 '''
 
@@ -14,6 +16,7 @@ import os
 
 volume = None
 vm = None
+snapshot = None
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
@@ -35,15 +38,15 @@ def test():
     snapshots.set_utility_vm(vm)
     snapshots.create_snapshot('snapshot_for_volume')
     snapshots.check()
-    snapshot_uuid = snapshots.get_snapshot().uuid
-    volume = create_volume_from_snapshot(snapshot_uuid)
+    snapshot = snapshots.get_current_snapshot()
+    snapshot_uuid = snapshot.snapshot.uuid
+
+    volume = snapshot.create_data_volume()
+    test_obj_dict.add_volume(volume)
     volume.check()
     volume_uuid = volume.volume.uuid
 
-    volume.attach(vm)
-    volume.detach(vm_uuid)
-
-    snapshots = test_obj_dict.get_volume_snapshot(root_vol_uuid)
+    snapshots = test_obj_dict.get_volume_snapshot(volume_uuid)
     snapshots.set_utility_vm(vm)
     snapshots.create_snapshot('create_snapshot1')
     snapshots.check()
@@ -56,7 +59,7 @@ def test():
     vol_ops.migrate_volume(volume_uuid, target_host_uuid)
 
     test_lib.lib_error_cleanup(test_obj_dict)
-    test_util.test_pass('Cold migrate Data Volume Test Success')
+    test_util.test_pass('Cold migrate Data Volume from Snapshot with Snapshot Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
