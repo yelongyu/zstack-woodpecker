@@ -1,5 +1,7 @@
 '''
+
 New Integration test for cold migration of data volume from template with snapshot between hosts.
+
 @author: SyZhao
 '''
 
@@ -81,6 +83,7 @@ def test():
     test_util.test_pass('Cold migrate Data Volume from Template with Snapshot Test Success')
 
 #Will be called only if exception happens in test().
-    def error_cleanup():
-
+def error_cleanup():
+    global test_obj_dict
+    test_lib.lib_error_cleanup(test_obj_dict)
 
