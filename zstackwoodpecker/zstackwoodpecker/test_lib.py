@@ -1176,6 +1176,31 @@ def lib_get_backup_storage_host(bs_uuid):
     '''
     Get host, who has backup storage uuid.
     '''
+    def _get_backup_storage_from_scenario_file(backupStorageRefName, scenarioConfig, scenarioFile, deployConfig):
+        if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
+            return []
+    
+        ip_list = []
+        for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+            for vm in xmlobject.safe_list(host.vms.vm):
+                if xmlobject.has_element(vm, 'backupStorageRef'):
+                    if backupStorageRefName == vm.backupStorageRef.text_:
+                        with open(scenarioFile, 'r') as fd:
+                            xmlstr = fd.read()
+                            fd.close()
+                            scenario_file = xmlobject.loads(xmlstr)
+                            for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                                if s_vm.name_ == vm.name_:
+                                    if vm.backupStorageRef.type_ == 'ceph':
+                                        nic_id = get_ceph_storages_mon_nic_id(vm.backupStorageRef.text_, scenarioConfig)
+                                        if nic_id == None:
+                                            ip_list.append(s_vm.ip_)
+                                        else:
+                                            ip_list.append(s_vm.ips.ip[nic_id].ip_)
+                                    else:
+                                        ip_list.append(s_vm.ip_)
+        return ip_list
+
     session_uuid = acc_ops.login_as_admin()
     try:
         bss = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid)
@@ -1207,6 +1232,10 @@ def lib_get_backup_storage_host(bs_uuid):
     #host.managementIp = os.environ.get('sftpBackupStorageHostname')
     #host.username = os.environ.get('sftpBackupStorageUsername')
     #host.password = os.environ.get('sftpBackupStoragePassword')
+    #hostname_list = _get_backup_storage_from_scenario_file(name, scenarioConfig, scenarioFile, deployConfig)
+    hostname_list = _get_backup_storage_from_scenario_file(name, all_scenario_config, scenario_file, deploy_config)
+    if len(hostname_list) != 0:
+        host.managementIp = hostname_list[0]
     
     return host
 
