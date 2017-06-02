@@ -27,8 +27,15 @@ def update_default_gw(vm_inv, gw, eth_id):
     cmd = 'ip route del 0/0'
     if not test_lib.lib_execute_command_in_vm(vm_inv, cmd):
         test_util.test_fail("fail to set default route for testing in vm")
-    cmd = 'ip route add default via %s dev eth%s' % (gw, eth_id)
-    if not test_lib.lib_execute_command_in_vm(vm_inv, cmd):
+
+    #cmd = 'ip route add default via %s dev eth%s' % (gw, eth_id)
+    cmd0 = 'ip route add default via %s dev eth0' % (gw)
+    cmd1 = 'ip route add default via %s dev eth1' % (gw)
+    if test_lib.lib_execute_command_in_vm(vm_inv, cmd0):
+        pass
+    elif test_lib.lib_execute_command_in_vm(vm_inv, cmd1):  
+        pass
+    else:
         test_util.test_fail("fail to set default route for testing in vm")
 
 def test():
