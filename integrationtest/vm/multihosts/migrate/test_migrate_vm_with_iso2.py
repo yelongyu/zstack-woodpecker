@@ -14,6 +14,7 @@ import zstackwoodpecker.zstack_test.zstack_test_image as test_image
 import zstackwoodpecker.test_state as test_state
 import apibinding.inventory as inventory
 import zstacklib.utils.ssh as ssh
+import time
 import os
 
 vm = None
@@ -69,6 +70,7 @@ def test():
     img_ops.detach_iso(vm_uuid)
     img_ops.attach_iso(iso_uuid, vm_uuid)
 
+    time.sleep(5)
     cmd = "mount /dev/sr0 /mnt"
     exec_cmd_in_vm(vm, cmd, "Failed to mount /dev/sr0 /mnt.")
 
