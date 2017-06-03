@@ -79,6 +79,7 @@ def test():
     vm.update()
     vm.check()
     vm.start()
+    vm.check()
 
     num = 1
     while num <= 6:
