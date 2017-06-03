@@ -13,6 +13,7 @@ import zstackwoodpecker.header.host as host_header
 import zstacklib.utils.ssh as ssh
 import os
 import os.path
+import re
 
 _config_ = {
         'timeout' : 600,
