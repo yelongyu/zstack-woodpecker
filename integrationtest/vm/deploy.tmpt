@@ -224,3 +224,6 @@ virtualRouterImageUrl = http://10.1.101.1/image/zstack-vr.qcow2
 vrImageUsername = root
 vrImagePassword = password
 bootOptionPicture = /home/boot.png
+
+testIsoName = testIso                                                                                                                                                                        
+testIsoUrl = http://10.1.101.1/image/virtio-win-0.1.126.iso
