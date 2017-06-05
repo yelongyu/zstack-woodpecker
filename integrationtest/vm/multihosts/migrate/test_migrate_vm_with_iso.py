@@ -57,6 +57,7 @@ def test():
     vm.destroy()
     test_util.test_pass('Migrate VM Test Success When Attach ISO')
 
+
 #Will be called only if exception happens in test().
 def error_cleanup():
     test_lib.lib_error_cleanup(test_obj_dict)
