@@ -160,7 +160,7 @@ class zstack_kvm_virtioscsi_shareable_checker(checker_header.TestChecker):
 	test_util.test_logger('vmInstanceUuid_host.ip is %s' %host.managementIp)
         test_util.test_logger('vmInstanceUuid is %s' %volume.vmInstanceUuid)
         #xml = os.popen('virsh dumpxml %s' % volume.vmInstanceUuid)
-	xml = os.popen('sshpass -p password ssh root@%s -p %s "virsh dumpxml %s"' %(host.managementIp, host.sshPort, volume.vmInstanceUuid))
+        xml = os.popen('sshpass -p password ssh root@%s -p %s "virsh dumpxml %s"' %(host.managementIp, host.sshPort, volume.vmInstanceUuid))
         tree = ET.parse(xml)
         root = tree.getroot()
         for domain in root:
