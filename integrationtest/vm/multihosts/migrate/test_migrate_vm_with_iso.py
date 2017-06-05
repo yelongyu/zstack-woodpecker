@@ -27,14 +27,13 @@ def test():
     vm_uuid = vm_inv.uuid
 
     test_util.test_dsc('Add ISO Image')
-    #cond = res_ops.gen_query_conditions('name', '=', 'sftp') 
     bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0].uuid
 
     img_option = test_util.ImageOption()
     img_option.set_name('iso')
     img_option.set_backup_storage_uuid_list([bs_uuid])
-    os.system("echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/test.iso" % (os.environ.get('zstackInstallPath')))
-    img_option.set_url('http://%s:8080/zstack/static/test.iso' % (os.environ.get('node1Ip')))
+    testIsoUrl = os.environ.get('testIsoUrl')
+    img_option.set_url(testIsoUrl)
     image_inv = img_ops.add_iso_template(img_option)
     image = test_image.ZstackTestImage()
     image.set_image(image_inv)
