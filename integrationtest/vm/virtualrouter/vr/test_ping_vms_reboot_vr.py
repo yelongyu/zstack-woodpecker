@@ -25,10 +25,17 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
 def check_vr_reboot_record_line(vr_ip):
+    vr_type = res_ops.query_resource(res_ops.VIRTUALROUTER_VM)[0].applianceVmType
     cmd = 'last reboot|grep reboot|wc -l'
-    ret, output, stderr = ssh.execute(cmd, vr_ip, "vyos", "vrouter12#", False, 22)
+    if vr_type == "VirtualRouter":
+        ret, output, stderr = ssh.execute(cmd, vr_ip, "root", "", False, 22)
+    elif vr_type == "vrouter":
+        ret, output, stderr = ssh.execute(cmd, vr_ip, "vyos", "vrouter12#", False, 22)
+    else:
+        test_util.test_fail("vr is not expected type")
+
     if ret != 0:
-        test_util.test_fail("vr login failed")
+        test_util.test_fail("%s login failed" %(vr_type))
 
     return output
 
