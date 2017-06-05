@@ -45,7 +45,9 @@ def test():
     l3_name = os.environ.get('l3VlanNetworkName1')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     vrs = test_lib.lib_find_vr_by_l3_uuid(l3_net_uuid)
+    vr_host_ips = []
     for vr in vrs:
+        vr_host_ips.append(test_lib.lib_find_host_by_vr(vr).managementIp)
 	if test_lib.lib_is_vm_running(vr) != True:
 	    vm_ops.start_vm(vr.uuid)
     time.sleep(60)
@@ -56,6 +58,8 @@ def test():
     conditions = res_ops.gen_query_conditions('state', '=', 'Enabled')
     conditions = res_ops.gen_query_conditions('status', '=', 'Connected', conditions)
     conditions = res_ops.gen_query_conditions('managementIp', '!=', mn_ip, conditions)
+    for vr_host_ip in vr_host_ips:
+        conditions = res_ops.gen_query_conditions('managementIp', '!=', vr_host_ip, conditions)
     host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].uuid
     vm_creation_option.set_host_uuid(host_uuid)
     vm_creation_option.set_l3_uuids([l3_net_uuid])
@@ -74,18 +78,21 @@ def test():
 
     #vm.check()
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
+    host_port = test_lib.lib_get_host_port(host_ip)
+    test_util.test_logger("host %s is disconnecting" %(host_ip))
     host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
     l2_network_interface = os.environ.get('l2ManagementNetworkInterface')
     cmd = "ifdown %s && sleep 180 && ifup %s" % (l2_network_interface, l2_network_interface)
     host_username = os.environ.get('hostUsername')
     host_password = os.environ.get('hostPassword')
-    rsp = test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd, 180)
+    rsp = test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd, 240)
     if not rsp:
 	test_util.test_logger("host is expected to shutdown after its network down for a while")
 
-    test_util.test_logger("wait for 600 seconds")
-    time.sleep(600)
+    #test_util.test_logger("wait for 600 seconds")
+    test_util.test_logger("wait for 180 seconds")
+    time.sleep(180)
     vm.update()
     if test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp == host_ip:
 	test_util.test_fail("VM is expected to start running on another host")
@@ -95,7 +102,7 @@ def test():
     test_lib.lib_set_ha_selffencer_maxattempts(max_attempts)
     test_lib.lib_set_ha_selffencer_storagechecker_timeout(storagechecker_timeout)
 
-    os.system('bash -ex %s %s' % (os.environ.get('hostRecoverScript'), host_ip))
+    os.system('PORT=%s bash -ex %s %s' % (host_port, os.environ.get('hostRecoverScript'), host_ip))
     host_ops.reconnect_host(host_uuid)
     test_util.test_pass('Test VM ha on host failure Success')
 
@@ -116,5 +123,5 @@ def error_cleanup():
     test_lib.lib_set_ha_selffencer_maxattempts(max_attempts)
     test_lib.lib_set_ha_selffencer_storagechecker_timeout(storagechecker_timeout)
 
-    os.system('bash -ex %s %s' % (os.environ.get('hostRecoverScript'), host_ip))
+    os.system('PORT=%s bash -ex %s %s' % (host_port, os.environ.get('hostRecoverScript'), host_ip))
     host_ops.reconnect_host(host_uuid)

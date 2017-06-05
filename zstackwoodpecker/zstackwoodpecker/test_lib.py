@@ -329,7 +329,9 @@ def lib_execute_ssh_cmd(host_ip, username, password, command, timeout = 30, \
         port = 22):
     def ssh_host():
         try:
-            ret, output, stderr = ssh.execute(command, host_ip, username, password, False, port)
+
+            h_port = lib_get_host_port(host_ip) 
+            ret, output, stderr = ssh.execute(command, host_ip, username, password, False, port=h_port)
             print("ssh: %s , return value: %d, standard output:%s, standard error: %s" % (command, ret, output, stderr))
             ssh_result['result'] = ret
             ssh_result['output'] = output
@@ -1350,6 +1352,33 @@ def lib_find_host_by_vm(vm_inv):
             uuid=host_uuid)
     if hosts:
         return hosts[0]
+
+def lib_find_host_by_vr(vr_inv):
+    '''
+    Get host inventory by providing vr inventory.
+    '''
+    host_uuid = vr_inv.hostUuid
+    if not host_uuid:
+        test_util.test_logger("Host UUID is None. Can't get Host IP address for [vr:] %s" % vr_inv.uuid)
+        return None
+
+    hosts = res_ops.get_resource(res_ops.HOST, session_uuid=None, \
+            uuid=host_uuid)
+    if hosts:
+        return hosts[0]
+
+def lib_get_host_port(host_ip):
+    target_host_in_plan = None
+    h_port = None
+    for host_in_plan in lib_get_all_hosts_from_plan():
+        if host_in_plan.managementIp_ == host_ip:
+            target_host_in_plan = host_in_plan
+            break
+    if target_host_in_plan != None:
+        if hasattr(target_host_in_plan, 'port_'):
+            h_port = int(target_host_in_plan.port_)
+
+    return h_port
 
 def lib_find_hosts_by_ps_uuid(ps_uuid):
     '''
@@ -4986,3 +5015,5 @@ def get_ip(start_ip, end_ip):
     start = ip2num(start_ip)
     end = ip2num(end_ip)
     return [ num2ip(num) for num in range(start, end+1) if num & 0xff ]
+
+
