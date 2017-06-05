@@ -28,7 +28,8 @@ def test():
 
     test_util.test_dsc('Add ISO Image')
     bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0].uuid
-
+    
+    
     img_option = test_util.ImageOption()
     img_option.set_name('iso')
     img_option.set_backup_storage_uuid_list([bs_uuid])
