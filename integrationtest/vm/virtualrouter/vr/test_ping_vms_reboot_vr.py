@@ -14,6 +14,7 @@ import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.operations.resource_operations as res_ops
 import threading
+import os
 import time
 
 _config_ = {
@@ -23,12 +24,14 @@ _config_ = {
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
+vr_type = None
 
 def check_vr_reboot_record_line(vr_ip):
-    vr_type = res_ops.query_resource(res_ops.VIRTUALROUTER_VM)[0].applianceVmType
+    global vr_type
     cmd = 'last reboot|grep reboot|wc -l'
+    test_util.test_logger("check vr type is %s, vr_ip:%s" %(vr_type, vr_ip))
     if vr_type == "VirtualRouter":
-        ret, output, stderr = ssh.execute(cmd, vr_ip, "root", "", False, 22)
+        ret, output, stderr = ssh.execute(cmd, vr_ip, os.environ.get('vrImageUsername'), os.environ.get('vrImagePassword'), False, 22)
     elif vr_type == "vrouter":
         ret, output, stderr = ssh.execute(cmd, vr_ip, "vyos", "vrouter12#", False, 22)
     else:
@@ -42,6 +45,7 @@ def check_vr_reboot_record_line(vr_ip):
     
 
 def test():
+    global vr_type
     test_util.test_dsc('Create test vm1 and check')
     vm1 = test_stub.create_vlan_vm()
     test_obj_dict.add_vm(vm1)
@@ -51,6 +55,9 @@ def test():
 
     vm1.check()
     vm2.check()
+
+    vr_type = res_ops.query_resource(res_ops.VIRTUALROUTER_VM)[0].applianceVmType
+    test_util.test_logger("vr type is %s" %(vr_type))
 
     vrs = test_lib.lib_find_vr_by_vm(vm1.vm)
     if len(vrs) != 1:
@@ -70,7 +77,7 @@ def test():
     #check vr vr service port
     cond = res_ops.gen_query_conditions('resourceUuid', '=', vr.uuid)
     cond = res_ops.gen_query_conditions('tag', '=', "ha::NeverStop", cond)
-    if res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0]:
+    if res_ops.query_resource(res_ops.SYSTEM_TAG, cond) and res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0]:
         time.sleep(30)
     elif not test_lib.lib_wait_target_down(vr_mgmt_ip, '7272', 120):
         test_util.test_fail('vr: %s is not shutdown in 120 seconds. Fail to reboot it. ' % vr.uuid)
