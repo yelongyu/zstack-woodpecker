@@ -102,7 +102,9 @@ def test():
     test_lib.lib_set_ha_selffencer_maxattempts(max_attempts)
     test_lib.lib_set_ha_selffencer_storagechecker_timeout(storagechecker_timeout)
 
-    os.system('PORT=%s bash -ex %s %s' % (host_port, os.environ.get('hostRecoverScript'), host_ip))
+    cmd = 'PORT=%s bash -ex %s %s' % (host_port, os.environ.get('hostRecoverScript'), host_ip)
+    test_util.test_logger(cmd)
+    os.system(cmd)
     host_ops.reconnect_host(host_uuid)
     test_util.test_pass('Test VM ha on host failure Success')
 
