@@ -226,4 +226,4 @@ vrImagePassword = password
 bootOptionPicture = /home/boot.png
 
 testIsoName = testIso                                                                                                                                                                        
-testIsoUrl = http://10.1.101.1/image/virtio-win-0.1.126.iso
+testIsoUrl = http://10.1.101.1/image/ttylinux-virtio_i486-16.1.iso
