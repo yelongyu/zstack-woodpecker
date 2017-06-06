@@ -54,6 +54,7 @@ def test():
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     root_disk_uuid = data_volume_offering.uuid
     vm = test_stub.create_vm_with_iso([l3_net_uuid], image_uuid, 'vm-iso', root_disk_uuid, new_offering.uuid)
+    host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
     test_obj_dict.add_vm(vm)
     
     test_util.test_dsc('wait for iso installation')    
@@ -63,21 +64,22 @@ def test():
     test_lib.lib_wait_target_up(vm_ip, '22', 2400)
 
     cmd ='[ -e /root ] && echo yes || echo no' 
-    ssh_num = 0
-    ssh_ok = 0
-    while ssh_num <= 5 and ssh_ok == 0 :
-        rsp = test_lib.lib_execute_ssh_cmd(vm_ip, 'root', 'password', cmd, 180)
-        if rsp == False:
-            time.sleep(30)
-        else:
-            ssh_ok = 1
-            break  
-        ssh_num = ssh_num + 1
+    #ssh_num = 0
+    #ssh_ok = 0
+    #while ssh_num <= 5 and ssh_ok == 0 :
+    #    rsp = test_lib.lib_execute_ssh_cmd(vm_ip, 'root', 'password', cmd, 180)
+    #    if rsp == False:
+    #        time.sleep(30)
+    #    else:
+    #        ssh_ok = 1
+    #        break  
+    #    ssh_num = ssh_num + 1
 
-    if ssh_ok == 0:
-        test_util.test_fail('fail to ssh to VM')
+    #if ssh_ok == 0:
+    #    test_util.test_fail('fail to ssh to VM')
+    test_lib.lib_ssh_vm_cmd_by_agent(host_ip, vm_ip, 'root', 'password', cmd)
 
-    vm.check()
+    #vm.check()
 
     vm.destroy()
     test_obj_dict.rm_vm(vm)
