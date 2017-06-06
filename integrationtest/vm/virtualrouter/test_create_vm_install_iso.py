@@ -21,6 +21,7 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
 def test():
+    global ssh_timeout
     data_volume_size = 10737418240
     disk_offering_option = test_util.DiskOfferingOption()
     disk_offering_option.set_name('root-disk-iso')
@@ -61,9 +62,11 @@ def test():
     vm_inv = vm.get_vm()
     vm_ip = vm_inv.vmNics[0].ip
 
-    test_lib.lib_wait_target_up(vm_ip, '22', 2400)
+    #test_lib.lib_wait_target_up(vm_ip, '22', 2400)
+    #vm.check()
 
-    cmd ='[ -e /root ] && echo yes || echo no' 
+    #cmd ='[ -e /root ] && echo yes || echo no' 
+    cmd ='[ -e /root ]'
     #ssh_num = 0
     #ssh_ok = 0
     #while ssh_num <= 5 and ssh_ok == 0 :
@@ -77,10 +80,13 @@ def test():
 
     #if ssh_ok == 0:
     #    test_util.test_fail('fail to ssh to VM')
-    test_lib.lib_ssh_vm_cmd_by_agent(host_ip, vm_ip, 'root', 'password', cmd)
+    ssh_timeout = test_lib.SSH_TIMEOUT
+    test_lib.SSH_TIMEOUT = 2400
+    if not test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host_ip, vm_ip, 'root', 'password', cmd):
+        test_lib.SSH_TIMEOUT = ssh_timeout
+        test_util.test_fail("iso has not been failed to installed.")
 
-    #vm.check()
-
+    test_lib.SSH_TIMEOUT = ssh_timeout
     vm.destroy()
     test_obj_dict.rm_vm(vm)
 
@@ -99,3 +105,4 @@ def test():
 def error_cleanup():
     global test_obj_dict
     test_lib.lib_error_cleanup(test_obj_dict)
+
