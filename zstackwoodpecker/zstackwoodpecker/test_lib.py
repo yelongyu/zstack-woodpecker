@@ -331,6 +331,8 @@ def lib_execute_ssh_cmd(host_ip, username, password, command, timeout = 30, \
         try:
 
             h_port = lib_get_host_port(host_ip) 
+            if not h_port:
+                h_port = port
             ret, output, stderr = ssh.execute(command, host_ip, username, password, False, port=h_port)
             print("ssh: %s , return value: %d, standard output:%s, standard error: %s" % (command, ret, output, stderr))
             ssh_result['result'] = ret
