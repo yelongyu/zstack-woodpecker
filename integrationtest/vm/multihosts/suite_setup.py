@@ -57,9 +57,6 @@ def test():
     for host in testHosts:
         os.system("bash %s %s" % (EXTRA_HOST_SETUP_SCRIPT, host.managementIp_))
 
-    if test_lib.lib_get_ha_selffencer_maxattempts() != None:
-        test_lib.lib_set_ha_selffencer_maxattempts('60')
-	test_lib.lib_set_ha_selffencer_storagechecker_timeout('60')
     test_lib.lib_set_allow_live_migration_local_storage('true')
     test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
     test_util.test_pass('Suite Setup Success')
