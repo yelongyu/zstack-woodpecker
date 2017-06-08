@@ -153,13 +153,17 @@ def create_multi_vms(name_prefix='', count=10, ps_uuid=None):
         vm.check()
     return vm_list
 
-def create_multi_volume(count=10, ps_uuid=None):
+def create_multi_volume(count=10, ps=None):
     volume_list = []
     for i in xrange(count):
         disk_offering = random.choice(res_ops.get_resource(res_ops.DISK_OFFERING))
         volume_creation_option = test_util.VolumeOption()
         volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
-        volume_creation_option.set_primary_storage_uuid(ps_uuid)
+        if ps:
+            volume_creation_option.set_primary_storage_uuid(ps.uuid)
+        if ps.type == inventory.LOCAL_STORAGE_TYPE:
+            host_uuid = random.choice(res_ops.get_resource(res_ops.HOST)).uuid
+            volume_creation_option.set_system_tags(['localStorage::hostUuid::{}'.format(host_uuid)])
         volume = create_volume(volume_creation_option)
         volume_list.append(volume)
     for volume in volume_list:
