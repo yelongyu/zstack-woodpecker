@@ -15,7 +15,7 @@ new_ps_list = []
 VOLUME_NUMBER = 100
 
 def test():
-    test_util.test_dsc("Create {0} volume in the first primaryStorage".format(VM_COUNT))
+    test_util.test_dsc("Create {0} volume in the first primaryStorage".format(VOLUME_NUMBER))
     ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
     first_ps = ps_list[0]
     volume_list = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=first_ps)
@@ -29,7 +29,7 @@ def test():
     else:
         second_ps = ps_list[1]
 
-    test_util.test_dsc("Create {0} volume in the second primaryStorage".format(VM_COUNT))
+    test_util.test_dsc("Create {0} volume in the second primaryStorage".format(VOLUME_NUMBER))
     volume_list = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=second_ps)
     for volume in volume_list:
         test_obj_dict.add_volume(volume)
