@@ -167,7 +167,7 @@ def create_multi_volume(count=10, ps_uuid=None):
     return volume_list
 
 def add_primaryStorage(first_ps=None):
-    cluster_uuid = first_ps.uuid
+    cluster_uuid = first_ps.attachedClusterUuids[0]
     ps_config = test_util.PrimaryStorageOption()
     if first_ps.type == inventory.LOCAL_STORAGE_TYPE:
         ps_config.set_name("local-ps2")
