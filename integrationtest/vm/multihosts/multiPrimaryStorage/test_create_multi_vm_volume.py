@@ -15,6 +15,7 @@ new_ps_list = []
 VM_COUNT = 5
 DATA_VOLUME_NUMBER = 10
 
+
 def test():
     test_util.test_dsc("Create {} vm  each with {} data volume in the first primaryStorage".format(VM_COUNT, DATA_VOLUME_NUMBER))
     ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
@@ -40,22 +41,15 @@ def test():
     test_util.test_dsc("Check the capacity")
     #To do
 
-    test_util.test_dsc("Destroy test object")
-    test_lib.lib_error_cleanup(test_obj_dict)
-
-    if new_ps_list:
-        test_util.test_dsc("Remove new added primaryStorage")
-        for new_ps in new_ps_list:
-            ps_ops.detach_primary_storage(new_ps.uuid, new_ps.attachedClusterUuids[0])
-            ps_ops.delete_primary_storage(new_ps.uuid)
 
     test_util.test_pass('Multi PrimaryStorage Test Pass')
 
 
-#Will be called only if exception happens in test().
-def error_cleanup():
+def env_recover():
+    test_util.test_dsc("Destroy test object")
     test_lib.lib_error_cleanup(test_obj_dict)
     if new_ps_list:
         for new_ps in new_ps_list:
             ps_ops.detach_primary_storage(new_ps.uuid, new_ps.attachedClusterUuids[0])
             ps_ops.delete_primary_storage(new_ps.uuid)
+
