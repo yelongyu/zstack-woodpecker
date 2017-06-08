@@ -12,13 +12,13 @@ import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 new_ps_list = []
-VM_COUNT = 10
+VOLUME_NUMBER = 100
 
 def test():
     test_util.test_dsc("Create {0} volume in the first primaryStorage".format(VM_COUNT))
     ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
     first_ps = ps_list[0]
-    volume_list = test_stub.create_multi_volume(count=VM_COUNT, ps=first_ps)
+    volume_list = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=first_ps)
     for volume in volume_list:
         test_obj_dict.add_volume(volume)
 
@@ -30,7 +30,7 @@ def test():
         second_ps = ps_list[1]
 
     test_util.test_dsc("Create {0} volume in the second primaryStorage".format(VM_COUNT))
-    volume_list = test_stub.create_multi_volume(count=VM_COUNT, ps=second_ps)
+    volume_list = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=second_ps)
     for volume in volume_list:
         test_obj_dict.add_volume(volume)
 
