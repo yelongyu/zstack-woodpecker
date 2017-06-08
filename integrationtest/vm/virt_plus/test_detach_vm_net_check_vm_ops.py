@@ -43,8 +43,8 @@ def test():
     try:
         vm.start()
     except Exception, e:
-        if "please attach a nic and try again" in str(e):
-            test_util.test_pass('test detach l3 check vm passed.')
+        #if "please attach a nic and try again" in str(e):
+        test_util.test_pass('test detach l3 check vm passed.')
 
     test_util.test_fail('test detach l3 check vm status is not as expected, expected should be not started with error message have not nic.')
 
