@@ -45,7 +45,9 @@ def test():
     l3_name = os.environ.get('l3VlanNetworkName1')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     vrs = test_lib.lib_find_vr_by_l3_uuid(l3_net_uuid)
+    vr_host_ips = []
     for vr in vrs:
+        vr_host_ips.append(test_lib.lib_find_host_by_vr(vr).managementIp)
 	if test_lib.lib_is_vm_running(vr) != True:
 	    vm_ops.start_vm(vr.uuid)
     time.sleep(60)
@@ -56,6 +58,8 @@ def test():
     conditions = res_ops.gen_query_conditions('state', '=', 'Enabled')
     conditions = res_ops.gen_query_conditions('status', '=', 'Connected', conditions)
     conditions = res_ops.gen_query_conditions('managementIp', '!=', mn_ip, conditions)
+    for vr_host_ip in vr_host_ips:
+        conditions = res_ops.gen_query_conditions('managementIp', '!=', vr_host_ip, conditions)
     host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].uuid
     vm_creation_option.set_host_uuid(host_uuid)
     vm_creation_option.set_l3_uuids([l3_net_uuid])
@@ -74,6 +78,8 @@ def test():
 
     #vm.check()
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
+    host_port = test_lib.lib_get_host_port(host_ip)
+    test_util.test_logger("host %s is disconnecting" %(host_ip))
     host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
     test_util.test_logger("force stop host: %s" % (host_ip))
