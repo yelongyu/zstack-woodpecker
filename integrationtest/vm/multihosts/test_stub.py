@@ -178,7 +178,7 @@ def add_primaryStorage(first_ps=None):
 
     ps = ps_ops.create_local_primary_storage(ps_config)
     ps_ops.attach_primary_storage(ps.uuid, cluster_uuid)
-
+    ps.attachedClusterUuids.append(cluster_uuid)
     return ps
 
 

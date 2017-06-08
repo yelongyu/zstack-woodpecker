@@ -17,6 +17,7 @@ import random
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
+new_ps_list = []
 VM_COUNT = 2
 
 def test():
@@ -30,6 +31,7 @@ def test():
     if len(ps_list) == 1:
         test_util.test_dsc("Add Another primaryStorage")
         second_ps = test_stub.add_primaryStorage(first_ps=first_ps)
+        new_ps_list.append(second_ps)
     else:
         second_ps = ps_list[1]
 
@@ -40,12 +42,24 @@ def test():
 
     test_util.test_dsc("Check the capacity")
     #To do
+
     test_util.test_dsc("Destroy test object")
     test_lib.lib_error_cleanup(test_obj_dict)
+
+    if new_ps_list:
+        test_util.test_dsc("Remove new added primaryStorage")
+        for new_ps in new_ps_list:
+            ps_ops.detach_primary_storage(new_ps.uuid, new_ps.attachedClusterUuids[0])
+            ps_ops.delete_primary_storage(new_ps.uuid)
+
     test_util.test_pass('Multi PrimaryStorage Test Pass')
 
 
 #Will be called only if exception happens in test().
 def error_cleanup():
-    global test_obj_dict
     test_lib.lib_error_cleanup(test_obj_dict)
+    if new_ps_list:
+        for new_ps in new_ps_list:
+            ps_ops.detach_primary_storage(new_ps.uuid, new_ps.attachedClusterUuids[0])
+            ps_ops.delete_primary_storage(new_ps.uuid)
+
