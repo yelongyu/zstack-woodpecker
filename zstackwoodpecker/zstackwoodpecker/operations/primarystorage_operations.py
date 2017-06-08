@@ -28,6 +28,19 @@ def create_nfs_primary_storage(primary_storage_option, session_uuid=None):
             (evt.inventory.uuid, action.name))
     return evt.inventory
 
+def create_local_primary_storage(primary_storage_option, session_uuid=None):
+    action = api_actions.AddLocalPrimaryStorageAction()
+    action.timeout = 30000
+    action.name = primary_storage_option.get_name()
+    action.description = primary_storage_option.get_description()
+    action.type = primary_storage_option.get_type()
+    action.url = primary_storage_option.get_url()
+    action.zoneUuid = primary_storage_option.get_zone_uuid()
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Create Primary Storage [uuid:] %s [name:] %s' % \
+            (evt.inventory.uuid, action.name))
+    return evt.inventory
+
 def create_ceph_primary_storage(primary_storage_option, session_uuid=None):
     action = api_actions.AddCephPrimaryStorageAction()
     action.timeout = 300000

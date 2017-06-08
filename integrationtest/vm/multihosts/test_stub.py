@@ -15,11 +15,15 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.header.host as host_header
+import apibinding.inventory as inventory
+import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import threading
 import time
 import sys
 import telnetlib
+import random
 #import traceback
+
 
 import zstackwoodpecker.test_state as test_state
 Port = test_state.Port
@@ -96,6 +100,88 @@ def create_vm_with_iso(vm_name, l3_name, session_uuid = None):
     vm.set_creation_option(vm_creation_option)
     vm.create()
     return vm
+
+def create_vm_with_random_offering(vm_name, image_name=None, l3_name=None, session_uuid=None,
+                                   instance_offering_uuid=None, host_uuid=None, disk_offering_uuids=None,
+                                   root_password=None, ps_uuid=None, system_tags=None):
+    if image_name:
+        imagename = os.environ.get(image_name)
+        image_uuid = test_lib.lib_get_image_by_name(imagename).uuid
+    else:
+        image_uuid = random.choice(res_ops.get_resource(res_ops.IMAGE)).uuid
+
+    if l3_name:
+        l3name = os.environ.get(l3_name)
+        l3_net_uuid = test_lib.lib_get_l3_by_name(l3name).uuid
+    else:
+        l3_net_uuid = random.choice(res_ops.get_resource(res_ops.L3_NETWORK)).uuid
+
+    if not instance_offering_uuid:
+        conf = res_ops.gen_query_conditions('type', '=', 'UserVM')
+        instance_offering_uuid = random.choice(res_ops.query_resource(res_ops.INSTANCE_OFFERING, conf)).uuid
+
+    vm_creation_option = test_util.VmOption()
+    vm_creation_option.set_l3_uuids([l3_net_uuid])
+    vm_creation_option.set_image_uuid(image_uuid)
+    vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+    vm_creation_option.set_name(vm_name)
+    if system_tags:
+        vm_creation_option.set_system_tags(system_tags)
+    if disk_offering_uuids:
+        vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
+    if root_password:
+        vm_creation_option.set_root_password(root_password)
+    if host_uuid:
+        vm_creation_option.set_host_uuid(host_uuid)
+    if session_uuid:
+        vm_creation_option.set_session_uuid(session_uuid)
+    if ps_uuid:
+        vm_creation_option.set_ps_uuid(ps_uuid)
+
+    vm = test_vm_header.ZstackTestVm()
+    vm.set_creation_option(vm_creation_option)
+    vm.create()
+    return vm
+
+def create_multi_vms(name_prefix='', count=10, ps_uuid=None):
+    vm_list = []
+    for i in xrange(count):
+        vm = create_vm_with_random_offering(name_prefix+"{}".format(i), image_name='imageName_s',
+                                       l3_name='l3VlanNetwork2', ps_uuid=ps_uuid)
+        vm_list.append(vm)
+    for vm in vm_list:
+        vm.check()
+    return vm_list
+
+def create_multi_volume(count=10, ps_uuid=None):
+    volume_list = []
+    for i in xrange(count):
+        disk_offering = random.choice(res_ops.get_resource(res_ops.DISK_OFFERING))
+        volume_creation_option = test_util.VolumeOption()
+        volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
+        volume_creation_option.set_primary_storage_uuid(ps_uuid)
+        volume = create_volume(volume_creation_option)
+        volume_list.append(volume)
+    for volume in volume_list:
+        volume.check()
+    return volume_list
+
+def add_primaryStorage(first_ps=None):
+    cluster_uuid = first_ps.uuid
+    ps_config = test_util.PrimaryStorageOption()
+    if first_ps.type == inventory.LOCAL_STORAGE_TYPE:
+        ps_config.set_name("local-ps2")
+        ps_config.set_description("test")
+        ps_config.set_zone_uuid(first_ps.zoneUuid)
+        ps_config.set_type(first_ps.type)
+        ps_config.set_url("/home/local-ps2")
+
+    ps = ps_ops.create_local_primary_storage(ps_config)
+    ps_ops.attach_primary_storage(ps.uuid, cluster_uuid)
+
+    return ps
+
+
 
 def migrate_vm_to_random_host(vm):
     test_util.test_dsc("migrate vm to random host")
