@@ -25,8 +25,8 @@ test_obj_dict = test_state.TestStateDict()
 TEMPT_FOLDER = "/tmp/"
 #MEVOCO_LOG_FOLDER = r"collect-log-mevoco*"
 #MEVOCO_LOG_FOLDER_PATTERN = "collect-log-mevoco"
-MEVOCO_LOG_FOLDER = r"collect-log-zstack*"
-MEVOCO_LOG_FOLDER_PATTERN = "collect-log-zstack"
+MEVOCO_LOG_FOLDER = r"collect-log-ZStack*"
+MEVOCO_LOG_FOLDER_PATTERN = "collect-log-ZStack"
 MEVOCO_LOG_FOLDER_MASK = ".gz"
 MEVOCO_LOG_PATH = None
 
