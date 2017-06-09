@@ -144,17 +144,17 @@ def create_vm_with_random_offering(vm_name, image_name=None, l3_name=None, sessi
     return vm
 
 
-def create_multi_vms(name_prefix='', count=10, ps_uuid=None, data_volume_number=0):
+def create_multi_vms(name_prefix='', count=10, host_uuid=None, ps_uuid=None, data_volume_number=0):
     vm_list = []
     for i in xrange(count):
         if not data_volume_number:
             vm = create_vm_with_random_offering(name_prefix+"{}".format(i), image_name='imageName_s',
-                                                l3_name='l3VlanNetwork2', ps_uuid=ps_uuid)
+                                                l3_name='l3VlanNetwork2', host_uuid=host_uuid, ps_uuid=ps_uuid)
         else:
             disk_offering_list = res_ops.get_resource(res_ops.DISK_OFFERING)
             disk_offering_uuids = [random.choice(disk_offering_list).uuid for _ in xrange(data_volume_number)]
             vm = create_vm_with_random_offering(name_prefix+"{}".format(i), image_name='imageName_s',
-                                                l3_name='l3VlanNetwork2', ps_uuid=ps_uuid,
+                                                l3_name='l3VlanNetwork2', host_uuid=host_uuid, ps_uuid=ps_uuid,
                                                 disk_offering_uuids=disk_offering_uuids)
         vm_list.append(vm)
     for vm in vm_list:
@@ -162,7 +162,7 @@ def create_multi_vms(name_prefix='', count=10, ps_uuid=None, data_volume_number=
     return vm_list
 
 
-def create_multi_volume(count=10, ps=None):
+def create_multi_volume(count=10, host_uuid=None, ps=None):
     volume_list = []
     for i in xrange(count):
         disk_offering = random.choice(res_ops.get_resource(res_ops.DISK_OFFERING))
@@ -171,7 +171,8 @@ def create_multi_volume(count=10, ps=None):
         if ps:
             volume_creation_option.set_primary_storage_uuid(ps.uuid)
         if ps.type == inventory.LOCAL_STORAGE_TYPE:
-            host_uuid = random.choice(res_ops.get_resource(res_ops.HOST)).uuid
+            if not host_uuid:
+                host_uuid = random.choice(res_ops.get_resource(res_ops.HOST)).uuid
             volume_creation_option.set_system_tags(['localStorage::hostUuid::{}'.format(host_uuid)])
         volume = create_volume(volume_creation_option)
         volume_list.append(volume)
@@ -303,3 +304,60 @@ def check_vm_internal_cpu_mem(vm, shutdown, window):
                 'password', get_mem_cmd)
     vm_mem = int(res.result.split()[1])
     return vm_cpu, vm_mem
+
+
+class TwoPrimaryStorageEnv(object):
+    def __init__(self, test_object_dict, first_ps_vm_number=0, second_ps_vm_number=0, first_ps_volume_number=0, second_ps_volume_number=0,
+                 vm_creation_with_volume_number=0):
+        self.first_ps_vm_number = first_ps_vm_number
+        self.second_ps_vm_number = second_ps_vm_number
+        self.first_ps_volume_number = first_ps_volume_number
+        self.second_ps_volume_number = second_ps_volume_number
+        self.vm_creation_with_volume_number = vm_creation_with_volume_number
+        self.test_object_dict = test_object_dict
+        self.host_uuid = None
+        self.first_ps = None
+        self.second_ps = None
+        self.first_ps_vm_list = []
+        self.second_ps_vm_list = []
+        self.first_ps_volume_list = []
+        self.second_ps_volume_list = []
+        self.new_ps = False
+
+    def check_env(self):
+        ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
+        self.first_ps = ps_list[0]
+        if len(ps_list) == 2:
+            self.second_ps = ps_list[1]
+        if self.first_ps.type == inventory.LOCAL_STORAGE_TYPE:
+            self.host_uuid = random.choice(res_ops.get_resource(res_ops.HOST)).uuid
+
+    def deploy_env(self):
+        if self.first_ps_vm_number:
+            self.first_ps_vm_list = create_multi_vms(name_prefix="vm_in_first_ps-", count=self.first_ps_vm_number,
+                                                     host_uuid=self.host_uuid, ps_uuid=self.first_ps.uuid,
+                                                     data_volume_number=self.vm_creation_with_volume_number)
+            for vm in self.first_ps_vm_list:
+                self.test_object_dict.add_vm(vm)
+
+        if self.first_ps_volume_number:
+            self.first_ps_volume_list = create_multi_volume(count=self.first_ps_volume_number, host_uuid=self.host_uuid,
+                                                            ps=self.first_ps)
+            for volume in self.first_ps_volume_list:
+                self.test_object_dict.add_volume(volume)
+
+        if not self.second_ps:
+            self.second_ps = add_primaryStorage(self.first_ps)
+            self.new_ps = True
+
+        if self.second_ps_vm_number:
+            self.second_ps_vm_list = create_multi_vms(name_prefix="vm_in_second_ps-", count=self.second_ps_vm_number,
+                                                      host_uuid=self.host_uuid, ps_uuid=self.second_ps.uuid)
+            for vm in self.second_ps_vm_list:
+                self.test_object_dict.add_vm(vm)
+
+        if self.second_ps_volume_number:
+            self.second_ps_volume_list = create_multi_volume(count=self.second_ps_volume_number, host_uuid=self.host_uuid,
+                                                             ps=self.second_ps)
+            for volume in self.second_ps_volume_list:
+                self.test_object_dict.add_volume(volume)
