@@ -23,9 +23,9 @@ def test():
                                          second_ps_volume_number=VOLUME_NUMBER)
     env.check_env()
     env.deploy_env()
-    first_ps_vm_list = env.first_ps_vm_list[0]
+    first_ps_vm_list = env.first_ps_vm_list
     first_ps_volume_list = env.first_ps_volume_list
-    second_ps_vm_list = env.second_ps_vm_list[0]
+    second_ps_vm_list = env.second_ps_vm_list
     second_ps_volume_list = env.second_ps_volume_list
     if env.new_ps:
         new_ps_list.append(env.second_ps)
@@ -55,11 +55,15 @@ def test():
     test_util.test_dsc("Create 5 vms and 10 Volumes and check all should be in enabled PS")
     vm_list = test_stub.create_multi_vms(name_prefix='test_vm', count=5)
     for vm in vm_list:
+        test_obj_dict.add_vm(vm)
+    for vm in vm_list:
         assert vm.get_vm().primaryStorageUuid == enabled_ps.uuid
 
     volume_list = test_stub.create_multi_volume(count=10)
     for volume in volume_list:
-        assert volume.volume.primaryStorageUuid == enabled_ps
+        test_obj_dict.add_volume(volume)
+    for volume in volume_list:
+        assert volume.volume.primaryStorageUuid == enabled_ps.uuid
 
     test_util.test_pass('Multi PrimaryStorage Test Pass')
 
