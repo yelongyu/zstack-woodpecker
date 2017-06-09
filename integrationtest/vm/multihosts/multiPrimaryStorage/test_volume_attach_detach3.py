@@ -30,7 +30,7 @@ def test():
     if env.new_ps:
         new_ps_list.append(env.second_ps)
 
-    all_volume_list = first_ps_vm + second_ps_vm
+    all_volume_list = first_ps_volume_list + second_ps_volume_list
     test_util.test_dsc("Attach all volumes to first ps vm")
     for volume in all_volume_list:
         volume.attach(first_ps_vm)
