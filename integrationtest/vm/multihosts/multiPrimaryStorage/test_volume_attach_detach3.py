@@ -30,30 +30,31 @@ def test():
     if env.new_ps:
         new_ps_list.append(env.second_ps)
 
-    test_util.test_dsc("Detach/Attach testing in first Primary Storage")
-    for volume in first_ps_volume_list:
+    all_volume_list = first_ps_vm + second_ps_vm
+    test_util.test_dsc("Attach all volumes to first ps vm")
+    for volume in all_volume_list:
         volume.attach(first_ps_vm)
 
-    for volume in first_ps_volume_list:
+    for volume in all_volume_list:
         volume.check()
 
-    for volume in first_ps_volume_list:
+    for volume in all_volume_list:
         volume.detach()
 
-    for volume in first_ps_volume_list:
+    for volume in all_volume_list:
         volume.check()
 
-    test_util.test_dsc("Detach/Attach testing in second Primary Storage")
-    for volume in second_ps_volume_list:
+    test_util.test_dsc("Attach all volumes to second ps vm")
+    for volume in all_volume_list:
         volume.attach(second_ps_vm)
 
-    for volume in second_ps_volume_list:
+    for volume in all_volume_list:
         volume.check()
 
-    for volume in second_ps_volume_list:
+    for volume in all_volume_list:
         volume.detach()
 
-    for volume in second_ps_volume_list:
+    for volume in all_volume_list:
         volume.check()
 
 def env_recover():

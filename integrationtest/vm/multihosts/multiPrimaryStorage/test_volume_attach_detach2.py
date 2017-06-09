@@ -30,9 +30,9 @@ def test():
     if env.new_ps:
         new_ps_list.append(env.second_ps)
 
-    test_util.test_dsc("Detach/Attach testing in first Primary Storage")
+    test_util.test_dsc("Attach fisrt ps volume to second-ps vm")
     for volume in first_ps_volume_list:
-        volume.attach(first_ps_vm)
+        volume.attach(second_ps_vm)
 
     for volume in first_ps_volume_list:
         volume.check()
@@ -43,9 +43,9 @@ def test():
     for volume in first_ps_volume_list:
         volume.check()
 
-    test_util.test_dsc("Detach/Attach testing in second Primary Storage")
+    test_util.test_dsc("Attach second ps volume to first-ps vm")
     for volume in second_ps_volume_list:
-        volume.attach(second_ps_vm)
+        volume.attach(first_ps_vm)
 
     for volume in second_ps_volume_list:
         volume.check()
