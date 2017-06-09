@@ -14,6 +14,7 @@ import zstackwoodpecker.operations.image_operations as img_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
+import zstackwoodpecker.operations.scenario_operations as sce_ops
 import zstackwoodpecker.header.host as host_header
 import apibinding.inventory as inventory
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
@@ -361,3 +362,75 @@ class TwoPrimaryStorageEnv(object):
                                                              ps=self.second_ps)
             for volume in self.second_ps_volume_list:
                 self.test_object_dict.add_volume(volume)
+
+def check_vm_running_on_host(vm_uuid, host_ip):
+    cmd = "virsh list|grep %s|awk '{print $3}'" %(vm_uuid)
+    host_username = os.environ.get('hostUsername')
+    host_password = os.environ.get('hostPassword')
+    vm_is_exist = True if test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd) else False
+
+    return vm_is_exist
+
+def stop_host(host_vm, scenarioConfig, force=None):
+    host_vm_uuid = host_vm.uuid_
+    mn_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
+    try:
+        host_inv = sce_ops.stop_vm(mn_ip, host_vm_uuid,force=force)
+        return host_inv
+    except:
+        test_util.test_logger("Fail to stop host [%s]" % host_vm.ip_)
+        return False
+
+def start_host(host_vm, scenarioConfig):
+    host_vm_uuid = host_vm.uuid_
+    mn_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
+    try:
+        host_inv = sce_ops.start_vm(mn_ip, host_vm_uuid)
+        return host_inv
+    except:
+        test_util.test_logger("Fail to start host [%s]" % host_vm.ip_)
+        return False
+
+def recover_host(host_vm, scenarioConfig, deploy_config):
+    stop_host(host_vm, scenarioConfig)
+    host_inv = start_host(host_vm, scenarioConfig)
+    if not host_inv:
+       return False
+    host_ip = host_vm.ip_
+    test_lib.lib_wait_target_up(host_ip, '22', 120)
+    host_config = sce_ops.get_scenario_config_vm(host_inv.name,scenarioConfig)
+    for l3network in xmlobject.safe_list(host_config.l3Networks.l3Network):
+        if hasattr(l3network, 'l2NetworkRef'):
+            for l2networkref in xmlobject.safe_list(l3network.l2NetworkRef):
+                nic_name = sce_ops.get_ref_l2_nic_name(l2networkref.text_, deploy_config)
+                if nic_name.find('.') >= 0 :
+                    vlan = nic_name.split('.')[1]
+                    test_util.test_logger('[vm:] %s %s is created.' % (host_ip, nic_name))
+                    cmd = 'vconfig add %s %s' % (nic_name.split('.')[0], vlan)
+                    test_lib.lib_execute_ssh_cmd(host_ip, host_config.imageUsername_, host_config.imagePassword_, cmd)
+    return True
+
+def down_host_network(host_ip, scenarioConfig):
+    zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
+    cond = res_ops.gen_query_conditions('vmNics.ip', '=', host_ip)
+    host_vm_inv = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0]
+    cond = res_ops.gen_query_conditions('uuid', '=', host_vm_inv.hostUuid)
+    host_inv = sce_ops.query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
+
+    host_vm_config = sce_ops.get_scenario_config_vm(host_vm_inv.name_, scenarioConfig)
+    l2network_nic = os.environ.get('l2ManagementNetworkInterface')
+    cmd = "ifdown %s" % (l2network_nic)
+    sce_ops.execute_in_vm_console(zstack_management_ip, host_inv.managementIp, host_vm_inv.uuid, host_vm_config, cmd)
+
+def up_host_network(host_ip, scenarioConfig):
+    zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
+    cond = res_ops.gen_query_conditions('vmNics.ip', '=', host_ip)
+    host_vm_inv = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0]
+    cond = res_ops.gen_query_conditions('uuid', '=', host_vm_inv.hostUuid)
+    host_inv = sce_ops.query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
+
+    host_vm_config = sce_ops.get_scenario_config_vm(host_vm_inv.name_, scenarioConfig)
+    l2network_nic = os.environ.get('l2ManagementNetworkInterface')
+    cmd = "ifup %s" % (l2network_nic)
+    sce_ops.execute_in_vm_console(zstack_management_ip, host_inv.managementIp, host_vm_inv.uuid, host_vm_config, cmd)
+
