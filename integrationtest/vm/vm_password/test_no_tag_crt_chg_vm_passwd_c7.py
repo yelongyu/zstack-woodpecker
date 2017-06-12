@@ -45,10 +45,7 @@ def test():
         try:
             vm_ops.change_vm_password(vm.get_vm().uuid, "root", root_password)
         except Exception, e:
-            if "CreateSystemTag" in str(e):
-                test_util.test_pass("negative test of change a no system tag image passed.")
-            else:
-                test_util.test_fail("negative test failed with not expected log: %s", str(e))
+            test_util.test_pass("negative test of change a no system tag image passed.")
                 
             
     test_util.test_fail('negative test failed because no system tag image has been set vm password successfully, but it should be a failure.')
