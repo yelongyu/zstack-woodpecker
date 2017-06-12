@@ -209,3 +209,7 @@ vlanIpRangeNetmask20 = 255.255.0.0
 
 hostRecoverScript = /home/host_recover_script.sh
 hostForceStopScript = /home/host_force_stop_script.sh
+
+physicalHostUsername = root
+physicalHostPassword = 123456
+physicalHostPassword2 = 234567
