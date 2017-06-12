@@ -171,9 +171,9 @@ def create_multi_volume(count=10, host_uuid=None, ps=None):
         volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
         if ps:
             volume_creation_option.set_primary_storage_uuid(ps.uuid)
-        if ps.type == inventory.LOCAL_STORAGE_TYPE:
-            if not host_uuid:
-                host_uuid = random.choice(res_ops.get_resource(res_ops.HOST)).uuid
+            if ps.type == inventory.LOCAL_STORAGE_TYPE:
+                if not host_uuid:
+                    host_uuid = random.choice(res_ops.get_resource(res_ops.HOST)).uuid
             volume_creation_option.set_system_tags(['localStorage::hostUuid::{}'.format(host_uuid)])
         volume = create_volume(volume_creation_option)
         volume_list.append(volume)

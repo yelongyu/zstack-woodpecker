@@ -31,39 +31,39 @@ def test():
         new_ps_list.append(env.second_ps)
     tbj_list = first_ps_vm_list + second_ps_vm_list + first_ps_volume_list + second_ps_volume_list
 
-    test_util.test_dsc('Disable random one Primary Storage')
-    disabled_ps = random.choice([env.first_ps, env.second_ps])
-    if disabled_ps is env.first_ps:
-        enabled_ps = env.second_ps
+    test_util.test_dsc('detach random one Primary Storage from cluster')
+    selected_ps = random.choice([env.first_ps, env.second_ps])
+    if selected_ps is env.first_ps:
+        another_ps = env.second_ps
     else:
-        enabled_ps = env.first_ps
-    ps_ops.change_primary_storage_state(disabled_ps.uuid, state='disable')
+        another_ps = env.first_ps
+    ps_ops.detach_primary_storage(selected_ps.uuid, selected_ps.attachedClusterUuids[0])
 
-    test_util.test_dsc('make sure all VM and Volumes still OK and running')
+    test_util.test_dsc('All volumes in selected ps shoud STOP')
     for test_object in tbj_list:
         test_object.check()
 
     test_util.test_dsc("Try to Create vm in disabeld ps")
     try:
-        vm = test_stub.create_multi_vms(name_prefix='test-vm', count=1, ps_uuid=disabled_ps.uuid)[0]
+        vm = test_stub.create_multi_vms(name_prefix='test-vm', count=1, ps_uuid=selected_ps.uuid)[0]
     except Exception as e:
         test_util.test_logger('EXPECTED: Catch exception {}\nCreate vm in disabled ps will fail'.format(e))
     else:
         test_obj_dict.add_vm(vm)
-        test_util.test_fail("CRITICAL ERROR: Can create VM in disabled ps")
+        test_util.test_fail("CRITICAL ERROR: Can create VM in ps not attached cluster")
 
     test_util.test_dsc("Create 5 vms and 10 Volumes and check all should be in enabled PS")
     vm_list = test_stub.create_multi_vms(name_prefix='test_vm', count=5)
     for vm in vm_list:
         test_obj_dict.add_vm(vm)
     for vm in vm_list:
-        assert vm.get_vm().allVolumes[0].primaryStorageUuid == enabled_ps.uuid
+        assert m.get_vm().allVolumes[0].primaryStorageUuid == another_ps.uuid
 
     volume_list = test_stub.create_multi_volume(count=10)
     for volume in volume_list:
         test_obj_dict.add_volume(volume)
     for volume in volume_list:
-        assert volume.volume.primaryStorageUuid == enabled_ps.uuid
+        assert volume.volume.primaryStorageUuid == another_ps.uuid
 
     test_util.test_pass('Multi PrimaryStorage Test Pass')
 
