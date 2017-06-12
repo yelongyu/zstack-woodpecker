@@ -418,8 +418,9 @@ def down_host_network(host_ip, scenarioConfig):
     host_inv = sce_ops.query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
 
     host_vm_config = sce_ops.get_scenario_config_vm(host_vm_inv.name_, scenarioConfig)
-    l2network_nic = os.environ.get('l2ManagementNetworkInterface')
-    cmd = "ifdown %s" % (l2network_nic)
+    #l2network_nic = os.environ.get('l2ManagementNetworkInterface')
+    #cmd = "ifdown %s" % (l2network_nic)
+    cmd = "virsh domiflist %s|sed -n '3p'|awk '{print $1}'|xargs -i virsh domif-setlink %s {} down" % (host_vm_inv.uuid)
     sce_ops.execute_in_vm_console(zstack_management_ip, host_inv.managementIp, host_vm_inv.uuid, host_vm_config, cmd)
 
 def up_host_network(host_ip, scenarioConfig):
@@ -430,7 +431,20 @@ def up_host_network(host_ip, scenarioConfig):
     host_inv = sce_ops.query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
 
     host_vm_config = sce_ops.get_scenario_config_vm(host_vm_inv.name_, scenarioConfig)
-    l2network_nic = os.environ.get('l2ManagementNetworkInterface')
-    cmd = "ifup %s" % (l2network_nic)
+    #l2network_nic = os.environ.get('l2ManagementNetworkInterface')
+    #cmd = "ifup %s" % (l2network_nic)
+    cmd = "virsh domiflist %s|sed -n '3p'|awk '{print $1}'|xargs -i virsh domif-setlink %s {} up" % (host_vm_inv.uuid)
     sce_ops.execute_in_vm_console(zstack_management_ip, host_inv.managementIp, host_vm_inv.uuid, host_vm_config, cmd)
 
+def get_host_network_status(host_ip, scenarioConfig):
+    zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
+    cond = res_ops.gen_query_conditions('vmNics.ip', '=', host_ip)
+    host_vm_inv = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0]
+    cond = res_ops.gen_query_conditions('uuid', '=', host_vm_inv.hostUuid)
+    host_inv = sce_ops.query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
+
+    host_vm_config = sce_ops.get_scenario_config_vm(host_vm_inv.name_, scenarioConfig)
+    #l2network_nic = os.environ.get('l2ManagementNetworkInterface')
+    #cmd = "ifup %s" % (l2network_nic)
+    cmd = "virsh domiflist %s|sed -n '3p'|awk '{print $1}'|xargs -i virsh domif-getlink %s {}" % (host_vm_inv.uuid)
+    sce_ops.execute_in_vm_console(zstack_management_ip, host_inv.managementIp, host_vm_inv.uuid, host_vm_config, cmd)
