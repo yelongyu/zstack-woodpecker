@@ -159,9 +159,15 @@ def execute_in_vm_console(zstack_management_ip, host_ip, vm_name, vm_config, cmd
     except:
         test_util.test_logger('pexpect not installed')
         return ''
-    ssh_cmd = "sshpass -p %s ssh -t -t -t %s" % (os.environ.get('scenarioHostPassword'), host_ip)
-    child = pexpect.spawn("%s virsh console %s" % (ssh_cmd, vm_name))
-    child.expect('Escape character is', timeout=20)
+
+    try:
+        ssh_cmd = "sshpass -p %s ssh -t -t -t %s" % (os.environ.get('scenarioHostPassword'), host_ip)
+        child = pexpect.spawn("%s virsh console %s" % (ssh_cmd, vm_name))
+        child.expect('Escape character is', timeout=20)
+    except:
+        ssh_cmd = "sshpass -p %s ssh -t -t -t %s" % ("password", host_ip)
+        child = pexpect.spawn("%s virsh console %s" % (ssh_cmd, vm_name))
+        child.expect('Escape character is', timeout=20)
     child.send('\n')
 
     i = child.expect(['login:', '[#\$] ', '~]# '], timeout=10)
