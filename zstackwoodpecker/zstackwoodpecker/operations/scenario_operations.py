@@ -153,6 +153,7 @@ def setup_vm_console(vm_inv, vm_config, deploy_config):
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
 def execute_in_vm_console(zstack_management_ip, host_ip, vm_name, vm_config, cmd):
+    test_util.test_logger("DEBUG.execute_in_vm_console:%s" %(cmd))
     try:
         import pexpect
     except:
@@ -163,17 +164,17 @@ def execute_in_vm_console(zstack_management_ip, host_ip, vm_name, vm_config, cmd
     child.expect('Escape character is', timeout=20)
     child.send('\n')
 
-    i = child.expect(['login:', '[#\$] '], timeout=1)
+    i = child.expect(['login:', '[#\$] ', '~]# '], timeout=10)
     if i == 0:
         test_util.test_logger('login to guest vm')
         child.send("%s\n" % (vm_config.imageUsername_))
         child.expect('Password:', timeout=1)
         child.send("%s\n" % (vm_config.imagePassword_))
         child.expect('[#\$] ', timeout=1)
-    elif i == 1:
+    elif i == 1 or i == 2:
         test_util.test_logger('already login guest vm')
     child.send("%s\n" % (cmd))
-    child.expect('[#\$] ', timeout=1)
+    child.expect(['[#\$] ', '~]# '], timeout=10)
     child.close()
     return child.before
 #    check_ret_cmd = 'echo RET=$?'
