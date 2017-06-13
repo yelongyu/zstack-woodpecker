@@ -66,12 +66,6 @@ def test():
     for vm in vm_list:
         assert vm.get_vm().allVolumes[0].primaryStorageUuid == another_ps.uuid
 
-    volume_list = test_stub.create_multi_volume(count=10)
-    for volume in volume_list:
-        test_obj_dict.add_volume(volume)
-    for volume in volume_list:
-        assert volume.get_volume().primaryStorageUuid == another_ps.uuid
-
     test_util.test_pass('Multi PrimaryStorage Test Pass')
 
 def env_recover():

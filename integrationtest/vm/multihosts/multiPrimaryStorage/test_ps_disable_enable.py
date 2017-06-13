@@ -63,12 +63,8 @@ def test():
         for vm in vm_list:
             assert vm.get_vm().allVolumes[0].primaryStorageUuid == enabled_ps.uuid
 
-        volume_list = test_stub.create_multi_volume(count=10)
-        for volume in volume_list:
-            test_obj_dict.add_volume(volume)
-        for volume in volume_list:
-            assert volume.get_volume().primaryStorageUuid == enabled_ps.uuid
         ps_ops.change_primary_storage_state(disabled_ps.uuid, state='enable')
+        disabled_ps_list.pop(disabled_ps)
         test_util.test_pass('Multi PrimaryStorage Test Pass')
 
 
