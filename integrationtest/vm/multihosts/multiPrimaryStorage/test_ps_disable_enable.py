@@ -10,7 +10,7 @@ import random
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
-VM_COUNT = 5
+VM_COUNT = 2
 VOLUME_NUMBER = 0
 new_ps_list = []
 disabled_ps_list = []
@@ -56,7 +56,7 @@ def test():
             test_obj_dict.add_vm(vm)
             test_util.test_fail("CRITICAL ERROR: Can create VM in disabled ps")
 
-        test_util.test_dsc("Create 5 vms and 10 Volumes and check all should be in enabled PS")
+        test_util.test_dsc("Create 5 vms and check all should be in enabled PS")
         vm_list = test_stub.create_multi_vms(name_prefix='test_vm', count=5)
         for vm in vm_list:
             test_obj_dict.add_vm(vm)
