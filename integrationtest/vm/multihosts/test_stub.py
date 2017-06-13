@@ -424,13 +424,13 @@ def down_host_network(host_ip, scenarioConfig):
 
     host_vm_config = sce_ops.get_scenario_config_vm(host_vm_inv.name_, scenarioConfig)
 
-    cmd = "virsh domiflist %s|sed -n '3p'|awk '{print $1}'|xargs -i virsh domif-setlink %s {} down" % (host_vm_inv.uuid)
-    if test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, "exit 0"):
-        test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd)
-    elif test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password2, "exit 0"):
-        test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password2, cmd)
+    cmd = "virsh domiflist %s|sed -n '3p'|awk '{print $1}'|xargs -i virsh domif-setlink %s {} down" % (host_vm_inv.uuid, host_vm_inv.uuid)
+    if test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, "exit 0"):
+        test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, cmd)
+    elif test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, "exit 0"):
+        test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, cmd)
     else:
-        test_util.test_fail("The candidate password are both not for the physical host %s" %(host_ip))
+        test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s" %(host_inv.managementIp, host_password, host_password2))
 
 def up_host_network(host_ip, scenarioConfig):
     zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
@@ -441,13 +441,13 @@ def up_host_network(host_ip, scenarioConfig):
 
     host_vm_config = sce_ops.get_scenario_config_vm(host_vm_inv.name_, scenarioConfig)
 
-    cmd = "virsh domiflist %s|sed -n '3p'|awk '{print $1}'|xargs -i virsh domif-setlink %s {} up" % (host_vm_inv.uuid)
-    if test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, "exit 0"):
-        test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd)
-    elif test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password2, "exit 0"):
-        test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password2, cmd)
+    cmd = "virsh domiflist %s|sed -n '3p'|awk '{print $1}'|xargs -i virsh domif-setlink %s {} up" % (host_vm_inv.uuid, host_vm_inv.uuid)
+    if test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, "exit 0"):
+        test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, cmd)
+    elif test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, "exit 0"):
+        test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, cmd)
     else:
-        test_util.test_fail("The candidate password are both not for the physical host %s" %(host_ip))
+        test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s" %(host_inv.managementIp, host_password, host_password2))
 
 def get_host_network_status(host_ip, scenarioConfig):
     zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
@@ -458,10 +458,10 @@ def get_host_network_status(host_ip, scenarioConfig):
 
     host_vm_config = sce_ops.get_scenario_config_vm(host_vm_inv.name_, scenarioConfig)
 
-    cmd = "virsh domiflist %s|sed -n '3p'|awk '{print $1}'|xargs -i virsh domif-getlink %s {}" % (host_vm_inv.uuid)
-    if test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, "exit 0"):
-        test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd)
-    elif test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password2, "exit 0"):
-        test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password2, cmd)
+    cmd = "virsh domiflist %s|sed -n '3p'|awk '{print $1}'|xargs -i virsh domif-getlink %s {}" % (host_vm_inv.uuid, host_vm_inv.uuid)
+    if test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, "exit 0"):
+        test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, cmd)
+    elif test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, "exit 0"):
+        test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, cmd)
     else:
-        test_util.test_fail("The candidate password are both not for the physical host %s" %(host_ip))
+        test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s" %(host_inv.managementIp, host_password, host_password2))
