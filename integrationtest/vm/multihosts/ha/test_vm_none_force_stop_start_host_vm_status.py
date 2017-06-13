@@ -1,5 +1,5 @@
 '''
-New Integration Test for KVM VM network disconnect and connect check vm status
+New Integration Test for KVM VM force stop and start host check vm status
 @author: SyZhao
 '''
 
@@ -22,6 +22,7 @@ host_ip = None
 max_attempts = None
 storagechecker_timeout = None
 test_stub = test_lib.lib_get_test_stub()
+test_host = None
 
 def test():
     global vm
@@ -84,17 +85,26 @@ def test():
     if ps.type == inventory.LOCAL_STORAGE_TYPE:
         test_util.test_skip('Skip test on localstorage')
 
-    #vm.check()
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
     host_port = test_lib.lib_get_host_port(host_ip)
     test_util.test_logger("host %s is disconnecting" %(host_ip))
 
-    test_stub.down_host_network(host_ip, test_lib.all_scenario_config)
+    host_list = test_stub.get_sce_hosts(test_lib.all_scenario_config, test_lib.scenario_file)
+    for host in host_list:
+        if host.ip_ == host_ip:
+            test_host = host
+            break
+    if not test_host:
+        test_util.test_fail('there is no host with ip %s in scenario file.' %(host_ip))
 
-    test_util.test_logger("wait for 180 seconds")
-    time.sleep(180)
+    #test_stub.down_host_network(host_ip, test_lib.all_scenario_config)
+    test_stub.stop_host(test_host, test_lib.all_scenario_config)
 
-    test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
+    test_util.test_logger("wait for 60 seconds")
+    time.sleep(60)
+
+    #test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
+    test_stub.start_host(test_host, test_lib.all_scenario_config)
 
     vm.set_state(vm_header.STOPPED)
     vm2.set_state(vm_header.STOPPED)
@@ -103,24 +113,13 @@ def test():
     vm.destroy()
     vm2.destroy()
 
-    test_lib.lib_set_ha_selffencer_maxattempts(max_attempts)
-    test_lib.lib_set_ha_selffencer_storagechecker_timeout(storagechecker_timeout)
+    #host_ops.reconnect_host(host_uuid)
+    test_util.test_pass('Test checking vm status after force stop and start success')
 
-    cmd = 'bash -ex %s %s' % (os.environ.get('hostRecoverScript'), host_ip)
-    test_util.test_logger(cmd)
-    os.system(cmd)
-
-    host_ops.reconnect_host(host_uuid)
-
-    test_util.test_pass('Test vm checking status after network disconnect and connect success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     global vm
-    global host_uuid
-    global host_ip
-    global max_attempts
-    global storagechecker_timeout
 
     if vm:
         try:
@@ -128,8 +127,11 @@ def error_cleanup():
         except:
             pass
 
+
+
+def env_recover():
+    test_util.test_logger("recover host: %s" % (test_host.ip_))
     test_lib.lib_set_ha_selffencer_maxattempts(max_attempts)
     test_lib.lib_set_ha_selffencer_storagechecker_timeout(storagechecker_timeout)
-
-    os.system('bash -ex %s %s' % (os.environ.get('hostRecoverScript'), host_ip))
-    host_ops.reconnect_host(host_uuid)
+    test_stub.recover_host(test_host, test_lib.all_scenario_config, test_lib.deploy_config)
+    #host_ops.reconnect_host(host_uuid)

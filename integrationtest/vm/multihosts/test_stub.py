@@ -474,3 +474,21 @@ def get_host_network_status(host_ip, scenarioConfig):
         test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, cmd)
     else:
         test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s with username %s" %(host_inv.managementIp, host_password, host_password2, host_username))
+
+
+def get_sce_hosts(scenarioConfig, scenarioFile):
+    host_list = []
+
+    if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
+        return host_list
+
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            with open(scenarioFile, 'r') as fd:
+                xmlstr = fd.read()
+                fd.close()
+                scenario_file = xmlobject.loads(xmlstr)
+                for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                    if s_vm.name_ == vm.name_:
+                        host_list.append(s_vm)
+    return host_list
