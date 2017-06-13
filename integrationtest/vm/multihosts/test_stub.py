@@ -363,6 +363,15 @@ class TwoPrimaryStorageEnv(object):
             for volume in self.second_ps_volume_list:
                 self.test_object_dict.add_volume(volume)
 
+    def get_vm_list_from_ps(self, ps):
+        if ps is self.first_ps:
+            return self.first_ps_vm_list
+        elif ps is self.second_ps:
+            return self.second_ps_vm_list
+        else:
+            raise NameError
+
+
 def check_vm_running_on_host(vm_uuid, host_ip):
     cmd = "virsh list|grep %s|awk '{print $3}'" %(vm_uuid)
     host_username = os.environ.get('hostUsername')

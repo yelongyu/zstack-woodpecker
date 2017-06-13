@@ -13,6 +13,7 @@ test_obj_dict = test_state.TestStateDict()
 VM_COUNT = 5
 VOLUME_NUMBER = 0
 new_ps_list = []
+disabled_ps_list = []
 
 
 def test():
@@ -34,6 +35,7 @@ def test():
     test_util.test_dsc('Disable All Primary Storage')
     for ps in [env.first, env.second_ps]:
         ps_ops.change_primary_storage_state(ps.uuid, state='disable')
+        disabled_ps_list.append(ps)
 
     test_util.test_dsc('make sure all VM and Volumes still OK and running')
     for test_object in tbj_list:
@@ -62,6 +64,8 @@ def test():
 
 def env_recover():
     test_lib.lib_error_cleanup(test_obj_dict)
+    for disabled_ps in disabled_ps_list:
+        ps_ops.change_primary_storage_state(disabled_ps.uuid, state='enable')
     if new_ps_list:
         for new_ps in new_ps_list:
             ps_ops.detach_primary_storage(new_ps.uuid, new_ps.attachedClusterUuids[0])

@@ -13,6 +13,7 @@ test_obj_dict = test_state.TestStateDict()
 VM_COUNT = 5
 VOLUME_NUMBER = 0
 new_ps_list = []
+disabled_ps_list = []
 
 
 def test():
@@ -38,6 +39,7 @@ def test():
     else:
         enabled_ps = env.first_ps
     ps_ops.change_primary_storage_state(disabled_ps.uuid, state='disable')
+    disabled_ps_list.append(disabled_ps)
 
     test_util.test_dsc('make sure all VM and Volumes still OK and running')
     for test_object in tbj_list:
@@ -63,12 +65,14 @@ def test():
     for volume in volume_list:
         test_obj_dict.add_volume(volume)
     for volume in volume_list:
-        assert volume.volume.primaryStorageUuid == enabled_ps.uuid
+        assert volume.get_volume().primaryStorageUuid == enabled_ps.uuid
 
     test_util.test_pass('Multi PrimaryStorage Test Pass')
 
 def env_recover():
     test_lib.lib_error_cleanup(test_obj_dict)
+    for disabled_ps in disabled_ps_list:
+        ps_ops.change_primary_storage_state(disabled_ps.uuid, state='enable')
     if new_ps_list:
         for new_ps in new_ps_list:
             ps_ops.detach_primary_storage(new_ps.uuid, new_ps.attachedClusterUuids[0])
