@@ -96,7 +96,7 @@ def test():
 
     test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
 
-    vm.set_state(vm_header.RUNNING)
+    vm.set_state(vm_header.STOPPED)
     vm2.set_state(vm_header.STOPPED)
     vm.check()
     vm2.check()
