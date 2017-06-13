@@ -434,12 +434,12 @@ def down_host_network(host_ip, scenarioConfig):
     host_vm_config = sce_ops.get_scenario_config_vm(host_vm_inv.name_, scenarioConfig)
 
     cmd = "virsh domiflist %s|sed -n '3p'|awk '{print $1}'|xargs -i virsh domif-setlink %s {} down" % (host_vm_inv.uuid, host_vm_inv.uuid)
-    if test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, "exit 0"):
+    if test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, "pwd"):
         test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, cmd)
-    elif test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, "exit 0"):
+    elif test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, "pwd"):
         test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, cmd)
     else:
-        test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s" %(host_inv.managementIp, host_password, host_password2))
+        test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s with username %s" %(host_inv.managementIp, host_password, host_password2, host_username))
 
 def up_host_network(host_ip, scenarioConfig):
     zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
@@ -451,12 +451,12 @@ def up_host_network(host_ip, scenarioConfig):
     host_vm_config = sce_ops.get_scenario_config_vm(host_vm_inv.name_, scenarioConfig)
 
     cmd = "virsh domiflist %s|sed -n '3p'|awk '{print $1}'|xargs -i virsh domif-setlink %s {} up" % (host_vm_inv.uuid, host_vm_inv.uuid)
-    if test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, "exit 0"):
+    if test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, "pwd"):
         test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, cmd)
-    elif test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, "exit 0"):
+    elif test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, "pwd"):
         test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, cmd)
     else:
-        test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s" %(host_inv.managementIp, host_password, host_password2))
+        test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s with username %s" %(host_inv.managementIp, host_password, host_password2, host_username))
 
 def get_host_network_status(host_ip, scenarioConfig):
     zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
@@ -468,9 +468,9 @@ def get_host_network_status(host_ip, scenarioConfig):
     host_vm_config = sce_ops.get_scenario_config_vm(host_vm_inv.name_, scenarioConfig)
 
     cmd = "virsh domiflist %s|sed -n '3p'|awk '{print $1}'|xargs -i virsh domif-getlink %s {}" % (host_vm_inv.uuid, host_vm_inv.uuid)
-    if test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, "exit 0"):
+    if test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, "pwd"):
         test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, cmd)
-    elif test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, "exit 0"):
+    elif test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, "pwd"):
         test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, cmd)
     else:
-        test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s" %(host_inv.managementIp, host_password, host_password2))
+        test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s with username %s" %(host_inv.managementIp, host_password, host_password2, host_username))
