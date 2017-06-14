@@ -121,15 +121,6 @@ def test():
     vm2.destroy()
     vm3.destroy()
 
-    test_lib.lib_set_ha_selffencer_maxattempts(max_attempts)
-    test_lib.lib_set_ha_selffencer_storagechecker_timeout(storagechecker_timeout)
-
-    cmd = 'bash -ex %s %s' % (os.environ.get('hostRecoverScript'), host_ip)
-    test_util.test_logger(cmd)
-    os.system(cmd)
-
-    host_ops.reconnect_host(host_uuid)
-
     test_util.test_pass('Test VM ha on host failure Success')
 
 #Will be called only if exception happens in test().
@@ -146,8 +137,13 @@ def error_cleanup():
         except:
             pass
 
+
+def env_recover():
+    test_util.test_logger("recover host: %s" % (test_host.ip_))
     test_lib.lib_set_ha_selffencer_maxattempts(max_attempts)
     test_lib.lib_set_ha_selffencer_storagechecker_timeout(storagechecker_timeout)
 
-    os.system('bash -ex %s %s' % (os.environ.get('hostRecoverScript'), host_ip))
-    host_ops.reconnect_host(host_uuid)
+    try:
+        test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
+    except:
+        pass

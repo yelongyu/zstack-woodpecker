@@ -125,10 +125,6 @@ def env_recover():
     test_util.test_logger("recover host: %s" % (test_host.ip_))
     test_lib.lib_set_ha_selffencer_maxattempts(max_attempts)
     test_lib.lib_set_ha_selffencer_storagechecker_timeout(storagechecker_timeout)
-    try:
-        test_stub.down_host_network(host_ip, test_lib.all_scenario_config)
-    except:
-        pass
 
     try:
         test_stub.up_host_network(host_ip, test_lib.all_scenario_config)

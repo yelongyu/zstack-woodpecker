@@ -91,13 +91,11 @@ def test():
     if not test_host:
         test_util.test_fail('there is no host with ip %s in scenario file.' %(host_ip))
 
-    #test_stub.down_host_network(host_ip, test_lib.all_scenario_config)
     test_stub.stop_host(test_host, test_lib.all_scenario_config)
 
     #test_util.test_logger("wait for 60 seconds")
     #time.sleep(60)
 
-    #test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
     test_stub.start_host(test_host, test_lib.all_scenario_config)
 
     vm.set_state(vm_header.RUNNING)
@@ -108,7 +106,6 @@ def test():
 
     vm.destroy()
 
-    #host_ops.reconnect_host(host_uuid)
     test_util.test_pass('Test checking vm status after graceful stop and start success')
 
 
