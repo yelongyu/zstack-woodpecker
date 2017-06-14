@@ -18,6 +18,7 @@ import zstackwoodpecker.operations.scenario_operations as sce_ops
 import zstackwoodpecker.header.host as host_header
 import apibinding.inventory as inventory
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
+import zstacklib.utils.xmlobject as xmlobject
 import threading
 import time
 import sys
