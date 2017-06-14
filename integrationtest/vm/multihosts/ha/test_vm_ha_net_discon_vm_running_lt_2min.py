@@ -78,7 +78,6 @@ def test():
 
     #vm.check()
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
-    host_port = test_lib.lib_get_host_port(host_ip)
     test_util.test_logger("host %s is disconnecting" %(host_ip))
 
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
@@ -90,14 +89,14 @@ def test():
     #test_util.test_logger("wait for 180 seconds")
     #time.sleep(180)
     vm_stop_time = None
-    cond = res_ops.gen_query_conditions('uuid', '!=', vm.vm.uuid)
-    for i in range(0, 120):
-        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Stopped":
+    cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid)
+    for i in range(0, 600):
+        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Unknown":
             vm_stop_time = i
             break
         time.sleep(1)
         
-    for i in range(vm_stop_time, 120):
+    for i in range(vm_stop_time, 600):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Running":
             break
         time.sleep(1)
