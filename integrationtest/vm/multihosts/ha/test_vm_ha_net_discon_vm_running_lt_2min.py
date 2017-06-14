@@ -43,7 +43,7 @@ def test():
     #l3_name = os.environ.get('l3NoVlanNetworkName1')
     l3_name = os.environ.get('l3VlanNetworkName1')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
-    vrs = test_lib.lib_find_vr_by_l3_uuid(l3_net_uuid)[0]
+    vrs = test_lib.lib_find_vr_by_l3_uuid(l3_net_uuid)
     vr_host_ips = []
     for vr in vrs:
         vr_host_ips.append(test_lib.lib_find_host_by_vr(vr).managementIp)
@@ -90,14 +90,15 @@ def test():
     #test_util.test_logger("wait for 180 seconds")
     #time.sleep(180)
     vm_stop_time = None
+    cond = res_ops.gen_query_conditions('uuid', '!=', vm.vm.uuid)
     for i in range(0, 120):
-        if test_lib.lib_check_vm_stopped_status(vm.vm):
+        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Stopped":
             vm_stop_time = i
             break
         time.sleep(1)
         
     for i in range(vm_stop_time, 120):
-        if test_lib.lib_check_vm_running_status(vm.vm):
+        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Running":
             break
         time.sleep(1)
     else:
@@ -122,10 +123,8 @@ def error_cleanup():
 
 
 def env_recover():
-    test_util.test_logger("recover host: %s" % (test_host.ip_))
     test_lib.lib_set_ha_selffencer_maxattempts(max_attempts)
     test_lib.lib_set_ha_selffencer_storagechecker_timeout(storagechecker_timeout)
-
     try:
         test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
     except:
