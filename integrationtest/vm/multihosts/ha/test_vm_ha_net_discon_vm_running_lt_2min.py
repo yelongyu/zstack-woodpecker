@@ -43,7 +43,7 @@ def test():
     #l3_name = os.environ.get('l3NoVlanNetworkName1')
     l3_name = os.environ.get('l3VlanNetworkName1')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
-    vrs = test_lib.lib_find_vr_by_l3_uuid(l3_net_uuid)
+    vrs = test_lib.lib_find_vr_by_l3_uuid(l3_net_uuid)[0]
     vr_host_ips = []
     for vr in vrs:
         vr_host_ips.append(test_lib.lib_find_host_by_vr(vr).managementIp)
@@ -91,13 +91,13 @@ def test():
     #time.sleep(180)
     vm_stop_time = None
     for i in range(0, 120):
-        if lib_check_vm_stopped_status(vm):
+        if test_lib.lib_check_vm_stopped_status(vm.vm):
             vm_stop_time = i
             break
         time.sleep(1)
         
     for i in range(vm_stop_time, 120):
-        if lib_check_vm_running_status(vm):
+        if test_lib.lib_check_vm_running_status(vm.vm):
             break
         time.sleep(1)
     else:
