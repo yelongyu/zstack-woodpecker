@@ -9,6 +9,12 @@ import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import random
 
+_config_ = {
+        'timeout' : 3000,
+        'noparallel' : True
+        }
+
+
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 VM_COUNT = 2

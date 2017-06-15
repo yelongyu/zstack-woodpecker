@@ -7,6 +7,11 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 
+_config_ = {
+        'timeout' : 3000,
+        'noparallel' : True
+        }
+
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
