@@ -161,6 +161,13 @@ def create_multi_vms(name_prefix='', count=10, host_uuid=None, ps_uuid=None, dat
         vm_list.append(vm)
     for vm in vm_list:
         vm.check()
+    if host_uuid:
+        for vm in vm_list:
+            assert vm.get_vm().hostUuid == host_uuid
+    if ps_uuid:
+        for vm in vm_list:
+            assert vm.get_vm().allVolumes[0].primaryStorageUuid == ps_uuid
+
     return vm_list
 
 
@@ -180,6 +187,9 @@ def create_multi_volume(count=10, host_uuid=None, ps=None):
         volume_list.append(volume)
     for volume in volume_list:
         volume.check()
+
+    for volume in volume_list:
+        assert volume.primaryStorageUuid == ps.uuid
     return volume_list
 
 def add_primaryStorage(first_ps=None):
