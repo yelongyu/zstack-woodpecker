@@ -33,7 +33,7 @@ def test():
     tbj_list = first_ps_vm_list + second_ps_vm_list + first_ps_volume_list + second_ps_volume_list
 
     test_util.test_dsc('Disable All Primary Storage')
-    for ps in [env.first, env.second_ps]:
+    for ps in [env.first_ps, env.second_ps]:
         ps_ops.change_primary_storage_state(ps.uuid, state='disable')
         disabled_ps_list.append(ps)
 
@@ -58,6 +58,17 @@ def test():
     else:
         test_obj_dict.add_volume(volume)
         test_util.test_fail("CRITICAL ERROR: Can create volume in disabled ps")
+
+    test_util.test_dsc("enable All primaryStorage")
+    for ps in [env.first_ps, env.second_ps]:
+        ps_ops.change_primary_storage_state(ps.uuid, state='enable')
+        disabled_ps_list.remove(ps)
+
+    test_util.test_dsc("Try to create vm in both PrimaryStorage")
+    vm1 = test_stub.create_multi_vms(name_prefix='test-vm_first_ps', count=1, ps_uuid=env.first_ps.uuid)[0]
+    vm2 = test_stub.create_multi_vms(name_prefix='test-vm_second_ps', count=1, ps_uuid=env.second_ps.uuid)[0]
+    test_obj_dict.add_vm(vm1)
+    test_obj_dict.add_vm(vm2)
 
 
     test_util.test_pass('Multi PrimaryStorage Test Pass')

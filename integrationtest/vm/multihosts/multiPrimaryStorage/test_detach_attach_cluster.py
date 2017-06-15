@@ -54,7 +54,7 @@ def test():
     for vm in env.get_vm_list_from_ps(another_ps):
         assert vm.get_vm().state == 'Running'
 
-    test_util.test_dsc("Recove the vm in the selected ps")
+    test_util.test_dsc("Recover the vm in the selected ps")
     for vm in env.get_vm_list_from_ps(selected_ps):
         vm.start()
     for vm in env.get_vm_list_from_ps(selected_ps):

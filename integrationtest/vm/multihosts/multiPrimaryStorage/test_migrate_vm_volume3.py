@@ -6,6 +6,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
+import apibinding.inventory as inventory
 
 
 test_stub = test_lib.lib_get_test_stub()
@@ -23,6 +24,9 @@ def test():
                                          second_ps_volume_number=VOLUME_NUMBER)
     env.check_env()
     env.deploy_env()
+    if env.first_ps.type == inventory.LOCAL_STORAGE_TYPE:
+        test_util.test_skip("SKIP TESTING for localstorage")
+
     first_ps_vm = env.first_ps_vm_list[0]
     first_ps_volume_list = env.first_ps_volume_list
     second_ps_vm = env.second_ps_vm_list[0]

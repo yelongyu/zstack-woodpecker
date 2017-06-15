@@ -44,8 +44,16 @@ def test():
     for vm in first_ps_vm_list + second_ps_vm_list:
         vm.update()
 
+
     for vm in env.get_vm_list_from_ps(selected_ps):
         assert vm.get_vm().state == 'Stopped'
+
+    try:
+        vm.start()
+    except:
+        test_util.test_logger("Expected: VM can not be started if PS not attahed to cluster")
+    else:
+        test_util.test_fail("CRITICAL ERROR: Can start VM in ps not attached cluster")
 
     for vm in env.get_vm_list_from_ps(another_ps):
         assert vm.get_vm().state == 'Running'
@@ -54,7 +62,7 @@ def test():
     try:
         vm = test_stub.create_multi_vms(name_prefix='test-vm', count=1, ps_uuid=selected_ps.uuid)[0]
     except Exception as e:
-        test_util.test_logger('EXPECTED: Catch exception {}\nCreate vm in disabled ps will fail'.format(e))
+        test_util.test_logger('EXPECTED: Catch exceptions Create vm in disabled ps will fail')
     else:
         test_obj_dict.add_vm(vm)
         test_util.test_fail("CRITICAL ERROR: Can create VM in ps not attached cluster")

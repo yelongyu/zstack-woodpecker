@@ -61,6 +61,13 @@ def test():
     for vm in vm_list:
         assert vm.get_vm().allVolumes[0].primaryStorageUuid == enabled_ps.uuid
 
+    ps_ops.change_primary_storage_state(disabled_ps.uuid, state='enable')
+    disabled_ps_list.pop()
+    test_util.test_dsc("Create 1 vms in the recovered ps")
+    vm = test_stub.create_multi_vms(name_prefix='test_vm', count=1, ps_uuid=disabled_ps.uuid)[0]
+    test_obj_dict.add_vm(vm)
+
+
     test_util.test_pass('Multi PrimaryStorage Test Pass')
 
 def env_recover():

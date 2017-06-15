@@ -46,7 +46,7 @@ def test():
     try:
         vm = test_stub.create_multi_vms(name_prefix='test-vm', count=1)[0]
     except Exception as e:
-        test_util.test_logger('EXPECTED: Catch exception {}\nCreate vm in disabled ps will fail'.format(e))
+        test_util.test_logger('EXPECTED: Catch exceptions Create vm in disabled ps will fail')
     else:
         test_obj_dict.add_vm(vm)
         test_util.test_fail("CRITICAL ERROR: Can create VM in ps not attached cluster")
@@ -64,6 +64,9 @@ def test():
 
     for vm in first_ps_vm_list + second_ps_vm_list:
         assert vm.get_vm().state == 'Running'
+
+    vm = test_stub.create_multi_vms(name_prefix='test-vm', count=1)[0]
+    test_obj_dict.add_vm(vm)
 
     test_util.test_pass('Multi PrimaryStorage Test Pass')
 
