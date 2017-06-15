@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-vyos-local-ps.xml</deployConfig>
+    <deployConfigTemplate>deploy-local-ps.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
