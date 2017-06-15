@@ -35,6 +35,10 @@ def test():
     for volume in volume_list:
         test_obj_dict.add_volume(volume)
 
+    test_util.test_dsc("Create one more volume in the first primaryStorage")
+    volume = test_stub.create_multi_vms(count=1, ps=first_ps)[0]
+    test_obj_dict.add_volume(volume)
+
     test_util.test_dsc("Check the capacity")
     #To do
 

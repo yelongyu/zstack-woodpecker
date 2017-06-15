@@ -38,6 +38,10 @@ def test():
     for vm in vm_list:
         test_obj_dict.add_vm(vm)
 
+    test_util.test_dsc("Create one more vm in the first primaryStorage")
+    vm = test_stub.create_multi_vms(name_prefix='test_vm', count=1, ps_uuid=first_ps.uuid)[0]
+    test_obj_dict.add_vm(vm)
+
     test_util.test_dsc("Check the capacity")
     #To do
 

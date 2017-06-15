@@ -189,7 +189,7 @@ def create_multi_volume(count=10, host_uuid=None, ps=None):
         volume.check()
 
     for volume in volume_list:
-        assert volume.primaryStorageUuid == ps.uuid
+        assert volume.get_volume().primaryStorageUuid == ps.uuid
     return volume_list
 
 def add_primaryStorage(first_ps=None):
