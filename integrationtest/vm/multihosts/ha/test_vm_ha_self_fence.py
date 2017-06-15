@@ -33,10 +33,6 @@ def test():
     if test_lib.lib_get_ha_enable() != 'true':
         test_util.test_skip("vm ha not enabled. Skip test")
 
-    max_attempts = test_lib.lib_get_ha_selffencer_maxattempts()
-    test_lib.lib_set_ha_selffencer_maxattempts('12')
-    storagechecker_timeout = test_lib.lib_get_ha_selffencer_storagechecker_timeout()
-    test_lib.lib_set_ha_selffencer_storagechecker_timeout('15')
 
     vm_creation_option = test_util.VmOption()
     image_name = os.environ.get('imageName_s')
@@ -113,9 +109,6 @@ def error_cleanup():
             vm.destroy()
         except:
             pass
-
-    test_lib.lib_set_ha_selffencer_maxattempts(max_attempts)
-    test_lib.lib_set_ha_selffencer_storagechecker_timeout(storagechecker_timeout)
 
     os.system('bash -ex %s %s' % (os.environ.get('hostRecoverScript'), host_ip))
     host_ops.reconnect_host(host_uuid)
