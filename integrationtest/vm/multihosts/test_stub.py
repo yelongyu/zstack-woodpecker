@@ -166,7 +166,8 @@ def create_multi_vms(name_prefix='', count=10, host_uuid=None, ps_uuid=None, dat
             assert vm.get_vm().hostUuid == host_uuid
     if ps_uuid:
         for vm in vm_list:
-            assert vm.get_vm().allVolumes[0].primaryStorageUuid == ps_uuid
+            for volume in vm.get_vm().allVolumes:
+                assert volume.primaryStorageUuid == ps_uuid
 
     return vm_list
 
