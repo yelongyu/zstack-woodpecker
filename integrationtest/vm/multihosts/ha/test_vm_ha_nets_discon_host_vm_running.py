@@ -39,7 +39,7 @@ def test():
     #l3_name = os.environ.get('l3NoVlanNetworkName1')
     l3_name = os.environ.get('l3VlanNetworkName1')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
-    l3_name2 = os.environ.get('l3VlanNetworkName2')
+    l3_name2 = os.environ.get('l3VlanNetwork2')
     l3_net_uuid2 = test_lib.lib_get_l3_by_name(l3_name2).uuid
     vrs = test_lib.lib_find_vr_by_l3_uuid(l3_net_uuid)
     vr_host_ips = []
@@ -86,18 +86,32 @@ def test():
 
     #Here we wait for 180 seconds for all vms have been killed, but test result show:
     #no need to wait, the reaction of killing the vm is very quickly.
-    test_util.test_logger("wait for 20 seconds")
-    time.sleep(20)
+    test_util.test_logger("wait for 360 seconds")
+    time.sleep(360)
 
     test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
-
-    if test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp == host_ip:
+    
+    #vm.update() #bug for host uuid is not updated
+    cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid)
+    vm_inv = res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0]
+    vm_host_ip = test_lib.lib_find_host_by_vm(vm_inv).managementIp
+    for i in range(0, 360):
+        test_util.test_logger("vm_host_ip:%s; host_ip:%s" %(vm_host_ip, host_ip))
+        time.sleep(1)
+        vm_inv = res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0]
+        vm_host_ip = test_lib.lib_find_host_by_vm(vm_inv).managementIp
+        if vm_host_ip != host_ip:
+            break
+    else:
         test_util.test_fail("VM is expected to start running on another host")
-    vm.set_state(vm_header.RUNNING)
-    vm.check()
-
-    if test_lib.lib_get_vm_last_host(vm.get_vm()).managementIp != host_ip:
-        test_util.test_fail("Migrated VM's last host is expected to be the last host[ip:%s]" % (host_ip))
+        
+    #vm.check() #bug when multi-networks
+    if test_lib.lib_wait_target_up(vm_inv.vmNics[0].ip, '22', 120):
+        test_util.test_logger("%s can be connected within 120s" %(vm_inv.vmNics[0].ip))
+    elif test_lib.lib_wait_target_up(vm_inv.vmNics[1].ip, '22', 120):
+        test_util.test_logger("%s can be connected within 120s" %(vm_inv.vmNics[1].ip))
+    else:
+        test_util.test_fail("Both %s and %s can't be connected." %(vm_inv.vmNics[0].ip, vm_inv.vmNics[1].ip))
 
     vm.destroy()
 
@@ -117,8 +131,6 @@ def error_cleanup():
 
 
 def env_recover():
-    test_util.test_logger("recover host: %s" % (test_host.ip_))
-
     try:
         test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
     except:
