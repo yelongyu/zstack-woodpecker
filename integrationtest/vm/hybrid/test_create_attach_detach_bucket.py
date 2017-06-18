@@ -13,6 +13,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import time
 import os
 
+date = time.strftime('%m%d%S', time.localtime())
 test_obj_dict = test_state.TestStateDict()
 ks_inv = None
 datacenter_inv = None
@@ -27,7 +28,7 @@ def test():
     datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
     region_id = datacenter_list[0].regionId
     datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
-    bucket_inv = hyb_ops.create_oss_bucket_remote(region_id, 'zstack-%s' % region_id, 'created-by-zstack-for-test')
+    bucket_inv = hyb_ops.create_oss_bucket_remote(region_id, 'zstack-test-%s-%s' % (date, region_id), 'created-by-zstack-for-test')
     hyb_ops.attach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid, datacenter_inv.uuid)
     hyb_ops.detach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid, datacenter_inv.uuid)
     test_util.test_pass('Create Attach Detach OSS bucket Test Success')

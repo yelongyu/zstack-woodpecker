@@ -83,6 +83,13 @@
   </backupStorages>
 
   <images>
+    <image name="$imageName_i_c7_no_qemu_ga" 
+      description="Centos7 Test Image without qemu ga" 
+      format="$rootImageFormat" url="$imageUrl_i_c7" 
+      mediaType="$rootMediaType"
+      username="$imageUsername" password="$imagePassword">
+      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+    </image>
     <image name="$imageName_s" 
       description="Small Test Image Template" 
       mediaType="$rootMediaType" format="$rootImageFormat"

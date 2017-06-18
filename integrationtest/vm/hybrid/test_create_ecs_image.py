@@ -13,11 +13,13 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import time
 import os
 
+date = time.strftime('%m%d%S', time.localtime())
 test_obj_dict = test_state.TestStateDict()
 ks_inv = None
 datacenter_inv = None
 bucket_inv = None
 ecs_image_inv = None
+
 
 def test():
     global ks_inv
@@ -25,7 +27,7 @@ def test():
     global bucket_inv
     global ecs_image_inv
     datacenter_type = os.getenv('datacenterType')
-    cond = res_ops.gen_query_conditions('name', '=', os.getenv('imageName_s'))
+    cond = res_ops.gen_query_conditions('name', '=', os.getenv('imageName_i_c7_no_qemu_ga'))
     image =  res_ops.query_resource(res_ops.IMAGE, cond)[0]
     bs_uuid = image.backupStorageRefs[0].backupStorageUuid
 
@@ -33,8 +35,9 @@ def test():
     datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
     region_id = datacenter_list[0].regionId
     datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
-    bucket_inv = hyb_ops.create_oss_bucket_remote(region_id, 'zstack-%s' % region_id, 'created-by-zstack-for-test')
+    bucket_inv = hyb_ops.create_oss_bucket_remote(region_id, 'zstack-test-%s-%s' % (date, region_id), 'created-by-zstack-for-test')
     hyb_ops.attach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid, datacenter_inv.uuid)
+    hyb_ops.update_image_guestOsType(image.uuid, guestOsType='CentOS')
     ecs_image_inv = hyb_ops.create_ecs_image_from_local_image(bs_uuid, datacenter_inv.uuid, image.uuid)
     test_util.test_pass('Create Ecs Image Test Success')
 

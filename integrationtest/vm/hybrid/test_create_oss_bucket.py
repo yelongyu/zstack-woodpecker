@@ -13,6 +13,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import time
 import os
 
+date = time.strftime('%m%d%S', time.localtime())
 test_obj_dict = test_state.TestStateDict()
 ks_inv = None
 bucket_inv = None
@@ -24,7 +25,7 @@ def test():
     ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
     datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
     region_id = datacenter_list[0].regionId
-    bucket_inv = hyb_ops.create_oss_bucket_remote(region_id, 'zstack-%s' % region_id, 'created-by-zstack-for-test')
+    bucket_inv = hyb_ops.create_oss_bucket_remote(region_id, 'zstack-test-%s-%s' % (date, region_id), 'created-by-zstack-for-test')
     test_util.test_pass('Create OSS bucket Test Success')
 
 
