@@ -21,6 +21,7 @@ vm = None
 host_uuid = None
 host_ip = None
 max_attempts = None
+max_time = 360
 storagechecker_timeout = None
 test_stub = test_lib.lib_get_test_stub()
 
@@ -84,8 +85,6 @@ def test():
 
     test_stub.down_host_network(host_ip, test_lib.all_scenario_config)
 
-    #Here we wait for 180 seconds for all vms have been killed, but test result show:
-    #no need to wait, the reaction of killing the vm is very quickly.
     test_util.test_logger("wait for 360 seconds")
     time.sleep(360)
 
@@ -95,7 +94,7 @@ def test():
     cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid)
     vm_inv = res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0]
     vm_host_ip = test_lib.lib_find_host_by_vm(vm_inv).managementIp
-    for i in range(0, 360):
+    for i in range(0, max_time):
         test_util.test_logger("vm_host_ip:%s; host_ip:%s" %(vm_host_ip, host_ip))
         time.sleep(1)
         vm_inv = res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0]
