@@ -22,6 +22,7 @@ host_ip = None
 max_attempts = None
 storagechecker_timeout = None
 test_stub = test_lib.lib_get_test_stub()
+max_time = 600
 
 def test():
     global vm
@@ -88,18 +89,21 @@ def test():
     vm_stop_time = None
     cond = res_ops.gen_query_conditions('name', '=', 'ls_vm_ha_self_start')
     cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid, cond)
-    for i in range(0, 600):
+    for i in range(0, max_time):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Unknown":
             vm_stop_time = i
             break
         time.sleep(1)
         
-    for i in range(vm_stop_time, 600):
+    if not vm_stop_time:
+        vm_stop_time = max_time
+
+    for i in range(vm_stop_time, max_time):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Running":
             break
         time.sleep(1)
     else:
-        test_util.test_fail("vm has not been changed to running as expected within 120s.")
+        test_util.test_fail("vm has not been changed to running as expected within %s s." %(max_time))
 
 
     test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
