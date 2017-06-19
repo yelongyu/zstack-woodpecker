@@ -83,7 +83,7 @@
   </backupStorages>
 
   <images>
-    <image name="$imageName_i_c7_no_qemu_ga" 
+    <image name="$imageName_i_c7" 
       description="Centos7 Test Image without qemu ga" 
       format="$rootImageFormat" url="$imageUrl_i_c7" 
       mediaType="$rootMediaType"
