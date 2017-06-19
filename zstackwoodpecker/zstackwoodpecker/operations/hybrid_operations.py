@@ -423,11 +423,11 @@ def update_ecs_instance(uuid, password, session_uuid=None):
     test_util.test_logger('[ecs instance:] %s is updated.' % uuid)
     return evt
 
-def update_image_guestOsType(uuid, guestOsType, session_uuid=None):
-    action = api_actions.UpdateImageAction
+def update_image_guestOsType(uuid, guest_os_type, session_uuid=None):
+    action = api_actions.UpdateImageAction()
     action.uuid = uuid
-    action.guestOsType = guestOsType
-    test_util.action_logger('Update [image guestOsType:] %s' % (guestOsType))
+    action.guestOsType = guest_os_type
+    test_util.action_logger('Update [image %s] guestOsType' % (uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    test_util.action_logger('Update [image guestOsType:] %s is updated' % (guestOsType))
+    test_util.action_logger('[image %s] guestOsType is updated to [%s]' % (uuid, guest_os_type))
     return evt

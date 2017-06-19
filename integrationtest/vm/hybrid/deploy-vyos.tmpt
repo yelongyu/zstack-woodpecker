@@ -4,5 +4,5 @@ aliyunKey = 123456
 aliyunSecret = 1234567
 datacenterType = aliyun
 
-imageName_i_c7_no_qemu_ga = centos7-installation-no-qemu-ga
-imageUrl_i_c7 = http://zstack/image/centos7-test.qcow2.no-qemu-ga
+imageName_i_c7 = centos7-test
+imageUrl_i_c7 = http://zstack/image/centos7-test.qcow2
