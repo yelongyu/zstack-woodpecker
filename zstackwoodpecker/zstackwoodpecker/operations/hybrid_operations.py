@@ -100,11 +100,11 @@ def del_oss_bucket_file_remote(bucket_uuid, file_name, session_uuid=None):
     return evt
 
 def get_oss_bucket_file_from_remote(bucket_uuid, session_uuid=None):
-    action = api_actions.DeleteOssBucketFileFromRemoteAction()
+    action = api_actions.GetOssBucketFileFromRemoteAction()
     action.uuid = bucket_uuid
     test_util.action_logger('Get [Oss Bucket File From Remote:] %s' % bucket_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    return evt.inventories
+    return evt
 
 def get_datacenter_from_remote(datacenter_type, session_uuid=None):
     action = api_actions.GetDataCenterFromRemoteAction()

@@ -48,6 +48,11 @@ def env_recover():
         hyb_ops.del_ecs_image_remote(ecs_image_inv.uuid)
     global bucket_inv
     if bucket_inv:
+        bucket_file = hyb_ops.get_oss_bucket_file_from_remote(bucket_inv.uuid).files
+        if bucket_file:
+            for i in bucket_file:
+                hyb_ops.del_oss_bucket_file_remote(bucket_inv.uuid, i)
+        time.sleep(10)
         hyb_ops.del_oss_bucket_remote(bucket_inv.uuid)
         #hyb_ops.del_oss_file_bucket_name_in_local(bucket_inv.uuid)
     global datacenter_inv
