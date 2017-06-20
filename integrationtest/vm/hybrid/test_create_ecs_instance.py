@@ -22,17 +22,22 @@ vpc_inv = None
 vswitch_inv = None
 iz_inv = None
 sg_inv = None
+ecs_inv = None
 
 def test():
     global ks_inv
     global datacenter_inv
     global bucket_inv
     global ecs_image_inv
+    global sg_inv
+    global iz_inv
+    global vswitch_inv
+    global ecs_inv
     datacenter_type = os.getenv('datacenterType')
     cond = res_ops.gen_query_conditions('name', '=', os.getenv('imageName_i_c7'))
     image =  res_ops.query_resource(res_ops.IMAGE, cond)[0]
     bs_uuid = image.backupStorageRefs[0].backupStorageUuid
-    cond2 = res_ops.gen_query_conditions('name', '=', os.getenv('small-vm'))
+    cond2 = res_ops.gen_query_conditions('name', '=', os.getenv('instanceOfferingName_m'))
     instance_offering = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond2)[0]
     ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
     datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
@@ -42,13 +47,15 @@ def test():
             region_id = r
 #     region_id = datacenter_list[0].regionId
     datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
-    bucket_inv = hyb_ops.create_oss_bucket_remote(region_id, 'zstack-test-%s' % region_id, 'created-by-zstack-for-test')
+    bucket_inv = hyb_ops.create_oss_bucket_remote(region_id, 'zstack-test-%s-%s' % (date, region_id), 'created-by-zstack-for-test')
     hyb_ops.attach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid, datacenter_inv.uuid)
     iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, region_id)
     zone_id = iz_list[0].zoneId
+    hyb_ops.update_image_guestOsType(image.uuid, guest_os_type='CentOS')
     iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, zone_id)
-    vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', '192.168.0.0/16')
-    vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'zstack-test-vswitch', '192.168.10.0/24')
+    vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', '172.16.0.0/12')
+    time.sleep(10)
+    vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'zstack-test-vswitch', '172.18.1.0/24')
     sg_inv = hyb_ops.create_ecs_security_group_remote('sg_for_test', vpc_inv.uuid)
     ecs_inv = hyb_ops.create_ecs_instance_from_local_image('Password123', bs_uuid, image.uuid, vswitch_inv.uuid, zone_id, instance_offering.uuid,
                                                            ecs_bandwidth=5, ecs_security_group_uuid=sg_inv.uuid, ecs_instance_name='zstack-ecs-test')

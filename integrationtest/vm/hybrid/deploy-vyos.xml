@@ -66,6 +66,9 @@
     <instanceOffering name="$instanceOfferingName_s"
       description="Test" memoryCapacity="$instanceOfferingMemory_s" cpuNum="$instanceOfferingCpuNum_s"
       />
+    <instanceOffering name="$instanceOfferingName_m"
+       description="Test2" memoryCapacity="$instanceOfferingMemory_m" cpuNum="$instanceOfferingCpuNum_m"
+      />
     <virtualRouterOffering name="$virtualRouterOfferingName_s"
       memoryCapacity="$virtualRouterOfferingMemory_s" cpuNum="$virtualRouterOfferingCpuNum_s" isDefault="true">
       <zoneRef>$zoneName</zoneRef>
