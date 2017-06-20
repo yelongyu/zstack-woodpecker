@@ -386,3 +386,113 @@ def make_ssh_no_password(vm_inv):
     vm_ip = vm_inv.vmNics[0].ip
     ssh.make_ssh_no_password(vm_ip, test_lib.lib_get_vm_username(vm_inv), \
             test_lib.lib_get_vm_password(vm_inv))
+
+def create_named_vm(vm_name=None, disk_offering_uuids=None, session_uuid = None):
+
+    image_name = os.environ.get('imageName_net')
+    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    l3_name = os.environ.get('l3VlanNetworkName1')
+    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    if not vm_name:
+        vm_name = 'named_vm'
+    return create_vm([l3_net_uuid], image_uuid, vm_name, disk_offering_uuids, session_uuid = session_uuid)
+
+def time_convert(log_str):
+    time_str = log_str.split()[0]+' '+log_str.split()[1]
+    time_microscond = time_str.split(',')[1]
+    time_str = time_str.split(',')[0]
+    time_tuple = time.strptime(time_str, "%Y-%m-%d %H:%M:%S")
+    return int(time.mktime(time_tuple)*1000+int(time_microscond))
+
+def get_stage_time(vm_name, begin_time):
+    mn_server_log = "/usr/local/zstacktest/apache-tomcat/logs/management-server.log"
+    file_obj = open(mn_server_log)
+    for line in file_obj.readlines():
+        if line.find('APICreateVmInstanceMsg') != -1 and line.find(vm_name) != -1:
+            time_stamp = time_convert(line)
+            if int(time_stamp) >= begin_time:
+                api_id = line.split('{"', 1)[1].split(',')[-3].split(':')[1].strip('"')
+                break
+    file_obj.close
+
+    log_str = ''
+    select_bs_time = select_bs_end_time = select_bs_begin_time = 0
+    allocate_host_time = allocate_host_end_time = allocate_host_begin_time = 0
+    allocate_ps_time = allocate_ps_end_time = allocate_ps_begin_time = 0
+    local_storage_allocate_capacity_time = local_storage_allocate_capacity_end_time = local_storage_allocate_capacity_begin_time = 0
+    allocate_volume_time = allocate_volume_end_time = allocate_volume_begin_time = 0
+    allocate_nic_time = allocate_nic_end_time = allocate_nic_begin_time = 0
+    instantiate_res_time = instantiate_res_end_time = instantiate_res_begin_time = 0
+    instantiate_res_pre_time = instantiate_res_pre_end_time = instantiate_res_pre_begin_time = 0
+    create_on_hypervisor_time = create_on_hypervisor_end_time = create_on_hypervisor_begin_time = 0
+    instantiate_res_post_time = instantiate_res_post_end_time = instantiate_res_post_begin_time = 0
+
+    file_obj = open(mn_server_log)
+    for line in file_obj.readlines():
+        if line.find(api_id) != -1 and line.find('SimpleFlowChain') != -1 and line.find('VmImageSelectBackupStorageFlow') != -1 and line.find('start executing flow') != -1:
+            select_bs_begin_time = time_convert(line)
+        if line.find(api_id) != -1 and line.find('SimpleFlowChain') != -1 and line.find('VmImageSelectBackupStorageFlow') != -1 and line.find('successfully executed flow') != -1:
+            select_bs_end_time = time_convert(line)
+
+        if line.find(api_id) != -1 and line.find('SimpleFlowChain') != -1 and line.find('VmAllocateHostFlow') != -1 and line.find('start executing flow') != -1:
+            allocate_host_begin_time = time_convert(line)
+        if line.find(api_id) != -1 and line.find('SimpleFlowChain') != -1 and line.find('VmAllocateHostFlow') != -1 and line.find('successfully executed flow') != -1:
+            allocate_host_end_time = time_convert(line)
+
+        if line.find(api_id) != -1 and line.find('SimpleFlowChain') != -1 and line.find('VmAllocatePrimaryStorageFlow') != -1 and line.find('start executing flow') != -1:
+            allocate_ps_begin_time = time_convert(line)
+        if line.find(api_id) != -1 and line.find('SimpleFlowChain') != -1 and line.find('VmAllocatePrimaryStorageFlow') != -1 and line.find('successfully executed flow') != -1:
+            allocate_ps_end_time = time_convert(line)
+
+        if line.find(api_id) != -1 and line.find('SimpleFlowChain') != -1 and line.find('LocalStorageAllocateCapacityFlow') != -1 and line.find('start executing flow') != -1:
+            local_storage_allocate_capacity_begin_time = time_convert(line)
+        if line.find(api_id) != -1 and line.find('SimpleFlowChain') != -1 and line.find('LocalStorageAllocateCapacityFlow') != -1 and line.find('successfully executed flow') != -1:
+            local_storage_allocate_capacity_end_time = time_convert(line)
+
+        if line.find(api_id) != -1 and line.find('SimpleFlowChain') != -1 and line.find('VmAllocateVolumeFlow') != -1 and line.find('start executing flow') != -1:
+            allocate_volume_begin_time = time_convert(line)
+        if line.find(api_id) != -1 and line.find('SimpleFlowChain') != -1 and line.find('VmAllocateVolumeFlow') != -1 and line.find('successfully executed flow') != -1:
+            allocate_volume_end_time = time_convert(line)
+
+        if line.find(api_id) != -1 and line.find('SimpleFlowChain') != -1 and line.find('VmAllocateNicFlow') != -1 and line.find('start executing flow') != -1:
+            allocate_nic_begin_time = time_convert(line)
+        if line.find(api_id) != -1 and line.find('SimpleFlowChain') != -1 and line.find('VmAllocateNicFlow') != -1 and line.find('successfully executed flow') != -1:
+            allocate_nic_end_time = time_convert(line)
+
+
+        if line.find(api_id) != -1 and line.find('SimpleFlowChain') != -1 and line.find('VmInstantiateResourcePreFlow') != -1 and line.find('start executing flow') != -1:
+            instantiate_res_pre_begin_time = time_convert(line)
+        if line.find(api_id) != -1 and line.find('SimpleFlowChain') != -1 and line.find('VmInstantiateResourcePreFlow') != -1 and line.find('successfully executed flow') != -1:
+            instantiate_res_pre_end_time = time_convert(line)
+
+        if line.find(api_id) != -1 and line.find('SimpleFlowChain') != -1 and line.find('VmCreateOnHypervisorFlow') != -1 and line.find('start executing flow') != -1:
+            create_on_hypervisor_begin_time = time_convert(line)
+        if line.find(api_id) != -1 and line.find('SimpleFlowChain') != -1 and line.find('VmCreateOnHypervisorFlow') != -1 and line.find('successfully executed flow') != -1:
+            create_on_hypervisor_end_time = time_convert(line)
+
+        if line.find(api_id) != -1 and line.find('SimpleFlowChain') != -1 and line.find('VmInstantiateResourcePostFlow') != -1 and line.find('start executing flow') != -1:
+            instantiate_res_post_begin_time = time_convert(line)
+        if line.find(api_id) != -1 and line.find('SimpleFlowChain') != -1 and line.find('VmInstantiateResourcePostFlow') != -1 and line.find('successfully executed flow') != -1:
+            instantiate_res_post_end_time = time_convert(line)
+
+    file_obj.close()
+
+    if select_bs_end_time != 0 and select_bs_begin_time != 0:
+        select_bs_time = select_bs_end_time - select_bs_begin_time
+    if allocate_host_end_time != 0 and allocate_host_begin_time != 0:
+        allocate_host_time = allocate_host_end_time - allocate_host_begin_time
+    if allocate_ps_end_time != 0 and allocate_ps_begin_time != 0:
+        allocate_ps_time = allocate_ps_end_time - allocate_ps_begin_time
+    if local_storage_allocate_capacity_end_time != 0 and local_storage_allocate_capacity_begin_time != 0:
+        local_storage_allocate_capacity_time = local_storage_allocate_capacity_end_time - local_storage_allocate_capacity_begin_time
+    if allocate_volume_end_time != 0 and allocate_volume_begin_time != 0:
+        allocate_volume_time = allocate_volume_end_time - allocate_volume_begin_time
+    if allocate_nic_end_time != 0 and allocate_volume_begin_time != 0:
+        allocate_nic_time = allocate_nic_end_time - allocate_nic_begin_time
+    if instantiate_res_pre_end_time != 0 and instantiate_res_pre_begin_time != 0:
+        instantiate_res_pre_time = instantiate_res_pre_end_time - instantiate_res_pre_begin_time
+    if create_on_hypervisor_end_time != 0 and create_on_hypervisor_begin_time != 0:
+        create_on_hypervisor_time = create_on_hypervisor_end_time - create_on_hypervisor_begin_time
+    if instantiate_res_post_end_time != 0 and instantiate_res_post_begin_time != 0:
+        instantiate_res_post_time = instantiate_res_post_end_time - instantiate_res_post_begin_time
+    return [select_bs_time, allocate_host_time, allocate_ps_time, local_storage_allocate_capacity_time, allocate_volume_time, allocate_nic_time, instantiate_res_pre_time, create_on_hypervisor_time, instantiate_res_post_time]
