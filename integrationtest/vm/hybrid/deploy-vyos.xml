@@ -84,7 +84,7 @@
 
   <images>
     <image name="$imageName_i_c7" 
-      description="Centos7 Test Image without qemu ga" 
+      description="Centos7 Test Image Template" 
       format="$rootImageFormat" url="$imageUrl_i_c7" 
       mediaType="$rootMediaType"
       username="$imageUsername" password="$imagePassword">

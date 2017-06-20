@@ -357,7 +357,7 @@ def sync_ecs_image_from_remote(datacenter_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt
 
-def create_ecs_instance_from_local_image(ecs_root_password, bs_uuid, image_uuid, ecs_vswtich_uuid, identity_zone_uuid, instance_offering_uuid, ecs_bandwidth, ecs_security_group_uuid, private_ip_address=None, allocate_public_ip='false', ecs_instance_name=None, session_uuid=None):
+def create_ecs_instance_from_local_image(ecs_root_password, bs_uuid, image_uuid, ecs_vswitch_uuid, identity_zone_uuid, instance_offering_uuid, ecs_bandwidth, ecs_security_group_uuid, private_ip_address=None, allocate_public_ip='false', ecs_instance_name=None, session_uuid=None):
     action = api_actions.CreateEcsInstanceFromLocalImageAction()
     action.ecsRootPassword = ecs_root_password
     action.backupStorageUuid = bs_uuid
@@ -431,3 +431,9 @@ def update_image_guestOsType(uuid, guest_os_type, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('[image %s] guestOsType is updated to [%s]' % (uuid, guest_os_type))
     return evt
+
+def query_ecs_image_local(session_uuid=None):
+    action = api_actions.QueryEcsImageFromLocalAction()
+    test_util.action_logger('Query ecs image from local')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventories

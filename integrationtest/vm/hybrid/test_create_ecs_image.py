@@ -27,7 +27,7 @@ def test():
     global bucket_inv
     global ecs_image_inv
     datacenter_type = os.getenv('datacenterType')
-    cond = res_ops.gen_query_conditions('name', '=', os.getenv('imageName_i_c7'))
+    cond = res_ops.gen_query_conditions('name', '=', os.getenv('imageName_s'))
     image =  res_ops.query_resource(res_ops.IMAGE, cond)[0]
     bs_uuid = image.backupStorageRefs[0].backupStorageUuid
 
