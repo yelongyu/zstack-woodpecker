@@ -99,8 +99,8 @@ def test():
 
     test_stub.stop_host(test_host, test_lib.all_scenario_config, 'cold')
 
-    test_util.test_logger("wait for 60 seconds")
-    time.sleep(60)
+    test_util.test_logger("wait for 120 seconds")
+    time.sleep(120)
 
     test_stub.start_host(test_host, test_lib.all_scenario_config)
 
@@ -108,7 +108,7 @@ def test():
     cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid)
     vm_inv = res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0]
     vm_host_ip = test_lib.lib_find_host_by_vm(vm_inv).managementIp
-    for i in range(0, 360):
+    for i in range(0, 60):
         test_util.test_logger("vm_host_ip:%s; host_ip:%s" %(vm_host_ip, host_ip))
         time.sleep(1)
         vm_inv = res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0]

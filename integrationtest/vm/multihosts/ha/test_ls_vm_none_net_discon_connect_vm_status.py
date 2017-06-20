@@ -74,17 +74,26 @@ def test():
 
     test_stub.down_host_network(host_ip, test_lib.all_scenario_config)
 
-    test_util.test_logger("wait for 120 seconds")
-    time.sleep(120)
-    test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
-
     cond = res_ops.gen_query_conditions('name', '=', 'ls_vm_none_status')
     cond = res_ops.gen_query_conditions('uuid', '=', vm2.vm.uuid, cond)
-    for i in range(0, 120):
-        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Stopped":
+
+    for i in range(0, 180):
+        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Unknown":
+            vm_stop_time = i
+            test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
             break
+        time.sleep(1)
+
+    if not vm_stop_time:
+        vm_stop_time = 180
+
+    for i in range(vm_stop_time, 180):
+        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Starting":
+            break
+        time.sleep(1)
     else:
-        test_util.test_fail("vm none is not change to Stopped as expected.")
+        test_util.test_fail("vm has not been changed to running as expected within 180s.")
+
 
     test_util.test_pass('Test VM none change to Stopped within 120s Success')
 

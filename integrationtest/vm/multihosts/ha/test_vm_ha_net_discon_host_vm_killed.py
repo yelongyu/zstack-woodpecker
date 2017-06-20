@@ -94,8 +94,8 @@ def test():
 
     #Here we wait for 180 seconds for all vms have been killed, but test result show:
     #no need to wait, the reaction of killing the vm is very quickly.
-    #test_util.test_logger("wait for 180 seconds")
-    #time.sleep(180)
+    test_util.test_logger("wait for 30 seconds")
+    time.sleep(30)
 
     if test_stub.check_vm_running_on_host(vm.vm.uuid, host_ip):
 	test_util.test_fail("VM1 is expected to start running on another host")
