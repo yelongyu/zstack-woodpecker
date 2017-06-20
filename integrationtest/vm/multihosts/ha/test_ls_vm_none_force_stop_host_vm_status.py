@@ -84,17 +84,26 @@ def test():
         test_util.test_fail('there is no host with ip %s in scenario file.' %(host_ip))
 
     test_stub.stop_host(test_host, test_lib.all_scenario_config, 'cold')
-    time.sleep(60)
-    test_stub.start_host(test_host, test_lib.all_scenario_config)
 
-    time.sleep(20)
     cond = res_ops.gen_query_conditions('name', '=', 'ls_vm_none_status')
     cond = res_ops.gen_query_conditions('uuid', '=', vm2.vm.uuid, cond)
-    for i in range(0, 120):
+
+    for i in range(0, 180):
+        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Unknown":
+            vm_stop_time = i
+            test_stub.start_host(test_host, test_lib.all_scenario_config)
+            break
+        time.sleep(1)
+
+    if not vm_stop_time:
+        vm_stop_time = 180
+
+    for i in range(vm_stop_time, 180):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Stopped":
             break
+        time.sleep(1)
     else:
-        test_util.test_fail("vm none is not change to Stopped as expected.")
+        test_util.test_fail("vm none is not change to Stopped as expected within 180s.")
 
     test_util.test_pass('Test checking vm none status when host has been force stop Success.')
 

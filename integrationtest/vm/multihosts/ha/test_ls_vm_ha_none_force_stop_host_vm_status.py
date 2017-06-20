@@ -95,29 +95,28 @@ def test():
     vm_stop_time = None
     cond = res_ops.gen_query_conditions('name', '=', 'ls_vm_ha_self_start')
     cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid, cond)
-    for i in range(0, 600):
+    for i in range(0, 180):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Unknown":
             vm_stop_time = i
+            test_stub.start_host(test_host, test_lib.all_scenario_config)
             break
         time.sleep(1)
         
-    for i in range(vm_stop_time, 600):
+    if not vm_stop_time:
+        vm_stop_time = 180
+
+    for i in range(vm_stop_time, 180):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Running":
             break
         time.sleep(1)
     else:
-        test_util.test_fail("vm has not been changed to running as expected within 120s.")
-
-    test_stub.start_host(test_host, test_lib.all_scenario_config)
+        test_util.test_fail("vm has not been changed to running as expected within 180s.")
 
     vm.destroy()
-    time.sleep(20)
+
     cond = res_ops.gen_query_conditions('name', '=', 'ls_vm_none_status')
     cond = res_ops.gen_query_conditions('uuid', '=', vm2.vm.uuid, cond)
-    for i in range(0, 120):
-        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Stopped":
-            break
-    else:
+    if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state != "Stopped":
         test_util.test_fail("vm none is not change to Stopped as expected.")
 
     test_util.test_pass('Test checking VM ha and none status when force stop vm Success.')

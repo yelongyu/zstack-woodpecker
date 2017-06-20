@@ -18,7 +18,7 @@ import os
 
 vm = None
 host_uuid = None
-max_time = 300
+max_time = 180
 host_ip = None
 max_attempts = None
 storagechecker_timeout = None
@@ -89,6 +89,7 @@ def test():
     for i in range(0, max_time):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Unknown":
             vm_stop_time = i
+            test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
             break
         time.sleep(1)
 
@@ -101,9 +102,6 @@ def test():
         time.sleep(1)
     else:
         test_util.test_fail("vm has not been changed to running as expected within %s s." %(max_time))
-
-
-    test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
 
     vm.destroy()
 

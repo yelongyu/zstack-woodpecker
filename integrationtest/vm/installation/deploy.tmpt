@@ -1,9 +1,9 @@
 import ../deploy.tmpt
 #-----Instance Template-----
 instanceOfferingName_m = medium-vm
-instanceOfferingMemory_m = 2048M
-instanceOfferingCpuNum_m = 2
-instanceOfferingCpuSpeed_m = 512
+instanceOfferingMemory_m = 6.5G
+instanceOfferingCpuNum_m = 4
+#instanceOfferingCpuSpeed_m = 512
 
 #-----Image-----
 # the installation image could be created from zstack-utility/virtualrouter/bootstrap/build_test_image.sh
