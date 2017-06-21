@@ -167,7 +167,7 @@ def make_ssh_no_password(vm_ip, tmp_file):
     copy_id_dsa_pub(vm_ip)
 def update_mn_hostname(vm_ip, tmp_file):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
-    cmd = '%s "hostnamectl set-hostname " ' % ssh_cmd
+    cmd = '%s "hostnamectl set-hostname zs-test" ' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
 
 def update_mn_ip(vm_ip, mn_ip, tmp_file):
