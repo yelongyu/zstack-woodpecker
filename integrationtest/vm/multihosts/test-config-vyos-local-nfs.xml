@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-vyos-local-nfs.xml</deployConfig>
+    <deployConfigTemplate>deploy-local-nfs.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

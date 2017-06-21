@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-local-nfs.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-local-nfs.tmpt</scenarioConfigTemplate>
+</testConfig>
