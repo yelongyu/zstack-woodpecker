@@ -1,4 +1,5 @@
 <integrationTest>
-    <suite name="license test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
+    <suite name="license test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
+        <case timeout='60' repeat='1' noparallel='True'>test_default_community_lic.py</case>
     </suite>
 </integrationTest>

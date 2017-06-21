@@ -18,3 +18,11 @@ def get_license_info(session_uuid = None):
             session_uuid)
 
     return result
+
+def reload_license(session_uuid = None):
+    action = api_actions.ReloadLicenseAction()
+    test_util.action_logger('Reload license')
+    result = account_operations.execute_action_with_session(action, \
+            session_uuid)
+
+    return result
