@@ -1,5 +1,6 @@
 <integrationTest>
     <suite name="license test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
         <case timeout='60' repeat='1' noparallel='True'>test_default_community_lic.py</case>
+        <case timeout='60' repeat='1' noparallel='True'>test_community_to_trialext.py</case>
     </suite>
 </integrationTest>
