@@ -24,19 +24,14 @@ def get_license_info():
     global lic_issued_date
     global lic_expired_date
     lic_info = lic_ops.get_license_info().inventory
-    print 'shuang45 %s' % lic_issued_date
     if lic_issued_date == None or lic_expired_date != None:
         lic_issued_date = lic_info.issuedDate
-        print 'shuang46 %s' % lic_issued_date
-        print 'shuang46 %s' % lic_issued_date == None
     lic_expired_date = lic_info.expiredDate
     return lic_info
 
 def get_license_issued_date():
     global lic_issued_date
-    print 'shuang44 %s' % lic_issued_date
     if lic_issued_date == None or lic_expired_date == None:
-        print 'shuang4'
         get_license_info()
     return lic_issued_date
 
@@ -128,12 +123,8 @@ def check_license(user_name, cpu_num, host_num, expired, lic_type, issued_date=N
     if lic_info.licenseType != lic_type:
         test_util.test_fail("License type info not correct")
     if lic_info.issuedDate != issued_date:
-        print 'shuang2 %s' % (issued_date)
-        print 'shuang3 %s' % (lic_info.issuedDate)
         test_util.test_fail("License issue date info not correct")
     if lic_info.expiredDate != expired_date:
-        print 'shuang22 %s' % (expired_date)
-        print 'shuang33 %s' % (lic_info.expiredDate)
 
         test_util.test_fail("License expire date info not correct")
 
