@@ -32,21 +32,35 @@ def test():
     else:
         time.sleep(60)
 
-    vm_inv = vm.get_vm()
-    vm_ip = vm_inv.vmNics[0].ip
+    #vm_inv = vm.get_vm()
+    #vm_ip = vm_inv.vmNics[0].ip
 
-    ssh_cmd = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
-    ssh.make_ssh_no_password(vm_ip, test_lib.lib_get_vm_username(vm_inv), \
-            test_lib.lib_get_vm_password(vm_inv))
-    test_stub.copy_id_dsa(vm_inv, ssh_cmd, tmp_file)
-    test_stub.copy_id_dsa_pub(vm_inv)
+    #ssh_cmd = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    #ssh.make_ssh_no_password(vm_ip, test_lib.lib_get_vm_username(vm_inv), \
+    #        test_lib.lib_get_vm_password(vm_inv))
+    #test_stub.copy_id_dsa(vm_inv, ssh_cmd, tmp_file)
+    #test_stub.copy_id_dsa_pub(vm_inv)
+
+    vm_inv = test_stub.create_vm_scenario(image_name, vm_name)
+    vm_ip = vm_inv.vmNics[0].ip
+    test_lib.lib_wait_target_up(vm_ip, 22)
+
+    test_stub.make_ssh_no_password(vm_ip, tmp_file)
 
     test_util.test_dsc('Update MN IP')
-    cmd = '%s "zstack-ctl change_ip --ip="%s ' % (ssh_cmd, vm_ip)
-    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
-    cmd = '%s "zstack-ctl start"' % ssh_cmd
-    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
-    test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
+    test_stub.update_mn_hostname(vm_ip, tmp_file)
+    test_stub.update_mn_ip(vm_ip, vm_ip, tmp_file)
+    test_stub.reset_rabbitmq(vm_ip, tmp_file)
+    test_stub.start_mn(vm_ip, tmp_file)
+    test_stub.check_installation(vm_ip, tmp_file)
+
+
+    #test_util.test_dsc('Update MN IP')
+    #cmd = '%s "zstack-ctl change_ip --ip="%s ' % (ssh_cmd, vm_ip)
+    #process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+    #cmd = '%s "zstack-ctl start"' % ssh_cmd
+    #process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+    #test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
 
     pkg_num = 1.3
     curren_num = float(os.environ.get('releasePkgNum'))
