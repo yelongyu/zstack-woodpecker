@@ -192,12 +192,20 @@ def sync_ecs_vpc_from_remote(datacenter_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt
 
+def del_ecs_vpc_local(uuid, session_uuid=None):
+    action = api_actions.DeleteEcsVpcInLocalAction()
+    action.uuid = uuid
+    test_util.action_logger('Delete [Ecs VPC Local:] %s ' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[Ecs VPC Local:] %s is deleted.' % (uuid))
+    return evt
+
 def del_ecs_vpc_remote(uuid, session_uuid=None):
     action = api_actions.DeleteEcsVpcRemoteAction()
     action.uuid = uuid
     test_util.action_logger('Delete [Ecs VPC Remote:] %s ' % (uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    test_util.test_logger('[Ecs VPC Remote:] %s is created.' % (uuid))
+    test_util.test_logger('[Ecs VPC Remote:] %s is deleted.' % (uuid))
     return evt
 
 def create_ecs_vswtich_remote(vpc_uuid, identity_zone_uuid, name, cidr_block, session_uuid=None):
@@ -214,7 +222,7 @@ def create_ecs_vswtich_remote(vpc_uuid, identity_zone_uuid, name, cidr_block, se
 def sync_ecs_vswitch_from_remote(identity_zone_uuid, session_uuid=None):
     action = api_actions.SyncEcsVSwitchFromRemoteAction()
     action.identityZoneUuid = identity_zone_uuid
-    test_util.action_logger('Sync [Ecs VSwitch From Remote:] %s' % (datacenter_uuid))
+    test_util.action_logger('Sync [Ecs VSwitch From Remote:] %s' % (identity_zone_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt
 
@@ -437,3 +445,17 @@ def query_ecs_image_local(session_uuid=None):
     test_util.action_logger('Query ecs image from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventories
+
+def query_ecs_vpc_local(session_uuid=None):
+    action = api_actions.QueryEcsVpcFromLocalAction()
+    action.conditions = []
+    test_util.action_logger('Query Ecs Vpc local')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def query_ecs_vswitch_local(session_uuid=None):
+    action = api_actions.QueryEcsVSwitchFromLocalAction()
+    action.conditions = []
+    test_util.action_logger('Query Ecs Vpc local')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
