@@ -1,6 +1,6 @@
 '''
 
-Test create ECS instance.
+Test start & stop ECS instance.
 
 @author: Legion
 '''
@@ -59,10 +59,12 @@ def test():
     hyb_ops.create_ecs_image_from_local_image(bs_uuid, datacenter_inv.uuid, image.uuid)
     ecs_inv = hyb_ops.create_ecs_instance_from_local_image('Password123', bs_uuid, image.uuid, vswitch_inv.uuid, zone_id, instance_offering.uuid,
                                                            ecs_bandwidth=5, ecs_security_group_uuid=sg_inv.uuid, ecs_instance_name='zstack-ecs-test')
-    ecs_instance_local = hyb_ops.query_ecs_instance_local()
-    assert ecs_instance_local[0].name
-    test_util.test_pass('Create Ecs Instance Test Success')
-
+    hyb_ops.reboot_ecs_instance(ecs_inv.uuid)
+    test_util.test_pass('Reboot Ecs Instance Test Success')
+    hyb_ops.stop_ecs_instance(ecs_inv.uuid)
+    test_util.test_pass('Stop Ecs Instance Test Success')
+    hyb_ops.start_ecs_instance(ecs_inv.uuid)
+    test_util.test_pass('Start Ecs Instance Test Success')
 
 def env_recover():
     global ecs_inv
@@ -79,7 +81,7 @@ def env_recover():
         hyb_ops.del_ecs_vswitch_remote(vswitch_inv.uuid)
     global vpc_inv
     if vpc_inv:
-        time.sleep(5)
+        time.sleep(10)
         hyb_ops.del_ecs_vpc_remote(vpc_inv.uuid)
     global iz_inv
     if iz_inv:

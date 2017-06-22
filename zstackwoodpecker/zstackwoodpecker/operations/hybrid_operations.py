@@ -442,20 +442,27 @@ def update_image_guestOsType(uuid, guest_os_type, session_uuid=None):
 
 def query_ecs_image_local(session_uuid=None):
     action = api_actions.QueryEcsImageFromLocalAction()
-    test_util.action_logger('Query ecs image from local')
+    test_util.action_logger('Query Ecs image in local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventories
 
 def query_ecs_vpc_local(session_uuid=None):
     action = api_actions.QueryEcsVpcFromLocalAction()
     action.conditions = []
-    test_util.action_logger('Query Ecs Vpc local')
+    test_util.action_logger('Query Ecs Vpc in local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
 def query_ecs_vswitch_local(session_uuid=None):
     action = api_actions.QueryEcsVSwitchFromLocalAction()
     action.conditions = []
-    test_util.action_logger('Query Ecs Vpc local')
+    test_util.action_logger('Query Ecs vSwitch in local')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def query_ecs_instance_local(session_uuid=None):
+    action = api_actions.QueryEcsInstanceFromLocalAction()
+    action.conditions = []
+    test_util.action_logger('Query Ecs Instance in local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt

@@ -51,9 +51,9 @@ def test():
 
 
 def env_recover():
-    global vswitch_loacl
-    if vswitch_loacl:
-        for v in vswitch_loacl:
+    global vswitch_local
+    if vswitch_local:
+        for v in vswitch_local:
             hyb_ops.del_ecs_vswitch_in_local(v.uuid)
     global vswitch_inv
     if vswitch_inv:
