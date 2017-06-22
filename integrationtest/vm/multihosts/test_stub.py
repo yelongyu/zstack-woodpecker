@@ -384,6 +384,15 @@ class TwoPrimaryStorageEnv(object):
             raise NameError
 
 
+def find_ps_local_uuid():
+    ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
+    for ps in ps_list:
+        if ps.type == inventory.LOCAL_STORAGE_TYPE:
+            return ps.uuid
+    test_util.test_fail("Can not find local primary storage ")
+
+
+
 def check_vm_running_on_host(vm_uuid, host_ip):
     cmd = "virsh list|grep %s|awk '{print $3}'" %(vm_uuid)
     host_username = os.environ.get('hostUsername')

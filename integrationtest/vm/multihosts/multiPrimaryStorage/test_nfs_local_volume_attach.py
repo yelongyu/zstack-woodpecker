@@ -6,6 +6,8 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
+import zstackwoodpecker.operations.resource_operations as res_ops
+import apibinding.inventory as inventory
 
 _config_ = {
         'timeout' : 3000,
@@ -14,28 +16,30 @@ _config_ = {
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
-VM_COUNT = 1
 VOLUME_NUMBER = 10
 new_ps_list = []
 
 
 def test():
     env = test_stub.TwoPrimaryStorageEnv(test_object_dict=test_obj_dict,
-                                         first_ps_vm_number=VM_COUNT,
                                          first_ps_volume_number=VOLUME_NUMBER,
                                          second_ps_volume_number=VOLUME_NUMBER)
     env.check_env()
     env.deploy_env()
-    first_ps_vm = env.first_ps_vm_list[0]
     first_ps_volume_list = env.first_ps_volume_list
     second_ps_volume_list = env.second_ps_volume_list
+
+    local_ps_uuid = test_stub.find_ps_local_uuid()
+    local_ps_vm = test_stub.create_multi_vms(name_prefix='test-', count=1, ps_uuid=local_ps_uuid)[0]
+    test_obj_dict.add_vm(local_ps_vm)
+
     if env.new_ps:
         new_ps_list.append(env.second_ps)
 
     all_volume_list = first_ps_volume_list + second_ps_volume_list
-    test_util.test_dsc("Attach all volumes to first ps vm")
+    test_util.test_dsc("Attach all volumes to local ps vm")
     for volume in all_volume_list:
-        volume.attach(first_ps_vm)
+        volume.attach(local_ps_vm)
 
     for volume in all_volume_list:
         volume.check()
