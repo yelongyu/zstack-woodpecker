@@ -37,22 +37,24 @@ def test():
 
 
     test_util.test_dsc('Update MN IP')
+    test_stub.update_mn_hostname(vm_ip, tmp_file)
     test_stub.update_mn_ip(vm_ip, vm_ip, tmp_file)
+    test_stub.reset_rabbitmq(vm_ip, tmp_file)
     test_stub.start_mn(vm_ip, tmp_file)
     test_stub.check_installation(vm_ip, tmp_file)
 
     test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
 
-    #pkg_num = 1.9
-    #curren_num = float(os.environ.get('releasePkgNum'))
-    #while pkg_num <= curren_num:
-    #    test_util.test_logger('Upgrade zstack to %s' % pkg_num)
-    #    upgrade_pkg = os.environ.get('zstackPkg_%s' % pkg_num)
-    #    test_stub.upgrade_zstack(vm_ip, upgrade_pkg, tmp_file) 
-    #    test_stub.start_mn(vm_ip, tmp_file)
-    #    test_stub.check_zstack_version(vm_ip, tmp_file, str(pkg_num))
-    #    test_stub.check_installation(vm_ip, tmp_file)
-    #    pkg_num = pkg_num + 0.1
+    pkg_num = 1.9
+    curren_num = float(os.environ.get('releasePkgNum'))
+    while pkg_num <= curren_num:
+        test_util.test_logger('Upgrade zstack to %s' % pkg_num)
+        upgrade_pkg = os.environ.get('zstackPkg_%s' % pkg_num)
+        test_stub.upgrade_zstack(vm_ip, upgrade_pkg, tmp_file) 
+        test_stub.start_mn(vm_ip, tmp_file)
+        test_stub.check_zstack_version(vm_ip, tmp_file, str(pkg_num))
+        test_stub.check_installation(vm_ip, tmp_file)
+        pkg_num = pkg_num + 0.1
 
     test_util.test_dsc('Upgrade zstack to latest') 
 
