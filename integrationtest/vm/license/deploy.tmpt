@@ -1,0 +1,3 @@
+import ../deploy.tmpt
+
+licenseGenScript = /root/.zstackwoodpecker/lic_gen.sh
