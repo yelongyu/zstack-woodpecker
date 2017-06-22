@@ -20,14 +20,14 @@ def test():
     test_util.test_logger('Check default community license')
     test_stub.check_license(None, None, 2147483647, False, 'Community')
 
-    test_util.test_logger('Load and Check Trial license with 2 day and 1 HOST')
+    test_util.test_logger('Load and Check Prepaid license with 2 day and 1 HOST')
     file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '2', 'Prepaid', '', '1')
     test_stub.load_license(file_path)
     issued_date = test_stub.get_license_info().issuedDate
     expired_date = test_stub.license_date_cal(issued_date, 86400 * 2)
     test_stub.check_license("woodpecker@zstack.io", None, 1, False, 'Paid', issued_date=issued_date, expired_date=expired_date)
 
-    test_util.test_logger('Load and Check Trial license with 1 day and 1 CPU')
+    test_util.test_logger('Load and Check Prepaid license with 1 day and 1 CPU')
     file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '1', 'Prepaid', '1', '')
     test_stub.load_license(file_path)
     issued_date = test_stub.get_license_info().issuedDate
@@ -35,35 +35,35 @@ def test():
     test_stub.check_license("woodpecker@zstack.io", 1, None, False, 'Paid', issued_date=issued_date, expired_date=expired_date)
 
 
-    test_util.test_logger('Load and Check Trial license with 2 day and 10 HOST')
+    test_util.test_logger('Load and Check Prepaid license with 2 day and 10 HOST')
     file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '2', 'Prepaid', '', '10')
     test_stub.load_license(file_path)
     issued_date = test_stub.get_license_info().issuedDate
     expired_date = test_stub.license_date_cal(issued_date, 86400 * 2)
     test_stub.check_license("woodpecker@zstack.io", None, 10, False, 'Paid', issued_date=issued_date, expired_date=expired_date)
 
-    test_util.test_logger('Load and Check Trial license with 3 day and 10 CPU')
+    test_util.test_logger('Load and Check Prepaid license with 3 day and 10 CPU')
     file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '3', 'Prepaid', '10', '')
     test_stub.load_license(file_path)
     issued_date = test_stub.get_license_info().issuedDate
     expired_date = test_stub.license_date_cal(issued_date, 86400 * 3)
     test_stub.check_license("woodpecker@zstack.io", 10, None, False, 'Paid', issued_date=issued_date, expired_date=expired_date)
 
-    test_util.test_logger('Load and Check Trial license with 2 day and 5 CPU')
+    test_util.test_logger('Load and Check Prepaid license with 2 day and 5 CPU')
     file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '2', 'Prepaid', '5', '')
     test_stub.load_license(file_path)
     issued_date = test_stub.get_license_info().issuedDate
     expired_date = test_stub.license_date_cal(issued_date, 86400 * 2)
     test_stub.check_license("woodpecker@zstack.io", 5, None, False, 'Paid', issued_date=issued_date, expired_date=expired_date)
 
-    test_util.test_logger('Load and Check Trial license with 2 day and 2 HOST')
+    test_util.test_logger('Load and Check Prepaid license with 2 day and 2 HOST')
     file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '2', 'Prepaid', '', '2')
     test_stub.load_license(file_path)
     issued_date = test_stub.get_license_info().issuedDate
     expired_date = test_stub.license_date_cal(issued_date, 86400 * 2)
     test_stub.check_license("woodpecker@zstack.io", None, 2, False, 'Paid', issued_date=issued_date, expired_date=expired_date)
 
-    test_util.test_logger('Load and Check Trial license with 3 day and 2 HOST')
+    test_util.test_logger('Load and Check Prepaid license with 3 day and 2 HOST')
     file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '3', 'Prepaid', '', '1')
     test_stub.load_license(file_path)
     issued_date = test_stub.get_license_info().issuedDate
