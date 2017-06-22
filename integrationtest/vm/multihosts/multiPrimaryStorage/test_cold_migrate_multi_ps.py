@@ -25,6 +25,8 @@ def test():
     local_nfs_env = False
     ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
     local_ps = test_stub.find_ps_local()
+    if not local_ps:
+        test_util.test_skip("Skip test for non local PS environment")
     another_ps = [ps for ps in ps_list if not ps is local_ps][0]
     if test_stub.find_ps_nfs():
         local_nfs_env = True
