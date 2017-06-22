@@ -389,7 +389,8 @@ def find_ps_local():
     for ps in ps_list:
         if ps.type == inventory.LOCAL_STORAGE_TYPE:
             return ps
-    test_util.test_fail("Can not find local primary storage ")
+    test_util.test_logger("Can not find local primary storage ")
+    return False
 
 
 def find_ps_nfs():
@@ -397,8 +398,8 @@ def find_ps_nfs():
     for ps in ps_list:
         if ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
             return ps
-    test_util.test_fail("Can not find NFS primary storage ")
-
+    test_util.test_logger("Can not find NFS primary storage ")
+    return False
 
 
 def check_vm_running_on_host(vm_uuid, host_ip):

@@ -30,7 +30,8 @@ def test():
     test_obj_dict.add_vm(vm)
 
     test_util.test_dsc("Create {0} volumes in both primary storage ".format(VOLUME_NUMBER))
-    volume_in_local = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=local_ps)
+    volume_in_local = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=local_ps,
+                                                    host_uuid=test_lib.lib_get_vm_host(vm.get_vm()).uuid)
     volume_in_nfs  = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=nfs_ps)
     for volume in volume_in_local + volume_in_nfs:
         test_obj_dict.add_volume(volume)
