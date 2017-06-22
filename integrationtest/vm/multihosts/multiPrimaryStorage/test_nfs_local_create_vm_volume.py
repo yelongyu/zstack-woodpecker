@@ -31,7 +31,7 @@ def test():
     for vm in vm_list:
         root_volume = test_lib.lib_get_root_volume(vm)
         ps_uuid = root_volume.primaryStorageUuid
-        ps = res_ops.get_resource(res_ops.PRIMARY_STORAGE, uuid=ps_uuid)
+        ps = res_ops.get_resource(res_ops.PRIMARY_STORAGE, uuid=ps_uuid)[0]
         assert ps.type == inventory.LOCAL_STORAGE_TYPE
 
     test_util.test_pass('Multi PrimaryStorage Test Pass')
