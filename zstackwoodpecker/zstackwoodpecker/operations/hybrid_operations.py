@@ -466,3 +466,10 @@ def query_ecs_instance_local(session_uuid=None):
     test_util.action_logger('Query Ecs Instance in local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
+
+def query_aliyun_key_secret(session_uuid=None):
+    action = api_actions.QueryAliyunKeySecretAction()
+    action.conditions = []
+    test_util.action_logger('Query Aliyun Key Secret')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt

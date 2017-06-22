@@ -22,8 +22,12 @@ def test():
     global datacenter_inv
     ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
     hyb_ops.detach_aliyun_key(ks_inv.uuid)
+    ks_detach = hyb_ops.query_aliyun_key_secret()
+    assert ks_detach[0].current == 'false'
     test_util.test_pass('Detach Aliyun key and secret success')
     hyb_ops.attach_aliyun_key(ks_inv.uuid)
+    ks_attach = hyb_ops.query_aliyun_key_secret()
+    assert ks_attach[0].current == 'true'
     test_util.test_pass('Attach Aliyun key and secret success')
 
 
