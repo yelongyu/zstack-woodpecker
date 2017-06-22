@@ -129,8 +129,13 @@ def check_license(user_name, cpu_num, host_num, expired, lic_type, issued_date=N
         test_util.test_fail("License expire date info not correct")
 
 def license_date_cal(issued_date, duration):
-    issued_time = time.mktime(time.strptime(issued_date, '%Y-%m-%d %H:%M:%S.0'))
-    expired_time = issued_time + duration
-    expired_date = datetime.datetime.fromtimestamp(expired_time).strftime('%Y-%m-%d %H:%M:%S.0')
+    try:
+        issued_time = time.mktime(time.strptime(issued_date, '%Y-%m-%d %H:%M:%S.0'))
+        expired_time = issued_time + duration
+        expired_date = datetime.datetime.fromtimestamp(expired_time).strftime('%Y-%m-%d %H:%M:%S.0')
+    except:
+        issued_time = time.mktime(time.strptime(issued_date, '%Y-%m-%dT%H:%M:%S.000+08:00'))
+        expired_time = issued_time + duration
+        expired_date = datetime.datetime.fromtimestamp(expired_time).strftime('%Y-%m-%dT%H:%M:%S.000+08:00')
     return expired_date
 
