@@ -3,5 +3,6 @@
         <case timeout='60' repeat='1' noparallel='True'>test_default_community_lic.py</case>
         <case timeout='60' repeat='1' noparallel='True'>test_community_to_trialext.py</case>
         <case timeout='60' repeat='1' noparallel='True'>test_community_to_trial.py</case>
+        <case timeout='60' repeat='1' noparallel='True'>test_community_to_prepaid.py</case>
     </suite>
 </integrationTest>
