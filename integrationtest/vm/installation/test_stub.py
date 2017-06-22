@@ -204,7 +204,7 @@ def update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path):
 
 def prepare_mevoco_test_env(vm_inv):
     all_in_one_pkg = os.environ['zstackPkg']
-    scp_file_to_vm(vm_inv, all_in_one_pkg, '/root/zizhu.bin')
+    scp_file_to_vm(vm_ip, all_in_one_pkg, '/root/zizhu.bin')
 
     vm_ip = vm_inv.vmNics[0].ip
     ssh.make_ssh_no_password(vm_ip, test_lib.lib_get_vm_username(vm_inv), \
@@ -216,10 +216,10 @@ def prepare_test_env(vm_inv, aio_target):
     vm_ip = vm_inv.vmNics[0].ip
     vm_username = test_lib.lib_get_vm_username(vm_inv)
     vm_password = test_lib.lib_get_vm_password(vm_inv)
-    scp_file_to_vm(vm_inv, zstack_install_script, target_file)
+    scp_file_to_vm(vm_ip, zstack_install_script, target_file)
 
     all_in_one_pkg = os.environ['zstackPkg']
-    scp_file_to_vm(vm_inv, all_in_one_pkg, aio_target)
+    scp_file_to_vm(vm_ip, all_in_one_pkg, aio_target)
 
     ssh.make_ssh_no_password(vm_ip, vm_username, vm_password)
 
@@ -229,9 +229,9 @@ def prepare_upgrade_test_env(vm_inv, aio_target, upgrade_pkg):
     vm_ip = vm_inv.vmNics[0].ip
     vm_username = test_lib.lib_get_vm_username(vm_inv)
     vm_password = test_lib.lib_get_vm_password(vm_inv)
-    scp_file_to_vm(vm_inv, zstack_install_script, target_file)
+    scp_file_to_vm(vm_ip, zstack_install_script, target_file)
 
-    scp_file_to_vm(vm_inv, upgrade_pkg, aio_target)
+    scp_file_to_vm(vm_ip, upgrade_pkg, aio_target)
 
     ssh.make_ssh_no_password(vm_ip, vm_username, vm_password)
 
@@ -241,7 +241,7 @@ def prepare_yum_repo(vm_inv):
     vm_ip = vm_inv.vmNics[0].ip
     vm_username = test_lib.lib_get_vm_username(vm_inv)
     vm_password = test_lib.lib_get_vm_password(vm_inv)
-    scp_file_to_vm(vm_inv, origin_file, target_file)
+    scp_file_to_vm(vm_ip, origin_file, target_file)
 
     ssh.make_ssh_no_password(vm_ip, vm_username, vm_password)
 

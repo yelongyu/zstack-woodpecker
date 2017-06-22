@@ -42,7 +42,7 @@ def test():
 
     test_util.test_dsc('Create test vm to test zstack installation with console proxy.')
 
-    conditions = res_ops.gen_query_conditions('name', 'like', os.environ.get('imageNameBase_o'))
+    conditions = res_ops.gen_query_conditions('name', 'like', os.environ.get('imageNameBase_20'))
     image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
 
     vm_inv = create_vm(image) 
@@ -63,7 +63,7 @@ def test():
     test_stub.prepare_test_env(vm_inv, target_file)
     args = '-o -C %s -I %s' % (vip, vm_ip)
     test_stub.execute_install_with_args(ssh_cmd, args, target_file, tmp_file)
-    test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
+    test_stub.check_installation(vm_ip, tmp_file)
 
     cmd = '%s cat /usr/local/zstack/apache-tomcat/webapps/zstack/WEB-INF/classes/zstack.properties | grep \'consoleProxyOverriddenIp = %s\'' % (ssh_cmd, vip)
     (process_result, check_result) = test_stub.execute_shell_in_process_stdout(cmd, tmp_file)
