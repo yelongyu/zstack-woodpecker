@@ -29,7 +29,7 @@ def test():
     first_ps_volume_list = env.first_ps_volume_list
     second_ps_volume_list = env.second_ps_volume_list
 
-    local_ps_uuid = test_stub.find_ps_local_uuid()
+    local_ps_uuid = test_stub.find_ps_local().uuid
     local_ps_vm = test_stub.create_multi_vms(name_prefix='test-', count=1, ps_uuid=local_ps_uuid)[0]
     test_obj_dict.add_vm(local_ps_vm)
 

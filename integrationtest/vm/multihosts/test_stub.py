@@ -384,12 +384,20 @@ class TwoPrimaryStorageEnv(object):
             raise NameError
 
 
-def find_ps_local_uuid():
+def find_ps_local():
     ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
     for ps in ps_list:
         if ps.type == inventory.LOCAL_STORAGE_TYPE:
-            return ps.uuid
+            return ps
     test_util.test_fail("Can not find local primary storage ")
+
+
+def find_ps_nfs():
+    ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
+    for ps in ps_list:
+        if ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
+            return ps
+    test_util.test_fail("Can not find NFS primary storage ")
 
 
 
