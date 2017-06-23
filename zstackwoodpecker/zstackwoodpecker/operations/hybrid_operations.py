@@ -442,9 +442,10 @@ def update_image_guestOsType(uuid, guest_os_type, session_uuid=None):
 
 def query_ecs_image_local(session_uuid=None):
     action = api_actions.QueryEcsImageFromLocalAction()
+    action.conditions = []
     test_util.action_logger('Query Ecs image from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventories
+    return evt
 
 def query_ecs_vpc_local(session_uuid=None):
     action = api_actions.QueryEcsVpcFromLocalAction()
