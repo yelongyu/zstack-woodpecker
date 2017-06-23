@@ -204,8 +204,8 @@ def update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path):
     process_result = execute_shell_in_process(cmd, tmp_file)
     cmd = '%s "yum -y clean all"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
-    cmd = '%s "yum -y --disablerepo=* --enablerepo=zstack-local,qemu-kvm-ev update"' % ssh_cmd
-    process_result = execute_shell_in_process(cmd, tmp_file)
+    #cmd = '%s "yum -y --disablerepo=* --enablerepo=zstack-local,qemu-kvm-ev update"' % ssh_cmd
+    #process_result = execute_shell_in_process(cmd, tmp_file)
 
 def prepare_mevoco_test_env(vm_inv):
     all_in_one_pkg = os.environ['zstackPkg']
