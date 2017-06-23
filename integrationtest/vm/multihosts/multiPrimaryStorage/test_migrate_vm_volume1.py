@@ -51,6 +51,7 @@ def test():
 
     for volume in first_ps_volume_list:
         volume.check()
+        assert volume.get_volume().vmInstanceUuid == first_ps_vm.get_vm().uuid
 
 
     test_util.test_dsc("Attach volume to vm in second Primary Storage")
@@ -65,6 +66,7 @@ def test():
 
     for volume in second_ps_volume_list:
         volume.check()
+        assert volume.get_volume().vmInstanceUuid == second_ps_vm.get_vm().uuid
 
 
 def env_recover():
