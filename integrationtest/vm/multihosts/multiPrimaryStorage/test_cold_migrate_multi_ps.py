@@ -27,7 +27,7 @@ def test():
     local_ps = test_stub.find_ps_local()
     if not local_ps:
         test_util.test_skip("Skip test for non local PS environment")
-    another_ps = [ps for ps in ps_list if not ps is local_ps][0]
+    another_ps = [ps for ps in ps_list if ps.type != inventory.LOCAL_STORAGE_TYPE][0]
     if test_stub.find_ps_nfs():
         local_nfs_env = True
 
