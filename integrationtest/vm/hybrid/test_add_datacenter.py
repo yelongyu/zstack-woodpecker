@@ -23,10 +23,9 @@ def test():
     datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
     region_id = datacenter_list[0].regionId
     datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
-    test_util.test_pass('Add DataCenter Test Success')
     time.sleep(5)
     hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
-    test_util.test_pass('Delete DataCenter Test Success')
+    test_util.test_pass('Add Delete DataCenter Test Success')
 
 def env_recover():
     global ks_inv

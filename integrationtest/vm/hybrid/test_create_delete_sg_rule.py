@@ -34,12 +34,11 @@ def test():
     sg_inv = hyb_ops.create_ecs_security_group_remote('sg_for_test', vpc_inv.uuid)
     sg_rule_ingress = hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'ingress', 'TCP', '445/445', '0.0.0.0/0', 'drop', 'intranet', '1')
     sg_rule_egress = hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'egress', 'TCP', '80/80', '0.0.0.0/0', 'accept', 'intranet', '10')
-    test_util.test_pass('Create ECS Security Group Rule Test Success')
     if sg_rule_ingress:
         hyb_ops.del_ecs_security_group_rule_remote(sg_rule_ingress.uuid)
     if sg_rule_egress:
         hyb_ops.del_ecs_security_group_rule_remote(sg_rule_egress.uuid)
-    test_util.test_pass('Delete ECS Security Group Rule Test Success')
+    test_util.test_pass('Create Delete ECS Security Group Rule Test Success')
 
 def env_recover():
     global sg_inv

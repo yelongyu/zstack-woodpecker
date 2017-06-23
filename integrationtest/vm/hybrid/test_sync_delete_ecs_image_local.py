@@ -42,14 +42,13 @@ def test():
     if ecs_image_auto_synced:
         for i in ecs_image_auto_synced:
             hyb_ops.del_ecs_image_in_local(i.uuid)
-        test_util.test_pass('Delete Local Ecs Image Test Success')
     ecs_image_sync = hyb_ops.sync_ecs_image_from_remote(datacenter_inv.uuid)
-    assert ecs_image_sync[0].uuid
-    test_util.test_pass('Sync Ecs Image Test Success')
+    assert ecs_image_sync.addList
     ecs_image_local = hyb_ops.query_ecs_image_local()
     for i in ecs_image_local:
         if i.name == image.name:
             ecs_image_inv = i
+    test_util.test_pass('Sync Delete Local Ecs Image Test Success')
 
 def env_recover():
     global ecs_image_inv

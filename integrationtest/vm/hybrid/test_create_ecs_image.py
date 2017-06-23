@@ -36,10 +36,9 @@ def test():
     hyb_ops.attach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid, datacenter_inv.uuid)
     hyb_ops.update_image_guestOsType(image.uuid, guest_os_type='CentOS')
     ecs_image_inv = hyb_ops.create_ecs_image_from_local_image(bs_uuid, datacenter_inv.uuid, image.uuid)
-    test_util.test_pass('Create Ecs Image Test Success')
     time.sleep(10)
     hyb_ops.del_ecs_image_remote(ecs_image_inv.uuid)
-    test_util.test_pass('Delete Ecs Image Test Success')
+    test_util.test_pass('Create Delete Ecs Image Test Success')
 
 def env_recover():
     global bucket_inv

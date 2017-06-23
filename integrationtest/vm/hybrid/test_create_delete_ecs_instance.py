@@ -61,11 +61,10 @@ def test():
                                                            ecs_bandwidth=5, ecs_security_group_uuid=sg_inv.uuid, ecs_instance_name='zstack-ecs-test')
     ecs_instance_local = hyb_ops.query_ecs_instance_local()
     assert ecs_instance_local[0].uuid
-    test_util.test_pass('Create Ecs Instance Test Success')
     time.sleep(10)
     hyb_ops.stop_ecs_instance(ecs_inv.uuid)
     hyb_ops.del_ecs_instance(ecs_inv.uuid)
-    test_util.test_pass('Delete Ecs Instance Test Success')
+    test_util.test_pass('Create Delete Ecs Instance Test Success')
 
 def env_recover():
     global sg_inv

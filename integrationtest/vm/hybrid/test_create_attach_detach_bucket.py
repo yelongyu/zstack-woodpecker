@@ -30,11 +30,9 @@ def test():
     datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
     bucket_inv = hyb_ops.create_oss_bucket_remote(region_id, 'zstack-test-%s-%s' % (date_s, region_id), 'created-by-zstack-for-test')
     hyb_ops.attach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid, datacenter_inv.uuid)
-    test_util.test_pass('Create Attach OSS bucket Test Success')
     time.sleep(5)
     hyb_ops.detach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid, datacenter_inv.uuid)
-    test_util.test_pass('Detach OSS bucket Test Success')
-
+    test_util.test_pass('Create Attach Detach OSS bucket Test Success')
 
 def env_recover():
     global bucket_inv

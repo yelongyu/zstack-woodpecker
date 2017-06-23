@@ -60,11 +60,11 @@ def test():
     ecs_inv = hyb_ops.create_ecs_instance_from_local_image('Password123', bs_uuid, image.uuid, vswitch_inv.uuid, zone_id, instance_offering.uuid,
                                                            ecs_bandwidth=5, ecs_security_group_uuid=sg_inv.uuid, ecs_instance_name='zstack-ecs-test')
     hyb_ops.reboot_ecs_instance(ecs_inv.uuid)
-    test_util.test_pass('Reboot Ecs Instance Test Success')
+    time.sleep(5)
     hyb_ops.stop_ecs_instance(ecs_inv.uuid)
-    test_util.test_pass('Stop Ecs Instance Test Success')
+    time.sleep(5)
     hyb_ops.start_ecs_instance(ecs_inv.uuid)
-    test_util.test_pass('Start Ecs Instance Test Success')
+    test_util.test_pass('Start Reboot Stop Ecs Instance Test Success')
 
 def env_recover():
     global ecs_inv

@@ -24,18 +24,15 @@ def test():
     hyb_ops.detach_aliyun_key(ks_inv.uuid)
     ks_detach = hyb_ops.query_aliyun_key_secret()
     assert ks_detach[0].current == 'false'
-    test_util.test_pass('Detach Aliyun key and secret success')
     hyb_ops.attach_aliyun_key(ks_inv.uuid)
     ks_attach = hyb_ops.query_aliyun_key_secret()
     assert ks_attach[0].current == 'true'
-    test_util.test_pass('Attach Aliyun key and secret success')
-
+    test_util.test_pass('Detach Attach Aliyun key and secret success')
 
 def env_recover():
     global ks_inv
     if ks_inv:
         hyb_ops.del_aliyun_key_secret(ks_inv.uuid)
-
 
 #Will be called only if exception happens in test().
 def error_cleanup():

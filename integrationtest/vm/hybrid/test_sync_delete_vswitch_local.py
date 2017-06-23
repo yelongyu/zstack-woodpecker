@@ -43,7 +43,6 @@ def test():
     if vswitch_auto_synced:
         for v in vswitch_auto_synced:
             hyb_ops.del_ecs_vswitch_in_local(v.uuid)
-        test_util.test_pass('Delete local Ecs vSwitch Test Success')
     vswitch_synced = hyb_ops.sync_ecs_vswitch_from_remote(iz_inv.uuid)
     assert vswitch_synced.addList
     vswitch_local = hyb_ops.query_ecs_vswitch_local()
@@ -51,7 +50,7 @@ def test():
         if vl.vSwitchName == 'zstack-test-vswitch-%s' % date_s:
             vswitch_inv = vl
     assert vswitch_inv.uuid
-    test_util.test_pass('Sync Ecs vSwitch Test Success')
+    test_util.test_pass('Sync Delete Ecs vSwitch Test Success')
 
 def env_recover():
     global vswitch_inv

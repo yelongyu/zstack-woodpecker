@@ -30,7 +30,6 @@ def test():
     vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', '192.168.0.0/16')
     test_util.test_pass('Create ECS VPC Test Success')
 
-
 def env_recover():
     global vpc_inv
     if vpc_inv:

@@ -30,10 +30,9 @@ def test():
     iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, region_id)
     zone_id = iz_list[0].zoneId
     iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, zone_id)
-    test_util.test_pass('Add Identity Zone Test Success')
     time.sleep(5)
     hyb_ops.del_identity_zone_in_local(iz_inv.uuid)
-    test_util.test_pass('Delete Identity Zone Test Success')
+    test_util.test_pass('Add Delete Identity Zone Test Success')
 
 def env_recover():
     global datacenter_inv
