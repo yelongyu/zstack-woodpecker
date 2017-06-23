@@ -35,7 +35,7 @@ def test():
 
 
     vm_creation_option = test_util.VmOption()
-    image_name = os.environ.get('imageName_s')
+    image_name = os.environ.get('imageName_net')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     #l3_name = os.environ.get('l3NoVlanNetworkName1')
     l3_name = os.environ.get('l3VlanNetworkName1')
