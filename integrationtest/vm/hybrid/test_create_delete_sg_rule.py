@@ -32,6 +32,7 @@ def test():
     vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', '192.168.0.0/16')
     time.sleep(5)
     sg_inv = hyb_ops.create_ecs_security_group_remote('sg_for_test', vpc_inv.uuid)
+    time.sleep(5)
     sg_rule_ingress = hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'ingress', 'TCP', '445/445', '0.0.0.0/0', 'drop', 'intranet', '1')
     sg_rule_egress = hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'egress', 'TCP', '80/80', '0.0.0.0/0', 'accept', 'intranet', '10')
     if sg_rule_ingress:

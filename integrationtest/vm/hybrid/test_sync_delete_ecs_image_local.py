@@ -38,6 +38,7 @@ def test():
     hyb_ops.attach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid, datacenter_inv.uuid)
     hyb_ops.update_image_guestOsType(image.uuid, guest_os_type='CentOS')
     ecs_image_inv = hyb_ops.create_ecs_image_from_local_image(bs_uuid, datacenter_inv.uuid, image.uuid)
+    time.sleep(5)
     ecs_image_auto_synced = hyb_ops.query_ecs_image_local()
     if ecs_image_auto_synced:
         for i in ecs_image_auto_synced:

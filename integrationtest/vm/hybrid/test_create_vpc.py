@@ -28,12 +28,11 @@ def test():
     region_id = datacenter_list[0].regionId
     datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
     vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', '192.168.0.0/16')
-    test_util.test_pass('Create ECS VPC Test Success')
+    time.sleep(10)
+    hyb_ops.del_ecs_vpc_remote(vpc_inv.uuid)
+    test_util.test_pass('Create Delete ECS VPC Test Success')
 
 def env_recover():
-    global vpc_inv
-    if vpc_inv:
-        hyb_ops.del_ecs_vpc_remote(vpc_inv.uuid)
     global datacenter_inv
     if datacenter_inv:
         hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)

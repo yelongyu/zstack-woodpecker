@@ -30,6 +30,7 @@ def test():
     region_id = datacenter_list[0].regionId
     datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
     vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test_%s' % date_s, '192.168.0.0/16')
+    time.sleep(5)
     vpc_auto_synced = hyb_ops.query_ecs_vpc_local()
     if vpc_auto_synced:
         for v in vpc_auto_synced:
