@@ -76,10 +76,12 @@ def test():
     vm.check()
 
     if not test_lib.lib_check_vm_live_migration_cap(vm.vm):
+        vm.destroy()
         test_util.test_skip('skip ha if live migrate not supported')
 
     ps = test_lib.lib_get_primary_storage_by_uuid(vm.get_vm().allVolumes[0].primaryStorageUuid)
     if ps.type == inventory.LOCAL_STORAGE_TYPE:
+        vm.destroy()
         test_util.test_skip('Skip test on localstorage')
 
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
@@ -97,19 +99,30 @@ def test():
     #test_stub.down_host_network(host_ip, test_lib.all_scenario_config)
     test_stub.stop_host(test_host, test_lib.all_scenario_config, 'cold')
 
-    time.sleep(1)
+    time.sleep(30)
 
     #test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
     test_stub.start_host(test_host, test_lib.all_scenario_config)
 
-    test_util.test_logger("wait for 480 seconds")
-    time.sleep(480)
+    time.sleep(120)
+    cmd = "nohup zstack-ctl start &"
+    host_username = os.environ.get('hostUsername')
+    host_password = os.environ.get('hostPassword')
+    if not test_lib.lib_execute_ssh_cmd(mn_ip, host_username, host_password, cmd,  timeout = 300):
+        test_util.test_fail("CMD:%s execute failed on %s" %(cmd, mn_ip))
 
-    vm.set_state(vm_header.STOPPED)
-    vm.check()
+    #test_util.test_logger("wait for 480 seconds")
+    #time.sleep(480)
+
+    time.sleep(120)
+    cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid)
+    if not res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Stopped":
+        test_util.test_fail("vm is not stopped as expected.") 
+
     vm.destroy()
 
     #this is used to design to check mn works normally
+    time.sleep(20)
     vm.create()
     vm.check()
     vm.destroy()
