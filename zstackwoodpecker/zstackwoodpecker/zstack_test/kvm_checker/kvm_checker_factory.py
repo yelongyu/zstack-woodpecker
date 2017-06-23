@@ -43,7 +43,7 @@ class KvmVmCheckerFactory(checker_header.CheckerFactory):
             if vrs:
                 svr_types = test_lib.lib_get_l3s_service_type(test_obj.vm)
                 #The first DHCP checker will wait for VM start up. 
-                if 'DHCP' in svr_types:
+                if 'DHCP' in svr_types and not test_lib.lib_get_flat_dhcp_by_vm(test_obj.vm):
                     checker_dict[vm_checker.zstack_kvm_vm_dhcp_checker] = True
                     checker_dict[vm_checker.zstack_kvm_vm_network_checker] = True
                     #if guest can't get IP address from DHCP, auto case can

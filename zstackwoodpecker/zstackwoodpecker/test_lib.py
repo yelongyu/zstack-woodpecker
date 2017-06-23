@@ -1976,6 +1976,21 @@ def lib_get_vm_l3_service_provider_types(vm):
         sps_types.append(sp.type)
     return sps_types
 
+def lib_get_flat_dhcp_by_vm(vm):
+    l3s = lib_get_l3s_by_vm(vm)
+    if not l3s:
+        test_util.test_logger('Did not find l3 for [vm:] %s' % vm.uuid)
+        return False
+
+    for l3 in l3s:
+        sps = lib_get_l3_service_providers(l3)
+        for service in l3.networkServices:
+            if service.networkServiceType == "DHCP":
+                for temp_sp1 in sps:
+                    if temp_sp1.type == 'Flat' and service.networkServiceProviderUuid == temp_sp1.uuid:
+                        return True
+    return False
+
 def lib_check_nic_in_db(vm_inv, l3_uuid):
     '''
     Check if VM has NIC in l3_uuid
