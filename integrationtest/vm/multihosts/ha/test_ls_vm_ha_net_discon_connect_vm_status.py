@@ -84,19 +84,17 @@ def test():
     for i in range(0, 180):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Unknown":
             vm_stop_time = i
+            test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
             break
         time.sleep(1)
     if not vm_stop_time:
         vm_stop_time = 180 
     for i in range(vm_stop_time, 180):
-        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Starting":
+        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Running":
             break
         time.sleep(1)
     else:
         test_util.test_fail("vm has not been changed to running as expected within 180s.")
-
-
-    test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
 
     vm.destroy()
 
