@@ -78,6 +78,9 @@ def test():
     vm.start()
     vm.check()
 
+    for volume in volume_in_local + volume_in_another:
+        assert volume.get_volume().vmInstanceUuid == vm.get_vm().uuid
+
     test_util.test_pass('Multi PrimaryStorage Test Pass')
 
 
