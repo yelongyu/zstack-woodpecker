@@ -12,6 +12,8 @@
         <case timeout='900' repeat='1' noparallel='True'>test_start_reboot_stop_ecs_instance.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_sync_delete_vpc_local.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_sync_delete_vswitch_local.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_sync_delete_sg_local.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_create_delete_sg_rule.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_attach_detach_ks.py</case>
     </suite>
 </integrationTest>
