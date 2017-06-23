@@ -36,6 +36,7 @@
         <case timeout="220" >test_set_vm_console_password.py</case>
         <case timeout="220" >test_set_vm_console_password_create.py</case>
         <case timeout="220" >test_delete_vm_console_password.py</case>
+        <case timeout="220" >test_add_image_file_url.py</case>
 	<case timeout="220" noparallel='True'>vga/test_vm_vga.py</case>
 	<case timeout="220" noparallel='True'>vga/test_vm_qxl.py</case>
 	<case timeout="220" noparallel='True'>vga/test_vm_cirrus.py</case>
