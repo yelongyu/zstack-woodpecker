@@ -27,7 +27,13 @@ def test():
     local_ps = test_stub.find_ps_local()
     if not local_ps:
         test_util.test_skip("Skip test for non local PS environment")
-    another_ps = [ps for ps in ps_list if ps.uuid != local_ps.uuid][0]
+
+    left_ps_list = [ps for ps in ps_list if ps.uuid != local_ps.uuid]
+    if not left_ps_list:
+        test_util.test_skip("Skip test if can not find another ps")
+
+    another_ps = left_ps_list[0]
+
     if test_stub.find_ps_nfs():
         local_nfs_env = True
 
