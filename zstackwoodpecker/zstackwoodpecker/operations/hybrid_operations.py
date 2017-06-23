@@ -442,28 +442,28 @@ def update_image_guestOsType(uuid, guest_os_type, session_uuid=None):
 
 def query_ecs_image_local(session_uuid=None):
     action = api_actions.QueryEcsImageFromLocalAction()
-    test_util.action_logger('Query Ecs image in local')
+    test_util.action_logger('Query Ecs image from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventories
 
 def query_ecs_vpc_local(session_uuid=None):
     action = api_actions.QueryEcsVpcFromLocalAction()
     action.conditions = []
-    test_util.action_logger('Query Ecs Vpc in local')
+    test_util.action_logger('Query Ecs Vpc from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
 def query_ecs_vswitch_local(session_uuid=None):
     action = api_actions.QueryEcsVSwitchFromLocalAction()
     action.conditions = []
-    test_util.action_logger('Query Ecs vSwitch in local')
+    test_util.action_logger('Query Ecs vSwitch from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
 def query_ecs_instance_local(session_uuid=None):
     action = api_actions.QueryEcsInstanceFromLocalAction()
     action.conditions = []
-    test_util.action_logger('Query Ecs Instance in local')
+    test_util.action_logger('Query Ecs Instance from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
@@ -471,5 +471,19 @@ def query_aliyun_key_secret(session_uuid=None):
     action = api_actions.QueryAliyunKeySecretAction()
     action.conditions = []
     test_util.action_logger('Query Aliyun Key Secret')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def query_datacenter_local(session_uuid=None):
+    action = api_actions.QueryDataCenterFromLocalAction()
+    action.conditions = []
+    test_util.action_logger('Query DataCenter from local')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def query_ecs_security_group_local(session_uuid=None):
+    action = api_actions.QueryEcsSecurityGroupFromLocalAction()
+    action.conditions = []
+    test_util.action_logger('Query DataCenter from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt

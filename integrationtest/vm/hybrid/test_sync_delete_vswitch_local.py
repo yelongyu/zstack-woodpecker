@@ -13,7 +13,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import time
 import os
 
-date = time.strftime('%m%d%S', time.localtime())
+date_s = time.strftime('%m%d%S', time.localtime())
 test_obj_dict = test_state.TestStateDict()
 ks_inv = None
 datacenter_inv = None
@@ -38,7 +38,7 @@ def test():
     iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, region_id)
     zone_id = iz_list[0].zoneId
     iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, zone_id)
-    vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'zstack-test-vswitch', '192.168.0.0/16')
+    vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'zstack-test-vswitch-%s' % date_s, '192.168.0.0/16')
     vswitch_auto_synced = hyb_ops.query_ecs_vswitch_local()
     if vswitch_auto_synced:
         for v in vswitch_auto_synced:
@@ -46,15 +46,13 @@ def test():
     vswitch_synced = hyb_ops.sync_ecs_vswitch_from_remote(iz_inv.uuid)
     assert vswitch_synced.addList
     vswitch_local = hyb_ops.query_ecs_vswitch_local()
-    assert vswitch_local[0].vSwitchName
+    for vl in vswitch_local:
+        if vl.vSwitchName == 'zstack-test-vswitch-%s' % date_s:
+            vswitch_inv = vl
+    assert vswitch_inv.uuid
     test_util.test_pass('Sync Ecs vSwitch Test Success')
 
-
 def env_recover():
-    global vswitch_local
-    if vswitch_local:
-        for v in vswitch_local:
-            hyb_ops.del_ecs_vswitch_in_local(v.uuid)
     global vswitch_inv
     if vswitch_inv:
         time.sleep(10)

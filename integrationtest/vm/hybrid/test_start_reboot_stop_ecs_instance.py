@@ -13,7 +13,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import time
 import os
 
-date = time.strftime('%m%d%S', time.localtime())
+date_s = time.strftime('%m%d%S', time.localtime())
 test_obj_dict = test_state.TestStateDict()
 ks_inv = None
 datacenter_inv = None
@@ -46,11 +46,11 @@ def test():
             region_id = r
 #     region_id = datacenter_list[0].regionId
     datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
-    bucket_inv = hyb_ops.create_oss_bucket_remote(region_id, 'zstack-test-%s-%s' % (date, region_id), 'created-by-zstack-for-test')
+    bucket_inv = hyb_ops.create_oss_bucket_remote(region_id, 'zstack-test-%s-%s' % (date_s, region_id), 'created-by-zstack-for-test')
     hyb_ops.attach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid, datacenter_inv.uuid)
     iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, region_id)
     zone_id = iz_list[0].zoneId
-    hyb_ops.update_image_guestOsType(image.uuid, guest_os_type='CentOS')
+    hyb_ops.update_s_image_guestOsType(image.uuid, guest_os_type='CentOS')
     iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, zone_id)
     vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', '172.16.0.0/12')
     time.sleep(10)

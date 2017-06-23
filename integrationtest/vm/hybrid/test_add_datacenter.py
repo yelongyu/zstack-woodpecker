@@ -29,12 +29,12 @@ def test():
 
 
 def env_recover():
-    global ks_inv
-    if ks_inv:
-        hyb_ops.del_aliyun_key_secret(ks_inv.uuid)
     global datacenter_inv
     if datacenter_inv:
         hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
+    global ks_inv
+    if ks_inv:
+        hyb_ops.del_aliyun_key_secret(ks_inv.uuid)
 
 #Will be called only if exception happens in test().
 def error_cleanup():
