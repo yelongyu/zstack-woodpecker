@@ -32,14 +32,12 @@ def test():
     vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', '192.168.0.0/16')
     time.sleep(5)
     sg_inv = hyb_ops.create_ecs_security_group_remote('sg_for_test', vpc_inv.uuid)
-    test_util.test_pass('Create ECS VPC Test Success')
-
+    test_util.test_pass('Create ECS Security Group Test Success')
+    time.sleep(10)
+    hyb_ops.del_ecs_security_group_remote(sg_inv.uuid)
+    test_util.test_pass('Delete ECS Security Group Test Success')
 
 def env_recover():
-    global sg_inv
-    if sg_inv:
-        time.sleep(10)
-        hyb_ops.del_ecs_security_group_remote(sg_inv.uuid)
     global vpc_inv
     if vpc_inv:
         time.sleep(5)

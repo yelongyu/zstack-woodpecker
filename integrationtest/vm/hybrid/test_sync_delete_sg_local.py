@@ -37,6 +37,7 @@ def test():
     if sg_auto_synced:
         for sg in sg_auto_synced:
             hyb_ops.del_ecs_security_group_in_local(sg.uuid)
+        test_util.test_pass('Delete local Ecs Security Group Test Success')
     sg_sync = hyb_ops.sync_security_group_from_remote(vpc_inv.uuid)
     assert sg_sync.addList
     sg_local = hyb_ops.query_ecs_security_group_local()

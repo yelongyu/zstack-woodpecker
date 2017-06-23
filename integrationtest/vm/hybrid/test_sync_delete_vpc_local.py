@@ -34,6 +34,7 @@ def test():
     if vpc_auto_synced:
         for v in vpc_auto_synced:
             hyb_ops.del_ecs_vpc_local(v.uuid)
+        test_util.test_pass('Delete local Ecs Vpc Test Success')
     vpc_sync = hyb_ops.sync_ecs_vpc_from_remote(datacenter_inv.uuid)
     assert vpc_sync.addList
     vpc_local = hyb_ops.query_ecs_vpc_local()
