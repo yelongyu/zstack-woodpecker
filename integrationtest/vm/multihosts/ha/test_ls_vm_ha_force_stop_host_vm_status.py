@@ -93,6 +93,7 @@ def test():
     for i in range(0, 180):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Unknown":
             vm_stop_time = i
+            test_stub.start_host(test_host, test_lib.all_scenario_config)
             break
         time.sleep(1)
     if not vm_stop_time:
@@ -104,7 +105,6 @@ def test():
     else:
         test_util.test_fail("vm has not been changed to running as expected within 180s.")
 
-    test_stub.start_host(test_host, test_lib.all_scenario_config)
 
     vm.destroy()
 
