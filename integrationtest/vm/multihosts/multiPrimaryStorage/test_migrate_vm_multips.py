@@ -40,11 +40,24 @@ def test():
     test_stub.migrate_vm_to_random_host(first_ps_vm)
     first_ps_vm.check()
 
+    first_ps_vm.stop()
+    first_ps_vm.check()
+
+    first_ps_vm.start()
+    first_ps_vm.check()
+
 
     test_util.test_dsc("migrate vm in second Primary Storage")
 
     test_stub.migrate_vm_to_random_host(second_ps_vm)
     second_ps_vm.check()
+
+    second_ps_vm.stop()
+    second_ps_vm.check()
+
+    second_ps_vm.start()
+    second_ps_vm.check()
+
 
 
 def env_recover():
