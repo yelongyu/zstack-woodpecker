@@ -75,13 +75,6 @@ def test():
     vm.set_creation_option(vm_creation_option)
     vm.create()
 
-    if not test_lib.lib_check_vm_live_migration_cap(vm.vm):
-        test_util.test_skip('skip ha if live migrate not supported')
-
-    ps = test_lib.lib_get_primary_storage_by_uuid(vm.get_vm().allVolumes[0].primaryStorageUuid)
-    if ps.type == inventory.LOCAL_STORAGE_TYPE:
-        test_util.test_skip('Skip test on localstorage')
-
     #vm.check()
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
     host_port = test_lib.lib_get_host_port(host_ip)
@@ -97,34 +90,20 @@ def test():
     if not test_host:
         test_util.test_fail('there is no host with ip %s in scenario file.' %(host_ip))
 
-    test_stub.stop_host(test_host, test_lib.all_scenario_config, 'cold')
-
-    test_util.test_logger("wait for 120 seconds")
-    time.sleep(120)
-
-    test_stub.start_host(test_host, test_lib.all_scenario_config)
-
-    #vm.update() #bug for host uuid is not updated
     cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid)
     vm_inv = res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0]
-    vm_host_ip = test_lib.lib_find_host_by_vm(vm_inv).managementIp
-    for i in range(0, 60):
-        test_util.test_logger("vm_host_ip:%s; host_ip:%s" %(vm_host_ip, host_ip))
-        time.sleep(1)
-        vm_inv = res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0]
-        vm_host_ip = test_lib.lib_find_host_by_vm(vm_inv).managementIp
-        if vm_host_ip != host_ip:
+
+    test_stub.stop_host(test_host, test_lib.all_scenario_config, 'cold')
+    test_util.test_logger("wait for 120 seconds")
+    time.sleep(120)
+    test_stub.start_host(test_host, test_lib.all_scenario_config)
+
+    for i in range(0, 120):
+        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Running":
             break
+        time.sleep(1)
     else:
-        test_util.test_fail("VM is expected to start running on another host")
-        
-    #vm.check() #bug when multi-networks
-    if test_lib.lib_wait_target_up(vm_inv.vmNics[0].ip, '22', 120):
-        test_util.test_logger("%s can be connected within 120s" %(vm_inv.vmNics[0].ip))
-    elif test_lib.lib_wait_target_up(vm_inv.vmNics[1].ip, '22', 120):
-        test_util.test_logger("%s can be connected within 120s" %(vm_inv.vmNics[1].ip))
-    else:
-        test_util.test_fail("Both %s and %s can't be connected." %(vm_inv.vmNics[0].ip, vm_inv.vmNics[1].ip))
+        test_util.test_fail("vm has not been changed to running as expected within %s s." %(240))
 
     vm.destroy()
 
