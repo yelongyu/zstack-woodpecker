@@ -92,6 +92,7 @@ def test():
     #time.sleep(60)
 
     test_stub.start_host(test_host, test_lib.all_scenario_config)
+    test_stub.recover_host_vlan(test_host, test_lib.all_scenario_config, test_lib.deploy_config)
 
     vm.set_state(vm_header.RUNNING)
     vm.check()

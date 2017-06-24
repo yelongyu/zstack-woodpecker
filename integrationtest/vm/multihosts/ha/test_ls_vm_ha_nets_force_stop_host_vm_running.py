@@ -97,6 +97,7 @@ def test():
     test_util.test_logger("wait for 120 seconds")
     time.sleep(120)
     test_stub.start_host(test_host, test_lib.all_scenario_config)
+    test_stub.recover_host_vlan(test_host, test_lib.all_scenario_config, test_lib.deploy_config)
 
     for i in range(0, 120):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Running":
@@ -124,7 +125,4 @@ def error_cleanup():
 
 def env_recover():
     global test_host
-    try:
-        test_stub.start_host(host_ip, test_lib.all_scenario_config)
-    except:
-        pass
+    test_stub.recover_host(test_host, test_lib.all_scenario_config, test_lib.deploy_config)

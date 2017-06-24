@@ -103,6 +103,7 @@ def test():
 
     #test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
     test_stub.start_host(test_host, test_lib.all_scenario_config)
+    test_stub.recover_host_vlan(test_host, test_lib.all_scenario_config, test_lib.deploy_config)
 
     time.sleep(120)
     cmd = "nohup zstack-ctl start &"

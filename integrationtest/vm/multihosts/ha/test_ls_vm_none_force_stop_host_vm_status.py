@@ -89,9 +89,10 @@ def test():
     cond = res_ops.gen_query_conditions('uuid', '=', vm2.vm.uuid, cond)
 
     for i in range(0, 180):
-        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Unknown":
+        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Stopped":
             vm_stop_time = i
             test_stub.start_host(test_host, test_lib.all_scenario_config)
+            test_stub.recover_host_vlan(test_host, test_lib.all_scenario_config, test_lib.deploy_config)
             break
         time.sleep(1)
 
@@ -122,5 +123,6 @@ def env_recover():
     global test_host
     try:
         test_stub.start_host(test_host, test_lib.all_scenario_config)
+        test_stub.recover_host_vlan(test_host, test_lib.all_scenario_config, test_lib.deploy_config)
     except:
         pass

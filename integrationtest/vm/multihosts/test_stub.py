@@ -435,6 +435,9 @@ def recover_host(host_vm, scenarioConfig, deploy_config):
     host_inv = start_host(host_vm, scenarioConfig)
     if not host_inv:
        return False
+    recover_host_vlan(host_vm, scenarioConfig, deploy_config)
+
+def recover_host_vlan(host_vm, scenarioConfig, deploy_config):
     host_ip = host_vm.ip_
     test_lib.lib_wait_target_up(host_ip, '22', 120)
     host_config = sce_ops.get_scenario_config_vm(host_inv.name,scenarioConfig)
@@ -448,7 +451,6 @@ def recover_host(host_vm, scenarioConfig, deploy_config):
                     cmd = 'vconfig add %s %s' % (nic_name.split('.')[0], vlan)
                     test_lib.lib_execute_ssh_cmd(host_ip, host_config.imageUsername_, host_config.imagePassword_, cmd)
     return True
-
 
 host_username = os.environ.get('physicalHostUsername')
 host_password = os.environ.get('physicalHostPassword')
