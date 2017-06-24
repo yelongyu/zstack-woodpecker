@@ -5034,3 +5034,15 @@ def get_ip(start_ip, end_ip):
     return [ num2ip(num) for num in range(start, end+1) if num & 0xff ]
 
 
+def skip_test_when_ps_include_local():
+    ps_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+    for ps in ps_list:
+        if ps.type == inventory.LOCAL_STORAGE_TYPE:
+            test_util.test_skip("The test is not support local storage.")
+
+def skip_test_when_ps_type_not_in_list(allow_ps_list):
+    ps_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+    for ps in ps_list:
+        if ps.type not in allow_ps_list:
+            test_util.test_skip("%s is not in %s." %(ps.type, allow_ps_list))
+
