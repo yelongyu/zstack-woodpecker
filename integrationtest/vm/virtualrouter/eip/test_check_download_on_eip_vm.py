@@ -78,7 +78,7 @@ def test():
     rsp_ping = os.system("sshpass -p '%s' ssh %s@%s '%s'"%(user_password, user_name, vm_ip, cmd)) 
 
     #Try to download webpage from Jenkins server
-    cmd = "curl http://172.20.198.250"
+    cmd = "curl http://192.168.200.100"
     rsp_curl = os.system("sshpass -p '%s' ssh %s@%s '%s'"%(user_password, user_name, vm_ip, cmd))
     if rsp_ping != 0:
         test_util.test_fail('Attach EIP but cannot ping from VM')
