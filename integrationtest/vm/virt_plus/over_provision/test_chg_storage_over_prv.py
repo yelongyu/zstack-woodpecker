@@ -44,9 +44,23 @@ def test():
     vm.check()
     test_obj_dict.add_vm(vm)
 
-    host_res = test_lib.lib_get_cpu_memory_capacity(host_uuids = [host.uuid])
-    ps_res = test_lib.lib_get_storage_capacity(zone_uuids = [zone_uuid])
-    avail_cap = ps_res.availableCapacity
+    cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
+    cond = res_ops.gen_query_conditions('status', '=', 'Connected', cond)
+
+    ps = res_ops.query_resource_with_num(res_ops.PRIMARY_STORAGE, cond, limit = 2)
+    if not ps:
+        test_util.test_skip('No Enabled/Connected primary storage was found, skip test.' )
+        return True
+
+    ps1 = ps[0].uuid
+    ps2 = ps[1].uuid
+
+
+    ps1_res = test_lib.lib_get_storage_capacity(ps_uuids=[ps1])
+    ps2_res = test_lib.lib_get_storage_capacity(ps_uuids=[ps2])
+    avail_cap = ps1_res.availableCapacity + ps2_res.availableCapacity
+    test_util.test_dsc("ps1[uuid:%s]'s available capacity is %s" % (ps1, ps1_res.availableCapacity))
+    test_util.test_dsc("ps2[uuid:%s]'s available capacity is %s" % (ps2, ps2_res.availableCapacity))
     if avail_cap < kept_disk_size:
         test_util.test_skip('available disk capacity:%d is too small, skip test.' % avail_cap)
         return True
@@ -90,8 +104,12 @@ def test():
 
     test_lib.lib_set_provision_storage_rate(original_rate)
     time.sleep(10)
-    ps_res2 = test_lib.lib_get_storage_capacity(zone_uuids = [zone_uuid])
-    avail_cap2 = ps_res2.availableCapacity
+    ps1_res2 = test_lib.lib_get_storage_capacity(ps_uuids=[ps1])
+    ps2_res2 = test_lib.lib_get_storage_capacity(ps_uuids=[ps2])
+    test_util.test_dsc("ps1[uuid:%s]'s available capacity is %s" % (ps1, ps1_res.availableCapacity))
+    test_util.test_dsc("ps2[uuid:%s]'s available capacity is %s" % (ps2, ps2_res.availableCapacity))
+
+    avail_cap2 = ps1_res2.availableCapacity + ps2_res2.availableCapacity
     if avail_cap2 != avail_cap:
         test_util.test_fail('Available disk size: %d is different with original size: %d, after creating volume under different over rate.' % (avail_cap2, avail_cap))
     
