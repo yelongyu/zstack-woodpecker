@@ -5046,3 +5046,11 @@ def skip_test_when_ps_type_not_in_list(allow_ps_list):
         if ps.type not in allow_ps_list:
             test_util.test_skip("%s is not in %s." %(ps.type, allow_ps_list))
 
+def skip_test_if_any_ps_not_deployed(must_ps_list):
+    ps_type_list = res_ops.query_resource_fields(res_ops.PRIMARY_STORAGE, None, None, ['type'])
+
+    for ps in must_ps_list:
+        if ps in ps_type_list:
+            continue
+        else:
+            test_util.test_skip("%s has not been deployed." %(ps))
