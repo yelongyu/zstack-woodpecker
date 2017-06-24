@@ -42,6 +42,9 @@ def test():
     global mn_ip
     global host_list
 
+    allow_ps_list = [inventory.LOCAL_STORAGE_TYPE]
+    test_lib.skip_test_when_ps_type_not_in_list(allow_ps_list)
+
     mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
     host_list = test_stub.get_sce_hosts(test_lib.all_scenario_config, test_lib.scenario_file)
     for host in host_list:

@@ -31,6 +31,9 @@ def test():
     global max_attempts
     global storagechecker_timeout
 
+    allow_ps_list = [inventory.CEPH_PRIMARY_STORAGE_TYPE, inventory.NFS_PRIMARY_STORAGE_TYPE, 'SharedMountPoint']
+    test_lib.skip_test_when_ps_type_not_in_list(allow_ps_list)
+
     if test_lib.lib_get_ha_enable() != 'true':
         test_util.test_skip("vm ha not enabled. Skip test")
 

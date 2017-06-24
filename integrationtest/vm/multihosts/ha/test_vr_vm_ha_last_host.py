@@ -28,13 +28,12 @@ def test():
     global host_ip
     global max_attempts
     global storagechecker_timeout
+
+    allow_ps_list = [inventory.CEPH_PRIMARY_STORAGE_TYPE, inventory.NFS_PRIMARY_STORAGE_TYPE, 'SharedMountPoint']
+    test_lib.skip_test_when_ps_type_not_in_list(allow_ps_list)
+
     if test_lib.lib_get_ha_enable() != 'true':
         test_util.test_skip("vm ha not enabled. Skip test")
-
-    max_attempts = test_lib.lib_get_ha_selffencer_maxattempts()
-    test_lib.lib_set_ha_selffencer_maxattempts('3')
-    storagechecker_timeout = test_lib.lib_get_ha_selffencer_storagechecker_timeout()
-    test_lib.lib_set_ha_selffencer_storagechecker_timeout('5')
 
     vm_creation_option = test_util.VmOption()
     image_name = os.environ.get('imageName_net')
@@ -68,12 +67,6 @@ def test():
     vm = test_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
     vm.create()
-    if not test_lib.lib_check_vm_live_migration_cap(vm.vm):
-        test_util.test_skip('skip ha if live migrate not supported')
-
-    ps = test_lib.lib_get_primary_storage_by_uuid(vm.get_vm().allVolumes[0].primaryStorageUuid)
-    if ps.type == inventory.LOCAL_STORAGE_TYPE:
-        test_util.test_skip('Skip test on localstorage')
 
     #vm.check()
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
@@ -97,8 +90,6 @@ def test():
         test_util.test_fail("Migrated VM's last host is expected to be the last host[ip:%s]" % (host_ip))
 
     vm.destroy()
-    test_lib.lib_set_ha_selffencer_maxattempts(max_attempts)
-    test_lib.lib_set_ha_selffencer_storagechecker_timeout(storagechecker_timeout)
 
     os.system('bash -ex %s %s' % (os.environ.get('hostRecoverScript'), host_ip))
     host_ops.reconnect_host(host_uuid)
@@ -118,8 +109,6 @@ def error_cleanup():
         except:
             pass
 
-    test_lib.lib_set_ha_selffencer_maxattempts(max_attempts)
-    test_lib.lib_set_ha_selffencer_storagechecker_timeout(storagechecker_timeout)
 
     os.system('bash -ex %s %s' % (os.environ.get('hostRecoverScript'), host_ip))
     host_ops.reconnect_host(host_uuid)

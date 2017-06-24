@@ -30,6 +30,10 @@ def test():
     global host_ip
     global max_attempts
     global storagechecker_timeout
+
+    allow_ps_list = [inventory.CEPH_PRIMARY_STORAGE_TYPE, inventory.NFS_PRIMARY_STORAGE_TYPE, 'SharedMountPoint']
+    test_lib.skip_test_when_ps_type_not_in_list(allow_ps_list)
+
     if test_lib.lib_get_ha_enable() != 'true':
         test_util.test_skip("vm ha not enabled. Skip test")
 
@@ -66,9 +70,6 @@ def test():
     vm.create()
     vm.check()
 
-    if not test_lib.lib_check_vm_live_migration_cap(vm.vm):
-        test_util.test_skip('skip ha if live migrate not supported')
-
     vm_creation_option.set_name('multihost_basic_vm_status_stopped')
     vm2 = test_vm_header.ZstackTestVm()
     vm2.set_creation_option(vm_creation_option)
@@ -76,9 +77,6 @@ def test():
     vm2.stop()
     vm2.check()
 
-    ps = test_lib.lib_get_primary_storage_by_uuid(vm.get_vm().allVolumes[0].primaryStorageUuid)
-    if ps.type == inventory.LOCAL_STORAGE_TYPE:
-        test_util.test_skip('Skip test on localstorage')
 
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
     host_port = test_lib.lib_get_host_port(host_ip)

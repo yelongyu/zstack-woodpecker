@@ -30,9 +30,8 @@ def test():
     global max_attempts
     global storagechecker_timeout
 
-    pss = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
-    if pss[0].type != "LocalStorage":
-        test_util.test_skip("this test is designed to run on localstorage, skip on other ps type.")
+    allow_ps_list = [inventory.LOCAL_STORAGE_TYPE]
+    test_lib.skip_test_when_ps_type_not_in_list(allow_ps_list)
 
     if test_lib.lib_get_ha_enable() != 'true':
         test_util.test_skip("vm ha not enabled. Skip test")
