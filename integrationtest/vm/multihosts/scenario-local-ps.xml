@@ -26,6 +26,10 @@
 	  <backupStorageRef type="sftp">$sftpBackupStorageName</backupStorageRef>
           <primaryStorageRef type="local" url="$localPrimaryStorageUrl">$localPrimaryStorageName</primaryStorageRef>
         </vm>
+      </vms>
+    </host>
+    <host uuid="$hostUuid2">
+      <vms>
         <vm name="$vmName2" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
@@ -39,6 +43,10 @@
           <hostRef>$hostName2</hostRef>
           <primaryStorageRef type="local" url="$localPrimaryStorageUrl">$localPrimaryStorageName</primaryStorageRef>
         </vm>
+      </vms>
+    </host>
+    <host uuid="$hostUuid3">
+      <vms>
         <vm name="$vmName3" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
@@ -52,6 +60,10 @@
           <hostRef>$hostName3</hostRef>
           <primaryStorageRef type="local" url="$localPrimaryStorageUrl">$localPrimaryStorageName</primaryStorageRef>
         </vm>
+      </vms>
+    </host>
+    <host uuid="$hostUuid4">
+      <vms>
         <vm name="$vmName4" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
