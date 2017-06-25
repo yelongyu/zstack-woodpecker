@@ -26,6 +26,10 @@
 	  <backupStorageRef type="fusionstor" offering_uuid="$fusionstorStorageOfferingUuid">$fusionstorBackupStorageName</backupStorageRef>
 	  <primaryStorageRef type="fusionstor">$fusionstorPrimaryStorageName</primaryStorageRef>
         </vm>
+      </vms>
+    </host>
+    <host uuid="$hostUuid2">
+      <vms>
         <vm name="$vmName2" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
@@ -40,6 +44,10 @@
 	  <backupStorageRef type="fusionstor" offering_uuid="$fusionstorStorageOfferingUuid">$fusionstorBackupStorageName</backupStorageRef>
 	  <primaryStorageRef type="fusionstor">$fusionstorPrimaryStorageName</primaryStorageRef>
         </vm>
+      </vms>
+    </host>
+    <host uuid="$hostUuid3">
+      <vms>
         <vm name="$vmName3" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
