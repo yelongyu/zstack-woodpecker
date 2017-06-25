@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-fusionstor-flat.xml</deployConfig>
+    <deployConfigTemplate>deploy-fusionstor-flat.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
