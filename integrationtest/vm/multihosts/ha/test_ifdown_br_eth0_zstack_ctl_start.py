@@ -33,7 +33,7 @@ def add_default_route(ip):
     host_username = os.environ.get('hostUsername')
     host_password = os.environ.get('hostPassword')
     cmd = "ip r add default dev br_eth0 via 172.20.0.1"
-    test_lib.lib_execute_ssh_cmd(ip, host_username, host_password, cmd,  timeout = 20):
+    test_lib.lib_execute_ssh_cmd(ip, host_username, host_password, cmd,  timeout = 20)
     
 
 
