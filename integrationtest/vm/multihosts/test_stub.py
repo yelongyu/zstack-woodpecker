@@ -440,7 +440,7 @@ def recover_host(host_vm, scenarioConfig, deploy_config):
 def recover_host_vlan(host_vm, scenarioConfig, deploy_config):
     host_ip = host_vm.ip_
     test_lib.lib_wait_target_up(host_ip, '22', 120)
-    host_config = sce_ops.get_scenario_config_vm(host_inv.name,scenarioConfig)
+    host_config = sce_ops.get_scenario_config_vm(host_vm.name_,scenarioConfig)
     for l3network in xmlobject.safe_list(host_config.l3Networks.l3Network):
         if hasattr(l3network, 'l2NetworkRef'):
             for l2networkref in xmlobject.safe_list(l3network.l2NetworkRef):

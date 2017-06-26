@@ -5048,15 +5048,18 @@ def skip_test_when_ps_type_not_in_list(allow_ps_list):
 
 def skip_test_if_any_ps_not_deployed(must_ps_list):
     ps_type_list = res_ops.query_resource_fields(res_ops.PRIMARY_STORAGE, None, None, ['type'])
+    ps_list = []
+    for ps in ps_type_list:
+        ps_list.append(ps.type)
 
     for ps in must_ps_list:
-        if ps in ps_type_list:
+        if ps in ps_list:
             continue
         else:
             test_util.test_skip("%s has not been deployed." %(ps))
 
 def clean_up_all_vr():
     cond = res_ops.gen_query_conditions('type', '=', 'ApplianceVm')
-    vr_uuid_list = res_ops.query_resource_fields(res_ops.VM_INSTANCE, cond, None, ['uuid'])
-    for vr_uuid in vr_uuid_list:
-        vm_ops.destroy_vm(vr_uuid)
+    vr_list = res_ops.query_resource_fields(res_ops.VM_INSTANCE, cond, None, ['uuid'])
+    for vr in vr_list:
+        vm_ops.destroy_vm(vr.uuid)
