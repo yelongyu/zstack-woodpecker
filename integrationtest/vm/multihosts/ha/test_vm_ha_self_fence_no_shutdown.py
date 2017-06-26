@@ -64,6 +64,9 @@ def test():
     vm = test_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
     vm.create()
+
+    test_stub.ensure_host_has_no_vr(host_uuid)
+
     #vm.check()
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
     host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid

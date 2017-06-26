@@ -70,6 +70,8 @@ def test():
     vm.create()
     vm.check()
 
+    test_stub.ensure_host_has_no_vr(host_uuid)
+
     vm_creation_option.set_name('multihost_basic_vm_status_stopped')
     vm2 = test_vm_header.ZstackTestVm()
     vm2.set_creation_option(vm_creation_option)

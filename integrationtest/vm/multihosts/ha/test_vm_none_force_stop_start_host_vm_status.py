@@ -78,6 +78,7 @@ def test():
     vm2.stop()
     vm2.check()
 
+    test_stub.ensure_host_has_no_vr(host_uuid)
 
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
     host_port = test_lib.lib_get_host_port(host_ip)

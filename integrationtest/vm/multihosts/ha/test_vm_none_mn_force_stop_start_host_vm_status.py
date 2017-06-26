@@ -76,6 +76,8 @@ def test():
     vm.create()
     vm.check()
 
+    test_stub.ensure_host_has_no_vr(host_uuid)
+
     if not test_lib.lib_check_vm_live_migration_cap(vm.vm):
         vm.destroy()
         test_util.test_skip('skip ha if live migrate not supported')
