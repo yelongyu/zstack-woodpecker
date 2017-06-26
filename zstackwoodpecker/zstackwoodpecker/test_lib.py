@@ -5054,3 +5054,9 @@ def skip_test_if_any_ps_not_deployed(must_ps_list):
             continue
         else:
             test_util.test_skip("%s has not been deployed." %(ps))
+
+def clean_up_all_vr():
+    cond = res_ops.gen_query_conditions('type', '=', 'ApplianceVm')
+    vr_uuid_list = res_ops.query_resource_fields(res_ops.VM_INSTANCE, cond, None, ['uuid'])
+    for vr_uuid in vr_uuid_list:
+        vm_ops.destroy_vm(vr_uuid)
