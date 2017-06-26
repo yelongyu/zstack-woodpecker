@@ -24,6 +24,9 @@ def test():
     begin_time = int(time.time()*1000)
     vm = test_stub.create_named_vm(vm_name)
     test_obj_dict.add_vm(vm)
+    ps = test_lib.lib_get_primary_storage_by_uuid(vm.get_vm().allVolumes[0].primaryStorageUuid)
+    if ps.type != inventory.LOCAL_STORAGE_TYPE:
+        test_util.test_skip('Skip test on non-localstorage')
     vm.check()
 
     [select_bs_time, allocate_host_time, allocate_ps_time, local_storage_allocate_capacity_time,\
