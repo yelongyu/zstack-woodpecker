@@ -13,6 +13,7 @@ import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.operations.ha_operations as ha_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
+import zstacklib.utils.ssh as ssh
 import apibinding.inventory as inventory
 import time
 import os
@@ -42,12 +43,18 @@ def set_quick_ha_params():
 
 def set_org_ha_params():
     global pre1,pre2,pre3,pre4,pre5,pre6
-    conf_ops.change_global_config('ha', 'host.selfFencer.storageChecker.timeout', pre1)
-    conf_ops.change_global_config('ha', 'neverStopVm.retry.delay', pre2)
-    conf_ops.change_global_config('ha', 'host.selfFencer.maxAttempts', pre3)
-    conf_ops.change_global_config('ha', 'host.selfFencer.interval', pre4)
-    conf_ops.change_global_config('ha', 'host.check.interval', pre5)
-    conf_ops.change_global_config('ha', 'ping.interval', pre6)
+    if pre1:
+        conf_ops.change_global_config('ha', 'host.selfFencer.storageChecker.timeout', pre1)
+    if pre2:
+        conf_ops.change_global_config('ha', 'neverStopVm.retry.delay', pre2)
+    if pre3:
+        conf_ops.change_global_config('ha', 'host.selfFencer.maxAttempts', pre3)
+    if pre4:
+        conf_ops.change_global_config('ha', 'host.selfFencer.interval', pre4)
+    if pre5:
+        conf_ops.change_global_config('ha', 'host.check.interval', pre5)
+    if pre6:
+        conf_ops.change_global_config('ha', 'ping.interval', pre6)
     
 def set_quick_ha_properties():
     host_username = os.environ.get('hostUsername')
