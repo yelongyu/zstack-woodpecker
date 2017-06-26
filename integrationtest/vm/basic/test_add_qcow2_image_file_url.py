@@ -1,5 +1,5 @@
 '''
-test for adding file:///image.raw
+test for adding file:///image.qcow2
 @author: SyZhao
 '''
 
@@ -41,7 +41,7 @@ def test():
         test_util.test_skip('Not find image store type backup storage.')
 
     image_option = test_util.ImageOption()
-    image_option.set_format('raw')
+    image_option.set_format('qcow2')
     image_option.set_name('test_file_url_image')
     image_option.set_system_tags('qemuga')
     image_option.set_mediaType('RootVolumeTemplate')
@@ -55,7 +55,7 @@ def test():
     new_image.add_root_volume_template()
     new_image.delete()
 
-    test_util.test_pass('test add file:///image.raw passed.')
+    test_util.test_pass('test add file:///image.qcow2 passed.')
 
 
 
