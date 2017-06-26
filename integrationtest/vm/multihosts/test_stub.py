@@ -536,13 +536,27 @@ def get_sce_hosts(scenarioConfig, scenarioFile):
 
 
 def ensure_host_has_no_vr(host_uuid):
-
     cond = res_ops.gen_query_conditions('type', '=', 'ApplianceVm')
     cond1 = res_ops.gen_query_conditions('hostUuid', '=', host_uuid, cond)
     vr_list = res_ops.query_resource(res_ops.VM_INSTANCE, cond1)
+    if not vr_list:
+        test_util.test_logger("host originally has no vr need to migrate.")
+        return
 
     cond2 = res_ops.gen_query_conditions('uuid', '!=', host_uuid)
     cadidate_host_uuid = res_ops.query_resource(res_ops.HOST, cond2)[0].uuid
 
     for vr in vr_list:
         vm_ops.migrate_vm(vr.uuid, cadidate_host_uuid)
+
+
+def ensure_all_vrs_on_host(host_uuid):
+    cond = res_ops.gen_query_conditions('type', '=', 'ApplianceVm')
+    vr_list = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
+    if not vr_list:
+        test_util.test_logger("no vr in current env.")
+        return
+
+    for vr in vr_list:
+        vm_ops.migrate_vm(vr.uuid, host_uuid)
+    
