@@ -42,13 +42,14 @@ def test():
     #l3_name = os.environ.get('l3NoVlanNetworkName1')
     l3_name = os.environ.get('l3VlanNetworkName1')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
-    vrs = test_lib.lib_find_vr_by_l3_uuid(l3_net_uuid)
-    vr_host_ips = []
-    for vr in vrs:
-        vr_host_ips.append(test_lib.lib_find_host_by_vr(vr).managementIp)
-	if test_lib.lib_is_vm_running(vr) != True:
-	    vm_ops.start_vm(vr.uuid)
-    time.sleep(60)
+    test_lib.clean_up_all_vr()
+    #vrs = test_lib.lib_find_vr_by_l3_uuid(l3_net_uuid)
+    #vr_host_ips = []
+    #for vr in vrs:
+    #    vr_host_ips.append(test_lib.lib_find_host_by_vr(vr).managementIp)
+    #    if test_lib.lib_is_vm_running(vr) != True:
+    #        vm_ops.start_vm(vr.uuid)
+    #time.sleep(60)
 
     mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
@@ -56,8 +57,8 @@ def test():
     conditions = res_ops.gen_query_conditions('state', '=', 'Enabled')
     conditions = res_ops.gen_query_conditions('status', '=', 'Connected', conditions)
     conditions = res_ops.gen_query_conditions('managementIp', '!=', mn_ip, conditions)
-    for vr_host_ip in vr_host_ips:
-        conditions = res_ops.gen_query_conditions('managementIp', '!=', vr_host_ip, conditions)
+    #for vr_host_ip in vr_host_ips:
+    #    conditions = res_ops.gen_query_conditions('managementIp', '!=', vr_host_ip, conditions)
     host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].uuid
     vm_creation_option.set_host_uuid(host_uuid)
     vm_creation_option.set_l3_uuids([l3_net_uuid])

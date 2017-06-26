@@ -42,20 +42,21 @@ def test():
     #l3_name = os.environ.get('l3NoVlanNetworkName1')
     l3_name = os.environ.get('l3VlanNetworkName1')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
-    vrs = test_lib.lib_find_vr_by_l3_uuid(l3_net_uuid)
+    test_lib.clean_up_all_vr()
+    #vrs = test_lib.lib_find_vr_by_l3_uuid(l3_net_uuid)
     mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
-    vr_host_ips = []
-    for vr in vrs:
-        vr_ip = test_lib.lib_find_host_by_vr(vr).managementIp
-        #ensure mn host has no vr
-        if vr_ip == mn_ip:
-            conditions = res_ops.gen_query_conditions('managementIp', '!=', mn_ip)
-            host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].uuid
-            vm_ops.migrate_vm(vr.uuid, host_uuid)
-        vr_host_ips.append(vr_ip)
-	if test_lib.lib_is_vm_running(vr) != True:
-	    vm_ops.start_vm(vr.uuid)
-    time.sleep(60)
+    #vr_host_ips = []
+    #for vr in vrs:
+    #    vr_ip = test_lib.lib_find_host_by_vr(vr).managementIp
+    #    #ensure mn host has no vr
+    #    if vr_ip == mn_ip:
+    #        conditions = res_ops.gen_query_conditions('managementIp', '!=', mn_ip)
+    #        host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].uuid
+    #        vm_ops.migrate_vm(vr.uuid, host_uuid)
+    #    vr_host_ips.append(vr_ip)
+    #    if test_lib.lib_is_vm_running(vr) != True:
+    #        vm_ops.start_vm(vr.uuid)
+    #time.sleep(60)
 
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
