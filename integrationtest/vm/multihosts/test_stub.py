@@ -146,7 +146,7 @@ def create_vm_with_random_offering(vm_name, image_name=None, l3_name=None, sessi
     return vm
 
 
-def create_multi_vms(name_prefix='', count=10, host_uuid=None, ps_uuid=None, data_volume_number=0):
+def create_multi_vms(name_prefix='', count=10, host_uuid=None, ps_uuid=None, data_volume_number=0, ps_uuid_for_data_vol=None):
     vm_list = []
     for i in xrange(count):
         if not data_volume_number:
@@ -157,7 +157,8 @@ def create_multi_vms(name_prefix='', count=10, host_uuid=None, ps_uuid=None, dat
             disk_offering_uuids = [random.choice(disk_offering_list).uuid for _ in xrange(data_volume_number)]
             vm = create_vm_with_random_offering(name_prefix+"{}".format(i), image_name='imageName_net',
                                                 l3_name='l3VlanNetwork2', host_uuid=host_uuid, ps_uuid=ps_uuid,
-                                                disk_offering_uuids=disk_offering_uuids)
+                                                disk_offering_uuids=disk_offering_uuids,
+                                                system_tags=['primaryStorageUuidForDataVolume::{}'.format(ps_uuid_for_data_vol)])
         vm_list.append(vm)
     for vm in vm_list:
         vm.check()
@@ -166,8 +167,14 @@ def create_multi_vms(name_prefix='', count=10, host_uuid=None, ps_uuid=None, dat
             assert vm.get_vm().hostUuid == host_uuid
     if ps_uuid:
         for vm in vm_list:
-            for volume in vm.get_vm().allVolumes:
-                assert volume.primaryStorageUuid == ps_uuid
+            root_volume = test_lib.lib_get_root_volume(vm.get_vm())
+            assert root_volume.primaryStorageUuid == ps_uuid
+
+    if ps_uuid_for_data_vol:
+        for vm in vm_list:
+            data_volume_list = [volume for volume in vm.get_vm().allVolumes if volume.type != 'Root']
+            for data_volume in data_volume_list:
+                assert data_volume.primaryStorageUuid == ps_uuid_for_data_vol
 
     return vm_list
 
