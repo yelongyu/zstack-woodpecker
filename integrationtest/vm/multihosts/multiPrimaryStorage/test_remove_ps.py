@@ -69,7 +69,8 @@ def test():
     assert vm1.get_vm().uuid in left_vm_uuid_list
     assert vm2.get_vm().uuid in left_vm_uuid_list
 
-    assert len(res_ops.query_resource(res_ops.VOLUME)) == VOLUME_NUMBER * 2
+    assert len(res_ops.query_resource(res_ops.VOLUME)) == \
+           VOLUME_NUMBER * 2 + len(res_ops.query_resource(res_ops.VM_INSTANCE))
 
 
 def env_recover():
