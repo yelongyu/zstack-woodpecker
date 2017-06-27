@@ -402,6 +402,13 @@ def find_ps_nfs():
     return False
 
 
+def get_ps_vm_creation():
+    if find_ps_local() and find_ps_nfs():
+        return find_ps_local(), find_ps_local()
+    else:
+        return random.sample(res_ops.get_resource(res_ops.PRIMARY_STORAGE), 2)
+
+
 def check_vm_running_on_host(vm_uuid, host_ip):
     cmd = "virsh list|grep %s|awk '{print $3}'" %(vm_uuid)
     host_username = os.environ.get('hostUsername')
