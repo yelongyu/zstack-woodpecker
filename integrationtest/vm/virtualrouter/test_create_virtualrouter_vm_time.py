@@ -28,8 +28,11 @@ def test():
     ps = test_lib.lib_get_primary_storage_by_uuid(vm.get_vm().allVolumes[0].primaryStorageUuid)
     if ps.type != inventory.LOCAL_STORAGE_TYPE:
         test_util.test_skip('Skip test on non-localstorage')
-    vm.check()
+    vr = test_lib.lib_find_vr_by_vm(vm.vm)[0]
+    if vr.applianceVmType != "VirtualRouter":
+        test_util.test_skip("This test only for VirtualRouter network")
 
+    vm.check()
     [select_bs_time, allocate_host_time, allocate_ps_time, local_storage_allocate_capacity_time,\
      allocate_volume_time, allocate_nic_time, instantiate_res_pre_time, create_on_hypervisor_time,\
      instantiate_res_post_time] = test_stub.get_stage_time(vm_name, begin_time)
