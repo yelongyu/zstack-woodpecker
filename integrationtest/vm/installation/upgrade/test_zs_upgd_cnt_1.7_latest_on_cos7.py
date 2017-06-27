@@ -45,9 +45,11 @@ def test():
 
     test_stub.update_iso(vm_ip, tmp_file, old_iso_path, upgrade_script_path)
 
-    pkg_num = 1.8
+    #pkg_num = 1.8
+    release_ver=['1.8','1.9','1.10','2.0']
     curren_num = float(os.environ.get('releasePkgNum'))
-    while pkg_num <= curren_num:
+    for pkg_num in release_ver:
+    #while pkg_num <= curren_num:
         test_util.test_logger('Upgrade zstack to %s' % pkg_num)
         if str(pkg_num) == '1.8':
             test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
@@ -56,7 +58,7 @@ def test():
         test_stub.start_mn(vm_ip, tmp_file)
         test_stub.check_zstack_version(vm_ip, tmp_file, str(pkg_num))
         test_stub.check_installation(vm_ip, tmp_file)
-        pkg_num = pkg_num + 0.1
+        #pkg_num = pkg_num + 0.1
 
     test_util.test_dsc('Upgrade zstack to latest') 
 
