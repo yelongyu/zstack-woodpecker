@@ -31,6 +31,7 @@ def test():
     global sg_inv
     global iz_inv
     global vswitch_inv
+    global vpc_inv
     global ecs_inv
     datacenter_type = os.getenv('datacenterType')
     cond = res_ops.gen_query_conditions('name', '=', os.getenv('imageName_i_c7'))

@@ -1,6 +1,6 @@
 '''
 
-Test create ECS instance with public ip and set console password.
+Test create ECS instance with public ip.
 
 @author: Legion
 '''
@@ -31,6 +31,7 @@ def test():
     global sg_inv
     global iz_inv
     global vswitch_inv
+    global vpc_inv
     global ecs_inv
     datacenter_type = os.getenv('datacenterType')
     cond = res_ops.gen_query_conditions('name', '=', os.getenv('imageName_i_c7'))
@@ -58,7 +59,7 @@ def test():
     sg_inv = hyb_ops.create_ecs_security_group_remote('sg_for_test', vpc_inv.uuid)
     hyb_ops.create_ecs_image_from_local_image(bs_uuid, datacenter_inv.uuid, image.uuid)
     ecs_inv = hyb_ops.create_ecs_instance_from_local_image('Password123', bs_uuid, image.uuid, vswitch_inv.uuid, zone_id, instance_offering.uuid, ecs_bandwidth=5,
-                                                           ecs_security_group_uuid=sg_inv.uuid, allocate_public_ip=True, ecs_instance_name='zstack-ecs-test')
+                                                           ecs_security_group_uuid=sg_inv.uuid, allocate_public_ip='true', ecs_instance_name='zstack-ecs-test')
     assert ecs_inv.publicIpAddresse
     test_util.test_pass('Create Delete Ecs Instance Test Success')
 
