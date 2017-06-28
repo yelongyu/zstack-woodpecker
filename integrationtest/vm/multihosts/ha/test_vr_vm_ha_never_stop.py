@@ -70,6 +70,13 @@ def test():
     vm.set_creation_option(vm_creation_option)
     vm.create()
 
+    vrs = test_lib.lib_find_vr_by_l3_uuid(l3_net_uuid)
+    target_host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid
+    for vr in vrs:
+        if test_lib.lib_find_host_by_vr(vr).managementIp != test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp:
+            vm_ops.migrate_vm(vr.uuid, target_host_uuid)
+    time.sleep(60)
+    
     #vm.check()
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
     host_port = test_lib.lib_get_host_port(host_ip)
