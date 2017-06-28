@@ -50,14 +50,14 @@ def test():
     time.sleep(60)
 
     vm_ip = vm_inv.vmNics[0].ip
-    vip = '172.20.198.1'
-    if vip == vm_ip:
-        vip = '172.20.198.2'
+    #vip = '172.20.198.1'
+    #if vip == vm_ip:
+    #    vip = '172.20.198.2'
 
-    ssh_cmd = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
-    ssh.make_ssh_no_password(vm_ip, test_lib.lib_get_vm_username(vm_inv), test_lib.lib_get_vm_password(vm_inv))
-    cmd = '%s ifconfig eth0:0 %s up' % (ssh_cmd, vip)
-    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+    #ssh_cmd = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    #ssh.make_ssh_no_password(vm_ip, test_lib.lib_get_vm_username(vm_inv), test_lib.lib_get_vm_password(vm_inv))
+    #cmd = '%s ifconfig eth0:0 %s up' % (ssh_cmd, vip)
+    #process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
 
     target_file = '/root/zstack-all-in-one.tgz'
     test_stub.prepare_test_env(vm_inv, target_file)
