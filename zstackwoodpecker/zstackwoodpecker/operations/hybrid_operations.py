@@ -489,3 +489,10 @@ def query_ecs_security_group_local(session_uuid=None):
     test_util.action_logger('Query DataCenter from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
+
+def get_ecs_instance_vnc_url(uuid, session_uuid=None):
+    action = api_actions.GetEcsInstanceVncUrlAction()
+    action.uuid = uuid
+    test_util.action_logger('Get Ecs Instance Vpc Url')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
