@@ -47,7 +47,7 @@ def env_recover():
         hyb_ops.del_ecs_vswitch_remote(vswitch_inv.uuid)
     global vpc_inv
     if vpc_inv:
-        time.sleep(5)
+        time.sleep(10)
         hyb_ops.del_ecs_vpc_remote(vpc_inv.uuid)
     global iz_inv
     if iz_inv:

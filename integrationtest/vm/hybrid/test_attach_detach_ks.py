@@ -27,7 +27,7 @@ def test():
     hyb_ops.attach_aliyun_key(ks_inv.uuid)
     ks_attach = hyb_ops.query_aliyun_key_secret()
     assert ks_attach[0].current == 'true'
-    test_util.test_pass('Detach Attach Aliyun key and secret success')
+    test_util.test_pass('Detach Attach Aliyun Key and Secret Success')
 
 def env_recover():
     global ks_inv

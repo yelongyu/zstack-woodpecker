@@ -48,7 +48,7 @@ def env_recover():
         hyb_ops.del_ecs_security_group_remote(sg_inv.uuid)
     global vpc_inv
     if vpc_inv:
-        time.sleep(5)
+        time.sleep(10)
         hyb_ops.del_ecs_vpc_remote(vpc_inv.uuid)
     global datacenter_inv
     if datacenter_inv:

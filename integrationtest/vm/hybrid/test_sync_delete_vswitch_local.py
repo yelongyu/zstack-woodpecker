@@ -38,7 +38,7 @@ def test():
     iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, region_id)
     zone_id = iz_list[0].zoneId
     iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, zone_id)
-    vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'zstack-test-vswitch-%s' % date_s, '192.168.0.0/16')
+    hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'zstack-test-vswitch-%s' % date_s, '192.168.0.0/16')
     time.sleep(5)
     vswitch_auto_synced = hyb_ops.query_ecs_vswitch_local()
     if vswitch_auto_synced:

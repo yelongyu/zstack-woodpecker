@@ -32,7 +32,7 @@ def test():
     hyb_ops.attach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid, datacenter_inv.uuid)
     time.sleep(5)
     hyb_ops.detach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid, datacenter_inv.uuid)
-    test_util.test_pass('Create Attach Detach OSS bucket Test Success')
+    test_util.test_pass('Create Attach Detach OSS Bucket Test Success')
 
 def env_recover():
     global bucket_inv

@@ -32,7 +32,7 @@ def test():
     datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
     vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', '192.168.0.0/16')
     time.sleep(5)
-    sg_inv = hyb_ops.create_ecs_security_group_remote('sg_for_test_%s' % date_s, vpc_inv.uuid)
+    hyb_ops.create_ecs_security_group_remote('sg_for_test_%s' % date_s, vpc_inv.uuid)
     time.sleep(5)
     sg_auto_synced = hyb_ops.query_ecs_security_group_local()
     if sg_auto_synced:

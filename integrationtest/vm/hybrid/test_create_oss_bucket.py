@@ -26,7 +26,7 @@ def test():
     datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
     region_id = datacenter_list[0].regionId
     bucket_inv = hyb_ops.create_oss_bucket_remote(region_id, 'zstack-test-%s-%s' % (date_s, region_id), 'created-by-zstack-for-test')
-    test_util.test_pass('Create OSS bucket Test Success')
+    test_util.test_pass('Create OSS Bucket Test Success')
 
 
 def env_recover():
