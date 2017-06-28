@@ -48,8 +48,8 @@
           </l3Networks>
 	  <nodeRef>$node1Name</nodeRef>
           <hostRef>$hostName</hostRef>
-	  <backupStorageRef type="sftp">$sftpBackupStorageName</backupStorageRef>
 	  <primaryStorageRef type="nfs">$nfsPrimaryStorageName</primaryStorageRef>
+	  <backupStorageRef type="sftp">$sftpBackupStorageName</backupStorageRef>
         </vm>
       </vms>
     </host>
@@ -71,6 +71,7 @@
             </l3Network>
           </l3Networks>
           <hostRef>$hostName2</hostRef>
+	  <backupStorageRef type="sftp">$sftpBackupStorageName2</backupStorageRef>
         </vm>
       </vms>
     </host>
