@@ -22,6 +22,7 @@
             </l3Network>
             <l3Network uuid="$vmStorageL3Uuid">
               <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+              <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
               <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
             </l3Network>
           </l3Networks>
@@ -41,6 +42,7 @@
             </l3Network>
             <l3Network uuid="$vmStorageL3Uuid">
               <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+              <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
               <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
             </l3Network>
           </l3Networks>
@@ -64,6 +66,7 @@
             </l3Network>
             <l3Network uuid="$vmStorageL3Uuid">
               <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+              <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
               <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
             </l3Network>
           </l3Networks>
@@ -84,6 +87,7 @@
             </l3Network>
             <l3Network uuid="$vmStorageL3Uuid">
               <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+              <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
               <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
             </l3Network>
           </l3Networks>
@@ -104,6 +108,7 @@
             </l3Network>
             <l3Network uuid="$vmStorageL3Uuid">
               <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+              <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
               <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
             </l3Network>
           </l3Networks>
