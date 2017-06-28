@@ -72,6 +72,8 @@ def test():
     assert len(res_ops.query_resource(res_ops.VOLUME)) == \
            VOLUME_NUMBER * 2 + len(res_ops.query_resource(res_ops.VM_INSTANCE))
 
+    test_util.test_pass('Multi PrimaryStorage Test Pass')
+
 
 def env_recover():
     test_lib.lib_error_cleanup(test_obj_dict)

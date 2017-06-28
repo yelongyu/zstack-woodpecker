@@ -50,6 +50,8 @@ def test():
     for volume in all_volume_list:
         volume.check()
 
+    test_util.test_pass('Multi PrimaryStorage Test Pass')
+
 
 def env_recover():
     test_lib.lib_error_cleanup(test_obj_dict)

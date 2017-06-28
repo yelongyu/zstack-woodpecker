@@ -58,6 +58,7 @@ def test():
     second_ps_vm.start()
     second_ps_vm.check()
 
+    test_util.test_pass('Multi PrimaryStorage Test Pass')
 
 
 def env_recover():

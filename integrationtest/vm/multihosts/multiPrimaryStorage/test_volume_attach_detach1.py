@@ -60,6 +60,9 @@ def test():
     for volume in second_ps_volume_list:
         volume.check()
 
+    test_util.test_pass('Multi PrimaryStorage Test Pass')
+
+
 def env_recover():
     test_lib.lib_error_cleanup(test_obj_dict)
     if new_ps_list:
