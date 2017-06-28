@@ -10,6 +10,7 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
 import time
+import random
 
 _config_ = {
         'timeout' : 3000,
@@ -28,7 +29,7 @@ def test():
     if len(ps_list) < 2:
         test_util.test_skip("Skip test if only one primary storage")
 
-    ps1, ps2 = test_stub.get_ps_vm_creation()
+    ps1, ps2 = random.sample(ps_list, 2)
 
     for _ in xrange(5):
         test_util.test_dsc('Remove ps2')
@@ -48,16 +49,24 @@ def test():
             ps2 = ps_ops.create_nfs_primary_storage(ps_config)
         else:
             ps2 = None
+        time.sleep(5)
         ps_ops.attach_primary_storage(ps2.uuid, res_ops.get_resource(res_ops.CLUSTER)[0].uuid)
         time.sleep(5)
+        delete_ps_list.pop()
 
     test_util.test_dsc('create VM by default para')
-    vm1 = test_stub.create_multi_vms(name_prefix='vm1', count=1)[0]
+    vm1 = test_stub.create_multi_vms(name_prefix='vm1', count=1, data_volume_number=VOLUME_NUMBER)[0]
     test_obj_dict.add_vm(vm1)
-    test_util.test_dsc('create VM in ps2')
-    vm2 = test_stub.create_multi_vms(name_prefix='vm2', count=1, ps_uuid=ps2.uuid,
-                                     data_volume_number=VOLUME_NUMBER, ps_uuid_for_data_vol=ps2.uuid)[0]
-    test_obj_dict.add_vm(vm2)
+
+    if ps2.type == inventory.NFS_PRIMARY_STORAGE_TYPE and ps1.type == inventory.LOCAL_STORAGE_TYPE:
+        test_util.test_dsc('create date volume in ps2')
+        volume = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=ps2)
+        test_obj_dict.add_volume(volume)
+    else:
+        test_util.test_dsc('create VM in ps2')
+        vm2 = test_stub.create_multi_vms(name_prefix='vm2', count=1, ps_uuid=ps2.uuid,
+                                        data_volume_number=VOLUME_NUMBER)[0]
+        test_obj_dict.add_vm(vm2)
 
     test_util.test_pass('Multi PrimaryStorage Test Pass')
 

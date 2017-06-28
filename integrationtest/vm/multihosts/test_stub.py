@@ -155,10 +155,16 @@ def create_multi_vms(name_prefix='', count=10, host_uuid=None, ps_uuid=None, dat
         else:
             disk_offering_list = res_ops.get_resource(res_ops.DISK_OFFERING)
             disk_offering_uuids = [random.choice(disk_offering_list).uuid for _ in xrange(data_volume_number)]
-            vm = create_vm_with_random_offering(name_prefix+"{}".format(i), image_name='imageName_net',
-                                                l3_name='l3VlanNetwork2', host_uuid=host_uuid, ps_uuid=ps_uuid,
-                                                disk_offering_uuids=disk_offering_uuids,
-                                                system_tags=['primaryStorageUuidForDataVolume::{}'.format(ps_uuid_for_data_vol)])
+            if ps_uuid_for_data_vol:
+                vm = create_vm_with_random_offering(name_prefix+"{}".format(i), image_name='imageName_net',
+                                                    l3_name='l3VlanNetwork2', host_uuid=host_uuid, ps_uuid=ps_uuid,
+                                                    disk_offering_uuids=disk_offering_uuids,
+                                                    system_tags=['primaryStorageUuidForDataVolume::{}'.format(ps_uuid_for_data_vol)])
+            else:
+                vm = create_vm_with_random_offering(name_prefix+"{}".format(i), image_name='imageName_net',
+                                                    l3_name='l3VlanNetwork2', host_uuid=host_uuid, ps_uuid=ps_uuid,
+                                                    disk_offering_uuids=disk_offering_uuids)
+
         vm_list.append(vm)
     for vm in vm_list:
         vm.check()
