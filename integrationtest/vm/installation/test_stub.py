@@ -181,7 +181,7 @@ def reset_rabb(vm_ip, tmp_file):
     process_result = execute_shell_in_process(cmd, tmp_file)
     cmd = '%s "rabbitmqctl set_user_tags zstack administrator" ' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
-    cmd = '%s "rabbitmqctl set_permissions -p / zstack ".*" ".*" ".*" " ' % ssh_cmd
+    cmd = '''%s 'rabbitmqctl set_permissions -p / zstack ".*" ".*" ".*" ' ''' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
 
 def reset_rabbitmq(vm_ip, tmp_file):
