@@ -50,7 +50,7 @@ def test():
     test_stub.check_installation(vm_ip, tmp_file)
 
     os.system('rm -f %s' % tmp_file)
-    #test_stub.destroy_vm_scenario(vm_inv.uuid)
+    test_stub.destroy_vm_scenario(vm_inv.uuid)
     test_util.test_pass('ZStack upgrade Test Success')
 
 #Will be called only if exception happens in test().
@@ -58,5 +58,5 @@ def error_cleanup():
     global vm_inv
     os.system('rm -f %s' % tmp_file)
     if vm_inv:
-    #    test_stub.destroy_vm_scenario(vm_inv.uuid)
-    #test_lib.lib_error_cleanup(test_obj_dict)
+        test_stub.destroy_vm_scenario(vm_inv.uuid)
+    test_lib.lib_error_cleanup(test_obj_dict)
