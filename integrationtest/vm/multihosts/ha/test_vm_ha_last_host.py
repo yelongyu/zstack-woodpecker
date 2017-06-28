@@ -23,6 +23,7 @@ host_uuid = None
 host_ip = None
 max_attempts = None
 storagechecker_timeout = None
+test_stub = test_lib.lib_get_test_stub()
 
 def test():
     global vm

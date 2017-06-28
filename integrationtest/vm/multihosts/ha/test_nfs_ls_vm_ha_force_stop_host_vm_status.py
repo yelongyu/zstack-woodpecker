@@ -92,7 +92,7 @@ def test():
     vm_stop_time = None
     cond = res_ops.gen_query_conditions('name', '=', 'ls_vm_ha_self_start')
     cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid, cond)
-    for i in range(0, 180):
+    for i in range(0, 300):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Stopped":
             vm_stop_time = i
             test_stub.start_host(test_host, test_lib.all_scenario_config)
@@ -100,8 +100,8 @@ def test():
             break
         time.sleep(1)
     if not vm_stop_time:
-        vm_stop_time = 180    
-    for i in range(vm_stop_time, 180):
+        vm_stop_time = 300    
+    for i in range(vm_stop_time, 300):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Starting":
             break
         time.sleep(1)
