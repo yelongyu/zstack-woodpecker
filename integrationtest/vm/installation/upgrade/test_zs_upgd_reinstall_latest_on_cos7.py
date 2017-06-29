@@ -103,14 +103,14 @@ def test():
     test_stub.execute_install_with_args(ssh_cmd, args, target_file, tmp_file)
     ins_path = "/home/zstack-test"
     check_installtion_path(ssh_cmd, ins_path)
-    test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
+    test_stub.check_installation(vm_ip, tmp_file)
 
     test_util.test_dsc('Upgrade zstack to latest') 
     upgrade_target_file = '/root/zstack-upgrade-all-in-one.tgz' 
     test_stub.prepare_test_env(vm_inv, upgrade_target_file)
     test_stub.upgrade_zstack(ssh_cmd, upgrade_target_file, tmp_file) 
     check_installtion_path(ssh_cmd, ins_path)
-    test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
+    test_stub.check_installation(vm_ip, tmp_file)
 
     test_util.test_dsc('Install zstack with default path')
     cmd= '%s "[ -e /usr/local/zstack ] && echo yes || echo no"' % ssh_cmd
@@ -127,7 +127,7 @@ def test():
     test_stub.execute_install_with_args(ssh_cmd, args, target_file, tmp_file)
     ins_path = "/usr/local/zstack"
     check_installtion_path(ssh_cmd, ins_path)
-    test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
+    test_stub.check_installation(vm_ip, tmp_file)
 
     os.system('rm -f %s' % tmp_file)
     sce_ops.destroy_vm(zstack_management_ip, vm_inv.uuid)
