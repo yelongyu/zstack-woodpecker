@@ -9,7 +9,7 @@ import zstackwoodpecker.test_util as test_util
 import apibinding.api_actions as api_actions
 import account_operations
 import resource_operations as res_ops
-import scenario_operations as sce_ops
+#import scenario_operations as sce_ops
 import zstacklib.utils.sizeunit as sizeunit
 import zstacklib.utils.jsonobject as jsonobject
 import zstacklib.utils.xmlobject as xmlobject
@@ -594,9 +594,9 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 hostname_list = get_primary_storage_from_scenario_file(pr.name_, scenarioConfig, scenarioFile, deployConfig)
                 if len(hostname_list) != 0:
                     action.url = "%s:%s" % (hostname_list[0], pr.url_.split(':')[1])
-                    cadidate_ip = get_nfs_ip_for_seperate_network(scenarioConfig, hostname_list[0])
-                    if cadidate_ip:
-                        action.url = "%s:%s" % (cadidate_ip, pr.url_.split(':')[1])
+                    #cadidate_ip = get_nfs_ip_for_seperate_network(scenarioConfig, hostname_list[0])
+                    #if cadidate_ip:
+                    #    action.url = "%s:%s" % (cadidate_ip, pr.url_.split(':')[1])
                 else:
                     action.url = pr.url_
                 action.zoneUuid = zinv.uuid
