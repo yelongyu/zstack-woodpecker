@@ -1564,7 +1564,7 @@ def get_nfs_ip_for_seperate_network(scenarioConfig, virtual_host_ip):
     storageNetworkUuid = None
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
         for vm in xmlobject.safe_list(host.vms.vm):
-            for l3Network in vm.l3Networks:
+            for l3Network in xmlobject.safe_list(vm.l3Networks):
                 if xmlobject.has_element(l3Network, 'primaryStorageRef'):
                     storageNetworkUuid = l3Network.uuid_
 
