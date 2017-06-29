@@ -44,7 +44,7 @@ def test():
     if vswitch_auto_synced:
         for v in vswitch_auto_synced:
             hyb_ops.del_ecs_vswitch_in_local(v.uuid)
-    vswitch_synced = hyb_ops.sync_ecs_vswitch_from_remote(iz_inv.uuid)
+    vswitch_synced = hyb_ops.sync_ecs_vswitch_from_remote(datacenter_inv.uuid)
     assert vswitch_synced.addList
     vswitch_local = hyb_ops.query_ecs_vswitch_local()
     for vl in vswitch_local:

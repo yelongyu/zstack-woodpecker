@@ -219,17 +219,17 @@ def create_ecs_vswtich_remote(vpc_uuid, identity_zone_uuid, name, cidr_block, se
     test_util.test_logger('[Ecs VSwitch Remote:] %s %s %s %s is created.' % (vpc_uuid, identity_zone_uuid, name, cidr_block))
     return evt.inventory
 
-def sync_ecs_vswitch_from_remote(identity_zone_uuid, session_uuid=None):
+def sync_ecs_vswitch_from_remote(data_center_uuid, session_uuid=None):
     action = api_actions.SyncEcsVSwitchFromRemoteAction()
-    action.identityZoneUuid = identity_zone_uuid
-    test_util.action_logger('Sync [Ecs VSwitch From Remote:] %s' % (identity_zone_uuid))
+    action.dataCenterUuid = data_center_uuid
+    test_util.action_logger('Sync [Ecs VSwitch From Remote:] %s' % (data_center_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt
 
 def del_ecs_vswitch_in_local(uuid, session_uuid=None):
     action = api_actions.DeleteEcsVSwitchInLocalAction()
     action.uuid = uuid
-    test_util.action_logger('Delete [ecs vswitch in local:] %s' % (uuid))
+    test_util.action_logger('Delete [Ecs VSwitch in Local:] %s' % (uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[ecs vswitch in local:] %s is deleted.' % uuid)
     return evt
