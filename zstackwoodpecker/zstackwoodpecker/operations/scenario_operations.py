@@ -829,3 +829,4 @@ def destroy_scenario(scenario_config, scenario_file):
                     for vip in vip_lst:
                         vip.delete()
             destroy_vm(zstack_management_ip, vm.uuid_)
+

@@ -9,6 +9,7 @@ import zstackwoodpecker.test_util as test_util
 import apibinding.api_actions as api_actions
 import account_operations
 import resource_operations as res_ops
+import scenario_operations as sce_ops
 import zstacklib.utils.sizeunit as sizeunit
 import zstacklib.utils.jsonobject as jsonobject
 import zstacklib.utils.xmlobject as xmlobject
@@ -25,6 +26,21 @@ exc_info = []
 AddKVMHostTimeOut = 10*60*1000
 IMAGE_THREAD_LIMIT = 2
 DEPLOY_THREAD_LIMIT = 500
+
+def get_nfs_ip_for_seperate_network(scenarioConfig, virtual_host_ip):
+    zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
+    for vm in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host.vms.vm):
+        if xmlobject.has_element(vm, 'primaryStorageRef'):
+            if vm.primaryStorageRef.type_ == 'nfs' and hasattr(vm.primaryStorageRef, 'storageNetworkUuid_'):                                                                                                                                 
+                cond = res_ops.gen_query_conditions('vmNics.ip', '=', virtual_host_ip)
+                vm_inv_nics = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0].vmNics
+                if len(vm_inv_nics) < 2:
+                    test_util.test_fail("virtual host:%s not has 2+ nics as expected, incorrect for seperate network case" %(virtual_host_ip))
+                for vm_inv_nic in vm_inv_nics:
+                    if vm_inv_nic.l3NetworkUuid == vm.primaryStorageRef.storageNetworkUuid_:
+                        return vm_inv_nic.ip
+
+    return None
 
 def get_first_item_from_list(list_obj, list_obj_name, list_obj_value, action_name):
     '''
@@ -578,6 +594,9 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 hostname_list = get_primary_storage_from_scenario_file(pr.name_, scenarioConfig, scenarioFile, deployConfig)
                 if len(hostname_list) != 0:
                     action.url = "%s:%s" % (hostname_list[0], pr.url_.split(':')[1])
+                    cadidate_ip = get_nfs_ip_for_seperate_network(scenarioConfig, hostname_list[0])
+                    if cadidate_ip:
+                        action.url = "%s:%s" % (cadidate_ip, pr.url_.split(':')[1])
                 else:
                     action.url = pr.url_
                 action.zoneUuid = zinv.uuid
@@ -1552,3 +1571,4 @@ def wait_for_thread_done(report = False):
         if report:
             print 'thread count: %d' % threading.active_count()
     check_thread_exception()
+
