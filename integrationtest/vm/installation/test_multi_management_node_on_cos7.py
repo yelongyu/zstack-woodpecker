@@ -75,7 +75,7 @@ def test():
     test_stub.execute_shell_in_process(cmd, tmp_file)
     cmd='%s "zstack-ctl start"'%ssh_cmd1
     test_stub.execute_shell_in_process(cmd, tmp_file)
-    test_stub.check_installation(ssh_cmd1, tmp_file, vm1_inv)
+    test_stub.check_installation(vm1_ip, tmp_file)
 
     test_util.test_dsc('Install multi management node on vm2 and vm3')
     host_list = 'root:password@%s root:password@%s' % (vm2_ip, vm3_ip)
@@ -83,42 +83,42 @@ def test():
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
 
     test_util.test_dsc('Check installation on vm1')
-    test_stub.check_installation(ssh_cmd1, tmp_file, vm1_inv)
+    test_stub.check_installation(vm1_ip, tmp_file)
 
     test_util.test_dsc('Check installation on vm2')
     ssh.make_ssh_no_password(vm2_ip, test_lib.lib_get_vm_username(vm2_inv), \
             test_lib.lib_get_vm_password(vm2_inv))
     cmd = '%s "zstack-ctl start"' % ssh_cmd2
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
-    test_stub.check_installation(ssh_cmd2, tmp_file, vm2_inv)
+    test_stub.check_installation(vm2_ip, tmp_file)
 
     test_util.test_dsc('Check installation on vm3')
     ssh.make_ssh_no_password(vm3_ip, test_lib.lib_get_vm_username(vm3_inv), \
             test_lib.lib_get_vm_password(vm3_inv))
     cmd = '%s "zstack-ctl start"' % ssh_cmd3
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
-    test_stub.check_installation(ssh_cmd3, tmp_file, vm3_inv)
+    test_stub.check_installation(vm3_ip, tmp_file)
 
     test_util.test_dsc('Upgrade multi management node on vm2 and vm3')
     cmd = '%s "zstack-ctl upgrade_multi_management_node --installer-bin %s"' % (ssh_cmd1, target_file) 
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
 
     test_util.test_dsc('After upgrade, check installation on vm1')
-    test_stub.check_installation(ssh_cmd1, tmp_file, vm1_inv)
+    test_stub.check_installation(vm1_ip, tmp_file)
 
     test_util.test_dsc('After upgrade, check installation on vm2')
     ssh.make_ssh_no_password(vm2_ip, test_lib.lib_get_vm_username(vm2_inv), \
             test_lib.lib_get_vm_password(vm2_inv))
     cmd = '%s "zstack-ctl start"' % ssh_cmd2
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
-    test_stub.check_installation(ssh_cmd2, tmp_file, vm2_inv)
+    test_stub.check_installation(vm2_ip, tmp_file)
 
     test_util.test_dsc('After upgrade, check installation on vm3')
     ssh.make_ssh_no_password(vm3_ip, test_lib.lib_get_vm_username(vm3_inv), \
             test_lib.lib_get_vm_password(vm3_inv))
     cmd = '%s "zstack-ctl start"' % ssh_cmd3
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
-    test_stub.check_installation(ssh_cmd3, tmp_file, vm3_inv)
+    test_stub.check_installation(vm3_ip, tmp_file)
 
     os.system('rm -f %s' % tmp_file)
     sce_ops.destroy_vm(zstack_management_ip, vm1_inv.uuid)
