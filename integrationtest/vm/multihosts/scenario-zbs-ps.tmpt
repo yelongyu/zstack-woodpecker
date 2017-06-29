@@ -1,0 +1,8 @@
+import ../scenario.tmpt
+import ./deploy-zbs-ps.tmpt
+vmName1 = test_vm1
+vmName2 = test_vm2
+vmInstranceOfferingUuid2 = 234567 
+imageUuid2 = 234567 
+scsiVolumeDiskOfferingUuid = 123456
+volumeName = test_volume

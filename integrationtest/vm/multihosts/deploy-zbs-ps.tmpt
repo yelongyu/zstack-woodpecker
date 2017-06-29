@@ -1,0 +1,4 @@
+import ./deploy.tmpt
+
+zbsPrimaryStorageName = zses-ps
+zbsPrimaryStorageUrl = /media

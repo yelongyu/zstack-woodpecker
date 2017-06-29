@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-zbs-ps.xml</deployConfig>
+    <deployConfigTemplate>deploy-zbs-ps.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
