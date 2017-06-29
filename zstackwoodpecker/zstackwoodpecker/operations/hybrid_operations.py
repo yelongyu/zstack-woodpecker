@@ -55,17 +55,17 @@ def get_oss_bucket_name_from_remote(uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt.inventories
 
-def add_oss_file_bucket_name(region_id, oss_bucket_name, session_uuid=None):
-    action = api_actions.AddOssFileBucketNameAction()
+def add_oss_bucket_from_remote(region_id, oss_bucket_name, session_uuid=None):
+    action = api_actions.AddOssBucketFromRemoteAction()
     action.regionid = region_id
-    action.ossBucketName = oss_bucket_name
-    test_util.action_logger('Add [Oss File Bucket Name:] %s %s' % (region_id, oss_bucket_name))
+    action.bucketName = oss_bucket_name
+    test_util.action_logger('Add [Oss Bucket From Remote:] %s %s' % (region_id, oss_bucket_name))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    test_util.test_logger('[Oss File Bucket Name:] %s %s is added.' % (region_id, oss_bucket_name))
+    test_util.test_logger('[Oss Bucket:] %s %s is added.' % (region_id, oss_bucket_name))
     return evt.inventory
 
-def del_oss_file_bucket_name_in_local(uuid, session_uuid=None):
-    action = api_actions.DeleteOssFileBucketNameInLocalAction()
+def del_oss_bucket_name_in_local(uuid, session_uuid=None):
+    action = api_actions.DeleteOssBucketNameLocalAction()
     action.uuid = uuid
     test_util.action_logger('Delete [Oss File Bucket Name in local:] %s' % (uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
@@ -243,24 +243,24 @@ def del_ecs_vswitch_remote(uuid, session_uuid=None):
     return evt
 
 def sync_virtual_router_from_remote(vpc_uuid, session_uuid=None):
-    action = api_actions.SyncVirtualRouterFromRemoteAction()
-    action.vpcUuid = vpc_uuid
+    action = api_actions.SyncAliyunVirtualRouterFromRemoteAction()
+    action.uuid = vpc_uuid
     test_util.action_logger('Sync [VirtualRouter From Remote:] %s' % (vpc_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt
 
 def sync_router_entry_from_remote(vrouter_uuid, vrouter_type, session_uuid=None):
-    action = api_actions.SyncRouterEntryFromRemoteAction()
-    action.vRouterUuid = vrouter_uuid
+    action = api_actions.SyncAliyunRouteEntryFromRemoteAction()
+    action.uuid = vrouter_uuid
     action.vRouterType = vrouter_type
-    test_util.action_logger('Sync [Router Entry From Remote:] %s' % (vpc_uuid))
+    test_util.action_logger('Sync [Router Entry From Remote:] %s' % (vrouter_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt
 
 def create_vpc_virtualrouter_entry_remote(dest_cidr_block, vrouter_uuid, vrouter_type, next_hop_type, next_hop_uuid, session_uuid=None):
-    action = api_actions.CreateVpcVirtualRouterEntryRemoteAction()
+    action = api_actions.CreateAliyunVpcVirtualRouterEntryRemoteAction()
     action.destinationCidrBlock = dest_cidr_block
-    action.vRouterUuid = vrouter_uuid
+    action.uuid = vrouter_uuid
     action.vRouterType = vrouter_type
     action.nextHopType = next_hop_type
     action.nextHopUuid = next_hop_uuid
@@ -270,7 +270,7 @@ def create_vpc_virtualrouter_entry_remote(dest_cidr_block, vrouter_uuid, vrouter
     return evt.inventory
 
 def del_router_entry_remote(uuid, session_uuid=None):
-    action = api_actions.DeleteRouteEntryRemoteAction()
+    action = api_actions.DeleteAliyunRouteEntryRemoteAction()
     action.uuid = uuid
     test_util.action_logger('Delete [Router Entry Remote:] %s ' % (uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
@@ -423,13 +423,13 @@ def reboot_ecs_instance(uuid, session_uuid=None):
     test_util.test_logger('[ecs instance:] %s is rebooted.' % uuid)
     return evt
 
-def update_ecs_instance(uuid, password, session_uuid=None):
-    action = api_actions.UpdateEcsInstanceAction()
+def update_ecs_instance_vnc_password(uuid, password, session_uuid=None):
+    action = api_actions.UpdateEcsInstanceVncPasswordAction()
     action.uuid = uuid
     action.password = password
-    test_util.action_logger('Update [ecs instance:] %s' % (uuid))
+    test_util.action_logger('Update [ecs instance:] vnc password %s' % (uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    test_util.test_logger('[ecs instance:] %s is updated.' % uuid)
+    test_util.test_logger('[ecs instance:] %s vnc password is updated.' % uuid)
     return evt
 
 def update_image_guestOsType(uuid, guest_os_type, session_uuid=None):
