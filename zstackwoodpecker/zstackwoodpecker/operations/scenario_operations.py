@@ -572,6 +572,8 @@ def setup_zbs_primary_storages(scenario_config, scenario_file, deploy_config, vm
                                     zbs_url = primaryStorageRef.url_
 
     i = 0
+    node1_ip = None
+    node2_ip = None
     for zbs_storage in zbs_storages:
         test_util.test_logger('setup zbs [%s] service.' % (zbs_storage))
         node_name = zbs_storages[zbs_storage][0]
@@ -887,7 +889,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
     setup_ceph_storages(scenario_config, scenario_file, deploy_config)
     setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst)
     setup_fusionstor_storages(scenario_config, scenario_file, deploy_config)
-    setup_zbs_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst)
+    #setup_zbs_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst)
 
 def destroy_scenario(scenario_config, scenario_file):
     with open(scenario_file, 'r') as fd:
