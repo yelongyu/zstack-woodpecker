@@ -35,7 +35,7 @@ def test():
     test_stub.copy_id_dsa(vm_inv, ssh_cmd, tmp_file)
     test_stub.copy_id_dsa_pub(vm_inv)
     test_stub.execute_all_install(ssh_cmd, target_file, tmp_file)
-    test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
+    test_stub.check_installation(vm_ip, tmp_file)
 
     num = 0
     pkg_num = 1.4
@@ -45,7 +45,7 @@ def test():
         install_pkg = os.environ.get('zstackPkg_%s' % pkg_num)
         test_stub.prepare_upgrade_test_env(vm_inv, degrade_target_file, install_pkg)
         test_stub.upgrade_zstack(ssh_cmd, degrade_target_file, tmp_file)
-        test_stub.check_installation(ssh_cmd, tmp_file, vm_inv)
+        test_stub.check_installation(vm_ip, tmp_file)
         pkg_num = pkg_num - 0.1
         num = num + 1
 
