@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-zbs-ps.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-zbs-ps.tmpt</scenarioConfigTemplate>
+</testConfig>

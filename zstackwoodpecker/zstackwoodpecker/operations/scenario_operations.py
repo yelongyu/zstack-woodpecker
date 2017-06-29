@@ -547,6 +547,71 @@ def setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_confi
         for vm_inv, vm_config in zip(vm_inv_lst, vm_cfg_lst):
             recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
 
+def setup_zbs_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst):
+    zbs_storages = dict()
+    zbs_url = None
+    fenceip = '172.20.0.1'
+    zbs_url = 'http://192.168.200.100/mirror/share/liq/zbs.bin'
+    drbd_utils_url = 'http://192.168.200.100/mirror/share/liq/drbd/drbd-utils-8.9.11-1.el7.centos.x86_64.rpm'
+    drbd_utils_rpm = 'drbd-utils-8.9.11-1.el7.centos.x86_64.rpm'
+    for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            vm_name = vm.name_
+            if hasattr(vm, 'primaryStorageRef'):
+                for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
+                    for zone in xmlobject.safe_list(deploy_config.zones.zone):
+                        if primaryStorageRef.type_ == 'ZSES':
+                            if zbs_storages.has_key(primaryStorageRef.text_):
+                                if vm_name in zbs_storages[primaryStorageRef.text_]:
+                                    continue
+                                else:
+                                    zbs_storages[primaryStorageRef.text_].append(vm_name)
+                            else:
+                                zbs_storages[primaryStorageRef.text_] = [ vm_name ]
+                                if hasattr(primaryStorageRef, 'url_'):
+                                    zbs_url = primaryStorageRef.url_
+
+    i = 0
+    for zbs_storage in zbs_storages:
+        test_util.test_logger('setup zbs [%s] service.' % (zbs_storage))
+        node_name = zbs_storages[zbs_storage][0]
+        node_config = get_scenario_config_vm(node_name, scenario_config)
+        #node1_ip = get_scenario_file_vm(node1_name, scenario_file).ip_
+        node_host = get_deploy_host(node1_config.hostRef.text_, deploy_config)
+        if not hasattr(node_host, 'port_') or node_host.port_ == '22':
+            node_host.port_ = '22'
+
+        vm = get_scenario_file_vm(zbs_node, scenario_file)
+        node_ip = vm.ip_
+        i += 1
+        if i == 0:
+            node1_ip = node_ip
+        elif i == 2:
+            node2_ip = node_ip
+
+        import commands
+        cmd = "cp -rnf /opt/zstack-dvd/repos/* /etc/yum.repos.d/; yum --disablerepo=* --enablerepo=zstack-local,uek4-ocfs2 \
+  install kernel-uek ocfs2-tools"
+        ssh.execute(cmd, node_ip, node_config.imageUsername_, node_config.imagePassword_, True, int(node_host.port_))
+        cmd = 'grub2-set-default "CentOS Linux (4.1.12-37.2.2.el7uek.x86_64) 7 (Core)"; reboot'
+        ssh.execute(cmd, node_ip, node_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
+        cmd = "rm -rf %s; wget %s; rpm -i %s" %(drbd_utils_rpm, drbd_utils_url, drbd_utils_rpm)
+        ssh.execute(cmd, node_ip, node_config.imageUsername_, node_config.imagePassword_, True, int(node_host.port_))
+        cmd = "rm -rf zbs.bin; wget %s; bash zbs.bin" %zbs_url
+        ssh.execute(cmd, node_ip, node_config.imageUsername_, node_config.imagePassword_, True, int(node_host.port_))
+        status, wwn_id = commands.getstatusoutput("ls /dev/disk/by-id/|grep wwn")
+        if wwn_id == '':
+            test_util.test_fail('SCSI volume does not attched to the host')
+        cmd = "zbs init-node --address %s --device /dev/disk/by-id/%s --fenceip %s"%(woodpecker_ip, wwn_id, fenceip)
+        ssh.execute(cmd, node_ip, node_config.imageUsername_, node_config.imagePassword_, True, int(node_host.port_))
+
+    cmd = 'zbs pair-node --peer %s --user %s --pass %s' %(node2_ip, node_config.imageUsername_, node_config.imagePassword_)
+    ssh.execute(cmd, node1_ip, node_config.imageUsername_, node_config.imagePassword_, True, int(node_host.port_))
+
+    if zbs_storages:
+        for vm_inv, vm_config in zip(vm_inv_lst, vm_cfg_lst):
+            recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
+
 def create_sftp_backup_storage(http_server_ip, backup_storage_option, session_uuid=None):
     action = api_actions.AddSftpBackupStorageAction()
     action.timeout = 300000
@@ -709,6 +774,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
     eip_lst = []
     vip_lst = []
     ocfs2smp_shareable_volume_is_created = False
+    zbs_virtio_scsi_volume_is_created = False
     zstack_management_ip = scenario_config.basicConfig.zstackManagementIp.text_
     root_xml = etree.Element("deployerConfig")
     vms_xml = etree.SubElement(root_xml, 'vms')
@@ -806,13 +872,22 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             share_volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
                             ocfs2smp_shareable_volume_is_created = True
                         attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
-                
+                    if ps_ref.type_ == 'ZSES':
+                        if zbs_virtio_scsi_volume_is_created == False and hasattr(ps_ref, 'disk_offering_uuid_'):
+                            zbs_disk_offering_uuid = ps_ref.disk_offering_uuid_
+                            volume_option.set_disk_offering_uuid(zbs_disk_offering_uuid)
+                            volume_option.set_system_tags(['ephemeral::shareable', 'capability::virtio-scsi'])
+                            share_volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
+                            zbs_virtio_scsi_volume_is_created = True
+                        attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
+
     xml_string = etree.tostring(root_xml, 'utf-8')
     xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
     open(scenario_file, 'w+').write(xml_string)
     setup_ceph_storages(scenario_config, scenario_file, deploy_config)
     setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst)
     setup_fusionstor_storages(scenario_config, scenario_file, deploy_config)
+    setup_zbs_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst)
 
 def destroy_scenario(scenario_config, scenario_file):
     with open(scenario_file, 'r') as fd:
