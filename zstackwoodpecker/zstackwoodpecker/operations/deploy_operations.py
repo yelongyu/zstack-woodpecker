@@ -1560,16 +1560,29 @@ def wait_for_thread_done(report = False):
 def get_nfs_ip_for_seperate_network(scenarioConfig, virtual_host_ip):
     import scenario_operations as sce_ops
     zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
+
+    storageNetworkUuid = None
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            for l3Network in vm.l3Networks:
+                if xmlobject.has_element(l3Network, 'primaryStorageRef'):
+                    storageNetworkUuid = l3Network.uuid_
+
+    if not storageNetworkUuid:
+        return None
+
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
         for vm in xmlobject.safe_list(host.vms.vm):
             if xmlobject.has_element(vm, 'primaryStorageRef'):
-                if vm.primaryStorageRef.type_ == 'nfs' and hasattr(vm.primaryStorageRef, 'storageNetworkUuid_'):
+                #if vm.primaryStorageRef.type_ == 'nfs' and hasattr(vm.primaryStorageRef, 'storageNetworkUuid_'):
+                if vm.primaryStorageRef.type_ == 'nfs' and xmlobject.has_element(vm, 'l3Networks.l3Network.primaryStorageRef'):
                     cond = res_ops.gen_query_conditions('vmNics.ip', '=', virtual_host_ip)
                     vm_inv_nics = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0].vmNics
                     if len(vm_inv_nics) < 2:
                         test_util.test_fail("virtual host:%s not has 2+ nics as expected, incorrect for seperate network case" %(virtual_host_ip))
                     for vm_inv_nic in vm_inv_nics:
-                        if vm_inv_nic.l3NetworkUuid == vm.primaryStorageRef.storageNetworkUuid_:
+                        #if vm_inv_nic.l3NetworkUuid == vm.primaryStorageRef.storageNetworkUuid_:
+                        if vm_inv_nic.l3NetworkUuid == storageNetworkUuid:
                             return vm_inv_nic.ip
 
     return None
