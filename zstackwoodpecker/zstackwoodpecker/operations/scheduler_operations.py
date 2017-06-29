@@ -23,8 +23,8 @@ def create_scheduler_job(name, description, target_uuid, type, parameters, sessi
     action.parameters = parameters
     test_util.action_logger('Create [Scheduler Job:] %s [%s] %s' % (name, target_uuid, type))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    test_util.test_logger('[Scheduler Job:] %s is created.' % evt.uuid)
-    return evt
+    test_util.test_logger('[Scheduler Job:] %s is created.' % evt.inventory.uuid)
+    return evt.inventory
 
 def del_scheduler_job(uuid, session_uuid = None):
     action = api_actions.DeleteSchedulerJobAction()
@@ -42,8 +42,8 @@ def create_scheduler_trigger(name, start_time, repeat_count, interval, type, ses
     action.schedulerType = type
     test_util.action_logger('Create [Scheduler Trigger:] %s [%s] %s %s' % (name, start_time, repeat_count, interval))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    test_util.test_logger('[Scheduler Trigger:] %s is created.' % evt.uuid)
-    return evt
+    test_util.test_logger('[Scheduler Trigger:] %s is created.' % evt.inventory.uuid)
+    return evt.inventory
 
 def del_scheduler_trigger(uuid, session_uuid = None):
     action = api_actions.DeleteSchedulerTriggerAction()

@@ -41,8 +41,9 @@ def test():
     if not test_lib.lib_find_in_local_management_server_log(start_date+60, '[msg received]: {"org.zstack.header.vm.RebootVmInstanceMsg', vm.get_vm().uuid):
         test_util.test_fail('VM is expected to reboot start from %s' % (start_date+60))
 
-    schd_ops.delete_scheduler_job(schd_job.uuid)
-    schd_ops.delete_scheduler_trigger(schd_trigger.uuid)
+    schd_ops.remove_scheduler_job_from_trigger(schd_trigger.uuid, schd_job.uuid)
+    schd_ops.del_scheduler_job(schd_job.uuid)
+    schd_ops.del_scheduler_trigger(schd_trigger.uuid)
     vm.destroy()
     test_util.test_pass('Create Simple VM Reboot Scheduler Success')
 
@@ -56,6 +57,6 @@ def error_cleanup():
         vm.destroy()
 
     if schd_job:
-	schd_ops.delete_scheduler_job(schd_job.uuid)
+	schd_ops.del_scheduler_job(schd_job.uuid)
     if schd_trigger:
-	schd_ops.delete_scheduler_trigger(schd_trigger.uuid)
+	schd_ops.del_scheduler_trigger(schd_trigger.uuid)
