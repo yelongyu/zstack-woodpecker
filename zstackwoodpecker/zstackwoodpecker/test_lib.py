@@ -1472,15 +1472,29 @@ def lib_create_host_vlan_bridge(host, cmd):
     with lock.FileLock(host.uuid):
         http.json_dump_post(testagent.build_http_path(host.managementIp, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd)
 
+def lib_check_stored_host_ip_dict(ip_address_list):
+    ip_address = '.'.join(ip_address_list)
+    for host_ip_dict in lib_get_stored_host_ip_dict_all():
+        for host_ip in host_ip_dict:
+            if host_ip_dict[host_ip] == ip_address:
+		return True
+    return False
+
 #will based on x.y.*.*/16 address. 
 #Host ip address will assigned from x.y.128.0 to x.y.255.254
-def _lib_gen_host_next_ip_addr(network_address, addr_list):
+def _lib_gen_host_next_ip_addr(network_address, netmask, addr_list):
     network_addr = network_address.split('.')
     available_ip_list = list(network_addr)
-    net_3_num = int(network_addr[2])
-    if net_3_num < 128:
-        net_3_num += 128
-        available_ip_list[2] = str(net_3_num)
+    if netmask == "255.255.255.0":
+        for candidate_ip in range(233, 254):
+            available_ip_list[3] = str(candidate_ip)
+	    if lib_check_stored_host_ip_dict(available_ip_list):
+                continue
+    else:
+        net_3_num = int(network_addr[2])
+        if net_3_num < 128:
+            net_3_num += 128
+            available_ip_list[2] = str(net_3_num)
 
     available_ip = '.'.join(available_ip_list)
 
@@ -1504,6 +1518,9 @@ def _lib_gen_host_next_ip_addr(network_address, addr_list):
     #    assigned_last_ip[3] = str(0)
     #    
     #return ('.').join(assigned_last_ip)
+def lib_get_stored_host_ip_dict_all(l2_vlan_value):
+    host_ip_db = filedb.FileDB(HostL2IpDb)
+    return host_ip_db.get_all()
 
 def lib_get_stored_host_ip_dict(l2_vlan_value):
     host_ip_db = filedb.FileDB(HostL2IpDb)
@@ -1538,8 +1555,9 @@ def lib_assign_host_l2_ip(host, l2, l3):
     In currently testing, it assumes each L2 only have 1 L3. It is because 
     multipal L3 will have different network mask. Then the sigle Host L2 IP 
     can't know which L3 network it needs to connect. Test netmask is assume 
-    to be 255.255.0.0. The reason is test case will use x.y.0.1~x.y.127.255 
-    for VM IP assignment; x.y.128.1~x.y.255.254 for hosts IP assignment.
+    to be 255.255.0.0/255.255.255.0. The reason is test case will use 
+    x.y.0.1~x.y.127.255/x.y.z.2~x.y.z.233 for VM IP assignment; 
+    x.y.128.1~x.y.255.254/x.y.z.234~x.y.z.254 for hosts IP assignment.
 
     It assumes L3 only has 1 ipRange. Multi ipRange will impact test, since
     host IP can only belong to 1 subnet.
@@ -1568,7 +1586,7 @@ def lib_assign_host_l2_ip(host, l2, l3):
             test_util.test_warn("[host:] %s [IP:] %s is Not connectable after 10 seconds. This will make future testing failure." % (host_pub_ip, next_avail_ip))
         return next_avail_ip
 
-    def _generate_and_save_host_l2_ip(host_pub_ip, dev_name):
+    def _generate_and_save_host_l2_ip(host_pub_ip, netmask, dev_name):
         host_pub_ip_list = host_pub_ip.split('.')
 
         host_ip_dict = lib_get_stored_host_ip_dict(dev_name)
@@ -1577,11 +1595,12 @@ def lib_assign_host_l2_ip(host, l2, l3):
             return next_avail_ip
 
         net_address = l3_ip_ranges.startIp.split('.')
-        net_address[2] = host_pub_ip_list[2]
-        net_address[3] = host_pub_ip_list[3]
+        if netmask == "255.255.0.0":
+            net_address[2] = host_pub_ip_list[2]
+            net_address[3] = host_pub_ip_list[3]
         net_address = '.'.join(net_address)
         
-        next_avail_ip = _lib_gen_host_next_ip_addr(net_address, None)
+        next_avail_ip = _lib_gen_host_next_ip_addr(net_address, netmask, None)
         host_ip_dict = {host_pub_ip: next_avail_ip}
         #following lines generate not fixed host ip address.
         #if not host_ip_dict or not isinstance(host_ip_dict, dict):
@@ -1594,7 +1613,7 @@ def lib_assign_host_l2_ip(host, l2, l3):
         lib_set_host_ip_dict(dev_name, host_ip_dict)
         return next_avail_ip
 
-    def _set_host_l2_ip(host_pub_ip):
+    def _set_host_l2_ip(host_pub_ip, netmask):
         br_ethname = 'br_%s' % l2.physicalInterface
         if l2_vxlan_vni:
             br_ethname = 'br_vx_%s' % (l2_vxlan_vni)
@@ -1604,7 +1623,7 @@ def lib_assign_host_l2_ip(host, l2, l3):
             test_util.test_warn('Dangours: should not change host default network interface config for %s' % br_dev)
             return
 
-        next_avail_ip = _generate_and_save_host_l2_ip(host_pub_ip, br_ethname+l3.uuid)
+        next_avail_ip = _generate_and_save_host_l2_ip(host_pub_ip, netmask, br_ethname+l3.uuid)
         #if ip has been set to other host, following code will do something wrong.
         #if lib_check_directly_ping(next_avail_ip):
         #    test_util.test_logger("[host:] %s [bridge IP:] %s is connectable. Skip setting IP." % (host_pub_ip, next_avail_ip))
@@ -1645,8 +1664,8 @@ def lib_assign_host_l2_ip(host, l2, l3):
             return 
 
         l3_ip_ranges = l3.ipRanges[0]
-        if (l3_ip_ranges.netmask != '255.255.0.0'):
-            test_util.test_warn('L3 name: %s uuid: %s network [mask:] %s is not 255.255.0.0 . Will not assign IP to host. Please change test configuration to make sure L3 network mask is 255.255.0.0.' % (l3.name, l3.uuid, l3_ip_ranges.netmask))
+        if (l3_ip_ranges.netmask != '255.255.0.0') and (l3_ip_ranges.netmask != '255.255.255.0'):
+            test_util.test_warn('L3 name: %s uuid: %s network [mask:] %s is not 255.255.0.0 or 255.255.255.0. Will not assign IP to host. Please change test configuration to make sure L3 network mask is 255.255.0.0 or 255.255.255.0.' % (l3.name, l3.uuid, l3_ip_ranges.netmask))
             return
 
         #Need to set vlan bridge ip address for local host firstly. 
@@ -1660,14 +1679,14 @@ def lib_assign_host_l2_ip(host, l2, l3):
             if linux.is_ip_existing(host_ip.managementIp):
                 current_host_ip = host_ip.managementIp
                 if l2_vxlan_vni:
-                    next_avail_ip = _generate_and_save_host_l2_ip(current_host_ip, br_vxlan_dev+l3.uuid)
+                    next_avail_ip = _generate_and_save_host_l2_ip(current_host_ip, l3_ip_ranges.netmask, br_vxlan_dev+l3.uuid)
                     try:
                         linux.set_device_ip(br_vxlan_dev, next_avail_ip, l3_ip_ranges.netmask)
                         test_util.test_logger('vxlan set ip:%s for bridge: %s' % (next_avail_ip, br_vxlan_dev))
                     except Exception, e:
                         test_util.test_logger('@@warning: because br_vx_xxx now only created when vm that used it has been created, ignore exception %s' % (str(e)))
                 else:
-                    _set_host_l2_ip(current_host_ip)
+                    _set_host_l2_ip(current_host_ip, l3_ip_ranges.netmask)
                 break
         else:
             test_util.test_logger("Current machine is not in ZStack Hosts. Will directly add vlan device:%s and set ip address." % l2_vlan)
@@ -1692,7 +1711,7 @@ def lib_assign_host_l2_ip(host, l2, l3):
                     test_util.test_warn('Dangours: should not change host default network interface config for %s' % br_dev)
                     return
 
-                next_avail_ip = _generate_and_save_host_l2_ip(current_host_ip, \
+                next_avail_ip = _generate_and_save_host_l2_ip(current_host_ip, l3_ip_ranges.netmask, \
                         br_dev+l3.uuid)
 
                 if not linux.is_ip_existing(next_avail_ip):
@@ -1725,7 +1744,7 @@ def lib_assign_host_l2_ip(host, l2, l3):
 
         #set remote host ip address
         if not linux.is_ip_existing(host_pub_ip):
-            _set_host_l2_ip(host_pub_ip)
+            _set_host_l2_ip(host_pub_ip, l3_ip_ranges.netmask)
 
 #host_l2_ip db should do regular cleanup, as its file size will be increased. 
 #the function should be put into suite_teardown.
