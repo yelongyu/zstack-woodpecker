@@ -48,7 +48,7 @@
           </l3Networks>
 	  <nodeRef>$node1Name</nodeRef>
           <hostRef>$hostName</hostRef>
-	  <primaryStorageRef type="nfs" storageNetworkUuid="$vmStorageL3Uuid">$nfsPrimaryStorageName</primaryStorageRef>
+	  <primaryStorageRef type="nfs">$nfsPrimaryStorageName</primaryStorageRef>
 	  <backupStorageRef type="sftp">$sftpBackupStorageName</backupStorageRef>
         </vm>
       </vms>
