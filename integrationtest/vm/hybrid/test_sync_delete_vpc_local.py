@@ -28,7 +28,11 @@ def test():
     datacenter_type = os.getenv('datacenterType')
     ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
     datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
-    region_id = datacenter_list[0].regionId
+    regions = [ i.regionId for i in datacenter_list]
+    for r in regions:
+        if 'shanghai' in r:
+            region_id = r
+#     region_id = datacenter_list[0].regionId
     datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
     hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test_%s' % date_s, '192.168.0.0/16')
     time.sleep(5)

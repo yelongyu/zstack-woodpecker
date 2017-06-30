@@ -21,7 +21,11 @@ def test():
     datacenter_type = os.getenv('datacenterType')
     ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
     datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
-    region_id = datacenter_list[0].regionId
+    regions = [ i.regionId for i in datacenter_list]
+    for r in regions:
+        if 'shanghai' in r:
+            region_id = r
+#     region_id = datacenter_list[0].regionId
     datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
     time.sleep(5)
     hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
