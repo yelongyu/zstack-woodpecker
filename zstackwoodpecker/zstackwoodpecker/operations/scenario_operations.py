@@ -549,7 +549,6 @@ def setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_confi
 
 def setup_zbs_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst):
     zbs_storages = dict()
-    zbs_url = None
     fenceip = ''
     zbs_url = ''
     drbd_utils_url = ''
@@ -582,7 +581,7 @@ def setup_zbs_primary_storages(scenario_config, scenario_file, deploy_config, vm
         test_util.test_logger('setup zbs [%s] service.' % (zbs_storage))
         node_name = zbs_storages[zbs_storage][0]
         node_config = get_scenario_config_vm(node_name, scenario_config)
-        node_host = get_deploy_host(node1_config.hostRef.text_, deploy_config)
+        node_host = get_deploy_host(node_config.hostRef.text_, deploy_config)
         if not hasattr(node_host, 'port_') or node_host.port_ == '22':
             node_host.port_ = '22'
 
@@ -599,7 +598,7 @@ def setup_zbs_primary_storages(scenario_config, scenario_file, deploy_config, vm
   install kernel-uek ocfs2-tools"
         ssh.execute(cmd, node_ip, node_config.imageUsername_, node_config.imagePassword_, True, int(node_host.port_))
         cmd = 'grub2-set-default "CentOS Linux (4.1.12-37.2.2.el7uek.x86_64) 7 (Core)"; reboot'
-        ssh.execute(cmd, node_ip, node_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
+        ssh.execute(cmd, node_ip, node_config.imageUsername_, node_config.imagePassword_, True, int(node_host.port_))
         cmd = "rm -rf %s; wget %s; rpm -i %s" %(drbd_utils_rpm, drbd_utils_url, drbd_utils_rpm)
         ssh.execute(cmd, node_ip, node_config.imageUsername_, node_config.imagePassword_, True, int(node_host.port_))
         cmd = "rm -rf zbs.bin; wget %s; bash zbs.bin" %zbs_url
