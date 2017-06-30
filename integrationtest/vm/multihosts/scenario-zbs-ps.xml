@@ -24,7 +24,7 @@
 	  <nodeRef>$node1Name</nodeRef>
           <hostRef>$hostName</hostRef>
           <backupStorageRef type="sftp">$sftpBackupStorageName</backupStorageRef>
-          <primaryStorageRef type="ZSES" disk_offering_uuid="$scsiVolumeDiskOfferingUuid" url="$zbsPrimaryStorageUrl">$zbsPrimaryStorageName</primaryStorageRef>
+          <primaryStorageRef type="ZSES" disk_offering_uuid="$scsiVolumeDiskOfferingUuid" fenceip="$fenceip" zbs_url="$zbsUrl" drbd_utils_url="$drbdUtilsUrl" url="$zbsPrimaryStorageUrl">$zbsPrimaryStorageName</primaryStorageRef>
         </vm>
       </vms>
     </host>
@@ -41,7 +41,7 @@
             </l3Network>
           </l3Networks>
           <hostRef>$hostName3</hostRef>
-          <primaryStorageRef type="ZSES" disk_offering_uuid="$scsiVolumeDiskOfferingUuid" url="$zbsPrimaryStorageUrl">$zbsPrimaryStorageName</primaryStorageRef>
+          <primaryStorageRef type="ZSES" disk_offering_uuid="$scsiVolumeDiskOfferingUuid" fenceip="$fenceip" zbs_url="$zbsUrl" drbd_utils_url="$drbdUtilsUrl" url="$zbsPrimaryStorageUrl">$zbsPrimaryStorageName</primaryStorageRef>
         </vm>
       </vms>
     </host>
