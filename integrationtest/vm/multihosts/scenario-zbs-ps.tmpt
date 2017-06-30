@@ -6,3 +6,6 @@ vmInstranceOfferingUuid2 = 234567
 imageUuid2 = 234567 
 scsiVolumeDiskOfferingUuid = 123456
 volumeName = test_volume
+fenceip = '192.168.0.1'
+zbsUrl = 'http://zbs.bin'
+drbdUtilsUrl = 'http://drbd-utils.rpm'
