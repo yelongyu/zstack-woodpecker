@@ -1,7 +1,6 @@
 '''
-New Integration Test for KVM VM ha network disconnect and check vm has been killed on original host
-In addition, this test is sepcific for nfs and local.
-@author: turnyouon
+New Integration Test for KVM VR&VM graceful stop and start host check vm running on other host
+@author: SyZhao
 '''
 
 import zstackwoodpecker.test_util as test_util
@@ -23,6 +22,7 @@ host_ip = None
 max_attempts = None
 storagechecker_timeout = None
 test_stub = test_lib.lib_get_test_stub()
+test_host = None
 
 def test():
     global vm
@@ -31,8 +31,8 @@ def test():
     global max_attempts
     global storagechecker_timeout
 
-    must_ps_list = [inventory.LOCAL_STORAGE_TYPE, inventory.NFS_PRIMARY_STORAGE_TYPE]
-    test_lib.skip_test_if_any_ps_not_deployed(must_ps_list)
+    allow_ps_list = [inventory.CEPH_PRIMARY_STORAGE_TYPE, inventory.NFS_PRIMARY_STORAGE_TYPE, 'SharedMountPoint']
+    test_lib.skip_test_when_ps_type_not_in_list(allow_ps_list)
 
     if test_lib.lib_get_ha_enable() != 'true':
         test_util.test_skip("vm ha not enabled. Skip test")
@@ -69,64 +69,50 @@ def test():
     vm = test_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
     vm.create()
+    vm.check()
 
-    vm_creation_option.set_name('multihost_basic_vm2')
-    vm2 = test_vm_header.ZstackTestVm()
-    vm2.set_creation_option(vm_creation_option)
-    vm2.create()
+    vrs = test_lib.lib_find_vr_by_l3_uuid(l3_net_uuid)
+    target_host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid
+    for vr in vrs:
+        if test_lib.lib_find_host_by_vr(vr).managementIp != test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp:
+            vm_ops.migrate_vm(vr.uuid, target_host_uuid)
+    time.sleep(60)
 
-    vm_creation_option.set_name('multihost_basic_vm3')
-    vm3 = test_vm_header.ZstackTestVm()
-    vm3.set_creation_option(vm_creation_option)
-    vm3.create()
-
-    test_stub.ensure_host_not_nfs_provider(host_uuid)
-    test_stub.ensure_host_has_no_vr(host_uuid)
-
-    #vm.check()
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
     host_port = test_lib.lib_get_host_port(host_ip)
     test_util.test_logger("host %s is disconnecting" %(host_ip))
-
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
-    ha_ops.set_vm_instance_ha_level(vm2.get_vm().uuid, "NeverStop")
-    ha_ops.set_vm_instance_ha_level(vm3.get_vm().uuid, "NeverStop")
 
-    test_stub.down_host_network(host_ip, test_lib.all_scenario_config)
+    host_list = test_stub.get_sce_hosts(test_lib.all_scenario_config, test_lib.scenario_file)
+    for host in host_list:
+        if host.ip_ == host_ip:
+            test_host = host
+            break
+    if not test_host:
+        test_util.test_fail('there is no host with ip %s in scenario file.' %(host_ip))
 
-    #Here we wait for 180 seconds for all vms have been killed, but test result show:
-    #no need to wait, the reaction of killing the vm is very quickly.
-    test_util.test_logger("wait for 30 seconds")
-    time.sleep(30)
+    test_stub.stop_host(test_host, test_lib.all_scenario_config)
 
-    if test_stub.check_vm_running_on_host(vm.vm.uuid, host_ip):
-	test_util.test_fail("VM1 is expected to start running on another host")
-    if test_stub.check_vm_running_on_host(vm2.vm.uuid, host_ip):
-	test_util.test_fail("VM2 is expected to start running on another host")
-    if test_stub.check_vm_running_on_host(vm3.vm.uuid, host_ip):
-	test_util.test_fail("VM3 is expected to start running on another host")
+    #test_util.test_logger("wait for 60 seconds")
+    #time.sleep(60)
 
-    test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
+    test_stub.start_host(test_host, test_lib.all_scenario_config)
+    test_stub.recover_host_vlan(test_host, test_lib.all_scenario_config, test_lib.deploy_config)
 
     vm.set_state(vm_header.RUNNING)
-    vm2.set_state(vm_header.RUNNING)
-    vm3.set_state(vm_header.RUNNING)
     vm.check()
-    vm2.check()
-    vm3.check()
-    vm.destroy()
-    vm2.destroy()
-    vm3.destroy()
 
-    test_util.test_pass('Test VM ha on host failure Success')
+    if test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp == host_ip:
+        test_util.test_fail("VM is expected to start running on another host")
+
+    vm.destroy()
+
+    test_util.test_pass('Test checking vm status after graceful stop and start success')
+
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     global vm
-    global host_uuid
-    global host_ip
-    global max_attempts
-    global storagechecker_timeout
 
     if vm:
         try:
@@ -135,10 +121,8 @@ def error_cleanup():
             pass
 
 
+
 def env_recover():
     test_util.test_logger("recover host: %s" % (test_host.ip_))
-
-    try:
-        test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
-    except:
-        pass
+    test_stub.recover_host(test_host, test_lib.all_scenario_config, test_lib.deploy_config)
+    #host_ops.reconnect_host(host_uuid)
