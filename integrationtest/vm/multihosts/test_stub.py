@@ -608,3 +608,15 @@ def async_exec_ifconfig_nic_down_up(sleep_time, ip, host_username, host_password
     t.start()
 
     return t
+
+
+def skip_if_not_storage_network_separate(scenarioConfig):
+    is_storage_network_separated = False
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            for l3Network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                if xmlobject.has_element(l3Network, 'primaryStorageRef'):
+                    is_storage_network_separated = True
+                    break
+    if not is_storage_network_separated:
+        test_util.test_skip("not found separate network in scenario config.")
