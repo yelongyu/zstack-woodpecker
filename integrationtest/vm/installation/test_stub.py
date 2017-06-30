@@ -40,7 +40,8 @@ def create_vm_scenario(image_name, vm_name = None):
     conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('instanceOfferingName_m'))
     instance_offering_uuid = scen_ops.query_resource(zstack_management_ip, res_ops.INSTANCE_OFFERING, conditions).inventories[0].uuid
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
-    l3_uuid = scen_ops.query_resource(zstack_management_ip, res_ops.L3_NETWORK, []).inventories[0].uuid
+    conditions = res_ops.gen_query_conditions('name', '=', 'public network')
+    l3_uuid = scen_ops.query_resource(zstack_management_ip, res_ops.L3_NETWORK, conditions).inventories[0].uuid
     vm_creation_option.set_l3_uuids([l3_uuid])
     vm_creation_option.set_default_l3_uuid(l3_uuid)
     conditions = res_ops.gen_query_conditions('name', '=', image_name)
