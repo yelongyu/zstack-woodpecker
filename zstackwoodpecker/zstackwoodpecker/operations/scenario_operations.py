@@ -880,10 +880,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                         if zbs_virtio_scsi_volume_is_created == False and hasattr(ps_ref, 'disk_offering_uuid_'):
                             zbs_disk_offering_uuid = ps_ref.disk_offering_uuid_
                             volume_option.set_disk_offering_uuid(zbs_disk_offering_uuid)
-                            volume_option.set_system_tags(['ephemeral::shareable', 'capability::virtio-scsi'])
+                            volume_option.set_system_tags(['capability::virtio-scsi'])
                             share_volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
                             zbs_virtio_scsi_volume_is_created = True
-                        attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
+                            attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
 
     xml_string = etree.tostring(root_xml, 'utf-8')
     xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
