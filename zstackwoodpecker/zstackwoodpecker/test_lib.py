@@ -1474,9 +1474,10 @@ def lib_create_host_vlan_bridge(host, cmd):
 
 def lib_check_stored_host_ip_dict(ip_address_list):
     ip_address = '.'.join(ip_address_list)
-    for host_ip_dict in lib_get_stored_host_ip_dict_all():
-        for host_ip in host_ip_dict:
-            if host_ip_dict[host_ip] == ip_address:
+    host_ip_dict_all = lib_get_stored_host_ip_dict_all()
+    for host_ip_dict in host_ip_dict_all:
+        for host_ip in host_ip_dict_all[host_ip_dict]:
+            if host_ip_dict_all[host_ip_dict][host_ip] == ip_address:
 		return True
     return False
 
@@ -1518,7 +1519,7 @@ def _lib_gen_host_next_ip_addr(network_address, netmask, addr_list):
     #    assigned_last_ip[3] = str(0)
     #    
     #return ('.').join(assigned_last_ip)
-def lib_get_stored_host_ip_dict_all(l2_vlan_value):
+def lib_get_stored_host_ip_dict_all():
     host_ip_db = filedb.FileDB(HostL2IpDb)
     return host_ip_db.get_all()
 
