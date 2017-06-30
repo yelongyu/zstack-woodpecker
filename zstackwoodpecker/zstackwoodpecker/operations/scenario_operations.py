@@ -223,7 +223,7 @@ def setup_host_vm(vm_inv, vm_config, deploy_config):
 
         udev_config = udev_config + r'\\nACTION=="add", SUBSYSTEM=="net", DRIVERS=="?*", ATTR{type}=="1", ATTR{address}=="%s", NAME="%s"' % (vmnic_mac, nic_name)
 
-    cmd = 'echo %s > /etc/udev/rules.d/70-persistent-net.rules' % (udev_config)
+    cmd = 'echo -e %s > /etc/udev/rules.d/70-persistent-net.rules' % (udev_config)
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
     for l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
