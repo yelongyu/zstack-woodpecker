@@ -1,6 +1,6 @@
 '''
 New Integration Test for KVM VM none network disconnect and connected again, check vm stop.
-In addition,this test is sepcific for nfs and local.
+In addition, this test is sepcific for nfs and local.
 @author: turnyouon
 '''
 
@@ -69,6 +69,7 @@ def test():
     vm2.set_creation_option(vm_creation_option)
     vm2.create()
 
+    test_stub.ensure_host_not_nfs_provider(host_uuid)
     test_stub.ensure_host_has_no_vr(host_uuid)
 
     #vm.check()
@@ -98,7 +99,7 @@ def test():
         test_util.test_fail("vm has not been changed to running as expected within 180s.")
 
 
-    test_util.test_pass('Test VM none change to Stopped within 120s Success')
+    test_util.test_pass('Test VM none change to Stopped within 180s Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():

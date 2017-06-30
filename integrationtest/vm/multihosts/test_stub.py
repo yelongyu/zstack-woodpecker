@@ -518,7 +518,7 @@ def execute_cmd_in_host(host_vm, scenarioConfig, cmd):
     host_inv = sce_ops.query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
     host_vm_config = sce_ops.get_scenario_config_vm(host_vm_inv.name_, scenarioConfig)
     sce_ops.execute_in_vm_console(zstack_management_ip, host_inv.managementIp, host_vm_inv.uuid, host_vm_config, cmd)
-                                                                                                                                                                                                                                             
+
 def get_host_network_status(host_ip, scenarioConfig):
     zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
     cond = res_ops.gen_query_conditions('vmNics.ip', '=', host_ip)
@@ -579,4 +579,23 @@ def ensure_all_vrs_on_host(host_uuid):
 
     for vr in vr_list:
         vm_ops.migrate_vm(vr.uuid, host_uuid)
-    
+
+
+def ensure_host_not_nfs_provider(host_uuid):
+    cond = res_ops.gen_query_conditions('type', '=', 'NFS')
+    primarystorage = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
+    for nfs_ps in primarystorage:
+        nfs_ps_url = nfs_ps.url
+        nfs_host_ip, nfs_path = nfs_ps_url.split(':', 1)
+
+    nfs_host_uuid = test_lib.lib_get_host_by_ip(nfs_host_ip)
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    cond1 = res_ops.gen_query_conditions('state', '=', 'Enabled')
+    cond1 = res_ops.gen_query_conditions('status', '=', 'Connected', cond1)
+    cond1 = res_ops.gen_query_conditions('managementIp', '!=', mn_ip, cond1)
+    cond1 = res_ops.gen_query_conditions('managementIp', '!=', nfs_host_ip, cond1)
+    candidate_host_uuid = res_ops.query_resource(res_ops.HOST, cond1)[0].uuid
+    if host_uuid == nfs_host_uuid:
+        vm_ops.migrate_vm(vm.uuid, candidate_host_uuid)
+
+

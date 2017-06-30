@@ -1,5 +1,5 @@
 '''
-New Integration Test for host where KVM VM ha located force stop and start again, 
+New Integration Test for host where KVM VM ha located force stop and start again,
 check vm self-start again. In addition, this test is sepcific for nfs and local.
 @author: SyZhao
 '''
@@ -71,6 +71,7 @@ def test():
     vm.set_creation_option(vm_creation_option)
     vm.create()
 
+    test_stub.ensure_host_not_nfs_provider(host_uuid)
     test_stub.ensure_host_has_no_vr(host_uuid)
 
     #vm.check()
@@ -92,7 +93,7 @@ def test():
     vm_stop_time = None
     cond = res_ops.gen_query_conditions('name', '=', 'ls_vm_ha_self_start')
     cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid, cond)
-    for i in range(0, 300):
+    for i in range(0, 180):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Stopped":
             vm_stop_time = i
             test_stub.start_host(test_host, test_lib.all_scenario_config)
@@ -100,8 +101,8 @@ def test():
             break
         time.sleep(1)
     if not vm_stop_time:
-        vm_stop_time = 300    
-    for i in range(vm_stop_time, 300):
+        vm_stop_time = 180
+    for i in range(vm_stop_time, 180):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Starting":
             break
         time.sleep(1)
