@@ -597,3 +597,5 @@ def ensure_host_not_nfs_provider(host_uuid):
     candidate_host_uuid = res_ops.query_resource(res_ops.HOST, cond1)[0].uuid
     if host_uuid == nfs_host_uuid:
         vm_ops.migrate_vm(vm.uuid, candidate_host_uuid)
+
+
