@@ -599,3 +599,12 @@ def ensure_host_not_nfs_provider(host_uuid):
         vm_ops.migrate_vm(vm.uuid, candidate_host_uuid)
 
 
+def async_exec_ifconfig_nic_down_up(sleep_time, ip, host_username, host_password, nic):
+    def _wrapper(sleep_time, ip, host_username, host_password, nic):
+        cmd = "ifconfig %s down; sleep %s; ifconfig %s up" %(nic, sleep_time, nic)
+        test_lib.lib_execute_ssh_cmd(ip, host_username, host_password, cmd,  timeout=sleep_time+20)
+
+    t = threading.Thread(target=_wrapper, args=(sleep_time, ip, host_username, host_password, nic))
+    t.start()
+
+    return t
