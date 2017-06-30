@@ -221,7 +221,7 @@ def setup_host_vm(vm_inv, vm_config, deploy_config):
             nic_name = "eth%s" % (nic_id)
         nic_id += 1
 
-        udev_config = udev_config + '\\nACTION=="add", SUBSYSTEM=="net", DRIVERS=="?*", ATTR{type}=="1", ATTR{address}=="%s", NAME="%s"' % (vmnic_mac, nic_name)
+        udev_config = udev_config + r'\\nACTION=="add", SUBSYSTEM=="net", DRIVERS=="?*", ATTR{type}=="1", ATTR{address}=="%s", NAME="%s"' % (vmnic_mac, nic_name)
 
     cmd = 'echo %s > /etc/udev/rules.d/70-persistent-net.rules' % (udev_config)
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
