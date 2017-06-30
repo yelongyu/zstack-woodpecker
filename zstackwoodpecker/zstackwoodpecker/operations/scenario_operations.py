@@ -550,10 +550,10 @@ def setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_confi
 def setup_zbs_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst):
     zbs_storages = dict()
     zbs_url = None
-    fenceip = '172.20.0.1'
-    zbs_url = 'http://192.168.200.100/mirror/share/liq/zbs.bin'
-    drbd_utils_url = 'http://192.168.200.100/mirror/share/liq/drbd/drbd-utils-8.9.11-1.el7.centos.x86_64.rpm'
-    drbd_utils_rpm = 'drbd-utils-8.9.11-1.el7.centos.x86_64.rpm'
+    fenceip = ''
+    zbs_url = ''
+    drbd_utils_url = ''
+    drbd_utils_rpm = ''
     for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
         for vm in xmlobject.safe_list(host.vms.vm):
             vm_name = vm.name_
@@ -570,6 +570,10 @@ def setup_zbs_primary_storages(scenario_config, scenario_file, deploy_config, vm
                                 zbs_storages[primaryStorageRef.text_] = [ vm_name ]
                                 if hasattr(primaryStorageRef, 'url_'):
                                     zbs_url = primaryStorageRef.url_
+                            fenceip = primaryStorageRef.fenceip_
+                            zbs_url = primaryStorageRef.zbs_url_
+                            drbd_utils_url = primaryStorageRef.drbd_utils_url_
+                            drbd_utils_rpm = drbd_utils_url.split('/')[-1]
 
     i = 0
     node1_ip = None
@@ -578,7 +582,6 @@ def setup_zbs_primary_storages(scenario_config, scenario_file, deploy_config, vm
         test_util.test_logger('setup zbs [%s] service.' % (zbs_storage))
         node_name = zbs_storages[zbs_storage][0]
         node_config = get_scenario_config_vm(node_name, scenario_config)
-        #node1_ip = get_scenario_file_vm(node1_name, scenario_file).ip_
         node_host = get_deploy_host(node1_config.hostRef.text_, deploy_config)
         if not hasattr(node_host, 'port_') or node_host.port_ == '22':
             node_host.port_ = '22'
