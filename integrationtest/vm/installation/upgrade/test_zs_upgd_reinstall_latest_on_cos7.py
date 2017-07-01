@@ -108,7 +108,7 @@ def test():
     test_util.test_dsc('Upgrade zstack to latest') 
     upgrade_target_file = '/root/zstack-upgrade-all-in-one.tgz' 
     test_stub.prepare_test_env(vm_inv, upgrade_target_file)
-    test_stub.upgrade_zstack(ssh_cmd, upgrade_target_file, tmp_file) 
+    test_stub.upgrade_zstack(vm_ip, upgrade_target_file, tmp_file) 
     check_installtion_path(ssh_cmd, ins_path)
     test_stub.check_installation(vm_ip, tmp_file)
 
