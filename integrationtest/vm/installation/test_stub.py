@@ -196,6 +196,17 @@ def start_mn(vm_ip, tmp_file):
     process_result = execute_shell_in_process(cmd, tmp_file)
     time.sleep(40)
 
+def stop_mn(vm_ip, tmp_file):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd = '%s "zstack-ctl stop"' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
+    time.sleep(40)
+
+def rm_old_zstack(vm_ip, zstack_home, tmp_file):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd = '%s "rm -rf %s" ' % (ssh_cmd, zstack_home)
+    process_result = execute_shell_in_process(cmd, tmp_file)
+
 def update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     vm_username = os.environ['imageUsername']
