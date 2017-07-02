@@ -205,6 +205,7 @@ def setup_host_vm(vm_inv, vm_config, deploy_config):
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
     udev_config = ''
+    change_nic_back_cmd = ''
     nic_id = 0
     for l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
         for vmnic in vm_inv.vmNics:
@@ -218,13 +219,17 @@ def setup_host_vm(vm_inv, vm_config, deploy_config):
                 if nic_name.find('.') < 0:
                     break
         if nic_name == None:
-            nic_name = "eth%s" % (nic_id)
+            #nic_name = "eth%s" % (nic_id)
+            nic_name = "ezs%s" % (nic_id)
         nic_id += 1
 
-        udev_config = udev_config + r'\\nACTION=="add", SUBSYSTEM=="net", DRIVERS=="?*", ATTR{type}=="1", ATTR{address}=="%s", NAME="%s"' % (vmnic_mac, nic_name)
+        udev_config = udev_config + r'\\nACTION==\"add\", SUBSYSTEM==\"net\", DRIVERS==\"?*\", ATTR{type}==\"1\", ATTR{address}==\"%s\", NAME=\"%s\"' % (vmnic_mac, nic_name)
+        change_nic_back_cmd = change_nic_back_cmd + r'\\nip link set %s down && ip link set %s name eth%s && ip link set eth%s up' %(nic_name, nic_id, nic_id)
 
     cmd = 'echo -e %s > /etc/udev/rules.d/70-persistent-net.rules' % (udev_config)
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+    cmd1 = 'echo -e %s >> /root/.bash_profile' %(change_nic_back_cmd)
+    ssh.execute(cmd1, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
     for l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
         if hasattr(l3network, 'l2NetworkRef'):
