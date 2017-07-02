@@ -44,7 +44,7 @@ def test():
     assert vpc_sync.addList
     vpc_local = hyb_ops.query_ecs_vpc_local()
     for vl in vpc_local:
-        if vl.vpcName == 'vpc_for_test_%s' % date_s:
+        if vl.name == 'vpc_for_test_%s' % date_s:
             vpc_inv = vl
     assert vpc_inv.uuid
     test_util.test_pass('Sync Delete Ecs Vpc Test Success')

@@ -52,7 +52,7 @@ def test():
     assert vswitch_synced.addList
     vswitch_local = hyb_ops.query_ecs_vswitch_local()
     for vl in vswitch_local:
-        if vl.vSwitchName == 'zstack-test-vswitch-%s' % date_s:
+        if vl.name == 'zstack-test-vswitch-%s' % date_s:
             vswitch_inv = vl
     assert vswitch_inv.uuid
     test_util.test_pass('Sync Delete Ecs vSwitch Test Success')
