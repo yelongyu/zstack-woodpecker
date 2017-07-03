@@ -1,6 +1,7 @@
 '''
 
 @author: MengLai
+updater: Yetian
 '''
 import os
 import tempfile
@@ -45,28 +46,15 @@ def test():
 
     test_util.test_dsc('Create 3 CentOS7 vm to test multi management node installation')
 
-    conditions = res_ops.gen_query_conditions('name', 'like', os.environ.get('imageNameBase_o'))
-    print "tianye-log1"
-    print conditions
+    conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_10_mn'))
     image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
-    print image
     
-    print "tianye-log2"
-    if os.path.exists('/home/installation-package/zstack'):
-        conditions1 = res_ops.gen_query_conditions('name', 'like', os.environ.get('imageNameBase_Z'))
-    print conditions1
-    print "tianye-log3"
-    elif os.path.exists('/home/installation-package/mevoco'):
-        conditions1 = res_ops.gen_query_conditions('name', 'like', os.environ.get('imageNameBase_M'))
-    print conditions1
-    
-    print "tianye-log4"
-    image1 = res_ops.query_resource(res_ops.IMAGE, conditions1)[0]
-    print image1
-    vm1_inv = create_vm(image1) 
-    
-    vm2_inv = create_vm(image)
-    vm3_inv = create_vm(image)
+    conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_10'))
+    image1 = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
+
+    vm1_inv = create_vm(image) 
+    vm2_inv = create_vm(image1)
+    vm3_inv = create_vm(image1)
 
     vm1_ip = vm1_inv.vmNics[0].ip
     vm2_ip = vm2_inv.vmNics[0].ip
