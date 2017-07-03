@@ -131,7 +131,7 @@ TestHarness = TestHarnessHost
 #Test Host Default Ethernet device. It is for zstack management device. 
 #Please change it to right one.
 #---------------
-HostDefaultEth = 'zsn0'
+HostDefaultEth = 'eth0'
 #---------------
 
 #File name for save host L2 IP dictionary. It doesn't need to be changed. 
@@ -956,7 +956,7 @@ def lib_create_vm(vm_cre_opt=test_util.VmOption(), session_uuid=None):
     if not vm_cre_opt.get_image_uuid():
         #pick up random image
         images = lib_get_not_vr_images()
-        #Virtual Router image is CentOS image, which will automatically create /etc/udev/rules.d/70-persistent-net.rules. If the CentOS image was bootup and save as a new image template, when the other VM using the new template, its valid network device will be zsn1, rather than zsn0. But there isn't zsn1 config in CentOS image, so it will cause VM networking checking failure. In Robot testing, we have to avoid of using virtual router image. 
+        #Virtual Router image is CentOS image, which will automatically create /etc/udev/rules.d/70-persistent-net.rules. If the CentOS image was bootup and save as a new image template, when the other VM using the new template, its valid network device will be eth1, rather than eth0. But there isn't eth1 config in CentOS image, so it will cause VM networking checking failure. In Robot testing, we have to avoid of using virtual router image. 
         #images = lib_remove_image_from_list_by_desc(images, img_desc="virtual router image")
         image = random.choice(images)
         vm_cre_opt.set_image_uuid(image.uuid)

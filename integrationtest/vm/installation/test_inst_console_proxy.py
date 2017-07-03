@@ -56,7 +56,7 @@ def test():
 
     ssh_cmd = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     ssh.make_ssh_no_password(vm_ip, test_lib.lib_get_vm_username(vm_inv), test_lib.lib_get_vm_password(vm_inv))
-    cmd = '%s ifconfig zsn0:0 %s up' % (ssh_cmd, vip)
+    cmd = '%s ifconfig eth0:0 %s up' % (ssh_cmd, vip)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
 
     target_file = '/root/zstack-all-in-one.tgz'

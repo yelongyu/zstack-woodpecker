@@ -96,19 +96,19 @@ MultiHostUsername = root
 MultiHostPassword = password
 
 #for all kinds of vlan. It could be same as public network and management network.
-l2NetworkPhysicalInterface = zsn0
+l2NetworkPhysicalInterface = eth0
 
 l2PublicNetworkName = l2-public
-l2PublicNetworkInterface = zsn0
+l2PublicNetworkInterface = eth0
 
 l2ManagementNetworkName = l2-management
-l2ManagementNetworkInterface = zsn1
+l2ManagementNetworkInterface = eth1
 
 l2NoVlanNetworkName1 = vlan10
-l2NoVlanNetworkInterface1 = zsn0.10
+l2NoVlanNetworkInterface1 = eth0.10
 
 l2NoVlanNetworkName2 = vlan11
-l2NoVlanNetworkInterface2 = zsn0.11
+l2NoVlanNetworkInterface2 = eth0.11
 
 l2VlanNetworkName1 = vlan-test-dns-dhcp-snat
 l2Vlan1 = 21

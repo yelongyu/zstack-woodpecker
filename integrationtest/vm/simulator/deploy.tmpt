@@ -25,7 +25,7 @@ cpuCapacity = 416000
 memoryCapacity = 1280G
 
 l2BasicNetworkName = noVlan
-l2NetworkPhysicalInterface = zsn0
+l2NetworkPhysicalInterface = eth0
 
 l3PublicNetworkName = basic
 

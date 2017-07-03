@@ -29,8 +29,8 @@ def update_default_gw(vm_inv, gw, eth_id):
         test_util.test_fail("fail to set default route for testing in vm")
 
     #cmd = 'ip route add default via %s dev eth%s' % (gw, eth_id)
-    cmd0 = 'ip route add default via %s dev zsn0' % (gw)
-    cmd1 = 'ip route add default via %s dev zsn1' % (gw)
+    cmd0 = 'ip route add default via %s dev eth0' % (gw)
+    cmd1 = 'ip route add default via %s dev eth1' % (gw)
     if test_lib.lib_execute_command_in_vm(vm_inv, cmd0):
         pass
     elif test_lib.lib_execute_command_in_vm(vm_inv, cmd1):  
@@ -103,7 +103,7 @@ def test():
     vip1.attach_eip(eip1)
     vip1.check()
     eip1.attach(vm_nic1_uuid, vm)
-    cmd = 'ip route | grep %s | grep zsn0' % (os.environ.get('vlanIpRangeGateway1'))
+    cmd = 'ip route | grep %s | grep eth0' % (os.environ.get('vlanIpRangeGateway1'))
     if vr1.applianceVmType == "vrouter":
         if not test_lib.lib_execute_command_in_vm(vm.get_vm(), cmd):
            default_eth = 1

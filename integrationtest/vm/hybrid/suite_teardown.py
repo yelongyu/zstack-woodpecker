@@ -22,7 +22,7 @@ def test():
     #linux.remove_vlan_eth("eth0", 10)
     #linux.remove_vlan_eth("eth0", 11)
     cmd = host_plugin.DeleteVlanDeviceCmd()
-    cmd.vlan_ethname = 'zsn0.10'
+    cmd.vlan_ethname = 'eth0.10'
     
     hosts = test_lib.lib_get_all_hosts_from_plan()
     if type(hosts) != type([]):
@@ -30,7 +30,7 @@ def test():
     for host in hosts:
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.DELETE_VLAN_DEVICE_PATH), cmd)
 
-    cmd.vlan_ethname = 'zsn0.11'
+    cmd.vlan_ethname = 'eth0.11'
     for host in hosts:
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.DELETE_VLAN_DEVICE_PATH), cmd)
 

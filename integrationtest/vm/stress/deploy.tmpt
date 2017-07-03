@@ -73,7 +73,7 @@ hostIp_1 = 127.0.0.1
 
 #-----L2 Network-----
 l2BasicNetworkName = l2-basic
-l2NetworkPhysicalInterface = zsn0
+l2NetworkPhysicalInterface = eth0
 
 l2VlanNetworkName_1 = l2-vlan10
 l2_vlan_1 = 10

@@ -28,9 +28,9 @@ def test():
         hosts = [hosts]
 
     for host in hosts:
-        cmd.vlan_ethname = 'zsn0.10'
+        cmd.vlan_ethname = 'eth0.10'
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.DELETE_VLAN_DEVICE_PATH), cmd)
-        cmd.vlan_ethname = 'zsn0.11'
+        cmd.vlan_ethname = 'eth0.11'
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.DELETE_VLAN_DEVICE_PATH), cmd)
 
     test_lib.lib_cleanup_host_ip_dict()

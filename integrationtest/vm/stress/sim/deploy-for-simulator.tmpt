@@ -37,13 +37,13 @@ cpuCapacity = 41600
 memoryCapacity = 128G
 
 l2BasicNetworkName = noVlan
-l2NetworkPhysicalInterface = zsn0
+l2NetworkPhysicalInterface = eth0
 
 l2NoVlanNetworkName1 = vlan10
-l2NoVlanNetworkInterface1 = zsn0.10
+l2NoVlanNetworkInterface1 = eth0.10
 
 l2NoVlanNetworkName2 = vlan11
-l2NoVlanNetworkInterface2 = zsn0.11
+l2NoVlanNetworkInterface2 = eth0.11
 
 l2VlanNetworkName1 = vlan-test-dns-dhcp-snat
 guestL2Vlan1 = 14
