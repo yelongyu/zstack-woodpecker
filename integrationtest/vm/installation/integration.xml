@@ -2,6 +2,7 @@
     <suite name="zstack installation test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" parallel="1">
         <case timeout="2400" >test_inst_console_proxy.py</case>
         <case timeout="3000" >test_multi_management_node_on_cos7.py</case>
+        <case timeout="3000" >test_multi_management_node_on_cos72.py</case>
         <case timeout="2400" >upgrade/test_zs_upgd_1.3_latest_on_cos7.py</case>
         <case timeout="2400" >upgrade/test_zs_upgd_1.4_latest_on_cos7.py</case>
 	<case timeout="2400" >upgrade/test_zs_upgd_1.5_latest_on_cos7.py</case>
