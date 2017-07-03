@@ -32,8 +32,8 @@ def test():
     #linux.create_vlan_eth("eth0", 10, "10.0.0.200", "255.255.255.0")
     #linux.create_vlan_eth("eth0", 11, "10.0.1.200", "255.255.255.0")
     #no matter if current host is a ZStest host, we need to create 2 vlan devs for future testing connection for novlan test cases.
-    linux.create_vlan_eth("eth0", 10)
-    linux.create_vlan_eth("eth0", 11)
+    linux.create_vlan_eth("zsn0", 10)
+    linux.create_vlan_eth("zsn0", 11)
 
     #If test execution machine is not the same one as Host machine, deploy work is needed to separated to 2 steps(deploy_test_agent, execute_plan_without_deploy_test_agent). And it can not directly call SetupAction.run()
     test_lib.setup_plan.deploy_test_agent()
@@ -43,7 +43,7 @@ def test():
     if type(hosts) != type([]):
         hosts = [hosts]
     for host in hosts:
-        cmd.ethname = 'eth0'
+        cmd.ethname = 'zsn0'
         cmd.vlan = 10
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd)
         cmd.vlan = 11

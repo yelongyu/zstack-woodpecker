@@ -14,7 +14,7 @@ else
 fi
 
 # change original ip to test ip
-ifconfig eth0 $test_ip
+ifconfig zsn0 $test_ip
 ifconfig_result=`ifconfig`
 if [[ $ifconfig_result =~ $test_ip ]]; then
     echo "change original ip to test ip">/home/ip_spoofing_result
@@ -33,7 +33,7 @@ else
 fi
 
 # reover ip to original ip 
-ifconfig eth0 $original_ip
+ifconfig zsn0 $original_ip
 ifconfig_result=`ifconfig`
 if [[ $ifconfig_result =~ $original_ip ]]; then
     echo "1">/home/ip_spoofing_result

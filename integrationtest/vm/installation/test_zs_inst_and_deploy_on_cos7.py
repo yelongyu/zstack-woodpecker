@@ -61,9 +61,9 @@ def test():
     test_config = test_config_obj.get_test_config()
     all_config = test_config_obj.get_deploy_config()
     deploy_config = all_config.deployerConfig
-    cmd = "vconfig add eth0 213"
+    cmd = "vconfig add zsn0 213"
     rsp = test_lib.lib_execute_ssh_cmd(vm_ip, 'root', 'password', cmd, 180)
-    cmd = "vconfig add eth0 212"
+    cmd = "vconfig add zsn0 212"
     rsp = test_lib.lib_execute_ssh_cmd(vm_ip, 'root', 'password', cmd, 180)
 
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = vm_ip

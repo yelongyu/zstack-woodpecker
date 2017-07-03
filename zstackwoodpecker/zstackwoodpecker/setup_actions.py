@@ -333,7 +333,7 @@ multi nowith dockerimage: %s.' % node.dockerImage_)
             dockerfile_content.append('CMD \
 export CATALINA_OPTS="-Djava.net.preferIPv4Stack=true" && \
 export ZSTACK_MANAGEMENT_SERVER_PASSWORD="%s" && \
-ifconfig eth0 %s && export ZSTACK_BUILT_IN_HTTP_SERVER_IP=%s && \
+ifconfig zsn0 %s && export ZSTACK_BUILT_IN_HTTP_SERVER_IP=%s && \
 /bin/sh %s/apache-tomcat/bin/startup.sh \
 && tail -f %s/apache-tomcat/logs/catalina.out ' % (NODE_PASSWORD, \
                 self.node_ip, self.node_ip, docker_apache_path, \
@@ -341,7 +341,7 @@ ifconfig eth0 %s && export ZSTACK_BUILT_IN_HTTP_SERVER_IP=%s && \
         else:
             dockerfile_content.append('CMD \
 export CATALINA_OPTS="-Djava.net.preferIPv4Stack=true" && \
-ifconfig eth0 %s && export ZSTACK_BUILT_IN_HTTP_SERVER_IP=%s && \
+ifconfig zsn0 %s && export ZSTACK_BUILT_IN_HTTP_SERVER_IP=%s && \
 /bin/sh %s/apache-tomcat/bin/startup.sh \
 && tail -f %s/apache-tomcat/logs/catalina.out ' % (self.node_ip, \
                 self.node_ip, docker_apache_path, docker_apache_path))

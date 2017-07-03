@@ -58,7 +58,7 @@ def test():
     cmd = "pkill dhclient"
     os.system("%s %s %s" % (ssh_cmd, vm1_ip, cmd))
     os.system("%s %s %s" % (ssh_cmd, vm2_ip, cmd))
-    cmd = "dhclient eth0 eth1"
+    cmd = "dhclient zsn0 zsn1"
     os.system("%s %s %s" % (ssh_cmd, vm1_ip, cmd))
     os.system("%s %s %s" % (ssh_cmd, vm2_ip, cmd))
 

@@ -24,7 +24,7 @@ host_list = None
 
 
 def async_ifconfig_br_eth0_down_up_wrapper(sleep_time, ip, host_username, host_password):
-    cmd = "ifconfig br_eth0 down; sleep %s; ifconfig br_eth0 up" %(sleep_time)
+    cmd = "ifconfig br_zsn0 down; sleep %s; ifconfig br_zsn0 up" %(sleep_time)
     test_lib.lib_execute_ssh_cmd(ip, host_username, host_password, cmd,  timeout=sleep_time+20)
         
     
@@ -32,7 +32,7 @@ def add_default_route(ip):
     #this function should not be invoked to recover the env.
     host_username = os.environ.get('hostUsername')
     host_password = os.environ.get('hostPassword')
-    cmd = "ip r add default dev br_eth0 via 172.20.0.1"
+    cmd = "ip r add default dev br_zsn0 via 172.20.0.1"
     test_lib.lib_execute_ssh_cmd(ip, host_username, host_password, cmd,  timeout = 20)
     
 

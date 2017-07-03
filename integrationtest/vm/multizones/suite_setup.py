@@ -17,17 +17,17 @@ USER_PATH = os.path.expanduser('~')
 EXTRA_SUITE_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_suite_setup_config.sh' % USER_PATH
 def test():
     #This vlan creation is not a must, if testing is under nested virt env. But it is required on physical host without enough physcial network devices and your test execution machine is not the same one as Host machine. 
-    linux.create_vlan_eth("eth0", 10)
-    linux.create_vlan_eth("eth0", 11)
+    linux.create_vlan_eth("zsn0", 10)
+    linux.create_vlan_eth("zsn0", 11)
 
     #If test execution machine is not the same one as Host machine, deploy work is needed to separated to 2 steps(deploy_test_agent, execute_plan_without_deploy_test_agent). And it can not directly call SetupAction.run()
     test_lib.setup_plan.deploy_test_agent()
     cmd = host_plugin.CreateVlanDeviceCmd()
-    cmd.ethname = 'eth0'
+    cmd.ethname = 'zsn0'
     cmd.vlan = 10
     
     cmd2 = host_plugin.CreateVlanDeviceCmd()
-    cmd2.ethname = 'eth0'
+    cmd2.ethname = 'zsn0'
     cmd2.vlan = 11
     testHosts = test_lib.lib_get_all_hosts_from_plan()
     if type(testHosts) != type([]):

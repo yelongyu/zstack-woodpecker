@@ -98,7 +98,7 @@ l3VlanNetwork20 = l3VlanNetwork20
 
 #l2NoVlanNetworkName3 = vlan12
 #l3NoVlanNetworkName3 = l3_user_defined_vlan3
-#l2NoVlanNetworkInterface3 = eth0.12
+#l2NoVlanNetworkInterface3 = zsn0.12
 #noVlanIpRangeName3 = guest novlan range 3
 #noVlanIpRangeStart3 = 10.253.1.2
 #noVlanIpRangeEnd3 = 10.253.1.199

@@ -99,19 +99,19 @@ hostUsername = root
 hostPassword = password
 
 #for all kinds of vlan. It could be same as public network and management network.
-l2NetworkPhysicalInterface = eth0
+l2NetworkPhysicalInterface = zsn0
 
 l2PublicNetworkName = l2-public
-l2PublicNetworkInterface = eth0
+l2PublicNetworkInterface = zsn0
 
 l2ManagementNetworkName = l2-management
-l2ManagementNetworkInterface = eth0
+l2ManagementNetworkInterface = zsn0
 
 l2NoVlanNetworkName1 = vlan212
-l2NoVlanNetworkInterface1 = eth0.212
+l2NoVlanNetworkInterface1 = zsn0.212
 
 l2NoVlanNetworkName2 = vlan213
-l2NoVlanNetworkInterface2 = eth0.213
+l2NoVlanNetworkInterface2 = zsn0.213
 
 l2VlanNetworkName1 = vlan-test-dns-dhcp-snat
 l2Vlan1 = 436
