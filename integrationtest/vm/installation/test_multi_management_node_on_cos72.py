@@ -128,9 +128,9 @@ def test():
     #test_stub.check_installation(vm3_ip, tmp_file)
 
     os.system('rm -f %s' % tmp_file)
-    #sce_ops.destroy_vm(zstack_management_ip, vm1_inv.uuid)
-    #sce_ops.destroy_vm(zstack_management_ip, vm2_inv.uuid)
-    #sce_ops.destroy_vm(zstack_management_ip, vm3_inv.uuid)
+    sce_ops.destroy_vm(zstack_management_ip, vm1_inv.uuid)
+    sce_ops.destroy_vm(zstack_management_ip, vm2_inv.uuid)
+    sce_ops.destroy_vm(zstack_management_ip, vm3_inv.uuid)
 
     test_util.test_pass('ZStack multi management nodes installation Test Success')
 
@@ -141,7 +141,7 @@ def error_cleanup():
     global vm3_inv
     
     os.system('rm -f %s' % tmp_file)
-    #sce_ops.destroy_vm(zstack_management_ip, vm1_inv.uuid)
-    #sce_ops.destroy_vm(zstack_management_ip, vm2_inv.uuid)
-    #sce_ops.destroy_vm(zstack_management_ip, vm3_inv.uuid)
+    sce_ops.destroy_vm(zstack_management_ip, vm1_inv.uuid)
+    sce_ops.destroy_vm(zstack_management_ip, vm2_inv.uuid)
+    sce_ops.destroy_vm(zstack_management_ip, vm3_inv.uuid)
     test_lib.lib_error_cleanup(test_obj_dict)
