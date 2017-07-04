@@ -67,6 +67,8 @@ LOAD_BALANCER_LISTENER = 'LoadBalancerListener'
 LOCAL_STORAGE_RESOURCE_REF = 'LocalStorageResourceRef'
 IMAGE_STORE_BACKUP_STORAGE = 'ImageStoreBackupStorage'
 SCHEDULER = 'Scheduler'
+SCHEDULERJOB = 'SchedulerJob'
+SCHEDULERTRIGGER = 'SchedulerTrigger'
 VCENTER = 'VCenter'
 VCENTER_CLUSTER = 'VCenterCluster'
 VCENTER_BACKUP_STORAGE = 'VCenterBackupStorage'
@@ -369,6 +371,10 @@ def _gen_query_action(resource):
         action = api_actions.QueryImageStoreBackupStorageAction()
     elif resource == SCHEDULER:
         action = api_actions.QuerySchedulerAction()
+    elif resource == SCHEDULERJOB:
+        action = api_actions.QuerySchedulerJobAction()
+    elif resource == SCHEDULERTRIGGER:
+        action = api_actions.QuerySchedulerTriggerAction()
     elif resource == VCENTER:
         action = api_actions.QueryVCenterAction()
     elif resource == VCENTER_CLUSTER:
