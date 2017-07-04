@@ -30,10 +30,12 @@ def test():
     start_date = int(time.time())
     schd_job1 = schd_ops.create_scheduler_job('simple_stop_vm_scheduler', 'simple_stop_vm_scheduler', vm.get_vm().uuid, 'stopVm', None)
     schd_trigger1 = schd_ops.create_scheduler_trigger('simple_stop_vm_scheduler', start_date+60, None, 120, 'simple')
+    schd_ops.add_scheduler_job_to_trigger(schd_trigger1.uuid, schd_job1.uuid)
     #schd1 = vm_ops.stop_vm_scheduler(vm.get_vm().uuid, 'simple', 'simple_stop_vm_scheduler', start_date+60, 120)
 
     schd_job2 = schd_ops.create_scheduler_job('simple_start_vm_scheduler', 'simple_start_vm_scheduler', vm.get_vm().uuid, 'startVm', None)
     schd_trigger2 = schd_ops.create_scheduler_trigger('simple_start_vm_scheduler', start_date+120, None, 120, 'simple')
+    schd_ops.add_scheduler_job_to_trigger(schd_trigger2.uuid, schd_job2.uuid)
     #schd2 = vm_ops.start_vm_scheduler(vm.get_vm().uuid, 'simple', 'simple_start_vm_scheduler', start_date+120, 120)
 
     test_stub.sleep_util(start_date + 60 + 120*2 + 5)
