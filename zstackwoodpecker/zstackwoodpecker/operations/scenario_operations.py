@@ -199,7 +199,7 @@ def setup_vm_no_password(vm_inv, vm_config, deploy_config):
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
 
-def setup_host_vm(vm_inv, vm_config, deploy_config):
+def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
     cmd = 'hostnamectl set-hostname %s' % (vm_ip.replace('.', '-'))
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
@@ -207,29 +207,42 @@ def setup_host_vm(vm_inv, vm_config, deploy_config):
     udev_config = ''
     change_nic_back_cmd = ''
     nic_id = 0
+    modify_cfg = []
+    modify_cfg.append(r"cp /etc/sysconfig/network-scripts/ifcfg-eth0 /root/ifcfg-eth0;sync")
     for l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
         for vmnic in vm_inv.vmNics:
             if vmnic.l3NetworkUuid == l3network.uuid_:
                 vmnic_mac = vmnic.mac
                 break
-        nic_name = None
-        if hasattr(l3network, 'l2NetworkRef'):
-            for l2networkref in xmlobject.safe_list(l3network.l2NetworkRef):
-                nic_name = get_ref_l2_nic_name(l2networkref.text_, deploy_config)
-                if nic_name.find('.') < 0:
-                    break
-        if nic_name == None:
+        #nic_name = None
+        #if hasattr(l3network, 'l2NetworkRef'):
+        #    for l2networkref in xmlobject.safe_list(l3network.l2NetworkRef):
+        #        nic_name = get_ref_l2_nic_name(l2networkref.text_, deploy_config)
+        #        if nic_name.find('.') < 0:
+        #            break
+        #if nic_name == None:
             #nic_name = "eth%s" % (nic_id)
-            nic_name = "ezs%s" % (nic_id)
-        nic_id += 1
-
+        nic_name = "zsn%s" % (nic_id)
         udev_config = udev_config + r'\\nACTION==\"add\", SUBSYSTEM==\"net\", DRIVERS==\"?*\", ATTR{type}==\"1\", ATTR{address}==\"%s\", NAME=\"%s\"' % (vmnic_mac, nic_name)
-        #change_nic_back_cmd = change_nic_back_cmd + r'\\nip link set %s down && ip link set %s name eth%s && ip link set eth%s up' %(nic_name, nic_id, nic_id)
+        modify_cfg.append(r"rm -rf /etc/sysconfig/network-scripts/ifcfg-eth%s || True" %(nic_id))
+        modify_cfg.append(r"cp /root/ifcfg-eth0 /etc/sysconfig/network-scripts/ifcfg-zsn%s" %(nic_id))
+        modify_cfg.append(r"sed -i 's:eth0:zsn%s:g' /etc/sysconfig/network-scripts/ifcfg-zsn%s" %(nic_id, nic_id))
+        nic_id += 1
 
     cmd = 'echo -e %s > /etc/udev/rules.d/70-persistent-net.rules' % (udev_config)
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
-    #cmd1 = 'echo -e %s >> /root/.bash_profile' %(change_nic_back_cmd)
-    #ssh.execute(cmd1, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+    modify_cfg.append(r"sleep 1")
+
+    for cmd in modify_cfg:
+        test_util.test_logger("execute cmd: %s" %(cmd))
+        ret, output, stderr = ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+        if int(ret) != 0:
+            test_util.test_fail("cmd %s failed" %(cmd))
+
+
+    stop_vm(zstack_management_ip, vm_inv.uuid)
+    start_vm(zstack_management_ip, vm_inv.uuid)
+    test_lib.lib_wait_target_up(vm_ip, '22', 120)
 
     for l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
         if hasattr(l3network, 'l2NetworkRef'):
@@ -237,8 +250,8 @@ def setup_host_vm(vm_inv, vm_config, deploy_config):
                 nic_name = get_ref_l2_nic_name(l2networkref.text_, deploy_config)
                 if nic_name.find('.') >= 0:
                     vlan = nic_name.split('.')[1]
-                    test_util.test_logger('[vm:] %s %s is created.' % (vm_ip, nic_name))
-                    cmd = 'vconfig add %s %s' % (nic_name.split('.')[0], vlan)
+                    test_util.test_logger('[vm:] %s %s is created.' % (vm_ip, nic_name.replace("eth", "zsn")))
+                    cmd = 'vconfig add %s %s' % (nic_name.split('.')[0].replace("eth", "zsn"), vlan)
                     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
     host = get_deploy_host(vm_config.hostRef.text_, deploy_config)
@@ -841,7 +854,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
             if xmlobject.has_element(vm, 'nodeRef'):
                 setup_node_vm(vm_inv, vm, deploy_config)
             if xmlobject.has_element(vm, 'hostRef'):
-                setup_host_vm(vm_inv, vm, deploy_config)
+                setup_host_vm(zstack_management_ip, vm_inv, vm, deploy_config)
                 vm_inv_lst.append(vm_inv)
                 vm_cfg_lst.append(vm)
                 vm_xml.set('managementIp', vm_ip)

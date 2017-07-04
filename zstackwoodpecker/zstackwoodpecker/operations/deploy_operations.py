@@ -356,7 +356,11 @@ def add_l2_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l2_
                         action.name = l2Name
                         action.description = l2Des
 
-                        action.physicalInterface = l2.physicalInterface_
+                        if scenarioFile != None:
+                            action.physicalInterface = l2.physicalInterface_.replace("eth", "zsn")
+                        else:
+                            action.physicalInterface = l2.physicalInterface_
+
                         action.zoneUuid = zinv.uuid
                         if is_vlan:
                             action.vlan = l2_vlan
