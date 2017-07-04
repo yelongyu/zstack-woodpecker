@@ -76,7 +76,7 @@ def test():
     #test_stub.down_host_network(host_ip, test_lib.all_scenario_config)
     host_username = os.environ.get('hostUsername')
     host_password = os.environ.get('hostPassword')
-    t = test_stub.async_exec_ifconfig_nic_down_up(120, host_ip, host_username, host_password, "zsn1")
+    t = test_stub.async_exec_ifconfig_nic_down_up(120, host_ip, host_username, host_password, "br_zsn0")
 
     vm_stop_time = None
     cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid)
@@ -114,6 +114,7 @@ def error_cleanup():
 
 def env_recover():
     global host_ip
-    cmd = 'PORT=%s bash -ex %s %s' % (host_port, os.environ.get('hostRecoverScript'), host_ip)
-    test_util.test_logger(cmd)
-    os.system(cmd)
+    pass
+    #cmd = 'bash -ex %s %s' % (os.environ.get('hostRecoverScript'), host_ip)
+    #test_util.test_logger(cmd)
+    #os.system(cmd)
