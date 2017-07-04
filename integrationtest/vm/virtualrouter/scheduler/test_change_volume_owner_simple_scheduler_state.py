@@ -17,7 +17,10 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 vm = None
-schd = None
+schd_job1 = None
+schd_job2 = None
+schd_trigger1 = None
+schd_trigger2 = None
 
 def query_snapshot_number(snapshot_name):
     cond = res_ops.gen_query_conditions('name', '=', snapshot_name)
@@ -33,7 +36,10 @@ def check_scheduler_state(schd, target_state):
 
 def test():
     global vm
-    global schd
+    global schd_job1
+    global schd_job2
+    global schd_trigger1
+    global schd_trigger2
     global new_account
 
     vm = test_stub.create_vlan_vm()
@@ -108,7 +114,10 @@ def test():
 #Will be called only if exception happens in test().
 def error_cleanup():
     global vm
-    global schd
+    global schd_job1
+    global schd_job2
+    global schd_trigger1
+    global schd_trigger2
     global new_account
  
     test_lib.lib_error_cleanup(test_obj_dict)
