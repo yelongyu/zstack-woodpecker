@@ -21,8 +21,11 @@ schd_trigger2 = None
 
 def test():
     global vm
-    global schd1
-    global schd2
+    global schd_job1
+    global schd_job2
+    global schd_trigger1
+    global schd_trigger2
+
     vm = test_stub.create_vlan_vm(os.environ.get('l3VlanNetworkName1'))
     start_date = int(time.time())
     schd_job1 = schd_ops.create_scheduler_job('simple_stop_vm_scheduler', 'simple_stop_vm_scheduler', vm.get_vm().uuid, 'stopVm', None)
@@ -64,8 +67,10 @@ def test():
 #Will be called only if exception happens in test().
 def error_cleanup():
     global vm
-    global schd1
-    global schd2
+    global schd_job1
+    global schd_job2
+    global schd_trigger1
+    global schd_trigger2
 
     if vm:
         vm.destroy()

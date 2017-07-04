@@ -68,8 +68,11 @@ def test():
 #Will be called only if exception happens in test().
 def error_cleanup():
     global vm
-    global schd1
-    global schd2
+    global schd_job1
+    global schd_job2
+    global schd_trigger1
+    global schd_trigger2
+
 
     if vm:
         vm.destroy()
