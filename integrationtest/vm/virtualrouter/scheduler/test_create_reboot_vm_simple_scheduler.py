@@ -29,19 +29,17 @@ def test():
     schd_ops.add_scheduler_job_to_trigger(schd_trigger.uuid, schd_job.uuid)
     #schd = vm_ops.reboot_vm_scheduler(vm.get_vm().uuid, 'simple', 'simple_reboot_vm_scheduler', start_date+60, 120)
     test_stub.sleep_util(start_date+58)
+    if not test_lib.lib_wait_target_down(vm.get_vm().vmNics[0].ip, '22', 120):
+        test_util.test_fail('VM: %s is not reboot in 120 seconds. Fail to reboot it with scheduler. ' % vm.get_vm().uuid)
+
     for i in range(0, 58):
         if test_lib.lib_find_in_local_management_server_log(start_date+i, '[msg received]: {"org.zstack.header.vm.RebootVmInstanceMsg', vm.get_vm().uuid):
             test_util.test_fail('VM is expected to reboot start from %s' (start_date+60))
 
     test_stub.sleep_util(start_date+59)
-
-    if not test_lib.lib_wait_target_down(vm.get_vm().vmNics[0].ip, '22', 120):
-        test_util.test_fail('VM: %s is not reboot in 120 seconds. Fail to reboot it with scheduler. ' % vm.get_vm().uuid)
-
     if not test_lib.lib_find_in_local_management_server_log(start_date+60, '[msg received]: {"org.zstack.header.vm.RebootVmInstanceMsg', vm.get_vm().uuid):
         test_util.test_fail('VM is expected to reboot start from %s' % (start_date+60))
 
-    schd_ops.remove_scheduler_job_from_trigger(schd_trigger.uuid, schd_job.uuid)
     schd_ops.del_scheduler_job(schd_job.uuid)
     schd_ops.del_scheduler_trigger(schd_trigger.uuid)
     vm.destroy()
