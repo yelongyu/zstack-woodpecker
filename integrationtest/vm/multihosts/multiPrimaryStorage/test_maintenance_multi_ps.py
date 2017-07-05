@@ -8,7 +8,6 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import apibinding.inventory as inventory
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
-import zstackwoodpecker.operations.volume_operations as vol_ops
 
 _config_ = {
         'timeout' : 3000,
@@ -79,5 +78,5 @@ def test():
 
 def env_recover():
     test_lib.lib_error_cleanup(test_obj_dict)
-    for disabled_ps in maintenance_ps_list:
-        ps_ops.change_primary_storage_state(disabled_ps.uuid, state='enable')
+    for maintenance_ps in maintenance_ps_list:
+        ps_ops.change_primary_storage_state(maintenance_ps.uuid, state='enable')
