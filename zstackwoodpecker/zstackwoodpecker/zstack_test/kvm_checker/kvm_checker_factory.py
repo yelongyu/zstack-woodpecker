@@ -1,8 +1,8 @@
 '''
-Zstack KVM Checker Factory.        
+Zstack KVM Checker Factory.
 
 
-@author: YYK                   
+@author: YYK
 '''
 
 import zstackwoodpecker.test_lib as test_lib
@@ -30,7 +30,7 @@ import zstackwoodpecker.test_util as test_util
 import apibinding.inventory as inventory
 
 class KvmVmCheckerFactory(checker_header.CheckerFactory):
-    def create_checker(self, test_obj): 
+    def create_checker(self, test_obj):
         kvm_vm_checker_chain = checker_header.CheckerChain()
         checker_dict = {}
 
@@ -42,7 +42,7 @@ class KvmVmCheckerFactory(checker_header.CheckerFactory):
             vrs = test_lib.lib_find_vr_by_vm(test_obj.vm)
             if vrs:
                 svr_types = test_lib.lib_get_l3s_service_type(test_obj.vm)
-                #The first DHCP checker will wait for VM start up. 
+                #The first DHCP checker will wait for VM start up.
                 if 'DHCP' in svr_types and not test_lib.lib_get_flat_dhcp_by_vm(test_obj.vm):
                     checker_dict[vm_checker.zstack_kvm_vm_dhcp_checker] = True
                     checker_dict[vm_checker.zstack_kvm_vm_network_checker] = True
@@ -54,6 +54,9 @@ class KvmVmCheckerFactory(checker_header.CheckerFactory):
                     else:
                         checker_dict[vm_checker.zstack_kvm_vm_dns_checker] \
                                 = False
+                elif 'DHCP' in svr_types and test_lib.lib_get_flat_dhcp_by_vm(test_obj.vm) and test_lib.lib_find_vr_by_vm(test_obj.vm):
+                    checker_dict[vm_checker.zstack_kvm_vm_dhcp_checker] = False
+                    checker_dict[vm_checker.zstack_kvm_vm_network_checker] = True
                 else:
                     checker_dict[vm_checker.zstack_kvm_vm_dhcp_checker] = False
                     checker_dict[vm_checker.zstack_kvm_vm_network_checker] \
@@ -95,7 +98,7 @@ class KvmVmCheckerFactory(checker_header.CheckerFactory):
         return kvm_vm_checker_chain
 
 class KvmVolumeCheckerFactory(checker_header.CheckerFactory):
-    def create_checker(self, test_obj): 
+    def create_checker(self, test_obj):
         kvm_volume_checker_chain = checker_header.CheckerChain()
         checker_dict = {}
         if test_obj.state == volume_header.CREATED:
@@ -130,7 +133,7 @@ class KvmVolumeCheckerFactory(checker_header.CheckerFactory):
         return kvm_volume_checker_chain
 
 class KvmSharableVolumeCheckerFactory(checker_header.CheckerFactory):
-    def create_checker(self, test_obj): 
+    def create_checker(self, test_obj):
         kvm_volume_checker_chain = checker_header.CheckerChain()
         checker_dict = {}
         if test_obj.state == volume_header.CREATED:
@@ -166,7 +169,7 @@ class KvmSharableVolumeCheckerFactory(checker_header.CheckerFactory):
         return kvm_volume_checker_chain
 
 class KvmImageCheckerFactory(checker_header.CheckerFactory):
-    def create_checker(self, test_obj): 
+    def create_checker(self, test_obj):
         kvm_image_checker_chain = checker_header.CheckerChain()
         checker_dict = {}
         if test_obj.state == image_header.CREATED:
@@ -185,7 +188,7 @@ class KvmImageCheckerFactory(checker_header.CheckerFactory):
         return kvm_image_checker_chain
 
 class KvmSecurityGroupCheckerFactory(checker_header.CheckerFactory):
-    def create_checker(self, test_obj): 
+    def create_checker(self, test_obj):
         kvm_sg_checker_chain = checker_header.CheckerChain()
         checker_dict = {}
         for nic_uuid in test_obj.get_all_nics():
@@ -196,7 +199,7 @@ class KvmSecurityGroupCheckerFactory(checker_header.CheckerFactory):
                     continue
                 if not test_lib.lib_is_vm_kvm(target_vm.vm):
                     continue
-                    
+
                 if test_obj.get_nic_tcp_ingress_rules(nic_uuid):
                     checker = sg_checker.zstack_kvm_sg_tcp_ingress_exist_checker()
                     checker.set_nic_uuid(nic_uuid)
@@ -343,7 +346,7 @@ class KvmSecurityGroupCheckerFactory(checker_header.CheckerFactory):
         return kvm_sg_checker_chain
 
 class KvmPortForwardingCheckerFactory(checker_header.CheckerFactory):
-    def create_checker(self, test_obj): 
+    def create_checker(self, test_obj):
         kvm_pf_checker_chain = checker_header.CheckerChain()
         checker_dict = {}
         pf_rule = test_obj.get_port_forwarding()
@@ -366,21 +369,21 @@ class KvmPortForwardingCheckerFactory(checker_header.CheckerFactory):
         return kvm_pf_checker_chain
 
 class HostCheckerFactory(checker_header.CheckerFactory):
-    def create_checker(self, test_obj): 
+    def create_checker(self, test_obj):
         host_checker_chain = checker_header.CheckerChain()
         checker = host_checker.zstack_kvm_host_checker()
         host_checker_chain.add_checker(checker, True, test_obj)
         return host_checker_chain
 
 class EipCheckerFactory(checker_header.CheckerFactory):
-    def create_checker(self, test_obj): 
+    def create_checker(self, test_obj):
         eip_checker_chain = checker_header.CheckerChain()
         checker = eip_checker.eip_checker()
         eip_checker_chain.add_checker(checker, True, test_obj)
         return eip_checker_chain
 
 class VipCheckerFactory(checker_header.CheckerFactory):
-    def create_checker(self, test_obj): 
+    def create_checker(self, test_obj):
         vip_checker_chain = checker_header.CheckerChain()
         if test_obj.get_state() == vip_header.ATTACHED:
             if test_obj.get_use_for() == vip_header.PortForwarding:

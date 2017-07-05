@@ -1,6 +1,6 @@
 '''
 New Integration Test for KVM VR&VM graceful stop and start host check vm running on other host
-@author: SyZhao
+@author: turnyouon
 '''
 
 import zstackwoodpecker.test_util as test_util
