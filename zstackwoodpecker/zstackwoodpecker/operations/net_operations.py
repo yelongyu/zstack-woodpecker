@@ -484,3 +484,78 @@ def refresh_load_balancer(lb_uuid, session_uuid = None):
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
+def create_vrouter_route_table(name=None, session_uuid = None):
+    if name == None:
+        name = 'vrouter_route_table'
+    action = api_actions.CreateVRouterRouteTableAction()
+    action.name = name
+    action.timeout = 120000
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.test_logger('Create [VRouter Route Table]: %s' % name)
+    return evt.inventory
+
+def delete_vrouter_route_table(vrrt_uuid, session_uuid=None):
+    action = api_actions.DeleteVRouterRouteTableAction()
+    action.uuid = vrrt_uuid
+    action.timeout = 12000
+    test_util.action_logger('Delete [VRouter Route Table]: %s' % vrrt_uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt
+
+def attach_vrouter_route_table_to_vrouter(route_table_uuid, virtual_router_vm_uuid, session_uuid=None):
+    action = api_actions.AttachVRouterRouteTableToVRouterAction()
+    action.routeTableUuid = route_table_uuid
+    action.virtualRouterVmUuid = virtual_router_vm_uuid
+    action.timeout = 12000
+    test_util.action_logger('Attach [VRouter Route Table]: %s to [VirtualRouter]: %s' % (route_table_uuid, virtual_router_vm_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt
+
+def detach_vrouter_route_table_from_vrouter(route_table_uuid, virtual_router_vm_uuid, session_uuid=None):
+    action = api_actions.DetachVRouterRouteTableFromVRouterAction()
+    action.routeTableUuid = route_table_uuid
+    action.virtualRouterVmUuid = virtual_router_vm_uuid
+    action.timeout = 12000
+    test_util.action_logger('Detach [VRouter Route Table]: %s from [VirtualRouter]: %s' % (route_table_uuid, virtual_router_vm_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt
+
+def add_vrouter_route_entry(route_table_uuid, destination, target, \
+        session_uuid = None):
+    action = api_actions.AddVRouterRouteEntryAction()
+    action.routeTableUuid = route_table_uuid
+    action.destination = destination
+    action.target = target
+    action.timeout = 120000
+    test_util.action_logger('Add [VRouter Route Entry]:')
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def delete_vrouter_route_entry(vrre_uuid, session_uuid=None):
+    action = api_actions.DeleteVRouterRouteEntryAction()
+    action.uuid = vrre_uuid
+    action.timeout = 12000
+    test_util.action_logger('Delete [VRouter Route Entry]: %s' % vrre_uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt
+
+def attach_network_service_to_l3network(l3_uuid, service_uuid, session_uuid=None):
+    providers = {}
+    action = api_actions.AttachNetworkServiceToL3NetworkAction()
+    action.l3NetworkUuid = l3_uuid
+    providers[service_uuid] = ['VRouterRoute'] 
+    action.networkServices = providers
+    action.timeout = 12000
+    test_util.action_logger('Attach [Network Service]: %s to [l3]: %s' % (service_uuid, l3_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt
+
+def detach_network_service_from_l3network(l3_uuid, service_uuid, session_uuid=None):
+    providers = {}
+    action = api_actions.DetachNetworkServiceFromL3NetworkAction()
+    action.l3NetworkUuid = l3_uuid
+    providers[service_uuid] = ['VRouterRoute']
+    action.networkServices = providers
+    action.timeout = 12000
+    test_util.action_logger('Detach [Network Service]: %s from [l3]: %s' % (service_uuid, l3_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
