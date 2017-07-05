@@ -231,7 +231,7 @@ def del_ecs_vswitch_in_local(uuid, session_uuid=None):
     action.uuid = uuid
     test_util.action_logger('Delete [Ecs VSwitch in Local:] %s' % (uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    test_util.test_logger('[ecs vswitch in local:] %s is deleted.' % uuid)
+    test_util.test_logger('[Ecs VSwitch in local:] %s is deleted.' % uuid)
     return evt
 
 def del_ecs_vswitch_remote(uuid, session_uuid=None):
