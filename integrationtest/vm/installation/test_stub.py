@@ -228,6 +228,28 @@ def update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path):
     #cmd = '%s "yum -y --disablerepo=* --enablerepo=zstack-local,qemu-kvm-ev update"' % ssh_cmd
     #process_result = execute_shell_in_process(cmd, tmp_file)
 
+def update_old_iso(vm_ip, tmp_file, old_iso_path, upgrade_script_path):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    vm_username = os.environ['imageUsername']
+    vm_password = os.environ['imagePassword']
+    cmd = '%s "rm -rf /opt/zstack_old.iso"' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
+    ssh.scp_file(iso_path, '/opt/zstack_old.iso', vm_ip, vm_username, vm_password)
+    ssh.scp_file(upgrade_script_path, '/opt/zstack-upgrade', vm_ip, vm_username, vm_password)
+    cmd = '%s "mkdir -p /opt/zstack-dvd"' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
+    cmd = '%s "bash /opt/zstack-upgrade -r /opt/zstack_old.iso"' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
+    cmd = '%s "zstack-ctl stop"' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
+    cmd = '%s "yum -y --disablerepo=* --enablerepo=zstack-local,qemu-kvm-ev clean all"' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
+    cmd = '%s "yum -y clean all"' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
+    #cmd = '%s "yum -y --disablerepo=* --enablerepo=zstack-local,qemu-kvm-ev update"' % ssh_cmd
+    #process_result = execute_shell_in_process(cmd, tmp_file)
+
+def prepare_mevoco_test_env(vm_inv):
 def prepare_mevoco_test_env(vm_inv):
     all_in_one_pkg = os.environ['zstackPkg']
     scp_file_to_vm(vm_ip, all_in_one_pkg, '/root/zizhu.bin')
