@@ -73,7 +73,7 @@ VCENTER = 'VCenter'
 VCENTER_CLUSTER = 'VCenterCluster'
 VCENTER_BACKUP_STORAGE = 'VCenterBackupStorage'
 VCENTER_PRIMARY_STORAGE = 'VCenterPrimaryStorage'
-
+PXE_SERVER = 'PxeServer'
 
 def find_item_by_uuid(inventories, uuid):
     for item in inventories:
@@ -383,6 +383,8 @@ def _gen_query_action(resource):
         action = api_actions.QueryVCenterBackupStorageAction()
     elif resource == VCENTER_PRIMARY_STORAGE:
         action = api_actions.QueryVCenterPrimaryStorageAction()
+    elif resource == PXE_SERVER:
+        action = api_actions.QueryBaremetalPxeServerAction()
 
     return action
 

@@ -32,6 +32,7 @@ import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.operations.zone_operations as zone_ops
+import zstackwoodpecker.operations.baremetal_operations as bare_ops
 
 #logger = log.get_logger(__name__)
 
@@ -447,3 +448,7 @@ def delete_all_volumes(thread_threshold = 1000):
     test_lib.lib_set_delete_policy('volume', delete_policy)
     test_lib.lib_set_expunge_time('volume', expunge_time)
     test_util.test_logger('Volumes destroy Success. Destroy %d Volumes.' % num)
+
+def delete_pxe():
+    pxe = res_ops.query_resource(res_ops.PXE_SERVER, [])
+    bare_ops.delete_pxe(pxe.uuid)

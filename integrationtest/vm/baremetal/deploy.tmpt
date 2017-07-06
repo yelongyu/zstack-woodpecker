@@ -1,0 +1,32 @@
+zstackPkg = ~/sanitytest/zstack-offline-installer-test.bin
+zstackInstallScript = ~/sanitytest/install.sh
+zstackInstallPath = /usr/local/zstacktest
+zstackPropertiesPath = ~/sanitytest/conf/zstack.properties
+zstackTestAgentPkgPath = ~/sanitytest/zstacktestagent.tar.bz
+zstackManagementIp = 192.168.200.25
+
+DBServer = 192.168.200.25
+DBAdminUser = root
+DBAdminPassword = zstack.mysql.password
+
+DBUserName = zstack
+DBPassword =
+
+DBPort = 3306
+rabbitmqServerIp = 192.168.200.25
+
+node1Name = centos1
+node1Ip = 192.168.200.25
+nodeUserName = root
+nodePassword = 1
+
+hostUsername = root
+hostPassword = 1
+
+
+ZSTACK_ALREADY_INSTALLED = yes
+pxename = Pxe_Test
+dhcpinterface = em1
+dhcpbegin = 10.0.0.1
+dhcpend = 10.0.0.254
+dhcpnetmask = 255.255.255.0

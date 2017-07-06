@@ -1084,6 +1084,38 @@ class EipOption(DataOption):
     def get_vm_nic_uuid(self):
         return self.vmNicUuid
 
+class PxeOption(DataOption):
+    def __init__(self):
+        self.dhcpInterface = None
+        self.dhcpRangeBegin = None
+        self.dhcpRangeEnd = None
+        self.dhcpRangeNetmask = None
+        super(PxeOption, self).__init__()
+
+    def set_dhcp_interface(self, dhcpInterface):
+        self.dhcpInterface = dhcpInterface
+
+    def get_dhcp_interface(self):
+        return self.dhcpInterface
+
+    def set_dhcp_range_begin(self, dhcpRangeBegin):
+        self.dhcpRangeBegin = dhcpRangeBegin
+
+    def get_dhcp_range_begin(self):
+        return self.dhcpRangeBegin
+
+    def set_dhcp_range_end(self, dhcpRangeEnd):
+        self.dhcpRangeEnd = dhcpRangeEnd
+
+    def get_dhcp_range_end(self):
+        return self.dhcpRangeEnd
+
+    def set_dhcp_netmask(self, dhcpRangeNetmask):
+        self.dhcpRangeNetmask = dhcpRangeNetmask
+
+    def get_dhcp_netmask(self):
+        return self.dhcpRangeNetmask
+ 
 
 def _template_to_dict(template_file_path):
     def _parse(path, ret, done):

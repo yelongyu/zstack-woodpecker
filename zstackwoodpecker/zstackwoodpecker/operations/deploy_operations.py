@@ -1405,6 +1405,31 @@ def add_instance_offering(scenarioConfig, scenarioFile, deployConfig, session_uu
 
     wait_for_thread_done()
 
+def add_pxe_server(scenarioConfig, scenarioFile, deployConfig, session_uuid):
+    def _add_pxe_server(pxe):
+        action = api_actions.CreateBaremetalPxeServerAction()
+        action.name = pxe.name_
+        action.sessionUuid = session_uuid
+        action.description = pxe.description__
+        action.dhcpInterface = pxe.dhcpInterface_
+        action.dhcpRangeBegin = pxe.dhcpRangeBegin_
+        action.dhcpRangeEnd = pxe.dhcpRangeEnd_
+        action.dhcpRangeNetmask = pxe.dhcpRangeNetmask_
+
+        try:
+            evt = action.run()
+            test_util.test_logger(jsonobject.dumps(evt))
+        except Exception as e:
+            exc_info.append(sys.exc_info())
+
+    if not xmlobject.has_element(deployConfig, 'pxe'):
+        return
+    pxe = deployConfig.pxe
+    thread = threading.Thread(target=_add_pxe_server, args=(pxe,))
+    wait_for_thread_queue()
+    thread.start()
+    wait_for_thread_done()
+
     #Add VM -- Pass
 
 def _thread_for_action(action):
@@ -1488,7 +1513,8 @@ def deploy_initial_database(deploy_config, scenario_config = None, scenario_file
             add_image,
             add_disk_offering,
             add_instance_offering,
-            add_virtual_router
+            add_virtual_router,
+            add_pxe_server
             ]
     for operation in operations:
         session_uuid = account_operations.login_as_admin()
