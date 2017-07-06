@@ -58,7 +58,7 @@ def test():
 
     test_util.test_dsc("Try to Create one volume")
     try:
-        volume = test_stub.create_multi_volume(count=1)[0]
+        volume = test_stub.create_multi_volume(count=1, ps=random.choice([env.first_ps, env.second_ps]))[0]
     except Exception as e:
         test_util.test_logger('EXPECTED: Catch exception {}\nCreate vm in disabled ps will fail'.format(e))
     else:
