@@ -242,6 +242,14 @@ def del_ecs_vswitch_remote(uuid, session_uuid=None):
     test_util.test_logger('[Ecs VSwitch Remote:] %s is deleted.' % (uuid))
     return evt
 
+def del_ecs_instance_local(uuid, session_uuid=None):
+    action = api_actions.DeleteEcsInstanceLocalAction()
+    action.uuid = uuid
+    test_util.action_logger('Delete [Ecs Instance in Local:] %s ' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[Ecs Instance in Local:] %s is deleted.' % (uuid))
+    return evt
+
 def sync_virtual_router_from_remote(vpc_uuid, session_uuid=None):
     action = api_actions.SyncAliyunVirtualRouterFromRemoteAction()
     action.uuid = vpc_uuid

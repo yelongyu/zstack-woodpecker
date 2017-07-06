@@ -18,5 +18,6 @@
         <case timeout='900' repeat='1' noparallel='True'>test_sync_delete_ecs_image_local.py</case>
         <case timeout='900' repeat='1' noparallel='True'>test_create_ecs_instance_public_ip.py</case>
         <case timeout='900' repeat='1' noparallel='True'>test_update_ecs_instance_console_password.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>test_sync_ecs_instance_from_remote.py</case>
     </suite>
 </integrationTest>
