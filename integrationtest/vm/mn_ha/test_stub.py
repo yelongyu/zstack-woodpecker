@@ -288,6 +288,9 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
     os.system('sed -i s/mn_ip/%s/g %s' % (mn_ip,config_json))
     os.system('sed -i s/mn_netmask/%s/g %s' % (mn_netmask,config_json))
     os.system('sed -i s/mn_gateway/%s/g %s' % (mn_gateway,config_json))
+    mn_ha_storage_type = sce_ops.get_mn_ha_storage_type(scenarioConfig, scenarioFile, deploy_config)
+    if mn_ha_storage_type == 'ceph':
+        os.system('sed -i s/FileConf/CephConf/g %s' % (config_json))
 
 def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, deploy_tool, mn_img):
     prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json)
@@ -299,8 +302,13 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
     installer_path = "/home/%s/zs-ha" % test_host_ip
     config_path = "/home/%s/config.json" % test_host_ip
     ssh.scp_file(config_json,config_path, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_)
-    cmd1="ceph osd pool create zstack 128"
-    cmd2="qemu-img convert -f qcow2 -O raw %s rbd:zstack/mnvm.img" % mn_image_path
+    mn_ha_storage_type = sce_ops.get_mn_ha_storage_type(scenarioConfig, scenarioFile, deploy_config)
+    if mn_ha_storage_type == 'ceph':
+        cmd1="ceph osd pool create zstack 128"
+        cmd2="qemu-img convert -f qcow2 -O raw %s rbd:zstack/mnvm.img" % mn_image_path
+    elif mn_ha_storage_type == 'nfs':
+        cmd1 = "cp %s %s" % (mn_image_path, "/storage/")
+        cmd2 = "echo debug"
     cmd3='%s install -p %s -c %s' % (installer_path, host_password, config_path)
     test_util.test_logger("[%s] %s" % (test_host_ip, cmd1))
     ssh.execute(cmd1, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
