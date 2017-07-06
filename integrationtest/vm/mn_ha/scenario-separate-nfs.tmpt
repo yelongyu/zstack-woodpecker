@@ -1,5 +1,6 @@
 import ../scenario.tmpt
-import ./deploy-vyos-nfs.tmpt
+import ./deploy.tmpt
+vmName0 = test_vm0
 vmName1 = test_vm1
 vmName2 = test_vm2
 vmName3 = test_vm3
