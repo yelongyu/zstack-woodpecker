@@ -34,8 +34,8 @@
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
           </l3Networks>
-	  <nodeRef>$node1Name</nodeRef>
           <hostRef>$hostName</hostRef>
+          <mnHostRef>$hostName</mnHostRef>
         </vm>
         <vm name="$vmName2" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
@@ -48,6 +48,7 @@
             </l3Network>
           </l3Networks>
           <hostRef>$hostName2</hostRef>
+          <mnHostRef>$hostName2</mnHostRef>
         </vm>
         <vm name="$vmName3" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
@@ -60,6 +61,7 @@
             </l3Network>
           </l3Networks>
           <hostRef>$hostName3</hostRef>
+          <mnHostRef>$hostName3</mnHostRef>
         </vm>
       </vms>
     </host>
