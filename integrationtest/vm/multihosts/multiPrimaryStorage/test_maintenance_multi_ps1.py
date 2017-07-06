@@ -7,6 +7,7 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
+import time
 
 
 _config_ = {
@@ -58,7 +59,8 @@ def test():
 
     ps_ops.change_primary_storage_state(state='maintain', primary_storage_uuid=ps2.uuid)
     maintenance_ps_list.append(ps2)
-
+    time.sleep(30)
+    vm1.check()
     for vm in vm_list:
         vm.update()
 
@@ -67,11 +69,11 @@ def test():
     assert vm3.get_vm().state == 'Stopped'
     assert vm4.get_vm().state == 'Stopped'
 
-    ps_ops.change_primary_storage_state(state='enable', primary_storage_uuid=ps2.uuid)
-    maintenance_ps_list.remove(ps2)
-
     for vm in [vm2, vm3, vm4]:
         try_start_vm(vm)
+
+    ps_ops.change_primary_storage_state(state='enable', primary_storage_uuid=ps2.uuid)
+    maintenance_ps_list.remove(ps2)
 
     test_util.test_dsc('enable ps2')
     for vm in [vm2, vm3, vm4]:
