@@ -498,6 +498,13 @@ def query_ecs_security_group_local(session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
+def query_hybrid_eip_local(session_uuid=None):
+    action = api_actions.QueryHybridEipFromLocalAction()
+    action.conditions = []
+    test_util.action_logger('Query DataCenter from local')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
 def get_ecs_instance_vnc_url(uuid, session_uuid=None):
     action = api_actions.GetEcsInstanceVncUrlAction()
     action.uuid = uuid

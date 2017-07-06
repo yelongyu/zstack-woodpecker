@@ -75,7 +75,7 @@ def test():
         if el.name == 'zstack-ecs-test':
             ecs_inv = el
     assert ecs_inv.uuid
-    test_util.test_pass('Create Delete Ecs Instance Test Success')
+    test_util.test_pass('Sync Ecs Instance From Remote Test Success')
 
 def env_recover():
     global ecs_inv

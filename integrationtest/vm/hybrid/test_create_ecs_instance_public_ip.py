@@ -63,8 +63,9 @@ def test():
     hyb_ops.create_ecs_image_from_local_image(bs_uuid, datacenter_inv.uuid, image.uuid)
     ecs_inv = hyb_ops.create_ecs_instance_from_local_image('Password123', bs_uuid, image.uuid, vswitch_inv.uuid, zone_id, instance_offering.uuid, ecs_bandwidth=5,
                                                            ecs_security_group_uuid=sg_inv.uuid, allocate_public_ip='true', ecs_instance_name='zstack-ecs-test')
-    assert ecs_inv.ecsEipUuid
-    test_util.test_pass('Create Delete Ecs Instance Test Success')
+    eip_local = hyb_ops.query_hybrid_eip_local()
+    assert eip_local[0].eipAddress
+    test_util.test_pass('Create Ecs Instance with Public IP Test Success')
 
 def env_recover():
     global ecs_inv
