@@ -24,8 +24,6 @@
 	  <backupStorageRef type="sftp">$sftpBackupStorageName</backupStorageRef>
 	  <primaryStorageRef type="nfs">$nfsPrimaryStorageName</primaryStorageRef>
         </vm>
-      </vms>
-      <vms>
         <vm name="$vmName1" vmInstranceOfferingUuid="$vmInstranceOfferingUuid" 
           imageUuid="$imageUuid" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
@@ -39,8 +37,6 @@
 	  <nodeRef>$node1Name</nodeRef>
           <hostRef>$hostName</hostRef>
         </vm>
-      </vms>
-      <vms>
         <vm name="$vmName2" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
@@ -53,8 +49,6 @@
           </l3Networks>
           <hostRef>$hostName2</hostRef>
         </vm>
-      </vms>
-      <vms>
         <vm name="$vmName3" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
