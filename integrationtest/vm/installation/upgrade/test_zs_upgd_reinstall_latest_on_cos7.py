@@ -87,7 +87,7 @@ def test():
     global vm_inv
     test_util.test_dsc('Create test vm to test zstack upgrade and re-install with -r.')
 
-    conditions = res_ops.gen_query_conditions('name', 'like', os.environ.get('imageNameBase_o'))
+    conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_10_mn'))
     image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
 
     vm_inv = create_vm(image)
