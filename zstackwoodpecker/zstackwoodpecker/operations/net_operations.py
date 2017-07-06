@@ -531,11 +531,12 @@ def add_vrouter_route_entry(route_table_uuid, destination, target, \
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def delete_vrouter_route_entry(vrre_uuid, session_uuid=None):
+def delete_vrouter_route_entry(vrre_uuid, vrrt_uuid, session_uuid=None):
     action = api_actions.DeleteVRouterRouteEntryAction()
     action.uuid = vrre_uuid
+    action.routeTableUuid = vrrt_uuid
     action.timeout = 12000
-    test_util.action_logger('Delete [VRouter Route Entry]: %s' % vrre_uuid)
+    test_util.action_logger('Delete [VRouter Route Entry]: %s from [VRouter Route Table]: %s' % (vrre_uuid, vrrt_uuid))
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt
 
