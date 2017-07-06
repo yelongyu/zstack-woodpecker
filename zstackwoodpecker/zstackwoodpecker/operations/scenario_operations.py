@@ -875,11 +875,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                         disk_offering_uuid = bs_ref.offering_uuid_
                         volume_option.set_disk_offering_uuid(disk_offering_uuid)
                         volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
-                        volume_inv1 = create_volume_from_offering(zstack_management_ip, volume_option)
-                        volume_inv2 = create_volume_from_offering(zstack_management_ip, volume_option)
                         attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
-                        attach_volume(zstack_management_ip, volume_inv1.uuid, vm_inv.uuid)
-                        attach_volume(zstack_management_ip, volume_inv2.uuid, vm_inv.uuid)
                         break
 
                 setup_backupstorage_vm(vm_inv, vm, deploy_config)
