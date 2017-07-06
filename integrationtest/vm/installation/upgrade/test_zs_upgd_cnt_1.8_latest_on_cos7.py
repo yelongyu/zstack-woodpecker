@@ -50,7 +50,7 @@ def test():
     curren_num = float(os.environ.get('releasePkgNum'))
     for pkg_num in release_ver:
     #while pkg_num <= curren_num:
-	if str(pkg_num) == '1.9':
+	if str(pkg_num) == '1.10':
 		test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
         test_util.test_logger('Upgrade zstack to %s' % pkg_num)
         upgrade_pkg = os.environ.get('zstackPkg_%s' % pkg_num)
