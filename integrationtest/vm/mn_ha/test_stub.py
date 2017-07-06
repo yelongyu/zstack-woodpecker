@@ -277,7 +277,7 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
     if len(mn_host_list) < 1:
         return False
     l2network_name = os.environ.get('l2PublicNetworkName')
-    nic_name = os.environ.get('nodeNic')
+    nic_name = os.environ.get('nodeNic').replace("eth", "zsn")
     mn_ip = os.environ.get('zstackHaVip')
     mn_netmask = os.environ.get('nodeNetMask')
     mn_gateway = os.environ.get('nodeGateway')
