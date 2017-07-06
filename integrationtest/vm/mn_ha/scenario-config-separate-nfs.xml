@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-separate-nfs.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-separate-nfs.tmpt</scenarioConfigTemplate>
+</testConfig>
