@@ -790,6 +790,13 @@ def query_resource(http_server_ip, resource, conditions = [], session_uuid=None,
     ret = execute_action_with_session(http_server_ip, action, session_uuid)
     return ret
 
+def get_mn_ha_storage_type(scenario_config, scenario_file, deploy_config):
+    for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            if xmlobject.has_element(vm, 'primaryStorageRef'):
+                for ps_ref in xmlobject.safe_list(vm.primaryStorageRef):
+			return ps_ref.type_
+
 def deploy_scenario(scenario_config, scenario_file, deploy_config):
     vm_inv_lst = []
     vm_cfg_lst = []
