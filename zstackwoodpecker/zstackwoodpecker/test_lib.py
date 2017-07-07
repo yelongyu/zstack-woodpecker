@@ -1615,7 +1615,11 @@ def lib_assign_host_l2_ip(host, l2, l3):
         return next_avail_ip
 
     def _set_host_l2_ip(host_pub_ip, netmask):
-        br_ethname = 'br_%s' % l2.physicalInterface
+        if scenario_config != None and scenario_file != None and os.path.exists(scenario_file):
+            br_ethname = 'br_%s' % l2.physicalInterface.replace("eth", "zsn")
+        else:
+            br_ethname = 'br_%s' % l2.physicalInterface
+
         if l2_vxlan_vni:
             br_ethname = 'br_vx_%s' % (l2_vxlan_vni)
         elif l2_vlan:
