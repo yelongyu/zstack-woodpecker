@@ -21,33 +21,24 @@ new_ps_list = []
 
 
 def test():
-    env = test_stub.TwoPrimaryStorageEnv(test_object_dict=test_obj_dict,
-                                         first_ps_volume_number=VOLUME_NUMBER,
-                                         second_ps_volume_number=VOLUME_NUMBER)
-    env.check_env()
-    env.deploy_env()
-    first_ps_volume_list = env.first_ps_volume_list
-    second_ps_volume_list = env.second_ps_volume_list
+    if not (test_stub.find_ps_local() and test_stub.find_ps_nfs()):
+        test_util.test_skip("Skip test if not local-nfs multi ps environment")
 
-    local_ps_uuid = test_stub.find_ps_local().uuid
-    local_ps_vm = test_stub.create_multi_vms(name_prefix='test-', count=1, ps_uuid=local_ps_uuid)[0]
-    test_obj_dict.add_vm(local_ps_vm)
+    nfs_ps = test_stub.find_ps_nfs()
+    vm = test_stub.create_multi_vms(name_prefix='test-', count=1)[0]
+    volume_list = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=nfs_ps)
 
-    if env.new_ps:
-        new_ps_list.append(env.second_ps)
-
-    all_volume_list = first_ps_volume_list + second_ps_volume_list
     test_util.test_dsc("Attach all volumes to local ps vm")
-    for volume in all_volume_list:
-        volume.attach(local_ps_vm)
+    for volume in volume_list:
+        volume.attach(vm)
 
-    for volume in all_volume_list:
+    for volume in volume_list:
         volume.check()
 
-    for volume in all_volume_list:
+    for volume in volume_list:
         volume.detach()
 
-    for volume in all_volume_list:
+    for volume in volume_list:
         volume.check()
 
     test_util.test_pass('Multi PrimaryStorage Test Pass')
