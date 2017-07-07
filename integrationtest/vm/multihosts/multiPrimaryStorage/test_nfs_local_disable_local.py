@@ -21,6 +21,9 @@ VOLUME_NUMBER = 10
 disabled_ps_list = []
 
 def test():
+    if not (test_stub.find_ps_local() and test_stub.find_ps_nfs()):
+        test_util.test_skip("Skip test if not local-nfs multi ps environment")
+
     local_ps = test_stub.find_ps_local()
     nfs_ps = test_stub.find_ps_nfs()
 

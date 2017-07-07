@@ -20,7 +20,20 @@ new_ps_list = []
 VM_COUNT = 10
 
 
+def try_create_vm_in_nfs(ps):
+    try:
+        test_util.test_dsc("Try create vm in NFS primary")
+        assert ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE
+        test_stub.create_multi_vms(name_prefix='test-', count=VM_COUNT, ps_uuid=ps.uuid)
+    except Exception as e:
+        test_util.test_logger('Can not create vm in NFS, it is as expected', e)
+    else:
+        test_util.test_fail('Critical ERROR: can create vm in NFS ps')
+
+
 def test():
+    if not (test_stub.find_ps_local() and test_stub.find_ps_nfs()):
+        test_util.test_skip("Skip test if not local-nfs multi ps environment")
 
     test_util.test_dsc("Create {0} vm ".format(VM_COUNT))
     vm_list = test_stub.create_multi_vms(name_prefix='test-', count=VM_COUNT)
@@ -32,6 +45,8 @@ def test():
         ps_uuid = vm.get_vm().allVolumes[0].primaryStorageUuid
         ps = res_ops.get_resource(res_ops.PRIMARY_STORAGE, uuid=ps_uuid)[0]
         assert ps.type == inventory.LOCAL_STORAGE_TYPE
+
+    try_create_vm_in_nfs(test_stub.find_ps_nfs())
 
     test_util.test_pass('Multi PrimaryStorage Test Pass')
 
