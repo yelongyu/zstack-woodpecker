@@ -290,7 +290,7 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
     cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (vm_nic, vm_ip, vm_netmask, vm_gateway)
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
     mn_ha_storage_type = get_mn_ha_storage_type(scenario_config, scenario_file, deploy_config)
-    if mn_ha_storage_type == "nfs":
+    if mn_ha_storage_type == "nfs" and hasattr(vm_config, 'primaryStorageRef'):
         #TODO: should make image folder configarable
         for primaryStorageRef in xmlobject.safe_list(vm_config.primaryStorageRef):
             print primaryStorageRef.text_
