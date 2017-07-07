@@ -282,13 +282,31 @@ def recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config):
                     except:
                         pass
 
-def setup_mn_host_vm(vm_inv, vm_config):
+def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
     vm_nic = os.environ.get('nodeNic')
     vm_netmask = os.environ.get('nodeNetMask')
     vm_gateway = os.environ.get('nodeGateway')
     cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (vm_nic, vm_ip, vm_netmask, vm_gateway)
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+    mn_ha_storage_type = get_mn_ha_storage_type(scenario_config, scenario_file, deploy_config)
+    if mn_ha_storage_type == "nfs":
+        #TODO: should make image folder configarable
+        for primaryStorageRef in xmlobject.safe_list(vm_config.primaryStorageRef):
+            print primaryStorageRef.text_
+            for zone in xmlobject.safe_list(deploy_config.zones.zone):
+                if primaryStorageRef.type_ == 'nfs':
+                    for nfsPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.nfsPrimaryStorage):
+                        if primaryStorageRef.text_ == nfsPrimaryStorage.name_:
+                            nfsIP = nfsPrimaryStorage.url_.split(':')[0]
+                            nfsPath = nfsPrimaryStorage.url_.split(':')[1]
+                            break
+    
+        # Auto mount in /etc/fstab
+        cmd = 'echo %s:%s /storage nfs rsize=8192,wsize=8192,timeo=14,intr >> /etc/fstab' % (nfsIP, nfsPath)
+        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+        cmd = 'mkdir -p /storage && mount /storage'
+        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
 def setup_backupstorage_vm(vm_inv, vm_config, deploy_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
@@ -866,7 +884,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 vm_cfg_lst.append(vm)
                 vm_xml.set('managementIp', vm_ip)
             if xmlobject.has_element(vm, 'mnHostRef'):
-                setup_mn_host_vm(vm_inv, vm)
+                setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm)
             if xmlobject.has_element(vm, 'backupStorageRef'):
                 volume_option = test_util.VolumeOption()
                 volume_option.set_name(os.environ.get('volumeName'))
