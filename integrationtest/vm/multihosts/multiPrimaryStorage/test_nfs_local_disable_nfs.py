@@ -21,49 +21,42 @@ VOLUME_NUMBER = 10
 disabled_ps_list = []
 
 
+def try_create_volume_in_nfs(ps):
+    try:
+        test_util.test_dsc("Try create volume in NFS primary")
+        assert ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE
+        volume = test_stub.create_multi_volume(count=1, ps=ps)[0]
+    except Exception as e:
+        test_util.test_logger('Can not create volume in NFS when disabled, it is as expected')
+    else:
+        test_obj_dict.add_volume(volume)
+        test_util.test_fail('Critical ERROR: can create vm in NFS ps')
+
+
 def test():
 
     if not (test_stub.find_ps_local() and test_stub.find_ps_nfs()):
         test_util.test_skip("Skip test if not local-nfs multi ps environment")
 
-    local_ps = test_stub.find_ps_local()
     nfs_ps = test_stub.find_ps_nfs()
 
-    test_util.test_dsc("Create {0} vm ".format(VM_COUNT))
-    vm = test_stub.create_multi_vms(name_prefix='test-', count=VM_COUNT)[0]
-    vm.check()
+    test_util.test_dsc("Create 1 vm  with {} data volume".format(VOLUME_NUMBER))
+    vm = test_stub.create_multi_vms(name_prefix='test-', count=1, data_volume_number=VOLUME_NUMBER)
     test_obj_dict.add_vm(vm)
-
-    test_util.test_dsc("Create {0} volumes in both primary storage ".format(VOLUME_NUMBER))
-    volume_in_local = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=local_ps,
-                                                    host_uuid=test_lib.lib_get_vm_host(vm.get_vm()).uuid)
-    volume_in_nfs  = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=nfs_ps)
-    for volume in volume_in_local + volume_in_nfs:
-        test_obj_dict.add_volume(volume)
-        volume.check()
-
-    test_util.test_dsc("Attach all volumes to VM")
-    for volume in volume_in_local + volume_in_nfs:
-        volume.attach(vm)
-        volume.check()
 
     test_util.test_dsc("disable NFS PS")
     ps_ops.change_primary_storage_state(nfs_ps.uuid, state='disable')
     disabled_ps_list.append(nfs_ps)
 
-    test_util.test_dsc("make sure all VM and Volumes still OK and running")
+    test_util.test_dsc("make sure VM till OK and running")
     vm.check()
-    for volume in volume_in_local + volume_in_nfs:
-        volume.check()
+    assert vm.get_vm().state == 'Running'
 
-    test_util.test_dsc("Try to create vm with datavolume")
-    new_vm = test_stub.create_multi_vms(name_prefix='test-vm', count=1, data_volume_number=10)[0]
+    try_create_volume_in_nfs(nfs_ps)
+
+    test_util.test_dsc("Try to create vm")
+    new_vm = test_stub.create_multi_vms(name_prefix='test-vm', count=1)[0]
     test_obj_dict.add_vm(new_vm)
-
-    test_util.test_dsc("new Created VM and data volume should be in local ps")
-
-    for volume in new_vm.get_vm().allVolumes:
-        assert volume.primaryStorageUuid == local_ps.uuid
 
     test_util.test_pass('Multi PrimaryStorage Test Pass')
 
