@@ -21,6 +21,7 @@ vpc_inv = None
 iz_inv = None
 vswitch_inv = None
 vswitch_local = None
+vswitch_name = 'zstack-test-vswitch-%s' % date_s
 
 def test():
     global ks_inv
@@ -45,14 +46,15 @@ def test():
     iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, region_id)
     zone_id = iz_list[0].zoneId
     iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, zone_id)
-    hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'zstack-test-vswitch-%s' % date_s, '192.168.0.0/16')
+    hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, vswitch_name, '192.168.0.0/16')
     time.sleep(5)
     vswitch_auto_synced = hyb_ops.query_ecs_vswitch_local()
     if vswitch_auto_synced:
         for v in vswitch_auto_synced:
             hyb_ops.del_ecs_vswitch_in_local(v.uuid)
     vswitch_synced = hyb_ops.sync_ecs_vswitch_from_remote(datacenter_inv.uuid)
-    assert vswitch_synced.addList
+    vswitch_name_list = [v.name for v in vswitch_synced]
+    assert vswitch_name in vswitch_name_list
     vswitch_local = hyb_ops.query_ecs_vswitch_local()
     for vl in vswitch_local:
         if vl.name == 'zstack-test-vswitch-%s' % date_s:

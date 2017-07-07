@@ -224,7 +224,7 @@ def sync_ecs_vswitch_from_remote(data_center_uuid, session_uuid=None):
     action.dataCenterUuid = data_center_uuid
     test_util.action_logger('Sync [Ecs VSwitch From Remote:] %s' % (data_center_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    return evt
+    return evt.inventories
 
 def del_ecs_vswitch_in_local(uuid, session_uuid=None):
     action = api_actions.DeleteEcsVSwitchInLocalAction()
