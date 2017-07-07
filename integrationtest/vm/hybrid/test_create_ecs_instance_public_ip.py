@@ -75,7 +75,7 @@ def env_recover():
         hyb_ops.del_ecs_instance(ecs_inv.uuid)
     global sg_inv
     if sg_inv:
-        time.sleep(10)
+        time.sleep(30)
         hyb_ops.del_ecs_security_group_remote(sg_inv.uuid)
     global vswitch_inv
     if vswitch_inv:
