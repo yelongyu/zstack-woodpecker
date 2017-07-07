@@ -417,7 +417,7 @@ def find_ps_nfs():
 
 def get_ps_vm_creation():
     if find_ps_local() and find_ps_nfs():
-        return find_ps_local(), find_ps_local()
+        return find_ps_local(), find_ps_nfs()
     else:
         return random.sample(res_ops.get_resource(res_ops.PRIMARY_STORAGE), 2)
 

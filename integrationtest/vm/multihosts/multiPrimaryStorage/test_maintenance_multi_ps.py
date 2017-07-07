@@ -27,8 +27,8 @@ def test():
 
     ps, another_ps = test_stub.get_ps_vm_creation()
 
-    vm1 = test_stub.create_multi_vms(name_prefix='test-', count=1, ps_uuid=ps.uuid, data_volume_number=VOLUME_NUMBER)[0]
-    vm2 = test_stub.create_multi_vms(name_prefix='test-', count=1, ps_uuid=ps.uuid)[0]
+    vm1 = test_stub.create_multi_vms(name_prefix='test1-', count=1, ps_uuid=ps.uuid)[0]
+    vm2 = test_stub.create_multi_vms(name_prefix='test2-', count=1, ps_uuid=ps.uuid)[0]
 
     for vm in (vm1, vm2):
         test_obj_dict.add_vm(vm)
