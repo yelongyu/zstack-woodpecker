@@ -26,7 +26,7 @@ def try_create_vm_in_nfs(ps):
         assert ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE
         test_stub.create_multi_vms(name_prefix='test-', count=VM_COUNT, ps_uuid=ps.uuid)
     except Exception as e:
-        test_util.test_logger('Can not create vm in NFS, it is as expected', e)
+        test_util.test_logger('Can not create vm in NFS, it is as expected')
     else:
         test_util.test_fail('Critical ERROR: can create vm in NFS ps')
 

@@ -25,7 +25,7 @@ def try_start_vm(vm):
     try:
         vm.start()
     except Exception as e:
-        test_util.test_logger('Can not start vm, it is as expected', e)
+        test_util.test_logger('Can not start vm, it is as expected')
     else:
         test_util.test_fail('Critical ERROR: can start vm2 in maintenance mode')
 
