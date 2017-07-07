@@ -45,8 +45,7 @@ def test():
     if sg_auto_synced:
         for sg in sg_auto_synced:
             hyb_ops.del_ecs_security_group_in_local(sg.uuid)
-    sg_sync = hyb_ops.sync_security_group_from_remote(vpc_inv.uuid)
-    assert sg_sync.addList
+    hyb_ops.sync_security_group_from_remote(vpc_inv.uuid)
     sg_local = hyb_ops.query_ecs_security_group_local()
     for sl in sg_local:
         if sl.name == 'sg_for_test_%s' % date_s:

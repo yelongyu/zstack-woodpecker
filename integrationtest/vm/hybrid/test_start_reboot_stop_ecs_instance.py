@@ -63,6 +63,7 @@ def test():
     hyb_ops.create_ecs_image_from_local_image(bs_uuid, datacenter_inv.uuid, image.uuid)
     ecs_inv = hyb_ops.create_ecs_instance_from_local_image('Password123', bs_uuid, image.uuid, vswitch_inv.uuid, zone_id, instance_offering.uuid,
                                                            ecs_bandwidth=5, ecs_security_group_uuid=sg_inv.uuid, ecs_instance_name='zstack-ecs-test')
+    time.sleep(10)
     hyb_ops.reboot_ecs_instance(ecs_inv.uuid)
     time.sleep(5)
     hyb_ops.stop_ecs_instance(ecs_inv.uuid)

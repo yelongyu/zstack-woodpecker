@@ -366,6 +366,15 @@ def del_ecs_image_in_local(uuid, session_uuid=None):
     test_util.test_logger('[ecs image in local:] %s is deleted.' % uuid)
     return evt
 
+def del_hybrid_eip_local(uuid, eip_type='aliyun', session_uuid=None):
+    action = api_actions.DeleteHybridEipFromLocalAction()
+    action.type = eip_type
+    action.uuid = uuid
+    test_util.action_logger('Delete [Hybrid Eip in local:] %s' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[Hybrid Eip in local:] %s is deleted.' % uuid)
+    return evt
+
 def sync_ecs_image_from_remote(datacenter_uuid, session_uuid=None):
     action = api_actions.SyncEcsImageFromRemoteAction()
     action.dataCenterUuid = datacenter_uuid

@@ -63,13 +63,12 @@ def test():
     hyb_ops.create_ecs_image_from_local_image(bs_uuid, datacenter_inv.uuid, image.uuid)
     ecs_inv = hyb_ops.create_ecs_instance_from_local_image('Password123', bs_uuid, image.uuid, vswitch_inv.uuid, zone_id, instance_offering.uuid,
                                                            ecs_bandwidth=5, ecs_security_group_uuid=sg_inv.uuid, ecs_instance_name='zstack-ecs-test')
-    ecs_instance_auto_synced = hyb_ops.query_ecs_instance_local()
     time.sleep(10)
+    ecs_instance_auto_synced = hyb_ops.query_ecs_instance_local()
     for e in ecs_instance_auto_synced:
         if e.name == 'zstack-ecs-test':
             hyb_ops.del_ecs_instance_local(e.uuid)
-    ecs_instance_sync = hyb_ops.sync_ecs_instance_from_remote(datacenter_inv.uuid)
-    assert ecs_instance_sync.addList
+    hyb_ops.sync_ecs_instance_from_remote(datacenter_inv.uuid)
     ecs_instance_local = hyb_ops.query_ecs_instance_local()
     for el in ecs_instance_local:
         if el.name == 'zstack-ecs-test':

@@ -1,6 +1,6 @@
 '''
 
-Test create ECS instance with console password.
+Test Get ECS instance Vnc Url.
 
 @author: Legion
 '''
@@ -39,7 +39,10 @@ def test():
     bs_uuid = image.backupStorageRefs[0].backupStorageUuid
     cond2 = res_ops.gen_query_conditions('name', '=', os.getenv('instanceOfferingName_m'))
     instance_offering = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond2)[0]
-    ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
+    try:
+        ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
+    except:
+        pass
     datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
     regions = [ i.regionId for i in datacenter_list]
     for r in regions:
@@ -58,21 +61,23 @@ def test():
     vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'zstack-test-vswitch', '172.18.1.0/24')
     sg_inv = hyb_ops.create_ecs_security_group_remote('sg_for_test', vpc_inv.uuid)
     hyb_ops.create_ecs_image_from_local_image(bs_uuid, datacenter_inv.uuid, image.uuid)
-    ecs_inv = hyb_ops.create_ecs_instance_from_local_image('Password123', bs_uuid, image.uuid, vswitch_inv.uuid, zone_id, instance_offering.uuid, ecs_bandwidth=5,
-                                                           ecs_security_group_uuid=sg_inv.uuid, ecs_instance_name='zstack-ecs-test', ecs_console_password='123abc')
+    ecs_inv = hyb_ops.create_ecs_instance_from_local_image('Password123', bs_uuid, image.uuid, vswitch_inv.uuid, zone_id, instance_offering.uuid,
+                                                           ecs_bandwidth=5, ecs_security_group_uuid=sg_inv.uuid, ecs_instance_name='zstack-ecs-test')
     time.sleep(10)
-    hyb_ops.update_ecs_instance_vnc_password(ecs_inv.uuid, '123abc')
-    test_util.test_pass('Update ECS Instance Console Password Test Success')
+    ecs_instance_local = hyb_ops.query_ecs_instance_local()
+    ecs_uuid = [e.uuid for e in ecs_instance_local if e.name == 'zstack-ecs-test'][0]
+    vnc_url = hyb_ops.get_ecs_instance_vnc_url(ecs_uuid).vncUrl
+    assert 'vncproxy.aliyun.com' in vnc_url
+    test_util.test_pass('Create Delete Ecs Instance Test Success')
 
 def env_recover():
     global ecs_inv
     if ecs_inv:
-        time.sleep(10)
         hyb_ops.stop_ecs_instance(ecs_inv.uuid)
         hyb_ops.del_ecs_instance(ecs_inv.uuid)
     global sg_inv
     if sg_inv:
-        time.sleep(10)
+        time.sleep(30)
         hyb_ops.del_ecs_security_group_remote(sg_inv.uuid)
     global vswitch_inv
     if vswitch_inv:

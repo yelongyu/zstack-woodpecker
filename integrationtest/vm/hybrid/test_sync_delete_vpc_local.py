@@ -43,8 +43,7 @@ def test():
     if vpc_auto_synced:
         for v in vpc_auto_synced:
             hyb_ops.del_ecs_vpc_local(v.uuid)
-    vpc_sync = hyb_ops.sync_ecs_vpc_from_remote(datacenter_inv.uuid)
-    assert vpc_sync.addList
+    hyb_ops.sync_ecs_vpc_from_remote(datacenter_inv.uuid)
     vpc_local = hyb_ops.query_ecs_vpc_local()
     for vl in vpc_local:
         if vl.name == 'vpc_for_test_%s' % date_s:

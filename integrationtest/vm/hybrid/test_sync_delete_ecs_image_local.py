@@ -18,13 +18,11 @@ test_obj_dict = test_state.TestStateDict()
 ks_inv = None
 datacenter_inv = None
 bucket_inv = None
-ecs_image_inv = None
 
 def test():
     global ks_inv
     global datacenter_inv
     global bucket_inv
-    global ecs_image_inv
     datacenter_type = os.getenv('datacenterType')
     cond = res_ops.gen_query_conditions('name', '=', os.getenv('imageName_s'))
     image =  res_ops.query_resource(res_ops.IMAGE, cond)[0]
@@ -49,18 +47,15 @@ def test():
     if ecs_image_auto_synced:
         for i in ecs_image_auto_synced:
             hyb_ops.del_ecs_image_in_local(i.uuid)
-    ecs_image_sync = hyb_ops.sync_ecs_image_from_remote(datacenter_inv.uuid)
-    assert ecs_image_sync.addList
+    hyb_ops.sync_ecs_image_from_remote(datacenter_inv.uuid)
     ecs_image_local = hyb_ops.query_ecs_image_local()
     for i in ecs_image_local:
         if i.name == image.name:
             ecs_image_inv = i
+    hyb_ops.del_ecs_image_remote(ecs_image_inv.uuid)
     test_util.test_pass('Sync Delete Local Ecs Image Test Success')
 
 def env_recover():
-    global ecs_image_inv
-    if ecs_image_inv:
-        hyb_ops.del_ecs_image_remote(ecs_image_inv.uuid)
     global bucket_inv
     if bucket_inv:
         bucket_file = hyb_ops.get_oss_bucket_file_from_remote(bucket_inv.uuid).files
