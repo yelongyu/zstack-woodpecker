@@ -69,7 +69,7 @@ def test():
     eip_local = hyb_ops.query_hybrid_eip_local()
     ecs_eip = [e for e in eip_local if e.allocateResourceUuid == ecs_uuid][0]
     assert len(ecs_eip.eipAddress.split('.')) >= 4
-    hyb_ops.del_hybrid_eip_local(ecs_eip)
+    hyb_ops.del_hybrid_eip_local(ecs_eip.uuid)
     test_util.test_pass('Create Ecs Instance with Public IP and delete Local Eip Test Success')
 
 def env_recover():
