@@ -7,6 +7,7 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
+import zstackwoodpecker.operations.ha_operations as ha_ops
 import time
 
 
@@ -56,6 +57,9 @@ def test():
 
     for vm in vm_list:
         test_obj_dict.add_vm(vm)
+
+    for vm in vm_list:
+        ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
 
     ps_ops.change_primary_storage_state(state='maintain', primary_storage_uuid=ps2.uuid)
     maintenance_ps_list.append(ps2)
