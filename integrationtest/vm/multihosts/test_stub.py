@@ -435,6 +435,7 @@ def stop_host(host_vm, scenarioConfig, force=None):
     mn_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
     try:
         host_inv = sce_ops.stop_vm(mn_ip, host_vm_uuid,force=force)
+        test_lib.lib_wait_target_down(mn_ip, '22', 120)
         return host_inv
     except:
         test_util.test_logger("Fail to stop host [%s]" % host_vm.ip_)
