@@ -282,6 +282,19 @@ def recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config):
                     except:
                         pass
 
+
+def get_mn_ha_nfs_url(scenario_config, scenario_file, deploy_config):
+    for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+	        for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
+	            for zone in xmlobject.safe_list(deploy_config.zones.zone):
+	                if primaryStorageRef.type_ == 'nfs':
+	                    for nfsPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.nfsPrimaryStorage):
+	                        if primaryStorageRef.text_ == nfsPrimaryStorage.name_:
+	                            return nfsPrimaryStorage.url_
+    return None
+
+
 def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
     vm_nic = os.environ.get('nodeNic')
@@ -290,18 +303,11 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
     cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (vm_nic, vm_ip, vm_netmask, vm_gateway)
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
     mn_ha_storage_type = get_mn_ha_storage_type(scenario_config, scenario_file, deploy_config)
-    if mn_ha_storage_type == "nfs" and hasattr(vm_config, 'primaryStorageRef'):
+    if mn_ha_storage_type == "nfs":
         #TODO: should make image folder configarable
-        for primaryStorageRef in xmlobject.safe_list(vm_config.primaryStorageRef):
-            print primaryStorageRef.text_
-            for zone in xmlobject.safe_list(deploy_config.zones.zone):
-                if primaryStorageRef.type_ == 'nfs':
-                    for nfsPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.nfsPrimaryStorage):
-                        if primaryStorageRef.text_ == nfsPrimaryStorage.name_:
-                            nfsIP = nfsPrimaryStorage.url_.split(':')[0]
-                            nfsPath = nfsPrimaryStorage.url_.split(':')[1]
-                            break
-    
+        nfs_url = get_mn_ha_nfs_url(scenario_config, scenario_file, deploy_config)
+        nfsIP = nfs_url.split(':')[0]
+        nfsPath = nfs_url.split(':')[1]
         # Auto mount in /etc/fstab
         cmd = 'echo %s:%s /storage nfs rsize=8192,wsize=8192,timeo=14,intr >> /etc/fstab' % (nfsIP, nfsPath)
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
