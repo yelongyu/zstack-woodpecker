@@ -309,7 +309,7 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
         cmd1="ceph osd pool create zstack 128"
         cmd2="qemu-img convert -f qcow2 -O raw %s rbd:zstack/mnvm.img" % mn_image_path
     elif mn_ha_storage_type == 'nfs':
-        cmd1 = "cp %s %s" % (mn_image_path, "/storage/")
+        cmd1 = "cp %s /storage/mnvm.img" % (mn_image_path)
         cmd2 = "chmod a+x %s" % (installer_path)
     cmd3='%s install -p %s -c %s' % (installer_path, host_password, config_path)
     test_util.test_logger("[%s] %s" % (test_host_ip, cmd1))
