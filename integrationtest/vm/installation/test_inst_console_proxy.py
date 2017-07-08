@@ -42,7 +42,7 @@ def test():
 
     test_util.test_dsc('Create test vm to test zstack installation with console proxy.')
 
-    conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_20_mn'))
+    conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_zstack'))
     image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
 
     vm_inv = create_vm(image) 
