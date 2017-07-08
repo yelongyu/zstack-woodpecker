@@ -297,7 +297,7 @@ def get_mn_ha_nfs_url(scenario_config, scenario_file, deploy_config):
 
 def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
-    vm_nic = os.environ.get('nodeNic')
+    vm_nic = os.environ.get('nodeNic').replace("eth", "zsn")
     vm_netmask = os.environ.get('nodeNetMask')
     vm_gateway = os.environ.get('nodeGateway')
     cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (vm_nic, vm_ip, vm_netmask, vm_gateway)
