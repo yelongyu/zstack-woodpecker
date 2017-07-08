@@ -80,7 +80,7 @@ func hostCreateVlanDeviceHandler(ctx *server.CommandContext) interface{} {
 	if isNetworkDeviceExisting(cmd.Ethname) {
 		VlanDevName := fmt.Sprintf("%s.%s", cmd.Ethname, cmd.Vlan)
 		if !isNetworkDeviceExisting(VlanDevName) {
-			b.Command = fmt.Sprintf("vconfig add %s %s", cmd.Ethname, cmd.Vlan)
+			b.Command = fmt.Sprintf("vconfig add %s %s", cmd.Ethname, strconv.Itoa(cmd.Vlan))
 			b.Run()
 			if cmd.Ip_ != "" {
 				b.Command = fmt.Sprintf("ifconfig %s %s netmask %s", cmd.Ethname, VlanDevName, cmd.Netmask_)
@@ -89,7 +89,7 @@ func hostCreateVlanDeviceHandler(ctx *server.CommandContext) interface{} {
 		} else {
 			if GetDeviceIp(VlanDevName) != cmd.Ip_ {
 				DeleteVlanEth(VlanDevName)
-				b.Command = fmt.Sprintf("vconfig add %s %s", cmd.Ethname, cmd.Vlan)
+				b.Command = fmt.Sprintf("vconfig add %s %s", cmd.Ethname, strconv.Itoa(cmd.Vlan))
 				b.Run()
 				b.Command = fmt.Sprintf("ifconfig %s %s netmask %s", VlanDevName, cmd.Ip_, cmd.Netmask_)
 				b.Run()
