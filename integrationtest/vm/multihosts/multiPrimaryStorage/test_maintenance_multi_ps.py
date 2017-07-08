@@ -8,6 +8,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import apibinding.inventory as inventory
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
+import time
 
 _config_ = {
         'timeout' : 3000,
@@ -49,9 +50,21 @@ def test():
     ps_ops.change_primary_storage_state(state='maintain', primary_storage_uuid=another_ps.uuid)
     maintenance_ps_list.append(another_ps)
 
+    time.sleep(30)
     vm1.update()
     vm1.check()
     vm2.update()
+
+    count = 10
+    while count:
+        if vm2.get_vm().state == inventory.STOPPED:
+            break
+        elif vm2.get_vm().state == inventory.STOPPING:
+            time.sleep(10)
+            vm2.update()
+            count -= 1
+        else:
+            test_util.test_fail("VM2 is not in Stopping or Stopped status!!!")
 
     assert vm1.get_vm().state == 'Running'
     assert vm2.get_vm().state == 'Stopped'
@@ -59,7 +72,7 @@ def test():
     try:
         vm2.start()
     except Exception as e:
-        test_util.test_logger('Can not start vm2, it is as expected', e)
+        test_util.test_logger('Can not start vm2, it is as expected')
     else:
         test_util.test_fail('Critical ERROR: can start vm2 in maintenance mode')
 

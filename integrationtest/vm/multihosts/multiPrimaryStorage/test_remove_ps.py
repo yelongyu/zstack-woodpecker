@@ -51,7 +51,7 @@ def test():
 
     ps_ops.detach_primary_storage(ps2.uuid, res_ops.get_resource(res_ops.CLUSTER)[0].uuid)
     delete_ps_list.append(ps2)
-
+    time.sleep(60)
     for vm in vm_list:
         vm.update()
 
