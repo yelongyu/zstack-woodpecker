@@ -23,6 +23,8 @@ def test():
     test_util.test_dsc('Create test vm to test zstack upgrade by -u.')
     image_name = os.environ.get('imageName_i_c7_z_1.9')
     iso_path = os.environ.get('iso_path')
+    iso_10_path = os.environ.get('iso_10_path')
+    iso_20_path = os.environ.get('iso_20_path')
     zstack_latest_version = os.environ.get('zstackLatestVersion')
     zstack_latest_path = os.environ.get('zstackLatestInstaller')
     vm_name = os.environ.get('vmName')
@@ -42,15 +44,17 @@ def test():
     test_stub.start_mn(vm_ip, tmp_file)
     test_stub.check_installation(vm_ip, tmp_file)
 
-    test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
+    #test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
 
     #pkg_num = 1.9
     release_ver=['1.10','2.0.0']
     curren_num = float(os.environ.get('releasePkgNum'))
     for pkg_num in release_ver:
     #while pkg_num <= curren_num:
-	#if str(pkg_num) == '1.10':
-	#	test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
+	if str(pkg_num) == '1.10':
+		test_stub.update_10_iso(vm_ip, tmp_file, iso_10_path, upgrade_script_path)
+	if str(pkg_num) == '2.0.0':
+		test_stub.update_20_iso(vm_ip, tmp_file, iso_20_path, upgrade_script_path)
         test_util.test_logger('Upgrade zstack to %s' % pkg_num)
         upgrade_pkg = os.environ.get('zstackPkg_%s' % pkg_num)
         test_stub.upgrade_zstack(vm_ip, upgrade_pkg, tmp_file) 
@@ -60,7 +64,7 @@ def test():
         #pkg_num = pkg_num + 0.1
 
     test_util.test_dsc('Upgrade zstack to latest') 
-
+    test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
     test_stub.upgrade_zstack(vm_ip, zstack_latest_path, tmp_file) 
     test_stub.start_mn(vm_ip, tmp_file)
     test_stub.check_zstack_version(vm_ip, tmp_file, zstack_latest_version)
