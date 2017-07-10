@@ -65,5 +65,8 @@
         <case timeout='1200' repeat='1'>test_delete_vm_l3_check_vm_ops.py</case>
         <case timeout='600' repeat='1'>test_create_vm_time.py</case>
         <!--<case timeout='1200' repeat='1'>capacity/test_remove_host_check_ps_capacity_eq_0.py</case>-->
+        <case timeout='600' repeat='1'>test_create_vm_with_userdata.py</case>
+        <case timeout='600' repeat='1'>test_get_userdata.py</case>
+        <case timeout='600' repeat='1'>test_remove_userdata.py</case>
     </suite>
 </integrationTest>
