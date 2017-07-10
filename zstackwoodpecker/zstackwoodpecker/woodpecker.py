@@ -464,7 +464,7 @@ class WoodPecker(object):
                     if self.case_failure and self.stop_when_fail:
                         return
                     #self.info('running teardown case: %s' % suite.teardown_case.name)
-                    run_case(suite, suite.teardown_case, suite_repeat, 0)
+                    #run_case(suite, suite.teardown_case, suite_repeat, 0) #@@This line should not be deleted for possibly reopen soon
         
         self.info('[Test Begin]\n')
         for suite in self.suites.values():
