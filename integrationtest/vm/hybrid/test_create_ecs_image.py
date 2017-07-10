@@ -34,7 +34,7 @@ def test():
     datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
     regions = [ i.regionId for i in datacenter_list]
     for r in regions:
-        if 'shanghai' in r:
+        if 'hangzhou' in r:
             region_id = r
 #     region_id = datacenter_list[0].regionId
     datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
