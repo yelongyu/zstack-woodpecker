@@ -39,7 +39,9 @@ def create_vm(image):
 
 def test():
     global vm_inv
-
+    
+    iso_path = os.environ.get('iso_path')
+    upgrade_script_path = os.environ.get('upgradeScript')
     test_util.test_dsc('Create test vm to test zstack installation with console proxy.')
 
     conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_zstack'))
@@ -58,6 +60,8 @@ def test():
     ssh.make_ssh_no_password(vm_ip, test_lib.lib_get_vm_username(vm_inv), test_lib.lib_get_vm_password(vm_inv))
     cmd = '%s ifconfig eth0:0 %s up' % (ssh_cmd, vip)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+
+    test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
 
     target_file = '/root/zstack-all-in-one.tgz'
     test_stub.prepare_test_env(vm_inv, target_file)

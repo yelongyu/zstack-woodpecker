@@ -43,6 +43,9 @@ def test():
     global vm2_inv
     global vm3_inv
 
+    iso_path = os.environ.get('iso_path')
+    upgrade_script_path = os.environ.get('upgradeScript')
+
     test_util.test_dsc('Create 3 CentOS7 vm to test multi management node installation')
 
     conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_zstack'))
@@ -72,7 +75,6 @@ def test():
     #test_stub.check_installation(vm1_ip, tmp_file)
 
     test_util.test_dsc('Update master iso')
-    iso_path = os.environ.get('iso_path')
     test_stub.update_iso(vm1_ip, tmp_file, iso_path, upgrade_script_path)
 
     test_util.test_dsc('Install zstack mangement node on vm1')

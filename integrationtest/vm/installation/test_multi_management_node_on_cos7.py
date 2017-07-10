@@ -45,7 +45,7 @@ def test():
     global vm3_inv
 
     iso_path = os.environ.get('iso_path')
-
+    upgrade_script_path = os.environ.get('upgradeScript')
     test_util.test_dsc('Create 3 CentOS7 vm to test multi management node installation')
 
     conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_20_mn'))
