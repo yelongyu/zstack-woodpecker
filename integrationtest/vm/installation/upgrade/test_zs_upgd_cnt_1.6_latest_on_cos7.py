@@ -59,7 +59,7 @@ def test():
         if str(pkg_num) == '1.10':
             test_stub.update_10_iso(vm_ip, tmp_file, iso_10_path, upgrade_script_path)
         if str(pkg_num) == '2.0.0':
-            test_stub.update_2.0_iso(vm_ip, tmp_file, iso_2.0_path, upgrade_script_path)
+            test_stub.update_20_iso(vm_ip, tmp_file, iso_20_path, upgrade_script_path)
         upgrade_pkg = os.environ.get('zstackPkg_%s' % pkg_num)
         test_stub.upgrade_zstack(vm_ip, upgrade_pkg, tmp_file) 
         test_stub.start_mn(vm_ip, tmp_file)
