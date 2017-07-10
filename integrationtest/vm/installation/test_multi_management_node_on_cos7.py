@@ -44,6 +44,8 @@ def test():
     global vm2_inv
     global vm3_inv
 
+    iso_path = os.environ.get('iso_path')
+
     test_util.test_dsc('Create 3 CentOS7 vm to test multi management node installation')
 
     conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_20_mn'))
@@ -96,6 +98,9 @@ def test():
     cmd = '%s "zstack-ctl start"' % ssh_cmd3
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     test_stub.check_installation(vm3_ip, tmp_file)
+
+    test_util.test_dsc('Update master iso')
+    test_stub.update_iso(vm1_ip, tmp_file, iso_path, upgrade_script_path)
 
     test_util.test_dsc('Upgrade multi management node on vm2 and vm3')
     cmd = '%s "zstack-ctl upgrade_multi_management_node --installer-bin %s"' % (ssh_cmd1, target_file) 

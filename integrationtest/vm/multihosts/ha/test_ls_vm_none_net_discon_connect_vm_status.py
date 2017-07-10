@@ -88,7 +88,7 @@ def test():
         vm_stop_time = 180
 
     for i in range(vm_stop_time, 180):
-        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Starting":
+        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Running":
             break
         time.sleep(1)
     else:
