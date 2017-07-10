@@ -178,7 +178,7 @@ def update_mn_ip(vm_ip, mn_ip, tmp_file):
 
 def reset_rabbitmq_for_13(vm_ip, tmp_file):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
-    cmd = '%s "rabbitmqctl add_user zstack zstack.password" ' % ssh_cmd
+    cmd = '''%s 'rabbitmqctl add_user zstack zstack.password' ''' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
     cmd = '%s "rabbitmqctl set_user_tags zstack administrator" ' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
