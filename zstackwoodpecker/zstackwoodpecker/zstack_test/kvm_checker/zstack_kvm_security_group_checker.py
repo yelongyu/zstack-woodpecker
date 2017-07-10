@@ -551,7 +551,8 @@ class zstack_kvm_sg_icmp_ingress_checker(sg_common_checker):
 
         stub_vm = self.test_obj.get_stub_vm(l3_uuid)
         if not stub_vm:
-            test_util.test_warn('Did not find test stub vm for [target address:] %s. Skip testing some TCP rules' % target_addr)
+            #test_util.test_warn('Did not find test stub vm for [target address:] %s. Skip testing some TCP rules' % target_addr)
+            test_util.test_warn('Did not find test stub vm for [l3:] %s. Skip testing some TCP rules' % l3_uuid)
             return self.judge(self.exp_result)
         stub_vm = stub_vm.vm
 
