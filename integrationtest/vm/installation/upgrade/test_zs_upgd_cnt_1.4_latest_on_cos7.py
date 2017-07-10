@@ -68,6 +68,7 @@ def test():
 
     test_util.test_dsc('Upgrade zstack to latest') 
 
+    test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
     test_stub.upgrade_zstack(vm_ip, zstack_latest_path, tmp_file) 
     test_stub.start_mn(vm_ip, tmp_file)
     test_stub.check_zstack_version(vm_ip, tmp_file, zstack_latest_version)
