@@ -99,8 +99,10 @@ def test():
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     test_stub.check_installation(vm3_ip, tmp_file)
 
+    test_util.test_dsc('Update master iso')
+    test_stub.update_iso(vm1_ip, tmp_file, iso_path, upgrade_script_path)
+
     test_util.test_dsc('Upgrade multi management node on vm2 and vm3')
-    test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
     cmd = '%s "zstack-ctl upgrade_multi_management_node --installer-bin %s"' % (ssh_cmd1, target_file) 
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
 

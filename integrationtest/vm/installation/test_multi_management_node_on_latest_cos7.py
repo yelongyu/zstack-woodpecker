@@ -71,6 +71,10 @@ def test():
     #test_stub.execute_shell_in_process(cmd, tmp_file)
     #test_stub.check_installation(vm1_ip, tmp_file)
 
+    test_util.test_dsc('Update master iso')
+    iso_path = os.environ.get('iso_path')
+    test_stub.update_iso(vm1_ip, tmp_file, iso_path, upgrade_script_path)
+
     test_util.test_dsc('Install zstack mangement node on vm1')
     cmd= '%s "[ -e /usr/local/zstack ] && echo yes || echo no"' % ssh_cmd1
     (process_result, cmd_stdout) = test_stub.execute_shell_in_process_stdout(cmd, tmp_file)
