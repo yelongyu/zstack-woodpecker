@@ -232,8 +232,8 @@ def update_19_iso(vm_ip, tmp_file, iso_19_path, upgrade_script_path):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     vm_username = os.environ['imageUsername']
     vm_password = os.environ['imagePassword']
-    cmd = '%s "rm -f /opt/zstack_19.iso"' % ssh_cmd
-    process_result = execute_shell_in_process(cmd, tmp_file)
+    #cmd = '%s "rm -f /opt/zstack_19.iso"' % ssh_cmd
+    #process_result = execute_shell_in_process(cmd, tmp_file)
     ssh.scp_file(iso_19_path, '/opt/zstack_19.iso', vm_ip, vm_username, vm_password)
     ssh.scp_file(upgrade_script_path, '/opt/zstack-upgrade', vm_ip, vm_username, vm_password)
     cmd = '%s "mkdir -p /opt/zstack-dvd"' % ssh_cmd
@@ -253,8 +253,8 @@ def update_10_iso(vm_ip, tmp_file, iso_10_path, upgrade_script_path):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     vm_username = os.environ['imageUsername']
     vm_password = os.environ['imagePassword']
-    cmd = '%s "rm -f /opt/zstack_10.iso"' % ssh_cmd
-    process_result = execute_shell_in_process(cmd, tmp_file)
+    #cmd = '%s "rm -f /opt/zstack_10.iso"' % ssh_cmd
+    #process_result = execute_shell_in_process(cmd, tmp_file)
     ssh.scp_file(iso_10_path, '/opt/zstack_10.iso', vm_ip, vm_username, vm_password)
     ssh.scp_file(upgrade_script_path, '/opt/zstack-upgrade', vm_ip, vm_username, vm_password)
     cmd = '%s "mkdir -p /opt/zstack-dvd"' % ssh_cmd
@@ -274,9 +274,9 @@ def update_20_iso(vm_ip, tmp_file, iso_20_path, upgrade_script_path):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     vm_username = os.environ['imageUsername']
     vm_password = os.environ['imagePassword']
-    cmd = '%s "rm -f /opt/zstack_20.iso"' % ssh_cmd
-    process_result = execute_shell_in_process(cmd, tmp_file)
-    ssh.scp_file(iso_10_path, '/opt/zstack_20.iso', vm_ip, vm_username, vm_password)
+    #cmd = '%s "rm -f /opt/zstack_20.iso"' % ssh_cmd
+    #process_result = execute_shell_in_process(cmd, tmp_file)
+    ssh.scp_file(iso_20_path, '/opt/zstack_20.iso', vm_ip, vm_username, vm_password)
     ssh.scp_file(upgrade_script_path, '/opt/zstack-upgrade', vm_ip, vm_username, vm_password)
     cmd = '%s "mkdir -p /opt/zstack-dvd"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
