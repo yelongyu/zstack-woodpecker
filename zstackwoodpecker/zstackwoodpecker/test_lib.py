@@ -1491,6 +1491,8 @@ def _lib_gen_host_next_ip_addr(network_address, netmask, addr_list):
             available_ip_list[3] = str(candidate_ip)
 	    if lib_check_stored_host_ip_dict(available_ip_list):
                 continue
+            else:
+                break
     else:
         net_3_num = int(network_addr[2])
         if net_3_num < 128:
