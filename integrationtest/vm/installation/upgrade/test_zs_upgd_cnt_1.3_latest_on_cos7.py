@@ -45,7 +45,7 @@ def test():
     test_stub.start_mn(vm_ip, tmp_file)
     test_stub.check_installation(vm_ip, tmp_file)
 
-    #test_stub.update_old_iso(vm_ip, tmp_file, old_iso_path, upgrade_script_path)
+    test_stub.update_19_iso(vm_ip, tmp_file, iso_19_path, upgrade_script_path)
 
     #pkg_num = 1.4 
     release_ver=['1.4','1.5','1.6','1.7','1.8','1.9','1.10','2.0.0']
