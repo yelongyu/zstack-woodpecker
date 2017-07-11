@@ -39,7 +39,8 @@ def set_quick_ha_params():
     pre3 = conf_ops.change_global_config('ha', 'host.selfFencer.maxAttempts', 10)
     pre4 = conf_ops.change_global_config('ha', 'host.selfFencer.interval', 1)
     pre5 = conf_ops.change_global_config('ha', 'host.check.interval', 1)
-    pre6 = conf_ops.change_global_config('ha', 'ping.interval', 2)
+    pre6 = conf_ops.change_global_config('primaryStorage', 'ping.interval', 2)
+    global ps_uuid
 
 def set_org_ha_params():
     global pre1,pre2,pre3,pre4,pre5,pre6
@@ -54,7 +55,7 @@ def set_org_ha_params():
     if pre5:
         conf_ops.change_global_config('ha', 'host.check.interval', pre5)
     if pre6:
-        conf_ops.change_global_config('ha', 'ping.interval', pre6)
+        conf_ops.change_global_config('primaryStorage', 'ping.interval', pre6)
 
 def set_quick_ha_properties():
     host_username = os.environ.get('hostUsername')
@@ -64,27 +65,27 @@ def set_quick_ha_properties():
     ret, properties_file, stderr = ssh.execute(cmd, mn_ip, host_username, host_password, False, 22)
 
     cmd = "zstack-ctl stop"
-    if not test_lib.lib_execute_ssh_cmd(mn_ip, host_username, host_password, cmd,  timeout = 120):
+    if test_lib.lib_execute_ssh_cmd(mn_ip, host_username, host_password, cmd,  timeout = 120) == False:
         test_util.test_fail("CMD:%s execute failed on %s" %(cmd, mn_ip))
 
     cmd = "sed 's/RESTFacade.connectTimeout.*$//g' -i " + properties_file
-    if not test_lib.lib_execute_ssh_cmd(mn_ip, host_username, host_password, cmd,  timeout = 10):
+    if test_lib.lib_execute_ssh_cmd(mn_ip, host_username, host_password, cmd,  timeout = 10) == False:
         test_util.test_fail("CMD:%s execute failed on %s" %(cmd, mn_ip))
 
     cmd = "sed 's/RESTFacade.readTimeout.*$//g' -i " + properties_file
-    if not test_lib.lib_execute_ssh_cmd(mn_ip, host_username, host_password, cmd,  timeout = 10):
+    if test_lib.lib_execute_ssh_cmd(mn_ip, host_username, host_password, cmd,  timeout = 10) == False:
         test_util.test_fail("CMD:%s execute failed on %s" %(cmd, mn_ip))
 
     cmd = "echo \"RESTFacade.readTimeout = 5000\" >>" + properties_file
-    if not test_lib.lib_execute_ssh_cmd(mn_ip, host_username, host_password, cmd,  timeout = 10):
+    if test_lib.lib_execute_ssh_cmd(mn_ip, host_username, host_password, cmd,  timeout = 10) == False:
         test_util.test_fail("CMD:%s execute failed on %s" %(cmd, mn_ip))
 
     cmd = "echo \"RESTFacade.connectTimeout = 5000\" >>" + properties_file
-    if not test_lib.lib_execute_ssh_cmd(mn_ip, host_username, host_password, cmd,  timeout = 10):
+    if test_lib.lib_execute_ssh_cmd(mn_ip, host_username, host_password, cmd,  timeout = 10) == False:
         test_util.test_fail("CMD:%s execute failed on %s" %(cmd, mn_ip))
 
     cmd = "nohup zstack-ctl start &"
-    if not test_lib.lib_execute_ssh_cmd(mn_ip, host_username, host_password, cmd,  timeout = 180):
+    if test_lib.lib_execute_ssh_cmd(mn_ip, host_username, host_password, cmd,  timeout = 180) == False:
         test_util.test_fail("CMD:%s execute failed on %s" %(cmd, mn_ip))
 
     time.sleep(60)
