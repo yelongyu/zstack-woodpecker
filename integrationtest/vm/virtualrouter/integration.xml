@@ -96,10 +96,10 @@
         <case timeout='800'  repeat='1'>lb/test_create_lb_source.py</case>
         <case timeout='800'  repeat='1'>lb/test_create_lb.py</case>
         <case timeout='800'  repeat='1'>lb/test_lb_health_check.py</case>
-	<case timeout='600' repeat='1'>scheduler/test_create_reboot_vm_simple_scheduler.py</case>
+	<!--<case timeout='600' repeat='1'>scheduler/test_create_reboot_vm_simple_scheduler.py</case>
 	<case timeout='600' repeat='1'>scheduler/test_create_1000_start_vm_simple_scheduler.py</case>
 	<case timeout='600' repeat='1'>scheduler/test_create_1000_start_vm_simple_scheduler2.py</case>
-	<!--<case timeout='600' repeat='1'>scheduler/test_create_start_vm_scheduler_startdate_0.py</case>-->
+	<case timeout='600' repeat='1'>scheduler/test_create_start_vm_scheduler_startdate_0.py</case>
 	<case timeout='1800' repeat='1'>scheduler/test_create_start_stop_vm_simple_scheduler.py</case>
 	<case timeout='1800' repeat='1'>scheduler/test_create_start_stop_vm_simple_scheduler_past.py</case>
 	<case timeout='1800' repeat='1'>scheduler/test_create_start_stop_vm_simple_repeatcount_scheduler.py</case>
@@ -108,7 +108,7 @@
         <case timeout='1800' repeat='1'>scheduler/test_pause_resume_simple_scheduler_state.py</case>
         <case timeout='1800' repeat='1'>scheduler/test_change_vm_owner_simple_scheduler_state.py</case>
 	<case timeout='1800' repeat='1'>scheduler/test_change_volume_owner_simple_scheduler_state.py</case>
-        <case timeout='1800' repeat='1' noparallel='True'>scheduler/test_delete_vm_check_simple_scheduler_state.py</case>
+	<case timeout='1800' repeat='1' noparallel='True'>scheduler/test_delete_vm_check_simple_scheduler_state.py</case>-->
         <case timeout='1800' repeat='1' noparallel='True'>test_sftp_update_password_sshport_username.py</case>
         <case timeout='1800' repeat='1' noparallel='True'>test_sftp_update_hostname.py</case>
         <case timeout='1800' repeat='1' noparallel='True'>test_kvm_host_update_password_sshport_username.py</case>
