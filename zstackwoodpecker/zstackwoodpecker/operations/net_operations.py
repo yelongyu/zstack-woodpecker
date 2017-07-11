@@ -48,9 +48,11 @@ def delete_security_group(sg_uuid, session_uuid=None):
     return evt
 
 #rules = [inventory.SecurityGroupRuleAO()]
-def add_rules_to_security_group(sg_uuid, rules, session_uuid=None):
+def add_rules_to_security_group(sg_uuid, rules, remote_sg_uuids=None, session_uuid=None):
     action = api_actions.AddSecurityGroupRuleAction()
     action.securityGroupUuid = sg_uuid
+    if remote_sg_uuids != None:
+        action.remoteSecurityGroupUuids = remote_sg_uuids
     action.timeout = 120000
     action.rules = rules
     for rule in rules:
