@@ -46,27 +46,25 @@ def test():
     test_stub.start_mn(vm_ip, tmp_file)
     test_stub.check_installation(vm_ip, tmp_file)
 
-    #test_stub.update_old_iso(vm_ip, tmp_file, old_iso_path, upgrade_script_path)
+    test_stub.update_19_iso(vm_ip, tmp_file, iso_19_path, upgrade_script_path)
 
     #pkg_num = 1.9
     release_ver=['1.9','1.10','2.0.0',]
     curren_num = float(os.environ.get('releasePkgNum'))
     for pkg_num in release_ver:
     #while pkg_num <= curren_num:
-	if str(pkg_num) == '1.9':
-		test_stub.update_19_iso(vm_ip, tmp_file, iso_19_path, upgrade_script_path)
+	#if str(pkg_num) == '1.9':
+	#	test_stub.update_19_iso(vm_ip, tmp_file, iso_19_path, upgrade_script_path)
 	if str(pkg_num) == '1.10':
 		test_stub.update_10_iso(vm_ip, tmp_file, iso_10_path, upgrade_script_path)
 	if str(pkg_num) == '2.0.0':
 		test_stub.update_20_iso(vm_ip, tmp_file, iso_20_path, upgrade_script_path)
         test_util.test_logger('Upgrade zstack to %s' % pkg_num)
         upgrade_pkg = os.environ.get('zstackPkg_%s' % pkg_num)
-        #test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
         test_stub.upgrade_zstack(vm_ip, upgrade_pkg, tmp_file) 
         test_stub.start_mn(vm_ip, tmp_file)
         test_stub.check_zstack_version(vm_ip, tmp_file, str(pkg_num))
         test_stub.check_installation(vm_ip, tmp_file)
-        #test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
         #pkg_num = pkg_num + 0.1
 
     test_util.test_dsc('Upgrade zstack to latest') 
