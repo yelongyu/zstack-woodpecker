@@ -29,11 +29,17 @@ def test():
         pass
     datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
     regions = [ i.regionId for i in datacenter_list]
-    for r in regions:
-        if 'shanghai' in r:
-            region_id = r
-#     region_id = datacenter_list[0].regionId
-    datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
+    err_list = []
+    for region_id in regions:
+        try:
+            datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
+        except hyb_ops.ApiError, e:
+            err_list.append(e)
+            pass
+        if datacenter_inv:
+            break
+    if len(err_list) == len(regions):
+        raise hyb_ops.ApiError("All available DataCenter failed to add: %s" % err_list)
     iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, region_id)
     zone_id = iz_list[0].zoneId
     iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, zone_id)

@@ -31,11 +31,17 @@ def test():
         pass
     datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
     regions = [ i.regionId for i in datacenter_list]
-    for r in regions:
-        if 'shanghai' in r:
-            region_id = r
-#     region_id = datacenter_list[0].regionId
-    datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
+    err_list = []
+    for region_id in regions:
+        try:
+            datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
+        except hyb_ops.ApiError, e:
+            err_list.append(e)
+            pass
+        if datacenter_inv:
+            break
+    if len(err_list) == len(regions):
+        raise hyb_ops.ApiError("All available DataCenter failed to add: %s" % err_list)
     vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', '192.168.0.0/16')
     time.sleep(5)
     sg_inv = hyb_ops.create_ecs_security_group_remote('sg_for_test', vpc_inv.uuid)

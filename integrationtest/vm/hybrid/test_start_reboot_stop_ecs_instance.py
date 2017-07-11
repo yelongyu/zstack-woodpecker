@@ -64,17 +64,37 @@ def test():
     ecs_inv = hyb_ops.create_ecs_instance_from_local_image('Password123', bs_uuid, image.uuid, vswitch_inv.uuid, zone_id, instance_offering.uuid,
                                                            ecs_bandwidth=5, ecs_security_group_uuid=sg_inv.uuid, ecs_instance_name='zstack-ecs-test')
     time.sleep(10)
+    ecs_instance_local = hyb_ops.query_ecs_instance_local()
+    ecs_inv = [e for e in ecs_instance_local if e.name == 'zstack-ecs-test'][0]
     hyb_ops.reboot_ecs_instance(ecs_inv.uuid)
-    time.sleep(5)
+    for _ in xrange(600):
+        hyb_ops.sync_ecs_instance_from_remote(datacenter_inv.uuid)
+        if ecs_inv.ecsStatus == "Running":
+            break
+        else:
+            time.sleep(1)
     hyb_ops.stop_ecs_instance(ecs_inv.uuid)
-    time.sleep(5)
+    for _ in xrange(600):
+        hyb_ops.sync_ecs_instance_from_remote(datacenter_inv.uuid)
+        if ecs_inv.ecsStatus == "Stopped":
+            break
+        else:
+            time.sleep(1)
     hyb_ops.start_ecs_instance(ecs_inv.uuid)
     test_util.test_pass('Start Reboot Stop Ecs Instance Test Success')
 
 def env_recover():
     global ecs_inv
+    global datacenter_inv
     if ecs_inv:
         hyb_ops.stop_ecs_instance(ecs_inv.uuid)
+        for _ in xrange(600):
+            hyb_ops.sync_ecs_instance_from_remote(datacenter_inv.uuid)
+            ecs_inv = [e for e in hyb_ops.query_ecs_instance_local() if e.name == 'zstack-ecs-test'][0]
+            if ecs_inv.ecsStatus == "Stopped":
+                break
+            else:
+                time.sleep(1)
         hyb_ops.del_ecs_instance(ecs_inv.uuid)
     global sg_inv
     if sg_inv:
@@ -91,7 +111,7 @@ def env_recover():
     global iz_inv
     if iz_inv:
         hyb_ops.del_identity_zone_in_local(iz_inv.uuid)
-    global datacenter_inv
+
     if datacenter_inv:
         hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
     global bucket_inv

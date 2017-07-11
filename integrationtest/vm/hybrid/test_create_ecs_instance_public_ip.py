@@ -65,18 +65,26 @@ def test():
                                                            ecs_security_group_uuid=sg_inv.uuid, allocate_public_ip='true', ecs_instance_name='zstack-ecs-test')
     time.sleep(10)
     ecs_instance_local = hyb_ops.query_ecs_instance_local()
-    ecs_uuid = [e.uuid for e in ecs_instance_local if e.name == 'zstack-ecs-test'][0]
+    ecs_inv = [e for e in ecs_instance_local if e.name == 'zstack-ecs-test'][0]
     eip_local = hyb_ops.query_hybrid_eip_local()
-    ecs_eip = [e for e in eip_local if e.allocateResourceUuid == ecs_uuid][0]
+    ecs_eip = [e for e in eip_local if e.allocateResourceUuid == ecs_inv.uuid][0]
     assert len(ecs_eip.eipAddress.split('.')) >= 4
     hyb_ops.del_hybrid_eip_local(ecs_eip.uuid)
     test_util.test_pass('Create Ecs Instance with Public IP and delete Local Eip Test Success')
 
 def env_recover():
     global ecs_inv
+    global datacenter_inv
     if ecs_inv:
         time.sleep(10)
         hyb_ops.stop_ecs_instance(ecs_inv.uuid)
+        for _ in xrange(600):
+            hyb_ops.sync_ecs_instance_from_remote(datacenter_inv.uuid)
+            ecs_inv = [e for e in hyb_ops.query_ecs_instance_local() if e.name == 'zstack-ecs-test'][0]
+            if ecs_inv.ecsStatus == "Stopped":
+                break
+            else:
+                time.sleep(1)
         hyb_ops.del_ecs_instance(ecs_inv.uuid)
     global sg_inv
     if sg_inv:
@@ -93,7 +101,7 @@ def env_recover():
     global iz_inv
     if iz_inv:
         hyb_ops.del_identity_zone_in_local(iz_inv.uuid)
-    global datacenter_inv
+
     if datacenter_inv:
         hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
     global bucket_inv

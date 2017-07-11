@@ -65,9 +65,17 @@ def test():
                                                            ecs_bandwidth=5, ecs_security_group_uuid=sg_inv.uuid, ecs_instance_name='zstack-ecs-test')
     time.sleep(10)
     ecs_instance_local = hyb_ops.query_ecs_instance_local()
-    assert ecs_instance_local[0].uuid
+    ecs_inv = [e for e in ecs_instance_local if e.name == 'zstack-ecs-test'][0]
     hyb_ops.stop_ecs_instance(ecs_inv.uuid)
+    for _ in xrange(600):
+        hyb_ops.sync_ecs_instance_from_remote(datacenter_inv.uuid)
+        ecs_inv = [e for e in hyb_ops.query_ecs_instance_local() if e.name == 'zstack-ecs-test'][0]
+        if ecs_inv.ecsStatus == "Stopped":
+            break
+        else:
+            time.sleep(1)
     hyb_ops.del_ecs_instance(ecs_inv.uuid)
+    assert not [ e for e in hyb_ops.query_ecs_instance_local() if e.name == 'zstack-ecs-test']
     test_util.test_pass('Create Delete Ecs Instance Test Success')
 
 def env_recover():

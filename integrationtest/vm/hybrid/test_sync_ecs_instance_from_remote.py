@@ -78,8 +78,16 @@ def test():
 
 def env_recover():
     global ecs_inv
+    global datacenter_inv
     if ecs_inv:
         hyb_ops.stop_ecs_instance(ecs_inv.uuid)
+        for _ in xrange(600):
+            hyb_ops.sync_ecs_instance_from_remote(datacenter_inv.uuid)
+            ecs_inv = [e for e in hyb_ops.query_ecs_instance_local() if e.name == 'zstack-ecs-test'][0]
+            if ecs_inv.ecsStatus == "Stopped":
+                break
+            else:
+                time.sleep(1)
         hyb_ops.del_ecs_instance(ecs_inv.uuid)
     global sg_inv
     if sg_inv:
@@ -96,7 +104,7 @@ def env_recover():
     global iz_inv
     if iz_inv:
         hyb_ops.del_identity_zone_in_local(iz_inv.uuid)
-    global datacenter_inv
+
     if datacenter_inv:
         hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
     global bucket_inv
