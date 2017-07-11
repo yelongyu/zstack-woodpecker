@@ -93,10 +93,14 @@ def test():
     vm_inv = create_vm(image)
 
     time.sleep(60)
+    iso_path = os.environ.get('iso_path')
 
     test_util.test_dsc('Install zstack with -o -r -I')
     vm_ip = vm_inv.vmNics[0].ip
     target_file = '/root/zstack-all-in-one.tgz'
+    test_stub.test_desc('Upgrade master iso')   
+    test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
+
     test_stub.prepare_test_env(vm_inv, target_file)
     ssh_cmd = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     args = "-o -r /home/zstack-test -I eth0"
