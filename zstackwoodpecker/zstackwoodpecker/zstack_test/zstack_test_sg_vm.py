@@ -203,6 +203,10 @@ class ZstackTestSgVm(sg_header.TestSecurityGroupVm):
     def add_stub_vm(self, l3_uuid, stub_vm):
         self.stub_vm_dict[l3_uuid] = stub_vm
 
+    def delete_stub_vm(self, l3_uuid):
+        if self.stub_vm_dict.has_key(l3_uuid):
+            del self.stub_vm_dict[l3_uuid]
+
     def get_stub_vm(self, l3_uuid):
         if self.stub_vm_dict.has_key(l3_uuid):
             return self.stub_vm_dict[l3_uuid]

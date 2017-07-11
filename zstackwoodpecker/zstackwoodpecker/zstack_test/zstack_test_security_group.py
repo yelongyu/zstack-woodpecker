@@ -110,8 +110,8 @@ class ZstackTestSecurityGroup(sg_header.TestSecurityGroup):
     def get_creation_option(self):
         return self.sg_creation_option
 
-    def add_rule(self, target_rule_objs):
-        rules = net_ops.add_rules_to_security_group(self.security_group.uuid, target_rule_objs).rules
+    def add_rule(self, target_rule_objs, remote_security_group_uuid=None):
+        rules = net_ops.add_rules_to_security_group(self.security_group.uuid, target_rule_objs, remote_security_group_uuid).rules
         for rule in rules:
             if rule.protocol == inventory.TCP:
                 if rule.type == inventory.INGRESS:
