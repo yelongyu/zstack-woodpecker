@@ -219,8 +219,8 @@ def update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path):
     process_result = execute_shell_in_process(cmd, tmp_file)
     cmd = '%s "bash /opt/zstack-upgrade -r /opt/zstack.iso"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
-    cmd = '%s "zstack-ctl stop"' % ssh_cmd
-    process_result = execute_shell_in_process(cmd, tmp_file)
+    #cmd = '%s "zstack-ctl stop"' % ssh_cmd
+    #process_result = execute_shell_in_process(cmd, tmp_file)
     cmd = '%s "yum -y --disablerepo=* --enablerepo=zstack-local,qemu-kvm-ev clean all"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
     cmd = '%s "yum -y clean all"' % ssh_cmd
@@ -240,8 +240,8 @@ def update_19_iso(vm_ip, tmp_file, iso_19_path, upgrade_script_path):
     process_result = execute_shell_in_process(cmd, tmp_file)
     cmd = '%s "bash /opt/zstack-upgrade -r /opt/zstack_19.iso"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
-    cmd = '%s "zstack-ctl stop"' % ssh_cmd
-    process_result = execute_shell_in_process(cmd, tmp_file)
+    #cmd = '%s "zstack-ctl stop"' % ssh_cmd
+    #process_result = execute_shell_in_process(cmd, tmp_file)
     cmd = '%s "yum -y --disablerepo=* --enablerepo=zstack-local,qemu-kvm-ev clean all"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
     cmd = '%s "yum -y clean all"' % ssh_cmd
@@ -261,8 +261,8 @@ def update_10_iso(vm_ip, tmp_file, iso_10_path, upgrade_script_path):
     process_result = execute_shell_in_process(cmd, tmp_file)
     cmd = '%s "bash /opt/zstack-upgrade -r /opt/zstack_10.iso"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
-    cmd = '%s "zstack-ctl stop"' % ssh_cmd
-    process_result = execute_shell_in_process(cmd, tmp_file)
+    #cmd = '%s "zstack-ctl stop"' % ssh_cmd
+    #process_result = execute_shell_in_process(cmd, tmp_file)
     cmd = '%s "yum -y --disablerepo=* --enablerepo=zstack-local,qemu-kvm-ev clean all"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
     cmd = '%s "yum -y clean all"' % ssh_cmd
@@ -282,8 +282,8 @@ def update_20_iso(vm_ip, tmp_file, iso_20_path, upgrade_script_path):
     process_result = execute_shell_in_process(cmd, tmp_file)
     cmd = '%s "bash /opt/zstack-upgrade -r /opt/zstack_20.iso"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
-    cmd = '%s "zstack-ctl stop"' % ssh_cmd
-    process_result = execute_shell_in_process(cmd, tmp_file)
+    #cmd = '%s "zstack-ctl stop"' % ssh_cmd
+    #process_result = execute_shell_in_process(cmd, tmp_file)
     cmd = '%s "yum -y --disablerepo=* --enablerepo=zstack-local,qemu-kvm-ev clean all"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
     cmd = '%s "yum -y clean all"' % ssh_cmd
