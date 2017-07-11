@@ -85,8 +85,8 @@ def test():
 
     test_stub.down_host_network(host_ip, test_lib.all_scenario_config)
 
-    test_util.test_logger("wait for 360 seconds")
-    time.sleep(360)
+    test_util.test_logger("wait for 180 seconds")
+    time.sleep(180)
 
     test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
     
@@ -103,14 +103,27 @@ def test():
             break
     else:
         test_util.test_fail("VM is expected to start running on another host")
+
+    test_lib.lib_set_vm_host_l2_ip(vm_inv)
         
     #vm.check() #bug when multi-networks
-    if test_lib.lib_wait_target_up(vm_inv.vmNics[0].ip, '22', 120):
-        test_util.test_logger("%s can be connected within 120s" %(vm_inv.vmNics[0].ip))
-    elif test_lib.lib_wait_target_up(vm_inv.vmNics[1].ip, '22', 120):
-        test_util.test_logger("%s can be connected within 120s" %(vm_inv.vmNics[1].ip))
-    else:
-        test_util.test_fail("Both %s and %s can't be connected." %(vm_inv.vmNics[0].ip, vm_inv.vmNics[1].ip))
+    #if test_lib.lib_wait_target_up(vm_inv.vmNics[0].ip, '22', 120):
+    #    test_util.test_logger("%s can be connected within 120s" %(vm_inv.vmNics[0].ip))
+    #elif test_lib.lib_wait_target_up(vm_inv.vmNics[1].ip, '22', 120):
+    #    test_util.test_logger("%s can be connected within 120s" %(vm_inv.vmNics[1].ip))
+    #else:
+    #    test_util.test_fail("Both %s and %s can't be connected." %(vm_inv.vmNics[0].ip, vm_inv.vmNics[1].ip))
+    ssh_timeout = test_lib.SSH_TIMEOUT
+    test_lib.SSH_TIMEOUT = 120
+    if not test_lib.lib_ssh_vm_cmd_by_agent_with_retry(vm_host_ip, vm_inv.vmNics[0].ip, 'root', 'password', "pwd"):
+        test_lib.SSH_TIMEOUT = ssh_timeout
+        test_util.test_fail("vm can't be access by %s." %(vm_inv.vmNics[0].ip))
+
+    if not test_lib.lib_ssh_vm_cmd_by_agent_with_retry(vm_host_ip, vm_inv.vmNics[1].ip, 'root', 'password', "pwd"):
+        test_lib.SSH_TIMEOUT = ssh_timeout
+        test_util.test_fail("vm can't be access by %s." %(vm_inv.vmNics[1].ip))
+
+    test_lib.SSH_TIMEOUT = ssh_timeout
 
     vm.destroy()
 
