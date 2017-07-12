@@ -71,7 +71,6 @@ def test():
     vm.set_creation_option(vm_creation_option)
     vm.create()
 
-    test_stub.ensure_host_not_nfs_provider(host_uuid)
     vrs = test_lib.lib_find_vr_by_l3_uuid(l3_net_uuid)
     target_host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid
     for vr in vrs:
