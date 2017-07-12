@@ -21,6 +21,7 @@ host_uuid = None
 host_ip = None
 max_attempts = None
 storagechecker_timeout = None
+test_stub = test_lib.lib_get_test_stub()
 
 def test():
     global vm
@@ -70,20 +71,23 @@ def test():
     vm.set_creation_option(vm_creation_option)
     vm.create()
 
+    test_stub.ensure_host_not_nfs_provider(host_uuid)
     vrs = test_lib.lib_find_vr_by_l3_uuid(l3_net_uuid)
     target_host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid
     for vr in vrs:
         if test_lib.lib_find_host_by_vr(vr).managementIp != test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp:
             vm_ops.migrate_vm(vr.uuid, target_host_uuid)
     time.sleep(60)
-    
+
     #vm.check()
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
     host_port = test_lib.lib_get_host_port(host_ip)
     test_util.test_logger("host %s is disconnecting" %(host_ip))
     host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
-    l2_network_interface = os.environ.get('l2ManagementNetworkInterface')
+#    l2_network_interface = os.environ.get('l2ManagementNetworkInterface')
+    l2interface = test_lib.lib_get_l2s_by_vm(vm.get_vm())[0].physicalInterface
+    l2_network_interface = test_stub.get_host_l2_physicalInterface(l2interface)
     cmd = "ifdown %s && sleep 360 && ifup %s" % (l2_network_interface, l2_network_interface)
     host_username = os.environ.get('hostUsername')
     host_password = os.environ.get('hostPassword')
