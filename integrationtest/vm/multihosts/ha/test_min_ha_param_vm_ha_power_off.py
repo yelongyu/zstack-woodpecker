@@ -12,6 +12,7 @@ import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.operations.ha_operations as ha_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
+import zstackwoodpecker.operations.config_operations as conf_ops
 import apibinding.inventory as inventory
 import time
 import os
