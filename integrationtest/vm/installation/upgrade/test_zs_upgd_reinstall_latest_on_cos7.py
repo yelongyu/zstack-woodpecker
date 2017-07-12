@@ -98,7 +98,7 @@ def test():
     test_util.test_dsc('Install zstack with -o -r -I')
     vm_ip = vm_inv.vmNics[0].ip
     target_file = '/root/zstack-all-in-one.tgz'
-    test_stub.test_desc('Upgrade master iso')   
+    test_stub.test_dsc('Upgrade master iso')   
     test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
 
     test_stub.prepare_test_env(vm_inv, target_file)
