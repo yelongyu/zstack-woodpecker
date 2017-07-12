@@ -77,7 +77,7 @@ def test():
     hyb_ops.stop_ecs_instance(ecs_inv.uuid)
     for _ in xrange(600):
         hyb_ops.sync_ecs_instance_from_remote(datacenter_inv.uuid)
-        if ecs_inv.ecsStatus == "Stopped":
+        if ecs_inv.ecsStatus.lower() == "stopped":
             break
         else:
             time.sleep(1)
