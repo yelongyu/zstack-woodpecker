@@ -142,7 +142,7 @@ def attach_oss_bucket_to_ecs_datacenter(oss_bucket_uuid, datacenter_uuid, sessio
     return evt
 
 def detach_oss_bucket_to_ecs_datacenter(oss_bucket_uuid, datacenter_uuid, session_uuid=None):
-    action = api_actions.DetachOssBucketToEcsDataCenterAction()
+    action = api_actions.DetachOssBucketFromEcsDataCenterAction()
     action.ossBucketUuid = oss_bucket_uuid
     action.dataCenterUuid = datacenter_uuid 
     test_util.action_logger('Detach [Oss bucket:] %s from [Datacenter:] %s' % (oss_bucket_uuid, datacenter_uuid))
@@ -219,6 +219,46 @@ def create_ecs_vswtich_remote(vpc_uuid, identity_zone_uuid, name, cidr_block, se
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Ecs VSwitch Remote:] %s %s %s %s is created.' % (vpc_uuid, identity_zone_uuid, name, cidr_block))
     return evt.inventory
+
+def create_hybrid_eip(data_center_uuid, name, band_width, charge_type='PayByTraffic', eip_type='aliyun', session_uuid=None):
+    action = api_actions.CreateHybridEipAction()
+    action.dataCenterUuid = data_center_uuid
+    action.name = name
+    action.bandWidthMb = band_width
+    action.chargeType = charge_type
+    action.type = eip_type
+    test_util.action_logger('Create [Hybrid Eip:] %s %s %s %s' % (data_center_uuid, name, charge_type, eip_type))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[Hybrid Eip:] %s %s %s %s is created.' % (data_center_uuid, name, charge_type, eip_type))
+    return evt.inventory
+
+def del_hybrid_eip_remote(uuid, eip_type='aliyun', session_uuid=None):
+    action = api_actions.DeleteHybridEipRemoteAction()
+    action.uuid = uuid
+    action.type = eip_type
+    test_util.action_logger('Delete [Hybrid Eip Remote:] %s' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[Hybrid Eip Remote:] %s is deleted.' % uuid)
+    return evt
+
+def attach_hybrid_eip_to_ecs(eip_uuid, ecs_uuid, eip_type='aliyun', session_uuid=None):
+    action = api_actions.AttachHybridEipToEcsAction()
+    action.eipUuid = eip_uuid
+    action.ecsUuid = ecs_uuid
+    action.type = eip_type
+    test_util.action_logger('Attach [Hybrid Eip :] %s to ECS %s %s' % (eip_uuid, ecs_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[Hybrid Eip :] %s is attached to Ecs %s.' % (eip_uuid, ecs_uuid))
+    return evt
+
+def detach_hybrid_eip_to_ecs(eip_uuid, eip_type='aliyun', session_uuid=None):
+    action = api_actions.AttachHybridEipToEcsAction()
+    action.eipUuid = eip_uuid
+    action.type = eip_type
+    test_util.action_logger('Detach [Hybrid Eip :] %s from ECS   %s' % eip_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[Hybrid Eip :] %s is detached from Ecs.' % eip_uuid)
+    return evt
 
 def sync_ecs_vswitch_from_remote(data_center_uuid, session_uuid=None):
     action = api_actions.SyncEcsVSwitchFromRemoteAction()

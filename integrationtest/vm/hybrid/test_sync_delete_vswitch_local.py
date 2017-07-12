@@ -1,6 +1,6 @@
 '''
 
-Test sync & delete vswitch in local.
+New Integration Test for hybrid.
 
 @author: Legion
 '''
@@ -46,7 +46,7 @@ def test():
         if datacenter_inv:
             break
     if len(err_list) == len(regions):
-        raise hyb_ops.ApiError("All available DataCenter failed to add: %s" % err_list)
+        raise hyb_ops.ApiError("Failed to add DataCenter: %s" % err_list)
     vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', '192.168.0.0/16')
     time.sleep(5)
     iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, region_id)

@@ -1,6 +1,6 @@
 '''
 
-Test create ECS instance with console password.
+New Integration Test for hybrid.
 
 @author: Legion
 '''
@@ -39,7 +39,10 @@ def test():
     bs_uuid = image.backupStorageRefs[0].backupStorageUuid
     cond2 = res_ops.gen_query_conditions('name', '=', os.getenv('instanceOfferingName_m'))
     instance_offering = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond2)[0]
-    ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
+    try:
+        ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
+    except:
+        pass
     datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
     regions = [ i.regionId for i in datacenter_list]
     for r in regions:
@@ -74,7 +77,7 @@ def env_recover():
         for _ in xrange(600):
             hyb_ops.sync_ecs_instance_from_remote(datacenter_inv.uuid)
             ecs_inv = [e for e in hyb_ops.query_ecs_instance_local() if e.name == 'zstack-ecs-test'][0]
-            if ecs_inv.ecsStatus == "Stopped":
+            if ecs_inv.ecsStatus.lower() == "stopped":
                 break
             else:
                 time.sleep(1)

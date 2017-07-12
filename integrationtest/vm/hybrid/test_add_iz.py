@@ -39,7 +39,7 @@ def test():
         if datacenter_inv:
             break
     if len(err_list) == len(regions):
-        raise hyb_ops.ApiError("All available DataCenter failed to add: %s" % err_list)
+        raise hyb_ops.ApiError("Failed to add DataCenter: %s" % err_list)
     iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, region_id)
     zone_id = iz_list[0].zoneId
     iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, zone_id)

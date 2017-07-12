@@ -1,6 +1,6 @@
 '''
 
-Test start & stop ECS instance.
+New Integration Test for hybrid.
 
 @author: Legion
 '''
@@ -67,9 +67,10 @@ def test():
     ecs_instance_local = hyb_ops.query_ecs_instance_local()
     ecs_inv = [e for e in ecs_instance_local if e.name == 'zstack-ecs-test'][0]
     hyb_ops.reboot_ecs_instance(ecs_inv.uuid)
+    time.sleep(5)
     for _ in xrange(600):
         hyb_ops.sync_ecs_instance_from_remote(datacenter_inv.uuid)
-        if ecs_inv.ecsStatus == "Running":
+        if ecs_inv.ecsStatus.lower() == "running":
             break
         else:
             time.sleep(1)
@@ -91,7 +92,7 @@ def env_recover():
         for _ in xrange(600):
             hyb_ops.sync_ecs_instance_from_remote(datacenter_inv.uuid)
             ecs_inv = [e for e in hyb_ops.query_ecs_instance_local() if e.name == 'zstack-ecs-test'][0]
-            if ecs_inv.ecsStatus == "Stopped":
+            if ecs_inv.ecsStatus.lower() == "stopped":
                 break
             else:
                 time.sleep(1)

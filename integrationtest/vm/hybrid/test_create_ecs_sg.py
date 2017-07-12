@@ -41,7 +41,7 @@ def test():
         if datacenter_inv:
             break
     if len(err_list) == len(regions):
-        raise hyb_ops.ApiError("All available DataCenter failed to add: %s" % err_list)
+        raise hyb_ops.ApiError("Failed to add DataCenter: %s" % err_list)
     vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', '192.168.0.0/16')
     time.sleep(5)
     sg_inv = hyb_ops.create_ecs_security_group_remote('sg_for_test', vpc_inv.uuid)

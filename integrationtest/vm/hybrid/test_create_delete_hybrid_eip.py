@@ -2,7 +2,7 @@
 
 New Integration Test for hybrid.
 
-@author: Quarkonics
+@author: Legion
 '''
 
 import zstackwoodpecker.test_util as test_util
@@ -13,17 +13,16 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import time
 import os
 
+date_s = time.strftime('%m%d%S', time.localtime())
 test_obj_dict = test_state.TestStateDict()
 ks_inv = None
 datacenter_inv = None
-vpc_inv = None
-sg_inv = None
+eip_inv = None
 
 def test():
     global ks_inv
     global datacenter_inv
-    global vpc_inv
-    global sg_inv
+    global eip_inv
     datacenter_type = os.getenv('datacenterType')
     try:
         ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
@@ -42,30 +41,16 @@ def test():
             break
     if len(err_list) == len(regions):
         raise hyb_ops.ApiError("Failed to add DataCenter: %s" % err_list)
-    vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', '192.168.0.0/16')
+    eip_inv = hyb_ops.create_hybrid_eip(datacenter_inv.uuid, 'zstack-test-eip', '5')
     time.sleep(5)
-    sg_inv = hyb_ops.create_ecs_security_group_remote('sg_for_test', vpc_inv.uuid)
-    time.sleep(5)
-    sg_rule_ingress = hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'ingress', 'TCP', '445/445', '0.0.0.0/0', 'drop', 'intranet', '1')
-    sg_rule_egress = hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'egress', 'TCP', '80/80', '0.0.0.0/0', 'accept', 'intranet', '10')
-    if sg_rule_ingress:
-        hyb_ops.del_ecs_security_group_rule_remote(sg_rule_ingress.uuid)
-    if sg_rule_egress:
-        hyb_ops.del_ecs_security_group_rule_remote(sg_rule_egress.uuid)
-    test_util.test_pass('Create Delete ECS Security Group Rule Test Success')
+    hyb_ops.del_hybrid_eip_remote(eip_inv.uuid)
+    test_util.test_pass('Create Delete Hybrid Eip Test Success')
 
 def env_recover():
-    global sg_inv
-    if sg_inv:
-        time.sleep(10)
-        hyb_ops.del_ecs_security_group_remote(sg_inv.uuid)
-    global vpc_inv
-    if vpc_inv:
-        time.sleep(10)
-        hyb_ops.del_ecs_vpc_remote(vpc_inv.uuid)
     global datacenter_inv
     if datacenter_inv:
         hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
+
     global ks_inv
     if ks_inv:
         hyb_ops.del_aliyun_key_secret(ks_inv.uuid)

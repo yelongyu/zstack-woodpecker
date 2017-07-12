@@ -1,6 +1,6 @@
 '''
 
-Test attach/detach Aliyun key & secret.
+New Integration Test for hybrid.
 
 @author: Quarkonics
 '''

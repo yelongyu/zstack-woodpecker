@@ -40,7 +40,7 @@ def test():
         if datacenter_inv:
             break
     if len(err_list) == len(regions):
-        raise hyb_ops.ApiError("All available DataCenter failed to add: %s" % err_list)
+        raise hyb_ops.ApiError("Failed to add DataCenter: %s" % err_list)
     bucket_inv = hyb_ops.create_oss_bucket_remote(region_id, 'zstack-test-%s-%s' % (date_s, region_id), 'created-by-zstack-for-test')
     hyb_ops.attach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid, datacenter_inv.uuid)
     time.sleep(5)

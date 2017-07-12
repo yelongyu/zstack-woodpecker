@@ -1,6 +1,6 @@
 '''
 
-Test create ECS instance with public ip.
+New Integration Test for hybrid.
 
 @author: Legion
 '''
@@ -81,7 +81,7 @@ def env_recover():
         for _ in xrange(600):
             hyb_ops.sync_ecs_instance_from_remote(datacenter_inv.uuid)
             ecs_inv = [e for e in hyb_ops.query_ecs_instance_local() if e.name == 'zstack-ecs-test'][0]
-            if ecs_inv.ecsStatus == "Stopped":
+            if ecs_inv.ecsStatus.lower() == "stopped":
                 break
             else:
                 time.sleep(1)
