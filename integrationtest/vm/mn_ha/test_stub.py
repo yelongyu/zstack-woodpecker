@@ -88,8 +88,8 @@ def recover_host(host_vm, scenarioConfig, deploy_config):
                 nic_name = sce_ops.get_ref_l2_nic_name(l2networkref.text_, deploy_config)
                 if nic_name.find('.') >= 0 :
                     vlan = nic_name.split('.')[1]
-                    test_util.test_logger('[vm:] %s %s is created.' % (host_ip, nic_name))
-                    cmd = 'vconfig add %s %s' % (nic_name.split('.')[0], vlan)
+                    test_util.test_logger('[vm:] %s %s is created.' % (host_ip, nic_name.replace("eth","zsn")))
+                    cmd = 'vconfig add %s %s' % (nic_name.split('.')[0].replace("eth","zsn"), vlan)
                     test_lib.lib_execute_ssh_cmd(host_ip, host_config.imageUsername_, host_config.imagePassword_, cmd)
     return True
 

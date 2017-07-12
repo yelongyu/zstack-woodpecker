@@ -1,6 +1,5 @@
 '''
-New Integration Test for KVM VR&VM none network disconnect and connected again, check vm stop, VR start again.
-In addition, this test is sepcific for nfs and local.
+New Integration Test for KVM VM ha with VR on the same host never stop mode. In addition, this test is sepcific for 2nfs.
 @author: turnyouon
 '''
 
@@ -31,7 +30,7 @@ def test():
     global max_attempts
     global storagechecker_timeout
 
-    must_ps_list = [inventory.LOCAL_STORAGE_TYPE, inventory.NFS_PRIMARY_STORAGE_TYPE]
+    must_ps_list = [inventory.NFS_PRIMARY_STORAGE_TYPE]
     test_lib.skip_test_if_any_ps_not_deployed(must_ps_list)
 
     if test_lib.lib_get_ha_enable() != 'true':
@@ -40,6 +39,7 @@ def test():
     vm_creation_option = test_util.VmOption()
     image_name = os.environ.get('imageName_net')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    #l3_name = os.environ.get('l3NoVlanNetworkName1')
     l3_name = os.environ.get('l3VlanNetworkName1')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     test_lib.clean_up_all_vr()
@@ -58,57 +58,65 @@ def test():
     conditions = res_ops.gen_query_conditions('status', '=', 'Connected', conditions)
     conditions = res_ops.gen_query_conditions('managementIp', '!=', mn_ip, conditions)
     #for vr_host_ip in vr_host_ips:
-    #    conditions = res_ops.gen_query_conditions('managementIp', '!=', vr_host_ip, conditions)
+    #    conditions = res_ops.gen_query_conditions('managementIp', '=', vr_host_ip, conditions)
+    #    break
     host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].uuid
     vm_creation_option.set_host_uuid(host_uuid)
     vm_creation_option.set_l3_uuids([l3_net_uuid])
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
-    vm_creation_option.set_name('ls_vm_none_status')
-    vm2 = test_vm_header.ZstackTestVm()
-    vm2.set_creation_option(vm_creation_option)
-    vm2.create()
+    vm_creation_option.set_name('multihost_basic_vm')
+    vm = test_vm_header.ZstackTestVm()
+    vm.set_creation_option(vm_creation_option)
+    vm.create()
 
     test_stub.ensure_host_not_nfs_provider(host_uuid)
     vrs = test_lib.lib_find_vr_by_l3_uuid(l3_net_uuid)
-    target_host_uuid = test_lib.lib_find_host_by_vm(vm2.get_vm()).uuid
+    target_host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid
     for vr in vrs:
-        if test_lib.lib_find_host_by_vr(vr).managementIp != test_lib.lib_find_host_by_vm(vm2.get_vm()).managementIp:
+        if test_lib.lib_find_host_by_vr(vr).managementIp != test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp:
             vm_ops.migrate_vm(vr.uuid, target_host_uuid)
     time.sleep(60)
 
     #vm.check()
-    host_ip = test_lib.lib_find_host_by_vm(vm2.get_vm()).managementIp
+    host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
+    host_port = test_lib.lib_get_host_port(host_ip)
     test_util.test_logger("host %s is disconnecting" %(host_ip))
+    host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid
+    ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
+#    l2_network_interface = os.environ.get('l2ManagementNetworkInterface')
+    l2interface = test_lib.lib_get_l2s_by_vm(vm.get_vm())[0].physicalInterface
+    l2_network_interface = test_stub.get_host_l2_nic_name(l2interface)
+    cmd = "ifdown %s && sleep 360 && ifup %s" % (l2_network_interface, l2_network_interface)
+    host_username = os.environ.get('hostUsername')
+    host_password = os.environ.get('hostPassword')
+    rsp = test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd, 360)
+    if not rsp:
+	test_util.test_logger("host is expected to shutdown after its network down for a while")
 
-    test_stub.down_host_network(host_ip, test_lib.all_scenario_config)
+    #test_util.test_logger("wait for 600 seconds")
+    test_util.test_logger("wait for 180 seconds")
+    time.sleep(180)
+    vm.update()
+    if test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp == host_ip:
+	test_util.test_fail("VM is expected to start running on another host")
+    vm.set_state(vm_header.RUNNING)
+    vm.check()
+    vm.destroy()
 
-    cond = res_ops.gen_query_conditions('name', '=', 'ls_vm_none_status')
-    cond = res_ops.gen_query_conditions('uuid', '=', vm2.vm.uuid, cond)
-
-    for i in range(0, 180):
-        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Unknown":
-            vm_stop_time = i
-            test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
-            break
-        time.sleep(1)
-
-    if not vm_stop_time:
-        vm_stop_time = 180
-
-    for i in range(vm_stop_time, 180):
-        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Starting":
-            break
-        time.sleep(1)
-    else:
-        test_util.test_fail("vm has not been changed to running as expected within 180s.")
-
-
-    test_util.test_pass('Test VM none change to Stopped within 180s Success')
+    cmd = 'PORT=%s bash -ex %s %s' % (host_port, os.environ.get('hostRecoverScript'), host_ip)
+    test_util.test_logger(cmd)
+    os.system(cmd)
+    host_ops.reconnect_host(host_uuid)
+    test_util.test_pass('Test VM ha on host failure Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     global vm
+    global host_uuid
+    global host_ip
+    global max_attempts
+    global storagechecker_timeout
 
     if vm:
         try:
@@ -117,8 +125,5 @@ def error_cleanup():
             pass
 
 
-def env_recover():
-    try:
-        test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
-    except:
-        pass
+    os.system('PORT=%s bash -ex %s %s' % (host_port, os.environ.get('hostRecoverScript'), host_ip))
+    host_ops.reconnect_host(host_uuid)

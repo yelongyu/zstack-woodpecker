@@ -621,3 +621,13 @@ def skip_if_not_storage_network_separate(scenarioConfig):
                     break
     if not is_storage_network_separated:
         test_util.test_skip("not found separate network in scenario config.")
+
+
+def get_host_l2_nic_name(l2interface):
+    if test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
+        l2_network_interface = l2interface.replace("eth", "zsn")
+        return l2_network_interface
+    else:
+        return l2interface
+
+    
