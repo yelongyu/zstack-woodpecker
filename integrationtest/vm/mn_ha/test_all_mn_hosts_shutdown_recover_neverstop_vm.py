@@ -84,6 +84,7 @@ def test():
 
     test_util.test_logger("Delay 60s and then check if the vm is running")
     time.sleep(60)
+    vm.update()
     vm.check()
     vm.destroy()
     test_util.test_pass('Check Never Stop VM Test Success')
