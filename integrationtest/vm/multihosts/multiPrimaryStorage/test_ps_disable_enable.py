@@ -62,8 +62,8 @@ def test():
             test_obj_dict.add_vm(vm)
             test_util.test_fail("CRITICAL ERROR: Can create VM in disabled ps")
 
-        test_util.test_dsc("Create 5 vms and check all should be in enabled PS")
-        vm_list = test_stub.create_multi_vms(name_prefix='test_vm', count=5)
+        test_util.test_dsc("Create 2 vms and check all should be in enabled PS")
+        vm_list = test_stub.create_multi_vms(name_prefix='test_vm', count=2)
         for vm in vm_list:
             test_obj_dict.add_vm(vm)
         for vm in vm_list:
