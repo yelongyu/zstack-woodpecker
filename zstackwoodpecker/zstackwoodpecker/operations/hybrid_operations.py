@@ -5,7 +5,7 @@ All ldap operations for test.
 @author: quarkonics
 '''
 
-import apibinding.api.ApiError as ApiError
+from apibinding.api import ApiError
 import apibinding.inventory as inventory
 import apibinding.api_actions as api_actions
 import zstackwoodpecker.test_util as test_util
