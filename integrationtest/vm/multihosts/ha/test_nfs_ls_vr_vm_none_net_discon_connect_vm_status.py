@@ -65,26 +65,26 @@ def test():
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
     vm_creation_option.set_name('ls_vm_none_status')
-    vm2 = test_vm_header.ZstackTestVm()
-    vm2.set_creation_option(vm_creation_option)
-    vm2.create()
+    vm = test_vm_header.ZstackTestVm()
+    vm.set_creation_option(vm_creation_option)
+    vm.create()
 
     test_stub.ensure_host_not_nfs_provider(host_uuid)
     vrs = test_lib.lib_find_vr_by_l3_uuid(l3_net_uuid)
-    target_host_uuid = test_lib.lib_find_host_by_vm(vm2.get_vm()).uuid
+    target_host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid
     for vr in vrs:
-        if test_lib.lib_find_host_by_vr(vr).managementIp != test_lib.lib_find_host_by_vm(vm2.get_vm()).managementIp:
+        if test_lib.lib_find_host_by_vr(vr).managementIp != test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp:
             vm_ops.migrate_vm(vr.uuid, target_host_uuid)
     time.sleep(60)
 
     #vm.check()
-    host_ip = test_lib.lib_find_host_by_vm(vm2.get_vm()).managementIp
+    host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
     test_util.test_logger("host %s is disconnecting" %(host_ip))
 
     test_stub.down_host_network(host_ip, test_lib.all_scenario_config)
 
     cond = res_ops.gen_query_conditions('name', '=', 'ls_vm_none_status')
-    cond = res_ops.gen_query_conditions('uuid', '=', vm2.vm.uuid, cond)
+    cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid, cond)
 
     for i in range(0, 180):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Unknown":
@@ -97,12 +97,13 @@ def test():
         vm_stop_time = 180
 
     for i in range(vm_stop_time, 180):
-        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Starting":
+        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Running":
             break
         time.sleep(1)
     else:
         test_util.test_fail("vm has not been changed to running as expected within 180s.")
 
+    vm.destroy()
 
     test_util.test_pass('Test VM none change to Stopped within 180s Success')
 
