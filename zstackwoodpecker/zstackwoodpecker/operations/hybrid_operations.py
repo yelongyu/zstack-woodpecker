@@ -334,6 +334,30 @@ def del_router_entry_remote(uuid, session_uuid=None):
     test_util.test_logger('[Router Entry Remote:] %s is deleted.' % (uuid))
     return evt
 
+def del_vpc_vpn_gateway_local(uuid, session_uuid=None):
+    action = api_actions.DeleteVpcVpnGatewayLocalAction()
+    action.uuid = uuid
+    test_util.action_logger('Delete [Router Entry Remote:] %s ' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[Router Entry Remote:] %s is deleted.' % (uuid))
+    return evt
+
+def del_vpc_vpn_connection_local(uuid, session_uuid=None):
+    action = api_actions.DeleteVpcVpnConnectionLocalAction()
+    action.uuid = uuid
+    test_util.action_logger('Delete [Router Entry Remote:] %s ' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[Router Entry Remote:] %s is deleted.' % (uuid))
+    return evt
+
+def del_vpc_user_vpn_gateway_local(uuid, session_uuid=None):
+    action = api_actions.DeleteVpcUserVpnGatewayLocalAction()
+    action.uuid = uuid
+    test_util.action_logger('Delete [Router Entry Remote:] %s ' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[Router Entry Remote:] %s is deleted.' % (uuid))
+    return evt
+
 def create_ecs_security_group_remote(name, vpc_uuid, session_uuid=None):
     action = api_actions.CreateEcsSecurityGroupRemoteAction()
     action.name = name
@@ -364,6 +388,27 @@ def sync_security_group_from_remote(ecs_vpc_uuid, session_uuid=None):
     test_util.action_logger('Sync [Security Group From Remote:] %s' % (ecs_vpc_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt
+
+def sync_vpc_vpn_gateway_from_remote(data_center_uuid, session_uuid=None):
+    action = api_actions.SyncVpcVpnGatewayFromRemoteAction()
+    action.dataCenterUuid = data_center_uuid
+    test_util.action_logger('Sync [Vpc Vpn Gateway From Remote:] %s' % (data_center_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    return evt.inventories
+
+def sync_vpc_user_vpn_gateway_from_remote(data_center_uuid, session_uuid=None):
+    action = api_actions.SyncVpcUserVpnGatewayFromRemoteAction()
+    action.dataCenterUuid = data_center_uuid
+    test_util.action_logger('Sync [Vpc User Vpn Gateway From Remote:] %s' % (data_center_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    return evt.inventories
+
+def sync_vpc_vpn_connection_from_remote(data_center_uuid, session_uuid=None):
+    action = api_actions.SyncVpcVpnConnectionFromRemoteAction()
+    action.dataCenterUuid = data_center_uuid
+    test_util.action_logger('Sync [Vpc Vpn Connection From Remote:] %s' % (data_center_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    return evt.inventories
 
 def del_ecs_security_group_in_local(uuid, session_uuid=None):
     action = api_actions.DeleteEcsSecurityGroupInLocalAction()
@@ -560,6 +605,27 @@ def query_hybrid_eip_local(session_uuid=None):
     action = api_actions.QueryHybridEipFromLocalAction()
     action.conditions = []
     test_util.action_logger('Query Hybrid Eip from local')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def query_vpc_vpn_gateway_local(session_uuid=None):
+    action = api_actions.QueryVpcVpnGatewayFromLocalAction()
+    action.conditions = []
+    test_util.action_logger('Query Vpc Vpn Gate from local')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def query_vpc_user_vpn_gateway_local(session_uuid=None):
+    action = api_actions.QueryVpcUserVpnGatewayFromLocalAction()
+    action.conditions = []
+    test_util.action_logger('Query Vpc User Vpn Gate from local')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def query_vpc_vpn_connection_local(session_uuid=None):
+    action = api_actions.QueryVpcVpnConnectionFromLocalAction()
+    action.conditions = []
+    test_util.action_logger('Query Vpc Vpn Gate from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
