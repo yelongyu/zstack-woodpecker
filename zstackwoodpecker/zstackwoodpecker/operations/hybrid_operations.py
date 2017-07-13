@@ -252,13 +252,21 @@ def attach_hybrid_eip_to_ecs(eip_uuid, ecs_uuid, eip_type='aliyun', session_uuid
     return evt
 
 def detach_hybrid_eip_to_ecs(eip_uuid, eip_type='aliyun', session_uuid=None):
-    action = api_actions.AttachHybridEipToEcsAction()
+    action = api_actions.DetachHybridEipFromEcsAction()
     action.eipUuid = eip_uuid
     action.type = eip_type
     test_util.action_logger('Detach [Hybrid Eip :] %s from ECS   %s' % eip_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Hybrid Eip :] %s is detached from Ecs.' % eip_uuid)
     return evt
+
+def sync_hybrid_eip_from_remote(data_center_uuid, eip_type='aliyun', session_uuid=None):
+    action = api_actions.SyncHybridEipFromRemoteAction()
+    action.dataCenterUuid = data_center_uuid
+    action.type = eip_type
+    test_util.action_logger('Sync [Hybrid Eip From Remote:] %s' % (data_center_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    return evt.inventories
 
 def sync_ecs_vswitch_from_remote(data_center_uuid, session_uuid=None):
     action = api_actions.SyncEcsVSwitchFromRemoteAction()
@@ -270,9 +278,9 @@ def sync_ecs_vswitch_from_remote(data_center_uuid, session_uuid=None):
 def del_ecs_vswitch_in_local(uuid, session_uuid=None):
     action = api_actions.DeleteEcsVSwitchInLocalAction()
     action.uuid = uuid
-    test_util.action_logger('Delete [Ecs VSwitch in Local:] %s' % (uuid))
+    test_util.action_logger('Delete [Ecs VSwitch: %s] in Local' % (uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    test_util.test_logger('[Ecs VSwitch in local:] %s is deleted.' % uuid)
+    test_util.test_logger('[Ecs VSwitch: %s] in Local is deleted.' % uuid)
     return evt
 
 def del_ecs_vswitch_remote(uuid, session_uuid=None):
@@ -544,14 +552,14 @@ def query_datacenter_local(session_uuid=None):
 def query_ecs_security_group_local(session_uuid=None):
     action = api_actions.QueryEcsSecurityGroupFromLocalAction()
     action.conditions = []
-    test_util.action_logger('Query DataCenter from local')
+    test_util.action_logger('Query Ecs Security Group from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
 def query_hybrid_eip_local(session_uuid=None):
     action = api_actions.QueryHybridEipFromLocalAction()
     action.conditions = []
-    test_util.action_logger('Query DataCenter from local')
+    test_util.action_logger('Query Hybrid Eip from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
