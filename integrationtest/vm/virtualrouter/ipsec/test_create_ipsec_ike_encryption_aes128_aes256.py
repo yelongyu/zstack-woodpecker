@@ -9,7 +9,6 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.ipsec_operations as ipsec_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
-import zstackwoodpecker.operations.resource_operations as res_ops
 import os
 
 test_stub = test_lib.lib_get_test_stub()
