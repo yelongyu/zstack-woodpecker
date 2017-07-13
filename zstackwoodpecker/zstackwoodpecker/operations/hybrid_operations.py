@@ -58,7 +58,7 @@ def get_oss_bucket_name_from_remote(uuid, session_uuid=None):
 
 def add_oss_bucket_from_remote(region_id, oss_bucket_name, session_uuid=None):
     action = api_actions.AddOssBucketFromRemoteAction()
-    action.regionid = region_id
+    action.regionId = region_id
     action.bucketName = oss_bucket_name
     test_util.action_logger('Add [Oss Bucket From Remote:] %s %s' % (region_id, oss_bucket_name))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
@@ -567,6 +567,13 @@ def query_aliyun_virtual_router_local(session_uuid=None):
     action = api_actions.QueryAliyunVirtualRouterFromLocalAction()
     action.conditions = []
     test_util.action_logger('Query Aliyun Virtual Router from local')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def query_oss_bucket_file_name(session_uuid=None):
+    action = api_actions.QueryOssBucketFileNameAction()
+    action.conditions = []
+    test_util.action_logger('Query Oss Bucket File Name')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
