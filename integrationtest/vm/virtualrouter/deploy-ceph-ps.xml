@@ -65,11 +65,12 @@
   <instanceOfferings>
     <instanceOffering name="$instanceOfferingName_s"
       description="Test" memoryCapacity="$instanceOfferingMemory_s" cpuNum="$instanceOfferingCpuNum_s"
-      />
+      cpuSpeed="$instanceOfferingCpuSpeed_s" />
     <virtualRouterOffering name="$virtualRouterOfferingName_s"
-      memoryCapacity="$virtualRouterOfferingMemory_s" cpuNum="$virtualRouterOfferingCpuNum_s" isDefault="true">
+      memoryCapacity="$virtualRouterOfferingMemory_s" cpuSpeed="$virtualRouterOfferingCpuSpeed_s" cpuNum="$virtualRouterOfferingCpuNum_s" isDefault="true">
       <zoneRef>$zoneName</zoneRef>
-      <managementL3NetworkRef>$l3ManagementNetworkName</managementL3NetworkRef>
+      <!--<managementL3NetworkRef>$l3ManagementNetworkName</managementL3NetworkRef>-->
+      <managementL3NetworkRef>$l3PublicNetworkName</managementL3NetworkRef>
       <publicL3NetworkRef>$l3PublicNetworkName</publicL3NetworkRef>
       <imageRef>$virtualRouterImageName</imageRef>
     </virtualRouterOffering>
@@ -141,7 +142,7 @@
           </hosts>
           <primaryStorageRef>$cephPrimaryStorageName</primaryStorageRef>
           <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
-          <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
+          <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
           <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
           <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
           <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
