@@ -299,10 +299,10 @@ def del_ecs_instance_local(uuid, session_uuid=None):
     test_util.test_logger('[Ecs Instance in Local:] %s is deleted.' % (uuid))
     return evt
 
-def sync_virtual_router_from_remote(vpc_uuid, session_uuid=None):
+def sync_aliyun_virtual_router_from_remote(vpc_uuid, session_uuid=None):
     action = api_actions.SyncAliyunVirtualRouterFromRemoteAction()
-    action.uuid = vpc_uuid
-    test_util.action_logger('Sync [VirtualRouter From Remote:] %s' % (vpc_uuid))
+    action.vpcUuid = vpc_uuid
+    test_util.action_logger('Sync [Aliyun VirtualRouter From Remote:] %s' % (vpc_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt
 
@@ -560,6 +560,13 @@ def query_hybrid_eip_local(session_uuid=None):
     action = api_actions.QueryHybridEipFromLocalAction()
     action.conditions = []
     test_util.action_logger('Query Hybrid Eip from local')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def query_aliyun_virtual_router_local(session_uuid=None):
+    action = api_actions.QueryAliyunVirtualRouterFromLocalAction()
+    action.conditions = []
+    test_util.action_logger('Query Aliyun Virtual Router from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
