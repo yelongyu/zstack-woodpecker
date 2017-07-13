@@ -100,7 +100,7 @@
       description="virtual router image" 
       mediaType="$rootMediaType" format="$rootImageFormat" 
       username="$vrImageUsername" password="$vrImagePassword"
-      url="$virtualRouterImageUrl">
+      url="$virtualRouterImageUrl" system="True">
       <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
     </image>
     <image name="$imageName_windows" 

@@ -114,7 +114,7 @@
         description="virtual router image" format="$rootImageFormat"
         username="$vrImageUsername" password="$vrImagePassword"
         mediaType="$rootMediaType"
-        hypervisorType='KVM' url="$virtualRouterImageUrl">
+        hypervisorType='KVM' url="$virtualRouterImageUrl" system="True">
         <backupStorageRef>$fusionstorBackupStorageName</backupStorageRef>
       </image>
     </images>

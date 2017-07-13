@@ -85,7 +85,7 @@
 			<backupStorageRef>$sftpBackupStorageName</backupStorageRef>
 		</image>
 		<image name="$virtualRouterImageName" description="virtual router image" format="$imageFormat" username="$vrImageUsername" password="$vrImagePassword"
-			hypervisorType='$imageHypervisorType' url="$virtualRouterImageUrl">
+			hypervisorType='$imageHypervisorType' url="$virtualRouterImageUrl" system="True">
 			<backupStorageRef>$sftpBackupStorageName</backupStorageRef>
 		</image>
 	</images>

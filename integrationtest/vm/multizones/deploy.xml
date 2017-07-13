@@ -117,7 +117,7 @@
     <image name="$virtualRouterImageName" 
       description="virtual router image" format="$rootImageFormat" mediaType="$rootMediaType"
       username="$vrImageUsername" password="$vrImagePassword"
-      hypervisorType='KVM' url="$virtualRouterImageUrl">
+      hypervisorType='KVM' url="$virtualRouterImageUrl" system="True">
       <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
     </image>
   </images>

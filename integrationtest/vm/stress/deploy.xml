@@ -110,7 +110,7 @@
         <image name="$virtualRouterImageName" description="virtual router image"
             format="$imageFormat" username="$vrImageUsername" 
             password="$vrImagePassword"	hypervisorType='$imageHypervisorType' 
-            url="$virtualRouterImageUrl">
+            url="$virtualRouterImageUrl" system="True">
 			<backupStorageRef>$sftpBackupStorageName</backupStorageRef>
 		</image>
 	</images>
