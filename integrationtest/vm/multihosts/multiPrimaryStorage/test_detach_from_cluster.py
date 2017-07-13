@@ -8,6 +8,7 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import random
+import apibinding.inventory as inventory
 
 _config_ = {
         'timeout' : 3000,
@@ -52,7 +53,7 @@ def test():
 
 
     for vm in env.get_vm_list_from_ps(selected_ps):
-        assert vm.get_vm().state == 'Stopped'
+        assert vm.get_vm().state == inventory.STOPPED
 
     try:
         vm.start()
@@ -62,7 +63,7 @@ def test():
         test_util.test_fail("CRITICAL ERROR: Can start VM in ps not attached cluster")
 
     for vm in env.get_vm_list_from_ps(another_ps):
-        assert vm.get_vm().state == 'Running'
+        assert vm.get_vm().state == inventory.RUNNING
 
     test_util.test_dsc("Try to Create vm in detached ps")
     try:

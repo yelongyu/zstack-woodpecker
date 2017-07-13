@@ -5,10 +5,10 @@
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
-import apibinding.inventory as inventory
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import time
+import apibinding.inventory as inventory
 
 _config_ = {
         'timeout' : 3000,
@@ -66,8 +66,8 @@ def test():
         else:
             test_util.test_fail("VM2 is not in Stopping or Stopped status!!!")
 
-    assert vm1.get_vm().state == 'Running'
-    assert vm2.get_vm().state == 'Stopped'
+    assert vm1.get_vm().state == inventory.RUNNING
+    assert vm2.get_vm().state == inventory.STOPPED
 
     try:
         vm2.start()

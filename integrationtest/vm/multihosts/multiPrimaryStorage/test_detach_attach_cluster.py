@@ -8,6 +8,7 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import random
+import apibinding.inventory as inventory
 
 _config_ = {
         'timeout' : 3000,
@@ -54,10 +55,10 @@ def test():
         vm.update()
 
     for vm in env.get_vm_list_from_ps(selected_ps):
-        assert vm.get_vm().state == 'Stopped'
+        assert vm.get_vm().state == inventory.STOPPED
 
     for vm in env.get_vm_list_from_ps(another_ps):
-        assert vm.get_vm().state == 'Running'
+        assert vm.get_vm().state == inventory.RUNNING
 
     test_util.test_dsc("Recover the vm in the selected ps")
     for vm in env.get_vm_list_from_ps(selected_ps):
@@ -65,7 +66,7 @@ def test():
     for vm in env.get_vm_list_from_ps(selected_ps):
         vm.check()
         vm.update()
-        assert vm.get_vm().state == 'Running'
+        assert vm.get_vm().state == inventory.RUNNING
 
     test_util.test_dsc("Create one vm in selected ps")
     vm = test_stub.create_multi_vms(name_prefix='test-vm', count=1, ps_uuid=selected_ps.uuid)[0]

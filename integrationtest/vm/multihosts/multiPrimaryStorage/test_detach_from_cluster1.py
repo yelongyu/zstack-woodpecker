@@ -8,6 +8,7 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import random
+import apibinding.inventory as inventory
 
 _config_ = {
         'timeout' : 3000,
@@ -45,7 +46,7 @@ def test():
         vm.update()
 
     for vm in first_ps_vm_list + second_ps_vm_list:
-        assert vm.get_vm().state == 'Stopped'
+        assert vm.get_vm().state == inventory.STOPPED
 
     test_util.test_dsc("Try to Create one vm")
     try:
@@ -68,7 +69,7 @@ def test():
         vm.update()
 
     for vm in first_ps_vm_list + second_ps_vm_list:
-        assert vm.get_vm().state == 'Running'
+        assert vm.get_vm().state == inventory.RUNNING
 
     vm = test_stub.create_multi_vms(name_prefix='test-vm', count=1)[0]
     test_obj_dict.add_vm(vm)

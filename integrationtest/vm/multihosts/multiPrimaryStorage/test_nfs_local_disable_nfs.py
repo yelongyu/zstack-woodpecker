@@ -50,7 +50,7 @@ def test():
 
     test_util.test_dsc("make sure VM till OK and running")
     vm.check()
-    assert vm.get_vm().state == 'Running'
+    assert vm.get_vm().state == inventory.RUNNING
 
     try_create_volume_in_nfs(nfs_ps)
 

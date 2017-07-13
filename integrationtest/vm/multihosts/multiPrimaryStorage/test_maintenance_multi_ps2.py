@@ -9,6 +9,7 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.ha_operations as ha_ops
 import time
+import apibinding.inventory as inventory
 
 
 _config_ = {
@@ -68,10 +69,10 @@ def test():
     for vm in vm_list:
         vm.update()
 
-    assert vm1.get_vm().state == 'Running'
-    assert vm2.get_vm().state == 'Stopped'
-    assert vm3.get_vm().state == 'Stopped'
-    assert vm4.get_vm().state == 'Stopped'
+    assert vm1.get_vm().state == inventory.RUNNING
+    assert vm2.get_vm().state == inventory.STOPPED
+    assert vm3.get_vm().state == inventory.STOPPED
+    assert vm4.get_vm().state == inventory.STOPPED
 
     for vm in [vm2, vm3, vm4]:
         try_start_vm(vm)
