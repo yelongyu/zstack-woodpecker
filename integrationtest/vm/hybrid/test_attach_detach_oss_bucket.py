@@ -41,10 +41,10 @@ def test():
             break
     if len(err_list) == len(regions):
         raise hyb_ops.ApiError("Failed to add DataCenter: %s" % err_list)
-    bucket_inv = hyb_ops.create_oss_bucket_remote(region_id, 'zstack-test-%s-%s' % (date_s, region_id), 'created-by-zstack-for-test')
-    hyb_ops.attach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid, datacenter_inv.uuid)
+    bucket_inv = hyb_ops.create_oss_bucket_remote(datacenter_inv.uuid, 'zstack-test-%s-%s' % (date_s, region_id), 'created-by-zstack-for-test')
+    hyb_ops.attach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid)
     time.sleep(5)
-    hyb_ops.detach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid, datacenter_inv.uuid)
+    hyb_ops.detach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid)
     test_util.test_pass('Create Attach Detach OSS Bucket Test Success')
 
 def env_recover():

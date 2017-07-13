@@ -32,7 +32,8 @@ def test():
     for r in regions:
         if 'shanghai' in r:
             region_id = r
-    bucket_inv = hyb_ops.add_oss_bucket_from_remote(region_id, remote_bucket_name)
+    datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
+    bucket_inv = hyb_ops.add_oss_bucket_from_remote(datacenter_inv.uuid, remote_bucket_name)
     bucket_local = hyb_ops.query_oss_bucket_file_name()
     bucket_name_list = [i.bucketName for i in bucket_local]
     assert remote_bucket_name in bucket_name_list

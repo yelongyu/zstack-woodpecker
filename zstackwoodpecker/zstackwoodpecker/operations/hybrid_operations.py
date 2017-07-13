@@ -50,19 +50,20 @@ def detach_aliyun_key(uuid, session_uuid=None):
     test_util.test_logger('[aliyun key:] %s is detached.' % uuid)
     return evt
 
-def get_oss_bucket_name_from_remote(uuid, session_uuid=None):
+def get_oss_bucket_name_from_remote(data_center_uuid, session_uuid=None):
     action = api_actions.GetOssBucketNameFromRemoteAction()
+    action.dataCenterUuid = data_center_uuid
     test_util.action_logger('get Oss Bucket Name from Remote')
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt.inventories
 
-def add_oss_bucket_from_remote(region_id, oss_bucket_name, session_uuid=None):
+def add_oss_bucket_from_remote(data_center_uuid, oss_bucket_name, session_uuid=None):
     action = api_actions.AddOssBucketFromRemoteAction()
-    action.regionId = region_id
+    action.dataCenterUuid = data_center_uuid
     action.bucketName = oss_bucket_name
-    test_util.action_logger('Add [Oss Bucket From Remote:] %s %s' % (region_id, oss_bucket_name))
+    test_util.action_logger('Add [Oss Bucket From Remote:] %s %s' % (data_center_uuid, oss_bucket_name))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    test_util.test_logger('[Oss Bucket:] %s %s is added.' % (region_id, oss_bucket_name))
+    test_util.test_logger('[Oss Bucket:] %s %s is added.' % (data_center_uuid, oss_bucket_name))
     return evt.inventory
 
 def del_oss_bucket_name_in_local(uuid, session_uuid=None):
@@ -73,14 +74,14 @@ def del_oss_bucket_name_in_local(uuid, session_uuid=None):
     test_util.test_logger('[Oss File Bucket Name in local:] %s is deleted.' % (uuid))
     return evt
 
-def create_oss_bucket_remote(region_id, bucket_name, description, session_uuid=None):
+def create_oss_bucket_remote(data_center_uuid, bucket_name, description, session_uuid=None):
     action = api_actions.CreateOssBucketRemoteAction()
-    action.regionId = region_id
+    action.dataCenterUuid = data_center_uuid
     action.bucketName = bucket_name
     action.description = description
-    test_util.action_logger('Create [Oss Bucket Name Remote:] %s %s' % (region_id, bucket_name))
+    test_util.action_logger('Create [Oss Bucket Name Remote:] %s %s' % (data_center_uuid, bucket_name))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    test_util.test_logger('[Oss Bucket Name Remote:] %s %s is created.' % (region_id, bucket_name))
+    test_util.test_logger('[Oss Bucket Name Remote:] %s %s is created.' % (data_center_uuid, bucket_name))
     return evt.inventory
 
 def del_oss_bucket_remote(uuid, session_uuid=None):
@@ -132,22 +133,22 @@ def del_datacenter_in_local(uuid, session_uuid=None):
     test_util.test_logger('[datacenter in local:] %s is deleted.' % uuid)
     return evt
 
-def attach_oss_bucket_to_ecs_datacenter(oss_bucket_uuid, datacenter_uuid, session_uuid=None):
+def attach_oss_bucket_to_ecs_datacenter(oss_bucket_uuid, session_uuid=None):
     action = api_actions.AttachOssBucketToEcsDataCenterAction()
     action.ossBucketUuid = oss_bucket_uuid
-    action.dataCenterUuid = datacenter_uuid 
-    test_util.action_logger('Attach [Oss bucket:] %s to [Datacenter:] %s' % (oss_bucket_uuid, datacenter_uuid))
+#     action.dataCenterUuid = datacenter_uuid 
+    test_util.action_logger('Attach [Oss bucket:] %s to Datacenter' % oss_bucket_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    test_util.test_logger('[Oss bucket:] %s is attached to [Datacenter:] %s.' % (oss_bucket_uuid, datacenter_uuid))
+    test_util.test_logger('[Oss bucket:] %s is attached to Datacenter.' % oss_bucket_uuid)
     return evt
 
-def detach_oss_bucket_to_ecs_datacenter(oss_bucket_uuid, datacenter_uuid, session_uuid=None):
+def detach_oss_bucket_to_ecs_datacenter(oss_bucket_uuid, session_uuid=None):
     action = api_actions.DetachOssBucketFromEcsDataCenterAction()
     action.ossBucketUuid = oss_bucket_uuid
-    action.dataCenterUuid = datacenter_uuid 
-    test_util.action_logger('Detach [Oss bucket:] %s from [Datacenter:] %s' % (oss_bucket_uuid, datacenter_uuid))
+#     action.dataCenterUuid = datacenter_uuid 
+    test_util.action_logger('Detach [Oss bucket:] %s from Datacenter' % oss_bucket_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    test_util.test_logger('[Oss bucket:] %s is detached to [Datacenter:] %s.' % (oss_bucket_uuid, datacenter_uuid))
+    test_util.test_logger('[Oss bucket:] %s is detached from Datacenter.' % oss_bucket_uuid)
     return evt
 
 def get_identity_zone_from_remote(datacenter_type, region_id, session_uuid=None):
@@ -345,7 +346,7 @@ def del_vpc_vpn_gateway_local(uuid, session_uuid=None):
 def del_vpc_vpn_connection_local(uuid, session_uuid=None):
     action = api_actions.DeleteVpcVpnConnectionLocalAction()
     action.uuid = uuid
-    test_util.action_logger('Delete [Router Entry Remote:] %s ' % (uuid))
+    test_util.action_logger('Delete [Vpc Vpn Gateway Local:] %s ' % (uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Router Entry Remote:] %s is deleted.' % (uuid))
     return evt

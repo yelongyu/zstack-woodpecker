@@ -32,7 +32,7 @@ def test():
         if 'shanghai' in r:
             region_id = r
 #     region_id = datacenter_list[0].regionId
-    bucket_inv = hyb_ops.create_oss_bucket_remote(region_id, 'zstack-test-%s-%s' % (date_s, region_id), 'created-by-zstack-for-test')
+    bucket_inv = hyb_ops.create_oss_bucket_remote(datacenter_inv.uuid, 'zstack-test-%s-%s' % (date_s, region_id), 'created-by-zstack-for-test')
     test_util.test_pass('Create OSS Bucket Test Success')
 
 
