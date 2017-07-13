@@ -9,6 +9,7 @@ import apibinding.inventory as inventory
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
+import random
 
 _config_ = {
         'timeout' : 3000,
@@ -24,25 +25,29 @@ disabled_ps_list = []
 def test():
     local_nfs_env = False
     ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
+    if len(ps_list) < 2:
+        test_util.test_skip("Skip test if not multi-ps environment")
+
     local_ps = test_stub.find_ps_local()
+    nfs_ps = test_stub.find_ps_nfs()
     if not local_ps:
         test_util.test_skip("Skip test for non local PS environment")
 
-    left_ps_list = [ps for ps in ps_list if ps.uuid != local_ps.uuid]
-    if not left_ps_list:
-        test_util.test_skip("Skip test if can not find another ps")
-
-    another_ps = left_ps_list[0]
-
-    if test_stub.find_ps_nfs():
+    if local_ps and nfs_ps:
         local_nfs_env = True
+        another_ps = nfs_ps
+    else:
+        left_ps_list = [ps for ps in ps_list if ps.uuid != local_ps.uuid]
+        another_ps = random.choice(left_ps_list)
 
     vm = test_stub.create_multi_vms(name_prefix='test-', count=1)[0]
     test_obj_dict.add_vm(vm)
     vm.check()
 
-    volume_in_local = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=local_ps,
-                                                    host_uuid=test_lib.lib_get_vm_host(vm.get_vm()).uuid)
+    volume_in_local = []
+    if not local_nfs_env:
+        volume_in_local = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=local_ps,
+                                                        host_uuid=test_lib.lib_get_vm_host(vm.get_vm()).uuid)
 
     if local_nfs_env:
         volume_in_another = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=another_ps)
