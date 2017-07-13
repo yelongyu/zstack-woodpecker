@@ -246,16 +246,16 @@ def attach_hybrid_eip_to_ecs(eip_uuid, ecs_uuid, eip_type='aliyun', session_uuid
     action.eipUuid = eip_uuid
     action.ecsUuid = ecs_uuid
     action.type = eip_type
-    test_util.action_logger('Attach [Hybrid Eip :] %s to ECS %s %s' % (eip_uuid, ecs_uuid))
+    test_util.action_logger('Attach [Hybrid Eip :] %s to ECS %s' % (eip_uuid, ecs_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Hybrid Eip :] %s is attached to Ecs %s.' % (eip_uuid, ecs_uuid))
     return evt
 
-def detach_hybrid_eip_to_ecs(eip_uuid, eip_type='aliyun', session_uuid=None):
+def detach_hybrid_eip_from_ecs(eip_uuid, eip_type='aliyun', session_uuid=None):
     action = api_actions.DetachHybridEipFromEcsAction()
     action.eipUuid = eip_uuid
     action.type = eip_type
-    test_util.action_logger('Detach [Hybrid Eip :] %s from ECS   %s' % eip_uuid)
+    test_util.action_logger('Detach [Hybrid Eip :] %s from ECS' % eip_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Hybrid Eip :] %s is detached from Ecs.' % eip_uuid)
     return evt
