@@ -251,7 +251,7 @@
                   netmask="$noVlanIpRangeNetmask1"/>
                 <dns>$DNSServer</dns> 
                 <networkService provider="vrouter">
-                  <serviceType>DNS</serviceType>
+                  <serviceType>CentralizedDNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -277,7 +277,7 @@
                   netmask="$noVlanIpRangeNetmask2"/>
                 <dns>$DNSServer</dns> 
                 <networkService provider="vrouter">
-                  <serviceType>DNS</serviceType>
+                  <serviceType>CentralizedDNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -307,7 +307,7 @@
                   netmask="$vlanIpRangeNetmask1"/>
                 <dns>$DNSServer</dns> 
                 <networkService provider="vrouter">
-                  <serviceType>DNS</serviceType>
+                  <serviceType>CentralizedDNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -333,7 +333,7 @@
                 <ipRange name="$vlanIpRangeName2" startIp="$vlanIpRangeStart2" endIp="$vlanIpRangeEnd2" gateway="$vlanIpRangeGateway2" netmask="$vlanIpRangeNetmask2"/>
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
-                  <serviceType>DNS</serviceType>
+                  <serviceType>CentralizedDNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -359,7 +359,7 @@
                 <ipRange name="$vlanIpRangeName3" startIp="$vlanIpRangeStart3" endIp="$vlanIpRangeEnd3" gateway="$vlanIpRangeGateway3" netmask="$vlanIpRangeNetmask3"/>
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
-                  <serviceType>DNS</serviceType>
+                  <serviceType>CentralizedDNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -385,7 +385,7 @@
                 <ipRange name="$vlanIpRangeName4" startIp="$vlanIpRangeStart4" endIp="$vlanIpRangeEnd4" gateway="$vlanIpRangeGateway4" netmask="$vlanIpRangeNetmask4"/>
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
-                  <serviceType>DNS</serviceType>
+                  <serviceType>CentralizedDNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -410,7 +410,7 @@
                 <ipRange name="$vlanIpRangeName5" startIp="$vlanIpRangeStart5" endIp="$vlanIpRangeEnd5" gateway="$vlanIpRangeGateway5" netmask="$vlanIpRangeNetmask5"/>
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
-                  <serviceType>DNS</serviceType>
+                  <serviceType>CentralizedDNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -435,7 +435,7 @@
                 <ipRange name="$vlanIpRangeName6" startIp="$vlanIpRangeStart6" endIp="$vlanIpRangeEnd6" gateway="$vlanIpRangeGateway6" netmask="$vlanIpRangeNetmask6"/>
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
-                  <serviceType>DNS</serviceType>
+                  <serviceType>CentralizedDNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -460,7 +460,7 @@
                 <ipRange name="$vlanIpRangeName7" startIp="$vlanIpRangeStart7" endIp="$vlanIpRangeEnd7" gateway="$vlanIpRangeGateway7" netmask="$vlanIpRangeNetmask7"/>
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
-                  <serviceType>DNS</serviceType>
+                  <serviceType>CentralizedDNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -485,7 +485,7 @@
                 <ipRange name="$vlanIpRangeName8" startIp="$vlanIpRangeStart8" endIp="$vlanIpRangeEnd8" gateway="$vlanIpRangeGateway8" netmask="$vlanIpRangeNetmask8"/>
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
-                  <serviceType>DNS</serviceType>
+                  <serviceType>CentralizedDNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -510,7 +510,7 @@
                 <ipRange name="$vlanIpRangeName9" startIp="$vlanIpRangeStart9" endIp="$vlanIpRangeEnd9" gateway="$vlanIpRangeGateway9" netmask="$vlanIpRangeNetmask9"/>
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
-                  <serviceType>DNS</serviceType>
+                  <serviceType>CentralizedDNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -535,7 +535,7 @@
                 <ipRange name="$vlanIpRangeName10" startIp="$vlanIpRangeStart10" endIp="$vlanIpRangeEnd10" gateway="$vlanIpRangeGateway10" netmask="$vlanIpRangeNetmask10"/>
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
-                  <serviceType>DNS</serviceType>
+                  <serviceType>CentralizedDNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -560,7 +560,7 @@
                 <ipRange name="$vlanIpRangeName11" startIp="$vlanIpRangeStart11" endIp="$vlanIpRangeEnd11" gateway="$vlanIpRangeGateway11" netmask="$vlanIpRangeNetmask11"/>
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
-                  <serviceType>DNS</serviceType>
+                  <serviceType>CentralizedDNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -585,7 +585,7 @@
                 <ipRange name="$vlanIpRangeName12" startIp="$vlanIpRangeStart12" endIp="$vlanIpRangeEnd12" gateway="$vlanIpRangeGateway12" netmask="$vlanIpRangeNetmask12"/>
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
-                  <serviceType>DNS</serviceType>
+                  <serviceType>CentralizedDNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -610,7 +610,7 @@
                 <ipRange name="$vlanIpRangeName13" startIp="$vlanIpRangeStart13" endIp="$vlanIpRangeEnd13" gateway="$vlanIpRangeGateway13" netmask="$vlanIpRangeNetmask13"/>
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
-                  <serviceType>DNS</serviceType>
+                  <serviceType>CentralizedDNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -635,7 +635,7 @@
                 <ipRange name="$vlanIpRangeName14" startIp="$vlanIpRangeStart14" endIp="$vlanIpRangeEnd14" gateway="$vlanIpRangeGateway14" netmask="$vlanIpRangeNetmask14"/>
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
-                  <serviceType>DNS</serviceType>
+                  <serviceType>CentralizedDNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -660,7 +660,7 @@
                 <ipRange name="$vlanIpRangeName15" startIp="$vlanIpRangeStart15" endIp="$vlanIpRangeEnd15" gateway="$vlanIpRangeGateway15" netmask="$vlanIpRangeNetmask15"/>
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
-                  <serviceType>DNS</serviceType>
+                  <serviceType>CentralizedDNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -685,7 +685,7 @@
                 <ipRange name="$vlanIpRangeName16" startIp="$vlanIpRangeStart16" endIp="$vlanIpRangeEnd16" gateway="$vlanIpRangeGateway16" netmask="$vlanIpRangeNetmask16"/>
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
-                  <serviceType>DNS</serviceType>
+                  <serviceType>CentralizedDNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -710,7 +710,7 @@
                 <ipRange name="$vlanIpRangeName17" startIp="$vlanIpRangeStart17" endIp="$vlanIpRangeEnd17" gateway="$vlanIpRangeGateway17" netmask="$vlanIpRangeNetmask17"/>
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
-                  <serviceType>DNS</serviceType>
+                  <serviceType>CentralizedDNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -735,7 +735,7 @@
                 <ipRange name="$vlanIpRangeName18" startIp="$vlanIpRangeStart18" endIp="$vlanIpRangeEnd18" gateway="$vlanIpRangeGateway18" netmask="$vlanIpRangeNetmask18"/>
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
-                  <serviceType>DNS</serviceType>
+                  <serviceType>CentralizedDNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -760,7 +760,7 @@
                 <ipRange name="$vlanIpRangeName19" startIp="$vlanIpRangeStart19" endIp="$vlanIpRangeEnd19" gateway="$vlanIpRangeGateway19" netmask="$vlanIpRangeNetmask19"/>
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
-                  <serviceType>DNS</serviceType>
+                  <serviceType>CentralizedDNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -785,7 +785,7 @@
                 <ipRange name="$vlanIpRangeName20" startIp="$vlanIpRangeStart20" endIp="$vlanIpRangeEnd20" gateway="$vlanIpRangeGateway20" netmask="$vlanIpRangeNetmask20"/>
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
-                  <serviceType>DNS</serviceType>
+                  <serviceType>CentralizedDNS</serviceType>
                   <serviceType>SNAT</serviceType>
                 </networkService>
                 <networkService provider="Flat Network Service Provider">

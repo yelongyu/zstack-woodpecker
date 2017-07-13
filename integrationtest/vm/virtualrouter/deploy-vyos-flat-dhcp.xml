@@ -164,7 +164,7 @@
               <dns>$DNSServer</dns>
               <networkService provider="vrouter">
                 <serviceType>DHCP</serviceType>
-                <serviceType>DNS</serviceType>
+                <serviceType>CentralizedDNS</serviceType>
               </networkService>
             </l3BasicNetwork>
           </l3Networks>
@@ -180,7 +180,7 @@
               <dns>$DNSServer</dns>
               <networkService provider="vrouter">
                 <serviceType>DHCP</serviceType>
-                <serviceType>DNS</serviceType>
+                <serviceType>CentralizedDNS</serviceType>
               </networkService>
               <networkService provider="SecurityGroup">
                 <serviceType>SecurityGroup</serviceType>
@@ -197,7 +197,7 @@
                gateway="$noVlanIpRangeGateway1" netmask="$noVlanIpRangeNetmask1"/>
               <dns>$DNSServer</dns> 
               <networkService provider="vrouter">
-                <serviceType>DNS</serviceType>
+                <serviceType>CentralizedDNS</serviceType>
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
@@ -221,7 +221,7 @@
                gateway="$noVlanIpRangeGateway2" netmask="$noVlanIpRangeNetmask2"/>
               <dns>$DNSServer</dns> 
               <networkService provider="vrouter">
-                <serviceType>DNS</serviceType>
+                <serviceType>CentralizedDNS</serviceType>
                 <serviceType>SNAT</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
@@ -240,7 +240,7 @@
                gateway="$vlanIpRangeGateway1" netmask="$vlanIpRangeNetmask1"/>
               <dns>$DNSServer</dns> 
               <networkService provider="vrouter">
-                <serviceType>DNS</serviceType>
+                <serviceType>CentralizedDNS</serviceType>
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType> 
@@ -264,7 +264,7 @@
                gateway="$vlanIpRangeGateway2" netmask="$vlanIpRangeNetmask2"/>
               <dns>$DNSServer</dns> 
               <networkService provider="vrouter">
-                <serviceType>DNS</serviceType>
+                <serviceType>CentralizedDNS</serviceType>
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
@@ -288,7 +288,7 @@
                gateway="$vlanIpRangeGateway3" netmask="$vlanIpRangeNetmask3"/>
               <dns>$DNSServer</dns> 
               <networkService provider="vrouter">
-                <serviceType>DNS</serviceType>
+                <serviceType>CentralizedDNS</serviceType>
                 <!--<serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
@@ -312,7 +312,7 @@
                gateway="$vlanIpRangeGateway4" netmask="$vlanIpRangeNetmask4"/>
               <dns>$DNSServer</dns> 
               <networkService provider="vrouter">
-                <serviceType>DNS</serviceType>
+                <serviceType>CentralizedDNS</serviceType>
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
@@ -360,7 +360,7 @@
                 netmask="$vlanIpRangeNetmask6"/>
               <dns>$DNSServer</dns> 
               <networkService provider="vrouter">
-                <serviceType>DNS</serviceType>
+                <serviceType>CentralizedDNS</serviceType>
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
