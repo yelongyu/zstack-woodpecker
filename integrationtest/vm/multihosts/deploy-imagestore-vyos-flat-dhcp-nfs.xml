@@ -254,6 +254,7 @@
                 <networkService provider="vrouter">
                   <serviceType>DHCP</serviceType>
                   <serviceType>CentralizedDNS</serviceType>
+                  <serviceType>DNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -278,6 +279,7 @@
                 <networkService provider="vrouter">
                   <serviceType>DHCP</serviceType>
                   <serviceType>CentralizedDNS</serviceType>
+                  <serviceType>DNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -305,6 +307,7 @@
                 <dns>$DNSServer</dns> 
                 <networkService provider="vrouter">
                   <serviceType>CentralizedDNS</serviceType>
+                  <serviceType>DNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -331,6 +334,7 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
                   <serviceType>CentralizedDNS</serviceType>
+                  <serviceType>DNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -357,6 +361,7 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
                   <serviceType>CentralizedDNS</serviceType>
+                  <serviceType>DNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -383,6 +388,7 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
                   <serviceType>CentralizedDNS</serviceType>
+                  <serviceType>DNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -408,6 +414,7 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
                   <serviceType>CentralizedDNS</serviceType>
+                  <serviceType>DNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -433,6 +440,7 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
                   <serviceType>CentralizedDNS</serviceType>
+                  <serviceType>DNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -458,6 +466,7 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
                   <serviceType>CentralizedDNS</serviceType>
+                  <serviceType>DNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -483,6 +492,7 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
                   <serviceType>CentralizedDNS</serviceType>
+                  <serviceType>DNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -508,6 +518,7 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
                   <serviceType>CentralizedDNS</serviceType>
+                  <serviceType>DNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -533,6 +544,7 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
                   <serviceType>CentralizedDNS</serviceType>
+                  <serviceType>DNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -558,6 +570,7 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
                   <serviceType>CentralizedDNS</serviceType>
+                  <serviceType>DNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -583,6 +596,7 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
                   <serviceType>CentralizedDNS</serviceType>
+                  <serviceType>DNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -608,6 +622,7 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
                   <serviceType>CentralizedDNS</serviceType>
+                  <serviceType>DNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -633,6 +648,7 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
                   <serviceType>CentralizedDNS</serviceType>
+                  <serviceType>DNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -658,6 +674,7 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
                   <serviceType>CentralizedDNS</serviceType>
+                  <serviceType>DNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -683,6 +700,7 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
                   <serviceType>CentralizedDNS</serviceType>
+                  <serviceType>DNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -708,6 +726,7 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
                   <serviceType>CentralizedDNS</serviceType>
+                  <serviceType>DNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -733,6 +752,7 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
                   <serviceType>CentralizedDNS</serviceType>
+                  <serviceType>DNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -758,6 +778,7 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
                   <serviceType>CentralizedDNS</serviceType>
+                  <serviceType>DNS</serviceType>
                   <serviceType>SNAT</serviceType>
                   <serviceType>PortForwarding</serviceType>
                   <serviceType>Eip</serviceType>
@@ -783,6 +804,7 @@
                 <dns>$DNSServer</dns>
                 <networkService provider="vrouter">
                   <serviceType>CentralizedDNS</serviceType>
+                  <serviceType>DNS</serviceType>
                   <serviceType>SNAT</serviceType>
                 </networkService>
                 <networkService provider="Flat Network Service Provider">
