@@ -83,7 +83,7 @@ def test():
         test_util.test_fail("management node does not recover after MN VM is running")
 
     test_util.test_logger("Delay 60s and then check if the vm is running")
-    time.sleep(60)
+    time.sleep(180)
     vm.update()
     vm.check()
     vm.destroy()
