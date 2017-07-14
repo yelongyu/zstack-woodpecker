@@ -115,7 +115,7 @@
         </clusters>
   
         <l2Networks>
-          <l2NoVlanNetwork name="$l2PublicNetworkName" description="Basic L2 for public network"
+          <l2NoVlanNetwork name="$l2PublicNetworkName" system="True" description="Basic L2 for public network"
             physicalInterface="$l2PublicNetworkInterface">
             <l3Networks>
               <l3BasicNetwork name="$l3PublicNetworkName" description="Basic L3 Network without Vlan for public network">
