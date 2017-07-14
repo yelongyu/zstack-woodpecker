@@ -5,7 +5,7 @@
         <case timeout='900' repeat='1'>test_create_100_images.py</case>
         <case timeout='600' repeat='1'>test_create_img_after_sp.py</case>
         <case timeout='600' repeat='1'>test_crt_2_vms_imgs_from_same_img.py</case>
-        <case timeout='600' repeat='1'>test_export_image.py</case>
+        <case timeout='900' repeat='1'>test_export_image.py</case>
         <case timeout='300' repeat='1'>test_export_iso.py</case>
         <case timeout='600' repeat='1'>test_delete_exported_image.py</case>
         <case timeout='300' repeat='1'>test_clone_vm.py</case>
