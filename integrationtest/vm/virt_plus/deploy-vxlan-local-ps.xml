@@ -197,7 +197,7 @@
             description="Test" 
             physicalInterface="$l2PublicNetworkInterface">
             <l3Networks>
-              <l3BasicNetwork name="$l3PublicNetworkName" description="Public Network">
+              <l3BasicNetwork name="$l3PublicNetworkName" system="True" description="Public Network">
                 <ipRange name="$ipRangeName" description="Test"
                   startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
                   netmask="$ipRangeNetmask" />
