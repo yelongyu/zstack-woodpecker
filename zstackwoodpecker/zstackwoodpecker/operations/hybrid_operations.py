@@ -327,6 +327,32 @@ def create_vpc_virtualrouter_entry_remote(dest_cidr_block, vrouter_uuid, vrouter
     test_util.test_logger('[VPC VirtualRouter Entry Remote:] %s %s %s %s %s is created.' % (dest_cidr_block, vrouter_uuid, vrouter_type, next_hop_type, next_hop_uuid))
     return evt.inventory
 
+def create_vpc_user_vpn_gateway(data_center_uuid, gw_ip, gw_name, session_uuid=None):
+    action = api_actions.CreateVpcUserVpnGatewayRemoteAction()
+    action.dataCenterUuid = data_center_uuid
+    action.ip = gw_ip
+    action.name = gw_name
+    test_util.action_logger('Create [VPC User VPN Gateway:] %s %s' % (data_center_uuid, gw_ip))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[VPC User VPN Gateway:] %s %s is created.' % (data_center_uuid, gw_ip))
+    return evt.inventory
+
+def del_vpc_user_vpn_gateway_remote(uuid, session_uuid=None):
+    action = api_actions.DeleteVpcUserVpnGatewayRemoteAction()
+    action.uuid = uuid
+    test_util.action_logger('Delete [Vpc User Vpn Gateway Remote:] %s ' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[Vpc User Vpn Gateway Remote:] %s is deleted.' % (uuid))
+    return evt
+
+def del_vpc_vpn_connection_remote(uuid, session_uuid=None):
+    action = api_actions.DeleteVpcVpnConnectionRemoteAction()
+    action.uuid = uuid
+    test_util.action_logger('Delete [Vpc Vpn Connection Remote:] %s ' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[Vpc Vpn Connection Remote:] %s is deleted.' % (uuid))
+    return evt
+
 def del_router_entry_remote(uuid, session_uuid=None):
     action = api_actions.DeleteAliyunRouteEntryRemoteAction()
     action.uuid = uuid
