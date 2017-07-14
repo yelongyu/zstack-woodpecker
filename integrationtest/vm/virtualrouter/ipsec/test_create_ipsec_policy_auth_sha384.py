@@ -34,6 +34,8 @@ def test():
     vr1 = test_lib.lib_find_vr_by_l3_uuid(pri_l3_uuid1)[0]
     l3_uuid1 = test_lib.lib_find_vr_pub_nic(vr1).l3NetworkUuid
     vip1 = test_stub.create_vip('ipsec1_vip', l3_uuid1)
+    cond = res_ops.gen_query_conditions('uuid', '=', pri_l3_uuid1)
+    first_zstack_cidrs = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0].ipRanges[0].networkCidr
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
     test_util.test_dsc('Create test vm in mevoco2')
     vm2 = test_stub.create_vlan_vm(os.environ.get('l3VlanDNATNetworkName'))
@@ -43,21 +45,16 @@ def test():
     vr2 = test_lib.lib_find_vr_by_l3_uuid(pri_l3_uuid2)[0]
     l3_uuid2 = test_lib.lib_find_vr_pub_nic(vr2).l3NetworkUuid
     vip2 = test_stub.create_vip('ipsec2_vip', l3_uuid2)
-
-    cond = res_ops.gen_query_conditions('uuid', '=', pri_l3_uuid1)
-    first_zstack_cidrs = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0].ipRanges[0].networkCidr
     cond = res_ops.gen_query_conditions('uuid', '=', pri_l3_uuid2)
     second_zstack_cidrs = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0].ipRanges[0].networkCidr
 
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco1_ip
     test_util.test_dsc('Create ipsec in mevoco1')
-    #ipsec1 = ipsec_ops.create_ipsec_connection('ipsec1', pri_l3_uuid1, vip2.get_vip().ip, '123456', vip1.get_vip().uuid, [os.environ['secondZStackCidrs']], policy_auth_algorithm="sha384")
-    ipsec1 = ipsec_ops.create_ipsec_connection('ipsec1', pri_l3_uuid1, vip2.get_vip().ip, '123456', vip1.get_vip().uuid, second_zstack_cidrs, policy_auth_algorithm="sha384")
+    ipsec1 = ipsec_ops.create_ipsec_connection('ipsec1', pri_l3_uuid1, vip2.get_vip().ip, '123456', vip1.get_vip().uuid, [second_zstack_cidrs], policy_auth_algorithm="sha384")
 
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
     test_util.test_dsc('Create ipsec in mevoco2')
-    #ipsec2 = ipsec_ops.create_ipsec_connection('ipsec2', pri_l3_uuid2, vip1.get_vip().ip, '123456', vip2.get_vip().uuid, [os.environ['firstZStackCidrs']], policy_auth_algorithm="sha384")
-    ipsec2 = ipsec_ops.create_ipsec_connection('ipsec2', pri_l3_uuid2, vip1.get_vip().ip, '123456', vip2.get_vip().uuid, first_zstack_cidrs, policy_auth_algorithm="sha384")
+    ipsec2 = ipsec_ops.create_ipsec_connection('ipsec2', pri_l3_uuid2, vip1.get_vip().ip, '123456', vip2.get_vip().uuid, [first_zstack_cidrs], policy_auth_algorithm="sha384")
 
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco1_ip
     if not test_lib.lib_check_ping(vm1.vm, vm2.vm.vmNics[0].ip):
