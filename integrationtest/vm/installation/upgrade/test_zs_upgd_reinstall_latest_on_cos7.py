@@ -94,6 +94,7 @@ def test():
 
     time.sleep(60)
     iso_path = os.environ.get('iso_path')
+    upgrade_script_path = os.environ.get('upgradeScript')
 
     test_util.test_dsc('Install zstack with -o -r -I')
     vm_ip = vm_inv.vmNics[0].ip
