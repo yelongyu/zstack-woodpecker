@@ -33,6 +33,8 @@ def test():
     test_lib.lib_delete_vm_console_password(vm1.get_vm().uuid)
     test_util.test_logger('delete [vm:] %s console password after reboot' % (vm1.get_vm().uuid))
     vm1.reboot()
+    if not test_lib.lib_wait_target_up(console.hostIp, console.port, timeout=60):
+        test_util.test_fail('[vm:] %s console on %s:%s is not connectable' % (vm1.get_vm().uuid, console.hostIp, console.port))
 
     try:
         client = api.connect(console.hostIp+":"+display)
@@ -52,6 +54,8 @@ def test():
     test_lib.lib_delete_vm_console_password(vm2.get_vm().uuid)
     test_util.test_logger('delete [vm:] %s console password without reboot' % (vm2.get_vm().uuid))
     vm1.reboot()
+    if not test_lib.lib_wait_target_up(console.hostIp, console.port, timeout=60):
+        test_util.test_fail('[vm:] %s console on %s:%s is not connectable' % (vm2.get_vm().uuid, console.hostIp, console.port))
 
     try:
         client = api.connect(console.hostIp+":"+display)
