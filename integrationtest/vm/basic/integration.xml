@@ -30,7 +30,6 @@
         <case timeout="120" >account/test_multi_accounts_vm_ops.py</case>
         <case timeout="120" >test_ldap_login.py</case>
         <case timeout="120" >test_ldap_tls_login.py</case>
-        <case timeout="120" >test_get_vm_console_address.py</case>
         <case timeout="480" >test_get_multi_vm_console_address.py</case>
         <case timeout="220" >test_vm_ha_never_stop.py</case>
         <case timeout="220" >test_set_vm_console_password.py</case>
@@ -38,6 +37,7 @@
         <case timeout="220" >test_delete_vm_console_password.py</case>
         <case timeout="220" >test_add_image_file_url.py</case>
         <case timeout="220" >test_add_qcow2_image_file_url.py</case>
+        <case timeout="120" noparallel='True'>test_get_vm_console_address.py</case>
 	<case timeout="220" noparallel='True'>vga/test_vm_vga.py</case>
 	<case timeout="220" noparallel='True'>vga/test_vm_qxl.py</case>
 	<case timeout="220" noparallel='True'>vga/test_vm_cirrus.py</case>

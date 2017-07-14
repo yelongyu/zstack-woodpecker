@@ -11,6 +11,11 @@ import zstacklib.utils.shell as shell
 import test_stub
 import zstackwoodpecker.operations.account_operations as acc_ops
 
+_config_ = {
+        'timeout' : 360,
+        'noparallel' : False
+        }
+
 vm = None
 
 def test():
