@@ -41,10 +41,9 @@ def test():
     bs_uuid = image.backupStorageRefs[0].backupStorageUuid
     cond2 = res_ops.gen_query_conditions('name', '=', os.getenv('instanceOfferingName_m'))
     instance_offering = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond2)[0]
-    try:
+    ks_existed = hyb_ops.query_aliyun_key_secret()
+    if not ks_existed:
         ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
-    except:
-        pass
     datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
     regions = [ i.regionId for i in datacenter_list]
     for r in regions:

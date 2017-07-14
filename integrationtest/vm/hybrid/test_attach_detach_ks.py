@@ -20,10 +20,11 @@ ks_inv = None
 def test():
     global ks_inv
     global datacenter_inv
-    try:
+    ks_existed = hyb_ops.query_aliyun_key_secret()
+    if not ks_existed:
         ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
-    except:
-        pass
+    else:
+        ks_inv = ks_existed[0]
     hyb_ops.detach_aliyun_key(ks_inv.uuid)
     ks_detach = hyb_ops.query_aliyun_key_secret()
     assert ks_detach[0].current == 'false'
