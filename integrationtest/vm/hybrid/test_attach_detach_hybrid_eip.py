@@ -36,11 +36,11 @@ def test():
     global ecs_inv
     global eip_inv
     datacenter_type = os.getenv('datacenterType')
-    cond = res_ops.gen_query_conditions('name', '=', os.getenv('imageName_i_c7'))
-    image =  res_ops.query_resource(res_ops.IMAGE, cond)[0]
+    cond_image = res_ops.gen_query_conditions('name', '=', os.getenv('imageName_i_c7'))
+    image =  res_ops.query_resource(res_ops.IMAGE, cond_image)[0]
     bs_uuid = image.backupStorageRefs[0].backupStorageUuid
-    cond2 = res_ops.gen_query_conditions('name', '=', os.getenv('instanceOfferingName_m'))
-    instance_offering = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond2)[0]
+    cond_offering = res_ops.gen_query_conditions('name', '=', os.getenv('instanceOfferingName_m'))
+    instance_offering = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond_offering)[0]
     ks_existed = hyb_ops.query_aliyun_key_secret()
     if not ks_existed:
         ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))

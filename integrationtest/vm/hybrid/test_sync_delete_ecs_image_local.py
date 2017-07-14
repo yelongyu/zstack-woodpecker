@@ -24,8 +24,8 @@ def test():
     global datacenter_inv
     global bucket_inv
     datacenter_type = os.getenv('datacenterType')
-    cond = res_ops.gen_query_conditions('name', '=', os.getenv('imageName_s'))
-    image =  res_ops.query_resource(res_ops.IMAGE, cond)[0]
+    cond_image = res_ops.gen_query_conditions('name', '=', os.getenv('imageName_s'))
+    image =  res_ops.query_resource(res_ops.IMAGE, cond_image)[0]
     bs_uuid = image.backupStorageRefs[0].backupStorageUuid
     ks_existed = hyb_ops.query_aliyun_key_secret()
     if not ks_existed:
