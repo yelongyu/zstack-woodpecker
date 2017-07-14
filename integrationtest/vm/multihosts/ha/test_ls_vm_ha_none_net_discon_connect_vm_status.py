@@ -98,7 +98,7 @@ def test():
             break
         time.sleep(1)
         
-    if not vm_stop_time:
+    if vm_stop_time is None:
         vm_stop_time = max_time
 
     for i in range(vm_stop_time, max_time):

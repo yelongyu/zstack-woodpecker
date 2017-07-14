@@ -105,7 +105,7 @@ def test():
             test_stub.recover_host_vlan(test_host, test_lib.all_scenario_config, test_lib.deploy_config)
             break
         time.sleep(1)
-    if not vm_stop_time:
+    if vm_stop_time is None:
         vm_stop_time = 180
     for i in range(vm_stop_time, 180):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Starting":
