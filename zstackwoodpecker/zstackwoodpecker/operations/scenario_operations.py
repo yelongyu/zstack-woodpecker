@@ -308,8 +308,9 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
         nfs_url = get_mn_ha_nfs_url(scenario_config, scenario_file, deploy_config)
         nfsIP = nfs_url.split(':')[0]
         nfsPath = nfs_url.split(':')[1]
-        # Auto mount in /etc/fstab
-        cmd = 'mount %s:%s /storage >> /etc/rc.local' % (nfsIP, nfsPath)
+        cmd = 'mkdir -p /storage'
+        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+        cmd = 'echo mount %s:%s /storage >> /etc/rc.local' % (nfsIP, nfsPath)
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 	cmd = 'mount %s:%s /storage'
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
