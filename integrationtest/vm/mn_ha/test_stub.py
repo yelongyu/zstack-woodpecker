@@ -298,7 +298,7 @@ def prepare_etc_hosts(scenarioConfig, scenarioFile, deploy_config, config_json):
         return False
 
     for i in range(len(mn_host_list)):
-        os.system('echo %s %s >> /etc/hosts' % (mn_host_list[i].ip_, mn_host_list[i].ip_.replace('.', '-'))
+        os.system('echo %s %s >> /etc/hosts' % (mn_host_list[i].ip_, mn_host_list[i].ip_.replace('.', '-')))
 
     for i in range(len(mn_host_list)):
         test_host_config = sce_ops.get_scenario_config_vm(mn_host_list[i].name_, scenarioConfig)
