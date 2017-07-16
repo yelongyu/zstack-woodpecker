@@ -292,6 +292,18 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
     if mn_ha_storage_type == 'ceph':
         os.system('sed -i s/FileConf/CephConf/g %s' % (config_json))
 
+def prepare_etc_hosts(scenarioConfig, scenarioFile, deploy_config, config_json):
+    mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
+    if len(mn_host_list) < 1:
+        return False
+
+    for i in range(len(mn_host_list)):
+        os.system('echo %s %s >> /etc/hosts' % (mn_host_list[i].ip_, mn_host_list[i].ip_.replace('.', '-'))
+
+    for i in range(len(mn_host_list)):
+        test_host_config = sce_ops.get_scenario_config_vm(mn_host_list[i].name_, scenarioConfig)
+        ssh.scp_file('/etc/hosts', '/etc/hosts', mn_host_list[i].ip_, test_host_config.imageUsername_, test_host_config.imagePassword_)
+
 def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, deploy_tool, mn_img):
     prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json)
     test_host = get_mn_host(scenarioConfig,scenarioFile)[0]
@@ -309,6 +321,7 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
         cmd1="ceph osd pool create zstack 128"
         cmd2="qemu-img convert -f qcow2 -O raw %s rbd:zstack/mnvm.img" % mn_image_path
     elif mn_ha_storage_type == 'nfs':
+        prepare_etc_hosts(scenarioConfig, scenarioFile, deploy_config, config_json)
         cmd1 = "cp %s /storage/mnvm.img" % (mn_image_path)
         cmd2 = "chmod a+x %s" % (installer_path)
     cmd3='%s install -p %s -c %s' % (installer_path, host_password, config_path)
