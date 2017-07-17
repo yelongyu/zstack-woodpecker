@@ -54,7 +54,7 @@ def test():
 
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
     test_util.test_dsc('Create ipsec in mevoco2')
-    ipsec2 = ipsec_ops.create_ipsec_connection('ipsec2', pri_l3_uuid2, vip1.get_vip().ip, '123456', vip2.get_vip().uuid, [first_zstack_cidrs], sfs="dh-group19")
+    ipsec2 = ipsec_ops.create_ipsec_connection('ipsec2', pri_l3_uuid2, vip1.get_vip().ip, '123456', vip2.get_vip().uuid, [first_zstack_cidrs], pfs="dh-group19")
 
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco1_ip
     if not test_lib.lib_check_ping(vm1.vm, vm2.vm.vmNics[0].ip):
