@@ -16,14 +16,24 @@ import zstackwoodpecker.test_lib as test_lib
 test_stub = test_lib.lib_get_test_stub()
 vm = None
 schds = []
+schd_jobs = []
+schd_triggers = []
 
 def create_start_vm_scheduler(vm_uuid, start_date, ops_id):
-    global schds
-    schds.append(vm_ops.start_vm_scheduler(vm_uuid, 'simple', 'simple_start_vm_scheduler_%s' % (ops_id), start_date+100, 1000))
+    global schd_jobs
+    global schd_triggers
+    schd_job = schd_ops.create_scheduler_job('simple_start_vm_scheduler_%s' % (ops_id), 'simple_stop_vm_scheduler', vm_uuid, 'startVm', None)
+    schd_trigger = schd_ops.create_scheduler_trigger('simple_stop_vm_scheduler', start_date+100, None, 1000, 'simple')
+    schd_ops.add_scheduler_job_to_trigger(schd_trigger.uuid, schd_job.uuid)
+    schd_jobs.append(schd_job)
+    schd_triggers.append(schd_trigger)
 
-def delete_start_vm_scheduler(schd_uuid):
-    global schds
-    schd_ops.delete_scheduler(schd_uuid)
+def delete_scheduler_job(schd_job_uuid):
+    schd_ops.del_scheduler_job(schd_job_uuid)
+
+def delete_scheduler_trigger(schd_trigger_uuid):
+    schd_ops.del_scheduler_trigger(schd_trigger_uuid)
+
 
 def test():
     global vm
@@ -58,11 +68,25 @@ def test():
     test_util.test_logger('%s of 1000 scheduler executed at the next second' % count1)
     count2 = test_lib.lib_count_in_local_management_server_log(start_date+100+2, '[msg send]: {"org.zstack.header.vm.StartVmInstanceMsg', vm.get_vm().uuid)
     test_util.test_logger('%s of 1000 scheduler executed at the third second' % count2)
-    if count0 + count1 + count2 < 900:
-        test_util.test_fail('only %s of 1000 scheduler executed at the specified first 3 seconds' % (count0 + count1 + count2))
+    count3 = test_lib.lib_count_in_local_management_server_log(start_date+100+3, '[msg send]: {"org.zstack.header.vm.StartVmInstanceMsg', vm.get_vm().uuid)
+    test_util.test_logger('%s of 1000 scheduler executed at the fourth second' % count2)
 
-    for schd in schds:
-        thread = threading.Thread(target=delete_start_vm_scheduler, args=(schd.uuid, ))
+    if count0 + count1 + count2 < 900:
+        test_util.test_fail('only %s of 1000 scheduler executed at the specified first 4 seconds' % (count0 + count1 + count2 + count3))
+
+    for schd_job in schd_jobs:
+        thread = threading.Thread(target=delete_scheduler_job, args=(schd_job.uuid, ))
+        while threading.active_count() > 10:
+            time.sleep(0.5)
+        exc = sys.exc_info()
+        thread.start()
+
+    while threading.activeCount() > 1:
+        exc = sys.exc_info()
+        time.sleep(0.1)
+
+    for schd_trigger in schd_triggers:
+        thread = threading.Thread(target=delete_scheduler_trigger, args=(schd_trigger.uuid, ))
         while threading.active_count() > 10:
             time.sleep(0.5)
         exc = sys.exc_info()
@@ -83,14 +107,8 @@ def error_cleanup():
     global vm
     global schds
 
-    if vm:
-        try:
-            vm.destroy()
-	except:
-            test_util.test_logger('expected exception when destroy VM since too many queued task')
-
-    for schd in schds:
-        thread = threading.Thread(target=delete_start_vm_scheduler, args=(schd.uuid, ))
+    for schd_job in schd_jobs:
+        thread = threading.Thread(target=delete_scheduler_job, args=(schd_job.uuid, ))
         while threading.active_count() > 10:
             time.sleep(0.5)
         exc = sys.exc_info()
@@ -99,4 +117,21 @@ def error_cleanup():
     while threading.activeCount() > 1:
         exc = sys.exc_info()
         time.sleep(0.1)
+
+    for schd_trigger in schd_triggers:
+        thread = threading.Thread(target=delete_scheduler_trigger, args=(schd_trigger.uuid, ))
+        while threading.active_count() > 10:
+            time.sleep(0.5)
+        exc = sys.exc_info()
+        thread.start()
+
+    while threading.activeCount() > 1:
+        exc = sys.exc_info()
+        time.sleep(0.1)
+
+    if vm:
+        try:
+            vm.destroy()
+	except:
+            test_util.test_logger('expected exception when destroy VM since too many queued task')
 
