@@ -67,8 +67,7 @@ def test():
     ecs_inv = [e for e in ecs_instance_local if e.name == 'zstack-ecs-test'][0]
     eip_local = hyb_ops.query_hybrid_eip_local()
     ecs_eip = [e for e in eip_local if e.allocateResourceUuid == ecs_inv.uuid][0]
-    assert len(ecs_eip.eipAddress.split('.')) >= 4
-    hyb_ops.del_hybrid_eip_local(ecs_eip.uuid)
+    hyb_ops.del_hybrid_eip_remote(ecs_eip.uuid)
     test_util.test_pass('Create Ecs Instance with Public IP and delete Local Eip Test Success')
 
 def env_recover():
