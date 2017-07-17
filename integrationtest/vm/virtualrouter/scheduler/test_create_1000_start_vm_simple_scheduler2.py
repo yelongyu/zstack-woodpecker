@@ -62,13 +62,13 @@ def test():
     if start_msg_mismatch > 5:
         test_util.test_fail('%s of 58 StartVmInstanceMsg not executed at expected timestamp' % (start_msg_mismatch))
 
-    count0 = test_lib.lib_count_in_local_management_server_log(start_date+100, '[msg send]: {"org.zstack.header.vm.StartVmInstanceMsg', vm.get_vm().uuid)
+    count0 = test_lib.lib_count_in_local_management_server_log(start_date+100-1, '[msg send]: {"org.zstack.header.vm.StartVmInstanceMsg', vm.get_vm().uuid)
     test_util.test_logger('%s of 1000 scheduler executed at the same second' % count0)
-    count1 = test_lib.lib_count_in_local_management_server_log(start_date+100+1, '[msg send]: {"org.zstack.header.vm.StartVmInstanceMsg', vm.get_vm().uuid)
+    count1 = test_lib.lib_count_in_local_management_server_log(start_date+100, '[msg send]: {"org.zstack.header.vm.StartVmInstanceMsg', vm.get_vm().uuid)
     test_util.test_logger('%s of 1000 scheduler executed at the next second' % count1)
-    count2 = test_lib.lib_count_in_local_management_server_log(start_date+100+2, '[msg send]: {"org.zstack.header.vm.StartVmInstanceMsg', vm.get_vm().uuid)
+    count2 = test_lib.lib_count_in_local_management_server_log(start_date+100+1, '[msg send]: {"org.zstack.header.vm.StartVmInstanceMsg', vm.get_vm().uuid)
     test_util.test_logger('%s of 1000 scheduler executed at the third second' % count2)
-    count3 = test_lib.lib_count_in_local_management_server_log(start_date+100+3, '[msg send]: {"org.zstack.header.vm.StartVmInstanceMsg', vm.get_vm().uuid)
+    count3 = test_lib.lib_count_in_local_management_server_log(start_date+100+2, '[msg send]: {"org.zstack.header.vm.StartVmInstanceMsg', vm.get_vm().uuid)
     test_util.test_logger('%s of 1000 scheduler executed at the fourth second' % count2)
 
     if count0 + count1 + count2 < 900:
