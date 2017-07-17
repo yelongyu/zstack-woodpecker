@@ -89,19 +89,18 @@ def test():
 
     conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_10_mn'))
     image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
-
     vm_inv = create_vm(image)
-
     time.sleep(60)
     iso_path = os.environ.get('iso_path')
     upgrade_script_path = os.environ.get('upgradeScript')
 
     test_util.test_dsc('Install zstack with -o -r -I')
     vm_ip = vm_inv.vmNics[0].ip
-    target_file = '/root/zstack-all-in-one.tgz'
+    test_stub.make_ssh_no_password(vm_ip, tmp_file)
     test_util.test_dsc('Upgrade master iso')   
     test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
 
+    target_file = '/root/zstack-all-in-one.tgz'
     test_stub.prepare_test_env(vm_inv, target_file)
     ssh_cmd = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     args = "-o -r /home/zstack-test -I eth0"
