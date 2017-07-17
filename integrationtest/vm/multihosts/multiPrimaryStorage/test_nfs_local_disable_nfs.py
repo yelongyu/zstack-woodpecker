@@ -41,7 +41,7 @@ def test():
     nfs_ps = test_stub.find_ps_nfs()
 
     test_util.test_dsc("Create 1 vm  with {} data volume".format(VOLUME_NUMBER))
-    vm = test_stub.create_multi_vms(name_prefix='test-', count=1, data_volume_number=VOLUME_NUMBER)
+    vm = test_stub.create_multi_vms(name_prefix='test-', count=1, data_volume_number=VOLUME_NUMBER)[0]
     test_obj_dict.add_vm(vm)
 
     test_util.test_dsc("disable NFS PS")
