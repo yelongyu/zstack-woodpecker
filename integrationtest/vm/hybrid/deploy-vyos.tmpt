@@ -11,3 +11,8 @@ instanceOfferingCpuSpeed_m = 512
 
 imageName_i_c7 = centos7-test
 imageUrl_i_c7 = http://zstack/image/centos7-test.qcow2
+
+ipRangeStartIp = IP_START
+ipRangeEndIp = IP_END
+ipRangeNetmask = NETMASK
+ipRangeGateway = GATEWAY
