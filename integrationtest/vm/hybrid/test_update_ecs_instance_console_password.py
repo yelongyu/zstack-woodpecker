@@ -97,8 +97,6 @@ def env_recover():
     if iz_inv:
         hyb_ops.del_identity_zone_in_local(iz_inv.uuid)
 
-    if datacenter_inv:
-        hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
     global bucket_inv
     if bucket_inv:
         bucket_file = hyb_ops.get_oss_bucket_file_from_remote(bucket_inv.uuid).files
@@ -107,6 +105,9 @@ def env_recover():
                 hyb_ops.del_oss_bucket_file_remote(bucket_inv.uuid, i)
         time.sleep(10)
         hyb_ops.del_oss_bucket_remote(bucket_inv.uuid)
+    global datacenter_inv
+    if datacenter_inv:
+        hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
     global ks_inv
     if ks_inv:
         hyb_ops.del_aliyun_key_secret(ks_inv.uuid)
