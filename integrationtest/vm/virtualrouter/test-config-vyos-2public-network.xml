@@ -1,6 +1,6 @@
 <!--test local storage as primary storage -->
 <testConfig>
-    <deployConfig>deploy-2public-network.xml</deployConfig>
+    <deployConfig>deploy-vyos-2public-network.xml</deployConfig>
     <deployConfigTemplate>../deploy.tmpt</deployConfigTemplate>
     <pingTestTarget>zstack.org</pingTestTarget>
 </testConfig>
