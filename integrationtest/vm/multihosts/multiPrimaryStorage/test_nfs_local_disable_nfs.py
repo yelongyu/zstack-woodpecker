@@ -49,6 +49,7 @@ def test():
     disabled_ps_list.append(nfs_ps)
 
     test_util.test_dsc("make sure VM till OK and running")
+    vm.update()
     vm.check()
     assert vm.get_vm().state == inventory.RUNNING
 

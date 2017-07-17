@@ -32,16 +32,14 @@ def test():
     vm.check()
     test_obj_dict.add_vm(vm)
 
-    test_util.test_dsc("Create {0} volumes in both primary storage ".format(VOLUME_NUMBER))
-    volume_in_local = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=local_ps,
-                                                    host_uuid=test_lib.lib_get_vm_host(vm.get_vm()).uuid)
+    test_util.test_dsc("Create {0} volumes in NFS".format(VOLUME_NUMBER))
     volume_in_nfs  = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=nfs_ps)
-    for volume in volume_in_local + volume_in_nfs:
+    for volume in  volume_in_nfs:
         test_obj_dict.add_volume(volume)
         volume.check()
 
     test_util.test_dsc("Attach all volumes to VM")
-    for volume in volume_in_local + volume_in_nfs:
+    for volume in volume_in_nfs:
         volume.attach(vm)
         volume.check()
 
@@ -51,7 +49,7 @@ def test():
 
     test_util.test_dsc("make sure all VM and Volumes still OK and running")
     vm.check()
-    for volume in volume_in_local + volume_in_nfs:
+    for volume in volume_in_nfs:
         volume.check()
 
     test_util.test_dsc("Try to create vm with datavolume")
