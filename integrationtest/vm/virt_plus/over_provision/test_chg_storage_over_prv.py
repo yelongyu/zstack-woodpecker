@@ -24,6 +24,10 @@ original_rate = None
 
 def test():
     global original_rate
+
+    must_ps_list = [inventory.LOCAL_STORAGE_TYPE, inventory.NFS_PRIMARY_STORAGE_TYPE]
+    test_lib.skip_test_if_any_ps_not_deployed(must_ps_list)
+
     test_util.test_dsc('Test change storage over provision rate method')
     zone_uuid = res_ops.query_resource(res_ops.ZONE)[0].uuid
     cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
@@ -53,22 +57,20 @@ def test():
         return True
 
     ps1 = ps[0].uuid
-    ps2 = ps[1].uuid
-
-
     ps1_res = test_lib.lib_get_storage_capacity(ps_uuids=[ps1])
-    ps2_res = test_lib.lib_get_storage_capacity(ps_uuids=[ps2])
-    avail_cap = ps1_res.availableCapacity + ps2_res.availableCapacity
     test_util.test_dsc("ps1[uuid:%s]'s available capacity is %s" % (ps1, ps1_res.availableCapacity))
-    test_util.test_dsc("ps2[uuid:%s]'s available capacity is %s" % (ps2, ps2_res.availableCapacity))
+    avail_cap = ps1_res.availableCapacity
+
+    if len(ps) > 1:
+        ps2 = ps[1].uuid
+        ps2_res = test_lib.lib_get_storage_capacity(ps_uuids=[ps2])
+        test_util.test_dsc("ps2[uuid:%s]'s available capacity is %s" % (ps2, ps2_res.availableCapacity))
+        avail_cap = ps1_res.availableCapacity + ps2_res.availableCapacity
+
     if avail_cap < kept_disk_size:
         test_util.test_skip('available disk capacity:%d is too small, skip test.' % avail_cap)
         return True
 
-    pss = res_ops.query_resource_with_num(res_ops.PRIMARY_STORAGE, cond)
-    for ps in pss:
-        if ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE or ps.type == 'SharedMountPoint':
-            test_util.test_skip('skip test on ceph and smp.' )
 
     original_rate = test_lib.lib_set_provision_storage_rate(over_provision_rate1)
     data_volume_size = int(over_provision_rate1 * (avail_cap - kept_disk_size) / target_volume_num)
@@ -104,12 +106,16 @@ def test():
 
     test_lib.lib_set_provision_storage_rate(original_rate)
     time.sleep(10)
-    ps1_res2 = test_lib.lib_get_storage_capacity(ps_uuids=[ps1])
-    ps2_res2 = test_lib.lib_get_storage_capacity(ps_uuids=[ps2])
-    test_util.test_dsc("ps1[uuid:%s]'s available capacity is %s" % (ps1, ps1_res.availableCapacity))
-    test_util.test_dsc("ps2[uuid:%s]'s available capacity is %s" % (ps2, ps2_res.availableCapacity))
 
-    avail_cap2 = ps1_res2.availableCapacity + ps2_res2.availableCapacity
+    ps1_res2 = test_lib.lib_get_storage_capacity(ps_uuids=[ps1])
+    test_util.test_dsc("ps1[uuid:%s]'s available capacity is %s" % (ps1, ps1_res.availableCapacity))
+    avail_cap2 = ps1_res2.availableCapacity
+
+    if len(ps) > 1:
+        ps2_res2 = test_lib.lib_get_storage_capacity(ps_uuids=[ps2])
+        test_util.test_dsc("ps2[uuid:%s]'s available capacity is %s" % (ps2, ps2_res.availableCapacity))
+        avail_cap2 = ps1_res2.availableCapacity + ps2_res2.availableCapacity
+
     if avail_cap2 != avail_cap:
         test_util.test_fail('Available disk size: %d is different with original size: %d, after creating volume under different over rate.' % (avail_cap2, avail_cap))
     
