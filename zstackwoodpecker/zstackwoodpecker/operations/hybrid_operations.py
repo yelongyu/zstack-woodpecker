@@ -461,11 +461,12 @@ def del_ecs_security_group_remote(uuid, session_uuid=None):
     test_util.test_logger('[Ecs Security Group Remote:] %s is deleted.' % (uuid))
     return evt
 
-def create_ecs_image_from_local_image(bs_uuid, datacenter_uuid, image_uuid, session_uuid=None):
+def create_ecs_image_from_local_image(bs_uuid, datacenter_uuid, image_uuid, name, session_uuid=None):
     action = api_actions.CreateEcsImageFromLocalImageAction()
     action.backupStorageUuid = bs_uuid
     action.dataCenterUuid = datacenter_uuid
     action.imageUuid = image_uuid
+    action.name = name
     test_util.action_logger('Create Ecs Image from [Local image:] %s %s %s' % (bs_uuid, datacenter_uuid, image_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('Ecs Image is created from [Local image:] %s %s %s.' % (bs_uuid, datacenter_uuid, image_uuid))

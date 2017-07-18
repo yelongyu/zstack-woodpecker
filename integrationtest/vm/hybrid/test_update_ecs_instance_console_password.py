@@ -59,7 +59,8 @@ def test():
     time.sleep(10)
     vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'zstack-test-vswitch', '172.18.1.0/24')
     sg_inv = hyb_ops.create_ecs_security_group_remote('sg_for_test', vpc_inv.uuid)
-    hyb_ops.create_ecs_image_from_local_image(bs_uuid, datacenter_inv.uuid, image.uuid)
+    ecs_image_name = os.getenv("Ecs_imageName")
+    hyb_ops.create_ecs_image_from_local_image(bs_uuid, datacenter_inv.uuid, image.uuid, name=ecs_image_name)
     ecs_inv = hyb_ops.create_ecs_instance_from_local_image('Password123', bs_uuid, image.uuid, vswitch_inv.uuid, zone_id, instance_offering.uuid, ecs_bandwidth=5,
                                                            ecs_security_group_uuid=sg_inv.uuid, ecs_instance_name='zstack-ecs-test', ecs_console_password='123abc')
     time.sleep(10)

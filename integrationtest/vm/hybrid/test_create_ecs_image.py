@@ -50,7 +50,7 @@ def test():
     bucket_inv = hyb_ops.create_oss_bucket_remote(datacenter_inv.uuid, 'zstack-test-%s-%s' % (date_s, region_id), 'created-by-zstack-for-test')
     hyb_ops.attach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid)
     hyb_ops.update_image_guestOsType(image.uuid, guest_os_type='CentOS')
-    ecs_image_inv = hyb_ops.create_ecs_image_from_local_image(bs_uuid, datacenter_inv.uuid, image.uuid)
+    ecs_image_inv = hyb_ops.create_ecs_image_from_local_image(bs_uuid, datacenter_inv.uuid, image.uuid, name='zstack-test-ecs-image')
     time.sleep(10)
     hyb_ops.del_ecs_image_remote(ecs_image_inv.uuid)
     test_util.test_pass('Create Delete Ecs Image Test Success')

@@ -16,3 +16,5 @@ ipRangeStartIp = IP_START
 ipRangeEndIp = IP_END
 ipRangeNetmask = NETMASK
 ipRangeGateway = GATEWAY
+
+Ecs_imageName = ECS_IMAGE_NAME
