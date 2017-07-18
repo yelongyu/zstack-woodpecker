@@ -523,6 +523,23 @@ def create_ecs_instance_from_local_image(ecs_root_password, bs_uuid, image_uuid,
     test_util.test_logger('Ecs Instance is created from [Local image:] %s %s.' % (bs_uuid, image_uuid))
     return evt.inventory
 
+def create_ecs_instance_from_ecs_image(ecs_root_password, image_uuid, ecs_vswitch_uuid, instance_offering_uuid, ecs_bandwidth, ecs_security_group_uuid, private_ip_address=None, allocate_public_ip='false', name=None, ecs_console_password=None, session_uuid=None):
+    action = api_actions.CreateEcsInstanceFromEcsImageAction()
+    action.ecsRootPassword = ecs_root_password
+    action.ecsImageUuid = image_uuid
+    action.ecsVSwitchUuid = ecs_vswitch_uuid
+    action.instanceOfferingUuid = instance_offering_uuid
+    action.ecsBandWidth = ecs_bandwidth
+    action.ecsSecurityGroupUuid = ecs_security_group_uuid
+    action.privateIpAddress = private_ip_address
+    action.allocatePublicIp = allocate_public_ip
+    action.name = name
+    action.ecsConsolePassword = ecs_console_password
+    test_util.action_logger('Create Ecs Instance from [Ecs Image:] %s' %  image_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('Ecs Instance is created from [Ecs Image:] %s.' %  image_uuid)
+    return evt.inventory
+
 def del_ecs_instance(uuid, session_uuid=None):
     action = api_actions.DeleteEcsInstanceAction()
     action.uuid = uuid

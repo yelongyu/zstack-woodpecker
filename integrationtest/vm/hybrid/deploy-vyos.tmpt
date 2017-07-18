@@ -18,3 +18,5 @@ ipRangeNetmask = NETMASK
 ipRangeGateway = GATEWAY
 
 Ecs_imageName = ECS_IMAGE_NAME
+
+l2PublicVlan = 3

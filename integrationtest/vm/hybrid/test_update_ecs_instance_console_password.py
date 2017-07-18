@@ -34,9 +34,10 @@ def test():
     global vpc_inv
     global ecs_inv
     datacenter_type = os.getenv('datacenterType')
-    cond_image = res_ops.gen_query_conditions('name', '=', os.getenv('imageName_i_c7'))
-    image =  res_ops.query_resource(res_ops.IMAGE, cond_image)[0]
-    bs_uuid = image.backupStorageRefs[0].backupStorageUuid
+    ecs_image_name = os.getenv("Ecs_imageName")
+#     cond_image = res_ops.gen_query_conditions('name', '=', os.getenv('imageName_i_c7'))
+#     image =  res_ops.query_resource(res_ops.IMAGE, cond_image)[0]
+#     bs_uuid = image.backupStorageRefs[0].backupStorageUuid
     cond_offering = res_ops.gen_query_conditions('name', '=', os.getenv('instanceOfferingName_m'))
     instance_offering = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond_offering)[0]
     ks_existed = hyb_ops.query_aliyun_key_secret()
@@ -53,16 +54,20 @@ def test():
     hyb_ops.attach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid)
     iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, region_id)
     zone_id = iz_list[0].zoneId
-    hyb_ops.update_image_guestOsType(image.uuid, guest_os_type='CentOS')
+#     hyb_ops.update_image_guestOsType(image.uuid, guest_os_type='CentOS')
     iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, zone_id)
     vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', '172.16.0.0/12')
     time.sleep(10)
     vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'zstack-test-vswitch', '172.18.1.0/24')
     sg_inv = hyb_ops.create_ecs_security_group_remote('sg_for_test', vpc_inv.uuid)
-    ecs_image_name = os.getenv("Ecs_imageName")
-    hyb_ops.create_ecs_image_from_local_image(bs_uuid, datacenter_inv.uuid, image.uuid, name=ecs_image_name)
-    ecs_inv = hyb_ops.create_ecs_instance_from_local_image('Password123', bs_uuid, image.uuid, vswitch_inv.uuid, zone_id, instance_offering.uuid, ecs_bandwidth=5,
-                                                           ecs_security_group_uuid=sg_inv.uuid, ecs_instance_name='zstack-ecs-test', ecs_console_password='123abc')
+    time.sleep(10)
+    hyb_ops.sync_ecs_image_from_remote(datacenter_inv.uuid)
+    ecs_image = hyb_ops.query_ecs_image_local()
+    for i in ecs_image:
+        if i.name == ecs_image_name:
+            image = i
+    ecs_inv = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, vswitch_inv.uuid, instance_offering.uuid,
+                                                         ecs_bandwidth=5, ecs_security_group_uuid=sg_inv.uuid, name='zstack-ecs-test')
     time.sleep(10)
     ecs_instance_local = hyb_ops.query_ecs_instance_local()
     ecs_inv = [e for e in ecs_instance_local if e.name == 'zstack-ecs-test'][0]
