@@ -183,13 +183,16 @@
         <l2VlanNetwork name="$l2PublicNetworkName" description="L2 vlan for public network"
           physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2PublicVlan">
           <l3Networks>
-            <l3BasicNetwork name="$l3PublicNetworkName" description = "L3 Network with Vlan for public network">
+            <l3BasicNetwork name="$l3PublicNetworkName" system="True" description = "L3 Network with Vlan for public network">
               <ipRange name="$ipRangeName" startIp="$ipRangeStartIp" endIp="$ipRangeEndIp"
                gateway="$ipRangeGateway" netmask="$ipRangeNetmask"/>
               <dns>$DNSServer</dns> 
               <networkService provider="vrouter">
                 <serviceType>DHCP</serviceType>
                 <serviceType>DNS</serviceType>
+              </networkService>
+              <networkService provider="SecurityGroup">
+                <serviceType>SecurityGroup</serviceType>
               </networkService>
             </l3BasicNetwork>
           </l3Networks>
