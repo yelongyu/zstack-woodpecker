@@ -34,8 +34,9 @@ def test():
     cond = res_ops.gen_query_conditions('uuid', '=', pri_l3_uuid1)
     first_zstack_cidrs = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0].ipRanges[0].networkCidr
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco2_ip
-    l3_uuid2 = test_lib.lib_get_l3_by_name(os.environ.get('l3VlanDNATNetworkName')).uuid
     pri_l3_uuid2 = test_lib.lib_get_l3_by_name(os.environ.get('l3VlanDNATNetworkName')).uuid
+    cond = res_ops.gen_query_conditions('name', '=', 'virtual-router-vm')
+    l3_uuid2  = res_ops.query_resource(res_ops.VR_OFFERING, cond)[0].publicNetworkUuid    
     vip2 = test_stub.create_vip('ipsec2_vip', l3_uuid2)
     cond = res_ops.gen_query_conditions('uuid', '=', pri_l3_uuid2)
     second_zstack_cidrs = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0].ipRanges[0].networkCidr
