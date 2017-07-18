@@ -312,7 +312,7 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
         cmd = 'echo mount %s:%s /storage >> /etc/rc.local' % (nfsIP, nfsPath)
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
-        cmd = 'chmod a+x /etc/rc.local /etc/rc.d/rc.local' % (nfsIP, nfsPath)
+        cmd = 'chmod a+x /etc/rc.local /etc/rc.d/rc.local'
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 	cmd = 'mount %s:%s /storage' % (nfsIP, nfsPath)
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
