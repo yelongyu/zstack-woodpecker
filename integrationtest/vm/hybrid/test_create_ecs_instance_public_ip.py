@@ -66,8 +66,8 @@ def test():
     for i in ecs_image:
         if i.name == ecs_image_name:
             image = i
-    ecs_inv = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, vswitch_inv.uuid, instance_offering.uuid,
-                                                         ecs_bandwidth=5, ecs_security_group_uuid=sg_inv.uuid, name='zstack-ecs-test')
+    ecs_inv = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, vswitch_inv.uuid, instance_offering.uuid, ecs_bandwidth=5,
+                                                         ecs_security_group_uuid=sg_inv.uuid, allocate_public_ip='true', name='zstack-ecs-test')
     time.sleep(10)
     ecs_instance_local = hyb_ops.query_ecs_instance_local()
     ecs_inv = [e for e in ecs_instance_local if e.name == 'zstack-ecs-test'][0]
