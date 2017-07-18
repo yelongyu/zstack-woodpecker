@@ -151,7 +151,7 @@
           </hosts>
           <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
           <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
-          <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
+          <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
           <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
           <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
           <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
@@ -172,7 +172,7 @@
                 startIp="$ipRangeManagementStartIp" endIp="$ipRangeManagementEndIp" gateway="$ipRangeManagementGateway"
                 netmask="$ipRangeManagementNetmask" />
               <dns>$DNSServer</dns>
-              <networkService provider="vrouter">
+              <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
                 <serviceType>DNS</serviceType>
               </networkService>
