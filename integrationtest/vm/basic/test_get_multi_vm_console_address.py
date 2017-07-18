@@ -15,7 +15,7 @@ vms = []
 
 def test():
     global vms
-    for i in range(12):
+    for i in range(6):
         vms.append(test_stub.create_vm())
 
     session_uuid = acc_ops.login_as_admin()
