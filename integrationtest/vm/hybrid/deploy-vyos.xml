@@ -253,16 +253,17 @@
         <l2VlanNetwork name="$l2VlanNetworkName1" description="guest l2 vlan network"
           physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan1">
           <l3Networks>
-            <l3BasicNetwork name="$l3VlanNetworkName1" description = "guest test vlan network with DHCP DNS and IPsec" domain_name="$L3VlanNetworkDomainName1">
+            <l3BasicNetwork name="$l3VlanNetworkName1" description = "guest test vlan network with DHCP DNS and SNAT" domain_name="$L3VlanNetworkDomainName1">
               <ipRange name="$vlanIpRangeName1" startIp="$vlanIpRangeStart1" endIp="$vlanIpRangeEnd1"
                gateway="$vlanIpRangeGateway1" netmask="$vlanIpRangeNetmask1"/>
               <dns>$DNSServer</dns> 
               <networkService provider="vrouter">
                 <serviceType>DHCP</serviceType>
                 <serviceType>DNS</serviceType>
-                <serviceType>IPsec</serviceType>
+                <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
+                <serviceType>IPsec</serviceType>
               </networkService>
               <networkService provider="SecurityGroup">
                 <serviceType>SecurityGroup</serviceType>
