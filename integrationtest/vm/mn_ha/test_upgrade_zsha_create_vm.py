@@ -35,14 +35,14 @@ def test():
         test_util.test_fail("management node VM was destroyed after upgrade zsha")
     if new_mn_host[0].ip_ != mn_vm_host[0].ip_:
         test_util.test_fail('management node VM starts on another host after upgrade zsha')
-    else:
-        try:
-            vm = test_stub.create_basic_vm()
-            vm.check()
-            vm.destroy()
-        except:
-            test_util.test_fail('Fail to create vm after mn is ready')
-        test_util.test_pass('Create VM Test Success')
+
+    test_stub.ensure_pss_connected()
+    test_stub.ensure_bss_connected()
+
+    vm = test_stub.create_basic_vm()
+    vm.check()
+    vm.destroy()
+    test_util.test_pass('Create VM Test Success')
 
 #Will be called what ever test result is
 def env_recover():

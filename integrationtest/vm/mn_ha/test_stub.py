@@ -398,3 +398,23 @@ def skip_if_vr_not_vyos(vr_image_name):
             break
     else:
         test_util.test_skip("not found vrouter image based on image name judgement. Therefore, skip test")
+
+def ensure_pss_connected():
+    ps_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+    for ps in ps_list:
+        for i in range(180):
+            if "connected" in lower(ps.status):
+                break
+            time.sleep(1)
+        else:
+            test_util.test_fail("ps status didn't change to Connected within 180s, therefore, failed")
+
+def ensure_bss_connected():
+    bs_list = res_ops.query_resource(res_ops.BACKUP_STORAGE)
+    for bs in bs_list:
+        for i in range(180):
+            if "connected" in lower(bs.status):
+                break
+            time.sleep(1)
+        else:
+            test_util.test_fail("bs status didn't change to Connected within 180s, therefore, failed")

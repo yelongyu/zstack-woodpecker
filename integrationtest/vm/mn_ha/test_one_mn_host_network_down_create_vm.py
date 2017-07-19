@@ -53,18 +53,10 @@ def test():
     except:
         test_util.test_fail("management node does not recover after its former host's network down")
 
-    test_util.test_logger("try to create vm, timeout is 30s")
-    time_out = 30
-    while time_out > 0:
-        try:
-            vm = test_stub.create_basic_vm()
-            break
-        except:
-            time.sleep(1)
-            time_out -= 1
-    if time_out == 0:
-        test_util.test_fail('Fail to create vm after mn is ready')
+    test_stub.ensure_pss_connected()
+    test_stub.ensure_bss_connected()
 
+    vm = test_stub.create_basic_vm()
     vm.check()
     vm.destroy()
 
