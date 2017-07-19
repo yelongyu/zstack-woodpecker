@@ -17,6 +17,9 @@ ipRangeEndIp = IP_END
 ipRangeNetmask = NETMASK
 ipRangeGateway = GATEWAY
 
-Ecs_imageName = ECS_IMAGE_NAME
+ecs_imageId = ECS_IMAGE_NAME
+
+ecs_vpcId = vpc-uf67vuravjbm9ncyudc9u
+vpn_gatewayId = vpn-uf6pq39bwve1icth6con6
 
 l2PublicVlan = 3

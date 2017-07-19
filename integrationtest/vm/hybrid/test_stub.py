@@ -14,6 +14,7 @@ import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
+import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
@@ -90,3 +91,20 @@ def create_vr_vm(test_obj_dict, l3_name, session_uuid = None):
 
     return vr
 
+def create_vip(vip_name=None, l3_uuid=None, session_uuid = None):
+    if not vip_name:
+        vip_name = 'test vip'
+    if not l3_uuid:
+        l3_name = os.environ.get('l3PublicNetworkName')
+        l3_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+
+    vip_creation_option = test_util.VipOption()
+    vip_creation_option.set_name(vip_name)
+    vip_creation_option.set_l3_uuid(l3_uuid)
+    vip_creation_option.set_session_uuid(session_uuid)
+
+    vip = zstack_vip_header.ZstackTestVip()
+    vip.set_creation_option(vip_creation_option)
+    vip.create()
+
+    return vip

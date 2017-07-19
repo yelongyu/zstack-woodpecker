@@ -34,7 +34,7 @@ def test():
     global vpc_inv
     global ecs_inv
     datacenter_type = os.getenv('datacenterType')
-    ecs_image_name = os.getenv("Ecs_imageName")
+    ecs_image_id = os.getenv('ecs_imageId')
 #     cond_image = res_ops.gen_query_conditions('name', '=', os.getenv('imageName_i_c7'))
 #     image =  res_ops.query_resource(res_ops.IMAGE, cond_image)[0]
 #     bs_uuid = image.backupStorageRefs[0].backupStorageUuid
@@ -64,7 +64,7 @@ def test():
     hyb_ops.sync_ecs_image_from_remote(datacenter_inv.uuid)
     ecs_image = hyb_ops.query_ecs_image_local()
     for i in ecs_image:
-        if i.name == ecs_image_name:
+        if i.ecsImageId == ecs_image_id:
             image = i
     ecs_inv = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, vswitch_inv.uuid, instance_offering.uuid,
                                                          ecs_bandwidth=5, ecs_security_group_uuid=sg_inv.uuid, name='zstack-ecs-test')

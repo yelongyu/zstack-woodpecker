@@ -327,6 +327,44 @@ def create_vpc_virtualrouter_entry_remote(dest_cidr_block, vrouter_uuid, vrouter
     test_util.test_logger('[VPC VirtualRouter Entry Remote:] %s %s %s %s %s is created.' % (dest_cidr_block, vrouter_uuid, vrouter_type, next_hop_type, next_hop_uuid))
     return evt.inventory
 
+def create_vpn_ipsec_config(name, pfs='group2', enc_alg='3des', auth_alg='sha1', session_uuid=None):
+    action = api_actions.CreateVpnIpsecConfigAction()
+    action.pfs = pfs
+    action.encAlg = enc_alg
+    action.authAlg = auth_alg
+    test_util.action_logger('Create [VPN IPsec Config:] %s %s %s %s' % (name, pfs, enc_alg, auth_alg))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[VPN IPsec Config:] %s %s %s %s is created.' % (name, pfs, enc_alg, auth_alg))
+    return evt.inventory
+
+def create_vpn_ike_ipsec_config(name, psk, pfs='group2', enc_alg='3des', auth_alg='sha1', version='ikev1', mode='main', session_uuid=None):
+    action = api_actions.CreateVpnIkeConfigAction()
+    action.psk = psk
+    action.pfs = pfs
+    action.encAlg = enc_alg
+    action.authAlg = auth_alg
+    action.version = version
+    action.mode = mode
+    test_util.action_logger('Create [VPN Ike Config:] %s %s %s %s %s %s %s' % (name, psk, pfs, enc_alg, auth_alg, version, mode))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[VPN Ike Config:] %s %s %s %s %s %s %s is created.' % (name, psk, pfs, enc_alg, auth_alg, version, mode))
+    return evt.inventory
+
+def create_vpc_vpn_connection(user_gatway_uuid, vpn_gateway_uuid, name, local_cidr, remote_cidr, ike_config_uuid, ipsec_config_uuid, active='true', session_uuid=None):
+    action = api_actions.CreateVpcVpnConnectionRemoteAction()
+    action.userGatewayUuid = user_gatway_uuid
+    action.vpnGatewayUuid = vpn_gateway_uuid
+    action.name = name
+    action.localCidr = local_cidr
+    action.remoteCidr = remote_cidr
+    action.ikeConfUuid = ike_config_uuid
+    action.ipsecConfUuid = ipsec_config_uuid
+    active = active
+    test_util.action_logger('Create [VPC VPN Connection:] %s %s' % (vpn_gateway_uuid, user_gatway_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[VPC VPN Connection:] %s %s is created.' % (vpn_gateway_uuid, user_gatway_uuid))
+    return evt.inventory
+
 def create_vpc_user_vpn_gateway(data_center_uuid, gw_ip, gw_name, session_uuid=None):
     action = api_actions.CreateVpcUserVpnGatewayRemoteAction()
     action.dataCenterUuid = data_center_uuid
@@ -497,9 +535,10 @@ def del_hybrid_eip_local(uuid, eip_type='aliyun', session_uuid=None):
     test_util.test_logger('[Hybrid Eip in local:] %s is deleted.' % uuid)
     return evt
 
-def sync_ecs_image_from_remote(datacenter_uuid, session_uuid=None):
+def sync_ecs_image_from_remote(datacenter_uuid, image_type='self', session_uuid=None):
     action = api_actions.SyncEcsImageFromRemoteAction()
     action.dataCenterUuid = datacenter_uuid
+    action.type = image_type
     test_util.action_logger('Sync [Ecs Image From Remote:] %s' % (datacenter_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt

@@ -172,6 +172,10 @@
                 startIp="$ipRangeManagementStartIp" endIp="$ipRangeManagementEndIp" gateway="$ipRangeManagementGateway"
                 netmask="$ipRangeManagementNetmask" />
               <dns>$DNSServer</dns>
+              <networkService provider="vrouter">
+                <serviceType>DHCP</serviceType>
+                <serviceType>DNS</serviceType>
+              </networkService>
             </l3BasicNetwork>
           </l3Networks>
         </l2NoVlanNetwork>
