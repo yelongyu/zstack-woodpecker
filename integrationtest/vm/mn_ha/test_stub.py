@@ -388,3 +388,13 @@ def create_ha_vm(disk_offering_uuids=None, session_uuid = None):
     vm = create_basic_vm(disk_offering_uuids=disk_offering_uuids, session_uuid=session_uuid)
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
     return vm
+
+def skip_if_vr_not_vyos(vr_image_name):
+    cond = res_ops.gen_query_conditions('name', '=', vr_image_name)
+    vr_urls_list = res_ops.query_resource_fields(res_ops.IMAGE, cond, None, ['url'])
+    for vr_url in vr_urls_list:
+        if "vrouter" in vr_url:
+            test_util.test_logger("find vrouter image. Therefore, no need to skip")
+            break
+    else:
+        test_util.test_skip("not found vrouter image based on image name judgement. Therefore, skip test")

@@ -25,6 +25,8 @@ def test():
     global vm
     global mn_host_list
     global need_recover_mn_host_list
+
+    test_stub.skip_if_vr_not_vyos("vr")
     mn_host_list = test_stub.get_mn_host(test_lib.all_scenario_config, test_lib.scenario_file)
     mn_host_num = len(mn_host_list)
     test_mn_host_list = random.sample(range(mn_host_num), (mn_host_num + 1) / 2)
