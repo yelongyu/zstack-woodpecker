@@ -402,29 +402,29 @@ def skip_if_vr_not_vyos(vr_image_name):
 def ensure_pss_connected():
     ps_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
     for ps in ps_list:
-        for i in range(180):
+        for i in range(300):
             if "connected" in ps.status.lower():
                 break
             time.sleep(1)
         else:
-            test_util.test_fail("ps status didn't change to Connected within 180s, therefore, failed")
+            test_util.test_fail("ps status didn't change to Connected within 300s, therefore, failed")
 
 def ensure_bss_connected():
     bs_list = res_ops.query_resource(res_ops.BACKUP_STORAGE)
     for bs in bs_list:
-        for i in range(180):
+        for i in range(300):
             if "connected" in bs.status.lower():
                 break
             time.sleep(1)
         else:
-            test_util.test_fail("bs status didn't change to Connected within 180s, therefore, failed")
+            test_util.test_fail("bs status didn't change to Connected within 300s, therefore, failed")
 
 def ensure_hosts_connected():
     host_list = res_ops.query_resource(res_ops.HOST)
     for host in host_list:
-        for i in range(180):
+        for i in range(300):
             if "connected" in host.status.lower():
                 break
             time.sleep(1)
         else:
-            test_util.test_fail("host status didn't change to Connected within 180s, therefore, failed")
+            test_util.test_fail("host status didn't change to Connected within 300s, therefore, failed")
