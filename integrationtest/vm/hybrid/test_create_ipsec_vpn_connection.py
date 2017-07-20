@@ -23,6 +23,7 @@ test_stub = test_lib.lib_get_test_stub()
 sg_inv = None
 ecs_inv = None
 ipsec_inv = None
+bucket_inv = None
 ecs_eip_inv = None
 vswitch_inv = None
 user_vpn_gw_inv = None
@@ -36,6 +37,7 @@ def test():
     global ecs_inv
     global ecs_eip_inv
     global ipsec_inv
+    global bucket_inv
     global vswitch_inv
     global user_vpn_gw_inv
     global route_entry_inv
@@ -115,9 +117,9 @@ def test():
     # Create vSwitch
     hyb_ops.sync_ecs_vswitch_from_remote(datacenter_inv.uuid)
     vswitch_local = hyb_ops.query_ecs_vswitch_local()
-    ecs_vswitch = [vs for vs in vswitch_local if vs.cidrBlock == '192.168.252.0/24'][0]
+    ecs_vswitch = [vs for vs in vswitch_local if vs.cidrBlock == '192.168.252.0/24']
     if ecs_vswitch:
-        vswitch_inv = ecs_vswitch
+        vswitch_inv = ecs_vswitch[0]
     else:
         vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'zstack-test-vswitch', '192.168.252.0/24')
         time.sleep(5)
@@ -151,8 +153,12 @@ def test():
     ipsec_vpn_inv_connection = hyb_ops.create_vpc_vpn_connection(user_vpn_gw_inv.uuid, vpn_gateway.uuid, 'zstack-test-ipsec-vpn-connection', '192.168.252.0/24',
                                       zstack_cidrs, vpn_ike_config.uuid, vpn_ipsec_config.uuid)
     # Create ZStack IPsec Vpn connection
-    ipsec_inv = ipsec_ops.create_ipsec_connection('ipsec', pri_l3_uuid, vpn_gateway.publicIp, 'zstack.hybrid.test123', vip.uuid, ['192.168.252.0/24'], ike_dh_group=2,
-                                      ike_encryption_algorithm='3des', policy_encryption_algorithm='3des')
+    ipsec_conntion = hyb_ops.query_ipsec_connection()
+    if ipsec_conntion:
+        ipsec_inv = ipsec_conntion[0]
+    else:
+        ipsec_inv = ipsec_ops.create_ipsec_connection('ipsec', pri_l3_uuid, vpn_gateway.publicIp, 'zstack.hybrid.test123', vip.uuid, ['192.168.252.0/24'],
+                                                      ike_dh_group=2, ike_encryption_algorithm='3des', policy_encryption_algorithm='3des')
     # Add route entry
     route_entry_inv = hyb_ops.create_aliyun_vpc_virtualrouter_entry_remote(zstack_cidrs.replace('1/', '0/'), vr.uuid, vrouter_type='vrouter', next_hop_type='Tunnel', next_hop_uuid=vpn_gateway.uuid)
     ping_ecs_cmd = "sshpass -p password ssh -o StrictHostKeyChecking=no root@%s 'ping %s -c 5 | grep time='" % (vm_ip, ecs_inv.privateIpAddress)

@@ -309,9 +309,9 @@ def sync_aliyun_virtual_router_from_remote(vpc_uuid, session_uuid=None):
 
 def sync_router_entry_from_remote(vrouter_uuid, vrouter_type, session_uuid=None):
     action = api_actions.SyncAliyunRouteEntryFromRemoteAction()
-    action.uuid = vrouter_uuid
+    action.vRouterUuid = vrouter_uuid
     action.vRouterType = vrouter_type
-    test_util.action_logger('Sync [Router Entry From Remote:] %s' % (vrouter_uuid))
+    test_util.action_logger('Sync [Route Entry From Remote:] %s' % (vrouter_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt
 
@@ -758,6 +758,13 @@ def query_oss_bucket_file_name(session_uuid=None):
     action = api_actions.QueryOssBucketFileNameAction()
     action.conditions = []
     test_util.action_logger('Query Oss Bucket File Name')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def query_ipsec_connection(session_uuid=None):
+    action = api_actions.QueryIPSecConnectionAction()
+    action.conditions = []
+    test_util.action_logger('Query IPsec Connection')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
