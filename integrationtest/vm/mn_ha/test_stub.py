@@ -403,7 +403,7 @@ def ensure_pss_connected():
     ps_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
     for ps in ps_list:
         for i in range(180):
-            if "connected" in lower(ps.status):
+            if "connected" in ps.status.lower():
                 break
             time.sleep(1)
         else:
