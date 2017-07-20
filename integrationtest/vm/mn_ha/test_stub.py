@@ -413,7 +413,7 @@ def ensure_bss_connected():
     bs_list = res_ops.query_resource(res_ops.BACKUP_STORAGE)
     for bs in bs_list:
         for i in range(180):
-            if "connected" in lower(bs.status):
+            if "connected" in bs.status.lower():
                 break
             time.sleep(1)
         else:
