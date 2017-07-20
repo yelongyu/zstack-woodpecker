@@ -418,3 +418,13 @@ def ensure_bss_connected():
             time.sleep(1)
         else:
             test_util.test_fail("bs status didn't change to Connected within 180s, therefore, failed")
+
+def ensure_hosts_connected():
+    host_list = res_ops.query_resource(res_ops.HOST)
+    for host in host_list:
+        for i in range(180):
+            if "connected" in host.status.lower():
+                break
+            time.sleep(1)
+        else:
+            test_util.test_fail("host status didn't change to Connected within 180s, therefore, failed")
