@@ -19,8 +19,8 @@ ipRangeGateway = GATEWAY
 
 ecs_imageId = ECS_IMAGE_NAME
 
-ecs_vpcId = vpc-uf67vuravjbm9ncyudc9u
-vpn_gatewayId = vpn-uf6pq39bwve1icth6con6
-vpc_vrId = vrt-uf6bni26imz6pxa3557c3
+ecs_vpcId = EcsVpcId
+vpn_gatewayId = VpnGatewayId
+vpc_vrId = VpcVrId
 
 l2PublicVlan = 3
