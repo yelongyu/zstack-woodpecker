@@ -25,6 +25,11 @@ def test():
     ks_existed = hyb_ops.query_aliyun_key_secret()
     if not ks_existed:
         ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
+    # Clear datacenter remained in local
+    datacenter_local = hyb_ops.query_datacenter_local()
+    if datacenter_local:
+        for d in datacenter_local:
+            hyb_ops.del_datacenter_in_local(d.uuid)
     datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
     regions = [ i.regionId for i in datacenter_list]
     for r in regions:

@@ -79,8 +79,8 @@ def test():
     # Add Aliyun key & secret
     if not ks_existed:
         ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
-    datacenter_local = hyb_ops.query_datacenter_local()
     # Clear datacenter remained in local
+    datacenter_local = hyb_ops.query_datacenter_local()
     if datacenter_local:
         for d in datacenter_local:
             hyb_ops.del_datacenter_in_local(d.uuid)
