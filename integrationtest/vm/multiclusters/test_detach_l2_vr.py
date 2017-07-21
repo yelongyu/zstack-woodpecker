@@ -62,7 +62,10 @@ def test():
     vr = vrs[0]
     cluster_uuid = vr.clusterUuid
     net_ops.detach_l2(l2_net_uuid, cluster_uuid)
-    vr = test_lib.lib_find_vr_by_l3_uuid(l3_net_uuid)[0]
+    vrs = test_lib.lib_find_vr_by_l3_uuid(l3_net_uuid)
+    if len(vrs) == 0:
+        test_util.test_skip("skip the test for non vr")
+    vr = vrs[0]
     if vr.clusterUuid == cluster_uuid:
         test_util.test_logger('vr is expected to migrate to another cluster')
     vm.destroy()
