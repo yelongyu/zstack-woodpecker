@@ -31,14 +31,14 @@ def test():
     nic_name = "eth0"
     if test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
         nic_name = "zsn0"
-
+    public_l2_vlan = int(os.getenv('l2PublicVlan'))
     #This vlan creation is not a must, if testing is under nested virt env. But it is required on physical host without enough physcial network devices and your test execution machine is not the same one as Host machine. 
     #linux.create_vlan_eth("eth0", 10, "10.0.0.200", "255.255.255.0")
     #linux.create_vlan_eth("eth0", 11, "10.0.1.200", "255.255.255.0")
     #no matter if current host is a ZStest host, we need to create 2 vlan devs for future testing connection for novlan test cases.
     linux.create_vlan_eth(nic_name, 10)
     linux.create_vlan_eth(nic_name, 11)
-    linux.create_vlan_eth(nic_name, 3)
+    linux.create_vlan_eth(nic_name, public_l2_vlan)
 
     #If test execution machine is not the same one as Host machine, deploy work is needed to separated to 2 steps(deploy_test_agent, execute_plan_without_deploy_test_agent). And it can not directly call SetupAction.run()
     test_lib.setup_plan.deploy_test_agent()
@@ -53,7 +53,7 @@ def test():
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd)
         cmd.vlan = 11
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd)
-        cmd.vlan = 3
+        cmd.vlan = public_l2_vlan
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd)
 
     test_lib.setup_plan.execute_plan_without_deploy_test_agent()
