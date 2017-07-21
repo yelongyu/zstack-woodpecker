@@ -12,6 +12,7 @@ import zstackwoodpecker.operations.hybrid_operations as hyb_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import time
 import os
+import commands
 
 date_s = time.strftime('%m%d-%H%M%S', time.localtime())
 test_obj_dict = test_state.TestStateDict()
@@ -65,6 +66,8 @@ def test():
     time.sleep(10)
     vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'zstack-test-vswitch', '172.18.1.0/24')
     sg_inv = hyb_ops.create_ecs_security_group_remote('sg_for_test', vpc_inv.uuid)
+    hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'ingress', 'ALL', '-1/-1', '0.0.0.0/0', 'accept', 'intranet', '10')
+    hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'egress', 'ALL', '-1/-1', '0.0.0.0/0', 'accept', 'intranet', '10')
     time.sleep(10)
     hyb_ops.sync_ecs_image_from_remote(datacenter_inv.uuid)
     ecs_image = hyb_ops.query_ecs_image_local()
@@ -78,6 +81,14 @@ def test():
     ecs_inv = [e for e in ecs_instance_local if e.name == 'zstack-ecs-test'][0]
     eip_local = hyb_ops.query_hybrid_eip_local()
     ecs_eip = [e for e in eip_local if e.allocateResourceUuid == ecs_inv.uuid][0]
+    cmd = "sshpass -p Password123 ssh -o StrictHostKeyChecking=no root@%s 'ls /'" % ecs_eip.eipAddress
+    for _ in xrange(60):
+        cmd_status = commands.getstatusoutput(cmd)[0]
+        if cmd_status == 0:
+            break
+        else:
+            time.sleep(3)
+    assert cmd_status == 0, "Login Ecs via public ip failed!"
     hyb_ops.del_hybrid_eip_remote(ecs_eip.uuid)
     test_util.test_pass('Create Ecs Instance with Public IP Test Success')
 

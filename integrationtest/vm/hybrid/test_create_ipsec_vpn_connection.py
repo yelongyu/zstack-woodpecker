@@ -160,7 +160,7 @@ def test():
         ipsec_inv = ipsec_ops.create_ipsec_connection('ipsec', pri_l3_uuid, vpn_gateway.publicIp, 'zstack.hybrid.test123', vip.uuid, ['192.168.252.0/24'],
                                                       ike_dh_group=2, ike_encryption_algorithm='3des', policy_encryption_algorithm='3des')
     # Add route entry
-    route_entry_inv = hyb_ops.create_aliyun_vpc_virtualrouter_entry_remote(zstack_cidrs.replace('1/', '0/'), vr.uuid, vrouter_type='vrouter', next_hop_type='Tunnel', next_hop_uuid=vpn_gateway.uuid)
+    route_entry_inv = hyb_ops.create_aliyun_vpc_virtualrouter_entry_remote(zstack_cidrs.replace('1/', '0/'), vr.uuid, vrouter_type='vrouter', next_hop_type='VpnGateway', next_hop_uuid=vpn_gateway.uuid)
     ping_ecs_cmd = "sshpass -p password ssh -o StrictHostKeyChecking=no root@%s 'ping %s -c 5 | grep time='" % (vm_ip, ecs_inv.privateIpAddress)
     # ZStack VM ping Ecs
     ping_ecs_cmd_status = commands.getstatusoutput(ping_ecs_cmd)[0]
