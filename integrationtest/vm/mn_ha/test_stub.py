@@ -393,7 +393,7 @@ def skip_if_vr_not_vyos(vr_image_name):
     cond = res_ops.gen_query_conditions('name', '=', vr_image_name)
     vr_urls_list = res_ops.query_resource_fields(res_ops.IMAGE, cond, None, ['url'])
     for vr_url in vr_urls_list:
-        if "vrouter" in vr_url:
+        if "vrouter" in vr_url.url:
             test_util.test_logger("find vrouter image. Therefore, no need to skip")
             break
     else:
