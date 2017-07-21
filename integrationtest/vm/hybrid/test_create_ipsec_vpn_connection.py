@@ -21,6 +21,7 @@ ks_inv = None
 datacenter_inv = None
 test_stub = test_lib.lib_get_test_stub()
 sg_inv = None
+vm_inv = None
 ecs_inv = None
 ipsec_inv = None
 bucket_inv = None
@@ -34,6 +35,7 @@ def test():
     global ks_inv
     global datacenter_inv
     global sg_inv
+    global vm_inv
     global ecs_inv
     global ecs_eip_inv
     global ipsec_inv
@@ -46,11 +48,11 @@ def test():
     cond_offering = res_ops.gen_query_conditions('name', '=', os.getenv('instanceOfferingName_m'))
     instance_offering = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond_offering)[0]
     # Create VM
-    vm = test_stub.create_vlan_vm(os.environ.get('l3VlanNetworkName1'))
-    test_obj_dict.add_vm(vm)
-    vm.check()
-    vm_ip = vm.vm.vmNics[0].ip
-    pri_l3_uuid = vm.vm.vmNics[0].l3NetworkUuid
+    vm_inv = test_stub.create_vlan_vm(os.environ.get('l3VlanNetworkName1'))
+#     test_obj_dict.add_vm(vm_inv)
+    vm_inv.check()
+    vm_ip = vm_inv.vm.vmNics[0].ip
+    pri_l3_uuid = vm_inv.vm.vmNics[0].l3NetworkUuid
     vr = test_lib.lib_find_vr_by_l3_uuid(pri_l3_uuid)[0]
     l3_uuid = test_lib.lib_find_vr_pub_nic(vr).l3NetworkUuid
     vip_existed = res_ops.query_resource(res_ops.VIP)
@@ -105,7 +107,7 @@ def test():
     hyb_ops.sync_ecs_image_from_remote(datacenter_inv.uuid, image_type='system')
     ecs_image = hyb_ops.query_ecs_image_local()
     for i in ecs_image:
-        if i.platform == 'CentOS':
+        if i.platform == 'CentOS' and i.type == 'system':
             image = i
             break
     # Get Vpn gateway
@@ -130,7 +132,13 @@ def test():
     hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'egress', 'ALL', '-1/-1', '0.0.0.0/0', 'accept', 'intranet', '10')
     time.sleep(5)
     # Create Vpc User Gateway
-    user_vpn_gw_inv = hyb_ops.create_vpc_user_vpn_gateway(datacenter_inv.uuid, gw_ip=public_ip_list[0], gw_name="zstack-test-user-vpn-gateway")
+    hyb_ops.sync_vpc_user_vpn_gateway_from_remote(datacenter_inv.uuid)
+    user_vpn_gw_local = hyb_ops.query_vpc_user_vpn_gateway_local()
+    user_vpn_gw = [gw for gw in user_vpn_gw_local if gw.ip == public_ip_list[0]]
+    if user_vpn_gw:
+        user_vpn_gw_inv = user_vpn_gw[0]
+    else:
+        user_vpn_gw_inv = hyb_ops.create_vpc_user_vpn_gateway(datacenter_inv.uuid, gw_ip=public_ip_list[0], gw_name="zstack-test-user-vpn-gateway")
     # Create Ecs
     ecs_inv = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, vswitch_inv.uuid, instance_offering.uuid, ecs_bandwidth=5,
                                                          ecs_security_group_uuid=sg_inv.uuid, allocate_public_ip='true', name='zstack-ecs-test')
@@ -172,6 +180,10 @@ def test():
     test_util.test_pass('Create hybrid IPsec Vpn Connection Test Success')
 
 def env_recover():
+    global vm_inv
+    if vm_inv:
+        hyb_ops.destroy_vm_instance(vm_inv.vm.uuid)
+
     global ecs_inv
     global datacenter_inv
     if ecs_inv:
@@ -214,7 +226,7 @@ def env_recover():
 
     global route_entry_inv
     if route_entry_inv:
-        hyb_ops.del_aliyun_route_entry_remote(route_entry_inv.uuid)
+        hyb_ops.del_aliyun_route_entry_remote(route_entry_inv.uuid, 'vrouter')
 
     global user_vpn_gw_inv
     if user_vpn_gw_inv:

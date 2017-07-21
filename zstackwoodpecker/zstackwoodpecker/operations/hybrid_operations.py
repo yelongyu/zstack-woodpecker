@@ -395,12 +395,13 @@ def del_vpc_vpn_connection_remote(uuid, session_uuid=None):
     test_util.test_logger('[Vpc Vpn Connection Remote:] %s is deleted.' % (uuid))
     return evt
 
-def del_aliyun_route_entry_remote(uuid, session_uuid=None):
+def del_aliyun_route_entry_remote(uuid, route_entry_type, session_uuid=None):
     action = api_actions.DeleteAliyunRouteEntryRemoteAction()
     action.uuid = uuid
-    test_util.action_logger('Delete [Aliyun Router Entry Remote:] %s ' % (uuid))
+    action.type = route_entry_type
+    test_util.action_logger('Delete [Aliyun Route Entry Remote:] %s ' % (uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    test_util.test_logger('[Aliyun Router Entry Remote:] %s is deleted.' % (uuid))
+    test_util.test_logger('[Aliyun Route Entry Remote:] %s is deleted.' % (uuid))
     return evt
 
 def del_vpc_vpn_gateway_local(uuid, session_uuid=None):
@@ -441,6 +442,14 @@ def del_vpc_user_vpn_gateway_local(uuid, session_uuid=None):
     test_util.action_logger('Delete [Router Entry Remote:] %s ' % (uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Router Entry Remote:] %s is deleted.' % (uuid))
+    return evt
+
+def destroy_vm_instance(uuid, session_uuid=None):
+    action = api_actions.DestroyVmInstanceAction()
+    action.uuid = uuid
+    test_util.action_logger('Destroy [VM Instance:] %s ' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[VM Instance:] %s is destroyed.' % (uuid))
     return evt
 
 def create_ecs_security_group_remote(name, vpc_uuid, session_uuid=None):
