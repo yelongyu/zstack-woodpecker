@@ -90,6 +90,6 @@ def test():
 
 
 def env_recover():
-    test_lib.lib_error_cleanup(test_obj_dict)
     for maintenance_ps in maintenance_ps_list:
         ps_ops.change_primary_storage_state(maintenance_ps.uuid, state='enable')
+    test_lib.lib_error_cleanup(test_obj_dict)
