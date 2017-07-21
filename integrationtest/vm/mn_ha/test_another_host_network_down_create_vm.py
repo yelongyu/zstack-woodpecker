@@ -34,7 +34,7 @@ def test():
     test_util.test_logger("shutdown host's network [%s] that mn vm is not running on" % (test_host.ip_))
     test_stub.shutdown_host_network(test_host, test_lib.all_scenario_config)
     test_util.test_logger("wait for 20 seconds to see if management node VM starts on another host")
-    time.sleep(20)
+    test_stub.ensure_host_disconnected(test_host, 300)
     try:
         new_mn_host = test_stub.get_host_by_mn_vm(test_lib.all_scenario_config, test_lib.scenario_file)
         if len(new_mn_host) == 0:
@@ -48,7 +48,7 @@ def test():
 
     test_stub.ensure_pss_connected()
     test_stub.ensure_bss_connected()
-    test_stub.ensure_hosts_connected()
+    #test_stub.ensure_hosts_connected()
     vm = test_stub.create_basic_vm()
     vm.check()
     vm.destroy()
