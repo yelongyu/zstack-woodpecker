@@ -63,5 +63,6 @@ def test():
 
     test_lib.lib_set_allow_live_migration_local_storage('true')
     test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
+    test_lib.ensure_recover_script_l2_correct()
     test_util.test_pass('Suite Setup Success')
 
