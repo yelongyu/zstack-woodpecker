@@ -55,8 +55,8 @@ def test():
             region_id = r
 #     region_id = datacenter_list[0].regionId
     datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
-    bucket_inv = hyb_ops.create_oss_bucket_remote(datacenter_inv.uuid, 'zstack-test-%s-%s' % (date_s, region_id), 'created-by-zstack-for-test')
-    hyb_ops.attach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid)
+#     bucket_inv = hyb_ops.create_oss_bucket_remote(datacenter_inv.uuid, 'zstack-test-%s-%s' % (date_s, region_id), 'created-by-zstack-for-test')
+#     hyb_ops.attach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid)
     iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, region_id)
     zone_id = iz_list[0].zoneId
 #     hyb_ops.update_image_guestOsType(image.uuid, guest_os_type='CentOS')
@@ -125,14 +125,14 @@ def env_recover():
     if iz_inv:
         hyb_ops.del_identity_zone_in_local(iz_inv.uuid)
 
-    global bucket_inv
-    if bucket_inv:
-        bucket_file = hyb_ops.get_oss_bucket_file_from_remote(bucket_inv.uuid).files
-        if bucket_file:
-            for i in bucket_file:
-                hyb_ops.del_oss_bucket_file_remote(bucket_inv.uuid, i)
-        time.sleep(10)
-        hyb_ops.del_oss_bucket_remote(bucket_inv.uuid)
+#     global bucket_inv
+#     if bucket_inv:
+#         bucket_file = hyb_ops.get_oss_bucket_file_from_remote(bucket_inv.uuid).files
+#         if bucket_file:
+#             for i in bucket_file:
+#                 hyb_ops.del_oss_bucket_file_remote(bucket_inv.uuid, i)
+#         time.sleep(10)
+#         hyb_ops.del_oss_bucket_remote(bucket_inv.uuid)
     global datacenter_inv
     if datacenter_inv:
         hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
