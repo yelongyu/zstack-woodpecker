@@ -224,10 +224,6 @@ def env_recover():
         time.sleep(30)
         hyb_ops.del_ecs_security_group_remote(sg_inv.uuid)
 
-    global route_entry_inv
-    if route_entry_inv:
-        hyb_ops.del_aliyun_route_entry_remote(route_entry_inv.uuid, 'vrouter')
-
     global user_vpn_gw_inv
     if user_vpn_gw_inv:
         time.sleep(5)
@@ -237,6 +233,10 @@ def env_recover():
     if vswitch_inv:
         time.sleep(10)
         hyb_ops.del_ecs_vswitch_remote(vswitch_inv.uuid)
+
+    global route_entry_inv
+    if route_entry_inv:
+        hyb_ops.del_aliyun_route_entry_remote(route_entry_inv.uuid, 'vrouter')
 
     global iz_inv
     if iz_inv:
