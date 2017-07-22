@@ -10,12 +10,14 @@ import zstackwoodpecker.operations.node_operations as node_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import test_stub
-import random
-import time
-import os
+import threading
 
 vm = None
 vm2 = None
+
+def async_exec_reboot_vr(uuid):
+    vm_ops.reboot_vm(uuid)
+
 
 def test():
     global vm, vm2
@@ -25,7 +27,9 @@ def test():
     vr_vm = test_lib.lib_find_vr_by_vm(vm.vm)[0]
     vm.destroy()
 
-    vm_ops.reboot_vm(vr_vm.uuid)
+    t = threading.Thread(target=async_exec_reboot_vr, args=(vr_vm.uuid,))
+    t.start()
+
     vm2 = test_stub.create_basic_vm(wait_vr_running=False)
     vm2.check()
     vm2.destroy()
