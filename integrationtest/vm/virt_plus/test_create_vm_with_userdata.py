@@ -40,22 +40,28 @@ def test():
     time.sleep(60)
 
     vm_ip = vm.get_vm().vmNics[0].ip
-    ssh_cmd = 'ssh -i %s -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null test@%s echo pass' % (os.environ.get('sshkeyPriKey_file'), vm_ip)
-    process_result = test_stub.execute_shell_in_process(ssh_cmd, tmp_file)
+    ssh_cmd = 'ssh -i %s -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null test@%s' % (os.environ.get('sshkeyPriKey_file'), vm_ip)
+
+    cmd = 'echo pass'
+    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
         test_util.test_fail("fail to use ssh key connect to VM")
 
-    ssh_cmd = 'ssh -i %s -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null test@%s cat /tmp/helloworld_config' % (os.environ.get('sshkeyPriKey_file'), vm_ip)
-    process_result = test_stub.execute_shell_in_process(ssh_cmd, tmp_file)
+    cmd = '%s cat /tmp/helloworld_config' % ssh_cmd
+    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
         test_util.test_fail("fail to cat /tmp/helloworld_config")
 
-    ssh_cmd = 'ssh -i %s -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null test@%s find /tmp/temp' % (os.environ.get('sshkeyPriKey_file'), vm_ip)
-    process_result = test_stub.execute_shell_in_process(ssh_cmd, tmp_file)
+    cmd = '%s find /tmp/temp' % ssh_cmd
+    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
         test_util.test_fail("fail to find /tmp/temp")
 
     vm.destroy()
+    test_obj_dict.rm_vm(vm)
+    image.delete()
+    image.expunge()
+    test_obj_dict.rm_image(image)
     test_util.test_pass('Create VM with userdata  Success')
 
     #Will be called only if exception happens in test().
