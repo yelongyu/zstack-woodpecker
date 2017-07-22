@@ -21,6 +21,7 @@ def async_exec_reboot_vr(uuid):
 
 def test():
     global vm, vm2
+    test_stub.skip_if_vr_not_vyos("vr")
     test_lib.clean_up_all_vr()
     vm = test_stub.create_basic_vm()
     vm.check()
