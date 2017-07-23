@@ -19,6 +19,7 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
+import zstackwoodpecker.operations.hybrid_operations as hyb_ops
 
 Port = test_state.Port
 
@@ -35,6 +36,30 @@ denied_ports = Port.get_denied_ports()
 #rule5_ports = [20000, 28999, 30000]
 #test_stub.denied_ports = [101, 4999, 8990, 15000, 30001, 49999]
 target_ports = rule1_ports + rule2_ports + rule3_ports + rule4_ports + rule5_ports + denied_ports
+
+def create_vpc_vswitch_sg(iz_uuid, datacenter_uuid):
+    hyb_ops.sync_ecs_vpc_from_remote(datacenter_uuid)
+    vpc_all = hyb_ops.query_ecs_vpc_local()
+    ecs_vpc = [vpc for vpc in vpc_all if vpc.status.lower() == 'available']
+    if ecs_vpc:
+        vpc_inv = ecs_vpc[0]
+    else:
+        vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_uuid, 'vpc_for_test', '172.16.0.0/12')
+    time.sleep(10)
+    hyb_ops.sync_ecs_vpc_from_remote(datacenter_uuid)
+    vswitch_all = hyb_ops.query_ecs_vswitch_local()
+    vswitch = [vs for vs in vswitch_all if vs.ecsVpcUuid ==vpc_inv.uuid and vs.status.lower() == 'available']
+    if not vswitch:
+        vpc_cidr_list = vpc_inv.cidrBlock.split('.')
+        vpc_cidr_list[2] = '252'
+        vswitch_cidr = '.'.join(vpc_cidr_list)
+        hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_uuid, 'zstack-test-vswitch', vswitch_cidr)
+    hyb_ops.sync_ecs_security_group_from_remote(vpc_inv.uuid)
+    sg_all = hyb_ops.query_ecs_security_group_local()
+    ecs_security_group = [ sg for sg in sg_all if sg.name == 'zstack-test-ecs-security-group']
+    if not ecs_security_group:
+        hyb_ops.create_ecs_security_group_remote('zstack-test-ecs-security-group', vpc_inv.uuid)
+    time.sleep(10)
 
 def create_vlan_vm(l3_name=None, disk_offering_uuids=None, system_tags=None, session_uuid = None, instance_offering_uuid = None):
     image_name = os.environ.get('imageName_net')

@@ -15,6 +15,7 @@ import os
 
 date_s = time.strftime('%m%d-%H%M%S', time.localtime())
 test_obj_dict = test_state.TestStateDict()
+test_stub = test_lib.lib_get_test_stub()
 ks_inv = None
 datacenter_inv = None
 bucket_inv = None
@@ -61,11 +62,7 @@ def test():
     zone_id = iz_list[0].zoneId
 #     hyb_ops.update_image_guestOsType(image.uuid, guest_os_type='CentOS')
     iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, zone_id)
-    vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', '172.16.0.0/12')
-    time.sleep(10)
-    vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'zstack-test-vswitch', '172.18.1.0/24')
-    sg_inv = hyb_ops.create_ecs_security_group_remote('sg_for_test', vpc_inv.uuid)
-    time.sleep(10)
+    test_stub.create_vpc_vswitch_sg(iz_inv.uuid, datacenter_inv.uuid)
     hyb_ops.sync_ecs_image_from_remote(datacenter_inv.uuid)
     ecs_image = hyb_ops.query_ecs_image_local()
     for i in ecs_image:
@@ -93,18 +90,18 @@ def env_recover():
             else:
                 time.sleep(1)
         hyb_ops.del_ecs_instance(ecs_inv.uuid)
-    global sg_inv
-    if sg_inv:
-        time.sleep(30)
-        hyb_ops.del_ecs_security_group_remote(sg_inv.uuid)
-    global vswitch_inv
-    if vswitch_inv:
-        time.sleep(10)
-        hyb_ops.del_ecs_vswitch_remote(vswitch_inv.uuid)
-    global vpc_inv
-    if vpc_inv:
-        time.sleep(10)
-        hyb_ops.del_ecs_vpc_remote(vpc_inv.uuid)
+#     global sg_inv
+#     if sg_inv:
+#         time.sleep(30)
+#         hyb_ops.del_ecs_security_group_remote(sg_inv.uuid)
+#     global vswitch_inv
+#     if vswitch_inv:
+#         time.sleep(10)
+#         hyb_ops.del_ecs_vswitch_remote(vswitch_inv.uuid)
+#     global vpc_inv
+#     if vpc_inv:
+#         time.sleep(10)
+#         hyb_ops.del_ecs_vpc_remote(vpc_inv.uuid)
     global iz_inv
     if iz_inv:
         hyb_ops.del_identity_zone_in_local(iz_inv.uuid)

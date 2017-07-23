@@ -476,7 +476,7 @@ def create_ecs_security_group_rule_remote(group_uuid, direction, protocol, port_
     test_util.test_logger('[Ecs Security Group Rule Remote:] %s %s %s %s %s %s %s %s is created.' % (group_uuid, direction, protocol, port_range, cidr, policy, nic_type, priority))
     return evt.inventory
 
-def sync_security_group_from_remote(ecs_vpc_uuid, session_uuid=None):
+def sync_ecs_security_group_from_remote(ecs_vpc_uuid, session_uuid=None):
     action = api_actions.SyncEcsSecurityGroupFromRemoteAction()
     action.ecsVpcUuid = ecs_vpc_uuid
     test_util.action_logger('Sync [Security Group From Remote:] %s' % (ecs_vpc_uuid))

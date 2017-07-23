@@ -141,13 +141,22 @@ def test():
         user_vpn_gw_inv = hyb_ops.create_vpc_user_vpn_gateway(datacenter_inv.uuid, gw_ip=public_ip_list[0], gw_name="zstack-test-user-vpn-gateway")
     # Create Ecs
     ecs_inv = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, vswitch_inv.uuid, instance_offering.uuid, ecs_bandwidth=5,
-                                                         ecs_security_group_uuid=sg_inv.uuid, allocate_public_ip='true', name='zstack-ecs-test')
+                                                         ecs_security_group_uuid=sg_inv.uuid, name='zstack-ecs-test')
     time.sleep(10)
     # Get Ecs Public IP
-    ecs_instance_local = hyb_ops.query_ecs_instance_local()
-    ecs_inv = [e for e in ecs_instance_local if e.name == 'zstack-ecs-test'][0]
-    eip_local = hyb_ops.query_hybrid_eip_local()
-    ecs_eip_inv = [e for e in eip_local if e.allocateResourceUuid == ecs_inv.uuid][0]
+    hyb_ops.sync_hybrid_eip_from_remote(datacenter_inv.uuid)
+    eip_all = hyb_ops.query_hybrid_eip_local()
+    eip_available = [eip for eip in eip_all if eip.status.lower() == 'available']
+    if eip_available:
+        eip_inv = eip_available[0]
+    else:
+        eip_inv = hyb_ops.create_hybrid_eip(datacenter_inv.uuid, 'zstack-test-eip', '5')
+    hyb_ops.attach_hybrid_eip_to_ecs(eip_inv.uuid, ecs_inv.uuid)
+    time.sleep(5)
+#     ecs_instance_local = hyb_ops.query_ecs_instance_local()
+#     ecs_inv = [e for e in ecs_instance_local if e.name == 'zstack-ecs-test'][0]
+#     eip_local = hyb_ops.query_hybrid_eip_local()
+#     ecs_eip_inv = [e for e in eip_local if e.allocateResourceUuid == ecs_inv.uuid][0]
     time.sleep(10)
     # Get Aliyun virtual router
     hyb_ops.sync_aliyun_virtual_router_from_remote(vpc_inv.uuid)
@@ -173,7 +182,7 @@ def test():
     # ZStack VM ping Ecs
     ping_ecs_cmd_status = commands.getstatusoutput(ping_ecs_cmd)[0]
     assert ping_ecs_cmd_status == 0
-    ping_vm_cmd = "sshpass -p Password123 ssh -o StrictHostKeyChecking=no root@%s 'ping %s -c 5 | grep time='" % (ecs_eip_inv.eipAddress, vm_ip)
+    ping_vm_cmd = "sshpass -p Password123 ssh -o StrictHostKeyChecking=no root@%s 'ping %s -c 5 | grep time='" % (eip_inv.eipAddress, vm_ip)
     # Ecs ping ZStack VM
     ping_vm_cmd_status = commands.getstatusoutput(ping_vm_cmd)[0]
     assert ping_vm_cmd_status == 0
@@ -198,9 +207,9 @@ def env_recover():
                 time.sleep(1)
         hyb_ops.del_ecs_instance(ecs_inv.uuid)
 
-    global ecs_eip_inv
-    if ecs_eip_inv:
-        hyb_ops.del_hybrid_eip_remote(ecs_eip_inv.uuid)
+#     global ecs_eip_inv
+#     if ecs_eip_inv:
+#         hyb_ops.del_hybrid_eip_remote(ecs_eip_inv.uuid)
 
     global ipsec_inv
     if ipsec_inv:
