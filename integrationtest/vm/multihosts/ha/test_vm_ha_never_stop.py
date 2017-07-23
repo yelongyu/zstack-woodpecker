@@ -21,6 +21,7 @@ import os
 vm = None
 host_uuid = None
 host_ip = None
+host_port = None
 max_attempts = None
 storagechecker_timeout = None
 test_stub = test_lib.lib_get_test_stub()
@@ -29,6 +30,7 @@ def test():
     global vm
     global host_uuid
     global host_ip
+    global host_port
     global max_attempts
     global storagechecker_timeout
 
@@ -110,6 +112,7 @@ def error_cleanup():
     global vm
     global host_uuid
     global host_ip
+    global host_port
     global max_attempts
     global storagechecker_timeout
 
