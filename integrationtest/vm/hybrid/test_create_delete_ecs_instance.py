@@ -35,12 +35,6 @@ def test():
     global vpc_inv
     global ecs_inv
     datacenter_type = os.getenv('datacenterType')
-    ecs_image_id = os.getenv('ecs_imageId')
-#     cond_image = res_ops.gen_query_conditions('name', '=', os.getenv('imageName_i_c7'))
-#     image =  res_ops.query_resource(res_ops.IMAGE, cond_image)[0]
-#     bs_uuid = image.backupStorageRefs[0].backupStorageUuid
-    cond_offering = res_ops.gen_query_conditions('name', '=', os.getenv('instanceOfferingName_m'))
-    instance_offering = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond_offering)[0]
     ks_existed = hyb_ops.query_aliyun_key_secret()
     if not ks_existed:
         ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
@@ -62,53 +56,26 @@ def test():
     zone_id = iz_list[0].zoneId
 #     hyb_ops.update_image_guestOsType(image.uuid, guest_os_type='CentOS')
     iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, zone_id)
-    test_stub.create_vpc_vswitch_sg(iz_inv.uuid, datacenter_inv.uuid)
-    hyb_ops.sync_ecs_image_from_remote(datacenter_inv.uuid)
-    ecs_image = hyb_ops.query_ecs_image_local()
-    for i in ecs_image:
-        if i.ecsImageId == ecs_image_id:
-            image = i
-    ecs_inv = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, vswitch_inv.uuid, instance_offering.uuid,
-                                                         ecs_bandwidth=5, ecs_security_group_uuid=sg_inv.uuid, name='zstack-ecs-test')
-    time.sleep(10)
+    _ecs_inv = test_stub.create_ecs_instance(iz_inv.uuid, datacenter_inv.uuid)
     ecs_instance_local = hyb_ops.query_ecs_instance_local()
-    ecs_inv = [e for e in ecs_instance_local if e.name == 'zstack-ecs-test'][0]
+    ecs_inv = [e for e in ecs_instance_local if e.ecsInstanceId == _ecs_inv.ecsInstanceId][0]
     hyb_ops.stop_ecs_instance(ecs_inv.uuid)
     for _ in xrange(600):
         hyb_ops.sync_ecs_instance_from_remote(datacenter_inv.uuid)
-        ecs_inv = [e for e in hyb_ops.query_ecs_instance_local() if e.name == 'zstack-ecs-test'][0]
-        if ecs_inv.ecsStatus.lower() == "stopped":
+        ecs = [e for e in hyb_ops.query_ecs_instance_local() if e.ecsInstanceId == ecs_inv.ecsInstanceId][0]
+        if ecs.ecsStatus.lower() == "stopped":
             break
         else:
             time.sleep(1)
-    hyb_ops.del_ecs_instance(ecs_inv.uuid)
-    assert not [ e for e in hyb_ops.query_ecs_instance_local() if e.name == 'zstack-ecs-test']
+    hyb_ops.del_ecs_instance(ecs.uuid)
+    assert not [ e for e in hyb_ops.query_ecs_instance_local() if e.ecsInstanceId == ecs_inv.ecsInstanceId]
     test_util.test_pass('Create Delete Ecs Instance Test Success')
 
 def env_recover():
-#     global sg_inv
-#     if sg_inv:
-#         time.sleep(30)
-#         hyb_ops.del_ecs_security_group_remote(sg_inv.uuid)
-#     global vswitch_inv
-#     if vswitch_inv:
-#         time.sleep(10)
-#         hyb_ops.del_ecs_vswitch_remote(vswitch_inv.uuid)
-#     global vpc_inv
-#     if vpc_inv:
-#         time.sleep(10)
-#         hyb_ops.del_ecs_vpc_remote(vpc_inv.uuid)
     global iz_inv
     if iz_inv:
         hyb_ops.del_identity_zone_in_local(iz_inv.uuid)
-#     global bucket_inv
-#     if bucket_inv:
-#         bucket_file = hyb_ops.get_oss_bucket_file_from_remote(bucket_inv.uuid).files
-#         if bucket_file:
-#             for i in bucket_file:
-#                 hyb_ops.del_oss_bucket_file_remote(bucket_inv.uuid, i)
-#         time.sleep(10)
-#         hyb_ops.del_oss_bucket_remote(bucket_inv.uuid)
+
     global datacenter_inv
     if datacenter_inv:
         hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)

@@ -37,29 +37,64 @@ denied_ports = Port.get_denied_ports()
 #test_stub.denied_ports = [101, 4999, 8990, 15000, 30001, 49999]
 target_ports = rule1_ports + rule2_ports + rule3_ports + rule4_ports + rule5_ports + denied_ports
 
-def create_vpc_vswitch_sg(iz_uuid, datacenter_uuid):
+
+def create_ecs_instance(iz_uuid, datacenter_uuid, allocate_public_ip=False):
+    ecs_image_id = os.environ.get('ecs_imageId')
+    cond_offering = res_ops.gen_query_conditions('name', '=', os.environ.get('instanceOfferingName_m'))
+    instance_offering = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond_offering)[0]
     hyb_ops.sync_ecs_vpc_from_remote(datacenter_uuid)
     vpc_all = hyb_ops.query_ecs_vpc_local()
     ecs_vpc = [vpc for vpc in vpc_all if vpc.status.lower() == 'available']
     if ecs_vpc:
         vpc_inv = ecs_vpc[0]
     else:
-        vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_uuid, 'vpc_for_test', '172.16.0.0/12')
+        vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_uuid, 'zstack-test-vpc', '172.16.0.0/12')
     time.sleep(10)
-    hyb_ops.sync_ecs_vpc_from_remote(datacenter_uuid)
+    hyb_ops.sync_ecs_vswitch_from_remote(datacenter_uuid)
     vswitch_all = hyb_ops.query_ecs_vswitch_local()
-    vswitch = [vs for vs in vswitch_all if vs.ecsVpcUuid ==vpc_inv.uuid and vs.status.lower() == 'available']
-    if not vswitch:
+    vswitch = [vs for vs in vswitch_all if vs.ecsVpcUuid == vpc_inv.uuid and vs.status.lower() == 'available']
+    if vswitch:
+        vswitch_inv = vswitch[0]
+    else:
         vpc_cidr_list = vpc_inv.cidrBlock.split('.')
         vpc_cidr_list[2] = '252'
+        vpc_cidr_list[3] = '0/24'
         vswitch_cidr = '.'.join(vpc_cidr_list)
-        hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_uuid, 'zstack-test-vswitch', vswitch_cidr)
+        vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_uuid, 'zstack-test-vswitch', vswitch_cidr)
     hyb_ops.sync_ecs_security_group_from_remote(vpc_inv.uuid)
     sg_all = hyb_ops.query_ecs_security_group_local()
-    ecs_security_group = [ sg for sg in sg_all if sg.name == 'zstack-test-ecs-security-group']
-    if not ecs_security_group:
-        hyb_ops.create_ecs_security_group_remote('zstack-test-ecs-security-group', vpc_inv.uuid)
+    ecs_security_group = [ sg for sg in sg_all if sg.ecsVpcUuid == vpc_inv.uuid and sg.name == 'zstack-test-ecs-security-group']
+    if ecs_security_group:
+        sg_inv = ecs_security_group[0]
+    else:
+        sg_inv = hyb_ops.create_ecs_security_group_remote('zstack-test-ecs-security-group', vpc_inv.uuid)
+    time.sleep(5)
+    hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'ingress', 'ALL', '-1/-1', '0.0.0.0/0', 'accept', 'intranet', '10')
+    hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'egress', 'ALL', '-1/-1', '0.0.0.0/0', 'accept', 'intranet', '10')
+    hyb_ops.sync_ecs_image_from_remote(datacenter_uuid)
+    ecs_image = hyb_ops.query_ecs_image_local()
+    for i in ecs_image:
+        if i.ecsImageId == ecs_image_id:
+            image = i
+    if not allocate_public_ip:
+        ecs_inv = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, vswitch_inv.uuid, instance_offering.uuid,
+                                                         ecs_bandwidth=5, ecs_security_group_uuid=sg_inv.uuid, name='zstack-test-ecs-instance')
+    else:
+        ecs_inv = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, vswitch_inv.uuid, instance_offering.uuid, ecs_bandwidth=5,
+                                                         ecs_security_group_uuid=sg_inv.uuid, allocate_public_ip='true', name='zstack-test-ecs-instance')
     time.sleep(10)
+    return ecs_inv
+
+def delete_ecs_instance(datacenter_inv, ecs_inv):
+    hyb_ops.stop_ecs_instance(ecs_inv.uuid)
+    for _ in xrange(600):
+        hyb_ops.sync_ecs_instance_from_remote(datacenter_inv.uuid)
+        ecs = [e for e in hyb_ops.query_ecs_instance_local() if e.ecsInstanceId == ecs_inv.ecsInstanceId][0]
+        if ecs.ecsStatus.lower() == "stopped":
+            break
+        else:
+            time.sleep(1)
+    hyb_ops.del_ecs_instance(ecs.uuid)
 
 def create_vlan_vm(l3_name=None, disk_offering_uuids=None, system_tags=None, session_uuid = None, instance_offering_uuid = None):
     image_name = os.environ.get('imageName_net')

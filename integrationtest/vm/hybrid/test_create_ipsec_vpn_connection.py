@@ -141,7 +141,7 @@ def test():
         user_vpn_gw_inv = hyb_ops.create_vpc_user_vpn_gateway(datacenter_inv.uuid, gw_ip=public_ip_list[0], gw_name="zstack-test-user-vpn-gateway")
     # Create Ecs
     ecs_inv = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, vswitch_inv.uuid, instance_offering.uuid, ecs_bandwidth=5,
-                                                         ecs_security_group_uuid=sg_inv.uuid, name='zstack-ecs-test')
+                                                         ecs_security_group_uuid=sg_inv.uuid, name='zstack-test-ecs-instance')
     time.sleep(10)
     # Get Ecs Public IP
     hyb_ops.sync_hybrid_eip_from_remote(datacenter_inv.uuid)
@@ -200,12 +200,12 @@ def env_recover():
         hyb_ops.stop_ecs_instance(ecs_inv.uuid)
         for _ in xrange(600):
             hyb_ops.sync_ecs_instance_from_remote(datacenter_inv.uuid)
-            ecs_inv = [e for e in hyb_ops.query_ecs_instance_local() if e.name == 'zstack-ecs-test'][0]
-            if ecs_inv.ecsStatus.lower() == "stopped":
+            ecs = [e for e in hyb_ops.query_ecs_instance_local() if e.ecsInstanceId == ecs_inv.ecsInstanceId][0]
+            if ecs.ecsStatus.lower() == "stopped":
                 break
             else:
                 time.sleep(1)
-        hyb_ops.del_ecs_instance(ecs_inv.uuid)
+        hyb_ops.del_ecs_instance(ecs.uuid)
 
 #     global ecs_eip_inv
 #     if ecs_eip_inv:
