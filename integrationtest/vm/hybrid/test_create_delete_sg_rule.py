@@ -54,7 +54,12 @@ def test():
     else:
         vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', '172.16.0.0/12')
     time.sleep(5)
-    sg_inv = hyb_ops.create_ecs_security_group_remote('sg_for_test', vpc_inv.uuid)
+    hyb_ops.sync_ecs_security_group_from_remote(vpc_inv.uuid)
+    sg_all = hyb_ops.query_ecs_security_group_local()
+    ecs_security_group = [ sg for sg in sg_all if sg.name == 'zstack-test-ecs-security-group']
+    if not ecs_security_group:
+        sg_inv = hyb_ops.create_ecs_security_group_remote('zstack-test-ecs-security-group', vpc_inv.uuid)
+#     sg_inv = hyb_ops.create_ecs_security_group_remote('sg_for_test', vpc_inv.uuid)
     time.sleep(5)
     sg_rule_ingress = hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'ingress', 'TCP', '445/445', '0.0.0.0/0', 'drop', 'intranet', '1')
     sg_rule_egress = hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'egress', 'TCP', '80/80', '0.0.0.0/0', 'accept', 'intranet', '10')
@@ -65,14 +70,14 @@ def test():
     test_util.test_pass('Create Delete ECS Security Group Rule Test Success')
 
 def env_recover():
-    global sg_inv
-    if sg_inv:
-        time.sleep(10)
-        hyb_ops.del_ecs_security_group_remote(sg_inv.uuid)
-    global vpc_inv
-    if vpc_inv:
-        time.sleep(10)
-        hyb_ops.del_ecs_vpc_remote(vpc_inv.uuid)
+#     global sg_inv
+#     if sg_inv:
+#         time.sleep(10)
+#         hyb_ops.del_ecs_security_group_remote(sg_inv.uuid)
+#     global vpc_inv
+#     if vpc_inv:
+#         time.sleep(10)
+#         hyb_ops.del_ecs_vpc_remote(vpc_inv.uuid)
     global datacenter_inv
     if datacenter_inv:
         hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
