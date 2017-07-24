@@ -403,7 +403,7 @@ def find_ps_local():
         if ps.type == inventory.LOCAL_STORAGE_TYPE:
             return ps
     test_util.test_logger("Can not find local primary storage ")
-    return False
+    return None
 
 
 def find_ps_nfs():
@@ -412,7 +412,7 @@ def find_ps_nfs():
         if ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
             return ps
     test_util.test_logger("Can not find NFS primary storage ")
-    return False
+    return None
 
 
 def get_ps_vm_creation():
