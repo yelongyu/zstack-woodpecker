@@ -2584,6 +2584,42 @@ def lib_find_vr_by_vm(vm, session_uuid=None):
 
     return vrs
 
+def lib_find_flat_dhcp_vr_by_vm(vm, session_uuid=None):
+    '''
+    Find VM's all VRs and return a list, which include VR inventory objects.
+    If vm is VR, will return itself in a list.
+
+    params:
+        - vm: vm inventory object.
+        - session_uuid: [Optional] current session_uuid, default is admin.
+    '''
+    if lib_is_vm_vr(vm):
+        return [vm]
+
+    vm_l3s = []
+    for vm_nic in vm.vmNics:
+        vm_l3s.append(vm_nic.l3NetworkUuid)
+
+    #need to remove metaData l3NetworkUuid
+    tmp_l3_list = list(vm_l3s)
+    for l3_uuid in tmp_l3_list:
+        if not lib_does_l3_has_network_service(l3_uuid):
+            vm_l3s.remove(l3_uuid)
+
+    if not vm_l3s:
+        return []
+
+    cond = res_ops.gen_query_conditions('vmNics.l3NetworkUuid', 'in', \
+            ','.join(vm_l3s))
+    cond = res_ops.gen_query_conditions('vmNics.metaData', '>', '3', cond)
+    vrs = res_ops.query_resource(res_ops.APPLIANCE_VM, cond, session_uuid)
+
+    if not vrs:
+        test_util.test_logger("Cannot find VM: [%s] 's Virtual Router VM" \
+                % vm.uuid)
+
+    return vrs
+
 def lib_get_all_vr_l3_uuid():
     vr_l3 = []
     all_l3 = lib_get_l3s()
