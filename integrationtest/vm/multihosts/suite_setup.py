@@ -61,6 +61,7 @@ def test():
     for host in testHosts:
         os.system("bash %s %s" % (EXTRA_HOST_SETUP_SCRIPT, host.managementIp_))
 
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
     if test_lib.ver_ge_zstack_2_0(mn_ip):
         test_lib.lib_set_allow_live_migration_local_storage('true')
     test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
