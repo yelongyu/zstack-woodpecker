@@ -82,6 +82,7 @@ def test():
     #    test_util.test_fail('fail to ssh to VM')
     ssh_timeout = test_lib.SSH_TIMEOUT
     test_lib.SSH_TIMEOUT = 2400
+    test_lib.lib_set_vm_host_l2_ip(vm_inv)
     if not test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host_ip, vm_ip, 'root', 'password', cmd):
         test_lib.SSH_TIMEOUT = ssh_timeout
         test_util.test_fail("iso has not been failed to installed.")
