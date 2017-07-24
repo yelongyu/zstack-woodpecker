@@ -42,11 +42,6 @@ def test():
     vm_ip = vm.get_vm().vmNics[0].ip
     ssh_cmd = 'ssh -i %s -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null test@%s' % (os.environ.get('sshkeyPriKey_file'), vm_ip)
 
-    cmd = 'echo pass'
-    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
-    if process_result != 0:
-        test_util.test_fail("fail to use ssh key connect to VM")
-
     cmd = '%s cat /tmp/helloworld_config' % ssh_cmd
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
