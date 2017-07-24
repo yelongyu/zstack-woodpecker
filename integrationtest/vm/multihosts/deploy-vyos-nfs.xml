@@ -32,7 +32,6 @@
     <zstackInstallPath>$zstackInstallPath</zstackInstallPath>
     <zstackProperties>$zstackPropertiesPath</zstackProperties>
     <testAgent>$zstackTestAgentPkgPath</testAgent>
-    <zstackHaVip>$zstackHaVip</zstackHaVip>
     <db>
       <!-- Database server IP address or hostname -->
       <server>$DBServer</server>
@@ -57,11 +56,6 @@
       <node name="$node1Name" ip="$node1Ip"
         username="$nodeUserName" password="$nodePassword"
         description="The default node 1. It could be same as test machine."/>
-      <!-- multi node setting
-      <node name="$node2Name" ip="$node2Ip" netmask="$nodeNetMask"
-	gateway="$nodeGateway" nic="$nodeNic" bridge="$nodeBridge"
-        username="$nodeUserName" password="$nodePassword"
-	description="multi nodes have same catalinaHome as node 1"/>-->
     </nodes> 
   
     <instanceOfferings>
@@ -179,39 +173,6 @@
             <l2NetworkRef>$l2VlanNetworkName19</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName20</l2NetworkRef>
           </cluster>
-          <!--
-          <cluster name="$clusterName2" description="Test"
-            hypervisorType="$clusterHypervisorType">
-            <hosts>
-              <host name="$hostName5" description="Ubuntu" managementIp="$hostIp5"
-                username="$hostUsername" password="$hostPassword" />
-            </hosts>
-            <primaryStorageRef>$cephPrimaryStorageName</primaryStorageRef>
-            <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
-            <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
-            <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName2</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName3</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName4</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName5</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName6</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName7</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName8</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName9</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName10</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName11</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName12</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName13</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName14</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName15</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName16</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName17</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName18</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName19</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName20</l2NetworkRef>
-          </cluster>
--->
         </clusters>
   
         <l2Networks>
