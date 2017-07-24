@@ -298,14 +298,14 @@
                   <serviceType>DNS</serviceType>
                 <!--<serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
-                <serviceType>Eip</serviceType>
+                <serviceType>Eip</serviceType>-->
               </networkService>
+              <!--
               <networkService provider="SecurityGroup">
                 <serviceType>SecurityGroup</serviceType>-->
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
                 <serviceType>Userdata</serviceType>
-              </networkService>
               </networkService> 
             </l3BasicNetwork>
           </l3Networks>
