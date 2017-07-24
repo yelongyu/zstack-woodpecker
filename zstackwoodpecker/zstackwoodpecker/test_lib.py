@@ -5131,3 +5131,8 @@ def ensure_recover_script_l2_correct():
         host_recover_script = os.environ.get('hostRecoverScript')
         os.system("sed -i 's/eth/zsn/g' %s" % (host_recover_script))
 
+def ver_ge_zstack_2_0(mn_ip):
+    if int(os.system("sshpass -p password ssh root@%s \"zstack-ctl status|tail -n 1|grep '2.'\"" %(mn_ip))) == 0:
+        return True
+    else:
+        return False
