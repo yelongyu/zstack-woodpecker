@@ -13,7 +13,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import time
 import os
 
-date_s = time.strftime('%m%d%S', time.localtime())
+date_s = time.strftime('%m%d-%H%M%S', time.localtime())
 test_obj_dict = test_state.TestStateDict()
 ks_inv = None
 datacenter_inv = None
@@ -30,6 +30,11 @@ def test():
     for r in regions:
         if 'shanghai' in r:
             region_id = r
+    # Clear datacenter remained in local
+    datacenter_local = hyb_ops.query_datacenter_local()
+    if datacenter_local:
+        for d in datacenter_local:
+            hyb_ops.del_datacenter_in_local(d.uuid)
     datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
     hyb_ops.sync_hybrid_eip_from_remote(datacenter_inv.uuid)
     eip_local = hyb_ops.query_hybrid_eip_local()

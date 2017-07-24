@@ -5089,3 +5089,9 @@ def clean_up_all_vr():
     vr_list = res_ops.query_resource_fields(res_ops.VM_INSTANCE, cond, None, ['uuid'])
     for vr in vr_list:
         vm_ops.destroy_vm(vr.uuid)
+
+def ensure_recover_script_l2_correct():
+    if scenario_config_path != None and scenario_file_path != None and os.path.exists(scenario_file_path):
+        host_recover_script = os.environ.get('hostRecoverScript')
+        os.system("sed -i 's/eth/zsn/g' %s" % (host_recover_script))
+

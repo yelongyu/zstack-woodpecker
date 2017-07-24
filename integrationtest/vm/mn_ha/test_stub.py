@@ -16,6 +16,7 @@ import zstackwoodpecker.operations.deploy_operations as dpy_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.operations.ha_operations as ha_ops
+import zstackwoodpecker.operations.vm_operations as vm_ops
 
 
 def wait_for_mn_ha_ready(scenarioConfig, scenarioFile):
@@ -377,11 +378,15 @@ def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
     vm.create()
     return vm
 
-def create_basic_vm(disk_offering_uuids=None, session_uuid = None):
+def create_basic_vm(disk_offering_uuids=None, session_uuid = None, wait_vr_running = True):
     image_name = os.environ.get('imageName_net')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     l3_name = os.environ.get('l3VlanNetworkName1')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+
+    if wait_vr_running:
+        ensure_vr_is_running(l3_net_uuid)
+
     return create_vm([l3_net_uuid], image_uuid, 'basic_no_vlan_vm', disk_offering_uuids, session_uuid = session_uuid)
 
 def create_ha_vm(disk_offering_uuids=None, session_uuid = None):
@@ -393,28 +398,80 @@ def skip_if_vr_not_vyos(vr_image_name):
     cond = res_ops.gen_query_conditions('name', '=', vr_image_name)
     vr_urls_list = res_ops.query_resource_fields(res_ops.IMAGE, cond, None, ['url'])
     for vr_url in vr_urls_list:
-        if "vrouter" in vr_url:
+        if "vrouter" in vr_url.url:
             test_util.test_logger("find vrouter image. Therefore, no need to skip")
             break
     else:
         test_util.test_skip("not found vrouter image based on image name judgement. Therefore, skip test")
 
 def ensure_pss_connected():
-    ps_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
-    for ps in ps_list:
-        for i in range(180):
-            if "connected" in lower(ps.status):
+    for i in range(300):
+        time.sleep(1)
+        ps_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+        for ps in ps_list:
+            if not "connected" in ps.status.lower():
+                test_util.test_logger("found not connected ps status: %s" %(ps.status))
                 break
-            time.sleep(1)
         else:
-            test_util.test_fail("ps status didn't change to Connected within 180s, therefore, failed")
+            return
+    else:
+        test_util.test_fail("ps status didn't change to Connected within 300s, therefore, failed")
 
 def ensure_bss_connected():
-    bs_list = res_ops.query_resource(res_ops.BACKUP_STORAGE)
-    for bs in bs_list:
-        for i in range(180):
-            if "connected" in bs.status.lower():
+    for i in range(300):
+        time.sleep(1)
+        bs_list = res_ops.query_resource(res_ops.BACKUP_STORAGE)
+        for bs in bs_list:
+            if not "connected" in bs.status.lower():
+                test_util.test_logger("found not connected ps status: %s" %(bs.status))
                 break
-            time.sleep(1)
         else:
-            test_util.test_fail("bs status didn't change to Connected within 180s, therefore, failed")
+            return
+    else:
+        test_util.test_fail("bs status didn't change to Connected within 300s, therefore, failed")
+
+def ensure_hosts_connected():
+    for i in range(300):
+        time.sleep(1)
+        host_list = res_ops.query_resource(res_ops.HOST)
+        for host in host_list:
+            if not "connected" in host.status.lower():
+                test_util.test_logger("found not connected ps status: %s" %(host.status))
+                break
+        else:
+            return
+    else:
+        test_util.test_fail("host status didn't change to Connected within 300s, therefore, failed")
+
+def ensure_host_disconnected(test_host, wait_time):
+    cond = res_ops.gen_query_conditions('managementIp', '=', test_host.ip_)
+    for i in range(wait_time):
+        time.sleep(1)
+        host_list = res_ops.query_resource(res_ops.HOST, cond)
+        if "disconnected" in host_list[0].status.lower():
+            test_util.test_logger("successfully got host disconnected: %s" %(host_list[0].status))
+            return
+
+def ensure_vr_is_running(l3_uuid):
+    vr_list = test_lib.lib_find_vr_by_l3_uuid(l3_uuid)
+    if not vr_list: return
+
+    if vr_list[0].applianceVmType == "VirtualRouter":
+
+        if vr_list[0].state == "Stopped":
+            vm_ops.start_vm(vr_list[0].uuid)
+
+    elif vr_list[0].applianceVmType == "vrouter":
+        pass
+    else:
+        test_util.test_fail("current vr type not support in ensure_vr_is_connected.")
+
+    cond = res_ops.gen_query_conditions('uuid', '=', vr_list[0].uuid)
+    for i in range(300):
+        time.sleep(1)
+        vr1 = res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0]
+        if vr1.state == "Running":
+            break
+    else:
+        test_util.test_fail("virtualrouter has not been started within 300s")
+

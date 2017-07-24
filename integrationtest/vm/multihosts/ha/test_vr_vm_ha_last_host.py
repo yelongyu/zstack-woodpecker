@@ -87,8 +87,8 @@ def test():
     os.system('bash -ex %s %s' % (os.environ.get('hostForceStopScript'), host_ip))
     test_util.test_logger("host is expected to shutdown for a while")
 
-    test_util.test_logger("wait for 120 seconds")
-    time.sleep(120)
+    test_util.test_logger("wait for 180 seconds")
+    time.sleep(180)
     vm.update()
     if test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp == host_ip:
 	test_util.test_fail("VM is expected to start running on another host")

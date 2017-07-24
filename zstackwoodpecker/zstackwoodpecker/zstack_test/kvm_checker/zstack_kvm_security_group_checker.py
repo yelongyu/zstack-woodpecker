@@ -357,6 +357,22 @@ class zstack_kvm_sg_tcp_ingress_checker(sg_common_checker):
         print_iptables(test_vm)
         return self.judge(test_result)
 
+def internal_sg_allow_all(nic_uuid1, nic_uuid2, type):
+    conditions = res_ops.gen_query_conditions('vmNicUuid', '=', nic_uuid1)
+    nic1_sgs = res_ops.query_resource(res_ops.VM_SECURITY_GROUP, conditions)
+    conditions = res_ops.gen_query_conditions('vmNicUuid', '=', nic_uuid2)
+    nic2_sgs = res_ops.query_resource(res_ops.VM_SECURITY_GROUP, conditions)
+   
+    for ns1 in nic1_sgs:
+        for ns2 in nic2_sgs:
+            if ns1.securityGroupUuid == ns2.securityGroupUuid:
+                conditions = res_ops.gen_query_conditions('securityGroupUuid', '=', ns1.securityGroupUuid)
+                ns_rules = res_ops.query_resource(res_ops.SECURITY_GROUP_RULE, conditions)
+                for nr in ns_rules:
+                    if nr.securityGroupUuid == nr.remoteSecurityGroupUuid and nr.type == type and nr.startPort == -1:
+                        return True
+    return False
+
 class zstack_kvm_sg_tcp_internal_vms_checker(sg_common_checker):
     '''check kvm security group tcp connections between attached vms.
         based on security group defination. VMs with same SG group will 
@@ -469,6 +485,12 @@ class zstack_kvm_sg_tcp_internal_vms_checker(sg_common_checker):
                 and (not self.test_obj.get_nic_icmp_egress_rules(nic_uuid)):
 
                 allowed_egress_ports = list(all_ports)
+
+            if internal_sg_allow_all(self.nic_uuid, nic_uuid, 'Ingress'):
+                allowed_ingress_ports = all_ports
+
+            if internal_sg_allow_all(self.nic_uuid, nic_uuid, 'Egress'):
+                allowed_egress_ports = all_ports
 
             shared_ports = get_shared_ports(allowed_egress_ports, \
                     allowed_ingress_ports)

@@ -13,28 +13,17 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import time
 import os
 
-date_s = time.strftime('%m%d-%H%M%S', time.localtime())
 test_obj_dict = test_state.TestStateDict()
-test_stub = test_lib.lib_get_test_stub()
 ks_inv = None
 datacenter_inv = None
-bucket_inv = None
-vpc_inv = None
-vswitch_inv = None
-iz_inv = None
-sg_inv = None
-ecs_inv = None
 
 def test():
     global ks_inv
     global datacenter_inv
-    global bucket_inv
-    global sg_inv
-    global iz_inv
-    global vswitch_inv
-    global vpc_inv
-    global ecs_inv
     datacenter_type = os.getenv('datacenterType')
+    vpc_id = os.getenv('ecs_vpcId')
+    vpc_vr_id = os.getenv('vpc_vrId')
+    vpn_gateway_id = os.getenv('vpn_gatewayId')
     ks_existed = hyb_ops.query_aliyun_key_secret()
     if not ks_existed:
         ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
@@ -48,30 +37,35 @@ def test():
     for r in regions:
         if 'shanghai' in r:
             region_id = r
-#     region_id = datacenter_list[0].regionId
     datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
-#     bucket_inv = hyb_ops.create_oss_bucket_remote(datacenter_inv.uuid, 'zstack-test-%s-%s' % (date_s, region_id), 'created-by-zstack-for-test')
-#     hyb_ops.attach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid)
     iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, region_id)
-    zone_id = iz_list[0].zoneId
-#     hyb_ops.update_image_guestOsType(image.uuid, guest_os_type='CentOS')
-    iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, zone_id)
-    _ecs_inv = test_stub.create_ecs_instance(iz_inv.uuid, datacenter_inv.uuid)
-    ecs_instance_local = hyb_ops.query_ecs_instance_local()
-    ecs_inv = [e for e in ecs_instance_local if e.ecsInstanceId == _ecs_inv.ecsInstanceId][0]
-    hyb_ops.update_ecs_instance_vnc_password(ecs_inv.uuid, '123abc')
-    test_util.test_pass('Update ECS Instance Console Password Test Success')
+    zone_id = iz_list[-1].zoneId
+    hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, zone_id)
+    hyb_ops.sync_ecs_vpc_from_remote(datacenter_inv.uuid)
+    vpc_local = hyb_ops.query_ecs_vpc_local()
+    # Get Vpc which has available gateway
+    for vl in vpc_local:
+        if vl.ecsVpcId == vpc_id:
+            vpc_inv = vl
+    # Get Vpn gateway
+    hyb_ops.sync_vpc_vpn_gateway_from_remote(datacenter_inv.uuid)
+    vpc_vpn_gw_local = hyb_ops.query_vpc_vpn_gateway_local()
+    for gw in vpc_vpn_gw_local:
+        if gw.vpnGatewayId == vpn_gateway_id:
+            vpn_gateway = gw
+    # Get Aliyun virtual router
+    hyb_ops.sync_aliyun_virtual_router_from_remote(vpc_inv.uuid)
+    vr_local = hyb_ops.query_aliyun_virtual_router_local()
+    for v in vr_local:
+        if v.vrId == vpc_vr_id:
+            vr = v
+    route_entry_inv = hyb_ops.create_aliyun_vpc_virtualrouter_entry_remote('172.18.200.0/24', vr.uuid, vrouter_type='vrouter', next_hop_type='VpnGateway', next_hop_uuid=vpn_gateway.uuid)
+    time.sleep(10)
+    hyb_ops.del_aliyun_route_entry_remote(route_entry_inv.uuid, route_entry_type='vrouter')
+    test_util.test_pass('Create Delete Vpc Route Entry Test Success')
 
 def env_recover():
-    global ecs_inv
     global datacenter_inv
-    if ecs_inv:
-        test_stub.delete_ecs_instance(datacenter_inv, ecs_inv)
-
-    global iz_inv
-    if iz_inv:
-        hyb_ops.del_identity_zone_in_local(iz_inv.uuid)
-
     if datacenter_inv:
         hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
     global ks_inv

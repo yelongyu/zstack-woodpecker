@@ -13,7 +13,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import time
 import os
 
-date_s = time.strftime('%m%d%S', time.localtime())
+date_s = time.strftime('%m%d-%H%M%S', time.localtime())
 test_obj_dict = test_state.TestStateDict()
 ks_inv = None
 datacenter_inv = None
@@ -29,6 +29,11 @@ def test():
     ks_existed = hyb_ops.query_aliyun_key_secret()
     if not ks_existed:
         ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
+    # Clear datacenter remained in local
+    datacenter_local = hyb_ops.query_datacenter_local()
+    if datacenter_local:
+        for d in datacenter_local:
+            hyb_ops.del_datacenter_in_local(d.uuid)
     datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
     regions = [ i.regionId for i in datacenter_list]
     err_list = []

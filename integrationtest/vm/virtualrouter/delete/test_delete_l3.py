@@ -43,7 +43,7 @@ def error_cleanup():
     global l3
     test_lib.lib_error_cleanup(test_obj_dict)
     l3 = res_ops.get_resource(res_ops.L3_NETWORK, name = l3_name)
-    if not l3s:
+    if not l3:
         try:
             net_ops.add_l3_resource(curr_deploy_conf, l3_name)
         except Exception as e:

@@ -45,6 +45,10 @@ def test():
     test_util.test_dsc("Create 3 VMs with vlan VR L3 network and using VR image.")
     vm1 = test_stub.create_sg_vm()
     test_obj_dict.add_vm(vm1)
+    vr = test_lib.lib_find_vr_by_vm(vm1.vm)[0]
+    if vr.applianceVmType == "vrouter":
+        test_util.test_skip("This test skip for vyos network")
+
     vm2 = test_stub.create_sg_vm()
     test_obj_dict.add_vm(vm2)
     vm3 = test_stub.create_sg_vm()

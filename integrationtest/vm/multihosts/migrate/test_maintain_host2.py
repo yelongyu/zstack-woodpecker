@@ -67,6 +67,8 @@ def test():
     if len(all_hosts) <= 1:
         test_util.test_fail('Not available host to do maintenance, since there is only %s host' % len(all_hosts))
     vr = test_lib.lib_get_all_vrs()
+    if len(vr) == 0:
+        test_util.test_skip('Skip test if not using vr')
     vr_uuid = vr[0].uuid
     vr_host_uuid = test_lib.lib_get_vm_host(vr[0]).uuid
 

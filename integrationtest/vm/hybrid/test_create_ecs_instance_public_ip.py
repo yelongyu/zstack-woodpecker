@@ -12,9 +12,11 @@ import zstackwoodpecker.operations.hybrid_operations as hyb_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import time
 import os
+import commands
 
-date_s = time.strftime('%m%d%S', time.localtime())
+date_s = time.strftime('%m%d-%H%M%S', time.localtime())
 test_obj_dict = test_state.TestStateDict()
+test_stub = test_lib.lib_get_test_stub()
 ks_inv = None
 datacenter_inv = None
 bucket_inv = None
@@ -34,12 +36,6 @@ def test():
     global vpc_inv
     global ecs_inv
     datacenter_type = os.getenv('datacenterType')
-    ecs_image_id = os.getenv('ecs_imageId')
-#     cond_image = res_ops.gen_query_conditions('name', '=', os.getenv('imageName_i_c7'))
-#     image =  res_ops.query_resource(res_ops.IMAGE, cond_image)[0]
-#     bs_uuid = image.backupStorageRefs[0].backupStorageUuid
-    cond_offering = res_ops.gen_query_conditions('name', '=', os.getenv('instanceOfferingName_m'))
-    instance_offering = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond_offering)[0]
     ks_existed = hyb_ops.query_aliyun_key_secret()
     if not ks_existed:
         ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
@@ -49,30 +45,31 @@ def test():
         if 'shanghai' in r:
             region_id = r
 #     region_id = datacenter_list[0].regionId
+    # Clear datacenter remained in local
+    datacenter_local = hyb_ops.query_datacenter_local()
+    if datacenter_local:
+        for d in datacenter_local:
+            hyb_ops.del_datacenter_in_local(d.uuid)
     datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
-    bucket_inv = hyb_ops.create_oss_bucket_remote(datacenter_inv.uuid, 'zstack-test-%s-%s' % (date_s, region_id), 'created-by-zstack-for-test')
-    hyb_ops.attach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid)
+#     bucket_inv = hyb_ops.create_oss_bucket_remote(datacenter_inv.uuid, 'zstack-test-%s-%s' % (date_s, region_id), 'created-by-zstack-for-test')
+#     hyb_ops.attach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid)
     iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, region_id)
     zone_id = iz_list[0].zoneId
 #     hyb_ops.update_image_guestOsType(image.uuid, guest_os_type='CentOS')
     iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, zone_id)
-    vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', '172.16.0.0/12')
-    time.sleep(10)
-    vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'zstack-test-vswitch', '172.18.1.0/24')
-    sg_inv = hyb_ops.create_ecs_security_group_remote('sg_for_test', vpc_inv.uuid)
-    time.sleep(10)
-    hyb_ops.sync_ecs_image_from_remote(datacenter_inv.uuid)
-    ecs_image = hyb_ops.query_ecs_image_local()
-    for i in ecs_image:
-        if i.ecsImageId == ecs_image_id:
-            image = i
-    ecs_inv = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, vswitch_inv.uuid, instance_offering.uuid, ecs_bandwidth=5,
-                                                         ecs_security_group_uuid=sg_inv.uuid, allocate_public_ip='true', name='zstack-ecs-test')
-    time.sleep(10)
+    _ecs_inv = test_stub.create_ecs_instance(iz_inv.uuid, datacenter_inv.uuid, allocate_public_ip=True)
     ecs_instance_local = hyb_ops.query_ecs_instance_local()
-    ecs_inv = [e for e in ecs_instance_local if e.name == 'zstack-ecs-test'][0]
+    ecs_inv = [e for e in ecs_instance_local if e.ecsInstanceId == _ecs_inv.ecsInstanceId][0]
     eip_local = hyb_ops.query_hybrid_eip_local()
     ecs_eip = [e for e in eip_local if e.allocateResourceUuid == ecs_inv.uuid][0]
+    cmd = "sshpass -p Password123 ssh -o StrictHostKeyChecking=no root@%s 'ls /'" % ecs_eip.eipAddress
+    for _ in xrange(60):
+        cmd_status = commands.getstatusoutput(cmd)[0]
+        if cmd_status == 0:
+            break
+        else:
+            time.sleep(3)
+    assert cmd_status == 0, "Login Ecs via public ip failed!"
     hyb_ops.del_hybrid_eip_remote(ecs_eip.uuid)
     test_util.test_pass('Create Ecs Instance with Public IP Test Success')
 
@@ -80,41 +77,12 @@ def env_recover():
     global ecs_inv
     global datacenter_inv
     if ecs_inv:
-        time.sleep(10)
-        hyb_ops.stop_ecs_instance(ecs_inv.uuid)
-        for _ in xrange(600):
-            hyb_ops.sync_ecs_instance_from_remote(datacenter_inv.uuid)
-            ecs_inv = [e for e in hyb_ops.query_ecs_instance_local() if e.name == 'zstack-ecs-test'][0]
-            if ecs_inv.ecsStatus.lower() == "stopped":
-                break
-            else:
-                time.sleep(1)
-        hyb_ops.del_ecs_instance(ecs_inv.uuid)
-    global sg_inv
-    if sg_inv:
-        time.sleep(30)
-        hyb_ops.del_ecs_security_group_remote(sg_inv.uuid)
-    global vswitch_inv
-    if vswitch_inv:
-        time.sleep(10)
-        hyb_ops.del_ecs_vswitch_remote(vswitch_inv.uuid)
-    global vpc_inv
-    if vpc_inv:
-        time.sleep(10)
-        hyb_ops.del_ecs_vpc_remote(vpc_inv.uuid)
+        test_stub.delete_ecs_instance(datacenter_inv, ecs_inv)
+
     global iz_inv
     if iz_inv:
         hyb_ops.del_identity_zone_in_local(iz_inv.uuid)
 
-    global bucket_inv
-    if bucket_inv:
-        bucket_file = hyb_ops.get_oss_bucket_file_from_remote(bucket_inv.uuid).files
-        if bucket_file:
-            for i in bucket_file:
-                hyb_ops.del_oss_bucket_file_remote(bucket_inv.uuid, i)
-        time.sleep(10)
-        hyb_ops.del_oss_bucket_remote(bucket_inv.uuid)
-    global datacenter_inv
     if datacenter_inv:
         hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
     global ks_inv

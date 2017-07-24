@@ -13,7 +13,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import time
 import os
 
-date_s = time.strftime('%m%d%S', time.localtime())
+date_s = time.strftime('%m%d-%H%M%S', time.localtime())
 test_obj_dict = test_state.TestStateDict()
 ks_inv = None
 datacenter_inv = None
@@ -29,6 +29,11 @@ def test():
     ks_existed = hyb_ops.query_aliyun_key_secret()
     if not ks_existed:
         ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
+    # Clear datacenter remained in local
+    datacenter_local = hyb_ops.query_datacenter_local()
+    if datacenter_local:
+        for d in datacenter_local:
+            hyb_ops.del_datacenter_in_local(d.uuid)
     datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
     regions = [ i.regionId for i in datacenter_list]
     err_list = []
@@ -42,7 +47,13 @@ def test():
             break
     if len(err_list) == len(regions):
         raise hyb_ops.ApiError("Failed to add DataCenter: %s" % err_list)
-    vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', '192.168.0.0/16')
+    hyb_ops.sync_ecs_vpc_from_remote(datacenter_inv.uuid)
+    vpc_all = hyb_ops.query_ecs_vpc_local()
+    ecs_vpc = [vpc for vpc in vpc_all if vpc.status.lower() == 'available']
+    if ecs_vpc:
+        vpc_inv = ecs_vpc[0]
+    else:
+        vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', '172.16.0.0/12')
     time.sleep(5)
     hyb_ops.create_ecs_security_group_remote('sg_for_test_%s' % date_s, vpc_inv.uuid)
     time.sleep(5)
@@ -50,7 +61,7 @@ def test():
     if sg_auto_synced:
         for sg in sg_auto_synced:
             hyb_ops.del_ecs_security_group_in_local(sg.uuid)
-    hyb_ops.sync_security_group_from_remote(vpc_inv.uuid)
+    hyb_ops.sync_ecs_security_group_from_remote(vpc_inv.uuid)
     sg_local = hyb_ops.query_ecs_security_group_local()
     for sl in sg_local:
         if sl.name == 'sg_for_test_%s' % date_s:
@@ -63,10 +74,10 @@ def env_recover():
     if sg_inv:
         time.sleep(10)
         hyb_ops.del_ecs_security_group_remote(sg_inv.uuid)
-    global vpc_inv
-    if vpc_inv:
-        time.sleep(5)
-        hyb_ops.del_ecs_vpc_remote(vpc_inv.uuid)
+#     global vpc_inv
+#     if vpc_inv:
+#         time.sleep(5)
+#         hyb_ops.del_ecs_vpc_remote(vpc_inv.uuid)
     global datacenter_inv
     if datacenter_inv:
         hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
