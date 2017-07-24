@@ -23,7 +23,7 @@ def test():
     vm1 = test_stub.create_vlan_vm(os.environ.get('l3VlanNetworkName1'))
     test_obj_dict.add_vm(vm1)
     vm1_ip = vm1.get_vm().vmNics[0].ip
-    vr1 = test_lib.lib_find_vr_by_vm(vm1.vm)[0]
+    vr1 = test_lib.lib_find_flat_dhcp_vr_by_vm(vm1.vm)[0]
     vr1_uuid = vr1.uuid
     vr1_pub_ip = test_lib.lib_find_vr_pub_ip(vr1)
     vr1_private_ip = test_lib.lib_find_vr_private_ip(vr1)
@@ -33,7 +33,7 @@ def test():
     vm2 = test_stub.create_vlan_vm(os.environ.get('l3VlanNetworkName3'))
     test_obj_dict.add_vm(vm2)
     vm2_ip = vm2.get_vm().vmNics[0].ip
-    vr2 = test_lib.lib_find_vr_by_vm(vm2.vm)[0]
+    vr2 = test_lib.lib_find_flat_dhcp_vr_by_vm(vm2.vm)[0]
     vr2_uuid = vr2.uuid
     vr2_pub_ip = test_lib.lib_find_vr_pub_ip(vr2)
     vr2_private_ip = test_lib.lib_find_vr_private_ip(vr2)
