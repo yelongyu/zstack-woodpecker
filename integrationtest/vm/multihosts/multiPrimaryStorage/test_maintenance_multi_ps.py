@@ -7,6 +7,7 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
+import zstackwoodpecker.operations.vm_operations as vm_ops
 import time
 import apibinding.inventory as inventory
 
@@ -19,6 +20,7 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 VOLUME_NUMBER = 10
 maintenance_ps_list = []
+
 
 
 def test():
@@ -64,6 +66,7 @@ def test():
             test_util.test_fail("VM2 is not in Stopped status!!!")
 
     vr_vm_list = test_lib.lib_find_vr_by_vm(vm1.get_vm())
+    vr_vm = None
     if vr_vm_list:
         vr_vm = vr_vm_list[0]
         if vr_vm.allVolumes[0].primaryStorageUuid == another_ps.uuid:
@@ -84,6 +87,11 @@ def test():
     test_util.test_dsc('enable another ps')
     ps_ops.change_primary_storage_state(state='enable', primary_storage_uuid=another_ps.uuid)
     maintenance_ps_list.remove(another_ps)
+
+    if vr_vm and vr_vm.state == inventory.STOPPED:
+        vm_ops.start_vm(vr_vm.uuid)
+
+    time.sleep(10)
     vm2.start()
     vm2.check()
 
