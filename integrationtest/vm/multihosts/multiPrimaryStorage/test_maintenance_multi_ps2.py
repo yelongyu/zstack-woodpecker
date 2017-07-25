@@ -8,6 +8,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.ha_operations as ha_ops
+import zstackwoodpecker.operations.vm_operations as vm_ops
 import time
 import apibinding.inventory as inventory
 
@@ -65,7 +66,19 @@ def test():
     ps_ops.change_primary_storage_state(state='maintain', primary_storage_uuid=ps2.uuid)
     maintenance_ps_list.append(ps2)
     time.sleep(60)
-    vm1.check()
+
+    vr_vm_list = test_lib.lib_find_vr_by_vm(vm1.get_vm())
+    vr_vm = None
+    if vr_vm_list:
+        vr_vm = vr_vm_list[0]
+        if vr_vm.allVolumes[0].primaryStorageUuid == ps2.uuid:
+            assert vr_vm.state == inventory.STOPPED
+        else:
+            assert vr_vm.state == inventory.RUNNING
+            vm1.check()
+    else:
+        vm1.check()
+
     for vm in vm_list:
         vm.update()
 
@@ -77,10 +90,14 @@ def test():
     for vm in [vm2, vm3, vm4]:
         try_start_vm(vm)
 
+    test_util.test_dsc('enable ps2')
     ps_ops.change_primary_storage_state(state='enable', primary_storage_uuid=ps2.uuid)
     maintenance_ps_list.remove(ps2)
 
-    test_util.test_dsc('enable ps2')
+    if vr_vm and vr_vm.state == inventory.STOPPED:
+        vm_ops.start_vm(vr_vm.uuid)
+
+    time.sleep(10)
     for vm in [vm2, vm3, vm4]:
         vm.start()
 
