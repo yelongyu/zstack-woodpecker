@@ -49,25 +49,30 @@ def test():
     test_util.test_dsc('set another ps in maintenance mode')
     ps_ops.change_primary_storage_state(state='maintain', primary_storage_uuid=another_ps.uuid)
     maintenance_ps_list.append(another_ps)
-
-    time.sleep(30)
-    vm1.update()
-    vm1.check()
-    vm2.update()
-
+    time.sleep(10)
     count = 10
+    vm1.update()
+    assert vm1.get_vm().state == inventory.RUNNING
     while count:
+        vm2.update()
         if vm2.get_vm().state == inventory.STOPPED:
             break
         elif vm2.get_vm().state == inventory.STOPPING:
             time.sleep(10)
-            vm2.update()
             count -= 1
         else:
-            test_util.test_fail("VM2 is not in Stopping or Stopped status!!!")
+            test_util.test_fail("VM2 is not in Stopped status!!!")
 
-    assert vm1.get_vm().state == inventory.RUNNING
-    assert vm2.get_vm().state == inventory.STOPPED
+    vr_vm_list = test_lib.lib_find_vr_by_vm(vm1.get_vm())
+    if vr_vm_list:
+        vr_vm = vr_vm_list[0]
+        if vr_vm.allVolumes[0].primaryStorageUuid == another_ps.uuid:
+            assert vr_vm.state == inventory.STOPPED
+        else:
+            assert vr_vm.state == inventory.RUNNING
+            vm1.check()
+    else:
+        vm1.check()
 
     try:
         vm2.start()
