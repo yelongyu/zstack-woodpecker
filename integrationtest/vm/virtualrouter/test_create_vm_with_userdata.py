@@ -35,16 +35,26 @@ def test():
     test_obj_dict.add_image(image)
 
     l3_name = os.environ.get('l3VlanNetworkName5')
-    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    l3_net = test_lib.lib_get_l3_by_name(l3_name)
+    l3_net_uuid = l3_net.uuid
+    if 'DHCP' not in test_lib.lib_get_l3_service_type(l3_net_uuid):
+        test_util.test_skip('Only DHCP support userdata')
+    for ns in l3_net.networkServices:
+        if ns.networkServiceType == 'DHCP':
+            sp_uuid = ns.networkServiceProviderUuid
+            sp = test_lib.lib_get_network_service_provider_by_uuid(sp_uuid)
+            if sp.type != 'Flat':
+                test_util.test_skip('Only Flat DHCP support userdata')
 
     vm = test_stub.create_vm(l3_uuid_list = [l3_net_uuid], vm_name = 'userdata-vm',image_uuid = image.get_image().uuid,system_tags = ["userdata::%s" % os.environ.get('userdata_systemTags')])
+
+    test_obj_dict.add_vm(vm)
+    time.sleep(60)
+
     try:
         vm.check()
     except:
         test_util.test_logger("expected failure to connect VM")
-
-    test_obj_dict.add_vm(vm)
-    time.sleep(60)
 
     vm_ip = vm.get_vm().vmNics[0].ip
     ssh_cmd = 'ssh -i %s -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null test@%s' % (os.environ.get('sshkeyPriKey_file'), vm_ip)
