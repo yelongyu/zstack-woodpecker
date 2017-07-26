@@ -38,8 +38,12 @@ def test():
     datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
     hyb_ops.sync_hybrid_eip_from_remote(datacenter_inv.uuid)
     eip_local = hyb_ops.query_hybrid_eip_local()
-    assert len(eip_local) > 0
+    if len(eip_local) == 0:
+        hyb_ops.create_hybrid_eip(datacenter_inv.uuid, 'zstack-test-eip', '1')
+        hyb_ops.sync_hybrid_eip_from_remote(datacenter_inv.uuid)
+        eip_local = hyb_ops.query_hybrid_eip_local()
     for eip in eip_local:
+        assert eip.eipId
         hyb_ops.del_hybrid_eip_local(eip.uuid)
     eip_local_after = hyb_ops.query_hybrid_eip_local()
     assert len(eip_local_after) == 0

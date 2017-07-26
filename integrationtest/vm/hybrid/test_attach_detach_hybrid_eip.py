@@ -65,7 +65,7 @@ def test():
     if eip_available:
         eip_inv = eip_available[0]
     else:
-        eip_inv = hyb_ops.create_hybrid_eip(datacenter_inv.uuid, 'zstack-test-eip', '5')
+        eip_inv = hyb_ops.create_hybrid_eip(datacenter_inv.uuid, 'zstack-test-eip', '1')
     hyb_ops.attach_hybrid_eip_to_ecs(eip_inv.uuid, ecs_inv.uuid)
     time.sleep(5)
     hyb_ops.detach_hybrid_eip_from_ecs(eip_inv.uuid)

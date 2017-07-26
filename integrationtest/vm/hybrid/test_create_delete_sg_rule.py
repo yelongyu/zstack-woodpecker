@@ -59,6 +59,8 @@ def test():
     ecs_security_group = [ sg for sg in sg_all if sg.name == 'zstack-test-ecs-security-group']
     if not ecs_security_group:
         sg_inv = hyb_ops.create_ecs_security_group_remote('zstack-test-ecs-security-group', vpc_inv.uuid)
+    else:
+        sg_inv = ecs_security_group[0]
 #     sg_inv = hyb_ops.create_ecs_security_group_remote('sg_for_test', vpc_inv.uuid)
     time.sleep(5)
     sg_rule_ingress = hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'ingress', 'TCP', '445/445', '0.0.0.0/0', 'drop', 'intranet', '1')

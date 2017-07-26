@@ -45,7 +45,7 @@ def test():
             break
     if len(err_list) == len(regions):
         raise hyb_ops.ApiError("Failed to add DataCenter: %s" % err_list)
-    eip_inv = hyb_ops.create_hybrid_eip(datacenter_inv.uuid, 'zstack-test-eip', '5')
+    eip_inv = hyb_ops.create_hybrid_eip(datacenter_inv.uuid, 'zstack-test-eip', '1')
     time.sleep(5)
     hyb_ops.del_hybrid_eip_remote(eip_inv.uuid)
     test_util.test_pass('Create Delete Hybrid Eip Test Success')

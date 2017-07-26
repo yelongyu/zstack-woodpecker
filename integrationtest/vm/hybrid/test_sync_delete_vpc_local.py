@@ -58,7 +58,7 @@ def test():
     for vl in vpc_local:
         if vl.name == 'vpc_for_test_%s' % date_s:
             vpc_inv = vl
-    assert vpc_inv.uuid
+    assert vpc_inv.ecsVpcId
     test_util.test_pass('Sync Delete Ecs Vpc Test Success')
 
 def env_recover():

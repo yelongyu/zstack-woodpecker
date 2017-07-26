@@ -42,7 +42,10 @@ def test():
     hyb_ops.sync_vpc_vpn_gateway_from_remote(datacenter_inv.uuid)
     hyb_ops.sync_vpc_user_vpn_gateway_from_remote(datacenter_inv.uuid)
     vpc_user_vpn_gw_local = hyb_ops.query_vpc_user_vpn_gateway_local()
-    assert len(vpc_user_vpn_gw_local) > 0
+    if len(vpc_user_vpn_gw_local) == 0:
+        hyb_ops.create_vpc_user_vpn_gateway(datacenter_inv.uuid, gw_ip='192.168.19.199', gw_name="ZStack-Vpc-User-Vpn-Gateway-Test")
+        hyb_ops.sync_vpc_user_vpn_gateway_from_remote(datacenter_inv.uuid)
+        vpc_user_vpn_gw_local = hyb_ops.query_vpc_user_vpn_gateway_local()
     for gw in vpc_user_vpn_gw_local:
         hyb_ops.del_vpc_user_vpn_gateway_local(gw.uuid)
     vpc_user_vpn_gw_local_after = hyb_ops.query_vpc_user_vpn_gateway_local()

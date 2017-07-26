@@ -55,7 +55,7 @@ def test():
     else:
         vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', '172.16.0.0/12')
     time.sleep(5)
-    hyb_ops.create_ecs_security_group_remote('sg_for_test_%s' % date_s, vpc_inv.uuid)
+    sg = hyb_ops.create_ecs_security_group_remote('sg_for_test_%s' % date_s, vpc_inv.uuid)
     time.sleep(5)
     sg_auto_synced = hyb_ops.query_ecs_security_group_local()
     if sg_auto_synced:
@@ -64,23 +64,16 @@ def test():
     hyb_ops.sync_ecs_security_group_from_remote(vpc_inv.uuid)
     sg_local = hyb_ops.query_ecs_security_group_local()
     for sl in sg_local:
-        if sl.name == 'sg_for_test_%s' % date_s:
+        if sl.securityGroupId == sg.securityGroupId:
             sg_inv = sl
-    assert sg_inv.uuid
+    hyb_ops.del_ecs_security_group_remote(sg_inv.uuid)
     test_util.test_pass('Sync Delete Ecs Security Group Test Success')
 
 def env_recover():
-    global sg_inv
-    if sg_inv:
-        time.sleep(10)
-        hyb_ops.del_ecs_security_group_remote(sg_inv.uuid)
-#     global vpc_inv
-#     if vpc_inv:
-#         time.sleep(5)
-#         hyb_ops.del_ecs_vpc_remote(vpc_inv.uuid)
     global datacenter_inv
     if datacenter_inv:
         hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
+
     global ks_inv
     if ks_inv:
         hyb_ops.del_aliyun_key_secret(ks_inv.uuid)

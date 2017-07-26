@@ -13,7 +13,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import time
 import os
 
-USERGATEWAY = '192.168.0.211'
+USERGATEWAY = '192.168.21.211'
 date_s = time.strftime('%m%d-%H%M%S', time.localtime())
 test_obj_dict = test_state.TestStateDict()
 ks_inv = None
