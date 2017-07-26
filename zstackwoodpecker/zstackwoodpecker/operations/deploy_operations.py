@@ -1333,6 +1333,8 @@ def add_image(scenarioConfig, scenarioFile, deployConfig, session_uuid):
             action.name = i.name_
             action.url = i.url_
             action.timeout = 1800000
+            if i.hasattr('system_'):
+                action.system = i.system_
             if i.hasattr('systemTags_'):
                 action.systemTags = i.systemTags_.split(',')
             thread = threading.Thread(target = _add_image, args = (action, ))
