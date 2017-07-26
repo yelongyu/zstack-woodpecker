@@ -42,15 +42,21 @@ def test():
     vm_ip = vm.get_vm().vmNics[0].ip
     ssh_cmd = 'ssh -i %s -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null test@%s' % (os.environ.get('sshkeyPriKey_file'), vm_ip)
 
-    cmd = '%s cat /tmp/helloworld_config' % ssh_cmd
-    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
-    if process_result != 0:
+    for i in range(5):
+        cmd = '%s cat /tmp/helloworld_config' % ssh_cmd
+        process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+        if process_result == 0:
+            break
+    else:
         test_util.test_fail("fail to cat /tmp/helloworld_config")
 
-    cmd = '%s find /tmp/temp' % ssh_cmd
-    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
-    if process_result != 0:
-        test_util.test_fail("fail to find /tmp/temp")
+    for i in range(5):
+        cmd = '%s find /tmp/temp' % ssh_cmd
+        process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+        if process_result == 0:
+            break
+    else:
+        test_util.test_fail("fail to find /tmp/temp")    
 
     vm.destroy()
     test_obj_dict.rm_vm(vm)
