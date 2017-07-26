@@ -228,6 +228,11 @@ def install_fio(vm_inv):
     vm_ip = vm_inv.vmNics[0].ip
 
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd = '%s "yum clean metadata"' \
+            % (ssh_cmd)
+    if  execute_shell_in_process(cmd, timeout) != 0:
+        test_util.test_fail('fail to clean metadata.')
+
     cmd = '%s "which fio || yum install -y fio"' \
             % (ssh_cmd)
     if  execute_shell_in_process(cmd, timeout) != 0:
