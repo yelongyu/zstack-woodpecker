@@ -6,6 +6,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.resource_operations as res_ops
+import apibinding.inventory as inventory
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
@@ -16,7 +17,12 @@ def test():
     cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
     cond = res_ops.gen_query_conditions('status', '=', 'Connected', cond)
     pss = res_ops.query_resource_with_num(res_ops.PRIMARY_STORAGE, cond)
-    for ps in pss:
+
+    ps_list_for_vm_creation = pss[:]
+    if test_stub.find_ps_local() and test_stub.find_ps_nfs():
+        ps_list_for_vm_creation = [ps for ps in pss if ps.type != inventory.NFS_PRIMARY_STORAGE_TYPE]
+
+    for ps in ps_list_for_vm_creation:
         vm = test_stub.create_specified_ps_vm(ps_uuid = ps.uuid)
         test_obj_dict.add_vm(vm)
         vm.check()
