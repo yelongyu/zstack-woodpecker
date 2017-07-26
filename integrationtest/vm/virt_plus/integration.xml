@@ -1,6 +1,9 @@
 <integrationTest>
     <suite name="virt plus test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
         <case timeout='300' repeat='1'>test_create_vm.py</case>
+        <case timeout='600' repeat='1'>test_create_vm_with_userdata.py</case>
+        <case timeout='600' repeat='1'>test_get_userdata.py</case>
+        <case timeout='600' repeat='1'>test_remove_userdata.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_add_image_progress2.py</case>
         <case timeout='1800' repeat='1' noparallel='True'>test_crt_temp_image_progress2.py</case>
         <!--<case timeout='300' repeat='1'>test_create_2vm_2l3_same_l2.py</case>-->
@@ -65,8 +68,5 @@
         <case timeout='1200' repeat='1'>test_delete_vm_l3_check_vm_ops.py</case>
         <case timeout='600' repeat='1'>test_create_vm_time.py</case>
         <!--<case timeout='1200' repeat='1'>capacity/test_remove_host_check_ps_capacity_eq_0.py</case>-->
-        <case timeout='600' repeat='1'>test_create_vm_with_userdata.py</case>
-        <case timeout='600' repeat='1'>test_get_userdata.py</case>
-        <case timeout='600' repeat='1'>test_remove_userdata.py</case>
     </suite>
 </integrationTest>

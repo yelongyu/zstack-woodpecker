@@ -6,6 +6,7 @@ Create an unified test_stub to share test operations
 '''
 
 import os
+import subprocess
 import sys
 import time
 import threading
@@ -496,3 +497,23 @@ def get_stage_time(vm_name, begin_time):
     if instantiate_res_post_end_time != 0 and instantiate_res_post_begin_time != 0:
         instantiate_res_post_time = instantiate_res_post_end_time - instantiate_res_post_begin_time
     return [select_bs_time, allocate_host_time, allocate_ps_time, local_storage_allocate_capacity_time, allocate_volume_time, allocate_nic_time, instantiate_res_pre_time, create_on_hypervisor_time, instantiate_res_post_time]
+
+def execute_shell_in_process(cmd, timeout=10, logfd=None):
+    if not logfd:
+        process = subprocess.Popen(cmd, executable='/bin/sh', shell=True, universal_newlines=True)
+    else:
+        process = subprocess.Popen(cmd, executable='/bin/sh', shell=True, stdout=logfd, stderr=logfd, universal_newlines=True)
+
+    start_time = time.time()
+    while process.poll() is None:
+        curr_time = time.time()
+        TEST_TIME = curr_time - start_time
+        if TEST_TIME > timeout:
+            process.kill()
+            test_util.test_logger('[shell:] %s timeout ' % cmd)
+            return False
+        time.sleep(1)
+
+    test_util.test_logger('[shell:] %s is finished.' % cmd)
+    return process.returncode
+

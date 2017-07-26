@@ -1,8 +1,7 @@
 '''
 @Integration Test
 @Scenario: management network and storage network separation for NFS
-           Disconnect storage network and check vm ha start on other
-           host
+           Disconnect storage network and destroy vm
 @author: SyZhao
 '''
 
@@ -76,30 +75,10 @@ def test():
     #test_stub.down_host_network(host_ip, test_lib.all_scenario_config)
     host_username = os.environ.get('hostUsername')
     host_password = os.environ.get('hostPassword')
-    t = test_stub.async_exec_ifconfig_nic_down_up(120, host_ip, host_username, host_password, "zsn1")
+    t = test_stub.async_exec_ifconfig_nic_down_up(2400, host_ip, host_username, host_password, "zsn1")
     t.start()
-    vm_stop_time = None
-    cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid)
-    for i in range(0, max_time):
-        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Unknown":
-            vm_stop_time = i
-            break
-        time.sleep(1)
-    else:
-        test_util.test_fail("fail to find host unknown")
-
-    if vm_stop_time is None:
-        vm_stop_time = max_time
-        
-    for i in range(vm_stop_time, max_time):
-        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Running":
-            break
-        time.sleep(1)
-    else:
-        test_util.test_fail("vm has not been changed to running as expected within %s s." %(max_time))
 
     vm.destroy()
-    t.join()
 
     test_util.test_pass('Test VM ha change to running within 180s Success')
 

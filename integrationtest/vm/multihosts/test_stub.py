@@ -18,6 +18,7 @@ import zstackwoodpecker.operations.scenario_operations as sce_ops
 import zstackwoodpecker.header.host as host_header
 import apibinding.inventory as inventory
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
+import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstacklib.utils.xmlobject as xmlobject
 import threading
 import time
@@ -160,7 +161,8 @@ def create_vm_with_random_offering(vm_name, image_name=None, l3_name=None, sessi
         imagename = os.environ.get(image_name)
         image_uuid = test_lib.lib_get_image_by_name(imagename).uuid
     else:
-        image_uuid = random.choice(res_ops.get_resource(res_ops.IMAGE)).uuid
+        conf = res_ops.gen_query_conditions('format', '!=', 'iso')
+        image_uuid = random.choice(res_ops.query_resource(res_ops.IMAGE, conf)).uuid
 
     if l3_name:
         l3name = os.environ.get(l3_name)
