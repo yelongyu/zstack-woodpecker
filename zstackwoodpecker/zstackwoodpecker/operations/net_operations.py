@@ -562,3 +562,29 @@ def detach_network_service_from_l3network(l3_uuid, service_uuid, session_uuid=No
     action.timeout = 12000
     test_util.action_logger('Detach [Network Service]: %s from [l3]: %s' % (service_uuid, l3_uuid))
     evt = acc_ops.execute_action_with_session(action, session_uuid)
+def create_virtual_router_offering(name, cpuNum, memorySize, imageUuid, zoneUuid, managementNetworkUuid, publicNetworkUuid=None, description=None, allocatorStrategy=None, offeringType=None, session_uuid = None):
+    action = api_actions.CreateVirtualRouterOfferingAction()
+    action.name = name
+    action.cpuNum = cpuNum
+    action.memorySize = memorySize
+    action.imageUuid = imageUuid
+    action.zoneUuid = zoneUuid
+    action.managementNetworkUuid = managementNetworkUuid
+    if publicNetworkUuid != None:
+        action.publicNetworkUuid = publicNetworkUuid
+    else:
+        action.publicNetworkUuid = managementNetworkUuid
+    if description != None:
+        action.description = description
+    if allocatorStrategy != None:
+        action.allocatorStrategy = allocatorStrategy
+    if offeringType != None:
+        action.type = offeringType
+    action.timeout = 12000
+    test_util.action_logger('create virtual router offering: name: %s cpuNum: %s, memorySize: %s,\
+             publicNetworkUuid: %s, managementNetworkUuid: %s, imageUuid: %s '\
+            % (action.name, action.cpuNum, action.memorySize,\
+             action.publicNetworkUuid, action.managementNetworkUuid, action.imageUuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.test_logger('Virtual Router Offering: %s is created' % evt.inventory.uuid)
+    return evt.inventory
