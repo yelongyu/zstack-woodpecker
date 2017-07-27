@@ -54,7 +54,7 @@ def test():
     if vpc:
         vpc_inv = vpc[0]
     else:
-        vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', '172.16.0.0/12')
+        vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', 'zstack-test-vpc-vrouter', '172.16.0.0/12')
     time.sleep(5)
     iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, region_id)
     zone_id = iz_list[0].zoneId

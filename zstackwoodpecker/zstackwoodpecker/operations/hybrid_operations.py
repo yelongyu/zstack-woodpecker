@@ -177,10 +177,11 @@ def del_identity_zone_in_local(uuid, session_uuid=None):
     test_util.test_logger('[identity zone in local:] %s is deleted.' % uuid)
     return evt
 
-def create_ecs_vpc_remote(datacenter_uuid, name, cidr_block, session_uuid=None):
+def create_ecs_vpc_remote(datacenter_uuid, name, vrouter_name, cidr_block, session_uuid=None):
     action = api_actions.CreateEcsVpcRemoteAction()
     action.dataCenterUuid = datacenter_uuid
     action.name = name
+    action.vRouterName = vrouter_name
     action.cidrBlock = cidr_block
     test_util.action_logger('Create [Ecs VPC Remote:] %s %s %s' % (datacenter_uuid, name, cidr_block))
     evt = account_operations.execute_action_with_session(action, session_uuid) 

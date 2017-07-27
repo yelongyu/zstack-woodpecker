@@ -53,7 +53,7 @@ def test():
     if ecs_vpc:
         vpc_inv = ecs_vpc[0]
     else:
-        vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', '172.16.0.0/12')
+        vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', 'zstack-test-vpc-vrouter', '172.16.0.0/12')
     time.sleep(5)
     sg = hyb_ops.create_ecs_security_group_remote('sg_for_test_%s' % date_s, vpc_inv.uuid)
     time.sleep(5)
