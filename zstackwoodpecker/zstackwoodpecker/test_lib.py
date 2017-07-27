@@ -5136,3 +5136,14 @@ def ver_ge_zstack_2_0(mn_ip):
         return True
     else:
         return False
+
+def lib_is_storage_network_separate():
+    if all_scenario_config == None or scenario_file == None or not os.path.exists(scenario_file):
+        test_util.test_logger("Not found scenario config or scenario file is not named or not generated")
+        return False
+    for host in xmlobject.safe_list(all_scenario_config.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            for l3Network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                if xmlobject.has_element(l3Network, 'primaryStorageRef'): 
+                    return True
+    return False

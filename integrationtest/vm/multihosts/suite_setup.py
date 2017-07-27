@@ -14,10 +14,34 @@ import zstackwoodpecker.operations.config_operations as config_operations
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.resource_operations as res_ops
+import zstackwoodpecker.operations.tag_operations as tag_ops
+
+
+def add_ps_network_gateway_sys_tag():
+    '''
+    This function currently only support 1 NFS storage separation.
+    TODO:
+        Fix for multiple ps and other type of storage network separation support
+    '''
+
+    pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+    if len(pss) > 1:
+        test_util.test_logger("add ps gateway skip for multiple ps case.")
+        return
+
+    ps = pss[0]
+    if ps.type == "NFS":
+        test_util.test_logger("add system tag: resourceUuid=%s tag=%s" %(ps.uuid, "primaryStorage::gateway::cidr::10.0.0.1/8"))
+        tag_ops.create_system_tag('PrimaryStorageVO', ps.uuid, "primaryStorage::gateway::cidr::10.0.0.1/8")
+    else:
+        test_util.test_logger("add ps gateway skip for not other ps type case.")
+
+    
 
 USER_PATH = os.path.expanduser('~')
 EXTRA_SUITE_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_suite_setup_config.sh' % USER_PATH
 EXTRA_HOST_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_host_setup_config.sh' % USER_PATH
+
 def test():
     if test_lib.scenario_config != None and test_lib.scenario_file != None and not os.path.exists(test_lib.scenario_file):
         scenario_operations.deploy_scenario(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
@@ -67,5 +91,9 @@ def test():
         test_lib.lib_set_allow_live_migration_local_storage('true')
     test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
     test_lib.ensure_recover_script_l2_correct()
+
+    if test_lib.lib_is_storage_network_separate():
+        add_ps_network_gateway_sys_tag()
+
     test_util.test_pass('Suite Setup Success')
 
