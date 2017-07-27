@@ -76,7 +76,6 @@ def test():
     host_username = os.environ.get('hostUsername')
     host_password = os.environ.get('hostPassword')
     t = test_stub.async_exec_ifconfig_nic_down_up(2400, host_ip, host_username, host_password, "zsn1")
-    t.start()
 
     vm.destroy()
 

@@ -77,7 +77,6 @@ def test():
     host_username = os.environ.get('hostUsername')
     host_password = os.environ.get('hostPassword')
     t = test_stub.async_exec_ifconfig_nic_down_up(120, host_ip, host_username, host_password, "zsn1")
-    t.start()
     vm_stop_time = None
     cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid)
     for i in range(0, max_time):
