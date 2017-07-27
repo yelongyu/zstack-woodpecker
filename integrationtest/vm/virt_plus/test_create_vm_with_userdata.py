@@ -47,6 +47,8 @@ def test():
         process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
         if process_result == 0:
             break
+        else:
+            time.sleep(10)
     else:
         test_util.test_fail("fail to cat /tmp/helloworld_config")
 
@@ -55,6 +57,8 @@ def test():
         process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
         if process_result == 0:
             break
+        else:
+            time.sleep(10)
     else:
         test_util.test_fail("fail to find /tmp/temp")    
 
