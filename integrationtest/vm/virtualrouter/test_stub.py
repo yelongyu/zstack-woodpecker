@@ -23,6 +23,7 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
+import apibinding.inventory as inventory
 
 Port = test_state.Port
 
@@ -517,3 +518,18 @@ def execute_shell_in_process(cmd, timeout=10, logfd=None):
     test_util.test_logger('[shell:] %s is finished.' % cmd)
     return process.returncode
 
+def find_ps_local():
+    ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
+    for ps in ps_list:
+        if ps.type == inventory.LOCAL_STORAGE_TYPE:
+            return ps
+    test_util.test_logger("Can not find local primary storage ")
+    return None
+
+def find_ps_nfs():
+    ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
+    for ps in ps_list:
+        if ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
+            return ps
+    test_util.test_logger("Can not find NFS primary storage ")
+    return None
