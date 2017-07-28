@@ -3,6 +3,7 @@
         <case timeout='300' repeat='1'>test_create_vm.py</case>
         <case timeout='600' repeat='1'>test_create_vm_with_userdata.py</case>
         <case timeout='600' repeat='1'>test_get_userdata.py</case>
+        <case timeout='800' repeat='1' noparallel='True'>test_set_l3_mtu.py</case>
         <case timeout='600' repeat='1'>test_remove_userdata.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_add_image_progress2.py</case>
         <case timeout='1800' repeat='1' noparallel='True'>test_crt_temp_image_progress2.py</case>
