@@ -307,6 +307,8 @@ def prepare_etc_hosts(scenarioConfig, scenarioFile, deploy_config, config_json):
 
 def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, deploy_tool, mn_img):
     prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json)
+    if mn_ha_storage_type == 'ceph':
+        os.system('sed -i s/node/ceph-/g %s' %(config_json))
     test_host = get_mn_host(scenarioConfig,scenarioFile)[0]
     test_host_ip = test_host.ip_
     test_host_config = sce_ops.get_scenario_config_vm(test_host.name_, scenarioConfig)
