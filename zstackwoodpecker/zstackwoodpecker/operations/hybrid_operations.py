@@ -399,7 +399,6 @@ def del_vpc_vpn_connection_remote(uuid, session_uuid=None):
 def del_aliyun_route_entry_remote(uuid, route_entry_type, session_uuid=None):
     action = api_actions.DeleteAliyunRouteEntryRemoteAction()
     action.uuid = uuid
-    action.type = route_entry_type
     test_util.action_logger('Delete [Aliyun Route Entry Remote:] %s ' % (uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Aliyun Route Entry Remote:] %s is deleted.' % (uuid))

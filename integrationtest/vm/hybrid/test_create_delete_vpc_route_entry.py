@@ -61,7 +61,7 @@ def test():
             vr = v
     route_entry_inv = hyb_ops.create_aliyun_vpc_virtualrouter_entry_remote('172.18.200.0/24', vr.uuid, vrouter_type='vrouter', next_hop_type='VpnGateway', next_hop_uuid=vpn_gateway.uuid)
     time.sleep(10)
-    hyb_ops.del_aliyun_route_entry_remote(route_entry_inv.uuid, route_entry_type='vrouter')
+    hyb_ops.del_aliyun_route_entry_remote(route_entry_inv.uuid)
     test_util.test_pass('Create Delete Vpc Route Entry Test Success')
 
 def env_recover():
