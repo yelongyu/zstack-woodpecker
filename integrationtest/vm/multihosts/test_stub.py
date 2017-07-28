@@ -162,6 +162,7 @@ def create_vm_with_random_offering(vm_name, image_name=None, l3_name=None, sessi
         image_uuid = test_lib.lib_get_image_by_name(imagename).uuid
     else:
         conf = res_ops.gen_query_conditions('format', '!=', 'iso')
+        conf = res_ops.gen_query_conditions('system', '=', 'false', conf)
         image_uuid = random.choice(res_ops.query_resource(res_ops.IMAGE, conf)).uuid
 
     if l3_name:
