@@ -239,6 +239,22 @@ def delete_l2(l2_uuid, session_uuid = None):
     test_util.action_logger("[L2:] %s is deleted" % l2_uuid)
     return evt
 
+def set_l3_mtu(l3_uuid, mtu, session_uuid = None):
+    action = api_actions.SetL3NetworkMtuAction()
+    action.l3NetworkUuid = l3_uuid
+    action.mtu = mtu
+    action.timeout = 300000
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("Set [L3:] %s [mtu:] %s" % (l3_uuid, mtu))
+
+def get_l3_mtu(l3_uuid, session_uuid = None):
+    action = api_actions.GetL3NetworkMtuAction()
+    action.l3NetworkUuid = l3_uuid
+    action.timeout = 300000
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("Get [L3:] %s mtu" % l3_uuid)
+    return evt.mtu
+
 def delete_l3(l3_uuid, session_uuid = None):
     '''
     Delete L3 will stop all VMs which is using this L3. When VM started again, 
