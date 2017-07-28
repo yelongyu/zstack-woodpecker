@@ -28,7 +28,8 @@ def test():
     vm = test_stub.create_vlan_vm(l3_name)
     test_obj_dict.add_vm(vm)
     vm.check()
-    test_lib.lib_execute_command_in_vm(vm.get_vm(), 'tracepath -n yyk.net | tail -1 | grep pmtu')
+    if not test_lib.lib_execute_command_in_vm(vm.get_vm(), 'tracepath -n yyk.net | tail -1 | grep "pmtu 1200"'):
+        test_util.test_fail("fail to check mtu in [vm:] %s" % (vm.get_vm().uuid))
 
     vm.destroy()
     test_util.test_pass('Create VirtualRouter VM DNS DHCP SANT EIP PF Test Success')
