@@ -183,9 +183,9 @@ def create_ecs_vpc_remote(datacenter_uuid, name, vrouter_name, cidr_block, sessi
     action.name = name
     action.vRouterName = vrouter_name
     action.cidrBlock = cidr_block
-    test_util.action_logger('Create [Ecs VPC Remote:] %s %s %s' % (datacenter_uuid, name, cidr_block))
+    test_util.action_logger('Create [Ecs VPC Remote:] %s %s %s %s' % (datacenter_uuid, name, vrouter_name, cidr_block))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    test_util.test_logger('[Ecs VPC Remote:] %s %s %s is created.' % (datacenter_uuid, name, cidr_block))
+    test_util.test_logger('[Ecs VPC Remote:] %s %s %s %s is created.' % (datacenter_uuid, name, vrouter_name, cidr_block))
     return evt.inventory
 
 def sync_ecs_vpc_from_remote(datacenter_uuid, session_uuid=None):
@@ -572,25 +572,6 @@ def sync_ecs_image_from_remote(datacenter_uuid, image_type='self', session_uuid=
     test_util.action_logger('Sync [Ecs Image From Remote:] %s' % (datacenter_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt
-
-def create_ecs_instance_from_local_image(ecs_root_password, bs_uuid, image_uuid, ecs_vswitch_uuid, identity_zone_uuid, instance_offering_uuid, ecs_bandwidth, ecs_security_group_uuid, private_ip_address=None, allocate_public_ip='false', ecs_instance_name=None, ecs_console_password=None, session_uuid=None):
-    action = api_actions.CreateEcsInstanceFromLocalImageAction()
-    action.ecsRootPassword = ecs_root_password
-    action.backupStorageUuid = bs_uuid
-    action.imageUuid = image_uuid
-    action.ecsVSwitchUuid = ecs_vswitch_uuid
-    action.identityZoneUuid = identity_zone_uuid
-    action.instanceOfferingUuid = instance_offering_uuid
-    action.ecsBandWidth = ecs_bandwidth
-    action.ecsSecurityGroupUuid = ecs_security_group_uuid
-    action.privateIpAddress = private_ip_address
-    action.allocatePublicIp = allocate_public_ip
-    action.ecsInstanceName = ecs_instance_name
-    action.ecsConsolePassword = ecs_console_password
-    test_util.action_logger('Create Ecs Instance from [Local image:] %s %s' % (bs_uuid, image_uuid))
-    evt = account_operations.execute_action_with_session(action, session_uuid) 
-    test_util.test_logger('Ecs Instance is created from [Local image:] %s %s.' % (bs_uuid, image_uuid))
-    return evt.inventory
 
 def create_ecs_instance_from_ecs_image(ecs_root_password, image_uuid, ecs_vswitch_uuid, instance_offering_uuid, ecs_bandwidth, ecs_security_group_uuid, private_ip_address=None, allocate_public_ip='false', name=None, ecs_console_password=None, session_uuid=None):
     action = api_actions.CreateEcsInstanceFromEcsImageAction()

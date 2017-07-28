@@ -38,20 +38,9 @@ def test():
     datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
     regions = [ i.regionId for i in datacenter_list]
     for r in regions:
-        if 'hangzhou' in r:
+        if 'zhangjiakou' in r:
             region_id = r
     datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
-#     err_list = []
-#     for region_id in regions:
-#         try:
-#             datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
-#         except hyb_ops.ApiError, e:
-#             err_list.append(e)
-#             pass
-#         if datacenter_inv:
-#             break
-#     if len(err_list) == len(regions):
-#         raise hyb_ops.ApiError("Failed to add DataCenter: %s" % err_list)
     bucket_inv = hyb_ops.create_oss_bucket_remote(datacenter_inv.uuid, 'zstack-test-%s-%s' % (date_s, region_id), 'created-by-zstack-for-test')
     hyb_ops.attach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid)
     hyb_ops.update_image_guestOsType(image.uuid, guest_os_type='CentOS')
@@ -70,9 +59,11 @@ def env_recover():
         time.sleep(10)
         hyb_ops.del_oss_bucket_remote(bucket_inv.uuid)
         #hyb_ops.del_oss_file_bucket_name_in_local(bucket_inv.uuid)
+
     global datacenter_inv
     if datacenter_inv:
         hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
+
     global ks_inv
     if ks_inv:
         hyb_ops.del_aliyun_key_secret(ks_inv.uuid)
