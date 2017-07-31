@@ -41,7 +41,8 @@ def test():
     test_util.test_dsc('Update MN IP')
     test_stub.update_mn_ip(vm_ip, vm_ip, tmp_file)
     test_stub.start_mn(vm_ip, tmp_file)
-    test_stub.check_installation(vm_ip, tmp_file)
+    #test_stub.check_installation(vm_ip, tmp_file)
+    test_stub.create_sftp_backup_storage(vm_ip, tmp_file)
 
     test_util.test_dsc('Upgrade zstack to latest mevoco') 
     test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
@@ -50,7 +51,9 @@ def test():
     test_stub.start_mn(vm_ip, tmp_file)
     #test_stub.check_zstack_or_mevoco(vm_ip, tmp_file, 'ZStack-enterprise')
     test_stub.check_zstack_or_mevoco(vm_ip, tmp_file, 'ZStack')
-    test_stub.check_installation(vm_ip, tmp_file)
+    #test_stub.check_installation(vm_ip, tmp_file)
+    test_stub.reconnect_backup_storage(vm_ip, tmp_file)
+    test_stub.delete_backup_storage(vm_ip, tmp_file)
 
     os.system('rm -f %s' % tmp_file)
     test_stub.destroy_vm_scenario(vm_inv.uuid)
