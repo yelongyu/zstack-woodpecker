@@ -48,13 +48,6 @@ def test():
     l3_name = os.environ.get('l3VlanNetworkName1')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     test_lib.clean_up_all_vr()
-    #vrs = test_lib.lib_find_vr_by_l3_uuid(l3_net_uuid)
-    #vr_host_ips = []
-    #for vr in vrs:
-    #    vr_host_ips.append(test_lib.lib_find_host_by_vr(vr).managementIp)
-    #    if test_lib.lib_is_vm_running(vr) != True:
-    #        vm_ops.start_vm(vr.uuid)
-    #time.sleep(60)
 
     mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
@@ -62,8 +55,6 @@ def test():
     conditions = res_ops.gen_query_conditions('state', '=', 'Enabled')
     conditions = res_ops.gen_query_conditions('status', '=', 'Connected', conditions)
     conditions = res_ops.gen_query_conditions('managementIp', '!=', mn_ip, conditions)
-    #for vr_host_ip in vr_host_ips:
-    #    conditions = res_ops.gen_query_conditions('managementIp', '!=', vr_host_ip, conditions)
     host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].uuid
     vm_creation_option.set_host_uuid(host_uuid)
     vm_creation_option.set_l3_uuids([l3_net_uuid])
@@ -76,7 +67,6 @@ def test():
 
     test_stub.ensure_host_has_no_vr(host_uuid)
 
-    #vm.check()
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
     test_util.test_logger("host %s is disconnecting" %(host_ip))
 
@@ -96,8 +86,8 @@ def test():
     cond = res_ops.gen_query_conditions('name', '=', 'ls_vm_ha_self_start')
     cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid, cond)
     for i in range(0, 180):
+        vm_stop_time = i
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Stopped":
-            vm_stop_time = i
             test_stub.start_host(test_host, test_lib.all_scenario_config)
             test_stub.recover_host_vlan(test_host, test_lib.all_scenario_config, test_lib.deploy_config)
             break
