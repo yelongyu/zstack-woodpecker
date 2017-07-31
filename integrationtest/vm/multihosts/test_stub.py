@@ -635,6 +635,9 @@ def ensure_all_vrs_on_host(host_uuid):
     for vr in vr_list:
         vm_ops.migrate_vm(vr.uuid, host_uuid)
 
+    #This is for ensure the migration completed
+    time.sleep(60)
+
 
 def ensure_host_not_nfs_provider(host_uuid):
     cond = res_ops.gen_query_conditions('type', '=', 'NFS')

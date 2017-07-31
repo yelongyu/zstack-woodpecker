@@ -78,7 +78,6 @@ def test():
     #for vr in vrs:
     #    if test_lib.lib_find_host_by_vr(vr).managementIp != test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp:
     #        vm_ops.migrate_vm(vr.uuid, target_host_uuid)
-    time.sleep(60)
 
     #vm.check()
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
