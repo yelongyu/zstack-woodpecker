@@ -82,8 +82,8 @@ def test():
     cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid, cond)
 
     for i in range(0, 180):
+        vm_stop_time = i
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Unknown":
-            vm_stop_time = i
             test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
             break
         time.sleep(1)

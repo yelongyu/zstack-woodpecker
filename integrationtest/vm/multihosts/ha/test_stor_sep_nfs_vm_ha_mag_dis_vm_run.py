@@ -81,8 +81,8 @@ def test():
     vm_stop_time = None
     cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid)
     for i in range(0, max_time):
+        vm_stop_time = i
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Unknown":
-            vm_stop_time = i
             break
         time.sleep(1)
 

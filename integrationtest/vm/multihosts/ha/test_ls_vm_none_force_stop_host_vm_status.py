@@ -92,8 +92,8 @@ def test():
 
     vm_stop_time = None
     for i in range(0, 180):
+        vm_stop_time = i
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Unknown":
-            vm_stop_time = i
             test_stub.start_host(test_host, test_lib.all_scenario_config)
             test_stub.recover_host_vlan(test_host, test_lib.all_scenario_config, test_lib.deploy_config)
             break
