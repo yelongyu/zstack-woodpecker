@@ -685,7 +685,7 @@ def check_installation(vm_ip, tmp_file):
 #    if file_exist == 'no':
 #        test_util.test_fail('there is no log file')
 
-def create_sftp_bachup_storage(vm_ip, tmp_file):
+def create_sftp_backup_storage(vm_ip, tmp_file):
     vm_username = os.environ['imageUsername']
     vm_password = os.environ['imagePassword']
 
@@ -699,10 +699,10 @@ def create_sftp_bachup_storage(vm_ip, tmp_file):
     bs_option.sshPort = '22'
     bs = scen_ops.create_sftp_backup_storage(vm_ip, bs_option)
 
-def reconnect_bachup_storage(vm_ip, tmp_file):
+def reconnect_backup_storage(vm_ip, tmp_file):
     scen_ops.reconnect_backup_storage(vm_ip, bs.uuid)
 
-def delete_bachup_storage(vm_ip, tmp_file):
+def delete_backup_storage(vm_ip, tmp_file):
     scen_ops.delete_backup_storage(vm_ip, bs.uuid)
 
 def check_zstack_version(vm_ip, tmp_file, pkg_version):
