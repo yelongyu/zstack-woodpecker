@@ -685,7 +685,8 @@ def get_host_l2_nic_name(l2interface):
         l2_network_interface = l2interface.replace("eth", "zsn")
         return l2_network_interface
     else:
-        return l2interface
+        #return l2interface
+        return "br_eth0"
 
 
 @contextmanager
