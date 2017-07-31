@@ -5147,3 +5147,8 @@ def lib_is_storage_network_separate():
                 if xmlobject.has_element(l3Network, 'primaryStorageRef'): 
                     return True
     return False
+
+def lib_skip_if_ps_num_is_not_eq_number(number):
+    ps_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+    if len(ps_list) != number:
+        test_util.test_skip("The expected ps number is %s VS. actual is %s." %(str(number), str(len(ps_list))))
