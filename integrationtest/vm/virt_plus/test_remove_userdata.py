@@ -50,6 +50,10 @@ def test():
 
 
     vm.destroy()
+    test_obj_dict.rm_vm(vm)
+    image.delete()
+    image.expunge()
+    test_obj_dict.rm_image(image)
     test_util.test_pass('Delete userdata  Success')
 
     #Will be called only if exception happens in test().
