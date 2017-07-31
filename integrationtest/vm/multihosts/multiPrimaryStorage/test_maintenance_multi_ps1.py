@@ -23,15 +23,6 @@ VOLUME_NUMBER = 10
 maintenance_ps_list = []
 
 
-def try_start_vm(vm):
-    try:
-        vm.start()
-    except Exception as e:
-        test_util.test_logger('Can not start vm, it is as expected')
-    else:
-        test_util.test_fail('Critical ERROR: can start vm2 in maintenance mode')
-
-
 def test():
 
     ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
@@ -84,7 +75,8 @@ def test():
     assert vm4.get_vm().state == inventory.STOPPED
 
     for vm in [vm2, vm3, vm4]:
-        try_start_vm(vm)
+        with test_stub.expect_failure("start vm in maintenance ps", Exception):
+            vm.start()
 
     test_util.test_dsc('enable ps2')
     ps_ops.change_primary_storage_state(state='enable', primary_storage_uuid=ps2.uuid)

@@ -77,12 +77,8 @@ def test():
     else:
         vm1.check()
 
-    try:
+    with test_stub.expect_failure("Start vm in maintenance ps", Exception):
         vm2.start()
-    except Exception as e:
-        test_util.test_logger('Can not start vm2, it is as expected')
-    else:
-        test_util.test_fail('Critical ERROR: can start vm2 in maintenance mode')
 
     test_util.test_dsc('enable another ps')
     ps_ops.change_primary_storage_state(state='enable', primary_storage_uuid=another_ps.uuid)

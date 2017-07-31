@@ -48,14 +48,8 @@ def test():
     for vm in first_ps_vm_list + second_ps_vm_list:
         assert vm.get_vm().state == inventory.STOPPED
 
-    test_util.test_dsc("Try to Create one vm")
-    try:
-        vm = test_stub.create_multi_vms(name_prefix='test-vm', count=1)[0]
-    except Exception as e:
-        test_util.test_logger('EXPECTED: Catch exceptions Create vm in disabled ps will fail')
-    else:
-        test_obj_dict.add_vm(vm)
-        test_util.test_fail("CRITICAL ERROR: Can create VM in ps not attached cluster")
+    with test_stub.expect_failure('Create vm when no ps attached to cluster', Exception):
+        test_stub.create_multi_vms(name_prefix='test-vm', count=1)
 
     for ps in [env.first_ps, env.second_ps]:
         ps_ops.attach_primary_storage(ps.uuid, res_ops.get_resource(res_ops.CLUSTER)[0].uuid)

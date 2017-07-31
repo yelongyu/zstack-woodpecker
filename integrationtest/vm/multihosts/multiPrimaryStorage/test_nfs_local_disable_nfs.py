@@ -21,18 +21,6 @@ VOLUME_NUMBER = 10
 disabled_ps_list = []
 
 
-def try_create_volume_in_nfs(ps):
-    try:
-        test_util.test_dsc("Try create volume in NFS primary")
-        assert ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE
-        volume = test_stub.create_multi_volume(count=1, ps=ps)[0]
-    except Exception as e:
-        test_util.test_logger('Can not create volume in NFS when disabled, it is as expected')
-    else:
-        test_obj_dict.add_volume(volume)
-        test_util.test_fail('Critical ERROR: can create vm in NFS ps')
-
-
 def test():
 
     if not (test_stub.find_ps_local() and test_stub.find_ps_nfs()):
@@ -53,7 +41,8 @@ def test():
     vm.check()
     assert vm.get_vm().state == inventory.RUNNING
 
-    try_create_volume_in_nfs(nfs_ps)
+    with test_stub.expect_failure("Create datavol in nfs-local env when nfs disabled", Exception):
+        test_stub.create_multi_volume(count=1, ps=nfs_ps)
 
     test_util.test_dsc("Try to create vm")
     new_vm = test_stub.create_multi_vms(name_prefix='test-vm', count=1)[0]

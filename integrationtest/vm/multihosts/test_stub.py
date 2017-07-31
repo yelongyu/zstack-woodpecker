@@ -25,6 +25,7 @@ import time
 import sys
 import telnetlib
 import random
+from contextlib import contextmanager
 #import traceback
 
 
@@ -683,4 +684,12 @@ def get_host_l2_nic_name(l2interface):
     else:
         return l2interface
 
-    
+
+@contextmanager
+def expect_failure(msg, *exceptions):
+    try:
+        yield
+    except exceptions:
+        test_util.test_logger("Expected failure: {}".format(msg))
+    else:
+        test_util.test_fail("CRITICAL ERROR: {} succeed!".format(msg))

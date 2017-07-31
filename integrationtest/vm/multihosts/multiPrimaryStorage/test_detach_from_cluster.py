@@ -32,9 +32,7 @@ def test():
     env.check_env()
     env.deploy_env()
     first_ps_vm_list = env.first_ps_vm_list
-    first_ps_volume_list = env.first_ps_volume_list
     second_ps_vm_list = env.second_ps_vm_list
-    second_ps_volume_list = env.second_ps_volume_list
     if env.new_ps:
         new_ps_list.append(env.second_ps)
 
@@ -51,28 +49,17 @@ def test():
     for vm in first_ps_vm_list + second_ps_vm_list:
         vm.update()
 
-
     for vm in env.get_vm_list_from_ps(selected_ps):
         assert vm.get_vm().state == inventory.STOPPED
-
-    try:
-        vm.start()
-    except:
-        test_util.test_logger("Expected: VM can not be started if PS not attahed to cluster")
-    else:
-        test_util.test_fail("CRITICAL ERROR: Can start VM in ps not attached cluster")
 
     for vm in env.get_vm_list_from_ps(another_ps):
         assert vm.get_vm().state == inventory.RUNNING
 
-    test_util.test_dsc("Try to Create vm in detached ps")
-    try:
-        vm = test_stub.create_multi_vms(name_prefix='test-vm', count=1, ps_uuid=selected_ps.uuid)[0]
-    except Exception as e:
-        test_util.test_logger('EXPECTED: Catch exceptions Create vm in disabled ps will fail')
-    else:
-        test_obj_dict.add_vm(vm)
-        test_util.test_fail("CRITICAL ERROR: Can create VM in ps not attached cluster")
+    with test_stub.expect_failure('start vm in ps that not attached to cluster', Exception):
+        random.choice(env.get_vm_list_from_ps(selected_ps)).start()
+
+    with test_stub.expect_failure("Create vm in detached ps", Exception):
+        test_stub.create_multi_vms(name_prefix='test-vm', count=1, ps_uuid=selected_ps.uuid)
 
     test_util.test_dsc("Create 5 vms and check all should be in enabled PS")
     vm_list = test_stub.create_multi_vms(name_prefix='test_vm', count=5)

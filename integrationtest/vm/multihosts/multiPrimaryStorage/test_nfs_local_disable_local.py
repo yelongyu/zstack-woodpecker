@@ -4,8 +4,6 @@
 
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
-import zstackwoodpecker.operations.resource_operations as res_ops
-import apibinding.inventory as inventory
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 
@@ -33,8 +31,8 @@ def test():
     test_obj_dict.add_vm(vm)
 
     test_util.test_dsc("Create {0} volumes in NFS".format(VOLUME_NUMBER))
-    volume_in_nfs  = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=nfs_ps)
-    for volume in  volume_in_nfs:
+    volume_in_nfs = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=nfs_ps)
+    for volume in volume_in_nfs:
         test_obj_dict.add_volume(volume)
         volume.check()
 
@@ -53,13 +51,8 @@ def test():
         volume.check()
 
     test_util.test_dsc("Try to create vm with datavolume")
-    try:
-        vm = test_stub.create_multi_vms(name_prefix='test-vm', count=1, datavolume=10)[0]
-    except Exception as e:
-        test_util.test_logger('EXPECTED: Catch exception {}\nCreate vm in disabled ps will fail'.format(e))
-    else:
-        test_obj_dict.add_vm(vm)
-        test_util.test_fail("CRITICAL ERROR: Can create VM when local ps disabled")
+    with test_stub.expect_failure('Create vm with datavol in nfs-local env when local disabled', Exception):
+        test_stub.create_multi_vms(name_prefix='test-vm', count=1, datavolume=10)
 
     test_util.test_dsc("Try to create datavolume in NFS")
     volume = test_stub.create_multi_volume(count=1, ps=nfs_ps)[0]

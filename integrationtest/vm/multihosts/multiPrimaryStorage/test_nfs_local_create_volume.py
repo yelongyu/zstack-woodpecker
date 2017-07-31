@@ -21,7 +21,6 @@ VM_COUNT = 10
 VOLUME_NUMBER = 10
 
 
-
 def test():
     if not (test_stub.find_ps_local() and test_stub.find_ps_nfs()):
         test_util.test_skip("Skip test if not local-nfs multi ps environment")
@@ -36,14 +35,8 @@ def test():
     for volume in volume_list:
         assert volume.get_volume().primaryStorageUuid == nfs_ps.uuid
 
-    try:
-        vol = test_stub.create_multi_volume(count=1, ps=local_ps)
-    except Exception as e:
-        test_util.test_logger('Can not create volume in local, it is as expected')
-    else:
-        test_obj_dict.add_volume()
-        test_util.test_fail('Critical ERROR:vol can create volume in local ps')
-
+    with test_stub.expect_failure('Create vm on nfs in local-nfs environment', Exception):
+        test_stub.create_multi_volume(count=1, ps=local_ps)
 
     test_util.test_pass('Multi PrimaryStorage Test Pass')
 

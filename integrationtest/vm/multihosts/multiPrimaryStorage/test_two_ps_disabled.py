@@ -48,22 +48,12 @@ def test():
         test_object.check()
 
     test_util.test_dsc("Try to Create one vm")
-    try:
-        vm = test_stub.create_multi_vms(name_prefix='test-vm', count=1)[0]
-    except Exception as e:
-        test_util.test_logger('EXPECTED: Catch exception {}\nCreate vm in disabled ps will fail'.format(e))
-    else:
-        test_obj_dict.add_vm(vm)
-        test_util.test_fail("CRITICAL ERROR: Can create VM in disabled ps")
+    with test_stub.expect_failure("Create vm when no ps in enable status", Exception):
+        test_stub.create_multi_vms(name_prefix='test-vm', count=1)
 
     test_util.test_dsc("Try to Create one volume")
-    try:
-        volume = test_stub.create_multi_volume(count=1, ps=random.choice([env.first_ps, env.second_ps]))[0]
-    except Exception as e:
-        test_util.test_logger('EXPECTED: Catch exception {}\nCreate vm in disabled ps will fail'.format(e))
-    else:
-        test_obj_dict.add_volume(volume)
-        test_util.test_fail("CRITICAL ERROR: Can create volume in disabled ps")
+    with test_stub.expect_failure("Create volume when no ps in enable status", Exception):
+        test_stub.create_multi_volume(count=1, ps=random.choice([env.first_ps, env.second_ps]))
 
     test_util.test_dsc("enable All primaryStorage")
     for ps in [env.first_ps, env.second_ps]:
