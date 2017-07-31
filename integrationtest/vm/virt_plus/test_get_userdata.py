@@ -46,6 +46,10 @@ def test():
         test_util.test_fail('Failed to get system tags.')
 
     vm.destroy()
+    test_obj_dict.rm_vm(vm)
+    image.delete()
+    image.expunge()
+    test_obj_dict.rm_image(image)
     test_util.test_pass('Get userdata  Success')
 
     #Will be called only if exception happens in test().
