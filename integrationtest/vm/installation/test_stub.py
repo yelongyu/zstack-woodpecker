@@ -313,7 +313,6 @@ def update_21_iso(vm_ip, tmp_file, iso_21_path, upgrade_script_path):
     #process_result = execute_shell_in_process(cmd, tmp_file)
 
 def prepare_mevoco_test_env(vm_inv):
-def prepare_mevoco_test_env(vm_inv):
     all_in_one_pkg = os.environ['zstackPkg']
     scp_file_to_vm(vm_ip, all_in_one_pkg, '/root/zizhu.bin')
 
