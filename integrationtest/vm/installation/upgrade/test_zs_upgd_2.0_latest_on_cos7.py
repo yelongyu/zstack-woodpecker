@@ -24,8 +24,8 @@ def test():
     test_util.test_dsc('Create test vm to test zstack upgrade by -u.')
 
     image_name = os.environ.get('imageName_i_c7_z_2.0')
-    #iso_path = os.environ.get('iso_path')
-    iso_21_path = os.environ.get('iso_21_path')
+    iso_path = os.environ.get('iso_path')
+    #iso_21_path = os.environ.get('iso_21_path')
     zstack_latest_version = os.environ.get('zstackLatestVersion')
     zstack_latest_path = os.environ.get('zstackLatestInstaller')
     vm_name = os.environ.get('vmName')
@@ -44,8 +44,8 @@ def test():
     test_stub.check_installation(vm_ip, tmp_file)
 
     test_util.test_logger('Upgrade zstack to latest') 
-    #test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
-    test_stub.updatei_21_iso(vm_ip, tmp_file, iso_21_path, upgrade_script_path)
+    test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
+    #test_stub.updatei_21_iso(vm_ip, tmp_file, iso_21_path, upgrade_script_path)
     test_stub.upgrade_zstack(vm_ip, zstack_latest_path, tmp_file) 
     test_stub.check_zstack_version(vm_ip, tmp_file, zstack_latest_version)
     test_stub.start_mn(vm_ip, tmp_file)
