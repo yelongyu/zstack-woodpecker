@@ -686,6 +686,29 @@ def check_installation(vm_ip, tmp_file):
 #    if file_exist == 'no':
 #        test_util.test_fail('there is no log file')
 
+def create_sftp_bachup_storage(vm_ip, tmp_file):
+    vm_username = os.environ['imageUsername']
+    vm_password = os.environ['imagePassword']
+
+    bs_option = test_util.BackupStorageOption()
+    bs_option.name = 'bs1'
+    bs_option.description = 'bs'
+    bs_option.hostname = vm_ip
+    bs_option.url = '/home/bs'
+    bs_option.username = vm_username
+    bs_option.password = vm_password
+    bs_option.sshPort = '22'
+    bs = scen_ops.create_sftp_backup_storage(vm_ip, bs_option)
+
+def reconnect_bachup_storage(vm_ip, tmp_file):
+    scen_ops.reconnect_backup_storage(vm_ip, bs.uuid)
+
+def delete_bachup_storage(vm_ip, tmp_file):
+    scen_ops.delete_backup_storage(vm_ip, bs.uuid)
+
+def check_zstack_version(vm_ip, tmp_file, pkg_version):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+
 def check_zstack_version(vm_ip, tmp_file, pkg_version):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     cmd = '%s "/usr/bin/zstack-ctl status" | grep ^version | awk \'{print $2}\'' % ssh_cmd
