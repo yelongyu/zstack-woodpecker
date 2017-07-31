@@ -71,7 +71,7 @@ def test():
         volume.check()
     vm.check()
 
-    target_host = test_lib.lib_find_random_host_by_volume_uuid(test_lib.lib_get_root_volume(vm.get_vm()).uuid)
+    target_host = test_lib.lib_find_random_host(vm.get_vm())
     target_host_uuid = target_host.uuid
 
     vm.stop()
