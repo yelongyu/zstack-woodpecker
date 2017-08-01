@@ -679,6 +679,14 @@ def create_sftp_backup_storage(http_server_ip, backup_storage_option, session_uu
             (evt.inventory.uuid, action.name))
     return evt.inventory
 
+def query_backup_storage(http_server_ip, backup_storage_uuid, session_uuid=None):
+    action = api_actions.QueryBackupStorageAction()
+    action.uuid = backup_storage_uuid
+    action.timeout = 6000000
+    test_util.action_logger('Query Backup Storage [uuid:] %s' % backup_storage_uuid)
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    return evt.inventory
+
 def reconnect_backup_storage(http_server_ip, backup_storage_uuid, session_uuid=None):
     action = api_actions.ReconnectBackupStorageAction()
     action.uuid = backup_storage_uuid
