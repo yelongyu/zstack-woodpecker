@@ -700,9 +700,12 @@ def create_sftp_backup_storage(vm_ip, tmp_file):
     bs = scen_ops.create_sftp_backup_storage(vm_ip, bs_option)
 
 def reconnect_backup_storage(vm_ip, tmp_file):
+	
+    bs = scen_ops.query_backup_storage(vm_ip, tmp_file)
     scen_ops.reconnect_backup_storage(vm_ip, bs.uuid)
 
 def delete_backup_storage(vm_ip, tmp_file):
+    bs = scen_ops.query_backup_storage(vm_ip, tmp_file)
     scen_ops.delete_backup_storage(vm_ip, bs.uuid)
 
 def check_zstack_version(vm_ip, tmp_file, pkg_version):
