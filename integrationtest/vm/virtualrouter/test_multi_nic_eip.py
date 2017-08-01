@@ -51,7 +51,13 @@ def test():
     if not second_public_l3network_attached:
         net_ops.attach_l3(second_public_l3network_uuid, vr1_uuid) 
 
-
+    #Get vr1 nic_uuid on second public network
+    cond = res_ops.gen_query_conditions('uuid', '=', vr1_uuid)
+    vr1_nics = res_ops.query_resource(res_ops.APPLIANCE_VM, cond)[0].vmNics
+    vr1_second_pub_nic_uuid = ''
+    for vm_nic in vr1_nics:
+        if vm_nic.l3NetworkUuid == second_public_l3network_uuid:
+           vr1_second_pub_nic_uuid = vm_nic.uuid
     #Create new vrouter offering
     vr_offering_name = "virtual_router_offering1"
     vr_offering_cpu_num = 2
@@ -67,9 +73,11 @@ def test():
 
     #Create vms for each public network eip attach
     vm2 = test_stub.create_vlan_vm(os.environ.get('l3VlanDNATNetworkName'))
+    vm2_ip = vm2.get_vm().vmNics[0].ip
     vm2_nic_uuid = vm2.get_vm().vmNics[0].uuid
     l3network2_uuid = vm2.get_vm().vmNics[0].l3NetworkUuid
     vm3 = test_stub.create_vlan_vm(os.environ.get('l3VlanNetworkName4'))
+    vm3_ip = vm3.get_vm().vmNics[0].ip
     vm3_nic_uuid = vm3.get_vm().vmNics[0].uuid
     l3network3_uuid = vm3.get_vm().vmNics[0].l3NetworkUuid    
 
@@ -104,14 +112,20 @@ def test():
     eip3.attach(vm3_nic_uuid, vm3)
     
     #Check if the network is able to ping with eip
-    if not test_lib.lib_check_ping(vm1.vm, eip2_pub_ip, no_exception=True):
-        test_util.test_fail('Exception: [vm:] %s ping [Eip:] %s fail. But it should ping successfully.' % (vm1.vm.uuid, eip2_pub_ip))
-    if not test_lib.lib_check_ping(vm1.vm, eip3_pub_ip, no_exception=True):
-        test_util.test_fail('Exception: [vm:] %s ping [Eip:] %s fail. But it should ping successfully.' % (vm1.vm.uuid, eip3_pub_ip))
-    if not test_lib.lib_check_ping(vm2.vm, eip11_pub_ip, no_exception=True):
-        test_util.test_fail('Exception: [vm:] %s ping [Eip:] %s fail. But it should ping successfully.' % (vm2.vm.uuid, eip11_pub_ip))
-    if not test_lib.lib_check_ping(vm3.vm, eip12_pub_ip, no_exception=True):
-        test_util.test_fail('Exception: [vm:] %s ping [Eip:] %s fail. But it should ping successfully.' % (vm3.vm.uuid, eip12_pub_ip))
+    user_name = "root"
+    user_password = "password"
+    rsp_ping = os.system("sshpass -p '%s' ssh %s@%s 'ping -c 4 %s'"%(user_password, user_name, vm1_ip, eip2_pub_ip))
+    if rsp_ping != 0:
+        test_util.test_fail('Exception: [vm ip:] %s ping [Eip:] %s fail. But it should ping successfully.' % (vm1_iP, eip2_pub_ip))
+    rsp_ping = os.system("sshpass -p '%s' ssh %s@%s 'ping -c 4 %s'"%(user_password, user_name, vm1_ip, eip3_pub_ip))
+    if rsp_ping != 0:
+        test_util.test_fail('Exception: [vm ip:] %s ping [Eip:] %s fail. But it should ping successfully.' % (vm1_ip, eip3_pub_ip))
+    rsp_ping = os.system("sshpass -p '%s' ssh %s@%s 'ping -c 4 %s'"%(user_password, user_name, vm2_ip, eip11_pub_ip))
+    if rsp_ping != 0:
+        test_util.test_fail('Exception: [vm ip:] %s ping [Eip:] %s fail. But it should ping successfully.' % (vm2_ip, eip11_pub_ip))
+    rsp_ping = os.system("sshpass -p '%s' ssh %s@%s 'ping -c 4 %s'"%(user_password, user_name, vm3_ip, eip12_pub_ip))
+    if rsp_ping != 0:
+        test_util.test_fail('Exception: [vm ip:] %s ping [Eip:] %s fail. But it should ping successfully.' % (vm3_ip, eip12_pub_ip))
 
     #Delete vips and vr offering
     vip11.delete()
@@ -121,8 +135,8 @@ def test():
     vm_ops.delete_instance_offering(vr_offering_uuid)
 
     #Dettach the route table to vrouter and second public nework
-    net_ops.detach_vrouter_route_table_from_vrouter(route_table1_uuid, vr1_uuid)
-    net_ops.detach_l3(nic_uuid)
+    if vr1_second_pub_nic_uuid != '':
+        net_ops.detach_l3(vr1_second_pub_nic_uuid)
 
     vm1.destroy()
     vm2.destroy()
