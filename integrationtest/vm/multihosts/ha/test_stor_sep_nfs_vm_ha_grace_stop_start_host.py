@@ -87,6 +87,7 @@ def test():
     vm.set_state(vm_header.RUNNING)
     vm.check()
 
+    vm.update()
     if test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp == host_ip:
         test_util.test_fail("VM is expected to start running on another host")
 
