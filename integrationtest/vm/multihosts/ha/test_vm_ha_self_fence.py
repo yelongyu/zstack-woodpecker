@@ -73,7 +73,7 @@ def test():
 
     host_username = os.environ.get('hostUsername')
     host_password = os.environ.get('hostPassword')
-    cmd = "ifdown %s && sleep 180 && ifup %s" % (l2_network_interface, l2_network_interface)
+    cmd = "ifconfig %s down && sleep 180 && ifconfig %s up" % (l2_network_interface, l2_network_interface)
     rsp = test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd, 180)
     if rsp:
 	test_util.test_fail("host is expected to shutdown after its network down for a while")

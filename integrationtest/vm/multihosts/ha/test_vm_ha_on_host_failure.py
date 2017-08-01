@@ -73,7 +73,7 @@ def test():
     host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "OnHostFailure")
     l2_network_interface = os.environ.get('l2ManagementNetworkInterface')
-    cmd = "ifdown %s && sleep 180 && ifup %s" % (l2_network_interface, l2_network_interface)
+    cmd = "ifconfig %s down && sleep 180 && ifconfig %s up" % (l2_network_interface, l2_network_interface)
     host_username = os.environ.get('hostUsername')
     host_password = os.environ.get('hostPassword')
     rsp = test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd, 180)

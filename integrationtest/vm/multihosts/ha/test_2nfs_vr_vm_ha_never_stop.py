@@ -87,7 +87,7 @@ def test():
 #    l2_network_interface = os.environ.get('l2ManagementNetworkInterface')
     #l2interface = test_lib.lib_get_l2s_by_vm(vm.get_vm())[0].physicalInterface
     l2_network_interface = test_stub.get_host_l2_nic_name("br_eth0")
-    cmd = "ifdown %s && sleep 360 && ifup %s" % (l2_network_interface, l2_network_interface)
+    cmd = "ifconfig %s down && sleep 360 && ifconfig %s up" % (l2_network_interface, l2_network_interface)
     host_username = os.environ.get('hostUsername')
     host_password = os.environ.get('hostPassword')
     rsp = test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd, 360)
