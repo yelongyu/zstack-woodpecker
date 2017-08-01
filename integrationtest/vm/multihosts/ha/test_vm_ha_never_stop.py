@@ -82,8 +82,8 @@ def test():
     host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
 #    l2_network_interface = os.environ.get('l2ManagementNetworkInterface')
-    l2interface = test_lib.lib_get_l2s_by_vm(vm.get_vm())[0].physicalInterface
-    l2_network_interface = test_stub.get_host_l2_nic_name(l2interface)
+    #l2interface = test_lib.lib_get_l2s_by_vm(vm.get_vm())[0].physicalInterface
+    l2_network_interface = test_stub.get_host_l2_nic_name("br_eth0")
     cmd = "ifdown %s && sleep 180 && ifup %s" % (l2_network_interface, l2_network_interface)
     host_username = os.environ.get('hostUsername')
     host_password = os.environ.get('hostPassword')
