@@ -698,6 +698,7 @@ def create_sftp_backup_storage(vm_ip, tmp_file):
     bs_option.password = vm_password
     bs_option.sshPort = '22'
     bs = scen_ops.create_sftp_backup_storage(vm_ip, bs_option)
+    scen_ops.reconnect_backup_storage(vm_ip, bs.uuid)
 
 def reconnect_backup_storage(vm_ip, tmp_file):
 	
