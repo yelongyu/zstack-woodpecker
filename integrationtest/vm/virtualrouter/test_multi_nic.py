@@ -30,17 +30,27 @@ def test():
     cond = res_ops.gen_query_conditions('name', '=', 'l3_user_defined_vlan1')
     second_public_l3network_uuid = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0].uuid
     net_ops.attach_l3(second_public_l3network_uuid, vr1_uuid) 
-   
-    cond = res_ops.gen_query_conditions('uuid','=',vr1_uuid)
-    nic_dict = res_ops.query_resource(res_ops.APPLIANCE_VM, cond)[0].vmNics
-    for nic in nic_dict:
-        if nic.l3NetworkUuid == second_public_l3network_uuid:
+
+    #Attach second public network to vrouter   
+    cond = res_ops.gen_query_conditions('uuid', '=', vr1_uuid)
+    vr1_nics = res_ops.query_resource(res_ops.APPLIANCE_VM, cond)[0].vmNics
+    second_public_l3network_attached = False
+    for vm_nic in vr1_nics:
+        if vm_nic.l3NetworkUuid == second_public_l3network_uuid:
+            second_public_l3network_attached = True
+    if not second_public_l3network_attached:
+        net_ops.attach_l3(second_public_l3network_uuid, vr1_uuid)
+
+    #Get vr1 nic_uuid on second public network
+    vr1_nics = res_ops.query_resource(res_ops.APPLIANCE_VM, cond)[0].vmNics
+    vr1_second_pub_nic_uuid = ''
+    for vm_nic in vr1_nics:
+        if vm_nic.l3NetworkUuid == second_public_l3network_uuid:
+            vr1_second_pub_nic_uuid = vm_nic.uuid
             test_util.test_pass('The Second Public Nic Is Attached To Vrouter')
-
-    net_ops.detach_l3(nic_uuid)
-
+    if vr1_second_pub_nic_uuid != '':
+        net_ops.detach_l3(vr1_second_pub_nic_uuid)
     vm1.check()
-
     vm1.destroy()
     test_util.test_fail('The Second Public Nic Does Not Attached To Vrouter')
 
