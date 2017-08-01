@@ -37,7 +37,7 @@ def test():
     vm = test_stub.create_vm(vm_name = 'userdata-vm',image_name = image_name,system_tags = ["userdata::%s" % os.environ.get('userdata_systemTags')])
 
     test_obj_dict.add_vm(vm)
-    time.sleep(60)
+    time.sleep(90)
 
     vm_ip = vm.get_vm().vmNics[0].ip
     ssh_cmd = 'ssh -i %s -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null test@%s' % (os.environ.get('sshkeyPriKey_file'), vm_ip)
