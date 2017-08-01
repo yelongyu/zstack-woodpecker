@@ -744,6 +744,13 @@ def query_aliyun_virtual_router_local(session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
+def query_aliyun_route_entry_local(session_uuid=None):
+    action = api_actions.QueryAliyunRouteEntryFromLocalAction()
+    action.conditions = []
+    test_util.action_logger('Query Aliyun Route Entry from local')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
 def query_oss_bucket_file_name(session_uuid=None):
     action = api_actions.QueryOssBucketFileNameAction()
     action.conditions = []
