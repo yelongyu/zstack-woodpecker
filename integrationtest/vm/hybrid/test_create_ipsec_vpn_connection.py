@@ -123,7 +123,11 @@ def test():
     if ecs_vswitch:
         vswitch_inv = ecs_vswitch[0]
     else:
-        vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'zstack-test-vswitch', '192.168.252.0/24')
+        vpc_cidr_list = vpc_inv.cidrBlock.split('.')
+        vpc_cidr_list[2] = '252'
+        vpc_cidr_list[3] = '0/24'
+        vswitch_cidr = '.'.join(vpc_cidr_list)
+        vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'zstack-test-vswitch', vswitch_cidr)
         time.sleep(5)
     # Create Vpc Security Group
     sg_inv = hyb_ops.create_ecs_security_group_remote('sg_for_test', vpc_inv.uuid)

@@ -59,7 +59,11 @@ def test():
     iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, region_id)
     zone_id = iz_list[0].zoneId
     iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, zone_id)
-    vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'vswitch-for-test', '192.168.0.0/16')
+    vpc_cidr_list = vpc_inv.cidrBlock.split('.')
+    vpc_cidr_list[2] = '253'
+    vpc_cidr_list[3] = '0/24'
+    vswitch_cidr = '.'.join(vpc_cidr_list)
+    vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'vswitch-for-test', vswitch_cidr)
     test_util.test_pass('Create ECS VSwitch Test Success')
 
 
