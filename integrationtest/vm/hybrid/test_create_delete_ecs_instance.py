@@ -50,13 +50,7 @@ def test():
             region_id = r
 #     region_id = datacenter_list[0].regionId
     datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
-#     bucket_inv = hyb_ops.create_oss_bucket_remote(datacenter_inv.uuid, 'zstack-test-%s-%s' % (date_s, region_id), 'created-by-zstack-for-test')
-#     hyb_ops.attach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid)
-    iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, region_id)
-    zone_id = iz_list[0].zoneId
-#     hyb_ops.update_image_guestOsType(image.uuid, guest_os_type='CentOS')
-    iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, zone_id)
-    _ecs_inv = test_stub.create_ecs_instance(iz_inv.uuid, datacenter_inv.uuid)
+    _ecs_inv = test_stub.create_ecs_instance(datacenter_type, datacenter_inv.uuid, region_id)
     ecs_instance_local = hyb_ops.query_ecs_instance_local()
     ecs_inv = [e for e in ecs_instance_local if e.ecsInstanceId == _ecs_inv.ecsInstanceId][0]
     hyb_ops.stop_ecs_instance(ecs_inv.uuid)
@@ -72,13 +66,10 @@ def test():
     test_util.test_pass('Create Delete Ecs Instance Test Success')
 
 def env_recover():
-    global iz_inv
-    if iz_inv:
-        hyb_ops.del_identity_zone_in_local(iz_inv.uuid)
-
     global datacenter_inv
     if datacenter_inv:
         hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
+
     global ks_inv
     if ks_inv:
         hyb_ops.del_aliyun_key_secret(ks_inv.uuid)

@@ -115,6 +115,13 @@ def get_datacenter_from_remote(datacenter_type, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt.inventories
 
+def get_ecs_instance_type_from_remote(iz_uuid, session_uuid=None):
+    action = api_actions.GetEcsInstanceTypeAction()
+    action.identityZoneUuid = iz_uuid
+    test_util.action_logger('Get [Ecs Instance Type From Remote:] %s' % iz_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    return evt.types
+
 def add_datacenter_from_remote(datacenter_type, region_id, description, session_uuid=None):
     action = api_actions.AddDataCenterFromRemoteAction()
     action.type = datacenter_type
@@ -572,12 +579,13 @@ def sync_ecs_image_from_remote(datacenter_uuid, image_type='self', session_uuid=
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt
 
-def create_ecs_instance_from_ecs_image(ecs_root_password, image_uuid, ecs_vswitch_uuid, instance_offering_uuid, ecs_bandwidth, ecs_security_group_uuid, private_ip_address=None, allocate_public_ip='false', name=None, ecs_console_password=None, session_uuid=None):
+def create_ecs_instance_from_ecs_image(ecs_root_password, image_uuid, ecs_vswitch_uuid, ecs_bandwidth, ecs_security_group_uuid, instance_offering_uuid=None, instance_type=None, private_ip_address=None, allocate_public_ip='false', name=None, ecs_console_password=None, session_uuid=None):
     action = api_actions.CreateEcsInstanceFromEcsImageAction()
     action.ecsRootPassword = ecs_root_password
     action.ecsImageUuid = image_uuid
     action.ecsVSwitchUuid = ecs_vswitch_uuid
     action.instanceOfferingUuid = instance_offering_uuid
+    action.instanceType = instance_type
     action.ecsBandWidth = ecs_bandwidth
     action.ecsSecurityGroupUuid = ecs_security_group_uuid
     action.privateIpAddress = private_ip_address

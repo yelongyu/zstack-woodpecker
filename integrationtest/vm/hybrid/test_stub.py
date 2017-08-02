@@ -38,8 +38,15 @@ denied_ports = Port.get_denied_ports()
 target_ports = rule1_ports + rule2_ports + rule3_ports + rule4_ports + rule5_ports + denied_ports
 
 
-def create_ecs_instance(iz_uuid, datacenter_uuid, allocate_public_ip=False):
+def create_ecs_instance(datacenter_type, datacenter_uuid, region_id, allocate_public_ip=False):
     ecs_image_id = os.environ.get('ecs_imageId')
+    iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, region_id)
+    for i in range(len(iz_list)):
+        zone_id = iz_list[i].zoneId
+        iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_uuid, zone_id)
+        ecs_instance_type = hyb_ops.get_ecs_instance_type_from_remote(iz_inv.uuid)
+        if ecs_instance_type:
+            break
     cond_offering = res_ops.gen_query_conditions('name', '=', os.environ.get('instanceOfferingName_m'))
     instance_offering = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond_offering)[0]
     hyb_ops.sync_ecs_vpc_from_remote(datacenter_uuid)
@@ -60,7 +67,7 @@ def create_ecs_instance(iz_uuid, datacenter_uuid, allocate_public_ip=False):
         vpc_cidr_list[2] = '252'
         vpc_cidr_list[3] = '0/24'
         vswitch_cidr = '.'.join(vpc_cidr_list)
-        vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_uuid, 'zstack-test-vswitch', vswitch_cidr)
+        vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'zstack-test-vswitch', vswitch_cidr)
     hyb_ops.sync_ecs_security_group_from_remote(vpc_inv.uuid)
     sg_all = hyb_ops.query_ecs_security_group_local()
     ecs_security_group = [ sg for sg in sg_all if sg.ecsVpcUuid == vpc_inv.uuid and sg.name == 'zstack-test-ecs-security-group']
@@ -77,11 +84,11 @@ def create_ecs_instance(iz_uuid, datacenter_uuid, allocate_public_ip=False):
         if i.ecsImageId == ecs_image_id:
             image = i
     if not allocate_public_ip:
-        ecs_inv = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, vswitch_inv.uuid, instance_offering.uuid,
-                                                         ecs_bandwidth=5, ecs_security_group_uuid=sg_inv.uuid, name='zstack-test-ecs-instance')
+        ecs_inv = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, vswitch_inv.uuid, ecs_bandwidth=5, ecs_security_group_uuid=sg_inv.uuid, 
+                                                             instance_type=ecs_instance_type[0].typeId, name='zstack-test-ecs-instance')
     else:
-        ecs_inv = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, vswitch_inv.uuid, instance_offering.uuid, ecs_bandwidth=1,
-                                                         ecs_security_group_uuid=sg_inv.uuid, allocate_public_ip='true', name='zstack-test-ecs-instance')
+        ecs_inv = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, vswitch_inv.uuid, ecs_bandwidth=1, ecs_security_group_uuid=sg_inv.uuid, 
+                                                             instance_type=ecs_instance_type[0].typeId, allocate_public_ip='true', name='zstack-test-ecs-instance')
     time.sleep(10)
     return ecs_inv
 
