@@ -48,6 +48,7 @@ def test():
 
     system_tag_uuid = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0].uuid
     tag_ops.delete_tag(system_tag_uuid)
+    system_tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
     if system_tag == []:
         test_util.test_logger ('Success delete system tags.')
     else:
