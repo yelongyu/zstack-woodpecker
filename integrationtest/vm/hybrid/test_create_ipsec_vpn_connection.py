@@ -92,11 +92,11 @@ def test():
         if 'shanghai' in r:
             region_id = r
     datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
-#     bucket_inv = hyb_ops.create_oss_bucket_remote(datacenter_inv.uuid, 'zstack-test-%s-%s' % (date_s, region_id), 'created-by-zstack-for-test')
-#     hyb_ops.attach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid)
+    # Add Identity Zone
     iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, region_id)
     zone_id = iz_list[-1].zoneId
     iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, zone_id)
+    ecs_instance_type = hyb_ops.get_ecs_instance_type_from_remote(iz_inv.uuid)
     hyb_ops.sync_ecs_vpc_from_remote(datacenter_inv.uuid)
     vpc_local = hyb_ops.query_ecs_vpc_local()
     # Get Vpc which has available gateway
@@ -144,8 +144,8 @@ def test():
     else:
         user_vpn_gw_inv = hyb_ops.create_vpc_user_vpn_gateway(datacenter_inv.uuid, gw_ip=public_ip_list[0], gw_name="zstack-test-user-vpn-gateway")
     # Create Ecs
-    ecs_inv = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, vswitch_inv.uuid, instance_offering.uuid, ecs_bandwidth=5,
-                                                         ecs_security_group_uuid=sg_inv.uuid, name='zstack-test-ecs-instance')
+    ecs_inv = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, vswitch_inv.uuid, ecs_bandwidth=1, ecs_security_group_uuid=sg_inv.uuid, 
+                                                             instance_type=ecs_instance_type[0].typeId, name='zstack-test-ecs-instance')
     time.sleep(10)
     # Get Ecs Public IP
     hyb_ops.sync_hybrid_eip_from_remote(datacenter_inv.uuid)
