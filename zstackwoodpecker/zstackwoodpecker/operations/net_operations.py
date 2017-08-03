@@ -205,7 +205,7 @@ def attach_eip(eip_uuid, nic_uuid, session_uuid=None):
     action = api_actions.AttachEipAction()
     action.eipUuid = eip_uuid
     action.vmNicUuid = nic_uuid
-    action.timeout = 12000
+    action.timeout = 120000
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger("[EIP:] %s is attached to [nic:] %s" % (eip_uuid, nic_uuid))
     return evt.inventory
