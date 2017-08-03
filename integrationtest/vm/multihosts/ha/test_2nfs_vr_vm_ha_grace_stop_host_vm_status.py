@@ -92,6 +92,9 @@ def test():
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Stopped":
             test_stub.start_host(test_host, test_lib.all_scenario_config)
             test_stub.recover_host_vlan(test_host, test_lib.all_scenario_config, test_lib.deploy_config)
+            conditions = res_ops.gen_query_conditions('managementIp', '=', host_ip)
+            kvm_host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].uuid
+            host_ops.reconnect_host(kvm_host_uuid)
             break
         time.sleep(1)
 
@@ -126,5 +129,8 @@ def env_recover():
     try:
         test_stub.start_host(test_host, test_lib.all_scenario_config)
         test_stub.recover_host_vlan(test_host, test_lib.all_scenario_config, test_lib.deploy_config)
+        conditions = res_ops.gen_query_conditions('managementIp', '=', host_ip)
+        kvm_host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].uuid
+        host_ops.reconnect_host(kvm_host_uuid)
     except:
         pass

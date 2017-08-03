@@ -112,3 +112,6 @@ def env_recover():
     cmd = 'bash -ex %s %s' % (os.environ.get('hostRecoverScript'), host_ip)
     test_util.test_logger(cmd)
     os.system(cmd)
+    conditions = res_ops.gen_query_conditions('managementIp', '=', host_ip)
+    kvm_host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].uuid
+    host_ops.reconnect_host(kvm_host_uuid)

@@ -107,6 +107,9 @@ def test():
 	test_util.test_fail("VM3 is expected to start running on another host")
 
     test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
+    conditions = res_ops.gen_query_conditions('managementIp', '=', host_ip)
+    kvm_host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].uuid
+    host_ops.reconnect_host(kvm_host_uuid)
 
     vm.set_state(vm_header.RUNNING)
     vm2.set_state(vm_header.RUNNING)
@@ -136,9 +139,13 @@ def error_cleanup():
 
 
 def env_recover():
+    global host_ip
     test_util.test_logger("recover host: %s" % (test_host.ip_))
 
     try:
         test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
     except:
         pass
+    conditions = res_ops.gen_query_conditions('managementIp', '=', host_ip)
+    kvm_host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].uuid
+    host_ops.reconnect_host(kvm_host_uuid)
