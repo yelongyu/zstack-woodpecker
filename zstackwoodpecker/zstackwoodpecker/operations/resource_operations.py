@@ -490,10 +490,9 @@ def get_resource_owner(resourceUuid, session_uuid = None):
     ret = account_operations.execute_action_with_session(action, session_uuid)
     return ret.inventories[resourceUuid[0]].uuid
 
-def get_task_progress(resourceUuid, processType=None, session_uuid = None):
+def get_task_progress(apiId, session_uuid = None):
     action = api_actions.GetTaskProgressAction()
-    action.resourceUuid = resourceUuid
-    action.processType = processType
+    action.apiId = apiId
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
