@@ -109,6 +109,7 @@ def test():
     vm.set_state(vm_header.RUNNING)
     vm2.set_state(vm_header.RUNNING)
     vm3.set_state(vm_header.RUNNING)
+    time.sleep(60)
     vm.check()
     vm2.check()
     vm3.check()
