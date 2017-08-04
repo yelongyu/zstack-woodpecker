@@ -2420,6 +2420,16 @@ def lib_find_vr_by_pri_l3(l3_uuid):
     vrs = res_ops.query_resource_with_num(res_ops.APPLIANCE_VM, cond, \
             None, 0, 1)
 
+    if vrs and len(vrs) != 0:
+        return vrs[0]
+
+    cond = res_ops.gen_query_conditions('vmNics.l3NetworkUuid', '=', \
+            l3_uuid)
+    cond = res_ops.gen_query_conditions('vmNics.metaData', '>', '3', \
+            cond)
+    vrs = res_ops.query_resource_with_num(res_ops.APPLIANCE_VM, cond, \
+            None, 0, 1)
+
     if vrs:
         return vrs[0]
 
@@ -2579,7 +2589,7 @@ def lib_find_vr_by_vm(vm, session_uuid=None):
     cond = res_ops.gen_query_conditions('__systemTag__', '=', 'role::DHCP', cond)
     vrs = res_ops.query_resource(res_ops.APPLIANCE_VM, cond, session_uuid)
 
-    if not vrs:
+    if not vrs or len(vrs) == 0:
         cond = res_ops.gen_query_conditions('vmNics.l3NetworkUuid', 'in', \
                 ','.join(vm_l3s))
         cond = res_ops.gen_query_conditions('vmNics.metaData', '>', '3', cond)
