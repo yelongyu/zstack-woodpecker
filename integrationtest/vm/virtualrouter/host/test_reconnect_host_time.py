@@ -29,7 +29,10 @@ def test():
     host = test_lib.lib_get_vm_host(vm.get_vm())
     host_uuid = host.uuid
 
-    host_ops.reconnect_host(host_uuid, timeout=recnt_timeout)
+    try:
+        host_ops.reconnect_host(host_uuid, timeout=recnt_timeout)
+    except:
+        host_ops.reconnect_host(host_uuid, timeout=recnt_timeout)
    
     vm.destroy()
     test_obj_dict.rm_vm(vm)
