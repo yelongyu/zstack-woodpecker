@@ -87,11 +87,20 @@ def test():
     os.system('bash -ex %s %s' % (os.environ.get('hostForceStopScript'), host_ip))
     test_util.test_logger("host is expected to shutdown for a while")
 
-    test_util.test_logger("wait for 180 seconds")
-    time.sleep(180)
-    vm.update()
-    if test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp == host_ip:
-	test_util.test_fail("VM is expected to start running on another host")
+    cost_time = 0
+    for i in range(240*2):
+        cost_time = i
+        time.sleep(1)
+        vm.update()
+        new_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
+        if new_ip != host_ip:
+            break
+    else:
+	test_util.test_fail("VM is expected to start running on another host within 480s.")
+
+    if cost_time > 240:
+        test_util.test_fail("Running on another host cost time:%s >240 sec." %(str(cost_time)))
+
     vm.set_state(vm_header.RUNNING)
     vm.check()
 
@@ -119,5 +128,7 @@ def error_cleanup():
             pass
 
 
+def env_recover():
+    global host_ip
     os.system('bash -ex %s %s' % (os.environ.get('hostRecoverScript'), host_ip))
-    host_ops.reconnect_host(host_uuid)
+
