@@ -59,17 +59,20 @@ def test():
     vr_type = res_ops.query_resource(res_ops.VIRTUALROUTER_VM)[0].applianceVmType
     test_util.test_logger("vr type is %s" %(vr_type))
 
-    vrs = test_lib.lib_find_vr_by_vm(vm1.vm)
+    #vrs = test_lib.lib_find_vr_by_vm(vm1.vm)
+    vrs = test_lib.lib_find_flat_dhcp_vr_by_vm(vm1.vm)
+    vr = vrs[0]
     if len(vrs) != 1:
         test_util.test_logger('more than 1 VR are found for vm1: %s. Will test the 1st one: %s.' % (vm1.vm.uuid, vr.uuid))
 
-    vr = vrs[0]
     vr_mgmt_ip = test_lib.lib_find_vr_mgmt_ip(vr)
 
     vr_reboot_record_org = check_vr_reboot_record_line(vr_mgmt_ip)
+
+    test_lib.lib_install_testagent_to_vr_with_vr_vm(vr)
     if not test_lib.lib_check_testagent_status(vr_mgmt_ip):
         test_util.test_fail('vr: %s is not reachable, since can not reach its test agent. Give up test and test failure. ' % vr.uuid)
-    test_lib.lib_install_testagent_to_vr_with_vr_vm(vr)
+
     #Need to put the vr restart into thread. Since vr reboot API is a sync API. 
     thread = threading.Thread(target=vm_ops.reboot_vm, args=(vr.uuid,))
     thread.start()
