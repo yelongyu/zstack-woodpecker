@@ -2580,8 +2580,14 @@ def lib_find_vr_by_vm(vm, session_uuid=None):
     vrs = res_ops.query_resource(res_ops.APPLIANCE_VM, cond, session_uuid)
 
     if not vrs:
-        test_util.test_logger("Cannot find VM: [%s] 's Virtual Router VM" \
-                % vm.uuid)
+        cond = res_ops.gen_query_conditions('vmNics.l3NetworkUuid', 'in', \
+                ','.join(vm_l3s))
+        cond = res_ops.gen_query_conditions('vmNics.metaData', '>', '3', cond)
+        vrs = res_ops.query_resource(res_ops.APPLIANCE_VM, cond, session_uuid)
+
+        if not vrs:
+            test_util.test_logger("Cannot find VM: [%s] 's Virtual Router VM" \
+                    % vm.uuid)
 
     return vrs
 
