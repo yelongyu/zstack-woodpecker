@@ -41,7 +41,7 @@ def test():
     test_util.test_logger(l3_1_name)
     cmd = "zstack-cli LogInByAccount accountName=admin password=password;" 
     fi, fo, fe = os.popen3('ssh ' + mn_ip + ' ' + cmd )
-    cmd = 'zstack-cli QueryL3Network fields=uuid name="' + l3_1_name + '"'
+    cmd = '"zstack-cli QueryL3Network fields=uuid name=\'' + l3_1_name + '\'"'
     test_util.test_logger(cmd)
     fi, fo, fe = os.popen3('ssh ' + mn_ip + ' ' + cmd )
     test_err = fe.read()
