@@ -490,6 +490,13 @@ def sync_ecs_security_group_from_remote(ecs_vpc_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt
 
+def sync_ecs_security_group_rule_from_remote(sg_uuid, session_uuid=None):
+    action = api_actions.SyncEcsSecurityGroupRuleFromRemoteAction()
+    action.uuid = sg_uuid
+    test_util.action_logger('Sync [Security Group From Remote:] %s' % (sg_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    return evt
+
 def sync_vpc_vpn_gateway_from_remote(data_center_uuid, session_uuid=None):
     action = api_actions.SyncVpcVpnGatewayFromRemoteAction()
     action.dataCenterUuid = data_center_uuid
@@ -699,6 +706,13 @@ def query_datacenter_local(session_uuid=None):
 def query_ecs_security_group_local(session_uuid=None):
     action = api_actions.QueryEcsSecurityGroupFromLocalAction()
     action.conditions = []
+    test_util.action_logger('Query Ecs Security Group from local')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def query_ecs_security_group_rule_local(conditions=[], session_uuid=None):
+    action = api_actions.QueryEcsSecurityGroupRuleFromLocalAction()
+    action.conditions = conditions
     test_util.action_logger('Query Ecs Security Group from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt

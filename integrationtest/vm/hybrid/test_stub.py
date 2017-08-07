@@ -56,7 +56,7 @@ def create_ecs_instance(datacenter_type, datacenter_uuid, region_id, allocate_pu
         vpc_inv = ecs_vpc[0]
     else:
         vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_uuid, 'zstack-test-vpc', 'zstack-test-vpc-vrouter', '172.16.0.0/12')
-    time.sleep(10)
+    time.sleep(5)
     hyb_ops.sync_ecs_vswitch_from_remote(datacenter_uuid)
     vswitch_all = hyb_ops.query_ecs_vswitch_local()
     vswitch = [vs for vs in vswitch_all if vs.ecsVpcUuid == vpc_inv.uuid and vs.status.lower() == 'available']
@@ -69,15 +69,20 @@ def create_ecs_instance(datacenter_type, datacenter_uuid, region_id, allocate_pu
         vswitch_cidr = '.'.join(vpc_cidr_list)
         vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'zstack-test-vswitch', vswitch_cidr)
     hyb_ops.sync_ecs_security_group_from_remote(vpc_inv.uuid)
+    time.sleep(5)
     sg_all = hyb_ops.query_ecs_security_group_local()
     ecs_security_group = [ sg for sg in sg_all if sg.ecsVpcUuid == vpc_inv.uuid and sg.name == 'zstack-test-ecs-security-group']
     if ecs_security_group:
         sg_inv = ecs_security_group[0]
     else:
         sg_inv = hyb_ops.create_ecs_security_group_remote('zstack-test-ecs-security-group', vpc_inv.uuid)
+    hyb_ops.sync_ecs_security_group_rule_from_remote(sg_inv.uuid)
     time.sleep(5)
-    hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'ingress', 'ALL', '-1/-1', '0.0.0.0/0', 'accept', 'intranet', '10')
-    hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'egress', 'ALL', '-1/-1', '0.0.0.0/0', 'accept', 'intranet', '10')
+    cond_sg_rule = res_ops.gen_query_conditions('ecsSecurityGroupUuid', '=', sg_inv.uuid)
+    sg_rule = hyb_ops.query_ecs_security_group_rule_local(cond_sg_rule)
+    if not sg_rule:
+        hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'ingress', 'ALL', '-1/-1', '0.0.0.0/0', 'accept', 'intranet', '10')
+        hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'egress', 'ALL', '-1/-1', '0.0.0.0/0', 'accept', 'intranet', '10')
     hyb_ops.sync_ecs_image_from_remote(datacenter_uuid)
     ecs_image = hyb_ops.query_ecs_image_local()
     for i in ecs_image:
