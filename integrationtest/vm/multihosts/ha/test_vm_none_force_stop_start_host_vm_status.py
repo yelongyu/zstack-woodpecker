@@ -126,4 +126,5 @@ def error_cleanup():
 def env_recover():
     test_util.test_logger("recover host: %s" % (test_host.ip_))
     test_stub.recover_host(test_host, test_lib.all_scenario_config, test_lib.deploy_config)
-    #host_ops.reconnect_host(host_uuid)
+    test_stub.recover_host_vlan(test_host, test_lib.all_scenario_config, test_lib.deploy_config)
+    host_ops.reconnect_host(host_uuid)

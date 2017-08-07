@@ -116,7 +116,7 @@ def env_recover():
     global host_ip
     test_util.test_logger("recover host: %s" % (test_host.ip_))
     test_stub.recover_host(test_host, test_lib.all_scenario_config, test_lib.deploy_config)
-    #host_ops.reconnect_host(host_uuid)
+    test_stub.recover_host_vlan(test_host, test_lib.all_scenario_config, test_lib.deploy_config)
     conditions = res_ops.gen_query_conditions('managementIp', '=', host_ip)
     kvm_host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].uuid
     host_ops.reconnect_host(kvm_host_uuid)

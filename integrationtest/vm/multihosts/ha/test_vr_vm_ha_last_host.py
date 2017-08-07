@@ -131,4 +131,5 @@ def error_cleanup():
 def env_recover():
     global host_ip
     os.system('bash -ex %s %s' % (os.environ.get('hostRecoverScript'), host_ip))
+    host_ops.reconnect_host(host_uuid)
 
