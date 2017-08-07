@@ -32,5 +32,6 @@
         <case timeout='900' repeat='1' noparallel='True'>test_create_ipsec_vpn_connection.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_create_delete_vpc_route_entry.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_sync_aliyun_route_entry.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_sync_ecs_sg_rule.py</case>
     </suite>
 </integrationTest>
