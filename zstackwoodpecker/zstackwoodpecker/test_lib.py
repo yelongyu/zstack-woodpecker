@@ -1804,6 +1804,22 @@ def lib_wait_target_up(target_ip, target_port, timeout=60):
 
     return linux.wait_callback_success(wait_network_check, (target_ip, target_port, True), timeout)
 
+def lib_check_win_target_up(vr_ip, target_ip, target_port, timeout=60):
+    '''
+        check windows vm already running
+    '''
+    global SSH_TIMEOUT
+    pre_ssh_timeout = SSH_TIMEOUT 
+    SSH_TIMEOUT = timeout
+
+    cmd = 'echo "quit" | timeout 4 telnet %s %s|grep "Escape character"' % (target_ip, target_port)
+    if lib_execute_sh_cmd_by_agent_with_retry(vr_ip, cmd):
+        test_util.test_logger("[target_ip:] %s from [vr:] %s Test Pass" % (target_ip, vr_ip))
+    else:
+        test_util.test_fail("target_ip: %s is failed by telnet from vr %s." %(target_ip, vr_ip))
+
+    SSH_TIMEOUT = pre_ssh_timeout
+
 #-----------Get L2 Network resource-------------
 def lib_get_l2s():
     return res_ops.get_resource(res_ops.L2_NETWORK, session_uuid=None)
