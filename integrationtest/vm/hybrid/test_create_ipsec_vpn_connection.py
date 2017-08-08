@@ -130,7 +130,7 @@ def test():
         vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'zstack-test-vswitch', vswitch_cidr)
         time.sleep(5)
     # Create Vpc Security Group
-    sg_inv = hyb_ops.create_ecs_security_group_remote('sg_for_test', vpc_inv.uuid)
+    sg_inv = hyb_ops.create_ecs_security_group_remote('sg_for_ipsec_test', vpc_inv.uuid)
     time.sleep(5)
     hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'ingress', 'ALL', '-1/-1', '0.0.0.0/0', 'accept', 'intranet', '10')
     hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'egress', 'ALL', '-1/-1', '0.0.0.0/0', 'accept', 'intranet', '10')
@@ -249,8 +249,8 @@ def env_recover():
 
     global route_entry_inv
     if route_entry_inv:
-        time.sleep(10)
-        hyb_ops.del_aliyun_route_entry_remote(route_entry_inv.uuid, 'vrouter')
+        time.sleep(30)
+        hyb_ops.del_aliyun_route_entry_remote(route_entry_inv.uuid)
 
     global iz_inv
     if iz_inv:
