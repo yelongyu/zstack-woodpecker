@@ -239,7 +239,7 @@ def env_recover():
 
     global user_vpn_gw_inv
     if user_vpn_gw_inv:
-        time.sleep(5)
+        time.sleep(10)
         hyb_ops.del_vpc_user_vpn_gateway_remote(user_vpn_gw_inv.uuid)
 
     global vswitch_inv
@@ -249,6 +249,7 @@ def env_recover():
 
     global route_entry_inv
     if route_entry_inv:
+        time.sleep(10)
         hyb_ops.del_aliyun_route_entry_remote(route_entry_inv.uuid, 'vrouter')
 
     global iz_inv
