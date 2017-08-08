@@ -245,6 +245,10 @@ class zstack_alone_lb_vr_db_checker(checker_header.TestChecker):
         cond = res_ops.gen_query_conditions('resourceUuid', '=', \
                 vr_uuid, cond)
         system_tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
+        if not system_tag or len(system_tag):
+            cond = res_ops.gen_query_conditions('resourceUuid', '=', vr_uuid)
+            system_tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
+
         if system_tag:
             test_util.test_logger("Load Balancer: %s is not in separated VR. Its VR is %s, which is at least shared with DHCP service." % (lb_inv.uuid, vr_uuid))
             return self.judge(False)
