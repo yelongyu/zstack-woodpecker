@@ -26,6 +26,11 @@ def test():
 
     vm = test_stub.create_vlan_vm(l3_name)
     test_obj_dict.add_vm(vm)
+    vrs = test_lib.lib_find_vr_by_vm(vm.vm)
+    for vr in vrs:
+        if vr.applianceVmType != "vrouter":
+            test_util.test_skip("Skip l3 mtu test for non vrouter")
+
     vm.check()
     if not test_lib.lib_execute_command_in_vm(vm.get_vm(), 'tracepath -n yyk.net | tail -1 | grep "pmtu %s"' % (default_l3_mtu)):
         test_util.test_fail("fail to check mtu in [vm:] %s" % (vm.get_vm().uuid))
