@@ -13,6 +13,7 @@ import zstackwoodpecker.operations.image_operations as img_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_image as test_image
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
+import time
 import os
 
 
@@ -75,6 +76,7 @@ def test():
 
     ps_ops.change_primary_storage_state(ps_uuid, 'enable')
     host_ops.reconnect_host(host_uuid)
+    test_stub.ensure_hosts_connected(120)
     #vm_ops.reconnect_vr(vr_uuid)
     vrs = test_lib.lib_get_all_vrs()
     for vr in vrs:
