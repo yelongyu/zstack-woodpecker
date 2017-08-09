@@ -232,6 +232,10 @@ class zstack_alone_lb_vr_db_checker(checker_header.TestChecker):
         LBL doesn't add any VM Nic, LB VR won't be created.
 
         When LB is deleted, LB VR will be destroyed. 
+
+        If it separated vr, there is no other service except load balance.
+        Originally, we tell if separated vr by whether there is DHCP service.
+        However, as the developing of ZStack, flat DHCP is a exception.
     '''
     def check(self):
         super(zstack_alone_lb_vr_db_checker, self).check()
@@ -241,7 +245,7 @@ class zstack_alone_lb_vr_db_checker(checker_header.TestChecker):
         vr = res_ops.query_resource(res_ops.VIRTUALROUTER_VM, cond)[0]
         vr_uuid = vr.uuid
         cond = res_ops.gen_query_conditions('tag', '=', \
-                'role::DHCP')
+                'role::DNS')
         cond = res_ops.gen_query_conditions('resourceUuid', '=', \
                 vr_uuid, cond)
         system_tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
