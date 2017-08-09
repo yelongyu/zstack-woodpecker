@@ -8,7 +8,9 @@ All host operations for test.
 import apibinding.api_actions as api_actions
 import zstackwoodpecker.test_util as test_util
 import account_operations
+import resource_operations
 import apibinding.inventory as inventory
+import time
 
 def add_kvm_host(host_option, session_uuid=None):
     action = api_actions.AddKVMHostAction()
@@ -39,6 +41,17 @@ def reconnect_host(host_uuid, session_uuid=None, timeout=120000):
     action.timeout = timeout
     test_util.action_logger('Reconnect Host [uuid:] %s' % host_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
+    cur_time = time.time()
+    while True:
+        cond = resource_operations.gen_query_conditions('uuid', '=', host_uuid)
+        host = resource_operations.query_resource_with_num(resource_operations.HOST, cond, limit = 1)[0]
+        if host.status == "Connected" or host.status == "Disconnected":
+            break
+        time.sleep(1)
+        if cur_time - time.time() > timeout:
+            test_util.test_logger("reconnect_host timeout(%s)" % (timeout))
+            break
+
     return evt.inventory
 
 def reconnect_sftp_backup_storage(sftpbs_uuid, session_uuid=None, timeout=120000):
