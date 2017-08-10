@@ -308,7 +308,7 @@ def test_fio_bandwidth(vm_inv, bandwidth, path = '/tmp', raise_exception=True):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     cmd1 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=write -size=100M -filename=%s/test1.img -name='EBS 1M write' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
             % (ssh_cmd, path)
-    cmd2 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=write -size=900G -filename=%s/test2.img -name='EBS 1M write' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
+    cmd2 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=write -size=900M -filename=%s/test2.img -name='EBS 1M write' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
             % (ssh_cmd, path)
 
 
