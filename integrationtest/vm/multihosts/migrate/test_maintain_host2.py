@@ -118,8 +118,14 @@ def test():
     vm1.check()
     vm2.check()
     
-    vm1.migrate(current_host1.uuid)
-    vm2.migrate(current_host2.uuid)
+    post_host1 = test_lib.lib_get_vm_host(vm1.vm)
+    post_host2 = test_lib.lib_get_vm_host(vm2.vm)
+
+    if post_host1.uuid != current_host1.uuid:
+        vm1.migrate(current_host1.uuid)
+
+    if post_host2.uuid != current_host2.uuid:
+        vm2.migrate(current_host2.uuid)
 
     vm1.check()
     vm2.check()
