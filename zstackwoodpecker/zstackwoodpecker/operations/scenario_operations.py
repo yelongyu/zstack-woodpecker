@@ -8,17 +8,20 @@ scenario operations for setup zstack test.
 import apibinding.api_actions as api_actions
 from apibinding import api
 import zstacklib.utils.xmlobject as xmlobject
+import json
 import xml.etree.cElementTree as etree
 import apibinding.inventory as inventory
 import os
 import sys
 import traceback
+import time
 import xml.dom.minidom as minidom
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.net_operations as net_ops
+import zstackwoodpecker.operations.volume_operations as volume_ops
 import zstackwoodpecker.zstack_test.zstack_test_eip as zstack_eip_header
 import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
 
@@ -520,6 +523,106 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
         cmd = "bash -ex /tmp/setup_ceph_nodes.sh %s" % (vm_ips)
         ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
 
+def setup_xsky_storages(scenario_config, scenario_file, deploy_config):
+    #Stop nodes
+    if hasattr(scenario_config.basicConfig, 'xskyNodesMN'):
+        xskyNodesMN = scenario_config.basicConfig.xskyNodesMN.text_
+    else:
+        xskyNodesMN = None
+    print xskyNodesMN
+
+    if hasattr(scenario_config.deployerConfig, 'xsky') == True:
+        for node in xmlobject.safe_list(scenario_config.deployerConfig.xsky.nodes.node):
+            vmUuid = node.uuid_
+            print "vm uuid %s" % (str(vmUuid))
+            stop_vm(xskyNodesMN, vmUuid)
+
+        #Wait nodes down
+        for node in xmlobject.safe_list(scenario_config.deployerConfig.xsky.nodes.node):
+            vmUuid = node.uuid_
+            vmIp = node.nodeIP_
+            test_lib.lib_wait_target_down(vmIp, '22', 120)
+
+        time.sleep(30)
+        #revert snapshot
+        for node in xmlobject.safe_list(scenario_config.deployerConfig.xsky.nodes.node):
+            nodesnapshot = node.snapshot_
+            conditions = res_ops.gen_query_conditions('name', '=', nodesnapshot)
+            snapshot_inventories = query_resource(xskyNodesMN, res_ops.VOLUME_SNAPSHOT, conditions).inventories[0]
+            snapshot_uuid = snapshot_inventories.uuid
+
+            use_snapshot(xskyNodesMN, snapshot_uuid)
+            for volume in xmlobject.safe_list(node.volumeDisks.volumeDisk):
+                volume_snapshot = volume.snapshot_
+                conditions = res_ops.gen_query_conditions('name', '=', volume_snapshot)
+                snapshot_inventories = query_resource(xskyNodesMN, res_ops.VOLUME_SNAPSHOT, conditions).inventories[0]
+                snapshot_uuid = snapshot_inventories.uuid
+                use_snapshot(xskyNodesMN, snapshot_uuid)
+
+        time.sleep(30)
+        #start nodes
+        for node in xmlobject.safe_list(scenario_config.deployerConfig.xsky.nodes.node):
+            vmUuid = node.uuid_
+            print "vm uuid %s" % (str(vmUuid))
+            start_vm(xskyNodesMN, vmUuid)
+
+        #Wait nodes up
+        for node in xmlobject.safe_list(scenario_config.deployerConfig.xsky.nodes.node):
+            vmUuid = node.uuid_
+            vmIp = node.nodeIP_
+            test_lib.lib_wait_target_up(vmIp, '22', 120)
+
+        #check xsky ENV
+        xskyUser = scenario_config.deployerConfig.xsky.account.user.text_
+        xskyPassword = scenario_config.deployerConfig.xsky.account.password.text_
+        xskyUrl = scenario_config.deployerConfig.xsky.url.text_
+        xmsNode = scenario_config.deployerConfig.xsky.xmsNode.xmsNodeIP.text_
+        xmsNodeLoginUser = scenario_config.deployerConfig.xsky.xmsNode.xmsNodeLoginUser.text_
+        xmsNodeLoginPassword = scenario_config.deployerConfig.xsky.xmsNode.xmsNodeLoginPassword.text_
+        host_status_cmd = 'xms-cli --user ' + xskyUser + ' --password ' + xskyPassword + ' --url ' + xskyUrl + ' --format "json" host list'
+        osd_status_cmd = 'xms-cli --user ' + xskyUser + ' --password ' + xskyPassword + ' --url ' + xskyUrl + ' --format "json" osd list'
+        unhealthy = False
+        for i in range(0, 10):
+            print "round %s" % (str(i))
+            time.sleep(20)
+            (ret, out, eout) = ssh.execute(host_status_cmd, xmsNode, xmsNodeLoginUser, xmsNodeLoginPassword)
+            print "xms output"
+            print out
+            print eout
+            xsky_host_info = json.loads(out)
+            for xskyhost in xsky_host_info['hosts']:
+                status = xskyhost['status']
+                print status
+                isUp = xskyhost['up']
+                print isUp
+                if status != 'active':
+                   unhealthy = True
+                if isUp != True:
+                   unhealthy = True
+            print "host status: " + str(unhealthy)
+
+            (ret, out, eout) = ssh.execute(osd_status_cmd, xmsNode, xmsNodeLoginUser, xmsNodeLoginPassword)
+            print "xms output"
+            print out
+            print eout
+            unhealthy = False
+            xsky_host_info = json.loads(out)
+            for xskyhost in xsky_host_info['osds']:
+                status = xskyhost['status']
+                print status
+                isUp = xskyhost['up']
+                print isUp
+                if status != 'active':
+                   unhealthy = True
+                if isUp != True:
+                   unhealthy = True
+            print "osd status:" + str(unhealthy)
+        if unhealthy:
+            test_util.test_fail('Xsky poc evn is not healthy')
+            
+
+
+
 def setup_fusionstor_storages(scenario_config, scenario_file, deploy_config):
     fusionstor_storages = dict()
     for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
@@ -932,6 +1035,14 @@ def detach_volume(http_server_ip, volume_uuid, vm_uuid=None, session_uuid=None):
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     return evt.inventory
 
+def use_snapshot(http_server_ip, snapshot_uuid, session_uuid=None):
+    action = api_actions.RevertVolumeFromSnapshotAction()
+    action.uuid = snapshot_uuid
+    action.timeout = 4800000
+    test_util.action_logger('Revert Volume by [Snapshot:] %s ' % snapshot_uuid)
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    return evt
+
 def query_resource(http_server_ip, resource, conditions = [], session_uuid=None, count='false'):
     action = res_ops._gen_query_action(resource)
     action.conditions = conditions
@@ -954,110 +1065,113 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
     zstack_management_ip = scenario_config.basicConfig.zstackManagementIp.text_
     root_xml = etree.Element("deployerConfig")
     vms_xml = etree.SubElement(root_xml, 'vms')
-    for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
-        for vm in xmlobject.safe_list(host.vms.vm):
-            vm_creation_option = test_util.VmOption()
-            l3_uuid_list = []
-            default_l3_uuid = None
-            for l3network in xmlobject.safe_list(vm.l3Networks.l3Network):
-                if not default_l3_uuid:
-                    default_l3_uuid = l3network.uuid_
-                l3_uuid_list.append(l3network.uuid_)
-            vm_creation_option.set_instance_offering_uuid(vm.vmInstranceOfferingUuid_)
-            vm_creation_option.set_l3_uuids(l3_uuid_list)
-            vm_creation_option.set_image_uuid(vm.imageUuid_)
-            vm_creation_option.set_name(vm.name_)
-            vm_creation_option.set_host_uuid(host.uuid_)
-            #vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
-            #vm_creation_option.set_default_l3_uuid(default_l3_uuid)
-            #vm_creation_option.set_system_tags(system_tags)
-            #vm_creation_option.set_ps_uuid(ps_uuid)
-            #vm_creation_option.set_session_uuid(session_uuid)
-            vm_inv = create_vm(zstack_management_ip, vm_creation_option)
-            vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, default_l3_uuid).ip
-            test_lib.lib_wait_target_up(vm_ip, '22', 120)
-
-            vm_xml = etree.SubElement(vms_xml, 'vm')
-            vm_xml.set('name', vm.name_)
-            vm_xml.set('uuid', vm_inv.uuid)
-            vm_xml.set('ip', vm_ip)
-            setup_vm_no_password(vm_inv, vm, deploy_config)
-            setup_vm_console(vm_inv, vm, deploy_config)
-            stop_vm(zstack_management_ip, vm_inv.uuid)
-            start_vm(zstack_management_ip, vm_inv.uuid)
-            test_lib.lib_wait_target_up(vm_ip, '22', 120)
-
-            ips_xml = etree.SubElement(vm_xml, 'ips')
-            for l3_uuid in l3_uuid_list:
-                ip_xml = etree.SubElement(ips_xml, 'ip')
-                ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, l3_uuid).ip
-                ip_xml.set('ip', ip)
-
-            #setup eip
-            if xmlobject.has_element(vm, 'eipRef'):
-                vm_nic = vm_inv.vm.vmNics[0]
-                vm_nic_uuid = vm_nic.uuid
+    if hasattr(scenario_config.deployerConfig, 'hosts'):
+        for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+            for vm in xmlobject.safe_list(host.vms.vm):
+                vm_creation_option = test_util.VmOption()
+                l3_uuid_list = []
+                default_l3_uuid = None
                 for l3network in xmlobject.safe_list(vm.l3Networks.l3Network):
-                    vip = test_stub.create_vip('scenario-auto-vip', l3network.uuid_)
-                    vip_lst.append(vip)
-                    eip = test_stub.create_eip(l3network.eipRef.text_, vip_uuid=vip.get_vip().uuid, vnic_uuid=vm_nic_uuid, vm_obj=vm_inv)
-                    eip_lst.append(eip)
-                    vip.attach_eip(eip)
-                    vm_xml.set('ip', eip.get_eip().vipIp)
+                    if not default_l3_uuid:
+                        default_l3_uuid = l3network.uuid_
+                    l3_uuid_list.append(l3network.uuid_)
+                vm_creation_option.set_instance_offering_uuid(vm.vmInstranceOfferingUuid_)
+                vm_creation_option.set_l3_uuids(l3_uuid_list)
+                vm_creation_option.set_image_uuid(vm.imageUuid_)
+                vm_creation_option.set_name(vm.name_)
+                vm_creation_option.set_host_uuid(host.uuid_)
+                #vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
+                #vm_creation_option.set_default_l3_uuid(default_l3_uuid)
+                #vm_creation_option.set_system_tags(system_tags)
+                #vm_creation_option.set_ps_uuid(ps_uuid)
+                #vm_creation_option.set_session_uuid(session_uuid)
+                vm_inv = create_vm(zstack_management_ip, vm_creation_option)
+                vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, default_l3_uuid).ip
+                test_lib.lib_wait_target_up(vm_ip, '22', 120)
 
-            if xmlobject.has_element(vm, 'nodeRef'):
-                setup_node_vm(vm_inv, vm, deploy_config)
-            if xmlobject.has_element(vm, 'hostRef'):
-                setup_host_vm(zstack_management_ip, vm_inv, vm, deploy_config)
-                vm_inv_lst.append(vm_inv)
-                vm_cfg_lst.append(vm)
-                vm_xml.set('managementIp', vm_ip)
-            if xmlobject.has_element(vm, 'mnHostRef'):
-                setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm)
-            if xmlobject.has_element(vm, 'backupStorageRef'):
-                volume_option = test_util.VolumeOption()
-                volume_option.set_name(os.environ.get('volumeName'))
-                for bs_ref in xmlobject.safe_list(vm.backupStorageRef):
-                    if bs_ref.type_ == 'ceph':
-                        disk_offering_uuid = bs_ref.offering_uuid_
-                        volume_option.set_disk_offering_uuid(disk_offering_uuid)
-                        volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
-                        attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
-                        break
+                vm_xml = etree.SubElement(vms_xml, 'vm')
+                vm_xml.set('name', vm.name_)
+                vm_xml.set('uuid', vm_inv.uuid)
+                vm_xml.set('ip', vm_ip)
+                setup_vm_no_password(vm_inv, vm, deploy_config)
+                setup_vm_console(vm_inv, vm, deploy_config)
+                stop_vm(zstack_management_ip, vm_inv.uuid)
+                start_vm(zstack_management_ip, vm_inv.uuid)
+                test_lib.lib_wait_target_up(vm_ip, '22', 120)
 
-                    if bs_ref.type_ == 'fusionstor':
-                        disk_offering_uuid = bs_ref.offering_uuid_
-                        volume_option.set_disk_offering_uuid(disk_offering_uuid)
-                        volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
-                        attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
-                        break
+                ips_xml = etree.SubElement(vm_xml, 'ips')
+                for l3_uuid in l3_uuid_list:
+                    ip_xml = etree.SubElement(ips_xml, 'ip')
+                    ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, l3_uuid).ip
+                    ip_xml.set('ip', ip)
 
-                setup_backupstorage_vm(vm_inv, vm, deploy_config)
-            if xmlobject.has_element(vm, 'primaryStorageRef'):
-                setup_primarystorage_vm(vm_inv, vm, deploy_config)
-                for ps_ref in xmlobject.safe_list(vm.primaryStorageRef):
-                    if ps_ref.type_ == 'ocfs2smp':
-                        if ocfs2smp_shareable_volume_is_created == False and hasattr(ps_ref, 'disk_offering_uuid_'):
-                            ocfs2smp_disk_offering_uuid = ps_ref.disk_offering_uuid_
-                            volume_option.set_disk_offering_uuid(ocfs2smp_disk_offering_uuid)
-                            volume_option.set_system_tags(['ephemeral::shareable', 'capability::virtio-scsi'])
-                            share_volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
-                            ocfs2smp_shareable_volume_is_created = True
-                        attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
-                    if ps_ref.type_ == 'ZSES':
-                        if hasattr(ps_ref, 'disk_offering_uuid_'):
-                            zbs_disk_offering_uuid = ps_ref.disk_offering_uuid_
-                            volume_option.set_disk_offering_uuid(zbs_disk_offering_uuid)
-                            volume_option.set_system_tags(['capability::virtio-scsi'])
-                            share_volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
+                #setup eip
+                if xmlobject.has_element(vm, 'eipRef'):
+                    vm_nic = vm_inv.vm.vmNics[0]
+                    vm_nic_uuid = vm_nic.uuid
+                    for l3network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                        vip = test_stub.create_vip('scenario-auto-vip', l3network.uuid_)
+                        vip_lst.append(vip)
+                        eip = test_stub.create_eip(l3network.eipRef.text_, vip_uuid=vip.get_vip().uuid, vnic_uuid=vm_nic_uuid, vm_obj=vm_inv)
+                        eip_lst.append(eip)
+                        vip.attach_eip(eip)
+                        vm_xml.set('ip', eip.get_eip().vipIp)
+
+                if xmlobject.has_element(vm, 'nodeRef'):
+                    setup_node_vm(vm_inv, vm, deploy_config)
+                if xmlobject.has_element(vm, 'hostRef'):
+                    setup_host_vm(zstack_management_ip, vm_inv, vm, deploy_config)
+                    vm_inv_lst.append(vm_inv)
+                    vm_cfg_lst.append(vm)
+                    vm_xml.set('managementIp', vm_ip)
+                if xmlobject.has_element(vm, 'mnHostRef'):
+                    setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm)
+                if xmlobject.has_element(vm, 'backupStorageRef'):
+                    volume_option = test_util.VolumeOption()
+                    volume_option.set_name(os.environ.get('volumeName'))
+                    for bs_ref in xmlobject.safe_list(vm.backupStorageRef):
+                        if bs_ref.type_ == 'ceph':
+                            disk_offering_uuid = bs_ref.offering_uuid_
+                            volume_option.set_disk_offering_uuid(disk_offering_uuid)
+                            volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
+                            attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
+                            break
+
+                        if bs_ref.type_ == 'fusionstor':
+                            disk_offering_uuid = bs_ref.offering_uuid_
+                            volume_option.set_disk_offering_uuid(disk_offering_uuid)
+                            volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
+                            attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
+                            break
+                    setup_backupstorage_vm(vm_inv, vm, deploy_config)
+                if xmlobject.has_element(vm, 'primaryStorageRef'):
+                    setup_primarystorage_vm(vm_inv, vm, deploy_config)
+                    for ps_ref in xmlobject.safe_list(vm.primaryStorageRef):
+                        if ps_ref.type_ == 'ocfs2smp':
+                            if ocfs2smp_shareable_volume_is_created == False and hasattr(ps_ref, 'disk_offering_uuid_'):
+                                ocfs2smp_disk_offering_uuid = ps_ref.disk_offering_uuid_
+                                volume_option.set_disk_offering_uuid(ocfs2smp_disk_offering_uuid)
+                                volume_option.set_system_tags(['ephemeral::shareable', 'capability::virtio-scsi'])
+                                share_volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
+                                ocfs2smp_shareable_volume_is_created = True
                             attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
+                        if ps_ref.type_ == 'ZSES':
+                            if zbs_virtio_scsi_volume_is_created == False and hasattr(ps_ref, 'disk_offering_uuid_'):
+                                zbs_disk_offering_uuid = ps_ref.disk_offering_uuid_
+                                volume_option.set_disk_offering_uuid(zbs_disk_offering_uuid)
+                                volume_option.set_system_tags(['capability::virtio-scsi'])
+                                share_volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
+                                zbs_virtio_scsi_volume_is_created = True
+                                attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
 
-    xml_string = etree.tostring(root_xml, 'utf-8')
-    xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
-    open(scenario_file, 'w+').write(xml_string)
-    setup_ceph_storages(scenario_config, scenario_file, deploy_config)
-    setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst)
-    setup_fusionstor_storages(scenario_config, scenario_file, deploy_config)
+        xml_string = etree.tostring(root_xml, 'utf-8')
+        xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
+        open(scenario_file, 'w+').write(xml_string)
+        setup_ceph_storages(scenario_config, scenario_file, deploy_config)
+        setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst)
+        setup_fusionstor_storages(scenario_config, scenario_file, deploy_config)
+    else:
+        setup_xsky_storages(scenario_config, scenario_file, deploy_config)
     #setup_zbs_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst)
 
 def destroy_scenario(scenario_config, scenario_file):

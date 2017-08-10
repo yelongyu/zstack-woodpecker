@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+<basicConfig>
+  <zstackManagementIp>$zstackManagementIp</zstackManagementIp>
+  <zstackAdminPassword>$zstackAdminPassword</zstackAdminPassword>
+  <zstackPkg>$zstackPkg</zstackPkg>
+  <xskyNodesMN>$xskyNodesMN</xskyNodesMN>
+</basicConfig>
+
+<deployerConfig xmlns="http://zstack.org/schema/zstack">
+  <xsky>
+    <nodes>
+        <node uuid="$xskyNode1" snapshot="$node1Sanpshot" nodeIP="$node1IP">
+            <volumeDisks>
+                <volumeDisk snapshot="$volumeSnapshotName11">
+                </volumeDisk>
+                <volumeDisk snapshot="$volumeSnapshotName12">
+                </volumeDisk>
+                <volumeDisk snapshot="$volumeSnapshotName13">
+                </volumeDisk>
+            </volumeDisks>
+        </node>
+        <node uuid="$xskyNode2" snapshot="$node2Sanpshot" nodeIP="$node2IP">
+            <volumeDisks>
+                <volumeDisk snapshot="$volumeSnapshotName21">
+                </volumeDisk>
+                <volumeDisk snapshot="$volumeSnapshotName22">
+                </volumeDisk>
+                <volumeDisk snapshot="$volumeSnapshotName23">
+                </volumeDisk>
+            </volumeDisks>
+        </node>
+        <node uuid="$xskyNode3" snapshot="$node3Sanpshot" nodeIP="$node3IP">
+            <volumeDisks>
+                <volumeDisk snapshot="$volumeSnapshotName31">
+                </volumeDisk>
+                <volumeDisk snapshot="$volumeSnapshotName32">
+                </volumeDisk>
+                <volumeDisk snapshot="$volumeSnapshotName33">
+                </volumeDisk>
+            </volumeDisks>
+        </node>
+    </nodes>
+    <account>
+        <user>$xskyUser</user>
+        <password>$xskyPassword</password>
+    </account>
+    <url>$xskyUrl</url>
+    <xmsNode>
+       <xmsNodeIP>$xmsNode</xmsNodeIP>
+       <xmsNodeLoginUser>$xmsLoginUser</xmsNodeLoginUser>
+       <xmsNodeLoginPassword>$xmsLoginPassword</xmsNodeLoginPassword>
+    </xmsNode>
+  </xsky>
+</deployerConfig>
+</config>

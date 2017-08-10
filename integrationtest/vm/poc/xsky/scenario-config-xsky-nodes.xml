@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-xsky-nodes.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-xsky-nodes.tmpt</scenarioConfigTemplate>
+</testConfig>

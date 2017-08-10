@@ -1,0 +1,26 @@
+import ../../scenario.tmpt
+xskyNodesMN=1.2.1.1
+xskyNode1=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+xskyNode2=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+xskyNode3=cccccccccccccccccccccccccccccccc
+node1IP=1.2.8.2
+node2IP=1.2.8.2
+node3IP=1.2.8.2
+node1Sanpshot=pool-created-1
+node2Sanpshot=pool-created-2
+node3Sanpshot=pool-created-3
+volumeSnapshotName11=VM
+volumeSnapshotName12=VM
+volumeSnapshotName13=VM
+volumeSnapshotName21=VM
+volumeSnapshotName22=VM
+volumeSnapshotName23=VM
+volumeSnapshotName31=VM
+volumeSnapshotName32=VM
+volumeSnapshotName33=VM
+xskyUser=admin
+xskyPassword=ppppp
+xskyUrl=http://1.2.7.2:8051
+xmsNode=1.2.7.0
+xmsLoginUser=root
+xmsLoginPassword=pppppp
