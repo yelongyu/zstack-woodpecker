@@ -26,6 +26,7 @@ def test():
     global res
     global original_rate
     test_util.test_dsc('Test storage over provision method')
+    test_lib.lib_skip_if_ps_num_is_not_eq_number(1)
     zone_uuid = res_ops.query_resource(res_ops.ZONE)[0].uuid
     cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
     cond = res_ops.gen_query_conditions('status', '=', 'Connected', cond)
