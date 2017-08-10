@@ -630,13 +630,14 @@ def setup_zbs_primary_storages(scenario_config, scenario_file, deploy_config, vm
         if not hasattr(node_host, 'port_') or node_host.port_ == '22':
             node_host.port_ = '22'
 
-        vm = get_scenario_file_vm(zbs_node, scenario_file)
-        node_ip = vm.ip_
-        i += 1
-        if i == 0:
-            node1_ip = node_ip
-        elif i == 2:
-            node2_ip = node_ip
+        for zbs_node in zbs_storages[zbs_storage]:
+            vm = get_scenario_file_vm(zbs_node, scenario_file)
+            node_ip = vm.ip_
+            i += 1
+            if i == 1:
+                node1_ip = node_ip
+            elif i == 2:
+                node2_ip = node_ip
 
         import commands
         cmd = "cp -rnf /opt/zstack-dvd/repos/* /etc/yum.repos.d/; yum --disablerepo=* --enablerepo=zstack-local,uek4-ocfs2 \
