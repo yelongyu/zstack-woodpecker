@@ -169,7 +169,7 @@ def test():
         if v.vrId == vpc_vr_id:
             vr = v
     # Create Hybrid IPsec Vpn connection
-    vpn_ike_config = hyb_ops.create_vpn_ike_ipsec_config(name='zstack-test-vpn-ike-config', psk='zstack.hybrid.test123', local_ip=vpn_gateway.publicIp, remote_ip=user_vpn_gw_inv.ip)
+    vpn_ike_config = hyb_ops.create_vpn_ike_ipsec_config(name='zstack-test-vpn-ike-config', psk='ZStack.Hybrid.Test123789', local_ip=vpn_gateway.publicIp, remote_ip=user_vpn_gw_inv.ip)
     vpn_ipsec_config = hyb_ops.create_vpn_ipsec_config(name='zstack-test-vpn-ike-config')
     ipsec_vpn_inv_connection = hyb_ops.create_vpc_vpn_connection(user_vpn_gw_inv.uuid, vpn_gateway.uuid, 'zstack-test-ipsec-vpn-connection', vswitch_cidr,
                                       zstack_cidrs, vpn_ike_config.uuid, vpn_ipsec_config.uuid)
@@ -178,7 +178,7 @@ def test():
     if ipsec_conntion:
         ipsec_inv = ipsec_conntion[0]
     else:
-        ipsec_inv = ipsec_ops.create_ipsec_connection('ipsec', pri_l3_uuid, vpn_gateway.publicIp, 'zstack.hybrid.test123', vip.uuid, [vswitch_cidr],
+        ipsec_inv = ipsec_ops.create_ipsec_connection('ipsec', pri_l3_uuid, vpn_gateway.publicIp, 'ZStack.Hybrid.Test123789', vip.uuid, [vswitch_cidr],
                                                       ike_dh_group=2, ike_encryption_algorithm='3des', policy_encryption_algorithm='3des', pfs='dh-group2')
     # Add route entry
     route_entry_inv = hyb_ops.create_aliyun_vpc_virtualrouter_entry_remote(zstack_cidrs.replace('1/', '0/'), vr.uuid, vrouter_type='vrouter', next_hop_type='VpnGateway', next_hop_uuid=vpn_gateway.uuid)
