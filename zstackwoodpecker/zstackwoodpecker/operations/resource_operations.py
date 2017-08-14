@@ -73,6 +73,8 @@ VCENTER = 'VCenter'
 VCENTER_CLUSTER = 'VCenterCluster'
 VCENTER_BACKUP_STORAGE = 'VCenterBackupStorage'
 VCENTER_PRIMARY_STORAGE = 'VCenterPrimaryStorage'
+MONITOR_TRIGGER = 'MonitorTrigger'
+MONITOR_TRIGGER_ACTION = 'MonitorTriggerAction'
 PXE_SERVER = 'PxeServer'
 
 def find_item_by_uuid(inventories, uuid):
@@ -383,6 +385,10 @@ def _gen_query_action(resource):
         action = api_actions.QueryVCenterBackupStorageAction()
     elif resource == VCENTER_PRIMARY_STORAGE:
         action = api_actions.QueryVCenterPrimaryStorageAction()
+    elif resource == MONITOR_TRIGGER:
+        action = api_actions.QueryMonitorTriggerAction()
+    elif resource == MONITOR_TRIGGER_ACTION:
+        action = api_actions.QueryMonitorTriggerActionAction()
     elif resource == PXE_SERVER:
         action = api_actions.QueryBaremetalPxeServerAction()
 
