@@ -654,9 +654,9 @@ def setup_zbs_primary_storages(scenario_config, scenario_file, deploy_config, vm
             test_util.test_fail('SCSI volume does not attched to the host')
         cmd = "zbs init-node --address %s --device /dev/disk/by-id/%s --fenceip %s"%(woodpecker_ip, wwn_id, fenceip)
         ssh.execute(cmd, node_ip, node_config.imageUsername_, node_config.imagePassword_, True, int(node_host.port_))
-
-    cmd = 'zbs pair-node --peer %s --user %s --pass %s' %(node2_ip, node_config.imageUsername_, node_config.imagePassword_)
-    ssh.execute(cmd, node1_ip, node_config.imageUsername_, node_config.imagePassword_, True, int(node_host.port_))
+        if node2_ip:
+            cmd = 'zbs pair-node --peer %s --user %s --pass %s' %(node2_ip, node_config.imageUsername_, node_config.imagePassword_)
+            ssh.execute(cmd, node1_ip, node_config.imageUsername_, node_config.imagePassword_, True, int(node_host.port_))
 
     if zbs_storages:
         for vm_inv, vm_config in zip(vm_inv_lst, vm_cfg_lst):
