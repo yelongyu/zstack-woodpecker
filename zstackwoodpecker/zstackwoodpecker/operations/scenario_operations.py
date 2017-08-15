@@ -586,6 +586,7 @@ def setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_confi
         else:
             cmd = "bash %s/%s %s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ocfs2.sh', vm_ips)
            
+        test_util.test_logger('%s:%s:%s:%s:%s' % (cmd, woodpecker_ip, node1_config.imageUsername_, node1_config.imagePassword_, str(node_host.port_)))
         ssh.execute(cmd, woodpecker_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
 
     if ocfs2_storages:
