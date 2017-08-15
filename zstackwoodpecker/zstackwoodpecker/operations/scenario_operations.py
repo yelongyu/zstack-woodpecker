@@ -275,8 +275,8 @@ def recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config):
                 nic_name = get_ref_l2_nic_name(l2networkref.text_, deploy_config)
                 if nic_name.find('.') >= 0:
                     vlan = nic_name.split('.')[1]
-                    test_util.test_logger('[vm:] %s %s is created.' % (vm_ip, nic_name))
-                    cmd = 'vconfig add %s %s' % (nic_name.split('.')[0], vlan)
+                    test_util.test_logger('[vm:] %s %s is created.' % (vm_ip, nic_name.replace("eth", "zsn")))
+                    cmd = 'vconfig add %s %s' % (nic_name.split('.')[0].replace("eth", "zsn"), vlan)
                     try:
                         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
                     except:
