@@ -1,0 +1,67 @@
+import ../deploy.tmpt
+
+localPrimaryStorageName = local-ps
+localPrimaryStorageUrl = /home/local-ps
+
+instanceOfferingName_m = medium-vm
+instanceOfferingMemory_m = 1024M
+instanceOfferingCpuNum_m = 2
+instanceOfferingCpuSpeed_m = 512
+
+largeDiskOfferingName = largeDiskOffering
+largeDiskOfferingSize = 1G
+
+mediumDiskOfferingName = mediumDiskOffering
+mediumDiskOfferingSize = 100M
+
+clusterName2 = cluster2
+
+hostName = centos5
+hostIp = 10.0.101.31
+
+hostName2 = centos2
+hostIp2 = 10.0.101.21
+
+hostName3 = centos3
+hostIp3 = 10.0.101.22
+
+hostName4 = centos4
+hostIp4 = 10.0.101.23
+
+l2PublicNetworkName = l2-public
+l2PublicNetworkInterface = ens32
+
+l3VlanNetworkName2 = l3VlanNetwork2
+
+#this var is used to overwrite original raw setting
+rootImageFormat = qcow2
+
+sshkeyImageName = vr
+sshkeyImageUrl = http://10.1.101.1/image/zstack-cloudinit.img
+sshkeyPubKey = 
+sshkeyPriKey_file = 
+
+winImageUsername = Administrator
+winImagePassword = linux@123
+
+rootIsoFormat = iso
+
+imageName_win2012 = win2012.img
+imageUrl_win2012 = http://zstack/image/windows-2012-cn-qcow2.qcow2
+isoUrl_win2012 = http://zstack/image/win2012.iso
+
+imageName_win10 = win10.img
+imageUrl_win10 =  http://zstack/image/win10.qcow2
+isoUrl_win10 = http://zstack/image/win10.iso
+
+imageName_win2003 = win2003
+imageUrl_win2003 =  http://zstack/image/win2003.qcow2
+isoUrl_win2003 = http://zstack/image/win2003.iso
+
+imageName_win2008 = win2008
+imageUrl_win2008 =  http://zstack/image/win2008.qcow2
+isoUrl_win2008 = http://zstack/image/win2008.iso
+
+imageName_win7 = win7
+imageUrl_win7 =  http://zstack/image/win7.qcow2
+isoUrl_win7 = http://zstack/image/win7.iso
