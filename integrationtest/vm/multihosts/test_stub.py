@@ -697,3 +697,48 @@ def expect_failure(msg, *exceptions):
         test_util.test_logger("Expected failure: {}".format(msg))
     else:
         test_util.test_fail("CRITICAL ERROR: {} succeed!".format(msg))
+
+
+class PSEnvChecker(object):
+    def __int__(self):
+        self.ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
+
+    @property
+    def is_multi_ps_env(self):
+        return True if len(self.ps_list) >= 2 else False
+
+    @property
+    def is_multi_local_env(self):
+        if not self.is_multi_ps_env:
+            return False
+        for ps in self.ps_list:
+            if ps.type != inventory.LOCAL_STORAGE_TYPE:
+                return False
+        return True
+
+    @property
+    def is_multi_nfs_env(self):
+        if not self.is_multi_ps_env:
+            return False
+        for ps in self.ps_list:
+            if ps.type != inventory.NFS_PRIMARY_STORAGE_TYPE:
+                return False
+        return True
+
+    @property
+    def is_local_nfs_env(self):
+        return True if self.have_local and self.have_nfs else False
+
+    @property
+    def have_local(self):
+        for ps in self.ps_list:
+            if ps.type == inventory.LOCAL_STORAGE_TYPE:
+                return True
+        return False
+
+    @property
+    def have_nfs(self):
+        for ps in self.ps_list:
+            if ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
+                return True
+        return False
