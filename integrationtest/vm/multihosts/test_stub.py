@@ -765,4 +765,12 @@ class PSEnvChecker(object):
             raise EnvironmentError
         return random.choice(ps for ps in self.ps_list if ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE)
 
+    def get_two_ps(self):
+        if not self.is_multi_ps_env:
+            raise EnvironmentError
+        if self.is_local_nfs_env:
+            return self.get_random_local(), self.get_random_nfs()
+        else:
+            return random.sample(self.ps_list, 2)
+
 
