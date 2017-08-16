@@ -702,6 +702,15 @@ def expect_failure(msg, *exceptions):
 class PSEnvChecker(object):
     def __int__(self):
         self.ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
+        assert self.ps_list
+
+    @property
+    def is_one_local_env(self):
+        return True if len(self.ps_list) == 1 and self.ps_list[0].type == inventory.LOCAL_STORAGE_TYPE else False
+
+    @property
+    def is_one_nfs_env(self):
+        return True if len(self.ps_list) == 1 and self.ps_list[0].type == inventory.NFS_PRIMARY_STORAGE_TYPE else False
 
     @property
     def is_multi_ps_env(self):
@@ -742,3 +751,18 @@ class PSEnvChecker(object):
             if ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
                 return True
         return False
+
+    def get_random_ps(self):
+        return random.choice(self.ps_list)
+
+    def get_random_local(self):
+        if not self.have_local:
+            raise EnvironmentError
+        return random.choice(ps for ps in self.ps_list if ps.type == inventory.LOCAL_STORAGE_TYPE)
+
+    def get_random_nfs(self):
+        if not self.have_nfs:
+            raise EnvironmentError
+        return random.choice(ps for ps in self.ps_list if ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE)
+
+
