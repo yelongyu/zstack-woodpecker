@@ -22,11 +22,11 @@ disabled_ps_list = []
 
 
 def test():
-
-    if not (test_stub.find_ps_local() and test_stub.find_ps_nfs()):
+    ps_env = test_stub.PSEnvChecker()
+    if not ps_env.is_local_nfs_env:
         test_util.test_skip("Skip test if not local-nfs multi ps environment")
 
-    nfs_ps = test_stub.find_ps_nfs()
+    nfs_ps = ps_env.get_random_nfs()
 
     test_util.test_dsc("Create 1 vm  with {} data volume".format(VOLUME_NUMBER))
     vm = test_stub.create_multi_vms(name_prefix='test-', count=1, data_volume_number=VOLUME_NUMBER)[0]

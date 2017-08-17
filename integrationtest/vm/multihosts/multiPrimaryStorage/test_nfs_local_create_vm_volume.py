@@ -7,7 +7,6 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import apibinding.inventory as inventory
 import zstackwoodpecker.test_state as test_state
-import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 
 _config_ = {
         'timeout' : 3000,
@@ -16,13 +15,12 @@ _config_ = {
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
-new_ps_list = []
 VM_COUNT = 10
 DATA_VOLUME_NUMBER = 10
 
 
 def test():
-    if not (test_stub.find_ps_local() and test_stub.find_ps_nfs()):
+    if not test_stub.PSEnvChecker().is_local_nfs_env:
         test_util.test_skip("Skip test if not local-nfs multi ps environment")
 
     test_util.test_dsc("Create {} vm each with {} data volume".format(VM_COUNT, DATA_VOLUME_NUMBER))

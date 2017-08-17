@@ -6,8 +6,6 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
-import zstackwoodpecker.operations.resource_operations as res_ops
-import apibinding.inventory as inventory
 
 _config_ = {
         'timeout' : 3000,
@@ -17,14 +15,16 @@ _config_ = {
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 VOLUME_NUMBER = 10
-new_ps_list = []
+
 
 
 def test():
-    if not (test_stub.find_ps_local() and test_stub.find_ps_nfs()):
+    ps_env = test_stub.PSEnvChecker()
+    if not ps_env.is_local_nfs_env:
         test_util.test_skip("Skip test if not local-nfs multi ps environment")
 
-    nfs_ps = test_stub.find_ps_nfs()
+    nfs_ps = ps_env.get_random_nfs()
+
     vm = test_stub.create_multi_vms(name_prefix='test-', count=1)[0]
     volume_list = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=nfs_ps)
 
@@ -46,7 +46,4 @@ def test():
 
 def env_recover():
     test_lib.lib_error_cleanup(test_obj_dict)
-    if new_ps_list:
-        for new_ps in new_ps_list:
-            ps_ops.detach_primary_storage(new_ps.uuid, new_ps.attachedClusterUuids[0])
-            ps_ops.delete_primary_storage(new_ps.uuid)
+
