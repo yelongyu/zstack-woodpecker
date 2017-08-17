@@ -700,7 +700,7 @@ def expect_failure(msg, *exceptions):
 
 
 class PSEnvChecker(object):
-    def __int__(self):
+    def __init__(self):
         self.ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
         assert self.ps_list
 
