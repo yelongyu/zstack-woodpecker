@@ -451,31 +451,6 @@ class TwoPrimaryStorageEnv(object):
             raise NameError
 
 
-def find_ps_local():
-    ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
-    for ps in ps_list:
-        if ps.type == inventory.LOCAL_STORAGE_TYPE:
-            return ps
-    test_util.test_logger("Can not find local primary storage ")
-    return None
-
-
-def find_ps_nfs():
-    ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
-    for ps in ps_list:
-        if ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
-            return ps
-    test_util.test_logger("Can not find NFS primary storage ")
-    return None
-
-
-def get_ps_vm_creation():
-    if find_ps_local() and find_ps_nfs():
-        return find_ps_local(), find_ps_nfs()
-    else:
-        return random.sample(res_ops.get_resource(res_ops.PRIMARY_STORAGE), 2)
-
-
 def check_vm_running_on_host(vm_uuid, host_ip):
     cmd = "virsh list|grep %s|awk '{print $3}'" %(vm_uuid)
     host_username = os.environ.get('hostUsername')

@@ -24,14 +24,13 @@ maintenance_ps_list = []
 
 
 def test():
-    ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
-    if len(ps_list) < 2:
+    ps_env = test_stub.PSEnvChecker()
+    if not ps_env.is_multi_ps_env:
         test_util.test_skip("Skip test if only one primary storage")
 
-    ps, another_ps = test_stub.get_ps_vm_creation()
+    ps, another_ps = ps_env.get_two_ps()
 
-    vm1 = test_stub.create_multi_vms(name_prefix='test1-', count=1, ps_uuid=ps.uuid)[0]
-    vm2 = test_stub.create_multi_vms(name_prefix='test2-', count=1, ps_uuid=ps.uuid)[0]
+    vm1, vm2 = test_stub.create_multi_vms(name_prefix='test-', count=2, ps_uuid=ps.uuid)
 
     for vm in (vm1, vm2):
         test_obj_dict.add_vm(vm)

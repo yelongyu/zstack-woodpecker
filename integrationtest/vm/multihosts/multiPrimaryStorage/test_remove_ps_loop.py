@@ -8,9 +8,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import apibinding.inventory as inventory
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
-import zstackwoodpecker.operations.volume_operations as vol_ops
 import time
-import random
 
 _config_ = {
         'timeout' : 3000,
@@ -24,12 +22,11 @@ delete_ps_list = []
 
 
 def test():
-
-    ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
-    if len(ps_list) < 2:
+    ps_env = test_stub.PSEnvChecker()
+    if not ps_env.is_multi_ps_env:
         test_util.test_skip("Skip test if only one primary storage")
 
-    ps1, ps2 = random.sample(ps_list, 2)
+    ps1, ps2 = ps_env.get_two_ps()
 
     for _ in xrange(5):
         test_util.test_dsc('Remove ps2')
@@ -58,7 +55,7 @@ def test():
     vm1 = test_stub.create_multi_vms(name_prefix='vm1', count=1, data_volume_number=VOLUME_NUMBER)[0]
     test_obj_dict.add_vm(vm1)
 
-    if ps2.type == inventory.NFS_PRIMARY_STORAGE_TYPE and ps1.type == inventory.LOCAL_STORAGE_TYPE:
+    if ps_env.is_local_nfs_env:
         test_util.test_dsc('create date volume in ps2')
         volume = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=ps2)
         test_obj_dict.add_volume(volume)

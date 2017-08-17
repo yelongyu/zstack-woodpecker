@@ -24,35 +24,26 @@ maintenance_ps_list = []
 
 
 def test():
+    ps_env = test_stub.PSEnvChecker()
+    if not ps_env.is_multi_ps_env or ps_env.is_local_nfs_env:
+        test_util.test_skip("Skip test if only one primary storage or local-nfs env")
 
-    ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
-    if len(ps_list) < 2:
-        test_util.test_skip("Skip test if only one primary storage")
-    if test_stub.find_ps_local() and test_stub.find_ps_nfs():
-        test_util.test_skip("Skip test for local-nfs multi ps environment")
+    ps1, ps2 = ps_env.get_two_ps()
 
-    ps1, ps2 = test_stub.get_ps_vm_creation()
+    vm_list = []
+    for root_vol_ps in [ps1, ps2]:
+        for data_vol_ps in [ps1, ps2]:
+            vm = test_stub.create_multi_vms(name_prefix='test_vm', count=1,
+                                            ps_uuid=root_vol_ps.uuid, data_volume_number=VOLUME_NUMBER,
+                                            ps_uuid_for_data_vol=data_vol_ps.uuid)[0]
+            test_obj_dict.add_vm(vm)
+            vm_list.append(vm)
 
-    vm1 = test_stub.create_multi_vms(name_prefix='vm1', count=1,
-                                     ps_uuid=ps1.uuid, data_volume_number=VOLUME_NUMBER,
-                                     ps_uuid_for_data_vol=ps1.uuid)[0]
-    vm2 = test_stub.create_multi_vms(name_prefix='vm2', count=1,
-                                     ps_uuid=ps1.uuid, data_volume_number=VOLUME_NUMBER,
-                                     ps_uuid_for_data_vol=ps2.uuid)[0]
-    vm3 = test_stub.create_multi_vms(name_prefix='vm3', count=1,
-                                     ps_uuid=ps2.uuid, data_volume_number=VOLUME_NUMBER,
-                                     ps_uuid_for_data_vol=ps2.uuid)[0]
-    vm4 = test_stub.create_multi_vms(name_prefix='vm4', count=1,
-                                     ps_uuid=ps2.uuid, data_volume_number=VOLUME_NUMBER,
-                                     ps_uuid_for_data_vol=ps1.uuid)[0]
-    vm_list = [vm1, vm2, vm3, vm4]
-
-    for vm in vm_list:
-        test_obj_dict.add_vm(vm)
+    vm1, vm2, vm3, vm4 = vm_list
 
     ps_ops.change_primary_storage_state(state='maintain', primary_storage_uuid=ps2.uuid)
     maintenance_ps_list.append(ps2)
-    time.sleep(60)
+    time.sleep(30)
 
     vr_vm_list = test_lib.lib_find_vr_by_vm(vm1.get_vm())
     vr_vm = None
