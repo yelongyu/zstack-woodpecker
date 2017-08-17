@@ -758,12 +758,12 @@ class PSEnvChecker(object):
     def get_random_local(self):
         if not self.have_local:
             raise EnvironmentError
-        return random.choice(ps for ps in self.ps_list if ps.type == inventory.LOCAL_STORAGE_TYPE)
+        return random.choice([ps for ps in self.ps_list if ps.type == inventory.LOCAL_STORAGE_TYPE])
 
     def get_random_nfs(self):
         if not self.have_nfs:
             raise EnvironmentError
-        return random.choice(ps for ps in self.ps_list if ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE)
+        return random.choice([ps for ps in self.ps_list if ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE])
 
     def get_two_ps(self):
         if not self.is_multi_ps_env:

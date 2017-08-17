@@ -30,7 +30,7 @@ def test():
     local_nfs_env = True if ps_env.is_local_nfs_env else False
 
     local_ps = ps_env.get_random_local()
-    another_ps = ps_env.get_random_nfs() if local_nfs_env else random.choice(ps for ps in ps_env.ps_list if ps.uuid != local_ps.uuid)
+    another_ps = ps_env.get_random_nfs() if local_nfs_env else random.choice([ps for ps in ps_env.ps_list if ps.uuid != local_ps.uuid])
 
     vm = test_stub.create_multi_vms(name_prefix='test-', count=1)[0]
     test_obj_dict.add_vm(vm)
