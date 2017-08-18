@@ -29,11 +29,9 @@ DATA_VOLUME_NUMBER = 10
 record = dict()
 
 
+@test_stub.skip_if_have_local
+@test_stub.skip_if_only_one_ps
 def test():
-
-    ps_env = test_stub.PSEnvChecker()
-    if not ps_env.is_multi_nfs_env:
-        test_util.test_skip("Skip test if not multi NFS PS environment")
 
     mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
     conditions = res_ops.gen_query_conditions('state', '=', 'Enabled')

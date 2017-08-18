@@ -18,11 +18,8 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 VM_COUNT = 10
 
-
+@test_stub.skip_if_not_local_nfs
 def test():
-    ps_env = test_stub.PSEnvChecker()
-    if not ps_env.is_local_nfs_env:
-        test_util.test_skip("Skip test if not local-nfs multi ps environment")
 
     test_util.test_dsc("Create {0} vm ".format(VM_COUNT))
     vm_list = test_stub.create_multi_vms(name_prefix='test-', count=VM_COUNT)
@@ -36,7 +33,7 @@ def test():
         assert ps.type == inventory.LOCAL_STORAGE_TYPE
 
     with test_stub.expect_failure('Create vm on nfs in local-nfs environment', Exception):
-        test_stub.create_multi_vms(name_prefix='test-', count=VM_COUNT, ps_uuid=ps_env.get_random_nfs().uuid)
+        test_stub.create_multi_vms(name_prefix='test-', count=VM_COUNT, ps_uuid=test_stub.PSEnvChecker().get_random_nfs().uuid)
 
     test_util.test_pass('Multi PrimaryStorage Test Pass')
 

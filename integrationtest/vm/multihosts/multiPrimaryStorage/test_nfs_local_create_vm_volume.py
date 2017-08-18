@@ -19,9 +19,8 @@ VM_COUNT = 10
 DATA_VOLUME_NUMBER = 10
 
 
+@test_stub.skip_if_not_local_nfs
 def test():
-    if not test_stub.PSEnvChecker().is_local_nfs_env:
-        test_util.test_skip("Skip test if not local-nfs multi ps environment")
 
     test_util.test_dsc("Create {} vm each with {} data volume".format(VM_COUNT, DATA_VOLUME_NUMBER))
     vm_list = test_stub.create_multi_vms(name_prefix='test-', count=VM_COUNT, data_volume_number=DATA_VOLUME_NUMBER)

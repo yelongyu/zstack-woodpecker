@@ -21,6 +21,7 @@ VOLUME_NUMBER = 10
 new_ps_list = []
 
 
+@test_stub.skip_if_have_local
 def test():
     env = test_stub.TwoPrimaryStorageEnv(test_object_dict=test_obj_dict,
                                          first_ps_vm_number=VM_COUNT,
@@ -29,8 +30,6 @@ def test():
                                          second_ps_volume_number=VOLUME_NUMBER)
     env.check_env()
     env.deploy_env()
-    if env.first_ps.type == inventory.LOCAL_STORAGE_TYPE:
-        test_util.test_skip("SKIP TESTING for localstorage")
 
     first_ps_vm = env.first_ps_vm_list[0]
     first_ps_volume_list = env.first_ps_volume_list

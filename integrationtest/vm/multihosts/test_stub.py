@@ -26,6 +26,7 @@ import sys
 import telnetlib
 import random
 from contextlib import contextmanager
+from functools import wraps
 #import traceback
 
 
@@ -680,12 +681,16 @@ class PSEnvChecker(object):
         assert self.ps_list
 
     @property
+    def is_one_ps_env(self):
+        return True if len(self.ps_list) == 1 else False
+
+    @property
     def is_one_local_env(self):
-        return True if len(self.ps_list) == 1 and self.ps_list[0].type == inventory.LOCAL_STORAGE_TYPE else False
+        return True if self.is_one_ps_env and self.ps_list[0].type == inventory.LOCAL_STORAGE_TYPE else False
 
     @property
     def is_one_nfs_env(self):
-        return True if len(self.ps_list) == 1 and self.ps_list[0].type == inventory.NFS_PRIMARY_STORAGE_TYPE else False
+        return True if self.is_one_ps_env and self.ps_list[0].type == inventory.NFS_PRIMARY_STORAGE_TYPE else False
 
     @property
     def is_multi_ps_env(self):
@@ -747,5 +752,60 @@ class PSEnvChecker(object):
             return self.get_random_local(), self.get_random_nfs()
         else:
             return random.sample(self.ps_list, 2)
+
+
+def skip_if_only_one_ps(test_method):
+    @wraps(test_method)
+    def wrapper():
+        if PSEnvChecker().is_one_ps_env:
+            test_util.test_skip("Skip test if only one PrimaryStorage")
+        return test_method()
+    return wrapper
+
+
+def skip_if_not_local_nfs(test_method):
+    @wraps(test_method)
+    def wrapper():
+        if not PSEnvChecker().is_local_nfs_env:
+            test_util.test_skip("Skip test if not local nfs PrimaryStorage Env")
+        return test_method()
+    return wrapper
+
+
+def skip_if_local_nfs(test_method):
+    @wraps(test_method)
+    def wrapper():
+        if PSEnvChecker().is_local_nfs_env:
+            test_util.test_skip("Skip test if not local nfs PrimaryStorage Env")
+        return test_method()
+    return wrapper
+
+
+def skip_if_multi_nfs(test_method):
+    @wraps(test_method)
+    def wrapper():
+        if PSEnvChecker().is_multi_nfs_env:
+            test_util.test_skip("Skip test if multi nfs PrimaryStorage Env")
+        return test_method()
+    return wrapper
+
+
+def skip_if_have_local(test_method):
+    @wraps(test_method)
+    def wrapper():
+        if PSEnvChecker().have_local:
+            test_util.test_skip("Skip test if have local PrimaryStorage")
+        return test_method()
+    return wrapper
+
+
+def skip_if_have_nfs(test_method):
+    @wraps(test_method)
+    def wrapper():
+        if PSEnvChecker().have_nfs:
+            test_util.test_skip("Skip test if have nfs PrimaryStorage")
+        return test_method()
+    return wrapper
+
 
 

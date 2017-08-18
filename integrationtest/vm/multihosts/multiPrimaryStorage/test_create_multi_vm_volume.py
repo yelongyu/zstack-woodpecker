@@ -20,6 +20,7 @@ VM_COUNT = 5
 DATA_VOLUME_NUMBER = 10
 
 
+@test_stub.skip_if_local_nfs
 def test():
     test_util.test_dsc("Create {} vm  each with {} data volume in the first primaryStorage".format(VM_COUNT, DATA_VOLUME_NUMBER))
     ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)

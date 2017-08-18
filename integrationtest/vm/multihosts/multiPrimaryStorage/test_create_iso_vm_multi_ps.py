@@ -17,10 +17,9 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
 
+@test_stub.skip_if_only_one_ps
 def test():
     ps_env = test_stub.PSEnvChecker()
-    if not ps_env.is_multi_ps_env:
-        test_util.test_skip("Skip test if not multi Primary Storage Env")
 
     ps, another = ps_env.get_two_ps()
     disk_offering_uuids = [random.choice(res_ops.get_resource(res_ops.DISK_OFFERING)).uuid]

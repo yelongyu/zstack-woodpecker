@@ -23,10 +23,10 @@ VOLUME_NUMBER = 10
 maintenance_ps_list = []
 
 
+@test_stub.skip_if_local_nfs
+@test_stub.skip_if_only_one_ps
 def test():
     ps_env = test_stub.PSEnvChecker()
-    if not ps_env.is_multi_ps_env or ps_env.is_local_nfs_env:
-        test_util.test_skip("Skip test if only one primary storage or local-nfs env")
 
     ps1, ps2 = ps_env.get_two_ps()
 

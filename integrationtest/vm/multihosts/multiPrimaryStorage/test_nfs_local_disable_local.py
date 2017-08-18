@@ -18,10 +18,10 @@ VM_COUNT = 1
 VOLUME_NUMBER = 10
 disabled_ps_list = []
 
+
+@test_stub.skip_if_not_local_nfs
 def test():
     ps_env = test_stub.PSEnvChecker()
-    if not ps_env.is_local_nfs_env:
-        test_util.test_skip("Skip test if not local-nfs multi ps environment")
 
     local_ps = ps_env.get_random_local()
     nfs_ps = ps_env.get_random_nfs()
