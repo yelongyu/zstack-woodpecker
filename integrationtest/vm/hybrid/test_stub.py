@@ -90,10 +90,10 @@ def create_ecs_instance(datacenter_type, datacenter_uuid, region_id, allocate_pu
             image = i
     if not allocate_public_ip:
         ecs_inv = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, vswitch_inv.uuid, ecs_bandwidth=1, ecs_security_group_uuid=sg_inv.uuid, 
-                                                             instance_type=ecs_instance_type[0].typeId, name='zstack-test-ecs-instance')
+                                                             instance_type=ecs_instance_type[0].typeId, name='zstack-test-ecs-instance', ecs_console_password='A1B2c3')
     else:
         ecs_inv = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, vswitch_inv.uuid, ecs_bandwidth=1, ecs_security_group_uuid=sg_inv.uuid, 
-                                                             instance_type=ecs_instance_type[0].typeId, allocate_public_ip='true', name='zstack-test-ecs-instance')
+                                                             instance_type=ecs_instance_type[0].typeId, allocate_public_ip='true', name='zstack-test-ecs-instance', ecs_console_password='a1B2c3')
     time.sleep(10)
     return ecs_inv
 

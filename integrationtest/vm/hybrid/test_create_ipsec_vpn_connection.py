@@ -145,7 +145,7 @@ def test():
         user_vpn_gw_inv = hyb_ops.create_vpc_user_vpn_gateway(datacenter_inv.uuid, gw_ip=public_ip_list[0], gw_name="zstack-test-user-vpn-gateway")
     # Create Ecs
     ecs_inv = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, vswitch_inv.uuid, ecs_bandwidth=1, ecs_security_group_uuid=sg_inv.uuid, 
-                                                             instance_type=ecs_instance_type[0].typeId, name='zstack-test-ecs-instance')
+                                                             instance_type=ecs_instance_type[0].typeId, name='zstack-test-ecs-instance', ecs_console_password='A1b2C3')
     time.sleep(10)
     # Get Ecs Public IP
     hyb_ops.sync_hybrid_eip_from_remote(datacenter_inv.uuid)
