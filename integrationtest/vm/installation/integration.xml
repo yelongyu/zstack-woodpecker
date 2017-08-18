@@ -3,6 +3,7 @@
         <case timeout="2400" >test_inst_console_proxy.py</case>
         <case timeout="3000" >test_multi_management_node_on_cos7.py</case>
         <case timeout="3000" >test_multi_management_node_on_latest_cos7.py</case>
+        <case timeout="3000" >test_install_management_node_on_cos7.py</case>
     <!--<case timeout="3600" >upgrade/test_zs_upgd_1.3_latest_repo_on_cos7.py</case>
         <case timeout="3000" >upgrade/test_zs_upgd_1.4_latest_repo_on_cos7.py</case>
 	<case timeout="3000" >upgrade/test_zs_upgd_1.5_latest_repo_on_cos7.py</case>
