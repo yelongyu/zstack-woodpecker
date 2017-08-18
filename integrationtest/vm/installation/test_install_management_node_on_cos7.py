@@ -96,22 +96,22 @@ def test():
     cmd = '%s "zstack-ctl upgrade_management_node --host=%s"' % (ssh_cmd1, vm2_ip) 
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
 
-    test_util.test_dsc('After upgrade, check installation on vm1')
-    test_stub.check_installation(vm1_ip, tmp_file)
+    #test_util.test_dsc('After upgrade, check installation on vm1')
+    #test_stub.check_installation(vm1_ip, tmp_file)
 
-    test_util.test_dsc('After upgrade, check installation on vm2')
-    ssh.make_ssh_no_password(vm2_ip, test_lib.lib_get_vm_username(vm2_inv), \
-            test_lib.lib_get_vm_password(vm2_inv))
-    cmd = '%s "zstack-ctl start_node"' % ssh_cmd2
+    #test_util.test_dsc('After upgrade, check installation on vm2')
+    #ssh.make_ssh_no_password(vm2_ip, test_lib.lib_get_vm_username(vm2_inv), \
+    #        test_lib.lib_get_vm_password(vm2_inv))
+    #cmd = '%s "zstack-ctl start_node"' % ssh_cmd2
 
-    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
-    test_stub.check_installation(vm2_ip, tmp_file)
+    #process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+    #test_stub.check_installation(vm2_ip, tmp_file)
 
-    os.system('rm -f %s' % tmp_file)
-    sce_ops.destroy_vm(zstack_management_ip, vm1_inv.uuid)
-    sce_ops.destroy_vm(zstack_management_ip, vm2_inv.uuid)
+    #os.system('rm -f %s' % tmp_file)
+    #sce_ops.destroy_vm(zstack_management_ip, vm1_inv.uuid)
+    #sce_ops.destroy_vm(zstack_management_ip, vm2_inv.uuid)
 
-    test_util.test_pass('ZStack install management nodes installation Test Success')
+    #test_util.test_pass('ZStack install management nodes installation Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
@@ -119,6 +119,6 @@ def error_cleanup():
     global vm2_inv
     
     os.system('rm -f %s' % tmp_file)
-    sce_ops.destroy_vm(zstack_management_ip, vm1_inv.uuid)
-    sce_ops.destroy_vm(zstack_management_ip, vm2_inv.uuid)
-    test_lib.lib_error_cleanup(test_obj_dict)
+    #sce_ops.destroy_vm(zstack_management_ip, vm1_inv.uuid)
+    #sce_ops.destroy_vm(zstack_management_ip, vm2_inv.uuid)
+    #test_lib.lib_error_cleanup(test_obj_dict)
