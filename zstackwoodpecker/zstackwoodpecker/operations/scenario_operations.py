@@ -314,7 +314,7 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
         stor_vm_netmask = os.environ.get('storNetMask')
         stor_vm_gateway = os.environ.get('storGateway')
         stor_cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (stor_vm_nic, stor_vm_ip, stor_vm_netmask, stor_vm_gateway)
-        ssh.execute(stor_cmd, stor_vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+        ssh.execute(stor_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
         
         #TODO: should make image folder configarable
         nfs_url = get_mn_ha_nfs_url(scenario_config, scenario_file, deploy_config)
