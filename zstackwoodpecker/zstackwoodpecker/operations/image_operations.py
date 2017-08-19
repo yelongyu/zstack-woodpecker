@@ -76,6 +76,34 @@ def add_root_volume_template(image_creation_option):
             image_creation_option.get_session_uuid())
     return evt.inventory
 
+def add_root_volume_template_apiid(image_creation_option, apiid):
+    '''
+    Add root volume template
+    '''
+    action = api_actions.AddImageAction()
+    action.id = apiid
+    action.name = image_creation_option.get_name()
+    action.guest_os_type = image_creation_option.get_guest_os_type()
+    action.mediaType = 'RootVolumeTemplate'
+    if image_creation_option.get_mediaType() and \
+            action.mediaType != image_creation_option.get_mediaType():
+        test_util.test_warn('image type %s was not %s' % \
+                (image_creation_option.get_mediaType(), action.mediaType))
+
+    action.backupStorageUuids = \
+            image_creation_option.get_backup_storage_uuid_list()
+    action.bits = image_creation_option.get_bits()
+    action.description = image_creation_option.get_description()
+    action.format = image_creation_option.get_format()
+    if image_creation_option.get_system_tags() != None:
+        action.systemTags = image_creation_option.get_system_tags().split(',')
+    action.url = image_creation_option.get_url()
+    action.timeout = image_creation_option.get_timeout()
+    test_util.action_logger('Add Root Volume Template from url: %s in [backup Storage:] %s' % (action.url, action.backupStorageUuids))
+    evt = account_operations.execute_action_with_session(action, \
+            image_creation_option.get_session_uuid())
+    return evt.inventory
+
 def create_root_volume_template(image_creation_option):
     '''
     Create Root Volume Template from a root volume

@@ -95,6 +95,10 @@ class ZstackTestImage(image_header.TestImage):
         self.set_image(img_ops.add_root_volume_template(self.get_creation_option()))
         return self
 
+    def add_root_volume_template_apiid(self, apiid):
+        self.set_image(img_ops.add_root_volume_template_apiid(self.get_creation_option(), apiid))
+        return self
+
     def set_original_checking_points(self, original_checking_points):
         '''
         If the tmpt is created from a snapshot, it should inherit snapshot's 
