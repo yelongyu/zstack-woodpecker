@@ -23,4 +23,6 @@ ecs_vpcId = EcsVpcId
 vpn_gatewayId = VpnGatewayId
 vpc_vrId = VpcVrId
 
+prepaid_ecsInstanceId = id-ecs-instance-prepaid
+
 l2PublicVlan = 3

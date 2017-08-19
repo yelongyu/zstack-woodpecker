@@ -612,9 +612,10 @@ def del_ecs_instance(uuid, session_uuid=None):
     test_util.test_logger('[ecs instance:] %s is deleted.' % uuid)
     return evt
 
-def sync_ecs_instance_from_remote(datacenter_uuid, session_uuid=None):
+def sync_ecs_instance_from_remote(datacenter_uuid, only_zstack=None, session_uuid=None):
     action = api_actions.SyncEcsInstanceFromRemoteAction()
     action.dataCenterUuid = datacenter_uuid
+    action.onlyZstack = only_zstack
     test_util.action_logger('Sync [Ecs Instance From Remote:] %s' % (datacenter_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt
