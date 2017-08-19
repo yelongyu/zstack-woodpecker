@@ -4682,6 +4682,10 @@ def lib_create_volume_snapshot_from_volume(target_volume_snapshots, robot_test_o
             possible_l3 = res_ops.query_resource(res_ops.L3_NETWORK, \
                     cond)[0].uuid
             util_vm_opt.set_l3_uuids([possible_l3])
+            #need to set host_uuid == target_volume host uuid if local ps,
+            #  as there will attach testing for snapshot creation
+            if lib_get_primary_storage_by_uuid(ps_uuid).type == inventory.LOCAL_STORAGE_TYPE:
+                util_vm_opt.set_host_uuid(lib_get_local_storage_volume_host(target_volume_inv.uuid).uuid)
 
             vol_utiltiy_vm  = lib_create_vm(util_vm_opt)
             tag_ops.delete_tag(tag.uuid)
