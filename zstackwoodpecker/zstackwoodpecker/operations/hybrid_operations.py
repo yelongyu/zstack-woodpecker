@@ -620,6 +620,16 @@ def sync_ecs_instance_from_remote(datacenter_uuid, only_zstack=None, session_uui
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt
 
+def update_ecs_instance(uuid, name=None, description=None, password=None, session_uuid=None):
+    action = api_actions.UpdateEcsInstanceAction()
+    action.uuid = uuid
+    action.name = name
+    action.description = description
+    action.password = password
+    test_util.action_logger('Update [Ecs Instance: %s]' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    return evt
+
 def stop_ecs_instance(uuid, session_uuid=None):
     action = api_actions.StopEcsInstanceAction()
     action.uuid = uuid

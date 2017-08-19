@@ -46,19 +46,26 @@ def test():
     for r in regions:
         if 'shanghai' in r:
             region_id = r
-#     region_id = datacenter_list[0].regionId
-    # Clear datacenter remained in local
     datacenter_local = hyb_ops.query_datacenter_local()
     if datacenter_local:
         for d in datacenter_local:
             hyb_ops.del_datacenter_in_local(d.uuid)
     datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
-    _ecs_inv = test_stub.create_ecs_instance(datacenter_type, datacenter_inv.uuid, region_id, allocate_public_ip=True)
-    ecs_instance_local = hyb_ops.query_ecs_instance_local()
-    ecs_inv = [e for e in ecs_instance_local if e.ecsInstanceId == _ecs_inv.ecsInstanceId][0]
+    ecs_inv = test_stub.create_ecs_instance(datacenter_type, datacenter_inv.uuid, region_id, allocate_public_ip=True)
     eip_local = hyb_ops.query_hybrid_eip_local()
     ecs_eip = [e for e in eip_local if e.allocateResourceUuid == ecs_inv.uuid][0]
-    cmd = "sshpass -p Password123 ssh -o StrictHostKeyChecking=no root@%s 'ls /'" % ecs_eip.eipAddress
+    # Update ECS password
+    hyb_ops.update_ecs_instance(ecs_inv.uuid, password='TestPassword123456')
+    time.sleep(5)
+    hyb_ops.reboot_ecs_instance(ecs_inv.uuid)
+    for _ in xrange(600):
+        hyb_ops.sync_ecs_instance_from_remote(datacenter_inv.uuid)
+        ecs = [e for e in hyb_ops.query_ecs_instance_local() if e.ecsInstanceId == ecs_inv.ecsInstanceId][0]
+        if ecs.ecsStatus.lower() == "running":
+            break
+        else:
+            time.sleep(1)
+    cmd = "sshpass -p TestPassword123456 ssh -o StrictHostKeyChecking=no root@%s 'ls /'" % ecs_eip.eipAddress
     for _ in xrange(60):
         cmd_status = commands.getstatusoutput(cmd)[0]
         if cmd_status == 0:
@@ -66,7 +73,22 @@ def test():
         else:
             time.sleep(3)
     assert cmd_status == 0, "Login Ecs via public ip failed!"
-    test_util.test_pass('Create Ecs Instance with Public IP Test Success')
+    ecs_name = 'test-ecs-instance-%s' % date_s
+    # Update ECS name
+    hyb_ops.update_ecs_instance(ecs_inv.uuid, name=ecs_name)
+    time.sleep(5)
+    hyb_ops.sync_ecs_instance_from_remote(datacenter_inv.uuid)
+    ecs_local = hyb_ops.query_ecs_instance_local()
+    ecs_2 = [e for e in ecs_local if e.ecsInstanceId == ecs_inv.ecsInstanceId][0]
+    assert ecs_2.name == ecs_name
+    # Update ECS description
+    hyb_ops.update_ecs_instance(ecs_inv.uuid, description='test-ecs-instance')
+    time.sleep(5)
+    hyb_ops.sync_ecs_instance_from_remote(datacenter_inv.uuid)
+    ecs_local = hyb_ops.query_ecs_instance_local()
+    ecs_3 = [e for e in ecs_local if e.ecsInstanceId == ecs_inv.ecsInstanceId][0]
+    assert ecs_3.description == 'test-ecs-instance'
+    test_util.test_pass('Update ECS Instance Test Success')
 
 def env_recover():
     global ecs_inv
