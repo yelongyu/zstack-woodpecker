@@ -304,6 +304,16 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
     mn_ha_storage_type = get_mn_ha_storage_type(scenario_config, scenario_file, deploy_config)
     if mn_ha_storage_type == "nfs":
+        import copy
+        vm_net_uuids_lst = copy.copy(vm_inv.l3NetworkUuids)
+        stor_network_uuid = vm_net_uuids_lst.remove(vm_inv.defaultL3NetworkUuid)[0]
+        stor_vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, stor_network_uuid).ip
+        stor_vm_nic = os.environ.get('storNic')
+        stor_vm_netmask = os.environ.get('storNetMask')
+        stor_vm_gateway = os.environ.get('storGateway')
+        stor_cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (stor_vm_nic, stor_vm_ip, stor_vm_netmask, stor_vm_gateway)
+        ssh.execute(stor_cmd, stor_vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+        
         #TODO: should make image folder configarable
         nfs_url = get_mn_ha_nfs_url(scenario_config, scenario_file, deploy_config)
         nfsIP = nfs_url.split(':')[0]
