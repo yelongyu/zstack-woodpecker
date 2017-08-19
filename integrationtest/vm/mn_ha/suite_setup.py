@@ -57,7 +57,7 @@ def test():
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd2)
 
     config_json = os.environ.get('configJson')
-    if "scenario-config-storage-separate-nfs.xml" in test_lib.scenario_config:
+    if "scenario-config-storage-separate-nfs.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE'):
         config_json = os.environ.get('configJson_2nets')
 
     ha_deploy_tool = os.environ.get('zstackHaInstaller')
