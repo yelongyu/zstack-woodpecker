@@ -21,17 +21,17 @@ class ZstackTestImage(image_header.TestImage):
         self.delete_policy = test_lib.lib_get_delete_policy('image')
         self.delete_delay_time = test_lib.lib_get_expunge_time('image')
 
-    def create(self):
+    def create(self, apiid=None):
         '''
         Create image template from Root Volume using CreateRootVolumeTemplateFromRootVolume
         '''
         if test_lib.lib_check_version_is_mevoco_1_8():
             if test_lib.lib_check_version_is_mevoco():
-                self.image = img_ops.commit_volume_as_image(self.image_creation_option)
+                self.image = img_ops.commit_volume_as_image_apiid(self.image_creation_option, apiid)
             else:
-                self.image = img_ops.create_root_volume_template(self.image_creation_option)
+                self.image = img_ops.create_root_volume_template_apiid(self.image_creation_option, apiid)
         else:
-            self.image = img_ops.create_root_volume_template(self.image_creation_option)
+            self.image = img_ops.create_root_volume_template_apiid(self.image_creation_option, apiid)
         super(ZstackTestImage, self).create()
 
     def delete(self):
