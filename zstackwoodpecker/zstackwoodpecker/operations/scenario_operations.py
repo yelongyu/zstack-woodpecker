@@ -384,6 +384,18 @@ def get_scenario_config_vm(vm_name, scenario_config):
             if vm.name_ == vm_name:
                 return vm
 
+def dump_scenario_file_ips(scenario_file):
+    ips = []
+    with open(scenario_file, 'r') as fd:
+        xmlstr = fd.read()
+        fd.close()
+        scenariofile = xmlobject.loads(xmlstr)
+        for vm in xmlobject.safe_list(scenariofile.vms.vm):
+            for ip in xmlobject.safe_list(vm.ips.ip):
+                ips.append(ip.ip_)
+    return ips
+
+
 def get_scenario_file_vm(vm_name, scenario_file):
     with open(scenario_file, 'r') as fd:
         xmlstr = fd.read()

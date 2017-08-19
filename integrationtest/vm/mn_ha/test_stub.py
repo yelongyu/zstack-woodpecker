@@ -273,6 +273,13 @@ def update_mn_vm_config(mn_vm_host, option, content, scenarioConfig, new_config 
     test_lib.lib_execute_ssh_cmd(mn_vm_host.ip_, host_config.imageUsername_, host_config.imagePassword_, cmd1)
     test_lib.lib_execute_ssh_cmd(mn_vm_host.ip_, host_config.imageUsername_, host_config.imagePassword_, cmd2)
 
+def adapt_pick_ip_not_used_in_scenario_file(scenarioFile, prefix="10.0.0.", pick_range=range(2,255,1)):
+    ips = sce_ops.dump_scenario_file_ips(scenarioFile)
+    for var in pick_range:
+        combined_ip = prefix + str(var)
+        if combined_ip not in ips:
+            return combined_ip
+
 def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
     if len(mn_host_list) < 1:
@@ -292,6 +299,15 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
     mn_ha_storage_type = sce_ops.get_mn_ha_storage_type(scenarioConfig, scenarioFile, deploy_config)
     if mn_ha_storage_type == 'ceph':
         os.system('sed -i s/FileConf/CephConf/g %s' % (config_json))
+
+    if mn_ha_storage_type == 'nfs':
+        #stor_vm_ip = "10.0.0.2"
+        stor_vm_ip = adapt_pick_ip_not_used_in_scenario_file(scenarioFile)
+        stor_vm_netmask = os.environ.get('storNetMask')
+        stor_vm_gateway = os.environ.get('storGateway')
+        os.system('sed -i s/stor_ip1/%s/g %s' % (stor_vm_ip,config_json))
+        os.system('sed -i s/stor_netmask1/%s/g %s' % (stor_vm_netmask,config_json))
+        os.system('sed -i s/stor_gateway1/%s/g %s' % (stor_vm_gateway,config_json))
 
 def prepare_etc_hosts(scenarioConfig, scenarioFile, deploy_config, config_json):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)

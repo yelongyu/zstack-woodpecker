@@ -57,6 +57,9 @@ def test():
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd2)
 
     config_json = os.environ.get('configJson')
+    if "scenario-config-storage-separate-nfs.xml" in test_lib.scenario_config:
+        config_json = os.environ.get('configJson_2nets')
+
     ha_deploy_tool = os.environ.get('zstackHaInstaller')
     mn_img = os.environ.get('mnImage')
     test_stub.deploy_ha_env(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config,config_json, ha_deploy_tool, mn_img)
