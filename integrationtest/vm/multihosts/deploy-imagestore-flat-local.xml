@@ -152,8 +152,8 @@
                 username="$hostUsername2" password="$hostPassword2" port="$hostPort2"/>
               <host name="$hostName3" description="Test3" managementIp="$hostIp3"
                 username="$hostUsername3" password="$hostPassword3" />
-              <host name="$hostName4" description="Test4" managementIp="$hostIp4"
-                username="$hostUsername4" password="$hostPassword4" port="$hostPort4"/>
+              <host name="$hostName5" description="Test5" managementIp="$hostIp5"
+                username="$hostUsername5" password="$hostPassword5" port="$hostPort5"/>
             </hosts>
             <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
             <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
