@@ -15,16 +15,19 @@ import apibinding.inventory as inventory
 import threading
 import os
 import time
+import uuid
 _config_ = {
         'timeout' : 1800,
         'noparallel' : True
         }
 
 test_obj_dict = test_state.TestStateDict()
-threads_num = 5
+threads_num = 1
 images = [None] * threads_num
+image_jobs = [None] * threads_num
 threads = [None] * threads_num
 checker_threads = [None] * threads_num
+checker_results = [None] * threads_num
 
 def add_image(bs_uuid, index):
     global images
@@ -39,7 +42,8 @@ def add_image(bs_uuid, index):
     images[index] = zstack_image_header.ZstackTestImage()
     images[index].set_creation_option(image_option)
 
-    images[index].add_root_volume_template()
+    image_jobs[index] = str(uuid.uuid4()).replace('-', '')
+    images[index].add_root_volume_template_apiid(image_jobs[index])
     test_obj_dict.add_image(images[index])
 
 def check_add_image_progress(index):
@@ -56,23 +60,23 @@ def check_add_image_progress(index):
         test_util.test_fail("image is not in creating after 10 seconds")
 
     for i in range(0, 100):
-        progress = res_ops.get_task_progress(image[0].uuid)
-        if progress.progress != None:
+        progress = res_ops.get_task_progress(image_jobs[index]).inventories[0]
+        if progress.content != None:
             break
         else:
             test_util.test_logger('task progress still not ready')
         time.sleep(0.1)
 
-    if int(progress.progress) < 0 or int(progress.progress) > 100:
-        test_util.test_fail("Progress of task should be between 0 and 100, while it actually is %s" % (progress.progress))
+    if int(progress.content) < 0 or int(progress.content) > 100:
+        test_util.test_fail("Progress of task should be between 0 and 100, while it actually is %s" % (progress.content))
 
     for i in range(0, 3600):
         last_progress = progress
-        progress = res_ops.get_task_progress(image[0].uuid)
-	if progress.progress == None:
+        progress = res_ops.get_task_progress(image_jobs[index]).inventories[0]
+	if progress.content == None:
             break
-        if int(progress.progress) < int(last_progress.progress):
-            test_util.test_fail("Progress (%s) of task is smaller than last time (%s)" % (progress.progress, last_progress.progress))
+        if int(progress.content) < int(last_progress.content):
+            test_util.test_fail("Progress (%s) of task is smaller than last time (%s)" % (progress.content, last_progress.content))
 
     image_cond = res_ops.gen_query_conditions("uuid", '=', image[0].uuid)
     image_query2 = res_ops.query_resource_fields(res_ops.IMAGE, image_cond, \
@@ -80,6 +84,7 @@ def check_add_image_progress(index):
     time.sleep(1)
     if image_query2[0].status != "Ready":
         test_util.test_fail("Image should be ready when no progress anymore")
+    checker_results[index] = 'pass'
 
 def test():
     global threads
@@ -106,6 +111,9 @@ def test():
         images[i].check()
         images[i].delete()
 
+    for i in range(0, threads_num):
+        if checker_results[i] == None:
+            test_util.test_fail("Image checker thread %s fail" % (i))
     test_util.test_pass('Add image Progress Test Success')
 
 #Will be called only if exception happens in test().
