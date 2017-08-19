@@ -42,8 +42,9 @@ def test():
     global vm1_inv
     global vm2_inv
 
-    iso_path = os.environ.get('iso_path')
-    upgrade_script_path = os.environ.get('upgradeScript')
+    zstack_latest_version = os.environ.get('zstackLatestVersion')
+    zstack_latest_path = os.environ.get('zstackLatestInstaller')
+
     test_util.test_dsc('Create 2 CentOS7 vm to test install management node installation')
 
     conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_20_mn'))
@@ -59,6 +60,7 @@ def test():
     vm2_ip = vm2_inv.vmNics[0].ip
 
     time.sleep(60)
+    test_stub.make_ssh_no_password(vm1_ip, tmp_file)
 
     target_file = '/root/zstack-all-in-one.tgz'
     test_stub.prepare_test_env(vm1_inv, target_file)
@@ -66,52 +68,48 @@ def test():
     ssh_cmd2 = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm2_ip
 
     test_util.test_dsc('Update MN IP and check installation on vm1')
-    cmd='%s "zstack-ctl change_ip --ip="%s'%(ssh_cmd1,vm1_ip)
-    test_stub.execute_shell_in_process(cmd, tmp_file)
-    cmd='%s "zstack-ctl start"'%ssh_cmd1
-    test_stub.execute_shell_in_process(cmd, tmp_file)
+    test_stub.update_mn_hostname(vm1_ip, tmp_file)
+    test_stub.update_mn_ip(vm1_ip, vm1_ip, tmp_file)
+    test_stub.start_mn(vm1_ip, tmp_file)
     test_stub.check_installation(vm1_ip, tmp_file)
 
-    test_util.test_dsc('Install install management node on vm2')
-    #host_list = 'root:password@%s root:password@%s' % (vm2_ip, vm3_ip)
-    ssh.make_ssh_no_password(vm2_ip, test_lib.lib_get_vm_username(vm2_inv), \
-            test_lib.lib_get_vm_password(vm2_inv))
-    cmd = '%s "zstack-ctl install_management_node --host=%s"' % (ssh_cmd1, vm2_ip)
+    test_util.test_dsc('Upgrade the latest master zstack')
+    test_stub.upgrade_zstack(vm1_ip, zstack_latest_path, tmp_file)
+    test_stub.check_zstack_version(vm1_ip, tmp_file, zstack_latest_version)
+    test_stub.start_mn(vm1_ip, tmp_file)
+    test_stub.check_installation(vm1_ip, tmp_file)
+
+    test_util.test_dsc('only Install one management node on vm2')
+    host_list = 'root:password@%s ' % vm2_ip
+    cmd = '%s "zstack-ctl install_management_node --host=%s"' % (ssh_cmd1, host_list)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
 
     test_util.test_dsc('Check installation on vm1')
     test_stub.check_installation(vm1_ip, tmp_file)
 
     test_util.test_dsc('Check installation on vm2')
-    ssh.make_ssh_no_password(vm2_ip, test_lib.lib_get_vm_username(vm2_inv), \
-            test_lib.lib_get_vm_password(vm2_inv))
+    test_stub.make_ssh_no_password(vm2_ip, tmp_file)
     cmd = '%s "zstack-ctl start_node"' % ssh_cmd2
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     test_stub.check_installation(vm2_ip, tmp_file)
 
-    test_util.test_dsc('Update master iso')
-    test_stub.update_iso(vm1_ip, tmp_file, iso_path, upgrade_script_path)
-
-    test_util.test_dsc('Upgrade install management node on vm2')
-    cmd = '%s "zstack-ctl upgrade_management_node --host=%s"' % (ssh_cmd1, vm2_ip) 
-    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
+    #test_util.test_dsc('Upgrade install management node on vm2')
+    #cmd = '%s "zstack-ctl upgrade_management_node --host=%s"' % (ssh_cmd1, host_list) 
+    #process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
 
     #test_util.test_dsc('After upgrade, check installation on vm1')
     #test_stub.check_installation(vm1_ip, tmp_file)
 
     #test_util.test_dsc('After upgrade, check installation on vm2')
-    #ssh.make_ssh_no_password(vm2_ip, test_lib.lib_get_vm_username(vm2_inv), \
-    #        test_lib.lib_get_vm_password(vm2_inv))
     #cmd = '%s "zstack-ctl start_node"' % ssh_cmd2
-
     #process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
     #test_stub.check_installation(vm2_ip, tmp_file)
 
-    #os.system('rm -f %s' % tmp_file)
-    #sce_ops.destroy_vm(zstack_management_ip, vm1_inv.uuid)
-    #sce_ops.destroy_vm(zstack_management_ip, vm2_inv.uuid)
+    os.system('rm -f %s' % tmp_file)
+    sce_ops.destroy_vm(zstack_management_ip, vm1_inv.uuid)
+    sce_ops.destroy_vm(zstack_management_ip, vm2_inv.uuid)
 
-    #test_util.test_pass('ZStack install management nodes installation Test Success')
+    test_util.test_pass('ZStack install management nodes installation Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
@@ -119,6 +117,6 @@ def error_cleanup():
     global vm2_inv
     
     os.system('rm -f %s' % tmp_file)
-    #sce_ops.destroy_vm(zstack_management_ip, vm1_inv.uuid)
-    #sce_ops.destroy_vm(zstack_management_ip, vm2_inv.uuid)
-    #test_lib.lib_error_cleanup(test_obj_dict)
+    sce_ops.destroy_vm(zstack_management_ip, vm1_inv.uuid)
+    sce_ops.destroy_vm(zstack_management_ip, vm2_inv.uuid)
+    test_lib.lib_error_cleanup(test_obj_dict)
