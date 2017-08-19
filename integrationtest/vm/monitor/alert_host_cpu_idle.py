@@ -1,6 +1,6 @@
 '''
 
-Test about monitor trigger on host memory free ratio in one minute
+Test about monitor trigger on host cpu use ratio in one minute
 
 @author: Songtao,Haochen
 
@@ -9,6 +9,7 @@ Test about monitor trigger on host memory free ratio in one minute
 import os
 import test_stub
 import random
+import time
 import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.resource_operations as res_ops
@@ -19,7 +20,7 @@ def test():
     global media
     global trigger_action
 
-    test_item = "host.mem.util"
+    test_item = "host.cpu.util"
     resource_type="HostVO"
     host_monitor_item = test_stub.get_monitor_item(resource_type)
     if test_item not in host_monitor_item:
@@ -28,7 +29,7 @@ def test():
     hosts = res_ops.get_resource(res_ops.HOST)
     host = hosts[0]
     duration = 60
-    expression = "host.mem.util{type=\"free\"} < 0.11"
+    expression = "host.cpu.util{cpu=2,type=\"idle\"}<40.3"
     monitor_trigger = mon_ops.create_monitor_trigger(host.uuid, duration, expression)
 
     send_email = test_stub.create_email_media()
@@ -41,7 +42,7 @@ def test():
 
     host.password = os.environ.get('hostPassword')
     ssh_cmd = test_stub.ssh_cmd_line(host.managementIp, host.username, host.password, port=int(host.sshPort))
-    test_stub.run_mem_load(ssh_cmd,80)
+    test_stub.run_cpu_load(ssh_cmd, 2, 1)
 
     status_problem, status_ok = test_stub.query_trigger_in_loop(trigger,50)
     test_util.action_logger('Trigger old status: %s triggered. Trigger new status: %s recovered' % (status_problem, status_ok ))
