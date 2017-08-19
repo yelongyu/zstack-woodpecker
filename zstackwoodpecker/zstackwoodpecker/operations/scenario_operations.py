@@ -304,8 +304,9 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
     mn_ha_storage_type = get_mn_ha_storage_type(scenario_config, scenario_file, deploy_config)
     if mn_ha_storage_type == "nfs":
-        import copy
-        vm_net_uuids_lst = copy.copy(vm_inv.l3NetworkUuids)
+        vm_net_uuids_lst = []
+        for vmNic in vm_inv.vmNics:
+            vm_net_uuids_lst.append(vmNic.l3NetworkUuid)
         stor_network_uuid = vm_net_uuids_lst.remove(vm_inv.defaultL3NetworkUuid)[0]
         stor_vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, stor_network_uuid).ip
         stor_vm_nic = os.environ.get('storNic')
