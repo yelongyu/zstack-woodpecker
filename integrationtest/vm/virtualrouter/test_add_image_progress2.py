@@ -22,7 +22,7 @@ _config_ = {
         }
 
 test_obj_dict = test_state.TestStateDict()
-threads_num = 1
+threads_num = 5
 images = [None] * threads_num
 image_jobs = [None] * threads_num
 threads = [None] * threads_num
