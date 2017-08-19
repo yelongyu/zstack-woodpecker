@@ -1,4 +1,4 @@
-import ../deploy.tmptdminUser = root
+import ../deploy.tmpt
 
 DBAdminUser = root
 DBAdminPassword = 
