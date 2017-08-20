@@ -87,11 +87,22 @@ def test():
     test_util.test_dsc('Check installation on vm1')
     test_stub.check_installation(vm1_ip, tmp_file)
 
+    test_util.test_dsc('Check installation on vm2 vm1')
+    test_stub.make_ssh_no_password(vm2_ip, tmp_file)
+    test_stub.start_node(vm1_ip, tmp_file)
+    test_stub.check_installation(vm1_ip, tmp_file)
+
+    test_util.test_dsc('Check installation on vm1')
+    test_stub.make_ssh_no_password(vm2_ip, tmp_file)
+    test_stub.start_node(vm1_ip, tmp_file)
+    test_stub.stop_node(vm2_ip, tmp_file)
+    test_stub.check_installation(vm1_ip, tmp_file)
+
     test_util.test_dsc('Check installation on vm2')
     test_stub.make_ssh_no_password(vm2_ip, tmp_file)
-    cmd = '%s "zstack-ctl start_node"' % ssh_cmd2
-    process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
-    test_stub.check_installation(vm2_ip, tmp_file)
+    test_stub.stop_node(vm1_ip, tmp_file)
+    test_stub.start_node(vm2_ip, tmp_file)
+    test_stub.check_installation(vm1_ip, tmp_file)
 
     #test_util.test_dsc('Upgrade install management node on vm2')
     #cmd = '%s "zstack-ctl upgrade_management_node --host=%s"' % (ssh_cmd1, host_list) 
