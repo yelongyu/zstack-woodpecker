@@ -196,9 +196,21 @@ def start_mn(vm_ip, tmp_file):
     process_result = execute_shell_in_process(cmd, tmp_file)
     time.sleep(40)
 
+def start_node(vm_ip, tmp_file):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd = '%s "zstack-ctl start_node"' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
+    time.sleep(40)
+
 def stop_mn(vm_ip, tmp_file):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     cmd = '%s "zstack-ctl stop"' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
+    time.sleep(40)
+
+def stop_node(vm_ip, tmp_file):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd = '%s "zstack-ctl stop_node"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
     time.sleep(40)
 
@@ -733,3 +745,5 @@ def check_zstack_or_mevoco(vm_ip, tmp_file, zom):
     test_util.test_dsc("current version: %s" % version)
     if version != zom:
         test_util.test_fail('try to install %s, but current version is %s' % (zom, version))
+
+
