@@ -1,0 +1,9 @@
+import ../scenario.tmpt
+import ./deploy-ceph-ps.tmpt
+vmName1 = test_vm0
+vmName2 = test_vm1
+vmName3 = test_vm2
+vmName4 = test_vm3
+vmInstranceOfferingUuid2 = 234567
+imageUuid2 = 234567
+vmL3Uuid2 = 234567
