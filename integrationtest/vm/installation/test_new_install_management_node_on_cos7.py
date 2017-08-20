@@ -97,7 +97,17 @@ def test():
     test_stub.make_ssh_no_password(vm2_ip, tmp_file)
     cmd = '%s "zstack-ctl start_node"' % ssh_cmd2
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
-    test_stub.check_installation(vm2_ip, tmp_file)
+    test_stub.check_installation(vm1_ip, tmp_file)
+
+    test_util.test_dsc('check installation stop_node one ')
+    test_stub.stop_node(vm1_ip, tmp_file)
+    test_stub.start_node(vm2_ip, tmp_file)
+    test_stub.check_installation(vm1_ip, tmp_file)
+
+    test_util.test_dsc('check installation stop_node the second one ')
+    test_stub.start_node(vm1_ip, tmp_file)
+    test_stub.stop_node(vm2_ip, tmp_file)
+    test_stub.check_installation(vm1_ip, tmp_file)
 
     os.system('rm -f %s' % tmp_file)
     sce_ops.destroy_vm(zstack_management_ip, vm1_inv.uuid)
