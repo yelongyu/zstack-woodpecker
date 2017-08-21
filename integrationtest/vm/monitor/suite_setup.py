@@ -26,13 +26,13 @@ def test():
 
     if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
-    os.system("bash %s/tools/prepare.sh %s/../aliyun.repo" % (os.environ.get('woodpecker_root_path'),os.environ.get('woodpecker_root_path')))
     deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
     delete_policy = test_lib.lib_set_delete_policy('vm', 'Direct')
     delete_policy = test_lib.lib_set_delete_policy('volume', 'Direct')
     delete_policy = test_lib.lib_set_delete_policy('image', 'Direct')
     if test_lib.lib_get_ha_selffencer_maxattempts() != None:
-	test_lib.lib_set_ha_selffencer_maxattempts('60')
-	test_lib.lib_set_ha_selffencer_storagechecker_timeout('60')
+	    test_lib.lib_set_ha_selffencer_maxattempts('60')
+	    test_lib.lib_set_ha_selffencer_storagechecker_timeout('60')
     test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
+    os.system("bash %s/tools/prepare.sh %s/../aliyun.repo" % (os.environ.get('woodpecker_root_path'),os.environ.get('woodpecker_root_path')))
     test_util.test_pass('Suite Setup Success')
