@@ -44,8 +44,7 @@ def test():
     if migration_pid == 0:
         test_stub.migrate_vm_to_random_host(vm)
         sys.exit(0)
-    for _ in xrange(60):
-        time.sleep(1)
+    for _ in xrange(300):
         if not test_lib.lib_check_directly_ping(vip.get_vip().ip):
             test_util.test_fail('expected to be able to ping vip while it fail')
     vm.destroy()
