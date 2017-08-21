@@ -29,7 +29,7 @@ def test():
     hosts = res_ops.get_resource(res_ops.HOST)
     host = hosts[0]
     duration = 300
-    expression = "host.cpu.util{cpu=2,type=\"used\"}>90.7"
+    expression = "host.cpu.util{cpu=2,type=\"used\"}>85.3"
     monitor_trigger = mon_ops.create_monitor_trigger(host.uuid, duration, expression)
 
     send_email = test_stub.create_email_media()
