@@ -59,8 +59,12 @@ def check_add_image_progress(index):
     if len(image) <= 0:
         test_util.test_fail("image is not in creating after 10 seconds")
 
-    for i in range(0, 100):
-        progress = res_ops.get_task_progress(image_jobs[index]).inventories[0]
+    for i in range(0, 600):
+        progresses = res_ops.get_progress(image_jobs[index])
+        if len(progresses) <= 0:
+            time.sleep(0.1)
+            continue
+        progress = progresses[0]
         if progress.content != None:
             break
         else:
@@ -72,9 +76,13 @@ def check_add_image_progress(index):
 
     for i in range(0, 3600):
         last_progress = progress
-        progress = res_ops.get_task_progress(image_jobs[index]).inventories[0]
+        progresses = res_ops.get_progress(image_jobs[index])
+        if len(progresses) <= 0:
+            break
+        progress = progresses[0]
 	if progress.content == None:
             break
+
         if int(progress.content) < int(last_progress.content):
             test_util.test_fail("Progress (%s) of task is smaller than last time (%s)" % (progress.content, last_progress.content))
 

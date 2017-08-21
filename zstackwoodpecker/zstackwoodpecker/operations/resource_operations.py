@@ -508,6 +508,17 @@ def get_task_progress(apiId, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
+def get_progress(apiId, session_uuid = None):
+    action = api_actions.GetTaskProgressAction()
+    action.apiId = apiId
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    inventories = []
+    for ei in evt.inventories:
+        if ei.type == 'Progress':
+            inventories.append(ei)
+    return inventories
+
+
 def enable_change_vm_password(is_enable, resourceUuid, resourceType, session_uuid = None):
     action = api_actions.EnableChangeVmPasswordAction()
     action.enable = is_enable
