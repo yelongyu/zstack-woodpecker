@@ -180,7 +180,7 @@ def ssh_cmd_line(ip_addr, username, password, port):
 
 def yum_install_stress_tool(ssh_cmd_line):
     timeout = 330
-    cmd = '%s "yum install -y fio stress iperf"' % (ssh_cmd_line)
+    cmd = '%s "yum install -y fio stress iperf enablerepo=ali* --nogpgcheck"' % (ssh_cmd_line)
     if execute_shell_in_process(cmd, timeout) != 0:
         test_util.test_fail('fail to install stress')
 
