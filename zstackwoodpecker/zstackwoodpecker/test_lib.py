@@ -2237,6 +2237,26 @@ def lib_gen_l3_nic_dict_by_nics(nic_list):
 
     return l3_nic_dict
 
+#-----------Get Baremetal resource-------------
+def lib_get_chassis_by_name(name):
+    conditions = res_ops.gen_query_conditions('name', '=', name)
+    chassis = res_ops.query_resource(res_ops.CHASSIS, conditions)
+    if chassis:
+        return chassis[0]
+
+def lib_get_hwinfo(chassis_uuid):
+    conditions = res_ops.gen_query_conditions('chassisUuid', '=', chassis_uuid)
+    hwinfo = res_ops.query_resource(res_ops.HWINFO, conditions)
+    if hwinfo:
+        return hwinfo
+
+def lib_get_chassis_by_uuid(chassis_uuid):
+    conditions = res_ops.gen_query_conditions('uuid', '=', chassis_uuid)
+    chassis = res_ops.query_resource(res_ops.CHASSIS, conditions)
+    if chassis:
+        return chassis[0]
+
+
 #-----------Get VM resource-------------
 def lib_is_vm_running(vm_inv):
     if vm_inv.state == 'Running':

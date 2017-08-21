@@ -1084,6 +1084,38 @@ class EipOption(DataOption):
     def get_vm_nic_uuid(self):
         return self.vmNicUuid
 
+class ChassisOption(DataOption):
+    def __init__(self):
+        self.ipmiAddress = None
+        self.ipmiUsername = None
+        self.ipmiPassword = None
+        self.ipmiPort = 623
+        super(ChassisOption, self).__init__()
+
+    def set_ipmi_address(self, ipmiAddress):
+        self.ipmiAddress = ipmiAddress
+
+    def get_ipmi_address(self):
+        return self.ipmiAddress
+
+    def set_ipmi_username(self, ipmiUsername):
+        self.ipmiUsername = ipmiUsername
+
+    def get_ipmi_username(self):
+        return self.ipmiUsername
+
+    def set_ipmi_password(self, ipmiPassword):
+        self.ipmiPassword = ipmiPassword
+
+    def get_ipmi_password(self):
+        return self.ipmiPassword
+
+    def set_ipmi_port(self, ipmiPort):
+        self.ipmiPort = ipmiPort
+
+    def get_ipmi_port(self):
+        return self.ipmiPort
+
 class PxeOption(DataOption):
     def __init__(self):
         self.dhcpInterface = None
@@ -1115,6 +1147,45 @@ class PxeOption(DataOption):
 
     def get_dhcp_netmask(self):
         return self.dhcpRangeNetmask
+
+class BaremetalHostCfgOption(DataOption):
+    def __init__(self):
+        self.chassisUuid = None
+        self.password = "password"
+        self.unattended = "True"
+        self.vnc = "True"
+        self.cfgItems = None
+        super(BaremetalHostCfgOption, self).__init__()
+
+    def set_chassis_uuid(self, chassis_uuid):
+        self.chassisUuid = chassis_uuid
+
+    def get_chassis_uuid(self):
+        return self.chassisUuid
+
+    def set_password(self, password):
+        self.password = password
+
+    def get_password(self):
+        return self.password
+
+    def set_unattended(self, unattended):
+        self.unattended = unattended
+
+    def get_unattended(self):
+        return self.unattended
+
+    def set_vnc(self, vnc):
+        self.vnc = vnc
+
+    def get_vnc(self):
+        return self.vnc
+
+    def set_cfgItems(self, cfgItems):
+        self.cfgItems = cfgItems
+
+    def get_cfgItems(self):
+        return self.cfgItems
  
 
 def _template_to_dict(template_file_path):

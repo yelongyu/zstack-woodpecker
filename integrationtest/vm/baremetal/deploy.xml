@@ -29,8 +29,7 @@
   <zstackInstallScript>$zstackInstallScript</zstackInstallScript>
   <zstackInstallPath>$zstackInstallPath</zstackInstallPath>
   <zstackProperties>$zstackPropertiesPath</zstackProperties>
-  <zstackManagementIp>$zstackManagementIp</zstackManagementIp>
-  <!--testAgent>$zstackTestAgentPkgPath</testAgent-->
+  <testAgent>$zstackTestAgentPkgPath</testAgent>
   <db>
     <!-- Database server IP address or hostname -->
     <server>$DBServer</server>
@@ -56,9 +55,114 @@
       username="$nodeUserName" password="$nodePassword"
       description="The default node 1. It could be same as test machine."/>
   </nodes>
+
+
   <pxe name="$pxename" dhcpInterface="$dhcpinterface" dhcpRangeBegin="$dhcpbegin"
 	  dhcpRangeEnd="$dhcpend" dhcpRangeNetmask="$dhcpnetmask" description="PXE Test">
   </pxe>
 
+  <instanceOfferings>
+    <instanceOffering name="$instanceOfferingName_m"
+      description="medium install offering" 
+      memoryCapacity="$instanceOfferingMemory_m" 
+      cpuNum="$instanceOfferingCpuNum_m" />
+  </instanceOfferings>
+
+  <backupStorages>
+    <imageStoreBackupStorage name="$imageStoreBackupStorageName"
+      description="Test" url="$imageStoreBackupStorageUrl" 
+      username="$imageStoreBackupStorageUsername" 
+      password="$imageStoreBackupStoragePassword" 
+      hostname="$imageStoreBackupStorageHostname"/>
+  </backupStorages>
+  
+  <images>
+    <image name="$imageName_s" description="Test" format="$rootImageFormat" 
+        url="$imageUrl_s" mediaType="$rootMediaType"
+	username="$imageUsername" password="$imagePassword">
+      <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
+    </image>
+  </images>
+
+  <diskOfferings>
+    <diskOffering name="$rootDiskOfferingName" description="Test"
+      diskSize="$rootDiskOfferingSize" />
+  </diskOfferings>
+
+  <zones>
+    <zone name="$zoneName" description="Test">
+      <clusters>
+        <cluster name="$clusterName" description="Test" 
+          hypervisorType="$clusterHypervisorType">
+          <hosts>
+            <host name="$hostName" description="Test"
+              managementIp="$hostIp" username="$hostUsername" 
+              password="$hostPassword" />
+          </hosts>
+          <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
+          <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
+          <l2NetworkRef>$l2VlanNetworkName2</l2NetworkRef>
+          <l2NetworkRef>$l2VlanNetworkName3</l2NetworkRef>
+        </cluster>
+      </clusters>
+
+      <l2Networks>
+        <l2NoVlanNetwork name="$l2PublicNetworkName" description="Test"
+          physicalInterface="$l2NetworkPhysicalInterface">
+          <l3Networks>
+            <l3BasicNetwork name="$l3PublicNetworkName"
+              description="Test">
+              <ipRange name="$ipRangeName" description="Test" 
+                startIp="$ipRangeStartIp" endIp="$ipRangeEndIp"
+                gateway="$ipRangeGateway"
+                netmask="$ipRangeNetmask" />
+              <networkService provider="SecurityGroup">
+                <serviceType>SecurityGroup</serviceType>
+              </networkService>
+            </l3BasicNetwork>
+          </l3Networks>
+        </l2NoVlanNetwork>
+
+        <l2VlanNetwork name="$l2VlanNetworkName2" description="Test"
+          physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan2">
+          <l3Networks>
+            <l3BasicNetwork name="$l3VlanNetworkName2"
+              description="Test">
+              <ipRange name="$vlanIpRangeName2" description="Test" 
+                startIp="$vlanIpRangeStart2" endIp="$vlanIpRangeEnd2"
+                gateway="$vlanIpRangeGateway2"
+                netmask="$vlanIpRangeNetmask2" />
+              <networkService provider="SecurityGroup">
+                <serviceType>SecurityGroup</serviceType>
+              </networkService>
+            </l3BasicNetwork>
+          </l3Networks>
+        </l2VlanNetwork>
+
+        <l2VlanNetwork name="$l2VlanNetworkName3" description="Test"
+          physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan3">
+          <l3Networks>
+            <l3BasicNetwork name="$l3VlanNetworkName3"
+              description="Test">
+              <ipRange name="$vlanIpRangeName3" description="Test" 
+                startIp="$vlanIpRangeStart3" endIp="$vlanIpRangeEnd3"
+                gateway="$vlanIpRangeGateway3"
+                netmask="$vlanIpRangeNetmask3" />
+              <networkService provider="SecurityGroup">
+                <serviceType>SecurityGroup</serviceType>
+              </networkService>
+            </l3BasicNetwork>
+          </l3Networks>
+        </l2VlanNetwork>
+      </l2Networks>
+      
+      <primaryStorages>
+        <localPrimaryStorage name="$localPrimaryStorageName"
+          description="Test" url="$localPrimaryStorageUrl" />
+      </primaryStorages>
+      
+      <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
+    </zone>
+  </zones>
 </deployerConfig>
 </config>

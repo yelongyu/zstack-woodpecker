@@ -451,4 +451,4 @@ def delete_all_volumes(thread_threshold = 1000):
 
 def delete_pxe():
     pxe = res_ops.query_resource(res_ops.PXE_SERVER, [])
-    bare_ops.delete_pxe(pxe.uuid)
+    bare_ops.delete_pxe(pxe[0].uuid)

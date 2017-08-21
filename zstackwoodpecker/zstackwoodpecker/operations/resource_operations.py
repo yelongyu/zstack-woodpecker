@@ -76,6 +76,8 @@ VCENTER_PRIMARY_STORAGE = 'VCenterPrimaryStorage'
 MONITOR_TRIGGER = 'MonitorTrigger'
 MONITOR_TRIGGER_ACTION = 'MonitorTriggerAction'
 PXE_SERVER = 'PxeServer'
+CHASSIS = 'Chassis'
+HWINFO = 'HardwareInfo'
 
 def find_item_by_uuid(inventories, uuid):
     for item in inventories:
@@ -391,6 +393,10 @@ def _gen_query_action(resource):
         action = api_actions.QueryMonitorTriggerActionAction()
     elif resource == PXE_SERVER:
         action = api_actions.QueryBaremetalPxeServerAction()
+    elif resource == CHASSIS:
+        action = api_actions.QueryBaremetalChassisAction()
+    elif resource == HWINFO:
+        action = api_actions.QueryBaremetalHardwareInfoAction()
 
     return action
 

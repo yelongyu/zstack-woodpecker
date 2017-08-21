@@ -10,6 +10,7 @@ import zstackwoodpecker.operations.deploy_operations as deploy_operations
 import zstackwoodpecker.operations.config_operations as config_operations
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
+import zstacklib.utils.shell as shell
 
 USER_PATH = os.path.expanduser('~')
 EXTRA_SUITE_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_suite_setup_config.sh' % USER_PATH
@@ -19,6 +20,15 @@ def test():
         test_util.test_skip('Suite Setup Success')
     if test_lib.scenario_config != None and test_lib.scenario_destroy != None:
         scenario_operations.destroy_scenario(test_lib.all_scenario_config, test_lib.scenario_destroy)
+
+    #setup = setup_actions.SetupAction()
+    #setup.plan = test_lib.all_config
+    #setup.run()
+
+    shell.call('yum install -y libvirt-devel')
+    shell.call('pip install virtualbmc')
+    test_util.test_logger('Virtualbmc has been deployed on Host')
+
 
     if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)

@@ -8,6 +8,7 @@ All Baremetal operations for test.
 import apibinding.inventory as inventory
 import apibinding.api_actions as api_actions
 import zstackwoodpecker.test_util as test_util
+import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.account_operations as account_operations
 import zstackwoodpecker.operations.config_operations as config_operations
 
@@ -33,7 +34,23 @@ def create_pxe(pxe_option, session_uuid=None):
 
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Add PXE Server [uuid:] %s [name:] %s' % \
-                                        (evt.uuid, action.name))
+                                        (evt.inventory.uuid, action.name))
+    return evt.inventory
+
+def create_hostcfg(hostcfg_option, session_uuid=None):
+    action = api_actions.CreateBaremetalHostCfgAction()
+    action.timeout = 30000
+    action.chassisUuid = hostcfg_option.get_chassis_uuid()
+    action.password = hostcfg_option.get_password()
+    action.unattended = hostcfg_option.get_unattended()
+    action.cfgItems = hostcfg_option.get_cfgItems()
+    action.systemTags = hostcfg_option.get_system_tags()
+    action.userTags = hostcfg_option.get_user_tags()
+
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Add Baremetal HostCfg [uuid:] %s for [chassis:] %s' % \
+                                        (evt.inventory.uuid, action.chassisUuid))
+    
     return evt.inventory
 
 def delete_pxe(pxe_uuid, session_uuid=None):
@@ -71,3 +88,53 @@ def update_pxe(pxe_uuid, begin, end, netmask, session_uuid=None):
     test_util.action_logger('Update PXE [uuid:] %s' % pxe_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
+
+def create_chassis(chassis_option, session_uuid=None):
+    action = api_actions.CreateBaremetalChassisAction()
+    action.timeout = 240000
+    name = chassis_option.get_name()
+    if not name:
+        action.name = 'chassis_default_name'
+    else:
+        action.name = name
+    action.ipmiAddress = chassis_option.get_ipmi_address()
+    action.ipmiUsername = chassis_option.get_ipmi_username()
+    action.ipmiPassword = chassis_option.get_ipmi_password()
+    action.ipmiPort = chassis_option.get_ipmi_port()
+    action.description = chassis_option.get_description()
+    action.systemTags = chassis_option.get_system_tags()
+    action.userTags = chassis_option.get_user_tags()
+
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Add Chassis [uuid:] %s [name:] %s' % \
+                            (evt.inventory.uuid, action.name))
+    return evt.inventory
+
+def update_chassis(chassis_uuid, address, username, password, \
+                   session_uuid=None):
+    action = api_actions.UpdateBaremetalChassisAction()
+    action.uuid = chassis_uuid
+    action.timeout = 30000
+    action.ipmiAddress = address
+    action.ipmiUsername = username
+    action.ipmiPassword = password
+    test_util.action_logger('Update Chassis [uuid:] %s' % chassis_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def delete_chassis(chassis_uuid, session_uuid=None):
+    action = api_actions.DeleteBaremetalChassisAction()
+    action.uuid = chassis_uuid
+    action.timeout = 30000
+    test_util.action_logger('Delete Chassis [uuid:] %s' % chassis_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def provision_baremetal(chassis_uuid, session_uuid=None):
+    action = api_actions.ProvisionBaremetalHostAction()
+    action.chassisUuid = chassis_uuid
+    action.timeout = 30000
+    test_util.action_logger('Provision Chassis [uuid:] %s' % chassis_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+

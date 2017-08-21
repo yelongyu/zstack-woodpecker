@@ -1,32 +1,42 @@
-zstackPkg = ~/sanitytest/zstack-offline-installer-test.bin
-zstackInstallScript = ~/sanitytest/install.sh
-zstackInstallPath = /usr/local/zstacktest
-zstackPropertiesPath = ~/sanitytest/conf/zstack.properties
-zstackTestAgentPkgPath = ~/sanitytest/zstacktestagent.tar.bz
-zstackManagementIp = 192.168.200.25
+import ../deploy.tmpt
 
-DBServer = 192.168.200.25
-DBAdminUser = root
-DBAdminPassword = zstack.mysql.password
+localPrimaryStorageName = local-ps
+localPrimaryStorageUrl = /home/local-ps
 
-DBUserName = zstack
-DBPassword =
+instanceOfferingName_m = medium-vm
+instanceOfferingMemory_m = 4G
+instanceOfferingCpuNum_m = 4
 
-DBPort = 3306
-rabbitmqServerIp = 192.168.200.25
+imageStoreBackupStorageName = imageStore
+imageStoreBackupStorageUrl = /home/imageStoreBackupStorage
+imageStoreBackupStorageUsername = root
+imageStoreBackupStoragePassword = password
+imageStoreBackupStorageHostname = 10.0.147.239
+imageStoreBackupStoragePort = 22
 
-node1Name = centos1
-node1Ip = 192.168.200.25
-nodeUserName = root
-nodePassword = 1
 
-hostUsername = root
-hostPassword = 1
-
+imageName_s = medium-image
+rootImageFormat = qcow2
+imageUrl_s = http://192.168.200.100/mirror/diskimages/baremetal_10G.qcow2
+rootMediaType = RootVolumeTemplate
+imageUsername = root
+imagePassword = password
 
 ZSTACK_ALREADY_INSTALLED = yes
 pxename = Pxe_Test
-dhcpinterface = em1
+dhcpinterface = br_eth0
 dhcpbegin = 10.0.0.1
 dhcpend = 10.0.0.254
-dhcpnetmask = 255.255.255.0
+dhcpnetmask = 255.0.0.0
+
+ipmiaddress = 10.0.147.239
+ipminame = ipmi1
+ipmiusername = admin
+ipmipassword = password
+ipmiport = 6230
+
+nicip0 = 10.0.118.1
+nicnetmask0 =255.255.255.0
+bondip0 = 10.0.118.2
+bondmask0 = 255.255.255.0
+bondname0 = bond0
