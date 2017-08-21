@@ -102,7 +102,7 @@ def test():
     test_util.test_dsc('check installation stop_node one ')
     test_stub.stop_node(vm1_ip, tmp_file)
     test_stub.start_node(vm2_ip, tmp_file)
-    test_stub.check_installation(vm1_ip, tmp_file)
+    test_stub.check_installation(vm2_ip, tmp_file)
 
     test_util.test_dsc('check installation stop_node the second one ')
     test_stub.start_node(vm1_ip, tmp_file)
