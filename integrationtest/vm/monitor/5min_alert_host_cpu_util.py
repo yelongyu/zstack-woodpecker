@@ -52,8 +52,8 @@ def test():
     mail_list = test_stub.receive_email()
     keywords = "fired"
     mail_flag = test_stub.check_email(mail_list, keywords, trigger, host.uuid)
-    if mail_flag != 0:
-        test_util.test_fail('Failed to Get Target: %s for: %s Trigger Mail' % (vm_uuid, test_item))
+    if mail_flag == 0:
+        test_util.test_fail('Failed to Get Target: %s for: %s Trigger Mail' % (host.uuid, test_item))
 
     mon_ops.delete_monitor_trigger_action(trigger_action)
     mon_ops.delete_monitor_trigger(trigger)
