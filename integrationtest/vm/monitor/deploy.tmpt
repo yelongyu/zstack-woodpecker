@@ -3,7 +3,7 @@ import ../deploy.tmpt
 DBAdminUser = root
 DBAdminPassword = 
 
-smtpport = 25
+media_smtpport = 25
 media_smtpserver = smtp.zstack.io
 media_username = hao.chen@zstack.io
 media_password = 971029Ech
