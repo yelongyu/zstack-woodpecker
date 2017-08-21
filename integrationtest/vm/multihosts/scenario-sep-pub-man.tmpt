@@ -6,4 +6,4 @@ vmName3 = test_vm2
 vmName4 = test_vm3
 vmInstranceOfferingUuid2 = 234567
 imageUuid2 = 234567
-vmL3Uuid2 = 234567
+vmManagementL3Uuid = 234567
