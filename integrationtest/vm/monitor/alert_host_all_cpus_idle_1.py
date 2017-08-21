@@ -59,7 +59,7 @@ def test():
     state = "enable"
     monitor_trigger = mon_ops.change_email_media_state(media,state)
     test_stub.run_all_cpus_load(ssh_cmd)
-    status_problem, status_ok = test_stub.query_trigger_in_loop(trigger)
+    status_problem, status_ok = test_stub.query_trigger_in_loop(trigger,50)
     test_util.action_logger('Trigger old status: %s triggered. Trigger new status: %s recovered' % (status_problem, status_ok ))
     if status_problem != 1 or status_ok != 1:
         test_util.test_fail('%s Monitor Test failed, expected Problem or OK status not triggered' % test_item)
