@@ -29,7 +29,7 @@ def test():
     hosts = res_ops.get_resource(res_ops.HOST)
     host = hosts[0]
     duration = 60
-    expression = "host.disk.io{type=\"bandwidth\", direction=\"write\"} > 10000.0"
+    expression = "host.disk.io{type=\"bandwidth\", direction=\"write\"} > 1000000.0"
     monitor_trigger = mon_ops.create_monitor_trigger(host.uuid, duration, expression)
 
     send_email = test_stub.create_email_media()
