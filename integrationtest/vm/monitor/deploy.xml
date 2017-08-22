@@ -116,6 +116,7 @@
                 startIp="$ipRangeStartIp" endIp="$ipRangeEndIp"
                 gateway="$ipRangeGateway" 
                 netmask="$ipRangeNetmask" />
+              <dns>$DNSServer</dns>
               <networkService provider="Flat Network Service Provider">
                  <serviceType>DHCP</serviceType>
                  <serviceType>Userdata</serviceType>
