@@ -280,6 +280,12 @@ def adapt_pick_ip_not_used_in_scenario_file(scenarioFile, prefix="10.0.0.", pick
         if combined_ip not in ips:
             return combined_ip
 
+def pick_randomized_ip(prefix="192.168.254."):
+    import random
+    var = random.randrange(2, 254, 1)
+    combined_ip = prefix + str(var)
+    return combined_ip
+
 def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
     if len(mn_host_list) < 1:
@@ -308,6 +314,13 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
         os.system('sed -i s/stor_ip1/%s/g %s' % (stor_vm_ip,config_json))
         os.system('sed -i s/stor_netmask1/%s/g %s' % (stor_vm_netmask,config_json))
         os.system('sed -i s/stor_gateway1/%s/g %s' % (stor_vm_gateway,config_json))
+
+        pub_vm_ip = pick_randomized_ip()
+        pub_vm_netmask = os.environ.get('pubNetMask')
+        pub_vm_gateway = os.environ.get('pubGateway')
+        os.system('sed -i s/pub_ip1/%s/g %s' % (pub_vm_ip,config_json))
+        os.system('sed -i s/pub_netmask1/%s/g %s' % (pub_vm_netmask,config_json))
+        os.system('sed -i s/pub_gateway1/%s/g %s' % (pub_vm_gateway,config_json))
 
 def prepare_etc_hosts(scenarioConfig, scenarioFile, deploy_config, config_json):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)

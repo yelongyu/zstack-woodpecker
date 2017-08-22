@@ -59,6 +59,8 @@ def test():
     config_json = os.environ.get('configJson')
     if "scenario-config-storage-separate-nfs.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE'):
         config_json = os.environ.get('configJson_2nets')
+    elif "scenario-config-sep-pub-man.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE'):
+        config_json = os.environ.get('configJsonPubMan')
 
     ha_deploy_tool = os.environ.get('zstackHaInstaller')
     mn_img = os.environ.get('mnImage')
