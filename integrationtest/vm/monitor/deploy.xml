@@ -117,9 +117,9 @@
                 gateway="$ipRangeGateway" 
                 netmask="$ipRangeNetmask" />
               <networkService provider="Flat Network Service Provider">
-                  <serviceType>DHCP</serviceType>
-                  <serviceType>Userdata</serviceType>
-                  <serviceType>Eip</serviceType>
+                 <serviceType>DHCP</serviceType>
+                 <serviceType>Userdata</serviceType>
+                 <serviceType>Eip</serviceType>
               </networkService>
             </l3BasicNetwork>
           </l3Networks>
