@@ -125,7 +125,7 @@ def query_monitor_trigger_action(uuid=None, session_uuid=None):
 def change_monitor_trigger_action_state(uuid, state, session_uuid=None):
     action = api_actions.ChangeMonitorTriggerActionStateAction()
     action.uuid = uuid
-    action.state = state
+    action.stateEvent = state
     action.timeout = 6000
     test_util.action_logger('Change monitor trigger action [uuid:] %s to [state:] %s' % (uuid, state))
     evt = account_operations.execute_action_with_session(action, session_uuid)
