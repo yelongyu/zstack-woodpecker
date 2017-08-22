@@ -3,6 +3,11 @@ import ../deploy.tmpt
 DBAdminUser = root
 DBAdminPassword = 
 
+imageName_s = ttylinux
+rootImageFormat = raw
+rootMediaType = RootVolumeTemplate
+imageUrl_s = http://192.168.200.100/mirror/diskimages/CentOS7.2-ZStack-8G.qcow2
+
 media_smtpport = 25
 media_smtpserver = smtp.zstack.io
 media_username = hao.chen@zstack.io
