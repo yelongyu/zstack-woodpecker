@@ -3,6 +3,10 @@ import ../deploy.tmpt
 DBAdminUser = root
 DBAdminPassword = 
 
+instanceOfferingName_s = small-vm
+instanceOfferingMemory_s = 1G
+instanceOfferingCpuNum_s = 2
+
 imageName_s = ttylinux
 rootImageFormat = raw
 rootMediaType = RootVolumeTemplate
