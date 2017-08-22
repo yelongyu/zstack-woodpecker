@@ -34,6 +34,16 @@ def del_aliyun_key_secret(uuid, session_uuid=None):
     test_util.test_logger('[aliyun key secret:] %s is deleted.' % uuid)
     return evt
 
+def update_aliyun_key_secret(uuid, name=None, description=None, session_uuid=None):
+    action = api_actions.UpdateAliyunKeySecretAction()
+    action.uuid = uuid
+    action.name = name
+    action.description = description
+    test_util.action_logger('Update [aliyun key secret:] %s' % uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[aliyun key secret:] %s is updated.' % uuid)
+    return evt
+
 def attach_aliyun_key(uuid, session_uuid=None):
     action = api_actions.AttachAliyunKeyAction()
     action.uuid = uuid
