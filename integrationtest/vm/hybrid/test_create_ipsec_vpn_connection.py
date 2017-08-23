@@ -67,11 +67,8 @@ def test():
 #     cmd = 'ip a add dev br_eth0_1101 %s' % _vm_ip
 #     commands.getoutput(cmd)
     datacenter_type = os.getenv('datacenterType')
-    vpc_id = os.getenv('ecs_vpcId')
-    vpc_vr_id = os.getenv('vpc_vrId')
-    vpn_gateway_id = os.getenv('vpn_gatewayId')
     # Get Public IP for IPsec connection
-    for i in ['ipRangeStartIp', 'ipRangeEndIp']:
+    for i in ['ipRangeStartPublicIp', 'ipRangeEndPublicIp']:
         public_ip_list.append(os.environ.get(i))
     vr_nics = res_ops.query_resource(res_ops.VIRTUALROUTER_VM)[0].vmNics
     for nic in vr_nics:
@@ -89,20 +86,34 @@ def test():
     datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
     regions = [ i.regionId for i in datacenter_list]
     for r in regions:
-        if 'shanghai' in r:
-            region_id = r
-    datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
-    # Add Identity Zone
-    iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, region_id)
-    zone_id = iz_list[-1].zoneId
-    iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, zone_id)
+        datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, r, 'datacenter for test')
+        # Add Identity Zone
+        iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, r)
+        vpn_gateway_list = []
+        for iz in iz_list:
+            if not iz.availableInstanceTypes:
+                continue
+            iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, iz.zoneId)
+            vpn_gateway_list = hyb_ops.sync_vpc_vpn_gateway_from_remote(datacenter_inv.uuid)
+            if vpn_gateway_list:
+                vpn_gateway = vpn_gateway_list[0]
+                break
+            else:
+                hyb_ops.del_identity_zone_in_local(iz_inv.uuid)
+        if vpn_gateway_list:
+            break
+        else:
+            hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
+    if not vpn_gateway_list:
+        test_util.test_fail("VpnGate which ipsec vpn needed was not found in all available dataCenter")
     ecs_instance_type = hyb_ops.get_ecs_instance_type_from_remote(iz_inv.uuid)
     hyb_ops.sync_ecs_vpc_from_remote(datacenter_inv.uuid)
+    hyb_ops.sync_ecs_vswitch_from_remote(datacenter_inv.uuid)
+    vswitch_local = hyb_ops.query_ecs_vswitch_local()
     vpc_local = hyb_ops.query_ecs_vpc_local()
     # Get Vpc which has available gateway
-    for vl in vpc_local:
-        if vl.ecsVpcId == vpc_id:
-            vpc_inv = vl
+    vpc_uuid = [vs.ecsVpcUuid for vs in vswitch_local if vs.uuid == vpn_gateway.vSwitchUuid][0]
+    vpc_inv = [vpc for vpc in vpc_local if vpc.uuid == vpc_uuid][0]
     # Sync Aliyun image to local
     hyb_ops.sync_ecs_image_from_remote(datacenter_inv.uuid, image_type='system')
     ecs_image = hyb_ops.query_ecs_image_local()
@@ -110,15 +121,7 @@ def test():
         if i.platform == 'CentOS' and i.type == 'system':
             image = i
             break
-    # Get Vpn gateway
-    hyb_ops.sync_vpc_vpn_gateway_from_remote(datacenter_inv.uuid)
-    vpc_vpn_gw_local = hyb_ops.query_vpc_vpn_gateway_local()
-    for gw in vpc_vpn_gw_local:
-        if gw.vpnGatewayId == vpn_gateway_id:
-            vpn_gateway = gw
     # Create vSwitch
-    hyb_ops.sync_ecs_vswitch_from_remote(datacenter_inv.uuid)
-    vswitch_local = hyb_ops.query_ecs_vswitch_local()
     vpc_cidr_list = vpc_inv.cidrBlock.split('.')
     vpc_cidr_list[2] = '252'
     vpc_cidr_list[3] = '0/24'
@@ -166,7 +169,7 @@ def test():
     hyb_ops.sync_aliyun_virtual_router_from_remote(vpc_inv.uuid)
     vr_local = hyb_ops.query_aliyun_virtual_router_local()
     for v in vr_local:
-        if v.vrId == vpc_vr_id:
+        if v.vrId == vpc_inv.vRouterId:
             vr = v
     # Create Hybrid IPsec Vpn connection
     vpn_ike_config = hyb_ops.create_vpn_ike_ipsec_config(name='zstack-test-vpn-ike-config', psk='ZStack.Hybrid.Test123789', local_ip=vpn_gateway.publicIp, remote_ip=user_vpn_gw_inv.ip)
@@ -267,6 +270,7 @@ def env_recover():
 
     if datacenter_inv:
         hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
+
     global ks_inv
     if ks_inv:
         hyb_ops.del_aliyun_key_secret(ks_inv.uuid)
