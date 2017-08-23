@@ -315,12 +315,12 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
         os.system('sed -i s/stor_netmask1/%s/g %s' % (stor_vm_netmask,config_json))
         os.system('sed -i s/stor_gateway1/%s/g %s' % (stor_vm_gateway,config_json))
 
-        pub_vm_ip = pick_randomized_ip()
-        pub_vm_netmask = os.environ.get('pubNetMask')
-        pub_vm_gateway = os.environ.get('pubGateway')
-        os.system('sed -i s/pub_ip1/%s/g %s' % (pub_vm_ip,config_json))
-        os.system('sed -i s/pub_netmask1/%s/g %s' % (pub_vm_netmask,config_json))
-        os.system('sed -i s/pub_gateway1/%s/g %s' % (pub_vm_gateway,config_json))
+        man_vm_ip = pick_randomized_ip()
+        man_vm_netmask = os.environ.get('manNetMask')
+        man_vm_gateway = os.environ.get('manGateway')
+        os.system('sed -i s/man_ip1/%s/g %s' % (man_vm_ip,config_json))
+        os.system('sed -i s/man_netmask1/%s/g %s' % (man_vm_netmask,config_json))
+        os.system('sed -i s/man_gateway1/%s/g %s' % (man_vm_gateway,config_json))
 
 def prepare_etc_hosts(scenarioConfig, scenarioFile, deploy_config, config_json):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
