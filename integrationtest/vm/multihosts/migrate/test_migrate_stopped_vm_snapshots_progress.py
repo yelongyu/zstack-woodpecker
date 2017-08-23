@@ -13,9 +13,11 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import apibinding.inventory as inventory
 import threading
 import time
+import uuid
 threads_num = 1
 vms = [None] * threads_num
 threads = [None] * threads_num
+migrate_jobs = [None] * threads_num
 threads_result = [None] * threads_num
 checker_threads = [None] * threads_num
 checker_threads_result = [None] * threads_num
@@ -31,30 +33,41 @@ def migrate_volume(index):
         sp_option.set_name("snapshot_for_migrate_progress_%s" % (i))
         sp = vol_ops.create_snapshot(sp_option)
 
-    vol_ops.migrate_volume(vms[index].get_vm().allVolumes[0].uuid, target_host.uuid)
+    migrate_jobs[index] = str(uuid.uuid4()).replace('-', '')
+    print 'shuang %s' % (migrate_jobs[index])
+    threads_result[index] = "Start"
+    vol_ops.migrate_volume_apiid(vms[index].get_vm().allVolumes[0].uuid, target_host.uuid, migrate_jobs[index])
     threads_result[index] = "Done"
 
 def check_migrate_volume_progress(index):
     for i in range(0, 3600):
-        if res_ops.get_task_progress(vms[index].get_vm().allVolumes[0].uuid).progress != None :
+        if migrate_jobs[index] == None:
+            time.sleep(0.1)
+            continue
+
+    print 'shuang2 %s' % (migrate_jobs[index])
+    for i in range(0, 3600):
+        progresses = res_ops.get_progress(migrate_jobs[index])
+        if len(progresses) > 0:
             break
         time.sleep(0.1)
-    if res_ops.get_task_progress(vms[index].get_vm().allVolumes[0].uuid).progress == None :
+    if len(progresses) <= 0:
         test_util.test_fail("volume not start migrating in 360 seconds")
 
-    progress = res_ops.get_task_progress(vms[index].get_vm().allVolumes[0].uuid)
+    progress = progresses[0]
 
-    if int(progress.progress) < 0 or int(progress.progress) > 100:
-        test_util.test_fail("Progress of task should be between 0 and 100, while it actually is %s" % (progress.progress))
+    if int(progress.content) < 0 or int(progress.content) > 100:
+        test_util.test_fail("Progress of task should be between 0 and 100, while it actually is %s" % (progress.content))
 
     for i in range(0, 3600):
         last_progress = progress
-        progress = res_ops.get_task_progress(vms[index].get_vm().allVolumes[0].uuid)
-        if progress.progress == None:
+        progresses = res_ops.get_progress(migrate_jobs[index])
+        if len(progresses) <= 0:
             break
+        progress = progresses[0]
 
-        if int(progress.progress) < int(last_progress.progress):
-            test_util.test_fail("Progress of task (%s) %s is smaller than last time %s" % (vms[index].get_vm().allVolumes[0].uuid, progress.progress, last_progress.progress))
+        if int(progress.content) < int(last_progress.content):
+            test_util.test_fail("Progress of task (%s) %s is smaller than last time %s" % (migrate_jobs[index], progress.content, last_progress.content))
         time.sleep(0.1)
 
 #    vms[index].update()
