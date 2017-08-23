@@ -1,0 +1,48 @@
+import ../deploy.tmpt
+
+xskyPrimaryStorageName = xsky-ps
+xskyPrimaryStorageMonUrls = root:password@node1;root:password@node2;root:password@node3
+xskyPrimaryStorageDataVolumePoolName = 
+xskyPrimaryStorageRootVolumePoolName = 
+xskyPrimaryStorageImageCachePoolName = 
+
+xskyBackupStorageName = xsky-bs
+xskyBackupStorageMonUrls = root:password@node1;root:password@node2;root:password@node3
+xskyBackupStoragePoolName =
+
+xskyHostName1 = node01
+xskyHostIp1 = 192.168.0.11
+xskyHostUsername1 = root
+xskyHostPassword1 = password
+
+xskyHostName2 = node02
+xskyHostIp2 = 192.168.0.12
+xskyHostUsername2 = root
+xskyHostPassword2 = password
+
+xskyHostName3 = node03
+xskyHostIp3 = 192.168.0.12
+xskyHostUsername3 = root
+xskyHostPassword3 = password
+
+aliyunKey = 123456
+aliyunSecret = 1234567
+datacenterType = aliyun
+
+instanceOfferingName_m = medium-vm
+instanceOfferingMemory_m = 1024M
+instanceOfferingCpuNum_m = 1
+instanceOfferingCpuSpeed_m = 512
+
+imageName_i_c7 = centos7-test
+imageUrl_i_c7 = http://zstack/image/centos7-test.qcow2
+
+ecs_imageId = ECS_IMAGE_NAME
+
+ecs_vpcId = EcsVpcId
+vpn_gatewayId = VpnGatewayId
+vpc_vrId = VpcVrId
+
+prepaid_ecsInstanceId = id-ecs-instance-prepaid
+
+l2PublicVlan = 3
