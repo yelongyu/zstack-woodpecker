@@ -244,6 +244,16 @@ def migrate_volume(volume_uuid, host_uuid, session_uuid = None):
             % (volume_uuid, host_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
 
+def migrate_volume_apiid(volume_uuid, host_uuid, apiid, session_uuid = None):
+    action = api_actions.LocalStorageMigrateVolumeAction()
+    action.id = apiid
+    action.destHostUuid = host_uuid
+    action.volumeUuid = volume_uuid
+    test_util.action_logger('Migrate Local Storage Volume: %s to Host: %s' \
+            % (volume_uuid, host_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+
+
 def get_volume_migratable_host(volume_uuid, session_uuid = None):
     action = api_actions.LocalStorageGetVolumeMigratableHostsAction()
     action.volumeUuid = volume_uuid
