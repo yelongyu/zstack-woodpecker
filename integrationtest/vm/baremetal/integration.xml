@@ -1,5 +1,10 @@
 <integrationTest>
     <suite name="baremetal test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
-        <case timeout='3600' repeat='1'>test_create_chassis.py</case>
+        <case timeout='1200' repeat='1'>update_pxe_server.py</case>
+        <case timeout='1200' repeat='1'>test_create_chassis.py</case>
+        <case timeout='1200' repeat='1'>update_chassis.py</case>
+        <case timeout='1200' repeat='1'>test_stop_pxe.py</case>
+        <case timeout='1200' repeat='1'>test_create_multi_chassis.py</case>
+	<case timeout='3600' repeat='1'>test_single_baremetal_installation.py</case>
     </suite>
 </integrationTest>

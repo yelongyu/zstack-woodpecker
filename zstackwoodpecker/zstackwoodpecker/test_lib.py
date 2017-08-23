@@ -2256,6 +2256,11 @@ def lib_get_chassis_by_uuid(chassis_uuid):
     if chassis:
         return chassis[0]
 
+def lib_get_pxe_by_name(name):
+    conditions = res_ops.gen_query_conditions('name', '=', name)
+    pxe = res_ops.query_resource(res_ops.PXE_SERVER, conditions)
+    if pxe:
+        return pxe[0]
 
 #-----------Get VM resource-------------
 def lib_is_vm_running(vm_inv):

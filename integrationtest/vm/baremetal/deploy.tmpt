@@ -4,8 +4,8 @@ localPrimaryStorageName = local-ps
 localPrimaryStorageUrl = /home/local-ps
 
 instanceOfferingName_m = medium-vm
-instanceOfferingMemory_m = 4G
-instanceOfferingCpuNum_m = 4
+instanceOfferingMemory_m = 2G
+instanceOfferingCpuNum_m = 2
 
 imageStoreBackupStorageName = imageStore
 imageStoreBackupStorageUrl = /home/imageStoreBackupStorage
@@ -29,11 +29,19 @@ dhcpbegin = 10.0.0.1
 dhcpend = 10.0.0.254
 dhcpnetmask = 255.0.0.0
 
+pxename_2 = Pxe_Test_2
+dhcpbegin_2 = 10.0.0.100
+dhcpend_2 = 10.0.0.150
+dhcpnetmask_2 = 255.0.0.0
+
 ipmiaddress = 10.0.147.239
 ipminame = ipmi1
 ipmiusername = admin
 ipmipassword = password
 ipmiport = 6230
+
+ipminame2 = ipmi2
+ipmiport2 = 6231
 
 nicip0 = 10.0.118.1
 nicnetmask0 =255.255.255.0

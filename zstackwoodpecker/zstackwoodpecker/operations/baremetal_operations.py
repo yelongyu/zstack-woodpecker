@@ -71,7 +71,7 @@ def stop_pxe(pxe_uuid, force=None, session_uuid=None):
     return evt.inventory
 
 def start_pxe(pxe_uuid, session_uuid=None):
-    action = api_actions.StartBaremetalPxeServerActio()
+    action = api_actions.StartBaremetalPxeServerAction()
     action.uuid = pxe_uuid
     action.timeout = 30000
     test_util.action_logger('Start PXE [uuid:] %s' % pxe_uuid)
@@ -110,7 +110,7 @@ def create_chassis(chassis_option, session_uuid=None):
                             (evt.inventory.uuid, action.name))
     return evt.inventory
 
-def update_chassis(chassis_uuid, address, username, password, \
+def update_chassis(chassis_uuid, address, username, password, port, \
                    session_uuid=None):
     action = api_actions.UpdateBaremetalChassisAction()
     action.uuid = chassis_uuid
@@ -118,6 +118,7 @@ def update_chassis(chassis_uuid, address, username, password, \
     action.ipmiAddress = address
     action.ipmiUsername = username
     action.ipmiPassword = password
+    action.ipmiPort = port
     test_util.action_logger('Update Chassis [uuid:] %s' % chassis_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory

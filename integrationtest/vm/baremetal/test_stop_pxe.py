@@ -8,9 +8,18 @@ vm = None
 
 def test():
     global vm
+    pxe_uuid = test_lib.lib_get_pxe_by_name(os.environ.get('pxename')).uuid
     # Create VM
     vm = test_stub.create_vm()
     vm.check()
+    # Stop PXE
+    bare_operations.stop_pxe(pxe_uuid)
+    if test_lib.lib_get_pxe_by_name(os.environ.get('pxename')).status != "Stopped":
+        test_util.test_fail('Fail to stop PXE')
+    # Start PXE
+    bare_operations.start_pxe(pxe_uuid)
+    if test_lib.lib_get_pxe_by_name(os.environ.get('pxename')).status != "Running":
+        test_util.test_fail('Fail to start PXE')
     # Create Virtual BMC
     test_stub.create_vbmc(vm = vm, port = 6230)
     # Create Chassis
@@ -26,7 +35,7 @@ def test():
     test_stub.delete_vbmc(vm = vm)
     bare_operations.delete_chassis(chassis_uuid)
     vm.destroy()
-    test_util.test_pass('Create chassis Test Success')
+    test_util.test_pass('Start/Stop PXE Test Success')
 
 def error_cleanup():
     global vm
