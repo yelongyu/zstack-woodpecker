@@ -72,8 +72,8 @@
     <virtualRouterOffering name="$virtualRouterOfferingName_s"
       memoryCapacity="$virtualRouterOfferingMemory_s" cpuNum="$virtualRouterOfferingCpuNum_s" isDefault="true">
       <zoneRef>$zoneName</zoneRef>
-      <managementL3NetworkRef>$l3ManagementNetworkName</managementL3NetworkRef>
-      <!--<managementL3NetworkRef>$l3PublicNetworkName</managementL3NetworkRef>-->
+      <!--<managementL3NetworkRef>$l3ManagementNetworkName</managementL3NetworkRef>-->
+      <managementL3NetworkRef>$l3PublicNetworkName</managementL3NetworkRef>
       <publicL3NetworkRef>$l3PublicNetworkName</publicL3NetworkRef>
       <imageRef>$virtualRouterImageName</imageRef>
     </virtualRouterOffering>
@@ -151,7 +151,7 @@
           </hosts>
           <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
           <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
-	  <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
+          <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
           <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
           <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
           <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
@@ -163,7 +163,7 @@
         </cluster>
       </clusters>
 
-      <l2Networks>
+      <!--<l2Networks>
         <l2NoVlanNetwork name="$l2ManagementNetworkName" description="Basic L2 for management network"
           physicalInterface="$l2ManagementNetworkInterface">
           <l3Networks>
@@ -178,14 +178,29 @@
               </networkService>
             </l3BasicNetwork>
           </l3Networks>
-        </l2NoVlanNetwork>
+        </l2NoVlanNetwork>-->
+
+        <l2NoVlanNetwork name="$l2ManagementNetworkName" description="Basic L2 for management network"
+          physicalInterface="$l2ManagementNetworkInterface0">
+          <l3Networks>
+            <l3BasicNetwork name="$l3ManagementNetworkName" description="Management L3 Network without Vlan and no special services" system="True">
+              <ipRange name="$ipRangeManagementName" description="Test"
+                startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
+                netmask="$ipRangeNetmask" />
+              <dns>$DNSServer</dns>
+              <networkService provider="vrouter">
+                <serviceType>DHCP</serviceType>
+                <serviceType>DNS</serviceType>
+              </networkService>
+            </l3BasicNetwork>
+          </l3Networks>
 
         <l2VlanNetwork name="$l2PublicNetworkName" description="L2 vlan for public network"
           physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2PublicVlan">
           <l3Networks>
             <l3BasicNetwork name="$l3PublicNetworkName" system="True" description = "L3 Network with Vlan for public network">
-              <ipRange name="$ipRangeName" startIp="$ipRangeStartIp" endIp="$ipRangeEndIp"
-               gateway="$ipRangeGateway" netmask="$ipRangeNetmask"/>
+              <ipRange name="$ipRangeName" startIp="$ipRangeStartPublicIp" endIp="$ipRangeEndPublicIp"
+               gateway="$ipRangePublicGateway" netmask="$ipRangePublicNetmask"/>
               <dns>$DNSServer</dns> 
               <networkService provider="vrouter">
                 <serviceType>DHCP</serviceType>

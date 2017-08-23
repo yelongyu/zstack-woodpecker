@@ -12,10 +12,10 @@ instanceOfferingCpuSpeed_m = 512
 imageName_i_c7 = centos7-test
 imageUrl_i_c7 = http://zstack/image/centos7-test.qcow2
 
-ipRangeStartIp = IP_START
-ipRangeEndIp = IP_END
-ipRangeNetmask = NETMASK
-ipRangeGateway = GATEWAY
+ipRangeStartPublicIp = 180.180.180.181
+ipRangeEndPublicIp = 180.180.180.182
+ipRangePublicNetmask = 255.255.255.240
+ipRangePublicGateway = 180.180.180.180
 
 ecs_imageId = ECS_IMAGE_NAME
 

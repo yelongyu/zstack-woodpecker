@@ -35,5 +35,7 @@
         <case timeout='600' repeat='1' noparallel='True'>test_sync_ecs_sg_rule.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_sync_ecs_instance_prepaid.py</case>
         <case timeout='900' repeat='1' noparallel='True'>test_update_ecs_instance.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_add_invalid_ks.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_update_ks.py</case>
     </suite>
 </integrationTest>
