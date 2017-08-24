@@ -72,7 +72,7 @@ def test():
     sps_num = res_ops.query_resource_count(res_ops.VOLUME_SNAPSHOT, cond)
 
     if sps_num != ori_num:
-        test_util_test_fail('Create %d snapshots, but only %d snapshots were successfully created' % (ori_num, sps_num))
+        test_util.test_fail('Create %d snapshots, but only %d snapshots were successfully created' % (ori_num, sps_num))
 
     test_lib.lib_robot_cleanup(test_obj_dict)
     test_util.test_pass('Test create 100 snapshots simultaneously success')
