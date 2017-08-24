@@ -126,12 +126,12 @@
         <l2VlanNetwork name="$l2VlanNetworkName2" description="Test"
           physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan2">
           <l3Networks>
-            <l3BasicNetwork name="$l3VlanNetworkName2"
+            <l3BasicNetwork name="$l3VlanNetworkName1"
               description="Test">
-              <ipRange name="$vlanIpRangeName2" description="Test" 
-                startIp="$vlanIpRangeStart2" endIp="$vlanIpRangeEnd2"
-                gateway="$vlanIpRangeGateway2"
-                netmask="$vlanIpRangeNetmask2" />
+              <ipRange name="$vlanIpRangeName1" description="Test" 
+                startIp="$vlanIpRangeStart1" endIp="$vlanIpRangeEnd1"
+                gateway="$vlanIpRangeGateway1"
+                netmask="$vlanIpRangeNetmask1" />
               <networkService provider="SecurityGroup">
                 <serviceType>SecurityGroup</serviceType>
               </networkService>
