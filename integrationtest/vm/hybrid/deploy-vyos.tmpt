@@ -26,3 +26,5 @@ vpc_vrId = VpcVrId
 prepaid_ecsInstanceId = id-ecs-instance-prepaid
 
 l2PublicVlan = 3
+
+hybrid_user_name = test

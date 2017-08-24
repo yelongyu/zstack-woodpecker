@@ -25,19 +25,23 @@ def get_new_ks(ks):
 def test():
     global ks_inv
     global datacenter_inv
+    user_name = os.getenv('hybrid_user_name')
     ks_existed = hyb_ops.query_aliyun_key_secret()
     if not ks_existed:
         ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
     else:
         ks_inv = ks_existed[0]
+    assert ks_inv.hybridUserName == user_name
     hyb_ops.update_aliyun_key_secret(ks_inv.uuid, name='test_ks')
     ks = hyb_ops.query_aliyun_key_secret()
     ks_inv = get_new_ks(ks)
     assert ks_inv.name == 'test_ks'
+    assert ks_inv.hybridUserName == user_name
     hyb_ops.update_aliyun_key_secret(ks_inv.uuid, description='test aliyun key secret')
     ks = hyb_ops.query_aliyun_key_secret()
     ks_inv = get_new_ks(ks)
     assert ks_inv.description == 'test aliyun key secret'
+    assert ks_inv.hybridUserName == user_name
     test_util.test_pass('Update Aliyun Key and Secret Success')
 
 def env_recover():
