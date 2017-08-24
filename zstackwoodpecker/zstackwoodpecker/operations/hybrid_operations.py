@@ -628,7 +628,7 @@ def sync_ecs_instance_from_remote(datacenter_uuid, only_zstack=None, session_uui
     action.onlyZstack = only_zstack
     test_util.action_logger('Sync [Ecs Instance From Remote:] %s' % (datacenter_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    return evt
+    return evt.inventories
 
 def update_ecs_instance(uuid, name=None, description=None, password=None, session_uuid=None):
     action = api_actions.UpdateEcsInstanceAction()

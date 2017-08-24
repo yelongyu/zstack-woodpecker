@@ -35,12 +35,25 @@ def test():
     datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
     regions = [ i.regionId for i in datacenter_list]
     for r in regions:
-        if 'shanghai' in r:
-            region_id = r
-    datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
-    iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, region_id)
-    zone_id = iz_list[-1].zoneId
-    hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, zone_id)
+        datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, r, 'datacenter for test')
+        # Add Identity Zone
+        iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, r)
+        vpn_gateway_list = []
+        for iz in iz_list:
+            if not iz.availableInstanceTypes:
+                continue
+            iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, iz.zoneId)
+            vpn_gateway_list = hyb_ops.sync_vpc_vpn_gateway_from_remote(datacenter_inv.uuid)
+            if vpn_gateway_list:
+                break
+            else:
+                hyb_ops.del_identity_zone_in_local(iz_inv.uuid)
+        if vpn_gateway_list:
+            break
+        else:
+            hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
+    if not vpn_gateway_list:
+        test_util.test_fail("VpnGate for route entry creating was not found in all available dataCenter")
     hyb_ops.sync_ecs_vpc_from_remote(datacenter_inv.uuid)
     vpc_local = hyb_ops.query_ecs_vpc_local()
     # Get Vpc which has available gateway
@@ -48,7 +61,6 @@ def test():
         if vl.ecsVpcId == vpc_id:
             vpc_inv = vl
     # Get Vpn gateway
-    hyb_ops.sync_vpc_vpn_gateway_from_remote(datacenter_inv.uuid)
     vpc_vpn_gw_local = hyb_ops.query_vpc_vpn_gateway_local()
     for gw in vpc_vpn_gw_local:
         if gw.vpnGatewayId == vpn_gateway_id:

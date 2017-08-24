@@ -105,7 +105,7 @@ def test():
         else:
             hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
     if not vpn_gateway_list:
-        test_util.test_fail("VpnGate which ipsec vpn needed was not found in all available dataCenter")
+        test_util.test_fail("VpnGate for ipsec vpn connection was not found in all available dataCenter")
     ecs_instance_type = hyb_ops.get_ecs_instance_type_from_remote(iz_inv.uuid)
     hyb_ops.sync_ecs_vpc_from_remote(datacenter_inv.uuid)
     hyb_ops.sync_ecs_vswitch_from_remote(datacenter_inv.uuid)

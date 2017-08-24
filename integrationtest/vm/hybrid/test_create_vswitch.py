@@ -12,6 +12,7 @@ import zstackwoodpecker.operations.hybrid_operations as hyb_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import time
 import os
+import random
 
 test_obj_dict = test_state.TestStateDict()
 ks_inv = None
@@ -55,15 +56,19 @@ def test():
         vpc_inv = vpc[0]
     else:
         vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', 'zstack-test-vpc-vrouter', '172.16.0.0/12')
-    time.sleep(5)
+    time.sleep(10)
     iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, region_id)
-    zone_id = iz_list[0].zoneId
+    for iz in iz_list:
+        if iz.availableInstanceTypes:
+            zone_id = iz.zoneId
+            break
     iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, zone_id)
     vpc_cidr_list = vpc_inv.cidrBlock.split('.')
-    vpc_cidr_list[2] = '253'
+    vpc_cidr_list[2] = str(random.randint(0,255))
     vpc_cidr_list[3] = '0/24'
     vswitch_cidr = '.'.join(vpc_cidr_list)
     vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'vswitch-for-test', vswitch_cidr)
+    time.sleep(10)
     test_util.test_pass('Create ECS VSwitch Test Success')
 
 
@@ -72,16 +77,20 @@ def env_recover():
     if vswitch_inv:
         time.sleep(10)
         hyb_ops.del_ecs_vswitch_remote(vswitch_inv.uuid)
+
     global vpc_inv
     if vpc_inv:
         time.sleep(10)
         hyb_ops.del_ecs_vpc_remote(vpc_inv.uuid)
+
     global iz_inv
     if iz_inv:
         hyb_ops.del_identity_zone_in_local(iz_inv.uuid)
+
     global datacenter_inv
     if datacenter_inv:
         hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
+
     global ks_inv
     if ks_inv:
         hyb_ops.del_aliyun_key_secret(ks_inv.uuid)

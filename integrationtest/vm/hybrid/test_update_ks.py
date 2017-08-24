@@ -16,6 +16,11 @@ import os
 test_obj_dict = test_state.TestStateDict()
 ks_inv = None
 
+def get_new_ks(ks):
+    for k in ks:
+        if k.uuid == ks_inv.uuid:
+            ks_new = k
+    return ks_new
 
 def test():
     global ks_inv
@@ -26,8 +31,12 @@ def test():
     else:
         ks_inv = ks_existed[0]
     hyb_ops.update_aliyun_key_secret(ks_inv.uuid, name='test_ks')
+    ks = hyb_ops.query_aliyun_key_secret()
+    ks_inv = get_new_ks(ks)
     assert ks_inv.name == 'test_ks'
     hyb_ops.update_aliyun_key_secret(ks_inv.uuid, description='test aliyun key secret')
+    ks = hyb_ops.query_aliyun_key_secret()
+    ks_inv = get_new_ks(ks)
     assert ks_inv.description == 'test aliyun key secret'
     test_util.test_pass('Update Aliyun Key and Secret Success')
 
