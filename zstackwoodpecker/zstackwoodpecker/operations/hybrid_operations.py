@@ -104,7 +104,7 @@ def del_oss_bucket_remote(uuid, session_uuid=None):
 
 def del_oss_bucket_file_remote(bucket_uuid, file_name, session_uuid=None):
     action = api_actions.DeleteOssBucketFileRemoteAction()
-    action.bucketUuid = bucket_uuid
+    action.uuid = bucket_uuid
     action.fileName = file_name
     test_util.action_logger('Delete [Oss Bucket File Remote:] %s %s' % (bucket_uuid, file_name))
     evt = account_operations.execute_action_with_session(action, session_uuid) 

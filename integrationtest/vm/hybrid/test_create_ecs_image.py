@@ -47,19 +47,16 @@ def test():
     ecs_image_inv = hyb_ops.create_ecs_image_from_local_image(bs_uuid, datacenter_inv.uuid, image.uuid, name='zstack-test-ecs-image')
     time.sleep(10)
     hyb_ops.del_ecs_image_remote(ecs_image_inv.uuid)
+    bucket_file = hyb_ops.get_oss_bucket_file_from_remote(bucket_inv.uuid).files
+    if bucket_file:
+        time.sleep(20)
+        for i in bucket_file:
+            hyb_ops.del_oss_bucket_file_remote(bucket_inv.uuid, i)
+    time.sleep(10)
+    hyb_ops.del_oss_bucket_remote(bucket_inv.uuid)
     test_util.test_pass('Create Delete Ecs Image Test Success')
 
 def env_recover():
-    global bucket_inv
-    if bucket_inv:
-        bucket_file = hyb_ops.get_oss_bucket_file_from_remote(bucket_inv.uuid).files
-        if bucket_file:
-            for i in bucket_file:
-                hyb_ops.del_oss_bucket_file_remote(bucket_inv.uuid, i)
-        time.sleep(10)
-        hyb_ops.del_oss_bucket_remote(bucket_inv.uuid)
-        #hyb_ops.del_oss_file_bucket_name_in_local(bucket_inv.uuid)
-
     global datacenter_inv
     if datacenter_inv:
         hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
