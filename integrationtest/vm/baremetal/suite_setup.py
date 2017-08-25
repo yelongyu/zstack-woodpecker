@@ -21,9 +21,9 @@ def test():
     if test_lib.scenario_config != None and test_lib.scenario_destroy != None:
         scenario_operations.destroy_scenario(test_lib.all_scenario_config, test_lib.scenario_destroy)
 
-    #setup = setup_actions.SetupAction()
-    #setup.plan = test_lib.all_config
-    #setup.run()
+    setup = setup_actions.SetupAction()
+    setup.plan = test_lib.all_config
+    setup.run()
 
     shell.call('yum --disablerepo=epel install -y libvirt-devel')
     shell.call('pip install virtualbmc')

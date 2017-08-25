@@ -24,7 +24,7 @@ def test():
     if not hwinfo:
         test_util.test_fail('Fail to get hardware info during the first provision')
     #Generate cfgItems
-    cfgItems, pxe_mac = test_stub.generate_cfgItems(chassis_uuid=chassis_uuid, nic_num=1, nic_flag=True, bond_num=1, slave_num=2, mode=4)
+    cfgItems, pxe_mac = test_stub.generate_cfgItems(chassis_uuid=chassis_uuid)
     host_cfg =  test_stub.create_hostcfg(chassis_uuid=chassis_uuid, unattended=True, password="password", cfgItems=cfgItems)
     
     test_stub.hack_ks(port = 6230, ks_file = str(pxe_mac.replace(':','-')))
