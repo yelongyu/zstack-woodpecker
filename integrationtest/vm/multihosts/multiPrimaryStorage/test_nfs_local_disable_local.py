@@ -32,7 +32,7 @@ def test():
     test_obj_dict.add_vm(vm)
 
     test_util.test_dsc("Create {0} volumes in NFS".format(VOLUME_NUMBER))
-    volume_in_nfs = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=nfs_ps)
+    volume_in_nfs = test_stub.create_multi_volumes(count=VOLUME_NUMBER, ps=nfs_ps)
     for volume in volume_in_nfs:
         test_obj_dict.add_volume(volume)
         volume.check()
@@ -56,7 +56,7 @@ def test():
         test_stub.create_multi_vms(name_prefix='test-vm', count=1, datavolume=10)
 
     test_util.test_dsc("Try to create datavolume in NFS")
-    volume = test_stub.create_multi_volume(count=1, ps=nfs_ps)[0]
+    volume = test_stub.create_multi_volumes(count=1, ps=nfs_ps)[0]
     test_obj_dict.add_volume(volume)
 
     test_util.test_pass('Multi PrimaryStorage Test Pass')

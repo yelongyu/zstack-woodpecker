@@ -38,13 +38,13 @@ def test():
 
     volume_in_local = []
     if not local_nfs_env:
-        volume_in_local = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=local_ps,
+        volume_in_local = test_stub.create_multi_volumes(count=VOLUME_NUMBER, ps=local_ps,
                                                         host_uuid=test_lib.lib_get_vm_host(vm.get_vm()).uuid)
 
     if local_nfs_env:
-        volume_in_another = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=another_ps)
+        volume_in_another = test_stub.create_multi_volumes(count=VOLUME_NUMBER, ps=another_ps)
     else:
-        volume_in_another = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=another_ps,
+        volume_in_another = test_stub.create_multi_volumes(count=VOLUME_NUMBER, ps=another_ps,
                                                           host_uuid=test_lib.lib_get_vm_host(vm.get_vm()).uuid)
 
     for volume in volume_in_local + volume_in_another:

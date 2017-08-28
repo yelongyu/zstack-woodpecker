@@ -242,7 +242,7 @@ def create_multi_vms(name_prefix='', count=10, host_uuid=None, ps_uuid=None, dat
     return vm_list
 
 
-def create_multi_volume(count=10, host_uuid=None, ps=None):
+def create_multi_volumes(count=10, host_uuid=None, ps=None):
     volume_list = []
     for i in xrange(count):
         disk_offering = random.choice(res_ops.get_resource(res_ops.DISK_OFFERING))
@@ -272,6 +272,8 @@ def add_primaryStorage(first_ps=None):
         ps_config.set_zone_uuid(first_ps.zoneUuid)
         ps_config.set_type(first_ps.type)
         ps_config.set_url("/home/local-ps2")
+    else:
+        test_util.test_skip('currently only support add local storage')
 
     ps = ps_ops.create_local_primary_storage(ps_config)
     ps_ops.attach_primary_storage(ps.uuid, cluster_uuid)
@@ -424,7 +426,7 @@ class TwoPrimaryStorageEnv(object):
                 self.test_object_dict.add_vm(vm)
 
         if self.first_ps_volume_number:
-            self.first_ps_volume_list = create_multi_volume(count=self.first_ps_volume_number, host_uuid=self.host_uuid,
+            self.first_ps_volume_list = create_multi_volumes(count=self.first_ps_volume_number, host_uuid=self.host_uuid,
                                                             ps=self.first_ps)
             for volume in self.first_ps_volume_list:
                 self.test_object_dict.add_volume(volume)
@@ -440,7 +442,7 @@ class TwoPrimaryStorageEnv(object):
                 self.test_object_dict.add_vm(vm)
 
         if self.second_ps_volume_number:
-            self.second_ps_volume_list = create_multi_volume(count=self.second_ps_volume_number, host_uuid=self.host_uuid,
+            self.second_ps_volume_list = create_multi_volumes(count=self.second_ps_volume_number, host_uuid=self.host_uuid,
                                                              ps=self.second_ps)
             for volume in self.second_ps_volume_list:
                 self.test_object_dict.add_volume(volume)

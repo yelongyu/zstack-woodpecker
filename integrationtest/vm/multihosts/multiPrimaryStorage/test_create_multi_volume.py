@@ -24,7 +24,7 @@ def test():
     test_util.test_dsc("Create {0} volume in the first primaryStorage".format(VOLUME_NUMBER))
     ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
     first_ps = ps_list[0]
-    volume_list = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=first_ps)
+    volume_list = test_stub.create_multi_volumes(count=VOLUME_NUMBER, ps=first_ps)
     for volume in volume_list:
         test_obj_dict.add_volume(volume)
 
@@ -36,12 +36,12 @@ def test():
         second_ps = ps_list[1]
 
     test_util.test_dsc("Create {0} volume in the second primaryStorage".format(VOLUME_NUMBER))
-    volume_list = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=second_ps)
+    volume_list = test_stub.create_multi_volumes(count=VOLUME_NUMBER, ps=second_ps)
     for volume in volume_list:
         test_obj_dict.add_volume(volume)
 
     test_util.test_dsc("Create one more volume in the first primaryStorage")
-    volume = test_stub.create_multi_volume(count=1, ps=first_ps)[0]
+    volume = test_stub.create_multi_volumes(count=1, ps=first_ps)[0]
     test_obj_dict.add_volume(volume)
 
     test_util.test_dsc("Check the capacity")

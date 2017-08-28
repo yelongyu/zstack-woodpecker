@@ -53,7 +53,7 @@ def test():
 
     test_util.test_dsc("Try to Create one volume")
     with test_stub.expect_failure("Create volume when no ps in enable status", Exception):
-        test_stub.create_multi_volume(count=1, ps=random.choice([env.first_ps, env.second_ps]))
+        test_stub.create_multi_volumes(count=1, ps=random.choice([env.first_ps, env.second_ps]))
 
     test_util.test_dsc("enable All primaryStorage")
     for ps in [env.first_ps, env.second_ps]:

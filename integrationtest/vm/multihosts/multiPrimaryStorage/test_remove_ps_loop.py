@@ -56,7 +56,7 @@ def test():
 
     if ps_env.is_local_nfs_env:
         test_util.test_dsc('create date volume in ps2')
-        volume = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=ps2)
+        volume = test_stub.create_multi_volumes(count=VOLUME_NUMBER, ps=ps2)
         test_obj_dict.add_volume(volume)
     else:
         test_util.test_dsc('create VM in ps2')

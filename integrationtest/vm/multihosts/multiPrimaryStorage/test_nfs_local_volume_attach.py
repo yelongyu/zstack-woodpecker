@@ -24,7 +24,7 @@ def test():
     nfs_ps = ps_env.get_random_nfs()
 
     vm = test_stub.create_multi_vms(name_prefix='test-', count=1)[0]
-    volume_list = test_stub.create_multi_volume(count=VOLUME_NUMBER, ps=nfs_ps)
+    volume_list = test_stub.create_multi_volumes(count=VOLUME_NUMBER, ps=nfs_ps)
 
     test_util.test_dsc("Attach all volumes to local ps vm")
     for volume in volume_list:
