@@ -670,7 +670,7 @@ def get_host_l2_nic_name(l2interface):
 
 
 @contextmanager
-def expect_failure(msg, *exceptions):
+def expected_failure(msg, *exceptions):
     try:
         yield
     except exceptions:

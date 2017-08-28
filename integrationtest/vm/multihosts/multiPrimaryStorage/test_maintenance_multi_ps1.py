@@ -65,7 +65,7 @@ def test():
     assert vm4.get_vm().state == inventory.STOPPED
 
     for vm in [vm2, vm3, vm4]:
-        with test_stub.expect_failure("start vm in maintenance ps", Exception):
+        with test_stub.expected_failure("start vm in maintenance ps", Exception):
             vm.start()
 
     test_util.test_dsc('enable ps2')

@@ -40,7 +40,7 @@ def test():
     vm.check()
     assert vm.get_vm().state == inventory.RUNNING
 
-    with test_stub.expect_failure("Create datavol in nfs-local env when nfs disabled", Exception):
+    with test_stub.expected_failure("Create datavol in nfs-local env when nfs disabled", Exception):
         test_stub.create_multi_volumes(count=1, ps=nfs_ps)
 
     test_util.test_dsc("Try to create vm")

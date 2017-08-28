@@ -52,7 +52,7 @@ def test():
         volume.check()
 
     test_util.test_dsc("Try to create vm with datavolume")
-    with test_stub.expect_failure('Create vm with datavol in nfs-local env when local disabled', Exception):
+    with test_stub.expected_failure('Create vm with datavol in nfs-local env when local disabled', Exception):
         test_stub.create_multi_vms(name_prefix='test-vm', count=1, datavolume=10)
 
     test_util.test_dsc("Try to create datavolume in NFS")

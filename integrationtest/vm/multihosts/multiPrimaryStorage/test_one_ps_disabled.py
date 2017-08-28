@@ -52,7 +52,7 @@ def test():
         test_object.check()
 
     test_util.test_dsc("Try to Create vm in disabeld ps")
-    with test_stub.expect_failure("Create vm in disabled ps", Exception):
+    with test_stub.expected_failure("Create vm in disabled ps", Exception):
         test_stub.create_multi_vms(name_prefix='test-vm', count=1, ps_uuid=disabled_ps.uuid)
 
     test_util.test_dsc("Create 5 vms and check all should be in enabled PS")

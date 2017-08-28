@@ -74,7 +74,7 @@ def test():
     else:
         vm1.check()
 
-    with test_stub.expect_failure("Start vm in maintenance ps", Exception):
+    with test_stub.expected_failure("Start vm in maintenance ps", Exception):
         vm2.start()
 
     test_util.test_dsc('enable another ps')

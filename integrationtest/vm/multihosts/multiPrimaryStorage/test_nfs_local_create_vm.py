@@ -32,7 +32,7 @@ def test():
         ps = res_ops.get_resource(res_ops.PRIMARY_STORAGE, uuid=ps_uuid)[0]
         assert ps.type == inventory.LOCAL_STORAGE_TYPE
 
-    with test_stub.expect_failure('Create vm on nfs in local-nfs environment', Exception):
+    with test_stub.expected_failure('Create vm on nfs in local-nfs environment', Exception):
         test_stub.create_multi_vms(name_prefix='test-', count=VM_COUNT, ps_uuid=test_stub.PSEnvChecker().get_random_nfs().uuid)
 
     test_util.test_pass('Multi PrimaryStorage Test Pass')

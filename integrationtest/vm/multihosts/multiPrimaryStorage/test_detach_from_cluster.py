@@ -57,10 +57,10 @@ def test():
     for vm in env.get_vm_list_from_ps(another_ps):
         assert vm.get_vm().state == inventory.RUNNING
 
-    with test_stub.expect_failure('start vm in ps that not attached to cluster', Exception):
+    with test_stub.expected_failure('start vm in ps that not attached to cluster', Exception):
         random.choice(env.get_vm_list_from_ps(selected_ps)).start()
 
-    with test_stub.expect_failure("Create vm in detached ps", Exception):
+    with test_stub.expected_failure("Create vm in detached ps", Exception):
         test_stub.create_multi_vms(name_prefix='test-vm', count=1, ps_uuid=selected_ps.uuid)
 
     test_util.test_dsc("Create 5 vms and check all should be in enabled PS")

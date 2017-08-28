@@ -29,7 +29,7 @@ def test():
     for volume in volume_list:
         assert volume.get_volume().primaryStorageUuid == nfs_ps.uuid
 
-    with test_stub.expect_failure('Create volume on local in local-nfs environment', Exception):
+    with test_stub.expected_failure('Create volume on local in local-nfs environment', Exception):
         test_stub.create_multi_volumes(count=1, ps=ps_env.get_random_local())
 
     test_util.test_pass('Multi PrimaryStorage Test Pass')

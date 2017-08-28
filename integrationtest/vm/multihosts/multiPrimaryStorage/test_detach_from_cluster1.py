@@ -50,7 +50,7 @@ def test():
     for vm in first_ps_vm_list + second_ps_vm_list:
         assert vm.get_vm().state == inventory.STOPPED
 
-    with test_stub.expect_failure('Create vm when no ps attached to cluster', Exception):
+    with test_stub.expected_failure('Create vm when no ps attached to cluster', Exception):
         test_stub.create_multi_vms(name_prefix='test-vm', count=1)
 
     for ps in [env.first_ps, env.second_ps]:

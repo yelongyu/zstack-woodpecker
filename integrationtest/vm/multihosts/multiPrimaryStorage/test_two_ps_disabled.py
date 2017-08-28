@@ -48,11 +48,11 @@ def test():
         test_object.check()
 
     test_util.test_dsc("Try to Create one vm")
-    with test_stub.expect_failure("Create vm when no ps in enable status", Exception):
+    with test_stub.expected_failure("Create vm when no ps in enable status", Exception):
         test_stub.create_multi_vms(name_prefix='test-vm', count=1)
 
     test_util.test_dsc("Try to Create one volume")
-    with test_stub.expect_failure("Create volume when no ps in enable status", Exception):
+    with test_stub.expected_failure("Create volume when no ps in enable status", Exception):
         test_stub.create_multi_volumes(count=1, ps=random.choice([env.first_ps, env.second_ps]))
 
     test_util.test_dsc("enable All primaryStorage")
