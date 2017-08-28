@@ -678,25 +678,26 @@ def expect_failure(msg, *exceptions):
 
 
 class PSEnvChecker(object):
+
     def __init__(self):
         self.ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
         assert self.ps_list
 
     @property
     def is_one_ps_env(self):
-        return True if len(self.ps_list) == 1 else False
+        return len(self.ps_list) == 1
 
     @property
     def is_one_local_env(self):
-        return True if self.is_one_ps_env and self.ps_list[0].type == inventory.LOCAL_STORAGE_TYPE else False
+        return self.is_one_ps_env and self.ps_list[0].type == inventory.LOCAL_STORAGE_TYPE
 
     @property
     def is_one_nfs_env(self):
-        return True if self.is_one_ps_env and self.ps_list[0].type == inventory.NFS_PRIMARY_STORAGE_TYPE else False
+        return self.is_one_ps_env and self.ps_list[0].type == inventory.NFS_PRIMARY_STORAGE_TYPE
 
     @property
     def is_multi_ps_env(self):
-        return True if len(self.ps_list) >= 2 else False
+        return len(self.ps_list) >= 2
 
     @property
     def is_multi_local_env(self):
