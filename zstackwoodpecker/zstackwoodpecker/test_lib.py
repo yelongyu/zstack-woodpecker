@@ -1893,6 +1893,18 @@ def lib_get_l2_vxlan_vni(l2_uuid, session_uuid=None):
     #test_util.test_logger('L2: %s did not have vlan. ' % l2_uuid)
     #return None
 
+def lib_get_l2_interface_by_name(l2_name, session_uuid=None):
+    '''
+        return l2 interface by the provided l2 name
+    '''
+    l2net = res_ops.get_resource(res_ops.L2_NETWORK, session_uuid, name=l2_name)
+
+    if l2net:
+        return l2net[0].physicalInterface
+    else:
+        test_util.test_logger("NOT FOUND L2 NETWORK BY NAME %s" %(l2_name))
+        return None
+
 #-----------Get L3 Network resource-------------
 def lib_get_l3_uuid_by_nic(nic_uuid, session_uuid=None):
     conditions = res_ops.gen_query_conditions('uuid', '=', nic_uuid)
