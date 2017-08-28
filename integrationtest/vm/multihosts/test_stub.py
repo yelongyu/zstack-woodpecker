@@ -819,6 +819,21 @@ def skip_if_have_nfs(test_method):
     return wrapper
 
 
+def wait_until_vm_reach_state(timeout, state, *vm_list):
+    total_time = 0
+    interval = 5
+    while total_time <= timeout:
+        [vm.update() for vm in vm_list]
+        state_list = [vm.get_vm().state for vm in vm_list]
+        if state in state_list and len(set(state_list)) == 1:
+            test_util.test_logger('All VMs reach {} status!'.format(state))
+            break
+        else:
+            time.sleep(interval)
+            total_time += interval
+    else:
+        test_util.test_fail('Some VM Fail to Reach {} state in {}s'.format(timeout))
+
 
 def create_eip(eip_name=None, vip_uuid=None, vnic_uuid=None, vm_obj=None, \
         session_uuid = None):

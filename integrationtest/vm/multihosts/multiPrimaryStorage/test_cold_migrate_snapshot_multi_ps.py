@@ -25,7 +25,7 @@ disabled_ps_list = []
 def test():
     ps_env = test_stub.PSEnvChecker()
 
-    local_nfs_env = True if ps_env.is_local_nfs_env else False
+    local_nfs_env = ps_env.is_local_nfs_env
 
     local_ps = ps_env.get_random_local()
     another_ps = ps_env.get_random_nfs() if local_nfs_env else random.choice([ps for ps in ps_env.ps_list if ps.uuid != local_ps.uuid])
@@ -37,11 +37,8 @@ def test():
     volume_in_local = test_stub.create_multi_volumes(count=VOLUME_NUMBER, ps=local_ps,
                                                     host_uuid=test_lib.lib_get_vm_host(vm.get_vm()).uuid)
 
-    if local_nfs_env:
-        volume_in_another = test_stub.create_multi_volumes(count=VOLUME_NUMBER, ps=another_ps)
-    else:
-        volume_in_another = test_stub.create_multi_volumes(count=VOLUME_NUMBER, ps=another_ps,
-                                                          host_uuid=test_lib.lib_get_vm_host(vm.get_vm()).uuid)
+    volume_in_another = test_stub.create_multi_volumes(count=VOLUME_NUMBER, ps=another_ps,
+                                                       host_uuid=None if local_nfs_env else test_lib.lib_get_vm_host(vm.get_vm()).uuid)
 
     for volume in volume_in_local + volume_in_another:
         test_obj_dict.add_volume(volume)
@@ -65,18 +62,17 @@ def test():
     vm.check()
 
     target_host = test_lib.lib_find_random_host(vm.get_vm())
-    target_host_uuid = target_host.uuid
 
     vm.stop()
     vm.check()
-    vol_ops.migrate_volume(test_lib.lib_get_root_volume(vm.get_vm()).uuid, target_host_uuid)
+    vol_ops.migrate_volume(test_lib.lib_get_root_volume(vm.get_vm()).uuid, target_host.uuid)
 
     for volume in volume_in_local:
-        vol_ops.migrate_volume(volume.get_volume().uuid, target_host_uuid)
+        vol_ops.migrate_volume(volume.get_volume().uuid, target_host.uuid)
 
     if not local_nfs_env:
         for volume in volume_in_another:
-            vol_ops.migrate_volume(volume.get_volume().uuid, target_host_uuid)
+            vol_ops.migrate_volume(volume.get_volume().uuid, target_host.uuid)
 
     for volume in volume_in_local + volume_in_another:
         volume.attach(vm)

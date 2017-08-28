@@ -4,13 +4,8 @@
 
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
-import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
-import apibinding.inventory as inventory
-import apibinding.api_actions as api_actions
 import zstackwoodpecker.test_state as test_state
-import zstackwoodpecker.header.host as host_header
-import os
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import random
 
@@ -29,7 +24,7 @@ VM_COUNT = 10
 def test():
     test_util.test_dsc("Create {0} vm in the first primaryStorage".format(VM_COUNT))
     ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
-    first_ps = ps_list[0]
+    first_ps = random.choice(ps_list)
     vm_list = test_stub.create_multi_vms(name_prefix='vm_in_fist_ps', count=VM_COUNT, ps_uuid=first_ps.uuid)
     for vm in vm_list:
         test_obj_dict.add_vm(vm)
@@ -39,7 +34,7 @@ def test():
         second_ps = test_stub.add_primaryStorage(first_ps=first_ps)
         new_ps_list.append(second_ps)
     else:
-        second_ps = ps_list[1]
+        second_ps = random.choice([ps for ps in ps_list if ps.uuid != first_ps.uuid])
 
     test_util.test_dsc("Create {0} vm in the second primaryStorage".format(VM_COUNT))
     vm_list = test_stub.create_multi_vms(name_prefix='vm_in_second_ps', count=VM_COUNT, ps_uuid=second_ps.uuid)

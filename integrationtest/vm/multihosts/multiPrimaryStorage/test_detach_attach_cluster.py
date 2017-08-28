@@ -50,7 +50,6 @@ def test():
         ps_ops.attach_primary_storage(selected_ps.uuid, res_ops.get_resource(res_ops.CLUSTER)[0].uuid)
         detached_ps_list.pop()
 
-
     test_util.test_dsc('All vm in selected ps should STOP')
     for vm in first_ps_vm_list + second_ps_vm_list:
         vm.update()

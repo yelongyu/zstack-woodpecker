@@ -6,7 +6,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
-import apibinding.inventory as inventory
+import random
 
 _config_ = {
         'timeout' : 3000,
@@ -31,9 +31,9 @@ def test():
     env.check_env()
     env.deploy_env()
 
-    first_ps_vm = env.first_ps_vm_list[0]
+    first_ps_vm = random.choice(env.first_ps_vm_list)
     first_ps_volume_list = env.first_ps_volume_list
-    second_ps_vm = env.second_ps_vm_list[0]
+    second_ps_vm = random.choice(env.second_ps_vm_list)
     second_ps_volume_list = env.second_ps_volume_list
     if env.new_ps:
         new_ps_list.append(env.second_ps)

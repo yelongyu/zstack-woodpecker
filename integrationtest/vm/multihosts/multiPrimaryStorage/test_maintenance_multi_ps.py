@@ -33,12 +33,9 @@ def test():
     for vm in (vm1, vm2):
         test_obj_dict.add_vm(vm)
 
-    if another_ps.type == inventory.LOCAL_STORAGE_TYPE:
-        volume_in_another = test_stub.create_multi_volumes(count=VOLUME_NUMBER, ps=another_ps,
-                                                          host_uuid=test_lib.lib_get_vm_host(vm2.get_vm()).uuid)
-    else:
-        volume_in_another = test_stub.create_multi_volumes(count=VOLUME_NUMBER, ps=another_ps)
-
+    volume_in_another = test_stub.create_multi_volumes(count=VOLUME_NUMBER, ps=another_ps,
+                                                       host_uuid=test_lib.lib_get_vm_host(vm2.get_vm()).uuid
+                                                       if another_ps.type == inventory.LOCAL_STORAGE_TYPE else None)
     for volume in volume_in_another:
         test_obj_dict.add_volume(volume)
 
@@ -48,19 +45,10 @@ def test():
     test_util.test_dsc('set another ps in maintenance mode')
     ps_ops.change_primary_storage_state(state='maintain', primary_storage_uuid=another_ps.uuid)
     maintenance_ps_list.append(another_ps)
-    time.sleep(10)
-    count = 10
+
+    test_stub.wait_until_vm_reach_state(timeout=60, state=inventory.STOPPED, vm2)
     vm1.update()
     assert vm1.get_vm().state == inventory.RUNNING
-    while count:
-        vm2.update()
-        if vm2.get_vm().state == inventory.STOPPED:
-            break
-        elif vm2.get_vm().state == inventory.STOPPING:
-            time.sleep(10)
-            count -= 1
-        else:
-            test_util.test_fail("VM2 is not in Stopped status!!!")
 
     vr_vm_list = test_lib.lib_find_vr_by_vm(vm1.get_vm())
     vr_vm = None

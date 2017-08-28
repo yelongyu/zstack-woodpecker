@@ -7,6 +7,7 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
+import random
 
 _config_ = {
         'timeout' : 3000,
@@ -23,7 +24,7 @@ VOLUME_NUMBER = 100
 def test():
     test_util.test_dsc("Create {0} volume in the first primaryStorage".format(VOLUME_NUMBER))
     ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
-    first_ps = ps_list[0]
+    first_ps = random.choice(ps_list)
     volume_list = test_stub.create_multi_volumes(count=VOLUME_NUMBER, ps=first_ps)
     for volume in volume_list:
         test_obj_dict.add_volume(volume)
@@ -33,7 +34,7 @@ def test():
         second_ps = test_stub.add_primaryStorage(first_ps=first_ps)
         new_ps_list.append(second_ps)
     else:
-        second_ps = ps_list[1]
+        second_ps = random.choice([ps for ps in ps_list if ps.uuid != first_ps.uuid])
 
     test_util.test_dsc("Create {0} volume in the second primaryStorage".format(VOLUME_NUMBER))
     volume_list = test_stub.create_multi_volumes(count=VOLUME_NUMBER, ps=second_ps)
