@@ -678,6 +678,12 @@ def expect_failure(msg, *exceptions):
 
 
 class PSEnvChecker(object):
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = object.__new__(cls, *args, **kwargs)
+        return cls._instance
 
     def __init__(self):
         self.ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
