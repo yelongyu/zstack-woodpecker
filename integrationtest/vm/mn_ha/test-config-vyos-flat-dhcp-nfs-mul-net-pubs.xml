@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-vyos-flat-dhcp-nfs-mul-net-pubs.xml</deployConfig>
+    <deployConfigTemplate>deploy.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
