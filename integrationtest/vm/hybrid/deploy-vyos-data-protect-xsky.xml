@@ -395,7 +395,9 @@
         <xskyPrimaryStorage name="$xskyPrimaryStorageName"
           description="Test" 
 	  monUrls="$xskyPrimaryStorageMonUrls"
-	  rootVolumePoolName="$xskyPrimaryStorageRootVolumePoolName" />
+	  rootVolumePoolName="$xskyPrimaryStorageRootVolumePoolName" 
+	  dataVolumePoolName="$xskyPrimaryStorageDataVolumePoolName"
+          imageCachePoolName="$xskyPrimaryStorageImageCachePoolName"/>
       </primaryStorages>
 
       <backupStorageRef>$xskyBackupStorageName</backupStorageRef>
