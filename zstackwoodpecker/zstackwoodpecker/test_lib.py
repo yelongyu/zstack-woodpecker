@@ -4627,31 +4627,35 @@ into robot_test_obj.exclusive_actions_list.')
         target_volume_snapshots.use_snapshot(target_snapshot)
 
     elif next_action == TestAction.backup_volume_snapshot:
-        test_util.test_dsc('Robot Action: %s; on Volume: %s; on SP: %s' % \
-            (next_action, \
-            target_volume_snapshots.get_target_volume().get_volume().uuid, \
-            target_snapshot.get_snapshot().uuid))
+        test_util.test_dsc("Skip backup snapshot currently for debugging as this operation is"
+                           "not exposed to users")
+        #test_util.test_dsc('Robot Action: %s; on Volume: %s; on SP: %s' % \
+        #    (next_action, \
+        #    target_volume_snapshots.get_target_volume().get_volume().uuid, \
+        #    target_snapshot.get_snapshot().uuid))
 
-        target_volume_snapshots.backup_snapshot(target_snapshot)
+        #target_volume_snapshots.backup_snapshot(target_snapshot)
 
     elif next_action == TestAction.delete_backup_volume_snapshot:
-        test_util.test_dsc('Robot Action: %s; on Volume: %s; on SP: %s' % \
-            (next_action, \
-            target_volume_snapshots.get_target_volume().get_volume().uuid, \
-            target_snapshot.get_snapshot().uuid))
-
-        target_volume_snapshots.delete_backuped_snapshot(target_snapshot)
+        test_util.test_dsc("Skip backup snapshot currently for debugging as this operation is"
+                           "not exposed to users")
+        #test_util.test_dsc('Robot Action: %s; on Volume: %s; on SP: %s' % \
+        #    (next_action, \
+        #    target_volume_snapshots.get_target_volume().get_volume().uuid, \
+        #    target_snapshot.get_snapshot().uuid))
+        #
+        #target_volume_snapshots.delete_backuped_snapshot(target_snapshot)
 
         #Both volume and snapshots are deleted, volume_snapshot obj could be 
         # removed.
-        if not target_volume_snapshots.get_backuped_snapshots():
-            target_volume_obj = target_volume_snapshots.get_target_volume()
-            if target_volume_obj.get_state() == vol_header.EXPUNGED \
-                    or (target_volume_snapshots.get_volume_type() == \
-                        vol_header.ROOT_VOLUME \
-                        and target_volume_obj.get_target_vm().get_state() == \
-                            vm_header.EXPUNGED):
-                test_dict.rm_volume_snapshot(target_volume_snapshots)
+        #if not target_volume_snapshots.get_backuped_snapshots():
+        #    target_volume_obj = target_volume_snapshots.get_target_volume()
+        #    if target_volume_obj.get_state() == vol_header.EXPUNGED \
+        #            or (target_volume_snapshots.get_volume_type() == \
+        #                vol_header.ROOT_VOLUME \
+        #                and target_volume_obj.get_target_vm().get_state() == \
+        #                    vm_header.EXPUNGED):
+        #        test_dict.rm_volume_snapshot(target_volume_snapshots)
 
     elif next_action == TestAction.create_volume_from_snapshot:
         test_util.test_dsc('Robot Action: %s; on Volume: %s; on SP: %s' % \
