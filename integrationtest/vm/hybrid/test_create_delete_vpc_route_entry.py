@@ -21,9 +21,6 @@ def test():
     global ks_inv
     global datacenter_inv
     datacenter_type = os.getenv('datacenterType')
-    vpc_id = os.getenv('ecs_vpcId')
-    vpc_vr_id = os.getenv('vpc_vrId')
-    vpn_gateway_id = os.getenv('vpn_gatewayId')
     ks_existed = hyb_ops.query_aliyun_key_secret()
     if not ks_existed:
         ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
@@ -45,6 +42,7 @@ def test():
             iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, iz.zoneId)
             vpn_gateway_list = hyb_ops.sync_vpc_vpn_gateway_from_remote(datacenter_inv.uuid)
             if vpn_gateway_list:
+                vpn_gateway = vpn_gateway_list[0]
                 break
             else:
                 hyb_ops.del_identity_zone_in_local(iz_inv.uuid)
@@ -52,25 +50,19 @@ def test():
             break
         else:
             hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
-    if not vpn_gateway_list:
+    if not vpn_gateway:
         test_util.test_fail("VpnGate for route entry creating was not found in all available dataCenter")
     hyb_ops.sync_ecs_vpc_from_remote(datacenter_inv.uuid)
+    hyb_ops.sync_ecs_vswitch_from_remote(datacenter_inv.uuid)
+    vswitch_local = hyb_ops.query_ecs_vswitch_local()
     vpc_local = hyb_ops.query_ecs_vpc_local()
     # Get Vpc which has available gateway
-    for vl in vpc_local:
-        if vl.ecsVpcId == vpc_id:
-            vpc_inv = vl
-    # Get Vpn gateway
-    vpc_vpn_gw_local = hyb_ops.query_vpc_vpn_gateway_local()
-    for gw in vpc_vpn_gw_local:
-        if gw.vpnGatewayId == vpn_gateway_id:
-            vpn_gateway = gw
+    vpc_uuid = [vs.ecsVpcUuid for vs in vswitch_local if vs.uuid == vpn_gateway.vSwitchUuid][0]
+    vpc_inv = [vpc for vpc in vpc_local if vpc.uuid == vpc_uuid][0]
     # Get Aliyun virtual router
     hyb_ops.sync_aliyun_virtual_router_from_remote(vpc_inv.uuid)
     vr_local = hyb_ops.query_aliyun_virtual_router_local()
-    for v in vr_local:
-        if v.vrId == vpc_vr_id:
-            vr = v
+    vr = [v for v in vr_local if v.vrId == vpc_inv.vRouterId][0]
     route_entry_inv = hyb_ops.create_aliyun_vpc_virtualrouter_entry_remote('172.18.200.0/24', vr.uuid, vrouter_type='vrouter', next_hop_type='VpnGateway', next_hop_uuid=vpn_gateway.uuid)
     time.sleep(30)
     hyb_ops.del_aliyun_route_entry_remote(route_entry_inv.uuid)
