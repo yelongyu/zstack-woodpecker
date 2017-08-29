@@ -219,4 +219,41 @@ def run_iperf_client(ssh_cmd_line, server_ip, runtime):
     if execute_shell_in_process(cmd, timeout) != 0:
         test_util.test_fail('network io load fail to run')
 
+class Threaddisk(threading.Thread):
+    def run(self):
+        time.sleep(80)
+        cmd = '%s "ps -ef|grep dd|grep iflag|awk '{print $2}'|xargs kill -9"'
 
+class Threadnetwork(threading.Thread):
+    def run(self):
+        time.sleep(80)
+        cmd = '%s "ps -ef|grep wget|awk '{print $2}'|xargs kill -9"'
+
+class Threadwrite(threading.Thread):
+    def run(self):
+        cmd = '%s "time dd if=/dev/zero of=test.dbf bs=8k count=300000 oflag=direct,nonblock"'
+
+class Threadread(threading.Thread):
+    def run(self):
+        cmd = '%s "time dd if=/dev/vda of=/dev/null bs=8k iflag=direct,nonblock"'
+
+class Threaddownload(threading.Thread):
+    def run(self):
+        cmd = '%s "wget http://192.168.200.100/mirror/diskimages/win7.qcow2"'
+
+def run_disk_load1(ssh_cmd_line,rw):
+    t1 = Threaddisk(args=ssh_cmd_line)
+    t1.start()
+    if rw == 'write':
+        t2 = Threadwrite(args=ssh_cmd_line)
+        t2.start()
+    else:
+        t2 = Threadread(args=ssh_cmd_line)
+        t2.start()
+
+def run_network_load(ssh_cmd_line):
+    t1 = Threadnetwork(args=ssh_cmd_line)
+    t1.start()
+    t2 = Threadread(args=ssh_cmd_line)
+    t2.start()
+    cmd = '%s "rm -rf win7.qcow2"' % ssh_cmd_line
