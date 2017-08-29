@@ -30,7 +30,7 @@ def create_vm(vm_name = 'vm1', image_name = None, \
 
     if not l3_name:
         l3_name1 = os.environ.get('l3PublicNetworkName')
-        l3_name2 = os.environ.get('l3VlanNetworkName2')
+        l3_name2 = os.environ.get('l3VlanNetworkName1')
         l3_name3 = os.environ.get('l3VlanNetworkName3')
 
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
