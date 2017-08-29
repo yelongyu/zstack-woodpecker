@@ -19,6 +19,7 @@ import zstackwoodpecker.operations.ha_operations as ha_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 
 
+
 def wait_for_mn_ha_ready(scenarioConfig, scenarioFile):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
     if len(mn_host_list) < 1:
@@ -364,7 +365,15 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
     test_util.test_logger("[%s] %s" % (test_host_ip, cmd3))
     ssh.execute(cmd3, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
 
+
+l2network_nic = None
 def shutdown_host_network(host_vm, scenarioConfig):
+    '''
+        Here we change l2network_nic to be global is due to the maybe failed once all mn nodes disconnected
+        In that case, lib_get_l2_magt_nic_by_vr_offering will be failed because of mn is disconnected.
+        Of course, to be global means the management network can be only selected once in ZStack DB.
+    '''
+    global l2network_nic
     zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
     cond = res_ops.gen_query_conditions('vmNics.ip', '=', host_vm.ip_)
     host_vm_inv = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0]
@@ -372,7 +381,8 @@ def shutdown_host_network(host_vm, scenarioConfig):
     host_inv = sce_ops.query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
 
     host_vm_config = sce_ops.get_scenario_config_vm(host_vm_inv.name_, scenarioConfig)
-    l2network_nic = test_lib.lib_get_l2_magt_nic_by_vr_offering()
+    if not l2network_nic:
+        l2network_nic = test_lib.lib_get_l2_magt_nic_by_vr_offering()
     if not l2network_nic:
         test_util.test_fail("fail to get management l2 by vr offering")
     #l2network_nic = os.environ.get('l2ManagementNetworkInterface').replace("eth", "zsn")
@@ -380,6 +390,10 @@ def shutdown_host_network(host_vm, scenarioConfig):
     sce_ops.execute_in_vm_console(zstack_management_ip, host_inv.managementIp, host_vm_inv.uuid, host_vm_config, cmd)
 
 def reopen_host_network(host_vm, scenarioConfig):
+    '''
+        This function can be only invoked after shutdown_host_network.
+    '''
+    global l2network_nic
     zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
     cond = res_ops.gen_query_conditions('vmNics.ip', '=', host_vm.ip_)
     host_vm_inv = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0]
@@ -387,7 +401,6 @@ def reopen_host_network(host_vm, scenarioConfig):
     host_inv = sce_ops.query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
 
     host_vm_config = sce_ops.get_scenario_config_vm(host_vm_inv.name_, scenarioConfig)
-    l2network_nic = test_lib.lib_get_l2_magt_nic_by_vr_offering()
     if not l2network_nic:
         test_util.test_fail("fail to get management l2 by vr offering")
     #l2network_nic = os.environ.get('l2ManagementNetworkInterface').replace("eth", "zsn")
