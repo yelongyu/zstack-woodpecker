@@ -578,6 +578,7 @@ def detach_network_service_from_l3network(l3_uuid, service_uuid, session_uuid=No
     action.timeout = 12000
     test_util.action_logger('Detach [Network Service]: %s from [l3]: %s' % (service_uuid, l3_uuid))
     evt = acc_ops.execute_action_with_session(action, session_uuid)
+
 def create_virtual_router_offering(name, cpuNum, memorySize, imageUuid, zoneUuid, managementNetworkUuid, publicNetworkUuid=None, description=None, allocatorStrategy=None, offeringType=None, session_uuid = None):
     action = api_actions.CreateVirtualRouterOfferingAction()
     action.name = name
@@ -604,3 +605,28 @@ def create_virtual_router_offering(name, cpuNum, memorySize, imageUuid, zoneUuid
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.test_logger('Virtual Router Offering: %s is created' % evt.inventory.uuid)
     return evt.inventory
+
+def get_l3network_router_interface_ip(l3NetworkUuid, systemTags=None, userTags=None, session_uuid=None):
+    action = api_actions.GetL3NetworkRouterInterfaceIpAction()
+    action.l3NetworkUuid = l3NetworkUuid
+    if systemTags:
+        action.systemTags = systemTags
+    if userTags:
+        action.userTags = userTags
+    action.timeout = 12000
+    test_util.test_logger('Get l3 network router interface ip from L3 uuid: {}'.format(l3NetworkUuid))
+    result = acc_ops.execute_action_with_session(action, session_uuid)
+    return result
+
+def set_l3network_router_interface_ip(l3NetworkUuid, routerInterfaceIp, systemTags=None, userTags=None, session_uuid=None):
+    action = api_actions.SetL3NetworkRouterInterfaceIpAction()
+    action.l3NetworkUuid = l3NetworkUuid
+    action.routerInterfaceIp = routerInterfaceIp
+    if systemTags:
+        action.systemTags = systemTags
+    if userTags:
+        action.userTags = userTags
+    action.timeout = 12000
+    test_util.test_logger('Set l3 network router interface ip for L3 uuid: {}'.format(l3NetworkUuid))
+    result = acc_ops.execute_action_with_session(action, session_uuid)
+    return result
