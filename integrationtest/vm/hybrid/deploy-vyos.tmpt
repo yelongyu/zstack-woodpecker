@@ -17,14 +17,6 @@ ipRangeEndPublicIp = 180.180.180.182
 ipRangePublicNetmask = 255.255.255.240
 ipRangePublicGateway = 180.180.180.180
 
-ecs_imageId = ECS_IMAGE_NAME
-
-ecs_vpcId = EcsVpcId
-vpn_gatewayId = VpnGatewayId
-vpc_vrId = VpcVrId
-
-prepaid_ecsInstanceId = id-ecs-instance-prepaid
-
 l2PublicVlan = 3
 
 hybrid_user_name = test

@@ -682,128 +682,128 @@ def update_image_guestOsType(uuid, guest_os_type, session_uuid=None):
     test_util.action_logger('[image %s] guestOsType is updated to [%s]' % (uuid, guest_os_type))
     return evt
 
-def query_ecs_image_local(session_uuid=None):
+def query_ecs_image_local(condition=[], session_uuid=None):
     action = api_actions.QueryEcsImageFromLocalAction()
-    action.conditions = []
+    action.conditions = condition
     test_util.action_logger('Query Ecs image from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def query_ecs_vpc_local(session_uuid=None):
+def query_ecs_vpc_local(condition=[], session_uuid=None):
     action = api_actions.QueryEcsVpcFromLocalAction()
-    action.conditions = []
+    action.conditions = condition
     test_util.action_logger('Query Ecs Vpc from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def query_ecs_vswitch_local(session_uuid=None):
+def query_ecs_vswitch_local(condition=[], session_uuid=None):
     action = api_actions.QueryEcsVSwitchFromLocalAction()
-    action.conditions = []
+    action.conditions = condition
     test_util.action_logger('Query Ecs vSwitch from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def query_ecs_instance_local(session_uuid=None):
+def query_ecs_instance_local(condition=[], session_uuid=None):
     action = api_actions.QueryEcsInstanceFromLocalAction()
-    action.conditions = []
+    action.conditions = condition
     test_util.action_logger('Query Ecs Instance from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def query_aliyun_key_secret(session_uuid=None):
+def query_aliyun_key_secret(condition=[], session_uuid=None):
     action = api_actions.QueryAliyunKeySecretAction()
-    action.conditions = []
+    action.conditions = condition
     test_util.action_logger('Query Aliyun Key Secret')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def query_datacenter_local(session_uuid=None):
+def query_datacenter_local(condition=[], session_uuid=None):
     action = api_actions.QueryDataCenterFromLocalAction()
-    action.conditions = []
+    action.conditions = condition
     test_util.action_logger('Query DataCenter from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def query_ecs_security_group_local(session_uuid=None):
+def query_ecs_security_group_local(condition=[], session_uuid=None):
     action = api_actions.QueryEcsSecurityGroupFromLocalAction()
-    action.conditions = []
+    action.conditions = condition
     test_util.action_logger('Query Ecs Security Group from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def query_ecs_security_group_rule_local(conditions=[], session_uuid=None):
+def query_ecs_security_group_rule_local(condition=[], session_uuid=None):
     action = api_actions.QueryEcsSecurityGroupRuleFromLocalAction()
-    action.conditions = conditions
+    action.conditions = condition
     test_util.action_logger('Query Ecs Security Group from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def query_hybrid_eip_local(session_uuid=None):
+def query_hybrid_eip_local(condition=[], session_uuid=None):
     action = api_actions.QueryHybridEipFromLocalAction()
-    action.conditions = []
+    action.conditions = condition
     test_util.action_logger('Query Hybrid Eip from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def query_vpc_vpn_gateway_local(session_uuid=None):
+def query_vpc_vpn_gateway_local(condition=[], session_uuid=None):
     action = api_actions.QueryVpcVpnGatewayFromLocalAction()
-    action.conditions = []
+    action.conditions = condition
     test_util.action_logger('Query Vpc Vpn Gate from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def query_vpc_vpn_ike_config_local(session_uuid=None):
+def query_vpc_vpn_ike_config_local(condition=[], session_uuid=None):
     action = api_actions.QueryVpcIkeConfigFromLocalAction()
-    action.conditions = []
+    action.conditions = condition
     test_util.action_logger('Query Vpc Vpn Ike Config from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def query_vpc_vpn_ipsec_config_local(session_uuid=None):
+def query_vpc_vpn_ipsec_config_local(condition=[], session_uuid=None):
     action = api_actions.QueryVpcIpSecConfigFromLocalAction()
-    action.conditions = []
+    action.conditions = condition
     test_util.action_logger('Query Vpc Vpn IPsec Config from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def query_vpc_user_vpn_gateway_local(session_uuid=None):
+def query_vpc_user_vpn_gateway_local(condition=[], session_uuid=None):
     action = api_actions.QueryVpcUserVpnGatewayFromLocalAction()
-    action.conditions = []
+    action.conditions = condition
     test_util.action_logger('Query Vpc User Vpn Gate from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def query_vpc_vpn_connection_local(session_uuid=None):
+def query_vpc_vpn_connection_local(condition=[], session_uuid=None):
     action = api_actions.QueryVpcVpnConnectionFromLocalAction()
-    action.conditions = []
+    action.conditions = condition
     test_util.action_logger('Query Vpc Vpn Gate from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def query_aliyun_virtual_router_local(session_uuid=None):
+def query_aliyun_virtual_router_local(condition=[], session_uuid=None):
     action = api_actions.QueryAliyunVirtualRouterFromLocalAction()
-    action.conditions = []
+    action.conditions = condition
     test_util.action_logger('Query Aliyun Virtual Router from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def query_aliyun_route_entry_local(session_uuid=None):
+def query_aliyun_route_entry_local(condition=[], session_uuid=None):
     action = api_actions.QueryAliyunRouteEntryFromLocalAction()
-    action.conditions = []
+    action.conditions = condition
     test_util.action_logger('Query Aliyun Route Entry from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def query_oss_bucket_file_name(session_uuid=None):
+def query_oss_bucket_file_name(condition=[], session_uuid=None):
     action = api_actions.QueryOssBucketFileNameAction()
-    action.conditions = []
+    action.conditions = condition
     test_util.action_logger('Query Oss Bucket File Name')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def query_ipsec_connection(session_uuid=None):
+def query_ipsec_connection(condition=[], session_uuid=None):
     action = api_actions.QueryIPSecConnectionAction()
-    action.conditions = []
+    action.conditions = condition
     test_util.action_logger('Query IPsec Connection')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt

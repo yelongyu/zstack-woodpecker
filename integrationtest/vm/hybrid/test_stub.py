@@ -39,7 +39,6 @@ target_ports = rule1_ports + rule2_ports + rule3_ports + rule4_ports + rule5_por
 
 
 def create_ecs_instance(datacenter_type, datacenter_uuid, region_id, allocate_public_ip=False):
-    ecs_image_id = os.environ.get('ecs_imageId')
     iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, region_id)
     for i in range(len(iz_list)):
         zone_id = iz_list[i].zoneId
@@ -47,8 +46,9 @@ def create_ecs_instance(datacenter_type, datacenter_uuid, region_id, allocate_pu
         ecs_instance_type = hyb_ops.get_ecs_instance_type_from_remote(iz_inv.uuid)
         if ecs_instance_type:
             break
-    cond_offering = res_ops.gen_query_conditions('name', '=', os.environ.get('instanceOfferingName_m'))
-    instance_offering = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond_offering)[0]
+#     cond_offering = res_ops.gen_query_conditions('name', '=', os.environ.get('instanceOfferingName_m'))
+#     instance_offering = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond_offering)[0]
+    # Create ECS VPC
     hyb_ops.sync_ecs_vpc_from_remote(datacenter_uuid)
     vpc_all = hyb_ops.query_ecs_vpc_local()
     ecs_vpc = [vpc for vpc in vpc_all if vpc.status.lower() == 'available']
@@ -57,6 +57,7 @@ def create_ecs_instance(datacenter_type, datacenter_uuid, region_id, allocate_pu
     else:
         vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_uuid, 'zstack-test-vpc', 'zstack-test-vpc-vrouter', '172.16.0.0/12')
     time.sleep(5)
+    # Create ECS vSwitch
     hyb_ops.sync_ecs_vswitch_from_remote(datacenter_uuid)
     vswitch_all = hyb_ops.query_ecs_vswitch_local()
     vswitch = [vs for vs in vswitch_all if vs.ecsVpcUuid == vpc_inv.uuid and vs.status.lower() == 'available']
@@ -68,6 +69,7 @@ def create_ecs_instance(datacenter_type, datacenter_uuid, region_id, allocate_pu
         vpc_cidr_list[3] = '0/24'
         vswitch_cidr = '.'.join(vpc_cidr_list)
         vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'zstack-test-vswitch', vswitch_cidr)
+    # Create ECS Security Group
     hyb_ops.sync_ecs_security_group_from_remote(vpc_inv.uuid)
     time.sleep(5)
     sg_all = hyb_ops.query_ecs_security_group_local()
@@ -83,11 +85,14 @@ def create_ecs_instance(datacenter_type, datacenter_uuid, region_id, allocate_pu
     if not sg_rule:
         hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'ingress', 'ALL', '-1/-1', '0.0.0.0/0', 'accept', 'intranet', '10')
         hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'egress', 'ALL', '-1/-1', '0.0.0.0/0', 'accept', 'intranet', '10')
+    # Get ECS Image
     hyb_ops.sync_ecs_image_from_remote(datacenter_uuid)
-    ecs_image = hyb_ops.query_ecs_image_local()
-    for i in ecs_image:
-        if i.ecsImageId == ecs_image_id:
-            image = i
+    cond_image_self = res_ops.gen_query_conditions('platform', '=', 'CentOS')
+    cond_image_all = cond_image_self[:]
+    cond_image_self.extend(res_ops.gen_query_conditions('type', '=', 'self'))
+    ecs_image_all = hyb_ops.query_ecs_image_local(cond_image_all)
+    ecs_image_self = hyb_ops.query_ecs_image_local(cond_image_self)
+    image = ecs_image_self[-1] if ecs_image_self else ecs_image_all[-1]
     if not allocate_public_ip:
         ecs_inv = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, vswitch_inv.uuid, ecs_bandwidth=1, ecs_security_group_uuid=sg_inv.uuid, 
                                                              instance_type=ecs_instance_type[0].typeId, name='zstack-test-ecs-instance', ecs_console_password='A1B2c3')
