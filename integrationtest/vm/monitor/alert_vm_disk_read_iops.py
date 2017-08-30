@@ -8,7 +8,9 @@ Test about monitor trigger on vm disk reading iops in one minute
 
 import os
 import test_stub
+import threading
 import random
+import time
 import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.resource_operations as res_ops
@@ -47,9 +49,11 @@ def test():
     trigger_action = monitor_trigger_action.uuid
 
     ssh_cmd = test_stub.ssh_cmd_line(vm_ip, vm_username, vm_password, vm_port)
-    test_stub.yum_install_stress_tool(ssh_cmd)
     rw = 'read'
-    test_stub.run_disk_load(ssh_cmd, rw)
+    t = threading.Thread(target=test_stub.run_disk_load1,args=(ssh_cmd, rw,))
+    t.start()
+    time.sleep(90)
+    test_stub.kill(ssh_cmd)
 
     status_problem, status_ok = test_stub.query_trigger_in_loop(trigger,50)
     test_util.action_logger('Trigger old status: %s triggered. Trigger new status: %s recovered' % (status_problem, status_ok ))

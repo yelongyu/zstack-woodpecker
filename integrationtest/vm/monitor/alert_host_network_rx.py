@@ -9,6 +9,7 @@ import os
 import test_stub
 import random
 import time
+import threading
 import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.resource_operations as res_ops
@@ -16,19 +17,9 @@ import zstackwoodpecker.operations.monitor_operations as mon_ops
 
 
 def test():
-    global vm
     global trigger
     global media
     global trigger_action
-
-    vm = test_stub.create_vm()
-    vm.check()
-    vm_ip = vm.get_vm().vmNics[0].ip
-    vm_uuid = vm.get_vm().uuid
-    vm_username = os.environ.get('Vm_Username')
-    vm_password = os.environ.get('Vm_Password')
-    vm_port = os.environ.get('Vm_Sshport')
-
 
     test_item = "host.network.io"
     resource_type="HostVO"
@@ -50,14 +41,13 @@ def test():
     monitor_trigger_action = mon_ops.create_email_monitor_trigger_action(trigger_action_name, send_email.uuid, trigger.split(), receive_email)
     trigger_action = monitor_trigger_action.uuid
 
-    ssh_cmd = test_stub.ssh_cmd_line(vm_ip, vm_username, vm_password, vm_port)
-    test_stub.yum_install_stress_tool(ssh_cmd)
-
     host.password = os.environ.get('hostPassword')
-    ssh_cmd_host = test_stub.ssh_cmd_line(host.managementIp, host.username, host.password, port=int(host.sshPort))
-    test_stub.run_iperf_server(ssh_cmd_host)
-    test_stub.run_iperf_client(ssh_cmd, host.managementIp,80)
-    time.sleep(60)
+    ssh_cmd = test_stub.ssh_cmd_line(host.managementIp, host.username, host.password, port=int(host.sshPort))
+    
+    t = threading.Thread(target=test_stub.run_network_load,args=(ssh_cmd,))
+    t.start()
+    time.sleep(110)
+    test_stub.kill(ssh_cmd)
 
     status_problem, status_ok = test_stub.query_trigger_in_loop(trigger,50)
     test_util.action_logger('Trigger old status: %s triggered. Trigger new status: %s recovered' % (status_problem, status_ok ))
