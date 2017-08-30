@@ -315,13 +315,13 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
                 "test-config-vyos-flat-dhcp-nfs-mul-net-pubs.xml" in os.environ.get('WOODPECKER_TEST_CONFIG_FILE')) and \
                 "scenario-config-sep-pub-man.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE'):
                 nfs_vm_nic = os.environ.get('storNic')
-                nfs_vm_netmask = os.environ.get('storNetMask')
-                nfs_vm_gateway = os.environ.get('storGateway')
+                nfs_vm_netmask = os.environ.get('manNetMask')
+                nfs_vm_gateway = os.environ.get('manGateway')
             elif "test-config-vyos-nfs.xml" in os.environ.get('WOODPECKER_TEST_CONFIG_FILE') and \
                 "scenario-config-storage-separate-nfs.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE'):
                 nfs_vm_nic = os.environ.get('storNic')
-                nfs_vm_netmask = os.environ.get('manNetMask')
-                nfs_vm_gateway = os.environ.get('manGateway')
+                nfs_vm_netmask = os.environ.get('storNetMask')
+                nfs_vm_gateway = os.environ.get('storGateway')
             else:
                 test_util.test_fail("not supported nfs testconfig and scenario combination")
             nfs_cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (nfs_vm_nic, nfs_vm_ip, nfs_vm_netmask, nfs_vm_gateway)
