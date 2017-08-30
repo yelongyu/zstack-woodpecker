@@ -616,7 +616,7 @@ def get_l3network_router_interface_ip(l3NetworkUuid, systemTags=None, userTags=N
     action.timeout = 12000
     test_util.test_logger('Get l3 network router interface ip from L3 uuid: {}'.format(l3NetworkUuid))
     result = acc_ops.execute_action_with_session(action, session_uuid)
-    return result
+    return result.routerInterfaceIp
 
 def set_l3network_router_interface_ip(l3NetworkUuid, routerInterfaceIp, systemTags=None, userTags=None, session_uuid=None):
     action = api_actions.SetL3NetworkRouterInterfaceIpAction()
@@ -629,4 +629,4 @@ def set_l3network_router_interface_ip(l3NetworkUuid, routerInterfaceIp, systemTa
     action.timeout = 12000
     test_util.test_logger('Set l3 network router interface ip for L3 uuid: {}'.format(l3NetworkUuid))
     result = acc_ops.execute_action_with_session(action, session_uuid)
-    return result
+    return result.success
