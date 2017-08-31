@@ -219,4 +219,16 @@ def run_iperf_client(ssh_cmd_line, server_ip, runtime):
     if execute_shell_in_process(cmd, timeout) != 0:
         test_util.test_fail('network io load fail to run')
 
+def run_disk_load1(ssh_cmd_line,rw):
+    if rw == 'write':
+        os.system('%s "dd if=/dev/zero of=test.dbf bs=8k count=300000 oflag=direct,nonblock"'% ssh_cmd_line)
+    else:
+        os.system('%s "dd if=/dev/vda of=/dev/null bs=8k iflag=direct,nonblock"' % ssh_cmd_line)
 
+def run_network_load(ssh_cmd_line):
+   os.system('%s "wget http://192.168.200.100/mirror/diskimages/win7.qcow2"' % ssh_cmd_line) 
+
+def kill(ssh_cmd_line):
+    os.system('%s "ps -A|grep -w dd|awk \'{print $1}\'|xargs kill -9"' % ssh_cmd_line)
+    os.system('%s "ps -A|grep wget|awk \'{print $1}\'|xargs kill -9"' % ssh_cmd_line)
+    os.system('%s "rm -rf win7.qcow2"' % ssh_cmd_line)

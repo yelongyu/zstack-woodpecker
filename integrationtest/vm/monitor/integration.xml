@@ -1,26 +1,26 @@
 <integrationTest>
     <suite name="monitor trigger test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
-        <case timeout='600' repeat='1' noparalle1='Ture'>alert_host_all_cpus_idle.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>alert_host_all_cpus_idle_1.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>alert_host_all_cpus_util.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>alert_host_cpu_idle.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>alert_host_cpu_idle_1.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>alert_host_cpu_util.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>alert_host_cpu_util_1.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>alert_host_disk_read_bandth.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>alert_host_disk_write_bandth.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>alert_host_disk_read_iops.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>alert_host_disk_write_iops.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>alert_host_mem_free.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>alert_host_mem_used.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>alert_vm_all_cpus_util.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>alert_vm_all_cpus_util_1.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>alert_vm_cpu_util.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>alert_vm_disk_read_bandth.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>alert_vm_disk_read_iops.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>alert_vm_disk_write_bandth.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>alert_vm_disk_write_iops.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>alert_vm_mem_free.py</case>
+        <case timeout='900' repeat='1' noparalle1='Ture'>alert_host_all_cpus_idle.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_host_all_cpus_idle_1.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_host_all_cpus_util.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_host_cpu_idle.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_host_cpu_idle_1.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_host_cpu_util.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_host_cpu_util_1.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_host_disk_read_bandth.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_host_disk_write_bandth.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_host_disk_read_iops.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_host_disk_write_iops.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_host_mem_free.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_host_mem_used.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_vm_all_cpus_util.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_vm_all_cpus_util_1.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_vm_cpu_util.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_vm_disk_read_bandth.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_vm_disk_read_iops.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_vm_disk_write_bandth.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_vm_disk_write_iops.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_vm_mem_free.py</case>
         <case timeout='900' repeat='1' noparalle1='Ture'>5min_alert_host_all_cpus_idle.py</case>
         <case timeout='900' repeat='1' noparalle1='Ture'>5min_alert_host_all_cpus_util.py</case>
         <case timeout='900' repeat='1' noparallel='True'>5min_alert_host_cpu_idle.py</case>

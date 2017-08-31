@@ -1,8 +1,8 @@
 '''
 
-Test about monitor trigger on host disk writing bandwidth in one minute
+Create an unified test_stub to share test operations
 
-@author: Songtao,Haochen
+@author: Songtao
 
 '''
 
@@ -21,7 +21,7 @@ def test():
     global media
     global trigger_action
 
-    test_item = "host.disk.io"
+    test_item = "host.network.io"
     resource_type="HostVO"
     vm_monitor_item = test_stub.get_monitor_item(resource_type)
     if test_item not in vm_monitor_item:
@@ -30,12 +30,12 @@ def test():
     hosts = res_ops.get_resource(res_ops.HOST)
     host = hosts[0]
     duration = 60
-    expression = "host.disk.io{type=\"bandwidth\", direction=\"write\"} > 2000.0"
+    expression = "host.network.io{direction=\"rx\"} > 2300"
     monitor_trigger = mon_ops.create_monitor_trigger(host.uuid, duration, expression)
 
     send_email = test_stub.create_email_media()
     media = send_email.uuid
-    trigger_action_name = "trigger"+ ''.join(map(lambda xx:(hex(ord(xx))[2:]),os.urandom(8)))
+    trigger_action_name = "trigger_"+ ''.join(map(lambda xx:(hex(ord(xx))[2:]),os.urandom(8)))
     trigger = monitor_trigger.uuid
     receive_email = os.environ.get('receive_email')
     monitor_trigger_action = mon_ops.create_email_monitor_trigger_action(trigger_action_name, send_email.uuid, trigger.split(), receive_email)
@@ -43,11 +43,10 @@ def test():
 
     host.password = os.environ.get('hostPassword')
     ssh_cmd = test_stub.ssh_cmd_line(host.managementIp, host.username, host.password, port=int(host.sshPort))
-
-    rw = 'write'
-    t = threading.Thread(target=test_stub.run_disk_load1,args=(ssh_cmd, rw,))
+    
+    t = threading.Thread(target=test_stub.run_network_load,args=(ssh_cmd,))
     t.start()
-    time.sleep(80)
+    time.sleep(110)
     test_stub.kill(ssh_cmd)
 
     status_problem, status_ok = test_stub.query_trigger_in_loop(trigger,50)
@@ -59,16 +58,19 @@ def test():
     keywords = "fired"
     mail_flag = test_stub.check_email(mail_list, keywords, trigger, host.uuid)
     if mail_flag == 0:
-        test_util.test_fail('Failed to Get Target: %s for: %s Trigger Mail' % (vm_uuid, test_item))
+        test_util.test_fail('Failed to Get Target: %s for: %s Trigger Mail' % (host.uuid, test_item))
 
     mon_ops.delete_monitor_trigger_action(trigger_action)
     mon_ops.delete_monitor_trigger(trigger)
     mon_ops.delete_email_media(media)
+    vm.destroy()
 
 def error_cleanup():
     global trigger
     global media
     global trigger_action
+    global vm
     mon_ops.delete_monitor_trigger_action(trigger_action)
     mon_ops.delete_monitor_trigger(trigger)
     mon_ops.delete_email_media(media)
+    vm.destroy()

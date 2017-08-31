@@ -9,6 +9,7 @@ Test about monitor trigger on host disk writing iops in one minute
 import os
 import test_stub
 import random
+import threading
 import time
 import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.test_util as test_util
@@ -43,10 +44,12 @@ def test():
     host.password = os.environ.get('hostPassword')
     ssh_cmd = test_stub.ssh_cmd_line(host.managementIp, host.username, host.password, port=int(host.sshPort))
 
-    test_stub.yum_install_stress_tool(ssh_cmd)
-    rw = 'write'
-    test_stub.run_disk_load(ssh_cmd, rw)
-    
+    rw='write'
+    t = threading.Thread(target=test_stub.run_disk_load1,args=(ssh_cmd, rw,))
+    t.start()
+    time.sleep(80)
+    test_stub.kill(ssh_cmd)
+
     status_problem, status_ok = test_stub.query_trigger_in_loop(trigger,50)
     test_util.action_logger('Trigger old status: %s triggered. Trigger new status: %s recovered' % (status_problem, status_ok ))
     if status_problem != 1 or status_ok != 1:
