@@ -44,6 +44,7 @@ def test():
     host.password = os.environ.get('hostPassword')
     ssh_cmd = test_stub.ssh_cmd_line(host.managementIp, host.username, host.password, port=int(host.sshPort))
     
+    test_stub.yum_install_stress_tool(ssh_cmd)
     t = threading.Thread(target=test_stub.run_network_load,args=(ssh_cmd,))
     t.start()
     time.sleep(110)

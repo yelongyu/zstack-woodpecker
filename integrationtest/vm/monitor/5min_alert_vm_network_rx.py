@@ -50,13 +50,10 @@ def test():
     
     ssh_cmd = test_stub.ssh_cmd_line(vm_ip, vm_username, vm_password, vm_port)
     test_stub.yum_install_stress_tool(ssh_cmd)
-    test_stub.run_iperf_server(ssh_cmd)
-
-    hosts = res_ops.get_resource(res_ops.HOST)
-    host = hosts[0]
-    host.password = os.environ.get('hostPassword')
-    ssh_cmd_host = test_stub.ssh_cmd_line(host.managementIp, host.username, host.password, port=int(host.sshPort))
-    test_stub.run_iperf_client(ssh_cmd_host, vm_ip,380)
+    t = threading.Thread(target=test_stub.run_network_load,args=(ssh_cmd,))
+    t.start()
+    time.sleep(360)
+    test_stub.kill(ssh_cmd)
 
     status_problem, status_ok = test_stub.query_trigger_in_loop(trigger,80)
     test_util.action_logger('Trigger old status: %s triggered. Trigger new status: %s recovered' % (status_problem, status_ok ))

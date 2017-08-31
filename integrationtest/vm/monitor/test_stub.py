@@ -180,7 +180,7 @@ def ssh_cmd_line(ip_addr, username, password, port):
 
 def yum_install_stress_tool(ssh_cmd_line):
     timeout = 330
-    cmd = '%s "yum install -y fio stress iperf enablerepo=ali* --nogpgcheck"' % (ssh_cmd_line)
+    cmd = '%s "yum install -y fio stress iperf trickle enablerepo=ali* --nogpgcheck"' % (ssh_cmd_line)
     if execute_shell_in_process(cmd, timeout) != 0:
         test_util.test_fail('fail to install stress')
 
@@ -226,7 +226,7 @@ def run_disk_load1(ssh_cmd_line,rw):
         os.system('%s "dd if=/dev/vda of=/dev/null bs=8k iflag=direct,nonblock"' % ssh_cmd_line)
 
 def run_network_load(ssh_cmd_line):
-   os.system('%s "wget http://192.168.200.100/mirror/diskimages/win7.qcow2"' % ssh_cmd_line) 
+   os.system('%s "trickle -d 1024 wget http://192.168.200.100/mirror/diskimages/win7.qcow2"' % ssh_cmd_line) 
 
 def kill(ssh_cmd_line):
     os.system('%s "ps -A|grep -w dd|awk \'{print $1}\'|xargs kill -9"' % ssh_cmd_line)
