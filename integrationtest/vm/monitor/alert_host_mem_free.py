@@ -28,7 +28,8 @@ def test():
     hosts = res_ops.get_resource(res_ops.HOST)
     host = hosts[0]
     duration = 60
-    expression = "host.mem.util{type=\"free\"} < 0.11"
+    rate=get_rate(free)
+    expression = "host.mem.util{type=\"free\"} < " + rate
     monitor_trigger = mon_ops.create_monitor_trigger(host.uuid, duration, expression)
 
     send_email = test_stub.create_email_media()

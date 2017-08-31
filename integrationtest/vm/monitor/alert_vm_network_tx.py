@@ -1,14 +1,16 @@
 '''
 
-Create an unified test_stub to share test operations
+Test about monitor trigger on vm network tx in one minute
 
-@author: Songtao
+@author: Songtao,Haochen
 
 '''
 
 import os
 import test_stub
 import random
+import time
+import threading
 import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.resource_operations as res_ops
@@ -53,8 +55,12 @@ def test():
     hosts = res_ops.get_resource(res_ops.HOST)
     host = hosts[0]
     host.password = os.environ.get('hostPassword')
-    ssh_cmd_host = test_stub.ssh_cmd_line(host.managementIp, host.username, host.password, port=int(host.sshPort))
-    test_stub.run_iperf_client(ssh_cmd_host, vm_ip,80)
+
+    test_stub.yum_install_stress_tool(ssh_cmd)
+    t = threading.Thread(target=test_stub.run_network_tx,args=(ssh_cmd,host.managementIp))
+    t.start()
+    time.sleep(110)
+    test_stub.kill(ssh_cmd)
 
     status_problem, status_ok = test_stub.query_trigger_in_loop(trigger,50)
     test_util.action_logger('Trigger old status: %s triggered. Trigger new status: %s recovered' % (status_problem, status_ok ))
