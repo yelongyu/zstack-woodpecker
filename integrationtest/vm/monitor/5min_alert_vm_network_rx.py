@@ -3,6 +3,7 @@
 Create an unified test_stub to share test operations
 
 @author: Songtao
+
 '''
 
 import os
@@ -14,7 +15,6 @@ import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.monitor_operations as mon_ops
-
 
 def test():
     global vm
@@ -29,7 +29,6 @@ def test():
     vm_username = os.environ.get('Vm_Username')
     vm_password = os.environ.get('Vm_Password')
     vm_port = os.environ.get('Vm_Sshport')
-
 
     test_item = "vm.network.io"
     resource_type = "VmInstanceVO"
@@ -49,7 +48,6 @@ def test():
     monitor_trigger_action = mon_ops.create_email_monitor_trigger_action(trigger_action_name, send_email.uuid, trigger.split(), receive_email)
     trigger_action = monitor_trigger_action.uuid
     
-
     ssh_cmd = test_stub.ssh_cmd_line(vm_ip, vm_username, vm_password, vm_port)
     test_stub.yum_install_stress_tool(ssh_cmd)
     test_stub.run_iperf_server(ssh_cmd)
@@ -75,9 +73,6 @@ def test():
     mon_ops.delete_monitor_trigger(trigger)
     mon_ops.delete_email_media(media)
     vm.destroy()
-    vm.expunge()
-
-
 
 def error_cleanup():
     global trigger
@@ -88,11 +83,3 @@ def error_cleanup():
     mon_ops.delete_monitor_trigger(trigger)
     mon_ops.delete_email_media(media)
     vm.destroy()
-    vm.expunge()
-
-
-
-
-
-
-
