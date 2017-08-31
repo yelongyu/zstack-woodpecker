@@ -231,6 +231,7 @@
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
                 <serviceType>Userdata</serviceType>
+              </networkService>
               <networkService provider="SecurityGroup">
                 <serviceType>SecurityGroup</serviceType>
               </networkService>
