@@ -10,6 +10,7 @@ import os
 import test_stub
 import random
 import time
+import threading
 import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.resource_operations as res_ops
@@ -38,7 +39,7 @@ def test():
     hosts = res_ops.get_resource(res_ops.HOST)
     host = hosts[0]
     duration = 60
-    expression = "host.network.io{direction=\"tx\"} > 1350"
+    expression = "host.network.io{direction=\"tx\"} > 2000"
     monitor_trigger = mon_ops.create_monitor_trigger(host.uuid, duration, expression)
 
     send_email = test_stub.create_email_media()
@@ -55,7 +56,7 @@ def test():
     test_stub.yum_install_stress_tool(ssh_cmd)
     t = threading.Thread(target=test_stub.run_network_tx,args=(ssh_cmd,vm_ip,))
     t.start()
-    time.sleep(110)
+    time.sleep(150)
     test_stub.kill(ssh_cmd)
 
     status_problem, status_ok = test_stub.query_trigger_in_loop(trigger,50)

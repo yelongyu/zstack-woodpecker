@@ -230,9 +230,10 @@ def run_network_rx(ssh_cmd_line):
 
 def run_network_tx(ssh_cmd_line,ip):
     os.system('%s "wget http://192.168.200.100/mirror/iso/try_iso.iso"' % ssh_cmd_line)
-    os.system('%s "trickle -u 1024 scp try_iso.iso root@%s:/root/'% (ssh_cmd_line,ip))
+    cmd = ssh_cmd_line + '"sshpass -p password scp -l 1024 try_iso.iso root@'+ ip +':/root/"'
+    os.system(cmd)
 
-def get_rate(typ):
+def get_rate(typ,ssh_cmd_line):
     total = os.popen('%s "free|grep Mem|awk \'{print $2}\'"' % ssh_cmd_line)
     free = os.popen('%s "free|grep Mem|awk \'{print $4}\'"' % ssh_cmd_line)
     if typ == 'free':
@@ -243,5 +244,6 @@ def get_rate(typ):
 def kill(ssh_cmd_line):
     os.system('%s "ps -A|grep -w dd|awk \'{print $1}\'|xargs kill -9"' % ssh_cmd_line)
     os.system('%s "ps -A|grep wget|awk \'{print $1}\'|xargs kill -9"' % ssh_cmd_line)
+    os.system('%s "ps -A|grep -w scp|awk \'{print $1}\'|xargs kill -9"' % ssh_cmd_line)
     os.system('%s "rm -rf win7.qcow2"' % ssh_cmd_line)
     os.system('%s "rm -rf try_iso.iso"' % ssh_cmd_line)
