@@ -3,6 +3,7 @@
 Create an unified test_stub to share test operations
 
 @author: Songtao
+
 '''
 
 import os
@@ -14,7 +15,6 @@ import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.monitor_operations as mon_ops
-
 
 def test():
     global trigger
@@ -64,8 +64,6 @@ def test():
     mon_ops.delete_monitor_trigger(trigger)
     mon_ops.delete_email_media(media)
     vm.destroy()
-    vm.expunge()
-
 
 def error_cleanup():
     global trigger
@@ -76,11 +74,3 @@ def error_cleanup():
     mon_ops.delete_monitor_trigger(trigger)
     mon_ops.delete_email_media(media)
     vm.destroy()
-    vm.expunge()
-
-
-
-
-
-
-
