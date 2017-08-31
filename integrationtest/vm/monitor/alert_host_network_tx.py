@@ -1,8 +1,8 @@
 '''
 
-Create an unified test_stub to share test operations
+Test about monitor trigger on host network tx in one minute
 
-@author: Songtao
+@author: Songtao,Haochen
 
 '''
 
@@ -49,13 +49,14 @@ def test():
     monitor_trigger_action = mon_ops.create_email_monitor_trigger_action(trigger_action_name, send_email.uuid, trigger.split(), receive_email)
     trigger_action = monitor_trigger_action.uuid
 
-    ssh_cmd = test_stub.ssh_cmd_line(vm_ip, vm_username, vm_password, vm_port)
-    test_stub.yum_install_stress_tool(ssh_cmd)
-    test_stub.run_iperf_server(ssh_cmd)
-
     host.password = os.environ.get('hostPassword')
-    ssh_cmd_host = test_stub.ssh_cmd_line(host.managementIp, host.username, host.password, port=int(host.sshPort))
-    test_stub.run_iperf_client(ssh_cmd_host, vm_ip,80)
+    ssh_cmd = test_stub.ssh_cmd_line(host.managementIp, host.username, host.password, port=int(host.sshPort))
+    
+    test_stub.yum_install_stress_tool(ssh_cmd)
+    t = threading.Thread(target=test_stub.run_network_tx,args=(ssh_cmd,vm_ip,))
+    t.start()
+    time.sleep(110)
+    test_stub.kill(ssh_cmd)
 
     status_problem, status_ok = test_stub.query_trigger_in_loop(trigger,50)
     test_util.action_logger('Trigger old status: %s triggered. Trigger new status: %s recovered' % (status_problem, status_ok ))

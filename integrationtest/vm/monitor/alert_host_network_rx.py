@@ -1,8 +1,8 @@
 '''
 
-Create an unified test_stub to share test operations
+Test about monitor trigger on host network rx in one minute
 
-@author: Songtao
+@author: Songtao,Haochen
 
 '''
 
@@ -45,7 +45,7 @@ def test():
     ssh_cmd = test_stub.ssh_cmd_line(host.managementIp, host.username, host.password, port=int(host.sshPort))
     
     test_stub.yum_install_stress_tool(ssh_cmd)
-    t = threading.Thread(target=test_stub.run_network_load,args=(ssh_cmd,))
+    t = threading.Thread(target=test_stub.run_network_rx,args=(ssh_cmd,))
     t.start()
     time.sleep(110)
     test_stub.kill(ssh_cmd)

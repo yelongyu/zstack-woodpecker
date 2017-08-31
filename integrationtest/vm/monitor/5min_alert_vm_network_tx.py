@@ -1,8 +1,8 @@
 '''
 
-Create an unified test_stub to share test operations
+Test about monitor trigger on vm network tx in five minutes
 
-@author: Songtao
+@author: Songtao,Haochen
 
 '''
 
@@ -10,6 +10,7 @@ import os
 import test_stub
 import random
 import time
+import threading
 import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.resource_operations as res_ops
@@ -48,14 +49,14 @@ def test():
     trigger_action = monitor_trigger_action.uuid
 
     ssh_cmd = test_stub.ssh_cmd_line(vm_ip, vm_username, vm_password, vm_port)
-    test_stub.yum_install_stress_tool(ssh_cmd)
-    test_stub.run_iperf_server(ssh_cmd)
-
     hosts = res_ops.get_resource(res_ops.HOST)
     host = hosts[0]
-    host.password = os.environ.get('hostPassword')
-    ssh_cmd_host = test_stub.ssh_cmd_line(host.managementIp, host.username, host.password, port=int(host.sshPort))
-    test_stub.run_iperf_client(ssh_cmd_host, vm_ip,380)
+
+    test_stub.yum_install_stress_tool(ssh_cmd)
+    t = threading.Thread(target=test_stub.run_network_tx,args=(ssh_cmd,host.managementIp,))
+    t.start()
+    time.sleep(380)
+    test_stub.kill(ssh_cmd)
 
     status_problem, status_ok = test_stub.query_trigger_in_loop(trigger,80)
     test_util.action_logger('Trigger old status: %s triggered. Trigger new status: %s recovered' % (status_problem, status_ok ))

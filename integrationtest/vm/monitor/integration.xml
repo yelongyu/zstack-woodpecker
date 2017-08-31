@@ -13,6 +13,8 @@
         <case timeout='900' repeat='1' noparallel='True'>alert_host_disk_write_iops.py</case>
         <case timeout='900' repeat='1' noparallel='True'>alert_host_mem_free.py</case>
         <case timeout='900' repeat='1' noparallel='True'>alert_host_mem_used.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_host_network_rx.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_host_network_tx.py</case>
         <case timeout='900' repeat='1' noparallel='True'>alert_vm_all_cpus_util.py</case>
         <case timeout='900' repeat='1' noparallel='True'>alert_vm_all_cpus_util_1.py</case>
         <case timeout='900' repeat='1' noparallel='True'>alert_vm_cpu_util.py</case>
@@ -21,22 +23,28 @@
         <case timeout='900' repeat='1' noparallel='True'>alert_vm_disk_write_bandth.py</case>
         <case timeout='900' repeat='1' noparallel='True'>alert_vm_disk_write_iops.py</case>
         <case timeout='900' repeat='1' noparallel='True'>alert_vm_mem_free.py</case>
-        <case timeout='900' repeat='1' noparalle1='Ture'>5min_alert_host_all_cpus_idle.py</case>
-        <case timeout='900' repeat='1' noparalle1='Ture'>5min_alert_host_all_cpus_util.py</case>
-        <case timeout='900' repeat='1' noparallel='True'>5min_alert_host_cpu_idle.py</case>
-        <case timeout='900' repeat='1' noparallel='True'>5min_alert_host_cpu_util.py</case>
-        <case timeout='900' repeat='1' noparallel='True'>5min_alert_host_disk_read_bandth.py</case>
-        <case timeout='900' repeat='1' noparallel='True'>5min_alert_host_disk_write_bandth.py</case>
-        <case timeout='900' repeat='1' noparallel='True'>5min_alert_host_disk_read_iops.py</case>
-        <case timeout='900' repeat='1' noparallel='True'>5min_alert_host_disk_write_iops.py</case>
-        <case timeout='900' repeat='1' noparallel='True'>5min_alert_host_mem_free.py</case>
-        <case timeout='900' repeat='1' noparallel='True'>5min_alert_host_mem_used.py</case>
-        <case timeout='900' repeat='1' noparallel='True'>5min_alert_vm_all_cpus_util.py</case>
-        <case timeout='900' repeat='1' noparallel='True'>5min_alert_vm_cpu_util.py</case>
-        <case timeout='900' repeat='1' noparallel='True'>5min_alert_vm_disk_read_bandth.py</case>
-        <case timeout='900' repeat='1' noparallel='True'>5min_alert_vm_disk_read_iops.py</case>
-        <case timeout='900' repeat='1' noparallel='True'>5min_alert_vm_disk_write_bandth.py</case>
-        <case timeout='900' repeat='1' noparallel='True'>5min_alert_vm_disk_write_iops.py</case>
-        <case timeout='900' repeat='1' noparallel='True'>5min_alert_vm_mem_free.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_vm_network_rx.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>alert_vm_network_tx.py</case>
+        <case timeout='1800' repeat='1' noparalle1='Ture'>5min_alert_host_all_cpus_idle.py</case>
+        <case timeout='1800' repeat='1' noparalle1='Ture'>5min_alert_host_all_cpus_util.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>5min_alert_host_cpu_idle.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>5min_alert_host_cpu_util.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>5min_alert_host_disk_read_bandth.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>5min_alert_host_disk_write_bandth.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>5min_alert_host_disk_read_iops.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>5min_alert_host_disk_write_iops.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>5min_alert_host_mem_free.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>5min_alert_host_mem_used.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>5min_alert_host_network_rx.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>5min_alert_host_network_tx.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>5min_alert_vm_all_cpus_util.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>5min_alert_vm_cpu_util.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>5min_alert_vm_disk_read_bandth.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>5min_alert_vm_disk_read_iops.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>5min_alert_vm_disk_write_bandth.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>5min_alert_vm_disk_write_iops.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>5min_alert_vm_mem_free.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>5min_alert_vm_network_rx.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>5min_alert_vm_network_tx.py</case>
     </suite>
 </integrationTest>

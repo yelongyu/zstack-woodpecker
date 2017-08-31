@@ -225,10 +225,23 @@ def run_disk_load1(ssh_cmd_line,rw):
     else:
         os.system('%s "dd if=/dev/vda of=/dev/null bs=8k iflag=direct,nonblock"' % ssh_cmd_line)
 
-def run_network_load(ssh_cmd_line):
-   os.system('%s "trickle -d 1024 wget http://192.168.200.100/mirror/diskimages/win7.qcow2"' % ssh_cmd_line) 
+def run_network_rx(ssh_cmd_line):
+    os.system('%s "trickle -d 1024 wget http://192.168.200.100/mirror/diskimages/win7.qcow2"' % ssh_cmd_line) 
+
+def run_network_tx(ssh_cmd_line,ip):
+    os.system('%s "wget http://192.168.200.100/mirror/iso/try_iso.iso"' % ssh_cmd_line)
+    os.system('%s "trickle -u 1024 scp try_iso.iso root@%s:/root/'% (ssh_cmd_line,ip))
+
+def get_rate(typ):
+    total = os.popen('%s "free|grep Mem|awk \'{print $2}\'"' % ssh_cmd_line)
+    free = os.popen('%s "free|grep Mem|awk \'{print $4}\'"' % ssh_cmd_line)
+    if typ == 'free':
+           return free/total
+    else:
+           return 1-free/total
 
 def kill(ssh_cmd_line):
     os.system('%s "ps -A|grep -w dd|awk \'{print $1}\'|xargs kill -9"' % ssh_cmd_line)
     os.system('%s "ps -A|grep wget|awk \'{print $1}\'|xargs kill -9"' % ssh_cmd_line)
     os.system('%s "rm -rf win7.qcow2"' % ssh_cmd_line)
+    os.system('%s "rm -rf try_iso.iso"' % ssh_cmd_line)
