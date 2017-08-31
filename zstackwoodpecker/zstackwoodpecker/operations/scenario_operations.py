@@ -295,6 +295,7 @@ def get_mn_ha_nfs_url(scenario_config, scenario_file, deploy_config):
     return None
 
 
+
 def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
     vm_nic = os.environ.get('nodeNic').replace("eth", "zsn")
@@ -324,9 +325,14 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
                 nfs_vm_gateway = os.environ.get('storGateway')
             else:
                 test_util.test_fail("not supported nfs testconfig and scenario combination")
+        
             nfs_cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (nfs_vm_nic, nfs_vm_ip, nfs_vm_netmask, nfs_vm_gateway)
             ssh.execute(nfs_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
-        
+            #TODO: should dynamically change gw followed config.json, but currently there is only one case, thus always change 
+            #default gw to public network gw
+            set_default_gw_cmd = "route del default gw %s && route add default gw %s" %(nfs_vm_gateway, vm_gateway)
+            ssh.execute(set_default_gw_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+
         #TODO: should make image folder configarable
         nfs_url = get_mn_ha_nfs_url(scenario_config, scenario_file, deploy_config)
         nfsIP = nfs_url.split(':')[0]
