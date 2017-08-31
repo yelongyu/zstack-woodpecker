@@ -24,14 +24,14 @@ def test():
                   for net_out in [None, NET_OUT] for net_in in [None, NET_IN]]
     for bandwidth, net_out, net_in in all_combinations:
         instance_offering = test_lib.lib_create_instance_offering(name='test_offering',
-                                                                  bandwidth=bandwidth,
+                                                                  volume_bandwidth=bandwidth,
                                                                   net_outbound_bandwidth=net_out,
-                                                                  net_in=net_in)
+                                                                  net_inbound_bandwidth=net_in)
         test_obj_dict.add_instance_offering(instance_offering)
         volume_list = create_multi_volumes()
         for volume in volume_list:
             test_obj_dict.add_volume(volume)
-        test_vm = create_vm_with_random_offering(vm_name='test_vm',instance_offering_uuid=instance_offering)
+        test_vm = create_vm_with_random_offering(vm_name='test_vm', instance_offering_uuid=instance_offering)
         test_obj_dict.add_vm(test_vm)
         for volume in volume_list:
             volume.attach(test_vm)
