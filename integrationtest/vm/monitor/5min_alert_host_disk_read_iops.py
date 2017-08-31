@@ -10,6 +10,7 @@ import os
 import test_stub
 import random
 import time
+import threading
 import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.resource_operations as res_ops
@@ -43,9 +44,11 @@ def test():
     host.password = os.environ.get('hostPassword')
     ssh_cmd = test_stub.ssh_cmd_line(host.managementIp, host.username, host.password, port=int(host.sshPort))
 
-    test_stub.yum_install_stress_tool(ssh_cmd)
     rw = 'read'
-    for i in range(4):test_stub.run_disk_load(ssh_cmd, rw)
+    t = threading.Thread(target=test_stub.run_disk_load1,args=(ssh_cmd, rw,))
+    t.start()
+    time.sleep(360)
+    test_stub.kill(ssh_cmd)
 
     status_problem, status_ok = test_stub.query_trigger_in_loop(trigger,80)
     test_util.action_logger('Trigger old status: %s triggered. Trigger new status: %s recovered' % (status_problem, status_ok ))

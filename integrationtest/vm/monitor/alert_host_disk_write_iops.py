@@ -47,7 +47,7 @@ def test():
     rw='write'
     t = threading.Thread(target=test_stub.run_disk_load1,args=(ssh_cmd, rw,))
     t.start()
-    time.sleep(80)
+    time.sleep(110)
     test_stub.kill(ssh_cmd)
 
     status_problem, status_ok = test_stub.query_trigger_in_loop(trigger,50)
