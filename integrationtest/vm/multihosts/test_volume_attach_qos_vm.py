@@ -31,7 +31,8 @@ def test():
         volume_list = create_multi_volumes()
         for volume in volume_list:
             test_obj_dict.add_volume(volume)
-        test_vm = create_vm_with_random_offering(vm_name='test_vm', instance_offering_uuid=instance_offering)
+        test_vm = create_vm_with_random_offering(vm_name='test_vm', instance_offering_uuid=instance_offering.uuid,
+                                                 l3_name='l3VlanNetwork2', image_name='imageName_net')
         test_obj_dict.add_vm(test_vm)
         for volume in volume_list:
             volume.attach(test_vm)
@@ -43,8 +44,9 @@ def test():
             volume.check()
         test_vm.check()
 
-        test_vm_with_datavol = create_vm_with_random_offering(vm_name='test_vm_datavol', instance_offering_uuid=instance_offering,
-                                                              disk_offering_uuids=[random.choice(res_ops.get_resource(res_ops.DISK_OFFERING)).uuid])
+        test_vm_with_datavol = create_vm_with_random_offering(vm_name='test_vm_datavol', instance_offering_uuid=instance_offering.uuid,
+                                                              disk_offering_uuids=[random.choice(res_ops.get_resource(res_ops.DISK_OFFERING)).uuid],
+                                                              l3_name='l3VlanNetwork2', image_name='imageName_net')
         test_obj_dict.add_vm(test_vm_with_datavol)
 
     test_util.test_pass('Volume attach on QOS vm TEST PASS')
