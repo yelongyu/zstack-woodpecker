@@ -39,7 +39,7 @@ def test():
     hosts = res_ops.get_resource(res_ops.HOST)
     host = hosts[0]
     duration = 60
-    expression = "host.network.io{direction=\"tx\"} > 2000"
+    expression = "host.network.io{direction=\"tx\"} > 10000"
     monitor_trigger = mon_ops.create_monitor_trigger(host.uuid, duration, expression)
 
     send_email = test_stub.create_email_media()
@@ -53,10 +53,9 @@ def test():
     host.password = os.environ.get('hostPassword')
     ssh_cmd = test_stub.ssh_cmd_line(host.managementIp, host.username, host.password, port=int(host.sshPort))
     
-    test_stub.yum_install_stress_tool(ssh_cmd)
     t = threading.Thread(target=test_stub.run_network_tx,args=(ssh_cmd,vm_ip,))
     t.start()
-    time.sleep(150)
+    time.sleep(120)
     test_stub.kill(ssh_cmd)
 
     status_problem, status_ok = test_stub.query_trigger_in_loop(trigger,50)

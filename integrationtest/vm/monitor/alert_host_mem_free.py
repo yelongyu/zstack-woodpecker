@@ -28,10 +28,6 @@ def test():
     hosts = res_ops.get_resource(res_ops.HOST)
     host = hosts[0]
     duration = 60
-
-    host.password = os.environ.get('hostPassword')
-    ssh_cmd = test_stub.ssh_cmd_line(host.managementIp, host.username, host.password, port=int(host.sshPort))
-
     expression = "host.mem.util{type=\"free\"} < 0.11" 
     monitor_trigger = mon_ops.create_monitor_trigger(host.uuid, duration, expression)
 
@@ -43,6 +39,8 @@ def test():
     monitor_trigger_action = mon_ops.create_email_monitor_trigger_action(trigger_action_name, send_email.uuid, trigger.split(), receive_email)
     trigger_action = monitor_trigger_action.uuid
 
+    host.password = os.environ.get('hostPassword')
+    ssh_cmd = test_stub.ssh_cmd_line(host.managementIp, host.username, host.password, port=int(host.sshPort))    
     test_stub.run_mem_load(ssh_cmd,80)
 
     status_problem, status_ok = test_stub.query_trigger_in_loop(trigger,50)

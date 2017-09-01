@@ -131,8 +131,6 @@ def receive_email():
         mail_list.append(msg)
     return mail_list
 
-
-
 def check_email(list, keywords, trigger, target_uuid):
     mail = os.environ.get('media_username')
     flag = 0
@@ -221,7 +219,7 @@ def run_iperf_client(ssh_cmd_line, server_ip, runtime):
 
 def run_disk_load1(ssh_cmd_line,rw):
     if rw == 'write':
-        os.system('%s "dd if=/dev/zero of=test.dbf bs=8k count=300000 oflag=direct,nonblock"'% ssh_cmd_line)
+        os.system('%s "dd if=/dev/zero of=test.dbf bs=8k oflag=direct,nonblock"'% ssh_cmd_line)
     else:
         os.system('%s "dd if=/dev/vda of=/dev/null bs=8k iflag=direct,nonblock"' % ssh_cmd_line)
 
@@ -232,14 +230,6 @@ def run_network_tx(ssh_cmd_line,ip):
     os.system('%s "wget http://192.168.200.100/mirror/iso/try_iso.iso"' % ssh_cmd_line)
     cmd = ssh_cmd_line + '"sshpass -p password scp -l 1024 try_iso.iso root@'+ ip +':/root/"'
     os.system(cmd)
-
-def get_rate(typ,ssh_cmd_line):
-    total = os.popen('%s "free|grep Mem|awk \'{print $2}\'"' % ssh_cmd_line)
-    free = os.popen('%s "free|grep Mem|awk \'{print $4}\'"' % ssh_cmd_line)
-    if typ == 'free':
-           return free/total
-    else:
-           return 1-free/total
 
 def kill(ssh_cmd_line):
     os.system('%s "ps -A|grep -w dd|awk \'{print $1}\'|xargs kill -9"' % ssh_cmd_line)

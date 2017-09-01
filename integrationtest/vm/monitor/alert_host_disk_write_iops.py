@@ -30,7 +30,7 @@ def test():
     hosts = res_ops.get_resource(res_ops.HOST)
     host = hosts[0]
     duration = 60
-    expression = "host.disk.io{type=\"iops\", direction=\"write\"} > 40.1"
+    expression = "host.disk.io{type=\"iops\", direction=\"write\"} > 2000.0"
     monitor_trigger = mon_ops.create_monitor_trigger(host.uuid, duration, expression)
 
     send_email = test_stub.create_email_media()
@@ -47,7 +47,7 @@ def test():
     rw='write'
     t = threading.Thread(target=test_stub.run_disk_load1,args=(ssh_cmd, rw,))
     t.start()
-    time.sleep(110)
+    time.sleep(120)
     test_stub.kill(ssh_cmd)
 
     status_problem, status_ok = test_stub.query_trigger_in_loop(trigger,50)
