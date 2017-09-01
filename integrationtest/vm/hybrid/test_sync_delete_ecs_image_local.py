@@ -40,6 +40,7 @@ def test():
             region_id = r
     datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
     hyb_ops.sync_ecs_image_from_remote(datacenter_inv.uuid)
+    hyb_ops.sync_ecs_image_from_remote(datacenter_inv.uuid, image_type='system')
     ecs_image_local = hyb_ops.query_ecs_image_local()
     for i in ecs_image_local:
         hyb_ops.del_ecs_image_in_local(i.uuid)

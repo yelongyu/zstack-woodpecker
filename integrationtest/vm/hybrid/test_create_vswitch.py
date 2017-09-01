@@ -56,15 +56,20 @@ def test():
         vpc_inv = vpc[0]
     else:
         vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', 'zstack-test-vpc-vrouter', '172.16.0.0/12')
-    time.sleep(10)
+        time.sleep(20)
     iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, region_id)
     for iz in iz_list:
         if iz.availableInstanceTypes:
             zone_id = iz.zoneId
             break
     iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter_inv.uuid, zone_id)
+    hyb_ops.sync_ecs_vswitch_from_remote(datacenter_inv.uuid)
+    cond_vpc_vs = res_ops.gen_query_conditions('ecsVpcUuid', '=', vpc_inv.uuid)
+    vpc_vs = hyb_ops.query_ecs_vswitch_local(cond_vpc_vs)
+    vs_cidr = [vs.cidrBlock.split('.')[-2] for vs in vpc_vs]
+    cidr_val = list(set(str(i) for i in xrange(255)).difference(set(vs_cidr)))
     vpc_cidr_list = vpc_inv.cidrBlock.split('.')
-    vpc_cidr_list[2] = str(random.randint(0,255))
+    vpc_cidr_list[2] = random.choice(cidr_val)
     vpc_cidr_list[3] = '0/24'
     vswitch_cidr = '.'.join(vpc_cidr_list)
     vswitch_inv = hyb_ops.create_ecs_vswtich_remote(vpc_inv.uuid, iz_inv.uuid, 'vswitch-for-test', vswitch_cidr)

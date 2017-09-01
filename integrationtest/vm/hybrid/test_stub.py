@@ -87,16 +87,21 @@ def create_ecs_instance(datacenter_type, datacenter_uuid, region_id, allocate_pu
         hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'egress', 'ALL', '-1/-1', '0.0.0.0/0', 'accept', 'intranet', '10')
     # Get ECS Image
     hyb_ops.sync_ecs_image_from_remote(datacenter_uuid)
-    cond_image_self = res_ops.gen_query_conditions('platform', '=', 'CentOS')
-    cond_image_all = cond_image_self[:]
+    hyb_ops.sync_ecs_image_from_remote(datacenter_uuid, image_type='system')
+    cond_image_centos = res_ops.gen_query_conditions('platform', '=', 'CentOS')
+    cond_image_self = cond_image_centos[:]
+    cond_image_system = cond_image_centos[:]
     cond_image_self.extend(res_ops.gen_query_conditions('type', '=', 'self'))
-    ecs_image_all = hyb_ops.query_ecs_image_local(cond_image_all)
+    cond_image_system.extend(res_ops.gen_query_conditions('type', '=', 'system'))
+    ecs_image_centos = hyb_ops.query_ecs_image_local(cond_image_centos)
     ecs_image_self = hyb_ops.query_ecs_image_local(cond_image_self)
-    image = ecs_image_self[-1] if ecs_image_self else ecs_image_all[-1]
+    ecs_image_system = hyb_ops.query_ecs_image_local(cond_image_system)
     if not allocate_public_ip:
+        image = ecs_image_self[-1] if ecs_image_self else ecs_image_centos[-1]
         ecs_inv = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, vswitch_inv.uuid, ecs_bandwidth=1, ecs_security_group_uuid=sg_inv.uuid, 
                                                              instance_type=ecs_instance_type[0].typeId, name='zstack-test-ecs-instance', ecs_console_password='A1B2c3')
     else:
+        image = ecs_image_system[-1]
         ecs_inv = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, vswitch_inv.uuid, ecs_bandwidth=1, ecs_security_group_uuid=sg_inv.uuid, 
                                                              instance_type=ecs_instance_type[0].typeId, allocate_public_ip='true', name='zstack-test-ecs-instance', ecs_console_password='a1B2c3')
     time.sleep(10)
