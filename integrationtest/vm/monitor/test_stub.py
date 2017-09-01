@@ -228,7 +228,7 @@ def run_network_rx(ssh_cmd_line):
 
 def run_network_tx(ssh_cmd_line,ip):
     os.system('%s "wget http://192.168.200.100/mirror/iso/try_iso.iso"' % ssh_cmd_line)
-    cmd = ssh_cmd_line + '"sshpass -p password scp -l 1024 try_iso.iso root@'+ ip +':/root/"'
+    cmd = ssh_cmd_line + ' "sshpass -p password scp -l 1024 try_iso.iso root@'+ ip +':/root/"'
     os.system(cmd)
 
 def kill(ssh_cmd_line):

@@ -65,7 +65,6 @@ def test():
     mon_ops.delete_monitor_trigger_action(trigger_action)
     mon_ops.delete_monitor_trigger(trigger)
     mon_ops.delete_email_media(media)
-    vm.destroy()
 
 def error_cleanup():
     global trigger
@@ -75,4 +74,3 @@ def error_cleanup():
     mon_ops.delete_monitor_trigger_action(trigger_action)
     mon_ops.delete_monitor_trigger(trigger)
     mon_ops.delete_email_media(media)
-    vm.destroy()
