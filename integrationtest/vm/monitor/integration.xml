@@ -46,5 +46,6 @@
         <case timeout='1800' repeat='1' noparallel='True'>5min_alert_vm_mem_free.py</case>
         <case timeout='1800' repeat='1' noparallel='True'>5min_alert_vm_network_rx.py</case>
         <case timeout='1800' repeat='1' noparallel='True'>5min_alert_vm_network_tx.py</case>
+        <case timeout='300' repeat='1' noparallel='True'>test_on_email_sever.py</case>
     </suite>
 </integrationTest>
