@@ -30,7 +30,7 @@ def test():
     hosts = res_ops.get_resource(res_ops.HOST)
     host = hosts[0]
     duration = 60
-    expression = "host.network.io{direction=\"rx\"} > 2300"
+    expression = "host.network.io{direction=\"rx\"} > 3000"
     monitor_trigger = mon_ops.create_monitor_trigger(host.uuid, duration, expression)
 
     send_email = test_stub.create_email_media()
@@ -64,14 +64,11 @@ def test():
     mon_ops.delete_monitor_trigger_action(trigger_action)
     mon_ops.delete_monitor_trigger(trigger)
     mon_ops.delete_email_media(media)
-    vm.destroy()
 
 def error_cleanup():
     global trigger
     global media
     global trigger_action
-    global vm
     mon_ops.delete_monitor_trigger_action(trigger_action)
     mon_ops.delete_monitor_trigger(trigger)
     mon_ops.delete_email_media(media)
-    vm.destroy()
