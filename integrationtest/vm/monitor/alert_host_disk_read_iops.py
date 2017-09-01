@@ -30,7 +30,7 @@ def test():
     hosts = res_ops.get_resource(res_ops.HOST)
     host = hosts[0]
     duration = 60
-    expression = "host.disk.io{type=\"iops\", direction=\"read\"} > 80.1"
+    expression = "host.disk.io{type=\"iops\", direction=\"read\"} > 1000.0"
     monitor_trigger = mon_ops.create_monitor_trigger(host.uuid, duration, expression)
 
     send_email = test_stub.create_email_media()
