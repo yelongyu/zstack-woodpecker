@@ -28,7 +28,11 @@ def test():
     hosts = res_ops.get_resource(res_ops.HOST)
     host = hosts[0]
     duration = 60
-    expression = "host.mem.util{type=\"used\"} > 0.8"
+    total = os.popen('free|grep Mem|awk \'{print $2}\'').read().replace('\n','')
+    free = os.popen('free|grep Mem|awk \'{print $4}\'').read().replace('\n','')
+    rate = float(free)/float(total)
+
+    expression = "host.mem.util{type=\"used\"} > " + str(1-rate) 
     monitor_trigger = mon_ops.create_monitor_trigger(host.uuid, duration, expression)
 
     send_email = test_stub.create_email_media()
