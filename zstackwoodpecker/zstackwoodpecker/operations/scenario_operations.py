@@ -1102,6 +1102,25 @@ def get_mn_ha_storage_type(scenario_config, scenario_file, deploy_config):
                 for ps_ref in xmlobject.safe_list(vm.primaryStorageRef):
 			return ps_ref.type_
 
+def get_host_management_ip(scenario_config, scenario_file, deploy_config, vm_inv, vm_config):
+    vr_offering = deploy_config.instanceOfferings.virtualRouterOffering
+    # TODO: May have multiple virtualrouter offering
+    if vr_offering.publicL3NetworkRef.text_ != vr_offering.managementL3NetworkRef.text_:
+        for zone in xmlobject.safe_list(deploy_config.zones.zone):
+            if hasattr(zone.l2Networks, 'l2NoVlanNetwork'):
+                for l2novlannetwork in xmlobject.safe_list(zone.l2Networks.l2NoVlanNetwork):
+                    for l3network in xmlobject.safe_list(l2novlannetwork.l3Networks.l3BasicNetwork):
+                        if l3network.name_ == vr_offering.managementL3NetworkRef.text_: 
+                            for vm_l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
+                                if hasattr(vm_l3network, 'l2NetworkRef'):
+                                    for vm_l2networkref in xmlobject.safe_list(vm_l3network.l2NetworkRef):
+                                        if vm_l2networkref.text_ == l2novlannetwork.name_:
+                                            return test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_l3network.uuid_).ip
+    else:
+        return test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
+        
+    return None
+
 def deploy_scenario(scenario_config, scenario_file, deploy_config):
     vm_inv_lst = []
     vm_cfg_lst = []
@@ -1169,7 +1188,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     setup_host_vm(zstack_management_ip, vm_inv, vm, deploy_config)
                     vm_inv_lst.append(vm_inv)
                     vm_cfg_lst.append(vm)
-                    vm_xml.set('managementIp', vm_ip)
+                    vm_management_ip = get_host_management_ip(scenario_config, scenario_file, deploy_config, vm_inv, vm)
+                    vm_xml.set('managementIp', vm_management_ip)
                 if xmlobject.has_element(vm, 'mnHostRef'):
                     setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm)
                 if xmlobject.has_element(vm, 'backupStorageRef'):
