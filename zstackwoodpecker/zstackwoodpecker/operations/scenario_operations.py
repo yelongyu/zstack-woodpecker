@@ -349,6 +349,46 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
 	cmd = 'mount %s:%s /storage' % (nfsIP, nfsPath)
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
+def get_backup_storage_type(deploy_config, bs_name):
+    for backupStorage in deploy_config.backupStorages.get_child_node_as_list('sftpBackupStorage'):
+        if backupStorage.name_ == bs_name:
+            return 'sftp'
+    for backupStorage in deploy_config.backupStorages.get_child_node_as_list('imageStoreBackupStorage'):
+        if backupStorage.name_ == bs_name:
+            return 'imagestore'
+    for backupStorage in deploy_config.backupStorages.get_child_node_as_list('cephBackupStorage'):
+        if backupStorage.name_ == bs_name:
+            return 'ceph'
+    for backupStorage in deploy_config.backupStorages.get_child_node_as_list('fusionstorBackupStorage'):
+        if backupStorage.name_ == bs_name:
+            return 'fusion'
+
+    return None
+
+def get_primary_storage_type(deploy_config, ps_name):
+    for zone in xmlobject.safe_list(deploy_config.zones.zone):
+        for primaryStorage in zone.primaryStorages.get_child_node_as_list('cephPrimaryStorage'):
+            if primaryStorage.name_ == ps_name:
+                return 'ceph'
+        for primaryStorage in zone.primaryStorages.get_child_node_as_list('fusionPrimaryStorage'):
+            if primaryStorage.name_ == ps_name:
+                return 'fusion'
+        for primaryStorage in zone.primaryStorages.get_child_node_as_list('localPrimaryStorage'):
+            if primaryStorage.name_ == ps_name:
+                return 'local'
+        for primaryStorage in zone.primaryStorages.get_child_node_as_list('nfsPrimaryStorage'):
+            if primaryStorage.name_ == ps_name:
+                return 'nfs'
+        for primaryStorage in zone.primaryStorages.get_child_node_as_list('sharedMountPointPrimaryStorage'):
+            if primaryStorage.name_ == ps_name:
+                return 'smp'
+        for primaryStorage in zone.primaryStorages.get_child_node_as_list('zbsPrimaryStorage'):
+            if primaryStorage.name_ == ps_name:
+                return 'zbs'
+
+    return None
+
+
 def setup_backupstorage_vm(vm_inv, vm_config, deploy_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
     if hasattr(vm_config, 'hostRef'):
@@ -363,7 +403,8 @@ def setup_backupstorage_vm(vm_inv, vm_config, deploy_config):
 
     for backupStorageRef in xmlobject.safe_list(vm_config.backupStorageRef):
         print backupStorageRef.text_
-        if backupStorageRef.type_ == 'sftp':
+        backup_storage_type = get_backup_storage_type(deploy_config, backupStorageRef.text_)
+        if backup_storage_type == 'sftp':
             for sftpBackupStorage in xmlobject.safe_list(deploy_config.backupStorages.sftpBackupStorage):
                 if backupStorageRef.text_ == sftpBackupStorage.name_:
                     # TODO: sftp may setup with non-root or non-default user/password port
@@ -386,7 +427,8 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
     for primaryStorageRef in xmlobject.safe_list(vm_config.primaryStorageRef):
         print primaryStorageRef.text_
         for zone in xmlobject.safe_list(deploy_config.zones.zone):
-            if primaryStorageRef.type_ == 'nfs':
+            primary_storage_type = get_primary_storage_type(deploy_config, primaryStorageRef.text_)
+            if primary_storage_type == 'nfs':
                 for nfsPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.nfsPrimaryStorage):
                     if primaryStorageRef.text_ == nfsPrimaryStorage.name_:
                         test_util.test_logger('[vm:] %s setup nfs service.' % (vm_ip))
@@ -480,7 +522,8 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
             if hasattr(vm, 'backupStorageRef'):
                 for backupStorageRef in xmlobject.safe_list(vm.backupStorageRef):
                     print backupStorageRef.text_
-                    if backupStorageRef.type_ == 'ceph':
+                    backup_storage_type = get_backup_storage_type(deploy_config, backupStorageRef.text_)
+                    if backup_storage_type == 'ceph':
                         if ceph_storages.has_key(backupStorageRef.text_):
                             if vm_name in ceph_storages[backupStorageRef.text_]:
                                 continue
@@ -492,8 +535,9 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
             if hasattr(vm, 'primaryStorageRef'):
                 for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
                     print primaryStorageRef.text_
+                    primary_storage_type = get_primary_storage_type(deploy_config, primaryStorageRef.text_)
                     for zone in xmlobject.safe_list(deploy_config.zones.zone):
-                        if primaryStorageRef.type_ == 'ceph':
+                        if primary_storage_type == 'ceph':
                             if ceph_storages.has_key(backupStorageRef.text_):
                                 if vm_name in ceph_storages[backupStorageRef.text_]:
                                     continue
@@ -632,7 +676,8 @@ def setup_fusionstor_storages(scenario_config, scenario_file, deploy_config):
             if hasattr(vm, 'backupStorageRef'):
                for backupStorageRef in xmlobject.safe_list(vm.backupStorageRef):
                    print backupStorageRef.text_
-                   if backupStorageRef.type_ == 'fusionstor':
+                   backup_storage_type = get_backup_storage_type(deploy_config, backupStorageRef.text_)
+                   if backup_storage_type == 'fusionstor':
                        if fusionstor_storages.has_key(backupStorageRef.text_):
                            if vm_name in fusionstor_storages[backupStorageRef.text_]:
                                continue
@@ -643,8 +688,9 @@ def setup_fusionstor_storages(scenario_config, scenario_file, deploy_config):
             if hasattr(vm, 'primaryStorageRef'):
                 for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
                     print primaryStorageRef.text_
+                    primary_storage_type = get_primary_storage_type(deploy_config, primaryStorageRef.text_)
                     for zone in xmlobject.safe_list(deploy_config.zones.zone):
-                        if primaryStorageRef.type_ == 'fusionstor':
+                        if primary_storage_type == 'fusionstor':
                             if fusionstor_storages.has_key(backupStorageRef.text_):
                                 if vm_name in fusionstor_storages[backupStorageRef.text_]:
                                     continue
