@@ -30,7 +30,7 @@ def test():
                                                                   net_outbound_bandwidth=net_out,
                                                                   net_inbound_bandwidth=net_in)
         test_obj_dict.add_instance_offering(instance_offering)
-        volume_list = test_stub.create_multi_volumes()
+        volume_list = test_stub.create_multi_volumes(ps=random.choice(res_ops.get_resource(res_ops.PRIMARY_STORAGE)))
         for volume in volume_list:
             test_obj_dict.add_volume(volume)
         test_vm = test_stub.create_vm_with_random_offering(vm_name='test_vm', instance_offering_uuid=instance_offering.uuid,
