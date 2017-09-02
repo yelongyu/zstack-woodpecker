@@ -9,14 +9,16 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
-from .test_stub import create_multi_volumes, create_vm_with_random_offering
 import random
 
 
 test_obj_dict = test_state.TestStateDict()
+test_stub = test_lib.lib_get_test_stub()
+
 BANDWIDTH = random.randint(1, 100) * 1024 * 1024
 NET_OUT =  random.randint(1,10) * 1024 * 1024
 NET_IN = random.randint(1,10) * 1024 * 1024
+
 
 def test():
 
@@ -28,10 +30,10 @@ def test():
                                                                   net_outbound_bandwidth=net_out,
                                                                   net_inbound_bandwidth=net_in)
         test_obj_dict.add_instance_offering(instance_offering)
-        volume_list = create_multi_volumes()
+        volume_list = test_stub.create_multi_volumes()
         for volume in volume_list:
             test_obj_dict.add_volume(volume)
-        test_vm = create_vm_with_random_offering(vm_name='test_vm', instance_offering_uuid=instance_offering.uuid,
+        test_vm = test_stub.create_vm_with_random_offering(vm_name='test_vm', instance_offering_uuid=instance_offering.uuid,
                                                  l3_name='l3VlanNetwork2', image_name='imageName_net')
         test_obj_dict.add_vm(test_vm)
         for volume in volume_list:
@@ -44,7 +46,7 @@ def test():
             volume.check()
         test_vm.check()
 
-        test_vm_with_datavol = create_vm_with_random_offering(vm_name='test_vm_datavol', instance_offering_uuid=instance_offering.uuid,
+        test_vm_with_datavol = test_stub.create_vm_with_random_offering(vm_name='test_vm_datavol', instance_offering_uuid=instance_offering.uuid,
                                                               disk_offering_uuids=[random.choice(res_ops.get_resource(res_ops.DISK_OFFERING)).uuid],
                                                               l3_name='l3VlanNetwork2', image_name='imageName_net')
         test_obj_dict.add_vm(test_vm_with_datavol)
