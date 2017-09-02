@@ -53,16 +53,16 @@ def test():
         vpc_inv = ecs_vpc[0]
     else:
         vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', 'zstack-test-vpc-vrouter', '172.16.0.0/12')
-    time.sleep(5)
+        time.sleep(20)
     hyb_ops.sync_ecs_security_group_from_remote(vpc_inv.uuid)
     sg_all = hyb_ops.query_ecs_security_group_local()
     ecs_security_group = [ sg for sg in sg_all if sg.name == 'zstack-test-ecs-security-group']
     if not ecs_security_group:
         sg_inv = hyb_ops.create_ecs_security_group_remote('zstack-test-ecs-security-group', vpc_inv.uuid)
+        time.sleep(20)
     else:
         sg_inv = ecs_security_group[0]
 #     sg_inv = hyb_ops.create_ecs_security_group_remote('sg_for_test', vpc_inv.uuid)
-    time.sleep(5)
     sg_rule_ingress = hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'ingress', 'TCP', '445/445', '0.0.0.0/0', 'drop', 'intranet', '1')
     sg_rule_egress = hyb_ops.create_ecs_security_group_rule_remote(sg_inv.uuid, 'egress', 'TCP', '80/80', '0.0.0.0/0', 'accept', 'intranet', '10')
     if sg_rule_ingress:

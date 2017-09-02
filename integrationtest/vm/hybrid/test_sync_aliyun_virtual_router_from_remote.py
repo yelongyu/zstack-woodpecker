@@ -48,7 +48,7 @@ def test():
     if len(err_list) == len(regions):
         raise hyb_ops.ApiError("Failed to add DataCenter: %s" % err_list)
     vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test_%s' % date_s, vr_name, '192.168.0.0/16')
-    time.sleep(5)
+    time.sleep(20)
     hyb_ops.sync_aliyun_virtual_router_from_remote(vpc_inv.uuid)
     vr_local = hyb_ops.query_aliyun_virtual_router_local()
     for vr in vr_local:

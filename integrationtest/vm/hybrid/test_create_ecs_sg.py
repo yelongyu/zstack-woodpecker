@@ -47,9 +47,9 @@ def test():
     if len(err_list) == len(regions):
         raise hyb_ops.ApiError("Failed to add DataCenter: %s" % err_list)
     vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_inv.uuid, 'vpc_for_test', 'zstack-test-vpc-vrouter', '192.168.0.0/16')
-    time.sleep(5)
+    time.sleep(20)
     sg_inv = hyb_ops.create_ecs_security_group_remote('sg_for_test', vpc_inv.uuid)
-    time.sleep(10)
+    time.sleep(20)
     hyb_ops.del_ecs_security_group_remote(sg_inv.uuid)
     test_util.test_pass('Create Delete ECS Security Group Test Success')
 

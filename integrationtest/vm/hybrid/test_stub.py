@@ -56,7 +56,7 @@ def create_ecs_instance(datacenter_type, datacenter_uuid, region_id, allocate_pu
         vpc_inv = ecs_vpc[0]
     else:
         vpc_inv = hyb_ops.create_ecs_vpc_remote(datacenter_uuid, 'zstack-test-vpc', 'zstack-test-vpc-vrouter', '172.16.0.0/12')
-    time.sleep(5)
+        time.sleep(20)
     # Create ECS vSwitch
     hyb_ops.sync_ecs_vswitch_from_remote(datacenter_uuid)
     vswitch_all = hyb_ops.query_ecs_vswitch_local()
