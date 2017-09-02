@@ -16,10 +16,11 @@ test_obj_dict = test_state.TestStateDict()
 test_stub = test_lib.lib_get_test_stub()
 
 BANDWIDTH = random.randint(1, 100) * 1024 * 1024
-NET_OUT =  random.randint(1,10) * 1024 * 1024
+NET_OUT = random.randint(1,10) * 1024 * 1024
 NET_IN = random.randint(1,10) * 1024 * 1024
 
 
+@test_stub.skip_if_multi_ps
 def test():
 
     all_combinations =[(bandwidth, net_out, net_in) for bandwidth in [None, BANDWIDTH]

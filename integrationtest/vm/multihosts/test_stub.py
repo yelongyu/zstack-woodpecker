@@ -774,6 +774,15 @@ def skip_if_only_one_ps(test_method):
     return wrapper
 
 
+def skip_if_multi_ps(test_method):
+    @wraps(test_method)
+    def wrapper():
+        if PSEnvChecker().is_multi_ps_env:
+            test_util.test_skip("Skip test if multi PrimaryStorage Env")
+        return test_method()
+    return wrapper
+
+
 def skip_if_not_local_nfs(test_method):
     @wraps(test_method)
     def wrapper():
