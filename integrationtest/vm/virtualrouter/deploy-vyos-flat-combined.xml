@@ -179,13 +179,10 @@
                 startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
                 netmask="$ipRangeNetmask" />
               <dns>$DNSServer</dns>
-              <networkService provider="vrouter">
+              <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
-                <serviceType>CentralizedDNS</serviceType>
-                  <serviceType>DNS</serviceType>
-              </networkService>
-              <networkService provider="SecurityGroup">
-                <serviceType>SecurityGroup</serviceType>
+                <serviceType>Eip</serviceType>
+                <serviceType>Userdata</serviceType>
               </networkService>
             </l3BasicNetwork>
           </l3Networks>
