@@ -1,0 +1,6 @@
+<testConfig>
+    <deployConfig>deploy-imagestore-flat-local-sep-pub-man.xml</deployConfig>
+    <deployConfigTemplate>deploy-imagestore-flat-local-sep-pub-man.tmpt</deployConfigTemplate>
+    <!-- suite special test variables -->
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
