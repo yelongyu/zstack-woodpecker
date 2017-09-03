@@ -729,7 +729,8 @@ def setup_fusionstor_storages(scenario_config, scenario_file, deploy_config):
             ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
         except Exception as e:
             print str(e)
-        ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
+            print "re-install fusionstor"
+            ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
 
 def setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst):
     ocfs2_storages = dict()
