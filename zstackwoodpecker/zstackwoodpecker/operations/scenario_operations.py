@@ -361,7 +361,7 @@ def get_backup_storage_type(deploy_config, bs_name):
             return 'ceph'
     for backupStorage in deploy_config.backupStorages.get_child_node_as_list('fusionstorBackupStorage'):
         if backupStorage.name_ == bs_name:
-            return 'fusion'
+            return 'fusionstor'
 
     return None
 
@@ -372,7 +372,7 @@ def get_primary_storage_type(deploy_config, ps_name):
                 return 'ceph'
         for primaryStorage in zone.primaryStorages.get_child_node_as_list('fusionPrimaryStorage'):
             if primaryStorage.name_ == ps_name:
-                return 'fusion'
+                return 'fusionstor'
         for primaryStorage in zone.primaryStorages.get_child_node_as_list('localPrimaryStorage'):
             if primaryStorage.name_ == ps_name:
                 return 'local'
