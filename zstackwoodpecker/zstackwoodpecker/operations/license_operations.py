@@ -26,3 +26,11 @@ def reload_license(session_uuid = None):
             session_uuid)
 
     return result
+
+def update_license(session_uuid = None):
+    action = api_actions.UpdateLicense()
+    test_util.action_logger('update license')
+    result = account_operations.execute_action_with_session(action, \
+            session_uuid)
+
+    return result
