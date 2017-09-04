@@ -472,6 +472,10 @@ class TwoPrimaryStorageEnv(object):
         return self._first_ps_volume_list
 
     @property
+    def second_ps_volume_list(self):
+        return self._second_ps_volume_list
+
+    @property
     def new_ps(self):
         return self._new_ps
 
