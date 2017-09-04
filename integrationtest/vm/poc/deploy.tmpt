@@ -1,3 +1,4 @@
+import ../deploy.tmpt
 instanceOfferingName_s = small-vm
 instanceOfferingMemory_s = 512M
 instanceOfferingCpuNum_s = 1
