@@ -245,7 +245,8 @@ def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
 
     stop_vm(zstack_management_ip, vm_inv.uuid)
     start_vm(zstack_management_ip, vm_inv.uuid)
-    test_lib.lib_wait_target_up(vm_ip, '22', 120)
+    if not test_lib.lib_wait_target_up(vm_ip, '22', 120):
+        test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
 
     for l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
         if hasattr(l3network, 'l2NetworkRef'):
