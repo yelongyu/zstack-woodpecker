@@ -5,7 +5,6 @@
     <zstackInstallScript>$zstackInstallScript</zstackInstallScript>
 	<zstackProperties>~/sanitytest/conf/zstack.properties</zstackProperties>
     <zstackInstallPath>$zstackInstallPath</zstackInstallPath>
-    <zstackProperties>$zstackPropertiesPath</zstackProperties>
     <testAgent>$zstackTestAgentPkgPath</testAgent>
     <db>
       <!-- Database server IP address or hostname -->
