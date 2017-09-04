@@ -19,9 +19,11 @@ def test():
     test_stub.hack_ks(port = 6230)
     chassis_uuid = test_lib.lib_get_chassis_by_name(chassis).uuid
 
-    status = bare_operations.power_off_baremetal(chassis_uuid)
+    bare_operations.power_off_baremetal(chassis_uuid)
+    status = bare_operations.get_power_status(chassis_uuid)
     if status.status == "Chassis Power is off":
-        status = bare_operations.power_on_baremetal(chassis_uuid)
+        bare_operations.power_on_baremetal(chassis_uuid)
+        status = bare_operations.get_power_status(chassis_uuid)
         if status.status != "Chassis Power is on":
             test_util.test_fail('Failed to power on chassis')
     else:
