@@ -6,22 +6,18 @@ Create an unified test_stub to share test operations
 '''
 
 import os
-import subprocess
 import time
-import uuid
 
 import zstacklib.utils.ssh as ssh
 import zstacklib.utils.shell as shell
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
-import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
-import zstackwoodpecker.zstack_test.zstack_test_eip as zstack_eip_header
-import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
 import telnetlib
+import random
 
 
 shell.logcmd = False
@@ -293,3 +289,49 @@ class CapacityCheckerContext(object):
         else:
             self.mem_aligned_change = 128 * 1024 * 1024 * (counter + 1)
         return self.mem_aligned_change
+
+
+def vmoffering_testcase_maker(tbj, test_image_name=None, add_cpu=True, add_memory=True, need_online=False):
+    '''
+     function closure to create testcases Automatically
+    :param tbj: test_object_dict used to store and destroy test object
+    :param test_image_name:
+    :param add_cpu:
+    :param add_memory:
+    :return: testcase
+    '''
+
+    assert isinstance(add_cpu, bool)
+    assert isinstance(add_memory, bool)
+    assert isinstance(need_online, bool)
+    assert add_cpu or add_memory
+
+    def testmethod():
+        test_util.test_dsc("STEP1: Ceate vm instance offering")
+        vm_instance_offering = test_lib.lib_create_instance_offering(cpuNum=1, memorySize=1024*1024*1024)
+        tbj.add_instance_offering(vm_instance_offering)
+
+        test_util.test_dsc("STEP2: Ceate vm and wait until it up for testing")
+        vm = create_vm(vm_name='test_vm', image_name = test_image_name,
+                       instance_offering_uuid=vm_instance_offering.uuid)
+        tbj.add_vm(vm)
+        vm.check()
+
+        cpu_change = random.randint(1, 5) if add_cpu else 0
+        mem_change = random.randint(1, 500)*1024*1024 if add_memory else 0
+
+        test_util.test_dsc("STEP3: Hot Plugin CPU: {} and Memory: {} and check capacity".format(cpu_change, mem_change))
+
+        with CapacityCheckerContext(vm, cpu_change, mem_change):
+            vm_ops.update_vm(vm.get_vm().uuid, vm_instance_offering.cpuNum+cpu_change,
+                             vm_instance_offering.memorySize+mem_change)
+            vm.update()
+            if need_online:
+                online_hotplug_cpu_memory(vm)
+            time.sleep(10)
+
+        test_util.test_dsc("STEP4: Destroy test object")
+        test_lib.lib_error_cleanup(tbj)
+        test_util.test_pass('VM online change instance offering Test Pass')
+
+    return testmethod
