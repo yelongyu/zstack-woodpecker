@@ -494,7 +494,7 @@ def ensure_hosts_connected():
         test_util.test_fail("host status didn't change to Connected within 300s, therefore, failed")
 
 def ensure_host_disconnected(test_host, wait_time):
-    cond = res_ops.gen_query_conditions('managementIp', '=', test_host.ip_)
+    cond = res_ops.gen_query_conditions('managementIp', '=', test_host.managementIp_)
     for i in range(wait_time):
         time.sleep(1)
         host_list = res_ops.query_resource(res_ops.HOST, cond)
