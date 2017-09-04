@@ -177,10 +177,11 @@ def ssh_cmd_line(ip_addr, username, password, port):
     return ssh_cmd
 
 def yum_install_stress_tool(ssh_cmd_line):
-    timeout = 330
-    cmd = '%s "yum install -y fio stress iperf trickle enablerepo=ali* --nogpgcheck"' % (ssh_cmd_line)
-    if execute_shell_in_process(cmd, timeout) != 0:
-        test_util.test_fail('fail to install stress')
+    test_util.test_logger('test image need to have fio stress iperf trickle installed')
+    #timeout = 330
+    #cmd = '%s "yum install -y fio stress iperf trickle enablerepo=ali* --nogpgcheck"' % (ssh_cmd_line)
+    #if execute_shell_in_process(cmd, timeout) != 0:
+    #    test_util.test_fail('fail to install stress')
 
 def run_cpu_load(ssh_cmd_line, cpu_core, threads):
     timeout = 100
