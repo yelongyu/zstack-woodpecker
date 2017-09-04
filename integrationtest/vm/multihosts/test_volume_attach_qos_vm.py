@@ -23,8 +23,8 @@ NET_IN = random.randint(1,10) * 1024 * 1024
 @test_stub.skip_if_multi_ps
 def test():
 
-    all_combinations =[(bandwidth, net_out, net_in) for bandwidth in [None, BANDWIDTH]
-                  for net_out in [None, NET_OUT] for net_in in [None, NET_IN]]
+    all_combinations = ((bandwidth, net_out, net_in) for bandwidth in [None, BANDWIDTH]
+                        for net_out in [None, NET_OUT] for net_in in [None, NET_IN])
     for bandwidth, net_out, net_in in all_combinations:
         instance_offering = test_lib.lib_create_instance_offering(name='test_offering',
                                                                   volume_bandwidth=bandwidth,
@@ -35,7 +35,7 @@ def test():
         for volume in volume_list:
             test_obj_dict.add_volume(volume)
         test_vm = test_stub.create_vm_with_random_offering(vm_name='test_vm', instance_offering_uuid=instance_offering.uuid,
-                                                 l3_name='l3VlanNetwork2', image_name='imageName_net')
+                                                           l3_name='l3VlanNetwork2', image_name='imageName_net')
         test_obj_dict.add_vm(test_vm)
         for volume in volume_list:
             volume.attach(test_vm)

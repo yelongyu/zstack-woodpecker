@@ -394,64 +394,92 @@ def check_vm_internal_cpu_mem(vm, shutdown, window):
 class TwoPrimaryStorageEnv(object):
     def __init__(self, test_object_dict, first_ps_vm_number=0, second_ps_vm_number=0, first_ps_volume_number=0, second_ps_volume_number=0,
                  vm_creation_with_volume_number=0):
-        self.first_ps_vm_number = first_ps_vm_number
-        self.second_ps_vm_number = second_ps_vm_number
-        self.first_ps_volume_number = first_ps_volume_number
-        self.second_ps_volume_number = second_ps_volume_number
-        self.vm_creation_with_volume_number = vm_creation_with_volume_number
-        self.test_object_dict = test_object_dict
-        self.host_uuid = None
-        self.first_ps = None
-        self.second_ps = None
-        self.first_ps_vm_list = []
-        self.second_ps_vm_list = []
-        self.first_ps_volume_list = []
-        self.second_ps_volume_list = []
-        self.new_ps = False
+        self._first_ps_vm_number = first_ps_vm_number
+        self._second_ps_vm_number = second_ps_vm_number
+        self._first_ps_volume_number = first_ps_volume_number
+        self._second_ps_volume_number = second_ps_volume_number
+        self._vm_creation_with_volume_number = vm_creation_with_volume_number
+        self._test_object_dict = test_object_dict
+        self._host_uuid = None
+        self._first_ps = None
+        self._second_ps = None
+        self._first_ps_vm_list = []
+        self._second_ps_vm_list = []
+        self._first_ps_volume_list = []
+        self._second_ps_volume_list = []
+        self._new_ps = False
 
     def check_env(self):
         ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
-        self.first_ps = ps_list[0]
+        self._first_ps = ps_list[0]
         if len(ps_list) == 2:
-            self.second_ps = ps_list[1]
-        if self.first_ps.type == inventory.LOCAL_STORAGE_TYPE:
-            self.host_uuid = random.choice(res_ops.get_resource(res_ops.HOST)).uuid
+            self._second_ps = ps_list[1]
+        if self._first_ps.type == inventory.LOCAL_STORAGE_TYPE:
+            self._host_uuid = random.choice(res_ops.get_resource(res_ops.HOST)).uuid
 
     def deploy_env(self):
-        if self.first_ps_vm_number:
-            self.first_ps_vm_list = create_multi_vms(name_prefix="vm_in_first_ps-", count=self.first_ps_vm_number,
-                                                     host_uuid=self.host_uuid, ps_uuid=self.first_ps.uuid,
-                                                     data_volume_number=self.vm_creation_with_volume_number)
-            for vm in self.first_ps_vm_list:
-                self.test_object_dict.add_vm(vm)
+        if self._first_ps_vm_number:
+            self._first_ps_vm_list = create_multi_vms(name_prefix="vm_in_first_ps-", count=self._first_ps_vm_number,
+                                                     host_uuid=self._host_uuid, ps_uuid=self._first_ps.uuid,
+                                                     data_volume_number=self._vm_creation_with_volume_number)
+            for vm in self._first_ps_vm_list:
+                self._test_object_dict.add_vm(vm)
 
-        if self.first_ps_volume_number:
-            self.first_ps_volume_list = create_multi_volumes(count=self.first_ps_volume_number, host_uuid=self.host_uuid,
-                                                            ps=self.first_ps)
-            for volume in self.first_ps_volume_list:
-                self.test_object_dict.add_volume(volume)
+        if self._first_ps_volume_number:
+            self._first_ps_volume_list = create_multi_volumes(count=self._first_ps_volume_number, host_uuid=self._host_uuid,
+                                                            ps=self._first_ps)
+            for volume in self._first_ps_volume_list:
+                self._test_object_dict.add_volume(volume)
 
-        if not self.second_ps:
-            self.second_ps = add_primaryStorage(self.first_ps)
-            self.new_ps = True
+        if not self._second_ps:
+            self._second_ps = add_primaryStorage(self._first_ps)
+            self._new_ps = True
 
-        if self.second_ps_vm_number:
-            self.second_ps_vm_list = create_multi_vms(name_prefix="vm_in_second_ps-", count=self.second_ps_vm_number,
-                                                      host_uuid=self.host_uuid, ps_uuid=self.second_ps.uuid)
-            for vm in self.second_ps_vm_list:
-                self.test_object_dict.add_vm(vm)
+        if self._second_ps_vm_number:
+            self._second_ps_vm_list = create_multi_vms(name_prefix="vm_in_second_ps-", count=self._second_ps_vm_number,
+                                                      host_uuid=self._host_uuid, ps_uuid=self._second_ps.uuid)
+            for vm in self._second_ps_vm_list:
+                self._test_object_dict.add_vm(vm)
 
-        if self.second_ps_volume_number:
-            self.second_ps_volume_list = create_multi_volumes(count=self.second_ps_volume_number, host_uuid=self.host_uuid,
-                                                             ps=self.second_ps)
-            for volume in self.second_ps_volume_list:
-                self.test_object_dict.add_volume(volume)
+        if self._second_ps_volume_number:
+            self._second_ps_volume_list = create_multi_volumes(count=self._second_ps_volume_number, host_uuid=self._host_uuid,
+                                                             ps=self._second_ps)
+            for volume in self._second_ps_volume_list:
+                self._test_object_dict.add_volume(volume)
+
+    @property
+    def host_uuid(self):
+        return self._host_uuid
+
+    @property
+    def first_ps(self):
+        return self._first_ps
+
+    @property
+    def second_ps(self):
+        return self._second_ps
+
+    @property
+    def first_ps_vm_list(self):
+        return self._first_ps_vm_list
+
+    @property
+    def second_ps_vm_list(self):
+        return self._second_ps_vm_list
+
+    @property
+    def first_ps_volume_list(self):
+        return self._first_ps_volume_list
+
+    @property
+    def new_ps(self):
+        return self._new_ps
 
     def get_vm_list_from_ps(self, ps):
-        if ps is self.first_ps:
-            return self.first_ps_vm_list
-        elif ps is self.second_ps:
-            return self.second_ps_vm_list
+        if ps is self._first_ps:
+            return self._first_ps_vm_list
+        elif ps is self._second_ps:
+            return self._second_ps_vm_list
         else:
             raise NameError
 
