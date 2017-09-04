@@ -139,3 +139,34 @@ def provision_baremetal(chassis_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
+def power_on_baremetal(chassis_uuid, session_uuid=None):
+    action = api_actions.PowerOnBaremetalHostAction()
+    action.chassisUuid = chassis_uuid
+    action.timeout = 30000
+    test_util.action_logger('PowerOn Chassis [uuid:] %s' % chassis_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def power_off_baremetal(chassis_uuid, session_uuid=None):
+    action = api_actions.PowerOffBaremetalHostAction()
+    action.chassisUuid = chassis_uuid
+    action.timeout = 30000
+    test_util.action_logger('PowerOff Chassis [uuid:] %s' % chassis_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def power_reset_baremetal(chassis_uuid, session_uuid=None):
+    action = api_actions.PowerResetBaremetalHostAction()
+    action.chassisUuid = chassis_uuid
+    action.timeout = 30000
+    test_util.action_logger('PowerReset Chassis [uuid:] %s' % chassis_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def get_power_status(chassis_uuid, session_uuid=None):
+    action = api_actions.PowerStatusBaremetalHostAction()
+    action.chassisUuid = chassis_uuid
+    action.timeout = 30000
+    test_util.action_logger('Get Power Status of Chassis [uuid:] %s' % chassis_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
