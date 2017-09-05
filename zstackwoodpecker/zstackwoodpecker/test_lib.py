@@ -140,6 +140,8 @@ HostL2IpDb = 'host_l2_ip.db'
 
 def lib_install_testagent_to_host(host, username = None, password = None):
     host_pub_ip = host.managementIp
+    if not lib_wait_target_up(host_pub_ip, '22', 120):
+        test_util.test_fail('vm: %s is not startup in 120 seconds.' % vm.uuid)
     try:
         shell.call('echo "quit" | telnet %s 9393|grep "Escape character"' % host_pub_ip)
         #shell.call('nc -w1 %s 9393' % host_pub_ip)
