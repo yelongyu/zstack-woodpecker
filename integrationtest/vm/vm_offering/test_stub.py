@@ -291,14 +291,38 @@ class CapacityCheckerContext(object):
         return self.mem_aligned_change
 
 
+def vm_offering_testcase(tbj, test_image_name=None, add_cpu=True, add_memory=True, need_online=False):
+    test_util.test_dsc("STEP1: Ceate vm instance offering")
+    vm_instance_offering = test_lib.lib_create_instance_offering(cpuNum=1, memorySize=1024*1024*1024)
+    tbj.add_instance_offering(vm_instance_offering)
+
+    test_util.test_dsc("STEP2: Ceate vm and wait until it up for testing image_name : {}".format(test_image_name))
+    vm = create_vm(vm_name='test_vm', image_name=test_image_name,
+                   instance_offering_uuid=vm_instance_offering.uuid)
+    tbj.add_vm(vm)
+    vm.check()
+
+    cpu_change = random.randint(1, 5) if add_cpu else 0
+    mem_change = random.randint(1, 500)*1024*1024 if add_memory else 0
+
+    test_util.test_dsc("STEP3: Hot Plugin CPU: {} and Memory: {} and check capacity".format(cpu_change, mem_change))
+
+    with CapacityCheckerContext(vm, cpu_change, mem_change):
+        vm_ops.update_vm(vm.get_vm().uuid, vm_instance_offering.cpuNum+cpu_change,
+                            vm_instance_offering.memorySize+mem_change)
+        vm.update()
+        if need_online:
+            online_hotplug_cpu_memory(vm)
+        time.sleep(10)
+
+    test_util.test_dsc("STEP4: Destroy test object")
+    test_lib.lib_error_cleanup(tbj)
+    test_util.test_pass('VM online change instance offering Test Pass')
+
+
 def vmoffering_testcase_maker(tbj, test_image_name=None, add_cpu=True, add_memory=True, need_online=False):
     '''
-     function closure to create testcases Automatically
-    :param tbj: test_object_dict used to store and destroy test object
-    :param test_image_name:
-    :param add_cpu:
-    :param add_memory:
-    :return: testcase
+    This a good try but I found functools could be a more gracefull way
     '''
 
     assert isinstance(add_cpu, bool)
