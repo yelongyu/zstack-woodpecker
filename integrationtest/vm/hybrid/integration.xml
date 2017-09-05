@@ -37,5 +37,7 @@
         <case timeout='900' repeat='1' noparallel='True'>test_update_ecs_instance.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_add_invalid_ks.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_update_ks.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>test_detect_vpc_vpn_connection_status.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>test_get_create_ecs_image_progress.py</case>
     </suite>
 </integrationTest>

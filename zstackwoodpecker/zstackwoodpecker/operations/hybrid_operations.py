@@ -776,7 +776,7 @@ def query_vpc_user_vpn_gateway_local(condition=[], session_uuid=None):
 def query_vpc_vpn_connection_local(condition=[], session_uuid=None):
     action = api_actions.QueryVpcVpnConnectionFromLocalAction()
     action.conditions = condition
-    test_util.action_logger('Query Vpc Vpn Gate from local')
+    test_util.action_logger('Query Vpc Vpn Connection from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
@@ -812,5 +812,13 @@ def get_ecs_instance_vnc_url(uuid, session_uuid=None):
     action = api_actions.GetEcsInstanceVncUrlAction()
     action.uuid = uuid
     test_util.action_logger('Get Ecs Instance Vpc Url')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def get_create_ecs_image_progress(data_center_uuid, image_uuid, session_uuid=None):
+    action = api_actions.GetCreateEcsImageProgressAction()
+    action.dataCenterUuid = data_center_uuid
+    action.imageUuid = image_uuid
+    test_util.action_logger('Get Create ECS Image Progress')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
