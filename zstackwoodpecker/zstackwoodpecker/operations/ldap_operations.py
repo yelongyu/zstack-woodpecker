@@ -14,7 +14,7 @@ import config_operations
 import os
 import inspect
 
-def add_ldap_server(name, description, url, base, username, password, encryption='None', session_uuid=None):
+def add_ldap_server(name, description, url, base, username, password, encryption='None', systemtags=None, session_uuid=None):
     action = api_actions.AddLdapServerAction()
     action.name = name
     action.description = description
@@ -23,6 +23,8 @@ def add_ldap_server(name, description, url, base, username, password, encryption
     action.username = username
     action.password = password
     action.encryption = encryption
+    if systemtags != None:
+        action.systemTags = systemtags
     test_util.action_logger('Add [ldap Server:] %s' % url)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[ldap Server:] %s is added.' % url)
@@ -50,3 +52,18 @@ def unbind_ldap_account(uuid, session_uuid=None):
     test_util.action_logger('unbind [ldap account:] %s' % (uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
+
+def update_ldap_server(uuid, systemtags, session_uuid=None):
+    action = api_actions.UpdateLdapServerAction()
+    action.ldapServerUuid = uuid
+    action.systemTags = systemtags
+    test_util.action_logger('update [ldap clean binding filter:] %s' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def clean_invalid_ldap_binding(session_uuid=None):
+    action = api_actions.CleanInvalidLdapBindingAction()
+    test_util.action_logger('clean [invalid ldap binding]')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
