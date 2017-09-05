@@ -30,6 +30,7 @@
         <case timeout="120" >account/test_multi_accounts_vm_ops.py</case>
         <case timeout="120" >test_ldap_login.py</case>
         <case timeout="120" >test_ldap_tls_login.py</case>
+        <case timeout="120" >test_ldap_filter.py</case>
         <case timeout="480" >test_get_multi_vm_console_address.py</case>
         <case timeout="220" >test_vm_ha_never_stop.py</case>
         <case timeout="220" >test_set_vm_console_password.py</case>
