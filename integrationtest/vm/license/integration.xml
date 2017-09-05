@@ -5,6 +5,7 @@
         <case timeout='60' repeat='1' noparallel='True'>test_community_to_trial.py</case>
         <case timeout='60' repeat='1' noparallel='True'>test_community_to_prepaid.py</case>
         <case timeout='60' repeat='1' noparallel='True'>test_community_to_hybrid.py</case>
+        <case timeout='60' repeat='1' noparallel='True'>test_community_to_trial_update_license.py</case>
         <case timeout='60' repeat='1' noparallel='True'>test_update_license.py</case>
     </suite>
 </integrationTest>
