@@ -28,7 +28,7 @@ def reload_license(session_uuid = None):
     return result
 
 def update_license(node_uuid, file_license, session_uuid = None):
-    action = api_actions.UpdateLicense()
+    action = api_actions.UpdateLicenseAction()
     action.managementNodeUuid = node_uuid
     action.license = file_license
     test_util.action_logger('update license from UI')
