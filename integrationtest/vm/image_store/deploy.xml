@@ -105,7 +105,6 @@
 	mediaType="$rootMediaType">
         <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       </image>
-      <!--
       <image name="$imageName_windows" 
         description="Small Test Image Template for windows platform" 
         mediaType="$rootMediaType" format="$rootImageFormat"
@@ -113,6 +112,7 @@
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       </image>
+      <!--
       <image name="$imageName_other" 
         description="Small Test Image Template for other platform" 
         mediaType="$rootMediaType" format="$rootImageFormat"
