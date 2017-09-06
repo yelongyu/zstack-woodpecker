@@ -318,7 +318,8 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
             nfs_vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, nfs_network_uuid).ip
             if ("test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml" in os.environ.get('WOODPECKER_TEST_CONFIG_FILE') or \
                 "test-config-vyos-flat-dhcp-nfs-mul-net-pubs.xml" in os.environ.get('WOODPECKER_TEST_CONFIG_FILE')) and \
-                "scenario-config-sep-pub-man.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE'):
+                ("scenario-config-sep-pub-man.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE') or \
+                "scenario-config-sep-pub-man-stor.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')):
                 nfs_vm_nic = os.environ.get('storNic')
                 nfs_vm_netmask = os.environ.get('manNetMask')
                 nfs_vm_gateway = os.environ.get('manGateway')
