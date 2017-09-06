@@ -131,6 +131,7 @@ def get_host_by_consul_leader(scenarioConfig, scenarioFile):
         try:
             host_ip = test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
         except:
+            test_util.test_logger("@@@host.ip_: %s exception when execute consul info" %(host.ip_))
             continue
         if host_ip != "" and host_ip != False and host_ip.count('.') == 3:
             return host_ip.strip()
