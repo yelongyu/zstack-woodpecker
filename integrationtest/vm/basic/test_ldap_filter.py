@@ -53,7 +53,7 @@ def test():
         test_util.test_fail('should not be able to login with filter account')
 
     new_account2 = acc_ops.create_account('new_account2', 'password', 'Normal')
-    new_account_uuid2 = new_account.uuid2
+    new_account_uuid2 = new_account2.uuid
     ldap_account2 = ldp_ops.bind_ldap_account('ldapfilter', new_account2.uuid)
     ldap_account_uuid2 = ldap_account2.inventory.uuid
     session_uuid2 = acc_ops.login_by_ldap('ldapfilter', 'password')
