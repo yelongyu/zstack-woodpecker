@@ -59,15 +59,15 @@ def test():
     config_json = os.environ.get('configJson')
     if "test-config-vyos-nfs.xml" in os.environ.get('WOODPECKER_TEST_CONFIG_FILE') and \
         "scenario-config-storage-separate-nfs.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE'):
-        config_json = os.environ.get('configJson_2nets')
+        config_json = os.environ.get('configJsonSepStor')
     elif "test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml" in os.environ.get('WOODPECKER_TEST_CONFIG_FILE') and \
          ( "scenario-config-nfs-sep-man.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE') or \
            "scenario-config-nfs-sep-pub.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE') ):
-        config_json = os.environ.get('configJsonPubMan')
+        config_json = os.environ.get('configJsonSepPub')
     elif "test-config-vyos-flat-dhcp-nfs-mul-net-pubs.xml" in os.environ.get('WOODPECKER_TEST_CONFIG_FILE') and \
          ( "scenario-config-nfs-sep-man.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE') or \
            "scenario-config-nfs-sep-pub.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE') ):
-        config_json = os.environ.get('configJsonPubPub')
+        config_json = os.environ.get('configJsonAllOne')
 
     ha_deploy_tool = os.environ.get('zstackHaInstaller')
     mn_img = os.environ.get('mnImage')
