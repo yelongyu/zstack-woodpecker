@@ -9,6 +9,7 @@
         <case timeout="120" >test_suspended_vm_ops.py</case>
         <case timeout="120" >test_start_vm.py</case>
         <case timeout="120" >test_support_vm_boot_option.py</case>
+        <case timeout="120" >test_vm_with_volumes_boot_option.py</case>
         <case timeout="220" >test_reboot_vm.py</case>
         <case timeout="200" >test_add_volume.py</case> 
         <case timeout="200" >test_add_vol_to_stopvm.py</case> 
