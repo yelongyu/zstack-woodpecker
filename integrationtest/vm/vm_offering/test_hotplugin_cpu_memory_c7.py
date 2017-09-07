@@ -25,7 +25,7 @@ test = functools.partial(test_stub.vm_offering_testcase,
                          test_image_name="imageName_i_c7",
                          add_cpu=True,
                          add_memory=True,
-                         need_online=False)
+                         need_online=True)
 
 
 def error_cleanup():
