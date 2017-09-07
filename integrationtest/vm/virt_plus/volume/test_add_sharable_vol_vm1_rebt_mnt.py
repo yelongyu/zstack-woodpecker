@@ -113,7 +113,7 @@ def check_sharable_volume_mount(vm1, vm2):
 
     cmd = "mount|grep sda"
     exec_cmd_in_vm(vm1, cmd, "%s failed" %(cmd))
-    time.sleep(5)
+    time.sleep(50)
     exec_cmd_in_vm(vm2, cmd, "%s failed" %(cmd))
     
 
