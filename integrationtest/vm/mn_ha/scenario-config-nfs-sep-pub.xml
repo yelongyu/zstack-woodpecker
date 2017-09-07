@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-nfs-sep-pub.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-nfs-sep-pub.tmpt</scenarioConfigTemplate>
+</testConfig>

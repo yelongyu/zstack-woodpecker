@@ -1,4 +1,0 @@
-<testConfig>
-    <scenarioConfig>scenario-sep-pub-man.xml</scenarioConfig>
-    <scenarioConfigTemplate>scenario-sep-pub-man.tmpt</scenarioConfigTemplate>
-</testConfig>
