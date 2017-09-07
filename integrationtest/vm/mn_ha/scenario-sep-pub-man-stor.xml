@@ -27,7 +27,6 @@
             </l3Network>
           </l3Networks>
 	  <backupStorageRef type="sftp">$sftpBackupStorageName</backupStorageRef>
-	  <backupStorageRef type="sftp">$sftpBackupStorageName2</backupStorageRef>
 	  <primaryStorageRef type="nfs">$nfsPrimaryStorageName</primaryStorageRef>
         </vm>
         <vm name="$vmName1" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
@@ -45,6 +44,7 @@
               <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
             </l3Network>
           </l3Networks>
+	  <backupStorageRef type="sftp">$sftpBackupStorageName2</backupStorageRef>
           <hostRef>$hostName</hostRef>
           <mnHostRef>$hostName</mnHostRef>
         </vm>
