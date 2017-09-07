@@ -50,7 +50,7 @@ def test():
     test_stub.check_zstack_version(vm_ip, tmp_file, zstack_latest_version)
     test_stub.start_mn(vm_ip, tmp_file)
     #test_stub.check_zstack_or_mevoco(vm_ip, tmp_file, 'ZStack-enterprise')
-    test_stub.check_zstack_or_mevoco(vm_ip, tmp_file, 'ZStack')
+    #test_stub.check_zstack_or_mevoco(vm_ip, tmp_file, 'ZStack')
     test_stub.check_installation(vm_ip, tmp_file)
     #test_stub.reconnect_backup_storage(vm_ip, tmp_file)
     #test_stub.delete_backup_storage(vm_ip, tmp_file)
