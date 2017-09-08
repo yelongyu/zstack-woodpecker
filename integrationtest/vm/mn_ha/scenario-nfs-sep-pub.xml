@@ -21,6 +21,9 @@
             </l3Network>
             <l3Network uuid="$vmManagementL3Uuid">
 	      <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
+              <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+              <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
+              <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
             </l3Network>
           </l3Networks>
 	  <backupStorageRef type="sftp">$sftpBackupStorageName</backupStorageRef>
@@ -36,8 +39,12 @@
             </l3Network>
             <l3Network uuid="$vmManagementL3Uuid">
 	      <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
+              <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+              <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
+              <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
             </l3Network>
           </l3Networks>
+	  <backupStorageRef type="sftp">$sftpBackupStorageName2</backupStorageRef>
           <hostRef>$hostName</hostRef>
           <mnHostRef>$hostName</mnHostRef>
         </vm>
@@ -51,6 +58,9 @@
             </l3Network>
             <l3Network uuid="$vmManagementL3Uuid">
 	      <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
+              <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+              <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
+              <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
             </l3Network>
           </l3Networks>
           <hostRef>$hostName2</hostRef>
@@ -66,11 +76,13 @@
             </l3Network>
             <l3Network uuid="$vmManagementL3Uuid">
 	      <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
+              <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+              <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
+              <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
             </l3Network>
           </l3Networks>
           <hostRef>$hostName3</hostRef>
           <mnHostRef>$hostName3</mnHostRef>
-	  <backupStorageRef type="sftp">$sftpBackupStorageName2</backupStorageRef>
         </vm>
       </vms>
     </host>
