@@ -141,6 +141,7 @@ def test():
     vm1.destroy()
     vm2.destroy()
     vm3.destroy()
+    net_ops.destroy_vrouter(vr1_uuid)
     test_util.test_pass('Check Multi Nics Success')
 
 #Will be called only if exception happens in test().
