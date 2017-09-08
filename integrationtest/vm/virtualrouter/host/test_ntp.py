@@ -3,6 +3,7 @@ Test case for checking ntp is correct setup
 @author: quarkonics
 '''
 import os
+import test_stub
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
@@ -16,12 +17,16 @@ def test():
 
     cmd = 'ntpq -p'
     for host in test_lib.lib_get_all_hosts_from_plan():
-        if host.managementIp_ == mn.hostName:
+        test_util.test_logger("host.managementIp_: %s" %(host.managementIp_))
+        test_util.test_logger("mn.hostName: %s" %(mn.hostName))
+        test_util.test_logger("anotherIp: %s" %(test_stub.get_another_ip_of_host(host.managementIp_, host.username_, host.password_)))
+        if host.managementIp_ == mn.hostName or test_stub.get_another_ip_of_host(host.managementIp_, host.username_, host.password_) == mn.hostName:
             output = test_lib.lib_execute_ssh_cmd(host.managementIp_, host.username_, host.password_, cmd, timeout=30)
             if output.find(mn.hostName) >= 0:
                 test_util.test_fail('if host and MN are same host, its not expected to use itself')
         else:
             output = test_lib.lib_execute_ssh_cmd(host.managementIp_, host.username_, host.password_, cmd, timeout=30)
+            test_util.test_logger("output: %s" %(output))
             if not output:
                 test_util.test_dsc('try ssh port 2222')
                 cmd='/usr/sbin/ntpq -p'

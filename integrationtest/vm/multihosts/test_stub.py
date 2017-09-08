@@ -913,4 +913,11 @@ def create_vip(vip_name=None, l3_uuid=None, session_uuid = None):
 
     return vip
 
+def get_another_ip_of_host(ip, username, password):
+    '''
+        This function is only suitable for 2 network cards in the host.
+    '''
+    cmd = "ip r|grep kernel|grep -v %s|awk '{print $NF}'" %(ip)
+    output = test_lib.lib_execute_ssh_cmd(ip, username, password, cmd, timeout=30)
+    return output.split(':')[-1].strip()
 
