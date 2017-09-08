@@ -24,6 +24,7 @@ import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import apibinding.inventory as inventory
+import random
 
 Port = test_state.Port
 
@@ -547,3 +548,100 @@ def ensure_hosts_connected(wait_time):
     else:
         test_util.test_fail("host status didn't change to Connected within %s, therefore, failed" % (wait_time))
 
+
+def create_vm_with_random_offering(vm_name, image_name=None, l3_name=None, session_uuid=None,
+                                   instance_offering_uuid=None, host_uuid=None, disk_offering_uuids=None,
+                                   root_password=None, ps_uuid=None, system_tags=None):
+    if image_name:
+        imagename = os.environ.get(image_name)
+        image_uuid = test_lib.lib_get_image_by_name(imagename).uuid
+    else:
+        conf = res_ops.gen_query_conditions('format', '!=', 'iso')
+        conf = res_ops.gen_query_conditions('system', '=', 'false', conf)
+        image_uuid = random.choice(res_ops.query_resource(res_ops.IMAGE, conf)).uuid
+
+    if l3_name:
+        l3name = os.environ.get(l3_name)
+        l3_net_uuid = test_lib.lib_get_l3_by_name(l3name).uuid
+    else:
+        l3_net_uuid = random.choice(res_ops.get_resource(res_ops.L3_NETWORK)).uuid
+
+    if not instance_offering_uuid:
+        conf = res_ops.gen_query_conditions('type', '=', 'UserVM')
+        instance_offering_uuid = random.choice(res_ops.query_resource(res_ops.INSTANCE_OFFERING, conf)).uuid
+
+    vm_creation_option = test_util.VmOption()
+    vm_creation_option.set_l3_uuids([l3_net_uuid])
+    vm_creation_option.set_image_uuid(image_uuid)
+    vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+    vm_creation_option.set_name(vm_name)
+    if system_tags:
+        vm_creation_option.set_system_tags(system_tags)
+    if disk_offering_uuids:
+        vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
+    if root_password:
+        vm_creation_option.set_root_password(root_password)
+    if host_uuid:
+        vm_creation_option.set_host_uuid(host_uuid)
+    if session_uuid:
+        vm_creation_option.set_session_uuid(session_uuid)
+    if ps_uuid:
+        vm_creation_option.set_ps_uuid(ps_uuid)
+
+    vm = zstack_vm_header.ZstackTestVm()
+    vm.set_creation_option(vm_creation_option)
+    vm.create()
+    return vm
+
+def create_multi_volumes(count=10, host_uuid=None, ps=None):
+    volume_list = []
+    for i in xrange(count):
+        disk_offering = random.choice(res_ops.get_resource(res_ops.DISK_OFFERING))
+        volume_creation_option = test_util.VolumeOption()
+        volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
+        if ps:
+            volume_creation_option.set_primary_storage_uuid(ps.uuid)
+            if ps.type == inventory.LOCAL_STORAGE_TYPE:
+                if not host_uuid:
+                    host_uuid = random.choice(res_ops.get_resource(res_ops.HOST)).uuid
+            volume_creation_option.set_system_tags(['localStorage::hostUuid::{}'.format(host_uuid)])
+        volume = create_volume(volume_creation_option)
+        volume_list.append(volume)
+    for volume in volume_list:
+        volume.check()
+    if ps:
+        for volume in volume_list:
+            assert volume.get_volume().primaryStorageUuid == ps.uuid
+    return volume_list
+
+
+def migrate_vm_to_random_host(vm):
+    test_util.test_dsc("migrate vm to random host")
+    if not test_lib.lib_check_vm_live_migration_cap(vm.vm):
+        test_util.test_skip('skip migrate if live migrate not supported')
+    target_host = test_lib.lib_find_random_host(vm.vm)
+    current_host = test_lib.lib_find_host_by_vm(vm.vm)
+    vm.migrate(target_host.uuid)
+
+    new_host = test_lib.lib_get_vm_host(vm.vm)
+    if not new_host:
+        test_util.test_fail('Not find available Hosts to do migration')
+
+    if new_host.uuid != target_host.uuid:
+        test_util.test_fail('[vm:] did not migrate from [host:] %s to target [host:] %s, but to [host:] %s' % (vm.vm.uuid, current_host.uuid, target_host.uuid, new_host.uuid))
+    else:
+        test_util.test_logger('[vm:] %s has been migrated from [host:] %s to [host:] %s' % (vm.vm.uuid, current_host.uuid, target_host.uuid))
+
+
+def generate_pub_test_vm(tbj):
+    disk_offering_uuids = [random.choice(res_ops.get_resource(res_ops.DISK_OFFERING)).uuid]
+    l3_name_list = [os.environ.get('l3PublicNetworkName'), os.environ.get('l3NoVlanNetworkName1'), os.environ.get('l3NoVlanNetworkName2')]
+
+    pub_l3_vm, flat_l3_vm, vr_l3_vm = [create_vm_with_random_offering(vm_name='test_vm',
+                                                                      disk_offering_uuids=random.choice([None, disk_offering_uuids]),
+                                                                      l3_name=name) for name in l3_name_list]
+    for vm in pub_l3_vm, flat_l3_vm, vr_l3_vm:
+        vm.check()
+        tbj.add_vm(vm)
+
+    return pub_l3_vm, flat_l3_vm, vr_l3_vm
