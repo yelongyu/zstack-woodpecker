@@ -630,3 +630,11 @@ def set_l3network_router_interface_ip(l3NetworkUuid, routerInterfaceIp, systemTa
     test_util.test_logger('Set l3 network router interface ip for L3 uuid: {}'.format(l3NetworkUuid))
     result = acc_ops.execute_action_with_session(action, session_uuid)
     return result.success
+
+def destroy_vrouter(vrouter_uuid, session_uuid=None):
+    action = api_actions.DestroyVmInstanceAction()
+    action.uuid = vrouter_uuid
+    action.timeout = 12000
+    test_util.test_logger('Destroy vRouter uuid: {}'.format(vrouter_uuid))
+    result = acc_ops.execute_action_with_session(action, session_uuid)
+    return result.success
