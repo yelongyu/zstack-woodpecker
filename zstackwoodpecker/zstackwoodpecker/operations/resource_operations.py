@@ -27,6 +27,7 @@ ZONE = 'Zone'
 CLUSTER = 'Cluster'
 PRIMARY_STORAGE = 'PrimaryStorage'
 CEPH_PRIMARY_STORAGE = 'CephPrimaryStorage'
+CEPH_PRIMARY_STORAGE_POOL = 'CephPrimaryStoragePool'
 L2_NETWORK = 'L2Network'
 L2_VLAN_NETWORK = 'L2VlanNetwork'
 L2_VXLAN_NETWORK = 'L2VxlanNetwork'
@@ -337,6 +338,8 @@ def _gen_query_action(resource):
         action = api_actions.QueryAccountAction()
     elif resource == CEPH_PRIMARY_STORAGE:
         action = api_actions.QueryCephPrimaryStorageAction()
+    elif resource == CEPH_PRIMARY_STORAGE_POOL:
+        action = api_actions.QueryCephPrimaryStoragePoolAction()
     elif resource == SECURITY_GROUP:
         action = api_actions.QuerySecurityGroupAction()
     elif resource == SECURITY_GROUP_RULE:

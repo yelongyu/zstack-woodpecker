@@ -24,7 +24,7 @@ def test():
     vm = test_stub.create_vlan_vm()
     test_obj_dict.add_vm(vm)
 
-    pool = ps_ops.create_ceph_primary_storage_pool(ps.uuid, 'woodpecker_7')
+    pool = ps_ops.add_ceph_primary_storage_pool(ps.uuid, 'woodpecker_7')
     test_util.test_dsc('Create shareable volume and check')
     disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName'))
     volume_creation_option = test_util.VolumeOption()

@@ -60,11 +60,15 @@ def create_ceph_primary_storage(primary_storage_option, session_uuid=None):
             (evt.inventory.uuid, action.name))
     return evt.inventory
 
-def create_ceph_primary_storage_pool(primary_storage_uuid, pool_name, session_uuid=None):
+def add_ceph_primary_storage_pool(primary_storage_uuid, pool_name, aliasName=None, isCreate=None, resourceUuid=None, description=None, session_uuid=None):
     action = api_actions.AddCephPrimaryStoragePoolAction()
     action.timeout = 300000
     action.primaryStorageUuid = primary_storage_uuid
     action.poolName = pool_name
+    action.aliasName = aliasName
+    action.description = description
+    action.isCreate = isCreate
+    action.resourceUuid = resourceUuid
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create Primary Storage [uuid:] %s Pool [uuid:] %s [name:] %s' % \
             (action.primaryStorageUuid, evt.inventory.uuid, action.poolName))
