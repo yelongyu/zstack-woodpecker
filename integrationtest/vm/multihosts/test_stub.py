@@ -925,12 +925,12 @@ def generate_pub_test_vm(tbj):
     disk_offering_uuids = [random.choice(res_ops.get_resource(res_ops.DISK_OFFERING)).uuid]
     l3_name_list = ['l3PublicNetworkName', 'l3NoVlanNetworkName1', 'l3NoVlanNetworkName2']
 
-    pub_l3_vm, flat_l3_vm, vr_l3_vm = [create_vm_with_random_offering(vm_name='test_vm',
-                                                                      image_name='imageName_net',
-                                                                      disk_offering_uuids=random.choice([None, disk_offering_uuids]),
-                                                                      l3_name=name) for name in l3_name_list]
-    for vm in pub_l3_vm, flat_l3_vm, vr_l3_vm:
+    pub_l3_vm, vm1, vm2 = [create_vm_with_random_offering(vm_name='test_vm',
+                                                          image_name='imageName_net',
+                                                          disk_offering_uuids=random.choice([None, disk_offering_uuids]),
+                                                          l3_name=name) for name in l3_name_list]
+    for vm in (pub_l3_vm, vm1, vm2):
         vm.check()
         tbj.add_vm(vm)
 
-    return pub_l3_vm, flat_l3_vm, vr_l3_vm
+    return pub_l3_vm, vm1, vm2
