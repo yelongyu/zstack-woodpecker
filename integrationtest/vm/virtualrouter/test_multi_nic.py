@@ -33,6 +33,7 @@ def test():
 
     #Attach second public network to vrouter   
     cond = res_ops.gen_query_conditions('uuid', '=', vr1_uuid)
+    vr1_vm = res_ops.query_resource(res_ops.APPLIANCE_VM, cond)
     vr1_nics = res_ops.query_resource(res_ops.APPLIANCE_VM, cond)[0].vmNics
     second_public_l3network_attached = False
     for vm_nic in vr1_nics:
@@ -47,11 +48,13 @@ def test():
     for vm_nic in vr1_nics:
         if vm_nic.l3NetworkUuid == second_public_l3network_uuid:
             vr1_second_pub_nic_uuid = vm_nic.uuid
+            vm1.destroy()
+            net_ops.destroy_vrouter(vr1_uuid)
             test_util.test_pass('The Second Public Nic Is Attached To Vrouter')
     if vr1_second_pub_nic_uuid != '':
         net_ops.detach_l3(vr1_second_pub_nic_uuid)
-    vm1.check()
     vm1.destroy()
+    net_ops.destroy_vrouter(vr1_uuid)
     test_util.test_fail('The Second Public Nic Does Not Attached To Vrouter')
 
 #Will be called only if exception happens in test().
