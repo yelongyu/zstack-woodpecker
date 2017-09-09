@@ -26,21 +26,26 @@ def test():
     test_util.test_logger('Load and Check Prepaid license with 1 day and 1 CPU')
     file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '1', 'Prepaid', '1', '')
     test_stub.load_license(file_path)
+    issued_date = test_stub.get_license_info().issuedDate
+    expired_date = test_stub.license_date_cal(issued_date, 86400 * 1)
+    test_stub.check_license("woodpecker@zstack.io", 1, None, False, 'Paid', issued_date=issued_date, expired_date=expired_date)
 
-    test_util.test_logger('update a error license and Check Prepaid license with 1 day and 1 CPU')
-    #file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '1', 'Prepaid', '1', '')
-    #file_license1 = open(file_path.strip('\n')).read()
-    #file_license = (base64.b64encode('%s' % file_license1)).replace('a','d')
-    file_license = base64.b64encode('cat /home/test_err_license.txt')
+    test_util.test_logger('update a error other MN_node license ')
+    file_path = "cat /home/test_err_license.txt"
+    file_license1 = open(file_path.strip('\n')).read()
+    file_license = base64.b64encode('%s' % file_license1)
     node_uuid = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].uuid
     try:
         lic_ops.update_license(node_uuid, file_license)
     except Exception:
         pass
 
+    issued_date = test_stub.get_license_info().issuedDate
+    expired_date = test_stub.license_date_cal(issued_date, 86400 * 1)
+    test_stub.check_license("woodpecker@zstack.io", 1, None, False, 'Paid', issued_date=issued_date, expired_date=expired_date)
+
     test_util.test_logger('Update License and Check Trial license with 5 day and 10 HOST')
     file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '5', 'Prepaid', '', '10')
-    #file_license = os.popen('base64 %s' % file_path).read()
     file_license1 = open(file_path.strip('\n')).read()
     file_license = base64.b64encode('%s' % file_license1)
     node_uuid = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].uuid
