@@ -30,8 +30,9 @@ def test():
     expired_date = test_stub.license_date_cal(issued_date, 86400 * 1)
     test_stub.check_license("woodpecker@zstack.io", 1, None, False, 'Paid', issued_date=issued_date, expired_date=expired_date)
 
-    test_util.test_logger('update a error other MN_node license ')
-    file_path = "/home/test_err_license.txt"
+    test_util.test_logger('update a  other MN_node license gen_other_license ')
+    file_path = test_stub.gen_other_license('woodpecker', 'woodpecker@zstack.io', '1', 'Prepaid', '1', '')
+    #file_path = "/home/test_err_license.txt"
     file_license1 = open(file_path.strip('\n')).read()
     file_license = base64.b64encode('%s' % file_license1)
     node_uuid = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].uuid
