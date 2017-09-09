@@ -28,9 +28,10 @@ def test():
     test_stub.load_license(file_path)
 
     test_util.test_logger('update a error license and Check Prepaid license with 1 day and 1 CPU')
-    file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '1', 'Prepaid', '1', '')
-    file_license1 = open(file_path.strip('\n')).read()
-    file_license = (base64.b64encode('%s' % file_license1)).replace('a','d')
+    #file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '1', 'Prepaid', '1', '')
+    #file_license1 = open(file_path.strip('\n')).read()
+    #file_license = (base64.b64encode('%s' % file_license1)).replace('a','d')
+    file_license = base64.b64encode('cat /home/test_err_license.txt')
     node_uuid = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].uuid
     try:
         lic_ops.update_license(node_uuid, file_license)
