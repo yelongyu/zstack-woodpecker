@@ -32,7 +32,10 @@ def test():
     file_license1 = open(file_path.strip('\n')).read()
     file_license = (base64.b64encode('%s' % file_license1)).replace('a','d')
     node_uuid = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].uuid
-    test_stub.check_license(None, None, 1, False, 'Trial')
+    try:
+        lic_ops.update_license(node_uuid, file_license)
+    except Exception:
+        pass
 
     test_util.test_logger('Update License and Check Trial license with 5 day and 10 HOST')
     file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '5', 'Prepaid', '', '10')
