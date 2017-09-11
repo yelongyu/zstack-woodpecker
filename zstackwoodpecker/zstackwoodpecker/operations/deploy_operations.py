@@ -93,7 +93,8 @@ def get_backup_storage_from_scenario_file(backupStorageRefName, scenarioConfig, 
             	                        ip_list.append(s_vm.ips.ip[nic_id].ip_)
                                 else:
                                     for l3Network in xmlobject.safe_list(vm.l3Networks.l3Network):
-                                        if xmlobject.has_element(l3Network, 'backupStorageRef') and l3Network.backupStorageRef.text_ == backupStorageRefName:
+                                        if xmlobject.has_element(l3Network, 'backupStorageRef') and backupStorageRefName in [ backupStorageRef.text_ for backupStorageRef in l3Network.backupStorageRef]:
+                                        #if xmlobject.has_element(l3Network, 'backupStorageRef') and l3Network.backupStorageRef.text_ == backupStorageRefName:
                                             cond = res_ops.gen_query_conditions('name', '=', vm.name_)
                                             vm_inv_nics = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0].vmNics
                                             for vm_inv_nic in vm_inv_nics:
