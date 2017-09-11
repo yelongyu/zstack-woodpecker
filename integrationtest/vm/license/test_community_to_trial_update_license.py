@@ -24,12 +24,11 @@ def test():
 
     test_util.test_logger('Update License and Check Trial license with 1 day and 1 HOST')
     file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '1', 'Trial', '', '1')
-    #file_license = os.popen('base64 %s' % file_path).read()
-    file_license1 = open(file_path.strip('\n')).read()
-    file_license = base64.b64encode('%s' % file_license1)
+    with open(file_path.strip('\n'), 'r') as file_license2:
+        file_license1 = file_license2.read()
+        file_license = base64.b64encode('%s' % file_license1)
     node_uuid = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].uuid
     lic_ops.update_license(node_uuid, file_license)
-    file_license1.close()
     test_stub.check_license(None, None, 1, False, 'Trial')
 
     test_util.test_pass('Check License Test Success')
