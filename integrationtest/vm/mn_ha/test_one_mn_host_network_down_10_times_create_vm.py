@@ -20,6 +20,9 @@ mn_host = None
 def test():
     global vm
     global mn_host
+
+    test_stub.skip_if_scenario_is_multiple_networks()
+
     for i in range(0, 10):
         test_util.test_logger("shutdown host network round %s" % (i))
         mn_host = test_stub.get_host_by_mn_vm(test_lib.all_scenario_config, test_lib.scenario_file)
