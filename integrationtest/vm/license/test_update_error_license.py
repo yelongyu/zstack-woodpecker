@@ -30,8 +30,8 @@ def test():
     expired_date = test_stub.license_date_cal(issued_date, 86400 * 1)
     test_stub.check_license("woodpecker@zstack.io", 1, None, False, 'Paid', issued_date=issued_date, expired_date=expired_date)
 
-    test_util.test_logger('update a  other MN_node license gen_other_license ')
-    file_path = test_stub.gen_other_license('woodpecker', 'woodpecker@zstack.io', '1', 'Prepaid', '1', '')
+    test_util.test_logger('update a  other MN_node license gen_other_license with 2 day 2 cpu')
+    file_path = test_stub.gen_other_license('woodpecker', 'woodpecker@zstack.io', '2', 'Prepaid', '2', '')
     #file_path = "/home/test_err_license.txt"
     file_license1 = open(file_path.strip('\n')).read()
     file_license = base64.b64encode('%s' % file_license1)
@@ -42,8 +42,8 @@ def test():
         pass
 
     issued_date = test_stub.get_license_info().issuedDate
-    expired_date = test_stub.license_date_cal(issued_date, 86400 * 1)
-    test_stub.check_license("woodpecker@zstack.io", 1, None, False, 'Paid', issued_date=issued_date, expired_date=expired_date)
+    expired_date = test_stub.license_date_cal(issued_date, 86400 * 2)
+    test_stub.check_license("woodpecker@zstack.io", 2, None, False, 'Paid', issued_date=issued_date, expired_date=expired_date)
 
     test_util.test_logger('Update License and Check Trial license with 5 day and 10 HOST')
     file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '5', 'Prepaid', '', '10')
