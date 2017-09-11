@@ -20,6 +20,9 @@ mn_host = None
 def test():
     global vm
     global mn_host
+
+    test_stub.skip_if_scenario_is_multiple_networks()
+
     mn_host = test_stub.get_host_by_mn_vm(test_lib.all_scenario_config, test_lib.scenario_file)
     if len(mn_host) != 1:
         test_util.test_fail('MN VM is running on %d host(s)' % len(mn_host))
