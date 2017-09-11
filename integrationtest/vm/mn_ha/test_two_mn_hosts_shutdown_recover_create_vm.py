@@ -24,7 +24,6 @@ def test():
     global mn_host_list
     global test_mn_host_list
 
-    test_stub.skip_if_scenario_is_multiple_networks()
 
     mn_host_list = test_stub.get_mn_host(test_lib.all_scenario_config, test_lib.scenario_file)
     mn_host_num = len(mn_host_list)
