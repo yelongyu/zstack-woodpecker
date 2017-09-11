@@ -34,6 +34,7 @@ def test():
     file_license = base64.b64encode('%s' % file_license1)
     node_uuid = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].uuid
     lic_ops.update_license(node_uuid, file_license)
+    file_license1.close()
     issued_date = test_stub.get_license_info().issuedDate
     expired_date = test_stub.license_date_cal(issued_date, 86400 * 5)
     test_stub.check_license("woodpecker@zstack.io", None, 10, False, 'Paid', issued_date=issued_date, expired_date=expired_date)

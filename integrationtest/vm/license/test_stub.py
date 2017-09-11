@@ -110,6 +110,7 @@ def gen_other_license(customer_name, user_name, duration, lic_type, cpu_num, hos
     #lic_info = lic_ops.get_license_info()
     test_util.test_logger("bash '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s'" % (license_script, customer_name, user_name, duration, lic_type, cpu_num, host_num, request_key))
     (ret, file_path) = execute_shell_in_process_stdout("bash '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s'" % (license_script, customer_name, user_name, duration, lic_type, cpu_num, host_num, request_key), tmp_file)
+    request_key.close()
     return file_path
 
 def load_license(file_path):
