@@ -368,7 +368,7 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
 
 
 l2network_nic = None
-def shutdown_host_network(host_vm, scenarioConfig):
+def shutdown_host_network(host_vm, scenarioConfig, downMagt=True):
     '''
         Here we change l2network_nic to be global is due to the maybe failed once all mn nodes disconnected
         In that case, lib_get_l2_magt_nic_by_vr_offering will be failed because of mn is disconnected.
@@ -382,13 +382,19 @@ def shutdown_host_network(host_vm, scenarioConfig):
     host_inv = sce_ops.query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
 
     host_vm_config = sce_ops.get_scenario_config_vm(host_vm_inv.name_, scenarioConfig)
+
     if not l2network_nic:
-        l2network_nic = test_lib.lib_get_l2_magt_nic_by_vr_offering()
+        if downMagt:
+            l2network_nic = test_lib.lib_get_l2_magt_nic_by_vr_offering()
+        else:
+            l2network_nic = test_lib.lib_get_l2_pub_nic_by_vr_offering()
+
     if not l2network_nic:
         test_util.test_fail("fail to get management l2 by vr offering")
     #l2network_nic = os.environ.get('l2ManagementNetworkInterface').replace("eth", "zsn")
     cmd = "ifdown %s" % (l2network_nic)
     sce_ops.execute_in_vm_console(zstack_management_ip, host_inv.managementIp, host_vm_inv.uuid, host_vm_config, cmd)
+
 
 def reopen_host_network(host_vm, scenarioConfig):
     '''
