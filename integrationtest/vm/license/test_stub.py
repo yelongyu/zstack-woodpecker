@@ -105,8 +105,9 @@ def gen_license(customer_name, user_name, duration, lic_type, cpu_num, host_num)
 def gen_other_license(customer_name, user_name, duration, lic_type, cpu_num, host_num):
     tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
     license_script = os.environ.get('licenseGenScript') 
-    request_key = os.environ.get('licenseRequestKey') 
-    lic_info = lic_ops.get_license_info()
+    request_key1 = os.environ.get('licenseRequestKey') 
+    request_key = open(request_key1.strip('\n')).read() 
+    #lic_info = lic_ops.get_license_info()
     test_util.test_logger("bash '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s'" % (license_script, customer_name, user_name, duration, lic_type, cpu_num, host_num, request_key))
     (ret, file_path) = execute_shell_in_process_stdout("bash '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s'" % (license_script, customer_name, user_name, duration, lic_type, cpu_num, host_num, request_key), tmp_file)
     return file_path
