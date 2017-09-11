@@ -72,6 +72,8 @@ def get_backup_storage_from_scenario_file(backupStorageRefName, scenarioConfig, 
     if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
         return []
 
+    import scenario_operations as sce_ops
+    zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
     ip_list = []
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
         for vm in xmlobject.safe_list(host.vms.vm):
@@ -90,7 +92,15 @@ def get_backup_storage_from_scenario_file(backupStorageRefName, scenarioConfig, 
                                     else:
             	                        ip_list.append(s_vm.ips.ip[nic_id].ip_)
                                 else:
-                                    ip_list.append(s_vm.ip_)
+                                    for l3Network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                                        if xmlobject.has_element(l3Network, 'backupStorageRef') and l3Network.backupStorageRef.text_ == backupStorageRefName:
+                                            cond = res_ops.gen_query_conditions('name', '=', vm.name_)
+                                            vm_inv_nics = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0].vmNics
+                                            for vm_inv_nic in vm_inv_nics:
+                                                if vm_inv_nic.l3NetworkUuid == l3Network.uuid_:
+                                                    ip_list.append(vm_inv_nic.ip)
+                                                    return ip_list
+                                    #ip_list.append(s_vm.ip_)
     return ip_list
 
 #Add Backup Storage
