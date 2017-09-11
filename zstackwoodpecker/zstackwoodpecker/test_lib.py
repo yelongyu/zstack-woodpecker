@@ -1943,6 +1943,34 @@ def lib_get_l2_magt_nic_by_vr_offering(vr_offering_uuid=None, session_uuid=None)
     return l2_inv[0].physicalInterface
 
 
+def lib_get_l2_pub_nic_by_vr_offering(vr_offering_uuid=None, session_uuid=None):
+    '''
+        return l2 public interface by vr offering
+    '''
+    if not vr_offering_uuid:
+        vr_offering_inv = res_ops.get_resource(res_ops.VR_OFFERING, session_uuid)
+    else:
+        vr_offering_inv = res_ops.get_resource(res_ops.VR_OFFERING, session_uuid, uuid=vr_offering_uuid)
+
+    if not vr_offering_inv:
+        test_util.test_logger("NOT FOUND VR OFFERING.")
+        return None
+
+    l3_uuid = vr_offering_inv[0].publicNetworkUuid
+    l3_inv = res_ops.get_resource(res_ops.L3_NETWORK, session_uuid, uuid=l3_uuid)
+    if not l3_inv:
+        test_util.test_logger("NOT FOUND L3 BY l3_uuid: %s" %(l3_uuid))
+        return None
+
+    l2_uuid = l3_inv[0].l2NetworkUuid
+    l2_inv = res_ops.get_resource(res_ops.L2_NETWORK, session_uuid, uuid=l2_uuid)
+    if not l2_inv:
+        test_util.test_logger("NOT FOUND L2 BY l2_uuid: %s" %(l2_uuid))
+        return None
+
+    return l2_inv[0].physicalInterface
+
+
 #-----------Get L3 Network resource-------------
 def lib_get_l3_uuid_by_nic(nic_uuid, session_uuid=None):
     conditions = res_ops.gen_query_conditions('uuid', '=', nic_uuid)
