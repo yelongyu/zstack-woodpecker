@@ -101,7 +101,8 @@ def get_backup_storage_from_scenario_file(backupStorageRefName, scenarioConfig, 
                                                 if vm_inv_nic.l3NetworkUuid == l3Network.uuid_:
                                                     ip_list.append(vm_inv_nic.ip)
                                                     return ip_list
-                                    #ip_list.append(s_vm.ip_)
+                                    else:
+                                        ip_list.append(s_vm.ip_)
     return ip_list
 
 #Add Backup Storage
