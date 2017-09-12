@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-vyos-data-protect.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-vyos-data-protect.tmpt</scenarioConfigTemplate>
+</testConfig>

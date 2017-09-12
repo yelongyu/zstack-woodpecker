@@ -1,0 +1,16 @@
+import ../deploy.tmpt
+
+hostName2 = centos2
+hostIp2 = 10.0.0.1
+hostUsername2 = root
+hostPassword2 = password
+hostPort2 = 22
+
+instanceOfferingName_m = medium-vm
+instanceOfferingMemory_m = 2G
+instanceOfferingCpuNum_m = 2
+
+imageName_i_c7 = centos7-test
+imageUrl_i_c7 = http://zstack/image/centos7-test.qcow2
+
+l2PublicVlan = 3
