@@ -1,7 +1,7 @@
 '''
 
 Integration Test for creating KVM VM in MN HA mode with all mn hosts network down and recovery.
-This test is specific for public network down case
+This test is specific for management network down when public network is separated case
 
 @author: SyZhao
 '''

@@ -1,7 +1,7 @@
 '''
 
 Integration Test for creating KVM VM in MN HA mode with all mn hosts network down and recovery.
-This test is specific for public network down case
+This test is specific for public network down when public network is separated case
 
 @author: SyZhao
 '''
@@ -40,8 +40,8 @@ def test():
     test_util.test_logger("wait 10s for MN VM to stop")
     time.sleep(10)
     mn_host = test_stub.get_host_by_mn_vm(test_lib.all_scenario_config, test_lib.scenario_file)
-    if len(mn_host) != 0:
-        test_util.test_fail('MN VM is still running on %d host(s)' % len(mn_host))
+    if len(mn_host) == 0:
+        test_util.test_fail('MN VM has been murdered, expected result should not be impacted when the separated network is down.')
 
     for index in test_mn_host_list:
         test_util.test_logger("recover host [%s]" % (mn_host_list[index].ip_))
