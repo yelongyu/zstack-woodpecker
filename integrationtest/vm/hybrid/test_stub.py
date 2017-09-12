@@ -444,8 +444,8 @@ class HybridObject(object):
             assert image_progress.progress.progress == "100%"
         else:
             self.ecs_image = hyb_ops.create_ecs_image_from_local_image(bs_uuid, self.datacenter.uuid, image.uuid, name='zstack-test-ecs-image')
-            time.sleep(30)
             self.check_resource('create', 'ecsImageId', self.ecs_image.ecsImageId, 'query_ecs_image_local')
+        time.sleep(30)
 
     def sync_ecs_image(self):
         hyb_ops.sync_ecs_image_from_remote(self.datacenter.uuid, image_type='system')
