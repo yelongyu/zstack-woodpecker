@@ -13,57 +13,22 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import time
 import os
 
-date_s = time.strftime('%m%d-%H%M%S', time.localtime())
+postfix = time.strftime('%m%d-%H%M%S', time.localtime())
 test_obj_dict = test_state.TestStateDict()
-ks_inv = None
-datacenter_inv = None
-bucket_inv = None
+remote_bucket_name = 'test-bucket-%s' % postfix
+test_stub = test_lib.lib_get_test_stub()
+hybrid = test_stub.HybridObject()
 
 def test():
-    global ks_inv
-    global datacenter_inv
-    global bucket_inv
-    datacenter_type = os.getenv('datacenterType')
-    ks_existed = hyb_ops.query_aliyun_key_secret()
-    if not ks_existed:
-        ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
-    # Clear datacenter remained in local
-    datacenter_local = hyb_ops.query_datacenter_local()
-    if datacenter_local:
-        for d in datacenter_local:
-            hyb_ops.del_datacenter_in_local(d.uuid)
-    datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
-    regions = [ i.regionId for i in datacenter_list]
-    err_list = []
-    for region_id in regions:
-        try:
-            datacenter_inv = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
-        except hyb_ops.ApiError, e:
-            err_list.append(e)
-            pass
-        if datacenter_inv:
-            break
-    if len(err_list) == len(regions):
-        raise hyb_ops.ApiError("Failed to add DataCenter: %s" % err_list)
-    bucket_inv = hyb_ops.create_oss_bucket_remote(datacenter_inv.uuid, 'zstack-test-%s-%s' % (date_s, region_id), 'created-by-zstack-for-test')
-    hyb_ops.attach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid)
-    time.sleep(5)
-    hyb_ops.detach_oss_bucket_to_ecs_datacenter(bucket_inv.uuid)
+    hybrid.add_datacenter_iz(add_datacenter_only=True)
+    hybrid.add_bucket()
+    hybrid.detach_bucket()
+    hybrid.attach_bucket()
     test_util.test_pass('Create Attach Detach OSS Bucket Test Success')
 
 def env_recover():
-    global bucket_inv
-    if bucket_inv:
-        hyb_ops.del_oss_bucket_remote(bucket_inv.uuid)
-        #hyb_ops.del_oss_file_bucket_name_in_local(bucket_inv.uuid)
-
-    global datacenter_inv
-    if datacenter_inv:
-        hyb_ops.del_datacenter_in_local(datacenter_inv.uuid)
-
-    global ks_inv
-    if ks_inv:
-        hyb_ops.del_aliyun_key_secret(ks_inv.uuid)
+    if hybrid.oss_bucket_create:
+        hybrid.del_bucket()
 
 #Will be called only if exception happens in test().
 def error_cleanup():

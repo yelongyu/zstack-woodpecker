@@ -9,36 +9,22 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.hybrid_operations as hyb_ops
-import zstackwoodpecker.operations.resource_operations as res_ops
-import time
-import os
+
 
 test_obj_dict = test_state.TestStateDict()
-ks_inv = None
-
 
 def test():
-    global ks_inv
-    global datacenter_inv
     ks_existed = hyb_ops.query_aliyun_key_secret()
-    if not ks_existed:
-        ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
-    else:
-        ks_inv = ks_existed[0]
+    if ks_existed:
+        for ks in ks_existed:
+            hyb_ops.del_aliyun_key_secret(ks.uuid)
     try:
         hyb_ops.add_aliyun_key_secret('test_invalid_hybrid', 'test for hybrid', 'invalid-key', 'invalid-secret')
     except hyb_ops.ApiError, e:
         err_msg = e
-    ks = hyb_ops.query_aliyun_key_secret()
-    for k in ks:
-        assert k.name != 'test_invalid_hybrid'
-    assert err_msg
+    assert err_msg and not hyb_ops.query_aliyun_key_secret()
     test_util.test_pass('Detach Attach Aliyun Key and Secret Success')
 
-def env_recover():
-    global ks_inv
-    if ks_inv:
-        hyb_ops.del_aliyun_key_secret(ks_inv.uuid)
 
 #Will be called only if exception happens in test().
 def error_cleanup():

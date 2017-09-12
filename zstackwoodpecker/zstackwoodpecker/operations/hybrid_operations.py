@@ -1,6 +1,6 @@
 '''
 
-All ldap operations for test.
+All hybrid operations for test.
 
 @author: quarkonics
 '''
@@ -159,7 +159,7 @@ def attach_oss_bucket_to_ecs_datacenter(oss_bucket_uuid, session_uuid=None):
     test_util.test_logger('[Oss bucket:] %s is attached to Datacenter.' % oss_bucket_uuid)
     return evt
 
-def detach_oss_bucket_to_ecs_datacenter(oss_bucket_uuid, session_uuid=None):
+def detach_oss_bucket_from_ecs_datacenter(oss_bucket_uuid, session_uuid=None):
     action = api_actions.DetachOssBucketFromEcsDataCenterAction()
     action.ossBucketUuid = oss_bucket_uuid
 #     action.dataCenterUuid = datacenter_uuid 
@@ -478,7 +478,7 @@ def create_ecs_security_group_remote(name, vpc_uuid, session_uuid=None):
     test_util.test_logger('Ecs Security Group Remote:] %s %s is created.' % (name, vpc_uuid))
     return evt.inventory
 
-def create_ecs_security_group_rule_remote(group_uuid, direction, protocol, port_range, cidr, policy, nic_type, priority, session_uuid=None):
+def create_ecs_security_group_rule_remote(group_uuid, direction, protocol, port_range, cidr, policy, nic_type, priority, description=None, session_uuid=None):
     action = api_actions.CreateEcsSecurityGroupRuleRemoteAction()
     action.groupUuid = group_uuid
     action.direction = direction
@@ -488,6 +488,7 @@ def create_ecs_security_group_rule_remote(group_uuid, direction, protocol, port_
     action.policy = policy
     action.nictype = nic_type
     action.priority = priority
+    action.description = description
     test_util.action_logger('Create [Ecs Security Group Rule Remote:] %s %s %s %s %s %s %s %s' % (group_uuid, direction, protocol, port_range, cidr, policy, nic_type, priority))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Ecs Security Group Rule Remote:] %s %s %s %s %s %s %s %s is created.' % (group_uuid, direction, protocol, port_range, cidr, policy, nic_type, priority))
@@ -724,6 +725,13 @@ def query_datacenter_local(condition=[], session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
+def query_iz_local(condition=[], session_uuid=None):
+    action = api_actions.QueryIdentityZoneFromLocalAction()
+    action.conditions = condition
+    test_util.action_logger('Query IdentityZone from local')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
 def query_ecs_security_group_local(condition=[], session_uuid=None):
     action = api_actions.QueryEcsSecurityGroupFromLocalAction()
     action.conditions = condition
@@ -748,7 +756,7 @@ def query_hybrid_eip_local(condition=[], session_uuid=None):
 def query_vpc_vpn_gateway_local(condition=[], session_uuid=None):
     action = api_actions.QueryVpcVpnGatewayFromLocalAction()
     action.conditions = condition
-    test_util.action_logger('Query Vpc Vpn Gate from local')
+    test_util.action_logger('Query Vpc Vpn Gateway from local')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
