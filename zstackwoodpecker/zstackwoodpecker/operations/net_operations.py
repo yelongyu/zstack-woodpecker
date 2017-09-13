@@ -135,6 +135,23 @@ def delete_vip(vip_uuid, session_uuid=None):
     test_util.action_logger("[VIP]: %s is deleted" % vip_uuid)
     return evt
 
+def set_vip_qos(vip_uuid, inboundBandwidth=None, outboundBandwidth=None, session_uuid=None):
+    action = api_actions.SetVipQosAction()
+    action.uuid = vip_uuid
+    action.inboundBandwidth = inboundBandwidth
+    action.outboundBandwidth = outboundBandwidth
+    action.timeout = 12000
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt
+
+def delete_vip_qos(vip_uuid, direction, session_uuid=None):
+    action = api_actions.DeleteVipQosAction()
+    action.uuid = vip_uuid
+    action.direction = direction
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("DeleteVipQos [vip:] %s is deleted" % vip_uuid)
+    return evt
+
 def create_port_forwarding(pf_rule_creation_option):
     action = api_actions.CreatePortForwardingRuleAction()
     action.name = pf_rule_creation_option.get_name()

@@ -646,3 +646,35 @@ def generate_pub_test_vm(tbj):
         tbj.add_vm(vm)
 
     return pub_l3_vm, flat_l3_vm, vr_l3_vm
+
+def install_iperf(vm_inv):
+    vm_ip = vm_inv.vmNics[0].ip
+
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd = '%s "wget http://dl.fedoraproject.org/pub/epel/7/x86_64/i/iperf-2.0.10-1.el7.x86_64.rpm; rpm -ivh iperf-2.0.10-1.el7.x86_64.rpm"' % (ssh_cmd)
+    if execute_shell_in_process(cmd, 150) != 0:
+        test_util.test_fail('fail to install iperf.')
+
+def test_iperf_bandwidth(vm1_inv,vm2_inv,vip_ip,server_port,client_port,bandwidth,raise_exception=True):
+    vm1_ip = vm1_inv.vmNics[0].ip
+    vm2_ip = vm2_inv.vmNics[0].ip
+
+    cmd1 = "sshpass -p 'password' ssh root@%s iperf -s -p %s | awk 'NR==7 {print $(NF-1)}'" % (vm1_ip, server_port)
+    process1 = subprocess.Popen(cmd1, executable='/bin/sh', shell=True, stdout=subprocess.PIPE, universal_newlines=True)
+    time.sleep(10)
+    cmd2 = "iperf -c %s -p %s | awk 'NR==7 {print $(NF-1)}'" % (vip_ip, client_port)
+    ret, output, stderr = ssh.execute(cmd2, vm2_ip, "root", "password", False, 22)
+    inboundBandwidth = float(output)*128
+
+    time.sleep(30)
+    cmd3 = "pkill -9 iperf"
+    ret, output, stderr = ssh.execute(cmd3, vm1_ip, "root", "password", False, 22)
+    outboundBandwidth = float(process1.stdout.read())*128
+
+    print ("inboundBandwidth = %s") % inboundBandwidth
+    print ("outboundBandwidth = %s") % outboundBandwidth
+
+    if  (inboundBandwidth < bandwidth*1.25 and outboundBandwidth < bandwidth*1.25):
+        test_util.test_logger('Successed to set vip qos bandwidth.')
+    else:
+        test_util.test_fail('Failed to set vip qos bandwidth.')
