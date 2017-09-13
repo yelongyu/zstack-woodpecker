@@ -15,17 +15,10 @@ test_stub = test_lib.lib_get_test_stub()
 hybrid = test_stub.HybridObject()
 
 def test():
-    hybrid.add_datacenter_iz(region_id='cn-beijing')
-    hybrid.create_bucket()
-    hybrid.create_ecs_image(check_progress=True)
-    test_util.test_pass('Get Create Ecs Image Progress Test Success')
-
-def env_recover():
-    if hybrid.oss_bucket_create:
-        hybrid.del_bucket()
-
-    if hybrid.ecs_image:
-        hybrid.del_ecs_image()
+    hybrid.create_ecs_instance()
+    hybrid.del_ecs_instance(remote=False)
+    hybrid.del_ecs_instance()
+    test_util.test_pass('Create Delete Ecs Instance Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():

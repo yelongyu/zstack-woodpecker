@@ -89,6 +89,7 @@ class HybridObject(object):
                 hyb_ops.del_datacenter_in_local(d.uuid)
         if region_id:
             self.datacenter = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
+            self.region_id = region_id
             return
         datacenter_list = hyb_ops.get_datacenter_from_remote(datacenter_type)
         regions = [dc.regionId for dc in datacenter_list]
@@ -122,7 +123,7 @@ class HybridObject(object):
                     else:
                         self.del_iz(iz_inv.uuid)
                 elif check_ecs:
-                    ecs_list = hyb_ops.sync_ecs_instance_from_remote(self.datacenter.uuid)
+                    ecs_list = hyb_ops.sync_ecs_instance_from_remote(datacenter.uuid)
                     if ecs_list:
                         self.datacenter = datacenter
                         self.iz = iz_inv
@@ -131,7 +132,7 @@ class HybridObject(object):
                     else:
                         self.del_iz(iz_inv.uuid)
                 elif iz_inv and check_prepaid_ecs:
-                    ecs_list = hyb_ops.sync_ecs_instance_from_remote(self.datacenter.uuid, only_zstack='false')
+                    ecs_list = hyb_ops.sync_ecs_instance_from_remote(datacenter.uuid, only_zstack='false')
                     prepaid_ecs_list = [ep for ep in ecs_list if ep.chargeType == 'PrePaid']
                     if prepaid_ecs_list:
                         self.datacenter = datacenter
@@ -144,13 +145,6 @@ class HybridObject(object):
                     self.datacenter = datacenter
                     self.iz = iz_inv
                     return
-                elif iz_inv and region_id:
-                    if r == region_id:
-                        self.datacenter = datacenter
-                        self.iz = iz_inv
-                        return
-                    else:
-                        self.del_iz(iz_inv.uuid)
             if check_vpn_gateway and vpn_gateway_list:
                 break
             elif check_prepaid_ecs and prepaid_ecs_list:
@@ -573,7 +567,7 @@ class HybridObject(object):
             hyb_ops.del_ecs_instance(self.ecs_instance.uuid)
             hyb_ops.sync_ecs_instance_from_remote(self.datacenter.uuid)
         else:
-            hyb_ops.del_ecs_instance(self.ecs_instance.uuid)
+            hyb_ops.del_ecs_instance_local(self.ecs_instance.uuid)
         self.check_resource('delete', 'ecsInstanceId', self.ecs_instance.ecsInstanceId, 'query_ecs_instance_local')
 
     def create_ipsec(self, pri_l3_uuid, vip):
