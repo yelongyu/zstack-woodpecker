@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-ceph-sep-man.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-ceph-sep-man.tmpt</scenarioConfigTemplate>
+</testConfig>
