@@ -74,7 +74,7 @@ def test():
     test_stub.check_installation(vm1_ip, tmp_file)
 
     test_util.test_dsc('Upgrade the latest master zstack')
-    test_stub.update_repo(vm_ip, tmp_file)
+    test_stub.update_repo(vm1_ip, tmp_file)
     test_stub.upgrade_zstack(vm1_ip, zstack_latest_path, tmp_file)
     test_stub.check_zstack_version(vm1_ip, tmp_file, zstack_latest_version)
     test_stub.start_mn(vm1_ip, tmp_file)
