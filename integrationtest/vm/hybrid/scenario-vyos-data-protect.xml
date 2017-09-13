@@ -31,8 +31,8 @@ scenario-vyos-data-protect
     </host>
     <host uuid="$hostUuid2">
       <vms>
-        <vm name="$vmName2" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
-          imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
+        <vm name="$vmName2" vmInstranceOfferingUuid="$vmInstranceOfferingUuid3" 
+          imageUuid="$imageUuid3" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
             <l3Network uuid="$vmL3Uuid">
 	      <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
