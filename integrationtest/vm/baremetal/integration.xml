@@ -7,6 +7,7 @@
         <case timeout='1200' repeat='1'>test_create_chassis.py</case>
         <case timeout='1200' repeat='1'>update_chassis.py</case>
         <case timeout='1200' repeat='1'>test_stop_pxe.py</case>
+        <case timeout='1200' repeat='1'>test_fail_to_pxe.py</case>
         <case timeout='1200' repeat='1'>test_create_multi_chassis.py</case>
 	<case timeout='4800' repeat='1'>test_single_baremetal_installation_no_nic_no_bond.py</case>
 	<case timeout='4800' repeat='1'>test_single_baremetal_installation_1_nic_1_bond.py</case>
