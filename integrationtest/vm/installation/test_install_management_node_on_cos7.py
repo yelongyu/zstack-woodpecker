@@ -103,7 +103,7 @@ def test():
     test_stub.make_ssh_no_password(vm2_ip, tmp_file)
     test_stub.stop_node(vm1_ip, tmp_file)
     test_stub.start_node(vm2_ip, tmp_file)
-    test_stub.check_installation(vm2_ip, tmp_file)
+    #test_stub.check_installation(vm2_ip, tmp_file)
 
     #test_util.test_dsc('Upgrade install management node on vm2')
     #cmd = '%s "zstack-ctl upgrade_management_node --host=%s"' % (ssh_cmd1, host_list) 
