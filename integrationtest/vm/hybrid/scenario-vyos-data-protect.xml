@@ -29,7 +29,7 @@ scenario-vyos-data-protect
         </vm>
       </vms>
     </host>
-    <host uuid="$hostUuid">
+    <host uuid="$hostUuid2">
       <vms>
         <vm name="$vmName2" vmInstranceOfferingUuid="$vmInstranceOfferingUuid3" 
           imageUuid="$imageUuid3" imageUsername="$imageUsername" imagePassword="$imagePassword">
@@ -41,7 +41,7 @@ scenario-vyos-data-protect
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
           </l3Networks>
-          <hostRef>$hostName2</hostRef>
+          <hostRef>$hostName</hostRef>
           <primaryStorageRef type="nfs">$nfsPrimaryStorageName</primaryStorageRef>
         </vm>
       </vms>
