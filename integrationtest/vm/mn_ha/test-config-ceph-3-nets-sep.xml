@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-ceph-3-nets-sep.xml</deployConfig>
+    <deployConfigTemplate>deploy-ceph-ps.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
