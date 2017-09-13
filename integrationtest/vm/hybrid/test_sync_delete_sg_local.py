@@ -17,10 +17,13 @@ hybrid = test_stub.HybridObject()
 def test():
     hybrid.add_datacenter_iz(add_datacenter_only=True)
     hybrid.get_vpc()
-    hybrid.get_sg()
+    hybrid.create_sg()
     hybrid.del_sg(remote=False)
     test_util.test_pass('Sync Delete Ecs Security Group Test Success')
 
+def env_recover():
+    if hybrid.sg_create:
+        hybrid.del_sg()
 
 #Will be called only if exception happens in test().
 def error_cleanup():

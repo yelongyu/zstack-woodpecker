@@ -95,6 +95,8 @@ class HybridObject(object):
         regions = [dc.regionId for dc in datacenter_list]
         err_list = []
         for r in regions:
+            if r == 'cn-beijing':
+                continue
             try:
                 datacenter = hyb_ops.add_datacenter_from_remote(datacenter_type, r, 'datacenter for test')
             except hyb_ops.ApiError, e:
@@ -348,19 +350,22 @@ class HybridObject(object):
         self.sg = hyb_ops.create_ecs_security_group_remote(sg_name, self.vpc.uuid)
         time.sleep(20)
         self.check_resource('create', 'securityGroupId', self.sg.securityGroupId, 'query_ecs_security_group_local')
+        self.sg_create = True
 
     def del_sg(self, remote=True):
         if remote:
-            hyb_ops.del_ecs_security_group_remote(self.sg.uuid)
             hyb_ops.sync_ecs_security_group_from_remote(self.vpc.uuid)
+            condition = res_ops.gen_query_conditions('securityGroupId', '=', self.sg.securityGroupId)
+            self.sg = hyb_ops.query_ecs_security_group_local(condition)[0]
+            hyb_ops.del_ecs_security_group_remote(self.sg.uuid)
         else:
             hyb_ops.del_ecs_security_group_in_local(self.sg.uuid)
         self.check_resource('delete', 'securityGroupId', self.sg.securityGroupId, 'query_ecs_security_group_local')
 
     def get_sg(self):
         hyb_ops.sync_ecs_security_group_from_remote(self.vpc.uuid)
-        sg_all = hyb_ops.query_ecs_security_group_local()
-        ecs_security_group = [ sg for sg in sg_all if sg.ecsVpcUuid == self.vpc.uuid and sg.name == 'zstack-test-ecs-security-group']
+        sg_local = hyb_ops.query_ecs_security_group_local()
+        ecs_security_group = [sg for sg in sg_local if sg.ecsVpcUuid == self.vpc.uuid]
         if ecs_security_group:
             self.sg = ecs_security_group[0]
         else:
@@ -386,6 +391,7 @@ class HybridObject(object):
         if not sg_rule:
             hyb_ops.create_ecs_security_group_rule_remote(self.sg.uuid, 'ingress', 'ALL', '-1/-1', '0.0.0.0/0', 'accept', 'intranet', '10')
             hyb_ops.create_ecs_security_group_rule_remote(self.sg.uuid, 'egress', 'ALL', '-1/-1', '0.0.0.0/0', 'accept', 'intranet', '10')
+        assert hyb_ops.query_ecs_security_group_rule_local(cond_sg_rule)
 
     def get_vr(self):
         hyb_ops.sync_aliyun_virtual_router_from_remote(self.vpc.uuid)
@@ -472,20 +478,17 @@ class HybridObject(object):
     def del_route_entry(self, remote=True):
         if remote:
             hyb_ops.del_aliyun_route_entry_remote(self.route_entry.uuid)
-            hyb_ops.sync_aliyun_virtual_router_from_remote(self.vpc.uuid)
+            hyb_ops.sync_route_entry_from_remote(self.vr.uuid, vrouter_type='vrouter')
         else:
             pass
         self.check_resource('delete', 'destinationCidrBlock', self.dst_cidr_block, 'query_aliyun_route_entry_local')
 
     def sync_route_entry(self):
-        hyb_ops.sync_router_entry_from_remote(self.vr.uuid, vrouter_type='vrouter')
-        route_entry_local = hyb_ops.query_aliyun_route_entry_local()
-        for r in route_entry_local:
-            if r.destinationCidrBlock == self.dst_cidr_block:
-                route_entry = r
-        assert route_entry.status.lower() == 'available'
+        hyb_ops.sync_route_entry_from_remote(self.vr.uuid, vrouter_type='vrouter')
+        condition = res_ops.gen_query_conditions('virtualRouterUuid', '=', self.vr.uuid)
+        assert hyb_ops.query_aliyun_route_entry_local(condition)
 
-    def create_ecs_instance(self, need_vpn_gateway=False, allocate_eip=False, region_id=None):
+    def create_ecs_instance(self, need_vpn_gateway=False, allocate_eip=False, region_id=None, connect=False):
         if need_vpn_gateway:
             self.add_datacenter_iz(check_vpn_gateway=True)
             self.get_vpc(has_vpn_gateway=True)
@@ -495,7 +498,10 @@ class HybridObject(object):
             self.add_datacenter_iz()
             self.get_vpc()
         self.get_vswitch()
-        self.get_sg()
+        if connect:
+            self.create_sg()
+        else:
+            self.get_sg()
         self.get_sg_rule()
         # Get ECS Instance Type
         ecs_instance_type = hyb_ops.get_ecs_instance_type_from_remote(self.iz.uuid)
@@ -602,11 +608,12 @@ class HybridObject(object):
             vip = create_vip('ipsec_vip', l3_uuid).get_vip()
         cond = res_ops.gen_query_conditions('uuid', '=', pri_l3_uuid)
         self.zstack_cidrs = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0].ipRanges[0].networkCidr
+        self.dst_cidr_block = self.zstack_cidrs.replace('1/', '0/')
     #     _vm_ip = zstack_cidrs.replace('1/', '254/')
     #     cmd = 'ip a add dev br_eth0_1101 %s' % _vm_ip
         time.sleep(10)
         if check_connectivity:
-            self.create_ecs_instance(need_vpn_gateway=True, allocate_eip=True)
+            self.create_ecs_instance(need_vpn_gateway=True, allocate_eip=True, connect=True)
             self.get_eip(in_use=True)
         else:
             self.add_datacenter_iz(check_vpn_gateway=True)
@@ -622,7 +629,7 @@ class HybridObject(object):
         self.create_ipsec(pri_l3_uuid, vip)
         if check_connectivity:
             # Add route entry
-            self.route_entry = hyb_ops.create_aliyun_vpc_virtualrouter_entry_remote(self.zstack_cidrs.replace('1/', '0/'), self.vr.uuid, vrouter_type='vrouter', next_hop_type='VpnGateway', next_hop_uuid=self.vpn_gateway.uuid)
+            self.route_entry = hyb_ops.create_aliyun_vpc_virtualrouter_entry_remote(self.dst_cidr_block, self.vr.uuid, vrouter_type='vrouter', next_hop_type='VpnGateway', next_hop_uuid=self.vpn_gateway.uuid)
             ping_ecs_cmd = "sshpass -p password ssh -o StrictHostKeyChecking=no root@%s 'ping %s -c 5 | grep time='" % (vm_ip, self.ecs_instance.privateIpAddress)
             # ZStack VM ping Ecs
             ping_ecs_cmd_status = commands.getstatusoutput(ping_ecs_cmd)[0]
@@ -649,7 +656,8 @@ class HybridObject(object):
 
     def get_ecs_vnc_url(self):
         vnc_url = hyb_ops.get_ecs_instance_vnc_url(self.ecs_instance.uuid).vncUrl
-        response = urllib2.urlopen(vnc_url)
+        req = urllib2.Request(vnc_url)
+        response = urllib2.urlopen(req)
         assert response.code == 200
 
 def create_vlan_vm(l3_name=None, disk_offering_uuids=None, system_tags=None, session_uuid = None, instance_offering_uuid = None):

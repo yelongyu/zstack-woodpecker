@@ -15,7 +15,7 @@ test_stub = test_lib.lib_get_test_stub()
 hybrid = test_stub.HybridObject()
 
 def test():
-    hybrid.add_datacenter_iz(region_id='cn-beijing')
+    hybrid.add_datacenter_iz(region_id='cn-shanghai')
     hybrid.create_bucket()
     hybrid.create_ecs_image(check_progress=True)
     test_util.test_pass('Get Create Ecs Image Progress Test Success')

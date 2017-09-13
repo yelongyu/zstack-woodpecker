@@ -11,7 +11,7 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.hybrid_operations as hyb_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.ipsec_operations as ipsec_ops
-
+import time
 
 test_obj_dict = test_state.TestStateDict()
 test_stub = test_lib.lib_get_test_stub()
@@ -35,6 +35,10 @@ def env_recover():
 
     if hybrid.user_vpn_gateway:
         hybrid.del_user_vpn_gateway()
+
+    if hybrid.sg_create:
+        time.sleep(30)
+        hybrid.del_sg()
 
     if hybrid.eip:
         hybrid.del_eip()

@@ -325,7 +325,7 @@ def sync_aliyun_virtual_router_from_remote(vpc_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt
 
-def sync_router_entry_from_remote(vrouter_uuid, vrouter_type, session_uuid=None):
+def sync_route_entry_from_remote(vrouter_uuid, vrouter_type, session_uuid=None):
     action = api_actions.SyncAliyunRouteEntryFromRemoteAction()
     action.vRouterUuid = vrouter_uuid
     action.vRouterType = vrouter_type
