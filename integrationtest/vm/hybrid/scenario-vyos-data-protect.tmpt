@@ -2,8 +2,8 @@ import ../scenario.tmpt
 import ./deploy-vyos-data-protect.tmpt
 vmName1 = test_vm1
 vmName2 = test_vm2
-vmInstranceOfferingUuid2 = 123456
-imageUuid2 = 123456
+vmInstranceOfferingUuid3 = 123456
+imageUuid3 = 123456
 
 dataVolume = data_volume
 volumeDiskOfferingUuid = 123456
