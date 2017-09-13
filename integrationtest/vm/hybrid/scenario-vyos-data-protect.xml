@@ -29,7 +29,7 @@ scenario-vyos-data-protect
         </vm>
       </vms>
     </host>
-    <host uuid="$hostUuid2">
+    <host uuid="$hostUuid">
       <vms>
         <vm name="$vmName2" vmInstranceOfferingUuid="$vmInstranceOfferingUuid3" 
           imageUuid="$imageUuid3" imageUsername="$imageUsername" imagePassword="$imagePassword">
