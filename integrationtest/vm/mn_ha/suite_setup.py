@@ -56,27 +56,28 @@ def test():
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd)
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd2)
 
+
     config_json = os.environ.get('configJson')
-    #if "test-config-vyos-nfs.xml" in os.environ.get('WOODPECKER_TEST_CONFIG_FILE') and \
-    #    "scenario-config-storage-separate-nfs.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE'):
     if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-nfs.xml"], \
-                          ["scenario-config-storage-separate-nfs.xml"]):
+                                       ["scenario-config-storage-separate-nfs.xml"]):
         config_json = os.environ.get('configJsonSepStor')
-    #elif "test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml" in os.environ.get('WOODPECKER_TEST_CONFIG_FILE') and \
-    #     ( "scenario-config-nfs-sep-man.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE') or \
-    #       "scenario-config-nfs-sep-pub.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE') ):
+
     elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml"], \
-                            ["scenario-config-nfs-sep-man.xml", "scenario-config-nfs-sep-pub.xml"]):
+                                         ["scenario-config-nfs-sep-man.xml", \
+                                          "scenario-config-nfs-sep-pub.xml"]):
         config_json = os.environ.get('configJsonSepPub')
-    #elif "test-config-vyos-flat-dhcp-nfs-mul-net-pubs.xml" in os.environ.get('WOODPECKER_TEST_CONFIG_FILE') and \
-    #     ( "scenario-config-nfs-sep-man.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE') or \
-    #       "scenario-config-nfs-sep-pub.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE') ):
+
     elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-ceph-3-nets-sep.xml"], \
-                            ["scenario-config-ceph-sep-man.xml", "scenario-config-ceph-sep-pub.xml", "scenario-config-ceph-3-nets-sep.xml"]):
+                                         ["scenario-config-ceph-sep-man.xml", \
+                                          "scenario-config-ceph-sep-pub.xml", \
+                                          "scenario-config-ceph-3-nets-sep.xml"]):
         config_json = os.environ.get('configJsonSepPub')
+
     elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-mul-net-pubs.xml"], \
-                            ["scenario-config-nfs-sep-man.xml", "scenario-config-nfs-sep-pub.xml"]):
+                                         ["scenario-config-nfs-sep-man.xml", \
+                                          "scenario-config-nfs-sep-pub.xml"]):
         config_json = os.environ.get('configJsonAllOne')
+
 
     ha_deploy_tool = os.environ.get('zstackHaInstaller')
     mn_img = os.environ.get('mnImage')

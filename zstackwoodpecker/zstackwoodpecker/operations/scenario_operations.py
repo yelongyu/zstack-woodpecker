@@ -316,15 +316,13 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
         if vm_net_uuids_lst:
             nfs_network_uuid = vm_net_uuids_lst[0]
             nfs_vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, nfs_network_uuid).ip
-            if ("test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml" in os.environ.get('WOODPECKER_TEST_CONFIG_FILE') or \
-                "test-config-vyos-flat-dhcp-nfs-mul-net-pubs.xml" in os.environ.get('WOODPECKER_TEST_CONFIG_FILE')) and \
-                ("scenario-config-nfs-sep-man.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE') or \
-                "scenario-config-nfs-sep-pub.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')):
+            if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml", "test-config-vyos-flat-dhcp-nfs-mul-net-pubs.xml"], \
+                                               ["scenario-config-nfs-sep-man.xml", "scenario-config-nfs-sep-pub.xml"]):
                 nfs_vm_nic = os.environ.get('storNic')
                 nfs_vm_netmask = os.environ.get('manNetMask')
                 nfs_vm_gateway = os.environ.get('manGateway')
-            elif "test-config-vyos-nfs.xml" in os.environ.get('WOODPECKER_TEST_CONFIG_FILE') and \
-                "scenario-config-storage-separate-nfs.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE'):
+            elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-nfs.xml"], \
+                                                 ["scenario-config-storage-separate-nfs.xml"]):
                 nfs_vm_nic = os.environ.get('storNic')
                 nfs_vm_netmask = os.environ.get('storNetMask')
                 nfs_vm_gateway = os.environ.get('storGateway')
@@ -350,6 +348,7 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 	cmd = 'mount %s:%s /storage' % (nfsIP, nfsPath)
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+
     elif mn_ha_storage_type == "ceph":
         vm_net_uuids_lst = []
         for vmNic in vm_inv.vmNics:
@@ -359,7 +358,9 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
             nfs_network_uuid = vm_net_uuids_lst[0]
             nfs_vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, nfs_network_uuid).ip
             if test_lib.lib_cur_cfg_is_a_and_b(["test-config-ceph-3-nets-sep.xml"], \
-                ["scenario-config-ceph-sep-man.xml", "scenario-config-ceph-sep-pub.xml", "scenario-config-ceph-3-nets-sep.xml"]):
+                                               ["scenario-config-ceph-sep-man.xml", \
+                                                "scenario-config-ceph-sep-pub.xml", \
+                                                "scenario-config-ceph-3-nets-sep.xml"]):
                 nfs_vm_nic = os.environ.get('storNic')
                 nfs_vm_netmask = os.environ.get('manNetMask')
                 nfs_vm_gateway = os.environ.get('manGateway')
