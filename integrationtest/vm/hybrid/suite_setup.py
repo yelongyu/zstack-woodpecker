@@ -14,6 +14,7 @@ import zstacktestagent.testagent as testagent
 import zstackwoodpecker.operations.scenario_operations as scenario_operations
 import zstackwoodpecker.operations.deploy_operations as deploy_operations
 import zstackwoodpecker.operations.config_operations as config_operations
+import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 
@@ -76,7 +77,7 @@ def test():
 
     bss = res_ops.query_resource(res_ops.BACKUP_STORAGE)
     bs = bss[0]
-    if bs.type == "imagestore":
+    if bs.type == "ImageStoreBackupStorage":
         print "condition for data protect test filter"
     test_util.test_pass('Suite Setup Success')
 
