@@ -439,6 +439,14 @@ def setup_backupstorage_vm(vm_inv, vm_config, deploy_config):
                     cmd = "mkdir -p %s" % (sftpBackupStorage.url_)
                     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
                     return
+        if backup_storage_type == 'imagestore':
+            for imageStoreBackupStorage in xmlobject.safe_list(deploy_config.backupStorages.imageStoreBackupStorage):
+                if backupStorageRef.text_ == imageStoreBackupStorage.name_:
+                    # TODO: image store may setup with non-root or non-default user/password port
+                    test_util.test_logger('[vm:] %s setup image store service.' % (vm_ip))
+                    cmd = "mkdir -p %s" % (imageStoreBackupStorage.url_)
+                    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                    return
 
 def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
@@ -896,6 +904,24 @@ def create_sftp_backup_storage(http_server_ip, backup_storage_option, session_uu
     action.importImages = backup_storage_option.get_import_images()
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     test_util.action_logger('Create Sftp Backup Storage [uuid:] %s [name:] %s' % \
+            (evt.inventory.uuid, action.name))
+    return evt.inventory
+
+def create_image_store_backup_storage(http_server_ip, backup_storage_option, session_uuid=None):
+    action = api_actions.AddImageStoreBackupStorageAction()
+    action.timeout = 300000
+    action.name = backup_storage_option.get_name()
+    action.description = backup_storage_option.get_description()
+    action.type = backup_storage_option.get_type()
+    action.url = backup_storage_option.get_url()
+    action.hostname = backup_storage_option.get_hostname()
+    action.username = backup_storage_option.get_username()
+    action.password = backup_storage_option.get_password()
+    action.sshPort = backup_storage_option.get_sshPort()
+    action.resourceUuid = backup_storage_option.get_resource_uuid()
+    action.importImages = backup_storage_option.get_import_images()
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    test_util.action_logger('Create Image Store Backup Storage [uuid:] %s [name:] %s' % \
             (evt.inventory.uuid, action.name))
     return evt.inventory
 
