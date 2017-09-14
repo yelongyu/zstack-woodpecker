@@ -5298,3 +5298,16 @@ def lib_skip_if_ps_num_is_not_eq_number(number):
         test_util.test_skip("The expected ps number is %s VS. actual is %s." %(str(number), str(len(ps_list))))
 
 
+def lib_cur_cfg_is_a_and_b(tst_cfg_lst, sce_xml_lst):
+    '''
+        This function helps to filter out the current test config and scenario config
+        is one of the combination.
+        @tst_cfg_lst: list type, test configure list, like a
+        @sce_xml_lst: list tyoe, scenario configure list, like b
+    '''
+    for tst_cfg in tst_cfg_lst:
+        if tst_cfg == os.path.basename(os.environ.get('WOODPECKER_TEST_CONFIG_FILE')).strip():
+            for sce_xml in sce_xml_lst:
+                if sce_xml == os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip():
+                    return True
+    return False

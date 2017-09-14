@@ -59,22 +59,22 @@ def test():
     config_json = os.environ.get('configJson')
     #if "test-config-vyos-nfs.xml" in os.environ.get('WOODPECKER_TEST_CONFIG_FILE') and \
     #    "scenario-config-storage-separate-nfs.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE'):
-    if cur_cfg_is_a_and_b(["test-config-vyos-nfs.xml"], \
+    if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-nfs.xml"], \
                           ["scenario-config-storage-separate-nfs.xml"]):
         config_json = os.environ.get('configJsonSepStor')
     #elif "test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml" in os.environ.get('WOODPECKER_TEST_CONFIG_FILE') and \
     #     ( "scenario-config-nfs-sep-man.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE') or \
     #       "scenario-config-nfs-sep-pub.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE') ):
-    elif cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml"], \
+    elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml"], \
                             ["scenario-config-nfs-sep-man.xml", "scenario-config-nfs-sep-pub.xml"]):
         config_json = os.environ.get('configJsonSepPub')
     #elif "test-config-vyos-flat-dhcp-nfs-mul-net-pubs.xml" in os.environ.get('WOODPECKER_TEST_CONFIG_FILE') and \
     #     ( "scenario-config-nfs-sep-man.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE') or \
     #       "scenario-config-nfs-sep-pub.xml" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE') ):
-    elif cur_cfg_is_a_and_b(["test-config-ceph-3-nets-sep.xml"], \
+    elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-ceph-3-nets-sep.xml"], \
                             ["scenario-config-ceph-sep-man.xml", "scenario-config-ceph-sep-pub.xml", "scenario-config-ceph-3-nets-sep.xml"]):
         config_json = os.environ.get('configJsonSepPub')
-    elif cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-mul-net-pubs.xml"], \
+    elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-mul-net-pubs.xml"], \
                             ["scenario-config-nfs-sep-man.xml", "scenario-config-nfs-sep-pub.xml"]):
         config_json = os.environ.get('configJsonAllOne')
 
@@ -98,17 +98,3 @@ def test():
     test_lib.lib_set_reserved_memory('8G')
     test_util.test_pass('Suite Setup Success')
 
-
-def cur_cfg_is_a_and_b(tst_cfg_lst, sce_xml_lst):
-    '''
-        This function helps to filter out the current test config and scenario config
-        is one of the combination.
-        @tst_cfg_lst: list type, test configure list, like a
-        @sce_xml_lst: list tyoe, scenario configure list, like b
-    '''
-    for tst_cfg in tst_cfg_lst:
-        if tst_cfg == os.path.basename(os.environ.get('WOODPECKER_TEST_CONFIG_FILE')).strip():
-            for sce_xml in sce_xml_lst:
-                if sce_xml == os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip():
-                    return True
-    return False
