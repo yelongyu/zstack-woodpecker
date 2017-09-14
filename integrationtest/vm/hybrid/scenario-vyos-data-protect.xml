@@ -24,7 +24,7 @@ scenario-vyos-data-protect
           </l3Networks>
 	  <nodeRef>$node1Name</nodeRef>
           <hostRef>$hostName</hostRef>
-	  <backupStorageRef type="sftp">$sftpBackupStorageName</backupStorageRef>
+	  <backupStorageRef type="imagestore">$imageStoreBackupStorageName</backupStorageRef>
           <primaryStorageRef type="nfs">$nfsPrimaryStorageName</primaryStorageRef>
         </vm>
       </vms>
