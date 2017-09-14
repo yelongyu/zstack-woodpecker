@@ -1246,18 +1246,18 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
     if hasattr(scenario_config.deployerConfig, 'volumes'):
         for volume in xmlobject.safe_list(scenario_config.deployerConfig.volumes.volume):
             volume_option = test_util.VolumeOption()
-            if volume.name != '':
-                volume_option.set_name(volume.name)
+            if volume.name_ != '':
+                volume_option.set_name(volume.name_)
             else:
                 volume_option.set_name('data_volume')
-            volume_option.set_disk_offering_uuid(volume.volumeDiskOfferingUuid)
-            volume_inv = create_volume_from_offering(zstack_management_ip, volume_option) 
+            volume_option.set_disk_offering_uuid(volume.volumeDiskOfferingUuid_)
+            volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
             for vm in xmlobject.safe_list(volume.vms.vm):
                 vm_uuid = ''
                 for vm_inv in vm_inv_lst:
-                    if vm_inv.name == vm.name:
-                        vm_uuid = vm_inv.uuid 
-                if vm_uuid != '': 
+                    if vm_inv.name == vm.text_:
+                        vm_uuid = vm_inv.uuid
+                if vm_uuid != '':
                     attach_volume(zstack_management_ip, volume_inv.uuid, vm_uuid)
 
 def destroy_scenario(scenario_config, scenario_file):
