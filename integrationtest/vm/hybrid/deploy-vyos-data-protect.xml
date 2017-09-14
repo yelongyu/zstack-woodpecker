@@ -80,9 +80,9 @@
   </instanceOfferings>
 
   <backupStorages>
-    <imageStoreBackupStorage name="$sftpBackupStorageName"
-      description="Test" url="$sftpBackupStorageUrl" username="$sftpBackupStorageUsername"
-      password="$sftpBackupStoragePassword" hostname="$sftpBackupStorageHostname" port="22"/>
+    <imageStoreBackupStorage name="$imageStoreBackupStorageName"
+      description="Test" url="$imageStoreBackupStorageUrl" username="$imageStoreBackupStorageUsername"
+      password="$imageStoreBackupStoragePassword" hostname="$imageStoreBackupStorageHostname" port="22"/>
   </backupStorages>
 
   <images>
@@ -91,42 +91,42 @@
       format="$rootImageFormat" url="$imageUrl_i_c7"
       mediaType="$rootMediaType"
       username="$imageUsername" password="$imagePassword">
-      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+      <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
     </image>
     <image name="$imageName_s" 
       description="Small Test Image Template" 
       mediaType="$rootMediaType" format="$rootImageFormat"
       url="$imageUrl_s" 
       username="$imageUsername" password="$imagePassword">
-      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+      <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
     </image>
     <image name="$imageName_net" 
       description="Test Image Template for network test" 
       mediaType="$rootMediaType" format="$rootImageFormat"
       url="$imageUrl_net" 
       username="$imageUsername" password="$imagePassword">
-      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+      <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
     </image>
     <image name="$virtualRouterImageName" 
       description="virtual router image" 
       mediaType="$rootMediaType" format="$rootImageFormat" 
       username="$vrImageUsername" password="$vrImagePassword"
       url="$virtualRouterImageUrl" system="True">
-      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+      <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
     </image>
     <image name="$imageName_windows" 
       description="Small Test Image Template for windows platform" 
       mediaType="$rootMediaType" format="$rootImageFormat"
       url="$imageUrl_windows" platform="Windows"
       username="$winImageUsername" password="$winImagePassword">
-      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+      <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
     </image>
     <image name="$imageName_other" 
       description="Small Test Image Template for other platform" 
       mediaType="$rootMediaType" format="$rootImageFormat"
       url="$imageUrl_s" platform="Other"
       username="$imageUsername" password="$imagePassword">
-      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+      <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
     </image>
   </images>
 
@@ -390,7 +390,7 @@
           description="Test" url="$nfsPrimaryStorageUrl" />
       </primaryStorages>
 
-      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+      <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
     </zone>
   </zones>
 </deployerConfig>

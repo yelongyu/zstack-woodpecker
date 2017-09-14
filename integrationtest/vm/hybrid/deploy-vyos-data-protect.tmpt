@@ -8,3 +8,10 @@ imageName_i_c7 = centos7-test
 imageUrl_i_c7 = http://IMAGE_SERVER/diskimages/centos7-test.qcow2
 
 l2PublicVlan = 3
+
+imageStoreBackupStorageName = image_store_bs
+imageStoreBackupStorageUrl = /home/imageStoreBackupStorage
+imageStoreBackupStorageUsername = root
+imageStoreBackupStoragePassword = password
+imageStoreBackupStorageHostname = 10.0.0.100
+imageStoreBackupStoragePort = 22
