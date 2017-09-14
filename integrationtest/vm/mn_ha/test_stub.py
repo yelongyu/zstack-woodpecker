@@ -336,6 +336,7 @@ def prepare_etc_hosts(scenarioConfig, scenarioFile, deploy_config, config_json):
         test_host_config = sce_ops.get_scenario_config_vm(mn_host_list[i].name_, scenarioConfig)
         ssh.scp_file('/etc/hosts', '/etc/hosts', mn_host_list[i].ip_, test_host_config.imageUsername_, test_host_config.imagePassword_)
 
+
 def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, deploy_tool, mn_img):
     prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json)
     mn_ha_storage_type = sce_ops.get_mn_ha_storage_type(scenarioConfig, scenarioFile, deploy_config)
@@ -351,18 +352,28 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
     ssh.scp_file(config_json, config_path, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_)
     ssh.scp_file(mn_img, mn_image_path, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_)
     ssh.scp_file(deploy_tool, installer_path, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_)
+
+    cmd0 = "chmod a+x %s" % (installer_path)
+    test_util.test_logger("[%s] %s" % (test_host_ip, cmd0))
+    ssh.execute(cmd0, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+
     if mn_ha_storage_type == 'ceph':
+
         cmd1="ceph osd pool create zstack 128"
+        test_util.test_logger("[%s] %s" % (test_host_ip, cmd1))
+        ssh.execute(cmd1, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+
         cmd2="qemu-img convert -f qcow2 -O raw %s rbd:zstack/mnvm.img" % mn_image_path
+        test_util.test_logger("[%s] %s" % (test_host_ip, cmd2))
+        ssh.execute(cmd2, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+
     elif mn_ha_storage_type == 'nfs':
         prepare_etc_hosts(scenarioConfig, scenarioFile, deploy_config, config_json)
         cmd1 = "cp %s /storage/mnvm.img" % (mn_image_path)
-        cmd2 = "chmod a+x %s" % (installer_path)
+        test_util.test_logger("[%s] %s" % (test_host_ip, cmd1))
+        ssh.execute(cmd1, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+
     cmd3='%s install -p %s -c %s' % (installer_path, host_password, config_path)
-    test_util.test_logger("[%s] %s" % (test_host_ip, cmd1))
-    ssh.execute(cmd1, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
-    test_util.test_logger("[%s] %s" % (test_host_ip, cmd2))
-    ssh.execute(cmd2, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
     test_util.test_logger("[%s] %s" % (test_host_ip, cmd3))
     ssh.execute(cmd3, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
 
