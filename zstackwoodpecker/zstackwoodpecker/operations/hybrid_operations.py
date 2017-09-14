@@ -830,3 +830,118 @@ def get_create_ecs_image_progress(data_center_uuid, image_uuid, session_uuid=Non
     test_util.action_logger('Get Create ECS Image Progress')
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
+
+def create_aliyun_disk_remote(name, identity_uuid, size_gb, disk_category=None, description=None, snapshot_uuid=None, session_uuid=None):
+    action = api_actions.CreateAliyunDiskFromRemoteAction()
+    action.identityUuid = identity_uuid
+    action.name = name
+    action.sizeWithGB = size_gb
+    action.diskCategory = disk_category
+    action.description = description
+    action.snapshotUuid = snapshot_uuid
+    test_util.action_logger('Create [Aliyun Disk Remote:] %s %s %s' % (identity_uuid, name, size_gb))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[Aliyun Disk Remote:] %s %s %s is created.' % (identity_uuid, name, size_gb))
+    return evt.inventory
+
+def del_aliyun_disk_remote(uuid, session_uuid=None):
+    action = api_actions.DeleteAliyunDiskFromRemoteAction()
+    action.uuid = uuid
+    test_util.action_logger('Delete [Aliyun Disk Remote:] %s' % uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[Aliyun Disk Remote:] %s is deleted.' % uuid)
+    return evt
+
+def del_aliyun_disk_in_local(uuid, session_uuid=None):
+    action = api_actions.DeleteAliyunDiskFromLocalAction()
+    action.uuid = uuid
+    test_util.action_logger('Delete [Aliyun Disk in Local:] %s' % uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[Aliyun Disk in Local:] %s is deleted.' % uuid)
+    return evt
+
+def attach_aliyun_disk_to_ecs(ecs_uuid, disk_uuid, session_uuid=None):
+    action = api_actions.AttachAliyunDiskToEcsAction()
+    action.ecsUuid = ecs_uuid
+    action.diskUuid = disk_uuid
+    test_util.action_logger('Attach Aliyun Disk to ECS: %s %s' % (disk_uuid, ecs_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[Aliyun Disk:] %s is attached to ECS:  %s' % (disk_uuid, ecs_uuid))
+    return evt
+
+def detach_aliyun_disk_from_ecs(uuid, session_uuid=None):
+    action = api_actions.DetachAliyunDiskFromEcsAction()
+    action.uuid = uuid
+    test_util.action_logger('Detach [Aliyun Disk:] %s from ECS' % uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[Aliyun Disk:] %s is detached from ECS.' % uuid)
+    return evt
+
+def sync_aliyun_disk_from_remote(identity_uuid, session_uuid=None):
+    action = api_actions.SyncDiskFromAliyunFromRemoteAction()
+    action.identityUuid = identity_uuid
+    test_util.action_logger('Sync Aliyun Disk from Remote %s' % identity_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('Aliyun Disk is synced from Remote %s.' % identity_uuid)
+    return evt
+
+def query_aliyun_disk_local(condition=[], session_uuid=None):
+    action = api_actions.QueryAliyunDiskFromLocalAction()
+    action.conditions = condition
+    test_util.action_logger('Query Aliyun Disk From Local')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def update_aliyun_disk(uuid, name=None, description=None, delete_autosnapshot=None, enable_autosnapshot=None,session_uuid=None):
+    action = api_actions.UpdateAliyunDiskAction()
+    action.uuid = uuid
+    action.uuid = name
+    action.description = description
+    action.deleteAutoSnapshot = delete_autosnapshot
+    action.enableAutoSnapshot = enable_autosnapshot
+    test_util.action_logger('Update [Aliyun Disk:] %s' % uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[Aliyun Disk:] %s is updated.' % uuid)
+    return evt
+
+def creaet_aliyun_snapshot_remote(uuid, name, description=None, resource_uuid=None, session_uuid=None):
+    action = api_actions.CreateAliyunSnapshotRemoteAction()
+    action.uuid = uuid
+    action.name = name
+    action.resourceUuid = resource_uuid
+    test_util.action_logger('Create Aliyun Snapshot Remote %s %s' % (uuid, name))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('Aliyun Snapshot Remote %s %s is Created' % (uuid, name))
+    return evt.inventory
+
+def del_aliyun_snapshot_remote(uuid, session_uuid=None):
+    action = api_actions.DeleteAliyunSnapshotFromRemoteAction()
+    action.uuid = uuid
+    test_util.action_logger('Delete [Aliyun Snapshot Remote:] %s' % uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[Aliyun Snapshot Remote:] %s is deleted.' % uuid)
+    return evt
+
+def del_aliyun_snapshot_in_local(uuid, session_uuid=None):
+    action = api_actions.DeleteAliyunSnapshotFromLocalAction()
+    action.uuid = uuid
+    test_util.action_logger('Delete [Aliyun Snapshot in Local:] %s' % uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('[Aliyun Snapshot in Local:] %s is deleted.' % uuid)
+    return evt
+
+def query_aliyun_snapshot_local(condition=[], session_uuid=None):
+    action = api_actions.QueryAliyunSnapshotFromLocalAction()
+    action.conditions = condition
+    test_util.action_logger('Query Aliyun Snapshot From Local')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def sync_aliyun_snapshot_from_remote(datacenter_uuid, snapshot_id=None, session_uuid=None):
+    action = api_actions.SyncAliyunSnapshotRemoteAction()
+    action.dataCenterUuid = datacenter_uuid
+    action.snapshotId = snapshot_id
+    test_util.action_logger('Sync Aliyun Snapshot from Remote %s' % datacenter_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('Aliyun Snapshot is synced from Remote %s.' % datacenter_uuid)
+    return evt

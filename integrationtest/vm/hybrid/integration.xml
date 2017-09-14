@@ -40,5 +40,10 @@
         <case timeout='900' repeat='1' noparallel='True'>test_detect_vpc_vpn_connection_status.py</case>
         <case timeout='900' repeat='1' noparallel='True'>test_get_create_ecs_image_progress.py</case>
         <case timeout='900' repeat='1' noparallel='True'>test_delete_synced_ecs_instance.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_create_aliyun_disk.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_sync_delete_aliyun_disk_local.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_attach_aliyun_disk.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_create_aliyun_snapshot.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_sync_delete_aliyun_snapshot_local.py</case>
     </suite>
 </integrationTest>

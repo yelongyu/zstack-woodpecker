@@ -41,7 +41,7 @@ denied_ports = Port.get_denied_ports()
 #test_stub.denied_ports = [101, 4999, 8990, 15000, 30001, 49999]
 target_ports = rule1_ports + rule2_ports + rule3_ports + rule4_ports + rule5_ports + denied_ports
 
-postfix = time.strftime('%m%d-%H%M%S', time.localtime())
+name_postfix = time.strftime('%m%d-%H%M%S', time.localtime())
 
 
 class HybridObject(object):
@@ -58,7 +58,7 @@ class HybridObject(object):
         self.sg_rule = None
         self.vm = None
         self.vr = None
-        self.vr_name = 'zstack-test-vrouter-%s' % postfix
+        self.vr_name = 'zstack-test-vrouter-%s' % name_postfix
         self.route_entry = None
         self.oss_bucket = None
         self.oss_bucket_create = None
@@ -181,7 +181,7 @@ class HybridObject(object):
             assert not eval(query_delete)
 
     def create_bucket(self):
-        self.bucket_name = 'zstack-test-oss-bucket-%s-%s' % (postfix, self.region_id)
+        self.bucket_name = 'zstack-test-oss-bucket-%s-%s' % (name_postfix, self.region_id)
         self.oss_bucket = hyb_ops.create_oss_bucket_remote(self.datacenter.uuid, self.bucket_name, 'created-by-zstack-for-test')
         self.oss_bucket_create = True
         self.check_resource('create', 'bucketName', self.bucket_name, 'query_oss_bucket_file_name')
@@ -227,6 +227,56 @@ class HybridObject(object):
             elif self.oss_bucket_create:
                 hyb_ops.del_oss_bucket_name_in_local(self.oss_bucket_create.uuid)
         self.check_resource('delete', 'bucketName', self.bucket_name, 'query_oss_bucket_file_name')
+
+    def create_aliyun_disk(self):
+        disk_name = 'zstack-test-aliyun-disk-%s' % name_postfix
+        self.disk = hyb_ops.create_aliyun_disk_remote(disk_name, self.iz.uuid, 20, disk_category='cloud_efficiency')
+        self.check_resource('create', 'diskId', self.disk.diskId, 'query_aliyun_disk_local')
+        time.sleep(10)
+
+    def del_aliyun_disk(self, remote=True):
+        if remote:
+            hyb_ops.del_aliyun_disk_remote(self.disk.uuid)
+        else:
+            hyb_ops.del_aliyun_disk_in_local(self.disk.uuid)
+        self.check_resource('delete', 'diskId', self.disk.diskId, 'query_aliyun_disk_local')
+
+    def attach_aliyun_disk(self):
+        hyb_ops.attach_aliyun_disk_to_ecs(self.ecs_instance.uuid, disk_uuid=self.disk.uuid)
+        time.sleep(30)
+        self.sync_aliyun_disk()
+        assert self.disk.ecsInstanceUuid == self.ecs_instance.uuid
+        assert self.disk.status.lower() == 'in_use'
+
+    def detach_aliyun_disk(self):
+        hyb_ops.detach_aliyun_disk_from_ecs(self.disk.uuid)
+        self.sync_aliyun_disk()
+        assert self.disk.status.lower() == 'available'
+
+    def sync_aliyun_disk(self):
+        hyb_ops.sync_aliyun_disk_from_remote(self.iz.uuid)
+        condition = res_ops.gen_query_conditions('diskId', '=', self.disk.diskId)
+        assert hyb_ops.query_aliyun_disk_local(condition)
+        self.disk = hyb_ops.query_aliyun_disk_local(condition)[0]
+
+    def create_aliyun_snapshot(self):
+        snapshot_name = 'zstack-test-aliyun-snapshot-%s' % name_postfix
+        self.snapshot = hyb_ops.creaet_aliyun_snapshot_remote(self.disk.uuid, snapshot_name)
+        self.check_resource('create', 'snapshotId', self.snapshot.snapshotId, 'query_aliyun_snapshot_local')
+
+    def sync_aliyun_snapshot(self):
+        hyb_ops.sync_aliyun_snapshot_from_remote(self.datacenter.uuid)
+        condition = res_ops.gen_query_conditions('snapshotId', '=', self.snapshot.snapshotId)
+        assert hyb_ops.query_aliyun_snapshot_local(condition)
+        self.snapshot = hyb_ops.query_aliyun_snapshot_local(condition)[0]
+
+    def del_aliyun_snapshot(self, remote=True):
+        if remote:
+            hyb_ops.del_aliyun_snapshot_remote(self.snapshot.uuid)
+            hyb_ops.sync_aliyun_snapshot_from_remote(self.datacenter.uuid)
+        else:
+            hyb_ops.del_aliyun_snapshot_in_local(self.snapshot.uuid)
+        self.check_resource('delete', 'snapshotId', self.snapshot.snapshotId, 'query_aliyun_snapshot_local')
 
     def del_vpn_gateway(self):
         hyb_ops.del_vpc_vpn_gateway_local(self.vpn_gateway.uuid)
@@ -282,7 +332,7 @@ class HybridObject(object):
         assert cmd_status == 0, "Login Ecs via public ip failed!"
 
     def create_vpc(self):
-        self.vpc_name = 'zstack-test-vpc-%s' % postfix
+        self.vpc_name = 'zstack-test-vpc-%s' % name_postfix
         self.vpc = hyb_ops.create_ecs_vpc_remote(self.datacenter.uuid, self.vpc_name, self.vr_name, '172.16.0.0/12')
         time.sleep(20)
         self.check_resource('create', 'ecsVpcId', self.vpc.ecsVpcId, 'query_ecs_vpc_local')
@@ -323,7 +373,7 @@ class HybridObject(object):
         vpc_cidr_list[2] = random.choice(cidr_val)
         vpc_cidr_list[3] = '0/24'
         vswitch_cidr = '.'.join(vpc_cidr_list)
-        self.vs_name = 'zstack-test-vswitch-%s' % postfix
+        self.vs_name = 'zstack-test-vswitch-%s' % name_postfix
         self.vswitch = hyb_ops.create_ecs_vswtich_remote(self.vpc.uuid, self.iz.uuid, self.vs_name, vswitch_cidr)
         time.sleep(10)
         self.check_resource('create', 'vSwitchId', self.vswitch.vSwitchId, 'query_ecs_vswitch_local')
@@ -346,7 +396,7 @@ class HybridObject(object):
             self.create_vswitch()
 
     def create_sg(self):
-        sg_name = 'zstack-test-ecs-security-group-%s' % postfix
+        sg_name = 'zstack-test-ecs-security-group-%s' % name_postfix
         self.sg = hyb_ops.create_ecs_security_group_remote(sg_name, self.vpc.uuid)
         time.sleep(20)
         self.check_resource('create', 'securityGroupId', self.sg.securityGroupId, 'query_ecs_security_group_local')
