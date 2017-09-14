@@ -164,7 +164,7 @@
       </clusters>
 
       <l2Networks>
-        <l2NoVlanNetwork name="$l2ManagementNetworkName" description="Basic L2 for management network"
+        <!--<l2NoVlanNetwork name="$l2ManagementNetworkName" description="Basic L2 for management network"
           physicalInterface="$l2ManagementNetworkInterface">
           <l3Networks>
             <l3BasicNetwork name="$l3ManagementNetworkName" description="Management L3 Network without Vlan and no special services" system="True">
@@ -196,9 +196,9 @@
               </networkService>
             </l3BasicNetwork>
           </l3Networks>
-        </l2VlanNetwork>
+        </l2VlanNetwork>-->
 
-        <!--<l2NoVlanNetwork name="$l2PublicNetworkName" description="Basic L2 for public network"
+        <l2NoVlanNetwork name="$l2PublicNetworkName" description="Basic L2 for public network"
           physicalInterface="$l2PublicNetworkInterface">
           <l3Networks>
             <l3BasicNetwork name="$l3PublicNetworkName" system="True" description="Basic L3 Network without Vlan for public network">
@@ -215,7 +215,7 @@
               </networkService>
             </l3BasicNetwork>
           </l3Networks>
-        </l2NoVlanNetwork>-->
+        </l2NoVlanNetwork>
 
         <l2NoVlanNetwork name="$l2NoVlanNetworkName1" description="guest l2 network with user defined vlan"
           physicalInterface="$l2NoVlanNetworkInterface1">
