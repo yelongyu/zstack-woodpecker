@@ -946,7 +946,7 @@ def sync_aliyun_snapshot_from_remote(datacenter_uuid, snapshot_id=None, session_
     test_util.test_logger('Aliyun Snapshot is synced from Remote %s.' % datacenter_uuid)
     return evt
 
-def setup_data_protect_image_store_vm(scenario_config, scenario_file, deploy_config)
+def setup_data_protect_image_store_vm(scenario_config, scenario_file, deploy_config):
     vm_ip = '' 
     vm = scenario_config.deployerConfig.volumes.volume.vms.vm
     vm_mount_url = vm.url_
