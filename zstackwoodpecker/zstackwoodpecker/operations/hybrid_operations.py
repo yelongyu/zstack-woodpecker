@@ -958,5 +958,5 @@ def setup_data_protect_image_store_vm(scenario_config, scenario_file, deploy_con
     if vm_ip != '':
         cmd = 'echo -e "\nn\np\n\n\n\nw\n" |fdisk /dev/vdb'
         os.system("sshpass -p password ssh root@%s '%s'" % (vm_ip, cmd))
-        os.system("sshpass -p password ssh root@%s 'mkdir %s; mkfs.ext4 /dev/vdb1; mount /dev/vdb1 %s'" % (vm_mount_url, vm_mount_url)
+        os.system("sshpass -p password ssh root@%s 'mkdir %s; mkfs.ext4 /dev/vdb1; mount /dev/vdb1 %s'" % (vm_mount_url, vm_mount_url))
     return vm_ip
