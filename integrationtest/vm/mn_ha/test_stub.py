@@ -209,6 +209,7 @@ def get_host_by_mn_vm(scenarioConfig, scenarioFile):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
     if len(mn_host_list) < 1:
         return []
+    test_util.test_logger("@@DEBUG@@: mn_host_list=<%s>" %(str(mn_host_list)))
     host_list = []
     for host in mn_host_list:
         host_config = sce_ops.get_scenario_config_vm(host.name_, scenarioConfig)
@@ -217,16 +218,21 @@ def get_host_by_mn_vm(scenarioConfig, scenarioFile):
             vm_list = test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
             if vm_list:
                 host_list.append(host)
-        except:
+        except Exception, e:
+            test_util.test_logger("%s" %(str(e)))
             continue
+    test_util.test_logger("@@DEBUG@@: host_list=<%s>" %(str(host_list)))
     return host_list
 
 def get_mn_host(scenarioConfig, scenarioFile):
     mn_host_list = []
 
+    test_util.test_logger("@@DEBUG@@:<scenarioConfig:%s><scenarioFile:%s><scenarioFile is existed: %s>" \
+                          %(str(scenarioConfig), str(scenarioFile), str(os.path.exists(scenarioFile))))
     if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
         return mn_host_list
 
+    test_util.test_logger("@@DEBUG@@: after config file exist check")
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
         for vm in xmlobject.safe_list(host.vms.vm):
             if xmlobject.has_element(vm, 'mnHostRef'):
@@ -237,6 +243,7 @@ def get_mn_host(scenarioConfig, scenarioFile):
                     for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
                         if s_vm.name_ == vm.name_:
                             mn_host_list.append(s_vm)
+    test_util.test_logger("@@DEBUG@@: %s" %(str(mn_host_list)))
     return mn_host_list
 
 def migrate_mn_vm(origin_host, target_host, scenarioConfig):
