@@ -9,6 +9,7 @@ from apibinding.api import ApiError
 import apibinding.inventory as inventory
 import apibinding.api_actions as api_actions
 import zstackwoodpecker.test_util as test_util
+import zstacklib.utils.xmlobject as xmlobject
 import account_operations
 import config_operations
 
@@ -962,6 +963,6 @@ def get_data_protect_image_store_vm_ip(scenario_config, scenario_file, deploy_co
     if vm_ip != '' and has_image_store_url != 0:
         cmd = 'echo -e "\nn\np\n\n\n\nw\n" |fdisk /dev/vdb'
         os.system("sshpass -p password ssh root@%s '%s'" % (vm_ip, cmd))
-        os.system("sshpass -p password ssh root@%s 'mkdir %s; mkfs.ext4 /dev/vdb1; mount /dev/vdb1 %s'" % (vm_mount_url, vm_mount_url))
+        os.system("sshpass -p password ssh root@%s 'mkdir %s; mkfs.ext4 /dev/vdb1; mount /dev/vdb1 %s'" % (vm_ip, vm_mount_url, vm_mount_url))
     return vm_ip
 
