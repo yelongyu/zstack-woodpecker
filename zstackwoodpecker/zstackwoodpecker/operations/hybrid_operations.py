@@ -952,6 +952,9 @@ def get_data_protect_image_store_vm_ip(scenario_config, scenario_file, deploy_co
     vm = scenario_config.deployerConfig.volumes.volume.vms.vm
     vm_name = vm.text_
     vm_mount_url = vm.url_
+    vm_username = vm.user_
+    vm_password = vm.password_
+    vm_port = vm.port_ 
     with open(scenario_file, 'r') as fd:
         xmlstr = fd.read()
         fd.close()
@@ -964,5 +967,6 @@ def get_data_protect_image_store_vm_ip(scenario_config, scenario_file, deploy_co
         cmd = 'echo -e "\nn\np\n\n\n\nw\n" |fdisk /dev/vdb'
         os.system("sshpass -p password ssh root@%s '%s'" % (vm_ip, cmd))
         os.system("sshpass -p password ssh root@%s 'mkdir %s; mkfs.ext4 /dev/vdb1; mount /dev/vdb1 %s'" % (vm_ip, vm_mount_url, vm_mount_url))
-    return vm_ip
+    ret = [vm_ip, vm_mount_url, vm_username, vm_password, vm_port]
+    return ret
 
