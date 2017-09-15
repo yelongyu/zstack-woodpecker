@@ -970,3 +970,24 @@ def get_data_protect_image_store_vm_ip(scenario_config, scenario_file, deploy_co
     ret = [vm_ip, vm_mount_url, vm_username, vm_password, vm_port]
     return ret
 
+def add_disaster_image_store_bs(url, hostname, username, password, sshport=None, name=None, end_point=None, attach_point=None, session_uuid=None):
+    action = api_actions.AddDisasterImageStoreBackupStorageAction()
+    action.hostname = hostname
+    action.username = username
+    action.password = password
+    action.url = url
+    if name != None:
+        action.name = name
+    else:
+        action.name = "disaster_image_store"
+    if sshport != None:
+        action.sshPort = sshport
+    else:
+        action.sshPort = 22
+    if end_point != None:
+        action.endPoint = end_point
+    if attach_point != None:
+        action.attachPoint = attach_point
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.test_logger('[Disaster ImageStore Backup Storage] %s is added' %action.name )
+    return evt

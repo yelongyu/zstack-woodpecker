@@ -20,9 +20,8 @@ def test():
     password = vm_res[3]
     sshport = vm_res[4]
     name = "BS-public"
-    #end_point = 
-    #attach_point = 
-    #hyb_ops.add_disaster_image_store_bs(name, url, hostname, username, password, sshport, name, )
+    dpbs_obj = hyb_ops.add_disaster_image_store_bs(url, hostname, username, password, sshport, name)
+    
     test_util.test_pass('Setup data protect bs image store success, the ip is %s' %dpbs_imagestore_ip)
 
 #Will be called only if exception happens in test().
