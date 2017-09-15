@@ -88,7 +88,7 @@
     </backupStorages>
   
     <images>
-      <image name="$imageName_win2012" description="Window2012 Test Image1"
+      <!--<image name="$imageName_win2012" description="Window2012 Test Image1"
         format="$rootImageFormat" url="$imageUrl_win2012"
         mediaType="$rootMediaType" systemTags="qemuga" platform="Windows"
         username="$winImageUsername" password="$winImagePassword">
@@ -142,7 +142,7 @@
         mediaType="$rootMediaType" systemTags="qemuga"
         username="$winImageUsername" password="$winImagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
-      </image>
+      </image>-->
       <image name="$imageName_win7" description="Window7 Test Iso1"
         format="$rootIsoFormat" url="$isoUrl_win7"
         mediaType="$rootMediaType" systemTags="qemuga"
