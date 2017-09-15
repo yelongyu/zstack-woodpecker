@@ -17,6 +17,10 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.operations.ha_operations as ha_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
+import zstackwoodpecker.operations.backupstorage_operations as bs_ops
+import zstackwoodpecker.operations.primarystorage_operations as ps_ops
+import zstackwoodpecker.operations.host_operations as host_ops
+
 
 
 
@@ -485,11 +489,14 @@ def skip_if_vr_not_vyos(vr_image_name):
 
 def ensure_pss_connected():
     for i in range(300):
-        time.sleep(1)
+        #time.sleep(1)
         ps_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
         for ps in ps_list:
-            if not "connected" in ps.status.lower():
-                test_util.test_logger("found not connected ps status: %s" %(ps.status))
+            ps_ops.reconnect_primary_storage(ps.uuid)
+            cond = res_ops.gen_query_conditions('uuid', '=', ps.uuid)
+            pss = res_ops.query_resource_fields(res_ops.PRIMARY_STORAGE, cond, None)
+            if not "connected" in pss[0].status.lower():
+                test_util.test_logger("time %s found not connected ps status: %s" %(str(i), pss[0].status))
                 break
         else:
             return
@@ -498,11 +505,14 @@ def ensure_pss_connected():
 
 def ensure_bss_connected():
     for i in range(300):
-        time.sleep(1)
+        #time.sleep(1)
         bs_list = res_ops.query_resource(res_ops.BACKUP_STORAGE)
         for bs in bs_list:
-            if not "connected" in bs.status.lower():
-                test_util.test_logger("found not connected ps status: %s" %(bs.status))
+            bs_ops.reconnect_backup_storage(bs.uuid)
+            cond = res_ops.gen_query_conditions('uuid', '=', bs.uuid)
+            bss = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, cond, None)
+            if not "connected" in bss[0].status.lower():
+                test_util.test_logger("times: %s found not connected ps status: %s" %(str(i), bss[0].status))
                 break
         else:
             return
@@ -511,11 +521,14 @@ def ensure_bss_connected():
 
 def ensure_hosts_connected():
     for i in range(300):
-        time.sleep(1)
+        #time.sleep(1)
         host_list = res_ops.query_resource(res_ops.HOST)
         for host in host_list:
-            if not "connected" in host.status.lower():
-                test_util.test_logger("found not connected ps status: %s" %(host.status))
+            host_ops.reconnect_host(host.uuid)
+            cond = res_ops.gen_query_conditions('uuid', '=', host.uuid)
+            hosts = res_ops.query_resource_fields(res_ops.HOST, cond, None)
+            if not "connected" in hosts[0].status.lower():
+                test_util.test_logger("time %s found not connected ps status: %s" %(str(i), hosts[0].status))
                 break
         else:
             return
