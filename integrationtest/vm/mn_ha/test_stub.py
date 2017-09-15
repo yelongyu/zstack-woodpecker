@@ -569,6 +569,9 @@ def skip_if_scenario_not_multiple_networks():
                         ]
 
     for sce_cfg in mul_nets_sce_list:
-        if sce_cfg not in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE'):
-            test_util.test_skip("Skip the test because scenario config is not %s" \
+        if sce_cfg in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE'):
+            break
+    else:
+        test_util.test_skip("Skip the test because scenario config is not %s" \
                           %(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')))
+        
