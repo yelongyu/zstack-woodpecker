@@ -14,6 +14,7 @@ import zstacktestagent.testagent as testagent
 import zstackwoodpecker.operations.scenario_operations as scenario_operations
 import zstackwoodpecker.operations.deploy_operations as deploy_operations
 import zstackwoodpecker.operations.config_operations as config_operations
+import zstackwoodpecker.operations.hybrid_operations as hyb_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
@@ -77,7 +78,8 @@ def test():
 
     bss = res_ops.query_resource(res_ops.BACKUP_STORAGE)
     bs = bss[0]
-    if bs.type == "ImageStoreBackupStorage":
-        print "condition for data protect test filter"
+    if bs.type == "ImageStoreBackupStorage" and bs.name == "image_store_bs":
+        dpbs_imagestore_ip = hyb_ops.setup_data_protect_image_store_vm(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
+        test_util.test_pass('Setup data protect bs image store success, the ip is %s' %dpbs_imagestore_ip)
     test_util.test_pass('Suite Setup Success')
 

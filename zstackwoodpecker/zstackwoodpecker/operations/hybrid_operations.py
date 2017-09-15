@@ -945,3 +945,18 @@ def sync_aliyun_snapshot_from_remote(datacenter_uuid, snapshot_id=None, session_
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('Aliyun Snapshot is synced from Remote %s.' % datacenter_uuid)
     return evt
+
+def setup_data_protect_image_store_vm(scenario_config, scenario_file, deploy_config)
+    vm_ip = '' 
+    vm = scenario_config.deployerConfig.volumes.volume.vms.vm
+    vm_mount_url = vm.url_
+    print vm.text_+" is vm_name and url is "+vm.url_
+    for host in scenario_file.deployerConfig.vms.vm:
+        if vm.text_ == host.name_:
+            vm_ip = host.ip_
+   
+    if vm_ip != '':
+        cmd = 'echo -e "\nn\np\n\n\n\nw\n" |fdisk /dev/vdb'
+        os.system("sshpass -p password ssh root@%s '%s'" % (vm_ip, cmd))
+        os.system("sshpass -p password ssh root@%s 'mkdir %s; mkfs.ext4 /dev/vdb1; mount /dev/vdb1 %s'" % (vm_mount_url, vm_mount_url)
+    return vm_ip
