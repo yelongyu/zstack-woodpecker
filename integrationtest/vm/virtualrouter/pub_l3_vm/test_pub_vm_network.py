@@ -42,6 +42,13 @@ def test():
 
 
 def env_recover():
-    test.flat_eip.delete()
-    test.vr_eip.delete()
+    try:
+        test.flat_eip.delete()
+    except Exception:
+        pass
+
+    try:
+        test.vr_eip.delete()
+    except Exception:
+        pass
     test_lib.lib_error_cleanup(test_obj_dict)

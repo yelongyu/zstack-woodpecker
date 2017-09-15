@@ -162,11 +162,6 @@
                 startIp="$ipRangeManagementStartIp" endIp="$ipRangeManagementEndIp" gateway="$ipRangeManagementGateway"
                 netmask="$ipRangeManagementNetmask" />
               <dns>$DNSServer</dns>
-              <networkService provider="vrouter">
-                <serviceType>DHCP</serviceType>
-                <serviceType>CentralizedDNS</serviceType>
-                  <serviceType>DNS</serviceType>
-              </networkService>
             </l3BasicNetwork>
           </l3Networks>
         </l2NoVlanNetwork>
@@ -174,14 +169,13 @@
         <l2NoVlanNetwork name="$l2PublicNetworkName" description="Basic L2 for public network"
           physicalInterface="$l2PublicNetworkInterface">
           <l3Networks>
-            <l3BasicNetwork name="$l3PublicNetworkName" system="True" description="Basic L3 Network without Vlan for public network">
+            <l3BasicNetwork name="$l3PublicNetworkName" systemTags="networkCategory::Public" description="Basic L3 Network without Vlan for public network">
               <ipRange name="$ipRangeName" description="Test"
                 startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
                 netmask="$ipRangeNetmask" />
               <dns>$DNSServer</dns>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
-                <serviceType>Eip</serviceType>
                 <serviceType>Userdata</serviceType>
               </networkService>
             </l3BasicNetwork>
