@@ -42,13 +42,10 @@ def test():
 
 
 def env_recover():
-    try:
+    with test_lib.ignored(AttributeError):
         test.flat_eip.delete()
-    except Exception:
-        pass
 
-    try:
+    with test_lib.ignored(AttributeError):
         test.vr_eip.delete()
-    except Exception:
-        pass
+
     test_lib.lib_error_cleanup(test_obj_dict)

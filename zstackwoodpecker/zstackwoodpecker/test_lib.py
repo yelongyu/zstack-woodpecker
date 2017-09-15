@@ -48,6 +48,7 @@ import apibinding.inventory as inventory
 import zstacktestagent.plugins.vm as vm_plugin
 import zstacktestagent.plugins.host as host_plugin
 import zstacktestagent.testagent as testagent
+from contextlib import contextmanager
 
 debug.install_runtime_tracedumper()
 test_stage = ts_header.TestStage
@@ -5311,3 +5312,11 @@ def lib_cur_cfg_is_a_and_b(tst_cfg_lst, sce_xml_lst):
                 if sce_xml == os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip():
                     return True
     return False
+
+
+@contextmanager
+def ignored(*exceptions):
+    try:
+        yield
+    except exceptions:
+        pass
