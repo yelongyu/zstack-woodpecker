@@ -50,7 +50,7 @@ scenario-vyos-data-protect
   <volumes>
     <volume name="$dataVolume" volumeDiskOfferingUuid="$volumeDiskOfferingUuid">
       <vms>
-        <vm>$vmName2</vm>
+        <vm url="$imageStoreDataProtectUrl">$vmName2</vm>
       </vms>
     </volume>
   </volumes>
