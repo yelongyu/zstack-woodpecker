@@ -237,6 +237,7 @@ class HybridObject(object):
     def del_aliyun_disk(self, remote=True):
         if remote:
             hyb_ops.del_aliyun_disk_remote(self.disk.uuid)
+            hyb_ops.sync_aliyun_disk_from_remote(self.iz.uuid)
         else:
             hyb_ops.del_aliyun_disk_in_local(self.disk.uuid)
         self.check_resource('delete', 'diskId', self.disk.diskId, 'query_aliyun_disk_local')
@@ -253,11 +254,33 @@ class HybridObject(object):
         self.sync_aliyun_disk()
         assert self.disk.status.lower() == 'available'
 
-    def sync_aliyun_disk(self):
+    def sync_aliyun_disk(self, check=True):
         hyb_ops.sync_aliyun_disk_from_remote(self.iz.uuid)
-        condition = res_ops.gen_query_conditions('diskId', '=', self.disk.diskId)
-        assert hyb_ops.query_aliyun_disk_local(condition)
-        self.disk = hyb_ops.query_aliyun_disk_local(condition)[0]
+        if check:
+            condition = res_ops.gen_query_conditions('diskId', '=', self.disk.diskId)
+            assert hyb_ops.query_aliyun_disk_local(condition)
+            self.disk = hyb_ops.query_aliyun_disk_local(condition)[0]
+
+    def update_aliyun_disk(self, name=None, description=None, delete_with_instance=None, delete_autosnapshot=None, enable_autosnapshot=None):
+        disk_attr = {'name':name,
+              'description':description,
+              'delete_with_instance':delete_with_instance,
+              'delete_autosnapshot':delete_autosnapshot,
+              'enable_autosnapshot':enable_autosnapshot
+              }
+        for k in disk_attr.keys():
+            if disk_attr[k]:
+                hyb_ops.update_aliyun_disk(self.disk.uuid, **disk_attr)
+                if k == 'delete_with_instance':
+                    self.delete_disk_with_instance = True
+                elif k == 'delete_autosnapshot':
+                    self.delete_autosnapshot = True
+                elif k == 'enable_autosnapshot':
+                    self.enable_autosnapshot = True
+                else:
+                    self.sync_aliyun_disk()
+                    disk_attr_eq = "self.disk.%s == '%s'" % (k, disk_attr[k])
+                    assert eval(disk_attr_eq)
 
     def create_aliyun_snapshot(self):
         snapshot_name = 'zstack-test-aliyun-snapshot-%s' % name_postfix
