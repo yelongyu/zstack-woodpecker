@@ -10,22 +10,20 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import random
-
+import itertools
 
 test_obj_dict = test_state.TestStateDict()
 test_stub = test_lib.lib_get_test_stub()
 
 BANDWIDTH = random.randint(1, 100) * 1024 * 1024
-NET_OUT = random.randint(1,10) * 1024 * 1024
-NET_IN = random.randint(1,10) * 1024 * 1024
+NET_OUT = random.randint(1, 10) * 1024 * 1024
+NET_IN = random.randint(1, 10) * 1024 * 1024
 
 
 @test_stub.skip_if_multi_ps
 def test():
 
-    all_combinations = ((bandwidth, net_out, net_in) for bandwidth in [None, BANDWIDTH]
-                        for net_out in [None, NET_OUT] for net_in in [None, NET_IN])
-    for bandwidth, net_out, net_in in all_combinations:
+    for bandwidth, net_out, net_in in itertools.product((None, BANDWIDTH), (None, NET_OUT), (None, NET_IN)):
         instance_offering = test_lib.lib_create_instance_offering(name='test_offering',
                                                                   volume_bandwidth=bandwidth,
                                                                   net_outbound_bandwidth=net_out,
