@@ -357,7 +357,7 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
         if vm_net_uuids_lst:
             nfs_network_uuid = vm_net_uuids_lst[0]
             nfs_vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, nfs_network_uuid).ip
-            if test_lib.lib_cur_cfg_is_a_and_b(["test-config-ceph-3-nets-sep.xml"], \
+            if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], \
                                                ["scenario-config-ceph-sep-man.xml", \
                                                 "scenario-config-ceph-sep-pub.xml", \
                                                 "scenario-config-ceph-3-nets-sep.xml"]):

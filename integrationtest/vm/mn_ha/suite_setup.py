@@ -67,7 +67,7 @@ def test():
                                           "scenario-config-nfs-sep-pub.xml"]):
         config_json = os.environ.get('configJsonSepPub')
 
-    elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-ceph-3-nets-sep.xml"], \
+    elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], \
                                          ["scenario-config-ceph-sep-man.xml", \
                                           "scenario-config-ceph-sep-pub.xml", \
                                           "scenario-config-ceph-3-nets-sep.xml"]):

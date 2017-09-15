@@ -310,7 +310,7 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
     mn_gateway = os.environ.get('nodeGateway')
     for i in range(len(mn_host_list)):
         if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml"], ["scenario-config-nfs-sep-man.xml"]) or \
-                         test_lib.lib_cur_cfg_is_a_and_b(["test-config-ceph-3-nets-sep.xml"], ["scenario-config-ceph-sep-man.xml"]):
+                         test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], ["scenario-config-ceph-sep-man.xml"]):
             os.system('sed -i s/host-%d/%s/g %s' % (i+1, mn_host_list[i].ip_,config_json))
         else:
             os.system('sed -i s/host-%d/%s/g %s' % (i+1, mn_host_list[i].managementIp_,config_json))
