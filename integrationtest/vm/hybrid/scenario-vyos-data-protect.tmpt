@@ -7,4 +7,8 @@ imageUuid3 = 123456
 
 dataVolume = data_volume
 volumeDiskOfferingUuid = 123456
+
 imageStoreDataProtectUrl = /zstack_bs
+imageStoreDataProtectUserName = root
+imageStoreDataProtectPassword = password
+imageStoreDataProtectPort = 22
