@@ -48,7 +48,7 @@ scenario-vyos-data-protect
     </host>
   </hosts>
   <volumes>
-    <volume name="$dataVolume" volumeDiskOfferingUuid="$volumeDiskOfferingUuid">
+    <volume name="$volumeName" volumeDiskOfferingUuid="$volumeDiskOfferingUuid">
       <vms>
         <vm url="$imageStoreDataProtectUrl" user="imageStoreDataProtectUserName" 
           password="imageStoreDataProtectPassword" port="imageStoreDataProtectPort">$vmName2</vm>
