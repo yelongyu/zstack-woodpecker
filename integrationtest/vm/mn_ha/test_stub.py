@@ -567,26 +567,30 @@ def ensure_vr_is_running(l3_uuid):
     else:
         test_util.test_fail("virtualrouter has not been started within 300s")
 
-def skip_if_scenario_is_multiple_networks():
-    mul_nets_sce_list = [ 					\
-                         'scenario-config-nfs-sep-man.xml',	\
-                         'scenario-config-nfs-sep-pub.xml',	\
-                         'scenario-config-ceph-sep-man.xml',	\
-                         'scenario-config-ceph-sep-pub.xml'	\
-                        ]
+def skip_if_scenario_is_multiple_networks(mul_nets_sce_list=[]):
+
+    if not mul_nets_sce_list:
+        mul_nets_sce_list = [ 					\
+                             'scenario-config-nfs-sep-man.xml',	\
+                             'scenario-config-nfs-sep-pub.xml',	\
+                             'scenario-config-ceph-sep-man.xml',	\
+                             'scenario-config-ceph-sep-pub.xml'	\
+                            ]
 
     for sce_cfg in mul_nets_sce_list:
         if sce_cfg in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE'):
             test_util.test_skip("Skip the test because scenario config is %s"	\
                           %(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')))
 
-def skip_if_scenario_not_multiple_networks():
-    mul_nets_sce_list = [ 					\
-                         'scenario-config-nfs-sep-man.xml',	\
-                         'scenario-config-nfs-sep-pub.xml',	\
-                         'scenario-config-ceph-sep-man.xml',	\
-                         'scenario-config-ceph-sep-pub.xml'	\
-                        ]
+def skip_if_scenario_not_multiple_networks(mul_nets_sce_list=[]):
+
+    if not mul_nets_sce_list:
+        mul_nets_sce_list = [ 					\
+                             'scenario-config-nfs-sep-man.xml',	\
+                             'scenario-config-nfs-sep-pub.xml',	\
+                             'scenario-config-ceph-sep-man.xml',	\
+                             'scenario-config-ceph-sep-pub.xml'	\
+                            ]
 
     for sce_cfg in mul_nets_sce_list:
         if sce_cfg in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE'):
