@@ -5,7 +5,7 @@ vmName2 = test_vm2
 vmInstranceOfferingUuid3 = 123456
 imageUuid3 = 123456
 
-dataVolume = data_volume
+volumeName = data_volume
 volumeDiskOfferingUuid = 123456
 
 imageStoreDataProtectUrl = /zstack_bs
