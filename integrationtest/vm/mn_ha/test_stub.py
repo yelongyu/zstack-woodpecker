@@ -524,7 +524,11 @@ def ensure_hosts_connected():
         #time.sleep(1)
         host_list = res_ops.query_resource(res_ops.HOST)
         for host in host_list:
-            host_ops.reconnect_host(host.uuid)
+            try:
+                host_ops.reconnect_host(host.uuid)
+            except Exception, e:
+                test_util.test_logger("reconnect host failed: %s" %(str(e)))
+                break
             cond = res_ops.gen_query_conditions('uuid', '=', host.uuid)
             hosts = res_ops.query_resource_fields(res_ops.HOST, cond, None)
             if not "connected" in hosts[0].status.lower():
