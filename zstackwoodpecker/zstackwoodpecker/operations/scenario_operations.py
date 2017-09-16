@@ -662,40 +662,48 @@ def setup_xsky_storages(scenario_config, scenario_file, deploy_config):
         osd_status_cmd = 'xms-cli --user ' + xskyUser + ' --password ' + xskyPassword + ' --url ' + xskyUrl + ' --format "json" osd list'
         unhealthy = False
         for i in range(0, 10):
+            unhealthy = False
             print "round %s" % (str(i))
             time.sleep(20)
-            (ret, out, eout) = ssh.execute(host_status_cmd, xmsNode, xmsNodeLoginUser, xmsNodeLoginPassword)
-            print "xms output"
-            print out
-            print eout
-            xsky_host_info = json.loads(out)
-            for xskyhost in xsky_host_info['hosts']:
-                status = xskyhost['status']
-                print status
-                isUp = xskyhost['up']
-                print isUp
-                if status != 'active':
-                   unhealthy = True
-                if isUp != True:
-                   unhealthy = True
-            print "host status: " + str(unhealthy)
+            try:
+                (ret, out, eout) = ssh.execute(host_status_cmd, xmsNode, xmsNodeLoginUser, xmsNodeLoginPassword)
+                print "xms output"
+                print out
+                print eout
+                xsky_host_info = json.loads(out)
+                for xskyhost in xsky_host_info['hosts']:
+                    status = xskyhost['status']
+                    print status
+                    isUp = xskyhost['up']
+                    print isUp
+                    if status != 'active':
+                       unhealthy = True
+                    if isUp != True:
+                       unhealthy = True
+                print "host status: " + str(unhealthy)
 
-            (ret, out, eout) = ssh.execute(osd_status_cmd, xmsNode, xmsNodeLoginUser, xmsNodeLoginPassword)
-            print "xms output"
-            print out
-            print eout
-            unhealthy = False
-            xsky_host_info = json.loads(out)
-            for xskyhost in xsky_host_info['osds']:
-                status = xskyhost['status']
-                print status
-                isUp = xskyhost['up']
-                print isUp
-                if status != 'active':
-                   unhealthy = True
-                if isUp != True:
-                   unhealthy = True
-            print "osd status:" + str(unhealthy)
+                (ret, out, eout) = ssh.execute(osd_status_cmd, xmsNode, xmsNodeLoginUser, xmsNodeLoginPassword)
+                print "xms output"
+                print out
+                print eout
+                unhealthy = False
+                xsky_host_info = json.loads(out)
+                for xskyhost in xsky_host_info['osds']:
+                    status = xskyhost['status']
+                    print status
+                    isUp = xskyhost['up']
+                    print isUp
+                    if status != 'active':
+                       unhealthy = True
+                    if isUp != True:
+                       unhealthy = True
+                print "osd status:" + str(unhealthy)
+            except Exception as e:
+                unhealthy = True
+                print str(e)
+                continue
+            if unhealthy == False:
+                break
         if unhealthy:
             test_util.test_fail('Xsky poc evn is not healthy')
             
