@@ -289,6 +289,16 @@ class zstack_kvm_vm_dhcp_checker(checker_header.TestChecker):
                 test_util.test_logger("Skip [VR:] %s, since it doesn't provide DHCP service" % vr_vm.uuid)
                 continue
 
+            for i in range(300):
+                cond = res_ops.gen_query_conditions('uuid', '=', vr_vm.uuid)
+                vr = res_ops.query_resource_fields(res_ops.VM_INSTANCE, cond, None)
+                if "connected" in vr.status.lower():
+                    test_util.test_logger("vr.uuid=%s vr.status=%s" %(vr_vm.uuid, vr.status.lower()))
+                    break
+                time.sleep(1)
+            else:
+                test_util.test_fail("vr.uuid=%s is not changed to changed within max waiting time." %(vr_vm.uuid))
+          
             guest_ip = nic.ip
             guest_mac = nic.mac
             vr_ip = test_lib.lib_find_vr_mgmt_ip(vr_vm)
