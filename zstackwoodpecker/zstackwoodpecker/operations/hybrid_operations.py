@@ -990,4 +990,4 @@ def add_disaster_image_store_bs(url, hostname, username, password, sshport=None,
         action.attachPoint = attach_point
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.test_logger('[Disaster ImageStore Backup Storage] %s is added' %action.name )
-    return evt
+    return evt.inventory
