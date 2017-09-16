@@ -70,5 +70,19 @@
         <case timeout='1200' repeat='1'>test_delete_vm_l3_check_vm_ops.py</case>
         <case timeout='600' repeat='1'>test_create_vm_time.py</case>
         <!--<case timeout='1200' repeat='1'>capacity/test_remove_host_check_ps_capacity_eq_0.py</case>-->
+        <case timeout='300' repeat='1'>image_store/test_create_vm.py</case>
+        <case timeout='600' repeat='1'>image_store/test_create_vm_images.py</case>
+        <case timeout='900' repeat='1'>image_store/test_create_100_images.py</case>
+        <case timeout='600' repeat='1'>image_store/test_create_img_after_sp.py</case>
+        <case timeout='600' repeat='1'>image_store/test_crt_2_vms_imgs_from_same_img.py</case>
+        <case timeout='1800' repeat='1'>image_store/test_export_image.py</case>
+        <case timeout='300' repeat='1'>image_store/test_export_iso.py</case>
+        <case timeout='900' repeat='1'>image_store/test_delete_exported_image.py</case>
+        <case timeout='300' repeat='1'>image_store/test_clone_vm.py</case>
+        <case timeout='400' repeat='1'>image_store/test_clone_vm2.py</case>
+        <case timeout='500' repeat='1'>image_store/test_clone_vm_sp_ops.py</case>
+        <case timeout='120' repeat='1'>image_store/test_win_vm_boot_option.py</case>
+	<!--<case timeout='500' repeat='1'>image_store/test_clone_stopped_vm_created.py</case>
+	<case timeout='500' repeat='1'>image_store/test_clone_vm_created.py</case>-->
     </suite>
 </integrationTest>
