@@ -197,6 +197,11 @@
         <case timeout='1200' repeat='1'>test_delete_vm_l3_check_vm_ops.py</case>
         <case timeout='600' repeat='1'>test_create_virtualrouter_vm_time.py</case>
         <case timeout='1200' repeat='1'>test_create_vm_with_userdata.py</case>
+        <case timeout='1200' repeat='1'>pub_l3_vm/test_pub_vm_multi_nic.py</case>
+        <case timeout='1200' repeat='1'>pub_l3_vm/test_pub_vm_network.py</case>
+        <case timeout='1200' repeat='1'>pub_l3_vm/test_pub_vm_ops.py</case>
+        <case timeout='1200' repeat='1'>pub_l3_vm/test_pub_vm_vip.py</case>
+        <case timeout='1200' repeat='1'>pub_l3_vm/test_pub_vm_vol_attach.py</case>
         <!--<case timeout='600' repeat='1'>test_create_vyos_vm_time.py</case>
         <case timeout='600' repeat='1'>test_vrouter_route.py</case>-->
     </suite>
