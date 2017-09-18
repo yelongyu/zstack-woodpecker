@@ -9,7 +9,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstacklib.utils.shell as shell
-import test_stub
+# import test_stub
 import time
 import os
 from vncdotool import api
