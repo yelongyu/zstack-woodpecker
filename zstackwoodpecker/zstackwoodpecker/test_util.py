@@ -808,6 +808,7 @@ class VolumeOption(DataOption):
 class ImageOption(DataOption):
     def __init__(self):
         self.root_volume_uuid = None #for create template from root volume
+        self.data_volume_uuid = None #for create template from data volume
         self.backup_storage_uuid_list = [] #
         self.guest_os_type = None #CentOS7
         self.platform = None #Linux, Windows, Unknown
@@ -822,8 +823,14 @@ class ImageOption(DataOption):
     def set_root_volume_uuid(self, root_volume_uuid):
         self.root_volume_uuid = root_volume_uuid
 
+    def set_data_volume_uuid(self, data_volume_uuid):
+        self.data_volume_uuid = data_volume_uuid
+
     def get_root_volume_uuid(self):
         return self.root_volume_uuid
+
+    def get_data_volume_uuid(self):
+        return self.data_volume_uuid
 
     def set_backup_storage_uuid_list(self, backup_storage_uuid_list):
         self.backup_storage_uuid_list = backup_storage_uuid_list
