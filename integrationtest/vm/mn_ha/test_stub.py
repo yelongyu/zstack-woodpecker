@@ -527,7 +527,7 @@ def ensure_hosts_connected():
             try:
                 host_ops.reconnect_host(host.uuid)
             except Exception, e:
-                test_util.test_logger("reconnect host failed: %s" %(str(e)))
+                test_util.test_logger("time: %s reconnect host failed: %s" %(str(i), host.uuid))
                 break
             cond = res_ops.gen_query_conditions('uuid', '=', host.uuid)
             hosts = res_ops.query_resource_fields(res_ops.HOST, cond, None)
