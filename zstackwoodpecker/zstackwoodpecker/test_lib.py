@@ -5320,3 +5320,12 @@ def ignored(*exceptions):
         yield
     except exceptions:
         pass
+
+@contextmanager
+def expected_failure(msg, *exceptions):
+    try:
+        yield
+    except exceptions:
+        test_util.test_logger("Expected failure: {}".format(msg))
+    else:
+        test_util.test_fail("CRITICAL ERROR: {} succeed!".format(msg))

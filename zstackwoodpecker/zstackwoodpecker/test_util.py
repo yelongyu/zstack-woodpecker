@@ -345,6 +345,7 @@ class VipOption(DataOption):
     def __init__(self):
         self.l3_uuid = None
         self.allocateStrategy = None
+        self.requiredIp = None
         super(VipOption, self).__init__()
 
     def set_l3_uuid(self, l3_uuid):
@@ -358,6 +359,12 @@ class VipOption(DataOption):
 
     def get_allocateStrategy(self):
         return self.allocateStrategy
+
+    def set_requiredIp(self, required_ip):
+        self.requiredIp = required_ip
+
+    def get_requiredIp(self):
+        return self.requiredIp
 
 class PrimaryStorageOption(DataOption):
     def __init__(self):

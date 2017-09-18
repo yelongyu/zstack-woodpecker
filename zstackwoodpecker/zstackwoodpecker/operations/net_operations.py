@@ -114,6 +114,7 @@ def create_vip(vip_creation_option):
     action = api_actions.CreateVipAction()
     action.l3NetworkUuid = vip_creation_option.get_l3_uuid()
     action.allocateStrategy = vip_creation_option.get_allocateStrategy()
+    action.requiredIp = vip_creation_option.get_requiredIp()
     action.timeout = vip_creation_option.get_timeout()
     #mandatory vip name:
     name = vip_creation_option.get_name()
