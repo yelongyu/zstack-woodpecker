@@ -143,7 +143,7 @@
         <l2NoVlanNetwork name="$l2ManagementNetworkName" description="Basic L2 for management network"
           physicalInterface="$l2ManagementNetworkInterface">
           <l3Networks>
-            <l3BasicNetwork name="$l3ManagementNetworkName" description="Management L3 Network without Vlan and no special services" system="True">
+            <l3BasicNetwork name="$l3ManagementNetworkName" systemTags="networkCategory::System" description="Management L3 Network without Vlan and no special services" system="True">
               <ipRange name="$ipRangeManagementName" description="Test"
                 startIp="$ipRangeManagementStartIp" endIp="$ipRangeManagementEndIp" gateway="$ipRangeManagementGateway"
                 netmask="$ipRangeManagementNetmask" />
@@ -159,7 +159,7 @@
         <l2NoVlanNetwork name="$l2PublicNetworkName" description="Basic L2 for public network"
           physicalInterface="$l2PublicNetworkInterface">
           <l3Networks>
-            <l3BasicNetwork name="$l3PublicNetworkName" description="Basic L3 Network without Vlan for public network">
+            <l3BasicNetwork name="$l3PublicNetworkName" systemTags="networkCategory::Public" description="Basic L3 Network without Vlan for public network">
               <ipRange name="$ipRangeName" description="Test"
                 startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
                 netmask="$ipRangeNetmask" />
