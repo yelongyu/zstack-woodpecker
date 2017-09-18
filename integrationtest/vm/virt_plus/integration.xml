@@ -71,7 +71,7 @@
         <!--<case timeout='1200' repeat='1'>capacity/test_remove_host_check_ps_capacity_eq_0.py</case>-->
         <case timeout='300' repeat='1'>image_store/test_create_vm.py</case>
         <case timeout='600' repeat='1'>image_store/test_create_vm_images.py</case>
-        <case timeout='900' repeat='1'>image_store/test_create_100_images.py</case>
+        <case timeout='3600' repeat='1'>image_store/test_create_100_images.py</case>
         <case timeout='600' repeat='1' noparallel='True'>image_store/test_create_img_after_sp.py</case>
         <case timeout='600' repeat='1' noparallel='True'>image_store/test_crt_2_vms_imgs_from_same_img.py</case>
         <case timeout='1800' repeat='1' noparallel='True'>image_store/test_export_image.py</case>

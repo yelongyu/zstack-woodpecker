@@ -26,11 +26,12 @@ def test():
     image_creation_option = test_util.ImageOption()
     backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm1.vm)
     for bs in backup_storage_list:
-        if bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+        if bs.type in [inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE, inventory.CEPH_BACKUP_STORAGE_TYPE]:
             image_creation_option.set_backup_storage_uuid_list([backup_storage_list[0].uuid])
             break
     else:
-        test_util.test_skip('Not find image store type backup storage.')
+        vm1.destroy()
+        test_util.test_skip('Not find image store or ceph type backup storage.')
 
     vm2 = test_stub.create_vm(vm_name = 'basic-test-vm')
     test_obj_dict.add_vm(vm2)

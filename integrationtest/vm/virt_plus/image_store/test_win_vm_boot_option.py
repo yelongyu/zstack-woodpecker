@@ -37,11 +37,11 @@ def test():
 
     backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
     for bs in backup_storage_list:
-        if bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+        if bs.type in [inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE, inventory.CEPH_BACKUP_STORAGE_TYPE]:
             break
     else:
         vm.destroy()
-        test_util.test_skip('Not find image store type backup storage.')
+        test_util.test_skip('Not find image store or ceph type backup storage.')
 
     new_vm = vm.clone(vm_name)[0]
     test_obj_dict.add_vm(new_vm)
