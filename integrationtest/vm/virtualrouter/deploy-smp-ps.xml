@@ -181,9 +181,9 @@
                 startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
                 netmask="$ipRangeNetmask" />
               <dns>$DNSServer</dns>
-              <networkService provider="VirtualRouter">
+              <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
-                <serviceType>DNS</serviceType>
+                <serviceType>Userdata</serviceType>
               </networkService>
             </l3BasicNetwork>
           </l3Networks>
