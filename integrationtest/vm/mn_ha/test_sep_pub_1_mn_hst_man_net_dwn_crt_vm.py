@@ -27,7 +27,7 @@ def test():
     if len(mn_host) != 1:
         test_util.test_fail('MN VM is running on %d host(s)' % len(mn_host))
     test_util.test_logger("shutdown host's network [%s] that mn vm is running on" % (mn_host[0].ip_))
-    test_stub.shutdown_host_network(mn_host[0], test_lib.all_scenario_config, downMagt=False)
+    test_stub.shutdown_host_network(mn_host[0], test_lib.all_scenario_config, downMagt=True)
     test_util.test_logger("wait for 20 seconds to see if management node VM starts on another host")
     time.sleep(20)
 
