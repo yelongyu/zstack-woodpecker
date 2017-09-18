@@ -12,3 +12,5 @@ imageStoreDataProtectUrl = /zstack_bs
 imageStoreDataProtectUserName = root
 imageStoreDataProtectPassword = password
 imageStoreDataProtectPort = 22
+
+vmManagementL3Uuid = 234567
