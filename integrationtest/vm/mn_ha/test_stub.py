@@ -223,7 +223,7 @@ def get_host_by_mn_vm(scenarioConfig, scenarioFile):
             if vm_list:
                 host_list.append(host)
         except Exception, e:
-            test_util.test_logger("%s" %(str(e)))
+            test_util.test_logger("@@get host exception@@:%s" %(str(e)))
             continue
     test_util.test_logger("@@DEBUG@@: host_list=<%s>" %(str(host_list)))
     return host_list
