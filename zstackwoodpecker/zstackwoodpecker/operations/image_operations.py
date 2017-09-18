@@ -132,6 +132,30 @@ def create_root_volume_template(image_creation_option):
     evt = account_operations.execute_action_with_session(action, image_creation_option.get_session_uuid())
     return evt.inventory
 
+def create_data_volume_template(image_creation_option):
+    '''
+    Create Data Volume Template from a data volume
+    '''
+    action = api_actions.CreateDataVolumeTemplateFromVolumeAction()
+    action.volumeUuid = image_creation_option.get_data_volume_uuid()
+    action.backupStorageUuids = image_creation_option.get_backup_storage_uuid_list()
+
+    name = image_creation_option.get_name()
+    if not name:
+        action.name = 'test_template_image'
+    else:
+        action.name = name
+
+    description = image_creation_option.get_description()
+    if not description:
+        action.description = "test create template from volume"
+    else:
+        action.description = description
+
+    test_util.action_logger('Create Data Volume Template from [data Volume:] %s in [backup Storage:] %s' % (action.volumeUuid, action.backupStorageUuids))
+    evt = account_operations.execute_action_with_session(action, image_creation_option.get_session_uuid())
+    return evt.inventory
+
 def create_root_volume_template_apiid(image_creation_option, apiid):
     '''
     Create Root Volume Template from a root volume
@@ -319,3 +343,18 @@ def set_image_qga_disable(img_uuid, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
+def sync_image_from_image_store_backup_storage(dst_bs_uuid, src_bs_uuid, img_uuid, session_uuid=None):
+    action = api_actions.SyncImageFromImageStoreBackupStorageAction()
+    action.dstBackupStorageUuid = dst_bs_uuid
+    action.srcBackupStorageUuid = src_bs_uuid
+    action.uuid = img_uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def recovery_image_from_image_store_backup_storage(dst_bs_uuid, src_bs_uuid, img_uuid, session_uuid=None):
+    action = api_actions.RecoveryImageFromImageStoreBackupStorageAction()
+    action.dstBackupStorageUuid = dst_bs_uuid
+    action.srcBackupStorageUuid = src_bs_uuid
+    action.uuid = img_uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
