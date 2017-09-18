@@ -1135,6 +1135,11 @@ def add_l3_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l3_
         if l3.domain_name__:
             action.dnsDomain = l3.domain_name__
 
+        if l3.hasattr('systemTags_'):
+            action.systemTags = l3.systemTags_.split(',')
+        elif not l3.hasattr('system_') or l3.system_ == False:
+            action.systemTags = [ "networkCategory::Private" ]
+
         try:
             evt = action.run()
         except:
