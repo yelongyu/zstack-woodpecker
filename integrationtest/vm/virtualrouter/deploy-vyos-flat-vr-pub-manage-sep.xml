@@ -351,6 +351,7 @@
             </l3BasicNetwork>
           </l3Networks>
         </l2VlanNetwork>
+      </l2Networks>
       <primaryStorages>
         <nfsPrimaryStorage name="$nfsPrimaryStorageName"
           description="Test" url="$nfsPrimaryStorageUrl" />
