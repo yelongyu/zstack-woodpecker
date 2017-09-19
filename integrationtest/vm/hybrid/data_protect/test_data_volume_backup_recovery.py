@@ -40,8 +40,7 @@ def test():
 
     primary_storage_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].uuid
     disk_offering_uuid = res_ops.query_resource(res_ops.DISK_OFFERING)[0].uuid
-    host_ip = res_ops.query_resource(res_ops.HOST)[0].managementIp
-    cond = res_ops.gen_query_conditions('zone.host.managementIp', '=', host_ip)
+    cond = res_ops.gen_query_conditions('name', '=', 'image_store_bs')
     local_bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
 
     volume_option = test_util.VolumeOption()
@@ -66,6 +65,8 @@ def test():
     recovery_image = img_ops.recovery_image_from_image_store_backup_storage(local_bs_uuid, dpbs_uuid, image_uuid) 
     if recovery_image.backupStorageRefs[0].backupStorageUuid != local_bs_uuid:
         test_util.test_fail('Recovery image failed, image uuid is %s' %recovery_image.uuid)
+    if recovery_image.mediaType != 'DataVolumeTemplate':
+        test_util.test_fail('Wrong image media type after recovery, the expect is "DataVolumeTemplate", the real is "%s"' %media_type)
     image_uuid = recovery_image.uuid
 
     vol_ops.delete_volume(data_volume_uuid)
