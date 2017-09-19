@@ -7,6 +7,7 @@ Create an unified test_stub to share test operations
 
 import os
 
+import apibinding.api_actions as api_actions
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm
@@ -191,5 +192,18 @@ def create_spice_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=N
     vm.create()
     return vm
 
+def get_vm_console_protocol(uuid, session_uuid=None):
+    action = api_actions.GetVmConsoleAddressAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Get VM Console protocol:  %s ' % evt.protocol)
+    return evt
+
+def check_vm_spice(vm_uuid)
+    if get_vm_console_protocol(vm_uuid).protocol == "spice":
+        test_util.test_pass('Check vm Console protocol is spice')
+    else:
+	test_util.test_fail('vm console protocol is not spice, test fail')
 
 
