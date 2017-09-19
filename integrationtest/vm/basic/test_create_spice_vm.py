@@ -1,6 +1,6 @@
 '''
 
-New Integration Test for creating KVM VM.
+New Integration Test for creating KVM VM with console type is spice.
 
 @author: ye.tian
 '''
@@ -15,22 +15,32 @@ def test():
     global vm
     vm = test_stub.create_spice_vm()
     vm.check()
-    test_stub.check_vm_spice(vm.vm.uuid)
 
     vm_inv=vm.get_vm()
     vm_uuid=vm_inv.uuid
     vm_state = vm.get_vm().state
-
     host_inv = test_lib.lib_find_host_by_vm(vm_inv)
     host_ip= host_inv.managementIp
     host_username=host_inv.username
     host_password=host_inv.password
 
-    test_util.test_dsc('check the vm console protocol is spice')
-    cmd='virsh dumpxml %s |grep spice'% (vm_uuid)
+    test_util.test_dsc('check the vm console protocol is spice via read xml')
+    cmd='''virsh dumpxml %s |grep spice|awk  '{print $2}' |awk -F= '{print $2}' '''% (vm_uuid)
     result=test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd, 180)
-    print cmd
-    print result
+    if eval(result) == "spice" :
+	print "Vm console protocol is spice, test success"
+    else :
+	print "Vm console protocol is %s " % eval(result)
+	print "test is fail"
+        test_util.test_fail('Create VM with spice Test Failed')
+
+    test_util.test_dsc('check the vm console protocol is spice via GetVmConsoleAddressAction')
+    if test_stub.get_vm_console_protocol(vm.vm.uuid).protocol == "spice" :
+	print "Vm console protocol is spice, test success"
+    else :
+	print "Vm console protocol is %s " % test_stub.get_vm_console_protocol(vm.vm.uuid).protocol
+        print "test is fail"
+        test_util.test_fail('Create VM with spice Test Failed')
 
     vm.destroy()
     vm.check()
