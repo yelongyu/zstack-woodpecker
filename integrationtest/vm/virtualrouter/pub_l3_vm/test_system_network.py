@@ -35,8 +35,7 @@ def test():
                                                imageUuid=exist_vr_offering.imageUuid,
                                                zoneUuid=exist_vr_offering.zoneUuid,
                                                managementNetworkUuid=exist_vr_offering.managementNetworkUuid,
-                                               publicNetworkUuid=exist_vr_offering.managementNetworkUuid)
-
+                                               publicNetworkUuid=test_lib.lib_get_l3_by_name(os.environ.get('l3ManagementNetworkName')).uuid)
 
 
 def env_recover():
