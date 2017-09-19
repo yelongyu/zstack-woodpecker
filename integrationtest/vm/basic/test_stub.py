@@ -200,7 +200,7 @@ def get_vm_console_protocol(uuid, session_uuid=None):
     test_util.action_logger('Get VM Console protocol:  %s ' % evt.protocol)
     return evt
 
-def check_vm_spice(vm_uuid)
+def check_vm_spice(vm_uuid):
     if get_vm_console_protocol(vm_uuid).protocol == "spice":
         test_util.test_pass('Check vm Console protocol is spice')
     else:
