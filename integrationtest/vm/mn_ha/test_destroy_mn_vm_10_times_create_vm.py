@@ -63,9 +63,9 @@ def test():
         except:
             test_util.test_fail("management node does not recover after mn vm was destroyed")
     
+        test_stub.ensure_hosts_connected()
         test_stub.ensure_pss_connected()
         test_stub.ensure_bss_connected()
-        test_stub.ensure_hosts_connected()
 
         vm = test_stub.create_basic_vm()
         vm.check()

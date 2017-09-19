@@ -36,9 +36,9 @@ def test():
     if new_mn_host[0].ip_ != mn_vm_host[0].ip_:
         test_util.test_fail('management node VM starts on another host after upgrade zsha')
 
+    test_stub.ensure_hosts_connected()
     test_stub.ensure_pss_connected()
     test_stub.ensure_bss_connected()
-    test_stub.ensure_hosts_connected()
 
     vm = test_stub.create_basic_vm()
     vm.check()
