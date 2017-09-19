@@ -152,7 +152,7 @@
       </clusters>
 
       <l2Networks>
-        <l2NoVlanNetwork name="$l2ManagementNetworkName" description="Basic L2 for management network"
+        <l2VlanNetwork name="$l2ManagementNetworkName" description="Basic L2 for management network"
           physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan6">
           <l3Networks>
             <l3BasicNetwork name="$l3ManagementNetworkName" systemTags="networkCategory::System" description="Management L3 Network with Vlan and no special services" system="True">
@@ -162,7 +162,7 @@
               <dns>$DNSServer</dns>
             </l3BasicNetwork>
           </l3Networks>
-        </l2NoVlanNetwork>
+        </l2VlanNetwork>
 
         <l2NoVlanNetwork name="$l2PublicNetworkName" description="Basic L2 for public network"
           physicalInterface="$l2PublicNetworkInterface">
