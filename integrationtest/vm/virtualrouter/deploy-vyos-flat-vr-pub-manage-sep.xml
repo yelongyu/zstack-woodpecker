@@ -153,12 +153,12 @@
 
       <l2Networks>
         <l2NoVlanNetwork name="$l2ManagementNetworkName" description="Basic L2 for management network"
-          physicalInterface="$l2ManagementNetworkInterface">
+          physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan6">
           <l3Networks>
-            <l3BasicNetwork name="$l3ManagementNetworkName" systemTags="networkCategory::System" description="Management L3 Network without Vlan and no special services" system="True">
-              <ipRange name="$ipRangeManagementName" description="Test"
-                startIp="$ipRangeManagementStartIp" endIp="$ipRangeManagementEndIp" gateway="$ipRangeManagementGateway"
-                netmask="$ipRangeManagementNetmask" />
+            <l3BasicNetwork name="$l3ManagementNetworkName" systemTags="networkCategory::System" description="Management L3 Network with Vlan and no special services" system="True">
+              <ipRange name="$vlanIpRangeName6" description="Test"
+                startIp="$vlanIpRangeStart6" endIp="$vlanIpRangeEnd6" gateway="$vlanIpRangeGateway6"
+                netmask="$vlanIpRangeNetmask6" />
               <dns>$DNSServer</dns>
             </l3BasicNetwork>
           </l3Networks>

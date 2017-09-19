@@ -1,5 +1,0 @@
-import ../deploy.tmpt
-
-l2ManagementNetworkName = l2-management
-l2ManagementNetworkInterface = eth0.1106
-
