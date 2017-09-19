@@ -86,6 +86,7 @@
   </backupStorages>
 
   <images>
+    <!--
     <image name="$imageName_i_c7"
       description="Centos7 Test Image Template"
       format="$rootImageFormat" url="$imageUrl_i_c7"
@@ -93,6 +94,7 @@
       username="$imageUsername" password="$imagePassword">
       <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
     </image>
+    -->
     <image name="$imageName_s" 
       description="Small Test Image Template" 
       mediaType="$rootMediaType" format="$rootImageFormat"
