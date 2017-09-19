@@ -168,7 +168,7 @@ def create_spice_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=N
         vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
         vm_creation_option.set_image_uuid(image_uuid)
         vm_creation_option.set_l3_uuids([l3net_uuid])
-        vm_creation_option.set_system_tags(system_tag)
+        vm_creation_option.set_system_tags([system_tag])
 
     if volume_uuids:
         if isinstance(volume_uuids, list):
