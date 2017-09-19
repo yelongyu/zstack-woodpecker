@@ -43,6 +43,5 @@
         <case timeout='600' repeat='1'>migrate/test_migrate_vm_with_iso.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_vm_with_iso2.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_vm_eip_check.py</case>
-        <case timeout='600' repeat='1'>test_pub_vm_migration.py</case>
     </suite>
 </integrationTest>
