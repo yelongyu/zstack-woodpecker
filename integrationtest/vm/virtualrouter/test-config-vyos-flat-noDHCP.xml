@@ -1,5 +1,5 @@
 <testConfig>
-    <deployConfig>deploy-vyos-flat-noDHCP.xml</deployConfig>
-    <deployConfigTemplate>../deploy.tmpt</deployConfigTemplate>
+    <deployConfig>deploy-vyos-flat-vr-pub-manage-sep.xml</deployConfig>
+    <deployConfigTemplate>deploy-vyos-flat-vr-pub-manage-sep.tmpt</deployConfigTemplate>
     <pingTestTarget>zstack.yyk.net</pingTestTarget>
 </testConfig>
