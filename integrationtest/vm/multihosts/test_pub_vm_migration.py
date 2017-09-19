@@ -18,8 +18,16 @@ def test():
     pub_l3_vm, vm1, vm2 = test_stub.generate_pub_test_vm(tbj=test_obj_dict)
 
     for vm in (pub_l3_vm, vm1, vm2):
+        for action in ('stop', 'start', 'reboot', 'suspend', 'resume', 'check'):
+            getattr(vm, action)()
+
+    for vm in (pub_l3_vm, vm1, vm2):
         test_stub.migrate_vm_to_random_host(vm)
         vm.check()
+
+    for vm in (pub_l3_vm, vm1, vm2):
+        for action in ('stop', 'start', 'reboot', 'suspend', 'resume', 'check'):
+            getattr(vm, action)()
 
     test_util.test_pass('pub vm volume migration check pass')
 
