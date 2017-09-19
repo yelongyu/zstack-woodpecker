@@ -14,7 +14,7 @@ def test():
     global vm
     vm = test_stub.create_spice_vm()
     vm.check()
-    test_stub.check_vm_spice(vm.uuid)
+    test_stub.check_vm_spice(vm.vm.uuid)
     vm.destroy()
     vm.check()
     test_util.test_pass('Create VM with spice Test Success')
