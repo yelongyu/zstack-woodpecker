@@ -196,7 +196,7 @@ def get_vm_console_protocol(uuid, session_uuid=None):
     action = api_actions.GetVmConsoleAddressAction()
     action.timeout = 30000
     action.uuid = uuid
-    evt = acc_opc.execute_action_with_session(action, session_uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Get VM Console protocol:  %s ' % evt.protocol)
     return evt
 
