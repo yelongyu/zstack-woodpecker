@@ -1,6 +1,7 @@
 '''
 
 @author: FangSun
+
 '''
 
 
@@ -21,10 +22,6 @@ def test():
         test_stub.create_vm_with_random_offering(vm_name='test_vm',
                                                  image_name='imageName_net',
                                                  l3_name='l3ManagementNetworkName')
-
-    with test_lib.expected_failure('use system network to create VIP', Exception):
-        test_stub.create_vip(vip_name='test_vip',
-                             l3_uuid=test_lib.lib_get_l3_by_name(os.environ.get('l3ManagementNetworkName')).uuid)
 
     exist_vr_offering = res_ops.get_resource(res_ops.VR_OFFERING)[0]
 
