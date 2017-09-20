@@ -55,9 +55,10 @@ def test():
     except:
         test_util.test_fail("management node does not recover after its former host's network down")
 
-    test_stub.ensure_hosts_connected()
-    test_stub.ensure_pss_connected()
+    test_stub.ensure_hosts_connected(exclude_host=[mn_host[0]])
+    test_stub.ensure_bss_host_connected_from_sep_net_down(test_lib.scenario_file, test_lib.all_scenario_config, downMagt=False)
     test_stub.ensure_bss_connected()
+    test_stub.ensure_pss_connected()
 
     vm = test_stub.create_basic_vm()
     vm.check()
@@ -67,6 +68,7 @@ def test():
 
 #Will be called what ever test result is
 def env_recover():
+    global mn_host
     test_stub.reopen_host_network(mn_host[0], test_lib.all_scenario_config)
     test_stub.wait_for_mn_ha_ready(test_lib.all_scenario_config, test_lib.scenario_file)
     #test_stub.recover_host(mn_host[0], test_lib.all_scenario_config, test_lib.deploy_config)
