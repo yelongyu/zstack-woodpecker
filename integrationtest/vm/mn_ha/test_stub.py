@@ -526,7 +526,9 @@ def ensure_hosts_connected(exclude_host=[]):
         #time.sleep(1)
         host_list = res_ops.query_resource(res_ops.HOST)
         for exh in exclude_host:
-            host_list.remove(exh)
+            for host in host_list:
+                if exh.managementIp_ == host.managementIp or exh.ip_ == host.managementIp:
+                    host_list.remove(host)
 
         for host in host_list:
             try:
