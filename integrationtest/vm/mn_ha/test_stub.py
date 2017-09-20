@@ -563,7 +563,7 @@ def ensure_bss_host_connected_from_stop(scenarioFile, scenarioConfig, deploy_con
         mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
         for bs_host_ip in bss_host_ip:
             for mn_host in mn_host_list:
-                if mn_host.mamagementIp_ == bs_host_ip:
+                if mn_host.managementIp_ == bs_host_ip:
                     recover_host(mn_host, scenarioConfig, deploy_config)
 
         for bs_host_ip in bss_host_ip:
@@ -598,7 +598,7 @@ def ensure_bss_host_connected_from_sep_net_down(scenarioFile, scenarioConfig, do
         mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
         for bs_host_ip in bss_host_ip:
             for mn_host in mn_host_list:
-                if mn_host.mamagementIp_ == bs_host_ip or mn_host.ip_ == bs_host_ip:
+                if mn_host.managementIp_ == bs_host_ip or mn_host.ip_ == bs_host_ip:
                     reopen_host_network(mn_host, scenarioConfig, param_l2_nic=l2network_nic)
 
         for bs_host_ip in bss_host_ip:
