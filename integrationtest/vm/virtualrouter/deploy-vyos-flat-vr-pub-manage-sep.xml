@@ -136,7 +136,13 @@
           hypervisorType="$clusterHypervisorType">
           <hosts>
             <host name="$hostName" description="Test" managementIp="$hostIp"
-              username="$hostUsername" password="$hostPassword" />
+                  username="$hostUsername" password="$hostPassword" />
+            <host name="$hostName2" description="Test2" managementIp="$hostIp2"
+                  username="$hostUsername2" password="$hostPassword2" port="$hostPort2"/>
+            <host name="$hostName3" description="Test3" managementIp="$hostIp3"
+                  username="$hostUsername3" password="$hostPassword3"/>
+            <host name="$hostName4" description="Test4" managementIp="$hostIp4"
+                  username="$hostUsername4" password="$hostPassword4" port="$hostPort4"/>
           </hosts>
           <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
           <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
@@ -152,17 +158,17 @@
       </clusters>
 
       <l2Networks>
-        <l2VlanNetwork name="$l2ManagementNetworkName" description="Basic L2 for management network"
-          physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan6">
+        <l2NoVlanNetwork name="$l2ManagementNetworkName" description="Basic L2 for management network"
+          physicalInterface="$l2ManagementNetworkInterface">
           <l3Networks>
             <l3BasicNetwork name="$l3ManagementNetworkName" systemTags="networkCategory::System" description="Management L3 Network with Vlan and no special services" system="True">
-              <ipRange name="$vlanIpRangeName6" description="Test"
-                startIp="$vlanIpRangeStart6" endIp="$vlanIpRangeEnd6" gateway="$vlanIpRangeGateway6"
-                netmask="$vlanIpRangeNetmask6" />
+              <ipRange name="$ipRangeManagementName" description="Test"
+                startIp="$ipRangeManagementStartIp" endIp="$ipRangeManagementEndIp" gateway="$ipRangeManagementGateway"
+                netmask="$ipRangeManagementNetmask" />
               <dns>$DNSServer</dns>
             </l3BasicNetwork>
           </l3Networks>
-        </l2VlanNetwork>
+        </l2NoVlanNetwork>
 
         <l2NoVlanNetwork name="$l2PublicNetworkName" description="Basic L2 for public network"
           physicalInterface="$l2PublicNetworkInterface">
