@@ -550,25 +550,28 @@ def ensure_bss_host_connected_from_stop(scenarioFile, scenarioConfig, deploy_con
     '''
     bss_host_ip = []
     bs_list = res_ops.query_resource(res_ops.BACKUP_STORAGE)
-    for bs in bs_list:
-        bss_host_ip.append(bs.hostname)
+    if bs_list[0].type == "SftpBackupStorage":
+        for bs in bs_list:
+            bss_host_ip.append(bs.hostname)
 
-    for bs_host_ip in bss_host_ip:
-        if test_lib.lib_wait_target_up(bs_host_ip, '22', 120):
-            bss_host_ip.remove(bs_host_ip)
+        for bs_host_ip in bss_host_ip:
+            if test_lib.lib_wait_target_up(bs_host_ip, '22', 120):
+                bss_host_ip.remove(bs_host_ip)
 
-    mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
-    for bs_host_ip in bss_host_ip:
-        for mn_host in mn_host_list:
-            if mn_host.mamagementIp_ == bs_host_ip:
-                recover_host(mn_host, scenarioConfig, deploy_config)
+        mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
+        for bs_host_ip in bss_host_ip:
+            for mn_host in mn_host_list:
+                if mn_host.mamagementIp_ == bs_host_ip:
+                    recover_host(mn_host, scenarioConfig, deploy_config)
 
-    for bs_host_ip in bss_host_ip:
-        if test_lib.lib_wait_target_up(bs_host_ip, '22', 120):
-            bss_host_ip.remove(bs_host_ip)
+        for bs_host_ip in bss_host_ip:
+            if test_lib.lib_wait_target_up(bs_host_ip, '22', 120):
+                bss_host_ip.remove(bs_host_ip)
 
-    if bss_host_ip:
-        test_util.test_fail("still have bs host not started.")
+        if bss_host_ip:
+            test_util.test_fail("still have bs host not started.")
+    else:
+        test_util.test_logger("the current bs is %s type, is not expected sftp, therefore, skip ensure bss host connected" %(bs_list[0].type))
 
 
 def ensure_bss_host_connected_from_sep_net_down(scenarioFile, scenarioConfig, downMagt=True):
@@ -577,30 +580,33 @@ def ensure_bss_host_connected_from_sep_net_down(scenarioFile, scenarioConfig, do
     '''
     bss_host_ip = []
     bs_list = res_ops.query_resource(res_ops.BACKUP_STORAGE)
-    for bs in bs_list:
-        bss_host_ip.append(bs.hostname)
+    if bs_list[0].type == "SftpBackupStorage":
+        for bs in bs_list:
+            bss_host_ip.append(bs.hostname)
 
-    for bs_host_ip in bss_host_ip:
-        if test_lib.lib_wait_target_up(bs_host_ip, '22', 120):
-            bss_host_ip.remove(bs_host_ip)
+        for bs_host_ip in bss_host_ip:
+            if test_lib.lib_wait_target_up(bs_host_ip, '22', 120):
+                bss_host_ip.remove(bs_host_ip)
 
-    if downMagt:
-        l2network_nic = test_lib.lib_get_l2_magt_nic_by_vr_offering()
+        if downMagt:
+            l2network_nic = test_lib.lib_get_l2_magt_nic_by_vr_offering()
+        else:
+            l2network_nic = test_lib.lib_get_l2_pub_nic_by_vr_offering()
+
+        mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
+        for bs_host_ip in bss_host_ip:
+            for mn_host in mn_host_list:
+                if mn_host.mamagementIp_ == bs_host_ip or mn_host.ip_ == bs_host_ip:
+                    reopen_host_network(mn_host, scenarioConfig, param_l2_nic=l2network_nic)
+
+        for bs_host_ip in bss_host_ip:
+            if test_lib.lib_wait_target_up(bs_host_ip, '22', 120):
+                bss_host_ip.remove(bs_host_ip)
+
+        if bss_host_ip:
+            test_util.test_fail("still have bs host not started.")
     else:
-        l2network_nic = test_lib.lib_get_l2_pub_nic_by_vr_offering()
-
-    mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
-    for bs_host_ip in bss_host_ip:
-        for mn_host in mn_host_list:
-            if mn_host.mamagementIp_ == bs_host_ip or mn_host.ip_ == bs_host_ip:
-                reopen_host_network(mn_host, scenarioConfig, param_l2_nic=l2network_nic)
-
-    for bs_host_ip in bss_host_ip:
-        if test_lib.lib_wait_target_up(bs_host_ip, '22', 120):
-            bss_host_ip.remove(bs_host_ip)
-
-    if bss_host_ip:
-        test_util.test_fail("still have bs host not started.")
+        test_util.test_logger("the current bs is %s type, is not expected sftp, therefore, skip ensure bss host connected" %(bs_list[0].type))
 
 
 def ensure_host_disconnected(test_host, wait_time):
