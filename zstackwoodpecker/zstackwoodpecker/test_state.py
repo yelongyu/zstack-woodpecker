@@ -646,6 +646,8 @@ class TestStateDict(object):
                 TestStage.deleted_image:[]
                 }
 
+        self.hybrid_obj = None
+
         #sg_list is deprecated. all sg should be managed in sg_vm.
         self.sg_list = []
         #[Inlined import]
@@ -758,6 +760,9 @@ class TestStateDict(object):
                 return True
 
         return False
+
+    def add_hybrid_obj(self, hybrid_obj):
+        self.hybrid_obj = hybrid_obj
 
     def get_vm_list(self, state=vm_header.RUNNING):
         return self.vm_dict[state]

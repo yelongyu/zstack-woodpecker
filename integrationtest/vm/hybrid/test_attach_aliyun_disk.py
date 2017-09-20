@@ -17,6 +17,7 @@ hybrid = test_stub.HybridObject()
 
 def test():
     hybrid.create_ecs_instance()
+    test_obj_dict.add_hybrid_obj(hybrid)
     hybrid.create_aliyun_disk()
     hybrid.attach_aliyun_disk()
     hybrid.detach_aliyun_disk()

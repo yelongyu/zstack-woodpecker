@@ -16,13 +16,15 @@ hybrid = test_stub.HybridObject()
 
 def test():
     hybrid.create_ecs_instance()
+    test_obj_dict.add_hybrid_obj(hybrid)
     hybrid.get_eip()
     hybrid.attach_eip_to_ecs()
     hybrid.detach_eip_from_ecs()
     test_util.test_pass('Attach Detach Hybrid Eip to/from Ecs Test Success')
 
 def env_recover():
-    hybrid.del_ecs_instance()
+    if hybrid.ecs_instance:
+        hybrid.del_ecs_instance()
 
     if hybrid.eip_create:
         hybrid.del_eip()

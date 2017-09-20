@@ -4051,6 +4051,13 @@ def lib_error_cleanup(test_dict):
         except:
             pass
 
+    test_util.test_logger('- - - Error cleanup: Delete ECS Instance - - -')
+    if test_dict.hybrid_obj and test_dict.hybrid_obj.ecs_instance:
+        try:
+            test_dict.hybrid_obj.del_ecs_instance()
+        except:
+            pass
+
     test_util.test_logger('- - - Error cleanup: volume - - -')
     for vl in test_dict.get_all_volume_list():
         try:

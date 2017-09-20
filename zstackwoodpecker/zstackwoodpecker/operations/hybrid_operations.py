@@ -684,6 +684,126 @@ def update_image_guestOsType(uuid, guest_os_type, session_uuid=None):
     test_util.action_logger('[image %s] guestOsType is updated to [%s]' % (uuid, guest_os_type))
     return evt
 
+def update_ecs_image(uuid, name=None, description=None, session_uuid=None):
+    action = api_actions.UpdateEcsImageAction()
+    action.uuid = uuid
+    action.name = name
+    action.description = description
+    test_util.action_logger('Update [ECS Image:] %s' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('[ECS Image:] %s is updated' % uuid)
+    return evt
+
+def update_ecs_security_group(uuid, name=None, description=None, session_uuid=None):
+    action = api_actions.UpdateEcsSecurityGroupAction()
+    action.uuid = uuid
+    action.name = name
+    action.description = description
+    test_util.action_logger('Update [ECS Security Group:] %s' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('[ECS Security Group:] %s is updated' % uuid)
+    return evt
+
+def update_ecs_vpc(uuid, name=None, description=None, session_uuid=None):
+    action = api_actions.UpdateEcsVpcAction()
+    action.uuid = uuid
+    action.name = name
+    action.description = description
+    test_util.action_logger('Update [ECS VPC:] %s' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('[ECS VPC:] %s is updated' % uuid)
+    return evt
+
+def update_ecs_vswitch(uuid, name=None, description=None, session_uuid=None):
+    action = api_actions.UpdateEcsVSwitchAction()
+    action.uuid = uuid
+    action.name = name
+    action.description = description
+    test_util.action_logger('Update [ECS vSwitch:] %s' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('[ECS vSwitch:] %s is updated' % uuid)
+    return evt
+
+def update_ecs_vbr(uuid, name=None, description=None, session_uuid=None):
+    action = api_actions.UpdateVirtualBorderRouterRemoteAction()
+    action.uuid = uuid
+    action.name = name
+    action.description = description
+    test_util.action_logger('Update [ECS Virtual Border Router:] %s' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('[ECS Virtual Border Router:] %s is updated' % uuid)
+    return evt
+
+def update_aliyun_vr(uuid, name=None, description=None, session_uuid=None):
+    action = api_actions.UpdateAliyunVirtualRouterAction()
+    action.uuid = uuid
+    action.name = name
+    action.description = description
+    test_util.action_logger('Update [Aliyun Virtual Router:] %s' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('[Aliyun Virtual Router:] %s is updated' % uuid)
+    return evt
+
+def update_oss_bucket(uuid, name=None, description=None, session_uuid=None):
+    action = api_actions.UpdateOssBucketAction()
+    action.uuid = uuid
+    action.name = name
+    action.description = description
+    test_util.action_logger('Update [OSS Bucket:] %s' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('[OSS Bucket:] %s is updated' % uuid)
+    return evt
+
+def update_aliyun_snapshot(uuid, name=None, description=None, session_uuid=None):
+    action = api_actions.UpdateEcsVSwitchAction()
+    action.uuid = uuid
+    action.name = name
+    action.description = description
+    test_util.action_logger('Update [Aliyun Snapshot:] %s' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('[Aliyun Snapshot:] %s is updated' % uuid)
+    return evt
+
+def update_hybrid_eip(uuid, name=None, description=None, session_uuid=None):
+    action = api_actions.UpdateHybridEipAction()
+    action.uuid = uuid
+    action.name = name
+    action.description = description
+    test_util.action_logger('Update [Hybrid EIP:] %s' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('[Hybrid EIP:] %s is updated' % uuid)
+    return evt
+
+def update_vpc_user_vpn_gateway(uuid, name=None, description=None, session_uuid=None):
+    action = api_actions.UpdateVpcUserVpnGatewayAction()
+    action.uuid = uuid
+    action.name = name
+    action.description = description
+    test_util.action_logger('Update [VPC User VPN Gateway:] %s' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('[VPC User VPN Gateway:] %s is updated' % uuid)
+    return evt
+
+def update_vpc_vpn_connection(uuid, name=None, description=None, session_uuid=None):
+    action = api_actions.UpdateVpcVpnConnectionRemoteAction()
+    action.uuid = uuid
+    action.name = name
+    action.description = description
+    test_util.action_logger('Update [VPC VPN Connection:] %s' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('[VPC VPN Connection:] %s is updated' % uuid)
+    return evt
+
+def update_vpc_vpn_gateway(uuid, name=None, description=None, session_uuid=None):
+    action = api_actions.UpdateVpcVpnGatewayAction()
+    action.uuid = uuid
+    action.name = name
+    action.description = description
+    test_util.action_logger('Update [VPC VPN Gateway:] %s' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('[VPC VPN Gateway:] %s is updated' % uuid)
+    return evt
+
 def query_ecs_image_local(condition=[], session_uuid=None):
     action = api_actions.QueryEcsImageFromLocalAction()
     action.conditions = condition
@@ -893,11 +1013,12 @@ def query_aliyun_disk_local(condition=[], session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def update_aliyun_disk(uuid, name=None, description=None, delete_autosnapshot=None, enable_autosnapshot=None,session_uuid=None):
+def update_aliyun_disk(uuid, name=None, description=None, delete_with_instance=None, delete_autosnapshot=None, enable_autosnapshot=None,session_uuid=None):
     action = api_actions.UpdateAliyunDiskAction()
     action.uuid = uuid
     action.uuid = name
     action.description = description
+    action.deleteWithInstance = delete_with_instance
     action.deleteAutoSnapshot = delete_autosnapshot
     action.enableAutoSnapshot = enable_autosnapshot
     test_util.action_logger('Update [Aliyun Disk:] %s' % uuid)

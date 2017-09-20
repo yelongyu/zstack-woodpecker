@@ -17,6 +17,7 @@ hybrid = test_stub.HybridObject()
 
 def test():
     hybrid.create_ecs_instance()
+    test_obj_dict.add_hybrid_obj(hybrid)
     hyb_ops.update_ecs_instance_vnc_password(hybrid.ecs_instance.uuid, '123abc')
     test_util.test_pass('Update ECS Instance Console Password Test Success')
 

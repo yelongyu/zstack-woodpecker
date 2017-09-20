@@ -20,6 +20,8 @@ hybrid = test_stub.HybridObject()
 
 def test():
     hybrid.create_ecs_instance()
+    test_obj_dict.add_hybrid_obj(hybrid)
+
     ecs_name = 'test-ecs-instance-%s' % postfix
     # Update ECS name
     hyb_ops.update_ecs_instance(hybrid.ecs_instance.uuid, name=ecs_name)

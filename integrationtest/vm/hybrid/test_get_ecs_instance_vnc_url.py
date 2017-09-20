@@ -15,6 +15,7 @@ hybrid = test_stub.HybridObject()
 
 def test():
     hybrid.create_ecs_instance()
+    test_obj_dict.add_hybrid_obj(hybrid)
     hybrid.get_ecs_vnc_url()
     test_util.test_pass('Get Ecs Instance Vnc Url Test Success')
 

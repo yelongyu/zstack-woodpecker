@@ -15,6 +15,7 @@ hybrid = test_stub.HybridObject()
 
 def test():
     hybrid.create_ecs_instance()
+    test_obj_dict.add_hybrid_obj(hybrid)
     hybrid.reboot_ecs()
     hybrid.stop_ecs()
     hybrid.start_ecs()

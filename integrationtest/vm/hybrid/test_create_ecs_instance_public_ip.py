@@ -17,6 +17,7 @@ hybrid = test_stub.HybridObject()
 
 def test():
     hybrid.create_ecs_instance(allocate_eip=True, connect=True)
+    test_obj_dict.add_hybrid_obj(hybrid)
     hybrid.get_eip(in_use=True)
     hybrid.check_eip_accessibility()
     test_util.test_pass('Create Ecs Instance with Public IP Test Success')

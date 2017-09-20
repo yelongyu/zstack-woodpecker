@@ -16,6 +16,7 @@ hybrid = test_stub.HybridObject()
 
 def test():
     hybrid.create_ecs_instance()
+    test_obj_dict.add_hybrid_obj(hybrid)
     hybrid.del_ecs_instance(remote=False)
     hybrid.del_ecs_instance()
     test_util.test_pass('Create Delete Ecs Instance Test Success')
