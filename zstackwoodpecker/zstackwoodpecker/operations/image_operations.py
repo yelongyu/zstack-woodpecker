@@ -21,11 +21,24 @@ def add_data_volume_template(image_option):
                 (image_option.get_mediaType(), action.mediaType))
 
     action.format = image_option.get_format()
-    action.backupStorageUuids = image_option.get_backup_storage_list()
+    action.backupStorageUuids = image_option.get_backup_storage_uuid_list()
     test_util.action_logger('Add [Volume:] %s from [url:] %s ' % (action.name, action.url))
     evt = account_operations.execute_action_with_session(action, image_option.get_session_uuid())
 
     test_util.test_logger('[volume:] %s is added.' % evt.inventory.uuid)
+    return evt.inventory
+
+def add_image(image_option):
+    action = api_actions.AddImageAction()
+    action.name = image_option.get_name()
+    action.url = image_option.get_url()
+    action.mediaType = image_option.get_mediaType()
+    action.format = image_option.get_format()
+    action.platform = image_option.get_platform()
+    action.backupStorageUuids = image_option.get_backup_storage_uuid_list()
+    test_util.action_logger('Add [Image:] %s from [url:] %s ' % (action.name, action.url))
+    evt = account_operations.execute_action_with_session(action, image_option.get_session_uuid())
+    test_util.test_logger('[image:] %s is added.' % evt.inventory.uuid)
     return evt.inventory
 
 def add_iso_template(image_creation_option):
