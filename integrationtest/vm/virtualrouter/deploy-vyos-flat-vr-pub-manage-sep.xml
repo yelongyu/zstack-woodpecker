@@ -136,7 +136,7 @@
           hypervisorType="$clusterHypervisorType">
           <hosts>
             <host name="$hostName" description="Test" managementIp="$hostIp"
-                  username="$hostUsername" password="$hostPassword" />
+                  username="$hostUsername" password="$hostPassword" port="22"/>
           </hosts>
           <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
           <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
