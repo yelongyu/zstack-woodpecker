@@ -263,6 +263,9 @@
                   <serviceType>DHCP</serviceType>
                   <serviceType>Userdata</serviceType>
                 </networkService>
+                <networkService provider="SecurityGroup">
+                  <serviceType>SecurityGroup</serviceType>
+                </networkService>
               </l3BasicNetwork>
             </l3Networks>
           </l2NoVlanNetwork>
