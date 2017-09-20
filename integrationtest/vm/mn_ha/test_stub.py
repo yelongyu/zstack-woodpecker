@@ -422,7 +422,7 @@ def shutdown_host_network(host_vm, scenarioConfig, downMagt=True):
     sce_ops.execute_in_vm_console(zstack_management_ip, host_inv.managementIp, host_vm_inv.uuid, host_vm_config, cmd)
 
 
-def reopen_host_network(host_vm, scenarioConfig):
+def reopen_host_network(host_vm, scenarioConfig, param_l2_nic=""):
     '''
         This function can be only invoked after shutdown_host_network.
     '''
@@ -434,10 +434,12 @@ def reopen_host_network(host_vm, scenarioConfig):
     host_inv = sce_ops.query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
 
     host_vm_config = sce_ops.get_scenario_config_vm(host_vm_inv.name_, scenarioConfig)
-    if not l2network_nic:
+    if not l2network_nic and not param_l2_nic:
         test_util.test_fail("fail to get management l2 by vr offering")
     #l2network_nic = os.environ.get('l2ManagementNetworkInterface').replace("eth", "zsn")
     cmd = "ifup %s" % (l2network_nic)
+    if param_l2_nic:
+        cmd = "ifup %s" % (param_l2_nic)
     sce_ops.execute_in_vm_console(zstack_management_ip, host_inv.managementIp, host_vm_inv.uuid, host_vm_config, cmd)
 
 
@@ -519,10 +521,13 @@ def ensure_bss_connected():
     else:
         test_util.test_fail("bs status didn't change to Connected within 300s, therefore, failed")
 
-def ensure_hosts_connected():
+def ensure_hosts_connected(exclude_host=[]):
     for i in range(300):
         #time.sleep(1)
         host_list = res_ops.query_resource(res_ops.HOST)
+        for exh in exclude_host:
+            host_list.remove(exh)
+
         for host in host_list:
             try:
                 host_ops.reconnect_host(host.uuid)
@@ -538,6 +543,65 @@ def ensure_hosts_connected():
             return
     else:
         test_util.test_fail("host status didn't change to Connected within 300s, therefore, failed")
+
+def ensure_bss_host_connected_from_stop(scenarioFile, scenarioConfig, deploy_config):
+    '''
+        This function is only support for not separated network case
+    '''
+    bss_host_ip = []
+    bs_list = res_ops.query_resource(res_ops.BACKUP_STORAGE)
+    for bs in bs_list:
+        bss_host_ip.append(bs.hostname)
+
+    for bs_host_ip in bss_host_ip:
+        if test_lib.lib_wait_target_up(bs_host_ip, '22', 120):
+            bss_host_ip.remove(bs_host_ip)
+
+    mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
+    for bs_host_ip in bss_host_ip:
+        for mn_host in mn_host_list:
+            if mn_host.mamagementIp_ == bs_host_ip:
+                recover_host(mn_host, scenarioConfig, deploy_config)
+
+    for bs_host_ip in bss_host_ip:
+        if test_lib.lib_wait_target_up(bs_host_ip, '22', 120):
+            bss_host_ip.remove(bs_host_ip)
+
+    if bss_host_ip:
+        test_util.test_fail("still have bs host not started.")
+
+
+def ensure_bss_host_connected_from_sep_net_down(scenarioFile, scenarioConfig, downMagt=True):
+    '''
+        This function is only support for separated network case
+    '''
+    bss_host_ip = []
+    bs_list = res_ops.query_resource(res_ops.BACKUP_STORAGE)
+    for bs in bs_list:
+        bss_host_ip.append(bs.hostname)
+
+    for bs_host_ip in bss_host_ip:
+        if test_lib.lib_wait_target_up(bs_host_ip, '22', 120):
+            bss_host_ip.remove(bs_host_ip)
+
+    if downMagt:
+        l2network_nic = test_lib.lib_get_l2_magt_nic_by_vr_offering()
+    else:
+        l2network_nic = test_lib.lib_get_l2_pub_nic_by_vr_offering()
+
+    mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
+    for bs_host_ip in bss_host_ip:
+        for mn_host in mn_host_list:
+            if mn_host.mamagementIp_ == bs_host_ip or mn_host.ip_ == bs_host_ip:
+                reopen_host_network(mn_host, scenarioConfig, param_l2_nic=l2network_nic)
+
+    for bs_host_ip in bss_host_ip:
+        if test_lib.lib_wait_target_up(bs_host_ip, '22', 120):
+            bss_host_ip.remove(bs_host_ip)
+
+    if bss_host_ip:
+        test_util.test_fail("still have bs host not started.")
+
 
 def ensure_host_disconnected(test_host, wait_time):
     cond = res_ops.gen_query_conditions('managementIp', '=', test_host.managementIp_)
