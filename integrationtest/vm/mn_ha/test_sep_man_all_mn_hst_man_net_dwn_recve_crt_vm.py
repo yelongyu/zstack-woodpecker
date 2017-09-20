@@ -76,6 +76,10 @@ def test():
     except:
         test_util.test_fail("management node does not recover after MN VM is running")
 
+    for index in need_recover_mn_host_list:
+        test_util.test_logger("recover host: %s" % (mn_host_list[index].ip_))
+        test_stub.recover_host(mn_host_list[index], test_lib.all_scenario_config, test_lib.deploy_config)
+
     test_stub.ensure_hosts_connected()
     test_stub.ensure_pss_connected()
     test_stub.ensure_bss_connected()
@@ -89,6 +93,7 @@ def test():
 
 #Will be called what ever test result is
 def env_recover():
+    global need_recover_mn_host_list
     if need_recover_mn_host_list:
         for index in need_recover_mn_host_list:
             test_util.test_logger("recover host: %s" % (mn_host_list[index].ip_))
