@@ -14,6 +14,7 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
 
+@test_stub.clean_all_vr_vm_before_case_execution
 def test():
 
     pub_l3_vm, flat_l3_vm, vr_l3_vm = test_stub.generate_pub_test_vm(tbj=test_obj_dict)

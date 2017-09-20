@@ -26,6 +26,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import apibinding.inventory as inventory
 import random
 import functools
+from zstackwoodpecker.operations import vm_operations as vm_ops
 
 Port = test_state.Port
 
@@ -694,6 +695,18 @@ def skip_if_no_service_in_l3(service_type, l3_name):
             return test_method()
         return wrapper
     return decorator
+
+
+def clean_all_vr_vm_before_case_execution(test_method):
+    @functools.wraps(test_method)
+    def wrapper():
+        cond = res_ops.gen_query_conditions('type', '=', 'ApplianceVm')
+        vr_vm_list = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
+        if vr_vm_list:
+            for vr_vm in vr_vm_list:
+                vm_ops.destroy_vm(vr_vm.uuid)
+        return test_method()
+    return wrapper
 
 
 
