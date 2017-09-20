@@ -23,7 +23,9 @@
 	      <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
             </l3Network>
           </l3Networks>
-	  <nodeRef>$node1Name</nodeRef>
+          <nodeRef>$node1Name</nodeRef>
+          <backupStorageRef type="sftp">$sftpBackupStorageName</backupStorageRef>
+          <primaryStorageRef type="nfs">$nfsPrimaryStorageName</primaryStorageRef>
           <hostRef>$hostName</hostRef>
         </vm>
       </vms>
