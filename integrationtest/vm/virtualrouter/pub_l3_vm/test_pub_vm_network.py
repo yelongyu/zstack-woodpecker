@@ -8,12 +8,15 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.net_operations as net_ops
+import os
 
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
 
+@test_stub.skip_if_no_service_in_l3('Eip', os.environ.get('l3NoVlanNetworkName2'))
+@test_stub.skip_if_no_service_in_l3('Eip', os.environ.get('l3NoVlanNetworkName1'))
 def test():
 
     pub_l3_vm, flat_l3_vm, vr_l3_vm = test_stub.generate_pub_test_vm(tbj=test_obj_dict)

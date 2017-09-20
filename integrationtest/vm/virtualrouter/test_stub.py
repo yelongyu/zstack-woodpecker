@@ -25,6 +25,7 @@ import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import apibinding.inventory as inventory
 import random
+import functools
 
 Port = test_state.Port
 
@@ -679,3 +680,24 @@ def test_iperf_bandwidth(vm1_inv,vm2_inv,vip_ip,server_port,client_port,bandwidt
         test_util.test_logger('Successed to set vip qos bandwidth.')
     else:
         test_util.test_fail('Failed to set vip qos bandwidth.')
+
+
+def skip_if_no_service_in_l3(service_type, l3_name):
+    def decorator(test_method):
+        @functools.wraps(test_method)
+        def wrapper():
+            l3 = test_lib.lib_get_l3_by_name(l3_name)
+            if not l3:
+                test_util.test_skip('Can not find l3!')
+            if service_type not in [service.networkServiceType for service in l3.networkServices]:
+                test_util.test_skip('Can not find service {} in l3: {}, skip test'.format(service_type, l3_name))
+            return test_method()
+        return wrapper
+    return decorator
+
+
+
+
+
+
+
