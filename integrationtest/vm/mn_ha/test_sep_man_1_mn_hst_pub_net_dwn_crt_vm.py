@@ -34,11 +34,11 @@ def test():
     if new_mn_host_ip == "" or new_mn_host_ip == mn_host[0].ip_ or new_mn_host_ip == mn_host[0].managementIp_:
         test_util.test_fail("management node VM not run correctly on [%s] after its former host [%s] down for 20s" % (new_mn_host_ip, mn_host[0].ip_))
 
-    count = 60
+    count = 120
     while count > 0:
         new_mn_host = test_stub.get_host_by_mn_vm(test_lib.all_scenario_config, test_lib.scenario_file)
         if len(new_mn_host) == 1:
-            test_util.test_logger("management node VM run after its former host down for 30s")
+            test_util.test_logger("management node VM run after its former host down for 120s")
             break
         elif len(new_mn_host) > 1:
             test_util.test_fail("management node VM runs on more than one host after its former host down")
@@ -46,7 +46,7 @@ def test():
         count -= 1
 
     if len(new_mn_host) == 0:
-        test_util.test_fail("management node VM does not run after its former host down for 30s")
+        test_util.test_fail("management node VM does not run after its former host down for 120s")
     elif len(new_mn_host) > 1:
         test_util.test_fail("management node VM runs on more than one host after its former host down")
 
