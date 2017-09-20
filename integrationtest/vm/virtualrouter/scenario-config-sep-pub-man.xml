@@ -1,4 +1,4 @@
 <testConfig>
-    <scenarioConfig>../multihosts/scenario-sep-pub-man.xml</scenarioConfig>
+    <scenarioConfig>scenario-sep-pub-man.xml</scenarioConfig>
     <scenarioConfigTemplate>../multihosts/scenario-sep-pub-man.tmpt</scenarioConfigTemplate>
 </testConfig>
