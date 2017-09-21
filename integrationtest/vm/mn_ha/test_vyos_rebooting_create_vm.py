@@ -21,6 +21,8 @@ def async_exec_reboot_vr(uuid):
 
 def test():
     global vm, vm2
+
+    test_stub.skip_if_scenario_is_multiple_networks(mul_nets_sce_list=["scenario-config-ceph-sep-man.xml", "scenario-config-ceph-sep-pub.xml"])
     test_stub.skip_if_vr_not_vyos("vr")
     test_lib.clean_up_all_vr()
     vm = test_stub.create_basic_vm()
