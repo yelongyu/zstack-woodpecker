@@ -261,7 +261,7 @@ class CapacityCheckerContext(object):
         mem_change = self._mem_change/1024/1024
         if mem_change == 0:
             self._mem_aligned_change = 0
-        if mem_change < 128:
+        elif mem_change < 128:
             self._mem_aligned_change = 128 * 1024 * 1024
         else:
             reminder = mem_change % 128
