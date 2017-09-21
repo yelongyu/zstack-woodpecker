@@ -21,6 +21,21 @@ USER_PATH = os.path.expanduser('~')
 EXTRA_SUITE_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_suite_setup_config.sh' % USER_PATH
 EXTRA_HOST_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_host_setup_config.sh' % USER_PATH
 
+def add_ps_network_gateway_sys_tag():
+    '''
+        Add system tag for mn to monitor the storage network in network separated.
+        Currently, not support multiple PS case
+    '''
+    pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+    if len(pss) > 1:
+        test_util.test_logger("add ps gateway skip for multiple ps case.")
+        return
+
+    ps = pss[0]
+    test_util.test_logger("add system tag: resourceUuid=%s tag=%s" %(ps.uuid, "primaryStorage::gateway::cidr::192.168.0.0/16"))
+    tag_ops.create_system_tag('PrimaryStorageVO', ps.uuid, "primaryStorage::gateway::cidr::192.168.0.0/16")
+
+
 def test():
     if test_lib.scenario_config == None or test_lib.scenario_file ==None:
         test_util.test_fail('Suite Setup Fail without scenario')
@@ -97,5 +112,10 @@ def test():
 	test_lib.lib_set_ha_selffencer_storagechecker_timeout('60')
     test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
     test_lib.lib_set_reserved_memory('8G')
+    
+    if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml"], ["scenario-config-nfs-sep-pub.xml"]) or \
+       test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], ["scenario-config-ceph-sep-pub.xml"]):
+        add_ps_network_gateway_sys_tag()
+
     test_util.test_pass('Suite Setup Success')
 
