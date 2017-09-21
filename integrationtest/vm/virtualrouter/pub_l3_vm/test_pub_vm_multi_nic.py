@@ -25,7 +25,7 @@ def test():
     for action in ('check', 'stop', 'start', 'check'):
         getattr(pub_l3_vm, action)()
 
-    pub_nic_l3uuid_list = (nic.l3NetworkUuid for nic in pub_l3_vm.get_vm().vmNics)
+    pub_nic_l3uuid_list = [nic.l3NetworkUuid for nic in pub_l3_vm.get_vm().vmNics]
     assert len(pub_l3_vm.get_vm().vmNics) == 3
     assert flat_l3_vm.get_vm().vmNics[0].l3NetworkUuid in pub_nic_l3uuid_list
     assert vr_l3_vm.get_vm().vmNics[0].l3NetworkUuid in pub_nic_l3uuid_list
