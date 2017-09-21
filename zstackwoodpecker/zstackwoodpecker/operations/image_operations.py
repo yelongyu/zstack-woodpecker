@@ -371,3 +371,10 @@ def recovery_image_from_image_store_backup_storage(dst_bs_uuid, src_bs_uuid, img
     action.uuid = img_uuid
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
+
+def list_image_from_image_store_backup_storage(uuid, session_uuid=None):
+    action = api_actions.ListImagesFromImageStoreBackupStorageAction()
+    action.uuid = uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+    
