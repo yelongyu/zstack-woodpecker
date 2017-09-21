@@ -15,6 +15,7 @@ import os.path
 from zstacktestagent.plugins import host as host_plugin
 from zstacktestagent import testagent
 
+
 def test():
     clean_util.cleanup_all_vms_violently()
     clean_util.cleanup_none_vm_volumes_violently()
