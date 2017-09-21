@@ -48,6 +48,13 @@ def test():
     image_uuid1 = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
   
     dpbs_image = img_ops.sync_image_from_image_store_backup_storage(dpbs_uuid, local_bs_uuid, image_uuid1)
+
+    cond = res_ops.gen_query_conditions('resourceUuid', '=', local_bs_uuid)
+    system_tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0].tag
+    status = system_tag.split('::')[5]
+    if status not in ['running', 'success']:
+        test_util.test_fail('Error status for recovery image, status: %s' %status)
+
     dpbs_image_uuid = dpbs_image.uuid
     cond = res_ops.gen_query_conditions('uuid', '=', dpbs_image_uuid)
     media_type = res_ops.query_resource(res_ops.IMAGE, cond)[0].mediaType
@@ -68,17 +75,30 @@ def test():
     except Exception,e:
         if str(e).find('already contains it') != -1:
             test_util.test_logger('Try to sync the image which had exist in disaster bs get the error info expectly: %s' %str(e))
+    else:
+        test_util.test_fail('Try to sync the image which had exist in local bs success unexpectly')
     try:
         recovery_image = img_ops.recovery_image_from_image_store_backup_storage(local_bs_uuid, dpbs_uuid, dpbs_image_uuid)
         image_uuid = recovery_image.uuid
     except Exception,e:
         if str(e).find('already contains it') != -1:
-            test_util.test_pass('Try to recovery the image which had exist in local bs get the error info expectly: %s' %str(e))
-    finally:
-        if image_uuid != None:
-            img_ops.delete_image(image_uuid)
-        bs_ops.delete_backup_storage(dpbs_uuid) 
-    test_util.test_fail('Try to recovery the image which had exist in local bs success unexpectly')
+            test_util.test_logger('Try to recovery the image which had exist in local bs get the error info expectly: %s' %str(e))
+    else:
+        test_util.test_fail('Try to recovery the image which had exist in local bs success unexpectly')
+    cond = res_ops.gen_query_conditions('backupStorageRefs.backupStorageUuid', '=', dpbs_uuid)
+    dpbs_images = res_ops.query_resource(res_ops.IMAGE, cond)
+    for img in dpbs_images:
+        img_ops.delete_image(img.uuid)
+
+    #test for feature ZSTAC-6709 image delete strategy
+    dpbs_image_lst = img_ops.list_image_from_image_store_backup_storage(dpbs_uuid)
+    if dpbs_image_lst.infos != []:
+        test_util.test_fail('Delete all images in disaster bs but ListImagesFromImageStoreBackupStorage still does not  null')
+
+    if image_uuid != None:
+        img_ops.delete_image(image_uuid)
+    bs_ops.delete_backup_storage(dpbs_uuid) 
+    test_util.test_pass('Test image sync and recovery success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
