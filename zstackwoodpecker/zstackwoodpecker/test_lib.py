@@ -1665,6 +1665,8 @@ def lib_assign_host_l2_ip(host, l2, l3):
 
         if not l2_vlan:
             l2_vlan = ''
+            if scenario_config != None and scenario_file != None and os.path.exists(scenario_file):
+                HostDefaultEth = 'zsn0'
             if l2.physicalInterface == HostDefaultEth:
                 test_util.test_logger('Not Vlan. Will not change br_%s ip.' \
                         % HostDefaultEth)
