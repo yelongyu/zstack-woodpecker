@@ -39,7 +39,7 @@ def test():
         with test_stub.CapacityCheckerContext(vm, cpu_change, mem_change) as cc:
             vm_ops.update_vm(vm.get_vm().uuid, last_cpu + cpu_change, last_mem + mem_change)
             last_cpu += cpu_change
-            last_mem += cc.calculate_mem_aligned_change()
+            last_mem += cc.mem_aligned_change
             vm.update()
             test_stub.online_hotplug_cpu_memory(vm)
             time.sleep(5)
