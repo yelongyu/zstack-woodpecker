@@ -709,7 +709,12 @@ def clean_all_vr_vm_before_case_execution(test_method):
     return wrapper
 
 
-
+def remove_all_vr_vm():
+    cond = res_ops.gen_query_conditions('type', '=', 'ApplianceVm')
+    vr_vm_list = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
+    if vr_vm_list:
+        for vr_vm in vr_vm_list:
+            vm_ops.destroy_vm(vr_vm.uuid)
 
 
 

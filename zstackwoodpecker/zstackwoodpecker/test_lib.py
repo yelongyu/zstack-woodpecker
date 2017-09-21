@@ -49,6 +49,7 @@ import zstacktestagent.plugins.vm as vm_plugin
 import zstacktestagent.plugins.host as host_plugin
 import zstacktestagent.testagent as testagent
 from contextlib import contextmanager
+import functools
 
 debug.install_runtime_tracedumper()
 test_stage = ts_header.TestStage
@@ -5328,6 +5329,7 @@ def ignored(*exceptions):
     except exceptions:
         pass
 
+
 @contextmanager
 def expected_failure(msg, *exceptions):
     try:
@@ -5336,3 +5338,14 @@ def expected_failure(msg, *exceptions):
         test_util.test_logger("Expected failure: {}".format(msg))
     else:
         test_util.test_fail("CRITICAL ERROR: {} succeed!".format(msg))
+
+
+def pre_execution_action(func):
+    def decorator(test_method):
+        @functools.wraps(test_method)
+        def wrapper():
+            with ignored(Exception):
+                func()
+            return test_method()
+        return wrapper
+    return decorator
