@@ -227,13 +227,22 @@ def install_fio(vm_inv):
     timeout = TEST_TIME + 30 
     vm_ip = vm_inv.vmNics[0].ip
 
+    cmd = 'scp /etc/yum.repos.d/zstack-internal-yum.repo root@%s:/etc/yum.repos.d/zstack-internal-yum.repo' % vm_ip
+    if execute_shell_in_process(cmd, timeout) != 0:
+        test_util.test_fail('fail to scp zstack-internal-yum.repo.')
+
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd = '%s "mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/epel.repo /etc"' \
+            % (ssh_cmd)
+    if  execute_shell_in_process(cmd, timeout) != 0:
+        test_util.test_fail('fail to move CentOS-Base.repo epel.repo.')
+
     cmd = '%s "yum clean metadata"' \
             % (ssh_cmd)
     if  execute_shell_in_process(cmd, timeout) != 0:
         test_util.test_fail('fail to clean metadata.')
 
-    cmd = '%s "which fio || yum install -y fio"' \
+    cmd = '%s "which fio || yum install -y fio --disableplugin=fastestmirror"' \
             % (ssh_cmd)
     if  execute_shell_in_process(cmd, timeout) != 0:
         test_util.test_fail('fio installation failed.')
