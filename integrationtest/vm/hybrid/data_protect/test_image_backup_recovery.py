@@ -17,13 +17,11 @@ test_stub = test_lib.lib_get_test_stub()
 dpbs_uuid = None
 root_volume_uuid = None
 image_uuid = None
-vm = None
 
 def test():
     global dpbs_uuid
     global root_volume_uuid
     global image_uuid
-    global vm
     vm_res = hyb_ops.get_data_protect_image_store_vm_ip(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
     hostname = vm_res[0]
     url = vm_res[1]
@@ -47,35 +45,49 @@ def test():
     local_bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
 
     cond = res_ops.gen_query_conditions('name', '=', 'ttylinux')
-    image_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
+    image_uuid1 = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
   
-    backup_image = img_ops.sync_image_from_image_store_backup_storage(dpbs_uuid, local_bs_uuid, image_uuid)
-    backup_image_uuid = backup_image.uuid
-    cond = res_ops.gen_query_conditions('uuid', '=', backup_image_uuid)
+    dpbs_image = img_ops.sync_image_from_image_store_backup_storage(dpbs_uuid, local_bs_uuid, image_uuid1)
+    dpbs_image_uuid = dpbs_image.uuid
+    cond = res_ops.gen_query_conditions('uuid', '=', dpbs_image_uuid)
     media_type = res_ops.query_resource(res_ops.IMAGE, cond)[0].mediaType
     if media_type != 'RootVolumeTemplate':
         test_util.test_fail('Wrong image type, the expect is "RootVolumeTemplate", the real is "%s"' %media_type) 
 
-    recovery_image = img_ops.recovery_image_from_image_store_backup_storage(local_bs_uuid, dpbs_uuid, backup_image.uuid) 
-    if recovery_image.backupStorageRefs[0].backupStorageUuid != local_bs_uuid:
-        test_util.test_fail('Recovery image failed, image uuid is %s' %recovery_image.uuid)
-    if recovery_image.mediaType != 'RootVolumeTemplate':
-        test_util.test_fail('Wrong image type after recovery, the expect is "RootVolumeTemplate", the real is "%s"' %recovery_image.mediaType)
-    image_uuid = recovery_image.uuid
-    img_ops.delete_image(image_uuid)
+    cond = res_ops.gen_query_conditions('resourceUuid', '=', dpbs_image_uuid)
+    system_tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0]
+    if system_tag.tag != "remote":
+        test_util.test_fail("Here isn't 'remote' system tag for image in data protect bs")
+    
+    dpbs_image_lst = img_ops.list_image_from_image_store_backup_storage(dpbs_uuid)
+    if dpbs_image_lst.infos == []:
+        test_util.test_fail('ListImagesFromImageStoreBackupStorage unable to list the images in disaster bs')
 
-    bs_ops.delete_backup_storage(dpbs_uuid) 
-    test_util.test_pass('Data volume backup to and recovery from image store backup storage success')
+    try:
+        image_uuid = img_ops.sync_image_from_image_store_backup_storage(dpbs_uuid, local_bs_uuid, image_uuid1)
+    except Exception,e:
+        if str(e).find('already contains it') != -1:
+            test_util.test_logger('Try to sync the image which had exist in disaster bs get the error info expectly: %s' %str(e))
+    try:
+        recovery_image = img_ops.recovery_image_from_image_store_backup_storage(local_bs_uuid, dpbs_uuid, dpbs_image_uuid)
+        image_uuid = recovery_image.uuid
+    except Exception,e:
+        if str(e).find('already contains it') != -1:
+            test_util.test_pass('Try to recovery the image which had exist in local bs get the error info expectly: %s' %str(e))
+    finally:
+        if image_uuid != None:
+            img_ops.delete_image(image_uuid)
+        bs_ops.delete_backup_storage(dpbs_uuid) 
+    test_util.test_fail('Try to recovery the image which had exist in local bs success unexpectly')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     global dpbs_uuid
     global root_volume_uuid
     global image_uuid
-    global vm
-    vm.delete()
     vol_ops.delete_volume(root_volume_uuid)
-    img_ops.delete_image(image_uuid)
+    if image_uuid != None:
+        img_ops.delete_image(image_uuid)
     if dpbs_uuid != None:
         bs_ops.delete_backup_storage(dpbs_uuid)
     
