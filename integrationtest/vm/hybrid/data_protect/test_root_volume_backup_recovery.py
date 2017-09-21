@@ -15,13 +15,11 @@ import zstackwoodpecker.test_lib as test_lib
 
 test_stub = test_lib.lib_get_test_stub()
 dpbs_uuid = None
-root_volume_uuid = None
 image_uuid = None
 vm = None
 
 def test():
     global dpbs_uuid
-    global root_volume_uuid
     global image_uuid
     global vm
     vm_res = hyb_ops.get_data_protect_image_store_vm_ip(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
@@ -64,34 +62,50 @@ def test():
     image_option.set_name('create_root_image_to_image_store')
     image_option.set_backup_storage_uuid_list([dpbs_uuid])
     image = img_ops.create_root_volume_template(image_option)
-    image_uuid = image.uuid
+    dpbs_image_uuid = image.uuid
 
-    cond = res_ops.gen_query_conditions('uuid', '=', image_uuid)
+    cond = res_ops.gen_query_conditions('resourceUuid', '=', dpbs_image_uuid)
+    system_tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0]
+    if system_tag.tag != "remote":
+        test_util.test_fail("Here isn't 'remote' system tag for image in data protect bs")
+
+    cond = res_ops.gen_query_conditions('uuid', '=', dpbs_image_uuid)
     media_type = res_ops.query_resource(res_ops.IMAGE, cond)[0].mediaType
     if media_type != 'RootVolumeTemplate':
         test_util.test_fail('Wrong image type, the expect is "RootVolumeTemplate", the real is "%s"' %media_type) 
 
-    recovery_image = img_ops.recovery_image_from_image_store_backup_storage(local_bs_uuid, dpbs_uuid, image_uuid) 
+    recovery_image = img_ops.recovery_image_from_image_store_backup_storage(local_bs_uuid, dpbs_uuid, dpbs_image_uuid) 
+    cond = res_ops.gen_query_conditions('resourceUuid', '=', local_bs_uuid)
+    system_tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0].tag
+    status = system_tag.split('::')[5]
+    if status not in ['running', 'success']:
+        test_util.test_fail('Error status for recovery image, status: %s' %status)
+
     if recovery_image.backupStorageRefs[0].backupStorageUuid != local_bs_uuid:
         test_util.test_fail('Recovery image failed, image uuid is %s' %recovery_image.uuid)
     if recovery_image.mediaType != 'RootVolumeTemplate':
         test_util.test_fail('Wrong image type after recovery, the expect is "RootVolumeTemplate", the real is "%s"' %recovery_image.mediaType)
     image_uuid = recovery_image.uuid
 
-    vol_ops.delete_volume(root_volume_uuid)
-    vm.delete()
-    img_ops.delete_image(image_uuid)
-    bs_ops.delete_backup_storage(dpbs_uuid) 
-    test_util.test_pass('Data volume backup to and recovery from image store backup storage success')
+    try:
+        #Try to recovery the same image again
+        recovery_image = img_ops.recovery_image_from_image_store_backup_storage(local_bs_uuid, dpbs_uuid, dpbs_image_uuid)
+
+    except Exception,e:
+        if str(e).find('already contains it') != -1:
+            test_util.test_pass('Try to recovery the same image again and get the error info expectly: %s' %str(e))
+    finally:
+        vm.delete()
+        img_ops.delete_image(image_uuid)
+        bs_ops.delete_backup_storage(dpbs_uuid)
+    test_util.test_fail('Try to recovery the same image second time success unexpectly')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     global dpbs_uuid
-    global root_volume_uuid
     global image_uuid
     global vm
     vm.delete()
-    vol_ops.delete_volume(root_volume_uuid)
     img_ops.delete_image(image_uuid)
     if dpbs_uuid != None:
         bs_ops.delete_backup_storage(dpbs_uuid)
