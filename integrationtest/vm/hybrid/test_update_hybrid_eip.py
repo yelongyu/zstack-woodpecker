@@ -8,23 +8,26 @@ New Integration Test for hybrid.
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
+import time
+
 
 test_obj_dict = test_state.TestStateDict()
 test_stub = test_lib.lib_get_test_stub()
 hybrid = test_stub.HybridObject()
 
 def test():
-    hybrid.create_ecs_instance()
-    test_obj_dict.add_hybrid_obj(hybrid)
+    hybrid.add_datacenter_iz(add_datacenter_only=True)
+    hybrid.create_eip()
+    time.sleep(10)
 
-    hybrid.update_ecs_instance(name='ECS-Instance')
-    hybrid.update_ecs_instance(description='test-ECS-Instance')
+    hybrid.update_eip(name='Hybrid-EIP')
+    hybrid.update_eip(description='test-Hybrid-EIP')
 
-    test_util.test_pass('Update ECS Instance Test Success')
+    test_util.test_pass('Update Hybrid Eip Test Success')
 
 def env_recover():
-    if hybrid.ecs_instance:
-        hybrid.del_ecs_instance()
+    if hybrid.eip:
+        hybrid.del_eip()
 
 #Will be called only if exception happens in test().
 def error_cleanup():

@@ -47,5 +47,18 @@
         <case timeout='600' repeat='1' noparallel='True'>test_sync_delete_aliyun_snapshot_local.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_delete_attached_aliyun_disk.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_update_aliyun_disk.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_datacenter_unique.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_update_aliyun_snapshot.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_update_aliyun_virtual_router.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_update_ecs_image.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_update_ecs_sg.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_update_ecs_vpc.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_update_ecs_vswitch.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_update_hybrid_eip.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_update_oss_bucket.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_update_user_vpn_gateway.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_update_vbr.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_update_vpn_connection.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_update_vpn_gateway.py</case>
     </suite>
 </integrationTest>

@@ -177,9 +177,9 @@ def get_identity_zone_from_remote(datacenter_type, region_id, session_uuid=None)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt.inventories
 
-def add_identity_zone_from_remote(datacenter_type, datacenter_uuid, zone_id, session_uuid=None):
+def add_identity_zone_from_remote(iz_type, datacenter_uuid, zone_id, session_uuid=None):
     action = api_actions.AddIdentityZoneFromRemoteAction()
-    action.type = datacenter_type
+    action.type = iz_type
     action.dataCenterUuid = datacenter_uuid
     action.zoneId = zone_id
     test_util.action_logger('Add [identity zone from remote:] %s %s' % (datacenter_uuid, zone_id))
@@ -211,7 +211,14 @@ def sync_ecs_vpc_from_remote(datacenter_uuid, session_uuid=None):
     action.dataCenterUuid = datacenter_uuid
     test_util.action_logger('Sync [Ecs VPC From Remote:] %s' % (datacenter_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    return evt
+    return evt.inventories
+
+def sync_virtual_border_router_from_remote(datacenter_uuid, session_uuid=None):
+    action = api_actions.SyncVirtualBorderRouterFromRemoteAction()
+    action.dataCenterUuid = datacenter_uuid
+    test_util.action_logger('Sync [Virtual Border Router From Remote:] %s' % (datacenter_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    return evt.inventories
 
 def del_ecs_vpc_local(uuid, session_uuid=None):
     action = api_actions.DeleteEcsVpcInLocalAction()
@@ -324,7 +331,7 @@ def sync_aliyun_virtual_router_from_remote(vpc_uuid, session_uuid=None):
     action.vpcUuid = vpc_uuid
     test_util.action_logger('Sync [Aliyun VirtualRouter From Remote:] %s' % (vpc_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    return evt
+    return evt.inventories
 
 def sync_route_entry_from_remote(vrouter_uuid, vrouter_type, session_uuid=None):
     action = api_actions.SyncAliyunRouteEntryFromRemoteAction()
@@ -332,7 +339,7 @@ def sync_route_entry_from_remote(vrouter_uuid, vrouter_type, session_uuid=None):
     action.vRouterType = vrouter_type
     test_util.action_logger('Sync [Route Entry From Remote:] %s' % (vrouter_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    return evt
+    return evt.inventories
 
 def create_aliyun_vpc_virtualrouter_entry_remote(dst_cidr_block, vrouter_uuid, vrouter_type, next_hop_type, next_hop_uuid, session_uuid=None):
     action = api_actions.CreateAliyunVpcVirtualRouterEntryRemoteAction()
@@ -500,14 +507,14 @@ def sync_ecs_security_group_from_remote(ecs_vpc_uuid, session_uuid=None):
     action.ecsVpcUuid = ecs_vpc_uuid
     test_util.action_logger('Sync [Security Group From Remote:] %s' % (ecs_vpc_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    return evt
+    return evt.inventories
 
 def sync_ecs_security_group_rule_from_remote(sg_uuid, session_uuid=None):
     action = api_actions.SyncEcsSecurityGroupRuleFromRemoteAction()
     action.uuid = sg_uuid
     test_util.action_logger('Sync [Security Group From Remote:] %s' % (sg_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    return evt
+    return evt.inventories
 
 def sync_vpc_vpn_gateway_from_remote(data_center_uuid, session_uuid=None):
     action = api_actions.SyncVpcVpnGatewayFromRemoteAction()
@@ -596,7 +603,7 @@ def sync_ecs_image_from_remote(datacenter_uuid, image_type='self', session_uuid=
     action.type = image_type
     test_util.action_logger('Sync [Ecs Image From Remote:] %s' % (datacenter_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    return evt
+    return evt.inventories
 
 def create_ecs_instance_from_ecs_image(ecs_root_password, image_uuid, ecs_vswitch_uuid, ecs_bandwidth, ecs_security_group_uuid, instance_offering_uuid=None, instance_type=None, private_ip_address=None, allocate_public_ip='false', name=None, ecs_console_password=None, session_uuid=None):
     action = api_actions.CreateEcsInstanceFromEcsImageAction()
@@ -724,7 +731,7 @@ def update_ecs_vswitch(uuid, name=None, description=None, session_uuid=None):
     test_util.action_logger('[ECS vSwitch:] %s is updated' % uuid)
     return evt
 
-def update_ecs_vbr(uuid, name=None, description=None, session_uuid=None):
+def update_vbr(uuid, name=None, description=None, session_uuid=None):
     action = api_actions.UpdateVirtualBorderRouterRemoteAction()
     action.uuid = uuid
     action.name = name
@@ -752,7 +759,7 @@ def update_oss_bucket(uuid, name=None, description=None, session_uuid=None):
     test_util.action_logger('Update [OSS Bucket:] %s' % (uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('[OSS Bucket:] %s is updated' % uuid)
-    return evt
+    return evt.inventory
 
 def update_aliyun_snapshot(uuid, name=None, description=None, session_uuid=None):
     action = api_actions.UpdateEcsVSwitchAction()
@@ -764,10 +771,11 @@ def update_aliyun_snapshot(uuid, name=None, description=None, session_uuid=None)
     test_util.action_logger('[Aliyun Snapshot:] %s is updated' % uuid)
     return evt
 
-def update_hybrid_eip(uuid, name=None, description=None, session_uuid=None):
+def update_hybrid_eip(uuid, name=None, description=None, eip_type='aliyun', session_uuid=None):
     action = api_actions.UpdateHybridEipAction()
     action.uuid = uuid
     action.name = name
+    action.type = eip_type
     action.description = description
     test_util.action_logger('Update [Hybrid EIP:] %s' % (uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
@@ -1004,7 +1012,7 @@ def sync_aliyun_disk_from_remote(identity_uuid, session_uuid=None):
     test_util.action_logger('Sync Aliyun Disk from Remote %s' % identity_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('Aliyun Disk is synced from Remote %s.' % identity_uuid)
-    return evt
+    return evt.inventories
 
 def query_aliyun_disk_local(condition=[], session_uuid=None):
     action = api_actions.QueryAliyunDiskFromLocalAction()
@@ -1016,7 +1024,7 @@ def query_aliyun_disk_local(condition=[], session_uuid=None):
 def update_aliyun_disk(uuid, name=None, description=None, delete_with_instance=None, delete_autosnapshot=None, enable_autosnapshot=None,session_uuid=None):
     action = api_actions.UpdateAliyunDiskAction()
     action.uuid = uuid
-    action.uuid = name
+    action.name = name
     action.description = description
     action.deleteWithInstance = delete_with_instance
     action.deleteAutoSnapshot = delete_autosnapshot
@@ -1066,7 +1074,7 @@ def sync_aliyun_snapshot_from_remote(datacenter_uuid, snapshot_id=None, session_
     test_util.action_logger('Sync Aliyun Snapshot from Remote %s' % datacenter_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('Aliyun Snapshot is synced from Remote %s.' % datacenter_uuid)
-    return evt
+    return evt.inventories
 
 def get_data_protect_image_store_vm_ip(scenario_config, scenario_file, deploy_config):
     vm_ip = '' 
