@@ -65,6 +65,7 @@ class TestCase(object):
         self.special = False
         self.setup_case = False
         self.teardown_case = False
+        self.flavor = None
 
     def analyze_test_case(self, candidate):
         self.rla_path = candidate
@@ -103,6 +104,12 @@ class TestCase(object):
 
     def get_suite(self):
         return self.suite
+
+    def get_flavor(self):
+        return self.flavor
+
+    def set_flavor(self, flavor):
+        self.flavor = flavor
 
 class TestLib(object):
     '''
@@ -235,9 +242,15 @@ class TestLib(object):
 
         for case in cases:
             case = case.strip()
+            flavor = None
+            if "::" in case:
+                case, flavor = case.split("::")
             try:
                 if case in self.all_cases_name:
-                    self.target_case_list.append(self.test_case_lib[self._find_case_num(case)])
+                    case_obj = self.test_case_lib[self._find_case_num(case)]
+                    if flavor:
+                        case_obj.set_flavor(flavor)
+                    self.target_case_list.append(case_obj)
                 elif int(case) in self.test_case_lib.keys():
                     self.target_case_list.append(self.test_case_lib[int(case)])
                 else:
@@ -247,7 +260,10 @@ class TestLib(object):
                 #following code will time consuming, so only move in exception.
                 for real_case_name in self.all_cases_name:
                     if case in real_case_name:
-                        self.target_case_list.append(self.test_case_lib[self._find_case_num(real_case_name)])
+                        case_obj = self.test_case_lib[self._find_case_num(real_case_name)]
+                        if flavor:
+                            case_obj.set_flavor(flavor)
+                        self.target_case_list.append(case_obj)
                         break
                 else:
                     for real_case_name_no_exclude in self.all_cases_name_no_exclude:
@@ -351,7 +367,10 @@ class TestLib(object):
 
         print_info("Following cases will be executed:")
         for case in self.target_case_list:
-            print "\t%s" % case.get_name_with_suite()
+            if case.get_flavor():
+                print "\t{}::{}".format(case.get_name_with_suite(), case.get_flavor())
+            else:
+                print "\t%s" % case.get_name_with_suite()
             suite_name = case.get_suite()
             if not suite_name in suite_dict.keys():
                 suite = etree.SubElement(root, "suite")
@@ -370,7 +389,10 @@ class TestLib(object):
                     suite.set("teardownCase", os.path.join(self.test_case_dir, case.get_name_with_suite()))
             else:
                 case_e = etree.SubElement(suite, "case")
-                case_e.text = os.path.join(self.test_case_dir, case.get_name_with_suite())
+                if case.get_flavor():
+                    case_e.text = os.path.join(self.test_case_dir, "{}::{}".format(case.get_name_with_suite(), case.get_flavor()))
+                else:
+                    case_e.text = os.path.join(self.test_case_dir, case.get_name_with_suite())
                 if repeat:
                     case_e.set("repeat", "%s" % repeat)
 
