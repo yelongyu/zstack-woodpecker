@@ -106,8 +106,9 @@ def generate_bond(bond_num, slave_num, mac_list, mode):
         netmask = os.environ.get("bondmask%d" % i)
         name = os.environ.get("bondname%d" % i)
         mode = mode
-        mac_list = mac_list[:slave_num]
-        slaves = ','.join(mac_list)
+        mac_list1 = mac_list[:slave_num]
+        slaves = ','.join(mac_list1)
+        mac_list = mac_list[slave_num:]
         bondcfg = gen_bond(name=name, slaves=slaves, mode=mode, ip=ip, netmask=netmask)
         bondCfg.append(bondcfg)
     return bondCfg
