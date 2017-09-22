@@ -1129,6 +1129,7 @@ def add_l3_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l3_
         action.description = l3.description__
         if l3.system__ and l3.system__ != 'False':
             action.system = 'true'
+            action.category = 'System'
         action.l2NetworkUuid = l2inv_uuid
         action.name = l3Name
         action.type = inventory.L3_BASIC_NETWORK_TYPE
