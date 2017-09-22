@@ -1143,7 +1143,7 @@ def detach_volume(http_server_ip, volume_uuid, vm_uuid=None, session_uuid=None):
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     return evt.inventory
 
-def create_security_group(http_server_ip, security_group_option):
+def create_security_group(http_server_ip, security_group_option, session_uuid=None):
     action = api_actions.CreateSecurityGroupAction()
     name = security_group_option.get_name()
     if not name:
@@ -1156,7 +1156,7 @@ def create_security_group(http_server_ip, security_group_option):
     test_util.test_logger('[SecurityGroup:] %s is created.' % evt.inventory.uuid)
     return evt.inventory
 
-def add_vm_nic_to_security_group(http_server_ip, security_group_uuid, vm_nic_uuid):
+def add_vm_nic_to_security_group(http_server_ip, security_group_uuid, vm_nic_uuid, session_uuid=None):
     action = api_actions.AddVmNicToSecurityGroupAction()
     action.securityGroupUuid = security_groupi_uuid
     action.vmNicUuids = vm_nic_uuid
