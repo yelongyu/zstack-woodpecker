@@ -13,6 +13,7 @@ import zstackwoodpecker.operations.scenario_operations as scenario_operations
 import zstackwoodpecker.operations.deploy_operations as deploy_operations
 import zstackwoodpecker.operations.config_operations as config_operations
 import zstackwoodpecker.operations.node_operations as node_operations
+import zstackwoodpecker.operations.tag_operations as tag_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
