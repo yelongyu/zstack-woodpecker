@@ -91,7 +91,8 @@ class TestCase(object):
         self.repeat = 1
         self.type = None
         #if test case is global safe for parallel execution. Default is True.
-        self.parallel = True 
+        self.parallel = True
+        self.flavor = ''
 
 class WoodPecker(object):
     INTEGRATION_TEST_TAG = 'integrationTest'
@@ -270,9 +271,9 @@ class WoodPecker(object):
 
             try:
                 if case_name == 'suite_setup' or self.startDebugger == False:
-                    test_env_variables = 'WOODPECKER_SCENARIO_CONFIG_FILE=%s WOODPECKER_SCENARIO_FILE=%s WOODPECKER_SCENARIO_DESTROY=%s WOODPECKER_TEST_CONFIG_FILE=%s WOODPECKER_CASE_ACTION_LOG_PATH=%s WOODPECKER_NO_ERROR_CLEANUP=%s WOODPECKER_ONLY_ACTION_LOG=%s' % (self.scenario_config, self.scenario_file, self.scenario_destroy, self._check_test_config(suite.test_config, case.path), case_action_log_path, self.noCleanup, self.onlyActionLog)
+                    test_env_variables = 'WOODPECKER_SCENARIO_CONFIG_FILE=%s WOODPECKER_SCENARIO_FILE=%s WOODPECKER_SCENARIO_DESTROY=%s WOODPECKER_TEST_CONFIG_FILE=%s WOODPECKER_CASE_ACTION_LOG_PATH=%s WOODPECKER_NO_ERROR_CLEANUP=%s WOODPECKER_ONLY_ACTION_LOG=%s CASE_FALVOR=%s' % (self.scenario_config, self.scenario_file, self.scenario_destroy, self._check_test_config(suite.test_config, case.path), case_action_log_path, self.noCleanup, self.onlyActionLog, case.flavor)
                 else:
-                    test_env_variables = 'WOODPECKER_SCENARIO_CONFIG_FILE=%s WOODPECKER_SCENARIO_FILE=%s WOODPECKER_SCENARIO_DESTROY=%s WOODPECKER_TEST_CONFIG_FILE=%s WOODPECKER_CASE_ACTION_LOG_PATH=%s WOODPECKER_NO_ERROR_CLEANUP=%s WOODPECKER_ONLY_ACTION_LOG=%s WOODPECKER_START_DEBUGGER=%s' % (self.scenario_config, self.scenario_file, self.scenario_destroy, self._check_test_config(suite.test_config, case.path), case_action_log_path, self.noCleanup, self.onlyActionLog, self.startDebugger)
+                    test_env_variables = 'WOODPECKER_SCENARIO_CONFIG_FILE=%s WOODPECKER_SCENARIO_FILE=%s WOODPECKER_SCENARIO_DESTROY=%s WOODPECKER_TEST_CONFIG_FILE=%s WOODPECKER_CASE_ACTION_LOG_PATH=%s WOODPECKER_NO_ERROR_CLEANUP=%s WOODPECKER_ONLY_ACTION_LOG=%s WOODPECKER_START_DEBUGGER=%s CASE_FALVOR=%s' % (self.scenario_config, self.scenario_file, self.scenario_destroy, self._check_test_config(suite.test_config, case.path), case_action_log_path, self.noCleanup, self.onlyActionLog, self.startDebugger, case.flavor)
                 #self.info('\n test environment variables: %s \n' % test_env_variables)
                 #cmd = '%s /usr/bin/nosetests -s --exe %s 2>&1' % (test_env_variables, case.path)
                 case_dir = os.path.dirname(case.path)
@@ -516,6 +517,8 @@ class WoodPecker(object):
                         case.name = c.name__
                         case.timeout = c.timeout__
                         case.path = full_path(c.text_)
+                        if "::" in case.path:
+                            case.path, case.flavor = case.path.split('::')
                         if c.noparallel__ and c.noparallel__ != 'False':
                             case.parallel = False
                         if not case.name:
@@ -526,6 +529,8 @@ class WoodPecker(object):
                                 case.name = case.path[len(os.path.dirname(suite.setup_case.path))+1:][:-3]
                             else:
                                 case.name = '/'.join(case.path.split('/')[-2:])[:-3]
+                            if case.flavor:
+                                case.name = case.name + "::" + case.flavor
                         case.suite = suite
                         case_name_len = len(case.name)
                         if (c.repeat__ and c.repeat__.isdigit() and (string.atoi(c.repeat__) > 0)):
