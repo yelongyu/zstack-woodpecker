@@ -16,23 +16,22 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
 
+@test_lib.pre_execution_action(test_stub.remove_all_vr_vm)
 def test():
+
+    pub_l3_vm, flat_l3_vm, vr_l3_vm = test_stub.generate_pub_test_vm(tbj=test_obj_dict)
 
     with test_lib.expected_failure('create vm use system network', Exception):
         test_stub.create_vm_with_random_offering(vm_name='test_vm',
                                                  image_name='imageName_net',
                                                  l3_name='l3ManagementNetworkName')
 
-    exist_vr_offering = res_ops.get_resource(res_ops.VR_OFFERING)[0]
+    vr = test_lib.lib_find_vr_by_vm(vr_l3_vm.get_vm())[0]
 
-    with test_lib.expected_failure('Create VR offering public network using system', Exception):
-        net_ops.create_virtual_router_offering(name='test_vr_offering',
-                                               cpuNum=exist_vr_offering.cpuNum,
-                                               memorySize=exist_vr_offering.memorySize,
-                                               imageUuid=exist_vr_offering.imageUuid,
-                                               zoneUuid=exist_vr_offering.zoneUuid,
-                                               managementNetworkUuid=exist_vr_offering.managementNetworkUuid,
-                                               publicNetworkUuid=test_lib.lib_get_l3_by_name(os.environ.get('l3ManagementNetworkName')).uuid)
+    for nic in vr.vmNics:
+        test_util.test_logger(nic.ip)
+        if not test_lib.lib_check_directly_ping(nic.ip):
+            test_util.test_fail('IP:{} expected to be able to ping vip while it fail'.format(nic.ip))
 
 
 def env_recover():
