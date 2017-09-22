@@ -32,7 +32,7 @@ def test():
     console_management_ip = console.hostIp 
 
     cluster = res_ops.get_resource(res_ops.CLUSTER)[0]
-    tag_inv = tag_ops.create_system_tag('ClusterVO', vm.get_vm().uuid, "display::network::cidr::172.20.0.0/16")
+    tag_inv = tag_ops.create_system_tag('ClusterVO', cluster.uuid, "display::network::cidr::172.20.0.0/16")
     tag_uuid = tag_inv.uuid
 
     console = test_lib.lib_get_vm_console_address(vm.get_vm().uuid)
