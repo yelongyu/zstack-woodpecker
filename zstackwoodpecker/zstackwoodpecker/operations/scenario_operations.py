@@ -1143,6 +1143,36 @@ def detach_volume(http_server_ip, volume_uuid, vm_uuid=None, session_uuid=None):
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     return evt.inventory
 
+def create_security_group(http_server_ip, security_group_option):
+    action = api_actions.CreateSecurityGroupAction()
+    name = security_group_option.get_name()
+    if not name:
+        action.name = 'security_group'
+    else:
+        action.name = name
+    action.timeout = 240000
+    test_util.action_logger('Create [SecurityGroup:] %s ' %action.name)
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    test_util.test_logger('[SecurityGroup:] %s is created.' % evt.inventory.uuid)
+    return evt.inventory
+
+def add_vm_nic_to_security_group(http_server_ip, security_group_uuid, vm_nic_uuid):
+    action = api_actions.AddVmNicToSecurityGroupAction()
+    action.securityGroupUuid = security_groupi_uuid
+    action.vmNicUuids = vm_nic_uuid
+    action.timeout = 240000
+    test_util.action_logger('Add [VmNic:] %s to [SecurityGroup:] $s ' %(action.vmNicUuids, action.securityGroupUuid))
+    execute_action_with_session(http_server_ip, action, session_uuid)
+
+def attach_security_group_to_l3network(http_server_ip, security_group_uuid, l3network_uuid, session_uuid=None):
+    action = api_actions.AttachSecurityGroupToL3NetworkAction()
+    action.securityGroupUuid = security_group_uuid
+    action.l3NetworkUuid = l3network_uuid
+    action.timeout = 240000
+    test_util.action_logger('Attach SecurityGroup [uuid:] %s to L3Network [uuid:] %s' % (security_group_uuid, l3network_uuid))
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    return evt.inventory
+
 def use_snapshot(http_server_ip, snapshot_uuid, session_uuid=None):
     action = api_actions.RevertVolumeFromSnapshotAction()
     action.uuid = snapshot_uuid
@@ -1318,6 +1348,37 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                         vm_uuid = vm_inv.uuid
                 if vm_uuid != '':
                     attach_volume(zstack_management_ip, volume_inv.uuid, vm_uuid)
+
+    if hasattr(scenario_config.deployerConfig, 'securityGroups'):
+        for securityGroup in xmlobject.safe_list(scenario_config.deployerConfig.securityGroups.securityGroup):
+            security_group_option = test_util.SecurityGroupOption()
+            if securityGroup.name_ != '':
+                security_group_option.set_name(securityGroup.name_)
+            else:
+                security_group_option.set_name('security_group')
+            security_group_inv = create_security_group(zstack_management_ip, security_group_option) 
+
+            if securityGroup.l3NetworkUuid_ != '':
+                attach_security_group_to_l3network(zstack_management_ip, security_group_inv.uuid, securityGroup.l3NetworkUuid_)
+
+            #Add zstack management vm nic to security group  
+            cond = res_ops.gen_query_conditions('vmNics.ip', '=', zstack_management_ip)
+            zstack_management_vm_uuid = query_resource(http_server_ip, res_ops.VM_INSTANCE, cond).inventories[0].uuid
+            cond = res_ops.gen_query_conditions('vmInstance.uuid', '=', zstack_management_vm_uuid)
+            cond = res_ops.gen_query_conditions('l3Network.uuid', '=', securityGroup.l3NetworkUuid_, cond )
+            vm_nic_uuid = query_resource(http_server_ip, res_ops.VM_NIC, cond).inventories[0].uuid
+            add_vm_nic_to_security_group(zstack_management_ip, security_group_inv.uuid, vm_nic_uuid)
+
+            for vm in xmlobject.safe_list(securityGroup.vms.vm):
+                vm_uuid = ''
+                for vm_inv in vm_inv_lst:
+                    if vm_inv.name == vm.text_:
+                        vm_uuid = vm_inv.uuid
+                    if vm_uuid != '' and vm_uuid != zstest_vm_uuid:
+                        cond = res_ops.gen_query_conditions('vmInstance.uuid', '=', vm_uuid)
+                        cond = res_ops.gen_query_conditions('l3Network.uuid', '=', securityGroup.l3NetworkUuid_, cond )
+                        vm_nic_uuid = query_resource(http_server_ip, res_ops.VM_NIC, cond).inventories[0].uuid
+                        add_vm_nic_to_security_group(zstack_management_ip, security_group_inv.uuid, vm_nic_uuid)
 
 def destroy_scenario(scenario_config, scenario_file):
     with open(scenario_file, 'r') as fd:
