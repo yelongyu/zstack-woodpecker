@@ -1362,7 +1362,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 attach_security_group_to_l3network(zstack_management_ip, security_group_inv.uuid, securityGroup.l3NetworkUuid_)
 
             #Add zstack management vm nic to security group  
-            cond = res_ops.gen_query_conditions('vmNics.ip', '=', zstack_management_ip)
+            zstest_vm_ip = os.system('hostname|sed s/-/./g') 
+            cond = res_ops.gen_query_conditions('vmNics.ip', '=', zstest_mv_ip)
             zstack_management_vm_uuid = query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0].uuid
             cond = res_ops.gen_query_conditions('vmInstance.uuid', '=', zstack_management_vm_uuid)
             cond = res_ops.gen_query_conditions('l3Network.uuid', '=', securityGroup.l3NetworkUuid_, cond )
