@@ -63,7 +63,7 @@
 				<l2NoVlanNetwork name="$l2BasicNetworkName" description="Basic L2 Test"
 					physicalInterface="$l2NetworkPhysicalInterface">
 					<l3Networks>
-						<l3BasicNetwork name="$l3PublicNetworkName" systemTags="networkCategory::Public" description="Basic L3 Network without Vlan and no special services">
+						<l3BasicNetwork name="$l3PublicNetworkName" category="Public" description="Basic L3 Network without Vlan and no special services">
 							<ipRange name="$ipRangeName" description="Test"
 								startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
 								netmask="$ipRangeNetmask" />

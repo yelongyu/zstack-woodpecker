@@ -53,7 +53,7 @@
 				<l2NoVlanNetwork name="$l2BasicNetworkName" description="Test"
 					physicalInterface="$l2NetworkPhysicalInterface">
 					<l3Networks>
-						<l3BasicNetwork name="$l3PublicNetworkName" systemTags="networkCategory::Public" description="Test">
+						<l3BasicNetwork name="$l3PublicNetworkName" category="Public" description="Test">
 							<ipRange name="$ipRangeName" description="Test" startIp="$ipRangeStartIp"
 								endIp="$ipRangeEndIp" gateway="$ipRangeGateway" netmask="$ipRangeNetmask" />
 						</l3BasicNetwork>
