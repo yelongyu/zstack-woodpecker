@@ -1586,6 +1586,7 @@ def lib_assign_host_l2_ip(host, l2, l3):
     default network device (for zstack management) is not eth0, please change 
     HostDefaultEth.
     '''
+    global HostDefaultEth
     def _do_set_host_l2_ip(host_pub_ip, next_avail_ip, dev_name):
         #Has to use use br_eth0_vlan device to assign ip address,
         #as guest vlan device can't ping each other in nested env.
