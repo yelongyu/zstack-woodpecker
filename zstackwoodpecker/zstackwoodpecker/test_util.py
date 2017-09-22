@@ -988,7 +988,15 @@ class SnapshotOption(DataOption):
 
 class SecurityGroupOption(DataOption):
     def __init__(self):
+        self.name = None
         super(SecurityGroupOption, self).__init__()
+
+    def set_name(self, name):
+        self.name = name
+
+    def get_name(self):
+        return self.name
+
 
 class LoadBalancerListenerOption(DataOption):
     def __init__(self, lb_uuid = None, instance_port = None, \
