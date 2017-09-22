@@ -219,7 +219,10 @@ def get_host_by_mn_vm(scenarioConfig, scenarioFile):
         host_config = sce_ops.get_scenario_config_vm(host.name_, scenarioConfig)
         cmd = "virsh list | grep -v paused | grep \"ZStack Management Node VM\""
         try:
-            vm_list = test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
+            if sce_is_sep_pub():
+                vm_list = test_lib.lib_execute_ssh_cmd(host.managementIp_, host_config.imageUsername_, host_config.imagePassword_,cmd)
+            else:
+                vm_list = test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
             if vm_list:
                 host_list.append(host)
         except Exception, e:
@@ -675,3 +678,28 @@ def skip_if_scenario_not_multiple_networks(mul_nets_sce_list=[]):
         test_util.test_skip("Skip the test because scenario config is not %s" \
                           %(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')))
         
+
+def sce_is_sep_pub():
+    sep_pub_sce_list = [ 					\
+                             'scenario-config-nfs-sep-pub.xml',	\
+                             'scenario-config-ceph-sep-pub.xml'	\
+                       ]
+
+    for sce_cfg in sep_pub_sce_list:
+        if sce_cfg in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE'):
+            return True
+    else:
+        return False
+
+
+def sce_is_sep_man():
+    sep_man_sce_list = [ 					\
+                             'scenario-config-nfs-sep-man.xml',	\
+                             'scenario-config-ceph-sep-man.xml' \
+                       ]
+
+    for sce_cfg in sep_man_sce_list:
+        if sce_cfg in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE'):
+            return True
+    else:
+        return False
