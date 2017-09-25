@@ -6,7 +6,8 @@
 
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
-import zstackwoodpecker.test_util as test_util
+
+import os
 
 
 test_stub = test_lib.lib_get_test_stub()
@@ -14,8 +15,9 @@ test_obj_dict = test_state.TestStateDict()
 
 
 def test():
-
-    pub_l3_vm, flat_l3_vm, vr_l3_vm = test_stub.generate_pub_test_vm(tbj=test_obj_dict)
+    pub_l3_vm, flat_l3_vm, vr_l3_vm = test_stub.generate_pub_test_vm(tbj=test_obj_dict, vm_check=True if 'DHCP' in [service.networkServiceType for service in
+                                                         test_lib.lib_get_l3_by_name(os.environ.get('l3PublicNetworkName')).networkServices]
+                                                         else False)
 
     for vm in (pub_l3_vm, flat_l3_vm, vr_l3_vm):
         for action in ('stop', 'start', 'reboot', 'suspend', 'resume'):
