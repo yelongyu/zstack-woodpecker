@@ -306,13 +306,17 @@ def get_nfs_ip_for_net_sep(scenarioConfig, virtual_host_ip, nfs_ps_name):
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
         for vm in xmlobject.safe_list(host.vms.vm):
             for l3Network in xmlobject.safe_list(vm.l3Networks.l3Network):
-                if xmlobject.has_element(l3Network, 'primaryStorageRef') and l3Network.primaryStorageRef.text_ == nfs_ps_name:
+                test_util.test_logger("nfs_ps_name=:%s" %(nfs_ps_name))
+                if xmlobject.has_element(l3Network, 'primaryStorageRef'):
+                #if xmlobject.has_element(l3Network, 'primaryStorageRef') and l3Network.primaryStorageRef.text_ == nfs_ps_name:
+                    test_util.test_logger("ps_name_in_config:%s" %(l3Network.primaryStorageRef.text_))
                     storageNetworkUuid = l3Network.uuid_
                     cond = res_ops.gen_query_conditions('vmNics.ip', '=', virtual_host_ip)
                     vm_inv_nics = query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0].vmNics
                     if len(vm_inv_nics) < 2:
                         test_util.test_fail("virtual host:%s not has 2+ nics as expected, incorrect for seperate network case" %(virtual_host_ip))
                     for vm_inv_nic in vm_inv_nics:
+                        test_util.test_logger("network_uuid:%s:%s" %(vm_inv_nic.l3NetworkUuid, storageNetworkUuid))
                         if vm_inv_nic.l3NetworkUuid == storageNetworkUuid:
                             return vm_inv_nic.ip
 
