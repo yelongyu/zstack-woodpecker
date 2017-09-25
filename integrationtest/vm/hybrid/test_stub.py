@@ -591,14 +591,16 @@ class HybridObject(object):
                 assert eval(sg_attr_eq)
 
     def create_sg_rule(self):
-        self.sg_rule_ingress = hyb_ops.create_ecs_security_group_rule_remote(self.sg.uuid, 'ingress', 'TCP', '445/445', '0.0.0.0/0', 'drop', 'intranet', '1')
-        self.sg_rule_egress = hyb_ops.create_ecs_security_group_rule_remote(self.sg.uuid, 'egress', 'TCP', '80/80', '0.0.0.0/0', 'accept', 'intranet', '10')
-        time.sleep(10)
+        self.sg_rule = []
+        for cidr in ['172.20.0.0/24', '172.20.0.100/24', '0.0.0.0/0']:
+            self.sg_rule.append(hyb_ops.create_ecs_security_group_rule_remote(self.sg.uuid, 'ingress', 'TCP', '445/445', cidr, 'drop', 'intranet', '1'))
+            self.sg_rule.append(hyb_ops.create_ecs_security_group_rule_remote(self.sg.uuid, 'egress', 'TCP', '80/80', cidr, 'accept', 'intranet', '10'))
+        time.sleep(30)
         self.check_resource('create', 'ecsSecurityGroupUuid', self.sg.uuid, 'query_ecs_security_group_rule_local')
 
     def del_sg_rule(self):
-        hyb_ops.del_ecs_security_group_rule_remote(self.sg_rule_ingress.uuid)
-        hyb_ops.del_ecs_security_group_rule_remote(self.sg_rule_egress.uuid)
+        for rule in self.sg_rule:
+            hyb_ops.del_ecs_security_group_rule_remote(rule.uuid)
         time.sleep(10)
         hyb_ops.sync_ecs_security_group_rule_from_remote(self.sg.uuid)
         self.check_resource('delete', 'ecsSecurityGroupUuid', self.sg.uuid, 'query_ecs_security_group_rule_local')
