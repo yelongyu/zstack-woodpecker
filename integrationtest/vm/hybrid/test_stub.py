@@ -72,6 +72,7 @@ class HybridObject(object):
         self.dst_cidr_block = None
         self.prepaid_ecs = None
         self.vpn_connection = None
+        self.cond_image_system = res_ops.gen_query_conditions('type', '=', 'system')
 
 
     def add_ks(self):
@@ -332,9 +333,14 @@ class HybridObject(object):
                     disk_attr_eq = "self.disk.%s == '%s'" % (k, disk_attr[k])
                     assert eval(disk_attr_eq)
 
-    def create_aliyun_snapshot(self):
+    def create_aliyun_snapshot(self, disk_type='data'):
         snapshot_name = 'zstack-test-aliyun-snapshot-%s' % _postfix
-        self.snapshot = hyb_ops.creaet_aliyun_snapshot_remote(self.disk.uuid, snapshot_name)
+        if disk_type == 'system':
+            condition = res_ops.gen_query_conditions('ecsInstanceUuid', '=', self.ecs_instance.uuid)
+            self.system_disk = hyb_ops.query_aliyun_disk_local(condition)[0]
+            self.snapshot = hyb_ops.creaet_aliyun_snapshot_remote(self.system_disk.uuid, snapshot_name)
+        else:
+            self.snapshot = hyb_ops.creaet_aliyun_snapshot_remote(self.disk.uuid, snapshot_name)
         self.check_resource('create', 'snapshotId', self.snapshot.snapshotId, 'query_aliyun_snapshot_local')
 
     def sync_aliyun_snapshot(self):
@@ -364,12 +370,12 @@ class HybridObject(object):
 
     def sync_vpn_gateway(self):
         hyb_ops.sync_vpc_vpn_gateway_from_remote(self.datacenter.uuid)
-        self.vpn_gateway = self.check_resource('sync', 'vpnGatewayId', self.vpn_gateway.vpnGatewayId, 'query_vpc_vpn_gateway_local')
+        self.vpn_gateway = self.check_resource('sync', 'gatewayId', self.vpn_gateway.gatewayId, 'query_vpc_vpn_gateway_local')
 
     def del_vpn_gateway(self):
         hyb_ops.del_vpc_vpn_gateway_local(self.vpn_gateway.uuid)
-        self.sync_vpn_gateway()
-        self.check_resource('delete', 'vpnGatewayId', self.vpn_gateway.vpnGatewayId, 'query_vpc_vpn_gateway_local')
+#         self.sync_vpn_gateway()
+        self.check_resource('delete', 'gatewayId', self.vpn_gateway.gatewayId, 'query_vpc_vpn_gateway_local')
 
     def update_vpn_gateway(self, name=None, description=None):
         name = 'vpn-gateway-%s' % _postfix
@@ -709,12 +715,12 @@ class HybridObject(object):
             self.check_resource('create', 'ecsImageId', self.ecs_image.ecsImageId, 'query_ecs_image_local')
         time.sleep(30)
 
-    def sync_ecs_image(self):
+    def sync_ecs_image(self, return_val=False):
         hyb_ops.sync_ecs_image_from_remote(self.datacenter.uuid)
         hyb_ops.sync_ecs_image_from_remote(self.datacenter.uuid, image_type='system')
-        condition = res_ops.gen_query_conditions('type', '=', 'system')
-        assert hyb_ops.query_ecs_image_local(condition)
-        return self.check_resource('sync', 'ecsImageId', self.ecs_image.ecsImageId, 'query_ecs_image_local')
+        assert hyb_ops.query_ecs_image_local(self.cond_image_system)
+        if return_val:
+            return self.check_resource('sync', 'ecsImageId', self.ecs_image.ecsImageId, 'query_ecs_image_local')
 
     def del_ecs_image(self, remote=True, system=False):
         if remote:
@@ -722,11 +728,10 @@ class HybridObject(object):
             hyb_ops.sync_ecs_image_from_remote(self.datacenter.uuid)
         else:
             if system:
-                image_local = hyb_ops.query_ecs_image_local()
+                image_local = hyb_ops.query_ecs_image_local(self.cond_image_system)
                 for i in image_local:
                     hyb_ops.del_ecs_image_in_local(i.uuid)
-                cond_image_system = res_ops.gen_query_conditions('type', '=', 'system')
-                assert not hyb_ops.query_ecs_image_local(cond_image_system)
+                assert not hyb_ops.query_ecs_image_local(self.cond_image_system)
                 return
             else:
                 hyb_ops.del_ecs_image_in_local(self.ecs_image.uuid)

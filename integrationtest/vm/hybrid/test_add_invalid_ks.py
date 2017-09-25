@@ -9,8 +9,9 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.hybrid_operations as hyb_ops
+import zstackwoodpecker.test_state as test_state
 
-
+test_obj_dict = test_state.TestStateDict()
 test_obj_dict = test_state.TestStateDict()
 
 def test():

@@ -25,7 +25,7 @@ def test():
     hybrid.update_aliyun_disk(description='test-aliyun-disk')
     hybrid.update_aliyun_disk(delete_with_instance='true')
     hybrid.del_ecs_instance()
-    hybrid.sync_aliyun_disk()
+    hybrid.sync_aliyun_disk(check=False)
     hybrid.check_resource('delete', 'diskId', hybrid.disk.diskId, 'query_aliyun_disk_local')
     test_util.test_pass('Update Aliyun Disk Test Success')
 

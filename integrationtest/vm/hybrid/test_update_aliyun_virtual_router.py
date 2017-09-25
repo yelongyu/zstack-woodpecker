@@ -17,6 +17,7 @@ hybrid = test_stub.HybridObject()
 def test():
     hybrid.add_datacenter_iz(add_datacenter_only=True)
     hybrid.create_vpc()
+    hybrid.get_vr()
 
     hybrid.update_vr(name='Vpc-vr')
     hybrid.update_vr(description='test-Vpc-vr')

@@ -7,8 +7,9 @@ New Integration Test for hybrid.
 
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
+import zstackwoodpecker.test_state as test_state
 
-
+test_obj_dict = test_state.TestStateDict()
 test_stub = test_lib.lib_get_test_stub()
 hybrid = test_stub.HybridObject()
 

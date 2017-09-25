@@ -10,8 +10,9 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.hybrid_operations as hyb_ops
 import zstackwoodpecker.operations.ipsec_operations as ipsec_ops
+import zstackwoodpecker.test_state as test_state
 
-
+test_obj_dict = test_state.TestStateDict()
 test_stub = test_lib.lib_get_test_stub()
 hybrid = test_stub.HybridObject()
 

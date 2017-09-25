@@ -762,7 +762,7 @@ def update_oss_bucket(uuid, name=None, description=None, session_uuid=None):
     return evt.inventory
 
 def update_aliyun_snapshot(uuid, name=None, description=None, session_uuid=None):
-    action = api_actions.UpdateEcsVSwitchAction()
+    action = api_actions.UpdateAliyunSnapshotAction()
     action.uuid = uuid
     action.name = name
     action.description = description
@@ -1036,7 +1036,7 @@ def update_aliyun_disk(uuid, name=None, description=None, delete_with_instance=N
 
 def creaet_aliyun_snapshot_remote(uuid, name, description=None, resource_uuid=None, session_uuid=None):
     action = api_actions.CreateAliyunSnapshotRemoteAction()
-    action.uuid = uuid
+    action.diskUuid = uuid
     action.name = name
     action.resourceUuid = resource_uuid
     test_util.action_logger('Create Aliyun Snapshot Remote %s %s' % (uuid, name))
