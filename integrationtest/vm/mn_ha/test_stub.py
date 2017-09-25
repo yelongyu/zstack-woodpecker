@@ -473,7 +473,7 @@ def create_basic_vm(disk_offering_uuids=None, session_uuid = None, wait_vr_runni
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
 
     if wait_vr_running:
-        ensure_vr_is_running(l3_net_uuid)
+        ensure_vr_is_running_connected(l3_net_uuid)
 
     return create_vm([l3_net_uuid], image_uuid, 'basic_no_vlan_vm', disk_offering_uuids, session_uuid = session_uuid)
 
@@ -623,7 +623,7 @@ def ensure_host_disconnected(test_host, wait_time):
             test_util.test_logger("successfully got host disconnected: %s" %(host_list[0].status))
             return
 
-def ensure_vr_is_running(l3_uuid):
+def ensure_vr_is_running_connected(l3_uuid):
     vr_list = test_lib.lib_find_vr_by_l3_uuid(l3_uuid)
     if not vr_list: return
 
@@ -641,10 +641,11 @@ def ensure_vr_is_running(l3_uuid):
     for i in range(300):
         time.sleep(1)
         vr1 = res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0]
-        if vr1.state == "Running":
+        if vr1.state == "Running" and vr1.status == "Connected":
+            test_util.test_logger("vr has successfully changed to Running and Connected")
             break
     else:
-        test_util.test_fail("virtualrouter has not been started within 300s")
+        test_util.test_fail("vr has not been successfully changed to Running and Connected within 300s: state=%s:status=%s" %(vr1.state, vr1.status))
 
 def skip_if_scenario_is_multiple_networks(mul_nets_sce_list=[]):
 
