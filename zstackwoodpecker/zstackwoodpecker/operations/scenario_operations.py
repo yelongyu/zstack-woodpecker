@@ -299,6 +299,25 @@ def get_mn_ha_nfs_url(scenario_config, scenario_file, deploy_config):
     return None
 
 
+def get_nfs_ip_for_net_sep(scenarioConfig, virtual_host_ip, nfs_ps_name):
+    zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
+
+    storageNetworkUuid = None
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            for l3Network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                if xmlobject.has_element(l3Network, 'primaryStorageRef') and l3Network.primaryStorageRef.text_ == nfs_ps_name:
+                    storageNetworkUuid = l3Network.uuid_
+                    cond = res_ops.gen_query_conditions('vmNics.ip', '=', virtual_host_ip)
+                    vm_inv_nics = query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0].vmNics
+                    if len(vm_inv_nics) < 2:
+                        test_util.test_fail("virtual host:%s not has 2+ nics as expected, incorrect for seperate network case" %(virtual_host_ip))
+                    for vm_inv_nic in vm_inv_nics:
+                        if vm_inv_nic.l3NetworkUuid == storageNetworkUuid:
+                            return vm_inv_nic.ip
+
+    return None
+
 
 def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
@@ -309,6 +328,9 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
     mn_ha_storage_type = get_mn_ha_storage_type(scenario_config, scenario_file, deploy_config)
     if mn_ha_storage_type == "nfs":
+        nfs_url = get_mn_ha_nfs_url(scenario_config, scenario_file, deploy_config)
+        nfsIP = nfs_url.split(':')[0]
+        nfsPath = nfs_url.split(':')[1]
         vm_net_uuids_lst = []
         for vmNic in vm_inv.vmNics:
             vm_net_uuids_lst.append(vmNic.l3NetworkUuid)
@@ -317,10 +339,16 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
             nfs_network_uuid = vm_net_uuids_lst[0]
             nfs_vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, nfs_network_uuid).ip
             if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml", "test-config-vyos-flat-dhcp-nfs-mul-net-pubs.xml"], \
-                                               ["scenario-config-nfs-sep-man.xml", "scenario-config-nfs-sep-pub.xml"]):
+                                               ["scenario-config-nfs-sep-man.xml"]):
                 nfs_vm_nic = os.environ.get('storNic')
                 nfs_vm_netmask = os.environ.get('manNetMask')
                 nfs_vm_gateway = os.environ.get('manGateway')
+            elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml", "test-config-vyos-flat-dhcp-nfs-mul-net-pubs.xml"], \
+                                                 ["scenario-config-nfs-sep-pub.xml"]):
+                nfs_vm_nic = os.environ.get('storNic')
+                nfs_vm_netmask = os.environ.get('manNetMask')
+                nfs_vm_gateway = os.environ.get('manGateway')
+                nfsIP = get_nfs_ip_for_net_sep(scenario_config, nfsIP, nfsPath)
             elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-nfs.xml"], \
                                                  ["scenario-config-storage-separate-nfs.xml"]):
                 nfs_vm_nic = os.environ.get('storNic')
@@ -337,9 +365,6 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
             ssh.execute(set_default_gw_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
         #TODO: should make image folder configarable
-        nfs_url = get_mn_ha_nfs_url(scenario_config, scenario_file, deploy_config)
-        nfsIP = nfs_url.split(':')[0]
-        nfsPath = nfs_url.split(':')[1]
         cmd = 'mkdir -p /storage'
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
         cmd = 'echo mount %s:%s /storage >> /etc/rc.local' % (nfsIP, nfsPath)
