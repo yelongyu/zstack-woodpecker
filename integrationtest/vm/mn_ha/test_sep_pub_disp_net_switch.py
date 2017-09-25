@@ -41,6 +41,11 @@ def test():
     if console_management_ip == console_display_ip:
         test_util.test_fail("console ip has not been switched as expected: %s and %s" %(console_management_ip, console_display_ip))
 
+    console1 = test_lib.lib_request_console_access(vm.get_vm().uuid)
+    console_req_ip = console1.hostname
+    if console_management_ip == console_req_ip:
+        test_util.test_fail("console ip has not been switched as expected: %s and %s" %(console_management_ip, console_req_ip))
+
     test_util.test_pass('Create VM Test Success')
 
 #Will be called what ever test result is
