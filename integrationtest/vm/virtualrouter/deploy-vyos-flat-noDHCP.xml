@@ -174,9 +174,6 @@
                 startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
                 netmask="$ipRangeNetmask" />
               <dns>$DNSServer</dns>
-              <networkService provider="Flat Network Service Provider">
-                <serviceType>Userdata</serviceType>
-              </networkService>
               <networkService provider="SecurityGroup">
                 <serviceType>SecurityGroup</serviceType>
               </networkService>
@@ -193,7 +190,6 @@
               <dns>$DNSServer</dns>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>Eip</serviceType>
-                <serviceType>Userdata</serviceType>
               </networkService>
               <networkService provider="SecurityGroup">
                 <serviceType>SecurityGroup</serviceType>
@@ -219,9 +215,6 @@
                 <serviceType>LoadBalancer</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
-              </networkService>
-              <networkService provider="Flat Network Service Provider">
-                <serviceType>Userdata</serviceType>
               </networkService>
               <networkService provider="SecurityGroup">
                 <serviceType>SecurityGroup</serviceType>
