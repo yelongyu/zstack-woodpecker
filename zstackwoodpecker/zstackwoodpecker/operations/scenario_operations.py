@@ -1363,7 +1363,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 
             #Add zstack management vm nic to security group  
             zstest_vm_hostname = os.popen('hostname|sed s/-/./g') 
-            zstest_vm_ip.zstest_vm_hostname.read()
+            zstest_vm_ip = zstest_vm_hostname.read()
             cond = res_ops.gen_query_conditions('vmNics.ip', '=', zstest_vm_ip)
             zstack_management_vm_uuid = query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0].uuid
             cond = res_ops.gen_query_conditions('vmInstance.uuid', '=', zstack_management_vm_uuid)
