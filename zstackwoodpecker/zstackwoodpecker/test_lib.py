@@ -5353,3 +5353,14 @@ def pre_execution_action(func):
             return test_method()
         return wrapper
     return decorator
+
+
+def checker_wrapper(self, service_type, l3_uuid):
+    '''
+    Wrap checker to Skip vm check if no service in l3
+    '''
+    if service_type not in [service.networkServiceType for service in lib_get_l3_by_uuid(l3_uuid).networkServices]:
+        test_util.test_logger('Skip vm checker, just update the vm')
+        return self.update
+    else:
+        return self.check

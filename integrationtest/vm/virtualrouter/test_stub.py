@@ -636,7 +636,7 @@ def migrate_vm_to_random_host(vm):
         test_util.test_logger('[vm:] %s has been migrated from [host:] %s to [host:] %s' % (vm.vm.uuid, current_host.uuid, target_host.uuid))
 
 
-def generate_pub_test_vm(tbj, vm_check=True):
+def generate_pub_test_vm(tbj):
     disk_offering_uuids = [random.choice(res_ops.get_resource(res_ops.DISK_OFFERING)).uuid]
     l3_name_list = ['l3PublicNetworkName', 'l3NoVlanNetworkName1', 'l3NoVlanNetworkName2']
 
@@ -645,8 +645,8 @@ def generate_pub_test_vm(tbj, vm_check=True):
                                                                       disk_offering_uuids=random.choice([None, disk_offering_uuids]),
                                                                       l3_name=name) for name in l3_name_list]
     for vm in pub_l3_vm, flat_l3_vm, vr_l3_vm:
-        if vm_check:
-            vm.check()
+        vm.check = test_lib.checker_wrapper(vm, 'DHCP', vm.get_vm().vmNics[0].l3NetworkUuid)
+        vm.check()
         tbj.add_vm(vm)
 
     return pub_l3_vm, flat_l3_vm, vr_l3_vm
