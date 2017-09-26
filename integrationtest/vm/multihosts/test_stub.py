@@ -927,12 +927,14 @@ def generate_pub_test_vm(tbj):
     l3_name_list = ['l3PublicNetworkName', 'l3NoVlanNetworkName1', 'l3NoVlanNetworkName2']
 
     pub_l3_vm, vm1, vm2 = [create_vm_with_random_offering(vm_name='test_vm',
-                                                          image_name='imageName_net',
+                                                          image_name='imageName3',
                                                           disk_offering_uuids=random.choice([None, disk_offering_uuids]),
                                                           l3_name=name) for name in l3_name_list]
-
+    import time
+    time.sleep(120)
     for vm in (pub_l3_vm, vm1, vm2):
-        if 'DHCP' not in [service.networkServiceType for service in vm.get_vm().vmNics[0].l3NetworkUuid.networkServices]:
+        if 'DHCP' not in [service.networkServiceType for service
+                          in test_lib.lib_get_l3_by_uuid(vm.get_vm().vmNics[0].l3NetworkUuid).networkServices]:
             set_static_ip(vm.get_vm())
 
     for vm in (pub_l3_vm, vm1, vm2):
@@ -944,13 +946,14 @@ def generate_pub_test_vm(tbj):
 
 def set_static_ip(vm):
     vmnic = vm.vmNics[0]
-    cmd1 = "BOOTPROTO=static\nONBOOT=yes\nIPADDR={}\nGATEWAY={}\nNETMASK={}\n".format(vmnic.ip, vmnic.gateway. vmnic.netmask)
+    cmd1 = '''echo -e "BOOTPROTO=static\nONBOOT=yes\nIPADDR={}\nGATEWAY={}\nNETMASK={}\n" > /etc/sysconfig/network-scripts/ifcfg-eth0 '''\
+        .format(vmnic.ip, vmnic.gateway,vmnic.netmask)
     cmd2 = "service network restart"
     return run_cmd_in_vm_console(vm, (cmd1, cmd2))
 
 
 def run_cmd_in_vm_console(vm, cmd_list):
-    ssh_cmd = "sshpass -p %s ssh -t -t -t %s" % ("password", test_lib.lib_get_host_by_uuid(vm.histUuid).managementIp)
+    ssh_cmd = "sshpass -p %s ssh -t -t -t %s" % ("password", test_lib.lib_get_host_by_uuid(vm.hostUuid).managementIp)
 
     try:
         import pexpect
@@ -965,5 +968,7 @@ def run_cmd_in_vm_console(vm, cmd_list):
         for cmd in cmd_list:
             result.sendline(cmd)
             result.expect('#')
+    except Exception as e:
+        test_util.test_fail('Fail to run cmds in vm: {}'.format(e))
     finally:
         result.close()
