@@ -254,9 +254,16 @@ def get_mn_host(scenarioConfig, scenarioFile):
     return mn_host_list
 
 def migrate_mn_vm(origin_host, target_host, scenarioConfig):
-    cmd = 'zsha migrate %s' % (target_host.managementIp_)
-    host_config = sce_ops.get_scenario_config_vm(origin_host.name_, scenarioConfig)
-    test_lib.lib_execute_ssh_cmd(origin_host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
+    if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml"], ["scenario-config-nfs-sep-pub.xml"]) or \
+       test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], ["scenario-config-ceph-sep-pub.xml"]):
+        cmd = 'zsha migrate %s' % (target_host.managementIp_)
+        host_config = sce_ops.get_scenario_config_vm(origin_host.name_, scenarioConfig)
+        test_lib.lib_execute_ssh_cmd(origin_host.managementIp_, host_config.imageUsername_, host_config.imagePassword_,cmd)
+    else:
+        cmd = 'zsha migrate %s' % (target_host.ip_)
+        host_config = sce_ops.get_scenario_config_vm(origin_host.name_, scenarioConfig)
+        test_lib.lib_execute_ssh_cmd(origin_host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
+
 
 def upgrade_zsha(scenarioConfig, scenarioFile):
     host_list = get_mn_host(scenarioConfig, scenarioFile)
