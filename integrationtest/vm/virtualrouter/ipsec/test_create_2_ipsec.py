@@ -68,6 +68,12 @@ def test():
     cond = res_ops.gen_query_conditions('uuid', '=', pri_l3_uuid3)
     third_zstack_cidrs = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0].ipRanges[0].networkCidr
 
+    cond = res_ops.gen_query_conditions('l3Network.uuid', '=', pri_l3_uuid3)
+    cond = res_ops.gen_query_conditions('vmInstanceUuid', '=', vr3.uuid, cond)
+    vr3_pri_ip = res_ops.query_resource(res_ops.VM_NIC, cond)[0].ip
+    cmd = 'route del defualt; route add defualt gw %s' %vr3_pri_ip
+    os.system('sshpass -p password root@%s %s' %(vm3.vmNics[0].ip, cmd))
+
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco1_ip
     test_util.test_dsc('Create ipsec in mevoco1')
     ipsec11 = ipsec_ops.create_ipsec_connection('ipsec11', pri_l3_uuid1, vip2.get_vip().ip, '123456', vip11.get_vip().uuid, [second_zstack_cidrs])
