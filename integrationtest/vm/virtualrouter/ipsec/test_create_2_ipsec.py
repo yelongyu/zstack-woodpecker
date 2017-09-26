@@ -120,7 +120,7 @@ def test():
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco3_ip
     ipsec_ops.delete_ipsec_connection(ipsec3.uuid)
 
-    if test_lib.lib_check_ping(vm1.vm, vm3.vm.vmNics[0].ip, no_exception=True):
+    if test_lib.lib_check_ping(vm3.vm, vm1.vm.vmNics[0].ip, no_exception=True):
         test_util.test_fail('vm in mevoco1[MN:%s] could still connect to vm in mevoco3[MN:%s] after Ipsec is deleted' % (mevoco1_ip, mevoco3_ip))
 
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco1_ip
