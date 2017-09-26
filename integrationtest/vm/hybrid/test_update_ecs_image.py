@@ -18,8 +18,8 @@ def test():
     hybrid.add_bucket()
     hybrid.create_ecs_image()
 
-    hybrid.update_ecs_image(name='ECS-Image')
-    hybrid.update_ecs_image(description='test-ECS-Image')
+    hybrid.update_ecs_image(name='ECS-Image-%s' % test_stub._postfix)
+    hybrid.update_ecs_image(description='test-ECS-Image-%s' % test_stub._postfix)
 
     test_util.test_pass('Update Ecs Image Test Success')
 

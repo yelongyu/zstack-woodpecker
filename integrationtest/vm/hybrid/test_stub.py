@@ -746,7 +746,7 @@ class HybridObject(object):
         for k in image_attr.keys():
             if image_attr[k]:
                 hyb_ops.update_ecs_image(self.ecs_image.uuid, **image_attr)
-                self.ecs_image = self.sync_ecs_image()
+                self.ecs_image = self.sync_ecs_image(return_val=True)
                 image_attr_eq = "self.ecs_image.%s == '%s'" % (k, image_attr[k])
                 assert eval(image_attr_eq)
 
