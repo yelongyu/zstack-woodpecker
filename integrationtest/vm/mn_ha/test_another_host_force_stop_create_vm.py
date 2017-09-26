@@ -45,6 +45,7 @@ def test():
         test_util.test_fail('management node VM starts on another host when its former host was not down')
 
     test_stub.ensure_pss_connected()
+    test_stub.ensure_bss_host_connected_from_stop(test_lib.scenario_file, test_lib.all_scenario_config, test_lib.deploy_config)
     test_stub.ensure_bss_connected()
     #test_stub.ensure_hosts_connected()
     vm = test_stub.create_basic_vm()

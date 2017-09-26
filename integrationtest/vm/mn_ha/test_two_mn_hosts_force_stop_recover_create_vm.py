@@ -76,6 +76,7 @@ def test():
         test_util.test_fail("management node does not recover after recover one mn host")
 
     test_stub.ensure_hosts_connected()
+    test_stub.ensure_bss_host_connected_from_stop(test_lib.scenario_file, test_lib.all_scenario_config, test_lib.deploy_config)
     test_stub.ensure_pss_connected()
     test_stub.ensure_bss_connected()
 

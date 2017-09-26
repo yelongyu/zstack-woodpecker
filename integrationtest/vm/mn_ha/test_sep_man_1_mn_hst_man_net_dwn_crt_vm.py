@@ -61,6 +61,7 @@ def test():
     test_stub.wait_for_mn_ha_ready(test_lib.all_scenario_config, test_lib.scenario_file)
 
     test_stub.ensure_hosts_connected()
+    test_stub.ensure_bss_host_connected_from_sep_net_down(test_lib.scenario_file, test_lib.all_scenario_config, downMagt=True)
     test_stub.ensure_bss_connected()
     test_stub.ensure_pss_connected()
 
