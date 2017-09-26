@@ -16,16 +16,25 @@ import os
 
 vm = None
 mn_host = None
+pub_mn_ip = None
+mag_mn_ip = None
 
 def test():
     global vm
     global mn_host
+    global pub_mn_ip
+    global mag_mn_ip
 
     test_stub.skip_if_scenario_not_multiple_networks()
 
     mn_host = test_stub.get_host_by_mn_vm(test_lib.all_scenario_config, test_lib.scenario_file)
     if len(mn_host) != 1:
         test_util.test_fail('MN VM is running on %d host(s)' % len(mn_host))
+
+    pub_mn_ip = os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP']
+    mag_mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mag_mn_ip
+
     test_util.test_logger("shutdown host's network [%s] that mn vm is running on" % (mn_host[0].ip_))
     test_stub.shutdown_host_network(mn_host[0], test_lib.all_scenario_config, downMagt=False)
     test_util.test_logger("wait for 20 seconds to see if management node VM starts on another host")
@@ -68,9 +77,12 @@ def test():
 
 #Will be called what ever test result is
 def env_recover():
+    global pub_mn_ip
+    global mag_mn_ip
     test_stub.reopen_host_network(mn_host[0], test_lib.all_scenario_config)
     test_stub.wait_for_mn_ha_ready(test_lib.all_scenario_config, test_lib.scenario_file)
     #test_stub.recover_host(mn_host[0], test_lib.all_scenario_config, test_lib.deploy_config)
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = pub_mn_ip
 
 #Will be called only if exception happens in test().
 def error_cleanup():

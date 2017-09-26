@@ -19,13 +19,21 @@ import os
 vm = None
 mn_host_list = None
 need_recover_mn_host_list = None
+pub_mn_ip = None
+mag_mn_ip = None
 
 def test():
     global vm
     global mn_host_list
     global need_recover_mn_host_list
+    global pub_mn_ip
+    global mag_mn_ip
 
     test_stub.skip_if_scenario_not_multiple_networks()
+
+    pub_mn_ip = os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP']
+    mag_mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mag_mn_ip
 
     mn_host_list = test_stub.get_mn_host(test_lib.all_scenario_config, test_lib.scenario_file)
     mn_host_num = len(mn_host_list)
@@ -90,11 +98,14 @@ def test():
 
 #Will be called what ever test result is
 def env_recover():
+    global pub_mn_ip
+    global mag_mn_ip
     if need_recover_mn_host_list:
         for index in need_recover_mn_host_list:
             test_util.test_logger("recover host: %s" % (mn_host_list[index].ip_))
             test_stub.recover_host(mn_host_list[index], test_lib.all_scenario_config, test_lib.deploy_config)
     test_stub.wait_for_mn_ha_ready(test_lib.all_scenario_config, test_lib.scenario_file)
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = pub_mn_ip
 
 #Will be called only if exception happens in test().
 def error_cleanup():
