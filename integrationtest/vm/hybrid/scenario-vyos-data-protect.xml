@@ -64,7 +64,7 @@ scenario-vyos-data-protect
   <securityGroups>
     <securityGroup name="$securityGroupName" l3NetworkUuid="$vmL3Uuid">
       <vms>
-        <vm>$vmName1</vm>
+        <vm>$vmName2</vm>
       </vms>
     </securityGroup>
   </securityGroups>
