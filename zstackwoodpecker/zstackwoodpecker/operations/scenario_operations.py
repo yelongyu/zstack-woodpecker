@@ -177,9 +177,9 @@ def execute_in_vm_console(zstack_management_ip, host_ip, vm_name, vm_config, cmd
     if i == 0:
         test_util.test_logger('login to guest vm')
         child.send("%s\n" % (vm_config.imageUsername_))
-        child.expect('Password:', timeout=1)
+        child.expect('Password:', timeout=10)
         child.send("%s\n" % (vm_config.imagePassword_))
-        child.expect('[#\$] ', timeout=1)
+        child.expect('[#\$] ', timeout=10)
     elif i == 1 or i == 2:
         test_util.test_logger('already login guest vm')
     child.send("%s\n" % (cmd))
