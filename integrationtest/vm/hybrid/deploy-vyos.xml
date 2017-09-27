@@ -404,7 +404,11 @@
         <nfsPrimaryStorage name="$nfsPrimaryStorageName"
           description="Test" url="$nfsPrimaryStorageUrl" />
       </primaryStorages>
-
+      <disasterBackupStorages>
+        <imageStoreBackupStorage name="$disasterBackupStorageName"
+          description="Test" url="$disasterBackupStorageUrl" username="$disasterBackupStorageUsername"
+          password="$disasterBackupStoragePassword" hostname="$disasterBackupStorageHostname" port="22"/>
+      </disasterBackupStorages>
       <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
     </zone>
   </zones>
