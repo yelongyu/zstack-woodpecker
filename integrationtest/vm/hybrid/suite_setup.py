@@ -78,9 +78,5 @@ def test():
 
     bss = res_ops.query_resource(res_ops.BACKUP_STORAGE)
     bs = bss[0]
-    if bs.type == "ImageStoreBackupStorage" and bs.name == "image_store_bs":
-        #setup data protect image store server and get the ip
-        dpbs_imagestore_ip = hyb_ops.get_data_protect_image_store_vm_ip(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)[0]
-        test_util.test_pass('Setup data protect bs image store success, the ip is %s' %dpbs_imagestore_ip)
     test_util.test_pass('Suite Setup Success')
 
