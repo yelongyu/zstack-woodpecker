@@ -131,3 +131,39 @@ def reconnect_backup_storage(backup_storage_uuid, session_uuid=None):
     test_util.action_logger('Reconnect Backup Storage [uuid:] %s' % backup_storage_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
+
+def get_disaster_backup_storage_info(deploy_config):
+    disaster_bs_info = {}
+    disaster_bs = deploy_config.deployerConfig.zones.zone.disasterBackupStorages.imageStoreBackupStorage
+    disaster_bs_info.name = disaster_bs.name_
+    disaster_bs_info.description = disaster_bs.description_
+    disaster_bs_info.url = disaster_bs.url_
+    disaster_bs_info.username = disaster_bs.username_
+    disaster_bs_info.password = disaster_bs.password_
+    disaster_bs_info.hostname = disaster_bs.hostname_
+    disaster_bs_info.port = disaster_bs.port_
+    return disaster_bs_info
+
+def add_disaster_image_store_bs(url, hostname, username, password, sshport=None, name=None, description=None, end_point=None, attach_point=None, session_uuid=None):
+    action = api_actions.AddDisasterImageStoreBackupStorageAction()
+    action.hostname = hostname
+    action.username = username
+    action.password = password
+    action.url = url
+    if name != None:
+        action.name = name
+    else:
+        action.name = "disaster_image_store"
+    if description != None:
+        action.description = description
+    if sshport != None:
+        action.sshPort = sshport
+    else:
+        action.sshPort = 22
+    if end_point != None:
+        action.endPoint = end_point
+    if attach_point != None:
+        action.attachPoint = attach_point
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.test_logger('[Disaster ImageStore Backup Storage] %s is added' %action.name )
+    return evt.inventory

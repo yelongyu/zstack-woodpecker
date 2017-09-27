@@ -20,3 +20,10 @@ ipRangePublicGateway = 180.180.180.180
 l2PublicVlan = 3
 
 hybrid_user_name = test
+
+disasterBackupStorageName = disaster_backup_storage
+disasterBackupStorageUrl = /disaster_backup_storage
+disasterBackupStorageUsername = root
+disasterBackupStoragePassword = 1
+disasterBackupStorageHostname = 10.1.101.40
+disasterBackupStoragePort = 22
