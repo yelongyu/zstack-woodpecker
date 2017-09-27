@@ -16,13 +16,13 @@ disaster_bs_uuid = None
 def test():
     global disaster_bs_uuid
     disaster_bs_dict = bs_ops.get_disaster_backup_storage_info(test_lib.deploy_config)
-    name = disaster_bs_dict.name
-    description = disaster_bs_dict.description
-    hostname = disaster_bs_dict.hostname
-    url = disaster_bs_dict.url
-    username = disaster_bs_dict.username
-    password = disaster_bs_dict.password
-    sshport = disaster_bs_dict.port
+    name = disaster_bs_dict['name']
+    description = disaster_bs_dict['description']
+    hostname = disaster_bs_dict['hostname']
+    url = disaster_bs_dict['url']
+    username = disaster_bs_dict['username']
+    password = disaster_bs_dict['password']
+    sshport = disaster_bs_dict['port']
     #AddDisasterImageStoreBackupStorage 
     disaster_backup_storage = bs_ops.add_disaster_image_store_bs(url, hostname, username, password, sshport, name, description)
     disaster_bs_uuid = disaster_backup_storage.uuid
