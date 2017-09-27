@@ -3,12 +3,13 @@ Test case for checking ntp is correct setup
 @author: quarkonics
 '''
 import os
-import test_stub
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
+
+test_stub = test_lib.lib_get_test_stub()
 
 def test():
     test_util.test_dsc('Test Host ntp')
