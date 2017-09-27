@@ -134,14 +134,14 @@ def reconnect_backup_storage(backup_storage_uuid, session_uuid=None):
 
 def get_disaster_backup_storage_info(deploy_config):
     disaster_bs_info = {}
-    disaster_bs = deploy_config.deployerConfig.zones.zone.disasterBackupStorages.imageStoreBackupStorage
-    disaster_bs_info.name = disaster_bs.name_
-    disaster_bs_info.description = disaster_bs.description_
-    disaster_bs_info.url = disaster_bs.url_
-    disaster_bs_info.username = disaster_bs.username_
-    disaster_bs_info.password = disaster_bs.password_
-    disaster_bs_info.hostname = disaster_bs.hostname_
-    disaster_bs_info.port = disaster_bs.port_
+    disaster_bs = deploy_config.zones.zone.disasterBackupStorages.imageStoreBackupStorage
+    disaster_bs_info['name'] = disaster_bs.name_
+    disaster_bs_info['description'] = disaster_bs.description_
+    disaster_bs_info['url'] = disaster_bs.url_
+    disaster_bs_info['username'] = disaster_bs.username_
+    disaster_bs_info['password'] = disaster_bs.password_
+    disaster_bs_info['hostname'] = disaster_bs.hostname_
+    disaster_bs_info['port'] = disaster_bs.port_
     return disaster_bs_info
 
 def add_disaster_image_store_bs(url, hostname, username, password, sshport=None, name=None, description=None, end_point=None, attach_point=None, session_uuid=None):
