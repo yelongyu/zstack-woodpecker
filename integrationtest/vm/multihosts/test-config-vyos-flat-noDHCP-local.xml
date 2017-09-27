@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-vyos-flat-noDHCP-local.xml</deployConfig>
+    <deployConfigTemplate>deploy-local-ps.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
