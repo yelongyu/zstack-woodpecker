@@ -14,72 +14,69 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 
 test_stub = test_lib.lib_get_test_stub()
-dpbs_uuid = None
+disaster_bs_uuid = None
 data_volume_uuid = None
 image_uuid = None
 
 def test():
-    global dpbs_uuid
+    global disaster_bs_uuid
     global data_volume_uuid
     global image_uuid
-    vm_res = hyb_ops.get_data_protect_image_store_vm_ip(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
-    hostname = vm_res[0]
-    url = vm_res[1]
-    username = vm_res[2]
-    password = vm_res[3]
-    sshport = vm_res[4]
-    name = "BS-public"
-    data_protect_backup_storage = hyb_ops.add_disaster_image_store_bs(url, hostname, username, password, sshport, name)
-    dpbs_uuid = data_protect_backup_storage.uuid 
-    cond = res_ops.gen_query_conditions('resourceUuid', '=', dpbs_uuid)
-    system_tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0]
-    if system_tag.tag != "remote":
-        test_util.test_fail("Here isn't 'remote' system tag for data protect bs")
-    zone = res_ops.query_resource(res_ops.ZONE)[0]
-    bs_ops.attach_backup_storage(dpbs_uuid, zone.uuid)
-
+    disaster_bs_dict = bs_ops.get_disaster_backup_storage_info(test_lib.deploy_config)
+    name = disaster_bs_dict['name']
+    description = disaster_bs_dict['description']
+    hostname = disaster_bs_dict['hostname']
+    url = disaster_bs_dict['url']
+    username = disaster_bs_dict['username']
+    password = disaster_bs_dict['password']
+    sshport = disaster_bs_dict['port']
+    #AddDisasterImageStoreBackupStorage
+    disaster_backup_storage = bs_ops.add_disaster_image_store_bs(url, hostname, username, password, sshport, name, description)
+    disaster_bs_uuid = disaster_backup_storage.uuid
+    #AttachBackupStorageToZone
+    zone_uuid = res_ops.query_resource(res_ops.ZONE)[0].uuid
+    bs_ops.attach_backup_storage(disaster_bs_uuid, zone_uuid)
+    #Create data volume
     primary_storage_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].uuid
     disk_offering_uuid = res_ops.query_resource(res_ops.DISK_OFFERING)[0].uuid
-    cond = res_ops.gen_query_conditions('name', '=', 'image_store_bs')
+    cond = res_ops.gen_query_conditions('name', '=', 'sftp')
     local_bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
-
     volume_option = test_util.VolumeOption()
     volume_option.set_disk_offering_uuid(disk_offering_uuid)
     volume_option.set_name('data_volume_for_data_protect_test')
     volume_option.set_primary_storage_uuid(primary_storage_uuid)
     data_volume = vol_ops.create_volume_from_offering(volume_option)
-
+    #Create data volume template
     data_volume_uuid = data_volume.uuid 
     image_option = test_util.ImageOption()
     image_option.set_data_volume_uuid(data_volume_uuid)
     image_option.set_name('create_data_iso_to_image_store')
-    image_option.set_backup_storage_uuid_list([dpbs_uuid])
+    image_option.set_backup_storage_uuid_list([disaster_bs_uuid])
     image = img_ops.create_data_volume_template(image_option)
-    dpbs_image_uuid = image.uuid
-
-    cond = res_ops.gen_query_conditions('uuid', '=', dpbs_image_uuid)
+    disaster_bs_image_uuid = image.uuid
+    #Check if the image's media_type correct
+    cond = res_ops.gen_query_conditions('uuid', '=', disaster_bs_image_uuid)
     media_type = res_ops.query_resource(res_ops.IMAGE, cond)[0].mediaType
     if media_type != 'DataVolumeTemplate':
         test_util.test_fail('Wrong image media type, the expect is "DataVolumeTemplate", the real is "%s"' %media_type) 
-
+    #Check if create data volume with volume template success
     ps_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].uuid
-    new_volume = vol_ops.create_volume_from_template(dpbs_image_uuid, ps_uuid)
-
+    new_volume = vol_ops.create_volume_from_template(disaster_bs_image_uuid, ps_uuid)
     vol_ops.delete_volume(new_volume.uuid)
-
-    cond = res_ops.gen_query_conditions('resourceUuid', '=', dpbs_image_uuid)
+    #Check if the system tag of the image in disaster bs is 'remote' 
+    cond = res_ops.gen_query_conditions('resourceUuid', '=', disaster_bs_image_uuid)
     system_tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0]
     if system_tag.tag != "remote":
         test_util.test_fail("Here isn't 'remote' system tag for image in data protect bs")
-
-    recovery_image = img_ops.recovery_image_from_image_store_backup_storage(local_bs_uuid, dpbs_uuid, dpbs_image_uuid) 
-    
+    #Check recovery data volume
+    recovery_image = img_ops.recovery_image_from_image_store_backup_storage(local_bs_uuid, disaster_bs_uuid, disaster_bs_image_uuid) 
+    #Check the process status when recoverying image
     cond = res_ops.gen_query_conditions('resourceUuid', '=', local_bs_uuid)
     system_tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0].tag
     status = system_tag.split('::')[5]
     if status not in ['running', 'success']:
         test_util.test_fail('Error status for recovery image, status: %s' %status)
-
+    #Check if recovery data volume success
     if recovery_image.backupStorageRefs[0].backupStorageUuid != local_bs_uuid:
         test_util.test_fail('Recovery image failed, image uuid is %s' %recovery_image.uuid)
     if recovery_image.mediaType != 'DataVolumeTemplate':
@@ -87,8 +84,8 @@ def test():
     image_uuid = recovery_image.uuid
 
     try:
-        #Try to recovery the same image again
-        recovery_image = img_ops.recovery_image_from_image_store_backup_storage(local_bs_uuid, dpbs_uuid, dpbs_image_uuid)
+        #Try to recovery the same image again, it's negative test
+        recovery_image = img_ops.recovery_image_from_image_store_backup_storage(local_bs_uuid, disaster_bs_uuid, disaster_bs_image_uuid)
 
     except Exception,e:
         if str(e).find('already contains it') != -1:
@@ -96,16 +93,16 @@ def test():
     finally: 
         vol_ops.delete_volume(data_volume_uuid)
         img_ops.delete_image(image_uuid)
-        bs_ops.delete_backup_storage(dpbs_uuid) 
+        bs_ops.delete_backup_storage(disaster_bs_uuid) 
     test_util.test_fail('Try to recovery the same image second time success unexpectly')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
-    global dpbs_uuid
+    global disaster_bs_uuid
     global data_volume_uuid
     global image_uuid
     vol_ops.delete_volume(data_volume_uuid)
     img_ops.delete_image(image_uuid)
-    if dpbs_uuid != None:
-        bs_ops.delete_backup_storage(dpbs_uuid)
+    if disaster_bs_uuid != None:
+        bs_ops.delete_backup_storage(disaster_bs_uuid)
     
