@@ -930,15 +930,15 @@ def generate_pub_test_vm(tbj):
                                                           image_name='imageName3',
                                                           disk_offering_uuids=random.choice([None, disk_offering_uuids]),
                                                           l3_name=name) for name in l3_name_list]
-    import time
-    time.sleep(120)
-    for vm in (pub_l3_vm, vm1, vm2):
-        if 'DHCP' not in [service.networkServiceType for service
-                          in test_lib.lib_get_l3_by_uuid(vm.get_vm().vmNics[0].l3NetworkUuid).networkServices]:
-            set_static_ip(vm.get_vm())
+    #import time
+    #time.sleep(120)
+    #for vm in (pub_l3_vm, vm1, vm2):
+    #    if 'DHCP' not in [service.networkServiceType for service
+    #                      in test_lib.lib_get_l3_by_uuid(vm.get_vm().vmNics[0].l3NetworkUuid).networkServices]:
+    #        set_static_ip(vm.get_vm())
 
     for vm in (pub_l3_vm, vm1, vm2):
-        vm.check()
+        vm.check = test_lib.checker_wrapper(vm, 'DHCP',  vm.get_vm().vmNics[0].l3NetworkUuid)
         tbj.add_vm(vm)
 
     return pub_l3_vm, vm1, vm2
