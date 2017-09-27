@@ -364,11 +364,15 @@ def sync_image_from_image_store_backup_storage(dst_bs_uuid, src_bs_uuid, img_uui
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def recovery_image_from_image_store_backup_storage(dst_bs_uuid, src_bs_uuid, img_uuid, session_uuid=None):
+def recovery_image_from_image_store_backup_storage(dst_bs_uuid, src_bs_uuid, img_uuid, name=None, session_uuid=None):
     action = api_actions.RecoveryImageFromImageStoreBackupStorageAction()
     action.dstBackupStorageUuid = dst_bs_uuid
     action.srcBackupStorageUuid = src_bs_uuid
     action.uuid = img_uuid
+    if name != None:
+        action.name = name
+    else:
+        action.name = 'recovery_image'
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
