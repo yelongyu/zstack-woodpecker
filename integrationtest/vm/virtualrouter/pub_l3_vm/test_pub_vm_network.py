@@ -49,12 +49,9 @@ def test():
     l3 = test_lib.lib_get_l3_by_name(os.environ.get('l3PublicNetworkName'))
     if 'DHCP' in [service.networkServiceType for service in l3.networkServices]:
         ip_list = [pub_l3_vm.get_vm().vmNics[0].ip, flat_vip.get_vip().ip, vr_vip.get_vip().ip]
-    else:
-        ip_list = [flat_vip.get_vip().ip, vr_vip.get_vip().ip]
-
-    for ip in ip_list:
-        if not test_lib.lib_check_directly_ping(ip):
-            test_util.test_fail('expected to be able to ping vip while it fail')
+        for ip in ip_list:
+            if not test_lib.lib_check_directly_ping(ip):
+                test_util.test_fail('expected to be able to ping vip while it fail')
 
     test_lib.lib_error_cleanup(test_obj_dict)
     ip_status_final = net_ops.get_ip_capacity_by_l3s(l3_network_list=[pub_l3_vm.get_vm().vmNics[0].l3NetworkUuid])
