@@ -77,7 +77,7 @@ class DataMigration(object):
         self.ceph_bs_name_2 = os.getenv('cephBackupStorageName2')
 
     def get_image(self):
-        conditions = res_ops.gen_query_conditions('name', '=', self.image_name)
+        conditions = res_ops.gen_query_conditions('name', '=', self.image_name_net)
         self.image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
 
     def get_ps(self):
@@ -102,6 +102,7 @@ class DataMigration(object):
         self.vm = create_vm('multicluster_basic_vm', image_name, os.getenv('l3VlanNetworkName1'))
         self.vm.check()
         self.root_vol_uuid = self.vm.vm.rootVolumeUuid
+        return self.vm
 
     def clone_vm(self):
         self.root_vol_uuid_list = []
@@ -109,26 +110,38 @@ class DataMigration(object):
         for vm in self.cloned_vms:
             self.root_vol_uuid_list.append(vm.vm.rootVolumeUuid)
 
-    def migrate_vm(self, cloned=False):
+    def migrate_vm(self, cloned=False, vms=[]):
         self.dst_ps = self.get_ps_candidate()
-        if not cloned:
-            self.vm.stop()
-            datamigr_ops.ps_migrage_root_volume(self.dst_ps.uuid, self.root_vol_uuid)
-            conditions = res_ops.gen_query_conditions('uuid', '=', self.vm.vm.uuid)
-            self.vm.vm = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)[0]
-            self.vm.start()
-            self.vm.check()
-            assert self.vm.vm.allVolumes[0].primaryStorageUuid == self.dst_ps.uuid
-            self.root_vol_uuid = self.vm.vm.rootVolumeUuid
+        if not vms:
+            if not cloned:
+                self.vm.stop()
+                datamigr_ops.ps_migrage_root_volume(self.dst_ps.uuid, self.root_vol_uuid)
+                conditions = res_ops.gen_query_conditions('uuid', '=', self.vm.vm.uuid)
+                self.vm.vm = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)[0]
+                self.vm.start()
+                self.vm.check()
+                assert self.vm.vm.allVolumes[0].primaryStorageUuid == self.dst_ps.uuid
+                self.root_vol_uuid = self.vm.vm.rootVolumeUuid
+            else:
+                for i in range(len(self.cloned_vms)):
+                    self.cloned_vms[i].stop()
+                    datamigr_ops.ps_migrage_root_volume(self.dst_ps.uuid, self.root_vol_uuid_list[i])
+                    conditions = res_ops.gen_query_conditions('uuid', '=', self.cloned_vms[i].vm.uuid)
+                    self.cloned_vms[i].vm = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)[0]
+                    self.cloned_vms[i].start()
+                    self.cloned_vms[i].check()
+                    assert self.cloned_vms[i].vm.allVolumes[0].primaryStorageUuid == self.dst_ps.uuid
         else:
-            for i in range(len(self.cloned_vms)):
-                self.cloned_vms[i].stop()
-                datamigr_ops.ps_migrage_root_volume(self.dst_ps.uuid, self.root_vol_uuid_list[i])
-                conditions = res_ops.gen_query_conditions('uuid', '=', self.cloned_vms[i].vm.uuid)
-                self.cloned_vms[i].vm = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)[0]
-                self.cloned_vms[i].start()
-                self.cloned_vms[i].check()
-                assert self.cloned_vms[i].vm.allVolumes[0].primaryStorageUuid == self.dst_ps.uuid
+            vms2 = []
+            for vm in vms:
+                vm.stop()
+                datamigr_ops.ps_migrage_root_volume(self.dst_ps.uuid, vm.get_vm().rootVolumeUuid)
+                conditions = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid)
+                vm.vm = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)[0]
+                vm.start()
+                vm.check()
+                vms2.append(vm)
+            return vms2
 
     def migrate_data_volume(self):
         if not self.dst_ps:
@@ -140,6 +153,7 @@ class DataMigration(object):
         conditions = res_ops.gen_query_conditions('uuid', '=', vol_migr_inv.uuid)
         self.data_volume.set_volume(res_ops.query_resource(res_ops.VOLUME, conditions)[0])
         assert self.data_volume.get_volume().primaryStorageUuid == self.dst_ps.uuid
+        self.set_ceph_mon_env(self.dst_ps.uuid)
 
     def del_obsoleted_data_volume(self):
         vol_ops.delete_volume(self.data_volume_obsoleted.uuid)
@@ -148,10 +162,10 @@ class DataMigration(object):
         self.get_image()
         dst_bs = self.get_bs_candidate()
         image_migr_inv = datamigr_ops.bs_migrage_image(dst_bs.uuid, self.image.backupStorageRefs[0].backupStorageUuid, self.image.uuid)
-        condition_uuid = res_ops.gen_query_conditions('uuid', '=', self.image.uuid)
-        assert res_ops.query_resource(res_ops.IMAGE, condition_uuid)
-        condition_name = res_ops.gen_query_conditions('uuid', '=', image_migr_inv.uuid)
-        self.image = res_ops.query_resource(res_ops.IMAGE, condition_name)[0]
+        conditions = res_ops.gen_query_conditions('uuid', '=', self.image.uuid)
+        assert res_ops.query_resource(res_ops.IMAGE, conditions)
+        conditions = res_ops.gen_query_conditions('uuid', '=', image_migr_inv.uuid)
+        self.image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
 
     def create_image(self):
         bs = self.get_bs_candidate()
@@ -191,12 +205,28 @@ class DataMigration(object):
         bs_to_migrate = self.get_bs_candidate()
         assert self.cand_bs[0].uuid == bs_to_migrate.uuid
 
-    def create_data_volume(self):
+    def create_data_volume(self, sharable=False, vms=[]):
         conditions = res_ops.gen_query_conditions('name', '=', os.getenv('largeDiskOfferingName'))
         disk_offering_uuid = res_ops.query_resource(res_ops.DISK_OFFERING, conditions)[0].uuid
+        ps_uuid = self.vm.vm.allVolumes[0].primaryStorageUuid
         volume_option = test_util.VolumeOption()
         volume_option.set_disk_offering_uuid(disk_offering_uuid)
         volume_option.set_name('data_volume_for_migration')
-        volume_option.set_primary_storage_uuid(self.vm.vm.allVolumes[0].primaryStorageUuid)
+        volume_option.set_primary_storage_uuid(ps_uuid)
+        if sharable:
+            volume_option.set_system_tags(['ephemeral::shareable', 'capability::virtio-scsi'])
         self.data_volume = create_volume(volume_option)
-        self.data_volume.attach(self.vm)
+        self.set_ceph_mon_env(ps_uuid)
+        if vms:
+            for vm in vms:
+                self.data_volume.attach(vm)
+        else:
+            self.data_volume.attach(self.vm)
+        self.data_volume.check()
+
+    def set_ceph_mon_env(self, ps_uuid):
+        cond_vol = res_ops.gen_query_conditions('uuid', '=', ps_uuid)
+        ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond_vol)[0]
+        if ps.type.lower() == 'ceph':
+            ps_mon_ip = ps.mons[0].monAddr
+            os.environ['cephBackupStorageMonUrls'] = 'root:password@%s' % ps_mon_ip
