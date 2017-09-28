@@ -65,7 +65,6 @@ def create_vr_vm(vm_name, image_name, l3_name):
     imagename = os.environ.get(image_name)
     l3name = os.environ.get(l3_name)
     vm = create_vm(vm_name, imagename, l3name)
-    vm.check = test_lib.checker_wrapper(vm, 'DHCP', test_lib.lib_get_l3_by_name(l3_name).uuid)
     return vm
 
 def create_vm(vm_name, image_name, l3_name):
@@ -942,7 +941,7 @@ def generate_pub_test_vm(tbj):
     #        set_static_ip(vm.get_vm())
 
     for vm in (pub_l3_vm, vm1, vm2):
-        vm.check = test_lib.checker_wrapper(vm, 'DHCP',  vm.get_vm().vmNics[0].l3NetworkUuid)
+        vm.check()
         tbj.add_vm(vm)
 
     return pub_l3_vm, vm1, vm2

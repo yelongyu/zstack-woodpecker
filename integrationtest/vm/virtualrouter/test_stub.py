@@ -645,7 +645,7 @@ def generate_pub_test_vm(tbj):
                                                                       disk_offering_uuids=random.choice([None, disk_offering_uuids]),
                                                                       l3_name=name) for name in l3_name_list]
     for vm in pub_l3_vm, flat_l3_vm, vr_l3_vm:
-        vm.check = test_lib.checker_wrapper(vm, 'DHCP', vm.get_vm().vmNics[0].l3NetworkUuid)
+        #vm.check = test_lib.checker_wrapper(vm, 'DHCP', vm.get_vm().vmNics[0].l3NetworkUuid)
         vm.check()
         tbj.add_vm(vm)
 
