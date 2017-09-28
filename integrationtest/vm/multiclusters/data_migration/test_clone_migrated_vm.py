@@ -17,7 +17,7 @@ data_migration = test_stub.DataMigration()
 def test():
     data_migration.create_vm()
     data_migration.migrate_vm()
-    time.sleep(30)
+    time.sleep(90)
     test_obj_dict.add_vm(data_migration.vm)
 
     data_migration.clone_vm()
