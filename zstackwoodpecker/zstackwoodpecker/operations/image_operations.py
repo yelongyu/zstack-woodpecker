@@ -356,11 +356,15 @@ def set_image_qga_disable(img_uuid, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def sync_image_from_image_store_backup_storage(dst_bs_uuid, src_bs_uuid, img_uuid, session_uuid=None):
+def sync_image_from_image_store_backup_storage(dst_bs_uuid, src_bs_uuid, img_uuid, name=None, session_uuid=None):
     action = api_actions.SyncImageFromImageStoreBackupStorageAction()
     action.dstBackupStorageUuid = dst_bs_uuid
     action.srcBackupStorageUuid = src_bs_uuid
     action.uuid = img_uuid
+    if name != None:
+        action.name = name
+    else:
+        action.name = 'backup_image'
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
@@ -376,8 +380,8 @@ def recovery_image_from_image_store_backup_storage(dst_bs_uuid, src_bs_uuid, img
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def list_image_from_image_store_backup_storage(uuid, session_uuid=None):
-    action = api_actions.ListImagesFromImageStoreBackupStorageAction()
+def get_images_from_image_store_backup_storage(uuid, session_uuid=None):
+    action = api_actions.GetImagesFromImageStoreBackupStorageAction()
     action.uuid = uuid
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt

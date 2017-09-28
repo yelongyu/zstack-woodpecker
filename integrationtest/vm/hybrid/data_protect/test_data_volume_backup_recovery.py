@@ -5,7 +5,6 @@ New Integration Test for data protect under hybrid.
 @author: Glody 
 '''
 
-import zstackwoodpecker.operations.hybrid_operations as hyb_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.backupstorage_operations as bs_ops
 import zstackwoodpecker.operations.image_operations as img_ops
