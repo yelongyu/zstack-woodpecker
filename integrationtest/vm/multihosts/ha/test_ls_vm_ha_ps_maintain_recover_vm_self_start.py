@@ -13,6 +13,7 @@ import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.operations.ha_operations as ha_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
+import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import apibinding.inventory as inventory
 import time
 import os
@@ -77,7 +78,7 @@ def test():
     ps_ops.change_primary_storage_state(ps_uuid, 'enable')
 
     for i in range(0, 180):
-        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Running":
+        if res_ops.query_resource(res_ops.VM_INSTANCE, conditions)[0].state == "Running":
             break
         time.sleep(1)
     else:
