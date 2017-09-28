@@ -33,7 +33,8 @@ def test():
     host_uuid = host.uuid
     host_ops.reconnect_host(host_uuid)
     vm.reboot()
-    time.sleep(60)
+    test_lib.lib_wait_target_up(vm_ip, '22', 240)
+    time.sleep(10)
     ssh_cmd = 'ssh -i %s -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s echo pass' % (os.environ.get('sshkeyPriKey_file'), vm_ip)
     process_result = test_stub.execute_shell_in_process(ssh_cmd, tmp_file)
     if process_result != 0:
