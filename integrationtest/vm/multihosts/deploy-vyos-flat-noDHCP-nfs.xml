@@ -245,6 +245,9 @@
                   startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
                   netmask="$ipRangeNetmask" />
                 <dns>$DNSServer</dns>
+                <networkService provider="SecurityGroup">
+                <serviceType>SecurityGroup</serviceType>
+                </networkService>
               </l3BasicNetwork>
             </l3Networks>
           </l2NoVlanNetwork>
