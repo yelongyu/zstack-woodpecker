@@ -311,16 +311,17 @@
                   gateway="$vlanIpRangeGateway1"
                   netmask="$vlanIpRangeNetmask1"/>
                 <dns>$DNSServer</dns>
-                <networkService provider="vrouter">
-                  <serviceType>CentralizedDNS</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
-                  <serviceType>Eip</serviceType>
-                </networkService>
-                <networkService provider="Flat Network Service Provider">
-                  <serviceType>DHCP</serviceType>
-                </networkService>
+              <networkService provider="vrouter">
+                <serviceType>IPsec</serviceType>
+                <serviceType>VRouterRoute</serviceType>
+                <serviceType>CentralizedDNS</serviceType>
+                <serviceType>VipQos</serviceType>
+                <serviceType>DNS</serviceType>
+                <serviceType>SNAT</serviceType>
+                <serviceType>LoadBalancer</serviceType>
+                <serviceType>PortForwarding</serviceType>
+                <serviceType>Eip</serviceType>
+              </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
                 </networkService>
@@ -338,16 +339,9 @@
                 domain_name = "$L3VlanNetworkDomainName2">
                 <ipRange name="$vlanIpRangeName2" startIp="$vlanIpRangeStart2" endIp="$vlanIpRangeEnd2" gateway="$vlanIpRangeGateway2" netmask="$vlanIpRangeNetmask2"/>
                 <dns>$DNSServer</dns>
-                <networkService provider="vrouter">
-                  <serviceType>CentralizedDNS</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
-                  <serviceType>Eip</serviceType>
-                </networkService>
-                <networkService provider="Flat Network Service Provider">
-                  <serviceType>DHCP</serviceType>
-                </networkService>
+              <networkService provider="Flat Network Service Provider">
+                <serviceType>Eip</serviceType>
+              </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
                 </networkService>
@@ -365,16 +359,17 @@
                 domain_name = "$L3VlanNetworkDomainName3">
                 <ipRange name="$vlanIpRangeName3" startIp="$vlanIpRangeStart3" endIp="$vlanIpRangeEnd3" gateway="$vlanIpRangeGateway3" netmask="$vlanIpRangeNetmask3"/>
                 <dns>$DNSServer</dns>
-                <networkService provider="vrouter">
-                  <serviceType>CentralizedDNS</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
-                  <serviceType>Eip</serviceType>
-                </networkService>
-                <networkService provider="Flat Network Service Provider">
-                  <serviceType>DHCP</serviceType>
-                </networkService>
+              <networkService provider="vrouter">
+                <serviceType>IPsec</serviceType>
+                <serviceType>VRouterRoute</serviceType>
+                <serviceType>CentralizedDNS</serviceType>
+                <serviceType>VipQos</serviceType>
+                <serviceType>DNS</serviceType>
+                <serviceType>SNAT</serviceType>
+                <serviceType>LoadBalancer</serviceType>
+                <serviceType>PortForwarding</serviceType>
+                <serviceType>Eip</serviceType>
+              </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
                 </networkService>
