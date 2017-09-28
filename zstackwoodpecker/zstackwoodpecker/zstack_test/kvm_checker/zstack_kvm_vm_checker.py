@@ -146,6 +146,14 @@ class zstack_kvm_vm_network_checker(checker_header.TestChecker):
             if not 'DHCP' in test_lib.lib_get_l3_service_type(nic.l3NetworkUuid):
                 test_util.test_logger("Skip [VR:] %s, since it doesn't provide DHCP service" % vr_vm.uuid)
                 continue
+            else:
+                break
+        else:
+            test_util.test_logger("Checker result FAILED: no DHCP in l3s")
+            return self.judge(False)
+
+        for vr_vm in vr_vms:
+            nic = test_lib.lib_get_vm_nic_by_vr(vm, vr_vm)
 
             guest_ip = nic.ip
             command = 'ping -c 5 -W 5 %s >/tmp/ping_result 2>&1; ret=$?; cat /tmp/ping_result; exit $ret' % guest_ip
