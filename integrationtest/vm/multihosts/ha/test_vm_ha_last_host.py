@@ -75,6 +75,7 @@ def test():
     vr_hosts = test_stub.get_host_has_vr()
     mn_hosts = test_stub.get_host_has_mn()
     nfs_hosts = test_stub.get_host_has_nfs()
+    test_stub.test_skip('debug')
     test_stub.ensure_vm_not_on(vm.get_vm().uuid, vm.get_vm().hostUuid, vr_hosts+mn_hosts+nfs_hosts)
 
     #vm.check()
