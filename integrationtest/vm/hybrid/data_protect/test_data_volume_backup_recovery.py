@@ -1,6 +1,6 @@
 '''
 
-New Integration Test for data protect under hybrid.
+New Integration Test for data volume backup to and recovery from disaster bs.
 
 @author: Glody 
 '''
@@ -45,7 +45,7 @@ def test():
     volume_option.set_name('data_volume_for_data_protect_test')
     volume_option.set_primary_storage_uuid(primary_storage_uuid)
     data_volume = vol_ops.create_volume_from_offering(volume_option)
-    #Create data volume template
+    #CreateDataVolumeTemplateFromVolume
     data_volume_uuid = data_volume.uuid 
     image_option = test_util.ImageOption()
     image_option.set_data_volume_uuid(data_volume_uuid)
@@ -85,7 +85,6 @@ def test():
     try:
         #Try to recovery the same image again, it's negative test
         recovery_image = img_ops.recovery_image_from_image_store_backup_storage(local_bs_uuid, disaster_bs_uuid, disaster_bs_image_uuid)
-
     except Exception,e:
         if str(e).find('already contains it') != -1:
             test_util.test_pass('Try to recovery the same image again and get the error info expectly: %s' %str(e))
