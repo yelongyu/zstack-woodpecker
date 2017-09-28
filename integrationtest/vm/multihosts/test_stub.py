@@ -64,8 +64,9 @@ def create_volume(volume_creation_option=None):
 def create_vr_vm(vm_name, image_name, l3_name):
     imagename = os.environ.get(image_name)
     l3name = os.environ.get(l3_name)
-
-    return create_vm(vm_name, imagename, l3name)
+    vm = create_vm(vm_name, imagename, l3name)
+    vm.check = test_lib.checker_wrapper(vm, 'DHCP', test_lib.lib_get_l3_by_name(l3_name).uuid)
+    return vm
 
 def create_vm(vm_name, image_name, l3_name):
     vm_creation_option = test_util.VmOption()
@@ -923,7 +924,10 @@ def get_another_ip_of_host(ip, username, password):
 
 
 def generate_pub_test_vm(tbj):
-    disk_offering_uuids = [random.choice(res_ops.get_resource(res_ops.DISK_OFFERING)).uuid]
+    if res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].type == inventory.LOCAL_STORAGE_TYPE:
+        disk_offering_uuids = None
+    else:
+        disk_offering_uuids = [random.choice(res_ops.get_resource(res_ops.DISK_OFFERING)).uuid]
     l3_name_list = ['l3PublicNetworkName', 'l3NoVlanNetworkName1', 'l3NoVlanNetworkName2']
 
     pub_l3_vm, vm1, vm2 = [create_vm_with_random_offering(vm_name='test_vm',
