@@ -621,6 +621,62 @@ def get_sce_hosts(scenarioConfig, scenarioFile):
                         host_list.append(s_vm)
     return host_list
 
+def get_host_has_vr():
+    cond = res_ops.gen_query_conditions('type', '=', 'ApplianceVm')
+    vr_list = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
+    host_list = []
+    for vr in vr_list:
+        if vr.hostUuid not in host_list:
+            host_list.append(vr.hostUuid)
+    return host_list
+
+def get_host_has_mn():
+    mns = res_ops.query_resource(res_ops.MANAGEMENT_NODE)
+    mn_host = []
+    host_list = []
+    for mn in mns:
+        if mn.hostName not in mn_host:
+            mn_host.append(mn.hostName)
+
+    hosts = res_ops.query_resource(res_ops.HOST)
+    for host in hosts:
+        if host.managementIp in mn_host:
+            if host.uuid not in host_list:
+                host_list.append(host.uuid)
+   
+    return host_list
+
+def get_host_has_nfs():
+    cond = res_ops.gen_query_conditions('type', '=', 'NFS')
+    primarystorages = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
+    host_list = []
+    nfs_list = []
+    for primarystorage in primarystorages:
+        nfs_ps_url = primarystorage.url
+        nfs_host_ip, nfs_path = nfs_ps_url.split(':', 1)
+        if nfs_host_ip not in nfs_list:
+            nfs_list.append(nfs_host_ip)
+
+    hosts = res_ops.query_resource(res_ops.HOST)
+    for host in hosts:
+        if host.managementIp in nfs_list:
+            if host.uuid not in host_list:
+                host_list.append(host.uuid)
+
+    return host_list
+
+def ensure_vm_not_on(vm_uuid, host_uuid, host_list):
+    if host_uuid not in host_list:
+        return True
+    cond1 = res_ops.gen_query_conditions('state', '=', 'Enabled')
+    cond1 = res_ops.gen_query_conditions('status', '=', 'Connected', cond1)
+    candidate_hosts = res_ops.query_resource(res_ops.HOST, cond1)
+    for candidate_host in candidate_hosts:
+        if candidate_host.uuid not in host_list:
+            vm_ops.migrate_vm(vm_uuid, candidate_host.uuid)
+            return True
+    return False
+          
 
 def ensure_host_has_no_vr(host_uuid):
     cond = res_ops.gen_query_conditions('type', '=', 'ApplianceVm')
