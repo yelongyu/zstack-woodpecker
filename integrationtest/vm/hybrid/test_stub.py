@@ -378,8 +378,6 @@ class HybridObject(object):
         self.check_resource('delete', 'gatewayId', self.vpn_gateway.gatewayId, 'query_vpc_vpn_gateway_local')
 
     def update_vpn_gateway(self, name=None, description=None):
-        name = 'vpn-gateway-%s' % _postfix
-        description = 'vpn-gateway-for-test-%s' % _postfix
         vpn_gateway_attr = {'name':name,
                             'description':description,
                             }
@@ -640,18 +638,18 @@ class HybridObject(object):
             self.vbr_desc = self.vbr.description
 
     def update_vbr(self, name=None, description=None):
-        name = 'aliyun-vbr-%s' % _postfix
-        description = 'test-aliyun-vbr-%s' % _postfix
-        vbr_attr = {'name':name,
-                    'description':description,
-                    }
-        for k in vbr_attr.keys():
-            if vbr_attr[k]:
-                hyb_ops.update_vbr(self.vbr.uuid, **vbr_attr)
-                self.sync_vbr(get_org_name=False)
-                vbr_attr_eq = "self.vbr.%s == '%s'" % (k, vbr_attr[k])
-                assert eval(vbr_attr_eq)
-        hyb_ops.update_vbr(self.vbr.uuid, name=self.vbr_name, description=self.vbr_desc)
+        if name or description:
+            vbr_attr = {'name':name,
+                        'description':description,
+                        }
+            for k in vbr_attr.keys():
+                if vbr_attr[k]:
+                    hyb_ops.update_vbr(self.vbr.uuid, **vbr_attr)
+                    self.sync_vbr(get_org_name=False)
+                    vbr_attr_eq = "self.vbr.%s == '%s'" % (k, vbr_attr[k])
+                    assert eval(vbr_attr_eq)
+        else:
+            hyb_ops.update_vbr(self.vbr.uuid, name=self.vbr_name, description=self.vbr_desc)
 
     def create_user_vpn_gateway(self):
         if not self.user_gw_ip:
