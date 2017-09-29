@@ -14,7 +14,7 @@ import apibinding.inventory as inventory
 import threading
 import time
 import uuid
-threads_num = 5
+threads_num = 3
 vms = [None] * threads_num
 threads = [None] * threads_num
 migrate_jobs = [None] * threads_num
