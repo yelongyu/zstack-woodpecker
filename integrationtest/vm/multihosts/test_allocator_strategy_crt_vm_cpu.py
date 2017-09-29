@@ -144,7 +144,7 @@ def test():
     cpuNum = 5
     #cpuSpeed = 16
     #memorySize = 536870912
-    memorySize = 268435456
+    memorySize = 134217728
     name = 'vm-offering-allocator-strategy'
     new_offering_option = test_util.InstanceOfferingOption()
     new_offering_option.set_cpuNum(cpuNum)
