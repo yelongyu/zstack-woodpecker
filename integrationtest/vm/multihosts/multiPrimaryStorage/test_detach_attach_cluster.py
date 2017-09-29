@@ -17,7 +17,7 @@ _config_ = {
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
-VM_COUNT = 2
+VM_COUNT = 1
 VOLUME_NUMBER = 0
 new_ps_list = []
 detached_ps_list = []

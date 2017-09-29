@@ -17,7 +17,7 @@ _config_ = {
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 new_ps_list = []
-VM_COUNT = 10
+VM_COUNT = 1
 
 
 @test_stub.skip_if_local_nfs

@@ -23,7 +23,7 @@ _config_ = {
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 new_ps_list = []
-VM_COUNT = 5
+VM_COUNT = 1
 DATA_VOLUME_NUMBER = 10
 
 record = dict()

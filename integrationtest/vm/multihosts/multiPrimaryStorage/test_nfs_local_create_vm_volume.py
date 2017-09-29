@@ -15,7 +15,7 @@ _config_ = {
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
-VM_COUNT = 10
+VM_COUNT = 1
 DATA_VOLUME_NUMBER = 10
 
 
