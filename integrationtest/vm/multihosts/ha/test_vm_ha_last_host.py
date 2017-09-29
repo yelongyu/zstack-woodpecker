@@ -75,7 +75,7 @@ def test():
     vr_hosts = test_stub.get_host_has_vr()
     mn_hosts = test_stub.get_host_has_mn()
     nfs_hosts = test_stub.get_host_has_nfs()
-    test_stub.test_skip('debug')
+    #test_stub.test_skip('debug')
     test_stub.ensure_vm_not_on(vm.get_vm().uuid, vm.get_vm().hostUuid, vr_hosts+mn_hosts+nfs_hosts)
 
     #vm.check()
@@ -88,8 +88,8 @@ def test():
     os.system('bash -ex %s %s' % (os.environ.get('hostForceStopScript'), host_ip))
     test_util.test_logger("host is expected to shutdown for a while")
 
-    test_util.test_logger("wait for 180 seconds")
-    time.sleep(180)
+    test_util.test_logger("wait for 240 seconds")
+    time.sleep(240)
     vm.update()
     if test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp == host_ip:
 	test_util.test_fail("VM is expected to start running on another host")

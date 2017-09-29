@@ -604,7 +604,9 @@ def get_host_network_status(host_ip, scenarioConfig):
         test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s with username %s" %(host_inv.managementIp, host_password, host_password2, host_username))
 
 
-def get_sce_hosts(scenarioConfig, scenarioFile):
+def get_sce_hosts():
+    scenarioConfig = test_lib.all_scenario_config
+    scenarioFile = test_lib.scenario_file
     host_list = []
 
     if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
@@ -620,6 +622,15 @@ def get_sce_hosts(scenarioConfig, scenarioFile):
                     if s_vm.name_ == vm.name_:
                         host_list.append(s_vm)
     return host_list
+
+def get_sce_host_by_ip(host_ip):
+    sce_host_list = get_sce_hosts()
+    for sce_host in sce_host_list:
+        for sce_ip in xmlobject.safe_list(sce_host.ips.ip):
+            if sce_ip.ip_ == host_ip:
+                return sce_host
+
+    return None
 
 def get_host_has_vr():
     cond = res_ops.gen_query_conditions('type', '=', 'ApplianceVm')
@@ -643,6 +654,12 @@ def get_host_has_mn():
         if host.managementIp in mn_host:
             if host.uuid not in host_list:
                 host_list.append(host.uuid)
+        else:
+            sce_host = get_sce_host_by_ip(host.managementIp)
+            if sce_host != None:
+                for sce_ip in xmlobject.safe_list(sce_host.ips.ip):
+                    if sce_ip.ip_ in mn_host:
+                        host_list.append(host.uuid)
    
     return host_list
 
@@ -662,6 +679,12 @@ def get_host_has_nfs():
         if host.managementIp in nfs_list:
             if host.uuid not in host_list:
                 host_list.append(host.uuid)
+        else:
+            sce_host = get_sce_host_by_ip(host.managementIp)
+            if sce_host != None:
+                for sce_ip in xmlobject.safe_list(sce_host.ips.ip):
+                    if sce_ip.ip_ in nfs_list:
+                        host_list.append(host.uuid)
 
     return host_list
 
