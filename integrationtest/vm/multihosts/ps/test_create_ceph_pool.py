@@ -31,7 +31,7 @@ def test():
         ps = res_ops.query_resource(res_ops.CEPH_PRIMARY_STORAGE)[0]
     except Exception as e:
         test_util.test_dsc(str(e))
-        test_util.test_fail('Fail to find ceph ps')
+        test_util.test_skip('Skip for not finding ceph ps')
     ps_uuid = ps.uuid
     try:
         ceph_node_ip = ps.mons[0].monAddr
