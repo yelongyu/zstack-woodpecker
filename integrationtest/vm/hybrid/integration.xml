@@ -64,5 +64,7 @@
         <case timeout='600' repeat='1' noparallel='True'>data_protect/test_add_disaster_bs.py</case>
         <case timeout='600' repeat='1' noparallel='True'>data_protect/test_add_image_to_backup_recovery.py</case>
         <case timeout='600' repeat='1' noparallel='True'>data_protect/test_data_volume_backup_recovery.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>data_protect/test_image_backup_recovery.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>data_protect/test_root_volume_backup_recovery.py</case>
     </suite>
 </integrationTest>
