@@ -11,7 +11,7 @@ import zstackwoodpecker.test_util as test_util
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
-
+@test_stub.skip_if_have_local
 def test():
 
     pub_l3_vm, vm1, vm2 = test_stub.generate_pub_test_vm(tbj=test_obj_dict)
