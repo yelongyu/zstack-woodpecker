@@ -56,7 +56,7 @@ def test():
     sps_num = res_ops.query_resource_count(res_ops.VOLUME_SNAPSHOT, cond)
 
     if sps_num != ori_num:
-        test_util_test_fail('Create %d snapshots, but only %d snapshots were successfully created' % (ori_num, sps_num))
+        test_util.test_fail('Create %d snapshots, but only %d snapshots were successfully created' % (ori_num, sps_num))
 
     test_num = 100
     snapshot_list = snapshots.get_snapshot_list()
