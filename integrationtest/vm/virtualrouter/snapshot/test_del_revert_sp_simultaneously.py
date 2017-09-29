@@ -49,7 +49,7 @@ def test():
         thread.start()
         index += 1
 
-    while threading.activeCount() > 1:
+    while threading.activeCount() > 0:
         time.sleep(0.1)
 
     cond = res_ops.gen_query_conditions('volumeUuid', '=', root_volume.get_volume().uuid)
