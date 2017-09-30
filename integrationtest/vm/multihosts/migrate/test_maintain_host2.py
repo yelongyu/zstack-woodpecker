@@ -33,7 +33,6 @@ import os
 import random
 
 _config_ = {
-        'timeout' : 1000,
         'noparallel' : True
         }
 
