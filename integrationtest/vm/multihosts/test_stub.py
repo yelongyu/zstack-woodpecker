@@ -604,9 +604,7 @@ def get_host_network_status(host_ip, scenarioConfig):
         test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s with username %s" %(host_inv.managementIp, host_password, host_password2, host_username))
 
 
-def get_sce_hosts():
-    scenarioConfig = test_lib.all_scenario_config
-    scenarioFile = test_lib.scenario_file
+def get_sce_hosts(scenarioConfig=test_lib.all_scenario_config, scenarioFile=test_lib.scenario_file):
     host_list = []
 
     if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
