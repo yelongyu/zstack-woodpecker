@@ -815,6 +815,10 @@ class PSEnvChecker(object):
         return self.is_one_ps_env and self.ps_list[0].type == inventory.NFS_PRIMARY_STORAGE_TYPE
 
     @property
+    def is_one_smp_env(self):
+        return self.is_one_ps_env and self.ps_list[0].type == "SharedMountPoint"
+
+    @property
     def is_multi_ps_env(self):
         return len(self.ps_list) >= 2
 
@@ -837,6 +841,15 @@ class PSEnvChecker(object):
         return True
 
     @property
+    def is_multi_smp_env(self):
+        if not self.is_multi_ps_env:
+            return False
+        for ps in self.ps_list:
+            if ps.type != "SharedMountPoint":
+                return False
+        return True
+
+    @property
     def is_local_nfs_env(self):
         return True if self.have_local and self.have_nfs else False
 
@@ -844,6 +857,13 @@ class PSEnvChecker(object):
     def have_local(self):
         for ps in self.ps_list:
             if ps.type == inventory.LOCAL_STORAGE_TYPE:
+                return True
+        return False
+
+    @property
+    def have_smp(self):
+        for ps in self.ps_list:
+            if ps.type == "SharedMountPoint":
                 return True
         return False
 
@@ -866,6 +886,11 @@ class PSEnvChecker(object):
         if not self.have_nfs:
             raise EnvironmentError
         return random.choice([ps for ps in self.ps_list if ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE])
+
+    def get_random_smp(self):
+        if not self.have_nfs:
+            raise EnvironmentError
+        return random.choice([ps for ps in self.ps_list if ps.type == "SharedMountPoint"])
 
     def get_two_ps(self):
         if not self.is_multi_ps_env:
