@@ -4,7 +4,6 @@
 
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
-import functools
 import os
 import random
 import zstackwoodpecker.test_util as test_util
@@ -13,8 +12,8 @@ import time
 
 
 _config_ = {
-        'timeout' : 1000,
-        'noparallel' : True
+        'timeout': 1000,
+        'noparallel': True
         }
 
 
@@ -23,16 +22,24 @@ test_obj_dict = test_state.TestStateDict()
 
 
 
-case_flavor = dict(c6_cpu=            dict(image='imageName_i_c6', add_cpu=True, add_memory=True, need_online=False),
-                   c6_cpu_mem=        dict(image='imageName_i_c7', add_cpu=True, add_memory=True, need_online=False),
-                   c7_cpu_mem=        dict(image=None, add_cpu=True, add_memory=True, need_online=False),
-                   u12_cpu_online=    dict(image=None, add_cpu=True, add_memory=True, need_online=False),
-                   u12_cpu_mem_online=dict(image=None, add_cpu=True, add_memory=True, need_online=False),
-                   u13_cpu_online=    dict(image=None, add_cpu=True, add_memory=True, need_online=False),
-                   u13_cpu_mem_online=dict(image=None, add_cpu=True, add_memory=True, need_online=False),
-                   u14_mem_online=    dict(image=None, add_cpu=True, add_memory=True, need_online=False),
-                   u15_cpu_mem_online=dict(image=None, add_cpu=True, add_memory=True, need_online=False),
-                   u16_cpu_mem_online=dict(image=None, add_cpu=True, add_memory=True, need_online=False)
+case_flavor = dict(c6_cpu=            dict(image='imageName_i_c6', add_cpu=True, add_memory=False, need_online=False),
+                   c7_cpu=            dict(image='imageName_i_c7', add_cpu=True, add_memory=False, need_online=False),
+                   u12_cpu=           dict(image='imageName_i_u12', add_cpu=True, add_memory=False, need_online=True),
+                   u13_cpu=           dict(image='imageName_i_u13', add_cpu=True, add_memory=False, need_online=True),
+                   u14_cpu=           dict(image='imageName_i_u14', add_cpu=True, add_memory=False, need_online=True),
+                   u15_cpu=           dict(image='imageName_i_u15', add_cpu=True, add_memory=False, need_online=True),
+                   u16_cpu=           dict(image='imageName_i_u16', add_cpu=True, add_memory=False, need_online=True),
+                   c6_mem=            dict(image='imageName_i_c6', add_cpu=False, add_memory=True, need_online=False),
+                   c7_mem=            dict(image='imageName_i_c7', add_cpu=False, add_memory=True, need_online=True),
+                   u12_mem=           dict(image='imageName_i_u12', add_cpu=False, add_memory=True, need_online=True),
+                   u16_mem=           dict(image='imageName_i_u16', add_cpu=False, add_memory=True, need_online=True),
+                   c6_cpu_mem=        dict(image='imageName_i_c6', add_cpu=True, add_memory=True, need_online=False),
+                   c7_cpu_mem=        dict(image='imageName_i_c7', add_cpu=True, add_memory=True, need_online=True),
+                   u12_cpu_mem=       dict(image='imageName_i_u12', add_cpu=True, add_memory=True, need_online=True),
+                   u13_cpu_mem=       dict(image='imageName_i_u13', add_cpu=True, add_memory=True, need_online=True),
+                   u14_cpu_mem=       dict(image='imageName_i_u14', add_cpu=True, add_memory=True, need_online=True),
+                   u15_cpu_mem=       dict(image='imageName_i_u15', add_cpu=True, add_memory=True, need_online=True),
+                   u16_cpu_mem=       dict(image='imageName_i_u16', add_cpu=True, add_memory=True, need_online=True),
                    )
 
 
@@ -57,7 +64,7 @@ def test():
 
     with test_stub.CapacityCheckerContext(vm, cpu_change, mem_change):
         vm_ops.update_vm(vm.get_vm().uuid, vm_instance_offering.cpuNum+cpu_change,
-                            vm_instance_offering.memorySize+mem_change)
+                         vm_instance_offering.memorySize+mem_change)
         vm.update()
         if flavor['need_online']:
             test_stub.online_hotplug_cpu_memory(vm)
@@ -66,9 +73,6 @@ def test():
     test_util.test_dsc("STEP4: Destroy test object")
     test_lib.lib_error_cleanup(test_obj_dict)
     test_util.test_pass('VM online change instance offering Test Pass')
-
-
-
 
 
 def error_cleanup():
