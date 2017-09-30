@@ -2,7 +2,7 @@
 
 New Integration Test for License.
 
-@author: Quarkonics
+@author: ye
 '''
 
 import zstackwoodpecker.test_util as test_util
@@ -24,6 +24,8 @@ nodeUserName = os.environ.get('nodeUserName')
 
 def test():
 
+    global bs_username, bs_hostname, bs_password, bs_name, bs_username, bs_url, bs_sshport
+    
     file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '1', 'Prepaid', '1', '')
     test_stub.load_license(file_path)
     issued_date = test_stub.get_license_info().issuedDate
@@ -32,13 +34,17 @@ def test():
 
     test_util.test_logger('create zone and add the bs of the imagestore')
     node_uuid = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].uuid
-    test_stub.create_zone(zone_name)
+    test_stub.create_zone()
     zone_uuid = res_ops.query_resource(res_ops.ZONE)[0].uuid
     print zone_uuid    
 
-    bs_username = os.environ.get('node1Ip')
+
+    bs_name = 'BS1'
+    bs_hostname = os.environ.get('node1Ip')
     bs_username = os.environ.get('nodeUserName')
     bs_password = os.environ.get('nodePassword')
+    bs_url = '/zstack_bs'
+    bs_sshport = '22'
     test_stub.create_image_store_backup_storage(bs_name, bs_hostname, bs_username, bs_password, bs_url, bs_sshport)
     bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0].uuid
     print bs_uuid
