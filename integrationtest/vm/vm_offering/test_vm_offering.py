@@ -43,10 +43,10 @@ case_flavor = dict(c6_cpu=            dict(image='imageName_i_c6', add_cpu=True,
                    )
 
 
-flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
 
 
 def test():
+    flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     test_util.test_dsc("STEP1: Ceate vm instance offering")
     vm_instance_offering = test_lib.lib_create_instance_offering(cpuNum=1, memorySize=1024*1024*1024)
     test_obj_dict.add_instance_offering(vm_instance_offering)
