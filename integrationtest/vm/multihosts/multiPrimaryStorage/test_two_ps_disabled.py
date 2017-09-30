@@ -21,7 +21,6 @@ new_ps_list = []
 disabled_ps_list = []
 
 
-@test_stub.skip_if_local_nfs
 def test():
     env = test_stub.TwoPrimaryStorageEnv(test_object_dict=test_obj_dict,
                                          first_ps_vm_number=VM_COUNT,

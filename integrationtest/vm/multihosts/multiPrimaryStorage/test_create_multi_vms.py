@@ -20,7 +20,6 @@ new_ps_list = []
 VM_COUNT = 1
 
 
-@test_stub.skip_if_local_nfs
 def test():
     test_util.test_dsc("Create {0} vm in the first primaryStorage".format(VM_COUNT))
     ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
