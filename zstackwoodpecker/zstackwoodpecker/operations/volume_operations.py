@@ -108,6 +108,15 @@ def detach_volume(volume_uuid, vm_uuid=None, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
+def resize_volume(volume_uuid, size, session_uuid=None):
+    action = api_actions.ResizeRootVolumeAction()
+    action.uuid = volume_uuid
+    action.size = size
+    action.timeout = 240000
+    test_util.action_logger('Resize Volume [uuid:] %s to %s' % (volume_uuid, size))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    return evt.inventory
+
 def create_snapshot(snapshot_option, session_uuid=None):
     action = api_actions.CreateVolumeSnapshotAction()
     action.volumeUuid = snapshot_option.get_volume_uuid()
