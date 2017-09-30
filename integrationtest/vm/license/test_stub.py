@@ -11,6 +11,10 @@ import time
 import datetime
 import uuid
 
+import apibinding.api_actions as api_actions
+import account_operations
+import apibinding.inventory as inventory
+
 import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
@@ -149,4 +153,25 @@ def license_date_cal(issued_date, duration):
         expired_time = issued_time + duration
         expired_date = datetime.datetime.fromtimestamp(expired_time).strftime('%Y-%m-%dT%H:%M:%S.000+08:00')
     return expired_date
+
+def create_zone(zone_name='ZONE1', session_uuid=None):
+    action = api_actions.CreateZoneAction()
+    action.name = zone_name
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Add Zone [uuid:] %s [name:] %s' % \
+            (evt.uuid, action.name))
+    return evt.inventory
+
+def create_image_store_backup_storage(bs_name='BS1', bs_hostname, bs_username='root', bs_password, bs_url='/bs1', bs_sshport='22', session_uuid=None):
+    action = api_actions.AddImageStoreBackupStorageAction()
+    action.name = bs_name
+    action.url = bs_url
+    action.hostname = bs_hostname
+    action.username = bs_username
+    action.password = bs_password
+    action.sshPort = bs_sshport
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Create Sftp Backup Storage [uuid:] %s [name:] %s' % \
+            (evt.inventory.uuid, action.name))
+    return evt.inventory
 
