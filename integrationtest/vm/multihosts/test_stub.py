@@ -851,7 +851,11 @@ class PSEnvChecker(object):
 
     @property
     def is_local_nfs_env(self):
-        return True if self.have_local and self.have_nfs else False
+        return self.have_local and self.have_nfs
+
+    @property
+    def is_local_smp_env(self):
+        return self.have_local and self.have_smp
 
     @property
     def have_local(self):
@@ -897,6 +901,8 @@ class PSEnvChecker(object):
             raise EnvironmentError
         if self.is_local_nfs_env:
             return self.get_random_local(), self.get_random_nfs()
+        elif self.is_local_smp_env:
+            return self.get_random_local(), self.get_random_smp()
         else:
             return random.sample(self.ps_list, 2)
 
