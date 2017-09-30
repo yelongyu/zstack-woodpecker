@@ -58,7 +58,7 @@ def test():
     vm.check()
 
     cpu_change = random.randint(1, 5) if flavor['add_cpu'] else 0
-    mem_change = random.randint(1, 500)*1024*1024 if flavor['add_mem'] else 0
+    mem_change = random.randint(1, 500)*1024*1024 if flavor['add_memory'] else 0
 
     test_util.test_dsc("STEP3: Hot Plugin CPU: {} and Memory: {} and check capacity".format(cpu_change, mem_change))
 
