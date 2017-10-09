@@ -46,10 +46,12 @@ def test():
                                                   disk_offering_uuids=disk_offering_uuids,
                                                   ps_uuid=local_ps.uuid if flavor["root_vol"] is LOCAL else shared_ps.uuid,
                                                   l3_name='l3VlanNetworkName1',
+                                                  image_name='imageName_net',
                                                   system_tags=['primaryStorageUuidForDataVolume::{}'.format(local_ps.uuid if flavor["data_vol"] in (LOCAL, MIXED)
                                                                                                             else shared_ps.uuid)])
 
     test_obj_dict.add_vm(vm)
+    vm.check()
 
     if flavor['data_vol'] is MIXED:
         test_util.test_dsc("Create volume from shared_ps and attached to VM")
