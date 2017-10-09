@@ -44,12 +44,12 @@ def test():
     test_util.test_dsc("Create VM: {}".format(os.environ.get('CASE_FLAVOR')))
 
     vm = test_stub.create_vm_with_random_offering(vm_name='test_vm',
-                                                  disk_offering_uuids=disk_offering_uuids,
+                                                  disk_offering_uuids=disk_offering_uuids if flavor["data_vol"] else None,
                                                   ps_uuid=local_ps.uuid if flavor["root_vol"] is LOCAL else shared_ps.uuid,
                                                   l3_name='l3VlanNetworkName1',
                                                   image_name='imageName_net',
                                                   system_tags=['primaryStorageUuidForDataVolume::{}'.format(local_ps.uuid if flavor["data_vol"] in (LOCAL, MIXED)
-                                                                                                            else shared_ps.uuid)])
+                                                                                                            else shared_ps.uuid)] if flavor["data_vol"] else None)
 
     test_obj_dict.add_vm(vm)
     vm.check()

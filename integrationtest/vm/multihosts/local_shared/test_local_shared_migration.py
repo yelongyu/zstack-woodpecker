@@ -39,12 +39,10 @@ def test():
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     ps_env = test_stub.PSEnvChecker()
     local_ps, shared_ps = ps_env.get_two_ps()
-    disk_offering_uuids = [random.choice(res_ops.get_resource(res_ops.DISK_OFFERING)).uuid]
 
     test_util.test_dsc("Create VM: {}".format(os.environ.get('CASE_FLAVOR')))
 
     vm = test_stub.create_vm_with_random_offering(vm_name='test_vm',
-                                                  disk_offering_uuids=disk_offering_uuids,
                                                   ps_uuid=local_ps.uuid if flavor["root_vol"] is LOCAL else shared_ps.uuid,
                                                   l3_name='l3VlanNetworkName1',
                                                   image_name='imageName_net')
