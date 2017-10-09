@@ -505,6 +505,23 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
                         cmd = "iptables -w 20 -I INPUT -p tcp -m tcp --dport 2049 -j ACCEPT && iptables -w 20 -I INPUT -p udp -m udp --dport 2049 -j ACCEPT"
                         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
                         return
+            elif primary_storage_type == 'smp':
+                for nfsPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.nfsPrimaryStorage):
+                    if primaryStorageRef.text_ == nfsPrimaryStorage.name_:
+                        test_util.test_logger('[vm:] %s setup nfs service.' % (vm_ip))
+                        # TODO: multiple NFS PS may refer to same host's different DIR
+                        nfsPath = nfsPrimaryStorage.url_.split(':')[1]
+                        cmd = "echo '%s *(rw,sync,no_root_squash)' > /etc/exports" % (nfsPath)
+                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                        cmd = "mkdir -p %s && service rpcbind restart && service nfs restart" % (nfsPath)
+                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                        cmd = "iptables -w 20 -I INPUT -p tcp -m tcp --dport 2049 -j ACCEPT && iptables -w 20 -I INPUT -p udp -m udp --dport 2049 -j ACCEPT"
+                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                        cmd = "mkdir -p /home/smp-ps/"
+                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                        cmd = "mount %s:/home/nfs /home/smp-ps/" %(vm_ip)
+                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                        return
 
 def get_scenario_config_vm(vm_name, scenario_config):
     for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
