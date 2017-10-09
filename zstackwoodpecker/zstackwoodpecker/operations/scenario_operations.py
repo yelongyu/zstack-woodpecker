@@ -506,9 +506,9 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
                         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
                         return
             elif primary_storage_type == 'smp':
-                for nfsPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.nfsPrimaryStorage):
-                    if primaryStorageRef.text_ == nfsPrimaryStorage.name_:
-                        test_util.test_logger('[vm:] %s setup nfs service.' % (vm_ip))
+                for smpPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.sharedMountPointPrimaryStorage):
+                    if primaryStorageRef.text_ == smpPrimaryStorage.name_:
+                        test_util.test_logger('[vm:] %s setup smp service.' % (vm_ip))
                         # TODO: multiple NFS PS may refer to same host's different DIR
                         nfsPath = nfsPrimaryStorage.url_.split(':')[1]
                         cmd = "echo '%s *(rw,sync,no_root_squash)' > /etc/exports" % (nfsPath)
