@@ -55,7 +55,7 @@ def test():
 
     if flavor['data_vol'] is MIXED:
         test_util.test_dsc("Create volume from shared_ps and attached to VM")
-        volume = test_stub.create_multi_volumes(count=1, ps=shared_ps)
+        volume = test_stub.create_multi_volumes(count=1, ps=shared_ps)[0]
         volume.attach(vm)
         vm.check()
         test_obj_dict.add_volume(volume)
