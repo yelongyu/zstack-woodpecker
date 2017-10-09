@@ -1,5 +1,5 @@
 <testConfig>
-    <deployConfig>deploy-local-smp.xml</deployConfig>
-    <deployConfigTemplate>deploy-local-smp.tmpt</deployConfigTemplate>
+    <deployConfig>deploy-vyos-local-smp.xml</deployConfig>
+    <deployConfigTemplate>deploy-vyos-local-smp.tmpt</deployConfigTemplate>
     <pingTestTarget>zstack.org</pingTestTarget>
 </testConfig>
