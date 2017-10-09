@@ -129,16 +129,17 @@ def get_host_by_consul_leader(scenarioConfig, scenarioFile):
     if len(mn_host_list) < 1:
         return []
     host_list = []
-    for host in mn_host_list:
-        host_config = sce_ops.get_scenario_config_vm(host.name_, scenarioConfig)
-        cmd = "consul info |grep -i leader_addr | awk '{print $3}' | awk -F ':' '{print $1}'"
-        try:
+    for i in range(5):
+        for host in mn_host_list:
+            host_config = sce_ops.get_scenario_config_vm(host.name_, scenarioConfig)
+            cmd = "consul info |grep -i leader_addr | awk '{print $3}' | awk -F ':' '{print $1}'"
             host_ip = test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
-        except:
-            test_util.test_logger("@@@host.ip_: %s exception when execute consul info" %(host.ip_))
-            continue
-        if host_ip != "" and host_ip != False and host_ip.count('.') == 3:
-            return host_ip.strip()
+            if host_ip != "" and host_ip != False and host_ip.count('.') == 3:
+                return host_ip.strip()
+            else:
+                test_util.test_logger("@@@host.ip_: %s exception when execute consul info" %(host.ip_))
+        time.sleep(1)
+
     return ""
 
 def get_host_by_mn_vm_consul(scenarioConfig, scenarioFile):
