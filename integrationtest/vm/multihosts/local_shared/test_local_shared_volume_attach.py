@@ -65,6 +65,7 @@ def test():
     for vol in local_vols:
         test_obj_dict.add_volume(vol)
         vol.attach(vm)
+        vol.check()
     vm.check()
 
     test_util.test_dsc("Create volume in shared and attach to VM")
@@ -72,6 +73,7 @@ def test():
     for vol in shared_vols:
         test_obj_dict.add_volume(vol)
         vol.attach(vm)
+        vol.check()
     vm.check()
 
     test_util.test_dsc("detach all volumes")

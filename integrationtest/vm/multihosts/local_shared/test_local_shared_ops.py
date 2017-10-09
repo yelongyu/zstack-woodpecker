@@ -62,13 +62,8 @@ def test():
         vm.check()
 
     test_util.test_dsc("perform basic ops on vm")
-    for action in ('stop', 'start', 'reboot', 'suspend', 'resume'):
-        if action is 'start':
-            time.sleep(30)
+    for action in ('stop', 'start', 'check', 'reboot', 'check', 'suspend', 'resume', 'check'):
         getattr(vm, action)()
-
-    vm.update()
-    vm.check()
 
     test_lib.lib_error_cleanup(test_obj_dict)
 
