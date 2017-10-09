@@ -110,7 +110,7 @@ def test():
         test_stub.migrate_vm_to_random_host(vm)
 
         if local_vol:
-            vol_ops.migrate_volume(local_vol.get_volume().uuid, vm.get_vm.hostUuid)
+            vol_ops.migrate_volume(local_vol.get_volume().uuid, vm.get_vm().hostUuid)
 
         if local_vol:
             local_vol.attach(vm)
