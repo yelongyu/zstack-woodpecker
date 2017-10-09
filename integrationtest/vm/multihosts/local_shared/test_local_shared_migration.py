@@ -68,6 +68,9 @@ def test():
     test_util.test_dsc("Try to perform live migration")
     if flavor['root_vol'] is SHARED and flavor['data_vol'] in (None, SHARED):
         test_stub.migrate_vm_to_random_host(vm)
+    elif flavor['root_vol'] is LOCAL and flavor['data_vol'] is None:
+        test_util.test_dsc("Try to perform local vm live migration")
+        test_stub.migrate_vm_to_random_host(vm)
     else:
         with test_lib.expected_failure("live migration will fail if have local volumes", Exception):
             test_stub.migrate_vm_to_random_host(vm)
@@ -86,7 +89,6 @@ def test():
         vol_ops.migrate_volume(test_lib.lib_get_root_volume(vm.get_vm()).uuid, target_host.uuid)
         if local_vol:
             vol_ops.migrate_volume(local_vol.get_volume().uuid, target_host.uuid)
-        vm.check()
         if shared_vol:
             with test_lib.expected_failure('cold migrate volume in shared ps', Exception):
                 vol_ops.migrate_volume(shared_vol.get_volume().uuid, target_host.uuid)
@@ -99,7 +101,7 @@ def test():
     vm.check()
 
     test_util.test_dsc("Try to perform detached VM hot migration")
-    if flavor['root_vol'] is LOCAL and flavor['data_vol'] in (LOCAL, MIXED):
+    if flavor['root_vol'] is SHARED and flavor['data_vol'] in (LOCAL, MIXED):
         if local_vol:
             local_vol.detach()
         if shared_vol:
