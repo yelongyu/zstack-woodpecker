@@ -890,7 +890,7 @@ class PSEnvChecker(object):
         return random.choice([ps for ps in self.ps_list if ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE])
 
     def get_random_smp(self):
-        if not self.have_nfs:
+        if not self.have_smp:
             raise EnvironmentError
         return random.choice([ps for ps in self.ps_list if ps.type == "SharedMountPoint"])
 
