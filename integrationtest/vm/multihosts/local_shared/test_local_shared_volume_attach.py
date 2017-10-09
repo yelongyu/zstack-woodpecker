@@ -8,8 +8,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.test_state as test_state
 import random
 import os
-import zstackwoodpecker.operations.volume_operations as vol_ops
-import time
+
 
 _config_ = {
         'timeout' : 3000,
@@ -55,21 +54,31 @@ def test():
     if flavor['data_vol'] is MIXED:
         test_util.test_dsc("Create volume from shared_ps and attached to VM")
         volume = test_stub.create_multi_volumes(count=1, ps=shared_ps)
-        test_obj_dict.add_volume(volume)
         volume.attach(vm)
         vm.check()
+        test_obj_dict.add_volume(volume)
 
-    test_util.test_dsc("perform basic ops on vm")
-    for action in ('stop', 'start', 'reboot', 'suspend', 'resume'):
-        if action is 'start':
-            time.sleep(30)
-        getattr(vm, action)()
+    test_util.test_dsc("Create volume in Local and attach to VM")
+    local_vols = test_stub.create_multi_volumes(count=2, host_uuid=vm.get_vm().hostUuid, ps=local_ps)
+    for vol in local_vols:
+        test_obj_dict.add_volume(vol)
+        vol.attach(vm)
+    vm.check()
 
-    vm.update()
+    test_util.test_dsc("Create volume in shared and attach to VM")
+    shared_vols = test_stub.create_multi_volumes(count=2, ps=shared_ps)
+    for vol in shared_vols:
+        test_obj_dict.add_volume(vol)
+        vol.attach(vm)
+    vm.check()
+
+    test_util.test_dsc("detach all volumes")
+    for volume in local_vols +shared_vols:
+        volume.detach()
+
     vm.check()
 
     test_lib.lib_error_cleanup(test_obj_dict)
-
 
 def env_recover():
     test_lib.lib_error_cleanup(test_obj_dict)
