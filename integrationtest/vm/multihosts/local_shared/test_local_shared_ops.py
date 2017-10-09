@@ -9,6 +9,7 @@ import zstackwoodpecker.test_state as test_state
 import random
 import os
 import zstackwoodpecker.operations.volume_operations as vol_ops
+import time
 
 _config_ = {
         'timeout' : 3000,
@@ -58,9 +59,10 @@ def test():
         vm.check()
         test_obj_dict.add_volume(volume)
 
-
     test_util.test_dsc("perform basic ops on vm")
     for action in ('stop', 'check', 'start', 'check', 'reboot', 'check', 'suspend', 'resume', 'check'):
+        if action is 'start':
+            time.sleep(30)
         getattr(vm, action)()
 
     test_lib.lib_error_cleanup(test_obj_dict)

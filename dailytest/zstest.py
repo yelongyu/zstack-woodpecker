@@ -65,7 +65,7 @@ class TestCase(object):
         self.special = False
         self.setup_case = False
         self.teardown_case = False
-        self.flavor = None
+        self.flavors = []
 
     def analyze_test_case(self, candidate):
         self.rla_path = candidate
@@ -106,10 +106,10 @@ class TestCase(object):
         return self.suite
 
     def get_flavor(self):
-        return self.flavor
+        return True if self.flavors else False
 
     def set_flavor(self, flavor):
-        self.flavor = flavor
+        self.flavors.insert(0, flavor)
 
 class TestLib(object):
     '''
@@ -368,7 +368,7 @@ class TestLib(object):
         print_info("Following cases will be executed:")
         for case in self.target_case_list:
             if case.get_flavor():
-                print "\t{}::{}".format(case.get_name_with_suite(), case.get_flavor())
+                print "\t{}::{}".format(case.get_name_with_suite(), case.flavors[-1])
             else:
                 print "\t%s" % case.get_name_with_suite()
             suite_name = case.get_suite()
@@ -390,7 +390,7 @@ class TestLib(object):
             else:
                 case_e = etree.SubElement(suite, "case")
                 if case.get_flavor():
-                    case_e.text = os.path.join(self.test_case_dir, "{}::{}".format(case.get_name_with_suite(), case.get_flavor()))
+                    case_e.text = os.path.join(self.test_case_dir, "{}::{}".format(case.get_name_with_suite(), case.flavors.pop()))
                 else:
                     case_e.text = os.path.join(self.test_case_dir, case.get_name_with_suite())
                 if repeat:
