@@ -49,16 +49,13 @@ def test():
     test_util.test_logger('Check default community license')
     #test_stub.check_license(None, None, 2147483647, False, 'Community')
 
-    bs_ops.reconnect_backup_storage(bs_uuid)
+    try:
+        bs_ops.reconnect_backup_storage(bs_uuid)
+    except Exception, e:
+        if "commercial" in str(e):
+            test_util.test_pass('test reconnect bs failed, An operation failed, details: commercial license is required to use ImageStore.')
+
     test_util.test_logger('reconnect the bs')
-
-    test_util.test_logger('check the BS status')
-    bs_cond = res_ops.gen_query_conditions("status", '=', "Disconnected")
-    bss = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, bs_cond, \
-            None)
-    if not bss:
-        test_util.test_skip("not find available backup storage. Skip test")
-
     test_util.test_pass('Check License Test Success')
 
 #Will be called only if exception happens in test().
