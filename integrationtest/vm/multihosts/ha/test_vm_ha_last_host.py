@@ -75,10 +75,14 @@ def test():
     vr_hosts = test_stub.get_host_has_vr()
     mn_hosts = test_stub.get_host_has_mn()
     nfs_hosts = test_stub.get_host_has_nfs()
+    test_util.test_logger('vr_hosts = %s' % vr_hosts)
+    test_util.test_logger('mn_hosts = %s' % mn_hosts)
+    test_util.test_logger('nfs_hosts = %s' % nfs_hosts)
     #test_stub.test_skip('debug')
     if not test_stub.ensure_vm_not_on(vm.get_vm().uuid, vm.get_vm().hostUuid, vr_hosts+mn_hosts+nfs_hosts):
         test_util.test_fail("Not find out a suitable host")
 
+    vm.update()
     #vm.check()
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
     host_port = test_lib.lib_get_host_port(host_ip)
