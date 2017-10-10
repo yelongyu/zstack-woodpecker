@@ -6,7 +6,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import os
-
+import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 
 _config_ = {
         'timeout' : 3000,
@@ -32,22 +32,29 @@ def test():
     ps_env = test_stub.PSEnvChecker()
     local_ps, shared_ps = ps_env.get_two_ps()
 
+    if flavor['local_enable'] == False:
+        ps_ops.change_primary_storage_state(local_ps.uuid, state='disable')
+    if flavor['shared_enable'] == False:
+        ps_ops.change_primary_storage_state(shared_ps.uuid, state='disable')
+
     test_util.test_dsc("Try to Create VM without specified ps")
     if flavor['local_enable'] or flavor['shared_enable']:
-        vm_list = test_stub.create_multi_vms(name_prefix='test-vm', count=10)
+        vm_list = test_stub.create_multi_vms(name_prefix='test-vm', count=2)
         for vm in vm_list:
+            test_obj_dict.add_vm(vm)
             if flavor['local_enable']:
                 assert test_lib.lib_get_root_volume(vm).primaryStorageUuid == local_ps.uuid
             else:
                 assert test_lib.lib_get_root_volume(vm).primaryStorageUuid == shared_ps.uuid
     else:
         with test_lib.expected_failure('Create vm when no ps enabled', Exception):
-            test_stub.create_multi_vms(name_prefix='test-vm', count=1)
+            test_stub.create_multi_vms(name_prefix='test-vm', count=2)
 
     test_util.test_dsc("Create VM with Volume without specified ps")
     if flavor['local_enable'] or flavor['shared_enable']:
-        vm_list = test_stub.create_multi_vms(name_prefix='test-vm', count=10, data_volume_number=1)
+        vm_list = test_stub.create_multi_vms(name_prefix='test-vm', count=2, data_volume_number=1)
         for vm in vm_list:
+            test_obj_dict.add_vm(vm)
             if flavor['local_enable']:
                 assert test_lib.lib_get_root_volume(vm).primaryStorageUuid == local_ps.uuid
             else:
@@ -60,8 +67,9 @@ def test():
                     assert data_vol.primaryStorageUuid == local_ps.uuid
     else:
         with test_lib.expected_failure('Create vm with volume when no ps enabled', Exception):
-            test_stub.create_multi_vms(name_prefix='test-vm', count=10, data_volume_number=1)
+            test_stub.create_multi_vms(name_prefix='test-vm', count=2, data_volume_number=1)
 
+    test_lib.lib_error_cleanup(test_obj_dict)
 
 
 def env_recover():
