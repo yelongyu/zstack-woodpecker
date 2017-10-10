@@ -22,6 +22,7 @@ disabled_ps_list = []
 LOOP = 5
 
 
+@test_stub.skip_if_local_shared
 def test():
     env = test_stub.TwoPrimaryStorageEnv(test_object_dict=test_obj_dict,
                                          first_ps_vm_number=VM_COUNT,

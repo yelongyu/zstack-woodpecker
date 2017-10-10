@@ -968,6 +968,15 @@ def skip_if_have_nfs(test_method):
     return wrapper
 
 
+def skip_if_local_shared(test_method):
+    @wraps(test_method)
+    def wrapper():
+        if PSEnvChecker().is_local_smp_env or PSEnvChecker().is_local_nfs_env:
+            test_util.test_skip("Skip test if ocal-shared environment")
+        return test_method()
+    return wrapper
+
+
 def skip_if_not_local_shared(test_method):
     @wraps(test_method)
     def wrapper():
@@ -975,6 +984,7 @@ def skip_if_not_local_shared(test_method):
             test_util.test_skip("Skip test if not local-shared environment")
         return test_method()
     return wrapper
+
 
 def wait_until_vm_reach_state(timeout, state, *vm_list):
     total_time = 0
