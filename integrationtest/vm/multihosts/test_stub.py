@@ -414,7 +414,7 @@ class TwoPrimaryStorageEnv(object):
         self._first_ps = ps_list[0]
         if len(ps_list) == 2:
             self._second_ps = ps_list[1]
-        if self._first_ps.type == inventory.LOCAL_STORAGE_TYPE:
+        if self._first_ps.type == inventory.LOCAL_STORAGE_TYPE or self._second_ps.type == inventory.LOCAL_STORAGE_TYPE:
             self._host_uuid = random.choice(res_ops.get_resource(res_ops.HOST)).uuid
 
     def deploy_env(self):
