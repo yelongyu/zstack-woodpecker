@@ -71,8 +71,8 @@ def test():
 
 def env_recover():
     local_ps, shared_ps = test_stub.PSEnvChecker().get_two_ps()
-    if flavor['local_enable'] == False:
+    if local_ps.state == 'Disabled':
         ps_ops.change_primary_storage_state(local_ps.uuid, state='enable')
-    if flavor['shared_enable'] == False:
+    if shared_ps.state == 'Disabled':
         ps_ops.change_primary_storage_state(shared_ps.uuid, state='enable')
     test_lib.lib_error_cleanup(test_obj_dict)
