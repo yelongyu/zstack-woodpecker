@@ -86,7 +86,7 @@ def test():
         if process_result != 0:
             test_util.test_fail('delete /usr/local/zstack fail')
     test_stub.execute_all_install(ssh_cmd1, target_file, tmp_file)
-    test_stub.check_installation(vm1_ip, tmp_file)
+    #test_stub.check_installation(vm1_ip, tmp_file)
 
     test_util.test_dsc('Install multi management node on vm2 and vm3')
     host_list = 'root:password@%s root:password@%s' % (vm2_ip, vm3_ip)
