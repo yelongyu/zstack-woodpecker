@@ -43,9 +43,9 @@ def test():
         for vm in vm_list:
             test_obj_dict.add_vm(vm)
             if flavor['local_enable']:
-                assert test_lib.lib_get_root_volume(vm).primaryStorageUuid == local_ps.uuid
+                assert test_lib.lib_get_root_volume(vm.get_vm()).primaryStorageUuid == local_ps.uuid
             else:
-                assert test_lib.lib_get_root_volume(vm).primaryStorageUuid == shared_ps.uuid
+                assert test_lib.lib_get_root_volume(vm.get_vm()).primaryStorageUuid == shared_ps.uuid
     else:
         with test_lib.expected_failure('Create vm when no ps enabled', Exception):
             test_stub.create_multi_vms(name_prefix='test-vm', count=2)
@@ -56,9 +56,9 @@ def test():
         for vm in vm_list:
             test_obj_dict.add_vm(vm)
             if flavor['local_enable']:
-                assert test_lib.lib_get_root_volume(vm).primaryStorageUuid == local_ps.uuid
+                assert test_lib.lib_get_root_volume(vm.get_vm()).primaryStorageUuid == local_ps.uuid
             else:
-                assert test_lib.lib_get_root_volume(vm).primaryStorageUuid == shared_ps.uuid
+                assert test_lib.lib_get_root_volume(vm.get_vm()).primaryStorageUuid == shared_ps.uuid
 
             for data_vol in [volume for volume in vm.get_vm().allVolumes if volume.type != 'Root']:
                 if flavor['shared_enable']:
