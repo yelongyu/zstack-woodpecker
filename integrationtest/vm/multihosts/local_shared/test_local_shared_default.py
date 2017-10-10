@@ -61,8 +61,18 @@ def test():
         with test_lib.expected_failure('Create vm with volume when no ps enabled', Exception):
             test_stub.create_multi_vms(name_prefix='test-vm', count=2, data_volume_number=1)
 
+    if flavor['local_enable'] == False:
+        ps_ops.change_primary_storage_state(local_ps.uuid, state='enable')
+    if flavor['shared_enable'] == False:
+        ps_ops.change_primary_storage_state(shared_ps.uuid, state='enable')
+
     test_lib.lib_error_cleanup(test_obj_dict)
 
 
 def env_recover():
+    local_ps, shared_ps = test_stub.PSEnvChecker().get_two_ps()
+    if flavor['local_enable'] == False:
+        ps_ops.change_primary_storage_state(local_ps.uuid, state='enable')
+    if flavor['shared_enable'] == False:
+        ps_ops.change_primary_storage_state(shared_ps.uuid, state='enable')
     test_lib.lib_error_cleanup(test_obj_dict)
