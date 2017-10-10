@@ -52,28 +52,12 @@ def test():
     bs_ops.reconnect_backup_storage(bs_uuid)
     test_util.test_logger('reconnect the bs')
 
-    test_util.test_logger('add image')
-    bs_cond = res_ops.gen_query_conditions("status", '=', "Connected")
+    test_util.test_logger('check the BS status')
+    bs_cond = res_ops.gen_query_conditions("status", '=', "Disconnected")
     bss = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, bs_cond, \
             None)
     if not bss:
         test_util.test_skip("not find available backup storage. Skip test")
-
-    image_option = test_util.ImageOption()
-    image_option.set_format('qcow2')
-    image_option.set_name('test_file_url_image')
-    image_option.set_system_tags('qemuga')
-    image_option.set_mediaType('RootVolumeTemplate')
-    image_option.set_url("file:///etc/issue")
-    image_option.set_backup_storage_uuid_list([bss[0].uuid])
-    image_option.set_timeout(600)
-
-    new_image = zstack_image_header.ZstackTestImage()
-    new_image.set_creation_option(image_option)
-
-    new_image.add_root_volume_template()
-    #new_image.delete()
-
 
     test_util.test_pass('Check License Test Success')
 
