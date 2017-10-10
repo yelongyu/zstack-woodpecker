@@ -64,6 +64,7 @@ def test():
         shared_vol = None
 
     vm.check()
+    vm.update()
 
     snapshots_list = []
     for volume in vm.get_vm().allVolumes:
