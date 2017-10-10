@@ -38,33 +38,25 @@ def test():
         ps_ops.change_primary_storage_state(shared_ps.uuid, state='disable')
 
     test_util.test_dsc("Try to Create VM without specified ps")
-    if flavor['local_enable'] or flavor['shared_enable']:
+    if flavor['local_enable']:
         vm_list = test_stub.create_multi_vms(name_prefix='test-vm', count=2)
         for vm in vm_list:
             test_obj_dict.add_vm(vm)
-            if flavor['local_enable']:
-                assert test_lib.lib_get_root_volume(vm.get_vm()).primaryStorageUuid == local_ps.uuid
-            else:
-                assert test_lib.lib_get_root_volume(vm.get_vm()).primaryStorageUuid == shared_ps.uuid
+            assert test_lib.lib_get_root_volume(vm.get_vm()).primaryStorageUuid == local_ps.uuid
     else:
         with test_lib.expected_failure('Create vm when no ps enabled', Exception):
             test_stub.create_multi_vms(name_prefix='test-vm', count=2)
 
     test_util.test_dsc("Create VM with Volume without specified ps")
-    if flavor['local_enable'] or flavor['shared_enable']:
+    if flavor['local_enable'] and flavor['shared_enable']:
         vm_list = test_stub.create_multi_vms(name_prefix='test-vm', count=2, data_volume_number=1)
         for vm in vm_list:
             test_obj_dict.add_vm(vm)
-            if flavor['local_enable']:
-                assert test_lib.lib_get_root_volume(vm.get_vm()).primaryStorageUuid == local_ps.uuid
-            else:
-                assert test_lib.lib_get_root_volume(vm.get_vm()).primaryStorageUuid == shared_ps.uuid
+            assert test_lib.lib_get_root_volume(vm.get_vm()).primaryStorageUuid == local_ps.uuid
 
             for data_vol in [volume for volume in vm.get_vm().allVolumes if volume.type != 'Root']:
-                if flavor['shared_enable']:
-                    assert data_vol.primaryStorageUuid == shared_ps.uuid
-                else:
-                    assert data_vol.primaryStorageUuid == local_ps.uuid
+                assert data_vol.primaryStorageUuid == shared_ps.uuid
+
     else:
         with test_lib.expected_failure('Create vm with volume when no ps enabled', Exception):
             test_stub.create_multi_vms(name_prefix='test-vm', count=2, data_volume_number=1)
