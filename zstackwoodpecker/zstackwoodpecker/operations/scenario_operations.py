@@ -299,6 +299,7 @@ def get_mn_ha_nfs_url(scenario_config, scenario_file, deploy_config):
     return None
 
 
+
 def get_nfs_ip_for_net_sep(scenarioConfig, virtual_host_ip, nfs_ps_name):
     zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
 
@@ -477,7 +478,9 @@ def setup_backupstorage_vm(vm_inv, vm_config, deploy_config):
                     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
                     return
 
+SMP_SERVER_IP = None
 def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
+    global SMP_SERVER_IP
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
     if hasattr(vm_config, 'hostRef'):
         host = get_deploy_host(vm_config.hostRef.text_, deploy_config)
@@ -509,19 +512,25 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
                 for smpPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.sharedMountPointPrimaryStorage):
                     if primaryStorageRef.text_ == smpPrimaryStorage.name_:
                         test_util.test_logger('[vm:] %s setup smp service.' % (vm_ip))
-                        # TODO: multiple NFS PS may refer to same host's different DIR
-                        nfsPath = "/home/nfs"
-                        cmd = "echo '%s *(rw,sync,no_root_squash)' > /etc/exports" % (nfsPath)
-                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-                        cmd = "mkdir -p %s && service rpcbind restart && service nfs restart" % (nfsPath)
-                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-                        cmd = "iptables -w 20 -I INPUT -p tcp -m tcp --dport 2049 -j ACCEPT && iptables -w 20 -I INPUT -p udp -m udp --dport 2049 -j ACCEPT"
-                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-                        cmd = "mkdir -p /home/smp-ps/"
-                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-                        cmd = "mount %s:/home/nfs /home/smp-ps/" %(vm_ip)
-                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-                        return
+                        for primaryStorageRef in xmlobject.safe_list(vm_config.primaryStorageRef):
+                            if primaryStorageRef.type_ == 'smp' and hasattr(primaryStorageRef, 'tag') and primaryStorageRef.tag_ == "smpserver":
+                                nfsPath = "/home/nfs"
+                                cmd = "echo '%s *(rw,sync,no_root_squash)' > /etc/exports" % (nfsPath)
+                                ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                                cmd = "mkdir -p %s && service rpcbind restart && service nfs restart" % (nfsPath)
+                                ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                                cmd = "iptables -w 20 -I INPUT -p tcp -m tcp --dport 2049 -j ACCEPT && iptables -w 20 -I INPUT -p udp -m udp --dport 2049 -j ACCEPT"
+                                ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                                SMP_SERVER_IP = vm_ip
+                                return
+                            else:
+                                if not SMP_SERVER_IP:
+                                    test_util.test_fail("smp server can't be None, SMP_SERVER_IP=%s" %(str(SMP_SERVER_IP)))
+                                cmd = "mkdir -p /home/smp-ps/"
+                                ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                                cmd = "mount %s:/home/nfs /home/smp-ps/" %(SMP_SERVER_IP)
+                                ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                                return
 
 def get_scenario_config_vm(vm_name, scenario_config):
     for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
@@ -1359,7 +1368,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                 share_volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
                                 ocfs2smp_shareable_volume_is_created = True
                             attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
-                        if ps_ref.type_ == 'ZSES':
+                        elif ps_ref.type_ == 'ZSES':
                             if zbs_virtio_scsi_volume_is_created == False and hasattr(ps_ref, 'disk_offering_uuid_'):
                                 zbs_disk_offering_uuid = ps_ref.disk_offering_uuid_
                                 volume_option.set_disk_offering_uuid(zbs_disk_offering_uuid)
