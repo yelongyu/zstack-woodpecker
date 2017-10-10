@@ -513,7 +513,7 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
                     if primaryStorageRef.text_ == smpPrimaryStorage.name_:
                         test_util.test_logger('[vm:] %s setup smp service.' % (vm_ip))
                         for primaryStorageRef in xmlobject.safe_list(vm_config.primaryStorageRef):
-                            if primaryStorageRef.type_ == 'smp' and hasattr(primaryStorageRef, 'tag') and primaryStorageRef.tag_ == "smpserver":
+                            if primaryStorageRef.type_ == 'smp' and hasattr(primaryStorageRef, 'tag_') and primaryStorageRef.tag_ == "smpserver":
                                 nfsPath = "/home/nfs"
                                 cmd = "echo '%s *(rw,sync,no_root_squash)' > /etc/exports" % (nfsPath)
                                 ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
