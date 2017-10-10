@@ -510,7 +510,7 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
                     if primaryStorageRef.text_ == smpPrimaryStorage.name_:
                         test_util.test_logger('[vm:] %s setup smp service.' % (vm_ip))
                         # TODO: multiple NFS PS may refer to same host's different DIR
-                        nfsPath = nfsPrimaryStorage.url_.split(':')[1]
+                        nfsPath = "/home/nfs"
                         cmd = "echo '%s *(rw,sync,no_root_squash)' > /etc/exports" % (nfsPath)
                         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
                         cmd = "mkdir -p %s && service rpcbind restart && service nfs restart" % (nfsPath)
