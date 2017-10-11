@@ -21,11 +21,11 @@ test_obj_dict = test_state.TestStateDict()
 
 DISABLED = 'Disabled'
 ENABLE = 'Enabled'
-MAINTAIMANCE = 'Maintain'
+MAINTENANCE = 'Maintenance'
 
 case_flavor = dict(both_disabled =      dict(local_state=DISABLED, shared_state=DISABLED, reconnect=False, vm_ha=True),
-                   local_maintain=      dict(local_state=MAINTAIMANCE, shared_state=ENABLE, reconnect=False, vm_ha=True),
-                   shared_maintain=     dict(local_state=ENABLE, shared_state=MAINTAIMANCE, reconnect=False, vm_ha=False),
+                   local_maintain=      dict(local_state=MAINTENANCE, shared_state=ENABLE, reconnect=False, vm_ha=True),
+                   shared_maintain=     dict(local_state=ENABLE, shared_state=MAINTENANCE, reconnect=False, vm_ha=False),
                    both_reconnect =     dict(local_state=ENABLE, shared_state=ENABLE, reconnect=True, vm_ha=False),
                    )
 
@@ -63,15 +63,15 @@ def test():
             vm.update()
             assert vm.get_vm().state == inventory.RUNNING
 
-    if flavor['local_state'] is MAINTAIMANCE:
+    if flavor['local_state'] is MAINTENANCE:
         ps_ops.change_primary_storage_state(local_ps.uuid, state='maintain')
         maintain_ps = local_ps
-    if flavor['shared_state'] is MAINTAIMANCE:
+    if flavor['shared_state'] is MAINTENANCE:
         ps_ops.change_primary_storage_state(shared_ps.uuid, state='maintain')
         maintain_ps = shared_ps
     time.sleep(30)
 
-    if MAINTAIMANCE in (flavor['local_state'], flavor['shared_state']):
+    if MAINTENANCE in (flavor['local_state'], flavor['shared_state']):
         vr_vm_list = test_lib.lib_find_vr_by_vm(vm_list[0].get_vm())
         vr_vm = None
         if vr_vm_list:
@@ -84,7 +84,7 @@ def test():
         for vm in vm_list:
             vm.update()
 
-    if flavor['local_state'] is MAINTAIMANCE:
+    if flavor['local_state'] is MAINTENANCE:
         for vm in (vm_root_local, vm_root_local_data_local,vm_root_local_data_shared, vm_root_local_data_mixed,
                    vm_root_shared_data_mixed,vm_root_shared_data_local):
             assert vm.get_vm().state == inventory.STOPPED
@@ -94,7 +94,7 @@ def test():
         for vm in (vm_root_shared, vm_root_shared_data_shared):
             assert vm.get_vm().state == inventory.RUNNING
 
-    if flavor['shared_state'] is MAINTAIMANCE:
+    if flavor['shared_state'] is MAINTENANCE:
         for vm in (vm_root_shared, vm_root_shared_data_shared,vm_root_shared_data_local, vm_root_shared_data_mixed,
                    vm_root_local_data_mixed,vm_root_local_data_shared):
             assert vm.get_vm().state == inventory.STOPPED
@@ -103,12 +103,12 @@ def test():
         for vm in (vm_root_local, vm_root_local_data_local):
             assert vm.get_vm().state == inventory.RUNNING
 
-    if flavor['local_state'] is MAINTAIMANCE:
+    if flavor['local_state'] is MAINTENANCE:
         ps_ops.change_primary_storage_state(local_ps.uuid, state='enable')
-    if flavor['shared_state'] is MAINTAIMANCE:
+    if flavor['shared_state'] is MAINTENANCE:
         ps_ops.change_primary_storage_state(shared_ps.uuid, state='enable')
 
-    if MAINTAIMANCE in (flavor['local_state'], flavor['shared_state']):
+    if MAINTENANCE in (flavor['local_state'], flavor['shared_state']):
         if vr_vm and vr_vm.state == inventory.STOPPED:
             vm_ops.start_vm(vr_vm.uuid)
 
@@ -121,8 +121,8 @@ def test():
 
 def env_recover():
     local_ps, shared_ps = test_stub.PSEnvChecker().get_two_ps()
-    if local_ps.state in ('Disabled', "Maintain"):
+    if local_ps.state in ('Disabled', "Maintenance"):
         ps_ops.change_primary_storage_state(local_ps.uuid, state='enable')
-    if shared_ps.state in ('Disabled', "Maintain"):
+    if shared_ps.state in ('Disabled', "Maintenance"):
         ps_ops.change_primary_storage_state(shared_ps.uuid, state='enable')
     test_lib.lib_error_cleanup(test_obj_dict)
