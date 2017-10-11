@@ -46,20 +46,20 @@ def test():
         with test_lib.expected_failure('Create vm in ps in {} or {} state'.format(DISABLED,MAINTAIMANCE), Exception):
             test_stub.create_multi_vms(name_prefix='test-vm', count=1, ps_uuid=local_ps.uuid)
 
-        vm1 = test_stub.create_multi_vms(name_prefix='test-vm', count=1, ps_uuid=shared_ps.uuid)
+        vm1 = test_stub.create_multi_vms(name_prefix='test-vm', count=1, ps_uuid=shared_ps.uuid)[0]
         test_obj_dict.add_vm(vm1)
         vm2 = test_stub.create_multi_vms(name_prefix='test-vm', count=1, ps_uuid=shared_ps.uuid,
-                                         data_volume_number=1, ps_uuid_for_data_vol=shared_ps.uuid)
+                                         data_volume_number=1, ps_uuid_for_data_vol=shared_ps.uuid)[0]
         test_obj_dict.add_vm(vm2)
 
     if flavor['shared_state'] in (DISABLED, MAINTAIMANCE):
         with test_lib.expected_failure('Create vm in ps in {} or {} state'.format(DISABLED,MAINTAIMANCE), Exception):
             test_stub.create_multi_vms(name_prefix='test-vm', count=1, ps_uuid=shared_ps.uuid)
 
-        vm1 = test_stub.create_multi_vms(name_prefix='test-vm', count=1, ps_uuid=local_ps.uuid)
+        vm1 = test_stub.create_multi_vms(name_prefix='test-vm', count=1, ps_uuid=local_ps.uuid)[0]
         test_obj_dict.add_vm(vm1)
         vm2 = test_stub.create_multi_vms(name_prefix='test-vm', count=1, ps_uuid=local_ps.uuid,
-                                         data_volume_number=1, ps_uuid_for_data_vol=local_ps.uuid)
+                                         data_volume_number=1, ps_uuid_for_data_vol=local_ps.uuid)[0]
         test_obj_dict.add_vm(vm2)
 
     if flavor['local_state'] in (DISABLED, MAINTAIMANCE):
