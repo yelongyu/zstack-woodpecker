@@ -29,7 +29,9 @@ import telnetlib
 import random
 from contextlib import contextmanager
 from functools import wraps
+import itertools
 #import traceback
+
 
 
 import zstackwoodpecker.test_state as test_state
@@ -1101,3 +1103,32 @@ def run_cmd_in_vm_console(vm, cmd_list):
         test_util.test_fail('Fail to run cmds in vm: {}'.format(e))
     finally:
         result.close()
+
+
+def generate_local_shared_testvms(tbj):
+    local_ps, shared_ps = PSEnvChecker().get_two_ps()
+    disk_offering_uuids = [random.choice(res_ops.get_resource(res_ops.DISK_OFFERING)).uuid]
+    SHARED='SHARED'
+    LOCAL='LOCAL'
+    MIXED='MIXED'
+
+    for root_vol, data_vol in itertools.product((LOCAL,SHARED),(None,LOCAL,SHARED,MIXED)):
+        vm = create_vm_with_random_offering(vm_name='test_vm',
+                                            disk_offering_uuids=disk_offering_uuids if data_vol else None,
+                                            ps_uuid=local_ps.uuid if root_vol is LOCAL else shared_ps.uuid,
+                                            l3_name='l3VlanNetworkName1',
+                                            image_name='imageName_net',
+                                            system_tags=['primaryStorageUuidForDataVolume::{}'.format(local_ps.uuid if data_vol in (LOCAL, MIXED)
+                                                                                                            else shared_ps.uuid)] if data_vol else None)
+
+        tbj.add_vm(vm)
+        if data_vol is MIXED:
+            test_util.test_dsc("Create volume from shared_ps and attached to VM")
+            volume = create_multi_volumes(count=1, ps=shared_ps)[0]
+            tbj.add_volume(volume)
+            volume.attach(vm)
+
+        yield vm
+
+
+
