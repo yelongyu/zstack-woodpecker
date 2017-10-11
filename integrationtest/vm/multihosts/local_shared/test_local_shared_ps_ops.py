@@ -23,10 +23,10 @@ DISABLED = 'Disabled'
 ENABLE = 'Enabled'
 MAINTAIMANCE = 'Maintain'
 
-case_flavor = dict(both_disabled =      dict(local_state=DISABLED, shared_state=DISABLED, reconnect=False),
-                   local_maintain=      dict(local_state=MAINTAIMANCE, shared_state=ENABLE, reconnect=False),
-                   shared_maintain=     dict(local_state=ENABLE, shared_state=MAINTAIMANCE, reconnect=False),
-                   both_reconnect =     dict(local_state=ENABLE, shared_state=ENABLE, reconnect=True),
+case_flavor = dict(both_disabled =      dict(local_state=DISABLED, shared_state=DISABLED, reconnect=False, vm_ha=True),
+                   local_maintain=      dict(local_state=MAINTAIMANCE, shared_state=ENABLE, reconnect=False, vm_ha=True),
+                   shared_maintain=     dict(local_state=ENABLE, shared_state=MAINTAIMANCE, reconnect=False, vm_ha=False),
+                   both_reconnect =     dict(local_state=ENABLE, shared_state=ENABLE, reconnect=True, vm_ha=False),
                    )
 
 
@@ -36,7 +36,7 @@ def test():
     ps_env = test_stub.PSEnvChecker()
     local_ps, shared_ps = ps_env.get_two_ps()
 
-    vm_list=list(test_stub.generate_local_shared_testvms(test_obj_dict))
+    vm_list=list(test_stub.generate_local_shared_test_vms(test_obj_dict, vm_ha=flavor['vm_ha']))
     (vm_root_local, vm_root_local_data_local,
      vm_root_local_data_shared, vm_root_local_data_mixed,
      vm_root_shared, vm_root_shared_data_local,

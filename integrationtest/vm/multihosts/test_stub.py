@@ -20,6 +20,7 @@ import zstackwoodpecker.operations.scenario_operations as sce_ops
 import zstackwoodpecker.header.host as host_header
 import apibinding.inventory as inventory
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
+import zstackwoodpecker.operations.ha_operations as ha_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstacklib.utils.xmlobject as xmlobject
 import threading
@@ -1105,7 +1106,7 @@ def run_cmd_in_vm_console(vm, cmd_list):
         result.close()
 
 
-def generate_local_shared_testvms(tbj):
+def generate_local_shared_test_vms(tbj, vm_ha=False):
     local_ps, shared_ps = PSEnvChecker().get_two_ps()
     disk_offering_uuids = [random.choice(res_ops.get_resource(res_ops.DISK_OFFERING)).uuid]
     SHARED='SHARED'
@@ -1127,6 +1128,9 @@ def generate_local_shared_testvms(tbj):
             volume = create_multi_volumes(count=1, ps=shared_ps)[0]
             tbj.add_volume(volume)
             volume.attach(vm)
+
+        if vm_ha:
+            ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
 
         yield vm
 
