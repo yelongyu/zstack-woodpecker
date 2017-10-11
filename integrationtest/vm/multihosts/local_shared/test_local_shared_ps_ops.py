@@ -100,7 +100,7 @@ def test():
             assert vm.get_vm().state == inventory.STOPPED
             with test_stub.expected_failure("start vm in maintenance ps", Exception):
                 vm.start()
-        for vm in (vm_root_local, vm_root_shared_data_local):
+        for vm in (vm_root_local, vm_root_local_data_local):
             assert vm.get_vm().state == inventory.RUNNING
 
     if flavor['local_state'] is MAINTAIMANCE:

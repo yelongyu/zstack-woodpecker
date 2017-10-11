@@ -1106,7 +1106,7 @@ def run_cmd_in_vm_console(vm, cmd_list):
         result.close()
 
 
-def generate_local_shared_test_vms(tbj, vm_ha=False):
+def generate_local_shared_test_vms(tbj, vm_ha=False, host_uuid=None):
     local_ps, shared_ps = PSEnvChecker().get_two_ps()
     disk_offering_uuids = [random.choice(res_ops.get_resource(res_ops.DISK_OFFERING)).uuid]
     SHARED='SHARED'
@@ -1118,6 +1118,7 @@ def generate_local_shared_test_vms(tbj, vm_ha=False):
                                             disk_offering_uuids=disk_offering_uuids if data_vol else None,
                                             ps_uuid=local_ps.uuid if root_vol is LOCAL else shared_ps.uuid,
                                             l3_name='l3VlanNetworkName1',
+                                            host_uuid=host_uuid,
                                             image_name='imageName_net',
                                             system_tags=['primaryStorageUuidForDataVolume::{}'.format(local_ps.uuid if data_vol in (LOCAL, MIXED)
                                                                                                             else shared_ps.uuid)] if data_vol else None)
