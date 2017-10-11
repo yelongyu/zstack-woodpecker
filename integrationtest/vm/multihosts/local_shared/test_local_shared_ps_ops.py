@@ -58,7 +58,7 @@ def test():
 
     if flavor['reconnect']:
         for ps in (local_ps, shared_ps):
-            ps_ops.reconnect_primary_storage(ps)
+            ps_ops.reconnect_primary_storage(ps.uuid)
         for vm in vm_list:
             vm.update()
             assert vm.get_vm().state == inventory.RUNNING
@@ -115,7 +115,7 @@ def test():
     for vm in vm_list:
         if vm.get_vm().state == inventory.STOPPED:
             vm.start()
-            vm.check()
+        vm.check()
 
 
 
