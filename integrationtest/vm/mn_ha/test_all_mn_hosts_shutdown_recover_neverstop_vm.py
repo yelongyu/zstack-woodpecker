@@ -86,9 +86,12 @@ def test():
 
     test_util.test_logger("Delay 60s and then check if the vm is running")
     time.sleep(180)
-    vm.update()
-    vm.check()
-    vm.destroy()
+    if test_lib.lib_wait_target_up(vm.get_vm().vmNics[0].ip, '22', 300):
+        vm.update()
+        vm.check()
+        vm.destroy()
+    else:
+        test_util.test_fail("ha vm has not changed to running after 2 hosts recover with 300s")
     test_util.test_pass('Check Never Stop VM Test Success')
 
 #Will be called what ever test result is
