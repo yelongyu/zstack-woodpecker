@@ -356,8 +356,9 @@ def test_fio_bandwidth(vm_inv, bandwidth, path = '/tmp', raise_exception=True):
             return False
         test_util.test_fail('Did not get bandwidth for fio test')
 
-    bw_up_limit = bandwidth/1024 + 10240
-    bw_down_limit = bandwidth/1024 - 10240
+    threshold = bandwidth/1024/3
+    bw_up_limit = bandwidth/1024 + threshold
+    bw_down_limit = bandwidth/1024 - threshold
     if bw > bw_down_limit and bw < bw_up_limit:
         test_util.test_logger('disk bandwidth:%s is between %s and %s' \
                 % (bw, bw_down_limit, bw_up_limit))
