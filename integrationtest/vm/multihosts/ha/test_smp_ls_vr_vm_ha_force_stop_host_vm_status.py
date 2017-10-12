@@ -1,7 +1,7 @@
 '''
 New Integration Test for host where KVM VR&HAVM located force stop and start again,
-check vm self-start again. In addition, this test is sepcific for nfs and local.
-@author: turnyouon
+check vm self-start again. In addition, this test is sepcific for smp and local.
+@author: SyZhao
 '''
 
 import zstackwoodpecker.test_util as test_util

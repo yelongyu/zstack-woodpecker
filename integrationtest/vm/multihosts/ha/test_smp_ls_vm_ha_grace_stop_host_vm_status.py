@@ -1,6 +1,6 @@
 '''
 New Integration Test for host where KVM VM ha located gracefully stop and start again,
-check vm self-start again. In addition, this test is sepcific for nfs and local.
+check vm self-start again. In addition, this test is sepcific for smp and local.
 @author: SyZhao
 '''
 

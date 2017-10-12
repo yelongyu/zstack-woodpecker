@@ -1,7 +1,7 @@
 '''
 New Integration Test for KVM VR&VM none network disconnect and connected again, check vm stop, VR start again.
-In addition, this test is sepcific for nfs and local.
-@author: turnyouon
+In addition, this test is sepcific for smp and local.
+@author: SyZhao
 '''
 
 import zstackwoodpecker.test_util as test_util
@@ -95,6 +95,8 @@ def test():
         vm_stop_time = i
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Unknown":
             test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
+            time.sleep(1)
+            test_stub.recover_smp_nfs_server(host_ip, test_lib.all_scenario_config)
             conditions = res_ops.gen_query_conditions('managementIp', '=', host_ip)
             kvm_host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].uuid
             host_ops.reconnect_host(kvm_host_uuid)
@@ -130,6 +132,8 @@ def env_recover():
     global host_ip
     try:
         test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
+        time.sleep(1)
+        test_stub.recover_smp_nfs_server(host_ip, test_lib.all_scenario_config)
         conditions = res_ops.gen_query_conditions('managementIp', '=', host_ip)
         kvm_host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].uuid
         host_ops.reconnect_host(kvm_host_uuid)
