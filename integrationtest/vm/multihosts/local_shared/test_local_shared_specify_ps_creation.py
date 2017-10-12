@@ -72,8 +72,8 @@ def test():
 
 def env_recover():
     local_ps, shared_ps = test_stub.PSEnvChecker().get_two_ps()
-    if local_ps.state in ('Disabled', "Maintain"):
+    if local_ps.state in ('Disabled', "Maintenance"):
         ps_ops.change_primary_storage_state(local_ps.uuid, state='enable')
-    if shared_ps.state in ('Disabled', "Maintain"):
+    if shared_ps.state in ('Disabled', "Maintenance"):
         ps_ops.change_primary_storage_state(shared_ps.uuid, state='enable')
     test_lib.lib_error_cleanup(test_obj_dict)
