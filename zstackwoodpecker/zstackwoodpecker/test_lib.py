@@ -5363,6 +5363,19 @@ def deprecated_case(test_method):
     return wrapper
 
 
+def skip_if(condition):
+    assert isinstance(condition, bool)
+
+    def decorator(test_method):
+        @functools.wraps(test_method)
+        def wrapper():
+            if condition:
+                test_util.test_skip('Skip test excution as meet some criterias')
+            return test_method()
+        return wrapper
+    return decorator
+
+
 def checker_wrapper(self, service_type, l3_uuid):
     '''
     Wrap checker to Skip vm check if no service in l3
