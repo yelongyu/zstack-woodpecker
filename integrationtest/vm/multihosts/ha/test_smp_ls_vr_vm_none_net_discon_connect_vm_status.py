@@ -134,8 +134,8 @@ def env_recover():
         test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
         time.sleep(1)
         test_stub.recover_smp_nfs_server(host_ip)
-        conditions = res_ops.gen_query_conditions('managementIp', '=', host_ip)
-        kvm_host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].uuid
-        host_ops.reconnect_host(kvm_host_uuid)
     except:
         pass
+    conditions = res_ops.gen_query_conditions('managementIp', '=', host_ip)
+    kvm_host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].uuid
+    host_ops.reconnect_host(kvm_host_uuid)
