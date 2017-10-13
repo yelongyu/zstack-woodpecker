@@ -248,10 +248,14 @@ class TestLib(object):
             try:
                 if case in self.all_cases_name:
                     case_obj = self.test_case_lib[self._find_case_num(case)]
-                    if flavor and "{}::{}".format(case.split('/')[-1], flavor) not in [item.split('/')[-1] for item in self.exclude_case_list]:
-                        case_obj.set_flavor(flavor)
-                        self.target_case_list.append(case_obj)
-                    if not flavor:
+                    if flavor:
+                        if not self.exclude_case_list:
+                            case_obj.set_flavor(flavor)
+                            self.target_case_list.append(case_obj)
+                        elif "{}::{}".format(case.split('/')[-1], flavor) not in [item.split('/')[-1] for item in self.exclude_case_list]:
+                            case_obj.set_flavor(flavor)
+                            self.target_case_list.append(case_obj)
+                    else:
                         self.target_case_list.append(case_obj)
                 elif int(case) in self.test_case_lib.keys():
                     self.target_case_list.append(self.test_case_lib[int(case)])
@@ -263,10 +267,14 @@ class TestLib(object):
                 for real_case_name in self.all_cases_name:
                     if case in real_case_name:
                         case_obj = self.test_case_lib[self._find_case_num(real_case_name)]
-                        if flavor and "{}::{}".format(case.split('/')[-1], flavor) not in [item.split('/')[-1] for item in self.exclude_case_list]:
-                            case_obj.set_flavor(flavor)
-                            self.target_case_list.append(case_obj)
-                        if not flavor:
+                        if flavor:
+                            if not self.exclude_case_list:
+                                case_obj.set_flavor(flavor)
+                                self.target_case_list.append(case_obj)
+                            elif "{}::{}".format(case.split('/')[-1], flavor) not in [item.split('/')[-1] for item in self.exclude_case_list]:
+                                case_obj.set_flavor(flavor)
+                                self.target_case_list.append(case_obj)
+                        else:
                             self.target_case_list.append(case_obj)
                         break
                 else:
