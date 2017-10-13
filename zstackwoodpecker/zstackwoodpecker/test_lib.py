@@ -5376,12 +5376,19 @@ def skip_if(condition):
     return decorator
 
 
-def checker_wrapper(self, service_type, l3_uuid):
+def disable_checker(self):
     '''
-    Wrap checker to Skip vm check if no service in l3
+    disable checker to Skip checker if meet some user defined criteria
+    to debug or speed up test running
     '''
-    if service_type not in [service.networkServiceType for service in lib_get_l3_by_uuid(l3_uuid).networkServices]:
-        test_util.test_logger('Skip vm checker, just update the vm')
-        return self.update
-    else:
-        return self.check
+    try:
+        getattr(self, "check")
+    except AttributeError:
+        test_util.test_warn("Fail to get check attribute")
+        return self
+    self.check = do_nothing
+    return self
+
+
+def do_nothing():
+    pass
