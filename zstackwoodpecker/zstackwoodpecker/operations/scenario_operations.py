@@ -958,7 +958,7 @@ def setup_zbs_primary_storages(scenario_config, scenario_file, deploy_config, vm
 
 def create_sftp_backup_storage(http_server_ip, backup_storage_option, session_uuid=None):
     action = api_actions.AddSftpBackupStorageAction()
-    action.timeout = 300000
+    action.timeout = 600000
     action.name = backup_storage_option.get_name()
     action.description = backup_storage_option.get_description()
     action.type = backup_storage_option.get_type()
