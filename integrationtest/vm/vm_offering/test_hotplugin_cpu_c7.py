@@ -26,6 +26,7 @@ test = functools.partial(test_stub.vm_offering_testcase,
                          add_memory=False,
                          need_online=False)
 
+test = test_lib.deprecated_case(test)
 
 def error_cleanup():
     test_lib.lib_error_cleanup(test_obj_dict)

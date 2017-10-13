@@ -17,7 +17,7 @@ VM_COUNT = 1
 VOLUME_NUMBER = 10
 
 
-@test_stub.skip_if_not_local_nfs
+@test_lib.deprecated_case
 def test():
     ps_env = test_stub.PSEnvChecker()
     nfs_ps = ps_env.get_random_nfs()

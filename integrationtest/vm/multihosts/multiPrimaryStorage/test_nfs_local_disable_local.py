@@ -19,7 +19,7 @@ VOLUME_NUMBER = 10
 disabled_ps_list = []
 
 
-@test_stub.skip_if_not_local_nfs
+@test_lib.deprecated_case
 def test():
     ps_env = test_stub.PSEnvChecker()
 

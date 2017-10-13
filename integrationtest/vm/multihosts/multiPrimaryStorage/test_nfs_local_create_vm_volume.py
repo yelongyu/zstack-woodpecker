@@ -19,7 +19,7 @@ VM_COUNT = 1
 DATA_VOLUME_NUMBER = 10
 
 
-@test_stub.skip_if_not_local_nfs
+@test_lib.deprecated_case
 def test():
 
     test_util.test_dsc("Create {} vm each with {} data volume".format(VM_COUNT, DATA_VOLUME_NUMBER))

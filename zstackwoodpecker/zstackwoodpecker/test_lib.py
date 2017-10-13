@@ -5355,6 +5355,14 @@ def pre_execution_action(func):
     return decorator
 
 
+def deprecated_case(test_method):
+    @functools.wraps(test_method)
+    def wrapper():
+        test_util.test_skip("deprecated case, Skip execution,"
+                            "Will be removed in some day")
+    return wrapper
+
+
 def checker_wrapper(self, service_type, l3_uuid):
     '''
     Wrap checker to Skip vm check if no service in l3

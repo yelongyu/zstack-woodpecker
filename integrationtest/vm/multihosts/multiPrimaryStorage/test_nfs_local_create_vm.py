@@ -18,7 +18,8 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 VM_COUNT = 1
 
-@test_stub.skip_if_not_local_nfs
+
+@test_lib.deprecated_case
 def test():
 
     test_util.test_dsc("Create {0} vm ".format(VM_COUNT))
