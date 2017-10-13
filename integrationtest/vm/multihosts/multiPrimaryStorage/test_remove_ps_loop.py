@@ -21,6 +21,7 @@ VOLUME_NUMBER = 10
 delete_ps_list = []
 
 
+@test_stub.skip_if_local_shared
 @test_stub.skip_if_only_one_ps
 def test():
     ps_env = test_stub.PSEnvChecker()
