@@ -50,6 +50,7 @@ def test():
         with test_lib.expected_failure('Create vm in ps in {} or {} state'.format(DISABLED,MAINTAIMANCE), Exception):
             test_stub.create_multi_vms(name_prefix='test-vm', count=1, ps_uuid=local_ps.uuid)
 
+    if flavor['local_state'] is DISABLED:
         vm1 = test_stub.create_multi_vms(name_prefix='test-vm', count=1, ps_uuid=shared_ps.uuid)[0]
         test_obj_dict.add_vm(vm1)
         vm2 = test_stub.create_multi_vms(name_prefix='test-vm', count=1, ps_uuid=shared_ps.uuid,
