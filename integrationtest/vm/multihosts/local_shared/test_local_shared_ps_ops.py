@@ -9,6 +9,7 @@ import os
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import apibinding.inventory as inventory
 import zstackwoodpecker.operations.vm_operations as vm_ops
+import zstackwoodpecker.operations.resource_operations as res_ops
 import time
 
 _config_ = {
@@ -125,4 +126,7 @@ def env_recover():
         ps_ops.change_primary_storage_state(local_ps.uuid, state='enable')
     if shared_ps.state in ('Disabled', "Maintenance"):
         ps_ops.change_primary_storage_state(shared_ps.uuid, state='enable')
+    for vr in res_ops.get_resource(res_ops.APPLIANCE_VM):
+        if vr.state != inventory.RUNNING:
+            vm_ops.start_vm(vr.uuid)
     test_lib.lib_error_cleanup(test_obj_dict)
