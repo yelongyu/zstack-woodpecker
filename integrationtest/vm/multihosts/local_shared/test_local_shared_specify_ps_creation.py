@@ -44,7 +44,7 @@ def test():
     if flavor['shared_state'] is DISABLED:
         ps_ops.change_primary_storage_state(shared_ps.uuid, state='disable')
     elif flavor['shared_state'] is MAINTAIMANCE:
-        ps_ops.change_primary_storage_state(local_ps.uuid, state='maintain')
+        ps_ops.change_primary_storage_state(shared_ps.uuid, state='maintain')
 
     if flavor['local_state'] in (DISABLED, MAINTAIMANCE):
         with test_lib.expected_failure('Create vm in ps in {} or {} state'.format(DISABLED,MAINTAIMANCE), Exception):
