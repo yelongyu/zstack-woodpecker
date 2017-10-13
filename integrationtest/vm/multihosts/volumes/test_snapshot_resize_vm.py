@@ -29,8 +29,8 @@ def test():
     vm.stop() 
     vm.check()
 
-    vol_size = res_ops.query_resource(res_ops.VOLUME)[0].size
-    volume_uuid = res_ops.query_resource(res_ops.VOLUME)[0].uuid
+    vol_size = test_lib.lib_get_root_volume(vm.get_vm()).size
+    volume_uuid = test_lib.lib_get_root_volume(vm.get_vm()).uuid
     set_size = 1024*1024*1024*5
 
     snapshots = test_obj_dict.get_volume_snapshot(volume_uuid)
@@ -39,7 +39,8 @@ def test():
     snapshots.check()
 
     vol_ops.resize_volume(volume_uuid, set_size)
-    vol_size_after = res_ops.query_resource(res_ops.VOLUME)[0].size
+    vm.update()
+    vol_size_after = test_lib.lib_get_root_volume(vm.get_vm()).size
     if set_size != vol_size_after:
         test_util.test_fail('Resize Root Volume failed, size = %s' % vol_size_after)
 
