@@ -11,21 +11,21 @@ import account_operations
 import apibinding.inventory as inventory
 
 
-def ps_migrage_root_volume(dst_ps_uuid, vol_uuid, session_uuid=None):
-    action = api_actions.PrimaryStorageMigrateRootVolumeAction()
+def ps_migrage_volume(dst_ps_uuid, vol_uuid, volume_type=None, session_uuid=None):
+    action = api_actions.PrimaryStorageMigrateVolumeAction()
     action.dstPrimaryStorageUuid = dst_ps_uuid
     action.volumeUuid = vol_uuid
-    test_util.action_logger('Migrate [Root Volume: %s] to [Primary Storage: %s]' % (vol_uuid, dst_ps_uuid))
+    test_util.action_logger('Migrate [%s Volume: %s] to [Primary Storage: %s]' % (volume_type, vol_uuid, dst_ps_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt.inventory
 
+def ps_migrage_root_volume(dst_ps_uuid, vol_uuid, session_uuid=None):
+    evt_inv = ps_migrage_volume(dst_ps_uuid=dst_ps_uuid, vol_uuid=vol_uuid, volume_type='Root', session_uuid=session_uuid)
+    return evt_inv
+
 def ps_migrage_data_volume(dst_ps_uuid, vol_uuid, session_uuid=None):
-    action = api_actions.PrimaryStorageMigrateDataVolumeAction()
-    action.dstPrimaryStorageUuid = dst_ps_uuid
-    action.volumeUuid = vol_uuid
-    test_util.action_logger('Migrate [Data Volume: %s] to [Primary Storage: %s]' % (vol_uuid, dst_ps_uuid))
-    evt = account_operations.execute_action_with_session(action, session_uuid) 
-    return evt.inventory
+    evt_inv = ps_migrage_volume(dst_ps_uuid=dst_ps_uuid, vol_uuid=vol_uuid, volume_type='Data', session_uuid=session_uuid)
+    return evt_inv
 
 def bs_migrage_image(dst_bs_uuid, src_bs_uuid, image_uuid, session_uuid=None):
     action = api_actions.BackupStorageMigrateImageAction()

@@ -36,7 +36,7 @@ def test():
     data_migration.data_volume.detach(vm2.get_vm().uuid)
     data_migration.data_volume.check()
 
-    data_migration.del_obsoleted_data_volume()
+#     data_migration.del_obsoleted_data_volume()
     test_lib.lib_robot_cleanup(test_obj_dict)
     test_util.test_pass('Migrate Data Volume Test Success')
 

@@ -25,7 +25,7 @@ def test():
     test_obj_dict.add_volume(data_migration.data_volume)
     data_migration.data_volume.attach(data_migration.vm)
 
-    data_migration.del_obsoleted_data_volume()
+#     data_migration.del_obsoleted_data_volume()
     test_lib.lib_robot_cleanup(test_obj_dict)
     test_util.test_pass('Migrate Data Volume Test Success')
 
