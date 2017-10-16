@@ -17,7 +17,6 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
 
-@test_stub.skip_if_local_shared
 @test_stub.skip_if_only_one_ps
 def test():
     ps_env = test_stub.PSEnvChecker()
@@ -31,7 +30,7 @@ def test():
     for root_volume_ps_uuid in [None, ps.uuid]:
         for data_vol_ps_uuid in [None, another.uuid]:
             vm = test_stub.create_iso_vm_with_random_offering(vm_name='test_iso_vm',
-                                                              disk_offering_uuids=disk_offering_uuids,
+                                                              disk_offering_uuids=disk_offering_uuids if data_vol_ps_uuid else None,
                                                               ps_uuid=root_volume_ps_uuid,
                                                               l3_name='l3VlanNetworkName1',
                                                               system_tags=['primaryStorageUuidForDataVolume::{}'.format(data_vol_ps_uuid)] if data_vol_ps_uuid else None)
