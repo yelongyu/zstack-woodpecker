@@ -26,7 +26,7 @@ def test():
     ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
     first_ps = random.choice(ps_list)
     vm_list = test_stub.create_multi_vms(name_prefix='vm_in_fist_ps', count=VM_COUNT, ps_uuid=first_ps.uuid,
-                                         data_volume_number=DATA_VOLUME_NUMBER)
+                                         data_volume_number=DATA_VOLUME_NUMBER, ps_uuid_for_data_vol=first_ps.uuid)
     for vm in vm_list:
         test_obj_dict.add_vm(vm)
 
@@ -39,7 +39,7 @@ def test():
 
     test_util.test_dsc("Create {} vm  each with {} data volume in the second primaryStorage".format(VM_COUNT, DATA_VOLUME_NUMBER))
     vm_list = test_stub.create_multi_vms(name_prefix='vm_in_second_ps', count=VM_COUNT, ps_uuid=second_ps.uuid,
-                                         data_volume_number=DATA_VOLUME_NUMBER)
+                                         data_volume_number=DATA_VOLUME_NUMBER, ps_uuid_for_data_vol=second_ps.uuid)
     for vm in vm_list:
         test_obj_dict.add_vm(vm)
 
