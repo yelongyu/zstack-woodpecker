@@ -69,7 +69,7 @@ def test():
 
     test_util.test_dsc('Update MN IP and check installation on vm1')
     test_stub.update_mn_hostname(vm1_ip, tmp_file)
-    test_stub.update_mn_ip(vm1_ip, vm1_ip, tmp_file)
+    test_stub.update_mn_ip(vm1_ip, tmp_file)
     test_stub.start_mn(vm1_ip, tmp_file)
     test_stub.check_installation(vm1_ip, tmp_file)
 
