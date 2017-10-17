@@ -582,7 +582,7 @@ def up_host_network(host_ip, scenarioConfig):
 
 def recover_smp_nfs_server(host_ip):
     cmd = "bash /etc/rc.d/rc.local"
-    if not test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password2, cmd):
+    if test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password2, cmd) == False :
         test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s with username %s" %(host_ip, host_password2, host_username))
 
 def execute_cmd_in_host(host_vm, scenarioConfig, cmd):
