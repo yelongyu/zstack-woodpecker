@@ -176,7 +176,12 @@ def update_repo(vm_ip, tmp_file):
     cmd = '''%s 'echo "172.20.198.214 repo.zstack.io" >> /etc/hosts' ''' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
 
-def update_mn_ip(vm_ip, mn_ip, tmp_file):
+def update_hosts(vm_ip, tmp_file):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd = '''%s 'echo "%s zs-test" >> /etc/hosts' ''' % (ssh_cmd, vm_ip)
+    process_result = execute_shell_in_process(cmd, tmp_file)
+
+def update_mn_ip(vm_ip, tmp_file):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     cmd = '%s "zstack-ctl change_ip --ip="%s ' % (ssh_cmd, vm_ip)
     process_result = execute_shell_in_process(cmd, tmp_file)
