@@ -38,7 +38,7 @@ def test():
 
     test_util.test_logger('Update MN IP')
     test_stub.update_mn_hostname(vm_ip, tmp_file)
-    test_stub.update_mn_ip(vm_ip, vm_ip, tmp_file)
+    test_stub.update_mn_ip(vm_ip, tmp_file)
     test_stub.start_mn(vm_ip, tmp_file)
     test_stub.check_installation(vm_ip, tmp_file)
 
