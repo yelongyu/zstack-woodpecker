@@ -32,7 +32,7 @@ def test():
     snapshots.check()
 
     snapshots.delete_snapshot(snapshot1)
-    data_migration.del_obsoleted_data_volume()
+#     data_migration.del_obsoleted_data_volume()
     test_lib.lib_robot_cleanup(test_obj_dict)
     test_util.test_pass('Create Snapshot of Migrate Data Volume Test Success')
 
