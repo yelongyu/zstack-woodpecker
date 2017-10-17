@@ -1,0 +1,6 @@
+<testConfig>
+    <deployConfig>deploy-vyos-nfs.xml</deployConfig>
+    <deployConfigTemplate>deploy.tmpt</deployConfigTemplate>
+    <!-- suite special test variables -->
+    <pingTestTarget>zstack.yyk.net</pingTestTarget>
+</testConfig>
