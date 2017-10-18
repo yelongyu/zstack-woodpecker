@@ -569,10 +569,8 @@
             </l3Networks>
           </l2VlanNetwork>
   
-          <l2VlanNetwork name="$l2VlanNetworkName11" 
-            description="guest l2 vlan network 11"
-            physicalInterface="$l2NetworkPhysicalInterface" 
-            vlan="$l2Vlan11">
+        <l2VxlanNetwork name="$l2VxlanNetworkName11" description="guest L2 Vxlan network 4, it is for test small ip range.">
+          <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <l3Networks>
               <l3BasicNetwork name="$l3VlanNetwork11" 
                 description = "guest test vlan network 11">
@@ -597,12 +595,10 @@
               </networkService>
               </l3BasicNetwork>
             </l3Networks>
-          </l2VlanNetwork>
+          </l2VxlanNetwork>
   
-          <l2VlanNetwork name="$l2VlanNetworkName12" 
-            description="guest l2 vlan network 12"
-            physicalInterface="$l2NetworkPhysicalInterface" 
-            vlan="$l2Vlan12">
+        <l2VxlanNetwork name="$l2VxlanNetworkName12" description="guest L2 Vxlan network 4, it is for test small ip range.">
+          <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <l3Networks>
               <l3BasicNetwork name="$l3VlanNetwork12" 
                 description = "guest test vlan network 12">
@@ -627,12 +623,10 @@
               </networkService>
               </l3BasicNetwork>
             </l3Networks>
-          </l2VlanNetwork>
+          </l2VxlanNetwork>
   
-          <l2VlanNetwork name="$l2VlanNetworkName13" 
-            description="guest l2 vlan network 13"
-            physicalInterface="$l2NetworkPhysicalInterface" 
-            vlan="$l2Vlan13">
+        <l2VxlanNetwork name="$l2VxlanNetworkName13" description="guest L2 Vxlan network 4, it is for test small ip range.">
+          <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <l3Networks>
               <l3BasicNetwork name="$l3VlanNetwork13" 
                 description = "guest test vlan network 13">
@@ -657,12 +651,10 @@
               </networkService>
               </l3BasicNetwork>
             </l3Networks>
-          </l2VlanNetwork>
+          </l2VxlanNetwork>
   
-          <l2VlanNetwork name="$l2VlanNetworkName14" 
-            description="guest l2 vlan network 14"
-            physicalInterface="$l2NetworkPhysicalInterface" 
-            vlan="$l2Vlan14">
+        <l2VxlanNetwork name="$l2VxlanNetworkName14" description="guest L2 Vxlan network 4, it is for test small ip range.">
+          <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <l3Networks>
               <l3BasicNetwork name="$l3VlanNetwork14" 
                 description = "guest test vlan network 14">
@@ -687,12 +679,10 @@
               </networkService>
               </l3BasicNetwork>
             </l3Networks>
-          </l2VlanNetwork>
+          </l2VxlanNetwork>
   
-          <l2VlanNetwork name="$l2VlanNetworkName15" 
-            description="guest l2 vlan network 15"
-            physicalInterface="$l2NetworkPhysicalInterface" 
-            vlan="$l2Vlan15">
+        <l2VxlanNetwork name="$l2VxlanNetworkName15" description="guest L2 Vxlan network 4, it is for test small ip range.">
+          <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <l3Networks>
               <l3BasicNetwork name="$l3VlanNetwork15" 
                 description = "guest test vlan network 15">
@@ -717,12 +707,10 @@
               </networkService>
               </l3BasicNetwork>
             </l3Networks>
-          </l2VlanNetwork>
+          </l2VxlanNetwork>
   
-          <l2VlanNetwork name="$l2VlanNetworkName16" 
-            description="guest l2 vlan network 16"
-            physicalInterface="$l2NetworkPhysicalInterface" 
-            vlan="$l2Vlan16">
+        <l2VxlanNetwork name="$l2VxlanNetworkName16" description="guest L2 Vxlan network 4, it is for test small ip range.">
+          <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <l3Networks>
               <l3BasicNetwork name="$l3VlanNetwork16" 
                 description = "guest test vlan network 16">
@@ -747,12 +735,10 @@
               </networkService>
               </l3BasicNetwork>
             </l3Networks>
-          </l2VlanNetwork>
+          </l2VxlanNetwork>
   
-          <l2VlanNetwork name="$l2VlanNetworkName17" 
-            description="guest l2 vlan network 17"
-            physicalInterface="$l2NetworkPhysicalInterface" 
-            vlan="$l2Vlan17">
+        <l2VxlanNetwork name="$l2VxlanNetworkName17" description="guest L2 Vxlan network 4, it is for test small ip range.">
+          <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <l3Networks>
               <l3BasicNetwork name="$l3VlanNetwork17" 
                 description = "guest test vlan network 17">
@@ -777,12 +763,10 @@
               </networkService>
               </l3BasicNetwork>
             </l3Networks>
-          </l2VlanNetwork>
+          </l2VxlanNetwork>
   
-          <l2VlanNetwork name="$l2VlanNetworkName18" 
-            description="guest l2 vlan network 18"
-            physicalInterface="$l2NetworkPhysicalInterface" 
-            vlan="$l2Vlan18">
+        <l2VxlanNetwork name="$l2VxlanNetworkName18" description="guest L2 Vxlan network 4, it is for test small ip range.">
+          <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <l3Networks>
               <l3BasicNetwork name="$l3VlanNetwork18" 
                 description = "guest test vlan network 18">
@@ -807,12 +791,10 @@
               </networkService>
               </l3BasicNetwork>
             </l3Networks>
-          </l2VlanNetwork>
+          </l2VxlanNetwork>
   
-          <l2VlanNetwork name="$l2VlanNetworkName19" 
-            description="guest l2 vlan network 19"
-            physicalInterface="$l2NetworkPhysicalInterface" 
-            vlan="$l2Vlan19">
+        <l2VxlanNetwork name="$l2VxlanNetworkName19" description="guest L2 Vxlan network 4, it is for test small ip range.">
+          <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <l3Networks>
               <l3BasicNetwork name="$l3VlanNetwork19" 
                 description = "guest test vlan network 19">
@@ -837,12 +819,10 @@
               </networkService>
               </l3BasicNetwork>
             </l3Networks>
-          </l2VlanNetwork>
+          </l2VxlanNetwork>
   
-          <l2VlanNetwork name="$l2VlanNetworkName20" 
-            description="guest l2 vlan network 20"
-            physicalInterface="$l2NetworkPhysicalInterface" 
-            vlan="$l2Vlan20">
+        <l2VxlanNetwork name="$l2VxlanNetworkName20" description="guest L2 Vxlan network 4, it is for test small ip range.">
+          <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <l3Networks>
               <l3BasicNetwork name="$l3VlanNetwork20" 
                 description = "guest test vlan network 20">
@@ -867,7 +847,7 @@
               </networkService>
               </l3BasicNetwork>
             </l3Networks>
-          </l2VlanNetwork>
+          </l2VxlanNetwork>
         </l2Networks>
       </zone>
     </zones>
