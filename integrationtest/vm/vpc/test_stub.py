@@ -39,7 +39,7 @@ import itertools
 
 def create_vpc_vrouter():
 
-    vr_offering = res_ops.get_resource(res_ops.APPLIANCE_VM)[0]
+    vr_offering = res_ops.get_resource(res_ops.VR_OFFERING)[0]
     return vpc_ops.create_vpc_vrouter(name="test_vpc", virtualrouter_offering_uuid=vr_offering.uuid)
 
 

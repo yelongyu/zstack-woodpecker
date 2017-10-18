@@ -5,7 +5,7 @@ import apibinding.inventory as inventory
 
 def create_vpc_vrouter(name, virtualrouter_offering_uuid, resource_uuid=None, system_tags=None, use_tags=None, session_uuid=None):
     action = api_actions.CreateVpcVRouterAction()
-    action.timeout = 30000
+    action.timeout = 300000
     action.name = name
     action.virtualRouterOfferingUuid = virtualrouter_offering_uuid
     action.resourceUuid = resource_uuid
