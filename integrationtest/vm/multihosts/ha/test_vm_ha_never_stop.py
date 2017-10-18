@@ -81,10 +81,10 @@ def test():
     test_util.test_logger("host %s is disconnecting" %(host_ip))
     host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
-#    l2_network_interface = os.environ.get('l2ManagementNetworkInterface')
+    #l2_network_interface = os.environ.get('l2ManagementNetworkInterface')
     #l2interface = test_lib.lib_get_l2s_by_vm(vm.get_vm())[0].physicalInterface
     l2_network_interface = test_stub.get_host_l2_nic_name("br_eth0")
-    cmd = "ifconfig %s down && sleep 180 && ifconfig %s up" % (l2_network_interface, l2_network_interface)
+    cmd = "ifconfig %s down && sleep 180 && ifconfig %s up && ip route add default via 172.20.0.1 dev %s" % (l2_network_interface, l2_network_interface, l2_network_interface)
     host_username = os.environ.get('hostUsername')
     host_password = os.environ.get('hostPassword')
     rsp = test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd, 240)
