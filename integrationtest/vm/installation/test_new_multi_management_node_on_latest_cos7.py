@@ -31,7 +31,7 @@ def create_vm(image):
 
     vm_creation_option = test_util.VmOption()
     vm_creation_option.set_instance_offering_uuid(vm_instrance_offering_uuid)
-    vm_creation_option.set_l3_uuids([l3_net_uuid])
+    .set_l3_uuids([l3_net_uuid])
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_name(vm_name)
     vm_inv = sce_ops.create_vm(zstack_management_ip, vm_creation_option)
@@ -48,7 +48,7 @@ def test():
 
     test_util.test_dsc('Create 3 CentOS7 vm to test multi management node installation')
 
-    conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_zstack'))
+    conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_21_ex'))
     image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
     
     vm1_inv = create_vm(image) 
