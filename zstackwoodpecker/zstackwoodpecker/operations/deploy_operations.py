@@ -1140,7 +1140,8 @@ def add_l3_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l3_
             action.category = l3.category_
         elif not l3.hasattr('system_') or l3.system_ == False:
             action.category = 'Private'
-
+        if l3.hasattr('type_'):
+            action.type = l3.type_
         try:
             evt = action.run()
         except:
