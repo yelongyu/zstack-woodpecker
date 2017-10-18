@@ -68,8 +68,6 @@ def test():
     ssh_cmd3 = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm3_ip
     test_util.test_dsc('ssh no password on vm1 vm2 vm3')
     test_stub.make_ssh_no_password(vm1_ip, tmp_file)
-    test_stub.make_ssh_no_password(vm2_ip, tmp_file)
-    test_stub.make_ssh_no_password(vm3_ip, tmp_file)
 
     test_util.test_dsc('Update master iso')
     test_stub.update_iso(vm1_ip, tmp_file, iso_path, upgrade_script_path)
@@ -86,7 +84,7 @@ def test():
         if process_result != 0:
             test_util.test_fail('delete /usr/local/zstack fail')
     test_stub.execute_all_install(ssh_cmd1, target_file, tmp_file)
-    #test_stub.check_installation(vm1_ip, tmp_file)
+    test_stub.check_installation(vm1_ip, tmp_file)
 
     test_util.test_dsc('Install multi management node on vm2 and vm3')
     host_list = 'root:password@%s root:password@%s' % (vm2_ip, vm3_ip)
@@ -95,11 +93,13 @@ def test():
 
     test_util.test_dsc('Check installation on vm1 and start_node vm2 and vm3')
     test_stub.start_node(vm1_ip, tmp_file)
+    test_stub.make_ssh_no_password(vm2_ip, tmp_file)
     test_stub.start_node(vm2_ip, tmp_file)
+    test_stub.make_ssh_no_password(vm3_ip, tmp_file)
     test_stub.start_node(vm3_ip, tmp_file)
-    #test_stub.check_installation(vm1_ip, tmp_file)
-    #test_stub.check_installation(vm2_ip, tmp_file)
-    #test_stub.check_installation(vm3_ip, tmp_file)
+    test_stub.check_installation(vm1_ip, tmp_file)
+    test_stub.check_installation(vm2_ip, tmp_file)
+    test_stub.check_installation(vm3_ip, tmp_file)
 
     test_util.test_dsc('Check installation on vm2 and stop_node vm1 and vm3')
     test_stub.stop_node(vm1_ip, tmp_file)
