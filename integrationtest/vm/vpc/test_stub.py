@@ -44,10 +44,12 @@ def create_vpc_vrouter():
 
 
 def attach_all_l3_to_vpc_vr(vpc_vr):
-    conf = res_ops.gen_query_conditions("category", "=", "Private")
-    conf = res_ops.gen_query_conditions("type", "=", "L3VpcNetwork", conf)
-    l3_list = res_ops.query_resource(res_ops.L3_NETWORK, conf)
+    l3_system_list=['l3VlanNetworkName1', "l3VlanNetworkName2", "l3VxlanNetworkName11", "l3VxlanNetworkName12"]
+    l3_name_list = [os.environ.get(name) for name in l3_system_list]
+    l3_list = [test_lib.lib_get_l3_by_name(name) for name in l3_name_list]
+
     for l3 in l3_list:
         net_ops.attach_l3(l3.uuid, vpc_vr.uuid)
+        time.sleep(5)
 
 
