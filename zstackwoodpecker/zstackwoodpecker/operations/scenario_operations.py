@@ -508,7 +508,12 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
                         cmd = "iptables -w 20 -I INPUT -p tcp -m tcp --dport 2049 -j ACCEPT && iptables -w 20 -I INPUT -p udp -m udp --dport 2049 -j ACCEPT"
                         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
                         return
-            elif primary_storage_type == 'smp':
+            elif primary_storage_type == 'smp': 
+                #the type is get from deploy, here we also need to define the condition based on scenario config
+                for primaryStorageRef in xmlobject.safe_list(vm_config.primaryStorageRef):
+                    if primaryStorageRef.type_ == 'ocfs2smp':
+                        #directly return when find the current config is for ocfs2
+                        return
                 for smpPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.sharedMountPointPrimaryStorage):
                     if primaryStorageRef.text_ == smpPrimaryStorage.name_:
                         test_util.test_logger('[vm:] %s setup smp service.' % (vm_ip))
