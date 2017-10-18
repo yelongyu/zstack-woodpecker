@@ -581,7 +581,7 @@
         <l2VxlanNetwork name="$l2VxlanNetworkName11" description="guest L2 Vxlan network 4, it is for test small ip range.">
           <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetwork11"
+              <l3BasicNetwork name="$l3VxlanNetwork11"
                 type="L3VpcNetwork"
                 description = "guest test vlan network 11">
                 <ipRange name="$vlanIpRangeName11" startIp="$vlanIpRangeStart11" endIp="$vlanIpRangeEnd11" gateway="$vlanIpRangeGateway11" netmask="$vlanIpRangeNetmask11"/>
@@ -610,7 +610,7 @@
         <l2VxlanNetwork name="$l2VxlanNetworkName12" description="guest L2 Vxlan network 4, it is for test small ip range.">
           <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetwork12"
+              <l3BasicNetwork name="$l3VxlanNetwork12"
                 type="L3VpcNetwork"
                 description = "guest test vlan network 12">
                 <ipRange name="$vlanIpRangeName12" startIp="$vlanIpRangeStart12" endIp="$vlanIpRangeEnd12" gateway="$vlanIpRangeGateway12" netmask="$vlanIpRangeNetmask12"/>
@@ -639,7 +639,7 @@
         <l2VxlanNetwork name="$l2VxlanNetworkName13" description="guest L2 Vxlan network 4, it is for test small ip range.">
           <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetwork13"
+              <l3BasicNetwork name="$l3VxlanNetwork13"
                 type="L3VpcNetwork"
                 description = "guest test vlan network 13">
                 <ipRange name="$vlanIpRangeName13" startIp="$vlanIpRangeStart13" endIp="$vlanIpRangeEnd13" gateway="$vlanIpRangeGateway13" netmask="$vlanIpRangeNetmask13"/>
@@ -668,7 +668,7 @@
         <l2VxlanNetwork name="$l2VxlanNetworkName14" description="guest L2 Vxlan network 4, it is for test small ip range.">
           <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetwork14"
+              <l3BasicNetwork name="$l3VxlanNetwork14"
                 type="L3VpcNetwork"
                 description = "guest test vlan network 14">
                 <ipRange name="$vlanIpRangeName14" startIp="$vlanIpRangeStart14" endIp="$vlanIpRangeEnd14" gateway="$vlanIpRangeGateway14" netmask="$vlanIpRangeNetmask14"/>
@@ -697,7 +697,7 @@
         <l2VxlanNetwork name="$l2VxlanNetworkName15" description="guest L2 Vxlan network 4, it is for test small ip range.">
           <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetwork15"
+              <l3BasicNetwork name="$l3VxlanNetwork15"
                 type="L3VpcNetwork"
                 description = "guest test vlan network 15">
                 <ipRange name="$vlanIpRangeName15" startIp="$vlanIpRangeStart15" endIp="$vlanIpRangeEnd15" gateway="$vlanIpRangeGateway15" netmask="$vlanIpRangeNetmask15"/>
@@ -726,7 +726,7 @@
         <l2VxlanNetwork name="$l2VxlanNetworkName16" description="guest L2 Vxlan network 4, it is for test small ip range.">
           <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetwork16"
+              <l3BasicNetwork name="$l3VxlanNetwork16"
                 type="L3VpcNetwork"
                 description = "guest test vlan network 16">
                 <ipRange name="$vlanIpRangeName16" startIp="$vlanIpRangeStart16" endIp="$vlanIpRangeEnd16" gateway="$vlanIpRangeGateway16" netmask="$vlanIpRangeNetmask16"/>
@@ -755,7 +755,7 @@
         <l2VxlanNetwork name="$l2VxlanNetworkName17" description="guest L2 Vxlan network 4, it is for test small ip range.">
           <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetwork17"
+              <l3BasicNetwork name="$l3VxlanNetwork17"
                 type="L3VpcNetwork"
                 description = "guest test vlan network 17">
                 <ipRange name="$vlanIpRangeName17" startIp="$vlanIpRangeStart17" endIp="$vlanIpRangeEnd17" gateway="$vlanIpRangeGateway17" netmask="$vlanIpRangeNetmask17"/>
@@ -784,7 +784,7 @@
         <l2VxlanNetwork name="$l2VxlanNetworkName18" description="guest L2 Vxlan network 4, it is for test small ip range.">
           <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetwork18"
+              <l3BasicNetwork name="$l3VxlanNetwork18"
                 type="L3VpcNetwork"
                 description = "guest test vlan network 18">
                 <ipRange name="$vlanIpRangeName18" startIp="$vlanIpRangeStart18" endIp="$vlanIpRangeEnd18" gateway="$vlanIpRangeGateway18" netmask="$vlanIpRangeNetmask18"/>
@@ -813,7 +813,7 @@
         <l2VxlanNetwork name="$l2VxlanNetworkName19" description="guest L2 Vxlan network 4, it is for test small ip range.">
           <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetwork19"
+              <l3BasicNetwork name="$l3VxlanNetwork19"
                 type="L3VpcNetwork"
                 description = "guest test vlan network 19">
                 <ipRange name="$vlanIpRangeName19" startIp="$vlanIpRangeStart19" endIp="$vlanIpRangeEnd19" gateway="$vlanIpRangeGateway19" netmask="$vlanIpRangeNetmask19"/>
@@ -842,7 +842,7 @@
         <l2VxlanNetwork name="$l2VxlanNetworkName20" description="guest L2 Vxlan network 4, it is for test small ip range.">
           <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetwork20"
+              <l3BasicNetwork name="$l3VxlanNetwork20"
                 type="L3VpcNetwork"
                 description = "guest test vlan network 20">
                 <ipRange name="$vlanIpRangeName20" startIp="$vlanIpRangeStart20" endIp="$vlanIpRangeEnd20" gateway="$vlanIpRangeGateway20" netmask="$vlanIpRangeNetmask20"/>
