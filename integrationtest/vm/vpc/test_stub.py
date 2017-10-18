@@ -44,8 +44,9 @@ def create_vpc_vrouter():
 
 
 def attach_all_l3_to_vpc_vr(vpc_vr):
-    condition = ["category", "=", "Private"]
-    l3_list = res_ops.query_resource(res_ops.L3_NETWORK, condition)
+    conf = res_ops.gen_query_conditions("category", "=", "Private")
+    conf = res_ops.gen_query_conditions("type", "=", "L3VpcNetwork", conf)
+    l3_list = res_ops.query_resource(res_ops.L3_NETWORK, conf)
     for l3 in l3_list:
         net_ops.attach_l3(l3.uuid, vpc_vr.uuid)
 
