@@ -57,7 +57,15 @@
         username="$nodeUserName" password="$nodePassword"
         description="The default node 1. It could be same as test machine."/>
     </nodes> 
-  
+
+    <l2VxlanNetworkPools>
+      <l2VxlanNetworkPool name="$l2VxlanNetworkPoolName">
+        <vniRanges>
+          <vniRange name="$vniRangeName" startVni="$startVni" endVni="$endVni"/>
+        </vniRanges>
+      </l2VxlanNetworkPool>
+    </l2VxlanNetworkPools>
+
     <instanceOfferings>
       <instanceOffering name="$instanceOfferingName_s"
         description="Test" 
