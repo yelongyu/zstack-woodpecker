@@ -1,4 +1,4 @@
-import ../deploy.tmpt
+import ./deploy.tmpt
 
 l2VxlanNetworkPoolName = l2_vxlan_network_pool
 vniRangeName = vni_range
