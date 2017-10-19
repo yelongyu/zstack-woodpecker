@@ -39,11 +39,12 @@ def test():
     test_stub.attach_all_l3_to_vpc_vr(vr_inv)
 
     test_util.test_dsc("create two vm, vm1 in l3 {}, vm2 in l3 {}".format(flavor['vm1l3'], flavor['vm2l3']))
-    vm1, vm2 = [test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(name), l3_name=name) for name in (flavor['vm1l3'], flavor['vm2l3']) ]
-
-    for vm in (vm1, vm2):
-        test_obj_dict.add_vm(vm)
-        vm.check()
+    vm1 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(flavor['vm1l3']), l3_name=flavor['vm1l3'])
+    test_obj_dict.add_vm(vm1)
+    vm1.check()
+    vm2 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(flavor['vm1l3']), l3_name=flavor['vm1l3'])
+    test_obj_dict.add_vm(vm2)
+    vm2.check()
 
     if flavor['migrate']:
         test_stub.migrate_vm_to_random_host(vm2)
@@ -51,6 +52,7 @@ def test():
 
     if flavor['vrreboot']:
         vm_ops.reboot_vm(vr_inv.uuid)
+        time.sleep(60)
 
     vm1_inv = vm1.get_vm()
     vm2_inv = vm2.get_vm()
