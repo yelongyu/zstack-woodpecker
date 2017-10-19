@@ -90,11 +90,12 @@ def test():
     try:
         #Try to recovery the same image again, it's negative test
         recovery_image = img_ops.recovery_image_from_image_store_backup_storage(local_bs_uuid, disaster_bs_uuid, disaster_bs_image_uuid)
+        img_ops.delete_image(recovery_image.uuid)
     except Exception,e:
         if str(e).find('already contains it') != -1:
             test_util.test_pass('Try to recovery the same image again and get the error info expectly: %s' %str(e))
     finally:
-        vm.delete()
+        vm_ops.destroy_vm(vm.uuid)
         img_ops.delete_image(image_uuid)
         bs_ops.delete_backup_storage(disaster_bs_uuid)
     test_util.test_fail('Try to recovery the same image second time success unexpectly')
@@ -104,7 +105,7 @@ def error_cleanup():
     global disaster_bs_uuid
     global image_uuid
     global vm
-    vm.delete()
+    vm_ops.destroy_vm(vm.uuid)
     img_ops.delete_image(image_uuid)
     if disaster_bs_uuid != None:
         bs_ops.delete_backup_storage(disaster_bs_uuid)
