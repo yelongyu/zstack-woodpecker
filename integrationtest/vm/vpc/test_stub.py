@@ -39,6 +39,7 @@ import itertools
 
 l3_vlan_system_name_list=['l3VlanNetworkName1', "l3VlanNetwork3"]
 l3_vxlan_system_name_list= ["l3VxlanNetwork11", "l3VxlanNetwork12"]
+L3_SYSTEM_NAME_LIST = tuple(l3_vlan_system_name_list + l3_vxlan_system_name_list)
 
 Port = test_state.Port
 
@@ -51,8 +52,7 @@ denied_ports = Port.get_denied_ports()
 target_ports = rule1_ports + rule2_ports + rule3_ports + rule4_ports + rule5_ports + denied_ports
 
 
-def create_vpc_vrouter():
-    vr_name= 'test_vpc'
+def create_vpc_vrouter(vr_name='test_vpc'):
     conf = res_ops.gen_query_conditions('name', '=', 'test_vpc')
     vr_list = res_ops.query_resource(res_ops.VIRTUALROUTER_VM, conf)
     if vr_list:
@@ -61,11 +61,10 @@ def create_vpc_vrouter():
     return vpc_ops.create_vpc_vrouter(name=vr_name, virtualrouter_offering_uuid=vr_offering.uuid)
 
 
-def attach_all_l3_to_vpc_vr(vpc_vr):
-    l3_vlan_name_list = [os.environ.get(name) for name in l3_vlan_system_name_list]
-    l3_vxlan_name_list = [os.environ.get(name) for name in l3_vxlan_system_name_list]
+def attach_all_l3_to_vpc_vr(vpc_vr, l3_system_name_list=L3_SYSTEM_NAME_LIST):
+    l3_name_list = [os.environ.get(name) for name in l3_system_name_list]
 
-    l3_list = [test_lib.lib_get_l3_by_name(name) for name in l3_vlan_name_list + l3_vxlan_name_list]
+    l3_list = [test_lib.lib_get_l3_by_name(name) for name in l3_name_list]
 
     l3_uuid_list = [nic.l3NetworkUuid for nic in vpc_vr.vmNics]
     for l3 in l3_list:
@@ -140,3 +139,11 @@ def run_command_in_vm(vminv, command):
     managerip = test_lib.lib_find_host_by_vm(vminv).managementIp
     vm_ip = vminv.vmNics[0].ip
     return test_lib.lib_ssh_vm_cmd_by_agent(managerip, vm_ip, 'root', 'password', command)
+
+
+def remove_all_vpc_vrouter():
+    cond = res_ops.gen_query_conditions('type', '=', 'L3VpcNetwork')
+    vr_vm_list = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
+    if vr_vm_list:
+        for vr_vm in vr_vm_list:
+            vm_ops.destroy_vm(vr_vm.uuid)

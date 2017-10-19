@@ -63,7 +63,7 @@ def test():
 
     test_lib.lib_check_ping(vm1_inv, vm2_inv.vmNics[0].ip)
     test_lib.lib_check_ping(vm2_inv, vm1_inv.vmNics[0].ip)
-    
+
     test_lib.lib_check_ports_in_a_command(vm1_inv, vm1_inv.vmNics[0].ip,
                                           vm2_inv.vmNics[0].ip, ["22"], [], vm2_inv)
 
