@@ -21,12 +21,11 @@ vpc3_l3_list = ['l3VlanNetwork5', "l3VlanNetwork6", "l3VxlanNetwork15", "l3Vxlan
 
 vpc_name_list = ['vpc1','vpc2','vpc3']
 vpc_l3_list = [vpc1_l3_list, vpc2_l3_lsit, vpc3_l3_list]
+vr_inv_list = []
 
-
-
-case_flavor = dict(vr=                  dict(vr=True, attach_l3=False, has_vm=False),
-                   vr_attach_l3=        dict(vr=True, attach_l3=False, has_vm=False),
-                   vr_attach_l3_has_vm= dict(vr=True, attach_l3=False, has_vm=False)
+case_flavor = dict(vr_only=             dict(vr=True, attach_l3=False, has_vm=False),
+                   vr_attach_l3=        dict(vr=True, attach_l3=True, has_vm=False),
+                   vr_attach_l3_has_vm= dict(vr=True, attach_l3=True, has_vm=True)
                    )
 
 
@@ -35,7 +34,6 @@ def test():
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     test_util.test_dsc("create vpc vrouter and attach vpc l3 to vpc")
 
-    vr_inv_list = []
     for vpc_name in vpc_name_list:
         vr_inv_list.append(test_stub.create_vpc_vrouter(vpc_name))
 
@@ -51,8 +49,13 @@ def test():
     for vr_inv in vr_inv_list:
         vm_ops.destroy_vm(vr_inv.uuid)
 
+    if flavor["has_vm"]:
+        with test_lib.expected_failure('reboot vm in vpc l3 when no vpc vrouter', Exception):
+            vm1.reboot()
 
 def env_recover():
+    for vr_inv in vr_inv_list:
+        vm_ops.destroy_vm(vr_inv.uuid)
     test_lib.lib_error_cleanup(test_obj_dict)
 
 
