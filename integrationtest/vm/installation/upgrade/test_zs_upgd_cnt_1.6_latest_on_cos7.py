@@ -49,7 +49,7 @@ def test():
     test_stub.update_19_iso(vm_ip, tmp_file, iso_19_path, upgrade_script_path)
 
     #pkg_num = 1.7
-    release_ver=['1.7','1.8','1.9','1.10','2.0.0']
+    release_ver=['1.7','1.8','1.9','1.10','2.0.0','2.1.0']
     curren_num = float(os.environ.get('releasePkgNum'))
     for pkg_num in release_ver:
     #while pkg_num <= curren_num:
