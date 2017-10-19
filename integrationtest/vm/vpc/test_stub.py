@@ -70,7 +70,6 @@ def attach_all_l3_to_vpc_vr(vpc_vr, l3_system_name_list=L3_SYSTEM_NAME_LIST):
     for l3 in l3_list:
         if l3.uuid not in l3_uuid_list:
             net_ops.attach_l3(l3.uuid, vpc_vr.uuid)
-            time.sleep(5)
 
 
 def create_vm_with_random_offering(vm_name, image_name=None, l3_name=None, session_uuid=None,
