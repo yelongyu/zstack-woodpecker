@@ -57,10 +57,10 @@ def test():
     system_tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0]
     if system_tag.tag != "remote":
         test_util.test_fail("Here isn't 'remote' system tag for image in data protect bs")
-    #Check if ListImagesFromImageStoreBackupStorage works well
+    #Check if GetImagesFromImageStoreBackupStorage works well
     disaster_bs_image_lst = img_ops.get_images_from_image_store_backup_storage(disaster_bs_uuid)
     if disaster_bs_image_lst.infos == []:
-        test_util.test_fail('ListImagesFromImageStoreBackupStorage unable to list the images in disaster bs')
+        test_util.test_fail('GetImagesFromImageStoreBackupStorage unable to list the images in disaster bs')
     #Try to sync the same image again, it's negative test
     try:
         image_uuid = img_ops.sync_image_from_image_store_backup_storage(disaster_bs_uuid, local_bs_uuid, image_uuid_local)
