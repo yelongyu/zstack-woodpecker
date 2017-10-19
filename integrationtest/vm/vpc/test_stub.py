@@ -145,4 +145,8 @@ def remove_all_vpc_vrouter():
     vr_vm_list = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
     if vr_vm_list:
         for vr_vm in vr_vm_list:
+            nic_uuid_list = [nic.uuid for nic in vr_vm.vmNics if nic.metaData == '4']
+            for nic_uuid in nic_uuid_list:
+                net_ops.detach_l3(nic_uuid)
             vm_ops.destroy_vm(vr_vm.uuid)
+

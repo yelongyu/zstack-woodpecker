@@ -54,8 +54,7 @@ def test():
             vm1.reboot()
 
 def env_recover():
-    for vr_inv in vr_inv_list:
-        vm_ops.destroy_vm(vr_inv.uuid)
+    test_stub.remove_all_vpc_vrouter()
     test_lib.lib_error_cleanup(test_obj_dict)
 
 
