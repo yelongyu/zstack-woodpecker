@@ -894,10 +894,10 @@ class HybridObject(object):
         pri_l3_uuid = self.vm.vm.vmNics[0].l3NetworkUuid
         vr = test_lib.lib_find_vr_by_l3_uuid(pri_l3_uuid)[0]
         l3_uuid = test_lib.lib_find_vr_pub_nic(vr).l3NetworkUuid
-        vip_existed = res_ops.query_resource(res_ops.VIP)
+        vip_not_for_vr = [vip for vip in res_ops.query_resource(res_ops.VIP) if 'vip-for-vrouter' not in vip.name]
         # Create Vip
-        if vip_existed:
-            vip = vip_existed[0]
+        if vip_not_for_vr:
+            vip = vip_not_for_vr[0]
         else:
             vip = create_vip('ipsec_vip', l3_uuid).get_vip()
         cond = res_ops.gen_query_conditions('uuid', '=', pri_l3_uuid)
