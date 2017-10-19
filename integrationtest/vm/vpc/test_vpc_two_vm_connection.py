@@ -6,6 +6,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.test_state as test_state
+import zstackwoodpecker.operations.vm_operations as vm_ops
 import random
 import os
 import zstackwoodpecker.operations.volume_operations as vol_ops
@@ -20,7 +21,7 @@ case_flavor = dict(vm1_vm2_one_l3_vlan=               dict(vm1l3=VLAN1_NAME, vm2
                    vm1_l3_vlan_vm2_l3_vlan=           dict(vm1l3=VLAN1_NAME, vm2l3=VLAN2_NAME, migrate=False, vrreboot=False),
                    vm1_l3_vxlan_vm2_l3_vxlan=         dict(vm1l3=VXLAN1_NAME, vm2l3=VXLAN2_NAME, migrate=False, vrreboot=False),
                    vm1_l3_vlan_vm2_l3_vxlan=          dict(vm1l3=VLAN1_NAME, vm2l3=VXLAN1_NAME, migrate=False, vrreboot=False),
-                   vm1_vm2_one_l3_vlan_migrate=       dict(vm1l3=VLAN1_NAME, vm2l3=VLAN1_NAME, migrate=False, vrreboot=False),
+                   vm1_vm2_one_l3_vlan_migrate=       dict(vm1l3=VLAN1_NAME, vm2l3=VLAN1_NAME, migrate=True, vrreboot=False),
                    vm1_l3_vlan_vm2_l3_vlan_migrate=   dict(vm1l3=VLAN1_NAME, vm2l3=VLAN2_NAME, migrate=True, vrreboot=False),
                    vm1_l3_vxlan_vm2_l3_vxlan_vrreboot=dict(vm1l3=VXLAN1_NAME, vm2l3=VXLAN2_NAME, migrate=False, vrreboot=True),
                    )
@@ -43,6 +44,13 @@ def test():
     for vm in (vm1, vm2):
         test_obj_dict.add_vm(vm)
         vm.check()
+
+    if flavor['migrate']:
+        test_stub.migrate_vm_to_random_host(vm2)
+        vm2.check()
+
+    if flavor['vrreboot']:
+        vm_ops.reboot_vm(vr_inv.uuid)
 
     vm1_inv = vm1.get_vm()
     vm2_inv = vm2.get_vm()

@@ -117,3 +117,21 @@ def create_vm_with_random_offering(vm_name, image_name=None, l3_name=None, sessi
     vm.set_creation_option(vm_creation_option)
     vm.create()
     return vm
+
+
+def migrate_vm_to_random_host(vm):
+    test_util.test_dsc("migrate vm to random host")
+    if not test_lib.lib_check_vm_live_migration_cap(vm.vm):
+        test_util.test_skip('skip migrate if live migrate not supported')
+    target_host = test_lib.lib_find_random_host(vm.vm)
+    current_host = test_lib.lib_find_host_by_vm(vm.vm)
+    vm.migrate(target_host.uuid)
+
+    new_host = test_lib.lib_get_vm_host(vm.vm)
+    if not new_host:
+        test_util.test_fail('Not find available Hosts to do migration')
+
+    if new_host.uuid != target_host.uuid:
+        test_util.test_fail('[vm:] did not migrate from [host:] %s to target [host:] %s, but to [host:] %s' % (vm.vm.uuid, current_host.uuid, target_host.uuid, new_host.uuid))
+    else:
+        test_util.test_logger('[vm:] %s has been migrated from [host:] %s to [host:] %s' % (vm.vm.uuid, current_host.uuid, target_host.uuid))
