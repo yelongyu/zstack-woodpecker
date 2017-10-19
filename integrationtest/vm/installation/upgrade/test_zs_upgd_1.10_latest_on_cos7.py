@@ -25,7 +25,6 @@ def test():
 
     image_name = os.environ.get('imageName_i_c7_z_1.10')
     iso_path = os.environ.get('iso_path')
-    #iso_21_path = os.environ.get('iso_21_path')
     zstack_latest_version = os.environ.get('zstackLatestVersion')
     zstack_latest_path = os.environ.get('zstackLatestInstaller')
     vm_name = os.environ.get('vmName')
@@ -45,7 +44,6 @@ def test():
 
     test_util.test_logger('Upgrade zstack to latest') 
     test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
-    #test_stub.update_21_iso(vm_ip, tmp_file, iso_21_path, upgrade_script_path)
     test_stub.upgrade_zstack(vm_ip, zstack_latest_path, tmp_file) 
     test_stub.check_zstack_version(vm_ip, tmp_file, zstack_latest_version)
     test_stub.start_mn(vm_ip, tmp_file)
