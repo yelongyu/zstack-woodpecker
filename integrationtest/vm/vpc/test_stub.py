@@ -79,11 +79,10 @@ def create_vm_with_random_offering(vm_name, image_name=None, l3_name=None, sessi
                                    root_password=None, ps_uuid=None, system_tags=None):
     if image_name:
         imagename = os.environ.get(image_name)
-        image_uuid = test_lib.lib_get_image_by_name(imagename).uuid
     else:
-        conf = res_ops.gen_query_conditions('format', '!=', 'iso')
-        conf = res_ops.gen_query_conditions('system', '=', 'false', conf)
-        image_uuid = random.choice(res_ops.query_resource(res_ops.IMAGE, conf)).uuid
+        imagename = os.environ.get("imageName_net")
+
+    image_uuid = test_lib.lib_get_image_by_name(imagename).uuid
 
     if l3_name:
         l3name = os.environ.get(l3_name)
@@ -135,3 +134,9 @@ def migrate_vm_to_random_host(vm):
         test_util.test_fail('[vm:] did not migrate from [host:] %s to target [host:] %s, but to [host:] %s' % (vm.vm.uuid, current_host.uuid, target_host.uuid, new_host.uuid))
     else:
         test_util.test_logger('[vm:] %s has been migrated from [host:] %s to [host:] %s' % (vm.vm.uuid, current_host.uuid, target_host.uuid))
+
+
+def run_command_in_vm(vminv, command):
+    managerip = test_lib.lib_find_host_by_vm(vminv).managementIp
+    vm_ip = vminv.vmNics[0].ip
+    return test_lib.lib_ssh_vm_cmd_by_agent(managerip, vm_ip, 'root', 'password', command)

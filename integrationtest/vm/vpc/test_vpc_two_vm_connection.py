@@ -58,14 +58,17 @@ def test():
     vm2_inv = vm2.get_vm()
 
     test_util.test_dsc("test two vm connectivity")
+    test_stub.run_command_in_vm(vm1_inv, 'iptables -F')
+    test_stub.run_command_in_vm(vm2_inv, 'iptables -F')
+
     test_lib.lib_check_ping(vm1_inv, vm2_inv.vmNics[0].ip)
     test_lib.lib_check_ping(vm2_inv, vm1_inv.vmNics[0].ip)
-
+    
     test_lib.lib_check_ports_in_a_command(vm1_inv, vm1_inv.vmNics[0].ip,
-                                          vm2_inv.vmNics[0].ip, test_stub.target_ports, [], vm2_inv)
+                                          vm2_inv.vmNics[0].ip, ["22"], [], vm2_inv)
 
     test_lib.lib_check_ports_in_a_command(vm2_inv, vm2_inv.vmNics[0].ip,
-                                          vm1_inv.vmNics[0].ip, test_stub.target_ports, [], vm1_inv)
+                                          vm1_inv.vmNics[0].ip, ["22"], [], vm1_inv)
 
 def env_recover():
     test_lib.lib_error_cleanup(test_obj_dict)
