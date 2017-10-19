@@ -1287,6 +1287,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
     root_xml = etree.Element("deployerConfig")
     vms_xml = etree.SubElement(root_xml, 'vms')
     poolName = os.environ.get('poolName')
+    primaryStorageUuid = os.environ.get('primaryStorageUuid')
     if hasattr(scenario_config.deployerConfig, 'hosts'):
         for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
             for vm in xmlobject.safe_list(host.vms.vm):
@@ -1356,6 +1357,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                         if bs_ref.type_ == 'ceph':
                             disk_offering_uuid = bs_ref.offering_uuid_
                             volume_option.set_disk_offering_uuid(disk_offering_uuid)
+                            if primaryStorageUuid != None and primaryStorageUuid != "":
+                                volume_option.set_primary_storage_uuid(primaryStorageUuid)
                             if poolName != None and poolName != "":
                                 volume_option.set_system_tags(['ceph::pool::%s' % (poolName)])
                             volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
@@ -1365,6 +1368,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                         if bs_ref.type_ == 'fusionstor':
                             disk_offering_uuid = bs_ref.offering_uuid_
                             volume_option.set_disk_offering_uuid(disk_offering_uuid)
+                            if primaryStorageUuid != None and primaryStorageUuid != "":
+                                volume_option.set_primary_storage_uuid(primaryStorageUuid)
                             if poolName != None and poolName != "":
                                 volume_option.set_system_tags(['ceph::pool::%s' % (poolName)])
                             volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
@@ -1378,6 +1383,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             if ocfs2smp_shareable_volume_is_created == False and hasattr(ps_ref, 'disk_offering_uuid_'):
                                 ocfs2smp_disk_offering_uuid = ps_ref.disk_offering_uuid_
                                 volume_option.set_disk_offering_uuid(ocfs2smp_disk_offering_uuid)
+                                if primaryStorageUuid != None and primaryStorageUuid != "":
+                                    volume_option.set_primary_storage_uuid(primaryStorageUuid)
                                 if poolName != None and poolName != "":
                                     volume_option.set_system_tags(['ephemeral::shareable', 'capability::virtio-scsi', 'ceph::pool::%s' % (poolName)])
                                 else:
@@ -1389,6 +1396,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             if zbs_virtio_scsi_volume_is_created == False and hasattr(ps_ref, 'disk_offering_uuid_'):
                                 zbs_disk_offering_uuid = ps_ref.disk_offering_uuid_
                                 volume_option.set_disk_offering_uuid(zbs_disk_offering_uuid)
+                                if primaryStorageUuid != None and primaryStorageUuid != "":
+                                    volume_option.set_primary_storage_uuid(primaryStorageUuid)
                                 if poolName != None and poolName != "":
                                     volume_option.set_system_tags(['capability::virtio-scsi', 'ceph::pool::%s' % (poolName)])
                                 else:
@@ -1415,6 +1424,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
             else:
                 volume_option.set_name('data_volume')
             volume_option.set_disk_offering_uuid(volume.volumeDiskOfferingUuid_)
+            if primaryStorageUuid != None and primaryStorageUuid != "":
+                volume_option.set_primary_storage_uuid(primaryStorageUuid)
             if poolName != None and poolName != "":
                 volume_option.set_system_tags(['ceph::pool::%s' % (poolName)])
             volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
