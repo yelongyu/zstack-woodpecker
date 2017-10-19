@@ -154,6 +154,8 @@ def setup_vm_console(vm_inv, vm_config, deploy_config):
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
     cmd = "grub2-mkconfig -o /boot/grub2/grub.cfg"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+    cmd = "sync"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
 def execute_in_vm_console(zstack_management_ip, host_ip, vm_name, vm_config, cmd):
     test_util.test_logger("DEBUG.execute_in_vm_console:%s" %(cmd))
@@ -235,6 +237,7 @@ def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
     cmd = 'echo -e %s > /etc/udev/rules.d/70-persistent-net.rules' % (udev_config)
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
     modify_cfg.append(r"sleep 1")
+    modify_cfg.append(r"sync")
 
     for cmd in modify_cfg:
         test_util.test_logger("execute cmd: %s" %(cmd))
@@ -243,7 +246,8 @@ def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
             test_util.test_fail("cmd %s failed" %(cmd))
 
 
-    stop_vm(zstack_management_ip, vm_inv.uuid)
+    # NOTE: need to make filesystem in sync in VM before cold stop VM
+    stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
     start_vm(zstack_management_ip, vm_inv.uuid)
     if not test_lib.lib_wait_target_up(vm_ip, '22', 120):
         test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
@@ -678,7 +682,8 @@ def setup_xsky_storages(scenario_config, scenario_file, deploy_config):
         for node in xmlobject.safe_list(scenario_config.deployerConfig.xsky.nodes.node):
             vmUuid = node.uuid_
             print "vm uuid %s" % (str(vmUuid))
-            stop_vm(xskyNodesMN, vmUuid)
+            # NOTE: need to make filesystem in sync in VM before cold stop VM
+            stop_vm(xskyNodesMN, vmUuid, 'cold')
 
         #Wait nodes down
         for node in xmlobject.safe_list(scenario_config.deployerConfig.xsky.nodes.node):
@@ -1168,6 +1173,7 @@ def start_vm(http_server_ip, vm_uuid, session_uuid=None, timeout=240000):
 
 def create_volume_from_offering(http_server_ip, volume_option, session_uuid=None):
     action = api_actions.CreateDataVolumeAction()
+    action.primaryStorageUuid = volume_option.get_primary_storage_uuid()
     action.diskOfferingUuid = volume_option.get_disk_offering_uuid()
     action.description = volume_option.get_description()
     action.systemTags = volume_option.get_system_tags()
@@ -1318,7 +1324,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 vm_xml.set('ip', vm_ip)
                 setup_vm_no_password(vm_inv, vm, deploy_config)
                 setup_vm_console(vm_inv, vm, deploy_config)
-                stop_vm(zstack_management_ip, vm_inv.uuid)
+                # NOTE: need to make filesystem in sync in VM before cold stop VM
+                stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
                 start_vm(zstack_management_ip, vm_inv.uuid)
                 test_lib.lib_wait_target_up(vm_ip, '22', 120)
 
