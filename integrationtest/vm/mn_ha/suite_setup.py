@@ -90,6 +90,10 @@ def test():
                                           "scenario-config-ceph-3-nets-sep.xml"]):
         config_json = os.environ.get('configJsonSepPub')
 
+    elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-fusionstor-3-nets-sep.xml"], \
+                                         ["scenario-config-fusionstor-3-nets-sep.xml"]):
+        config_json = os.environ.get('configJsonSepPub')
+
     elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-mul-net-pubs.xml"], \
                                          ["scenario-config-nfs-sep-man.xml", \
                                           "scenario-config-nfs-sep-pub.xml"]):
@@ -116,7 +120,8 @@ def test():
     test_lib.lib_set_reserved_memory('8G')
     
     if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml"], ["scenario-config-nfs-sep-pub.xml"]) or \
-       test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], ["scenario-config-ceph-sep-pub.xml"]):
+       test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], ["scenario-config-ceph-sep-pub.xml"]) or \
+       test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-fusionstor-3-nets-sep.xml"], ["scenario-config-fusionstor-3-nets-sep.xml"]):
         add_ps_network_gateway_sys_tag()
 
     test_util.test_pass('Suite Setup Success')
