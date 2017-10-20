@@ -16,11 +16,11 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
 vpc1_l3_list = ['l3VlanNetworkName1', "l3VlanNetwork2", "l3VxlanNetwork11", "l3VxlanNetwork12"]
-vpc3_l3_list = ['l3VlanNetwork3', "l3VlanNetwork4", "l3VxlanNetwork13", "l3VxlanNetwork14"]
+vpc2_l3_list = ['l3VlanNetwork3', "l3VlanNetwork4", "l3VxlanNetwork13", "l3VxlanNetwork14"]
 vpc3_l3_list = ['l3VlanNetwork5', "l3VlanNetwork6", "l3VxlanNetwork15", "l3VxlanNetwork16"]
 
 vpc_name_list = ['vpc1','vpc2','vpc3']
-vpc_l3_list = [vpc1_l3_list, vpc3_l3_list, vpc3_l3_list]
+vpc_l3_list = [vpc1_l3_list, vpc2_l3_list, vpc3_l3_list]
 vr_inv_list = []
 
 case_flavor = dict(vr_only=             dict(vr=True, attach_l3=False, has_vm=False),
@@ -42,7 +42,7 @@ def test():
             test_stub.attach_all_l3_to_vpc_vr(vr_inv, l3_list)
 
     if flavor["has_vm"]:
-        l3 = random.choice(vpc1_l3_list + vpc3_l3_list + vpc3_l3_list)
+        l3 = random.choice(vpc1_l3_list + vpc2_l3_list + vpc3_l3_list)
         vm1 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(l3), l3_name=l3)
         test_obj_dict.add_vm(vm1)
 
