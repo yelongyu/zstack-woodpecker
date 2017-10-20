@@ -320,7 +320,9 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
     mn_netmask = os.environ.get('nodeNetMask')
     mn_gateway = os.environ.get('nodeGateway')
     for i in range(len(mn_host_list)):
-        if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml"], ["scenario-config-nfs-sep-man.xml"]) or \
+        if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-fusionstor-3-nets-sep.xml"], ["scenario-config-fusionstor-3-nets-sep.xml"]):
+            os.system('sed -i s/host-%d/%s/g %s' % (i+1, mn_host_list[i].storageIp_,config_json))
+        elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml"], ["scenario-config-nfs-sep-man.xml"]) or \
                          test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], ["scenario-config-ceph-sep-man.xml"]):
             os.system('sed -i s/host-%d/%s/g %s' % (i+1, mn_host_list[i].ip_,config_json))
         else:
@@ -330,11 +332,13 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
     os.system('sed -i s/mn_ip/%s/g %s' % (mn_ip,config_json))
     os.system('sed -i s/mn_netmask/%s/g %s' % (mn_netmask,config_json))
     os.system('sed -i s/mn_gateway/%s/g %s' % (mn_gateway,config_json))
+
     mn_ha_storage_type = sce_ops.get_mn_ha_storage_type(scenarioConfig, scenarioFile, deploy_config)
     if mn_ha_storage_type == 'ceph':
         os.system('sed -i s/FileConf/CephConf/g %s' % (config_json))
-
-    if mn_ha_storage_type == 'nfs':
+    elif mn_ha_storage_type == 'fusionstor':
+        os.system('sed -i s/FileConf/FstrConf/g %s' % (config_json))
+    elif mn_ha_storage_type == 'nfs':
         #stor_vm_ip = "10.0.0.2"
         stor_vm_ip = adapt_pick_ip_not_used_in_scenario_file(scenarioFile)
         stor_vm_netmask = os.environ.get('storNetMask')
