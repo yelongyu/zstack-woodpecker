@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-fusionstor-3-nets-sep.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-fusionstor-3-nets-sep.tmpt</scenarioConfigTemplate>
+</testConfig>

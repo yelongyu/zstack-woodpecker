@@ -1,4 +1,0 @@
-<testConfig>
-    <scenarioConfig>scenario-fusionstor-3-nodes.xml</scenarioConfig>
-    <scenarioConfigTemplate>scenario-fusionstor-3-nodes.tmpt</scenarioConfigTemplate>
-</testConfig>
