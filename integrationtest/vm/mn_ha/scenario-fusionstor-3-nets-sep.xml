@@ -19,8 +19,8 @@
               <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
-              <backupStorageRef monIp="yes">$fusionstorBackupStorageName</backupStorageRef>
-              <primaryStorageRef monIp="yes">$fusionstorPrimaryStorageName</primaryStorageRef>
+              <!--<backupStorageRef monIp="yes">$fusionstorBackupStorageName</backupStorageRef>-->
+              <!--<primaryStorageRef monIp="yes">$fusionstorPrimaryStorageName</primaryStorageRef>-->
             </l3Network>
             <l3Network uuid="$vmStorageL3Uuid">
               <backupStorageRef>$fusionstorBackupStorageName</backupStorageRef>
@@ -43,8 +43,8 @@
               <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
-              <backupStorageRef monIp="yes">$fusionstorBackupStorageName</backupStorageRef>
-              <primaryStorageRef monIp="yes">$fusionstorPrimaryStorageName</primaryStorageRef>
+              <!--<backupStorageRef monIp="yes">$fusionstorBackupStorageName</backupStorageRef>-->
+              <!--<primaryStorageRef monIp="yes">$fusionstorPrimaryStorageName</primaryStorageRef>-->
             </l3Network>
             <l3Network uuid="$vmStorageL3Uuid">
               <backupStorageRef>$fusionstorBackupStorageName</backupStorageRef>
@@ -67,8 +67,8 @@
               <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
-              <backupStorageRef monIp="yes">$fusionstorBackupStorageName</backupStorageRef>
-              <primaryStorageRef monIp="yes">$fusionstorPrimaryStorageName</primaryStorageRef>
+              <!--<backupStorageRef monIp="yes">$fusionstorBackupStorageName</backupStorageRef>-->
+              <!--<primaryStorageRef monIp="yes">$fusionstorPrimaryStorageName</primaryStorageRef>-->
             </l3Network>
             <l3Network uuid="$vmStorageL3Uuid">
               <backupStorageRef>$fusionstorBackupStorageName</backupStorageRef>
