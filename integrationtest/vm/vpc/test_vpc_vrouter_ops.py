@@ -20,9 +20,15 @@ test_obj_dict = test_state.TestStateDict()
 
 def test():
 
-    test_util.test_dsc("create vpc vrouter and attach vpc l3 to vpc")
+    test_util.test_dsc("create vpc vrouter")
 
     vr_inv = test_stub.create_vpc_vrouter()
+
+    test_util.test_dsc("Try to create one vm in random L3 not attached")
+    with test_lib.expected_failure("create one vm in random L3 not attached", Exception):
+        test_stub.create_vm_with_random_offering(vm_name='vpc_vm1', l3_name=random.choice(test_stub.L3_SYSTEM_NAME_LIST))
+
+    test_util.test_dsc("attach vpc l3 to vpc vrouter")
     test_stub.attach_all_l3_to_vpc_vr(vr_inv, test_stub.L3_SYSTEM_NAME_LIST)
 
     test_util.test_dsc("Try to create one vm in random L3")
