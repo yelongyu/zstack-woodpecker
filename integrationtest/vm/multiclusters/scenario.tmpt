@@ -6,3 +6,4 @@ vmName3 = test_vm3
 vmName4 = test_vm4
 vmInstranceOfferingUuid2 = 234567
 imageUuid2 = 234567
+volumeName = test_volume
