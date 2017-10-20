@@ -53,9 +53,10 @@ def test():
     for nic_uuid in nic_uuid_list:
         net_ops.detach_l3(nic_uuid)
 
+    test_lib.lib_error_cleanup(test_obj_dict)
     test_stub.remove_all_vpc_vrouter()
 
 def env_recover():
-    test_stub.remove_all_vpc_vrouter()
     test_lib.lib_error_cleanup(test_obj_dict)
+    test_stub.remove_all_vpc_vrouter()
 

@@ -53,11 +53,12 @@ def test():
         with test_lib.expected_failure('reboot vm in vpc l3 when no vpc vrouter', Exception):
             vm1.reboot()
 
+    test_lib.lib_error_cleanup(test_obj_dict)
     test_stub.remove_all_vpc_vrouter()
 
 def env_recover():
-    test_stub.remove_all_vpc_vrouter()
     test_lib.lib_error_cleanup(test_obj_dict)
+    test_stub.remove_all_vpc_vrouter()
 
 
 

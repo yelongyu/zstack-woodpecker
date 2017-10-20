@@ -96,8 +96,9 @@ def test():
     test_lib.lib_check_ports_in_a_command(vm2_inv, vm2_inv.vmNics[0].ip,
                                           vm1_inv.vmNics[0].ip, ["22"], [], vm1_inv)
 
+    test_lib.lib_error_cleanup(test_obj_dict)
     test_stub.remove_all_vpc_vrouter()
 
 def env_recover():
-    test_stub.remove_all_vpc_vrouter()
     test_lib.lib_error_cleanup(test_obj_dict)
+    test_stub.remove_all_vpc_vrouter()

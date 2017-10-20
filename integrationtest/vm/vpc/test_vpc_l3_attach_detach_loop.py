@@ -43,9 +43,10 @@ def test():
 
         time.sleep(10)
 
+    test_lib.lib_error_cleanup(test_obj_dict)
     test_stub.remove_all_vpc_vrouter()
 
 def env_recover():
-    test_stub.remove_all_vpc_vrouter()
     test_lib.lib_error_cleanup(test_obj_dict)
+    test_stub.remove_all_vpc_vrouter()
 

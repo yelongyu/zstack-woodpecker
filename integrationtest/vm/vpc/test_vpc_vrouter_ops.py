@@ -56,9 +56,12 @@ def test():
     with test_lib.expected_failure('Create vpc vm when vpc l3 not attached', Exception):
         test_stub.create_vm_with_random_offering(vm_name='vpc_vm5', l3_name=random.choice(test_stub.L3_SYSTEM_NAME_LIST))
 
+    test_lib.lib_error_cleanup(test_obj_dict)
+    test_stub.remove_all_vpc_vrouter()
+
 
 def env_recover():
-    test_stub.remove_all_vpc_vrouter()
     test_lib.lib_error_cleanup(test_obj_dict)
+    test_stub.remove_all_vpc_vrouter()
 
 
