@@ -11,6 +11,8 @@ from itertools import izip
 VLAN1_NAME, VLAN2_NAME = ['l3VlanNetworkName1', "l3VlanNetwork3"]
 VXLAN1_NAME, VXLAN2_NAME = ["l3VxlanNetwork11", "l3VxlanNetwork12"]
 
+CLASSIC_L3 = 'l3NoVlanNetworkName1'
+
 vpc1_l3_list = [VLAN1_NAME, VLAN2_NAME]
 vpc2_l3_list = [VXLAN1_NAME, VXLAN2_NAME]
 
@@ -18,9 +20,10 @@ vpc_l3_list = [vpc1_l3_list, vpc2_l3_list]
 vpc_name_list = ['vpc1','vpc2']
 
 
-case_flavor = dict(vm1_vm2_one_l3_vlan=     dict(vm1l3=VLAN1_NAME, vm2l3=VLAN1_NAME),
+case_flavor = dict(vm1_vm2_one_vpc_1vlan=   dict(vm1l3=VLAN1_NAME, vm2l3=VLAN1_NAME),
                    vm1_vm2_one_vpc_2vlan=   dict(vm1l3=VLAN1_NAME, vm2l3=VLAN2_NAME),
                    vm1_vm2_two_vpc=         dict(vm1l3=VLAN1_NAME, vm2l3=VXLAN2_NAME),
+                   vm1_classic_vm2_vpc  =   dict(vm1l3=CLASSIC_L3, vm2l3=VXLAN2_NAME)
                    )
 
 
