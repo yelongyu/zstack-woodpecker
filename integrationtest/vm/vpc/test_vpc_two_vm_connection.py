@@ -49,7 +49,6 @@ def test():
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     test_util.test_dsc("create vpc vrouter and attach vpc l3 to vpc")
     vr_inv = test_stub.create_vpc_vrouter()
-    time.sleep(30)
     test_stub.attach_all_l3_to_vpc_vr(vr_inv)
 
     test_util.test_dsc("create two vm, vm1 in l3 {}, vm2 in l3 {}".format(flavor['vm1l3'], flavor['vm2l3']))
@@ -66,7 +65,7 @@ def test():
         vm1.check()
     elif flavor['ops'] is VR_REBOOT:
         vm_ops.reboot_vm(vr_inv.uuid)
-        time.sleep(60)
+        time.sleep(10)
     elif flavor['ops'] is VR_RECONNECT:
         vm_ops.reconnect_vr(vr_inv.uuid)
         time.sleep(10)
@@ -97,5 +96,8 @@ def test():
     test_lib.lib_check_ports_in_a_command(vm2_inv, vm2_inv.vmNics[0].ip,
                                           vm1_inv.vmNics[0].ip, ["22"], [], vm1_inv)
 
+    test_stub.remove_all_vpc_vrouter()
+
 def env_recover():
+    test_stub.remove_all_vpc_vrouter()
     test_lib.lib_error_cleanup(test_obj_dict)
