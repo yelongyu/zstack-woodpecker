@@ -1283,6 +1283,16 @@ def get_host_management_ip(scenario_config, scenario_file, deploy_config, vm_inv
         
     return None
 
+def get_host_storage_network_ip(scenario_config, scenario_file, deploy_config, vm_inv, vm_config):
+    for zone in xmlobject.safe_list(deploy_config.zones.zone):
+        if hasattr(zone.primaryStorages, 'fusionstorPrimaryStorage'):
+            for fusionstorPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.fusionstorPrimaryStorage):
+                for vm_l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
+                    if hasattr(vm_l3network, 'primaryStorageRef'):
+                        if vm_l3network.primaryStorageRef.text_ == fusionstorPrimaryStorage.name_:
+                            return test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_l3network.uuid_).ip
+    return None
+
 def deploy_scenario(scenario_config, scenario_file, deploy_config):
     vm_inv_lst = []
     vm_cfg_lst = []
@@ -1355,6 +1365,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     vm_cfg_lst.append(vm)
                     vm_management_ip = get_host_management_ip(scenario_config, scenario_file, deploy_config, vm_inv, vm)
                     vm_xml.set('managementIp', vm_management_ip)
+                    vm_storage_ip = get_host_storage_network_ip(scenario_config, scenario_file, deploy_config, vm_inv, vm)
+                    vm_xml.set('storageIp', vm_management_ip)
                 if xmlobject.has_element(vm, 'mnHostRef'):
                     setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm)
                 if xmlobject.has_element(vm, 'backupStorageRef'):
