@@ -1,6 +1,7 @@
 '''
 
 @author: MengLai
+Updater: YeTian
 '''
 import os
 import tempfile
@@ -26,6 +27,7 @@ def test():
     iso_19_path = os.environ.get('iso_19_path')
     iso_10_path = os.environ.get('iso_10_path')
     iso_20_path = os.environ.get('iso_20_path')
+    iso_21_path = os.environ.get('iso_21_path')
     zstack_latest_version = os.environ.get('zstackLatestVersion')
     zstack_latest_path = os.environ.get('zstackLatestInstaller')
     vm_name = os.environ.get('vmName')
@@ -59,6 +61,8 @@ def test():
             test_stub.update_10_iso(vm_ip, tmp_file, iso_10_path, upgrade_script_path)
         if str(pkg_num) == '2.0.0':
             test_stub.update_20_iso(vm_ip, tmp_file, iso_20_path, upgrade_script_path)
+        if str(pkg_num) == '2.1.0':
+            test_stub.update_21_iso(vm_ip, tmp_file, iso_21_path, upgrade_script_path)
         upgrade_pkg = os.environ.get('zstackPkg_%s' % pkg_num)
         test_stub.upgrade_zstack(vm_ip, upgrade_pkg, tmp_file) 
         test_stub.start_mn(vm_ip, tmp_file)
