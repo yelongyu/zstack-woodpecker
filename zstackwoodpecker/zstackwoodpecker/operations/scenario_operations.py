@@ -417,9 +417,9 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
             fstor_network_uuid = vm_net_uuids_lst[0]
             fstor_vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, fstor_network_uuid).ip
             if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-fusionstor-3-nets-sep.xml"], ["scenario-config-fusionstor-3-nets-sep.xml"]):
-                fstor_vm_nic = os.environ.get('storNic')
-                fstor_vm_netmask = os.environ.get('manNetMask')
-                fstor_vm_gateway = os.environ.get('manGateway')
+                fstor_vm_nic = os.environ.get('fstrStorNic')
+                fstor_vm_netmask = os.environ.get('storNetMask')
+                fstor_vm_gateway = os.environ.get('storGateway')
             else:
                 test_util.test_fail("not supported fusionstor testconfig and scenario combination")
         
