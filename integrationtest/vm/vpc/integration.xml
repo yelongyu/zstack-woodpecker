@@ -8,9 +8,24 @@
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_two_vm_connection.py::vm1_vm2_one_l3_vlan_migrate</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_two_vm_connection.py::vm1_l3_vlan_vm2_l3_vlan_migrate</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_two_vm_connection.py::vm1_l3_vxlan_vm2_l3_vxlan_vrreboot</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_two_vm_connection.py::vm1_l3_vxlan_vm2_l3_vxlan_vmreboot</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_two_vm_connection.py::vm1_l3_vlan_vm2_l3_vlan_vrreconnect</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_two_vm_connection.py::vm1_l3_vlan_vm2_l3_vlan_vr_migrate</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_two_vm_connection.py::vm1_l3_vlan_vm2_l3_vxlan_hostreconnect</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_create_delete_vpc.py::vr_only</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_create_delete_vpc.py::vr_attach_l3</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_create_delete_vpc.py::vr_attach_l3_has_vm</case>
-        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_l3_attach_detach.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_l3_attach_detach_loop.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_l3_attach_detach_negative.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_vrouter_ops.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_eip_two_vm.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_two_eip_two_vm_connection.py::vm1_vm2_one_vpc_1vlan</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_two_eip_two_vm_connection.py::vm1_vm2_one_vpc_2vlan</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_two_eip_two_vm_connection.py::vm1_vm2_two_vpc</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_two_eip_two_vm_connection.py::vm1_classic_vm2_vpc</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_5vm_mixed_system.py::vm_ops</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_5vm_mixed_system.py::vm_migrate</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_5vm_mixed_system.py::vm_snapshot</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_5vm_mixed_system.py::vm_volume</case>
     </suite>
 </integrationTest>
