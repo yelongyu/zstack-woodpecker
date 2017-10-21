@@ -492,7 +492,7 @@ class TestLib(object):
                         if exclude_case == None:
                             continue
                         if "::" in exclude_case:
-                            exclude_case = exclude_case.split("::")[0] + ".py" + exclude_case.split("::")[1]
+                            exclude_case = exclude_case.split("::")[0] + ".py" + exclude_case.split("::")[1].split('.')[0]
                         if case_item.text == exclude_case or case_item.text == '%s.py' % (exclude_case) or '/%s.py' % (exclude_case) in case_item.text or '/%s' % (case_item.text) in '%s.py' % (exclude_case):
                             suite_item.remove(case_item)
                             break
