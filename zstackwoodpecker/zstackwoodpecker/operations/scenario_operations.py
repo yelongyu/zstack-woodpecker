@@ -409,26 +409,26 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
             ssh.execute(set_default_gw_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
         
     elif mn_ha_storage_type == "fusionstor":
-        vm_net_uuids_lst = []
-        for vmNic in vm_inv.vmNics:
-            vm_net_uuids_lst.append(vmNic.l3NetworkUuid)
-        vm_net_uuids_lst.remove(vm_inv.defaultL3NetworkUuid)
-        if vm_net_uuids_lst:
-            fstor_network_uuid = vm_net_uuids_lst[0]
-            fstor_vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, fstor_network_uuid).ip
-            if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-fusionstor-3-nets-sep.xml"], ["scenario-config-fusionstor-3-nets-sep.xml"]):
-                fstor_vm_nic = os.environ.get('fstrStorNic')
-                fstor_vm_netmask = os.environ.get('storNetMask')
-                fstor_vm_gateway = os.environ.get('storGateway')
-            else:
-                test_util.test_fail("not supported fusionstor testconfig and scenario combination")
-        
-            fstor_cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (fstor_vm_nic, fstor_vm_ip, fstor_vm_netmask, fstor_vm_gateway)
-            ssh.execute(fstor_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
-            #TODO: should dynamically change gw followed config.json, but currently there is only one case, thus always change 
-            #default gw to public network gw
-            set_default_gw_cmd = "route del default gw %s && route add default gw %s" %(fstor_vm_gateway, vm_gateway)
-            ssh.execute(set_default_gw_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+        if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-fusionstor-3-nets-sep.xml"], ["scenario-config-fusionstor-3-nets-sep.xml"]):
+            for vm_l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
+                if vm_l3network.uuid_ == os.environ.get('vmManageL3Uuid'):
+                    fstor_vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_l3network.uuid_).ip
+                    fstor_vm_nic = os.environ.get('storNic')
+                    fstor_vm_netmask = os.environ.get('manNetMask')
+                    fstor_vm_gateway = os.environ.get('manGateway')
+                elif vm_l3network.uuid_ == os.environ.get('vmStorageL3Uuid'):
+                    fstor_vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_l3network.uuid_).ip
+                    fstor_vm_nic = os.environ.get('fstrStorNic')
+                    fstor_vm_netmask = os.environ.get('storNetMask')
+                    fstor_vm_gateway = os.environ.get('storGateway')
+
+               fstor_cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (fstor_vm_nic, fstor_vm_ip, fstor_vm_netmask, fstor_vm_gateway)
+               ssh.execute(fstor_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+        else:
+            test_util.test_fail("not supported fusionstor testconfig and scenario combination")
+            
+        set_default_gw_cmd = "route del default && route add default gw %s" %(vm_gateway)
+        ssh.execute(set_default_gw_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
 
 def get_backup_storage_type(deploy_config, bs_name):
