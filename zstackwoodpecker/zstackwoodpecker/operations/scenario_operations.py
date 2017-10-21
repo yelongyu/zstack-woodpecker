@@ -1238,6 +1238,25 @@ def detach_volume(http_server_ip, volume_uuid, vm_uuid=None, session_uuid=None):
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     return evt.inventory
 
+def attach_l3(http_server_ip, l3_uuid, vm_uuid, session_uuid = None):
+    action = api_actions.AttachL3NetworkToVmAction()
+    action.l3NetworkUuid = l3_uuid
+    action.vmInstanceUuid = vm_uuid
+    test_util.action_logger('[Attach L3 Network:] %s to [VM:] %s' % \
+            (l3_uuid, vm_uuid))
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    test_util.test_logger('[L3 Network:] %s has been attached to [VM:] %s' % \
+            (l3_uuid, vm_uuid))
+    return evt.inventory
+
+def detach_l3(http_server_ip, nic_uuid, session_uuid = None):
+    action = api_actions.DetachL3NetworkFromVmAction()
+    action.vmNicUuid = nic_uuid
+    test_util.action_logger('[Detach L3 Network Nic]: %s' % nic_uuid)
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    test_util.test_logger('[L3 Network Nic]: %s has been detached'% nic_uuid)
+    return evt.inventory
+
 def create_security_group(http_server_ip, security_group_option, session_uuid=None):
     action = api_actions.CreateSecurityGroupAction()
     name = security_group_option.get_name()
@@ -1334,11 +1353,17 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
             for vm in xmlobject.safe_list(host.vms.vm):
                 vm_creation_option = test_util.VmOption()
                 l3_uuid_list = []
+                l3_uuid_list_ge_3 = []
                 default_l3_uuid = None
+                l3_cnt = 0
                 for l3network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                    l3_cnt = l3_cnt + 1
                     if not default_l3_uuid:
                         default_l3_uuid = l3network.uuid_
-                    l3_uuid_list.append(l3network.uuid_)
+                    if l3_cnt < 3:
+                        l3_uuid_list.append(l3network.uuid_)
+                    else:
+                        l3_uuid_list_ge_3.append(l3network.uuid_)
                 vm_creation_option.set_instance_offering_uuid(vm.vmInstranceOfferingUuid_)
                 vm_creation_option.set_l3_uuids(l3_uuid_list)
                 vm_creation_option.set_image_uuid(vm.imageUuid_)
@@ -1353,6 +1378,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, default_l3_uuid).ip
                 test_lib.lib_wait_target_up(vm_ip, '22', 120)
 
+                #this is a walk around due to create vm with 3 networks, one network will not get ip due to 2 ifcfg-eth* file
+                for l3_uuid in l3_uuid_list_ge_3:
+                    attach_l3(zstack_management_ip, l3_uuid, vm_inv.uuid)
+
                 vm_xml = etree.SubElement(vms_xml, 'vm')
                 vm_xml.set('name', vm.name_)
                 vm_xml.set('uuid', vm_inv.uuid)
@@ -1365,7 +1394,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 test_lib.lib_wait_target_up(vm_ip, '22', 120)
 
                 ips_xml = etree.SubElement(vm_xml, 'ips')
-                for l3_uuid in l3_uuid_list:
+                for l3_uuid in l3_uuid_list+l3_uuid_list_ge_3:
                     ip_xml = etree.SubElement(ips_xml, 'ip')
                     ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, l3_uuid).ip
                     ip_xml.set('ip', ip)
