@@ -2667,8 +2667,10 @@ def lib_get_all_vrs(session_uuid=None):
     vrs_virtualrouter = res_ops.query_resource(res_ops.APPLIANCE_VM, conditions, session_uuid)
     conditions = res_ops.gen_query_conditions('applianceVmType', '=', 'vrouter')
     vrs_vyos = res_ops.query_resource(res_ops.APPLIANCE_VM, conditions, session_uuid)
+    conditions = res_ops.gen_query_conditions('applianceVmType', '=', 'vpcvrouter')
+    vpc_vyos = res_ops.query_resource(res_ops.APPLIANCE_VM, conditions, session_uuid)
 
-    return vrs_virtualrouter + vrs_vyos
+    return vrs_virtualrouter + vrs_vyos + vpc_vyos
 
 def lib_get_all_user_vms(session_uuid=None):
     conditions = res_ops.gen_query_conditions('type', '=', inventory.USER_VM_TYPE)
