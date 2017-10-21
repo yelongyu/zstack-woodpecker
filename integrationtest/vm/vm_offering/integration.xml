@@ -3,22 +3,22 @@
         <case timeout='600' repeat='1' >test_chg_instance_offering_online.py</case>
         <case timeout='600' repeat='1' >test_chg_instance_offering_cpu_online.py</case>
         <case timeout='600' repeat='1' >test_chg_instance_offering_memory_online.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering.py::c6_cpu</case>
-        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering.py::c7_cpu</case>
-        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering.py::u12_cpu</case>
-        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering.py::u14_cpu</case>
-        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering.py::u15_cpu</case>
-        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering.py::u16_cpu</case>
-        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering.py::c6_mem</case>
-        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering.py::c7_mem</case>
-        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering.py::u12_mem</case>
-        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering.py::u16_mem</case>
-        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering.py::c6_cpu_mem</case>
-        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering.py::c7_cpu_mem</case>
-        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering.py::u12_cpu_mem</case>
-        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering.py::u14_cpu_mem</case>
-        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering.py::u15_cpu_mem</case>
-        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering.py::u16_cpu_mem</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering::c6_cpu</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering::c7_cpu</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering::u12_cpu</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering::u14_cpu</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering::u15_cpu</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering::u16_cpu</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering::c6_mem</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering::c7_mem</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering::u12_mem</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering::u16_mem</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering::c6_cpu_mem</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering::c7_cpu_mem</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering::u12_cpu_mem</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering::u14_cpu_mem</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering::u15_cpu_mem</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_vm_offering::u16_cpu_mem</case>
         <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_cpu_continuously.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_memory_continuously.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_cpu_memory_continuously.py</case>
