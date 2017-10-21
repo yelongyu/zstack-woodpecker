@@ -41,6 +41,10 @@ def test():
     test_obj_dict.add_vm(vm)
     vm.check()
 
+    test_util.test_dsc("update vr_inv1")
+    conf = res_ops.gen_query_conditions('name', '=', 'vpc1')
+    vr_inv1 = res_ops.query_resource(res_ops.APPLIANCE_VM, conf)[0]
+
     test_util.test_dsc("Try to create vm in l3: l3VlanNetworkName1")
     with test_lib.expected_failure('Detach vpc l3 when have vm running on it', Exception):
         nic_uuid_list = [nic.uuid for nic in vr_inv1.vmNics if nic.metaData == '4']
