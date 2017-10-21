@@ -1196,6 +1196,11 @@ def start_vm(http_server_ip, vm_uuid, session_uuid=None, timeout=240000):
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     return evt.inventory
 
+def update_vm(http_server_ip, vm_uuid, session_uuid=None, timeout=240000):
+    cond = res_ops.gen_query_conditions('uuid', '=', vm_uuid)
+    vm_inv = query_resource(http_server_ip, res_ops.VM_INSTANCE, cond).inventories[0]
+    return vm_inv
+
 def create_volume_from_offering(http_server_ip, volume_option, session_uuid=None):
     action = api_actions.CreateDataVolumeAction()
     action.primaryStorageUuid = volume_option.get_primary_storage_uuid()
@@ -1381,7 +1386,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 #this is a walk around due to create vm with 3 networks, one network will not get ip due to 2 ifcfg-eth* file
                 for l3_uuid in l3_uuid_list_ge_3:
                     attach_l3(zstack_management_ip, l3_uuid, vm_inv.uuid)
-
+                    vm_inv = update_vm(zstack_management_ip, vm_inv.uuid)
+               
                 vm_xml = etree.SubElement(vms_xml, 'vm')
                 vm_xml.set('name', vm.name_)
                 vm_xml.set('uuid', vm_inv.uuid)

@@ -2381,7 +2381,9 @@ def lib_get_vm_nic_by_l3(vm, l3_uuid):
         @return:
             The vm nic inventory
     '''
+    test_util.test_logger("lib_get_vm_nic_by_l3")
     for vmNic in vm.vmNics:
+        test_util.test_logger("@@@DEBUG@@@: vm_l3_uuid=%s; l3_uuid=%s" %(vmNic.l3NetworkUuid, l3_uuid))
         if vmNic.l3NetworkUuid == l3_uuid:
             return vmNic
 
