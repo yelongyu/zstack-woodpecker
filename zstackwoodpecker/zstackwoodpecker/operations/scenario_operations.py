@@ -349,18 +349,18 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
             nfs_vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, nfs_network_uuid).ip
             if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml", "test-config-vyos-flat-dhcp-nfs-mul-net-pubs.xml"], \
                                                ["scenario-config-nfs-sep-man.xml"]):
-                nfs_vm_nic = os.environ.get('storNic')
+                nfs_vm_nic = os.environ.get('storNic').replace("eth", "zsn")
                 nfs_vm_netmask = os.environ.get('manNetMask')
                 nfs_vm_gateway = os.environ.get('manGateway')
             elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml", "test-config-vyos-flat-dhcp-nfs-mul-net-pubs.xml"], \
                                                  ["scenario-config-nfs-sep-pub.xml"]):
-                nfs_vm_nic = os.environ.get('storNic')
+                nfs_vm_nic = os.environ.get('storNic').replace("eth", "zsn")
                 nfs_vm_netmask = os.environ.get('manNetMask')
                 nfs_vm_gateway = os.environ.get('manGateway')
                 nfsIP = get_nfs_ip_for_net_sep(scenario_config, nfsIP, nfsPath)
             elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-nfs.xml"], \
                                                  ["scenario-config-storage-separate-nfs.xml"]):
-                nfs_vm_nic = os.environ.get('storNic')
+                nfs_vm_nic = os.environ.get('storNic').replace("eth", "zsn")
                 nfs_vm_netmask = os.environ.get('storNetMask')
                 nfs_vm_gateway = os.environ.get('storGateway')
             else:
@@ -395,7 +395,7 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
                                                ["scenario-config-ceph-sep-man.xml", \
                                                 "scenario-config-ceph-sep-pub.xml", \
                                                 "scenario-config-ceph-3-nets-sep.xml"]):
-                ceph_vm_nic = os.environ.get('storNic')
+                ceph_vm_nic = os.environ.get('storNic').replace("eth", "zsn")
                 ceph_vm_netmask = os.environ.get('manNetMask')
                 ceph_vm_gateway = os.environ.get('manGateway')
             else:
@@ -413,12 +413,12 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
             for vm_l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
                 if vm_l3network.uuid_ == os.environ.get('vmManageL3Uuid'):
                     fstor_vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_l3network.uuid_).ip
-                    fstor_vm_nic = os.environ.get('storNic')
+                    fstor_vm_nic = os.environ.get('storNic').replace("eth", "zsn")
                     fstor_vm_netmask = os.environ.get('manNetMask')
                     fstor_vm_gateway = os.environ.get('manGateway')
                 elif vm_l3network.uuid_ == os.environ.get('vmStorageL3Uuid'):
                     fstor_vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_l3network.uuid_).ip
-                    fstor_vm_nic = os.environ.get('fstrStorNic')
+                    fstor_vm_nic = os.environ.get('fstrStorNic').replace("eth", "zsn")
                     fstor_vm_netmask = os.environ.get('storNetMask')
                     fstor_vm_gateway = os.environ.get('storGateway')
                 else:
