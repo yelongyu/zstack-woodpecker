@@ -54,7 +54,7 @@ target_ports = rule1_ports + rule2_ports + rule3_ports + rule4_ports + rule5_por
 
 def create_vpc_vrouter(vr_name='test_vpc'):
     conf = res_ops.gen_query_conditions('name', '=', 'test_vpc')
-    vr_list = res_ops.query_resource(res_ops.VIRTUALROUTER_VM, conf)
+    vr_list = res_ops.query_resource(res_ops.APPLIANCE_VM, conf)
     if vr_list:
         return vr_list[0]
     vr_offering = res_ops.get_resource(res_ops.VR_OFFERING)[0]

@@ -34,7 +34,7 @@ def test():
         test_stub.attach_all_l3_to_vpc_vr(vr_inv, all_vpc_l3_list)
 
         conf = res_ops.gen_query_conditions('uuid', '=', vr_inv.uuid)
-        vr_inv = res_ops.query_resource(res_ops.VM_INSTANCE, conf)[0]
+        vr_inv = res_ops.query_resource(res_ops.APPLIANCE_VM, conf)[0]
         nic_uuid_list = [nic.uuid for nic in vr_inv.vmNics if nic.metaData == '4']
         assert len(nic_uuid_list) == len(all_vpc_l3_list)
 
