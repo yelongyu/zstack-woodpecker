@@ -18,7 +18,10 @@
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_l3_attach_detach_loop.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_l3_attach_detach_negative.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_vrouter_ops.py</case>
-        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_eip_two_vm.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_eip_two_vm.py::vm1_vm2_one_vpc_1vlan</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_eip_two_vm.py::vm1_vm2_one_vpc_2vlan</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_eip_two_vm.py::vm1_vm2_two_vpc</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_eip_two_vm.py::vm1_classic_vm2_vpc</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_two_eip_two_vm_connection.py::vm1_vm2_one_vpc_1vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_two_eip_two_vm_connection.py::vm1_vm2_one_vpc_2vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_two_eip_two_vm_connection.py::vm1_vm2_two_vpc</case>
