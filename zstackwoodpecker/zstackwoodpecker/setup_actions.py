@@ -401,7 +401,7 @@ class Plan(object):
         self.zstack_pkg = self._full_path(basic_config.zstackPkg.text_)
         self.zstack_install_script = \
                 self._full_path(basic_config.zstackInstallScript.text_)
-        if not os.path.exists(self.zstack_pkg):
+        if os.environ.get('ZSTACK_ALREADY_INSTALLED') != "yes" and not os.path.exists(self.zstack_pkg):
             raise ActionError('unable to find %s for ZStack binary' \
                     % self.zstack_pkg)
 
