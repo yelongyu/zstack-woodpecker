@@ -141,8 +141,9 @@ def run_command_in_vm(vminv, command):
 
 
 def remove_all_vpc_vrouter():
+    
     cond = res_ops.gen_query_conditions('applianceVmType', '=', 'vpcvrouter')
-    vr_vm_list = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
+    vr_vm_list = res_ops.query_resource(res_ops.APPLIANCE_VM, cond)
     if vr_vm_list:
         for vr_vm in vr_vm_list:
             nic_uuid_list = [nic.uuid for nic in vr_vm.vmNics if nic.metaData == '4']
