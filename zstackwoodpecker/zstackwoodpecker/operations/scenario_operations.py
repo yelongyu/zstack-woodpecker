@@ -421,6 +421,9 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
                     fstor_vm_nic = os.environ.get('fstrStorNic')
                     fstor_vm_netmask = os.environ.get('storNetMask')
                     fstor_vm_gateway = os.environ.get('storGateway')
+                else:
+                    test_util.test_logger("@@@BUG@@@ vm.uuid=%s, but vmManageL3Uuid=%s, vmStorageL3Uuid=%s" %(vm_l3network.uuid_, os.environ.get('vmManageL3Uuid'), os.environ.get('vmStorageL3Uuid')))
+                    continue
 
                 fstor_cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (fstor_vm_nic, fstor_vm_ip, fstor_vm_netmask, fstor_vm_gateway)
                 ssh.execute(fstor_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
