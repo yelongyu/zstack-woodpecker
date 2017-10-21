@@ -426,6 +426,7 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
                     continue
 
                 fstor_cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (fstor_vm_nic, fstor_vm_ip, fstor_vm_netmask, fstor_vm_gateway)
+                test_util.test_logger("%s" %(fstor_cmd))
                 ssh.execute(fstor_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
         else:
             test_util.test_fail("not supported fusionstor testconfig and scenario combination")
