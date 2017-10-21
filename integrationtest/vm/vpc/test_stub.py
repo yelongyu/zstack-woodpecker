@@ -141,7 +141,7 @@ def run_command_in_vm(vminv, command):
 
 
 def remove_all_vpc_vrouter():
-    cond = res_ops.gen_query_conditions('type', '=', 'L3VpcNetwork')
+    cond = res_ops.gen_query_conditions('applianceVmType', '=', 'vpcvrouter')
     vr_vm_list = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
     if vr_vm_list:
         for vr_vm in vr_vm_list:
