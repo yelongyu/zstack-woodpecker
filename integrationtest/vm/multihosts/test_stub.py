@@ -863,6 +863,9 @@ class PSEnvChecker(object):
     def is_local_smp_env(self):
         return self.have_local and self.have_smp
 
+    def is_local_shared_env(self):
+        return self.is_local_nfs_env or self.is_local_smp_env
+
     @property
     def have_local(self):
         for ps in self.ps_list:

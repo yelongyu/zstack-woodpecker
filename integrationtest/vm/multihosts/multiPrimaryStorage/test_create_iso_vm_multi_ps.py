@@ -29,6 +29,9 @@ def test():
 
     for root_volume_ps_uuid in [None, ps.uuid]:
         for data_vol_ps_uuid in [None, another.uuid]:
+            if ps_env.is_local_shared_env:
+                if type(root_volume_ps_uuid) != type(data_vol_ps_uuid):
+                    continue
             vm = test_stub.create_iso_vm_with_random_offering(vm_name='test_iso_vm',
                                                               disk_offering_uuids=disk_offering_uuids if data_vol_ps_uuid else None,
                                                               ps_uuid=root_volume_ps_uuid,
