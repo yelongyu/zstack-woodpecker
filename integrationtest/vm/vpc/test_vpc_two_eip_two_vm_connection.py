@@ -56,11 +56,9 @@ def test():
         vip = test_stub.create_vip('vip_{}'.format(vm.get_vm().name), vr_pub_nic.l3NetworkUuid)
         test_obj_dict.add_vip(vip)
         vip_list.append(vip)
-
         test_util.test_dsc("Create eip for vm {}".format(vm.get_vm().name))
         eip = test_stub.create_eip('eip_{}'.format(vm.get_vm().name), vip_uuid=vip.get_vip().uuid)
         vip.attach_eip(eip)
-        vip.check()
         eip.attach(vm.get_vm().vmNics[0].uuid, vm)
         vip.check()
 
