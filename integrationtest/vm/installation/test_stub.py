@@ -355,7 +355,7 @@ def prepare_test_env(vm_inv, aio_target):
     #all_in_one_pkg = os.environ['zstackPkg']
     #scp_file_to_vm(vm_ip, all_in_one_pkg, aio_target)
 
-    #ssh.make_ssh_no_password(vm_ip, vm_username, vm_password)
+    ssh.make_ssh_no_password(vm_ip, vm_username, vm_password)
 
 def prepare_upgrade_test_env(vm_inv, aio_target, upgrade_pkg):
     zstack_install_script = os.environ['zstackInstallScript']
