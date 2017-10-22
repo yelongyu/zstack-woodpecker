@@ -54,11 +54,11 @@ def test():
     test_util.test_dsc("create two vm, vm1 in l3 {}, vm2 in l3 {}".format(flavor['vm1l3'], flavor['vm2l3']))
     vm1 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(flavor['vm1l3']), l3_name=flavor['vm1l3'])
     test_obj_dict.add_vm(vm1)
+    vm1.check()
     vm2 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(flavor['vm2l3']), l3_name=flavor['vm2l3'])
     test_obj_dict.add_vm(vm2)
+    vm2.check()
 
-    for vm in (vm1, vm2):
-        vm.check()
 
     if flavor['ops'] is VM_MIGRATE:
         test_stub.migrate_vm_to_random_host(vm2)
