@@ -12,11 +12,15 @@ import random
 import os
 import zstackwoodpecker.operations.volume_operations as vol_ops
 import time
+from itertools import izip
 
 
-VPC1_VLAN , VPC1_VXLAN = ['l3VlanNetworkName1', "l3VxlanNetwork11"]
-VPC2_VLAN, VPC2_VXLAN = ["l3VlanNetwork2", "l3VxlanNetwork12"]
+VPC1_VLAN , VPC1_VXLAN = ['l3VlanNetwork2', "l3VxlanNetwork12"]
+VPC2_VLAN, VPC2_VXLAN = ["l3VlanNetwork3", "l3VxlanNetwork13"]
 
+vpc_l3_list = [(VPC1_VLAN , VPC1_VXLAN), (VPC2_VLAN, VPC2_VXLAN)]
+
+vpc_name_list =['vpc1', 'vpc2']
 
 
 case_flavor = dict(vm1_l3_vlan_vm2_l3_vlan=           dict(vm1l3=VPC1_VLAN, vm2l3=VPC2_VLAN),
@@ -28,12 +32,17 @@ case_flavor = dict(vm1_l3_vlan_vm2_l3_vlan=           dict(vm1l3=VPC1_VLAN, vm2l
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
+vr_inv_list= []
+
 
 def test():
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     test_util.test_dsc("create vpc vrouter and attach vpc l3 to vpc")
-    vr_inv = test_stub.create_vpc_vrouter()
-    test_stub.attach_all_l3_to_vpc_vr(vr_inv)
+    for vpc_name in vpc_name_list:
+        vr_inv_list.append(test_stub.create_vpc_vrouter(vpc_name))
+    for vr_inv, l3_list in izip(vr_inv_list, vpc_l3_list):
+        test_stub.attach_all_l3_to_vpc_vr(vr_inv, l3_list)
+
 
     test_util.test_dsc("create two vm, vm1 in l3 {}, vm2 in l3 {}".format(flavor['vm1l3'], flavor['vm2l3']))
     vm1 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(flavor['vm1l3']), l3_name=flavor['vm1l3'])
