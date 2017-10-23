@@ -31,7 +31,7 @@ def test():
     vr_inv = test_stub.create_vpc_vrouter()
     test_stub.attach_all_l3_to_vpc_vr(vr_inv)
 
-    vm = test_stub.create_vm_with_random_offering(vm_name='vpc_vm', l3_name="l3VlanNetwork2")
+    vm = test_stub.create_vm_with_random_offering(vm_name='vpc_vm', l3_name=random.choice(test_stub.L3_SYSTEM_NAME_LIST))
     test_obj_dict.add_vm(vm)
     vm.check()
 
