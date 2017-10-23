@@ -403,6 +403,17 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
         test_util.test_logger("[%s] %s" % (test_host_ip, cmd1))
         ssh.execute(cmd1, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
 
+    elif mn_ha_storage_type == 'fusionstor':
+        cmd1 = "lichbd pool create zstack -p nbd"
+        test_util.test_logger("[%s] %s" % (test_host_ip, cmd1))
+        ssh.execute(cmd1, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+        cmd2 = "lichbd vol import %s zstack/mnvm.img -p nbd" %(mn_image_path)
+        test_util.test_logger("[%s] %s" % (test_host_ip, cmd2))
+        ssh.execute(cmd4, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+        cmd3 = "lich.inspect --localize /default/zstack/mnvm.img 0"
+        test_util.test_logger("[%s] %s" % (test_host_ip, cmd3))
+        ssh.execute(cmd3, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+
     cmd3='%s install -p %s -c %s' % (installer_path, host_password, config_path)
     test_util.test_logger("[%s] %s" % (test_host_ip, cmd3))
     ssh.execute(cmd3, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
