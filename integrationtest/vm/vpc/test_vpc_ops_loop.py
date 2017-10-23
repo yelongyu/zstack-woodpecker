@@ -35,13 +35,11 @@ def test():
     test_obj_dict.add_vm(vm)
     vm.check()
 
-    for _ in xrange(10):
+    for _ in xrange(5):
         if flavor['reboot']:
             vm_ops.reboot_vm(vr_inv.uuid)
         elif flavor['reconnect']:
             vm_ops.reconnect_vr(vr_inv.uuid)
-
-    vm.check()
 
     test_lib.lib_error_cleanup(test_obj_dict)
     test_stub.remove_all_vpc_vrouter()
