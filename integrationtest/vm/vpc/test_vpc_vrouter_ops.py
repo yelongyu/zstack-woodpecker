@@ -52,7 +52,7 @@ def test():
     test_obj_dict.add_vm(vm4)
 
     test_util.test_dsc("delete vr and try to create vm in random L3")
-    test_stub.remove_all_vpc_vrouter()
+    vm_ops.destroy_vm(vr_inv.uuid)
     with test_lib.expected_failure('Create vpc vm when vpc l3 not attached', Exception):
         test_stub.create_vm_with_random_offering(vm_name='vpc_vm5', l3_name=random.choice(test_stub.L3_SYSTEM_NAME_LIST))
 
