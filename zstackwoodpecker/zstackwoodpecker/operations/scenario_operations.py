@@ -207,10 +207,14 @@ def ensure_nic_all_have_cfg(vm_inv, vm_config, num_of_cfg):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
     cmd = 'cp /etc/sysconfig/network-scripts/ifcfg-eth0 /root/ifcfg-eth0;sync'
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+
     for num_idx in range(num_of_cfg-1): 
         cmd = 'cp /root/ifcfg-eth0 /etc/sysconfig/network-scripts/ifcfg-eth%s;sync' %(str(num_idx+1))
+        test_util.test_logger("@@@DEBUG@@@:cmd=%s" %(cmd))
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
-        cmd = "sed -i 's:eth0:eth%s:g' /etc/sysconfig/network-scripts/ifcfg-eth%s;sync" %((str(num_idx),)*2)
+
+        cmd = "sed -i 's:eth0:eth%s:g' /etc/sysconfig/network-scripts/ifcfg-eth%s;sync" %((str(num_idx+1),)*2)
+        test_util.test_logger("@@@DEBUG@@@:cmd=%s" %(cmd))
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
     
 
