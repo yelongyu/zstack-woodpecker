@@ -1348,11 +1348,17 @@ def get_host_management_ip(scenario_config, scenario_file, deploy_config, vm_inv
 
 def get_host_storage_network_ip(scenario_config, scenario_file, deploy_config, vm_inv, vm_config):
     for zone in xmlobject.safe_list(deploy_config.zones.zone):
+        test_util.test_logger("loop in zone")
         if hasattr(zone.primaryStorages, 'fusionstorPrimaryStorage'):
+            test_util.test_logger("if fstor ps")
             for fusionstorPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.fusionstorPrimaryStorage):
+                test_util.test_logger("loop in fstor ps")
                 for vm_l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
+                    test_util.test_logger("loop in vm_l3network %s" %(str(vm_l3network)))
                     if hasattr(vm_l3network, 'primaryStorageRef'):
+                        test_util.test_logger("if in vm_l3network ps %s;%s" %(vm_l3network.primaryStorageRef.text_, fusionstorPrimaryStorage.name_))
                         if vm_l3network.primaryStorageRef.text_ == fusionstorPrimaryStorage.name_:
+                            test_util.test_logger("find equal one")
                             return test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_l3network.uuid_).ip
     return None
 
@@ -1446,12 +1452,12 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     if vm_management_ip:
                         vm_xml.set('managementIp', vm_management_ip)
                     else:
-                        test_util.test_logger("vm_management_ip is null, failed")
+                        test_util.test_fail("vm_management_ip is null, failed")
                     vm_storage_ip = get_host_storage_network_ip(scenario_config, scenario_file, deploy_config, vm_inv, vm)
                     if vm_storage_ip:
                         vm_xml.set('storageIp', vm_storage_ip)
                     else:
-                        test_util.test_logger("vm_storage_ip is null, failed")
+                        test_util.test_fail("vm_storage_ip is null, failed")
                 if xmlobject.has_element(vm, 'mnHostRef'):
                     setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm)
                 if xmlobject.has_element(vm, 'backupStorageRef'):
