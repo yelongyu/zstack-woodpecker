@@ -1362,13 +1362,15 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 default_l3_uuid = None
                 l3_cnt = 0
                 for l3network in xmlobject.safe_list(vm.l3Networks.l3Network):
-                    l3_cnt = l3_cnt + 1
                     if not default_l3_uuid:
                         default_l3_uuid = l3network.uuid_
-                    if l3_cnt < 3:
                         l3_uuid_list.append(l3network.uuid_)
-                    else:
-                        l3_uuid_list_ge_3.append(l3network.uuid_)
+                while len(l3_uuid_list) >=3:
+                    for l3_uuid in l3_uuid_list:
+                        if l3_uuid == os.environ.get('vmStorageL3Uuid') or l3_uuid == os.environ.get('vmManageL3Uuid'): 
+                            l3_uuid_list_ge_3.append(l3_uuid)
+                            l3_uuid_list.remove(l3_uuid)
+
                 vm_creation_option.set_instance_offering_uuid(vm.vmInstranceOfferingUuid_)
                 vm_creation_option.set_l3_uuids(l3_uuid_list)
                 vm_creation_option.set_image_uuid(vm.imageUuid_)
