@@ -36,7 +36,10 @@ def test():
     if flavor['vpc_num'] == 2:
         vr_inv_list.append(test_stub.create_vpc_vrouter('vpc2'))
 
-    for _ in xrange(2):
+
+    ROUND = 2 if flavor['vpc_num'] == 1 else 1
+
+    for _ in xrange(ROUND):
         for vr_inv in vr_inv_list:
             conf = res_ops.gen_query_conditions('uuid', '=', vr_inv.uuid)
             vr_inv = res_ops.query_resource(res_ops.APPLIANCE_VM, conf)[0]
