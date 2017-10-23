@@ -1364,7 +1364,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 for l3network in xmlobject.safe_list(vm.l3Networks.l3Network):
                     if not default_l3_uuid:
                         default_l3_uuid = l3network.uuid_
-                        l3_uuid_list.append(l3network.uuid_)
+                    l3_uuid_list.append(l3network.uuid_)
                 while len(l3_uuid_list) >=3:
                     for l3_uuid in l3_uuid_list:
                         if l3_uuid == os.environ.get('vmStorageL3Uuid') or l3_uuid == os.environ.get('vmManageL3Uuid'): 
