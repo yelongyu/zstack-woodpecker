@@ -409,7 +409,7 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
         ssh.execute(cmd1, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
         cmd2 = "lichbd vol import %s zstack/mnvm.img -p nbd" %(mn_image_path)
         test_util.test_logger("[%s] %s" % (test_host_ip, cmd2))
-        ssh.execute(cmd4, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+        ssh.execute(cmd2, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
         cmd3 = "lich.inspect --localize /default/zstack/mnvm.img 0"
         test_util.test_logger("[%s] %s" % (test_host_ip, cmd3))
         ssh.execute(cmd3, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
