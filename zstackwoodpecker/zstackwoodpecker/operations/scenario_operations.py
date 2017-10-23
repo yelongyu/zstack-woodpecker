@@ -211,6 +211,7 @@ def ensure_nic_all_have_cfg(vm_inv, vm_config, num_of_cfg):
         cmd = 'cp /root/ifcfg-eth0 /etc/sysconfig/network-scripts/ifcfg-eth%s;sync' %(str(num_idx+1))
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
         cmd = "sed -i 's:eth0:eth%s:g' /etc/sysconfig/network-scripts/ifcfg-eth%s;sync" %((str(num_idx),)*2)
+        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
     
 
 def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
