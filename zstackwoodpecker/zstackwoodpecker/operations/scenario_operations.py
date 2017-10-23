@@ -203,6 +203,15 @@ def setup_vm_no_password(vm_inv, vm_config, deploy_config):
     cmd = "sed -i 's/.*StrictHostKeyChecking.*$/StrictHostKeyChecking no/g' /etc/ssh/ssh_config"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
+def ensure_nic_all_have_cfg(vm_inv, vm_config, num_of_cfg):
+    vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
+    cmd = 'cp /etc/sysconfig/network-scripts/ifcfg-eth0 /root/ifcfg-eth0;sync'
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+    for num_idx in range(num_of_cfg-1): 
+        cmd = 'cp /root/ifcfg-eth0 /etc/sysconfig/network-scripts/ifcfg-eth%s;sync' %(str(num_idx+1))
+        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+        cmd = "sed -i 's:eth0:eth%s:g' /etc/sysconfig/network-scripts/ifcfg-eth%s;sync" %((str(num_idx),)*2)
+    
 
 def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
@@ -1398,6 +1407,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 vm_xml.set('ip', vm_ip)
                 setup_vm_no_password(vm_inv, vm, deploy_config)
                 setup_vm_console(vm_inv, vm, deploy_config)
+                ensure_nic_all_have_cfg(vm_inv, vm, len(l3_uuid_list+l3_uuid_list_ge_3))
                 # NOTE: need to make filesystem in sync in VM before cold stop VM
                 stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
                 start_vm(zstack_management_ip, vm_inv.uuid)
