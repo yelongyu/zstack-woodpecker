@@ -80,6 +80,10 @@ def test():
         host_ops.reconnect_host(host.uuid)
         time.sleep(10)
 
+    if flavor['ops'] is not None:
+        for vm in (vm1,vm2):
+            vm.check()
+
     vm1_inv = vm1.get_vm()
     vm2_inv = vm2.get_vm()
 
