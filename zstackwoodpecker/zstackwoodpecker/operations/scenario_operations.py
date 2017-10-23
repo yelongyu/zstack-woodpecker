@@ -816,7 +816,16 @@ def setup_xsky_storages(scenario_config, scenario_file, deploy_config):
             test_util.test_fail('Xsky poc evn is not healthy')
             
 
-
+def modify_setup_script_for_mn_ha_fusionstor(node_ip, username, password, port):
+    if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-fusionstor-3-nets-sep.xml"], ["scenario-config-fusionstor-3-nets-sep.xml"]):
+        cmd = "sed -i 's/solomode   on/solomode   off/g' %s/%s" %(os.environ.get('woodpecker_root_path'), '/tools/setup_fusionstor_nodes.sh')
+        test_util.test_logger("@@@DEBUG-> change solomode@@@ %s" %(cmd))
+        ssh.execute(cmd, node_ip, username, password, True, port)
+        cmd = "sed -i 's/172.20.0.1/192.168.0.1/g' %s/%s" %(os.environ.get('woodpecker_root_path'), '/tools/setup_fusionstor_nodes.sh')
+        test_util.test_logger("@@@DEBUG-> change ip@@@ %s" %(cmd))
+        ssh.execute(cmd, node_ip, username, password, True, port)
+    else:
+        pass
 
 def setup_fusionstor_storages(scenario_config, scenario_file, deploy_config):
     fusionstor_storages = dict()
@@ -873,6 +882,7 @@ def setup_fusionstor_storages(scenario_config, scenario_file, deploy_config):
             else:
                 vm_ips += vm.ips.ip[vm_nic_id].ip_ + ' '
 
+        modify_setup_script_for_mn_ha_fusionstor(node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host.port_))
         ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_fusionstor_nodes.sh'), '/tmp/setup_fusionstor_nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host.port_))
         ssh.scp_file(fusionstorPkg, fusionstorPkg, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host.port_))
         cmd = "bash -ex /tmp/setup_fusionstor_nodes.sh %s %s" % ((fusionstorPkg), (vm_ips))
