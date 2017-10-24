@@ -88,7 +88,7 @@ def get_backup_storage_from_scenario_file(backupStorageRefName, scenarioConfig, 
                             if s_vm.name_ == vm.name_:
                                 if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-fusionstor-3-nets-sep.xml"], ["scenario-config-fusionstor-3-nets-sep.xml"]):
             	                    ip_list.append(s_vm.storageIp_)
-                                    return ip_list
+                                    continue
                                 if vm.backupStorageRef.type_ == 'ceph':
                                     nic_id = get_ceph_storages_mon_nic_id(vm.backupStorageRef.text_, scenarioConfig)
                                     if nic_id == None:
@@ -445,7 +445,7 @@ def get_primary_storage_from_scenario_file(primaryStorageRefName, scenarioConfig
                                         if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-fusionstor-3-nets-sep.xml"], ["scenario-config-fusionstor-3-nets-sep.xml"]):
                                             ip_list.append(s_vm.storageIp_)
                                             test_util.test_logger("@@@DEBUG->get ps->list@@@")
-                                            return ip_list
+                                            continue
                                         if xmlobject.has_element(vm, 'backupStorageRef') and vm.backupStorageRef.type_ == 'ceph':
                                             nic_id = get_ceph_storages_mon_nic_id(vm.backupStorageRef.text_, scenarioConfig)
                                             if nic_id == None:
@@ -465,7 +465,7 @@ def get_primary_storage_from_scenario_file(primaryStorageRefName, scenarioConfig
                                     if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-fusionstor-3-nets-sep.xml"], ["scenario-config-fusionstor-3-nets-sep.xml"]):
                                         ip_list.append(s_vm.storageIp_)
                                         test_util.test_logger("@@@DEBUG->get ps->not list@@@")
-                                        return ip_list
+                                        continue
                                     if xmlobject.has_element(vm, 'backupStorageRef') and vm.backupStorageRef.type_ == 'ceph':
                                         nic_id = get_ceph_storages_mon_nic_id(vm.backupStorageRef.text_, scenarioConfig)
                                         if nic_id == None:
