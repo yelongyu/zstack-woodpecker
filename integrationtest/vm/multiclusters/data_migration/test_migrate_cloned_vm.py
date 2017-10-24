@@ -8,7 +8,6 @@ New Integration Test for migrate between clusters
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
-import time
 
 test_obj_dict = test_state.TestStateDict()
 test_stub = test_lib.lib_get_test_stub()
@@ -16,7 +15,6 @@ data_migration = test_stub.DataMigration()
 
 def test():
     data_migration.create_vm()
-    time.sleep(90)
     data_migration.clone_vm()
 
     data_migration.migrate_vm(cloned=True)
