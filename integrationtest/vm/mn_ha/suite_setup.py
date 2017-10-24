@@ -92,7 +92,7 @@ def test():
 
     elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-fusionstor-3-nets-sep.xml"], \
                                          ["scenario-config-fusionstor-3-nets-sep.xml"]):
-        config_json = os.environ.get('configJsonSepPub')
+        config_json = os.environ.get('configJson3Net')
 
     elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-mul-net-pubs.xml"], \
                                          ["scenario-config-nfs-sep-man.xml", \

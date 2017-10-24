@@ -354,6 +354,14 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
     os.system('sed -i s/man_netmask1/%s/g %s' % (man_vm_netmask,config_json))
     os.system('sed -i s/man_gateway1/%s/g %s' % (man_vm_gateway,config_json))
 
+    if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-fusionstor-3-nets-sep.xml"], ["scenario-config-fusionstor-3-nets-sep.xml"]):
+        stor_vm_ip = adapt_pick_ip_not_used_in_scenario_file(scenarioFile)
+        stor_vm_netmask = os.environ.get('storNetMask')
+        stor_vm_gateway = os.environ.get('storGateway')
+        os.system('sed -i s/stor_ip1/%s/g %s' % (stor_vm_ip,config_json))
+        os.system('sed -i s/stor_netmask1/%s/g %s' % (stor_vm_netmask,config_json))
+        os.system('sed -i s/stor_gateway1/%s/g %s' % (stor_vm_gateway,config_json))
+
 def prepare_etc_hosts(scenarioConfig, scenarioFile, deploy_config, config_json):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
     if len(mn_host_list) < 1:
