@@ -62,10 +62,10 @@ def test():
         eip.attach(vm.get_vm().vmNics[0].uuid, vm)
         #TO DO : fix checker issue
         #vm.check()
-        #vip.check()
+        vip.check()
 
-    #for vm in (vm1, vm2):
-    #    vm.check()
+    for vm in (vm1, vm2):
+        vm.check()
 
     vm1_inv = vm1.get_vm()
     vm2_inv = vm2.get_vm()

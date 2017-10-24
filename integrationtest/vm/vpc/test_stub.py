@@ -184,3 +184,38 @@ def create_vip(vip_name=None, l3_uuid=None, session_uuid = None, required_ip=Non
     vip.create()
 
     return vip
+
+
+def create_volume(volume_creation_option=None):
+    if not volume_creation_option:
+        disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
+        volume_creation_option = test_util.VolumeOption()
+        volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
+        volume_creation_option.set_name('vr_test_volume')
+
+    volume = zstack_volume_header.ZstackTestVolume()
+    volume.set_creation_option(volume_creation_option)
+    volume.create()
+    return volume
+
+
+def create_multi_volumes(count=10, host_uuid=None, ps=None):
+    volume_list = []
+    for i in xrange(count):
+        disk_offering = random.choice(res_ops.get_resource(res_ops.DISK_OFFERING))
+        volume_creation_option = test_util.VolumeOption()
+        volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
+        if ps:
+            volume_creation_option.set_primary_storage_uuid(ps.uuid)
+            if ps.type == inventory.LOCAL_STORAGE_TYPE:
+                if not host_uuid:
+                    host_uuid = random.choice(res_ops.get_resource(res_ops.HOST)).uuid
+            volume_creation_option.set_system_tags(['localStorage::hostUuid::{}'.format(host_uuid)])
+        volume = create_volume(volume_creation_option)
+        volume_list.append(volume)
+    for volume in volume_list:
+        volume.check()
+    if ps:
+        for volume in volume_list:
+            assert volume.get_volume().primaryStorageUuid == ps.uuid
+    return volume_list

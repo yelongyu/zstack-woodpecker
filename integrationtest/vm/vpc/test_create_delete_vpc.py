@@ -45,6 +45,7 @@ def test():
         l3 = random.choice(vpc1_l3_list + vpc2_l3_list + vpc3_l3_list)
         vm1 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(l3), l3_name=l3)
         test_obj_dict.add_vm(vm1)
+        vm1.check()
 
     for vr_inv in vr_inv_list:
         vm_ops.destroy_vm(vr_inv.uuid)

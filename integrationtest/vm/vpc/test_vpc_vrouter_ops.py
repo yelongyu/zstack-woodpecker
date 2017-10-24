@@ -34,22 +34,26 @@ def test():
     test_util.test_dsc("Try to create one vm in random L3")
     vm1 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm1', l3_name=random.choice(test_stub.L3_SYSTEM_NAME_LIST))
     test_obj_dict.add_vm(vm1)
+    vm1.check()
 
     test_util.test_dsc("reboot VR and try to create vm in random L3")
     vm_ops.reboot_vm(vr_inv.uuid)
     vm2 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm2', l3_name=random.choice(test_stub.L3_SYSTEM_NAME_LIST))
     test_obj_dict.add_vm(vm2)
+    vm2.check()
 
     test_util.test_dsc("reconnect VR and try to create vm in random L3")
     vm_ops.reconnect_vr(vr_inv.uuid)
     vm3 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm3', l3_name=random.choice(test_stub.L3_SYSTEM_NAME_LIST))
     test_obj_dict.add_vm(vm3)
+    vm3.check()
 
     test_util.test_dsc("migrate VR and try to create vm in random L3")
     vm_ops.migrate_vm(vr_inv.uuid, random.choice([host.uuid for host in res_ops.get_resource(res_ops.HOST)
                                                   if host.uuid != test_lib.lib_find_host_by_vm(vr_inv).uuid]))
     vm4 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm4', l3_name=random.choice(test_stub.L3_SYSTEM_NAME_LIST))
     test_obj_dict.add_vm(vm4)
+    vm4.check()
 
     test_util.test_dsc("delete vr and try to create vm in random L3")
     vm_ops.destroy_vm(vr_inv.uuid)
