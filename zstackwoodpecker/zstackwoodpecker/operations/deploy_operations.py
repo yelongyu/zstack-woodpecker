@@ -73,6 +73,7 @@ def get_backup_storage_from_scenario_file(backupStorageRefName, scenarioConfig, 
         return []
 
     import scenario_operations as sce_ops
+    import zstackwoodpecker.test_lib as test_lib
     zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
     ip_list = []
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
@@ -426,6 +427,7 @@ def get_primary_storage_from_scenario_file(primaryStorageRefName, scenarioConfig
     if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
         return []
 
+    import zstackwoodpecker.test_lib as test_lib
     ip_list = []
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
         for vm in xmlobject.safe_list(host.vms.vm):
