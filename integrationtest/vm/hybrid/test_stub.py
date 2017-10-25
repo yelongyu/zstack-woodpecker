@@ -704,12 +704,12 @@ class HybridObject(object):
                 sys.exit(0)
             for _ in xrange(600):
                     image_progress = hyb_ops.get_create_ecs_image_progress(self.datacenter.uuid, image.uuid)
-                    if image_progress.progress.progress == "100%":
+                    if image_progress.progress.progress == "99%":
                         break
                     else:
                         time.sleep(1)
             os.waitpid(create_image_pid, 0)
-            assert image_progress.progress.progress == "100%"
+            assert image_progress.progress.progress == "99%"
         else:
             self.ecs_image = hyb_ops.create_ecs_image_from_local_image(bs_uuid, self.datacenter.uuid, image.uuid, name='zstack-test-ecs-image')
             self.check_resource('create', 'ecsImageId', self.ecs_image.ecsImageId, 'query_ecs_image_local')
