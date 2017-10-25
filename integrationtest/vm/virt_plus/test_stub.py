@@ -311,7 +311,7 @@ def test_fio_bandwidth(vm_inv, bandwidth, path = '/tmp', raise_exception=True):
         logfd.close()
         os.system('rm -f %s' % tmp_file)
 
-    timeout = TEST_TIME + 120
+    timeout = TEST_TIME + 180
     vm_ip = vm_inv.vmNics[0].ip
 
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip

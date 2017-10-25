@@ -4906,6 +4906,24 @@ def lib_limit_vm_network_bandwidth(instance_offering_uuid, bandwidth, \
                 '%s::%d' % (vm_header.NETWORK_INBOUND_BANDWIDTH, bandwidth),\
                 session_uuid)
 
+#--------disk offering--------
+def lib_limit_disk_bandwidth(disk_offering_uuid, bandwidth, \
+        session_uuid = None):
+    return tag_ops.create_system_tag('DiskOfferingVO', \
+            disk_offering_uuid, \
+            '%s::%d' % (vm_header.VOLUME_BANDWIDTH, bandwidth),\
+            session_uuid)
+
+def lib_create_disk_offering(diskSize = 1073741824, \
+        name = 'new_disk_offering', volume_bandwidth = None):
+    new_offering_option = test_util.DiskOfferingOption()
+    new_offering_option.set_diskSize(diskSize)
+    new_offering_option.set_name(name)
+    new_offering = vol_ops.create_volume_offering(new_offering_option)
+    if volume_bandwidth:
+        lib_limit_disk_bandwidth(new_offering.uuid, volume_bandwidth)
+    return new_offering
+
 
 #--------instance offering--------
 #def lib_create_instance_offering(cpuNum = 1, cpuSpeed = 16, \
