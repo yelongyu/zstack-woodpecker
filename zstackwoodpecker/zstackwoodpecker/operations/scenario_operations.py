@@ -821,7 +821,7 @@ def modify_setup_script_for_mn_ha_fusionstor():
         cmd = "sed -i 's/solomode   on/solomode   off/g' %s/%s" %(os.environ.get('woodpecker_root_path'), '/tools/setup_fusionstor_nodes.sh')
         test_util.test_logger("@@@DEBUG-> change solomode@@@ %s" %(cmd))
         os.system(cmd)
-        cmd = "sed -i 's/172.20.0.1/192.168.0.1/g' %s/%s" %(os.environ.get('woodpecker_root_path'), '/tools/setup_fusionstor_nodes.sh')
+        cmd = "sed -i 's:172.20.0.1/16:10.0.0.1/8:g' %s/%s" %(os.environ.get('woodpecker_root_path'), '/tools/setup_fusionstor_nodes.sh')
         test_util.test_logger("@@@DEBUG-> change ip@@@ %s" %(cmd))
         os.system(cmd)
     else:
