@@ -3760,7 +3760,7 @@ def lib_check_vm_pf_rule_exist_in_iptables(pf_rule):
         check_string2 = '-p udp'
 
 
-    if vr.applianceVmType == 'vrouter':
+    if vr.applianceVmType == 'vrouter' or vr.applianceVmType == 'vpcvrouter':
         check_string3 = '--dports %s:%s' % (pf_rule.vipPortStart, pf_rule.vipPortEnd)
         check_cmd = "sudo iptables-save| grep -Fe '%s'|grep -Fe '%s'|grep -Fe '%s'" % (check_string1, check_string2, check_string3)
     else:
