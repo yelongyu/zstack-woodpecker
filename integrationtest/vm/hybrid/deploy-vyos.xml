@@ -85,13 +85,6 @@
   </backupStorages>
 
   <images>
-    <image name="$imageName_i_c7" 
-      description="Centos7 Test Image Template" 
-      format="$rootImageFormat" url="$imageUrl_i_c7" 
-      mediaType="$rootMediaType"
-      username="$imageUsername" password="$imagePassword">
-      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
-    </image>
     <image name="$imageName_s" 
       description="Small Test Image Template" 
       mediaType="$rootMediaType" format="$rootImageFormat"
@@ -187,10 +180,6 @@
                 startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
                 netmask="$ipRangeNetmask" />
               <dns>$DNSServer</dns>
-              <networkService provider="vrouter">
-                <serviceType>DHCP</serviceType>
-                <serviceType>DNS</serviceType>
-              </networkService>
             </l3BasicNetwork>
           </l3Networks>
         </l2NoVlanNetwork>
