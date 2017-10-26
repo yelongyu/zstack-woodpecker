@@ -191,7 +191,7 @@
               <ipRange name="$ipRangeName" startIp="$ipRangeStartPublicIp" endIp="$ipRangeEndPublicIp"
                gateway="$ipRangePublicGateway" netmask="$ipRangePublicNetmask"/>
               <dns>$DNSServer</dns> 
-              <networkService provider="vrouter">
+              <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
                 <serviceType>DNS</serviceType>
               </networkService>
