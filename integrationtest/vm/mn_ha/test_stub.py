@@ -403,7 +403,9 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
 
         cmd2="qemu-img convert -f qcow2 -O raw %s rbd:zstack/mnvm.img" % mn_image_path
         test_util.test_logger("[%s] %s" % (test_host_ip, cmd2))
-        ssh.execute(cmd2, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+        #ssh.execute(cmd2, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+        if test_lib.lib_execute_ssh_cmd(test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, cmd2) == False:
+            test_util.test_fail("fail to run cmd: %s on %s" %(cmd2, test_host_ip))
 
     elif mn_ha_storage_type == 'nfs':
         prepare_etc_hosts(scenarioConfig, scenarioFile, deploy_config, config_json)
@@ -424,7 +426,9 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
 
     cmd3='%s install -p %s -c %s' % (installer_path, host_password, config_path)
     test_util.test_logger("[%s] %s" % (test_host_ip, cmd3))
-    ssh.execute(cmd3, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+    #ssh.execute(cmd3, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+    if test_lib.lib_execute_ssh_cmd(test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, cmd3) == False:
+        test_util.test_fail("fail to run cmd: %s on %s" %(cmd3, test_host_ip))
 
 
 l2network_nic = None
