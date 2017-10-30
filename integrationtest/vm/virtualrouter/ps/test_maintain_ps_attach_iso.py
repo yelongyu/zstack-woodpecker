@@ -78,10 +78,9 @@ def test():
     host_ops.reconnect_host(host_uuid)
     test_stub.ensure_hosts_connected(120)
     #vm_ops.reconnect_vr(vr_uuid)
-
-    #vrs = test_lib.lib_get_all_vrs()
-    #for vr in vrs:
-    #    vm_ops.start_vm(vr.uuid)  
+    vrs = test_lib.lib_get_all_vrs()
+    for vr in vrs:
+        vm_ops.start_vm(vr.uuid)  
 
     vm.start()
     vm.check()
