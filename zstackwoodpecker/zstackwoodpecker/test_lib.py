@@ -50,6 +50,7 @@ import zstacktestagent.plugins.host as host_plugin
 import zstacktestagent.testagent as testagent
 from contextlib import contextmanager
 import functools
+from collections import defaultdict
 
 debug.install_runtime_tracedumper()
 test_stage = ts_header.TestStage
@@ -5414,3 +5415,8 @@ def disable_checker(self):
 
 def do_nothing():
     pass
+
+
+class DefaultFalseDict(defaultdict):
+    def __init__(self, **kwargs):
+        super(DefaultFalseDict, self).__init__(lambda:False, **kwargs)
