@@ -38,8 +38,10 @@ def test():
 
     hosts = res_ops.get_resource(res_ops.HOST)
     host = hosts[0]
-    duration = 60
-    expression = "host.network.io{direction=\"tx\"} > 2000"
+    #duration = 60
+    duration = 50
+    #expression = "host.network.io{direction=\"tx\"} > 2000"
+    expression = "host.network.io{direction=\"tx\"} > 1000"
     monitor_trigger = mon_ops.create_monitor_trigger(host.uuid, duration, expression)
 
     send_email = test_stub.create_email_media()
