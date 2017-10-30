@@ -41,8 +41,7 @@ def test():
     for vpc_name in vpc_name_list:
         vr_inv_list.append(test_stub.create_vpc_vrouter(vpc_name))
     for vr_inv, l3_list in izip(vr_inv_list, vpc_l3_list):
-        test_stub.attach_all_l3_to_vpc_vr(vr_inv, l3_list)
-
+        test_stub.attach_l3_to_vpc_vr(vr_inv, l3_list)
 
     test_util.test_dsc("create two vm, vm1 in l3 {}, vm2 in l3 {}".format(flavor['vm1l3'], flavor['vm2l3']))
     vm1 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(flavor['vm1l3']), l3_name=flavor['vm1l3'])
@@ -52,12 +51,12 @@ def test():
     test_obj_dict.add_vm(vm2)
     vm2.check()
 
-    vm1_inv = vm1.get_vm()
-    vm2_inv = vm2.get_vm()
+    vm1_inv, vm2_inv = [vm.get_vm() for vm in (vm1, vm2)]
 
     test_util.test_dsc("test two vm connectivity")
-    test_stub.run_command_in_vm(vm1_inv, 'iptables -F')
-    test_stub.run_command_in_vm(vm2_inv, 'iptables -F')
+    for vm_inv in (vm1_inv, vm2_inv):
+        test_stub.run_command_in_vm(vm_inv, 'iptables -F')
+
 
     with test_lib.expected_failure('Check two vm pingable', Exception):
         test_lib.lib_check_ping(vm1_inv, vm2_inv.vmNics[0].ip)

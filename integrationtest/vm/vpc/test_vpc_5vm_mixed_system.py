@@ -42,8 +42,7 @@ def test():
     for vpc_name in vpc_name_list:
         vr_inv_list.append(test_stub.create_vpc_vrouter(vpc_name))
     for vr_inv, l3_list in izip(vr_inv_list, vpc_l3_list):
-        test_stub.attach_all_l3_to_vpc_vr(vr_inv, l3_list)
-
+        test_stub.attach_l3_to_vpc_vr(vr_inv, l3_list)
 
     vm_list = []
     for l3_name in all_l3_list:

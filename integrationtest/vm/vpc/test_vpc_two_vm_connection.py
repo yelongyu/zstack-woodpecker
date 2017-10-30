@@ -49,7 +49,7 @@ def test():
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     test_util.test_dsc("create vpc vrouter and attach vpc l3 to vpc")
     vr_inv = test_stub.create_vpc_vrouter()
-    test_stub.attach_all_l3_to_vpc_vr(vr_inv)
+    test_stub.attach_l3_to_vpc_vr(vr_inv)
 
     test_util.test_dsc("create two vm, vm1 in l3 {}, vm2 in l3 {}".format(flavor['vm1l3'], flavor['vm2l3']))
     vm1 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(flavor['vm1l3']), l3_name=flavor['vm1l3'])

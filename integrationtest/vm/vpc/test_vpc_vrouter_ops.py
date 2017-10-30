@@ -29,7 +29,7 @@ def test():
         test_stub.create_vm_with_random_offering(vm_name='vpc_vm1', l3_name=random.choice(test_stub.L3_SYSTEM_NAME_LIST))
 
     test_util.test_dsc("attach vpc l3 to vpc vrouter")
-    test_stub.attach_all_l3_to_vpc_vr(vr_inv, test_stub.L3_SYSTEM_NAME_LIST)
+    test_stub.attach_l3_to_vpc_vr(vr_inv, test_stub.L3_SYSTEM_NAME_LIST)
 
     test_util.test_dsc("Try to create one vm in random L3")
     vm1 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm1', l3_name=random.choice(test_stub.L3_SYSTEM_NAME_LIST))

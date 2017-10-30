@@ -11,7 +11,6 @@ from itertools import izip
 VLAN1_NAME, VLAN2_NAME = ['l3VlanNetworkName1', "l3VlanNetwork3"]
 VXLAN1_NAME, VXLAN2_NAME = ["l3VxlanNetwork11", "l3VxlanNetwork12"]
 
-CLASSIC_L3 = 'l3NoVlanNetworkName1'
 
 vpc1_l3_list = [VLAN1_NAME, VLAN2_NAME]
 vpc2_l3_list = [VXLAN1_NAME, VXLAN2_NAME]
@@ -38,7 +37,7 @@ def test():
     for vpc_name in vpc_name_list:
         vr_inv_list.append(test_stub.create_vpc_vrouter(vpc_name))
     for vr_inv, l3_list in izip(vr_inv_list, vpc_l3_list):
-        test_stub.attach_all_l3_to_vpc_vr(vr_inv, l3_list)
+        test_stub.attach_l3_to_vpc_vr(vr_inv, l3_list)
 
     test_util.test_dsc("create two vm, vm1 in l3 {}, vm2 in l3 {}".format(flavor['vm1l3'], flavor['vm2l3']))
     vm1 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(flavor['vm1l3']), l3_name=flavor['vm1l3'])
@@ -60,9 +59,8 @@ def test():
         eip = test_stub.create_eip('eip_{}'.format(vm.get_vm().name), vip_uuid=vip.get_vip().uuid)
         vip.attach_eip(eip)
         eip.attach(vm.get_vm().vmNics[0].uuid, vm)
-        #TO DO : fix checker issue
-        #vm.check()
         vip.check()
+        vm.check()
 
     for vm in (vm1, vm2):
         vm.check()

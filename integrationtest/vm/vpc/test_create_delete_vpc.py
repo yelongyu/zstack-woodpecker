@@ -35,7 +35,7 @@ def test():
 
     if flavor["attach_l3"]:
         for vr_inv, l3_list in izip(vr_inv_list, vpc_l3_list):
-            test_stub.attach_all_l3_to_vpc_vr(vr_inv, l3_list)
+            test_stub.attach_l3_to_vpc_vr(vr_inv, l3_list)
 
     if flavor["has_vm"]:
         l3 = random.choice(test_stub.vpc1_l3_list + test_stub.vpc2_l3_list + test_stub.vpc2_l3_list)

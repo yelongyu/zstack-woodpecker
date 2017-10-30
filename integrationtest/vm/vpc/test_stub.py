@@ -45,6 +45,8 @@ vpc1_l3_list = ['l3VlanNetworkName1', "l3VlanNetwork2", "l3VxlanNetwork11", "l3V
 vpc2_l3_list = ['l3VlanNetwork3', "l3VlanNetwork4", "l3VxlanNetwork13", "l3VxlanNetwork14"]
 vpc3_l3_list = ['l3VlanNetwork5', "l3VlanNetwork6", "l3VxlanNetwork15", "l3VxlanNetwork16"]
 
+all_vpc_l3_list = ['l3VlanNetworkName1'] + ["l3VlanNetwork{}".format(i) for i in xrange(2,11)] + ["l3VxlanNetwork{}".format(i) for i in xrange(11,21)]
+
 
 Port = test_state.Port
 
@@ -66,7 +68,7 @@ def create_vpc_vrouter(vr_name='test_vpc'):
     return vpc_ops.create_vpc_vrouter(name=vr_name, virtualrouter_offering_uuid=vr_offering.uuid)
 
 
-def attach_all_l3_to_vpc_vr(vpc_vr, l3_system_name_list=L3_SYSTEM_NAME_LIST):
+def attach_l3_to_vpc_vr(vpc_vr, l3_system_name_list=L3_SYSTEM_NAME_LIST):
     l3_name_list = [os.environ.get(name) for name in l3_system_name_list]
 
     l3_list = [test_lib.lib_get_l3_by_name(name) for name in l3_name_list]

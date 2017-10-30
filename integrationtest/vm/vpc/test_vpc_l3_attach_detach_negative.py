@@ -14,13 +14,8 @@ import os
 from itertools import izip
 
 
-
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
-
-
-all_vpc_l3_list = ['l3VlanNetworkName1'] + ["l3VlanNetwork{}".format(i) for i in xrange(2,11)] + \
-                  ["l3VxlanNetwork{}".format(i) for i in xrange(11,21)]
 
 
 @test_lib.pre_execution_action(test_stub.remove_all_vpc_vrouter)
@@ -33,9 +28,9 @@ def test():
 
     test_util.test_dsc("create vm in ")
 
-    test_stub.attach_all_l3_to_vpc_vr(vr_inv1, ['l3VlanNetworkName1'])
+    test_stub.attach_l3_to_vpc_vr(vr_inv1, ['l3VlanNetworkName1'])
     with test_lib.expected_failure('Attach vpc l3 to vpc2 which is already attached to vpc1', Exception):
-        test_stub.attach_all_l3_to_vpc_vr(vr_inv2, ['l3VlanNetworkName1'])
+        test_stub.attach_l3_to_vpc_vr(vr_inv2, ['l3VlanNetworkName1'])
 
     vm = test_stub.create_vm_with_random_offering(vm_name='vpc_vm', l3_name='l3VlanNetworkName1')
     test_obj_dict.add_vm(vm)
