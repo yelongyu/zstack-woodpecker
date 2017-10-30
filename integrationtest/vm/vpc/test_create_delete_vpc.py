@@ -9,23 +9,19 @@ import zstackwoodpecker.operations.vm_operations as vm_ops
 import random
 import os
 from itertools import izip
-
+DefaultFalseDict = test_lib.DefaultFalseDict
 
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
-vpc1_l3_list = ['l3VlanNetworkName1', "l3VlanNetwork2", "l3VxlanNetwork11", "l3VxlanNetwork12"]
-vpc2_l3_list = ['l3VlanNetwork3', "l3VlanNetwork4", "l3VxlanNetwork13", "l3VxlanNetwork14"]
-vpc3_l3_list = ['l3VlanNetwork5', "l3VlanNetwork6", "l3VxlanNetwork15", "l3VxlanNetwork16"]
-
 vpc_name_list = ['vpc1','vpc2','vpc3']
-vpc_l3_list = [vpc1_l3_list, vpc2_l3_list, vpc3_l3_list]
+vpc_l3_list = [test_stub.vpc1_l3_list, test_stub.vpc2_l3_list, test_stub.vpc3_l3_list]
 vr_inv_list = []
 
-case_flavor = dict(vr_only=             dict(vr=True, attach_l3=False, has_vm=False),
-                   vr_attach_l3=        dict(vr=True, attach_l3=True, has_vm=False),
-                   vr_attach_l3_has_vm= dict(vr=True, attach_l3=True, has_vm=True)
+case_flavor = dict(vr_only=             DefaultFalseDict(vr=True),
+                   vr_attach_l3=        DefaultFalseDict(vr=True, attach_l3=True),
+                   vr_attach_l3_has_vm= DefaultFalseDict(vr=True, attach_l3=True, has_vm=True)
                    )
 
 
@@ -42,20 +38,21 @@ def test():
             test_stub.attach_all_l3_to_vpc_vr(vr_inv, l3_list)
 
     if flavor["has_vm"]:
-        l3 = random.choice(vpc1_l3_list + vpc2_l3_list + vpc3_l3_list)
-        vm1 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(l3), l3_name=l3)
-        test_obj_dict.add_vm(vm1)
-        vm1.check()
+        l3 = random.choice(test_stub.vpc1_l3_list + test_stub.vpc2_l3_list + test_stub.vpc2_l3_list)
+        vm = test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(l3), l3_name=l3)
+        test_obj_dict.add_vm(vm)
+        vm.check()
 
     for vr_inv in vr_inv_list:
         vm_ops.destroy_vm(vr_inv.uuid)
 
     if flavor["has_vm"]:
         with test_lib.expected_failure('reboot vm in vpc l3 when no vpc vrouter', Exception):
-            vm1.reboot()
+            vm.reboot()
 
     test_lib.lib_error_cleanup(test_obj_dict)
     test_stub.remove_all_vpc_vrouter()
+
 
 def env_recover():
     test_lib.lib_error_cleanup(test_obj_dict)

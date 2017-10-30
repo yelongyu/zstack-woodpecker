@@ -41,6 +41,11 @@ l3_vlan_system_name_list=['l3VlanNetworkName1', "l3VlanNetwork3"]
 l3_vxlan_system_name_list= ["l3VxlanNetwork11", "l3VxlanNetwork12"]
 L3_SYSTEM_NAME_LIST = tuple(l3_vlan_system_name_list + l3_vxlan_system_name_list)
 
+vpc1_l3_list = ['l3VlanNetworkName1', "l3VlanNetwork2", "l3VxlanNetwork11", "l3VxlanNetwork12"]
+vpc2_l3_list = ['l3VlanNetwork3', "l3VlanNetwork4", "l3VxlanNetwork13", "l3VxlanNetwork14"]
+vpc3_l3_list = ['l3VlanNetwork5', "l3VlanNetwork6", "l3VxlanNetwork15", "l3VxlanNetwork16"]
+
+
 Port = test_state.Port
 
 rule1_ports = Port.get_ports(Port.rule1_ports)
