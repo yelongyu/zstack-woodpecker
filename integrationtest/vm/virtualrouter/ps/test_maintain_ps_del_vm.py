@@ -59,9 +59,9 @@ def test():
     ps_ops.change_primary_storage_state(ps_uuid, 'enable')
     host_ops.reconnect_host(host_uuid)
     #vm_ops.reconnect_vr(vr_uuid)
-    vrs = test_lib.lib_get_all_vrs()
-    for vr in vrs:
-        vm_ops.start_vm(vr.uuid)  
+    #vrs = test_lib.lib_get_all_vrs()
+    #for vr in vrs:
+    #    vm_ops.start_vm(vr.uuid)  
 
     test_lib.lib_set_delete_policy('vm', 'Direct')
     test_lib.lib_set_delete_policy('volume', 'Direct')
