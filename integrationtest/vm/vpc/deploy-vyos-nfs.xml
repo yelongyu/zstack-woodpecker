@@ -185,39 +185,37 @@
              </l3Networks>
           </l2NoVlanNetwork>
 
-          <l2NoVlanNetwork name="$l2PublicNetworkName"
-            description="Test" 
-            physicalInterface="$l2PublicNetworkInterface">
-            <l3Networks>
-              <l3BasicNetwork name="$l3PublicNetworkName" category="Public" description="Public Network">
-                <ipRange name="$ipRangeName" description="Test"
-                  startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
-                  netmask="$ipRangeNetmask" />
-                <dns>$DNSServer</dns>
-              </l3BasicNetwork>
-            </l3Networks>
-          </l2NoVlanNetwork>
-          
+
+          <l2NoVlanNetwork name="$l2PublicNetworkName" description="Basic L2 for public network"
+          physicalInterface="$l2PublicNetworkInterface">
+          <l3Networks>
+            <l3BasicNetwork name="$l3PublicNetworkName" category="Public"  description="Basic L3 Network without Vlan for public network">
+              <ipRange name="$ipRangeName" description="Test"
+                startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
+                netmask="$ipRangeNetmask" />
+              <dns>$DNSServer</dns>
+              <networkService provider="Flat Network Service Provider">
+                <serviceType>DHCP</serviceType>
+                <serviceType>Userdata</serviceType>
+              </networkService>
+              <networkService provider="SecurityGroup">
+                <serviceType>SecurityGroup</serviceType>
+              </networkService>
+            </l3BasicNetwork>
+          </l3Networks>
+        </l2NoVlanNetwork>
+
+
           <l2NoVlanNetwork name="$l2NoVlanNetworkName1" description="guest l2 network"
             physicalInterface="$l2NoVlanNetworkInterface1">
             <l3Networks>
-              <l3BasicNetwork name="$l3NoVlanNetworkName1" description = "guest l3 network with user defined vlan">
+              <l3BasicNetwork name="$l3NoVlanNetworkName1"  category="Public" description = "guest l3 network with user defined vlan">
                 <ipRange name="$noVlanIpRangeName1" 
                   startIp="$noVlanIpRangeStart1" 
                   endIp="$noVlanIpRangeEnd1"
                   gateway="$noVlanIpRangeGateway1" 
                   netmask="$noVlanIpRangeNetmask1"/>
-                <dns>$DNSServer</dns> 
-              <networkService provider="vrouter">
-                <serviceType>IPsec</serviceType>
-                <serviceType>VRouterRoute</serviceType>
-                <serviceType>CentralizedDNS</serviceType>
-                <serviceType>VipQos</serviceType>
-                <serviceType>DNS</serviceType>
-                <serviceType>SNAT</serviceType>
-                <serviceType>PortForwarding</serviceType>
-                <serviceType>Eip</serviceType>
-              </networkService>
+                <dns>$DNSServer</dns>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
                 <serviceType>Userdata</serviceType>
