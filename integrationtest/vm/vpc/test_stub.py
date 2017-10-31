@@ -26,6 +26,7 @@ import apibinding.inventory as inventory
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.ha_operations as ha_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
+import zstackwoodpecker.header.vm as vm_header
 import zstacklib.utils.xmlobject as xmlobject
 import threading
 import time
@@ -226,3 +227,70 @@ def create_multi_volumes(count=10, host_uuid=None, ps=None):
         for volume in volume_list:
             assert volume.get_volume().primaryStorageUuid == ps.uuid
     return volume_list
+
+
+class ZstackTestVR(vm_header.TestVm):
+    def __init__(self, vr_inv):
+        super(ZstackTestVR, self).__init__()
+        self._inv = vr_inv
+
+    def __hash__(self):
+        return hash(self.inv.uuid)
+
+    def __eq__(self, other):
+        return self.inv.uuid == other.inv.uuid
+
+    @property
+    def inv(self):
+        return self._inv
+
+    @inv.setter
+    def inv(self, value):
+        self._inv = value
+
+    def destroy(self, session_uuid = None):
+        vm_ops.destroy_vm(self.inv.uuid, session_uuid)
+        super(ZstackTestVR, self).destroy()
+
+    def reboot(self, session_uuid = None):
+        self.inv = vm_ops.reboot_vm(self.inv.uuid, session_uuid)
+        super(ZstackTestVR, self).reboot()
+
+    def migrate(self, host_uuid, timeout = None, session_uuid = None):
+        self.inv = vm_ops.migrate_vm(self.inv.uuid, host_uuid, timeout, session_uuid)
+        super(ZstackTestVR, self).migrate(host_uuid)
+
+    def update(self):
+        '''
+        If vm's status was changed by none vm operations, it needs to call
+        vm.update() to update vm's infromation.
+
+        The none vm operations: host.maintain() host.delete(), zone.delete()
+        cluster.delete()
+        '''
+        super(ZstackTestVR, self).update()
+        if self.get_state != vm_header.EXPUNGED:
+            update_inv = test_lib.lib_get_vm_by_uuid(self.inv.uuid)
+            if update_inv:
+                self.inv = update_inv
+                #vm state need to chenage to stopped, if host is deleted
+                host = test_lib.lib_find_host_by_vm(update_inv)
+                if not host and self.inv.state != vm_header.STOPPED:
+                    self.set_state(vm_header.STOPPED)
+            else:
+                self.set_state(vm_header.EXPUNGED)
+            return self.inv
+
+    def add_nic(self, l3_uuid):
+        '''
+        Add a new NIC device to VM. The NIC device will connect with l3_uuid.
+        '''
+        self.inv = net_ops.attach_l3(l3_uuid, self.inv.uuid)
+        return self.inv
+
+    def remove_nic(self, nic_uuid):
+        '''
+        Detach a NIC from VM.
+        '''
+        self.inv = net_ops.detach_l3(nic_uuid)
+        return self.inv
