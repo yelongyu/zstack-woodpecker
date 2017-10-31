@@ -10,7 +10,7 @@ from itertools import izip
 
 VLAN1_NAME, VLAN2_NAME = ['l3VlanNetworkName1', "l3VlanNetwork3"]
 VXLAN1_NAME, VXLAN2_NAME = ["l3VxlanNetwork11", "l3VxlanNetwork12"]
-CLASSIC_L3 = 'l3NoVlanNetworkName1'
+CLASSIC_L3 = 'l3NoVlanNetworkName2'
 
 vpc1_l3_list = [VLAN1_NAME, VLAN2_NAME]
 vpc2_l3_list = [VXLAN1_NAME, VXLAN2_NAME]
