@@ -65,7 +65,6 @@ def test():
         vm2.check()
     elif flavor['ops'] is VM_REBOOT:
         vm1.reboot()
-        vm1.check()
     elif flavor['ops'] is VR_REBOOT:
         vr.reboot()
         time.sleep(10)

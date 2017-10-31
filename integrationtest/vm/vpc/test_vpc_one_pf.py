@@ -51,7 +51,6 @@ def test():
     test_obj_dict.add_vm(vm2)
     vm2.check()
 
-
     test_util.test_dsc("create testing vr vm")
     temp_vm = test_stub.create_vm_with_random_offering(vm_name='test', l3_name='l3NoVlanNetworkName1')
     test_obj_dict.add_vm(vm2)

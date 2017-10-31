@@ -82,6 +82,11 @@ def test():
         vm.check()
         vip.check()
 
+    for vm in (vm1,vm2):
+        vm.stop()
+        vm.start()
+        vm.check()
+
     for vm, pf in izip((vm1, vm2), (test.pf1, test.pf2)):
         pf.detach()
         vm.check()
