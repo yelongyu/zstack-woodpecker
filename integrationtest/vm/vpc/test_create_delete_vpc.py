@@ -17,7 +17,7 @@ test_obj_dict = test_state.TestStateDict()
 
 vpc_name_list = ['vpc1','vpc2','vpc3']
 vpc_l3_list = [test_stub.vpc1_l3_list, test_stub.vpc2_l3_list, test_stub.vpc3_l3_list]
-vr_inv_list = []
+vr_list = []
 
 case_flavor = dict(vr_only=             DefaultFalseDict(vr=True),
                    vr_attach_l3=        DefaultFalseDict(vr=True, attach_l3=True),
@@ -31,11 +31,11 @@ def test():
     test_util.test_dsc("create vpc vrouter and attach vpc l3 to vpc")
 
     for vpc_name in vpc_name_list:
-        vr_inv_list.append(test_stub.create_vpc_vrouter(vpc_name))
+        vr_list.append(test_stub.create_vpc_vrouter(vpc_name))
 
     if flavor["attach_l3"]:
-        for vr_inv, l3_list in izip(vr_inv_list, vpc_l3_list):
-            test_stub.attach_l3_to_vpc_vr(vr_inv, l3_list)
+        for vr, l3_list in izip(vr_list, vpc_l3_list):
+            test_stub.attach_l3_to_vpc_vr(vr, l3_list)
 
     if flavor["has_vm"]:
         l3 = random.choice(test_stub.vpc1_l3_list + test_stub.vpc2_l3_list + test_stub.vpc2_l3_list)
@@ -43,8 +43,8 @@ def test():
         test_obj_dict.add_vm(vm)
         vm.check()
 
-    for vr_inv in vr_inv_list:
-        vm_ops.destroy_vm(vr_inv.uuid)
+    for vr in vr_list:
+        vr.destroy()
 
     if flavor["has_vm"]:
         with test_lib.expected_failure('reboot vm in vpc l3 when no vpc vrouter', Exception):

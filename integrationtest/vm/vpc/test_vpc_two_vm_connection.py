@@ -48,8 +48,8 @@ test_obj_dict = test_state.TestStateDict()
 def test():
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     test_util.test_dsc("create vpc vrouter and attach vpc l3 to vpc")
-    vr_inv = test_stub.create_vpc_vrouter()
-    test_stub.attach_l3_to_vpc_vr(vr_inv)
+    vr = test_stub.create_vpc_vrouter()
+    test_stub.attach_l3_to_vpc_vr(vr)
 
     test_util.test_dsc("create two vm, vm1 in l3 {}, vm2 in l3 {}".format(flavor['vm1l3'], flavor['vm2l3']))
     vm1 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(flavor['vm1l3']), l3_name=flavor['vm1l3'])
@@ -67,21 +67,20 @@ def test():
         vm1.reboot()
         vm1.check()
     elif flavor['ops'] is VR_REBOOT:
-        vm_ops.reboot_vm(vr_inv.uuid)
+        vr.reboot()
         time.sleep(10)
     elif flavor['ops'] is VR_RECONNECT:
-        vm_ops.reconnect_vr(vr_inv.uuid)
+        vr.reconnect()
         time.sleep(10)
     elif flavor['ops'] is VR_MIGRATE:
-        vm_ops.migrate_vm(vr_inv.uuid, random.choice([host.uuid for host in res_ops.get_resource(res_ops.HOST)
-                                                      if host.uuid != test_lib.lib_find_host_by_vm(vr_inv).uuid]))
+        vr.migrate_to_random_host()
     elif flavor['ops'] is HOST_RECONNECT:
         host = test_lib.lib_find_host_by_vm(vm1.get_vm())
         host_ops.reconnect_host(host.uuid)
         time.sleep(10)
 
     if flavor['ops'] is not None:
-        for vm in (vm1,vm2):
+        for vm in (vm1, vm2):
             vm.check()
 
     vm1_inv = vm1.get_vm()
@@ -102,6 +101,7 @@ def test():
 
     test_lib.lib_error_cleanup(test_obj_dict)
     test_stub.remove_all_vpc_vrouter()
+
 
 def env_recover():
     test_lib.lib_error_cleanup(test_obj_dict)

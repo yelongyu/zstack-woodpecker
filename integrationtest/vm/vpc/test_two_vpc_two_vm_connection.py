@@ -32,16 +32,16 @@ case_flavor = dict(vm1_l3_vlan_vm2_l3_vlan=           dict(vm1l3=VPC1_VLAN, vm2l
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
-vr_inv_list= []
+vr_list= []
 
 
 def test():
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     test_util.test_dsc("create vpc vrouter and attach vpc l3 to vpc")
     for vpc_name in vpc_name_list:
-        vr_inv_list.append(test_stub.create_vpc_vrouter(vpc_name))
-    for vr_inv, l3_list in izip(vr_inv_list, vpc_l3_list):
-        test_stub.attach_l3_to_vpc_vr(vr_inv, l3_list)
+        vr_list.append(test_stub.create_vpc_vrouter(vpc_name))
+    for vr, l3_list in izip(vr_list, vpc_l3_list):
+        test_stub.attach_l3_to_vpc_vr(vr, l3_list)
 
     test_util.test_dsc("create two vm, vm1 in l3 {}, vm2 in l3 {}".format(flavor['vm1l3'], flavor['vm2l3']))
     vm1 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(flavor['vm1l3']), l3_name=flavor['vm1l3'])

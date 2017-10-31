@@ -22,14 +22,14 @@ def test():
 
     test_util.test_dsc("create vpc vrouter")
 
-    vr_inv = test_stub.create_vpc_vrouter()
+    vr = test_stub.create_vpc_vrouter()
 
     test_util.test_dsc("Try to create one vm in random L3 not attached")
     with test_lib.expected_failure("create one vm in random L3 not attached", Exception):
         test_stub.create_vm_with_random_offering(vm_name='vpc_vm1', l3_name=random.choice(test_stub.L3_SYSTEM_NAME_LIST))
 
     test_util.test_dsc("attach vpc l3 to vpc vrouter")
-    test_stub.attach_l3_to_vpc_vr(vr_inv, test_stub.L3_SYSTEM_NAME_LIST)
+    test_stub.attach_l3_to_vpc_vr(vr, test_stub.L3_SYSTEM_NAME_LIST)
 
     test_util.test_dsc("Try to create one vm in random L3")
     vm1 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm1', l3_name=random.choice(test_stub.L3_SYSTEM_NAME_LIST))
@@ -37,26 +37,25 @@ def test():
     vm1.check()
 
     test_util.test_dsc("reboot VR and try to create vm in random L3")
-    vm_ops.reboot_vm(vr_inv.uuid)
+    vr.reboot()
     vm2 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm2', l3_name=random.choice(test_stub.L3_SYSTEM_NAME_LIST))
     test_obj_dict.add_vm(vm2)
     vm2.check()
 
     test_util.test_dsc("reconnect VR and try to create vm in random L3")
-    vm_ops.reconnect_vr(vr_inv.uuid)
+    vr.reconnect()
     vm3 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm3', l3_name=random.choice(test_stub.L3_SYSTEM_NAME_LIST))
     test_obj_dict.add_vm(vm3)
     vm3.check()
 
     test_util.test_dsc("migrate VR and try to create vm in random L3")
-    vm_ops.migrate_vm(vr_inv.uuid, random.choice([host.uuid for host in res_ops.get_resource(res_ops.HOST)
-                                                  if host.uuid != test_lib.lib_find_host_by_vm(vr_inv).uuid]))
+    vr.migrate_to_random_host()
     vm4 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm4', l3_name=random.choice(test_stub.L3_SYSTEM_NAME_LIST))
     test_obj_dict.add_vm(vm4)
     vm4.check()
 
     test_util.test_dsc("delete vr and try to create vm in random L3")
-    vm_ops.destroy_vm(vr_inv.uuid)
+    vr.destroy()
     with test_lib.expected_failure('Create vpc vm when vpc l3 not attached', Exception):
         test_stub.create_vm_with_random_offering(vm_name='vpc_vm5', l3_name=random.choice(test_stub.L3_SYSTEM_NAME_LIST))
 

@@ -23,7 +23,7 @@ vpc_name_list = ['vpc1','vpc2']
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
-vr_inv_list = []
+vr_list = []
 
 BASIC='basic'
 MIGRATE='migrate'
@@ -36,13 +36,14 @@ case_flavor = dict(vm_ops=       dict(ops=BASIC),
                    vm_volume  =  dict(ops=VM_VOLUME)
                    )
 
+
 def test():
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     test_util.test_dsc("create vpc vrouter and attach vpc l3 to vpc")
     for vpc_name in vpc_name_list:
-        vr_inv_list.append(test_stub.create_vpc_vrouter(vpc_name))
-    for vr_inv, l3_list in izip(vr_inv_list, vpc_l3_list):
-        test_stub.attach_l3_to_vpc_vr(vr_inv, l3_list)
+        vr_list.append(test_stub.create_vpc_vrouter(vpc_name))
+    for vr, l3_list in izip(vr_list, vpc_l3_list):
+        test_stub.attach_l3_to_vpc_vr(vr, l3_list)
 
     vm_list = []
     for l3_name in all_l3_list:
@@ -89,6 +90,7 @@ def test():
 
     test_lib.lib_error_cleanup(test_obj_dict)
     test_stub.remove_all_vpc_vrouter()
+
 
 def env_recover():
     test_lib.lib_error_cleanup(test_obj_dict)

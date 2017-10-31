@@ -28,8 +28,8 @@ case_flavor = dict(reboot_vr=       dict(reboot=True, reconnect=False),
 def test():
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     test_util.test_dsc("create vpc vrouter and attach vpc l3 to vpc")
-    vr_inv = test_stub.create_vpc_vrouter()
-    test_stub.attach_l3_to_vpc_vr(vr_inv)
+    vr = test_stub.create_vpc_vrouter()
+    test_stub.attach_l3_to_vpc_vr(vr)
 
     vm = test_stub.create_vm_with_random_offering(vm_name='vpc_vm', l3_name=random.choice(test_stub.L3_SYSTEM_NAME_LIST))
     test_obj_dict.add_vm(vm)
@@ -37,10 +37,9 @@ def test():
 
     for _ in xrange(3):
         if flavor['reboot']:
-            vm_ops.reboot_vm(vr_inv.uuid)
+            vr.reboot()
         elif flavor['reconnect']:
-            vm_ops.reconnect_vr(vr_inv.uuid)
-
+            vr.reconnect()
     vm.check()
 
     test_lib.lib_error_cleanup(test_obj_dict)

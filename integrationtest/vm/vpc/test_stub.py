@@ -66,18 +66,16 @@ def create_vpc_vrouter(vr_name='test_vpc'):
     if vr_list:
         return vr_list[0]
     vr_offering = res_ops.get_resource(res_ops.VR_OFFERING)[0]
-    return vpc_ops.create_vpc_vrouter(name=vr_name, virtualrouter_offering_uuid=vr_offering.uuid)
+    vr_inv =  vpc_ops.create_vpc_vrouter(name=vr_name, virtualrouter_offering_uuid=vr_offering.uuid)
+    return ZstackTestVR(vr_inv)
 
 
 def attach_l3_to_vpc_vr(vpc_vr, l3_system_name_list=L3_SYSTEM_NAME_LIST):
     l3_name_list = [os.environ.get(name) for name in l3_system_name_list]
-
     l3_list = [test_lib.lib_get_l3_by_name(name) for name in l3_name_list]
-
-    l3_uuid_list = [nic.l3NetworkUuid for nic in vpc_vr.vmNics]
     for l3 in l3_list:
-        if l3.uuid not in l3_uuid_list:
-            net_ops.attach_l3(l3.uuid, vpc_vr.uuid)
+        vpc_vr.add_nic(l3.uuid)
+
 
 
 def create_vm_with_random_offering(vm_name, image_name=None, l3_name=None, session_uuid=None,
@@ -142,9 +140,9 @@ def migrate_vm_to_random_host(vm):
         test_util.test_logger('[vm:] %s has been migrated from [host:] %s to [host:] %s' % (vm.vm.uuid, current_host.uuid, target_host.uuid))
 
 
-def run_command_in_vm(vminv, command):
-    managerip = test_lib.lib_find_host_by_vm(vminv).managementIp
-    vm_ip = vminv.vmNics[0].ip
+def run_command_in_vm(vm_inv, command):
+    managerip = test_lib.lib_find_host_by_vm(vm_inv).managementIp
+    vm_ip = vm_inv.vmNics[0].ip
     return test_lib.lib_ssh_vm_cmd_by_agent(managerip, vm_ip, 'root', 'password', command)
 
 
@@ -256,7 +254,16 @@ class ZstackTestVR(vm_header.TestVm):
         self.inv = vm_ops.reboot_vm(self.inv.uuid, session_uuid)
         super(ZstackTestVR, self).reboot()
 
+    def reconnect(self, session_uuid = None):
+        self.inv = vm_ops.reconnect_vr(self.inv.uuid, session_uuid)
+
     def migrate(self, host_uuid, timeout = None, session_uuid = None):
+        self.inv = vm_ops.migrate_vm(self.inv.uuid, host_uuid, timeout, session_uuid)
+        super(ZstackTestVR, self).migrate(host_uuid)
+
+    def migrate_to_random_host(self, timeout = None, session_uuid = None):
+        host_uuid = random.choice([host.uuid for host in res_ops.get_resource(res_ops.HOST)
+                                                      if host.uuid != test_lib.lib_find_host_by_vm(self.inv).uuid])
         self.inv = vm_ops.migrate_vm(self.inv.uuid, host_uuid, timeout, session_uuid)
         super(ZstackTestVR, self).migrate(host_uuid)
 
@@ -285,12 +292,11 @@ class ZstackTestVR(vm_header.TestVm):
         '''
         Add a new NIC device to VM. The NIC device will connect with l3_uuid.
         '''
-        self.inv = net_ops.attach_l3(l3_uuid, self.inv.uuid)
-        return self.inv
+        return net_ops.attach_l3(l3_uuid, self.inv.uuid)
 
     def remove_nic(self, nic_uuid):
         '''
         Detach a NIC from VM.
         '''
-        self.inv = net_ops.detach_l3(nic_uuid)
-        return self.inv
+        return net_ops.detach_l3(nic_uuid)
+
