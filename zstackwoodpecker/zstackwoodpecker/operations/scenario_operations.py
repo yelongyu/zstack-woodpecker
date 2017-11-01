@@ -602,6 +602,18 @@ def dump_scenario_file_ips(scenario_file):
     return ips
 
 
+def get_host_management_ip_by_public_ip_from_scenario_file(scenario_file, public_ip):
+    with open(scenario_file, 'r') as fd:
+        xmlstr = fd.read()
+        fd.close()
+        scenariofile = xmlobject.loads(xmlstr)
+        for vm in xmlobject.safe_list(scenariofile.vms.vm):
+            for ip in xmlobject.safe_list(vm.ips.ip):
+                if ip.ip_ == public_ip:
+                    return ip.managementIp_
+    return None
+
+
 def get_scenario_file_vm(vm_name, scenario_file):
     with open(scenario_file, 'r') as fd:
         xmlstr = fd.read()
