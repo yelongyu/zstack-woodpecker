@@ -11,7 +11,7 @@ import apibinding.inventory as inventory
 from itertools import izip
 
 
-VLAN1_NAME, VLAN2_NAME = ['l3VlanNetworkName1', "l3VlanNetwork3"]
+VLAN1_NAME, VLAN2_NAME = ['l3VlanNetworkName1', "l3VlanNetwork2"]
 VXLAN1_NAME, VXLAN2_NAME = ["l3VxlanNetwork11", "l3VxlanNetwork12"]
 CLASSIC_L3 = 'l3NoVlanNetworkName2'
 
@@ -52,7 +52,7 @@ def test():
     vm2.check()
 
     test_util.test_dsc("create testing vr vm")
-    temp_vm = test_stub.create_vm_with_random_offering(vm_name='test', l3_name='l3NoVlanNetworkName1')
+    temp_vm = test_stub.create_vm_with_random_offering(vm_name='test', l3_name='l3NoVlanNetworkName2')
     test_obj_dict.add_vm(vm2)
     vr_pub_ip = test_lib.lib_find_vr_pub_ip(test_lib.lib_find_vr_by_vm(temp_vm.get_vm())[0])
 

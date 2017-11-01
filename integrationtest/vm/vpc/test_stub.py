@@ -38,7 +38,7 @@ from functools import wraps
 import itertools
 #import traceback
 
-l3_vlan_system_name_list=['l3VlanNetworkName1', "l3VlanNetwork3"]
+l3_vlan_system_name_list=['l3VlanNetworkName1', "l3VlanNetwork2"]
 l3_vxlan_system_name_list= ["l3VxlanNetwork11", "l3VxlanNetwork12"]
 L3_SYSTEM_NAME_LIST = tuple(l3_vlan_system_name_list + l3_vxlan_system_name_list)
 

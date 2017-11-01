@@ -8,7 +8,7 @@ import zstackwoodpecker.test_state as test_state
 import os
 from itertools import izip
 
-VLAN1_NAME, VLAN2_NAME = ['l3VlanNetworkName1', "l3VlanNetwork3"]
+VLAN1_NAME, VLAN2_NAME = ['l3VlanNetworkName1', "l3VlanNetwork2"]
 VXLAN1_NAME, VXLAN2_NAME = ["l3VxlanNetwork11", "l3VxlanNetwork12"]
 CLASSIC_L3 = 'l3NoVlanNetworkName2'
 
