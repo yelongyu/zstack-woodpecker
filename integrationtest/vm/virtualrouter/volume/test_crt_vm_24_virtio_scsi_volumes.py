@@ -26,17 +26,17 @@ def test():
     test_obj_dict.add_vm(vm)
     vm.check()
     volumes_number = len(test_lib.lib_get_all_volumes(vm.vm))
-    if volumes_number != 24:
-        test_util.test_fail('Did not find 24 volumes for [vm:] %s. But we assigned 23 data volume when create the vm. We only catch %s volumes' % (vm.vm.uuid, volumes_number))
+    if volumes_number != 23:
+        test_util.test_fail('Did not find 23 volumes for [vm:] %s. But we assigned 22 data volume when create the vm. We only catch %s volumes' % (vm.vm.uuid, volumes_number))
     else:
-        test_util.test_logger('Find 24 volumes for [vm:] %s.' % vm.vm.uuid)
+        test_util.test_logger('Find 23 volumes for [vm:] %s.' % vm.vm.uuid)
 
     scsi_cmd = 'ls /dev/sd* | wc -l'
-    if test_lib.lib_execute_command_in_vm(vm.get_vm(), scsi_cmd).strip() != '23':
-        test_util.test_fail('Only expect 23 disk in virtio scsi mode')
+    if test_lib.lib_execute_command_in_vm(vm.get_vm(), scsi_cmd).strip() != '22':
+        test_util.test_fail('Only expect 22 disk in virtio scsi mode')
 
     vm.destroy()
-    test_util.test_pass('Create a VM with 23 additional data volumes with 23 of them using virtio-scsi PASS')
+    test_util.test_pass('Create a VM with 22 additional data volumes with 22 of them using virtio-scsi PASS')
 
 #Will be called only if exception happens in test().
 def error_cleanup():

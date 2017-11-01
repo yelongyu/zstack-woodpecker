@@ -9,7 +9,7 @@ import zstackwoodpecker.test_state as test_state
 import time
 
 test_obj_dict = test_state.TestStateDict()
-vol_num = 21
+vol_num = 22
 volume_list = []
 
 def test():
@@ -30,7 +30,7 @@ def test():
         volume_list[i].check()
     time.sleep(60)
 
-    test_util.test_dsc('Test attach/detach 21 volumes operations.')
+    test_util.test_dsc('Test attach/detach 22 volumes operations.')
     for i in range(vol_num):
         volume_list[i].attach(vm)
 
@@ -41,7 +41,7 @@ def test():
         volume_list[i].detach()
         volume_list[i].check()
 
-    test_util.test_dsc('Redo attach/detach 21 volumes operations.')
+    test_util.test_dsc('Redo attach/detach 22 volumes operations.')
 
     for i in range(vol_num):
         volume_list[i].attach(vm)
