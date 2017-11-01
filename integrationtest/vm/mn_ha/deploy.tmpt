@@ -195,4 +195,6 @@ vlanIpRangeNetmask20 = 255.255.0.0
 
 hostRecoverScript = /home/host_recover_script.sh
 nodeRecoverScript = /home/node_recover_script.sh
-zstackHaVip = 192.168.0.10
+zstackHaVip = 172.16.0.10
+zstackHaVip2 = 192.168.0.10
+zstackHaVip3 = 10.0.0.10
