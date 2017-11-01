@@ -44,5 +44,6 @@
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_vip_two_pf.py::vm1_vm2_one_vpc_2vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_vip_two_pf.py::vm1_vm2_two_vpc</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_vip_two_pf.py::vm1_classic_vm2_vpc</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_2_pub_nic_vrouter_route.py</case>
     </suite>
 </integrationTest>

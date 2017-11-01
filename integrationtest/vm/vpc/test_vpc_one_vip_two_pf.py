@@ -72,8 +72,8 @@ def test():
     test.pf2.set_creation_option(pf_creation_opt2)
     test.pf2.create()
 
-    vip.attach_pf(test.pf1)
-    vip.attach_pf(test.pf2)
+    for pf in (test.pf1, test.pf2):
+        vip.attach_pf(pf)
 
     vip.check()
 
