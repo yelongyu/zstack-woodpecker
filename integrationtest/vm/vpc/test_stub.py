@@ -227,6 +227,18 @@ def create_multi_volumes(count=10, host_uuid=None, ps=None):
             assert volume.get_volume().primaryStorageUuid == ps.uuid
     return volume_list
 
+def create_sg(sg_creation_option=None, session_uuid = None):
+    if not sg_creation_option:
+        sg_creation_option = test_util.SecurityGroupOption()
+        sg_creation_option.set_name('test_sg')
+        sg_creation_option.set_description('test sg description')
+
+    sg_creation_option.set_session_uuid(session_uuid)
+    sg = zstack_sg_header.ZstackTestSecurityGroup()
+    sg.set_creation_option(sg_creation_option)
+    sg.create()
+    return sg
+
 
 class ZstackTestVR(vm_header.TestVm):
     def __init__(self, vr_inv):
