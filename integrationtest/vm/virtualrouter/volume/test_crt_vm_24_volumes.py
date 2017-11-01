@@ -19,8 +19,8 @@ def test():
     test_obj_dict.add_vm(vm)
     vm.check()
     volumes_number = len(test_lib.lib_get_all_volumes(vm.vm))
-    if volumes_number != 22:
-        test_util.test_fail('Did not find 22 volumes for [vm:] %s. But we assigned 22 data volume when create the vm. We only catch %s volumes' % (vm.vm.uuid, volumes_number))
+    if volumes_number != 23:
+        test_util.test_fail('Did not find 23 volumes for [vm:] %s. But we assigned 22 data volume when create the vm. We only catch %s volumes' % (vm.vm.uuid, volumes_number))
     else:
         test_util.test_logger('Find 22 volumes for [vm:] %s.' % vm.vm.uuid)
 
