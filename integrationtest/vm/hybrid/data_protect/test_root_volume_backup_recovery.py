@@ -77,7 +77,7 @@ def test():
     #Check the process status when recoverying image
     cond = res_ops.gen_query_conditions('resourceUuid', '=', local_bs_uuid)
     system_tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0].tag
-    status = system_tag.split('::')[5]
+    status = system_tag.split('::')[7]
     if status not in ['running', 'success']:
         test_util.test_fail('Error status for recovery image, status: %s' %status)
     #Check if recovery root volume success
