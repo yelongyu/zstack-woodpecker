@@ -35,7 +35,8 @@ def test():
         test_util.test_fail('%s is not available for monitor' % test_item)
 
     duration = 300
-    expression = "vm.disk.io{type=\"bandwidth\", direction=\"read\"} > 250.0"
+    #expression = "vm.disk.io{type=\"bandwidth\", direction=\"read\"} > 250.0"
+    expression = "vm.disk.io{type=\"bandwidth\", direction=\"read\"} > 50.0"
     monitor_trigger = mon_ops.create_monitor_trigger(vm_uuid, duration, expression)
 
     send_email = test_stub.create_email_media()
@@ -51,7 +52,8 @@ def test():
     rw = 'read'
     for i in range(5):test_stub.run_disk_load(ssh_cmd, rw)
 
-    status_problem, status_ok = test_stub.query_trigger_in_loop(trigger,80)
+    #status_problem, status_ok = test_stub.query_trigger_in_loop(trigger,80)
+    status_problem, status_ok = test_stub.query_trigger_in_loop(trigger,50)
     test_util.action_logger('Trigger old status: %s triggered. Trigger new status: %s recovered' % (status_problem, status_ok ))
     if status_problem != 1 or status_ok != 1:
         test_util.test_fail('%s Monitor Test failed, expected Problem or OK status not triggered' % test_item)

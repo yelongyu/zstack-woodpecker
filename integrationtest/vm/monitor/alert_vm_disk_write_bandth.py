@@ -37,9 +37,9 @@ def test():
         test_util.test_fail('%s is not available for monitor' % test_item)
 
     #duration = 60
-    duration = 50
+    duration = 20
     #expression = "vm.disk.io{type=\"bandwidth\", direction=\"write\"} > 300.0"
-    expression = "vm.disk.io{type=\"bandwidth\", direction=\"write\"} > 100.0"
+    expression = "vm.disk.io{type=\"bandwidth\", direction=\"write\"} > 10.0"
     monitor_trigger = mon_ops.create_monitor_trigger(vm_uuid, duration, expression)
     send_email = test_stub.create_email_media()
     media = send_email.uuid

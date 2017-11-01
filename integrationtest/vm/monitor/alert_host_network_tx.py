@@ -57,7 +57,7 @@ def test():
     
     t = threading.Thread(target=test_stub.run_network_tx,args=(ssh_cmd,vm_ip,))
     t.start()
-    time.sleep(120)
+    time.sleep(50)
     test_stub.kill(ssh_cmd)
 
     status_problem, status_ok = test_stub.query_trigger_in_loop(trigger,50)

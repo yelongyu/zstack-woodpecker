@@ -35,7 +35,8 @@ def test():
         test_util.test_fail('%s is not available for monitor' % test_item)
 
     duration = 300
-    expression = "vm.disk.io{type=\"iops\", direction=\"write\"} > 70.0"
+    #expression = "vm.disk.io{type=\"iops\", direction=\"write\"} > 70.0"
+    expression = "vm.disk.io{type=\"iops\", direction=\"write\"} > 10.0"
     monitor_trigger = mon_ops.create_monitor_trigger(vm_uuid, duration, expression)
 
     send_email = test_stub.create_email_media()

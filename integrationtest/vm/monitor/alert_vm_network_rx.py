@@ -35,8 +35,8 @@ def test():
     if test_item not in vm_monitor_item:
         test_util.test_fail('%s is not available for monitor' % test_item)
 
-    duration = 60
-    expression = "vm.network.io{direction=\"rx\"} > 2000"
+    duration = 20
+    expression = "vm.network.io{direction=\"rx\"} > 20"
     monitor_trigger = mon_ops.create_monitor_trigger(vm_uuid, duration, expression)
 
     send_email = test_stub.create_email_media()

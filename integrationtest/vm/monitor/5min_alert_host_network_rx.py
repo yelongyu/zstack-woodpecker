@@ -31,7 +31,7 @@ def test():
     hosts = res_ops.get_resource(res_ops.HOST)
     host = hosts[0]
     duration = 300
-    expression = "host.network.io{direction=\"rx\"} > 1700"
+    expression = "host.network.io{direction=\"rx\"} > 200"
     monitor_trigger = mon_ops.create_monitor_trigger(host.uuid, duration, expression)
 
     send_email = test_stub.create_email_media()
@@ -48,10 +48,10 @@ def test():
     test_stub.yum_install_stress_tool(ssh_cmd)
     t = threading.Thread(target=test_stub.run_network_rx,args=(ssh_cmd,))
     t.start()
-    time.sleep(360)
+    time.sleep(320)
     test_stub.kill(ssh_cmd)
 
-    status_problem, status_ok = test_stub.query_trigger_in_loop(trigger,80)
+    status_problem, status_ok = test_stub.query_trigger_in_loop(trigger,50)
     test_util.action_logger('Trigger old status: %s triggered. Trigger new status: %s recovered' % (status_problem, status_ok ))
     if status_problem != 1 or status_ok != 1:
         test_util.test_fail('%s Monitor Test failed, expected Problem or OK status not triggered' % test_item)
