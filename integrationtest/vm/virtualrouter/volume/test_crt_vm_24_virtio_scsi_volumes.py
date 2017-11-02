@@ -17,7 +17,7 @@ def test():
     test_util.test_dsc('Create a VM with 3 additional data volumes with 1 of them using virtio-scsi')
     disk_offering1 = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
     disk_offering_uuids = []
-    for i in range(0, 10):
+    for i in range(0, 8):
         disk_offering_uuids.append(disk_offering1.uuid)
     disk_offering2 = test_lib.lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName'))
     for i in range(0, 14):
