@@ -36,7 +36,7 @@ def test():
         for vr in vr_list:
             test_stub.attach_l3_to_vpc_vr(vr, test_stub.all_vpc_l3_list)
             nic_uuid_list = [nic.uuid for nic in vr.inv.vmNics if nic.metaData == '4']
-            assert len(nic_uuid_list) == len(test_stub.all_vpc_l3_list)
+            assert len(nic_uuid_list) == len(test_stub.all_vpc_l3_list) - 1
             for nic_uuid in nic_uuid_list:
                 vr.remove_nic(nic_uuid)
 
