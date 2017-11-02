@@ -12,12 +12,13 @@ VLAN1_NAME, VLAN2_NAME = ['l3VlanNetworkName1', "l3VlanNetwork2"]
 VXLAN1_NAME, VXLAN2_NAME = ["l3VxlanNetwork11", "l3VxlanNetwork12"]
 
 CLASSIC_L3 = 'l3NoVlanNetworkName2'
+PUB_L3 = 'l3PublicNetworkName'
 
 vpc1_l3_list = [VLAN1_NAME, VLAN2_NAME]
 vpc2_l3_list = [VXLAN1_NAME, VXLAN2_NAME]
 
 vpc_l3_list = [vpc1_l3_list, vpc2_l3_list]
-all_l3_list = vpc1_l3_list + vpc2_l3_list + [CLASSIC_L3]
+all_l3_list = vpc1_l3_list + vpc2_l3_list + [CLASSIC_L3] + [PUB_L3]
 
 vpc_name_list = ['vpc1','vpc2']
 
