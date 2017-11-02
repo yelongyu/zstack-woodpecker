@@ -62,7 +62,7 @@ def test():
 
     #stop vm
     pf_vm.stop()
-    test_pf.check()
+    vip.check()
     pf_vm.start()
     pf_vm.check()
     vip.check()
