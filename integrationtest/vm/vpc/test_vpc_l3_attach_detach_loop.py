@@ -30,7 +30,7 @@ def test():
     if flavor['vpc_num'] == 2:
         vr_list.append(test_stub.create_vpc_vrouter('vpc2'))
 
-    ROUND = 2 if flavor['vpc_num'] == 1 else 1
+    ROUND = 4 if flavor['vpc_num'] == 1 else 2
 
     for _ in xrange(ROUND):
         for vr in vr_list:
