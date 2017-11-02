@@ -1223,7 +1223,7 @@ def stop_vm(http_server_ip, vm_uuid, force=None, session_uuid=None):
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     return evt.inventory
 
-def start_vm(http_server_ip, vm_uuid, session_uuid=None, timeout=240000):
+def start_vm(http_server_ip, vm_uuid, session_uuid=None, timeout=1200000):
     cond = res_ops.gen_query_conditions('uuid', '=', vm_uuid)
     vm_inv = query_resource(http_server_ip, res_ops.VM_INSTANCE, cond).inventories[0]
 
@@ -1422,6 +1422,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 vm_creation_option.set_l3_uuids(l3_uuid_list)
                 vm_creation_option.set_image_uuid(vm.imageUuid_)
                 vm_creation_option.set_name(vm.name_)
+                vm_creation_option.set_timeout(1200000)
                 #vm_creation_option.set_host_uuid(host.uuid_)
                 #vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
                 #vm_creation_option.set_default_l3_uuid(default_l3_uuid)
