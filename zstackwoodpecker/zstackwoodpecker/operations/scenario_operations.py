@@ -603,7 +603,7 @@ def dump_scenario_file_ips(scenario_file):
 
 
 def get_host_management_ip_by_public_ip_from_scenario_file(scenario_file, public_ip):
-    if not os.path.exists(scenario_file):
+    if not scenario_file or not os.path.exists(scenario_file):
         return None
 
     with open(scenario_file, 'r') as fd:
