@@ -65,8 +65,7 @@ def test():
     for vm in (vm1, vm2):
         vm.check()
 
-    vm1_inv = vm1.get_vm()
-    vm2_inv = vm2.get_vm()
+    vm1_inv, vm2_inv = [vm.get_vm() for vm in (vm1, vm2)]
     vip1, vip2 = vip_list
 
     test_util.test_dsc("test two vm EIP connectivity")

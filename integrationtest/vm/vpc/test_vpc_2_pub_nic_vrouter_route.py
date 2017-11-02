@@ -68,8 +68,7 @@ def test():
     route_entry1 = net_ops.add_vrouter_route_entry(route_table2.uuid, vpc1_l3_cdir, vpc1_second_pub_ip)
     net_ops.attach_vrouter_route_table_to_vrouter(route_table2.uuid, vr2.inv.uuid)
 
-    vm1_inv = vm1.get_vm()
-    vm2_inv = vm2.get_vm()
+    vm1_inv, vm2_inv = [vm.get_vm() for vm in (vm1, vm2)]
 
     test_lib.lib_check_ping(vm1_inv, vm2_inv.vmNics[0].ip)
     test_lib.lib_check_ping(vm2_inv, vm1_inv.vmNics[0].ip)
