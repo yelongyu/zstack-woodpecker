@@ -611,9 +611,8 @@ def get_host_management_ip_by_public_ip_from_scenario_file(scenario_file, public
         fd.close()
         scenariofile = xmlobject.loads(xmlstr)
         for vm in xmlobject.safe_list(scenariofile.vms.vm):
-            for ip in xmlobject.safe_list(vm.ips.ip):
-                if ip.ip_ == public_ip:
-                    return ip.managementIp_
+            if vm.ip_ == public_ip:
+                return vm.managementIp_
     return None
 
 
