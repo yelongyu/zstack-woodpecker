@@ -1487,6 +1487,11 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                         test_util.test_logger("@@@DEBUG-WARNING@@@: vm_storage_ip is null, failed")
                 if xmlobject.has_element(vm, 'mnHostRef'):
                     setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm)
+
+                #walk around for ntp not start issue
+                ntp_cmd = "service ntpd start"
+                ssh.execute(ntp_cmd, vm_ip, vm.imageUsername_, vm.imagePassword_, True, 22)
+                 
                 if xmlobject.has_element(vm, 'backupStorageRef'):
                     volume_option = test_util.VolumeOption()
                     volume_option.set_name(os.environ.get('volumeName'))
