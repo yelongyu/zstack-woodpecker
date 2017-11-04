@@ -216,19 +216,24 @@ def get_host_by_mn_vm(scenarioConfig, scenarioFile):
         return []
     test_util.test_logger("@@DEBUG@@: mn_host_list=<%s>" %(str(mn_host_list)))
     host_list = []
-    for host in mn_host_list:
-        host_config = sce_ops.get_scenario_config_vm(host.name_, scenarioConfig)
-        cmd = "virsh list | grep -v paused | grep \"ZStack Management Node VM\""
-        try:
-            if sce_is_sep_pub():
-                vm_list = test_lib.lib_execute_ssh_cmd(host.managementIp_, host_config.imageUsername_, host_config.imagePassword_,cmd)
-            else:
-                vm_list = test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
-            if vm_list:
-                host_list.append(host)
-        except Exception, e:
-            test_util.test_logger("@@get host exception@@:%s" %(str(e)))
-            continue
+    retry_cnt = 3
+    while not host_list and retry_cnt > 0:
+        for host in mn_host_list:
+            host_config = sce_ops.get_scenario_config_vm(host.name_, scenarioConfig)
+            cmd = "virsh list | grep -v paused | grep \"ZStack Management Node VM\""
+            try:
+                if sce_is_sep_pub():
+                    vm_list = test_lib.lib_execute_ssh_cmd(host.managementIp_, host_config.imageUsername_, host_config.imagePassword_,cmd)
+                else:
+                    vm_list = test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
+                if vm_list:
+                    host_list.append(host)
+            except Exception, e:
+                test_util.test_logger("@@get host exception@@:%s" %(str(e)))
+                continue
+        retry_cnt = retry_cnt - 1
+        time.sleep(5)
+
     test_util.test_logger("@@DEBUG@@: host_list=<%s>" %(str(host_list)))
     return host_list
 
