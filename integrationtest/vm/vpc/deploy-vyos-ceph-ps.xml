@@ -148,11 +148,9 @@
               <host name="$hostName" description="Test" managementIp="$hostIp"
                 username="$hostUsername" password="$hostPassword" />
               <host name="$hostName2" description="Test2" managementIp="$hostIp2"
-                username="$hostUsername2" password="$hostPassword2" port="$hostPort2"/>
+                username="$hostUsername" password="$hostPassword" />
               <host name="$hostName3" description="Test3" managementIp="$hostIp3"
-                username="$hostUsername3" password="$hostPassword3" />
-              <host name="$hostName4" description="Test4" managementIp="$hostIp4"
-                username="$hostUsername4" password="$hostPassword4" port="$hostPort4"/>
+                username="$hostUsername" password="$hostPassword" />
             </hosts>
             <l2VxlanNetworkPoolRef cidr="$l2VxlanNetworkCidr">$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <primaryStorageRef>$cephPrimaryStorageName</primaryStorageRef>
