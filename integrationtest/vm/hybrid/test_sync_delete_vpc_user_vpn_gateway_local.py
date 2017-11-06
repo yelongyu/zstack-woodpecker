@@ -20,6 +20,9 @@ def test():
     hybrid.del_user_vpn_gateway(remote=False)
     test_util.test_pass('Sync Delete Vpc User Vpn Gateway Local Test Success')
 
+def env_recover():
+    if hybrid.user_vpn_gateway:
+        hybrid.del_user_vpn_gateway()
 
 #Will be called only if exception happens in test().
 def error_cleanup():
