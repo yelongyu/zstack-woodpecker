@@ -12,7 +12,6 @@ import zstackwoodpecker.operations.hybrid_operations as hyb_ops
 import zstackwoodpecker.test_state as test_state
 
 test_obj_dict = test_state.TestStateDict()
-test_obj_dict = test_state.TestStateDict()
 
 def test():
     ks_existed = hyb_ops.query_aliyun_key_secret()

@@ -14,7 +14,13 @@ import zstackwoodpecker.test_lib as test_lib
 import zstacktestagent.plugins.host as host_plugin
 import zstacktestagent.testagent as testagent
 
+test_stub = test_lib.lib_get_test_stub()
+hybrid = test_stub.HybridObject()
+
 def test():
+    # Clear ECS instance remained in Aliyun
+    hybrid.add_datacenter_iz()
+    hybrid.tear_down()
     clean_util.cleanup_all_vms_violently()
     clean_util.cleanup_none_vm_volumes_violently()
     clean_util.umount_all_primary_storages_violently()
@@ -36,4 +42,4 @@ def test():
 
     test_lib.setup_plan.stop_node()
     test_lib.lib_cleanup_host_ip_dict()
-    test_util.test_pass('VirtualRouter Teardown Success')
+    test_util.test_pass('Hybrid Teardown Success')

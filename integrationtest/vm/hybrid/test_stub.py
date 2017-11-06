@@ -44,6 +44,7 @@ target_ports = rule1_ports + rule2_ports + rule3_ports + rule4_ports + rule5_por
 
 datacenter_type = os.getenv('datacenterType')
 _postfix = time.strftime('%m%d-%H%M%S', time.localtime())
+TEST_ECS_NAME = 'ZStack-Hybrid-Test-ECS-Instance'
 
 
 class HybridObject(object):
@@ -801,11 +802,11 @@ class HybridObject(object):
         if not allocate_eip:
             image = ecs_image_self[0] if ecs_image_self else ecs_image_centos_64[0]
             self.ecs_instance = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, self.vswitch.uuid, ecs_bandwidth=1, ecs_security_group_uuid=self.sg.uuid, 
-                                                                 instance_type=ecs_instance_type[0].typeId, name='zstack-test-ecs-instance', ecs_console_password='A1B2c3')
+                                                                 instance_type=ecs_instance_type[0].typeId, name=TEST_ECS_NAME, ecs_console_password='A1B2c3')
         else:
             image = ecs_image_system_64[0]
             self.ecs_instance = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, self.vswitch.uuid, ecs_bandwidth=1, ecs_security_group_uuid=self.sg.uuid, 
-                                                                 instance_type=ecs_instance_type[0].typeId, allocate_public_ip='true', name='zstack-test-ecs-instance', ecs_console_password='a1B2c3')
+                                                                 instance_type=ecs_instance_type[0].typeId, allocate_public_ip='true', name=TEST_ECS_NAME, ecs_console_password='a1B2c3')
         time.sleep(10)
         self.ecs_create = True
 
@@ -965,6 +966,13 @@ class HybridObject(object):
         response = urllib2.urlopen(req)
         assert response.code == 200
 
+    def tear_down(self):
+        self.sync_ecs_instance()
+        ecs_local = hyb_ops.query_ecs_instance_local()
+        ecs_to_clear = [e for e in ecs_local if e.name == TEST_ECS_NAME]
+        for ecs in ecs_to_clear:
+            self.ecs_instance = ecs
+            self.del_ecs_instance()
 
 def create_vlan_vm(l3_name=None, disk_offering_uuids=None, system_tags=None, session_uuid = None, instance_offering_uuid = None):
     image_name = os.environ.get('imageName_net')
