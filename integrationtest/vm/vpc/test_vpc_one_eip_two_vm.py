@@ -19,10 +19,10 @@ vpc_l3_list = [vpc1_l3_list, vpc2_l3_list]
 vpc_name_list = ['vpc1','vpc2']
 
 
-case_flavor = dict(vm1_vm2_one_vpc_1vlan=   dict(vm1l3=VLAN1_NAME, vm2l3=VLAN1_NAME),
-                   vm1_vm2_one_vpc_2vlan=   dict(vm1l3=VLAN1_NAME, vm2l3=VLAN2_NAME),
-                   vm1_vm2_two_vpc=         dict(vm1l3=VLAN1_NAME, vm2l3=VXLAN2_NAME),
-                   vm1_classic_vm2_vpc  =   dict(vm1l3=CLASSIC_L3, vm2l3=VXLAN2_NAME)
+case_flavor = dict(vm1_vm2_one_vpc_1vlan=   dict(vm1l3=VLAN1_NAME, vm2l3=VLAN1_NAME, one_vpc=True),
+                   vm1_vm2_one_vpc_2vlan=   dict(vm1l3=VLAN1_NAME, vm2l3=VLAN2_NAME, one_vpc=True),
+                   vm1_vm2_two_vpc=         dict(vm1l3=VLAN1_NAME, vm2l3=VXLAN2_NAME, one_vpc=False),
+                   vm1_classic_vm2_vpc  =   dict(vm1l3=CLASSIC_L3, vm2l3=VXLAN2_NAME, one_vpc=False)
                    )
 
 
@@ -58,11 +58,28 @@ def test():
     vip.attach_eip(eip)
     vip.check()
 
-    for vm in (vm1, vm2):
-        eip.attach(vm.get_vm().vmNics[0].uuid, vm)
+
+    if flavor['one_vpc']:
+        for vm in (vm1, vm2):
+            eip.attach(vm.get_vm().vmNics[0].uuid, vm)
+            vip.check()
+            eip.detach()
+            vip.check()
+    else:
+        eip.attach(vm1.get_vm().vmNics[0].uuid, vm1)
         vip.check()
         eip.detach()
         vip.check()
+        eip.delete()
+        test_util.test_dsc("Create a new eip")
+        eip = test_stub.create_eip('eip2', vip_uuid=vip.get_vip().uuid)
+        vip.attach_eip(eip)
+        vip.check()
+        eip.attach(vm2.get_vm().vmNics[0].uuid, vm2)
+        vip.check()
+        eip.detach()
+        vip.check()
+        eip.delete()
 
     test_lib.lib_error_cleanup(test_obj_dict)
     test_stub.remove_all_vpc_vrouter()
