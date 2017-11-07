@@ -91,6 +91,7 @@ def test():
         test.pf.set_creation_option(pf_creation_opt)
         test.pf.create()
         vip.attach_pf(test.pf)
+        vip.check()
         test.pf.attach(vm2.get_vm().vmNics[0].uuid, vm2)
         vm2.check()
         vip.check()
