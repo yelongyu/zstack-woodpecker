@@ -22,10 +22,10 @@ vpc_l3_list = [vpc1_l3_list, vpc2_l3_list]
 vpc_name_list = ['vpc1','vpc2']
 
 
-case_flavor = dict(vm1_vm2_one_vpc_1vlan=   dict(vm1l3=VLAN1_NAME, vm2l3=VLAN1_NAME),
-                   vm1_vm2_one_vpc_2vlan=   dict(vm1l3=VLAN1_NAME, vm2l3=VLAN2_NAME),
-                   vm1_vm2_two_vpc=         dict(vm1l3=VLAN1_NAME, vm2l3=VXLAN2_NAME),
-                   vm1_classic_vm2_vpc  =   dict(vm1l3=CLASSIC_L3, vm2l3=VXLAN2_NAME)
+case_flavor = dict(vm1_vm2_one_vpc_1vlan=   dict(vm1l3=VLAN1_NAME, vm2l3=VLAN1_NAME, one_vpc=True),
+                   vm1_vm2_one_vpc_2vlan=   dict(vm1l3=VLAN1_NAME, vm2l3=VLAN2_NAME, one_vpc=True),
+                   vm1_vm2_two_vpc=         dict(vm1l3=VLAN1_NAME, vm2l3=VXLAN2_NAME, one_vpc=False),
+                   vm1_classic_vm2_vpc  =   dict(vm1l3=VXLAN2_NAME, vm2l3=CLASSIC_L3, one_vpc=False)
                    )
 
 PfRule = test_state.PfRule
@@ -70,14 +70,34 @@ def test():
 
     vip.check()
 
-    for vm in (vm1,vm2):
-        test.pf.attach(vm.get_vm().vmNics[0].uuid, vm)
-        vm.check()
+    if flavor['one_vpc']:
+        for vm in (vm1,vm2):
+            test.pf.attach(vm.get_vm().vmNics[0].uuid, vm)
+            vm.check()
+            vip.check()
+            test.pf.detach()
+            vm.check()
+            vip.check()
+    else:
+        test.pf.attach(vm1.get_vm().vmNics[0].uuid, vm1)
+        vm1.check()
         vip.check()
         test.pf.detach()
-        vm.check()
+        vm1.check()
         vip.check()
-
+        test.pf.delete()
+        pf_creation_opt = PfRule.generate_pf_rule_option(vr_pub_ip, protocol=inventory.TCP, vip_target_rule=Port.rule4_ports, private_target_rule=Port.rule4_ports, vip_uuid=vip.get_vip().uuid)
+        test.pf = zstack_pf_header.ZstackTestPortForwarding()
+        test.pf.set_creation_option(pf_creation_opt)
+        test.pf.create()
+        vip.attach_pf(test.pf)
+        test.pf.attach(vm2.get_vm().vmNics[0].uuid, vm2)
+        vm2.check()
+        vip.check()
+        test.pf.detach()
+        vm2.check()
+        vip.check()
+        
     test.pf.delete()
 
     test_lib.lib_error_cleanup(test_obj_dict)
