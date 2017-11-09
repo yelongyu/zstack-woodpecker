@@ -51,18 +51,19 @@ def test():
     test_obj_dict.add_vm(vm2)
     vm2.check()
 
-    test_util.test_dsc("create testing vr vm")
-    temp_vm = test_stub.create_vm_with_random_offering(vm_name='test', l3_name='l3NoVlanNetworkName2')
-    test_obj_dict.add_vm(vm2)
-    vr_pub_ip = test_lib.lib_find_vr_pub_ip(test_lib.lib_find_vr_by_vm(temp_vm.get_vm())[0])
-
-    vr_pub_nic = test_lib.lib_find_vr_pub_nic(vr_list[0].inv)
+    vr_pub_nic = None
+    test_util.test_dsc("create testing vpc vm")
+    tmp_vr = test_stub.create_vpc_vrouter('test_vpc')
+    for nic in tmp_vr.inv.vmNics:
+        if nic.metaData == "3":
+            vr_pub_nic = nic
+            break
 
     test_util.test_dsc("Create vip")
     vip = test_stub.create_vip('vip1', vr_pub_nic.l3NetworkUuid)
     test_obj_dict.add_vip(vip)
 
-    pf_creation_opt = PfRule.generate_pf_rule_option(vr_pub_ip, protocol=inventory.TCP, vip_target_rule=Port.rule4_ports, private_target_rule=Port.rule4_ports, vip_uuid=vip.get_vip().uuid)
+    pf_creation_opt = PfRule.generate_pf_rule_option(vr_pub_nic.ip, protocol=inventory.TCP, vip_target_rule=Port.rule4_ports, private_target_rule=Port.rule4_ports, vip_uuid=vip.get_vip().uuid)
     test.pf = zstack_pf_header.ZstackTestPortForwarding()
     test.pf.set_creation_option(pf_creation_opt)
     test.pf.create()
@@ -86,7 +87,7 @@ def test():
         vm1.check()
         vip.check()
         test.pf.delete()
-        pf_creation_opt = PfRule.generate_pf_rule_option(vr_pub_ip, protocol=inventory.TCP, vip_target_rule=Port.rule4_ports, private_target_rule=Port.rule4_ports, vip_uuid=vip.get_vip().uuid)
+        pf_creation_opt = PfRule.generate_pf_rule_option(vr_pub_nic.ip, protocol=inventory.TCP, vip_target_rule=Port.rule4_ports, private_target_rule=Port.rule4_ports, vip_uuid=vip.get_vip().uuid)
         test.pf = zstack_pf_header.ZstackTestPortForwarding()
         test.pf.set_creation_option(pf_creation_opt)
         test.pf.create()
