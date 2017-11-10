@@ -240,6 +240,29 @@ def create_sg(sg_creation_option=None, session_uuid = None):
     return sg
 
 
+def check_icmp_between_vms(vm1, vm2, expected_result='PASS'):
+    vm1_inv, vm2_inv = [vm.get_vm() for vm in (vm1, vm2)]
+    if expected_result is 'PASS':
+        test_lib.lib_check_ping(vm1_inv, vm2_inv.vmNics[0].ip)
+        test_lib.lib_check_ping(vm2_inv, vm1_inv.vmNics[0].ip)
+    elif expected_result is 'FAIL':
+        with test_lib.expected_failure("ping from vm1 to vm2", Exception):
+            test_lib.lib_check_ping(vm1_inv, vm2_inv.vmNics[0].ip)
+        with test_lib.expected_failure('ping from vm2 to vm1', Exception):
+            test_lib.lib_check_ping(vm2_inv, vm1_inv.vmNics[0].ip)
+    else:
+        test_util.test_fail('The expected result should either PASS or FAIL')
+
+
+def check_tcp_between_vms(vm1, vm2, allowed_port_list, denied_port_list):
+    vm1_inv, vm2_inv = [vm.get_vm() for vm in (vm1, vm2)]
+    test_lib.lib_check_ports_in_a_command(vm1_inv, vm1_inv.vmNics[0].ip,
+                                          vm2_inv.vmNics[0].ip, allowed_port_list, denied_port_list, vm2_inv)
+
+    test_lib.lib_check_ports_in_a_command(vm2_inv, vm2_inv.vmNics[0].ip,
+                                          vm1_inv.vmNics[0].ip, allowed_port_list, denied_port_list, vm1_inv)
+
+
 class ZstackTestVR(vm_header.TestVm):
     def __init__(self, vr_inv):
         super(ZstackTestVR, self).__init__()

@@ -26,18 +26,18 @@ VR_RECONNECT = 'vr_reconnect'
 HOST_RECONNECT = 'host_reconnect'
 
 
-case_flavor = dict(vm1_vm2_one_l3_vlan=               dict(vm1l3=VLAN1_NAME, vm2l3=VLAN1_NAME, ops=None),
-                   vm1_vm2_one_l3_vxlan=              dict(vm1l3=VXLAN1_NAME, vm2l3=VXLAN1_NAME, ops=None),
-                   vm1_l3_vlan_vm2_l3_vlan=           dict(vm1l3=VLAN1_NAME, vm2l3=VLAN2_NAME, ops=None),
-                   vm1_l3_vxlan_vm2_l3_vxlan=         dict(vm1l3=VXLAN1_NAME, vm2l3=VXLAN2_NAME, ops=None),
-                   vm1_l3_vlan_vm2_l3_vxlan=          dict(vm1l3=VLAN1_NAME, vm2l3=VXLAN1_NAME, ops=None),
-                   vm1_vm2_one_l3_vlan_migrate=       dict(vm1l3=VLAN1_NAME, vm2l3=VLAN1_NAME, ops=VM_MIGRATE),
-                   vm1_l3_vlan_vm2_l3_vlan_migrate=   dict(vm1l3=VLAN1_NAME, vm2l3=VLAN2_NAME, ops=VM_MIGRATE),
-                   vm1_l3_vxlan_vm2_l3_vxlan_vrreboot=dict(vm1l3=VXLAN1_NAME, vm2l3=VXLAN2_NAME, ops=VR_REBOOT),
-                   vm1_l3_vxlan_vm2_l3_vxlan_vmreboot=dict(vm1l3=VXLAN1_NAME, vm2l3=VXLAN2_NAME, ops=VM_REBOOT),
-                   vm1_l3_vlan_vm2_l3_vlan_vrreconnect= dict(vm1l3=VLAN1_NAME, vm2l3=VLAN2_NAME, ops=VR_RECONNECT),
-                   vm1_l3_vlan_vm2_l3_vlan_vr_migrate= dict(vm1l3=VLAN1_NAME, vm2l3=VLAN2_NAME, ops=VR_MIGRATE),
-                   vm1_l3_vlan_vm2_l3_vxlan_hostreconnect= dict(vm1l3=VLAN1_NAME, vm2l3=VXLAN1_NAME, ops=HOST_RECONNECT),
+case_flavor = dict(vm1_vm2_one_l3_vlan=                   dict(vm1l3=VLAN1_NAME, vm2l3=VLAN1_NAME, ops=None),
+                   vm1_vm2_one_l3_vxlan=                  dict(vm1l3=VXLAN1_NAME, vm2l3=VXLAN1_NAME, ops=None),
+                   vm1_l3_vlan_vm2_l3_vlan=               dict(vm1l3=VLAN1_NAME, vm2l3=VLAN2_NAME, ops=None),
+                   vm1_l3_vxlan_vm2_l3_vxlan=             dict(vm1l3=VXLAN1_NAME, vm2l3=VXLAN2_NAME, ops=None),
+                   vm1_l3_vlan_vm2_l3_vxlan=              dict(vm1l3=VLAN1_NAME, vm2l3=VXLAN1_NAME, ops=None),
+                   vm1_vm2_one_l3_vlan_migrate=           dict(vm1l3=VLAN1_NAME, vm2l3=VLAN1_NAME, ops=VM_MIGRATE),
+                   vm1_l3_vlan_vm2_l3_vlan_migrate=       dict(vm1l3=VLAN1_NAME, vm2l3=VLAN2_NAME, ops=VM_MIGRATE),
+                   vm1_l3_vxlan_vm2_l3_vxlan_vrreboot=    dict(vm1l3=VXLAN1_NAME, vm2l3=VXLAN2_NAME, ops=VR_REBOOT),
+                   vm1_l3_vxlan_vm2_l3_vxlan_vmreboot=    dict(vm1l3=VXLAN1_NAME, vm2l3=VXLAN2_NAME, ops=VM_REBOOT),
+                   vm1_l3_vlan_vm2_l3_vlan_vrreconnect=   dict(vm1l3=VLAN1_NAME, vm2l3=VLAN2_NAME, ops=VR_RECONNECT),
+                   vm1_l3_vlan_vm2_l3_vlan_vr_migrate=    dict(vm1l3=VLAN1_NAME, vm2l3=VLAN2_NAME, ops=VR_MIGRATE),
+                   vm1_l3_vlan_vm2_l3_vxlan_hostreconnect=dict(vm1l3=VLAN1_NAME, vm2l3=VXLAN1_NAME, ops=HOST_RECONNECT),
                    )
 
 
@@ -52,13 +52,11 @@ def test():
     test_stub.attach_l3_to_vpc_vr(vr)
 
     test_util.test_dsc("create two vm, vm1 in l3 {}, vm2 in l3 {}".format(flavor['vm1l3'], flavor['vm2l3']))
-    vm1 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(flavor['vm1l3']), l3_name=flavor['vm1l3'])
-    test_obj_dict.add_vm(vm1)
-    vm1.check()
-    vm2 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(flavor['vm2l3']), l3_name=flavor['vm2l3'])
-    test_obj_dict.add_vm(vm2)
-    vm2.check()
 
+    vm1, vm2 = [test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(name), l3_name=name) for name in (flavor['vm1l3'], flavor['vm2l3'])]
+
+    [vm.check() for vm in (vm1,vm2)]
+    [test_obj_dict.add_vm(vm) for vm in (vm1,vm2)]
 
     if flavor['ops'] is VM_MIGRATE:
         test_stub.migrate_vm_to_random_host(vm2)
@@ -70,32 +68,21 @@ def test():
         time.sleep(10)
     elif flavor['ops'] is VR_RECONNECT:
         vr.reconnect()
-        time.sleep(10)
     elif flavor['ops'] is VR_MIGRATE:
         vr.migrate_to_random_host()
     elif flavor['ops'] is HOST_RECONNECT:
-        host = test_lib.lib_find_host_by_vm(vm1.get_vm())
+        host = test_lib.lib_find_host_by_vm(random.choice([vm1,vm2]).get_vm())
         host_ops.reconnect_host(host.uuid)
-        time.sleep(10)
 
     if flavor['ops'] is not None:
         for vm in (vm1, vm2):
             vm.check()
 
-    vm1_inv, vm2_inv = [vm.get_vm() for vm in (vm1, vm2)]
-
     test_util.test_dsc("test two vm connectivity")
-    test_stub.run_command_in_vm(vm1_inv, 'iptables -F')
-    test_stub.run_command_in_vm(vm2_inv, 'iptables -F')
+    [test_stub.run_command_in_vm(vm.get_vm(), 'iptables -F') for vm in (vm1,vm2)]
 
-    test_lib.lib_check_ping(vm1_inv, vm2_inv.vmNics[0].ip)
-    test_lib.lib_check_ping(vm2_inv, vm1_inv.vmNics[0].ip)
-
-    test_lib.lib_check_ports_in_a_command(vm1_inv, vm1_inv.vmNics[0].ip,
-                                          vm2_inv.vmNics[0].ip, ["22"], [], vm2_inv)
-
-    test_lib.lib_check_ports_in_a_command(vm2_inv, vm2_inv.vmNics[0].ip,
-                                          vm1_inv.vmNics[0].ip, ["22"], [], vm1_inv)
+    test_stub.check_icmp_between_vms(vm1, vm2, expected_result='PASS')
+    test_stub.check_tcp_between_vms(vm1, vm2, ["22"], [])
 
     test_lib.lib_error_cleanup(test_obj_dict)
     test_stub.remove_all_vpc_vrouter()
