@@ -799,12 +799,13 @@ class HybridObject(object):
         ecs_image_self = hyb_ops.query_ecs_image_local(cond_image_self)
         ecs_image_system_all = hyb_ops.query_ecs_image_local(cond_image_system)
         ecs_image_system_64 = [i for i in ecs_image_system_all if '64' in i.name]
+        image = ecs_image_system_64[0]
         if not allocate_eip:
-            image = ecs_image_self[0] if ecs_image_self else ecs_image_centos_64[0]
+#             image = ecs_image_self[0] if ecs_image_self else ecs_image_centos_64[0]
             self.ecs_instance = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, self.vswitch.uuid, ecs_bandwidth=1, ecs_security_group_uuid=self.sg.uuid, 
                                                                  instance_type=ecs_instance_type[0].typeId, name=TEST_ECS_NAME, ecs_console_password='A1B2c3')
         else:
-            image = ecs_image_system_64[0]
+#             image = ecs_image_system_64[0]
             self.ecs_instance = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, self.vswitch.uuid, ecs_bandwidth=1, ecs_security_group_uuid=self.sg.uuid, 
                                                                  instance_type=ecs_instance_type[0].typeId, allocate_public_ip='true', name=TEST_ECS_NAME, ecs_console_password='a1B2c3')
         time.sleep(10)
@@ -911,8 +912,9 @@ class HybridObject(object):
     #     cmd = 'ip a add dev br_eth0_1101 %s' % _vm_ip
         time.sleep(10)
         if check_connectivity:
-            self.create_ecs_instance(need_vpn_gateway=True, allocate_eip=True, connect=True)
-            self.get_eip(in_use=True)
+            self.create_ecs_instance(need_vpn_gateway=True, connect=True)
+            self.get_eip()
+            self.attach_eip_to_ecs()
         else:
             self.add_datacenter_iz(check_vpn_gateway=True)
             self.get_vpc(has_vpn_gateway=True)
