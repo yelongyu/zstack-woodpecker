@@ -32,19 +32,11 @@ def test():
     test_util.test_dsc("random get two vms and check the connectivity")
     for _ in range(5):
         vm1, vm2 = random.sample(vm_list, 2)
-        vm1_inv, vm2_inv = [vm.get_vm() for vm in (vm1, vm2)]
         test_util.test_dsc("test two vm connectivity")
-        test_stub.run_command_in_vm(vm1_inv, 'iptables -F')
-        test_stub.run_command_in_vm(vm2_inv, 'iptables -F')
+        [test_stub.run_command_in_vm(vm.get_vm(), 'iptables -F') for vm in (vm1,vm2)]
 
-        test_lib.lib_check_ping(vm1_inv, vm2_inv.vmNics[0].ip)
-        test_lib.lib_check_ping(vm2_inv, vm1_inv.vmNics[0].ip)
-
-        test_lib.lib_check_ports_in_a_command(vm1_inv, vm1_inv.vmNics[0].ip,
-                                              vm2_inv.vmNics[0].ip, ["22"], [], vm2_inv)
-
-        test_lib.lib_check_ports_in_a_command(vm2_inv, vm2_inv.vmNics[0].ip,
-                                              vm1_inv.vmNics[0].ip, ["22"], [], vm1_inv)
+        test_stub.check_icmp_between_vms(vm1, vm2, expected_result='PASS')
+        test_stub.check_tcp_between_vms(vm1, vm2, ["22"], [])
 
     test_lib.lib_error_cleanup(test_obj_dict)
     test_stub.remove_all_vpc_vrouter()
