@@ -887,7 +887,7 @@ class HybridObject(object):
         time.sleep(10)
         self.check_resource('create', 'connectionId', self.vpn_connection.connectionId, 'query_vpc_vpn_connection_local')
 
-    def create_ipsec_vpn_connection(self, check_connectivity=True, check_status=False):
+    def create_ipsec_vpn_connection(self, check_connectivity=True, check_status=False, use_1_vip=False):
         self.vm = create_vlan_vm(os.environ.get('l3VlanNetworkName1'))
 #     test_obj_dict.add_vm(self.vm)
         self.vm.check()
@@ -895,12 +895,15 @@ class HybridObject(object):
         pri_l3_uuid = self.vm.vm.vmNics[0].l3NetworkUuid
         vr = test_lib.lib_find_vr_by_l3_uuid(pri_l3_uuid)[0]
         l3_uuid = test_lib.lib_find_vr_pub_nic(vr).l3NetworkUuid
-        vip_not_for_vr = [vip for vip in res_ops.query_resource(res_ops.VIP) if 'vip-for-vrouter' not in vip.name]
-        # Create Vip
-        if vip_not_for_vr:
-            vip = vip_not_for_vr[0]
+        vip_for_vr = [vip for vip in res_ops.query_resource(res_ops.VIP) if 'vip-for-vrouter' in vip.name]
+        if use_1_vip:
+            vip = vip_for_vr[0]
         else:
-            vip = create_vip('ipsec_vip', l3_uuid).get_vip()
+            vip_not_for_vr = [vip for vip in res_ops.query_resource(res_ops.VIP) if 'vip-for-vrouter' not in vip.name]
+            if vip_not_for_vr:
+                vip = vip_not_for_vr[0]
+            else:
+                vip = create_vip('ipsec_vip', l3_uuid).get_vip()
         cond = res_ops.gen_query_conditions('uuid', '=', pri_l3_uuid)
         self.zstack_cidrs = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0].ipRanges[0].networkCidr
         self.dst_cidr_block = self.zstack_cidrs.replace('1/', '0/')
