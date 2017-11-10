@@ -10,7 +10,7 @@
         <!--<case timeout='300' repeat='1'>test_create_2vm_2l3_same_l2.py</case>-->
         <case timeout='300' repeat='1'>test_expunge_vm.py</case>
         <case timeout='300' repeat='1'>test_expunge_vm_chg_del_policy.py</case>
-        <case timeout='300' repeat='1'>test_snapshot_vm_ops.py</case>
+        <case timeout='600' repeat='1'>test_snapshot_vm_ops.py</case>
         <case timeout='300' repeat='1'>test_change_offering.py</case>
         <case timeout='300' repeat='1'>test_create_vm_sshkey.py</case>
         <case timeout='300' repeat='1'>test_create_vm_sshkey2.py</case>
