@@ -13,8 +13,8 @@
 	<case timeout='720' repeat='1'>migrate/test_migrate_vm_console_access2.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_sg_vm.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_pf_sg_tcp.py</case>
-	<case timeout='600' repeat='1'>migrate/test_migrate_stopped_vm_progress3.py</case>
-	<case timeout='600' repeat='1'>migrate/test_migrate_stopped_vm_snapshots_progress.py</case>
+	<case timeout='1200' repeat='1'>migrate/test_migrate_stopped_vm_progress3.py</case>
+	<case timeout='1200' repeat='1'>migrate/test_migrate_stopped_vm_snapshots_progress.py</case>
 	<case timeout='1200' repeat='1'>migrate/test_migrate_vm_with_sp_ops.py</case>
 	<case timeout='600' repeat='1'>migrate/test_migrate_vm_with_deep_sp_chain.py</case>
 	<case timeout='600' repeat='1'>migrate/test_sharable_vol_live_migrate.py</case>

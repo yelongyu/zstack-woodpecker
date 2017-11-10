@@ -47,7 +47,7 @@ def add_image(bs_uuid, index):
     test_obj_dict.add_image(images[index])
 
 def check_add_image_progress(index):
-    for i in range(0, 100):
+    for i in range(0, 600):
         time.sleep(0.1)
         image_cond = res_ops.gen_query_conditions("status", '=', "Downloading")
         image_cond = res_ops.gen_query_conditions("name", '=', 'test_add_image_progress%s' % (index), image_cond)
