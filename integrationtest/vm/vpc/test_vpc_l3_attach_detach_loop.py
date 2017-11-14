@@ -30,15 +30,14 @@ def test():
     if flavor['vpc_num'] == 2:
         vr_list.append(test_stub.create_vpc_vrouter('vpc2'))
 
-    ROUND = 4 if flavor['vpc_num'] == 1 else 2
+    ROUND = 2 if flavor['vpc_num'] == 1 else 1
 
     for _ in xrange(ROUND):
         for vr in vr_list:
             test_stub.attach_l3_to_vpc_vr(vr, test_stub.all_vpc_l3_list)
-            nic_uuid_list = [nic.uuid for nic in vr.inv.vmNics if nic.metaData == '4']
+            nic_uuid_list = [nic.uuid for nic in vr.inv.vmNics if nic.metaData in ['4', '8']]
             assert len(nic_uuid_list) == len(test_stub.all_vpc_l3_list) - 1
-            for nic_uuid in nic_uuid_list:
-                vr.remove_nic(nic_uuid)
+            [vr.remove_nic(nic_uuid) for nic_uuid in nic_uuid_list]
 
     test_lib.lib_error_cleanup(test_obj_dict)
     test_stub.remove_all_vpc_vrouter()
