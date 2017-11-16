@@ -1,6 +1,11 @@
 '''
-New Integration Test for host where KVM VM ha located force stop and start again,
-check vm self-start again. In addition, this test is sepcific for nfs and local.
+Integration Test
+
+Check:
+1. NFS and LocalStorage, stop ha vm and check vm stopped
+2. Check to see whether natural ha works normally
+
+
 @author: SyZhao
 '''
 
