@@ -42,6 +42,7 @@
 	<case timeout='840' repeat='1' noparallel='True'>test_allocator_strategy_crt_vm_use_all_cpu.py</case>
 	<case timeout='2400' repeat='1' noparallel='True'>test_nols_10_stop_vm_ha_grace_stop_start_host.py</case>
 	<case timeout='2400' repeat='1' noparallel='True'>test_ls_10_stop_vm_ha_force_stop_host.py</case>
+	<case timeout='2400' repeat='1' noparallel='True'>test_nols_stopped_ha_vm_grace_stop_host_expect_vm_stopped.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_vm_ops2.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_vm_with_iso.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_vm_with_iso2.py</case>
