@@ -20,23 +20,15 @@ def test():
     global ldap_server_uuid
     global new_account_uuid
     global new_account_uuid2
-    system_tags = ["ldapCleanBindingFilter::(uidNumber=1002)"]
+    system_tags = ["ldapCleanBindingFilter::(uidNumber=1002)", "ldapUseAsLoginName::uid"]
     ldap_server = ldp_ops.add_ldap_server('ldap1', 'ldap for test', os.environ.get('ldapServerUrl'), os.environ.get('ldapServerBase'), os.environ.get('ldapServerUsername'), os.environ.get('ldapServerPassword'), 'None', system_tags)
     ldap_server_uuid = ldap_server.inventory.uuid
     conditions = res_ops.gen_query_conditions('type', '=', 'SystemAdmin')
     account = res_ops.query_resource(res_ops.ACCOUNT, conditions)[0]
 
-    get_excepted_exception = False
-    try:
-        ldap_account = ldp_ops.bind_ldap_account(os.environ.get('ldapUid'), account.uuid)
-    except:
-	get_excepted_exception = True
-    if not get_excepted_exception:
-        test_util.test_fail('should not be able to bind ldapuid to admin account')
-
     new_account = acc_ops.create_account('new_account', 'password', 'Normal')
     new_account_uuid = new_account.uuid
-    ldap_account = ldp_ops.bind_ldap_account(os.environ.get('ldapUid'), new_account.uuid)
+    ldap_account = ldp_ops.bind_ldap_account(os.environ.get('ldapDn'), new_account.uuid)
     ldap_account_uuid = ldap_account.inventory.uuid
     session_uuid = acc_ops.login_by_ldap(os.environ.get('ldapUid'), os.environ.get('ldapPassword'))
     acc_ops.logout(session_uuid)
@@ -54,7 +46,7 @@ def test():
 
     new_account2 = acc_ops.create_account('new_account2', 'password', 'Normal')
     new_account_uuid2 = new_account2.uuid
-    ldap_account2 = ldp_ops.bind_ldap_account('ldapfilter', new_account2.uuid)
+    ldap_account2 = ldp_ops.bind_ldap_account('uid=ldapfilter,ou=People,dc=mevoco,dc=com', new_account2.uuid)
     ldap_account_uuid2 = ldap_account2.inventory.uuid
     session_uuid2 = acc_ops.login_by_ldap('ldapfilter', 'password')
     acc_ops.logout(session_uuid)
