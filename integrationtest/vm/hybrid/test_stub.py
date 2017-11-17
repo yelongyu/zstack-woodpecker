@@ -109,6 +109,7 @@ class HybridObject(object):
                 datacenter = hyb_ops.add_datacenter_from_remote(datacenter_type, r, 'datacenter for test')
             except hyb_ops.ApiError, e:
                 err_list.append(e)
+                continue
             if datacenter and add_datacenter_only:
                 self.datacenter = datacenter
                 self.region_id = r
