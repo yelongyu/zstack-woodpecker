@@ -36,6 +36,7 @@
 	<case timeout='600' repeat='1'>qos/test_del_data_vol_qos.py</case>
 	<case timeout='600' repeat='1'>qos/test_del_outbound_qos_reboot.py</case>
         <case timeout='300' repeat='1'>other/test_add_local_image.py</case>
+        <case timeout='300' repeat='1'>other/test_add_zstore_image.py</case>
         <case timeout='300' repeat='1'>other/test_memory_allocation.py</case>
         <case timeout='800' repeat='1'>eip/test_create_eip_vm.py</case>
         <case timeout='800' repeat='1'>eip/test_create_eip_reconnect_host.py</case>
