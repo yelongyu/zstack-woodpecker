@@ -22,7 +22,7 @@ def test():
     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
     if bs.type == "Ceph":
         test_util.test_skip('bs: %s is ceph backup storage. Will skip test.' % bs.uuid)
-    ca_str = os.environ.get('zstore_ca')
+    ca_str = os.environ.get('zstore_ca').replace('\\n','\n')
     zstore_url = os.environ.get('zstore_url') 
 
     image_name = 'test-image-%s' % time.time()
