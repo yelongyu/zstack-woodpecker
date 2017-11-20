@@ -284,6 +284,11 @@ def create_vip(vip_name=None, l3_uuid=None, session_uuid = None, required_ip=Non
     vip.create()
 
     return vip
+
+def get_snat_ip_as_vip(snat_ip):
+    vip = zstack_vip_header.ZstackTestVip()
+    vip.get_snat_ip_as_vip(snat_ip)
+    return vip
     
 def create_vr_vm(test_obj_dict, l3_name, session_uuid = None):
     '''
@@ -727,3 +732,7 @@ def get_another_ip_of_host(ip, username, password):
     cmd = "ip r|grep kernel|grep -v %s|awk '{print $NF}'" %(ip)
     output = test_lib.lib_execute_ssh_cmd(ip, username, password, cmd, timeout=30)
     return output.split(':')[-1].strip()
+
+def set_httpd_in_vm(ip, username, password):
+    cmd = "yum install httpd -y; systemctl start httpd; iptables -F; echo %s > /var/www/html/index.html" % ip
+    test_lib.lib_execute_ssh_cmd(ip, username, password, cmd, timeout=300)

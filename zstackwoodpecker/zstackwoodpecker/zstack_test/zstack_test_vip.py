@@ -43,6 +43,11 @@ class ZstackTestVip(vip_header.TestVip):
         super(ZstackTestVip, self).create()
         return self.vip
 
+    def get_snat_ip_as_vip(self, snat_ip):
+        self.vip = net_ops.get_snat_ip_as_vip(snat_ip)
+        super(ZstackTestVip, self).create()
+        return self.vip
+
     def delete(self):
         net_ops.delete_vip(self.get_vip().uuid)
         #delete vip will release all services belong to vip. So needs to update
@@ -75,6 +80,14 @@ class ZstackTestVip(vip_header.TestVip):
         self.state = vip_header.ATTACHED
         self.set_use_for(vip_header.Eip)
 
+    def attach_lb(self, lb):
+        self.lb = lb
+        self.state = vip_header.ATTACHED
+        self.set_use_for(vip_header.LoadBalancer)
+
+    def _detach_lb(self):
+        self.lb = None
+
     def _detach_pf(self, pf):
         self.pf_list.remove(pf)
 
@@ -106,7 +119,7 @@ class ZstackTestVip(vip_header.TestVip):
                 self._detach_eip()
 
         #When vip is not used for PF or EIP, the VIP is detached status
-        if not self.pf_list and not self.eip:
+        if not self.pf_list and not self.eip and not self.lb:
             if self.get_use_for():
                 self.set_use_for()
             if self.state == vip_header.ATTACHED:

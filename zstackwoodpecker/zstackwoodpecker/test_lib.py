@@ -3989,6 +3989,11 @@ def lib_get_vip_by_uuid(vip_uuid):
     vip = res_ops.query_resource(res_ops.VIP, conditions)
     return vip[0]
 
+def lib_get_vip_by_ip(ip):
+    conditions = res_ops.gen_query_conditions('ip', '=', ip)
+    vip = res_ops.query_resource(res_ops.VIP, conditions)
+    return vip[0]
+
 def lib_get_eip_by_uuid(eip_uuid):
     conditions = res_ops.gen_query_conditions('uuid', '=', eip_uuid)
     eip = res_ops.query_resource(res_ops.EIP, conditions)

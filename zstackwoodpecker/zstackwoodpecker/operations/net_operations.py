@@ -129,6 +129,12 @@ def create_vip(vip_creation_option):
     test_util.action_logger('Create [VIP:] %s [IP:] %s in [l3:] %s' % (evt.uuid, evt.ip, action.l3NetworkUuid))
     return evt
 
+def get_snat_ip_as_vip(snat_ip):
+    conditions = res_ops.gen_query_conditions('ip', '=', snat_ip)
+    vip = res_ops.query_resource(res_ops.VIP, conditions)
+    test_util.action_logger('Get SNAT [VIP:] %s [IP:] %s' % (vip[0].uuid, vip[0].ip))
+    return vip[0]
+
 def delete_vip(vip_uuid, session_uuid=None):
     action = api_actions.DeleteVipAction()
     action.uuid = vip_uuid
