@@ -1152,4 +1152,12 @@ def generate_local_shared_test_vms(tbj, vm_ha=False, host_uuid=None):
         yield vm
 
 
-
+def stop_ha_vm(vm_uuid, force=None, session_uuid=None):
+    action = api_actions.StopVmInstanceAction()
+    action.uuid = vm_uuid
+    action.type = force
+    action.stopHA = true
+    action.timeout = 240000
+    test_util.action_logger('Stop VM [uuid:] %s' % vm_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory

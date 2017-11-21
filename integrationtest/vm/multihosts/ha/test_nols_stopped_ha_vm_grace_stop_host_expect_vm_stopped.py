@@ -78,7 +78,7 @@ def test():
     test_util.test_logger("host %s is disconnecting" %(host_ip))
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
 
-    vm.stop()
+    test_stub.stop_ha_vm(vm.get_vm().uuid)
     vm.check()
 
     #vm ha natural feature:

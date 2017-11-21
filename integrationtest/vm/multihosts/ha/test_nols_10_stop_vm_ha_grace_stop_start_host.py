@@ -80,7 +80,7 @@ def test():
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
 
     for i in range(10):
-        vm.stop()
+        test_stub.stop_ha_vm(vm.get_vm().uuid)
         vm.check()
         vm.start()
         vm.check()
