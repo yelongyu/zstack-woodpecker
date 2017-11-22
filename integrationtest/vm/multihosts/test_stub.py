@@ -1153,6 +1153,7 @@ def generate_local_shared_test_vms(tbj, vm_ha=False, host_uuid=None):
 
 
 def stop_ha_vm(vm_uuid, force=None, session_uuid=None):
+    import apibinding.api_actions as api_actions
     action = api_actions.StopVmInstanceAction()
     action.uuid = vm_uuid
     action.type = force
