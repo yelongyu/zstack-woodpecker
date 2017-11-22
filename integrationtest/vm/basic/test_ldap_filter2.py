@@ -21,8 +21,8 @@ def test():
     global ldap_server_uuid
     global new_account_uuid
     global new_account_uuid2
-    system_tag = ["ldapUseAsLoginName::uid"]
-    ldap_server = ldp_ops.add_ldap_server('ldap1', 'ldap for test', os.environ.get('ldapServerUrl'), os.environ.get('ldapServerBase'), os.environ.get('ldapServerUsername'), os.environ.get('ldapServerPassword'), systemtags=system_tag)
+    system_tag = "ldapUseAsLoginName::uid"
+    ldap_server = ldp_ops.add_ldap_server('ldap1', 'ldap for test', os.environ.get('ldapServerUrl'), os.environ.get('ldapServerBase'), os.environ.get('ldapServerUsername'), os.environ.get('ldapServerPassword'), systemtags=[system_tag])
     ldap_server_uuid = ldap_server.inventory.uuid
     conditions = res_ops.gen_query_conditions('type', '=', 'SystemAdmin')
     account = res_ops.query_resource(res_ops.ACCOUNT, conditions)[0]
@@ -36,13 +36,13 @@ def test():
     ldap_account_uuid = ldap_account.inventory.uuid
     session_uuid = acc_ops.login_by_ldap(os.environ.get('ldapUid'), os.environ.get('ldapPassword'))
     acc_ops.logout(session_uuid)
-    ldap_account2 = ldp_ops.bind_ldap_account('uid=ldapfilter,ou=People,dc=mevoco,dc=com', new_account2.uuid)
+    ldap_account2 = ldp_ops.bind_ldap_account('uid=ldapuser3,ou=People,dc=mevoco,dc=com', new_account2.uuid)
     ldap_account_uuid2 = ldap_account2.inventory.uuid
-    session_uuid2 = acc_ops.login_by_ldap('ldapfilter', 'password')
+    session_uuid2 = acc_ops.login_by_ldap('ldapuser3', 'password')
     acc_ops.logout(session_uuid)
 
     #Update multi ldap filters
-    system_tags = ["ldapCleanBindingFilter::(&(loginShell=/bin/bash)(|(homeDirectory=/home/mldapuser)(homeDirectory=/home/ldapfilter)))"]
+    system_tags = ["ldapCleanBindingFilter::(&(loginShell=/bin/bash)(|(homeDirectory=/home/mldapuser)(homeDirectory=/home/ldapuser3)))", "ldapUseAsLoginName::uid"]
     ldap_filter = ldp_ops.update_ldap_server(ldap_server_uuid, system_tags)
 
     ldp_ops.clean_invalid_ldap_binding()
@@ -59,7 +59,7 @@ def test():
 
     get_excepted_exception = False
     try:
-        session_uuid = acc_ops.login_by_ldap('ldapfilter','password')
+        session_uuid = acc_ops.login_by_ldap('ldapuser3','password')
         acc_ops.logout(session_uuid)
     except:
         get_excepted_exception = True
@@ -72,13 +72,14 @@ def test():
     #Clear filter
     tag_ops.delete_tag(ldap_clean_binding_filter_tag_uuid)
     
+    ldap_filter = ldp_ops.update_ldap_server(ldap_server_uuid, [system_tag]) 
     ldap_account = ldp_ops.bind_ldap_account(os.environ.get('ldapDn'), new_account.uuid)
     ldap_account_uuid = ldap_account.inventory.uuid
     session_uuid = acc_ops.login_by_ldap(os.environ.get('ldapUid'), os.environ.get('ldapPassword'))
     acc_ops.logout(session_uuid)
-    ldap_account2 = ldp_ops.bind_ldap_account('uid=ldapfilter,ou=People,dc=mevoco,dc=com', new_account2.uuid)
+    ldap_account2 = ldp_ops.bind_ldap_account('uid=ldapuser3,ou=People,dc=mevoco,dc=com', new_account2.uuid)
     ldap_account_uuid2 = ldap_account2.inventory.uuid
-    session_uuid2 = acc_ops.login_by_ldap('ldapfilter', 'password')
+    session_uuid2 = acc_ops.login_by_ldap('ldapuser3', 'password')
     acc_ops.logout(session_uuid)
 
     ldp_ops.clean_invalid_ldap_binding()
@@ -95,7 +96,7 @@ def test():
 
     get_excepted_exception = False
     try:
-        session_uuid = acc_ops.login_by_ldap('ldapfilter','password')
+        session_uuid = acc_ops.login_by_ldap('ldapuser3','password')
         acc_ops.logout(session_uuid)
     except:
         get_excepted_exception = True
