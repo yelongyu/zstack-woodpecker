@@ -17,6 +17,7 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.zstack_test.zstack_test_load_balancer \
         as zstack_lb_header
+import time
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
@@ -27,6 +28,7 @@ def test():
     test_obj_dict.add_vm(vm1)
     vm2 = test_stub.create_lb_vm()
     test_obj_dict.add_vm(vm2)
+    time.sleep(15)
     
     #l3_name = os.environ.get('l3VlanNetworkName1')
     #vr1 = test_stub.get_vr_by_private_l3_name(l3_name)

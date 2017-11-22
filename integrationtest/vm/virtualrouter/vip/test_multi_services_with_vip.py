@@ -2,7 +2,7 @@
 
 Test PF, LB, IPsec with 1 snat ip
 
-@author: Quarkonics
+@author: czhou25
 '''
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
@@ -66,7 +66,10 @@ def test():
     second_zstack_cidrs = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0].ipRanges[0].networkCidr
  
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mevoco1_ip
+
     test_util.test_dsc('Create PF in mevoco1')
+    l3_name = os.environ.get('l3NoVlanNetworkName1')
+    vr = test_stub.create_vr_vm(test_obj_dict1, l3_name)
     l3_name = os.environ.get('l3VlanNetworkName4')
     vr = test_stub.create_vr_vm(test_obj_dict1, l3_name) 
     vr_pub_ip = test_lib.lib_find_vr_pub_ip(vr)
