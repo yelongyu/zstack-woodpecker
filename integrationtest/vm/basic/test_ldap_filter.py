@@ -46,20 +46,20 @@ def test():
 
     new_account2 = acc_ops.create_account('new_account2', 'password', 'Normal')
     new_account_uuid2 = new_account2.uuid
-    ldap_account2 = ldp_ops.bind_ldap_account('uid=ldapfilter,ou=People,dc=mevoco,dc=com', new_account2.uuid)
+    ldap_account2 = ldp_ops.bind_ldap_account('uid=ldapuser3,ou=People,dc=mevoco,dc=com', new_account2.uuid)
     ldap_account_uuid2 = ldap_account2.inventory.uuid
-    session_uuid2 = acc_ops.login_by_ldap('ldapfilter', 'password')
+    session_uuid2 = acc_ops.login_by_ldap('ldapuser3', 'password')
     acc_ops.logout(session_uuid)
-
+    '''
     #Upcate ldap filter    
-    system_tags = ["ldapCleanBindingFilter::(homeDirectory=/home/ldapfilter)"]
+    system_tags = ["ldapCleanBindingFilter::(homeDirectory=/home/ldapuser3)", "ldapUseAsLoginName::uid"]
     ldap_filter = ldp_ops.update_ldap_server(ldap_server_uuid, system_tags)
 
     ldp_ops.clean_invalid_ldap_binding()
 
     get_excepted_exception = False
     try:
-        session_uuid = acc_ops.login_by_ldap('ldapfilter','password')
+        session_uuid = acc_ops.login_by_ldap('ldapuser3','password')
         acc_ops.logout(session_uuid)
     except:
         get_excepted_exception = True
@@ -74,7 +74,7 @@ def test():
     ldp_ops.delete_ldap_server(ldap_server_uuid)
     test_util.test_pass('Create VM by normal user account Success')
     acc_ops.logout(session_uuid)
-
+    '''
 #Will be called only if exception happens in test().
 def error_cleanup():
     global ldap_server_uuid
