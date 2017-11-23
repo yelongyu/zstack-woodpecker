@@ -1160,5 +1160,5 @@ def stop_ha_vm(vm_uuid, force=None, session_uuid=None):
     action.stopHA = "true"
     action.timeout = 240000
     test_util.action_logger('Stop VM [uuid:] %s' % vm_uuid)
-    evt = account_operations.execute_action_with_session(action, session_uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
