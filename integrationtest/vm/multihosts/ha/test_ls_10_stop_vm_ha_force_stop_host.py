@@ -81,6 +81,7 @@ def test():
 
     for i in range(10):
         test_stub.stop_ha_vm(vm.get_vm().uuid)
+        vm.set_state(vm_header.STOPPED)
         vm.check()
         vm.start()
         vm.check()
