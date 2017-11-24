@@ -148,8 +148,15 @@ def lib_install_testagent_to_host(host, username = None, password = None):
             shell.call('echo "quit" | telnet %s 22|grep "Escape character"' % host_pub_ip)
             break
         except:
-            test_util.test_logger("retry %s times: wait 10 seconds" %(str(i)))
-            time.sleep(10)
+            test_util.test_logger("retry %s times: exception on telnet ip 22" %(str(i)))
+
+        try:
+            shell.call('echo "quit" | telnet %s 2222|grep "Escape character"' % host_pub_ip)
+            break
+        except:
+            test_util.test_logger("retry %s times: exception on telnet ip 2222" %(str(i)))
+
+        time.sleep(10)
 
     try:
         shell.call('echo "quit" | telnet %s 9393|grep "Escape character"' % host_pub_ip)
