@@ -152,9 +152,7 @@ def setup_vm_console(vm_inv, vm_config, deploy_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
     cmd = "sed -i 's/quiet/quiet console=ttyS0/g' /etc/default/grub"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
-    cmd = "grub2-mkconfig -o /boot/grub2/grub.cfg"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
-    cmd = "sync"
+    cmd = "grub2-mkconfig -o /boot/grub2/grub.cfg; sync; sync; sync"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
 def execute_in_vm_console(zstack_management_ip, host_ip, vm_name, vm_config, cmd):
@@ -205,15 +203,15 @@ def setup_vm_no_password(vm_inv, vm_config, deploy_config):
 
 def ensure_nic_all_have_cfg(vm_inv, vm_config, num_of_cfg):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
-    cmd = 'cp /etc/sysconfig/network-scripts/ifcfg-eth0 /root/ifcfg-eth0;sync'
+    cmd = 'cp /etc/sysconfig/network-scripts/ifcfg-eth0 /root/ifcfg-eth0;sync;sync;sync'
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
     for num_idx in range(num_of_cfg-1): 
-        cmd = 'cp /root/ifcfg-eth0 /etc/sysconfig/network-scripts/ifcfg-eth%s;sync' %(str(num_idx+1))
+        cmd = 'cp /root/ifcfg-eth0 /etc/sysconfig/network-scripts/ifcfg-eth%s;sync;sync;sync' %(str(num_idx+1))
         test_util.test_logger("@@@DEBUG@@@:cmd=%s" %(cmd))
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
-        cmd = "sed -i 's:eth0:eth%s:g' /etc/sysconfig/network-scripts/ifcfg-eth%s;sync" %((str(num_idx+1),)*2)
+        cmd = "sed -i 's:eth0:eth%s:g' /etc/sysconfig/network-scripts/ifcfg-eth%s;sync;sync;sync" %((str(num_idx+1),)*2)
         test_util.test_logger("@@@DEBUG@@@:cmd=%s" %(cmd))
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
     
@@ -227,7 +225,7 @@ def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
     change_nic_back_cmd = ''
     nic_id = 0
     modify_cfg = []
-    modify_cfg.append(r"cp /etc/sysconfig/network-scripts/ifcfg-eth0 /root/ifcfg-eth0;sync")
+    modify_cfg.append(r"cp /etc/sysconfig/network-scripts/ifcfg-eth0 /root/ifcfg-eth0;sync;sync;sync")
     for l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
         for vmnic in vm_inv.vmNics:
             if vmnic.l3NetworkUuid == l3network.uuid_:
@@ -252,6 +250,8 @@ def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
     modify_cfg.append(r"sleep 1")
     modify_cfg.append(r"sync")
+    modify_cfg.append(r"sync")
+    modify_cfg.append(r"sync")
 
     for cmd in modify_cfg:
         test_util.test_logger("execute cmd: %s" %(cmd))
@@ -261,7 +261,7 @@ def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
 
 
     # NOTE: need to make filesystem in sync in VM before cold stop VM
-    stop_vm(zstack_management_ip, vm_inv.uuid)
+    stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
     start_vm(zstack_management_ip, vm_inv.uuid)
     if not test_lib.lib_wait_target_up(vm_ip, '22', 120):
         test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
@@ -738,7 +738,7 @@ def setup_xsky_storages(scenario_config, scenario_file, deploy_config):
             vmUuid = node.uuid_
             print "vm uuid %s" % (str(vmUuid))
             # NOTE: need to make filesystem in sync in VM before cold stop VM
-            stop_vm(xskyNodesMN, vmUuid)
+            stop_vm(xskyNodesMN, vmUuid, 'cold')
 
         #Wait nodes down
         for node in xmlobject.safe_list(scenario_config.deployerConfig.xsky.nodes.node):
@@ -1447,7 +1447,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 setup_vm_console(vm_inv, vm, deploy_config)
                 ensure_nic_all_have_cfg(vm_inv, vm, len(l3_uuid_list+l3_uuid_list_ge_3))
                 # NOTE: need to make filesystem in sync in VM before cold stop VM
-                stop_vm(zstack_management_ip, vm_inv.uuid)
+                stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
                 start_vm(zstack_management_ip, vm_inv.uuid)
                 test_lib.lib_wait_target_up(vm_ip, '22', 120)
 
