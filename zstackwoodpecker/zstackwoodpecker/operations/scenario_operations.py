@@ -261,7 +261,7 @@ def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
 
 
     # NOTE: need to make filesystem in sync in VM before cold stop VM
-    stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
+    stop_vm(zstack_management_ip, vm_inv.uuid)
     start_vm(zstack_management_ip, vm_inv.uuid)
     if not test_lib.lib_wait_target_up(vm_ip, '22', 120):
         test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
@@ -738,7 +738,7 @@ def setup_xsky_storages(scenario_config, scenario_file, deploy_config):
             vmUuid = node.uuid_
             print "vm uuid %s" % (str(vmUuid))
             # NOTE: need to make filesystem in sync in VM before cold stop VM
-            stop_vm(xskyNodesMN, vmUuid, 'cold')
+            stop_vm(xskyNodesMN, vmUuid)
 
         #Wait nodes down
         for node in xmlobject.safe_list(scenario_config.deployerConfig.xsky.nodes.node):
@@ -1447,7 +1447,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 setup_vm_console(vm_inv, vm, deploy_config)
                 ensure_nic_all_have_cfg(vm_inv, vm, len(l3_uuid_list+l3_uuid_list_ge_3))
                 # NOTE: need to make filesystem in sync in VM before cold stop VM
-                stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
+                stop_vm(zstack_management_ip, vm_inv.uuid)
                 start_vm(zstack_management_ip, vm_inv.uuid)
                 test_lib.lib_wait_target_up(vm_ip, '22', 120)
 
