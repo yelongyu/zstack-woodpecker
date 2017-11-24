@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-imagestore-ceph.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-imagestore-ceph.tmpt</scenarioConfigTemplate>
+</testConfig>
