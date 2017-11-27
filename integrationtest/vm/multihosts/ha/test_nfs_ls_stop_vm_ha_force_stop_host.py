@@ -41,6 +41,8 @@ def test():
     must_ps_list = [inventory.LOCAL_STORAGE_TYPE, inventory.NFS_PRIMARY_STORAGE_TYPE]
     test_lib.skip_test_if_any_ps_not_deployed(must_ps_list)
 
+    test_lib.lib_cur_env_is_not_scenario()
+
     if test_lib.lib_get_ha_enable() != 'true':
         test_util.test_skip("vm ha not enabled. Skip test")
 

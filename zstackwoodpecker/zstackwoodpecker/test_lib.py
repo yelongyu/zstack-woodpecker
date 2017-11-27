@@ -5340,6 +5340,10 @@ def lib_is_storage_network_separate():
                     return True
     return False
 
+def lib_cur_env_is_not_scenario():
+    if all_scenario_config == None or scenario_file == None or not os.path.exists(scenario_file):
+        test_util.test_skip("Not found scenario config or scenario file is not named or not generated")
+
 def lib_skip_if_ps_num_is_not_eq_number(number):
     ps_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
     if len(ps_list) != number:

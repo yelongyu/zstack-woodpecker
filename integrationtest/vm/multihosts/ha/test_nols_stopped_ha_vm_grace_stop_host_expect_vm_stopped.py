@@ -44,6 +44,8 @@ def test():
     allow_ps_list = [inventory.CEPH_PRIMARY_STORAGE_TYPE, inventory.NFS_PRIMARY_STORAGE_TYPE, 'SharedMountPoint', inventory.FUSIONSTOR_PRIMARY_STORAGE_TYPE]
     test_lib.skip_test_when_ps_type_not_in_list(allow_ps_list)
 
+    test_lib.lib_cur_env_is_not_scenario()
+
     if test_lib.lib_get_ha_enable() != 'true':
         test_util.test_skip("vm ha not enabled. Skip test")
 
