@@ -19,10 +19,10 @@ def test():
     test_util.test_logger('Check default community license')
     test_stub.check_license(None, None, 2147483647, False, 'Community')
 
-    test_util.test_logger('Load and Check Trial license with 1 day and 1 HOST')
+    test_util.test_logger('Load and Check Trial license with 1 HOST')
     file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '1', 'Trial', '', '1')
     test_stub.load_license(file_path)
-    test_stub.check_license('woodpecke', None, 1, False, 'Trial')
+    test_stub.check_license('woodpecker@zstack.io', None, 1, False, 'Trial')
 
     test_util.test_pass('Check License Test Success')
 

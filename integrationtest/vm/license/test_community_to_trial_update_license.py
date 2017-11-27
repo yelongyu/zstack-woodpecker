@@ -29,7 +29,7 @@ def test():
         file_license = base64.b64encode('%s' % file_license1)
     node_uuid = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].uuid
     lic_ops.update_license(node_uuid, file_license)
-    test_stub.check_license('woodpecker', None, 1, False, 'Trial')
+    test_stub.check_license('woodpecker@zstack.io', None, 1, False, 'Trial')
 
     test_util.test_pass('Check License Test Success')
 
