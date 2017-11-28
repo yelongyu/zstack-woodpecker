@@ -103,6 +103,8 @@ def test():
     os.system(cmd)
     cmd = 'echo "password"| passwd --stdin test'
     os.system(cmd)
+    cmd = 'echo "test        ALL=(ALL)       NOPASSWD: ALL">>/etc/sudoers '
+    os.system(cmd)
     host_ops.reconnect_host(kvm_host_uuid)
 
     test_util.test_dsc('Recover KVM Host username')
