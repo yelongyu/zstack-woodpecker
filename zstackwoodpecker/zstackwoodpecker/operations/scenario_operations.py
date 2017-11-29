@@ -98,7 +98,7 @@ def login_by_account(http_server_ip, name, password, timeout = 60000):
 
 def logout(http_server_ip, session_uuid):
     logout = api_actions.LogOutAction()
-    logout.timeout = 60000
+    logout.timeout = 300000
     logout.sessionUuid = session_uuid
     async_call(http_server_ip, logout, session_uuid)
 
