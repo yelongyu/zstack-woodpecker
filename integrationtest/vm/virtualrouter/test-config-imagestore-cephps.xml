@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-imagestore-cephps.xml</deployConfig>
+    <deployConfigTemplate>deploy-imagestore-cephps.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

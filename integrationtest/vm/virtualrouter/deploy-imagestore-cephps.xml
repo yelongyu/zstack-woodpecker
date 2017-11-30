@@ -82,9 +82,6 @@
         username="$sftpBackupStorageUsername"
         password="$sftpBackupStoragePassword"
         hostname="$sftpBackupStorageHostname" />
-    <cephBackupStorage name="$cephBackupStorageName"
-        description="Test"
-        monUrls="$cephBackupStorageMonUrls" />
   </backupStorages>
 
   <images>
@@ -94,7 +91,6 @@
       url="$imageUrl_s" 
       username="$imageUsername" password="$imagePassword">
       <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
-      <backupStorageRef>$cephBackupStorageName</backupStorageRef>
     </image>
     <image name="$imageName_net" 
       description="Test Image Template for network test" 
@@ -102,7 +98,6 @@
       url="$imageUrl_net" 
       username="$imageUsername" password="$imagePassword">
       <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
-      <backupStorageRef>$cephBackupStorageName</backupStorageRef>
     </image>
     <image name="$virtualRouterImageName" 
       description="virtual router image" 
@@ -367,7 +362,6 @@
       </primaryStorages>
 
       <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
-      <backupStorageRef>$cephBackupStorageName</backupStorageRef>
     </zone>
   </zones>
 </deployerConfig>
