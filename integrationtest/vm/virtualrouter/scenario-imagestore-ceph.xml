@@ -30,6 +30,7 @@
 	  <nodeRef>$node1Name</nodeRef>
           <hostRef>$hostName</hostRef>
 	  <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
+	  <backupStorageRef type="ceph" offering_uuid="$cephStorageOfferingUuid">$cephBackupStorageName</backupStorageRef>
 	  <primaryStorageRef type="ceph">$cephPrimaryStorageName</primaryStorageRef>
         </vm>
       </vms>
