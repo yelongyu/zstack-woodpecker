@@ -82,6 +82,9 @@
         username="$sftpBackupStorageUsername"
         password="$sftpBackupStoragePassword"
         hostname="$sftpBackupStorageHostname" />
+    <cephBackupStorage name="$cephBackupStorageName"
+        description="Test"
+        monUrls="$cephBackupStorageMonUrls" />
   </backupStorages>
 
   <images>
