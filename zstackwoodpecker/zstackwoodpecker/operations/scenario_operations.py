@@ -1452,10 +1452,13 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 test_lib.lib_wait_target_up(vm_ip, '22', 120)
 
                 ips_xml = etree.SubElement(vm_xml, 'ips')
+                l3_id = 0
                 for l3_uuid in l3_uuid_list+l3_uuid_list_ge_3:
                     ip_xml = etree.SubElement(ips_xml, 'ip')
                     ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, l3_uuid).ip
                     ip_xml.set('ip', ip)
+                    ip_xml.set('uuid', (l3_uuid_list+l3_uuid_list_ge_3)[l3_id])
+                    l3_id += 1
 
                 #setup eip
                 if xmlobject.has_element(vm, 'eipRef'):

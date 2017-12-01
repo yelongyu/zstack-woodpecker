@@ -936,6 +936,21 @@ def get_node_from_scenario_file(nodeRefName, scenarioConfig, scenarioFile, deplo
     if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
         return None
 
+    s_l3_uuid = None
+    for zone in xmlobject.safe_list(deployConfig.deployerConfig.zones.zone):
+        if hasattr(zone.l2Networks, 'l2NoVlanNetwork'):
+            for l2novlannetwork in xmlobject.safe_list(zone.l2Networks.l2NoVlanNetwork):
+                for l3network in xmlobject.safe_list(l2novlannetwork.l3Networks.l3BasicNetwork):
+                    if hasattr(l3network, 'category_') and l3network.category_ == 'System':
+                        for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+                            for vm in xmlobject.safe_list(host.vms.vm):
+                                if xmlobject.has_element(vm, 'nodeRef'):
+                                    for l3Network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                                        if hasattr(l3Network, 'l2NetworkRef'):
+                                            for l2networkref in xmlobject.safe_list(l3Network.l2NetworkRef):
+                                                if l2networkref.text_ == l2novlannetwork.name_:
+                                                    s_l3_uuid = l3Network.uuid_
+
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
         for vm in xmlobject.safe_list(host.vms.vm):
             if xmlobject.has_element(vm, 'nodeRef'):
@@ -946,12 +961,32 @@ def get_node_from_scenario_file(nodeRefName, scenarioConfig, scenarioFile, deplo
                         scenario_file = xmlobject.loads(xmlstr)
                         for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
                             if s_vm.name_ == vm.name_:
-                                return s_vm.ip_
+                                if s_l3_uuid == None:
+                                    return s_vm.ip_
+                                else:
+                                    for ip in xmlobject.safe_list(s_vm.ips.ip):
+                                        if ip.uuid_ == s_l3_uuid:
+                                            return ip.ip_
     return None
 
 def get_nodes_from_scenario_file(scenarioConfig, scenarioFile, deployConfig):
     if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
         return None
+
+    s_l3_uuid = None
+    for zone in xmlobject.safe_list(deployConfig.zones.zone):
+        if hasattr(zone.l2Networks, 'l2NoVlanNetwork'):
+            for l2novlannetwork in xmlobject.safe_list(zone.l2Networks.l2NoVlanNetwork):
+                for l3network in xmlobject.safe_list(l2novlannetwork.l3Networks.l3BasicNetwork):
+                    if hasattr(l3network, 'category_') and l3network.category_ == 'System':
+                        for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+                            for vm in xmlobject.safe_list(host.vms.vm):
+                                if xmlobject.has_element(vm, 'nodeRef'):
+                                    for l3Network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                                        if hasattr(l3Network, 'l2NetworkRef'):
+                                            for l2networkref in xmlobject.safe_list(l3Network.l2NetworkRef):
+                                                if l2networkref.text_ == l2novlannetwork.name_:
+                                                    s_l3_uuid = l3Network.uuid_
 
     nodes_ip = ''
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
@@ -963,7 +998,13 @@ def get_nodes_from_scenario_file(scenarioConfig, scenarioFile, deployConfig):
                     scenario_file = xmlobject.loads(xmlstr)
                     for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
                         if s_vm.name_ == vm.name_:
-                            nodes_ip += ' %s' % s_vm.ip_
+                            if s_l3_uuid == None:
+                                nodes_ip += ' %s' % s_vm.ip_
+                            else:
+                                for ip in xmlobject.safe_list(s_vm.ips.ip):
+                                    if ip.uuid_ == s_l3_uuid:
+                                        return ip.ip_
+
     return nodes_ip
 
 def get_host_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, deployConfig):
