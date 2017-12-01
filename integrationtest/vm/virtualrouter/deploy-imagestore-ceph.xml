@@ -112,7 +112,6 @@
       <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       <backupStorageRef>$cephBackupStorageName</backupStorageRef>
     </image>
-    </image>
     <image name="$imageName_windows" 
       description="Small Test Image Template for windows platform" 
       mediaType="$rootMediaType" format="$rootImageFormat"
