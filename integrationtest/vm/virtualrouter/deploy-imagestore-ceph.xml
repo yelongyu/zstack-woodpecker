@@ -110,6 +110,7 @@
       username="$vrImageUsername" password="$vrImagePassword"
       url="$virtualRouterImageUrl" system="True">
       <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
+      <backupStorageRef>$cephBackupStorageName</backupStorageRef>
     </image>
     <image name="$imageName_windows" 
       description="Small Test Image Template for windows platform" 
@@ -117,6 +118,7 @@
       url="$imageUrl_windows" platform="Windows"
       username="$winImageUsername" password="$winImagePassword">
       <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
+      <backupStorageRef>$cephBackupStorageName</backupStorageRef>
     </image>
     <image name="$imageName_other" 
       description="Small Test Image Template for other platform" 
@@ -124,6 +126,7 @@
       url="$imageUrl_s" platform="Other"
       username="$imageUsername" password="$imagePassword">
       <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
+      <backupStorageRef>$cephBackupStorageName</backupStorageRef>
     </image>
   </images>
 
