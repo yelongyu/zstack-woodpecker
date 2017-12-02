@@ -30,7 +30,7 @@ def test():
         vm.check()
 
     test_util.test_dsc("random get two vms and check the connectivity")
-    for _ in range(5):
+    for _ in range(10):
         vm1, vm2 = random.sample(vm_list, 2)
         test_util.test_dsc("test two vm connectivity")
         [test_stub.run_command_in_vm(vm.get_vm(), 'iptables -F') for vm in (vm1,vm2)]
