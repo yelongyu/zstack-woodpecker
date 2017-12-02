@@ -22,7 +22,7 @@ import time
 
 #global exception information for thread usage
 exc_info = []
-AddKVMHostTimeOut = 10*60*1000
+AddKVMHostTimeOut = 15*60*1000
 IMAGE_THREAD_LIMIT = 2
 DEPLOY_THREAD_LIMIT = 500
 
