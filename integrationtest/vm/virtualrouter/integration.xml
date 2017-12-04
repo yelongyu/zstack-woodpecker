@@ -1,40 +1,40 @@
 <integrationTest>
     <suite name="virtual router test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
         <case timeout='800' repeat='1' noparallel='True'>host/test_reconnect_host.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>test_imagecache_cleanup.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>test_imagecache_cleanup.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_add_image_progress2.py</case>
-	<case timeout="220" noparallel='True'>vga/test_vm_cirrus.py</case>
-	<case timeout="220" noparallel='True'>vga/test_vm_qxl.py</case>
-	<case timeout="220" noparallel='True'>vga/test_vm_vga.py</case>
-        <case timeout='600' repeat='1'>test_ip_spoofing.py</case>
+	<case timeout="330" noparallel='True'>vga/test_vm_cirrus.py</case>
+	<case timeout="330" noparallel='True'>vga/test_vm_qxl.py</case>
+	<case timeout="330" noparallel='True'>vga/test_vm_vga.py</case>
+        <case timeout='900' repeat='1'>test_ip_spoofing.py</case>
 	<!--<case timeout='600' repeat='1'>test_update_vm_cpu_memory.py</case>
 	<case timeout='600' repeat='1'>test_update_vm_cpu_memory2.py</case>-->
         <case timeout='1200' repeat='1'>account/test_vm_ops_by_normal_account.py</case>
-        <case timeout='2400' repeat='1'>test_create_vm_install_iso.py</case>
+        <case timeout='3600' repeat='1'>test_create_vm_install_iso.py</case>
         <case timeout='2400' repeat='1'>test_heartbeat_ceph.py</case>
-        <case timeout='2400' repeat='1'>test_cachemode_writeback.py</case>
+        <case timeout='3600' repeat='1'>test_cachemode_writeback.py</case>
         <case timeout='2400' repeat='1'>test_cachemode_writethrough.py</case>
         <case timeout='800' repeat='1' noparallel='True'>vlan/test_set_l3_mtu.py</case>
         <case timeout='800' repeat='1' noparallel='True'>vlan/test_update_l3_mtu.py</case>
-        <case timeout='800' repeat='1'>novlan/test_create_vm.py</case>
+        <case timeout='1200' repeat='1'>novlan/test_create_vm.py</case>
         <case timeout='800' repeat='1'>novlan/test_create_vm_on_specified_ps.py</case>
         <case timeout='800' repeat='1'>novlan/test_stop_vm_force.py</case>
         <case timeout='800' repeat='1'>novlan/test_stop_vm_qga.py</case>
-        <case timeout='800' repeat='1'>novlan/test_reboot_vm.py</case>
+        <case timeout='1200' repeat='1'>novlan/test_reboot_vm.py</case>
         <case timeout='800' repeat='1'>novlan/test_ping_vms.py</case>
         <case timeout='800' repeat='1'>novlan/test_reinit_vm.py</case>
         <case timeout='800' repeat='1'>novlan/test_reinit_vm_raw.py</case>
-        <case timeout='800' repeat='1'>novlan/test_reinit_vm_snapshot.py</case>
+        <case timeout='1200' repeat='1'>novlan/test_reinit_vm_snapshot.py</case>
         <case timeout='800' repeat='1' noparallel='True'>host/test_reconnect_host.py</case>
-        <case timeout='800' repeat='1'>vlan/test_create_vm.py</case>
-        <case timeout='800' repeat='1'>vlan/test_reboot_vm.py</case>
+        <case timeout='1200' repeat='1'>vlan/test_create_vm.py</case>
+        <case timeout='1200' repeat='1'>vlan/test_reboot_vm.py</case>
         <case timeout='800' repeat='1'>vlan/test_snat_create.py</case>
         <case timeout='800' repeat='1'>vlan/test_dnat_reboot.py</case>
         <case timeout='800' repeat='1'>vlan/test_ping_vms.py</case>
         <case timeout='800' repeat='1'>vlan/test_create_3vms.py</case>
         <case timeout='800' repeat='1'>vlan/test_start_vm.py</case>
         <case timeout='800' repeat='1'>vlan/test_3l3s_vm.py</case>
-        <case timeout='600' repeat='1'>vlan/test_remove_dhcp.py</case>
+        <case timeout='900' repeat='1'>vlan/test_remove_dhcp.py</case>
         <case timeout='800' repeat='1'>vlan/test_2l3_vm.py</case>
         <case timeout='800' repeat='1'>vlan/test_crt_vms_with_limited_ips.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>vlan/test_crt_vms_with_limited_ips2.py</case>
@@ -46,8 +46,8 @@
         <case timeout='800' repeat='1'>vlan/test_attach_nic_reboot_vm.py</case>
         <case timeout='800' repeat='1'>vlan/test_chg_static_ip_vm.py</case>
         <case timeout='800' repeat='1'>vlan/test_attach_nic_with_static_ip.py</case>
-        <case timeout='600' repeat='1'>volume/test_add_volume.py</case>
-        <case timeout='900' repeat='1'>volume/test_add_m_vols.py</case>
+        <case timeout='900' repeat='1'>volume/test_add_volume.py</case>
+        <case timeout='1350' repeat='1'>volume/test_add_m_vols.py</case>
         <case timeout='800' repeat='1'>volume/test_add_volume_vr.py</case>
         <case timeout='600' repeat='1'>volume/test_crt_vm_volume.py</case>
         <case timeout='700' repeat='1'>volume/test_crt_vm_2_volumes.py</case>
@@ -59,7 +59,7 @@
 	<case timeout='700' repeat='1'>volume/test_crt_vm_3_virtio_scsi_volumes.py</case>
 	<case timeout='700' repeat='1'>volume/test_crt_vm_24_virtio_scsi_volumes.py</case>
         <case timeout='700' repeat='1' noparallel='True'>volume/test_create_large_vm_2_local_ps.py</case>
-        <case timeout='800' repeat='1'>template_image/test_crt_temp_image.py</case>
+        <case timeout='1200' repeat='1'>template_image/test_crt_temp_image.py</case>
         <case timeout='700' repeat='1'>template_image/test_del_temp_image.py</case>
         <case timeout='1200' repeat='1'>sg/test_ingress.py</case>
         <case timeout='1200' repeat='1'>sg/test_egress.py</case>
@@ -118,17 +118,17 @@
 	<case timeout='1800' repeat='1'>scheduler/test_change_volume_owner_simple_scheduler_state.py</case>
 	<case timeout='1800' repeat='1' noparallel='True'>scheduler/test_delete_vm_check_simple_scheduler_state.py</case>-->
         <case timeout='1800' repeat='1' noparallel='True'>test_sftp_update_password_sshport_username.py</case>
-        <case timeout='1800' repeat='1' noparallel='True'>test_sftp_update_hostname.py</case>
-        <case timeout='1800' repeat='1' noparallel='True'>test_kvm_host_update_password_sshport_username.py</case>
+        <case timeout='2700' repeat='1' noparallel='True'>test_sftp_update_hostname.py</case>
+        <case timeout='2700' repeat='1' noparallel='True'>test_kvm_host_update_password_sshport_username.py</case>
         <!--<case timeout='800'  repeat='1'>snapshot/test_backup_snapshot.py</case>
         <case timeout='2400' repeat='1' noparallel='True'>snapshot/test_create_100_snapshots.py</case> -->
         <case timeout='1800'  repeat='1'>snapshot/test_create_image_by_snapshot.py</case>
         <case timeout='1200'  repeat='1'>snapshot/test_crt_windows_sp_in_live_vm.py</case>
         <case timeout='1200'  repeat='1'>snapshot/test_crt_other_sp_in_live_vm.py</case>
         <!--<case timeout='2200' repeat='1' noparallel='True'>snapshot/test_change_max_sp_depth.py</case> -->
-        <case timeout='400'  repeat='1'>regression/delete_sg_with_2_attached_nics.py</case>
+        <case timeout='600'  repeat='1'>regression/delete_sg_with_2_attached_nics.py</case>
         <case timeout='400'  repeat='1'>regression/rm_nic_sg_on_stopped_vm.py</case>
-        <case timeout='600'  repeat='1'>regression/test_data_volume_with_vm_ops.py</case>
+        <case timeout='900'  repeat='1'>regression/test_data_volume_with_vm_ops.py</case>
         <case timeout='1000'  repeat='1' noparallel='True'>vr/test_ping_vms_reboot_vr.py</case>
         <case timeout='600'  repeat='1'>vr/test_vr_ha.py</case>
         <case timeout='100' repeat='1' >host/test_ntp.py</case>
@@ -150,8 +150,8 @@
         <case timeout='1800'  repeat='1'>snapshot/test_crt_sp_for_both_root_data_vol.py</case>
         <case timeout='3600'  repeat='1'>snapshot/test_create_snapshot.py</case>
         <case timeout='3600'  repeat='1'>snapshot/test_create_snapshot_parallel.py</case>
-        <case timeout='400'  repeat='1'>snapshot/test_crt_sp_simultaneously.py</case>
-        <case timeout='600'  repeat='1'>snapshot/test_del_sp_simultaneously.py</case>
+        <case timeout='600'  repeat='1'>snapshot/test_crt_sp_simultaneously.py</case>
+        <case timeout='900'  repeat='1'>snapshot/test_del_sp_simultaneously.py</case>
         <case timeout='600'  repeat='1'>snapshot/test_del_revert_sp_simultaneously.py</case>
         <case timeout='600'  repeat='1'>cli/test_cli.py</case>
         <case timeout='2600'  repeat='1'>windows/test_windows_vm_multi_data_volumes.py</case>

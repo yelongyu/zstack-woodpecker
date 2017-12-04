@@ -9,7 +9,7 @@
         <case timeout='600' repeat='1' noparallel='True'>test_create_ecs_sg.py</case>
         <case timeout='900' repeat='1' noparallel='True'>test_create_ecs_image.py</case>
         <case timeout='900' repeat='1' noparallel='True'>test_create_delete_ecs_instance.py</case>
-        <case timeout='900' repeat='1' noparallel='True'>test_start_reboot_stop_ecs_instance.py</case>
+        <case timeout='1350' repeat='1' noparallel='True'>test_start_reboot_stop_ecs_instance.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_sync_delete_vpc_local.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_sync_delete_vswitch_local.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_sync_delete_sg_local.py</case>
@@ -27,7 +27,7 @@
         <case timeout='600' repeat='1' noparallel='True'>test_add_delete_oss_bucket_local.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_sync_delete_vpc_vpn_gateway_local.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_sync_delete_vpc_user_vpn_gateway_local.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>test_sync_delete_vpc_vpn_connection_local.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>test_sync_delete_vpc_vpn_connection_local.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_create_delete_vpc_user_vpn_gateway.py</case>
         <case timeout='900' repeat='1' noparallel='True'>test_create_ipsec_vpn_connection.py</case>
         <case timeout='900' repeat='1' noparallel='True'>test_create_ipsec_vpn_connection_with_single_vip.py</case>

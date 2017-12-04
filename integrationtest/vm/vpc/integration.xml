@@ -18,8 +18,8 @@
         <case timeout='1200' repeat='1' noparallel='True'>test_create_delete_vpc.py::vr_only</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_create_delete_vpc.py::vr_attach_l3</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_create_delete_vpc.py::vr_attach_l3_has_vm</case>
-        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_l3_attach_detach_loop.py::one_vpc</case>
-        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_l3_attach_detach_loop.py::two_vpc</case>
+        <case timeout='1800' repeat='1' noparallel='True'>test_vpc_l3_attach_detach_loop.py::one_vpc</case>
+        <case timeout='1800' repeat='1' noparallel='True'>test_vpc_l3_attach_detach_loop.py::two_vpc</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_l3_attach_detach_negative.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ops_loop.py::reboot_vr</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ops_loop.py::reconnect_vr</case>

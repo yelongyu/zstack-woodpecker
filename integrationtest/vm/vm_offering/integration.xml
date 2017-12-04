@@ -19,7 +19,7 @@
         <case timeout='600' repeat='1' noparallel='True'>test_vm_offering.py::u14_cpu_mem</case>
         <case timeout='600' repeat='1' noparallel='True'>test_vm_offering.py::u15_cpu_mem</case>
         <case timeout='600' repeat='1' noparallel='True'>test_vm_offering.py::u16_cpu_mem</case>
-        <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_cpu_continuously.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>test_hotplugin_cpu_continuously.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_memory_continuously.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_cpu_memory_continuously.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_hotplugin_mem_alignment.py</case>

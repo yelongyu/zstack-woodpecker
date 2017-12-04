@@ -2,7 +2,7 @@
     <suite name="basic test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" parallel="2">
         <case timeout="60" >test_get_current_time.py</case>
         <case timeout="60" >test_nested_virt.py</case>
-        <case timeout="180" >test_create_vm.py</case>
+        <case timeout="270" >test_create_vm.py</case>
         <case timeout="180" >test_create_spice_vm.py</case>
         <case timeout="180" >test_create_vnc_vm.py</case>
         <case timeout="180" >test_create_spice_all_vm.py</case>
@@ -14,8 +14,8 @@
         <case timeout="120" >test_start_vm.py</case>
         <case timeout="120" >test_support_vm_boot_option.py</case>
         <case timeout="120" >test_vm_with_volumes_boot_option.py</case>
-        <case timeout="220" >test_reboot_vm.py</case>
-        <case timeout="200" >test_add_volume.py</case> 
+        <case timeout="330" >test_reboot_vm.py</case>
+        <case timeout="300" >test_add_volume.py</case> 
         <case timeout="200" >test_add_vol_to_stopvm.py</case> 
         <case timeout="200" >test_add_volume_reboot_vm.py</case> 
         <case timeout="700" >test_add_multi_volumes.py</case> 
@@ -41,16 +41,16 @@
         <case timeout="120" >test_ad_user_login.py</case>
         <case timeout="120" >test_ad_group_login.py</case>
         <case timeout="480" >test_get_multi_vm_console_address.py</case>
-        <case timeout="220" >test_vm_ha_never_stop.py</case>
-        <case timeout="220" >test_set_vm_console_password.py</case>
-        <case timeout="220" >test_set_vm_console_password_create.py</case>
-        <case timeout="220" >test_delete_vm_console_password.py</case>
+        <case timeout="900" >test_vm_ha_never_stop.py</case>
+        <case timeout="330" >test_set_vm_console_password.py</case>
+        <case timeout="330" >test_set_vm_console_password_create.py</case>
+        <case timeout="330" >test_delete_vm_console_password.py</case>
         <case timeout="220" >test_add_image_file_url.py</case>
         <case timeout="220" >test_add_qcow2_image_file_url.py</case>
         <case timeout="120" noparallel='True'>test_get_vm_console_address.py</case>
-	<case timeout="220" noparallel='True'>vga/test_vm_vga.py</case>
-	<case timeout="220" noparallel='True'>vga/test_vm_qxl.py</case>
-	<case timeout="220" noparallel='True'>vga/test_vm_cirrus.py</case>
+	<case timeout="330" noparallel='True'>vga/test_vm_vga.py</case>
+	<case timeout="330" noparallel='True'>vga/test_vm_qxl.py</case>
+	<case timeout="330" noparallel='True'>vga/test_vm_cirrus.py</case>
 	<case timeout="220" noparallel='True'>vga/test_vm_reboot_vga_mode.py</case>
 	<case timeout="220" noparallel='True'>test_vm_ha_never_stop_disable_host.py</case>
         <case timeout="220" noparallel='True'>test_vm_ha_never_stop_disable_ha.py</case>

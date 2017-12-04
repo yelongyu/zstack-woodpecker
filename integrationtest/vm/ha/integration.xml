@@ -1,6 +1,6 @@
 <integrationTest>
     <suite name="ha test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
-        <case timeout="540" >test_create_vm.py</case>
+        <case timeout="860" >test_create_vm.py</case>
         <case timeout="720" >migrate/test_migrate_vm_ops.py</case>
         <case timeout='960' noparallel='True'>test_mysql_stop_create_vm.py</case>
         <case timeout='960' noparallel='True'>test_mysql_stop2_create_vm.py</case>

@@ -2,7 +2,7 @@
     <suite name="virt plus test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
         <case timeout='300' repeat='1'>test_create_vm.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_create_vm_with_userdata.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>test_create_vm_with_long_userdata.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>test_create_vm_with_long_userdata.py</case>
         <case timeout='800' repeat='1' noparallel='True'>test_set_l3_mtu.py</case>
         <case timeout='800' repeat='1' noparallel='True'>test_update_l3_mtu.py</case>
         <case timeout='600' repeat='1'>test_remove_userdata.py</case>
@@ -13,9 +13,9 @@
         <case timeout='300' repeat='1'>test_expunge_vm_chg_del_policy.py</case>
         <case timeout='600' repeat='1'>test_snapshot_vm_ops.py</case>
         <case timeout='300' repeat='1'>test_change_offering.py</case>
-        <case timeout='600' repeat='1'>test_create_vm_sshkey.py</case>
-        <case timeout='600' repeat='1'>test_create_vm_sshkey2.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>test_create_vm_sshkey3.py</case>
+        <case timeout='900' repeat='1'>test_create_vm_sshkey.py</case>
+        <case timeout='900' repeat='1'>test_create_vm_sshkey2.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>test_create_vm_sshkey3.py</case>
 	<case timeout='300' repeat='1' noparallel='True'>over_provision/test_change_mem_over_prv.py</case>
         <case timeout='300' repeat='1' noparallel='True'>over_provision/test_chg_storage_over_prv.py</case>
         <case timeout='300' repeat='1' noparallel='True'>over_provision/test_memory_over_provision.py</case>
@@ -41,10 +41,10 @@
         <case timeout='300' repeat='1'>other/test_memory_allocation.py</case>
         <case timeout='800' repeat='1'>eip/test_create_eip_vm.py</case>
         <case timeout='800' repeat='1'>eip/test_create_eip_reconnect_host.py</case>
-        <case timeout='360' repeat='1' noparallel='True'>other/test_parallel_crt_vm_to_use_all_disk.py</case>
+        <case timeout='540' repeat='1' noparallel='True'>other/test_parallel_crt_vm_to_use_all_disk.py</case>
         <case timeout='360' repeat='1' noparallel='True'>other/test_parallel_crt_vm_to_use_all_mem.py</case>
-        <case timeout='600' repeat='1'>volume/test_add_volume.py</case>
-        <case timeout='900' repeat='1'>volume/test_add_m_vols.py</case>
+        <case timeout='900' repeat='1'>volume/test_add_volume.py</case>
+        <case timeout='1350' repeat='1'>volume/test_add_m_vols.py</case>
         <case timeout='600' repeat='1'>volume/test_crt_vm_volume.py</case>
         <case timeout='700' repeat='1'>volume/test_crt_vm_2_volumes.py</case>
         <case timeout='700' repeat='1'>volume/test_crt_vm_24_volumes.py</case>
@@ -73,8 +73,8 @@
         <case timeout='1200' repeat='1'>test_delete_vm_l3_check_vm_ops.py</case>
         <case timeout='600' repeat='1'>test_create_vm_time.py</case>
         <!--<case timeout='1200' repeat='1'>capacity/test_remove_host_check_ps_capacity_eq_0.py</case>-->
-        <case timeout='300' repeat='1'>image_store/test_create_vm.py</case>
-        <case timeout='600' repeat='1'>image_store/test_create_vm_images.py</case>
+        <case timeout='450' repeat='1'>image_store/test_create_vm.py</case>
+        <case timeout='900' repeat='1'>image_store/test_create_vm_images.py</case>
         <case timeout='1800' repeat='1' noparallel='True'>image_store/test_create_100_images.py</case>
         <case timeout='600' repeat='1' noparallel='True'>image_store/test_create_img_after_sp.py</case>
         <case timeout='600' repeat='1' noparallel='True'>image_store/test_crt_2_vms_imgs_from_same_img.py</case>
