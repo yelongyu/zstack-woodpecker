@@ -29,7 +29,7 @@ def test():
         test_util.test_skip('qemu-ga not running on VM, skip testing')
     current_time = time.time()
     vm_ops.stop_vm(vm.get_vm().uuid)
-    if time.time()-current_time >= 10:
+    if time.time()-current_time >= 20:
         test_util.test_fail("VM should shutdown with default grace method in %s seconds" % (time.time()-current_time))
     vm.set_state(vm_header.STOPPED)
     vm.check()
