@@ -85,7 +85,7 @@ def delete_volume(volume_uuid, session_uuid=None):
 def expunge_volume(volume_uuid, session_uuid=None):
     action = api_actions.ExpungeDataVolumeAction()
     action.uuid = volume_uuid
-    action.timeout = 60000
+    action.timeout = 240000
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Expunge Volume [uuid:] %s' % volume_uuid)
     return evt
