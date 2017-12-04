@@ -39,7 +39,7 @@ def login_by_ldap(uid, password, timeout = 60000):
 
 def logout(session_uuid):
     logout = api_actions.LogOutAction()
-    logout.timeout = 60000
+    logout.timeout = 160000
     logout.sessionUuid = session_uuid
     logout.run()
 
