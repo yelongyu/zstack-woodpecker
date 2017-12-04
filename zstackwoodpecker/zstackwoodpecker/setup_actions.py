@@ -597,7 +597,7 @@ default one' % self.zstack_properties)
             else:
                 thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
                 thread.start()
-                self._wait_for_thread_completion('change management node ip', 60)
+                self._wait_for_thread_completion('change management node ip', 120)
 
     def _wait_for_thread_completion(self, msg, wait_time, raise_exception = True):
         end_time = wait_time
