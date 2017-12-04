@@ -15,7 +15,7 @@ def login_as_admin():
     password = inventory.INITIAL_SYSTEM_ADMIN_PASSWORD
     return login_by_account(accountName, password)
 
-def login_by_account(name, password, timeout = 60000):
+def login_by_account(name, password, timeout = 160000):
     login = api_actions.LogInByAccountAction()
     login.accountName = name
     login.password = password
