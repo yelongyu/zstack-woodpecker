@@ -1,5 +1,5 @@
 <integrationTest>
-    <suite name="virtual router test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
+    <suite name="virtual router test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
         <case timeout='800' repeat='1' noparallel='True'>host/test_reconnect_host.py</case>
         <case timeout='900' repeat='1' noparallel='True'>test_imagecache_cleanup.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_add_image_progress2.py</case>
