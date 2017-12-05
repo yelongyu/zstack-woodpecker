@@ -8,13 +8,13 @@
         <case timeout="180" >test_create_spice_all_vm.py</case>
         <case timeout="180" >test_create_spice_filter_vm.py</case>
         <case timeout="600" >test_create_windows_vm.py</case>
-        <case timeout="120" >test_stop_vm.py</case>
-        <case timeout="120" >test_suspend_vm.py</case>
-        <case timeout="120" >test_suspended_vm_ops.py</case>
-        <case timeout="120" >test_start_vm.py</case>
-        <case timeout="120" >test_support_vm_boot_option.py</case>
-        <case timeout="120" >test_vm_with_volumes_boot_option.py</case>
-        <case timeout="330" >test_reboot_vm.py</case>
+        <case timeout="180" >test_stop_vm.py</case>
+        <case timeout="180" >test_suspend_vm.py</case>
+        <case timeout="180" >test_suspended_vm_ops.py</case>
+        <case timeout="180" >test_start_vm.py</case>
+        <case timeout="180" >test_support_vm_boot_option.py</case>
+        <case timeout="180" >test_vm_with_volumes_boot_option.py</case>
+        <case timeout="600" >test_reboot_vm.py</case>
         <case timeout="300" >test_add_volume.py</case> 
         <case timeout="200" >test_add_vol_to_stopvm.py</case> 
         <case timeout="200" >test_add_volume_reboot_vm.py</case> 
@@ -24,33 +24,33 @@
         <case timeout="400" >test_crt_vm_with_volume.py</case> 
         <case timeout="400" >test_vm_securitygroup.py</case> 
         <case timeout="600" >test_MN_examine_vm_state.py</case> 
-        <case timeout="120" >test_create_iso_vm.py</case>
-        <case timeout="120" >test_iso_vm_capability.py</case>
-        <case timeout="120" >test_detach_iso_vm.py</case>
-        <case timeout="120" >account/test_multi_accounts_cli_login.py</case>
-        <case timeout="120" >account/test_multi_users_cli_login.py</case>
-        <case timeout="120" >account/test_crt_vm_by_normal_account.py</case>
-        <case timeout="120" >account/test_crt_vm_by_normal_account2.py</case>
-        <case timeout="120" >account/test_vm_ops_by_normal_account.py</case>
-        <case timeout="120" >account/test_multi_accounts_vm_ops.py</case>
-        <case timeout="120" >test_ldap_login.py</case>
-        <case timeout="120" >test_ldap_tls_login.py</case>
-        <case timeout="120" >test_ldap_filter.py</case>
-        <case timeout="120" >test_ldap_filter2.py</case>
-        <case timeout="120" >test_ad_admin_login.py</case>
-        <case timeout="120" >test_ad_user_login.py</case>
-        <case timeout="120" >test_ad_group_login.py</case>
+        <case timeout="180" >test_create_iso_vm.py</case>
+        <case timeout="180" >test_iso_vm_capability.py</case>
+        <case timeout="180" >test_detach_iso_vm.py</case>
+        <case timeout="180" >account/test_multi_accounts_cli_login.py</case>
+        <case timeout="180" >account/test_multi_users_cli_login.py</case>
+        <case timeout="180" >account/test_crt_vm_by_normal_account.py</case>
+        <case timeout="180" >account/test_crt_vm_by_normal_account2.py</case>
+        <case timeout="180" >account/test_vm_ops_by_normal_account.py</case>
+        <case timeout="180" >account/test_multi_accounts_vm_ops.py</case>
+        <case timeout="180" >test_ldap_login.py</case>
+        <case timeout="180" >test_ldap_tls_login.py</case>
+        <case timeout="180" >test_ldap_filter.py</case>
+        <case timeout="180" >test_ldap_filter2.py</case>
+        <case timeout="180" >test_ad_admin_login.py</case>
+        <case timeout="180" >test_ad_user_login.py</case>
+        <case timeout="180" >test_ad_group_login.py</case>
         <case timeout="480" >test_get_multi_vm_console_address.py</case>
         <case timeout="900" >test_vm_ha_never_stop.py</case>
-        <case timeout="330" >test_set_vm_console_password.py</case>
-        <case timeout="330" >test_set_vm_console_password_create.py</case>
-        <case timeout="330" >test_delete_vm_console_password.py</case>
+        <case timeout="600" >test_set_vm_console_password.py</case>
+        <case timeout="600" >test_set_vm_console_password_create.py</case>
+        <case timeout="600" >test_delete_vm_console_password.py</case>
         <case timeout="220" >test_add_image_file_url.py</case>
         <case timeout="220" >test_add_qcow2_image_file_url.py</case>
-        <case timeout="120" noparallel='True'>test_get_vm_console_address.py</case>
-	<case timeout="330" noparallel='True'>vga/test_vm_vga.py</case>
-	<case timeout="330" noparallel='True'>vga/test_vm_qxl.py</case>
-	<case timeout="330" noparallel='True'>vga/test_vm_cirrus.py</case>
+        <case timeout="180" noparallel='True'>test_get_vm_console_address.py</case>
+	<case timeout="600" noparallel='True'>vga/test_vm_vga.py</case>
+	<case timeout="600" noparallel='True'>vga/test_vm_qxl.py</case>
+	<case timeout="600" noparallel='True'>vga/test_vm_cirrus.py</case>
 	<case timeout="220" noparallel='True'>vga/test_vm_reboot_vga_mode.py</case>
 	<case timeout="220" noparallel='True'>test_vm_ha_never_stop_disable_host.py</case>
         <case timeout="220" noparallel='True'>test_vm_ha_never_stop_disable_ha.py</case>
