@@ -33,6 +33,7 @@ def test():
     cond = res_ops.gen_query_conditions('resourceUuid', '=', disaster_bs_uuid)
     system_tag =  res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0]
     if system_tag.tag != "remote":
+        bs_ops.delete_backup_storage(disaster_bs_uuid)
         test_util.test_fail("Here isn't 'remote' system tag for disaster bs")
      
     bs_ops.delete_backup_storage(disaster_bs_uuid) 
