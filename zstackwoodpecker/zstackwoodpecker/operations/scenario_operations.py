@@ -1191,11 +1191,7 @@ def create_vm(http_server_ip, vm_create_option):
 
     create_vm.systemTags = vm_create_option.get_system_tags()
     create_vm.userTags = vm_create_option.get_user_tags()
-    timeout = vm_create_option.get_timeout()
-    if not timeout:
-        create_vm.timeout = 1200000
-    else:
-        create_vm.timeout = timeout
+    create_vm.timeout = 1200000
 
     create_vm.dataDiskOfferingUuids = vm_create_option.get_data_disk_uuids()
     create_vm.rootDiskOfferingUuid = vm_create_option.get_root_disk_uuid()
