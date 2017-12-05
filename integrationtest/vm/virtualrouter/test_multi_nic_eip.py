@@ -116,7 +116,7 @@ def test():
     user_password = "password"
     rsp_ping = os.system("sshpass -p '%s' ssh %s@%s 'ping -c 4 %s'"%(user_password, user_name, vm1_ip, eip2_pub_ip))
     if rsp_ping != 0:
-        test_util.test_fail('Exception: [vm ip:] %s ping [Eip:] %s fail. But it should ping successfully.' % (vm1_iP, eip2_pub_ip))
+        test_util.test_fail('Exception: [vm ip:] %s ping [Eip:] %s fail. But it should ping successfully.' % (vm1_ip, eip2_pub_ip))
     rsp_ping = os.system("sshpass -p '%s' ssh %s@%s 'ping -c 4 %s'"%(user_password, user_name, vm1_ip, eip3_pub_ip))
     if rsp_ping != 0:
         test_util.test_fail('Exception: [vm ip:] %s ping [Eip:] %s fail. But it should ping successfully.' % (vm1_ip, eip3_pub_ip))
