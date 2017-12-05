@@ -60,7 +60,6 @@ def test():
 
     if flavor['ops'] is VM_MIGRATE:
         test_stub.migrate_vm_to_random_host(vm2)
-        vm2.check()
     elif flavor['ops'] is VM_REBOOT:
         vm1.reboot()
     elif flavor['ops'] is VR_REBOOT:
