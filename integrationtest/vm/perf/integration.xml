@@ -1,5 +1,5 @@
 <integrationTest>
-    <suite name="multi hosts test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
+    <suite name="multi hosts test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
         <case timeout='300' repeat='1'>vm/test_crt_basic_vm_with_max_threads.py</case>
     </suite>
 </integrationTest>

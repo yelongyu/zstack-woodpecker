@@ -1,5 +1,5 @@
 <integrationTest>
-    <suite name="monitor trigger test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
+    <suite name="monitor trigger test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
         <case timeout='900' repeat='1' noparalle1='Ture'>alert_host_all_cpus_idle.py</case>
         <case timeout='900' repeat='1' noparallel='True'>alert_host_all_cpus_idle_1.py</case>
         <case timeout='900' repeat='1' noparallel='True'>alert_host_all_cpus_util.py</case>
