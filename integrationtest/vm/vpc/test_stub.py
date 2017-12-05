@@ -65,7 +65,7 @@ def create_vpc_vrouter(vr_name='test_vpc'):
     conf = res_ops.gen_query_conditions('name', '=', 'test_vpc')
     vr_list = res_ops.query_resource(res_ops.APPLIANCE_VM, conf)
     if vr_list:
-        return vr_list[0]
+        return ZstackTestVR(vr_list[0])
     vr_offering = res_ops.get_resource(res_ops.VR_OFFERING)[0]
     vr_inv =  vpc_ops.create_vpc_vrouter(name=vr_name, virtualrouter_offering_uuid=vr_offering.uuid)
     return ZstackTestVR(vr_inv)
