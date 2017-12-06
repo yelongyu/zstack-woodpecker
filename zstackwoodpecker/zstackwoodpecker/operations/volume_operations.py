@@ -118,7 +118,7 @@ def resize_volume(volume_uuid, size, session_uuid=None):
     return evt.inventory
 
 def resize_data_volume(volume_uuid, size, session_uuid=None):
-    action = api_actions.ResizeRootVolumeAction()
+    action = api_actions.ResizeDataVolumeAction()
     action.uuid = volume_uuid
     action.size = size
     action.timeout = 240000

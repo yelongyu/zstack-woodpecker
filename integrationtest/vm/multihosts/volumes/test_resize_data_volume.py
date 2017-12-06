@@ -35,9 +35,12 @@ def test():
     vm.check()
     test_obj_dict.add_vm(vm)
     volume.attach(vm)
+    vm.stop()
+    vm.check()
 
     set_size = 1024*1024*1024*5
     vol_ops.resize_data_volume(volume_uuid, set_size)
+    vm.update()
     vol_size_after = test_lib.lib_get_data_volumes(vm.get_vm())[0].size
     if set_size != vol_size_after:
         test_util.test_fail('Resize Data Volume failed, size = %s' % vol_size_after)
