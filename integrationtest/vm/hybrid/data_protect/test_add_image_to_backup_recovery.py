@@ -62,3 +62,10 @@ def error_cleanup():
     global disaster_bs_uuid
     if disaster_bs_uuid != None:
         bs_ops.delete_backup_storage(disaster_bs_uuid)
+
+#recover envrionment wehether the test pass or not
+def env_recover():
+    global disaster_bs_uuid
+    if disaster_bs_uuid != None:
+        bs_ops.delete_backup_storage(disaster_bs_uuid)
+

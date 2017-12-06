@@ -66,13 +66,11 @@ def test():
     cond = res_ops.gen_query_conditions('resourceUuid', '=', disaster_bs_image_uuid)
     system_tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0]
     if system_tag.tag != "remote":
-        bs_ops.delete_backup_storage(disaster_bs_uuid)
         test_util.test_fail("Here isn't 'remote' system tag for image in data protect bs")
     #Check if the image's media_type correct
     cond = res_ops.gen_query_conditions('uuid', '=', disaster_bs_image_uuid)
     media_type = res_ops.query_resource(res_ops.IMAGE, cond)[0].mediaType
     if media_type != 'RootVolumeTemplate':
-        bs_ops.delete_backup_storage(disaster_bs_uuid)
         test_util.test_fail('Wrong image type, the expect is "RootVolumeTemplate", the real is "%s"' %media_type) 
     #Check recovery root volume
     recovery_image = img_ops.recovery_image_from_image_store_backup_storage(local_bs_uuid, disaster_bs_uuid, disaster_bs_image_uuid) 
@@ -81,14 +79,11 @@ def test():
     system_tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0].tag
     status = system_tag.split('::')[7]
     if status not in ['running', 'success']:
-        bs_ops.delete_backup_storage(disaster_bs_uuid)
         test_util.test_fail('Error status for recovery image, status: %s' %status)
     #Check if recovery root volume success
     if recovery_image.backupStorageRefs[0].backupStorageUuid != local_bs_uuid:
-        bs_ops.delete_backup_storage(disaster_bs_uuid)
         test_util.test_fail('Recovery image failed, image uuid is %s' %recovery_image.uuid)
     if recovery_image.mediaType != 'RootVolumeTemplate':
-        bs_ops.delete_backup_storage(disaster_bs_uuid)
         test_util.test_fail('Wrong image type after recovery, the expect is "RootVolumeTemplate", the real is "%s"' %recovery_image.mediaType)
     image_uuid = recovery_image.uuid
 
@@ -102,7 +97,6 @@ def test():
     finally:
         vm_ops.destroy_vm(vm.uuid)
         img_ops.delete_image(image_uuid)
-        bs_ops.delete_backup_storage(disaster_bs_uuid)
     test_util.test_fail('Try to recovery the same image second time success unexpectly')
 
 #Will be called only if exception happens in test().
@@ -115,3 +109,9 @@ def error_cleanup():
     if disaster_bs_uuid != None:
         bs_ops.delete_backup_storage(disaster_bs_uuid)
     
+#recover envrionment wehether the test pass or not
+def env_recover():
+    global disaster_bs_uuid
+    if disaster_bs_uuid != None:
+        bs_ops.delete_backup_storage(disaster_bs_uuid)
+
