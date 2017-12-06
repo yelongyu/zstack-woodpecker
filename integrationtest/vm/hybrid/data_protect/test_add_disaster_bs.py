@@ -33,10 +33,8 @@ def test():
     cond = res_ops.gen_query_conditions('resourceUuid', '=', disaster_bs_uuid)
     system_tag =  res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0]
     if system_tag.tag != "remote":
-        bs_ops.delete_backup_storage(disaster_bs_uuid)
         test_util.test_fail("Here isn't 'remote' system tag for disaster bs")
      
-    bs_ops.delete_backup_storage(disaster_bs_uuid) 
     test_util.test_pass('Setup data protect bs image store success, the uuid is %s' %disaster_bs_uuid)
 
 #Will be called only if exception happens in test().
@@ -44,3 +42,10 @@ def error_cleanup():
     global disaster_bs_uuid
     if disaster_bs_uuid != None:
         bs_ops.delete_backup_storage(disaster_bs_uuid)
+
+#recover envrionment wehether the test pass or not
+def env_recover():
+    global disaster_bs_uuid
+    if disaster_bs_uuid != None:
+        bs_ops.delete_backup_storage(disaster_bs_uuid)
+

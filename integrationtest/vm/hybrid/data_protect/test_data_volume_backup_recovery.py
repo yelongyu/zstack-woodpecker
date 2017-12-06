@@ -57,7 +57,6 @@ def test():
     cond = res_ops.gen_query_conditions('uuid', '=', disaster_bs_image_uuid)
     media_type = res_ops.query_resource(res_ops.IMAGE, cond)[0].mediaType
     if media_type != 'DataVolumeTemplate':
-        bs_ops.delete_backup_storage(disaster_bs_uuid)
         test_util.test_fail('Wrong image media type, the expect is "DataVolumeTemplate", the real is "%s"' %media_type) 
     #Check if create data volume with volume template success
     ps_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].uuid
@@ -67,7 +66,6 @@ def test():
     cond = res_ops.gen_query_conditions('resourceUuid', '=', disaster_bs_image_uuid)
     system_tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0]
     if system_tag.tag != "remote":
-        bs_ops.delete_backup_storage(disaster_bs_uuid)
         test_util.test_fail("Here isn't 'remote' system tag for image in data protect bs")
     #Check recovery data volume
     recovery_image = img_ops.recovery_image_from_image_store_backup_storage(local_bs_uuid, disaster_bs_uuid, disaster_bs_image_uuid) 
@@ -76,14 +74,11 @@ def test():
     system_tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0].tag
     status = system_tag.split('::')[7]
     if status not in ['running', 'success']:
-        bs_ops.delete_backup_storage(disaster_bs_uuid)
         test_util.test_fail('Error status for recovery image, status: %s' %status)
     #Check if recovery data volume success
     if recovery_image.backupStorageRefs[0].backupStorageUuid != local_bs_uuid:
-        bs_ops.delete_backup_storage(disaster_bs_uuid)
         test_util.test_fail('Recovery image failed, image uuid is %s' %recovery_image.uuid)
     if recovery_image.mediaType != 'DataVolumeTemplate':
-        bs_ops.delete_backup_storage(disaster_bs_uuid)
         test_util.test_fail('Wrong image media type after recovery, the expect is "DataVolumeTemplate", the real is "%s"' %media_type)
     image_uuid = recovery_image.uuid
 
@@ -96,7 +91,6 @@ def test():
     finally: 
         vol_ops.delete_volume(data_volume_uuid)
         img_ops.delete_image(image_uuid)
-        bs_ops.delete_backup_storage(disaster_bs_uuid) 
     test_util.test_fail('Try to recovery the same image second time success unexpectly')
 
 #Will be called only if exception happens in test().
@@ -109,3 +103,8 @@ def error_cleanup():
     if disaster_bs_uuid != None:
         bs_ops.delete_backup_storage(disaster_bs_uuid)
     
+#recover envrionment wehether the test pass or not
+def env_recover():
+    global disaster_bs_uuid
+    if disaster_bs_uuid != None:
+        bs_ops.delete_backup_storage(disaster_bs_uuid)

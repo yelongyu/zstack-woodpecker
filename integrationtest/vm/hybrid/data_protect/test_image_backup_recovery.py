@@ -45,20 +45,17 @@ def test():
     system_tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0].tag
     status = system_tag.split('::')[7]
     if status not in ['running', 'success']:
-        bs_ops.delete_backup_storage(disaster_bs_uuid)
         test_util.test_fail('Error status for recovery image, status: %s' %status)
     #Check if the image's media_type correct
     disaster_bs_image_uuid = disaster_bs_image.uuid
     cond = res_ops.gen_query_conditions('uuid', '=', disaster_bs_image_uuid)
     media_type = res_ops.query_resource(res_ops.IMAGE, cond)[0].mediaType
     if media_type != 'RootVolumeTemplate':
-        bs_ops.delete_backup_storage(disaster_bs_uuid)
         test_util.test_fail('Wrong image type, the expect is "RootVolumeTemplate", the real is "%s"' %media_type) 
     #Check if the system tag of the image in disaster bs is 'remote'
     cond = res_ops.gen_query_conditions('resourceUuid', '=', disaster_bs_image_uuid)
     system_tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0]
     if system_tag.tag != "remote":
-        bs_ops.delete_backup_storage(disaster_bs_uuid)
         test_util.test_fail("Here isn't 'remote' system tag for image in data protect bs")
     #Check if GetImagesFromImageStoreBackupStorage works well
     #disaster_bs_image_lst = img_ops.get_images_from_image_store_backup_storage(disaster_bs_uuid)
@@ -71,7 +68,6 @@ def test():
         if str(e).find('already contains it') != -1:
             test_util.test_logger('Try to sync the image which had exist in disaster bs get the error info expectly: %s' %str(e))
     else:
-        bs_ops.delete_backup_storage(disaster_bs_uuid)
         test_util.test_fail('Try to sync the image which had exist in local bs success unexpectly')
     #Delete local image and recovery from disaster bs
     img_ops.delete_image(image_uuid_local)
@@ -82,14 +78,11 @@ def test():
     system_tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0].tag
     status = system_tag.split('::')[7]
     if status not in ['running', 'success']:
-        bs_ops.delete_backup_storage(disaster_bs_uuid)
         test_util.test_fail('Error status for recovery image, status: %s' %status)
     #Check if recovery image success
     if recovery_image.backupStorageRefs[0].backupStorageUuid != local_bs_uuid:
-        bs_ops.delete_backup_storage(disaster_bs_uuid)
         test_util.test_fail('Recovery image failed, image uuid is %s' %recovery_image.uuid)
     if recovery_image.mediaType != 'RootVolumeTemplate':
-        bs_ops.delete_backup_storage(disaster_bs_uuid)
         test_util.test_fail('Wrong image media type after recovery, the expect is "RootVolumeTemplate", the real is "%s"' %media_type)
  
     try:
@@ -100,7 +93,6 @@ def test():
         if str(e).find('already contains it') != -1:
             test_util.test_logger('Try to recovery the image which had exist in local bs get the error info expectly: %s' %str(e))
     else:
-        bs_ops.delete_backup_storage(disaster_bs_uuid)
         test_util.test_fail('Try to recovery the image which had exist in local bs success unexpectly')
     cond = res_ops.gen_query_conditions('backupStorageRefs.backupStorageUuid', '=', disaster_bs_uuid)
     disaster_bs_images = res_ops.query_resource(res_ops.IMAGE, cond)
@@ -110,7 +102,6 @@ def test():
     #disaster_bs_image_lst = img_ops.get_images_from_image_store_backup_storage(disaster_bs_uuid)
     #if disaster_bs_image_lst.infos != []:
     #    test_util.test_fail('Delete all images in disaster bs but GetImagesFromImageStoreBackupStorage still does not  null')
-    bs_ops.delete_backup_storage(disaster_bs_uuid) 
     test_util.test_pass('Test image sync and recovery success')
 
 #Will be called only if exception happens in test().
@@ -121,3 +112,9 @@ def error_cleanup():
     if disaster_bs_uuid != None:
         bs_ops.delete_backup_storage(disaster_bs_uuid)
     
+#recover envrionment wehether the test pass or not
+def env_recover():
+    global disaster_bs_uuid
+    if disaster_bs_uuid != None:
+        bs_ops.delete_backup_storage(disaster_bs_uuid)
+
