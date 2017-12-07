@@ -12,7 +12,7 @@ from vncdotool import api
 from PIL import Image
 
 _config_ = {
-        'timeout' : 360,
+        'timeout' : 600,
         'noparallel' : False
         }
 
