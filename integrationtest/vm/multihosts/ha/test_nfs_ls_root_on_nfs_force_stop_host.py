@@ -57,7 +57,7 @@ def test():
     vm_creation_option.set_l3_uuids([l3_net_uuid])
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
-    vm_creation_option.set_ps_uuid(res_ops.get_resource(res_ops.PRIMARY_STORAGE, type=inventory.NFS_PRIMARY_STORAGE_TYPE)[0].uuid)
+    vm_creation_option.set_ps_uuid(res_ops.get_resource(res_ops.PRIMARY_STORAGE, type=str(inventory.NFS_PRIMARY_STORAGE_TYPE))[0].uuid)
     vm_creation_option.set_name('vm-nfs')
     vm = test_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
