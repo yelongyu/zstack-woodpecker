@@ -21,6 +21,9 @@ def key_gen(key_len):
 
 def test():
     test_util.test_dsc('Create test vm and check the time spend on each stage')
+
+    test_util.test_skip('Time cases need further polish, skip test right now')
+
     vm_name = 'vm_'+key_gen(7)
     begin_time = int(time.time()*1000)
     vm = test_stub.create_named_vm(vm_name)
