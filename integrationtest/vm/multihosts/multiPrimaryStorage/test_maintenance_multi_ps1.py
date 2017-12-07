@@ -41,7 +41,7 @@ def test():
 
     ps_ops.change_primary_storage_state(state='maintain', primary_storage_uuid=ps2.uuid)
     maintenance_ps_list.append(ps2)
-    time.sleep(30)
+    time.sleep(60)
 
     vr_vm_list = test_lib.lib_find_vr_by_vm(vm1.get_vm())
     vr_vm = None
