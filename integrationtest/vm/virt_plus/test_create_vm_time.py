@@ -23,6 +23,9 @@ def key_gen(key_len):
     return ("".join(keylist))
 
 def test():
+
+    test_util.test_skip('Time cases need further polish, skip test right now')
+
     vm_name = 'vm_'+key_gen(7)
     begin_time = int(time.time()*1000)
     vm = test_stub.create_vm(vm_name)
