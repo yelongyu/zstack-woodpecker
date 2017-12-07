@@ -5,13 +5,8 @@
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
-import zstackwoodpecker.operations.vm_operations as vm_ops
-import zstackwoodpecker.operations.resource_operations as res_ops
-import zstackwoodpecker.operations.net_operations as net_ops
 import time
 import random
-import os
-from itertools import izip
 
 
 test_stub = test_lib.lib_get_test_stub()
@@ -50,6 +45,12 @@ def test():
 
     test_util.test_dsc("migrate VR and try to create vm in random L3")
     vr.migrate_to_random_host()
+
+    count = 0
+    while vr.inv.state is 'Paused' and count < 10:
+        time.sleep(5)
+        count += 1
+
     vm4 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm4', l3_name=random.choice(test_stub.L3_SYSTEM_NAME_LIST))
     test_obj_dict.add_vm(vm4)
     vm4.check()
