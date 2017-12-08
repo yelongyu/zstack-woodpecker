@@ -34,7 +34,7 @@ def test():
                 output = test_lib.lib_execute_ssh_cmd(host.managementIp_, host.username_, host.password_, cmd, timeout=30, port=2222)
                 if not output:
                     test_util.test_fail('can not ssh in vm[%s]' % host.managementIp_)
-            if output.find(mn.hostName.replace('.', '-')) < 0:
+            if output.find(mn.hostName.replace('.', '-')) < 0 and output.find(mn.hostName) < 0:
                 test_util.test_fail('all host expect to use MN ntp service')
 
     test_util.test_pass('Test Host ntp Pass')
