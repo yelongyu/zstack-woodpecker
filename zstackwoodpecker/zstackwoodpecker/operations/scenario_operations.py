@@ -1207,7 +1207,7 @@ def create_vm(http_server_ip, vm_create_option):
 def destroy_vm(http_server_ip, vm_uuid, session_uuid=None):
     action = api_actions.DestroyVmInstanceAction()
     action.uuid = vm_uuid
-    action.timeout = 240000
+    action.timeout = 360000
     test_util.action_logger('Destroy VM [uuid:] %s' % vm_uuid)
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
 
@@ -1215,7 +1215,7 @@ def stop_vm(http_server_ip, vm_uuid, force=None, session_uuid=None):
     action = api_actions.StopVmInstanceAction()
     action.uuid = vm_uuid
     action.type = force
-    action.timeout = 240000
+    action.timeout = 360000
     test_util.action_logger('Stop VM [uuid:] %s' % vm_uuid)
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     return evt.inventory
