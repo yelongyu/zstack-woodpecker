@@ -28,7 +28,7 @@ def test():
     test_obj_dict.add_vm(vm1)
     vm2 = test_stub.create_lb_vm()
     test_obj_dict.add_vm(vm2)
-    time.sleep(15)
+    time.sleep(30)
     
     #l3_name = os.environ.get('l3VlanNetworkName1')
     #vr1 = test_stub.get_vr_by_private_l3_name(l3_name)
