@@ -41,8 +41,8 @@ def test():
 
     test_util.test_dsc("create two vm, vm1 in l3 {}, vm2 in l3 {}".format(flavor['vm1l3'], flavor['vm2l3']))
     vm1, vm2 = [test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(name), l3_name=name) for name in (flavor['vm1l3'], flavor['vm2l3'])]
-    [vm.check() for vm in (vm1,vm2)]
     [test_obj_dict.add_vm(vm) for vm in (vm1,vm2)]
+    [vm.check() for vm in (vm1,vm2)]
 
     vr_pub_nic = test_lib.lib_find_vr_pub_nic(vr_list[0].inv)
 

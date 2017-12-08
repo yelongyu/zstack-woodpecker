@@ -55,8 +55,8 @@ def test():
 
     vm1, vm2 = [test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(name), l3_name=name) for name in (flavor['vm1l3'], flavor['vm2l3'])]
 
-    [vm.check() for vm in (vm1,vm2)]
     [test_obj_dict.add_vm(vm) for vm in (vm1,vm2)]
+    [vm.check() for vm in (vm1,vm2)]
 
     if flavor['ops'] is VM_MIGRATE:
         test_stub.migrate_vm_to_random_host(vm2)
