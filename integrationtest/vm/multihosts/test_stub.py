@@ -17,6 +17,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.operations.scenario_operations as sce_ops
+import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.header.host as host_header
 import apibinding.inventory as inventory
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
@@ -289,9 +290,15 @@ def migrate_vm_to_random_host(vm):
     test_util.test_dsc("migrate vm to random host")
     if not test_lib.lib_check_vm_live_migration_cap(vm.vm):
         test_util.test_skip('skip migrate if live migrate not supported')
+    root_volume = test_lib.lib_get_root_volume(vm.vm)
+    ps = test_lib.lib_get_primary_storage_by_uuid(root_volume.primaryStorageUuid)
     target_host = test_lib.lib_find_random_host(vm.vm)
     current_host = test_lib.lib_find_host_by_vm(vm.vm)
-    vm.migrate(target_host.uuid)
+    if ps.type == inventory.LOCAL_STORAGE_TYPE:
+        vol_ops.migrate_volume(root_volume.uuid, target_host.uuid)
+        vm.start()
+    else:
+        vm.migrate(target_host.uuid)
 
     new_host = test_lib.lib_get_vm_host(vm.vm)
     if not new_host:
