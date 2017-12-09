@@ -17,7 +17,6 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.zstack_test.zstack_test_load_balancer \
         as zstack_lb_header
-import time
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
@@ -28,7 +27,6 @@ def test():
     test_obj_dict.add_vm(vm1)
     vm2 = test_stub.create_lb_vm()
     test_obj_dict.add_vm(vm2)
-    time.sleep(30)
     
     #l3_name = os.environ.get('l3VlanNetworkName1')
     #vr1 = test_stub.get_vr_by_private_l3_name(l3_name)
@@ -42,6 +40,9 @@ def test():
     vm_nic2 = vm2.get_vm().vmNics[0]
     vm_nic2_uuid = vm_nic2.uuid
     vm_nic2_ip = vm_nic2.ip
+
+    test_lib.lib_wait_target_up(vm_nic1_ip, "root", 120)
+    test_lib.lib_wait_target_up(vm_nic2_ip, "root", 120)
 
     test_stub.set_httpd_in_vm(vm_nic1_ip, "root", "password")
     test_stub.set_httpd_in_vm(vm_nic2_ip, "root", "password")
