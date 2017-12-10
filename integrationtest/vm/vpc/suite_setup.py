@@ -56,6 +56,7 @@ def test():
 
     test_lib.setup_plan.execute_plan_without_deploy_test_agent()
     conf_ops.change_global_config('vpc', 'zsnp.enabled', 'true')
+    conf_ops.change_global_config("applianceVm", "agent.deployOnStart", 'true')
     if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
     deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
