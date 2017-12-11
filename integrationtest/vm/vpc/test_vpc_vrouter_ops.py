@@ -48,6 +48,7 @@ def test():
 
     count = 0
     while vr.inv.state is 'Paused' and count < 10:
+        vr.update()
         time.sleep(5)
         count += 1
 
