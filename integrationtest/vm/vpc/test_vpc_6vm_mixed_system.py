@@ -57,7 +57,7 @@ def test():
 
     if flavor['ops'] is BASIC:
         for vm in vm_list:
-            for action in ('stop', 'start', 'check', 'reboot', 'check', 'suspend', 'resume', 'check'):
+            for action in ('stop', 'start', 'check', 'reboot', 'suspend', 'resume', 'check'):
                 getattr(vm, action)()
     elif flavor['ops'] is MIGRATE:
         for vm in vm_list:
@@ -83,6 +83,7 @@ def test():
             vm.check()
     elif flavor['ops'] is VM_VOLUME:
         volume = test_stub.create_multi_volumes(count=1)[0]
+        test_obj_dict.add_volume(volume)
         for vm in vm_list:
             volume.attach(vm)
             vm.check()
