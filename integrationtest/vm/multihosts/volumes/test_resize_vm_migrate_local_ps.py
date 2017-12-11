@@ -35,10 +35,17 @@ def test():
     vol_size_after = test_lib.lib_get_root_volume(vm.get_vm()).size
     if set_size != vol_size_after:
         test_util.test_fail('Resize Root Volume failed, size = %s' % vol_size_after)
+    vm.start()
+    vm.check()
 
     test_stub.migrate_vm_to_random_host(vm)
     vm.check()
+    vm.stop()
+    vm.check()
     
+    target_host = test_lib.lib_find_random_host(vm.get_vm())
+    vol_ops.migrate_volume(volume_uuid, target_host.uuid)
+    vm.start()
     vm.update()
     vol_size_after = test_lib.lib_get_root_volume(vm.get_vm()).size
     if set_size != vol_size_after:
