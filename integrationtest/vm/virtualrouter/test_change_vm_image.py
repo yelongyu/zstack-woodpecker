@@ -37,21 +37,10 @@ def test():
    primarystorage_uuid_after = test_lib.lib_get_root_volume(vm.get_vm()).primaryStorageUuid
    if primarystorage_uuid_after != last_primarystorage_uuid:
       test_util.test_fail('Change VM Image Failed.Primarystorage has changed.')
-   #ping vm
-   vm2 = test_stub.create_basic_vm()
-   test_obj_dict.add_vm(vm2)
-   vm2.check()
-   
+   #check whether the vm is running successfully
    test_lib.lib_wait_target_up(vm.get_vm().vmNics[0].ip,22)
-   test_lib.lib_wait_target_up(vm2.get_vm().vmNics[0].ip,22)
-   cmd = "ping %s -c 4" % vm.get_vm().vmNics[0].ip
-   rsp = test_lib.lib_execute_ssh_cmd(vm2.get_vm().vmNics[0].ip,'root','password',cmd,300)
-   if isinstance(rsp,bool):
-      if rsp == False:
-         test_util.test_fail('Test Ping VM Failed')
    
    vm.destroy()
-   vm2.destroy()
    test_util.test_pass('Change Vm Image Test Success')
 
 def error_cleanup():
