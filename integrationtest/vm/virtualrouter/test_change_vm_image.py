@@ -41,6 +41,9 @@ def test():
    vm2 = test_stub.create_basic_vm()
    test_obj_dict.add_vm(vm2)
    vm2.check()
+   
+   test_lib.lib_wait_target_up(vm.get_vm().vmNics[0].ip,22)
+   test_lib.lib_wait_target_up(vm2.get_vm().vmNics[0].ip,22)
    cmd = "ping %s -c 4" % vm.get_vm().vmNics[0].ip
    rsp = test_lib.lib_execute_ssh_cmd(vm2.get_vm().vmNics[0].ip,'root','password',cmd,300)
    if isinstance(rsp,bool):
