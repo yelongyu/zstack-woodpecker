@@ -376,3 +376,20 @@ def get_vm_capabilities(vm_uuid, session_uuid = None):
     action.uuid = vm_uuid
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
+	
+def change_vm_image(vm_uuid,image_uuid,session_uuid=None):
+   action = api_actions.ChangeVmImageAction()
+   action.vmInstanceUuid = vm_uuid
+   action.imageUuid = image_uuid
+   action.timeout = 240000
+   test_util.action_logger('Change image [imageUuid:] %s for vm [vmInstanceUuid:] %s' % (vm_uuid,image_uuid))
+   evt = account_operations.execute_action_with_session(action,session_uuid)
+   return evt.inventory
+   
+def get_image_candidates_for_vm_to_change(vm_uuid,session_uuid=None):
+   action = api_actions.GetImageCandidatesForVmToChangeAction()
+   action.vmInstanceUuid = vm_uuid
+   action.timeout = 2400000
+   test_util.action_logger('Get image candidates for vm [uuid:] %s to change' % vm_uuid)
+   evt = account_operations.execute_action_with_session(action,session_uuid)
+   return evt
