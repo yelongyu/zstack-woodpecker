@@ -29,6 +29,8 @@ def test():
    vm_ops.change_vm_image(vm_uuid,image_uuid)
    vm_ops.start_vm(vm_uuid)
    vm.update()
+   #check whether the vm is running successfully
+   test_lib.lib_wait_target_up(vm.get_vm().vmNics[0].ip,22)
    #check whether the network config has changed
    l3network_uuid_after = test_lib.lib_get_l3s_uuid_by_vm(vm.get_vm())
    if l3network_uuid_after != last_l3network_uuid:
@@ -37,8 +39,7 @@ def test():
    primarystorage_uuid_after = test_lib.lib_get_root_volume(vm.get_vm()).primaryStorageUuid
    if primarystorage_uuid_after != last_primarystorage_uuid:
       test_util.test_fail('Change VM Image Failed.Primarystorage has changed.')
-   #check whether the vm is running successfully
-   test_lib.lib_wait_target_up(vm.get_vm().vmNics[0].ip,22)
+   
    
    vm.destroy()
    test_util.test_pass('Change Vm Image Test Success')
