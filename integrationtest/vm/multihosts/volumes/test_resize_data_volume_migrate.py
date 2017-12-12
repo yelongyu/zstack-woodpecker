@@ -45,14 +45,14 @@ def test():
     if set_size != vol_size_after:
         test_util.test_fail('Resize Data Volume failed, size = %s' % vol_size_after)
 
-    volume.detach(vm)
+    volume.detach()
     vm.update()
     target_host = test_lib.lib_find_random_host(vm.get_vm())
     vol_ops.migrate_volume(volume_uuid, target_host.uuid)
 
     cond = res_ops.gen_query_conditions('uuid', '=', volume_uuid)
     data_volume = res_ops.query_resource(res_ops.VOLUME, cond)
-    vol_size_after = data_volume.size
+    vol_size_after = data_volume[0].size
     if set_size != vol_size_after:
         test_util.test_fail('Resize Data Volume failed, size = %s' % vol_size_after)
 

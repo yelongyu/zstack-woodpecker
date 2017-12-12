@@ -33,8 +33,8 @@ def test():
     l3_name = os.environ.get('l3VlanNetworkName1')
     vm = test_stub.create_vm("test_resize_vm", image_name, l3_name)
     vm.check()
-    test_obj_dict.add_vm(vm)
     volume.attach(vm)
+    test_obj_dict.add_vm(vm)
     vm.stop()
     vm.check()
 
@@ -44,7 +44,7 @@ def test():
     vol_size_after = test_lib.lib_get_data_volumes(vm.get_vm())[0].size
     if set_size != vol_size_after:
         test_util.test_fail('Resize Data Volume failed, size = %s' % vol_size_after)
-
+    vm.start()
     snapshots = test_obj_dict.get_volume_snapshot(volume_uuid)
     snapshots.set_utility_vm(vm)
     snapshots.create_snapshot('create_snapshot1')

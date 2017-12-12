@@ -52,8 +52,9 @@ def test():
     image_option.set_name('data_resize_template')
     image_option.set_backup_storage_uuid_list([bs_list[0].uuid])
     data_image = img_ops.create_data_volume_template(image_option)
+    target_host = test_lib.lib_find_random_host(vm.get_vm())
 
-    new_data = vol_ops.create_volume_from_template(data_image.uuid, volume.volume.primaryStorageUuid)
+    new_data = vol_ops.create_volume_from_template(data_image.uuid, volume.volume.primaryStorageUuid, host_uuid = target_host.uuid)
     if set_size != new_data.size:
         test_util.test_fail('Resize Data Volume failed, size = %s' % new_data.size)
 
