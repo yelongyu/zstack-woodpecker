@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-storage-separate-ceph.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-ceph-3-nets-sep.tmpt</scenarioConfigTemplate>
+</testConfig>
