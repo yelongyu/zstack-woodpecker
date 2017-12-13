@@ -715,9 +715,14 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
         node1_name = ceph_storages[ceph_storage][0]
         node1_config = get_scenario_config_vm(node1_name, scenario_config)
         node1_ip = get_scenario_file_vm(node1_name, scenario_file).ip_
-        node_host = get_deploy_host(node1_config.hostRef.text_, deploy_config)
-        if not hasattr(node_host, 'port_') or node_host.port_ == '22':
-            node_host.port_ = '22'
+        if not hasattr(node1_config, 'hostRef'):
+            node_host_port = '22'
+        else:
+            node_host = get_deploy_host(node1_config.hostRef.text_, deploy_config)
+            if not hasattr(node_host, 'port_') or node_host.port_ == '22':
+                node_host_port = '22'
+            else:
+                node_host_port = node_host.port_
 
         vm_ips = ''
         for ceph_node in ceph_storages[ceph_storage]:
@@ -727,9 +732,9 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
                 vm_ips += vm.ip_ + ' '
             else:
                 vm_ips += vm.ips.ip[vm_nic_id].ip_ + ' '
-        ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ceph_nodes.sh'), '/tmp/setup_ceph_nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host.port_))
+        ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ceph_nodes.sh'), '/tmp/setup_ceph_nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host_port))
         cmd = "bash -ex /tmp/setup_ceph_nodes.sh %s" % (vm_ips)
-        ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host.port_))
+        ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host_port))
 
 def setup_xsky_storages(scenario_config, scenario_file, deploy_config):
     #Stop nodes
