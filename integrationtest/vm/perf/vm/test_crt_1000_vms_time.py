@@ -144,9 +144,9 @@ def Create():
     vm_creation_option = test_util.VmOption()
     image_name = os.environ.get('imageName_s')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
-    l3_name = os.environ.get('l3PublicNetworkName')
 
-    l3 = test_lib.lib_get_l3_by_name(l3_name)
+    cond = res_ops.gen_query_conditions('category', '=', 'Private')
+    l3net_uuid = res_ops.query_resource(res_ops.L3_NETWORK, cond, session_uuid)[0].uuid
     l3s = test_lib.lib_get_l3s()
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
@@ -161,7 +161,7 @@ def Create():
     vm_creation_option.set_session_uuid(session_uuid)
 
     vm = test_vm_header.ZstackTestVm()
-    vm_creation_option.set_l3_uuids([l3.uuid])
+    vm_creation_option.set_l3_uuids([l3net_uuid])
           
     while vm_num > 0:
         check_thread_exception()
