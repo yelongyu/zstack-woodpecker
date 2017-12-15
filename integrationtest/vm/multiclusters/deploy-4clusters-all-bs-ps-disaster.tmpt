@@ -26,3 +26,5 @@ nfsPrimaryStorageName2 = nfs2
 clusterName2 = cluster2
 clusterName3 = cluster3
 clusterName4 = cluster4
+
+disasterBsUrls = root:password@disaster_host01
