@@ -70,8 +70,6 @@
 	  <backupStorageRef type="imageStore">$imageStoreBackupStorageName2</backupStorageRef>
           <primaryStorageRef type="nfs">$nfsPrimaryStorageName2</primaryStorageRef>
           <primaryStorageRef type="smp">$sharedMountPointPrimaryStorageName2</primaryStorageRef>
-        />
-      </primaryStorages>
         </vm>
       </vms>
     </host>
