@@ -1021,7 +1021,7 @@ def get_host_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, deplo
                         scenario_file = xmlobject.loads(xmlstr)
                         for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
                             if s_vm.name_ == vm.name_:
-                                if s_vm.managementIp_ != s_vm.ip_:
+                                if xmlobject.has_element(s_vm, 'managementIp_') and s_vm.managementIp_ != s_vm.ip_:
                                     return s_vm.managementIp_
                                 else:
                                     return s_vm.ip_

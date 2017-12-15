@@ -255,6 +255,19 @@ def get_mn_host(scenarioConfig, scenarioFile):
     test_util.test_logger("@@DEBUG@@: %s" %(str(mn_host_list)))
     return mn_host_list
 
+def get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, index):
+    test_util.test_logger("@@DEBUG@@:<scenarioConfig:%s><scenarioFile:%s><scenarioFile is existed: %s>" \
+                          %(str(scenarioConfig), str(scenarioFile), str(os.path.exists(scenarioFile))))
+    if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
+        return mn_host_list
+
+    test_util.test_logger("@@DEBUG@@: after config file exist check")
+    with open(scenarioFile, 'r') as fd:
+        xmlstr = fd.read()
+        fd.close()
+        scenario_file = xmlobject.loads(xmlstr)
+        return xmlobject.safe_list(scenario_file.vms.vm)[index]
+
 def migrate_mn_vm(origin_host, target_host, scenarioConfig):
     if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml"], ["scenario-config-nfs-sep-pub.xml"]) or \
        test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], ["scenario-config-ceph-sep-pub.xml"]):
@@ -311,6 +324,11 @@ def pick_randomized_ip(prefix="192.168.254."):
     combined_ip = prefix + str(var)
     return combined_ip
 
+def get_ceph_mon_addr(ceph_mon_ip):
+    cmd = r"ceph mon stat|grep -o '\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}:6789'"
+    ret, output, stderr = ssh.execute(cmd, ceph_mon_ip, "root", "password", False, 22)
+    return r"\"MonAddrs\": " + str(output.strip('\n').split('\n'))
+
 def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
     if len(mn_host_list) < 1:
@@ -324,6 +342,7 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
         if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-fusionstor-3-nets-sep.xml"], ["scenario-config-fusionstor-3-nets-sep.xml"]):
             os.system('sed -i s/host-%d/%s/g %s' % (i+1, mn_host_list[i].storageIp_,config_json))
         elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml"], ["scenario-config-nfs-sep-man.xml"]) or \
+                         test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], ["scenario-config-storage-separate-ceph.xml"]) or \
                          test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], ["scenario-config-ceph-sep-man.xml"]):
             os.system('sed -i s/host-%d/%s/g %s' % (i+1, mn_host_list[i].ip_,config_json))
         else:
@@ -365,6 +384,11 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
         os.system('sed -i s/stor_ip1/%s/g %s' % (stor_vm_ip,config_json))
         os.system('sed -i s/stor_netmask1/%s/g %s' % (stor_vm_netmask,config_json))
         os.system('sed -i s/stor_gateway1/%s/g %s' % (stor_vm_gateway,config_json))
+    elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], ["scenario-config-storage-separate-ceph.xml"]):
+        ceph_mon_ip = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, 0).ip_
+        os.system("sed -i '/MonAddrs/d' %s" % (config_json))
+        os.system("sed -i /Type/a\ \"%s\" %s" % (get_ceph_mon_addr(ceph_mon_ip), config_json))
+        os.system("sed -i 's:\"MonAddrs:  \"MonAddrs:g' %s" % (config_json))
 
 def prepare_etc_hosts(scenarioConfig, scenarioFile, deploy_config, config_json):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
@@ -401,15 +425,24 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
 
     if mn_ha_storage_type == 'ceph':
 
+        if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], ["scenario-config-storage-separate-ceph.xml"]):
+            ceph_node_ip = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, 0).ip_ 
+            mn_image_path = "/home/%s/mn.qcow2" % ceph_node_ip
+            ssh.scp_file(mn_img, mn_image_path, ceph_node_ip, test_host_config.imageUsername_, test_host_config.imagePassword_)
+            cmd0="yum install -y --disablerepo=* --enablerepo=zstack-local qemu-img"
+            test_util.test_logger("[%s] %s" % (ceph_node_ip, cmd0))
+            ssh.execute(cmd0, ceph_node_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+        else:
+            ceph_node_ip = test_host_ip
+
         cmd1="ceph osd pool create zstack 128"
-        test_util.test_logger("[%s] %s" % (test_host_ip, cmd1))
-        ssh.execute(cmd1, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+        test_util.test_logger("[%s] %s" % (ceph_node_ip, cmd1))
+        ssh.execute(cmd1, ceph_node_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
 
         cmd2="qemu-img convert -f qcow2 -O raw %s rbd:zstack/mnvm.img" % mn_image_path
-        test_util.test_logger("[%s] %s" % (test_host_ip, cmd2))
-        #ssh.execute(cmd2, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
-        if test_lib.lib_execute_ssh_cmd(test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, cmd2, timeout=7200 ) == False:
-            test_util.test_fail("fail to run cmd: %s on %s" %(cmd2, test_host_ip))
+        test_util.test_logger("[%s] %s" % (ceph_node_ip, cmd2))
+        if test_lib.lib_execute_ssh_cmd(ceph_node_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, cmd2, timeout=7200 ) == False:
+            test_util.test_fail("fail to run cmd: %s on %s" %(cmd2, ceph_node_ip))
 
     elif mn_ha_storage_type == 'nfs':
         prepare_etc_hosts(scenarioConfig, scenarioFile, deploy_config, config_json)
