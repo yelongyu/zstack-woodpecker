@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-4clusters-all-bs-ps-disaster.xml</deployConfig>
+    <deployConfigTemplate>deploy-4clusters-all-bs-ps-disaster.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
