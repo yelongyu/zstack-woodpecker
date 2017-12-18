@@ -39,7 +39,7 @@
           <hostRef>$hostName2</hostRef>
           <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
           <primaryStorageRef type="local" url="$localPrimaryStorageUrl">$localPrimaryStorageName</primaryStorageRef>
-          <primaryStorageRef type="smp">$sharedMountPointPrimaryStorageName</primaryStorageRef>
+          <primaryStorageRef type="smp" tag="smpserver">$sharedMountPointPrimaryStorageName</primaryStorageRef>
         </vm>
         <vm name="$vmName3" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
@@ -69,7 +69,7 @@
           <hostRef>$hostName4</hostRef>
 	  <backupStorageRef type="imageStore">$imageStoreBackupStorageName2</backupStorageRef>
           <primaryStorageRef type="nfs">$nfsPrimaryStorageName2</primaryStorageRef>
-          <primaryStorageRef type="smp">$sharedMountPointPrimaryStorageName2</primaryStorageRef>
+          <primaryStorageRef type="smp" tag="smpserver">$sharedMountPointPrimaryStorageName2</primaryStorageRef>
         </vm>
       </vms>
     </host>
