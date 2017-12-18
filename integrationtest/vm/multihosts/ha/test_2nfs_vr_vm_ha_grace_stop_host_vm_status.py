@@ -89,11 +89,12 @@ def test():
         test_util.test_fail('there is no host with ip %s in scenario file.' %(host_ip))
 
     test_stub.stop_host(test_host, test_lib.all_scenario_config)
+    test_stub.check_if_vm_starting_incorrectly_on_original_host(vm.get_vm().uuid, host_uuid, max_count=180)
 
     vm_stop_time = None
     cond = res_ops.gen_query_conditions('name', '=', vm_name)
     cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid, cond)
-    for i in range(0, 240):
+    for i in range(0, 60):
         vm_stop_time = i
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Stopped":
             test_stub.start_host(test_host, test_lib.all_scenario_config)
@@ -104,7 +105,7 @@ def test():
             break
         time.sleep(1)
 
-    for i in range(vm_stop_time, 240):
+    for i in range(vm_stop_time, 60):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Running":
             break
         time.sleep(1)
