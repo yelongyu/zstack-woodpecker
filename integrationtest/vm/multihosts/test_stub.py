@@ -1162,3 +1162,34 @@ def stop_ha_vm(vm_uuid, force=None, session_uuid=None):
     test_util.action_logger('Stop VM [uuid:] %s' % vm_uuid)
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
+
+
+def check_if_vm_starting_incorrectly_on_original_host(vm_uuid, host_uuid, max_count=180):
+    '''
+    This function is designed for Nfs/Ceph/SMP/FusionStor and etc kinds of shared primary storage.
+    Therefore, it should not be invoked when the env is local storage.
+
+    The following failed cases should be captured:
+        1. vm is starting && vm.hostUuid == original hostUuid
+        2. vm is running && vm.hostUuid == original hostUuid
+
+    The function should be exist in advance when checking the following case:
+        1. vm is running && vm.hostUuid != original hostUuid
+    '''
+    cond = res_ops.gen_query_conditions('uuid', '=', vm_uuid)
+    vm_stop_time = max_count
+    for i in range(0, max_count):
+        vm_stop_time = i
+        vm_inv = res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0]
+        if vm_inv.state == "Starting" and vm_inv.hostUuid == host_uuid:
+            test_util.test_fail('Find vm is starting incorrectly on original disconnected host %s' %(host_uuid))
+        elif vm_inv.state == "Running" and vm_inv.hostUuid == host_uuid:
+            test_util.test_fail('Find vm is running incorrectly on original disconnected host %s' %(host_uuid))
+        elif vm_inv.state == "Running" and vm_inv.hostUuid != host_uuid:
+            test_util.test_logger('Find vm is running correctly on another host %s' %(host_uuid))
+            break
+        time.sleep(1)
+    else:
+        test_util.test_logger("Checked %s rounds, not find vm is Starting and host is original" %(max_count))
+
+
