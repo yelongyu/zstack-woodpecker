@@ -777,7 +777,7 @@ def create_cluster1(vm_ip, zone_uuid, tmp_file):
 
     #return cluster_inv
 
-def add_kvm_host1(vm_ip, cluster_uuid, tmp_file)
+def add_kvm_host1(vm_ip, cluster_uuid, tmp_file):
     
     vm_username = os.environ['imageUsername']
     vm_password = os.environ['imagePassword']

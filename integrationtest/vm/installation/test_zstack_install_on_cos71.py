@@ -2,7 +2,7 @@
 @author: YeTian
 Test install management node with centos7.1 image and upgrade zstack iso and add the host
 '''
-import is
+import os
 import tempfile
 import uuid
 import time
@@ -15,7 +15,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.scenario_operations as sce_ops
 
 test_stub = test_lib.lib_get_test_stub()
-test_obj_dict = test_state.TestStateDirt()
+test_obj_dict = test_state.TestStateDict()
 tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
 zstack_management_ip = os.environ.get('zstackManagementIp')
 vm_inv = None
@@ -58,7 +58,7 @@ def test():
 
     target_file = '/root/zstack-all-in-one.tgz'
     test_stub.prepare_test_env(vm_inv, target_file)
-    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' %s vm_ip
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     args = "-o"
     test_stub.execute_install_with_args(ssh_cmd, args, target_file, tmp_file)
     test_stub.check_installation(vm_ip, tmp_file)
