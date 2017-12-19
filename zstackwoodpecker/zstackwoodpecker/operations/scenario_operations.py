@@ -5,7 +5,6 @@ scenario operations for setup zstack test.
 @author: quarkonics
 '''
 
-import zstacklib.utils.shell as shell
 import apibinding.api_actions as api_actions
 from apibinding import api
 import zstacklib.utils.xmlobject as xmlobject
@@ -22,7 +21,6 @@ import zstackwoodpecker.test_lib as test_lib
 import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.net_operations as net_ops
-import zstackwoodpecker.operations.vpc_operations as vpc_ops
 import zstackwoodpecker.operations.volume_operations as volume_ops
 import zstackwoodpecker.zstack_test.zstack_test_eip as zstack_eip_header
 import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
@@ -229,19 +227,10 @@ def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
     modify_cfg = []
     modify_cfg.append(r"cp /etc/sysconfig/network-scripts/ifcfg-eth0 /root/ifcfg-eth0;sync;sync;sync")
     for l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
-        if hasattr(l3network, 'scenl3NetworkRef'):
-            for scenl3networkref in xmlobject.safe_list(l3network.scenl3NetworkRef):
-                conf = res_ops.gen_query_conditions('name', '=', '%s' % (scenl3networkref.text_))
-                l3_network = query_resource(zstack_management_ip, res_ops.L3_NETWORK, conf).inventories[0]
-                for vmnic in vm_inv.vmNics:
-                    if vmnic.l3NetworkUuid == l3_network.uuid:
-                        vmnic_mac = vmnic.mac
-                        break
-        else:
-            for vmnic in vm_inv.vmNics:
-                if vmnic.l3NetworkUuid == l3network.uuid_:
-                    vmnic_mac = vmnic.mac
-                    break
+        for vmnic in vm_inv.vmNics:
+            if vmnic.l3NetworkUuid == l3network.uuid_:
+                vmnic_mac = vmnic.mac
+                break
         #nic_name = None
         #if hasattr(l3network, 'l2NetworkRef'):
         #    for l2networkref in xmlobject.safe_list(l3network.l2NetworkRef):
@@ -1126,15 +1115,15 @@ def create_zone(http_server_ip, zone_option, session_uuid=None):
 
 
 
-def create_cluster(http_server_ip, zone_uuid, cluster_option, session_uuid=None):
+def create_cluster(http_server_ip, cluster_option, session_uuid=None):
     action = api_actions.CreateClusterAction()
     action.timeout = 30000
     action.name = cluster_option.get_name()
     action.description = cluster_option.get_description()
     action.hypervisorType = cluster_option.get_hypervisor_type()
     action.type = cluster_option.get_type()
-    action.zoneuuid = zone_uuid
-    evt = account_operations.execute_action_with_session(http_server_ip, action, session_uuid)
+    action.zoneUuid = cluster_option.get_zone_uuid()
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
     test_util.action_logger('Create Cluster [uuid:] %s [name:] %s' % \
             (evt.uuid, action.name))
     return evt.inventory
@@ -1150,7 +1139,7 @@ def add_kvm_host(http_server_ip, host_option, session_uuid=None):
     action.name = host_option.get_name()
     action.sshPort = host_option.get_sshPort()
     action.description = host_option.get_description()
-    evt = account_operations.execute_action_with_session(http_server_ip, action, session_uuid)
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
     test_util.action_logger('Add KVM Host [uuid:] %s with [ip:] %s' % \
             (evt.uuid, action.managementIp))
     return evt.inventory
@@ -1366,97 +1355,6 @@ def query_resource(http_server_ip, resource, conditions = [], session_uuid=None,
     ret = execute_action_with_session(http_server_ip, action, session_uuid)
     return ret
 
-def create_vpc_vrouter(http_server_ip, name, virtualrouter_offering_uuid, resource_uuid=None, system_tags=None, use_tags=None, session_uuid=None):
-    action = api_actions.CreateVpcVRouterAction()
-    action.timeout = 300000
-    action.name = name
-    action.virtualRouterOfferingUuid = virtualrouter_offering_uuid
-    action.resourceUuid = resource_uuid
-    action.systemTags = system_tags
-    action.userTags = use_tags
-    evt = execute_action_with_session(http_server_ip, action, session_uuid)
-    return evt.inventory
-
-def create_l2_vlan(http_server_ip, name, physicalInterface, vlan, zone_uuid, session_uuid = None):
-    action = api_actions.CreateL2VlanNetworkAction()
-    action.name = name
-    action.physicalInterface = physicalInterface
-    action.vlan = vlan
-    action.zoneUuid = zone_uuid
-    action.timeout = 300000
-    evt = execute_action_with_session(http_server_ip, action, session_uuid)
-    return evt
-
-def delete_l2(http_server_ip, l2_uuid, session_uuid = None):
-    action = api_actions.DeleteL2NetworkAction()
-    action.uuid = l2_uuid
-    action.timeout = 300000
-    evt = execute_action_with_session(http_server_ip, action, session_uuid)
-    return evt
-
-def attach_l2(http_server_ip, l2_uuid, cluster_uuid, session_uuid = None):
-    action = api_actions.AttachL2NetworkToClusterAction()
-    action.clusterUuid = cluster_uuid
-    action.l2NetworkUuid = l2_uuid
-    evt = execute_action_with_session(http_server_ip, action, session_uuid)
-    return evt
-
-
-def create_l3(http_server_ip, l3Name, type, l2_uuid, dnsDomain, session_uuid = None):
-    action = api_actions.CreateL3NetworkAction()
-    action.sessionUuid = session_uuid
-    action.l2NetworkUuid = l2_uuid
-    action.name = l3Name
-    action.type = type
-    action.dnsDomain = dnsDomain
-    evt = execute_action_with_session(http_server_ip, action, session_uuid)
-    return evt
-
-def attach_network_service_to_l3network(http_server_ip, l3_uuid, service_uuid, session_uuid=None):
-    providers = {}
-    action = api_actions.AttachNetworkServiceToL3NetworkAction()
-    action.l3NetworkUuid = l3_uuid
-    providers[service_uuid] = ['VRouterRoute'] 
-    action.networkServices = providers
-    action.timeout = 12000
-    evt = execute_action_with_session(http_server_ip, action, session_uuid)
-    return evt
-
-def add_dns_to_l3(http_server_ip, l3_uuid, dns, session_uuid=None):
-    action = api_actions.AddDnsToL3NetworkAction()
-    action.sessionUuid = session_uuid
-    action.dns = dns
-    action.l3NetworkUuid = l3_uuid
-    evt = execute_action_with_session(http_server_ip, action, session_uuid)
-    return evt
-
-def add_ip_range(http_server_ip, name, l3_uuid, start_ip, end_ip, gateway, netmask, session_uuid=None):
-    action = api_actions.AddIpRangeAction()
-    action.sessionUuid = session_uuid
-    action.startIp = start_ip
-    action.endIp = end_ip
-    action.gateway = gateway
-    action.l3NetworkUuid = l3_uuid
-    action.name = name
-    action.netmask = netmask
-    evt = execute_action_with_session(http_server_ip, action, session_uuid)
-    return evt
-
-def add_network_service(http_server_ip, l3_uuid, allservices, session_uuid=None): 
-    action = api_actions.AttachNetworkServiceToL3NetworkAction()
-    action.sessionUuid = session_uuid
-    action.l3NetworkUuid = l3_uuid
-    action.networkServices = allservices
-    evt = execute_action_with_session(http_server_ip, action, session_uuid)
-    return evt
-
-def attach_l3(http_server_ip, l3_uuid, vm_uuid, session_uuid = None):
-    action = api_actions.AttachL3NetworkToVmAction()
-    action.l3NetworkUuid = l3_uuid
-    action.vmInstanceUuid = vm_uuid
-    evt = execute_action_with_session(http_server_ip, action, session_uuid)
-    return evt.inventory
-
 def get_mn_ha_storage_type(scenario_config, scenario_file, deploy_config):
     for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
         for vm in xmlobject.safe_list(host.vms.vm):
@@ -1465,12 +1363,9 @@ def get_mn_ha_storage_type(scenario_config, scenario_file, deploy_config):
 			return ps_ref.type_
 
 def get_host_management_ip(scenario_config, scenario_file, deploy_config, vm_inv, vm_config):
-    vr_offering = None
-    if deploy_config.hasattr('instanceOfferings'):
-        if deploy_config.instanceOfferings.hasattr('virtualRouterOffering'):
-            vr_offering = deploy_config.instanceOfferings.virtualRouterOffering
+    vr_offering = deploy_config.instanceOfferings.virtualRouterOffering
     # TODO: May have multiple virtualrouter offering
-    if vr_offering != None and vr_offering.publicL3NetworkRef.text_ != vr_offering.managementL3NetworkRef.text_:
+    if vr_offering.publicL3NetworkRef.text_ != vr_offering.managementL3NetworkRef.text_:
         for zone in xmlobject.safe_list(deploy_config.zones.zone):
             if hasattr(zone.l2Networks, 'l2NoVlanNetwork'):
                 for l2novlannetwork in xmlobject.safe_list(zone.l2Networks.l2NoVlanNetwork):
@@ -1513,67 +1408,6 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
     vms_xml = etree.SubElement(root_xml, 'vms')
     poolName = os.environ.get('poolName')
     primaryStorageUuid = os.environ.get('primaryStorageUuid')
-    if hasattr(scenario_config.deployerConfig, 'vpcVrouters'):
-        # Need to clean up left over VPC Vrouters
-        scenvpcVrouterCleanPattern = os.environ.get('scenvpcVrouterCleanPattern')
-        if scenvpcVrouterCleanPattern != None and scenvpcVrouterCleanPattern != "":
-            conf = res_ops.gen_query_conditions('name', 'like', '%%%s%%' % (scenvpcVrouterCleanPattern))
-            vr_list = query_resource(zstack_management_ip, res_ops.APPLIANCE_VM, conf).inventories
-            for vr in vr_list:
-                destroy_vm(zstack_management_ip, vr.uuid_)
-
-        for vpcvrouter in xmlobject.safe_list(scenario_config.deployerConfig.vpcVrouters.vpcVrouter):
-            vr_inv = create_vpc_vrouter(zstack_management_ip, name=vpcvrouter.name_, virtualrouter_offering_uuid=vpcvrouter.virtualRouterOfferingUuid_)
-
-    vpc_l3_uuid = None
-    if hasattr(scenario_config.deployerConfig, 'l2Networks'):
-        if hasattr(scenario_config.deployerConfig.l2Networks, 'l2VlanNetwork'):
-            for l2network in xmlobject.safe_list(scenario_config.deployerConfig.l2Networks.l2VlanNetwork):
-                # Need to clean up left over VPC networks
-                scenvpcZoneUuid = os.environ.get('scenvpcZoneUuid')
-                conf = res_ops.gen_query_conditions('physicalInterface', '=', '%s' % (l2network.physicalInterface_))
-                l2_network_list = query_resource(zstack_management_ip, res_ops.L2_NETWORK, conf).inventories
-                for l2_network in l2_network_list:
-                    if l2network.vlan_ != None and l2network.vlan_ != "":
-                        if str(l2_network.vlan) == str(l2network.vlan_):
-                            delete_l2(zstack_management_ip, l2_network.uuid)
-                l2_inv = create_l2_vlan(zstack_management_ip, l2network.name_, l2network.physicalInterface_, l2network.vlan_, scenvpcZoneUuid).inventory
-                scenl2Clusters = os.environ.get('scenl2Clusters').split(',')
-                for scenl2cluster in scenl2Clusters:
-                    attach_l2(zstack_management_ip, l2_inv.uuid, scenl2cluster)
-                for l3network in xmlobject.safe_list(l2network.l3Networks.l3BasicNetwork):
-                    l3_inv = create_l3(zstack_management_ip, l3network.name_, l3network.type_, l2_inv.uuid, l3network.domain_name_, session_uuid = None).inventory
-                    vpc_l3_uuid = l3_inv.uuid
-                    if xmlobject.has_element(l3network, 'dns'):
-                        for dns in xmlobject.safe_list(l3network.dns):
-                            add_dns_to_l3(zstack_management_ip, l3_inv.uuid, dns.text_)
-                    if xmlobject.has_element(l3network, 'ipRange'):
-                        for ir in xmlobject.safe_list(l3network.ipRange):
-                            add_ip_range(zstack_management_ip, ir.name_, l3_inv.uuid, ir.startIp_, ir.endIp_, ir.gateway_, ir.netmask_)
-                    if xmlobject.has_element(l3network, 'networkService'):
-                        network_provider_list = query_resource(zstack_management_ip, res_ops.NETWORK_SERVICE_PROVIDER, []).inventories
-                        providers = {}
-                        for network_provider in network_provider_list:
-                            providers[network_provider.name] = network_provider.uuid
-                        allservices = {}
-                        for ns in xmlobject.safe_list(l3network.networkService):
-                            puuid = providers.get(ns.provider_)
-                            if not puuid:
-                                raise test_util.TestError('cannot find network service provider[%s], it may not have been added' % ns.provider_)
-
-                            servs = []
-                            for nst in xmlobject.safe_list(ns.serviceType):
-                                servs.append(nst.text_)
-                            allservices[puuid] = servs
-
-                        add_network_service(zstack_management_ip, l3_inv.uuid, allservices)
-                    attach_l3(zstack_management_ip, l3_inv.uuid, vr_inv.uuid)
-        woodpecker_vm_ip = shell.call("ip r | grep src | head -1 | awk '{print $NF}'").strip()
-        cond = res_ops.gen_query_conditions('vmNics.ip', '=', woodpecker_vm_ip)
-        woodpecker_vm = query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0]
-        attach_l3(zstack_management_ip, l3_inv.uuid, woodpecker_vm.uuid)
-        shell.call('dhclient eth0')
-
     if hasattr(scenario_config.deployerConfig, 'hosts'):
         for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
             for vm in xmlobject.safe_list(host.vms.vm):
@@ -1583,18 +1417,9 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 default_l3_uuid = None
                 l3_cnt = 0
                 for l3network in xmlobject.safe_list(vm.l3Networks.l3Network):
-                    if hasattr(l3network, 'scenl3NetworkRef'):
-                        for scenl3networkref in xmlobject.safe_list(l3network.scenl3NetworkRef):
-                            conf = res_ops.gen_query_conditions('name', '=', '%s' % (scenl3networkref.text_))
-                            l3_network = query_resource(zstack_management_ip, res_ops.L3_NETWORK, conf).inventories[0]
-                        l3_uuid_list.append(l3_network.uuid)
-                        if not default_l3_uuid:
-                            default_l3_uuid = l3_network.uuid
-                    else:
-                        l3_uuid_list.append(l3network.uuid_)
-                        if not default_l3_uuid:
-                            default_l3_uuid = l3network.uuid_
-
+                    if not default_l3_uuid:
+                        default_l3_uuid = l3network.uuid_
+                    l3_uuid_list.append(l3network.uuid_)
                 while len(l3_uuid_list) >=3:
                     for l3_uuid in l3_uuid_list:
                         if l3_uuid == os.environ.get('vmStorageL3Uuid') or l3_uuid == os.environ.get('vmManageL3Uuid'): 

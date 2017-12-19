@@ -63,46 +63,30 @@ def test():
     test_stub.execute_install_with_args(ssh_cmd, args, target_file, tmp_file)
     test_stub.check_installation(vm_ip, tmp_file)
 
-    test_stub.create_zone1(vm_ip, tmp_file)
     zone_inv = test_stub.create_zone1(vm_ip, tmp_file)
     zone_uuid = zone_inv.uuid
     print zone_uuid
    
-    test_stub.create_cluster1(vm_ip, zone_uuid, tmp_file)
     cluster_inv = test_stub.create_cluster1(vm_ip, zone_uuid, tmp_file)
     cluster_uuid = cluster_inv.uuid
     print cluster_uuid
 
-    test_stub.add_kvm_host1(vm_ip, cluster_uuid, tmp_file)
     host_inv = test_stub.add_kvm_host1(vm_ip, cluster_uuid, tmp_file)
     host_uuid = host_inv.uuid
     print host_uuid
 
-    #os.system('rm -f %s' % tmp_file)
-    #sce_ops.destroy_vm(zstack_management_ip, vm_inv.uuid)
+    os.system('rm -f %s' % tmp_file)
+    sce_ops.destroy_vm(zstack_management_ip, vm_inv.uuid)
     test_util.test_pass('Install ZStack with -o  Success')
 
 
 def error_cleanup():
     global vm_inv
+    global zone_inv
+    global cluster_inv
+    global host_inv
 
-    #os.system('rm -f %s' % tmp_file)
-    #sce_ops.destroy_vm(zstack_management_ip, vm_inv.uuid)
+    os.system('rm -f %s' % tmp_file)
+    sce_ops.destroy_vm(zstack_management_ip, vm_inv.uuid)
     test_lib.lib_error_cleanup(test_obj_dict)
     
-
-
-
-
-
-
-
-
-
-
-
-     
-
-
-
-
