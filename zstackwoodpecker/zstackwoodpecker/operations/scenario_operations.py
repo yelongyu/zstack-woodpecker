@@ -1115,13 +1115,14 @@ def create_zone(http_server_ip, zone_option, session_uuid=None):
 
 
 
-def create_cluster(http_server_ip, cluster_option, session_uuid=None):
+def create_cluster(http_server_ip, zone_uuid, cluster_option, session_uuid=None):
     action = api_actions.CreateClusterAction()
     action.timeout = 30000
     action.name = cluster_option.get_name()
     action.description = cluster_option.get_description()
     action.hypervisorType = cluster_option.get_hypervisor_type()
     action.type = cluster_option.get_type()
+    action.zoneuuid = zone_uuid
     evt = account_operations.execute_action_with_session(http_server_ip, action, session_uuid)
     test_util.action_logger('Create Cluster [uuid:] %s [name:] %s' % \
             (evt.uuid, action.name))
@@ -1136,8 +1137,8 @@ def add_kvm_host(http_server_ip, host_option, session_uuid=None):
     action.password = host_option.get_password()
     action.managementIp = host_option.get_management_ip()
     action.name = host_option.get_name()
+    action.sshPort = host_option.get_sshPort()
     action.description = host_option.get_description()
-    action.hostTags = host_option.get_host_tags()
     evt = account_operations.execute_action_with_session(http_server_ip, action, session_uuid)
     test_util.action_logger('Add KVM Host [uuid:] %s with [ip:] %s' % \
             (evt.uuid, action.managementIp))

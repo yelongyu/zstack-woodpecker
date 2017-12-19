@@ -759,3 +759,36 @@ def check_zstack_or_mevoco(vm_ip, tmp_file, zom):
         test_util.test_fail('try to install %s, but current version is %s' % (zom, version))
 
 
+def create_zone1(vm_ip, tmp_file):
+    zone_option = test_util.ZoneOption()
+    zone_option.name = 'Zone1'
+    zone_option.description = 'Zone1'
+    zone_inv = scen_ops.create_zone(vm_ip, zone_option)
+
+    #return zone_inv
+
+def create_cluster1(vm_ip, zone_uuid, tmp_file):
+    cluster_option = test_util.ClusterOption()
+    cluster_option.name = 'Cluster1'
+    cluster_option.description = 'Cluster1'
+    cluster_option.hypervisorType = 'KVM'
+    cluster_option.zoneUuid = zone_uuid
+    cluster_inv = scen_ops.create_cluster(vm_ip, Cluster_option)
+
+    #return cluster_inv
+
+def add_kvm_host1(vm_ip, cluster_uuid, tmp_file)
+    
+    vm_username = os.environ['imageUsername']
+    vm_password = os.environ['imagePassword']
+
+    host_option = test_util.HostOption()
+    host_option.clusterUuid = cluster_uuid
+    host_option.username = vm_username
+    host_option.password = vm_password
+    host_option.managementIp = vm_ip
+    host_option.sshPort = '22'
+    host_option.name = 'HOST1'
+    host_inv = scen_ops.add_kvm_host(vm_ip, host_option)
+
+    #return host_inv

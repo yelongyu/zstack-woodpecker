@@ -284,6 +284,10 @@ class DataOption(object):
     def get_user_tags(self):
         return self.user_tags
 
+class ZoneOption(DataOption):
+    def __init__(self):
+        super(ZoneOption, self).__init__()
+
 class ClusterOption(DataOption):
     def __init__(self):
         self.hypervisor_type = None
