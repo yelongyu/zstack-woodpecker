@@ -24,12 +24,12 @@ def create_vm(image):
     l3_name = os.environ.get('l3PublicNetworkNames')
     l3_net_uuid =  test_lib.lib_get_l3_by_name(l3_name).uuid
     image_uuid = image.uuid
-    vm_name = 'zs_install_%s' % image.name
+    vm_name = 'zs_install_test_centos71_%s' % image.name
     vm_instance_offering_uuid = os.environ.get('instanceOfferingUuid')
     
     vm_creation_option = test_util.VmOption()
     vm_creation_option.set_instance_offering_uuid(vm_instance_offering_uuid)
-    vm_creation_option.set_l3_uuid([l3_net_uuid])
+    vm_creation_option.set_l3_uuids([l3_net_uuid])
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_name(vm_name)
     vm_inv = sce_ops.create_vm(zstack_management_ip, vm_creation_option)
