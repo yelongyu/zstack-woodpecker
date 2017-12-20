@@ -565,33 +565,33 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
                     if primaryStorageRef.type_ == 'ocfs2smp':
                         #directly return when find the current config is for ocfs2
                         return
-                for smpPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.sharedMountPointPrimaryStorage):
-                    if primaryStorageRef.text_ == smpPrimaryStorage.name_:
-                        test_util.test_logger('[vm:] %s setup smp service.' % (vm_ip))
-                        for primaryStorageRef in xmlobject.safe_list(vm_config.primaryStorageRef):
-                            if primaryStorageRef.type_ == 'smp':
-                                if hasattr(primaryStorageRef, 'tag_') and primaryStorageRef.tag_ == "smpserver":
-                                    nfsPath = "/home/nfs"
-                                    cmd = "echo '%s *(rw,sync,no_root_squash)' > /etc/exports" % (nfsPath)
-                                    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-                                    cmd = "mkdir -p %s && service rpcbind restart && service nfs restart" % (nfsPath)
-                                    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-                                    cmd = "iptables -w 20 -I INPUT -p tcp -m tcp --dport 2049 -j ACCEPT && iptables -w 20 -I INPUT -p udp -m udp --dport 2049 -j ACCEPT"
-                                    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-                                    SMP_SERVER_IP = vm_ip
-                                    return
-                                else:
-                                    if not SMP_SERVER_IP:
-                                        test_util.test_fail("smp server can't be None, SMP_SERVER_IP=%s" %(str(SMP_SERVER_IP)))
-                                    cmd = "mkdir -p /home/smp-ps/"
-                                    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-                                    cmd = "echo 'mount %s:/home/nfs /home/smp-ps/' >> /etc/rc.local" %(SMP_SERVER_IP)
-                                    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-                                    cmd = "chmod a+x /etc/rc.d/rc.local"
-                                    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-                                    cmd = "mount %s:/home/nfs /home/smp-ps/" %(SMP_SERVER_IP)
-                                    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-                                    return
+                    for smpPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.sharedMountPointPrimaryStorage):
+                        if primaryStorageRef.text_ == smpPrimaryStorage.name_:
+                            test_util.test_logger('[vm:] %s setup smp service.' % (vm_ip))
+                            for primaryStorageRef in xmlobject.safe_list(vm_config.primaryStorageRef):
+                                if primaryStorageRef.type_ == 'smp':
+                                    if hasattr(primaryStorageRef, 'tag_') and primaryStorageRef.tag_ == "smpserver":
+                                        nfsPath = "/home/nfs"
+                                        cmd = "echo '%s *(rw,sync,no_root_squash)' > /etc/exports" % (nfsPath)
+                                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                                        cmd = "mkdir -p %s && service rpcbind restart && service nfs restart" % (nfsPath)
+                                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                                        cmd = "iptables -w 20 -I INPUT -p tcp -m tcp --dport 2049 -j ACCEPT && iptables -w 20 -I INPUT -p udp -m udp --dport 2049 -j ACCEPT"
+                                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                                        SMP_SERVER_IP = vm_ip
+                                        return
+                                    else:
+                                        if not SMP_SERVER_IP:
+                                            test_util.test_fail("smp server can't be None, SMP_SERVER_IP=%s" %(str(SMP_SERVER_IP)))
+                                        cmd = "mkdir -p /home/smp-ps/"
+                                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                                        cmd = "echo 'mount %s:/home/nfs /home/smp-ps/' >> /etc/rc.local" %(SMP_SERVER_IP)
+                                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                                        cmd = "chmod a+x /etc/rc.d/rc.local"
+                                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                                        cmd = "mount %s:/home/nfs /home/smp-ps/" %(SMP_SERVER_IP)
+                                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                                        return
 
 def get_scenario_config_vm(vm_name, scenario_config):
     for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
