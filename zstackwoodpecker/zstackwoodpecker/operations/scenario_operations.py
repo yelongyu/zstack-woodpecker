@@ -551,14 +551,16 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
                     if primaryStorageRef.text_ == nfsPrimaryStorage.name_:
                         test_util.test_logger('[vm:] %s setup nfs service.' % (vm_ip))
                         # TODO: multiple NFS PS may refer to same host's different DIR
-                        nfsPath = nfsPrimaryStorage.url_.split(':')[1]
-                        cmd = "echo '%s *(rw,sync,no_root_squash)' > /etc/exports" % (nfsPath)
-                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-                        cmd = "mkdir -p %s && service rpcbind restart && service nfs restart" % (nfsPath)
-                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-                        cmd = "iptables -w 20 -I INPUT -p tcp -m tcp --dport 2049 -j ACCEPT && iptables -w 20 -I INPUT -p udp -m udp --dport 2049 -j ACCEPT"
-                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-                        return
+                        for primaryStorageRef in xmlobject.safe_list(vm_config.primaryStorageRef):
+                            if primaryStorageRef.type_ == 'nfs':
+                                nfsPath = nfsPrimaryStorage.url_.split(':')[1]
+                                cmd = "echo '%s *(rw,sync,no_root_squash)' > /etc/exports" % (nfsPath)
+                                ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                                cmd = "mkdir -p %s && service rpcbind restart && service nfs restart" % (nfsPath)
+                                ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                                cmd = "iptables -w 20 -I INPUT -p tcp -m tcp --dport 2049 -j ACCEPT && iptables -w 20 -I INPUT -p udp -m udp --dport 2049 -j ACCEPT"
+                                ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                                return
             elif primary_storage_type == 'smp': 
                 #the type is get from deploy, here we also need to define the condition based on scenario config
                 for primaryStorageRef in xmlobject.safe_list(vm_config.primaryStorageRef):
