@@ -41,7 +41,8 @@ def test():
     global zone_inv
     global cluster_inv
     global host_inv
-    test_util.test_dsc('Create test vm to test zstack install MN and add the HOST')
+
+    test_util.test_dsc('Create test vm to test zstack install MN on centos7.1 and add the HOST')
     
     conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_c71'))
     image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
@@ -51,43 +52,51 @@ def test():
     upgrade_script_path = os.environ.get('upgradeScript')
 
     test_util.test_dsc('Install zstack with -o')
+
     vm_ip = vm_inv.vmNics[0].ip
     test_stub.make_ssh_no_password(vm_ip, tmp_file)
     test_util.test_dsc('Upgrade master iso')
+
     test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
 
     target_file = '/root/zstack-all-in-one.tgz'
     test_stub.prepare_test_env(vm_inv, target_file)
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     args = "-o"
-    test_stub.execute_install_with_args(ssh_cmd, args, target_file, tmp_file)
-    test_stub.check_installation(vm_ip, tmp_file)
 
-    test_stub.create_zone1(vm_ip, tmp_file)
+    test_util.test_dsc('start install the latest zstack-MN')
+
+    test_stub.execute_install_with_args(ssh_cmd, args, target_file, tmp_file)
+
+    test_util.test_dsc('check the add the sftp BS and delete sftp bs')
+    test_stub.check_installation(vm_ip, tmp_file)\
+
+    test_util.test_dsc('create zone names is zone1')
     zone_inv = test_stub.create_zone1(vm_ip, tmp_file)
     zone_uuid = zone_inv.uuid
-    print zone_uuid
-   
-    test_stub.create_cluster1(vm_ip, zone_uuid, tmp_file)
+
+    test_util.test_dsc('create cluster names is clsuter1')
     cluster_inv = test_stub.create_cluster1(vm_ip, zone_uuid, tmp_file)
     cluster_uuid = cluster_inv.uuid
-    print cluster_uuid
 
-    test_stub.add_kvm_host1(vm_ip, cluster_uuid, tmp_file)
+    test_util.test_dsc('add HOST names is HOST1')
     host_inv = test_stub.add_kvm_host1(vm_ip, cluster_uuid, tmp_file)
     host_uuid = host_inv.uuid
-    print host_uuid
 
-    #os.system('rm -f %s' % tmp_file)
-    #sce_ops.destroy_vm(zstack_management_ip, vm_inv.uuid)
+    os.system('rm -f %s' % tmp_file)
+    sce_ops.destroy_vm(zstack_management_ip, vm_inv.uuid)
     test_util.test_pass('Install ZStack with -o  Success')
 
 
 def error_cleanup():
     global vm_inv
+    global zone_inv
+    global cluster_inv
+    global host_inv
 
-    #os.system('rm -f %s' % tmp_file)
-    #sce_ops.destroy_vm(zstack_management_ip, vm_inv.uuid)
+    test_util.test_dsc('Create test vm to test zstack install MN on centos7.1 and add the HOST')
+    os.system('rm -f %s' % tmp_file)
+    sce_ops.destroy_vm(zstack_management_ip, vm_inv.uuid)
     test_lib.lib_error_cleanup(test_obj_dict)
     
 

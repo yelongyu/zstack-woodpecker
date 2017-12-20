@@ -765,17 +765,17 @@ def create_zone1(vm_ip, tmp_file):
     zone_option.description = 'Zone1'
     zone_inv = scen_ops.create_zone(vm_ip, zone_option)
 
-    #return zone_inv
+    return zone_inv
 
 def create_cluster1(vm_ip, zone_uuid, tmp_file):
     cluster_option = test_util.ClusterOption()
     cluster_option.name = 'Cluster1'
     cluster_option.description = 'Cluster1'
-    cluster_option.hypervisorType = 'KVM'
-    cluster_option.zoneUuid = zone_uuid
+    cluster_option.hypervisor_type = 'KVM'
+    cluster_option.zone_uuid = zone_uuid
     cluster_inv = scen_ops.create_cluster(vm_ip, Cluster_option)
 
-    #return cluster_inv
+    return cluster_inv
 
 def add_kvm_host1(vm_ip, cluster_uuid, tmp_file):
     
@@ -791,4 +791,5 @@ def add_kvm_host1(vm_ip, cluster_uuid, tmp_file):
     host_option.name = 'HOST1'
     host_inv = scen_ops.add_kvm_host(vm_ip, host_option)
 
-    #return host_inv
+    return host_inv
+
