@@ -1114,6 +1114,7 @@ def delete_backup_storage(http_server_ip, backup_storage_uuid, session_uuid=None
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     return evt.inventory
 
+
 def create_zone(http_server_ip, zone_option, session_uuid=None):
     action = api_actions.CreateZoneAction()
     action.timeout = 30000
@@ -1126,15 +1127,15 @@ def create_zone(http_server_ip, zone_option, session_uuid=None):
 
 
 
-def create_cluster(http_server_ip, zone_uuid, cluster_option, session_uuid=None):
+def create_cluster(http_server_ip, cluster_option, session_uuid=None):
     action = api_actions.CreateClusterAction()
     action.timeout = 30000
     action.name = cluster_option.get_name()
     action.description = cluster_option.get_description()
     action.hypervisorType = cluster_option.get_hypervisor_type()
     action.type = cluster_option.get_type()
-    action.zoneuuid = zone_uuid
-    evt = account_operations.execute_action_with_session(http_server_ip, action, session_uuid)
+    action.zoneuuid = cluster_option.get_zone_uuid()
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
     test_util.action_logger('Create Cluster [uuid:] %s [name:] %s' % \
             (evt.uuid, action.name))
     return evt.inventory
@@ -1150,7 +1151,7 @@ def add_kvm_host(http_server_ip, host_option, session_uuid=None):
     action.name = host_option.get_name()
     action.sshPort = host_option.get_sshPort()
     action.description = host_option.get_description()
-    evt = account_operations.execute_action_with_session(http_server_ip, action, session_uuid)
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
     test_util.action_logger('Add KVM Host [uuid:] %s with [ip:] %s' % \
             (evt.uuid, action.managementIp))
     return evt.inventory
@@ -1164,7 +1165,7 @@ def create_local_primary_storage(http_server_ip, primary_storage_option, session
     action.type = primary_storage_option.get_type()
     action.url = primary_storage_option.get_url()
     action.zoneUuid = primary_storage_option.get_zone_uuid()
-    evt = account_operations.execute_action_with_session(http_server_ip, action, session_uuid)
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
     test_util.action_logger('Create Primary Storage [uuid:] %s [name:] %s' % \
             (evt.inventory.uuid, action.name))
     return evt.inventory
@@ -1182,7 +1183,7 @@ def add_data_volume_template(http_server_ip, image_option):
     action.format = image_option.get_format()
     action.backupStorageUuids = image_option.get_backup_storage_list()
     test_util.action_logger('Add [Volume:] %s from [url:] %s ' % (action.name, action.url))
-    evt = account_operations.execute_action_with_session(http_server_ip, action, image_option.get_session_uuid())
+    evt = execute_action_with_session(http_server_ip, action, image_option.get_session_uuid())
 
     test_util.test_logger('[volume:] %s is added.' % evt.inventory.uuid)
     return evt.inventory
