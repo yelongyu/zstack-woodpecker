@@ -36,7 +36,6 @@
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
           </l3Networks>
-          <hostRef>$hostName2</hostRef>
           <backupStorageRef type="imageStore">$imageStoreBackupStorageName2</backupStorageRef>
           <primaryStorageRef type="smp" tag="smpserver">$sharedMountPointPrimaryStorageName</primaryStorageRef>
         </vm>
@@ -80,7 +79,6 @@
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
           </l3Networks>
-          <hostRef>$hostName4</hostRef>
           <backupStorageRef type="imageStore">$imageStoreBackupStorageName2</backupStorageRef>
           <primaryStorageRef type="smp" tag="smpserver">$sharedMountPointPrimaryStorageName2</primaryStorageRef>
         </vm>
