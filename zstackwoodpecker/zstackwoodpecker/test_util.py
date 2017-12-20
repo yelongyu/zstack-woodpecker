@@ -308,7 +308,7 @@ class ClusterOption(DataOption):
         return self.type
 
     def set_zone_uuid(self, zone_uuid):
-        return self.zone_uuid = zone_uuid
+        self.zone_uuid = zone_uuid
 
     def get_zone_uuid(self):
         return self.zone_uuid
