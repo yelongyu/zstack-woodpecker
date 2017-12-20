@@ -284,10 +284,15 @@ class DataOption(object):
     def get_user_tags(self):
         return self.user_tags
 
+class ZoneOption(DataOption):
+    def __init__(self):
+        super(ZoneOption, self).__init__()
+
 class ClusterOption(DataOption):
     def __init__(self):
         self.hypervisor_type = None
         self.type = 'zstack'
+        self.zone_uuid = None
         super(ClusterOption, self).__init__()
 
     def set_hypervisor_type(self, hypervisor_type):
@@ -301,6 +306,12 @@ class ClusterOption(DataOption):
 
     def get_type(self):
         return self.type
+
+    def set_zone_uuid(self, zone_uuid):
+        self.zone_uuid = zone_uuid
+
+    def get_zone_uuid(self):
+        return self.zone_uuid
 
 class IpRangeOption(DataOption):
     def __init__(self):
