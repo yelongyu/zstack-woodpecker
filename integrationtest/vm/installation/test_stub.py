@@ -773,7 +773,7 @@ def create_cluster1(vm_ip, zone_uuid, tmp_file):
     cluster_option.description = 'Cluster1'
     cluster_option.hypervisor_type = 'KVM'
     cluster_option.zone_uuid = zone_uuid
-    cluster_inv = scen_ops.create_cluster(vm_ip, Cluster_option)
+    cluster_inv = scen_ops.create_cluster(vm_ip, cluster_option)
 
     return cluster_inv
 
