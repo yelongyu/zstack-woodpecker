@@ -21,7 +21,7 @@ zstack_management_ip = os.environ.get('zstackManagementIp')
 vm_inv = None
 
 def create_vm(image):
-    l3_name = os.environ.get('l3PublicNetworkNames')
+    l3_name = os.environ.get('l3PublicNetworkName')
     l3_net_uuid =  test_lib.lib_get_l3_by_name(l3_name).uuid
     image_uuid = image.uuid
     vm_name = 'zs_install_test_centos71_%s' % image.name
