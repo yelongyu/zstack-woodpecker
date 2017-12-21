@@ -1588,7 +1588,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
         attach_l3(zstack_management_ip, l3_inv.uuid, woodpecker_vm.uuid)
         shell.call('dhclient eth0')
         shell.call('ip route del default || true')
-        shell.call('ip route add default dev eth0')
+        shell.call('ip route add default via %s dev eth0' % last_ip_gateway)
         shell.call('ip route del 192.168.0.0/16')
 #        for ip_range in ip_ranges:
 #            if last_ip_range != ip_range:
