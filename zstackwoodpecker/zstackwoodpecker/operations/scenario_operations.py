@@ -1500,6 +1500,16 @@ def get_host_storage_network_ip(scenario_config, scenario_file, deploy_config, v
                             return test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_l3network.uuid_).ip
     return None
 
+def map_ip_range(ip_addr):
+    net_addr = ip_addr.split('.')
+    net_addr[-1] = '0'
+    return ('.').join(net_addr)
+
+def map_ip_gateway(ip_addr):
+    net_addr = ip_addr.split('.')
+    net_addr[-1] = '1'
+    return ('.').join(net_addr)
+
 def deploy_scenario(scenario_config, scenario_file, deploy_config):
     vm_inv_lst = []
     vm_cfg_lst = []
@@ -1526,6 +1536,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
     vpc_l3_uuid = None
     if hasattr(scenario_config.deployerConfig, 'l2Networks'):
         if hasattr(scenario_config.deployerConfig.l2Networks, 'l2VlanNetwork'):
+            # This currently depend on mapping to hardcoded IP range
+            ip_ranges = []
             for l2network in xmlobject.safe_list(scenario_config.deployerConfig.l2Networks.l2VlanNetwork):
                 # Need to clean up left over VPC networks
                 scenvpcZoneUuid = os.environ.get('scenvpcZoneUuid')
@@ -1548,6 +1560,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     if xmlobject.has_element(l3network, 'ipRange'):
                         for ir in xmlobject.safe_list(l3network.ipRange):
                             add_ip_range(zstack_management_ip, ir.name_, l3_inv.uuid, ir.startIp_, ir.endIp_, ir.gateway_, ir.netmask_)
+                            if map_ip_range(ir.gateway_) not in ip_ranges:
+                                ip_ranges.append(map_ip_range(ir.gateway_))
+                                last_ip_range = map_ip_range(ir.gateway_)
+                                last_ip_gateway = map_ip_gateway(ir.gateway_)
                     if xmlobject.has_element(l3network, 'networkService'):
                         network_provider_list = query_resource(zstack_management_ip, res_ops.NETWORK_SERVICE_PROVIDER, []).inventories
                         providers = {}
@@ -1571,6 +1587,13 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
         woodpecker_vm = query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0]
         attach_l3(zstack_management_ip, l3_inv.uuid, woodpecker_vm.uuid)
         shell.call('dhclient eth0')
+        shell.call('ip route del default || true')
+        shell.call('ip route add default dev eth0')
+        shell.call('ip route del 192.168.0.0/16')
+#        for ip_range in ip_ranges:
+#            if last_ip_range != ip_range:
+#                shell.call('ip route del %s/24 || true' % ip_range)
+#                shell.call('ip route add %s/24 via %s dev eth0' % (ip_range, last_ip_gateway))
 
     if hasattr(scenario_config.deployerConfig, 'hosts'):
         for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
