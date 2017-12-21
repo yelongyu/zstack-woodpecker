@@ -1131,7 +1131,7 @@ def create_cluster(http_server_ip, cluster_option, session_uuid=None):
     action.description = cluster_option.get_description()
     action.hypervisorType = cluster_option.get_hypervisor_type()
     action.type = cluster_option.get_type()
-    action.zoneuuid = cluster_option.get_zone_uuid()
+    action.zoneUuid = cluster_option.get_zone_uuid()
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     test_util.action_logger('Create Cluster [uuid:] %s [name:] %s' % \
             (evt.uuid, action.name))
