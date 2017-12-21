@@ -35,7 +35,7 @@ def test():
     #image_option.set_system_tags('qemuga')
     image_option.set_mediaType('RootVolumeTemplate')
     image_option.set_url(os.environ.get('imageUrl_s'))
-    image_option.set_backup_storage_uuid_list([bss[0].uuid])
+    #image_option.set_backup_storage_uuid_list([bss[0].uuid])
     image_option.set_timeout(3600*1000)
 
     image1 = zstack_image_header.ZstackTestImage()
