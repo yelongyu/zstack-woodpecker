@@ -10,6 +10,7 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_image as test_image
+import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
