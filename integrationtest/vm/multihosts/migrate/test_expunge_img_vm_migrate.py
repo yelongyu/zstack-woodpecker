@@ -29,6 +29,9 @@ def test():
     if len(hosts) <= 1:
         test_util.test_skip("skip for host_num is not satisfy condition host_num>1")
 
+    bs_cond = res_ops.gen_query_conditions("status", '=', "Connected")
+    bss = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, bs_cond, None, fields=['uuid'])
+
     image_name1 = 'image1_a'
     image_option = test_util.ImageOption()
     image_option.set_format('qcow2')
@@ -36,7 +39,7 @@ def test():
     #image_option.set_system_tags('qemuga')
     image_option.set_mediaType('RootVolumeTemplate')
     image_option.set_url(os.environ.get('imageUrl_s'))
-    #image_option.set_backup_storage_uuid_list([bss[0].uuid])
+    image_option.set_backup_storage_uuid_list([bss[0].uuid])
     image_option.set_timeout(3600*1000)
 
     image1 = zstack_image_header.ZstackTestImage()
@@ -44,7 +47,9 @@ def test():
     image1.add_root_volume_template()
     image1.check()
 
-    vm1 = test_stub.create_vm(image_name = image_name1)
+    image_name = os.environ.get('imageName_net')
+    l3_name = os.environ.get('l3VlanNetworkName1')
+    vm1 = test_stub.create_vm(image_name1, image_name, l3_name)
     test_obj_dict.add_vm(vm1)
 
     image1.delete()
