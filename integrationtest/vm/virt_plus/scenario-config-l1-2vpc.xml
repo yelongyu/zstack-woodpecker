@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-l1-2vpc.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-l1-2vpc.tmpt</scenarioConfigTemplate>
+</testConfig>

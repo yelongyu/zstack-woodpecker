@@ -1589,7 +1589,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
         shell.call('dhclient eth0')
         shell.call('ip route del default || true')
         shell.call('ip route add default via %s dev eth0' % last_ip_gateway)
-        shell.call('ip route del 192.168.0.0/16')
+        shell.call('ip route del 192.168.0.0/16 || true')
 #        for ip_range in ip_ranges:
 #            if last_ip_range != ip_range:
 #                shell.call('ip route del %s/24 || true' % ip_range)
