@@ -4165,6 +4165,8 @@ def lib_error_cleanup(test_dict):
             pass
 
 def lib_robot_status_check(test_dict):
+    test_util.test_logger("- - - Robot check skip - - -" )
+    return
     print 'target checking test dict: %s' % test_dict
     test_util.test_logger('- - - check running VMs status - - -')
     for vm in test_dict.get_vm_list(vm_header.RUNNING):
