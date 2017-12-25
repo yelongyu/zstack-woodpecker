@@ -26,7 +26,7 @@
             gateway="$scenvpcIpRangeGateway1"
             netmask="$scenvpcIpRangeNetmask1"/>
           <dns>$DNSServer</dns> 
-          <networkService provider="VirtualRouter">
+          <networkService provider="vrouter">
             <serviceType>DHCP</serviceType>
             <serviceType>DNS</serviceType>
             <serviceType>SNAT</serviceType>
@@ -53,7 +53,7 @@
             gateway="$scenvpcIpRangeGateway2"
             netmask="$scenvpcIpRangeNetmask2"/>
           <dns>$DNSServer</dns> 
-          <networkService provider="VirtualRouter">
+          <networkService provider="vrouter">
             <serviceType>DHCP</serviceType>
             <serviceType>DNS</serviceType>
             <serviceType>SNAT</serviceType>
