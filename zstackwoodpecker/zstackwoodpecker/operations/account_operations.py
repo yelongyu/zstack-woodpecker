@@ -157,5 +157,15 @@ def share_resources(account_uuid_list, resource_uuid_list, to_public = None, \
     test_util.action_logger('Share [Resources]: %s to [Accounts]: %s' % \
             (resource_uuid_list, account_uuid_list))
     return evt
+	
+def update_quota(identity_uuid,name,value,session_uuid=None):
+   action = api_actions.UpdateQuotaAction()
+   action.identityUuid = identity_uuid
+   action.name = name
+   action.value = value
+   action.timeout = 240000
+   evt = execute_action_with_session(action,session_uuid)
+   test_util.action_logger('Update resource [name:] %s value to %s of account [identityUuid] %s ' % (name,value,identity_uuid))
+   return evt.inventory	
 
 #result=create_account('c','password','Normal')
