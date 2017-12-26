@@ -1,6 +1,0 @@
-<testConfig>
-    <!--simulator kvm environment -->
-    <deployConfig>deploy_sim_kvm.xml</deployConfig>
-    <deployConfigTemplate>deploy_sim_kvm.tmpt</deployConfigTemplate>
-    <pingTestTarget>www.google.com</pingTestTarget>
-</testConfig>
