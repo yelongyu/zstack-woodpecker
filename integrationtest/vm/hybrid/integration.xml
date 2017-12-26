@@ -46,7 +46,7 @@
         <case timeout='600' repeat='1' noparallel='True'>test_attach_aliyun_disk.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_create_aliyun_snapshot.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_sync_delete_aliyun_snapshot_local.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>test_delete_attached_aliyun_disk.py</case>
+        <!-- <case timeout='600' repeat='1' noparallel='True'>test_delete_attached_aliyun_disk.py</case> -->
         <case timeout='600' repeat='1' noparallel='True'>test_update_aliyun_disk.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_datacenter_unique.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_iz_unique.py</case>
