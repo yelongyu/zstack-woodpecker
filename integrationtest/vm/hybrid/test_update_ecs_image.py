@@ -5,6 +5,7 @@ New Integration Test for hybrid.
 @author: Legion
 '''
 
+import time
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
@@ -25,6 +26,7 @@ def test():
 
 def env_recover():
     if hybrid.ecs_image:
+        time.sleep(300)
         hybrid.del_ecs_image()
 
     if hybrid.oss_bucket_create:

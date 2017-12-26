@@ -118,7 +118,7 @@ class HybridObject(object):
                 raise hyb_ops.ApiError("Failed to add DataCenter: %s" % err_list)
             # Add Identity Zone
             iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, r)
-            vpn_gateway_list = []
+            vpn_gateway_normal = []
             prepaid_ecs_list = []
             for iz in iz_list:
                 if not iz.availableInstanceTypes:
@@ -126,10 +126,11 @@ class HybridObject(object):
                 iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter.uuid, iz.zoneId)
                 if check_vpn_gateway:
                     vpn_gateway_list = hyb_ops.sync_vpc_vpn_gateway_from_remote(datacenter.uuid)
-                    if iz_inv and vpn_gateway_list:
+                    vpn_gateway_normal = [gw for gw in vpn_gateway_list if gw.businessStatus == 'Normal']
+                    if iz_inv and vpn_gateway_normal:
                         self.datacenter = datacenter
                         self.iz = iz_inv
-                        self.vpn_gateway = vpn_gateway_list[0]
+                        self.vpn_gateway = vpn_gateway_normal[0]
                         return
                     else:
                         self.del_iz(iz_inv.uuid)
@@ -158,13 +159,13 @@ class HybridObject(object):
                     self.dc_uuid = datacenter.uuid
                     self.zone_id = iz_inv.zoneId
                     return
-            if check_vpn_gateway and vpn_gateway_list:
+            if check_vpn_gateway and vpn_gateway_normal:
                 break
             elif check_prepaid_ecs and prepaid_ecs_list:
                 break
             else:
                 hyb_ops.del_datacenter_in_local(datacenter.uuid)
-        if check_vpn_gateway and not vpn_gateway_list:
+        if check_vpn_gateway and not vpn_gateway_normal:
             test_util.test_fail("VpnGate for ipsec vpn connection was not found in all available dataCenter")
         elif check_prepaid_ecs and not prepaid_ecs_list:
             test_util.test_fail("Prepaid ECS was not found in all available dataCenter")
@@ -443,9 +444,9 @@ class HybridObject(object):
         self.get_eip(sync_eip=True)
         assert self.eip.status.lower() == 'available'
 
-    def check_eip_accessibility(self):
-        self.get_eip(in_use=True)
-        cmd = "sshpass -p Password123 ssh -o StrictHostKeyChecking=no root@%s 'ls /'" % self.eip.eipAddress
+    def check_eip_accessibility(self, eip):
+#         self.get_eip(in_use=True)
+        cmd = "sshpass -p Password123 ssh -o StrictHostKeyChecking=no root@%s 'ls /'" % eip
         for _ in xrange(60):
             cmd_status = commands.getstatusoutput(cmd)[0]
             if cmd_status == 0:

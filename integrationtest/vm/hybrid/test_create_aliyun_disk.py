@@ -17,7 +17,7 @@ hybrid = test_stub.HybridObject()
 def test():
     hybrid.add_datacenter_iz()
     hybrid.create_aliyun_disk()
-    time.sleep(50)
+    time.sleep(90)
     hybrid.del_aliyun_disk()
     test_util.test_pass('Create Aliyun Disk Test Success')
 

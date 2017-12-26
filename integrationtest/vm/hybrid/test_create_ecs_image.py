@@ -5,6 +5,7 @@ New Integration Test for hybrid.
 @author: Quarkonics
 '''
 
+import time
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
@@ -17,6 +18,7 @@ def test():
     hybrid.add_datacenter_iz(add_datacenter_only=True)
     hybrid.add_bucket()
     hybrid.create_ecs_image()
+    time.sleep(300)
     hybrid.del_ecs_image()
     test_util.test_pass('Create Delete Ecs Image Test Success')
 
