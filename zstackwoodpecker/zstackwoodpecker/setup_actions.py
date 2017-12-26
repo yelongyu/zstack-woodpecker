@@ -875,7 +875,10 @@ default one' % self.zstack_properties)
                 #consider some zstack-server is running in vm, the server 
                 # startup speed is slow. Increase timeout to 180s.
                 if linux.is_ip_existing(node.ip_):
-                    cmd = 'zstack-ctl stop; nohup zstack-ctl start'
+                    if os.environ.get('ZSTACK_SIMULATOR') == "yes":
+                        cmd = 'zstack-ctl stop; zstack-ctl configure unitTestOn=true; nohup zstack-ctl start_node --simulator -DredeployDB=true'
+                    else:
+                        cmd = 'zstack-ctl stop; nohup zstack-ctl start'
                     thread = threading.Thread(target=shell_cmd_thread, args=(cmd, True, ))
                 elif not linux.is_ip_existing(node1.ip_):
                     # when first node1 ip is not local, it usualy means woodpecker is running on hosts other than MN
