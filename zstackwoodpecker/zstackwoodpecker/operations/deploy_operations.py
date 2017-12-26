@@ -19,6 +19,9 @@ import sys
 import traceback
 import threading
 import time
+import urllib3
+import types
+import simplejson
 
 #global exception information for thread usage
 exc_info = []
@@ -1640,6 +1643,177 @@ def add_virtual_router(scenarioConfig, scenarioFile, deployConfig, session_uuid,
         thread.start()
 
     wait_for_thread_done()
+
+def json_post(uri, body=None, headers={}, method='POST', fail_soon=False):
+    ret = []
+    def post(_):
+        try:
+            pool = urllib3.PoolManager(timeout=120.0, retries=urllib3.util.retry.Retry(15))
+            header = {'Content-Type': 'application/json', 'Connection': 'close'}
+            for k in headers.keys():
+                header[k] = headers[k]
+
+            if body is not None:
+                assert isinstance(body, types.StringType)
+                header['Content-Length'] = str(len(body))
+                content = pool.urlopen(method, uri, headers=header, body=str(body)).data
+            else:
+                header['Content-Length'] = '0'
+                content = pool.urlopen(method, uri, headers=header).data
+
+            pool.clear()
+            ret.append(content)
+            return True
+        except Exception as e:
+            if fail_soon:
+                raise e
+            return False
+
+    post(None)
+    return ret[0]
+
+#Add Backup Storage
+def add_simulator_backup_storage(scenarioConfig, scenarioFile, deployConfig):
+    resources = []
+    if xmlobject.has_element(deployConfig, 'backupStorages.sftpBackupStorage'):
+        for bs in xmlobject.safe_list(deployConfig.backupStorages.sftpBackupStorage):
+            data = {}
+            data['type'] = 'SftpBackupStorage'
+            data['data'] = {}
+            data['data']['ip'] = bs.hostname_
+            data['data']['path'] = bs.url_
+            data['data']['id'] = bs.name_
+            resources.append(data)
+
+    if xmlobject.has_element(deployConfig, 'backupStorages.imageStoreBackupStorage'):
+        for bs in xmlobject.safe_list(deployConfig.backupStorages.imageStoreBackupStorage):
+            data = {}
+            data['type'] = 'ImageStoreBackupStorage'
+            data['data'] = {}
+            data['data']['ip'] = bs.hostname_
+            data['data']['path'] = bs.url_
+            data['data']['id'] = bs.name_
+            resources.append(data)
+
+    if xmlobject.has_element(deployConfig, 'backupStorages.cephBackupStorage'):
+        for bs in xmlobject.safe_list(deployConfig.backupStorages.cephBackupStorage):
+            data = {}
+            data['type'] = 'CephBackupStorage'
+            data['data'] = {}
+            data['data']['fsid'] = "445ce4c1-bab0-449e-a684-a3fe80be844d"
+            data['data']['id'] = bs.name_
+            resources.append(data)
+            for mon_url in bs.monUrls_.split(';'):
+                mon_data = {}
+                mon_data['type'] = 'CephBackupStorageMon'
+                mon_data['data'] = {}
+                mon_data['data']['ip'] = mon_url.split('@')[1]
+                mon_data['data']['id'] = mon_data['data']['ip']
+                mon_data['data']['cephId'] = bs.name_
+                resources.append(mon_data)
+
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    url = "http://%s:8080/zstack/simulators/batch-create" % (mn_ip)
+    ret = json_post(url, simplejson.dumps({"resources": resources}))
+
+#Add Primary Storage
+def add_simulator_primary_storage(scenarioConfig, scenarioFile, deployConfig):
+    if not xmlobject.has_element(deployConfig, 'zones.zone'):
+        test_util.test_logger('Not find zones.zone in config, skip primary storage deployment')
+        return
+
+    resources = []
+    for zone in xmlobject.safe_list(deployConfig.zones.zone):
+        if xmlobject.has_element(zone, 'primaryStorages.localPrimaryStorage'):
+            for pr in xmlobject.safe_list(zone.primaryStorages.localPrimaryStorage):
+                data = {}
+                data['type'] = 'LocalStorage'
+                data['data'] = {}
+                data['data']['path'] = pr.url_
+                data['data']['id'] = pr.name_
+                resources.append(data)
+    
+        if xmlobject.has_element(zone, 'primaryStorages.cephPrimaryStorage'):
+            for pr in xmlobject.safe_list(zone.primaryStorages.cephPrimaryStorage):
+                data = {}
+                data['type'] = 'CephPrimaryStorage'
+                data['data'] = {}
+                data['data']['fsid'] = "445ce4c1-bab0-449e-a684-a3fe80be844d"
+                data['data']['id'] = pr.name_
+                resources.append(data)
+                for mon_url in pr.monUrls_.split(';'):
+                    mon_data = {}
+                    mon_data['type'] = 'CephPrimaryStorageMon'
+                    mon_data['data'] = {}
+                    mon_data['data']['ip'] = mon_url.split('@')[1]
+                    mon_data['data']['id'] = mon_data['data']['ip']
+                    mon_data['data']['cephId'] = pr.name_
+                    resources.append(mon_data)
+    
+        if xmlobject.has_element(zone, 'primaryStorages.nfsPrimaryStorage'):
+            for pr in xmlobject.safe_list(zone.primaryStorages.nfsPrimaryStorage):
+                data = {}
+                data['type'] = 'NfsPrimaryStorage'
+                data['data'] = {}
+                data['data']['id'] = pr.name_
+                data['data']['ip'] = pr.url_.split(':')[0]
+                data['data']['mountPoint'] = pr.url_.split(':')[1]
+                resources.append(data)
+    
+        if xmlobject.has_element(zone, 'primaryStorages.sharedMountPointPrimaryStorage'):
+            for pr in xmlobject.safe_list(zone.primaryStorages.sharedMountPointPrimaryStorage):
+                data = {}
+                data['type'] = 'SharedMountPointPrimaryStorage'
+                data['data'] = {}
+                data['data']['path'] = pr.url_
+                data['data']['id'] = pr.name_
+                resources.append(data)
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    url = "http://%s:8080/zstack/simulators/batch-create" % (mn_ip)
+    ret = json_post(url, simplejson.dumps({"resources": resources}))
+
+#Add Host
+def add_simulator_host(scenarioConfig, scenarioFile, deployConfig):
+    if not xmlobject.has_element(deployConfig, 'zones.zone'):
+        test_util.test_logger('Not find zones.zone in config, skip primary storage deployment')
+        return
+
+    resources = []
+    for zone in xmlobject.safe_list(deployConfig.zones.zone):
+        if not xmlobject.has_element(zone, 'clusters.cluster'):
+            continue
+
+        for cluster in xmlobject.safe_list(zone.clusters.cluster):
+            for host in xmlobject.safe_list(cluster.hosts.host):
+                data = {}
+                data['type'] = 'KvmHost'
+                data['data'] = {}
+                data['data']['username'] = host.username_
+                data['data']['password'] = host.password__
+                data['data']['id'] = host.name_
+                data['data']['ip'] = host.managementIp_
+                resources.append(data)
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    url = "http://%s:8080/zstack/simulators/batch-create" % (mn_ip)
+    ret = json_post(url, simplejson.dumps({"resources": resources}))
+
+def deploy_simulator_database(deploy_config, scenario_config = None, scenario_file = None):
+    operations = [
+            add_simulator_backup_storage,
+            add_simulator_primary_storage,
+            add_simulator_host
+            ]
+    for operation in operations:
+        try:
+            operation(scenario_config, scenario_file, deploy_config)
+        except Exception as e:
+            test_util.test_logger('[Error] zstack simluator deployment meets exception when doing: %s . The real exception are:.' % operation.__name__)
+            print('----------------------Exception Reason------------------------')
+            traceback.print_exc(file=sys.stdout)
+            print('-------------------------Reason End---------------------------\n')
+            raise e
+
+    test_util.test_logger('[Done] zstack simulator database was created successfully.')
 
 def deploy_initial_database(deploy_config, scenario_config = None, scenario_file = None):
     operations = [
