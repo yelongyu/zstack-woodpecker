@@ -4,7 +4,6 @@
 '''
 
 import os
-import zstackwoodpecker.setup_actions as setup_actions
 import zstackwoodpecker.operations.scenario_operations as scenario_operations
 import zstackwoodpecker.operations.deploy_operations as deploy_operations
 import zstackwoodpecker.operations.config_operations as config_operations
@@ -20,9 +19,7 @@ def test():
     if test_lib.scenario_config != None and test_lib.scenario_destroy != None:
         scenario_operations.destroy_scenario(test_lib.all_scenario_config, test_lib.scenario_destroy)
 
-    setup = setup_actions.SetupAction()
-    setup.plan = test_lib.all_config
-    setup.run()
+    test_lib.setup_plan.execute_plan_without_deploy_test_agent()
 
     if test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
         mn_ips = deploy_operations.get_nodes_from_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
