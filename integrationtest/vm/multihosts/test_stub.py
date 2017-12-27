@@ -1215,7 +1215,7 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
     import zstackwoodpecker.operations.vm_operations as vm_ops
     test_obj_dict = test_state.TestStateDict()
 
-    if vm_ops_test_choice not in dir(VM_OPS_TEST): 
+    if vm_ops_test_choice not in VM_OPS_TEST: 
         test_util.test_fail( "Find not support vm operation" )
 
     if vm_ops_test_choice == "VM_TEST_NONE":
@@ -1223,6 +1223,7 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         return
 
     if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_MIGRATE":
+        test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_MIGRATE")
         ps = test_lib.lib_get_primary_storage_by_vm(vm_obj.get_vm())[0]
         if ps.type in [ inventory.CEPH_PRIMARY_STORAGE_TYPE, 'SharedMountPoint', inventory.NFS_PRIMARY_STORAGE_TYPE ]:
             pass
@@ -1240,6 +1241,7 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
             vm_obj.check()
 
     if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_SNAPSHOT":
+        test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_SNAPSHOT")
         vm_root_volume_inv = test_lib.lib_get_root_volume(vm_obj.get_vm())
         snapshots_root = test_obj_dict.get_volume_snapshot(vm_root_volume_inv.uuid)
         snapshots_root.set_utility_vm(vm_obj)
@@ -1253,6 +1255,10 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         ssh.execute(cmd, vm_obj.get_vm().vmNics[0].ip, "root", "password", True, 22)
 
     if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_STATE":
+        test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_STATE")
+        vm_ops.vm_stop(vm_obj.vm.uuid, 'cold')
+        vm_obj.update()
+        vm_obj.check()
         vm_obj.stop()
         vm_obj.check()
         vm_obj.start()
@@ -1263,6 +1269,7 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         vm_obj.check()
 
     if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_REIMAGE":
+        test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_REIMAGE")
         cmd = "touch /opt/beforeReimage"
         ssh.execute(cmd, vm_obj.get_vm().vmNics[0].ip, "root", "password", True, 22)
         vm_obj.stop()
@@ -1275,6 +1282,7 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         ssh.execute(cmd, vm_obj.get_vm().vmNics[0].ip, "root", "password", True, 22)
 
     if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_ATTACH":
+        test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_ATTACH")
         cond = res_ops.gen_query_conditions("status", '=', "Connected")
         bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
         img_option = test_util.ImageOption()
@@ -1295,6 +1303,7 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         vm_obj.check()
 
     if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_RESIZE_VOL":
+        test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_RESIZE_VOL")
         vol_size = test_lib.lib_get_root_volume(vm_obj.get_vm()).size
         volume_uuid = test_lib.lib_get_root_volume(vm_obj.get_vm()).uuid
         set_size = 1024*1024*1024*7
@@ -1305,6 +1314,7 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
             test_util.test_fail('Resize Root Volume failed, size = %s' % vol_size_after)
 
     if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_CHANGE_OS":
+        test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_CHANGE_OS")
         vm_uuid = vm_obj.get_vm().uuid
         last_l3network_uuid = test_lib.lib_get_l3s_uuid_by_vm(vm_obj.get_vm())
         last_ps_uuid = test_lib.lib_get_root_volume(vm_obj.get_vm()).primaryStorageUuid
