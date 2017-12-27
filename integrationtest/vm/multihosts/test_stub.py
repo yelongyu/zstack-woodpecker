@@ -1310,7 +1310,7 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         vm_obj.check()
 
         test_util.test_dsc("@@@==>ATTACH VOLUME")
-        disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName'))
+        disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOffering'))
         volume_creation_option = test_util.VolumeOption()
         volume_creation_option.set_name('volume1')
         volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
@@ -1321,7 +1321,7 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         volume.detach(vm_obj.get_vm().uuid)
 
         test_util.test_dsc("@@@==>ATTACH SHAREABLE VOLUME")
-        disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName'))
+        disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOffering'))
         volume_creation_option = test_util.VolumeOption()
         volume_creation_option.set_name('shareable_volume1')
         volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
