@@ -1683,6 +1683,10 @@ def add_simulator_backup_storage(scenarioConfig, scenarioFile, deployConfig):
             data['data']['ip'] = bs.hostname_
             data['data']['path'] = bs.url_
             data['data']['id'] = bs.name_
+	    if hasattr(bs, 'totalCapacity_') and bs.totalCapacity_ != "":
+               	data['data']['totalCapacity'] = bs.totalCapacity_
+	    if hasattr(bs, 'availableCapacity_') and bs.availableCapacity_ != "":
+               	data['data']['availableCapacity'] = bs.availableCapacity_
             resources.append(data)
 
     if xmlobject.has_element(deployConfig, 'backupStorages.imageStoreBackupStorage'):
@@ -1702,6 +1706,10 @@ def add_simulator_backup_storage(scenarioConfig, scenarioFile, deployConfig):
             data['data'] = {}
             data['data']['fsid'] = "445ce4c1-bab0-449e-a684-a3fe80be844d"
             data['data']['id'] = bs.name_
+	    if hasattr(bs, 'totalCapacity_') and bs.totalCapacity_ != "":
+               	data['data']['totalCapacity'] = bs.totalCapacity_
+	    if hasattr(bs, 'availableCapacity_') and bs.availableCapacity_ != "":
+               	data['data']['availableCapacity'] = bs.availableCapacity_
             resources.append(data)
             for mon_url in bs.monUrls_.split(';'):
                 mon_data = {}
@@ -1731,6 +1739,10 @@ def add_simulator_primary_storage(scenarioConfig, scenarioFile, deployConfig):
                 data['data'] = {}
                 data['data']['path'] = pr.url_
                 data['data']['id'] = pr.name_
+	        if hasattr(pr, 'totalCapacity_') and pr.totalCapacity_ != "":
+                    data['data']['totalCapacity'] = pr.totalCapacity_
+	        if hasattr(pr, 'availableCapacity_') and pr.availableCapacity_ != "":
+                    data['data']['availableCapacity'] = pr.availableCapacity_
                 resources.append(data)
     
         if xmlobject.has_element(zone, 'primaryStorages.cephPrimaryStorage'):
@@ -1740,6 +1752,10 @@ def add_simulator_primary_storage(scenarioConfig, scenarioFile, deployConfig):
                 data['data'] = {}
                 data['data']['fsid'] = "445ce4c1-bab0-449e-a684-a3fe80be844d"
                 data['data']['id'] = pr.name_
+	        if hasattr(pr, 'totalCapacity_') and pr.totalCapacity_ != "":
+                    data['data']['totalCapacity'] = pr.totalCapacity_
+	        if hasattr(pr, 'availableCapacity_') and pr.availableCapacity_ != "":
+                    data['data']['availableCapacity'] = pr.availableCapacity_
                 resources.append(data)
                 for mon_url in pr.monUrls_.split(';'):
                     mon_data = {}
@@ -1758,6 +1774,10 @@ def add_simulator_primary_storage(scenarioConfig, scenarioFile, deployConfig):
                 data['data']['id'] = pr.name_
                 data['data']['ip'] = pr.url_.split(':')[0]
                 data['data']['mountPoint'] = pr.url_.split(':')[1]
+	        if hasattr(pr, 'totalCapacity_') and pr.totalCapacity_ != "":
+                    data['data']['totalCapacity'] = bs.totalCapacity_
+	        if hasattr(pr, 'availableCapacity_') and pr.availableCapacity_ != "":
+                    data['data']['availableCapacity'] = pr.availableCapacity_
                 resources.append(data)
     
         if xmlobject.has_element(zone, 'primaryStorages.sharedMountPointPrimaryStorage'):
@@ -1767,6 +1787,10 @@ def add_simulator_primary_storage(scenarioConfig, scenarioFile, deployConfig):
                 data['data'] = {}
                 data['data']['path'] = pr.url_
                 data['data']['id'] = pr.name_
+	        if hasattr(pr, 'totalCapacity_') and pr.totalCapacity_ != "":
+                    data['data']['totalCapacity'] = pr.totalCapacity_
+	        if hasattr(pr, 'availableCapacity_') and pr.availableCapacity_ != "":
+                    data['data']['availableCapacity'] = pr.availableCapacity_
                 resources.append(data)
     mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
     url = "http://%s:8080/zstack/simulators/batch-create" % (mn_ip)
@@ -1792,6 +1816,18 @@ def add_simulator_host(scenarioConfig, scenarioFile, deployConfig):
                 data['data']['password'] = host.password__
                 data['data']['id'] = host.name_
                 data['data']['ip'] = host.managementIp_
+		if hasattr(host, 'cpuNum_') and host.cpuNum_ != "":
+                    data['data']['cpuNum'] = host.cpuNum_
+		if hasattr(host, 'totalCpu_') and host.totalCpu_ != "":
+                    data['data']['totalCpu'] = host.totalCpu_
+		if hasattr(host, 'cpuSockets_') and host.cpuSockets_ != "":
+                    data['data']['cpuSockets'] = host.cpuSockets_
+		if hasattr(host, 'usedCpu_') and host.usedCpu_ != "":
+                    data['data']['usedCpu'] = host.usedCpu_
+		if hasattr(host, 'totalMemory_') and host.totalMemory_ != "":
+                    data['data']['totalMemory'] = host.totalMemory_
+		if hasattr(host, 'usedMemory_') and host.usedMemory_ != "":
+                    data['data']['usedMemory'] = host.usedMemory_
                 resources.append(data)
     mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
     url = "http://%s:8080/zstack/simulators/batch-create" % (mn_ip)
