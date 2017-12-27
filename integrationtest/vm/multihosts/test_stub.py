@@ -1193,3 +1193,134 @@ def check_if_vm_starting_incorrectly_on_original_host(vm_uuid, host_uuid, max_co
         test_util.test_logger("Checked %s rounds, not find vm is Starting and host is original" %(max_count))
 
 
+VM_OPS_TEST = [
+"VM_TEST_NONE", 
+"VM_TEST_MIGRATE",
+"VM_TEST_SNAPSHOT",
+"VM_TEST_STATE",
+"VM_TEST_REIMAGE",
+"VM_TEST_ATTACH",
+"VM_TEST_RESIZE_VOL",
+"VM_TEST_CHANGE_OS",
+"VM_TEST_ALL"
+]
+
+
+def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
+    '''
+    This function provides vm operation related test
+    '''
+    import zstackwoodpecker.zstack_test.zstack_test_image as test_image
+    import zstackwoodpecker.operations.volume_operations as vol_ops
+    import zstackwoodpecker.operations.vm_operations as vm_ops
+    test_obj_dict = test_state.TestStateDict()
+
+    if vm_ops_test_choice not in dir(VM_OPS_TEST): 
+        test_util.test_fail( "Find not support vm operation" )
+
+    if vm_ops_test_choice == "VM_TEST_NONE":
+        test_util.test_logger( "VM_OPS_TEST.VM_TEST_NONE, therefore, skip vm_ops function" )
+        return
+
+    if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_MIGRATE":
+        ps = test_lib.lib_get_primary_storage_by_vm(vm_obj.get_vm())[0]
+        if ps.type in [ inventory.CEPH_PRIMARY_STORAGE_TYPE, 'SharedMountPoint', inventory.NFS_PRIMARY_STORAGE_TYPE ]:
+            pass
+        elif ps.type in [ inventory.LOCAL_STORAGE_TYPE ]:
+            vm_obj.stop()
+            vm_obj.check()
+        else:
+            test_util.test_fail("FOUND NEW STORAGTE TYPE. FAILED")
+
+        target_host = test_lib.lib_find_random_host(vm_obj.vm)
+        vm_obj.migrate(target_host.uuid)
+
+        if ps.type in [ inventory.LOCAL_STORAGE_TYPE ]:
+            vm_obj.start()
+            vm_obj.check()
+
+    if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_SNAPSHOT":
+        vm_root_volume_inv = test_lib.lib_get_root_volume(vm_obj.get_vm())
+        snapshots_root = test_obj_dict.get_volume_snapshot(vm_root_volume_inv.uuid)
+        snapshots_root.set_utility_vm(vm_obj)
+        snapshots_root.create_snapshot('create_data_snapshot1')
+        snapshots_root.check()
+        sp1 = snapshots_root.get_current_snapshot()
+        cmd = "touch /opt/check_snapshot"
+        ssh.execute(cmd, vm_obj.get_vm().vmNics[0].ip, "root", "password", True, 22)
+        snapshots_root.use_snapshot(sp1)
+        cmd = "! test -f /opt/check_snapshot"
+        ssh.execute(cmd, vm_obj.get_vm().vmNics[0].ip, "root", "password", True, 22)
+
+    if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_STATE":
+        vm_obj.stop()
+        vm_obj.check()
+        vm_obj.start()
+        vm_obj.check()
+        vm_obj.suspend()
+        vm_obj.check()
+        vm_obj.resume()
+        vm_obj.check()
+
+    if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_REIMAGE":
+        cmd = "touch /opt/beforeReimage"
+        ssh.execute(cmd, vm_obj.get_vm().vmNics[0].ip, "root", "password", True, 22)
+        vm_obj.stop()
+        vm_obj.reinit()
+        vm_obj.update()
+        vm_obj.check()
+        vm_obj.start()
+        vm_obj.check()
+        cmd = "! test -f /opt/beforeReimage"
+        ssh.execute(cmd, vm_obj.get_vm().vmNics[0].ip, "root", "password", True, 22)
+
+    if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_ATTACH":
+        cond = res_ops.gen_query_conditions("status", '=', "Connected")
+        bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
+        img_option = test_util.ImageOption()
+        img_option.set_name('iso')
+        img_option.set_backup_storage_uuid_list([bs_uuid])
+        os.system("echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/test.iso" % (os.environ.get('zstackInstallPath')))
+        img_option.set_url('http://%s:8080/zstack/static/test.iso' % (os.environ.get('node1Ip')))
+        image_inv = img_ops.add_iso_template(img_option)
+        image = test_image.ZstackTestImage()
+        image.set_image(image_inv)
+        image.set_creation_option(img_option)
+
+        cond = res_ops.gen_query_conditions('name', '=', 'iso')
+        iso_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
+        img_ops.attach_iso(iso_uuid, vm_obj.vm.uuid)
+        vm_obj.check()
+        img_ops.detach_iso(vm_obj.vm.uuid)
+        vm_obj.check()
+
+    if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_RESIZE_VOL":
+        vol_size = test_lib.lib_get_root_volume(vm_obj.get_vm()).size
+        volume_uuid = test_lib.lib_get_root_volume(vm_obj.get_vm()).uuid
+        set_size = 1024*1024*1024*7
+        vol_ops.resize_volume(volume_uuid, set_size)
+        vm_obj.update()
+        vol_size_after = test_lib.lib_get_root_volume(vm_obj.get_vm()).size
+        if set_size != vol_size_after:
+            test_util.test_fail('Resize Root Volume failed, size = %s' % vol_size_after)
+
+    if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_CHANGE_OS":
+        vm_uuid = vm_obj.get_vm().uuid
+        last_l3network_uuid = test_lib.lib_get_l3s_uuid_by_vm(vm_obj.get_vm())
+        last_ps_uuid = test_lib.lib_get_root_volume(vm_obj.get_vm()).primaryStorageUuid
+        vm_ops.stop_vm(vm_uuid)
+        image_uuid = test_lib.lib_get_image_by_name("ttylinux").uuid
+        vm_ops.change_vm_image(vm_uuid,image_uuid)
+        vm_ops.start_vm(vm_uuid)
+        vm_obj.update()
+        #check whether the vm is running successfully
+        test_lib.lib_wait_target_up(vm_obj.get_vm().vmNics[0].ip,22)
+        #check whether the network config has changed
+        l3network_uuid_after = test_lib.lib_get_l3s_uuid_by_vm(vm_obj.get_vm())
+        if l3network_uuid_after != last_l3network_uuid:
+           test_util.test_fail('Change VM Image Failed.The Network config has changed.')
+        #check whether primarystorage has changed
+        ps_uuid_after = test_lib.lib_get_root_volume(vm_obj.get_vm()).primaryStorageUuid
+        if ps_uuid_after != last_ps_uuid:
+           test_util.test_fail('Change VM Image Failed.Primarystorage has changed.')
+
