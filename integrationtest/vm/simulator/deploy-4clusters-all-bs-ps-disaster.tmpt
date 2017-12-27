@@ -14,7 +14,7 @@ imageStoreBackupStorageName2 = imagestore2
 
 localPrimaryStorageName = local
 localPrimaryStorageName2 = local2
-localPrimaryStorageUrl = /home/local_ps
+localPrimaryStorageUrl = /local_ps
 
 sharedMountPointPrimaryStorageName = smp
 sharedMountPointPrimaryStorageName2 = smp2
