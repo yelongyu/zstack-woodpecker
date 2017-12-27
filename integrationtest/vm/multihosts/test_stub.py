@@ -1200,7 +1200,8 @@ VM_OPS_TEST = [
 "VM_TEST_STATE",
 "VM_TEST_REIMAGE",
 "VM_TEST_ATTACH",
-"VM_TEST_RESIZE_VOL",
+"VM_TEST_RESIZE_RVOL",
+"VM_TEST_RESIZE_RVOL",
 "VM_TEST_CHANGE_OS",
 "VM_TEST_ALL"
 ]
@@ -1238,6 +1239,7 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         else:
             test_util.test_fail("FOUND NEW STORAGTE TYPE. FAILED")
 
+
     if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_SNAPSHOT":
         test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_SNAPSHOT")
         vm_root_volume_inv = test_lib.lib_get_root_volume(vm_obj.get_vm())
@@ -1251,6 +1253,7 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         snapshots_root.use_snapshot(sp1)
         cmd = "! test -f /opt/check_snapshot"
         ssh.execute(cmd, vm_obj.get_vm().vmNics[0].ip, "root", "password", True, 22)
+
 
     if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_STATE":
         test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_STATE")
@@ -1266,6 +1269,7 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         vm_obj.resume()
         vm_obj.check()
 
+
     if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_REIMAGE":
         test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_REIMAGE")
         cmd = "touch /opt/beforeReimage"
@@ -1279,8 +1283,12 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         cmd = "! test -f /opt/beforeReimage"
         ssh.execute(cmd, vm_obj.get_vm().vmNics[0].ip, "root", "password", True, 22)
 
+
     if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_ATTACH":
+
         test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_ATTACH")
+
+        test_util.test_dsc("@@@==>ATTACH ISO")
         cond = res_ops.gen_query_conditions("status", '=', "Connected")
         bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
         img_option = test_util.ImageOption()
@@ -1300,8 +1308,35 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         img_ops.detach_iso(vm_obj.vm.uuid)
         vm_obj.check()
 
-    if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_RESIZE_VOL":
-        test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_RESIZE_VOL")
+        test_util.test_dsc("@@@==>ATTACH VOLUME")
+        disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName'))
+        volume_creation_option = test_util.VolumeOption()
+        volume_creation_option.set_name('volume1')
+        volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
+        volume = test_stub.create_volume(volume_creation_option)
+        test_obj_dict.add_volume(volume)
+        volume.check()
+        volume.attach(vm_obj)
+        volume.detach(vm_obj.get_vm().uuid)
+
+        test_util.test_dsc("@@@==>ATTACH SHAREABLE VOLUME")
+        disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName'))
+        volume_creation_option = test_util.VolumeOption()
+        volume_creation_option.set_name('shareable_volume1')
+        volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
+        volume_creation_option.set_system_tags(['ephemeral::shareable', 'capability::virtio-scsi'])
+        volume = test_stub.create_volume(volume_creation_option)
+        test_obj_dict.add_volume(volume)
+        volume.check()
+        volume.attach(vm_obj)
+        volume.detach(vm_obj.get_vm().uuid)
+        test_lib.lib_error_cleanup(test_obj_dict)
+
+        test_util.test_dsc("@@@==>ATTACH NIC(TODO:)")
+
+
+    if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_RESIZE_RVOL":
+        test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_RESIZE_RVOL")
         vol_size = test_lib.lib_get_root_volume(vm_obj.get_vm()).size
         volume_uuid = test_lib.lib_get_root_volume(vm_obj.get_vm()).uuid
         set_size = 1024*1024*1024*7
@@ -1310,6 +1345,31 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         vol_size_after = test_lib.lib_get_root_volume(vm_obj.get_vm()).size
         if set_size != vol_size_after:
             test_util.test_fail('Resize Root Volume failed, size = %s' % vol_size_after)
+
+
+    if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_RESIZE_DVOL":
+        test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_RESIZE_DVOL")
+        volume_creation_option = test_util.VolumeOption()
+        test_util.test_dsc('Create volume and check')
+        disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
+        volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
+        volume = test_stub.create_volume(volume_creation_option)
+        test_obj_dict.add_volume(volume)
+        volume.check()
+        volume_uuid = volume.volume.uuid
+        vol_size = volume.volume.size
+        volume.attach(vm_obj)
+        vm_obj.stop()
+        vm_obj.check()
+
+        set_size = 1024*1024*1024*5
+        vol_ops.resize_data_volume(volume_uuid, set_size)
+        vm_obj.update()
+        vol_size_after = test_lib.lib_get_data_volumes(vm_obj.get_vm())[0].size
+        if set_size != vol_size_after:
+            test_util.test_fail('Resize Data Volume failed, size = %s' % vol_size_after)
+        test_lib.lib_error_cleanup(test_obj_dict)
+
 
     if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_CHANGE_OS":
         test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_CHANGE_OS")
