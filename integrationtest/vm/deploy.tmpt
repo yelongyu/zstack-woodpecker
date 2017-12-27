@@ -58,7 +58,7 @@ sftpBackupStorageHostname2 = 127.1.101.41
 sftpBackupStoragePort2 = 22
 
 nfsPrimaryStorageName = nfs
-nfsPrimaryStorageUrl = 10.1.101.1:/home/nfs
+nfsPrimaryStorageUrl = 127.1.101.1:/home/nfs
 
 imageName_s = f18
 rootImageFormat = raw

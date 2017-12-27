@@ -1,7 +1,7 @@
 import ../deploy.tmpt
 
 nfsPrimaryStorageName2 = nfs2
-nfsPrimaryStorageUrl2 = zstack:/home/nfs2
+nfsPrimaryStorageUrl2 = 127.1.101.2:/home/nfs2
 
 imageName3 = centos
 imageUrl3 = http://zstack.yyk.net/image/centos_400m_140527.img
