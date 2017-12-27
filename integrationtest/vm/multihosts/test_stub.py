@@ -1224,7 +1224,7 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
 
     if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_MIGRATE":
         test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_MIGRATE")
-        ps = test_lib.lib_get_primary_storage_by_vm(vm_obj.get_vm())[0]
+        ps = test_lib.lib_get_primary_storage_by_vm(vm_obj.get_vm())
         if ps.type in [ inventory.CEPH_PRIMARY_STORAGE_TYPE, 'SharedMountPoint', inventory.NFS_PRIMARY_STORAGE_TYPE ]:
             pass
         elif ps.type in [ inventory.LOCAL_STORAGE_TYPE ]:
