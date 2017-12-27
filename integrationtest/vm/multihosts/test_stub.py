@@ -1226,19 +1226,17 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_MIGRATE")
         ps = test_lib.lib_get_primary_storage_by_vm(vm_obj.get_vm())
         if ps.type in [ inventory.CEPH_PRIMARY_STORAGE_TYPE, 'SharedMountPoint', inventory.NFS_PRIMARY_STORAGE_TYPE ]:
-            pass
+            target_host = test_lib.lib_find_random_host(vm_obj.vm)
+            vm_obj.migrate(target_host.uuid)
         elif ps.type in [ inventory.LOCAL_STORAGE_TYPE ]:
             vm_obj.stop()
             vm_obj.check()
-        else:
-            test_util.test_fail("FOUND NEW STORAGTE TYPE. FAILED")
-
-        target_host = test_lib.lib_find_random_host(vm_obj.vm)
-        vm_obj.migrate(target_host.uuid)
-
-        if ps.type in [ inventory.LOCAL_STORAGE_TYPE ]:
+            target_host = test_lib.lib_find_random_host(vm_obj.vm)
+            vol_ops.migrate_volume(vm_obj.get_vm().allVolumes[0].uuid, target_host.uuid)
             vm_obj.start()
             vm_obj.check()
+        else:
+            test_util.test_fail("FOUND NEW STORAGTE TYPE. FAILED")
 
     if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_SNAPSHOT":
         test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_SNAPSHOT")
