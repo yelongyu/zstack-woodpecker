@@ -42,14 +42,14 @@ sftpBackupStorageName = sftp
 sftpBackupStorageUrl = /home/sftpBackupStorage
 sftpBackupStorageUsername = root
 sftpBackupStoragePassword = 1
-sftpBackupStorageHostname = 10.1.101.40
+sftpBackupStorageHostname = 127.1.101.40
 sftpBackupStoragePort = 22
 
 sftpBackupStorageName2 = sftp2
 sftpBackupStorageUrl2 = /home/sftpBackupStorage
 sftpBackupStorageUsername2 = root
 sftpBackupStoragePassword2 = 1
-sftpBackupStorageHostname2 = 10.1.101.41
+sftpBackupStorageHostname2 = 127.1.101.41
 sftpBackupStoragePort2 = 22
 
 nfsPrimaryStorageName = nfs
@@ -82,7 +82,7 @@ clusterName = cluster1
 clusterHypervisorType = KVM
 
 hostName = centos1
-hostIp = 10.1.101.40
+hostIp = 127.1.101.40
 #hostName = ubuntu
 #hostIp = 10.1.101.10
 #hostName = centos7
