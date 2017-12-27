@@ -33,6 +33,11 @@ instanceOfferingMemory_s = 128M
 instanceOfferingCpuNum_s = 1
 instanceOfferingCpuSpeed_s = 512
 
+instanceOfferingName_win = windos-vm
+instanceOfferingMemory_win = 8G
+instanceOfferingCpuNum_win = 8
+
+
 virtualRouterOfferingName_s = virtual-router-vm
 virtualRouterOfferingMemory_s = 512M
 virtualRouterOfferingCpuNum_s = 2
@@ -69,6 +74,8 @@ imageUrl_net = http://10.1.101.1/image/centos_400m_140527.img
 imageName_windows = windows
 imageUrl_windows = http://192.168.200.16/mirror/diskimages/windows-2012-cn-qcow2.qcow2
 imageName_other = other
+winImageUsername = Administrater
+winImagePassword = password
 
 rootDiskOfferingName = root-disk
 rootDiskOfferingSize = 1G
