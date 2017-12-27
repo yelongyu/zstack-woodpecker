@@ -92,7 +92,7 @@
         description="Test" url="$sftpBackupStorageUrl"
         username="$sftpBackupStorageUsername"
         password="$sftpBackupStoragePassword"
-        hostname="$sftpBackupStorageHostname" />
+        hostname="$sftpBackupStorageHostname2" />
       <cephBackupStorage name="$cephBackupStorageName"
         description="Test"
         monUrls="$cephBackupStorageMonUrls" />
