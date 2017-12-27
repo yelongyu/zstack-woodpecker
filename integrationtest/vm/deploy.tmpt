@@ -73,6 +73,8 @@ imageUrl_net = http://10.1.101.1/image/centos_400m_140527.img
 
 imageName_windows = windows
 imageUrl_windows = http://192.168.200.16/mirror/diskimages/windows-2012-cn-qcow2.qcow2
+winImageUsername = Administrator
+winImagePassword = linux@123
 imageName_other = other
 winImageUsername = Administrater
 winImagePassword = password
