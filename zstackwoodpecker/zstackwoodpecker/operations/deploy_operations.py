@@ -1762,6 +1762,7 @@ def add_simulator_primary_storage(scenarioConfig, scenarioFile, deployConfig):
                     mon_data['type'] = 'CephPrimaryStorageMon'
                     mon_data['data'] = {}
                     mon_data['data']['ip'] = mon_url.split('@')[1]
+                    mon_data['data']['monAddr'] = mon_url.split('@')[1]
                     mon_data['data']['id'] = mon_data['data']['ip']
                     mon_data['data']['cephId'] = pr.name_
                     resources.append(mon_data)
