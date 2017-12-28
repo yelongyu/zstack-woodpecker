@@ -45,7 +45,7 @@ target_ports = rule1_ports + rule2_ports + rule3_ports + rule4_ports + rule5_por
 datacenter_type = os.getenv('datacenterType')
 _postfix = time.strftime('%m%d-%H%M%S', time.localtime())
 TEST_ECS_NAME = 'ZStack-Hybrid-Test-ECS-Instance'
-
+ECS_IMAGE_NAME = 'zstack-test-ecs-image'
 
 class HybridObject(object):
     def __init__(self):
@@ -703,7 +703,7 @@ class HybridObject(object):
         if check_progress:
             create_image_pid = os.fork()
             if create_image_pid == 0:
-                self.ecs_image = hyb_ops.create_ecs_image_from_local_image(bs_uuid, self.datacenter.uuid, image.uuid, name='zstack-test-ecs-image')
+                self.ecs_image = hyb_ops.create_ecs_image_from_local_image(bs_uuid, self.datacenter.uuid, image.uuid, name=ECS_IMAGE_NAME)
                 sys.exit(0)
             for _ in xrange(600):
                     image_progress = hyb_ops.get_create_ecs_image_progress(self.datacenter.uuid, image.uuid)
@@ -714,7 +714,7 @@ class HybridObject(object):
             os.waitpid(create_image_pid, 0)
             assert image_progress.progress.progress == "99%"
         else:
-            self.ecs_image = hyb_ops.create_ecs_image_from_local_image(bs_uuid, self.datacenter.uuid, image.uuid, name='zstack-test-ecs-image')
+            self.ecs_image = hyb_ops.create_ecs_image_from_local_image(bs_uuid, self.datacenter.uuid, image.uuid, name=ECS_IMAGE_NAME)
             self.check_resource('create', 'ecsImageId', self.ecs_image.ecsImageId, 'query_ecs_image_local')
         time.sleep(30)
 
