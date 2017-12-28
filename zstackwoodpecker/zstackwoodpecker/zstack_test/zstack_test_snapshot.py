@@ -14,6 +14,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 
 import uuid
+import os
 
 checking_point_folder = '%s/checking_point' % test_lib.WOODPECKER_MOUNT_POINT
 
@@ -391,7 +392,7 @@ class ZstackTestSnapshot(sp_header.TestSnapshot):
         super(ZstackTestSnapshot, self).create()
         if not self.target_volume:
             test_util.test_fail('Can not create snapshot, before set target_volume')
-        if add_check:
+        if add_check and os.environ.get('ZSTACK_SIMULATOR') != "yes":
             if not self.utility_vm:
                 test_util.test_fail('Can not create snapshot, before set utility_vm, which will be used for doing snapshot checking. utiltiy_vm is mostly like a VR vm.')
             #self._live_snapshot_cap_check()
