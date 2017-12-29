@@ -19,9 +19,6 @@ image1 = None
 def test():
     global image1
 
-    allow_ps_list = [ inventory.LOCAL_STORAGE_TYPE ]
-    test_lib.skip_test_when_ps_type_not_in_list(allow_ps_list)
-
     hosts = res_ops.query_resource(res_ops.HOST)
     if len(hosts) <= 1:
         test_util.test_skip("skip for host_num is not satisfy condition host_num>1")
