@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-imagestore-vyos-flat-dhcp-nfs.xml</deployConfig>
+    <deployConfigTemplate>deploy-imagestore-vyos-flat-dhcp-nfs.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
