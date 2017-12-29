@@ -1716,6 +1716,7 @@ def add_simulator_backup_storage(scenarioConfig, scenarioFile, deployConfig):
                 mon_data['type'] = 'CephBackupStorageMon'
                 mon_data['data'] = {}
                 mon_data['data']['ip'] = mon_url.split('@')[1]
+                mon_data['data']['monAddr'] = mon_url.split('@')[1]
                 mon_data['data']['id'] = mon_data['data']['ip']
                 mon_data['data']['cephId'] = bs.name_
                 resources.append(mon_data)
@@ -1767,6 +1768,31 @@ def add_simulator_primary_storage(scenarioConfig, scenarioFile, deployConfig):
                     mon_data['data']['cephId'] = pr.name_
                     resources.append(mon_data)
     
+                if hasattr(pr, 'dataVolumePoolName_') and pr.dataVolumePoolName_ != "":
+                    pool_data = {}
+                    pool_data['type'] = 'CephBackupStoragePool'
+                    pool_data['data'] = {}
+                    pool_data['data']['cephId'] = pr.dataVolumePoolName_
+                    pool_data['data']['name'] = pr.dataVolumePoolName_
+                    pool_data['data']['id'] = pr.dataVolumePoolName_
+                    resources.append(pool_data)
+                if hasattr(pr, 'rootVolumePoolName_') and pr.rootVolumePoolName_ != "":
+                    pool_data = {}
+                    pool_data['type'] = 'CephBackupStoragePool'
+                    pool_data['data'] = {}
+                    pool_data['data']['cephId'] = pr.dataVolumePoolName_
+                    pool_data['data']['name'] = pr.dataVolumePoolName_
+                    pool_data['data']['id'] = pr.dataVolumePoolName_
+                    resources.append(pool_data)
+                if hasattr(pr, 'imageCachePoolName_') and pr.imageCachePoolName_ != "":
+                    pool_data = {}
+                    pool_data['type'] = 'CephBackupStoragePool'
+                    pool_data['data'] = {}
+                    pool_data['data']['cephId'] = pr.dataVolumePoolName_
+                    pool_data['data']['name'] = pr.dataVolumePoolName_
+                    pool_data['data']['id'] = pr.dataVolumePoolName_
+                    resources.append(pool_data)
+
         if xmlobject.has_element(zone, 'primaryStorages.nfsPrimaryStorage'):
             for pr in xmlobject.safe_list(zone.primaryStorages.nfsPrimaryStorage):
                 data = {}
