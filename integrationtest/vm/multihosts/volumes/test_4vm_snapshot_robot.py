@@ -33,7 +33,8 @@ def test():
     utility_vm_create_option.set_l3_uuids([l3_uuid])
     utility_vm = test_lib.lib_create_vm(utility_vm_create_option)
     test_dict.add_utility_vm(utility_vm)
-    utility_vm.check()
+    if os.environ.get('ZSTACK_SIMULATOR') != "yes":
+        utility_vm.check()
 
     test_util.test_dsc('Random Test Begin. Test target: 4 coexisting running VM (not include VR and SG target test VMs.).')
     robot_test_obj = test_util.Robot_Test_Object()
