@@ -3854,12 +3854,13 @@ def lib_execute_random_sg_rule_operation(test_dict, target_vm, cre_vm_opt):
             create_sg_vm_option.set_instance_offering_uuid(cre_vm_opt.get_instance_offering_uuid())
             create_sg_vm_option.set_instance_offering_uuid(cre_vm_opt.get_instance_offering_uuid())
             sg_stub_vm = lib_create_vm(create_sg_vm_option)
-            try:
-                sg_stub_vm.check()
-            except:
-                test_util.test_logger("Create Test Stub [VM:] %s (for SG testing) fail, as it's network checking failure. Has to quit." % sg_stub_vm.vm.uuid)
-                traceback.print_exc(file=sys.stdout)
-                test_util.test_fail("Create SG test stub vm fail.")
+            if os.environ.get('ZSTACK_SIMULATOR') != "yes":
+                try:
+                    sg_stub_vm.check()
+                except:
+                    test_util.test_logger("Create Test Stub [VM:] %s (for SG testing) fail, as it's network checking failure. Has to quit." % sg_stub_vm.vm.uuid)
+                    traceback.print_exc(file=sys.stdout)
+                    test_util.test_fail("Create SG test stub vm fail.")
             test_util.test_logger("Create Test [VM:] %s (for SG testing) successfully." % sg_stub_vm.vm.uuid)
             sg_vm.add_stub_vm(target_l3_uuid, sg_stub_vm)
 
