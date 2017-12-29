@@ -1214,6 +1214,7 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
     import zstackwoodpecker.zstack_test.zstack_test_image as test_image
     import zstackwoodpecker.operations.volume_operations as vol_ops
     import zstackwoodpecker.operations.vm_operations as vm_ops
+    #import zstacklib.utils.ssh as ssh
     import test_stub
     test_obj_dict = test_state.TestStateDict()
 
@@ -1250,10 +1251,14 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         snapshots_root.check()
         sp1 = snapshots_root.get_current_snapshot()
         cmd = "touch /opt/check_snapshot"
-        ssh.execute(cmd, vm_obj.get_vm().vmNics[0].ip, "root", "password", True, 22)
+        #ssh.execute(cmd, vm_obj.get_vm().vmNics[0].ip, "root", "password", True, 22)
+        if not test_lib.lib_execute_command_in_vm(vm_obj.get_vm(), cmd):
+            test_util.test_fail("execute cmd %s in vm failed" %(cmd))
         snapshots_root.use_snapshot(sp1)
         cmd = "! test -f /opt/check_snapshot"
-        ssh.execute(cmd, vm_obj.get_vm().vmNics[0].ip, "root", "password", True, 22)
+        #ssh.execute(cmd, vm_obj.get_vm().vmNics[0].ip, "root", "password", True, 22)
+        if not test_lib.lib_execute_command_in_vm(vm_obj.get_vm(), cmd):
+            test_util.test_fail("execute cmd %s in vm failed" %(cmd))
 
 
     if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_STATE":
@@ -1274,7 +1279,9 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
     if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_REIMAGE":
         test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_REIMAGE")
         cmd = "touch /opt/beforeReimage"
-        ssh.execute(cmd, vm_obj.get_vm().vmNics[0].ip, "root", "password", True, 22)
+        #ssh.execute(cmd, vm_obj.get_vm().vmNics[0].ip, "root", "password", True, 22)
+        if not test_lib.lib_execute_command_in_vm(vm_obj.get_vm(), cmd):
+            test_util.test_fail("execute cmd %s in vm failed" %(cmd))
         vm_obj.stop()
         vm_obj.reinit()
         vm_obj.update()
@@ -1282,7 +1289,9 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         vm_obj.start()
         vm_obj.check()
         cmd = "! test -f /opt/beforeReimage"
-        ssh.execute(cmd, vm_obj.get_vm().vmNics[0].ip, "root", "password", True, 22)
+        #ssh.execute(cmd, vm_obj.get_vm().vmNics[0].ip, "root", "password", True, 22)
+        if not test_lib.lib_execute_command_in_vm(vm_obj.get_vm(), cmd):
+            test_util.test_fail("execute cmd %s in vm failed" %(cmd))
 
 
     if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_ATTACH":
