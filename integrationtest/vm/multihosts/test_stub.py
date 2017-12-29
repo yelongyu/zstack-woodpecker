@@ -1214,6 +1214,7 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
     import zstackwoodpecker.zstack_test.zstack_test_image as test_image
     import zstackwoodpecker.operations.volume_operations as vol_ops
     import zstackwoodpecker.operations.vm_operations as vm_ops
+    import test_stub
     test_obj_dict = test_state.TestStateDict()
 
     if vm_ops_test_choice not in VM_OPS_TEST: 
