@@ -1252,6 +1252,8 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         sp1 = snapshots_root.get_current_snapshot()
         cmd = "touch /opt/check_snapshot"
         #ssh.execute(cmd, vm_obj.get_vm().vmNics[0].ip, "root", "password", True, 22)
+        if not test_lib.lib_wait_target_up(vm_obj.get_vm().vmNics[0].ip, '22', 90):
+            test_util.test_fail('VM is expected to running before execute cmd %s' %(cmd))
         if not test_lib.lib_execute_command_in_vm(vm_obj.get_vm(), cmd):
             test_util.test_fail("execute cmd %s in vm failed" %(cmd))
         snapshots_root.use_snapshot(sp1)
@@ -1280,6 +1282,8 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_REIMAGE")
         cmd = "touch /opt/beforeReimage"
         #ssh.execute(cmd, vm_obj.get_vm().vmNics[0].ip, "root", "password", True, 22)
+        if not test_lib.lib_wait_target_up(vm_obj.get_vm().vmNics[0].ip, '22', 90):
+            test_util.test_fail('VM is expected to running before execute cmd %s' %(cmd))
         if not test_lib.lib_execute_command_in_vm(vm_obj.get_vm(), cmd):
             test_util.test_fail("execute cmd %s in vm failed" %(cmd))
         vm_obj.stop()
