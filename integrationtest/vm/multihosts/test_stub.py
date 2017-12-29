@@ -1214,6 +1214,8 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
     import zstackwoodpecker.zstack_test.zstack_test_image as test_image
     import zstackwoodpecker.operations.volume_operations as vol_ops
     import zstackwoodpecker.operations.vm_operations as vm_ops
+    import zstackwoodpecker.zstack_test.zstack_test_snapshot as zstack_sp_header
+
     #import zstacklib.utils.ssh as ssh
     import test_stub
     test_obj_dict = test_state.TestStateDict()
@@ -1244,9 +1246,13 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
 
     if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_SNAPSHOT":
         test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_SNAPSHOT")
-        vm_root_volume_inv = test_lib.lib_get_root_volume(vm_obj.get_vm())
-        snapshots_root = test_obj_dict.get_volume_snapshot(vm_root_volume_inv.uuid)
+        #vm_root_volume_inv = test_lib.lib_get_root_volume(vm_obj.get_vm())
+        #snapshots_root = test_obj_dict.get_volume_snapshot(vm_root_volume_inv.uuid)
+        vol_obj = zstack_volume_header.ZstackTestVolume()
+        vol_obj.set_volume(test_lib.lib_get_root_volume(vm_obj.get_vm()))
+        snapshots_root = zstack_sp_header.ZstackVolumeSnapshot()
         snapshots_root.set_utility_vm(vm_obj)
+        snapshots_root.set_target_volume(vol_obj)
         snapshots_root.create_snapshot('create_data_snapshot1')
         snapshots_root.check()
         sp1 = snapshots_root.get_current_snapshot()
@@ -1256,7 +1262,11 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
             test_util.test_fail('VM is expected to running before execute cmd %s' %(cmd))
         if not test_lib.lib_execute_command_in_vm(vm_obj.get_vm(), cmd):
             test_util.test_fail("execute cmd %s in vm failed" %(cmd))
+        vm_obj.stop()
+        vm_obj.check()
         snapshots_root.use_snapshot(sp1)
+        vm_obj.start()
+        vm_obj.check()
         cmd = "! test -f /opt/check_snapshot"
         #ssh.execute(cmd, vm_obj.get_vm().vmNics[0].ip, "root", "password", True, 22)
         if not test_lib.lib_execute_command_in_vm(vm_obj.get_vm(), cmd):
