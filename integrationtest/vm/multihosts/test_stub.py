@@ -1357,11 +1357,15 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         vol_size = test_lib.lib_get_root_volume(vm_obj.get_vm()).size
         volume_uuid = test_lib.lib_get_root_volume(vm_obj.get_vm()).uuid
         set_size = 1024*1024*1024*7
+        vm_obj.stop()
+        vm_obj.check()
         vol_ops.resize_volume(volume_uuid, set_size)
         vm_obj.update()
         vol_size_after = test_lib.lib_get_root_volume(vm_obj.get_vm()).size
         if set_size != vol_size_after:
             test_util.test_fail('Resize Root Volume failed, size = %s' % vol_size_after)
+        vm_obj.start()
+        vm_obj.check()
 
 
     if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_RESIZE_DVOL":
