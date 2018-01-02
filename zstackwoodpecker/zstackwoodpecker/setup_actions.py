@@ -582,6 +582,8 @@ default one' % self.zstack_properties)
         for node in self.nodes:
             cmd = 'zstack-ctl configure --duplicate-to-remote=%s; zstack-ctl configure --host=%s management.server.ip=%s' % \
                     (node.ip_, node.ip_, node.ip_)
+            if os.environ.get('ZSTACK_SIMULATOR') == "yes":
+                cmd += '; zstack-ctl configure --host=%s ApplianceVm.agentPort=8080' % (node.ip_)
             if not linux.is_ip_existing(node.ip_):
                 ssh.execute(cmd, node1.ip_, node.username_, node.password_)
             else:
