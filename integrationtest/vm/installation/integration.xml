@@ -36,6 +36,7 @@
         <case timeout="4000" >upgrade/test_zs_upgd_2.0_latest_repo_on_cos7.py</case>
         <case timeout="4000" >upgrade/test_zs_upgd_2.1.0_latest_repo_on_cos7.py</case>
         <case timeout="4000" >test_zstack_install_on_cos71.py</case>
+        <case timeout="4000" >test_zstack_install_on_cos71_new.py</case>
         <case timeout="4000" >test_zstack_install_on_cos72.py</case>
     </suite>
 </integrationTest>

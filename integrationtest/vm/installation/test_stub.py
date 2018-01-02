@@ -709,21 +709,6 @@ def check_installation(vm_ip, tmp_file):
 #    if file_exist == 'no':
 #        test_util.test_fail('there is no log file')
 
-def create_sftp_backup_storage(vm_ip, tmp_file):
-    vm_username = os.environ['imageUsername']
-    vm_password = os.environ['imagePassword']
-
-    bs_option = test_util.BackupStorageOption()
-    bs_option.name = 'bs1'
-    bs_option.description = 'bs'
-    bs_option.hostname = vm_ip
-    bs_option.url = '/home/bs'
-    bs_option.username = vm_username
-    bs_option.password = vm_password
-    bs_option.sshPort = '22'
-    bs = scen_ops.create_sftp_backup_storage(vm_ip, bs_option)
-    scen_ops.reconnect_backup_storage(vm_ip, bs.uuid)
-
 def reconnect_backup_storage(vm_ip, tmp_file):
 	
     bs = scen_ops.query_backup_storage(vm_ip, tmp_file)
@@ -792,4 +777,31 @@ def add_kvm_host1(vm_ip, cluster_uuid, tmp_file):
     host_inv = scen_ops.add_kvm_host(vm_ip, host_option)
 
     return host_inv
+
+def create_local_ps(vm_ip, zone_uuid, tmp_file):
+    ps_option = test_util.PrimaryStorageOption()
+    ps_option.name = 'PS1'
+    ps_option.url = '/zstack_ps1'
+    ps_option.zone_uuid = zone_uuid
+    ps_inv = scen_ops.create_local_primary_storage(vm_ip, ps_option)
+
+    return ps_inv
+
+
+def create_sftp_backup_storage(vm_ip, tmp_file):
+    vm_username = os.environ['imageUsername']
+    vm_password = os.environ['imagePassword']
+
+    bs_option = test_util.BackupStorageOption()
+    bs_option.name = 'bs1'
+    bs_option.description = 'bs'
+    bs_option.hostname = vm_ip
+    bs_option.url = '/home/bs'
+    bs_option.username = vm_username
+    bs_option.password = vm_password
+    bs_option.sshPort = '22'
+    bs_inv = scen_ops.create_sftp_backup_storage(vm_ip, bs_option)
+    scen_ops.reconnect_backup_storage(vm_ip, bs_inv.uuid)
+    
+    return bs_inv
 
