@@ -35,13 +35,13 @@ def test():
    vr = test_lib.lib_find_vr_by_vm(vm.get_vm())[0]
    vr_mgmt_ip = test_lib.lib_find_vr_mgmt_ip(vr)
    #stop vm's vr
-   vm_ops.stop_vm(vr.uuid)
+   #vm_ops.stop_vm(vr.uuid)
    image_uuid = test_lib.lib_get_image_by_name("image_for_sg_test").uuid
    vm_ops.change_vm_image(vm_uuid,image_uuid)
    #check whether vr's status is running
-   if not test_lib.lib_wait_target_up(vr_mgmt_ip,'7272',180):
-      test_util.test_fail('vm:%s is not startup in 180 seconds.Fail to reboot it.' % vr.uuid)
-   time.sleep(20)
+   #if not test_lib.lib_wait_target_up(vr_mgmt_ip,'7272',180):
+      #test_util.test_fail('vm:%s is not startup in 180 seconds.Fail to reboot it.' % vr.uuid)
+   #time.sleep(20)
    vm_ops.start_vm(vm_uuid)
    vm.update()
    #check whether the vm is running successfully
@@ -56,11 +56,7 @@ def test():
       test_util.test_fail('Change Vm Image Failed.Data volumes changed.')
    #check whether the network config has changed
    l3network_uuid_after = test_lib.lib_get_l3s_uuid_by_vm(vm.get_vm())
-   if l3network_uuid_after != last_l3network_uuid:
-      test_util.test_fail('Change VM Image Failed.The Network config has changed.')
-   #check whether primarystorage has changed
-   l3network_uuid_after = test_lib.lib_get_l3s_uuid_by_vm(vm.get_vm())
-   if l3network_uuid_after != last_l3network_uuid:
+   if set(l3network_uuid_after) != set(last_l3network_uuid):
       test_util.test_fail('Change VM Image Failed.The Network config has changed.')
    #check whether primarystorage has changed
    primarystorage_uuid_after = test_lib.lib_get_root_volume(vm.get_vm()).primaryStorageUuid
@@ -73,4 +69,4 @@ def test():
 def error_cleanup():
    global vm
    if vm:
-      vm.destory()
+      vm.destroy()
