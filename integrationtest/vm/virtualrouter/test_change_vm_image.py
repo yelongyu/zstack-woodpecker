@@ -17,7 +17,7 @@ test_obj_dict = test_state.TestStateDict()
 def test():
    test_util.test_dsc('Test Change VM Image Function')
    global vm
-   l3_uuid = test_lib.lib_get_l3_by_name("l3VlanNetwork1").uuid
+   l3_uuid = test_lib.lib_get_l3_by_name("l3VlanNetwork3").uuid
    image_uuid = test_lib.lib_get_image_by_name("ttylinux").uuid
    disk_offering_uuids = [test_lib.lib_get_disk_offering_by_name("smallDiskOffering").uuid,test_lib.lib_get_disk_offering_by_name("root-disk").uuid]
    vm = test_stub.create_vm(l3_uuid_list = [l3_uuid],image_uuid = image_uuid,vm_name="test-nxs",disk_offering_uuids = disk_offering_uuids)
@@ -35,13 +35,18 @@ def test():
    vr = test_lib.lib_find_vr_by_vm(vm.get_vm())[0]
    vr_mgmt_ip = test_lib.lib_find_vr_mgmt_ip(vr)
    #stop vm's vr
-   #vm_ops.stop_vm(vr.uuid)
+   vm_ops.stop_vm(vr.uuid)
    image_uuid = test_lib.lib_get_image_by_name("image_for_sg_test").uuid
    vm_ops.change_vm_image(vm_uuid,image_uuid)
    #check whether vr's status is running
-   #if not test_lib.lib_wait_target_up(vr_mgmt_ip,'7272',180):
-      #test_util.test_fail('vm:%s is not startup in 180 seconds.Fail to reboot it.' % vr.uuid)
-   #time.sleep(20)
+   if vr.applianceVmType == 'vrouter':
+      if not test_lib.lib_wait_target_up(vr_mgmt_ip,'7272',240):
+         test_util.test_fail('vm:%s is not startup in 240 seconds.Fail to reboot it.' % vr.uuid)
+      time.sleep(20)
+   #if vr.state == 'Stopped':
+   else:
+      vm_ops.start_vm(vr.uuid)
+      vm_ops.reconnect_vr(vr.uuid)
    vm_ops.start_vm(vm_uuid)
    vm.update()
    #check whether the vm is running successfully
