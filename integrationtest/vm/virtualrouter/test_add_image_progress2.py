@@ -38,6 +38,7 @@ def add_image(bs_uuid, index):
     image_option.set_mediaType('RootVolumeTemplate')
     image_option.set_url(os.environ.get('imageUrl_net'))
     image_option.set_backup_storage_uuid_list([bs_uuid])
+    image_option.set_timeout(600000)
 
     images[index] = zstack_image_header.ZstackTestImage()
     images[index].set_creation_option(image_option)
