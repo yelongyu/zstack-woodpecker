@@ -1180,6 +1180,22 @@ def add_image1(http_server_ip, image_option, session_uuid=None):
     test_util.test_logger('[image:] %s is added.' % evt.inventory.uuid)
     return evt.inventory
 
+
+def create_instance_offering1(http_server_ip, instance_offering_option, session_uuid = None):
+    action = api_actions.CreateInstanceOfferingAction()
+    action.cpuNum = instance_offering_option.get_cpuNum()
+    action.memorySize = instance_offering_option.get_memorySize()
+    action.allocatorStrategy = instance_offering_option.get_allocatorStrategy()
+    action.type = instance_offering_option.get_type()
+    action.name = instance_offering_option.get_name()
+    action.description = instance_offering_option.get_description()
+
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    test_util.action_logger('create instance offering: name: %s cpuNum: %s, memorySize: %s, allocatorStrategy:%s, type: %s '\
+            % (action.name, action.cpuNum, action.memorySize, action.allocatorStrategy, action.type))
+    test_util.test_logger('Instance Offering: %s is created' % evt.inventory.uuid)
+    return evt.inventory
+
 def add_data_volume_template(http_server_ip, image_option):
     action = api_actions.AddImageAction()
     action.name = image_option.get_name()

@@ -825,4 +825,13 @@ def add_image_local(vm_ip, bs_uuid, tmp_file):
 
     return image_inv
 
+def create_vm_offering(vm_ip, tmp_file):
+    vmoffering_option = test_util.InstanceOfferingOption()
+    vmoffering_option.name = '1-1G'
+    vmoffering_option.cpuNum = '1'
+    vmoffering_option.memorySize = '1073741824'
+    vmoffering_option.type = 'UserVm'
+    vmoffering_inv = scen_ops.create_instance_offering1(vm_ip, vmoffering_option)
+
+    return vmoffering_inv
 

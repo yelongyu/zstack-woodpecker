@@ -44,6 +44,7 @@ def test():
     global ps_inv
     global bs_inv
     global image_inv
+    global vmoffering_inv
 
     test_util.test_dsc('Create test vm to test zstack install MN on centos7.1 and add the HOST')
     
@@ -102,9 +103,14 @@ def test():
     image_inv = test_stub.add_image_local(vm_ip, bs_uuid, tmp_file)
     image_uuid = image_inv.uuid
 
+    test_util.test_dsc('add vm instance offering names is 1-1G')
+    vmoffering_inv = test_stub.create_vm_offering(vm_ip, tmp_file)
+    vmoffering_uuid = vmoffering_inv.uuid
 
+    sce_ops.create_l2_vlan(vm_ip, 'L2_vlan', 'eth0', '2100', zone_uuid, tmp_file)
+    
     os.system('rm -f %s' % tmp_file)
-    sce_ops.destroy_vm(zstack_management_ip, vm_inv.uuid)
+    #sce_ops.destroy_vm(zstack_management_ip, vm_inv.uuid)
     test_util.test_pass('Install ZStack with -o  Success')
 
 
@@ -116,9 +122,10 @@ def error_cleanup():
     global ps_inv
     global bs_inv
     global image_inv
+    global vmoffering_inv
 
     test_util.test_dsc('Create test vm to test zstack install MN on centos7.1 and add the HOST')
-    #os.system('rm -f %s' % tmp_file)
+    os.system('rm -f %s' % tmp_file)
     #sce_ops.destroy_vm(zstack_management_ip, vm_inv.uuid)
     test_lib.lib_error_cleanup(test_obj_dict)
     
