@@ -45,6 +45,8 @@ def test():
     global bs_inv
     global image_inv
     global vmoffering_inv
+    global l2_inv
+    global l3_inv
 
     test_util.test_dsc('Create test vm to test zstack install MN on centos7.1 and add the HOST')
     
@@ -107,7 +109,12 @@ def test():
     vmoffering_inv = test_stub.create_vm_offering(vm_ip, tmp_file)
     vmoffering_uuid = vmoffering_inv.uuid
 
-    sce_ops.create_l2_vlan(vm_ip, 'L2_vlan', 'eth0', '2100', zone_uuid, tmp_file)
+    l2_inv = sce_ops.create_l2_vlan(vm_ip, 'L2_vlan', 'eth0', '2100', zone_uuid)
+    l2_uuid = l2_inv.uuid
+
+    sce_ops.attach_l2(vm_ip, l2_uuid, cluster_uuid)
+
+    l3_inv = sce_ops.create_l3(vm_ip, 'l3_network', 'L3BasicNetwork', l2_uuid, 'local.com')
     
     os.system('rm -f %s' % tmp_file)
     #sce_ops.destroy_vm(zstack_management_ip, vm_inv.uuid)
@@ -123,6 +130,8 @@ def error_cleanup():
     global bs_inv
     global image_inv
     global vmoffering_inv
+    global l2_inv
+    global l3_inv
 
     test_util.test_dsc('Create test vm to test zstack install MN on centos7.1 and add the HOST')
     os.system('rm -f %s' % tmp_file)
