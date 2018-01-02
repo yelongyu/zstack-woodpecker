@@ -43,6 +43,7 @@ def test():
     global host_inv
     global ps_inv
     global bs_inv
+    global image_inv
 
     test_util.test_dsc('Create test vm to test zstack install MN on centos7.1 and add the HOST')
     
@@ -89,12 +90,21 @@ def test():
     ps_inv = test_stub.create_local_ps(vm_ip, zone_uuid, tmp_file)
     ps_uuid = ps_inv.uuid
 
+    test_stub.attach_ps(vm_ip, ps_uuid, cluster_uuid, tmp_file)
+
     test_util.test_dsc('add BS names is bs1')
     bs_inv = test_stub.create_sftp_backup_storage(vm_ip, tmp_file)
     bs_uuid = bs_inv.uuid
 
-    #os.system('rm -f %s' % tmp_file)
-    #sce_ops.destroy_vm(zstack_management_ip, vm_inv.uuid)
+    test_stub.attach_bs(vm_ip, bs_uuid, zone_uuid, tmp_file)
+
+    test_util.test_dsc('add image names is image1.4')
+    image_inv = test_stub.add_image_local(vm_ip, bs_uuid, tmp_file)
+    image_uuid = image_inv.uuid
+
+
+    os.system('rm -f %s' % tmp_file)
+    sce_ops.destroy_vm(zstack_management_ip, vm_inv.uuid)
     test_util.test_pass('Install ZStack with -o  Success')
 
 
@@ -105,6 +115,7 @@ def error_cleanup():
     global host_inv
     global ps_inv
     global bs_inv
+    global image_inv
 
     test_util.test_dsc('Create test vm to test zstack install MN on centos7.1 and add the HOST')
     #os.system('rm -f %s' % tmp_file)

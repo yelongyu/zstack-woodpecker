@@ -805,3 +805,24 @@ def create_sftp_backup_storage(vm_ip, tmp_file):
     
     return bs_inv
 
+def attach_ps(vm_ip, ps_uuid, cluster_uuid, tmp_file):
+
+    scen_ops.attach_ps_to_cluster(vm_ip, ps_uuid, cluster_uuid)
+
+def attach_bs(vm_ip, bs_uuid, zone_uuid, tmp_file):
+
+    scen_ops.attach_bs_to_zone(vm_ip, bs_uuid, zone_uuid)
+
+def add_image_local(vm_ip, bs_uuid, tmp_file):
+
+    image_option = test_util.ImageOption()
+    image_option.name = 'image1.4'
+    image_option.format = 'qcow2'
+    image_option.platform = 'Linux'
+    image_option.backup_storage_uuid_list = [bs_uuid]
+    image_option.url = 'file:///opt/zstack-dvd/zstack-image-1.4.qcow2'
+    image_inv = scen_ops.add_image1(vm_ip, image_option)
+
+    return image_inv
+
+

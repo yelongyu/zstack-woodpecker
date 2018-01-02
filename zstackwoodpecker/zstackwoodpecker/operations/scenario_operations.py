@@ -1167,6 +1167,19 @@ def create_local_primary_storage(http_server_ip, primary_storage_option, session
             (evt.inventory.uuid, action.name))
     return evt.inventory
 
+def add_image1(http_server_ip, image_option, session_uuid=None):
+    action = api_actions.AddImageAction()
+    action.name = image_option.get_name()
+    action.url = image_option.get_url()
+    action.mediaType = image_option.get_mediaType()
+    action.format = image_option.get_format()
+    action.platform = image_option.get_platform()
+    action.backupStorageUuids = image_option.get_backup_storage_uuid_list()
+    test_util.action_logger('Add [Image:] %s from [url:] %s ' % (action.name,action.url))
+    evt = execute_action_with_session(http_server_ip, action, image_option.get_session_uuid())
+    test_util.test_logger('[image:] %s is added.' % evt.inventory.uuid)
+    return evt.inventory
+
 def add_data_volume_template(http_server_ip, image_option):
     action = api_actions.AddImageAction()
     action.name = image_option.get_name()
