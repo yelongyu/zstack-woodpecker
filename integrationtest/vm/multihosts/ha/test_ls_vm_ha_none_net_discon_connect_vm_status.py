@@ -112,7 +112,7 @@ def test():
 
     cond = res_ops.gen_query_conditions('name', '=', 'ls_vm_none_status')
     cond = res_ops.gen_query_conditions('uuid', '=', vm2.vm.uuid, cond)
-    for i in range(0, 120):
+    for i in range(0, 240):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state != "Running":
             time.sleep(1)
             continue
