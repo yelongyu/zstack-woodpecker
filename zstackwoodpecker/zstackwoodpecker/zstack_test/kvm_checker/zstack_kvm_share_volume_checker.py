@@ -156,11 +156,15 @@ class zstack_kvm_virtioscsi_shareable_checker(checker_header.TestChecker):
         #sv_cond = res_ops.gen_query_conditions("volumeUuid", '=', volume.uuid)
         #share_volume_vm_uuids = res_ops.query_resource_fields(res_ops.SHARE_VOLUME, sv_cond, None, fields=['vmInstanceUuid'])
         #test_util.test_logger('share_volume_vm_uuids is %s' %share_volume_vm_uuids)
-	host = test_lib.lib_get_vm_host(test_lib.lib_get_vm_by_uuid(volume.vmInstanceUuid))
-	test_util.test_logger('vmInstanceUuid_host.ip is %s' %host.managementIp)
-        test_util.test_logger('vmInstanceUuid is %s' %volume.vmInstanceUuid)
+        print "volume_uuid= %s" %(volume.uuid)
+        sv_cond = res_ops.gen_query_conditions("volumeUuid", '=', volume.uuid)
+        volume_vmInstanceUuid = res_ops.query_resource_fields(res_ops.SHARE_VOLUME, sv_cond, None, fields=['vmInstanceUuid'])[0].vmInstanceUuid
+
+        host = test_lib.lib_get_vm_host(test_lib.lib_get_vm_by_uuid(volume_vmInstanceUuid))
+        test_util.test_logger('vmInstanceUuid_host.ip is %s' %host.managementIp)
+        test_util.test_logger('vmInstanceUuid is %s' %volume_vmInstanceUuid)
         #xml = os.popen('virsh dumpxml %s' % volume.vmInstanceUuid)
-        xml = os.popen('sshpass -p password ssh root@%s -p %s "virsh dumpxml %s"' %(host.managementIp, host.sshPort, volume.vmInstanceUuid))
+        xml = os.popen('sshpass -p password ssh root@%s -p %s "virsh dumpxml %s"' %(host.managementIp, host.sshPort, volume_vmInstanceUuid))
         tree = ET.parse(xml)
         root = tree.getroot()
         for domain in root:
