@@ -20,6 +20,7 @@ localPrimaryStorageUrl2 = /local_ps2
 sharedMountPointPrimaryStorageName = smp
 sharedMountPointPrimaryStorageName2 = smp2
 sharedMountPointPrimaryStorageUrl = /home/smp-ps
+sharedMountPointPrimaryStorageUrl2 = /home/smp-ps2
 
 nfsPrimaryStorageName = nfs
 nfsPrimaryStorageName2 = nfs2

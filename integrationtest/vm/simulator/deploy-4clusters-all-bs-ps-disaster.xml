@@ -175,13 +175,13 @@
           <nfsPrimaryStorage name="$nfsPrimaryStorageName"
             description="Test NFS 1" url="$nfsPrimaryStorageUrl" />
           <nfsPrimaryStorage name="$nfsPrimaryStorageName2"
-            description="Test NFS 2" url="$nfsPrimaryStorageUrl" />
+            description="Test NFS 2" url="$nfsPrimaryStorageUrl2" />
           <sharedMountPointPrimaryStorage name="$sharedMountPointPrimaryStorageName"
             description="Test SMP PS 1"
             url="$sharedMountPointPrimaryStorageUrl" />
           <sharedMountPointPrimaryStorage name="$sharedMountPointPrimaryStorageName2"
             description="Test SMP PS 2"
-            url="$sharedMountPointPrimaryStorageUrl" />
+            url="$sharedMountPointPrimaryStorageUrl2" />
         </primaryStorages>
   
         <clusters>
