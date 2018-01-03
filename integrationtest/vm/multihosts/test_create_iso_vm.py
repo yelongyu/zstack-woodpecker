@@ -18,7 +18,7 @@ def test():
     global vm
     global vm2
     l3_name = os.environ.get('l3VlanNetworkName1')
-    vm = test_stub.create_vm_with_iso('fake_iso_vm', l3_name)
+    vm = test_stub.create_vm_with_fake_iso('fake_iso_vm', l3_name)
 
     test_util.test_pass('Create VM with ISO Test Success')
 
