@@ -1136,7 +1136,6 @@ def create_cluster(http_server_ip, cluster_option, session_uuid=None):
             (evt.uuid, action.name))
     return evt.inventory
 
-
 def add_kvm_host(http_server_ip, host_option, session_uuid=None):
     action = api_actions.AddKVMHostAction()
     action.timeout = 300000
@@ -1152,7 +1151,6 @@ def add_kvm_host(http_server_ip, host_option, session_uuid=None):
             (evt.uuid, action.managementIp))
     return evt.inventory
 
-
 def create_local_primary_storage(http_server_ip, primary_storage_option, session_uuid=None):
     action = api_actions.AddLocalPrimaryStorageAction()
     action.timeout = 30000
@@ -1164,6 +1162,26 @@ def create_local_primary_storage(http_server_ip, primary_storage_option, session
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     test_util.action_logger('Create Primary Storage [uuid:] %s [name:] %s' % \
             (evt.inventory.uuid, action.name))
+    return evt.inventory
+
+def attach_ps_to_cluster(http_server_ip, primary_storage_uuid, cluster_uuid, session_uuid=None):
+    action = api_actions.AttachPrimaryStorageToClusterAction()
+    action.clusterUuid = cluster_uuid
+    action.primaryStorageUuid = primary_storage_uuid
+    action.timeout = 30000
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    test_util.action_logger('Attach Primary Storage [uuid:] %s to Cluster [uuid:] %s' % \
+            (primary_storage_uuid, cluster_uuid))
+    return evt.inventory
+
+def attach_bs_to_zone(http_server_ip, backup_storage_uuid, zone_uuid, session_uuid=None):
+    action = api_actions.AttachBackupStorageToZoneAction()
+    action.zoneUuid = zone_uuid
+    action.backupStorageUuid = backup_storage_uuid
+    action.timeout = 30000
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    test_util.action_logger('Attach Backup Storage [uuid:] %s to Zone [uuid:] %s' % \
+            (backup_storage_uuid, zone_uuid))
     return evt.inventory
 
 def add_image1(http_server_ip, image_option, session_uuid=None):
