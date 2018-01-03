@@ -190,6 +190,10 @@
             <hosts>
               <host name="$hostName" description="Test" managementIp="$hostIp"
                 username="$hostUsername" password="$hostPassword" />
+              <host name="$hostName5" description="Test5" managementIp="$hostIp5"
+                username="$hostUsername5" password="$hostPassword5" port="$hostPort5"/>
+              <host name="$hostName9" description="Test9" managementIp="$hostIp9"
+                username="$hostUsername9" password="$hostPassword9" port="$hostPort9"/>
             </hosts>
             <primaryStorageRef>$cephPrimaryStorageName</primaryStorageRef>
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
@@ -221,6 +225,10 @@
             <hosts>
               <host name="$hostName2" description="Test2" managementIp="$hostIp2"
                 username="$hostUsername2" password="$hostPassword2" port="$hostPort2"/>
+              <host name="$hostName6" description="Test6" managementIp="$hostIp6"
+                username="$hostUsername6" password="$hostPassword6" port="$hostPort6"/>
+              <host name="$hostName10" description="Test10" managementIp="$hostIp10"
+                username="$hostUsername10" password="$hostPassword10" port="$hostPort10"/>
             </hosts>
             <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
             <primaryStorageRef>$sharedMountPointPrimaryStorageName</primaryStorageRef>
@@ -253,6 +261,10 @@
             <hosts>
               <host name="$hostName3" description="Test3" managementIp="$hostIp3"
                 username="$hostUsername3" password="$hostPassword3"/>
+              <host name="$hostName7" description="Test7" managementIp="$hostIp7"
+                username="$hostUsername7" password="$hostPassword7"/>
+              <host name="$hostName11" description="Test11" managementIp="$hostIp11"
+                username="$hostUsername11" password="$hostPassword11"/>
             </hosts>
             <primaryStorageRef>$localPrimaryStorageName2</primaryStorageRef>
             <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
@@ -285,6 +297,10 @@
             <hosts>
               <host name="$hostName4" description="Test4" managementIp="$hostIp4"
                 username="$hostUsername4" password="$hostPassword4" port="$hostPort4"/>
+              <host name="$hostName8" description="Test8" managementIp="$hostIp8"
+                username="$hostUsername8" password="$hostPassword8" port="$hostPort8"/>
+              <host name="$hostName12" description="Test12" managementIp="$hostIp12"
+                username="$hostUsername12" password="$hostPassword12" port="$hostPort12"/>
             </hosts>
             <primaryStorageRef>$nfsPrimaryStorageName2</primaryStorageRef>
             <primaryStorageRef>$sharedMountPointPrimaryStorageName2</primaryStorageRef>

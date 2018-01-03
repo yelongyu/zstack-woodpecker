@@ -35,11 +35,59 @@ hostUsername4 = root
 hostPassword4 = password
 hostPort4 = 22
 
-hostName5 = ubuntu
-hostIp5 = 127.1.101.10
+hostName5 = centos5
+hostIp5 = 127.1.101.44
 hostUsername5 = root
 hostPassword5 = password
 hostPort5 = 22
+
+hostName6 = centos6
+hostIp6 = 127.1.101.45
+hostUsername6 = root
+hostPassword6 = password
+hostPort6 = 22
+
+hostName7 = centos7
+hostIp3 = 127.1.101.46
+hostUsername7 = root
+hostPassword7 = password
+hostPort7 = 22
+
+hostName8 = centos8
+hostIp8 = 127.1.101.47
+hostUsername8 = root
+hostPassword8 = password
+hostPort8 = 22
+
+hostName9 = centos9
+hostIp9 = 127.1.101.48
+hostUsername9 = root
+hostPassword9 = password
+hostPort9 = 22
+
+hostName10 = centos10
+hostIp10 = 127.1.101.49
+hostUsername10 = root
+hostPassword10 = password
+hostPort10 = 22
+
+hostName11 = centos11
+hostIp11 = 127.1.101.50
+hostUsername11 = root
+hostPassword11 = password
+hostPort11 = 22
+
+hostName12 = centos12
+hostIp12 = 127.1.101.51
+hostUsername12 = root
+hostPassword12 = password
+hostPort12 = 22
+
+hostName13 = centos13
+hostIp9 = 127.1.101.52
+hostUsername13 = root
+hostPassword13 = password
+hostPort13 = 22
 
 l2VlanNetworkName4 = vlan-test4
 l2VlanNetworkName5 = vlan-test5
