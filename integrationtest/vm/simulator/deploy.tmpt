@@ -48,7 +48,7 @@ hostPassword6 = password
 hostPort6 = 22
 
 hostName7 = centos7
-hostIp3 = 127.1.101.46
+hostIp7 = 127.1.101.46
 hostUsername7 = root
 hostPassword7 = password
 hostPort7 = 22
@@ -84,7 +84,7 @@ hostPassword12 = password
 hostPort12 = 22
 
 hostName13 = centos13
-hostIp9 = 127.1.101.52
+hostIp13 = 127.1.101.52
 hostUsername13 = root
 hostPassword13 = password
 hostPort13 = 22
