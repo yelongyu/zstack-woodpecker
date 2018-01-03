@@ -5,6 +5,7 @@ New Integration Test for hybrid.
 @author: Legion
 '''
 
+import time
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
@@ -16,6 +17,7 @@ hybrid = test_stub.HybridObject()
 
 def test():
     hybrid.create_ecs_instance()
+    time.sleep(120)
     test_obj_dict.add_hybrid_obj(hybrid)
     hybrid.del_ecs_instance()
     test_util.test_pass('Create Delete Ecs Instance Test Success')
