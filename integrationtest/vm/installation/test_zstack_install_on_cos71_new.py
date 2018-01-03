@@ -39,10 +39,11 @@ def create_vm(image):
 
 def create_new_vm(new_image):
     new_vm_name = 'new_vm_%s' % image_inv.name
+    l3_net_uuid = l3_inv.inventory.uuid
 
     vm_creation_option = test_util.VmOption()
     vm_creation_option.set_instance_offering_uuid(vmoffering_uuid)
-    vm_creation_option.l3_uuids(l3_uuid)
+    vm_creation_option.set_l3_uuids([l3_net_uuid])
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_name(new_vm_name)
     new_vm_inv = sce_ops.create_vm(vm_ip, vm_creation_option)
