@@ -2450,42 +2450,38 @@ def lib_get_root_image_from_vm(vm):
             vm_root_image_uuid = volume.rootImageUuid
 
     if not vm_root_image_uuid:
-        test_util.logger("Can't find root device for [vm:] %s" % vm.uuid)
+        test_util.test_logger("Can't find root device for [vm:] %s" % vm.uuid)
         return False
 
     condition = res_ops.gen_query_conditions('uuid', '=', vm_root_image_uuid)
-    image = res_ops.query_resource(res_ops.IMAGE, condition)[0]
+    try:
+        image = res_ops.query_resource(res_ops.IMAGE, condition)[0]
+    except Exception, e:
+        test_util.test_logger("QueryImage find exception: %s" %(str(e)))
+        return False
     return image
 
 def lib_get_vm_username(vm):
-    try:
-        image = lib_get_root_image_from_vm(vm)
-        image_plan = lib_get_image_from_plan(image)
-        if image_plan:
-            username = image_plan.username_
-        else:
-            #image might be created from other root image template
-            #So there isn't pre-set username/password. Try to use default username.
-            username = os.environ.get('imageUsername')
-        return username
-    except Exception, e:
-        test_util.test_logger("lib_get_vm_username->exception: %s" %(str(e)))
-        return "root"
+    image = lib_get_root_image_from_vm(vm)
+    image_plan = lib_get_image_from_plan(image)
+    if image_plan:
+        username = image_plan.username_
+    else:
+        #image might be created from other root image template
+        #So there isn't pre-set username/password. Try to use default username.
+        username = os.environ.get('imageUsername')
+    return username
 
 def lib_get_vm_password(vm):
-    try:
-        image = lib_get_root_image_from_vm(vm)
-        image_plan = lib_get_image_from_plan(image)
-        if image_plan:
-            password = image_plan.password_
-        else:
-            #image might be created from other root image template
-            #So there isn't pre-set username/password. try to use default password.
-            password = os.environ.get('imagePassword')
-        return password
-    except Exception, e:
-        test_util.test_logger("lib_get_vm_password->exception: %s" %(str(e)))
-        return "password"
+    image = lib_get_root_image_from_vm(vm)
+    image_plan = lib_get_image_from_plan(image)
+    if image_plan:
+        password = image_plan.password_
+    else:
+        #image might be created from other root image template
+        #So there isn't pre-set username/password. try to use default password.
+        password = os.environ.get('imagePassword')
+    return password
 
 def lib_get_nic_by_uuid(vm_nic_uuid, session_uuid=None):
     if vm_nic_uuid:
