@@ -47,12 +47,22 @@ def main(argv):
     test_case_path = argv[0]
     sys.path.append(os.path.dirname(test_case_path))
     test_case = imp.load_source('test_case', test_case_path)
+    case_setup_path = os.path.dirname(test_case_path)+'/case_setup.py'
+    case_setup = None
+    if os.path.exists(case_setup_path):
+        case_setup = imp.load_source('case_setup', case_setup_path)
+    if case_setup == None:
+        case_setup_path = os.path.dirname(os.path.dirname(test_case_path))+'/case_setup.py'
+        if os.path.exists(case_setup_path):
+            case_setup = imp.load_source('case_setup', case_setup_path)
 
     if not hasattr(test_case, 'test'):
         raise Exception('Not able to execute test case: %s, test case should at least define an entry function test()' % test_case_path)
 
     signal.signal(signal.SIGTERM, sigint_handler)
     try:
+        if case_setup and 'suite_setup' not in test_case_path:
+            case_setup.test()
         ret = test_case.test()
         if ret == True or ret == None:
             sys.exit(0)
