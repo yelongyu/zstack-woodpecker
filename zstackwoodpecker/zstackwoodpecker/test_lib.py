@@ -2463,7 +2463,11 @@ def lib_get_root_image_from_vm(vm):
 
 def lib_get_vm_username(vm):
     image = lib_get_root_image_from_vm(vm)
-    image_plan = lib_get_image_from_plan(image)
+    if not image:
+        image_plan = False
+    else:
+        image_plan = lib_get_image_from_plan(image)
+
     if image_plan:
         username = image_plan.username_
     else:
@@ -2474,7 +2478,11 @@ def lib_get_vm_username(vm):
 
 def lib_get_vm_password(vm):
     image = lib_get_root_image_from_vm(vm)
-    image_plan = lib_get_image_from_plan(image)
+    if not image:
+        image_plan = False
+    else:
+        image_plan = lib_get_image_from_plan(image)
+
     if image_plan:
         password = image_plan.password_
     else:
