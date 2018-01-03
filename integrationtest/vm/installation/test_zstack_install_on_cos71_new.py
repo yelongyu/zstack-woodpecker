@@ -58,7 +58,6 @@ def test():
     upgrade_script_path = os.environ.get('upgradeScript')
 
     test_util.test_dsc('Install zstack with -o')
-
     vm_ip = vm_inv.vmNics[0].ip
     test_stub.make_ssh_no_password(vm_ip, tmp_file)
     test_util.test_dsc('Upgrade master iso')
@@ -71,11 +70,7 @@ def test():
     args = "-o"
 
     test_util.test_dsc('start install the latest zstack-MN')
-
     test_stub.execute_install_with_args(ssh_cmd, args, target_file, tmp_file)
-
-    test_util.test_dsc('check the add the sftp BS and delete sftp bs')
-    #test_stub.check_installation(vm_ip, tmp_file)\
 
     test_util.test_dsc('create zone names is zone1')
     zone_inv = test_stub.create_zone1(vm_ip, tmp_file)
@@ -109,15 +104,36 @@ def test():
     vmoffering_inv = test_stub.create_vm_offering(vm_ip, tmp_file)
     vmoffering_uuid = vmoffering_inv.uuid
 
+    test_util.test_dsc('create L2_vlan network  names is L2_vlan')
     l2_inv = sce_ops.create_l2_vlan(vm_ip, 'L2_vlan', 'eth0', '2100', zone_uuid)
-    l2_uuid = l2_inv.uuid
+    l2_uuid = l2_inv.inventory.uuid
 
+    test_util.test_dsc('attach L2 netowrk to cluster')
     sce_ops.attach_l2(vm_ip, l2_uuid, cluster_uuid)
 
-    l3_inv = sce_ops.create_l3(vm_ip, 'l3_network', 'L3BasicNetwork', l2_uuid, 'local.com')
+    test_util.test_dsc('create L3_flat_network names is L3_flat_network')
+    l3_inv = sce_ops.create_l3(vm_ip, 'l3_flat_network', 'L3BasicNetwork', l2_uuid, 'local.com')
+    l3_uuid = l3_inv.inventory.uuid    
+
+    l3_dns = '223.5.5.5'
+    start_ip = '192.168.108.5'
+    end_ip = '192.168.108.200'
+    gateway = '192.168.108.1'
+    netmask = '255.255.255.0'
+
+    test_util.test_dsc('add DNS and IP_Range for L3_flat_network')
+    sce_ops.add_dns_to_l3(vm_ip, l3_uuid, l3_dns)
+    sce_ops.add_ip_range(vm_ip,'IP_range', l3_uuid, start_ip, end_ip, gateway, netmask)
     
+    test_util.test_dsc('query flat provider and attach network service to  L3_flat_network')
+    provider_name = 'Flat Network Service Provider'
+    conditions = res_ops.gen_query_conditions('name', '=', provider_name)
+    net_provider_list = sce_ops.query_resource(vm_ip, res_ops.NETWORK_SERVICE_PROVIDER, conditions).inventories[0]
+    pro_uuid = net_provider_list.uuid
+    sce_ops.attach_flat_network_service_to_l3network(vm_ip, l3_uuid, pro_uuid)
+
     os.system('rm -f %s' % tmp_file)
-    #sce_ops.destroy_vm(zstack_management_ip, vm_inv.uuid)
+    sce_ops.destroy_vm(zstack_management_ip, vm_inv.uuid)
     test_util.test_pass('Install ZStack with -o  Success')
 
 
@@ -135,7 +151,7 @@ def error_cleanup():
 
     test_util.test_dsc('Create test vm to test zstack install MN on centos7.1 and add the HOST')
     os.system('rm -f %s' % tmp_file)
-    #sce_ops.destroy_vm(zstack_management_ip, vm_inv.uuid)
+    sce_ops.destroy_vm(zstack_management_ip, vm_inv.uuid)
     test_lib.lib_error_cleanup(test_obj_dict)
     
 

@@ -1123,7 +1123,6 @@ def create_zone(http_server_ip, zone_option, session_uuid=None):
     return evt.inventory
 
 
-
 def create_cluster(http_server_ip, cluster_option, session_uuid=None):
     action = api_actions.CreateClusterAction()
     action.timeout = 30000
@@ -1195,6 +1194,16 @@ def create_instance_offering1(http_server_ip, instance_offering_option, session_
             % (action.name, action.cpuNum, action.memorySize, action.allocatorStrategy, action.type))
     test_util.test_logger('Instance Offering: %s is created' % evt.inventory.uuid)
     return evt.inventory
+
+def attach_flat_network_service_to_l3network(http_server_ip, l3_uuid, service_uuid, session_uuid=None):
+    providers = {}
+    action = api_actions.AttachNetworkServiceToL3NetworkAction()
+    action.l3NetworkUuid = l3_uuid
+    providers[service_uuid] = ['DHCP', 'Eip', 'Userdata']
+    action.networkServices = providers
+    action.timeout = 12000
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    return evt
 
 def add_data_volume_template(http_server_ip, image_option):
     action = api_actions.AddImageAction()
