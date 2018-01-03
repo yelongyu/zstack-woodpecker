@@ -59,5 +59,5 @@ def test():
 def error_cleanup():
    global vm
    if vm:
-      vm.destory()
+      vm.destroy()
 

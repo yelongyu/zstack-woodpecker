@@ -381,7 +381,7 @@ def change_vm_image(vm_uuid,image_uuid,session_uuid=None):
    action = api_actions.ChangeVmImageAction()
    action.vmInstanceUuid = vm_uuid
    action.imageUuid = image_uuid
-   action.timeout = 240000
+   action.timeout = 600000
    test_util.action_logger('Change image [imageUuid:] %s for vm [vmInstanceUuid:] %s' % (vm_uuid,image_uuid))
    evt = account_operations.execute_action_with_session(action,session_uuid)
    return evt.inventory
