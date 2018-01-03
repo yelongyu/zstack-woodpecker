@@ -19,6 +19,7 @@ test_obj_dict = test_state.TestStateDict()
 tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
 zstack_management_ip = os.environ.get('zstackManagementIp')
 vm_inv = None
+new_vm_inv = None
 
 def create_vm(image):
     l3_name = os.environ.get('l3PublicNetworkName')
@@ -36,6 +37,18 @@ def create_vm(image):
 
     return vm_inv
 
+def create_new_vm(new_image):
+    new_vm_name = 'new_vm_%s' % image_inv.name
+
+    vm_creation_option = test_util.VmOption()
+    vm_creation_option.set_instance_offering_uuid(vmoffering_uuid)
+    vm_creation_option.l3_uuids(l3_uuid)
+    vm_creation_option.set_image_uuid(image_uuid)
+    vm_creation_option.set_name(new_vm_name)
+    new_vm_inv = sce_ops.create_vm(vm_ip, vm_creation_option)
+
+    return new_vm_inv
+
 def test():
     global vm_inv
     global zone_inv
@@ -47,6 +60,11 @@ def test():
     global vmoffering_inv
     global l2_inv
     global l3_inv
+    global l3_uuid
+    global image_uuid
+    global vmoffering_uuid
+    global image_uuid
+    global vm_ip
 
     test_util.test_dsc('Create test vm to test zstack install MN on centos7.1 and add the HOST')
     
@@ -132,9 +150,12 @@ def test():
     pro_uuid = net_provider_list.uuid
     sce_ops.attach_flat_network_service_to_l3network(vm_ip, l3_uuid, pro_uuid)
 
+    test_util.test_dsc('create a vm with L3_flat_network')
+    new_vm_inv = create_new_vm(image_inv)
+
     os.system('rm -f %s' % tmp_file)
     sce_ops.destroy_vm(zstack_management_ip, vm_inv.uuid)
-    test_util.test_pass('Install ZStack with -o  Success')
+    test_util.test_pass('Install ZStack with -o on centos7.1 and create a vmSuccess')
 
 
 def error_cleanup():
