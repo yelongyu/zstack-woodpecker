@@ -14,8 +14,8 @@ mediumDiskOfferingSize = 100M
 
 clusterName2 = cluster2
 
-hostName = centos5
-hostIp = 127.1.101.44
+hostName = centos1
+hostIp = 127.1.101.40
 
 hostName2 = centos2
 hostIp2 = 127.1.101.41
