@@ -89,6 +89,7 @@ def create_vm(vm_name, image_name, l3_name):
 def create_vm_with_iso(l3_uuid_list, image_uuid, vm_name = None, root_disk_uuids = None, instance_offering_uuid = None, \
                        disk_offering_uuids = None, default_l3_uuid = None, system_tags = None, \
                        session_uuid = None, ps_uuid=None):
+    import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
     vm_creation_option = test_util.VmOption()
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     if not instance_offering_uuid:
