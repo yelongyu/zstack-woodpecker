@@ -1593,6 +1593,8 @@ class VipAction(object):
             eip_flag = False
 
         vr = test_lib.lib_find_vr_by_pri_l3(l3_net_uuid)
+        if not vr:
+            return
         vr_ip = test_lib.lib_find_vr_pub_ip(vr)
 
         if not self.vip_state_dict.has_key(vm_uuid):
