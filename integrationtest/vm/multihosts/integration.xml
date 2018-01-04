@@ -44,6 +44,24 @@
 	<case timeout='2400' repeat='1' noparallel='True'>ha/test_nols_10_stop_vm_ha_grace_stop_start_host.py</case>
 	<case timeout='2400' repeat='1' noparallel='True'>ha/test_ls_10_stop_vm_ha_force_stop_host.py</case>
 	<case timeout='2400' repeat='1' noparallel='True'>ha/test_nols_stopped_ha_vm_grace_stop_host_expect_vm_stopped.py</case>
+	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_img_vm_attach.py</case>
+	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_img_vm_change_os.py</case>
+	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_img_vm_cold_migrate.py</case>
+	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_img_vm_hot_migrate.py</case>
+	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_img_vm_reimage.py</case>
+	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_img_vm_resize_data_vol.py</case>
+	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_img_vm_resize_root_vol.py</case>
+	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_img_vm_sp.py</case>
+	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_img_vm_state.py</case>
+	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_iso_vm_attach.py</case>
+	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_iso_vm_change_os.py</case>
+	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_iso_vm_cold_migrate.py</case>
+	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_iso_vm_hot_migrate.py</case>
+	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_iso_vm_reimage.py</case>
+	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_iso_vm_resize_data_vol.py</case>
+	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_iso_vm_resize_root_vol.py</case>
+	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_iso_vm_sp.py</case>
+	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_iso_vm_state.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_vm_ops2.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_vm_with_iso.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_vm_with_iso2.py</case>
