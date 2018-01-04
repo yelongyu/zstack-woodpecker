@@ -4374,7 +4374,7 @@ def lib_vm_random_operation(robot_test_obj):
                 else:
                     test_stage_obj.set_snapshot_state(test_stage.no_snapshot)
             if target_snapshot:
-                if target_snapshot.get_target_volume().get_state() == vol_header.DELETED::
+                if target_snapshot.get_target_volume().get_state() == vol_header.DELETED:
                     test_stage_obj.set_snapshot_state(test_stage.no_snapshot)
 
 
