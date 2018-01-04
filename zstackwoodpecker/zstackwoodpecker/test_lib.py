@@ -4375,11 +4375,11 @@ def lib_vm_random_operation(robot_test_obj):
                 else:
                     test_stage_obj.set_snapshot_state(test_stage.no_snapshot)
     if target_snapshot:
-        if target_snapshot.get_target_volume().get_state() == vol_header.DELETED:
-            test_stage_obj.set_snapshot_state(test_stage.no_snapshot)
+        if target_snapshot.get_target_volume().get_state() == vol_header.DELETED or target_snapshot.get_target_volume().get_state() == vol_header.EXPUNGED:
+            test_stage_obj.set_snapshot_state(test_stage.no_volume_file)
     if target_volume_snapshots:
-        if target_volume_snapshots.get_target_volume().get_state() == vol_header.DELETED:
-            test_stage_obj.set_snapshot_state(test_stage.no_snapshot)
+        if target_volume_snapshots.get_target_volume().get_state() == vol_header.DELETED or target_volume_snapshots.get_target_volume().get_state() == vol_header.EXPUNGED:
+            test_stage_obj.set_snapshot_state(test_stage.no_volume_file)
 
 
     #Sixly, check system vip resource
