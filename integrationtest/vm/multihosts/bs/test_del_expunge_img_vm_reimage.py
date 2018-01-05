@@ -45,6 +45,7 @@ def test():
     l3_name = os.environ.get('l3VlanNetworkName1')
     vm1 = test_stub.create_vm(image_name1, image_name, l3_name)
     test_obj_dict.add_vm(vm1)
+    vm1.check()
 
     image1.delete()
     image1.expunge()
