@@ -33,7 +33,7 @@ def migrate_volume(index):
     threads_result[index] = "Done"
 
 def check_migrate_volume_progress(index):
-    for i in range(0, 600):
+    for i in range(0, 2400):
         if threads_result[index] == None:
             time.sleep(0.1)
             continue
