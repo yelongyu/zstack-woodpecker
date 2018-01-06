@@ -4253,9 +4253,18 @@ def lib_vm_random_operation(robot_test_obj):
     if target_vm_list:
         target_vm = random.choice(target_vm_list)
 
-        vm = lib_get_vm_by_uuid(target_vm.get_vm().uuid)
-        #vm state in db
-        vm_current_state = vm.state
+        # vm state in db may become inconsistent due to VM may become paused for a short period and vm sync to ZStack
+        retry_count = 0
+        while retry_count < 120:
+            vm = lib_get_vm_by_uuid(target_vm.get_vm().uuid)
+            #vm state in db
+            vm_current_state = vm.state
+            if target_vm_state == vm_current_state:
+                break
+            test_util.test_logger('[retry:] %s [vm:] %s current [state:] %s is not aligned with random test record [state:] \
+%s .' % (retry_count, target_vm.get_vm().uuid, vm_current_state, target_vm_state))
+            time.sleep(2)
+            retry_count += 1
         if target_vm_state != vm_current_state:
             test_util.test_fail('\
 [vm:] %s current [state:] %s is not aligned with random test record [state:] \
