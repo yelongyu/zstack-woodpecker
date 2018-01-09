@@ -1262,7 +1262,8 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
             target_host = test_lib.lib_find_random_host(vm_obj.vm)
             vol_ops.migrate_volume(vm_obj.get_vm().allVolumes[0].uuid, target_host.uuid)
             vm_obj.start()
-            vm_obj.check()
+            test_lib.lib_wait_target_up(vm_obj.get_vm().vmNics[0].ip, 22, 300)
+            #vm_obj.check()
         else:
             test_util.test_fail("FOUND NEW STORAGTE TYPE. FAILED")
 
@@ -1291,7 +1292,8 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         vm_obj.check()
         snapshots_root.use_snapshot(sp1)
         vm_obj.start()
-        vm_obj.check()
+        test_lib.lib_wait_target_up(vm_obj.get_vm().vmNics[0].ip, 22, 300)
+        #vm_obj.check()
         #cmd = "! test -f /opt/check_snapshot"
         #if not test_lib.lib_execute_command_in_vm(vm_obj.get_vm(), cmd):
         #    test_util.test_fail("execute cmd %s in vm failed" %(cmd))
@@ -1303,15 +1305,18 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         vm.set_state(vm_header.STOPPED)
         vm_obj.check()
         vm_obj.start()
-        vm_obj.check()
+        test_lib.lib_wait_target_up(vm_obj.get_vm().vmNics[0].ip, 22, 300)
+        #vm_obj.check()
         vm_obj.stop()
         vm_obj.check()
         vm_obj.start()
-        vm_obj.check()
+        test_lib.lib_wait_target_up(vm_obj.get_vm().vmNics[0].ip, 22, 300)
+        #vm_obj.check()
         vm_obj.suspend()
         vm_obj.check()
         vm_obj.resume()
-        vm_obj.check()
+        #vm_obj.check()
+        test_lib.lib_wait_target_up(vm_obj.get_vm().vmNics[0].ip, 22, 300)
 
 
     if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_REIMAGE":
@@ -1329,7 +1334,8 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         vm_obj.update()
         vm_obj.check()
         vm_obj.start()
-        vm_obj.check()
+        #vm_obj.check()
+        test_lib.lib_wait_target_up(vm_obj.get_vm().vmNics[0].ip, 22, 300)
         #cmd = "! test -f /opt/beforeReimage"
         #if not test_lib.lib_execute_command_in_vm(vm_obj.get_vm(), cmd):
         #    test_util.test_fail("execute cmd %s in vm failed" %(cmd))
@@ -1356,9 +1362,11 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         cond = res_ops.gen_query_conditions('name', '=', 'iso')
         iso_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
         img_ops.attach_iso(iso_uuid, vm_obj.vm.uuid)
-        vm_obj.check()
+        #vm_obj.check()
+        test_lib.lib_wait_target_up(vm_obj.get_vm().vmNics[0].ip, 22, 300)
         img_ops.detach_iso(vm_obj.vm.uuid)
-        vm_obj.check()
+        test_lib.lib_wait_target_up(vm_obj.get_vm().vmNics[0].ip, 22, 300)
+        #vm_obj.check()
 
         test_util.test_dsc("@@@==>ATTACH VOLUME")
         disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
@@ -1402,7 +1410,8 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         if set_size != vol_size_after:
             test_util.test_fail('Resize Root Volume failed, size = %s' % vol_size_after)
         vm_obj.start()
-        vm_obj.check()
+        #vm_obj.check()
+        test_lib.lib_wait_target_up(vm_obj.get_vm().vmNics[0].ip, 22, 300)
 
 
     if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_RESIZE_DVOL":
@@ -1440,7 +1449,7 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         vm_ops.start_vm(vm_uuid)
         vm_obj.update()
         #check whether the vm is running successfully
-        test_lib.lib_wait_target_up(vm_obj.get_vm().vmNics[0].ip,22)
+        test_lib.lib_wait_target_up(vm_obj.get_vm().vmNics[0].ip,22, 300)
         #check whether the network config has changed
         l3network_uuid_after = test_lib.lib_get_l3s_uuid_by_vm(vm_obj.get_vm())
         if l3network_uuid_after != last_l3network_uuid:
