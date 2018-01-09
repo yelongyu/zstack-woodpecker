@@ -77,15 +77,16 @@ def test():
     vm_inv = vm.get_vm()
     vm_ip = vm_inv.vmNics[0].ip
 
-    cmd ='[ -e /root ]'
-    ssh_timeout = test_lib.SSH_TIMEOUT
-    test_lib.SSH_TIMEOUT = 3600
+    #cmd ='[ -e /root ]'
+    #ssh_timeout = test_lib.SSH_TIMEOUT
+    #test_lib.SSH_TIMEOUT = 3600
     test_lib.lib_set_vm_host_l2_ip(vm_inv)
-    if not test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host_ip, vm_ip, 'root', 'password', cmd):
-        test_lib.SSH_TIMEOUT = ssh_timeout
-        test_util.test_fail("iso has been failed to installed.")
+    test_lib.lib_wait_target_up(vm.get_vm().vmNics[0].ip, 22, 1800)
+    #if not test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host_ip, vm_ip, 'root', 'password', cmd):
+    #    test_lib.SSH_TIMEOUT = ssh_timeout
+    #    test_util.test_fail("iso has been failed to installed.")
 
-    test_lib.SSH_TIMEOUT = ssh_timeout
+    #test_lib.SSH_TIMEOUT = ssh_timeout
 
     #delete iso
     image.delete()
