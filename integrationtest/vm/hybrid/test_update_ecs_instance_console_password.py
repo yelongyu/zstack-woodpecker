@@ -9,7 +9,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.hybrid_operations as hyb_ops
-
+import time
 
 test_obj_dict = test_state.TestStateDict()
 test_stub = test_lib.lib_get_test_stub()
@@ -22,8 +22,8 @@ def test():
     test_util.test_pass('Update ECS Instance Console Password Test Success')
 
 def env_recover():
-    if hybrid.ecs_instance:
-        hybrid.del_ecs_instance()
+    time.sleep(120)
+    hybrid.tear_down()
 
 #Will be called only if exception happens in test().
 def error_cleanup():
