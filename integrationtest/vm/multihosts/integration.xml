@@ -57,7 +57,7 @@
 	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_iso_vm_change_os.py</case>
 	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_iso_vm_cold_migrate.py</case>
 	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_iso_vm_hot_migrate.py</case>
-	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_iso_vm_reimage.py</case>
+	<!--<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_iso_vm_reimage.py</case>-->
 	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_iso_vm_resize_data_vol.py</case>
 	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_iso_vm_resize_root_vol.py</case>
 	<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_iso_vm_sp.py</case>
