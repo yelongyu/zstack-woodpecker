@@ -1302,7 +1302,7 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
     if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_STATE":
         test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_STATE")
         vm_ops.stop_vm(vm_obj.vm.uuid, 'cold')
-        vm.set_state(vm_header.STOPPED)
+        vm_obj.set_state(vm_header.STOPPED)
         vm_obj.check()
         vm_obj.start()
         test_lib.lib_wait_target_up(vm_obj.get_vm().vmNics[0].ip, 22, 300)
