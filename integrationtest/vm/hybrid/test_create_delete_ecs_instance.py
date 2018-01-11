@@ -22,6 +22,10 @@ def test():
     hybrid.del_ecs_instance()
     test_util.test_pass('Create Delete Ecs Instance Test Success')
 
+def env_recover():
+    time.sleep(60)
+    hybrid.tear_down()
+
 #Will be called only if exception happens in test().
 def error_cleanup():
     global test_obj_dict
