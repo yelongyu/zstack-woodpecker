@@ -1238,6 +1238,7 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
     import zstackwoodpecker.operations.volume_operations as vol_ops
     import zstackwoodpecker.operations.vm_operations as vm_ops
     import zstackwoodpecker.zstack_test.zstack_test_snapshot as zstack_sp_header
+    import zstackwoodpecker.header.vm as vm_header
 
     #import zstacklib.utils.ssh as ssh
     import test_stub
