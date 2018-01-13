@@ -8,7 +8,7 @@ New Integration Test for hybrid.
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
-
+import time
 
 test_obj_dict = test_state.TestStateDict()
 test_stub = test_lib.lib_get_test_stub()
@@ -22,6 +22,7 @@ def test():
 
 def env_recover():
     if hybrid.user_vpn_gateway:
+        time.sleep(60)
         hybrid.del_user_vpn_gateway()
 
 #Will be called only if exception happens in test().
