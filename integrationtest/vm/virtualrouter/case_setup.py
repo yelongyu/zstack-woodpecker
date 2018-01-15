@@ -8,13 +8,16 @@ import zstackwoodpecker.operations.deploy_operations as deploy_operations
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.zone_operations as zone_operations
 import zstackwoodpecker.operations.backupstorage_operations as bs_operations
+import zstackwoodpecker.operations.vm_operations as vm_ops
 import os
 import time
 
 def check_resource():
     vrs = res_ops.query_resource(res_ops.APPLIANCE_VM, [], None)
     for vr in vrs:
-        if vr.status != "Connected":
+        if vr.status != "Connected" or vr.state != "Running":
+            if vr.applianceVmType != "vrouter":
+                vm_ops.reboot_vm(vr.uuid) 
             return False
     hosts = res_ops.query_resource(res_ops.HOST, [], None)
     for host in hosts:
