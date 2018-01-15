@@ -8,6 +8,8 @@ import zstackwoodpecker.operations.deploy_operations as deploy_operations
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.zone_operations as zone_operations
 import zstackwoodpecker.operations.backupstorage_operations as bs_operations
+import zstackwoodpecker.operations.primarystorage_operations as ps_ops
+import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import os
 import time
@@ -22,16 +24,19 @@ def check_resource():
     hosts = res_ops.query_resource(res_ops.HOST, [], None)
     for host in hosts:
         if host.status != "Connected":
+            host_ops.reconnect_host(host.uuid) 
             return False
 
     pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, [], None)
     for ps in pss:
         if ps.status != "Connected":
+            ps_ops.reconnect_primary_storage(ps.uuid)
             return False
 
     bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, [], None)
     for bs in bss:
         if bs.status != "Connected":
+            bs_ops.reconnect_backup_storage(bs.uuid)
             return False
 
     return True
