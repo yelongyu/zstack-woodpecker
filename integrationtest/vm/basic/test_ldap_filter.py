@@ -86,3 +86,13 @@ def error_cleanup():
         acc_ops.delete_account(new_account_uuid)
     if new_account_uuid2:
         acc_ops.delete_account(new_account_uuid2)
+def env_recover():
+    global ldap_server_uuid
+    global new_account_uuid
+    global new_account_uuid2
+    if ldap_server_uuid:
+        ldp_ops.delete_ldap_server(ldap_server_uuid)
+    if new_account_uuid:
+        acc_ops.delete_account(new_account_uuid)
+    if new_account_uuid2:
+        acc_ops.delete_account(new_account_uuid2)

@@ -73,3 +73,12 @@ def error_cleanup():
         ldp_ops.delete_ldap_server(ad_server_uuid)
     if new_account_uuid:
         acc_ops.delete_account(new_account_uuid)
+
+def env_recover():
+    global ad_server_uuid
+    global new_account_uuid
+    if ad_server_uuid:
+        ldp_ops.delete_ldap_server(ad_server_uuid)
+    if new_account_uuid:
+        acc_ops.delete_account(new_account_uuid)
+
