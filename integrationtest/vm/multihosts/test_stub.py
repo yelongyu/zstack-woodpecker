@@ -1357,8 +1357,8 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         img_option = test_util.ImageOption()
         img_option.set_name('iso')
         img_option.set_backup_storage_uuid_list([bs_uuid])
-        os.system("echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/test.iso" % (os.environ.get('zstackInstallPath')))
         mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+        os.system("sshpass -p password ssh %s 'echo fake iso for test only' >  %s/apache-tomcat/webapps/zstack/static/test.iso" % (mn_ip, os.environ.get('zstackInstallPath')))
         img_option.set_url('http://%s:8080/zstack/static/test.iso' % (mn_ip))
         image_inv = img_ops.add_iso_template(img_option)
         image = test_image.ZstackTestImage()
