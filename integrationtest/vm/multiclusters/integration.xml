@@ -1,5 +1,5 @@
 <integrationTest>
-    <suite name="multi clusters test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
+    <suite name="multi clusters test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
         <case timeout='300' repeat='1'>test_create_vm.py</case>
         <case timeout='300' repeat='1' noparallel='True'>test_detach_l2_vr.py</case>
         <case timeout='300' repeat='1'>migrate/test_migrate_vm.py</case>
