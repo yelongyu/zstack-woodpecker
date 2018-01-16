@@ -1834,28 +1834,51 @@ def add_simulator_host(scenarioConfig, scenarioFile, deployConfig):
         if not xmlobject.has_element(zone, 'clusters.cluster'):
             continue
 
-        for cluster in xmlobject.safe_list(zone.clusters.cluster):
-            for host in xmlobject.safe_list(cluster.hosts.host):
-                data = {}
-                data['type'] = 'KvmHost'
-                data['data'] = {}
-                data['data']['username'] = host.username_
-                data['data']['password'] = host.password__
-                data['data']['id'] = host.name_
-                data['data']['ip'] = host.managementIp_
-		if hasattr(host, 'cpuNum_') and host.cpuNum_ != "":
-                    data['data']['cpuNum'] = host.cpuNum_
-		if hasattr(host, 'totalCpu_') and host.totalCpu_ != "":
-                    data['data']['totalCpu'] = host.totalCpu_
-		if hasattr(host, 'cpuSockets_') and host.cpuSockets_ != "":
-                    data['data']['cpuSockets'] = host.cpuSockets_
-		if hasattr(host, 'usedCpu_') and host.usedCpu_ != "":
-                    data['data']['usedCpu'] = host.usedCpu_
-		if hasattr(host, 'totalMemory_') and host.totalMemory_ != "":
-                    data['data']['totalMemory'] = host.totalMemory_
-		if hasattr(host, 'usedMemory_') and host.usedMemory_ != "":
-                    data['data']['usedMemory'] = host.usedMemory_
-                resources.append(data)
+        if zone.duplication__ == None:
+            zone_duplication = 1
+        else:
+            zone_duplication = int(zone.duplication__)
+
+
+        for zone_ref in range(zone_duplication):
+            for cluster in xmlobject.safe_list(zone.clusters.cluster):
+                if cluster.duplication__ == None:
+                    cluster_duplication = 1
+                else:
+                    cluster_duplication = int(cluster.duplication__)
+
+                for cluster_ref in range(cluster_duplication):
+                    for host in xmlobject.safe_list(cluster.hosts.host):
+                        if host.duplication__ == None:
+                            host_duplication = 1
+                        else:
+                            host_duplication = int(host.duplication__)
+            
+                        for host_ref in range(host_duplication):
+                            data = {}
+                            data['type'] = 'KvmHost'
+                            data['data'] = {}
+                            if zone_ref == 0 and cluster_ref == 0 and host_ref == 0:
+                                data['data']['ip'] = host.managementIp_
+                            else:
+                                data['data']['ip'] = generate_dup_host_ip(host.managementIp_, zone_ref, cluster_ref, host_ref)
+                            data['data']['username'] = host.username_
+                            data['data']['password'] = host.password__
+                            data['data']['id'] = host.name_
+                            data['data']['ip'] = host.managementIp_
+                            if hasattr(host, 'cpuNum_') and host.cpuNum_ != "":
+                                data['data']['cpuNum'] = host.cpuNum_
+                            if hasattr(host, 'totalCpu_') and host.totalCpu_ != "":
+                                data['data']['totalCpu'] = host.totalCpu_
+                            if hasattr(host, 'cpuSockets_') and host.cpuSockets_ != "":
+                                data['data']['cpuSockets'] = host.cpuSockets_
+                            if hasattr(host, 'usedCpu_') and host.usedCpu_ != "":
+                                data['data']['usedCpu'] = host.usedCpu_
+                            if hasattr(host, 'totalMemory_') and host.totalMemory_ != "":
+                                data['data']['totalMemory'] = host.totalMemory_
+                            if hasattr(host, 'usedMemory_') and host.usedMemory_ != "":
+                                data['data']['usedMemory'] = host.usedMemory_
+                            resources.append(data)
     mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
     url = "http://%s:8080/zstack/simulators/batch-create" % (mn_ip)
     ret = json_post(url, simplejson.dumps({"resources": resources}))
