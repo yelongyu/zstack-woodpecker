@@ -23,7 +23,7 @@ def test():
     global ipsec2
     cond = res_ops.gen_query_conditions('name', '=', 'public network') 
     public_network = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0]
-    vip1 = _test_stub.create_vip('vip1', public_network.uuid)
+    vip1 = test_stub.create_vip('vip1', public_network.uuid)
 
     test_util.test_dsc('Create vpc vr and attach networks')
     vpc_vr = test_stub.create_vpc_vrouter()
@@ -43,6 +43,6 @@ def test():
 #Will be called only if exception happens in test().
 def error_cleanup():
     global ipsec
-    if ipsec1 != None:
-        ipsec_ops.delete_ipsec_connection(ipsec1.uuid)
+    if ipsec != None:
+        ipsec_ops.delete_ipsec_connection(ipsec.uuid)
 
