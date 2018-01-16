@@ -16,6 +16,7 @@ import zstackwoodpecker.operations.image_operations as img_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
+import zstackwoodpecker.operations.vpc_operations as vpc_ops
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
 import re
 
@@ -277,4 +278,37 @@ def recover_volume(volume_uuid):
 def expunge_image(image_uuid):
     evt = img_ops.expunge_image(image_uuid)
     return evt
+
+def create_vip(vip_name=None, l3_uuid=None, session_uuid = None, required_ip=None):
+    if not vip_name:
+        vip_name = 'test vip'
+    if not l3_uuid:
+        l3_name = os.environ.get('l3PublicNetworkName')
+        l3_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+
+    vip_creation_option = test_util.VipOption()
+    vip_creation_option.set_name(vip_name)
+    vip_creation_option.set_l3_uuid(l3_uuid)
+    vip_creation_option.set_session_uuid(session_uuid)
+    vip_creation_option.set_requiredIp(required_ip)
+
+    vip = zstack_vip_header.ZstackTestVip()
+    vip.set_creation_option(vip_creation_option)
+    vip.create()
+
+    return vip
+
+def create_vpc_vrouter(vr_name='test_vpc'):
+    conf = res_ops.gen_query_conditions('name', '=', 'test_vpc')
+    vr_list = res_ops.query_resource(res_ops.APPLIANCE_VM, conf)
+    if vr_list:
+        return ZstackTestVR(vr_list[0])
+    vr_offering = res_ops.get_resource(res_ops.VR_OFFERING)[0]
+    vr_inv =  vpc_ops.create_vpc_vrouter(name=vr_name, virtualrouter_offering_uuid=vr_offering.uuid)
+    return ZstackTestVR(vr_inv)
+
+
+def attach_l3_to_vpc_vr(vpc_vr, l3_list):
+    for l3 in l3_list:
+        vpc_vr.add_nic(l3.uuid)
 
