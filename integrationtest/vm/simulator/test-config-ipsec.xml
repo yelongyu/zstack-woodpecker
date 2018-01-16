@@ -1,5 +1,0 @@
-<testConfig>
-    <deployConfig>deploy-vyos-nfs.xml</deployConfig>
-    <deployConfigTemplate>deploy-ipsec.tmpt</deployConfigTemplate>
-    <pingTestTarget>zstack.yyk.net</pingTestTarget>
-</testConfig>
