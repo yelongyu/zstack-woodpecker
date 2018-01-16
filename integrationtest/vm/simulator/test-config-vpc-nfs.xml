@@ -1,0 +1,6 @@
+<testConfig>
+    <deployConfig>deploy-vpc-nfs.xml</deployConfig>
+    <deployConfigTemplate>deploy-vpc-nfs.tmpt</deployConfigTemplate>
+    <!-- suite special test variables -->
+    <pingTestTarget>zstack.yyk.net</pingTestTarget>
+</testConfig>
