@@ -46,6 +46,9 @@ def test():
     zstack_latest_version = os.environ.get('zstackLatestVersion')
     zstack_latest_path = os.environ.get('zstackLatestInstaller')
 
+    iso_path = os.environ.get('iso_path')
+    upgrade_script_path = os.environ.get('upgradeScript')
+
     test_util.test_dsc('Create 2 CentOS7 vm to test install management node installation')
 
     conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_21_ex'))
@@ -59,6 +62,7 @@ def test():
 
     time.sleep(60)
     test_stub.make_ssh_no_password(vm1_ip, tmp_file)
+    test_stub.update_iso(vm1_ip, tmp_file, iso_path, upgrade_script_path)
 
     target_file = '/root/zstack-all-in-one.tgz'
     test_stub.prepare_test_env(vm1_inv, target_file)
