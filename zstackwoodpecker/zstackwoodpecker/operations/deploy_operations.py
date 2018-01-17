@@ -1860,12 +1860,12 @@ def add_simulator_host(scenarioConfig, scenarioFile, deployConfig):
                             data['data'] = {}
                             if zone_ref == 0 and cluster_ref == 0 and host_ref == 0:
                                 data['data']['ip'] = host.managementIp_
+                                data['data']['id'] = host.name_
                             else:
                                 data['data']['ip'] = generate_dup_host_ip(host.managementIp_, zone_ref, cluster_ref, host_ref)
+                                data['data']['id'] = generate_dup_name(generate_dup_name(generate_dup_name(host.name_, zone_ref, 'z'), cluster_ref, 'c'), host_ref, 'h')
                             data['data']['username'] = host.username_
                             data['data']['password'] = host.password__
-                            data['data']['id'] = host.name_
-                            data['data']['ip'] = host.managementIp_
                             if hasattr(host, 'cpuNum_') and host.cpuNum_ != "":
                                 data['data']['cpuNum'] = host.cpuNum_
                             if hasattr(host, 'totalCpu_') and host.totalCpu_ != "":
