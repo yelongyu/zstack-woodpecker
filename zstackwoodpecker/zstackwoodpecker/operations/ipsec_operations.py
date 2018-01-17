@@ -65,3 +65,23 @@ def detach_l3network_from_ipsec_connection(l3network_uuids, ipsec_uuid, session_
             (l3network_uuids, ipsec_uuid))
     return evt
 
+def attach_remote_cidr_to_ipsec_connection(peer_cidrs, ipsec_uuid, session_uuid=None):
+    action = api_actions.AttachRemoteCIDRToIPsecConnectionAction()
+    action.timeout = 30000
+    action.peerCidrs = peer_cidrs
+    action.uuid = ipsec_uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Attach Peer CIDRs %s to Ipsec Connection [uuid:] %s' % \
+            (peer_cidrs, ipsec_uuid))
+    return evt
+
+def detach_remote_cidr_from_ipsec_connection(peer_cidrs, ipsec_uuid, session_uuid=None):
+    action = api_actions.DetachRemoteCIDRFromIPsecConnectionAction()
+    action.timeout = 30000
+    action.peerCidrs = peer_cidrs
+    action.uuid = ipsec_uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Detach Peer CIDRs %s From Ipsec Connection [uuid:] %s' % \
+            (peer_cidrs, ipsec_uuid))
+    return evt
+

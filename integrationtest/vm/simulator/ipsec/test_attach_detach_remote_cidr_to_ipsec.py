@@ -1,6 +1,6 @@
 '''
 
-Test attach l3network to VPC IPsec
+Test attach peer cidrs to VPC IPsec
 
 @author: Glody 
 '''
@@ -15,16 +15,17 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict1 = test_state.TestStateDict()
 test_obj_dict2 = test_state.TestStateDict()
 ipsec = None
+vip1_uuid = None
+vpc_vr = None
 
 def test():
-    global mevoco1_ip
-    global mevoco2_ip
-    global ipsec1
-    global ipsec2
-    cond = res_ops.gen_query_conditions('name', '=', 'public network') 
+    global ipsec
+    global vip1_uuid
+    global vpc_vr
+    cond = res_ops.gen_query_conditions('name', '=', 'public network')
     public_network = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0]
-    vip1 = test_stub.create_vip('vip1', public_network.uuid)
-
+    vip1 = test_stub.create_vip('vip_ipsec', public_network.uuid)
+    vip1_uuid = vip1.get_vip().uuid
     test_util.test_dsc('Create vpc vr and attach networks')
     vpc_vr = test_stub.create_vpc_vrouter()
 
@@ -32,22 +33,39 @@ def test():
     l3_vlan_network11 = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0]
     vpc_vr.add_nic(l3_vlan_network11.uuid)
 
-    peer_address = '10.94.10.10'
+    peer_address = '10.94.10.11'
+
     try:
-        ipsec = ipsec_ops.create_ipsec_connection('ipsec', None, peer_address, '123456', vip1.uuid, None)
+        ipsec = ipsec_ops.create_ipsec_connection('ipsec', None, peer_address, '123456', vip1_uuid, None)
     except:
         test_util.test_fail('Failed to create vpc ipsec')
 
+    peer_cidrs = ['10.94.100.1/24', '10.94.101.1/24', '10.94.102.1/24', '10.94.103.1/24', '10.94.104.1/24']
+    try:
+        ipsec_ops.attach_remote_cidr_to_ipsec_connection(peer_cidrs, ipsec_uuid)
+    except:
+        test_util.test_fail('Attach Peer CIDRs Failed')
 
-    ipsec_ops.attach_remote_cidr_to_ipsec_connection(peer_cidrs, ipsec_uuid)
+    try:
+        ipsec_ops.detach_remote_cidr_from_ipsec_connection(peer_cidrs, ipsec_uuid)
+    except:
+        test_util.test_fail('Detach Peer CIDRs Failed')
 
-    ipsec_ops.detach_remote_cidr_from_ipsec_connection(peer_cidrs, ipsec_uuid)
+    test_util.test_pass('Attach/Detach Peer CIDRs Success')
 
-    test_util.test_pass('Attach Detach L3Network Success')
+    test_stub.delete_vip(vip1_uuid)
+    vpc_vr.destroy()
+    ipsec_ops.delete_ipsec_connection(ipsec.uuid)
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     global ipsec
+    global vip1_uuid
+    global vpc_vr
     if ipsec != None:
         ipsec_ops.delete_ipsec_connection(ipsec.uuid)
+    if vip != None:
+        test_stub.delete_vip(vip1_uuid)
+    if vpc_vr != None:
+        vpc_vr.destroy()
 
