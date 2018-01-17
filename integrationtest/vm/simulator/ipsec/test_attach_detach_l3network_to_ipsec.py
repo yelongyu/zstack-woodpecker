@@ -1,6 +1,6 @@
 '''
 
-Test VPC IPsec
+Test attach l3network to VPC IPsec
 
 @author: Glody 
 '''
@@ -38,7 +38,12 @@ def test():
     except:
         test_util.test_fail('Failed to create vpc ipsec')
 
-    test_util.test_pass('Create VPC Ipsec Success')
+
+    ipsec_ops.attach_l3network_to_ipsec_connection((l3network_uuids, ipsec_uuid)
+
+    ipsec_ops.detach_l3network_from_ipsec_connection((l3network_uuids, ipsec_uuid)
+
+    test_util.test_pass('Attach Detach L3Network Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():

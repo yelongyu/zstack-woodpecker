@@ -17,7 +17,10 @@ import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.operations.vpc_operations as vpc_ops
+import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
+import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
+import zstackwoodpecker.header.vm as vm_header
 import re
 
 def create_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None,
@@ -311,4 +314,77 @@ def create_vpc_vrouter(vr_name='test_vpc'):
 def attach_l3_to_vpc_vr(vpc_vr, l3_list):
     for l3 in l3_list:
         vpc_vr.add_nic(l3.uuid)
+
+class ZstackTestVR(vm_header.TestVm):
+    def __init__(self, vr_inv):
+        super(ZstackTestVR, self).__init__()
+        self._inv = vr_inv
+
+    def __hash__(self):
+        return hash(self.inv.uuid)
+
+    def __eq__(self, other):
+        return self.inv.uuid == other.inv.uuid
+
+    @property
+    def inv(self):
+        return self._inv
+
+    @inv.setter
+    def inv(self, value):
+        self._inv = value
+
+    def destroy(self, session_uuid = None):
+        vm_ops.destroy_vm(self.inv.uuid, session_uuid)
+        super(ZstackTestVR, self).destroy()
+
+    def reboot(self, session_uuid = None):
+        self.inv = vm_ops.reboot_vm(self.inv.uuid, session_uuid)
+        super(ZstackTestVR, self).reboot()
+
+    def reconnect(self, session_uuid = None):
+        self.inv = vm_ops.reconnect_vr(self.inv.uuid, session_uuid)
+
+    def migrate(self, host_uuid, timeout = None, session_uuid = None):
+        self.inv = vm_ops.migrate_vm(self.inv.uuid, host_uuid, timeout, session_uuid)
+        super(ZstackTestVR, self).migrate(host_uuid)
+
+    def migrate_to_random_host(self, timeout = None, session_uuid = None):
+        host_uuid = random.choice([host.uuid for host in res_ops.get_resource(res_ops.HOST)
+                                                      if host.uuid != test_lib.lib_find_host_by_vm(self.inv).uuid])
+        self.inv = vm_ops.migrate_vm(self.inv.uuid, host_uuid, timeout, session_uuid)
+        super(ZstackTestVR, self).migrate(host_uuid)
+
+    def update(self):
+        '''
+        If vm's status was changed by none vm operations, it needs to call
+        vm.update() to update vm's infromation.
+
+        The none vm operations: host.maintain() host.delete(), zone.delete()
+        cluster.delete()
+        '''
+        super(ZstackTestVR, self).update()
+        if self.get_state != vm_header.EXPUNGED:
+            update_inv = test_lib.lib_get_vm_by_uuid(self.inv.uuid)
+            if update_inv:
+                self.inv = update_inv
+                #vm state need to chenage to stopped, if host is deleted
+                host = test_lib.lib_find_host_by_vm(update_inv)
+                if not host and self.inv.state != vm_header.STOPPED:
+                    self.set_state(vm_header.STOPPED)
+            else:
+                self.set_state(vm_header.EXPUNGED)
+            return self.inv
+
+    def add_nic(self, l3_uuid):
+        '''
+        Add a new NIC device to VM. The NIC device will connect with l3_uuid.
+        '''
+        self.inv = net_ops.attach_l3(l3_uuid, self.inv.uuid)
+
+    def remove_nic(self, nic_uuid):
+        '''
+        Detach a NIC from VM.
+        '''
+        self.inv = net_ops.detach_l3(nic_uuid)
 
