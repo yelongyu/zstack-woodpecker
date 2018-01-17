@@ -21,6 +21,7 @@ import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
 import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
 import zstackwoodpecker.header.vm as vm_header
+from zstackwoodpecker.operations import vm_operations as vm_ops
 import re
 
 def create_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None,
@@ -298,8 +299,15 @@ def create_vip(vip_name=None, l3_uuid=None, session_uuid = None, required_ip=Non
     vip = zstack_vip_header.ZstackTestVip()
     vip.set_creation_option(vip_creation_option)
     vip.create()
-
     return vip
+
+def delete_vip(vip_uuid, session_uuid = None):
+    action = api_actions.DeleteVipAction()
+    action.timeout = 30000
+    action.uuid = vip_uuid
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Delete Vip:  %s ' % vip_uuid)
+    return evt 
 
 def create_vpc_vrouter(vr_name='test_vpc'):
     conf = res_ops.gen_query_conditions('name', '=', 'test_vpc')
