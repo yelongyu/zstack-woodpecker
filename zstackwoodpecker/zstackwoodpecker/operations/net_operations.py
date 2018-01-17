@@ -142,19 +142,29 @@ def delete_vip(vip_uuid, session_uuid=None):
     test_util.action_logger("[VIP]: %s is deleted" % vip_uuid)
     return evt
 
-def set_vip_qos(vip_uuid, inboundBandwidth=None, outboundBandwidth=None, session_uuid=None):
+def set_vip_qos(vip_uuid, inboundBandwidth=None, outboundBandwidth=None, port=None, session_uuid=None):
     action = api_actions.SetVipQosAction()
     action.uuid = vip_uuid
+    action.port = port
     action.inboundBandwidth = inboundBandwidth
     action.outboundBandwidth = outboundBandwidth
     action.timeout = 12000
+    test_util.action_logger("SetVipQos [vip:] %s [inboundBandwidth: ] %s [outboundBandwidth: ] %s [port: ] %s" % (vip_uuid, inboundBandwidth, outboundBandwidth, port))
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt
 
-def delete_vip_qos(vip_uuid, direction, session_uuid=None):
+def get_vip_qos(vip_uuid, session_uuid=None):
+    action = api_actions.GetVipQosAction()
+    action.uuid = vip_uuid
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("GetVipQos [vip:] %s" % vip_uuid)
+    return evt.inventories
+
+def delete_vip_qos(vip_uuid, port, session_uuid=None):
     action = api_actions.DeleteVipQosAction()
     action.uuid = vip_uuid
-    action.direction = direction
+    action.port = port
+#     action.direction = direction
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger("DeleteVipQos [vip:] %s is deleted" % vip_uuid)
     return evt

@@ -27,6 +27,7 @@ import apibinding.inventory as inventory
 import random
 import functools
 from zstackwoodpecker.operations import vm_operations as vm_ops
+import commands
 
 Port = test_state.Port
 
@@ -736,3 +737,120 @@ def get_another_ip_of_host(ip, username, password):
 def set_httpd_in_vm(ip, username, password):
     cmd = "yum install httpd -y; systemctl start httpd; iptables -F; echo %s > /var/www/html/index.html" % ip
     test_lib.lib_execute_ssh_cmd(ip, username, password, cmd, timeout=300)
+
+
+class QOS_Checker(object):
+    def __init__(self, ssh_cmd, vm_ip, port=None):
+        self.ssh_cmd = ssh_cmd
+        self.vm_ip = vm_ip
+        self.port = port
+
+    def exec_cmd_in_vm(self, cmd, fail_msg):
+        ret, output, stderr = ssh.execute(cmd, self.vm_ip, "root", "password", False, 22)
+        if ret != 0:
+            test_util.test_fail(fail_msg)
+        return output
+
+    def start_iperf_server(self):
+        cmd = self.ssh_cmd + self.vm_ip + ' iperf3 -s -p %s' % self.port
+#         commands.getstatusoutput(cmd)
+        subprocess.Popen(cmd, executable='/bin/sh', shell=True, stdout=subprocess.PIPE, universal_newlines=True)
+
+    def __enter__(self):
+        test_util.test_dsc('Start iperf server.')
+        self.start_iperf_server()
+        return self
+
+    def __exit__(self, *args):
+        cmd = self.ssh_cmd + self.vm_ip + " pkill -9 iperf3"
+        test_util.test_dsc('Terminate iperf server.')
+        commands.getstatusoutput(cmd)
+#         subprocess.Popen(cmd, executable='/bin/sh', shell=True, stdout=subprocess.PIPE, universal_newlines=True)
+
+class VIPQOS(object):
+    def __init__(self):
+        self.mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+        self.ssh_cmd = 'sshpass -p password ssh -o StrictHostKeyChecking=no root@'
+        self.inbound_width = None
+        self.outbound_width = None
+        self.iperf_url = None
+        self.vm_ip = None
+        self.port = None
+        commands.getoutput("iptables -F")
+
+    def install_iperf(self, vm_ip):
+        iperf_url = os.getenv('iperfUrl')
+        cmd = "%s 'wget %s; rpm -ivh %s'" % (self.ssh_cmd + vm_ip, iperf_url, iperf_url.split('/')[-1])
+        if commands.getstatusoutput(self.ssh_cmd + vm_ip + ' iperf3 -v')[0] != 0:
+            ret = commands.getstatusoutput(cmd)
+            print '*' * 90
+            print ret
+            if ret[0] != 0:
+                test_util.test_fail('fail to install iperf.')
+
+    def start_iperf_server(self):
+        terminate_cmd =  self.ssh_cmd + self.vm_ip + " pkill -9 iperf3"
+        commands.getstatusoutput(terminate_cmd)
+        time.sleep(5)
+        if self.port:
+            cmd = self.ssh_cmd + self.vm_ip + ' "nohup iperf3 -s -p %s &> /dev/null &"' % self.port
+        else:
+            cmd = self.ssh_cmd + self.vm_ip + ' "nohup iperf3 -s &> /dev/null &"'
+        commands.getstatusoutput(cmd)
+
+    def create_vm(self, l3_network):
+        self.vm = create_vlan_vm(os.getenv(l3_network))
+        self.vm.check()
+        self.vm_ip = self.vm.vm.vmNics[0].ip
+        time.sleep(60)
+        for ip in [self.mn_ip, self.vm_ip]:
+            self.install_iperf(ip)
+
+    def create_vip(self):
+        self.vm_nic_uuid = self.vm.vm.vmNics[0].uuid
+        pri_l3_uuid = self.vm.vm.vmNics[0].l3NetworkUuid
+        vr = test_lib.lib_find_vr_by_l3_uuid(pri_l3_uuid)[0]
+#         vm_ops.reconnect_vr(vr.uuid)
+        l3_uuid = test_lib.lib_find_vr_pub_nic(vr).l3NetworkUuid
+        self.vip = create_vip('vip_for_qos', l3_uuid)
+
+    def create_eip(self):
+        eip = create_eip('qos_test', vip_uuid=self.vip.get_vip().uuid, vnic_uuid=self.vm_nic_uuid, vm_obj=self.vm)
+        self.vip.attach_eip(eip)
+        self.vip_ip = self.vip.get_vip().ip
+        self.vip_uuid = self.vip.get_vip().uuid
+
+    def set_vip_qos(self, inbound_width=None, outbound_width=None, port=None):
+        self.inbound_width = inbound_width * 1024 * 1024
+        self.outbound_width = outbound_width * 1024 * 1024
+        self.port = port
+        net_ops.set_vip_qos(vip_uuid=self.vip_uuid, inboundBandwidth=self.inbound_width, outboundBandwidth=self.outbound_width, port=port)
+
+    def del_vip_qos(self, port):
+        self.vip_qos = net_ops.get_vip_qos(self.vip_uuid)
+
+    def check_bandwidth(self, cmd):
+        commands.getoutput(self.ssh_cmd + self.vm_ip +" iptables -F")
+        self.start_iperf_server()
+        time.sleep(10)
+        ret = commands.getstatusoutput(cmd)
+        print '*' * 50
+        print ret
+        if ret[0] == 0:
+            assert abs((float(ret) - self.outbound_width)) / self.outbound_width < 0.5
+        else:
+            raise Exception('Execute command % error' % cmd)
+
+    def check_outbound_bandwidth(self):
+        if self.port:
+            cmd = "iperf3 -c %s -p %s -R | awk 'NR==18 {print $(NF-2)}'" % (self.vip_ip, self.port)
+        else:
+            cmd = "iperf3 -c %s -R | awk 'NR==18 {print $(NF-2)}'" % self.vip_ip
+        self.check_bandwidth(cmd)
+
+    def check_inbound_bandwidth(self):
+        if self.port:
+            cmd = "iperf3 -c %s -p %s | awk 'NR==16 {print $(NF-3)}'" % (self.vip_ip, self.port)
+        else:
+            cmd = "iperf3 -c %s | awk 'NR==16 {print $(NF-3)}'" % self.vm_ip
+        self.check_bandwidth(cmd)
