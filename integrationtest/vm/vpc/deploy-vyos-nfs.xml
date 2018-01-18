@@ -246,6 +246,7 @@
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
@@ -282,6 +283,7 @@
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
@@ -314,6 +316,7 @@
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
@@ -346,6 +349,7 @@
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
@@ -378,6 +382,7 @@
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
@@ -409,6 +414,7 @@
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
@@ -440,6 +446,7 @@
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
@@ -471,6 +478,7 @@
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
@@ -502,6 +510,7 @@
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
@@ -533,6 +542,7 @@
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
@@ -564,6 +574,7 @@
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
@@ -593,6 +604,7 @@
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
@@ -622,6 +634,7 @@
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
@@ -651,6 +664,7 @@
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
@@ -680,6 +694,7 @@
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
@@ -709,6 +724,7 @@
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
@@ -738,6 +754,7 @@
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
@@ -767,6 +784,7 @@
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
@@ -796,6 +814,7 @@
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
@@ -825,6 +844,7 @@
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
@@ -854,6 +874,7 @@
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
