@@ -66,5 +66,11 @@
         <case timeout='600' repeat='1'>migrate/test_migrate_vm_with_iso.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_vm_with_iso2.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_vm_eip_check.py</case>
+        <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_host.py::kill_kvmagent</case>
+        <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_host.py::stop_kvmagent</case>
+        <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_ceph.py::kill_bs</case>
+        <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_ceph.py::stop_bs</case>
+        <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_ceph.py::kill_ps</case>
+        <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_ceph.py::stop_ps</case>
     </suite>
 </integrationTest>
