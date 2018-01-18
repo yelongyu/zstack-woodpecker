@@ -14,11 +14,12 @@ qos = test_stub.VIPQOS()
 
 def test():
     qos.create_vm('l3VlanNetworkName1')
+    qos.create_vip()
     qos.create_eip()
     test_obj_dict.add_vm(qos.vm)
     test_obj_dict.add_vip(qos.vip)
 
-    qos.set_vip_qos(1, 1)
+    qos.set_vip_qos(1000, 1000)
 
     qos.check_outbound_bandwidth()
     qos.check_inbound_bandwidth()

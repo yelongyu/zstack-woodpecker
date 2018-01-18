@@ -247,7 +247,8 @@
                   <serviceType>DNS</serviceType>
                 <serviceType>SNAT</serviceType>
                 <serviceType>PortForwarding</serviceType>
-                <serviceType>Eip</serviceType> 
+                <serviceType>Eip</serviceType>
+                <serviceType>VipQos</serviceType> 
               </networkService>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
@@ -348,6 +349,7 @@
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
                 <serviceType>Userdata</serviceType>
+                <serviceType>VipQos</serviceType>
               </networkService>
               <networkService provider="SecurityGroup">
                 <serviceType>SecurityGroup</serviceType>
@@ -373,6 +375,7 @@
                 <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
                 <serviceType>LoadBalancer</serviceType>
+                <serviceType>VipQos</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>

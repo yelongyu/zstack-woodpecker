@@ -666,14 +666,14 @@ def install_iperf(vm_inv):
     if execute_shell_in_process(cmd, 150) != 0:
         test_util.test_fail('fail to install iperf.')
 
-def test_iperf_bandwidth(vm1_inv,vm2_inv,vip_ip,server_port,client_port,bandwidth,raise_exception=True):
+def test_iperf_bandwidth(vm1_inv,vm2_inv,vip_ip,server_iperf_port,client_iperf_port,bandwidth,raise_exception=True):
     vm1_ip = vm1_inv.vmNics[0].ip
     vm2_ip = vm2_inv.vmNics[0].ip
 
-    cmd1 = "sshpass -p 'password' ssh root@%s iperf -s -p %s | awk 'NR==7 {print $(NF-1)}'" % (vm1_ip, server_port)
+    cmd1 = "sshpass -p 'password' ssh root@%s iperf -s -p %s | awk 'NR==7 {print $(NF-1)}'" % (vm1_ip, server_iperf_port)
     process1 = subprocess.Popen(cmd1, executable='/bin/sh', shell=True, stdout=subprocess.PIPE, universal_newlines=True)
     time.sleep(10)
-    cmd2 = "iperf -c %s -p %s | awk 'NR==7 {print $(NF-1)}'" % (vip_ip, client_port)
+    cmd2 = "iperf -c %s -p %s | awk 'NR==7 {print $(NF-1)}'" % (vip_ip, client_iperf_port)
     ret, output, stderr = ssh.execute(cmd2, vm2_ip, "root", "password", False, 22)
     inboundBandwidth = float(output)*128
 
@@ -739,34 +739,6 @@ def set_httpd_in_vm(ip, username, password):
     test_lib.lib_execute_ssh_cmd(ip, username, password, cmd, timeout=300)
 
 
-class QOS_Checker(object):
-    def __init__(self, ssh_cmd, vm_ip, port=None):
-        self.ssh_cmd = ssh_cmd
-        self.vm_ip = vm_ip
-        self.port = port
-
-    def exec_cmd_in_vm(self, cmd, fail_msg):
-        ret, output, stderr = ssh.execute(cmd, self.vm_ip, "root", "password", False, 22)
-        if ret != 0:
-            test_util.test_fail(fail_msg)
-        return output
-
-    def start_iperf_server(self):
-        cmd = self.ssh_cmd + self.vm_ip + ' iperf3 -s -p %s' % self.port
-#         commands.getstatusoutput(cmd)
-        subprocess.Popen(cmd, executable='/bin/sh', shell=True, stdout=subprocess.PIPE, universal_newlines=True)
-
-    def __enter__(self):
-        test_util.test_dsc('Start iperf server.')
-        self.start_iperf_server()
-        return self
-
-    def __exit__(self, *args):
-        cmd = self.ssh_cmd + self.vm_ip + " pkill -9 iperf3"
-        test_util.test_dsc('Terminate iperf server.')
-        commands.getstatusoutput(cmd)
-#         subprocess.Popen(cmd, executable='/bin/sh', shell=True, stdout=subprocess.PIPE, universal_newlines=True)
-
 class VIPQOS(object):
     def __init__(self):
         self.mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
@@ -776,6 +748,7 @@ class VIPQOS(object):
         self.iperf_url = None
         self.vm_ip = None
         self.port = None
+        self.iperf_port = None
         commands.getoutput("iptables -F")
 
     def install_iperf(self, vm_ip):
@@ -792,8 +765,8 @@ class VIPQOS(object):
         terminate_cmd =  self.ssh_cmd + self.vm_ip + " pkill -9 iperf3"
         commands.getstatusoutput(terminate_cmd)
         time.sleep(5)
-        if self.port:
-            cmd = self.ssh_cmd + self.vm_ip + ' "nohup iperf3 -s -p %s &> /dev/null &"' % self.port
+        if self.iperf_port:
+            cmd = self.ssh_cmd + self.vm_ip + ' "nohup iperf3 -s -p %s &> /dev/null &"' % self.iperf_port
         else:
             cmd = self.ssh_cmd + self.vm_ip + ' "nohup iperf3 -s &> /dev/null &"'
         commands.getstatusoutput(cmd)
@@ -815,42 +788,66 @@ class VIPQOS(object):
         self.vip = create_vip('vip_for_qos', l3_uuid)
 
     def create_eip(self):
+        self.create_vip()
         eip = create_eip('qos_test', vip_uuid=self.vip.get_vip().uuid, vnic_uuid=self.vm_nic_uuid, vm_obj=self.vm)
         self.vip.attach_eip(eip)
+        time.sleep(10)
         self.vip_ip = self.vip.get_vip().ip
         self.vip_uuid = self.vip.get_vip().uuid
 
-    def set_vip_qos(self, inbound_width=None, outbound_width=None, port=None):
+    def set_vip_qos(self, inbound_width=None, outbound_width=None, port=None, iperf_port=None):
         self.inbound_width = inbound_width * 1024 * 1024
         self.outbound_width = outbound_width * 1024 * 1024
         self.port = port
+        self.iperf_port = iperf_port
         net_ops.set_vip_qos(vip_uuid=self.vip_uuid, inboundBandwidth=self.inbound_width, outboundBandwidth=self.outbound_width, port=port)
+        time.sleep(60)
 
-    def del_vip_qos(self, port):
+    def del_vip_qos(self, iperf_port):
         self.vip_qos = net_ops.get_vip_qos(self.vip_uuid)
 
-    def check_bandwidth(self, cmd):
+    def check_bandwidth(self, direction, cmd, bandwidth):
         commands.getoutput(self.ssh_cmd + self.vm_ip +" iptables -F")
-        self.start_iperf_server()
         time.sleep(10)
-        ret = commands.getstatusoutput(cmd)
-        print '*' * 50
-        print ret
-        if ret[0] == 0:
-            assert abs((float(ret) - self.outbound_width)) / self.outbound_width < 0.5
+        self.start_iperf_server()
+        time.sleep(30)
+        (status, ret) = commands.getstatusoutput(cmd)
+        seper = '*' * 80
+        print "%s\n%s\n%s" % (seper, ret, seper)
+        if direction == 'out':
+            pos = -3
         else:
-            raise Exception('Execute command % error' % cmd)
+            pos = -4
+        summ = ret.split('\n')[pos]
+        bndwth = float(summ.split()[pos])
+        if summ.split()[pos + 1] == 'Kbits/sec':
+            bndwth /= 1024
+        elif summ.split()[pos + 1] == 'Gbits/sec':
+            bndwth *= 1024
+        if status == 0:
+            if bandwidth == 1000:
+                assert bndwth < bandwidth
+            else:
+                assert abs(bndwth - bandwidth) / bandwidth < 0.1
+        else:
+            raise Exception('Execute command %s error: %s' % (cmd, ret))
 
     def check_outbound_bandwidth(self):
-        if self.port:
-            cmd = "iperf3 -c %s -p %s -R | awk 'NR==18 {print $(NF-2)}'" % (self.vip_ip, self.port)
+        if self.iperf_port:
+            if self.port:
+                cmd = "iperf3 -c %s -p %s --cport %s --bind %s -i 20 -t 200 -R" % (self.vip_ip, self.iperf_port, self.port, self.mn_ip)
+            else:
+                cmd = "iperf3 -c %s -p %s -i 20 -t 200 -R" % (self.vip_ip, self.iperf_port)
         else:
-            cmd = "iperf3 -c %s -R | awk 'NR==18 {print $(NF-2)}'" % self.vip_ip
-        self.check_bandwidth(cmd)
+            cmd = "iperf3 -c %s -i 20 -t 200 -R" % self.vip_ip
+        self.check_bandwidth('out', cmd, self.outbound_width/(1024 * 1024))
 
     def check_inbound_bandwidth(self):
-        if self.port:
-            cmd = "iperf3 -c %s -p %s | awk 'NR==16 {print $(NF-3)}'" % (self.vip_ip, self.port)
+        if self.iperf_port:
+            if self.port:
+                cmd = "iperf3 -c %s -p %s --cport %s --bind %s -i 20 -t 200" % (self.vip_ip, self.iperf_port, self.port, self.mn_ip)
+            else:
+                cmd = "iperf3 -c %s -p %s -i 20 -t 200" % (self.vip_ip, self.iperf_port)
         else:
-            cmd = "iperf3 -c %s | awk 'NR==16 {print $(NF-3)}'" % self.vm_ip
-        self.check_bandwidth(cmd)
+            cmd = "iperf3 -c %s -i 20 -t 200" % self.vip_ip
+        self.check_bandwidth('in', cmd, self.inbound_width/(1024 * 1024))
