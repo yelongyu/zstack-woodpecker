@@ -37,7 +37,7 @@ def test():
         resource_type = res_ops.BACKUP_STORAGE
     else:
         resource_type = res_ops.PRIMARY_STORAGE
-    bpss = res_ops.query_resource(resource_type, [])
+    bpss = res_ops.query_resource(resource_type, conditions)
     if len(bpss) == 0:
         test_util.test_skip('Skip due to no ceph storage available')
 
