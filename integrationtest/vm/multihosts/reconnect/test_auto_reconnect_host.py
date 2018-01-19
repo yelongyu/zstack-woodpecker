@@ -42,7 +42,7 @@ def test():
     test_util.test_logger("host %s is expected to disconnect and start reconnect automatically")
     conditions = res_ops.gen_query_conditions('uuid', '=', host_inv.uuid)
     count = 0
-    while count < 12:
+    while count < 24:
         host = res_ops.query_resource(res_ops.HOST, conditions)[0]
         if host.status == "Connecting":
             break
@@ -53,7 +53,7 @@ def test():
         test_util.test_fail("host %s is not disconnect and start reconnect automatically in 60 seconds")
 
     count = 0
-    while count < 12:
+    while count < 24:
         host = res_ops.query_resource(res_ops.HOST, conditions)[0]
         if host.status == "Connected":
             break
