@@ -72,5 +72,9 @@
         <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_ceph.py::stop_bs</case>
         <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_ceph.py::kill_ps</case>
         <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_ceph.py::stop_ps</case>
+        <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_bs.py::stop_sftp</case>
+        <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_bs.py::kill_sftp</case>
+        <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_bs.py::stop_imagestore</case>
+        <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_bs.py::kill_imagestore</case>
     </suite>
 </integrationTest>
