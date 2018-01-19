@@ -19,7 +19,11 @@ def check_resource():
     for vr in vrs:
         if vr.status != "Connected" or vr.state != "Running":
             if vr.applianceVmType != "vrouter":
-                vm_ops.reboot_vm(vr.uuid) 
+		try:
+                    vm_ops.stop_vm(vr.uuid, force='cold')
+                    vm_ops.start_vm(vr.uuid)
+                except:
+                    test_util.test_logger('Exception when reboot vr vm')
             return False
     hosts = res_ops.query_resource(res_ops.HOST, [], None)
     for host in hosts:
