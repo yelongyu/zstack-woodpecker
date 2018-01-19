@@ -7,7 +7,7 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.deploy_operations as deploy_operations
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.zone_operations as zone_operations
-import zstackwoodpecker.operations.backupstorage_operations as bs_operations
+import zstackwoodpecker.operations.backupstorage_operations as bs_ops
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
