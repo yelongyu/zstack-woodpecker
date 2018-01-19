@@ -43,7 +43,7 @@ def test():
    image_option.set_mediaType('RootVolumeTemplate')
    image_option.set_url('http://172.20.1.16:7480/diskimages/windows-telnet.qcow2')
    image_option.set_backup_storage_uuid_list([bss[0].uuid])
-   image_option.set_timeout(1200*1000)
+   image_option.set_timeout(1800*1000)
    new_image = zstack_image_header.ZstackTestImage()
    new_image.set_creation_option(image_option)
    new_image.add_root_volume_template()
