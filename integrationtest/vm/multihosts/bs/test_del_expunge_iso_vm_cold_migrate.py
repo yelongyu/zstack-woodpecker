@@ -99,7 +99,7 @@ def test():
     img_ops.detach_iso(vm.vm.uuid)
 
     #vm ops test
-    test_stub.vm_ops_test(vm1, "VM_TEST_MIGRATE")
+    test_stub.vm_ops_test(vm, "VM_TEST_MIGRATE")
 
     vm.destroy()
     vol_ops.delete_disk_offering(root_disk_uuid)
