@@ -1660,7 +1660,7 @@ def lib_assign_host_l2_ip(host, l2, l3):
     
         return _do_set_host_l2_ip(host_pub_ip, next_avail_ip, br_ethname)
 
-    with lock.FileLock('lib_assign_host_l2_ip'):
+    with lock.FileLock('lib_assign_host_l2_ip', lock.Lockf()):
         host_pub_ip = host.managementIp
 
         l2_vlan = lib_get_l2_vlan(l2.uuid)
