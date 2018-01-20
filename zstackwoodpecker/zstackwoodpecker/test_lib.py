@@ -1474,7 +1474,7 @@ def lib_find_random_host(vm = None):
     return random.choice(target_hosts)
 
 def _lib_assign_host_l3_ip(host_pub_ip, cmd):
-    with lock.FileLock(host_pub_ip):
+    with lock.FileLock(host_pub_ip, lock.Lockf()):
         http.json_dump_post(testagent.build_http_path(host_pub_ip, \
                 host_plugin.SET_DEVICE_IP_PATH), cmd)
 
@@ -1483,12 +1483,12 @@ def _lib_flush_host_l2_ip(host_ip, net_device):
     cmd.ethname = net_device
     test_util.test_logger('Flush ip address for net device: %s from host: %s' \
             % (net_device, host_ip))
-    with lock.FileLock(host_ip):
+    with lock.FileLock(host_ip, lock.Lockf()):
         http.json_dump_post(testagent.build_http_path(host_ip, \
                 host_plugin.FLUSH_DEVICE_IP_PATH), cmd)
 
 def lib_create_host_vlan_bridge(host, cmd):
-    with lock.FileLock(host.uuid):
+    with lock.FileLock(host.uuid, lock.Lockf()):
         http.json_dump_post(testagent.build_http_path(host.managementIp, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd)
 
 def lib_check_stored_host_ip_dict(ip_address_list):
