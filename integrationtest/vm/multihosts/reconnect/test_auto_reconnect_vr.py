@@ -39,7 +39,8 @@ def test():
     #create VRs.
     vrs = test_lib.lib_find_vr_by_l3_uuid(l3_1.uuid)
     if not vrs:
-        vm = test_stub.create_vlan_vm(l3_name=l3_1_name)
+        image_name = os.environ.get('imageName_net')
+        vm = test_stub.create_vr_vm('vm_for_vr', image_name, l3_1_name)
         vm.destroy()
         vr1 = test_lib.lib_find_vr_by_l3_uuid(l3_1.uuid)[0]
     else:
