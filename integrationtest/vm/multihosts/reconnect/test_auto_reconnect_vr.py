@@ -21,6 +21,7 @@ _config_ = {
         'noparallel' : True
         }
 
+test_stub = test_lib.lib_get_test_stub()
 case_flavor = dict(stop_virtualrouter_agent=             DefaultFalseDict(virtualrouter=True, vrouter=False, kill=False),
                    kill_virtualrouter_agent=             DefaultFalseDict(virtualrouter=True, vrouter=False, kill=True),
                    kill_vrouter_agent=             DefaultFalseDict(virtualrouter=False, vrouter=True, kill=True),
