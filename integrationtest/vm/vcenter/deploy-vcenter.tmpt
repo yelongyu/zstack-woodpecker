@@ -1,0 +1,17 @@
+import ./deploy.tmpt
+
+localPrimaryStorageName = local-ps
+localPrimaryStorageUrl = /home/local-ps
+
+vcenter = 172.20.81.81
+vcenteruser = administrator@vsphere.local
+vcenterpwd = Testing%123 
+
+vcdatacenterName = datacenter
+vcclusterName = cluster
+vchostName = 172.20.197.51
+vchostUser = root
+vchostpwd = password
+vcsslthumbprint = 52:DF:8F:E5:37:43:57:7B:65:CC:BC:97:DE:EC:80:AE:96:FC:49:11
+vciscsitarget = 172.20.14.154
+vcvmfsdatastore = datastore

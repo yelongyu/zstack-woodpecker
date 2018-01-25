@@ -1693,7 +1693,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 #vm_creation_option.set_session_uuid(session_uuid)
                 vm_inv = create_vm(zstack_management_ip, vm_creation_option)
                 vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, default_l3_uuid).ip
-                test_lib.lib_wait_target_up(vm_ip, '22', 120)
+                test_lib.lib_wait_target_up(vm_ip, '22', 360)
 
                 #this is a walk around due to create vm with 3 networks, one network will not get ip due to 2 ifcfg-eth* file
                 for l3_uuid in l3_uuid_list_ge_3:
@@ -1704,13 +1704,14 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 vm_xml.set('name', vm.name_)
                 vm_xml.set('uuid', vm_inv.uuid)
                 vm_xml.set('ip', vm_ip)
-                setup_vm_no_password(vm_inv, vm, deploy_config)
-                setup_vm_console(vm_inv, vm, deploy_config)
-                ensure_nic_all_have_cfg(vm_inv, vm, len(l3_uuid_list+l3_uuid_list_ge_3))
-                # NOTE: need to make filesystem in sync in VM before cold stop VM
-                stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
-                start_vm(zstack_management_ip, vm_inv.uuid)
-                test_lib.lib_wait_target_up(vm_ip, '22', 120)
+                if not xmlobject.has_element(vm, 'vcenterRef'):
+                    setup_vm_no_password(vm_inv, vm, deploy_config)
+                    setup_vm_console(vm_inv, vm, deploy_config)
+                    ensure_nic_all_have_cfg(vm_inv, vm, len(l3_uuid_list+l3_uuid_list_ge_3))
+                    # NOTE: need to make filesystem in sync in VM before cold stop VM
+                    stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
+                    start_vm(zstack_management_ip, vm_inv.uuid)
+                    test_lib.lib_wait_target_up(vm_ip, '22', 120)
 
                 ips_xml = etree.SubElement(vm_xml, 'ips')
                 l3_id = 0
@@ -1735,7 +1736,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 
                 if xmlobject.has_element(vm, 'nodeRef'):
                     setup_node_vm(vm_inv, vm, deploy_config)
-                if xmlobject.has_element(vm, 'hostRef'):
+                if xmlobject.has_element(vm, 'hostRef') and not xmlobject.has_element(vm, 'vcenterRef'):
                     setup_host_vm(zstack_management_ip, vm_inv, vm, deploy_config)
                     vm_inv_lst.append(vm_inv)
                     vm_cfg_lst.append(vm)
@@ -1752,9 +1753,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 if xmlobject.has_element(vm, 'mnHostRef'):
                     setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm)
 
-                #walk around for ntp not start issue
-                ntp_cmd = "service ntpd start"
-                ssh.execute(ntp_cmd, vm_ip, vm.imageUsername_, vm.imagePassword_, True, 22)
+                if not xmlobject.has_element(vm, 'vcenterRef'):
+                    #walk around for ntp not start issue
+                    ntp_cmd = "service ntpd start"
+                    ssh.execute(ntp_cmd, vm_ip, vm.imageUsername_, vm.imagePassword_, True, 22)
                  
                 if xmlobject.has_element(vm, 'backupStorageRef'):
                     volume_option = test_util.VolumeOption()

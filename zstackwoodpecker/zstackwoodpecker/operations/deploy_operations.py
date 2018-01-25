@@ -22,6 +22,12 @@ import time
 import urllib3
 import types
 import simplejson
+from pyVmomi import vim
+from pyVmomi import vmodl
+from pyVim import connect
+from pyVim import task
+import atexit
+
 
 #global exception information for thread usage
 exc_info = []
@@ -1575,6 +1581,32 @@ def add_pxe_server(scenarioConfig, scenarioFile, deployConfig, session_uuid):
 
     #Add VM -- Pass
 
+def add_vcenter(scenarioConfig, scenarioFile, deployConfig, session_uuid):
+    def _add_vcenter(vcenter):
+        action = api_actions.AddVCenterAction()
+        action.name = vcenter.name_
+        action.domainName = vcenter.domainName_
+        action.username = vcenter.username_
+        action.password = vcenter.password_
+        action.sessionUuid = session_uuid
+        zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, name=vcenter.zoneRef.text_)
+        zinv = get_first_item_from_list(zinvs, 'zone', vcenter.zoneRef.text_, 'add vcenter')
+        action.zoneUuid = zinv.uuid
+    
+        try:
+            evt = action.run()
+            test_util.test_logger(jsonobject.dumps(evt))
+        except Exception as e:
+            exc_info.append(sys.exc_info())
+    
+    if not xmlobject.has_element(deployConfig, 'vcenter'):
+        return
+    vcenter = deployConfig.vcenter
+    thread = threading.Thread(target=_add_vcenter, args=(vcenter,))
+    wait_for_thread_queue()
+    thread.start()
+    wait_for_thread_done()
+
 def _thread_for_action(action):
     try:
         evt = action.run()
@@ -1914,7 +1946,8 @@ def deploy_initial_database(deploy_config, scenario_config = None, scenario_file
             add_disk_offering,
             add_instance_offering,
             add_virtual_router,
-            add_pxe_server
+            add_pxe_server,
+            add_vcenter
             ]
     for operation in operations:
         session_uuid = account_operations.login_as_admin()
@@ -2006,3 +2039,163 @@ def get_nfs_ip_for_seperate_network(scenarioConfig, virtual_host_ip, nfs_ps_name
                             return vm_inv_nic.ip
 
     return None
+
+def create_datacenter(dcname=None, service_instance=None, folder=None):
+    if folder is None:
+        folder = service_instance.content.rootFolder
+
+    if folder is not None and isinstance(folder, vim.Folder):
+        dc_moref = folder.CreateDatacenter(name=dcname)
+        return dc_moref
+
+def create_cluster(datacenter=None, clustername=None, cluster_spec=None):
+    if datacenter is None:
+        test_util.test_fail("Miss datacenter for cluster")
+    if clustername is None:
+        clustername = "cluster1"
+    if cluster_spec is None:
+        cluster_spec = vim.cluster.ConfigSpecEx()
+    host_folder = datacenter.hostFolder
+    cluster = host_folder.CreateClusterEx(name=clustername, spec=cluster_spec)
+    return cluster
+
+def add_vc_host(cluster=None, host_spec=None, asConnected=True):
+    if cluster is None:
+        test_util.test_fail("Miss cluster for host")
+    if host_spec is None:
+        test_util.test_fail("Miss host_spec for host")
+    TASK = cluster.AddHost_Task(spec=host_spec, asConnected=True)
+    task.WaitForTask(TASK)
+    host_inf = TASK.info.result
+    return host_inf
+
+def setup_iscsi_device(host=None, target_ip=None):
+    #iscsi device name -> hba.device
+    def get_iscsi_device(host=None):
+        hba_list = host.config.storageDevice.hostBusAdapter
+        for hba in hba_list:
+            if hba.model == "iSCSI Software Adapter":
+                return hba
+
+    #TODO: now iscsi adapter shares the vnic with management network,
+    # we need to add a seperate storage network for this
+    # vnic device name -> vnic.device
+    def get_iscsi_candidate_vnic(host=None):
+        iscsi_hba = get_iscsi_device(host=host).device
+        available_vnic = host.configManager.iscsiManager.QueryCandidateNics(iScsiHbaName=iscsi_hba)
+        for vnic in available_vnic:
+            if vnic.vnic.portgroup == "Management Network":
+                return vnic.vnic
+
+    def bind_vnic_to_iscsi(iScsiHbaName=None, vnicDevice=None):
+        host.configManager.iscsiManager.BindVnic(iScsiHbaName=iScsiHbaName, vnicDevice=vnicDevice)
+
+    #targets is target object list
+    def add_iscsi_send_target(iScsiHbaName=None, target_ip=None):
+        targets = []
+        target = vim.host.InternetScsiHba.SendTarget()
+        target.address = target_ip
+        targets.append(target)
+        host.configManager.storageSystem.AddInternetScsiSendTargets(iScsiHbaDevice=iScsiHbaName, targets=targets)
+
+    def rescan_allhba():
+        host.configManager.storageSystem.RescanAllHba()
+
+    host_obj = host
+    host_obj.configManager.storageSystem.UpdateSoftwareInternetScsiEnabled(enabled=True)
+    candidate_vnic_device = get_iscsi_candidate_vnic(host=host_obj).device
+    iscsihba_name = get_iscsi_device(host=host_obj).device
+    bind_vnic_to_iscsi(iScsiHbaName=iscsihba_name, vnicDevice=candidate_vnic_device)
+    rescan_allhba()
+    add_iscsi_send_target(iScsiHbaName=iscsihba_name, target_ip=target_ip)
+    rescan_allhba()
+
+def create_datastore(host=None, dsname=None):
+    #TODO: support iscsi disk for now
+    #device_path -> disk.devicePath
+    #display_name -> disk.displayName
+    def available_disk_vmfs(host=host):
+        disk_list = host.configManager.datastoreSystem.QueryAvailableDisksForVmfs()
+        for disk in disk_list:
+            if "iSCSI" in disk.displayName:
+                return disk
+            else:
+                continue
+
+    def query_datastore_create_option(host=None):
+        device_path = available_disk_vmfs(host=host).devicePath
+        create_option = host.configManager.datastoreSystem.QueryVmfsDatastoreCreateOptions(device_path)[0]
+        return create_option
+
+    vmfs_create_spec = query_datastore_create_option(host=host).spec
+    vmfs_create_spec.vmfs.volumeName = dsname
+    datastore = host.configManager.datastoreSystem.CreateVmfsDatastore(vmfs_create_spec)
+    return datastore
+
+#To get the vswitch list from the host
+#vswitch_obj = host.config.network.vswitch
+def addvswitch_portgroup(host=None, vswitch="vSwitch0", portgroup=None, vlanId=None):
+    portgroup_spec = vim.host.PortGroup.Specification()
+    portgroup_spec.vswitchName = vswitch
+    portgroup_spec.name = portgroup
+    portgroup_spec.vlanId = int(vlanId)
+    network_policy = vim.host.NetworkPolicy()
+    network_policy.security = vim.host.NetworkPolicy.SecurityPolicy()
+    network_policy.security.allowPromiscuous = True
+    network_policy.security.macChanges = False
+    network_policy.security.forgedTransmits = False
+    portgroup_spec.policy = network_policy
+
+    host.configManager.networkSystem.AddPortGroup(portgroup_spec)
+
+
+def cleanup_datacenter(datacenter=None):
+    TASK = datacenter.Destroy_Task()
+    task.WaitForTask(TASK)
+
+def get_obj(content, vimtype):
+    obj = None
+    container = content.viewManager.CreateContainerView(
+        content.rootFolder, vimtype, True)
+    return container.view
+
+def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file = None):
+    vcenter = os.environ.get('vcenter')
+    vcenteruser = os.environ.get('vcenteruser')
+    vcenterpwd = os.environ.get('vcenterpwd')
+    SI = connect.SmartConnectNoSSL(host=vcenter, user=vcenteruser, pwd=vcenterpwd, port=443)
+    if not SI:
+       test_util.test_fail("Unable to connect to the vCenter %s" % vcenter) 
+
+    atexit.register(connect.Disconnect, SI)
+
+    content = SI.RetrieveContent()
+    exist_dc = get_obj(content, [vim.Datacenter])
+    for dc in exist_dc:
+        cleanup_datacenter(datacenter=dc)
+    
+    if not xmlobject.has_element(deploy_config, 'datacenters.datacenter'):
+        return
+
+    for datacenter in xmlobject.safe_list(deploy_config.vcenter.datacenters.datacenter):
+        vc_dc = create_datacenter(dcname=datacenter.name_, service_instance=SI)
+        for cluster in xmlobject.safe_list(datacenter.clusters.cluster):
+            vc_cl = create_cluster(datacenter=vc_dc, clustername=cluster.name_)
+            for host in xmlobject.safe_list(cluster.hosts.host):
+                managementIp = get_host_from_scenario_file(host.name_, scenario_config, scenario_file, deploy_config)
+                vc_hs_spec = vim.host.ConnectSpec(hostName=managementIp,
+                                                userName=host.username_,
+                                                password=host.password_,
+                                                sslThumbprint=host.thumbprint_,
+                                                force=False)
+                vc_hs = add_vc_host(cluster=vc_cl, host_spec=vc_hs_spec, asConnected=True)
+                #The ESXi hosts are created from 1 template, so the default local storage shares the
+                #same devicePath for different ESXi host, which will make only 1 host can be added 
+                #into datacenter, here we work around to delete the datastore after host is added.
+                for datastore in vc_hs.datastore:
+                    datastore.Destroy()
+                if xmlobject.has_element(host, "iScsiStorage"):
+                    setup_iscsi_device(host=vc_hs, target_ip=host.iScsiStorage.target_)
+                    vc_ds = create_datastore(host=vc_hs, dsname=host.iScsiStorage.vmfsdatastore.name_)
+
+    test_util.test_logger('[Done] zstack initial vcenter environment was created successfully.')
