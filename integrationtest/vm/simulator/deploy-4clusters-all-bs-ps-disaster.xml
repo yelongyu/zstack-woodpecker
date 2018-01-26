@@ -171,7 +171,7 @@
             url="$localPrimaryStorageUrl" />
           <localPrimaryStorage name="$localPrimaryStorageName2"
             description="Test Local Primary Storage 2"
-            url="$localPrimaryStorageUrl2" />
+            url="$localPrimaryStorageUrl" />
           <nfsPrimaryStorage name="$nfsPrimaryStorageName"
             description="Test NFS 1" url="$nfsPrimaryStorageUrl" />
           <nfsPrimaryStorage name="$nfsPrimaryStorageName2"
