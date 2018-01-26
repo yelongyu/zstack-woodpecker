@@ -32,12 +32,6 @@ hostIp4 = 10.0.101.23
 serverName2 = mevoco2
 serverIp2 = 10.0.101.25
 
-imageName_s = MicroCore-Linux.ova
-imageUrl_s =
-
-imageName_net = MicroCore-Linux.ova
-imageUrl_net =
-
 vcenter1_name = VM-VCENTER1
 vcenter1_ip = 10.0.0.250
 vcenter1_domain_name = administrator@vsphere.local

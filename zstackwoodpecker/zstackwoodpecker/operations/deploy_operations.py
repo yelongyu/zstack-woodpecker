@@ -2037,6 +2037,7 @@ def get_nfs_ip_for_seperate_network(scenarioConfig, virtual_host_ip, nfs_ps_name
     return None
 
 def create_datacenter(dcname=None, service_instance=None, folder=None):
+    from pyVmomi import vim
     if folder is None:
         folder = service_instance.content.rootFolder
 
@@ -2045,6 +2046,7 @@ def create_datacenter(dcname=None, service_instance=None, folder=None):
         return dc_moref
 
 def create_cluster(datacenter=None, clustername=None, cluster_spec=None):
+    from pyVmomi import vim
     if datacenter is None:
         test_util.test_fail("Miss datacenter for cluster")
     if clustername is None:
@@ -2056,6 +2058,7 @@ def create_cluster(datacenter=None, clustername=None, cluster_spec=None):
     return cluster
 
 def add_vc_host(cluster=None, host_spec=None, asConnected=True):
+    from pyVim import task
     if cluster is None:
         test_util.test_fail("Miss cluster for host")
     if host_spec is None:
@@ -2066,6 +2069,7 @@ def add_vc_host(cluster=None, host_spec=None, asConnected=True):
     return host_inf
 
 def setup_iscsi_device(host=None, target_ip=None):
+    from pyVmomi import vim
     #iscsi device name -> hba.device
     def get_iscsi_device(host=None):
         hba_list = host.config.storageDevice.hostBusAdapter
@@ -2131,6 +2135,7 @@ def create_datastore(host=None, dsname=None):
 #To get the vswitch list from the host
 #vswitch_obj = host.config.network.vswitch
 def addvswitch_portgroup(host=None, vswitch="vSwitch0", portgroup=None, vlanId=None):
+    from pyVmomi import vim
     portgroup_spec = vim.host.PortGroup.Specification()
     portgroup_spec.vswitchName = vswitch
     portgroup_spec.name = portgroup
@@ -2146,6 +2151,7 @@ def addvswitch_portgroup(host=None, vswitch="vSwitch0", portgroup=None, vlanId=N
 
 
 def cleanup_datacenter(datacenter=None):
+    from pyVim import task
     TASK = datacenter.Destroy_Task()
     task.WaitForTask(TASK)
 
@@ -2157,7 +2163,6 @@ def get_obj(content, vimtype):
 
 def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file = None):
     from pyVmomi import vim
-    from pyVmomi import vmodl
     from pyVim import connect
     from pyVim import task
     import atexit
@@ -2175,7 +2180,7 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
     for dc in exist_dc:
         cleanup_datacenter(datacenter=dc)
     
-    if not xmlobject.has_element(deploy_config, 'datacenters.datacenter'):
+    if not xmlobject.has_element(deploy_config, 'vcenter.datacenters.datacenter'):
         return
 
     for datacenter in xmlobject.safe_list(deploy_config.vcenter.datacenters.datacenter):
