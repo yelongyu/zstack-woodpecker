@@ -22,11 +22,6 @@ import time
 import urllib3
 import types
 import simplejson
-from pyVmomi import vim
-from pyVmomi import vmodl
-from pyVim import connect
-from pyVim import task
-import atexit
 
 
 #global exception information for thread usage
@@ -2160,6 +2155,11 @@ def get_obj(content, vimtype):
     return container.view
 
 def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file = None):
+    from pyVmomi import vim
+    from pyVmomi import vmodl
+    from pyVim import connect
+    from pyVim import task
+    import atexit
     vcenter = os.environ.get('vcenter')
     vcenteruser = os.environ.get('vcenteruser')
     vcenterpwd = os.environ.get('vcenterpwd')
