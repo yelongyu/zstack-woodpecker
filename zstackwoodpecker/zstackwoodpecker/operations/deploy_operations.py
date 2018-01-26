@@ -1767,6 +1767,7 @@ def add_simulator_primary_storage(scenarioConfig, scenarioFile, deployConfig):
                 data['data'] = {}
                 data['data']['path'] = pr.url_
                 data['data']['id'] = pr.name_
+                data['data']['name'] = pr.name_
 	        if hasattr(pr, 'totalCapacity_') and pr.totalCapacity_ != "":
                     data['data']['totalCapacity'] = pr.totalCapacity_
 	        if hasattr(pr, 'availableCapacity_') and pr.availableCapacity_ != "":
