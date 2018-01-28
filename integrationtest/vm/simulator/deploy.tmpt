@@ -15,76 +15,76 @@ mediumDiskOfferingSize = 100M
 clusterName2 = cluster2
 
 hostName = centos1
-hostIp = 127.0.101.40
+hostIp = 127.1.101.40
 
-hostName2 = centos2
-hostIp2 = 127.0.101.41
+hostName2 = ce1tos2
+hostIp2 = 127.2.101.41
 hostUsername2 = root
 hostPassword2 = password
 hostPort2 = 22
 
 hostName3 = centos3
-hostIp3 = 127.0.101.42
+hostIp3 = 127.3.101.42
 hostUsername3 = root
 hostPassword3 = password
 hostPort3 = 22
 
 hostName4 = centos4
-hostIp4 = 127.0.101.43
+hostIp4 = 127.4.101.43
 hostUsername4 = root
 hostPassword4 = password
 hostPort4 = 22
 
 hostName5 = centos5
-hostIp5 = 127.0.101.44
+hostIp5 = 127.5.101.44
 hostUsername5 = root
 hostPassword5 = password
 hostPort5 = 22
 
 hostName6 = centos6
-hostIp6 = 127.0.101.45
+hostIp6 = 127.6.101.45
 hostUsername6 = root
 hostPassword6 = password
 hostPort6 = 22
 
 hostName7 = centos7
-hostIp7 = 127.0.101.46
+hostIp7 = 127.7.101.46
 hostUsername7 = root
 hostPassword7 = password
 hostPort7 = 22
 
 hostName8 = centos8
-hostIp8 = 127.0.101.47
+hostIp8 = 127.8.101.47
 hostUsername8 = root
 hostPassword8 = password
 hostPort8 = 22
 
 hostName9 = centos9
-hostIp9 = 127.0.101.48
+hostIp9 = 127.9.101.48
 hostUsername9 = root
 hostPassword9 = password
 hostPort9 = 22
 
 hostName10 = centos10
-hostIp10 = 127.0.101.49
+hostIp10 = 127.10.101.49
 hostUsername10 = root
 hostPassword10 = password
 hostPort10 = 22
 
 hostName11 = centos11
-hostIp11 = 127.0.101.50
+hostIp11 = 127.11.101.50
 hostUsername11 = root
 hostPassword11 = password
 hostPort11 = 22
 
 hostName12 = centos12
-hostIp12 = 127.0.101.51
+hostIp12 = 127.12.101.51
 hostUsername12 = root
 hostPassword12 = password
 hostPort12 = 22
 
 hostName13 = centos13
-hostIp13 = 127.0.101.52
+hostIp13 = 127.13.101.52
 hostUsername13 = root
 hostPassword13 = password
 hostPort13 = 22

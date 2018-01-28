@@ -1097,7 +1097,7 @@ def add_host(scenarioConfig, scenarioFile, deployConfig, session_uuid, host_ip =
                 action.sessionUuid = session_uuid
                 action.clusterUuid = cinv.uuid
                 action.hostTags = host.hostTags__
-                if zone_ref == 0 and cluster_ref == 0 and i == 0:
+                if zone_duplication == 0 and cluster_duplication == 0:
                     action.name = host.name_
                     action.description = host.description__
                     managementIp = get_host_from_scenario_file(host.name_, scenarioConfig, scenarioFile, deployConfig)
@@ -1886,7 +1886,7 @@ def add_simulator_host(scenarioConfig, scenarioFile, deployConfig):
                             data = {}
                             data['type'] = 'KvmHost'
                             data['data'] = {}
-                            if zone_ref == 0 and cluster_ref == 0 and host_ref == 0:
+                            if zone_duplication == 0 and cluster_duplication == 0 and host_duplication == 0:
                                 data['data']['ip'] = host.managementIp_
                                 data['data']['id'] = host.name_
                             else:
