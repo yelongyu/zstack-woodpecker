@@ -2203,5 +2203,10 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
                 if xmlobject.has_element(host, "iScsiStorage"):
                     setup_iscsi_device(host=vc_hs, target_ip=host.iScsiStorage.target_)
                     vc_ds = create_datastore(host=vc_hs, dsname=host.iScsiStorage.vmfsdatastore.name_)
+                if xmlobject.has_element(host, "vswitch"):
+                    for vswitch in xmlobject.safe_list(host.vswitch):
+                        if vswitch.name_ == "vSwitch0":
+                            for port_group in vswitch.portgroup:
+                                addvswitch_portgroup(host=vc_hs, vswitch=vswitch.name_, portgroup=port_group.text_, vlanId=port_group.vlanId_)
 
     test_util.test_logger('[Done] zstack initial vcenter environment was created successfully.')

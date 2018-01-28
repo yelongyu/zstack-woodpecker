@@ -15,3 +15,9 @@ vchostpwd = password
 vcsslthumbprint = 52:DF:8F:E5:37:43:57:7B:65:CC:BC:97:DE:EC:80:AE:96:FC:49:11
 vciscsitarget = 172.20.14.154
 vcvmfsdatastore = datastore
+vswitch0 = vSwitch0
+portgroup0 = port_group0
+portgroup1 = port_group1
+vlanid = 0
+vlanid = 1
+
