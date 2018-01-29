@@ -29,20 +29,9 @@ gen_ssh_keys(){
     chmod go-rwx /root/.ssh/authorized_keys
 }
 
-cat  >>  /etc/yum.repos.d/ceph.repo  <<  EOF
-[ceph-jewel]
-name=ceph-jewel
-baseurl=http://mirrors.aliyun.com/ceph/rpm-jewel/el7/x86_64/
-gpgcheck=0
-[ceph-noarch]
-name=cephnoarch
-baseurl=http://mirrors.aliyun.com/ceph/rpm-jewel/el7/noarch/
-gpgcheck=0
-EOF
-
 yum --disablerepo=* --enablerepo=zstack-local install -y iptables-services >/dev/null 2>&1
 #yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install ceph ceph-deploy ntp expect>/dev/null 2>&1
-yum --enablerepo=zstack-local,ceph-jewel,ceph-noarch install -y ceph ceph-deploy ceph-radowgw rdate ntp expect>/dev/null 2>&1
+yum --disablerepo=* --enablerepo=zstack-local,ceph install -y ceph ceph-deploy ceph-radowgw rdate ntp expect>/dev/null 2>&1
 #HOST_IP=`ip addr show eth0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'`
 
 echo " ${IP[0]} ceph-1 ">>/etc/hosts
@@ -67,13 +56,6 @@ if [ "${CEPH_ONE_NODE}" != "yes" ]; then
     scp /etc/hosts ceph-3:/etc/hosts
 fi
 
-scp /etc/yum.repos.d/ceph.repo ceph-1:/etc/yum.repos.d/ceph.repo 
-if [ "${CEPH_ONE_NODE}" != "yes" ]; then
-    scp /etc/yum.repos.d/ceph.repo  ceph-2:/etc/yum.repos.d/ceph.repo 
-    scp /etc/yum.repos.d/ceph.repo  ceph-3:/etc/yum.repos.d/ceph.repo 
-fi
-
-
 ssh  ceph-1 hostnamectl set-hostname ceph-1 && export HOSTNAME=ceph-1
 ssh  ceph-1 ntpdate -d -u 172.20.0.1
 if [ "${CEPH_ONE_NODE}" != "yes" ]; then
@@ -84,13 +66,13 @@ if [ "${CEPH_ONE_NODE}" != "yes" ]; then
 fi
 
 if [ "${CEPH_ONE_NODE}" != "yes" ]; then 
-    ssh  ceph-2 yum --enablerepo=zstack-local,ceph-jewel,ceph-noarch -y install ceph ceph-deploy ceph-radosgw rdate ntp expect>/dev/null 2>&1
-    ssh  ceph-3 yum --enablerepo=zstack-local,ceph-jewel,ceph-noarch -y install ceph ceph-deploy ceph-radosgw rdate ntp expect>/dev/null 2>&1
+    ssh  ceph-2 yum --disablerepo=* --enablerepo=zstack-local,ceph -y install ceph ceph-deploy ceph-radosgw rdate ntp expect>/dev/null 2>&1
+    ssh  ceph-3 yum --disablerepo=* --enablerepo=zstack-local,ceph -y install ceph ceph-deploy ceph-radosgw rdate ntp expect>/dev/null 2>&1
 fi
 
 if [ "${CEPH_ONE_NODE}" != "yes" ]; then 
-    ssh  ceph-2 yum --enablerepo=zstack-local,ceph-jewel,ceph-noarch -y install iptables-services>/dev/null 2>&1
-    ssh  ceph-3 yum --enablerepo=zstack-local,ceph-jewel,ceph-noarch -y install iptables-services>/dev/null 2>&1
+    ssh  ceph-2 yum --disablerepo=* --enablerepo=zstack-local,ceph -y install iptables-services>/dev/null 2>&1
+    ssh  ceph-3 yum --disablerepo=* --enablerepo=zstack-local,ceph -y install iptables-services>/dev/null 2>&1
 fi
 
 
