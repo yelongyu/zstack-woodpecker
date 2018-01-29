@@ -1451,6 +1451,9 @@ def add_image(scenarioConfig, scenarioFile, deployConfig, session_uuid):
         return
 
     for i in xmlobject.safe_list(deployConfig.images.image):
+        if i.hasattr('label_') and i.label_ == 'lazyload':
+            print "lazyload image: %s will be added in case" % (i.name_)
+            continue
         for bsref in xmlobject.safe_list(i.backupStorageRef):
             bss = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid, name=bsref.text_)
             bs = get_first_item_from_list(bss, 'backup storage', bsref.text_, 'image')

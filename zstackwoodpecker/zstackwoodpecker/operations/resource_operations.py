@@ -7,11 +7,16 @@ List resource API
 
 import apibinding.api_actions as api_actions
 import account_operations
+import deploy_operations
 import apibinding.inventory as inventory
+import zstackwoodpecker.test_util as test_util
+import zstacklib.utils.lock as lock
+import zstacklib.utils.xmlobject as xmlobject
 import time
 import os
 import sys
 import traceback
+import threading
 
 #Define default get resource method. default is using searchAPI, it can also be ListAPI.
 SEARCH_RESOURCE_METHOD = 'search'
@@ -285,6 +290,113 @@ def gen_query_conditions(name, op, value, conditions=[]):
     new_conditions.extend(conditions)
     return new_conditions
 
+reimage_thread_queue = 0
+
+@lock.lock('image_thread')
+def increase_image_thread():
+    global reimage_thread_queue
+    reimage_thread_queue += 1
+
+@lock.lock('image_thread')
+def decrease_image_thread():
+    global reimage_thread_queue
+    reimage_thread_queue -= 1
+
+def wait_for_image_thread_queue():
+    while reimage_thread_queue >= IMAGE_THREAD_LIMIT:
+        time.sleep(1)
+        print 'reimage_thread_queue: %d' % reimage_thread_queue
+
+def cleanup_exc_info():
+    exc_info = []
+
+def check_thread_exception():
+    if exc_info:
+        info1 = exc_info[0][1]
+        info2 = exc_info[0][2]
+        cleanup_exc_info()
+        raise info1, None, info2
+
+def wait_for_thread_done(report = False):
+    while threading.active_count() > 1:
+        check_thread_exception()
+        time.sleep(1)
+        if report:
+            print 'thread count: %d' % threading.active_count()
+    check_thread_exception()
+
+exc_info = []
+IMAGE_THREAD_LIMIT=2
+def _lazyload_image():
+
+    def _load_image(action):
+        increase_image_thread()
+        try:
+            #evt = action.run()
+            evt = account_operations.execute_action_with_session(action, None)
+        except:
+            exc_info.append(sys.exc_info())
+        finally:
+            decrease_image_thread()
+    test_config_path = os.environ.get('WOODPECKER_TEST_CONFIG_FILE')
+    test_config_obj = test_util.TestConfig(test_config_path)
+    #Special config in test-config.xml, such like test ping target. 
+    test_config = test_config_obj.get_test_config()
+    #All configs in deploy.xml.
+    all_config = test_config_obj.get_deploy_config()
+    #Detailed zstack deployment information, including zones/cluster/hosts...
+    deploy_config = all_config.deployerConfig
+    
+
+    for i in xmlobject.safe_list(deploy_config.images.image):
+        image_action = api_actions.QueryImageAction()
+        condition = gen_query_conditions('name', '=', i.name_)
+        image_action.conditions = condition
+        ret = account_operations.execute_action_with_session(image_action, None)
+        
+        if len(ret) != 0:
+            print "image has beed added"
+            continue
+
+        session_uuid = None
+        if i.hasattr('label_') and i.label_ == 'lazyload':
+            for bsref in xmlobject.safe_list(i.backupStorageRef):
+                bss = get_resource(BACKUP_STORAGE, None, name=bsref.text_)
+                bs = deploy_operations.get_first_item_from_list(bss, 'backup storage', bsref.text_, 'image')
+                action = api_actions.AddImageAction()
+                action.sessionUuid = session_uuid
+                #TODO: account uuid will be removed later.
+                action.accountUuid = inventory.INITIAL_SYSTEM_ADMIN_UUID
+                action.backupStorageUuids = [bs.uuid]
+                action.bits = i.bits__
+                if not action.bits:
+                    action.bits = 64
+                action.description = i.description__
+                action.format = i.format_
+                action.mediaType = i.mediaType_
+                action.guestOsType = i.guestOsType__
+                if not action.guestOsType:
+                    action.guestOsType = 'unknown'
+                action.platform = i.platform__
+                if not action.platform:
+                    action.platform = 'Linux'
+                action.hypervisorType = i.hypervisorType__
+                action.name = i.name_
+                action.url = i.url_
+                action.timeout = 1800000
+                if i.hasattr('system_'):
+                    action.system = i.system_
+                if i.hasattr('systemTags_'):
+                    action.systemTags = i.systemTags_.split(',')
+                thread = threading.Thread(target = _load_image, args = (action, ))
+                wait_for_image_thread_queue()
+                print 'before add image2: %s' % i.url_
+                thread.start()
+                print 'add image: %s' % i.url_
+    print 'all images add command are executed'
+    wait_for_thread_done(True)
+    print 'all images have been added'
+
 def _gen_query_action(resource):
     if resource == BACKUP_STORAGE:
         action = api_actions.QueryBackupStorageAction()
@@ -313,6 +425,7 @@ def _gen_query_action(resource):
     elif resource == INSTANCE_OFFERING:
         action = api_actions.QueryInstanceOfferingAction()
     elif resource == IMAGE:
+        _lazyload_image()
         action = api_actions.QueryImageAction()
     elif resource == VOLUME:
         action = api_actions.QueryVolumeAction()
