@@ -74,13 +74,12 @@ def test():
     new_image.delete()
     new_image.expunge()
     ps_ops.cleanup_imagecache_on_primary_storage(ps.uuid)
-    if ps.type == inventory.LOCAL_STORAGE_TYPE:
-        image_cache_path = "%s/imagecache/template/%s" % (ps.mountPath, new_image.image.uuid)
-        if test_lib.lib_check_file_exist(host, image_cache_path):
-            test_util.test_fail('image cache is expected to be deleted')
-#    elif ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
-#    elif ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
-#    elif ps.type == 'SharedMountPoint':
+    image_cache_path = "%s/imagecache/template/%s" % (ps.mountPath, new_image.image.uuid)
+    if test_lib.lib_check_file_exist(host, image_cache_path):
+        test_util.test_fail('image cache is expected to be deleted')
+    image_cache_path = "%s/zstore-cache/%s" % (ps.mountPath, new_image.image.uuid)
+    if test_lib.lib_check_file_exist(host, image_cache_path):
+        test_util.test_fail('image cache is expected to be deleted')
 
     vm.destroy()
     test_util.test_pass('Migrate VM Test Success')

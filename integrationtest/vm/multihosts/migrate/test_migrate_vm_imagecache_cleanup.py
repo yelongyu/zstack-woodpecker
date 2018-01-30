@@ -63,9 +63,7 @@ def test():
     ps = test_lib.lib_get_primary_storage_by_uuid(vm.get_vm().allVolumes[0].primaryStorageUuid)
     test_obj_dict.add_vm(vm)
     vm.check()
-    if ps.type == 'SharedMountPoint':
-        test_util.test_skip('CleanUpImageCacheOnPrimaryStorage not supported on SMP storage, skip test.')
-    elif ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
+    if ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
         test_util.test_skip('ceph is not directly using image cache, skip test.')
 
     host = test_lib.lib_find_host_by_vm(vm.get_vm())
@@ -81,12 +79,12 @@ def test():
     vm.destroy()
     vm.expunge()
     ps_ops.cleanup_imagecache_on_primary_storage(ps.uuid)
-    if ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
-        image_cache_path = "%s/imagecache/template/%s" % (ps.mountPath, new_image.image.uuid)
-        if test_lib.lib_check_file_exist(host, image_cache_path):
-            test_util.test_fail('image cache is expected to be deleted')
-#    elif ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
-#    elif ps.type == 'SharedMountPoint':
+    image_cache_path = "%s/imagecache/template/%s" % (ps.mountPath, new_image.image.uuid)
+    if test_lib.lib_check_file_exist(host, image_cache_path):
+        test_util.test_fail('image cache is expected to be deleted')
+    image_cache_path = "%s/zstore-cache/%s" % (ps.mountPath, new_image.image.uuid)
+    if test_lib.lib_check_file_exist(host, image_cache_path):
+        test_util.test_fail('image cache is expected to be deleted')
 
     test_util.test_pass('Migrate VM Test Success')
 
