@@ -327,7 +327,7 @@ def wait_for_thread_done(report = False):
 
 exc_info = []
 IMAGE_THREAD_LIMIT=2
-def _lazyload_image():
+def _lazyload_image(condition=None):
 
     def _load_image(action):
         increase_image_thread()
@@ -338,6 +338,15 @@ def _lazyload_image():
             exc_info.append(sys.exc_info())
         finally:
             decrease_image_thread()
+
+    iaction = api_actions.QueryImageAction()
+    iaction.conditions = condition
+    ret = account_operations.execute_action_with_session(iaction, None)
+
+    if len(ret) != 0:
+        print "no need lazy"
+        return
+
     test_config_path = os.environ.get('WOODPECKER_TEST_CONFIG_FILE')
     test_config_obj = test_util.TestConfig(test_config_path)
     #Special config in test-config.xml, such like test ping target. 
@@ -397,7 +406,7 @@ def _lazyload_image():
     wait_for_thread_done(True)
     print 'all images have been added'
 
-def _gen_query_action(resource):
+def _gen_query_action(resource, condition=None):
     if resource == BACKUP_STORAGE:
         action = api_actions.QueryBackupStorageAction()
     elif resource == SFTP_BACKUP_STORAGE:
@@ -425,7 +434,7 @@ def _gen_query_action(resource):
     elif resource == INSTANCE_OFFERING:
         action = api_actions.QueryInstanceOfferingAction()
     elif resource == IMAGE:
-        _lazyload_image()
+        _lazyload_image(condition)
         action = api_actions.QueryImageAction()
     elif resource == VOLUME:
         action = api_actions.QueryVolumeAction()
@@ -525,7 +534,7 @@ def query_resource(resource, conditions = [], session_uuid=None, count='false'):
     If session_uuid is missing, we will create one for you and only live in 
         this API.
     '''
-    action = _gen_query_action(resource)
+    action = _gen_query_action(resource, conditions)
     action.conditions = conditions
     ret = account_operations.execute_action_with_session(action, session_uuid)
     return ret
@@ -535,7 +544,7 @@ def query_resource_count(resource, conditions = [], session_uuid=None):
     Call Query API to return the matched resource count
     When count=true, it will only return the number of matched resource
     '''
-    action = _gen_query_action(resource)
+    action = _gen_query_action(resource, conditions)
     action.conditions = conditions
     action.count='true'
     account_operations.execute_action_with_session(action, session_uuid)
@@ -546,7 +555,7 @@ def query_resource_with_num(resource, conditions = [], session_uuid=None, \
     '''
     Query matched resource and return required numbers. 
     '''
-    action = _gen_query_action(resource)
+    action = _gen_query_action(resource, conditions)
     action.conditions = conditions
     action.start = start
     action.limit = limit
@@ -558,7 +567,7 @@ def query_resource_fields(resource, conditions = [], session_uuid=None, \
     '''
     Query matched resource by returning required fields and required numbers. 
     '''
-    action = _gen_query_action(resource)
+    action = _gen_query_action(resource, conditions)
     action.conditions = conditions
     action.start = start
     action.limit = limit
