@@ -15,6 +15,12 @@ import os
 import time
 
 def check_resource():
+
+    vms = res_ops.query_resource(res_ops.VM_INSTANCE, [], None)
+    for vm in vms:
+        if vm.type == 'UserVm':
+            vm_ops.stop_vm(vm.uuid, force='cold')
+
     vrs = res_ops.query_resource(res_ops.APPLIANCE_VM, [], None)
     for vr in vrs:
         if vr.status != "Connected" or vr.state != "Running":
