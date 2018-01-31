@@ -396,12 +396,11 @@ class ZstackTestVR(vm_header.TestVm):
         '''
         self.inv = net_ops.detach_l3(nic_uuid)
 
-def create_alarm(comparisonOperator, period, threshold,namespace,metricName,name=None,repeatInterval=None, labels=None,actions=None, resourceUuid=None, session_uuid=None):
+def create_alarm(comparisonOperator, period, threshold, namespace, metricName, name=None, repeatInterval=None, labels=None, actions=None, resourceUuid=None, session_uuid=None):
     action = api_actions.CreateAlarmAction()
     action.timeout = 30000
-
     if not name:
-        action.name = alarm_01
+        action.name = 'alarm_01'
     action.comparisonOperator=comparisonOperator
     action.period=period
     action.threshold=threshold
@@ -415,22 +414,105 @@ def create_alarm(comparisonOperator, period, threshold,namespace,metricName,name
         action.labels=labels
     if resourceUuid:
         action.resourceUuid=resourceUuid
-
-    if session_uuid:
-        volume_creation_option.set_session_uuid(session_uuid)
-
     evt = acc_ops.execute_action_with_session(action, session_uuid)
-    test_util.action_logger('Create Alarm:  %s ' % name)
-    return evt
-def delete_alarm(uuid,deleteMode=None,session_uuid=None):
+    test_util.action_logger('Create Alarm: %s ' % name)
+    return evt.inventory
+
+def update_alarm(uuid, comparisonOperator=None, period=None, threshold=None, name=None, repeatInterval=None, resourceUuid=None, session_uuid=None):
+    action = api_actions.UpdateAlarmAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    if comparisonOperator:
+        action.comparisonOperator = comparisonOperator
+    if period:
+        action.period = period
+    if threshold:
+        action.threshold = threshold
+    if name:
+        action.name = name
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Update Alarm: %s ' % uuid)
+    return evt.inventory
+
+def change_alarm_state(uuid, stateEvent, session_uuid=None):
+    action = api_actions.ChangeAlarmStateAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    action.stateEvent = stateEvent
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Change Alarm: %s State to %s' % (uuid, stateEvent))
+    return evt.inventory
+
+def delete_alarm(uuid, deleteMode=None, session_uuid=None):
     action = api_actions.DeleteAlarmAction()
     action.timeout = 30000
     action.uuid = uuid
     if deleteMode:
         action.deleteMode=deleteMode
-
     evt = acc_ops.execute_action_with_session(action, session_uuid)
-    test_util.action_logger('Delete Alarm:  %s ' % uuid)
-    return evt
+    test_util.action_logger('Delete Alarm: %s ' % uuid)
+    return evt.inventory
 
+def add_action_to_alarm(alarmUuid, actionUuid, actionType, session_uuid=None):
+    action = api_actions.AddActionToAlarmAction() 
+    action.timeout = 30000
+    action.alarmUuid = alarmUuid
+    action.actionUuid = actionUuid
+    action.actionType = actionType
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Add Action: %s to Alarm: %s ' % (actionUuid, alarmUuid))
+    return evt.inventory
+
+def remove_action_from_alarm(alarmUuid, actionUuid, deleteMode=None, session_uuid=None):
+    action = api_actions.RemoveActionFromAlarmAction()
+    action.timeout = 30000
+    action.alarmUuid = alarmUuid
+    action.actionUuid = actionUuid
+    if deleteMode:
+        action.deleteMode = deleteMode
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Remove Action: %s From Alarm: %s ' % (actionUuid, alarmUuid))
+    return evt.inventory
+
+def add_label_to_alarm(alarmUuid, key, value, operator, session_uuid=None):
+    action = api_actions.AddLabelToAlarmAction()
+    action.timeout = 30000
+    action.alarmUuid = alarmUuid
+    action.key = key
+    action.value = value
+    action.operator = operator
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Add Label to Alarm: %s ' %alarmUuid)
+    return evt.inventory
+
+def remove_label_from_alarm(uuid, deleteMode=None, session_uuid=None):
+    action = api_actions.RemoveLabelFromAlarmAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    if deleteMode:
+        action.deleteMode = deleteMode
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Remove Label From Alarm: %s ' %alarmUuid)
+    return evt.inventory
+
+def subscribe_event(namespace, eventName, actions, labels, session_uuid=None):
+    action = api_actions.SubscribeEventAction()
+    action.timeout = 30000
+    action.namespace = namespace
+    action.eventName = eventName
+    action.actions = actions
+    action.labels = labels
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Subscribe Event: %s ' %eventName)
+    return evt.inventory
+
+def unsubscribe_event(uuid, deleteMode=None, session_uuid=None):
+    action = api_actions.UnsubscribeEventAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    if deleteMode:
+        action.deleteMode = deleteMode
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Unsubscribe Event: %s ' %uuid)
+    return evt.inventory
 
