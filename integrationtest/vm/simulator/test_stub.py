@@ -396,3 +396,41 @@ class ZstackTestVR(vm_header.TestVm):
         '''
         self.inv = net_ops.detach_l3(nic_uuid)
 
+def create_alarm(comparisonOperator, period, threshold,namespace,metricName,name=None,repeatInterval=None, labels=None,actions=None, resourceUuid=None, session_uuid=None):
+    action = api_actions.CreateAlarmAction()
+    action.timeout = 30000
+
+    if not name:
+        action.name = alarm_01
+    action.comparisonOperator=comparisonOperator
+    action.period=period
+    action.threshold=threshold
+    action.namespace=namespace
+    action.metricName=metricName
+    if actions:
+        action.actions=actions
+    if repeatInterval:
+        action.repeatInterval=repeatInterval
+    if labels:
+        action.labels=labels
+    if resourceUuid:
+        action.resourceUuid=resourceUuid
+
+    if session_uuid:
+        volume_creation_option.set_session_uuid(session_uuid)
+
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Create Alarm:  %s ' % name)
+    return evt
+def delete_alarm(uuid,deleteMode=None,session_uuid=None):
+    action = api_actions.DeleteAlarmAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    if deleteMode:
+        action.deleteMode=deleteMode
+
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Delete Alarm:  %s ' % uuid)
+    return evt
+
+
