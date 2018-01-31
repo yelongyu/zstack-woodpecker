@@ -65,9 +65,11 @@ def test():
     image_cache_path = "%s/imagecache/template/%s" % (ps.mountPath, new_image.image.uuid)
     if not test_lib.lib_check_file_exist(host, image_cache_path):
         test_util.test_fail('image cache is expected to exist')
-    image_cache_path = "%s/zstore-cache/%s" % (ps.mountPath, new_image.image.uuid)
-    if not test_lib.lib_check_file_exist(host, image_cache_path):
-        test_util.test_fail('image cache is expected to exist')
+
+    if bss[0].type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+        image_cache_path = "%s/zstore-cache/%s" % (ps.mountPath, new_image.image.uuid)
+        if not test_lib.lib_check_file_exist(host, image_cache_path):
+            test_util.test_fail('image cache is expected to exist')
 
     ps_ops.cleanup_imagecache_on_primary_storage(ps.uuid)
     image_cache_path = "%s/imagecache/template/%s" % (ps.mountPath, new_image.image.uuid)
