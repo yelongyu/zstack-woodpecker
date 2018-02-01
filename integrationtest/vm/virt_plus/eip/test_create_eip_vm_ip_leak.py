@@ -43,8 +43,9 @@ def test():
         test_util.test_fail('expected to be able to ping vip while it fail')
 
     pri_l3_gateway = os.environ.get('vlanIpRangeGateway1')
-    if os.popen("nping --arp %s | grep RCVD | awk '{print $NF}' | sort | uniq | wc -l" % (pri_l3_gateway)).read().strip() != "0":
-        test_util.test_fail("gateway IP conflict check failed: %s" % (os.popen("nping --arp %s" % (pri_l3_gateway)).read()))
+    reply = os.popen("nping --arp %s" % (pri_l3_gateway)).read()
+    if reply.count('RCVD') > 5:
+        test_util.test_fail("gateway IP conflict check failed: %s" % (reply))
 
     vm.destroy()
     test_obj_dict.rm_vm(vm)
