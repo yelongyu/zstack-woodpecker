@@ -1417,7 +1417,7 @@ def use_snapshot(http_server_ip, snapshot_uuid, session_uuid=None):
     return evt
 
 def query_resource(http_server_ip, resource, conditions = [], session_uuid=None, count='false'):
-    action = res_ops._gen_query_action(resource)
+    action = res_ops._gen_query_action(resource, conditions)
     action.conditions = conditions
     ret = execute_action_with_session(http_server_ip, action, session_uuid)
     return ret
