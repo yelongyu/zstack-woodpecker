@@ -81,9 +81,6 @@ def test():
     host2 = test_lib.lib_find_host_by_vm(vm2.get_vm())
     test_obj_dict.add_vm(vm2)
 
-    new_image.delete()
-    new_image.expunge()
-
     if ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
         test_util.test_skip('ceph is not directly using image cache, skip test.')
 
@@ -95,10 +92,14 @@ def test():
         if not test_lib.lib_check_file_exist(host, image_cache_path):
             test_util.test_fail('image cache is expected to exist')
 
+    new_image.delete()
+    new_image.expunge()
+
     ps_ops.cleanup_imagecache_on_primary_storage(ps.uuid)
-    image_cache_path = "%s/imagecache/template/%s/%s.qcow2" % (ps.mountPath, new_image.image.uuid, new_image.image.uuid)
-    if test_lib.lib_check_file_exist(host, image_cache_path):
-        test_util.test_fail('image cache is expected to be deleted')
+    if ps.type == inventory.LOCAL_STORAGE_TYPE:
+        image_cache_path = "%s/imagecache/template/%s/%s.qcow2" % (ps.mountPath, new_image.image.uuid, new_image.image.uuid)
+        if test_lib.lib_check_file_exist(host, image_cache_path):
+            test_util.test_fail('image cache is expected to be deleted')
 
     vm2.destroy()
     vm2.expunge()

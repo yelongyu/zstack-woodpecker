@@ -51,14 +51,6 @@ def test():
     vm.check()
     host = test_lib.lib_find_host_by_vm(vm.get_vm())
     ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
-
-    vm.destroy()
-    if test_lib.lib_get_vm_delete_policy() != 'Direct':
-        vm.expunge()
-
-    new_image.delete()
-    if test_lib.lib_get_image_delete_policy() != 'Direct':
-        new_image.expunge()
     if ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
         test_util.test_skip('ceph is not directly using image cache, skip test.')
 
@@ -70,6 +62,14 @@ def test():
         image_cache_path = "%s/zstore-cache/%s" % (ps.mountPath, new_image.image.uuid)
         if not test_lib.lib_check_file_exist(host, image_cache_path):
             test_util.test_fail('image cache is expected to exist')
+
+    vm.destroy()
+    if test_lib.lib_get_vm_delete_policy() != 'Direct':
+        vm.expunge()
+
+    new_image.delete()
+    if test_lib.lib_get_image_delete_policy() != 'Direct':
+        new_image.expunge()
 
     ps_ops.cleanup_imagecache_on_primary_storage(ps.uuid)
     image_cache_path = "%s/imagecache/template/%s" % (ps.mountPath, new_image.image.uuid)
