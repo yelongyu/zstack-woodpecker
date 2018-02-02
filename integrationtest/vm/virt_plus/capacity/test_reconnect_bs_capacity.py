@@ -1,6 +1,6 @@
 '''
 
-New Integration Test for imagestore capacity update when reconnect bs.
+New Integration Test for capacity update when reconnect bs.
 
 @author: quarkonics
 '''
@@ -25,12 +25,22 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 bs = None
 
+DefaultFalseDict = test_lib.DefaultFalseDict
+case_flavor = dict(reconnect_sftp=             DefaultFalseDict(sftp=True, imagestore=False),
+                   reconnect_imagestore=             DefaultFalseDict(sftp=False, imagestore=True),
+                   )
+
+
 def test():
     global bs
+    flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
 
     cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
     cond = res_ops.gen_query_conditions('status', '=', 'Connected', cond)
-    cond = res_ops.gen_query_conditions('type', '=', 'ImageStoreBackupStorage', cond)
+    if flavor['sftp']:
+        cond = res_ops.gen_query_conditions('type', '=', 'SftpBackupStorage', cond)
+    elif flavor['imagestore']:
+        cond = res_ops.gen_query_conditions('type', '=', 'ImageStoreBackupStorage', cond)
     bs = res_ops.query_resource_with_num(res_ops.BACKUP_STORAGE, cond, limit = 1)
     if not bs:
         test_util.test_skip('No Enabled/Connected bs was found, skip test.' )
