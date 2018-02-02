@@ -551,3 +551,18 @@ def get_stage_time(vm_name, begin_time):
     if instantiate_res_post_end_time != 0 and instantiate_res_post_begin_time != 0:
         instantiate_res_post_time = instantiate_res_post_end_time - instantiate_res_post_begin_time
     return [select_bs_time, allocate_host_time, allocate_ps_time, local_storage_allocate_capacity_time, allocate_volume_time, allocate_nic_time, instantiate_res_pre_time, create_on_hypervisor_time, instantiate_res_post_time]
+
+def setup_fake_df(host, total, avail):
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, "ls /usr/bin/df.real")
+    if rsp.return_code != 0:
+        rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, 'cp /usr/bin/df /usr/bin/df.real')
+    used = int(total) - int(avail)
+
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, '''echo "echo 'Filesystem     1K-blocks    Used Available Use% Mounted on'" >/usr/bin/df''')
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, '''echo "echo '/dev/vda1      %s %s %s   2%% /'" >>/usr/bin/df''' % (total, used, avail))
+
+def remove_fake_df(host):
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, "ls /usr/bin/df.real")
+    if rsp.return_code == 0:
+        rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, 'rm -rf /usr/bin/df; ln -s /usr/bin/df.real /usr/bin/df')
+
