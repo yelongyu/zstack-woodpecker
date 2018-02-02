@@ -558,8 +558,9 @@ def setup_fake_df(host, total, avail):
         rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, 'cp /usr/bin/df /usr/bin/df.real')
     used = int(total) - int(avail)
 
-    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, '''echo "echo 'Filesystem     1K-blocks    Used Available Use% Mounted on'" >/usr/bin/df''')
-    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, '''echo "echo '/dev/vda1      %s %s %s   2%% /'" >>/usr/bin/df''' % (total, used, avail))
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, '''echo "echo 'Filesystem     1K-blocks    Used Available Use% Mounted on'" >/usr/bin/df.fake''')
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, '''echo "echo '/dev/vda1      %s %s %s   2%% /'" >>/usr/bin/df.fake''' % (total, used, avail))
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, 'rm -rf /usr/bin/df; ln -s /usr/bin/df.fake /usr/bin/df; chmod a+x /usr/bin/df')
 
 def remove_fake_df(host):
     rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, "ls /usr/bin/df.real")
