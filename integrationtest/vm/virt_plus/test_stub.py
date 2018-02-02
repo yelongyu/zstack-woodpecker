@@ -567,3 +567,9 @@ def remove_fake_df(host):
     if rsp.return_code == 0:
         rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, 'rm -rf /usr/bin/df; ln -s /usr/bin/df.real /usr/bin/df')
 
+def setup_fake_fs(host, total, path):
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, "mount -t tmpfs -o size=%s tmpfs %s" % (total, path))
+
+def remove_fake_fs(host, path):
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, "umount %s" % (path))
+
