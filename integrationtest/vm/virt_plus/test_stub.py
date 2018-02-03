@@ -581,7 +581,7 @@ def setup_fake_ceph(host, total, avail):
         rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, 'cp /usr/bin/ceph /usr/bin/ceph.real')
     used = int(total) - int(avail)
 
-    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, '''echo '[ "$1 $2 $3" != "df -f json" ] && ceph.real $@'  >/usr/bin/ceph.fake''')
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, '''echo '[ "$1 $2 $3" != "df -f json" ] && ceph.real "$@"'  >/usr/bin/ceph.fake''')
     rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, '''echo '[ "$1 $2 $3" != "df -f json" ] && exit'  >>/usr/bin/ceph.fake''')
     rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, "/usr/bin/ceph.real df -f json")
     df = jsonobject.loads(rsp.stdout)
