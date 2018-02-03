@@ -613,6 +613,27 @@ def detach_network_service_from_l3network(l3_uuid, service_uuid, session_uuid=No
     test_util.action_logger('Detach [Network Service]: %s from [l3]: %s' % (service_uuid, l3_uuid))
     evt = acc_ops.execute_action_with_session(action, session_uuid)
 
+def attach_eip_service_to_l3network(l3_uuid, service_uuid, session_uuid=None):
+    providers = {}
+    action = api_actions.AttachNetworkServiceToL3NetworkAction()
+    action.l3NetworkUuid = l3_uuid
+    providers[service_uuid] = ['Eip'] 
+    action.networkServices = providers
+    action.timeout = 12000
+    test_util.action_logger('Attach [Eip Service]: %s to [l3]: %s' % (service_uuid, l3_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt
+
+def detach_eip_service_from_l3network(l3_uuid, service_uuid, session_uuid=None):
+    providers = {}
+    action = api_actions.DetachNetworkServiceFromL3NetworkAction()
+    action.l3NetworkUuid = l3_uuid
+    providers[service_uuid] = ['Eip']
+    action.networkServices = providers
+    action.timeout = 12000
+    test_util.action_logger('Detach [Eip Service]: %s from [l3]: %s' % (service_uuid, l3_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+
 def create_virtual_router_offering(name, cpuNum, memorySize, imageUuid, zoneUuid, managementNetworkUuid, publicNetworkUuid=None, description=None, allocatorStrategy=None, offeringType=None, session_uuid = None):
     action = api_actions.CreateVirtualRouterOfferingAction()
     action.name = name
