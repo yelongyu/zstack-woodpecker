@@ -11,6 +11,7 @@ import time
 import uuid
 
 import zstacklib.utils.ssh as ssh
+import zstacklib.utils.jsonobject as jsonobject
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
@@ -572,4 +573,27 @@ def setup_fake_fs(host, total, path):
 
 def remove_fake_fs(host, path):
     rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, "umount %s" % (path))
+
+def setup_fake_ceph(host, total, avail):
+    test_lib.lib_install_testagent_to_host(host)
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, "ls /usr/bin/ceph.real")
+    if rsp.return_code != 0:
+        rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, 'cp /usr/bin/ceph /usr/bin/ceph.real')
+    used = int(total) - int(avail)
+
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, '''echo '[ "$1 $2 $3" != "df -f json" ] && ceph.real $@'  >/usr/bin/ceph.fake''')
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, '''echo '[ "$1 $2 $3" != "df -f json" ] && exit'  >>/usr/bin/ceph.fake''')
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, "/usr/bin/ceph.real df -f json")
+    df = jsonobject.loads(rsp.stdout)
+    df.stats.total_bytes = total
+    df.stats.total_avail_bytes = avail
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, '''echo "echo ''" >>/usr/bin/ceph.fake''')
+    string = jsonobject.dumps(df).replace('"', '\\"')
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, '''echo "echo '%s'" >>/usr/bin/ceph.fake''' % (string))
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, 'rm -rf /usr/bin/ceph; ln -s /usr/bin/ceph.fake /usr/bin/ceph; chmod a+x /usr/bin/ceph')
+
+def remove_fake_ceph(host):
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, "ls /usr/bin/ceph.real")
+    if rsp.return_code == 0:
+        rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, 'rm -rf /usr/bin/ceph; ln -s /usr/bin/ceph.real /usr/bin/ceph')
 

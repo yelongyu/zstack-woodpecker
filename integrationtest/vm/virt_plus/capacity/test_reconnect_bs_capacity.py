@@ -26,8 +26,9 @@ test_obj_dict = test_state.TestStateDict()
 bs = None
 
 DefaultFalseDict = test_lib.DefaultFalseDict
-case_flavor = dict(reconnect_sftp=             DefaultFalseDict(sftp=True, imagestore=False),
-                   reconnect_imagestore=             DefaultFalseDict(sftp=False, imagestore=True),
+case_flavor = dict(reconnect_sftp=             DefaultFalseDict(sftp=True, imagestore=False, ceph=False),
+                   reconnect_imagestore=             DefaultFalseDict(sftp=False, imagestore=True, ceph=False),
+                   reconnect_ceph=             DefaultFalseDict(sftp=False, imagestore=False, ceph=True),
                    )
 
 
@@ -41,28 +42,53 @@ def test():
         cond = res_ops.gen_query_conditions('type', '=', 'SftpBackupStorage', cond)
     elif flavor['imagestore']:
         cond = res_ops.gen_query_conditions('type', '=', 'ImageStoreBackupStorage', cond)
+    elif flavor['ceph']:
+        cond = res_ops.gen_query_conditions('type', '=', 'Ceph', cond)
+
     bs = res_ops.query_resource_with_num(res_ops.BACKUP_STORAGE, cond, limit = 1)
     if not bs:
         test_util.test_skip('No Enabled/Connected bs was found, skip test.' )
 
     bs_ops.reconnect_backup_storage(bs[0].uuid)
     saved_bs = res_ops.query_resource_with_num(res_ops.BACKUP_STORAGE, cond, limit = 1)
-    bs[0].managementIp = bs[0].hostname
-    test_stub.setup_fake_fs(bs[0], '2G', saved_bs[0].url)
+    if flavor['ceph']:
+        bs[0].managementIp = bs[0].mons[0].hostname
+    else:
+        bs[0].managementIp = bs[0].hostname
+    if flavor['ceph']:
+        test_stub.setup_fake_ceph(bs[0], 631242663936, 428968118272)
+        fake_total = 631242663936
+        fake_available = 428968118272
+    else:
+        test_stub.setup_fake_fs(bs[0], '2G', saved_bs[0].url)
+        fake_total = 2*1024*1024*1024
+        fake_available = 2*1024*1024*1024
+
     bs_ops.reconnect_backup_storage(bs[0].uuid)
 
     bs = res_ops.query_resource_with_num(res_ops.BACKUP_STORAGE, cond, limit = 1)
-    bs[0].managementIp = bs[0].hostname
-    if bs[0].totalCapacity != 2*1024*1024*1024:
+    if flavor['ceph']:
+        bs[0].managementIp = bs[0].mons[0].hostname
+    else:
+        bs[0].managementIp = bs[0].hostname
+
+    if bs[0].totalCapacity != fake_total:
         test_util.test_fail('totalCapacity %s not updated after reconnect bs' % (bs[0].totalCapacity))
-    if bs[0].availableCapacity != 2*1024*1024*1024:
+    if bs[0].availableCapacity != fake_available:
         test_util.test_fail('availableCapacity %s not updated after reconnect bs' % (bs[0].availableCapacity))
 
-    test_stub.remove_fake_fs(bs[0], saved_bs[0].url)
+    if flavor['ceph']:
+        test_stub.remove_fake_ceph(bs[0])
+    else:
+        test_stub.remove_fake_fs(bs[0], saved_bs[0].url)
     bs_ops.reconnect_backup_storage(bs[0].uuid)
     
     bs = res_ops.query_resource_with_num(res_ops.BACKUP_STORAGE, cond, limit = 1)
-    bs[0].managementIp = bs[0].hostname
+    if flavor['ceph']:
+        bs[0].managementIp = bs[0].mons[0].hostname
+    else:
+        bs[0].managementIp = bs[0].hostname
+
     if bs[0].totalCapacity != saved_bs[0].totalCapacity:
         test_util.test_fail('totalCapacity %s not updated after reconnect bs' % (bs[0].totalCapacity))
     if bs[0].availableCapacity == 0:
@@ -73,4 +99,8 @@ def test():
 #Will be called only if exception happens in test().
 def env_recover():
     global bs
-    test_stub.remove_fake_fs(bs[0], saved_bs[0].url)
+    flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
+    if flavor['ceph']:
+        test_stub.remove_fake_ceph(bs[0])
+    else:
+        test_stub.remove_fake_fs(bs[0], saved_bs[0].url)
