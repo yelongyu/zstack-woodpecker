@@ -516,3 +516,189 @@ def unsubscribe_event(uuid, deleteMode=None, session_uuid=None):
     test_util.action_logger('Unsubscribe Event: %s ' %uuid)
     return evt.inventory
 
+def create_sns_email_endpoint(email, name, platform_uuid=None, session_uuid=None):
+    action = api_actions.CreateSNSEmailEndpointAction()
+    action.timeout = 30000
+    action.email = email
+    action.name = name
+    if platform_uuid:
+        action.platformUuid = platform_uuid
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Create SNS Email Endpoint: %s ' %name)
+    return evt.inventory
+
+def create_sns_email_platform(smtp_server, smtp_port, name, username=None, password=None, session_uuid=None):
+    action = api_actions.CreateSNSEmailPlatformAction()
+    action.timeout = 30000
+    action.smtpServer = smtp_server
+    action.smtpPort = smtp_port
+    action.name = name
+    if username:
+        action.username = username
+    if password:
+        action.password
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Create SNS Email Platform: %s ' %name)
+    return evt.inventory
+
+def validate_sns_email_platform(uuid, session_uuid=None):
+    action = api_actions.ValidateSNSEmailPlatformAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Validate SNS Email Platform: %s ' %uuid)
+    return evt.inventory
+
+def create_sns_http_endpoint(url, name, username=None, password=None, session_uuid=None):
+    action = api_actions.CreateSNSHttpEndpointAction()
+    action.timeout = 30000
+    action.url = url
+    action.name = name
+    if username:
+        action.username = username
+    if password:
+        action.password
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Create SNS Http Endpoint: %s ' %name)
+    return evt.inventory
+
+def create_sns_dingtalk_endplint(url, name, at_all=None, at_person_phone_numbers=None, session_uuid=None):
+    action = api_actions.CreateSNSDingTalkEndpointAction()
+    action.timeout = 30000
+    action.url = url
+    if at_all:
+        action.atAll = at_all
+    if at_person_phone_numbers
+        action.atPersonPhoneNumbers = at_person_phone_numbers
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Create SNS DingTalk Endpoint: %s ' %name)
+    return evt.inventory
+
+def add_sns_dingtalk_at_person(phone_number, endpoint_uuid, session_uuid=None):
+    action = api_actions.AddSNSDingTalkAtPersonAction()
+    action.timeout = 30000
+    action.phoneNumber = phone_number
+    action.endpointUuid = endpoint_uuid
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Add SNS DingTalk At Person: %s ' %phone_number)
+    return evt.inventory
+
+def remove_sns_dingtalk_at_person(uuid, delete_mode, session_uuid=None):
+    action = api_actions.RemoveSNSDingTalkAtPersonAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    action.deleteMode = delete_mode
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Remove SNS DingTalk At Person: %s ' %uuid)
+    return evt.inventory
+
+def update_sns_application_endpoint(uuid, name, description, session_uuid=None):
+    action = api_actions.UpdateSNSApplicationEndpointAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    action.name = name
+    action.description = description
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Update SNS Application Endpoint: %s ' %uuid)
+    return evt.inventory
+
+def delete_sns_application_endpoint(uuid, delete_mode, session_uuid=None):
+    action = api_actions.DeleteSNSApplicationEndpointAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    action.deleteMode = delete_mode
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Delete SNS Application Endpoint: %s ' %uuid)
+    return evt.inventory
+
+def change_sns_application_endpoint_state(uuid, state_event, session_uuid=None):
+    action = api_actions.ChangeSNSApplicationEndpointStateAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    action.stateEvent = state_event
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Change SNS Application Endpoint State To: %s ' %state_event)
+    return evt.inventory
+
+def update_sns_application_platform(uuid, name, description, session_uuid=None):
+    action = api_actions.UpdateSNSApplicationPlatformAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    action.name = name
+    action.description = description
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Update SNS Application Platform: %s ' %uuid)
+    return evt.inventory
+
+def delete_sns_application_platform(uuid, delete_mode, session_uuid=None):
+    action = api_actions.DeleteSNSApplicationPlatformAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    action.deleteMode = delete_mode
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Delete SNS Application Platform: %s ' %uuid)
+    return evt.inventory
+
+def change_sns_application_platform_state(uuid, state_event, session_uuid=None):
+    action = api_actions.ChangeSNSApplicationPlatformStateAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    action.stateEvent = state_event
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Change SNS Application Plarform State To: %s ' %state_event)
+    return evt.inventory
+
+def create_sns_topic(name, session_uuid=None):
+    action = api_actions.CreateSNSTopicAction()
+    action.timeout = 30000
+    action.name = name
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Create SNS Topic: %s ' %name)
+    return evt.inventory
+
+def update_sns_topic(uuid, name, description, session_uuid=None):
+    action = api_actions.UpdateSNSTopicAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    action.name = name
+    action.description = description
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Update SNS Topic: %s ' %uuid)
+    return evt.inventory
+
+def delete_sns_topic(uuid, delete_mode, session_uuid=None):
+    action = api_actions.DeleteSNSTopicAction()
+    action.timeout = 30000
+    action.uuid
+    action.deleteMode = delete_mode
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Delete SNS Topic: %s ' %uuid)
+    return evt.inventory
+
+def change_sns_topic_state(uuid, state_event, session_uuid=None):
+    action = api_actions.ChangeSNSTopicStateAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    action.stateEvent = state_event
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Change SNS Topic State To: %s ' %state_event)
+    return evt.inventory
+
+def subscribe_sns_topic(topic_uuid, endpoint_uuid, session_uuid=None):
+    action = api_actions.SubscribeSNSTopicAction()
+    action.timeout = 30000
+    action.topicUuid = topic_uuid
+    action.endpointUuid = endpoint_uuid
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Subscribe SNS Topic: %s ' %topic_uuid)
+    return evt.inventory
+
+def unsubscribe_sns_topic(topic_uuid, endpoint_uuid, session_uuid=None):
+    action = api_actions.UnsubscribeSNSTopicAction()
+    action.timeout = 30000
+    action.topicUuid = topic_uuid
+    action.endpointUuid = endpoint_uuid
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Unsubscribe SNS Topic: %s ' %topic_uuid)
+    return evt.inventory
+
