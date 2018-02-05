@@ -11,10 +11,11 @@ import zstackwoodpecker.test_state as test_state
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 qos = test_stub.VIPQOS()
-port = test_stub.gen_random_port()
+
 
 def test():
     qos.create_vm('l3VlanNetworkName1')
+    port = test_stub.gen_random_port()
     qos.create_eip()
     test_obj_dict.add_vm(qos.vm)
     test_obj_dict.add_vip(qos.vip)
