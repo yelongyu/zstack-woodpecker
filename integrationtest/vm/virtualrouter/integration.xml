@@ -218,7 +218,7 @@
         <case timeout='1200' repeat='1' noparallel='True'>vip_qos/test_vrouter_vip_port_qos_1m.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>vip_qos/test_vrouter_vip_port_qos_37m.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>vip_qos/test_vrouter_vip_port_qos_in_21m_out_19m.py</case>
-        <case timeout='1200' repeat='1' noparallel='True'>vip_qostest_vrouter_vip_qos_1m</case>
+        <case timeout='1200' repeat='1' noparallel='True'>vip_qos/test_vrouter_vip_qos_1m.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>vip_qos/test_vrouter_vip_qos_69m.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>vip_qos/test_vrouter_vip_qos_in_79m_out_91m.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>vip_qos/test_vrouter_vip_qos_pf_lb.py</case>
