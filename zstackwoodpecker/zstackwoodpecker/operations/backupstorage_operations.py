@@ -106,6 +106,31 @@ def detach_backup_storage(backup_storage_uuid, zone_uuid, \
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
+def change_backup_storage_state(backup_storage_uuid, state, session_uuid=None):
+    # ENABLE = 'enable'
+    # DISABLE = 'disable'
+    action = api_actions.ChangeBackupStorageStateAction()
+    action.uuid = backup_storage_uuid
+    action.stateEvent = state
+    action.timeout = 300000
+    test_util.action_logger('Change BackupStorageStateAction [uuid:] %s to [state:] %s' % (backup_storage_uuid, state))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def update_image_store_backup_storage_info(backup_storage_uuid, infoType, infoValue, session_uuid = None):
+    action = api_actions.UpdateImageStoreBackupStorageAction()
+    action.uuid = backup_storage_uuid
+    if infoType == 'password':
+        action.password = infoValue
+    elif infoType == 'hostname':
+        action.hostname = infoValue
+    elif infoType == 'sshPort':
+        action.sshPort = infoValue
+    elif infoType == 'username':
+        action.username = infoValue
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
 def update_sftp_backup_storage_info(sftpUuid, infoType, infoValue, session_uuid = None):
     action = api_actions.UpdateSftpBackupStorageAction()
     action.uuid = sftpUuid
