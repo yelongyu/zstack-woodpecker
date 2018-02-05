@@ -844,10 +844,10 @@ class VIPQOS(object):
         self.port = port
         self.iperf_port = iperf_port
         net_ops.set_vip_qos(vip_uuid=self.vip_uuid, inboundBandwidth=self.inbound_width, outboundBandwidth=self.outbound_width, port=port)
-        time.sleep(60)
+        time.sleep(10)
 
-    def del_vip_qos(self, iperf_port):
-        self.vip_qos = net_ops.get_vip_qos(self.vip_uuid)
+    def del_vip_qos(self):
+        net_ops.delete_vip_qos(self.vip_uuid, self.port)
         time.sleep(10)
 
     def create_pf(self):

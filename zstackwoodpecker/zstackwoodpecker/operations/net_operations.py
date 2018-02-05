@@ -160,7 +160,7 @@ def get_vip_qos(vip_uuid, session_uuid=None):
     test_util.action_logger("GetVipQos [vip:] %s" % vip_uuid)
     return evt.inventories
 
-def delete_vip_qos(vip_uuid, port, session_uuid=None):
+def delete_vip_qos(vip_uuid, port=None, session_uuid=None):
     action = api_actions.DeleteVipQosAction()
     action.uuid = vip_uuid
     action.port = port
