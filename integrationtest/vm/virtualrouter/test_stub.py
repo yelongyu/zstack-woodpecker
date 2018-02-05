@@ -744,7 +744,7 @@ def set_httpd_in_vm(ip, username, password):
 
 def gen_random_port(start=1, end=65535):
     rand_port = random.randint(start, end)
-    cmd = 'lsof -i -P -n | grep LISTEN | grep %s' % rand_port
+    cmd = 'lsof -i -P -n | grep LISTEN | grep -w ":%s"' % rand_port
     ret = commands.getoutput(cmd)
     if not ret:
         return rand_port
