@@ -72,13 +72,28 @@ def test():
         new_image.expunge()
 
     ps_ops.cleanup_imagecache_on_primary_storage(ps.uuid)
-    image_cache_path = "%s/imagecache/template/%s" % (ps.mountPath, new_image.image.uuid)
-    if test_lib.lib_check_file_exist(host, image_cache_path):
-        test_util.test_fail('image cache is expected to be deleted')
 
-    image_cache_path = "%s/zstore-cache/%s" % (ps.mountPath, new_image.image.uuid)
-    if test_lib.lib_check_file_exist(host, image_cache_path):
-        test_util.test_fail('image cache is expected to be deleted')
+    count = 0
+    while True:
+        image_cache_path = "%s/imagecache/template/%s" % (ps.mountPath, new_image.image.uuid)
+        if not test_lib.lib_check_file_exist(host, image_cache_path):
+            break
+        elif count > 5:
+            test_util.test_fail('image cache is expected to be deleted')
+        test_util.test_logger('check %s times: image cache still exist' % (count))
+        time.sleep(5)
+        count += 1
+    
+    count = 0
+    while True:
+        image_cache_path = "%s/zstore-cache/%s" % (ps.mountPath, new_image.image.uuid)
+        if not test_lib.lib_check_file_exist(host, image_cache_path):
+            break
+        elif count > 5:
+            test_util.test_fail('image cache is expected to be deleted')
+        test_util.test_logger('check %s times: image cache still exist' % (count))
+        time.sleep(5)
+        count += 1
 
     test_util.test_pass('imagecache cleanup Pass.')
 
