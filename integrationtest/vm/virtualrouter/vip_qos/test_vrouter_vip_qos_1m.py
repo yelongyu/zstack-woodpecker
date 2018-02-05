@@ -24,8 +24,7 @@ def test():
     qos.check_inbound_bandwidth()
 
     qos.vip.delete()
-    test_obj_dict.rm_vm(qos.vm)
-    test_util.test_pass('VRouter Network VIP QoS 1M-In 1M-Out Test Success')
+    test_util.test_pass('Create VIP Qos for EIP Success')
 
 def env_recover():
     if qos.vm:
