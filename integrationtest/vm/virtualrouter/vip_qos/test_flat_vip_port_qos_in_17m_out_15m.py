@@ -15,7 +15,7 @@ port = test_stub.gen_random_port()
 
 def test():
     qos.create_vm('l3VlanNetworkName5')
-    qos.create_eip(falt=True)
+    qos.create_eip(flat=True)
     test_obj_dict.add_vm(qos.vm)
     test_obj_dict.add_vip(qos.vip)
 
@@ -25,7 +25,8 @@ def test():
     qos.check_inbound_bandwidth()
 
     qos.vip.delete()
-    test_util.test_pass('Create VIP Qos for EIP Success')
+    test_obj_dict.rm_vm(qos.vm)
+    test_util.test_pass('Flat Network VIP Multi-Port QoS 17M-In 15M-Out Test Success')
 
 def env_recover():
     if qos.vm:

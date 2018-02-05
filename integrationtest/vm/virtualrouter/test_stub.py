@@ -754,17 +754,18 @@ def gen_random_port(start=1, end=65535):
 
 class VIPQOS(object):
     def __init__(self):
-        self.mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+        self.mn_ip = None
         self.ssh_cmd = 'sshpass -p password ssh -o StrictHostKeyChecking=no root@'
         self.inbound_width = None
         self.outbound_width = None
         self.iperf_url = None
         self.vm_ip = None
+        self.vm_ip2 = None
         self.port = None
         self.iperf_port = None
         self.lb = None
         self.vr = None
-        commands.getoutput("iptables -F")
+        self.reconnected = False
 
     def install_iperf(self, vm_ip):
         iperf_url = os.getenv('iperfUrl')
@@ -792,17 +793,13 @@ class VIPQOS(object):
         self.vm = create_vlan_vm(os.getenv(l3_network))
         self.vm.check()
         self.vm_ip = self.vm.vm.vmNics[0].ip
-        time.sleep(60)
-        for ip in [self.mn_ip, self.vm_ip]:
-            self.install_iperf(ip)
+#         time.sleep(60)
 
     def create_vm2(self, l3_network):
         self.vm2 = create_vlan_vm(os.getenv(l3_network))
         self.vm2.check()
         self.vm_ip2 = self.vm.vm.vmNics[0].ip
-        time.sleep(60)
-        for ip in [self.mn_ip, self.vm_ip2]:
-            self.install_iperf(ip)
+#         time.sleep(60)
 
     def attach_eip_service(self):
         try:
@@ -817,6 +814,8 @@ class VIPQOS(object):
             pass
 
     def create_vip(self, flat):
+        self.mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+        commands.getoutput("iptables -F")
         self.vm_nic_uuid = self.vm.vm.vmNics[0].uuid
         self.pri_l3_uuid = self.vm.vm.vmNics[0].l3NetworkUuid
         if flat:
@@ -838,8 +837,6 @@ class VIPQOS(object):
         eip = create_eip('qos_test', vip_uuid=self.vip.get_vip().uuid, vnic_uuid=self.vm_nic_uuid, vm_obj=self.vm)
         self.vip.attach_eip(eip)
         time.sleep(10)
-        for ip in [self.mn_ip, self.vm_ip]:
-            self.install_iperf(ip)
 
     def set_vip_qos(self, inbound_width=None, outbound_width=None, port=None, iperf_port=None):
         self.inbound_width = inbound_width * 1024 * 1024
@@ -851,6 +848,7 @@ class VIPQOS(object):
 
     def del_vip_qos(self, iperf_port):
         self.vip_qos = net_ops.get_vip_qos(self.vip_uuid)
+        time.sleep(10)
 
     def create_pf(self):
 #         self.create_vip(flat=False)
@@ -875,9 +873,13 @@ class VIPQOS(object):
         lbl.add_nics([self.vm2.vm.vmNics[0].uuid])
 
     def check_bandwidth(self, vm_ip, direction, cmd, bandwidth):
-        if self.vr:
+        if self.vr and not self.reconnected:
             vm_ops.reconnect_vr(self.vr.uuid)
+            self.reconnected = True
             time.sleep(10)
+        for ip in [self.mn_ip, self.vm_ip, self.vm_ip2]:
+            if ip:
+                self.install_iperf(ip)
         commands.getoutput(self.ssh_cmd + vm_ip +" iptables -F")
         time.sleep(10)
         self.start_iperf_server(vm_ip)

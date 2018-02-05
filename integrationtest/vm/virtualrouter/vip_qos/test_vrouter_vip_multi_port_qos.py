@@ -11,7 +11,6 @@ import zstackwoodpecker.test_state as test_state
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 qos = test_stub.VIPQOS()
-port = test_stub.gen_random_port()
 
 def test():
     qos.create_vm('l3VlanNetworkName1')
@@ -19,14 +18,24 @@ def test():
     test_obj_dict.add_vm(qos.vm)
     test_obj_dict.add_vip(qos.vip)
 
+    port = test_stub.gen_random_port()
     qos.set_vip_qos(1, 1, port, port)
+    qos.check_outbound_bandwidth()
+    qos.check_inbound_bandwidth()
 
+    port = test_stub.gen_random_port()
+    qos.set_vip_qos(29, 31, port, port)
+    qos.check_outbound_bandwidth()
+    qos.check_inbound_bandwidth()
+
+    port = test_stub.gen_random_port()
+    qos.set_vip_qos(61, 55, port, port)
     qos.check_outbound_bandwidth()
     qos.check_inbound_bandwidth()
 
     qos.vip.delete()
     test_obj_dict.rm_vm(qos.vm)
-    test_util.test_pass('VRouter Network VIP Port QoS 1M-In 1M-Out Test Success')
+    test_util.test_pass('VRouter Network VIP Multi-Port QoS Test Success')
 
 def env_recover():
     if qos.vm:
