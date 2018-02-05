@@ -26,7 +26,6 @@ def test():
     qos.del_vip_qos()
 
     qos.set_vip_qos(69, 93)
-    qos.del_vip_qos()
 
     qos.check_outbound_bandwidth()
     qos.check_inbound_bandwidth()
