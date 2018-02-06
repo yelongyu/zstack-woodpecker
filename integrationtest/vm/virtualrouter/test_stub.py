@@ -749,7 +749,11 @@ def gen_random_port(start=1, end=65535):
     if not ret:
         return rand_port
     else:
-        return gen_random_port(start, end)
+        start += end // 5
+        if start > end:
+            return end - 1
+        else:
+            return gen_random_port(start, end)
 
 
 class VIPQOS(object):
