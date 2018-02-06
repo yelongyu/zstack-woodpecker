@@ -742,18 +742,15 @@ def set_httpd_in_vm(ip, username, password):
     cmd = "yum install httpd -y; systemctl start httpd; iptables -F; echo %s > /var/www/html/index.html" % ip
     test_lib.lib_execute_ssh_cmd(ip, username, password, cmd, timeout=300)
 
-def gen_random_port(start=1, end=65535):
-    rand_port = random.randint(start, end)
-    cmd = 'lsof -i -P -n | grep LISTEN | grep -w ":%s"' % rand_port
-    ret = commands.getoutput(cmd)
-    if not ret:
-        return rand_port
-    else:
-        start += end // 5
-        if start > end:
-            return end - 1
-        else:
-            return gen_random_port(start, end)
+def gen_random_port(start=1, end=100):
+#     cmd = "lsof -i -P -n | grep LISTEN | awk -F ':' '{print $2}' | awk '{print $1}'"
+    cmd = "netstat -plnt | awk 'NR>2{print $4}'"
+    ret = commands.getoutput(cmd).split('\n')
+#     ret = list(set(ret))
+    port_listening = [int(p.split(':')[-1]) for p in ret if p]
+    port_all = xrange(start, end)
+    port_not_listen = [port for port in port_all if port not in port_listening]
+    return random.choice(port_not_listen)
 
 
 class VIPQOS(object):
