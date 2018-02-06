@@ -562,13 +562,13 @@ def create_sns_http_endpoint(url, name, username=None, password=None, session_uu
     test_util.action_logger('Create SNS Http Endpoint: %s ' %name)
     return evt.inventory
 
-def create_sns_dingtalk_endplint(url, name, at_all=None, at_person_phone_numbers=None, session_uuid=None):
+def create_sns_dingtalk_endpoint(url, name, at_all=None, at_person_phone_numbers=None, session_uuid=None):
     action = api_actions.CreateSNSDingTalkEndpointAction()
     action.timeout = 30000
     action.url = url
     if at_all:
         action.atAll = at_all
-    if at_person_phone_numbers
+    if at_person_phone_numbers:
         action.atPersonPhoneNumbers = at_person_phone_numbers
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create SNS DingTalk Endpoint: %s ' %name)
