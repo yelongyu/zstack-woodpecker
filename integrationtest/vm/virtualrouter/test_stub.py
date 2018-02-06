@@ -748,9 +748,9 @@ def gen_random_port(start=1, end=100):
     ret = commands.getoutput(cmd).split('\n')
 #     ret = list(set(ret))
     port_listening = [int(p.split(':')[-1]) for p in ret if p]
-    port_all = xrange(start, end)
-    port_not_listen = [port for port in port_all if port not in port_listening]
-    return random.choice(port_not_listen)
+    port_range = xrange(start, end)
+    port_val_list = [port for port in port_range if port not in port_listening]
+    return random.choice(port_val_list)
 
 
 class VIPQOS(object):
