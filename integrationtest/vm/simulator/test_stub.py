@@ -22,6 +22,7 @@ import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
 import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
 import zstackwoodpecker.header.vm as vm_header
 from zstackwoodpecker.operations import vm_operations as vm_ops
+import poplib
 import re
 
 def create_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None,
@@ -701,4 +702,31 @@ def unsubscribe_sns_topic(topic_uuid, endpoint_uuid, session_uuid=None):
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Unsubscribe SNS Topic: %s ' %topic_uuid)
     return evt.inventory
+
+def get_mail_list(pop_server, username, password):
+    pop3 = poplib.POP3(pop_server)
+    pop3.set_debuglevel(1)
+    pop3.user(username)
+    pop3.pass_(password)
+    ret = pop3.stat()
+    mail_list = []
+    for i in range(ret[0] - 20, ret[0]):
+        resp, msg, octets = pop3.retr(i)
+        mail_list.append(msg)
+    return mail_list
+
+def check_sns_email(pop_server, username, password, keywords, trigger, target_uuid):
+    mail_list = get_mail_list(pop_server, username, password)
+    flag = 0
+    for i in mail_list:
+        '''check mail list form the mail sender'''
+        if 'MF='+ username in i[0]:
+            test_util.action_logger('Mail sent addr is %s' % mail)
+            if (trigger in i[13].lower()) and (target_uuid in i[13]) and keywords in i[8]:
+                flag = 1
+                test_util.action_logger('Got Target: %s for: %s Trigger Mail' % (target_uuid, trigger))
+                test_util.action_logger('Mail detail info is %s' % i)
+                break
+    test_util.action_logger('flag value is %s' % flag)
+    return flag
 
