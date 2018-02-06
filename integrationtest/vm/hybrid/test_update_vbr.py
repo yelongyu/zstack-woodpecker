@@ -17,7 +17,7 @@ name = 'aliyun-vbr-%s' % test_stub._postfix
 description = 'test-aliyun-vbr-%s' % test_stub._postfix
 
 def test():
-    hybrid.add_datacenter_iz(region_id='cn-shanghai')
+    hybrid.add_datacenter_iz(region_id='cn-shanghai', ks2=True)
     hybrid.sync_vbr()
     hybrid.update_vbr(name=name)
     hybrid.update_vbr(description=description)

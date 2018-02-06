@@ -14,7 +14,7 @@ test_stub = test_lib.lib_get_test_stub()
 hybrid = test_stub.HybridObject()
 
 def test():
-    hybrid.add_datacenter_iz(check_prepaid_ecs=True)
+    hybrid.add_datacenter_iz(check_prepaid_ecs=True, ks2=True)
     if hybrid.prepaid_ecs:
         test_util.test_pass('Sync Prepaid ECS Instance Test Success')
     else:

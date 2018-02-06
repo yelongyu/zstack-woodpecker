@@ -76,12 +76,16 @@ class HybridObject(object):
         self.cond_image_system = res_ops.gen_query_conditions('type', '=', 'system')
 
 
-    def add_ks(self):
-        ks_existed = hyb_ops.query_aliyun_key_secret()
-        if ks_existed:
-            self.ks = ks_existed[0]
+    def add_ks(self, ks2):
+        if ks2:
+            self.ks = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey2'), os.getenv('aliyunSecret2'))
+            hyb_ops.attach_aliyun_key(self.ks.uuid)
         else:
-            self.ks = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
+            ks_existed = hyb_ops.query_aliyun_key_secret()
+            if ks_existed:
+                self.ks = ks_existed[0]
+            else:
+                self.ks = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
 
     def clean_datacenter(self):
         '''
@@ -92,8 +96,8 @@ class HybridObject(object):
             for d in datacenter_local:
                 hyb_ops.del_datacenter_in_local(d.uuid)
 
-    def add_datacenter_iz(self, add_datacenter_only=False, check_vpn_gateway=False, region_id=None, check_ecs=False, check_prepaid_ecs=False):
-        self.add_ks()
+    def add_datacenter_iz(self, add_datacenter_only=False, check_vpn_gateway=False, region_id=None, check_ecs=False, check_prepaid_ecs=False, ks2=None):
+        self.add_ks(ks2=ks2)
         self.clean_datacenter()
         if region_id:
             self.datacenter = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')

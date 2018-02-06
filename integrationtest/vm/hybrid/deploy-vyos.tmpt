@@ -4,6 +4,9 @@ aliyunKey = 123456
 aliyunSecret = 1234567
 datacenterType = aliyun
 
+aliyunKey2 = 123456
+aliyunSecret2 = 1234567
+
 instanceOfferingName_m = medium-vm
 instanceOfferingMemory_m = 1024M
 instanceOfferingCpuNum_m = 1
