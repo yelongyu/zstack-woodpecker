@@ -77,13 +77,18 @@ class HybridObject(object):
 
 
     def add_ks(self, ks2):
-        if ks2:
-            self.ks = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey2'), os.getenv('aliyunSecret2'))
+        ks_existed = hyb_ops.query_aliyun_key_secret()
+        for ks in ks_existed:
+            if ks.name == 'test_hybrid2' and ks2:
+                self.ks = ks
+            elif ks.name == 'test_hybrid' and not ks2:
+                self.ks = ks
+        if self.ks:
             hyb_ops.attach_aliyun_key(self.ks.uuid)
+            time.sleep(5)
         else:
-            ks_existed = hyb_ops.query_aliyun_key_secret()
-            if ks_existed:
-                self.ks = ks_existed[0]
+            if ks2:
+                self.ks = hyb_ops.add_aliyun_key_secret('test_hybrid2', 'test for hybrid', os.getenv('aliyunKey2'), os.getenv('aliyunSecret2'))
             else:
                 self.ks = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
 
