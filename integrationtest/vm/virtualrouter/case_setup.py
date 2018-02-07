@@ -15,22 +15,7 @@ import os
 import time
 
 def check_resource():
-    if os.environ.get('WOODPECKER_PARALLEL') != None and os.environ.get('WOODPECKER_PARALLEL') == '0':
-        vms = res_ops.query_resource(res_ops.VM_INSTANCE, [], None)
-        for vm in vms:
-            if vm.type == 'UserVm' and vm.state == 'Running':
-                vm_ops.stop_vm(vm.uuid, force='cold')
 
-    vrs = res_ops.query_resource(res_ops.APPLIANCE_VM, [], None)
-    for vr in vrs:
-        if vr.status != "Connected" or vr.state != "Running":
-            if vr.applianceVmType != "vrouter":
-		try:
-                    vm_ops.stop_vm(vr.uuid, force='cold')
-                    vm_ops.start_vm(vr.uuid)
-                except:
-                    test_util.test_logger('Exception when reboot vr vm')
-            return False
     hosts = res_ops.query_resource(res_ops.HOST, [], None)
     for host in hosts:
         if host.status != "Connected":
@@ -47,6 +32,23 @@ def check_resource():
     for bs in bss:
         if bs.status != "Connected":
             bs_ops.reconnect_backup_storage(bs.uuid)
+            return False
+
+    if os.environ.get('WOODPECKER_PARALLEL') != None and os.environ.get('WOODPECKER_PARALLEL') == '0':
+        vms = res_ops.query_resource(res_ops.VM_INSTANCE, [], None)
+        for vm in vms:
+            if vm.type == 'UserVm' and vm.state == 'Running':
+                vm_ops.stop_vm(vm.uuid, force='cold')
+
+    vrs = res_ops.query_resource(res_ops.APPLIANCE_VM, [], None)
+    for vr in vrs:
+        if vr.status != "Connected" or vr.state != "Running":
+            if vr.applianceVmType != "vrouter":
+		try:
+                    vm_ops.stop_vm(vr.uuid, force='cold')
+                    vm_ops.start_vm(vr.uuid)
+                except:
+                    test_util.test_logger('Exception when reboot vr vm')
             return False
 
     return True
