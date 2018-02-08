@@ -1605,6 +1605,65 @@ def add_vcenter(scenarioConfig, scenarioFile, deployConfig, session_uuid):
     thread.start()
     wait_for_thread_done()
 
+def add_vcenter_image(scenarioConfig, scenarioFile, deployConfig, session_uuid):
+    def _add_image(action):
+        increase_image_thread()
+        try:
+            evt = action.run()
+            test_util.test_logger(jsonobject.dumps(evt))
+        except:
+            exc_info.append(sys.exc_info())
+        finally:
+            decrease_image_thread()
+
+    if not xmlobject.has_element(deployConfig, 'vcenter.images.image'):
+        return
+
+    for i in xmlobject.safe_list(deployConfig.vcenter.images.image):
+        if i.hasattr('label_') and i.label_ == 'lazyload':
+            print "lazyload image: %s will be added in case" % (i.name_)
+            continue
+        for bsref in xmlobject.safe_list(i.backupStorageRef):
+            bss = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid, name=bsref.text_)
+            bs = get_first_item_from_list(bss, 'backup storage', bsref.text_, 'image')
+            action = api_actions.AddImageAction()
+            action.sessionUuid = session_uuid
+            #TODO: account uuid will be removed later.
+            action.accountUuid = inventory.INITIAL_SYSTEM_ADMIN_UUID
+            action.backupStorageUuids = [bs.uuid]
+            action.bits = i.bits__
+            if not action.bits:
+                action.bits = 64
+            action.description = i.description__
+            action.format = i.format_
+            action.mediaType = i.mediaType_
+            action.guestOsType = i.guestOsType__
+            if not action.guestOsType:
+                action.guestOsType = 'unknown'
+            action.platform = i.platform__
+            if not action.platform:
+                action.platform = 'Linux'
+            action.hypervisorType = i.hypervisorType__
+            action.name = i.name_
+            action.url = i.url_
+            action.timeout = 1800000
+            if i.hasattr('system_'):
+                action.system = i.system_
+            if i.hasattr('systemTags_'):
+                action.systemTags = i.systemTags_.split(',')
+            thread = threading.Thread(target = _add_image, args = (action, ))
+            print 'before add image1: %s' % i.url_
+            wait_for_image_thread_queue()
+            print 'before add image2: %s' % i.url_
+            thread.start()
+            print 'add image: %s' % i.url_
+
+    print 'vcenter images add command are executed'
+    wait_for_thread_done(True)
+    print 'vcenter images have been added'
+
+
+
 def _thread_for_action(action):
     try:
         evt = action.run()
@@ -1946,7 +2005,8 @@ def deploy_initial_database(deploy_config, scenario_config = None, scenario_file
             add_instance_offering,
             add_virtual_router,
             add_pxe_server,
-            add_vcenter
+            add_vcenter,
+            add_vcenter_image
             ]
     for operation in operations:
         session_uuid = account_operations.login_as_admin()

@@ -32,6 +32,11 @@ hostIp4 = 10.0.101.23
 serverName2 = mevoco2
 serverIp2 = 10.0.101.25
 
+image_dhcp_name = centos-dhcp
+image_centos_dhcp = http://192.168.200.100/mirror/diskimages/centos7-dhcp-good.vmdk
+image_static_name = centos-static
+image_centos_static = http://192.168.200.100/mirror/diskimages/centos7-good-all.vmdk
+
 vcenter1_name = VM-VCENTER1
 vcenter1_ip = 10.0.0.250
 vcenter1_domain_name = administrator@vsphere.local
@@ -62,6 +67,7 @@ l3VlanNetworkName2 = l3VlanNetwork2
 
 #this var is used to overwrite original raw setting
 rootImageFormat = qcow2
+vcenterrootImageFormat = vmtx
 
 sshkeyImageName = vr
 sshkeyImageUrl = http://10.1.101.1/image/zstack-cloudinit.img
