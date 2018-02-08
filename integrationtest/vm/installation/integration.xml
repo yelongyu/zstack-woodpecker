@@ -7,10 +7,8 @@
         <case timeout="3000" >test_install_management_node_on_cos7.py</case>
         <case timeout="3600" >test_new_install_management_node_on_cos7.py</case>
         <case timeout="3000" >upgrade/test_zs_upgd_reinstall_latest_on_cos7.py</case>
-        <case timeout="2400" >upgrade/test_zs_upgd_1.3_latest_on_cos7.py</case> 
-        <case timeout="2400" >upgrade/test_zs_upgd_1.4_latest_on_cos7.py</case>
-	<case timeout="2400" >upgrade/test_zs_upgd_1.5_latest_on_cos7.py</case> 
-        <case timeout="2400" >upgrade/test_zs_upgd_1.6_latest_on_cos7.py</case>
+        <case timeout="4400" >upgrade/test_zs_upgd_2.1.0_latest_repo_on_cos7.py</case>
+        <case timeout="4400" >upgrade/test_zs_upgd_2.2.0_latest_repo_on_cos7.py</case>
         <case timeout="2400" >upgrade/test_zs_upgd_1.7_latest_on_cos7.py</case>
         <case timeout="2400" >upgrade/test_zs_upgd_1.8_latest_on_cos7.py</case>
         <case timeout="2400" >upgrade/test_zs_upgd_1.9_latest_on_cos7.py</case>
@@ -21,11 +19,6 @@
         <!--<case timeout="2400" >upgrade/test_zs_upgd_2.2.3_latest_iso_on_cos7.py</case> -->
         <case timeout="2400" >upgrade/test_zs_upgd_2.2.3_latest_on_cos71.py</case>
         <case timeout="2400" >upgrade/test_zs_upgd_2.2.2_latest_on_cos72.py</case>
-        <case timeout="4700" >upgrade/test_zs_upgd_cnt_1.3_latest_on_cos7.py</case>
-	<case timeout="4700" >upgrade/test_zs_upgd_cnt_1.4_latest_on_cos7.py</case>
-	<case timeout="4500" >upgrade/test_zs_upgd_cnt_1.5_latest_on_cos7.py</case>
-        <case timeout="4000" >upgrade/test_zs_upgd_cnt_1.6_latest_on_cos7.py</case> 
-        <case timeour="4000" >upgrade/test_zs_upgd_cnt_1.7_latest_on_cos7.py</case>
         <case timeour="4000" >upgrade/test_zs_upgd_cnt_1.8_latest_on_cos7.py</case>
         <case timeour="3000" >upgrade/test_zs_upgd_cnt_1.9_latest_on_cos7.py</case>
         <case timeour="3000" >upgrade/test_zs_upgd_cnt_1.10_latest_on_cos7.py</case>
@@ -33,9 +26,17 @@
         <case timeout="2400" >upgrade/test_zs_upgd_z_1.8_to_m_latest_on_cos7.py</case>
         <case timeout="2400" >upgrade/test_zs_upgd_z_1.9_to_m_latest_on_cos7.py</case>
         <case timeout="4000" >upgrade/test_zs_upgd_1.9_latest_repo_on_cos7.py</case>
-        <case timeout="4000" >upgrade/test_zs_upgd_1.10_latest_repo_on_cos7.py</case>
-        <case timeout="4000" >upgrade/test_zs_upgd_2.0_latest_repo_on_cos7.py</case>
-        <case timeout="4000" >upgrade/test_zs_upgd_2.1.0_latest_repo_on_cos7.py</case>
+        <case timeout="4400" >upgrade/test_zs_upgd_1.10_latest_repo_on_cos7.py</case>
+        <case timeout="4400" >upgrade/test_zs_upgd_2.0_latest_repo_on_cos7.py</case>
+        <case timeout="2400" >upgrade/test_zs_upgd_1.3_latest_on_cos7.py</case> 
+        <case timeout="2400" >upgrade/test_zs_upgd_1.4_latest_on_cos7.py</case>
+	<case timeout="2400" >upgrade/test_zs_upgd_1.5_latest_on_cos7.py</case> 
+        <case timeout="2400" >upgrade/test_zs_upgd_1.6_latest_on_cos7.py</case>
+        <case timeout="4700" >upgrade/test_zs_upgd_cnt_1.3_latest_on_cos7.py</case>
+	<case timeout="4700" >upgrade/test_zs_upgd_cnt_1.4_latest_on_cos7.py</case>
+	<case timeout="4500" >upgrade/test_zs_upgd_cnt_1.5_latest_on_cos7.py</case>
+        <case timeout="4000" >upgrade/test_zs_upgd_cnt_1.6_latest_on_cos7.py</case> 
+        <case timeour="4000" >upgrade/test_zs_upgd_cnt_1.7_latest_on_cos7.py</case>
         <case timeout="4000" >test_zstack_install_on_cos71_new.py</case>
         <case timeout="4000" >test_zstack_install_on_cos72_new.py</case>
     </suite>
