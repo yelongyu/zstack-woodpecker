@@ -941,17 +941,22 @@ def get_node_from_scenario_file(nodeRefName, scenarioConfig, scenarioFile, deplo
         return None
 
     s_l3_uuid = None
-    for zone in xmlobject.safe_list(deployConfig.deployerConfig.zones.zone):
-        if hasattr(zone.l2Networks, 'l2NoVlanNetwork'):
-            for l2novlannetwork in xmlobject.safe_list(zone.l2Networks.l2NoVlanNetwork):
+    for zone in xmlobject.safe_list(deployConfig.deployerConfig.zones.zone):
+
+        if hasattr(zone.l2Networks, 'l2NoVlanNetwork'):
+
+            for l2novlannetwork in xmlobject.safe_list(zone.l2Networks.l2NoVlanNetwork):
+
                 for l3network in xmlobject.safe_list(l2novlannetwork.l3Networks.l3BasicNetwork):
                     if hasattr(l3network, 'category_') and l3network.category_ == 'System':
                         for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
                             for vm in xmlobject.safe_list(host.vms.vm):
                                 if xmlobject.has_element(vm, 'nodeRef'):
                                     for l3Network in xmlobject.safe_list(vm.l3Networks.l3Network):
-                                        if hasattr(l3Network, 'l2NetworkRef'):
-                                            for l2networkref in xmlobject.safe_list(l3Network.l2NetworkRef):
+                                        if hasattr(l3Network, 'l2NetworkRef'):
+
+                                            for l2networkref in xmlobject.safe_list(l3Network.l2NetworkRef):
+
                                                 if l2networkref.text_ == l2novlannetwork.name_:
                                                     s_l3_uuid = l3Network.uuid_
 
@@ -978,17 +983,22 @@ def get_nodes_from_scenario_file(scenarioConfig, scenarioFile, deployConfig):
         return None
 
     s_l3_uuid = None
-    for zone in xmlobject.safe_list(deployConfig.zones.zone):
-        if hasattr(zone.l2Networks, 'l2NoVlanNetwork'):
-            for l2novlannetwork in xmlobject.safe_list(zone.l2Networks.l2NoVlanNetwork):
+    for zone in xmlobject.safe_list(deployConfig.zones.zone):
+
+        if hasattr(zone.l2Networks, 'l2NoVlanNetwork'):
+
+            for l2novlannetwork in xmlobject.safe_list(zone.l2Networks.l2NoVlanNetwork):
+
                 for l3network in xmlobject.safe_list(l2novlannetwork.l3Networks.l3BasicNetwork):
                     if hasattr(l3network, 'category_') and l3network.category_ == 'System':
                         for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
                             for vm in xmlobject.safe_list(host.vms.vm):
                                 if xmlobject.has_element(vm, 'nodeRef'):
                                     for l3Network in xmlobject.safe_list(vm.l3Networks.l3Network):
-                                        if hasattr(l3Network, 'l2NetworkRef'):
-                                            for l2networkref in xmlobject.safe_list(l3Network.l2NetworkRef):
+                                        if hasattr(l3Network, 'l2NetworkRef'):
+
+                                            for l2networkref in xmlobject.safe_list(l3Network.l2NetworkRef):
+
                                                 if l2networkref.text_ == l2novlannetwork.name_:
                                                     s_l3_uuid = l3Network.uuid_
 
@@ -2544,6 +2554,7 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
                 if xmlobject.has_element(host, "vswitch"):
                     for vswitch in xmlobject.safe_list(host.vswitch):
                         if vswitch.name_ == "vSwitch0":
+                            for port_group in vswitch.portgroup:
                                 addvswitch_portgroup(host=vc_hs, vswitch=vswitch.name_, portgroup=port_group.text_, vlanId=port_group.vlanId_)
 	for template in xmlobject.safe_list(datacenter.templates.template):
             name = deploy_ova(service_instance=SI,
