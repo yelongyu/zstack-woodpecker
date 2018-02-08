@@ -2217,12 +2217,283 @@ def cleanup_datacenter(datacenter=None):
     from pyVim import task
     TASK = datacenter.Destroy_Task()
     task.WaitForTask(TASK)
+def create_dvswitch(datacenter=None, name='DvSwitch0', DVSCreateSpec=None):
+    from pyVmomi import vim
+    from pyVim import task
+    if not DVSCreateSpec:
+        DVSCreateSpec = vim.DistributedVirtualSwitch.CreateSpec(
+            configSpec=vim.DistributedVirtualSwitch.ConfigSpec(name=name)
+        )
+        # print DVSCreateSpec
+    folder = datacenter.networkFolder
+    Task = folder.CreateDVS_Task(spec=DVSCreateSpec)
+    task.WaitForTask(Task)
+    return Task.info.result
 
-def get_obj(content, vimtype):
+
+def create_dvPortgroup(DVSwitch=None, name='DPortGroup0', DVPortgroupConfigSpec=None):
+    from pyVmomi import vim
+    from pyVim import task
+    if not DVPortgroupConfigSpec:
+        # https://vdc-download.vmware.com/vmwb-repository/dcr-public/6b586ed2-655c-49d9-9029-bc416323cb22/fa0b429a-a695-4c11-b7d2-2cbc284049dc/doc/index.html#link8de9e11294a7c96e09506f8151e28ecaad9525ff;vim.Folder.html
+        DVPortgroupConfigSpec = vim.dvs.DistributedVirtualPortgroup.ConfigSpec(name=name, type='ephemeral')
+        # print DVPortgroupConfigSpec
+    Task = DVSwitch.CreateDVPortgroup_Task(spec=DVPortgroupConfigSpec)
+    task.WaitForTask(Task)
+    return Task.info.result
+
+
+def clone_vm_from_vm(datacenter=None, name='vm-0', power=True):
+    from pyVmomi import vim
+    from pyVim import task
+    resource_pool = get_obj(content, [vim.ResourcePool])[0]
+    vm_template = get_obj(content, [vim.VirtualMachine])[0]
+
+    relospec = vim.vm.RelocateSpec()
+    # default the first template
+    relospec.datastore = get_obj(content, [vim.Datastore])[0]
+    relospec.pool = resource_pool
+
+    relospec = vim.vm.RelocateSpec()
+    clonespec = vim.vm.CloneSpec()
+    clonespec.location = relospec
+    clonespec.powerOn = power
+
+    Task = vm_template.Clone(folder=datacenter.vmFolder, name=name, spec=clonespec)
+    task.WaitForTask(Task)
+
+
+class OvfHandler(object):
+    """
+    OvfHandler handles most of the OVA operations.
+    It processes the tarfile, matches disk keys to files and
+    uploads the disks, while keeping the progress up to date for the lease.
+    """
+
+    def __init__(self, ovafile):
+        """
+        Performs necessary initialization, opening the OVA file,
+        processing the files and reading the embedded ovf file.
+        """
+        import tarfile
+        self.handle = self._create_file_handle(ovafile)
+        self.tarfile = tarfile.open(fileobj=self.handle)
+        ovffilename = list(filter(lambda x: x.endswith(".ovf"),
+                                  self.tarfile.getnames()))[0]
+        ovffile = self.tarfile.extractfile(ovffilename)
+        self.descriptor = ovffile.read().decode()
+
+    def _create_file_handle(self, entry):
+        """
+        A simple mechanism to pick whether the file is local or not.
+        This is not very robust.
+        """
+        return WebHandle(entry)
+
+    def get_descriptor(self):
+        return self.descriptor
+
+    def set_spec(self, spec):
+        """
+        The import spec is needed for later matching disks keys with
+        file names.
+        """
+        self.spec = spec
+
+    def get_disk(self, fileItem, lease):
+        """
+        Does translation for disk key to file name, returning a file handle.
+        """
+        ovffilename = list(filter(lambda x: x == fileItem.path,
+                                  self.tarfile.getnames()))[0]
+        return self.tarfile.extractfile(ovffilename)
+
+    def get_device_url(self, fileItem, lease):
+        for deviceUrl in lease.info.deviceUrl:
+            if deviceUrl.importKey == fileItem.deviceId:
+                return deviceUrl
+        raise Exception("Failed to find deviceUrl for file %s" % fileItem.path)
+
+    def upload_disks(self, lease, host):
+        """
+        Uploads all the disks, with a progress keep-alive.
+        """
+        from pyVmomi import vim, vmodl
+        self.lease = lease
+        try:
+            self.start_timer()
+            for fileItem in self.spec.fileItem:
+                self.upload_disk(fileItem, lease, host)
+            lease.Complete()
+            print("Finished deploy successfully.")
+            return 0
+        except vmodl.MethodFault as e:
+            print("Hit an error in upload: %s" % e)
+            lease.Abort(e)
+        except Exception as e:
+            print("Lease: %s" % lease.info)
+            print("Hit an error in upload: %s" % e)
+            lease.Abort(vmodl.fault.SystemError(reason=str(e)))
+            raise
+        return 1
+
+    def upload_disk(self, fileItem, lease, host):
+        """
+        Upload an individual disk. Passes the file handle of the
+        disk directly to the urlopen request.
+        """
+        import ssl
+        from six.moves.urllib.request import Request, urlopen
+        ovffile = self.get_disk(fileItem, lease)
+        if ovffile is None:
+            return
+        deviceUrl = self.get_device_url(fileItem, lease)
+        url = deviceUrl.url.replace('*', host)
+        headers = {'Content-length': get_tarfile_size(ovffile)}
+        if hasattr(ssl, '_create_unverified_context'):
+            sslContext = ssl._create_unverified_context()
+        else:
+            sslContext = None
+        req = Request(url, ovffile, headers)
+        urlopen(req, context=sslContext)
+
+    def start_timer(self):
+        from threading import Timer
+        """
+        A simple way to keep updating progress while the disks are transferred.
+        """
+        Timer(5, self.timer).start()
+
+    def timer(self):
+        """
+        Update the progress and reschedule the timer if not complete.
+        """
+        from pyVmomi import vim
+        try:
+            prog = self.handle.progress()
+            self.lease.Progress(prog)
+            if self.lease.state not in [vim.HttpNfcLease.State.done,
+                                        vim.HttpNfcLease.State.error]:
+                self.start_timer()
+            sys.stderr.write("Progress: %d%%\r" % prog)
+        except:  # Any exception means we should stop updating progress.
+            pass
+
+
+class WebHandle(object):
+    def __init__(self, url):
+        from six.moves.urllib.request import Request, urlopen
+        self.url = url
+        r = urlopen(url)
+        if r.code != 200:
+            raise Exception('not found url')
+        self.headers = self._headers_to_dict(r)
+        if 'accept-ranges' not in self.headers:
+            raise Exception("Site does not accept ranges")
+        self.st_size = int(self.headers['content-length'])
+        self.offset = 0
+
+    def _headers_to_dict(self, r):
+        result = {}
+        if hasattr(r, 'getheaders'):
+            for n, v in r.getheaders():
+                result[n.lower()] = v.strip()
+        else:
+            for line in r.info().headers:
+                if line.find(':') != -1:
+                    n, v = line.split(': ', 1)
+                    result[n.lower()] = v.strip()
+        return result
+
+    def tell(self):
+        return self.offset
+
+    def seek(self, offset, whence=0):
+        if whence == 0:
+            self.offset = offset
+        elif whence == 1:
+            self.offset += offset
+        elif whence == 2:
+            self.offset = self.st_size - offset
+        return self.offset
+
+    def seekable(self):
+        return True
+
+    def read(self, amount):
+	from six.moves.urllib.request import Request, urlopen
+        start = self.offset
+        end = self.offset + amount - 1
+        req = Request(self.url,
+                      headers={'Range': 'bytes=%d-%d' % (start, end)})
+        r = urlopen(req)
+        self.offset += amount
+        result = r.read(amount)
+        r.close()
+        return result
+
+    # A slightly more accurate percentage
+    def progress(self):
+        return int(100.0 * self.offset / self.st_size)
+
+
+def get_tarfile_size(tarfile):
+    """
+    Determine the size of a file inside the tarball.
+    If the object has a size attribute, use that. Otherwise seek to the end
+    and report that.
+    """
+    if hasattr(tarfile, 'size'):
+        return tarfile.size
+    size = tarfile.seek(0, 2)
+    tarfile.seek(0, 0)
+    return size
+
+
+def deploy_ova(service_instance=None, datacenter=None, datastore=None, resourcepool=None, path=None):
+    from pyVmomi import vim
+    from pyVim import task
+    ovf_handle = OvfHandler(path)
+    ovfManager = service_instance.content.ovfManager
+
+    cisp = vim.OvfManager.CreateImportSpecParams()
+    cisr = ovfManager.CreateImportSpec(ovf_handle.get_descriptor(),
+                                       resourcepool, datastore, cisp)
+
+    if len(cisr.error):
+        print("The following errors will prevent import of this OVA:")
+        for error in cisr.error:
+            print("%s" % error)
+        return 1
+
+    ovf_handle.set_spec(cisr)
+
+    lease = resourcepool.ImportVApp(cisr.importSpec, datacenter.vmFolder)
+    while lease.state == vim.HttpNfcLease.State.initializing:
+        time.sleep(1)
+
+    if lease.state == vim.HttpNfcLease.State.error:
+        test_util.test_fail("vim.HttpNfcLease.State.error")
+        return
+    if lease.state == vim.HttpNfcLease.State.done:
+        test_util.test_fail("vim.HttpNfcLease.State.done")
+        return
+
+    ovf_handle.upload_disks(lease, os.environ.get('vcenter'))
+    return cisr.importSpec.configSpec.name
+
+def get_obj(content, vimtype, name=None):
     obj = None
     container = content.viewManager.CreateContainerView(
         content.rootFolder, vimtype, True)
-    return container.view
+    if name:
+        for c in container.view:
+            if c.name == name:
+                obj = c
+                return obj
+        return container.view
+    else:
+        return container.view
 
 def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file = None):
     from pyVmomi import vim
@@ -2248,6 +2519,10 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
 
     for datacenter in xmlobject.safe_list(deploy_config.vcenter.datacenters.datacenter):
         vc_dc = create_datacenter(dcname=datacenter.name_, service_instance=SI)
+        for dswitch in xmlobject.safe_list(datacenter.dswitch):
+            dvswitch = create_dvswitch(datacenter=vc_dc, name=dswitch.name_)
+            for dportgroup in xmlobject.safe_list(dswitch.dportgroups.dportgroup):
+                create_dvPortgroup(DVSwitch=dvswitch, name=dportgroup.name_)
         for cluster in xmlobject.safe_list(datacenter.clusters.cluster):
             vc_cl = create_cluster(datacenter=vc_dc, clustername=cluster.name_)
             for host in xmlobject.safe_list(cluster.hosts.host):
@@ -2269,7 +2544,13 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
                 if xmlobject.has_element(host, "vswitch"):
                     for vswitch in xmlobject.safe_list(host.vswitch):
                         if vswitch.name_ == "vSwitch0":
-                            for port_group in vswitch.portgroup:
                                 addvswitch_portgroup(host=vc_hs, vswitch=vswitch.name_, portgroup=port_group.text_, vlanId=port_group.vlanId_)
-
+	for template in xmlobject.safe_list(datacenter.templates.template):
+            name = deploy_ova(service_instance=SI,
+                              datacenter=vc_dc,
+                              datastore=get_obj(content, [vim.Datastore])[0],
+                              resourcepool=get_obj(content, [vim.ResourcePool])[0],
+                              path=template.path_)
+            get_obj(content, [vim.VirtualMachine], name).MarkAsTemplate()
     test_util.test_logger('[Done] zstack initial vcenter environment was created successfully.')
+
