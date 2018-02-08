@@ -189,6 +189,14 @@
       <zoneRef>$zoneName</zoneRef>
       <datacenters>
         <datacenter name="$vcdatacenterName">
+	  <templates>
+            <template path="$templatepath"></template>
+          </templates>
+          <dswitch name="$dswitch">
+            <dportgroups>
+              <dportgroup name="$dportgroup"></dportgroup>
+            </dportgroups>
+          </dswitch>
           <clusters>
             <cluster name="$vcclusterName">
               <hosts>
@@ -196,6 +204,7 @@
                     <iScsiStorage target="$vciscsitarget">
                       <vmfsdatastore name="$vcvmfsdatastore"/>
                     </iScsiStorage>
+                    <vm name="$vcvm" ></vm>
                   </host>
               </hosts>
             </cluster>

@@ -7,6 +7,13 @@ vcenter = 172.20.81.81
 vcenteruser = administrator@vsphere.local
 vcenterpwd = Testing%123 
 
+vcenterDefaultNetwork = L3-VM Network
+templatepath = http://192.168.200.100/mirror/diskimages/MicroCore-Linux.ova
+dswitch = dswitch0
+dportgroup = dportgroup0
+vcvm = vc-vm0
+vcenterDefaultmplate = MicroCore-Linux
+
 vcdatacenterName = datacenter
 vcclusterName = cluster
 vchostName = 172.20.197.51
