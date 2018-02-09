@@ -91,7 +91,7 @@ def test():
     cond = res_ops.gen_query_conditions('uuid', '=', vm2.vm.uuid, cond)
 
     vm_stop_time = None
-    for i in range(0, 180):
+    for i in range(0, 300):
         vm_stop_time = i
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Unknown":
             test_stub.start_host(test_host, test_lib.all_scenario_config)
@@ -100,14 +100,14 @@ def test():
         time.sleep(1)
 
     if vm_stop_time is None:
-        vm_stop_time = 180
+        vm_stop_time = 300
 
-    for i in range(vm_stop_time, 180):
+    for i in range(vm_stop_time, 300):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Stopped":
             break
         time.sleep(1)
     else:
-        test_util.test_fail("vm none is not change to Stopped as expected within 180s.")
+        test_util.test_fail("vm none is not change to Stopped as expected within 300s.")
 
     test_util.test_pass('Test checking vm none status when host has been force stop Success.')
 

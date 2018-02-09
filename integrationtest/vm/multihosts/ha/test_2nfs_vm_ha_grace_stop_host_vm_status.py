@@ -91,7 +91,7 @@ def test():
     vm_stop_time = None
     cond = res_ops.gen_query_conditions('name', '=', vm_name)
     cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid, cond)
-    for i in range(0, 60):
+    for i in range(0, 120):
         vm_stop_time = i
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Stopped":
             test_stub.start_host(test_host, test_lib.all_scenario_config)
@@ -102,12 +102,12 @@ def test():
             break
         time.sleep(1)
 
-    for i in range(vm_stop_time, 60):
+    for i in range(vm_stop_time, 120):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Running":
             break
         time.sleep(1)
     else:
-        test_util.test_fail("vm has not been changed to running as expected within 180s.")
+        test_util.test_fail("vm has not been changed to running as expected within 300s.")
 
     vm.update()
     if test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp == host_ip:

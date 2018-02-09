@@ -20,7 +20,7 @@ import os
 
 vm = None
 host_uuid = None
-max_time = 180
+max_time = 300
 host_ip = None
 max_attempts = None
 storagechecker_timeout = None
@@ -83,7 +83,7 @@ def test():
 
     vm.destroy()
 
-    test_util.test_pass('Test VM ha change to running within 180s Success')
+    test_util.test_pass('Test VM ha change to running within 300s Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
