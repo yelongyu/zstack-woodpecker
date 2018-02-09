@@ -2247,7 +2247,6 @@ def create_dvPortgroup(DVSwitch=None, name='DPortGroup0', DVPortgroupConfigSpec=
     if not DVPortgroupConfigSpec:
         # https://vdc-download.vmware.com/vmwb-repository/dcr-public/6b586ed2-655c-49d9-9029-bc416323cb22/fa0b429a-a695-4c11-b7d2-2cbc284049dc/doc/index.html#link8de9e11294a7c96e09506f8151e28ecaad9525ff;vim.Folder.html
         DVPortgroupConfigSpec = vim.dvs.DistributedVirtualPortgroup.ConfigSpec(name=name, type='ephemeral')
-        # print DVPortgroupConfigSpec
     Task = DVSwitch.CreateDVPortgroup_Task(spec=DVPortgroupConfigSpec)
     task.WaitForTask(Task)
     return Task.info.result
@@ -2260,7 +2259,6 @@ def clone_vm_from_vm(datacenter=None, name='vm-0', power=True):
     vm_template = get_obj(content, [vim.VirtualMachine])[0]
 
     relospec = vim.vm.RelocateSpec()
-    # default the first template
     relospec.datastore = get_obj(content, [vim.Datastore])[0]
     relospec.pool = resource_pool
 
@@ -2335,17 +2333,12 @@ class OvfHandler(object):
             for fileItem in self.spec.fileItem:
                 self.upload_disk(fileItem, lease, host)
             lease.Complete()
-            print("Finished deploy successfully.")
-            return 0
+            return 
         except vmodl.MethodFault as e:
-            print("Hit an error in upload: %s" % e)
             lease.Abort(e)
         except Exception as e:
-            print("Lease: %s" % lease.info)
-            print("Hit an error in upload: %s" % e)
             lease.Abort(vmodl.fault.SystemError(reason=str(e)))
             raise
-        return 1
 
     def upload_disk(self, fileItem, lease, host):
         """
@@ -2471,11 +2464,9 @@ def deploy_ova(service_instance=None, datacenter=None, datastore=None, resourcep
                                        resourcepool, datastore, cisp)
 
     if len(cisr.error):
-        print("The following errors will prevent import of this OVA:")
         for error in cisr.error:
-            print("%s" % error)
-        return 1
-
+            test_util.test.logger("%s" % error)
+        test_util.test.logger("some errors prevent import of this OVA")
     ovf_handle.set_spec(cisr)
 
     lease = resourcepool.ImportVApp(cisr.importSpec, datacenter.vmFolder)
@@ -2484,10 +2475,8 @@ def deploy_ova(service_instance=None, datacenter=None, datastore=None, resourcep
 
     if lease.state == vim.HttpNfcLease.State.error:
         test_util.test_fail("vim.HttpNfcLease.State.error")
-        return
     if lease.state == vim.HttpNfcLease.State.done:
         test_util.test_fail("vim.HttpNfcLease.State.done")
-        return
 
     ovf_handle.upload_disks(lease, os.environ.get('vcenter'))
     return cisr.importSpec.configSpec.name
