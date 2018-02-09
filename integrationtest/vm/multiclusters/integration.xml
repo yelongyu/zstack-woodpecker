@@ -4,8 +4,5 @@
         <case timeout='300' repeat='1' noparallel='True'>test_detach_l2_vr.py</case>
         <case timeout='300' repeat='1'>migrate/test_migrate_vm.py</case>
         <case timeout='300' repeat='1' noparallel='True'>test_restore_mysql.py</case>
-        <case timeout='600' repeat='1'>data_migration/test_migrate_vm.py</case>
-        <case timeout='600' repeat='1'>data_migration/test_migrate_data_volume.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>data_migration/test_migrate_image.py</case>
     </suite>
 </integrationTest>
