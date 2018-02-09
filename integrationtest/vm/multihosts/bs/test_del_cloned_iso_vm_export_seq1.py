@@ -109,7 +109,8 @@ def test():
 
     #clone vm
     cloned_vm_name = ['cloned_vm_name']
-    cloned_vm_obj = vm.clone(cloned_vm_name)
+    cloned_vm_obj = vm.clone(cloned_vm_name)[0]
+    test_obj_dict.add_vm(cloned_vm_obj)
 
     #delete iso
     image.delete()
@@ -143,7 +144,7 @@ def test():
     image1.export()
 
     #create vm 
-    vm2 = test_stub.create_vm(image_name = cloned_vm_img_name)
+    vm2 = test_stub.create_vm('image-vm', cloned_vm_img_name, l3_name)
 
     #delete image
     image1.delete()
