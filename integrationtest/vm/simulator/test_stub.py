@@ -23,6 +23,7 @@ import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
 import zstackwoodpecker.header.vm as vm_header
 from zstackwoodpecker.operations import vm_operations as vm_ops
 import poplib
+import time
 import re
 
 def create_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None,
@@ -730,3 +731,8 @@ def check_sns_email(pop_server, username, password, keywords, trigger, target_uu
     test_util.action_logger('flag value is %s' % flag)
     return flag
 
+def sleep_util(timestamp):
+   while True:
+      if time.time() >= timestamp:
+         break
+      time.sleep(0.5)

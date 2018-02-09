@@ -1,0 +1,9 @@
+<integrationTest>
+    <suite name="simulator test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
+        <case timeout='600' repeat='1' >test_volume_operation.py</case>
+        <case timeout='600' repeat='1' >test_change_vm_image_neg.py</case>
+	<case timeout='600' repeat='1' >test_change_vm_image_in_multihosts_env.py</case>
+	<case timeout='600' repeat='1' >test_create_root_volume_template_with_bs_disable_or_disconnected.py</case>
+	<case timeout='600' repeat='1' >test_vm_operation.py</case>
+    </suite>
+</integrationTest>
