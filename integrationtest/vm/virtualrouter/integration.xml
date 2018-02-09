@@ -206,7 +206,7 @@
 		<case timeout='600' repeat='1'>test_change_vm_image_to_windows.py</case>
         <!--<case timeout='600' repeat='1'>test_create_vyos_vm_time.py</case>
         <case timeout='600' repeat='1'>test_vrouter_route.py</case>-->
-	<!--<case timeout='1800' repeat='1' noparallel='True'>vip_qos/test_flat_vip_multi_port_qos.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>vip_qos/test_flat_vip_multi_port_qos.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>vip_qos/test_flat_vip_port_qos_1m.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>vip_qos/test_flat_vip_port_qos_51m.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>vip_qos/test_flat_vip_port_qos_in_17m_out_15m.py</case>
@@ -224,6 +224,6 @@
         <case timeout='1200' repeat='1' noparallel='True'>vip_qos/test_vrouter_vip_qos_pf_lb.py</case>
         <case timeout='1800' repeat='1' noparallel='True'>vip_qos/test_vrouter_vip_multi_port_qos.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>vip_qos/test_vrouter_vip_qos_multi_crt.py</case>
-	<case timeout='1200' repeat='1' noparallel='True'>vip_qos/test_vrouter_vip_port_qos_multi_crt.py</case>-->
+	<case timeout='1200' repeat='1' noparallel='True'>vip_qos/test_vrouter_vip_port_qos_multi_crt.py</case>
     </suite>
 </integrationTest>
