@@ -38,26 +38,26 @@ image_static_name = centos-static
 image_centos_static = http://192.168.200.100/mirror/diskimages/centos7-good-all.vmdk
 
 vcenter1_name = VM-VCENTER1
-vcenter1_ip = 10.0.0.250
+vcenter1_ip = 172.20.76.250
 vcenter1_domain_name = administrator@vsphere.local
-vcenter1_password = abc%123
+vcenter1_password = Testing%123
 vcenter1_vm_pattern1 = vm-fingerprint1
 vcenter1_vm_pattern2 = vm-fingerprint2
-vcenter1_sync_image_name = sync-img-name
 vcenter1_template_exist = MicroCore-Linux.ova
+vcenter1_sync_image_name = sync-img-name
 vcenter1_network_pattern1 = L3-250-net1
-vcenter1_sync_image_url = http://SERVER_NAME/mirror/iso/vmdk-image/sync-vm-start-stop-use-1.vmdk
+vcenter1_sync_image_url = http://192.168.200.100/mirror/iso/vmdk-image/sync-vm-start-stop-use-1.vmdk
 
 vcenter2_name = VM-VCENTER2
-vcenter2_ip = 10.0.0.251
+vcenter2_ip = 172.20.76.251
 vcenter2_domain_name = administrator@vsphere.local
-vcenter2_password = abc%123
+vcenter2_password = Testing%123
 vcenter2_sync_image_name = sync-img-name
 vcenter2_template_exist = MicroCore-Linux.ova
 vcenter2_network_pattern1 = L3-251-net1
 vcenter2_sync_vm_start_stop = sync-vm-start-stop-use
 vcenter2_sync_vm_create_delete = sync-vm-create-delete-use
-vcenter2_sync_image_url = http://SERVER_NAME/mirror/iso/vmdk-image/sync-vm-start-stop-use-1.vmdk
+vcenter2_sync_image_url = http://192.168.200.100/mirror/iso/vmdk-image/sync-vm-start-stop-use-1.vmdk
 
 
 l2PublicNetworkName = l2-public
@@ -70,10 +70,10 @@ rootImageFormat = qcow2
 vcenterrootImageFormat = vmtx
 
 sshkeyImageName = vr
-sshkeyImageUrl = http://10.1.101.1/image/zstack-cloudinit.img
+sshkeyImageUrl = http://IMAGE_SERVER/diskimages/CentOS-7-x86_64-Cloudinit-8G-official.qcow2
 sshkeyPubKey = 
 sshkeyPriKey_file = 
 
 imageName_i_c7 = centos7-installation-test
-imageUrl_i_c7 = http://zstack/image/centos7-test.qcow2
+imageUrl_i_c7 = http://IMAGE_SERVER/diskimages/centos7-test.qcow2
 
