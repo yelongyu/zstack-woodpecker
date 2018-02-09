@@ -77,5 +77,6 @@
         </vm>
       </vms>
     </host>
+  </hosts>
 </deployerConfig>
 </config>
