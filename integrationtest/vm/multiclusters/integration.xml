@@ -7,12 +7,5 @@
         <case timeout='600' repeat='1'>data_migration/test_migrate_vm.py</case>
         <case timeout='600' repeat='1'>data_migration/test_migrate_data_volume.py</case>
         <case timeout='600' repeat='1' noparallel='True'>data_migration/test_migrate_image.py</case>
-        <case timeout='600' repeat='1'>data_migration/test_get_migration_candidate.py</case>
-        <case timeout='600' repeat='1'>data_migration/test_migrated_vm_crt_sp.py</case>
-        <case timeout='600' repeat='1'>data_migration/test_migrated_vm_crt_image.py</case>
-        <case timeout='600' repeat='1'>data_migration/test_migrated_data_volume_crt_sp.py</case>
-        <case timeout='600' repeat='1'>data_migration/test_clone_migrated_vm.py</case>
-        <case timeout='600' repeat='1'>data_migration/test_migrate_cloned_vm.py</case>
-        <case timeout='600' repeat='1'>data_migration/test_migrate_sharable_data_volume.py</case>
     </suite>
 </integrationTest>
