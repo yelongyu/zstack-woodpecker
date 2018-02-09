@@ -75,7 +75,7 @@ def set_quick_ha_properties():
     if test_lib.lib_execute_ssh_cmd(mn_ip, host_username, host_password, cmd,  timeout = 10) == False:
         test_util.test_fail("CMD:%s execute failed on %s" %(cmd, mn_ip))
 
-    cmd = "echo \"RESTFacade.readTimeout = 5000\" >>" + properties_file
+    cmd = "echo \"RESTFacade.readTimeout = 10000\" >>" + properties_file
     if test_lib.lib_execute_ssh_cmd(mn_ip, host_username, host_password, cmd,  timeout = 10) == False:
         test_util.test_fail("CMD:%s execute failed on %s" %(cmd, mn_ip))
 
