@@ -26,10 +26,9 @@ def get_vcenter_vm_status_by_vm_name(vm_name):
     """
     This function is used for return vm status by invoking vsphere dcli
     """
-    vcenter_password = os.environ['vcenter2_password']
-    vcenter_server = os.environ['vcenter2_ip']
-    vcenter_username = os.environ['vcenter2_domain_name']
-    vcenter_password = os.environ['vcenter2_password']
+    vcenter_password = os.environ['vcenterpwd']
+    vcenter_server = os.environ['vcenter']
+    vcenter_username = os.environ['vcenteruser']
 
     cmd = "sshpass -p " + vcenter_password + " dcli +server " + vcenter_server + " +skip-server-verification +username " + vcenter_username + " com vmware vcenter vm list"
     status, output = commands.getstatusoutput(cmd)
