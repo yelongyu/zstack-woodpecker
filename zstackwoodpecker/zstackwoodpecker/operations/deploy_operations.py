@@ -2333,7 +2333,6 @@ class OvfHandler(object):
             for fileItem in self.spec.fileItem:
                 self.upload_disk(fileItem, lease, host)
             lease.Complete()
-            return 
         except vmodl.MethodFault as e:
             lease.Abort(e)
         except Exception as e:
@@ -2481,6 +2480,23 @@ def deploy_ova(service_instance=None, datacenter=None, datastore=None, resourcep
     ovf_handle.upload_disks(lease, os.environ.get('vcenter'))
     return cisr.importSpec.configSpec.name
 
+
+def create_vm(name="vm-0", vm_folder=None, resource_pool=None, datastore=None):
+    from pyVim import task
+    from pyVmomi import vim
+    datastore_path = '[' + datastore + '] ' + name
+
+    vmx_file = vim.vm.FileInfo(logDirectory=None,
+                               snapshotDirectory=None,
+                               suspendDirectory=None,
+                               vmPathName=datastore_path)
+
+    config = vim.vm.ConfigSpec(name=name, memoryMB=128, numCPUs=1,
+                               files=vmx_file, guestId='dosGuest',
+                               version='vmx-07')
+    Task = vm_folder.CreateVM_Task(config=config, pool=resource_pool)
+    task.WaitForTask(Task)
+
 def get_obj(content, vimtype, name=None):
     obj = None
     container = content.viewManager.CreateContainerView(
@@ -2545,6 +2561,9 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
                         if vswitch.name_ == "vSwitch0":
                             for port_group in vswitch.portgroup:
                                 addvswitch_portgroup(host=vc_hs, vswitch=vswitch.name_, portgroup=port_group.text_, vlanId=port_group.vlanId_)
+		for vm in xmlobject.safe_list(host.vms.vm):
+                    resource_pool = vc_cl.resourcePool
+                    create_vm(name=vm.name_,vm_folder=vc_dc.vmFolder,resource_pool=resource_pool,datastore=get_obj(content, [vim.Datastore])[0].name)
 	for template in xmlobject.safe_list(datacenter.templates.template):
             name = deploy_ova(service_instance=SI,
                               datacenter=vc_dc,

@@ -198,7 +198,9 @@
                     <iScsiStorage target="$vciscsitarget">
                       <vmfsdatastore name="$vcvmfsdatastore"/>
                     </iScsiStorage>
-                    <vm name="$vcvm" ></vm>
+                    <vms>
+                      <vm name="$vcvm" ></vm>
+                    </vms>
                   </host>
               </hosts>
             </cluster>
