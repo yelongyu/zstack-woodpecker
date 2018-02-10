@@ -16,6 +16,7 @@ import time
 import os 
 
 
+
 def test():
     global vcenter_uuid
     test_util.test_logger(os.environ)
@@ -27,7 +28,4 @@ def test():
 
 
 def error_cleanup():
-    global vcenter_uuid
-    if vcenter_uuid:
-        pass
-        #vct_ops.delete_vcenter(vcenter_uuid)
+    pass
