@@ -2562,8 +2562,7 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
                             for port_group in vswitch.portgroup:
                                 addvswitch_portgroup(host=vc_hs, vswitch=vswitch.name_, portgroup=port_group.text_, vlanId=port_group.vlanId_)
 		for vm in xmlobject.safe_list(host.vms.vm):
-                    hosts = vc_dc.hostFolder.childEntity
-                    resource_pool = hosts[0].resourcePool
+                    resource_pool = vc_cl.resourcePool
                     create_vm(name=vm.name_,vm_folder=vc_dc.vmFolder,resource_pool=resource_pool,datastore=get_obj(content, [vim.Datastore])[0].name)
 	for template in xmlobject.safe_list(datacenter.templates.template):
             name = deploy_ova(service_instance=SI,
