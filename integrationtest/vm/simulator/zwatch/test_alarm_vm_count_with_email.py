@@ -15,7 +15,7 @@ def test():
     smtp_port = 25
     username = 'test.qa@zstack.io'
     password = 'Test1234'
-    email_platform = test_stub.create_sns_email_platform(smtp_server, smtp_port, 'Alarm_email', username, username)
+    email_platform = test_stub.create_sns_email_platform(smtp_server, smtp_port, 'Alarm_email', username, password)
     email_platform_uuid = email_platform.uuid
 
     try:
@@ -42,8 +42,12 @@ def test():
        vm_name = 'vm'+str(i)
        test_stub.create_vm(vm_name)
 
+    keywords = ''
+    trigger = ''
+    target_uuid = ''
+
     if test_util.check_sns_email(pop_server, username, password, keywords, trigger, target_uuid):
-        test_util.test_pass('Email Alarm Triggered Success'
+        test_util.test_pass('Email Alarm Triggered Success')
     else:
         test_util.test_Fail('Email Alarm Didnt Triggered When The VM Count Equal To Threshold')
 
