@@ -1,6 +1,0 @@
-<testConfig>
-    <deployConfig>deploy-vcenter.xml</deployConfig>
-    <deployConfigTemplate>deploy-vcenter.tmpt</deployConfigTemplate>
-    <!-- suite special test variables -->
-    <pingTestTarget>zstack.yyk.net</pingTestTarget>
-</testConfig>

@@ -1,6 +1,0 @@
-<testConfig>
-    <deployConfig>deploy.xml</deployConfig>
-    <deployConfigTemplate>deploy-iscsi.tmpt</deployConfigTemplate>
-    <!-- suite special test variables -->
-    <pingTestTarget>zstack.yyk.net</pingTestTarget>
-</testConfig>
