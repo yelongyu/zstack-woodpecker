@@ -2480,6 +2480,23 @@ def deploy_ova(service_instance=None, datacenter=None, datastore=None, resourcep
     ovf_handle.upload_disks(lease, os.environ.get('vcenter'))
     return cisr.importSpec.configSpec.name
 
+
+def create_vm(name="vm-0", vm_folder=None, resource_pool=None, datastore=None):
+    from pyVim import task
+    from pyVmomi import vim
+    datastore_path = '[' + datastore + '] ' + name
+
+    vmx_file = vim.vm.FileInfo(logDirectory=None,
+                               snapshotDirectory=None,
+                               suspendDirectory=None,
+                               vmPathName=datastore_path)
+
+    config = vim.vm.ConfigSpec(name=name, memoryMB=128, numCPUs=1,
+                               files=vmx_file, guestId='dosGuest',
+                               version='vmx-07')
+    Task = vm_folder.CreateVM_Task(config=config, pool=resource_pool)
+    task.WaitForTask(Task)
+
 def get_obj(content, vimtype, name=None):
     obj = None
     container = content.viewManager.CreateContainerView(

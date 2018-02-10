@@ -18,8 +18,6 @@ import os
 
 
 def test():
-    global vcenter_uuid
-    test_util.test_logger(os.environ)
 
     vcenter_uuid = res_ops.get_resource(res_ops.VCENTER)[0].uuid
     vct_ops.delete_vcenter(vcenter_uuid)
