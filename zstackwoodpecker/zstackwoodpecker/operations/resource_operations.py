@@ -84,6 +84,7 @@ MONITOR_TRIGGER_ACTION = 'MonitorTriggerAction'
 PXE_SERVER = 'PxeServer'
 CHASSIS = 'Chassis'
 HWINFO = 'HardwareInfo'
+LONGJOB = 'LongJob'
 
 def find_item_by_uuid(inventories, uuid):
     for item in inventories:
@@ -522,6 +523,8 @@ def _gen_query_action(resource, condition=None):
         action = api_actions.QueryBaremetalChassisAction()
     elif resource == HWINFO:
         action = api_actions.QueryBaremetalHardwareInfoAction()
+    elif resource == LONGJOB:
+        action = api_actions.QueryLongJobAction()
 
     return action
 

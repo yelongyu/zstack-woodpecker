@@ -76,7 +76,7 @@
         memoryCapacity="$virtualRouterOfferingMemory_s"
         cpuNum="$virtualRouterOfferingCpuNum_s" isDefault="true">
         <zoneRef>$zoneName</zoneRef>
-        <managementL3NetworkRef>$l3ManagementNetworkName</managementL3NetworkRef>
+        <managementL3NetworkRef>$l3PublicNetworkName</managementL3NetworkRef>
         <publicL3NetworkRef>$l3PublicNetworkName</publicL3NetworkRef>
         <imageRef>$virtualRouterImageName</imageRef>
       </virtualRouterOffering>
@@ -242,6 +242,9 @@
                   startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
                   netmask="$ipRangeNetmask" />
                 <dns>$DNSServer</dns>
+                <networkService provider="Flat Network Service Provider">
+                  <serviceType>DHCP</serviceType>
+                </networkService>
               </l3BasicNetwork>
             </l3Networks>
           </l2NoVlanNetwork>

@@ -14,6 +14,7 @@ import zstackwoodpecker.zstack_test.zstack_test_image as test_image
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.operations.datamigrate_operations as datamigr_ops
+import zstackwoodpecker.operations.longjob_operations as longjob_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.header.host as host_header
@@ -64,6 +65,24 @@ def create_volume(volume_creation_option=None, session_uuid = None):
     volume.create()
     return volume
 
+def migrate_vm_to_random_host(vm):
+    test_util.test_dsc("migrate vm to random host")
+    if not test_lib.lib_check_vm_live_migration_cap(vm.vm):
+        test_util.test_skip('skip migrate if live migrate not supported')
+    target_host = test_lib.lib_find_random_host(vm.vm)
+    current_host = test_lib.lib_find_host_by_vm(vm.vm)
+    vm.migrate(target_host.uuid)
+
+    new_host = test_lib.lib_get_vm_host(vm.vm)
+    if not new_host:
+        test_util.test_fail('Not find available Hosts to do migration')
+
+    if new_host.uuid != target_host.uuid:
+        test_util.test_fail('[vm:] did not migrate from [host:] %s to target [host:] %s, but to [host:] %s' % (vm.vm.uuid, current_host.uuid, target_host.uuid, new_host.uuid))
+    else:
+        test_util.test_logger('[vm:] %s has been migrated from [host:] %s to [host:] %s' % (vm.vm.uuid, current_host.uuid, target_host.uuid))
+
+
 class DataMigration(object):
     def __init__(self):
         self.vm = None
@@ -75,18 +94,25 @@ class DataMigration(object):
         self.ceph_ps_name_2 = os.getenv('cephPrimaryStorageName2')
         self.ceph_bs_name = os.getenv('cephBackupStorageName')
         self.ceph_bs_name_2 = os.getenv('cephBackupStorageName2')
+        self.vol_job_name = "APIPrimaryStorageMigrateVolumeMsg"
+        self.image_job_name = "APIBackupStorageMigrateImageMsg"
+
+    def get_current_ps(self):
+        _ps1 = [os.getenv('cephPrimaryStorageName'), os.getenv('nfsPrimaryStorageName')]
+        _ps2 = [os.getenv('cephPrimaryStorageName2'), os.getenv('nfsPrimaryStorageName2')]
+        self.ps_1_name = [pn for pn in _ps1 if pn][0]
+        self.ps_2_name = [pn2 for pn2 in _ps2 if pn2][0]
 
     def get_image(self):
         conditions = res_ops.gen_query_conditions('name', '=', self.image_name_net)
         self.image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
 
     def get_ps(self):
-        if self.ceph_ps_name:
-            conditions = res_ops.gen_query_conditions('name', '=', self.ceph_ps_name)
-            self.ceph_ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, conditions)[0]
-        if self.ceph_ps_name_2:
-            conditions = res_ops.gen_query_conditions('name', '=', self.ceph_ps_name_2)
-            self.ceph_ps_2 = res_ops.query_resource(res_ops.PRIMARY_STORAGE, conditions)[0]
+        self.get_current_ps()
+        cond = res_ops.gen_query_conditions('name', '=', self.ps_1_name)
+        self.ps_1 = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)[0]
+        cond2 = res_ops.gen_query_conditions('name', '=', self.ps_2_name)
+        self.ps_2 = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond2)[0]
 
     def get_bs(self):
         if self.ceph_bs_name:
@@ -98,8 +124,8 @@ class DataMigration(object):
 
     def create_vm(self, image_name=None):
         if not image_name:
-            image_name = self.image_name
-        self.vm = create_vm('multicluster_basic_vm', image_name, os.getenv('l3VlanNetworkName1'))
+            image_name = self.image_name_net
+        self.vm = create_vm('multicluster_basic_vm', image_name, os.getenv('l3PublicNetworkName'))
         self.vm.check()
         self.root_vol_uuid = self.vm.vm.rootVolumeUuid
         return self.vm
@@ -166,9 +192,14 @@ class DataMigration(object):
         assert res_ops.query_resource(res_ops.IMAGE, conditions)
         conditions = res_ops.gen_query_conditions('uuid', '=', image_migr_inv.uuid)
         self.image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
+        assert self.image.backupStorageRefs[0].backupStorageUuid == dst_bs.uuid
 
     def create_image(self):
-        bs = self.get_bs_candidate()
+        _bs = self.query_bs()
+        if _bs.type == 'Ceph':
+            bs = self.get_bs_candidate()
+        else:
+            bs = _bs
         self._image_name = 'vm-created-image-%s' % time.strftime('%y%m%d-%H%M%S', time.localtime())
         image_creation_option = test_util.ImageOption()
         image_creation_option.set_backup_storage_uuid_list([bs.uuid])
@@ -186,7 +217,7 @@ class DataMigration(object):
         self.cand_ps = datamigr_ops.get_ps_candidate_for_vol_migration(self.root_vol_uuid)
         assert len(self.cand_ps) == 1
         self.get_ps()
-        ps_to_migrate = self.ceph_ps if self.ceph_ps.uuid != self.vm.vm.allVolumes[0].primaryStorageUuid else self.ceph_ps_2
+        ps_to_migrate = self.ps_1 if self.ps_1.uuid != self.vm.vm.allVolumes[0].primaryStorageUuid else self.ps_2
         return ps_to_migrate
 
     def get_bs_candidate(self):
@@ -197,13 +228,19 @@ class DataMigration(object):
         bs_to_migrate = self.ceph_bs if self.ceph_bs.uuid != self.image.backupStorageRefs[0].backupStorageUuid else self.ceph_bs_2
         return bs_to_migrate
 
+    def query_bs(self):
+        bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
+        return bs
+
     def check_ps_candidate(self):
         ps_to_migrate = self.get_ps_candidate()
         assert self.cand_ps[0].uuid == ps_to_migrate.uuid
 
     def check_bs_candidate(self):
-        bs_to_migrate = self.get_bs_candidate()
-        assert self.cand_bs[0].uuid == bs_to_migrate.uuid
+        bs_type = self.query_bs().type
+        if bs_type == 'Ceph':
+            bs_to_migrate = self.get_bs_candidate()
+            assert self.cand_bs[0].uuid == bs_to_migrate.uuid
 
     def create_data_volume(self, sharable=False, vms=[]):
         conditions = res_ops.gen_query_conditions('name', '=', os.getenv('largeDiskOfferingName'))
@@ -230,3 +267,45 @@ class DataMigration(object):
         if ps.type.lower() == 'ceph':
             ps_mon_ip = ps.mons[0].monAddr
             os.environ['cephBackupStorageMonUrls'] = 'root:password@%s' % ps_mon_ip
+
+    def submit_logjob(self, job_data, name):
+        long_job = longjob_ops.submit_longjob(self.vol_job_name, job_data, name)
+        assert long_job.state == "Running"
+        cond_longjob = res_ops.gen_query_conditions('apiId', '=', long_job.apiId)
+        for _ in xrange(60):
+            longjob = res_ops.query_resource(res_ops.LONGJOB, cond_longjob)[0]
+            if longjob.state == "Succeeded":
+                break
+            else:
+                time.sleep(5)
+        assert longjob.state == "Succeeded"
+        assert longjob.jobResult == "Succeeded"
+
+    def longjob_migr_vm(self):
+        self.vm.stop()
+        name = "long_job_of_%s" % self.vm.vm.name
+        self.dst_ps = self.get_ps_candidate()
+        job_data = '{"volumeUuid": %s, "dstPrimaryStorageUuid": %s}' % (self.vm.vm.rootVolumeUuid, self.dst_ps.uuid)
+        self.submit_logjob(job_data, name)
+        self.vm.start()
+        self.vm.check()
+        assert self.vm.vm.allVolumes[0].primaryStorageUuid == self.dst_ps.uuid
+
+    def longjob_migr_data_vol(self):
+        vol_uuid = self.data_volume.get_volume().uuid
+        name = "long_job_of_%s" % self.data_volume.get_volume().name
+        if not self.dst_ps:
+            self.dst_ps = self.get_ps_candidate()
+        job_data = '{"volumeUuid": %s, "dstPrimaryStorageUuid": %s}' % (vol_uuid, self.dst_ps.uuid)
+        self.submit_logjob(job_data, name)
+        cond_vol = res_ops.gen_query_conditions('uuid', '=', vol_uuid)
+        self.data_volume.set_volume(res_ops.query_resource(res_ops.VOLUME, cond_vol)[0])
+        assert self.data_volume.get_volume().primaryStorageUuid == self.dst_ps.uuid
+
+    def longjob_migr_image(self):
+        self.dst_bs = self.get_bs_candidate()
+        name = "long_job_of_%s" % self.image.name
+        job_data = '{"imageUuid": %s, "srcBackupStorageUuid": %s, "dstBackupStorageUuid": %s}' % (self.image.uuid, self.image.backupStorageRefs[0].backupStorageUuid, self.dst_bs.uuid)
+        self.submit_logjob(job_data, name)
+        
+        assert self.vm.vm.allVolumes[0].primaryStorageUuid == self.dst_ps.uuid
