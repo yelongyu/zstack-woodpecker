@@ -268,8 +268,12 @@ class DataMigration(object):
             ps_mon_ip = ps.mons[0].monAddr
             os.environ['cephBackupStorageMonUrls'] = 'root:password@%s' % ps_mon_ip
 
-    def submit_logjob(self, job_data, name):
-        long_job = longjob_ops.submit_longjob(self.vol_job_name, job_data, name)
+    def submit_logjob(self, job_data, name, job_type=None):
+        if job_type == 'image':
+            _job_name = self.image_job_name
+        else:
+            _job_name = self.vol_job_name
+        long_job = longjob_ops.submit_longjob(_job_name, job_data, name)
         assert long_job.state == "Running"
         cond_longjob = res_ops.gen_query_conditions('apiId', '=', long_job.apiId)
         for _ in xrange(60):
@@ -306,6 +310,7 @@ class DataMigration(object):
         self.dst_bs = self.get_bs_candidate()
         name = "long_job_of_%s" % self.image.name
         job_data = '{"imageUuid": %s, "srcBackupStorageUuid": %s, "dstBackupStorageUuid": %s}' % (self.image.uuid, self.image.backupStorageRefs[0].backupStorageUuid, self.dst_bs.uuid)
-        self.submit_logjob(job_data, name)
-        
-        assert self.vm.vm.allVolumes[0].primaryStorageUuid == self.dst_ps.uuid
+        self.submit_logjob(job_data, name, job_type='image')
+        cond_image = res_ops.gen_query_conditions('uuid', '=', self.image.uuid)
+        self.image = res_ops.query_resource(res_ops.IMAGE, cond_image)[0]
+        assert self.image.backupStorageRefs[0].backupStorageUuid == self.dst_bs.uuid
