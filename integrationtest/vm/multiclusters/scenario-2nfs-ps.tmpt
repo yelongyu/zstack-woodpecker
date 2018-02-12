@@ -8,3 +8,4 @@ vmName4 = test_vm4
 vmInstranceOfferingUuid2 = 234567
 imageUuid2 = 234567
 imageStoreBackupStorageName = imagestore
+imageStoreBackupStorageName2 = imagestore2
