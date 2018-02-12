@@ -21,7 +21,7 @@
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
           </l3Networks>
-	  <backupStorageRef type="sftp">$sftpBackupStorageName2</backupStorageRef>
+	  <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
 	  <primaryStorageRef type="nfs">$nfsPrimaryStorageName2</primaryStorageRef>
         </vm>
       </vms>
@@ -40,7 +40,7 @@
           </l3Networks>
 	  <nodeRef>$node1Name</nodeRef>
           <hostRef>$hostName</hostRef>
-	  <backupStorageRef type="sftp">$sftpBackupStorageName</backupStorageRef>
+	  <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
 	  <primaryStorageRef type="nfs">$nfsPrimaryStorageName</primaryStorageRef>
         </vm>
       </vms>
