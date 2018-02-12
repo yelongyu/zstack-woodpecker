@@ -2481,9 +2481,11 @@ def deploy_ova(service_instance=None, datacenter=None, datastore=None, resourcep
     return cisr.importSpec.configSpec.name
 
 
-def create_vm(name="vm-0", vm_folder=None, resource_pool=None, datastore=None):
+def create_vm(name="vm-0", vm_folder=None, resource_pool=None, host=None):
     from pyVim import task
     from pyVmomi import vim
+
+    datastore = host.datastore[0].name
     datastore_path = '[' + datastore + '] ' + name
 
     vmx_file = vim.vm.FileInfo(logDirectory=None,
@@ -2496,6 +2498,65 @@ def create_vm(name="vm-0", vm_folder=None, resource_pool=None, datastore=None):
                                version='vmx-07')
     Task = vm_folder.CreateVM_Task(config=config, pool=resource_pool)
     task.WaitForTask(Task)
+    return Task.info.result
+
+def add_vm_to_Dvsportgroup(vm=None, DPortgroupName=None):
+    from pyVim import task
+    from pyVmomi import vim
+
+    virtual_nic_device = vim.vm.device.VirtualE1000()
+    dportgroup = get_obj(content, [vim.dvs.DistributedVirtualPortgroup], name=DPortgroupName)
+
+    backing = vim.vm.device.VirtualEthernetCard.DistributedVirtualPortBackingInfo()
+    backing.port = vim.dvs.PortConnection()
+    backing.port.switchUuid = dportgroup.config.distributedVirtualSwitch.uuid
+    backing.port.portgroupKey = dportgroup.key
+    virtual_nic_device.backing = backing
+
+    virtual_nic_device.connectable = vim.vm.device.VirtualDevice.ConnectInfo()
+    virtual_nic_device.connectable.startConnected = True
+    virtual_nic_device.connectable.allowGuestControl = True
+    virtual_nic_device.connectable.connected = False
+    virtual_nic_device.connectable.status = 'untried'
+
+    virtual_nic_device.addressType = 'assigned'
+
+    device_config = vim.vm.device.VirtualDeviceSpec()
+    device_config.operation = vim.vm.device.VirtualDeviceSpec.Operation.add
+    device_config.device = virtual_nic_device
+
+    spec = vim.vm.ConfigSpec(deviceChange=[device_config, ])
+    Task = vm.ReconfigVM_Task(spec=spec)
+    task.WaitForTask(Task)
+
+def add_vm_to_portgroup(vm=None, PortgroupName=None):
+    from pyVim import task
+    from pyVmomi import vim
+
+    virtual_nic_device = vim.vm.device.VirtualE1000()
+
+    portgroup = get_obj(content, [vim.Network], name=PortgroupName)
+
+    backing = vim.vm.device.VirtualEthernetCard.NetworkBackingInfo()
+    backing.network = portgroup
+    backing.deviceName = portgroup.name
+    virtual_nic_device.backing = backing
+
+    virtual_nic_device.connectable = vim.vm.device.VirtualDevice.ConnectInfo()
+    virtual_nic_device.connectable.startConnected = True
+    virtual_nic_device.connectable.allowGuestControl = True
+    virtual_nic_device.connectable.connected = False
+    virtual_nic_device.connectable.status = 'untried'
+
+    virtual_nic_device.addressType = 'assigned'
+
+    device_config = vim.vm.device.VirtualDeviceSpec()
+    device_config.operation = vim.vm.device.VirtualDeviceSpec.Operation.add
+    device_config.device = virtual_nic_device
+
+    spec = vim.vm.ConfigSpec(deviceChange=[device_config, ])
+    Task = vm.ReconfigVM_Task(spec=spec)
+    task.WaitForTask(Task)
 
 def get_obj(content, vimtype, name=None):
     obj = None
@@ -2506,9 +2567,7 @@ def get_obj(content, vimtype, name=None):
             if c.name == name:
                 obj = c
                 return obj
-        return container.view
-    else:
-        return container.view
+    return container.view
 
 def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file = None):
     from pyVmomi import vim
@@ -2563,7 +2622,7 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
                                 addvswitch_portgroup(host=vc_hs, vswitch=vswitch.name_, portgroup=port_group.text_, vlanId=port_group.vlanId_)
 		for vm in xmlobject.safe_list(host.vms.vm):
                     resource_pool = vc_cl.resourcePool
-                    create_vm(name=vm.name_,vm_folder=vc_dc.vmFolder,resource_pool=resource_pool,datastore=get_obj(content, [vim.Datastore])[0].name)
+                    create_vm(name=vm.name_,vm_folder=vc_dc.vmFolder,resource_pool=resource_pool,host=vc_hs)
 	for template in xmlobject.safe_list(datacenter.templates.template):
             name = deploy_ova(service_instance=SI,
                               datacenter=vc_dc,
