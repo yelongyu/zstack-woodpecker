@@ -136,36 +136,43 @@ class DataMigration(object):
         for vm in self.cloned_vms:
             self.root_vol_uuid_list.append(vm.vm.rootVolumeUuid)
 
-    def migrate_vm(self, cloned=False, vms=[]):
-        self.dst_ps = self.get_ps_candidate()
+    def migrate_vm(self, cloned=False, vms=[], start=True):
+#         self.dst_ps = self.get_ps_candidate()
         if not vms:
             if not cloned:
                 self.vm.stop()
-                datamigr_ops.ps_migrage_root_volume(self.dst_ps.uuid, self.root_vol_uuid)
+                ps_uuid_to_migrate = self.get_ps_candidate().uuid
+                datamigr_ops.ps_migrage_root_volume(ps_uuid_to_migrate, self.root_vol_uuid)
                 conditions = res_ops.gen_query_conditions('uuid', '=', self.vm.vm.uuid)
                 self.vm.vm = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)[0]
-                self.vm.start()
-                self.vm.check()
-                assert self.vm.vm.allVolumes[0].primaryStorageUuid == self.dst_ps.uuid
-                self.root_vol_uuid = self.vm.vm.rootVolumeUuid
+                if start:
+                    self.vm.start()
+                    self.vm.check()
+                    assert self.vm.vm.allVolumes[0].primaryStorageUuid == ps_uuid_to_migrate
+                    self.root_vol_uuid = self.vm.vm.rootVolumeUuid
             else:
                 for i in range(len(self.cloned_vms)):
                     self.cloned_vms[i].stop()
-                    datamigr_ops.ps_migrage_root_volume(self.dst_ps.uuid, self.root_vol_uuid_list[i])
+                    ps_uuid_to_migrate = self.get_ps_candidate(self.root_vol_uuid_list[i]).uuid
+                    datamigr_ops.ps_migrage_root_volume(ps_uuid_to_migrate, self.root_vol_uuid_list[i])
                     conditions = res_ops.gen_query_conditions('uuid', '=', self.cloned_vms[i].vm.uuid)
                     self.cloned_vms[i].vm = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)[0]
-                    self.cloned_vms[i].start()
-                    self.cloned_vms[i].check()
-                    assert self.cloned_vms[i].vm.allVolumes[0].primaryStorageUuid == self.dst_ps.uuid
+                    if start:
+                        self.cloned_vms[i].start()
+                        self.cloned_vms[i].check()
+                        assert self.cloned_vms[i].vm.allVolumes[0].primaryStorageUuid == ps_uuid_to_migrate
         else:
             vms2 = []
             for vm in vms:
                 vm.stop()
-                datamigr_ops.ps_migrage_root_volume(self.dst_ps.uuid, vm.get_vm().rootVolumeUuid)
+                root_vol_uuid = vm.get_vm().rootVolumeUuid
+                self.get_ps_candidate(root_vol_uuid)
+                datamigr_ops.ps_migrage_root_volume(self.cand_ps.uuid, root_vol_uuid)
                 conditions = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid)
                 vm.vm = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)[0]
-                vm.start()
-                vm.check()
+                if start:
+                    vm.start()
+                    vm.check()
                 vms2.append(vm)
             return vms2
 
@@ -213,11 +220,13 @@ class DataMigration(object):
             os.environ['cephBackupStorageMonUrls'] = 'root:password@%s' % bs_mon_ip
         self._image.check()
 
-    def get_ps_candidate(self):
-        self.cand_ps = datamigr_ops.get_ps_candidate_for_vol_migration(self.root_vol_uuid)
-        assert len(self.cand_ps) == 1
-        self.get_ps()
-        ps_to_migrate = self.ps_1 if self.ps_1.uuid != self.vm.vm.allVolumes[0].primaryStorageUuid else self.ps_2
+    def get_ps_candidate(self, root_vol_uuid=None):
+        if not root_vol_uuid:
+            root_vol_uuid = self.root_vol_uuid
+        ps_to_migrate = random.choice(datamigr_ops.get_ps_candidate_for_vol_migration(root_vol_uuid))
+#         assert len(self.cand_ps) == 1
+#         self.get_ps()
+#         ps_to_migrate = self.ps_1 if self.ps_1.uuid != self.vm.vm.allVolumes[0].primaryStorageUuid else self.ps_2
         return ps_to_migrate
 
     def get_bs_candidate(self):
@@ -234,7 +243,7 @@ class DataMigration(object):
 
     def check_ps_candidate(self):
         ps_to_migrate = self.get_ps_candidate()
-        assert self.cand_ps[0].uuid == ps_to_migrate.uuid
+        assert ps_to_migrate.uuid != self.vm.vm.allVolumes[0].primaryStorageUuid
 
     def check_bs_candidate(self):
         bs_type = self.query_bs().type
