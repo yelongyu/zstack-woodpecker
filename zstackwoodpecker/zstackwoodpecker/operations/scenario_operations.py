@@ -1681,6 +1681,11 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             l3_uuid_list.remove(l3_uuid)
                             if len(l3_uuid_list) < 3:
                                 break
+                        elif l3_uuid == os.environ.get('vmL3Uuid2') or l3_uuid == os.environ.get('vmL3Uuid3'):
+                            l3_uuid_list_ge_3.append(l3_uuid)
+                            l3_uuid_list.remove(l3_uuid)
+                            if len(l3_uuid_list) < 3:
+                                break
 
                 vm_creation_option.set_instance_offering_uuid(vm.vmInstranceOfferingUuid_)
                 vm_creation_option.set_l3_uuids(l3_uuid_list)

@@ -14,3 +14,5 @@ imageUuid = 123456
 imageUsername = root
 imagePassword = password
 vmL3Uuid = 123456
+vmL3Uuid2 = 123456
+vmL3Uuid3 = 123456
