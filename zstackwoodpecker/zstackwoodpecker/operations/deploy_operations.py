@@ -2207,7 +2207,7 @@ def create_datastore(host=None, dsname=None):
 
 #To get the vswitch list from the host
 #vswitch_obj = host.config.network.vswitch
-def addvswitch_portgroup(host=None, vswitch="vSwitch0", portgroup=None, vlanId=None):
+def addvswitch_portgroup(host=None, vswitch="vSwitch0", portgroup=None, vlanId=0):
     from pyVmomi import vim
     portgroup_spec = vim.host.PortGroup.Specification()
     portgroup_spec.vswitchName = vswitch
@@ -2222,11 +2222,11 @@ def addvswitch_portgroup(host=None, vswitch="vSwitch0", portgroup=None, vlanId=N
 
     host.configManager.networkSystem.AddPortGroup(portgroup_spec)
 
-
 def cleanup_datacenter(datacenter=None):
     from pyVim import task
     TASK = datacenter.Destroy_Task()
     task.WaitForTask(TASK)
+
 def create_dvswitch(datacenter=None, name='DvSwitch0', DVSCreateSpec=None):
     from pyVmomi import vim
     from pyVim import task
@@ -2234,23 +2234,29 @@ def create_dvswitch(datacenter=None, name='DvSwitch0', DVSCreateSpec=None):
         DVSCreateSpec = vim.DistributedVirtualSwitch.CreateSpec(
             configSpec=vim.DistributedVirtualSwitch.ConfigSpec(name=name)
         )
-        # print DVSCreateSpec
     folder = datacenter.networkFolder
     Task = folder.CreateDVS_Task(spec=DVSCreateSpec)
     task.WaitForTask(Task)
     return Task.info.result
 
 
-def create_dvPortgroup(DVSwitch=None, name='DPortGroup0', DVPortgroupConfigSpec=None):
+def adddvswitch_portgroup(DVSwitch=None, name='DPortGroup0', vlanId=0):
     from pyVmomi import vim
     from pyVim import task
-    if not DVPortgroupConfigSpec:
-        # https://vdc-download.vmware.com/vmwb-repository/dcr-public/6b586ed2-655c-49d9-9029-bc416323cb22/fa0b429a-a695-4c11-b7d2-2cbc284049dc/doc/index.html#link8de9e11294a7c96e09506f8151e28ecaad9525ff;vim.Folder.html
-        DVPortgroupConfigSpec = vim.dvs.DistributedVirtualPortgroup.ConfigSpec(name=name, type='ephemeral')
+    vlan = vim.dvs.VmwareDistributedVirtualSwitch.VlanIdSpec()
+    vlan.vlanId = int(vlanId)
+    defaultPortConfig = vim.dvs.VmwareDistributedVirtualSwitch.VmwarePortConfigPolicy()
+    defaultPortConfig.vlan = vlan
+
+    DVPortgroupConfigSpec = vim.dvs.DistributedVirtualPortgroup.ConfigSpec()
+    DVPortgroupConfigSpec.name = name
+    DVPortgroupConfigSpec.type = 'ephemeral'
+    DVPortgroupConfigSpec.autoExpand = False
+    DVPortgroupConfigSpec.defaultPortConfig = defaultPortConfig
+
     Task = DVSwitch.CreateDVPortgroup_Task(spec=DVPortgroupConfigSpec)
     task.WaitForTask(Task)
     return Task.info.result
-
 
 def clone_vm_from_vm(datacenter=None, name='vm-0', power=True):
     from pyVmomi import vim
@@ -2500,12 +2506,55 @@ def create_vm(name="vm-0", vm_folder=None, resource_pool=None, host=None):
     task.WaitForTask(Task)
     return Task.info.result
 
-def add_vm_to_Dvsportgroup(vm=None, DPortgroupName=None):
+def add_vswitch_to_host(host=None, vsname=None, hostname=None):
+    from pyVim import task
+    from pyVmomi import vim
+    tmp = os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP']
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.environ.get("zstackManagementIp")
+    cond = res_ops.gen_query_conditions('name', '=', hostname)
+    vm = res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0]
+    l3_uuid = os.environ.get("vmL3Uuid2")
+    for net in vm.vmNics:
+        if net.l3NetworkUuid == l3_uuid:
+            mac = net.mac
+    for pnic in host.config.network.pnic:
+        if mac == pnic.mac:
+            nic = pnic.device
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = tmp
+    brige = vim.host.VirtualSwitch.BondBridge()
+    brige.nicDevice = [nic,]
+    spec = vim.host.VirtualSwitch.Specification()
+    spec.bridge = brige
+    spec.numPorts = 128
+    host.configManager.networkSystem.AddVirtualSwitch(vswitchName=vsname, spec=spec)
+
+def add_host_to_dvswitch(host=None, dvswitch=None, hostname=None):
+    from pyVim import task
+    from pyVmomi import vim
+    tmp = os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP']
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.environ.get("zstackManagementIp")
+    cond = res_ops.gen_query_conditions('name', '=', hostname)
+    vm = res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0]
+    l3_uuid = os.environ.get("vmL3Uuid2")
+    for net in vm.vmNics:
+        if net.l3NetworkUuid == l3_uuid:
+            mac = net.mac
+    for pnic in host.config.network.pnic:
+        if mac == pnic.mac:
+            nic = pnic.device
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = tmp
+
+    backing = vim.dvs.HostMember.PnicBacking(pnicSpec=[vim.dvs.HostMember.PnicSpec(pnicDevice=nic), ])
+    host_config = vim.dvs.HostMember.ConfigSpec(host=host, backing=backing, operation='add')
+    config = vim.DistributedVirtualSwitch.ConfigSpec(host=[host_config, ], configVersion=dvswitch.config.configVersion)
+    Task = dvswitch.ReconfigureDvs_Task(spec=config)
+    task.WaitForTask(Task)
+
+def add_vm_to_dvsportgroup(vm=None, DPortgroup=None):
     from pyVim import task
     from pyVmomi import vim
 
     virtual_nic_device = vim.vm.device.VirtualE1000()
-    dportgroup = get_obj(content, [vim.dvs.DistributedVirtualPortgroup], name=DPortgroupName)
 
     backing = vim.vm.device.VirtualEthernetCard.DistributedVirtualPortBackingInfo()
     backing.port = vim.dvs.PortConnection()
@@ -2529,13 +2578,11 @@ def add_vm_to_Dvsportgroup(vm=None, DPortgroupName=None):
     Task = vm.ReconfigVM_Task(spec=spec)
     task.WaitForTask(Task)
 
-def add_vm_to_portgroup(vm=None, PortgroupName=None):
+def add_vm_to_portgroup(vm=None, portgroup=None):
     from pyVim import task
     from pyVmomi import vim
 
     virtual_nic_device = vim.vm.device.VirtualE1000()
-
-    portgroup = get_obj(content, [vim.Network], name=PortgroupName)
 
     backing = vim.vm.device.VirtualEthernetCard.NetworkBackingInfo()
     backing.network = portgroup
@@ -2596,7 +2643,7 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
         for dswitch in xmlobject.safe_list(datacenter.dswitch):
             dvswitch = create_dvswitch(datacenter=vc_dc, name=dswitch.name_)
             for dportgroup in xmlobject.safe_list(dswitch.dportgroups.dportgroup):
-                create_dvPortgroup(DVSwitch=dvswitch, name=dportgroup.name_)
+                adddvswitch_portgroup(DVSwitch=dvswitch, name=dportgroup.name_, vlanId=dportgroup.vlanId_)
         for cluster in xmlobject.safe_list(datacenter.clusters.cluster):
             vc_cl = create_cluster(datacenter=vc_dc, clustername=cluster.name_)
             for host in xmlobject.safe_list(cluster.hosts.host):
@@ -2615,14 +2662,26 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
                 if xmlobject.has_element(host, "iScsiStorage"):
                     setup_iscsi_device(host=vc_hs, target_ip=host.iScsiStorage.target_)
                     vc_ds = create_datastore(host=vc_hs, dsname=host.iScsiStorage.vmfsdatastore.name_)
-                if xmlobject.has_element(host, "vswitch"):
-                    for vswitch in xmlobject.safe_list(host.vswitch):
+                if xmlobject.has_element(host, "vswitchs"):
+                    for vswitch in xmlobject.safe_list(host.vswitchs.vswitch):
                         if vswitch.name_ == "vSwitch0":
-                            for port_group in vswitch.portgroup:
+                            for port_group in xmlobject.safe_list(vswitch.portgroup):
                                 addvswitch_portgroup(host=vc_hs, vswitch=vswitch.name_, portgroup=port_group.text_, vlanId=port_group.vlanId_)
+                        else:
+                            add_vswitch_to_host(host=vc_hs, vsname=vswitch.name_, hostname=host.ref_)
+                            for port_group in xmlobject.safe_list(vswitch.portgroup):
+                                addvswitch_portgroup(host=vc_hs, vswitch=vswitch.name_, portgroup=port_group.text_, vlanId=port_group.vlanId_)
+                if xmlobject.has_element(host, "dswitchRef"):
+                    add_host_to_dvswitch(host=vc_hs, dvswitch=dvswitch, hostname=host.ref_)
 		for vm in xmlobject.safe_list(host.vms.vm):
                     resource_pool = vc_cl.resourcePool
-                    create_vm(name=vm.name_,vm_folder=vc_dc.vmFolder,resource_pool=resource_pool,host=vc_hs)
+                    vc_vm = create_vm(name=vm.name_,vm_folder=vc_dc.vmFolder,resource_pool=resource_pool,host=vc_hs)
+                    if xmlobject.has_element(vm, "portgroupRef"):
+                        portgroup1 = get_obj(content, [vim.Network], name=vm.portgroupRef.text_)
+                        add_vm_to_portgroup(vm=vc_vm, portgroup=portgroup1)
+                    if xmlobject.has_element(vm, "dportgroupRef"):
+                        dportgroup1 = get_obj(content, [vim.dvs.DistributedVirtualPortgroup], name=vm.dportgroupRef.text_)
+                        add_vm_to_dvsportgroup(vm=vc_vm, DPortgroup=dportgroup1)
 	for template in xmlobject.safe_list(datacenter.templates.template):
             name = deploy_ova(service_instance=SI,
                               datacenter=vc_dc,

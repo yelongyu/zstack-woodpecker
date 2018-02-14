@@ -209,6 +209,27 @@
                         <!--dportgroupRef>$dportgroup</dportgroupRef-->
                       </vm>
                     </vms>
+                    <dswitchRef>$dswitch</dswitchRef>
+                  </host>
+                  <host name="$hostName3" ref="$vmName3" username="$vchostUser" password="$vchostpwd" thumbprint="$vcsslthumbprint">
+                    <iScsiStorage target="$vciscsitarget">
+                      <vmfsdatastore name="$vcvmfsdatastore"/>
+                    </iScsiStorage>
+                    <vswitchs>
+                      <vswitch name="$vswitch1">
+                        <portgroup vlanId="$vlanid0">$portgroup1</portgroup>
+                      </vswitch>
+                    </vswitchs>
+                    <vms>
+                      <vm name="$vcvm2" >
+                        <portgroupRef>$portgroup1</portgroupRef>
+                        <!--dportgroupRef>$dportgroup</dportgroupRef-->
+                      </vm>
+                      <vm name="$vcvm3" >
+                        <portgroupRef>$portgroup1</portgroupRef>
+                        <!--dportgroupRef>$dportgroup</dportgroupRef-->
+                      </vm>
+                    </vms>
                   </host>
               </hosts>
             </cluster>

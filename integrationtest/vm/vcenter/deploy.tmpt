@@ -59,8 +59,11 @@ vcvmfsdatastore = datastore
 vswitch0 = vSwitch0
 portgroup0 = port_group0
 portgroup1 = port_group1
-vlanid = 0
-vlanid = 1
+vlanid0 = 0
+vlanid1 = 1
+vmName2 = 12345
+vmName3 = 12345
+vmName4 = 12345
 
 l2PublicNetworkName = l2-public
 l2PublicNetworkInterface = eth0
