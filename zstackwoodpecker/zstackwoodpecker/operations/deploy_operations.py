@@ -2661,7 +2661,8 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
                     datastore.Destroy()
                 if xmlobject.has_element(host, "iScsiStorage"):
                     setup_iscsi_device(host=vc_hs, target_ip=host.iScsiStorage.target_)
-                    vc_ds = create_datastore(host=vc_hs, dsname=host.iScsiStorage.vmfsdatastore.name_)
+                    if not vc_hs.datastore:
+                        vc_ds = create_datastore(host=vc_hs, dsname=host.iScsiStorage.vmfsdatastore.name_)
                 if xmlobject.has_element(host, "vswitchs"):
                     for vswitch in xmlobject.safe_list(host.vswitchs.vswitch):
                         if vswitch.name_ == "vSwitch0":
