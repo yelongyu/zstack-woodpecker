@@ -2173,6 +2173,7 @@ def setup_iscsi_device(host=None, target_ip=None):
 
     def rescan_allhba():
         host.configManager.storageSystem.RescanAllHba()
+        host.configManager.storageSystem.RescanVmfs()
 
     host_obj = host
     host_obj.configManager.storageSystem.UpdateSoftwareInternetScsiEnabled(enabled=True)
