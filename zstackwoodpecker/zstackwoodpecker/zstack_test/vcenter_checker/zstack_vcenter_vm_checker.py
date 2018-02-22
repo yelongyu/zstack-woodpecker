@@ -53,8 +53,8 @@ def get_vcenter_vm_status_by_vm_name(vm_name):
     content = SI.RetrieveContent()
 
     vm = get_obj(content, [vim.VirtualMachine], name=vm_name)
-    if isinstance(vm, vim.VirtualMachine):
-        test_util.test_fail("%s is not found in vcenter %s" %(vm.name, vcenter_server))
+    if not isinstance(vm, vim.VirtualMachine):
+        test_util.test_fail("%s is not found in vcenter %s" %(vm_name, vcenter_server))
 
     pysf_vm_real_status = vm.summary.runtime.powerState
 
