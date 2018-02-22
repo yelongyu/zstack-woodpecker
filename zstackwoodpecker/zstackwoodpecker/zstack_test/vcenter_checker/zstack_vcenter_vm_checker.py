@@ -49,10 +49,13 @@ def get_vcenter_vm_status_by_vm_name(vm_name):
     sslContext.verify_mode = ssl.CERT_NONE
     SI = connect.SmartConnect(host=vcenter_server, user=vcenter_username, pwd=vcenter_password, port=443, sslContext=sslContext)
     if not SI:
-        raise SystemExit("Unable to connect to the vCenter")
+        test_util.test_fail("Unable to connect to the vCenter")
     content = SI.RetrieveContent()
 
     vm = get_obj(content, [vim.VirtualMachine], name=vm_name)
+    if isinstance(vm, vim.VirtualMachine):
+        test_util.test_fail("%s is not found in vcenter %s" %(vm.name, vcenter_server))
+
     pysf_vm_real_status = vm.summary.runtime.powerState
 
     atexit.register(connect.Disconnect, SI)
