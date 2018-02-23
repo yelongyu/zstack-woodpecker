@@ -2279,6 +2279,11 @@ def clone_vm_from_vm(datacenter=None, name='vm-0', power=True):
     task.WaitForTask(Task)
 
 
+def powerOn_vm(vm):
+    from pyVim import task
+    Task = vm.PowerOnVM_Task()
+    task.WaitForTask(Task)
+
 class OvfHandler(object):
     """
     OvfHandler handles most of the OVA operations.
@@ -2680,6 +2685,7 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
 		for vm in xmlobject.safe_list(host.vms.vm):
                     resource_pool = vc_cl.resourcePool
                     vc_vm = create_vm(name=vm.name_,vm_folder=vc_dc.vmFolder,resource_pool=resource_pool,host=vc_hs)
+		    powerOn_vm(vc_vm)
                     if xmlobject.has_element(vm, "portgroupRef"):
                         portgroup1 = get_obj(content, [vim.Network], name=vm.portgroupRef.text_)
                         add_vm_to_portgroup(vm=vc_vm, portgroup=portgroup1)
