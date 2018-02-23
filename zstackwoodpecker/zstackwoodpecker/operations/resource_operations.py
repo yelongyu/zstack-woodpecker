@@ -85,6 +85,16 @@ PXE_SERVER = 'PxeServer'
 CHASSIS = 'Chassis'
 HWINFO = 'HardwareInfo'
 LONGJOB = 'LongJob'
+ALARM = 'Alarm'
+EVENT_SUBSCRIPTION = 'EventSubscription'
+SNS_APPLICATION_ENDPOINT = 'SNSApplicationEndpoint'
+SNS_APPLICATION_PLATFORM ='SNSApplicationPlatform'
+SNS_TOPIC = 'SNSTopic'
+SNS_DING_TALK_ENDPOINT = 'SNSDingTalkEndpoint'
+SNS_EMAIL_ENDPOINT = 'SNSEmailEndpoint'
+SNS_EMAIL_PLATFORM = 'SNSEmailPlatform'
+SNS_HTTP_ENDPOINT = 'SNSHttpEndpoint'
+
 
 def find_item_by_uuid(inventories, uuid):
     for item in inventories:
@@ -525,7 +535,24 @@ def _gen_query_action(resource, condition=None):
         action = api_actions.QueryBaremetalHardwareInfoAction()
     elif resource == LONGJOB:
         action = api_actions.QueryLongJobAction()
-
+    elif resource == ALARM:
+        action = api_actions.QueryAlarmAction()
+    elif resource == EVENT_SUBSCRIPTION:
+        action = api_actions.QueryEventSubscriptionAction()
+    elif resource == SNS_APPLICATION_ENDPOINT:
+        action = api_actions.QuerySNSApplicationEndpointAction()
+    elif resource == SNS_APPLICATION_PLATFORM:
+        action = api_actions.QuerySNSApplicationPlatformAction()
+    elif resource == SNS_TOPIC:
+        action = api_actions.QuerySNSTopicAction()
+    elif resource == SNS_DING_TALK_ENDPOINT:
+        action = api_actions.QuerySNSDingTalkEndpointAction()
+    elif resource == SNS_EMAIL_ENDPOINT:
+        action = api_actions.QuerySNSEmailEndpointAction()
+    elif resource == SNS_EMAIL_PLATFORM:
+        action = api_actions.QuerySNSEmailPlatformAction()
+    elif resource == SNS_HTTP_ENDPOINT:
+        action = api_actions.QuerySNSHttpEndpointAction()
     return action
 
 def query_resource(resource, conditions = [], session_uuid=None, count='false'):
