@@ -2279,6 +2279,11 @@ def clone_vm_from_vm(datacenter=None, name='vm-0', power=True):
     task.WaitForTask(Task)
 
 
+def powerOn_vm(vm):
+    from pyVim import task
+    Task = vm.PowerOnVM_Task()
+    task.WaitForTask(Task)
+
 class OvfHandler(object):
     """
     OvfHandler handles most of the OVA operations.
