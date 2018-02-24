@@ -79,6 +79,7 @@ VCENTER = 'VCenter'
 VCENTER_CLUSTER = 'VCenterCluster'
 VCENTER_BACKUP_STORAGE = 'VCenterBackupStorage'
 VCENTER_PRIMARY_STORAGE = 'VCenterPrimaryStorage'
+VCENTER_DVSWITCHES = 'VCenterDVSwitches'
 MONITOR_TRIGGER = 'MonitorTrigger'
 MONITOR_TRIGGER_ACTION = 'MonitorTriggerAction'
 PXE_SERVER = 'PxeServer'
@@ -285,6 +286,8 @@ def get_resource_by_get(resource, session_uuid, uuid):
         action = api_actions.GetPrimaryStorageAction()
     elif resource == VR_OFFERING:
         action = api_actions.GetVirtualRouterOfferingAction()
+    elif resource == VCENTER_DVSWITCHES:
+        action = api_actions.GetVCenterDVSwitchesAction()
     #elif resource == SECURITY_GROUP:
     #    action = api_actions.GetSecurityGroupAction()
     #elif resource == VM_SECURITY_GROUP:

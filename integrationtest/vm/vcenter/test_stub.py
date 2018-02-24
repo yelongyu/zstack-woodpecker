@@ -20,7 +20,10 @@ import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
+import zstackwoodpecker.operations.vcenter_operations as vc_ops
+import zstackwoodpecker.operations.deploy_operations as dep_ops
 import apibinding.api_actions as api_actions
+import zstacklib.utils.xmlobject as xmlobject
 
 
 original_root_password = "password"
@@ -166,5 +169,64 @@ def share_admin_resource(account_uuid_list):
         share_list.append(l3net_uuid)
     acc_ops.share_resources(account_uuid_list, share_list)
 
+#To get common pgs amoung all the host with the same vswitch and the same pgs
+#vsdic example
+# vsdic = {'host3': {'switch2': ['pg5', 'pg6'], 'switch1': ['pg1', 'pg2', 'pg4'], 'switch3': ['pg9']}, 'host2': {'switch1': ['pg2', 'pg3'], 'switch2': ['pg5'], 'switch3': ['pg9']}, 'host1': {'switch1': ['pg1', 'pg2'], 'switch2': ['pg5', 'pg6']}}
+def get_common_pgs(vsdic):
+    res1 = []
+    tmp_switches = None
+    for host, v in vsdic.items():
+        tmp_switches = (set(v.keys()) if not tmp_switches else tmp_switches & set(v.keys()))
 
+    for switch in tmp_switches:
+        tmp_pgs = None
+        for host in vsdic:
+            tmp_pgs = (set(vsdic[host][switch]) if not tmp_pgs else tmp_pgs & set(vsdic[host][switch]))
+        if tmp_pgs:
+            res1.extend(list(tmp_pgs))
+    return res1
 
+def check_deployed_vcenter(deploy_config, scenario_config = None, scenario_file = None):
+    vc_name = os.environ.get('vcenter')
+
+    if xmlobject.has_element(deploy_config, 'vcenter.datacenters.datacenter'):
+        assert deploy_config.vcenter.name_ == vc_ops.lib_get_vcenter_by_name(vc_name).name
+
+    for datacenter in xmlobject.safe_list(deploy_config.vcenter.datacenters.datacenter):
+        for dswitch in xmlobject.safe_list(datacenter.dswitch):
+            for dportgroup in xmlobject.safe_list(dswitch.dportgroups.dportgroup):
+                assert dportgroup.name_ == vc_ops.lib_get_vcenter_l2_by_name(dportgroup.name_).name
+                assert "L3-" + dportgroup.name_ == vc_ops.lib_get_vcenter_l3_by_name("L3-" + dportgroup.name_).name
+        for cluster in xmlobject.safe_list(datacenter.clusters.cluster):
+            assert cluster.name_ == vc_ops.lib_get_vcenter_cluster_by_name(cluster.name_).name
+            for host in xmlobject.safe_list(cluster.hosts.host):
+                vslist[host.name_] = {'vSwitch0':['VM Network']}
+                managementIp = dep_ops.get_host_from_scenario_file(host.name_, scenario_config, scenario_file, deploy_config)
+                assert managementIp == vc_ops.lib_get_vcenter_host_by_ip(managementIp).name
+                assert vc_ops.lib_get_vcenter_host_by_ip(managementIp).hypervisorType == "ESX"
+                if xmlobject.has_element(host, "iScsiStorage.vmfsdatastore"):
+                    assert host.iScsiStorage.vmfsdatastore.name_ == vc_ops.lib_get_vcenter_primary_storage_by_name(host.iScsiStorage.vmfsdatastore.name_).name
+                    assert vc_ops.lib_get_vcenter_primary_storage_by_name(host.iScsiStorage.vmfsdatastore.name_).type == "VCenter"
+                    assert host.iScsiStorage.vmfsdatastore.name_ == vc_ops.lib_get_vcenter_backup_storage_by_name(host.iScsiStorage.vmfsdatastore.name_).name
+                    assert vc_ops.lib_get_vcenter_backup_storage_by_name(host.iScsiStorage.vmfsdatastore.name_).type == "VCenter"
+                if xmlobject.has_element(host, "vswitchs"):
+                    for vswitch in xmlobject.safe_list(host.vswitchs.vswitch):
+                        if vswitch.name_ == "vSwitch0":
+                            for port_group in xmlobject.safe_list(vswitch.portgroup):
+                                vslist[host.name_]['vSwitch0'].append(port_group.text_)
+                        else:
+                            vslist[host.name_][vswitch.name_] = []
+                            for port_group in xmlobject.safe_list(vswitch.portgroup):
+                                vslist[host.name_][vswitch.name_].append(port_group.text_)
+                for vm in xmlobject.safe_list(host.vms.vm):
+                    assert vm.name_ == vc_ops.lib_get_vm_by_name(vm.name_).name
+                    assert vc_ops.lib_get_vm_by_name(vm.name_).hypervisorType == "ESX"
+                    assert vc_ops.lib_get_vm_by_name(vm.name_).state == "Running"
+        for template in xmlobject.safe_list(datacenter.templates.template):
+            templ_name = template.path_
+            tp_name = templ_name.split('/')[-1].split('.')[0]
+            assert tp_name == vc_ops.lib_get_root_image_by_name(tp_name).name
+        pg_list = get_common_pgs(vslist)
+        for pg in pg_list:
+            assert pg == vc_ops.lib_get_vcenter_l2_by_name(pg).name
+            assert "L3-" + pg == vc_ops.lib_get_vcenter_l3_by_name("L3-" + pg).name

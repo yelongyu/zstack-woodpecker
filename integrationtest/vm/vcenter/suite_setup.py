@@ -16,6 +16,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.tag_operations as tag_ops
 import zstackwoodpecker.setup_actions as setup_actions
+import test_stub
 
 
 USER_PATH = os.path.expanduser('~')
@@ -44,6 +45,7 @@ def test():
 
     deploy_operations.deploy_initial_vcenter(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
     deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
+    test_stub.check_deployed_vcenter(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
 
     test_util.test_pass('Suite Setup Success')
 
