@@ -178,7 +178,7 @@ class DataMigration(object):
 
     def migrate_data_volume(self):
         if not self.dst_ps:
-            self.dst_ps = self.get_ps_candidate()
+            self.dst_ps = self.get_ps_candidate(self.data_volume.get_volume().uuid)
         vol_migr_inv = datamigr_ops.ps_migrage_data_volume(self.dst_ps.uuid, self.data_volume.get_volume().uuid)
         cond_vol = res_ops.gen_query_conditions('uuid', '=', self.data_volume.get_volume().uuid)
         assert res_ops.query_resource(res_ops.VOLUME, cond_vol)
@@ -220,10 +220,10 @@ class DataMigration(object):
             os.environ['cephBackupStorageMonUrls'] = 'root:password@%s' % bs_mon_ip
         self._image.check()
 
-    def get_ps_candidate(self, root_vol_uuid=None):
-        if not root_vol_uuid:
-            root_vol_uuid = self.root_vol_uuid
-        ps_to_migrate = random.choice(datamigr_ops.get_ps_candidate_for_vol_migration(root_vol_uuid))
+    def get_ps_candidate(self, vol_uuid=None):
+        if not vol_uuid:
+            vol_uuid = self.root_vol_uuid
+        ps_to_migrate = random.choice(datamigr_ops.get_ps_candidate_for_vol_migration(vol_uuid))
 #         assert len(self.cand_ps) == 1
 #         self.get_ps()
 #         ps_to_migrate = self.ps_1 if self.ps_1.uuid != self.vm.vm.allVolumes[0].primaryStorageUuid else self.ps_2
@@ -308,7 +308,7 @@ class DataMigration(object):
         vol_uuid = self.data_volume.get_volume().uuid
         name = "long_job_of_%s" % self.data_volume.get_volume().name
         if not self.dst_ps:
-            self.dst_ps = self.get_ps_candidate()
+            self.dst_ps = self.get_ps_candidate(vol_uuid)
         job_data = '{"volumeUuid": %s, "dstPrimaryStorageUuid": %s}' % (vol_uuid, self.dst_ps.uuid)
         self.submit_logjob(job_data, name)
         cond_vol = res_ops.gen_query_conditions('uuid', '=', vol_uuid)
