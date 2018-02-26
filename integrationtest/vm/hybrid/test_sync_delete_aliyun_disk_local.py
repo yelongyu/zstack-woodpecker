@@ -22,11 +22,10 @@ def test():
     test_util.test_pass('Sync Aliyun Disk Test Success')
 
 def env_recover():
-    if hybrid.disk:
-        time.sleep(50)
-        hybrid.del_aliyun_disk()
+    hybrid.tear_down()
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     global test_obj_dict
+    hybrid.tear_down()
     test_lib.lib_error_cleanup(test_obj_dict)

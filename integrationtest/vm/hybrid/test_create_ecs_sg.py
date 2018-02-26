@@ -23,10 +23,7 @@ def test():
     test_util.test_pass('Create Delete ECS Security Group Test Success')
 
 def env_recover():
-    try:
-        hybrid.del_sg()
-    except:
-        pass
+    hybrid.tear_down()
 
 #Will be called only if exception happens in test().
 def error_cleanup():

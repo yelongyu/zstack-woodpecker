@@ -67,6 +67,7 @@ class HybridObject(object):
         self.oss_bucket_create = None
         self.ecs_instance = None
         self.ecs_image = None
+        self.disk = None
         self.vpn_gateway = None
         self.user_vpn_gateway = None
         self.user_gw_ip = None
@@ -988,6 +989,16 @@ class HybridObject(object):
         for ecs in ecs_to_clear:
             self.ecs_instance = ecs
             self.del_ecs_instance()
+        if self.sg_create:
+            try:
+                self.del_sg()
+            except:
+                pass
+        if self.disk:
+            try:
+                self.del_aliyun_disk()
+            except:
+                pass
 
 def create_vlan_vm(l3_name=None, disk_offering_uuids=None, system_tags=None, session_uuid = None, instance_offering_uuid = None):
     image_name = os.environ.get('imageName_net')
