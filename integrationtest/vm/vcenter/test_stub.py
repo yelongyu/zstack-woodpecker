@@ -193,10 +193,11 @@ def check_deployed_vcenter(deploy_config, scenario_config = None, scenario_file 
         assert deploy_config.vcenter.name_ == vc_ops.lib_get_vcenter_by_name(vc_name).name
 
     for datacenter in xmlobject.safe_list(deploy_config.vcenter.datacenters.datacenter):
-        for dswitch in xmlobject.safe_list(datacenter.dswitch):
-            for dportgroup in xmlobject.safe_list(dswitch.dportgroups.dportgroup):
-                assert dportgroup.name_ == vc_ops.lib_get_vcenter_l2_by_name(dportgroup.name_).name
-                assert "L3-" + dportgroup.name_ == vc_ops.lib_get_vcenter_l3_by_name("L3-" + dportgroup.name_).name
+        if xmlobject.has_element(datacenter, 'dswitch'):
+            for dswitch in xmlobject.safe_list(datacenter.dswitch):
+                for dportgroup in xmlobject.safe_list(dswitch.dportgroups.dportgroup):
+                    assert dportgroup.name_ == vc_ops.lib_get_vcenter_l2_by_name(dportgroup.name_).name
+                    assert "L3-" + dportgroup.name_ == vc_ops.lib_get_vcenter_l3_by_name("L3-" + dportgroup.name_).name
         for cluster in xmlobject.safe_list(datacenter.clusters.cluster):
             assert cluster.name_ == vc_ops.lib_get_vcenter_cluster_by_name(cluster.name_).name
             for host in xmlobject.safe_list(cluster.hosts.host):

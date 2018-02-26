@@ -2647,10 +2647,11 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
 
     for datacenter in xmlobject.safe_list(deploy_config.vcenter.datacenters.datacenter):
         vc_dc = create_datacenter(dcname=datacenter.name_, service_instance=SI)
-        for dswitch in xmlobject.safe_list(datacenter.dswitch):
-            dvswitch = create_dvswitch(datacenter=vc_dc, name=dswitch.name_)
-            for dportgroup in xmlobject.safe_list(dswitch.dportgroups.dportgroup):
-                adddvswitch_portgroup(DVSwitch=dvswitch, name=dportgroup.name_, vlanId=dportgroup.vlanId_)
+        if xmlobject.has_element(datacenter, 'dswitch'):
+            for dswitch in xmlobject.safe_list(datacenter.dswitch):
+                dvswitch = create_dvswitch(datacenter=vc_dc, name=dswitch.name_)
+                for dportgroup in xmlobject.safe_list(dswitch.dportgroups.dportgroup):
+                    adddvswitch_portgroup(DVSwitch=dvswitch, name=dportgroup.name_, vlanId=dportgroup.vlanId_)
         for cluster in xmlobject.safe_list(datacenter.clusters.cluster):
             vc_cl = create_cluster(datacenter=vc_dc, clustername=cluster.name_)
             for host in xmlobject.safe_list(cluster.hosts.host):
