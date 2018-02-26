@@ -184,7 +184,7 @@ def get_common_pgs(vsdic):
             tmp_pgs = (set(vsdic[host][switch]) if not tmp_pgs else tmp_pgs & set(vsdic[host][switch]))
         if tmp_pgs:
             res1.extend(list(tmp_pgs))
-    return res1
+    return map(lambda x: x.split('.')[0], res1), map(lambda x: x.split('.')[1], res1)
 
 def check_deployed_vcenter(deploy_config, scenario_config = None, scenario_file = None):
     vc_name = os.environ.get('vcenter')
@@ -202,7 +202,7 @@ def check_deployed_vcenter(deploy_config, scenario_config = None, scenario_file 
         for cluster in xmlobject.safe_list(datacenter.clusters.cluster):
             assert cluster.name_ == vc_ops.lib_get_vcenter_cluster_by_name(cluster.name_).name
             for host in xmlobject.safe_list(cluster.hosts.host):
-                vslist[host.name_] = {'vSwitch0':['VM Network']}
+                vslist[host.name_] = {'vSwitch0':['VM Network.0']}
                 managementIp = dep_ops.get_host_from_scenario_file(host.name_, scenario_config, scenario_file, deploy_config)
                 assert managementIp == vc_ops.lib_get_vcenter_host_by_ip(managementIp).name
                 assert vc_ops.lib_get_vcenter_host_by_ip(managementIp).hypervisorType == "ESX"
@@ -215,11 +215,11 @@ def check_deployed_vcenter(deploy_config, scenario_config = None, scenario_file 
                     for vswitch in xmlobject.safe_list(host.vswitchs.vswitch):
                         if vswitch.name_ == "vSwitch0":
                             for port_group in xmlobject.safe_list(vswitch.portgroup):
-                                vslist[host.name_]['vSwitch0'].append(port_group.text_)
+                                vslist[host.name_]['vSwitch0'].append(port_group.text_ + '.' + port_group.vlanId)
                         else:
                             vslist[host.name_][vswitch.name_] = []
                             for port_group in xmlobject.safe_list(vswitch.portgroup):
-                                vslist[host.name_][vswitch.name_].append(port_group.text_)
+                                vslist[host.name_][vswitch.name_].append(port_group.text_ + '.' + port_group.vlanId)
                 for vm in xmlobject.safe_list(host.vms.vm):
                     assert vm.name_ == vc_ops.lib_get_vm_by_name(vm.name_).name
                     assert vc_ops.lib_get_vm_by_name(vm.name_).hypervisorType == "ESX"
@@ -228,7 +228,7 @@ def check_deployed_vcenter(deploy_config, scenario_config = None, scenario_file 
             templ_name = template.path_
             tp_name = templ_name.split('/')[-1].split('.')[0]
             assert tp_name == vc_ops.lib_get_root_image_by_name(tp_name).name
-        pg_list = get_common_pgs(vslist)
+        pg_list, vlan_list = get_common_pgs(vslist)
         for pg in pg_list:
             assert pg == vc_ops.lib_get_vcenter_l2_by_name(pg).name
             assert "L3-" + pg == vc_ops.lib_get_vcenter_l3_by_name("L3-" + pg).name

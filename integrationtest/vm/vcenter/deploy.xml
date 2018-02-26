@@ -186,18 +186,18 @@
 	  <templates>
             <template path="$templatepath"></template>
           </templates>
-          <dswitch name="$dswitch">
+          <!--dswitch name="$dswitch">
             <dportgroups>
               <dportgroup name="$dportgroup" vlanId="$dvlanid0"></dportgroup>
             </dportgroups>
-          </dswitch>
+          </dswitch-->
           <clusters>
             <cluster name="$vcclusterName">
               <hosts>
                   <host name="$hostName2" ref="$vmName2" username="$vchostUser" password="$vchostpwd" thumbprint="$vcsslthumbprint">
-                    <iScsiStorage target="$vciscsitarget">
+                    <!--iScsiStorage target="$vciscsitarget">
                       <vmfsdatastore name="$vcvmfsdatastore"/>
-                    </iScsiStorage>
+                    </iScsiStorage-->
                     <vswitchs>
                       <vswitch name="$vswitch0">
                         <portgroup vlanId="$vlanid0">$portgroup0</portgroup>

@@ -195,9 +195,9 @@
             <cluster name="$vcclusterName">
               <hosts>
                   <host name="$hostName2" ref="$vmName2" username="$vchostUser" password="$vchostpwd" thumbprint="$vcsslthumbprint">
-                    <iScsiStorage target="$vciscsitarget">
+                    <!--iScsiStorage target="$vciscsitarget">
                       <vmfsdatastore name="$vcvmfsdatastore"/>
-                    </iScsiStorage>
+                    </iScsiStorage-->
                     <vswitchs>
                       <vswitch name="$vswitch0">
                         <portgroup vlanId="$vlanid0">$portgroup0</portgroup>
@@ -212,9 +212,9 @@
                     <dswitchRef>$dswitch</dswitchRef>
                   </host>
                   <host name="$hostName3" ref="$vmName3" username="$vchostUser" password="$vchostpwd" thumbprint="$vcsslthumbprint">
-                    <iScsiStorage target="$vciscsitarget">
+                    <!--iScsiStorage target="$vciscsitarget">
                       <vmfsdatastore name="$vcvmfsdatastore"/>
-                    </iScsiStorage>
+                    </iScsiStorage-->
                     <vswitchs>
                       <vswitch name="$vswitch1">
                         <portgroup vlanId="$vlanid0">$portgroup1</portgroup>
