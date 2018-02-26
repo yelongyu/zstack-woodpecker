@@ -2665,9 +2665,9 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
                 #The ESXi hosts are created from 1 template, so the default local storage shares the
                 #same devicePath for different ESXi host, which will make only 1 host can be added 
                 #into datacenter, here we work around to delete the datastore after host is added.
-                for datastore in vc_hs.datastore:
-                    datastore.Destroy()
                 if xmlobject.has_element(host, "iScsiStorage"):
+                    for datastore in vc_hs.datastore:
+                        datastore.Destroy()
                     setup_iscsi_device(host=vc_hs, target_ip=host.iScsiStorage.target_)
                     time.sleep(5)
                     if not vc_hs.datastore:
