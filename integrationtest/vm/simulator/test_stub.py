@@ -398,34 +398,34 @@ class ZstackTestVR(vm_header.TestVm):
         '''
         self.inv = net_ops.detach_l3(nic_uuid)
 
-def create_alarm(comparisonOperator, period, threshold, namespace, metricName, name=None, repeatInterval=None, labels=None, actions=None, resourceUuid=None, session_uuid=None):
+def create_alarm(comparison_operator, period, threshold, namespace, metric_name, name=None, repeat_interval=None, labels=None, actions=None, resource_uuid=None, session_uuid=None):
     action = api_actions.CreateAlarmAction()
     action.timeout = 30000
     if not name:
         action.name = 'alarm_01'
-    action.comparisonOperator=comparisonOperator
+    action.comparisonOperator=comparison_operator
     action.period=period
     action.threshold=threshold
     action.namespace=namespace
-    action.metricName=metricName
+    action.metricName=metric_name
     if actions:
         action.actions=actions
-    if repeatInterval:
-        action.repeatInterval=repeatInterval
+    if repeat_interval:
+        action.repeatInterval=repeat_interval
     if labels:
         action.labels=labels
     if resourceUuid:
-        action.resourceUuid=resourceUuid
+        action.resourceUuid=resource_uuid
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create Alarm: %s ' % name)
     return evt.inventory
 
-def update_alarm(uuid, comparisonOperator=None, period=None, threshold=None, name=None, repeatInterval=None, resourceUuid=None, session_uuid=None):
+def update_alarm(uuid, comparison_operator=None, period=None, threshold=None, name=None, repeat_interval=None, resource_uuid=None, session_uuid=None):
     action = api_actions.UpdateAlarmAction()
     action.timeout = 30000
     action.uuid = uuid
-    if comparisonOperator:
-        action.comparisonOperator = comparisonOperator
+    if comparison_operator:
+        action.comparisonOperator = comparison_operator
     if period:
         action.period = period
     if threshold:
@@ -436,84 +436,84 @@ def update_alarm(uuid, comparisonOperator=None, period=None, threshold=None, nam
     test_util.action_logger('Update Alarm: %s ' % uuid)
     return evt.inventory
 
-def change_alarm_state(uuid, stateEvent, session_uuid=None):
+def change_alarm_state(uuid, state_event, session_uuid=None):
     action = api_actions.ChangeAlarmStateAction()
     action.timeout = 30000
     action.uuid = uuid
-    action.stateEvent = stateEvent
+    action.stateEvent = state_event
     evt = acc_ops.execute_action_with_session(action, session_uuid)
-    test_util.action_logger('Change Alarm: %s State to %s' % (uuid, stateEvent))
+    test_util.action_logger('Change Alarm: %s State to %s' % (uuid, state_event))
     return evt.inventory
 
-def delete_alarm(uuid, deleteMode=None, session_uuid=None):
+def delete_alarm(uuid, delete_mode=None, session_uuid=None):
     action = api_actions.DeleteAlarmAction()
     action.timeout = 30000
     action.uuid = uuid
-    if deleteMode:
-        action.deleteMode=deleteMode
+    if delete_mode:
+        action.deleteMode=delete_mode
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Delete Alarm: %s ' % uuid)
     return evt.inventory
 
-def add_action_to_alarm(alarmUuid, actionUuid, actionType, session_uuid=None):
+def add_action_to_alarm(alarm_uuid, action_uuid, action_type, session_uuid=None):
     action = api_actions.AddActionToAlarmAction() 
     action.timeout = 30000
-    action.alarmUuid = alarmUuid
-    action.actionUuid = actionUuid
-    action.actionType = actionType
+    action.alarmUuid = alarm_uuid
+    action.actionUuid = action_uuid
+    action.actionType = action_type
     evt = acc_ops.execute_action_with_session(action, session_uuid)
-    test_util.action_logger('Add Action: %s to Alarm: %s ' % (actionUuid, alarmUuid))
+    test_util.action_logger('Add Action: %s to Alarm: %s ' % (action_uuid, alarm_uuid))
     return evt.inventory
 
-def remove_action_from_alarm(alarmUuid, actionUuid, deleteMode=None, session_uuid=None):
+def remove_action_from_alarm(alarm_uuid, action_uuid, delete_mode=None, session_uuid=None):
     action = api_actions.RemoveActionFromAlarmAction()
     action.timeout = 30000
-    action.alarmUuid = alarmUuid
-    action.actionUuid = actionUuid
-    if deleteMode:
-        action.deleteMode = deleteMode
+    action.alarmUuid = alarm_uuid
+    action.actionUuid = action_uuid
+    if delete_mode:
+        action.deleteMode = delete_mode
     evt = acc_ops.execute_action_with_session(action, session_uuid)
-    test_util.action_logger('Remove Action: %s From Alarm: %s ' % (actionUuid, alarmUuid))
+    test_util.action_logger('Remove Action: %s From Alarm: %s ' % (action_uuid, alarm_uuid))
     return evt.inventory
 
-def add_label_to_alarm(alarmUuid, key, value, operator, session_uuid=None):
+def add_label_to_alarm(alarm_uuid, key, value, operator, session_uuid=None):
     action = api_actions.AddLabelToAlarmAction()
     action.timeout = 30000
-    action.alarmUuid = alarmUuid
+    action.alarmUuid = alarm_uuid
     action.key = key
     action.value = value
     action.operator = operator
     evt = acc_ops.execute_action_with_session(action, session_uuid)
-    test_util.action_logger('Add Label to Alarm: %s ' %alarmUuid)
+    test_util.action_logger('Add Label to Alarm: %s ' %alarm_uuid)
     return evt.inventory
 
-def remove_label_from_alarm(uuid, deleteMode=None, session_uuid=None):
+def remove_label_from_alarm(uuid, delete_mode=None, session_uuid=None):
     action = api_actions.RemoveLabelFromAlarmAction()
     action.timeout = 30000
     action.uuid = uuid
-    if deleteMode:
-        action.deleteMode = deleteMode
+    if delete_mode:
+        action.deleteMode = delete_mode
     evt = acc_ops.execute_action_with_session(action, session_uuid)
-    test_util.action_logger('Remove Label From Alarm: %s ' %alarmUuid)
+    test_util.action_logger('Remove Label From Alarm: %s ' %uuid)
     return evt.inventory
 
-def subscribe_event(namespace, eventName, actions, labels, session_uuid=None):
+def subscribe_event(namespace, event_name, actions, labels, session_uuid=None):
     action = api_actions.SubscribeEventAction()
     action.timeout = 30000
     action.namespace = namespace
-    action.eventName = eventName
+    action.eventName = event_name
     action.actions = actions
     action.labels = labels
     evt = acc_ops.execute_action_with_session(action, session_uuid)
-    test_util.action_logger('Subscribe Event: %s ' %eventName)
+    test_util.action_logger('Subscribe Event: %s ' %event_name)
     return evt.inventory
 
-def unsubscribe_event(uuid, deleteMode=None, session_uuid=None):
+def unsubscribe_event(uuid, delete_mode=None, session_uuid=None):
     action = api_actions.UnsubscribeEventAction()
     action.timeout = 30000
     action.uuid = uuid
-    if deleteMode:
-        action.deleteMode = deleteMode
+    if delete_mode:
+        action.deleteMode = delete_mode
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Unsubscribe Event: %s ' %uuid)
     return evt.inventory
@@ -585,11 +585,12 @@ def add_sns_dingtalk_at_person(phone_number, endpoint_uuid, session_uuid=None):
     test_util.action_logger('Add SNS DingTalk At Person: %s ' %phone_number)
     return evt.inventory
 
-def remove_sns_dingtalk_at_person(uuid, delete_mode, session_uuid=None):
+def remove_sns_dingtalk_at_person(uuid, delete_mode=None, session_uuid=None):
     action = api_actions.RemoveSNSDingTalkAtPersonAction()
     action.timeout = 30000
     action.uuid = uuid
-    action.deleteMode = delete_mode
+    if delete_mode:
+        action.deleteMode = delete_mode
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Remove SNS DingTalk At Person: %s ' %uuid)
     return evt.inventory
@@ -604,11 +605,12 @@ def update_sns_application_endpoint(uuid, name, description, session_uuid=None):
     test_util.action_logger('Update SNS Application Endpoint: %s ' %uuid)
     return evt.inventory
 
-def delete_sns_application_endpoint(uuid, delete_mode, session_uuid=None):
+def delete_sns_application_endpoint(uuid, delete_mode=None, session_uuid=None):
     action = api_actions.DeleteSNSApplicationEndpointAction()
     action.timeout = 30000
     action.uuid = uuid
-    action.deleteMode = delete_mode
+    if delete_mode:
+        action.deleteMode = delete_mode
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Delete SNS Application Endpoint: %s ' %uuid)
     return evt.inventory
@@ -632,11 +634,12 @@ def update_sns_application_platform(uuid, name, description, session_uuid=None):
     test_util.action_logger('Update SNS Application Platform: %s ' %uuid)
     return evt.inventory
 
-def delete_sns_application_platform(uuid, delete_mode, session_uuid=None):
+def delete_sns_application_platform(uuid, delete_mode=None, session_uuid=None):
     action = api_actions.DeleteSNSApplicationPlatformAction()
     action.timeout = 30000
     action.uuid = uuid
-    action.deleteMode = delete_mode
+    if delete_mode:
+        action.deleteMode = delete_mode
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Delete SNS Application Platform: %s ' %uuid)
     return evt.inventory
@@ -668,11 +671,12 @@ def update_sns_topic(uuid, name, description, session_uuid=None):
     test_util.action_logger('Update SNS Topic: %s ' %uuid)
     return evt.inventory
 
-def delete_sns_topic(uuid, delete_mode, session_uuid=None):
+def delete_sns_topic(uuid, delete_mode=None, session_uuid=None):
     action = api_actions.DeleteSNSTopicAction()
     action.timeout = 30000
     action.uuid
-    action.deleteMode = delete_mode
+    if delete_mode:
+        action.deleteMode = delete_mode
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Delete SNS Topic: %s ' %uuid)
     return evt.inventory
