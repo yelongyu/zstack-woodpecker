@@ -414,7 +414,7 @@ def create_alarm(comparison_operator, period, threshold, namespace, metric_name,
         action.repeatInterval=repeat_interval
     if labels:
         action.labels=labels
-    if resourceUuid:
+    if resource_Uuid:
         action.resourceUuid=resource_uuid
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create Alarm: %s ' % name)
