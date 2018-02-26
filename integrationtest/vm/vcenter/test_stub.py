@@ -188,6 +188,7 @@ def get_common_pgs(vsdic):
 
 def check_deployed_vcenter(deploy_config, scenario_config = None, scenario_file = None):
     vc_name = os.environ.get('vcenter')
+    vslist = {}
 
     if xmlobject.has_element(deploy_config, 'vcenter.datacenters.datacenter'):
         assert deploy_config.vcenter.name_ == vc_ops.lib_get_vcenter_by_name(vc_name).name
