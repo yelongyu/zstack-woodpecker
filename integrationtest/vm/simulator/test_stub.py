@@ -414,7 +414,7 @@ def create_alarm(comparison_operator, period, threshold, namespace, metric_name,
         action.repeatInterval=repeat_interval
     if labels:
         action.labels=labels
-    if resource_Uuid:
+    if resource_uuid:
         action.resourceUuid=resource_uuid
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create Alarm: %s ' % name)
@@ -538,7 +538,7 @@ def create_sns_email_platform(smtp_server, smtp_port, name, username=None, passw
     if username:
         action.username = username
     if password:
-        action.password
+        action.password = password
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create SNS Email Platform: %s ' %name)
     return evt.inventory
@@ -674,7 +674,7 @@ def update_sns_topic(uuid, name, description, session_uuid=None):
 def delete_sns_topic(uuid, delete_mode=None, session_uuid=None):
     action = api_actions.DeleteSNSTopicAction()
     action.timeout = 30000
-    action.uuid
+    action.uuid = uuid
     if delete_mode:
         action.deleteMode = delete_mode
     evt = acc_ops.execute_action_with_session(action, session_uuid)
