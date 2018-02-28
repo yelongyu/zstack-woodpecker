@@ -189,47 +189,30 @@
           <dswitch name="$dswitch">
             <dportgroups>
               <dportgroup name="$dportgroup" vlanId="$dvlanid0"></dportgroup>
+              <dportgroup name="$dportgroup1" vlanId="$dvlanid0"></dportgroup>
             </dportgroups>
           </dswitch>
           <clusters>
             <cluster name="$vcclusterName">
               <hosts>
                   <host name="$hostName2" ref="$vmName2" username="$vchostUser" password="$vchostpwd" thumbprint="$vcsslthumbprint">
-                    <!--iScsiStorage target="$vciscsitarget">
-                      <vmfsdatastore name="$vcvmfsdatastore"/>
-                    </iScsiStorage-->
-                    <vswitchs>
-                      <vswitch name="$vswitch0">
-                        <portgroup vlanId="$vlanid0">$portgroup0</portgroup>
-                      </vswitch>
-                    </vswitchs>
                     <vms>
                       <vm name="$vcvm" >
-                        <portgroupRef>$portgroup0</portgroupRef>
-                        <!--dportgroupRef>$dportgroup</dportgroupRef-->
+                        <dportgroupRef>$dportgroup</dportgroupRef>
+                      </vm>
+                      <vm name="$vcvm2" >
+                        <dportgroupRef>$dportgroup1</dportgroupRef>
                       </vm>
                     </vms>
                     <dswitchRef>$dswitch</dswitchRef>
                   </host>
                   <host name="$hostName3" ref="$vmName3" username="$vchostUser" password="$vchostpwd" thumbprint="$vcsslthumbprint">
-                    <!--iScsiStorage target="$vciscsitarget">
-                      <vmfsdatastore name="$vcvmfsdatastore"/>
-                    </iScsiStorage-->
-                    <vswitchs>
-                      <vswitch name="$vswitch1">
-                        <portgroup vlanId="$vlanid0">$portgroup1</portgroup>
-                      </vswitch>
-                    </vswitchs>
                     <vms>
-                      <vm name="$vcvm2" >
-                        <portgroupRef>$portgroup1</portgroupRef>
-                        <!--dportgroupRef>$dportgroup</dportgroupRef-->
-                      </vm>
                       <vm name="$vcvm3" >
-                        <portgroupRef>$portgroup1</portgroupRef>
-                        <!--dportgroupRef>$dportgroup</dportgroupRef-->
+                        <dportgroupRef>$dportgroup1</dportgroupRef>
                       </vm>
                     </vms>
+                    <dswitchRef>$dswitch</dswitchRef>
                   </host>
               </hosts>
             </cluster>

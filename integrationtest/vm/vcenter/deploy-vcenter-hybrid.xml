@@ -67,10 +67,10 @@
     </nodes> 
   
     <instanceOfferings>
-      <instanceOffering name="$instanceOfferingName_s"
+      <instanceOffering name="$instanceOfferingName_m"
         description="Test" 
-        memoryCapacity="$instanceOfferingMemory_s" 
-        cpuNum="$instanceOfferingCpuNum_s"
+        memoryCapacity="$instanceOfferingMemory_m" 
+        cpuNum="$instanceOfferingCpuNum_m"
         />
       <virtualRouterOffering name="$virtualRouterOfferingName_s"
         memoryCapacity="$virtualRouterOfferingMemory_s" 
@@ -105,14 +105,8 @@
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
-      <image name="$imageName3" description="Test Image3" 
-        format="$rootImageFormat" url="$imageUrl3" 
-        mediaType="$rootMediaType"
-        username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
-      </image>
-      <image name="$virtualRouterImageName" 
-        description="virtual router image" format="$rootImageFormat" 
+      <image name="$virtualRouterImageName"
+        description="virtual router image" format="$rootImageFormat"
         username="$vrImageUsername" password="$vrImagePassword"
         mediaType="$rootMediaType"
         hypervisorType='KVM' url="$virtualRouterImageUrl" system="True">
@@ -174,9 +168,30 @@
     </zones>
    
     <vcenter name="$vcenter" domainName="$vcenter" username="$vcenteruser" password="$vcenterpwd">
+      <images>
+        <image name="$image_dhcp_name" description="Test Image1"
+          format="$vcenterrootImageFormat" url="$image_centos_dhcp"
+          mediaType="$rootMediaType" systemTags="vcenter::datacenter::undefined">
+          <backupStorageRef>$vcvmfsdatastore</backupStorageRef>
+        </image>
+        <image name="$image_static_name" description="Test Image2"
+          format="$vcenterrootImageFormat" url="$image_centos_static"
+          mediaType="$rootMediaType" systemTags="vcenter::datacenter::undefined">
+          <backupStorageRef>$vcvmfsdatastore</backupStorageRef>
+        </image>
+      </images>
       <zoneRef>$zoneName</zoneRef>
       <datacenters>
         <datacenter name="$vcdatacenterName">
+	  <templates>
+            <template path="$templatepath"></template>
+          </templates>
+          <dswitch name="$dswitch">
+            <dportgroups>
+              <dportgroup name="$dportgroup" vlanId="$dvlanid0"></dportgroup>
+              <dportgroup name="$dportgroup1" vlanId="$dvlanid0"></dportgroup>
+            </dportgroups>
+          </dswitch>
           <clusters>
             <cluster name="$vcclusterName">
               <hosts>
@@ -186,40 +201,31 @@
                         <portgroup vlanId="$vlanid0">$portgroup0</portgroup>
                         <portgroup vlanId="$vlanid1">$portgroup1</portgroup>
                       </vswitch>
-                      <vswitch name="$vswitch1">
-                        <portgroup vlanId="$vlanid0">$portgroup2</portgroup>
-                        <portgroup vlanId="$vlanid1">$portgroup3</portgroup>
-                      </vswitch>
-                    <vswitchs>
+                    </vswitchs>
                     <vms>
                       <vm name="$vcvm" >
+                        <dportgroupRef>$dportgroup</dportgroupRef>
                         <portgroupRef>$portgroup0</portgroupRef>
                       </vm>
                     </vms>
+                    <dswitchRef>$dswitch</dswitchRef>
                   </host>
                   <host name="$hostName3" ref="$vmName3" username="$vchostUser" password="$vchostpwd" thumbprint="$vcsslthumbprint">
                     <vswitchs>
-                      <vswitch name="$vswitch0">
-                        <portgroup vlanId="$vlanid0">$portgroup0</portgroup>
-                        <portgroup vlanId="$vlanid1">$portgroup1</portgroup>
-                      </vswitch>
                       <vswitch name="$vswitch1">
-                        <portgroup vlanId="$vlanid0">$portgroup2</portgroup>
-                        <portgroup vlanId="$vlanid1">$portgroup3</portgroup>
+                        <portgroup vlanId="$vlanid0">$portgroup0</portgroup>
                       </vswitch>
-                    <vswitchs>
+                    </vswitchs>
                     <vms>
-                      <vm name="$vcvm" >
+                      <vm name="$vcvm2" >
+                        <dportgroupRef>$dportgroup</dportgroupRef>
                         <portgroupRef>$portgroup0</portgroupRef>
                       </vm>
-                      <vm name="$vcvm2" >
-                        <portgroupRef>$portgroup1</portgroupRef>
-                      </vm>
                       <vm name="$vcvm3" >
-                        <portgroupRef>$portgroup2</portgroupRef>
-                        <portgroupRef>$portgroup3</portgroupRef>
+                        <dportgroupRef>$dportgroup1</dportgroupRef>
                       </vm>
                     </vms>
+                    <dswitchRef>$dswitch</dswitchRef>
                   </host>
               </hosts>
             </cluster>
