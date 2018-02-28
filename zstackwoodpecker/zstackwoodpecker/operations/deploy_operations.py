@@ -1673,6 +1673,173 @@ def add_vcenter_image(scenarioConfig, scenarioFile, deployConfig, session_uuid):
     wait_for_thread_done(True)
     print 'vcenter images have been added'
 
+def add_vcenter_l2l3_network(scenarioConfig, scenarioFile, deployConfig, session_uuid):
+    if not xmlobject.has_element(deployConfig, "vcenter.l2Networks"):
+        return
+
+    def attachL2ToCluster(l2_inv, session_uuid):
+        test_util.test_logger(l2_inv)
+        datacenter = xmlobject.safe_list(vcenter.datacenters.datacenter)[0]
+        cluster_name = xmlobject.safe_list(datacenter.clusters.cluster)[0].name_
+        conditions = res_ops.gen_query_conditions('name', '=', cluster_name)
+        cluster = res_ops.query_resource(res_ops.CLUSTER, conditions)[0]
+
+        action = api_actions.AttachL2NetworkToClusterAction()
+        action.l2NetworkUuid = l2_inv.uuid
+        action.clusterUuid = cluster.uuid
+        action.sessionUuid = session_uuid
+        try:
+            evt = action.run()
+            test_util.test_logger(jsonobject.dumps(evt))
+        except:
+            exc_info.append(sys.exc_info())
+
+    def createL2Network(l2, session_uuid):
+        # create l2Network
+        zone = res_ops.query_resource(res_ops.ZONE)[0]
+        action = api_actions.CreateL2NoVlanNetworkAction()
+        action.name = l2.name_
+        action.physicalInterface = l2.physicalInterface_
+        action.zoneUuid = zone.uuid
+        action.sessionUuid = session_uuid
+        if hasattr(l2, 'vlan'):
+            action.vlan = l2.vlan_
+        evt = action.run()
+        test_util.test_logger(jsonobject.dumps(evt))
+        return evt.inventory
+
+
+    vcenter = xmlobject.safe_list(deployConfig.vcenter)[0]
+    if  xmlobject.has_element(vcenter, "l2Networks.l2NoVlanNetwork"):
+        for l2 in  xmlobject.safe_list(vcenter.l2Networks.l2NoVlanNetwork):
+            # create l2Network
+            l2_inv = createL2Network(l2, session_uuid)
+
+            # attach l2Network to cluster
+            attachL2ToCluster(l2_inv, session_uuid)
+
+            # create l3Network
+            if not xmlobject.has_element(l2, "l3Networks.l3BasicNetwork"):
+                continue
+            add_vcenter_l3_network(l2, session_uuid)
+
+    if  xmlobject.has_element(vcenter, "l2Networks.l2VlanNetwork"):
+        for l2 in  xmlobject.safe_list(vcenter.l2Networks.l2VlanNetwork):
+            # create l2Network
+            l2_inv = createL2Network(l2, session_uuid)
+
+            # attach l2Network to cluster
+            attachL2ToCluster(l2_inv, session_uuid)
+
+            # create l3Network
+            if not xmlobject.has_element(l2, "l3Networks.l3BasicNetwork"):
+                continue
+            add_vcenter_l3_network(l2, session_uuid)     
+def add_vcenter_l3_network(l2, session_uuid):
+    for l3 in xmlobject.safe_list(l2.l3Networks.l3BasicNetwork):
+        # create l3Network
+        action = api_actions.CreateL3NetworkAction()
+        action.sessionUuid = session_uuid
+        action.name = l3.name_
+        action.type = inventory.L3_BASIC_NETWORK_TYPE
+
+        conditions = res_ops.gen_query_conditions('name', '=', l2.name_)
+        l2_network = res_ops.query_resource(res_ops.L2_NETWORK, conditions)[0]
+        action.l2NetworkUuid = l2_network.uuid
+
+        if l3.domain_name__:
+            action.dnsDomain = l3.domain_name__
+
+        if l3.hasattr('category_'):
+            action.category = l3.category_
+        elif not l3.hasattr('system_') or l3.system_ == False:
+            action.category = 'Private'
+
+        if l3.hasattr('type_'):
+            action.type = l3.type_
+
+        try:
+            evt = action.run()
+            test_util.test_logger(jsonobject.dumps(evt))
+        except:
+            exc_info.append(sys.exc_info())
+
+        #add dns
+        l3_inv = evt.inventory
+        if xmlobject.has_element(l3, 'dns'):
+            for dns in xmlobject.safe_list(l3.dns):
+                action = api_actions.AddDnsToL3NetworkAction()
+                action.sessionUuid = session_uuid
+                action.dns = dns.text_
+                action.l3NetworkUuid = l3_inv.uuid
+                try:
+                    evt = action.run()
+                    test_util.test_logger(jsonobject.dumps(evt))
+                except:
+                    exc_info.append(sys.exc_info())
+
+        #add ip range.
+        if xmlobject.has_element(l3, 'ipRange'):
+            do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid)
+        #add network service.
+        providers = {}
+        action = api_actions.QueryNetworkServiceProviderAction()
+        action.sessionUuid = session_uuid
+        action.conditions = []
+        try:
+            reply = action.run()
+        except:
+            exc_info.append(sys.exc_info())
+        for pinv in reply:
+            providers[pinv.name] = pinv.uuid
+
+        if xmlobject.has_element(l3, 'networkService'):
+            do_add_network_service(l3.networkService, l3_inv.uuid, providers, session_uuid)
+
+def add_vcenter_vrouter(scenarioConfig, scenarioFile, deployConfig, session_uuid):
+    if not xmlobject.has_element(deployConfig, 'vcenter.virtualRouterOfferings'):
+        return
+
+    for i in xmlobject.safe_list(deployConfig.vcenter.virtualRouterOfferings.virtualRouterOffering):
+        action = api_actions.CreateVirtualRouterOfferingAction()
+        action.sessionUuid = session_uuid
+        action.name = i.name__
+        action.decription = i.description_
+        action.cpuNum = i.cpuNum_
+
+        if i.memorySize__:
+            action.memorySize = sizeunit.get_size(i.memorySize_)
+        elif i.memoryCapacity_:
+            action.memorySize = sizeunit.get_size(i.memoryCapacity_)
+
+        action.isDefault = i.isDefault__
+        action.type = 'VirtualRouter'
+
+        zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, name=i.zoneRef.text_)
+        zinv = get_first_item_from_list(zinvs, 'zone', i.zoneRef.text_, 'virtual router offering')
+        action.zoneUuid = zinv.uuid
+
+        cond = res_ops.gen_query_conditions('zoneUuid', '=', zinv.uuid)
+        cond1 = res_ops.gen_query_conditions('name', '=', i.managementL3NetworkRef.text_, cond)
+        minvs = res_ops.query_resource(res_ops.L3_NETWORK, cond1, session_uuid)
+        minv = get_first_item_from_list(minvs, 'Management L3 Network', i.managementL3NetworkRef.text_, 'virtualRouterOffering')
+        action.managementNetworkUuid = minv.uuid
+
+        cond2 = res_ops.gen_query_conditions('name', '=', i.publicL3NetworkRef.text_, cond)
+        pinvs = res_ops.query_resource(res_ops.L3_NETWORK, cond2, session_uuid)
+        pinv = get_first_item_from_list(pinvs, 'Public L3 Network', i.publicL3NetworkRef.text_, 'virtualRouterOffering')
+        action.publicNetworkUuid = pinv.uuid
+
+        iinvs = res_ops.get_resource(res_ops.IMAGE, session_uuid, name=i.imageRef.text_)
+        iinv = get_first_item_from_list(iinvs, 'Image', i.imageRef.text_, 'virtualRouterOffering')
+        action.imageUuid = iinv.uuid
+
+        try:
+            evt = action.run()
+        except:
+            exc_info.append(sys.exc_info())
+        test_util.test_logger(jsonobject.dumps(evt))
+
 
 
 def _thread_for_action(action):
@@ -2017,7 +2184,9 @@ def deploy_initial_database(deploy_config, scenario_config = None, scenario_file
             add_virtual_router,
             add_pxe_server,
             add_vcenter,
-            add_vcenter_image
+            add_vcenter_image,
+	    add_vcenter_l2l3_network,
+            add_vcenter_vrouter
             ]
     for operation in operations:
         session_uuid = account_operations.login_as_admin()
