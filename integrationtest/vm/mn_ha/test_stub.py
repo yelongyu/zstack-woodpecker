@@ -639,7 +639,7 @@ def ensure_bss_host_connected_from_stop(scenarioFile, scenarioConfig, deploy_con
             bss_host_ip.append(bs.hostname)
 
         for bs_host_ip in bss_host_ip:
-            if test_lib.lib_wait_target_up(bs_host_ip, '22', 120):
+            if test_lib.lib_wait_target_up(bs_host_ip, '22', 300):
                 bss_host_ip.remove(bs_host_ip)
 
         mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
@@ -649,7 +649,7 @@ def ensure_bss_host_connected_from_stop(scenarioFile, scenarioConfig, deploy_con
                     recover_host(mn_host, scenarioConfig, deploy_config)
 
         for bs_host_ip in bss_host_ip:
-            if test_lib.lib_wait_target_up(bs_host_ip, '22', 120):
+            if test_lib.lib_wait_target_up(bs_host_ip, '22', 300):
                 bss_host_ip.remove(bs_host_ip)
 
         if bss_host_ip:
@@ -669,7 +669,7 @@ def ensure_bss_host_connected_from_sep_net_down(scenarioFile, scenarioConfig, do
             bss_host_ip.append(bs.hostname)
 
         for bs_host_ip in bss_host_ip:
-            if test_lib.lib_wait_target_up(bs_host_ip, '22', 120):
+            if test_lib.lib_wait_target_up(bs_host_ip, '22', 300):
                 bss_host_ip.remove(bs_host_ip)
 
         if downMagt:
@@ -684,7 +684,7 @@ def ensure_bss_host_connected_from_sep_net_down(scenarioFile, scenarioConfig, do
                     reopen_host_network(mn_host, scenarioConfig, param_l2_nic=l2network_nic)
 
         for bs_host_ip in bss_host_ip:
-            if test_lib.lib_wait_target_up(bs_host_ip, '22', 120):
+            if test_lib.lib_wait_target_up(bs_host_ip, '22', 300):
                 bss_host_ip.remove(bs_host_ip)
 
         if bss_host_ip:
