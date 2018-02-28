@@ -453,8 +453,9 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
         nfsIP = nfs_url.split(':')[0]
         nfsPath = nfs_url.split(':')[1]
         image_nfs_path = "%s/mnvm.img" %(nfsPath)
-        test_util.test_logger("scp from %s to %s:%s" % (mn_image_path, nfsIP, image_nfs_path))
-        ssh.scp_file(mn_image_path, image_nfs_path, nfsIP, test_host_config.imageUsername_, test_host_config.imagePassword_)
+        mn_image_nfs_server_path = "/home/%s/mn.qcow2" % nfsIP
+        test_util.test_logger("scp from %s to %s:%s" % (mn_image_nfs_server_path, nfsIP, image_nfs_path))
+        ssh.scp_file(mn_image_nfs_server_path, image_nfs_path, nfsIP, test_host_config.imageUsername_, test_host_config.imagePassword_)
 
     elif mn_ha_storage_type == 'fusionstor':
         cmd1 = "lichbd pool create zstack -p nbd"
