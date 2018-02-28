@@ -105,12 +105,6 @@
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
-      <image name="$imageName3" description="Test Image3" 
-        format="$rootImageFormat" url="$imageUrl3" 
-        mediaType="$rootMediaType"
-        username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
-      </image>
       <image name="$virtualRouterImageName" 
         description="virtual router image" format="$rootImageFormat" 
         username="$vrImageUsername" password="$vrImagePassword"
@@ -174,9 +168,24 @@
     </zones>
    
     <vcenter name="$vcenter" domainName="$vcenter" username="$vcenteruser" password="$vcenterpwd">
+      <images>
+        <image name="$image_dhcp_name" description="Test Image1"
+          format="$vcenterrootImageFormat" url="$image_centos_dhcp"
+          mediaType="$rootMediaType" systemTags="vcenter::datacenter::undefined">
+          <backupStorageRef>$vcvmfsdatastore</backupStorageRef>
+        </image>
+        <image name="$image_static_name" description="Test Image2"
+          format="$vcenterrootImageFormat" url="$image_centos_static"
+          mediaType="$rootMediaType" systemTags="vcenter::datacenter::undefined">
+          <backupStorageRef>$vcvmfsdatastore</backupStorageRef>
+        </image>
+      </images>
       <zoneRef>$zoneName</zoneRef>
       <datacenters>
         <datacenter name="$vcdatacenterName">
+          <templates>
+            <template path="$templatepath"></template>
+          </templates>
           <clusters>
             <cluster name="$vcclusterName">
               <hosts>
@@ -190,7 +199,7 @@
                         <portgroup vlanId="$vlanid0">$portgroup2</portgroup>
                         <portgroup vlanId="$vlanid1">$portgroup3</portgroup>
                       </vswitch>
-                    <vswitchs>
+                    </vswitchs>
                     <vms>
                       <vm name="$vcvm" >
                         <portgroupRef>$portgroup0</portgroupRef>
@@ -207,7 +216,7 @@
                         <portgroup vlanId="$vlanid0">$portgroup2</portgroup>
                         <portgroup vlanId="$vlanid1">$portgroup3</portgroup>
                       </vswitch>
-                    <vswitchs>
+                    </vswitchs>
                     <vms>
                       <vm name="$vcvm" >
                         <portgroupRef>$portgroup0</portgroupRef>
