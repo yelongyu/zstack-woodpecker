@@ -586,14 +586,15 @@ def add_sns_dingtalk_at_person(phone_number, endpoint_uuid, session_uuid=None):
     test_util.action_logger('Add SNS DingTalk At Person: %s ' %phone_number)
     return evt.inventory
 
-def remove_sns_dingtalk_at_person(uuid, delete_mode=None, session_uuid=None):
+def remove_sns_dingtalk_at_person(phone_number, endpoint_uuid, delete_mode=None, session_uuid=None):
     action = api_actions.RemoveSNSDingTalkAtPersonAction()
     action.timeout = 30000
-    action.uuid = uuid
+    action.phoneNumber = phone_number
+    action.uuid = endpoint_uuid
     if delete_mode:
         action.deleteMode = delete_mode
     evt = acc_ops.execute_action_with_session(action, session_uuid)
-    test_util.action_logger('Remove SNS DingTalk At Person: %s ' %uuid)
+    test_util.action_logger('Remove SNS DingTalk At Person: %s ' % endpoint_uuid)
     return evt.inventory
 
 def update_sns_application_endpoint(uuid, name, description, session_uuid=None):
