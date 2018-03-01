@@ -590,7 +590,7 @@ def remove_sns_dingtalk_at_person(phone_number, endpoint_uuid, delete_mode=None,
     action = api_actions.RemoveSNSDingTalkAtPersonAction()
     action.timeout = 30000
     action.phoneNumber = phone_number
-    action.uuid = endpoint_uuid
+    action.endpointUuid = endpoint_uuid
     if delete_mode:
         action.deleteMode = delete_mode
     evt = acc_ops.execute_action_with_session(action, session_uuid)
