@@ -44,7 +44,7 @@ def test():
 
     test_util.test_logger('Upgrade zstack to latest with repo') 
     #test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
-    #test_stub.update_repo(vm_ip, tmp_file)
+    test_stub.update_repo(vm_ip, tmp_file)
     test_stub.upgrade_zstack(vm_ip, zstack_latest_path, tmp_file) 
     test_stub.check_zstack_version(vm_ip, tmp_file, zstack_latest_version)
     test_stub.start_mn(vm_ip, tmp_file)
