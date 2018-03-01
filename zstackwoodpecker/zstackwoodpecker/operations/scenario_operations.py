@@ -1579,6 +1579,20 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
     vms_xml = etree.SubElement(root_xml, 'vms')
     poolName = os.environ.get('poolName')
     primaryStorageUuid = os.environ.get('primaryStorageUuid')
+
+    cmd = "systemctl disable mariadb"
+    test_util.test_logger("@@@DEBUG-> change solomode@@@ %s" %(cmd))
+    os.system(cmd)
+    cmd = "systemctl stop mariadb"
+    test_util.test_logger("@@@DEBUG-> change solomode@@@ %s" %(cmd))
+    os.system(cmd)
+    cmd = "systemctl disable httpd"
+    test_util.test_logger("@@@DEBUG-> change solomode@@@ %s" %(cmd))
+    os.system(cmd)
+    cmd = "systemctl stop httpd"
+    test_util.test_logger("@@@DEBUG-> change solomode@@@ %s" %(cmd))
+    os.system(cmd)
+
     if hasattr(scenario_config.deployerConfig, 'vpcVrouters'):
         # Need to clean up left over VPC Vrouters
         scenvpcVrouterCleanPattern = os.environ.get('scenvpcVrouterCleanPattern')
