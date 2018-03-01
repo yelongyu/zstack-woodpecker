@@ -224,10 +224,11 @@ def check_deployed_vcenter(deploy_config, scenario_config = None, scenario_file 
                     assert vm.name_ == vc_ops.lib_get_vm_by_name(vm.name_).name
                     assert vc_ops.lib_get_vm_by_name(vm.name_).hypervisorType == "ESX"
                     assert vc_ops.lib_get_vm_by_name(vm.name_).state == "Running"
-        for template in xmlobject.safe_list(datacenter.templates.template):
-            templ_name = template.path_
-            tp_name = templ_name.split('/')[-1].split('.')[0]
-            assert tp_name == vc_ops.lib_get_root_image_by_name(tp_name).name
+            if xmlobject.has_element(cluster, "templates"):
+                for template in xmlobject.safe_list(cluster.templates.template):
+                    templ_name = template.path_
+                    tp_name = templ_name.split('/')[-1].split('.')[0]
+                    assert tp_name == vc_ops.lib_get_root_image_by_name(tp_name).name
         pg_list, vlan_list = get_common_pgs(vslist)
         for pg in pg_list:
             assert pg == vc_ops.lib_get_vcenter_l2_by_name(pg).name

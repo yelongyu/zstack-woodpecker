@@ -2711,7 +2711,7 @@ def add_host_to_dvswitch(host=None, dvswitch=None, hostname=None):
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.environ.get("zstackManagementIp")
     cond = res_ops.gen_query_conditions('name', '=', hostname)
     vm = res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0]
-    l3_uuid = os.environ.get("vmL3Uuid2")
+    l3_uuid = os.environ.get("vmL3Uuid3")
     for net in vm.vmNics:
         if net.l3NetworkUuid == l3_uuid:
             mac = net.mac
@@ -2862,7 +2862,7 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
                             add_vm_to_portgroup(vm=vc_vm, portgroup=portgroup1_vc)
                     if xmlobject.has_element(vm, "dportgroupRef"):
                         for dportgroup1 in xmlobject.safe_list(vm.dportgroupRef):
-                            dportgroup1_vc = get_obj(content, [vim.dvs.DistributedVirtualPortgroup], name=portgroup1.text_)
+                            dportgroup1_vc = get_obj(content, [vim.dvs.DistributedVirtualPortgroup], name=dportgroup1.text_)
                             add_vm_to_dvsportgroup(vm=vc_vm, dportgroup=dportgroup1_vc)
             if xmlobject.has_element(cluster, "templates"):
 	        for template in xmlobject.safe_list(cluster.templates.template):

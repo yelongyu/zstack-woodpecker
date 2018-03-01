@@ -72,15 +72,6 @@
         memoryCapacity="$instanceOfferingMemory_m" 
         cpuNum="$instanceOfferingCpuNum_m"
         />
-      <virtualRouterOffering name="$virtualRouterOfferingName_s"
-        memoryCapacity="$virtualRouterOfferingMemory_s" 
-        cpuNum="$virtualRouterOfferingCpuNum_s" isDefault="true">
-        <zoneRef>$zoneName</zoneRef>
-        <!--<managementL3NetworkRef>$l3ManagementNetworkName</managementL3NetworkRef>-->
-        <managementL3NetworkRef>$l3PublicNetworkName</managementL3NetworkRef>
-        <publicL3NetworkRef>$l3PublicNetworkName</publicL3NetworkRef>
-        <imageRef>$virtualRouterImageName</imageRef>
-      </virtualRouterOffering>
     </instanceOfferings>
   
     <backupStorages>
@@ -103,13 +94,6 @@
         format="$rootImageFormat" url="$imageUrl_net" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
-      </image>
-      <image name="$virtualRouterImageName"
-        description="virtual router image" format="$rootImageFormat"
-        username="$vrImageUsername" password="$vrImagePassword"
-        mediaType="$rootMediaType"
-        hypervisorType='KVM' url="$virtualRouterImageUrl" system="True">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
     </images>
@@ -145,25 +129,10 @@
                 username="$hostUsername" password="$hostPassword" />
             </hosts>
             <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
-            <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
-            <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
           </cluster>
         </clusters>
         <l2Networks>
-          <l2NoVlanNetwork name="$l2PublicNetworkName"
-            description="Test"
-            physicalInterface="$l2PublicNetworkInterface">
-            <l3Networks>
-              <l3BasicNetwork name="$l3PublicNetworkName" category="Public" description="Public Network">
-                <ipRange name="$ipRangeName" description="Test"
-                  startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
-                  netmask="$ipRangeNetmask" />
-                <dns>$DNSServer</dns>
-              </l3BasicNetwork>
-            </l3Networks>
-          </l2NoVlanNetwork>
         </l2Networks>
-
       </zone>
     </zones>
    
@@ -179,7 +148,58 @@
           mediaType="$rootMediaType" systemTags="vcenter::datacenter::undefined">
           <backupStorageRef>$vcvmfsdatastore</backupStorageRef>
         </image>
+        <image name="$vCenterVirtualRouterImageName"
+          description="virtual router image for vcenter"
+          mediaType="$rootMediaType" format="$vcenterrootImageFormat"
+          username="$vCenterVRImageUsername" password="$vCenterVRImagePassword"
+          url="$vCenterVirtualRouterImageUrl" system="True" systemTags="vcenter::datacenter::undefined">
+          <backupStorageRef>$vcvmfsdatastore</backupStorageRef>
+        </image>
       </images>
+      <l2Networks>
+        <l2NoVlanNetwork name="$l2vCenterPublicNetworkName"
+          description="public and management network for vCenter vrouter network"
+          physicalInterface="$dswitch">
+          <l3Networks>
+            <l3BasicNetwork name="$l3PublicNetworkName" category="Public" description="Public Network in vCenter">
+              <ipRange name="$ipRangeName" description="Test"
+                startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
+                netmask="$ipRangeNetmask" />
+              <dns>$DNSServer</dns>
+            </l3BasicNetwork>
+          </l3Networks>
+        </l2NoVlanNetwork>
+        <l2NoVlanNetwork name="$l2vCenterNoVlanNetworkName" description="vCenter vrouter network"
+          physicalInterface="dswitch">
+          <l3Networks>
+            <l3BasicNetwork name="$l3vCenterNoVlanNetworkName" description = "vCenter vrouter network">
+              <ipRange name="$vCenterNoVlanIpRangeName" description="Test"
+                startIp="$vCenterNoVlanIpRangeStartIp" endIp="$vCenterNoVlanIpRangeEndIp"
+                gateway="$vCenterNoVlanIpRangeGateway" netmask="$vCenterNoVlanIpRangeNetmask"/>
+              <dns>$vCenterDNSServer</dns>
+              <networkService provider="vrouter">
+                <serviceType>DHCP</serviceType>
+                <serviceType>DNS</serviceType>
+                <serviceType>SNAT</serviceType>
+                <serviceType>PortForwarding</serviceType>
+                <serviceType>Eip</serviceType>
+                <serviceType>LoadBalancer</serviceType>
+                <serviceType>IPsec</serviceType>
+              </networkService>
+            </l3BasicNetwork>
+          </l3Networks>
+        </l2NoVlanNetwork>
+      </l2Networks>
+      <virtualRouterOfferings>
+        <virtualRouterOffering name="$vCenterVirtualRouterOfferingName"
+          description="vcenter vrouter offering"
+          memoryCapacity="$vCenterVirtualRouterOfferingMemory" cpuSpeed="$vCenterVirtualRouterOfferingCpuSpeed" cpuNum="$vCenterVirtualRouterOfferingCpuNum" isDefault="true">
+          <zoneRef>$zoneName</zoneRef>
+          <managementL3NetworkRef>$l3PublicNetworkName</managementL3NetworkRef>
+          <publicL3NetworkRef>$l3PublicNetworkName</publicL3NetworkRef>
+          <imageRef>$vCenterVirtualRouterImageName</imageRef>
+        </virtualRouterOffering>
+      </virtualRouterOfferings>
       <zoneRef>$zoneName</zoneRef>
       <datacenters>
         <datacenter name="$vcdatacenterName">
