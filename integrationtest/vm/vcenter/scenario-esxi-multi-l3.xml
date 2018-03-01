@@ -16,7 +16,6 @@
           <l3Networks>
             <l3Network uuid="$vmL3Uuid">
 	      <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
-              <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             </l3Network>
           </l3Networks>
 	  <nodeRef>$node1Name</nodeRef>
@@ -33,7 +32,6 @@
           <l3Networks>
             <l3Network uuid="$vmL3Uuid">
 	      <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
-              <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             </l3Network>
             <l3Network uuid="$vmL3Uuid2" />
             <l3Network uuid="$vmL3Uuid3" />
@@ -50,7 +48,6 @@
           <l3Networks>
             <l3Network uuid="$vmL3Uuid">
 	      <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
-              <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             </l3Network>
             <l3Network uuid="$vmL3Uuid2" />
             <l3Network uuid="$vmL3Uuid3" />
@@ -67,7 +64,6 @@
           <l3Networks>
             <l3Network uuid="$vmL3Uuid">
 	      <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
-              <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             </l3Network>
             <l3Network uuid="$vmL3Uuid2" />
             <l3Network uuid="$vmL3Uuid3" />
