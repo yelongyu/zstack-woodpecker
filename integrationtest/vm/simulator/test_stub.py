@@ -559,7 +559,7 @@ def create_sns_http_endpoint(url, name, username=None, password=None, session_uu
     if username:
         action.username = username
     if password:
-        action.password
+        action.password =password
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create SNS Http Endpoint: %s ' %name)
     return evt.inventory
@@ -568,6 +568,7 @@ def create_sns_dingtalk_endpoint(url, name, at_all=None, at_person_phone_numbers
     action = api_actions.CreateSNSDingTalkEndpointAction()
     action.timeout = 30000
     action.url = url
+    action.name = name
     if at_all:
         action.atAll = at_all
     if at_person_phone_numbers:
