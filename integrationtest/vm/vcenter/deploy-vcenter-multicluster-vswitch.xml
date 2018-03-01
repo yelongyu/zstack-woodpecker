@@ -183,11 +183,11 @@
       <zoneRef>$zoneName</zoneRef>
       <datacenters>
         <datacenter name="$vcdatacenterName">
-          <templates>
-            <template path="$templatepath"></template>
-          </templates>
           <clusters>
             <cluster name="$vcclusterName">
+              <templates>
+                <template path="$templatepath"></template>
+              </templates>
               <hosts>
                   <host name="$hostName2" ref="$vmName2" username="$vchostUser" password="$vchostpwd" thumbprint="$vcsslthumbprint">
                     <vswitchs>
@@ -203,9 +203,7 @@
                     <vms>
                       <vm name="$vcvm" >
                         <portgroupRef>$portgroup0</portgroupRef>
-                      </vm>
-                      <vm name="$vcvm2" >
-                        <portgroupRef>$portgroup2</portgroupRef>
+                        <portgroupRef>$portgroup1</portgroupRef>
                       </vm>
                     </vms>
                   </host>
@@ -225,8 +223,8 @@
                       </vswitch>
                     </vswitchs>
                     <vms>
-                      <vm name="$vcvm" >
-                        <portgroupRef>$portgroup0</portgroupRef>
+                      <vm name="$vcvm2" >
+                        <portgroupRef>$portgroup1</portgroupRef>
                       </vm>
                     </vms>
                   </host>
@@ -242,14 +240,9 @@
                       </vswitch>
                     </vswitchs>
                     <vms>
-                      <vm name="$vcvm" >
-                        <portgroupRef>$portgroup0</portgroupRef>
-                        <portgroupRef>$portgroup2</portgroupRef>
-                      </vm>
-                      <vm name="$vcvm2" >
-                        <portgroupRef>$portgroup1</portgroupRef>
-                      </vm>
                       <vm name="$vcvm3" >
+                        <portgroupRef>$portgroup1</portgroupRef>
+                        <portgroupRef>$portgroup2</portgroupRef>
                         <portgroupRef>$portgroup3</portgroupRef>
                       </vm>
                     </vms>

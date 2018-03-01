@@ -74,7 +74,6 @@ vmName4 = 12345
 
 vCenterVirtualRouterImageName = vCenter-vr
 rootMediaType = RootVolumeTemplate
-vCenterRootImageFormat = vmtx
 vCenterVRImageUsername = root
 vCenterVRImagePassword = password
 vCenterVirtualRouterImageUrl = http://192.168.200.100/mirror/diskimages/zstack-vrouter-latest.vmdk

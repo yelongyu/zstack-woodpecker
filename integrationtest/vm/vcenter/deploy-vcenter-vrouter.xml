@@ -150,7 +150,7 @@
         </image>
         <image name="$vCenterVirtualRouterImageName"
           description="virtual router image for vcenter"
-          mediaType="$rootMediaType" format="$vCenterRootImageFormat"
+          mediaType="$rootMediaType" format="$vcenterrootImageFormat"
           username="$vCenterVRImageUsername" password="$vCenterVRImagePassword"
           url="$vCenterVirtualRouterImageUrl" system="True" systemTags="vcenter::datacenter::undefined">
           <backupStorageRef>$vcvmfsdatastore</backupStorageRef>

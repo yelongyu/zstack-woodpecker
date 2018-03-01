@@ -183,9 +183,6 @@
       <zoneRef>$zoneName</zoneRef>
       <datacenters>
         <datacenter name="$vcdatacenterName">
-	  <templates>
-            <template path="$templatepath"></template>
-          </templates>
           <dswitch name="$dswitch">
             <dportgroups>
               <dportgroup name="$dportgroup" vlanId="$dvlanid0"></dportgroup>
@@ -194,6 +191,9 @@
           </dswitch>
           <clusters>
             <cluster name="$vcclusterName">
+	      <templates>
+                <template path="$templatepath"></template>
+              </templates>
               <hosts>
                   <host name="$hostName2" ref="$vmName2" username="$vchostUser" password="$vchostpwd" thumbprint="$vcsslthumbprint">
                     <vms>
@@ -206,9 +206,6 @@
                   </host>
                   <host name="$hostName3" ref="$vmName3" username="$vchostUser" password="$vchostpwd" thumbprint="$vcsslthumbprint">
                     <vms>
-                      <vm name="$vcvm2" >
-                        <dportgroupRef>$dportgroup</dportgroupRef>
-                      </vm>
                       <vm name="$vcvm3" >
                         <dportgroupRef>$dportgroup1</dportgroupRef>
                       </vm>
@@ -223,9 +220,6 @@
                     <vms>
                       <vm name="$vcvm2" >
                         <dportgroupRef>$dportgroup</dportgroupRef>
-                        <dportgroupRef>$dportgroup1</dportgroupRef>
-                      </vm>
-                      <vm name="$vcvm3" >
                         <dportgroupRef>$dportgroup1</dportgroupRef>
                       </vm>
                     </vms>

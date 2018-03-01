@@ -183,9 +183,6 @@
       <zoneRef>$zoneName</zoneRef>
       <datacenters>
         <datacenter name="$vcdatacenterName">
-	  <templates>
-            <template path="$templatepath"></template>
-          </templates>
           <!--dswitch name="$dswitch">
             <dportgroups>
               <dportgroup name="$dportgroup" vlanId="$dvlanid0"></dportgroup>
@@ -193,6 +190,9 @@
           </dswitch-->
           <clusters>
             <cluster name="$vcclusterName">
+	      <templates>
+                <template path="$templatepath"></template>
+              </templates>
               <hosts>
                   <host name="$hostName2" ref="$vmName2" username="$vchostUser" password="$vchostpwd" thumbprint="$vcsslthumbprint">
                     <!--iScsiStorage target="$vciscsitarget">

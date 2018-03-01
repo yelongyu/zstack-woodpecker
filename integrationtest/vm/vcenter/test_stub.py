@@ -215,11 +215,11 @@ def check_deployed_vcenter(deploy_config, scenario_config = None, scenario_file 
                     for vswitch in xmlobject.safe_list(host.vswitchs.vswitch):
                         if vswitch.name_ == "vSwitch0":
                             for port_group in xmlobject.safe_list(vswitch.portgroup):
-                                vslist[host.name_]['vSwitch0'].append(port_group.text_ + '.' + port_group.vlanId)
+                                vslist[host.name_]['vSwitch0'].append(port_group.text_ + '.' + port_group.vlanId_)
                         else:
                             vslist[host.name_][vswitch.name_] = []
                             for port_group in xmlobject.safe_list(vswitch.portgroup):
-                                vslist[host.name_][vswitch.name_].append(port_group.text_ + '.' + port_group.vlanId)
+                                vslist[host.name_][vswitch.name_].append(port_group.text_ + '.' + port_group.vlanId_)
                 for vm in xmlobject.safe_list(host.vms.vm):
                     assert vm.name_ == vc_ops.lib_get_vm_by_name(vm.name_).name
                     assert vc_ops.lib_get_vm_by_name(vm.name_).hypervisorType == "ESX"

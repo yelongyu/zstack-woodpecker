@@ -2646,8 +2646,8 @@ def deploy_ova(service_instance=None, datacenter=None, datastore=None, resourcep
 
     if len(cisr.error):
         for error in cisr.error:
-            test_util.test.logger("%s" % error)
-        test_util.test.logger("some errors prevent import of this OVA")
+            test_util.test_logger("%s" % error)
+        test_util.test_logger("some errors prevent import of this OVA")
     ovf_handle.set_spec(cisr)
 
     lease = resourcepool.ImportVApp(cisr.importSpec, datacenter.vmFolder)
@@ -2726,7 +2726,7 @@ def add_host_to_dvswitch(host=None, dvswitch=None, hostname=None):
     Task = dvswitch.ReconfigureDvs_Task(spec=config)
     task.WaitForTask(Task)
 
-def add_vm_to_dvsportgroup(vm=None, DPortgroup=None):
+def add_vm_to_dvsportgroup(vm=None, dportgroup=None):
     from pyVim import task
     from pyVmomi import vim
 
@@ -2857,17 +2857,20 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
                     vc_vm = create_vm(name=vm.name_,vm_folder=vc_dc.vmFolder,resource_pool=resource_pool,host=vc_hs)
 		    powerOn_vm(vc_vm)
                     if xmlobject.has_element(vm, "portgroupRef"):
-                        portgroup1 = get_obj(content, [vim.Network], name=vm.portgroupRef.text_)
-                        add_vm_to_portgroup(vm=vc_vm, portgroup=portgroup1)
+                        for portgroup1 in xmlobject.safe_list(vm.portgroupRef):
+                            portgroup1_vc = get_obj(content, [vim.Network], name=portgroup1.text_)
+                            add_vm_to_portgroup(vm=vc_vm, portgroup=portgroup1_vc)
                     if xmlobject.has_element(vm, "dportgroupRef"):
-                        dportgroup1 = get_obj(content, [vim.dvs.DistributedVirtualPortgroup], name=vm.dportgroupRef.text_)
-                        add_vm_to_dvsportgroup(vm=vc_vm, DPortgroup=dportgroup1)
-	for template in xmlobject.safe_list(datacenter.templates.template):
-            name = deploy_ova(service_instance=SI,
-                              datacenter=vc_dc,
-                              datastore=get_obj(content, [vim.Datastore])[0],
-                              resourcepool=get_obj(content, [vim.ResourcePool])[0],
-                              path=template.path_)
-            get_obj(content, [vim.VirtualMachine], name).MarkAsTemplate()
+                        for dportgroup1 in xmlobject.safe_list(vm.dportgroupRef):
+                            dportgroup1_vc = get_obj(content, [vim.dvs.DistributedVirtualPortgroup], name=portgroup1.text_)
+                            add_vm_to_dvsportgroup(vm=vc_vm, dportgroup=dportgroup1_vc)
+            if xmlobject.has_element(cluster, "templates"):
+	        for template in xmlobject.safe_list(cluster.templates.template):
+                    name = deploy_ova(service_instance=SI,
+                                      datacenter=vc_dc,
+                                      datastore=vc_cl.datastore[0],
+                                      resourcepool=vc_cl.resourcePool,
+                                      path=template.path_)
+                    get_obj(content, [vim.VirtualMachine], name).MarkAsTemplate()
     test_util.test_logger('[Done] zstack initial vcenter environment was created successfully.')
 

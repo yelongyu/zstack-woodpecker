@@ -183,11 +183,11 @@
       <zoneRef>$zoneName</zoneRef>
       <datacenters>
         <datacenter name="$vcdatacenterName">
-          <templates>
-            <template path="$templatepath"></template>
-          </templates>
           <clusters>
             <cluster name="$vcclusterName">
+              <templates>
+                <template path="$templatepath"></template>
+              </templates>
               <hosts>
                   <host name="$hostName2" ref="$vmName2" username="$vchostUser" password="$vchostpwd" thumbprint="$vcsslthumbprint">
                     <vswitchs>
@@ -218,9 +218,6 @@
                       </vswitch>
                     </vswitchs>
                     <vms>
-                      <vm name="$vcvm" >
-                        <portgroupRef>$portgroup0</portgroupRef>
-                      </vm>
                       <vm name="$vcvm2" >
                         <portgroupRef>$portgroup1</portgroupRef>
                       </vm>
