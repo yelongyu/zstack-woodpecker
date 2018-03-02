@@ -324,10 +324,21 @@ def get_mn_ha_nfs_url(scenario_config, scenario_file, deploy_config):
 	                if primaryStorageRef.type_ == 'nfs':
 	                    for nfsPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.nfsPrimaryStorage):
 	                        if primaryStorageRef.text_ == nfsPrimaryStorage.name_:
-	                            return nfsPrimaryStorage.url_
+	                            #return nfsPrimaryStorage.url_
+	                            return create_and_clean_nfs_sub_url_in_server()
     return None
 
-
+def create_and_clean_nfs_sub_url_in_server():
+    woodpecker_vm_ip = shell.call("ip r | grep src | head -1 | awk '{print $NF}'").strip()
+    shell.call("mkdir -p /opt/mnt_nfs")
+    shell.call("mount 172.20.1.7:/mnt/test /opt/mnt_nfs")
+    nfs_sub_folder = "/opt/mnt_nfs/%s" % woodpecker_vm_ip
+    shell.call("mkdir -p %s" % nfs_sub_folder)
+    shell.call("rm -rf %s/mnvm.*" % nfs_sub_folder)
+    shell.call("umount /opt/mnt_nfs")
+    nfs_sub_url = "172.20.1.7:/mnt/test/" + woodpecker_vm_ip
+    return nfs_sub_url
+    
 
 def get_nfs_ip_for_net_sep(scenarioConfig, virtual_host_ip, nfs_ps_name):
     zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
@@ -401,13 +412,13 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
         #TODO: should make image folder configarable
         cmd = 'mkdir -p /storage'
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
-        cmd = 'echo mount %s:%s /storage >> /etc/rc.local' % (nfsIP, nfsPath)
-        #cmd = 'echo mount -t nfs -o rw,soft,timeo=30,retry=3 %s:%s /storage >> /etc/rc.local' % (nfsIP, nfsPath)
+        #cmd = 'echo mount %s:%s /storage >> /etc/rc.local' % (nfsIP, nfsPath)
+        cmd = 'echo mount -t nfs -o rw,soft,timeo=30,retry=3 %s:%s /storage >> /etc/rc.local' % (nfsIP, nfsPath)
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
         cmd = 'chmod a+x /etc/rc.local /etc/rc.d/rc.local'
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
-	cmd = 'mount %s:%s /storage' % (nfsIP, nfsPath)
-	#cmd = 'mount -t nfs -o rw,soft,timeo=30,retry=3 %s:%s /storage' % (nfsIP, nfsPath)
+	#cmd = 'mount %s:%s /storage' % (nfsIP, nfsPath)
+	cmd = 'mount -t nfs -o rw,soft,timeo=30,retry=3 %s:%s /storage' % (nfsIP, nfsPath)
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
     elif mn_ha_storage_type == "ceph":
