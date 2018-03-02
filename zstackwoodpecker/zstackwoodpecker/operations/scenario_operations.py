@@ -401,13 +401,13 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
         #TODO: should make image folder configarable
         cmd = 'mkdir -p /storage'
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
-        #cmd = 'echo mount %s:%s /storage >> /etc/rc.local' % (nfsIP, nfsPath)
-        cmd = 'echo mount -t nfs -o rw,soft,timeo=30,retry=3 %s:%s /storage >> /etc/rc.local' % (nfsIP, nfsPath)
+        cmd = 'echo mount %s:%s /storage >> /etc/rc.local' % (nfsIP, nfsPath)
+        #cmd = 'echo mount -t nfs -o rw,soft,timeo=30,retry=3 %s:%s /storage >> /etc/rc.local' % (nfsIP, nfsPath)
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
         cmd = 'chmod a+x /etc/rc.local /etc/rc.d/rc.local'
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
-	#cmd = 'mount %s:%s /storage' % (nfsIP, nfsPath)
-	cmd = 'mount -t nfs -o rw,soft,timeo=30,retry=3 %s:%s /storage' % (nfsIP, nfsPath)
+	cmd = 'mount %s:%s /storage' % (nfsIP, nfsPath)
+	#cmd = 'mount -t nfs -o rw,soft,timeo=30,retry=3 %s:%s /storage' % (nfsIP, nfsPath)
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
     elif mn_ha_storage_type == "ceph":
