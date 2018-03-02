@@ -458,13 +458,16 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
         test_util.test_logger("scp from %s to %s:%s" % (mn_image_nfs_server_path, nfsIP, qcow2_nfs_path))
         ssh.scp_file(mn_image_nfs_server_path, qcow2_nfs_path, nfsIP, test_host_config.imageUsername_, test_host_config.imagePassword_)
 
-        cmd1 = r"yum install -y qemu-img --disablerepo=* --enablerepo=zstack-local"
-        test_util.test_logger("[%s] %s" % (nfsIP, cmd1))
-        ssh.execute(cmd1, nfsIP, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+        #cmd1 = r"yum install -y qemu-img --disablerepo=* --enablerepo=zstack-local"
+        #test_util.test_logger("[%s] %s" % (nfsIP, cmd1))
+        #ssh.execute(cmd1, nfsIP, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
 
-        cmd1 = "qemu-img convert -p -f qcow2 -O raw %s %s" % (qcow2_nfs_path, raw_nfs_path)
-        test_util.test_logger("[%s] %s" % (nfsIP, cmd1))
-        ssh.execute(cmd1, nfsIP, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+        #cmd1 = "qemu-img convert -p -f qcow2 -O raw %s %s" % (qcow2_nfs_path, raw_nfs_path)
+        #test_util.test_logger("[%s] %s" % (nfsIP, cmd1))
+        #ssh.execute(cmd1, nfsIP, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+        cmd1 = "qemu-img convert -p -f qcow2 -O raw /storage/mnvm.qcow2 /storage/mnvm.img"
+        test_util.test_logger("[%s] %s" % (test_host_ip, cmd1))
+        ssh.execute(cmd1, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
 
     elif mn_ha_storage_type == 'fusionstor':
         cmd1 = "lichbd pool create zstack -p nbd"
