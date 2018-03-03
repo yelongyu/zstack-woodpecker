@@ -461,10 +461,11 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
         qcow2_nfs_path = "%s/mnvm.qcow2" %(nfsPath)
         raw_nfs_path = "%s/mnvm.img" %(nfsPath)
         #mn_image_nfs_server_path = "/home/%s/mn.qcow2" % nfsIP
-        mn_image_nfs_server_path = "/home/%s/mn.qcow2" % test_host_ip
+        woodpecker_vm_ip = shell.call("ip r | grep src | head -1 | awk '{print $NF}'").strip()
+        #mn_image_nfs_server_path = "/home/%s/mn.qcow2" % test_host_ip
+        mn_image_nfs_server_path = "/home/%s/mn.qcow2" % woodpecker_vm_ip
         test_util.test_logger("scp from %s to %s:%s" % (mn_image_nfs_server_path, nfsIP, qcow2_nfs_path))
-        #ssh.scp_file(mn_image_nfs_server_path, qcow2_nfs_path, nfsIP, test_host_config.imageUsername_, test_host_config.imagePassword_)
-        ssh.scp_file(mn_image_nfs_server_path, qcow2_nfs_path, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_)
+        ssh.scp_file(mn_image_nfs_server_path, qcow2_nfs_path, nfsIP, test_host_config.imageUsername_, test_host_config.imagePassword_)
 
         #cmd1 = r"yum install -y qemu-img --disablerepo=* --enablerepo=zstack-local"
         #test_util.test_logger("[%s] %s" % (nfsIP, cmd1))
