@@ -449,9 +449,15 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
         #cmd1 = "cp %s /storage/mnvm.img" % (mn_image_path)
         #test_util.test_logger("[%s] %s" % (test_host_ip, cmd1))
         #ssh.execute(cmd1, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
-        nfs_url = sce_ops.get_mn_ha_nfs_url(scenarioConfig, scenarioFile, deploy_config)
+        if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml", "test-config-vyos-flat-dhcp-nfs-mul-net-pubs.xml"], \
+                                                 ["scenario-config-nfs-sep-pub.xml"]):
+            nfs_url = sce_ops.get_mn_ha_nfs_url(scenarioConfig, scenarioFile, deploy_config, False)
+        else:
+            nfs_url = sce_ops.get_mn_ha_nfs_url(scenarioConfig, scenarioFile, deploy_config)
+
         nfsIP = nfs_url.split(':')[0]
         nfsPath = nfs_url.split(':')[1]
+
         qcow2_nfs_path = "%s/mnvm.qcow2" %(nfsPath)
         raw_nfs_path = "%s/mnvm.img" %(nfsPath)
         #mn_image_nfs_server_path = "/home/%s/mn.qcow2" % nfsIP
