@@ -503,7 +503,8 @@ def subscribe_event(namespace, event_name, actions, labels, session_uuid=None):
     action.namespace = namespace
     action.eventName = event_name
     action.actions = actions
-    action.labels = labels
+    if labels:
+        action.labels = labels
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Subscribe Event: %s ' %event_name)
     return evt.inventory
