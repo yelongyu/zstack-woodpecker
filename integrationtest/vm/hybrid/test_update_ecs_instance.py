@@ -29,10 +29,12 @@ def env_recover():
         hybrid.del_ecs_instance()
     except:
         pass
+    hybrid.tear_down()
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     global test_obj_dict
     if hybrid.ecs_instance:
         hybrid.del_ecs_instance()
+    hybrid.tear_down()
     test_lib.lib_error_cleanup(test_obj_dict)

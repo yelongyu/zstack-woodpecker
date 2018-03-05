@@ -316,7 +316,7 @@ def recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config):
                         pass
 
 
-def get_mn_ha_nfs_url(scenario_config, scenario_file, deploy_config):
+def get_mn_ha_nfs_url(scenario_config, scenario_file, deploy_config, use_nas=True):
     for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
         for vm in xmlobject.safe_list(host.vms.vm):
 	        for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
@@ -324,10 +324,23 @@ def get_mn_ha_nfs_url(scenario_config, scenario_file, deploy_config):
 	                if primaryStorageRef.type_ == 'nfs':
 	                    for nfsPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.nfsPrimaryStorage):
 	                        if primaryStorageRef.text_ == nfsPrimaryStorage.name_:
-	                            return nfsPrimaryStorage.url_
+                                    if use_nas != True:
+	                                return nfsPrimaryStorage.url_
+                                    else:
+	                                return create_and_clean_nfs_sub_url_in_server()
     return None
 
-
+def create_and_clean_nfs_sub_url_in_server():
+    woodpecker_vm_ip = shell.call("ip r | grep src | head -1 | awk '{print $NF}'").strip()
+    shell.call("mkdir -p /opt/mnt_nfs")
+    shell.call("mount 172.20.1.7:/mnt/test /opt/mnt_nfs")
+    nfs_sub_folder = "/opt/mnt_nfs/%s" % woodpecker_vm_ip
+    shell.call("mkdir -p %s" % nfs_sub_folder)
+    shell.call("rm -rf %s/mnvm.*" % nfs_sub_folder)
+    shell.call("umount /opt/mnt_nfs")
+    nfs_sub_url = "172.20.1.7:/mnt/test/" + woodpecker_vm_ip
+    return nfs_sub_url
+    
 
 def get_nfs_ip_for_net_sep(scenarioConfig, virtual_host_ip, nfs_ps_name):
     zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
@@ -379,6 +392,9 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
                 nfs_vm_gateway = os.environ.get('manGateway')
             elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml", "test-config-vyos-flat-dhcp-nfs-mul-net-pubs.xml"], \
                                                  ["scenario-config-nfs-sep-pub.xml"]):
+                nfs_url = get_mn_ha_nfs_url(scenario_config, scenario_file, deploy_config, False)
+                nfsIP = nfs_url.split(':')[0]
+                nfsPath = nfs_url.split(':')[1]
                 nfs_vm_nic = os.environ.get('storNic').replace("eth", "zsn")
                 nfs_vm_netmask = os.environ.get('manNetMask')
                 nfs_vm_gateway = os.environ.get('manGateway')

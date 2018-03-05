@@ -989,16 +989,18 @@ class HybridObject(object):
         for ecs in ecs_to_clear:
             self.ecs_instance = ecs
             self.del_ecs_instance()
-        if self.sg_create:
-            try:
-                self.del_sg()
-            except:
-                pass
-        if self.disk:
-            try:
-                self.del_aliyun_disk()
-            except:
-                pass
+        try:
+            self.del_sg()
+        except:
+            self.del_aliyun_disk()
+        except:
+            self.del_aliyun_snapshot()
+        except:
+            self.del_eip()
+        except:
+            pass
+        finally:
+            pass
 
 def create_vlan_vm(l3_name=None, disk_offering_uuids=None, system_tags=None, session_uuid = None, instance_offering_uuid = None):
     image_name = os.environ.get('imageName_net')
