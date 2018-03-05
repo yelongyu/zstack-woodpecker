@@ -35,24 +35,20 @@ def test():
 	name_01 = 'dingtalkAtPerson'
 	name_02 = 'dingtalkAtAll'
 	phone_number = '18482223118'
-
 	endpoint_uuid_01 = test_stub.create_sns_dingtalk_endpoint(url_01, name_01, at_all=False).uuid
 	cond = res_ops.gen_query_conditions('uuid', '=', endpoint_uuid_01)
 	if not res_ops.query_resource(res_ops.SNS_DING_TALK_ENDPOINT, cond):
 		test_util.test_fail('create sns dingtalk endpoint failed')
-
 	test_stub.add_sns_dingtalk_at_person(phone_number, endpoint_uuid_01)
 	cond = res_ops.gen_query_conditions('uuid', '=', endpoint_uuid_01)
 	inv = res_ops.query_resource(res_ops.SNS_DING_TALK_ENDPOINT, cond)[0]
 	if phone_number not in inv.atPersonPhoneNumbers:
 		test_util.test_fail('add sns dingtalk at person failed')
-
 	test_stub.remove_sns_dingtalk_at_person(phone_number, endpoint_uuid_01)
 	cond = res_ops.gen_query_conditions('uuid', '=', endpoint_uuid_01)
 	inv = res_ops.query_resource(res_ops.SNS_DING_TALK_ENDPOINT, cond)[0]
 	if phone_number in inv.atPersonPhoneNumbers:
 		test_util.test_fail('remove sns dingtalk at person failed')
-
 	endpoint_uuid_02 = test_stub.create_sns_dingtalk_endpoint(url_02, name_02, at_all=True).uuid
 	cond = res_ops.gen_query_conditions('uuid', '=', endpoint_uuid_02)
 	if not res_ops.query_resource(res_ops.SNS_DING_TALK_ENDPOINT, cond):
@@ -99,6 +95,7 @@ def test():
 	cond = res_ops.gen_query_conditions('endpoints.uuid', '=', endpoint_uuid_02)
 	if len(res_ops.query_resource(res_ops.SNS_TOPIC, cond)) != 2:
 		test_util.test_fail('subscribe sns topic failed')
+
 	# create alarm
 	namespace = 'ZStack/VM'
 	actions = [{"actionUuid": sns_topic_uuid_01, "actionType": "sns"}]
