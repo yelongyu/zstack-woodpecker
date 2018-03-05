@@ -67,10 +67,10 @@
     </nodes> 
   
     <instanceOfferings>
-      <instanceOffering name="$instanceOfferingName_s"
+      <instanceOffering name="$instanceOfferingName_m"
         description="Test" 
-        memoryCapacity="$instanceOfferingMemory_s" 
-        cpuNum="$instanceOfferingCpuNum_s"
+        memoryCapacity="$instanceOfferingMemory_m" 
+        cpuNum="$instanceOfferingCpuNum_m"
         />
     </instanceOfferings>
   
