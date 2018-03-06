@@ -66,6 +66,24 @@ def create_volume_from_template(image_uuid, ps_uuid, name = None, \
     test_util.test_logger('[Volume:] %s is created from [Volume Template:] %s on [Primary Storage:] %s.' % (evt.inventory.uuid, image_uuid, ps_uuid))
     return evt.inventory
 
+def stop_volume(volume_uuid, session_uuid=None):
+    action = api_actions.ChangeVolumeStateAction()
+    action.uuid = volume_uuid
+    action.stateEvent = 'disable'
+    action.timeout = 240000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Stop Volume [uuid:] %s' % volume_uuid)
+    return evt.inventory
+
+def start_volume(volume_uuid, session_uuid=None):
+    action = api_actions.ChangeVolumeStateAction()
+    action.uuid = volume_uuid
+    action.stateEvent = 'enable'
+    action.timeout = 240000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Start Volume [uuid:] %s' % volume_uuid)
+    return evt.inventory
+
 def recover_volume(volume_uuid, session_uuid=None):
     action = api_actions.RecoverDataVolumeAction()
     action.uuid = volume_uuid
