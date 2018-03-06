@@ -497,7 +497,7 @@ def remove_label_from_alarm(uuid, delete_mode=None, session_uuid=None):
     test_util.action_logger('Remove Label From Alarm: %s ' %uuid)
     return evt.inventory
 
-def subscribe_event(namespace, event_name, actions, labels, session_uuid=None):
+def subscribe_event(namespace, event_name, actions, labels=None, session_uuid=None):
     action = api_actions.SubscribeEventAction()
     action.timeout = 30000
     action.namespace = namespace
