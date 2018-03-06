@@ -151,6 +151,18 @@ def test():
         test_util.test_fail('change email platform state failed')
 
     # test recover and delete
+    state_event='enable'
+    state_result='Enabled'
+    test_stub.change_sns_topic_state(system_alarm_topic_uuid,state_event)
+    cond=res_ops.gen_query_conditions('uuid','=',system_alarm_topic_uuid)
+    inv=res_ops.query_resource(res_ops.SNS_TOPIC,cond)[0]
+    if inv.state!=state_result:
+        test_util.test_fail('change system alarm topic state failed')
+    test_stub.change_sns_topic_state(api_topic_uuid, state_event)
+    cond = res_ops.gen_query_conditions('uuid', '=', api_topic_uuid)
+    inv = res_ops.query_resource(res_ops.SNS_TOPIC, cond)[0]
+    if inv.state != state_result:
+        test_util.test_fail('change api topic state failed')
     test_stub.unsubscribe_event(event_sub_uuid)
     cond = res_ops.gen_query_conditions('uuid', '=', event_sub_uuid)
     event_subscription = res_ops.query_resource(res_ops.EVENT_SUBSCRIPTION, cond)
