@@ -1465,3 +1465,82 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         if ps_uuid_after != last_ps_uuid:
            test_util.test_fail('Change VM Image Failed.Primarystorage has changed.')
 
+
+
+DVOL_OPS_TEST = [
+"DVOL_TEST_NONE",
+"DVOL_TEST_MIGRATE",
+"DVOL_TEST_SNAPSHOT",
+"DVOL_TEST_STATE",
+"DVOL_TEST_ATTACH",
+"DVOL_TEST_RESIZE",
+"DVOL_TEST_ALL"
+]
+
+def dvol_ops_test(dvol_obj,vm_obj, dvol_ops_test_choice="DVOL_TEST_NONE"):
+    '''
+    This function provides dvol operation related test
+    '''
+
+
+    import zstackwoodpecker.operations.volume_operations as vol_ops
+
+
+    #import zstacklib.utils.ssh as ssh
+    import test_stub
+    test_obj_dict = test_state.TestStateDict()
+
+
+    if dvol_ops_test_choice not in DVOL_OPS_TEST:
+        test_util.test_fail( "Find not support dvol operation" )
+
+
+    if dvol_ops_test_choice == "DVOL_TEST_NONE":
+        test_util.test_logger( "DVOL_OPS_TEST.DVOL_TEST_NONE, therefore, skip DVOL_ops function" )
+        return
+
+
+    if dvol_ops_test_choice == "DVOL_TEST_ALL" or dvol_ops_test_choice == "DVOL_TEST_MIGRATE":
+        test_util.test_dsc("@@@_FUNC_:dvol_ops_test   @@@_IF_BRANCH_:DVOL_TEST_ALL|DVOL_TEST_MIGRATE")
+        ps = test_lib.lib_get_primary_storage_by_vm(vm_obj.get_vm())
+        if ps.type in [ inventory.CEPH_PRIMARY_STORAGE_TYPE, 'SharedMountPoint', inventory.NFS_PRIMARY_STORAGE_TYPE ,inventory.LOCAL_STORAGE_TYPE ]:
+            target_host = test_lib.lib_find_random_host(vm_obj.vm)
+            vol_ops.migrate_volume(dvol_obj.uuid, target_host.uuid)
+            target_host2 = test_lib.lib_find_host_by_vm(vm_obj.get_vm())
+            vol_ops.migrate_volume(dvol_obj.uuid, target_host2.uuid)
+        else:
+            test_util.test_fail("FOUND NEW STORAGTE TYPE. FAILED")
+
+
+    if dvol_ops_test_choice == "DVOL_TEST_ALL" or dvol_ops_test_choice == "DVOL_TEST_SNAPSHOT":
+        test_util.test_dsc("@@@_FUNC_:dvol_ops_test   @@@_IF_BRANCH_:DVOL_TEST_ALL|DVOL_TEST_SNAPSHOT")
+        snapshot_option = test_util.SnapshotOption()
+        snapshot_option.set_volume_uuid(dvol_obj.uuid)
+        snapshot_option.set_name('snapshot-1')
+        snapshot_option.set_description('Test')
+        vol_snapshot = vol_ops.create_snapshot(snapshot_option)
+        vol_ops.use_snapshot(vol_snapshot.uuid)
+
+
+    if dvol_ops_test_choice == "DVOL_TEST_ALL" or dvol_ops_test_choice == "DVOL_TEST_STATE":
+        test_util.test_dsc("@@@_FUNC_:dvol_ops_test   @@@_IF_BRANCH_:DVOL_TEST_ALL|DVOL_TEST_STATE")
+        vol_ops.stop_volume(dvol_obj.uuid)
+        vol_ops.start_volume(dvol_obj.uuid)
+
+
+    if dvol_ops_test_choice == "DVOL_TEST_ALL" or dvol_ops_test_choice == "DVOL_TEST_ATTACH":
+        test_util.test_dsc("@@@_FUNC_:dvol_ops_test   @@@_IF_BRANCH_:DVOL_TEST_ALL|DVOL_TEST_ATTACH")
+        vol_ops.attach_volume(dvol_obj.uuid, vm_obj.get_vm().uuid)
+        vm_obj.update()
+        vol_ops.detach_volume(dvol_obj.uuid, vm_obj.get_vm().uuid)
+        vm_obj.update()
+
+
+    if dvol_ops_test_choice == "DVOL_TEST_ALL" or dvol_ops_test_choice == "DVOL_TEST_RESIZE":
+        test_util.test_dsc("@@@_FUNC_:dvol_ops_test   @@@_IF_BRANCH_:DVOL_TEST_ALL|DVOL_TEST_RESIZE")
+        vol_size_before = dvol_obj.size
+        if vol_size_before < 1024*1024*1024*1:
+            vol_size_before = 1024*1024*1024*1
+        set_size = 1024*1024*1024*1 + vol_size_before
+        vol_ops.resize_data_volume(dvol_obj.uuid, set_size)
+        dvol_obj.size = set_size
