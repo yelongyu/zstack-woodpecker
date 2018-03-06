@@ -729,7 +729,7 @@ def check_sns_email(pop_server, username, password, keywords, trigger, target_uu
     for i in mail_list:
         '''check mail list form the mail sender'''
         if 'MF='+ username in i[0]:
-            test_util.action_logger('Mail sent addr is %s' % mail)
+            test_util.action_logger('Mail sent addr is %s' % username)
             if (trigger in i[13].lower()) and (target_uuid in i[13]) and keywords in i[8]:
                 flag = 1
                 test_util.action_logger('Got Target: %s for: %s Trigger Mail' % (target_uuid, trigger))
