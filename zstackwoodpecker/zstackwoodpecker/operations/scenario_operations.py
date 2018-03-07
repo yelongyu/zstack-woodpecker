@@ -1449,6 +1449,16 @@ def create_vpc_vrouter(http_server_ip, name, virtualrouter_offering_uuid, resour
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     return evt.inventory
 
+def change_instance_offering_state(http_server_ip, offering_uuid, state_event, system_tags=None, user_tags=None, session_uuid=None):
+    action = api_actions.ChangeInstanceOfferingStateAction()
+    action.uuid = offering_uuid
+    action.stateEvent = state_event
+    action.systemTags = system_tags
+    action.userTags = user_tags
+    action.timeout = 30000
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    return evt
+
 def create_l2_vlan(http_server_ip, name, physicalInterface, vlan, zone_uuid, session_uuid = None):
     action = api_actions.CreateL2VlanNetworkAction()
     action.name = name
@@ -1472,7 +1482,6 @@ def attach_l2(http_server_ip, l2_uuid, cluster_uuid, session_uuid = None):
     action.l2NetworkUuid = l2_uuid
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     return evt
-
 
 def create_l3(http_server_ip, l3Name, type, l2_uuid, dnsDomain, session_uuid = None):
     action = api_actions.CreateL3NetworkAction()
@@ -1618,8 +1627,19 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
             for vr in vr_list:
                 destroy_vm(zstack_management_ip, vr.uuid_)
 
+        conditions = res_ops.gen_query_conditions('name', '=', 'pub-man')
+        vr_instance_offering = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0]
+        vr_instance_offering_uuid = vr_instance_offering.uuid
+        vr_instance_offering_state = vr_instance_offering.state
+
         for vpcvrouter in xmlobject.safe_list(scenario_config.deployerConfig.vpcVrouters.vpcVrouter):
+            if instance_offering_state == "Disabled" and vr_instance_offering_uuid == vpcvrouter.virtualRouterOfferingUuid_:
+                change_instance_offering_state(zstack_management_ip, vr_instance_offering_uuid, "enable")
+
             vr_inv = create_vpc_vrouter(zstack_management_ip, name=vpcvrouter.name_, virtualrouter_offering_uuid=vpcvrouter.virtualRouterOfferingUuid_)
+
+            if instance_offering_state == "Disabled" and vr_instance_offering_uuid == vpcvrouter.virtualRouterOfferingUuid_:
+                change_instance_offering_state(zstack_management_ip, vr_instance_offering_uuid, "disable")
 
     vpc_l3_uuid = None
     if hasattr(scenario_config.deployerConfig, 'l2Networks'):
