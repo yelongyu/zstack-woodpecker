@@ -718,25 +718,47 @@ def get_mail_list(pop_server, username, password):
     pop3.pass_(password)
     ret = pop3.stat()
     mail_list = []
-    for i in range(ret[0] - 20, ret[0]):
+    for i in range(ret[0] - 20, ret[0]+1):
         resp, msg, octets = pop3.retr(i)
         mail_list.append(msg)
+    pop3.quit()
     return mail_list
 
-def check_sns_email(pop_server, username, password, keywords, trigger, target_uuid):
+def check_sns_email(pop_server, username, password, name, uuid):
+    '''
+    :param pop_server: 'pop3.zstack.io'
+    :param username: 'test.qa@zstack.io'
+    :param password: 'Test1234'
+    :param keywords: metric_name or event_name
+    :param uuid: For Alarm email,this is alarm_uuid;For Event email,this is subscription_uuid or resource_uuid
+    :return: 1 for found or 0 for not found
+    '''
     mail_list = get_mail_list(pop_server, username, password)
-    flag = 0
-    for i in mail_list:
-        '''check mail list form the mail sender'''
-        if 'MF='+ username in i[0]:
-            test_util.action_logger('Mail sent addr is %s' % username)
-            if (trigger in i[13].lower()) and (target_uuid in i[13]) and keywords in i[8]:
+    flag = 0      #check result
+    for mail in mail_list:
+        if flag == 1:
+            break
+        else:
+            flag_1 = 0  # check for username
+            flag_2 = 0  # check for event_name
+            flag_3 = 0  # check for event_subscribetion_uuid
+        for line in mail:
+            #line=str(line, encoding='utf8')   #python3.x
+            if username in line:
+                flag_1 = 1
+                test_util.action_logger('Mail sent addr is %s' % username)
+            if name in line:
+                flag_2 = 1
+                test_util.action_logger('Got keywords name: %s in Mail' % name)
+            if uuid in line:
+                flag_3 = 1
+                test_util.action_logger('Got keywords uuid : %s in Mail' % uuid)
+            if flag_1 and flag_2 and flag_3:
                 flag = 1
-                test_util.action_logger('Got Target: %s for: %s Trigger Mail' % (target_uuid, trigger))
-                test_util.action_logger('Mail detail info is %s' % i)
                 break
     test_util.action_logger('flag value is %s' % flag)
     return flag
+
 
 def sleep_util(timestamp):
    while True:
