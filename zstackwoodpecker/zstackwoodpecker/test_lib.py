@@ -2354,6 +2354,13 @@ def lib_get_pxe_by_name(name):
     if pxe:
         return pxe[0]
 
+#-----------Get Affinity Group----------
+def lib_get_affinity_group_by_name(name):
+    conditions = res_ops.gen_query_conditions('name', '=', name)
+    ag = res_ops.query_resource(res_ops.AFFINITY_GROUP, conditions)
+    if ag:
+        return ag[0]
+
 #-----------Get VM resource-------------
 def lib_is_vm_running(vm_inv):
     if vm_inv.state == 'Running':
