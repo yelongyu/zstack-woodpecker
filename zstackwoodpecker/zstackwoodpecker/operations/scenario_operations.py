@@ -1628,7 +1628,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 destroy_vm(zstack_management_ip, vr.uuid_)
 
         conditions = res_ops.gen_query_conditions('name', '=', 'pub-man')
-        vr_instance_offering = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0]
+        vr_instance_offering = query_resource(zstack_management_ip, res_ops.INSTANCE_OFFERING, conditions)[0]
         vr_instance_offering_uuid = vr_instance_offering.uuid
         vr_instance_offering_state = vr_instance_offering.state
 
