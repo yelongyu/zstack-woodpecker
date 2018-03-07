@@ -247,6 +247,46 @@ def create_vnc_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=Non
     vm.create()
     return vm
 
+def create_ag_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None,
+              image_uuid=None, affinitygroup_uuid=None, host_uuid=None, session_uuid=None):
+    if not vm_creation_option:
+        instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(
+            os.environ.get('instanceOfferingName_s')).uuid
+        cond = res_ops.gen_query_conditions('mediaType', '!=', 'ISO')
+        cond = res_ops.gen_query_conditions('platform', '=', 'Linux', cond)
+        image_uuid = res_ops.query_resource(
+            res_ops.IMAGE, cond, session_uuid)[0].uuid
+        l3net_uuid = res_ops.get_resource(
+            res_ops.L3_NETWORK, session_uuid)[0].uuid
+        vm_creation_option = test_util.VmOption()
+        vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+        vm_creation_option.set_image_uuid(image_uuid)
+        vm_creation_option.set_l3_uuids([l3net_uuid])
+        vm_creation_option.set_host_uuid(host_uuid)
+        vm_creation_option.set_system_tags(["affinityGroupUuid::%s"] % affinitygroup_uuid)
+
+    if volume_uuids:
+        if isinstance(volume_uuids, list):
+            vm_creation_option.set_data_disk_uuids(volume_uuids)
+        else:
+            test_util.test_fail(
+                'volume_uuids type: %s is not "list".' % type(volume_uuids))
+
+    if root_disk_uuid:
+        vm_creation_option.set_root_disk_uuid(root_disk_uuid)
+
+    if image_uuid:
+        vm_creation_option.set_image_uuid(image_uuid)
+
+    if session_uuid:
+        vm_creation_option.set_session_uuid(session_uuid)
+
+    vm = test_vm.ZstackTestVm()
+    vm.set_creation_option(vm_creation_option)
+    vm.create()
+    return vm
+
+
 def create_data_volume_template_from_volume(volume_uuid, backup_storage_uuid_list, name = None, session_uuid = None ):
     volume_temp = vol_ops.create_volume_template(volume_uuid, backup_storage_uuid_list, name, session_uuid)
     return volume_temp
