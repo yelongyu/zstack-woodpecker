@@ -1,5 +1,17 @@
 '''
 Test for deleting and expunge vol image check vol ops.
+
+The key step:
+-add image1
+-create vm1 from image1
+-create data vol1
+-create template from data vol1
+-create data vol2 from template
+-expunge template
+-do data vol all ops test on data vol2
+-expunge template
+-do data vol all ops test on data vol2
+
 @author: PxChen
 '''
 
