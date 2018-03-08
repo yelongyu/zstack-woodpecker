@@ -1,5 +1,15 @@
 '''
-Test for deleting and expunge cloned vm ops.
+Test for deleting and expunge iso cloned vm ops.
+
+The key step:
+-add iso1
+-create vm1 from iso1
+-clone vm2 from vm1
+-del iso1
+-do vm all ops test on vm2
+-expunge and detach iso1
+-do vm all ops test on vm2
+
 @author: PxChen
 '''
 
