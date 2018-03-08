@@ -1,5 +1,18 @@
 '''
 Test for deleting and expunge image created vm ops.
+
+The key step:
+-add image1
+-create vm1 from image1
+-export image1
+-create image2 from vm1
+-export image2
+-do vm all ops test on vm2
+-del image2
+-do vm all ops test on vm2
+-expunge image2
+-do vm all ops test on vm2
+
 @author: PxChen
 '''
 

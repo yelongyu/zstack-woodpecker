@@ -1,5 +1,18 @@
 '''
-Test for deleting and expunge vol image check vol ops.
+Test for deleting and expunge iso created vm ops.
+
+The key step:
+-add iso1
+-create vm1 from iso1
+-create image1 from vm1
+-del expunge and detach iso1
+-export image1
+-do vm all ops test on vm2
+-del image1
+-do vm all ops test on vm2
+-expunge image1
+-do vm all ops test on vm2
+
 @author: PxChen
 '''
 
