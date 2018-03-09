@@ -371,8 +371,11 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
     vm_nic = os.environ.get('nodeNic').replace("eth", "zsn")
     vm_netmask = os.environ.get('nodeNetMask')
     vm_gateway = os.environ.get('nodeGateway')
-    cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (vm_nic, vm_ip, vm_netmask, vm_gateway)
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+    if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml":
+        pass
+    else:
+        cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (vm_nic, vm_ip, vm_netmask, vm_gateway)
+        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
     mn_ha_storage_type = get_mn_ha_storage_type(scenario_config, scenario_file, deploy_config)
     if mn_ha_storage_type == "nfs":
         nfs_url = get_mn_ha_nfs_url(scenario_config, scenario_file, deploy_config)
