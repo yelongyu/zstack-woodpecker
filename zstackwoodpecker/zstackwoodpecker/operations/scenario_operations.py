@@ -1671,8 +1671,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 #l2_inv = create_l2_vlan(zstack_management_ip, l2network.name_, l2network.physicalInterface_, l2network.vlan_, scenvpcZoneUuid).inventory
                 l2_inv = create_l2_vxlan(zstack_management_ip, l2network.name_, scenvpcPoolUuid, scenvpcZoneUuid, session_uuid=None).inventory
                 scenl2Clusters = os.environ.get('scenl2Clusters').split(',')
-                for scenl2cluster in scenl2Clusters:
-                    attach_l2(zstack_management_ip, l2_inv.uuid, scenl2cluster)
+                #for scenl2cluster in scenl2Clusters:
+                #    attach_l2(zstack_management_ip, l2_inv.uuid, scenl2cluster)
                 for l3network in xmlobject.safe_list(l2network.l3Networks.l3BasicNetwork):
                     l3_inv = create_l3(zstack_management_ip, l3network.name_, l3network.type_, l2_inv.uuid, l3network.domain_name_, session_uuid = None).inventory
                     vpc_l3_uuid = l3_inv.uuid
