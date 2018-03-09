@@ -1692,7 +1692,14 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                         add_network_service(zstack_management_ip, l3_inv.uuid, allservices)
                     attach_l3(zstack_management_ip, l3_inv.uuid, vr_inv.uuid)
         if test_lib.scenario_config != None and os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml":
-            pass
+            woodpecker_vm_ip = shell.call("ip r | grep src | head -1 | awk '{print $NF}'").strip()
+            cond = res_ops.gen_query_conditions('vmNics.ip', '=', woodpecker_vm_ip)
+            woodpecker_vm = query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0]
+            attach_l3(zstack_management_ip, l3_inv.uuid, woodpecker_vm.uuid)
+            shell.call('dhclient zsn0')
+            shell.call('ip route del default || true')
+            shell.call('ip route add default via %s dev zsn0' % last_ip_gateway)
+            shell.call('ip route del 192.168.0.0/16 || true')
         else:
             woodpecker_vm_ip = shell.call("ip r | grep src | head -1 | awk '{print $NF}'").strip()
             cond = res_ops.gen_query_conditions('vmNics.ip', '=', woodpecker_vm_ip)
