@@ -450,10 +450,12 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
             else:
                 test_util.test_fail("not supported ceph testconfig and scenario combination")
         
-            ceph_cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (ceph_vm_nic, ceph_vm_ip, ceph_vm_netmask, ceph_vm_gateway)
-            ssh.execute(ceph_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+            if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml":
+                pass
+            else:
+                ceph_cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (ceph_vm_nic, ceph_vm_ip, ceph_vm_netmask, ceph_vm_gateway)
+                ssh.execute(ceph_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
-            if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() != "scenario-config-vpc-ceph-3-sites.xml":
                 #TODO: should dynamically change gw followed config.json, but currently there is only one case, thus always change 
                 #default gw to public network gw
                 set_default_gw_cmd = "route del default gw %s && route add default gw %s" %(ceph_vm_gateway, vm_gateway)
