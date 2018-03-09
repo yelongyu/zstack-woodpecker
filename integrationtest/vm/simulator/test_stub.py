@@ -25,6 +25,7 @@ from zstackwoodpecker.operations import vm_operations as vm_ops
 import poplib
 import time
 import re
+from email.parser import Parser
 
 def create_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None,
               image_uuid=None, session_uuid=None):
@@ -456,8 +457,8 @@ def create_alarm(comparison_operator, period, threshold, namespace, metric_name,
         action.labels=labels
     if resource_uuid:
         action.resourceUuid=resource_uuid
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create Alarm: %s ' % name)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def update_alarm(uuid, comparison_operator=None, period=None, threshold=None, name=None, repeat_interval=None, resource_uuid=None, session_uuid=None):
@@ -472,8 +473,8 @@ def update_alarm(uuid, comparison_operator=None, period=None, threshold=None, na
         action.threshold = threshold
     if name:
         action.name = name
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Update Alarm: %s ' % uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def change_alarm_state(uuid, state_event, session_uuid=None):
@@ -481,8 +482,8 @@ def change_alarm_state(uuid, state_event, session_uuid=None):
     action.timeout = 30000
     action.uuid = uuid
     action.stateEvent = state_event
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Change Alarm: %s State to %s' % (uuid, state_event))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def delete_alarm(uuid, delete_mode=None, session_uuid=None):
@@ -491,8 +492,8 @@ def delete_alarm(uuid, delete_mode=None, session_uuid=None):
     action.uuid = uuid
     if delete_mode:
         action.deleteMode=delete_mode
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Delete Alarm: %s ' % uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def add_action_to_alarm(alarm_uuid, action_uuid, action_type, session_uuid=None):
@@ -501,8 +502,8 @@ def add_action_to_alarm(alarm_uuid, action_uuid, action_type, session_uuid=None)
     action.alarmUuid = alarm_uuid
     action.actionUuid = action_uuid
     action.actionType = action_type
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Add Action: %s to Alarm: %s ' % (action_uuid, alarm_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def remove_action_from_alarm(alarm_uuid, action_uuid, delete_mode=None, session_uuid=None):
@@ -512,8 +513,8 @@ def remove_action_from_alarm(alarm_uuid, action_uuid, delete_mode=None, session_
     action.actionUuid = action_uuid
     if delete_mode:
         action.deleteMode = delete_mode
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Remove Action: %s From Alarm: %s ' % (action_uuid, alarm_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def add_label_to_alarm(alarm_uuid, key, value, operator, session_uuid=None):
@@ -523,8 +524,8 @@ def add_label_to_alarm(alarm_uuid, key, value, operator, session_uuid=None):
     action.key = key
     action.value = value
     action.operator = operator
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Add Label to Alarm: %s ' %alarm_uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def remove_label_from_alarm(uuid, delete_mode=None, session_uuid=None):
@@ -533,8 +534,8 @@ def remove_label_from_alarm(uuid, delete_mode=None, session_uuid=None):
     action.uuid = uuid
     if delete_mode:
         action.deleteMode = delete_mode
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Remove Label From Alarm: %s ' %uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def subscribe_event(namespace, event_name, actions, labels=None, session_uuid=None):
@@ -545,8 +546,8 @@ def subscribe_event(namespace, event_name, actions, labels=None, session_uuid=No
     action.actions = actions
     if labels:
         action.labels = labels
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Subscribe Event: %s ' %event_name)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def unsubscribe_event(uuid, delete_mode=None, session_uuid=None):
@@ -555,8 +556,8 @@ def unsubscribe_event(uuid, delete_mode=None, session_uuid=None):
     action.uuid = uuid
     if delete_mode:
         action.deleteMode = delete_mode
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Unsubscribe Event: %s ' %uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def create_sns_email_endpoint(email, name, platform_uuid=None, session_uuid=None):
@@ -566,8 +567,8 @@ def create_sns_email_endpoint(email, name, platform_uuid=None, session_uuid=None
     action.name = name
     if platform_uuid:
         action.platformUuid = platform_uuid
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create SNS Email Endpoint: %s ' %name)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def create_sns_email_platform(smtp_server, smtp_port, name, username=None, password=None, session_uuid=None):
@@ -580,16 +581,16 @@ def create_sns_email_platform(smtp_server, smtp_port, name, username=None, passw
         action.username = username
     if password:
         action.password = password
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create SNS Email Platform: %s ' %name)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def validate_sns_email_platform(uuid, session_uuid=None):
     action = api_actions.ValidateSNSEmailPlatformAction()
     action.timeout = 30000
     action.uuid = uuid
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Validate SNS Email Platform: %s ' %uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def create_sns_http_endpoint(url, name, username=None, password=None, session_uuid=None):
@@ -601,8 +602,8 @@ def create_sns_http_endpoint(url, name, username=None, password=None, session_uu
         action.username = username
     if password:
         action.password = password
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create SNS Http Endpoint: %s ' %name)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def create_sns_dingtalk_endpoint(url, name, at_all=None, at_person_phone_numbers=None, session_uuid=None):
@@ -614,8 +615,8 @@ def create_sns_dingtalk_endpoint(url, name, at_all=None, at_person_phone_numbers
         action.atAll = at_all
     if at_person_phone_numbers:
         action.atPersonPhoneNumbers = at_person_phone_numbers
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create SNS DingTalk Endpoint: %s ' %name)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def add_sns_dingtalk_at_person(phone_number, endpoint_uuid, session_uuid=None):
@@ -623,8 +624,8 @@ def add_sns_dingtalk_at_person(phone_number, endpoint_uuid, session_uuid=None):
     action.timeout = 30000
     action.phoneNumber = phone_number
     action.endpointUuid = endpoint_uuid
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Add SNS DingTalk At Person: %s ' %phone_number)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def remove_sns_dingtalk_at_person(phone_number, endpoint_uuid, delete_mode=None, session_uuid=None):
@@ -634,8 +635,8 @@ def remove_sns_dingtalk_at_person(phone_number, endpoint_uuid, delete_mode=None,
     action.endpointUuid = endpoint_uuid
     if delete_mode:
         action.deleteMode = delete_mode
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Remove SNS DingTalk At Person: %s ' % endpoint_uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def update_sns_application_endpoint(uuid, name, description, session_uuid=None):
@@ -644,8 +645,8 @@ def update_sns_application_endpoint(uuid, name, description, session_uuid=None):
     action.uuid = uuid
     action.name = name
     action.description = description
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Update SNS Application Endpoint: %s ' %uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def delete_sns_application_endpoint(uuid, delete_mode=None, session_uuid=None):
@@ -654,8 +655,8 @@ def delete_sns_application_endpoint(uuid, delete_mode=None, session_uuid=None):
     action.uuid = uuid
     if delete_mode:
         action.deleteMode = delete_mode
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Delete SNS Application Endpoint: %s ' %uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def change_sns_application_endpoint_state(uuid, state_event, session_uuid=None):
@@ -663,8 +664,8 @@ def change_sns_application_endpoint_state(uuid, state_event, session_uuid=None):
     action.timeout = 30000
     action.uuid = uuid
     action.stateEvent = state_event
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Change SNS Application Endpoint State To: %s ' %state_event)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def update_sns_application_platform(uuid, name, description, session_uuid=None):
@@ -673,8 +674,8 @@ def update_sns_application_platform(uuid, name, description, session_uuid=None):
     action.uuid = uuid
     action.name = name
     action.description = description
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Update SNS Application Platform: %s ' %uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def delete_sns_application_platform(uuid, delete_mode=None, session_uuid=None):
@@ -683,8 +684,8 @@ def delete_sns_application_platform(uuid, delete_mode=None, session_uuid=None):
     action.uuid = uuid
     if delete_mode:
         action.deleteMode = delete_mode
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Delete SNS Application Platform: %s ' %uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def change_sns_application_platform_state(uuid, state_event, session_uuid=None):
@@ -692,16 +693,16 @@ def change_sns_application_platform_state(uuid, state_event, session_uuid=None):
     action.timeout = 30000
     action.uuid = uuid
     action.stateEvent = state_event
+    test_util.action_logger('Change SNS Application Platform State To: %s ' %state_event)
     evt = acc_ops.execute_action_with_session(action, session_uuid)
-    test_util.action_logger('Change SNS Application Plarform State To: %s ' %state_event)
     return evt.inventory
 
 def create_sns_topic(name, session_uuid=None):
     action = api_actions.CreateSNSTopicAction()
     action.timeout = 30000
     action.name = name
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create SNS Topic: %s ' %name)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def update_sns_topic(uuid, name, description, session_uuid=None):
@@ -710,8 +711,8 @@ def update_sns_topic(uuid, name, description, session_uuid=None):
     action.uuid = uuid
     action.name = name
     action.description = description
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Update SNS Topic: %s ' %uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def delete_sns_topic(uuid, delete_mode=None, session_uuid=None):
@@ -720,8 +721,8 @@ def delete_sns_topic(uuid, delete_mode=None, session_uuid=None):
     action.uuid = uuid
     if delete_mode:
         action.deleteMode = delete_mode
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Delete SNS Topic: %s ' %uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def change_sns_topic_state(uuid, state_event, session_uuid=None):
@@ -729,8 +730,8 @@ def change_sns_topic_state(uuid, state_event, session_uuid=None):
     action.timeout = 30000
     action.uuid = uuid
     action.stateEvent = state_event
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Change SNS Topic State To: %s ' %state_event)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def subscribe_sns_topic(topic_uuid, endpoint_uuid, session_uuid=None):
@@ -738,8 +739,8 @@ def subscribe_sns_topic(topic_uuid, endpoint_uuid, session_uuid=None):
     action.timeout = 30000
     action.topicUuid = topic_uuid
     action.endpointUuid = endpoint_uuid
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Subscribe SNS Topic: %s ' %topic_uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def unsubscribe_sns_topic(topic_uuid, endpoint_uuid, session_uuid=None):
@@ -747,11 +748,134 @@ def unsubscribe_sns_topic(topic_uuid, endpoint_uuid, session_uuid=None):
     action.timeout = 30000
     action.topicUuid = topic_uuid
     action.endpointUuid = endpoint_uuid
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Unsubscribe SNS Topic: %s ' %topic_uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def get_all_metric_metadata(session_uuid=None):
+    action = api_actions.GetAllMetricMetadataAction()
+    action.timeout = 30000
+    test_util.action_logger('Get All Metric Metadata:')
+    evt = acc_ops.execute_action_with_session(action,session_uuid)
+    return evt.metrics
+
+def get_all_event_metadata(session_uuid=None):
+    action = api_actions.GetAllEventMetadataAction()
+    action.timeout = 30000
+    test_util.action_logger('Get All Event Metadata:')
+    evt = acc_ops.execute_action_with_session(action,session_uuid)
+    return evt.events
+
+def get_audit_data(start_time=None,end_time=None,limit=None,conditions=None,session_uuid=None):
+    action = api_actions.GetAuditDataAction()
+    action.timeout = 30000
+    if start_time:
+        action.startTime=start_time
+    if end_time:
+        action.endTime=end_time
+    if limit:
+        action.limit=limit
+    if conditions:
+        action.conditions=conditions
+    test_util.action_logger('Get Audit Data:')
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt.audits
+
+def get_metric_label_value(namespace,metric_name,label_names,filter_labels=None,session_uuid=None):
+    action = api_actions.GetMetricLabelValueAction()
+    action.timeout = 30000
+    action.namespace = namespace
+    action.metricName = metric_name
+    action.labelNames = label_names
+    if filter_labels:
+        action.filterLabels = filter_labels
+    test_util.action_logger('Get Metric Label value:[namespace]:%s [metricName]:%s [labelNames]:%s'% (namespace,metric_name,label_names))
+    evt=acc_ops.execute_action_with_session(action,session_uuid)
+    return evt.labels
+
+def get_metric_data(namespace,metric_name,start_time=None,end_time=None,period=None,labels=None,session_uuid=None):
+    action = api_actions.GetMetricDataAction()
+    action.timeout = 30000
+    action.namespace = namespace
+    action.metricName = metric_name
+    if start_time:
+        action.startTime = start_time
+    if end_time:
+        action.endTime = end_time
+    if period:
+        action.period = period
+    if labels:
+        action.labels = labels
+    test_util.action_logger('Get Metric Data:[namespace]:%s [metricName]:%s' % (namespace, metric_name,))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt.data
+
+def get_event_data(start_time=None,end_time=None,labels=None,conditions=None,session_uuid=None):
+    action = api_actions.GetEventDataAction()
+    action.timeout = 30000
+    if start_time:
+        action.startTime = start_time
+    if end_time:
+        action.endTime = end_time
+    if conditions:
+        action.conditions= conditions
+    if labels:
+        action.labels = labels
+    test_util.action_logger('Get Event Data:')
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt.events
+
+def put_metric_data(namespace,data,session_uuid=None):
+    action = api_actions.PutMetricDataAction()
+    action.timeout = 30000
+    action.namespace = namespace
+    action.data = data
+    test_util.action_logger('Put Metric Data:[namespace]:%s [data]:%s'%(namespace,data))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def create_sns_text_template(name,applicationPlatformType,template,defaultTemplate=None,description=None,session_uuid=None):
+    action = api_actions.CreateSNSTextTemplateAction()
+    action.timeout = 30000
+    action.name = name
+    action.applicationPlatformType = applicationPlatformType
+    action.template = template
+    if defaultTemplate:
+        action.defaultTemplate = defaultTemplate
+    if description:
+        action.description = description
+    test_util.action_logger('Create SNS Text Template:%s '% name)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def delete_sns_text_template(uuid,delete_mode=None,session_uuid=None):
+    action = api_actions.DeleteSNSTextTemplateAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    if delete_mode:
+        action.deleteMode = delete_mode
+    test_util.action_logger('Delete SNS Text Template:%s ' % uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def update_sns_text_template(uuid,name=None,description=None,template=None,default_template=None,session_uuid=None):
+    action = api_actions.UpdateSNSTextTemplateAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    if name:
+        action.name = name
+    if description:
+        action.description = description
+    if template:
+        action.template = template
+    if default_template:
+        action.defaultTemplate = default_template
+    test_util.action_logger('Update SNS Text Template:%s ' % uuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
 def get_mail_list(pop_server, username, password):
+    test_util.action_logger('Get Mail List From [pop server]:%s [user]:%s '%(pop_server,username))
     pop3 = poplib.POP3(pop_server)
     pop3.set_debuglevel(1)
     pop3.user(username)
@@ -766,39 +890,62 @@ def get_mail_list(pop_server, username, password):
 
 def check_sns_email(pop_server, username, password, name, uuid):
     '''
+    This function is using for checking default SNS Text Template
+
     :param pop_server: 'pop3.zstack.io'
     :param username: 'test.qa@zstack.io'
     :param password: 'Test1234'
-    :param keywords: metric_name or event_name
+    :param name: metric_name or event_name
     :param uuid: For Alarm email,this is alarm_uuid;For Event email,this is subscription_uuid or resource_uuid
     :return: 1 for found or 0 for not found
     '''
     mail_list = get_mail_list(pop_server, username, password)
     flag = 0      #check result
+    test_util.action_logger('Check SNS Email:[name]:%s [uuid]:%s'% (name,uuid))
     for mail in mail_list:
         if flag == 1:
             break
-        else:
-            flag_1 = 0  # check for username
-            flag_2 = 0  # check for event_name
-            flag_3 = 0  # check for event_subscribetion_uuid
-        for line in mail:
-            #line=str(line, encoding='utf8')   #python3.x
-            if username in line:
-                flag_1 = 1
-                test_util.action_logger('Mail sent addr is %s' % username)
-            if name in line:
-                flag_2 = 1
-                test_util.action_logger('Got keywords name: %s in Mail' % name)
-            if uuid in line:
-                flag_3 = 1
-                test_util.action_logger('Got keywords uuid : %s in Mail' % uuid)
-            if flag_1 and flag_2 and flag_3:
-                flag = 1
-                break
-    test_util.action_logger('flag value is %s' % flag)
+        #msg_content = b'\r\n'.join(mail).decode('utf-8') #python3.x
+        msg_content = '\r\n'.join(mail)  #python2.x
+        msg = Parser().parsestr(msg_content)
+        content=str(msg)
+        if (username in content) and (name in content) and (uuid in content):
+            flag = 1
+            test_util.test_logger('Mail sent addr is %s' % username)
+            test_util.test_logger('Got keywords uuid : %s in Mail' % uuid)
+            test_util.test_logger('Got keywords name: %s in Mail' % name)
+
+    test_util.test_logger('flag value is %s' % flag)
     return flag
 
+def check_keywords_in_email(pop_server, username, password, first_keyword, second_keyword):
+    '''
+    This function is used for checking different SNS Text Template
+
+    :param pop_server: 'pop3.zstack.io'
+    :param username: 'test.qa@zstack.io'
+    :param password: 'Test1234'
+    :param first_keyword: keyword search in mail
+    :param second_keyword: keyword search in mail
+    :return: 1 for found or 0 for not found
+    '''
+    mail_list = get_mail_list(pop_server, username, password)
+    flag = 0      #check result
+    test_util.action_logger('Check Keywords In Email:[keyword]:%s [keyword]:%s'% (first_keyword,second_keyword))
+    for mail in mail_list:
+        if flag == 1:
+            break
+        #msg_content = b'\r\n'.join(mail).decode('utf-8') #python3.x
+        msg_content = '\r\n'.join(mail)  #python2.x
+        msg = Parser().parsestr(msg_content)
+        content=str(msg)
+        if (username in content) and (first_keyword in content) and (second_keyword in content):
+            flag = 1
+            test_util.test_logger('Mail sent addr is %s' % username)
+            test_util.test_logger('Got first_keyword :[ %s ]in Mail' % first_keyword)
+            test_util.test_logger('Got second_keyword :[ %s ]in Mail' % second_keyword)
+    test_util.test_logger('flag value is %s' % flag)
+    return flag
 
 def sleep_util(timestamp):
    while True:
