@@ -86,7 +86,7 @@ def create_vm(vm_name, image_name, l3_name):
     vm.create()
     return vm
 
-def add_test_Minimal_iso(iso_name):
+def add_test_minimal_iso(iso_name):
     import zstackwoodpecker.zstack_test.zstack_test_image as test_image
     img_option = test_util.ImageOption()
     img_option.set_name(iso_name)
