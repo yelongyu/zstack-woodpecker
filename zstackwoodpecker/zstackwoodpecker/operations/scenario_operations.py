@@ -1469,6 +1469,17 @@ def create_l2_vlan(http_server_ip, name, physicalInterface, vlan, zone_uuid, ses
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     return evt
 
+def create_l2_vxlan(http_server_ip, name, pool_uuid, zone_uuid, session_uuid=None):
+    action = api_actions.CreateL2VxlanNetworkAction()
+    action.timeout = 30000
+    action.name = name
+    action.poolUuid = pool_uuid
+    action.zoneUuid = zone_uuid
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    test_util.action_logger('Create L2 Vxlan network [name:] %s, [poolUuid:] %s, [zoneUuid:] %s' \
+                             %(name, pool_uuid, zone_uuid))
+    return evt
+
 def delete_l2(http_server_ip, l2_uuid, session_uuid = None):
     action = api_actions.DeleteL2NetworkAction()
     action.uuid = l2_uuid
@@ -1650,13 +1661,15 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
             for l2network in xmlobject.safe_list(scenario_config.deployerConfig.l2Networks.l2VlanNetwork):
                 # Need to clean up left over VPC networks
                 scenvpcZoneUuid = os.environ.get('scenvpcZoneUuid')
+                scenvpcPoolUuid = os.environ.get('scenvpcPoolUuid')
                 conf = res_ops.gen_query_conditions('physicalInterface', '=', '%s' % (l2network.physicalInterface_))
                 l2_network_list = query_resource(zstack_management_ip, res_ops.L2_NETWORK, conf).inventories
                 for l2_network in l2_network_list:
                     if l2network.vlan_ != None and l2network.vlan_ != "":
                         if str(l2_network.vlan) == str(l2network.vlan_):
                             delete_l2(zstack_management_ip, l2_network.uuid)
-                l2_inv = create_l2_vlan(zstack_management_ip, l2network.name_, l2network.physicalInterface_, l2network.vlan_, scenvpcZoneUuid).inventory
+                #l2_inv = create_l2_vlan(zstack_management_ip, l2network.name_, l2network.physicalInterface_, l2network.vlan_, scenvpcZoneUuid).inventory
+                l2_inv = create_l2_vxlan(zstack_management_ip, l2network.name_, scenvpcPoolUuid, scenvpcZoneUuid, session_uuid=None).inventory
                 scenl2Clusters = os.environ.get('scenl2Clusters').split(',')
                 for scenl2cluster in scenl2Clusters:
                     attach_l2(zstack_management_ip, l2_inv.uuid, scenl2cluster)
