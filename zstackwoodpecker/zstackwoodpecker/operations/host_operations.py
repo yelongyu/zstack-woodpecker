@@ -85,6 +85,7 @@ def update_host(hostUuid, infoType, infoValue, session_uuid = None):
         action.description = infoValue
     elif infoType == 'managementIp':
         action.managementIp = infoValue
+    test_util.action_logger('Update Host %s to %s' %(infoType,infoValue))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
