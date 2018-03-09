@@ -16,6 +16,7 @@ The key step:
 '''
 
 import os
+import apibinding.inventory as inventory
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
@@ -83,7 +84,8 @@ def test():
     image_option2.set_backup_storage_uuid_list([bss[0].uuid])
     vol_image = img_ops.create_data_volume_template(image_option2)
     #export vol template
-    img_ops.export_image_from_backup_storage(vol_image.uuid, bss[0].uuid)
+    if bss[0].type in [inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE]:
+        img_ops.export_image_from_backup_storage(vol_image.uuid, bss[0].uuid)
     target_host = test_lib.lib_find_host_by_vm(vm1.vm)
     volume2 = vol_ops.create_volume_from_template(vol_image.uuid, volume.volume.primaryStorageUuid, host_uuid = target_host.uuid)
 
