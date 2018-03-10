@@ -91,10 +91,12 @@ EVENT_SUBSCRIPTION = 'EventSubscription'
 SNS_APPLICATION_ENDPOINT = 'SNSApplicationEndpoint'
 SNS_APPLICATION_PLATFORM ='SNSApplicationPlatform'
 SNS_TOPIC = 'SNSTopic'
+SNS_TOPIC_SUBSCRIBER = 'SNSTopicSubscriber'
 SNS_DING_TALK_ENDPOINT = 'SNSDingTalkEndpoint'
 SNS_EMAIL_ENDPOINT = 'SNSEmailEndpoint'
 SNS_EMAIL_PLATFORM = 'SNSEmailPlatform'
 SNS_HTTP_ENDPOINT = 'SNSHttpEndpoint'
+AFFINITY_GROUP = "AffinityGroup"
 
 
 def find_item_by_uuid(inventories, uuid):
@@ -548,6 +550,8 @@ def _gen_query_action(resource, condition=None):
         action = api_actions.QuerySNSApplicationPlatformAction()
     elif resource == SNS_TOPIC:
         action = api_actions.QuerySNSTopicAction()
+    elif resource == SNS_TOPIC_SUBSCRIBER:
+        action = api_actions.QuerySNSTopicSubscriberAction()
     elif resource == SNS_DING_TALK_ENDPOINT:
         action = api_actions.QuerySNSDingTalkEndpointAction()
     elif resource == SNS_EMAIL_ENDPOINT:
@@ -556,6 +560,8 @@ def _gen_query_action(resource, condition=None):
         action = api_actions.QuerySNSEmailPlatformAction()
     elif resource == SNS_HTTP_ENDPOINT:
         action = api_actions.QuerySNSHttpEndpointAction()
+    elif resource == AFFINITY_GROUP:
+        action = api_actions.QueryAffinityGroupAction()
     return action
 
 def query_resource(resource, conditions = [], session_uuid=None, count='false'):

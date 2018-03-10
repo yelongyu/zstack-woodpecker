@@ -371,8 +371,11 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
     vm_nic = os.environ.get('nodeNic').replace("eth", "zsn")
     vm_netmask = os.environ.get('nodeNetMask')
     vm_gateway = os.environ.get('nodeGateway')
-    cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (vm_nic, vm_ip, vm_netmask, vm_gateway)
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+    if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml":
+        pass
+    else:
+        cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (vm_nic, vm_ip, vm_netmask, vm_gateway)
+        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
     mn_ha_storage_type = get_mn_ha_storage_type(scenario_config, scenario_file, deploy_config)
     if mn_ha_storage_type == "nfs":
         nfs_url = get_mn_ha_nfs_url(scenario_config, scenario_file, deploy_config)
@@ -450,12 +453,16 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
             else:
                 test_util.test_fail("not supported ceph testconfig and scenario combination")
         
-            ceph_cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (ceph_vm_nic, ceph_vm_ip, ceph_vm_netmask, ceph_vm_gateway)
-            ssh.execute(ceph_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
-            #TODO: should dynamically change gw followed config.json, but currently there is only one case, thus always change 
-            #default gw to public network gw
-            set_default_gw_cmd = "route del default gw %s && route add default gw %s" %(ceph_vm_gateway, vm_gateway)
-            ssh.execute(set_default_gw_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+            if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml":
+                pass
+            else:
+                ceph_cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (ceph_vm_nic, ceph_vm_ip, ceph_vm_netmask, ceph_vm_gateway)
+                ssh.execute(ceph_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+
+                #TODO: should dynamically change gw followed config.json, but currently there is only one case, thus always change 
+                #default gw to public network gw
+                set_default_gw_cmd = "route del default gw %s && route add default gw %s" %(ceph_vm_gateway, vm_gateway)
+                ssh.execute(set_default_gw_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
         
     elif mn_ha_storage_type == "fusionstor":
         if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-fusionstor-3-nets-sep.xml"], ["scenario-config-fusionstor-3-nets-sep.xml"]):
@@ -1449,6 +1456,16 @@ def create_vpc_vrouter(http_server_ip, name, virtualrouter_offering_uuid, resour
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     return evt.inventory
 
+def change_instance_offering_state(http_server_ip, offering_uuid, state_event, system_tags=None, user_tags=None, session_uuid=None):
+    action = api_actions.ChangeInstanceOfferingStateAction()
+    action.uuid = offering_uuid
+    action.stateEvent = state_event
+    action.systemTags = system_tags
+    action.userTags = user_tags
+    action.timeout = 30000
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    return evt
+
 def create_l2_vlan(http_server_ip, name, physicalInterface, vlan, zone_uuid, session_uuid = None):
     action = api_actions.CreateL2VlanNetworkAction()
     action.name = name
@@ -1457,6 +1474,17 @@ def create_l2_vlan(http_server_ip, name, physicalInterface, vlan, zone_uuid, ses
     action.zoneUuid = zone_uuid
     action.timeout = 300000
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    return evt
+
+def create_l2_vxlan(http_server_ip, name, pool_uuid, zone_uuid, session_uuid=None):
+    action = api_actions.CreateL2VxlanNetworkAction()
+    action.timeout = 30000
+    action.name = name
+    action.poolUuid = pool_uuid
+    action.zoneUuid = zone_uuid
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    test_util.action_logger('Create L2 Vxlan network [name:] %s, [poolUuid:] %s, [zoneUuid:] %s' \
+                             %(name, pool_uuid, zone_uuid))
     return evt
 
 def delete_l2(http_server_ip, l2_uuid, session_uuid = None):
@@ -1472,7 +1500,6 @@ def attach_l2(http_server_ip, l2_uuid, cluster_uuid, session_uuid = None):
     action.l2NetworkUuid = l2_uuid
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     return evt
-
 
 def create_l3(http_server_ip, l3Name, type, l2_uuid, dnsDomain, session_uuid = None):
     action = api_actions.CreateL3NetworkAction()
@@ -1618,8 +1645,20 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
             for vr in vr_list:
                 destroy_vm(zstack_management_ip, vr.uuid_)
 
+        conditions = res_ops.gen_query_conditions('name', '=', 'pub-man')
+        vr_instance_offering = query_resource(zstack_management_ip, res_ops.INSTANCE_OFFERING, conditions).inventories[0]
+        vr_instance_offering_uuid = vr_instance_offering.uuid
+        vr_instance_offering_state = vr_instance_offering.state
+
         for vpcvrouter in xmlobject.safe_list(scenario_config.deployerConfig.vpcVrouters.vpcVrouter):
+            test_util.test_logger("@@@DEBUG-> vr_instance_offering_state=:%s: and <%s>==<%s>@@@" %(vr_instance_offering_state, vr_instance_offering_uuid, vpcvrouter.virtualRouterOfferingUuid_))
+            if vr_instance_offering_state == "Disabled" and vr_instance_offering_uuid == vpcvrouter.virtualRouterOfferingUuid_:
+                change_instance_offering_state(zstack_management_ip, vr_instance_offering_uuid, "enable")
+
             vr_inv = create_vpc_vrouter(zstack_management_ip, name=vpcvrouter.name_, virtualrouter_offering_uuid=vpcvrouter.virtualRouterOfferingUuid_)
+
+            if vr_instance_offering_state == "Disabled" and vr_instance_offering_uuid == vpcvrouter.virtualRouterOfferingUuid_:
+                change_instance_offering_state(zstack_management_ip, vr_instance_offering_uuid, "disable")
 
     vpc_l3_uuid = None
     if hasattr(scenario_config.deployerConfig, 'l2Networks'):
@@ -1629,16 +1668,18 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
             for l2network in xmlobject.safe_list(scenario_config.deployerConfig.l2Networks.l2VlanNetwork):
                 # Need to clean up left over VPC networks
                 scenvpcZoneUuid = os.environ.get('scenvpcZoneUuid')
+                scenvpcPoolUuid = os.environ.get('scenvpcPoolUuid')
                 conf = res_ops.gen_query_conditions('physicalInterface', '=', '%s' % (l2network.physicalInterface_))
                 l2_network_list = query_resource(zstack_management_ip, res_ops.L2_NETWORK, conf).inventories
                 for l2_network in l2_network_list:
                     if l2network.vlan_ != None and l2network.vlan_ != "":
                         if str(l2_network.vlan) == str(l2network.vlan_):
                             delete_l2(zstack_management_ip, l2_network.uuid)
-                l2_inv = create_l2_vlan(zstack_management_ip, l2network.name_, l2network.physicalInterface_, l2network.vlan_, scenvpcZoneUuid).inventory
+                #l2_inv = create_l2_vlan(zstack_management_ip, l2network.name_, l2network.physicalInterface_, l2network.vlan_, scenvpcZoneUuid).inventory
+                l2_inv = create_l2_vxlan(zstack_management_ip, l2network.name_, scenvpcPoolUuid, scenvpcZoneUuid, session_uuid=None).inventory
                 scenl2Clusters = os.environ.get('scenl2Clusters').split(',')
-                for scenl2cluster in scenl2Clusters:
-                    attach_l2(zstack_management_ip, l2_inv.uuid, scenl2cluster)
+                #for scenl2cluster in scenl2Clusters:
+                #    attach_l2(zstack_management_ip, l2_inv.uuid, scenl2cluster)
                 for l3network in xmlobject.safe_list(l2network.l3Networks.l3BasicNetwork):
                     l3_inv = create_l3(zstack_management_ip, l3network.name_, l3network.type_, l2_inv.uuid, l3network.domain_name_, session_uuid = None).inventory
                     vpc_l3_uuid = l3_inv.uuid

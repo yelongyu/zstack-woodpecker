@@ -86,6 +86,50 @@ def create_vm(vm_name, image_name, l3_name):
     vm.create()
     return vm
 
+def add_test_minimal_iso(iso_name):
+    import zstackwoodpecker.zstack_test.zstack_test_image as test_image
+    img_option = test_util.ImageOption()
+    img_option.set_name(iso_name)
+    bs_uuid = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, [], None)[0].uuid
+    img_option.set_backup_storage_uuid_list([bs_uuid])
+    img_option.set_url('http://172.20.1.15:7480/iso/CentOS-x86_64-7.2-Minimal.iso')
+    image_inv = img_ops.add_iso_template(img_option)
+    image = test_image.ZstackTestImage()
+    image.set_image(image_inv)
+    image.set_creation_option(img_option)
+    return image
+
+def add_test_root_volume_offering(root_offering_name, root_offering_size):
+    import zstackwoodpecker.operations.volume_operations as vol_ops
+    root_offering_option = test_util.DiskOfferingOption()
+    root_offering_option.set_name(root_offering_name)
+    root_offering_option.set_diskSize(root_offering_size)
+    root_volume_offering = vol_ops.create_volume_offering(root_offering_option)
+    return root_volume_offering
+
+def add_test_vm_offering(cpuNum, memorySize, vm_offering_name):
+    vm_offering_option = test_util.InstanceOfferingOption()
+    vm_offering_option.set_cpuNum(cpuNum)
+    vm_offering_option.set_memorySize(memorySize)
+    vm_offering_option.set_name(vm_offering_name)
+    vm_offering = vm_ops.create_instance_offering(vm_offering_option)
+    return vm_offering
+
+def create_vm_with_iso_for_test(vm_offering_uuid, iso_uuid, root_volume_offering_uuid, vm_name = None):
+    import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
+    l3_name = os.environ.get('l3VlanNetworkName1')
+    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    vm_creation_option = test_util.VmOption()
+    vm_creation_option.set_instance_offering_uuid(vm_offering_uuid)
+    vm_creation_option.set_l3_uuids([l3_net_uuid])
+    vm_creation_option.set_image_uuid(iso_uuid)
+    vm_creation_option.set_name(vm_name)
+    vm_creation_option.set_root_disk_uuid(root_volume_offering_uuid)
+    vm = zstack_vm_header.ZstackTestVm()
+    vm.set_creation_option(vm_creation_option)
+    vm.create()
+    return vm
+
 def create_vm_with_iso(l3_uuid_list, image_uuid, vm_name = None, root_disk_uuids = None, instance_offering_uuid = None, \
                        disk_offering_uuids = None, default_l3_uuid = None, system_tags = None, \
                        session_uuid = None, ps_uuid=None):
@@ -1465,3 +1509,84 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         if ps_uuid_after != last_ps_uuid:
            test_util.test_fail('Change VM Image Failed.Primarystorage has changed.')
 
+
+
+DVOL_OPS_TEST = [
+"DVOL_TEST_NONE",
+"DVOL_TEST_MIGRATE",
+"DVOL_TEST_SNAPSHOT",
+"DVOL_TEST_STATE",
+"DVOL_TEST_ATTACH",
+"DVOL_TEST_RESIZE",
+"DVOL_TEST_ALL"
+]
+
+def dvol_ops_test(dvol_obj,vm_obj, dvol_ops_test_choice="DVOL_TEST_NONE"):
+    '''
+    This function provides dvol operation related test
+    '''
+
+
+    import zstackwoodpecker.operations.volume_operations as vol_ops
+
+
+    #import zstacklib.utils.ssh as ssh
+    import test_stub
+    test_obj_dict = test_state.TestStateDict()
+
+
+    if dvol_ops_test_choice not in DVOL_OPS_TEST:
+        test_util.test_fail( "Find not support dvol operation" )
+
+
+    if dvol_ops_test_choice == "DVOL_TEST_NONE":
+        test_util.test_logger( "DVOL_OPS_TEST.DVOL_TEST_NONE, therefore, skip DVOL_ops function" )
+        return
+
+
+    if dvol_ops_test_choice == "DVOL_TEST_ALL" or dvol_ops_test_choice == "DVOL_TEST_MIGRATE":
+        test_util.test_dsc("@@@_FUNC_:dvol_ops_test   @@@_IF_BRANCH_:DVOL_TEST_ALL|DVOL_TEST_MIGRATE")
+        ps = test_lib.lib_get_primary_storage_by_vm(vm_obj.get_vm())
+        if ps.type in [inventory.LOCAL_STORAGE_TYPE]:
+            target_host = test_lib.lib_find_random_host(vm_obj.vm)
+            vol_ops.migrate_volume(dvol_obj.uuid, target_host.uuid)
+            target_host2 = test_lib.lib_find_host_by_vm(vm_obj.get_vm())
+            vol_ops.migrate_volume(dvol_obj.uuid, target_host2.uuid)
+        elif ps.type in [inventory.CEPH_PRIMARY_STORAGE_TYPE, 'SharedMountPoint', inventory.NFS_PRIMARY_STORAGE_TYPE]:
+            test_util.test_dsc("skip migrate if ps type is not local")
+        else:
+            test_util.test_fail("FOUND NEW STORAGTE TYPE. FAILED")
+
+
+    if dvol_ops_test_choice == "DVOL_TEST_ALL" or dvol_ops_test_choice == "DVOL_TEST_SNAPSHOT":
+        test_util.test_dsc("@@@_FUNC_:dvol_ops_test   @@@_IF_BRANCH_:DVOL_TEST_ALL|DVOL_TEST_SNAPSHOT")
+        snapshot_option = test_util.SnapshotOption()
+        snapshot_option.set_volume_uuid(dvol_obj.uuid)
+        snapshot_option.set_name('snapshot-1')
+        snapshot_option.set_description('Test')
+        vol_snapshot = vol_ops.create_snapshot(snapshot_option)
+        vol_ops.use_snapshot(vol_snapshot.uuid)
+
+
+    if dvol_ops_test_choice == "DVOL_TEST_ALL" or dvol_ops_test_choice == "DVOL_TEST_STATE":
+        test_util.test_dsc("@@@_FUNC_:dvol_ops_test   @@@_IF_BRANCH_:DVOL_TEST_ALL|DVOL_TEST_STATE")
+        vol_ops.stop_volume(dvol_obj.uuid)
+        vol_ops.start_volume(dvol_obj.uuid)
+
+
+    if dvol_ops_test_choice == "DVOL_TEST_ALL" or dvol_ops_test_choice == "DVOL_TEST_ATTACH":
+        test_util.test_dsc("@@@_FUNC_:dvol_ops_test   @@@_IF_BRANCH_:DVOL_TEST_ALL|DVOL_TEST_ATTACH")
+        vol_ops.attach_volume(dvol_obj.uuid, vm_obj.get_vm().uuid)
+        vm_obj.update()
+        vol_ops.detach_volume(dvol_obj.uuid, vm_obj.get_vm().uuid)
+        vm_obj.update()
+
+
+    if dvol_ops_test_choice == "DVOL_TEST_ALL" or dvol_ops_test_choice == "DVOL_TEST_RESIZE":
+        test_util.test_dsc("@@@_FUNC_:dvol_ops_test   @@@_IF_BRANCH_:DVOL_TEST_ALL|DVOL_TEST_RESIZE")
+        vol_size_before = dvol_obj.size
+        if vol_size_before < 1024*1024*1024*1:
+            vol_size_before = 1024*1024*1024*1
+        set_size = 1024*1024*1024*1 + vol_size_before
+        vol_ops.resize_data_volume(dvol_obj.uuid, set_size)
+        dvol_obj.size = set_size

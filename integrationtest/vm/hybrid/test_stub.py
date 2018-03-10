@@ -991,11 +991,11 @@ class HybridObject(object):
             self.del_ecs_instance()
         try:
             self.del_sg()
-        except:
+        except hyb_ops.ApiError:
             self.del_aliyun_disk()
-        except:
+        except hyb_ops.ApiError:
             self.del_aliyun_snapshot()
-        except:
+        except hyb_ops.ApiError:
             self.del_eip()
         except:
             pass

@@ -76,6 +76,19 @@ def change_host_state(host_uuid, state, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
+def update_host(hostUuid, infoType, infoValue, session_uuid = None):
+    action = api_actions.UpdateHostAction()
+    action.uuid = hostUuid
+    if infoType == 'name':
+        action.name = infoValue
+    elif infoType == 'description':
+        action.description = infoValue
+    elif infoType == 'managementIp':
+        action.managementIp = infoValue
+    test_util.action_logger('Update Host %s to %s' %(infoType,infoValue))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
 def update_kvm_host(hostUuid, infoType, infoValue, session_uuid = None):
     action = api_actions.UpdateKVMHostAction()
     action.uuid = hostUuid

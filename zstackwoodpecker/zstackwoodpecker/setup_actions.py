@@ -601,6 +601,14 @@ default one' % self.zstack_properties)
                 thread.start()
                 self._wait_for_thread_completion('change management node ip', 120)
 
+            cmd = 'zstack-ctl configure InfluxDB.startupTimeout=1200'
+            if not linux.is_ip_existing(node.ip_):
+                ssh.execute(cmd, node.ip_, node.username_, node.password_)
+            else:
+                thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
+                thread.start()
+                self._wait_for_thread_completion('InfluxDB startup time setting to 10 mins', 120)
+
     def _wait_for_thread_completion(self, msg, wait_time, raise_exception = True):
         end_time = wait_time
         while end_time > 0:
