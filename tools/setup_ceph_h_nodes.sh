@@ -29,8 +29,23 @@ gen_ssh_keys(){
     chmod go-rwx /root/.ssh/authorized_keys
 }
 
+auto_select_right_ceph_install(){
+    if [ -z "$1" ]; then
+        dest_ip="localhost"
+    else
+        dest_ip=$1
+    fi
+
+    if ssh $dest_ip "yum repolist all|grep ceph-hammer"; then
+        ssh $dest_ip "yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install ceph ceph-deploy ntp expect>/dev/null 2>&1"
+    else
+        ssh $dest_ip "yum --disablerepo=* --enablerepo=zstack-local,ceph -y install ceph ceph-deploy ntp expect>/dev/null 2>&1"
+    fi
+}
+
 yum --disablerepo=* --enablerepo=zstack-local install -y iptables-services >/dev/null 2>&1
-yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install ceph ceph-deploy ntp expect>/dev/null 2>&1
+#yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install ceph ceph-deploy ntp expect>/dev/null 2>&1
+auto_select_right_ceph_install
 #HOST_IP=`ip addr show eth0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'`
 
 echo " ${IP[0]} ceph-1 ">>/etc/hosts
@@ -65,13 +80,15 @@ if [ "${CEPH_ONE_NODE}" != "yes" ]; then
 fi
 
 if [ "${CEPH_ONE_NODE}" != "yes" ]; then 
-    ssh  ceph-2 yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install ceph ceph-deploy ntp expect>/dev/null 2>&1
-    ssh  ceph-3 yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install ceph ceph-deploy ntp expect>/dev/null 2>&1
+    #ssh  ceph-2 yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install ceph ceph-deploy ntp expect>/dev/null 2>&1
+    #ssh  ceph-3 yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install ceph ceph-deploy ntp expect>/dev/null 2>&1
+    auto_select_right_ceph_install ceph-2
+    auto_select_right_ceph_install ceph-3
 fi
 
 if [ "${CEPH_ONE_NODE}" != "yes" ]; then 
-    ssh  ceph-2 yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install iptables-services>/dev/null 2>&1
-    ssh  ceph-3 yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install iptables-services>/dev/null 2>&1
+    ssh  ceph-2 yum --disablerepo=* --enablerepo=zstack-local -y install iptables-services>/dev/null 2>&1
+    ssh  ceph-3 yum --disablerepo=* --enablerepo=zstack-local -y install iptables-services>/dev/null 2>&1
 fi
 
 
