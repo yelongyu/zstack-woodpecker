@@ -326,15 +326,16 @@ def attach_iso(iso_uuid, vm_uuid, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def detach_iso(vm_uuid, session_uuid = None):
+def detach_iso(vm_uuid, iso_uuid=None, session_uuid = None):
     '''
     Detach iso from vm
     '''
     action = api_actions.DetachIsoFromVmInstanceAction()
     action.vmInstanceUuid = vm_uuid
+    action.isoUuid = iso_uuid
     test_util.action_logger('Detach ISO from VM[UUID: %s]' % (vm_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventory    
+    return evt.inventory
 
 def get_image_qga_enable(img_uuid, session_uuid = None):
     action = api_actions.GetImageQgaEnableAction()
