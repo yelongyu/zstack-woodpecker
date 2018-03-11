@@ -90,6 +90,7 @@ def create_vm_in_vcenter(vm_name='vcenter-vm', \
         instance_offering_uuid = None, \
         host_uuid = None, \
         disk_offering_uuids=None, system_tags=None, \
+        timeout = 600000, \
         root_password=None, session_uuid = None):
 
 
@@ -114,6 +115,7 @@ def create_vm_in_vcenter(vm_name='vcenter-vm', \
     vm_creation_option.set_name(vm_name)
     vm_creation_option.set_system_tags(system_tags)
     vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
+    vm_creation_option.set_timeout(timeout)
     if root_password:
         vm_creation_option.set_root_password(root_password)
     if host_uuid:
