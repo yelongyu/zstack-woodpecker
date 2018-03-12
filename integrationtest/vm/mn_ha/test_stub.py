@@ -835,3 +835,25 @@ def sce_is_sep_man():
             return True
     else:
         return False
+
+
+def auto_set_mn_ip(scenario_file):
+    import re
+    host_ip_lst = sce_ops.dump_scenario_file_ips(scenario_file)
+    host_ip = host_ip_lst[0]
+    for i in range(30):
+        time.sleep(10)
+        cmd = "zsha status|head -n 2|tail -n 1|cut -d: -f1"
+        ret, mn_host_ip, stderr = ssh.execute(cmd, host_ip, "root", "password", True, 22) 
+        if re.match(r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$", mn_host_ip):
+            test_util.test_logger("find mn_host_ip=%s" %(mn_host_ip))
+            break
+    else:
+        test_util.test_fail("not find valid mn_host_ip within 300s")
+
+    mn_host_ip_lst = mn_host_ip.split('.')
+    mn_host_ip_lst[3] = '200'
+    mn_ip = '.'.join(mn_host_ip_lst)
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mn_ip
+    os.environ['zstackHaVip'] = mn_ip
+    

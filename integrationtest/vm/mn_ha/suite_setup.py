@@ -106,7 +106,11 @@ def test():
     mn_img = os.environ.get('mnImage')
     test_stub.deploy_ha_env(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config,config_json, ha_deploy_tool, mn_img)
 
-    node_operations.wait_for_management_server_start(300)
+    if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml":
+        test_stub.auto_set_mn_ip(test_lib.scenario_file)
+    else:
+        node_operations.wait_for_management_server_start(300)
+
     ssh.scp_file("/home/license-10host-10days-hp.txt", "/home/license-10host-10days-hp.txt", os.environ.get('zstackHaVip'), 'root', 'password')
     if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
