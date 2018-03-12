@@ -235,3 +235,20 @@ def check_deployed_vcenter(deploy_config, scenario_config = None, scenario_file 
         for pg in pg_list:
             assert pg == vc_ops.lib_get_vcenter_l2_by_name(pg).name
             assert "L3-" + pg == vc_ops.lib_get_vcenter_l3_by_name("L3-" + pg).name
+
+
+
+
+def create_volume(volume_creation_option=None, session_uuid = None):
+    if not volume_creation_option:
+        disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
+        volume_creation_option = test_util.VolumeOption()
+        volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
+        volume_creation_option.set_name('test_vcenter_volume')
+
+    volume_creation_option.set_session_uuid(session_uuid)
+    volume = zstack_volume_header.ZstackTestVolume()
+    volume.set_creation_option(volume_creation_option)
+    volume.create()
+    return volume
+
