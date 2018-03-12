@@ -14,7 +14,7 @@ def add_data_volume_template(image_option):
     action = api_actions.AddImageAction()
     action.name = image_option.get_name()
     action.url = image_option.get_url()
-    action.mediaType = 'DataVolumnTemplate'
+    action.mediaType = 'DataVolumeTemplate'
     if image_option.get_mediaType() and \
             action.mediaType != image_option.get_mediaType():
         test_util.test_warn('image type %s was not %s' % \

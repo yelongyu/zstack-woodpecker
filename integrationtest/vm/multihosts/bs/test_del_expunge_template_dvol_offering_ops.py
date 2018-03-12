@@ -1,5 +1,5 @@
 '''
-Test for deleting and expunge vol image check vol ops.
+Test for deleting and expunge vol template check vol created from offering ops.
 
 The key step:
 -add image1
@@ -7,7 +7,7 @@ The key step:
 -create data vol1
 -create template from data vol1
 -create data vol2 from template
--expunge template
+-delete template
 -do data vol all ops test on data vol2
 -expunge template
 -do data vol all ops test on data vol2
