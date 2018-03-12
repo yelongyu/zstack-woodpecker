@@ -1960,6 +1960,22 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                         #add_vm_nic_to_security_group(zstack_management_ip, security_group_inv.uuid, vm_nic_uuid)
 
 def destroy_scenario(scenario_config, scenario_file):
+    #below is for vpc ceph destroy l2 without debugging, we'll continue to complete this in the future.
+    #if hasattr(scenario_config.deployerConfig, 'l2Networks'):
+    #    if hasattr(scenario_config.deployerConfig.l2Networks, 'l2VlanNetwork'):
+    #        # This currently depend on mapping to hardcoded IP range
+    #        ip_ranges = []
+    #        for l2network in xmlobject.safe_list(scenario_config.deployerConfig.l2Networks.l2VlanNetwork):
+    #            # Need to clean up left over VPC networks
+    #            scenvpcZoneUuid = os.environ.get('scenvpcZoneUuid')
+    #            scenvpcPoolUuid = os.environ.get('scenvpcPoolUuid')
+    #            conf = res_ops.gen_query_conditions('physicalInterface', '=', '%s' % (l2network.physicalInterface_))
+    #            l2_network_list = query_resource(zstack_management_ip, res_ops.L2_NETWORK, conf).inventories
+    #            for l2_network in l2_network_list:
+    #                if l2network.vlan_ != None and l2network.vlan_ != "":
+    #                    if str(l2_network.vlan) == str(l2network.vlan_):
+    #                        delete_l2(zstack_management_ip, l2_network.uuid)
+
     with open(scenario_file, 'r') as fd:
         xmlstr = fd.read()
         fd.close()
