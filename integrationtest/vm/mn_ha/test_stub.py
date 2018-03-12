@@ -363,11 +363,11 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
             mn_gateway = mn_gateway + mn_gateway_new + '@' + hostname + ', '
             mn_netmask_new = "255.255.255.0"
             mn_netmask = mn_netmask + mn_netmask_new + '@' + hostname + ', '
-        mn_ip = mn_ip.strip().strip(',')
-        mn_netmask = mn_netmask.strip().strip(',')
-        mn_gateway = mn_gateway.strip().strip(',')
+        mn_ip = mn_ip.strip().strip(',').replace('\n', '')
+        mn_netmask = mn_netmask.strip().strip(',').replace('\n', '')
+        mn_gateway = mn_gateway.strip().strip(',').replace('\n', '')
         test_util.test_logger("mn_ip=:%s:; mn_netmask=:%s:; mn_gateway=:%s:" %(mn_ip, mn_netmask, mn_gateway))
-        os.system('sed -i "s/mn_ip/%s/g %s"' % (mn_ip,config_json))
+        os.system('sed -i "s/mn_ip/%s/g" %s' % (mn_ip,config_json))
         os.system('sed -i "s/mn_netmask/%s/g" %s' % (mn_netmask,config_json))
         os.system('sed -i "s/mn_gateway/%s/g" %s' % (mn_gateway,config_json))
     else:
