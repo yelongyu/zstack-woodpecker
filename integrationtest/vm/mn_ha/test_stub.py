@@ -366,16 +366,17 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
         mn_ip = mn_ip.strip().strip(',')
         mn_netmask = mn_netmask.strip().strip(',')
         mn_gateway = mn_gateway.strip().strip(',')
-        os.system('sed -i s/mn_ip/%s/g %s' % (mn_ip,config_json))
-        os.system('sed -i s/mn_netmask/%s/g %s' % (mn_netmask,config_json))
-        os.system('sed -i s/mn_gateway/%s/g %s' % (mn_gateway,config_json))
+        test_util.test_logger("mn_ip=:%s:; mn_netmask=:%s:; mn_gateway=:%s:" %(mn_ip, mn_netmask, mn_gateway))
+        os.system('sed -i "s/mn_ip/%s/g %s"' % (mn_ip,config_json))
+        os.system('sed -i "s/mn_netmask/%s/g" %s' % (mn_netmask,config_json))
+        os.system('sed -i "s/mn_gateway/%s/g" %s' % (mn_gateway,config_json))
     else:
         mn_ip = os.environ.get('zstackHaVip')
         mn_netmask = os.environ.get('nodeNetMask')
         mn_gateway = os.environ.get('nodeGateway')
-        os.system('sed -i s/mn_ip/%s/g %s' % (mn_ip,config_json))
-        os.system('sed -i s/mn_netmask/%s/g %s' % (mn_netmask,config_json))
-        os.system('sed -i s/mn_gateway/%s/g %s' % (mn_gateway,config_json))
+        os.system('sed -i "s/mn_ip/%s/g" %s' % (mn_ip,config_json))
+        os.system('sed -i "s/mn_netmask/%s/g" %s' % (mn_netmask,config_json))
+        os.system('sed -i "s/mn_gateway/%s/g" %s' % (mn_gateway,config_json))
 
     mn_ha_storage_type = sce_ops.get_mn_ha_storage_type(scenarioConfig, scenarioFile, deploy_config)
     if mn_ha_storage_type == 'ceph':
