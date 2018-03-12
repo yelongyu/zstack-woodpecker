@@ -333,11 +333,8 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
     if len(mn_host_list) < 1:
         return False
-    l2network_name = os.environ.get('l2PublicNetworkName')
+    #l2network_name = os.environ.get('l2PublicNetworkName')
     #nic_name = os.environ.get('nodeNic').replace("eth", "zsn")
-    mn_ip = os.environ.get('zstackHaVip')
-    mn_netmask = os.environ.get('nodeNetMask')
-    mn_gateway = os.environ.get('nodeGateway')
     for i in range(len(mn_host_list)):
         if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-fusionstor-3-nets-sep.xml"], ["scenario-config-fusionstor-3-nets-sep.xml"]):
             os.system('sed -i s/host-%d/%s/g %s' % (i+1, mn_host_list[i].storageIp_,config_json))
@@ -349,9 +346,36 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
             os.system('sed -i s/host-%d/%s/g %s' % (i+1, mn_host_list[i].managementIp_,config_json))
 
     os.system('sed -i s/nic/%s/g %s' % ("zsn", config_json))
-    os.system('sed -i s/mn_ip/%s/g %s' % (mn_ip,config_json))
-    os.system('sed -i s/mn_netmask/%s/g %s' % (mn_netmask,config_json))
-    os.system('sed -i s/mn_gateway/%s/g %s' % (mn_gateway,config_json))
+    if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml"
+        host_ips = sce_ops.dump_scenario_file_ips(scenarioFile)
+        mn_ip = ""
+        mn_gateway = ""
+        mn_netmask = ""
+        for host_ip in host_ips:
+            cmd = "hostname"
+            ret, hostname, stderr = ssh.execute(cmd, host_ip, "root", "password", True, 22)
+            host_ip_new_lst = host_ip.split('.')
+            host_ip_new_lst[3] = '200'
+            mn_ip_new = '.'.join(host_ip_new_lst)
+            mn_ip = mn_ip + mn_ip_new + '@' + hostname + ', '
+            host_ip_new_lst[3] = '1'
+            mn_gateway_new = '.'.join(host_ip_new_lst)
+            mn_gateway = mn_gateway + mn_gateway_new + '@' + hostname + ', '
+            mn_netmask_new = "255.255.255.0"
+            mn_netmask = mn_netmask + mn_netmask_new + '@' + hostname + ', '
+        mn_ip = mn_ip.strip().strip(',')
+        mn_netmask = mn_netmask.strip().strip(',')
+        mn_gateway = mn_gateway.strip().strip(',')
+        os.system('sed -i s/mn_ip/%s/g %s' % (mn_ip,config_json))
+        os.system('sed -i s/mn_netmask/%s/g %s' % (mn_netmask,config_json))
+        os.system('sed -i s/mn_gateway/%s/g %s' % (mn_gateway,config_json))
+    else:
+        mn_ip = os.environ.get('zstackHaVip')
+        mn_netmask = os.environ.get('nodeNetMask')
+        mn_gateway = os.environ.get('nodeGateway')
+        os.system('sed -i s/mn_ip/%s/g %s' % (mn_ip,config_json))
+        os.system('sed -i s/mn_netmask/%s/g %s' % (mn_netmask,config_json))
+        os.system('sed -i s/mn_gateway/%s/g %s' % (mn_gateway,config_json))
 
     mn_ha_storage_type = sce_ops.get_mn_ha_storage_type(scenarioConfig, scenarioFile, deploy_config)
     if mn_ha_storage_type == 'ceph':
