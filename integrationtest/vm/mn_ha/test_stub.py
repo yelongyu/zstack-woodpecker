@@ -346,7 +346,7 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
             os.system('sed -i s/host-%d/%s/g %s' % (i+1, mn_host_list[i].managementIp_,config_json))
 
     os.system('sed -i s/nic/%s/g %s' % ("zsn", config_json))
-    if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml"
+    if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml":
         host_ips = sce_ops.dump_scenario_file_ips(scenarioFile)
         mn_ip = ""
         mn_gateway = ""
