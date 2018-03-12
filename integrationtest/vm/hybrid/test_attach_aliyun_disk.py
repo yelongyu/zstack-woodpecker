@@ -22,6 +22,8 @@ def test():
     hybrid.attach_aliyun_disk()
     time.sleep(90)
     hybrid.detach_aliyun_disk()
+    time.sleep(60)
+    hybrid.del_aliyun_disk()
     test_util.test_pass('Attach Aliyun Disk Test Success')
 
 def env_recover():

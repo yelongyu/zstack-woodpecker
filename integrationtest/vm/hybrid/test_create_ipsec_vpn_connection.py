@@ -46,6 +46,8 @@ def env_recover():
     if hybrid.route_entry:
         hybrid.del_route_entry()
 
+    hybrid.tear_down()
+
 #Will be called only if exception happens in test().
 def error_cleanup():
     global test_obj_dict

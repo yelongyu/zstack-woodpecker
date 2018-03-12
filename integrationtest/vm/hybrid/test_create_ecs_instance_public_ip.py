@@ -23,14 +23,8 @@ def test():
     test_util.test_pass('Create Ecs Instance with Public IP Test Success')
 
 def env_recover():
-    time.sleep(120)
     hybrid.tear_down()
 
-    hybrid.del_eip()
-
-    if hybrid.sg_create:
-        time.sleep(30)
-        hybrid.del_sg()
 
 #Will be called only if exception happens in test().
 def error_cleanup():

@@ -57,7 +57,9 @@ class HybridObject(object):
         self.vswitch = None
         self.vpn = None
         self.eip = None
+        self.eip_create = None
         self.sg = None
+        self.sg_create = None
         self.sg_rule = None
         self.vm = None
         self.vr = None
@@ -68,6 +70,7 @@ class HybridObject(object):
         self.ecs_instance = None
         self.ecs_image = None
         self.disk = None
+        self.snapshot = None
         self.vpn_gateway = None
         self.user_vpn_gateway = None
         self.user_gw_ip = None
@@ -75,7 +78,6 @@ class HybridObject(object):
         self.prepaid_ecs = None
         self.vpn_connection = None
         self.cond_image_system = res_ops.gen_query_conditions('type', '=', 'system')
-
 
     def add_ks(self, ks2):
         ks_existed = hyb_ops.query_aliyun_key_secret()
@@ -989,18 +991,15 @@ class HybridObject(object):
         for ecs in ecs_to_clear:
             self.ecs_instance = ecs
             self.del_ecs_instance()
-        try:
-            self.del_sg()
-        except hyb_ops.ApiError:
-            self.del_aliyun_disk()
-        except hyb_ops.ApiError:
-            self.del_aliyun_snapshot()
-        except hyb_ops.ApiError:
-            self.del_eip()
-        except:
-            pass
-        finally:
-            pass
+        res = [self.sg_create, self.disk, self.snapshot, self.eip_create, self.user_vpn_gateway, self.ecs_image]
+        res_del_func = [self.del_sg, self.del_aliyun_disk, self.del_aliyun_snapshot, self.del_eip, self.del_user_vpn_gateway, self.del_ecs_image]
+        for i in xrange(len(res)):
+            if res[i]:
+                time.sleep(120)
+                try:
+                    res_del_func[i]()
+                except:
+                    pass
 
 def create_vlan_vm(l3_name=None, disk_offering_uuids=None, system_tags=None, session_uuid = None, instance_offering_uuid = None):
     image_name = os.environ.get('imageName_net')

@@ -29,4 +29,9 @@ def env_recover():
 def error_cleanup():
     global test_obj_dict
     hybrid.tear_down()
+    try:
+        hybrid.get_eip(sync_eip=True)
+        hybrid.del_eip()
+    except:
+        pass
     test_lib.lib_error_cleanup(test_obj_dict)
