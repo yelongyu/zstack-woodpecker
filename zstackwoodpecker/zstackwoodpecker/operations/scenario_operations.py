@@ -365,6 +365,11 @@ def get_nfs_ip_for_net_sep(scenarioConfig, virtual_host_ip, nfs_ps_name):
 
     return None
 
+def get_vm_gateway(vm_ip, vm_config):
+    cmd = "ip r|head -n 1|awk '{print $3}'"
+    ret, output, stderr = ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+    return output
+
 
 def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
@@ -372,7 +377,10 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
     vm_netmask = os.environ.get('nodeNetMask')
     vm_gateway = os.environ.get('nodeGateway')
     if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml":
-        pass
+        vm_gateway = get_vm_gateway(vm_ip, vm_config)
+        vm_netmask = "255.255.255.0"
+        cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (vm_nic, vm_ip, vm_netmask, vm_gateway)
+        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
     else:
         cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (vm_nic, vm_ip, vm_netmask, vm_gateway)
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
