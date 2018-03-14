@@ -109,7 +109,7 @@ def test():
     if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml":
         test_stub.auto_set_mn_ip(test_lib.scenario_file)
 
-    node_operations.wait_for_management_server_start(300)
+    node_operations.wait_for_management_server_start(600)
     ssh.scp_file("/home/license-10host-10days-hp.txt", "/home/license-10host-10days-hp.txt", os.environ.get('zstackHaVip'), 'root', 'password')
     if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
