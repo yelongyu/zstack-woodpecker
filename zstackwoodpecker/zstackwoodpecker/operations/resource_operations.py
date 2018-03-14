@@ -96,7 +96,9 @@ SNS_DING_TALK_ENDPOINT = 'SNSDingTalkEndpoint'
 SNS_EMAIL_ENDPOINT = 'SNSEmailEndpoint'
 SNS_EMAIL_PLATFORM = 'SNSEmailPlatform'
 SNS_HTTP_ENDPOINT = 'SNSHttpEndpoint'
+SNS_TEXT_TEMPLATE = 'SNSTextTemplate'
 AFFINITY_GROUP = "AffinityGroup"
+
 
 
 def find_item_by_uuid(inventories, uuid):
@@ -560,6 +562,8 @@ def _gen_query_action(resource, condition=None):
         action = api_actions.QuerySNSEmailPlatformAction()
     elif resource == SNS_HTTP_ENDPOINT:
         action = api_actions.QuerySNSHttpEndpointAction()
+    elif resource == SNS_TEXT_TEMPLATE:
+        action = api_actions.QuerySNSTextTemplateAction()
     elif resource == AFFINITY_GROUP:
         action = api_actions.QueryAffinityGroupAction()
     return action
