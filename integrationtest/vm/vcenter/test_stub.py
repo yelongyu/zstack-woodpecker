@@ -252,3 +252,6 @@ def create_volume(volume_creation_option=None, session_uuid = None):
     volume.create()
     return volume
 
+def set_httpd_in_vm(vm, ip):
+    cmd = "systemctl start httpd; iptables -F; echo %s > /var/www/html/index.html" % ip
+    test_lib.lib_execute_command_in_vm(vm, cmd)

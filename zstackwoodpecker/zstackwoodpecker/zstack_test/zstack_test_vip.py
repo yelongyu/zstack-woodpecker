@@ -21,6 +21,7 @@ class ZstackTestVip(vip_header.TestVip):
         self.pf_dict = {vm_header.RUNNING:[], vm_header.STOPPED:[], pf_header.DETACHED:[]}
         self.eip = None
         self.lb = None
+        self.isVcenter = False
         #not used currently
         self.creation_option = None
         super(ZstackTestVip, self).__init__()

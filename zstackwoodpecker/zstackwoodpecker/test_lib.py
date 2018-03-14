@@ -3115,11 +3115,21 @@ def lib_get_image_from_plan(image):
     if not isinstance(images, list):
         if images.name_ == image.name:
             return images
-        else:
-            return None
     for img in images:
         if img.name_ == image.name:
             return img
+
+    if not xmlobject.has_element(deploy_config, "vcenter.images"):
+        return None
+
+    images_vcenter = deploy_config.vcenter.images.image
+    if not isinstance(images_vcenter, list):
+        if images_vcenter.name_ == image.name:
+            return images
+    for img in images_vcenter:
+        if img.name_ == image.name:
+            return img
+    return None
 
 def lib_get_disk_offering_by_name(do_name, session_uuid = None):
     conditions = res_ops.gen_query_conditions('name', '=', do_name)

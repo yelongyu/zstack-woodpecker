@@ -92,8 +92,8 @@ class zstack_vcenter_lbl_checker(checker_header.TestChecker):
         self.vm_list = []
         self.vm_ip_test_dict = {}
 
-        if self.lbl.get_creation_option().get_instance_port() != 22:
-            test_util.test_logger('LBL target port is not 22, skip test.')
+        if self.lbl.get_creation_option().get_instance_port() != 22 in self.lbl.get_creation_option().get_instance_port() != 80:
+            test_util.test_logger('LBL target port is not 22 and 80, skip test.')
             return self.judge(self.exp_result)
 
         for vm_nic_uuid in self.vm_nic_uuids:
