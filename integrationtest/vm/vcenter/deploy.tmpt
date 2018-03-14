@@ -74,8 +74,8 @@ vmName4 = 12345
 
 vCenterVirtualRouterImageName = vCenter-vr
 rootMediaType = RootVolumeTemplate
-vCenterVRImageUsername = root
-vCenterVRImagePassword = password
+vCenterVRImageUsername = vyos
+vCenterVRImagePassword = vyos
 vCenterVirtualRouterImageUrl = http://192.168.200.100/mirror/diskimages/zstack-vrouter-latest.vmdk
 
 l2vCenterPublicNetworkName = vCenter-public
@@ -94,9 +94,9 @@ vCenterNoVlanIpRangeGateway = 192.168.0.1
 vCenterNoVlanIpRangeNetmask = 255.255.255.0
 
 vCenterVirtualRouterOfferingName = vcenter_vrouter
-vCenterVirtualRouterOfferingMemory = 512M
+vCenterVirtualRouterOfferingMemory = 1024M
 vCenterVirtualRouterOfferingCpuSpeed = 512
-vCenterVirtualRouterOfferingCpuNum = 2
+vCenterVirtualRouterOfferingCpuNum = 1
 
 l2PublicNetworkName = l2-public
 l2PublicNetworkInterface = eth0

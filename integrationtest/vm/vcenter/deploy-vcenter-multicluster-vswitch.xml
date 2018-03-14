@@ -140,11 +140,13 @@
       <images>
         <image name="$image_dhcp_name" description="Test Image1"
           format="$vcenterrootImageFormat" url="$image_centos_dhcp"
+	  username="$imageUsername" password="$imagePassword"
           mediaType="$rootMediaType" systemTags="vcenter::datacenter::undefined">
           <backupStorageRef>$vcvmfsdatastore</backupStorageRef>
         </image>
         <image name="$image_static_name" description="Test Image2"
           format="$vcenterrootImageFormat" url="$image_centos_static"
+ 	  username="$imageUsername" password="$imagePassword"
           mediaType="$rootMediaType" systemTags="vcenter::datacenter::undefined">
           <backupStorageRef>$vcvmfsdatastore</backupStorageRef>
         </image>
