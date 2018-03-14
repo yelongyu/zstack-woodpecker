@@ -837,14 +837,14 @@ def put_metric_data(namespace,data,session_uuid=None):
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def create_sns_text_template(name,applicationPlatformType,template,defaultTemplate=None,description=None,session_uuid=None):
+def create_sns_text_template(name,application_platform_type,template,default_template=None,description=None,session_uuid=None):
     action = api_actions.CreateSNSTextTemplateAction()
     action.timeout = 30000
     action.name = name
-    action.applicationPlatformType = applicationPlatformType
+    action.applicationPlatformType = application_platform_type
     action.template = template
-    if defaultTemplate:
-        action.defaultTemplate = defaultTemplate
+    if default_template:
+        action.defaultTemplate = default_template
     if description:
         action.description = description
     test_util.action_logger('Create SNS Text Template:%s '% name)
@@ -895,9 +895,6 @@ def check_sns_email(pop_server, username, password, name, uuid):
     '''
     This function is using for checking default SNS Text Template
 
-    :param pop_server: 'pop3.zstack.io'
-    :param username: 'test.qa@zstack.io'
-    :param password: 'Test1234'
     :param name: metric_name or event_name
     :param uuid: For Alarm email,this is alarm_uuid;For Event email,this is subscription_uuid or resource_uuid
     :return: 1 for found or 0 for not found
@@ -925,9 +922,6 @@ def check_keywords_in_email(pop_server, username, password, first_keyword, secon
     '''
     This function is used for checking different SNS Text Template
 
-    :param pop_server: 'pop3.zstack.io'
-    :param username: 'test.qa@zstack.io'
-    :param password: 'Test1234'
     :param first_keyword: keyword search in mail
     :param second_keyword: keyword search in mail
     :return: 1 for found or 0 for not found
