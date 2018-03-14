@@ -236,7 +236,7 @@ def test():
     alarm_template_uuid = test_stub.create_sns_text_template(alarm_template_name,
                                                              application_platform_type,
                                                              alarm_template,
-                                                             defaultTemplate=False).uuid
+                                                             default_template=False).uuid
 
     event_template_name = 'my-event-template'
     event_keywords = 'TemplateForEventHappened'
@@ -248,7 +248,7 @@ def test():
     event_template_uuid = test_stub.create_sns_text_template(event_template_name,
                                                              application_platform_type,
                                                              event_template,
-                                                             defaultTemplate=True).uuid
+                                                             default_template=True).uuid
 
     # test update text template
     test_stub.update_sns_text_template(alarm_template_uuid, description='this is a new description',
