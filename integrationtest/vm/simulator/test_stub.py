@@ -443,6 +443,8 @@ class ZstackTestVR(vm_header.TestVm):
 def create_alarm(comparison_operator, period, threshold, namespace, metric_name, name=None, repeat_interval=None, labels=None, actions=None, resource_uuid=None, session_uuid=None):
     action = api_actions.CreateAlarmAction()
     action.timeout = 30000
+    if name:
+        action.name = name
     if not name:
         action.name = 'alarm_01'
     action.comparisonOperator=comparison_operator
