@@ -23,8 +23,10 @@ alarm_template_uuid = None
 
 alarm_uuid_list = []
 
+
 def test():
-    global my_sns_topic_uuid, email_endpoint_uuid, email_platform_uuid, event_template_uuid, alarm_template_uuid, alarm_uuid_list, test_dict
+    global my_sns_topic_uuid, email_endpoint_uuid, email_platform_uuid, event_template_uuid, \
+        alarm_template_uuid, alarm_uuid_list, test_dict
 
     smtp_server = 'smtp.zstack.io'
     pop_server = 'pop3.zstack.io'
@@ -32,13 +34,16 @@ def test():
     username = 'test.qa@zstack.io'
     password = 'Test1234'
     email_platform_name = 'Alarm_email'
-    email_platform = test_stub.create_sns_email_platform(smtp_server, smtp_port, email_platform_name, username, password)
+    email_platform = test_stub.create_sns_email_platform(smtp_server, smtp_port,
+                                                         email_platform_name, username, password)
     email_platform_uuid = email_platform.uuid
     try:
         test_stub.validate_sns_email_platform(email_platform_uuid)
     except:
-        test_util.test_fail('Validate SNS Email Platform Failed, Email Plarform: %s' % email_platform_uuid)
-    email_endpoint_uuid = test_stub.create_sns_email_endpoint(username, 'test_qa', email_platform_uuid).uuid
+        test_util.test_fail(
+            'Validate SNS Email Platform Failed, Email Plarform: %s' % email_platform_uuid)
+    email_endpoint_uuid = test_stub.create_sns_email_endpoint(username, 'test_qa',
+                                                              email_platform_uuid).uuid
 
     my_sns_topic = test_stub.create_sns_topic('my_sns_topic')
     my_sns_topic_uuid = my_sns_topic.uuid
@@ -58,46 +63,81 @@ def test():
     threshold_50 = 50
 
     total_image_count = 'TotalImageCount'
-    total_image_count_alarm_uuid = test_stub.create_alarm(greater_than_or_equal_to, period, threshold_3, namespace, total_image_count, name='total-count-image', repeat_interval=600,
+    total_image_count_alarm_uuid = test_stub.create_alarm(greater_than_or_equal_to, period,
+                                                          threshold_3, namespace,
+                                                          total_image_count,
+                                                          name='total-count-image',
+                                                          repeat_interval=600,
                                                           actions=actions).uuid
     alarm_uuid_list.append(total_image_count_alarm_uuid)
 
     ready_image_count = 'ReadyImageCount'
-    ready_image_count_alarm_uuid = test_stub.create_alarm(greater_than_or_equal_to, period, threshold_3, namespace, ready_image_count, name='ready_image_count', repeat_interval=600,
+    ready_image_count_alarm_uuid = test_stub.create_alarm(greater_than_or_equal_to, period,
+                                                          threshold_3, namespace,
+                                                          ready_image_count,
+                                                          name='ready_image_count',
+                                                          repeat_interval=600,
                                                           actions=actions).uuid
     alarm_uuid_list.append(ready_image_count_alarm_uuid)
 
     ready_image_in_percent = 'ReadyImageInPercent'
-    ready_image_in_percent_alarm_uuid = test_stub.create_alarm(greater_than_or_equal_to, period, threshold_1, namespace, ready_image_in_percent, name='ready_image_in_percent', repeat_interval=600,
+    ready_image_in_percent_alarm_uuid = test_stub.create_alarm(greater_than_or_equal_to, period,
+                                                               threshold_1, namespace,
+                                                               ready_image_in_percent,
+                                                               name='ready_image_in_percent',
+                                                               repeat_interval=600,
                                                                actions=actions).uuid
     alarm_uuid_list.append(ready_image_in_percent_alarm_uuid)
 
     root_volume_template_count = 'RootVolumeTemplateCount'
-    root_volume_template_count_alarm_uuid = test_stub.create_alarm(greater_than_or_equal_to, period, threshold_3, namespace, root_volume_template_count, name='root_volume_template_count',
-                                                                   repeat_interval=600, actions=actions, ).uuid
+    root_volume_template_count_alarm_uuid = test_stub.create_alarm(greater_than_or_equal_to,
+                                                                   period,
+                                                                   threshold_3, namespace,
+                                                                   root_volume_template_count,
+                                                                   name='root_volume_template_count',
+                                                                   repeat_interval=600,
+                                                                   actions=actions, ).uuid
     alarm_uuid_list.append(root_volume_template_count_alarm_uuid)
 
     root_volume_template_in_percent = 'RootVolumeTemplateInPercent'
-    root_volume_template_in_percent_alarm_uuid = test_stub.create_alarm(greater_than, period, threshold_1, namespace, root_volume_template_in_percent, name='root_volume_template_in_percent',
-                                                                        repeat_interval=600, actions=actions).uuid
+    root_volume_template_in_percent_alarm_uuid = test_stub.create_alarm(greater_than, period,
+                                                                        threshold_1, namespace,
+                                                                        root_volume_template_in_percent,
+                                                                        name='root_volume_template_in_percent',
+                                                                        repeat_interval=600,
+                                                                        actions=actions).uuid
     alarm_uuid_list.append(root_volume_template_in_percent_alarm_uuid)
 
     data_volume_template_count = 'DataVolumeTemplateCount'
-    data_volume_template_count_alarm_uuid = test_stub.create_alarm(greater_than_or_equal_to, period, threshold_3, namespace, data_volume_template_count, name='data_volume_template_count',
-                                                                   repeat_interval=600, actions=actions).uuid
+    data_volume_template_count_alarm_uuid = test_stub.create_alarm(greater_than_or_equal_to,
+                                                                   period,
+                                                                   threshold_3, namespace,
+                                                                   data_volume_template_count,
+                                                                   name='data_volume_template_count',
+                                                                   repeat_interval=600,
+                                                                   actions=actions).uuid
     alarm_uuid_list.append(data_volume_template_count_alarm_uuid)
 
     data_volume_template_in_percent = 'DataVolumeTemplateInPercent'
-    data_volume_template_in_percent_alarm_uuid = test_stub.create_alarm(greater_than, period, threshold_1, namespace, data_volume_template_in_percent, name='data_volume_template_in_percent',
-                                                                        repeat_interval=600, actions=actions).uuid
+    data_volume_template_in_percent_alarm_uuid = test_stub.create_alarm(greater_than, period,
+                                                                        threshold_1, namespace,
+                                                                        data_volume_template_in_percent,
+                                                                        name='data_volume_template_in_percent',
+                                                                        repeat_interval=600,
+                                                                        actions=actions).uuid
     alarm_uuid_list.append(data_volume_template_in_percent_alarm_uuid)
 
     iso_count = 'ISOCount'
-    iso_count_alarm_uuid = test_stub.create_alarm(greater_than_or_equal_to, period, threshold_3, namespace, iso_count, name='iso_count', repeat_interval=600, actions=actions).uuid
+    iso_count_alarm_uuid = test_stub.create_alarm(greater_than_or_equal_to, period, threshold_3,
+                                                  namespace, iso_count, name='iso_count',
+                                                  repeat_interval=600, actions=actions).uuid
     alarm_uuid_list.append(iso_count_alarm_uuid)
 
     iso_in_percent = 'ISOInPercent'
-    iso_in_percent_alarm_uuid = test_stub.create_alarm(greater_than, period, threshold_1, namespace, iso_in_percent, name='iso_in_percent', repeat_interval=600, actions=actions).uuid
+    iso_in_percent_alarm_uuid = test_stub.create_alarm(greater_than, period, threshold_1,
+                                                       namespace,
+                                                       iso_in_percent, name='iso_in_percent',
+                                                       repeat_interval=600, actions=actions).uuid
     alarm_uuid_list.append(iso_in_percent_alarm_uuid)
 
     # create Image
@@ -126,47 +166,64 @@ def test():
 
     time.sleep(30)
     # before change template
-    flag = test_stub.check_sns_email(pop_server, username, password, total_image_count, total_image_count_alarm_uuid)
+    flag = test_stub.check_sns_email(pop_server, username, password, total_image_count,
+                                     total_image_count_alarm_uuid)
     if flag != 1:
         test_util.test_fail('No send event email')
-    flag = test_stub.check_sns_email(pop_server, username, password, ready_image_count, ready_image_count_alarm_uuid)
+    flag = test_stub.check_sns_email(pop_server, username, password, ready_image_count,
+                                     ready_image_count_alarm_uuid)
     if flag != 1:
         test_util.test_fail('No send event email')
-    flag = test_stub.check_sns_email(pop_server, username, password, ready_image_in_percent, ready_image_in_percent_alarm_uuid)
+    flag = test_stub.check_sns_email(pop_server, username, password, ready_image_in_percent,
+                                     ready_image_in_percent_alarm_uuid)
     if flag != 1:
         test_util.test_fail('No send event email')
-    flag = test_stub.check_sns_email(pop_server, username, password, root_volume_template_count, root_volume_template_count_alarm_uuid)
+    flag = test_stub.check_sns_email(pop_server, username, password, root_volume_template_count,
+                                     root_volume_template_count_alarm_uuid)
     if flag != 1:
         test_util.test_fail('No send event email')
-    flag = test_stub.check_sns_email(pop_server, username, password, root_volume_template_in_percent, root_volume_template_in_percent_alarm_uuid)
+    flag = test_stub.check_sns_email(pop_server, username, password,
+                                     root_volume_template_in_percent,
+                                     root_volume_template_in_percent_alarm_uuid)
     if flag != 1:
         test_util.test_fail('No send event email')
-    flag = test_stub.check_sns_email(pop_server, username, password, iso_count, iso_count_alarm_uuid)
+    flag = test_stub.check_sns_email(pop_server, username, password, iso_count,
+                                     iso_count_alarm_uuid)
     if flag != 1:
         test_util.test_fail('No send event email')
-    flag = test_stub.check_sns_email(pop_server, username, password, iso_in_percent, iso_in_percent_alarm_uuid)
+    flag = test_stub.check_sns_email(pop_server, username, password, iso_in_percent,
+                                     iso_in_percent_alarm_uuid)
     if flag != 1:
         test_util.test_fail('No send event email')
 
     alarm_keywords = 'TemplateForAlarmOn'
 
-    if test_stub.check_keywords_in_email(pop_server, username, password, alarm_keywords, total_image_count_alarm_uuid):
+    if test_stub.check_keywords_in_email(pop_server, username, password, alarm_keywords,
+                                         total_image_count_alarm_uuid):
         test_util.test_fail('email already exsist before test')
-    if test_stub.check_keywords_in_email(pop_server, username, password, alarm_keywords, ready_image_count_alarm_uuid):
+    if test_stub.check_keywords_in_email(pop_server, username, password, alarm_keywords,
+                                         ready_image_count_alarm_uuid):
         test_util.test_fail('email already exsist before test')
-    if test_stub.check_keywords_in_email(pop_server, username, password, alarm_keywords, ready_image_in_percent_alarm_uuid):
+    if test_stub.check_keywords_in_email(pop_server, username, password, alarm_keywords,
+                                         ready_image_in_percent_alarm_uuid):
         test_util.test_fail('email already exsist before test')
-    if test_stub.check_keywords_in_email(pop_server, username, password, alarm_keywords, root_volume_template_count_alarm_uuid):
+    if test_stub.check_keywords_in_email(pop_server, username, password, alarm_keywords,
+                                         root_volume_template_count_alarm_uuid):
         test_util.test_fail('email already exsist before test')
-    if test_stub.check_keywords_in_email(pop_server, username, password, alarm_keywords, root_volume_template_in_percent_alarm_uuid):
+    if test_stub.check_keywords_in_email(pop_server, username, password, alarm_keywords,
+                                         root_volume_template_in_percent_alarm_uuid):
         test_util.test_fail('email already exsist before test')
-    if test_stub.check_keywords_in_email(pop_server, username, password, alarm_keywords, data_volume_template_count_alarm_uuid):
+    if test_stub.check_keywords_in_email(pop_server, username, password, alarm_keywords,
+                                         data_volume_template_count_alarm_uuid):
         test_util.test_fail('email already exsist before test')
-    if test_stub.check_keywords_in_email(pop_server, username, password, alarm_keywords, data_volume_template_in_percent_alarm_uuid):
+    if test_stub.check_keywords_in_email(pop_server, username, password, alarm_keywords,
+                                         data_volume_template_in_percent_alarm_uuid):
         test_util.test_fail('email already exsist before test')
-    if test_stub.check_keywords_in_email(pop_server, username, password, alarm_keywords, iso_count_alarm_uuid):
+    if test_stub.check_keywords_in_email(pop_server, username, password, alarm_keywords,
+                                         iso_count_alarm_uuid):
         test_util.test_fail('email already exsist before test')
-    if test_stub.check_keywords_in_email(pop_server, username, password, alarm_keywords, iso_in_percent_alarm_uuid):
+    if test_stub.check_keywords_in_email(pop_server, username, password, alarm_keywords,
+                                         iso_in_percent_alarm_uuid):
         test_util.test_fail('email already exsist before test')
 
     application_platform_type = 'Email'
@@ -176,7 +233,10 @@ def test():
                      'keyword1:ThisWordIsKeyWord' \
                      'keyword2:TemplateForAlarmOn' \
                      '(Using for template changes email check)'
-    alarm_template_uuid = test_stub.create_sns_text_template(alarm_template_name, application_platform_type, alarm_template, defaultTemplate=False).uuid
+    alarm_template_uuid = test_stub.create_sns_text_template(alarm_template_name,
+                                                             application_platform_type,
+                                                             alarm_template,
+                                                             defaultTemplate=False).uuid
 
     event_template_name = 'my-event-template'
     event_keywords = 'TemplateForEventHappened'
@@ -185,10 +245,14 @@ def test():
                      'keyword2:TemplateForEventHappened' \
                      'keyword3{PARAM_EVENT_SUBSCRIPTION_UUID}' \
                      '(Using for template changes email check)'
-    event_template_uuid = test_stub.create_sns_text_template(event_template_name, application_platform_type, event_template, defaultTemplate=True).uuid
+    event_template_uuid = test_stub.create_sns_text_template(event_template_name,
+                                                             application_platform_type,
+                                                             event_template,
+                                                             defaultTemplate=True).uuid
 
     # test update text template
-    test_stub.update_sns_text_template(alarm_template_uuid, description='this is a new description', default_template=True)
+    test_stub.update_sns_text_template(alarm_template_uuid, description='this is a new description',
+                                       default_template=True)
 
     cond = res_ops.gen_query_conditions('uuid', '=', alarm_template_uuid)
     inv = res_ops.query_resource(res_ops.SNS_TEXT_TEMPLATE, cond)[0]
@@ -196,7 +260,8 @@ def test():
         test_util.test_fail('change template fail')
 
     for i in range(threshold_3):
-        data_volume_template = volume.create_template(bs_uuid_list, name="vol_temp_for_volume_test_" + str(i))
+        data_volume_template = volume.create_template(bs_uuid_list,
+                                                      name="vol_temp_for_volume_test_" + str(i))
         test_dict.add_image(data_volume_template)
 
     # wait for reboot and send email
@@ -208,7 +273,10 @@ def test():
     test_stub.delete_sns_application_endpoint(email_endpoint_uuid)
     test_stub.delete_sns_application_platform(email_platform_uuid)
 
-    if test_stub.check_keywords_in_email(pop_server, username, password, alarm_keywords, data_volume_template_count_alarm_uuid) and test_stub.check_keywords_in_email(pop_server, username, password,alarm_keywords,data_volume_template_in_percent_alarm_uuid):
+    if test_stub.check_keywords_in_email(pop_server, username, password, alarm_keywords,
+                                         data_volume_template_count_alarm_uuid) and test_stub.check_keywords_in_email(
+        pop_server, username, password, alarm_keywords,
+        data_volume_template_in_percent_alarm_uuid):
         test_util.test_pass('success check all keywords in the email')
     else:
         test_util.test_fail('cannt check all mail')
@@ -216,7 +284,8 @@ def test():
 
 # Will be called only if exception happens in test().
 def error_cleanup():
-    global test_dict, my_sns_topic_uuid, email_endpoint_uuid, email_platform_uuid, event_template_uuid, alarm_template_uuid, alarm_uuid_list
+    global test_dict, my_sns_topic_uuid, email_endpoint_uuid, email_platform_uuid, event_template_uuid, \
+        alarm_template_uuid, alarm_uuid_list
     test_lib.lib_error_cleanup(test_dict)
     if alarm_uuid_list:
         for alarm_uuid in alarm_uuid_list:
