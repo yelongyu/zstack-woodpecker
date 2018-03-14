@@ -61,7 +61,7 @@ def test():
   lb.create('create lb test', vip.get_vip().uuid)
   lb2.create('create lb2 test', vip.get_vip().uuid)
   lb.isVcenter = True
-  lb2.isVcenter = False
+  lb2.isVcenter = True
   test_obj_dict.add_load_balancer(lb)
   test_obj_dict.add_load_balancer(lb2)
   vip.attach_lb(lb)
