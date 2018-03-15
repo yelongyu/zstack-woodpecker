@@ -856,4 +856,6 @@ def auto_set_mn_ip(scenario_file):
     mn_ip = '.'.join(mn_host_ip_lst)
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mn_ip
     os.environ['zstackHaVip'] = mn_ip
+    test_util.test_logger("@@@DEBUG->in auto_set_mn_ip@@@ os\.environ\[\'ZSTACK_BUILT_IN_HTTP_SERVER_IP\'\]=%s; os\.environ\[\'zstackHaVip\'\]=%s"	\
+                          %(os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'], os.environ['zstackHaVip']) )
     
