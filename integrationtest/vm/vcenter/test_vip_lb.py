@@ -1,3 +1,17 @@
+'''
+
+Test load balance with snat ip 
+
+Test step:
+    1. Create 2 VM with load balance l3 network service.
+    2. Create 2 LB with 22 and 80 port
+    3. Check the 2 LB status
+    4. Destroy VMs
+
+@author: moyu
+'''
+
+
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
@@ -29,9 +43,9 @@ def test():
   image_name = os.environ['image_dhcp_name']
 
   test_util.test_dsc('Create test vm with lb.')
-  vm1 = test_stub.create_vm_in_vcenter(vm_name='test_vip_pf_2', image_name = image_name, l3_name=l3_vr_network)
+  vm1 = test_stub.create_vm_in_vcenter(vm_name='test_vip_lb_1', image_name = image_name, l3_name=l3_vr_network)
   test_obj_dict.add_vm(vm1)
-  vm2 = test_stub.create_vm_in_vcenter(vm_name='test_vip_pf_4', image_name = image_name, l3_name=l3_vr_network)
+  vm2 = test_stub.create_vm_in_vcenter(vm_name='test_vip_lb_2', image_name = image_name, l3_name=l3_vr_network)
   test_obj_dict.add_vm(vm2)
   time.sleep(50)
 
@@ -39,7 +53,7 @@ def test():
   vm_nic1 = vm1.get_vm().vmNics[0]
   vm_nic1_uuid = vm_nic1.uuid
   vm_nic1_ip = vm_nic1.ip
-  vm_nic2 = vm2.get_vm()vmNics[0]
+  vm_nic2 = vm2.get_vm().vmNics[0]
   vm_nic2_uuid = vm_nic2.uuid
   vm_nic2_ip = vm_nic2.ip
 
