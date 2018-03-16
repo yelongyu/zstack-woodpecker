@@ -828,6 +828,19 @@ def get_event_data(start_time=None,end_time=None,labels=None,conditions=None,ses
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.events
 
+def get_alarm_data(start_time=None,end_time=None,labels=None,session_uuid=None):
+    action = api_actions.GetAlarmDataAction()
+    action.timeout = 30000
+    if start_time:
+        action.startTime = start_time
+    if end_time:
+        action.endTime = end_time
+    if labels:
+        action.labels = labels
+    test_util.action_logger('Get Alarm Data:')
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt.histories
+
 def put_metric_data(namespace,data,session_uuid=None):
     action = api_actions.PutMetricDataAction()
     action.timeout = 30000
