@@ -69,6 +69,7 @@ def test():
 
     # test GetEventData
     events = test_stub.get_event_data()
+    test_stub.get_alarm_data()
     # if events:
     # 	test_util.test_dsc('all events happend are list as below:\n')
     # 	for event in events:
