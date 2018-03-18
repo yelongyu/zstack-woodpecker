@@ -34,7 +34,7 @@ def test():
 	url_02 = 'https://oapi.dingtalk.com/robot/send?access_token=0be899d4bd0a7629961a5ccd3035dfba30d084b57944897838f1b601006dd151'
 	name_01 = 'dingtalkAtPerson'
 	name_02 = 'dingtalkAtAll'
-	phone_number = '18482223118'
+	phone_number = '13999999999'
 	endpoint_uuid_01 = test_stub.create_sns_dingtalk_endpoint(url_01, name_01, at_all=False).uuid
 	cond = res_ops.gen_query_conditions('uuid', '=', endpoint_uuid_01)
 	if not res_ops.query_resource(res_ops.SNS_DING_TALK_ENDPOINT, cond):
@@ -163,11 +163,10 @@ def test():
 	state_event = 'disable'
 	state_result = 'Disabled'
 	test_stub.change_alarm_state(alarm_uuid, state_event)
-	# TODO:when the bug 'missing state' is fixed,cancel the annotation below
-	# cond = res_ops.gen_query_conditions('uuid', '=', alarm_uuid)
-	# inv = res_ops.query_resource(res_ops.ALARM, cond)[0]
-	# if inv.state != state_result:
-	# 	test_util.test_fail('change alarm state failed')
+	cond = res_ops.gen_query_conditions('uuid', '=', alarm_uuid)
+	inv = res_ops.query_resource(res_ops.ALARM, cond)[0]
+	if inv.state != state_result:
+		test_util.test_fail('change alarm state failed')
 	test_stub.change_sns_application_endpoint_state(endpoint_uuid_02, state_event)
 	cond = res_ops.gen_query_conditions('uuid', '=', endpoint_uuid_02)
 	inv = res_ops.query_resource(res_ops.SNS_APPLICATION_ENDPOINT, cond)[0]
@@ -183,11 +182,10 @@ def test():
 	state_event = 'enable'
 	state_result = 'Enabled'
 	test_stub.change_alarm_state(alarm_uuid, state_event)
-	# TODO:when the bug 'missing state' is fixed,cancel the annotation below
-	# cond = res_ops.gen_query_conditions('uuid', '=', alarm_uuid)
-	# inv = res_ops.query_resource(res_ops.ALARM, cond)[0]
-	# if inv.state != state_result:
-	# 	test_util.test_fail('change alarm state failed')
+	cond = res_ops.gen_query_conditions('uuid', '=', alarm_uuid)
+	inv = res_ops.query_resource(res_ops.ALARM, cond)[0]
+	if inv.state != state_result:
+		test_util.test_fail('change alarm state failed')
 	test_stub.change_sns_application_endpoint_state(endpoint_uuid_02, state_event)
 	cond = res_ops.gen_query_conditions('uuid', '=', endpoint_uuid_02)
 	inv = res_ops.query_resource(res_ops.SNS_APPLICATION_ENDPOINT, cond)[0]
@@ -217,7 +215,7 @@ def test():
 	inv = res_ops.query_resource(res_ops.SNS_TOPIC, cond)
 	if inv:
 		test_util.test_fail('delete sns topic failed')
-	test_stub.delete_sns_topic(sns_topic_uuid_02, delete_mode='Delay')
+	test_stub.delete_sns_topic(sns_topic_uuid_02)
 	cond = res_ops.gen_query_conditions('uuid', '=', sns_topic_uuid_02)
 	inv = res_ops.query_resource(res_ops.SNS_TOPIC, cond)
 	if inv:
@@ -227,7 +225,7 @@ def test():
 	inv = res_ops.query_resource(res_ops.SNS_APPLICATION_ENDPOINT, cond)
 	if inv:
 		test_util.test_fail('delete sns application endpoint  failed')
-	test_stub.delete_sns_application_endpoint(endpoint_uuid_02, delete_mode='Delay')  # delete_mode test
+	test_stub.delete_sns_application_endpoint(endpoint_uuid_02)
 	cond = res_ops.gen_query_conditions('uuid', '=', endpoint_uuid_02)
 	inv = res_ops.query_resource(res_ops.SNS_APPLICATION_ENDPOINT, cond)
 	if inv:

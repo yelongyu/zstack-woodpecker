@@ -159,7 +159,9 @@ class EipCheckerFactory(checker.CheckerFactory):
 
 class VipCheckerFactory(checker.CheckerFactory):
     def create_checker(self, test_obj):
-        return kvm_checker.VipCheckerFactory().create_checker(test_obj)
+        if not test_obj.isVcenter:
+	    return kvm_checker.VipCheckerFactory().create_checker(test_obj)
+        return vcenter_checker.VipCheckerFactory().create_checker(test_obj)
 
 class SnapshotCheckerFactory(checker.CheckerFactory):
     def create_checker(self, test_obj):
@@ -167,4 +169,6 @@ class SnapshotCheckerFactory(checker.CheckerFactory):
 
 class LoadBalancerCheckerFactory(checker.CheckerFactory):
     def create_checker(self, test_obj):
-        return kvm_checker.LoadBalancerCheckerFactory().create_checker(test_obj)
+        if not test_obj.isVcenter:
+	    return kvm_checker.LoadBalancerCheckerFactory().create_checker(test_obj)
+        return vcenter_checker.LoadBalancerCheckerFactory().create_checker(test_obj)

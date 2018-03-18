@@ -16,6 +16,7 @@ class ZstackTestLoadBalancer(lb_header.TestLoadBalancer):
     def __init__(self):
         self.load_balancer_listeners = {}
         self.separated_vr = False
+        self.isVcenter = False
         super(ZstackTestLoadBalancer, self).__init__()
 
     def __hash__(self):

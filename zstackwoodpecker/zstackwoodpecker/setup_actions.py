@@ -911,7 +911,7 @@ default one' % self.zstack_properties)
         for thread in threads:
             thread.start()
 
-        self._wait_for_thread_completion('start management node', 200)
+        self._wait_for_thread_completion('start management node', 400)
         time.sleep(10)
 
         if node_exception:

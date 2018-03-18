@@ -346,7 +346,7 @@ class VipCheckerFactory(checker_header.CheckerFactory):
     def create_checker(self, test_obj): 
         vip_checker_chain = checker_header.CheckerChain()
         if test_obj.get_state() == vip_header.ATTACHED:
-            if test_obj.get_use_for() == vip_header.PortForwarding:
+            if vip_header.PortForwarding in test_obj.get_use_for():
                 checker = vip_checker.vip_used_for_checker()
                 checker.set_target_use_for(vip_header.PortForwarding)
                 vip_checker_chain.add_checker(checker, True, test_obj)
@@ -357,7 +357,7 @@ class VipCheckerFactory(checker_header.CheckerFactory):
                     #vip_checker_chain.add_checker(pf_checker.zstack_vcenter_pf_rule_exist_checker(), True, pf)
                     pass
 
-            elif test_obj.get_use_for() == vip_header.Eip:
+            elif vip_header.Eip in test_obj.get_use_for():
                 checker = vip_checker.vip_used_for_checker()
                 checker.set_target_use_for(vip_header.Eip)
                 vip_checker_chain.add_checker(checker, True, test_obj)

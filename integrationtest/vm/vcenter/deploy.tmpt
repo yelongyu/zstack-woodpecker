@@ -59,7 +59,8 @@ vchostUser = root
 vchostpwd = password
 vcsslthumbprint = 52:DF:8F:E5:37:43:57:7B:65:CC:BC:97:DE:EC:80:AE:96:FC:49:11
 vciscsitarget = 172.20.14.154
-vcvmfsdatastore = datastore
+vcvmfsdatastore = newdatastore
+vcvmfsdatastore1 = datastore1
 vswitch0 = vSwitch0
 vswitch1 = vSwitch1
 portgroup0 = port_group0
@@ -68,20 +69,27 @@ portgroup2 = port_group2
 portgroup3 = port_group3
 vlanid0 = 0
 vlanid1 = 1
+dvlanid0 = 0
+dvlanid1 = 1
 vmName2 = 12345
 vmName3 = 12345
 vmName4 = 12345
 
 vCenterVirtualRouterImageName = vCenter-vr
 rootMediaType = RootVolumeTemplate
-vCenterVRImageUsername = root
-vCenterVRImagePassword = password
+vCenterVRImageUsername = vyos
+vCenterVRImagePassword = vyos
 vCenterVirtualRouterImageUrl = http://192.168.200.100/mirror/diskimages/zstack-vrouter-latest.vmdk
 
 l2vCenterPublicNetworkName = vCenter-public
 l2vCenterPublicNetworkInterface = vSwitch0
-
 l2vCenterNoVlanNetworkName = vCenter-noVlan
+
+l2vCenterPublicNetworkInterface1 = vSwitch1
+l2vCenterNoVlanNetworkName1 = vCenter-noVlan-1
+
+l2vCenterPublicNetworkInterface2 = dswitch0
+l2vCenterNoVlanNetworkName2 = vCenter-noVlan-2
 
 vCenterDNSServer = 172.20.0.1
 
@@ -93,10 +101,24 @@ vCenterNoVlanIpRangeEndIp = 192.168.0.200
 vCenterNoVlanIpRangeGateway = 192.168.0.1
 vCenterNoVlanIpRangeNetmask = 255.255.255.0
 
+l3vCenterNoVlanNetworkName1 = vCenter-noVlan-network-1
+vCenterNoVlanIpRangeName1 = vCenter-noVlan-ipRangeName
+vCenterNoVlanIpRangeStartIp1 = 192.168.1.100
+vCenterNoVlanIpRangeEndIp1 = 192.168.1.200
+vCenterNoVlanIpRangeGateway1 = 192.168.1.1
+vCenterNoVlanIpRangeNetmask1 = 255.255.255.0
+
+l3vCenterNoVlanNetworkName2 = vCenter-noVlan-network-2
+vCenterNoVlanIpRangeName2 = vCenter-noVlan-ipRangeName
+vCenterNoVlanIpRangeStartIp2 = 192.168.2.100
+vCenterNoVlanIpRangeEndIp2 = 192.168.2.200
+vCenterNoVlanIpRangeGateway2 = 192.168.2.1
+vCenterNoVlanIpRangeNetmask2 = 255.255.255.0
+
 vCenterVirtualRouterOfferingName = vcenter_vrouter
-vCenterVirtualRouterOfferingMemory = 512M
+vCenterVirtualRouterOfferingMemory = 1024M
 vCenterVirtualRouterOfferingCpuSpeed = 512
-vCenterVirtualRouterOfferingCpuNum = 2
+vCenterVirtualRouterOfferingCpuNum = 1
 
 l2PublicNetworkName = l2-public
 l2PublicNetworkInterface = eth0
@@ -109,9 +131,8 @@ vcenterrootImageFormat = vmtx
 
 sshkeyImageName = vr
 sshkeyImageUrl = http://IMAGE_SERVER/diskimages/CentOS-7-x86_64-Cloudinit-8G-official.qcow2
-sshkeyPubKey = 
-sshkeyPriKey_file = 
+sshkeyPubKey =
+sshkeyPriKey_file =
 
 imageName_i_c7 = centos7-installation-test
 imageUrl_i_c7 = http://IMAGE_SERVER/diskimages/centos7-test.qcow2
-

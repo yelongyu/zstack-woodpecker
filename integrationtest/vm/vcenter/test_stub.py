@@ -90,7 +90,7 @@ def create_vm_in_vcenter(vm_name='vcenter-vm', \
         instance_offering_uuid = None, \
         host_uuid = None, \
         disk_offering_uuids=None, system_tags=None, \
-        timeout = 600000, \
+        timeout = 1200000, \
         root_password=None, session_uuid = None):
 
 
@@ -252,3 +252,6 @@ def create_volume(volume_creation_option=None, session_uuid = None):
     volume.create()
     return volume
 
+def set_httpd_in_vm(vm, ip):
+    cmd = "systemctl start httpd; iptables -F; echo %s > /var/www/html/index.html" % ip
+    test_lib.lib_execute_command_in_vm(vm, cmd)
