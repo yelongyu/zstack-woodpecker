@@ -467,4 +467,9 @@ def start_vm_with_target_host(vm_uuid, host_uuid=None, cluster_uuid=None, sessio
    action.timeout = timeout
    test_util.action_logger('Start VM [uuid:] %s' % vm_uuid)
    evt = account_operations.execute_action_with_session(action, session_uuid)
-   return evt.inventory
+   return evt.inventory
+def get_candidate_iso_for_attaching(vm_uuid, session_uuid = None):
+    action = api_actions.GetCandidateIsoForAttachingVmAction()
+    action.vmInstanceUuid = vm_uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventories

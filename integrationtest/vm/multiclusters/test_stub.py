@@ -277,7 +277,7 @@ class DataMigration(object):
             ps_mon_ip = ps.mons[0].monAddr
             os.environ['cephBackupStorageMonUrls'] = 'root:password@%s' % ps_mon_ip
 
-    def submit_logjob(self, job_data, name, job_type=None):
+    def submit_longjob(self, job_data, name, job_type=None):
         if job_type == 'image':
             _job_name = self.image_job_name
         else:
@@ -299,7 +299,7 @@ class DataMigration(object):
         name = "long_job_of_%s" % self.vm.vm.name
         self.dst_ps = self.get_ps_candidate()
         job_data = '{"volumeUuid": %s, "dstPrimaryStorageUuid": %s}' % (self.vm.vm.rootVolumeUuid, self.dst_ps.uuid)
-        self.submit_logjob(job_data, name)
+        self.submit_longjob(job_data, name)
         self.vm.start()
         self.vm.check()
         assert self.vm.vm.allVolumes[0].primaryStorageUuid == self.dst_ps.uuid
@@ -310,7 +310,7 @@ class DataMigration(object):
         if not self.dst_ps:
             self.dst_ps = self.get_ps_candidate(vol_uuid)
         job_data = '{"volumeUuid": %s, "dstPrimaryStorageUuid": %s}' % (vol_uuid, self.dst_ps.uuid)
-        self.submit_logjob(job_data, name)
+        self.submit_longjob(job_data, name)
         cond_vol = res_ops.gen_query_conditions('uuid', '=', vol_uuid)
         self.data_volume.set_volume(res_ops.query_resource(res_ops.VOLUME, cond_vol)[0])
         assert self.data_volume.get_volume().primaryStorageUuid == self.dst_ps.uuid
@@ -319,7 +319,7 @@ class DataMigration(object):
         self.dst_bs = self.get_bs_candidate()
         name = "long_job_of_%s" % self.image.name
         job_data = '{"imageUuid": %s, "srcBackupStorageUuid": %s, "dstBackupStorageUuid": %s}' % (self.image.uuid, self.image.backupStorageRefs[0].backupStorageUuid, self.dst_bs.uuid)
-        self.submit_logjob(job_data, name, job_type='image')
+        self.submit_longjob(job_data, name, job_type='image')
         cond_image = res_ops.gen_query_conditions('uuid', '=', self.image.uuid)
         self.image = res_ops.query_resource(res_ops.IMAGE, cond_image)[0]
         assert self.image.backupStorageRefs[0].backupStorageUuid == self.dst_bs.uuid

@@ -25,6 +25,9 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
+import zstackwoodpecker.operations.image_operations as img_ops
+import zstackwoodpecker.operations.longjob_operations as longjob_ops
+import zstackwoodpecker.zstack_test.zstack_test_image as test_image
 import apibinding.inventory as inventory
 import random
 import functools
@@ -931,3 +934,159 @@ class VIPQOS(object):
         else:
             cmd = "iperf3 -c %s -i 20 -t 200 --get-server-output" % self.vip_ip
         self.check_bandwidth(vm_ip, 'in', cmd, self.inbound_width/(1024 * 1024))
+
+
+class MulISO(object):
+    def __init__(self):
+        self.vm1 = None
+        self.vm2 = None
+        self.iso_uuids = None
+        self.iso = [{'name': 'iso1', 'url': os.getenv('testIsoUrl')},
+                    {'name': 'iso2', 'url': os.getenv('testIsoUrl')},
+                    {'name': 'iso3', 'url': os.getenv('testIsoUrl')}]
+
+    def add_iso_image(self):
+        bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0].uuid
+        images = res_ops.query_resource(res_ops.IMAGE)
+        image_names = [i.name for i in  images]
+        if self.iso[-1]['name'] not in image_names:
+            for iso in self.iso:
+                img_option = test_util.ImageOption()
+                img_option.set_name(iso['name'])
+                img_option.set_backup_storage_uuid_list([bs_uuid])
+                testIsoUrl = iso['url']
+                img_option.set_url(testIsoUrl)
+                image_inv = img_ops.add_iso_template(img_option)
+                image = test_image.ZstackTestImage()
+                image.set_image(image_inv)
+                image.set_creation_option(img_option)
+
+    def get_all_iso_uuids(self):
+        cond = res_ops.gen_query_conditions('mediaType', '=', 'ISO')
+        iso_images = res_ops.query_resource(res_ops.IMAGE, cond)
+        self.iso_uuids = [i.uuid for i in iso_images]
+
+    def check_iso_candidate(self, iso_name, vm_uuid=None, is_candidate=False):
+        if not vm_uuid:
+            vm_uuid = self.vm1.vm.uuid
+        iso_cand = vm_ops.get_candidate_iso_for_attaching(vm_uuid)
+        cand_name_list = [i.name for i in iso_cand]
+        if is_candidate:
+            assert iso_name in cand_name_list
+        else:
+            assert iso_name not in cand_name_list
+
+    def create_vm(self, vm2=False):
+        self.vm1 = create_basic_vm()
+        if vm2:
+            self.vm2 = create_basic_vm()
+
+    def attach_iso(self, iso_uuid, vm_uuid=None):
+        if not vm_uuid:
+            vm_uuid = self.vm1.vm.uuid
+        img_ops.attach_iso(iso_uuid, vm_uuid)
+        self.check_vm_systag(iso_uuid, vm_uuid)
+
+    def detach_iso(self, iso_uuid, vm_uuid=None):
+        if not vm_uuid:
+            vm_uuid = self.vm1.vm.uuid
+        img_ops.detach_iso(vm_uuid, iso_uuid)
+        self.check_vm_systag(iso_uuid, vm_uuid, tach='detach')
+
+    def set_iso_first(self, iso_uuid, vm_uuid=None):
+        if not vm_uuid:
+            vm_uuid = self.vm1.vm.uuid
+        system_tags = ['iso::%s::0' % iso_uuid]
+        vm_ops.update_vm(vm_uuid, system_tags=system_tags)
+
+    def check_vm_systag(self, iso_uuid, vm_uuid=None, tach='attach', order=None):
+        if not vm_uuid:
+            vm_uuid = self.vm1.vm.uuid
+        cond = res_ops.gen_query_conditions('resourceUuid', '=', vm_uuid)
+        systags = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
+        iso_orders = {t.tag.split('::')[-2]: t.tag.split('::')[-1] for t in systags if 'iso' in t.tag}
+        if tach == 'attach':
+            assert iso_uuid in iso_orders
+        else:
+            assert iso_uuid not in iso_orders
+        if order:
+            assert iso_orders[iso_uuid] == order
+
+
+class Longjob(object):
+    def __init__(self):
+        self.image_name = 'test'
+        self.image_url = 'test'
+        self.vm = None
+        self.image_name_net = os.getenv('imageName_net')
+        self.url = os.getenv('imageUrl_windows')
+        self.add_image_job_name = 'APIAddImageMsg'
+        self.crt_vm_image_job_name = 'APICreateRootVolumeTemplateFromRootVolumeMsg'
+        self.crt_vol_image_job_name = 'APICreateDataVolumeTemplateFromVolumeMsg'
+
+    def create_vm(self, vm2=False):
+        self.vm = create_basic_vm()
+
+    def create_data_volume(self):
+        conditions = res_ops.gen_query_conditions('name', '=', os.getenv('largeDiskOfferingName'))
+        disk_offering_uuid = res_ops.query_resource(res_ops.DISK_OFFERING, conditions)[0].uuid
+        ps_uuid = self.vm.vm.allVolumes[0].primaryStorageUuid
+        volume_option = test_util.VolumeOption()
+        volume_option.set_disk_offering_uuid(disk_offering_uuid)
+        volume_option.set_name('data-volume-for-crt-image-test')
+        volume_option.set_primary_storage_uuid(ps_uuid)
+        self.data_volume = create_volume(volume_option)
+        self.set_ceph_mon_env(ps_uuid)
+        self.data_volume.attach(self.vm)
+        self.data_volume.check()
+
+    def set_ceph_mon_env(self, ps_uuid):
+        cond_vol = res_ops.gen_query_conditions('uuid', '=', ps_uuid)
+        ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond_vol)[0]
+        if ps.type.lower() == 'ceph':
+            ps_mon_ip = ps.mons[0].monAddr
+            os.environ['cephBackupStorageMonUrls'] = 'root:password@%s' % ps_mon_ip
+
+    def submit_longjob(self, job_data, name, job_type=None):
+        if job_type == 'image':
+            _job_name = self.add_image_job_name
+        elif job_type == 'crt_vm_image':
+            _job_name = self.crt_vm_image_job_name
+        elif job_type == 'crt_vol_image':
+            _job_name = self.crt_vol_image_job_name
+        long_job = longjob_ops.submit_longjob(_job_name, job_data, name)
+        assert long_job.state == "Running"
+        cond_longjob = res_ops.gen_query_conditions('apiId', '=', long_job.apiId)
+        for _ in xrange(60):
+            longjob = res_ops.query_resource(res_ops.LONGJOB, cond_longjob)[0]
+            if longjob.state == "Succeeded":
+                break
+            else:
+                time.sleep(5)
+        assert longjob.state == "Succeeded"
+        assert longjob.jobResult == "Succeeded"
+        progress = res_ops.get_task_progress(long_job.apiId)
+        assert progress.content == '100'
+
+    def add_image(self):
+        name = "longjob_image"
+        job_data = '{"name":"test-image-longjob", "url":%s, "mediaType"="RootVolumeTemplate", "format"="qcow2", "platform"="Linux", \
+        "backupStorageUuids"=%s}' % (self.url, res_ops.query_resource(res_ops.BACKUP_STORAGE)[0].uuid)
+        self.submit_longjob(job_data, name, job_type='image')
+
+    def expunge_image(self):
+        cond_image = res_ops.gen_query_conditions('name', '=', 'test-image-longjob')
+        longjob_image = res_ops.query_resource(res_ops.IMAGE, cond_image)[0]
+        img_ops.expunge_image(longjob_image.uuid, backup_storage_uuid_list=[res_ops.query_resource(res_ops.BACKUP_STORAGE)[0].uuid])
+
+    def crt_vm_image(self):
+        name = 'longjob_crt_vol_image'
+        job_data = '{"name"="test-crt-vol-image", "guestOsType":"Linux","system"="false","platform"="Linux","backupStorageUuids"="%s", \
+        "rootVolumeUuid"="%s"}' % (res_ops.query_resource(res_ops.BACKUP_STORAGE)[-1].uuid, self.vm.vm.rootVolumeUuid)
+        self.submit_longjob(job_data, name, job_type='image')
+
+    def crt_vol_image(self):
+        name = 'longjob_crt_vol_image'
+        job_data = '{"name"="test-crt-vol-image", "guestOsType":"Linux","system"="false","platform"="Linux","backupStorageUuids"="%s", \
+        "dataVolumeUuid"="%s"}' %(res_ops.query_resource(res_ops.BACKUP_STORAGE)[0].uuid, self.data_volume.get_volume().uuid)
+        self.submit_longjob(job_data, name, job_type='image')
