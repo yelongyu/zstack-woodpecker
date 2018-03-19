@@ -47,7 +47,8 @@ def test():
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = new_mn_vm_ip
     test_util.test_logger("wait for 5 minutes to see if management node starts again")
     try:
-        node_ops.wait_for_management_server_start(300)
+        #node_ops.wait_for_management_server_start(300)
+        test_stub.wrapper_of_wait_for_management_server_start(600)
     except:
         test_util.test_fail("management node does not recover after destroyed")
 
