@@ -858,4 +858,7 @@ def auto_set_mn_ip(scenario_file):
     os.environ['zstackHaVip'] = mn_ip
     test_util.test_logger("@@@DEBUG->in auto_set_mn_ip@@@ os\.environ\[\'ZSTACK_BUILT_IN_HTTP_SERVER_IP\'\]=%s; os\.environ\[\'zstackHaVip\'\]=%s"	\
                           %(os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'], os.environ['zstackHaVip']) )
+    cmd = 'sed -i "s/zstackHaVip = .*$/zstackHaVip = %s/g" /root/.zstackwoodpecker/integrationtest/vm/mn_ha/deploy.tmpt' %(mn_ip)
+    test_util.test_logger("@@@DEBUG->replace zstackHaVip @@@: %s" %cmd)
+    os.system(cmd)
     
