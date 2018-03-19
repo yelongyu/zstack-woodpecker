@@ -120,6 +120,11 @@ vCenterVirtualRouterOfferingMemory = 1024M
 vCenterVirtualRouterOfferingCpuSpeed = 512
 vCenterVirtualRouterOfferingCpuNum = 1
 
+zstackVirtualRouterImageName = zstack-vrouter
+zstackVrImageUsername = vyos
+zstackVrImagePassword = vrouter12#
+zstackVirtualRouterImageUrl = http://192.168.200.100/mirror/diskimages/zstack-vrouter-latest.qcow2
+
 l2PublicNetworkName = l2-public
 l2PublicNetworkInterface = eth0
 
