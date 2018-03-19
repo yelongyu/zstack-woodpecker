@@ -870,7 +870,7 @@ def wrapper_of_wait_for_management_server_start(wait_start_timeout, EXTRA_SUITE_
         test_util.test_logger("@@@DEBUG->IS VPC CEPH@@@")
         if os.environ.get('zstackHaVip'):
             old_mn_ip = os.environ['zstackHaVip']
-        test_stub.auto_set_mn_ip(test_lib.scenario_file)
+        auto_set_mn_ip(test_lib.scenario_file)
         if EXTRA_SUITE_SETUP_SCRIPT and EXTRA_SUITE_SETUP_SCRIPT != "":
             cmd = 'sed -i "s/%s/%s/g" %s' %(old_mn_ip, os.environ['zstackHaVip'], EXTRA_SUITE_SETUP_SCRIPT)
             test_util.test_logger("@@@DEBUG-> run cmd: %s @@@ " %(cmd))
