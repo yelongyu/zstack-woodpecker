@@ -114,7 +114,7 @@ def test():
     #    os.system(cmd)
 
     #node_operations.wait_for_management_server_start(600)
-    test_stub.wrapper_of_wait_for_management_server_start(600)
+    test_stub.wrapper_of_wait_for_management_server_start(600, EXTRA_SUITE_SETUP_SCRIPT)
     test_util.test_logger("@@@DEBUG->suite_setup@@@ os\.environ\[\'ZSTACK_BUILT_IN_HTTP_SERVER_IP\'\]=%s; os\.environ\[\'zstackHaVip\'\]=%s"	\
                           %(os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'], os.environ['zstackHaVip']) )
     ssh.scp_file("/home/license-10host-10days-hp.txt", "/home/license-10host-10days-hp.txt", os.environ.get('zstackHaVip'), 'root', 'password')
