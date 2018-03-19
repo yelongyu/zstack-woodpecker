@@ -868,7 +868,8 @@ def wrapper_of_wait_for_management_server_start(wait_start_timeout, EXTRA_SUITE_
     import zstackwoodpecker.operations.node_operations as node_operations
     if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml":
         test_util.test_logger("@@@DEBUG->IS VPC CEPH@@@")
-        old_mn_ip = os.environ['zstackHaVip']
+        if os.environ.get('zstackHaVip'):
+            old_mn_ip = os.environ['zstackHaVip']
         test_stub.auto_set_mn_ip(test_lib.scenario_file)
         if EXTRA_SUITE_SETUP_SCRIPT or EXTRA_SUITE_SETUP_SCRIPT != "":
             cmd = 'sed -i "s/%s/%s/g" %s' %(old_mn_ip, os.environ['zstackHaVip'], EXTRA_SUITE_SETUP_SCRIPT)
