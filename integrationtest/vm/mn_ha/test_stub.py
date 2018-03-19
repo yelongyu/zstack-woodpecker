@@ -862,3 +862,15 @@ def auto_set_mn_ip(scenario_file):
     test_util.test_logger("@@@DEBUG->replace zstackHaVip @@@: %s" %cmd)
     os.system(cmd)
     
+
+
+def wrapper_of_wait_for_management_server_start(wait_start_timeout):
+    import zstackwoodpecker.operations.node_operations as node_operations
+    if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml":
+        test_util.test_logger("@@@DEBUG->IS VPC CEPH@@@")
+        old_mn_ip = os.environ['zstackHaVip']
+        test_stub.auto_set_mn_ip(test_lib.scenario_file)
+        cmd = 'sed -i "s/%s/%s/g" %s' %(old_mn_ip, os.environ['zstackHaVip'], EXTRA_SUITE_SETUP_SCRIPT)
+        os.system(cmd)
+
+    node_operations.wait_for_management_server_start(wait_start_timeout)
