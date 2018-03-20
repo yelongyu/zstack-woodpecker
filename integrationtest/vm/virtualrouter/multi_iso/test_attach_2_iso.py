@@ -1,6 +1,6 @@
 '''
 
-New Simulator Test for Multi-ISO.
+New Integration Test for Multi-ISO.
 
 @author: Legion
 '''
@@ -21,10 +21,16 @@ def test():
 
     multi_iso.get_all_iso_uuids()
     multi_iso.attach_iso(multi_iso.iso_uuids[0])
+    multi_iso.check_vm_cdrom(2, True)
     multi_iso.attach_iso(multi_iso.iso_uuids[1])
+    multi_iso.check_vm_cdrom(1, True)
 
     multi_iso.detach_iso(multi_iso.iso_uuids[0])
+    multi_iso.check_vm_cdrom()
+    multi_iso.check_vm_cdrom(2, True)
     multi_iso.detach_iso(multi_iso.iso_uuids[1])
+    multi_iso.check_vm_cdrom()
+    multi_iso.check_vm_cdrom(3, True)
 
     test_lib.lib_robot_cleanup(test_obj_dict)
     test_util.test_pass('Attach 2 ISO Test Success')

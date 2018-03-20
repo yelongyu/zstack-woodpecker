@@ -1,6 +1,6 @@
 '''
 
-New Simulator Test for Multi-ISO.
+New Integration Test for Multi-ISO.
 
 @author: Legion
 '''

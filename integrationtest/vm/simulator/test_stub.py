@@ -994,6 +994,7 @@ class MulISO(object):
         cond = res_ops.gen_query_conditions('mediaType', '=', 'ISO')
         iso_images = res_ops.query_resource(res_ops.IMAGE, cond)
         self.iso_uuids = [i.uuid for i in iso_images]
+        self.iso_names = [i.name for i in iso_images]
 
     def check_iso_candidate(self, iso_name, vm_uuid=None, is_candidate=False):
         if not vm_uuid:

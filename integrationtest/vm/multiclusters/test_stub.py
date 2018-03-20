@@ -165,9 +165,10 @@ class DataMigration(object):
             vms2 = []
             for vm in vms:
                 vm.stop()
+                ps_uuid_to_migrate = self.get_ps_candidate().uuid
                 root_vol_uuid = vm.get_vm().rootVolumeUuid
                 self.get_ps_candidate(root_vol_uuid)
-                datamigr_ops.ps_migrage_root_volume(self.cand_ps.uuid, root_vol_uuid)
+                datamigr_ops.ps_migrage_root_volume(ps_uuid_to_migrate, root_vol_uuid)
                 conditions = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid)
                 vm.vm = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)[0]
                 if start:

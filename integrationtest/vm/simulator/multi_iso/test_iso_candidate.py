@@ -21,17 +21,17 @@ def test():
 
     multi_iso.get_all_iso_uuids()
     multi_iso.attach_iso(multi_iso.iso_uuids[0])
-    multi_iso.check_iso_candidate(multi_iso.iso_uuids[0])
+    multi_iso.check_iso_candidate(multi_iso.iso_names[0])
     multi_iso.attach_iso(multi_iso.iso_uuids[1])
-    multi_iso.check_iso_candidate(multi_iso.iso_uuids[1])
+    multi_iso.check_iso_candidate(multi_iso.iso_names[1])
 
     multi_iso.detach_iso(multi_iso.iso_uuids[0])
-    multi_iso.check_iso_candidate(multi_iso.iso_uuids[0], is_candidate=True)
+    multi_iso.check_iso_candidate(multi_iso.iso_names[0], is_candidate=True)
     multi_iso.detach_iso(multi_iso.iso_uuids[1])
-    multi_iso.check_iso_candidate(multi_iso.iso_uuids[1], is_candidate=True)
+    multi_iso.check_iso_candidate(multi_iso.iso_names[1], is_candidate=True)
 
     test_lib.lib_robot_cleanup(test_obj_dict)
-    test_util.test_pass('Attach 2 ISO Test Success')
+    test_util.test_pass('Get Candidate ISO Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():

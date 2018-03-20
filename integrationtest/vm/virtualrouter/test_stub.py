@@ -34,6 +34,7 @@ import functools
 from zstackwoodpecker.operations import vm_operations as vm_ops
 import commands
 from lib2to3.pgen2.token import STAR
+import telnetlib
 
 PfRule = test_state.PfRule
 Port = test_state.Port
@@ -965,6 +966,7 @@ class MulISO(object):
         cond = res_ops.gen_query_conditions('mediaType', '=', 'ISO')
         iso_images = res_ops.query_resource(res_ops.IMAGE, cond)
         self.iso_uuids = [i.uuid for i in iso_images]
+        self.iso_names = [i.name for i in iso_images]
 
     def check_iso_candidate(self, iso_name, vm_uuid=None, is_candidate=False):
         if not vm_uuid:
@@ -978,8 +980,16 @@ class MulISO(object):
 
     def create_vm(self, vm2=False):
         self.vm1 = create_basic_vm()
+        self.vm1.check()
         if vm2:
             self.vm2 = create_basic_vm()
+            self.vm2.check()
+
+    def create_windows_vm(self):
+        new_offering = test_lib.lib_create_instance_offering(cpuNum = 2, memorySize = 2048 * 1024 * 1024)
+        new_offering_uuid = new_offering.uuid
+        self.vm1 = create_windows_vm_2(instance_offering_uuid = new_offering_uuid)
+        vm_ops.delete_instance_offering(new_offering_uuid)
 
     def attach_iso(self, iso_uuid, vm_uuid=None):
         if not vm_uuid:
@@ -991,7 +1001,7 @@ class MulISO(object):
         if not vm_uuid:
             vm_uuid = self.vm1.vm.uuid
         img_ops.detach_iso(vm_uuid, iso_uuid)
-        self.check_vm_systag(iso_uuid, vm_uuid, tach='detach')
+        self.check_vm_systag(iso_uuid, vm_uuid, attach=False)
 
     def set_iso_first(self, iso_uuid, vm_uuid=None):
         if not vm_uuid:
@@ -999,18 +1009,50 @@ class MulISO(object):
         system_tags = ['iso::%s::0' % iso_uuid]
         vm_ops.update_vm(vm_uuid, system_tags=system_tags)
 
-    def check_vm_systag(self, iso_uuid, vm_uuid=None, tach='attach', order=None):
+    def check_vm_systag(self, iso_uuid, vm_uuid=None, attach=True, order=None):
         if not vm_uuid:
             vm_uuid = self.vm1.vm.uuid
         cond = res_ops.gen_query_conditions('resourceUuid', '=', vm_uuid)
         systags = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
         iso_orders = {t.tag.split('::')[-2]: t.tag.split('::')[-1] for t in systags if 'iso' in t.tag}
-        if tach == 'attach':
+        if attach:
             assert iso_uuid in iso_orders
         else:
             assert iso_uuid not in iso_orders
         if order:
             assert iso_orders[iso_uuid] == order
+
+    def check_vm_cdrom(self, no_media_cdrom=0, check=False):
+        actual_no_media_cdrom = 0
+        vm_ip = self.vm1.vm.vmNics[0].ip
+        for i in range(3):
+            cmd_mount = 'sshpass -p password ssh -o StrictHostKeyChecking=no root@%s "umount -f /mnt &> /dev/null;mount /dev/sr%s /mnt"' % (vm_ip, i)
+            _ret = commands.getoutput(cmd_mount)
+            ret = _ret.split('\n')[-1]
+            print '*' * 80
+            print _ret, ret
+            if 'no medium found' in ret:
+                actual_no_media_cdrom += 1
+        if check:
+            assert actual_no_media_cdrom == no_media_cdrom
+
+    def check_windows_vm_cdrom(self, cdroms_with_media):
+        vm_ip = self.vm1.get_vm().vmNics[0].ip
+        test_lib.lib_wait_target_up(vm_ip, '23', 1200)
+        vm_username = os.environ.get('winImageUsername')
+        vm_password = os.environ.get('winImagePassword')
+        tn = telnetlib.Telnet(vm_ip)
+        tn.read_until("login: ")
+        tn.write(vm_username+"\r\n")
+        tn.read_until("password: ")
+        tn.write(vm_password+"\r\n")
+        tn.read_until(vm_username+">")
+        tn.write("wmic cdrom get volumename\r\n")
+        ret = tn.read_until(vm_username+">")
+        tn.close()
+        cdrome_list = ret.split('\r')
+        _cdroms_with_media = [x.strip('\n| ') for x in cdrome_list if x.strip('\n| ')][2:-1]
+        assert len(_cdroms_with_media) == cdroms_with_media
 
 
 class Longjob(object):
@@ -1057,7 +1099,7 @@ class Longjob(object):
         long_job = longjob_ops.submit_longjob(_job_name, job_data, name)
         assert long_job.state == "Running"
         cond_longjob = res_ops.gen_query_conditions('apiId', '=', long_job.apiId)
-        for _ in xrange(60):
+        for _ in xrange(120):
             longjob = res_ops.query_resource(res_ops.LONGJOB, cond_longjob)[0]
             if longjob.state == "Succeeded":
                 break
@@ -1065,13 +1107,13 @@ class Longjob(object):
                 time.sleep(5)
         assert longjob.state == "Succeeded"
         assert longjob.jobResult == "Succeeded"
-        progress = res_ops.get_task_progress(long_job.apiId)
+        progress = res_ops.get_task_progress(long_job.apiId).inventories[0]
         assert progress.content == '100'
 
     def add_image(self):
         name = "longjob_image"
-        job_data = '{"name":"test-image-longjob", "url":%s, "mediaType"="RootVolumeTemplate", "format"="qcow2", "platform"="Linux", \
-        "backupStorageUuids"=%s}' % (self.url, res_ops.query_resource(res_ops.BACKUP_STORAGE)[0].uuid)
+        job_data = '{"name":"test-image-longjob", "url":"%s", "mediaType"="RootVolumeTemplate", "format"="qcow2", "platform"="Linux", \
+        "backupStorageUuids"=["%s"]}' % (self.url, res_ops.query_resource(res_ops.BACKUP_STORAGE)[0].uuid)
         self.submit_longjob(job_data, name, job_type='image')
 
     def expunge_image(self):
@@ -1083,10 +1125,10 @@ class Longjob(object):
         name = 'longjob_crt_vol_image'
         job_data = '{"name"="test-crt-vol-image", "guestOsType":"Linux","system"="false","platform"="Linux","backupStorageUuids"="%s", \
         "rootVolumeUuid"="%s"}' % (res_ops.query_resource(res_ops.BACKUP_STORAGE)[-1].uuid, self.vm.vm.rootVolumeUuid)
-        self.submit_longjob(job_data, name, job_type='image')
+        self.submit_longjob(job_data, name, job_type='crt_vm_image')
 
     def crt_vol_image(self):
         name = 'longjob_crt_vol_image'
         job_data = '{"name"="test-crt-vol-image", "guestOsType":"Linux","system"="false","platform"="Linux","backupStorageUuids"="%s", \
         "dataVolumeUuid"="%s"}' %(res_ops.query_resource(res_ops.BACKUP_STORAGE)[0].uuid, self.data_volume.get_volume().uuid)
-        self.submit_longjob(job_data, name, job_type='image')
+        self.submit_longjob(job_data, name, job_type='crt_vol_image')
