@@ -49,6 +49,11 @@ def check_resource():
                     vm_ops.start_vm(vr.uuid)
                 except:
                     test_util.test_logger('Exception when reboot vr vm')
+            else:
+                try:
+                    vm_ops.stop_vm(vr.uuid, force='cold')
+                except:
+                    test_util.test_logger('Exception when reboot vr vm')
             return False
 
     return True
