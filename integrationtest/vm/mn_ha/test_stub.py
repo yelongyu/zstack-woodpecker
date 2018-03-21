@@ -845,6 +845,7 @@ def auto_set_mn_ip(scenario_file):
         time.sleep(10)
         #cmd = "zsha status|head -n 2|tail -n 1|cut -d: -f1"
         cmd = "zsha status|head -n 5|grep -v stale|grep running|tail -n 1|cut -d: -f1"
+        test_util.test_logger("@@@DEBUG->cmd=<%s>;host_ip=<%s>" %(cmd, host_ip))
         ret, mn_host_ip, stderr = ssh.execute(cmd, host_ip, "root", "password", False, 22) 
         if re.match(r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$", mn_host_ip):
             test_util.test_logger("find mn_host_ip=%s" %(mn_host_ip))
