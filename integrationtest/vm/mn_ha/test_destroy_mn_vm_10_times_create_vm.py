@@ -65,9 +65,13 @@ def test():
         test_stub.ensure_pss_connected()
         test_stub.ensure_bss_connected()
 
-        vm = test_stub.create_basic_vm()
-        vm.check()
-        vm.destroy()
+        test_stub.return_pass_ahead_if_3sites("TEST PASS") 
+        if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml":
+            pass
+        else:
+            vm = test_stub.create_basic_vm()
+            vm.check()
+            vm.destroy()
 
     test_util.test_pass('Create VM Test Success')
 

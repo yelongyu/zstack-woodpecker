@@ -18,6 +18,7 @@ vm = None
 
 def test():
     global vm
+    test_stub.return_skip_ahead_if_3sites("TEST SKIP")
     ori_host = test_stub.get_host_by_mn_vm(test_lib.all_scenario_config, test_lib.scenario_file)
     if len(ori_host) != 1:
         test_util.test_fail('MN VM is running on %d host(s)' % len(ori_host))

@@ -878,3 +878,14 @@ def wrapper_of_wait_for_management_server_start(wait_start_timeout, EXTRA_SUITE_
             os.system(cmd)
 
     node_operations.wait_for_management_server_start(wait_start_timeout)
+
+
+
+def return_pass_ahead_if_3sites(msg):
+    if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml":
+        test_util.test_pass(msg)
+
+
+def return_skip_ahead_if_3sites(msg):
+    if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml":
+        test_util.test_skip(msg)

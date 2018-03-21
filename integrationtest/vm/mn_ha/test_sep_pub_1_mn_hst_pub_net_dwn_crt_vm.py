@@ -69,6 +69,7 @@ def test():
     test_stub.ensure_bss_host_connected_from_sep_net_down(test_lib.scenario_file, test_lib.all_scenario_config, downMagt=False)
     test_stub.ensure_bss_connected()
 
+    test_stub.return_pass_ahead_if_3sites("TEST PASS")
     vm = test_stub.create_basic_vm()
     vm.check()
     vm.destroy()

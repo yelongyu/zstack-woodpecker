@@ -59,9 +59,12 @@ def test():
         test_stub.ensure_bss_connected()
         test_stub.ensure_pss_connected()
 
-        vm = test_stub.create_basic_vm()
-        vm.check()
-        vm.destroy()
+        if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml":
+            pass
+        else:
+            vm = test_stub.create_basic_vm()
+            vm.check()
+            vm.destroy()
         test_stub.recover_host(mn_host[0], test_lib.all_scenario_config, test_lib.deploy_config)
         test_stub.wait_for_mn_ha_ready(test_lib.all_scenario_config, test_lib.scenario_file)
 
