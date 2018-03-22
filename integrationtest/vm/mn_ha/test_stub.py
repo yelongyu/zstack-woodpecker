@@ -452,11 +452,18 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
 
         if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], ["scenario-config-storage-separate-ceph.xml"]):
             ceph_node_ip = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, 0).ip_ 
-            mn_image_path = "/home/%s/mn.qcow2" % ceph_node_ip
-            ssh.scp_file(mn_img, mn_image_path, ceph_node_ip, test_host_config.imageUsername_, test_host_config.imagePassword_)
-            cmd0="yum install -y --disablerepo=* --enablerepo=zstack-local qemu-img"
-            test_util.test_logger("[%s] %s" % (ceph_node_ip, cmd0))
-            ssh.execute(cmd0, ceph_node_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+            #mn_image_path = "/home/%s/mn.qcow2" % ceph_node_ip
+            #ssh.scp_file(mn_img, mn_image_path, ceph_node_ip, test_host_config.imageUsername_, test_host_config.imagePassword_)
+            #cmd0="yum install -y --disablerepo=* --enablerepo=zstack-local qemu-img"
+            #test_util.test_logger("[%s] %s" % (ceph_node_ip, cmd0))
+            #ssh.execute(cmd0, ceph_node_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+            os.system("sshpass -p %s scp -r %s@%s:/etc/ceph /tmp/" %(test_host_config.imagePassword_, test_host_config.imageUsername_, ceph_node_ip))
+            for i in xrange(1,4,1):
+                mn_node_ip = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, i).ip_ 
+                cmd0="yum --disablerepo=* --enablerepo=zstack-local,ceph -y install ceph"
+                test_util.test_logger("[%s] %s" % (ceph_node_ip, cmd0))
+                ssh.execute(cmd0, mn_node_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+                os.system("sshpass -p %s scp -r /tmp/ceph %s@%s:/etc/" %(test_host_config.imagePassword_, test_host_config.imageUsername_, mn_node_ip))
         else:
             ceph_node_ip = test_host_ip
 
