@@ -460,9 +460,16 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
             os.system("sshpass -p %s scp -r %s@%s:/etc/ceph /tmp/" %(test_host_config.imagePassword_, test_host_config.imageUsername_, ceph_node_ip))
             for i in xrange(1,4,1):
                 mn_node_ip = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, i).ip_ 
-                cmd0="yum --disablerepo=* --enablerepo=zstack-local,ceph -y install ceph"
-                test_util.test_logger("[%s] %s" % (ceph_node_ip, cmd0))
-                ssh.execute(cmd0, mn_node_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+                cmd0="yum repolist all|grep ceph-hammer"
+                ret, stdout, stderr = ssh.execute(cmd0, mn_node_ip, "root", "password", False, 22)
+                test_util.test_logger("ret=%s" % (ret))
+                if str(ret) == "0":
+                    yum_cmd = "yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install ceph >/dev/null 2>&1"
+                else:
+                    yum_cmd = "yum --disablerepo=* --enablerepo=zstack-local,ceph -y install ceph >/dev/null 2>&1"
+
+                test_util.test_logger("[%s] %s" % (mn_node_ip, yum_cmd))
+                ssh.execute(yum_cmd, mn_node_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
                 os.system("sshpass -p %s scp -r /tmp/ceph %s@%s:/etc/" %(test_host_config.imagePassword_, test_host_config.imageUsername_, mn_node_ip))
         else:
             ceph_node_ip = test_host_ip
