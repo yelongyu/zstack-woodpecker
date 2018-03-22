@@ -1108,7 +1108,7 @@ class Longjob(object):
         assert longjob.state == "Succeeded"
         assert longjob.jobResult == "Succeeded"
         progress = res_ops.get_task_progress(long_job.apiId).inventories[0]
-        assert progress.content == '100'
+        assert int(progress.content) > 90
 
     def add_image(self):
         name = "longjob_image"
