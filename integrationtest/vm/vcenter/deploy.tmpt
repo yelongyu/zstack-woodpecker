@@ -93,6 +93,7 @@ l2vCenterNoVlanNetworkName2 = vCenter-noVlan-2
 
 vCenterDNSServer = 172.20.0.1
 
+l3vCenterPublicNetworkName = public network vcenter
 
 l3vCenterNoVlanNetworkName = vCenter-noVlan-network
 vCenterNoVlanIpRangeName = vCenter-noVlan-ipRangeName
