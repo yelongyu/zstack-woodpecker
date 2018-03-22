@@ -412,7 +412,7 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
     elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], ["scenario-config-storage-separate-ceph.xml"]):
         ceph_mon_ip = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, 0).ip_
         os.system("sed -i '/MonAddrs/d' %s" % (config_json))
-        os.system("sed -i /Type/a\ \"%s\" %s" % (get_ceph_mon_addr(ceph_mon_ip), config_json))
+        os.system("sed -i /Type/a\ \"%s\" %s" % (get_ceph_mon_addr(ceph_mon_ip).replace("'", '"'), config_json))
         os.system("sed -i 's:\"MonAddrs:  \"MonAddrs:g' %s" % (config_json))
 
 def prepare_etc_hosts(scenarioConfig, scenarioFile, deploy_config, config_json):
