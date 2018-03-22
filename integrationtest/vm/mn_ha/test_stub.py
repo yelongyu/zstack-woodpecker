@@ -327,7 +327,7 @@ def pick_randomized_ip(prefix="192.168.254."):
 def get_ceph_mon_addr(ceph_mon_ip):
     cmd = r"ceph mon stat|grep -o '\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}:6789'"
     ret, output, stderr = ssh.execute(cmd, ceph_mon_ip, "root", "password", False, 22)
-    return r"\"MonAddrs\": " + str(output.strip('\n').split('\n'))
+    return r"\"MonAddrs\": " + str(output.strip('\n').split('\n')) + ','
 
 def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
