@@ -1,20 +1,21 @@
 '''
-Test for deleting and expunge cloned vm ops.
+Test for deleting and expunge image cloned vm ops.
 
 The key step:
 -add image1
 -create vm1 from image1
 -export image1
 -clone vm2 from vm1
--del image2
--do vm all ops test on vm2
--expunge image2
--do vm all ops test on vm2
+-del image1
+-migrate vm2
+-expunge image1
+-attach iso/volume to vm2
 
 @author: PxChen
 '''
 
 import os
+import apibinding.inventory as inventory
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
@@ -33,10 +34,8 @@ def test():
     hosts = res_ops.query_resource(res_ops.HOST)
     if len(hosts) <= 1:
         test_util.test_skip("skip for host_num is not satisfy condition host_num>1")
-
     bs_cond = res_ops.gen_query_conditions("status", '=', "Connected")
     bss = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, bs_cond, None, fields=['uuid'])
-
 
     image_name1 = 'image1_a'
     image_option = test_util.ImageOption()
@@ -54,29 +53,30 @@ def test():
     image1.check()
 
     #export image
-    #image1.export()
+    if bss[0].type in [inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE]:
+        image1.export()
 
     image_name = os.environ.get('imageName_net')
     l3_name = os.environ.get('l3VlanNetworkName1')
-    vm1 = test_stub.create_vm(image_name1, image_name, l3_name)
-    test_obj_dict.add_vm(vm1)
+    vm = test_stub.create_vm('test-vm', image_name, l3_name)
+    test_obj_dict.add_vm(vm)
 
     # clone vm
-    cloned_vm_name = ['cloned_vm_name']
-    cloned_vm_obj = vm1.clone(cloned_vm_name)[0]
+    cloned_vm_name = ['cloned_vm']
+    cloned_vm_obj = vm.clone(cloned_vm_name)[0]
     test_obj_dict.add_vm(cloned_vm_obj)
 
     # delete image
     image1.delete()
 
     # vm ops test
-    test_stub.vm_ops_test(cloned_vm_obj, "VM_TEST_ALL")
+    test_stub.vm_ops_test(cloned_vm_obj, "VM_TEST_MIGRATE")
 
     # expunge image
     image1.expunge()
 
     # vm ops test
-    test_stub.vm_ops_test(cloned_vm_obj, "VM_TEST_ALL")
+    test_stub.vm_ops_test(cloned_vm_obj, "VM_TEST_ATTACH")
 
     test_lib.lib_robot_cleanup(test_obj_dict)
     test_util.test_pass('Cloned VM ops for BS Success')
@@ -91,4 +91,3 @@ def error_cleanup():
         image1.delete()
     except:
         pass
-
