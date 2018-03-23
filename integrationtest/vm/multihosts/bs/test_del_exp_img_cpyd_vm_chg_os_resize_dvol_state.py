@@ -7,16 +7,19 @@ The key step:
 -export image1
 -create image2 from vm1
 -export image2
--do vm all ops test on vm2
+-create vm2 from image2
+-del and expunge image1
+-change vm2 os
 -del image2
--do vm all ops test on vm2
+-resize data volume on vm2
 -expunge image2
--do vm all ops test on vm2
+-change vm2 state
 
 @author: PxChen
 '''
 
 import os
+import apibinding.inventory as inventory
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
@@ -40,7 +43,6 @@ def test():
     bs_cond = res_ops.gen_query_conditions("status", '=', "Connected")
     bss = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, bs_cond, None, fields=['uuid'])
 
-
     image_name1 = 'image1_a'
     image_option = test_util.ImageOption()
     image_option.set_format('qcow2')
@@ -57,7 +59,8 @@ def test():
     image1.check()
 
     #export image
-    #image1.export()
+    if bss[0].type in [inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE]:
+        image1.export()
 
     image_name = os.environ.get('imageName_net')
     l3_name = os.environ.get('l3VlanNetworkName1')
@@ -76,7 +79,8 @@ def test():
     test_obj_dict.add_image(image2)
 
     #export image
-    #image2.export()
+    if bss[0].type in [inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE]:
+        image2.export()
 
     #create vm
     vm2 = test_stub.create_vm('image-vm', created_vm_img_name, l3_name)
@@ -86,15 +90,15 @@ def test():
     image1.expunge()
 
     # vm ops test
-    test_stub.vm_ops_test(vm2, "VM_TEST_ALL")
+    test_stub.vm_ops_test(vm2, "VM_TEST_CHANGE_OS")
 
     #del and expunge image2
     image2.delete()
-    test_stub.vm_ops_test(vm2, "VM_TEST_ALL")
+    test_stub.vm_ops_test(vm2, "VM_TEST_RESIZE_DVOL")
     image2.expunge()
 
     # vm ops test
-    test_stub.vm_ops_test(vm2, "VM_TEST_ALL")
+    test_stub.vm_ops_test(vm2, "VM_TEST_STATE")
 
     test_lib.lib_robot_cleanup(test_obj_dict)
     test_util.test_pass('Cloned VM ops for BS Success')
