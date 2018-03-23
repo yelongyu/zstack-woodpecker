@@ -74,8 +74,8 @@ def test():
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd2)
 
 
-    if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-nfs.xml"], \
-                                       ["scenario-config-storage-separate-nfs.xml"]):
+    if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-nfs.xml", "test-config-vyos-ceph-3-nets-sep.xml"], \
+                                       ["scenario-config-storage-separate-nfs.xml", "scenario-config-storage-separate-ceph.xml"]):
         config_json = os.environ.get('configJsonSepStor')
 
     elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml"], \

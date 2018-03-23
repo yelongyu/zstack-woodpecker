@@ -414,6 +414,12 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
         os.system("sed -i '/MonAddrs/d' %s" % (config_json))
         os.system("sed -i /Type/a\ \"%s\" %s" % (get_ceph_mon_addr(ceph_mon_ip).replace("'", '"'), config_json))
         os.system("sed -i 's:\"MonAddrs:  \"MonAddrs:g' %s" % (config_json))
+        stor_vm_ip = os.environ.get('zstackHaVip3')
+        stor_vm_netmask = os.environ.get('storNetMask')
+        stor_vm_gateway = os.environ.get('storGateway')
+        os.system('sed -i s/stor_ip1/%s/g %s' % (stor_vm_ip,config_json))
+        os.system('sed -i s/stor_netmask1/%s/g %s' % (stor_vm_netmask,config_json))
+        os.system('sed -i s/stor_gateway1/%s/g %s' % (stor_vm_gateway,config_json))
 
 def prepare_etc_hosts(scenarioConfig, scenarioFile, deploy_config, config_json):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
