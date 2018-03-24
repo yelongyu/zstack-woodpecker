@@ -885,6 +885,34 @@ def auto_set_mn_ip(scenario_file):
     os.system(cmd)
     
 
+def modify_startup_script():
+    mn_ip = os.environ['zstackHaVip']
+    cmd = "sed -i \"s:zstack-ctl start:zstack-ctl start_node --timeout 3000:g\" /etc/init.d/zstack-server"
+    test_lib.lib_execute_ssh_cmd(mn_ip, "root", "password", cmd)
+    time.sleep(1)
+    cmd = "sed -i /zstack-ctl start_node --timeout 3000/ a \'    ZSTACK_HOME=$zstack_app zstack-ctl start_ui\' /etc/init.d/zstack-server"
+    test_lib.lib_execute_ssh_cmd(mn_ip, "root", "password", cmd)
+
+
+def restart_mn_node_with_long_timeout():
+    mn_ip = os.environ['zstackHaVip']
+    check_mn_tool_path = "%s/%s" %(os.environ.get('woodpecker_root_path'), '/tools/check_mn_start.sh')
+    ssh.scp_file(check_mn_tool_path, "/home/", mn_ip, "root", "password")
+    cmd = "bash /home/check_mn_start.sh"
+    ret1, stdout, stderr = ssh.execute(cmd, mn_ip, "root", "password", True, 22)
+    test_util.test_logger("check_mn_start.sh output:[%s],stderr:[%s]" %(output,stderr))
+    cmd = "zstack-ctl status|grep 'MN status'|cut -d: -f2"
+    ret2, stdout, stderr = ssh.execute(cmd, mn_ip, "root", "password", True, 22)
+    if lower(stdout.strip().strip('\n')) != "running" and str(ret1) == "0" :
+        cmd = "zstack-ctl stop"
+        ret, stdout, stderr = ssh.execute(cmd, mn_ip, "root", "password", True, 22)
+        cmd = "zstack-ctl configure ThreadFacade.maxThreadNum=200"
+        ret, stdout, stderr = ssh.execute(cmd, mn_ip, "root", "password", True, 22)
+        cmd = "zstack-ctl start_node --timeout 3000"
+        ret, stdout, stderr = ssh.execute(cmd, mn_ip, "root", "password", True, 22)
+        cmd = "zstack-ctl start_ui"
+        ret, stdout, stderr = ssh.execute(cmd, mn_ip, "root", "password", True, 22)
+        
 
 def wrapper_of_wait_for_management_server_start(wait_start_timeout, EXTRA_SUITE_SETUP_SCRIPT=None):
     import zstackwoodpecker.operations.node_operations as node_operations
@@ -898,7 +926,12 @@ def wrapper_of_wait_for_management_server_start(wait_start_timeout, EXTRA_SUITE_
             test_util.test_logger("@@@DEBUG-> run cmd: %s @@@ " %(cmd))
             os.system(cmd)
 
-    node_operations.wait_for_management_server_start(wait_start_timeout)
+    try:
+        wait_start_timeout = 300
+        node_operations.wait_for_management_server_start(wait_start_timeout)
+    except:
+        restart_mn_node_with_long_timeout()
+        modify_startup_script()
 
 
 
