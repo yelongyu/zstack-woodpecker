@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# This script can only be executed in MN host.
+
 MN_LOG=$(zstack-ctl status|grep management-server.log|awk -F: '{ print $2}'|tr -d ' ')
 
 keys=`cat <<EOF
