@@ -37,18 +37,12 @@ def test():
     finally:
         if vm4:
             test_util.test_fail("Test Fail, vm4 [uuid:%s] is not expected to be created" % vm4.uuid)
-    vm1.destroy()
-    vm1.expunge()
-    vm4 = test_stub.create_ag_vm(affinitygroup_uuid=ag1.uuid)
-    test_obj_dict.add_vm(vm4)
-    assert vm4.get_vm().hostUuid != vm2.get_vm().hostUuid
-    assert vm4.get_vm().hostUuid != vm3.get_vm().hostUuid
+    vm1.suspend()
     vmuuids = []
-    vm2.stop()
     ag = test_lib.lib_get_affinity_group_by_name(name="ag1")
     for usage in ag.usages:
         vmuuids.append(usage.resourceUuid)
-    assert vm2.get_vm().uuid in vmuuids       
+    assert vm1.get_vm().uuid in vmuuids
 
     try:
         vm5 = None
@@ -59,6 +53,7 @@ def test():
     finally:
         if vm5:
             test_util.test_fail("Test Fail, vm5 [uuid:%s] is not expected to be created" % vm5.uuid)
+
     test_lib.lib_error_cleanup(test_obj_dict)
     ag_ops.delete_affinity_group(ag1.uuid)
     test_util.test_pass("Affinity Group antiHard policy pass")
