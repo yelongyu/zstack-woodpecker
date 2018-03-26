@@ -5,6 +5,7 @@
         <case timeout='300' repeat='1'>test_ntp.py</case>
         <case timeout='600' repeat='1'>test_imagecache_size.py</case>
         <case timeout='600' repeat='1'>test_imagecache_size2.py</case>
+	<case timeout='600' repeat='1'>test_create_volume_from_template_attach_vm.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_vm.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_stopped_vm.py</case>
 	<case timeout='720' repeat='1'>migrate/test_migrate_stopped_vm_iso.py</case>

@@ -10,6 +10,7 @@ import zstackwoodpecker.test_lib as test_lib
 import apibinding.inventory as inventory
 
 import zstackwoodpecker.operations.resource_operations as res_ops
+import os
 
 test_obj_dict = test_state.TestStateDict()
 test_stub = test_lib.lib_get_test_stub()
@@ -19,7 +20,10 @@ def test():
     test_lib.skip_test_when_bs_type_not_in_list([inventory.SFTP_BACKUP_STORAGE_TYPE])
 
     global test_obj_dict
-    vm = test_stub.create_vm()
+    image_name = os.environ.get('imageName_s')
+    l3_name = os.environ.get('l3VlanNetworkName1')
+    vm_name='multihost_basic_vm'
+    vm = test_stub.create_vm(vm_name,image_name,l3_name)
     test_obj_dict.add_vm(vm)
 
     volume = test_stub.create_volume()
