@@ -1099,16 +1099,19 @@ class Longjob(object):
         long_job = longjob_ops.submit_longjob(_job_name, job_data, name)
         assert long_job.state == "Running"
         cond_longjob = res_ops.gen_query_conditions('apiId', '=', long_job.apiId)
+        time.sleep(5)
         for _ in xrange(120):
             longjob = res_ops.query_resource(res_ops.LONGJOB, cond_longjob)[0]
+            progress1 = res_ops.get_task_progress(long_job.apiId).inventories[0].content
             if longjob.state == "Succeeded":
                 break
             else:
                 time.sleep(5)
+                progress2 = res_ops.get_task_progress(long_job.apiId).inventories[0].content
+                assert int(progress2) >= int(progress1)
+                assert int(progress2) >= 0 and int(progress2) <= 100
         assert longjob.state == "Succeeded"
         assert longjob.jobResult == "Succeeded"
-        progress = res_ops.get_task_progress(long_job.apiId).inventories[0]
-        assert int(progress.content) > 90
 
     def add_image(self):
         name = "longjob_image"
@@ -1123,12 +1126,12 @@ class Longjob(object):
 
     def crt_vm_image(self):
         name = 'longjob_crt_vol_image'
-        job_data = '{"name"="test-crt-vol-image", "guestOsType":"Linux","system"="false","platform"="Linux","backupStorageUuids"="%s", \
+        job_data = '{"name"="test-crt-vol-image", "guestOsType":"Linux","system"="false","platform"="Linux","backupStorageUuids"=["%s"], \
         "rootVolumeUuid"="%s"}' % (res_ops.query_resource(res_ops.BACKUP_STORAGE)[-1].uuid, self.vm.vm.rootVolumeUuid)
         self.submit_longjob(job_data, name, job_type='crt_vm_image')
 
     def crt_vol_image(self):
         name = 'longjob_crt_vol_image'
-        job_data = '{"name"="test-crt-vol-image", "guestOsType":"Linux","system"="false","platform"="Linux","backupStorageUuids"="%s", \
-        "dataVolumeUuid"="%s"}' %(res_ops.query_resource(res_ops.BACKUP_STORAGE)[0].uuid, self.data_volume.get_volume().uuid)
+        job_data = '{"name"="test-crt-vol-image", "guestOsType":"Linux","system"="false","platform"="Linux","backupStorageUuids"=["%s"], \
+        "volumeUuid"="%s"}' %(res_ops.query_resource(res_ops.BACKUP_STORAGE)[0].uuid, self.data_volume.get_volume().uuid)
         self.submit_longjob(job_data, name, job_type='crt_vol_image')

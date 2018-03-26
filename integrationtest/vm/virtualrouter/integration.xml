@@ -214,5 +214,7 @@
         <case timeout='1200' repeat='1'>multi_iso/test_attach_3_iso_windows.py</case>
         <case timeout='600' repeat='1'>multi_iso/test_iso_candidate.py</case>
         <case timeout='600' repeat='1'>test_add_image_longjob.py</case>
+        <case timeout='600' repeat='1'>test_create_vm_image_longjob.py</case>
+        <case timeout='600' repeat='1'>test_create_volume_image_longjob.py</case>
     </suite>
 </integrationTest>
