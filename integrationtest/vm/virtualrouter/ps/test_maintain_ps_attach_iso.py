@@ -60,9 +60,10 @@ def test():
     test_obj_dict.add_image(image)
 
 
-    ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
-    ps_uuid = ps.uuid
-    ps_ops.change_primary_storage_state(ps_uuid, 'maintain')
+    #ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
+    #ps_uuid = ps.uuid
+    #ps_ops.change_primary_storage_state(ps_uuid, 'maintain')
+    test_stub.maintain_all_pss()
     if not test_lib.lib_wait_target_down(vm.get_vm().vmNics[0].ip, '22', 90):
         test_util.test_fail('VM is expected to stop when PS change to maintain state')
     vm.set_state(vm_header.STOPPED)
@@ -74,7 +75,8 @@ def test():
     img_ops.attach_iso(iso_uuid, vm.vm.uuid)
 
 
-    ps_ops.change_primary_storage_state(ps_uuid, 'enable')
+    #ps_ops.change_primary_storage_state(ps_uuid, 'enable')
+    test_stub.enable_all_pss()
     host_ops.reconnect_host(host_uuid)
     test_stub.ensure_hosts_connected(120)
     #vm_ops.reconnect_vr(vr_uuid)
