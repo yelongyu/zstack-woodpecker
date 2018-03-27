@@ -1,6 +1,6 @@
 '''
 
-New Integration Test for migrate between clusters
+New Simulator Test for Long Job
 
 @author: Legion
 '''
