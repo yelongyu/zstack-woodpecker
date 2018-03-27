@@ -903,10 +903,10 @@ def restart_mn_node_with_long_timeout():
         check_mn_tool_path = "%s/%s" %(os.environ.get('woodpecker_root_path'), '/tools/check_mn_start.sh')
         test_util.test_logger("check_mn_tool_path:[%s],mn_ip:[%s]" %(check_mn_tool_path, mn_ip))
         ssh.scp_file(check_mn_tool_path, "/home/check_mn_start.sh", mn_ip, "root", "password")
+
         cmd = "bash /home/check_mn_start.sh"
         ret1, stdout1, stderr1 = ssh.execute(cmd, mn_ip, "root", "password", False, 22)
-
-        test_util.test_logger("check_mn_start.sh output:[%s],stderr:[%s]" %(output,stderr))
+        test_util.test_logger("check_mn_start.sh stdout1:[%s],stderr1:[%s]" %(stdout1,stderr1))
 
         if str(ret1) == "0" :
             cmd = "zstack-ctl stop"
