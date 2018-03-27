@@ -922,7 +922,7 @@ def restart_mn_node_with_long_timeout():
             cmd = r'sed -i "s:zstack-ctl start:zstack-ctl start_node --timeout 3000:g" /etc/init.d/zstack-server'
             test_lib.lib_execute_ssh_cmd(mn_ip, "root", "password", cmd)
             time.sleep(1)
-            cmd = r'sed -i "/zstack-ctl start_node --timeout 3000/ a\    ZSTACK_HOME=$zstack_app zstack-ctl start_ui" /etc/init.d/zstack-server'
+            cmd = r'sed -i "/zstack-ctl start_node --timeout 3000/ a\    ZSTACK_HOME=\$zstack_app zstack-ctl start_ui" /etc/init.d/zstack-server'
             test_lib.lib_execute_ssh_cmd(mn_ip, "root", "password", cmd)
 
         else:
