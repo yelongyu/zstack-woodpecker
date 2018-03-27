@@ -945,9 +945,6 @@ def wrapper_of_wait_for_management_server_start(wait_start_timeout, EXTRA_SUITE_
             os.system(cmd)
 
     try:
-        wait_start_timeout = 300
-        time.sleep(180)
-        raise Exception("debug")
         node_operations.wait_for_management_server_start(wait_start_timeout)
     except:
         restart_mn_node_with_long_timeout()
