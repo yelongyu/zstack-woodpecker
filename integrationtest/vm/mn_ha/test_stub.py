@@ -898,7 +898,7 @@ def restart_mn_node_with_long_timeout():
     cmd = "zstack-ctl status|grep 'MN status'|awk '{print $3}'"
     ret, stdout, stderr = ssh.execute(cmd, mn_ip, "root", "password", False, 22)
 
-    if lower(stdout.strip().strip('\n')) != "running":
+    if stdout.strip().strip('\n').lower() != "running":
 
         check_mn_tool_path = "%s/%s" %(os.environ.get('woodpecker_root_path'), '/tools/check_mn_start.sh')
         test_util.test_logger("check_mn_tool_path:[%s],mn_ip:[%s]" %(check_mn_tool_path, mn_ip))
