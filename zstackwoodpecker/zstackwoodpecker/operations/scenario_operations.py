@@ -448,16 +448,17 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
             if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], \
                                                ["scenario-config-ceph-sep-man.xml", \
                                                 "scenario-config-ceph-sep-pub.xml", \
-                                                "scenario-config-ceph-3-nets-sep.xml"]):
+                                                "scenario-config-ceph-3-nets-sep.xml", \
+                                                "scenario-config-storage-separate-ceph.xml"]):
                 ceph_vm_nic = os.environ.get('storNic').replace("eth", "zsn")
                 ceph_vm_netmask = os.environ.get('manNetMask')
                 ceph_vm_gateway = os.environ.get('manGateway')
-            elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], \
-                                                 [ #"scenario-config-separate-ceph.xml", \
-                                                "scenario-config-storage-separate-ceph.xml"]):
-                ceph_vm_nic = os.environ.get('storNic').replace("eth", "zsn")
-                ceph_vm_netmask = os.environ.get('storNetMask')
-                ceph_vm_gateway = os.environ.get('storGateway')
+            #elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], \
+            #                                     [ #"scenario-config-separate-ceph.xml", \
+            #                                    "scenario-config-storage-separate-ceph.xml"]):
+            #    ceph_vm_nic = os.environ.get('storNic').replace("eth", "zsn")
+            #    ceph_vm_netmask = os.environ.get('storNetMask')
+            #    ceph_vm_gateway = os.environ.get('storGateway')
             else:
                 test_util.test_fail("not supported ceph testconfig and scenario combination")
         
