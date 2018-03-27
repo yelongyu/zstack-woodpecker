@@ -28,6 +28,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.image_operations as img_ops
 import zstackwoodpecker.operations.longjob_operations as longjob_ops
 import zstackwoodpecker.zstack_test.zstack_test_image as test_image
+import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import apibinding.inventory as inventory
 import random
 import functools
@@ -1141,3 +1142,24 @@ class Longjob(object):
         job_data = '{"name"="test-crt-vol-image", "guestOsType":"Linux","system"="false","platform"="Linux","backupStorageUuids"=["%s"], \
         "volumeUuid"="%s"}' %(res_ops.query_resource(res_ops.BACKUP_STORAGE)[0].uuid, self.data_volume.get_volume().uuid)
         self.submit_longjob(job_data, name, job_type='crt_vol_image')
+
+
+def disable_all_pss():
+    ps_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+    for ps in ps_list:
+        ps_uuid = ps.uuid
+        ps_ops.change_primary_storage_state(ps_uuid, 'disable')
+
+
+def maintain_all_pss():
+    ps_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+    for ps in ps_list:
+        ps_uuid = ps.uuid
+        ps_ops.change_primary_storage_state(ps_uuid, 'maintain')
+
+
+def enable_all_pss():
+    ps_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+    for ps in ps_list:
+        ps_uuid = ps.uuid
+        ps_ops.change_primary_storage_state(ps_uuid, 'enable')
