@@ -17,6 +17,7 @@ test_stub = test_lib.lib_get_test_stub()
 
 
 def test():
+
     test_lib.skip_test_when_bs_type_not_in_list([inventory.SFTP_BACKUP_STORAGE_TYPE])
 
     global test_obj_dict
@@ -37,10 +38,16 @@ def test():
     volume_template = volume.create_template(sftp_uuid_list)
     test_obj_dict.add_image(volume_template)
 
-    ps_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].uuid
-    new_volume_01 = volume_template.create_data_volume(ps_uuid)
+
+    ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0]
+    ps_uuid = ps.uuid
+    host_uuid=None
+    if ps.type == inventory.LOCAL_STORAGE_TYPE:
+        host_uuid=test_lib.lib_get_local_storage_volume_host(volume.get_volume().uuid).uuid
+
+    new_volume_01 = volume_template.create_data_volume(ps_uuid,"new volume 01",host_uuid)
     test_obj_dict.add_volume(new_volume_01)
-    new_volume_02 = volume_template.create_data_volume(ps_uuid)
+    new_volume_02 = volume_template.create_data_volume(ps_uuid,"new volume 02",host_uuid)
     test_obj_dict.add_volume(new_volume_02)
 
     volume.detach()
