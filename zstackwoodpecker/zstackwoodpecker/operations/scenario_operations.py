@@ -455,38 +455,38 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
             elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], \
                                                  [ #"scenario-config-separate-ceph.xml", \
                                                 "scenario-config-storage-separate-ceph.xml"]):
-                #ceph_vm_nic = os.environ.get('storNic').replace("eth", "zsn")
-                #ceph_vm_netmask = os.environ.get('storNetMask')
-                #ceph_vm_gateway = os.environ.get('storGateway')
-                for vm_l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
-                    if vm_l3network.uuid_ == os.environ.get('vmManageL3Uuid'):
-                        ceph_vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_l3network.uuid_).ip
-                        ceph_vm_nic = os.environ.get('storNic').replace("eth", "zsn")
-                        ceph_vm_netmask = os.environ.get('manNetMask')
-                        ceph_vm_gateway = os.environ.get('manGateway')
-                    elif vm_l3network.uuid_ == os.environ.get('vmStorageL3Uuid'):
-                        ceph_vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_l3network.uuid_).ip
-                        ceph_vm_nic = os.environ.get('fstrStorNic').replace("eth", "zsn")
-                        ceph_vm_netmask = os.environ.get('storNetMask')
-                        ceph_vm_gateway = os.environ.get('storGateway')
-                    else:
-                        test_util.test_logger("@@@BUG@@@ vm.uuid=%s, but vmManageL3Uuid=%s, vmStorageL3Uuid=%s" %(vm_l3network.uuid_, os.environ.get('vmManageL3Uuid'), os.environ.get('vmStorageL3Uuid')))
-                        continue
+                ceph_vm_nic = os.environ.get('storNic').replace("eth", "zsn")
+                ceph_vm_netmask = os.environ.get('storNetMask')
+                ceph_vm_gateway = os.environ.get('storGateway')
+                #for vm_l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
+                #    if vm_l3network.uuid_ == os.environ.get('vmManageL3Uuid'):
+                #        ceph_vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_l3network.uuid_).ip
+                #        ceph_vm_nic = os.environ.get('storNic').replace("eth", "zsn")
+                #        ceph_vm_netmask = os.environ.get('manNetMask')
+                #        ceph_vm_gateway = os.environ.get('manGateway')
+                #    elif vm_l3network.uuid_ == os.environ.get('vmStorageL3Uuid'):
+                #        ceph_vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_l3network.uuid_).ip
+                #        ceph_vm_nic = os.environ.get('fstrStorNic').replace("eth", "zsn")
+                #        ceph_vm_netmask = os.environ.get('storNetMask')
+                #        ceph_vm_gateway = os.environ.get('storGateway')
+                #    else:
+                #        test_util.test_logger("@@@BUG@@@ vm.uuid=%s, but vmManageL3Uuid=%s, vmStorageL3Uuid=%s" %(vm_l3network.uuid_, os.environ.get('vmManageL3Uuid'), os.environ.get('vmStorageL3Uuid')))
+                #        continue
 
-                    ceph_cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (ceph_vm_nic, ceph_vm_ip, ceph_vm_netmask, ceph_vm_gateway)
-                    test_util.test_logger("%s" %(ceph_cmd))
-                    ssh.execute(ceph_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+                #    ceph_cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (ceph_vm_nic, ceph_vm_ip, ceph_vm_netmask, ceph_vm_gateway)
+                #    test_util.test_logger("%s" %(ceph_cmd))
+                #    ssh.execute(ceph_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
-                set_default_gw_cmd = "route del default && route add default gw %s" %(vm_gateway)
-                ssh.execute(set_default_gw_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+                #set_default_gw_cmd = "route del default && route add default gw %s" %(vm_gateway)
+                #ssh.execute(set_default_gw_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
             else:
                 test_util.test_fail("not supported ceph testconfig and scenario combination")
         
 
             if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml":
                 pass
-            elif os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-storage-separate-ceph.xml":
-                pass
+            #elif os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-storage-separate-ceph.xml":
+            #    pass
             else:
                 ceph_cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (ceph_vm_nic, ceph_vm_ip, ceph_vm_netmask, ceph_vm_gateway)
                 ssh.execute(ceph_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
