@@ -493,7 +493,7 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
 
                 #TODO: should dynamically change gw followed config.json, but currently there is only one case, thus always change 
                 #default gw to public network gw
-                set_default_gw_cmd = "route del default gw %s && route add default gw %s" %(ceph_vm_gateway, vm_gateway)
+                set_default_gw_cmd = "route del default && route add default gw %s" %(ceph_vm_gateway, vm_gateway)
                 ssh.execute(set_default_gw_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
         
     elif mn_ha_storage_type == "fusionstor":
