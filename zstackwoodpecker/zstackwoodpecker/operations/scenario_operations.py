@@ -452,7 +452,7 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
                 ceph_vm_nic = os.environ.get('storNic').replace("eth", "zsn")
                 ceph_vm_netmask = os.environ.get('manNetMask')
                 ceph_vm_gateway = os.environ.get('manGateway')
-            elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], \
+            elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-nonmon-ceph.xml"], \
                                                  [ #"scenario-config-separate-ceph.xml", \
                                                 "scenario-config-storage-separate-ceph.xml"]):
                 ceph_vm_nic = os.environ.get('storNic').replace("eth", "zsn")
