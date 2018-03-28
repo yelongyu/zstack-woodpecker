@@ -14,7 +14,7 @@ test_stub = test_lib.lib_get_test_stub()
 longjob = test_stub.Longjob()
 
 def test():
-    longjob.create_vm(longjob.image_name_net)
+    longjob.create_vm()
     longjob.create_data_volume()
 
     test_obj_dict.add_vm(longjob.vm)
@@ -22,7 +22,8 @@ def test():
     longjob.crt_vol_image()
 
     test_lib.lib_robot_cleanup(test_obj_dict)
-    test_util.test_pass('Create Data Volume Longjob Test Success')
+    longjob.delete_image()
+    test_util.test_pass('Data Volume Create Image Longjob Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():

@@ -14,7 +14,7 @@ test_stub = test_lib.lib_get_test_stub()
 longjob = test_stub.Longjob()
 
 def test():
-    longjob.create_vm(longjob.image_name_net)
+    longjob.create_vm()
     longjob.create_data_volume()
 
     test_obj_dict.add_vm(longjob.vm)
