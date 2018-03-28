@@ -3,7 +3,6 @@
         <case timeout='1200'  repeat='1' noparallel='True'>test_query_vcenter_cluster.py</case>
         <case timeout='1200'  repeat='1' noparallel='True'>test_query_vcenter_primary_storage.py</case>
         <case timeout='1200'  repeat='1' noparallel='True'>test_query_vcenter_backup_storage.py</case>
-        <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_check_exist_vm.py</case>
         <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_check_exist_template.py</case>
         <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_check_exist_network.py</case>
         <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_vm_create.py</case>
