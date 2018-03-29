@@ -387,6 +387,7 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
     mn_ha_storage_type = get_mn_ha_storage_type(scenario_config, scenario_file, deploy_config)
     if mn_ha_storage_type == "nfs":
         nfs_url = get_mn_ha_nfs_url(scenario_config, scenario_file, deploy_config)
+        test_util.test_logger("setup_mn_host.nfs_branch")
         nfsIP = nfs_url.split(':')[0]
         nfsPath = nfs_url.split(':')[1]
         vm_net_uuids_lst = []
@@ -398,20 +399,26 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
             nfs_vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, nfs_network_uuid).ip
             if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml", "test-config-vyos-flat-dhcp-nfs-mul-net-pubs.xml"], \
                                                ["scenario-config-nfs-sep-man.xml"]):
+                test_util.test_logger("setup_mn_host.nfs_branch.sep_man")
                 nfs_vm_nic = os.environ.get('storNic').replace("eth", "zsn")
                 nfs_vm_netmask = os.environ.get('manNetMask')
                 nfs_vm_gateway = os.environ.get('manGateway')
             elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml", "test-config-vyos-flat-dhcp-nfs-mul-net-pubs.xml"], \
                                                  ["scenario-config-nfs-sep-pub.xml"]):
+                test_util.test_logger("setup_mn_host.nfs_branch.mul_net_pubs")
                 nfs_url = get_mn_ha_nfs_url(scenario_config, scenario_file, deploy_config, False)
+                test_util.test_logger("setup_mn_host.nfs_branch.mul_net_pubs.after_get_mn_ha_nfs_url")
                 nfsIP = nfs_url.split(':')[0]
                 nfsPath = nfs_url.split(':')[1]
                 nfs_vm_nic = os.environ.get('storNic').replace("eth", "zsn")
                 nfs_vm_netmask = os.environ.get('manNetMask')
                 nfs_vm_gateway = os.environ.get('manGateway')
+                test_util.test_logger("setup_mn_host.nfs_branch.mul_net_pubs.before_get_nfs_ip_for_net_sep")
                 nfsIP = get_nfs_ip_for_net_sep(scenario_config, nfsIP, nfsPath)
+                test_util.test_logger("setup_mn_host.nfs_branch.mul_net_pubs.after_get_nfs_ip_for_net_sep")
             elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-nfs.xml"], \
                                                  ["scenario-config-storage-separate-nfs.xml"]):
+                test_util.test_logger("setup_mn_host.nfs_branch.sep_nfs_branch")
                 nfs_vm_nic = os.environ.get('storNic').replace("eth", "zsn")
                 nfs_vm_netmask = os.environ.get('storNetMask')
                 nfs_vm_gateway = os.environ.get('storGateway')
@@ -419,22 +426,31 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
                 test_util.test_fail("not supported nfs testconfig and scenario combination")
         
             nfs_cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (nfs_vm_nic, nfs_vm_ip, nfs_vm_netmask, nfs_vm_gateway)
+            test_util.test_logger("nfs_cmd=%s" %(nfs_cmd))
             ssh.execute(nfs_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
             #TODO: should dynamically change gw followed config.json, but currently there is only one case, thus always change 
             #default gw to public network gw
             set_default_gw_cmd = "route del default gw %s && route add default gw %s" %(nfs_vm_gateway, vm_gateway)
+            test_util.test_logger("set_default_gw_cmd=%s" %(set_default_gw_cmd))
             ssh.execute(set_default_gw_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
         #TODO: should make image folder configarable
         cmd = 'mkdir -p /storage'
+        test_util.test_logger("cmd=%s" %(cmd))
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+
         #cmd = 'echo mount %s:%s /storage >> /etc/rc.local' % (nfsIP, nfsPath)
         cmd = 'echo mount -t nfs -o rw,soft,timeo=30,retry=3 %s:%s /storage >> /etc/rc.local' % (nfsIP, nfsPath)
+        test_util.test_logger("cmd=%s" %(cmd))
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+
         cmd = 'chmod a+x /etc/rc.local /etc/rc.d/rc.local'
+        test_util.test_logger("cmd=%s" %(cmd))
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
-	#cmd = 'mount %s:%s /storage' % (nfsIP, nfsPath)
-	cmd = 'mount -t nfs -o rw,soft,timeo=30,retry=3 %s:%s /storage' % (nfsIP, nfsPath)
+
+        #cmd = 'mount %s:%s /storage' % (nfsIP, nfsPath)
+        cmd = 'mount -t nfs -o rw,soft,timeo=30,retry=3 %s:%s /storage' % (nfsIP, nfsPath)
+        test_util.test_logger("cmd=%s" %(cmd))
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
     elif mn_ha_storage_type == "ceph":
