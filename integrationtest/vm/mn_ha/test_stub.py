@@ -523,7 +523,12 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
             test_util.test_logger("[%s] %s" % (test_host_ip, cmd1))
             ssh.execute(cmd1, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
         else:
-            cmd1 = r"yum install -y qemu-img --disablerepo=* --enablerepo=zstack-local"
+            woodpecker_vm_ip = shell.call("ip r | grep src | head -1 | awk '{print $NF}'").strip()
+            qemu_kvm_repo_path = "/home/%s/qemu-kvm-ev.repo" % woodpecker_vm_ip
+            ssh.scp_file(qemu_kvm_repo_path, "/etc/yum.repos.d/qemu-kvm-ev.repo", test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_)
+            cmd1="yum install -y --disablerepo=* --enablerepo=zstack-local,qemu-kvm-ev qemu-img"
+
+            #cmd1 = r"yum install -y qemu-img --disablerepo=* --enablerepo=zstack-local"
             test_util.test_logger("[%s] %s" % (test_host_ip, cmd1))
             ssh.execute(cmd1, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
 
