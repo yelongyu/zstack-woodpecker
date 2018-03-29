@@ -1103,27 +1103,24 @@ class Longjob(object):
         assert long_job.state == "Running"
         cond_longjob = res_ops.gen_query_conditions('apiId', '=', long_job.apiId)
         progress_set = set()
-        for _ in xrange(3600):
+        for _ in xrange(600):
             progress_inv = res_ops.get_task_progress(long_job.apiId).inventories
             if not progress_inv:
-                time.sleep(1)
+                time.sleep(3)
                 continue
             else:
                 progress = progress_inv[0].content
                 progress_set.add(progress)
-                if job_type != 'image':
-                    if progress == '100':
-                        break
-                    else:
-                        time.sleep(1)
+                if '100' in progress or 'image cache' in progress:
+                    break
                 else:
-                    if 'image cache' in progress:
-                        break
-                    else:
-                        time.sleep(1)
+                    time.sleep(3)
         progress_list = [int(i) for i in progress_set if len(i) <= 3]
         progress_list.sort()
-        test_util.test_dsc("Task Progress History: %s" % progress_list)
+        if self.target_bs.type != inventory.SFTP_BACKUP_STORAGE_TYPE:
+            test_util.test_dsc("Task Progress History: %s" % progress_list)
+            assert progress_list, 'Get task progress failed!'
+        time.sleep(10)
         longjob = res_ops.query_resource(res_ops.LONGJOB, cond_longjob)[0]
         assert longjob.state == "Succeeded"
         assert longjob.jobResult == "Succeeded"
