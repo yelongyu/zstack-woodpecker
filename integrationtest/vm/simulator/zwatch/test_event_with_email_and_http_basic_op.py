@@ -92,7 +92,7 @@ def test():
     # subscribe event
     namespace = 'ZStack/VM'
     actions = [{"actionUuid": sns_topic_uuid, "actionType": "sns"}]
-    labels = [{"key": "NewStatus", "op": "Equal", "value": "Disconnected"}]
+    labels = [{"key": "NewState", "op": "Equal", "value": "Disconnected"}]
     event_name = 'VMStateChangedOnHost'
     event_sub_uuid = test_stub.subscribe_event(namespace, event_name, actions, labels).uuid
     cond = res_ops.gen_query_conditions('uuid', '=', event_sub_uuid)
@@ -186,7 +186,7 @@ def test():
     inv = res_ops.query_resource(res_ops.SNS_TOPIC_SUBSCRIBER,cond)
     if inv:
         test_util.test_fail('unsubscribe api topic failed')
-    test_stub.delete_sns_topic(sns_topic_uuid, delete_mode='Delay')
+    test_stub.delete_sns_topic(sns_topic_uuid)
     cond=res_ops.gen_query_conditions('uuid','=',sns_topic_uuid)
     inv = res_ops.query_resource(res_ops.SNS_TOPIC, cond)
     if inv:
@@ -196,12 +196,12 @@ def test():
     inv = res_ops.query_resource(res_ops.SNS_APPLICATION_ENDPOINT, cond)
     if inv:
         test_util.test_fail('delete http endpoint failed')
-    test_stub.delete_sns_application_endpoint(email_endpoint_uuid, delete_mode='Delay')
+    test_stub.delete_sns_application_endpoint(email_endpoint_uuid)
     cond=res_ops.gen_query_conditions('uuid','=',email_endpoint_uuid)
     inv = res_ops.query_resource(res_ops.SNS_APPLICATION_ENDPOINT, cond)
     if inv:
         test_util.test_fail('delete email endpoint failed')
-    test_stub.delete_sns_application_platform(email_platform_uuid,delete_mode='Delay')
+    test_stub.delete_sns_application_platform(email_platform_uuid)
     cond=res_ops.gen_query_conditions('uuid','=',email_platform_uuid)
     inv = res_ops.query_resource(res_ops.SNS_APPLICATION_PLATFORM, cond)
     if inv:
@@ -219,6 +219,6 @@ def error_cleanup():
     if email_endpoint_uuid:
         test_stub.delete_sns_application_endpoint(email_endpoint_uuid)
     if email_platform_uuid:
-        test_stub.delete_sns_application_platform(email_platform_uuid, delete_mode='Delay')
+        test_stub.delete_sns_application_platform(email_platform_uuid)
 
 
