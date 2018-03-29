@@ -5490,3 +5490,20 @@ def do_nothing():
 class DefaultFalseDict(defaultdict):
     def __init__(self, **kwargs):
         super(DefaultFalseDict, self).__init__(lambda:False, **kwargs)
+
+def check_vcenter_host(ip):
+  test = 0
+  while test < 5:
+    test += 1
+    lib_execute_ssh_cmd(ip,"root","password","esxcli storage filesystem rescan")
+    result = lib_execute_ssh_cmd(ip,"root","password","ls vmfs/volumes")
+    if result != False:
+      if 'newdatastore' == result.split('\n')[-2]:
+          command = "sed /newdatastore/d etc/rc.local.d/local.sh"
+          _result = lib_execute_ssh_cmd(ip,"root","password", command)
+          return
+      else:
+          command = "source etc/rc.local.d/local.sh"
+          _result = lib_execute_ssh_cmd(ip,"root","password", command)
+
+  test_util.test_logger("The esxi host: %s checks faild" % ip)

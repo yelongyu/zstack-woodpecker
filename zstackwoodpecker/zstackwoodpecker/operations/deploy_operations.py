@@ -2797,6 +2797,8 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
     from pyVim import connect
     from pyVim import task
     import atexit
+    import zstackwoodpecker.test_lib as test_lib
+
     vcenter = os.environ.get('vcenter')
     vcenteruser = os.environ.get('vcenteruser')
     vcenterpwd = os.environ.get('vcenterpwd')
@@ -2825,7 +2827,8 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
             vc_cl = create_cluster(datacenter=vc_dc, clustername=cluster.name_)
             for host in xmlobject.safe_list(cluster.hosts.host):
                 managementIp = get_host_from_scenario_file(host.name_, scenario_config, scenario_file, deploy_config)
-                vc_hs_spec = vim.host.ConnectSpec(hostName=managementIp,
+                test_lib.check_vcenter_host(managementIp)
+		vc_hs_spec = vim.host.ConnectSpec(hostName=managementIp,
                                                 userName=host.username_,
                                                 password=host.password_,
                                                 sslThumbprint=host.thumbprint_,
