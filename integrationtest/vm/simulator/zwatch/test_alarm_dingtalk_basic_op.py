@@ -34,7 +34,7 @@ def test():
 	url_02 = 'https://oapi.dingtalk.com/robot/send?access_token=0be899d4bd0a7629961a5ccd3035dfba30d084b57944897838f1b601006dd151'
 	name_01 = 'dingtalkAtPerson'
 	name_02 = 'dingtalkAtAll'
-	phone_number = '13999999999'
+	phone_number = '+86-13999999999'
 	endpoint_uuid_01 = test_stub.create_sns_dingtalk_endpoint(url_01, name_01, at_all=False).uuid
 	cond = res_ops.gen_query_conditions('uuid', '=', endpoint_uuid_01)
 	if not res_ops.query_resource(res_ops.SNS_DING_TALK_ENDPOINT, cond):
