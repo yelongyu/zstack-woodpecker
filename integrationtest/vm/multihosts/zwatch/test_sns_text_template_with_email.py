@@ -11,8 +11,9 @@ import zstackwoodpecker.operations.zwatch_operations as zwt_ops
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_image as  zstack_image_header
-import multihosts.test_stub as test_stub
-#test_stub = test_lib.lib_get_test_stub()
+import os
+
+test_stub = test_lib.lib_get_test_stub()
 test_dict = test_state.TestStateDict()
 
 email_platform_uuid = None
@@ -157,8 +158,7 @@ def test():
     image_option.set_root_volume_uuid(root_volume_uuid)
     image_option.set_format('qcow2')
     image_option.set_backup_storage_uuid_list(bs_uuid_list)
-    image_option.set_backup_storage_uuid_list([bs_uuid_list[0]])
-    image_option.set_mediaType('ISO')
+    # image_option.set_mediaType('ISO')
 
     for i in range(threshold_3):
         image_option.set_name('root_volume_template_for_test_' + str(i))
@@ -166,7 +166,8 @@ def test():
         root_volume_template.set_creation_option(image_option)
         root_volume_template.create()
         test_dict.add_image(root_volume_template)
-
+        iso=test_stub.add_test_minimal_iso("iso_for_test_"+str(i))
+        test_dict.add_image(iso)
     time.sleep(30)
     # before change template
     flag = zwt_ops.check_sns_email(pop_server, username, password, total_image_count,
