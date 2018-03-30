@@ -5499,7 +5499,7 @@ def check_vcenter_host(ip):
     result = lib_execute_ssh_cmd(ip,"root","password","ls vmfs/volumes")
     if result != False:
       if 'newdatastore' == result.split('\n')[-2]:
-          command = "sed /newdatastore/d etc/rc.local.d/local.sh"
+          command = "sed -i '/newdatastore/d' etc/rc.local.d/local.sh"
           _result = lib_execute_ssh_cmd(ip,"root","password", command)
           return
       else:
