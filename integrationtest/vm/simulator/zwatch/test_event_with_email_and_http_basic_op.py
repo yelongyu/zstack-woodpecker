@@ -14,11 +14,9 @@ test basic function of event subscribetion,system-alarm topic,api alarm topic wi
 @author: rhZhou
 '''
 import zstackwoodpecker.test_util as test_util
-import zstackwoodpecker.test_lib as test_lib
-#import simulator.test_stub as test_stub
 import zstackwoodpecker.operations.resource_operations as res_ops
+import zstackwoodpecker.operations.zwatch_operations as zwt_ops
 
-test_stub = test_lib.lib_get_test_stub()
 email_platform_uuid = None
 email_endpoint_uuid = None
 http_endpoint_uuid = None
@@ -34,21 +32,21 @@ def test():
     email_platform_name = 'Alarm_email'
     email_username = 'test.qa@zstack.io'
     email_password = 'Test1234'
-    email_platform = test_stub.create_sns_email_platform(smtp_server, smtp_port, email_platform_name, email_username, email_password)
+    email_platform = zwt_ops.create_sns_email_platform(smtp_server, smtp_port, email_platform_name, email_username, email_password)
     email_platform_uuid = email_platform.uuid
     cond=res_ops.gen_query_conditions('uuid','=',email_platform_uuid)
     inv = res_ops.query_resource(res_ops.SNS_EMAIL_PLATFORM,cond)
     if not inv:
         test_util.test_fail('create sns email platform failed')
     try:
-        test_stub.validate_sns_email_platform(email_platform_uuid)
+        zwt_ops.validate_sns_email_platform(email_platform_uuid)
     except:
         test_util.test_fail('Validate SNS Email Platform Failed, Email Plarform: %s' % email_platform_uuid)
 
     # create endpoint
     email_receiver = 'test.qa@zstack.io'
     email_endpoint_name = 'test_qa'
-    email_endpoint_uuid = test_stub.create_sns_email_endpoint(email_receiver, email_endpoint_name, email_platform_uuid).uuid
+    email_endpoint_uuid = zwt_ops.create_sns_email_endpoint(email_receiver, email_endpoint_name, email_platform_uuid).uuid
     cond=res_ops.gen_query_conditions('uuid','=',email_endpoint_uuid)
     inv=res_ops.query_resource(res_ops.SNS_EMAIL_ENDPOINT,cond)
     if not inv:
@@ -57,7 +55,7 @@ def test():
     url = 'http://localhost:8080/webhook-url'
     http_username='url-username'
     http_password='url-password'
-    http_endpoint=test_stub.create_sns_http_endpoint(url,http_endpoint_name,http_username,http_password)
+    http_endpoint=zwt_ops.create_sns_http_endpoint(url,http_endpoint_name,http_username,http_password)
     http_endpoint_uuid=http_endpoint.uuid
     cond=res_ops.gen_query_conditions('uuid','=',http_endpoint_uuid)
     inv=res_ops.query_resource(res_ops.SNS_HTTP_ENDPOINT,cond)
@@ -65,8 +63,8 @@ def test():
         test_util.test_fail('create sns http endpoint failed')
 
     # create sns topic and query system-in topic
-    sns_topic_uuid = test_stub.create_sns_topic('sns_topic_01').uuid
-    test_stub.subscribe_sns_topic(sns_topic_uuid, email_endpoint_uuid)
+    sns_topic_uuid = zwt_ops.create_sns_topic('sns_topic_01').uuid
+    zwt_ops.subscribe_sns_topic(sns_topic_uuid, email_endpoint_uuid)
     cond=res_ops.gen_query_conditions('endpoints.uuid','=',email_endpoint_uuid)
     inv=res_ops.query_resource(res_ops.SNS_TOPIC,cond)
     if not inv:
@@ -74,7 +72,7 @@ def test():
     cond = res_ops.gen_query_conditions('name', '=', 'system-alarm')
     system_alarm_topic = res_ops.query_resource(res_ops.SNS_TOPIC, cond)[0]
     system_alarm_topic_uuid=system_alarm_topic.uuid
-    test_stub.subscribe_sns_topic(system_alarm_topic_uuid, email_endpoint_uuid)
+    zwt_ops.subscribe_sns_topic(system_alarm_topic_uuid, email_endpoint_uuid)
     cond=res_ops.gen_query_conditions('endpoints.uuid','=',email_endpoint_uuid)
     inv=res_ops.query_resource(res_ops.SNS_TOPIC,cond)
     if not inv:
@@ -82,7 +80,7 @@ def test():
     cond = res_ops.gen_query_conditions('name','=','api')
     api_topic= res_ops.query_resource(res_ops.SNS_TOPIC,cond)[0]
     api_topic_uuid=api_topic.uuid
-    test_stub.subscribe_sns_topic(api_topic_uuid,http_endpoint_uuid)
+    zwt_ops.subscribe_sns_topic(api_topic_uuid,http_endpoint_uuid)
     cond = res_ops.gen_query_conditions('endpointUuid','=',http_endpoint_uuid)
     cond = res_ops.gen_query_conditions('topicUuid','=',api_topic_uuid)
     inv=res_ops.query_resource(res_ops.SNS_TOPIC_SUBSCRIBER,cond)
@@ -94,7 +92,7 @@ def test():
     actions = [{"actionUuid": sns_topic_uuid, "actionType": "sns"}]
     labels = [{"key": "NewState", "op": "Equal", "value": "Disconnected"}]
     event_name = 'VMStateChangedOnHost'
-    event_sub_uuid = test_stub.subscribe_event(namespace, event_name, actions, labels).uuid
+    event_sub_uuid = zwt_ops.subscribe_event(namespace, event_name, actions, labels).uuid
     cond = res_ops.gen_query_conditions('uuid', '=', event_sub_uuid)
     event_subscription = res_ops.query_resource(res_ops.EVENT_SUBSCRIPTION, cond)
     if not event_subscription:
@@ -103,19 +101,19 @@ def test():
     #update endpoint
     new_name='endpointNewName'
     new_description='endpoint new description'
-    test_stub.update_sns_application_endpoint(email_endpoint_uuid,new_name,new_description)
+    zwt_ops.update_sns_application_endpoint(email_endpoint_uuid,new_name,new_description)
     cond= res_ops.gen_query_conditions('uuid','=',email_endpoint_uuid)
     inv =res_ops.query_resource(res_ops.SNS_APPLICATION_ENDPOINT,cond)[0]
     if inv.name!=new_name or inv.description!=new_description:
         test_util.test_fail('test update email endpoint failed')
-    test_stub.update_sns_application_endpoint(http_endpoint_uuid,new_name,new_description)
+    zwt_ops.update_sns_application_endpoint(http_endpoint_uuid,new_name,new_description)
     cond= res_ops.gen_query_conditions('uuid','=',http_endpoint_uuid)
     inv =res_ops.query_resource(res_ops.SNS_APPLICATION_ENDPOINT,cond)[0]
     if inv.name!=new_name or inv.description!=new_description:
         test_util.test_fail('test update http endpoint failed')
     new_name_platform='platformNewName'
     new_description_platform='platformNewName'
-    test_stub.update_sns_application_platform(email_platform_uuid,new_name_platform,new_description_platform)
+    zwt_ops.update_sns_application_platform(email_platform_uuid,new_name_platform,new_description_platform)
     cond= res_ops.gen_query_conditions('uuid','=',email_platform_uuid)
     inv =res_ops.query_resource(res_ops.SNS_APPLICATION_PLATFORM,cond)[0]
     if inv.name!=new_name_platform or inv.description!=new_description_platform:
@@ -124,27 +122,27 @@ def test():
     #change state
     state_event = 'disable'
     state_result = 'Disabled'
-    test_stub.change_sns_topic_state(system_alarm_topic_uuid,state_event)
+    zwt_ops.change_sns_topic_state(system_alarm_topic_uuid,state_event)
     cond=res_ops.gen_query_conditions('uuid','=',system_alarm_topic_uuid)
     inv=res_ops.query_resource(res_ops.SNS_TOPIC,cond)[0]
     if inv.state!=state_result:
         test_util.test_fail('change system alarm topic state failed')
-    test_stub.change_sns_topic_state(api_topic_uuid, state_event)
+    zwt_ops.change_sns_topic_state(api_topic_uuid, state_event)
     cond = res_ops.gen_query_conditions('uuid', '=', api_topic_uuid)
     inv = res_ops.query_resource(res_ops.SNS_TOPIC, cond)[0]
     if inv.state != state_result:
         test_util.test_fail('change api topic state failed')
-    test_stub.change_sns_application_endpoint_state(email_endpoint_uuid,state_event)
+    zwt_ops.change_sns_application_endpoint_state(email_endpoint_uuid,state_event)
     cond = res_ops.gen_query_conditions('uuid', '=', email_endpoint_uuid)
     inv = res_ops.query_resource(res_ops.SNS_APPLICATION_ENDPOINT, cond)[0]
     if inv.state != state_result:
         test_util.test_fail('change email endpoint state failed')
-    test_stub.change_sns_application_endpoint_state(http_endpoint_uuid,state_event)
+    zwt_ops.change_sns_application_endpoint_state(http_endpoint_uuid,state_event)
     cond = res_ops.gen_query_conditions('uuid', '=', http_endpoint_uuid)
     inv = res_ops.query_resource(res_ops.SNS_APPLICATION_ENDPOINT, cond)[0]
     if inv.state != state_result:
         test_util.test_fail('change http endpoint state failed')
-    test_stub.change_sns_application_platform_state(email_platform_uuid,state_event)
+    zwt_ops.change_sns_application_platform_state(email_platform_uuid,state_event)
     cond = res_ops.gen_query_conditions('uuid', '=', email_platform_uuid)
     inv = res_ops.query_resource(res_ops.SNS_APPLICATION_PLATFORM, cond)[0]
     if inv.state != state_result:
@@ -153,55 +151,55 @@ def test():
     # test recover and delete
     state_event='enable'
     state_result='Enabled'
-    test_stub.change_sns_topic_state(system_alarm_topic_uuid,state_event)
+    zwt_ops.change_sns_topic_state(system_alarm_topic_uuid,state_event)
     cond=res_ops.gen_query_conditions('uuid','=',system_alarm_topic_uuid)
     inv=res_ops.query_resource(res_ops.SNS_TOPIC,cond)[0]
     if inv.state!=state_result:
         test_util.test_fail('change system alarm topic state failed')
-    test_stub.change_sns_topic_state(api_topic_uuid, state_event)
+    zwt_ops.change_sns_topic_state(api_topic_uuid, state_event)
     cond = res_ops.gen_query_conditions('uuid', '=', api_topic_uuid)
     inv = res_ops.query_resource(res_ops.SNS_TOPIC, cond)[0]
     if inv.state != state_result:
         test_util.test_fail('change api topic state failed')
-    test_stub.unsubscribe_event(event_sub_uuid)
+    zwt_ops.unsubscribe_event(event_sub_uuid)
     cond = res_ops.gen_query_conditions('uuid', '=', event_sub_uuid)
     event_subscription = res_ops.query_resource(res_ops.EVENT_SUBSCRIPTION, cond)
     if event_subscription:
         test_util.test_fail('unsubscribe event failed')
-    test_stub.unsubscribe_sns_topic(sns_topic_uuid, email_endpoint_uuid)
+    zwt_ops.unsubscribe_sns_topic(sns_topic_uuid, email_endpoint_uuid)
     cond =res_ops.gen_query_conditions('endpointUuid','=',email_endpoint_uuid)
     cond=res_ops.gen_query_conditions('topicUuid','=',sns_topic_uuid,cond)
     inv = res_ops.query_resource(res_ops.SNS_TOPIC_SUBSCRIBER,cond)
     if inv:
         test_util.test_fail('unsubscribe sns topic failed')
-    test_stub.unsubscribe_sns_topic(system_alarm_topic_uuid, email_endpoint_uuid)
+    zwt_ops.unsubscribe_sns_topic(system_alarm_topic_uuid, email_endpoint_uuid)
     cond =res_ops.gen_query_conditions('endpointUuid','=',email_endpoint_uuid)
     cond=res_ops.gen_query_conditions('topicUuid','=',system_alarm_topic_uuid,cond)
     inv = res_ops.query_resource(res_ops.SNS_TOPIC_SUBSCRIBER,cond)
     if inv:
         test_util.test_fail('unsubscribe system alarm topic failed')
-    test_stub.unsubscribe_sns_topic(api_topic_uuid, http_endpoint_uuid)
+    zwt_ops.unsubscribe_sns_topic(api_topic_uuid, http_endpoint_uuid)
     cond =res_ops.gen_query_conditions('endpointUuid','=',http_endpoint_uuid)
     cond=res_ops.gen_query_conditions('topicUuid','=',api_topic_uuid,cond)
     inv = res_ops.query_resource(res_ops.SNS_TOPIC_SUBSCRIBER,cond)
     if inv:
         test_util.test_fail('unsubscribe api topic failed')
-    test_stub.delete_sns_topic(sns_topic_uuid)
+    zwt_ops.delete_sns_topic(sns_topic_uuid)
     cond=res_ops.gen_query_conditions('uuid','=',sns_topic_uuid)
     inv = res_ops.query_resource(res_ops.SNS_TOPIC, cond)
     if inv:
         test_util.test_fail('delete sns topic failed')
-    test_stub.delete_sns_application_endpoint(http_endpoint_uuid)
+    zwt_ops.delete_sns_application_endpoint(http_endpoint_uuid)
     cond=res_ops.gen_query_conditions('uuid','=',http_endpoint_uuid)
     inv = res_ops.query_resource(res_ops.SNS_APPLICATION_ENDPOINT, cond)
     if inv:
         test_util.test_fail('delete http endpoint failed')
-    test_stub.delete_sns_application_endpoint(email_endpoint_uuid)
+    zwt_ops.delete_sns_application_endpoint(email_endpoint_uuid)
     cond=res_ops.gen_query_conditions('uuid','=',email_endpoint_uuid)
     inv = res_ops.query_resource(res_ops.SNS_APPLICATION_ENDPOINT, cond)
     if inv:
         test_util.test_fail('delete email endpoint failed')
-    test_stub.delete_sns_application_platform(email_platform_uuid)
+    zwt_ops.delete_sns_application_platform(email_platform_uuid)
     cond=res_ops.gen_query_conditions('uuid','=',email_platform_uuid)
     inv = res_ops.query_resource(res_ops.SNS_APPLICATION_PLATFORM, cond)
     if inv:
@@ -213,12 +211,12 @@ def test():
 def error_cleanup():
     global email_platform_uuid, email_endpoint_uuid, http_endpoint_uuid,sns_topic_uuid
     if sns_topic_uuid:
-        test_stub.delete_sns_topic(sns_topic_uuid)
+        zwt_ops.delete_sns_topic(sns_topic_uuid)
     if http_endpoint_uuid:
-        test_stub.delete_sns_application_endpoint(http_endpoint_uuid)
+        zwt_ops.delete_sns_application_endpoint(http_endpoint_uuid)
     if email_endpoint_uuid:
-        test_stub.delete_sns_application_endpoint(email_endpoint_uuid)
+        zwt_ops.delete_sns_application_endpoint(email_endpoint_uuid)
     if email_platform_uuid:
-        test_stub.delete_sns_application_platform(email_platform_uuid)
+        zwt_ops.delete_sns_application_platform(email_platform_uuid)
 
 

@@ -15,11 +15,8 @@ test basic function of alarm and dingtalk
 @author: rhZhou
 '''
 import zstackwoodpecker.test_util as test_util
-import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
-#import integrationtest.vm.simulator.test_stub as test_stub
-
-test_stub = test_lib.lib_get_test_stub()
+import zstackwoodpecker.operations.zwatch_operations as zwt_ops
 
 endpoint_uuid_01 = None
 endpoint_uuid_02 = None
@@ -35,21 +32,21 @@ def test():
 	name_01 = 'dingtalkAtPerson'
 	name_02 = 'dingtalkAtAll'
 	phone_number = '+86-13999999999'
-	endpoint_uuid_01 = test_stub.create_sns_dingtalk_endpoint(url_01, name_01, at_all=False).uuid
+	endpoint_uuid_01 = zwt_ops.create_sns_dingtalk_endpoint(url_01, name_01, at_all=False).uuid
 	cond = res_ops.gen_query_conditions('uuid', '=', endpoint_uuid_01)
 	if not res_ops.query_resource(res_ops.SNS_DING_TALK_ENDPOINT, cond):
 		test_util.test_fail('create sns dingtalk endpoint failed')
-	test_stub.add_sns_dingtalk_at_person(phone_number, endpoint_uuid_01)
+	zwt_ops.add_sns_dingtalk_at_person(phone_number, endpoint_uuid_01)
 	cond = res_ops.gen_query_conditions('uuid', '=', endpoint_uuid_01)
 	inv = res_ops.query_resource(res_ops.SNS_DING_TALK_ENDPOINT, cond)[0]
 	if phone_number not in inv.atPersonPhoneNumbers:
 		test_util.test_fail('add sns dingtalk at person failed')
-	test_stub.remove_sns_dingtalk_at_person(phone_number, endpoint_uuid_01)
+	zwt_ops.remove_sns_dingtalk_at_person(phone_number, endpoint_uuid_01)
 	cond = res_ops.gen_query_conditions('uuid', '=', endpoint_uuid_01)
 	inv = res_ops.query_resource(res_ops.SNS_DING_TALK_ENDPOINT, cond)[0]
 	if phone_number in inv.atPersonPhoneNumbers:
 		test_util.test_fail('remove sns dingtalk at person failed')
-	endpoint_uuid_02 = test_stub.create_sns_dingtalk_endpoint(url_02, name_02, at_all=True).uuid
+	endpoint_uuid_02 = zwt_ops.create_sns_dingtalk_endpoint(url_02, name_02, at_all=True).uuid
 	cond = res_ops.gen_query_conditions('uuid', '=', endpoint_uuid_02)
 	if not res_ops.query_resource(res_ops.SNS_DING_TALK_ENDPOINT, cond):
 		test_util.test_fail('create sns dingtalk endpoint failed')
@@ -57,18 +54,18 @@ def test():
 	# update endpoint
 	endpoint_new_name = 'dingtalkAtpersonNew'
 	endpoint_description = 'this is a description for atperson'
-	test_stub.update_sns_application_endpoint(endpoint_uuid_01, endpoint_new_name, endpoint_description)
+	zwt_ops.update_sns_application_endpoint(endpoint_uuid_01, endpoint_new_name, endpoint_description)
 	cond = res_ops.gen_query_conditions('name', '=', endpoint_new_name)
 	endpoint = res_ops.query_resource(res_ops.SNS_DING_TALK_ENDPOINT, cond)[0]
 	if endpoint.description != endpoint_description:
 		test_util.test_fail('update sns application endpoint failed')
 
 	# create sns topic
-	sns_topic_uuid_01 = test_stub.create_sns_topic('sns_topic_01').uuid
+	sns_topic_uuid_01 = zwt_ops.create_sns_topic('sns_topic_01').uuid
 	cond = res_ops.gen_query_conditions('uuid', '=', sns_topic_uuid_01)
 	if not res_ops.query_resource(res_ops.SNS_TOPIC, cond):
 		test_util.test_fail('create sns topic failed')
-	sns_topic_uuid_02 = test_stub.create_sns_topic('sns_topic_02').uuid
+	sns_topic_uuid_02 = zwt_ops.create_sns_topic('sns_topic_02').uuid
 	cond = res_ops.gen_query_conditions('uuid', '=', sns_topic_uuid_02)
 	if not res_ops.query_resource(res_ops.SNS_TOPIC, cond):
 		test_util.test_fail('create sns topic failed')
@@ -76,22 +73,22 @@ def test():
 	# update sns topic
 	topic_new_name = 'sns_topic_01_new'
 	topic_description = 'this is a description for topic'
-	test_stub.update_sns_topic(sns_topic_uuid_01, topic_new_name, topic_description)
+	zwt_ops.update_sns_topic(sns_topic_uuid_01, topic_new_name, topic_description)
 	cond = res_ops.gen_query_conditions('uuid', '=', sns_topic_uuid_01)
 	inv = res_ops.query_resource(res_ops.SNS_TOPIC, cond)[0]
 	if inv.name != topic_new_name or inv.description != topic_description:
 		test_util.test_fail('update sns topic failed')
 
 	# subscribe sns topic
-	test_stub.subscribe_sns_topic(sns_topic_uuid_01, endpoint_uuid_01)
+	zwt_ops.subscribe_sns_topic(sns_topic_uuid_01, endpoint_uuid_01)
 	cond = res_ops.gen_query_conditions('endpoints.uuid', '=', endpoint_uuid_01)
 	if not res_ops.query_resource(res_ops.SNS_TOPIC, cond):
 		test_util.test_fail('subscribe sns topic failed')
-	test_stub.subscribe_sns_topic(sns_topic_uuid_01, endpoint_uuid_02)
+	zwt_ops.subscribe_sns_topic(sns_topic_uuid_01, endpoint_uuid_02)
 	cond = res_ops.gen_query_conditions('endpoints.uuid', '=', endpoint_uuid_02)
 	if not res_ops.query_resource(res_ops.SNS_TOPIC, cond):
 		test_util.test_fail('subscribe sns topic failed')
-	test_stub.subscribe_sns_topic(sns_topic_uuid_02, endpoint_uuid_02)
+	zwt_ops.subscribe_sns_topic(sns_topic_uuid_02, endpoint_uuid_02)
 	cond = res_ops.gen_query_conditions('endpoints.uuid', '=', endpoint_uuid_02)
 	if len(res_ops.query_resource(res_ops.SNS_TOPIC, cond)) != 2:
 		test_util.test_fail('subscribe sns topic failed')
@@ -103,7 +100,7 @@ def test():
 	comparisonOperator = 'GreaterThanOrEqualTo'
 	threshold = 10
 	metric_name = 'CPUUsedUtilization'
-	alarm = test_stub.create_alarm(comparisonOperator, period, threshold, namespace, metric_name, actions=actions)
+	alarm = zwt_ops.create_alarm(comparisonOperator, period, threshold, namespace, metric_name, actions=actions)
 	alarm_uuid = alarm.uuid
 	cond = res_ops.gen_query_conditions('uuid', '=', alarm_uuid)
 	inv = res_ops.query_resource(res_ops.ALARM, cond)
@@ -112,7 +109,7 @@ def test():
 
 	# test update alarm
 	new_name = 'total_image_count_alarm'
-	test_stub.update_alarm(alarm_uuid, name=new_name, period=10)
+	zwt_ops.update_alarm(alarm_uuid, name=new_name, period=10)
 	cond = res_ops.gen_query_conditions('uuid', '=', alarm_uuid)
 	inv = res_ops.query_resource(res_ops.ALARM, cond)[0]
 	if inv.period != 10 or inv.name != new_name:
@@ -120,7 +117,7 @@ def test():
 
 	# test add action to alarm
 	action_type = 'sns'
-	test_stub.add_action_to_alarm(alarm_uuid, sns_topic_uuid_02, action_type)
+	zwt_ops.add_action_to_alarm(alarm_uuid, sns_topic_uuid_02, action_type)
 	cond = res_ops.gen_query_conditions('uuid', '=', alarm_uuid)
 	inv = res_ops.query_resource(res_ops.ALARM, cond)[0]
 	flag = False
@@ -131,7 +128,7 @@ def test():
 		test_util.test_fail('add action to alarm failed')
 
 	# test remove action from alarm
-	test_stub.remove_action_from_alarm(alarm_uuid, sns_topic_uuid_02)
+	zwt_ops.remove_action_from_alarm(alarm_uuid, sns_topic_uuid_02)
 	cond = res_ops.gen_query_conditions('uuid', '=', alarm_uuid)
 	inv = res_ops.query_resource(res_ops.ALARM, cond)[0]
 	flag = False
@@ -145,7 +142,7 @@ def test():
 	key = 'VMUuid'
 	operator = 'Equal'
 	value = '1a1d7395cf74474ca52deb80c41214a1'
-	test_stub.add_label_to_alarm(alarm_uuid, key, value, operator)
+	zwt_ops.add_label_to_alarm(alarm_uuid, key, value, operator)
 	cond = res_ops.gen_query_conditions('uuid', '=', alarm_uuid)
 	inv = res_ops.query_resource(res_ops.ALARM, cond)[0]
 	if not inv.labels:
@@ -153,7 +150,7 @@ def test():
 	label_uuid = inv.labels[0].uuid
 
 	# test remove label from alarm
-	test_stub.remove_label_from_alarm(label_uuid)
+	zwt_ops.remove_label_from_alarm(label_uuid)
 	cond = res_ops.gen_query_conditions('uuid', '=', alarm_uuid)
 	inv = res_ops.query_resource(res_ops.ALARM, cond)[0]
 	if inv.labels:
@@ -162,17 +159,17 @@ def test():
 	# test change state
 	state_event = 'disable'
 	state_result = 'Disabled'
-	test_stub.change_alarm_state(alarm_uuid, state_event)
+	zwt_ops.change_alarm_state(alarm_uuid, state_event)
 	cond = res_ops.gen_query_conditions('uuid', '=', alarm_uuid)
 	inv = res_ops.query_resource(res_ops.ALARM, cond)[0]
 	if inv.state != state_result:
 		test_util.test_fail('change alarm state failed')
-	test_stub.change_sns_application_endpoint_state(endpoint_uuid_02, state_event)
+	zwt_ops.change_sns_application_endpoint_state(endpoint_uuid_02, state_event)
 	cond = res_ops.gen_query_conditions('uuid', '=', endpoint_uuid_02)
 	inv = res_ops.query_resource(res_ops.SNS_APPLICATION_ENDPOINT, cond)[0]
 	if inv.state != state_result:
 		test_util.test_fail('change sns application endpoint failed')
-	test_stub.change_sns_topic_state(sns_topic_uuid_02, state_event)
+	zwt_ops.change_sns_topic_state(sns_topic_uuid_02, state_event)
 	cond = res_ops.gen_query_conditions('uuid', '=', sns_topic_uuid_02)
 	inv = res_ops.query_resource(res_ops.SNS_TOPIC, cond)[0]
 	if inv.state != state_result:
@@ -181,51 +178,51 @@ def test():
 	# test recover and delete
 	state_event = 'enable'
 	state_result = 'Enabled'
-	test_stub.change_alarm_state(alarm_uuid, state_event)
+	zwt_ops.change_alarm_state(alarm_uuid, state_event)
 	cond = res_ops.gen_query_conditions('uuid', '=', alarm_uuid)
 	inv = res_ops.query_resource(res_ops.ALARM, cond)[0]
 	if inv.state != state_result:
 		test_util.test_fail('change alarm state failed')
-	test_stub.change_sns_application_endpoint_state(endpoint_uuid_02, state_event)
+	zwt_ops.change_sns_application_endpoint_state(endpoint_uuid_02, state_event)
 	cond = res_ops.gen_query_conditions('uuid', '=', endpoint_uuid_02)
 	inv = res_ops.query_resource(res_ops.SNS_APPLICATION_ENDPOINT, cond)[0]
 	if inv.state != state_result:
 		test_util.test_fail('change sns application endpoint failed')
-	test_stub.change_sns_topic_state(sns_topic_uuid_02, state_event)
+	zwt_ops.change_sns_topic_state(sns_topic_uuid_02, state_event)
 	cond = res_ops.gen_query_conditions('uuid', '=', sns_topic_uuid_02)
 	inv = res_ops.query_resource(res_ops.SNS_TOPIC, cond)[0]
 	if inv.state != state_result:
 		test_util.test_fail('change sns topic state failed')
-	test_stub.unsubscribe_sns_topic(sns_topic_uuid_01, endpoint_uuid_01)
+	zwt_ops.unsubscribe_sns_topic(sns_topic_uuid_01, endpoint_uuid_01)
 	cond = res_ops.gen_query_conditions('endpoints.uuid', '=', endpoint_uuid_01)
 	if res_ops.query_resource(res_ops.SNS_TOPIC, cond):
 		test_util.test_fail('unsubscribe sns topic failed')
-	test_stub.unsubscribe_sns_topic(sns_topic_uuid_01, endpoint_uuid_02)
-	test_stub.unsubscribe_sns_topic(sns_topic_uuid_02, endpoint_uuid_02)
+	zwt_ops.unsubscribe_sns_topic(sns_topic_uuid_01, endpoint_uuid_02)
+	zwt_ops.unsubscribe_sns_topic(sns_topic_uuid_02, endpoint_uuid_02)
 	cond = res_ops.gen_query_conditions('endpoints.uuid', '=', endpoint_uuid_02)
 	if res_ops.query_resource(res_ops.SNS_TOPIC, cond):
 		test_util.test_fail('unsubscribe sns topic failed')
-	test_stub.delete_alarm(alarm_uuid)
+	zwt_ops.delete_alarm(alarm_uuid)
 	cond = res_ops.gen_query_conditions('uuid', '=', alarm_uuid)
 	inv = res_ops.query_resource(res_ops.ALARM, cond)
 	if inv:
 		test_util.test_fail('delete alarm failed')
-	test_stub.delete_sns_topic(sns_topic_uuid_01)
+	zwt_ops.delete_sns_topic(sns_topic_uuid_01)
 	cond = res_ops.gen_query_conditions('uuid', '=', sns_topic_uuid_01)
 	inv = res_ops.query_resource(res_ops.SNS_TOPIC, cond)
 	if inv:
 		test_util.test_fail('delete sns topic failed')
-	test_stub.delete_sns_topic(sns_topic_uuid_02)
+	zwt_ops.delete_sns_topic(sns_topic_uuid_02)
 	cond = res_ops.gen_query_conditions('uuid', '=', sns_topic_uuid_02)
 	inv = res_ops.query_resource(res_ops.SNS_TOPIC, cond)
 	if inv:
 		test_util.test_fail('delete sns topic failed')
-	test_stub.delete_sns_application_endpoint(endpoint_uuid_01)
+	zwt_ops.delete_sns_application_endpoint(endpoint_uuid_01)
 	cond = res_ops.gen_query_conditions('uuid', '=', endpoint_uuid_01)
 	inv = res_ops.query_resource(res_ops.SNS_APPLICATION_ENDPOINT, cond)
 	if inv:
 		test_util.test_fail('delete sns application endpoint  failed')
-	test_stub.delete_sns_application_endpoint(endpoint_uuid_02)
+	zwt_ops.delete_sns_application_endpoint(endpoint_uuid_02)
 	cond = res_ops.gen_query_conditions('uuid', '=', endpoint_uuid_02)
 	inv = res_ops.query_resource(res_ops.SNS_APPLICATION_ENDPOINT, cond)
 	if inv:
@@ -238,12 +235,12 @@ def test():
 def error_cleanup():
 	global endpoint_uuid_01, endpoint_uuid_02, sns_topic_uuid_01, sns_topic_uuid_02, alarm_uuid
 	if alarm_uuid:
-		test_stub.delete_alarm(alarm_uuid)
+		zwt_ops.delete_alarm(alarm_uuid)
 	if sns_topic_uuid_01:
-		test_stub.delete_sns_topic(sns_topic_uuid_01)
+		zwt_ops.delete_sns_topic(sns_topic_uuid_01)
 	if sns_topic_uuid_02:
-		test_stub.delete_sns_topic(sns_topic_uuid_02)
+		zwt_ops.delete_sns_topic(sns_topic_uuid_02)
 	if endpoint_uuid_02:
-		test_stub.delete_sns_application_endpoint(endpoint_uuid_02)
+		zwt_ops.delete_sns_application_endpoint(endpoint_uuid_02)
 	if endpoint_uuid_01:
-		test_stub.delete_sns_application_endpoint(endpoint_uuid_01)
+		zwt_ops.delete_sns_application_endpoint(endpoint_uuid_01)
