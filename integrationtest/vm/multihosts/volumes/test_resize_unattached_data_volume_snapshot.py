@@ -26,6 +26,9 @@ def test():
     disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
     volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
     volume_creation_option.set_primary_storage_uuid(ps_uuid)
+    if res_ops.query_resource(res_ops.PRIMARY_STORAGE, [])[0].type == "LocalStorage":
+        host = test_lib.lib_find_random_host()
+        volume_creation_option.set_system_tags(["localStorage::hostUuid::%s" % host.uuid])
     volume = test_stub.create_volume(volume_creation_option)
     test_obj_dict.add_volume(volume)
     volume.check()
@@ -33,7 +36,10 @@ def test():
     vol_size = volume.volume.size
     image_name = os.environ.get('imageName_net')
     l3_name = os.environ.get('l3VlanNetworkName1')
-    vm = test_stub.create_vm("test_resize_vm", image_name, l3_name)
+    if res_ops.query_resource(res_ops.PRIMARY_STORAGE, [])[0].type == "LocalStorage":
+        vm = test_stub.create_vm("test_resize_vm", image_name, l3_name, host.uuid)
+    else:
+        vm = test_stub.create_vm("test_resize_vm", image_name, l3_name)
     vm.check()
 
     set_size = 1024*1024*1024*5
