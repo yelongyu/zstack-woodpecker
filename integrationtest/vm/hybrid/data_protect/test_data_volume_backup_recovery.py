@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 '''
 
 New Integration Test for data volume backup to and recovery from disaster bs.
@@ -86,8 +87,8 @@ def test():
         #Try to recovery the same image again, it's negative test
         recovery_image = img_ops.recovery_image_from_image_store_backup_storage(local_bs_uuid, disaster_bs_uuid, disaster_bs_image_uuid)
     except Exception,e:
-        if str(e).find('already contains it') != -1:
-            test_util.test_pass('Try to recovery the same image again and get the error info expectly: %s' %str(e))
+        if unicode(e).encode("utf-8").find('包含') != -1:
+            test_util.test_pass('Try to recovery the same image again and get the error info expectly: %s' %unicode(e).encode("utf-8"))
     finally: 
         vol_ops.delete_volume(data_volume_uuid)
         img_ops.delete_image(image_uuid)

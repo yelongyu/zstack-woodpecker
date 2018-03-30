@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 '''
 
 New Integration Test for add images to disaster backup storage. It is a negative test
@@ -49,8 +50,8 @@ def test():
     try:
         new_img = img_ops.add_image(image_option)
     except Exception,e:
-        if str(e).find('forbidden') != -1:
-            test_util.test_pass('AddImage is forbidden in Disaster BS, Here is the expect error info: %s' %str(e))
+        if unicode(e).encode("utf-8").find('禁止') != -1:
+            test_util.test_pass('AddImage is forbidden in Disaster BS, Here is the expect error info: %s' %unicode(e).encode("utf-8"))
 
     finally:
         bs_ops.delete_backup_storage(disaster_bs_uuid)
