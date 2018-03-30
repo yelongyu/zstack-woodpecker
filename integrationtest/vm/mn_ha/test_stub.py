@@ -871,7 +871,7 @@ def auto_set_mn_ip(scenario_file):
     import re
     host_ip_lst = sce_ops.dump_scenario_file_ips(scenario_file)
     host_ip = host_ip_lst[0]
-    for i in range(30):
+    for i in range(60):
         time.sleep(10)
         #cmd = "zsha status|head -n 2|tail -n 1|cut -d: -f1"
         cmd = "zsha status|head -n 5|grep -v stale|grep running|tail -n 1|cut -d: -f1"
