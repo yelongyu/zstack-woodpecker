@@ -501,8 +501,8 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
 
             if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml":
                 pass
-            #elif os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-storage-separate-ceph.xml":
-            #    pass
+            elif os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-storage-separate-ceph.xml":
+                ensure_set_ip_to_bridge(vm_ip, "zsn0", vm_inv, vm_config)
             else:
                 ceph_cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (ceph_vm_nic, ceph_vm_ip, ceph_vm_netmask, ceph_vm_gateway)
                 ssh.execute(ceph_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
@@ -537,6 +537,20 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
             
         set_default_gw_cmd = "route del default && route add default gw %s" %(vm_gateway)
         ssh.execute(set_default_gw_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+
+
+def ensure_set_ip_to_bridge(vm_ip, nic, vm_inv, vm_config):
+ 
+    zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
+
+    cond = res_ops.gen_query_conditions('uuid', '=', vm_inv.hostUuid)
+    host_inv = sce_ops.query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
+
+    bridge = "br_" + nic
+    cmd = "ip a del %s/16 dev %s;ip a add %s/16 dev %s" %(vm_ip, nic, vm_ip, bridge)
+    test_util.test_logger("cmd=%s" %(cmd))
+
+    execute_in_vm_console(zstack_management_ip, host_inv.managementIp, vm_inv.uuid, vm_config, cmd)
 
 
 def get_backup_storage_type(deploy_config, bs_name):
