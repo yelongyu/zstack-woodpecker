@@ -109,7 +109,7 @@ def execute_shell_in_process(cmd, tmp_file, timeout = 1200, no_timeout_excep = F
     logfd.close()
     return process.returncode
 
-def execute_shell_in_process_stdout(cmd, tmp_file, timeout = 1200, no_timeout_excep = False):
+def execute_shell_in_process_stdout(cmd, tmp_file, timeout = 3600, no_timeout_excep = False):
     logfd = open(tmp_file, 'w', 0)
     process = subprocess.Popen(cmd, executable='/bin/sh', shell=True, stdout=logfd, universal_newlines=True)
 
