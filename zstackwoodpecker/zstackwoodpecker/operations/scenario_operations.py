@@ -503,6 +503,13 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
                 pass
             elif os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-storage-separate-ceph.xml":
                 ensure_set_ip_to_bridge(vm_ip, "zsn0", vm_inv, vm_config, scenario_config)
+
+                ceph_cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (ceph_vm_nic, ceph_vm_ip, ceph_vm_netmask, ceph_vm_gateway)
+                ssh.execute(ceph_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+
+                set_default_gw_cmd = "route del default && route add default gw %s" %(vm_gateway)
+                ssh.execute(set_default_gw_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+
             else:
                 ceph_cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (ceph_vm_nic, ceph_vm_ip, ceph_vm_netmask, ceph_vm_gateway)
                 ssh.execute(ceph_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
