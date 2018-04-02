@@ -541,7 +541,8 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
 
 def ensure_set_ip_to_bridge(vm_ip, nic, vm_inv, vm_config):
  
-    zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
+    #zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
+    zstack_management_ip = None
 
     cond = res_ops.gen_query_conditions('uuid', '=', vm_inv.hostUuid)
     host_inv = sce_ops.query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
