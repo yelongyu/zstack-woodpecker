@@ -558,10 +558,12 @@ def ensure_set_ip_to_bridge(vm_ip, nic, vm_inv, vm_config, scenario_config):
     test_util.test_logger("cmd=%s" %(cmd))
     execute_in_vm_console(zstack_management_ip, host_inv.managementIp, vm_inv.uuid, vm_config, cmd)
 
-    #cmd = r"brif_not_null=$(brctl show|grep br_zsn0|awk '{print $4}'); [ -z \"$brif_not_null\" ] && brctl addif br_zsn0 zsn0"
-    cmd = r"brif_not_null=$(brctl show|grep %s|awk '{print $4}'); [ -z \"$brif_not_null\" ] && brctl addif %s %s" %(bridge, bridge, nic)
-    test_util.test_logger("cmd=%s" %(cmd))
-    execute_in_vm_console(zstack_management_ip, host_inv.managementIp, vm_inv.uuid, vm_config, cmd)
+    if not test_lib.lib_wait_target_up(vm_ip, '22', 120):
+        #cmd = r"brif_not_null=$(brctl show|grep br_zsn0|awk '{print $4}'); [ -z \"$brif_not_null\" ] && brctl addif br_zsn0 zsn0"
+        cmd = r"brif_not_null=$(brctl show|grep %s|awk '{print $4}'); [ -z \"$brif_not_null\" ] && brctl addif %s %s" %(bridge, bridge, nic)
+        test_util.test_logger("cmd=%s" %(cmd))
+        execute_in_vm_console(zstack_management_ip, host_inv.managementIp, vm_inv.uuid, vm_config, cmd)
+
 
 def get_backup_storage_type(deploy_config, bs_name):
     for backupStorage in deploy_config.backupStorages.get_child_node_as_list('sftpBackupStorage'):
