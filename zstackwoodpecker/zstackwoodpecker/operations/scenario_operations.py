@@ -545,7 +545,7 @@ def ensure_set_ip_to_bridge(vm_ip, nic, vm_inv, vm_config):
     zstack_management_ip = None
 
     cond = res_ops.gen_query_conditions('uuid', '=', vm_inv.hostUuid)
-    host_inv = sce_ops.query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
+    host_inv = query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
 
     bridge = "br_" + nic
     cmd = "ip a del %s/16 dev %s;ip a add %s/16 dev %s" %(vm_ip, nic, vm_ip, bridge)
