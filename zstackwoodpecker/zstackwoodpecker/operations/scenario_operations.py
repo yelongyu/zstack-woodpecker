@@ -1237,7 +1237,7 @@ def create_cluster(http_server_ip, cluster_option, session_uuid=None):
 
 def add_kvm_host(http_server_ip, host_option, session_uuid=None):
     action = api_actions.AddKVMHostAction()
-    action.timeout = 600000
+    action.timeout = 900000
     action.clusterUuid = host_option.get_cluster_uuid()
     action.username = host_option.get_username()
     action.password = host_option.get_password()
