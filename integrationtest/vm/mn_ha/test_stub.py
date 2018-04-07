@@ -341,7 +341,7 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
         if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-fusionstor-3-nets-sep.xml"], ["scenario-config-fusionstor-3-nets-sep.xml"]):
             os.system('sed -i s/host-%d/%s/g %s' % (i+1, mn_host_list[i].storageIp_,config_json))
         elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml"], ["scenario-config-nfs-sep-man.xml"]) or \
-                         test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], ["scenario-config-storage-separate-ceph.xml"]) or \
+                         test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-nonmon-ceph.xml"], ["scenario-config-storage-separate-ceph.xml"]) or \
                          test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], ["scenario-config-ceph-sep-man.xml"]):
             os.system('sed -i s/host-%d/%s/g %s' % (i+1, mn_host_list[i].ip_,config_json))
         else:
@@ -411,7 +411,7 @@ def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json
         os.system('sed -i s/stor_ip1/%s/g %s' % (stor_vm_ip,config_json))
         os.system('sed -i s/stor_netmask1/%s/g %s' % (stor_vm_netmask,config_json))
         os.system('sed -i s/stor_gateway1/%s/g %s' % (stor_vm_gateway,config_json))
-    elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], ["scenario-config-storage-separate-ceph.xml"]):
+    elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-nonmon-ceph.xml"], ["scenario-config-storage-separate-ceph.xml"]):
         ceph_mon_ip = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, 0).ip_
         os.system("sed -i '/MonAddrs/d' %s" % (config_json))
         os.system("sed -i /Type/a\ \"%s\" %s" % (get_ceph_mon_addr(ceph_mon_ip).replace("'", '\\\"'), config_json))
