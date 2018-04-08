@@ -23,7 +23,7 @@ vm_inv = None
 
 
 def test():
-    global vm_inv
+    global vm_inv,host_name, host_uuid, host_management_ip, vm_ip, bs_name, bs_uuid, 
     test_util.test_dsc('Create test vm to test zstack upgrade by -u.')
 
     image_name = os.environ.get('imageTestAlarm_230_mn')
@@ -49,7 +49,7 @@ def test():
     test_util.test_logger('Update host management IP and reconnect host')
     host_name = 'Host-1'
     conditions = res_ops.gen_query_conditions('name', '=', host_name)
-    host_uuid = res_ops.query_resource(res_ops.HOST, conditions).inventories[0].uuid    
+    host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].inventories[0].uuid    
     host_management_ip = vm_ip
     host_ops.update_host(host_uuid, 'managementIp', host_management_ip)
     host_ops.reconnect_host(host_uuid)
@@ -57,7 +57,7 @@ def test():
     test_util.test_logger('Update bs IP and reconnect bs')
     bs_name = 'BS-1'
     conditions = res_ops.gen_query_conditions('name', '=', bs_name)
-    bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE, conditions).inventories[0].uuid    
+    bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE, conditions)[0].inventories[0].uuid    
     bs_ip = vm_ip
     bs_ops.update_image_store_backup_storage_info(bs_uuid, 'hostname', bs_ip)
     bs_ops.reconnect_backup_storage(bs_uuid)
