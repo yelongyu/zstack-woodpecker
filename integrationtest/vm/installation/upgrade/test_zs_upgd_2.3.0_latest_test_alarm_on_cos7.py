@@ -23,7 +23,7 @@ vm_inv = None
 
 
 def test():
-    global vm_inv,host_name, host_uuid, host_management_ip, vm_ip, bs_name, bs_uuid, 
+    global vm_inv, host_name, host_uuid, host_management_ip, vm_ip, bs_name, bs_uuid, management_ip
     test_util.test_dsc('Create test vm to test zstack upgrade by -u.')
 
     image_name = os.environ.get('imageTestAlarm_230_mn')
@@ -38,6 +38,9 @@ def test():
     vm_ip = vm_inv.vmNics[0].ip
     test_lib.lib_wait_target_up(vm_ip, 22)
 
+    test_util.test_dsc('vm_ip change to environ management_node_ip')
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = vm_ip
+
     test_stub.make_ssh_no_password(vm_ip, tmp_file)
 
     test_util.test_logger('Update MN IP')
@@ -48,16 +51,19 @@ def test():
 
     test_util.test_logger('Update host management IP and reconnect host')
     host_name = 'Host-1'
-    conditions = res_ops.gen_query_conditions('name', '=', host_name)
-    host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].inventories[0].uuid    
+    management_ip = vm_ip
+    cond1 = res_ops.gen_query_conditions('name', '=', host_name)
+    #host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].inventories[0].uuid 
+    host_uuid = scen_ops.query_resource(management_ip, res_ops.HOST, cond1).inventories[0].uuid   
     host_management_ip = vm_ip
     host_ops.update_host(host_uuid, 'managementIp', host_management_ip)
     host_ops.reconnect_host(host_uuid)
 
     test_util.test_logger('Update bs IP and reconnect bs')
     bs_name = 'BS-1'
-    conditions = res_ops.gen_query_conditions('name', '=', bs_name)
-    bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE, conditions)[0].inventories[0].uuid    
+    cond2 = res_ops.gen_query_conditions('name', '=', bs_name)
+    #bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE, conditions)[0].inventories[0].uuid    
+    bs_uuid = scen_ops.query_resource(management_ip, res_ops.BACKUP_STORAGE, cond2).inventories[0].uuid
     bs_ip = vm_ip
     bs_ops.update_image_store_backup_storage_info(bs_uuid, 'hostname', bs_ip)
     bs_ops.reconnect_backup_storage(bs_uuid)
@@ -73,7 +79,7 @@ def test():
     #test_stub.check_installation(vm_ip, tmp_file)
 
     os.system('rm -f %s' % tmp_file)
-    #test_stub.destroy_vm_scenario(vm_inv.uuid)
+    test_stub.destroy_vm_scenario(vm_inv.uuid)
     test_util.test_pass('ZStack upgrade Test Success')
 
 #Will be called only if exception happens in test().
@@ -82,4 +88,4 @@ def error_cleanup():
     os.system('rm -f %s' % tmp_file)
     if vm_inv:
         test_stub.destroy_vm_scenario(vm_inv.uuid)
-    #test_lib.lib_error_cleanup(test_obj_dict)
+    test_lib.lib_error_cleanup(test_obj_dict)
