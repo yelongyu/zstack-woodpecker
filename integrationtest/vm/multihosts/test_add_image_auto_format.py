@@ -55,13 +55,8 @@ def test():
 
     image_cond = res_ops.gen_query_conditions('uuid', '=', new_image.get_image().uuid)
     image_inv = res_ops.query_resource(res_ops.IMAGE, image_cond)[0]
-    if bss[0].type!=inventory.CEPH_BACKUP_STORAGE_TYPE:
-        if image_inv.format != 'iso':
-            test_util.test_fail('image\'s format is not iso,fail')
-    else:
-        if image_inv.format!='raw':
-            test_util.test_fail('image\' format is not raw,fail')
-
+    if image_inv.format != 'iso':
+        test_util.test_fail('image\'s format is not iso,fail')
 
     #test add qcow2
 
@@ -128,6 +123,7 @@ def test():
     if image_inv.format!='raw':
         test_util.test_fail('image\' format is not raw,fail')
 
+    test_lib.lib_robot_cleanup(test_dict)
     test_util.test_pass('test add image auto format success!')
 
 
