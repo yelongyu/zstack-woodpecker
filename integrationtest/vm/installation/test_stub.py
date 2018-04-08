@@ -226,6 +226,17 @@ def stop_node(vm_ip, tmp_file):
     process_result = execute_shell_in_process(cmd, tmp_file)
     time.sleep(40)
 
+def check_mn_running(vm_ip, tmp_file):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd = '%s "zstack-ctl status|grep Running |wc -l"' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
+    if process_result != 2:
+       test_util.test_fail('zstack upgrade failed ')
+    cmd = '%s "zstack-ctl status|grep Running "' % ssh_cmd
+    process_result1 = execute_shell_in_process(cmd, tmp_file)
+    test_util.test_logger('zstack-ctl status  %s' % process_result)   
+    time.sleep(40)
+
 def rm_old_zstack(vm_ip, zstack_home, tmp_file):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     cmd = '%s "rm -rf %s" ' % (ssh_cmd, zstack_home)
