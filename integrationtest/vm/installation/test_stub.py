@@ -228,9 +228,9 @@ def stop_node(vm_ip, tmp_file):
 
 def check_mn_running(vm_ip, tmp_file):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
-    cmd = '%s "zstack-ctl status|grep Running |wc -l"' % ssh_cmd
+    cmd = '%s "zstack-ctl status|grep Stopped"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
-    if process_result != 2:
+    if process_result != 1:
        test_util.test_fail('zstack upgrade failed ')
     cmd = '%s "zstack-ctl status|grep Running "' % ssh_cmd
     process_result1 = execute_shell_in_process(cmd, tmp_file)
@@ -417,21 +417,22 @@ def upgrade_zstack(vm_ip, target_file, tmp_file):
     process_result = execute_shell_in_process(cmd, tmp_file)
 
     if process_result != 0:
-        cmd = '%s "cat /tmp/zstack_installation.log"' % ssh_cmd
-        execute_shell_in_process(cmd, tmp_file)
-        if 'no management-node-ready message received within' in open(tmp_file).read():
-            times = 30
-            cmd = '%s "zstack-ctl status"' % ssh_cmd
-            while (times > 0):
-                time.sleep(10)
-                process_result = execute_shell_in_process(cmd, tmp_file, 10, True)
-                times -= 0
-                if process_result == 0:
-                    test_util.test_logger("management node start after extra %d seconds" % (30 - times + 1) * 10 )
-                    return 0
-                test_util.test_logger("mn node is still not started up, wait for another 10 seconds...")
-            else:
-                test_util.test_fail('zstack upgrade failed')
+         test_util.test_fail('zstack upgrade failed')
+       # cmd = '%s "cat /tmp/zstack_installation.log"' % ssh_cmd
+       # execute_shell_in_process(cmd, tmp_file)
+       # if 'no management-node-ready message received within' in open(tmp_file).read():
+       #     times = 30
+       #     cmd = '%s "zstack-ctl status"' % ssh_cmd
+       #     while (times > 0):
+       #         time.sleep(10)
+       #         process_result = execute_shell_in_process(cmd, tmp_file, 10, True)
+       #         times -= 0
+       #         if process_result == 0:
+       #             test_util.test_logger("management node start after extra %d seconds" % (30 - times + 1) * 10 )
+       #             return 0
+       #         test_util.test_logger("mn node is still not started up, wait for another 10 seconds...")
+       #     else:
+       #         test_util.test_fail('zstack upgrade failed')
 
 def execute_mevoco_aliyun_install(ssh_cmd, tmp_file):
     target_file = '/root/zizhu.bin'
