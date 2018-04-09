@@ -100,20 +100,4 @@ def lib_get_root_image_by_name(name):
     cond = res_ops.gen_query_conditions('name', '=', name, cond)
     return res_ops.query_resource(res_ops.IMAGE, cond)[0]
 
-def connect_to_vCenter()
-    import ssl
-    from pyVmomi import vim
-    import atexit
-    from pyVim import connect
-    import zstackwoodpecker.zstack_test.vcenter_checker.zstack_vcenter_vm_checker as vm_checker
 
-    vcenter_password = os.environ['vcenterpwd']
-    vcenter_server = os.environ['vcenter']
-    vcenter_username = os.environ['vcenteruser']
-
-    sslContext = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
-    sslContext.verify_mode = ssl.CERT_NONE
-    SI = connect.SmartConnect(host=vcenter_server, user=vcenter_username, pwd=vcenter_password, port=443, sslContext=sslContext)
-    if not SI:
-        test_util.test_fail("Unable to connect to the vCenter")
-    return SI
