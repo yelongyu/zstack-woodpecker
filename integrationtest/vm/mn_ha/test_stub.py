@@ -554,9 +554,27 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
 
     cmd3='%s install -p %s -c %s' % (installer_path, host_password, config_path)
     test_util.test_logger("[%s] %s" % (test_host_ip, cmd3))
+
     #ssh.execute(cmd3, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
-    if test_lib.lib_execute_ssh_cmd(test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, cmd3, timeout=3600 ) == False:
+
+    ret, output, stderr = ssh.execute(cmd3, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, False, 22)
+    test_util.test_logger("cmd=%s; ret=%s; output=%s; stderr=%s" %(cmd3, ret, output, stderr))
+    allow_retry_times = 5
+    while allow_retry_times > 0 and "please retry or check log" in output:
+        if ret==0:
+            test_util.test_logger("zsha install successfully, jump out retry.")
+            break
+        else:
+            test_util.test_logger("retry_times=%s; cmd=%s; ret=%s; output=%s; stderr=%s" %(allow_retry_times, cmd3, ret, output, stderr))
+
+        ret, output, stderr = ssh.execute(cmd3, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, False, 22)
+        allow_retry_times = allow_retry_times - 1
+        time.sleep(5)
+    else:
         test_util.test_fail("fail to run cmd: %s on %s" %(cmd3, test_host_ip))
+
+    #if test_lib.lib_execute_ssh_cmd(test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, cmd3, timeout=3600 ) == False:
+    #    test_util.test_fail("fail to run cmd: %s on %s" %(cmd3, test_host_ip))
 
 
 l2network_nic = None
