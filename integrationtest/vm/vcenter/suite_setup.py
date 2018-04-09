@@ -15,6 +15,7 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.tag_operations as tag_ops
+import zstackwoodpecker.operations.image_operations as img_ops
 import zstackwoodpecker.setup_actions as setup_actions
 import test_stub
 
@@ -46,6 +47,11 @@ def test():
     deploy_operations.deploy_initial_vcenter(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
     deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
     test_stub.check_deployed_vcenter(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
+
+    image_name = os.environ['vcenterDefaultmplate']
+    cond = res_ops.gen_query_conditions('name', '=', image_name)
+    image_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
+    img_ops.update_image_platform(image_uuid, 'Linux')
 
     test_util.test_pass('Suite Setup Success')
 

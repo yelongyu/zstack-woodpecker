@@ -10,6 +10,7 @@ import apibinding.api_actions as api_actions
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.account_operations as account_operations
 import zstackwoodpecker.operations.resource_operations as res_ops
+import os
 
 
 
@@ -34,6 +35,13 @@ def delete_vcenter(vcenter_uuid, timeout=240000, session_uuid=None):
     test_util.action_logger('Delete VCenter [uuid:] %s' % vcenter_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
+
+def sync_vcenter(vcenter_uuid, session_uuid=None):
+    action = api_actions.SyncVCenterAction()
+    action.uuid = vcenter_uuid
+    test_util.action_logger('Sync vcenter %s' % vcenter_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt   
 
 def lib_get_vcenter_primary_storage_by_name(ps_name):
     cond = res_ops.gen_query_conditions("name", '=', ps_name)
@@ -92,3 +100,20 @@ def lib_get_root_image_by_name(name):
     cond = res_ops.gen_query_conditions('name', '=', name, cond)
     return res_ops.query_resource(res_ops.IMAGE, cond)[0]
 
+def connect_to_vCenter()
+    import ssl
+    from pyVmomi import vim
+    import atexit
+    from pyVim import connect
+    import zstackwoodpecker.zstack_test.vcenter_checker.zstack_vcenter_vm_checker as vm_checker
+
+    vcenter_password = os.environ['vcenterpwd']
+    vcenter_server = os.environ['vcenter']
+    vcenter_username = os.environ['vcenteruser']
+
+    sslContext = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+    sslContext.verify_mode = ssl.CERT_NONE
+    SI = connect.SmartConnect(host=vcenter_server, user=vcenter_username, pwd=vcenter_password, port=443, sslContext=sslContext)
+    if not SI:
+        test_util.test_fail("Unable to connect to the vCenter")
+    return SI

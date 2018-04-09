@@ -386,4 +386,11 @@ def get_images_from_image_store_backup_storage(uuid, session_uuid=None):
     action.uuid = uuid
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
-    
+
+def update_image_platform(uuid, platform, session_uuid=None):
+    action = api_actions.UpdateImageAction()
+    action.uuid = uuid
+    action.platform = platform
+    test_util.action_logger('Update [image %s] platform' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory   
