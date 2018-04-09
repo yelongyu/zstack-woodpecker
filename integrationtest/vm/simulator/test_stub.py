@@ -267,7 +267,7 @@ def create_ag_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None
         vm_creation_option.set_host_uuid(host_uuid)
 
     if affinitygroup_uuid:
-        vm_creation_option.set_system_tags(["affinityGroupUuid::%s"] % affinitygroup_uuid)
+        vm_creation_option.set_system_tags(["affinityGroupUuid::%s" % affinitygroup_uuid])
 
     if volume_uuids:
         if isinstance(volume_uuids, list):

@@ -24,7 +24,7 @@ def test():
     assert vm1.get_vm().hostUuid != vm2.get_vm().hostUuid
   
     vm3 = test_stub.create_ag_vm(affinitygroup_uuid=ag1.uuid)
-    test_obj_dict.add_vm(vm1)
+    test_obj_dict.add_vm(vm3)
     assert vm1.get_vm().hostUuid != vm3.get_vm().hostUuid
     assert vm2.get_vm().hostUuid != vm3.get_vm().hostUuid
 
@@ -36,7 +36,7 @@ def test():
             test_util.test_logger("vm4 isn't created as expected")
     finally:
         if vm4:
-            test_util.test_fail("Test Fail, vm4 [uuid:%s] is not expected to be created" % vm4.uuid)
+            test_util.test_fail("Test Fail, vm4 [uuid:%s] is not expected to be created" % vm4.get_vm().uuid)
     vm1.destroy()
     vm1.expunge()
     vm4 = test_stub.create_ag_vm(affinitygroup_uuid=ag1.uuid)
@@ -44,7 +44,7 @@ def test():
     assert vm4.get_vm().hostUuid != vm2.get_vm().hostUuid
     assert vm4.get_vm().hostUuid != vm3.get_vm().hostUuid
     vmuuids = []
-    vm2.stop()
+    #vm2.stop()
     ag = test_lib.lib_get_affinity_group_by_name(name="ag1")
     for usage in ag.usages:
         vmuuids.append(usage.resourceUuid)

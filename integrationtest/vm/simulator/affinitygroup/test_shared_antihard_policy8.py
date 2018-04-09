@@ -23,36 +23,30 @@ def test():
     test_obj_dict.add_vm(vm2)
     assert vm1.get_vm().hostUuid != vm2.get_vm().hostUuid
   
-    vm3 = test_stub.create_ag_vm(affinitygroup_uuid=ag1.uuid)
+    vm3 = test_stub.create_ag_vm()
     test_obj_dict.add_vm(vm3)
-    assert vm1.get_vm().hostUuid != vm3.get_vm().hostUuid
-    assert vm2.get_vm().hostUuid != vm3.get_vm().hostUuid
 
-    try:
-        vm4 = None
-        vm4 = test_stub.create_ag_vm(affinitygroup_uuid=ag1.uuid)
-    except:
-        if not vm4:
-            test_util.test_logger("vm4 isn't created as expected")
-    finally:
-        if vm4:
-            test_util.test_fail("Test Fail, vm4 [uuid:%s] is not expected to be created" % vm4.get_vm().uuid)
-    vm1.suspend()
-    vmuuids = []
-    ag = test_lib.lib_get_affinity_group_by_name(name="ag1")
-    for usage in ag.usages:
-        vmuuids.append(usage.resourceUuid)
-    assert vm1.get_vm().uuid in vmuuids
+    vm3.stop()
+  
+    vm4 = test_stub.create_ag_vm()
+    test_obj_dict.add_vm(vm4)
+    vm4.stop()
 
+    ag_ops.add_vm_to_affinity_group(ag1.uuid, vm3.get_vm().uuid)
+    ag_ops.add_vm_to_affinity_group(ag1.uuid, vm4.get_vm().uuid)
+
+    vm3.start()
+    vm3.update()
+    assert vm3.get_vm().hostUuid != vm1.get_vm().hostUuid
+    assert vm3.get_vm().hostUuid != vm2.get_vm().hostUuid
+    
     try:
-        vm5 = None
-        vm5 = test_stub.create_ag_vm(affinitygroup_uuid=ag1.uuid)
+        vm4.start()
     except:
-        if not vm5:
-            test_util.test_logger("vm5 isn't created as expected")
+        test_util.test_logger("vm4 isn't started as expected")
     finally:
-        if vm5:
-            test_util.test_fail("Test Fail, vm5 [uuid:%s] is not expected to be created" % vm5.uuid)
+        if vm4.state == 'Running':
+            test_util.test_fail("Test Fail, vm4 [uuid:%s] is not expected to be started" % vm4.get_vm().uuid)
 
     test_lib.lib_error_cleanup(test_obj_dict)
     ag_ops.delete_affinity_group(ag1.uuid)
