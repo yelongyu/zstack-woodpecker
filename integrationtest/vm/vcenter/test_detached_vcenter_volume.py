@@ -19,12 +19,12 @@ def test():
     global test_obj_dict
 
     ova_image_name = os.environ['vcenterDefaultmplate']
-    centos_image_name = os.environ['image_dhcp_name']
+    #centos_image_name = os.environ['image_dhcp_name']
     network_pattern1 = os.environ['l3vCenterNoVlanNetworkName']
     disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('largeDiskOfferingName'))
 
     #create vm with disk
-    vm = test_stub.create_vm_in_vcenter(vm_name = 'vm_with_disk', image_name = centos_image_name, l3_name = network_pattern1, disk_offering_uuids = [disk_offering.uuid])
+    vm = test_stub.create_vm_in_vcenter(vm_name = 'vm_with_disk', image_name = ova_image_name, l3_name = network_pattern1, disk_offering_uuids = [disk_offering.uuid])
     test_obj_dict.add_vm(vm)
     vm.check()
    

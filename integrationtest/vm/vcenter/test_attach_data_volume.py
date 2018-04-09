@@ -25,7 +25,7 @@ def test():
     cond = res_ops.gen_query_conditions('name', '=', 'newdatastore (1)')
     ps1_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)[0].uuid
 
-    ova_image_name = os.environ['vcenterDefaultmplate']
+    centos_image_name = os.environ['image_dhcp_name']
     if os.environ['dportgroup']:
         network_pattern = os.environ['dportgroup']
         network_pattern = 'L3-%s'%network_pattern
@@ -35,7 +35,7 @@ def test():
     
     disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('largeDiskOfferingName'))
     #create vm 
-    vm = test_stub.create_vm_in_vcenter(vm_name = 'vm-create', image_name = ova_image_name, l3_name = network_pattern)
+    vm = test_stub.create_vm_in_vcenter(vm_name = 'vm-create', image_name = centos_image_name, l3_name = network_pattern)
     vm.check()
     
     test_util.test_dsc('Create volume and check')
