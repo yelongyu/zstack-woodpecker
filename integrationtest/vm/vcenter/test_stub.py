@@ -174,19 +174,41 @@ def share_admin_resource(account_uuid_list):
 #To get common pgs amoung all the host with the same vswitch and the same pgs
 #vsdic example
 # vsdic = {'host3': {'switch2': ['pg5', 'pg6'], 'switch1': ['pg1', 'pg2', 'pg4'], 'switch3': ['pg9']}, 'host2': {'switch1': ['pg2', 'pg3'], 'switch2': ['pg5'], 'switch3': ['pg9']}, 'host1': {'switch1': ['pg1', 'pg2'], 'switch2': ['pg5', 'pg6']}}
-def get_common_pgs(vsdic):
+def get_pgs(vsdic):
+    test_util.test_logger('begin!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
     res1 = []
+    res2 = []
+    #tmp_switches get common vswitches
     tmp_switches = None
     for host, v in vsdic.items():
         tmp_switches = (set(v.keys()) if not tmp_switches else tmp_switches & set(v.keys()))
 
+    for host, v in vsdic.items():
+        non_common_switches = (tmp_switches ^ set(v.keys()))
+        for non_common_switch in non_common_switches:
+            if vsdic[host][non_common_switch]:
+                res2.extend(vsdic[host][non_common_switch])
+
     for switch in tmp_switches:
+        #tmp_pgs get common pgs
         tmp_pgs = None
         for host in vsdic:
             tmp_pgs = (set(vsdic[host][switch]) if not tmp_pgs else tmp_pgs & set(vsdic[host][switch]))
         if tmp_pgs:
             res1.extend(list(tmp_pgs))
-    return map(lambda x: x.split('.')[0], res1), map(lambda x: x.split('.')[1], res1)
+        for host in vsdic:
+            non_common_pgs = (set(vsdic[host][switch]) ^ tmp_pgs)
+            if non_common_pgs:
+                res2.extend(non_common_pgs)
+
+    if res2:
+        res2_pg = map(lambda x: x.split('.')[0], res2)
+        res2_vlan = map(lambda x: x.split('.')[1], res2)
+    else:
+        res2_pg = None
+        res2_vlan = None
+
+    return map(lambda x: x.split('.')[0], res1), map(lambda x: x.split('.')[1], res1), res2_pg, res2_vlan
 
 def check_deployed_vcenter(deploy_config, scenario_config = None, scenario_file = None):
     vc_name = os.environ.get('vcenter')
@@ -199,9 +221,11 @@ def check_deployed_vcenter(deploy_config, scenario_config = None, scenario_file 
         if xmlobject.has_element(datacenter, 'dswitch'):
             for dswitch in xmlobject.safe_list(datacenter.dswitch):
                 for dportgroup in xmlobject.safe_list(dswitch.dportgroups.dportgroup):
-                    assert dportgroup.name_ == vc_ops.lib_get_vcenter_l2_by_name(dportgroup.name_).name
-                    assert "L3-" + dportgroup.name_ == vc_ops.lib_get_vcenter_l3_by_name("L3-" + dportgroup.name_).name
+                   # assert dportgroup.name_ == vc_ops.lib_get_vcenter_l2_by_name(dportgroup.name_).name
+                   # assert "L3-" + dportgroup.name_ == vc_ops.lib_get_vcenter_l3_by_name("L3-" + dportgroup.name_).name
+                    dportgroup_name = dportgroup.name_
         for cluster in xmlobject.safe_list(datacenter.clusters.cluster):
+            sign = None
             assert cluster.name_ == vc_ops.lib_get_vcenter_cluster_by_name(cluster.name_).name
             for host in xmlobject.safe_list(cluster.hosts.host):
                 vslist[host.name_] = {'vSwitch0':['VM Network.0']}
@@ -222,6 +246,8 @@ def check_deployed_vcenter(deploy_config, scenario_config = None, scenario_file 
                             vslist[host.name_][vswitch.name_] = []
                             for port_group in xmlobject.safe_list(vswitch.portgroup):
                                 vslist[host.name_][vswitch.name_].append(port_group.text_ + '.' + port_group.vlanId_)
+                if xmlobject.has_element(host, "dswitchRef"): 
+                    sign = 1                
                 for vm in xmlobject.safe_list(host.vms.vm):
                     assert vm.name_ == vc_ops.lib_get_vm_by_name(vm.name_).name
                     assert vc_ops.lib_get_vm_by_name(vm.name_).hypervisorType == "ESX"
@@ -231,10 +257,22 @@ def check_deployed_vcenter(deploy_config, scenario_config = None, scenario_file 
                     templ_name = template.path_
                     tp_name = templ_name.split('/')[-1].split('.')[0]
                     assert tp_name == vc_ops.lib_get_root_image_by_name(tp_name).name
-        pg_list, vlan_list = get_common_pgs(vslist)
-        for pg in pg_list:
-            assert pg == vc_ops.lib_get_vcenter_l2_by_name(pg).name
-            assert "L3-" + pg == vc_ops.lib_get_vcenter_l3_by_name("L3-" + pg).name
+            if sign:
+                assert dportgroup_name == vc_ops.lib_get_vcenter_l2_by_name(dportgroup_name).name
+                assert "L3-" + dportgroup_name == vc_ops.lib_get_vcenter_l3_by_name("L3-" + dportgroup_name).name
+            else:
+                assert vc_ops.lib_get_vcenter_l2_by_name(dportgroup_name) == None
+                assert vc_ops.lib_get_vcenter_l3_by_name("L3-" + dportgroup_name) == None
+            pg_list, vlan_list, non_pg_list, non_vlan_list = get_pgs(vslist)
+            for pg in pg_list:
+                assert pg == vc_ops.lib_get_vcenter_l2_by_name(pg).name
+                assert "L3-" + pg == vc_ops.lib_get_vcenter_l3_by_name("L3-" + pg).name
+            for non_pg in non_pg_list:
+                assert vc_ops.lib_get_vcenter_l2_by_name(non_pg) == None
+                assert vc_ops.lib_get_vcenter_l3_by_name("L3-" + non_pg) == None
+
+
+
 
 
 
