@@ -175,7 +175,6 @@ def share_admin_resource(account_uuid_list):
 #vsdic example
 # vsdic = {'host3': {'switch2': ['pg5', 'pg6'], 'switch1': ['pg1', 'pg2', 'pg4'], 'switch3': ['pg9']}, 'host2': {'switch1': ['pg2', 'pg3'], 'switch2': ['pg5'], 'switch3': ['pg9']}, 'host1': {'switch1': ['pg1', 'pg2'], 'switch2': ['pg5', 'pg6']}}
 def get_pgs(vsdic):
-    test_util.test_logger('begin!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
     res1 = []
     res2 = []
     #tmp_switches get common vswitches
@@ -201,14 +200,9 @@ def get_pgs(vsdic):
             if non_common_pgs:
                 res2.extend(non_common_pgs)
 
-    if res2:
-        res2_pg = map(lambda x: x.split('.')[0], res2)
-        res2_vlan = map(lambda x: x.split('.')[1], res2)
-    else:
-        res2_pg = None
-        res2_vlan = None
+    return map(lambda x: x.split('.')[0], res1), map(lambda x: x.split('.')[1], res1), map(lambda x: x.split('.')[0], res2), map(lambda x: x.split('.')[1], res2)
 
-    return map(lambda x: x.split('.')[0], res1), map(lambda x: x.split('.')[1], res1), res2_pg, res2_vlan
+
 
 def check_deployed_vcenter(deploy_config, scenario_config = None, scenario_file = None):
     vc_name = os.environ.get('vcenter')
@@ -218,12 +212,11 @@ def check_deployed_vcenter(deploy_config, scenario_config = None, scenario_file 
         assert deploy_config.vcenter.name_ == vc_ops.lib_get_vcenter_by_name(vc_name).name
 
     for datacenter in xmlobject.safe_list(deploy_config.vcenter.datacenters.datacenter):
+        dportgroup_list = []
         if xmlobject.has_element(datacenter, 'dswitch'):
             for dswitch in xmlobject.safe_list(datacenter.dswitch):
                 for dportgroup in xmlobject.safe_list(dswitch.dportgroups.dportgroup):
-                   # assert dportgroup.name_ == vc_ops.lib_get_vcenter_l2_by_name(dportgroup.name_).name
-                   # assert "L3-" + dportgroup.name_ == vc_ops.lib_get_vcenter_l3_by_name("L3-" + dportgroup.name_).name
-                    dportgroup_name = dportgroup.name_
+                    dportgroup_list.append(dportgroup.name_)
         for cluster in xmlobject.safe_list(datacenter.clusters.cluster):
             sign = None
             assert cluster.name_ == vc_ops.lib_get_vcenter_cluster_by_name(cluster.name_).name
@@ -246,8 +239,8 @@ def check_deployed_vcenter(deploy_config, scenario_config = None, scenario_file 
                             vslist[host.name_][vswitch.name_] = []
                             for port_group in xmlobject.safe_list(vswitch.portgroup):
                                 vslist[host.name_][vswitch.name_].append(port_group.text_ + '.' + port_group.vlanId_)
-                if xmlobject.has_element(host, "dswitchRef"): 
-                    sign = 1                
+                if xmlobject.has_element(host, "dswitchRef"):
+                    sign = 1
                 for vm in xmlobject.safe_list(host.vms.vm):
                     assert vm.name_ == vc_ops.lib_get_vm_by_name(vm.name_).name
                     assert vc_ops.lib_get_vm_by_name(vm.name_).hypervisorType == "ESX"
@@ -257,19 +250,36 @@ def check_deployed_vcenter(deploy_config, scenario_config = None, scenario_file 
                     templ_name = template.path_
                     tp_name = templ_name.split('/')[-1].split('.')[0]
                     assert tp_name == vc_ops.lib_get_root_image_by_name(tp_name).name
-            if sign:
-                assert dportgroup_name == vc_ops.lib_get_vcenter_l2_by_name(dportgroup_name).name
-                assert "L3-" + dportgroup_name == vc_ops.lib_get_vcenter_l3_by_name("L3-" + dportgroup_name).name
-            else:
-                assert vc_ops.lib_get_vcenter_l2_by_name(dportgroup_name) == None
-                assert vc_ops.lib_get_vcenter_l3_by_name("L3-" + dportgroup_name) == None
+            for dportgroup_name in dportgroup_list:
+               if sign:
+                    assert dportgroup_name == vc_ops.lib_get_vcenter_l2_by_name(dportgroup_name).name
+                    assert "L3-" + dportgroup_name == vc_ops.lib_get_vcenter_l3_by_name("L3-" + dportgroup_name).name
+                    cluster_list = vc_ops.lib_get_vcenter_l2_by_name(dportgroup_name).attachedClusterUuids
+                    if vc_ops.lib_get_vcenter_cluster_by_name(cluster.name_).uuid not in cluster_list:
+                        test_util.test_fail("dpg not sync success")
+               else:
+                    if vc_ops.lib_get_vcenter_l2_by_name(dportgroup_name):
+                        cluster_list = vc_ops.lib_get_vcenter_l2_by_nam(dportgroup_name).attachedClusterUuids
+                        if vc_ops.lib_get_vcenter_cluster_by_name(cluster.name_).uuid in cluster_list:
+                           test_util.test_fail("dpg not sync success")
+                    else:
+                        assert vc_ops.lib_get_vcenter_l2_by_name(dportgroup_name) == None
+                        assert vc_ops.lib_get_vcenter_l3_by_name("L3-" + dportgroup_name) == None
             pg_list, vlan_list, non_pg_list, non_vlan_list = get_pgs(vslist)
             for pg in pg_list:
                 assert pg == vc_ops.lib_get_vcenter_l2_by_name(pg).name
                 assert "L3-" + pg == vc_ops.lib_get_vcenter_l3_by_name("L3-" + pg).name
+                cluster_list = vc_ops.lib_get_vcenter_l2_by_name(pg).attachedClusterUuids
+                if vc_ops.lib_get_vcenter_cluster_by_name(cluster.name_).uuid not in cluster_list:
+                    test_util.test_fail("pg not sync success")
             for non_pg in non_pg_list:
-                assert vc_ops.lib_get_vcenter_l2_by_name(non_pg) == None
-                assert vc_ops.lib_get_vcenter_l3_by_name("L3-" + non_pg) == None
+                if vc_ops.lib_get_vcenter_l2_by_name(non_pg):
+                    cluster_list = vc_ops.lib_get_vcenter_l2_by_name(non_pg).attachedClusterUuids
+                    if vc_ops.lib_get_vcenter_cluster_by_name(cluster.name_).uuid in cluster_list:
+                        test_util.test_fail("pg not sync success")
+                else:
+                    assert vc_ops.lib_get_vcenter_l2_by_name(non_pg) == None
+                    assert vc_ops.lib_get_vcenter_l3_by_name("L3-" + non_pg) == None
 
 
 
