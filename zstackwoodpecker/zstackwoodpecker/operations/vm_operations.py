@@ -403,6 +403,13 @@ def get_vm_migration_candidate_hosts(vm_uuid,session_uuid=None):
    evt = account_operations.execute_action_with_session(action, session_uuid)
    return evt
 
+def get_vm_starting_candidate(vm_uuid,systemtag=[],session_uuid=None):
+   action = api_actions.GetVmStartingCandidateClustersHostsAction()
+   action.uuid = vm_uuid
+   action.systemtag = systemtag
+   test_util.action_logger('Get candidate hosts for starting vm [uuid:] %s to migrate' % vm_uuid)
+   evt = account_operations.execute_action_with_session(action, session_uuid)
+   return evt.hostInventories
 
 def set_vm_boot_order(vm_uuid,boot_order,session_uuid=None):
    action = api_actions.SetVmBootOrderAction()
