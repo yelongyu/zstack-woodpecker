@@ -80,7 +80,7 @@ def test():
 
     elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-nonmon-ceph.xml"], \
                                        ["scenario-config-storage-separate-ceph.xml"]):
-        config_json = os.environ.get('configJson')
+        config_json = os.environ.get('configJsonNonMon')
 
     elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml"], \
                                          ["scenario-config-nfs-sep-man.xml", \
