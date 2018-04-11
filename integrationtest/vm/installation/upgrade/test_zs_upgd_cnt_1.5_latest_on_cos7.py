@@ -71,7 +71,7 @@ def test():
         test_stub.upgrade_zstack(vm_ip, upgrade_pkg, tmp_file) 
         test_stub.start_mn(vm_ip, tmp_file)
         test_stub.check_zstack_version(vm_ip, tmp_file, str(pkg_num))
-        test_stub.check_installation(vm_ip, tmp_file)
+        #test_stub.check_installation(vm_ip, tmp_file)
         #pkg_num = pkg_num + 0.1
 
     test_util.test_dsc('Upgrade zstack to latest') 
