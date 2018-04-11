@@ -218,13 +218,13 @@ def stop_mn(vm_ip, tmp_file):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     cmd = '%s "zstack-ctl stop"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
-    time.sleep(40)
+    time.sleep(20)
 
 def stop_node(vm_ip, tmp_file):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     cmd = '%s "zstack-ctl stop_node"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
-    time.sleep(40)
+    time.sleep(20)
 
 def check_mn_running(vm_ip, tmp_file):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
@@ -232,10 +232,12 @@ def check_mn_running(vm_ip, tmp_file):
     process_result = execute_shell_in_process(cmd, tmp_file)
     if process_result != 1:
        test_util.test_fail('zstack upgrade failed ')
+    else:
+       test_util.test_logger('zstack-ctl status are all running')
     #cmd = '%s "zstack-ctl status|grep Running "' % ssh_cmd
     #process_result1 = execute_shell_in_process(cmd, tmp_file)
     #test_util.test_logger('zstack-ctl status  %s' % process_result)   
-    time.sleep(40)
+    time.sleep(5)
 
 def rm_old_zstack(vm_ip, zstack_home, tmp_file):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
@@ -264,6 +266,8 @@ def update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path):
     #process_result = execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
          test_util.test_fail('zstack upgrade iso failed')
+    else:
+       test_util.test_logger('update the iso success')
 
 def upgrade_by_iso(vm_ip, tmp_file, iso_path, upgrade_script_path):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
@@ -279,6 +283,8 @@ def upgrade_by_iso(vm_ip, tmp_file, iso_path, upgrade_script_path):
     process_result = execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
          test_util.test_fail('zstack upgrade iso failed')
+    else:
+       test_util.test_logger('upgrade iso success')
 
 def update_19_iso(vm_ip, tmp_file, iso_19_path, upgrade_script_path):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
@@ -302,6 +308,8 @@ def update_19_iso(vm_ip, tmp_file, iso_19_path, upgrade_script_path):
     #process_result = execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
          test_util.test_fail('zstack upgrade iso failed')
+    else:
+       test_util.test_logger('update the 1.9 iso success')
 
 def update_10_iso(vm_ip, tmp_file, iso_10_path, upgrade_script_path):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
@@ -325,6 +333,8 @@ def update_10_iso(vm_ip, tmp_file, iso_10_path, upgrade_script_path):
     #process_result = execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
          test_util.test_fail('zstack upgrade iso failed')
+    else:
+       test_util.test_logger('update the 1.10 iso success')
 
 def update_20_iso(vm_ip, tmp_file, iso_20_path, upgrade_script_path):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
@@ -348,6 +358,8 @@ def update_20_iso(vm_ip, tmp_file, iso_20_path, upgrade_script_path):
     #process_result = execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
          test_util.test_fail('zstack upgrade iso failed')
+    else:
+       test_util.test_logger('update the 2.0 iso success')
 
 def update_21_iso(vm_ip, tmp_file, iso_21_path, upgrade_script_path):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
@@ -371,6 +383,8 @@ def update_21_iso(vm_ip, tmp_file, iso_21_path, upgrade_script_path):
     #process_result = execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
          test_util.test_fail('zstack upgrade iso failed')
+    else:
+       test_util.test_logger('update the 2.10 iso success')
 
 def update_230_iso(vm_ip, tmp_file, iso_230_path, upgrade_script_path):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
@@ -386,6 +400,8 @@ def update_230_iso(vm_ip, tmp_file, iso_230_path, upgrade_script_path):
     process_result = execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
          test_util.test_fail('zstack upgrade iso failed')
+    else:
+       test_util.test_logger('update the 2.3.0 iso success')
 
 def prepare_mevoco_test_env(vm_inv):
     all_in_one_pkg = os.environ['zstackPkg']
@@ -445,6 +461,8 @@ def upgrade_zstack(vm_ip, target_file, tmp_file):
 
     if process_result != 0:
          test_util.test_fail('zstack upgrade failed')
+    else:
+       test_util.test_logger('upgrade zstack success')
        # cmd = '%s "cat /tmp/zstack_installation.log"' % ssh_cmd
        # execute_shell_in_process(cmd, tmp_file)
        # if 'no management-node-ready message received within' in open(tmp_file).read():
