@@ -81,7 +81,6 @@ def test():
     test_stub.make_ssh_no_password(vm_ip, tmp_file)
     test_util.test_dsc('Upgrade master iso')
 
-    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = vm_ip
     #test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
 
     target_file = '/root/zstack-all-in-one.tgz'
@@ -91,6 +90,9 @@ def test():
 
     test_util.test_dsc('start install the latest zstack-MN')
     test_stub.execute_install_with_args(ssh_cmd, args, target_file, tmp_file)
+
+       
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = vm_ip
 
     test_util.test_dsc('create zone names is zone1')
     zone_inv = test_stub.create_zone1(vm_ip, tmp_file)
