@@ -81,6 +81,7 @@ def test():
     test_stub.make_ssh_no_password(vm_ip, tmp_file)
     test_util.test_dsc('Upgrade master iso')
 
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = vm_ip
     #test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
 
     target_file = '/root/zstack-all-in-one.tgz'

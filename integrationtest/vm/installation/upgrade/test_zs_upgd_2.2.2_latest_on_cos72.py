@@ -64,6 +64,8 @@ def test():
 
     test_stub.make_ssh_no_password(vm_ip, tmp_file)
 
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = vm_ip
+
     test_util.test_logger('Update MN IP')
     test_stub.update_mn_hostname(vm_ip, tmp_file)
     test_stub.update_mn_ip(vm_ip, tmp_file)

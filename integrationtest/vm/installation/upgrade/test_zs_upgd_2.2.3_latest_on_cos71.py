@@ -70,6 +70,8 @@ def test():
     test_stub.start_mn(vm_ip, tmp_file)
     #test_stub.check_installation(vm_ip, tmp_file)
 
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = vm_ip
+
     test_util.test_dsc('create zone names is zone1')
     zone_inv = test_stub.create_zone1(vm_ip, tmp_file)
     zone_uuid = zone_inv.uuid
