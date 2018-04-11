@@ -100,4 +100,213 @@ def lib_get_root_image_by_name(name):
     cond = res_ops.gen_query_conditions('name', '=', name, cond)
     return res_ops.query_resource(res_ops.IMAGE, cond)[0]
 
+def connect_vcenter(ip):
+    from pyVim import connect
+    vcenter = ip
+    vcenteruser = "administrator@vsphere.local"
+    vcenterpwd = "Testing%123"
+    SI = connect.SmartConnectNoSSL(host=vcenter, user=vcenteruser, pwd=vcenterpwd, port=443)
+    if not SI:
+        test_util.test_fail("Unable to connect to the vCenter %s" % vcenter)
+    return SI
 
+
+def get_obj(content, vimtype, name=None):
+    from pyVmomi import vim
+    obj = None
+    container = content.viewManager.CreateContainerView(
+        content.rootFolder, vimtype, True)
+    if name:
+        for c in container.view:
+            if c.name == name:
+                obj = c
+                return obj
+    return container.view
+
+
+def create_datacenter(service_instance, name):
+    folder = service_instance.content.rootFolder
+    datacenter = folder.CreateDatacenter(name=name)
+    return datacenter
+
+
+def get_datacenter(content, name=None):
+    from pyVmomi import vim
+    dc = get_obj(content, [vim.Datacenter], name=name)
+    if isinstance(dc, list):
+        test_util.test_logger("do not find datacenter named %s, now return all datacenter" % name)
+        return dc
+    return [dc]
+
+
+def create_cluster(datacenter=None, name='cluster_x'):
+    from pyVmomi import vim
+    cluster_spec = vim.cluster.ConfigSpecEx()
+    host_folder = datacenter.hostFolder
+    cluster = host_folder.CreateClusterEx(name=name, spec=cluster_spec)
+    return cluster
+
+
+def get_cluster(content, name=None):
+    from pyVmomi import vim
+    cluster = get_obj(content, [vim.ClusterComputeResource], name=name)
+    if isinstance(cluster, list):
+        test_util.test_logger("do not find cluster named %s, now return all cluster" % name)
+        return cluster
+    return [cluster]
+
+def remove_cluster(cluster):
+    from pyVim import task
+    TASK = cluster.Destroy_Task()
+    task.WaitForTask(TASK)
+
+def create_dvswitch(datacenter=None, name='DvSwitch0', DVSCreateSpec=None):
+    from pyVmomi import vim
+    from pyVim import task
+    if not DVSCreateSpec:
+        DVSCreateSpec = vim.DistributedVirtualSwitch.CreateSpec(
+            configSpec=vim.DistributedVirtualSwitch.ConfigSpec(name=name)
+        )
+    folder = datacenter.networkFolder
+    Task = folder.CreateDVS_Task(spec=DVSCreateSpec)
+    task.WaitForTask(Task)
+    return Task.info.result
+
+def add_dportgroup(dvswitch, name='dpg_0', vlanId=0):
+    from pyVmomi import vim
+    from pyVim import task
+    vlan = vim.dvs.VmwareDistributedVirtualSwitch.VlanIdSpec()
+    vlan.vlanId = int(vlanId)
+    defaultPortConfig = vim.dvs.VmwareDistributedVirtualSwitch.VmwarePortConfigPolicy()
+    defaultPortConfig.vlan = vlan
+
+    DVPortgroupConfigSpec = vim.dvs.DistributedVirtualPortgroup.ConfigSpec()
+    DVPortgroupConfigSpec.name = name
+    DVPortgroupConfigSpec.type = 'ephemeral'
+    DVPortgroupConfigSpec.autoExpand = False
+    DVPortgroupConfigSpec.defaultPortConfig = defaultPortConfig
+
+    Task = dvswitch.CreateDVPortgroup_Task(spec=DVPortgroupConfigSpec)
+    task.WaitForTask(Task)
+    return Task.info.result
+
+
+def add_host(cluster, ip):
+    from pyVmomi import vim
+    from pyVim import task
+    host_spec = vim.host.ConnectSpec(hostName=ip,
+                                     userName="root",
+                                     password="password",
+                                     sslThumbprint='52:DF:8F:E5:37:43:57:7B:65:CC:BC:97:DE:EC:80:AE:96:FC:49:11',
+                                     force=False)
+    TASK = cluster.AddHost_Task(spec=host_spec, asConnected=True)
+    task.WaitForTask(TASK)
+    host_inf = TASK.info.result
+    return host_inf
+
+
+def get_host(content, name=None):
+    from pyVmomi import vim
+    host = get_obj(content, [vim.HostSystem], name=name)
+    if isinstance(host, list):
+        test_util.test_logger("do not find host named %s, now return all host" % name)
+        return host
+    return [host]
+
+
+def get_host_networkSystem(host):
+    return host.configManager.networkSystem
+
+
+def add_vswitch(host, name):
+    from pyVmomi import vim
+    nics = get_free_nics(host)
+    if not nics:
+        test_util.test_fail("no available nic to create vswitch")
+    brige = vim.host.VirtualSwitch.BondBridge()
+    brige.nicDevice = [nics[0], ]
+    spec = vim.host.VirtualSwitch.Specification()
+    spec.bridge = brige
+    spec.numPorts = 128
+    get_host_networkSystem(host).AddVirtualSwitch(vswitchName=name, spec=spec)
+
+
+def dvswitch_add_host(dvswitch, host):
+    from pyVmomi import vim
+    from pyVim import task
+    nics = get_free_nics(host)
+    if not nics:
+        test_util.test_fail("no available nic to add dvswitch")
+    backing = vim.dvs.HostMember.PnicBacking(pnicSpec=[vim.dvs.HostMember.PnicSpec(pnicDevice=nics[0]), ])
+    host_config = vim.dvs.HostMember.ConfigSpec(host=host, backing=backing, operation='add')
+    config = vim.DistributedVirtualSwitch.ConfigSpec(host=[host_config, ], configVersion=dvswitch.config.configVersion)
+    Task = dvswitch.ReconfigureDvs_Task(spec=config)
+    task.WaitForTask(Task)
+
+
+def remove_vswitch(host, name=None):
+    nics = get_busy_nics(host)
+    for i in nics:
+        if ''.join(i.values()) == name:
+            get_host_networkSystem(host).RemoveVirtualSwitch(name)
+            return
+    test_util.test_fail("no vswicth named %s" % name)
+
+def remove_portgroup(host, name=None):
+    get_host_networkSystem(host).RemovePortGroup(name)
+
+
+def get_all_nics(host):
+    _pnic = get_host_networkSystem(host).networkInfo.pnic
+    pnic = [i.device for i in _pnic]
+    return pnic
+
+
+def get_free_nics(host):
+    all_nics = get_all_nics(host)
+    busy_nics = get_busy_nics(host)
+    for i in busy_nics:
+        all_nics.remove(''.join(i.keys()))
+    return all_nics
+
+
+def get_busy_nics(host):
+    _vswitch = get_host_networkSystem(host).networkInfo.vswitch
+    nics = [{(str(i.spec.bridge.nicDevice).split("\n")[1]).strip(" '"): i.name} for i in _vswitch]
+    _proxyswitchs = get_host_networkSystem(host).networkInfo.proxySwitch
+    if _proxyswitchs:
+        for _proxyswitch in _proxyswitchs:
+            nics.append({_proxyswitch.spec.backing.pnicSpec[0].pnicDevice: _proxyswitch.dvsName})
+    return nics
+
+
+def add_portgroup(host=None, vswitch="vSwitch0", name=None, vlanId=0):
+    from pyVmomi import vim
+    portgroup_spec = vim.host.PortGroup.Specification()
+    portgroup_spec.vswitchName = vswitch
+    portgroup_spec.name = name
+    portgroup_spec.vlanId = int(vlanId)
+    network_policy = vim.host.NetworkPolicy()
+    network_policy.security = vim.host.NetworkPolicy.SecurityPolicy()
+    network_policy.security.allowPromiscuous = True
+    network_policy.security.macChanges = False
+    network_policy.security.forgedTransmits = False
+    portgroup_spec.policy = network_policy
+
+    get_host_networkSystem(host).AddPortGroup(portgroup_spec)
+
+
+def enter_maintenance_mode(host, timeout=60):
+    from pyVim import task
+    TASK = host.EnterMaintenanceMode_Task(timeout=timeout)
+    task.WaitForTask(TASK)
+    host_inf = TASK.info.result
+    return host_inf
+
+
+def exit_maintenance_mode(host, timeout=60):
+    from pyVim import task
+    TASK = host.ExitMaintenanceMode(timeout=timeout)
+    task.WaitForTask(TASK)
+    host_inf = TASK.info.result
+    return host_inf
