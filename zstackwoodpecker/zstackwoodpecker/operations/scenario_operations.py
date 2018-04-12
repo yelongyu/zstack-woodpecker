@@ -1438,6 +1438,41 @@ def create_volume_from_offering(http_server_ip, volume_option, session_uuid=None
     test_util.test_logger('[volume:] %s is created.' % evt.inventory.uuid)
     return evt.inventory
 
+def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_inv, session_uuid=None):
+
+    action = api_actions.CreateDataVolumeAction()
+    action.diskOfferingUuid = volume_option.get_disk_offering_uuid()
+    action.description = volume_option.get_description()
+    timeout = volume_option.get_timeout()
+
+    ps = test_lib.lib_get_primary_storage_by_vm(vm_inv)
+    if ps.type in [ inventory.CEPH_PRIMARY_STORAGE_TYPE ]:
+        action.primaryStorageUuid = volume_option.get_primary_storage_uuid()
+        action.systemTags = volume_option.get_system_tags()
+    elif ps.type in [ inventory.LOCAL_STORAGE_TYPE ]:
+        action.primaryStorageUuid = ps.uuid
+        host = test_lib.lib_find_random_host()
+        action.systemTags = ["localStorage::hostUuid::%s" % host.uuid]
+    else:
+        test_util.test_fail("new ps type in scenario.")
+
+    if not timeout:
+        action.timeout = 240000
+    else:
+        action.timeout = timeout
+
+    name = volume_option.get_name()
+    if not name:
+        action.name = 'test_volume'
+    else:
+        action.name = name
+
+    test_util.action_logger('Create [Volume:] %s with [disk offering:] %s ' % (action.name, action.diskOfferingUuid))
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+
+    test_util.test_logger('[volume:] %s is created.' % evt.inventory.uuid)
+    return evt.inventory
+
 def attach_volume(http_server_ip, volume_uuid, vm_uuid, session_uuid=None):
     action = api_actions.AttachDataVolumeToVmAction()
     action.vmInstanceUuid = vm_uuid
@@ -1916,7 +1951,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                 volume_option.set_primary_storage_uuid(primaryStorageUuid)
                             if poolName != None and poolName != "":
                                 volume_option.set_system_tags(['ceph::pool::%s' % (poolName)])
-                            volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
+                            #volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
+                            volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
                             attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
                             break
 
@@ -1927,7 +1963,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                 volume_option.set_primary_storage_uuid(primaryStorageUuid)
                             if poolName != None and poolName != "":
                                 volume_option.set_system_tags(['ceph::pool::%s' % (poolName)])
-                            volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
+                            #volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
+                            volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
                             attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
                             break
                     setup_backupstorage_vm(vm_inv, vm, deploy_config)
@@ -1944,7 +1981,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                     volume_option.set_system_tags(['ephemeral::shareable', 'capability::virtio-scsi', 'ceph::pool::%s' % (poolName)])
                                 else:
                                     volume_option.set_system_tags(['ephemeral::shareable', 'capability::virtio-scsi'])
-                                share_volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
+                                #share_volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
+                                share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
                                 ocfs2smp_shareable_volume_is_created = True
                             attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
                         elif ps_ref.type_ == 'ZSES':
@@ -1957,7 +1995,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                     volume_option.set_system_tags(['capability::virtio-scsi', 'ceph::pool::%s' % (poolName)])
                                 else:
                                     volume_option.set_system_tags(['capability::virtio-scsi'])
-                                share_volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
+                                #share_volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
+                                share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
                                 zbs_virtio_scsi_volume_is_created = True
                                 attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
 
@@ -1983,7 +2022,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 volume_option.set_primary_storage_uuid(primaryStorageUuid)
             if poolName != None and poolName != "":
                 volume_option.set_system_tags(['ceph::pool::%s' % (poolName)])
-            volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
+            #volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
+            volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
             for vm in xmlobject.safe_list(volume.vms.vm):
                 vm_uuid = ''
                 for vm_inv in vm_inv_lst:
