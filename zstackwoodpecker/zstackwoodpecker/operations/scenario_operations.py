@@ -1445,6 +1445,52 @@ def lib_get_primary_storage_by_vm(http_server_ip, vm):
     ps = query_resource(http_server_ip, res_ops.PRIMARY_STORAGE, cond).inventories[0]
     return ps
 
+
+def lib_find_random_host(http_server_ip, vm = None):
+    '''
+    Return a random host inventory. 
+    
+    If Vm is provided, the returned host should not be the host of VM. But it 
+    should belong to the same cluster of VM.
+    '''
+    import zstackwoodpecker.header.host as host_header
+    import random
+    target_hosts = []
+    cluster_id = None
+    current_host_uuid = None
+    if vm:
+        current_host = lib_get_vm_host(vm)
+        cluster_id = vm.clusterUuid
+        current_host_uuid = current_host.uuid
+
+    all_hosts = lib_get_cluster_hosts(http_server_ip, cluster_id)
+    # TODO: it should select non-root host for migrate after cold migrate issue is fixed
+    for host in all_hosts:
+        if host.uuid != current_host_uuid and \
+                host.status == host_header.CONNECTED and \
+                host.state == host_header.ENABLED and \
+                host.username == 'root' and \
+                host.sshPort == 22:
+            target_hosts.append(host)
+
+    if not target_hosts:
+        return None
+
+    return random.choice(target_hosts)
+	
+
+def lib_get_cluster_hosts(http_server_ip, cluster_uuid = None):
+    if cluster_uuid:
+       conditions = res_ops.gen_query_conditions('clusterUuid', '=', \
+               cluster_uuid)
+    else:
+       conditions = res_ops.gen_query_conditions('clusterUuid', '!=', \
+               'impossible_uuid')
+
+    hosts = query_resource(http_server_ip, res_ops.HOST, conditions)
+    return hosts
+
+
 def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_inv, session_uuid=None):
 
     action = api_actions.CreateDataVolumeAction()
