@@ -46,8 +46,9 @@ def test():
     test_stub.check_installation(vm_ip, tmp_file)
 
     #test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
-
+    test_stub.update_20_iso(vm_ip, tmp_file, iso_20_path, upgrade_script_path)
     #pkg_num = 1.9
+
     release_ver=['2.0.0','2.1.0','2.2.0','2.3.0','2.3.1']
     curren_num = float(os.environ.get('releasePkgNum'))
     for pkg_num in release_ver:
@@ -55,8 +56,6 @@ def test():
 	#if str(pkg_num) == '1.10':
 	#	test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
         if str(pkg_num) == '2.0.0':
-		test_stub.update_20_iso(vm_ip, tmp_file, iso_20_path, upgrade_script_path)
-        if str(pkg_num) == '2.1.0':
 		test_stub.update_21_iso(vm_ip, tmp_file, iso_21_path, upgrade_script_path)
         if str(pkg_num) == '2.2.0':
 		test_stub.update_230_iso(vm_ip, tmp_file, iso_230_path, upgrade_script_path)

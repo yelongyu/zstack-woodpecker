@@ -59,11 +59,11 @@ def test():
         test_util.test_logger('Upgrade zstack to %s' % pkg_num)
 	#if str(pkg_num) == '1.7':
         #    test_stub.update_19_iso(vm_ip, tmp_file, iso_19_path, upgrade_script_path)
-        if str(pkg_num) == '1.10':
+        if str(pkg_num) == '1.9':
             test_stub.update_10_iso(vm_ip, tmp_file, iso_10_path, upgrade_script_path)
-        if str(pkg_num) == '2.0.0':
+        if str(pkg_num) == '1.10':
             test_stub.update_20_iso(vm_ip, tmp_file, iso_20_path, upgrade_script_path)
-        if str(pkg_num) == '2.1.0':
+        if str(pkg_num) == '2.0.0':
             test_stub.update_21_iso(vm_ip, tmp_file, iso_21_path, upgrade_script_path)
         if str(pkg_num) == '2.2.0':
             test_stub.update_230_iso(vm_ip, tmp_file, iso_230_path, upgrade_script_path)
