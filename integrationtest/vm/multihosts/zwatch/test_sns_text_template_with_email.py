@@ -273,6 +273,8 @@ def test():
     test_lib.lib_robot_cleanup(test_dict)
     zwt_ops.delete_sns_text_template(alarm_template_uuid)
     zwt_ops.delete_sns_text_template(event_template_uuid)
+    for alarm_uuid in alarm_uuid_list:
+        zwt_ops.delete_alarm(alarm_uuid)
     zwt_ops.delete_sns_topic(my_sns_topic_uuid)
     zwt_ops.delete_sns_application_endpoint(email_endpoint_uuid)
     zwt_ops.delete_sns_application_platform(email_platform_uuid)

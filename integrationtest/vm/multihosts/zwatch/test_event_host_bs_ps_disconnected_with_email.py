@@ -27,6 +27,7 @@ host_status=None
 bs_uuid=None
 bs_type=None
 bs_status=None
+event_list=[]
 
 def test():
     global email_endpoint_uuid,email_platform_uuid,my_sns_topic_uuid,host_sns_topic_uuid,ps_uuid,hostname,host_management_ip,host_uuid,host_status,bs_uuid,bs_type,bs_status
@@ -72,20 +73,24 @@ def test():
     ps_namespace = 'ZStack/PrimaryStorage'
     ps_disconnected = 'PrimaryStorageDisconnected'
     ps_event_sub_uuid = zwt_ops.subscribe_event(ps_namespace, ps_disconnected, ps_actions).uuid
+    event_list.append(ps_event_sub_uuid)
 
     bs_actions = [{"actionUuid": my_sns_topic_uuid, "actionType": "sns"}]
     bs_namespace = 'ZStack/BackupStorage'
     bs_disconnected = 'BackupStorageDisconnected'
     bs_event_sub_uuid = zwt_ops.subscribe_event(bs_namespace, bs_disconnected, bs_actions).uuid
+    event_list.append(bs_event_sub_uuid)
 
     host_actions = [{"actionUuid": host_sns_topic_uuid, "actionType": "sns"}]
     host_namespace = 'ZStack/Host'
     host_status_changed = 'HostStatusChanged'
     host_status_labels = [{"key": "NewStatus", "op": "Equal", "value": "Disconnected"}]
     host_status_event_sub_uuid = zwt_ops.subscribe_event(host_namespace, host_status_changed, host_actions, host_status_labels).uuid
+    event_list.append(host_status_event_sub_uuid)
 
     host_disconnected = 'HostDisconnected'
     host_disconnected_event_sub_uuid = zwt_ops.subscribe_event(host_namespace, host_disconnected, host_actions).uuid
+    event_list.append(host_disconnected_event_sub_uuid)
 
     if zwt_ops.check_sns_email(pop_server, username, password, ps_disconnected, ps_event_sub_uuid):
         test_util.test_fail('email already exsist before test')
@@ -150,6 +155,8 @@ def test():
     host_ops.reconnect_host(host_uuid)
     zwt_ops.delete_sns_topic(host_sns_topic_uuid)
     zwt_ops.delete_sns_topic(my_sns_topic_uuid)
+    for event_uuid in event_list:
+        zwt_ops.unsubscribe_event(event_uuid)
     zwt_ops.delete_sns_application_endpoint(email_endpoint_uuid)
     zwt_ops.delete_sns_application_platform(email_platform_uuid)
 
@@ -166,7 +173,7 @@ def test():
 
 # Will be called only if exception happens in test().
 def error_cleanup():
-    global email_endpoint_uuid,email_platform_uuid,my_sns_topic_uuid,host_sns_topic_uuid,ps_uuid,hostname,host_management_ip,host_status,bs_type,bs_status
+    global email_endpoint_uuid,email_platform_uuid,my_sns_topic_uuid,host_sns_topic_uuid,ps_uuid,hostname,host_management_ip,host_status,bs_type,bs_status,event_list
     if host_status == 'Disconnected':
         host_ops.update_host(host_uuid, 'managementIp', host_management_ip)
         host_ops.reconnect_host(host_uuid)
@@ -183,6 +190,9 @@ def error_cleanup():
         zwt_ops.delete_sns_topic(host_sns_topic_uuid)
     if my_sns_topic_uuid:
         zwt_ops.delete_sns_topic(my_sns_topic_uuid)
+    if event_list:
+        for event_uuid in event_list:
+            zwt_ops.unsubscribe_event(event_uuid)
     if email_endpoint_uuid:
         zwt_ops.delete_sns_application_endpoint(email_endpoint_uuid)
     if email_platform_uuid:
