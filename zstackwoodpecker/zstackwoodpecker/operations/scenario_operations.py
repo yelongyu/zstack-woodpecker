@@ -1487,7 +1487,7 @@ def lib_get_cluster_hosts(http_server_ip, cluster_uuid = None):
        conditions = res_ops.gen_query_conditions('clusterUuid', '!=', \
                'impossible_uuid')
 
-    hosts = query_resource(http_server_ip, res_ops.HOST, conditions)
+    hosts = query_resource(http_server_ip, res_ops.HOST, conditions).inventories
     return hosts
 
 
