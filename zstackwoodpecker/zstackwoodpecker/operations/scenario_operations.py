@@ -1504,7 +1504,7 @@ def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_in
         action.systemTags = volume_option.get_system_tags()
     elif ps.type in [ inventory.LOCAL_STORAGE_TYPE ]:
         action.primaryStorageUuid = ps.uuid
-        host = lib_find_random_host()
+        host = lib_find_random_host(http_server_ip)
         action.systemTags = ["localStorage::hostUuid::%s" % host.uuid]
     else:
         test_util.test_fail("new ps type in scenario.")
