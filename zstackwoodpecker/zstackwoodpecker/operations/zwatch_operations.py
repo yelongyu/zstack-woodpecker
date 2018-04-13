@@ -11,6 +11,13 @@ import zstackwoodpecker.operations.account_operations as acc_ops
 import poplib
 from email.parser import Parser
 
+from email import encoders
+from email.header import Header
+from email.mime.text import MIMEText
+from email.utils import parseaddr, formataddr
+import smtplib
+
+
 
 def create_alarm(comparison_operator, period, threshold, namespace, metric_name, name=None, repeat_interval=None, labels=None, actions=None, resource_uuid=None, session_uuid=None):
     action = api_actions.CreateAlarmAction()
@@ -473,6 +480,7 @@ def get_mail_list(pop_server, username, password):
     for i in range(ret[0] - 20, ret[0]+1):
         resp, msg, octets = pop3.retr(i)
         mail_list.append(msg)
+    mail_list.reverse()
     pop3.quit()
     return mail_list
 
@@ -503,28 +511,64 @@ def check_sns_email(pop_server, username, password, name, uuid):
     test_util.test_logger('flag value is %s' % flag)
     return flag
 
-def check_keywords_in_email(pop_server, username, password, first_keyword, second_keyword):
+def check_keywords_in_email(pop_server, username, password, first_keyword, second_keyword='',boundary_words=None):
     '''
     This function is used for checking different SNS Text Template
 
     :param first_keyword: keyword search in mail
-    :param second_keyword: keyword search in mail
+    :param second_keyword: keyword search in mail(optional)
+    :param boundary_words: when find boundary_words,serch will be terminated.You may send an email has this
+                           boundary_words earlly to make a difference between old email and new email
     :return: 1 for found or 0 for not found
     '''
     mail_list = get_mail_list(pop_server, username, password)
-    flag = 0      #check result
     test_util.action_logger('Check Keywords In Email:[keyword]:%s [keyword]:%s'% (first_keyword,second_keyword))
     for mail in mail_list:
-        if flag == 1:
-            break
         #msg_content = b'\r\n'.join(mail).decode('utf-8') #python3.x
         msg_content = '\r\n'.join(mail)  #python2.x
         msg = Parser().parsestr(msg_content)
         content=str(msg)
+        #test_util.test_logger(msg)
+        if boundary_words:
+            if boundary_words in content:
+                test_util.test_logger('find boundary_words,Search words is terminated .')
+                return 0
         if (username in content) and (first_keyword in content) and (second_keyword in content):
-            flag = 1
             test_util.test_logger('Mail sent addr is %s' % username)
             test_util.test_logger('Got first_keyword :[ %s ]in Mail' % first_keyword)
             test_util.test_logger('Got second_keyword :[ %s ]in Mail' % second_keyword)
-    test_util.test_logger('flag value is %s' % flag)
-    return flag
+            return 1
+    test_util.test_logger('cant find boundary_words or keywords in latest 20 emails')
+    return 0
+
+
+
+def send_boundary_email(boundary_words):
+    '''
+    this function is used to send a boundary email to make a distinction between old and new email
+    :param boundary_words:(may be a timestamp or uuid)
+    :return: no return
+    '''
+
+    from_addr = 'test.qa@zstack.io'
+    password = 'Test1234'
+    to_addr = 'test.qa@zstack.io'
+    smtp_server = 'smtp.zstack.io'
+
+    msg = MIMEText(boundary_words, 'plain')
+    msg['From'] = from_addr
+    msg['To'] = to_addr
+    msg['Subject'] = Header('boundary_email')
+
+    test_util.action_logger('Send Mail List From :%s  to :%s '%(from_addr,to_addr))
+    server = smtplib.SMTP(smtp_server, 25)
+    server.set_debuglevel(1)
+    server.login(from_addr, password)
+    server.sendmail(from_addr, [to_addr], msg.as_string())
+    server.quit()
+
+def get_boundary_words():
+    import time
+    time_stamp=str(int(time.time()))
+    boundary_words='this is a boundary message,with time stamp:%s'%time_stamp
+    return boundary_words
