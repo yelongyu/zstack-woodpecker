@@ -1438,6 +1438,13 @@ def create_volume_from_offering(http_server_ip, volume_option, session_uuid=None
     test_util.test_logger('[volume:] %s is created.' % evt.inventory.uuid)
     return evt.inventory
 
+
+def lib_get_primary_storage_by_vm(http_server_ip, vm):
+    ps_uuid = vm.allVolumes[0].primaryStorageUuid
+    cond = res_ops.gen_query_conditions('uuid', '=', ps_uuid)
+    ps = query_resource(http_server_ip, res_ops.PRIMARY_STORAGE, cond).inventories[0]
+    return ps
+
 def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_inv, session_uuid=None):
 
     action = api_actions.CreateDataVolumeAction()
@@ -1445,7 +1452,7 @@ def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_in
     action.description = volume_option.get_description()
     timeout = volume_option.get_timeout()
 
-    ps = test_lib.lib_get_primary_storage_by_vm(vm_inv)
+    ps = lib_get_primary_storage_by_vm(http_server_ip, vm_inv)
     if ps.type in [ inventory.CEPH_PRIMARY_STORAGE_TYPE ]:
         action.primaryStorageUuid = volume_option.get_primary_storage_uuid()
         action.systemTags = volume_option.get_system_tags()
