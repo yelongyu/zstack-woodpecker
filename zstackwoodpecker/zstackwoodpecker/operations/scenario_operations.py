@@ -1152,7 +1152,7 @@ def setup_zbs_primary_storages(scenario_config, scenario_file, deploy_config, vm
 
 def create_sftp_backup_storage(http_server_ip, backup_storage_option, session_uuid=None):
     action = api_actions.AddSftpBackupStorageAction()
-    action.timeout = 600000
+    action.timeout = 1200000
     action.name = backup_storage_option.get_name()
     action.description = backup_storage_option.get_description()
     action.type = backup_storage_option.get_type()
@@ -1170,7 +1170,7 @@ def create_sftp_backup_storage(http_server_ip, backup_storage_option, session_uu
 
 def create_image_store_backup_storage(http_server_ip, backup_storage_option, session_uuid=None):
     action = api_actions.AddImageStoreBackupStorageAction()
-    action.timeout = 300000
+    action.timeout = 600000
     action.name = backup_storage_option.get_name()
     action.description = backup_storage_option.get_description()
     action.type = backup_storage_option.get_type()
@@ -1237,7 +1237,7 @@ def create_cluster(http_server_ip, cluster_option, session_uuid=None):
 
 def add_kvm_host(http_server_ip, host_option, session_uuid=None):
     action = api_actions.AddKVMHostAction()
-    action.timeout = 900000
+    action.timeout = 1200000
     action.clusterUuid = host_option.get_cluster_uuid()
     action.username = host_option.get_username()
     action.password = host_option.get_password()
