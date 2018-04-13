@@ -1816,7 +1816,7 @@ def lib_wait_target_down(target_ip, target_port, timeout=60):
 
     return linux.wait_callback_success(wait_network_check, (target_ip, target_port, False), timeout)
 
-def lib_wait_target_up(target_ip, target_port, timeout=60):
+def lib_wait_target_up(target_ip, target_port, timeout=300):
     '''
         wait for target "machine" startup by checking its network connection, 
         until timeout. 
