@@ -310,3 +310,97 @@ def exit_maintenance_mode(host, timeout=60):
     task.WaitForTask(TASK)
     host_inf = TASK.info.result
     return host_inf
+
+def add_disk(vm, disk_size):
+    """
+    :param vm: Virtual Machine Object
+    :param disk_size: disk size, in GB
+    """
+    from pyVmomi import vim
+    from pyVim import task
+    spec = vim.vm.ConfigSpec()
+    # get all disks on a VM, set unit_number to the next available
+    unit_number = 0
+    for dev in vm.config.hardware.device:
+        if hasattr(dev.backing, 'fileName'):
+            unit_number = int(dev.unitNumber) + 1
+            # unit_number 7 reserved for scsi controller
+            if unit_number == 7:
+                unit_number += 1
+            if unit_number >= 16:
+                print "we don't support this many disks"
+                return
+        if isinstance(dev, vim.vm.device.VirtualSCSIController):
+            controller = dev
+    # add disk here
+    dev_changes = []
+    new_disk_kb = int(disk_size) * 1024 * 1024
+    disk_spec = vim.vm.device.VirtualDeviceSpec()
+    disk_spec.fileOperation = "create"
+    disk_spec.operation = vim.vm.device.VirtualDeviceSpec.Operation.add
+    disk_spec.device = vim.vm.device.VirtualDisk()
+    disk_spec.device.backing = vim.vm.device.VirtualDisk.FlatVer2BackingInfo()
+    disk_spec.device.backing.thinProvisioned = True
+    disk_spec.device.backing.diskMode = 'persistent'
+    disk_spec.device.unitNumber = unit_number
+    disk_spec.device.capacityInKB = new_disk_kb
+    disk_spec.device.controllerKey = controller.key
+    dev_changes.append(disk_spec)
+    spec.deviceChange = dev_changes
+    TASK = vm.ReconfigVM_Task(spec=spec)
+    task.WaitForTask(TASK)
+    print "%sGB disk added to %s" % (disk_size, vm.config.name)
+
+def delete_virtual_disk(vm, disk_number):
+    """ Deletes virtual Disk based on disk number
+    :param vm: Virtual Machine Object
+    :param disk_number: Hard Disk Unit Number
+    :return: True if success
+    """
+    from pyVmomi import vim
+    from pyVim import task
+    hdd_label = 'Hard disk ' + str(disk_number)
+    virtual_hdd_device = None
+    for dev in vm.config.hardware.device:
+        if isinstance(dev, vim.vm.device.VirtualDisk) and dev.deviceInfo.label == hdd_label:
+            virtual_hdd_device = dev
+    if not virtual_hdd_device:
+        raise RuntimeError('Virtual {} could not be found.'.format(virtual_hdd_device))
+
+    virtual_hdd_spec = vim.vm.device.VirtualDeviceSpec()
+    virtual_hdd_spec.operation = vim.vm.device.VirtualDeviceSpec.Operation.remove
+    virtual_hdd_spec.device = virtual_hdd_device
+
+    spec = vim.vm.ConfigSpec()
+    spec.deviceChange = [virtual_hdd_spec]
+    TASK = vm.ReconfigVM_Task(spec=spec)
+    task.WaitForTask(TASK)
+    return True
+
+def get_data_volume_attach_to_vm(vm):
+    from pyVmomi import vim
+    disk = []
+    for dev in vm.config.hardware.device:
+      if isinstance(dev, vim.vm.device.VirtualDisk) and dev.deviceInfo.label != 'Hard disk 1':
+         disk.append(dev.backing.fileName)
+    return disk
+
+def get_vm(content, name=None):
+    from pyVmomi import vim
+    vm = get_obj(content, [vim.VirtualMachine], name=name)
+    if isinstance(vm, list):
+        test_util.test_logger("do not find vm named %s, now return all vm" % name)
+        return vm
+    return [vm]
+
+def destroy_vm(vm):
+    from pyVim import task
+    if vm.runtime.powerState == 'poweredOn':
+        powerOff_vm(vm)
+    TASK = vm.Destroy_Task()
+    task.WaitForTask(TASK)
+
+def powerOff_vm(vm):
+    from pyVim import task
+    Task = vm.PowerOffVM_Task()
+    task.WaitForTask(Task)
