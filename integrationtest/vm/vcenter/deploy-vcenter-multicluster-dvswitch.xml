@@ -170,7 +170,7 @@
           </l3Networks>
         </l2NoVlanNetwork>
         <l2NoVlanNetwork name="$l2vCenterNoVlanNetworkName" description="vCenter vrouter network"
-          physicalInterface="dswitch">
+          physicalInterface="$dswitch">
           <l3Networks>
             <l3BasicNetwork name="$l3vCenterNoVlanNetworkName" description = "vCenter vrouter network">
               <ipRange name="$vCenterNoVlanIpRangeName" description="Test"

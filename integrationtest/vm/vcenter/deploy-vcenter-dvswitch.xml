@@ -1,3 +1,4 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
   <!--basicConfig will set basic test environment, include where is install
@@ -172,7 +173,7 @@
           </l3Networks>
         </l2NoVlanNetwork>
         <l2NoVlanNetwork name="$l2vCenterNoVlanNetworkName" description="vCenter vrouter network"
-          physicalInterface="dswitch">
+          physicalInterface="$dswitch">
           <l3Networks>
             <l3BasicNetwork name="$l3vCenterNoVlanNetworkName" description = "vCenter vrouter network">
               <ipRange name="$vCenterNoVlanIpRangeName" description="Test"
