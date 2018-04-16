@@ -2797,6 +2797,7 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
     from pyVim import connect
     from pyVim import task
     import atexit
+    import zstackwoodpecker.operations.vcenter_operations as vct_ops
     import zstackwoodpecker.test_lib as test_lib
 
     vcenter = os.environ.get('vcenter')
@@ -2811,6 +2812,9 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
     content = SI.RetrieveContent()
     exist_dc = get_obj(content, [vim.Datacenter])
     for dc in exist_dc:
+        exist_cluster = vct_ops.get_cluster(content)
+        for cluster in exist_cluster:
+            vct_ops.remove_cluster(cluster)
         cleanup_datacenter(datacenter=dc)
     
     if not xmlobject.has_element(deploy_config, 'vcenter.datacenters.datacenter'):
