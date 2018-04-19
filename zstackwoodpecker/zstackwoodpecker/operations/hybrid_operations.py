@@ -16,8 +16,8 @@ import config_operations
 import os
 import inspect
 
-def add_aliyun_key_secret(name, description, key, secret, session_uuid=None):
-    action = api_actions.AddAliyunKeySecretAction()
+def add_hybrid_key_secret(name, description, key, secret, session_uuid=None):
+    action = api_actions.AddHybridKeySecretAction()
     action.name = name
     action.description = description
     action.key = key
@@ -27,8 +27,8 @@ def add_aliyun_key_secret(name, description, key, secret, session_uuid=None):
     test_util.test_logger('[aliyun key secret:] %s is added.' % key)
     return evt.inventory
 
-def del_aliyun_key_secret(uuid, session_uuid=None):
-    action = api_actions.DeleteAliyunKeySecretAction()
+def del_hybrid_key_secret(uuid, session_uuid=None):
+    action = api_actions.DeleteHybridKeySecretAction()
     action.uuid = uuid
     test_util.action_logger('Delete [aliyun key secret:] %s' % uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
@@ -45,16 +45,16 @@ def update_aliyun_key_secret(uuid, name=None, description=None, session_uuid=Non
     test_util.test_logger('[aliyun key secret:] %s is updated.' % uuid)
     return evt
 
-def attach_aliyun_key(uuid, session_uuid=None):
-    action = api_actions.AttachAliyunKeyAction()
+def attach_hybrid_key(uuid, session_uuid=None):
+    action = api_actions.AttachHybridKeyAction()
     action.uuid = uuid
     test_util.action_logger('Attach [aliyun key:] %s' % uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[aliyun key:] %s is attached.' % uuid)
     return evt
 
-def detach_aliyun_key(uuid, session_uuid=None):
-    action = api_actions.DetachAliyunKeyAction()
+def detach_hybrid_key(uuid, session_uuid=None):
+    action = api_actions.DetachHybridKeyAction()
     action.uuid = uuid
     test_util.action_logger('Detach [aliyun key:] %s' % uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
@@ -840,8 +840,8 @@ def query_ecs_instance_local(condition=[], session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def query_aliyun_key_secret(condition=[], session_uuid=None):
-    action = api_actions.QueryAliyunKeySecretAction()
+def query_hybrid_key_secret(condition=[], session_uuid=None):
+    action = api_actions.QueryHybridKeySecretAction()
     action.conditions = condition
     test_util.action_logger('Query Aliyun Key Secret')
     evt = account_operations.execute_action_with_session(action, session_uuid)

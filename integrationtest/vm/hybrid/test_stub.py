@@ -80,7 +80,7 @@ class HybridObject(object):
         self.cond_image_system = res_ops.gen_query_conditions('type', '=', 'system')
 
     def add_ks(self, ks2):
-        ks_existed = hyb_ops.query_aliyun_key_secret()
+        ks_existed = hyb_ops.query_hybrid_key_secret()
         for ks in ks_existed:
             if ks.name == 'test_hybrid2' and ks2:
                 self.ks = ks
@@ -88,10 +88,10 @@ class HybridObject(object):
                 self.ks = ks
         if not self.ks:
             if ks2:
-                self.ks = hyb_ops.add_aliyun_key_secret('test_hybrid2', 'test for hybrid', os.getenv('aliyunKey2'), os.getenv('aliyunSecret2'))
+                self.ks = hyb_ops.add_hybrid_key_secret('test_hybrid2', 'test for hybrid', os.getenv('aliyunKey2'), os.getenv('aliyunSecret2'))
             else:
-                self.ks = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
-        hyb_ops.attach_aliyun_key(self.ks.uuid)
+                self.ks = hyb_ops.add_hybrid_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
+        hyb_ops.attach_hybrid_key(self.ks.uuid)
         time.sleep(5)
 
     def clean_datacenter(self):
