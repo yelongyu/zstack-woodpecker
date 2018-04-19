@@ -24,8 +24,6 @@ def test():
     l3_name = os.environ.get('l3VlanNetworkName1')
     vm = test_stub.create_vm("test_resize_vm", image_name, l3_name)
     vm.check()
-    vm.stop() 
-    vm.check()
 
     vol_size = test_lib.lib_get_root_volume(vm.get_vm()).size
     volume_uuid = test_lib.lib_get_root_volume(vm.get_vm()).uuid
@@ -36,16 +34,16 @@ def test():
     if set_size != vol_size_after:
         test_util.test_fail('Resize Root Volume failed, size = %s' % vol_size_after)
 
-    vm.start()
-    set_size = 1024*1024*1024*6   
-    vol_ops.resize_volume(volume_uuid, set_size)
+    test_stub.migrate_vm_to_random_host(vm)
+    vm.check()
+    
     vm.update()
     vol_size_after = test_lib.lib_get_root_volume(vm.get_vm()).size
     if set_size != vol_size_after:
-        test_util.test_fail('Resize Root Volume failed, size = %s' % vol_size_after)    
+        test_util.test_fail('Resize Root Volume failed, size = %s' % vol_size_after)
 
     vm.destroy()
-    test_util.test_pass('Resize VM Test Success')
+    test_util.test_pass('Resize VM and Migrate Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
