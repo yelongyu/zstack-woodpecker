@@ -1,3 +1,5 @@
+# -*- coding: UTF-8 -*-
+import os
 '''
 
 New Integration Test for data protect.
@@ -67,8 +69,8 @@ def test():
     try:
         image_uuid = img_ops.sync_image_from_image_store_backup_storage(disaster_bs_uuid, local_bs_uuid, image_uuid_local)
     except Exception,e:
-        if str(e).find('already contains it') != -1:
-            test_util.test_logger('Try to sync the image which had exist in disaster bs get the error info expectly: %s' %str(e))
+        if unicode(e).encode("utf-8").find('包含') != -1:
+            test_util.test_logger('Try to sync the image which had exist in disaster bs get the error info expectly: %s' %unicode(e).encode("utf-8"))
     else:
         test_util.test_fail('Try to sync the image which had exist in local bs success unexpectly')
     #Delete local image and recovery from disaster bs
@@ -93,8 +95,8 @@ def test():
         recovery_image = img_ops.recovery_image_from_image_store_backup_storage(local_bs_uuid, disaster_bs_uuid, disaster_bs_image_uuid)
         image_uuid_recovery = recovery_image.uuid
     except Exception,e:
-        if str(e).find('already contains it') != -1:
-            test_util.test_logger('Try to recovery the image which had exist in local bs get the error info expectly: %s' %str(e))
+        if unicode(e).encode("utf-8").find('包含') != -1:
+            test_util.test_logger('Try to recovery the image which had exist in local bs get the error info expectly: %s' %unicode(e).encode("utf-8"))
     else:
         test_util.test_fail('Try to recovery the image which had exist in local bs success unexpectly')
     cond = res_ops.gen_query_conditions('backupStorageRefs.backupStorageUuid', '=', disaster_bs_uuid)
