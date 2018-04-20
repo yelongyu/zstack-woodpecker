@@ -146,13 +146,13 @@
       <zone name="$zoneName" description="Test">
         <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
         <primaryStorages>
-          <cephPrimaryStorage name="$cephPrimaryStorageName"
+          <!--<cephPrimaryStorage name="$cephPrimaryStorageName"
             description="Test Ceph PS" 
-            monUrls="$cephPrimaryStorageMonUrls" />
+            monUrls="$cephPrimaryStorageMonUrls" />-->
 	  <localPrimaryStorage name="$localPrimaryStorageName"
 	    description="Test Local Primary Storage 1"
             url="$localPrimaryStorageUrl" />
-          <localPrimaryStorage name="$localPrimaryStorageName2"
+          <!--<localPrimaryStorage name="$localPrimaryStorageName2"
             description="Test Local Primary Storage 2"
             url="$localPrimaryStorageUrl2" />
           <nfsPrimaryStorage name="$nfsPrimaryStorageName"
@@ -164,7 +164,7 @@
             url="$sharedMountPointPrimaryStorageUrl" />
           <sharedMountPointPrimaryStorage name="$sharedMountPointPrimaryStorageName2"
             description="Test SMP PS 2"
-            url="$sharedMountPointPrimaryStorageUrl2" />
+            url="$sharedMountPointPrimaryStorageUrl2" />-->
         </primaryStorages>
   
         <clusters>
