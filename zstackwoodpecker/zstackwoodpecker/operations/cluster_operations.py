@@ -23,6 +23,7 @@ def create_cluster(cluster_option, session_uuid=None):
     action.description = cluster_option.get_description()
     action.hypervisorType = cluster_option.get_hypervisor_type()
     action.type = cluster_option.get_type()
+    action.zoneUuid = cluster_option.get_zone_uuid()
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create Cluster [uuid:] %s [name:] %s' % \
             (evt.uuid, action.name))
