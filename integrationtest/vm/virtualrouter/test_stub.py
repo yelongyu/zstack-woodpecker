@@ -1085,6 +1085,7 @@ class Longjob(object):
         self.data_volume.attach(self.vm)
         self.data_volume.check()
 
+
     def set_ceph_mon_env(self, ps_uuid):
         cond_vol = res_ops.gen_query_conditions('uuid', '=', ps_uuid)
         ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond_vol)[0]
@@ -1184,3 +1185,81 @@ def enable_all_pss():
     for ps in ps_list:
         ps_uuid = ps.uuid
         ps_ops.change_primary_storage_state(ps_uuid, 'enable')
+
+CEPHPOOLTESTIMAGENAME = 'ceph_pool_capacity_test_image'
+CEPHPOOLTESTISONAME = 'ceph_pool_capacity_test_iso'
+
+class PoolCapacity(Longjob):
+    def __init__(self):
+        self.vm = None
+        self.data_volume = None
+        self.bs = None
+        self.image = None
+        self.pool = None
+
+    def get_bs(self, bs_type='Ceph'):
+        cond_bs_type = res_ops.gen_query_conditions('type', '=', bs_type)
+        self.bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond_bs_type)[0]
+
+    def add_image(self, bs_type='Ceph', name=CEPHPOOLTESTIMAGENAME, image_format='qcow2', media_type='RootVolumeTemplate', image='imageUrl_net'):
+        self.get_bs(bs_type)
+        image_option = test_util.ImageOption()
+        image_option.set_name(name)
+        image_option.set_format(image_format)
+        image_option.set_mediaType(media_type)
+        image_option.set_url(os.environ.get(image))
+        image_option.set_backup_storage_uuid_list([self.bs.uuid])
+        self.image = test_image.ZstackTestImage()
+        self.image.set_creation_option(image_option)
+        self.image.add_root_volume_template()
+
+    def del_image(self):
+        self.image.delete()
+        if test_lib.lib_get_image_delete_policy() != 'Direct':
+            self.image.expunge()
+
+    def get_pool_cap_remote(self, pool_name):
+        self.get_bs()
+        mon_ip = self.bs.mons[0].monAddr
+        used_cmd = "sshpass -p password ssh -o StrictHostKeyChecking=no root@%s ceph df | grep %s | awk '{print $3}'" % (mon_ip, pool_name)
+        avail_cmd = "sshpass -p password ssh -o StrictHostKeyChecking=no root@%s ceph df | grep %s | awk '{print $5}'" % (mon_ip, pool_name)
+        self.used_cap = commands.getoutput(used_cmd).split('\n')[-1]
+        self.avail_cap = commands.getoutput(avail_cmd).split('\n')[-1]
+
+    def get_replicated_size(self):
+        cmd = "sshpass -p password ssh -o StrictHostKeyChecking=no root@%s ceph osd pool get %s size | awk '{print $2}'" % (self.bs.mons[0].monAddr, self.bs.poolName)
+        self.size = int(commands.getoutput(cmd).split('\n')[-1])
+
+    def check_pool_replicated_size(self):
+        self.get_bs()
+        assert self.bs.poolReplicatedSize == self.size
+
+    def get_ceph_pool(self, pool_type):
+        cond_pool_type = res_ops.gen_query_conditions('type', '=', pool_type)
+        self.pool = res_ops.query_resource(res_ops.CEPH_PRIMARY_STORAGE_POOL, cond_pool_type)[0]
+
+    def check_pool_cap(self, cap, pool_name=None, bs=False):
+        if bs:
+            pool_name = self.bs.poolName
+        self.get_pool_cap_remote(pool_name)
+        test_util.test_dsc('%s, %s, %s' % (cap, self.used_cap, self.avail_cap))
+        if 'M' in self.used_cap:
+            assert cap[0] // 1024 //1024 == int(self.used_cap[:-1])
+        elif 'k' in self.used_cap:
+            assert cap[0] // 1024 == int(self.used_cap[:-1])
+        elif 'G' in self.used_cap:
+            assert cap[0] // 1024 //1024 // 1024 == int(self.used_cap[:-1])
+        else:
+            assert cap[0] == int(self.used_cap)
+        if 'M' in self.avail_cap:
+            assert cap[1] // 1024 //1024 == int(self.avail_cap[:-1])
+        elif 'k' in self.avail_cap:
+            assert cap[1] // 1024 == int(self.avail_cap[:-1])
+        elif 'G' in self.avail_cap:
+            assert cap[1] // 1024 //1024 // 1024 == int(self.avail_cap[:-1])
+        else:
+            assert cap[1] == int(self.avail_cap)
+
+    def attach_iso(self):
+        image_uuid = test_lib.lib_get_image_by_name('ceph_pool_capacity_test_iso').uuid
+        img_ops.attach_iso(image_uuid, self.vm.vm.uuid)

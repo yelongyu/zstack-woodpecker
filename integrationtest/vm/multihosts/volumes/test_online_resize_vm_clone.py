@@ -16,6 +16,7 @@ import os
 
 vm = None
 test_stub = test_lib.lib_get_test_stub()
+test_obj_dict = test_state.TestStateDict()
 
 def test():
     global vm
@@ -23,8 +24,7 @@ def test():
     image_name = os.environ.get('imageName_net')
     l3_name = os.environ.get('l3VlanNetworkName1')
     vm = test_stub.create_vm("test_resize_vm", image_name, l3_name)
-    vm.check()
-    vm.stop() 
+    test_obj_dict.add_vm(vm)
     vm.check()
 
     vol_size = test_lib.lib_get_root_volume(vm.get_vm()).size
@@ -36,22 +36,15 @@ def test():
     if set_size != vol_size_after:
         test_util.test_fail('Resize Root Volume failed, size = %s' % vol_size_after)
 
-    vm.start()
-    set_size = 1024*1024*1024*6   
-    vol_ops.resize_volume(volume_uuid, set_size)
-    vm.update()
-    vol_size_after = test_lib.lib_get_root_volume(vm.get_vm()).size
+    new_vm = vm.clone(['vm_clone'])[0]
+    test_obj_dict.add_vm(new_vm)
+    new_volume_uuid = test_lib.lib_get_root_volume_uuid(new_vm.get_vm())
+    vol_size_after = test_lib.lib_get_root_volume(new_vm.get_vm()).size
     if set_size != vol_size_after:
-        test_util.test_fail('Resize Root Volume failed, size = %s' % vol_size_after)    
-
-    vm.destroy()
-    test_util.test_pass('Resize VM Test Success')
+        test_util.test_fail('Resize Root Volume failed, size = %s' % vol_size_after) 
+    test_lib.lib_error_cleanup(test_obj_dict)
+    test_util.test_pass('Resize VM Snapshot Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
-    global vm
-    if vm:
-        try:
-            vm.destroy()
-        except:
-            pass
+    test_lib.lib_error_cleanup(test_obj_dict)

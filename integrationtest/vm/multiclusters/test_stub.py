@@ -324,3 +324,24 @@ class DataMigration(object):
         cond_image = res_ops.gen_query_conditions('uuid', '=', self.image.uuid)
         self.image = res_ops.query_resource(res_ops.IMAGE, cond_image)[0]
         assert self.image.backupStorageRefs[0].backupStorageUuid == self.dst_bs.uuid
+
+
+def get_host_cpu_model(ip):
+    cmd = 'virsh capabilities | grep "<arch>.*.</arch>" -C 1 | tail -1'
+    result = test_lib.lib_execute_ssh_cmd(ip, 'root', 'password',cmd)
+    return result[13:-9]
+
+
+def set_host_cpu_model(ip,model=None):
+    i = 0
+    _model = get_host_cpu_model(ip)
+    test_util.test_logger(_model)
+    while _model != model:
+        i += 1
+        if i > 5:
+            test_util.test_fail("set host cpu model faild")
+        cmd = '''sed -i "s/'{}'/'{}'/g" /usr/share/libvirt/cpu_map.xml'''.format(_model,model)
+        test_lib.lib_execute_ssh_cmd(ip, 'root', 'password',cmd)
+        cmd = "systemctl restart libvirtd"
+        test_lib.lib_execute_ssh_cmd(ip, 'root', 'password',cmd)
+        _model = get_host_cpu_model(ip)

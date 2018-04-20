@@ -98,7 +98,10 @@ SNS_EMAIL_PLATFORM = 'SNSEmailPlatform'
 SNS_HTTP_ENDPOINT = 'SNSHttpEndpoint'
 SNS_TEXT_TEMPLATE = 'SNSTextTemplate'
 AFFINITY_GROUP = "AffinityGroup"
-
+IAM2_ORGANIZATION = 'IAM2Organization'
+IAM2_PROJECT = 'IAM2Project'
+IAM2_VIRTUAL_ID_GROUP = 'IAM2VirtualIDGroup'
+IAM2_VIRTUAL_ID = 'IAM2VirtualID'
 
 
 def find_item_by_uuid(inventories, uuid):
@@ -566,6 +569,14 @@ def _gen_query_action(resource, condition=None):
         action = api_actions.QuerySNSTextTemplateAction()
     elif resource == AFFINITY_GROUP:
         action = api_actions.QueryAffinityGroupAction()
+    elif resource == IAM2_ORGANIZATION:
+        action = api_actions.QueryIAM2OrganizationAction()
+    elif resource == IAM2_PROJECT:
+        action = api_actions.QueryIAM2ProjectAction()
+    elif resource == IAM2_VIRTUAL_ID_GROUP:
+        action = api_actions.QueryIAM2VirtualIDGroupAction()
+    elif resource == IAM2_VIRTUAL_ID:
+        action = api_actions.QueryIAM2VirtualIDAction()
     return action
 
 def query_resource(resource, conditions = [], session_uuid=None, count='false'):
