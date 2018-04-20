@@ -57,22 +57,19 @@ def test():
 
     conditions = res_ops.gen_query_conditions('name', '=', 'vlan-test9')
     l2 = res_ops.query_resource(res_ops.L2_VLAN_NETWORK, conditions)[0]
-    
+
     conditions = res_ops.gen_query_conditions('name', '=', 'l2-public')
     l2_public = res_ops.query_resource(res_ops.L2_NETWORK, conditions)[0]
 
-    conditions = res_ops.gen_query_conditions('name', '=', 'nfs')
-    nfs = res_ops.query_resource(res_ops.PRIMARY_STORAGE, conditions)[0]
+    ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
 
-    conditions = res_ops.gen_query_conditions('name', '=', 'nfs2')
-    nfs2 = res_ops.query_resource(res_ops.PRIMARY_STORAGE, conditions)[0]
 
     _hosts = []
     for i in range(len(clusters)):
         net_ops.attach_l2(l2.uuid, clusters[i].uuid)
         net_ops.attach_l2(l2_public.uuid, clusters[i].uuid)
-        ps_ops.attach_primary_storage(nfs.uuid, clusters[i].uuid)
-	ps_ops.attach_primary_storage(nfs2.uuid, clusters[i].uuid)
+        for j in ps:
+            ps_ops.attach_primary_storage(j.uuid, clusters[i].uuid)
         host_option = test_util.HostOption()
         host_option.set_cluster_uuid(clusters[i].uuid)
         host_option.set_username('root')
