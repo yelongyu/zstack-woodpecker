@@ -1149,10 +1149,13 @@ class Longjob(object):
         except:
             pass
 
-    def crt_vm_image(self):
+    def crt_vm_image(self, target_bs=None):
         name = 'longjob_crt_vol_image'
         bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)
-        self.target_bs = bs[random.randint(0, len(bs) - 1)]
+        if not target_bs:
+            self.target_bs = bs[random.randint(0, len(bs) - 1)]
+        else:
+            self.target_bs = target_bs
         job_data = '{"name"="%s", "guestOsType":"Linux","system"="false","platform"="Linux","backupStorageUuids"=["%s"], \
         "rootVolumeUuid"="%s"}' % (self.vm_create_image_name, self.target_bs.uuid, self.vm.vm.rootVolumeUuid)
         self.submit_longjob(job_data, name, job_type='crt_vm_image')
@@ -1191,6 +1194,7 @@ CEPHPOOLTESTISONAME = 'ceph_pool_capacity_test_iso'
 
 class PoolCapacity(Longjob):
     def __init__(self):
+        super(PoolCapacity, self).__init__()
         self.vm = None
         self.data_volume = None
         self.bs = None
