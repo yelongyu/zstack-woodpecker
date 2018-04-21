@@ -79,6 +79,16 @@ def add_iam2_virtual_ids_to_project(virtual_id_uuids, project_uuid, session_uuid
     return evt
 
 
+def add_policy_statement_to_role(uuid,statements, session_uuid=None):
+    action = api_actions.AddPolicyStatementToRoleAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    action.statements = statements
+    test_util.action_logger('Add policy statement: %s to role:%s' % (statements, uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+
 def add_roles_to_iam2_virtual_id_group(role_uuids, group_uuid, session_uuid=None):
     action = api_actions.AddRolesToIAM2VirtualIDGroupAction()
     action.timeout = 30000
@@ -149,6 +159,16 @@ def change_iam2_virtual_id_state(uuid, state_event, session_uuid=None):
     return evt.inventory
 
 
+def change_role_state(uuid, state_event, session_uuid=None):
+    action = api_actions.ChangeRoleStateAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    action.stateEvent = state_event
+    test_util.action_logger('change role : %s to state :%s' % (uuid, state_event))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+
 def create_iam2_organization(name, type, description=None, parent_uuid=None, attributes=None, session_uuid=None):
     action = api_actions.CreateIAM2OrganizationAction()
     action.timeout = 30000
@@ -165,6 +185,18 @@ def create_iam2_organization(name, type, description=None, parent_uuid=None, att
     return evt.inventory
 
 
+def create_iam2_project_from_template(name, template_uuid, description=None,  session_uuid=None):
+    action = api_actions.CreateIAM2ProjectFromTemplateAction()
+    action.timeout = 30000
+    action.name = name
+    action.templateUuid = template_uuid
+    if description:
+        action.description = description
+    test_util.action_logger('create iam2 project : %s from template:%s' % (name,template_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+
 def create_iam2_project(name, description=None, attributes=None, session_uuid=None):
     action = api_actions.CreateIAM2ProjectAction()
     action.timeout = 30000
@@ -174,6 +206,33 @@ def create_iam2_project(name, description=None, attributes=None, session_uuid=No
     if attributes:
         action.attributes = attributes
     test_util.action_logger('create iam2 project : %s ' % name)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+
+def create_iam2_project_template_from_project(name, project_uuid,description=None, session_uuid=None):
+    action = api_actions.CreateIAM2ProjectTemplateFromProjectAction()
+    action.timeout = 30000
+    action.name = name
+    action.projectUuid = project_uuid
+    if description:
+        action.description = description
+    test_util.action_logger('create iam2 project template : %s  from project %s' % (name,project_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+
+def create_iam2_project_template(name, attributes=None,quato=None,description=None, session_uuid=None):
+    action = api_actions.CreateIAM2ProjectTemplateAction()
+    action.timeout = 30000
+    action.name = name
+    if description:
+        action.description = description
+    if attributes:
+        action.attributes = attributes
+    if quato:
+        action.quato = quato
+    test_util.action_logger('create iam2 project template : %s ' %name)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
@@ -210,6 +269,17 @@ def create_iam2_virtual_id(name, password, description=None, attributes=None, pr
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
+#TODO:check change
+def create_role(name, statements=None,session_uuid=None):
+    action = api_actions.CreateRoleAction()
+    action.timeout = 30000
+    action.name = name
+    if statements:
+        action.statements = statements
+    test_util.action_logger('create role : %s ' % name)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
 
 def delete_iam2_organization(uuid, session_uuid=None):
     action = api_actions.DeleteIAM2OrganizationAction()
@@ -243,6 +313,23 @@ def delete_iam2_virtual_id(uuid, session_uuid=None):
     action.timeout = 30000
     action.uuid = uuid
     test_util.action_logger('delete IAM2 virtual id  : %s ' % uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+
+def delete_iam2_project_template(uuid, session_uuid=None):
+    action = api_actions.DeleteIAM2ProjectTemplateAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    test_util.action_logger('delete IAM2 project template  : %s ' % uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def delete_role(uuid, session_uuid=None):
+    action = api_actions.DeleteRoleAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    test_util.action_logger('delete role  : %s ' % uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
@@ -350,6 +437,16 @@ def remove_iam2_virtual_ids_from_project(virtual_id_uuids, project_uuid, session
     action.virtualIDUuids = virtual_id_uuids
     action.projectUuid = project_uuid
     test_util.action_logger('remove virtual id : %s from project :%s' % (virtual_id_uuids, project_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+
+def remove_policy_statements_from_role(uuid, statements, session_uuid=None):
+    action = api_actions.RemovePolicyStatementsFromRoleAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    action.statements = statements
+    test_util.action_logger('remove policy statements : %s from role :%s' % (statements,uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
