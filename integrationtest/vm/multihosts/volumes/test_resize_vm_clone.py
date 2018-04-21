@@ -19,6 +19,8 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
 def test():
+    if res_ops.query_resource(res_ops.SFTP_BACKUP_STORAGE):
+        test_util.test_skip("sftp backupstorage doesn't support for clone test. Skip test")
     global vm
     vm_creation_option = test_util.VmOption()
     image_name = os.environ.get('imageName_net')
