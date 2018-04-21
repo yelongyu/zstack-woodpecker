@@ -271,7 +271,7 @@ def get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, index):
 def migrate_mn_vm(origin_host, target_host, scenarioConfig):
 
     host_config = sce_ops.get_scenario_config_vm(origin_host.name_, scenarioConfig)
-    set_migration_speed_cmd = "virsh migrate-setspeed 'ZStack Management Node VM' 10"
+    set_migration_speed_cmd = "virsh migrate-setspeed 'ZStack Management Node VM' 50"
     if not test_lib.lib_execute_ssh_cmd(origin_host.managementIp_, host_config.imageUsername_, host_config.imagePassword_, set_migration_speed_cmd, 30):
         test_util.test_fail("failed to set speed on original host:<%s>" %(origin_host.managementIp_))
 
