@@ -102,7 +102,8 @@ IAM2_ORGANIZATION = 'IAM2Organization'
 IAM2_PROJECT = 'IAM2Project'
 IAM2_VIRTUAL_ID_GROUP = 'IAM2VirtualIDGroup'
 IAM2_VIRTUAL_ID = 'IAM2VirtualID'
-
+IAM2_PROJECT_TEMPLATE = 'IAM2ProjectTemplate'
+ROLE='Role'
 
 def find_item_by_uuid(inventories, uuid):
     for item in inventories:
@@ -577,6 +578,10 @@ def _gen_query_action(resource, condition=None):
         action = api_actions.QueryIAM2VirtualIDGroupAction()
     elif resource == IAM2_VIRTUAL_ID:
         action = api_actions.QueryIAM2VirtualIDAction()
+    elif resource == IAM2_PROJECT_TEMPLATE:
+        action = api_actions.QueryIAM2ProjectTemplateAction()
+    elif resource == ROLE:
+        action = api_actions.QueryRoleAction()
     return action
 
 def query_resource(resource, conditions = [], session_uuid=None, count='false'):
