@@ -270,6 +270,7 @@ def get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, index):
 
 def migrate_mn_vm(origin_host, target_host, scenarioConfig):
 
+    host_config = sce_ops.get_scenario_config_vm(origin_host.name_, scenarioConfig)
     set_migration_speed_cmd = "virsh migrate-setspeed 'ZStack Management Node VM' 100"
     if not test_lib.lib_execute_ssh_cmd(origin_host.managementIp_, host_config.imageUsername_, host_config.imagePassword_, set_migration_speed_cmd, 30):
         test_util.test_fail("failed to set speed on original host:<%s>" %(origin_host.managementIp_))
@@ -277,12 +278,10 @@ def migrate_mn_vm(origin_host, target_host, scenarioConfig):
     if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml"], ["scenario-config-nfs-sep-pub.xml"]) or \
        test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], ["scenario-config-ceph-sep-pub.xml"]):
         cmd = 'zsha migrate %s' % (target_host.managementIp_)
-        host_config = sce_ops.get_scenario_config_vm(origin_host.name_, scenarioConfig)
         if not test_lib.lib_execute_ssh_cmd(origin_host.managementIp_, host_config.imageUsername_, host_config.imagePassword_,cmd, 120):
             test_util.test_fail("failed to run %s, maybe timeout refer to before log." %(cmd))
     else:
         cmd = 'zsha migrate %s' % (target_host.ip_)
-        host_config = sce_ops.get_scenario_config_vm(origin_host.name_, scenarioConfig)
         if not test_lib.lib_execute_ssh_cmd(origin_host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd, 120):
             test_util.test_fail("failed to run %s, maybe timeout refer to before log." %(cmd))
 
