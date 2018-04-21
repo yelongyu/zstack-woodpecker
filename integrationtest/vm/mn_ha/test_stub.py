@@ -278,11 +278,11 @@ def migrate_mn_vm(origin_host, target_host, scenarioConfig):
     if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml"], ["scenario-config-nfs-sep-pub.xml"]) or \
        test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], ["scenario-config-ceph-sep-pub.xml"]):
         cmd = 'zsha migrate %s' % (target_host.managementIp_)
-        if not test_lib.lib_execute_ssh_cmd(origin_host.managementIp_, host_config.imageUsername_, host_config.imagePassword_,cmd, 120):
+        if not test_lib.lib_execute_ssh_cmd(origin_host.managementIp_, host_config.imageUsername_, host_config.imagePassword_,cmd, 240):
             test_util.test_fail("failed to run %s, maybe timeout refer to before log." %(cmd))
     else:
         cmd = 'zsha migrate %s' % (target_host.ip_)
-        if not test_lib.lib_execute_ssh_cmd(origin_host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd, 120):
+        if not test_lib.lib_execute_ssh_cmd(origin_host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd, 240):
             test_util.test_fail("failed to run %s, maybe timeout refer to before log." %(cmd))
 
 
