@@ -1,5 +1,0 @@
-<testConfig>
-    <deployConfig>deploy-sftp-pss-10000hosts.xml</deployConfig>
-    <deployConfigTemplate>deploy-4clusters-all-bs-ps-disaster.tmpt</deployConfigTemplate>
-    <pingTestTarget>zstack.org</pingTestTarget>
-</testConfig>

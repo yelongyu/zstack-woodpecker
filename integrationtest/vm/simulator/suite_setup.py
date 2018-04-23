@@ -21,9 +21,7 @@ def test():
 
     test_lib.setup_plan.execute_plan_without_deploy_test_agent()
 
-    if os.path.basename(os.environ.get('WOODPECKER_TEST_CONFIG_FILE')).strip() == "test-config-scenario-sftp-pss-10000hosts.xml":
-        pass
-    elif test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
+    if test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
         mn_ips = deploy_operations.get_nodes_from_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
         if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
             os.system("bash %s '%s'" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ips))
