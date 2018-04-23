@@ -44,6 +44,7 @@
         <case timeout="900" >test_vm_ha_never_stop.py</case>
         <case timeout="600" >test_set_vm_console_password.py</case>
         <case timeout="600" >test_set_vm_console_password_create.py</case>
+        <case timeout="600" >test_set_vm_hostname.py</case>
         <case timeout="600" >test_delete_vm_console_password.py</case>
         <case timeout="220" >test_add_image_file_url.py</case>
         <case timeout="220" >test_add_qcow2_image_file_url.py</case>
