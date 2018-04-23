@@ -892,10 +892,10 @@ default one' % self.zstack_properties)
                     thread = threading.Thread(target=shell_cmd_thread, args=(cmd, True, ))
                 elif not linux.is_ip_existing(node1.ip_):
                     # when first node1 ip is not local, it usualy means woodpecker is running on hosts other than MN
-                    cmd = 'zstack-ctl stop_node --host=%s ; zstack-ctl start_node --host=%s --timeout=180' % (node.ip_, node.ip_)
+                    cmd = 'zstack-ctl stop_node --host=%s ; zstack-ctl start_node --host=%s' % (node.ip_, node.ip_)
                     thread = threading.Thread(target=ssh.execute, args=(cmd, node1.ip_, node1.username_, node1.password_, ))
                 else:
-                    cmd = 'zstack-ctl stop_node --host=%s ; zstack-ctl start_node --host=%s --timeout=180' % (node.ip_, node.ip_)
+                    cmd = 'zstack-ctl stop_node --host=%s ; zstack-ctl start_node --host=%s' % (node.ip_, node.ip_)
                     thread = threading.Thread(target=shell_cmd_thread, args=(cmd, True, ))
                 threads.append(thread)
             else:
