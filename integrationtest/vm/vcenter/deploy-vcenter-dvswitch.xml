@@ -1,4 +1,3 @@
-
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
   <!--basicConfig will set basic test environment, include where is install
@@ -162,7 +161,7 @@
       <l2Networks>
         <l2NoVlanNetwork name="$l2vCenterPublicNetworkName"
           description="public and management network for vCenter vrouter network"
-          physicalInterface="$dswitch">
+          physicalInterface="$l2vCenterPublicNetworkInterface">
           <l3Networks>
             <l3BasicNetwork name="$l3PublicNetworkName" category="Public" description="Public Network in vCenter">
               <ipRange name="$ipRangeName" description="Test"

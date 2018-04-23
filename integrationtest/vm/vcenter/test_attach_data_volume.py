@@ -8,7 +8,7 @@ import apibinding.inventory as inventory
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
-import zstackwoodpecker.operations.image_operations as img_ops
+import zstackwoodpecker.operations.vcenter_operations as vct_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import test_stub
 import os
@@ -20,24 +20,22 @@ test_obj_dict = test_state.TestStateDict()
 def test():
     global test_obj_dict
 
-    cond = res_ops.gen_query_conditions('name', '=', 'newdatastore')
-    ps_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)[0].uuid
-    cond = res_ops.gen_query_conditions('name', '=', 'newdatastore (1)')
-    ps1_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)[0].uuid
+    network_pattern = 'L3-%s'%os.environ['dportgroup']
+    if not vct_ops.lib_get_vcenter_l3_by_name(network_pattern):
+        network_pattern = 'L3-%s'%os.environ['portgroup0']
 
-    centos_image_name = os.environ['image_dhcp_name']
-    if os.environ['dportgroup']:
-        network_pattern = os.environ['dportgroup']
-        network_pattern = 'L3-%s'%network_pattern
-    else:
-        network_pattern = os.environ['portgroup0']
-        network_pattern = 'L3-%s'%network_pattern
-    
+    ova_image_name = os.environ['vcenterDefaultmplate']
     disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('largeDiskOfferingName'))
     #create vm 
-    vm = test_stub.create_vm_in_vcenter(vm_name = 'vm-create', image_name = centos_image_name, l3_name = network_pattern)
+    vm = test_stub.create_vm_in_vcenter(vm_name = 'vm-create', image_name = ova_image_name, l3_name = network_pattern)
     vm.check()
-    
+    test_obj_dict.add_vm(vm)
+    ps_uuid = vm.vm.allVolumes[0].primaryStorageUuid
+    for ps in res_ops.query_resource(res_ops.VCENTER_PRIMARY_STORAGE):
+        if ps.uuid != ps_uuid:
+            ps1_uuid = ps.uuid
+            break
+
     test_util.test_dsc('Create volume and check')
     volume_creation_option = test_util.VolumeOption()
     volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
@@ -62,12 +60,16 @@ def test():
     volume_ps.attach(vm)
     volume_ps.check()
     
-    try:
+    if vct_ops.get_datastore_type(os.environ['vcenter']) == 'iscsi':
         volume_ps1.attach(vm)
-    except:
-        test_util.test_logger('test for volume_ps1 pass')
+        volume_ps1.check()
     else:
-        test_util.test_fail('volume_ps1 should not attach to vm')
+        try:
+            volume_ps1.attach(vm)
+        except:
+            test_util.test_logger('test for volume_ps1 pass')
+        else:
+            test_util.test_fail('volume_ps1 should not attach to vm')
 
     
     #cleanup 

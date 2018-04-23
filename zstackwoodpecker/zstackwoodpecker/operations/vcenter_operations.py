@@ -404,3 +404,13 @@ def powerOff_vm(vm):
     from pyVim import task
     Task = vm.PowerOffVM_Task()
     task.WaitForTask(Task)
+
+def get_datastore_type(vcenter):
+    SI = connect_vcenter(vcenter)
+    content = SI.RetrieveContent()
+    host = get_host(content)[0]
+    if host.configManager.storageSystem.fileSystemVolumeInfo.mountInfo[0].volume.local:
+        type = 'local'  
+    else:
+        type = 'iscsi'     
+    return type
