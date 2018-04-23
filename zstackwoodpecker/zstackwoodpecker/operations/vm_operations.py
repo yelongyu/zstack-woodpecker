@@ -178,7 +178,7 @@ def migrate_vm(vm_uuid, host_uuid, timeout = 480000, session_uuid = None):
     action.timeout = timeout
     test_util.action_logger('Migrate VM [uuid:] %s to Host [uuid:] %s, in timeout: %s' % (vm_uuid, host_uuid, timeout))
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventory 
+    return evt.inventory
 
 def change_vm_static_ip(vm_uuid, l3NetworkUuid, ip, session_uuid = None):
     action = api_actions.SetVmStaticIpAction()
@@ -195,7 +195,7 @@ def reconnect_vr(vr_uuid, session_uuid=None):
     action.timeout = 600000
     test_util.action_logger('Reconnect VR VM [uuid:] %s' % vr_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventory 
+    return evt.inventory
 
 def change_instance_offering(vm_uuid, offering_uuid, session_uuid=None):
     action = api_actions.ChangeInstanceOfferingAction()
@@ -260,7 +260,7 @@ def expunge_vm(vm_uuid, session_uuid = None):
     action.timeout = 40000
     test_util.action_logger('Expunge VM [uuid:] %s ' % vm_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventory 
+    return evt.inventory
 
 def recover_vm(vm_uuid, session_uuid = None):
     action = api_actions.RecoverVmInstanceAction()
@@ -268,7 +268,7 @@ def recover_vm(vm_uuid, session_uuid = None):
     action.timeout = 40000
     test_util.action_logger('Recover VM [uuid:] %s ' % vm_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventory 
+    return evt.inventory
 
 def clone_vm(vm_uuid, vm_names, strategy, systemtag = None, session_uuid = None):
     action = api_actions.CloneVmInstanceAction()
@@ -378,104 +378,104 @@ def get_vm_capabilities(vm_uuid, session_uuid = None):
     action.uuid = vm_uuid
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
-	
+
 def change_vm_image(vm_uuid,image_uuid,session_uuid=None):
-   action = api_actions.ChangeVmImageAction()
-   action.vmInstanceUuid = vm_uuid
-   action.imageUuid = image_uuid
-   action.timeout = 600000
-   test_util.action_logger('Change image [imageUuid:] %s for vm [vmInstanceUuid:] %s' % (vm_uuid,image_uuid))
-   evt = account_operations.execute_action_with_session(action,session_uuid)
-   return evt.inventory
+    action = api_actions.ChangeVmImageAction()
+    action.vmInstanceUuid = vm_uuid
+    action.imageUuid = image_uuid
+    action.timeout = 600000
+    test_util.action_logger('Change image [imageUuid:] %s for vm [vmInstanceUuid:] %s' % (vm_uuid,image_uuid))
+    evt = account_operations.execute_action_with_session(action,session_uuid)
+    return evt.inventory
    
 def get_image_candidates_for_vm_to_change(vm_uuid,session_uuid=None):
-   action = api_actions.GetImageCandidatesForVmToChangeAction()
-   action.vmInstanceUuid = vm_uuid
-   action.timeout = 2400000
-   test_util.action_logger('Get image candidates for vm [uuid:] %s to change' % vm_uuid)
-   evt = account_operations.execute_action_with_session(action,session_uuid)
-   return evt
+    action = api_actions.GetImageCandidatesForVmToChangeAction()
+    action.vmInstanceUuid = vm_uuid
+    action.timeout = 2400000
+    test_util.action_logger('Get image candidates for vm [uuid:] %s to change' % vm_uuid)
+    evt = account_operations.execute_action_with_session(action,session_uuid)
+    return evt
 
 def get_vm_migration_candidate_hosts(vm_uuid,session_uuid=None):
-   action = api_actions.GetVmMigrationCandidateHostsAction()
-   action.vmInstanceUuid = vm_uuid
-   test_util.action_logger('Get candidate hosts for vm [uuid:] %s to migrate' % vm_uuid)
-   evt = account_operations.execute_action_with_session(action, session_uuid)
-   return evt
+    action = api_actions.GetVmMigrationCandidateHostsAction()
+    action.vmInstanceUuid = vm_uuid
+    test_util.action_logger('Get candidate hosts for vm [uuid:] %s to migrate' % vm_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
 
 def get_vm_starting_candidate(vm_uuid,systemtag=[],session_uuid=None):
-   action = api_actions.GetVmStartingCandidateClustersHostsAction()
-   action.uuid = vm_uuid
-   action.systemtag = systemtag
-   test_util.action_logger('Get candidate hosts for starting vm [uuid:] %s to migrate' % vm_uuid)
-   evt = account_operations.execute_action_with_session(action, session_uuid)
-   return evt.hostInventories
+    action = api_actions.GetVmStartingCandidateClustersHostsAction()
+    action.uuid = vm_uuid
+    action.systemtag = systemtag
+    test_util.action_logger('Get candidate hosts for starting vm [uuid:] %s to migrate' % vm_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.hostInventories
 
 def set_vm_boot_order(vm_uuid,boot_order,session_uuid=None):
-   action = api_actions.SetVmBootOrderAction()
-   action.uuid = vm_uuid
-   action.bootOrder = boot_order
-   test_util.action_logger('Set vm[uuid:] %s boot order %s' % (vm_uuid, boot_order))
-   evt = account_operations.execute_action_with_session(action, session_uuid)
-   return evt
+    action = api_actions.SetVmBootOrderAction()
+    action.uuid = vm_uuid
+    action.bootOrder = boot_order
+    test_util.action_logger('Set vm[uuid:] %s boot order %s' % (vm_uuid, boot_order))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
 
 def delete_vm_ssh_key(vm_uuid,session_uuid=None):
-   action = api_actions.DeleteVmSshKeyAction()
-   action.uuid = vm_uuid
-   test_util.action_logger('Delete vm[uuid:] %s sshkey' % vm_uuid)
-   evt = account_operations.execute_action_with_session(action, session_uuid)
-   return evt
+    action = api_actions.DeleteVmSshKeyAction()
+    action.uuid = vm_uuid
+    test_util.action_logger('Delete vm[uuid:] %s sshkey' % vm_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
 
 def update_vm_nic_mac(vmNic_uuid, mac, session_uuid=None):
-   action = api_actions.UpdateVmNicMacAction()
-   action.vmNicUuid = vmNic_uuid
-   action.mac = mac
-   action.timeout = 240000
-   test_util.action_logger('Update VM [uuid:] %s mac[address:] %s' % (vmNic_uuid,mac))
-   evt = account_operations.execute_action_with_session(action, session_uuid)
-   return evt.inventory
+    action = api_actions.UpdateVmNicMacAction()
+    action.vmNicUuid = vmNic_uuid
+    action.mac = mac
+    action.timeout = 240000
+    test_util.action_logger('Update VM [uuid:] %s mac[address:] %s' % (vmNic_uuid,mac))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
 
 def delete_vm_static_ip(vm_uuid, l3NetworkUuid, session_uuid = None):
-   action = api_actions.DeleteVmStaticIpAction()
-   action.vmInstanceUuid = vm_uuid
-   action.l3NetworkUuid = l3NetworkUuid
-   test_util.action_logger('Delete VM[uuid:] %s l3Network[uuid:] %s static IP ' % (vm_uuid, l3NetworkUuid))
-   evt = account_operations.execute_action_with_session(action, session_uuid)
-   return evt.inventory
+    action = api_actions.DeleteVmStaticIpAction()
+    action.vmInstanceUuid = vm_uuid
+    action.l3NetworkUuid = l3NetworkUuid
+    test_util.action_logger('Delete VM[uuid:] %s l3Network[uuid:] %s static IP ' % (vm_uuid, l3NetworkUuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
 
 def set_vm_rdp(vm_uuid,enable,session_uuid = None):
-   action = api_actions.SetVmRDPAction()
-   action.uuid = vm_uuid
-   action.enable = enable
-   test_util.action_logger('Set VM[uuid:] %s RDP[enable:] %s ' % (vm_uuid, enable))
-   evt = account_operations.execute_action_with_session(action, session_uuid)
-   return evt
+    action = api_actions.SetVmRDPAction()
+    action.uuid = vm_uuid
+    action.enable = enable
+    test_util.action_logger('Set VM[uuid:] %s RDP[enable:] %s ' % (vm_uuid, enable))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
 
 def set_vm_monitor_number(vm_uuid,monitor_number,session_uuid = None):
-   action = api_actions.SetVmMonitorNumberAction()
-   action.uuid = vm_uuid
-   action.monitorNumber = monitor_number
-   test_util.action_logger('Set VM[uuid:] %s Monitor Number[number:] %s ' % (vm_uuid, monitor_number))
-   evt = account_operations.execute_action_with_session(action, session_uuid)
-   return evt
+    action = api_actions.SetVmMonitorNumberAction()
+    action.uuid = vm_uuid
+    action.monitorNumber = monitor_number
+    test_util.action_logger('Set VM[uuid:] %s Monitor Number[number:] %s ' % (vm_uuid, monitor_number))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
 
 def set_vm_usb_redirect(uuid,enable,session_uuid = None):
-   action = api_actions.SetVmUsbRedirectAction()
-   action.uuid = uuid
-   action.enable = enable
-   test_util.action_logger('Set VM[uuid:] %s Usb Redirect[enable:] %s ' % (uuid, enable))
-   evt = account_operations.execute_action_with_session(action, session_uuid)
-   return evt
+    action = api_actions.SetVmUsbRedirectAction()
+    action.uuid = uuid
+    action.enable = enable
+    test_util.action_logger('Set VM[uuid:] %s Usb Redirect[enable:] %s ' % (uuid, enable))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
 
 def start_vm_with_target_host(vm_uuid, host_uuid=None, cluster_uuid=None, session_uuid=None, timeout=240000):
-   action = api_actions.StartVmInstanceAction()
-   action.uuid = vm_uuid
-   action.hostUuid = host_uuid
-   action.clusterUuid = cluster_uuid
-   action.timeout = timeout
-   test_util.action_logger('Start VM [uuid:] %s' % vm_uuid)
-   evt = account_operations.execute_action_with_session(action, session_uuid)
-   return evt.inventory
+    action = api_actions.StartVmInstanceAction()
+    action.uuid = vm_uuid
+    action.hostUuid = host_uuid
+    action.clusterUuid = cluster_uuid
+    action.timeout = timeout
+    test_util.action_logger('Start VM [uuid:] %s' % vm_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
 
 def get_candidate_iso_for_attaching(vm_uuid, session_uuid = None):
     action = api_actions.GetCandidateIsoForAttachingVmAction()
