@@ -45,32 +45,9 @@ def test():
     vm.check()
     volume.check()
 
-    test_util.test_dsc('Check in vcenter after destroying vm and its attached data volume both in zstack')
-    #connect vcenter
-    import ssl
-    from pyVmomi import vim
-    import atexit
-    from pyVim import connect
-    import zstackwoodpecker.zstack_test.vcenter_checker.zstack_vcenter_vm_checker as vm_checker
-    vcenter_password = os.environ['vcenterpwd']
-    vcenter_server = os.environ['vcenter']
-    vcenter_username = os.environ['vcenteruser']
-    sslContext = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
-    sslContext.verify_mode = ssl.CERT_NONE
-    SI = connect.SmartConnect(host=vcenter_server, user=vcenter_username, pwd=vcenter_password, port=443, sslContext=sslContext)
-    if not SI:
-        test_util.test_fail("Unable to connect to the vCenter")
-    content = SI.RetrieveContent()
-    vc_vm = vm_checker.get_obj(content, [vim.VirtualMachine], name='test_for_sync_vcenter_vm')
-    test_util.test_logger(vc_vm.summary.runtime.powerState)
-    if not (vc_vm.summary.runtime.powerState == 'poweredOff'):
-        test_util.test_fail("Vm should stop in vcenter")
-    atexit.register(connect.Disconnect, SI)
-
     test_util.test_dsc('Sync vcenter')
-    vc_name = os.environ['vcenter']
-    vcenter_uuid = vct_ops.lib_get_vcenter_by_name(vc_name).uuid
-    test_util.test_logger(vcenter_uuid)
+    vc = os.environ.get('vcenter')
+    vcenter_uuid = vct_ops.lib_get_vcenter_by_name(vc).uuid
     vct_ops.sync_vcenter(vcenter_uuid)
 
     #After synchronization, wait for the database update
@@ -78,7 +55,6 @@ def test():
 
     test_util.test_dsc('check vm and volumes after synchronizing vcenter')
     db_volume = test_lib.lib_get_volume_by_uuid(volume.get_volume().uuid)
-    test_util.test_logger(db_volume.status)
     if db_volume.status != 'Deleted':
         test_util.test_fail("check data volume fail")
     db_vm = test_lib.lib_get_vm_by_uuid(vm.vm.uuid)
@@ -98,28 +74,16 @@ def test():
 
     vm.destroy()
     vm.expunge()
+    #check in vcenter
+    SI = vct_ops.connect_vcenter(vc)
+    content = SI.RetrieveContent()
+    vc_vm = vct_ops.get_vm(content, name='test_for_sync_vcenter_vm')[0]
+    if vc_vm.name == 'test_for_sync_vcenter_vm' :
+        test_util.test_fail("check vm fail: vm has been expunged.")
     vct_ops.sync_vcenter(vcenter_uuid)
     time.sleep(5)
     if test_lib.lib_get_vm_by_uuid(vm.vm.uuid):
         test_util.test_fail("check vm fail: vm has been expunged")
-    #connect vcenter
-    import ssl
-    from pyVmomi import vim
-    import atexit
-    from pyVim import connect
-    import zstackwoodpecker.zstack_test.vcenter_checker.zstack_vcenter_vm_checker as vm_checker
-    vcenter_password = os.environ['vcenterpwd']
-    vcenter_server = os.environ['vcenter']
-    vcenter_username = os.environ['vcenteruser']
-    sslContext = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
-    sslContext.verify_mode = ssl.CERT_NONE
-    SI = connect.SmartConnect(host=vcenter_server, user=vcenter_username, pwd=vcenter_password, port=443, sslContext=sslContext)
-    if not SI:
-        test_util.test_fail("Unable to connect to the vCenter")
-    content = SI.RetrieveContent()
-    vc_vm = vm_checker.get_obj(content, [vim.VirtualMachine], name='test_for_sync_vcenter_vm')
-    if not isinstance(vc_vm, list):
-        test_util.test_fail("check vm fail: vm has been expunged.")
 
     volume.expunge()
 

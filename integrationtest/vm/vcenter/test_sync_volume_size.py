@@ -6,6 +6,7 @@ import apibinding.inventory as inventory
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
+import zstackwoodpecker.operations.vcenter_operations as vct_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
 import test_stub
 
@@ -19,7 +20,10 @@ def test():
     global test_obj_dict
 
     ova_image_name = os.environ['vcenterDefaultmplate']
-    network_pattern1 = os.environ['l3vCenterNoVlanNetworkName']
+    network_pattern1 = 'L3-%s'%os.environ['dportgroup']
+    if not vct_ops.lib_get_vcenter_l3_by_name(network_pattern1):
+        network_pattern1 = 'L3-%s'%os.environ['portgroup0']
+
     disk_offering1 = test_lib.lib_get_disk_offering_by_name(os.environ.get('largeDiskOfferingName'))
 
     vm = test_stub.create_vm_in_vcenter(vm_name = 'test_for_sync_volume_size_vm', image_name = ova_image_name, l3_name = network_pattern1)

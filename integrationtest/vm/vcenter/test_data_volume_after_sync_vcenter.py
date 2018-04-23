@@ -40,26 +40,22 @@ def test():
     volume.check()
     volume.attach(vm)
     volume.check()
+    volume.detach()
+    volume.check()
 
     volume_creation_option.set_name('vcenter_volume1')
     volume_creation_option.set_primary_storage_uuid(ps_uuid)
     volume1 = test_stub.create_volume(volume_creation_option)
     test_obj_dict.add_volume(volume1)
     volume1.check()
-
-    volume.detach()
-    volume.check()
     volume1.attach(vm) 
     volume1.check()
     volume1.delete()
     volume1.check()
 
     test_util.test_dsc('Sync vcenter')
-    vc_name = os.environ['vcenter']
-    vcenter_uuid = vct_ops.lib_get_vcenter_by_name(vc_name).uuid
-    test_util.test_logger(vcenter_uuid)
+    vcenter_uuid = vct_ops.lib_get_vcenter_by_name(os.environ['vcenter']).uuid
     vct_ops.sync_vcenter(vcenter_uuid)
-
     time.sleep(5)
 
     test_util.test_dsc('check volumes after synchronizing vcenter')
@@ -68,28 +64,14 @@ def test():
     if db_volume.status != 'Ready' or db_volume1.status != 'Deleted':
         test_util.test_fail("check data volumes fail after synchronizing vcenter")
 
-    #connect vcenter
-    import ssl
-    from pyVmomi import vim
-    import atexit
-    from pyVim import connect
-    import zstackwoodpecker.zstack_test.vcenter_checker.zstack_vcenter_vm_checker as vm_checker
-    vcenter_password = os.environ['vcenterpwd']
-    vcenter_server = os.environ['vcenter']
-    vcenter_username = os.environ['vcenteruser']
-    sslContext = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
-    sslContext.verify_mode = ssl.CERT_NONE
-    SI = connect.SmartConnect(host=vcenter_server, user=vcenter_username, pwd=vcenter_password, port=443, sslContext=sslContext)
-    if not SI:
-        test_util.test_fail("Unable to connect to the vCenter")
-    content = SI.RetrieveContent()
+    #delete volume file
     volume_installPath = vc_ps.url.split('//')[1] + db_volume.installPath.split('[' + vc_ps.name + ']')[1].lstrip()
     test_util.test_logger(volume_installPath)
     cmd = 'rm -f %s' %volume_installPath
     vchost_user = os.environ['vchostUser']
     vchost_password = os.environ['vchostpwd'] 
     result = test_lib.lib_execute_ssh_cmd(vc_host, vchost_user, vchost_password, cmd, 180)
-    atexit.register(connect.Disconnect, SI)
+    
 
     test_util.test_dsc('Sync vcenter')
     vct_ops.sync_vcenter(vcenter_uuid)
