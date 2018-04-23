@@ -19,12 +19,9 @@ def test():
     volumes = []
 
     ova_image_name = os.environ['vcenterDefaultmplate']
-    if os.environ['dportgroup']:
-        network_pattern = os.environ['dportgroup']
-        network_pattern = 'L3-%s'%network_pattern
-    else:
-        network_pattern = os.environ['portgroup0']
-        network_pattern = 'L3-%s'%network_pattern
+    network_pattern = 'L3-%s'%os.environ['dportgroup']
+    if not vct_ops.lib_get_vcenter_l3_by_name(network_pattern):
+        network_pattern = 'L3-%s'%os.environ['portgroup0']
     disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('largeDiskOfferingName'))
     #create vm
     vm = test_stub.create_vm_in_vcenter(vm_name = 'vm_1', image_name = ova_image_name, l3_name = network_pattern)
