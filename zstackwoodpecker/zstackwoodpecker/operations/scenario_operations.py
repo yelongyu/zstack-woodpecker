@@ -440,9 +440,8 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
         test_util.test_logger("cmd=%s" %(cmd))
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
-        #cmd = 'echo mount %s:%s /storage >> /etc/rc.local' % (nfsIP, nfsPath)
+        cmd = 'echo mount %s:%s /storage >> /etc/rc.local' % (nfsIP, nfsPath)
         #cmd = 'echo mount -t nfs -o rw,soft,timeo=30,retry=3 %s:%s /storage >> /etc/rc.local' % (nfsIP, nfsPath)
-        cmd = 'echo mount -t nfs -o rw,soft,timeo=30,retry=10 %s:%s /storage >> /etc/rc.local' % (nfsIP, nfsPath)
         test_util.test_logger("cmd=%s" %(cmd))
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
@@ -450,9 +449,8 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
         test_util.test_logger("cmd=%s" %(cmd))
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
-        #cmd = 'mount %s:%s /storage' % (nfsIP, nfsPath)
+        cmd = 'mount %s:%s /storage' % (nfsIP, nfsPath)
         #cmd = 'mount -t nfs -o rw,soft,timeo=30,retry=3 %s:%s /storage' % (nfsIP, nfsPath)
-        cmd = 'mount -t nfs -o rw,soft,timeo=30,retry=10 %s:%s /storage' % (nfsIP, nfsPath)
         test_util.test_logger("cmd=%s" %(cmd))
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
