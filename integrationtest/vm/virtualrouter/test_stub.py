@@ -1073,13 +1073,15 @@ class Longjob(object):
     def create_vm(self):
         self.vm = create_basic_vm()
 
-    def create_data_volume(self):
+    def create_data_volume(self, ceph_pool=None):
         disk_offering = test_lib.lib_get_disk_offering_by_name(os.getenv('rootDiskOfferingName'))
         ps_uuid = self.vm.vm.allVolumes[0].primaryStorageUuid
         volume_option = test_util.VolumeOption()
         volume_option.set_disk_offering_uuid(disk_offering.uuid)
         volume_option.set_name('data-volume-for-crt-image-test')
-#         volume_option.set_primary_storage_uuid(ps_uuid)
+        if ceph_pool:
+            volume_option.set_system_tags(["ceph::pool::%s" % ceph_pool])
+            volume_option.set_primary_storage_uuid(ps_uuid)
         self.data_volume = create_volume(volume_option)
         self.set_ceph_mon_env(ps_uuid)
         self.data_volume.attach(self.vm)
@@ -1200,6 +1202,7 @@ class PoolCapacity(Longjob):
         self.bs = None
         self.image = None
         self.pool = None
+        self.pool_name = 'data-pool-' + str(time.time()).replace('.', '-')
 
     def get_bs(self, bs_type='Ceph'):
         cond_bs_type = res_ops.gen_query_conditions('type', '=', bs_type)
@@ -1238,9 +1241,13 @@ class PoolCapacity(Longjob):
         self.get_bs()
         assert self.bs.poolReplicatedSize == self.size
 
-    def get_ceph_pool(self, pool_type):
+    def get_ceph_pool(self, pool_type, pool_name=None):
         cond_pool_type = res_ops.gen_query_conditions('type', '=', pool_type)
-        self.pool = res_ops.query_resource(res_ops.CEPH_PRIMARY_STORAGE_POOL, cond_pool_type)[0]
+        cond_pool_name = res_ops.gen_query_conditions('poolName', '=', pool_name)
+        if not pool_name:
+            self.pool = res_ops.query_resource(res_ops.CEPH_PRIMARY_STORAGE_POOL, cond_pool_type)[0]
+        else:
+            self.pool = res_ops.query_resource(res_ops.CEPH_PRIMARY_STORAGE_POOL, cond_pool_name)[0]
 
     def check_pool_cap(self, cap, pool_name=None, bs=False):
         if bs:
@@ -1267,3 +1274,8 @@ class PoolCapacity(Longjob):
     def attach_iso(self):
         image_uuid = test_lib.lib_get_image_by_name('ceph_pool_capacity_test_iso').uuid
         img_ops.attach_iso(image_uuid, self.vm.vm.uuid)
+
+    def add_ceph_ps_pool(self):
+        ps = res_ops.query_resource(res_ops.CEPH_PRIMARY_STORAGE)[0]
+        ps_ops.add_ceph_primary_storage_pool(ps.uuid, self.pool_name, isCreate='true')
+

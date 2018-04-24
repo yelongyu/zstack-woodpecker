@@ -16,22 +16,22 @@ pool_cap = test_stub.PoolCapacity()
 
 def test():
     pool_cap.create_vm()
-    pool_cap.create_data_volume()
+    pool_cap.add_ceph_ps_pool()
+    pool_cap.create_data_volume(pool_cap.pool_name)
     test_obj_dict.add_vm(pool_cap.vm)
     test_obj_dict.add_volume(pool_cap.data_volume)
     time.sleep(300)
-    pool_cap.get_ceph_pool('Data')
+    pool_cap.get_ceph_pool('Data', pool_cap.pool_name)
     used1 = pool_cap.pool.usedCapacity
     avail1 = pool_cap.pool.availableCapacity
-    pool_name = pool_cap.pool.poolName
-    pool_cap.check_pool_cap([used1, avail1], pool_name=pool_name)
+    pool_cap.check_pool_cap([used1, avail1], pool_name=pool_cap.pool_name)
 
     test_obj_dict.rm_volume(pool_cap.data_volume)
     time.sleep(300)
-    pool_cap.get_ceph_pool('Data')
+    pool_cap.get_ceph_pool('Data', pool_cap.pool_name)
     used2 = pool_cap.pool.usedCapacity
     avail2 = pool_cap.pool.availableCapacity
-    pool_cap.check_pool_cap([used2, avail2], pool_name=pool_name)
+    pool_cap.check_pool_cap([used2, avail2], pool_name=pool_cap.pool_name)
     pool_cap.vm.destroy()
     test_obj_dict.rm_vm(pool_cap.vm)
     test_util.test_pass('Ceph Data Pool Capacity Test Success')
