@@ -9,6 +9,7 @@ vmName2 = test_vm2
 vmName3 = test_vm3
 vmName4 = test_vm4
 vmInstranceOfferingUuid2 = 234567
+vmInstranceOfferingUuid0 = 511e20b16132466ebfdc4479d7676c8d
 imageUuid2 = 234567
 vcentername = esxi
 vmL3Uuid2 = 705a5c1938544ab0947cb344ab3c910e
