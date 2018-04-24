@@ -19,6 +19,12 @@ vm = None
 def test():
     global vm
     test_stub.return_skip_ahead_if_3sites("TEST SKIP")
+
+    #ensure mn works normally
+    vm0 = test_stub.create_basic_vm()
+    vm0.check()
+    vm0.destroy()
+
     for i in range(0, 10):
         test_util.test_logger("migrate MN VM round %s" % (i))
         ori_host = test_stub.get_host_by_mn_vm(test_lib.all_scenario_config, test_lib.scenario_file)
