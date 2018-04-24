@@ -74,7 +74,6 @@ def test():
         test_util.test_logger("the resource consumption are aligned after destroy a vm")
     else:
         test_util.test_fail("the resource consumption are not aligned after destroy vm: %s on host: %s" % (vm.get_vm().uuid, host_uuid))
-    vm.expunge()
 
     vm = test_stub.create_vlan_vm(os.environ.get('l3VlanNetworkName1'))
     test_obj_dict.add_vm(vm)
@@ -87,7 +86,6 @@ def test():
         test_util.test_fail("the resource consumption are not aligned after create a new vm: %s " % vm.get_vm().uuid)
 
     vm.destroy()
-    vm.expunge()
 
     test_util.test_pass('Reconnect Host and Test CPU/Memory Capacity Pass')
 
