@@ -49,7 +49,7 @@ def create_vm(vm_name='virt-vm', \
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     if not instance_offering_uuid:
-	instance_offering_name = os.environ.get('instanceOfferingName_m')
+	instance_offering_name = os.environ.get('instanceOfferingName_s')
         instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(instance_offering_name).uuid
 
     vm_creation_option = test_util.VmOption()
@@ -105,7 +105,7 @@ def create_vm_in_vcenter(vm_name='vcenter-vm', \
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     if not instance_offering_uuid:
-	instance_offering_name = os.environ.get('instanceOfferingName_m')
+	instance_offering_name = os.environ.get('instanceOfferingName_s')
         instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(instance_offering_name).uuid
 
     vm_creation_option = test_util.VmOption()
