@@ -35,10 +35,16 @@ def test():
     vm.reboot()
     test_lib.lib_wait_target_up(vm_ip, '22', 240)
     time.sleep(10)
-    ssh_cmd = 'ssh -i %s -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s echo pass' % (os.environ.get('sshkeyPriKey_file'), vm_ip)
-    process_result = test_stub.execute_shell_in_process(ssh_cmd, tmp_file)
-    if process_result != 0:
+    for i in range(5):
+        ssh_cmd = 'timeout 5 ssh -i %s -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s echo pass' % (os.environ.get('sshkeyPriKey_file'), vm_ip)
+        process_result = test_stub.execute_shell_in_process(ssh_cmd, tmp_file)
+        if process_result == 0:
+            break
+        else:
+            time.sleep(10)
+    else:
         test_util.test_fail("fail to use ssh key connect to VM")
+
     vm.destroy()
     test_util.test_pass('Create VM Test Success')
 
