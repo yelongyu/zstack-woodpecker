@@ -90,6 +90,7 @@
         <case timeout='800'  repeat='1'>eip/test_attach_eip.py</case>
         <case timeout='800'  repeat='1'>eip/test_create_eip_vm.py</case>
 	<case timeout='800'  repeat='1'>eip/test_create_eip_vm2.py</case>
+	<case timeout='800'  repeat='1'>eip/test_create_eip_vm3.py</case>
         <case timeout='800'  repeat='1'>eip/test_del_vip_before_add_eip_to_vm.py</case>
         <case timeout='1000'  repeat='1' noparallel='True'>eip/test_eip_sg_tcp.py</case>
         <case timeout='800'  repeat='1'>eip/test_vm_ops.py</case>
