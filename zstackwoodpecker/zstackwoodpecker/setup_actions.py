@@ -721,6 +721,14 @@ default one' % self.zstack_properties)
             #default will deploy all test hosts.
             exc_info = []
             for h in self.test_agent_hosts:
+                print('Enable ansible connection in host: [%s] \n' % h.managementIp_)
+
+                if hasattr(h, 'port_'):
+                    enable_ansible_connection(h.managementIp_, h.username_, h.password_, exc_info, h.port_)
+                else:
+                    enable_ansible_connection(h.managementIp_, h.username_, h.password_, exc_info, 22)
+
+            for h in self.test_agent_hosts:
                 print('Deploy test agent in host: [%s] \n' % h.managementIp_)
                 if h.username_ != 'root':
                     ansible_become_args = "ansible_become=yes become_user=root ansible_become_pass=%s" % (h.password_)
@@ -746,15 +754,8 @@ default one' % self.zstack_properties)
 
                 ansible_cmd = "testagent.yaml -e '%s'" % ansible_cmd_args
 
-                if hasattr(h, 'port_'):
-                    thread = threading.Thread(target=ansible.execute_ansible,\
-                        args=(h.managementIp_, h.username_, h.password_,\
-                        testagentdir, ansible_cmd, lib_files, exc_info, h.port_))
-                else:
-                    thread = threading.Thread(target=ansible.execute_ansible,\
-                        args=(h.managementIp_, h.username_, h.password_,\
-                        testagentdir, ansible_cmd, lib_files, exc_info))
-
+                thread = threading.Thread(target=ansible.do_ansible,\
+                     args=(testagentdir, ansible_cmd, lib_files, exc_info))
                 # Wrap up old zstack logs in /var/log/zstack/
                 #print('archive test log on host: [%s] \n' % h.managementIp_)
                 #try:
