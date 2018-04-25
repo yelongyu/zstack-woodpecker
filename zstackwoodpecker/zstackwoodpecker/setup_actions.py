@@ -724,9 +724,9 @@ default one' % self.zstack_properties)
                 print('Enable ansible connection in host: [%s] \n' % h.managementIp_)
 
                 if hasattr(h, 'port_'):
-                    enable_ansible_connection(h.managementIp_, h.username_, h.password_, exc_info, h.port_)
+                    ansible.enable_ansible_connection(h.managementIp_, h.username_, h.password_, exc_info, h.port_)
                 else:
-                    enable_ansible_connection(h.managementIp_, h.username_, h.password_, exc_info, 22)
+                    ansible.enable_ansible_connection(h.managementIp_, h.username_, h.password_, exc_info, 22)
 
             for h in self.test_agent_hosts:
                 print('Deploy test agent in host: [%s] \n' % h.managementIp_)
