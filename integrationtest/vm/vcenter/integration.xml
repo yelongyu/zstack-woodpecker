@@ -15,6 +15,8 @@
         <case timeout='1200'  repeat='1' noparallel='True'>test_sync_vcenter_after_destroy_vm_datavolume.py</case>
         <case timeout='1200'  repeat='1' noparallel='True'>test_sync_volume_size.py</case>
         <case timeout='1200'  repeat='1' noparallel='True'>test_uninstantiated_volume_attach_to_vm.py</case>
+        <case timeout='1200'  repeat='1' noparallel='True'>test_clone_stop_vm.py</case>
+        <case timeout='1200'  repeat='1' noparallel='True'>test_clone_vm.py</case>
         <!--case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_vm_no_nic_start_stop.py</case>
         <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_sync_image_add_delete.py</case>
         <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_sync_vm_start_stop.py</case>
