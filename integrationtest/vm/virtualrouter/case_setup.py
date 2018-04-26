@@ -38,7 +38,10 @@ def check_resource():
         vms = res_ops.query_resource(res_ops.VM_INSTANCE, [], None)
         for vm in vms:
             if vm.type == 'UserVm':
-                vm_ops.destroy_vm(vm.uuid)
+                try:
+                    vm_ops.destroy_vm(vm.uuid)
+                except:
+                    test_util.test_logger('ignore exception try to destroy vm')
                 try:
                     vm_ops.expunge_vm(vm.uuid)
                 except:
