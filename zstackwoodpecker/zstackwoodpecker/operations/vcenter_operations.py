@@ -67,8 +67,22 @@ def lib_get_vcenter_l2_by_name(l2_name):
     if l2_inv:
         return l2_inv[0]
 
+def lib_get_vcenter_l2_by_name_and_cluster(l2_name, cluster_uuid):
+    cond = res_ops.gen_query_conditions("name", '=', l2_name)
+    cond = res_ops.gen_query_conditions('attachedClusterUuids', '=', cluster_uuid, cond)
+    l2_inv = res_ops.query_resource(res_ops.L2_NETWORK, cond)
+    if l2_inv:
+        return l2_inv[0]
+
 def lib_get_vcenter_l3_by_name(l3_name):
     cond = res_ops.gen_query_conditions("name", '=', l3_name)
+    l3_inv = res_ops.query_resource(res_ops.L3_NETWORK, cond)
+    if l3_inv:
+        return l3_inv[0]
+
+def lib_get_vcenter_l3_by_name_and_l2(l3_name, l2_uuid):
+    cond = res_ops.gen_query_conditions("name", '=', l3_name)
+    cond = res_ops.gen_query_conditions('l2NetworkUuid', '=', l2_uuid, cond)
     l3_inv = res_ops.query_resource(res_ops.L3_NETWORK, cond)
     if l3_inv:
         return l3_inv[0]

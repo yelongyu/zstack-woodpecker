@@ -199,8 +199,8 @@ def get_pgs(vsdic):
             non_common_pgs = (set(vsdic[host][switch]) ^ tmp_pgs)
             if non_common_pgs:
                 res2.extend(non_common_pgs)
-
-    return map(lambda x: x.split('.')[0], res1), map(lambda x: x.split('.')[1], res1), map(lambda x: x.split('.')[0], res2), map(lambda x: x.split('.')[1], res2)
+    
+    return res1, res2
 
 
 
@@ -220,6 +220,7 @@ def check_deployed_vcenter(deploy_config, scenario_config = None, scenario_file 
         for cluster in xmlobject.safe_list(datacenter.clusters.cluster):
             sign = None
             assert cluster.name_ == vc_ops.lib_get_vcenter_cluster_by_name(cluster.name_).name
+            cluster_uuid = vc_ops.lib_get_vcenter_cluster_by_name(cluster.name_).uuid
             for host in xmlobject.safe_list(cluster.hosts.host):
                 vslist[host.name_] = {'vSwitch0':['VM Network.0']}
                 managementIp = dep_ops.get_host_from_scenario_file(host.name_, scenario_config, scenario_file, deploy_config)
@@ -252,39 +253,23 @@ def check_deployed_vcenter(deploy_config, scenario_config = None, scenario_file 
                     assert tp_name == vc_ops.lib_get_root_image_by_name(tp_name).name
             for dportgroup_name in dportgroup_list:
                if sign:
-                    assert dportgroup_name == vc_ops.lib_get_vcenter_l2_by_name(dportgroup_name).name
-                    assert "L3-" + dportgroup_name == vc_ops.lib_get_vcenter_l3_by_name("L3-" + dportgroup_name).name
-                    cluster_list = vc_ops.lib_get_vcenter_l2_by_name(dportgroup_name).attachedClusterUuids
-                    if vc_ops.lib_get_vcenter_cluster_by_name(cluster.name_).uuid not in cluster_list:
-                        test_util.test_fail("dpg not sync success")
-               else:
-                    if vc_ops.lib_get_vcenter_l2_by_name(dportgroup_name):
-                        cluster_list = vc_ops.lib_get_vcenter_l2_by_nam(dportgroup_name).attachedClusterUuids
-                        if vc_ops.lib_get_vcenter_cluster_by_name(cluster.name_).uuid in cluster_list:
-                           test_util.test_fail("dpg not sync success")
-                    else:
-                        assert vc_ops.lib_get_vcenter_l2_by_name(dportgroup_name) == None
-                        assert vc_ops.lib_get_vcenter_l3_by_name("L3-" + dportgroup_name) == None
-            pg_list, vlan_list, non_pg_list, non_vlan_list = get_pgs(vslist)
-            for pg in pg_list:
-                assert pg == vc_ops.lib_get_vcenter_l2_by_name(pg).name
-                assert "L3-" + pg == vc_ops.lib_get_vcenter_l3_by_name("L3-" + pg).name
-                cluster_list = vc_ops.lib_get_vcenter_l2_by_name(pg).attachedClusterUuids
-                if vc_ops.lib_get_vcenter_cluster_by_name(cluster.name_).uuid not in cluster_list:
-                    test_util.test_fail("pg not sync success")
-            for non_pg in non_pg_list:
-                if vc_ops.lib_get_vcenter_l2_by_name(non_pg):
-                    cluster_list = vc_ops.lib_get_vcenter_l2_by_name(non_pg).attachedClusterUuids
-                    if vc_ops.lib_get_vcenter_cluster_by_name(cluster.name_).uuid in cluster_list:
-                        test_util.test_fail("pg not sync success")
-                else:
-                    assert vc_ops.lib_get_vcenter_l2_by_name(non_pg) == None
-                    assert vc_ops.lib_get_vcenter_l3_by_name("L3-" + non_pg) == None
+                    l2 = vc_ops.lib_get_vcenter_l2_by_name_and_cluster(dportgroup_name, cluster_uuid)
+                    assert dportgroup_name == l2.name
+                    assert "L3-" + dportgroup_name == vc_ops.lib_get_vcenter_l3_by_name_and_l2("L3-" + dportgroup_name, l2.uuid).name
+            pg_vlan_list, non_pg_vlan_list = get_pgs(vslist)
+            for pg_vlan in pg_vlan_list:
+                pg = pg_vlan.split('.')[0]
+                vlan = pg_vlan.split('.')[1]
+                l2 = vc_ops.lib_get_vcenter_l2_by_name_and_cluster(pg, cluster_uuid)
+                assert pg == l2.name
+                if l2.vlan:                    
+                    assert vlan == str(l2.vlan)
+                assert "L3-" + pg == vc_ops.lib_get_vcenter_l3_by_name_and_l2("L3-" + pg, l2.uuid).name
+            for non_pg_vlan in non_pg_vlan_list:
+                non_pg = non_pg_vlan.split('.')[0]
+                assert vc_ops.lib_get_vcenter_l2_by_name_and_cluster(non_pg, cluster_uuid) == None
 
-
-
-
-
+                
 
 
 def create_volume(volume_creation_option=None, session_uuid = None):
