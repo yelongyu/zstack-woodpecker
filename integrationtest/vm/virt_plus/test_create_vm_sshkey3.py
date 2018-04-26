@@ -36,7 +36,7 @@ def test():
     test_lib.lib_wait_target_up(vm_ip, '22', 240)
     time.sleep(10)
     for i in range(5):
-        ssh_cmd = 'timeout 5 ssh -i %s -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s echo pass' % (os.environ.get('sshkeyPriKey_file'), vm_ip)
+        ssh_cmd = 'timeout 5 ssh -i %s -oPasswordAuthentication=no -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s echo pass' % (os.environ.get('sshkeyPriKey_file'), vm_ip)
         process_result = test_stub.execute_shell_in_process(ssh_cmd, tmp_file)
         if process_result == 0:
             break
