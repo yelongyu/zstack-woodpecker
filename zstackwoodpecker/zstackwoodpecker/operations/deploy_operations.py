@@ -1042,6 +1042,26 @@ def get_host_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, deplo
                                     return s_vm.ip_
     return None
 
+def get_iscsi_host_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, deployConfig):
+    if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
+        return None
+
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            if vm.name_ == hostRefName:
+                with open(scenarioFile, 'r') as fd:
+                    xmlstr = fd.read()
+                    fd.close()
+                    scenario_file = xmlobject.loads(xmlstr)
+                    for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                        if s_vm.name_ == vm.name_:
+                            if xmlobject.has_element(s_vm, 'managementIp_') and s_vm.managementIp_ != s_vm.ip_:
+                                return s_vm.managementIp_
+                            else:
+                                return s_vm.ip_
+    return None
+
+
 def get_host_obj_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, deployConfig):
     if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
         return None
@@ -2844,7 +2864,8 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
                 if xmlobject.has_element(host, "iScsiStorage"):
                     for datastore in vc_hs.datastore:
                         datastore.Destroy()
-                    setup_iscsi_device(host=vc_hs, target_ip=host.iScsiStorage.target_)
+                    target = get_iscsi_host_from_scenario_file(host.iScsiStorage.target_, scenario_config, scenario_file, deploy_config)
+                    setup_iscsi_device(host=vc_hs, target_ip=target)
                     time.sleep(5)
                     if not vc_hs.datastore:
                         vc_ds = create_datastore(host=vc_hs, dsname=host.iScsiStorage.vmfsdatastore.name_)

@@ -74,6 +74,7 @@ dvlanid1 = 1
 vmName2 = 12345
 vmName3 = 12345
 vmName4 = 12345
+vmName5 = 12345
 
 vCenterVirtualRouterImageName = vCenter-vr
 rootMediaType = RootVolumeTemplate
