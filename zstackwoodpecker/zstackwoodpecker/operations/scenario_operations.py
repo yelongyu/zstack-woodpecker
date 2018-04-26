@@ -274,7 +274,7 @@ def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
     # NOTE: need to make filesystem in sync in VM before cold stop VM
     stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
     start_vm(zstack_management_ip, vm_inv.uuid)
-    if not test_lib.lib_wait_target_up(vm_ip, '22', 120):
+    if not test_lib.lib_wait_target_up(vm_ip, '22', 360):
         test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
 
     for l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
@@ -895,7 +895,7 @@ def setup_xsky_storages(scenario_config, scenario_file, deploy_config):
         for node in xmlobject.safe_list(scenario_config.deployerConfig.xsky.nodes.node):
             vmUuid = node.uuid_
             vmIp = node.nodeIP_
-            test_lib.lib_wait_target_up(vmIp, '22', 120)
+            test_lib.lib_wait_target_up(vmIp, '22', 360)
 
         #check xsky ENV
         xskyUser = scenario_config.deployerConfig.xsky.account.user.text_
@@ -1950,7 +1950,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     # NOTE: need to make filesystem in sync in VM before cold stop VM
                     stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
                     start_vm(zstack_management_ip, vm_inv.uuid)
-                    test_lib.lib_wait_target_up(vm_ip, '22', 120)
+                    test_lib.lib_wait_target_up(vm_ip, '22', 360)
 
                 ips_xml = etree.SubElement(vm_xml, 'ips')
                 l3_id = 0
