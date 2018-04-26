@@ -238,6 +238,7 @@ def create_vm_with_random_offering(vm_name, image_name=None, l3_name=None, sessi
         image_uuid = test_lib.lib_get_image_by_name(imagename).uuid
     else:
         conf = res_ops.gen_query_conditions('format', '!=', 'iso')
+        conf = res_ops.gen_query_conditions('mediaType', '!=', 'ISO', conf)
         conf = res_ops.gen_query_conditions('system', '=', 'false', conf)
         image_uuid = random.choice(res_ops.query_resource(res_ops.IMAGE, conf)).uuid
 
@@ -1370,7 +1371,7 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_REIMAGE")
         cond = res_ops.gen_query_conditions("uuid", '=', vm_obj.vm.imageUuid)
         img_inv = res_ops.query_resource(res_ops.IMAGE, cond)[0]
-        if img_inv.format == "iso":
+        if img_inv.format == "iso" or img_inv.mediaType == "ISO":
             test_util.test_dsc("skip reimage if image type is iso")
         else:
             #comment this data check for avoiding execute a cmd in vm in flat network mode.
