@@ -34,6 +34,7 @@
               <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
             </l3Network>
           </l3Networks>
+          <vcenterRef>$vcentername</vcenterRef>
         </vm>
       </vms>
     </host>
