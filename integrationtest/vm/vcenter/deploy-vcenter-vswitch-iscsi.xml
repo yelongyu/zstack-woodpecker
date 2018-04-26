@@ -230,6 +230,10 @@
                     </vms>
                   </host>
                   <host name="$hostName3" ref="$vmName3" username="$vchostUser" password="$vchostpwd" thumbprint="$vcsslthumbprint">
+                    <iScsiStorage target="$vmName5">
+                      <vmfsdatastore name="$vcvmfsdatastore"/>
+                    </iScsiStorage>
+
                     <vswitchs>
                       <vswitch name="$vswitch0">
                         <portgroup vlanId="$vlanid0">$portgroup0</portgroup>
