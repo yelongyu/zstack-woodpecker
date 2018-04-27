@@ -379,13 +379,10 @@ class WoodPecker(object):
 
                     msg = fmt % case_name.ljust(max_case_name_len) + ret
                     self.info(msg)
-
-                if not self.dry_run and os.path.exists(POST_TEST_CASE_SCRIPT):
-                    os.system("bash %s" % POST_TEST_CASE_SCRIPT)
-
-                    
             finally:
                 logfd.close()
+                if not self.dry_run and os.path.exists(POST_TEST_CASE_SCRIPT):
+                    os.system("bash %s" % POST_TEST_CASE_SCRIPT)
 
             if self.stop_when_fail_match:
                 logfd = open(case_log_path, 'r')
