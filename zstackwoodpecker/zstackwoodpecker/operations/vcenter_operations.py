@@ -231,6 +231,9 @@ def get_host(content, name=None):
 def get_host_networkSystem(host):
     return host.configManager.networkSystem
 
+def find_host_by_vm(content, vm_name):
+    vc_vm = get_vm(content, vm_name)[0]
+    return vc_vm.summary.runtime.host.name
 
 def add_vswitch(host, name):
     from pyVmomi import vim
@@ -428,3 +431,10 @@ def get_datastore_type(vcenter):
     else:
         type = 'iscsi'     
     return type
+
+def enable_vmotion(host_obj):
+    vnic = host_obj.configManager.virtualNicManager
+    vnic.SelectVnicForNicType(nicType='vmotion',device='vmk0')
+
+
+ 
