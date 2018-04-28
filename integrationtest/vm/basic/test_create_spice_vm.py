@@ -25,7 +25,7 @@ def test():
     host_password=host_inv.password
 
     test_util.test_dsc('check the vm console protocol is spice via read xml')
-    cmd='''virsh dumpxml %s |grep spice|awk  '{print $2}' |awk -F= '{print $2}' '''% (vm_uuid)
+    cmd='''virsh dumpxml %s |grep spice | grep -v spicevmc | grep -v com.redhat.spice.0 |awk  '{print $2}' |awk -F= '{print $2}' '''% (vm_uuid)
     result=test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd, 180)
     if eval(result) == "spice" :
 	print "Vm console protocol is spice, test success"
