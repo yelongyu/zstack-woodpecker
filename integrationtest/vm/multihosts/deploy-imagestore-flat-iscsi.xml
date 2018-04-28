@@ -96,26 +96,26 @@
         format="$rootImageFormat" url="$imageUrl_s" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName_net" description="Test Image2" 
         format="$rootImageFormat" url="$imageUrl_net" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName3" description="Test Image3" 
         format="$rootImageFormat" url="$imageUrl3" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       </image>
       <image name="$virtualRouterImageName" 
         description="virtual router image" format="$rootImageFormat" 
         username="$vrImageUsername" password="$vrImagePassword"
         mediaType="$rootMediaType"
         hypervisorType='KVM' url="$virtualRouterImageUrl" system="True">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       </image>
     </images>
   
@@ -135,11 +135,10 @@
   
     <zones>
       <zone name="$zoneName" description="Test">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
         <primaryStorages>
-	  <sharedMountPointPrimaryStorage name="$sharedMountPointPrimaryStorageName"
-            description="Test SMP PS"
-            url="$sharedMountPointPrimaryStorageUrl" />
+	  <iscsiPrimaryStorage name="$iscsiPrimaryStorageName"
+            description="ISCSI PS" />
         </primaryStorages>
 
         <clusters>
