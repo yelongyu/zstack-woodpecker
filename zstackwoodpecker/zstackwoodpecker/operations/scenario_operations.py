@@ -701,6 +701,110 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
                                 ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
                                 continue
 
+def setup_iscsi_target(vm_inv, vm_config, deploy_config):
+    vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
+    if hasattr(vm_config, 'hostRef'):
+        host = get_deploy_host(vm_config.hostRef.text_, deploy_config)
+        if not hasattr(host, 'port_') or host.port_ == '22':
+            host_port = '22'
+        else:
+            host_port = host.port_
+    else:
+        host_port = '22'
+
+    #TODO: install with local repo
+    cmd = "yum install scsi-target-utils -y"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "iptables -I INPUT -p tcp -m tcp --dport 3260 -j ACCEPT"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "service iptables save"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "service tgtd start"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "chkconfig tgtd on"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "itgtadm --lld iscsi --mode target --op new --tid 1 -T iqn.iscsi_target:disk1"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "tgtadm --lld iscsi --mode logicalunit --op new --tid 1 --lun 1 -b /dev/vdb"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "tgtadm --lld iscsi --mode target --op bind --tid 1 -I ALL"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "tgt-admin -s"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #cmd = ""
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+
+
+ALEADY_DONE_ON_ANOTHER_HOST = None
+def setup_iscsi_initiator(vm_inv, vm_config, deploy_config, iscsi_target_ip):
+    global ALEADY_DONE_ON_ANOTHER_HOST
+    vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
+    if hasattr(vm_config, 'hostRef'):
+        host = get_deploy_host(vm_config.hostRef.text_, deploy_config)
+        if not hasattr(host, 'port_') or host.port_ == '22':
+            host_port = '22'
+        else:
+            host_port = host.port_
+    else:
+        host_port = '22'
+
+    #TODO: install with local repo
+    cmd = "yum -y install iscsi-initiator-utils"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "service iscsi start"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "chkconfig iscsi on"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "service iscsid start"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "chkconfig iscsid on"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "iscsiadm -m discovery -t sendtargets -p %s:3260" %(iscsi_target_ip)
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "iscsiadm -m node -T iqn.iscsi_target:disk1 -p %s:3260 -l" %(iscsi_target_ip)
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "yum -y install device-mapper device-mapper-multipath"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "chkconfig -level 2345 multipathd on"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #cmd = "lsmod |grep dm_multipath"
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "modprobe dm-multipath"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "modprobe dm-round-robin"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #TODO: scp multipath.conf to host machine
+    cmd = "scp "
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "service multipathd start"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "multipath -v2"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+
+    if not ALEADY_DONE_ON_ANOTHER_HOST:
+        #TODO: auto separate 2 partitions
+        cmd = "fdisk /dev/mapper/mpatha"
+        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        cmd = "pvcreate /dev/mapper/mpatha1"
+        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        cmd = "pvcreate /dev/mapper/mpatha2 --metadatasize 512m"
+        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        cmd = "systemctl restart multipathd.service"
+        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        cmd = "vgcreate --shared zstacksanlock /dev/mapper/mpatha1"
+        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        cmd = "vgchange --lock-start zstacksanlock"
+        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        #TODO: get vg_name
+        vg_name="fake_vg_name"
+        cmd = "lvmlockctl --gl-disable %s" %(vg_name)
+        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        cmd = "lvmlockctl --gl-enable zstacksanlock"
+        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        ALEADY_DONE_ON_ANOTHER_HOST = True
+
+
+
 def get_scenario_config_vm(vm_name, scenario_config):
     for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
         for vm in xmlobject.safe_list(host.vms.vm):
@@ -2012,7 +2116,6 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
                             attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
                             break
-
                         if bs_ref.type_ == 'fusionstor':
                             disk_offering_uuid = bs_ref.offering_uuid_
                             volume_option.set_disk_offering_uuid(disk_offering_uuid)
@@ -2042,6 +2145,16 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                 share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
                                 ocfs2smp_shareable_volume_is_created = True
                             attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
+                        elif ps_ref.type_ == 'iscsiTarget':
+                            iscsi_disk_offering_uuid = ps_ref.disk_offering_uuid_
+                            volume_option.set_disk_offering_uuid(iscsi_disk_offering_uuid)
+                            iscsi_share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
+                            attach_volume(zstack_management_ip, iscsi_share_volume_inv.uuid, vm_inv.uuid)
+                            #setup_iscsi_target(vm_inv, vm, deploy_config)
+                            break
+                        elif ps_ref.type_ == 'iscsiInitiator':
+                            #setup_iscsi_initiator(vm_inv, vm, deploy_config)
+                            break
                         elif ps_ref.type_ == 'ZSES':
                             if zbs_virtio_scsi_volume_is_created == False and hasattr(ps_ref, 'disk_offering_uuid_'):
                                 zbs_disk_offering_uuid = ps_ref.disk_offering_uuid_
