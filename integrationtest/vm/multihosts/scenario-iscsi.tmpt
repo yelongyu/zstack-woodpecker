@@ -1,5 +1,5 @@
 import ./scenario.tmpt
-import ./deploy-iscsi.tmpt
+import ./deploy-imagestore-flat-iscsi.tmpt
 vmName0 = ocfs2_scenario0
 vmName1 = ocfs2_scenario1
 vmName2 = ocfs2_scenario2
