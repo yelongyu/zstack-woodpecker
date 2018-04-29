@@ -713,7 +713,7 @@ def setup_iscsi_target(vm_inv, vm_config, deploy_config):
         host_port = '22'
 
     #TODO: install with local repo
-    cmd = "yum install scsi-target-utils -y"
+    cmd = "yum install scsi-target-utils -y --disablerepo=* --enablerepo=zstack-local"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     cmd = "iptables -I INPUT -p tcp -m tcp --dport 3260 -j ACCEPT"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
@@ -749,7 +749,7 @@ def setup_iscsi_initiator(vm_inv, vm_config, deploy_config, iscsi_target_ip):
         host_port = '22'
 
     #TODO: install with local repo
-    cmd = "yum -y install iscsi-initiator-utils"
+    cmd = "yum -y install iscsi-initiator-utils --disablerepo=* --enablerepo=zstack-local"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     cmd = "service iscsi start"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
@@ -774,8 +774,10 @@ def setup_iscsi_initiator(vm_inv, vm_config, deploy_config, iscsi_target_ip):
     cmd = "modprobe dm-round-robin"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     #TODO: scp multipath.conf to host machine
-    cmd = "scp "
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    
+    multipath_cfg_src = ""
+    multipath_cfg_dst = ""
+    ssh.scp_file(multipath_cfg_src, multipath_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
     cmd = "service multipathd start"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     cmd = "multipath -v2"
