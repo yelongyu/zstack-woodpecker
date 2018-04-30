@@ -770,7 +770,7 @@ def setup_iscsi_initiator(vm_inv, vm_config, deploy_config):
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     cmd = "yum -y install device-mapper device-mapper-multipath"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-    cmd = "chkconfig -level 2345 multipathd on"
+    cmd = "chkconfig --level 2345 multipathd on"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     #cmd = "lsmod |grep dm_multipath"
     #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
