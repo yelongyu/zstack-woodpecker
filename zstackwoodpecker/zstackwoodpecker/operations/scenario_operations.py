@@ -701,7 +701,9 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
                                 ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
                                 continue
 
+ISCSI_TARGET_IP = None
 def setup_iscsi_target(vm_inv, vm_config, deploy_config):
+    global ISCSI_TARGET_IP
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
     if hasattr(vm_config, 'hostRef'):
         host = get_deploy_host(vm_config.hostRef.text_, deploy_config)
@@ -733,11 +735,14 @@ def setup_iscsi_target(vm_inv, vm_config, deploy_config):
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     #cmd = ""
     #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    ISCSI_TARGET_IP = vm_ip
 
 
 ALEADY_DONE_ON_ANOTHER_HOST = None
-def setup_iscsi_initiator(vm_inv, vm_config, deploy_config, iscsi_target_ip):
+def setup_iscsi_initiator(vm_inv, vm_config, deploy_config):
     global ALEADY_DONE_ON_ANOTHER_HOST
+    global ISCSI_TARGET_IP
+    iscsi_target_ip = ISCSI_TARGET_IP
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
     if hasattr(vm_config, 'hostRef'):
         host = get_deploy_host(vm_config.hostRef.text_, deploy_config)
