@@ -713,7 +713,7 @@ def setup_iscsi_target(vm_inv, vm_config, deploy_config):
         host_port = '22'
 
     #TODO: install with local repo
-    cmd = "yum install scsi-target-utils -y --disablerepo=* --enablerepo=zstack-local"
+    cmd = "yum install scsi-target-utils -y"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     cmd = "iptables -I INPUT -p tcp -m tcp --dport 3260 -j ACCEPT"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
@@ -749,7 +749,7 @@ def setup_iscsi_initiator(vm_inv, vm_config, deploy_config, iscsi_target_ip):
         host_port = '22'
 
     #TODO: install with local repo
-    cmd = "yum -y install iscsi-initiator-utils --disablerepo=* --enablerepo=zstack-local"
+    cmd = "yum -y install iscsi-initiator-utils"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     cmd = "service iscsi start"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
@@ -2152,10 +2152,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             volume_option.set_disk_offering_uuid(iscsi_disk_offering_uuid)
                             iscsi_share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
                             attach_volume(zstack_management_ip, iscsi_share_volume_inv.uuid, vm_inv.uuid)
-                            #setup_iscsi_target(vm_inv, vm, deploy_config)
+                            setup_iscsi_target(vm_inv, vm, deploy_config)
                             break
                         elif ps_ref.type_ == 'iscsiInitiator':
-                            #setup_iscsi_initiator(vm_inv, vm, deploy_config)
+                            setup_iscsi_initiator(vm_inv, vm, deploy_config)
                             break
                         elif ps_ref.type_ == 'ZSES':
                             if zbs_virtio_scsi_volume_is_created == False and hasattr(ps_ref, 'disk_offering_uuid_'):
