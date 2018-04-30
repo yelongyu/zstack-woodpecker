@@ -723,7 +723,7 @@ def setup_iscsi_target(vm_inv, vm_config, deploy_config):
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     cmd = "chkconfig tgtd on"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-    cmd = "itgtadm --lld iscsi --mode target --op new --tid 1 -T iqn.iscsi_target:disk1"
+    cmd = "tgtadm --lld iscsi --mode target --op new --tid 1 -T iqn.iscsi_target:disk1"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     cmd = "tgtadm --lld iscsi --mode logicalunit --op new --tid 1 --lun 1 -b /dev/vdb"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
