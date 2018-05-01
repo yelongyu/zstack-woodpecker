@@ -12,13 +12,13 @@ test_obj_dict = test_state.TestStateDict()
 def test():
     '''
     Test Description:
-        Create 1 VR VM and create 22 Data Volumes. Check if 22 Data Volumes could be attached to VM at the same time. 
+        Create 1 VR VM and create 19 Data Volumes. Check if 19 Data Volumes could be attached to VM at the same time. 
     Resource required:
-        2 VM will be created. 22*10M data volumes will be created. 
+        2 VM will be created. 19*10M data volumes will be created. 
     '''
     global test_obj_dict
     volume_list = []
-    vol_num = 22
+    vol_num = 19
 
     vm = test_stub.create_vlan_vm()
     test_obj_dict.add_vm(vm)
@@ -36,7 +36,7 @@ def test():
         volume_list[i].check()
 
     vm.check()
-    test_util.test_dsc('Test attach/detach 22 volumes operations.')
+    test_util.test_dsc('Test attach/detach 19 volumes operations.')
     for i in range(vol_num):
         volume_list[i].attach(vm)
 
@@ -47,7 +47,7 @@ def test():
         volume_list[i].detach()
         volume_list[i].check()
         
-    test_util.test_dsc('Redo attach/detach 22 volumes operations.')
+    test_util.test_dsc('Redo attach/detach 19 volumes operations.')
 
     for i in range(vol_num):
         volume_list[i].attach(vm)
