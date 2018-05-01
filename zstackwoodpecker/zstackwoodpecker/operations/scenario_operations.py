@@ -778,10 +778,11 @@ def setup_iscsi_initiator(vm_inv, vm_config, deploy_config):
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     cmd = "modprobe dm-round-robin"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-    #TODO: scp multipath.conf to host machine
     
-    multipath_cfg_src = ""
-    multipath_cfg_dst = ""
+    import commands
+    status, woodpecker_ip = commands.getstatusoutput("ip addr show zsn0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'")
+    multipath_cfg_src = "/home/%s/multipath.conf" %(woodpecker_ip)
+    multipath_cfg_dst = "/etc/multipath.conf"
     ssh.scp_file(multipath_cfg_src, multipath_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
     cmd = "service multipathd start"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
@@ -790,7 +791,10 @@ def setup_iscsi_initiator(vm_inv, vm_config, deploy_config):
 
     if not ALEADY_DONE_ON_ANOTHER_HOST:
         #TODO: auto separate 2 partitions
-        cmd = "fdisk /dev/mapper/mpatha"
+        fdisk_cfg_src = "/home/%s/fdiskIscsiUse.cmd" %(woodpecker_ip)
+        fdisk_cfg_dst = "/tmp/fdiskIscsiUse.cmd"
+        ssh.scp_file(fdisk_cfg_src, fdisk_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
+        cmd = "fdisk /dev/mapper/mpatha </tmp/fdiskIscsiUse.cmd"
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
         cmd = "pvcreate /dev/mapper/mpatha1"
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
