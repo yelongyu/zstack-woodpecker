@@ -702,8 +702,11 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
                                 continue
 
 ISCSI_TARGET_IP = None
+ISCSI_TARGET_UUID = None
 def setup_iscsi_target(vm_inv, vm_config, deploy_config):
     global ISCSI_TARGET_IP
+    global ISCSI_TARGET_UUID
+    ISCSI_TARGET_UUID = vm_inv.uuid
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
     if hasattr(vm_config, 'hostRef'):
         host = get_deploy_host(vm_config.hostRef.text_, deploy_config)
@@ -742,6 +745,7 @@ ALEADY_DONE_ON_ANOTHER_HOST = None
 def setup_iscsi_initiator(vm_inv, vm_config, deploy_config):
     global ALEADY_DONE_ON_ANOTHER_HOST
     global ISCSI_TARGET_IP
+    global ISCSI_TARGET_UUID
     iscsi_target_ip = ISCSI_TARGET_IP
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
     if hasattr(vm_config, 'hostRef'):
@@ -795,7 +799,12 @@ def setup_iscsi_initiator(vm_inv, vm_config, deploy_config):
         fdisk_cfg_dst = "/tmp/fdiskIscsiUse.cmd"
         ssh.scp_file(fdisk_cfg_src, fdisk_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
         cmd = "fdisk /dev/mapper/mpatha </tmp/fdiskIscsiUse.cmd"
-        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, False, int(host_port))
+
+        zstack_management_ip = scenario_config.basicConfig.zstackManagementIp.text_
+        stop_vm(zstack_management_ip, ISCSI_TARGET_UUID, 'cold')
+        start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
+
         cmd = "pvcreate /dev/mapper/mpatha1"
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
         cmd = "pvcreate /dev/mapper/mpatha2 --metadatasize 512m"
@@ -806,13 +815,26 @@ def setup_iscsi_initiator(vm_inv, vm_config, deploy_config):
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
         cmd = "vgchange --lock-start zstacksanlock"
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+
+        stop_vm(zstack_management_ip, ISCSI_TARGET_UUID, 'cold')
+        start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
+
+        stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
+        start_vm(zstack_management_ip, vm_inv.uuid)
+
         #TODO: get vg_name
-        vg_name="fake_vg_name"
+        status, ps_uuid = commands.getstatusoutput("vgs|grep wz--n-|grep -v zstack|head -n 1|awk '{print $1}'")
+        test_util.test_logger("ps_uuid=%s" %(ps_uuid))
+        vg_name = ps_uuid
         cmd = "lvmlockctl --gl-disable %s" %(vg_name)
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
         cmd = "lvmlockctl --gl-enable zstacksanlock"
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
         ALEADY_DONE_ON_ANOTHER_HOST = True
+    else:
+        stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
+        start_vm(zstack_management_ip, vm_inv.uuid)
+        
 
 
 
