@@ -213,5 +213,3 @@ hostForceStopScript = /home/host_force_stop_script.sh
 physicalHostUsername = root
 physicalHostPassword = 123456
 physicalHostPassword2 = 234567
-
-isoForVmUrl = http://zstack.yyk.net/iso/CentOS-x86_64-7.2-Minimal.iso
