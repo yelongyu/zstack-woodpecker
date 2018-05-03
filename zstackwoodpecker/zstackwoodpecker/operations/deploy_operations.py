@@ -2396,6 +2396,18 @@ def create_datastore(host=None, dsname=None):
     datastore = host.configManager.datastoreSystem.CreateVmfsDatastore(vmfs_create_spec)
     return datastore
 
+def create_nfs_datastore(host=None, mn_ip=None, mount_point_path=None, ds_name=None):
+    from pyVmomi import vim
+    spec = vim.host.NasVolume.Specification()
+    spec.accessMode="readWrite"
+    spec.type = 'NFS41'
+    spec.securityType = 'AUTH_SYS'
+    spec.remoteHost = mn_ip
+    spec.remotePath = mount_point_path
+    spec.remoteHostNames = mn_ip
+    spec.localPath = ds_name
+    host.configManager.datastoreSystem.CreateNasDatastore(spec=spec)
+
 #To get the vswitch list from the host
 #vswitch_obj = host.config.network.vswitch
 def addvswitch_portgroup(host=None, vswitch="vSwitch0", portgroup=None, vlanId=0):
@@ -2869,6 +2881,11 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
                     time.sleep(5)
                     if not vc_hs.datastore:
                         vc_ds = create_datastore(host=vc_hs, dsname=host.iScsiStorage.vmfsdatastore.name_)
+                if xmlobject.has_element(host, "nfsStorage"):
+                    for datastore in vc_hs.datastore:
+                        datastore.Destroy()
+                    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+                    vc_ds = create_nfs_datastore(host=vc_hs, mn_ip=mn_ip, mount_point_path=host.nfsStorage.path_, ds_name=host.nfsStorage.nasdatastore.name_)
                 if xmlobject.has_element(host, "vswitchs"):
                     for vswitch in xmlobject.safe_list(host.vswitchs.vswitch):
                         if vswitch.name_ == "vSwitch0":
