@@ -61,6 +61,9 @@ vcsslthumbprint = 52:DF:8F:E5:37:43:57:7B:65:CC:BC:97:DE:EC:80:AE:96:FC:49:11
 vciscsitarget = 172.20.14.154
 vcvmfsdatastore = newdatastore
 vcvmfsdatastore1 = datastore1
+vcnasdatastore = nfs
+mountpointpath = /home/nfs
+
 vswitch0 = vSwitch0
 vswitch1 = vSwitch1
 portgroup0 = port_group0
