@@ -1,5 +1,5 @@
 '''
-test for migrating vm with iscsi storage 
+test for migrating vm with iscsi/nfs storage 
 @author: guocan
 '''
 
@@ -41,21 +41,15 @@ def test():
     if candidate_hosts == []:
         test_util.test_logger('Not find vm migration candidate hosts, skip test migrate vm')
     else:
-        test_util.test_dsc('Migrate vm from the current host')
-        vm_ops.migrate_vm_for_vcenter(vm.vm.uuid, current_host_uuid = vm.vm.hostUuid)
-        vm.update()
-        vm.check()
-        #check the consistency of the migration in zstack and vmware
-        assert test_lib.lib_find_host_by_vm(vm.vm).name == vct_ops.find_host_by_vm(content, vm.vm.name)
         test_util.test_dsc('Migrate vm to the specified host')
-        candidate_host = vm_ops.get_vm_migration_candidate_hosts(vm.vm.uuid).inventories[0]
-        host_uuid = candidate_host.uuid
-        vm_ops.migrate_vm_for_vcenter(vm.vm.uuid, host_uuid)
+        host_uuid = candidate_hosts[0].uuid
+        vm_ops.migrate_vm(vm.vm.uuid, host_uuid)
         vm.update()
         vm.check()
         #check whether the specified host is effective
-        assert candidate_host.name == test_lib.lib_find_host_by_vm(vm.vm).name
-        assert candidate_host.name == vct_ops.find_host_by_vm(content, vm.vm.name)
+        assert candidate_hosts[0].name == test_lib.lib_find_host_by_vm(vm.vm).name
+        #check the consistency of the migration in zstack and vmware
+        assert candidate_hosts[0].name == vct_ops.find_host_by_vm(content, vm.vm.name)
         test_util.test_dsc('vm in suspended state does not allow migration')
         vm.suspend()
         candidate_host = vm_ops.get_vm_migration_candidate_hosts(vm.vm.uuid).inventories
@@ -70,19 +64,13 @@ def test():
     if candidate_hosts == []:
         test_util.test_logger('Not find vm migration candidate hosts, skip test migrate vm with disk')
     else:
-        test_util.test_dsc('Migrate vm with disk from the current host')
-        vm_ops.migrate_vm_for_vcenter(vm1.vm.uuid, current_host_uuid = vm1.vm.hostUuid)
-        vm1.update()
-        vm1.check()
-        assert test_lib.lib_find_host_by_vm(vm1.vm).name == vct_ops.find_host_by_vm(content, vm1.vm.name)
         test_util.test_dsc('Migrate vm with disk to the specified host')
-        candidate_host = vm_ops.get_vm_migration_candidate_hosts(vm1.vm.uuid).inventories[0]
-        host_uuid = candidate_host.uuid
-        vm_ops.migrate_vm_for_vcenter(vm1.vm.uuid, host_uuid)
+        host_uuid = candidate_hosts[0].uuid
+        vm_ops.migrate_vm(vm1.vm.uuid, host_uuid)
         vm1.update()
         vm1.check()
-        assert candidate_host.name == test_lib.lib_find_host_by_vm(vm1.vm).name
-        assert candidate_host.name == vct_ops.find_host_by_vm(content, vm1.vm.name)
+        assert candidate_hosts[0].name == test_lib.lib_find_host_by_vm(vm1.vm).name
+        assert candidate_hosts[0].name == vct_ops.find_host_by_vm(content, vm1.vm.name)
    
     #cleanup 
     test_lib.lib_error_cleanup(test_obj_dict)
