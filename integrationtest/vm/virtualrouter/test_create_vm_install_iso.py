@@ -43,7 +43,7 @@ def test():
     img_option.set_name('image-iso')
     bs_uuid = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, [], None)[0].uuid
     img_option.set_backup_storage_uuid_list([bs_uuid])
-    img_option.set_url('http://172.20.1.15:7480/iso/iso_for_install_vm_test.iso')
+    img_option.set_url(os.environ.get('imageServer')+'/iso/iso_for_install_vm_test.iso')
     image_inv = img_ops.add_iso_template(img_option)
     image_uuid = image_inv.uuid
     image = test_image.ZstackTestImage()

@@ -238,3 +238,4 @@ testIsoName = testIso
 testIsoUrl = http://10.1.101.1/image/ttylinux-virtio_i486-16.1.iso
 
 iperfUrl = https://iperf.fr/download/fedora/iperf3-3.1.3-1.fc24.x86_64.rpm
+imageServer = http://10.1.101.1/

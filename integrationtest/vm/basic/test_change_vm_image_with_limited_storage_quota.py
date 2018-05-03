@@ -42,7 +42,7 @@ def test():
    image_option = test_util.ImageOption()
    image_option.set_name('8G')
    image_option.set_format('qcow2')
-   image_option.set_url("http://172.20.1.15:7480/diskimages/CentOS-7-x86_64-Cloudinit-8G-official.qcow2")
+   image_option.set_url(os.environ.get('imageServer')+"/diskimages/CentOS-7-x86_64-Cloudinit-8G-official.qcow2")
    image_option.set_backup_storage_uuid_list([bss[0].uuid])
    new_image = zstack_image_header.ZstackTestImage()
    new_image.set_creation_option(image_option)
