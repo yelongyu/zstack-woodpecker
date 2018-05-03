@@ -67,7 +67,7 @@ def test():
     img_option.set_name('iso1')
     bs_uuid = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, [], None)[0].uuid
     img_option.set_backup_storage_uuid_list([bs_uuid])
-    img_option.set_url('http://172.20.1.15:7480/iso/CentOS-x86_64-7.2-Minimal.iso')
+    img_option.set_url('os.environ.get('isoForVmUrl')')
     image_inv = img_ops.add_iso_template(img_option)
     image_uuid = image_inv.uuid
     image = test_image.ZstackTestImage()
