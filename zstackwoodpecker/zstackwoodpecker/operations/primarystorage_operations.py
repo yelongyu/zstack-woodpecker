@@ -75,6 +75,19 @@ def add_ceph_primary_storage_pool(primary_storage_uuid, pool_name, aliasName=Non
     return evt.inventory
 
 
+def create_sharedblock_primary_storage(primary_storage_option, disk_uuid, session_uuid=None):
+    action = api_actions.AddSharedBlockGroupPrimaryStorageAction()
+    action.timeout = 300000
+    action.name = primary_storage_option.get_name()
+    action.zoneUuid = primary_storage_option.get_zone_uuid()
+    action.description = primary_storage_option.get_description()
+    action.diskUuids = disk_uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Create SharedBlock Primary Storage [uuid:] %s [name:] %s' % \
+            (evt.inventory.uuid, action.name))
+    return evt.inventory
+
+
 def delete_primary_storage(primary_storage_uuid, session_uuid=None):
     '''
     Delete PS will delete all VMs and Volumes using this ps.
