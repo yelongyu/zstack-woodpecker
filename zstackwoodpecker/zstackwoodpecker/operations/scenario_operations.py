@@ -809,37 +809,37 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
         stop_vm(zstack_management_ip, ISCSI_TARGET_UUID, 'cold')
         start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
 
-        time.sleep(60)
+        #time.sleep(300)
 
-        cmd = "pvcreate /dev/mapper/mpatha1"
-        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-        cmd = "pvcreate /dev/mapper/mpatha2 --metadatasize 512m"
-        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-        cmd = "systemctl restart multipathd.service"
-        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-        cmd = "vgcreate --shared zstacksanlock /dev/mapper/mpatha1"
-        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-        cmd = "vgchange --lock-start zstacksanlock"
-        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        #cmd = "pvcreate /dev/mapper/mpatha1"
+        #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        #cmd = "pvcreate /dev/mapper/mpatha2 --metadatasize 512m"
+        #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        #cmd = "systemctl restart multipathd.service"
+        #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        #cmd = "vgcreate --shared zstacksanlock /dev/mapper/mpatha1"
+        #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        #cmd = "vgchange --lock-start zstacksanlock"
+        #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
 
-        stop_vm(zstack_management_ip, ISCSI_TARGET_UUID, 'cold')
-        start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
+        #stop_vm(zstack_management_ip, ISCSI_TARGET_UUID, 'cold')
+        #start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
 
-        stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
-        start_vm(zstack_management_ip, vm_inv.uuid)
+        #stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
+        #start_vm(zstack_management_ip, vm_inv.uuid)
 
-        test_lib.lib_wait_target_up(iscsi_target_ip, '22', 120)
-        test_lib.lib_wait_target_up(vm_ip, '22', 120)
-        time.sleep(10)
+        #test_lib.lib_wait_target_up(iscsi_target_ip, '22', 120)
+        #test_lib.lib_wait_target_up(vm_ip, '22', 120)
+        #time.sleep(10)
 
-        #TODO: get vg_name
-        status, ps_uuid = commands.getstatusoutput("vgs|grep wz--n-|grep -v zstack|head -n 1|awk '{print $1}'")
-        test_util.test_logger("ps_uuid=%s" %(ps_uuid))
-        vg_name = ps_uuid
-        cmd = "lvmlockctl --gl-disable %s" %(vg_name)
-        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-        cmd = "lvmlockctl --gl-enable zstacksanlock"
-        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        ##TODO: get vg_name
+        #status, ps_uuid = commands.getstatusoutput("vgs|grep wz--n-|grep -v zstack|head -n 1|awk '{print $1}'")
+        #test_util.test_logger("ps_uuid=%s" %(ps_uuid))
+        #vg_name = ps_uuid
+        #cmd = "lvmlockctl --gl-disable %s" %(vg_name)
+        #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        #cmd = "lvmlockctl --gl-enable zstacksanlock"
+        #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
         ALEADY_DONE_ON_ANOTHER_HOST = True
     else:
         stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
