@@ -1,10 +1,10 @@
 import ./scenario.tmpt
 import ./deploy-imagestore-flat-iscsi.tmpt
-vmName0 = ocfs2_scenario0
 vmName1 = ocfs2_scenario1
 vmName2 = ocfs2_scenario2
 vmName3 = ocfs2_scenario3
 vmName4 = ocfs2_scenario4
+vmName5 = ocfs2_scenario5
 vmInstranceOfferingUuid2 = 123456
 imageUuid2 = 123456
 shareVolumeDiskOfferingUuid = 123456
