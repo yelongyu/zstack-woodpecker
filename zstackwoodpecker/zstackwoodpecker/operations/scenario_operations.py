@@ -728,17 +728,20 @@ def setup_iscsi_target(vm_inv, vm_config, deploy_config):
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     cmd = "chkconfig tgtd on"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-    cmd = "tgtadm --lld iscsi --mode target --op new --tid 1 -T iqn.iscsi_target:disk1"
+    cmd = "echo 'tgtadm --lld iscsi --mode target --op new --tid 1 -T iqn.iscsi_target:disk1' >>/etc/rc.local"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-    cmd = "tgtadm --lld iscsi --mode logicalunit --op new --tid 1 --lun 1 -b /dev/vdb"
+    cmd = "echo 'tgtadm --lld iscsi --mode logicalunit --op new --tid 1 --lun 1 -b /dev/vdb' >>/etc/rc.local"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-    cmd = "tgtadm --lld iscsi --mode target --op bind --tid 1 -I ALL"
+    cmd = "echo 'tgtadm --lld iscsi --mode target --op bind --tid 1 -I ALL' >>/etc/rc.local"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "bash -x /etc/rc.local"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     cmd = "tgt-admin -s"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     #cmd = ""
     #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     ISCSI_TARGET_IP = vm_ip
+    test_util.test_logger("ISCSI_TARGET_IP=%s" %(ISCSI_TARGET_IP))
 
 
 ALEADY_DONE_ON_ANOTHER_HOST = None
