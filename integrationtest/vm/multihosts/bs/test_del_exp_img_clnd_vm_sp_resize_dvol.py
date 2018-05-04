@@ -31,6 +31,9 @@ def test():
     global test_obj_dict
 
     #run condition
+    allow_bs_list = [inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE, inventory.CEPH_BACKUP_STORAGE_TYPE]
+    test_lib.skip_test_when_bs_type_not_in_list(allow_bs_list)
+
     hosts = res_ops.query_resource(res_ops.HOST)
     if len(hosts) <= 1:
         test_util.test_skip("skip for host_num is not satisfy condition host_num>1")

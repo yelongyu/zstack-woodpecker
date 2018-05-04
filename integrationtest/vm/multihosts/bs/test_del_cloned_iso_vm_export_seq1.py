@@ -38,7 +38,7 @@ image = None
 def test():
     global image
     global test_obj_dict
-    allow_bs_list = [inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE, inventory.CEPH_BACKUP_STORAGE_TYPE, inventory.SFTP_BACKUP_STORAGE_TYPE]
+    allow_bs_list = [inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE, inventory.CEPH_BACKUP_STORAGE_TYPE]
     test_lib.skip_test_when_bs_type_not_in_list(allow_bs_list)
 
     allow_ps_list = [inventory.CEPH_PRIMARY_STORAGE_TYPE, inventory.NFS_PRIMARY_STORAGE_TYPE, 'SharedMountPoint']
