@@ -94,5 +94,8 @@
 		<case timeout='600' repeat='1'>test_create_vm_with_mac.py</case>
 	<!--<case timeout='500' repeat='1'>image_store/test_clone_stopped_vm_created.py</case>
 	<case timeout='500' repeat='1'>image_store/test_clone_vm_created.py</case>-->
+        <case timeout='600' repeat='1' noparallel='True'>test_add_image_file_url.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_add_qcow2_image_file_url.py</case>
+
     </suite>
 </integrationTest>
