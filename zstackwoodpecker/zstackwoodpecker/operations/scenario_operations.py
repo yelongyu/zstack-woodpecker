@@ -728,11 +728,13 @@ def setup_iscsi_target(vm_inv, vm_config, deploy_config):
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     cmd = "chkconfig tgtd on"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-    cmd = "echo 'tgtadm --lld iscsi --mode target --op new --tid 1 -T iqn.iscsi_target:disk1' >>/etc/rc.local"
+    cmd = "echo 'sleep 15' >>/etc/rc.local"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-    cmd = "echo 'tgtadm --lld iscsi --mode logicalunit --op new --tid 1 --lun 1 -b /dev/vdb' >>/etc/rc.local"
+    cmd = "echo 'tgtadm --lld iscsi --mode target --op new --tid 1 -T iqn.iscsi_target:disk1 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-    cmd = "echo 'tgtadm --lld iscsi --mode target --op bind --tid 1 -I ALL' >>/etc/rc.local"
+    cmd = "echo 'tgtadm --lld iscsi --mode logicalunit --op new --tid 1 --lun 1 -b /dev/vdb 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "echo 'tgtadm --lld iscsi --mode target --op bind --tid 1 -I ALL 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     cmd = "bash -x /etc/rc.local"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
@@ -807,6 +809,8 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
         stop_vm(zstack_management_ip, ISCSI_TARGET_UUID, 'cold')
         start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
 
+        time.sleep(10)
+
         cmd = "pvcreate /dev/mapper/mpatha1"
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
         cmd = "pvcreate /dev/mapper/mpatha2 --metadatasize 512m"
@@ -823,6 +827,8 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
 
         stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
         start_vm(zstack_management_ip, vm_inv.uuid)
+
+        time.sleep(10)
 
         #TODO: get vg_name
         status, ps_uuid = commands.getstatusoutput("vgs|grep wz--n-|grep -v zstack|head -n 1|awk '{print $1}'")
