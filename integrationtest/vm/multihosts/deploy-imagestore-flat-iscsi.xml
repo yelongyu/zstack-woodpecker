@@ -137,7 +137,7 @@
       <zone name="$zoneName" description="Test">
         <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
         <primaryStorages>
-	  <iscsiPrimaryStorage name="$iscsiPrimaryStorageName"
+	  <sharedBlockPrimaryStorage name="$iscsiPrimaryStorageName"
             description="ISCSI PS" />
         </primaryStorages>
 

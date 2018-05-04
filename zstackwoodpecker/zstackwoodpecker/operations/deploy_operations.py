@@ -511,6 +511,12 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
         action.availablePhysicalCapacity = sizeunit.get_size(pr.availableCapacity_)
         return action
 
+    def _get_disk_uuid():
+        import scenario_operations as sce_ops
+        host_ips = sce_ops.dump_scenario_file_ips(scenarioFile)
+        cmd = r"blkid|grep mpatha2|awk -F\" '{print $2}'"
+        ret, disk_uuid, stderr = ssh.execute(cmd, host_ips[-1], "root", "password", True, 22)
+        return disk_uuid
     def _deploy_primary_storage(zone):
         if xmlobject.has_element(zone, 'primaryStorages.IscsiFileSystemBackendPrimaryStorage'):
             zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, \
@@ -534,6 +540,25 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 action.sshUsername = pr.sshUsername_
                 action.hostname = pr.hostname_
                 action.filesystemType = pr.filesystemType_
+                thread = threading.Thread(target=_thread_for_action, args=(action,))
+                wait_for_thread_queue()
+                thread.start()
+
+        if xmlobject.has_element(zone, 'primaryStorages.sharedBlockPrimaryStorage'):
+            zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, \
+                    name=zone.name_)
+            zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
+
+            for pr in xmlobject.safe_list(zone.primaryStorages.sharedBlockPrimaryStorage):
+                if ps_name and ps_name != pr.name_:
+                    continue
+
+                action = api_actions.AddSharedBlockGroupPrimaryStorageAction()
+                action.sessionUuid = session_uuid
+                action.name = pr.name_
+                action.description = pr.description__
+                action.zoneUuid = zinv.uuid
+                action.diskUuids = _get_disk_uuid()
                 thread = threading.Thread(target=_thread_for_action, args=(action,))
                 wait_for_thread_queue()
                 thread.start()
