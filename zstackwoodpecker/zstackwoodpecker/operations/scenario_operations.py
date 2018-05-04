@@ -742,7 +742,7 @@ def setup_iscsi_target(vm_inv, vm_config, deploy_config):
 
 
 ALEADY_DONE_ON_ANOTHER_HOST = None
-def setup_iscsi_initiator(vm_inv, vm_config, deploy_config):
+def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config):
     global ALEADY_DONE_ON_ANOTHER_HOST
     global ISCSI_TARGET_IP
     global ISCSI_TARGET_UUID
@@ -801,7 +801,6 @@ def setup_iscsi_initiator(vm_inv, vm_config, deploy_config):
         cmd = "fdisk /dev/mapper/mpatha </tmp/fdiskIscsiUse.cmd"
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, False, int(host_port))
 
-        zstack_management_ip = scenario_config.basicConfig.zstackManagementIp.text_
         stop_vm(zstack_management_ip, ISCSI_TARGET_UUID, 'cold')
         start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
 
@@ -2186,7 +2185,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             setup_iscsi_target(vm_inv, vm, deploy_config)
                             break
                         elif ps_ref.type_ == 'iscsiInitiator':
-                            setup_iscsi_initiator(vm_inv, vm, deploy_config)
+                            setup_iscsi_initiator(zstack_management_ip, vm_inv, vm, deploy_config)
                             break
                         elif ps_ref.type_ == 'ZSES':
                             if zbs_virtio_scsi_volume_is_created == False and hasattr(ps_ref, 'disk_offering_uuid_'):
