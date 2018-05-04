@@ -809,8 +809,7 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
         stop_vm(zstack_management_ip, ISCSI_TARGET_UUID, 'cold')
         start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
 
-        test_lib.lib_wait_target_up(iscsi_target_ip, '22', 120)
-        time.sleep(10)
+        time.sleep(60)
 
         cmd = "pvcreate /dev/mapper/mpatha1"
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
