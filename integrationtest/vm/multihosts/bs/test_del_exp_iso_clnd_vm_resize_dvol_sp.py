@@ -38,7 +38,7 @@ def test():
     test_obj_dict.add_image(iso)
     root_volume_offering = test_stub.add_test_root_volume_offering('root-disk-iso', 10737418240)
     test_obj_dict.add_disk_offering(root_volume_offering)
-    vm_offering = test_stub.add_test_vm_offering(2, 2147483648, 'iso-vm-offering')
+    vm_offering = test_stub.add_test_vm_offering(2, 1024*1024*1024, 'iso-vm-offering')
     test_obj_dict.add_instance_offering(vm_offering)
     vm = test_stub.create_vm_with_iso_for_test(vm_offering.uuid, iso.image.uuid, root_volume_offering.uuid, 'iso-vm')
     test_obj_dict.add_vm(vm)

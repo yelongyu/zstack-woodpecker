@@ -41,7 +41,7 @@ def test():
 
     #create instance offering
     cpuNum = 2
-    memorySize = 2147483648
+    memorySize = 1024*1024*1024
     name = 'iso-vm-offering'
     new_offering_option = test_util.InstanceOfferingOption()
     new_offering_option.set_cpuNum(cpuNum)
