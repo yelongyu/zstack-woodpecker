@@ -84,7 +84,7 @@
     </instanceOfferings>
   
     <backupStorages>
-      <imageStoreBackupStorage name="$sftpBackupStorageName"
+      <imageStoreBackupStorage name="$imageStoreBackupStorageName"
         description="Test" url="$sftpBackupStorageUrl"
 	username="$sftpBackupStorageUsername"
 	password="$sftpBackupStoragePassword"
