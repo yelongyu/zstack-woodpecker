@@ -1417,7 +1417,7 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         img_ops.attach_iso(iso_uuid, vm_obj.vm.uuid)
         #vm_obj.check()
         test_lib.lib_wait_target_up(vm_obj.get_vm().vmNics[0].ip, 22, 300)
-        img_ops.detach_iso(vm_obj.vm.uuid)
+        img_ops.detach_iso(vm_obj.vm.uuid, iso_uuid)
         test_lib.lib_wait_target_up(vm_obj.get_vm().vmNics[0].ip, 22, 300)
         #vm_obj.check()
 
