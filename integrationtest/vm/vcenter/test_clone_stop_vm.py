@@ -12,19 +12,19 @@ def test():
   l3_vr_network = os.environ['l3vCenterNoVlanNetworkName']
   image_name = os.environ['image_dhcp_name']
 
-  vm = test_stub.create_vm_in_vcenter(vm_name='vm', image_name = image_name, l3_name=l3_vr_network)
+  vm = test_stub.create_vm_in_vcenter(vm_name='stop_vm', image_name = image_name, l3_name=l3_vr_network)
   test_obj_dict.add_vm(vm) 
   vm.stop() 
   vm.check()
   
-  clone_vm = vm.clone(['clone_vm'])[0]
+  clone_vm = vm.clone(['clone_stop_vm'])[0]
   test_obj_dict.add_vm(clone_vm)
   clone_vm.stop()
   clone_vm.check()
 
   names = []
   for i in range(5):
-    names.append('clone' + str(i+1))
+    names.append('clone_stop_vm' + str(i+1))
 
   clone_vms = clone_vm.clone(names)
 
