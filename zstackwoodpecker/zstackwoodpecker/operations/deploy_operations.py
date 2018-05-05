@@ -481,6 +481,14 @@ def get_primary_storage_from_scenario_file(primaryStorageRefName, scenarioConfig
                                         ip_list.append(s_vm.ip_)
     return ip_list
 
+def get_disk_uuid(scenarioFile):
+    import scenario_operations as sce_ops
+    import zstacklib.utils.ssh as ssh
+    host_ips = sce_ops.dump_scenario_file_ips(scenarioFile)
+    cmd = r"blkid|grep mpatha2|awk -F\" '{print $2}'"
+    ret, disk_uuid, stderr = ssh.execute(cmd, host_ips[-1], "root", "password", True, 22)
+    return disk_uuid
+
 #Add Primary Storage
 def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid, ps_name = None, \
         zone_name = None):
@@ -511,13 +519,6 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
         action.availablePhysicalCapacity = sizeunit.get_size(pr.availableCapacity_)
         return action
 
-    def _get_disk_uuid():
-        import scenario_operations as sce_ops
-        import zstacklib.utils.ssh as ssh
-        host_ips = sce_ops.dump_scenario_file_ips(scenarioFile)
-        cmd = r"blkid|grep mpatha2|awk -F\" '{print $2}'"
-        ret, disk_uuid, stderr = ssh.execute(cmd, host_ips[-1], "root", "password", True, 22)
-        return disk_uuid
     def _deploy_primary_storage(zone):
         if xmlobject.has_element(zone, 'primaryStorages.IscsiFileSystemBackendPrimaryStorage'):
             zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, \
@@ -559,7 +560,7 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 action.name = pr.name_
                 action.description = pr.description__
                 action.zoneUuid = zinv.uuid
-                action.diskUuids = _get_disk_uuid()
+                action.diskUuids = get_disk_uuid(scenarioFile)
                 thread = threading.Thread(target=_thread_for_action, args=(action,))
                 wait_for_thread_queue()
                 thread.start()
@@ -1104,6 +1105,52 @@ def get_host_obj_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, d
                             if s_vm.name_ == vm.name_:
                                 return s_vm
     return None
+
+
+#Add sanlock
+def add_sanlock(scenarioFile):
+    '''
+    sanlock creation and enable for sharedblock ps
+    '''
+
+    import zstackwoodpecker.test_lib as test_lib
+
+    if test_lib.lib_cur_cfg_is_a_and_b(["test-config-flat-imagestore-iscsi.xml"], ["scenario-config-iscsi.xml"]):
+        import scenario_operations as sce_ops
+        import zstacklib.utils.ssh as ssh
+
+        host_ips = sce_ops.dump_scenario_file_ips(scenarioFile)
+        vm_ip = host_ips[-1]
+        host_port = 22
+        username = "root"
+        password = "password"
+        cmd = "vgcreate --shared zstacksanlock /dev/mapper/mpatha1"
+        ssh.execute(cmd, vm_ip, username, password, True, int(host_port))
+        cmd = "vgchange --lock-start zstacksanlock"
+        ssh.execute(cmd, vm_ip, username, password, True, int(host_port))
+
+        #stop_vm(zstack_management_ip, ISCSI_TARGET_UUID, 'cold')
+        #start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
+
+        #stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
+        #start_vm(zstack_management_ip, vm_inv.uuid)
+
+        #test_lib.lib_wait_target_up(iscsi_target_ip, '22', 120)
+        #test_lib.lib_wait_target_up(vm_ip, '22', 120)
+        #time.sleep(10)
+
+        #TODO: get vg_name
+        #cmd = r"vgs|grep wz--n-|grep -v zstack|head -n 1|awk '{print $1}'"
+        #ret, ps_uuid, stderr = ssh.execute(cmd, vm_ip, "root", "password", True, 22)
+        #status, ps_uuid = commands.getstatusoutput("vgs|grep wz--n-|grep -v zstack|head -n 1|awk '{print $1}'")
+        #test_util.test_logger("ps_uuid=%s" %(ps_uuid))
+        #vg_name = ps_uuid
+        vg_name = get_disk_uuid(scenarioFile)
+        cmd = "lvmlockctl --gl-disable %s" %(vg_name)
+        ssh.execute(cmd, vm_ip, username, password, True, int(host_port))
+        cmd = "lvmlockctl --gl-enable zstacksanlock"
+        ssh.execute(cmd, vm_ip, username, password, True, int(host_port))
+    
 
 #Add Host
 def add_host(scenarioConfig, scenarioFile, deployConfig, session_uuid, host_ip = None, zone_name = None, \

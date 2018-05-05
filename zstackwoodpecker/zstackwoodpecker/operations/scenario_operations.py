@@ -823,14 +823,14 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
         stop_vm(zstack_management_ip, ISCSI_TARGET_UUID, 'cold')
         start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
 
-        #time.sleep(300)
+        time.sleep(180)
 
-        #cmd = "pvcreate /dev/mapper/mpatha1"
-        #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-        #cmd = "pvcreate /dev/mapper/mpatha2 --metadatasize 512m"
-        #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-        #cmd = "systemctl restart multipathd.service"
-        #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        cmd = "pvcreate /dev/mapper/mpatha1"
+        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        cmd = "pvcreate /dev/mapper/mpatha2 --metadatasize 512m"
+        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        cmd = "systemctl restart multipathd.service"
+        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
         #cmd = "vgcreate --shared zstacksanlock /dev/mapper/mpatha1"
         #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
         #cmd = "vgchange --lock-start zstacksanlock"
@@ -855,10 +855,10 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
         #cmd = "lvmlockctl --gl-enable zstacksanlock"
         #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
         ALEADY_DONE_ON_ANOTHER_HOST = True
-    #else:
-    #    stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
-    #    start_vm(zstack_management_ip, vm_inv.uuid)
-    #    test_lib.lib_wait_target_up(vm_ip, '22', 120)
+    else:
+        stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
+        start_vm(zstack_management_ip, vm_inv.uuid)
+        test_lib.lib_wait_target_up(vm_ip, '22', 120)
         
 
 
