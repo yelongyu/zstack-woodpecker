@@ -784,13 +784,16 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     cmd = "chkconfig iscsid on"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-    cmd = "iscsiadm -m discovery -t sendtargets -p %s:3260" %(iscsi_target_ip)
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-    cmd = "iscsiadm -m node -T iqn.iscsi_target:disk1 -p %s:3260 -l" %(iscsi_target_ip)
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     cmd = "yum -y install device-mapper device-mapper-multipath"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     cmd = "chkconfig --level 2345 multipathd on"
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+
+    cmd = "echo 'iscsiadm -m discovery -t sendtargets -p %s:3260 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local" %(iscsi_target_ip)
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "echo 'iscsiadm -m node -T iqn.iscsi_target:disk1 -p %s:3260 -l >>/tmp/tgtadm.log' >>/etc/rc.local" %(iscsi_target_ip)
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    cmd = "bash -x /etc/rc.local"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     #cmd = "lsmod |grep dm_multipath"
     #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
@@ -852,10 +855,10 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
         #cmd = "lvmlockctl --gl-enable zstacksanlock"
         #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
         ALEADY_DONE_ON_ANOTHER_HOST = True
-    else:
-        stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
-        start_vm(zstack_management_ip, vm_inv.uuid)
-        test_lib.lib_wait_target_up(vm_ip, '22', 120)
+    #else:
+    #    stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
+    #    start_vm(zstack_management_ip, vm_inv.uuid)
+    #    test_lib.lib_wait_target_up(vm_ip, '22', 120)
         
 
 
