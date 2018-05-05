@@ -513,6 +513,7 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
 
     def _get_disk_uuid():
         import scenario_operations as sce_ops
+        import zstacklib.utils.ssh as ssh
         host_ips = sce_ops.dump_scenario_file_ips(scenarioFile)
         cmd = r"blkid|grep mpatha2|awk -F\" '{print $2}'"
         ret, disk_uuid, stderr = ssh.execute(cmd, host_ips[-1], "root", "password", True, 22)
