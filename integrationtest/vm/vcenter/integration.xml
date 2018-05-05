@@ -1,22 +1,22 @@
 <integrationTest>
     <suite name="vcenter test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
-        <case timeout='1200'  repeat='1' noparallel='True'>test_query_vcenter_cluster.py</case>
-        <case timeout='1200'  repeat='1' noparallel='True'>test_query_vcenter_primary_storage.py</case>
-        <case timeout='1200'  repeat='1' noparallel='True'>test_query_vcenter_backup_storage.py</case>
-        <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_check_exist_template.py</case>
-        <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_check_exist_network.py</case>
-        <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_vm_create.py</case>
-        <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_vm_suspend.py</case>
-        <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_vm_reboot.py</case>
-        <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_vm_start_stop.py</case>
-        <case timeout='1200'  repeat='1' noparallel='True'>test_attach_data_volume.py</case>
-        <case timeout='1200'  repeat='1' noparallel='True'>test_data_volume_after_sync_vcenter.py</case>
-        <case timeout='1200'  repeat='1' noparallel='True'>test_detached_vcenter_volume.py</case>
-        <case timeout='1200'  repeat='1' noparallel='True'>test_sync_vcenter_after_destroy_vm_datavolume.py</case>
-        <case timeout='1200'  repeat='1' noparallel='True'>test_sync_volume_size.py</case>
-        <case timeout='1200'  repeat='1' noparallel='True'>test_uninstantiated_volume_attach_to_vm.py</case>
-        <case timeout='1200'  repeat='1' noparallel='True'>test_clone_stop_vm.py</case>
-        <case timeout='1200'  repeat='1' noparallel='True'>test_clone_vm.py</case>
+        <case timeout='3600'  repeat='1' noparallel='True'>test_query_vcenter_cluster.py</case>
+        <case timeout='3600'  repeat='1' noparallel='True'>test_query_vcenter_primary_storage.py</case>
+        <case timeout='3600'  repeat='1' noparallel='True'>test_query_vcenter_backup_storage.py</case>
+        <case timeout='3600'  repeat='1' noparallel='True'>test_vcenter_check_exist_template.py</case>
+        <case timeout='3600'  repeat='1' noparallel='True'>test_vcenter_check_exist_network.py</case>
+        <case timeout='3600'  repeat='1' noparallel='True'>test_vcenter_vm_create.py</case>
+        <case timeout='3600'  repeat='1' noparallel='True'>test_vcenter_vm_suspend.py</case>
+        <case timeout='3600'  repeat='1' noparallel='True'>test_vcenter_vm_reboot.py</case>
+        <case timeout='3600'  repeat='1' noparallel='True'>test_vcenter_vm_start_stop.py</case>
+        <case timeout='3600'  repeat='1' noparallel='True'>test_attach_data_volume.py</case>
+        <case timeout='3600'  repeat='1' noparallel='True'>test_data_volume_after_sync_vcenter.py</case>
+        <case timeout='3600'  repeat='1' noparallel='True'>test_detached_vcenter_volume.py</case>
+        <case timeout='3600'  repeat='1' noparallel='True'>test_sync_vcenter_after_destroy_vm_datavolume.py</case>
+        <case timeout='3600'  repeat='1' noparallel='True'>test_sync_volume_size.py</case>
+        <case timeout='3600'  repeat='1' noparallel='True'>test_uninstantiated_volume_attach_to_vm.py</case>
+        <case timeout='3600'  repeat='1' noparallel='True'>test_clone_stop_vm.py</case>
+        <case timeout='3600'  repeat='1' noparallel='True'>test_clone_vm.py</case>
         <!--case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_vm_no_nic_start_stop.py</case>
         <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_sync_image_add_delete.py</case>
         <case timeout='1200'  repeat='1' noparallel='True'>test_vcenter_sync_vm_start_stop.py</case>
