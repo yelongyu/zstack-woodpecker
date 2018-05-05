@@ -46,8 +46,8 @@ vpc1_l3_list = ['l3VlanNetworkName1', "l3VlanNetwork2", "l3VxlanNetwork11", "l3V
 vpc2_l3_list = ['l3VlanNetwork3', "l3VlanNetwork4", "l3VxlanNetwork13", "l3VxlanNetwork14"]
 vpc3_l3_list = ['l3VlanNetwork5', "l3VlanNetwork6", "l3VxlanNetwork15", "l3VxlanNetwork16"]
 
-all_vpc_l3_list = ['l3VlanNetworkName1'] + ["l3VlanNetwork{}".format(i) for i in xrange(2,11)] + \
-                  ["l3VxlanNetwork{}".format(i) for i in xrange(11,21)] + ['l3NoVlanNetworkName1']
+all_vpc_l3_list = ['l3VlanNetworkName1'] + ["l3VlanNetwork{}".format(i) for i in xrange(2,10)] + \
+                  ["l3VxlanNetwork{}".format(i) for i in xrange(11,20)] + ['l3NoVlanNetworkName1']
 
 
 Port = test_state.Port
