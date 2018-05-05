@@ -701,6 +701,15 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
                                 ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
                                 continue
 
+
+def scp_iscsi_repo_to_host(vm_config, vm_ip):
+    import commands
+    status, woodpecker_ip = commands.getstatusoutput("ip addr show zsn0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'")
+    iscsi_repo_cfg_src = "/home/%s/zstack-internal-yum.repo" %(woodpecker_ip)
+    iscsi_repo_cfg_dst = "/etc/yum.repos.d/zstack-internal-yum.repo"
+    ssh.scp_file(iscsi_repo_cfg_src, iscsi_repo_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
+
+
 ISCSI_TARGET_IP = None
 ISCSI_TARGET_UUID = None
 def setup_iscsi_target(vm_inv, vm_config, deploy_config):
@@ -718,6 +727,7 @@ def setup_iscsi_target(vm_inv, vm_config, deploy_config):
         host_port = '22'
 
     #TODO: install with local repo
+    scp_iscsi_repo_to_host(vm_config, vm_ip)
     cmd = "yum install scsi-target-utils -y"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     cmd = "iptables -I INPUT -p tcp -m tcp --dport 3260 -j ACCEPT"
@@ -763,6 +773,7 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
         host_port = '22'
 
     #TODO: install with local repo
+    scp_iscsi_repo_to_host(vm_config, vm_ip)
     cmd = "yum -y install iscsi-initiator-utils"
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     cmd = "service iscsi start"
