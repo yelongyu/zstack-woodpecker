@@ -830,11 +830,11 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
     #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    cmd = "echo 'iscsiadm -m discovery -t sendtargets -p %s:3260 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local" %(iscsi_target_ip)
+    cmd = "echo 'iscsiadm -m discovery -t sendtargets -p %s:3260 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local; sync" %(iscsi_target_ip)
     #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    cmd = "echo 'iscsiadm -m node -T iqn.iscsi_target:disk1 -p %s:3260 -l >>/tmp/tgtadm.log' >>/etc/rc.local" %(iscsi_target_ip)
+    cmd = "echo 'iscsiadm -m node -T iqn.iscsi_target:disk1 -p %s:3260 -l >>/tmp/tgtadm.log' >>/etc/rc.local; sync" %(iscsi_target_ip)
     #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
