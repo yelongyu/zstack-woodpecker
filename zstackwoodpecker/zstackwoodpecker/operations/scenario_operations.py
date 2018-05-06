@@ -702,6 +702,11 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
                                 continue
 
 
+def exec_cmd_in_vm(cmd, vm_ip, vm_config, raise_if_exception, host_port):
+    test_util.test_logger(cmd)
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, raise_if_exception, int(host_port))
+
+
 def scp_iscsi_repo_to_host(vm_config, vm_ip):
     import commands
     status, woodpecker_ip = commands.getstatusoutput("ip addr show zsn0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'")
@@ -729,31 +734,54 @@ def setup_iscsi_target(vm_inv, vm_config, deploy_config):
     #TODO: install with local repo
     scp_iscsi_repo_to_host(vm_config, vm_ip)
     cmd = "yum install scsi-target-utils -y"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "iptables -I INPUT -p tcp -m tcp --dport 3260 -j ACCEPT"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "service iptables save"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "service tgtd start"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "chkconfig tgtd on"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "echo 'sleep 15' >>/etc/rc.local"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "echo 'tgtadm --lld iscsi --mode target --op new --tid 1 -T iqn.iscsi_target:disk1 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "echo 'tgtadm --lld iscsi --mode logicalunit --op new --tid 1 --lun 1 -b /dev/vdb 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "echo 'tgtadm --lld iscsi --mode target --op bind --tid 1 -I ALL 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "bash -x /etc/rc.local"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "tgt-admin -s"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     #cmd = ""
     #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     ISCSI_TARGET_IP = vm_ip
     test_util.test_logger("ISCSI_TARGET_IP=%s" %(ISCSI_TARGET_IP))
+
 
 
 ALEADY_DONE_ON_ANOTHER_HOST = None
@@ -775,32 +803,54 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
     #TODO: install with local repo
     scp_iscsi_repo_to_host(vm_config, vm_ip)
     cmd = "yum -y install iscsi-initiator-utils"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "service iscsi start"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "chkconfig iscsi on"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "service iscsid start"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "chkconfig iscsid on"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "yum -y install device-mapper device-mapper-multipath"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "chkconfig --level 2345 multipathd on"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
     cmd = "echo 'iscsiadm -m discovery -t sendtargets -p %s:3260 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local" %(iscsi_target_ip)
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "echo 'iscsiadm -m node -T iqn.iscsi_target:disk1 -p %s:3260 -l >>/tmp/tgtadm.log' >>/etc/rc.local" %(iscsi_target_ip)
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "bash -x /etc/rc.local"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     #cmd = "lsmod |grep dm_multipath"
     #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
     cmd = "modprobe dm-multipath"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "modprobe dm-round-robin"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
     
     import commands
     status, woodpecker_ip = commands.getstatusoutput("ip addr show zsn0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'")
@@ -808,29 +858,40 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
     multipath_cfg_dst = "/etc/multipath.conf"
     ssh.scp_file(multipath_cfg_src, multipath_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
     cmd = "service multipathd start"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "multipath -v2"
-    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
     if not ALEADY_DONE_ON_ANOTHER_HOST:
         #TODO: auto separate 2 partitions
         fdisk_cfg_src = "/home/%s/fdiskIscsiUse.cmd" %(woodpecker_ip)
         fdisk_cfg_dst = "/tmp/fdiskIscsiUse.cmd"
         ssh.scp_file(fdisk_cfg_src, fdisk_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
+
         cmd = "fdisk /dev/mapper/mpatha </tmp/fdiskIscsiUse.cmd"
-        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, False, int(host_port))
+        #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, False, int(host_port))
+        exec_cmd_in_vm(cmd, vm_ip, vm_config, False, host_port)
 
         stop_vm(zstack_management_ip, ISCSI_TARGET_UUID, 'cold')
         start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
 
-        time.sleep(180)
+        time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
 
         cmd = "pvcreate /dev/mapper/mpatha1"
-        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
         cmd = "pvcreate /dev/mapper/mpatha2 --metadatasize 512m"
-        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
         cmd = "systemctl restart multipathd.service"
-        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+        exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
         #cmd = "vgcreate --shared zstacksanlock /dev/mapper/mpatha1"
         #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
         #cmd = "vgchange --lock-start zstacksanlock"
@@ -856,6 +917,7 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
         #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
         ALEADY_DONE_ON_ANOTHER_HOST = True
     else:
+        time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
         stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
         start_vm(zstack_management_ip, vm_inv.uuid)
         test_lib.lib_wait_target_up(vm_ip, '22', 120)
