@@ -560,7 +560,7 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 action.name = pr.name_
                 action.description = pr.description__
                 action.zoneUuid = zinv.uuid
-                action.diskUuids = get_disk_uuid(scenarioFile)
+                action.diskUuids = [get_disk_uuid(scenarioFile)]
                 thread = threading.Thread(target=_thread_for_action, args=(action,))
                 wait_for_thread_queue()
                 thread.start()
@@ -1108,7 +1108,7 @@ def get_host_obj_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, d
 
 
 #Add sanlock
-def add_sanlock(scenarioFile):
+def add_sanlock(scenarioConfig, scenarioFile, deployConfig, session_uuid):
     '''
     sanlock creation and enable for sharedblock ps
     '''
@@ -2269,6 +2269,7 @@ def deploy_initial_database(deploy_config, scenario_config = None, scenario_file
             add_l2_network,
             add_primary_storage,
             add_cluster,
+            add_sanlock,
             add_host,
             add_l3_network,
             add_image,
