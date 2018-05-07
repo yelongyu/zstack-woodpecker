@@ -879,6 +879,7 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
         start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
 
         time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
+        recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
 
         cmd = "pvcreate /dev/mapper/mpatha1"
         #ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
@@ -920,6 +921,7 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
         time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
         stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
         start_vm(zstack_management_ip, vm_inv.uuid)
+        recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
         test_lib.lib_wait_target_up(vm_ip, '22', 120)
         
 
