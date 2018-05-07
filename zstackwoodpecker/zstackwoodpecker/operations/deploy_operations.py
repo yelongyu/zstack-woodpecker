@@ -487,7 +487,7 @@ def get_disk_uuid(scenarioFile):
     host_ips = sce_ops.dump_scenario_file_ips(scenarioFile)
     cmd = r"blkid|grep mpatha2|awk -F\" '{print $2}'"
     ret, disk_uuid, stderr = ssh.execute(cmd, host_ips[-1], "root", "password", True, 22)
-    return disk_uuid
+    return disk_uuid.strip()
 
 #Add Primary Storage
 def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid, ps_name = None, \
