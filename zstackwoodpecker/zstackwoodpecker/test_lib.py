@@ -5492,18 +5492,26 @@ class DefaultFalseDict(defaultdict):
         super(DefaultFalseDict, self).__init__(lambda:False, **kwargs)
 
 def check_vcenter_host(ip):
-  test = 0
-  while test < 5:
-    test += 1
-    lib_execute_ssh_cmd(ip,"root","password","esxcli storage filesystem rescan")
+    test = 0
+    old_url, new_url = '', ''
     result = lib_execute_ssh_cmd(ip,"root","password","ls vmfs/volumes")
-    if result != False:
-      if 'newdatastore' == result.split('\n')[-2]:
-          command = "sed -i '/newdatastore/d' etc/rc.local.d/local.sh"
-          _result = lib_execute_ssh_cmd(ip,"root","password", command)
-          return
-      else:
-          command = "source etc/rc.local.d/local.sh"
-          _result = lib_execute_ssh_cmd(ip,"root","password", command)
-
-  test_util.test_logger("The esxi host: %s checks faild" % ip)
+    '''for example:
+	5a609b8c-9ec41a7c-2b90-fa3c0c711b00
+	5a609b96-cd1e9698-8316-fa3c0c711b00 
+	5aefdca7-51326905-a5a5-fa80a82b9900 (datastore url)  
+	627adf75-dfb4ef0f-0649-19b4b53f5af3  
+	a0b9e87d-eb910865-4905-b555b6619b12
+	newdatastore
+    '''
+    if result != False: old_url = result.split('\n')[2]
+    while test < 5:
+        command = "source etc/rc.local.d/local.sh"
+        _result = lib_execute_ssh_cmd(ip,"root","password", command)
+        test += 1
+        time.sleep(1)
+        lib_execute_ssh_cmd(ip,"root","password","esxcli storage filesystem rescan")
+        result = lib_execute_ssh_cmd(ip,"root","password","ls vmfs/volumes")
+        if result != False: new_url = result.split('\n')[2]
+        if old_url != new_url:
+            return
+    test_util.test_logger("The esxi host: %s checks faild" % ip)
