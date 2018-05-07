@@ -209,7 +209,7 @@
               </templates>
               <hosts>
                   <host name="$hostName2" ref="$vmName2" username="$vchostUser" password="$vchostpwd" thumbprint="$vcsslthumbprint">
-                    <nfsStorage path="$mountpointpath">
+                    <nfsStorage target="$vmName5" path="$mountpointpath">
                       <nasdatastore name="$vcnasdatastore"/>
                     </nfsStorage>
                     <vswitchs>
@@ -229,7 +229,7 @@
                     </vms>
                   </host>
                   <host name="$hostName3" ref="$vmName3" username="$vchostUser" password="$vchostpwd" thumbprint="$vcsslthumbprint">
-                    <nfsStorage path="$mountpointpath">
+                    <nfsStorage target="$vmName5" path="$mountpointpath">
                       <nasdatastore name="$vcnasdatastore"/>
                     </nfsStorage>
                     <vswitchs>

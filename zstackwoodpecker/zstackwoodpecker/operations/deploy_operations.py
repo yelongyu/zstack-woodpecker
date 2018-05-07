@@ -1069,7 +1069,7 @@ def get_host_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, deplo
                                     return s_vm.ip_
     return None
 
-def get_iscsi_host_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, deployConfig):
+def get_iscsi_nfs_host_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, deployConfig):
     if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
         return None
 
@@ -2470,15 +2470,14 @@ def create_datastore(host=None, dsname=None):
     datastore = host.configManager.datastoreSystem.CreateVmfsDatastore(vmfs_create_spec)
     return datastore
 
-def create_nfs_datastore(host=None, mn_ip=None, mount_point_path=None, ds_name=None):
+def create_nfs_datastore(host=None, remotehost=None, mount_point_path=None, ds_name=None):
     from pyVmomi import vim
     spec = vim.host.NasVolume.Specification()
     spec.accessMode="readWrite"
-    spec.type = 'NFS41'
     spec.securityType = 'AUTH_SYS'
-    spec.remoteHost = mn_ip
+    spec.remoteHost = remotehost
     spec.remotePath = mount_point_path
-    spec.remoteHostNames = mn_ip
+    spec.remoteHostNames = remotehost
     spec.localPath = ds_name
     host.configManager.datastoreSystem.CreateNasDatastore(spec=spec)
 
@@ -2950,7 +2949,7 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
                 if xmlobject.has_element(host, "iScsiStorage"):
                     for datastore in vc_hs.datastore:
                         datastore.Destroy()
-                    target = get_iscsi_host_from_scenario_file(host.iScsiStorage.target_, scenario_config, scenario_file, deploy_config)
+                    target = get_iscsi_nfs_host_from_scenario_file(host.iScsiStorage.target_, scenario_config, scenario_file, deploy_config)
                     setup_iscsi_device(host=vc_hs, target_ip=target)
                     time.sleep(5)
                     if not vc_hs.datastore:
@@ -2958,8 +2957,8 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
                 if xmlobject.has_element(host, "nfsStorage"):
                     for datastore in vc_hs.datastore:
                         datastore.Destroy()
-                    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
-                    vc_ds = create_nfs_datastore(host=vc_hs, mn_ip=mn_ip, mount_point_path=host.nfsStorage.path_, ds_name=host.nfsStorage.nasdatastore.name_)
+                    target = get_iscsi_nfs_host_from_scenario_file(host.nfsStorage.target_, scenario_config, scenario_file, deploy_config)
+                    vc_ds = create_nfs_datastore(host=vc_hs, remotehost=target, mount_point_path=host.nfsStorage.path_, ds_name=host.nfsStorage.nasdatastore.name_)
                 if xmlobject.has_element(host, "vswitchs"):
                     for vswitch in xmlobject.safe_list(host.vswitchs.vswitch):
                         if vswitch.name_ == "vSwitch0":
