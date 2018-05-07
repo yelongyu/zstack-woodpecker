@@ -5513,5 +5513,7 @@ def check_vcenter_host(ip):
         result = lib_execute_ssh_cmd(ip,"root","password","ls vmfs/volumes")
         if result != False: new_url = result.split('\n')[2]
         if old_url != new_url:
+            command = "sed -i '/newdatastore/d' etc/rc.local.d/local.sh"
+	    _result = lib_execute_ssh_cmd(ip,"root","password", command)
             return
     test_util.test_logger("The esxi host: %s checks faild" % ip)
