@@ -485,7 +485,12 @@ def get_disk_uuid(scenarioFile):
     import scenario_operations as sce_ops
     import zstacklib.utils.ssh as ssh
     host_ips = sce_ops.dump_scenario_file_ips(scenarioFile)
-    cmd = r"blkid|grep mpatha2|awk -F\" '{print $2}'"
+    #Below is aim to migrate sanlock to a separated partition, don't delete!!!
+    #IF separated_partition:
+    #cmd = r"blkid|grep mpatha2|awk -F\" '{print $2}'"
+    #ELSE
+    cmd = r"blkid|grep mpatha|awk -F\" '{print $2}'"
+    #ENDIF
     ret, disk_uuid, stderr = ssh.execute(cmd, host_ips[-1], "root", "password", True, 22)
     return disk_uuid.strip()
 
@@ -1140,20 +1145,19 @@ def add_sanlock(scenarioConfig, scenarioFile, deployConfig, session_uuid):
         vm_inv = _get_vm_inv_by_vm_ip(zstack_management_ip, vm_ip)
         vm_config = _get_vm_config(vm_inv)
 
+        #Below optimize is aim to migrate sanlock to separated partition, don't delete!!!
+        #cmd = "vgcreate --shared zstacksanlock /dev/mapper/mpatha1"
+        #sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-        cmd = "vgcreate --shared zstacksanlock /dev/mapper/mpatha1"
-        sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+        #cmd = "vgchange --lock-start zstacksanlock"
+        #sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-        cmd = "vgchange --lock-start zstacksanlock"
-        sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+        #vg_name = get_disk_uuid(scenarioFile)
+        #cmd = "lvmlockctl --gl-disable %s" %(vg_name)
+        #sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-
-        vg_name = get_disk_uuid(scenarioFile)
-        cmd = "lvmlockctl --gl-disable %s" %(vg_name)
-        sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
-
-        cmd = "lvmlockctl --gl-enable zstacksanlock"
-        sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+        #cmd = "lvmlockctl --gl-enable zstacksanlock"
+        #sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
     
 
 #Add Host

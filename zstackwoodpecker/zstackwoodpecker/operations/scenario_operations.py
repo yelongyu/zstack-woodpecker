@@ -870,11 +870,18 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
 
         time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
 
-        cmd = "pvcreate /dev/mapper/mpatha1"
-        exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+        #Below is aim to migrate sanlock to a separated partition, don't delete!!!
+        #IF separated_partition:
+        #cmd = "pvcreate /dev/mapper/mpatha1"
+        #exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-        cmd = "pvcreate /dev/mapper/mpatha2 --metadatasize 512m"
+        #cmd = "pvcreate /dev/mapper/mpatha2 --metadatasize 512m"
+        #exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+        #ELSE
+        cmd = "pvcreate /dev/mapper/mpatha"
         exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+        #ENDIF
 
         cmd = "systemctl restart multipathd.service"
         exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
