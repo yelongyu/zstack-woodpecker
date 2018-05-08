@@ -1113,8 +1113,9 @@ def add_sanlock(scenarioConfig, scenarioFile, deployConfig, session_uuid):
     sanlock creation and enable for sharedblock ps
     '''
 
+    import zstackwoodpecker.test_lib as test_lib
+
     if test_lib.lib_cur_cfg_is_a_and_b(["test-config-flat-imagestore-iscsi.xml"], ["scenario-config-iscsi.xml"]):
-        import zstackwoodpecker.test_lib as test_lib
         import scenario_operations as sce_ops
         import zstacklib.utils.ssh as ssh
 
