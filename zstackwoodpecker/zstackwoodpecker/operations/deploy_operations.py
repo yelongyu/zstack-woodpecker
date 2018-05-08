@@ -1113,43 +1113,89 @@ def add_sanlock(scenarioConfig, scenarioFile, deployConfig, session_uuid):
     sanlock creation and enable for sharedblock ps
     '''
 
-    import zstackwoodpecker.test_lib as test_lib
-
     if test_lib.lib_cur_cfg_is_a_and_b(["test-config-flat-imagestore-iscsi.xml"], ["scenario-config-iscsi.xml"]):
+        import zstackwoodpecker.test_lib as test_lib
         import scenario_operations as sce_ops
         import zstacklib.utils.ssh as ssh
+
+        def _get_vm_config(vm_inv):
+            if hasattr(scenario_config.deployerConfig, 'hosts'):
+                for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+                    for vm in xmlobject.safe_list(host.vms.vm):
+                        if vm.name_ == vm_inv.name:
+                            return vm
+            return None
+
+        def _get_vm_inv_by_vm_ip(zstack_management_ip, vm_ip):
+            cond = res_ops.gen_query_conditions('vmnics.ip', '=', vm_ip)
+            vm_inv = sce_ops.query_resource(zstack_management_ip, res_ops.vm_instance, cond).inventories[0]
+            return vm_inv
 
         host_ips = sce_ops.dump_scenario_file_ips(scenarioFile)
         vm_ip = host_ips[-1]
         host_port = 22
-        username = "root"
-        password = "password"
+        zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
+
+        #cond = res_ops.gen_query_conditions('vmnics.ip', '=', vm_ip)
+        #vm_inv = sce_ops.query_resource(zstack_management_ip, res_ops.vm_instance, cond).inventories[0]
+        vm_inv = _get_vm_inv_by_vm_ip(zstack_management_ip, vm_ip)
+        vm_config = _get_vm_config(vm_inv)
+
+        fdisk_cfg_src = "/home/%s/fdiskIscsiUse.cmd" %(woodpecker_ip)
+        fdisk_cfg_dst = "/tmp/fdiskIscsiUse.cmd"
+        ssh.scp_file(fdisk_cfg_src, fdisk_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
+
+        cmd = "fdisk /dev/mapper/mpatha </tmp/fdiskIscsiUse.cmd"
+        sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, False, host_port)
+
+        iscsi_target_uuid = _get_vm_inv_by_vm_ip(zstack_management_ip, host_ips[0]).uuid #host_ip[0] is used to be iscsi target
+        sce_ops.stop_vm(zstack_management_ip, iscsi_target_uuid, 'cold')
+        sce_ops.start_vm(zstack_management_ip, iscsi_target_uuid)
+
+        time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
+        #sce_ops.recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
+
+        cmd = "pvcreate /dev/mapper/mpatha1"
+        sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+        cmd = "pvcreate /dev/mapper/mpatha2 --metadatasize 512m"
+        sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+        #cmd = "pvcreate /dev/mapper/mpatha"
+        #sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+        cmd = "systemctl restart multipathd.service"
+        sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+        for host_ip in host_ips:
+            if host_ip == host_ips[0] or host_ip == host_ips[1]: 
+                #host_ip[0] is iscsi target
+                #host_ip[1] is mn
+                continue
+            if host_ip != vm_ip:
+                #for other host except the one execute fisk
+                time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
+                host_uuid = _get_vm_inv_by_vm_ip(zstack_management_ip, host_ip).uuid 
+                sce_ops.stop_vm(zstack_management_ip, host_uuid, 'cold')
+                sce_ops.start_vm(zstack_management_ip, host_uuid)
+                vm_inv = _get_vm_inv_by_vm_ip(zstack_management_ip, host_ip)
+                vm_config = _get_vm_config(vm_inv)
+                sce_ops.recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
+
+
         cmd = "vgcreate --shared zstacksanlock /dev/mapper/mpatha1"
-        ssh.execute(cmd, vm_ip, username, password, True, int(host_port))
+        sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
         cmd = "vgchange --lock-start zstacksanlock"
-        ssh.execute(cmd, vm_ip, username, password, True, int(host_port))
+        sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-        #stop_vm(zstack_management_ip, ISCSI_TARGET_UUID, 'cold')
-        #start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
 
-        #stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
-        #start_vm(zstack_management_ip, vm_inv.uuid)
-
-        #test_lib.lib_wait_target_up(iscsi_target_ip, '22', 120)
-        #test_lib.lib_wait_target_up(vm_ip, '22', 120)
-        #time.sleep(10)
-
-        #TODO: get vg_name
-        #cmd = r"vgs|grep wz--n-|grep -v zstack|head -n 1|awk '{print $1}'"
-        #ret, ps_uuid, stderr = ssh.execute(cmd, vm_ip, "root", "password", True, 22)
-        #status, ps_uuid = commands.getstatusoutput("vgs|grep wz--n-|grep -v zstack|head -n 1|awk '{print $1}'")
-        #test_util.test_logger("ps_uuid=%s" %(ps_uuid))
-        #vg_name = ps_uuid
         vg_name = get_disk_uuid(scenarioFile)
         cmd = "lvmlockctl --gl-disable %s" %(vg_name)
-        ssh.execute(cmd, vm_ip, username, password, True, int(host_port))
+        sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
         cmd = "lvmlockctl --gl-enable zstacksanlock"
-        ssh.execute(cmd, vm_ip, username, password, True, int(host_port))
+        sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
     
 
 #Add Host
