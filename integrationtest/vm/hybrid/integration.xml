@@ -7,7 +7,7 @@
         <case timeout='600' repeat='1' noparallel='True'>test_create_vpc.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_create_vswitch.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_create_ecs_sg.py</case>
-        <case timeout='900' repeat='1' noparallel='True'>test_create_ecs_image.py</case>
+        <case timeout='3600' repeat='1' noparallel='True'>test_create_ecs_image.py</case>
         <case timeout='900' repeat='1' noparallel='True'>test_create_delete_ecs_instance.py</case>
         <case timeout='1350' repeat='1' noparallel='True'>test_start_reboot_stop_ecs_instance.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_sync_delete_vpc_local.py</case>
@@ -39,7 +39,7 @@
         <case timeout='600' repeat='1' noparallel='True'>test_add_invalid_ks.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_update_ks.py</case>
         <case timeout='900' repeat='1' noparallel='True'>test_detect_vpc_vpn_connection_status.py</case>
-        <case timeout='900' repeat='1' noparallel='True'>test_get_create_ecs_image_progress.py</case>
+        <case timeout='3600' repeat='1' noparallel='True'>test_get_create_ecs_image_progress.py</case>
         <case timeout='900' repeat='1' noparallel='True'>test_delete_synced_ecs_instance.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_create_aliyun_disk.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_sync_delete_aliyun_disk_local.py</case>
