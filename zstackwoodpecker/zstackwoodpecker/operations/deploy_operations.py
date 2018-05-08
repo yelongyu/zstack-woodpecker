@@ -1128,7 +1128,7 @@ def add_sanlock(scenarioConfig, scenarioFile, deployConfig, session_uuid):
             return None
 
         def _get_vm_inv_by_vm_ip(zstack_management_ip, vm_ip):
-            cond = res_ops.gen_query_conditions('vmnics.ip', '=', vm_ip)
+            cond = res_ops.gen_query_conditions('vmNics.ip', '=', vm_ip)
             vm_inv = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0]
             return vm_inv
 
