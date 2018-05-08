@@ -1120,8 +1120,8 @@ def add_sanlock(scenarioConfig, scenarioFile, deployConfig, session_uuid):
         import zstacklib.utils.ssh as ssh
 
         def _get_vm_config(vm_inv):
-            if hasattr(scenario_config.deployerConfig, 'hosts'):
-                for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+            if hasattr(scenarioConfig.deployerConfig, 'hosts'):
+                for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
                     for vm in xmlobject.safe_list(host.vms.vm):
                         if vm.name_ == vm_inv.name:
                             return vm
