@@ -879,7 +879,7 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
         #exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
         #ELSE
-        cmd = "pvcreate /dev/mapper/mpatha"
+        cmd = "pvcreate /dev/mapper/mpatha1"
         exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
         #ENDIF
 
