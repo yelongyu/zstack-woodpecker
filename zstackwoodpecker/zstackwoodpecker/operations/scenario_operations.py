@@ -770,14 +770,35 @@ def setup_iscsi_target(vm_inv, vm_config, deploy_config):
     test_util.test_logger("ISCSI_TARGET_IP=%s" %(ISCSI_TARGET_IP))
 
 
+def get_vm_inv_by_vm_ip(zstack_management_ip, vm_ip):
+    cond = res_ops.gen_query_conditions('vmnics.ip', '=', vm_ip)
+    vm_inv = query_resource(zstack_management_ip, res_ops.vm_instance, cond).inventories[0]
+    return vm_inv
 
-ALEADY_DONE_ON_ANOTHER_HOST = None
+def get_vm_config(vm_inv, scenario_config):
+    if hasattr(scenario_config.deployerConfig, 'hosts'):
+        for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+            for vm in xmlobject.safe_list(host.vms.vm):
+                if vm.name_ == vm_inv.name:
+                    return vm
+    return None
+
+HOST_INITIATOR_COUNT = 0
+HOST_INITIATOR_IP_LIST = []
+HOST_INITIATOR_VM_CONFIG_LIST = []
 def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config):
-    global ALEADY_DONE_ON_ANOTHER_HOST
+    global HOST_INITIATOR_COUNT
+    global HOST_INITIATOR_IP_LIST
+    global HOST_INITIATOR_VM_CONFIG_LIST
     global ISCSI_TARGET_IP
     global ISCSI_TARGET_UUID
+
     iscsi_target_ip = ISCSI_TARGET_IP
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
+
+    HOST_INITIATOR_IP_LIST.append(vm_ip)
+    HOST_INITIATOR_VM_CONFIG_LIST.append(vm_config)
+
     if hasattr(vm_config, 'hostRef'):
         host = get_deploy_host(vm_config.hostRef.text_, deploy_config)
         if not hasattr(host, 'port_') or host.port_ == '22':
@@ -835,35 +856,37 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
     cmd = "multipath -v2"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    #if not ALEADY_DONE_ON_ANOTHER_HOST:
-    #    fdisk_cfg_src = "/home/%s/fdiskIscsiUse.cmd" %(woodpecker_ip)
-    #    fdisk_cfg_dst = "/tmp/fdiskIscsiUse.cmd"
-    #    ssh.scp_file(fdisk_cfg_src, fdisk_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
+    HOST_INITIATOR_COUNT = HOST_INITIATOR_COUNT + 1
+    if HOST_INITIATOR_COUNT == 3:
+        fdisk_cfg_src = "/home/%s/fdiskIscsiUse.cmd" %(woodpecker_ip)
+        fdisk_cfg_dst = "/tmp/fdiskIscsiUse.cmd"
+        ssh.scp_file(fdisk_cfg_src, fdisk_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
 
-    #    cmd = "fdisk /dev/mapper/mpatha </tmp/fdiskIscsiUse.cmd"
-    #    exec_cmd_in_vm(cmd, vm_ip, vm_config, False, host_port)
+        cmd = "fdisk /dev/mapper/mpatha </tmp/fdiskIscsiUse.cmd"
+        exec_cmd_in_vm(cmd, vm_ip, vm_config, False, host_port)
 
-    #    stop_vm(zstack_management_ip, ISCSI_TARGET_UUID, 'cold')
-    #    start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
+        stop_vm(zstack_management_ip, ISCSI_TARGET_UUID, 'cold')
+        start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
 
-    #    time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
-    #    recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
+        time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
+        #recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
 
-    #    cmd = "pvcreate /dev/mapper/mpatha1"
-    #    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+        cmd = "pvcreate /dev/mapper/mpatha1"
+        exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    #    cmd = "pvcreate /dev/mapper/mpatha2 --metadatasize 512m"
-    #    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+        cmd = "pvcreate /dev/mapper/mpatha2 --metadatasize 512m"
+        exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    #    cmd = "systemctl restart multipathd.service"
-    #    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+        cmd = "systemctl restart multipathd.service"
+        exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    #    ALEADY_DONE_ON_ANOTHER_HOST = True
-    #else:
-    #    time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
-    #    recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
-    #    test_lib.lib_wait_target_up(vm_ip, '22', 120)
-        
+        for vm_ip,vm_config in (HOST_INITIATOR_IP_LIST, HOST_INITIATOR_VM_CONFIG_LIST):
+            vm_inv = get_vm_inv_by_vm_ip(zstack_management_ip, vm_ip)
+            vm_uuid = vm_inv.uuid
+            stop_vm(zstack_management_ip, vm_uuid, 'cold')
+            start_vm(zstack_management_ip, vm_uuid)
+            time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
+            recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
 
 
 

@@ -1142,46 +1142,46 @@ def add_sanlock(scenarioConfig, scenarioFile, deployConfig, session_uuid):
         vm_inv = _get_vm_inv_by_vm_ip(zstack_management_ip, vm_ip)
         vm_config = _get_vm_config(vm_inv)
 
-        fdisk_cfg_src = "/home/%s/fdiskIscsiUse.cmd" %(woodpecker_ip)
-        fdisk_cfg_dst = "/tmp/fdiskIscsiUse.cmd"
-        ssh.scp_file(fdisk_cfg_src, fdisk_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
+        #fdisk_cfg_src = "/home/%s/fdiskIscsiUse.cmd" %(woodpecker_ip)
+        #fdisk_cfg_dst = "/tmp/fdiskIscsiUse.cmd"
+        #ssh.scp_file(fdisk_cfg_src, fdisk_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
 
-        cmd = "fdisk /dev/mapper/mpatha </tmp/fdiskIscsiUse.cmd"
-        sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, False, host_port)
+        #cmd = "fdisk /dev/mapper/mpatha </tmp/fdiskIscsiUse.cmd"
+        #sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, False, host_port)
 
-        iscsi_target_uuid = _get_vm_inv_by_vm_ip(zstack_management_ip, host_ips[0]).uuid #host_ip[0] is used to be iscsi target
-        sce_ops.stop_vm(zstack_management_ip, iscsi_target_uuid, 'cold')
-        sce_ops.start_vm(zstack_management_ip, iscsi_target_uuid)
+        #iscsi_target_uuid = _get_vm_inv_by_vm_ip(zstack_management_ip, host_ips[0]).uuid #host_ip[0] is used to be iscsi target
+        #sce_ops.stop_vm(zstack_management_ip, iscsi_target_uuid, 'cold')
+        #sce_ops.start_vm(zstack_management_ip, iscsi_target_uuid)
 
-        time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
-        #sce_ops.recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
+        #time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
+        ##sce_ops.recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
 
-        cmd = "pvcreate /dev/mapper/mpatha1"
-        sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
-
-        cmd = "pvcreate /dev/mapper/mpatha2 --metadatasize 512m"
-        sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
-
-        #cmd = "pvcreate /dev/mapper/mpatha"
+        #cmd = "pvcreate /dev/mapper/mpatha1"
         #sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-        cmd = "systemctl restart multipathd.service"
-        sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+        #cmd = "pvcreate /dev/mapper/mpatha2 --metadatasize 512m"
+        #sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-        for host_ip in host_ips:
-            if host_ip == host_ips[0] or host_ip == host_ips[1]: 
-                #host_ip[0] is iscsi target
-                #host_ip[1] is mn
-                continue
-            if host_ip != vm_ip:
-                #for other host except the one execute fisk
-                time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
-                host_uuid = _get_vm_inv_by_vm_ip(zstack_management_ip, host_ip).uuid 
-                sce_ops.stop_vm(zstack_management_ip, host_uuid, 'cold')
-                sce_ops.start_vm(zstack_management_ip, host_uuid)
-                vm_inv = _get_vm_inv_by_vm_ip(zstack_management_ip, host_ip)
-                vm_config = _get_vm_config(vm_inv)
-                sce_ops.recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
+        ##cmd = "pvcreate /dev/mapper/mpatha"
+        ##sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+        #cmd = "systemctl restart multipathd.service"
+        #sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+        #for host_ip in host_ips:
+        #    if host_ip == host_ips[0] or host_ip == host_ips[1]: 
+        #        #host_ip[0] is iscsi target
+        #        #host_ip[1] is mn
+        #        continue
+        #    if host_ip != vm_ip:
+        #        #for other host except the one execute fisk
+        #        time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
+        #        host_uuid = _get_vm_inv_by_vm_ip(zstack_management_ip, host_ip).uuid 
+        #        sce_ops.stop_vm(zstack_management_ip, host_uuid, 'cold')
+        #        sce_ops.start_vm(zstack_management_ip, host_uuid)
+        #        vm_inv = _get_vm_inv_by_vm_ip(zstack_management_ip, host_ip)
+        #        vm_config = _get_vm_config(vm_inv)
+        #        sce_ops.recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
 
 
         cmd = "vgcreate --shared zstacksanlock /dev/mapper/mpatha1"
