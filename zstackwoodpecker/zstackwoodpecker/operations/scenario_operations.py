@@ -772,7 +772,7 @@ def setup_iscsi_target(vm_inv, vm_config, deploy_config):
 
 def get_vm_inv_by_vm_ip(zstack_management_ip, vm_ip):
     cond = res_ops.gen_query_conditions('vmnics.ip', '=', vm_ip)
-    vm_inv = query_resource(zstack_management_ip, res_ops.vm_instance, cond).inventories[0]
+    vm_inv = query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0]
     return vm_inv
 
 def get_vm_config(vm_inv, scenario_config):
