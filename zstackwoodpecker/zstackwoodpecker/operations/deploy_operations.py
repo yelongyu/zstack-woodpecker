@@ -2998,7 +2998,7 @@ def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file 
                         datastore.Destroy()
                     target = get_iscsi_nfs_host_from_scenario_file(host.iScsiStorage.target_, scenario_config, scenario_file, deploy_config)
                     setup_iscsi_device(host=vc_hs, target_ip=target)
-                    time.sleep(5)
+                    time.sleep(10)
                     if not vc_hs.datastore:
                         vc_ds = create_datastore(host=vc_hs, dsname=host.iScsiStorage.vmfsdatastore.name_)
                 if xmlobject.has_element(host, "nfsStorage"):
