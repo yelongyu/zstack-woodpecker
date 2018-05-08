@@ -869,7 +869,6 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
         start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
 
         time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
-        #recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
 
         cmd = "pvcreate /dev/mapper/mpatha1"
         exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
@@ -891,12 +890,6 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
             
         thd_list = []
         for vm_ip,vm_config in zip(HOST_INITIATOR_IP_LIST, HOST_INITIATOR_VM_CONFIG_LIST):
-            #vm_inv = get_vm_inv_by_vm_ip(zstack_management_ip, vm_ip)
-            #vm_uuid = vm_inv.uuid
-            #stop_vm(zstack_management_ip, vm_uuid, 'cold')
-            #start_vm(zstack_management_ip, vm_uuid)
-            #time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
-            #recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
             thd = threading.Thread(target = _reboot_vm_wrapper, args=(zstack_management_ip, vm_ip, vm_config, deploy_config))
             thd_list.append(thd)
             thd.daemon = True
