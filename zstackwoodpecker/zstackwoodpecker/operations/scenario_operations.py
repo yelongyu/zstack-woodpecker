@@ -835,34 +835,34 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
     cmd = "multipath -v2"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    if not ALEADY_DONE_ON_ANOTHER_HOST:
-        fdisk_cfg_src = "/home/%s/fdiskIscsiUse.cmd" %(woodpecker_ip)
-        fdisk_cfg_dst = "/tmp/fdiskIscsiUse.cmd"
-        ssh.scp_file(fdisk_cfg_src, fdisk_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
+    #if not ALEADY_DONE_ON_ANOTHER_HOST:
+    #    fdisk_cfg_src = "/home/%s/fdiskIscsiUse.cmd" %(woodpecker_ip)
+    #    fdisk_cfg_dst = "/tmp/fdiskIscsiUse.cmd"
+    #    ssh.scp_file(fdisk_cfg_src, fdisk_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
 
-        cmd = "fdisk /dev/mapper/mpatha </tmp/fdiskIscsiUse.cmd"
-        exec_cmd_in_vm(cmd, vm_ip, vm_config, False, host_port)
+    #    cmd = "fdisk /dev/mapper/mpatha </tmp/fdiskIscsiUse.cmd"
+    #    exec_cmd_in_vm(cmd, vm_ip, vm_config, False, host_port)
 
-        stop_vm(zstack_management_ip, ISCSI_TARGET_UUID, 'cold')
-        start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
+    #    stop_vm(zstack_management_ip, ISCSI_TARGET_UUID, 'cold')
+    #    start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
 
-        time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
-        recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
+    #    time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
+    #    recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
 
-        cmd = "pvcreate /dev/mapper/mpatha1"
-        exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+    #    cmd = "pvcreate /dev/mapper/mpatha1"
+    #    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-        cmd = "pvcreate /dev/mapper/mpatha2 --metadatasize 512m"
-        exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+    #    cmd = "pvcreate /dev/mapper/mpatha2 --metadatasize 512m"
+    #    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-        cmd = "systemctl restart multipathd.service"
-        exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+    #    cmd = "systemctl restart multipathd.service"
+    #    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-        ALEADY_DONE_ON_ANOTHER_HOST = True
-    else:
-        time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
-        recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
-        test_lib.lib_wait_target_up(vm_ip, '22', 120)
+    #    ALEADY_DONE_ON_ANOTHER_HOST = True
+    #else:
+    #    time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
+    #    recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
+    #    test_lib.lib_wait_target_up(vm_ip, '22', 120)
         
 
 
