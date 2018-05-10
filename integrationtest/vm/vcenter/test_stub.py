@@ -102,8 +102,22 @@ def create_vm_in_vcenter(vm_name='vcenter-vm', \
     if not l3_name:
         l3_name = os.environ.get('l3PublicNetworkName')
 
-    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    image = test_lib.lib_get_image_by_name(image_name)
+    image_uuid = image.uuid
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    datastore_type = vc_ops.get_datastore_type(os.environ['vcenter'])
+    if datastore_type == 'local':
+        cond = res_ops.gen_query_conditions('image.uuid', '=', image_uuid)
+        vcbs = res_ops.query_resource(res_ops.VCENTER_BACKUP_STORAGE, cond)[0]
+        vcps = vc_ops.lib_get_vcenter_primary_storage_by_name(vcbs.name)
+        cond = res_ops.gen_query_conditions("name", '=', l3_name)
+        l3_inv = res_ops.query_resource(res_ops.L3_NETWORK, cond)
+        for l3_net in l3_inv:
+            cond = res_ops.gen_query_conditions("uuid", '=', l3_net.l2NetworkUuid)
+            l2 = res_ops.query_resource(res_ops.L2_NETWORK, cond)[0]
+            if l2.attachedClusterUuids == vcps.attachedClusterUuids:
+                l3_net_uuid = l3_net.uuid
+                break   
     if not instance_offering_uuid:
 	instance_offering_name = os.environ.get('instanceOfferingName_s')
         instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(instance_offering_name).uuid

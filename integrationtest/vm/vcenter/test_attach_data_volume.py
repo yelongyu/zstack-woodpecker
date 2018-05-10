@@ -31,6 +31,7 @@ def test():
     vm.check()
     test_obj_dict.add_vm(vm)
     ps_uuid = vm.vm.allVolumes[0].primaryStorageUuid
+    ps1_uuid = None
     for ps in res_ops.query_resource(res_ops.VCENTER_PRIMARY_STORAGE):
         if ps.uuid != ps_uuid:
             ps1_uuid = ps.uuid
@@ -48,11 +49,12 @@ def test():
     volume_ps = test_stub.create_volume(volume_creation_option)
     test_obj_dict.add_volume(volume_ps)
     volume_ps.check()
-    volume_creation_option.set_primary_storage_uuid(ps1_uuid)
-    volume_creation_option.set_name('vcenter_volume_ps1')
-    volume_ps1 = test_stub.create_volume(volume_creation_option)
-    test_obj_dict.add_volume(volume_ps1)
-    volume_ps1.check()
+    if ps1_uuid:
+        volume_creation_option.set_primary_storage_uuid(ps1_uuid)
+        volume_creation_option.set_name('vcenter_volume_ps1')
+        volume_ps1 = test_stub.create_volume(volume_creation_option)
+        test_obj_dict.add_volume(volume_ps1)
+        volume_ps1.check()
     
     test_util.test_dsc('Attach volume and check')
     volume.attach(vm)
@@ -60,10 +62,7 @@ def test():
     volume_ps.attach(vm)
     volume_ps.check()
     
-    if vct_ops.get_datastore_type(os.environ['vcenter']) == 'iscsi':
-        volume_ps1.attach(vm)
-        volume_ps1.check()
-    else:
+    if vct_ops.get_datastore_type(os.environ['vcenter']) == 'local' and ps1_uuid != None:
         try:
             volume_ps1.attach(vm)
         except:
