@@ -732,7 +732,7 @@ def setup_iscsi_target(vm_inv, vm_config, deploy_config):
         host_port = '22'
 
     #TODO: install with local repo
-    scp_iscsi_repo_to_host(vm_config, vm_ip)
+    #scp_iscsi_repo_to_host(vm_config, vm_ip)
     cmd = "yum install scsi-target-utils -y"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
@@ -808,7 +808,7 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
     else:
         host_port = '22'
 
-    scp_iscsi_repo_to_host(vm_config, vm_ip)
+    #scp_iscsi_repo_to_host(vm_config, vm_ip)
     cmd = "yum -y install iscsi-initiator-utils"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
