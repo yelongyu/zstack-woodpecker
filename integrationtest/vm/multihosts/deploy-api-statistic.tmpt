@@ -3,5 +3,5 @@ import ./deploy.tmpt
 localPrimaryStorageName = local-ps
 localPrimaryStorageUrl = /home/local-ps
 
-imageName0 = u14-desktop-cfg-sytools 
-imageUrl0 = http://10.1.101.1/image/u14-desktop-cfg-sytools.img
+imageName0 = u14-desktop-chrome-headless 
+imageUrl0 = http://10.1.101.1/image/u14-desktop-chrome-headless.qcow2
