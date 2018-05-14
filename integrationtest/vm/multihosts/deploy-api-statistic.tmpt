@@ -3,5 +3,3 @@ import ./deploy.tmpt
 localPrimaryStorageName = local-ps
 localPrimaryStorageUrl = /home/local-ps
 
-imageName0 = u14-desktop-chrome-headless 
-imageUrl0 = http://IMAGE_SERVER/diskimages/u14-desktop-chrome-headless.qcow2

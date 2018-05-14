@@ -6,6 +6,9 @@ nfsPrimaryStorageUrl2 = zstack:/home/nfs2
 imageName3 = centos
 imageUrl3 = http://zstack.yyk.net/image/centos_400m_140527.img
 
+imageName0 = u14-desktop-chrome-headless 
+imageUrl0 = http://IMAGE_SERVER/diskimages/u14-desktop-chrome-headless.qcow2
+
 largeDiskOfferingName = largeDiskOffering
 largeDiskOfferingSize = 1G
 
