@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-api-statistic.xml</deployConfig>
+    <deployConfigTemplate>deploy-api-statistic.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
