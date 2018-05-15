@@ -55,36 +55,36 @@
 	port="$sftpBackupStoragePort"/>
     </backupStorages>
     <images>
-      <image name="$imageName0" description="Test Image0" 
+      <!--<image name="$imageName0" description="Test Image0" 
         format="$rootImageFormat" url="$imageUrl0" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
-      </image>
+      </image>-->
       <image name="$imageName_s" description="Test Image1" 
         format="$rootImageFormat" url="$imageUrl_s" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName_net" description="Test Image2" 
         format="$rootImageFormat" url="$imageUrl_net" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName3" description="Test Image3" 
         format="$rootImageFormat" url="$imageUrl3" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       </image>
       <image name="$virtualRouterImageName" 
         description="virtual router image" format="$rootImageFormat" 
         username="$vrImageUsername" password="$vrImagePassword"
         mediaType="$rootMediaType"
         hypervisorType='KVM' url="$virtualRouterImageUrl" system="True">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       </image>
     </images>
   
@@ -104,7 +104,7 @@
   
     <zones>
       <zone name="$zoneName" description="Test">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
         <primaryStorages>
 	  <localPrimaryStorage name="$localPrimaryStorageName"
             description="Test Local Primary Storage"
@@ -118,11 +118,9 @@
               <host name="$hostName" description="Test" managementIp="$hostIp"
                 username="$hostUsername" password="$hostPassword" />
               <host name="$hostName2" description="Test2" managementIp="$hostIp2"
-                username="$hostUsername2" password="$hostPassword2" port="$hostPort2"/>
+                username="$hostUsername2" password="$hostPassword2"/>
               <host name="$hostName3" description="Test3" managementIp="$hostIp3"
                 username="$hostUsername3" password="$hostPassword3" />
-              <host name="$hostName5" description="Test5" managementIp="$hostIp5"
-                username="$hostUsername5" password="$hostPassword5" port="$hostPort5"/>
             </hosts>
             <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
             <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
