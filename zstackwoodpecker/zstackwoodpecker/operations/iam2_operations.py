@@ -6,7 +6,8 @@ All IAM2 operations for test.
 '''
 import apibinding.api_actions as api_actions
 import zstackwoodpecker.test_util as test_util
-import account_operations
+import zstackwoodpecker.operations.account_operations as account_operations
+import zstackwoodpecker.operations.resource_operations as res_ops
 
 
 def add_attributes_to_iam2_project(uuid, attributes, session_uuid=None):
@@ -39,8 +40,8 @@ def add_attributes_to_iam2_virtual_id(uuid, attributes, session_uuid=None):
     return evt
 
 
-def add_attributes_to_organization(uuid, attributes, session_uuid=None):
-    action = api_actions.AddAttributesToOrganizationAction()
+def add_attributes_to_iam2_organization(uuid, attributes, session_uuid=None):
+    action = api_actions.AddAttributesToIAM2OrganizationAction()
     action.timeout = 30000
     action.uuid = uuid
     action.attributes = attributes
@@ -79,8 +80,8 @@ def add_iam2_virtual_ids_to_project(virtual_id_uuids, project_uuid, session_uuid
     return evt
 
 
-def add_policy_statement_to_role(uuid,statements, session_uuid=None):
-    action = api_actions.AddPolicyStatementToRoleAction()
+def add_policy_statements_to_role(uuid,statements, session_uuid=None):
+    action = api_actions.AddPolicyStatementsToRoleAction()
     action.timeout = 30000
     action.uuid = uuid
     action.statements = statements
@@ -441,12 +442,12 @@ def remove_iam2_virtual_ids_from_project(virtual_id_uuids, project_uuid, session
     return evt
 
 
-def remove_policy_statements_from_role(uuid, statements, session_uuid=None):
+def remove_policy_statements_from_role(uuid, policy_statement_uuids, session_uuid=None):
     action = api_actions.RemovePolicyStatementsFromRoleAction()
     action.timeout = 30000
     action.uuid = uuid
-    action.statements = statements
-    test_util.action_logger('remove policy statements : %s from role :%s' % (statements,uuid))
+    action.policyStatementUuids = policy_statement_uuids
+    test_util.action_logger('remove policy statements : %s from role :%s' % (policy_statement_uuids,uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
@@ -523,7 +524,13 @@ def update_iam2_virtual_id(uuid, name=None, description=None, password=None, ses
     if description:
         action.description = description
     if password:
-        action.password = description
+        action.password = password
     test_util.action_logger('update iam2 virtual id : %s' % uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
+
+def get_policy_statement_uuid_of_role(role_uuid,action):
+    policy_statements=res_ops.get_resource(res_ops.ROLE,uuid=role_uuid)[0].statements
+    for policy_statement in policy_statements:
+        if policy_statement.statement.actions[0]==action:
+            return policy_statement.uuid
