@@ -27,8 +27,8 @@ alarm_uuid = None
 def test():
 	global endpoint_uuid_01, endpoint_uuid_02, sns_topic_uuid_01, sns_topic_uuid_02, alarm_uuid
 	# create endpoint
-	url_01 = 'https://oapi.dingtalk.com/robot/send?access_token=0be899d4bd0a7629961a5ccd3035dfba30d084b57944897838f1b601006dd151'
-	url_02 = 'https://oapi.dingtalk.com/robot/send?access_token=0be899d4bd0a7629961a5ccd3035dfba30d084b57944897838f1b601006dd151'
+	url_01 = 'https://oapi.dingtalk.com/robot/send?access_token=0be899d4bd0a7629961a5ccd3035dfba30d084b57944897838f1b601006dd153'
+	url_02 = 'https://oapi.dingtalk.com/robot/send?access_token=0be899d4bd0a7629961a5ccd3035dfba30d084b57944897838f1b601006dd153'
 	name_01 = 'dingtalkAtPerson'
 	name_02 = 'dingtalkAtAll'
 	phone_number = '+86-13999999999'

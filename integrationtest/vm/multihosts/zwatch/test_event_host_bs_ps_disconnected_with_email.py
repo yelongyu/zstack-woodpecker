@@ -12,6 +12,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.backupstorage_operations as bs_ops
+import os
 
 test_stub = test_lib.lib_get_test_stub()
 
@@ -47,11 +48,11 @@ def test():
         else:
             test_util.test_skip('No match backupStorage,test skip')
 
-    smtp_server = 'smtp.zstack.io'
-    pop_server = 'pop3.zstack.io'
-    smtp_port = 25
-    username = 'test.qa@zstack.io'
-    password = 'Test1234'
+    smtp_server = os.environ.get('smtpServer')
+    pop_server = os.environ.get('popServer')
+    smtp_port = os.environ.get('smtpPort')
+    username = os.environ.get('mailUsername')
+    password = os.environ.get('mailPassword')
     email_platform_name='Alarm_email'
     email_platform = zwt_ops.create_sns_email_platform(smtp_server, smtp_port,email_platform_name , username, password)
     email_platform_uuid = email_platform.uuid

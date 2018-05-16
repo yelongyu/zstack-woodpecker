@@ -21,11 +21,11 @@ vm = None
 
 def test():
 	global email_endpoint_uuid, email_platform_uuid, vm, disk_all_write_bytes_alarm_uuid, my_sns_topic_uuid
-	smtp_server = 'smtp.zstack.io'
-	pop_server = 'pop3.zstack.io'
-	smtp_port = 25
-	username = 'test.qa@zstack.io'
-	password = 'Test1234'
+	smtp_server = os.environ.get('smtpServer')
+	pop_server = os.environ.get('popServer')
+	smtp_port = os.environ.get('smtpPort')
+	username = os.environ.get('mailUsername')
+	password = os.environ.get('mailPassword')
 	email_platform_name = 'Alarm_email'
 	email_platform_uuid = zwt_ops.create_sns_email_platform(smtp_server, smtp_port,
 	                                                        email_platform_name, username, password).uuid
