@@ -21,7 +21,7 @@ def test():
   clone_vm.check()
 
   names = []
-  for i in range(5):
+  for i in range(3):
     names.append('clone' + str(i+1))
 
   clone_vms = clone_vm.clone(names)

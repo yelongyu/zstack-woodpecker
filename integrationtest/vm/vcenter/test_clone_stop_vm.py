@@ -23,7 +23,7 @@ def test():
   clone_vm.check()
 
   names = []
-  for i in range(5):
+  for i in range(3):
     names.append('clone_stop_vm' + str(i+1))
 
   clone_vms = clone_vm.clone(names)
