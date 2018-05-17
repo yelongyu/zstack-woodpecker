@@ -302,3 +302,36 @@ def create_volume(volume_creation_option=None, session_uuid = None):
 def set_httpd_in_vm(vm, ip):
     cmd = "systemctl start httpd; iptables -F; echo %s > /var/www/html/index.html" % ip
     test_lib.lib_execute_command_in_vm(vm, cmd)
+
+def set_flat_vm_ip(vm,ipaddr,gateway,netmask):
+    from pyVmomi import vim
+    import datetime
+    import urllib2
+    import ssl
+
+    ssl._create_default_https_context = ssl._create_unverified_context
+
+    vm = get_obj(content, [vim.VirtualMachine], name=vm.name)
+    if isinstance(vm, list):
+        test_util.test_fail("there is no vm uuid:%s" % vm.uuid)
+
+    auth = vim.vm.guest.NamePasswordAuthentication(password="password", username="root")
+    path = '/tmp/netcfg.sh'
+    data = """echo "DEVICE=eno16777984 \nBOOTPROTO=static\nNAME=eno16777984\nIPADDR=$1\nNETMASK=$2\nGATEWAY=$3\nONBOOT=yes\nTYPE=Ethernet">/etc/sysconfig/network-scripts/ifcfg-eno16777984;
+        systemctl restart network.service;
+    """
+    fattr = vim.vm.guest.FileManager.PosixFileAttributes(
+        accessTime=datetime.datetime.now(),
+        modificationTime=datetime.datetime.now(),
+        permissions=744)
+
+    url = content.guestOperationsManager.fileManager.InitiateFileTransferToGuest(
+        vm=vm, auth=auth, guestFilePath=path, fileAttributes=fattr, fileSize=len(data), overwrite=True)
+
+    request = urllib2.Request(url=url,data=data,unverifiable=True)
+    request.get_method = lambda: 'PUT'
+    response = urllib2.urlopen(request)
+
+    arguments = "%s %s %s" % (ipaddr,gateway,netmask)
+    content.guestOperationsManager.processManager.StartProgramInGuest(
+        vm=vm, auth=auth, spec=vim.vm.guest.ProcessManager.ProgramSpec(arguments=arguments, programPath=path))
