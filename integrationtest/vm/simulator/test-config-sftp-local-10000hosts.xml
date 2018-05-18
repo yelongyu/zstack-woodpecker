@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-sftp-local-10000hosts.xml</deployConfig>
+    <deployConfigTemplate>deploy-sftp-local-10000hosts.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

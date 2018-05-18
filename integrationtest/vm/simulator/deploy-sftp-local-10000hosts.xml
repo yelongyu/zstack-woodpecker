@@ -83,19 +83,11 @@
     </instanceOfferings>
   
     <backupStorages>
-      <imageStoreBackupStorage name="$imageStoreBackupStorageName"
+      <sftpBackupStorage name="$sftpBackupStorageName"
         description="Test" url="$sftpBackupStorageUrl"
         username="$sftpBackupStorageUsername"
         password="$sftpBackupStoragePassword"
         hostname="$sftpBackupStorageHostname" />
-      <imageStoreBackupStorage name="$imageStoreBackupStorageName2"
-        description="Test" url="$sftpBackupStorageUrl"
-        username="$sftpBackupStorageUsername"
-        password="$sftpBackupStoragePassword"
-        hostname="$sftpBackupStorageHostname2" />
-      <cephBackupStorage name="$cephBackupStorageName"
-        description="Test"
-        monUrls="$cephBackupStorageMonUrls" />
     </backupStorages>
   
     <images>
@@ -104,42 +96,35 @@
         mediaType="$rootMediaType" format="$rootImageFormat"
         url="$imageUrl_s" 
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
-        <backupStorageRef>$imageStoreBackupStorageName2</backupStorageRef>
-        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName_net" 
         description="Test Image Template for network test" 
         mediaType="$rootMediaType" format="$rootImageFormat"
         url="$imageUrl_net" 
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
-        <backupStorageRef>$imageStoreBackupStorageName2</backupStorageRef>
-        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
       <image name="$virtualRouterImageName" 
         description="virtual router image" 
         mediaType="$rootMediaType" format="$rootImageFormat" 
         username="$vrImageUsername" password="$vrImagePassword"
         url="$virtualRouterImageUrl" system="True">
-        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName_windows" 
         description="Small Test Image Template for windows platform" 
         mediaType="$rootMediaType" format="$rootImageFormat"
         url="$imageUrl_windows" platform="Windows"
         username="$winImageUsername" password="$winImagePassword">
-        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
-        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName_other" 
         description="Small Test Image Template for other platform" 
         mediaType="$rootMediaType" format="$rootImageFormat"
         url="$imageUrl_s" platform="Other"
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
-        <backupStorageRef>$imageStoreBackupStorageName2</backupStorageRef>
-        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
     </images>
   
@@ -159,29 +144,11 @@
   
     <zones>
       <zone name="$zoneName" description="Test">
-        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
-        <backupStorageRef>$imageStoreBackupStorageName2</backupStorageRef>
-        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
         <primaryStorages>
-          <cephPrimaryStorage name="$cephPrimaryStorageName"
-            description="Test Ceph PS" 
-            monUrls="$cephPrimaryStorageMonUrls" />
 	  <localPrimaryStorage name="$localPrimaryStorageName"
 	    description="Test Local Primary Storage 1"
             url="$localPrimaryStorageUrl" />
-          <localPrimaryStorage name="$localPrimaryStorageName2"
-            description="Test Local Primary Storage 2"
-            url="$localPrimaryStorageUrl2" />
-          <nfsPrimaryStorage name="$nfsPrimaryStorageName"
-            description="Test NFS 1" url="$nfsPrimaryStorageUrl" />
-          <nfsPrimaryStorage name="$nfsPrimaryStorageName2"
-            description="Test NFS 2" url="$nfsPrimaryStorageUrl2" />
-          <sharedMountPointPrimaryStorage name="$sharedMountPointPrimaryStorageName"
-            description="Test SMP PS 1"
-            url="$sharedMountPointPrimaryStorageUrl" />
-          <sharedMountPointPrimaryStorage name="$sharedMountPointPrimaryStorageName2"
-            description="Test SMP PS 2"
-            url="$sharedMountPointPrimaryStorageUrl2" />
         </primaryStorages>
   
         <clusters>
@@ -191,103 +158,7 @@
               <host name="$hostName" description="Test" managementIp="$hostIp"
                 username="$hostUsername" password="$hostPassword" duplication='10000'/>
             </hosts>
-            <primaryStorageRef>$cephPrimaryStorageName</primaryStorageRef>
-            <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
-            <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
-            <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName2</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName3</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName4</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName5</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName6</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName7</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName8</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName9</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName10</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName11</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName12</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName13</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName14</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName15</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName16</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName17</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName18</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName19</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName20</l2NetworkRef>
-          </cluster>
-          <cluster name="$clusterName2" description="Test"
-            hypervisorType="$clusterHypervisorType">
-            <hosts>
-              <host name="$hostName2" description="Test2" managementIp="$hostIp2"
-                username="$hostUsername2" password="$hostPassword2" port="$hostPort2" duplication='200'/>
-            </hosts>
             <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
-            <primaryStorageRef>$sharedMountPointPrimaryStorageName</primaryStorageRef>
-            <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
-            <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
-            <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName2</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName3</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName4</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName5</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName6</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName7</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName8</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName9</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName10</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName11</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName12</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName13</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName14</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName15</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName16</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName17</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName18</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName19</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName20</l2NetworkRef>
-          </cluster>
-<cluster name="$clusterName3" description="Test"
-            hypervisorType="$clusterHypervisorType">
-            <hosts>
-              <host name="$hostName3" description="Test3" managementIp="$hostIp3"
-                username="$hostUsername3" password="$hostPassword3" duplication='200'/>
-            </hosts>
-            <primaryStorageRef>$localPrimaryStorageName2</primaryStorageRef>
-            <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
-            <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
-            <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
-            <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName2</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName3</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName4</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName5</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName6</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName7</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName8</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName9</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName10</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName11</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName12</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName13</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName14</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName15</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName16</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName17</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName18</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName19</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName20</l2NetworkRef>
-          </cluster>
-<cluster name="$clusterName4" description="Test"
-            hypervisorType="$clusterHypervisorType">
-            <hosts>
-              <host name="$hostName4" description="Test4" managementIp="$hostIp4"
-                username="$hostUsername4" password="$hostPassword4" port="$hostPort4" duplication='200'/>
-            </hosts>
-            <primaryStorageRef>$nfsPrimaryStorageName2</primaryStorageRef>
-            <primaryStorageRef>$sharedMountPointPrimaryStorageName2</primaryStorageRef>
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
