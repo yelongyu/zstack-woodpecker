@@ -145,9 +145,8 @@
             </l3BasicNetwork>
           </l3Networks>
         </l2NoVlanNetwork>
-      </l2Networks>
 
-      <l2VlanNetwork name="$l2VlanNetworkName1"
+        <l2VlanNetwork name="$l2VlanNetworkName1"
             description="guest l2 vlan network1"
             physicalInterface="$l2NetworkPhysicalInterface"
             vlan="$l2Vlan1">
@@ -179,7 +178,7 @@
             </l3Networks>
           </l2VlanNetwork>
 
-          <l2VlanNetwork name="$l2VlanNetworkName2"
+        <l2VlanNetwork name="$l2VlanNetworkName2"
             description="guest l2 vlan network 2"
             physicalInterface="$l2NetworkPhysicalInterface"
             vlan="$l2Vlan2">
@@ -205,7 +204,9 @@
                 </networkService>
               </l3BasicNetwork>
             </l3Networks>
-          </l2VlanNetwork>
+        </l2VlanNetwork>
+
+      </l2Networks>
       
       <primaryStorages>
         <nfsPrimaryStorage name="$nfsPrimaryStorageName"
