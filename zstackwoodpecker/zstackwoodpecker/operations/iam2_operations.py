@@ -343,8 +343,8 @@ def get_iam2_system_attributes(session_uuid=None):
     return evt.inventories
 
 
-def get_iam2_virtual_id_api_permission(apis_to_check=None, session_uuid=None):
-    action = api_actions.GetIAM2VirtualIDAPIPermissionAction()
+def get_iam2_virtual_id_permission(apis_to_check=None, session_uuid=None):
+    action = api_actions.GetIAM2VirtualIDPermissionAction()
     action.timeout = 30000
     if apis_to_check:
         action.apisToCheck = apis_to_check
@@ -353,11 +353,20 @@ def get_iam2_virtual_id_api_permission(apis_to_check=None, session_uuid=None):
     return evt.permissions
 
 
+def get_iam2_projects_of_virtual_id(session_uuid=None):
+    action = api_actions.GetIAM2ProjectsOfVirtualIDAction()
+    action.timeout = 30000
+    test_util.action_logger('get iam2 virtual id api permission')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventories
+
+
 def login_iam2_virtual_id(name, password, timeout=160000):
     login = api_actions.LoginIAM2VirtualIDAction()
     login.name = name
     login.password = password
     login.timeout = timeout
+    login.sessionUuid = 1
     test_util.action_logger('login by iam2 virtual id :%s' % name)
     session_uuid = login.run().inventory.uuid
     return session_uuid
