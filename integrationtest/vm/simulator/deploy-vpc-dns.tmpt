@@ -3,8 +3,8 @@ import ../deploy.tmpt
 l2VlanNetworkName1 = vlan-test1
 l2VlanNetworkName2 = vlan-test2
 
-l2Vlan4 = 21
-l2Vlan5 = 22
+l2Vlan1 = 21
+l2Vlan2 = 22
 
 l3VlanNetwork1  = l3VlanNetwork1
 l3VlanNetwork2  = l3VlanNetwork2
