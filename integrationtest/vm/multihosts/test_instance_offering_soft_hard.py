@@ -78,6 +78,8 @@ def test():
     test_util.test_pass("test instanceoffering soft->hard and create vm case pass")
 
 def error_cleanup():
+    mn_ip = os.environ["ZSTACK_BUILT_IN_HTTP_SERVER_IP"]
+    test_lib.lib_execute_ssh_cmd(mn_ip,"root","password","zstack-ctl restart_node",timeout=300)
     test_lib.lib_error_cleanup(test_obj_dict)
 
 
