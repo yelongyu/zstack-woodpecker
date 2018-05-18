@@ -100,7 +100,7 @@
         username="$vrImageUsername" password="$vrImagePassword"
         mediaType="$rootMediaType"
         hypervisorType='KVM' url="$virtualRouterImageUrl" system="True">
-        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
     </image>
   </images>
 
