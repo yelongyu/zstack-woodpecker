@@ -1,0 +1,22 @@
+import ../deploy.tmpt
+
+l2VlanNetworkName1 = vlan-test1
+l2VlanNetworkName2 = vlan-test2
+
+l2Vlan1 = 21
+l2Vlan2 = 22
+
+l3VlanNetwork1  = l3VlanNetwork1
+l3VlanNetwork2  = l3VlanNetwork2
+
+vlanIpRangeName1 = guest vlan ip range name 1
+vlanIpRangeStart1 = 10.11.0.2
+vlanIpRangeEnd1 = 10.11.127.255
+vlanIpRangeGateway1 = 10.11.0.1
+vlanIpRangeNetmask1 = 255.255.0.0
+
+vlanIpRangeName2 = guest vlan ip range name 2
+vlanIpRangeStart2 = 10.12.0.2
+vlanIpRangeEnd2 = 10.12.127.255
+vlanIpRangeGateway2 = 10.12.0.1
+vlanIpRangeNetmask2 = 255.255.0.0
