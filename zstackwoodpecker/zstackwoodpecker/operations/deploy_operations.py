@@ -488,7 +488,7 @@ def get_disk_uuid(scenarioFile):
     #IF separated_partition:
     #cmd = r"blkid|grep mpatha2|awk -F\" '{print $2}'"
     #ELSE
-    cmd = r"blkid|grep mpatha1|awk -F\" '{print $2}'"
+    cmd = r"blkid|grep mpatha|awk -F\" '{print $2}'"
     #ENDIF
     ret, disk_uuid, stderr = ssh.execute(cmd, host_ips[-1], "root", "password", True, 22)
     return disk_uuid.strip()

@@ -16,6 +16,7 @@ from email.header import Header
 from email.mime.text import MIMEText
 from email.utils import parseaddr, formataddr
 import smtplib
+import os
 
 
 
@@ -543,17 +544,12 @@ def check_keywords_in_email(pop_server, username, password, first_keyword, secon
 
 
 
-def send_boundary_email(boundary_words):
+def send_boundary_email(boundary_words,smtp_server,from_addr,password,to_addr):
     '''
     this function is used to send a boundary email to make a distinction between old and new email
     :param boundary_words:(may be a timestamp or uuid)
     :return: no return
     '''
-
-    from_addr = 'test.qa@zstack.io'
-    password = 'Test1234'
-    to_addr = 'test.qa@zstack.io'
-    smtp_server = 'smtp.zstack.io'
 
     msg = MIMEText(boundary_words, 'plain')
     msg['From'] = from_addr

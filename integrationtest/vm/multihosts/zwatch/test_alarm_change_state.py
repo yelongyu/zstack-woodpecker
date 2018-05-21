@@ -63,7 +63,7 @@ def test():
 
 	time.sleep(10)
 	time_stamp = zwt_ops.get_boundary_words()
-	zwt_ops.send_boundary_email(time_stamp)
+	zwt_ops.send_boundary_email(time_stamp,smtp_server,username,password,username)
 
 	time.sleep(30)
 	flag = zwt_ops.check_keywords_in_email(pop_server, username, password, disk_all_write_bytes,
