@@ -44,7 +44,7 @@ def test():
     iam2_ops.remove_policy_statements_from_role(role_uuid, [statement_uuid])
 
     # 2 create 1001 projects and  add/remove attributes to/from it
-    for i in range(1,1000):
+    for i in range(0,1001):
         project_name = 'test_project-'+str(i)
         project_uuid = iam2_ops.create_iam2_project(project_name).uuid
         #iam2_ops.create_iam2_project(project_name)
@@ -94,7 +94,7 @@ def test():
     # iam2_ops.remove_attributes_from_iam2_virtual_id_group()
 
     # 8 create 10001 virtual ids
-    for i in range(0, 10000):
+    for i in range(0, 10001):
         (name, email, phone) = user_info_generator.generate_user_info()
         print name
         print email
@@ -105,7 +105,7 @@ def test():
         attributes = [{"name": "fullname", "value": name}, {"name": "phone", "value": phone}, {"name": "mail", "value": email}, {"name": "identifier", "value": str(i+10000)} ]
         iam2_ops.add_attributes_to_iam2_virtual_id(virtual_id_uuid, attributes)
         #cond = res_ops.gen_query_conditions('virtualIDUuid', '=', virtual_id_uuid)
-        if i <= 21:
+        if i < 21:
         
             attributes = [{"name": "__PlatformAdmin__"}]
             iam2_ops.add_attributes_to_iam2_virtual_id(virtual_id_uuid, attributes)
