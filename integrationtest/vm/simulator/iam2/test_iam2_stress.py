@@ -44,11 +44,11 @@ def test():
     iam2_ops.remove_policy_statements_from_role(role_uuid, [statement_uuid])
 
     # 2 create 1001 projects and  add/remove attributes to/from it
-    project_name = 'test_project'
-    project_uuid = iam2_ops.create_iam2_project(project_name).uuid
     for i in range(1,1000):
-        project_name = 'test_project'+str(i)
-        iam2_ops.create_iam2_project(project_name)
+        project_name = 'test_project-'+str(i)
+        project_uuid = iam2_ops.create_iam2_project(project_name).uuid
+        #iam2_ops.create_iam2_project(project_name)
+
     # TODO:there is nothing to do with the below api in the first version of iam2
     # iam2_ops.add_attributes_to_iam2_project(project_uuid,attributes='')
     # iam2_ops.remove_attributes_from_iam2_project(project_uuid,attributes='')
@@ -93,20 +93,19 @@ def test():
     # iam2_ops.add_attributes_to_iam2_virtual_id_group()
     # iam2_ops.remove_attributes_from_iam2_virtual_id_group()
 
-    # 8 create virtual id and add/remove role or attributes to/from it
     # 8 create 10001 virtual ids
     for i in range(0, 10000):
         (name, email, phone) = user_info_generator.generate_user_info()
         print name
         print email
         print phone
-        virtual_id_uuid = iam2_ops.create_iam2_virtual_id(name, 'password').uuid
+        virtual_id_uuid = iam2_ops.create_iam2_virtual_id('user-'+str(i), 'password').uuid
         iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], virtual_id_uuid)
         #iam2_ops.remove_roles_from_iam2_virtual_id([role_uuid], virtual_id_uuid)
         attributes = [{"name": "fullname", "value": name}, {"name": "phone", "value": phone}, {"name": "mail", "value": email}, {"name": "identifier", "value": str(i+10000)} ]
         iam2_ops.add_attributes_to_iam2_virtual_id(virtual_id_uuid, attributes)
         #cond = res_ops.gen_query_conditions('virtualIDUuid', '=', virtual_id_uuid)
-        if i >= 21:
+        if i <= 21:
         
             attributes = [{"name": "__PlatformAdmin__"}]
             iam2_ops.add_attributes_to_iam2_virtual_id(virtual_id_uuid, attributes)
@@ -232,7 +231,6 @@ def test():
     iam2_ops.delete_iam2_virtual_id(virtual_id_uuid)
     iam2_ops.delete_role(role_uuid)
     test_util.test_fail('success test iam2 login in by admin!')
-    test_util.test_pass('success test iam2 login in by admin!')
 
 
 # Will be called only if exception happens in test().
