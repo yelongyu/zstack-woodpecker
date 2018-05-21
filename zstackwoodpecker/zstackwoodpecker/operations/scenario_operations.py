@@ -858,18 +858,19 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
 
     HOST_INITIATOR_COUNT = HOST_INITIATOR_COUNT + 1
     if HOST_INITIATOR_COUNT == 3:
-        fdisk_cfg_src = "/home/%s/fdiskIscsiUse.cmd" %(woodpecker_ip)
-        fdisk_cfg_dst = "/tmp/fdiskIscsiUse.cmd"
-        ssh.scp_file(fdisk_cfg_src, fdisk_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
+        ####wipefs####fdisk_cfg_src = "/home/%s/fdiskIscsiUse.cmd" %(woodpecker_ip)
+        ####wipefs####fdisk_cfg_dst = "/tmp/fdiskIscsiUse.cmd"
+        ####wipefs####ssh.scp_file(fdisk_cfg_src, fdisk_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
 
-        cmd = "fdisk /dev/mapper/mpatha </tmp/fdiskIscsiUse.cmd"
-        exec_cmd_in_vm(cmd, vm_ip, vm_config, False, host_port)
+        ####wipefs####cmd = "fdisk /dev/mapper/mpatha </tmp/fdiskIscsiUse.cmd"
+        ####wipefs####exec_cmd_in_vm(cmd, vm_ip, vm_config, False, host_port)
 
-        stop_vm(zstack_management_ip, ISCSI_TARGET_UUID, 'cold')
-        start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
+        ####wipefs####stop_vm(zstack_management_ip, ISCSI_TARGET_UUID, 'cold')
+        ####wipefs####start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
 
-        time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
+        ####wipefs####time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
 
+        
         #Below is aim to migrate sanlock to a separated partition, don't delete!!!
         #IF separated_partition:
         #cmd = "pvcreate /dev/mapper/mpatha1"
@@ -879,7 +880,11 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
         #exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
         #ELSE
-        cmd = "pvcreate /dev/mapper/mpatha1"
+        cmd = "wipefs -a /dev/mapper/mpatha"
+        exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+        ####wipefs####cmd = "pvcreate /dev/mapper/mpatha1"
+        time.sleep(2)
+        cmd = "pvcreate /dev/mapper/mpatha"
         exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
         #ENDIF
 
