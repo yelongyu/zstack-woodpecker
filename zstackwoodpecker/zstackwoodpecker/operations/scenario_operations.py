@@ -1715,6 +1715,8 @@ def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_in
         #host = lib_find_random_host(http_server_ip)
         #action.systemTags = ["localStorage::hostUuid::%s" % host.uuid]
         action.systemTags = ["localStorage::hostUuid::%s" % vm_inv.hostUuid]
+    elif ps.type in [ 'SharedBlock' ]:
+        action.primaryStorageUuid = ps.uuid
     else:
         test_util.test_fail("new ps type in scenario.")
 
