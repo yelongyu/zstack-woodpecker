@@ -858,19 +858,18 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
 
     HOST_INITIATOR_COUNT = HOST_INITIATOR_COUNT + 1
     if HOST_INITIATOR_COUNT == 3:
-        ####wipefs####fdisk_cfg_src = "/home/%s/fdiskIscsiUse.cmd" %(woodpecker_ip)
-        ####wipefs####fdisk_cfg_dst = "/tmp/fdiskIscsiUse.cmd"
-        ####wipefs####ssh.scp_file(fdisk_cfg_src, fdisk_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
+        fdisk_cfg_src = "/home/%s/fdiskIscsiUse.cmd" %(woodpecker_ip)
+        fdisk_cfg_dst = "/tmp/fdiskIscsiUse.cmd"
+        ssh.scp_file(fdisk_cfg_src, fdisk_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
 
-        ####wipefs####cmd = "fdisk /dev/mapper/mpatha </tmp/fdiskIscsiUse.cmd"
-        ####wipefs####exec_cmd_in_vm(cmd, vm_ip, vm_config, False, host_port)
+        cmd = "fdisk /dev/mapper/mpatha </tmp/fdiskIscsiUse.cmd"
+        exec_cmd_in_vm(cmd, vm_ip, vm_config, False, host_port)
 
-        ####wipefs####stop_vm(zstack_management_ip, ISCSI_TARGET_UUID, 'cold')
-        ####wipefs####start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
+        stop_vm(zstack_management_ip, ISCSI_TARGET_UUID, 'cold')
+        start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
 
-        ####wipefs####time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
+        time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
 
-        
         #Below is aim to migrate sanlock to a separated partition, don't delete!!!
         #IF separated_partition:
         #cmd = "pvcreate /dev/mapper/mpatha1"
@@ -880,11 +879,7 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
         #exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
         #ELSE
-        cmd = "wipefs -a /dev/mapper/mpatha"
-        exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
-        ####wipefs####cmd = "pvcreate /dev/mapper/mpatha1"
-        time.sleep(2)
-        cmd = "pvcreate /dev/mapper/mpatha"
+        cmd = "pvcreate /dev/mapper/mpatha1"
         exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
         #ENDIF
 
@@ -1720,6 +1715,8 @@ def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_in
         #host = lib_find_random_host(http_server_ip)
         #action.systemTags = ["localStorage::hostUuid::%s" % host.uuid]
         action.systemTags = ["localStorage::hostUuid::%s" % vm_inv.hostUuid]
+    elif ps.type in [ 'SharedBlock' ]:
+        action.primaryStorageUuid = ps.uuid
     else:
         test_util.test_fail("new ps type in scenario.")
 
@@ -2140,6 +2137,12 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 #vm_creation_option.set_system_tags(system_tags)
                 #vm_creation_option.set_ps_uuid(ps_uuid)
                 #vm_creation_option.set_session_uuid(session_uuid)
+
+                #if iscsiClusterUuid has been set, vm will be assigned to iscsiCluster.
+                iscsi_cluster_uuid = os.environ.get('iscsiClusterUuid')
+                if iscsi_cluster_uuid:
+                    vm_creation_option.set_cluster_uuid(iscsi_cluster_uuid)
+
                 vm_inv = create_vm(zstack_management_ip, vm_creation_option)
                 vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, default_l3_uuid).ip
                 test_lib.lib_wait_target_up(vm_ip, '22', 360)
