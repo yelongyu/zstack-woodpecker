@@ -10,6 +10,7 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import threading
 import test_stub
+import time
 
 
 vm_num = 3
@@ -42,6 +43,7 @@ def test():
         for i in range(vm_num):
             vms.append(test_stub.create_vm(vm_name = 'c7-vm'+str(i), image_name = "batch_test_image"))
         
+        time.sleep(30)
         for vm in vms:
             t = threading.Thread(target=change_vm_password_wrapper, args=(vm.get_vm().uuid, usr, passwd))
             ts.append(t)
