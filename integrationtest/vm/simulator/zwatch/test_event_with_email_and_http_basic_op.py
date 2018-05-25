@@ -31,8 +31,8 @@ def test():
     smtp_server = os.environ.get('smtpServer')
     smtp_port = os.environ.get('smtpPort')
     email_platform_name = 'Alarm_email'
-    email_username = os.environ.get('emailUsername')
-    email_password = os.environ.get('emailPassword')
+    email_username = os.environ.get('mailUsername')
+    email_password = os.environ.get('mailPassword')
     email_platform = zwt_ops.create_sns_email_platform(smtp_server, smtp_port, email_platform_name, email_username, email_password)
     email_platform_uuid = email_platform.uuid
     cond=res_ops.gen_query_conditions('uuid','=',email_platform_uuid)
@@ -45,8 +45,8 @@ def test():
         test_util.test_fail('Validate SNS Email Platform Failed, Email Plarform: %s' % email_platform_uuid)
 
     # create endpoint
-    email_receiver = os.environ.get('emailUsername')
-    email_endpoint_name = os.environ.get('emailPassword')
+    email_receiver = os.environ.get('mailUsername')
+    email_endpoint_name = os.environ.get('mailPassword')
     email_endpoint_uuid = zwt_ops.create_sns_email_endpoint(email_receiver, email_endpoint_name, email_platform_uuid).uuid
     cond=res_ops.gen_query_conditions('uuid','=',email_endpoint_uuid)
     inv=res_ops.query_resource(res_ops.SNS_EMAIL_ENDPOINT,cond)
