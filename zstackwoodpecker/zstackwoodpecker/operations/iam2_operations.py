@@ -366,7 +366,6 @@ def login_iam2_virtual_id(name, password, timeout=160000):
     login.name = name
     login.password = password
     login.timeout = timeout
-    login.sessionUuid = 1
     test_util.action_logger('login by iam2 virtual id :%s' % name)
     session_uuid = login.run().inventory.uuid
     return session_uuid
