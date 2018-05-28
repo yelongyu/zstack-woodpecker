@@ -18,7 +18,7 @@ def test():
     '''
     global test_obj_dict
     volume_list = []
-    vol_num = 19
+    vol_num = 20
 
     vm = test_stub.create_vlan_vm()
     test_obj_dict.add_vm(vm)
