@@ -26,7 +26,7 @@ def test():
         if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
             os.system("bash %s '%s' %s" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ips,'project-management'))
     elif os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
-        os.system("bash %s %s %s" % (EXTRA_SUITE_SETUP_SCRIPT,'','project-management'))
+        os.system("bash %s '' '%s'" % (EXTRA_SUITE_SETUP_SCRIPT,'project-management'))
 
     if os.environ.get('ZSTACK_SIMULATOR') == "yes":
         deploy_operations.deploy_simulator_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
