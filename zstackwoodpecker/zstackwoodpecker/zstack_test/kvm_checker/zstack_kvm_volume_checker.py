@@ -39,6 +39,21 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
             self.check_file_exist(volume, volume_installPath, host)
         elif ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
             self.check_ceph(volume, volume_installPath, ps)
+        elif ps.type == 'SharedBlock':
+            self.check_sharedblock(volume, volume_installPath, ps)
+
+    def check_sharedblock(self, volume, volume_installPath, ps):
+        devPath = "/dev/" + volume_installPath.split("sharedblock://")[1]
+        cmd = 'lvs -o path %s' % devPath
+        conditions = res_ops.gen_query_conditions('primaryStorage.uuid', '=', ps.uuid)
+        cluster = res_ops.query_resource(res_ops.CLUSTER, conditions)[0]
+        conditions = res_ops.gen_query_conditions('clusterUuid', '=', cluster.uuid)
+        host = res_ops.query_resource(res_ops.HOST, conditions)[0]
+        result = test_lib.lib_execute_ssh_cmd(host.managementIp, 'root', 'password', cmd)
+        if devPath in result:
+            return self.judge(True)
+        else:
+            return self.judge(False)
 
     def check_iscsi(self, volume, volume_installPath, ps):
         host = test_lib.lib_find_host_by_iscsi_ps(ps)

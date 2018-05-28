@@ -3241,6 +3241,15 @@ def lib_check_backup_storage_image_file(image):
 
     test_util.test_logger('Did not find suiteable checker for bs: %s, whose type is: %s ' % (bs.uuid, bs.type))
 
+def lib_check_sharedblock_file_exist(host, path):
+    #cmd = "echo 11;lvdisplay | grep %s" % path
+    cmd = "lvdisplay"
+    result = lib_execute_ssh_cmd(host.managementIp, 'root', 'password', cmd)
+    if path in result:
+        return True
+    else:
+        return False
+
 def lib_check_file_exist(host, file_path):
     command = 'ls -l %s' % file_path
     eout = ''
