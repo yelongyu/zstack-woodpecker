@@ -24,9 +24,9 @@ def test():
     if test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
         mn_ips = deploy_operations.get_nodes_from_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
         if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
-            os.system("bash %s '%s'" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ips))
+            os.system("bash %s '%s' %s" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ips,'project-management'))
     elif os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
-        os.system("bash %s" % (EXTRA_SUITE_SETUP_SCRIPT))
+        os.system("bash %s %s %s" % (EXTRA_SUITE_SETUP_SCRIPT,'','project-management'))
 
     if os.environ.get('ZSTACK_SIMULATOR') == "yes":
         deploy_operations.deploy_simulator_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
