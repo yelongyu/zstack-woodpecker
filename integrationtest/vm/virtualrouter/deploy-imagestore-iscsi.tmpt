@@ -1,0 +1,4 @@
+import ./deploy.tmpt
+
+iscsiPrimaryStorageName = iscsi-ps1
+imageStoreBackupStorageName = imagestore1
