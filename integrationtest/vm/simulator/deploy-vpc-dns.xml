@@ -146,58 +146,33 @@
           </l3Networks>
         </l2NoVlanNetwork>
 
-        <l2VlanNetwork name="$l2VlanNetworkName1"
-            description="guest l2 vlan network1"
+        <l2VlanNetwork name="$l2VpcNetworkName1"
+            description="guest l2 vpc network1"
             physicalInterface="$l2NetworkPhysicalInterface"
             vlan="$l2Vlan1">
             <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetworkName1"
-                description = "guest test vlan network with DHCP DNS and SNAT"
+              <l3BasicNetwork name="$l3VpcNetworkName1"
+				type="L3VpcNetwork"
+                description = "guest test vpc network with DHCP DNS and SNAT"
                 domain_name = "$L3VlanNetworkDomainName1">
-                <ipRange name="$vlanIpRangeName1"
-                  startIp="$vlanIpRangeStart1"
-                  endIp="$vlanIpRangeEnd1"
-                  gateway="$vlanIpRangeGateway1"
-                  netmask="$vlanIpRangeNetmask1"/>
-                <dns>$DNSServer</dns>
+                <ipRange name="$vpcIpRangeName1"
+                  startIp="$vpcIpRangeStart1"
+                  endIp="$vpcIpRangeEnd1"
+                  gateway="$vpcIpRangeGateway1"
+                  netmask="$vpcIpRangeNetmask1"/>
                 <networkService provider="vrouter">
                   <serviceType>IPsec</serviceType>
-                  <serviceType>CentralizedDNS</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
-                  <serviceType>Eip</serviceType>
+				  <serviceType>VRouterRoute</serviceType>
+				  <serviceType>CentralizedDNS</serviceType>
+				  <serviceType>VipQos</serviceType>
+				  <serviceType>DNS</serviceType>
+				  <serviceType>SNAT</serviceType>
+				  <serviceType>PortForwarding</serviceType>
+				  <serviceType>Eip</serviceType>
                 </networkService>
                 <networkService provider="Flat Network Service Provider">
                   <serviceType>DHCP</serviceType>
-                </networkService>
-                <networkService provider="SecurityGroup">
-                  <serviceType>SecurityGroup</serviceType>
-                </networkService>
-              </l3BasicNetwork>
-            </l3Networks>
-          </l2VlanNetwork>
-
-        <l2VlanNetwork name="$l2VlanNetworkName2"
-            description="guest l2 vlan network 2"
-            physicalInterface="$l2NetworkPhysicalInterface"
-            vlan="$l2Vlan2">
-            <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetwork2"
-                description = "guest test vlan network 2"
-                domain_name = "$L3VlanNetworkDomainName2">
-                <ipRange name="$vlanIpRangeName2" startIp="$vlanIpRangeStart2" endIp="$vlanIpRangeEnd2" gateway="$vlanIpRangeGateway2" netmask="$vlanIpRangeNetmask2"/>
-                <dns>$DNSServer</dns>
-                <networkService provider="vrouter">
-                  <serviceType>IPsec</serviceType>
-                  <serviceType>CentralizedDNS</serviceType>
-                  <serviceType>DNS</serviceType>
-                  <serviceType>SNAT</serviceType>
-                  <serviceType>PortForwarding</serviceType>
-                  <serviceType>Eip</serviceType>
-                </networkService>
-                <networkService provider="Flat Network Service Provider">
-                  <serviceType>DHCP</serviceType>
+                  <serviceType>Userdata</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
