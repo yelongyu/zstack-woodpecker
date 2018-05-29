@@ -44,6 +44,8 @@ class zstack_kvm_share_volume_file_checker(checker_header.TestChecker):
         #    self.check_file_exist(volume, volume_installPath, host)
         if ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
             self.check_ceph(volume, volume_installPath, ps)
+        elif ps.type == 'SharedBlock':
+            self.check_sharedblock(volume, volume_installPath, ps)
         else:
             test_util.test_logger('Check result: [share volume] primary storage is only support ceph, other storage type is not supported.')
 
@@ -71,6 +73,19 @@ class zstack_kvm_share_volume_file_checker(checker_header.TestChecker):
             return self.judge(True)
         else:
             test_util.test_logger('Check result: [volume:] %s [file:] %s does NOT exist on ceph [host name:] %s .' % (volume.uuid, volume_installPath, ceph_host))
+            return self.judge(False)
+
+    def check_sharedblock(self, volume, volume_installPath, ps):
+        devPath = "/dev/" + volume_installPath.split("sharedblock://")[1]
+        cmd = 'lvs -o path %s' % devPath
+        conditions = res_ops.gen_query_conditions('primaryStorage.uuid', '=', ps.uuid)
+        cluster = res_ops.query_resource(res_ops.CLUSTER, conditions)[0]
+        conditions = res_ops.gen_query_conditions('clusterUuid', '=', cluster.uuid)
+        host = res_ops.query_resource(res_ops.HOST, conditions)[0]
+        result = test_lib.lib_execute_ssh_cmd(host.managementIp, 'root', 'password', cmd)
+        if devPath in result:
+            return self.judge(True)
+        else:
             return self.judge(False)
 
     #def check_nfs(self, volume, volume_installPath):
@@ -133,6 +148,9 @@ class zstack_kvm_share_volume_attach_checker(checker_header.TestChecker):
         #elif volume_installPath.startswith('ceph'):
         if volume_installPath.startswith('ceph'):
             volume_installPath = volume_installPath.split('ceph://')[1]
+        elif volume_installPath.startswith('sharedblock'):
+            volume_installPath = "/dev/" + volume_installPath.split('sharedblock://')[1]
+
 
         if volume_installPath in output:
             test_util.test_logger('Check result: [volume:] %s [file:] %s is found in [vm:] %s on [host:] %s .' % (volume.uuid, volume_installPath, vm.uuid, host.managementIp))

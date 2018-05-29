@@ -142,6 +142,9 @@ class zstack_kvm_volume_attach_checker(checker_header.TestChecker):
             volume_installPath = volume_installPath.split('ceph://')[1]
         elif volume_installPath.startswith('fusionstor'):
             volume_installPath = volume_installPath.split('fusionstor://')[1]
+        elif volume_installPath.startswith('sharedblock'):
+            volume_installPath = "/dev/" + volume_installPath.split('sharedblock://')[1]
+
 
 
         if volume_installPath in output:
