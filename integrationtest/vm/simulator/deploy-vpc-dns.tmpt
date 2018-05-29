@@ -4,7 +4,7 @@ l2VpcNetworkName1 = vpc-test1
 
 l2Vlan1 = 21
 
-l3VpcNetwork1  = l3VpcNetwork1
+l3VpcNetworkName1  = l3VpcNetwork1
 
 vpcIpRangeName1 = guest vpc ip range name 1
 vpcIpRangeStart1 = 10.11.0.2
