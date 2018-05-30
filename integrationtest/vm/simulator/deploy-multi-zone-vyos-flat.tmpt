@@ -1,0 +1,47 @@
+import ./deploy.tmpt
+cephPrimaryStorageName = ceph-ps
+cephPrimaryStorageMonUrls = root:password@127.127.127.2;root:password@127.127.127.3;root:password@127.127.127.4
+cephPrimaryStorageDataVolumePoolName =
+cephPrimaryStorageRootVolumePoolName =
+cephPrimaryStorageImageCachePoolName =
+
+cephBackupStorageName = ceph-bs
+cephBackupStorageMonUrls = root:password@127.127.127.2;root:password@127.127.127.3;root:password@127.127.127.4
+cephBackupStoragePoolName =
+
+imageStoreBackupStorageName = imagestore
+imageStoreBackupStorageName2 = imagestore2
+
+localPrimaryStorageName = local
+localPrimaryStorageName2 = local2
+localPrimaryStorageUrl = /local_ps
+
+clusterName2 = cluster2-1
+clusterName3 = cluster3-1
+
+zoneName2 = zone2 
+zoneName3 = zone3
+
+l2PublicNetworkName1 = l2-public-1
+l2PublicNetworkInterface1 = eth2
+
+l2ManagementNetworkName1 = l2-management-1
+l2ManagementNetworkInterface1 = eth3 
+
+l2NoVlanNetworkName11 = vlan10 
+l2NoVlanNetworkInterface11 = eth2.10
+
+l2NoVlanNetworkName12 = vlan11
+l2NoVlanNetworkInterface12 = eth2.11
+
+l2PublicNetworkName2 = l2-public-2
+l2PublicNetworkInterface2 = eth4
+
+l2ManagementNetworkName2 = l2-management-2
+l2ManagementNetworkInterface2 = eth5
+
+l2NoVlanNetworkName21 = vlan10
+l2NoVlanNetworkInterface21 = eth4.10
+
+l2NoVlanNetworkName22 = vlan11
+l2NoVlanNetworkInterface22 = eth4.11
