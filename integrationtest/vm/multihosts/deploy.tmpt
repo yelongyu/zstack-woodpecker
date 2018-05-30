@@ -217,8 +217,3 @@ physicalHostUsername = root
 physicalHostPassword = 123456
 physicalHostPassword2 = 234567
 
-smtpServer = smtp.domain.com
-popServer = pop.domain.com
-smtpPort = 25
-mailUsername = test.qa@domain.com
-mailPassword = 0

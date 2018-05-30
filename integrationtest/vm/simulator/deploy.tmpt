@@ -249,8 +249,3 @@ vlanIpRangeNetmask20 = 255.255.0.0
 hostRecoverScript = /home/host_recover_script.sh
 hostForceStopScript = /home/host_force_stop_script.sh
 
-smtpServer = smtp.domain.com
-popServer = pop3.domain.com
-smtpPort = 25
-mailUsername = test@domain.com
-mailPassword = 0
