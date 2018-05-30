@@ -141,7 +141,7 @@ def gen_other_license(customer_name, user_name, duration, lic_type, cpu_num, hos
 def gen_addons_license(customer_name, user_name, duration, lic_type, cpu_num, host_num, pro_mode):
     tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
     license_script = os.environ.get('licenseGenScript') 
-    lic_info = lic_ops.get_license_addons_info()
+    lic_info = lic_ops.get_license_info()
     test_util.test_logger("bash '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s'" % (license_script, customer_name, user_name, duration, lic_type, cpu_num, host_num, lic_info.inventory.licenseRequest, pro_mode))
     (ret, file_path) = execute_shell_in_process_stdout("bash '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s'" % (license_script, customer_name, user_name, duration, lic_type, cpu_num, host_num, lic_info.inventory.licenseRequest, pro_mode), tmp_file)
     return file_path
