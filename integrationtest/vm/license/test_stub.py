@@ -36,7 +36,7 @@ def get_license_info():
 def get_license_addons_info():
     global lic_issued_date
     global lic_expired_date
-    lic_info = lic_ops.get_license_addons_info().inventory
+    lic_info = lic_ops.get_license_addons_info().addons[0]
     if lic_issued_date == None or lic_expired_date != None:
         lic_issued_date = lic_info.issuedDate
     lic_expired_date = lic_info.expiredDate
@@ -150,6 +150,10 @@ def load_license(file_path):
     execute_shell_in_process('zstack-ctl install_license --license %s' % file_path)
     result = lic_ops.reload_license()
 
+def update_license(node_uuid, file_path):
+    execute_shell_in_process('zstack-cli managementNodeUuid=%s license=`base64 -w 0 %s`' % (node_uuid, file_path))
+    result = lic_ops.reload_license()
+
 def check_license(user_name, cpu_num, host_num, expired, lic_type, issued_date=None, expired_date=None):
     if issued_date == None:
         issued_date = get_license_issued_date()
@@ -176,7 +180,7 @@ def check_license_addons(expired, lic_type, issued_date=None, expired_date=None)
         issued_date = get_license_addons_issued_date()
     if expired_date == None:
         expired_date = get_license_addons_expired_date()
-    lic_info = lic_ops.get_license_addons_info().inventory
+    lic_info = lic_ops.get_license_addons_info().addons[0]
     if lic_info.expired != expired:
         test_util.test_fail("License expire info not correct")
     if lic_info.licenseType != lic_type:
