@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-multi-zone-vyos-flat.xml</deployConfig>
+    <deployConfigTemplate>deploy-multi-zone-vyos-flat.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
