@@ -131,7 +131,7 @@
         format="$rootImageFormat" url="$ocfs2HostImageUrl" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
     </images>
   
