@@ -151,7 +151,7 @@ def load_license(file_path):
     result = lic_ops.reload_license()
 
 def update_license(node_uuid, file_path):
-    execute_shell_in_process('zstack-cli managementNodeUuid=%s license=`base64 -w 0 %s`' % (node_uuid, file_path))
+    execute_shell_in_process('zstack-cli UpdateLicense managementNodeUuid=%s license=`base64 -w 0 %s`' % (node_uuid, file_path))
     result = lic_ops.reload_license()
 
 def check_license(user_name, cpu_num, host_num, expired, lic_type, issued_date=None, expired_date=None):
