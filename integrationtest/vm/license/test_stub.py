@@ -33,16 +33,37 @@ def get_license_info():
     lic_expired_date = lic_info.expiredDate
     return lic_info
 
+def get_license_addons_info():
+    global lic_issued_date
+    global lic_expired_date
+    lic_info = lic_ops.get_license_addons_info().inventory
+    if lic_issued_date == None or lic_expired_date != None:
+        lic_issued_date = lic_info.issuedDate
+    lic_expired_date = lic_info.expiredDate
+    return lic_info
+
 def get_license_issued_date():
     global lic_issued_date
     if lic_issued_date == None or lic_expired_date == None:
         get_license_info()
     return lic_issued_date
 
+def get_license_addons_issued_date():
+    global lic_issued_date
+    if lic_issued_date == None or lic_expired_date == None:
+        get_license_addons_info()
+    return lic_issued_date
+
 def get_license_expired_date():
     global lic_expired_date
     if lic_expired_date == None:
         get_license_info()
+    return lic_expired_date
+
+def get_license_addons_expired_date():
+    global lic_expired_date
+    if lic_expired_date == None:
+        get_license_addons_info()
     return lic_expired_date
 
 def execute_shell_in_process(cmd, timeout=10, logfd=None):
@@ -117,6 +138,14 @@ def gen_other_license(customer_name, user_name, duration, lic_type, cpu_num, hos
     (ret, file_path) = execute_shell_in_process_stdout("bash '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s'" % (license_script, customer_name, user_name, duration, lic_type, cpu_num, host_num, request_key), tmp_file)
     return file_path
 
+def gen_addons_license(customer_name, user_name, duration, lic_type, cpu_num, host_num, pro_mode):
+    tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
+    license_script = os.environ.get('licenseGenScript') 
+    lic_info = lic_ops.get_license_addons_info()
+    test_util.test_logger("bash '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s'" % (license_script, customer_name, user_name, duration, lic_type, cpu_num, host_num, lic_info.inventory.licenseRequest, pro_mode))
+    (ret, file_path) = execute_shell_in_process_stdout("bash '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s'" % (license_script, customer_name, user_name, duration, lic_type, cpu_num, host_num, lic_info.inventory.licenseRequest, pro_mode), tmp_file)
+    return file_path
+
 def load_license(file_path):
     execute_shell_in_process('zstack-ctl install_license --license %s' % file_path)
     result = lic_ops.reload_license()
@@ -140,7 +169,21 @@ def check_license(user_name, cpu_num, host_num, expired, lic_type, issued_date=N
     if lic_info.issuedDate != issued_date:
         test_util.test_fail("License issue date info not correct")
     if lic_info.expiredDate != expired_date:
+        test_util.test_fail("License expire date info not correct")
 
+def check_license_addons(expired, lic_type, issued_date=None, expired_date=None):
+    if issued_date == None:
+        issued_date = get_license_addons_issued_date()
+    if expired_date == None:
+        expired_date = get_license_addons_expired_date()
+    lic_info = lic_ops.get_license_addons_info().inventory
+    if lic_info.expired != expired:
+        test_util.test_fail("License expire info not correct")
+    if lic_info.licenseType != lic_type:
+        test_util.test_fail("License type info not correct")
+    if lic_info.issuedDate != issued_date:
+        test_util.test_fail("License issue date info not correct")
+    if lic_info.expiredDate != expired_date:
         test_util.test_fail("License expire date info not correct")
 
 def license_date_cal(issued_date, duration):
