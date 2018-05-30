@@ -54,7 +54,7 @@ def test():
     test_stub.load_license(file_path)
     issued_date = test_stub.get_license_info().issuedDate
     expired_date = test_stub.license_date_cal(issued_date, 86400 * 1)
-    test_stub.check_license("woodpecker@zstack.io", 1, None, False, 'Prepaid', issued_date=issued_date, expired_date=expired_date)
+    test_stub.check_license("woodpecker@zstack.io", 1, None, False, 'Paid', issued_date=issued_date, expired_date=expired_date)
 
     test_util.test_logger('Load and Check Hybrid license with 2 day and 10 HOST')
     file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '2', 'Hybrid', '', '10')
