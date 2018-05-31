@@ -44,7 +44,7 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
 
     def check_sharedblock(self, volume, volume_installPath, ps):
         devPath = "/dev/" + volume_installPath.split("sharedblock://")[1]
-        cmd = 'lvscan'
+        cmd = 'lvs -o path %s' % devPath
         conditions = res_ops.gen_query_conditions('primaryStorage.uuid', '=', ps.uuid)
         cluster = res_ops.query_resource(res_ops.CLUSTER, conditions)[0]
         conditions = res_ops.gen_query_conditions('clusterUuid', '=', cluster.uuid)
