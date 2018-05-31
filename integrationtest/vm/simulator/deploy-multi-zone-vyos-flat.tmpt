@@ -16,6 +16,9 @@ localPrimaryStorageName = local
 localPrimaryStorageName2 = local2
 localPrimaryStorageUrl = /local_ps
 
+virtualRouterImageName1 = vr1
+virtualRouterImageName2 = vr2
+
 clusterName2 = cluster2
 clusterName3 = cluster3
 
@@ -28,11 +31,11 @@ l2PublicNetworkInterface1 = eth2
 l2ManagementNetworkName1 = l2-management-1
 l2ManagementNetworkInterface1 = eth3 
 
-l2NoVlanNetworkName11 = vlan10 
-l2NoVlanNetworkInterface11 = eth2.10
+l2NoVlanNetworkName11 = vlan12 
+l2NoVlanNetworkInterface11 = eth2.12
 
-l2NoVlanNetworkName12 = vlan11
-l2NoVlanNetworkInterface12 = eth2.11
+l2NoVlanNetworkName12 = vlan13
+l2NoVlanNetworkInterface12 = eth2.13
 
 l2PublicNetworkName2 = l2-public-2
 l2PublicNetworkInterface2 = eth4
@@ -45,11 +48,11 @@ l3PublicNetworkName1 = public network1
 l3NoVlanNetworkName11 = l3_user_defined_vlan11
 l3NoVlanNetworkName12 = l3_user_defined_vlan12
 
-l2NoVlanNetworkName21 = vlan10
-l2NoVlanNetworkInterface21 = eth4.10
+l2NoVlanNetworkName21 = vlan14
+l2NoVlanNetworkInterface21 = eth4.14
 
-l2NoVlanNetworkName22 = vlan11
-l2NoVlanNetworkInterface22 = eth4.11
+l2NoVlanNetworkName22 = vlan15
+l2NoVlanNetworkInterface22 = eth4.15
 
 l3ManagementNetworkName2 = management network2
 l3PublicNetworkName2 = public network2

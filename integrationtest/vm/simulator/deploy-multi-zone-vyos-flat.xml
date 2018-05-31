@@ -86,7 +86,7 @@
         <zoneRef>$zoneName1</zoneRef>
         <managementL3NetworkRef>$l3PublicNetworkName1</managementL3NetworkRef>
         <publicL3NetworkRef>$l3PublicNetworkName1</publicL3NetworkRef>
-        <imageRef>$virtualRouterImageName</imageRef>
+        <imageRef>$virtualRouterImageName1</imageRef>
       </virtualRouterOffering>
       <virtualRouterOffering name="$virtualRouterOfferingName_s"
         memoryCapacity="$virtualRouterOfferingMemory_s" 
@@ -94,7 +94,7 @@
         <zoneRef>$zoneName2</zoneRef>
         <managementL3NetworkRef>$l3PublicNetworkName2</managementL3NetworkRef>
         <publicL3NetworkRef>$l3PublicNetworkName2</publicL3NetworkRef>
-        <imageRef>$virtualRouterImageName</imageRef>
+        <imageRef>$virtualRouterImageName2</imageRef>
       </virtualRouterOffering>
     </instanceOfferings>
   
@@ -139,7 +139,19 @@
         username="$vrImageUsername" password="$vrImagePassword"
         url="$virtualRouterImageUrl" system="True">
         <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
+      </image>
+      <image name="$virtualRouterImageName1"
+        description="virtual router image"
+        mediaType="$rootMediaType" format="$rootImageFormat"
+        username="$vrImageUsername" password="$vrImagePassword"
+        url="$virtualRouterImageUrl" system="True">
         <backupStorageRef>$imageStoreBackupStorageName2</backupStorageRef>
+      </image>
+      <image name="$virtualRouterImageName2"
+        description="virtual router image"
+        mediaType="$rootMediaType" format="$rootImageFormat"
+        username="$vrImageUsername" password="$vrImagePassword"
+        url="$virtualRouterImageUrl" system="True">
         <backupStorageRef>$cephBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName_windows" 
@@ -364,7 +376,7 @@
             description="Test" 
             physicalInterface="$l2PublicNetworkInterface1">
             <l3Networks>
-              <l3BasicNetwork name="$l3PublicNetworkName" category="Public" description="Public Network">
+              <l3BasicNetwork name="$l3PublicNetworkName1" category="Public" description="Public Network">
                 <ipRange name="$ipRangeName" description="Test"
                   startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
                   netmask="$ipRangeNetmask" />
@@ -504,7 +516,7 @@
             description="Test" 
             physicalInterface="$l2PublicNetworkInterface2">
             <l3Networks>
-              <l3BasicNetwork name="$l3PublicNetworkName" category="Public" description="Public Network">
+              <l3BasicNetwork name="$l3PublicNetworkName2" category="Public" description="Public Network">
                 <ipRange name="$ipRangeName" description="Test"
                   startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
                   netmask="$ipRangeNetmask" />
