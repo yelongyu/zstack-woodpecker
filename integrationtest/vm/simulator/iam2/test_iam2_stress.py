@@ -99,7 +99,7 @@ def test():
         print name
         print email
         print phone
-        virtual_id_uuid = iam2_ops.create_iam2_virtual_id('user-'+str(i), 'password').uuid
+        virtual_id_uuid = iam2_ops.create_iam2_virtual_id('user-'+str(i), 'b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86').uuid
         iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], virtual_id_uuid)
         #iam2_ops.remove_roles_from_iam2_virtual_id([role_uuid], virtual_id_uuid)
         attributes = [{"name": "fullname", "value": name}, {"name": "phone", "value": phone}, {"name": "mail", "value": email}, {"name": "identifier", "value": str(i+10000)} ]
