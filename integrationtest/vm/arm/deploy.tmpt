@@ -1,0 +1,8 @@
+import ../deploy.tmpt
+
+imageStoreBackupStorageName = ImageStore
+imageStoreBackupStorageUrl = /home/imageStore
+imageStoreBackupStorageHostname = 127.101.0.32
+
+localPrimaryStorageName = local-ps
+localPrimaryStorageUrl = /home/zstack-local
