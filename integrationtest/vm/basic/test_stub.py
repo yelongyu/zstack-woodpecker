@@ -108,9 +108,9 @@ def create_vm_with_iso(vm_creation_option=None, session_uuid=None):
     bs_uuid = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, [],
                                             session_uuid)[0].uuid
     img_option.set_backup_storage_uuid_list([bs_uuid])
-    os.system("echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/test.iso" %
+    os.system("echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/zstack-repo/7/x86_64/os/test.iso" %
               (os.environ.get('zstackInstallPath')))
-    img_option.set_url('http://%s:8080/zstack/static/test.iso' %
+    img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/test.iso' %
                        (os.environ.get('node1Ip')))
     image_uuid = img_ops.add_iso_template(img_option).uuid
 
