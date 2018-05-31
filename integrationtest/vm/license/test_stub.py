@@ -151,6 +151,7 @@ def load_license(file_path):
     result = lic_ops.reload_license()
 
 def update_license(node_uuid, file_path):
+    execute_shell_in_process('zstack-cli LogInByAccount accountName=admin password=password')
     execute_shell_in_process('zstack-cli UpdateLicense managementNodeUuid=%s license=`base64 -w 0 %s`' % (node_uuid, file_path))
     result = lic_ops.reload_license()
 
