@@ -3,8 +3,8 @@ import ./deploy.tmpt
 
 iscsiPrimaryStorageName = iscsi-ps1
 
-ocfs2HostImage = ocfs2-host-image
-ocfs2HostImageUrl = http://10.1.101.1/image/share-vol-ocfs2-host.qcow2
+#ocfs2HostImage = ocfs2-host-image
+#ocfs2HostImageUrl = http://10.1.101.1/image/share-vol-ocfs2-host.qcow2
 
 imageStoreBackupStorageName = imagestore1
 hostName = centos5

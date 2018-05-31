@@ -37,6 +37,10 @@ sshkeyImageName = vr
 sshkeyImageUrl = http://10.1.101.1/image/zstack-cloudinit.img
 sshkeyPubKey = 
 sshkeyPriKey_file = 
+
+ocfs2HostImage = ocfs2-host-image
+ocfs2HostImageUrl = http://10.1.101.1/image/share-vol-ocfs2-host.qcow2
+
 l3VlanNetwork2  = l3VlanNetwork2 
 l3VlanNetwork3  = l3VlanNetwork3 
 l3VlanNetwork4  = l3VlanNetwork4 
