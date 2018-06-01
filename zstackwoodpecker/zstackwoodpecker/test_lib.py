@@ -3234,6 +3234,11 @@ def lib_check_backup_storage_image_file(image):
         image_info = image_url.split('://')[1].split('/')
         image_url = '%s/registry/v1/repos/public/%s/manifests/revisions/%s' \
                 % (bs.url, image_info[0], image_info[1])
+	conditions = res_ops.gen_query_conditions('uuid', '=', image.uuid)
+        _image = res_ops.query_resource(res_ops.IMAGE, conditions)
+        if not _image:
+            image_url += '/deleted'
+            return not lib_check_file_exist(host, image_url)
         return lib_check_file_exist(host, image_url)
 
     elif bs.type == inventory.SFTP_BACKUP_STORAGE_TYPE:
