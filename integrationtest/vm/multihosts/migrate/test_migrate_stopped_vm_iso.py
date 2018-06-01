@@ -38,7 +38,10 @@ def test():
     img_option.set_name('iso')
     img_option.set_backup_storage_uuid_list([bs_uuid])
     mn = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0]
-    cmd = "echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/zstack-repo/7/x86_64/os/test.iso" % (os.environ.get('zstackInstallPath'))
+    if os.path.exists("%s/apache-tomcat/webapps/zstack/static/zstack-repo/" % (os.environ.get('zstackInstallPath'))):
+        cmd = "echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/zstack-repo/7/x86_64/os/test.iso" % (os.environ.get('zstackInstallPath'))
+    else:
+        cmd = "echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/test.iso" % (os.environ.get('zstackInstallPath'))
     if os.system("ip r | grep %s" % (mn.hostName)) == 0:
         os.system(cmd)
     else:
@@ -49,7 +52,10 @@ def test():
             if host.managementIp_ == mn.hostName or test_stub.get_another_ip_of_host(host.managementIp_, host.username_, host.password_) == mn.hostName:
                 out = test_lib.lib_execute_ssh_cmd(host.managementIp_, host.username_, host.password_, cmd, timeout=30)
 
-    img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/test.iso' % (mn.hostName))
+    if os.path.exists("%s/apache-tomcat/webapps/zstack/static/zstack-repo/" % (os.environ.get('zstackInstallPath'))):
+        img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/test.iso' % (mn.hostName))
+    else:
+        img_option.set_url('http://%s:8080/zstack/static/test.iso' % (mn.hostName))
     image_inv = img_ops.add_iso_template(img_option)
     image = test_image.ZstackTestImage()
     image.set_image(image_inv)
