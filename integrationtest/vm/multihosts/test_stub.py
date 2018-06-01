@@ -177,7 +177,10 @@ def create_vm_with_fake_iso(vm_name, l3_name, session_uuid = None):
             session_uuid)[0].uuid
     img_option.set_backup_storage_uuid_list([bs_uuid])
     mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
-    img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/ks.cfg' % (mn_ip))
+    if os.system("sshpass -p password ssh %s 'ls  %s/apache-tomcat/webapps/zstack/static/zstack-repo/'" % (mn_ip, os.environ.get('zstackInstallPath'))) == 0:
+        img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/ks.cfg' % (mn_ip))
+    else:
+        img_option.set_url('http://%s:8080/zstack/static/zstack-dvd/ks.cfg' % (mn_ip))
     image_uuid = img_ops.add_iso_template(img_option).uuid
 
     vm_creation_option = test_util.VmOption()
@@ -202,7 +205,10 @@ def create_iso_vm_with_random_offering(vm_name, l3_name=None, session_uuid=None,
     bs_uuid = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, [], session_uuid)[0].uuid
     img_option.set_backup_storage_uuid_list([bs_uuid])
     mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
-    img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/ks.cfg' % (mn_ip))
+    if os.system("sshpass -p password ssh %s 'ls  %s/apache-tomcat/webapps/zstack/static/zstack-repo/'" % (mn_ip, os.environ.get('zstackInstallPath'))) == 0:
+        img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/ks.cfg' % (mn_ip))
+    else:
+        img_option.set_url('http://%s:8080/zstack/static/zstack-dvd/ks.cfg' % (mn_ip))
     image_uuid = img_ops.add_iso_template(img_option).uuid
 
     if l3_name:
@@ -1419,8 +1425,12 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         img_option.set_name('iso')
         img_option.set_backup_storage_uuid_list([bs_uuid])
         mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
-        os.system("sshpass -p password ssh %s 'echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/zstack-repo/7/x86_64/os/test.iso'" % (mn_ip, os.environ.get('zstackInstallPath')))
-        img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/test.iso' % (mn_ip))
+        if os.system("sshpass -p password ssh %s 'ls  %s/apache-tomcat/webapps/zstack/static/zstack-repo/'" % (mn_ip, os.environ.get('zstackInstallPath'))) == 0:
+            os.system("sshpass -p password ssh %s 'echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/zstack-repo/7/x86_64/os/test.iso'" % (mn_ip, os.environ.get('zstackInstallPath')))
+            img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/test.iso' % (mn_ip))
+        else:
+            os.system("sshpass -p password ssh %s 'echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/test.iso'" % (mn_ip, os.environ.get('zstackInstallPath')))
+            img_option.set_url('http://%s:8080/zstack/static/test.iso' % (mn_ip))
         image_inv = img_ops.add_iso_template(img_option)
         image = test_image.ZstackTestImage()
         image.set_image(image_inv)
