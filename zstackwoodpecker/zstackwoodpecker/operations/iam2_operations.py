@@ -326,11 +326,21 @@ def delete_iam2_project_template(uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
+
 def delete_role(uuid, session_uuid=None):
     action = api_actions.DeleteRoleAction()
     action.timeout = 30000
     action.uuid = uuid
     test_util.action_logger('delete role  : %s ' % uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+
+def expunge_iam2_project(uuid, session_uuid=None):
+    action = api_actions.ExpungeIAM2ProjectAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    test_util.action_logger('expunge iam2 project : %s ' % uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 

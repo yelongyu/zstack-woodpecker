@@ -92,6 +92,7 @@ def test():
     iam2_ops.delete_iam2_virtual_id(virtual_id_uuid)
     iam2_ops.delete_iam2_virtual_id(project_admin_uuid)
     iam2_ops.delete_iam2_project(project_uuid)
+    iam2_ops.expunge_iam2_project(project_uuid)
 
     test_util.test_pass('success test iam2 login in by project admin!')
 
@@ -108,3 +109,4 @@ def error_cleanup():
         iam2_ops.delete_iam2_virtual_id(project_admin_uuid)
     if project_uuid:
         iam2_ops.delete_iam2_project(project_uuid)
+        iam2_ops.expunge_iam2_project(project_uuid)

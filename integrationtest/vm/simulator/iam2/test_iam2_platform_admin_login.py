@@ -249,6 +249,8 @@ def test():
     iam2_ops.delete_iam2_virtual_id_group(virtual_id_group_uuid, session_uuid=platform_admin_session_uuid)
     iam2_ops.delete_iam2_project(project_uuid, session_uuid=platform_admin_session_uuid)
     iam2_ops.delete_iam2_project(project_02_uuid, session_uuid=platform_admin_session_uuid)
+    iam2_ops.expunge_iam2_project(project_uuid,session_uuid=platform_admin_session_uuid)
+    iam2_ops.expunge_iam2_project(project_02_uuid,session_uuid=platform_admin_session_uuid)
     iam2_ops.delete_iam2_project_template(project_template_01_uuid, session_uuid=platform_admin_session_uuid)
     iam2_ops.delete_iam2_project_template(project_template_02_uuid, session_uuid=platform_admin_session_uuid)
     iam2_ops.delete_iam2_virtual_id(virtual_id_uuid, session_uuid=platform_admin_session_uuid)
@@ -273,8 +275,10 @@ def error_cleanup():
         iam2_ops.delete_iam2_virtual_id_group(virtual_id_group_uuid)
     if project_uuid:
         iam2_ops.delete_iam2_project(project_uuid)
+        iam2_ops.expunge_iam2_project(project_uuid)
     if project_02_uuid:
         iam2_ops.delete_iam2_project(project_02_uuid)
+        iam2_ops.expunge_iam2_project(project_02_uuid)
     if project_template_01_uuid:
         iam2_ops.delete_iam2_project_template(project_template_01_uuid)
     if project_template_02_uuid:

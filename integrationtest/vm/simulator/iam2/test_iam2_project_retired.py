@@ -52,9 +52,11 @@ def test():
     time.sleep(20)
 
     # 5 query project
-    project_list = res_ops.get_resource(res_ops.IAM2_PROJECT,uuid=project_uuid)
-    if project_list:
-        test_util.test_fail("the project [%s] is still exist after 20s " % project_uuid)
+    project_inv = res_ops.get_resource(res_ops.IAM2_PROJECT,uuid=project_uuid)[0]
+    if project_inv.state != 'Deleted':
+        iam2_ops.delete_iam2_project(project_uuid)
+        iam2_ops.expunge_iam2_project(project_uuid)
+        test_util.test_fail("the project [%s] is still available after 20s " % project_uuid)
 
     test_util.test_pass("success test project retired")
 
@@ -63,3 +65,4 @@ def error_cleanup():
     global project_uuid
     if project_uuid:
         iam2_ops.delete_iam2_project(project_uuid)
+        iam2_ops.expunge_iam2_project(project_uuid)

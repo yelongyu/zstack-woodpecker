@@ -79,6 +79,8 @@ session_uuid=project_admin_login_uuid).uuid
 
     iam2_ops.delete_iam2_project(project_uuid)
     iam2_ops.delete_iam2_project(project_uuid_02)
+    iam2_ops.expunge_iam2_project(project_uuid)
+    iam2_ops.expunge_iam2_project(project_uuid_02)
     iam2_ops.delete_iam2_virtual_id(virtual_id_uuid)
     iam2_ops.delete_iam2_virtual_id(project_admin_uuid)
 
@@ -89,8 +91,10 @@ def error_cleanup():
 
     if project_uuid:
         iam2_ops.delete_iam2_project(project_uuid)
+        iam2_ops.expunge_iam2_project(project_uuid)
     if project_uuid_02:
         iam2_ops.delete_iam2_project(project_uuid_02)
+        iam2_ops.expunge_iam2_project(project_uuid_02)
     if virtual_id_uuid:
         iam2_ops.delete_iam2_virtual_id(virtual_id_uuid)
     if project_admin_uuid:
