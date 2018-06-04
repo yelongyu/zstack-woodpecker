@@ -23,6 +23,7 @@ import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.hybrid_operations as hyb_ops
+import zstackwoodpecker.operations.nas_operations as nas_ops
 import zstackwoodpecker.operations.ipsec_operations as ipsec_ops
 from multiprocessing import Process
 
@@ -1073,3 +1074,15 @@ def create_vip(vip_name=None, l3_uuid=None, session_uuid = None):
     vip.create()
 
     return vip
+
+
+class AliyunNAS(HybridObject):
+    def __init__(self):
+        self.nas_fs_name = 'test-nas-file-system'
+        self.acc_grp = None
+        self.acc_grp_rule = None
+        self.nas_fs = None
+        self.nas_mnt_target = None
+
+
+

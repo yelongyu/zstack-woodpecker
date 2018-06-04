@@ -1,0 +1,17 @@
+import ../deploy.tmpt
+
+aliyunKey = 123456
+aliyunSecret = 1234567
+datacenterType = privateAliyun
+
+aliyunKey2 = 123456
+aliyunSecret2 = 1234567
+
+instanceOfferingName_m = medium-vm
+instanceOfferingMemory_m = 1024M
+instanceOfferingCpuNum_m = 1
+instanceOfferingCpuSpeed_m = 512
+
+imageName_i_c7 = centos7-test
+imageUrl_i_c7 = http://zstack/image/centos7-test.qcow2
+
