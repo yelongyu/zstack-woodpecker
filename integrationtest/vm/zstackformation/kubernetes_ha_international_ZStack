@@ -1,0 +1,260 @@
+{
+    "ZStackTemplateFormatVersion": "2018-06-18",
+    "Description": "Example for create kubernetes in zstack.",
+    "Parameters": {
+        "imageUrl": {
+            "Type": "String",
+            "DefaultValue": "http://172.20.1.105:8001/imagestore/download/image-925c18e01f4343dfea48f8bf6c342630e05a8437.qcow2",
+            "Description": "Image Url to add"
+        },
+        "name": {
+            "Type": "String",
+            "DefaultValue": "names"
+        },
+        "backupStorageUuid": {
+            "Type": "String",
+            "DefaultValue": "a135d9744c5844308bf14ca5724f04e8",
+            "Description": "backup storage uuid"
+        },
+        "cpuNum": {
+            "Type": "Num",
+            "DefaultValue": 8,
+            "Description": "instance offering cpuNum"
+        },
+        "memorySize": {
+            "Type": "Num",
+            "DefaultValue": 8589934592,
+            "Description": "instance offering cpuNum"
+        },
+        "PublicNetworkUuid": {
+            "Type": "String",
+            "DefaultValue": "81a21a81cde84c1084c191354053a3b5",
+            "Description": "Public network uuid"
+        },
+        "PrivateNetworkUuid": {
+            "Type": "String",
+            "DefaultValue": "8fc56385a5a44937995b2ba6445594c5",
+            "Description": "Private network uuid"
+        },
+        "LBListenerProtocol": {
+            "Type": "String",
+            "DefaultValue": "tcp"
+        },
+        "LBListenerPort": {
+            "Type": "Num",
+            "DefaultValue": 8080,
+            "AllowedValues": "[\n443,\n80,\n8080,\n2379\n]"
+        }
+    },
+    "Resources": {
+        "CoreOSImage": {
+            "Type": "ZStack::Image",
+            "Properties": {
+                "name": "CoreOSImage",
+                "url": {
+                    "Ref": "imageUrl"
+                },
+                "format": "qcow2",
+                "backupStorageUuids": [
+                    {
+                        "Ref": "backupStorageUuid"
+                    }
+                ]
+            }
+        },
+        "InstanceOffering": {
+            "Type": "ZStack::InstanceOffering",
+            "Properties": {
+                "name": "8cpu-8g",
+                "cpuNum": 8,
+                "memorySize": 8589934592
+            }
+        },
+        "Vip": {
+            "Type": "ZStack::VIP",
+            "Properties": {
+                "name": "VipForLB",
+                "l3NetworkUuid": {
+                    "Ref": "PublicNetworkUuid"
+                }
+            }
+        },
+        "LB": {
+            "Type": "ZStack::LoadBalance",
+            "Properties": {
+                "name": "LoadBalance",
+                "vipUuid": {
+                    "Fn::GetAtt": [
+                        "Vip",
+                        "uuid"
+                    ]
+                }
+            }
+        },
+        "LBListener-80": {
+            "Type": "ZStack::LoadBalanceListener",
+            "Properties": {
+                "name": "LoadBalance",
+                "loadBalancerUuid": {
+                    "Fn::GetAtt": [
+                        "LB",
+                        "uuid"
+                    ]
+                },
+                "vipUuid": {
+                    "Fn::GetAtt": [
+                        "Vip",
+                        "uuid"
+                    ]
+                },
+                "loadBalancerPort": 80,
+                "instancePort": 8080
+            },
+            "protocol": "tcp"
+        },
+        "LBListener-443": {
+            "Type": "ZStack::LoadBalanceListener",
+            "Properties": {
+                "name": "LoadBalance",
+                "loadBalancerUuid": {
+                    "Fn::GetAtt": [
+                        "LB",
+                        "uuid"
+                    ]
+                },
+                "vipUuid": {
+                    "Fn::GetAtt": [
+                        "Vip",
+                        "uuid"
+                    ]
+                },
+                "loadBalancerPort": 443,
+                "instancePort": 443
+            },
+            "protocol": "tcp"
+        },
+        "LBListener-8080": {
+            "Type": "ZStack::LoadBalanceListener",
+            "Properties": {
+                "name": "LoadBalance",
+                "loadBalancerUuid": {
+                    "Fn::GetAtt": [
+                        "LB",
+                        "uuid"
+                    ]
+                },
+                "vipUuid": {
+                    "Fn::GetAtt": [
+                        "Vip",
+                        "uuid"
+                    ]
+                },
+                "loadBalancerPort": 8080,
+                "instancePort": 8080
+            },
+            "protocol": "tcp"
+        },
+        "LBListener-2379": {
+            "Type": "ZStack::LoadBalanceListener",
+            "Properties": {
+                "name": "LoadBalance",
+                "loadBalancerUuid": {
+                    "Fn::GetAtt": [
+                        "LB",
+                        "uuid"
+                    ]
+                },
+                "vipUuid": {
+                    "Fn::GetAtt": [
+                        "Vip",
+                        "uuid"
+                    ]
+                },
+                "loadBalancerPort": 2379,
+                "instancePort": 2379
+            },
+            "protocol": "tcp"
+        },
+        "Master-1": {
+            "Type": "ZStack::VmInstance",
+            "Properties": {
+                "name": "kubernetes-master-1",
+                "imageUuid": {
+                    "Fn::GetAtt": [
+                        "CoreOSImage",
+                        "uuid"
+                    ]
+                },
+                "instanceOfferingUuid": {
+                    "Fn::GetAtt": [
+                        "InstanceOffering",
+                        "uuid"
+                    ]
+                },
+                "l3NetworkUuids": [
+                    {
+                        "Ref": "PrivateNetworkUuid"
+                    }
+                ]
+            },
+            "DependsOn": {
+                "Ref": "CoreOSImage"
+            },
+            "DeletionPolicy": "Retain"
+        },
+        "Node-1": {
+            "Type": "ZStack::VmInstance",
+            "Properties": {
+                "name": "kubernetes-Node-1",
+                "imageUuid": {
+                    "Fn::GetAtt": [
+                        "CoreOSImage",
+                        "uuid"
+                    ]
+                },
+                "instanceOfferingUuid": {
+                    "Fn::GetAtt": [
+                        "InstanceOffering",
+                        "uuid"
+                    ]
+                },
+                "l3NetworkUuids": [
+                    {
+                        "Ref": "PrivateNetworkUuid"
+                    }
+                ]
+            },
+            "DependsOn": {
+                "Ref": "CoreOSImage"
+            },
+            "DeletionPolicy": "Retain"
+        }
+    },
+    "Actions": {
+        "AddVmNicToLoadBalancer": {
+            "Type": "ZStack::AddVmNicToLoadBalancer",
+            "Properties": {
+                "vmNicUuids": [
+                    {
+                        "Fn::Select": [
+                            "0",
+                            {
+                                "Fn::GetAttr": [
+                                    "vmNics",
+                                    "Master-1"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "Outputs": {
+        "VmInstance": {
+            "Value": {
+                "Ref": "Master-1"
+            }
+        }
+    }
+}
