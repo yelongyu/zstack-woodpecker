@@ -32,7 +32,7 @@ def test():
     global host_uuid
     global vr_uuid
 
-    allow_ps_list = [inventory.CEPH_PRIMARY_STORAGE_TYPE]
+    allow_ps_list = [inventory.CEPH_PRIMARY_STORAGE_TYPE, "SharedBlock"]
     test_lib.skip_test_when_ps_type_not_in_list(allow_ps_list)
 
     test_util.test_dsc('Create test vm and check')

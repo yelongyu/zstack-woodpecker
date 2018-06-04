@@ -30,6 +30,9 @@ def test():
     global ps_uuid
     global host_uuid
     global vr_uuid
+    allow_ps_list = [inventory.CEPH_PRIMARY_STORAGE_TYPE, "SharedBlock"]
+    test_lib.skip_test_when_ps_type_not_in_list(allow_ps_list)
+
     test_util.test_dsc('Create test vm and check')
     l3_1_name = os.environ.get('l3VlanNetworkName1')
     vm = test_stub.create_vlan_vm(l3_name=l3_1_name)
@@ -43,9 +46,6 @@ def test():
     if not bss:
         test_util.test_skip("not find available backup storage. Skip test")
 
-    if bss[0].type != inventory.CEPH_BACKUP_STORAGE_TYPE:
-        test_util.test_skip("not find available ceph backup storage. Skip test")
-    
     host = test_lib.lib_get_vm_host(vm.get_vm())
     host_uuid = host.uuid
     test_obj_dict.add_vm(vm)
