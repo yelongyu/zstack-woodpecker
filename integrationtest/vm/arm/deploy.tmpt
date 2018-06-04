@@ -1,5 +1,17 @@
 import ../deploy.tmpt
 
+hostName2 = centos2
+hostIp2 = 127.1.101.33
+hostUsername2 = root
+hostPassword2 = 1
+hostPort2 = 22
+
+hostName3 = centos3
+hostIp3 = 127.1.101.34
+hostUsername3 = root
+hostPassword3 = 1
+hostPort3 = 22
+
 imageStoreBackupStorageName = ImageStore
 imageStoreBackupStorageUrl = /home/imageStore
 imageStoreBackupStorageHostname = 127.101.0.32
