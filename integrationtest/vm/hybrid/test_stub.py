@@ -1074,15 +1074,3 @@ def create_vip(vip_name=None, l3_uuid=None, session_uuid = None):
     vip.create()
 
     return vip
-
-
-class AliyunNAS(HybridObject):
-    def __init__(self):
-        self.nas_fs_name = 'test-nas-file-system'
-        self.acc_grp = None
-        self.acc_grp_rule = None
-        self.nas_fs = None
-        self.nas_mnt_target = None
-
-
-

@@ -1,0 +1,5 @@
+import ./scenario.tmpt
+import ../hybrid/deploy.tmpt
+import ./scenario-aliyun-nas.tmpt
+
+datacenterType = privateAliyun

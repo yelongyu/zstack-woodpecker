@@ -23,6 +23,8 @@ import time
 import sys
 #import traceback
 
+hybrid_test_stub = test_lib.lib_get_test_stub('hybrid')
+
 
 def create_vm(vm_name, image_name, l3_name):
     vm_creation_option = test_util.VmOption()
@@ -345,3 +347,13 @@ def set_host_cpu_model(ip,model=None):
         cmd = "systemctl restart libvirtd"
         test_lib.lib_execute_ssh_cmd(ip, 'root', 'password',cmd)
         _model = get_host_cpu_model(ip)
+
+
+class AliyunNAS(hybrid_test_stub.HybridObject):
+    def __init__(self):
+        self.nas_fs_name = 'test-nas-file-system'
+        self.acc_grp = None
+        self.acc_grp_rule = None
+        self.nas_fs = None
+        self.nas_mnt_target = None
+

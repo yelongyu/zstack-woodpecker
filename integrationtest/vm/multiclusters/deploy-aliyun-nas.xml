@@ -159,8 +159,8 @@
               <host name="$hostName2" description="Test2" managementIp="$hostIp2"
                 username="$hostUsername2" password="$hostPassword2" port="$hostPort2"/>
             </hosts>
-            <!--<primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>-->
-            <!-- <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef> -->
+            <!--<primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
+             <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef> -->
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
