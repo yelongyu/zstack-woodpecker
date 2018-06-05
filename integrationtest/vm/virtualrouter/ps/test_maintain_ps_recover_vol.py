@@ -11,6 +11,7 @@ import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.header.vm as vm_header
 import os
+import time
 
 _config_ = {
         'timeout' : 1000,
@@ -70,6 +71,7 @@ def test():
     host_ops.reconnect_host(host_uuid)
     #vm_ops.reconnect_vr(vr_uuid)
     vrs = test_lib.lib_get_all_vrs()
+    time.sleep(5)
     for vr in vrs:
         vm_ops.start_vm(vr.uuid)  
 
