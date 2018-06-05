@@ -23,7 +23,7 @@ def test():
     for _bs in range(len(bs_lst)):
         if _bs.type == "ImageStore":
             has_iamgestore = True
-                bs = _bs
+            bs = _bs
     if has_iamgestore == False:
         test_util.test_skip('Here does not have ImageStore backup storage. Will skip test.')
     ca_str = os.environ.get('zstore_ca').replace('\\n','\n')
