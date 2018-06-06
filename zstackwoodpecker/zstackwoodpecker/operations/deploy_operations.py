@@ -757,6 +757,59 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 wait_for_thread_queue()
                 thread.start()
 
+        if xmlobject.has_element(zone, 'primaryStorages.aliyunNASPrimaryStorage'):
+            zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, \
+                    name=zone.name_)
+            zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
+            # Add KS
+            action_ks = api_actions.AddHybridKeySecretAction()
+            action_ks.name = 'ks_for_nas_test'
+            action_ks.type = 'aliyun'
+            action_ks.key = os.getenv('aliyunKey')
+            action_ks.secret = os.getenv('aliyunSecret')
+            # Add DataCenter
+            action_dc = api_actions.AddDataCenterFromRemoteAction()
+            action_dc.type = os.getenv('datacenterType')
+            action_dc.regionId = os.getenv('regionId')
+            for act in [action_ks, action_dc]:
+                thread1 = threading.Thread(target=_thread_for_action, args=(act,))
+                wait_for_thread_queue()
+                thread1.start()
+            # Add NAS File System
+            dcinv = res_ops.get_resource(res_ops.DATACENTER, session_uuid)[0]
+            action_fs = api_actions.AddAliyunNasFileSystemAction()
+            action_fs.name = 'setup_nasfs'
+            action_fs.fileSystemId = os.getenv('fileSystemId')
+            action_fs.dataCenterUuid = dcinv.uuid
+            thread_fs = threading.Thread(target=_thread_for_action, args=(action_fs,))
+            wait_for_thread_queue()
+            thread_fs.start()
+            # Add NAS Mount Target
+            nasinv = res_ops.get_resource(res_ops.NAS_FILESYSTEM, session_uuid)[0]
+            action_mt = api_actions.AddAliyunNasMountTargetAction()
+            action_mt.name = 'setup_nas_mount_target'
+            action_mt.mountDomain = os.getenv('mountDomain')
+            action_mt.nasFSUuid = nasinv.uuid
+            # Add Aliyun Access Group
+            action_grp = api_actions.AddAliyunNasAccessGroupAction()
+            action_grp.name = 'setup_access_group'
+            action_grp.groupName = os.getenv('groupName')
+            action_grp.dataCenterUuid = dcinv.uuid
+            for act2 in [action_mt, action_grp]:
+                thread2 = threading.Thread(target=_thread_for_action, args=(act2,))
+                wait_for_thread_queue()
+                thread2.start()
+            # Add AliyunNas PS
+            action = api_actions.AddAliyunNasPrimaryStorageAction()
+            action.name = 'AliyunNas'
+            action.accessGroupUuid = os.getenv('groupName')
+            action.url = '/' + str(time.time()).split('.')[0]
+            action.zoneUuid = zinv.uuid
+            thread = threading.Thread(target=_thread_for_action, args=(action,))
+            wait_for_thread_queue()
+            thread.start()
+
+
     for zone in xmlobject.safe_list(deployConfig.zones.zone):
         if zone_name and zone.name_ != zone_name:
             continue

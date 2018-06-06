@@ -22,7 +22,6 @@
             </l3Network>
           </l3Networks>
 	  <backupStorageRef type="imageStore">$imageStoreBackupStorageName2</backupStorageRef>
-	  <!--<primaryStorageRef type="nfs">$nfsPrimaryStorageName2</primaryStorageRef>-->
         </vm>
       </vms>
     </host>
@@ -41,7 +40,6 @@
 	  <nodeRef>$node1Name</nodeRef>
           <hostRef>$hostName</hostRef>
 	  <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
-	  <!--<primaryStorageRef type="nfs">$nfsPrimaryStorageName</primaryStorageRef>-->
         </vm>
       </vms>
     </host>

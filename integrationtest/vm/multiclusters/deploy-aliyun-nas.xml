@@ -143,12 +143,10 @@
       <zone name="$zoneName" description="Test">
         <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
         <backupStorageRef>$imageStoreBackupStorageName2</backupStorageRef>
-        <!--<primaryStorages>
-          <nfsPrimaryStorage name="$nfsPrimaryStorageName"
-            description="NFSTest1" url="$nfsPrimaryStorageUrl" />
-          <nfsPrimaryStorage name="$nfsPrimaryStorageName2"
-            description="NFSTest2" url="$nfsPrimaryStorageUrl2" />
-        </primaryStorages>-->
+        <primaryStorages>
+          <aliyunNASPrimaryStorage name="$aliyunNASPrimaryStorageName"
+          description="NASTest"/>
+        </primaryStorages>
 
         <clusters>
           <cluster name="$clusterName" description="Test"
@@ -159,8 +157,8 @@
               <host name="$hostName2" description="Test2" managementIp="$hostIp2"
                 username="$hostUsername2" password="$hostPassword2" port="$hostPort2"/>
             </hosts>
-            <!--<primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
-             <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef> -->
+            <primaryStorageRef>$aliyunNASPrimaryStorageName</primaryStorageRef>
+            <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef> -->
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
@@ -193,7 +191,7 @@
               <host name="$hostName4" description="Test4" managementIp="$hostIp4"
                 username="$hostUsername4" password="$hostPassword4" port="$hostPort4"/>
             </hosts>
-            <!--<primaryStorageRef>$nfsPrimaryStorageName2</primaryStorageRef>-->
+            <primaryStorageRef>$aliyunNASPrimaryStorageName</primaryStorageRef>
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>

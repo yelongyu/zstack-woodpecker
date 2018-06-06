@@ -108,6 +108,11 @@ IAM2_VIRTUAL_ID_ATTRIBUTE = 'IAM2VirtualIDAttribute'
 IAM2_PROJECT_ATTRIBUTE = 'IAM2ProjectAttribute'
 IAM2_ORGANIZATION_ATTRIBUTE = 'IAM2OrganizationAttribute'
 ROLE='Role'
+DATACENTER = 'DataCenter'
+NAS_FILESYSTEM = 'NasFileSystem'
+NAS_MOUNTTARGET = 'NasMountTarget'
+ALIYUNNAS_ACCESSGROUP = 'AliyunNasAccessGroup'
+
 
 def find_item_by_uuid(inventories, uuid):
     for item in inventories:
@@ -594,6 +599,14 @@ def _gen_query_action(resource, condition=None):
         action = api_actions.QueryIAM2OrganizationAttributeAction()
     elif resource == ROLE:
         action = api_actions.QueryRoleAction()
+    elif action == DATACENTER:
+        action = api_actions.QueryDataCenterFromLocalAction
+    elif action == ALIYUNNAS_ACCESSGROUP:
+        action = api_actions.QueryAliyunNasAccessGroupAction
+    elif action == NAS_FILESYSTEM:
+        action = api_actions.QueryNasFileSystemAction
+    elif action == NAS_MOUNTTARGET:
+        action = api_actions.QueryNasMountTargetAction
     return action
 
 def query_resource(resource, conditions = [], session_uuid=None, count='false'):

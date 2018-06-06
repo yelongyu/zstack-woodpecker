@@ -1,5 +1,9 @@
 import ./scenario.tmpt
-import ../hybrid/deploy.tmpt
-import ./scenario-aliyun-nas.tmpt
+import ../hybrid/deploy-vyos.tmpt
 
 datacenterType = privateAliyun
+aliyunNASPrimaryStorageName = aliyunNAS
+regionId = nasRegionID
+fileSystemId = nasFileSystemID
+groupName = accessGroupName
+apiEndPoint = yes
