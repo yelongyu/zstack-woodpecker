@@ -28,7 +28,7 @@ def test():
     def handler(signum, frame):
         raise Exception()
     signal.signal(signal.SIGALRM, handler)
-    signal.alarm(180)
+    signal.alarm(300)
     test_util.test_dsc('Create test clone windows vm boot option')
 
     image_name = os.environ.get('imageName_windows')

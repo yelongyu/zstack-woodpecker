@@ -767,32 +767,47 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
             action_ks.type = 'aliyun'
             action_ks.key = os.getenv('aliyunKey')
             action_ks.secret = os.getenv('aliyunSecret')
-            _thread_for_action(action_ks)
+            thread_ks = threading.Thread(target=_thread_for_action, args=(action_ks,))
+            wait_for_thread_queue()
+            thread_ks.start()
+            thread_ks.join()
             # Add DataCenter
             action_dc = api_actions.AddDataCenterFromRemoteAction()
             action_dc.type = os.getenv('datacenterType')
             action_dc.regionId = os.getenv('regionId')
-            _thread_for_action(action_dc)
+            thread_dc = threading.Thread(target=_thread_for_action, args=(action_dc,))
+            wait_for_thread_queue()
+            thread_dc.start()
+            thread_dc.join()
             # Add NAS File System
             dcinv = res_ops.get_resource(res_ops.DATACENTER, session_uuid)[0]
             action_fs = api_actions.AddAliyunNasFileSystemAction()
             action_fs.name = 'setup_nasfs'
             action_fs.fileSystemId = os.getenv('fileSystemId')
             action_fs.dataCenterUuid = dcinv.uuid
-            _thread_for_action(action_fs)
+            thread_fs = threading.Thread(target=_thread_for_action, args=(action_fs,))
+            wait_for_thread_queue()
+            thread_fs.start()
+            thread_fs.join()
             # Add NAS Mount Target
             nasinv = res_ops.get_resource(res_ops.NAS_FILESYSTEM, session_uuid)[0]
             action_mt = api_actions.AddAliyunNasMountTargetAction()
             action_mt.name = 'setup_nas_mount_target'
             action_mt.mountDomain = os.getenv('mountDomain')
             action_mt.nasFSUuid = nasinv.uuid
-            _thread_for_action(action_mt)
+            thread_mt = threading.Thread(target=_thread_for_action, args=(action_mt,))
+            wait_for_thread_queue()
+            thread_mt.start()
+            thread_mt.join()
             # Add Aliyun Access Group
             action_grp = api_actions.AddAliyunNasAccessGroupAction()
             action_grp.name = 'setup_access_group'
             action_grp.groupName = os.getenv('groupName')
             action_grp.dataCenterUuid = dcinv.uuid
-            _thread_for_action(action_grp)
+            thread_grp = threading.Thread(target=_thread_for_action, args=(action_grp,))
+            wait_for_thread_queue()
+            thread_grp.start()
+            thread_grp.join()
             # Add AliyunNas PS
             action = api_actions.AddAliyunNasPrimaryStorageAction()
             action.name = 'AliyunNas'
@@ -802,7 +817,6 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
             thread = threading.Thread(target=_thread_for_action, args=(action,))
             wait_for_thread_queue()
             thread.start()
-
 
     for zone in xmlobject.safe_list(deployConfig.zones.zone):
         if zone_name and zone.name_ != zone_name:
