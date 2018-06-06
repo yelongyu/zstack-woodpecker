@@ -599,13 +599,13 @@ def _gen_query_action(resource, condition=None):
         action = api_actions.QueryIAM2OrganizationAttributeAction()
     elif resource == ROLE:
         action = api_actions.QueryRoleAction()
-    elif action == DATACENTER:
+    elif resource == DATACENTER:
         action = api_actions.QueryDataCenterFromLocalAction
-    elif action == ALIYUNNAS_ACCESSGROUP:
+    elif resource == ALIYUNNAS_ACCESSGROUP:
         action = api_actions.QueryAliyunNasAccessGroupAction
-    elif action == NAS_FILESYSTEM:
+    elif resource == NAS_FILESYSTEM:
         action = api_actions.QueryNasFileSystemAction
-    elif action == NAS_MOUNTTARGET:
+    elif resource == NAS_MOUNTTARGET:
         action = api_actions.QueryNasMountTargetAction
     return action
 
