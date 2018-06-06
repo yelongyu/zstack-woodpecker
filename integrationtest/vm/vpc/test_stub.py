@@ -6,6 +6,7 @@ Create an unified test_stub to share test operations
 '''
 
 import zstackwoodpecker.operations.vpc_operations as vpc_ops
+import zstackwoodpecker.operations.vpcdns_operations as vpcdns_ops
 import zstackwoodpecker.operations.net_operations as net_ops
 import os
 import random
@@ -68,6 +69,8 @@ def create_vpc_vrouter(vr_name='test_vpc'):
         return ZstackTestVR(vr_list[0])
     vr_offering = res_ops.get_resource(res_ops.VR_OFFERING)[0]
     vr_inv =  vpc_ops.create_vpc_vrouter(name=vr_name, virtualrouter_offering_uuid=vr_offering.uuid)
+    dns_server = os.getenv('DNSServer')
+    vpcdns_ops.add_dns_to_vpc_router(vr_inv.uuid, dns_server)
     return ZstackTestVR(vr_inv)
 
 
