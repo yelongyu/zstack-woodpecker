@@ -1,0 +1,60 @@
+{
+    "ZStackTemplateFormatVersion": "2018-06-18",
+    "Description": "Test ZStack formation functions",
+    "Parameters": {
+        "4TestBoolean2": {
+            "Type": "Boolean",
+            "Description":"测试boolean "
+            "Default": false 
+        },
+    },
+
+    "Mappings" : {
+        "names" : {
+              "instanceOffering" : { "name1" : "test-just-t", "name2" : "test2" },
+        },
+        "JustForTest" : {"test" : "I am valid!"},
+        "JustForTest2" : {"test" : "I am valid!", "test2" : "I am valid too!"}
+    },
+    "Resources": {
+        "InstanceOffering": {
+            "Type": "ZStack::Resource::InstanceOffering",
+            "Properties": {
+                "name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"},{},{"Ref":"ZStack::StackUuid"}，{"Ref":"ZStack::AccountUuid},{"Ref":"ZStack::AccountName},{"Fn::Split":["-",{"Fn::FindInMap":["names","instanceOffering", "name1"]}]}]]},
+                "cpuNum": 8,
+                "memorySize": 8589934592
+            }
+        },
+        "VM": {
+            "Type": "ZStack::Resource::VmInstance",
+            "Properties": {
+                "name": {"Fn::Base64": "kubernetes-Node-1"},
+                "imageUuid": "test-image-uuid",
+                "instanceOfferingUuid": {
+                    "Fn::GetAtt": [
+                        "InstanceOffering",
+                        "uuid"
+                    ]
+                },
+                "l3NetworkUuids": ["test-l3-network-uuit"
+                ]
+            },
+            "DependsOn":[{"Ref":"InstanceOffering"}]
+            "DeletionPolicy":"Retain"
+        }
+    },
+    "Outputs": {
+        "InstanceOffering": {
+            "Value": {
+                "Ref": "VM"
+            }
+        }
+
+        "IP": {
+            "Value": {
+                "Fn:GetAttr": [{"Fn::Select": [0, {"Fn::GetAttr": ["VM","VmNics"]}]}, "ip"]
+            }
+        }
+
+    }
+}
