@@ -58,8 +58,8 @@ def test():
         iam2_ops.expunge_iam2_project(project_uuid)
         test_util.test_fail("the project [%s] is still available after 20s " % project_uuid)
 
+    iam2_ops.expunge_iam2_project(project_uuid)
     test_util.test_pass("success test project retired")
-
 
 def error_cleanup():
     global project_uuid
