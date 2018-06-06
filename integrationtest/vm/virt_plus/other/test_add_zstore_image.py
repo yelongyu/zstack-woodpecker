@@ -20,7 +20,7 @@ test_obj_dict = test_state.TestStateDict()
 def test():
     has_iamgestore = False
     bs_lst = res_ops.query_resource(res_ops.BACKUP_STORAGE)
-    for _bs in range(len(bs_lst)):
+    for _bs in bs_lst:
         if _bs.type == "ImageStore":
             has_iamgestore = True
             bs = _bs
