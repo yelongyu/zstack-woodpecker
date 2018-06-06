@@ -49,7 +49,7 @@ def test():
     test_stub.update_mn_ip(vm_ip, tmp_file)
     test_stub.start_mn(vm_ip, tmp_file)
 
-
+    time.sleep(120)
     test_util.test_logger('Update host management IP and reconnect host')
     host_name = 'Host-1'
     management_ip = vm_ip
