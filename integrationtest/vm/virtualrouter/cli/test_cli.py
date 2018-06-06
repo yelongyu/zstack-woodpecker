@@ -21,7 +21,7 @@ import os
 def test():
 
     test_util.test_dsc('Create test vm and check')
-    mn_ip = os.environ.get('node1Name')
+    mn_ip = os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP']
     test_util.test_dsc("wait 10s for start")
     nodeUserName = os.environ.get('nodeUserName')
     nodePassword = os.environ.get('nodePassword')
