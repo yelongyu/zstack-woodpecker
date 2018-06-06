@@ -600,13 +600,13 @@ def _gen_query_action(resource, condition=None):
     elif resource == ROLE:
         action = api_actions.QueryRoleAction()
     elif resource == DATACENTER:
-        action = api_actions.QueryDataCenterFromLocalAction
+        action = api_actions.QueryDataCenterFromLocalAction()
     elif resource == ALIYUNNAS_ACCESSGROUP:
-        action = api_actions.QueryAliyunNasAccessGroupAction
+        action = api_actions.QueryAliyunNasAccessGroupAction()
     elif resource == NAS_FILESYSTEM:
-        action = api_actions.QueryNasFileSystemAction
+        action = api_actions.QueryNasFileSystemAction()
     elif resource == NAS_MOUNTTARGET:
-        action = api_actions.QueryNasMountTargetAction
+        action = api_actions.QueryNasMountTargetAction()
     return action
 
 def query_resource(resource, conditions = [], session_uuid=None, count='false'):
