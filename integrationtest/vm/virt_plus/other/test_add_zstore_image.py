@@ -21,7 +21,7 @@ def test():
     has_iamgestore = False
     bs_lst = res_ops.query_resource(res_ops.BACKUP_STORAGE)
     for _bs in bs_lst:
-        if _bs.type == "ImageStore":
+        if _bs.type == "ImageStoreBackupStorage":
             has_iamgestore = True
             bs = _bs
     if has_iamgestore == False:
