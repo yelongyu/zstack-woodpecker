@@ -14,6 +14,8 @@ import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.config_operations as con_ops
 import time
+import os
+
 vm = None
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
@@ -47,7 +49,8 @@ def test():
    image_option.set_format('qcow2')
    image_option.set_mediaType('RootVolumeTemplate')
    image_option.set_platform('windows')
-   image_option.set_url('http://172.20.1.16:7480/diskimages/windows-telnet.qcow2')
+   #image_option.set_url('http://172.20.1.16:7480/diskimages/windows-telnet.qcow2')
+   image_option.set_url(os.environ.get('windowsImageUrl'))
    image_option.set_backup_storage_uuid_list([bss[0].uuid])
    image_option.set_timeout(1800*1000)
    new_image = zstack_image_header.ZstackTestImage()
