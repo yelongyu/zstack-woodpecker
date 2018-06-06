@@ -42,6 +42,7 @@ def test():
     volume.attach(vm)
     if flavor['vm_running'] == False:
         vm.stop()
+        test_lib.lib_wait_target_down(vm.get_vm().vmNics[0].ip, 22)
     if flavor['vm_running'] == True:
         allow_ps_list = [inventory.CEPH_PRIMARY_STORAGE_TYPE]
         test_lib.skip_test_when_ps_type_not_in_list(allow_ps_list)
@@ -58,9 +59,11 @@ def test():
     #check data snapshots
     if flavor['vm_running'] == True:
         vm.stop()
+        test_lib.lib_wait_target_down(vm.get_vm().vmNics[0].ip, 22)
         snapshots_data.use_snapshot(snapshot1)
         snapshots_data.check()
         vm.start()
+        test_lib.lib_wait_target_up(vm.get_vm().vmNics[0].ip, 22)
     else:
         snapshots_data.use_snapshot(snapshot1)
         snapshots_data.check()
@@ -71,6 +74,40 @@ def test():
     snapshots_data.check()
     snapshots_data.delete_snapshot(snapshot2)
     snapshots_data.check()
+    #check delete snapshot1
+    sp = snapshots_data.get_current_snapshot()
+    snapshots_data.delete_snapshot(snapshot1)
+    snapshots_data.check()
+    if flavor['vm_running'] == False:
+        vm.start()
+        test_lib.lib_wait_target_up(vm.get_vm().vmNics[0].ip, 22)
+    import tempfile
+    with tempfile.NamedTemporaryFile() as script:
+        script.write('''
+device=/dev/`ls -ltr --file-type /dev | awk '$4~/disk/ {print $NF}' | grep -v '[[:digit:]]' | tail -1`1
+mkdir -p %s >/dev/null
+mount $device %s >/dev/null
+mkdir -p %s >/dev/null
+checking_result=''
+ls %s
+umount %s >/dev/null
+            ''' % (test_lib.WOODPECKER_MOUNT_POINT, \
+                    test_lib.WOODPECKER_MOUNT_POINT, \
+                    zstack_sp_header.checking_point_folder, \
+                    zstack_sp_header.checking_point_folder, \
+                    test_lib.WOODPECKER_MOUNT_POINT))
+        script.flush()
+        rsp = test_lib.lib_execute_shell_script_in_vm(vm.get_vm(), script.name)
+    if rsp:
+        result_list = rsp.result.split()
+        temp_checking_list = list(result_list)
+
+        if len(temp_checking_list) == 3:
+            test_util.test_logger('Checker result: snapshot: %s integrity checking pass' % sp.get_snapshot().uuid)
+        else:
+            test_util.test_fail('Checker fail.')
+    else:
+        test_util.test_fail('Cmd fail.')
 
     test_lib.lib_robot_cleanup(test_obj_dict)
     test_util.test_pass('Test sharable volume snapshot success.')
