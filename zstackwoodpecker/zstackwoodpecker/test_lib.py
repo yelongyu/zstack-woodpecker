@@ -3305,6 +3305,11 @@ def lib_check_two_files_md5(host1, file1, host2, file2):
 def lib_delete_image(img_uuid, session_uuid=None):
     vol_ops.delete_image(img_uuid, session_uuid)
 
+def lib_get_ShareableVolume_Vm(volume_uuid):
+    conditions = res_ops.gen_query_conditions('volumeUuid', '=', volume_uuid)
+    vms = res_ops.query_resource(res_ops.SHARE_VOLUME, conditions)
+    return vms
+
 def lib_mkfs_for_volume(volume_uuid, vm_inv):
     '''
     Will check if volume's 1st partition could be mountable. If not, it will try
@@ -3320,10 +3325,18 @@ def lib_mkfs_for_volume(volume_uuid, vm_inv):
         test_util.test_logger("[volume:] %s is Root Volume. It can not be make filesystem." % volume_uuid)
         return False
 
-    old_vm_uuid = None
-    if volume.vmInstanceUuid:
-        old_vm_uuid = volume.vmInstanceUuid
-        lib_detach_volume(volume_uuid)
+    if volume.isShareable:
+        vms = lib_get_ShareableVolume_Vm(volume.uuid)
+        old_vms_uuid = []
+        for vm in vms:
+            old_vms_uuid.append(vm.vmInstanceUuid)
+            lib_detach_volume(volume_uuid, vm.vmInstanceUuid)
+    else:
+        old_vms_uuid = None
+        if volume.vmInstanceUuid:
+            old_vms_uuid = volume.vmInstanceUuid
+            lib_detach_volume(volume_uuid)
+        old_vms_uuid=[old_vms_uuid]
 
     lib_attach_volume(volume_uuid, vm_inv.uuid)
 
@@ -3353,16 +3366,16 @@ fi
     if not lib_execute_shell_script_in_vm(vm_inv, script_file.name):
         test_util.test_fail("make partition and make filesystem operation failed in [volume:] %s in [vm:] %s" % (volume_uuid, vm_inv.uuid))
 
-        lib_detach_volume(volume_uuid)
+        lib_detach_volume(volume_uuid, vm_inv.uuid)
         os.unlink(script_file.name)
         return False
 
     test_util.test_logger("Successfully make partition and make filesystem operation in [volume:] %s in [vm:] %s" % (volume_uuid, vm_inv.uuid))
 
-    lib_detach_volume(volume_uuid)
+    lib_detach_volume(volume_uuid,vm_inv.uuid)
     os.unlink(script_file.name)
 
-    if old_vm_uuid:
+    for old_vm_uuid in old_vms_uuid:
         lib_attach_volume(volume_uuid, old_vm_uuid)
 
     return True

@@ -415,17 +415,17 @@ class ZstackTestSnapshot(sp_header.TestSnapshot):
                     volume_vm.get_state() == vm_header.RUNNING:
                 test_util.test_logger('volume has been attached to living VM.')
 
-                volume_obj.detach()
+                volume_obj.detach(volume_vm.get_vm().uuid)
                 volume_obj.attach(self.utility_vm)
                 #add checking point
                 self._create_checking_file()
-                volume_obj.detach()
+                volume_obj.detach(self.utility_vm.get_vm().uuid)
                 volume_obj.attach(volume_vm)
-                return 
+                return
         volume_obj.attach(self.utility_vm)
         #add_checking_point
         self._create_checking_file()
-        volume_obj.detach()
+        volume_obj.detach(self.utility_vm.get_vm().uuid)
 
     def _create_checking_file(self):
         #make fs for volume, if it doesn't exist
@@ -436,7 +436,7 @@ class ZstackTestSnapshot(sp_header.TestSnapshot):
         import tempfile
         with tempfile.NamedTemporaryFile() as script:
             script.write('''
-device=/dev/`ls -ltr --file-type /dev | grep disk | awk '{print $NF}' | grep -v '[[:digit:]]' | tail -1`1
+device=/dev/`ls -ltr --file-type /dev | awk '$4~/disk/ {print $NF}' | grep -v '[[:digit:]]' | tail -1`1
 mkdir -p %s
 mount $device %s
 mkdir -p %s
