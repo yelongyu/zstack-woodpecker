@@ -4,9 +4,9 @@
     "Parameters": {
         "4TestBoolean2": {
             "Type": "Boolean",
-            "Description":"测试boolean "
+            "Description":"测试boolean ",
             "Default": false 
-        },
+        }
     },
 
     "Mappings" : {
