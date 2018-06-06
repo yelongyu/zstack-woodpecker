@@ -54,14 +54,19 @@ def test():
     if ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
         test_util.test_skip('ceph is not directly using image cache, skip test.')
 
-    image_cache_path = "%s/imagecache/template/%s" % (ps.mountPath, new_image.image.uuid)
-    if not test_lib.lib_check_file_exist(host, image_cache_path):
-        test_util.test_fail('image cache is expected to exist')
-
-    if bss[0].type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
-        image_cache_path = "%s/zstore-cache/%s" % (ps.mountPath, new_image.image.uuid)
+    if ps.type == "SharedBlock":
+        path = "/dev/" + ps.uuid + '/' + new_image.image.uuid
+        if not test_lib.lib_check_sharedblock_file_exist(host, path):
+            test_util.test_fail('image cache is expected to exist')
+    else:
+        image_cache_path = "%s/imagecache/template/%s" % (ps.mountPath, new_image.image.uuid)
         if not test_lib.lib_check_file_exist(host, image_cache_path):
             test_util.test_fail('image cache is expected to exist')
+
+        if bss[0].type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+            image_cache_path = "%s/zstore-cache/%s" % (ps.mountPath, new_image.image.uuid)
+            if not test_lib.lib_check_file_exist(host, image_cache_path):
+                test_util.test_fail('image cache is expected to exist')
 
     vm.destroy()
     if test_lib.lib_get_vm_delete_policy() != 'Direct':
@@ -72,6 +77,19 @@ def test():
         new_image.expunge()
 
     ps_ops.cleanup_imagecache_on_primary_storage(ps.uuid)
+
+    if ps.type == "SharedBlock":
+        image_cache_path = "/dev/" + ps.uuid + '/' + new_image.image.uuid
+        count = 0
+        while True:
+            if not test_lib.lib_check_sharedblock_file_exist(host, image_cache_path):
+                break
+            elif count > 5:
+                test_util.test_fail('image cache is expected to be deleted')
+            test_util.test_logger('check %s times: image cache still exist' % (count))
+            time.sleep(5)
+            count += 1
+        test_util.test_pass('imagecache cleanup Pass.')
 
     count = 0
     while True:

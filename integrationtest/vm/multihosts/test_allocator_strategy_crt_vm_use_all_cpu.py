@@ -77,6 +77,7 @@ def prepare_host_with_different_cpu_scenario():
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     vm_creation_option.set_l3_uuids([l3_net_uuid])
     vm_creation_option.set_image_uuid(image_uuid)
+    vm_creation_option.set_timeout(1800000)
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
 
     ps_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].uuid
