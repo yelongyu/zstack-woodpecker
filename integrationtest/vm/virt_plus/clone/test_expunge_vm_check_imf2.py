@@ -38,6 +38,12 @@ def test():
         vm.destroy()
         vm.expunge()
         test_util.test_skip('Not find image store type backup storage.')
+    primary_storage_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+    for ps in primary_storage_list:
+        if ps.type == "SharedBlock":
+            vm.destroy()
+            vm.expunge()
+            test_util.test_skip('The test is not support sharedblock storage.')
 
     new_vms = vm.clone(vm_names)
     for new_vm in new_vms:
