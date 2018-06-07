@@ -2754,6 +2754,17 @@ def lib_find_vr_by_vm(vm, session_uuid=None):
         if not vrs:
             test_util.test_logger("Cannot find VM: [%s] 's Virtual Router VM" \
                     % vm.uuid)
+    
+    tmp_vr_list = []
+    tmp_l3s_list = list(vm_l3s) 
+    if vrs:
+        for vr in vrs:
+            for nic in vr.vmNics:
+                for l3 in tmp_l3s_list:
+                    if nic.l3NetworkUuid == l3 and int(nic.metaData) & 4 == 4:
+                        tmp_vr_list.append(vr)
+    vrs = tmp_vr_list
+
 
     return vrs
 
