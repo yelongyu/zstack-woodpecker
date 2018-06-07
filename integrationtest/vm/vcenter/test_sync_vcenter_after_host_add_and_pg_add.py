@@ -8,6 +8,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.vcenter_operations as vct_ops
+import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.operations.deploy_operations as deploy_operations
 import test_stub
 
@@ -63,6 +64,18 @@ def test():
     vct_ops.remove_vswitch(vc_host,'vSwitch1')
     for name in portgroup:
         vct_ops.remove_portgroup(vc_host, name)
+    vct_ops.remove_host(vc_host)
+
+    #recover the test environment
+    vc_origin_host = vct_ops.get_host(content)[0]
+    #delete the virtualrouter network corresponding portgroups
+    vct_ops.remove_portgroup(vc_origin_host, name=os.environ['l2vCenterPublicNetworkName'])
+    vct_ops.remove_portgroup(vc_origin_host, name=os.environ['l2vCenterNoVlanNetworkName'])
+    vct_ops.sync_vcenter(vcenter_uuid)
+    #recover virtualrouter network
+    deploy_operations.add_vcenter_l2l3_network(test_lib.all_scenario_config, test_lib.scenario_file,test_lib.deploy_config, acc_ops.login_as_admin())
+    deploy_operations.add_vcenter_vrouter(test_lib.all_scenario_config, test_lib.scenario_file,test_lib.deploy_config, acc_ops.login_as_admin())
+    vct_ops.sync_vcenter(vcenter_uuid)
 
     test_util.test_pass('Sync vcenter after adding host to vcenter cluster and add portgroup successfully')
 

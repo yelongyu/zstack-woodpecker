@@ -227,7 +227,17 @@ def get_host(content, name=None):
         return host
     return [host]
 
+def disconnect_host(host_obj):
+    from pyVim import task
+    Task = host_obj.DisconnectHost_Task()
+    task.WaitForTask(Task)
 
+def remove_host(host_obj):
+    from pyVim import task
+    disconnect_host(host_obj)
+    TASK = host_obj.Destroy_Task()
+    task.WaitForTask(TASK)
+    
 def get_host_networkSystem(host):
     return host.configManager.networkSystem
 
