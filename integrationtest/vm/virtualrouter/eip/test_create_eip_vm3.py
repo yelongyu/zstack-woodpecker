@@ -48,6 +48,9 @@ def test():
     vm_nic_uuid = vm_nic.uuid
     pri_l3_uuid = vm_nic.l3NetworkUuid
     vr = test_lib.lib_find_vr_by_l3_uuid(pri_l3_uuid)[0]
+    if vr.applianceVmType == "VirtualRouter":
+        test_util.test_skip("This test only for vrouter network")
+
     vr_pub_nic = test_lib.lib_find_vr_pub_nic(vr)
     l3_uuid = vr_pub_nic.l3NetworkUuid
     vip = test_stub.create_vip('create_eip_test', l3_uuid)
