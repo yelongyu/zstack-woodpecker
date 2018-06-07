@@ -177,6 +177,8 @@ class zstack_kvm_virtioscsi_shareable_checker(checker_header.TestChecker):
         print "volume_uuid= %s" %(volume.uuid)
         sv_cond = res_ops.gen_query_conditions("volumeUuid", '=', volume.uuid)
         volume_vmInstanceUuid = res_ops.query_resource_fields(res_ops.SHARE_VOLUME, sv_cond, None, fields=['vmInstanceUuid'])[0].vmInstanceUuid
+        pv_cond = res_ops.gen_query_conditions("volume.uuid", '=', volume.uuid)
+        volume_ps_type = res_ops.query_resource_fields(res_ops.PRIMARY_STORAGE, pv_cond, None, fields=['type'])[0].type
 
         host = test_lib.lib_get_vm_host(test_lib.lib_get_vm_by_uuid(volume_vmInstanceUuid))
         test_util.test_logger('vmInstanceUuid_host.ip is %s' %host.managementIp)
@@ -191,8 +193,12 @@ class zstack_kvm_virtioscsi_shareable_checker(checker_header.TestChecker):
                     if device.tag == "disk":
                        for disk in device:
                            if disk.tag == "source":
-                               if disk.get("name").find(volume.uuid) > 0:
-                                   has_volume = True
+                               if volume_ps_type == "ceph":
+                                   if disk.get("name").find(volume.uuid) > 0:
+                                       has_volume = True
+                               if volume_ps_type == "SharedBlock":
+                                   if disk.get("file").find(volume.uuid) > 0:
+                                       has_volume = True
                            if disk.tag == "shareable":
                                    shareable = True
                            if has_volume and shareable:
