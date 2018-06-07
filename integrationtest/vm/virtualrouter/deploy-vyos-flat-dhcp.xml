@@ -350,6 +350,7 @@
                 <serviceType>DHCP</serviceType>
                 <serviceType>Userdata</serviceType>
                 <serviceType>VipQos</serviceType>
+                <serviceType>HostRoute</serviceType>
               </networkService>
               <networkService provider="SecurityGroup">
                 <serviceType>SecurityGroup</serviceType>
