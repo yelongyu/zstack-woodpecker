@@ -83,10 +83,22 @@ def test():
 
     test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
 
+    test_util.test_dsc('Install zstack with default path')
+    cmd= '%s "[ -e /usr/local/zstack ] && echo yes || echo no"' % ssh_cmd
+    (process_result, cmd_stdout) = test_stub.execute_shell_in_process_stdout(cmd, tmp_file)
+    if process_result != 0:
+        test_util.test_fail('check /usr/local/zstack fail, cmd_stdout:%s' % cmd_stdout)
+    cmd_stdout = cmd_stdout[:-1]
+    if cmd_stdout == "yes":
+        cmd = '%s "rm -rf /usr/local/zstack"' % ssh_cmd
+        (process_result, cmd_stdout) = test_stub.execute_shell_in_process_stdout(cmd, tmp_file)
+        if process_result != 0:
+            test_util.test_fail('delete /usr/local/zstack fail')
+
     target_file = '/root/zstack-all-in-one.tgz'
     test_stub.prepare_test_env(vm_inv, target_file)
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
-    args = "-o"
+    args = "-D"
 
     test_util.test_dsc('start install the latest zstack-MN')
     test_stub.execute_install_with_args(ssh_cmd, args, target_file, tmp_file)
