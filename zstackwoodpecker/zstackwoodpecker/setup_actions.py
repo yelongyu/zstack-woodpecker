@@ -586,7 +586,8 @@ default one' % self.zstack_properties)
                 cmd += '; zstack-ctl configure --host=%s ApplianceVm.agentPort=8080' % (node.ip_)
             end_point = os.environ.get('apiEndPoint')
             if end_point:
-                cmd += '; zstack-ctl configure user.define.api.endpoint=%s' % end_point
+                cmd += '; zstack-cli UpdateGlobalConfig category=aliyun name=user.define.api.endpoint value="%s"' % end_point
+#                 cmd += '; zstack-ctl configure user.define.api.endpoint=%s' % end_point
             if not linux.is_ip_existing(node.ip_):
                 ssh.execute(cmd, node1.ip_, node.username_, node.password_)
             else:

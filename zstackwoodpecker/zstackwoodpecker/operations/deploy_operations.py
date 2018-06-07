@@ -22,6 +22,8 @@ import urllib3
 import types
 import simplejson
 import time
+import nas_operations as nas_ops
+import hybrid_operations as hyb_ops
 
 
 #global exception information for thread usage
@@ -761,59 +763,55 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
             zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, \
                     name=zone.name_)
             zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
+
             # Add KS
-            action_ks = api_actions.AddHybridKeySecretAction()
-            action_ks.name = 'ks_for_nas_test'
-            action_ks.type = 'aliyun'
-            action_ks.key = os.getenv('aliyunKey')
-            action_ks.secret = os.getenv('aliyunSecret')
-            thread_ks = threading.Thread(target=_thread_for_action, args=(action_ks,))
-            wait_for_thread_queue()
-            thread_ks.start()
-            thread_ks.join()
+            hyb_ops.add_hybrid_key_secret(name='ks_for_nas_test',
+                                          description='ks_for_nas_test',
+                                          key=os.getenv('aliyunKey'),
+                                          secret=os.getenv('aliyunSecret'),
+                                          session_uuid=session_uuid)
             # Add DataCenter
-            action_dc = api_actions.AddDataCenterFromRemoteAction()
-            action_dc.type = os.getenv('datacenterType')
-            action_dc.regionId = os.getenv('regionId')
-            thread_dc = threading.Thread(target=_thread_for_action, args=(action_dc,))
-            wait_for_thread_queue()
-            thread_dc.start()
-            thread_dc.join()
+            hyb_ops.add_datacenter_from_remote(datacenter_type=os.getenv('datacenterType'),
+                                               description='dc_for_nas_test',
+                                               region_id=os.getenv('regionId'),
+                                               session_uuid=session_uuid)
             # Add NAS File System
-            dcinv = res_ops.get_resource(res_ops.DATACENTER, session_uuid)[0]
-            action_fs = api_actions.AddAliyunNasFileSystemAction()
-            action_fs.name = 'setup_nasfs'
-            action_fs.fileSystemId = os.getenv('fileSystemId')
-            action_fs.dataCenterUuid = dcinv.uuid
-            thread_fs = threading.Thread(target=_thread_for_action, args=(action_fs,))
-            wait_for_thread_queue()
-            thread_fs.start()
-            thread_fs.join()
+            dcinvs = res_ops.get_resource(res_ops.DATACENTER, session_uuid=session_uuid)
+            if dcinvs:
+                dcinv = dcinvs[0]
+            else:
+                raise test_util.TestError("Can't find Any DataCenter.")
+            nas_ops.add_aliyun_nas_file_system(datacenter_uuid=dcinv.uuid,
+                                               fsid=os.getenv('fileSystemId'),
+                                               name='setup_nasfs',
+                                               session_uuid=session_uuid)
             # Add NAS Mount Target
-            nasinv = res_ops.get_resource(res_ops.NAS_FILESYSTEM, session_uuid)[0]
-            action_mt = api_actions.AddAliyunNasMountTargetAction()
-            action_mt.name = 'setup_nas_mount_target'
-            action_mt.mountDomain = os.getenv('mountDomain')
-            action_mt.nasFSUuid = nasinv.uuid
-            thread_mt = threading.Thread(target=_thread_for_action, args=(action_mt,))
-            wait_for_thread_queue()
-            thread_mt.start()
-            thread_mt.join()
+            nasinvs = res_ops.get_resource(res_ops.NAS_FILESYSTEM, session_uuid=session_uuid)
+            if nasinvs:
+                nasinv = nasinvs[0]
+            else:
+                raise test_util.TestError("Can't find Any NAS File System.")
+            nas_ops.add_aliyun_nas_mount_target(nas_fs_uuid=nasinv.uuid,
+                                                mount_domain=os.getenv('mountDomain'),
+                                                name='setup_nas_mount_target',
+                                                session_uuid=session_uuid)
             # Add Aliyun Access Group
-            action_grp = api_actions.AddAliyunNasAccessGroupAction()
-            action_grp.name = 'setup_access_group'
-            action_grp.groupName = os.getenv('groupName')
-            action_grp.dataCenterUuid = dcinv.uuid
-            thread_grp = threading.Thread(target=_thread_for_action, args=(action_grp,))
-            wait_for_thread_queue()
-            thread_grp.start()
-            thread_grp.join()
+            nas_ops.add_aliyun_nas_access_group(datacenter_uuid=dcinv.uuid,
+                                                group_name=os.getenv('groupName'),
+                                                session_uuid=session_uuid)
             # Add AliyunNas PS
+            grpinvs = res_ops.get_resource(res_ops.ALIYUNNAS_ACCESSGROUP, session_uuid=session_uuid)
+            if grpinvs:
+                grpinv = grpinvs[0]
+            else:
+                raise test_util.TestError("Can't find Aliyun NAS Access Group.")
             action = api_actions.AddAliyunNasPrimaryStorageAction()
             action.name = 'AliyunNas'
-            action.accessGroupUuid = os.getenv('groupName')
+            action.nasUuid = nasinv.uuid
+            action.accessGroupUuid = grpinv.uuid
             action.url = '/' + str(time.time()).split('.')[0]
             action.zoneUuid = zinv.uuid
+            action.sessionUuid = session_uuid
             thread = threading.Thread(target=_thread_for_action, args=(action,))
             wait_for_thread_queue()
             thread.start()
