@@ -23,6 +23,8 @@ case_flavor = dict(online = dict(vm_running=True, vm_stopped=False),
                    )
 
 def test():
+    allow_ps_list = [inventory.CEPH_PRIMARY_STORAGE_TYPE, "SharedBlock"]
+    test_lib.skip_test_when_ps_type_not_in_list(allow_ps_list)
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     test_util.test_dsc('Create original vm')
     vm = test_stub.create_vlan_vm()

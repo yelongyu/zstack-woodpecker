@@ -50,6 +50,8 @@
         <case timeout='1350' repeat='1'>volume/test_add_m_vols.py</case>
         <case timeout='800' repeat='1'>volume/test_add_volume_vr.py</case>
         <case timeout='600' repeat='1'>volume/test_crt_vm_volume.py</case>
+        <case timeout='600' repeat='1'>volume/test_crt_data_vol_tmpt_from_sharable_vol.py::online</case>
+        <case timeout='600' repeat='1'>volume/test_crt_data_vol_tmpt_from_sharable_vol.py::offline</case>
         <case timeout='700' repeat='1'>volume/test_crt_vm_2_volumes.py</case>
         <case timeout='700' repeat='1'>volume/test_crt_vm_24_volumes.py</case>
         <case timeout='700' repeat='1'>volume/test_volume_ops_on_stopped_vm.py</case>
@@ -154,6 +156,8 @@
         <case timeout='600'  repeat='1'>snapshot/test_crt_sp_simultaneously.py</case>
         <case timeout='900'  repeat='1'>snapshot/test_del_sp_simultaneously.py</case>
         <case timeout='600'  repeat='1'>snapshot/test_del_revert_sp_simultaneously.py</case>
+        <case timeout='2400'  repeat='1'>snapshot/test_sharable_volume_snapshot.py::online</case>
+        <case timeout='2400'  repeat='1'>snapshot/test_sharable_volume_snapshot.py::offline</case>
         <case timeout='600'  repeat='1'>cli/test_cli.py</case>
         <case timeout='2600'  repeat='1'>windows/test_windows_vm_multi_data_volumes.py</case>
         <case timeout='9000' repeat='1' noparallel='True'>snapshot/test_change_max_sp_depth_live_vm.py</case>
