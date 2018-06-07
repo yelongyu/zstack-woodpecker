@@ -24,7 +24,7 @@ import simplejson
 import time
 import nas_operations as nas_ops
 import hybrid_operations as hyb_ops
-
+import config_operations as cfg_ops
 
 #global exception information for thread usage
 exc_info = []
@@ -764,6 +764,11 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                     name=zone.name_)
             zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
 
+            # Update Global Config: user.define.api.endpoint
+            cfg_ops.change_global_config(category='aliyun',
+                                         name='user.define.api.endpoint',
+                                         value=os.getenv('apiEndPoint'),
+                                         session_uuid=session_uuid)
             # Add KS
             hyb_ops.add_hybrid_key_secret(name='ks_for_nas_test',
                                           description='ks_for_nas_test',

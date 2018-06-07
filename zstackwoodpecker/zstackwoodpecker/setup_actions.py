@@ -47,8 +47,6 @@ ENV_HTTPS_PROXY = os.environ.get('woodpecker_https_proxy')
 if not ENV_HTTPS_PROXY:
     ENV_HTTPS_PROXY = ''
 
-ENDPOINT = os.environ.get('apiEndPoint')
-
 NODE_PASSWORD = os.environ.get('ZSTACK_MANAGEMENT_SERVER_PASSWORD')
 EXTRA_DEPLOY_SCRIPT = '%s/.zstackwoodpecker/extra_zstack_config.sh' % USER_PATH
 
@@ -586,10 +584,6 @@ default one' % self.zstack_properties)
                     (node.ip_, node.ip_, node.ip_)
             if os.environ.get('ZSTACK_SIMULATOR') == "yes":
                 cmd += '; zstack-ctl configure --host=%s ApplianceVm.agentPort=8080' % (node.ip_)
-            if ENDPOINT:
-                cmd += '; zstack-cli LogInByAccount accountName=admin password=password\
-                        ; zstack-cli UpdateGlobalConfig category=aliyun name=user.define.api.endpoint value="%s"' % ENDPOINT
-#                 cmd += '; zstack-ctl configure user.define.api.endpoint=%s' % end_point
             if not linux.is_ip_existing(node.ip_):
                 ssh.execute(cmd, node1.ip_, node.username_, node.password_)
             else:
@@ -639,8 +633,6 @@ default one' % self.zstack_properties)
             if not linux.is_ip_existing(node.ip_) and os.environ.get('ZSTACK_ALREADY_INSTALLED') != "yes":
                 cmd = 'zstack-ctl install_management_node --force-reinstall \
                         --host=%s' % node.ip_
-                if ENDPOINT:
-                    cmd += '; zstack-ctl start_node'
                 thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
                 thread.start()
             else:
