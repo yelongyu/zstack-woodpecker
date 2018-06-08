@@ -193,7 +193,7 @@ class zstack_kvm_virtioscsi_shareable_checker(checker_header.TestChecker):
                     if device.tag == "disk":
                        for disk in device:
                            if disk.tag == "source":
-                               if volume_ps_type == "ceph":
+                               if volume_ps_type == "Ceph":
                                    if disk.get("name").find(volume.uuid) > 0:
                                        has_volume = True
                                if volume_ps_type == "SharedBlock":
