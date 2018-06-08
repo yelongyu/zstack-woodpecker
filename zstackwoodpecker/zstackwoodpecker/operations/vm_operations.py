@@ -257,7 +257,7 @@ def delete_instance_offering(instance_offering_uuid, session_uuid = None):
 def expunge_vm(vm_uuid, session_uuid = None):
     action = api_actions.ExpungeVmInstanceAction()
     action.uuid = vm_uuid
-    action.timeout = 40000
+    action.timeout = 60000
     test_util.action_logger('Expunge VM [uuid:] %s ' % vm_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory

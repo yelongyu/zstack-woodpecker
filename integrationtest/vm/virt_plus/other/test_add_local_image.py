@@ -24,9 +24,9 @@ def test():
     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
     if bs.type == "Ceph":
         test_util.test_skip('bs: %s is ceph backup storage. Will skip test.' % bs.uuid)
-
-    os.system('dd if=/dev/zero of=%s bs=1M count=1 seek=300' % test_image)
-    time.sleep(10)
+    
+    command = 'dd if=/dev/zero of=%s bs=1M count=1 seek=300' % test_image
+    test_lib.lib_execute_ssh_cmd(bs.hostname, 'root', 'password', command)
     image_name = 'test-image-%s' % time.time()
     image_option = test_util.ImageOption()
     image_option.set_name(image_name)
@@ -46,10 +46,13 @@ def test():
     vm = test_stub.create_vm(image_name = image_name)
     vm.destroy()
     image.delete()
-    if not os.path.exists(test_image):
-        test_util.test_fail('test image disappeared, after add image.')
-    os.system('rm -f %s' % test_image)
+    command = 'ls %s' % test_image
+    if not test_lib.lib_execute_ssh_cmd(bs.hostname, 'root', 'password', command):
+       test_util.test_fail('test image disappeared, after add image.')
+    command = 'rm -f %s' % test_image
+    result = test_lib.lib_execute_ssh_cmd(bs.hostname, 'root', 'password', command)
     test_util.test_pass('Test adding image from local storage pass.')
+
 
 #Will be called only if exception happens in test().
 def error_cleanup():
