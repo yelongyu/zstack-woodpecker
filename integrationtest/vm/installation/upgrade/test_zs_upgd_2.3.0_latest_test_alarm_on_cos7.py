@@ -96,12 +96,12 @@ def test():
     while times>0:
         cond3=res_ops.gen_query_conditions('status','=','Alarm')
         alarm_list=scen_ops.query_resource(vm_ip,res_ops.ALARM,cond3).inventories
-        server = 'pop3.zstack.io'
-        email = 'test.qa@zstack.io'
-        password = 'Test1234'
-        # server = os.environ.get('receive_pop3server')
-        # email = os.environ.get('receive_email')
-        # password = os.environ.get('receive_password')
+        #server = 'pop3.zstack.io'
+        #email = 'test.qa@zstack.io'
+        #password = 'Test1234'
+        server = os.environ.get('receive_pop3server')
+        email = os.environ.get('receive_email')
+        password = os.environ.get('receive_password')
         for alarm in alarm_list:
             if True == flag:
                 break
