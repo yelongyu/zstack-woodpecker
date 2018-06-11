@@ -140,8 +140,10 @@ def test():
     image1.check()
     test_obj_dict.add_image(image1)
 
-    #export image
-    image1.export()
+    bs_list = res_ops.query_resource(res_ops.BACKUP_STORAGE)
+    if inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE == bs_list[0] and len(bs_list) == 1 :
+        #export image
+        image1.export()
 
     #create vm 
     vm2 = test_stub.create_vm('image-vm', cloned_vm_img_name, l3_name)
