@@ -62,7 +62,7 @@ def test():
     template_option.set_name('data-volume-template')
     template_option.set_backup_storage_uuid_list([bss[0].uuid])
     template_option.set_format('qcow2')
-    template_option.set_url('http://192.168.200.100/mirror/diskimages/data_volume_image_chunli_200M-4M.qcow2')
+    template_option.set_url(os.environ.get('data_vol_qcow2'))
     template_inv = img_ops.add_data_volume_template(template_option)
     template = test_image.ZstackTestImage()
     template.set_image(template_inv)
