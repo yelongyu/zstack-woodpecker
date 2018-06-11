@@ -84,6 +84,7 @@ def test():
     test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
 
     test_util.test_dsc('Install zstack with default path')
+    ssh_cmd = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     cmd= '%s "[ -e /usr/local/zstack ] && echo yes || echo no"' % ssh_cmd
     (process_result, cmd_stdout) = test_stub.execute_shell_in_process_stdout(cmd, tmp_file)
     if process_result != 0:
