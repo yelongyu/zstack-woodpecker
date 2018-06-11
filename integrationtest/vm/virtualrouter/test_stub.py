@@ -1037,8 +1037,30 @@ class MulISO(object):
         if check:
             assert actual_no_media_cdrom == no_media_cdrom
 
+    def add_route_to_bridge(self, l3_uuid):
+
+        cond = res_ops.gen_query_conditions('uuid', '=', l3_uuid)
+        l3_inv = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0]
+
+        l3_cidr = l3_inv.ipRanges[0].networkCidr
+        l2_uuid = l3_inv.l2NetworkUuid
+        cond = res_ops.gen_query_conditions('uuid', '=', l2_uuid)
+        l2_inv = res_ops.query_resource(res_ops.L2_NETWORK, cond)[0]
+        vlan_id = l2_inv.vlan
+
+        del_route_cmd = "ip addr del " + l3_cidr + " dev br_eth0_" + str(vlan_id)
+        test_util.test_logger(del_route_cmd)
+        os.system(del_route_cmd)
+
+        add_route_cmd = "ip addr add " + l3_cidr + " dev br_eth0_" + str(vlan_id)
+        test_util.test_logger(add_route_cmd)
+        os.system(add_route_cmd)
+
     def check_windows_vm_cdrom(self, cdroms_with_media):
         vm_ip = self.vm1.get_vm().vmNics[0].ip
+        l3_uuid = test_lib.lib_get_l3s_uuid_by_vm(self.vm1.get_vm())[0]
+        self.add_route_to_bridge(l3_uuid)
+        
         test_lib.lib_wait_target_up(vm_ip, '23', 1200)
         vm_username = os.environ.get('winImageUsername')
         vm_password = os.environ.get('winImagePassword')
