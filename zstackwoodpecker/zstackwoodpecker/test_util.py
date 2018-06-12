@@ -1167,6 +1167,85 @@ class ChassisOption(DataOption):
     def get_ipmi_port(self):
         return self.ipmiPort
 
+class StackTemplateOption(DataOption):
+    def __init__(self):
+        self.type = "zstack"
+        self.name = None
+        self.description = None
+        self.templateContent = None
+        self.url = None
+        self.state = None
+        super(StackTemplateOption, self).__init__()
+
+    def set_state(self, state):
+        self.state = state
+    def get_state(self):
+        return self.state
+    def set_name(self, name):
+        self.name = name
+    def get_name(self):
+        return self.name
+    def set_description(self, description):
+        self.description = description
+    def get_description(self):
+        return self.description
+    def set_templateContent(self, templateContent):
+        self.templateContent = templateContent
+    def get_templateContent(self):
+        return self.templateContent
+    def set_url(self, url):
+        self.url = url
+    def get_url(self):
+        return self.url
+
+class ResourceStackOption(DataOption):
+    def __init(self):
+        self.zone_uuid = None
+        self.name = None
+        self.description = None
+        self.type = "zstack"
+        self.rollback = false
+        self.templateContent = None
+        self.template_uuid = None
+        self.parameters = None
+        self.uuid = None
+        super(ResourceStack, self).__init__()
+
+    def set_zone_uuid(self, zone_uuid):
+        self.zone_uuid = zone_uuid
+    def get_zone_uuid(self):
+        return self.zone_uuid
+    def get_type(self):
+        return self.type
+    def set_name(self, name):
+        self.name = name
+    def get_name(self):
+        return self.name
+    def set_templateContent(self, templateContent):
+        self.templateContent = templateContent
+    def get_templateContent(self):
+        return self.templateContent
+    def set_description(self, description):
+        self.description = description
+    def get_description(self):
+        return self.description
+    def set_rollback(self, rollback):
+        self.rollback = rollback
+    def get_rollback(self):
+        return self.rollback
+    def set_template_uuid(self, template_uuid):
+        self.template_uuid = template_uuid
+    def get_template_uuid(self):
+        return self.template_uuid
+    def set_parameters(self, parameters):
+        self.parameters = parameters
+    def get_parameters(self):
+        return self.parameters
+    def set_uuid(self, uuid):
+        self.uuid = uuid
+    def get_uuid(self):
+        return self.uuid
+
 class PxeOption(DataOption):
     def __init__(self):
         self.dhcpInterface = None

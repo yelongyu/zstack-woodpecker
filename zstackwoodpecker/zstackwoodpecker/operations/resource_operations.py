@@ -112,6 +112,8 @@ DATACENTER = 'DataCenter'
 NAS_FILESYSTEM = 'NasFileSystem'
 NAS_MOUNTTARGET = 'NasMountTarget'
 ALIYUNNAS_ACCESSGROUP = 'AliyunNasAccessGroup'
+STACK_TEMPLATE = "StackTemplate"
+RESOURCE_STACK = "ResourceStack"
 
 
 def find_item_by_uuid(inventories, uuid):
@@ -607,6 +609,10 @@ def _gen_query_action(resource, condition=None):
         action = api_actions.QueryNasFileSystemAction()
     elif resource == NAS_MOUNTTARGET:
         action = api_actions.QueryNasMountTargetAction()
+    elif resource == STACK_TEMPLATE:
+        action = api_actions.QueryStackTemplateAction()
+    elif resource == RESOURCE_STACK:
+        action = api_actions.QueryResourceStackAction()
     return action
 
 def query_resource(resource, conditions = [], session_uuid=None, count='false'):
