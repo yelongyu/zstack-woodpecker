@@ -1075,6 +1075,7 @@ class MulISO(object):
         tn.read_until(vm_username+">")
         tn.write("wmic cdrom get volumename\r\n")
         ret = tn.read_until(vm_username+">")
+        tn.write("exit\r\n")
         tn.close()
         cdrome_list = ret.split('\r')
         _cdroms_with_media = [x.strip('\n| ') for x in cdrome_list if x.strip('\n| ')][2:-1]
