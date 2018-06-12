@@ -1061,17 +1061,17 @@ class MulISO(object):
         l3_uuid = test_lib.lib_get_l3s_uuid_by_vm(self.vm1.get_vm())[0]
         self.add_route_to_bridge(l3_uuid)
         
-        test_lib.lib_wait_target_up(vm_ip, '23', 1200)
+        test_lib.lib_wait_target_up(vm_ip, '23', 300)
         vm_username = os.environ.get('winImageUsername')
         vm_password = os.environ.get('winImagePassword')
-        tn = telnetlib.Telnet(vm_ip, timeout=120)
-        tn.read_until("login: ", timeout=120)
+        tn = telnetlib.Telnet(vm_ip)
+        tn.read_until("login: ")
         tn.write(vm_username+"\r\n")
-        tn.read_until("password: ", timeout=120)
+        tn.read_until("password: ")
         tn.write(vm_password+"\r\n")
-        tn.read_until(vm_username+">", timeout=120)
+        tn.read_until(vm_username+">")
         tn.write("wmic cdrom get volumename\r\n")
-        ret = tn.read_until(vm_username+">", timeout=120)
+        ret = tn.read_until(vm_username+">")
         tn.close()
         cdrome_list = ret.split('\r')
         _cdroms_with_media = [x.strip('\n| ') for x in cdrome_list if x.strip('\n| ')][2:-1]
