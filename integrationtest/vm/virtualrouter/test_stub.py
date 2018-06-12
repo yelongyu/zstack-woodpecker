@@ -744,7 +744,10 @@ def get_another_ip_of_host(ip, username, password):
     return output.split(':')[-1].strip()
 
 def set_httpd_in_vm(ip, username, password):
-    cmd = "yum install httpd -y; systemctl start httpd; iptables -F; echo %s > /var/www/html/index.html" % ip
+    cmd = "yum install httpd -y"
+    if not test_lib.lib_execute_ssh_cmd(ip, username, password, cmd, timeout=300):
+       test_util.test_fail('install httpd in vm failed')
+    cmd = "systemctl start httpd; iptables -F; echo %s > /var/www/html/index.html" % ip
     test_lib.lib_execute_ssh_cmd(ip, username, password, cmd, timeout=300)
 
 def gen_random_port(start=1, end=100):
