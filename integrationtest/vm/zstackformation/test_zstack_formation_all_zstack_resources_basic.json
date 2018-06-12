@@ -1,0 +1,291 @@
+{
+    "ZStackTemplateFormatVersion": "2018-06-18",
+    "Description": "Test ZStack formation functions",
+    "Parameters": {
+        "4TestBoolean2": {
+            "Type": "Boolean",
+            "Description":"测试boolean ",
+            "DefaultValue": false 
+        },
+        "ZoneUuid": {
+            "Type": "String",
+            "Description":"测试boolean ",
+            "DefaultValue": "zoneuuid"
+        },
+        "ClusterUuid": {
+            "Type": "String"
+			"DefaultValue":"clusteruuid"
+        },
+        "PrimaryStorageUuidForRootVolume": {
+            "Type": "String",
+            "Description":"主存储Uuid ",
+            "DefaultValue": "primarystorageuuidforrootvolume"
+        },
+        "ImageUrl": {
+            "Type": "String",
+            "Description":"镜像地址",
+            "DefaultValue": "http://test.zss.com/testimage.qcow2"
+        },
+        "BackupStorages": {
+            "Type": "CommaDelimitedList",
+            "Description":"所有镜像服务器",
+            "DefaultValue": "BS1,BS2,BS3"
+        },
+        "Vlan": {
+            "Type": "Number",
+            "Description":"Vlan id",
+            "DefaultValue": 1000
+        },
+        "VipPortStar": {
+            "Type": "Number",
+            "Description":"Vip port start num",
+            "DefaultValue": 22
+        },
+		"LoadBalancerPort":{
+            "Type": "Number",
+            "Description":"load balancer port",
+            "DefaultValue": 443
+		}
+	
+    },
+
+    "Mappings" : {
+        "names" : {
+              "instanceOffering" : { "name1" : "test-just-t", "name2" : "test2" }
+        },
+        "JustForTest" : {"test" : "I am valid!"},
+        "JustForTest2" : {"test" : "I am valid!", "test2" : "I am valid too!"}
+    },
+    "Resources": {
+        "InstanceOffering": {
+            "Type": "ZStack::Resource::InstanceOffering",
+            "Properties": {
+				"name": {"Fn::Join":["-",["a","b","ccc"]]},
+                "cpuNum": 8,
+                "memorySize": 8589934592
+            }
+        },
+		"DiskOffering": {
+			"Type":"ZStack::Resource::DiskOffering",
+			"Properties":{
+				"name":"diskoffering",
+				"diskSize": 1124774006935781000,
+				"sortKey": 1,
+				"allocationStrategy":"DefaultPrimaryStorageAllocationStrategy",
+				"resourceUuid": "DefaultDiskOfferingType",
+				"type":"DefaultDiskOfferingType",
+				"systemTages":["test","ttt"],
+				"userTags":["中文","testdiskofferingusertag"]
+			}
+		},
+        "VM": {
+            "Type": "ZStack::Resource::VmInstance",
+            "Properties": {
+                "name": {"Fn::Base64": "kubernetes-Node-1"},
+                "instanceOfferingUuid": {
+                    "Fn::GetAtt": [
+                        "InstanceOffering",
+                        "uuid"
+                    ]
+                },
+                "imageUuid": {"Fn::FindInMap":["names","instanceOffering","name1"]},
+                "l3NetworkUuids":{"Fn::Split":["-", ["a-bc-cc"]]},
+				"rootDiskOfferingUuid": {"Fn::GetAtt":["RootDiskOffering", "uuid"]},
+				"dataDiskOfferingUuids": ["uuid1","uuid2"],
+				"zoneUuid": {"Ref":"ZoneUuid"},
+				"clusterUuid": {"Ref":"ClusterUuid"},
+				"hostUuid":"hostuuid",
+				"primaryStorageUuidForRootVolume":{"Ref":"PrimaryStorageUuidForRootVolume"},
+				"description":"创建一个云主机··‘’“''、$# $?\"",
+				"defaultL3NetworkUuid":{"Fn::GetAtt": ["L3Network","uuid"]},
+				"systemTags": ["userdata"],
+				"userTages": ["Test","test2","中文试一下''';\'\""]
+            },
+            "DependsOn":[{"Ref":"InstanceOffering"}],
+            "DeletionPolicy":"Retain"
+        },
+		"DataVolume": {
+			"Type": "ZStack::Resource::DataVolume",
+			"Properties": {
+				"name":"testDataVolume",
+				"diskOfferingUuid": {"Fn::GetAtt":["DiskOffering","uuid"]},
+				"primaryStorageUuid":{"Ref":"PrimaryStorageUuidForRootVolume"},
+				"systemTages":["test","ttt"],
+				"userTages": ["Test","test2","中文试一下''';\'\""]
+			}
+		},
+		"Image": {
+			"Type":"ZStack::Resource::Image",
+			"Properties":{
+				"name": "testimage",
+				"description":"添加镜像，‘’‘’“”",
+				"url": {"Ref":"ImageUrl"},
+				"mediaType": "ISO",
+				"guestOsType":"Linux",
+				"system": false,
+				"format":"qcow2",
+				"platform":"Linux",
+				"backupStorageUuids": {"Ref":"BackupStorages"},
+				"resourceUuid":"testuuid",
+				"systemTages":["imagesystemtags","imagestsytemtages2"],
+				"userTages": ["imageusertages1","imageusertages2","中文试一下''';\'\""]
+			}
+		},
+		"RootVolumeTemplate":{
+			"Type":"ZStack::Resource::RootVolumeTemplate",
+			"Properties":{
+				"name":"Testrootvolumetemplate",
+				"description": "测试从跟云盘创建镜像",
+				"guestOsType": "Linux",
+				"backupStorageUuids": {"Ref":"BackupStorages"},
+				"rootVolumeUuid":{"Fn::GetAtt":["VM","rootVolumeUuid"]},
+				"platform":"Linux",
+				"system": false,
+				"systemTages":["rootvolumetemplatesystemtags","rootvolumetemplatestsytemtages2"],
+				"userTages": ["imageusertages1","imageusertages2","中文试一下''';\'\""]
+			}
+		},
+		"DataVolumeTemplate": {
+			"Type":"ZStack::Resource::DataVolumeTemplate",
+			"Properties":{
+				"name": "testdatavolumetemplate",
+				"description":"测试给数据盘",
+				"volumeUuid":{"Fn::GetAtt":["DataVolume", "uuid"]},
+				"backupStorageUuids":["test"],
+				"resourceUuid":"TestDataVolumeTemplate"
+			}
+		},
+		"AffinityGroup": {
+			"Type":"ZStack::Resource::AffinityGroup",
+			"Properties": {
+				"name":"testAffinityGroup",
+				"policy":"antiSoft",
+				"type":"host",
+				"resourceUuid":"affinitygroupuuid"
+			}
+		},
+		"L2VxlanNetworkPool": {
+			"Type":"ZStack::Resource::L2VxlanNetworkPool",
+			"Properties":{
+				"name":"testl2vxlannetworkpool",
+				"zoneUuid":{"Ref":"ZoneUuid"},
+				"physicalInterface":{"Ref":"L2Interface"},
+				"type":"L2VxlanNetwork"，
+				"resourceUuid":"testl2vxlannetworkpooluuid",
+				"systemTages":["l2vxlanpoolsystemtags","l2vxlanpoolsystemtages2"],
+				"userTages": ["l2vxlanpoolsertages1","l2vxlanpoolertages2","中文试一下''';\'\""]
+			}
+		},
+		"L2NoVlanNetwork": {
+			"Type":"ZStack::Resource::L2NoVlanNetwork",
+			"Properties": {
+				"name": "testl2novlannetwork",
+				"description":"Novlan 二层网络",
+				"zoneUuid":{"Ref":"ZoneUuid"},
+				"physicalInterface": "eth0"
+			}
+		},
+		"L2VlanNetwork": {
+			"Type":"ZStack::Resource::L2VlanNetwork",
+			"Properties":{
+				"name":"testl2vlannetwork",
+				"vlan":{"Ref":"Vlan"},
+				"zoneUuid":{"Ref":"ZoneUuid"},
+				"physicalInterface":{"Ref":"L2Interface"}
+			}
+		},
+		"L2VxlanNetwork": {
+			"Type":"ZStack::Resource::L2VxlanNetwork",
+			"Properties":{
+				"name":"testl2vxlannetwork",
+				"zoneUuid":{"Ref":"ZoneUuid"},
+				"physicalInterface":{"Ref":"L2Interface"}
+		},
+		"L3Network":{
+			"Type":"ZStack::Resource::L3Network",
+			"Properties":{
+				"name":"testl3network",
+				"l2NetworkUuid":{"Fn:GetAtt":["L2NoVlanNetwork","uuid"]}
+			}
+		},
+		"VRouterRouteTable":{
+			"Type":"ZStack::Resource::VRouterRouteTable",
+			"Properties":{
+				"name":"testVrouterRouTable"
+			}
+		},
+		"VpcVRouter":{
+			"Type": "ZStack::Resource::VpcVRouter",
+			"Properties":{
+				"name":"testvpcvrouter",
+				"virtualRouterOfferingUuid":"Todo"
+			}
+		},
+		"SecurityGroup":{
+			"Type":"ZStack::Resource::SecurityGroup",
+			"Properties":{
+				"name":"testsecurityGroup"
+			}
+		},
+		"Vip":{
+			"Type":"ZStack::Resource::Vip",
+			"Properties":{
+				"name":"testvip",
+				"l3NetworkUuid":{"Fn::GetAtt":["L3Network","uuid"]}
+			}
+		},
+		"Eip":{
+			"Type":"ZStack::Resource::Eip",
+			"Properties":{
+				"name":"testeip",
+				"vipUuid":{"Fn::GetAtt":["Vip","uuid"]}
+			}
+		},
+		"PortForwardingRule":{
+			"Type":"ZStack::Resource::PortForwardingRule",
+			"Properties":{
+				"name":"testPortForwardingRule",
+				"vipUuid":{"Fn::GetAtt":["Vip","uuid"]},
+				"vipPortStart":{"Ref":"VipPortStart"},
+				"protocolType":"TCP"
+			}
+		},
+		"LoadBalancer":{
+			"Type":"ZStack::Resource::LoadBalancer",
+			"Properties":{
+				"name":"testLoadBalancer",
+				"vipUuid":{"Fn::GetAtt":["Vip","uuid"]}
+			}
+		},
+		"LoadBalancerListener":{
+			"Type":"ZStack::Resource::LoadBalancerListener",
+			"Properties":{
+				"name":"testLocaBalancerListerner",
+				"loadBalancerUuid":{"Fn::GetAtt":["LoadBalancer","uuid"]},
+				"loadBalancerPort": {"Ref":"LoadBalancerPort"}
+			}
+		},
+		"IPsecConnection": {
+			"Type":"ZStack::Resource::IPsecConnection",
+			"Properties":{
+				"name":"testIPsecConnection",
+				"peerAddress":{"Ref":"PeerAdress"},
+				"authKey":{"Ref":"AuthKey"},
+				"vipUuid":{"Fn::GetAtt":["Vip","uuid"]}
+			}
+		}
+    },
+    "Outputs": {
+        "InstanceOffering": {
+            "Value": {
+                "Ref": "VM"
+            }
+        },
+        "IP": {
+            "Value": {
+                "Fn::Select": ["0", ["ip","11","test"]]
+            }
+        }
+
+    }
+}
