@@ -1,0 +1,974 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="4.0" jmeter="4.0 r1823414">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Plan" enabled="true">
+      <stringProp name="TestPlan.comments"></stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+      <stringProp name="TestPlan.user_define_classpath"></stringProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">2</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">100</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">172.20.12.204</stringProp>
+          <stringProp name="HTTPSampler.port">8080</stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path"></stringProp>
+          <stringProp name="HTTPSampler.concurrentPool">6</stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </ConfigTestElement>
+        <hashTree/>
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+          <collectionProp name="HeaderManager.headers">
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Authorization</stringProp>
+              <stringProp name="Header.value">OAuth ${uuid}</stringProp>
+            </elementProp>
+          </collectionProp>
+        </HeaderManager>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="login" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="accountName" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">admin</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">accountName</stringProp>
+              </elementProp>
+              <elementProp name="password" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">password</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port">5000</stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/apiCall/loginAccount</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Regular Expression Extractor" enabled="true">
+            <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+            <stringProp name="RegexExtractor.refname">uuid</stringProp>
+            <stringProp name="RegexExtractor.regex">&quot;uuid&quot;:&quot;(.*?)&quot;</stringProp>
+            <stringProp name="RegexExtractor.template">$1$</stringProp>
+            <stringProp name="RegexExtractor.default">not found</stringProp>
+            <stringProp name="RegexExtractor.match_number">0</stringProp>
+          </RegexExtractor>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="licenses" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/licenses</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="time" enabled="true">
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{  &quot;getCurrentTime&quot;: {},  &quot;systemTags&quot;: [],  &quot;userTags&quot;: [] }</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/management-nodes/actions</stringProp>
+          <stringProp name="HTTPSampler.method">PUT</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="time" enabled="true">
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{  &quot;getCurrentTime&quot;: {},  &quot;systemTags&quot;: [],  &quot;userTags&quot;: [] }</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/management-nodes/actions</stringProp>
+          <stringProp name="HTTPSampler.method">PUT</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="zones" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/zones</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Regular Expression Extractor" enabled="true">
+            <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+            <stringProp name="RegexExtractor.refname">zone.uuid</stringProp>
+            <stringProp name="RegexExtractor.regex">&quot;uuid&quot;:&quot;(.*?)&quot;</stringProp>
+            <stringProp name="RegexExtractor.template">$1$</stringProp>
+            <stringProp name="RegexExtractor.default">not found</stringProp>
+            <stringProp name="RegexExtractor.match_number">0</stringProp>
+          </RegexExtractor>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="time" enabled="true">
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{  &quot;getCurrentTime&quot;: {},  &quot;systemTags&quot;: [],  &quot;userTags&quot;: [] }</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/management-nodes/actions</stringProp>
+          <stringProp name="HTTPSampler.method">PUT</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="licenses/addons" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/licenses/addons</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="licenses/capabilities" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/licenses/capabilities</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="global-configurations" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="q" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">category=ha</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">q</stringProp>
+              </elementProp>
+              <elementProp name="q" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">name=enable</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">q</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/global-configurations</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="global-configurations" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="q" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">category=vm</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">q</stringProp>
+              </elementProp>
+              <elementProp name="q" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">name=numa</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">q</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/global-configurations</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="global-configurations" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="q" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">category=mevoco</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">q</stringProp>
+              </elementProp>
+              <elementProp name="q" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">name=vm.consoleMode</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">q</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/global-configurations</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="time" enabled="true">
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{  &quot;getCurrentTime&quot;: {},  &quot;systemTags&quot;: [],  &quot;userTags&quot;: [] }</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/management-nodes/actions</stringProp>
+          <stringProp name="HTTPSampler.method">PUT</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="sns/application-endpoints/http" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="q" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">topics.uuid=e7d6f5e23bb74e99a2777126078b551c</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">q</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/sns/application-endpoints/http</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="tickets" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="q" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">status=Pending</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">q</stringProp>
+              </elementProp>
+              <elementProp name="count" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">true</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">count</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/tickets</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="zones" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/zones</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="zones" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/zones</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="zones" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/zones</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="licenses" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/licenses</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="backup-storage" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="q" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">zone.uuid=${zone.uuid}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">q</stringProp>
+              </elementProp>
+              <elementProp name="q" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">__systemTag__!=remote</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">q</stringProp>
+              </elementProp>
+              <elementProp name="q" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">state?=Enabled,Disabled</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">q</stringProp>
+              </elementProp>
+              <elementProp name="q" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">status?=Connected,Disconnected</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">q</stringProp>
+              </elementProp>
+              <elementProp name="q" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">type?=ImageStoreBackupStorage,Ceph,SftpBackupStorage</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">q</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/backup-storage</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="licenses" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/licenses</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="time" enabled="true">
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{  &quot;getCurrentTime&quot;: {},  &quot;systemTags&quot;: [],  &quot;userTags&quot;: [] }</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/management-nodes/actions</stringProp>
+          <stringProp name="HTTPSampler.method">PUT</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="meta-data/opensource" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/sns/application-endpoints/http</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="licenses" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/licenses</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="meta-data/opensource" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/sns/application-endpoints/http</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="batch-queries4044" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="script" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">%0A%20%20%20%20%20%20%20%20def%20host%20%3D%20%5B%3A%5D%0A%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryHost%20hypervisorType%3DKVM%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20replyWithCount%3Dtrue%22)%0A%20%20%20%20%20%20%20%20host.total%20%3D%20tmp.total%0A%20%20%20%20%20%20%20%20def%20hostUuid%20%3D%20tmp.result.collect%20%7B%20it.uuid%20%7D%0A%20%20%20%20%20%20%20%20def%20hostUuidStr%20%3D%20hostUuid.join(&apos;%7C&apos;)%0A%20%20%20%20%20%20%20%20if%20(hostUuid.size()%20%3E%200)%20%7B%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20call(%22org.zstack.zwatch.api.APIGetMetricDataMsg%22%2C%20&apos;%7B%22namespace%22%3A%20%22ZStack%2FHost%22%2C%20%22metricName%22%3A%20%22CPUAllUsedUtilization%22%2C%20%22period%22%3A%2010%2C%20%22offsetAheadOfCurrentTime%22%3A%20310%2C%20labels%22%3A%20%5B%22HostUuid%3D~&apos;%20%2B%20hostUuidStr%20%2B%20&apos;%22%5D%7D&apos;)%0A%20%20%20%20%20%20%20%20%20%20put(%22cpuAllUsed%22%2C%20tmp)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20call(%22org.zstack.zwatch.api.APIGetMetricDataMsg%22%2C%20&apos;%7B%22namespace%22%3A%20%22ZStack%2FHost%22%2C%20%22metricName%22%3A%20%22MemoryUsedInPercent%22%2C%20%22period%22%3A%2010%2C%20%22offsetAheadOfCurrentTime%22%3A%20310%2C%20%22labels%22%3A%20%5B%22HostUuid%3D~&apos;%20%2B%20hostUuidStr%20%2B%20&apos;%22%5D%7D&apos;)%0A%20%20%20%20%20%20%20%20%20%20put(%22memoryUsedBytes%22%2C%20tmp)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20call(%22org.zstack.zwatch.api.APIGetMetricDataMsg%22%2C%20&apos;%7B%22namespace%22%3A%20%22ZStack%2FHost%22%2C%20%22metricName%22%3A%20%22NetworkAllOutBytes%22%2C%20%22period%22%3A%2010%2C%20%22offsetAheadOfCurrentTime%22%3A%20310%2C%20%22labels%22%3A%20%5B%22HostUuid%3D~&apos;%20%2B%20hostUuidStr%20%2B%20&apos;%22%5D%7D&apos;)%0A%20%20%20%20%20%20%20%20%20%20put(%22networkAllOutBytes%22%2C%20tmp)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20call(%22org.zstack.zwatch.api.APIGetMetricDataMsg%22%2C%20&apos;%7B%22namespace%22%3A%20%22ZStack%2FHost%22%2C%20%22metricName%22%3A%20%22NetworkAllInBytes%22%2C%20%22period%22%3A%2010%2C%20%22offsetAheadOfCurrentTime%22%3A%20310%2C%20%22labels%22%3A%20%5B%22HostUuid%3D~&apos;%20%2B%20hostUuidStr%20%2B%20&apos;%22%5D%7D&apos;)%0A%20%20%20%20%20%20%20%20%20%20put(%22networkAllInBytes%22%2C%20tmp)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20call(%22org.zstack.zwatch.api.APIGetMetricDataMsg%22%2C%20&apos;%7B%22namespace%22%3A%20%22ZStack%2FHost%22%2C%20%22metricName%22%3A%20%22DiskAllWriteBytes%22%2C%20%22period%22%3A%2010%2C%20%22offsetAheadOfCurrentTime%22%3A%20310%2C%20%22labels%22%3A%20%5B%22HostUuid%3D~&apos;%20%2B%20hostUuidStr%20%2B%20&apos;%22%5D%7D&apos;)%0A%20%20%20%20%20%20%20%20%20%20put(%22diskAllWriteOps%22%2C%20tmp)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20call(%22org.zstack.zwatch.api.APIGetMetricDataMsg%22%2C%20&apos;%7B%22namespace%22%3A%20%22ZStack%2FHost%22%2C%20%22metricName%22%3A%20%22DiskAllReadBytes%22%2C%20%22period%22%3A%2010%2C%20%22offsetAheadOfCurrentTime%22%3A%20310%2C%20%22labels%22%3A%20%5B%22HostUuid%3D~&apos;%20%2B%20hostUuidStr%20%2B%20&apos;%22%5D%7D&apos;)%0A%20%20%20%20%20%20%20%20%20%20put(%22diskAllReadOps%22%2C%20tmp)%0A%20%20%20%20%20%20%20%20%7D%20else%20%7B%0A%20%20%20%20%20%20%20%20%20%20def%20data%20%3D%20%5B%5D%20as%20int%5B%5D%0A%0A%20%20%20%20%20%20%20%20%20%20put(%22cpuAllUsed%22%2C%20%5B%22result%22%3A%20%5B%22data%22%3A%20data%5D%5D)%0A%20%20%20%20%20%20%20%20%20%20put(%22memoryUsedBytes%22%2C%20%5B%22result%22%3A%20%5B%22data%22%3A%20data%5D%5D)%0A%20%20%20%20%20%20%20%20%20%20put(%22networkAllOutBytes%22%2C%20%5B%22result%22%3A%20%5B%22data%22%3A%20data%5D%5D)%0A%20%20%20%20%20%20%20%20%20%20put(%22networkAllInBytes%22%2C%20%5B%22result%22%3A%20%5B%22data%22%3A%20data%5D%5D)%0A%20%20%20%20%20%20%20%20%20%20put(%22diskAllWriteOps%22%2C%20%5B%22result%22%3A%20%5B%22data%22%3A%20data%5D%5D)%0A%20%20%20%20%20%20%20%20%20%20put(%22diskAllReadOps%22%2C%20%5B%22result%22%3A%20%5B%22data%22%3A%20data%5D%5D)%0A%20%20%20%20%20%20%20%20%7D%0A%0A%20%20%20%20%20%20%20%20</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">script</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/batch-queries</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="batch-queries17773" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="script" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">%0A%20%20%20%20%20%20%20%20def%20tmp%20%3D%20query(%22QueryZone%20count%3Dtrue%20replyWithCount%3Dtrue%20fields%3Duuid%22)%0A%20%20%20%20%20%20%20%20def%20tmpEnable%20%3D%20query(%22QueryZone%20replyWithCount%3Dtrue%20state%3DEnabled%22)%0A%20%20%20%20%20%20%20%20put(%22zone%22%2C%20%5B%22total%22%3A%20tmp.total%2C%20%22enable%22%3A%20tmpEnable.total%5D)%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryCluster%20hypervisorType!%3DESX%20replyWithCount%3Dtrue%20fields%3Duuid%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QueryCluster%20hypervisorType!%3DESX%20count%3Dtrue%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20state%3DEnabled%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22cluster%22%2C%20%5B%22total%22%3A%20tmp.total%2C%20%22enable%22%3A%20tmpEnable.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20def%20clusterUuidList%20%3D%20tmp.result.collect%20%7B%20it.uuid%20%7D%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryBackupStorage%20type!%3DVCenter%20fields%3Duuid%20zone.uuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%0A%20%20%20%20%20%20%20%20%20%20def%20backupStorageUuidList%20%3D%20tmp.result.collect%20%7B%20it.uuid%20%7D%0A%20%20%20%20%20%20%20%20%20%20put(%22backupStorageUuidList%22%2C%20backupStorageUuidList)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryVolume%20format!%3Dvmtx%20count%3Dtrue%20status!%3DDeleted%20primaryStorage.zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20type%3DData%20status!%3DNotInstantiated%22)%0A%20%20%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QueryVolume%20format!%3Dvmtx%20count%3Dtrue%20primaryStorage.zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20state%3DEnabled%20status!%3DDeleted%20type%3DData%20status!%3DNotInstantiated%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22volume%22%2C%20%5B%22total%22%3A%20tmp.total%2C%20%22enable%22%3A%20tmpEnable.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryImage%20format!%3Dvmtx%20status!%3DDeleted%20count%3Dtrue%20backupStorage.zone.uuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20system!%3Dtrue%20__systemTag__!%3Dremote%22)%0A%20%20%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QueryImage%20format!%3Dvmtx%20count%3Dtrue%20backupStorage.zone.uuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20state%3DEnabled%20status!%3DDeleted%20system!%3Dtrue%20__systemTag__!%3Dremote%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22image%22%2C%20%5B%22total%22%3A%20tmp.total%2C%20%22enable%22%3A%20tmpEnable.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryVolumeSnapshot%20count%3Dtrue%20volumeType%3DData%20volume.status!%3DDeleted%20primaryStorage.zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22volumeSnapshot%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryVolumeSnapshot%20volumeType%3DRoot%20volume.status!%3DDeleted%20count%3Dtrue%20primaryStorage.zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22vmSnapshot%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryL3Network%20l2Network.cluster.type!%3Dvmware%20system%3Dtrue%20count%3Dtrue%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22l3SystemNetwork%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryL3Network%20l2Network.cluster.type!%3Dvmware%20system%3Dfalse%20category%3DPublic%20replyWithCount%3Dtrue%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22l3PublicNetwork%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20def%20publicUuidList%20%3D%20tmp.result.collect%20%7B%20it.uuid%20%7D%0A%20%20%20%20%20%20%20%20%20%20if%20(publicUuidList.size()%20%3E%200)%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20call(%22org.zstack.header.network.l3.APIGetIpAddressCapacityMsg%22%2C%20&apos;%7B%22l3NetworkUuids%22%3A%20%5B%22&apos;%20%2B%20publicUuidList.join(&apos;%22%2C%22&apos;)%20%2B%20&apos;%22%5D%7D&apos;)%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22publicIpCapacity%22%2C%20tmp)%0A%20%20%20%20%20%20%20%20%20%20%7D%20else%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22publicIpCapacity%22%2C%20%5B%22result%22%3A%20%5B%22totalCapacity%22%3A%200%2C%20%22availableCapacity%22%3A%200%5D%5D)%0A%20%20%20%20%20%20%20%20%20%20%7D%0A%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryL3Network%20l2Network.cluster.type!%3Dvmware%20system%3Dfalse%20category%3DPrivate%20type!%3DL3VpcNetwork%20replyWithCount%3Dtrue%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20fields%3Duuid%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22l3PrivateNetwork%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20def%20privateUuidList%20%3D%20tmp.result.collect%20%7B%20it.uuid%20%7D%0A%20%20%20%20%20%20%20%20%20%20if%20(privateUuidList.size()%20%3E%200)%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20call(%22org.zstack.header.network.l3.APIGetIpAddressCapacityMsg%22%2C%20&apos;%7B%22l3NetworkUuids%22%3A%20%5B%22&apos;%20%2B%20privateUuidList.join(&apos;%22%2C%22&apos;)%20%2B%20&apos;%22%5D%7D&apos;)%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22privateIpCapacity%22%2C%20tmp)%0A%20%20%20%20%20%20%20%20%20%20%7D%20else%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22privateIpCapacity%22%2C%20%5B%22result%22%3A%20%5B%22totalCapacity%22%3A%200%2C%20%22availableCapacity%22%3A%200%5D%5D)%0A%20%20%20%20%20%20%20%20%20%20%7D%0A%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryVirtualRouterVm%20applianceVmType%3F%3Dvrouter%2CVirtualRouter%20count%3Dtrue%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20status%3DConnected%22)%0A%20%20%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QueryVirtualRouterVm%20applianceVmType%3F%3Dvrouter%2CVirtualRouter%20count%3Dtrue%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20status%3DConnected%20state%3DRunning%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22virtualRouterVm%22%2C%20%5B%22total%22%3A%20tmp.total%2C%20%22enable%22%3A%20tmpEnable.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QuerySecurityGroup%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20def%20tmpOther%20%3D%20query(%22QuerySecurityGroup%20count%3Dtrue%20l3Network.zoneUuid!%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22securityGroup%22%2C%20%5B%22total%22%3A%20tmp.total%20-%20tmpOther.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryVip%20count%3Dtrue%20useFor!%3DSNAT%20l3Network.zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20def%20tmp1%20%3D%20query(%22QueryVip%20count%3Dtrue%20useFor%3Dnull%20l3Network.zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22vip%22%2C%20%5B%22total%22%3A%20tmp.total%20%2B%20tmp1.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryEip%20count%3Dtrue%20vip.l3Network.zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22eip%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryPortForwardingRule%20count%3Dtrue%20vip.l3Network.zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22portFrowarding%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryLoadBalancer%20count%3Dtrue%20vip.l3Network.zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22loadBalancer%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%0A%0A%20%20%20%20%20%20%20%20%20%20if%20(clusterUuidList.size()%20%3E%200)%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20call(%22org.zstack.header.allocator.APIGetCpuMemoryCapacityMsg%22%2C%20&apos;%7B%22zoneUuids%22%3A%20%5B9b2c06c4cc5d4fecb55b8ca3045fc833%5D%2C%20%22clusterUuids%22%3A%20%5B%22&apos;%20%2B%20clusterUuidList.join(&apos;%22%2C%22&apos;)%20%2B%20&apos;%22%5D%7D&apos;)%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22cpuMemoryCapacity%22%2C%20tmp)%0A%20%20%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20call(%22org.zstack.header.storage.primary.APIGetPrimaryStorageCapacityMsg%22%2C%20&apos;%7B%22zoneUuids%22%3A%20%5B9b2c06c4cc5d4fecb55b8ca3045fc833%5D%2C%20%22clusterUuids%22%3A%20%5B%22&apos;%20%2B%20clusterUuidList.join(&apos;%22%2C%22&apos;)%20%2B%20&apos;%22%5D%7D&apos;)%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22primaryStorageCapacity%22%2C%20tmp)%0A%20%20%20%20%20%20%20%20%20%20%7D%20else%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22cpuMemoryCapacity%22%2C%20%5B%22result%22%3A%20%5B%22availableCpu%22%3A%200%2C%20%22availableMemory%22%3A%200%2C%20%22totalCpu%22%3A%200%2C%20%22totalMemory%22%3A%200%5D%5D)%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22primaryStorageCapacity%22%2C%20%5B%22result%22%3A%20%5B%22availableCapacity%22%3A%200%2C%20%22availablePhysicalCapacity%22%3A%200%2C%20%22totalCapacity%22%3A%200%2C%20%22totalPhysicalCapacity%22%3A%200%5D%5D)%0A%20%20%20%20%20%20%20%20%20%20%7D%0A%0A%20%20%20%20%20%20%20%20%20%20if%20(backupStorageUuidList.size()%20%3E%200)%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20call(%22org.zstack.header.storage.backup.APIGetBackupStorageCapacityMsg%22%2C%20&apos;%7B%22zoneUuids%22%3A%20%5B9b2c06c4cc5d4fecb55b8ca3045fc833%5D%2C%20%22backupStorageUuids%22%3A%20%5B%22&apos;%20%2B%20backupStorageUuidList.join(&apos;%22%2C%22&apos;)%20%2B%20&apos;%22%5D%7D&apos;)%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22backupStorageCapacity%22%2C%20tmp)%0A%20%20%20%20%20%20%20%20%20%20%7D%20else%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22backupStorageCapacity%22%2C%20%5B%22result%22%3A%20%5B%22availableCapacity%22%3A%200%2C%20%22totalCapacity%22%3A%200%5D%5D)%0A%20%20%20%20%20%20%20%20%20%20%7D%0A%0A%0A%0A%20%20%20%20%20%20%20%20%20%20def%20vm%20%3D%20%5B%3A%5D%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryVmInstance%20type%3DUserVm%20hypervisorType%3DKVM%20count%3Dtrue%20state!%3DDestroyed%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20vm.total%20%3D%20tmp.total%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryVmInstance%20type%3DUserVm%20hypervisorType%3DKVM%20count%3Dtrue%20state%3DRunning%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20vm.running%20%3D%20tmp.total%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryVmInstance%20type%3DUserVm%20hypervisorType%3DKVM%20count%3Dtrue%20state%3DStopped%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20vm.stopped%20%3D%20tmp.total%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryVmInstance%20type%3DUserVm%20hypervisorType%3DKVM%20count%3Dtrue%20state!%3DStopped%20state!%3DRunning%20%20state!%3DDestroyed%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20vm.unknown%20%3D%20tmp.total%0A%20%20%20%20%20%20%20%20%20%20put(%22vm%22%2C%20vm)%0A%0A%20%20%20%20%20%20%20%20%20%20def%20host%20%3D%20%5B%3A%5D%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryHost%20hypervisorType%3DKVM%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20replyWithCount%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20host.total%20%3D%20tmp.total%0A%20%20%20%20%20%20%20%20%20%20def%20hostUuid%20%3D%20tmp.result.collect%20%7B%20it.uuid%20%7D%0A%20%20%20%20%20%20%20%20%20%20def%20hostUuidStr%20%3D%20hostUuid.join(&apos;%7C&apos;)%0A%20%20%20%20%20%20%20%20%20%20put(%22hostUuidStr%22%2C%20hostUuidStr)%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryHost%20status%3DConnected%20hypervisorType%3DKVM%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20host.connected%20%3D%20tmp.total%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryHost%20status%3DDisconnected%20hypervisorType%3DKVM%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20host.disconnected%20%3D%20tmp.total%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryHost%20status!%3DConnected%20status!%3DDisconnected%20hypervisorType%3DKVM%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20host.unknown%20%3D%20tmp.total%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryHost%20status%3DConnected%20state%3DEnabled%20hypervisorType%3DKVM%20count%3Dtrue%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20host.enablednum%20%3D%20tmp.total%0A%20%20%20%20%20%20%20%20%20%20put(%22host%22%2C%20host)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryGlobalConfig%20category%3Dhost%20name%3Dcpu.overProvisioning.ratio%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22cpuOverProvision%22%2C%20tmp)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryGlobalConfig%20name%3DreservedMemory%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22reservedMemory%22%2C%20tmp)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryGlobalConfig%20category%3Dmevoco%20name%3DoverProvisioning.memory%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22memoryOverProvision%22%2C%20tmp)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryGlobalConfig%20category%3Dmevoco%20name%3DoverProvisioning.primaryStorage%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22primaryStorageOverProvision%22%2C%20tmp)%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryInstanceOffering%20type%3DUserVm%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QueryInstanceOffering%20type%3DUserVm%20count%3Dtrue%20state%3DEnabled%22)%0A%20%20%20%20%20%20%20%20put(%22instanceOffering%22%2C%20%5B%22total%22%3A%20tmp.total%2C%20%22enable%22%3A%20tmpEnable.total%5D)%0A%0A%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryDiskOffering%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QueryDiskOffering%20count%3Dtrue%20state%3DEnabled%22)%0A%20%20%20%20%20%20%20%20put(%22diskOffering%22%2C%20%5B%22total%22%3A%20tmp.total%2C%20%22enable%22%3A%20tmpEnable.total%5D)%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryVirtualRouterVm%20applianceVmType%3Dvpcvrouter%20count%3Dtrue%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QueryVirtualRouterVm%20applianceVmType%3Dvpcvrouter%20count%3Dtrue%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20state%3DRunning%20status%3DConnected%22)%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22vpcVRouter%22%2C%20%5B%22total%22%3A%20tmp.total%2C%20%22enable%22%3A%20tmpEnable.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryL3Network%20l2Network.cluster.type!%3Dvmware%20type%3DL3VpcNetwork%20count%3Dtrue%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22vpcNetwork%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryIPSecConnection%20count%3Dtrue%20vip.l3Network.zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22ipsec%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%20%20%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QuerySNSEmailEndpoint%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20def%20total%20%3D%20tmp.total%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QuerySNSHttpEndpoint%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20total%20%3D%20tmp.total%20%2B%20total%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QuerySNSDingTalkEndpoint%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20total%20%3D%20tmp.total%20%2B%20total%0A%0A%20%20%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QuerySNSEmailEndpoint%20count%3Dtrue%20state%3DEnabled%22)%0A%20%20%20%20%20%20%20%20%20%20def%20totalEnable%20%3D%20tmpEnable.total%0A%20%20%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QuerySNSHttpEndpoint%20count%3Dtrue%20state%3DEnabled%22)%0A%20%20%20%20%20%20%20%20%20%20totalEnable%20%3D%20tmpEnable.total%20%2B%20totalEnable%0A%20%20%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QuerySNSDingTalkEndpoint%20count%3Dtrue%20state%3DEnabled%22)%0A%20%20%20%20%20%20%20%20%20%20totalEnable%20%3D%20tmpEnable.total%20%2B%20totalEnable%0A%0A%20%20%20%20%20%20%20%20%20%20put(%22endPoint%22%2C%20%5B%22total%22%3A%20total%2C%20%22enable%22%3A%20totalEnable%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryAlarm%20count%3Dtrue%20namespace!%3DZStack%2FSystem%22)%0A%20%20%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QueryAlarm%20count%3Dtrue%20state%3DEnabled%20namespace!%3DZStack%2FSystem%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22alarm%22%2C%20%5B%22total%22%3A%20tmp.total%2C%20%22enable%22%3A%20tmpEnable.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryAccount%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22account%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryUser%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22user%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QuerySchedulerJob%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QuerySchedulerJob%20count%3Dtrue%20state%3DEnabled%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22schedulerJob%22%2C%20%5B%22total%22%3A%20tmp.total%2C%20%22enable%22%3A%20tmpEnable.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QuerySchedulerTrigger%20replyWithCount%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22schedulerTrigger%22%2C%20tmp)%0A%20%20%20%20%20%20%20%20</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">script</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/batch-queries</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="licenses" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/licenses</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="meta-data/opensource" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/sns/application-endpoints/http</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="batch-queries4044" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="script" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">%0A%20%20%20%20%20%20%20%20def%20host%20%3D%20%5B%3A%5D%0A%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryHost%20hypervisorType%3DKVM%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20replyWithCount%3Dtrue%22)%0A%20%20%20%20%20%20%20%20host.total%20%3D%20tmp.total%0A%20%20%20%20%20%20%20%20def%20hostUuid%20%3D%20tmp.result.collect%20%7B%20it.uuid%20%7D%0A%20%20%20%20%20%20%20%20def%20hostUuidStr%20%3D%20hostUuid.join(&apos;%7C&apos;)%0A%20%20%20%20%20%20%20%20if%20(hostUuid.size()%20%3E%200)%20%7B%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20call(%22org.zstack.zwatch.api.APIGetMetricDataMsg%22%2C%20&apos;%7B%22namespace%22%3A%20%22ZStack%2FHost%22%2C%20%22metricName%22%3A%20%22CPUAllUsedUtilization%22%2C%20%22period%22%3A%2010%2C%20%22offsetAheadOfCurrentTime%22%3A%20310%2C%20labels%22%3A%20%5B%22HostUuid%3D~&apos;%20%2B%20hostUuidStr%20%2B%20&apos;%22%5D%7D&apos;)%0A%20%20%20%20%20%20%20%20%20%20put(%22cpuAllUsed%22%2C%20tmp)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20call(%22org.zstack.zwatch.api.APIGetMetricDataMsg%22%2C%20&apos;%7B%22namespace%22%3A%20%22ZStack%2FHost%22%2C%20%22metricName%22%3A%20%22MemoryUsedInPercent%22%2C%20%22period%22%3A%2010%2C%20%22offsetAheadOfCurrentTime%22%3A%20310%2C%20%22labels%22%3A%20%5B%22HostUuid%3D~&apos;%20%2B%20hostUuidStr%20%2B%20&apos;%22%5D%7D&apos;)%0A%20%20%20%20%20%20%20%20%20%20put(%22memoryUsedBytes%22%2C%20tmp)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20call(%22org.zstack.zwatch.api.APIGetMetricDataMsg%22%2C%20&apos;%7B%22namespace%22%3A%20%22ZStack%2FHost%22%2C%20%22metricName%22%3A%20%22NetworkAllOutBytes%22%2C%20%22period%22%3A%2010%2C%20%22offsetAheadOfCurrentTime%22%3A%20310%2C%20%22labels%22%3A%20%5B%22HostUuid%3D~&apos;%20%2B%20hostUuidStr%20%2B%20&apos;%22%5D%7D&apos;)%0A%20%20%20%20%20%20%20%20%20%20put(%22networkAllOutBytes%22%2C%20tmp)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20call(%22org.zstack.zwatch.api.APIGetMetricDataMsg%22%2C%20&apos;%7B%22namespace%22%3A%20%22ZStack%2FHost%22%2C%20%22metricName%22%3A%20%22NetworkAllInBytes%22%2C%20%22period%22%3A%2010%2C%20%22offsetAheadOfCurrentTime%22%3A%20310%2C%20%22labels%22%3A%20%5B%22HostUuid%3D~&apos;%20%2B%20hostUuidStr%20%2B%20&apos;%22%5D%7D&apos;)%0A%20%20%20%20%20%20%20%20%20%20put(%22networkAllInBytes%22%2C%20tmp)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20call(%22org.zstack.zwatch.api.APIGetMetricDataMsg%22%2C%20&apos;%7B%22namespace%22%3A%20%22ZStack%2FHost%22%2C%20%22metricName%22%3A%20%22DiskAllWriteBytes%22%2C%20%22period%22%3A%2010%2C%20%22offsetAheadOfCurrentTime%22%3A%20310%2C%20%22labels%22%3A%20%5B%22HostUuid%3D~&apos;%20%2B%20hostUuidStr%20%2B%20&apos;%22%5D%7D&apos;)%0A%20%20%20%20%20%20%20%20%20%20put(%22diskAllWriteOps%22%2C%20tmp)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20call(%22org.zstack.zwatch.api.APIGetMetricDataMsg%22%2C%20&apos;%7B%22namespace%22%3A%20%22ZStack%2FHost%22%2C%20%22metricName%22%3A%20%22DiskAllReadBytes%22%2C%20%22period%22%3A%2010%2C%20%22offsetAheadOfCurrentTime%22%3A%20310%2C%20%22labels%22%3A%20%5B%22HostUuid%3D~&apos;%20%2B%20hostUuidStr%20%2B%20&apos;%22%5D%7D&apos;)%0A%20%20%20%20%20%20%20%20%20%20put(%22diskAllReadOps%22%2C%20tmp)%0A%20%20%20%20%20%20%20%20%7D%20else%20%7B%0A%20%20%20%20%20%20%20%20%20%20def%20data%20%3D%20%5B%5D%20as%20int%5B%5D%0A%0A%20%20%20%20%20%20%20%20%20%20put(%22cpuAllUsed%22%2C%20%5B%22result%22%3A%20%5B%22data%22%3A%20data%5D%5D)%0A%20%20%20%20%20%20%20%20%20%20put(%22memoryUsedBytes%22%2C%20%5B%22result%22%3A%20%5B%22data%22%3A%20data%5D%5D)%0A%20%20%20%20%20%20%20%20%20%20put(%22networkAllOutBytes%22%2C%20%5B%22result%22%3A%20%5B%22data%22%3A%20data%5D%5D)%0A%20%20%20%20%20%20%20%20%20%20put(%22networkAllInBytes%22%2C%20%5B%22result%22%3A%20%5B%22data%22%3A%20data%5D%5D)%0A%20%20%20%20%20%20%20%20%20%20put(%22diskAllWriteOps%22%2C%20%5B%22result%22%3A%20%5B%22data%22%3A%20data%5D%5D)%0A%20%20%20%20%20%20%20%20%20%20put(%22diskAllReadOps%22%2C%20%5B%22result%22%3A%20%5B%22data%22%3A%20data%5D%5D)%0A%20%20%20%20%20%20%20%20%7D%0A%0A%20%20%20%20%20%20%20%20</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">script</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/batch-queries</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="batch-queries17773" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="script" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">%0A%20%20%20%20%20%20%20%20def%20tmp%20%3D%20query(%22QueryZone%20count%3Dtrue%20replyWithCount%3Dtrue%20fields%3Duuid%22)%0A%20%20%20%20%20%20%20%20def%20tmpEnable%20%3D%20query(%22QueryZone%20replyWithCount%3Dtrue%20state%3DEnabled%22)%0A%20%20%20%20%20%20%20%20put(%22zone%22%2C%20%5B%22total%22%3A%20tmp.total%2C%20%22enable%22%3A%20tmpEnable.total%5D)%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryCluster%20hypervisorType!%3DESX%20replyWithCount%3Dtrue%20fields%3Duuid%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QueryCluster%20hypervisorType!%3DESX%20count%3Dtrue%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20state%3DEnabled%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22cluster%22%2C%20%5B%22total%22%3A%20tmp.total%2C%20%22enable%22%3A%20tmpEnable.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20def%20clusterUuidList%20%3D%20tmp.result.collect%20%7B%20it.uuid%20%7D%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryBackupStorage%20type!%3DVCenter%20fields%3Duuid%20zone.uuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%0A%20%20%20%20%20%20%20%20%20%20def%20backupStorageUuidList%20%3D%20tmp.result.collect%20%7B%20it.uuid%20%7D%0A%20%20%20%20%20%20%20%20%20%20put(%22backupStorageUuidList%22%2C%20backupStorageUuidList)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryVolume%20format!%3Dvmtx%20count%3Dtrue%20status!%3DDeleted%20primaryStorage.zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20type%3DData%20status!%3DNotInstantiated%22)%0A%20%20%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QueryVolume%20format!%3Dvmtx%20count%3Dtrue%20primaryStorage.zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20state%3DEnabled%20status!%3DDeleted%20type%3DData%20status!%3DNotInstantiated%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22volume%22%2C%20%5B%22total%22%3A%20tmp.total%2C%20%22enable%22%3A%20tmpEnable.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryImage%20format!%3Dvmtx%20status!%3DDeleted%20count%3Dtrue%20backupStorage.zone.uuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20system!%3Dtrue%20__systemTag__!%3Dremote%22)%0A%20%20%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QueryImage%20format!%3Dvmtx%20count%3Dtrue%20backupStorage.zone.uuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20state%3DEnabled%20status!%3DDeleted%20system!%3Dtrue%20__systemTag__!%3Dremote%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22image%22%2C%20%5B%22total%22%3A%20tmp.total%2C%20%22enable%22%3A%20tmpEnable.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryVolumeSnapshot%20count%3Dtrue%20volumeType%3DData%20volume.status!%3DDeleted%20primaryStorage.zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22volumeSnapshot%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryVolumeSnapshot%20volumeType%3DRoot%20volume.status!%3DDeleted%20count%3Dtrue%20primaryStorage.zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22vmSnapshot%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryL3Network%20l2Network.cluster.type!%3Dvmware%20system%3Dtrue%20count%3Dtrue%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22l3SystemNetwork%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryL3Network%20l2Network.cluster.type!%3Dvmware%20system%3Dfalse%20category%3DPublic%20replyWithCount%3Dtrue%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22l3PublicNetwork%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20def%20publicUuidList%20%3D%20tmp.result.collect%20%7B%20it.uuid%20%7D%0A%20%20%20%20%20%20%20%20%20%20if%20(publicUuidList.size()%20%3E%200)%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20call(%22org.zstack.header.network.l3.APIGetIpAddressCapacityMsg%22%2C%20&apos;%7B%22l3NetworkUuids%22%3A%20%5B%22&apos;%20%2B%20publicUuidList.join(&apos;%22%2C%22&apos;)%20%2B%20&apos;%22%5D%7D&apos;)%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22publicIpCapacity%22%2C%20tmp)%0A%20%20%20%20%20%20%20%20%20%20%7D%20else%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22publicIpCapacity%22%2C%20%5B%22result%22%3A%20%5B%22totalCapacity%22%3A%200%2C%20%22availableCapacity%22%3A%200%5D%5D)%0A%20%20%20%20%20%20%20%20%20%20%7D%0A%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryL3Network%20l2Network.cluster.type!%3Dvmware%20system%3Dfalse%20category%3DPrivate%20type!%3DL3VpcNetwork%20replyWithCount%3Dtrue%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20fields%3Duuid%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22l3PrivateNetwork%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20def%20privateUuidList%20%3D%20tmp.result.collect%20%7B%20it.uuid%20%7D%0A%20%20%20%20%20%20%20%20%20%20if%20(privateUuidList.size()%20%3E%200)%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20call(%22org.zstack.header.network.l3.APIGetIpAddressCapacityMsg%22%2C%20&apos;%7B%22l3NetworkUuids%22%3A%20%5B%22&apos;%20%2B%20privateUuidList.join(&apos;%22%2C%22&apos;)%20%2B%20&apos;%22%5D%7D&apos;)%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22privateIpCapacity%22%2C%20tmp)%0A%20%20%20%20%20%20%20%20%20%20%7D%20else%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22privateIpCapacity%22%2C%20%5B%22result%22%3A%20%5B%22totalCapacity%22%3A%200%2C%20%22availableCapacity%22%3A%200%5D%5D)%0A%20%20%20%20%20%20%20%20%20%20%7D%0A%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryVirtualRouterVm%20applianceVmType%3F%3Dvrouter%2CVirtualRouter%20count%3Dtrue%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20status%3DConnected%22)%0A%20%20%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QueryVirtualRouterVm%20applianceVmType%3F%3Dvrouter%2CVirtualRouter%20count%3Dtrue%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20status%3DConnected%20state%3DRunning%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22virtualRouterVm%22%2C%20%5B%22total%22%3A%20tmp.total%2C%20%22enable%22%3A%20tmpEnable.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QuerySecurityGroup%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20def%20tmpOther%20%3D%20query(%22QuerySecurityGroup%20count%3Dtrue%20l3Network.zoneUuid!%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22securityGroup%22%2C%20%5B%22total%22%3A%20tmp.total%20-%20tmpOther.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryVip%20count%3Dtrue%20useFor!%3DSNAT%20l3Network.zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20def%20tmp1%20%3D%20query(%22QueryVip%20count%3Dtrue%20useFor%3Dnull%20l3Network.zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22vip%22%2C%20%5B%22total%22%3A%20tmp.total%20%2B%20tmp1.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryEip%20count%3Dtrue%20vip.l3Network.zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22eip%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryPortForwardingRule%20count%3Dtrue%20vip.l3Network.zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22portFrowarding%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryLoadBalancer%20count%3Dtrue%20vip.l3Network.zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22loadBalancer%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%0A%0A%20%20%20%20%20%20%20%20%20%20if%20(clusterUuidList.size()%20%3E%200)%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20call(%22org.zstack.header.allocator.APIGetCpuMemoryCapacityMsg%22%2C%20&apos;%7B%22zoneUuids%22%3A%20%5B9b2c06c4cc5d4fecb55b8ca3045fc833%5D%2C%20%22clusterUuids%22%3A%20%5B%22&apos;%20%2B%20clusterUuidList.join(&apos;%22%2C%22&apos;)%20%2B%20&apos;%22%5D%7D&apos;)%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22cpuMemoryCapacity%22%2C%20tmp)%0A%20%20%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20call(%22org.zstack.header.storage.primary.APIGetPrimaryStorageCapacityMsg%22%2C%20&apos;%7B%22zoneUuids%22%3A%20%5B9b2c06c4cc5d4fecb55b8ca3045fc833%5D%2C%20%22clusterUuids%22%3A%20%5B%22&apos;%20%2B%20clusterUuidList.join(&apos;%22%2C%22&apos;)%20%2B%20&apos;%22%5D%7D&apos;)%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22primaryStorageCapacity%22%2C%20tmp)%0A%20%20%20%20%20%20%20%20%20%20%7D%20else%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22cpuMemoryCapacity%22%2C%20%5B%22result%22%3A%20%5B%22availableCpu%22%3A%200%2C%20%22availableMemory%22%3A%200%2C%20%22totalCpu%22%3A%200%2C%20%22totalMemory%22%3A%200%5D%5D)%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22primaryStorageCapacity%22%2C%20%5B%22result%22%3A%20%5B%22availableCapacity%22%3A%200%2C%20%22availablePhysicalCapacity%22%3A%200%2C%20%22totalCapacity%22%3A%200%2C%20%22totalPhysicalCapacity%22%3A%200%5D%5D)%0A%20%20%20%20%20%20%20%20%20%20%7D%0A%0A%20%20%20%20%20%20%20%20%20%20if%20(backupStorageUuidList.size()%20%3E%200)%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20call(%22org.zstack.header.storage.backup.APIGetBackupStorageCapacityMsg%22%2C%20&apos;%7B%22zoneUuids%22%3A%20%5B9b2c06c4cc5d4fecb55b8ca3045fc833%5D%2C%20%22backupStorageUuids%22%3A%20%5B%22&apos;%20%2B%20backupStorageUuidList.join(&apos;%22%2C%22&apos;)%20%2B%20&apos;%22%5D%7D&apos;)%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22backupStorageCapacity%22%2C%20tmp)%0A%20%20%20%20%20%20%20%20%20%20%7D%20else%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22backupStorageCapacity%22%2C%20%5B%22result%22%3A%20%5B%22availableCapacity%22%3A%200%2C%20%22totalCapacity%22%3A%200%5D%5D)%0A%20%20%20%20%20%20%20%20%20%20%7D%0A%0A%0A%0A%20%20%20%20%20%20%20%20%20%20def%20vm%20%3D%20%5B%3A%5D%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryVmInstance%20type%3DUserVm%20hypervisorType%3DKVM%20count%3Dtrue%20state!%3DDestroyed%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20vm.total%20%3D%20tmp.total%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryVmInstance%20type%3DUserVm%20hypervisorType%3DKVM%20count%3Dtrue%20state%3DRunning%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20vm.running%20%3D%20tmp.total%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryVmInstance%20type%3DUserVm%20hypervisorType%3DKVM%20count%3Dtrue%20state%3DStopped%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20vm.stopped%20%3D%20tmp.total%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryVmInstance%20type%3DUserVm%20hypervisorType%3DKVM%20count%3Dtrue%20state!%3DStopped%20state!%3DRunning%20%20state!%3DDestroyed%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20vm.unknown%20%3D%20tmp.total%0A%20%20%20%20%20%20%20%20%20%20put(%22vm%22%2C%20vm)%0A%0A%20%20%20%20%20%20%20%20%20%20def%20host%20%3D%20%5B%3A%5D%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryHost%20hypervisorType%3DKVM%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20replyWithCount%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20host.total%20%3D%20tmp.total%0A%20%20%20%20%20%20%20%20%20%20def%20hostUuid%20%3D%20tmp.result.collect%20%7B%20it.uuid%20%7D%0A%20%20%20%20%20%20%20%20%20%20def%20hostUuidStr%20%3D%20hostUuid.join(&apos;%7C&apos;)%0A%20%20%20%20%20%20%20%20%20%20put(%22hostUuidStr%22%2C%20hostUuidStr)%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryHost%20status%3DConnected%20hypervisorType%3DKVM%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20host.connected%20%3D%20tmp.total%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryHost%20status%3DDisconnected%20hypervisorType%3DKVM%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20host.disconnected%20%3D%20tmp.total%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryHost%20status!%3DConnected%20status!%3DDisconnected%20hypervisorType%3DKVM%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20host.unknown%20%3D%20tmp.total%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryHost%20status%3DConnected%20state%3DEnabled%20hypervisorType%3DKVM%20count%3Dtrue%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20host.enablednum%20%3D%20tmp.total%0A%20%20%20%20%20%20%20%20%20%20put(%22host%22%2C%20host)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryGlobalConfig%20category%3Dhost%20name%3Dcpu.overProvisioning.ratio%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22cpuOverProvision%22%2C%20tmp)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryGlobalConfig%20name%3DreservedMemory%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22reservedMemory%22%2C%20tmp)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryGlobalConfig%20category%3Dmevoco%20name%3DoverProvisioning.memory%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22memoryOverProvision%22%2C%20tmp)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryGlobalConfig%20category%3Dmevoco%20name%3DoverProvisioning.primaryStorage%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22primaryStorageOverProvision%22%2C%20tmp)%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryInstanceOffering%20type%3DUserVm%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QueryInstanceOffering%20type%3DUserVm%20count%3Dtrue%20state%3DEnabled%22)%0A%20%20%20%20%20%20%20%20put(%22instanceOffering%22%2C%20%5B%22total%22%3A%20tmp.total%2C%20%22enable%22%3A%20tmpEnable.total%5D)%0A%0A%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryDiskOffering%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QueryDiskOffering%20count%3Dtrue%20state%3DEnabled%22)%0A%20%20%20%20%20%20%20%20put(%22diskOffering%22%2C%20%5B%22total%22%3A%20tmp.total%2C%20%22enable%22%3A%20tmpEnable.total%5D)%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryVirtualRouterVm%20applianceVmType%3Dvpcvrouter%20count%3Dtrue%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QueryVirtualRouterVm%20applianceVmType%3Dvpcvrouter%20count%3Dtrue%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%20state%3DRunning%20status%3DConnected%22)%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22vpcVRouter%22%2C%20%5B%22total%22%3A%20tmp.total%2C%20%22enable%22%3A%20tmpEnable.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryL3Network%20l2Network.cluster.type!%3Dvmware%20type%3DL3VpcNetwork%20count%3Dtrue%20zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22vpcNetwork%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryIPSecConnection%20count%3Dtrue%20vip.l3Network.zoneUuid%3D9b2c06c4cc5d4fecb55b8ca3045fc833%22)%0A%20%20%20%20%20%20%20%20%20%20%20%20put(%22ipsec%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%20%20%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QuerySNSEmailEndpoint%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20def%20total%20%3D%20tmp.total%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QuerySNSHttpEndpoint%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20total%20%3D%20tmp.total%20%2B%20total%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QuerySNSDingTalkEndpoint%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20total%20%3D%20tmp.total%20%2B%20total%0A%0A%20%20%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QuerySNSEmailEndpoint%20count%3Dtrue%20state%3DEnabled%22)%0A%20%20%20%20%20%20%20%20%20%20def%20totalEnable%20%3D%20tmpEnable.total%0A%20%20%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QuerySNSHttpEndpoint%20count%3Dtrue%20state%3DEnabled%22)%0A%20%20%20%20%20%20%20%20%20%20totalEnable%20%3D%20tmpEnable.total%20%2B%20totalEnable%0A%20%20%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QuerySNSDingTalkEndpoint%20count%3Dtrue%20state%3DEnabled%22)%0A%20%20%20%20%20%20%20%20%20%20totalEnable%20%3D%20tmpEnable.total%20%2B%20totalEnable%0A%0A%20%20%20%20%20%20%20%20%20%20put(%22endPoint%22%2C%20%5B%22total%22%3A%20total%2C%20%22enable%22%3A%20totalEnable%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryAlarm%20count%3Dtrue%20namespace!%3DZStack%2FSystem%22)%0A%20%20%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QueryAlarm%20count%3Dtrue%20state%3DEnabled%20namespace!%3DZStack%2FSystem%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22alarm%22%2C%20%5B%22total%22%3A%20tmp.total%2C%20%22enable%22%3A%20tmpEnable.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryAccount%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22account%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QueryUser%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22user%22%2C%20%5B%22total%22%3A%20tmp.total%5D)%0A%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QuerySchedulerJob%20count%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20tmpEnable%20%3D%20query(%22QuerySchedulerJob%20count%3Dtrue%20state%3DEnabled%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22schedulerJob%22%2C%20%5B%22total%22%3A%20tmp.total%2C%20%22enable%22%3A%20tmpEnable.total%5D)%0A%0A%20%20%20%20%20%20%20%20%20%20tmp%20%3D%20query(%22QuerySchedulerTrigger%20replyWithCount%3Dtrue%22)%0A%20%20%20%20%20%20%20%20%20%20put(%22schedulerTrigger%22%2C%20tmp)%0A%20%20%20%20%20%20%20%20</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">script</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/zstack/v1/batch-queries</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="StatGraphVisualizer" testclass="ResultCollector" testname="Aggregate Graph" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
