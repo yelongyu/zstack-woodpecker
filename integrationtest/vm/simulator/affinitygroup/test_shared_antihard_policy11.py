@@ -40,7 +40,7 @@ def test():
     ag_ops.add_vm_to_affinity_group(ag1.uuid, vm3.get_vm().uuid)
     test_obj_dict.add_vm(vm3)
 
-    vm4 = test_stub.create_ag_vm()
+    vm4 = test_stub.create_ag_vm(host_uuid=h1[0].uuid)
     test_obj_dict.add_vm(vm4)
 
     try:
