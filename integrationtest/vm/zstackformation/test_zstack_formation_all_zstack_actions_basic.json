@@ -53,10 +53,24 @@
 		"AuthKey":{
 			"Type":"String",
 			"DefaultValue":"testAuthKey"
+		},
+		"StartIp":{
+			"Type":"String",
+			"DefaultValue":"192.168.200.2"
+		},
+		"EndIp":{
+			"Type":"String",
+			"DefaultValue":"192.168.200.200"
+		},
+		"Netmask":{
+			"Type":"String",
+			"DefaultValue":"255.255.255.0"
+		},
+		"Gateway":{
+			"Type":"String",
+			"DefaultValue":"192.268.200.1"
 		}
-	
     },
-
     "Mappings" : {
         "names" : {
               "instanceOffering" : { "name1" : "test-just-t", "name2" : "test2" }
@@ -280,6 +294,17 @@
 				"peerAddress":{"Ref":"PeerAdress"},
 				"authKey":{"Ref":"AuthKey"},
 				"vipUuid":{"Fn::GetAtt":["Vip","uuid"]}
+			}
+		},
+		"AddIpRange":{
+			"Type":"ZStack::Action::AddIpRange",
+			"Properties":{
+				"l3NetworkUuid":{"Fn::GetAtt":["L3Network","uuid"]},
+				"name":"TestIpRange",
+				"startIp":{"Ref":"StartIP"},
+				"endIp":{"Ref":"EndIP"},
+				"netmask":{"Ref":"Netmask"},
+				"gateway":{"Ref":"Gateway"}
 			}
 		}
     },
