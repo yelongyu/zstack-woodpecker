@@ -394,3 +394,12 @@ def update_image_platform(uuid, platform, session_uuid=None):
     test_util.action_logger('Update [image %s] platform' % (uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory   
+
+def change_image_state(uuid, state, session_uuid):
+    action = api_actions.ChangeImageStateAction()
+    action.uuid = uuid
+    action.stateEvent = state
+    test_util.action_logger('Change [image %s] state' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory   
+
