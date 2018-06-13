@@ -26,6 +26,7 @@ def test():
     setup.run()
 
     shell.call('yum --disablerepo=epel install -y libvirt-devel')
+    shell.call('pip install --upgrade pip')
     shell.call('pip install virtualbmc')
     shell.call('cp %s/integrationtest/vm/baremetal/vbmc.py \
                /var/lib/zstack/virtualenv/woodpecker/lib/python2.7/site-packages/virtualbmc/vbmc.py -fr' \
