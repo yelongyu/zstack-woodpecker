@@ -123,6 +123,13 @@
         hypervisorType='KVM' url="$virtualRouterImageUrl" system="True">
         <backupStorageRef>$imageStoreBackupStorageName2</backupStorageRef>
       </image>
+      <image name="$imageName_windows" 
+      description="Small Test Image Template for windows platform" 
+      mediaType="$rootMediaType" format="$rootImageFormat"
+      url="$imageUrl_windows" platform="Windows"
+      username="$winImageUsername" password="$winImagePassword">
+      <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
+     </image>
     </images>
 
     <diskOfferings>
