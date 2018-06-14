@@ -33,9 +33,13 @@ def test():
                % os.environ.get('woodpecker_root_path'))
     test_util.test_logger('Virtualbmc has been deployed on Host')
 
+    if test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
+        mn_ips = deploy_operations.get_nodes_from_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
+        if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
+            os.system("bash %s '%s'" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ips))
+    elif os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
+        os.system("bash %s" % (EXTRA_SUITE_SETUP_SCRIPT))
 
-    if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
-        os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
     deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
     delete_policy = test_lib.lib_set_delete_policy('vm', 'Direct')
     delete_policy = test_lib.lib_set_delete_policy('volume', 'Direct')
