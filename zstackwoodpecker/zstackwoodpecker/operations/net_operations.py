@@ -721,3 +721,21 @@ def destroy_vrouter(vrouter_uuid, session_uuid=None):
     test_util.test_logger('Destroy vRouter uuid: {}'.format(vrouter_uuid))
     result = acc_ops.execute_action_with_session(action, session_uuid)
     return result.success
+
+def create_certificate(name, certificate, session_uuid = None):
+    action = api_actions.CreateCertificateAction()
+    action.name = name
+    action.certificate = certificate
+    action.timeout = 120000
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.test_logger('Create [Certificate]: %s' % name)
+    return evt.inventory
+
+def delete_certificate(uuid, session_uuid = None):
+    action = api_actions.DeleteCertificateAction()
+    action.uuid = uuid
+    action.timeout = 120000
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.test_logger('Delete [Certificate]: %s' % uuid)
+    return evt.inventory
+
