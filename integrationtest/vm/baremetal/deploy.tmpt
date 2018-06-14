@@ -48,3 +48,8 @@ nicnetmask0 =255.255.255.0
 bondip0 = 10.0.118.2
 bondmask0 = 255.255.255.0
 bondname0 = bond0
+
+hostName2 = host2
+hostIp2 = 127.1.101.42
+hostName3 = host3
+hostIp3 = 127.1.101.43
