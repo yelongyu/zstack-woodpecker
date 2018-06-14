@@ -14,6 +14,25 @@ import zstacklib.utils.shell as shell
 
 USER_PATH = os.path.expanduser('~')
 EXTRA_SUITE_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_suite_setup_config.sh' % USER_PATH
+
+def deploy_vbmc(vm_ip=None):
+    if vm_ip != None:
+        ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null'
+        shell.call('%s %s yum --disablerepo=epel install -y libvirt-devel' %(ssh_cmd, vm_ip))
+        shell.call('%s %s pip install --upgrade pip' %(ssh_cmd, vm_ip))
+        shell.call('%s %s pip install virtualbmc' %(ssh_cmd, vm_ip))
+        shell.call('scp %s/integrationtest/vm/baremetal/vbmc.py \
+               %s:/var/lib/zstack/virtualenv/woodpecker/lib/python2.7/site-packages/virtualbmc/vbmc.py -fr' \
+               % (os.environ.get('woodpecker_root_path'),vm_ip))
+    else:
+        shell.call('yum --disablerepo=epel install -y libvirt-devel')
+        shell.call('pip install --upgrade pip')
+        shell.call('pip install virtualbmc')
+        shell.call('cp %s/integrationtest/vm/baremetal/vbmc.py \
+               /var/lib/zstack/virtualenv/woodpecker/lib/python2.7/site-packages/virtualbmc/vbmc.py -fr' \
+               % os.environ.get('woodpecker_root_path'))
+    test_util.test_logger('Virtualbmc has been deployed on Host')
+
 def test():
     if test_lib.scenario_config != None and test_lib.scenario_file != None and not os.path.exists(test_lib.scenario_file):
         scenario_operations.deploy_scenario(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
@@ -25,20 +44,14 @@ def test():
     setup.plan = test_lib.all_config
     setup.run()
 
-    shell.call('yum --disablerepo=epel install -y libvirt-devel')
-    shell.call('pip install --upgrade pip')
-    shell.call('pip install virtualbmc')
-    shell.call('cp %s/integrationtest/vm/baremetal/vbmc.py \
-               /var/lib/zstack/virtualenv/woodpecker/lib/python2.7/site-packages/virtualbmc/vbmc.py -fr' \
-               % os.environ.get('woodpecker_root_path'))
-    test_util.test_logger('Virtualbmc has been deployed on Host')
-
     if test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
         mn_ips = deploy_operations.get_nodes_from_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
         if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
             os.system("bash %s '%s'" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ips))
+            deploy_vbmc(mn_ips)
     elif os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % (EXTRA_SUITE_SETUP_SCRIPT))
+        deploy_vbmc()
 
     deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
     delete_policy = test_lib.lib_set_delete_policy('vm', 'Direct')
