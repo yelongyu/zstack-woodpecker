@@ -59,21 +59,6 @@
         </vm>
         </vms>
     </host>
-    <host uuid="$hostUuid4">
-      <vms>
-        <vm name="$vmName4" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
-          imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
-          <l3Networks>
-            <l3Network uuid="$vmManagementL3Uuid">
-              <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
-            </l3Network>
-          </l3Networks>
-          <hostRef>$hostName4</hostRef>
-          <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
-          <primaryStorageRef type="local" url="$localPrimaryStorageUrl">$localPrimaryStorageName</primaryStorageRef>
-        </vm>
-      </vms>
-    </host>
   </hosts>
 </deployerConfig>
 </config>
