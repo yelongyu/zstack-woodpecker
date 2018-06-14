@@ -89,6 +89,14 @@
       diskSize="$rootDiskOfferingSize" />
   </diskOfferings>
 
+  <l2VxlanNetworkPools>
+    <l2VxlanNetworkPool name="$l2VxlanNetworkPoolName">
+      <vniRanges>
+        <vniRange name="$vniRangeName" startVni="$startVni" endVni="$endVni"/>
+      </vniRanges>
+    </l2VxlanNetworkPool>
+  </l2VxlanNetworkPools>
+
   <zones>
     <zone name="$zoneName" description="Test">
       <clusters>
@@ -107,12 +115,13 @@
           </hosts>
           <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
           <l2NetworkRef>$l2BaremetalNetworkName</l2NetworkRef>
+          <l2VxlanNetworkPoolRef cidr="$l2VxlanNetworkCidr">$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
         </cluster>
       </clusters>
 
       <l2Networks>
-        <l2NoVlanNetwork name="$l2BaremetalNetworkName" description="Test"
-          physicalInterface="$l2NetworkPhysicalInterface">
+        <l2VxlanNetwork name="$l2BaremetalNetworkName" description="guest L2 Vxlan network 4, it is for test small ip range.">
+          <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
           <l3Networks>
             <l3BasicNetwork name="$l3PublicNetworkName" category="Public"
               description="Test">
@@ -125,7 +134,7 @@
               </networkService>
             </l3BasicNetwork>
           </l3Networks>
-        </l2NoVlanNetwork>
+        </l2VxlanNetwork>
       </l2Networks>
       
       <primaryStorages>

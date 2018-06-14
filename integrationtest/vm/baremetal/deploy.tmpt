@@ -55,3 +55,10 @@ hostName3 = host3
 hostIp3 = 127.1.101.43
 
 l2BaremetalNetworkName = l2-baremetal
+l2VxlanNetworkPoolName = l2_vxlan_network_pool
+vniRangeName = vni_range
+startVni = 10
+endVni = 10000
+l2VxlanNetworkName = l2_vxlan_network
+l2VxlanNetworkCidr = 192.168.0.1/24
+
