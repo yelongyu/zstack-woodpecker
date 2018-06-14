@@ -259,7 +259,35 @@ def delete_eip(eip_uuid, session_uuid=None):
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger("[EIP:] %s is deleted" % eip_uuid)
     return evt
-    
+
+def create_l2_novlan(name, nic, zone_uuid, session_uuid = None):
+    '''
+    Delete L2 will stop all VMs which is using this L2. When VM started again, 
+    the related L2 NIC will be removed. 
+    '''
+    action = api_actions.CreateL2NoVlanNetworkAction()
+    action.name = name
+    action.physicalInterface = nic
+    action.zoneUuid = zone_uuid
+    action.timeout = 300000
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("[Novlan L2:] %s is created" % evt.uuid)
+    return evt   
+
+def create_l2_vlan(name, nic, zone_uuid, vlan, session_uuid = None):
+    '''
+    Delete L2 will stop all VMs which is using this L2. When VM started again, 
+    the related L2 NIC will be removed. 
+    '''
+    action = api_actions.CreateL2VlanNetworkAction()
+    action.name = name
+    action.physicalInterface = nic
+    action.vlan = vlan
+    action.zoneUuid = zone_uuid
+    action.timeout = 300000
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("[Vlan L2:] %s is created" % evt.uuid)
+    return evt   
 
 def delete_l2(l2_uuid, session_uuid = None):
     '''
