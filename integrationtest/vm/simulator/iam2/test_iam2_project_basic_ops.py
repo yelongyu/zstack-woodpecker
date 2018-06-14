@@ -13,7 +13,7 @@ test iam2 login by platform admin
 # 10 remove virtual ids from group and project
 # 11 delete
 
-@author: rhZhou
+@author: quarkonics
 '''
 import os
 import zstackwoodpecker.test_util as test_util
@@ -25,6 +25,7 @@ import zstackwoodpecker.operations.image_operations as img_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
 from zstackwoodpecker.operations import vm_operations as vm_ops
+import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.test_lib as test_lib
 
 project_uuid = None
@@ -123,7 +124,21 @@ def test():
     vm_ops.destroy_vm(vm_uuid, session_uuid=project_login_uuid)
     vm_ops.expunge_vm(vm_uuid, session_uuid=project_login_uuid)
 
-    # L2 related ops:
+    # L2 related ops: create, delete
+    zone_uuid = res_ops.get_resource(res_ops.ZONE)[0].uuid
+    try:
+        l2 = net_ops.create_l2_novlan('l2_for_pm', 'eth0', zone_uuid, session_uuid=project_login_uuid)
+        test_util.test_fail("Expect exception: project admin not allowed to create Novlan L2 except vxlan")
+    except:
+        pass
+
+    try:
+        l2 = net_ops.create_l2_vlan('l2_for_pm', 'eth0', zone_uuid, 1234, session_uuid=project_login_uuid)
+        test_util.test_fail("Expect exception: project admin not allowed to create vlan L2 except vxlan")
+    except:
+        pass
+
+    #net_ops.delete_l2(l2.uuid, session_uuid=project_login_uuid)
 
     # L3 related ops:
 
