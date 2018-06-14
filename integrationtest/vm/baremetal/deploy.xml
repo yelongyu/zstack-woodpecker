@@ -98,6 +98,15 @@
             <host name="$hostName" description="Test"
               managementIp="$hostIp" username="$hostUsername" 
               password="$hostPassword" />
+            <host name="$hostName2" description="Test"
+              managementIp="$hostIp2" username="$hostUsername"
+              password="$hostPassword" />
+            <host name="$hostName3" description="Test"
+              managementIp="$hostIp3" username="$hostUsername"
+              password="$hostPassword" />
+            <host name="$hostName4" description="Test"
+              managementIp="$hostIp4" username="$hostUsername"
+              password="$hostPassword" />
           </hosts>
           <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
           <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
