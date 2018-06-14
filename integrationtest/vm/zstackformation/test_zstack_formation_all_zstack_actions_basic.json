@@ -69,6 +69,48 @@
 		"Gateway":{
 			"Type":"String",
 			"DefaultValue":"192.268.200.1"
+		},
+		"Dns":{
+			"Type":"String",
+			"DefaultValue":"114.114.114.114"
+		},
+		"NetworkCidr":{
+			"Type":"String",
+			"DefaultValue":"192.168.10.0/24"
+		},
+		"Rules":{
+			"Type":"List",
+			"DefaultValue":"{
+				"type": "Ingress",
+				"startPort": 22.0,
+				"endPort": 22.0,
+				"protocol": "TCP",
+				"allowedCidr": "0.0.0.0/0"      
+				}"
+		},
+		"Destination":{
+			"Type":"String",
+			"DefaultValue":"192.168.2.0/24"
+		},
+		"PeerCidrs":{
+			"Type":"List",
+			"DefaultValue":"192.168.100.0/2"
+		},
+		"Prefix":{
+			"Type":"String",
+			"DefaultValue":"169.254.169.254/32"
+		},
+		"Nexthop":{
+			"Type":"String",
+			"DefaultValue":"192.168.1.254"
+		},
+		"UsbDeviceUuid":{
+			"Type":"String",
+			"DefaultValue":"usbDeviceUuid"
+		},
+		"PciDeviceUuid":{
+			"Type":"String",
+			"DefaultValue":"pciDeviceUuid"
 		}
     },
     "Mappings" : {
@@ -306,8 +348,173 @@
 				"netmask":{"Ref":"Netmask"},
 				"gateway":{"Ref":"Gateway"}
 			}
+		},
+		"AddDnsToL3Network":{
+			"Type":"ZStack::Action::AddDnsToL3Network",
+			"Properties":{
+				 "l3NetworkUuid":{"Fn::GetAtt":["L3Network","uuid"]},
+				 "dns":{"Ref":"Dns"}
+			}
+		},
+		"AddNetworkServiceProvider":{
+			"Type":"ZStack::Action::AddNetworkServiceProvider",
+			"Properties":{
+			}
+		},
+		"AddSecurityGroupRule":{
+			"Type":"ZStack::Action::AddSecurityGroupRule",
+			"Properties":{
+				"securityGroupUuid":{"Fn::GetAtt":["SecurityGroup","uuid"]},
+				"rules":{"Ref":"Rules"}
+			}
+		},
+		"AddVmToAffinityGroup":{
+			"Type":"ZStack::Action::AddVmToAffinityGroup",
+			"Properties":{
+				"affinityGroupUuid":{"Fn::GetAtt":["AffinityGroup","uuid"]},
+				"uuid":{"Fn::GetAtt":["VM","uuid"]}
+			}
+		},
+		"AddVRouterRouteEntry":{
+			"Type":"ZStack::Action::AddVRouterRouteEntry",
+			"Properties":{
+				"routeTableUuid":{"Fn::GetAtt":["VRouterRouteTable","uuid"]},
+				"destination":{"Ref":"Destination"}		
+			}
+		},
+		"AddIpRangeByNetworkCidr":{
+			"Type":"ZStack::Action::AddIpRangeByNetworkCidr",
+			"Properties":{
+				"name":"Test-IpRange",
+				"l3NetworkUuid":{"Fn::GetAtt":["L3Network","uuid"]},
+				"networkCidr":{"Ref":"NetworkCidr"}
+			}
+		},
+		"AddVmNicToLoadBalancer":{
+			"Type":"ZStack::Action::AddVmNicToLoadBalancer",
+			"Properties":{
+				"vmNicUuids":{"Fn::Select": ["0", "Fn::GetAtt":["VM","vmNics"]]},
+				"listenerUuid":{"Fn::GetAtt":["LoadBalancerListener","uuid"]}
+			}
+		},
+		"AddVmNicToSecurityGroup":{
+			"Type":"ZStack::Action::AddVmNicToSecurityGroup",
+			"Properties":{
+				"securityGroupUuid":{"Fn::GetAtt":["SecurityGroup","uuid"]},
+				"vmNicUuids":{"Fn::Select": ["0", "Fn::GetAtt":["VM","vmNics"]]}
+			}
+		},
+		"AddRemoteCidrsToIPsecConnection":{
+			"Type":"ZStack::Action::AddRemoteCidrsToIPsecConnection",
+			"Properties":{
+				"uuid":{"Fn::GetAtt":["IPsecConnection","uuid"]},
+				"peerCidrs":{"Ref":"PeerCidrs"}
+			}
+		},
+		"AttachEip":{
+			"Type":"ZStack::Action::AttachEip",
+			"Properties":{
+				"eipUuid":{"Fn::GetAtt":["Eip","uuid"]},
+				"vmNicUuids":{"Fn::Select": ["0", "Fn::GetAtt":["VM","vmNics"]]}
+			}
+		},
+		"AttachDataVolumeToVm":{
+			"Type":"ZStack::Action::AttachDataVolumeToVm",
+			"Properties":{
+				"vmInstanceUuid":{"Fn::GetAtt":["VM","uuid"]},
+				"volumeUuid":{"Fn::GetAtt":["DataVolume","uuid"]}
+			}
+		},
+		"AttachPortForwardingRule":{
+			"Type":"ZStack::Action::AttachPortForwardingRule",
+			"Properties":{
+				"ruleUuid":{"Fn::GetAtt":["PortForwardingRule","uuid"]},
+				"vmNicUuids":{"Fn::Select": ["0", "Fn::GetAtt":["VM","vmNics"]]}
+			}
+		},
+		"AttachIsoToVmInstance":{
+			"Type":"ZStack::Action::AttachIsoToVmInstance",
+			"Properties":{
+				"vmInstanceUuid":{"Fn::GetAtt":["VM","uuid"]},
+				"isoUuid":{"Ref":"IsoUuid"}
+			}
+		},
+		"AttachPciDeviceToVm":{
+			"Type":"ZStack::Action::AttachPciDeviceToVm",
+			"Properties":{
+				"pciDeviceUuid":{"Ref":"PciDeviceUuid"},
+				"vmInstanceUuid":{"Fn::GetAtt":["VM","uuid"]}
+			}
+		},
+		"AttachUsbDeviceToVm":{
+			"Type":"ZStack::Action::AttachUsbDeviceToVm",
+			"Properties":{
+				"usbDeviceUuid":,{"Ref":"UsbDeviceUuid"},
+				"vmInstanceUuid":{"Fn::GetAtt":["VM","uuid"]}
+			}
+		},
+		"AttachL2NetworkToCluster":{
+			"Type":"ZStack::Action::AttachL2NetworkToCluster",
+			"Properties":{
+				"l2NetworkUuid":{"Fn::GetAtt":["L2Network","uuid"]},
+				"clusterUuid":{"Ref":"ClusterUuid"}
+			}
+		},
+		"AttachL3NetworkToVm":{
+			"Type":"ZStack::Action::AttachL3NetworkToVm",
+			"Properties":{
+				"vmInstanceUuid":"{"Fn::GetAtt":["VM","uuid"]},
+				"l3NetworkUuid":{"Fn::GetAtt":["L3Network","uuid"]}
+			}
+		},
+		"AttachNetworkServiceToL3Network":{
+			"Type":"ZStack::Action::AttachNetworkServiceToL3Network",
+			"Properties":{
+				"l3NetworkUuid":{"Fn::GetAtt":["L3Network","uuid"]},
+				"networkServices":{"Fn::Select": ["0", "Fn::GetAtt":["L3Network","networkServices"]]}
+			}
+		},
+		"AttachSecurityGroupToL3Network":{
+			"Type":"ZStack::Action::AttachSecurityGroupToL3Network",
+			"Properties":{
+				"securityGroupUuid":{"Fn::GetAtt":["SecurityGroup","uuid"]},
+				"l3NetworkUuid":{"Fn::GetAtt":["L3Network","uuid"]}
+			}
+		},
+		"AttachL3NetworkToIPsecConnection":{
+			"Type":"ZStack::Action::AttachL3NetworkToIPsecConnection",
+			"Properties":{
+				"uuid":{"Fn::GetAtt":["IPsecConnection","uuid"]},
+				"l3NetworkUuids":[{"Fn::GetAtt":["L3Network","uuid"]}]
+			}
+		},
+		"AttachNetworkServiceProviderToL2Network":{
+			"Type":"ZStack::Action::AttachNetworkServiceProviderToL2Network",
+			"Properties":{
+			}
+		},
+		"AttachVRouterRouteTableToVRouter":{
+			"Type":"ZStack::Action::AttachVRouterRouteTableToVRouter",
+			"Properties":{
+				"routeTableUuid":{"Fn::GetAtt":["VRouterRouteTable","uuid"]},
+				"virtualRouterVmUuid":"lei"
+			}
+		},
+		"AddCertificateToLoadBalancerListener":{
+			"Type":"ZStack::Action::AddCertificateToLoadBalancerListener",
+			"Properties":{
+				"certificateUuid":"lei",
+				"listenerUuid":{"Fn::GetAtt":["LoadBalancerListener","uuid"]}
+			}
+		},
+		"AddHostRouteToL3Network":{
+			"Type":"ZStack::Action::AddHostRouteToL3Network",
+			"Properties":{
+				"l3NetworkUuid":{"Fn::GetAtt":["L3Network","uuid"]},
+				"prefix":{"Ref":"Prefix"},
+				"nexthop":{"Ref":"Nexthop"}
+			}
 		}
-    },
     "Outputs": {
         "InstanceOffering": {
             "Value": {
