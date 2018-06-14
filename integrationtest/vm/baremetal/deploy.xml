@@ -106,14 +106,12 @@
               password="$hostPassword" />
           </hosts>
           <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
-          <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
-          <l2NetworkRef>$l2VlanNetworkName2</l2NetworkRef>
-          <l2NetworkRef>$l2VlanNetworkName3</l2NetworkRef>
+          <l2NetworkRef>$l2BaremetalNetworkName</l2NetworkRef>
         </cluster>
       </clusters>
 
       <l2Networks>
-        <l2NoVlanNetwork name="$l2PublicNetworkName" description="Test"
+        <l2NoVlanNetwork name="$l2BaremetalNetworkName" description="Test"
           physicalInterface="$l2NetworkPhysicalInterface">
           <l3Networks>
             <l3BasicNetwork name="$l3PublicNetworkName" category="Public"
@@ -128,38 +126,6 @@
             </l3BasicNetwork>
           </l3Networks>
         </l2NoVlanNetwork>
-
-        <l2VlanNetwork name="$l2VlanNetworkName2" description="Test"
-          physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan2">
-          <l3Networks>
-            <l3BasicNetwork name="$l3VlanNetworkName1"
-              description="Test">
-              <ipRange name="$vlanIpRangeName1" description="Test" 
-                startIp="$vlanIpRangeStart1" endIp="$vlanIpRangeEnd1"
-                gateway="$vlanIpRangeGateway1"
-                netmask="$vlanIpRangeNetmask1" />
-              <networkService provider="SecurityGroup">
-                <serviceType>SecurityGroup</serviceType>
-              </networkService>
-            </l3BasicNetwork>
-          </l3Networks>
-        </l2VlanNetwork>
-
-        <l2VlanNetwork name="$l2VlanNetworkName3" description="Test"
-          physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan3">
-          <l3Networks>
-            <l3BasicNetwork name="$l3VlanNetworkName3"
-              description="Test">
-              <ipRange name="$vlanIpRangeName3" description="Test" 
-                startIp="$vlanIpRangeStart3" endIp="$vlanIpRangeEnd3"
-                gateway="$vlanIpRangeGateway3"
-                netmask="$vlanIpRangeNetmask3" />
-              <networkService provider="SecurityGroup">
-                <serviceType>SecurityGroup</serviceType>
-              </networkService>
-            </l3BasicNetwork>
-          </l3Networks>
-        </l2VlanNetwork>
       </l2Networks>
       
       <primaryStorages>

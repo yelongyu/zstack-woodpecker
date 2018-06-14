@@ -53,3 +53,5 @@ hostName2 = host2
 hostIp2 = 127.1.101.42
 hostName3 = host3
 hostIp3 = 127.1.101.43
+
+l2BaremetalNetworkName = l2-baremetal

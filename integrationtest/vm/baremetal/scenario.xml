@@ -20,8 +20,8 @@
               <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
-            <l3Network uuid="$vmManagementL3Uuid">
-              <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
+            <l3Network uuid="$vmBaremetalL3Uuid">
+              <l2NetworkRef>$l2BaremetalNetworkName</l2NetworkRef>
             </l3Network>
           </l3Networks>
           <hostRef>$hostName</hostRef>
@@ -33,8 +33,8 @@
         <vm name="$vmName2" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
-            <l3Network uuid="$vmManagementL3Uuid">
-              <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
+            <l3Network uuid="$vmBaremetalL3Uuid">
+              <l2NetworkRef>$l2BaremetalNetworkName</l2NetworkRef>
             </l3Network>
           </l3Networks>
           <nodeRef>$node1Name</nodeRef>
@@ -49,8 +49,8 @@
         <vm name="$vmName3" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
-            <l3Network uuid="$vmManagementL3Uuid">
-              <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
+            <l3Network uuid="$vmBaremetalL3Uuid">
+              <l2NetworkRef>$l2BaremetalNetworkName</l2NetworkRef>
             </l3Network>
           </l3Networks>
           <hostRef>$hostName3</hostRef>
