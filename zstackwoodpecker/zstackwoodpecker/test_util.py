@@ -997,6 +997,24 @@ class SnapshotOption(DataOption):
     def get_volume_uuid(self):
         return self.volume_uuid
 
+class BackupOption(DataOption):
+    def __init__(self):
+        super(BackupOption, self).__init__()
+        self.volume_uuid = None
+        self.backupStorage_uuid = None
+
+    def set_volume_uuid(self, volume_uuid):
+        self.volume_uuid = volume_uuid
+
+    def get_volume_uuid(self):
+        return self.volume_uuid
+
+    def set_backupStorage_uuid(self, bs_uuid):
+        self.backupStorage_uuid = bs_uuid
+
+    def get_backupStorage_uuid(self):
+        return self.backupStorage_uuid
+
 class SecurityGroupOption(DataOption):
     def __init__(self):
         self.name = None

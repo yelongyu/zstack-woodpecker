@@ -160,6 +160,24 @@ def create_snapshot(snapshot_option, session_uuid=None):
             (action.name, snapshot.uuid, action.volumeUuid))
     return snapshot
 
+def create_backup(backup_option, session_uuid=None):
+    action = api_actions.CreateVolumeBackupAction()
+    action.volumeUuid = backup_option.get_volume_uuid()
+    action.backupStorageUuid = backup_option.get_backupStorage_uuid()
+    action.name = backup_option.get_name()
+    if not action.name:
+        action.name = 'backup_for_volume_%s' % action.volumeUuid
+    action.description = backup_option.get_description()
+    action.timeout = 240000
+    if backup_option.get_session_uuid():
+        session_uuid = backup_option.get_session_uuid()
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    backup = evt.inventory
+    test_util.action_logger('Create [Backup:] %s [uuid:] %s for [volume:] %s' % \
+            (action.name, backup.uuid, action.volumeUuid))
+    return backup
+
+
 def create_snapshot_scheduler(snapshot_option, type, name, start_time=None, interval=None, repeatCount=None, cron=None, session_uuid=None):
     action = api_actions.CreateVolumeSnapshotSchedulerAction()
     action.volumeUuid = snapshot_option.get_volume_uuid()
