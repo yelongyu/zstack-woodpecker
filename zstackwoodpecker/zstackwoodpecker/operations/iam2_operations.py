@@ -552,3 +552,38 @@ def get_policy_statement_uuid_of_role(role_uuid,action):
     for policy_statement in policy_statements:
         if policy_statement.statement.actions[0]==action:
             return policy_statement.uuid
+
+def clean_all_projects():
+    project_list=res_ops.query_resource(res_ops.IAM2_PROJECT)
+    if project_list:
+        for project in project_list:
+            if project.state == 'Deleted':
+                expunge_iam2_project(project.uuid)
+            else:
+                delete_iam2_project(project.uuid)
+                expunge_iam2_project(project.uuid)
+
+def clean_all_project_templates():
+    project_template_list=res_ops.query_resource(res_ops.IAM2_PROJECT_TEMPLATE)
+    if project_template_list:
+        for project_template in project_template_list:
+            delete_iam2_project_template(project_template.uuid)
+
+def clean_all_organizations():
+    organization_list=res_ops.query_resource(res_ops.IAM2_ORGANIZATION)
+    if organization_list:
+        for organization in organization_list:
+            delete_iam2_organization(organization.uuid)
+
+def clean_all_virtual_ids():
+    virtual_id_list=res_ops.query_resource(res_ops.IAM2_VIRTUAL_ID)
+    if virtual_id_list:
+        for virtual_id in virtual_id_list:
+            delete_iam2_virtual_id(virtual_id.uuid)
+
+def clean_iam2_enviroment():
+    clean_all_projects()
+    clean_all_project_templates()
+    clean_all_organizations()
+    clean_all_virtual_ids()
+
