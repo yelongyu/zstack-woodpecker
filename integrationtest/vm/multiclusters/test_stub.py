@@ -16,11 +16,14 @@ import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.operations.datamigrate_operations as datamigr_ops
 import zstackwoodpecker.operations.longjob_operations as longjob_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
+import zstackwoodpecker.operations.nas_operations as nas_ops
+import zstackwoodpecker.operations.hybrid_operations as hyb_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.header.host as host_header
 import threading
 import time
 import sys
+from integrationtest.vm.multiclusters.aliyun_nas.test_create_nas_access_group import nas
 #import traceback
 
 hybrid_test_stub = test_lib.lib_get_test_stub('hybrid')
@@ -356,4 +359,60 @@ class AliyunNAS(hybrid_test_stub.HybridObject):
         self.acc_grp_rule = None
         self.nas_fs = None
         self.nas_mnt_target = None
+
+    def get_dc(self):
+        self.dc = hyb_ops.query_datacenter_local()[0]
+
+    def create_nas_fs(self, storage_type='Capacity', protocol='NFS'):
+        self.get_dc()
+        name = 'aliyun-nas-fs-' + str(time.time())[:-3]
+        self.nas_fs = nas_ops.create_aliyun_nas_file_system(self.dc.uuid, name=name, storage_type=storage_type, protocol=protocol)
+        self.check_resource('create', 'name', name, 'query_nas_file_system', aliyun_nas=True)
+
+    def del_nas_fs(self):
+        nas_ops.delete_nas_file_system(self.nas_fs.uuid)
+        self.check_resource('delete', 'fileSystemId', self.nas_fs.fileSystemId, 'query_nas_file_system', aliyun_nas=True)
+
+    def crt_nas_mount_target(self):
+        self.create_nas_fs()
+
+    def crt_access_grp(self, network_type='classic'):
+        self.get_dc()
+        self.grp_name = 'aliyun-nas-acc-grp-' + str(time.time())[:-3]
+        self.acc_grp = nas_ops.create_aliyun_nas_access_group(self.dc.uuid, self.grp_name, network_type=network_type)
+        self.check_resource('create', 'name', self.grp_name, 'query_aliyun_nas_access_group', aliyun_nas=True)
+
+    def del_acc_grp(self):
+        nas_ops.delete_aliyun_nas_access_group(self.acc_grp.uuid)
+        self.check_resource('delete', 'name', self.grp_name, 'query_nas_file_system', aliyun_nas=True)
+
+    def crt_acc_grp_rule(self, source_cidr='172.26.0.0/24', rw_type='RDWR'):
+        self.crt_access_grp()
+        self.grp_rule = nas_ops.create_aliyun_nas_access_group_rule(self.acc_grp.uuid, source_cidr=source_cidr, rw_type=rw_type)
+        cond_acc_grp = res_ops.gen_query_conditions('name', '=', self.grp_name)
+        self.acc_grp = nas_ops.query_aliyun_nas_access_group(cond_acc_grp)[0]
+        assert self.acc_grp.rules[0].sourceCidr == source_cidr
+
+    def del_acc_grp_rule(self):
+        nas_ops.delete_aliyun_nas_access_group_rule(self.grp_rule.uuid)
+        cond_acc_grp = res_ops.gen_query_conditions('name', '=', self.grp_name)
+        self.acc_grp = nas_ops.query_aliyun_nas_access_group(cond_acc_grp)[0]
+        assert not self.acc_grp.rules
+
+    def get_aliyun_nas_fs(self):
+        self.get_dc()
+        fs_remote = nas_ops.get_aliyun_nas_file_system_remote(self.dc.uuid)[0]
+        assert fs_remote.fileSystemId == os.getenv('fileSystemId')
+
+    def get_aliyun_nas_acc_grp(self):
+        self.get_dc()
+        grp_remote = nas_ops.get_aliyun_nas_access_group_remote(self.dc.uuid)[0]
+        assert grp_remote.name == os.getenv('groupName')
+
+    def get_aliyun_nas_mount_target(self):
+        cond_fs = res_ops.gen_query_conditions('fileSystemId', '=', os.getenv('fileSystemId'))
+        nas_fs = nas_ops.query_nas_file_system(cond_fs)[0]
+        mtarget = nas_ops.get_aliyun_nas_mount_target_remote(nas_fs.uuid)[0]
+        assert mtarget.mountDomain == os.getenv('mountDomain')
+
 

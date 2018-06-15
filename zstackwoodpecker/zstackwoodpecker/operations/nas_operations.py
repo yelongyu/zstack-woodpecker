@@ -45,10 +45,11 @@ def delete_aliyun_nas_access_group(uuid, session_uuid=None):
     test_util.test_logger('[Aliyun nas access group:] %s is created.' % uuid)
     return evt.inventory
 
-def create_aliyun_nas_access_group_rule(access_group_uuid, source_cidr, session_uuid=None):
+def create_aliyun_nas_access_group_rule(access_group_uuid, source_cidr, rw_type, session_uuid=None):
     action = api_actions.CreateAliyunNasAccessGroupRuleAction()
     action.accessGroupUuid = access_group_uuid
     action.sourceCidrIp = source_cidr
+    action.rwAccessType = rw_type
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Aliyun nas access group rule with source cidr:] %s is created.' % source_cidr)
     return evt.inventory
@@ -61,11 +62,11 @@ def delete_aliyun_nas_access_group_rule(uuid, session_uuid=None):
     return evt.inventory
 
 def query_aliyun_nas_access_group(condition=[], session_uuid=None):
-    action = api_actions.QueryAliyunDiskFromLocalAction()
+    action = api_actions.QueryAliyunNasAccessGroupAction()
     action.conditions = condition
-    test_util.action_logger('Query Aliyun Access Group In Local')
+    test_util.action_logger('Query Aliyun Access Group')
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventories
+    return evt
 
 def add_aliyun_nas_file_system(datacenter_uuid, fsid, name, session_uuid=None):
     action = api_actions.AddAliyunNasFileSystemAction()
@@ -77,11 +78,12 @@ def add_aliyun_nas_file_system(datacenter_uuid, fsid, name, session_uuid=None):
     test_util.test_logger('[Aliyun NASFile System:] %s %s is added.' % (name, fsid))
     return evt.inventory
 
-def create_aliyun_nas_file_system(datacenter_uuid, storage_type, protocol='NFS', session_uuid=None):
+def create_aliyun_nas_file_system(datacenter_uuid, name, storage_type, protocol='NFS', session_uuid=None):
     action = api_actions.CreateAliyunNasFileSystemAction()
     action.dataCenterUuid = datacenter_uuid
     action.storageType = storage_type
     action.protocol = protocol
+    action.name = name
     test_util.action_logger('Create [Aliyun NASFile System:] %s %s' % (protocol, storage_type))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Aliyun NASFile System:] %s %s is added.' % (protocol, storage_type))
@@ -99,7 +101,7 @@ def query_nas_file_system(condition=[], session_uuid=None):
     action.conditions = condition
     test_util.action_logger('Query NASFile System')
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventories
+    return evt
 
 def update_nas_file_system(uuid, description=None, name=None, session_uuid=None):
     action = api_actions.UpdateNasFileSystemAction()
@@ -128,10 +130,10 @@ def add_aliyun_nas_mount_target(nas_fs_uuid, mount_domain, name, session_uuid=No
     test_util.test_logger('[Aliyun NAS mount target:] %s %s is added.' % (nas_fs_uuid, mount_domain))
     return evt.inventory
 
-def get_aliyun_nas_mount_target_remote(datacenter_uuid, session_uuid=None):
-    action = api_actions.GetAliyunNasFileSystemRemoteAction()
-    action.dataCenterUuid = datacenter_uuid
-    test_util.action_logger('Get [Aliyun NAS Mount Target remote:] %s' % datacenter_uuid)
+def get_aliyun_nas_mount_target_remote(nas_fs_uuid, session_uuid=None):
+    action = api_actions.GetAliyunNasMountTargetRemoteAction()
+    action.nasFSUuid = nas_fs_uuid
+    test_util.action_logger('Get [Aliyun NAS Mount Target remote:] %s' % nas_fs_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt.inventories
 
@@ -150,7 +152,7 @@ def query_nas_mount_target(condition=[], session_uuid=None):
     action.conditions = condition
     test_util.action_logger('Query NAS Mount Target')
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventories
+    return evt
 
 def delete_nas_mount_target(uuid, session_uuid=None):
     action = api_actions.DeleteNasFileSystemAction()

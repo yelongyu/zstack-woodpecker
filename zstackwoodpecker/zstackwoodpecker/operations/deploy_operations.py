@@ -790,26 +790,18 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                                                fsid=os.getenv('fileSystemId'),
                                                name='setup_nasfs',
                                                session_uuid=session_uuid)
-            # Add NAS Mount Target
-            nasinvs = res_ops.get_resource(res_ops.NAS_FILESYSTEM, session_uuid=session_uuid)
-            if nasinvs:
-                nasinv = nasinvs[0]
-            else:
-                raise test_util.TestError("Can't find Any NAS File System.")
-            nas_ops.add_aliyun_nas_mount_target(nas_fs_uuid=nasinv.uuid,
-                                                mount_domain=os.getenv('mountDomain'),
-                                                name='setup_nas_mount_target',
-                                                session_uuid=session_uuid)
             # Add Aliyun Access Group
             nas_ops.add_aliyun_nas_access_group(datacenter_uuid=dcinv.uuid,
                                                 group_name=os.getenv('groupName'),
                                                 session_uuid=session_uuid)
             # Add AliyunNas PS
             grpinvs = res_ops.get_resource(res_ops.ALIYUNNAS_ACCESSGROUP, session_uuid=session_uuid)
-            if grpinvs:
+            nasinvs = res_ops.get_resource(res_ops.NAS_FILESYSTEM, session_uuid=session_uuid)
+            if grpinvs and nasinvs:
                 grpinv = grpinvs[0]
+                nasinv = nasinvs[0]
             else:
-                raise test_util.TestError("Can't find Aliyun NAS Access Group.")
+                raise test_util.TestError("Can't find Aliyun NAS Access Group or File system.")
             action = api_actions.AddAliyunNasPrimaryStorageAction()
             action.name = 'AliyunNas'
             action.nasUuid = nasinv.uuid

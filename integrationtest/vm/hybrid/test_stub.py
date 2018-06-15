@@ -226,9 +226,12 @@ class HybridObject(object):
             condition = res_ops.gen_query_conditions('zoneId', '=', self.iz.zoneId)
             assert not hyb_ops.query_iz_local(condition)
 
-    def check_resource(self, ops, cond_name, cond_val, query_method):
+    def check_resource(self, ops, cond_name, cond_val, query_method, aliyun_nas=False):
         condition = res_ops.gen_query_conditions(cond_name, '=', cond_val)
-        query_str = 'hyb_ops.%s(condition)' % query_method
+        if aliyun_nas:
+            query_str = 'nas_ops.%s(condition)' % query_method
+        else:
+            query_str = 'hyb_ops.%s(condition)' % query_method
         if ops == 'create':
             assert eval(query_str)
         elif ops == 'delete':
