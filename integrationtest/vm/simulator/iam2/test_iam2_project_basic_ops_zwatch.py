@@ -39,7 +39,7 @@ test_stub = test_lib.lib_get_test_stub()
 
 def test():
     global project_uuid, project_admin_uuid, virtual_id_uuid
-
+    global email_platform_uuid, email_endpoint_uuid,http_endpoint_uuid, sns_topic_uuid
     # 1 create project
     project_name = 'test_project'
     project = iam2_ops.create_iam2_project(project_name)
@@ -62,68 +62,192 @@ def test():
     project_login_uuid = iam2_ops.login_iam2_project(project_name, session_uuid=project_admin_session_uuid).uuid
     # iam2_ops.remove_attributes_from_iam2_virtual_id(virtual_id_uuid, attributes)
 
-    # zwatch ops:
+
+    # create platform
     smtp_server = os.environ.get('smtpServer')
     smtp_port = os.environ.get('smtpPort')
     email_platform_name = 'Alarm_email'
     email_username = os.environ.get('mailUsername')
     email_password = os.environ.get('mailPassword')
     email_platform = zwt_ops.create_sns_email_platform(smtp_server, smtp_port, email_platform_name, email_username, email_password, session_uuid=project_login_uuid)
+    email_platform_uuid = email_platform.uuid
+    cond=res_ops.gen_query_conditions('uuid','=',email_platform_uuid)
+    inv = res_ops.query_resource(res_ops.SNS_EMAIL_PLATFORM,cond, session_uuid=project_login_uuid)
+    if not inv:
+        test_util.test_fail('create sns email platform failed')
+    try:
+        zwt_ops.validate_sns_email_platform(email_platform_uuid)
+    except:
+        test_util.test_fail('Validate SNS Email Platform Failed, Email Plarform: %s' % email_platform_uuid)
 
+    # create endpoint
     email_receiver = os.environ.get('mailUsername')
     email_endpoint_name = os.environ.get('mailPassword')
     email_endpoint_uuid = zwt_ops.create_sns_email_endpoint(email_receiver, email_endpoint_name, email_platform_uuid, session_uuid=project_login_uuid).uuid
+    cond=res_ops.gen_query_conditions('uuid','=',email_endpoint_uuid)
+    inv=res_ops.query_resource(res_ops.SNS_EMAIL_ENDPOINT,cond, session_uuid=project_login_uuid)
+    if not inv:
+        test_util.test_fail('create sns email endpoint failed')
+    http_endpoint_name='http'
+    url = 'http://localhost:8080/webhook-url'
+    http_username='url-username'
+    http_password='url-password'
+    http_endpoint=zwt_ops.create_sns_http_endpoint(url,http_endpoint_name,http_username,http_password, session_uuid=project_login_uuid)
+    http_endpoint_uuid=http_endpoint.uuid
+    cond=res_ops.gen_query_conditions('uuid','=',http_endpoint_uuid)
+    inv=res_ops.query_resource(res_ops.SNS_HTTP_ENDPOINT,cond, session_uuid=project_login_uuid)
+    if not inv:
+        test_util.test_fail('create sns http endpoint failed')
 
+    # create sns topic and query system-in topic
     sns_topic_uuid = zwt_ops.create_sns_topic('sns_topic_01', session_uuid=project_login_uuid).uuid
     zwt_ops.subscribe_sns_topic(sns_topic_uuid, email_endpoint_uuid, session_uuid=project_login_uuid)
-    zwt_ops.unsubscribe_sns_topic(sns_topic_uuid, email_endpoint_uuid, session_uuid=project_login_uuid)
+    cond=res_ops.gen_query_conditions('endpoints.uuid','=',email_endpoint_uuid)
+    inv=res_ops.query_resource(res_ops.SNS_TOPIC,cond, session_uuid=project_login_uuid)
+    if not inv:
+        test_util.test_fail('create and subscribe snstopic failed')
+    cond = res_ops.gen_query_conditions('name', '=', 'system-alarm')
+    system_alarm_topic = res_ops.query_resource(res_ops.SNS_TOPIC, cond, session_uuid=project_login_uuid)[0]
+    system_alarm_topic_uuid=system_alarm_topic.uuid
+    zwt_ops.subscribe_sns_topic(system_alarm_topic_uuid, email_endpoint_uuid, session_uuid=project_login_uuid)
+    cond=res_ops.gen_query_conditions('endpoints.uuid','=',email_endpoint_uuid)
+    inv=res_ops.query_resource(res_ops.SNS_TOPIC,cond, session_uuid=project_login_uuid)
+    if not inv:
+        test_util.test_fail('subscribe system-alarm topic failed')
+    cond = res_ops.gen_query_conditions('name','=','api')
+    api_topic= res_ops.query_resource(res_ops.SNS_TOPIC,cond, session_uuid=project_login_uuid)[0]
+    api_topic_uuid=api_topic.uuid
+    zwt_ops.subscribe_sns_topic(api_topic_uuid,http_endpoint_uuid, session_uuid=project_login_uuid)
+    cond = res_ops.gen_query_conditions('endpointUuid','=',http_endpoint_uuid)
+    cond = res_ops.gen_query_conditions('topicUuid','=',api_topic_uuid)
+    inv=res_ops.query_resource(res_ops.SNS_TOPIC_SUBSCRIBER,cond, session_uuid=project_login_uuid)
+    if not inv:
+        test_util.test_fail('subscribe api topic failed')
 
+    # subscribe event
     namespace = 'ZStack/VM'
-    less_than = 'LessThan'
     actions = [{"actionUuid": sns_topic_uuid, "actionType": "sns"}]
-    period = 10
-    threshold_3 = 1024 * 1024 * 1024
-    disk_all_write_bytes = 'DiskAllWriteBytes'
-    disk_all_write_bytes_alarm_uuid = zwt_ops.create_alarm(less_than, period,
-                                                           threshold_3, namespace,
-                                                           disk_all_write_bytes,
-                                                           name='disk_all_write_bytes',
-                                                           repeat_interval=20,
-                                                           actions=actions, session_uuid=project_login_uuid).uuid
-    zwt_ops.change_alarm_state(disk_all_write_bytes_alarm_uuid, 'disable', session_uuid=project_login_uuid)
-    zwt_ops.change_alarm_state(disk_all_write_bytes_alarm_uuid, 'enable', session_uuid=project_login_uuid)
-    zwt_ops.delete_alarm(disk_all_write_bytes_alarm_uuid, session_uuid=project_login_uuid)
-    sns_topic_uuid_02 = zwt_ops.create_sns_topic('sns_topic_02').uuid
-    zwt_ops.add_action_to_alarm(disk_all_write_bytes_alarm_uuid, sns_topic_uuid_02, 'sns', session_uuid=project_login_uuid)
-    zwt_ops.remove_action_from_alarm(disk_all_write_bytes_alarm_uuid, sns_topic_uuid_02, session_uuid=project_login_uuid)
-    key = 'VMUuid'
-    operator = 'Equal'
-    value = '1a1d7395cf74474ca52deb80c41214a1'
-    label_uuid = zwt_ops.add_label_to_alarm(disk_all_write_bytes_alarm_uuid, key, value, operator, session_uuid=project_login_uuid).uuid
-    zwt_ops.remove_label_from_alarm(label_uuid, session_uuid=project_login_uuid)
+    labels = [{"key": "NewState", "op": "Equal", "value": "Disconnected"}]
+    event_name = 'VMStateChangedOnHost'
+    event_sub_uuid = zwt_ops.subscribe_event(namespace, event_name, actions, labels, session_uuid=project_login_uuid).uuid
+    cond = res_ops.gen_query_conditions('uuid', '=', event_sub_uuid)
+    event_subscription = res_ops.query_resource(res_ops.EVENT_SUBSCRIPTION, cond, session_uuid=project_login_uuid)
+    if not event_subscription:
+        test_util.test_fail('Subscribe event failed')
 
-    # scheduler ops:
-    start_date = int(time.time())
-    schd_job1 = schd_ops.create_scheduler_job('simple_start_vm_scheduler', 'simple_start_vm_scheduler', vm.get_vm().uuid, 'startVm', None, session_uuid=project_login_uuid)
-    schd_trigger1 = schd_ops.create_scheduler_trigger('simple_start_vm_scheduler', start_date+5, None, 15, 'simple', session_uuid=project_login_uuid)
-    schd_ops.add_scheduler_job_to_trigger(schd_trigger1.uuid, schd_job1.uuid, session_uuid=project_login_uuid)
-    schd_ops.change_scheduler_state(schd_job1.uuid, 'disable', session_uuid=project_login_uuid)
-    schd_ops.change_scheduler_state(schd_job1.uuid, 'enable', session_uuid=project_login_uuid)
-    schd_ops.remove_scheduler_job_from_trigger(schd_trigger1.uuid, schd_job1.uuid, session_uuid=project_login_uuid)
-    schd_ops.del_scheduler_job(schd_job1.uuid, session_uuid=project_login_uuid)
-    schd_ops.del_scheduler_trigger(schd_trigger1.uuid, session_uuid=project_login_uuid)
-    schd_ops.get_current_time()
+    #update endpoint
+    new_name='endpointNewName'
+    new_description='endpoint new description'
+    zwt_ops.update_sns_application_endpoint(email_endpoint_uuid,new_name,new_description, session_uuid=project_login_uuid)
+    cond= res_ops.gen_query_conditions('uuid','=',email_endpoint_uuid)
+    inv =res_ops.query_resource(res_ops.SNS_APPLICATION_ENDPOINT,cond, session_uuid=project_login_uuid)[0]
+    if inv.name!=new_name or inv.description!=new_description:
+        test_util.test_fail('test update email endpoint failed')
+    zwt_ops.update_sns_application_endpoint(http_endpoint_uuid,new_name,new_description, session_uuid=project_login_uuid)
+    cond= res_ops.gen_query_conditions('uuid','=',http_endpoint_uuid)
+    inv =res_ops.query_resource(res_ops.SNS_APPLICATION_ENDPOINT,cond, session_uuid=project_login_uuid)[0]
+    if inv.name!=new_name or inv.description!=new_description:
+        test_util.test_fail('test update http endpoint failed')
+    new_name_platform='platformNewName'
+    new_description_platform='platformNewName'
+    zwt_ops.update_sns_application_platform(email_platform_uuid,new_name_platform,new_description_platform, session_uuid=project_login_uuid)
+    cond= res_ops.gen_query_conditions('uuid','=',email_platform_uuid)
+    inv =res_ops.query_resource(res_ops.SNS_APPLICATION_PLATFORM,cond, session_uuid=project_login_uuid)[0]
+    if inv.name!=new_name_platform or inv.description!=new_description_platform:
+        test_util.test_fail('test update email platform failed')
 
-    # certificate
-    cert = net_ops.create_certificate('certificate_for_pm', 'fake certificate', session_uuid=project_login_uuid)
-    net_ops.delete_certificate(cert.uuid, session_uuid=project_login_uuid)
+    #change state
+    state_event = 'disable'
+    state_result = 'Disabled'
+    zwt_ops.change_sns_topic_state(system_alarm_topic_uuid,state_event, session_uuid=project_login_uuid)
+    cond=res_ops.gen_query_conditions('uuid','=',system_alarm_topic_uuid)
+    inv=res_ops.query_resource(res_ops.SNS_TOPIC,cond, session_uuid=project_login_uuid)[0]
+    if inv.state!=state_result:
+        test_util.test_fail('change system alarm topic state failed')
+    zwt_ops.change_sns_topic_state(api_topic_uuid, state_event, session_uuid=project_login_uuid)
+    cond = res_ops.gen_query_conditions('uuid', '=', api_topic_uuid)
+    inv = res_ops.query_resource(res_ops.SNS_TOPIC, cond, session_uuid=project_login_uuid)[0]
+    if inv.state != state_result:
+        test_util.test_fail('change api topic state failed')
+    zwt_ops.change_sns_application_endpoint_state(email_endpoint_uuid,state_event, session_uuid=project_login_uuid)
+    cond = res_ops.gen_query_conditions('uuid', '=', email_endpoint_uuid)
+    inv = res_ops.query_resource(res_ops.SNS_APPLICATION_ENDPOINT, cond, session_uuid=project_login_uuid)[0]
+    if inv.state != state_result:
+        test_util.test_fail('change email endpoint state failed')
+    zwt_ops.change_sns_application_endpoint_state(http_endpoint_uuid,state_event, session_uuid=project_login_uuid)
+    cond = res_ops.gen_query_conditions('uuid', '=', http_endpoint_uuid)
+    inv = res_ops.query_resource(res_ops.SNS_APPLICATION_ENDPOINT, cond, session_uuid=project_login_uuid)[0]
+    if inv.state != state_result:
+        test_util.test_fail('change http endpoint state failed')
+    zwt_ops.change_sns_application_platform_state(email_platform_uuid,state_event, session_uuid=project_login_uuid)
+    cond = res_ops.gen_query_conditions('uuid', '=', email_platform_uuid)
+    inv = res_ops.query_resource(res_ops.SNS_APPLICATION_PLATFORM, cond, session_uuid=project_login_uuid)[0]
+    if inv.state != state_result:
+        test_util.test_fail('change email platform state failed')
+
+    # test recover and delete
+    state_event='enable'
+    state_result='Enabled'
+    zwt_ops.change_sns_topic_state(system_alarm_topic_uuid,state_event, session_uuid=project_login_uuid)
+    cond=res_ops.gen_query_conditions('uuid','=',system_alarm_topic_uuid)
+    inv=res_ops.query_resource(res_ops.SNS_TOPIC,cond, session_uuid=project_login_uuid)[0]
+    if inv.state!=state_result:
+        test_util.test_fail('change system alarm topic state failed')
+    zwt_ops.change_sns_topic_state(api_topic_uuid, state_event, session_uuid=project_login_uuid)
+    cond = res_ops.gen_query_conditions('uuid', '=', api_topic_uuid)
+    inv = res_ops.query_resource(res_ops.SNS_TOPIC, cond, session_uuid=project_login_uuid)[0]
+    if inv.state != state_result:
+        test_util.test_fail('change api topic state failed')
+    zwt_ops.unsubscribe_event(event_sub_uuid, session_uuid=project_login_uuid)
+    cond = res_ops.gen_query_conditions('uuid', '=', event_sub_uuid)
+    event_subscription = res_ops.query_resource(res_ops.EVENT_SUBSCRIPTION, cond, session_uuid=project_login_uuid)
+    if event_subscription:
+        test_util.test_fail('unsubscribe event failed')
+    zwt_ops.unsubscribe_sns_topic(sns_topic_uuid, email_endpoint_uuid)
+    cond =res_ops.gen_query_conditions('endpointUuid','=',email_endpoint_uuid)
+    cond=res_ops.gen_query_conditions('topicUuid','=',sns_topic_uuid,cond)
+    inv = res_ops.query_resource(res_ops.SNS_TOPIC_SUBSCRIBER,cond, session_uuid=project_login_uuid)
+    if inv:
+        test_util.test_fail('unsubscribe sns topic failed')
+    zwt_ops.unsubscribe_sns_topic(system_alarm_topic_uuid, email_endpoint_uuid, session_uuid=project_login_uuid)
+    cond =res_ops.gen_query_conditions('endpointUuid','=',email_endpoint_uuid)
+    cond=res_ops.gen_query_conditions('topicUuid','=',system_alarm_topic_uuid,cond)
+    inv = res_ops.query_resource(res_ops.SNS_TOPIC_SUBSCRIBER,cond, session_uuid=project_login_uuid)
+    if inv:
+        test_util.test_fail('unsubscribe system alarm topic failed')
+    zwt_ops.unsubscribe_sns_topic(api_topic_uuid, http_endpoint_uuid, session_uuid=project_login_uuid)
+    cond =res_ops.gen_query_conditions('endpointUuid','=',http_endpoint_uuid)
+    cond=res_ops.gen_query_conditions('topicUuid','=',api_topic_uuid,cond)
+    inv = res_ops.query_resource(res_ops.SNS_TOPIC_SUBSCRIBER,cond, session_uuid=project_login_uuid)
+    if inv:
+        test_util.test_fail('unsubscribe api topic failed')
+    zwt_ops.delete_sns_topic(sns_topic_uuid, session_uuid=project_login_uuid)
+    cond=res_ops.gen_query_conditions('uuid','=',sns_topic_uuid)
+    inv = res_ops.query_resource(res_ops.SNS_TOPIC, cond, session_uuid=project_login_uuid)
+    if inv:
+        test_util.test_fail('delete sns topic failed')
+    zwt_ops.delete_sns_application_endpoint(http_endpoint_uuid, session_uuid=project_login_uuid)
+    cond=res_ops.gen_query_conditions('uuid','=',http_endpoint_uuid)
+    inv = res_ops.query_resource(res_ops.SNS_APPLICATION_ENDPOINT, cond, session_uuid=project_login_uuid)
+    if inv:
+        test_util.test_fail('delete http endpoint failed')
+    zwt_ops.delete_sns_application_endpoint(email_endpoint_uuid, session_uuid=project_login_uuid)
+    cond=res_ops.gen_query_conditions('uuid','=',email_endpoint_uuid)
+    inv = res_ops.query_resource(res_ops.SNS_APPLICATION_ENDPOINT, cond, session_uuid=project_login_uuid)
+    if inv:
+        test_util.test_fail('delete email endpoint failed')
+    zwt_ops.delete_sns_application_platform(email_platform_uuid, session_uuid=project_login_uuid)
+    cond=res_ops.gen_query_conditions('uuid','=',email_platform_uuid)
+    inv = res_ops.query_resource(res_ops.SNS_APPLICATION_PLATFORM, cond, session_uuid=project_login_uuid)
+    if inv:
+        test_util.test_fail('delete email platform failed')
 
     # 11 delete
     acc_ops.logout(project_login_uuid)
-    iam2_ops.delete_iam2_virtual_id(virtual_id_uuid)
-    iam2_ops.delete_iam2_virtual_id(project_admin_uuid)
-    iam2_ops.delete_iam2_project(project_uuid)
-    iam2_ops.expunge_iam2_project(project_uuid)
+    iam2_ops.delete_iam2_virtual_id(virtual_id_uuid, session_uuid=project_login_uuid)
+    iam2_ops.delete_iam2_virtual_id(project_admin_uuid, session_uuid=project_login_uuid)
+    iam2_ops.delete_iam2_project(project_uuid, session_uuid=project_login_uuid)
+    iam2_ops.expunge_iam2_project(project_uuid, session_uuid=project_login_uuid)
 
     test_util.test_pass('success test iam2 login in by project admin!')
 
@@ -137,3 +261,13 @@ def error_cleanup():
     if project_uuid:
         iam2_ops.delete_iam2_project(project_uuid)
         iam2_ops.expunge_iam2_project(project_uuid)
+    global email_platform_uuid, email_endpoint_uuid, http_endpoint_uuid,sns_topic_uuid
+    if sns_topic_uuid:
+        zwt_ops.delete_sns_topic(sns_topic_uuid)
+    if http_endpoint_uuid:
+        zwt_ops.delete_sns_application_endpoint(http_endpoint_uuid)
+    if email_endpoint_uuid:
+        zwt_ops.delete_sns_application_endpoint(email_endpoint_uuid)
+    if email_platform_uuid:
+        zwt_ops.delete_sns_application_platform(email_platform_uuid)
+
