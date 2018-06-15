@@ -23,7 +23,6 @@ import zstackwoodpecker.header.host as host_header
 import threading
 import time
 import sys
-from integrationtest.vm.multiclusters.aliyun_nas.test_create_nas_access_group import nas
 #import traceback
 
 hybrid_test_stub = test_lib.lib_get_test_stub('hybrid')
