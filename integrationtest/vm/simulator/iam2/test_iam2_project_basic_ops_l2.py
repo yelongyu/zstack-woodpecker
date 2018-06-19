@@ -27,6 +27,7 @@ import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
 from zstackwoodpecker.operations import vm_operations as vm_ops
 import zstackwoodpecker.operations.net_operations as net_ops
+import zstackwoodpecker.operations.vxlan_operations as vxlan_ops
 import zstackwoodpecker.operations.scheduler_operations as schd_ops
 import zstackwoodpecker.operations.zwatch_operations as zwt_ops
 import zstackwoodpecker.test_lib as test_lib
@@ -75,6 +76,11 @@ def test():
         test_util.test_fail("Expect exception: project admin not allowed to create vlan L2 except vxlan")
     except:
         pass
+    vxlan_pool_uuid = res_ops.get_resource(res_ops.L2_VXLAN_NETWORK_POOL)[0].uuid
+    acc_ops.share_resources([project_linked_account_uuid], [vxlan_pool_uuid])
+    vxlan_pool_uuid = res_ops.get_resource(res_ops.L2_VXLAN_NETWORK_POOL, session_uuid=project_login_uuid)[0].uuid
+    vxlan_l2_uuid = vxlan_ops.create_l2_vxlan_network('vxlan_for_pm', vxlan_pool_uuid, zone_uuid, session_uuid=project_login_uuid).uuid
+    net_ops.delete_l2(vxlan_l2_uuid, session_uuid=project_login_uuid)
 
     # 11 delete
     acc_ops.logout(project_login_uuid)
