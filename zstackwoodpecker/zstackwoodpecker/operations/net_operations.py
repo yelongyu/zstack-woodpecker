@@ -739,3 +739,20 @@ def delete_certificate(uuid, session_uuid = None):
     test_util.test_logger('Delete [Certificate]: %s' % uuid)
     return evt.inventory
 
+def create_l3(name, l2_uuid, session_uuid = None):
+    action = api_actions.CreateL3NetworkAction()
+    action.name = name
+    action.l2NetworkUuid = l2_uuid
+    action.timeout = 300000
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("[L3:] %s is created" % name)
+    return evt.inventory 
+
+def delete_l3(uuid, session_uuid = None):
+    action = api_actions.DeleteL3NetworkAction()
+    action.uuid = uuid
+    action.timeout = 300000
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("[L3:] %s is deleted" % uuid)
+    return evt   
+
