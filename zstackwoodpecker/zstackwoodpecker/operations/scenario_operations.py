@@ -1065,7 +1065,7 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
 
 def post_to_mock_server(mn_ip, nfs_ip):
     # Aliyun NAS SDK mock server
-    url = os.getenv('apiEndPoint').split('::')[-1]
+    url = 'http://' + os.getenv('apiEndPoint').split('::')[-1] + '/mntarget'
     data = json.dumps({"mn_ip": mn_ip, "nfs_ip": nfs_ip})
     req = urllib2.Request(url, data, {'Content-Type': 'application/json'})
     rsp = urllib2.urlopen(req)
