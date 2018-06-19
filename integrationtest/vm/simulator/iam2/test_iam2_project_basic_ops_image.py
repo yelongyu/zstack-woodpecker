@@ -1,17 +1,10 @@
 '''
-test iam2 login by platform admin
+test iam2 image operations by platform admin/operator/member
 
 # 1 create project
-# 2 create virtual id
-# 3 create project admin
-# 4 login in project by project admin
-# 5 create virtual id group
-# 6 create role
-# 7 add virtual id into project and group
-# 8 add/remove roles to/from virtual id (group)
-# 9 create/delete project operator
-# 10 remove virtual ids from group and project
-# 11 delete
+# 2 create virtual id (project admin/operator/member)
+# 3 Add image with virtual id
+# 4 delete
 
 @author: quarkonics
 '''
@@ -34,6 +27,7 @@ import zstackwoodpecker.test_lib as test_lib
 project_uuid = None
 virtual_id_uuid = None
 project_admin_uuid = None
+plain_user_uuid = None
 test_stub = test_lib.lib_get_test_stub()
 
 case_flavor = dict(project_admin=                   dict(target_role='project_admin'),
@@ -42,7 +36,7 @@ case_flavor = dict(project_admin=                   dict(target_role='project_ad
                    )
 
 def test():
-    global project_uuid, project_admin_uuid, virtual_id_uuid
+    global project_uuid, project_admin_uuid, virtual_id_uuid, plain_user_uuid
 
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     # 1 create project
@@ -95,6 +89,10 @@ def test():
 
 
     # Image related ops: Add, Delete, Expunge, sync image size, Update QGA, delete, expunge
+    if flavor['target_role'] == 'project_member':
+        statements = [{"effect": "Allow", "actions": ["org.zstack.header.image.**"]}]
+        role_uuid = iam2_ops.create_role('test_role', statements).uuid
+        iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], plain_user_uuid)
     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
     image_option = test_util.ImageOption()
     image_option.set_name('fake_image')
@@ -118,8 +116,13 @@ def test():
 
     # 11 delete
     acc_ops.logout(project_login_uuid)
-    iam2_ops.delete_iam2_virtual_id(virtual_id_uuid)
-    iam2_ops.delete_iam2_virtual_id(project_admin_uuid)
+    if virtual_id_uuid != None:
+        iam2_ops.delete_iam2_virtual_id(virtual_id_uuid)
+    if project_admin_uuid != None:
+        iam2_ops.delete_iam2_virtual_id(project_admin_uuid)
+    if plain_user_uuid != None:
+        iam2_ops.delete_iam2_virtual_id(plain_user_uuid)
+
     iam2_ops.delete_iam2_project(project_uuid)
     iam2_ops.expunge_iam2_project(project_uuid)
 
@@ -135,3 +138,6 @@ def error_cleanup():
     if project_uuid:
         iam2_ops.delete_iam2_project(project_uuid)
         iam2_ops.expunge_iam2_project(project_uuid)
+    if plain_user_uuid != None:
+        iam2_ops.delete_iam2_virtual_id(plain_user_uuid)
+
