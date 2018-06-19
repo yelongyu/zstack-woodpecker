@@ -1,4 +1,0 @@
-<testConfig>
-    <scenarioConfig>scenario-aliyun-nas.xml</scenarioConfig>
-    <scenarioConfigTemplate>scenario-aliyun-nas.tmpt</scenarioConfigTemplate>
-</testConfig>

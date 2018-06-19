@@ -16,6 +16,7 @@ import os
 import sys
 import traceback
 import time
+import urllib2
 import xml.dom.minidom as minidom
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
@@ -604,6 +605,9 @@ def get_primary_storage_type(deploy_config, ps_name):
         for primaryStorage in zone.primaryStorages.get_child_node_as_list('zbsPrimaryStorage'):
             if primaryStorage.name_ == ps_name:
                 return 'zbs'
+        for primaryStorage in zone.primaryStorages.get_child_node_as_list('aliyunNASPrimaryStorageName'):
+            if primaryStorage.name_ == ps_name:
+                return 'nas'
 
     return None
 
@@ -643,6 +647,7 @@ def setup_backupstorage_vm(vm_inv, vm_config, deploy_config):
 SMP_SERVER_IP = None
 def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
     global SMP_SERVER_IP
+    nas_mt = None
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
     if hasattr(vm_config, 'hostRef'):
         host = get_deploy_host(vm_config.hostRef.text_, deploy_config)
@@ -660,7 +665,7 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
             continue
         for zone in xmlobject.safe_list(deploy_config.zones.zone):
             primary_storage_type = get_primary_storage_type(deploy_config, primaryStorageRef.text_)
-            if primary_storage_type == 'nfs':
+            if primary_storage_type == 'nfs' or primary_storage_type == 'nas':
                 for nfsPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.nfsPrimaryStorage):
                     if primaryStorageRef.text_ == nfsPrimaryStorage.name_:
                         test_util.test_logger('[vm:] %s setup nfs service.' % (vm_ip))
@@ -672,6 +677,8 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
                         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
                         cmd = "iptables -w 20 -I INPUT -p tcp -m tcp --dport 2049 -j ACCEPT && iptables -w 20 -I INPUT -p udp -m udp --dport 2049 -j ACCEPT"
                         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                        if primary_storage_type == 'nas':
+                            nas_mt = vm_ip
                         continue
             elif primary_storage_type == 'smp':
                 for smpPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.sharedMountPointPrimaryStorage):
@@ -700,6 +707,10 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
                                 cmd = "mount %s:/home/nfs /home/smp-ps/" %(SMP_SERVER_IP)
                                 ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
                                 continue
+    if nas_mt:
+        return nas_mt
+    else:
+        return None
 
 
 def exec_cmd_in_vm(cmd, vm_ip, vm_config, raise_if_exception, host_port):
@@ -1051,6 +1062,15 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
         ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ceph_h_nodes.sh'), '/tmp/setup_ceph_h_nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host_port))
         cmd = "bash -ex /tmp/setup_ceph_nodes.sh %s" % (vm_ips)
         ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host_port))
+
+def post_to_mock_server(mn_ip, nfs_ip):
+    # Aliyun NAS SDK mock server
+    url = os.getenv('apiEndPoint').split('::')[-1]
+    data = json.dumps({"mn_ip": mn_ip, "nfs_ip": nfs_ip})
+    req = urllib2.Request(url, data, {'Content-Type': 'application/json'})
+    rsp = urllib2.urlopen(req)
+    ret = rsp.read()
+    assert "success" in ret, 'Data post to mock server failed!'
 
 def setup_xsky_storages(scenario_config, scenario_file, deploy_config):
     #Stop nodes
@@ -2097,6 +2117,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 #                shell.call('ip route del %s/24 || true' % ip_range)
 #                shell.call('ip route add %s/24 via %s dev eth0' % (ip_range, last_ip_gateway))
 
+    mn_ip_to_post, vm_ip_to_post = (None, None)
     if hasattr(scenario_config.deployerConfig, 'hosts'):
         for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
             for vm in xmlobject.safe_list(host.vms.vm):
@@ -2195,6 +2216,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     vm_management_ip = get_host_management_ip(scenario_config, scenario_file, deploy_config, vm_inv, vm)
                     if vm_management_ip:
                         vm_xml.set('managementIp', vm_management_ip)
+                        if xmlobject.has_element(vm, 'nodeRef'):
+                            mn_ip_to_post = vm_management_ip
                     else:
                         test_util.test_logger("@@@DEBUG-WARNING@@@: vm_management_ip is null, failed")
                     vm_storage_ip = get_host_storage_network_ip(scenario_config, scenario_file, deploy_config, vm_inv, vm)
@@ -2238,7 +2261,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             break
                     setup_backupstorage_vm(vm_inv, vm, deploy_config)
                 if xmlobject.has_element(vm, 'primaryStorageRef'):
-                    setup_primarystorage_vm(vm_inv, vm, deploy_config)
+                    vm_ip_to_post = setup_primarystorage_vm(vm_inv, vm, deploy_config)
                     for ps_ref in xmlobject.safe_list(vm.primaryStorageRef):
                         if ps_ref.type_ == 'ocfs2smp':
                             if ocfs2smp_shareable_volume_is_created == False and hasattr(ps_ref, 'disk_offering_uuid_'):
@@ -2285,6 +2308,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
         setup_ceph_storages(scenario_config, scenario_file, deploy_config)
         setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst)
         setup_fusionstor_storages(scenario_config, scenario_file, deploy_config)
+        if vm_ip_to_post and mn_ip_to_post:
+            post_to_mock_server(mn_ip_to_post, vm_ip_to_post)
     else:
         setup_xsky_storages(scenario_config, scenario_file, deploy_config)
     #setup_zbs_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst)

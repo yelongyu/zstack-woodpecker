@@ -1,5 +1,0 @@
-<testConfig>
-    <deployConfig>deploy-aliyun-nas.xml</deployConfig>
-    <deployConfigTemplate>deploy-aliyun-nas.tmpt</deployConfigTemplate>
-    <pingTestTarget>zstack.yyk.net</pingTestTarget>
-</testConfig>

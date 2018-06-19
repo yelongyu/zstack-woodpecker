@@ -144,6 +144,10 @@
       <diskOffering name="$smallDiskOfferingName"
         description="Small Disk Offering"
         diskSize="$smallDiskOfferingSize" />
+
+      <diskOffering name="$rootDiskOfferingName" 
+      description="Root Disk Offering"
+      diskSize="$rootDiskOfferingSize" />
     </diskOfferings>
 
     <zones>
