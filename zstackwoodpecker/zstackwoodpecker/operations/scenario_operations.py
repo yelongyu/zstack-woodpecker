@@ -714,7 +714,7 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
                         nasPath = aliyunNASPrimaryStorage.url_.split(':')[1]
                         cmd = "echo '%s *(rw,sync,no_root_squash)' > /etc/exports" % (nasPath)
                         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-                        cmd = "mkdir -p %s && service rpcbind restart && service nfs restart" % (nfsPath)
+                        cmd = "mkdir -p %s && service rpcbind restart && service nfs restart" % (nasPath)
                         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
                         cmd = "iptables -w 20 -I INPUT -p tcp -m tcp --dport 2049 -j ACCEPT && iptables -w 20 -I INPUT -p udp -m udp --dport 2049 -j ACCEPT"
                         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
