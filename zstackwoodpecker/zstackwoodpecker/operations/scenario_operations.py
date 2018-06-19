@@ -605,7 +605,7 @@ def get_primary_storage_type(deploy_config, ps_name):
         for primaryStorage in zone.primaryStorages.get_child_node_as_list('zbsPrimaryStorage'):
             if primaryStorage.name_ == ps_name:
                 return 'zbs'
-        for primaryStorage in zone.primaryStorages.get_child_node_as_list('aliyunNASPrimaryStorageName'):
+        for primaryStorage in zone.primaryStorages.get_child_node_as_list('aliyunNASPrimaryStorage'):
             if primaryStorage.name_ == ps_name:
                 return 'nas'
 
