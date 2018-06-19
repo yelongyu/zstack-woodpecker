@@ -1,17 +1,10 @@
 '''
-test iam2 login by platform admin
+test iam2 zwatch operations by platform admin/operator/member
 
 # 1 create project
-# 2 create virtual id
-# 3 create project admin
-# 4 login in project by project admin
-# 5 create virtual id group
-# 6 create role
-# 7 add virtual id into project and group
-# 8 add/remove roles to/from virtual id (group)
-# 9 create/delete project operator
-# 10 remove virtual ids from group and project
-# 11 delete
+# 2 create virtual id (project admin/operator/member)
+# 3 operations on zwatch with virtual id
+# 4 delete
 
 @author: quarkonics
 '''
@@ -34,34 +27,73 @@ import zstackwoodpecker.test_lib as test_lib
 project_uuid = None
 virtual_id_uuid = None
 project_admin_uuid = None
+project_operator_uuid = None
+plain_user_uuid = None
 test_stub = test_lib.lib_get_test_stub()
 
+case_flavor = dict(project_admin=                   dict(target_role='project_admin'),
+                   project_operator=                dict(target_role='project_operator'),
+                   project_member=                  dict(target_role='project_member'),
+                   )
 
 def test():
-    global project_uuid, project_admin_uuid, virtual_id_uuid
-    global email_platform_uuid, email_endpoint_uuid,http_endpoint_uuid, sns_topic_uuid
+    global project_uuid, project_admin_uuid, virtual_id_uuid, project_operator_uuid, plain_user_uuid
+
+    flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     # 1 create project
     project_name = 'test_project'
     project = iam2_ops.create_iam2_project(project_name)
     project_uuid = project.uuid
     project_linked_account_uuid = project.linkedAccountUuid
 
-    # 2 create virtual id
-    project_admin_name = 'username'
-    project_admin_password = 'password'
-    project_admin_uuid = iam2_ops.create_iam2_virtual_id(project_admin_name, project_admin_password).uuid
-    virtual_id_uuid = iam2_ops.create_iam2_virtual_id('usernametwo', 'password').uuid
+    if flavor['target_role'] == 'project_admin':
+        # 2 create virtual id
+        project_admin_name = 'username'
+        project_admin_password = 'password'
+        project_admin_uuid = iam2_ops.create_iam2_virtual_id(project_admin_name, project_admin_password).uuid
+        virtual_id_uuid = iam2_ops.create_iam2_virtual_id('usernametwo', 'password').uuid
+    
+        # 3 create project admin
+        iam2_ops.add_iam2_virtual_ids_to_project([project_admin_uuid],project_uuid)
+        attributes = [{"name": "__ProjectAdmin__", "value": project_uuid}]
+        iam2_ops.add_attributes_to_iam2_virtual_id(project_admin_uuid, attributes)
 
-    # 3 create project admin
-    iam2_ops.add_iam2_virtual_ids_to_project([project_admin_uuid],project_uuid)
-    attributes = [{"name": "__ProjectAdmin__", "value": project_uuid}]
-    iam2_ops.add_attributes_to_iam2_virtual_id(project_admin_uuid, attributes)
+        # login in project by project admin
+        project_admin_session_uuid = iam2_ops.login_iam2_virtual_id(project_admin_name, project_admin_password)
+        project_login_uuid = iam2_ops.login_iam2_project(project_name, session_uuid=project_admin_session_uuid).uuid
+        # iam2_ops.remove_attributes_from_iam2_virtual_id(virtual_id_uuid, attributes)
+    elif flavor['target_role'] == 'project_operator':
+        project_operator_name = 'username2'
+        project_operator_password = 'password'
+        attributes = [{"name": "__ProjectOperator__", "value": project_uuid}]
+        project_operator_uuid = iam2_ops.create_iam2_virtual_id(project_operator_name,project_operator_password,attributes=attributes).uuid
+        virtual_id_uuid = iam2_ops.create_iam2_virtual_id('usernamethree','password').uuid
 
-    # 4 login in project by project admin
-    project_admin_session_uuid = iam2_ops.login_iam2_virtual_id(project_admin_name, project_admin_password)
-    project_login_uuid = iam2_ops.login_iam2_project(project_name, session_uuid=project_admin_session_uuid).uuid
-    # iam2_ops.remove_attributes_from_iam2_virtual_id(virtual_id_uuid, attributes)
+        # login in project by project operator
+        iam2_ops.add_iam2_virtual_ids_to_project([project_operator_uuid],project_uuid)
+        project_operator_session_uuid = iam2_ops.login_iam2_virtual_id(project_operator_name,project_operator_password)
+        project_login_uuid = iam2_ops.login_iam2_project(project_name,session_uuid=project_operator_session_uuid).uuid
+    elif flavor['target_role'] == 'project_member':
+	plain_user_name = 'username'
+	plain_user_password = 'password'
+	plain_user_uuid = iam2_ops.create_iam2_virtual_id(plain_user_name, plain_user_password,
+	                                                  project_uuid=project_uuid).uuid
+	# 3 add virtual id to project
+	iam2_ops.add_iam2_virtual_ids_to_project([plain_user_uuid],project_uuid)
 
+	# 4 login in project by plain user
+	plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(plain_user_name, plain_user_password)
+
+	# 4 login in project
+	#project_inv=iam2_ops.get_iam2_projects_of_virtual_id(plain_user_session_uuid)
+	project_login_uuid = iam2_ops.login_iam2_project(project_name, plain_user_session_uuid).uuid
+
+
+    # Image related ops: Add, Delete, Expunge, sync image size, Update QGA, delete, expunge
+    if flavor['target_role'] == 'project_member':
+        statements = [{"effect": "Allow", "actions": ["org.zstack.sns.**"]}, {"effect": "Allow", "actions": ["org.zstack.zwatch.**"]}]
+        role_uuid = iam2_ops.create_role('test_role', statements).uuid
+        iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], plain_user_uuid)
 
     # create platform
     smtp_server = os.environ.get('smtpServer')
@@ -107,13 +139,21 @@ def test():
     if not inv:
         test_util.test_fail('create and subscribe snstopic failed')
     cond = res_ops.gen_query_conditions('name', '=', 'system-alarm')
-    system_alarm_topic = res_ops.query_resource(res_ops.SNS_TOPIC, cond, session_uuid=project_login_uuid)[0]
+    system_alarm_topic = res_ops.query_resource(res_ops.SNS_TOPIC, cond)[0]
+    system_alarm_topic_uuid=system_alarm_topic.uuid
+    acc_ops.share_resources([project_linked_account_uuid], [system_alarm_topic_uuid])
+    cond = res_ops.gen_query_conditions('name', '=', 'system-alarm')
+    system_alarm_topic = res_ops.query_resource(res_ops.SNS_TOPIC, cond)[0]
     system_alarm_topic_uuid=system_alarm_topic.uuid
     zwt_ops.subscribe_sns_topic(system_alarm_topic_uuid, email_endpoint_uuid, session_uuid=project_login_uuid)
     cond=res_ops.gen_query_conditions('endpoints.uuid','=',email_endpoint_uuid)
     inv=res_ops.query_resource(res_ops.SNS_TOPIC,cond, session_uuid=project_login_uuid)
     if not inv:
         test_util.test_fail('subscribe system-alarm topic failed')
+    cond = res_ops.gen_query_conditions('name','=','api')
+    api_topic= res_ops.query_resource(res_ops.SNS_TOPIC,cond)[0]
+    api_topic_uuid=api_topic.uuid
+    acc_ops.share_resources([project_linked_account_uuid], [api_topic_uuid])
     cond = res_ops.gen_query_conditions('name','=','api')
     api_topic= res_ops.query_resource(res_ops.SNS_TOPIC,cond, session_uuid=project_login_uuid)[0]
     api_topic_uuid=api_topic.uuid
@@ -244,10 +284,17 @@ def test():
 
     # 11 delete
     acc_ops.logout(project_login_uuid)
-    iam2_ops.delete_iam2_virtual_id(virtual_id_uuid, session_uuid=project_login_uuid)
-    iam2_ops.delete_iam2_virtual_id(project_admin_uuid, session_uuid=project_login_uuid)
-    iam2_ops.delete_iam2_project(project_uuid, session_uuid=project_login_uuid)
-    iam2_ops.expunge_iam2_project(project_uuid, session_uuid=project_login_uuid)
+    if virtual_id_uuid != None:
+        iam2_ops.delete_iam2_virtual_id(virtual_id_uuid)
+    if project_admin_uuid != None:
+        iam2_ops.delete_iam2_virtual_id(project_admin_uuid)
+    if project_operator_uuid != None:
+        iam2_ops.delete_iam2_virtual_id(project_operator_uuid)
+    if plain_user_uuid != None:
+        iam2_ops.delete_iam2_virtual_id(plain_user_uuid)
+
+    iam2_ops.delete_iam2_project(project_uuid)
+    iam2_ops.expunge_iam2_project(project_uuid)
 
     test_util.test_pass('success test iam2 login in by project admin!')
 
@@ -261,13 +308,6 @@ def error_cleanup():
     if project_uuid:
         iam2_ops.delete_iam2_project(project_uuid)
         iam2_ops.expunge_iam2_project(project_uuid)
-    global email_platform_uuid, email_endpoint_uuid, http_endpoint_uuid,sns_topic_uuid
-    if sns_topic_uuid:
-        zwt_ops.delete_sns_topic(sns_topic_uuid)
-    if http_endpoint_uuid:
-        zwt_ops.delete_sns_application_endpoint(http_endpoint_uuid)
-    if email_endpoint_uuid:
-        zwt_ops.delete_sns_application_endpoint(email_endpoint_uuid)
-    if email_platform_uuid:
-        zwt_ops.delete_sns_application_platform(email_platform_uuid)
+    if plain_user_uuid != None:
+        iam2_ops.delete_iam2_virtual_id(plain_user_uuid)
 
