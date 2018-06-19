@@ -19,7 +19,6 @@ def create_resource_stack(resource_stack_option):
         action.name = name
 
     action.templateContent = resource_stack_option.get_templateContent()
-    action.zoneUuid = resource_stack_option.get_zone_uuid()
     action.description = resource_stack_option.get_description()
     action.rollback = resource_stack_option.get_rollback()
     action.templateContent = resource_stack_option.get_templateContent()
@@ -29,11 +28,11 @@ def create_resource_stack(resource_stack_option):
     evt = account_operations.execute_action_with_session(action, resource_stack_option.get_session_uuid())
     return evt.inventory
 
-def preview_resource_stack(resource_stack_option, session_uuid):
+def preview_resource_stack(resource_stack_option, session_uuid=None):
     action = api_actions.PreviewResourceStackAction()
     action.type = resource_stack_option.get_type()
     action.parameters = resource_stack_option.get_parameters()
-    action.templateContent = resource_stack_option.get_parameters()
+    action.templateContent = resource_stack_option.get_templateContent()
     action.uuid = resource_stack_option.get_uuid()
     test_util.action_logger('Preview Resource Stack template')
     evt = account_operations.execute_action_with_session(action, session_uuid)
@@ -52,14 +51,14 @@ def get_resource_from_resource_stack(uuid, session_uuid=None):
     action.uuid = uuid
     test_util.action_logger('get resource from resource stack [uuid:] %s' % uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventory
+    return evt.resources
 
 def query_event_from_resource_stack(uuid, session_uuid=None):
     action = api_actions.QueryEventFromResourceStackAction()
-    action.uuid = uuid
+    action.stackUuid = uuid
     test_util.action_logger('query event from resource stack [uuid:] %s' % uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventory
+    return evt.inventories
 
 def restart_resource_stack(uuid, session_uuid=None):
     action = api_actions.RestartResourceStackAction()

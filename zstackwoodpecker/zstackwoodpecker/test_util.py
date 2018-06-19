@@ -1199,22 +1199,17 @@ class StackTemplateOption(DataOption):
         return self.url
 
 class ResourceStackOption(DataOption):
-    def __init(self):
-        self.zone_uuid = None
+    def __init__(self):
         self.name = None
         self.description = None
         self.type = "zstack"
-        self.rollback = false
+        self.rollback = False
         self.templateContent = None
         self.template_uuid = None
         self.parameters = None
         self.uuid = None
-        super(ResourceStack, self).__init__()
+        super(ResourceStackOption, self).__init__()
 
-    def set_zone_uuid(self, zone_uuid):
-        self.zone_uuid = zone_uuid
-    def get_zone_uuid(self):
-        return self.zone_uuid
     def get_type(self):
         return self.type
     def set_name(self, name):
