@@ -155,7 +155,7 @@
               <host name="$hostName4" description="Test4" managementIp="$hostIp4"
                 username="$hostUsername4" password="$hostPassword4" port="$hostPort4"/>
             </hosts>
-            <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
+            <primaryStorageRef>$aliyunNASPrimaryStorageName</primaryStorageRef>
             <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>

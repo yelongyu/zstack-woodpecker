@@ -21,7 +21,6 @@
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
           </l3Networks>
-	  <backupStorageRef type="imageStore">$imageStoreBackupStorageName2</backupStorageRef>
 	  <primaryStorageRef type="nas">$aliyunNASPrimaryStorageName</primaryStorageRef>
         </vm>
       </vms>
