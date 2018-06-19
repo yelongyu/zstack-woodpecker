@@ -27,6 +27,7 @@ import zstackwoodpecker.test_lib as test_lib
 project_uuid = None
 virtual_id_uuid = None
 project_admin_uuid = None
+project_operator_uuid = None
 plain_user_uuid = None
 test_stub = test_lib.lib_get_test_stub()
 
@@ -36,7 +37,7 @@ case_flavor = dict(project_admin=                   dict(target_role='project_ad
                    )
 
 def test():
-    global project_uuid, project_admin_uuid, virtual_id_uuid, plain_user_uuid
+    global project_uuid, project_admin_uuid, virtual_id_uuid, project_operator_uuid, plain_user_uuid
 
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     # 1 create project
@@ -111,6 +112,10 @@ def test():
         img_ops.delete_exported_image_from_backup_storage(image_uuid, bs.uuid, session_uuid=project_login_uuid)
     img_ops.set_image_qga_enable(image_uuid, session_uuid=project_login_uuid)
     img_ops.set_image_qga_disable(image_uuid, session_uuid=project_login_uuid)
+    cond = res_ops.gen_query_conditions('name', '=', "fake_image")
+    image = res_ops.query_resource(res_ops.IMAGE, cond, session_uuid=project_login_uuid)
+    if image == None:
+        test_util.test_fail('fail to query image just added')
     img_ops.delete_image(image_uuid, session_uuid=project_login_uuid)
     img_ops.expunge_image(image_uuid, session_uuid=project_login_uuid)
 
@@ -120,6 +125,8 @@ def test():
         iam2_ops.delete_iam2_virtual_id(virtual_id_uuid)
     if project_admin_uuid != None:
         iam2_ops.delete_iam2_virtual_id(project_admin_uuid)
+    if project_operator_uuid != None:
+        iam2_ops.delete_iam2_virtual_id(project_operator_uuid)
     if plain_user_uuid != None:
         iam2_ops.delete_iam2_virtual_id(plain_user_uuid)
 
