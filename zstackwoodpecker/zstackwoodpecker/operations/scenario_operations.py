@@ -665,7 +665,7 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
             continue
         for zone in xmlobject.safe_list(deploy_config.zones.zone):
             primary_storage_type = get_primary_storage_type(deploy_config, primaryStorageRef.text_)
-            if primary_storage_type == 'nfs' or primary_storage_type == 'nas':
+            if primary_storage_type == 'nfs':
                 for nfsPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.nfsPrimaryStorage):
                     if primaryStorageRef.text_ == nfsPrimaryStorage.name_:
                         test_util.test_logger('[vm:] %s setup nfs service.' % (vm_ip))
@@ -707,6 +707,19 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
                                 cmd = "mount %s:/home/nfs /home/smp-ps/" %(SMP_SERVER_IP)
                                 ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
                                 continue
+            elif primary_storage_type == 'nas':
+                for aliyunNASPrimaryStorage in xmlobject.safe_list(zone.primaryStorages.aliyunNASPrimaryStorage):
+                    if primaryStorageRef.text_ == aliyunNASPrimaryStorage.name_:
+                        test_util.test_logger('[vm:] %s setup nfs service.' % (vm_ip))
+                        nasPath = aliyunNASPrimaryStorage.url_.split(':')[1]
+                        cmd = "echo '%s *(rw,sync,no_root_squash)' > /etc/exports" % (nasPath)
+                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                        cmd = "mkdir -p %s && service rpcbind restart && service nfs restart" % (nfsPath)
+                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                        cmd = "iptables -w 20 -I INPUT -p tcp -m tcp --dport 2049 -j ACCEPT && iptables -w 20 -I INPUT -p udp -m udp --dport 2049 -j ACCEPT"
+                        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
+                        nas_mt = vm_ip
+                        continue
     if nas_mt:
         return nas_mt
     else:
