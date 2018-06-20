@@ -145,7 +145,8 @@
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
         <primaryStorages>
           <aliyunNASPrimaryStorage name="$aliyunNASPrimaryStorageName"
-          description="NASTest"/>
+            description="Test Aliyun NAS Primary Storage"
+            url="$aliyunNASPrimaryStorageUrl" />
         </primaryStorages>
 
         <clusters>
