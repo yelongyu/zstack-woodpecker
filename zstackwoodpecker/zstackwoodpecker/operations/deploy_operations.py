@@ -26,7 +26,6 @@ import time
 import nas_operations as nas_ops
 import hybrid_operations as hyb_ops
 import config_operations as cfg_ops
-import scenario_operations.post_to_mock_server as post_to_mock_server
 
 #global exception information for thread usage
 exc_info = []
