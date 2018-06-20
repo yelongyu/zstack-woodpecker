@@ -142,7 +142,7 @@
   
     <zones>
       <zone name="$zoneName" description="Test Zone">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
         <primaryStorages>
           <aliyunNASPrimaryStorage name="$aliyunNASPrimaryStorageName"
             description="Test Aliyun NAS Primary Storage"
