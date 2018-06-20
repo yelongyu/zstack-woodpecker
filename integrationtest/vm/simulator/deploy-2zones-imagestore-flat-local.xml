@@ -76,11 +76,17 @@
         memoryCapacity="$virtualRouterOfferingMemory_s" 
         cpuNum="$virtualRouterOfferingCpuNum_s" isDefault="true">
         <zoneRef>$zoneName1</zoneRef>
-         <zoneRef>$zoneName2</zoneRef>
         <!--<managementL3NetworkRef>$l3ManagementNetworkName</managementL3NetworkRef>-->
         <managementL3NetworkRef>$l3PublicNetworkName1</managementL3NetworkRef>
-        <managementL3NetworkRef>$l3PublicNetworkName2</managementL3NetworkRef>
         <publicL3NetworkRef>$l3PublicNetworkName1</publicL3NetworkRef>
+        <imageRef>$virtualRouterImageName</imageRef>
+      </virtualRouterOffering>
+            <virtualRouterOffering name="$virtualRouterOfferingName_s2"
+        memoryCapacity="$virtualRouterOfferingMemory_s"
+        cpuNum="$virtualRouterOfferingCpuNum_s" isDefault="true">
+         <zoneRef>$zoneName2</zoneRef>
+        <!--<managementL3NetworkRef>$l3ManagementNetworkName</managementL3NetworkRef>-->
+        <managementL3NetworkRef>$l3PublicNetworkName2</managementL3NetworkRef>
         <publicL3NetworkRef>$l3PublicNetworkName2</publicL3NetworkRef>
         <imageRef>$virtualRouterImageName</imageRef>
       </virtualRouterOffering>

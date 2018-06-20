@@ -23,3 +23,5 @@ l3PublicNetworkName1 = public network1
 
 l3ManagementNetworkName2 = management network2
 l3PublicNetworkName2 = public network2
+
+virtualRouterOfferingName_s2 = virtual-router-vm2
