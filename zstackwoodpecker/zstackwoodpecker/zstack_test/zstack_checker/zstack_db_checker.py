@@ -266,13 +266,14 @@ class zstack_vid_attr_db_checker(checker_header.TestChecker):
             vid = res_ops.query_resource(res_ops.IAM2_VIRTUAL_ID, conditions)[0]
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
-            test_util.test_logger('Check result: [account Inventory uuid:] %s does not exist in database.' % self.test_obj.virtual_id.uuid)
+            test_util.test_logger('Check result: [vid Inventory uuid:] %s does not exist in database.' % self.test_obj.virtual_id.uuid)
             return self.judge(False)
 
         for attr in vid.attributes.name:
             if attr = virtual_id.attributes.name:
-                test_util.test_logger('Check result: [account Inventory uuid:] %s exist in database.' % virtual_id.uuid)
+                test_util.test_logger('Check result: [vid Inventory attribute:] exist in database.')
                 return self.judge(True)
+        return self.judge(False)
 
 class zstack_vid_policy_db_checker(checker_header.TestChecker):
     '''check virtual id policy existence in database. If it is in DB,
@@ -281,12 +282,28 @@ class zstack_vid_policy_db_checker(checker_header.TestChecker):
         super(zstack_vid_policy_db_checker, self).check()
         try:
             conditions = res_ops.gen_query_conditions('uuid', '=', self.test_obj.virtual_id.uuid)
-            account = res_ops.query_resource(res_ops.IAM2_VIRTUAL_ID, conditions)[0]
+            vid = res_ops.query_resource(res_ops.IAM2_VIRTUAL_ID, conditions)[0]
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
-            test_util.test_logger('Check result: [account Inventory uuid:] %s does not exist in database.' % self.test_obj.virtual_id.uuid)
+            test_util.test_logger('Check result: [vid Inventory uuid:] %s does not exist in database.' % self.test_obj.virtual_id.uuid)
             return self.judge(False)
 
-        test_util.test_logger('Check result: [account Inventory uuid:] %s exist in database.' % virtual_id.uuid)
+        try:
+            conditions = res_ops.gen_query_conditions('virtualids.uuid', '=', self.test_obj.virtual_id.uuid)
+            conditions = res_ops.gen_query_conditions('project.uuid', '=', self.test_obj.project.uuid, conditions)
+            statement = res_ops.query_resource(res_ops.IAM2_VIRTUAL_ID, conditions)[0].statements.statement
+                for act in self.test_obj.virtual_id.statements.statement:
+                    test_result = False
+                    for action in statement:
+                        if actiot == act:
+                            test_result = True
+                    if test_result == False:
+                        test_util.test_logger('Check result: [vid Inventory policy] does not exist in database.')
+                        return self.judge(False)
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            test_util.test_logger('Check result: [vid Inventory policy] does not exist in database.')
+            return self.judge(False)        
+        test_util.test_logger('Check result: [vid Inventory policy] exist in database.' )
         return self.judge(True)
 
