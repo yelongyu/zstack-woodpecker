@@ -75,14 +75,17 @@
       <virtualRouterOffering name="$virtualRouterOfferingName_s"
         memoryCapacity="$virtualRouterOfferingMemory_s" 
         cpuNum="$virtualRouterOfferingCpuNum_s" isDefault="true">
-        <zoneRef>$zoneName</zoneRef>
+        <zoneRef>$zoneName1</zoneRef>
+         <zoneRef>$zoneName2</zoneRef>
         <!--<managementL3NetworkRef>$l3ManagementNetworkName</managementL3NetworkRef>-->
-        <managementL3NetworkRef>$l3PublicNetworkName</managementL3NetworkRef>
-        <publicL3NetworkRef>$l3PublicNetworkName</publicL3NetworkRef>
+        <managementL3NetworkRef>$l3PublicNetworkName1</managementL3NetworkRef>
+        <managementL3NetworkRef>$l3PublicNetworkName2</managementL3NetworkRef>
+        <publicL3NetworkRef>$l3PublicNetworkName1</publicL3NetworkRef>
+        <publicL3NetworkRef>$l3PublicNetworkName2</publicL3NetworkRef>
         <imageRef>$virtualRouterImageName</imageRef>
       </virtualRouterOffering>
     </instanceOfferings>
-
+  
     <backupStorages>
       <imageStoreBackupStorage name="$sftpBackupStorageName"
         description="Test" url="$sftpBackupStorageUrl"
@@ -92,71 +95,89 @@
 	port="$sftpBackupStoragePort"/>
     </backupStorages>
     <images>
-      <image name="$imageName_s" description="Test Image1"
-        format="$rootImageFormat" url="$imageUrl_s"
+      <image name="$imageName_s" description="Test Image1" 
+        format="$rootImageFormat" url="$imageUrl_s" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
-      <image name="$imageName_net" description="Test Image2"
-        format="$rootImageFormat" url="$imageUrl_net"
+      <image name="$imageName_net" description="Test Image2" 
+        format="$rootImageFormat" url="$imageUrl_net" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
-      <image name="$imageName3" description="Test Image3"
-        format="$rootImageFormat" url="$imageUrl3"
+      <image name="$imageName3" description="Test Image3" 
+        format="$rootImageFormat" url="$imageUrl3" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
-      <image name="$virtualRouterImageName"
-        description="virtual router image" format="$rootImageFormat"
+      <image name="$virtualRouterImageName" 
+        description="virtual router image" format="$rootImageFormat" 
         username="$vrImageUsername" password="$vrImagePassword"
         mediaType="$rootMediaType"
         hypervisorType='KVM' url="$virtualRouterImageUrl" system="True">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
     </images>
-
+  
     <diskOfferings>
-      <diskOffering name="$largeDiskOfferingName"
-        description="large Disk Offering"
+      <diskOffering name="$largeDiskOfferingName" 
+        description="large Disk Offering" 
         diskSize="$largeDiskOfferingSize" />
-
-      <diskOffering name="$mediumDiskOfferingName"
-        description="Medium Disk Offering"
+  
+      <diskOffering name="$mediumDiskOfferingName" 
+        description="Medium Disk Offering" 
         diskSize="$mediumDiskOfferingSize" />
-
-      <diskOffering name="$smallDiskOfferingName"
-        description="Small Disk Offering"
-        diskSize="$smallDiskOfferingSize" />
+  
+      <diskOffering name="$smallDiskOfferingName" 
+        description="Small Disk Offering" 
+        diskSize="$smallDiskOfferingSize" /> 
     </diskOfferings>
-
+  
     <zones>
-      <zone name="$zoneName" description="Test" duplication='2'>
+      <zone name="$zoneName1" description="Test">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
         <primaryStorages>
-	  <localPrimaryStorage name="$localPrimaryStorageName"
+	  <localPrimaryStorage name="$localPrimaryStorageName1"
             description="Test Local Primary Storage"
-            url="$localPrimaryStorageUrl" />
+            url="$localPrimaryStorageUrl1" />
         </primaryStorages>
-
+  
         <clusters>
-          <cluster name="$clusterName" description="Test"
+          <cluster name="$clusterName1" description="Test"
             hypervisorType="$clusterHypervisorType">
             <hosts>
               <host name="$hostName" description="Test" managementIp="$hostIp"
                 username="$hostUsername" password="$hostPassword" />
               <host name="$hostName2" description="Test2" managementIp="$hostIp2"
                 username="$hostUsername2" password="$hostPassword2" port="$hostPort2"/>
-              <host name="$hostName3" description="Test3" managementIp="$hostIp3"
-                username="$hostUsername3" password="$hostPassword3" />
-              <host name="$hostName5" description="Test5" managementIp="$hostIp5"
-                username="$hostUsername5" password="$hostPassword5" port="$hostPort5"/>
             </hosts>
-            <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
+            <primaryStorageRef>$localPrimaryStorageName1</primaryStorageRef>
             <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
+            <l2NetworkRef>$l2PublicNetworkName1</l2NetworkRef>
+            <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName2</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName3</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName4</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName5</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName6</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName7</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName8</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName9</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName10</l2NetworkRef>
+
+          </cluster>
+          <!--
+          <cluster name="$clusterName2" description="Test"
+            hypervisorType="$clusterHypervisorType">
+            <hosts>
+              <host name="$hostName5" description="Ubuntu" managementIp="$hostIp5"
+                username="$hostUsername" password="$hostPassword" />
+            </hosts>
+            <primaryStorageRef>$nfsPrimaryStorageName2</primaryStorageRef>
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
@@ -170,6 +191,297 @@
             <l2NetworkRef>$l2VlanNetworkName8</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName9</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName10</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName11</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName12</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName13</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName14</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName15</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName16</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName17</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName18</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName19</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName20</l2NetworkRef>
+          </cluster>
+-->
+        </clusters>
+  
+        <l2Networks>
+           <l2NoVlanNetwork name="$l2ManagementNetworkName1" description="Basic L2 for management network"
+             physicalInterface="$l2ManagementNetworkInterface">
+             <l3Networks>
+               <l3BasicNetwork name="$l3ManagementNetworkName1" category="System" description="Management L3 Network without Vlan and no special services" system="True">
+                 <ipRange name="$ipRangeManagementName" description="Test"
+                   startIp="$ipRangeManagementStartIp" endIp="$ipRangeManagementEndIp" gateway="$ipRangeManagementGateway"
+                   netmask="$ipRangeManagementNetmask" />
+                 <dns>$DNSServer</dns>
+               </l3BasicNetwork>
+             </l3Networks>
+          </l2NoVlanNetwork>
+
+          <l2NoVlanNetwork name="$l2PublicNetworkName1"
+            description="Test" physicalInterface="$l2PublicNetworkInterface">
+            <l3Networks>
+              <l3BasicNetwork name="$l3PublicNetworkName1" category="Public" description="Public Network">
+                <ipRange name="$ipRangeName" description="Test"
+                  startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
+                  netmask="$ipRangeNetmask" />
+                <dns>$DNSServer</dns>
+              </l3BasicNetwork>
+            </l3Networks>
+          </l2NoVlanNetwork>
+          
+          <l2NoVlanNetwork name="$l2NoVlanNetworkName1" description="guest l2 network"
+            physicalInterface="$l2NoVlanNetworkInterface1">
+            <l3Networks>
+              <l3BasicNetwork name="$l3NoVlanNetworkName1" description = "guest l3 network with user defined vlan">
+                <ipRange name="$noVlanIpRangeName1" 
+                  startIp="$noVlanIpRangeStart1" 
+                  endIp="$noVlanIpRangeEnd1"
+                  gateway="$noVlanIpRangeGateway1" 
+                  netmask="$noVlanIpRangeNetmask1"/>
+                <dns>$DNSServer</dns> 
+                <networkService provider="Flat Network Service Provider">
+                  <serviceType>DHCP</serviceType>
+                  <serviceType>Eip</serviceType>
+                </networkService>
+                <networkService provider="SecurityGroup">
+                  <serviceType>SecurityGroup</serviceType>
+                </networkService>
+              </l3BasicNetwork>
+            </l3Networks>
+          </l2NoVlanNetwork>
+
+          <l2VlanNetwork name="$l2VlanNetworkName1" 
+            description="guest l2 vlan network1"
+            physicalInterface="$l2NetworkPhysicalInterface" 
+            vlan="$l2Vlan1">
+            <l3Networks>
+              <l3BasicNetwork name="$l3VlanNetworkName1" 
+                description = "guest test vlan network with DHCP DNS and SNAT"
+                domain_name = "$L3VlanNetworkDomainName1">
+                <ipRange name="$vlanIpRangeName1" 
+                  startIp="$vlanIpRangeStart1" 
+                  endIp="$vlanIpRangeEnd1"
+                  gateway="$vlanIpRangeGateway1" 
+                  netmask="$vlanIpRangeNetmask1"/>
+                <dns>$DNSServer</dns> 
+                <networkService provider="Flat Network Service Provider">
+                  <serviceType>DHCP</serviceType>
+                  <serviceType>Eip</serviceType>
+                </networkService>
+                <networkService provider="SecurityGroup">
+                  <serviceType>SecurityGroup</serviceType>
+                </networkService>
+              </l3BasicNetwork>
+            </l3Networks>
+          </l2VlanNetwork>
+  
+          <l2VlanNetwork name="$l2VlanNetworkName2" 
+            description="guest l2 vlan network 2"
+            physicalInterface="$l2NetworkPhysicalInterface" 
+            vlan="$l2Vlan2">
+            <l3Networks>
+              <l3BasicNetwork name="$l3VlanNetwork2" 
+                description = "guest test vlan network 2"
+                domain_name = "$L3VlanNetworkDomainName2">
+                <ipRange name="$vlanIpRangeName2" startIp="$vlanIpRangeStart2" endIp="$vlanIpRangeEnd2" gateway="$vlanIpRangeGateway2" netmask="$vlanIpRangeNetmask2"/>
+                <dns>$DNSServer</dns>
+                <networkService provider="Flat Network Service Provider">
+                  <serviceType>DHCP</serviceType>
+                  <serviceType>Eip</serviceType>
+                </networkService>
+                <networkService provider="SecurityGroup">
+                  <serviceType>SecurityGroup</serviceType>
+                </networkService>
+              </l3BasicNetwork>
+            </l3Networks>
+          </l2VlanNetwork>
+  
+          <l2VlanNetwork name="$l2VlanNetworkName3" 
+            description="guest l2 vlan network 3"
+            physicalInterface="$l2NetworkPhysicalInterface" 
+            vlan="$l2Vlan3">
+            <l3Networks>
+              <l3BasicNetwork name="$l3VlanNetwork3" 
+                description = "guest test vlan network 3"
+                domain_name = "$L3VlanNetworkDomainName3">
+                <ipRange name="$vlanIpRangeName3" startIp="$vlanIpRangeStart3" endIp="$vlanIpRangeEnd3" gateway="$vlanIpRangeGateway3" netmask="$vlanIpRangeNetmask3"/>
+                <dns>$DNSServer</dns>
+                <networkService provider="Flat Network Service Provider">
+                  <serviceType>DHCP</serviceType>
+                  <serviceType>Eip</serviceType>
+                </networkService>
+                <networkService provider="SecurityGroup">
+                  <serviceType>SecurityGroup</serviceType>
+                </networkService>
+              </l3BasicNetwork>
+            </l3Networks>
+          </l2VlanNetwork>
+  
+          <l2VlanNetwork name="$l2VlanNetworkName4" 
+            description="guest l2 vlan network 4"
+            physicalInterface="$l2NetworkPhysicalInterface" 
+            vlan="$l2Vlan4">
+            <l3Networks>
+              <l3BasicNetwork name="$l3VlanNetwork4" 
+                description = "guest test vlan network 4"
+                domain_name = "$L3VlanNetworkDomainName1">
+                <ipRange name="$vlanIpRangeName4" startIp="$vlanIpRangeStart4" endIp="$vlanIpRangeEnd4" gateway="$vlanIpRangeGateway4" netmask="$vlanIpRangeNetmask4"/>
+                <dns>$DNSServer</dns>
+                <networkService provider="Flat Network Service Provider">
+                  <serviceType>DHCP</serviceType>
+                  <serviceType>Eip</serviceType>
+                </networkService>
+                <networkService provider="SecurityGroup">
+                  <serviceType>SecurityGroup</serviceType>
+                </networkService>
+              </l3BasicNetwork>
+            </l3Networks>
+          </l2VlanNetwork>
+  
+          <l2VlanNetwork name="$l2VlanNetworkName5" 
+            description="guest l2 vlan network 5"
+            physicalInterface="$l2NetworkPhysicalInterface" 
+            vlan="$l2Vlan5">
+            <l3Networks>
+              <l3BasicNetwork name="$l3VlanNetwork5" 
+                description = "guest test vlan network 5">
+                <ipRange name="$vlanIpRangeName5" startIp="$vlanIpRangeStart5" endIp="$vlanIpRangeEnd5" gateway="$vlanIpRangeGateway5" netmask="$vlanIpRangeNetmask5"/>
+                <dns>$DNSServer</dns>
+                <networkService provider="Flat Network Service Provider">
+                  <serviceType>DHCP</serviceType>
+                  <serviceType>Eip</serviceType>
+                </networkService>
+                <networkService provider="SecurityGroup">
+                  <serviceType>SecurityGroup</serviceType>
+                </networkService>
+              </l3BasicNetwork>
+            </l3Networks>
+          </l2VlanNetwork>
+  
+          <l2VlanNetwork name="$l2VlanNetworkName6" 
+            description="guest l2 vlan network 6"
+            physicalInterface="$l2NetworkPhysicalInterface" 
+            vlan="$l2Vlan6">
+            <l3Networks>
+              <l3BasicNetwork name="$l3VlanNetwork6" 
+                description = "guest test vlan network 6">
+                <ipRange name="$vlanIpRangeName6" startIp="$vlanIpRangeStart6" endIp="$vlanIpRangeEnd6" gateway="$vlanIpRangeGateway6" netmask="$vlanIpRangeNetmask6"/>
+                <dns>$DNSServer</dns>
+                <networkService provider="Flat Network Service Provider">
+                  <serviceType>DHCP</serviceType>
+                  <serviceType>Eip</serviceType>
+                </networkService>
+                <networkService provider="SecurityGroup">
+                  <serviceType>SecurityGroup</serviceType>
+                </networkService>
+              </l3BasicNetwork>
+            </l3Networks>
+          </l2VlanNetwork>
+  
+          <l2VlanNetwork name="$l2VlanNetworkName7" 
+            description="guest l2 vlan network 7"
+            physicalInterface="$l2NetworkPhysicalInterface" 
+            vlan="$l2Vlan7">
+            <l3Networks>
+              <l3BasicNetwork name="$l3VlanNetwork7" 
+                description = "guest test vlan network 7">
+                <ipRange name="$vlanIpRangeName7" startIp="$vlanIpRangeStart7" endIp="$vlanIpRangeEnd7" gateway="$vlanIpRangeGateway7" netmask="$vlanIpRangeNetmask7"/>
+                <dns>$DNSServer</dns>
+                <networkService provider="Flat Network Service Provider">
+                  <serviceType>DHCP</serviceType>
+                  <serviceType>Eip</serviceType>
+                </networkService>
+                <networkService provider="SecurityGroup">
+                  <serviceType>SecurityGroup</serviceType>
+                </networkService>
+              </l3BasicNetwork>
+            </l3Networks>
+          </l2VlanNetwork>
+  
+          <l2VlanNetwork name="$l2VlanNetworkName8" 
+            description="guest l2 vlan network 8"
+            physicalInterface="$l2NetworkPhysicalInterface" 
+            vlan="$l2Vlan8">
+            <l3Networks>
+              <l3BasicNetwork name="$l3VlanNetwork8" 
+                description = "guest test vlan network 8">
+                <ipRange name="$vlanIpRangeName8" startIp="$vlanIpRangeStart8" endIp="$vlanIpRangeEnd8" gateway="$vlanIpRangeGateway8" netmask="$vlanIpRangeNetmask8"/>
+                <dns>$DNSServer</dns>
+                <networkService provider="Flat Network Service Provider">
+                  <serviceType>DHCP</serviceType>
+                  <serviceType>Eip</serviceType>
+                </networkService>
+                <networkService provider="SecurityGroup">
+                  <serviceType>SecurityGroup</serviceType>
+                </networkService>
+              </l3BasicNetwork>
+            </l3Networks>
+          </l2VlanNetwork>
+  
+          <l2VlanNetwork name="$l2VlanNetworkName9" 
+            description="guest l2 vlan network 9"
+            physicalInterface="$l2NetworkPhysicalInterface" 
+            vlan="$l2Vlan9">
+            <l3Networks>
+              <l3BasicNetwork name="$l3VlanNetwork9" 
+                description = "guest test vlan network 9">
+                <ipRange name="$vlanIpRangeName9" startIp="$vlanIpRangeStart9" endIp="$vlanIpRangeEnd9" gateway="$vlanIpRangeGateway9" netmask="$vlanIpRangeNetmask9"/>
+                <dns>$DNSServer</dns>
+                <networkService provider="Flat Network Service Provider">
+                  <serviceType>DHCP</serviceType>
+                  <serviceType>Eip</serviceType>
+                </networkService>
+                <networkService provider="SecurityGroup">
+                  <serviceType>SecurityGroup</serviceType>
+                </networkService>
+              </l3BasicNetwork>
+            </l3Networks>
+          </l2VlanNetwork>
+  
+          <l2VlanNetwork name="$l2VlanNetworkName10" 
+            description="guest l2 vlan network 10"
+            physicalInterface="$l2NetworkPhysicalInterface" 
+            vlan="$l2Vlan10">
+            <l3Networks>
+              <l3BasicNetwork name="$l3VlanNetwork10" 
+                description = "guest test vlan network 10">
+                <ipRange name="$vlanIpRangeName10" startIp="$vlanIpRangeStart10" endIp="$vlanIpRangeEnd10" gateway="$vlanIpRangeGateway10" netmask="$vlanIpRangeNetmask10"/>
+                <dns>$DNSServer</dns>
+                <networkService provider="Flat Network Service Provider">
+                  <serviceType>DHCP</serviceType>
+                  <serviceType>Eip</serviceType>
+                </networkService>
+                <networkService provider="SecurityGroup">
+                  <serviceType>SecurityGroup</serviceType>
+                </networkService>
+              </l3BasicNetwork>
+            </l3Networks>
+          </l2VlanNetwork>
+
+        </l2Networks>
+      </zone>
+      <zone name="$zoneName2" description="Test">
+        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <primaryStorages>
+	  <localPrimaryStorage name="$localPrimaryStorageName2"
+            description="Test Local Primary Storage"
+            url="$localPrimaryStorageUrl2" />
+        </primaryStorages>
+
+        <clusters>
+          <cluster name="$clusterName2" description="Test"
+            hypervisorType="$clusterHypervisorType">
+            <hosts>
+              <host name="$hostName3" description="Test3" managementIp="$hostIp3"
+                username="$hostUsername3" password="$hostPassword3" />
+              <host name="$hostName5" description="Test5" managementIp="$hostIp5"
+                username="$hostUsername5" password="$hostPassword5" port="$hostPort5"/>
+            </hosts>
+            <primaryStorageRef>$localPrimaryStorageName2</primaryStorageRef>
+            <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
+            <l2NetworkRef>$l2PublicNetworkName2</l2NetworkRef>
+            <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName11</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName12</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName13</l2NetworkRef>
@@ -217,10 +529,10 @@
         </clusters>
 
         <l2Networks>
-           <l2NoVlanNetwork name="$l2ManagementNetworkName" description="Basic L2 for management network"
+           <l2NoVlanNetwork name="$l2ManagementNetworkName2" description="Basic L2 for management network"
              physicalInterface="$l2ManagementNetworkInterface">
              <l3Networks>
-               <l3BasicNetwork name="$l3ManagementNetworkName" category="System" description="Management L3 Network without Vlan and no special services" system="True">
+               <l3BasicNetwork name="$l3ManagementNetworkName2" category="System" description="Management L3 Network without Vlan and no special services" system="True">
                  <ipRange name="$ipRangeManagementName" description="Test"
                    startIp="$ipRangeManagementStartIp" endIp="$ipRangeManagementEndIp" gateway="$ipRangeManagementGateway"
                    netmask="$ipRangeManagementNetmask" />
@@ -229,35 +541,14 @@
              </l3Networks>
           </l2NoVlanNetwork>
 
-          <l2NoVlanNetwork name="$l2PublicNetworkName"
+          <l2NoVlanNetwork name="$l2PublicNetworkName2"
             description="Test" physicalInterface="$l2PublicNetworkInterface">
             <l3Networks>
-              <l3BasicNetwork name="$l3PublicNetworkName" category="Public" description="Public Network">
+              <l3BasicNetwork name="$l3PublicNetworkName2" category="Public" description="Public Network">
                 <ipRange name="$ipRangeName" description="Test"
                   startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
                   netmask="$ipRangeNetmask" />
                 <dns>$DNSServer</dns>
-              </l3BasicNetwork>
-            </l3Networks>
-          </l2NoVlanNetwork>
-
-          <l2NoVlanNetwork name="$l2NoVlanNetworkName1" description="guest l2 network"
-            physicalInterface="$l2NoVlanNetworkInterface1">
-            <l3Networks>
-              <l3BasicNetwork name="$l3NoVlanNetworkName1" description = "guest l3 network with user defined vlan">
-                <ipRange name="$noVlanIpRangeName1"
-                  startIp="$noVlanIpRangeStart1"
-                  endIp="$noVlanIpRangeEnd1"
-                  gateway="$noVlanIpRangeGateway1"
-                  netmask="$noVlanIpRangeNetmask1"/>
-                <dns>$DNSServer</dns>
-                <networkService provider="Flat Network Service Provider">
-                  <serviceType>DHCP</serviceType>
-                  <serviceType>Eip</serviceType>
-                </networkService>
-                <networkService provider="SecurityGroup">
-                  <serviceType>SecurityGroup</serviceType>
-                </networkService>
               </l3BasicNetwork>
             </l3Networks>
           </l2NoVlanNetwork>
@@ -282,214 +573,6 @@
               </l3BasicNetwork>
             </l3Networks>
           </l2NoVlanNetwork>
-
-          <l2VlanNetwork name="$l2VlanNetworkName1"
-            description="guest l2 vlan network1"
-            physicalInterface="$l2NetworkPhysicalInterface"
-            vlan="$l2Vlan1">
-            <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetworkName1"
-                description = "guest test vlan network with DHCP DNS and SNAT"
-                domain_name = "$L3VlanNetworkDomainName1">
-                <ipRange name="$vlanIpRangeName1"
-                  startIp="$vlanIpRangeStart1"
-                  endIp="$vlanIpRangeEnd1"
-                  gateway="$vlanIpRangeGateway1"
-                  netmask="$vlanIpRangeNetmask1"/>
-                <dns>$DNSServer</dns>
-                <networkService provider="Flat Network Service Provider">
-                  <serviceType>DHCP</serviceType>
-                  <serviceType>Eip</serviceType>
-                </networkService>
-                <networkService provider="SecurityGroup">
-                  <serviceType>SecurityGroup</serviceType>
-                </networkService>
-              </l3BasicNetwork>
-            </l3Networks>
-          </l2VlanNetwork>
-
-          <l2VlanNetwork name="$l2VlanNetworkName2"
-            description="guest l2 vlan network 2"
-            physicalInterface="$l2NetworkPhysicalInterface"
-            vlan="$l2Vlan2">
-            <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetwork2"
-                description = "guest test vlan network 2"
-                domain_name = "$L3VlanNetworkDomainName2">
-                <ipRange name="$vlanIpRangeName2" startIp="$vlanIpRangeStart2" endIp="$vlanIpRangeEnd2" gateway="$vlanIpRangeGateway2" netmask="$vlanIpRangeNetmask2"/>
-                <dns>$DNSServer</dns>
-                <networkService provider="Flat Network Service Provider">
-                  <serviceType>DHCP</serviceType>
-                  <serviceType>Eip</serviceType>
-                </networkService>
-                <networkService provider="SecurityGroup">
-                  <serviceType>SecurityGroup</serviceType>
-                </networkService>
-              </l3BasicNetwork>
-            </l3Networks>
-          </l2VlanNetwork>
-
-          <l2VlanNetwork name="$l2VlanNetworkName3"
-            description="guest l2 vlan network 3"
-            physicalInterface="$l2NetworkPhysicalInterface"
-            vlan="$l2Vlan3">
-            <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetwork3"
-                description = "guest test vlan network 3"
-                domain_name = "$L3VlanNetworkDomainName3">
-                <ipRange name="$vlanIpRangeName3" startIp="$vlanIpRangeStart3" endIp="$vlanIpRangeEnd3" gateway="$vlanIpRangeGateway3" netmask="$vlanIpRangeNetmask3"/>
-                <dns>$DNSServer</dns>
-                <networkService provider="Flat Network Service Provider">
-                  <serviceType>DHCP</serviceType>
-                  <serviceType>Eip</serviceType>
-                </networkService>
-                <networkService provider="SecurityGroup">
-                  <serviceType>SecurityGroup</serviceType>
-                </networkService>
-              </l3BasicNetwork>
-            </l3Networks>
-          </l2VlanNetwork>
-
-          <l2VlanNetwork name="$l2VlanNetworkName4"
-            description="guest l2 vlan network 4"
-            physicalInterface="$l2NetworkPhysicalInterface"
-            vlan="$l2Vlan4">
-            <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetwork4"
-                description = "guest test vlan network 4"
-                domain_name = "$L3VlanNetworkDomainName1">
-                <ipRange name="$vlanIpRangeName4" startIp="$vlanIpRangeStart4" endIp="$vlanIpRangeEnd4" gateway="$vlanIpRangeGateway4" netmask="$vlanIpRangeNetmask4"/>
-                <dns>$DNSServer</dns>
-                <networkService provider="Flat Network Service Provider">
-                  <serviceType>DHCP</serviceType>
-                  <serviceType>Eip</serviceType>
-                </networkService>
-                <networkService provider="SecurityGroup">
-                  <serviceType>SecurityGroup</serviceType>
-                </networkService>
-              </l3BasicNetwork>
-            </l3Networks>
-          </l2VlanNetwork>
-
-          <l2VlanNetwork name="$l2VlanNetworkName5"
-            description="guest l2 vlan network 5"
-            physicalInterface="$l2NetworkPhysicalInterface"
-            vlan="$l2Vlan5">
-            <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetwork5"
-                description = "guest test vlan network 5">
-                <ipRange name="$vlanIpRangeName5" startIp="$vlanIpRangeStart5" endIp="$vlanIpRangeEnd5" gateway="$vlanIpRangeGateway5" netmask="$vlanIpRangeNetmask5"/>
-                <dns>$DNSServer</dns>
-                <networkService provider="Flat Network Service Provider">
-                  <serviceType>DHCP</serviceType>
-                  <serviceType>Eip</serviceType>
-                </networkService>
-                <networkService provider="SecurityGroup">
-                  <serviceType>SecurityGroup</serviceType>
-                </networkService>
-              </l3BasicNetwork>
-            </l3Networks>
-          </l2VlanNetwork>
-
-          <l2VlanNetwork name="$l2VlanNetworkName6"
-            description="guest l2 vlan network 6"
-            physicalInterface="$l2NetworkPhysicalInterface"
-            vlan="$l2Vlan6">
-            <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetwork6"
-                description = "guest test vlan network 6">
-                <ipRange name="$vlanIpRangeName6" startIp="$vlanIpRangeStart6" endIp="$vlanIpRangeEnd6" gateway="$vlanIpRangeGateway6" netmask="$vlanIpRangeNetmask6"/>
-                <dns>$DNSServer</dns>
-                <networkService provider="Flat Network Service Provider">
-                  <serviceType>DHCP</serviceType>
-                  <serviceType>Eip</serviceType>
-                </networkService>
-                <networkService provider="SecurityGroup">
-                  <serviceType>SecurityGroup</serviceType>
-                </networkService>
-              </l3BasicNetwork>
-            </l3Networks>
-          </l2VlanNetwork>
-
-          <l2VlanNetwork name="$l2VlanNetworkName7"
-            description="guest l2 vlan network 7"
-            physicalInterface="$l2NetworkPhysicalInterface"
-            vlan="$l2Vlan7">
-            <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetwork7"
-                description = "guest test vlan network 7">
-                <ipRange name="$vlanIpRangeName7" startIp="$vlanIpRangeStart7" endIp="$vlanIpRangeEnd7" gateway="$vlanIpRangeGateway7" netmask="$vlanIpRangeNetmask7"/>
-                <dns>$DNSServer</dns>
-                <networkService provider="Flat Network Service Provider">
-                  <serviceType>DHCP</serviceType>
-                  <serviceType>Eip</serviceType>
-                </networkService>
-                <networkService provider="SecurityGroup">
-                  <serviceType>SecurityGroup</serviceType>
-                </networkService>
-              </l3BasicNetwork>
-            </l3Networks>
-          </l2VlanNetwork>
-
-          <l2VlanNetwork name="$l2VlanNetworkName8"
-            description="guest l2 vlan network 8"
-            physicalInterface="$l2NetworkPhysicalInterface"
-            vlan="$l2Vlan8">
-            <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetwork8"
-                description = "guest test vlan network 8">
-                <ipRange name="$vlanIpRangeName8" startIp="$vlanIpRangeStart8" endIp="$vlanIpRangeEnd8" gateway="$vlanIpRangeGateway8" netmask="$vlanIpRangeNetmask8"/>
-                <dns>$DNSServer</dns>
-                <networkService provider="Flat Network Service Provider">
-                  <serviceType>DHCP</serviceType>
-                  <serviceType>Eip</serviceType>
-                </networkService>
-                <networkService provider="SecurityGroup">
-                  <serviceType>SecurityGroup</serviceType>
-                </networkService>
-              </l3BasicNetwork>
-            </l3Networks>
-          </l2VlanNetwork>
-
-          <l2VlanNetwork name="$l2VlanNetworkName9"
-            description="guest l2 vlan network 9"
-            physicalInterface="$l2NetworkPhysicalInterface"
-            vlan="$l2Vlan9">
-            <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetwork9"
-                description = "guest test vlan network 9">
-                <ipRange name="$vlanIpRangeName9" startIp="$vlanIpRangeStart9" endIp="$vlanIpRangeEnd9" gateway="$vlanIpRangeGateway9" netmask="$vlanIpRangeNetmask9"/>
-                <dns>$DNSServer</dns>
-                <networkService provider="Flat Network Service Provider">
-                  <serviceType>DHCP</serviceType>
-                  <serviceType>Eip</serviceType>
-                </networkService>
-                <networkService provider="SecurityGroup">
-                  <serviceType>SecurityGroup</serviceType>
-                </networkService>
-              </l3BasicNetwork>
-            </l3Networks>
-          </l2VlanNetwork>
-
-          <l2VlanNetwork name="$l2VlanNetworkName10"
-            description="guest l2 vlan network 10"
-            physicalInterface="$l2NetworkPhysicalInterface"
-            vlan="$l2Vlan10">
-            <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetwork10"
-                description = "guest test vlan network 10">
-                <ipRange name="$vlanIpRangeName10" startIp="$vlanIpRangeStart10" endIp="$vlanIpRangeEnd10" gateway="$vlanIpRangeGateway10" netmask="$vlanIpRangeNetmask10"/>
-                <dns>$DNSServer</dns>
-                <networkService provider="Flat Network Service Provider">
-                  <serviceType>DHCP</serviceType>
-                  <serviceType>Eip</serviceType>
-                </networkService>
-                <networkService provider="SecurityGroup">
-                  <serviceType>SecurityGroup</serviceType>
-                </networkService>
-              </l3BasicNetwork>
-            </l3Networks>
-          </l2VlanNetwork>
 
           <l2VlanNetwork name="$l2VlanNetworkName11"
             description="guest l2 vlan network 11"
@@ -691,6 +774,7 @@
           </l2VlanNetwork>
         </l2Networks>
       </zone>
+
     </zones>
   </deployerConfig>
 </config>
