@@ -9,6 +9,10 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.image_operations as image_ops
 import zstackwoodpecker.operations.volume_operations as volume_ops
+import zstackwoodpecker.operations.affinitygroup_operations as ag_ops
+import zstackwoodpecker.operations.net_operations as net_ops
+import zstackwoodpecker.operations.scheduler_operations as schd_ops
+import zstackwoodpecker.operations.zwatch_operations as zwt_ops
 
 class zstack_vid_attr_checker(checker_header.TestChecker):
     def __init__(self):
@@ -105,6 +109,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         except:
             test_util.test_logger('Check Result: [Virtual ID:] %s login failed' % username)
             return self.judge(False)
+
     def check_role_vm(self):
         session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
         iam2_ops.login_iam2_project(project_name, session_uuid=session_uuid)
@@ -118,9 +123,10 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             vm_ops.destroy_vm(vm_uuid, session_uuid=session_uuid)
         except e:
             if e.find('permission') != -1:
-                test_util.test_logger('Check Result: [Virtual ID:] %s has not permission to create vm' % username)    
+                test_util.test_logger('Check Result: [Virtual ID:] %s has permission to create vm but creation failed' % username)    
                 return self.judge(False)
         return self.judge(True)
+
     def check_role_vm_without_create(self):
         session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
         iam2_ops.login_iam2_project(project_name, session_uuid=session_uuid)
@@ -134,10 +140,11 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             vm_ops.destroy_vm(vm_uuid, session_uuid=session_uuid)
         except e:
             if e.find('permission') != -1:
-                test_util.test_logger('Check Result: [Virtual ID:] %s has not permission to create vm' % username)
+                test_util.test_logger('Check Result: [Virtual ID:] %s has permission to create vm but creation failed' % username)
                 return self.judge(True)
             return self.judge(False)
         return self.judge(False)
+
     def check_role_image(self):
         session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
         iam2_ops.login_iam2_project(project_name, session_uuid=session_uuid)
@@ -148,9 +155,10 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             image_ops.expunge_image(image_uuid, session_uuid=session_uuid)
         except e:
             if e.find('permission') != -1:
-                test_util.test_logger('Check Result: [Virtual ID:] %s has not permission to add image' % username)
+                test_util.test_logger('Check Result: [Virtual ID:] %s has permission to add image but addition failed' % username)
                 return self.judge(False)
         return self.judge(True)
+
     def check_role_snapshot(self):
         session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
         iam2_ops.login_iam2_project(project_name, session_uuid=session_uuid)
@@ -160,9 +168,10 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             volume_ops.delete_snapshot(snapshot_uuid, session_uuid=session_uuid)
         except e:
             if e.find('permission') != -1:
-                test_util.test_logger('Check Result: [Virtual ID:] %s has not permission to create snapshot' % username)
+                test_util.test_logger('Check Result: [Virtual ID:] %s has permission to create snapshot but creation failed' % username)
                 return self.judge(False)
         return self.judge(True)
+
     def check_role_volume(self):
         session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
         iam2_ops.login_iam2_project(project_name, session_uuid=session_uuid)
@@ -172,40 +181,140 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             volume_ops.delete_volume(volume_uuid, session_uuid=session_uuid)
         except e:
             if e.find('permission') != -1:
-                test_util.test_logger('Check Result: [Virtual ID:] %s has not permission to create volume' % username)
+                test_util.test_logger('Check Result: [Virtual ID:] %s has  permission to create volume but creation failed' % username)
                 return self.judge(False)
         return self.judge(True)
+
     def check_role_affinity_group(self):
-        pass
+        session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
+        iam2_ops.login_iam2_project(project_name, session_uuid=session_uuid)
+        try:
+            ag_uuid = ag_ops.create_affinity_group('affinity_group_role_checker', 'soft', session_uuid=session_uuid).uuid
+            ag_ops.delete_affinity_group(ag_uuid, session_uuid=session_uuid)
+        except e:
+            if e.find('permission') != -1:
+                test_util.test_logger('Check Result: [Virtual ID:] %s has permission to create affinity group but creation failed' % username)
+                return self.judge(False)
+        return self.judge(True)
+
     def check_role_networks(self):
-        pass
+        session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
+        iam2_ops.login_iam2_project(project_name, session_uuid=session_uuid)
+        try:
+            l2_uuid = ''
+            l3_uuid = net_ops.create_ls('l3_network_role_check', l2_uuid, session_uuid=session_uuid).uuid
+            net_ops.delete_l3(l3_uuid, session_uuid=session_uuid)
+        except e:
+            if e.find('permission') != -1:
+                test_util.test_logger('Check Result: [Virtual ID:] %s has permission to create l3 network but creation failed' % username)
+                return self.judge(False)
+        return self.judge(True)
+
     def check_role_eip(self):
-        pass
+        session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
+        iam2_ops.login_iam2_project(project_name, session_uuid=session_uuid)
+        try:
+            eip_creation_option = test_util.EipOption()
+            eip_uuid = net_ops.create_eip(eip_creation_option).inventory.uuid
+            net_ops.delete_eip(eip_uuid, session_uuid=session_uuid)
+        except e:
+            if e.find('permission') != -1:
+                test_util.test_logger('Check Result: [Virtual ID:] %s has permission to create eip but creation failed' % username)
+                return self.judge(False)
+        return self.judge(True)
+
     def check_role_sg(self):
-        pass
+        session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
+        iam2_ops.login_iam2_project(project_name, session_uuid=session_uuid)
+        try:
+            sg_creation_option = test_util.SecurityGroupOption()
+            sg_uuid = net_ops.create_security_group(sg_creation_option).uuid
+            net_ops.delete_security_group(sg_uuid, session_uuid=session_uuid)
+        except e:
+            if e.find('permission') != -1:
+                test_util.test_logger('Check Result: [Virtual ID:] %s has permission to create security group but creation failed' % username)
+                return self.judge(False)
+        return self.judge(True)
+
     def check_role_lb(self):
-        pass
+        session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
+        iam2_ops.login_iam2_project(project_name, session_uuid=session_uuid)
+        try:
+            vip_creation_option = test_util.LoadBalancerListenerOption()
+            vip_uuid = net_ops.create_vip()
+            lb_uuid = net_ops.(create_load_balancer(vip_uuid, 'load_balancer_role_check').uuid
+            net_ops.delete_load_balancer(lb_uuid, session_uuid=session_uuid)
+        except e:
+            if e.find('permission') != -1:
+                test_util.test_logger('Check Result: [Virtual ID:] %s has permission to create load balancer but creation failed' % username)
+                return self.judge(False)
+        return self.judge(True)
+
     def check_role_pf(self):
-        pass
-    def check_scheduler(self):
-        pass
+        session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
+        iam2_ops.login_iam2_project(project_name, session_uuid=session_uuid)
+        try:
+            pf_rule_creation_option = test_util.PortForwardingRuleOption()
+            pf_uuid = net_ops.create_port_forwarding(pf_rule_creation_option).uuid
+            net_ops.delete_port_forwarding(pf_uuid, session_uuid=session_uuid)
+        except e:
+            if e.find('permission') != -1:
+                test_util.test_logger('Check Result: [Virtual ID:] %s has permission to create port forwarding but creation failed' % username)
+                return self.judge(False)
+        return self.judge(True)
+
+    def check_role_scheduler(self):
+        session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
+        iam2_ops.login_iam2_project(project_name, session_uuid=session_uuid)
+        try:
+            description = 'scheduler_role_check'
+            target_uuid = ''
+            type = ''
+            parameters = ''
+            schd_uuid = schd_ops.create_scheduler_job('scheduler_role_check', description, target_uuid, type, parameters, session_uuid=session_uuid).uuid
+            net_ops.del_scheduler_job(schd_uuid, session_uuid=session_uuid)
+        except e:
+            if e.find('permission') != -1:
+                test_util.test_logger('Check Result: [Virtual ID:] %s has permission to create scheduler but creation failed' % username)
+                return self.judge(False)
+        return self.judge(True)
     def check_role_pci(self):
         pass
+
     def check_role_zwatch(self):
         session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
         iam2_ops.login_iam2_project(project_name, session_uuid=session_uuid)
+        try:
+            comparison_operator = ''
+            period = ''
+            threshold = ''
+            namespace = ''
+            metric_name = ''
+            alarm_uuid = zwt_ops.create_alarm(comparison_operator, period, threshold, namespace, metric_name, session_uuid=session_uuid)
+            zwt_ops.delete_alarm(alarm_uuid, session_uuid=session_uuid)
+        except e:
+            if e.find('permission') != -1:
+                test_util.test_logger('Check Result: [Virtual ID:] %s has permission to create alarm but creation failed' % username)
+                return self.judge(False)
+        return self.judge(True)
 
     def check_role_sns(self):
         session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
         iam2_ops.login_iam2_project(project_name, session_uuid=session_uuid)
+        try:
+            endpoint_uuid = zwt_ops.create_sns_http_endpoint('http://test.checker', 'endpoint_role_check', session_uuid=session_uuid)
+            zwt_ops.delete_sns_application_endpoint(endpoint_uuid, session_uuid=session_uuid)
+        except e:
+            if e.find('permission') != -1:
+                test_util.test_logger('Check Result: [Virtual ID:] %s has permission to create endpoint but creation failed' % username)
+                return self.judge(False)
+        return self.judge(True)
 
     def check(self):
         super(zstack_vid_policy_checker, self).check()
 
         virtual_id = self.test_obj.virtual_id
-
         self.check_login(virtual_id.username, virtual_id.password)
-        
         for role in virtual_id.role:
             if role.type = 'CreatedBySystem':
                 if role.name = 'predefined: vm':
@@ -241,4 +350,3 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
                 else:
                     test_util.test_logger('The role is not predifined role, unable to check')
         return self.judge(True)
-
