@@ -21,6 +21,7 @@ import xml.dom.minidom as minidom
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstacklib.utils.ssh as ssh
+import zstacklib.utils.http as http
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.operations.vpc_operations as vpc_ops
@@ -1075,15 +1076,6 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
         ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ceph_h_nodes.sh'), '/tmp/setup_ceph_h_nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host_port))
         cmd = "bash -ex /tmp/setup_ceph_nodes.sh %s" % (vm_ips)
         ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host_port))
-
-def post_to_mock_server(mn_ip, nfs_ip):
-    # Aliyun NAS SDK mock server
-    url = 'http://' + os.getenv('apiEndPoint').split('::')[-1] + '/mntarget'
-    data = json.dumps({"mn_ip": mn_ip, "nfs_ip": nfs_ip})
-    req = urllib2.Request(url, data, {'Content-Type': 'application/json'})
-    rsp = urllib2.urlopen(req)
-    ret = rsp.read()
-    assert "success" in ret, 'Data post to mock server failed!'
 
 def setup_xsky_storages(scenario_config, scenario_file, deploy_config):
     #Stop nodes
@@ -2322,7 +2314,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
         setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst)
         setup_fusionstor_storages(scenario_config, scenario_file, deploy_config)
         if vm_ip_to_post and mn_ip_to_post:
-            post_to_mock_server(mn_ip_to_post, vm_ip_to_post)
+            uri = 'http://' + os.getenv('apiEndPoint').split('::')[-1] + '/mntarget'
+            http.json_dump_post(uri, {"mn_ip": mn_ip_to_post, "nfs_ip": vm_ip_to_post})
     else:
         setup_xsky_storages(scenario_config, scenario_file, deploy_config)
     #setup_zbs_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst)
