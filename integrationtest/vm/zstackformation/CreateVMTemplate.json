@@ -19,7 +19,7 @@
 		"VmInstance": {
 			"Type": "ZStack::Resource::VmInstance",
 			"Properties": {
-				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "VM"]]},
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, {"Ref":"ZStack::StackUuid"},{"Ref":"ZStack::AccountUuid"},{"Ref":"ZStack::AccountName"},"VM"]]},
 				"instanceOfferingUuid": {"Ref":"InstanceOfferingUuid"},
 				"imageUuid":{"Ref":"ImageUuid"},
 				"l3NetworkUuids":[{"Ref":"L3NetworkUuid"}],
