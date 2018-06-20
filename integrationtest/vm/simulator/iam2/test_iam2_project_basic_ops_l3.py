@@ -103,7 +103,7 @@ def test():
     except:
         pass
     if flavor['target_role'] == 'project_member':
-        statements = [{"effect": "Allow", "actions": ["org.zstack.network.l2.**"]}, {"effect": "Allow", "actions": ["org.zstack.network.l3.**"]}]
+        statements = [{"effect": "Allow", "actions": ["org.zstack.network.l2.**"]}, {"effect": "Allow", "actions": ["org.zstack.header.network.l3.**"]}]
         role_uuid = iam2_ops.create_role('test_role', statements).uuid
         iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], plain_user_uuid)
 
