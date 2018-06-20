@@ -256,3 +256,37 @@ class zstack_alone_lb_vr_db_checker(checker_header.TestChecker):
                 % (lb_inv.uuid, vr_uuid))
         return self.judge(True)
 
+class zstack_vid_attr_db_checker(checker_header.TestChecker):
+    '''check virtual id attribute existence in database. If it is in DB,
+        return self.judge(True). If not, return self.judge(False)'''
+    def check(self):
+        super(zstack_vid_attr_db_checker, self).check()
+        try:
+            conditions = res_ops.gen_query_conditions('uuid', '=', self.test_obj.virtual_id.uuid)
+            vid = res_ops.query_resource(res_ops.IAM2_VIRTUAL_ID, conditions)[0]
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            test_util.test_logger('Check result: [account Inventory uuid:] %s does not exist in database.' % self.test_obj.virtual_id.uuid)
+            return self.judge(False)
+
+        for attr in vid.attributes.name:
+            if attr = virtual_id.attributes.name:
+                test_util.test_logger('Check result: [account Inventory uuid:] %s exist in database.' % virtual_id.uuid)
+                return self.judge(True)
+
+class zstack_vid_policy_db_checker(checker_header.TestChecker):
+    '''check virtual id policy existence in database. If it is in DB,
+        return self.judge(True). If not, return self.judge(False)'''
+    def check(self):
+        super(zstack_vid_policy_db_checker, self).check()
+        try:
+            conditions = res_ops.gen_query_conditions('uuid', '=', self.test_obj.virtual_id.uuid)
+            account = res_ops.query_resource(res_ops.IAM2_VIRTUAL_ID, conditions)[0]
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            test_util.test_logger('Check result: [account Inventory uuid:] %s does not exist in database.' % self.test_obj.virtual_id.uuid)
+            return self.judge(False)
+
+        test_util.test_logger('Check result: [account Inventory uuid:] %s exist in database.' % virtual_id.uuid)
+        return self.judge(True)
+
