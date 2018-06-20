@@ -107,7 +107,10 @@ def test():
         role_uuid = iam2_ops.create_role('test_role', statements).uuid
         iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], plain_user_uuid)
 
-    vxlan_pool_uuid = res_ops.get_resource(res_ops.L2_VXLAN_NETWORK_POOL)[0].uuid
+    vxlan_pool = res_ops.get_resource(res_ops.L2_VXLAN_NETWORK_POOL)
+    if vxlan_pool == None:
+        test_util.test_skip('Vxlan is required for testing')
+    vxlan_pool_uuid = vxlan_pool[0].uuid
     acc_ops.share_resources([project_linked_account_uuid], [vxlan_pool_uuid])
     vxlan_pool_uuid = res_ops.get_resource(res_ops.L2_VXLAN_NETWORK_POOL, session_uuid=project_login_uuid)[0].uuid
     vxlan_l2_uuid = vxlan_ops.create_l2_vxlan_network('vxlan_for_pm', vxlan_pool_uuid, zone_uuid, session_uuid=project_login_uuid).uuid
