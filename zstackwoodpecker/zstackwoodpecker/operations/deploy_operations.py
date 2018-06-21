@@ -769,7 +769,7 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 if ps_name and ps_name != pr.name_:
                     continue
                 hostname_list = get_primary_storage_from_scenario_file(pr.name_, scenarioConfig, scenarioFile, deployConfig)
-                if len(hostname_list) != 0:
+                if len(hostname_list) == 0:
                     nasPath = pr.url_.split(':')[1]
                     cmd = "echo '%s *(rw,sync,no_root_squash)' > /etc/exports" % (nasPath)
                     cmd_rst = "service nfs-server stop; service nfs-server start"
