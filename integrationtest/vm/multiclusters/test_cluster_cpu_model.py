@@ -99,7 +99,8 @@ def test():
     # migrate vm
     conditions = res_ops.gen_query_conditions('name', '=', 'ttylinux')
     img = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
-    ins = res_ops.query_resource(res_ops.INSTANCE_OFFERING)[0]
+    conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+    ins = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0]
     conditions = res_ops.gen_query_conditions('name', '=', 'public network')
     l3 = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0]
 
