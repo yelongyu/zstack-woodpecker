@@ -30,6 +30,23 @@ import zstackwoodpecker.zstack_test.zstack_test_eip as zstack_eip_header
 import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
 
 
+def replace_env_params_if_scenario():
+    """
+    This is aim to replace environment parameters those are used and different 
+    if the current env is not scenario.
+    """
+    
+    #ceph url:
+    pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+    for ps in pss:
+        if ps.type.lower() == 'ceph':
+            ps_mon_ip = ps.mons[0].monAddr
+            os.environ['cephPrimaryStorageMonUrls'] = 'root:password@%s' % ps_mon_ip
+            os.environ['cephBackupStorageMonUrls'] = 'root:password@%s' % ps_mon_ip
+            break
+
+    return
+
 def create_eip(eip_name=None, vip_uuid=None, vnic_uuid=None, vm_obj=None, \
         session_uuid = None):
     if not vip_uuid:
