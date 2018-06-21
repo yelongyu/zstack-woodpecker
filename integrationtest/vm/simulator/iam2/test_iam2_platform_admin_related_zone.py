@@ -29,13 +29,13 @@ def test():
     iam2_ops.clean_iam2_enviroment()
 
     username = 'username'
-    password = 'password'
+    password = 'b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86'
     platform_admin_uuid = iam2_ops.create_iam2_virtual_id(username, password).uuid
     attributes = [{"name": "__PlatformAdmin__"}, {"name": "__PlatformAdminRelatedZone__", "value": zone1_uuid}]
     iam2_ops.add_attributes_to_iam2_virtual_id(platform_admin_uuid, attributes)
 
     username2 = 'username2'
-    password2 = 'password2'
+    password2 = 'b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86'
     platform_admin2_uuid = iam2_ops.create_iam2_virtual_id(username2, password2).uuid
     attributes = [{"name": "__PlatformAdmin__"}, {"name": "__PlatformAdminRelatedZone__", "value": zone2_uuid}]
     iam2_ops.add_attributes_to_iam2_virtual_id(platform_admin2_uuid, attributes)
