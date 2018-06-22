@@ -23,7 +23,7 @@ import zstackwoodpecker.zstack_test.kvm_checker.kvm_checker_factory as kvm_check
 import zstackwoodpecker.zstack_test.sim_checker.sim_checker_factory as sim_checker
 import zstackwoodpecker.zstack_test.vcenter_checker.vcenter_checker_factory as vcenter_checker
 import zstackwoodpecker.zstack_test.zstack_checker.zstack_checker_factory as zstack_checker
-import zstackwoodpecker.zstack_test.zstack_checker.vid_checker_factory as vid_checker
+import zstackwoodpecker.zstack_test.vid_checker.vid_checker_factory as vid_checker
 import zstackwoodpecker.zstack_test.zstack_test_node as zstack_test_node
 
 class CheckerFactory(checker.CheckerFactory):
@@ -86,9 +86,9 @@ class CheckerFactory(checker.CheckerFactory):
             checker_chain = LoadBalancerCheckerFactory().create_checker(test_obj)
             obj_uuid = test_obj.get_load_balancer().uuid
 
-        elif isinstance(test_obj, vid_header.ZstackVid):
+        elif isinstance(test_obj, vid_header.TestVid):
             checker_chain = VidCheckerFactory().create_checker(test_obj)
-            virtual_id_obj = test_obj.get_target_virtual_id().get_virtual_id()
+            virtual_id_obj = test_obj.get_vid()
             obj_uuid = virtual_id_obj.uuid
 
         test_util.test_logger('Add checker for [%s:] %s. Checkers are: %s' % \
@@ -182,5 +182,5 @@ class LoadBalancerCheckerFactory(checker.CheckerFactory):
 
 class VidCheckerFactory(checker.CheckerFactory):
     def create_checker(self, test_obj):
-        return vid_checker.VidCheckerFactory().create_checker(test_obj)
+        return vid_checker.VidAttrCheckerFactory().create_checker(test_obj)
 

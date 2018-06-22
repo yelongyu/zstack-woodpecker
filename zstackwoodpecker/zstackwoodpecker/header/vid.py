@@ -8,6 +8,7 @@ class TestVid(zstack_header.ZstackObject):
     def __init__(self):
         self.vid = None
         self.state = None
+        self.attributes = []
 
     def __repr__(self):
         if self.vid:
@@ -34,7 +35,13 @@ class TestVid(zstack_header.ZstackObject):
 
     def set_vid(self, vid):
         self.vid = vid
-        return self.vid
 
     def get_state(self):
         return self.state
+
+    def set_vid_attributes(self, attributes):
+        if not isinstance(attributes, list):
+            raise TestError('attributes is not a list.')
+        self.attributes = attributes
+    def get_vid_attributes(self):
+        return self.attributes
