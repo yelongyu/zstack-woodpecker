@@ -819,8 +819,9 @@ default one' % self.zstack_properties)
             self._change_node_ip()
             self._install_management_nodes()
             self._set_extra_node_config()
-        with open(os.path.abspath(self.deploy_config_tmpt_path), 'a+') as conf_tmpt:
-            conf_tmpt.write("ZSTACK_ALREADY_INSTALLED = yes")
+        if os.path.exists(self.deploy_config_tmpt_path):
+            with open(os.path.abspath(self.deploy_config_tmpt_path), 'a+') as conf_tmpt:
+                conf_tmpt.write("ZSTACK_ALREADY_INSTALLED = yes")
         self._start_multi_nodes(restart=True)
 
     def execute_plan_ha(self):
