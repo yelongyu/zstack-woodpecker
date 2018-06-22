@@ -15,13 +15,9 @@ import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.operations.iam2_operations as iam2_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 
-project_uuid=None
-project_uuid_02=None
-project_admin_uuid=None
-virtual_id_uuid=None
 
 def test():
-    global project_uuid,project_uuid_02,project_admin_uuid,virtual_id_uuid
+    iam2_ops.clean_iam2_enviroment()
 
     # 1 create project
     project_name = 'test_project'
@@ -32,7 +28,7 @@ def test():
 
     # 2 create projectAdmin
     username = 'username'
-    password = 'password'
+    password = 'b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86'
     project_admin_uuid = iam2_ops.create_iam2_virtual_id(username, password).uuid
     iam2_ops.add_iam2_virtual_ids_to_project([project_admin_uuid],project_uuid)
     attributes = [{"name": "__ProjectAdmin__", "value": project_uuid}]
@@ -77,26 +73,15 @@ session_uuid=project_admin_login_uuid).uuid
     except:
         pass
 
-    iam2_ops.delete_iam2_project(project_uuid)
-    iam2_ops.delete_iam2_project(project_uuid_02)
-    iam2_ops.expunge_iam2_project(project_uuid)
-    iam2_ops.expunge_iam2_project(project_uuid_02)
-    iam2_ops.delete_iam2_virtual_id(virtual_id_uuid)
-    iam2_ops.delete_iam2_virtual_id(project_admin_uuid)
+    fake_virtual_uuid='iamafakevirtualiduuid'
+    try:
+        iam2_ops.add_iam2_virtual_ids_to_project([fake_virtual_uuid],project_uuid,session_uuid=project_admin_login_uuid)
+        test_util.test_fail("can't add fake virtual id into project")
+    except:
+        pass
 
+    iam2_ops.clean_iam2_enviroment()
     test_util.test_pass("success test  ProjectAdmin negtive operations")
 
 def error_cleanup():
-    global project_uuid,project_uuid_02,project_admin_uuid,virtual_id_uuid
-
-    if project_uuid:
-        iam2_ops.delete_iam2_project(project_uuid)
-        iam2_ops.expunge_iam2_project(project_uuid)
-    if project_uuid_02:
-        iam2_ops.delete_iam2_project(project_uuid_02)
-        iam2_ops.expunge_iam2_project(project_uuid_02)
-    if virtual_id_uuid:
-        iam2_ops.delete_iam2_virtual_id(virtual_id_uuid)
-    if project_admin_uuid:
-        iam2_ops.delete_iam2_virtual_id(project_admin_uuid)
-
+    iam2_ops.clean_iam2_enviroment()

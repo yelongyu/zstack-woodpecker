@@ -18,14 +18,9 @@ import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.operations.iam2_operations as iam2_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 
-role_uuid = None
-project_uuid = None
-virtual_id_uuid = None
-virtual_id_group_uuid = None
-project_operator_uuid = None
-
 def test():
-    global role_uuid, project_uuid, project_operator_uuid, virtual_id_uuid, virtual_id_group_uuid
+
+    iam2_ops.clean_iam2_enviroment()
 
     # 1 create project
     project_name = 'test_project'
@@ -33,10 +28,11 @@ def test():
 
     # 2 create project operator and virtual id
     project_operator_name = 'username'
-    project_operator_password = 'password'
+    project_operator_password = 'b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86'
+    password='b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86'
     attributes = [{"name": "__ProjectOperator__", "value": project_uuid}]
     project_operator_uuid = iam2_ops.create_iam2_virtual_id(project_operator_name,project_operator_password,attributes=attributes).uuid
-    virtual_id_uuid = iam2_ops.create_iam2_virtual_id('usernametwo','password').uuid
+    virtual_id_uuid = iam2_ops.create_iam2_virtual_id('usernametwo',password).uuid
 
     # 3 login in project by project operator
     iam2_ops.add_iam2_virtual_ids_to_project([project_operator_uuid],project_uuid)
@@ -68,25 +64,11 @@ def test():
     iam2_ops.delete_role(role_uuid,session_uuid=project_login_uuid)
     iam2_ops.delete_iam2_virtual_id_group(virtual_id_group_uuid,session_uuid=project_login_uuid)
     acc_ops.logout(project_login_uuid)
-    iam2_ops.delete_iam2_virtual_id(virtual_id_uuid)
-    iam2_ops.delete_iam2_virtual_id(project_operator_uuid)
-    iam2_ops.delete_iam2_project(project_uuid)
-    iam2_ops.expunge_iam2_project(project_uuid)
+
+    iam2_ops.clean_iam2_enviroment()
 
     test_util.test_pass('success test iam2 login by project operator')
 
 def error_cleanup():
-    global role_uuid, project_uuid, project_operator_uuid, virtual_id_uuid, virtual_id_group_uuid
-    if role_uuid:
-        iam2_ops.delete_role(role_uuid)
-    if virtual_id_group_uuid:
-        iam2_ops.delete_iam2_virtual_id_group(virtual_id_group_uuid)
-    if virtual_id_uuid:
-        iam2_ops.delete_iam2_virtual_id(virtual_id_uuid)
-    if project_operator_uuid:
-        iam2_ops.delete_iam2_virtual_id(project_operator_uuid)
-    if project_uuid:
-        iam2_ops.delete_iam2_project(project_uuid)
-        iam2_ops.expunge_iam2_project(project_uuid)
-
+    iam2_ops.clean_iam2_enviroment()
 

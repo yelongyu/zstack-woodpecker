@@ -36,9 +36,10 @@ def test():
 
     # 2 create virtual id
     project_admin_name = 'username'
-    project_admin_password = 'password'
+    project_admin_password = 'b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86'
+    password = 'b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86'
     project_admin_uuid = iam2_ops.create_iam2_virtual_id(project_admin_name, project_admin_password).uuid
-    virtual_id_uuid = iam2_ops.create_iam2_virtual_id('usernametwo', 'password').uuid
+    virtual_id_uuid = iam2_ops.create_iam2_virtual_id('usernametwo', password).uuid
 
     # 3 create project admin
     iam2_ops.add_iam2_virtual_ids_to_project([project_admin_uuid],project_uuid)
@@ -88,25 +89,13 @@ def test():
     # 11 delete
     acc_ops.logout(project_login_uuid)
     iam2_ops.delete_role(role_uuid)
-    iam2_ops.delete_iam2_virtual_id_group(virtual_id_group_uuid)
-    iam2_ops.delete_iam2_virtual_id(virtual_id_uuid)
-    iam2_ops.delete_iam2_virtual_id(project_admin_uuid)
-    iam2_ops.delete_iam2_project(project_uuid)
-    iam2_ops.expunge_iam2_project(project_uuid)
 
+    iam2_ops.clean_iam2_enviroment()
     test_util.test_pass('success test iam2 login in by project admin!')
 
 
 def error_cleanup():
-    global role_uuid, project_uuid, project_admin_uuid, virtual_id_uuid, virtual_id_group_uuid
+    global role_uuid
     if role_uuid:
         iam2_ops.delete_role(role_uuid)
-    if virtual_id_group_uuid:
-        iam2_ops.delete_iam2_virtual_id_group(virtual_id_group_uuid)
-    if virtual_id_uuid:
-        iam2_ops.delete_iam2_virtual_id(virtual_id_uuid)
-    if project_admin_uuid:
-        iam2_ops.delete_iam2_virtual_id(project_admin_uuid)
-    if project_uuid:
-        iam2_ops.delete_iam2_project(project_uuid)
-        iam2_ops.expunge_iam2_project(project_uuid)
+    iam2_ops.clean_iam2_enviroment()
