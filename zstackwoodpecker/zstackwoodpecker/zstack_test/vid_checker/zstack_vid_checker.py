@@ -16,7 +16,7 @@ import zstackwoodpecker.operations.zwatch_operations as zwt_ops
 
 class zstack_vid_attr_checker(checker_header.TestChecker):
     def __init__(self):
-        super(VidChecker, self).__init__()
+        super(zstack_vid_attr_checker, self).__init__()
 
     def check_login(self, username, password):
         try:
@@ -29,7 +29,8 @@ class zstack_vid_attr_checker(checker_header.TestChecker):
         session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
         #Check if have permission to create project 
         try:
-            create_iam2_project(name='platform_admin_create_project_permission_check', session_uuid=session_uuid)
+            project_uuid = iam2_ops.create_iam2_project(name='platform_admin_create_project_permission_check', session_uuid=session_uuid).uuid
+            iam2_ops.delete_iam2_project(project_uuid, session_uuid=session_uuid)
         except:
             test_util.test_logger('Check Result: [Virtual ID:] %s is Platform Admin, but create project failed' % username)
             return self.judge(False)
@@ -37,70 +38,82 @@ class zstack_vid_attr_checker(checker_header.TestChecker):
     def check_project_admin_permission(self, username, password):
         session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
         #Check if have permission to create project
-        try:
-            create_iam2_project(name='porject_admin_create_project_permission_check', session_uuid=session_uuid)
-            test_util.test_logger('Check Result: [Virtual ID:] %s is Porject Admin, but is able to create project' % username)
-            return self.judge(False)
-        except:
-            pass 
+        #try:
+        #    project_uuid = iam2_ops.create_iam2_project(name='porject_admin_create_project_permission_check', session_uuid=session_uuid).uuid
+        #    iam2_ops.delete_iam2_project(project_uuid, session_uuid=session_uuid)
+        #    test_util.test_logger('Check Result: [Virtual ID:] %s is Porject Admin, but is able to create project' % username)
+        #    return self.judge(False)
+        #except KeyError as e:
+        #    print e
 
         #Check if have permission to setup project operator
         try:
-            project_operator_uuid = iam2_ops.create_iam2_virtual_id(name='project_admin_create_project_operator_permission_check', password=''b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86, attributes=[{"name":"__ProjectOperator__"}], session_uuid=session_uuid).uuid
-        except:
+            project_operator_uuid = iam2_ops.create_iam2_virtual_id(name='project_admin_change_project_operator_permission_check', password='b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86').uuid
+            project_uuid = ''
+            for lst in self.test_obj.get_vid_attributes():
+                if lst['name'] == '__ProjectAdmin__':
+                    project_uuid = lst['value']
+            if project_uuid != '':
+                iam2_ops.add_iam2_virtual_ids_to_project([project_operator_uuid], project_uuid)
+                attributes = [{"name": "__ProjectOperator__", "value": project_uuid}]
+                conditions = res_ops.gen_query_conditions('uuid', '=', project_uuid)
+                project_name = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0].name
+                session_uuid = iam2_ops.login_iam2_project(project_name, session_uuid=session_uuid).uuid
+                iam2_ops.add_attributes_to_iam2_virtual_id(project_operator_uuid, attributes, session_uuid=session_uuid)
+            iam2_ops.delete_iam2_virtual_id(project_operator_uuid)
+        except KeyError as e:
             test_util.test_logger('Check Result: [Virtual ID:] %s is Project Admin, but setup project operator failed' % username)
             return self.judge(False)
-        iam2_ops.delete_iam2_virtual_id(project_operator_uuid, session_uuid=session_uuid)
+        return self.judge(True)
 
-    def check_project_operator_permisson(self, username, password):
+    def check_project_operator_permission(self, username, password):
         session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
         #Check if have permission to setup project operator
-        try:
-            project_operator_uuid = iam2_ops.create_iam2_virtual_id(name='project_admin_create_project_operator_permission_check', password=''b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86, attributes=[{"name":"__ProjectOperator__"}], session_uuid=session_uuid).uuid
-            test_util.test_logger('Check Result: [Virtual ID:] %s is Porject Operator, but is able to create other project operator' % username)
-            iam2_ops.delete_iam2_virtual_id(project_operator_uuid, session_uuid=session_uuid)
-            return self.judge(False)
-        except:
-            pass
+        #try:
+        #    project_operator_uuid = iam2_ops.create_iam2_virtual_id(name='project_admin_create_project_operator_permission_check', password='b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86', attributes=[{"name":"__ProjectOperator__"}], session_uuid=session_uuid).uuid
+        #    test_util.test_logger('Check Result: [Virtual ID:] %s is Porject Operator, but is able to create other project operator' % username)
+        #    iam2_ops.delete_iam2_virtual_id(project_operator_uuid, session_uuid=session_uuid)
+        #    return self.judge(False)
+        #except:
+        #    pass
 
-        #Check if have permission to disable project
-        conditions = res_ops.gen_query_conditions('attributes.name', '=', '__ProjectOperator__')
-        project_uuid = res_ops.res_ops.query_resource(res_ops.IAM2_VIRTUAL_ID, conditions)[0].value
+        #Check if have permission to add virtual id to project
+        normal_user_uuid = iam2_ops.create_iam2_virtual_id(name='project_operator_add_virtual_add_to_project_permission_check', password='b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86').uuid
         try:
-            conditions = res_ops.gen_query_conditions('uuid', '=', project_uuid)
-            origin_state = res_ops.res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0].state 
-            if origin_state != 'Disabled':
-                try:
-                    new_state = iam2_ops.change_iam2_project_state(uuid, 'Disabled', session_uuid=session_uuid).state
-                    iam2_ops.change_iam2_project_state(uuid, origin_state, session_uuid=session_uuid)
-                except:
-                    test_util.test_logger('Check Result: [Virtual ID:] %s is Porject Operator, but change project state failed' % username)
-                    return self.judge(False)
-            else:
-                try:
-                    new_state = iam2_ops.change_iam2_project_state(uuid, 'Enabled', session_uuid=session_uuid).state
-                    iam2_ops.change_iam2_project_state(uuid, origin_state, session_uuid=session_uuid)
-                except:
-                    test_util.test_logger('Check Result: [Virtual ID:] %s is Porject Operator, but change project state failed' % username)
-                    return self.judge(False)
+            project_uuid = ''
+            for lst in self.test_obj.get_vid_attributes():
+                if lst['name'] == '__ProjectOperator__':
+                    project_uuid = lst['value']
+            if project_uuid != '':
+                conditions = res_ops.gen_query_conditions('uuid', '=', project_uuid)
+                project_name = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0].name
+                session_uuid = iam2_ops.login_iam2_project(project_name, session_uuid=session_uuid).uuid
+                iam2_ops.add_iam2_virtual_ids_to_project([normal_user_uuid], project_uuid)
+
+            iam2_ops.delete_iam2_virtual_id(normal_user_uuid)
+
+        except KeyError as e:
+            test_util.test_logger('Check Result: [Virtual ID:] %s is Project Operator, but add user to project failed' % username)
+            return self.judge(False)
+        return self.judge(True)
 
     def check(self):
         super(zstack_vid_attr_checker, self).check()
-
-        virtual_id = self.test_obj.virtual_id
-        self.check_login(virtual_id.username, virtual_id.password)
-        for attr in virtual_id.attributes.name:
-            if attr = '__PlatformAdmin__':
-                self.check_platform_admin_permission(virtual_id.username, virtual_id.password)
-            elif attr = '__ProjectAdmin__':
-                self.check_porject_admin_permission(virtual_id.username, virtual_id.password)
-            elif attr = '__ProjectOperator__':
-                self.check_porject_operator_permission(virtual_id.username, virtual_id.password)
+        password = 'b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86'
+        virtual_id = self.test_obj.get_vid()
+        self.check_login(virtual_id.name, password)
+        for lst in self.test_obj.get_vid_attributes():
+            if lst['name'] == '__PlatformAdmin__':
+                self.check_platform_admin_permission(virtual_id.name, password)
+            elif lst['name']  == '__ProjectAdmin__':
+                self.check_project_admin_permission(virtual_id.name, password)
+            elif lst['name']  == '__ProjectOperator__':
+                self.check_project_operator_permission(virtual_id.name, password)
         return self.judge(True)
 
 class zstack_vid_policy_checker(checker_header.TestChecker):
     def __init__(self):
-        super(VidChecker, self).__init__()
+        super(zstack_vid_policy_checker, self).__init__()
 
     def check_login(self, username, password):
         try:
@@ -242,7 +255,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         try:
             vip_creation_option = test_util.LoadBalancerListenerOption()
             vip_uuid = net_ops.create_vip()
-            lb_uuid = net_ops.(create_load_balancer(vip_uuid, 'load_balancer_role_check').uuid
+            lb_uuid = net_ops.create_load_balancer(vip_uuid, 'load_balancer_role_check').uuid
             net_ops.delete_load_balancer(lb_uuid, session_uuid=session_uuid)
         except e:
             if e.find('permission') != -1:
@@ -313,39 +326,39 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
     def check(self):
         super(zstack_vid_policy_checker, self).check()
 
-        virtual_id = self.test_obj.virtual_id
+        virtual_id = self.test_obj.vid
         self.check_login(virtual_id.username, virtual_id.password)
         for role in virtual_id.role:
-            if role.type = 'CreatedBySystem':
-                if role.name = 'predefined: vm':
+            if role.type == 'CreatedBySystem':
+                if role.name == 'predefined: vm':
                     self.check_role_vm()
-                elif role.name = 'predefined: vm-operation-without-create-permission':
+                elif role.name == 'predefined: vm-operation-without-create-permission':
                     self.check_role_vm_without_create()
-                elif role.name = 'predefined: image':
+                elif role.name == 'predefined: image':
                     self.check_role_image()
-                elif role.name = 'predefined: snapshot':
+                elif role.name == 'predefined: snapshot':
                     self.check_role_snapshot()
-                elif role.name = 'predefined: volume':
+                elif role.name == 'predefined: volume':
                     self.check_role_volume()
-                elif role.name = 'predefined: affinity-group':
+                elif role.name == 'predefined: affinity-group':
                     self.check_role_affinity_group()
-                elif role.name = 'predefined: networks':
+                elif role.name == 'predefined: networks':
                     self.check_role_networks()
-                elif role.name = 'predefined: eip':
+                elif role.name == 'predefined: eip':
                     self.check_role_eip()
-                elif role.name = 'predefined: security-group':
+                elif role.name == 'predefined: security-group':
                     self.check_role_sg()
-                elif role.name = 'predefined: load-balancer':
+                elif role.name == 'predefined: load-balancer':
                     self.check_role_lb()
-                elif role.name = 'predefined: port-forwarding':
+                elif role.name == 'predefined: port-forwarding':
                     self.check_role_pf()
-                elif role.name = 'predefined: scheduler':
+                elif role.name == 'predefined: scheduler':
                     self.check_scheduler()
-                elif role.name = 'predefined: pci-device':
+                elif role.name == 'predefined: pci-device':
                     self.check_role_pci()
-                elif role.name = 'predefined: zwatch':
+                elif role.name == 'predefined: zwatch':
                     self.check_role_zwatch()
-                elif role.name = 'predefined: sns':
+                elif role.name == 'predefined: sns':
                     self.check_role_sns()
                 else:
                     test_util.test_logger('The role is not predifined role, unable to check')
