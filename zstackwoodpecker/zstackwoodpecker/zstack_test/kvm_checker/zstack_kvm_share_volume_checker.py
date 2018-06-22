@@ -65,6 +65,10 @@ class zstack_kvm_share_volume_file_checker(checker_header.TestChecker):
                 ceph_host, username, password = \
                         test_lib.lib_get_ceph_info(os.environ.get(key))
                 break
+        else:
+            ceph_host = monHost
+            username = 'root'
+            password = 'password'
 
         volume_installPath = volume_installPath.split('ceph://')[1]
         command = 'rbd info %s' % volume_installPath

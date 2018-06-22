@@ -1,0 +1,200 @@
+{
+	"ZStackTemplateFormatVersion": "2018-06-18",
+	"Description": "鏈ず渚嬩細鍒涘缓涓€涓畝鍗曠殑VPC缃戠粶锛岄渶瑕佺敤鎴锋彁渚涗笅闈㈡纭殑鏁版嵁i\n鍏湁缃戠粶Uuid\n绠＄悊缃戠粶Uuid: 濡傛灉鍙湁鍏湁缃戠粶锛屽垯鎶婂叕鏈夌綉缁滃綋浣滅鐞嗙綉鍗冲彲.\n",
+	"Parameters": {
+		"VrouterImageUrl": {
+			"Type": "String",
+			"Description":"浜戣矾鐢遍暅鍍忛摼鎺ュ湴鍧€"
+		},
+		"VmImageUrl": {
+			"Type": "String",
+			"Description":"娴嬭瘯浜戜富鏈洪暅鍍忥紝璇风‘瀹歓Stack 鍙互涓嬭浇涓嬮潰閾炬帴鐨勯暅鍍?,
+			"DefaultValue": "http://cdn.zstack.io/zstack_repo/latest/zstack-image-1.4.qcow2"
+		},
+		"BackupStorage":{
+			"Type": "CommaDelimitedList",
+			"Description":"闀滃儚鏈嶅姟鍣║uid"
+		},
+		"ManagementNetworkUuid":{
+			"Type": "String",
+			"Description":"绠＄悊缃戠粶Uuid,濡傛灉鍙湁鍏辨湁缃戠粶濉叆鍏辨湁缃戠粶Uuid鍗冲彲"
+		},
+		"PublicNetworkUuid":{
+			"Type": "String",
+			"Description":"鍏湁缃戠粶Uuid"
+		},
+		"ZoneUuid":{
+			"Type": "String",
+			"Description":"鍖哄煙Uuid"
+		},
+		"ClusterUuid":{
+			"Type": "String",
+			"Description":"闆嗙兢Uuid"
+		},
+		"Cidr":{
+			"Type": "String",
+			"Description":"VTEP Cider"
+		},
+		"Vni":{
+			"Type": "Number",
+			"DefaultValue":222
+		},
+		"StartVni":{
+			"Type": "Number",
+			"DefaultValue":100
+		},
+		"EndVni":{
+			"Type": "Number",
+			"DefaultValue":300
+		},
+		"PhysicalInterface":{
+			"Type": "String"
+		},
+		"StartIp":{
+			"Type": "String",
+			"DefaultValue":"192.168.20.2"
+		},
+		"EndIp":{
+			"Type": "String",
+			"DefaultValue":"192.168.20.200"
+		},
+		"Netmask":{
+			"Type": "String",
+			"DefaultValue":"255.255.255.0"
+		},
+		"Gateway":{
+			"Type": "String",
+			"DefaultValue":"192.168.20.1"
+		}
+	},
+	"Resources": {
+		"VrouterImage": {
+			"Type": "ZStack::Resource::Image",
+			"Properties": {
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "Vrouter-Image"]]},
+				"url": {"Ref":"VrouterImageUrl"},
+				"system": true,
+				"format": "qcow2",
+				"backupStorageUuids":{"Ref":"BackupStorage"}
+			}
+		},
+		"VMImage": {
+			"Type": "ZStack::Resource::Image",
+			"Properties": {
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "VmImage"]]},
+				"url": {"Ref":"VmImageUrl"},
+				"format": "qcow2",
+				"backupStorageUuids":{"Ref":"BackupStorage"}
+			}
+		},
+		"VirtualRouterOffering":{
+			"Type":"ZStack::Resource::VirtualRouterOffering",
+			"Properties":{
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "Vrouter-Offering"]]},
+				"zoneUuid":{"Ref":"ZoneUuid"},
+				"managementNetworkUuid":{"Ref":"ManagementNetworkUuid"},
+				"publicNetworkUuid":{"Ref":"PublicNetworkUuid"},
+				"imageUuid":{"Fn::GetAtt":["VrouterImage", "uuid"]},
+				"cpuNum":2,
+				"memorySize":2147483648
+			}
+		},
+		"VpcVRouter":{
+			"Type":"ZStack::Resource::VpcVRouter",
+			"Properties":{
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "VPC-Router"]]},
+				"virtualRouterOfferingUuid":{"Fn::GetAtt":["VirtualRouterOffering","uuid"]}
+			}
+		},
+		"L2VxlanNetworkPool":{
+			"Type":"ZStack::Resource::L2VxlanNetworkPool",
+			"Properties":{
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "L2VxlanNetworkPool"]]},
+				"zoneUuid":{"Ref":"ZoneUuid"},
+				"physicalInterface":{"Ref":"PhysicalInterface"}
+			}
+		},
+		"VniRange":{
+			"Type":"ZStack::Resource::VniRange",
+			"Properties":{
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "VniRange"]]},
+				"startVni":{"Ref":"StartVni"},
+				"endVni":{"Ref":"EndVni"},
+				"l2NetworkUuid":{"Fn::GetAtt":["L2VxlanNetworkPool","uuid"]}
+			}
+		},
+		"L2VxlanNetwork":{
+			"Type":"ZStack::Resource::L2VxlanNetwork",
+			"Properties":{
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "L2VxlanNetwork"]]},
+				"poolUuid":{"Fn::GetAtt":["L2VxlanNetworkPool","uuid"]},
+				"zoneUuid":{"Ref":"ZoneUuid"},
+				"vni":{"Ref":"Vni"},
+				"physicalInterface":{"Ref":"PhysicalInterface"}
+			}
+		},
+		"VpcL3Network":{
+			"Type":"ZStack::Resource::L3Network",
+			"Properties":{
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "VPC-Network"]]},
+				"l2NetworkUuid":{"Fn::GetAtt":["L2VxlanNetwork","uuid"]},
+				"category":"Private",
+				"type":"L3VpcNetwork"
+			}
+		},
+		"InstanceOffering":{
+			"Type":"ZStack::Resource::InstanceOffering",
+			"Properties":{
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "1cpu","4G"]]},
+				"cpuNum": 1,
+				"memorySize" : 4294967296
+			}
+		},
+
+		"AttachL3ToVm":{
+			"Type":"ZStack::Action::AttachL3NetworkToVm",
+			"Properties":{
+				"vmInstanceUuid": {"Fn::GetAtt":["VpcVRouter","uuid"]},
+				"l3NetworkUuid":{"Fn::GetAtt":["VpcL3Network","uuid"]}
+			},
+			"DependsOn":[{"Ref":"AddIpRange"}]
+		},
+		"AddIpRange" :{
+			"Type":"ZStack::Action::AddIpRange",
+			"Properties":{
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "iprange"]]},
+				"l3NetworkUuid":{"Fn::GetAtt":["VpcL3Network","uuid"]},
+				"startIp":{"Ref":"StartIp"},
+				"endIp":{"Ref":"EndIp"},
+				"netmask":{"Ref":"Netmask"},
+				"gateway":{"Ref":"Gateway"}
+			}
+		},
+		"AttachL2NetworkToCluster":{
+			"Type":"ZStack::Action::AttachL2NetworkToCluster",
+			"Properties":{
+				"l2NetworkUuid":{"Fn::GetAtt":["L2VxlanNetwork","uuid"]},
+				"clusterUuid":{"Ref":"ClusterUuid"},
+				"systemTags":[{"Fn::Join":["::",["l2NetworkUuid",{"Fn::GetAtt":["L2VxlanNetwork","uuid"]},"clusterUuid",{"Ref":"ClusterUuid"},"cidr",{"Ref":"Cidr"}]]}]
+			}
+		},
+		"TestVm":{
+			"Type":"ZStack::Resource::VmInstance",
+			"Properties":{
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "TestVm"]]},
+				"instanceOfferingUuid": {"Fn::GetAtt":["InstanceOffering","uuid"]},
+				"l3NetworkUuids": [{"Fn::GetAtt":["VpcL3Network","uuid"]}],
+				"imageUuid": {"Fn::GetAtt":["VMImage", "uuid"]}
+			},
+			"DependsOn":[{"Ref":"AttachL3ToVm"}]
+		}
+	},
+	"Outputs": {
+		"vpc": {
+			"Value": {
+				"Ref": "VpcL3Network"
+			}
+		}
+	}
+}
+

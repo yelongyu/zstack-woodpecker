@@ -23,7 +23,7 @@ test_obj_dict = test_state.TestStateDict()
 Path = [[]]
 index = 0
 tag = "VM_TEST_REBOOT"
-
+backup = None
 
 def record(fun):
     def recorder(vm, op):
@@ -42,7 +42,8 @@ def record(fun):
 VM_RUNGGING_OPS = [
     "VM_TEST_SNAPSHOT",
     "VM_TEST_CREATE_IMG",
-    "VM_TEST_RESIZE_RVOL"
+    "VM_TEST_RESIZE_RVOL",
+    "VM_TEST_NONE"
 ]
 
 VM_STOPPED_OPS = [
@@ -50,7 +51,8 @@ VM_STOPPED_OPS = [
     "VM_TEST_CREATE_IMG",
     "VM_TEST_RESIZE_RVOL",
     "VM_TEST_CHANGE_OS",
-    "VM_TEST_RESET"
+    "VM_TEST_RESET",
+    "VM_TEST_NONE"
 ]
 
 VM_STATE_OPS = [
@@ -73,6 +75,7 @@ def vm_op_test(vm, op):
         "VM_TEST_RESIZE_RVOL": resize_rvol,
         "VM_TEST_CHANGE_OS": change_os,
         "VM_TEST_RESET": reset,
+        "VM_TEST_BACKUP": back_up
     }
     ops[op](vm)
 
@@ -175,6 +178,15 @@ def change_os(vm_obj):
         test_util.test_fail('Change VM Image Failed.Primarystorage has changed.')
 
 
+def back_up(vm_obj):
+     global backup
+     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
+     backup_option = test_util.BackupOption()
+     backup_option.set_name("test_compare")
+     backup_option.set_volume_uuid(test_lib.lib_get_root_volume(vm_obj.get_vm()).uuid)
+     backup_option.set_backupStorage_uuid(bs.uuid)
+     backup = vol_ops.create_backup(backup_option)
+
 def print_path(Path):
     print("=" * 43 + "PATH" + "=" * 43)
     for i in range(len(Path)):
@@ -189,7 +201,7 @@ def print_path(Path):
 
 
 def test():
-    global test_obj_dict, VM_RUNGGING_OPS, VM_STOPPED_OPS, VM_STATE_OPS
+    global test_obj_dict, VM_RUNGGING_OPS, VM_STOPPED_OPS, VM_STATE_OPS, backup
 
     ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0]
     if ps.type == inventory.LOCAL_STORAGE_TYPE:
@@ -236,12 +248,7 @@ def test():
 	test_lib.lib_execute_command_in_vm(vm.vm,cmd)
         vm.suspend()
         # create_snapshot/backup
-        bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
-        backup_option = test_util.BackupOption()
-	backup_option.set_name("test_compare_" + str(i))
-        backup_option.set_volume_uuid(test_lib.lib_get_root_volume(vm.get_vm()).uuid)
-        backup_option.set_backupStorage_uuid(bs.uuid)
-        backup = vol_ops.create_backup(backup_option)
+        vm_op_test(vm, "VM_TEST_BACKUP")
         # compare vm & image created by backup
         compare(ps, vm, backup)
 

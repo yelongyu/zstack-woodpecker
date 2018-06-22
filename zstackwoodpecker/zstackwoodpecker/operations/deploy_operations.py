@@ -13,6 +13,7 @@ import zstacklib.utils.sizeunit as sizeunit
 import zstacklib.utils.jsonobject as jsonobject
 import zstacklib.utils.xmlobject as xmlobject
 import zstacklib.utils.lock as lock
+import zstacklib.utils.http as http
 import apibinding.inventory as inventory
 import os
 import sys
@@ -764,54 +765,68 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                     name=zone.name_)
             zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
 
-            # Update Global Config: user.define.api.endpoint
-            cfg_ops.change_global_config(category='aliyun',
-                                         name='user.define.api.endpoint',
-                                         value=os.getenv('apiEndPoint'),
-                                         session_uuid=session_uuid)
-            # Add KS
-            hyb_ops.add_hybrid_key_secret(name='ks_for_nas_test',
-                                          description='ks_for_nas_test',
-                                          key=os.getenv('aliyunKey'),
-                                          secret=os.getenv('aliyunSecret'),
-                                          session_uuid=session_uuid)
-            # Add DataCenter
-            hyb_ops.add_datacenter_from_remote(datacenter_type=os.getenv('datacenterType'),
-                                               description='dc_for_nas_test',
-                                               region_id=os.getenv('regionId'),
-                                               session_uuid=session_uuid)
-            # Add NAS File System
-            dcinvs = res_ops.get_resource(res_ops.DATACENTER, session_uuid=session_uuid)
-            if dcinvs:
-                dcinv = dcinvs[0]
-            else:
-                raise test_util.TestError("Can't find Any DataCenter.")
-            nas_ops.add_aliyun_nas_file_system(datacenter_uuid=dcinv.uuid,
-                                               fsid=os.getenv('fileSystemId'),
-                                               name='setup_nasfs',
-                                               session_uuid=session_uuid)
-            # Add Aliyun Access Group
-            nas_ops.add_aliyun_nas_access_group(datacenter_uuid=dcinv.uuid,
-                                                group_name=os.getenv('groupName'),
-                                                session_uuid=session_uuid)
-            # Add AliyunNas PS
-            grpinvs = res_ops.get_resource(res_ops.ALIYUNNAS_ACCESSGROUP, session_uuid=session_uuid)
-            nasinvs = res_ops.get_resource(res_ops.NAS_FILESYSTEM, session_uuid=session_uuid)
-            if grpinvs and nasinvs:
-                grpinv = grpinvs[0]
-                nasinv = nasinvs[0]
-            else:
-                raise test_util.TestError("Can't find Aliyun NAS Access Group or File system.")
-            action = api_actions.AddAliyunNasPrimaryStorageAction()
-            action.name = 'AliyunNas'
-            action.nasUuid = nasinv.uuid
-            action.accessGroupUuid = grpinv.uuid
-            action.url = '/' + str(time.time()).split('.')[0]
-            action.zoneUuid = zinv.uuid
-            action.sessionUuid = session_uuid
-            thread = threading.Thread(target=_thread_for_action, args=(action,))
-            wait_for_thread_queue()
-            thread.start()
+            for pr in xmlobject.safe_list(zone.primaryStorages.aliyunNASPrimaryStorage):
+                if ps_name and ps_name != pr.name_:
+                    continue
+                hostname_list = get_primary_storage_from_scenario_file(pr.name_, scenarioConfig, scenarioFile, deployConfig)
+                if len(hostname_list) == 0:
+                    nasPath = pr.url_.split(':')[1]
+                    cmd = "echo '%s *(rw,sync,no_root_squash)' > /etc/exports" % (nasPath)
+                    cmd_rst = "service nfs-server stop; service nfs-server start"
+                    os.system(cmd)
+                    os.system(cmd_rst)
+                    mn_ip = res_ops.get_resource(res_ops.MANAGEMENT_NODE, session_uuid=session_uuid)[0].hostName
+                    if mn_ip:
+                        uri = 'http://' + os.getenv('apiEndPoint').split('::')[-1] + '/mntarget'
+                        http.json_dump_post(uri, {"mn_ip": mn_ip, "nfs_ip": mn_ip})
+                # Update Global Config: user.define.api.endpoint
+                cfg_ops.change_global_config(category='aliyun',
+                                             name='user.define.api.endpoint',
+                                             value=os.getenv('apiEndPoint'),
+                                             session_uuid=session_uuid)
+                # Add KS
+                hyb_ops.add_hybrid_key_secret(name='ks_for_nas_test',
+                                              description='ks_for_nas_test',
+                                              key=os.getenv('aliyunKey'),
+                                              secret=os.getenv('aliyunSecret'),
+                                              session_uuid=session_uuid)
+                # Add DataCenter
+                hyb_ops.add_datacenter_from_remote(datacenter_type=os.getenv('datacenterType'),
+                                                   description='dc_for_nas_test',
+                                                   region_id=os.getenv('regionId'),
+                                                   session_uuid=session_uuid)
+                # Add NAS File System
+                dcinvs = res_ops.get_resource(res_ops.DATACENTER, session_uuid=session_uuid)
+                if dcinvs:
+                    dcinv = dcinvs[0]
+                else:
+                    raise test_util.TestError("Can't find Any DataCenter.")
+                nas_ops.add_aliyun_nas_file_system(datacenter_uuid=dcinv.uuid,
+                                                   fsid=os.getenv('fileSystemId'),
+                                                   name='setup_nasfs',
+                                                   session_uuid=session_uuid)
+                # Add Aliyun Access Group
+                nas_ops.add_aliyun_nas_access_group(datacenter_uuid=dcinv.uuid,
+                                                    group_name=os.getenv('groupName'),
+                                                    session_uuid=session_uuid)
+                # Add AliyunNas PS
+                grpinvs = res_ops.get_resource(res_ops.ALIYUNNAS_ACCESSGROUP, session_uuid=session_uuid)
+                nasinvs = res_ops.get_resource(res_ops.NAS_FILESYSTEM, session_uuid=session_uuid)
+                if grpinvs and nasinvs:
+                    grpinv = grpinvs[0]
+                    nasinv = nasinvs[0]
+                else:
+                    raise test_util.TestError("Can't find Aliyun NAS Access Group or File system.")
+                action = api_actions.AddAliyunNasPrimaryStorageAction()
+                action.name = 'AliyunNas'
+                action.nasUuid = nasinv.uuid
+                action.accessGroupUuid = grpinv.uuid
+                action.url = '/' + str(time.time()).split('.')[0]
+                action.zoneUuid = zinv.uuid
+                action.sessionUuid = session_uuid
+                thread = threading.Thread(target=_thread_for_action, args=(action,))
+                wait_for_thread_queue()
+                thread.start()
 
     for zone in xmlobject.safe_list(deployConfig.zones.zone):
         if zone_name and zone.name_ != zone_name:

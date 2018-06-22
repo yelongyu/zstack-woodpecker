@@ -1,0 +1,37 @@
+{
+	"ZStackTemplateFormatVersion": "2018-06-18",
+	"Description": "Just create a VM, we need Image,L3Network,InstanceOffering,RootDiskOffering ready before start",
+	"Parameters": {
+		"InstanceOfferingUuid": {
+			"Type": "String"
+		},
+		"ImageUuid":{
+			"Type": "String"
+		},
+		"L3NetworkUuid":{
+			"Type": "String"
+		},
+		"RootDiskOfferingUuid":{
+			"Type": "String"
+		}
+	},
+	"Resources": {
+		"VmInstance": {
+			"Type": "ZStack::Resource::VmInstance",
+			"Properties": {
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, {"Ref":"ZStack::StackUuid"},{"Ref":"ZStack::AccountUuid"},{"Ref":"ZStack::AccountName"},"VM"]]},
+				"instanceOfferingUuid": {"Ref":"InstanceOfferingUuid"},
+				"imageUuid":{"Ref":"ImageUuid"},
+				"l3NetworkUuids":[{"Ref":"L3NetworkUuid"}],
+				"rootDiskOfferingUuid":{"Ref":"RootDiskOfferingUuid"}
+			}
+		}
+	},
+	"Outputs": {
+		"VmInsta": {
+			"Value": {
+				"Ref": "VmInstance"
+			}
+		}
+	}
+}

@@ -38,6 +38,10 @@ class zstack_kvm_image_file_checker(checker_header.TestChecker):
                 test_util.test_logger("skip ceph image delete check, since the image won't be deleted until no vms refer to it.")
                 return self.judge(self.exp_result)
 
+            if test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
+                import zstackwoodpecker.operations.scenario_operations as sce_ops
+                sce_ops.replace_env_params_if_scenario()
+
             ceph_host, username, password = test_lib.lib_get_ceph_info(os.environ.get('cephBackupStorageMonUrls'))
             image_installPath = bs_one.installPath.split('ceph://')[1]
 

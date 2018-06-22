@@ -1,9 +1,9 @@
 '''
-test iam2 image operations by platform admin/operator/member
+test iam2 vm operations by platform admin/operator/member
 
 # 1 create project
 # 2 create virtual id (project admin/operator/member)
-# 3 Add image with virtual id
+# 3 operations on vm with virtual id
 # 4 delete
 
 @author: quarkonics
@@ -91,33 +91,50 @@ def test():
 
     # Image related ops: Add, Delete, Expunge, sync image size, Update QGA, delete, expunge
     if flavor['target_role'] == 'project_member':
-        statements = [{"effect": "Allow", "actions": ["org.zstack.header.image.**"], {"effect": "Allow", "actions": ["org.zstack.header.storage.backup.**"]}]
+        statements = [{"effect": "Allow", "actions": ["org.zstack.header.vm.**"]}]
         role_uuid = iam2_ops.create_role('test_role', statements).uuid
         iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], plain_user_uuid)
-    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
-    image_option = test_util.ImageOption()
-    image_option.set_name('fake_image')
-    image_option.set_description('fake image')
-    image_option.set_format('raw')
-    image_option.set_mediaType('RootVolumeTemplate')
-    image_option.set_backup_storage_uuid_list([bs.uuid])
-    image_option.url = "http://fake/fake.raw"
-    image_option.set_session_uuid(project_login_uuid)
-    image_uuid = img_ops.add_image(image_option).uuid
-    img_ops.sync_image_size(image_uuid, session_uuid=project_login_uuid)
-    img_ops.change_image_state(image_uuid, 'disable', session_uuid=project_login_uuid)
-    img_ops.change_image_state(image_uuid, 'enable', session_uuid=project_login_uuid)
-    if bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
-        img_ops.export_image_from_backup_storage(image_uuid, bs.uuid, session_uuid=project_login_uuid)
-        img_ops.delete_exported_image_from_backup_storage(image_uuid, bs.uuid, session_uuid=project_login_uuid)
-    img_ops.set_image_qga_enable(image_uuid, session_uuid=project_login_uuid)
-    img_ops.set_image_qga_disable(image_uuid, session_uuid=project_login_uuid)
-    cond = res_ops.gen_query_conditions('name', '=', "fake_image")
-    image = res_ops.query_resource(res_ops.IMAGE, cond, session_uuid=project_login_uuid)
-    if image == None:
-        test_util.test_fail('fail to query image just added')
-    img_ops.delete_image(image_uuid, session_uuid=project_login_uuid)
-    img_ops.expunge_image(image_uuid, session_uuid=project_login_uuid)
+
+    vm_creation_option = test_util.VmOption()
+    pub_l3_uuid = test_lib.lib_get_l3_by_name(os.environ.get('l3PublicNetworkName')).uuid
+    l3_net_uuid = test_lib.lib_get_l3_by_name(os.environ.get('l3VlanNetworkName3')).uuid
+    acc_ops.share_resources([project_linked_account_uuid], [l3_net_uuid])
+    vm_creation_option.set_l3_uuids([l3_net_uuid])
+    image_uuid = test_lib.lib_get_image_by_name(os.environ.get('imageName_net')).uuid
+    vm_creation_option.set_image_uuid(image_uuid)
+    acc_ops.share_resources([project_linked_account_uuid], [image_uuid])
+    instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(os.environ.get('instanceOfferingName_s')).uuid
+    vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+    acc_ops.share_resources([project_linked_account_uuid], [instance_offering_uuid])
+    vm_creation_option.set_name('vm_for_project_management')
+    vm_creation_option.set_session_uuid(project_login_uuid)
+    vm = test_stub.create_vm(image_uuid = image_uuid, session_uuid=project_login_uuid) 
+    vm_uuid = vm.get_vm().uuid
+
+
+    vip_option = test_util.VipOption()
+    vip_option.set_name("vip for pm")
+    vip_option.set_session_uuid(project_login_uuid)
+    vip_option.set_l3_uuid(pub_l3_uuid)
+
+    vm_nic = vm.vm.vmNics[0]
+    vm_nic_uuid = vm_nic.uuid
+    vip = net_ops.create_vip(vip_option)
+    eip_option = test_util.EipOption()
+    eip_option.set_name('eip for pm')
+    eip_option.set_session_uuid(project_login_uuid)
+    eip_option.set_vip_uuid(vip.uuid)
+    eip_option.set_vm_nic_uuid(vm_nic_uuid)
+    eip = net_ops.create_eip(eip_option)
+    
+    net_ops.detach_eip(eip.uuid, session_uuid=project_login_uuid)
+    net_ops.attach_eip(eip.uuid, vm_nic_uuid, session_uuid=project_login_uuid)
+    net_ops.detach_eip(eip.uuid, session_uuid=project_login_uuid)
+    net_ops.delete_eip(eip.uuid)
+    net_ops.delete_vip(vip.uuid)
+
+    vm_ops.destroy_vm(vm_uuid, session_uuid=project_login_uuid)
+    vm_ops.expunge_vm(vm_uuid, session_uuid=project_login_uuid)
 
     # 11 delete
     acc_ops.logout(project_login_uuid)

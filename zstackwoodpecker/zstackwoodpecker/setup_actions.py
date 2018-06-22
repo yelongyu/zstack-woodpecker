@@ -401,6 +401,10 @@ class Plan(object):
         self.zstack_pkg = self._full_path(basic_config.zstackPkg.text_)
         self.zstack_install_script = \
                 self._full_path(basic_config.zstackInstallScript.text_)
+        try:
+            os.system('source /root/.bashrc')
+        except:
+            pass
         if os.environ.get('ZSTACK_ALREADY_INSTALLED') != "yes" and not os.path.exists(self.zstack_pkg):
             raise ActionError('unable to find %s for ZStack binary' \
                     % self.zstack_pkg)
@@ -819,7 +823,12 @@ default one' % self.zstack_properties)
             self._change_node_ip()
             self._install_management_nodes()
             self._set_extra_node_config()
-            
+        try:
+            with open('/root/.bashrc', 'a+') as bashrc:
+                bashrc.write('export ZSTACK_ALREADY_INSTALLED=yes\n')
+        except:
+            pass
+
         self._start_multi_nodes(restart=True)
 
     def execute_plan_ha(self):

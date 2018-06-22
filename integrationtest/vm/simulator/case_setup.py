@@ -8,6 +8,7 @@ import zstackwoodpecker.operations.deploy_operations as deploy_operations
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.zone_operations as zone_operations
 import zstackwoodpecker.operations.backupstorage_operations as bs_operations
+import zstackwoodpecker.operations.iam2_operations as iam2_ops
 import os
 
 def destroy_initial_database():
@@ -17,7 +18,7 @@ def destroy_initial_database():
     backstorageinvs = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, [], None, ['uuid'])
     for backstorageinv in backstorageinvs:
         bs_operations.delete_backup_storage(backstorageinv.uuid)
-
+    iam2_ops.clean_iam2_enviroment()
 
 def test():
     if os.environ.get('ZSTACK_SIMULATOR') == "yes":

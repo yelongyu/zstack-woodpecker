@@ -95,5 +95,10 @@ def test():
     if test_lib.lib_is_storage_network_separate():
         add_ps_network_gateway_sys_tag()
 
+    if test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
+        scenario_operations.replace_env_params_if_scenario()
+    else:
+        pass
+
     test_util.test_pass('Suite Setup Success')
 

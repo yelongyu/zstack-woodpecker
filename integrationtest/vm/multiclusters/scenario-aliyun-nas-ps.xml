@@ -22,6 +22,7 @@
             </l3Network>
           </l3Networks>
 	  <backupStorageRef type="imageStore">$imageStoreBackupStorageName2</backupStorageRef>
+	  <primaryStorageRef type="nas">$aliyunNASPrimaryStorageName</primaryStorageRef>
         </vm>
       </vms>
     </host>
