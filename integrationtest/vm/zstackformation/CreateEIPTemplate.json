@@ -1,0 +1,60 @@
+{
+	"ZStackTemplateFormatVersion": "2018-06-18",
+	"Description": "Just create a flat network & VM",
+	"Parameters": {
+		"InstanceOfferingUuid": {
+			"Type": "String",
+			"Lable": "vm instance offering"
+		},
+		"ImageUuid":{
+			"Type": "String"
+		},
+		"ImageUuid":{
+			"Type": "String"
+		},
+		"PrivateNetworkUuid":{
+			"Type": "String"
+		},
+		"PublicNetworkUuid":{
+			"Type": "String"
+		},
+		"RootDiskOfferingUuid":{
+			"Type": "String"
+		}
+	},
+	"Resources": {
+		"VmInstance": {
+			"Type": "ZStack::Resource::VmInstance",
+			"Properties": {
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, {"Ref":"ZStack::StackUuid"},{"Ref":"ZStack::AccountUuid"},{"Ref":"ZStack::AccountName"},"VM"]]},
+				"instanceOfferingUuid": {"Ref":"InstanceOfferingUuid"},
+				"imageUuid":{"Ref":"ImageUuid"},
+				"l3NetworkUuids":[{"Ref":"PrivateNetworkUuid"}],
+				"rootDiskOfferingUuid":{"Ref":"RootDiskOfferingUuid"}
+			}
+		},
+		"VIP": {
+			"Type": "ZStack::Resource::Vip",
+			"Properties": {
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, {"Ref":"ZStack::StackUuid"},{"Ref":"ZStack::AccountUuid"},{"Ref":"ZStack::AccountName"},"VIP"]]},
+				"l3NetworkUuid":{"Ref":"PublicNetworkUuid"}
+			}
+		},
+		"EIP":{
+			"Type": "ZStack::Resource::Eip",
+			"Properties": {
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, {"Ref":"ZStack::StackUuid"},{"Ref":"ZStack::AccountUuid"},{"Ref":"ZStack::AccountName"},"EIP"]]},
+				"vipUuid":{"Fn::GetAtt":["VIP","uuid"]},
+				"vmNicUuid":{"Fn::GetAtt":[{"Fn::Select":["0",[{"Fn::GetAtt":["VmInstance","vmNics"]}]]},"uuid"]}
+			}
+		}
+	},
+	"Outputs": {
+		"VmInstance": {
+			"Value": {
+				"Ref": "VmInstance"
+			}
+		}
+	}
+}
+
