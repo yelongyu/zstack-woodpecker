@@ -40,6 +40,8 @@ def test():
         company_uuid_01, company_uuid_02, department_01_uuid, department_02_uuid, virtual_id_group_uuid, \
         virtual_id_uuid
 
+    iam2_ops.clean_iam2_enviroment()
+
     # 1 create role and add/remove policy
     statements = [{"effect": "Allow", "actions": ["org.zstack.header.vm.**"]}]
     role_uuid = iam2_ops.create_role('test_role', statements).uuid
@@ -99,7 +101,8 @@ def test():
     # iam2_ops.remove_attributes_from_iam2_virtual_id_group()
 
     # 8 create virtual id and add/remove role or attributes to/from it
-    virtual_id_uuid = iam2_ops.create_iam2_virtual_id('username', 'password').uuid
+    password ='b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86'
+    virtual_id_uuid = iam2_ops.create_iam2_virtual_id('username', password).uuid
     iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], virtual_id_uuid)
     iam2_ops.remove_roles_from_iam2_virtual_id([role_uuid], virtual_id_uuid)
 
@@ -184,7 +187,7 @@ def test():
     if virtual_id_inv.name != virtual_id_new_name:
         test_util.test_fail("update iam2 virtual id name fail")
     try:
-        iam2_ops.login_iam2_virtual_id('username', 'password')
+        iam2_ops.login_iam2_virtual_id('username', password)
     except:
         test_util.test_logger("the old username and password can't login")
     try:
@@ -229,6 +232,7 @@ def test():
     iam2_ops.delete_iam2_virtual_id(virtual_id_uuid)
     iam2_ops.delete_role(role_uuid)
 
+    iam2_ops.clean_iam2_enviroment()
     test_util.test_pass('success test iam2 login in by admin!')
 
 
@@ -261,3 +265,4 @@ def error_cleanup():
         iam2_ops.delete_iam2_virtual_id(virtual_id_uuid)
     if role_uuid:
         iam2_ops.delete_role(role_uuid)
+    iam2_ops.clean_iam2_enviroment()

@@ -1312,6 +1312,40 @@ class BaremetalHostCfgOption(DataOption):
     def get_cfgItems(self):
         return self.cfgItems
  
+class VidOption(DataOption):
+    def __init__(self):
+        self.uuid = None
+        self.name = None
+        self.state = None
+        self.attributes = None
+        self.password = None
+        super(VidOption, self).__init__()
+
+    def set_vid_uuid(self, uuid):
+        self.uuid = uuid
+
+    def get_vid_uuid(self):
+        return self.uuid
+
+    def set_password(self, password):
+        self.password = password
+
+    def get_password(self):
+        return self.password
+
+    def set_state(self, state):
+        self.state = state
+
+    def get_state(self):
+        return self.state
+
+    def set_attributes(self, attributes):
+        if not isinstance(attributes, list):
+            raise TestError('Attributes is not a list.')
+        self.attributes = attributes
+
+    def get_attributes(self):
+        return self.attributes
 
 def _template_to_dict(template_file_path):
     def _parse(path, ret, done):

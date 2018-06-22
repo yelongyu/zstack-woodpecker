@@ -9,10 +9,13 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.test_util as test_util
 
 def test():
+    iam2_ops.clean_iam2_enviroment()
+
     virtual_id_uuid_list = []
+    password = 'b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86'
     for char in ['A','B','C','D','E']:
         username = 'testuser-'+char
-        virtual_id_uuid = iam2_ops.create_iam2_virtual_id(username, 'password').uuid
+        virtual_id_uuid = iam2_ops.create_iam2_virtual_id(username, password).uuid
         virtual_id_uuid_list.append(virtual_id_uuid)
 
     project_name = 'test_project'

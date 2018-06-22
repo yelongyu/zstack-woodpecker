@@ -581,9 +581,17 @@ def clean_all_virtual_ids():
         for virtual_id in virtual_id_list:
             delete_iam2_virtual_id(virtual_id.uuid)
 
+def clean_all_customized_roles():
+    cond=res_ops.gen_query_conditions('type','=','Customized')
+    role_list=res_ops.query_resource(res_ops.ROLE,cond,)
+    if role_list:
+        for role in role_list:
+            delete_role(role.uuid)
+
 def clean_iam2_enviroment():
     clean_all_projects()
     clean_all_project_templates()
     clean_all_organizations()
     clean_all_virtual_ids()
+    clean_all_customized_roles()
 
