@@ -825,7 +825,7 @@ default one' % self.zstack_properties)
             self._set_extra_node_config()
         try:
             with open('/root/.bashrc', 'a+') as bashrc:
-                bashrc.write('export ZSTACK_ALREADY_INSTALLED=yes')
+                bashrc.write('export ZSTACK_ALREADY_INSTALLED=yes\n')
         except:
             pass
 
