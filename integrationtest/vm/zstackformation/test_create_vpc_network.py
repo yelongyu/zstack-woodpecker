@@ -24,6 +24,11 @@ def test():
 			"Type": "String",
 			"Description":"云路由镜像链接地址"
 		},
+		"VmImageUrl": {
+			"Type": "String",
+			"Description":"测试云主机镜像，请确定ZStack 可以下载下面链接的镜像",
+			"DefaultValue": "http://cdn.zstack.io/zstack_repo/latest/zstack-image-1.4.qcow2"
+		},
 		"BackupStorage":{
 			"Type": "CommaDelimitedList",
 			"Description":"镜像服务器Uuid"
@@ -45,7 +50,7 @@ def test():
 			"Description":"集群Uuid"
 		},
 		"Cidr":{
-			"Type": "String"
+			"Type": "String",
 			"Description":"VTEP Cider"
 		},
 		"Vni":{
@@ -87,6 +92,15 @@ def test():
 				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "Vrouter-Image"]]},
 				"url": {"Ref":"VrouterImageUrl"},
 				"system": true,
+				"format": "qcow2",
+				"backupStorageUuids":{"Ref":"BackupStorage"}
+			}
+		},
+		"VMImage": {
+			"Type": "ZStack::Resource::Image",
+			"Properties": {
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "VmImage"]]},
+				"url": {"Ref":"VmImageUrl"},
 				"format": "qcow2",
 				"backupStorageUuids":{"Ref":"BackupStorage"}
 			}
@@ -146,6 +160,14 @@ def test():
 				"type":"L3VpcNetwork"
 			}
 		},
+		"InstanceOffering":{
+			"Type":"ZStack::Resource::InstanceOffering",
+			"Properties":{
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "1cpu","4G"]]},
+				"cpuNum": 1,
+				"memorySize" : 4294967296
+			}
+		},
 
 		"AttachL3ToVm":{
 			"Type":"ZStack::Action::AttachL3NetworkToVm",
@@ -167,12 +189,22 @@ def test():
 			}
 		},
 		"AttachL2NetworkToCluster":{
-			"Type":"ZStack::Action::AddIpRange",
+			"Type":"ZStack::Action::AttachL2NetworkToCluster",
 			"Properties":{
 				"l2NetworkUuid":{"Fn::GetAtt":["L2VxlanNetwork","uuid"]},
 				"clusterUuid":{"Ref":"ClusterUuid"},
-				"systemTags":{"Fn::Join":["::",["l2NetworkUuid",{"Fn::GetAtt":["L2VxlanNetwork","uuid"]},"clusterUuid",{"Ref":"ClusterUuid"},"cidr",{"Ref":"Cidr"}]]}
+				"systemTags":[{"Fn::Join":["::",["l2NetworkUuid",{"Fn::GetAtt":["L2VxlanNetwork","uuid"]},"clusterUuid",{"Ref":"ClusterUuid"},"cidr",{"Ref":"Cidr"}]]}]
 			}
+		},
+		"TestVm":{
+			"Type":"ZStack::Resource::VmInstance",
+			"Properties":{
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "TestVm"]]},
+				"instanceOfferingUuid": {"Fn::GetAtt":["InstanceOffering","uuid"]},
+				"l3NetworkUuids": [{"Fn::GetAtt":["VpcL3Network","uuid"]}],
+				"imageUuid": {"Fn::GetAtt":["VMImage", "uuid"]}
+			},
+			"DependsOn":[{"Ref":"AttachL3ToVm"}]
 		}
 	},
 	"Outputs": {

@@ -1,33 +1,38 @@
 {
 	"ZStackTemplateFormatVersion": "2018-06-18",
-	"Description": "本示例会创建一个简单的VPC网络，需要用户提供下面正确的数据i\n公有网络Uuid\n>管理网络Uuid: 如果只有公有网络，则把公有网络当作管理网即可.\n",
+	"Description": "鏈ず渚嬩細鍒涘缓涓€涓畝鍗曠殑VPC缃戠粶锛岄渶瑕佺敤鎴锋彁渚涗笅闈㈡纭殑鏁版嵁i\n鍏湁缃戠粶Uuid\n绠＄悊缃戠粶Uuid: 濡傛灉鍙湁鍏湁缃戠粶锛屽垯鎶婂叕鏈夌綉缁滃綋浣滅鐞嗙綉鍗冲彲.\n",
 	"Parameters": {
 		"VrouterImageUrl": {
 			"Type": "String",
-			"Description":"云路由镜像链接地址"
+			"Description":"浜戣矾鐢遍暅鍍忛摼鎺ュ湴鍧€"
+		},
+		"VmImageUrl": {
+			"Type": "String",
+			"Description":"娴嬭瘯浜戜富鏈洪暅鍍忥紝璇风‘瀹歓Stack 鍙互涓嬭浇涓嬮潰閾炬帴鐨勯暅鍍?,
+			"DefaultValue": "http://cdn.zstack.io/zstack_repo/latest/zstack-image-1.4.qcow2"
 		},
 		"BackupStorage":{
 			"Type": "CommaDelimitedList",
-			"Description":"镜像服务器Uuid"
+			"Description":"闀滃儚鏈嶅姟鍣║uid"
 		},
 		"ManagementNetworkUuid":{
 			"Type": "String",
-			"Description":"管理网络Uuid,如果只有共有网络填入共有网络Uuid即可"
+			"Description":"绠＄悊缃戠粶Uuid,濡傛灉鍙湁鍏辨湁缃戠粶濉叆鍏辨湁缃戠粶Uuid鍗冲彲"
 		},
 		"PublicNetworkUuid":{
 			"Type": "String",
-			"Description":"公有网络Uuid"
+			"Description":"鍏湁缃戠粶Uuid"
 		},
 		"ZoneUuid":{
 			"Type": "String",
-			"Description":"区域Uuid"
+			"Description":"鍖哄煙Uuid"
 		},
 		"ClusterUuid":{
 			"Type": "String",
-			"Description":"集群Uuid"
+			"Description":"闆嗙兢Uuid"
 		},
 		"Cidr":{
-			"Type": "String"
+			"Type": "String",
 			"Description":"VTEP Cider"
 		},
 		"Vni":{
@@ -69,6 +74,15 @@
 				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "Vrouter-Image"]]},
 				"url": {"Ref":"VrouterImageUrl"},
 				"system": true,
+				"format": "qcow2",
+				"backupStorageUuids":{"Ref":"BackupStorage"}
+			}
+		},
+		"VMImage": {
+			"Type": "ZStack::Resource::Image",
+			"Properties": {
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "VmImage"]]},
+				"url": {"Ref":"VmImageUrl"},
 				"format": "qcow2",
 				"backupStorageUuids":{"Ref":"BackupStorage"}
 			}
@@ -128,6 +142,14 @@
 				"type":"L3VpcNetwork"
 			}
 		},
+		"InstanceOffering":{
+			"Type":"ZStack::Resource::InstanceOffering",
+			"Properties":{
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "1cpu","4G"]]},
+				"cpuNum": 1,
+				"memorySize" : 4294967296
+			}
+		},
 
 		"AttachL3ToVm":{
 			"Type":"ZStack::Action::AttachL3NetworkToVm",
@@ -149,12 +171,22 @@
 			}
 		},
 		"AttachL2NetworkToCluster":{
-			"Type":"ZStack::Action::AddIpRange",
+			"Type":"ZStack::Action::AttachL2NetworkToCluster",
 			"Properties":{
 				"l2NetworkUuid":{"Fn::GetAtt":["L2VxlanNetwork","uuid"]},
 				"clusterUuid":{"Ref":"ClusterUuid"},
-				"systemTags":{"Fn::Join":["::",["l2NetworkUuid",{"Fn::GetAtt":["L2VxlanNetwork","uuid"]},"clusterUuid",{"Ref":"ClusterUuid"},"cidr",{"Ref":"Cidr"}]]}
+				"systemTags":[{"Fn::Join":["::",["l2NetworkUuid",{"Fn::GetAtt":["L2VxlanNetwork","uuid"]},"clusterUuid",{"Ref":"ClusterUuid"},"cidr",{"Ref":"Cidr"}]]}]
 			}
+		},
+		"TestVm":{
+			"Type":"ZStack::Resource::VmInstance",
+			"Properties":{
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "TestVm"]]},
+				"instanceOfferingUuid": {"Fn::GetAtt":["InstanceOffering","uuid"]},
+				"l3NetworkUuids": [{"Fn::GetAtt":["VpcL3Network","uuid"]}],
+				"imageUuid": {"Fn::GetAtt":["VMImage", "uuid"]}
+			},
+			"DependsOn":[{"Ref":"AttachL3ToVm"}]
 		}
 	},
 	"Outputs": {
