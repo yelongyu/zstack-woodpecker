@@ -91,7 +91,7 @@ def test():
 
     # Image related ops: Add, Delete, Expunge, sync image size, Update QGA, delete, expunge
     if flavor['target_role'] == 'project_member':
-        statements = [{"effect": "Allow", "actions": ["org.zstack.header.image.**"]}]
+        statements = [{"effect": "Allow", "actions": ["org.zstack.header.image.**"], {"effect": "Allow", "actions": ["org.zstack.header.storage.backup.**"]}]
         role_uuid = iam2_ops.create_role('test_role', statements).uuid
         iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], plain_user_uuid)
     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
