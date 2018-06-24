@@ -26,6 +26,7 @@ def test():
     ps_env = test_stub.PSEnvChecker()
 
     local_nfs_env = ps_env.is_local_nfs_env
+    local_smp_env = ps_env.is_local_smp_env
 
     local_ps, another_ps = ps_env.get_two_ps()
 
@@ -62,7 +63,7 @@ def test():
     for volume in volume_in_local:
         vol_ops.migrate_volume(volume.get_volume().uuid, target_host.uuid)
 
-    if not local_nfs_env:
+    if not (local_nfs_env or local_smp_env):
         for volume in volume_in_another:
             vol_ops.migrate_volume(volume.get_volume().uuid, target_host.uuid)
 
