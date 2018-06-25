@@ -34,6 +34,8 @@ def test():
     mem_change = random.randint(1,500) * 1024 * 1024
 
     with test_stub.CapacityCheckerContext(vm, cpu_change, mem_change, window=True):
+        # wait for 90s to ensure all the windows services up
+        time.sleep(90)
         vm_ops.update_vm(vm.get_vm().uuid, vm_instanc_offering.cpuNum+cpu_change,
                          vm_instanc_offering.memorySize+mem_change)
         vm.update()
