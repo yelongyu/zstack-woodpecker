@@ -56,9 +56,24 @@ def test():
     project_name = 'test_project'
     project_uuid = iam2_ops.create_iam2_project(project_name).uuid
 
-    # TODO:there is nothing to do with the below api in the first version of iam2
-    # iam2_ops.add_attributes_to_iam2_project(project_uuid,attributes='')
-    # iam2_ops.remove_attributes_from_iam2_project(project_uuid,attributes='')
+    zone_inv=res_ops.query_resource(res_ops.ZONE)
+    if len(zone_inv)>=2:
+        attributes = [{"name":"__ProjectRelatedZone__", "value":zone_inv[0].uuid}]
+        iam2_ops.add_attributes_to_iam2_project(project_uuid,attributes)
+        username='virtualid'
+        password = \
+            'b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86'
+        virtual_id_uuid=iam2_ops.create_iam2_virtual_id(username,password).uuid
+        iam2_ops.add_iam2_virtual_ids_to_project([virtual_id_uuid],project_uuid)
+        session_uuid=iam2_ops.login_iam2_virtual_id(username,password)
+        session_uuid=iam2_ops.login_iam2_project(project_name,session_uuid).uuid
+        cond=res_ops.gen_query_conditions('zoneUuid','=',zone_inv[1].uuid)
+        host_inv=res_ops.query_resource(res_ops.HOST,cond,session_uuid=session_uuid)
+        if host_inv:
+            test_util.test_fail("test Project Related Zone fail")
+        attribute_uuid=iam2_ops.get_attribute_uuid_of_project(project_uuid,"__ProjectRelatedZone__")
+        iam2_ops.delete_iam2_virtual_id(virtual_id_uuid)
+        iam2_ops.remove_attributes_from_iam2_project(project_uuid,[attribute_uuid])
 
     # 3 create project template from project
     project_template_01_uuid = iam2_ops.create_iam2_project_template_from_project('project_template', project_uuid,

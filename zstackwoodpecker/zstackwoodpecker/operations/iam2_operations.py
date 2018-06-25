@@ -553,6 +553,12 @@ def get_policy_statement_uuid_of_role(role_uuid,action):
         if policy_statement.statement.actions[0]==action:
             return policy_statement.uuid
 
+def get_attribute_uuid_of_project(project_uuid,attribute_name):
+    attributes=res_ops.get_resource(res_ops.IAM2_PROJECT,uuid=project_uuid)[0].attributes
+    for attribute in attributes:
+        if attribute['name'] == attribute_name:
+            return attribute['uuid']
+
 def clean_all_projects():
     project_list=res_ops.query_resource(res_ops.IAM2_PROJECT)
     if project_list:
