@@ -176,12 +176,16 @@ def check_license(user_name, cpu_num, host_num, expired, lic_type, issued_date=N
     if lic_info.expiredDate != expired_date:
         test_util.test_fail("License expire date info not correct")
 
-def check_license_addons(expired, lic_type, issued_date=None, expired_date=None):
+def check_license_addons(cpu_num, host_num, expired, lic_type, issued_date=None, expired_date=None):
     if issued_date == None:
         issued_date = get_license_addons_issued_date()
     if expired_date == None:
         expired_date = get_license_addons_expired_date()
     lic_info = lic_ops.get_license_addons_info().addons[0]
+    if lic_info.cpuNum != cpu_num:
+        test_util.test_fail("License cpu info not correct")
+    if lic_info.hostNum != host_num:
+        test_util.test_fail("License host info not correct")
     if lic_info.expired != expired:
         test_util.test_fail("License expire info not correct")
     if lic_info.licenseType != lic_type:

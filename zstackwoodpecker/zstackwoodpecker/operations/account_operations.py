@@ -10,6 +10,7 @@ import traceback
 import sys
 import zstackwoodpecker.test_util as test_util
 
+
 def login_as_admin():
     accountName = inventory.INITIAL_SYSTEM_ADMIN_NAME
     password = inventory.INITIAL_SYSTEM_ADMIN_PASSWORD
@@ -157,6 +158,20 @@ def share_resources(account_uuid_list, resource_uuid_list, to_public = None, \
     test_util.action_logger('Share [Resources]: %s to [Accounts]: %s' % \
             (resource_uuid_list, account_uuid_list))
     return evt
+
+def revoke_resources(account_uuid_list,resource_uuid_list,session_uuid = None):
+		action = api_actions.RevokeResourceSharingAction()
+		action.accountUuids = account_uuid_list
+		action.resourceUuids = resource_uuid_list
+
+		evt = execute_action_with_session(action, session_uuid)
+		test_util.action_logger('Revoke [Resources]: %s from [Accounts]: %s' % \
+			   (resource_uuid_list, account_uuid_list))
+		return evt
+
+
+
+
 	
 def update_quota(identity_uuid,name,value,session_uuid=None):
    action = api_actions.UpdateQuotaAction()

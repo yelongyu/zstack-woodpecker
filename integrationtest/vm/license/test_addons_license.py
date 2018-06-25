@@ -1,6 +1,6 @@
 '''
 
-New Integration Test for License.
+New Integration Test for License addons project-management.
 
 @author: yetian
 '''
@@ -28,7 +28,7 @@ def test():
     test_stub.update_license(node_uuid, file_path)
     issued_date = test_stub.get_license_addons_info().issuedDate
     expired_date = test_stub.license_date_cal(issued_date, 86400 * 2)
-    test_stub.check_license_addons(False, 'AddOn', issued_date=issued_date, expired_date=expired_date)
+    test_stub.check_license_addons(None, None, False, 'AddOn', issued_date=issued_date, expired_date=expired_date)
 
     test_util.test_logger('Load and Check Hybrid license with 2 day and 1 HOST')
     file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '2', 'Hybrid', '', '1')
@@ -47,7 +47,7 @@ def test():
     lic_ops.update_license(node_uuid, file_license)
     issued_date = test_stub.get_license_addons_info().issuedDate
     expired_date = test_stub.license_date_cal(issued_date, 86400 * 2)
-    test_stub.check_license_addons(False, 'AddOn', issued_date=issued_date, expired_date=expired_date)
+    test_stub.check_license_addons(None, None, False, 'AddOn', issued_date=issued_date, expired_date=expired_date)
 
     test_util.test_logger('Load and Check Prepaid license with 1 day and 1 CPU')
     file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '1', 'Prepaid', '1', '')

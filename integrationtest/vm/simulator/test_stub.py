@@ -28,6 +28,52 @@ import time
 import re
 import random
 
+
+def share_admin_resource_include_vxlan_pool(account_uuid_list, session_uuid=None):
+    instance_offerings = res_ops.get_resource(res_ops.INSTANCE_OFFERING)
+    for instance_offering in instance_offerings:
+        acc_ops.share_resources(account_uuid_list, [instance_offering.uuid], session_uuid)
+    cond1 = res_ops.gen_query_conditions('mediaType', '!=', 'ISO')
+    images = res_ops.query_resource(res_ops.IMAGE, cond1)
+    for image in images:
+        acc_ops.share_resources(account_uuid_list, [image.uuid], session_uuid)
+
+    l3nets = res_ops.get_resource(res_ops.L3_NETWORK)
+    for l3net in l3nets:
+        acc_ops.share_resources(account_uuid_list, [l3net.uuid], session_uuid)
+
+    l2vxlan_pool_uuid = res_ops.get_resource(res_ops.L2_VXLAN_NETWORK_POOL)[0].uuid
+    acc_ops.share_resources(account_uuid_list, [l2vxlan_pool_uuid], session_uuid)
+
+    virtual_router_offerings = res_ops.get_resource(res_ops.VR_OFFERING)
+    for virtual_router_offering in virtual_router_offerings:
+        acc_ops.share_resources(account_uuid_list, [virtual_router_offering.uuid], session_uuid)
+    volume_offerings = res_ops.get_resource(res_ops.DISK_OFFERING)
+    for volume_offering in volume_offerings:
+        acc_ops.share_resources(account_uuid_list, [volume_offering.uuid], session_uuid)
+
+
+def revoke_admin_resource(account_uuid_list, session_uuid=None):
+    instance_offerings = res_ops.get_resource(res_ops.INSTANCE_OFFERING)
+    for instance_offering in instance_offerings:
+        acc_ops.revoke_resources(account_uuid_list, [instance_offering.uuid], session_uuid)
+    cond2 = res_ops.gen_query_conditions('mediaType', '!=', 'ISO')
+    images = res_ops.query_resource(res_ops.IMAGE, cond2)
+    for image in images:
+        acc_ops.revoke_resources(account_uuid_list, [image.uuid], session_uuid)
+    l3nets = res_ops.get_resource(res_ops.L3_NETWORK)
+    for l3net in l3nets:
+        acc_ops.revoke_resources(account_uuid_list, [l3net.uuid], session_uuid)
+
+    l2vxlan_pool_uuid = res_ops.get_resource(res_ops.L2_VXLAN_NETWORK_POOL)[0].uuid
+    acc_ops.revoke_resources(account_uuid_list, [l2vxlan_pool_uuid], session_uuid)
+
+    virtual_router_offerings = res_ops.get_resource(res_ops.VR_OFFERING)
+    for virtual_router_offering in virtual_router_offerings:
+        acc_ops.revoke_resources(account_uuid_list, [virtual_router_offering.uuid], session_uuid)
+    volume_offerings = res_ops.get_resource(res_ops.DISK_OFFERING)
+    for volume_offering in volume_offerings:
+        acc_ops.revoke_resources(account_uuid_list, [volume_offering.uuid], session_uuid)
 def create_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None,
               image_uuid=None, session_uuid=None):
     if not vm_creation_option:
@@ -263,7 +309,7 @@ def create_ag_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None
         image_uuid = res_ops.query_resource(
             res_ops.IMAGE, cond, session_uuid)[0].uuid
         cond = res_ops.gen_query_conditions('category', '!=', 'System')
-        l3net_uuid = res_ops.get_resource(
+        l3net_uuid = res_ops.query_resource(
             res_ops.L3_NETWORK, cond, session_uuid)[0].uuid
         vm_creation_option = test_util.VmOption()
         vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
@@ -617,3 +663,5 @@ class Longjob(object):
         job_data = '{"name"="%s", "guestOsType":"Linux","system"="false","platform"="Linux","backupStorageUuids"=["%s"], \
         "volumeUuid"="%s"}' %(self.vol_create_image_name, res_ops.query_resource(res_ops.BACKUP_STORAGE)[0].uuid, self.data_volume.get_volume().uuid)
         self.submit_longjob(job_data, name, job_type='crt_vol_image')
+
+

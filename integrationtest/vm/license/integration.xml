@@ -10,5 +10,6 @@
         <case timeout='60' repeat='1' noparallel='True'>test_update_error_license.py</case>
         <case timeout='800' repeat='1' noparallel='True'>test_prepaid_to_community_check_imagestore.py</case>
         <case timeout='800' repeat='1' noparallel='True'>test_addons_license.py</case>
+        <case timeout='800' repeat='1' noparallel='True'>test_addons_license_for_vmware.py</case>
     </suite>
 </integrationTest>
