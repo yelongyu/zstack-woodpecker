@@ -55,7 +55,7 @@ def test():
     cmd = "zstack-ctl restore_mysql -f %s --mysql-root-password %s"%(dump_file, host_password)
     rsp = test_lib.lib_execute_ssh_cmd(node_ip, host_username, host_password, cmd, 180)
 
-    cmd = '''mysql -uroot -pzstack.mysql.password -D zstack "delete from VmInstanceVO where uuid='%s';"''' % (vm.get_vm().uuid)
+    cmd = '''mysql -uroot -pzstack.mysql.password -D zstack -e "delete from VmInstanceVO where uuid='%s';"''' % (vm.get_vm().uuid)
     rsp = test_lib.lib_execute_ssh_cmd(node_ip, host_username, host_password, cmd, 180)
 
     cmd = "mysqldump -uroot -pzstack.mysql.password -A -r /tmp/mysql_after_restore.dump"
