@@ -1,35 +1,35 @@
 {
 	"ZStackTemplateFormatVersion": "2018-06-18",
-	"Description": "鏈ず渚嬩細鍒涘缓涓€涓畝鍗曠殑VPC缃戠粶锛岄渶瑕佺敤鎴锋彁渚涗笅闈㈡纭殑鏁版嵁i\n鍏湁缃戠粶Uuid\n绠＄悊缃戠粶Uuid: 濡傛灉鍙湁鍏湁缃戠粶锛屽垯鎶婂叕鏈夌綉缁滃綋浣滅鐞嗙綉鍗冲彲.\n",
+	"Description": "本示例会创建一个简单的VPC网络，需要用户提供下面正确的数据i\n公有网络Uuid\n管理网络Uuid: 如果只有公有网络，则把公有网络当作管理网即可.\n"
 	"Parameters": {
 		"VrouterImageUrl": {
 			"Type": "String",
-			"Description":"浜戣矾鐢遍暅鍍忛摼鎺ュ湴鍧€"
+			"Description":"云路由镜像链接地址"
 		},
 		"VmImageUrl": {
 			"Type": "String",
-			"Description":"娴嬭瘯浜戜富鏈洪暅鍍忥紝璇风‘瀹歓Stack 鍙互涓嬭浇涓嬮潰閾炬帴鐨勯暅鍍?,
+			"Description":"测试云主机镜像，请确定ZStack 可以下载下面链接的镜像",
 			"DefaultValue": "http://cdn.zstack.io/zstack_repo/latest/zstack-image-1.4.qcow2"
 		},
 		"BackupStorage":{
 			"Type": "CommaDelimitedList",
-			"Description":"闀滃儚鏈嶅姟鍣║uid"
+			"Description":"镜像服务器Uuid"
 		},
 		"ManagementNetworkUuid":{
 			"Type": "String",
-			"Description":"绠＄悊缃戠粶Uuid,濡傛灉鍙湁鍏辨湁缃戠粶濉叆鍏辨湁缃戠粶Uuid鍗冲彲"
+			"Description":"管理网络Uuid,如果只有共有网络填入共有网络Uuid即可"
 		},
 		"PublicNetworkUuid":{
 			"Type": "String",
-			"Description":"鍏湁缃戠粶Uuid"
+			"Description":"公有网络Uuid"
 		},
 		"ZoneUuid":{
 			"Type": "String",
-			"Description":"鍖哄煙Uuid"
+			"Description":"区域Uuid"
 		},
 		"ClusterUuid":{
 			"Type": "String",
-			"Description":"闆嗙兢Uuid"
+			"Description":"集群Uuid"
 		},
 		"Cidr":{
 			"Type": "String",
