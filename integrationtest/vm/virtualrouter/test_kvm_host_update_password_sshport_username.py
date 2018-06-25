@@ -26,7 +26,8 @@ def test():
     global kvm_host_uuid
     conditions = res_ops.gen_query_conditions('state', '=', 'Enabled')
     if res_ops.query_resource(res_ops.HOST, conditions):
-        kvm_host_uuid = res_ops.query_resource(res_ops.HOST, conditions)[0].uuid
+        kvm_host = res_ops.query_resource(res_ops.HOST, conditions)[0]
+        kvm_host_uuid = kvm_host.uuid
     else:
         test_util.test_skip("There is no host. Skip test")
 
@@ -48,13 +49,13 @@ def test():
 
     test_util.test_dsc('Update KVM Host Password')
     cmd = 'echo "zstackmevoco"| passwd --stdin root'
-    os.system(cmd)
+    test_lib.lib_execute_ssh_cmd(kvm_host.managementIp,"root","password",cmd)
     host_ops.reconnect_host(kvm_host_uuid)
 
     test_util.test_dsc('Recover KVM Host Password')
     host_ops.update_kvm_host(kvm_host_uuid, 'password', 'password')
     cmd = 'echo "password"| passwd --stdin root'
-    os.system(cmd)
+    test_lib.lib_execute_ssh_cmd(kvm_host.managementIp,"root","zstackmevoco",cmd)
 
 #====================== sshPort ======================
     test_util.test_dsc('Update sshPort')
@@ -72,17 +73,17 @@ def test():
 
     test_util.test_dsc('Update KVM Host SSH Port')
     cmd = 'sed -i \'/#Port 22/ i Port 23\' /etc/ssh/sshd_config'
-    os.system(cmd)
+    test_lib.lib_execute_ssh_cmd(kvm_host.managementIp,"root","password",cmd) 
     cmd = 'service sshd restart'
-    os.system(cmd)
+    test_lib.lib_execute_ssh_cmd(kvm_host.managementIp,"root","password",cmd) 
     host_ops.reconnect_host(kvm_host_uuid)
 
     test_util.test_dsc('Recover KVM Host SSH Port')
     host_ops.update_kvm_host(kvm_host_uuid, 'sshPort', '22')
     cmd = 'sed -i \'/Port 23/d\' /etc/ssh/sshd_config'
-    os.system(cmd)
+    test_lib.lib_execute_ssh_cmd(kvm_host.managementIp,"root","password",cmd, port=23)
     cmd = 'service sshd restart'
-    os.system(cmd)
+    test_lib.lib_execute_ssh_cmd(kvm_host.managementIp,"root","password",cmd, port=23)
 
 #====================== username ======================
     test_util.test_dsc('Update Username')
@@ -100,17 +101,17 @@ def test():
 
     test_util.test_dsc('Update KVM Host username')
     cmd = 'adduser test'
-    os.system(cmd)
+    test_lib.lib_execute_ssh_cmd(kvm_host.managementIp,"root","password",cmd)
     cmd = 'echo "password"| passwd --stdin test'
-    os.system(cmd)
+    test_lib.lib_execute_ssh_cmd(kvm_host.managementIp,"root","password",cmd)
     cmd = 'echo "test        ALL=(ALL)       NOPASSWD: ALL">>/etc/sudoers '
-    os.system(cmd)
+    test_lib.lib_execute_ssh_cmd(kvm_host.managementIp,"root","password",cmd)
     host_ops.reconnect_host(kvm_host_uuid)
 
     test_util.test_dsc('Recover KVM Host username')
     host_ops.update_kvm_host(kvm_host_uuid, 'username', 'root')
     cmd = 'userdel test'
-    os.system(cmd)
+    test_lib.lib_execute_ssh_cmd(kvm_host.managementIp,"root","password",cmd)
 
     test_util.test_pass('KVM Host Update Infomation SUCCESS')
 
@@ -119,17 +120,17 @@ def error_cleanup():
     global kvm_host_uuid
     host_ops.update_kvm_host(kvm_host_uuid, 'password', 'password')
     cmd = 'echo "password"| passwd --stdin root'
-    os.system(cmd)
+    test_lib.lib_execute_ssh_cmd(kvm_host.managementIp,"root","password",cmd)
 
     host_ops.update_kvm_host(kvm_host_uuid, 'sshPort', '22')    
     cmd = 'sed -i \'/Port 23/d\' /etc/ssh/sshd_config'
-    os.system(cmd)
+    test_lib.lib_execute_ssh_cmd(kvm_host.managementIp,"root","password",cmd)
     cmd = 'service sshd restart'
-    os.system(cmd)
+    test_lib.lib_execute_ssh_cmd(kvm_host.managementIp,"root","password",cmd)
 
     host_ops.update_kvm_host(kvm_host_uuid, 'username', 'root')
     cmd = 'userdel test'
-    os.system(cmd)
+    test_lib.lib_execute_ssh_cmd(kvm_host.managementIp,"root","password",cmd)
 
     host_ops.reconnect_host(kvm_host_uuid)
 
