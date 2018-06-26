@@ -1067,9 +1067,18 @@ class MulISO(object):
         test_lib.lib_wait_target_up(vm_ip, '23', 300)
         vm_username = os.environ.get('winImageUsername')
         vm_password = os.environ.get('winImagePassword')
-        tn = telnetlib.Telnet(vm_ip)
+        
+        for i in range(10):
+            try:
+                tn = telnetlib.Telnet(vm_ip, timeout=120)
+                break
+            except:
+                test_util.test_logger("retry id: %s" %(int(i)))
+                continue
+
         tn.read_until("login: ")
         tn.write(vm_username+"\r\n")
+
         tn.read_until("password: ")
         tn.write(vm_password+"\r\n")
         tn.read_until(vm_username+">")
