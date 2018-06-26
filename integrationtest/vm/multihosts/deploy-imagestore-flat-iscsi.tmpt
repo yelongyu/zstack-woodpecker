@@ -1,5 +1,5 @@
 import ./deploy.tmpt
 
 iscsiPrimaryStorageName = iscsi-ps1
-iscsiPrimaryStorageName = iscsi-ps2
+iscsiPrimaryStorageName2 = iscsi-ps2
 imageStoreBackupStorageName = imagestore1
