@@ -182,5 +182,8 @@ class LoadBalancerCheckerFactory(checker.CheckerFactory):
 
 class VidCheckerFactory(checker.CheckerFactory):
     def create_checker(self, test_obj):
-        return vid_checker.VidAttrCheckerFactory().create_checker(test_obj)
+        if test_obj.statements != []:
+            return vid_checker.VidPolicyCheckerFactory().create_checker(test_obj)
+        if test_obj.attributes != []:
+            return vid_checker.VidAttrCheckerFactory().create_checker(test_obj)
 

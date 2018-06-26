@@ -280,6 +280,8 @@ class zstack_vid_policy_db_checker(checker_header.TestChecker):
     '''check virtual id policy existence in database. If it is in DB,
         return self.judge(True). If not, return self.judge(False)'''
     def check(self):
+        import json
+        import zstacklib.utils.jsonobject as jsonobject
         super(zstack_vid_policy_db_checker, self).check()
         try:
             conditions = res_ops.gen_query_conditions('uuid', '=', self.test_obj.get_vid().uuid)
@@ -289,22 +291,16 @@ class zstack_vid_policy_db_checker(checker_header.TestChecker):
             test_util.test_logger('Check result: [vid Inventory uuid:] %s does not exist in database.' % self.test_obj.get_vid().uuid)
             return self.judge(False)
 
-        try:
-            conditions = res_ops.gen_query_conditions('virtualids.uuid', '=', self.test_obj.get_vid().uuid)
-            conditions = res_ops.gen_query_conditions('project.uuid', '=', self.test_obj.project.uuid, conditions)
-            statement = res_ops.query_resource(res_ops.IAM2_VIRTUAL_ID, conditions)[0].statements.statement
-            for act in self.test_obj.get_vid().statements.statement:
-                    test_result = False
-                    for action in statement:
-                        if actiot == act:
-                            test_result = True
-                    if test_result == False:
-                        test_util.test_logger('Check result: [vid Inventory policy] does not exist in database.')
-                        return self.judge(False)
-        except Exception as e:
-            traceback.print_exc(file=sys.stdout)
-            test_util.test_logger('Check result: [vid Inventory policy] does not exist in database.')
-            return self.judge(False)        
-        test_util.test_logger('Check result: [vid Inventory policy] exist in database.' )
+        conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=', self.test_obj.get_vid().uuid)
+        role_statements = res_ops.query_resource(res_ops.ROLE, conditions)[0].statements 
+        for state_lst in self.test_obj.get_vid_statements()[0]['actions']:
+            test_result = False
+            for statement in role_statements:
+                atatement_dict = json.loads(jsonobject.dumps(statement))['statement']
+                for lst in atatement_dict['actions']:
+                    if lst == state_lst:
+                        test_result = True
+            if test_result == False:
+                test_util.test_logger('Check result: [vid Inventory statement:] does not exist in database.')
+                return self.judge(False)
         return self.judge(True)
-
