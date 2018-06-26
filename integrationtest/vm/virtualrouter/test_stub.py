@@ -1081,9 +1081,11 @@ class MulISO(object):
 
         tn.read_until("password: ")
         tn.write(vm_password+"\r\n")
-        tn.read_until(vm_username+">")
+        #tn.read_until(vm_username+">")
+        tn.read_until("tor>")
         tn.write("wmic cdrom get volumename\r\n")
-        ret = tn.read_until(vm_username+">")
+        #ret = tn.read_until(vm_username+">")
+        ret = tn.read_until("tor>")
         tn.write("exit\r\n")
         tn.close()
         cdrome_list = ret.split('\r')
