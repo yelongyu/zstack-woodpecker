@@ -778,7 +778,7 @@ class VIPQOS(object):
 
     def install_iperf(self, vm_ip):
         iperf_url = os.getenv('iperfUrl')
-        cmd = "%s 'sshpass -p password scp -o StrictHostKeyChecking=no %s; rpm -ivh %s'" % (self.ssh_cmd + vm_ip, iperf_url, iperf_url.split('/')[-1])
+        cmd = "%s 'sshpass -p password scp -o StrictHostKeyChecking=no %s .; rpm -ivh %s'" % (self.ssh_cmd + vm_ip, iperf_url, iperf_url.split('/')[-1])
         if commands.getstatusoutput(self.ssh_cmd + vm_ip + ' iperf3 -v')[0] != 0:
             ret = commands.getstatusoutput(cmd)
             print '*' * 90
