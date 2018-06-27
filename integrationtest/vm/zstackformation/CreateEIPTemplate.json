@@ -9,9 +9,6 @@
 		"ImageUuid":{
 			"Type": "String"
 		},
-		"ImageUuid":{
-			"Type": "String"
-		},
 		"PrivateNetworkUuid":{
 			"Type": "String"
 		},
@@ -26,7 +23,7 @@
 		"VmInstance": {
 			"Type": "ZStack::Resource::VmInstance",
 			"Properties": {
-				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, {"Ref":"ZStack::StackUuid"},{"Ref":"ZStack::AccountUuid"},{"Ref":"ZStack::AccountName"},"VM"]]},
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"},"VM"]]},
 				"instanceOfferingUuid": {"Ref":"InstanceOfferingUuid"},
 				"imageUuid":{"Ref":"ImageUuid"},
 				"l3NetworkUuids":[{"Ref":"PrivateNetworkUuid"}],
@@ -36,16 +33,16 @@
 		"VIP": {
 			"Type": "ZStack::Resource::Vip",
 			"Properties": {
-				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, {"Ref":"ZStack::StackUuid"},{"Ref":"ZStack::AccountUuid"},{"Ref":"ZStack::AccountName"},"VIP"]]},
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"},"VIP"]]},
 				"l3NetworkUuid":{"Ref":"PublicNetworkUuid"}
 			}
 		},
 		"EIP":{
 			"Type": "ZStack::Resource::Eip",
 			"Properties": {
-				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, {"Ref":"ZStack::StackUuid"},{"Ref":"ZStack::AccountUuid"},{"Ref":"ZStack::AccountName"},"EIP"]]},
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"},"EIP"]]},
 				"vipUuid":{"Fn::GetAtt":["VIP","uuid"]},
-				"vmNicUuid":{"Fn::GetAtt":[{"Fn::Select":["0",[{"Fn::GetAtt":["VmInstance","vmNics"]}]]},"uuid"]}
+				"vmNicUuid":{"Fn::GetAtt":[{"Fn::Select":[0,{"Fn::GetAtt":["VmInstance","vmNics"]}]},"uuid"]}
 			}
 		}
 	},

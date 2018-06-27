@@ -27,9 +27,6 @@ def test():
 		"ImageUuid":{
 			"Type": "String"
 		},
-		"ImageUuid":{
-			"Type": "String"
-		},
 		"PrivateNetworkUuid":{
 			"Type": "String"
 		},
@@ -44,7 +41,7 @@ def test():
 		"VmInstance": {
 			"Type": "ZStack::Resource::VmInstance",
 			"Properties": {
-				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, {"Ref":"ZStack::StackUuid"},{"Ref":"ZStack::AccountUuid"},{"Ref":"ZStack::AccountName"},"VM"]]},
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "VM"]]},
 				"instanceOfferingUuid": {"Ref":"InstanceOfferingUuid"},
 				"imageUuid":{"Ref":"ImageUuid"},
 				"l3NetworkUuids":[{"Ref":"PrivateNetworkUuid"}],
@@ -54,16 +51,16 @@ def test():
 		"VIP": {
 			"Type": "ZStack::Resource::Vip",
 			"Properties": {
-				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, {"Ref":"ZStack::StackUuid"},{"Ref":"ZStack::AccountUuid"},{"Ref":"ZStack::AccountName"},"VIP"]]},
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "VIP"]]},
 				"l3NetworkUuid":{"Ref":"PublicNetworkUuid"}
 			}
 		},
 		"PortForwardingRule":{
 			"Type": "ZStack::Resource::PortForwardingRule",
 			"Properties": {
-				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, {"Ref":"ZStack::StackUuid"},{"Ref":"ZStack::AccountUuid"},{"Ref":"ZStack::AccountName"},"PortForwarding"]]},
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "PortForwarding"]]},
 				"vipUuid":{"Fn::GetAtt":["VIP","uuid"]},
-				"vmNicUuid":{"Fn::GetAtt":[{"Fn::Select":["0",{"Fn::GetAtt":["VmInstance","vmNics"]}]},"uuid"]},
+				"vmNicUuid":{"Fn::GetAtt":[{"Fn::Select":[0,{"Fn::GetAtt":["VmInstance","vmNics"]}]},"uuid"]},
 				"vipPortStart":100,
 				"vipPortEnd":100,
 				"privatePortStart":22,
@@ -84,11 +81,11 @@ def test():
 
 	parameter = '''
 {
-	"InstanceOfferingUuid": "8e1fb8ceed434829a892f32142d3cfd9",
-	"ImageUuid":"ca0778d072a41bc39d5257493c025e71",
-	"PrivateNetworkUuid":"27d87b240aab411890059715e08ed092",
-	"PublicNetworkUuid":"f6f17ccd25694b3992bf8172246bd16d",
-	"RootDiskOfferingUuid":"cd8d228190304745a88b404c21c87d50"
+	"InstanceOfferingUuid": "d8779004827c4eab9165be05dd9a21fc",
+	"ImageUuid":"3b978207351027b980ea887677c654da",
+	"PrivateNetworkUuid":"896d05bcbb884b40881be9418ab3c198",
+	"PublicNetworkUuid":"f92af7311f4646659a8866ef826f9afe",
+	"RootDiskOfferingUuid":"9e5f705feaee498b8ff570544bd27a04"
 }
 '''
 	resource_stack_option.set_templateContent(templateContent)

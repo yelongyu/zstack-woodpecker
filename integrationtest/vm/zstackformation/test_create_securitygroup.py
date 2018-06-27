@@ -21,8 +21,7 @@ def test():
 	"Description": "Just create a flat network & VM",
 	"Parameters": {
 		"InstanceOfferingUuid": {
-			"Type": "String",
-			"Lable": "vm instance offering"
+			"Type": "String"
 		},
 		"ImageUuid":{
 			"Type": "String"
@@ -60,21 +59,21 @@ def test():
 		"SecurityGroupRule":{
 			"Type": "ZStack::Resource::SecurityGroupRule",
 			"Properties": {
-				"securityGroupUuid": {"Fn::GetAtt",["SecurityGroup","uuid"]},
+				"securityGroupUuid": {"Fn::GetAtt":["SecurityGroup","uuid"]},
 				"rules":[{"type":"Ingress","startPort":22,"endPort":22,"protocol":"TCP","allowedCidr":"0.0.0.0/0"}]
 			}
 		},
 		"AddVmNicToSecurityGroup": {
-			"Type": "ZStack::Action::AddVmNicToSecurityGroup"
+			"Type": "ZStack::Action::AddVmNicToSecurityGroup",
 			"Properties": {
-				"securityGroupUuid": {"Fn::GetAtt",["SecurityGroup","uuid"]},
-				"vmNicUuids":[{"Fn::GetAtt":[{"Fn::Select":["0",[{"Fn::GetAtt":["VmInstance","vmNics"]}]]},"uuid"]}]
+				"securityGroupUuid": {"Fn::GetAtt":["SecurityGroup","uuid"]},
+				"vmNicUuids":[{"Fn::GetAtt":[{"Fn::Select":[0,{"Fn::GetAtt":["VmInstance","vmNics"]}]},"uuid"]}]
 			}
 		},
 		"AttachSecurityGroupToL3Network": {
-			"Type": "ZStack::Action::AttachSecurityGroupToL3Network"
+			"Type": "ZStack::Action::AttachSecurityGroupToL3Network",
 			"Properties": {
-				"securityGroupUuid": {"Fn::GetAtt",["SecurityGroup","uuid"]},
+				"securityGroupUuid": {"Fn::GetAtt":["SecurityGroup","uuid"]},
 				"l3NetworkUuid":{"Ref":"PrivateNetworkUuid"}
 			}
 		}
@@ -91,11 +90,11 @@ def test():
 
 	parameter = '''
 {
-	"InstanceOfferingUuid": "8e1fb8ceed434829a892f32142d3cfd9",
-	"ImageUuid":"ca0778d072a41bc39d5257493c025e71",
-	"PrivateNetworkUuid":"27d87b240aab411890059715e08ed092",
-	"PublicNetworkUuid":"f6f17ccd25694b3992bf8172246bd16d",
-	"RootDiskOfferingUuid":"cd8d228190304745a88b404c21c87d50"
+        "InstanceOfferingUuid": "d8779004827c4eab9165be05dd9a21fc",
+        "ImageUuid":"3b978207351027b980ea887677c654da",
+        "PrivateNetworkUuid":"896d05bcbb884b40881be9418ab3c198",
+        "PublicNetworkUuid":"f92af7311f4646659a8866ef826f9afe",
+        "RootDiskOfferingUuid":"9e5f705feaee498b8ff570544bd27a04"
 }
 '''
 	resource_stack_option.set_templateContent(templateContent)

@@ -14912,11 +14912,11 @@
     "UsbDeviceUuid149":{ 
       "Type":"String", 
       "DefaultValue":"usbDeviceUuid149" 
-    }, 
+    },
     "PciDeviceUuid149":{ 
       "Type":"String", 
       "DefaultValue":"pciDeviceUuid149" 
-    }, 
+    }
   }, 
   "Resources": { 
     "InstanceOffering1": { 
@@ -88821,14 +88821,14 @@
         "timeout": 100, 
         "systemTags":["test"], 
         "userTags":["test"] 
-      } 
-    }, 
+      }
+    }
   }, 
   "Outputs": { 
     "InstanceOffering1": { 
       "Value": { 
         "Ref": "InstanceOffering1" 
-      } 
+      }
     }, 
     "InstanceOffering2": { 
       "Value": { 
