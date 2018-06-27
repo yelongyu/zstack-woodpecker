@@ -80,6 +80,7 @@ class TestCase(object):
     PASS = "pass"
     FAIL = "fail"
     SKIP = "skip"
+    ENV = "env"
     def __init__(self):
         self.id = None
         self.name = None
@@ -348,6 +349,11 @@ class WoodPecker(object):
                         #ret = ' [ \033[93mskipped\033[0m ]'
                         ret = ' [ \033[93mskipped 0:00:00\033[0m ]'
 			result = "SKIP"
+                    elif process.returncode == 3:
+                        case.success[suite_repeat][case_repeat] = TestCase.ENV
+                        #ret = ' [ \033[93mskipped\033[0m ]'
+                        ret = ' [ \033[93menv 0:00:00\033[0m ]'
+			result = "ENV"
                     else:
                         case.success[suite_repeat][case_repeat] = TestCase.FAIL
                         #ret = ' [ \033[91mfailed\033[0m  ]'
@@ -646,6 +652,7 @@ class WoodPecker(object):
         success = 0
         failure = 0
         timeout = 0
+        env = 0
 
         err_case = []
         report = ['\n']
@@ -677,6 +684,9 @@ class WoodPecker(object):
                         if case.success[suite_repeat][case_repeat] is None or case.success[suite_repeat][case_repeat] == TestCase.SKIP:
                             summary += "    {0:44}0\t0\t0\t1\n".format(case_name)
                             skipped += 1
+                        elif case.success[suite_repeat][case_repeat] == TestCase.ENV:
+                            summary += "    {0:44}0\t0\t0\t1\n".format(case_name)
+                            env += 1
                         elif case.success[suite_repeat][case_repeat] == TestCase.PASS:
                             summary += "    {0:44}1\t0\t0\t0\n".format(case_name)
                             success += 1
@@ -691,13 +701,13 @@ class WoodPecker(object):
                             case_log_path = self.get_case_log_path(case, suite_repeat, case_repeat)
                             err_case.append(case_log_path)
 
-        total = success + failure + timeout + skipped
+        total = success + failure + timeout + skipped + env
         if total > 25:
             summary += minus_sign + summary_title
         else:
             summary += minus_sign
 
-        summary += " Total:\t%d\t\t\t\t\t%d\t%d\t%d\t%d\t\n" % (total, success, failure, timeout, skipped)
+        summary += " Total:\t%d\t\t\t\t\t%d\t%d\t%d\t%d\t%d\t\n" % (total, success, failure, timeout, skipped, env)
         summary += equal_sign
         self.write_file_a(self.summary_path, summary)
 
