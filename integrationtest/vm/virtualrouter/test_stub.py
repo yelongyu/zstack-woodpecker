@@ -778,7 +778,11 @@ class VIPQOS(object):
 
     def install_iperf(self, vm_ip):
         iperf_url = os.getenv('iperfUrl')
-        cmd = "%s 'sshpass -p password scp -o StrictHostKeyChecking=no %s .; rpm -ivh %s'" % (self.ssh_cmd + vm_ip, iperf_url, iperf_url.split('/')[-1])
+        iperf_file = iperf_url.split('/')[-1]
+        cmd_loc = 'sshpass -p password scp -o StrictHostKeyChecking=no root@%s .' % iperf_url
+        if not os.path.exists(iperf_file):
+            commands.getstatusoutput(cmd_loc)
+        cmd = "sshpass -p password scp -o StrictHostKeyChecking=no %s root@%s:; %s ' rpm -ivh %s'" % (iperf_file, vm_ip, self.ssh_cmd + vm_ip, iperf_file)
         if commands.getstatusoutput(self.ssh_cmd + vm_ip + ' iperf3 -v')[0] != 0:
             ret = commands.getstatusoutput(cmd)
             print '*' * 90
@@ -881,7 +885,7 @@ class VIPQOS(object):
         lbl = self.lb.create_listener(lb_creation_option)
         lbl.add_nics([self.vm2.vm.vmNics[0].uuid])
 
-    def check_bandwidth(self, vm_ip, direction, cmd, bandwidth):
+    def check_bandwidth(self, vm_ip, direction, cmd, excepted_bandwidth):
         if self.vr and not self.reconnected:
             vm_ops.reconnect_vr(self.vr.uuid)
             self.reconnected = True
@@ -893,39 +897,48 @@ class VIPQOS(object):
         time.sleep(10)
         self.start_iperf_server(vm_ip)
         time.sleep(30)
-        print '*' * 50
-        print cmd
-        (status, ret) = commands.getstatusoutput(cmd)
-        seper = '*' * 80
-        print "%s\n%s\n%s" % (seper, ret, seper)
-        if direction == 'out':
-            pos = -3
-        else:
-            pos = -4
-        summ = ret.split('\n')[pos]
-        bndwth = float(summ.split()[-3])
-        if summ.split()[-2] == 'Kbits/sec':
-            bndwth /= 1024
-        elif summ.split()[-2] == 'Gbits/sec':
-            bndwth *= 1024
-        if status == 0:
-            if bandwidth == 1000:
-                assert bndwth < bandwidth
+        actual_bandwidth, bndwth = 0, 0
+        for _ in range(5):
+            (status, ret) = commands.getstatusoutput(cmd)
+            seper = '*' * 80
+            print "%s\n%s\n%s" % (seper, ret, seper)
+            if direction == 'out':
+                pos = -3
             else:
-                assert abs(bndwth - bandwidth) / bandwidth < 0.1
-        else:
-            raise Exception('Execute command %s error: %s' % (cmd, ret))
+                pos = -4
+            summ = ret.split('\n')[pos]
+            bndwth = float(summ.split()[-3])
+            if summ.split()[-2] == 'Kbits/sec':
+                bndwth /= 1024
+            elif summ.split()[-2] == 'Gbits/sec':
+                bndwth *= 1024
+            if status == 0:
+                if excepted_bandwidth == 1000:
+                    assert bndwth < excepted_bandwidth
+                    break
+                else:
+                    if abs(bndwth - excepted_bandwidth) / excepted_bandwidth < 0.1:
+                        actual_bandwidth = bndwth
+                        break
+                    else:
+                        time.sleep(10)
+            else:
+                raise Exception('Execute command %s error: %s' % (cmd, ret))
+        if not bndwth:
+            test_util.test_fail("Get VIP bandwidth failed")
+        if excepted_bandwidth < 1000 and actual_bandwidth == 0:
+            test_util.test_fail('Except bandwidth: %s, actual bandwidth: %s.' % (excepted_bandwidth, bndwth))
 
     def check_outbound_bandwidth(self, vm_ip=None):
         if not vm_ip:
             vm_ip = self.vm_ip
         if self.iperf_port:
             if self.port:
-                cmd = "iperf3 -c %s -p %s --cport %s --bind %s -i 30 -O 30 -l 1M -t 300 -R" % (self.vip_ip, self.iperf_port, self.port, self.mn_ip)
+                cmd = "iperf3 -c %s -p %s --cport %s --bind %s -O 1 -t 3 -R" % (self.vip_ip, self.iperf_port, self.port, self.mn_ip)
             else:
-                cmd = "iperf3 -c %s -p %s -i 30 -O 30 -l 1M -t 300 -R " % (self.vip_ip, self.iperf_port)
+                cmd = "iperf3 -c %s -p %s -O 1 -t 3 -R " % (self.vip_ip, self.iperf_port)
         else:
-            cmd = "iperf3 -c %s -i 30 -O 30 -l 1M -t 300 -R" % self.vip_ip
+            cmd = "iperf3 -c %s -O 1 -t 3 -R" % self.vip_ip
         self.check_bandwidth(vm_ip, 'out', cmd, self.outbound_width/(1024 * 1024))
 
     def check_inbound_bandwidth(self, vm_ip=None):
@@ -933,11 +946,11 @@ class VIPQOS(object):
             vm_ip = self.vm_ip
         if self.iperf_port:
             if self.port:
-                cmd = "iperf3 -c %s -p %s --cport %s --bind %s -i 30 -O 30 -l 1M -t 300 --get-server-output" % (self.vip_ip, self.iperf_port, self.port, self.mn_ip)
+                cmd = "iperf3 -c %s -p %s --cport %s --bind %s -O 1 -t 3 --get-server-output" % (self.vip_ip, self.iperf_port, self.port, self.mn_ip)
             else:
-                cmd = "iperf3 -c %s -p %s -i 30 -O 30 -l 1M -t 300 --get-server-output" % (self.vip_ip, self.iperf_port)
+                cmd = "iperf3 -c %s -p %s -O 1 -t 3 --get-server-output" % (self.vip_ip, self.iperf_port)
         else:
-            cmd = "iperf3 -c %s -i 30 -O 30 -l 1M -t 300 --get-server-output" % self.vip_ip
+            cmd = "iperf3 -c %s -O 1 -t 3 --get-server-output" % self.vip_ip
         self.check_bandwidth(vm_ip, 'in', cmd, self.inbound_width/(1024 * 1024))
 
 
