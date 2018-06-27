@@ -660,7 +660,7 @@ class WoodPecker(object):
         equal_sign = '='*80 + '\n'
         minus_sign = '-'*80 + '\n'
         summary = '\nTest Summary:\n'
-        summary_title = " Test Case\t\t\t\t\tPass\tFail\tTMO\tSkip   \n" + minus_sign
+        summary_title = " Test Case\t\t\t\t\tPass\tFail\tTMO\tSkip\tEnv   \n" + minus_sign
         summary += equal_sign + summary_title
         for suite in self.suites.values():
 #            engine_log += "Test Suite: " + suite.name + "\n"
@@ -682,21 +682,21 @@ class WoodPecker(object):
                             case_name = case_show_name + '.' + str(case_repeat)
 
                         if case.success[suite_repeat][case_repeat] is None or case.success[suite_repeat][case_repeat] == TestCase.SKIP:
-                            summary += "    {0:44}0\t0\t0\t1\n".format(case_name)
+                            summary += "    {0:44}0\t0\t0\t1\t0\n".format(case_name)
                             skipped += 1
                         elif case.success[suite_repeat][case_repeat] == TestCase.ENV:
-                            summary += "    {0:44}0\t0\t0\t1\n".format(case_name)
+                            summary += "    {0:44}0\t0\t0\t0\t1\n".format(case_name)
                             env += 1
                         elif case.success[suite_repeat][case_repeat] == TestCase.PASS:
-                            summary += "    {0:44}1\t0\t0\t0\n".format(case_name)
+                            summary += "    {0:44}1\t0\t0\t0\t0\n".format(case_name)
                             success += 1
                         elif case.success[suite_repeat][case_repeat] == TestCase.FAIL:
-                            summary += "    {0:44}0\t1\t0\t0\n".format(case_name)
+                            summary += "    {0:44}0\t1\t0\t0\t0\n".format(case_name)
                             failure += 1
                             case_log_path = self.get_case_log_path(case, suite_repeat, case_repeat)
                             err_case.append(case_log_path)
                         elif case.success[suite_repeat][case_repeat] == TestCase.TIMEOUT:
-                            summary += "    {0:44}0\t0\t1\t0\n".format(case_name)
+                            summary += "    {0:44}0\t0\t1\t0\t0\n".format(case_name)
                             timeout += 1
                             case_log_path = self.get_case_log_path(case, suite_repeat, case_repeat)
                             err_case.append(case_log_path)
