@@ -97,6 +97,14 @@ def test_skip(msg):
     test_result("Skipped")
     sys.exit(2)
 
+def test_env_not_ready(msg):
+    '''
+    No test case codes will be executed, after calling this function.
+    '''
+    test_logger(msg)
+    test_result("Env not ready")
+    sys.exit(3)
+
 #Record Action Log
 def action_logger(msg):
     print_msg = '[ACTION LOG]:\n%s %s \n%s' % (minus_split, msg, minus_split)
