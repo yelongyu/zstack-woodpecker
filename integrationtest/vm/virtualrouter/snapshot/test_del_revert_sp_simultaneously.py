@@ -13,6 +13,7 @@ import zstackwoodpecker.test_state as test_state
 import apibinding.inventory as inventory
 import threading
 import time
+import os
 import random
 
 test_stub = test_lib.lib_get_test_stub()
@@ -54,9 +55,12 @@ def test():
     snapshots = test_obj_dict.get_volume_snapshot(root_volume.get_volume().uuid)
     snapshots.set_utility_vm(vm)
 
-    ori_num = 100
+    ori_thread_num = 100
+    if test_lib.scenario_config != None and "iscsi" in os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE'):
+        ori_thread_num = 60
+
     index = 1
-    while index < 101:
+    while index < ori_thread_num + 1:
         thread = threading.Thread(target=create_snapshot, args=(snapshots, index,))
         thread.start()
         index += 1
@@ -67,12 +71,12 @@ def test():
     cond = res_ops.gen_query_conditions('volumeUuid', '=', root_volume.get_volume().uuid)
     sps_num = res_ops.query_resource_count(res_ops.VOLUME_SNAPSHOT, cond)
 
-    if sps_num != ori_num:
-        test_util.test_fail('Create %d snapshots, but only %d snapshots were successfully created' % (ori_num, sps_num))
+    if sps_num != ori_thread_num:
+        test_util.test_fail('Create %d snapshots, but only %d snapshots were successfully created' % (ori_thread_num, sps_num))
 
-    test_num = 100
+    #ori_thread_num = 100
     snapshot_list = snapshots.get_snapshot_list()
-    for index in range(test_num):
+    for index in range(ori_thread_num):
         thread_1 = threading.Thread(target=snapshots.delete_snapshot, args=(random.choice(snapshot_list),))
         thread_2 = threading.Thread(target=snapshots.use_snapshot, args=(random.choice(snapshot_list),))
         thread_1.start()
