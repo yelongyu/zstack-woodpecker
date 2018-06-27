@@ -778,7 +778,7 @@ class VIPQOS(object):
 
     def install_iperf(self, vm_ip):
         iperf_url = os.getenv('iperfUrl')
-        cmd = "%s 'wget %s; rpm -ivh %s'" % (self.ssh_cmd + vm_ip, iperf_url, iperf_url.split('/')[-1])
+        cmd = "%s 'sshpass -p password scp -o StrictHostKeyChecking=no %s; rpm -ivh %s'" % (self.ssh_cmd + vm_ip, iperf_url, iperf_url.split('/')[-1])
         if commands.getstatusoutput(self.ssh_cmd + vm_ip + ' iperf3 -v')[0] != 0:
             ret = commands.getstatusoutput(cmd)
             print '*' * 90
@@ -990,7 +990,7 @@ class MulISO(object):
             self.vm2.check()
 
     def create_windows_vm(self):
-        new_offering = test_lib.lib_create_instance_offering(cpuNum = 2, memorySize = 2048 * 1024 * 1024)
+        new_offering = test_lib.lib_create_instance_offering(cpuNum = 6, memorySize = 2048 * 1024 * 1024)
         new_offering_uuid = new_offering.uuid
         self.vm1 = create_windows_vm_2(instance_offering_uuid = new_offering_uuid)
         vm_ops.delete_instance_offering(new_offering_uuid)
