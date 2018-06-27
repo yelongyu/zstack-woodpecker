@@ -62,7 +62,11 @@ def main(argv):
     signal.signal(signal.SIGTERM, sigint_handler)
     try:
         if case_setup and 'suite_setup' not in test_case_path:
-            case_setup.test()
+            try:
+                case_setup.test()
+            except:
+                traceback.print_exc(file=sys.stdout)
+                test_util.test_env_not_ready("Env not ready")
         ret = test_case.test()
         if ret == True or ret == None:
             sys.exit(0)
