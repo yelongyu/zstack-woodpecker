@@ -794,12 +794,10 @@ class VIPQOS(object):
         terminate_cmd =  self.ssh_cmd + vm_ip + " pkill -9 iperf3"
         commands.getstatusoutput(terminate_cmd)
         time.sleep(5)
-        print '*' * 50
-        print self.iperf_port
         if self.iperf_port:
-            cmd = self.ssh_cmd + self.vm_ip + ' "nohup iperf3 -s -p %s &> /dev/null &"' % self.iperf_port
+            cmd = self.ssh_cmd + self.vm_ip + ' "iperf3 -s -p -D"' % self.iperf_port
         else:
-            cmd = self.ssh_cmd + self.vm_ip + ' "nohup iperf3 -s &> /dev/null &"'
+            cmd = self.ssh_cmd + self.vm_ip + ' "iperf3 -s -D"'
         commands.getstatusoutput(cmd)
 
     def create_vm(self, l3_network):
@@ -898,7 +896,7 @@ class VIPQOS(object):
         self.start_iperf_server(vm_ip)
         time.sleep(30)
         actual_bandwidth, bndwth = 0, 0
-        for _ in range(5):
+        for _ in range(10):
             (status, ret) = commands.getstatusoutput(cmd)
             seper = '*' * 80
             print "%s\n%s\n%s" % (seper, ret, seper)
@@ -934,11 +932,11 @@ class VIPQOS(object):
             vm_ip = self.vm_ip
         if self.iperf_port:
             if self.port:
-                cmd = "iperf3 -c %s -p %s --cport %s --bind %s -i 3 -O 3 -t 30 -R" % (self.vip_ip, self.iperf_port, self.port, self.mn_ip)
+                cmd = "iperf3 -c %s -p %s --cport %s --bind %s -t 2 -R" % (self.vip_ip, self.iperf_port, self.port, self.mn_ip)
             else:
-                cmd = "iperf3 -c %s -p %s -i 3 -O 3 -t 30 -R " % (self.vip_ip, self.iperf_port)
+                cmd = "iperf3 -c %s -p %s -t 2 -R " % (self.vip_ip, self.iperf_port)
         else:
-            cmd = "iperf3 -c %s -i 3 -O 3 -t 30 -R" % self.vip_ip
+            cmd = "iperf3 -c %s -t 2 -R" % self.vip_ip
         self.check_bandwidth(vm_ip, 'out', cmd, self.outbound_width/(1024 * 1024))
 
     def check_inbound_bandwidth(self, vm_ip=None):
@@ -946,11 +944,11 @@ class VIPQOS(object):
             vm_ip = self.vm_ip
         if self.iperf_port:
             if self.port:
-                cmd = "iperf3 -c %s -p %s --cport %s --bind %s -i 3 -O 3 -t 30 --get-server-output" % (self.vip_ip, self.iperf_port, self.port, self.mn_ip)
+                cmd = "iperf3 -c %s -p %s --cport %s --bind %s -t 2 --get-server-output" % (self.vip_ip, self.iperf_port, self.port, self.mn_ip)
             else:
-                cmd = "iperf3 -c %s -p %s -i 3 -O 3 -t 30 --get-server-output" % (self.vip_ip, self.iperf_port)
+                cmd = "iperf3 -c %s -p %s -t 2 --get-server-output" % (self.vip_ip, self.iperf_port)
         else:
-            cmd = "iperf3 -c %s -i 3 -O 3 -t 30 --get-server-output" % self.vip_ip
+            cmd = "iperf3 -c %s -t 2 --get-server-output" % self.vip_ip
         self.check_bandwidth(vm_ip, 'in', cmd, self.inbound_width/(1024 * 1024))
 
 
