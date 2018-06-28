@@ -795,7 +795,7 @@ class VIPQOS(object):
         commands.getstatusoutput(terminate_cmd)
         time.sleep(5)
         if self.iperf_port:
-            cmd = self.ssh_cmd + self.vm_ip + ' "iperf3 -s -p -D"' % self.iperf_port
+            cmd = self.ssh_cmd + self.vm_ip + ' "iperf3 -s -p %s -D"' % self.iperf_port
         else:
             cmd = self.ssh_cmd + self.vm_ip + ' "iperf3 -s -D"'
         commands.getstatusoutput(cmd)
@@ -896,7 +896,7 @@ class VIPQOS(object):
         self.start_iperf_server(vm_ip)
         time.sleep(30)
         actual_bandwidth, bndwth = 0, 0
-        for _ in range(10):
+        for _ in range(5):
             (status, ret) = commands.getstatusoutput(cmd)
             seper = '*' * 80
             print "%s\n%s\n%s" % (seper, ret, seper)
