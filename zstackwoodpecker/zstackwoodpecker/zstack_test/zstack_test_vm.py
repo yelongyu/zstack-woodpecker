@@ -112,7 +112,7 @@ class ZstackTestVm(vm_header.TestVm):
         vm_ops.reinit_vm(self.vm.uuid, session_uuid)
 
     def clone(self, names, strategy = None, systemtag = None, full= False, session_uuid = None):
-        new_vms = vm_ops.clone_vm(self.vm.uuid, names, strategy, systemtag)
+        new_vms = vm_ops.clone_vm(self.vm.uuid, names, strategy, systemtag, full)
         new_vm_objs = []
         for new_vm in new_vms:
             new_vm = new_vm.inventory
