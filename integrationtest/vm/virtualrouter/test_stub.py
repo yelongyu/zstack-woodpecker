@@ -915,7 +915,8 @@ class VIPQOS(object):
                     assert bndwth < excepted_bandwidth
                     break
                 else:
-                    if abs(bndwth - excepted_bandwidth) / excepted_bandwidth < 0.1:
+#                     if abs(bndwth - excepted_bandwidth) / excepted_bandwidth < 0.1:
+                    if bndwth <= excepted_bandwidth:
                         actual_bandwidth = bndwth
                         break
                     else:
