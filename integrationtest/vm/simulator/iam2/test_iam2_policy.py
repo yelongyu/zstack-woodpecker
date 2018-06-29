@@ -20,25 +20,27 @@ case_flavor = dict(predefined_vm=    				               dict(target_role='vm'),
                    predefined_security_group=				       dict(target_role='sg'),
                    predefined_load_balancer=				       dict(target_role='lb'),
                    predefined_port_forwarding=				       dict(target_role='pf'),
-                   predefined_scheduler=				       dict(target_role='sechduler'),
+                   predefined_scheduler=				       dict(target_role='scheduler'),
                    predefined_pci_device= 				       dict(target_role='pci'),
                    predefined_zwatch=				       	       dict(target_role='zwatch'),
                    predefined_sns=				       	       dict(target_role='sns'),
                    )
 
+project_uuid = None
+virtual_id_uuid = None
+
 def test():
+    global project_uuid, virtual_id_uuid
     statements = []
-
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
-
     zone_uuid = res_ops.query_resource(res_ops.ZONE)[0].uuid
     project_name = 'test_project_01'
     attributes = [{"name": "__ProjectRelatedZone__", "value": zone_uuid}]
     project_obj = iam2_ops.create_iam2_project(project_name, attributes=attributes)
     project_uuid = project_obj.uuid
     project_linked_account_uuid = project_obj.linkedAccountUuid
-
-    name = 'username'
+    password = 'b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86'
+    '''name = 'username'
     name1 = 'username1'
     name2 = 'username2'
     password = 'b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86'
@@ -66,15 +68,13 @@ def test():
     iam2_ops.add_attributes_to_iam2_virtual_id(vid2.get_vid().uuid, attributes)
     vid2.set_vid_attributes(attributes)
     vid2.check()
-
+    '''
 
 
     policy_check_vid = test_vid.ZstackTestVid()
     policy_check_vid.create('policy_check', password)
-    
     iam2_ops.add_iam2_virtual_ids_to_project([policy_check_vid.get_vid().uuid], project_uuid)
-
-    
+    virtual_id_uuid = policy_check_vid.get_vid().uuid    
     if flavor['target_role'] == 'vm':
         statements = [{"effect": "Allow", "actions": ["org.zstack.header.vm.**",
                             "org.zstack.ha.**"]}]
@@ -221,11 +221,16 @@ def test():
     #policy_check_vid.check()
 
     iam2_ops.delete_iam2_project(project_uuid)
-    vid.delete()
-    vid1.delete()
-    vid2.delete()
+    #vid.delete()
+    #vid1.delete()
+    #vid2.delete()
     policy_check_vid.delete()
-
+    test_util.test_pass('success test iam2 policy!')
 # Will be called only if exception happens in test().
 def error_cleanup():
-    pass
+    global project_uuid, project_admin_uuid, virtual_id_uuid
+    if virtual_id_uuid:
+        iam2_ops.delete_iam2_virtual_id(virtual_id_uuid)
+    if project_uuid:
+        iam2_ops.delete_iam2_project(project_uuid)
+        iam2_ops.expunge_iam2_project(project_uuid)
