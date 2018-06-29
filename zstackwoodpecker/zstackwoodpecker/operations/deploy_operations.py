@@ -491,10 +491,10 @@ def get_disk_uuid(scenarioFile):
     #IF separated_partition:
     #cmd = r"blkid|grep mpatha2|awk -F\" '{print $2}'"
     #ELSE
-    cmd = r"blkid|grep mpatha1|awk -F\" '{print $2}'"
+    cmd = r"ls -l /dev/disk/by-id/ | grep wwn | awk '{print $9}'"
     #ENDIF
     ret, disk_uuid, stderr = ssh.execute(cmd, host_ips[-1], "root", "password", True, 22)
-    return disk_uuid.strip()
+    return disk_uuid.strip().split('\n')
 
 #Add Primary Storage
 def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid, ps_name = None, \
@@ -557,6 +557,7 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
             zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, \
                     name=zone.name_)
             zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
+            disk_uuids = get_disk_uuid(scenarioFile)
 
             for pr in xmlobject.safe_list(zone.primaryStorages.sharedBlockPrimaryStorage):
                 if ps_name and ps_name != pr.name_:
@@ -567,7 +568,7 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 action.name = pr.name_
                 action.description = pr.description__
                 action.zoneUuid = zinv.uuid
-                action.diskUuids = [get_disk_uuid(scenarioFile)]
+                action.diskUuids = [disk_uuids.pop()]
                 thread = threading.Thread(target=_thread_for_action, args=(action,))
                 wait_for_thread_queue()
                 thread.start()

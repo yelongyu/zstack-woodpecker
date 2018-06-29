@@ -25,6 +25,22 @@
         </vm>
       </vms>
     </host>
+    <host uuid="$hostUuid6">
+      <vms>
+        <vm name="$vmName6" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2"
+          imageUuid="$imageUuid" imageUsername="$imageUsername" imagePassword="$imagePassword">
+          <l3Networks>
+            <l3Network uuid="$vmL3Uuid">
+              <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
+              <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
+              <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
+            </l3Network>
+          </l3Networks>
+          <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
+          <primaryStorageRef type="iscsiTarget" disk_offering_uuid="$iscsiDiskOfferingUuid">$iscsiPrimaryStorageName2</primaryStorageRef>
+        </vm>
+      </vms>
+    </host>
     <host uuid="$hostUuid2">
       <vms>
         <vm name="$vmName2" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
@@ -54,6 +70,7 @@
           <hostRef>$hostName</hostRef>
           <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
           <primaryStorageRef type="iscsiInitiator" >$iscsiPrimaryStorageName</primaryStorageRef>
+          <primaryStorageRef type="iscsiInitiator" >$iscsiPrimaryStorageName2</primaryStorageRef>
         </vm>
       </vms>
     </host>
@@ -71,6 +88,7 @@
           <hostRef>$hostName2</hostRef>
           <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
           <primaryStorageRef type="iscsiInitiator" >$iscsiPrimaryStorageName</primaryStorageRef>
+          <primaryStorageRef type="iscsiInitiator" >$iscsiPrimaryStorageName2</primaryStorageRef>
         </vm>
       </vms>
     </host>
@@ -88,6 +106,7 @@
           <hostRef>$hostName3</hostRef>
           <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
           <primaryStorageRef type="iscsiInitiator" >$iscsiPrimaryStorageName</primaryStorageRef>
+          <primaryStorageRef type="iscsiInitiator" >$iscsiPrimaryStorageName2</primaryStorageRef>
         </vm>
       </vms>
     </host>

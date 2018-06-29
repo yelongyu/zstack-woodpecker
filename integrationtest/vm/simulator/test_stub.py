@@ -42,8 +42,9 @@ def share_admin_resource_include_vxlan_pool(account_uuid_list, session_uuid=None
     for l3net in l3nets:
         acc_ops.share_resources(account_uuid_list, [l3net.uuid], session_uuid)
 
-    l2vxlan_pool_uuid = res_ops.get_resource(res_ops.L2_VXLAN_NETWORK_POOL)[0].uuid
-    acc_ops.share_resources(account_uuid_list, [l2vxlan_pool_uuid], session_uuid)
+    l2vxlan_pools = res_ops.get_resource(res_ops.L2_VXLAN_NETWORK_POOL)
+    for l2vxlan_pool in l2vxlan_pools:
+        acc_ops.share_resources(account_uuid_list, [l2vxlan_pool.uuid], session_uuid)
 
     virtual_router_offerings = res_ops.get_resource(res_ops.VR_OFFERING)
     for virtual_router_offering in virtual_router_offerings:

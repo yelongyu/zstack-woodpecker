@@ -81,6 +81,11 @@ def test():
     test_stub.make_ssh_no_password(vm_ip, tmp_file)
     test_util.test_dsc('Upgrade master iso')
 
+    test_util.test_logger('Update MN IP')
+    test_stub.update_mn_hostname(vm_ip, tmp_file)
+    test_stub.update_mn_ip(vm_ip, tmp_file)
+    test_stub.start_mn(vm_ip, tmp_file)
+
     test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
 
     test_util.test_dsc('Install zstack with default path')

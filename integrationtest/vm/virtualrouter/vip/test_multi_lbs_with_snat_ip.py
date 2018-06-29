@@ -41,8 +41,10 @@ def test():
     vm_nic2_uuid = vm_nic2.uuid
     vm_nic2_ip = vm_nic2.ip
 
-    test_lib.lib_wait_target_up(vm_nic1_ip, "root", 120)
-    test_lib.lib_wait_target_up(vm_nic2_ip, "root", 120)
+    vm1.check()
+    vm2.check()
+    #test_lib.lib_wait_target_up(vm_nic1_ip, "root", 120)
+    #test_lib.lib_wait_target_up(vm_nic2_ip, "root", 120)
 
     test_stub.set_httpd_in_vm(vm_nic1_ip, "root", "password")
     test_stub.set_httpd_in_vm(vm_nic2_ip, "root", "password")

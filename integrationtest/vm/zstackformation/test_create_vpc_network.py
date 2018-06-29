@@ -14,7 +14,7 @@ def test():
 	test_util.test_dsc("Test Resource template Apis")
 	
 	resource_stack_option = test_util.ResourceStackOption()
-	resource_stack_option.set_name("Create_VPC_Network")
+	resource_stack_option.set_name("Create_VPC_Network-1")
 	templateContent = '''
 {
 	"ZStackTemplateFormatVersion": "2018-06-18",
@@ -22,7 +22,8 @@ def test():
 	"Parameters": {
 		"VrouterImageUrl": {
 			"Type": "String",
-			"Description":"云路由镜像链接地址"
+			"Description":"云路由镜像链接地址",
+			"DefaultValue": "http://cdn.zstack.io/product_downloads/vrouter/2.3/zstack-vrouter-2.3.2.qcow2"
 		},
 		"VmImageUrl": {
 			"Type": "String",
@@ -64,9 +65,6 @@ def test():
 		"EndVni":{
 			"Type": "Number",
 			"DefaultValue":300
-		},
-		"PhysicalInterface":{
-			"Type": "String"
 		},
 		"StartIp":{
 			"Type": "String",
@@ -128,8 +126,7 @@ def test():
 			"Type":"ZStack::Resource::L2VxlanNetworkPool",
 			"Properties":{
 				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "L2VxlanNetworkPool"]]},
-				"zoneUuid":{"Ref":"ZoneUuid"},
-				"physicalInterface":{"Ref":"PhysicalInterface"}
+				"zoneUuid":{"Ref":"ZoneUuid"}
 			}
 		},
 		"VniRange":{
@@ -147,8 +144,7 @@ def test():
 				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "L2VxlanNetwork"]]},
 				"poolUuid":{"Fn::GetAtt":["L2VxlanNetworkPool","uuid"]},
 				"zoneUuid":{"Ref":"ZoneUuid"},
-				"vni":{"Ref":"Vni"},
-				"physicalInterface":{"Ref":"PhysicalInterface"}
+				"vni":{"Ref":"Vni"}
 			}
 		},
 		"VpcL3Network":{
@@ -191,7 +187,7 @@ def test():
 		"AttachL2NetworkToCluster":{
 			"Type":"ZStack::Action::AttachL2NetworkToCluster",
 			"Properties":{
-				"l2NetworkUuid":{"Fn::GetAtt":["L2VxlanNetwork","uuid"]},
+				"l2NetworkUuid":{"Fn::GetAtt":["L2VxlanNetworkPool","uuid"]},
 				"clusterUuid":{"Ref":"ClusterUuid"},
 				"systemTags":[{"Fn::Join":["::",["l2NetworkUuid",{"Fn::GetAtt":["L2VxlanNetwork","uuid"]},"clusterUuid",{"Ref":"ClusterUuid"},"cidr",{"Ref":"Cidr"}]]}]
 			}
@@ -218,29 +214,27 @@ def test():
 '''
 	parameter = '''
 {
-	"VrouterImageUrl": "http://172.20.198.234/mirror/zstack_vyos_image/176/zstack-vrouter-180528-176.qcow2",
-	"BackupStorage":"e7f5ea3d546547d892c16e16187591ae",
-	"ManagementNetworkUuid":"f6f17ccd25694b3992bf8172246bd16d",
-	"PublicNetworkUuid":"f6f17ccd25694b3992bf8172246bd16d",
-	"ZoneUuid":"b5ba5c34bcfe4bb0917b7587de25295b",
-	"ClusterUuid":"d919bab269c94f67a1cdf9017d68f813",
-	"Cidr":"172.20.78.0/16",
-	"Vni":222,
-	"StartVni":100,
-	"EndVni":300,
-	"PhysicalInterface":"eth0",
-	"StartIp":"192.168.78.2",
-	"EndIp":"192.168.78.120",
-	"Netmask":"255.255.255.0",
-	"Gateway":"192.168.78.1",
-	"InstanceOfferingUuid": "8e1fb8ceed434829a892f32142d3cfd9",
-	"ImageUuid":"ca0778d072a41bc39d5257493c025e71",
-	"L3NetworkUuid":"27d87b240aab411890059715e08ed092"
+    "VrouterImageUrl": "http://172.20.198.234/mirror/zstack_vyos_image/176/zstack-vrouter-180528-176.qcow2",
+    "BackupStorage":"e689ba5107294a59ad254f75e1d9fca6",
+    "ManagementNetworkUuid":"f92af7311f4646659a8866ef826f9afe",
+    "PublicNetworkUuid":"f92af7311f4646659a8866ef826f9afe",
+    "ZoneUuid":"a505e2f0878b47549c91447781e060df",
+    "ClusterUuid":"65059440f2fc4f5abf1d97978d08cfd2",
+    "Cidr":"{172.20.0.0/16}",
+    "Vni":22,
+    "StartVni":10,
+    "EndVni":100,
+    "PhysicalInterface":"eth0",
+    "StartIp":"192.168.78.2",
+    "EndIp":"192.168.78.120",
+    "Netmask":"255.255.255.0",
+    "Gateway":"192.168.78.1",
+    "InstanceOfferingUuid": "d8779004827c4eab9165be05dd9a21fc"
 }
 '''
 	resource_stack_option.set_templateContent(templateContent)
 	resource_stack_option.set_parameters(parameter)
-	resource_stack_option.set_rollback("true")
+	#resource_stack_option.set_rollback("true")
 
 	preview_resource_stack = resource_stack_ops.preview_resource_stack(resource_stack_option)
 

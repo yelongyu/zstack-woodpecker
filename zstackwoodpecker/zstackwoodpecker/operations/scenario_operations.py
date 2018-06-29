@@ -757,12 +757,12 @@ def scp_iscsi_repo_to_host(vm_config, vm_ip):
     ssh.scp_file(iscsi_repo_cfg_src, iscsi_repo_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
 
 
-ISCSI_TARGET_IP = None
-ISCSI_TARGET_UUID = None
+ISCSI_TARGET_IP = []
+ISCSI_TARGET_UUID = []
 def setup_iscsi_target(vm_inv, vm_config, deploy_config):
     global ISCSI_TARGET_IP
     global ISCSI_TARGET_UUID
-    ISCSI_TARGET_UUID = vm_inv.uuid
+    ISCSI_TARGET_UUID.append(vm_inv.uuid)
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
     if hasattr(vm_config, 'hostRef'):
         host = get_deploy_host(vm_config.hostRef.text_, deploy_config)
@@ -775,7 +775,7 @@ def setup_iscsi_target(vm_inv, vm_config, deploy_config):
 
     #TODO: install with local repo
     #scp_iscsi_repo_to_host(vm_config, vm_ip)
-    cmd = "yum install scsi-target-utils -y"
+    cmd = "yum --disablerepo=* --enablerepo=alibase install targetcli -y"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
     cmd = "iptables -I INPUT -p tcp -m tcp --dport 3260 -j ACCEPT"
@@ -784,32 +784,35 @@ def setup_iscsi_target(vm_inv, vm_config, deploy_config):
     cmd = "service iptables save"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    cmd = "service tgtd start"
+    cmd = "systemctl start target"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    cmd = "chkconfig tgtd on"
+    cmd = "systemctl enable target"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
     cmd = "echo 'sleep 15' >>/etc/rc.local"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    cmd = "echo 'tgtadm --lld iscsi --mode target --op new --tid 1 -T iqn.iscsi_target:disk1 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local"
+    cmd = "echo 'targetcli /backstores/block create blkvdb /dev/vdb 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    cmd = "echo 'tgtadm --lld iscsi --mode logicalunit --op new --tid 1 --lun 1 -b /dev/vdb 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local"
+    cmd = "echo 'targetcli /iscsi create iqn.2018-06.org.disk1 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    cmd = "echo 'tgtadm --lld iscsi --mode target --op bind --tid 1 -I ALL 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local"
+    cmd = "echo 'targetcli /iscsi/iqn.2018-06.org.disk1/tpg1/luns create /backstores/block/blkvdb 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+    cmd = "echo 'targetcli /iscsi/iqn.2018-06.org.disk1/tpg1/ set attribute authentication=0 demo_mode_write_protect=0 generate_node_acls=1 cache_dynamic_acls=1 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+    cmd = "echo 'targetcli saveconfig 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
     cmd = "bash -x /etc/rc.local"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    cmd = "tgt-admin -s"
-    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
-
-    ISCSI_TARGET_IP = vm_ip
-    test_util.test_logger("ISCSI_TARGET_IP=%s" %(ISCSI_TARGET_IP))
+    ISCSI_TARGET_IP.append(vm_ip)
+    test_util.test_logger("ISCSI_TARGET_IP=%s" %(vm_ip))
 
 
 def get_vm_inv_by_vm_ip(zstack_management_ip, vm_ip):
@@ -869,83 +872,84 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
     cmd = "yum -y install device-mapper device-mapper-multipath"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    cmd = "chkconfig --level 2345 multipathd on"
-    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+    #cmd = "chkconfig --level 2345 multipathd on"
+    #exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+ 
+    for i in iscsi_target_ip:
+        cmd = "echo 'iscsiadm -m discovery -t sendtargets -p %s:3260 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local; sync" %(i)
+        exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    cmd = "echo 'iscsiadm -m discovery -t sendtargets -p %s:3260 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local; sync" %(iscsi_target_ip)
-    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
-
-    cmd = "echo 'iscsiadm -m node -T iqn.iscsi_target:disk1 -p %s:3260 -l >>/tmp/tgtadm.log' >>/etc/rc.local; sync" %(iscsi_target_ip)
-    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+        cmd = "echo 'iscsiadm -m node -T iqn.2018-06.org.disk1 -p %s:3260 -l >>/tmp/tgtadm.log' >>/etc/rc.local; sync" %(i)
+        exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
     cmd = "bash -x /etc/rc.local"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    cmd = "modprobe dm-multipath"
-    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+    #cmd = "modprobe dm-multipath"
+    #exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    cmd = "modprobe dm-round-robin"
-    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+    #cmd = "modprobe dm-round-robin"
+    #exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
     
     import commands
     status, woodpecker_ip = commands.getstatusoutput("ip addr show zsn0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'")
-    multipath_cfg_src = "/home/%s/multipath.conf" %(woodpecker_ip)
-    multipath_cfg_dst = "/etc/multipath.conf"
-    ssh.scp_file(multipath_cfg_src, multipath_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
-    cmd = "service multipathd start"
-    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+    #multipath_cfg_src = "/home/%s/multipath.conf" %(woodpecker_ip)
+    #multipath_cfg_dst = "/etc/multipath.conf"
+    #ssh.scp_file(multipath_cfg_src, multipath_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
+    #cmd = "service multipathd start"
+    #exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    cmd = "multipath -v2"
-    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+    #cmd = "multipath -v2"
+    #exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    HOST_INITIATOR_COUNT = HOST_INITIATOR_COUNT + 1
-    if HOST_INITIATOR_COUNT == 3:
-        fdisk_cfg_src = "/home/%s/fdiskIscsiUse.cmd" %(woodpecker_ip)
-        fdisk_cfg_dst = "/tmp/fdiskIscsiUse.cmd"
-        ssh.scp_file(fdisk_cfg_src, fdisk_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
+    #HOST_INITIATOR_COUNT = HOST_INITIATOR_COUNT + 1
+    #if HOST_INITIATOR_COUNT == 3:
+    #    fdisk_cfg_src = "/home/%s/fdiskIscsiUse.cmd" %(woodpecker_ip)
+    #    fdisk_cfg_dst = "/tmp/fdiskIscsiUse.cmd"
+    #    ssh.scp_file(fdisk_cfg_src, fdisk_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
 
-        cmd = "fdisk /dev/mapper/mpatha </tmp/fdiskIscsiUse.cmd"
-        exec_cmd_in_vm(cmd, vm_ip, vm_config, False, host_port)
+    #    cmd = "fdisk /dev/mapper/mpatha </tmp/fdiskIscsiUse.cmd"
+    #    exec_cmd_in_vm(cmd, vm_ip, vm_config, False, host_port)
 
-        stop_vm(zstack_management_ip, ISCSI_TARGET_UUID, 'cold')
-        start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
+    #    stop_vm(zstack_management_ip, ISCSI_TARGET_UUID, 'cold')
+    #    start_vm(zstack_management_ip, ISCSI_TARGET_UUID)
 
-        time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
+    #    time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
 
-        #Below is aim to migrate sanlock to a separated partition, don't delete!!!
-        #IF separated_partition:
-        #cmd = "pvcreate /dev/mapper/mpatha1"
-        #exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+    #    #Below is aim to migrate sanlock to a separated partition, don't delete!!!
+    #    #IF separated_partition:
+    #    #cmd = "pvcreate /dev/mapper/mpatha1"
+    #    #exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-        #cmd = "pvcreate /dev/mapper/mpatha2 --metadatasize 512m"
-        #exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+    #    #cmd = "pvcreate /dev/mapper/mpatha2 --metadatasize 512m"
+    #    #exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-        #ELSE
-        cmd = "pvcreate /dev/mapper/mpatha1"
-        exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
-        #ENDIF
+    #    #ELSE
+    #    cmd = "pvcreate /dev/mapper/mpatha1"
+    #    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+    #    #ENDIF
 
-        cmd = "systemctl restart multipathd.service"
-        exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+    #    cmd = "systemctl restart multipathd.service"
+    #    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-        import threading
-        def _reboot_vm_wrapper(zstack_management_ip, vm_ip, vm_config, deploy_config):
-            vm_inv = get_vm_inv_by_vm_ip(zstack_management_ip, vm_ip)
-            vm_uuid = vm_inv.uuid
-            stop_vm(zstack_management_ip, vm_uuid, 'cold')
-            start_vm(zstack_management_ip, vm_uuid)
-            time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
-            recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
-            
-        thd_list = []
-        for vm_ip,vm_config in zip(HOST_INITIATOR_IP_LIST, HOST_INITIATOR_VM_CONFIG_LIST):
-            thd = threading.Thread(target = _reboot_vm_wrapper, args=(zstack_management_ip, vm_ip, vm_config, deploy_config))
-            thd_list.append(thd)
-            thd.daemon = True
-            thd.start()
+    #    import threading
+    #    def _reboot_vm_wrapper(zstack_management_ip, vm_ip, vm_config, deploy_config):
+    #        vm_inv = get_vm_inv_by_vm_ip(zstack_management_ip, vm_ip)
+    #        vm_uuid = vm_inv.uuid
+    #        stop_vm(zstack_management_ip, vm_uuid, 'cold')
+    #        start_vm(zstack_management_ip, vm_uuid)
+    #        time.sleep(180) #This is a must, or host will not find mpatha and mpatha2 uuid
+    #        recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config)
+    #        
+    #    thd_list = []
+    #    for vm_ip,vm_config in zip(HOST_INITIATOR_IP_LIST, HOST_INITIATOR_VM_CONFIG_LIST):
+    #        thd = threading.Thread(target = _reboot_vm_wrapper, args=(zstack_management_ip, vm_ip, vm_config, deploy_config))
+    #        thd_list.append(thd)
+    #        thd.daemon = True
+    #        thd.start()
 
-        for thd in thd_list:
-            thd.join()
+    #    for thd in thd_list:
+    #        thd.join()
 
 
 def get_scenario_config_vm(vm_name, scenario_config):

@@ -778,7 +778,11 @@ class VIPQOS(object):
 
     def install_iperf(self, vm_ip):
         iperf_url = os.getenv('iperfUrl')
-        cmd = "%s 'wget %s; rpm -ivh %s'" % (self.ssh_cmd + vm_ip, iperf_url, iperf_url.split('/')[-1])
+        iperf_file = iperf_url.split('/')[-1]
+        cmd_loc = 'sshpass -p password scp -o StrictHostKeyChecking=no root@%s .' % iperf_url
+        if not os.path.exists(iperf_file):
+            commands.getstatusoutput(cmd_loc)
+        cmd = "sshpass -p password scp -o StrictHostKeyChecking=no %s root@%s:; %s ' rpm -ivh %s'" % (iperf_file, vm_ip, self.ssh_cmd + vm_ip, iperf_file)
         if commands.getstatusoutput(self.ssh_cmd + vm_ip + ' iperf3 -v')[0] != 0:
             ret = commands.getstatusoutput(cmd)
             print '*' * 90
@@ -790,12 +794,10 @@ class VIPQOS(object):
         terminate_cmd =  self.ssh_cmd + vm_ip + " pkill -9 iperf3"
         commands.getstatusoutput(terminate_cmd)
         time.sleep(5)
-        print '*' * 50
-        print self.iperf_port
         if self.iperf_port:
-            cmd = self.ssh_cmd + self.vm_ip + ' "nohup iperf3 -s -p %s &> /dev/null &"' % self.iperf_port
+            cmd = self.ssh_cmd + self.vm_ip + ' "iperf3 -s -p %s -D"' % self.iperf_port
         else:
-            cmd = self.ssh_cmd + self.vm_ip + ' "nohup iperf3 -s &> /dev/null &"'
+            cmd = self.ssh_cmd + self.vm_ip + ' "iperf3 -s -D"'
         commands.getstatusoutput(cmd)
 
     def create_vm(self, l3_network):
@@ -881,7 +883,7 @@ class VIPQOS(object):
         lbl = self.lb.create_listener(lb_creation_option)
         lbl.add_nics([self.vm2.vm.vmNics[0].uuid])
 
-    def check_bandwidth(self, vm_ip, direction, cmd, bandwidth):
+    def check_bandwidth(self, vm_ip, direction, cmd, excepted_bandwidth):
         if self.vr and not self.reconnected:
             vm_ops.reconnect_vr(self.vr.uuid)
             self.reconnected = True
@@ -893,39 +895,48 @@ class VIPQOS(object):
         time.sleep(10)
         self.start_iperf_server(vm_ip)
         time.sleep(30)
-        print '*' * 50
-        print cmd
-        (status, ret) = commands.getstatusoutput(cmd)
-        seper = '*' * 80
-        print "%s\n%s\n%s" % (seper, ret, seper)
-        if direction == 'out':
-            pos = -3
-        else:
-            pos = -4
-        summ = ret.split('\n')[pos]
-        bndwth = float(summ.split()[-3])
-        if summ.split()[-2] == 'Kbits/sec':
-            bndwth /= 1024
-        elif summ.split()[-2] == 'Gbits/sec':
-            bndwth *= 1024
-        if status == 0:
-            if bandwidth == 1000:
-                assert bndwth < bandwidth
+        actual_bandwidth, bndwth = 0, 0
+        for _ in range(5):
+            (status, ret) = commands.getstatusoutput(cmd)
+            seper = '*' * 80
+            print "%s\n%s\n%s" % (seper, ret, seper)
+            if direction == 'out':
+                pos = -3
             else:
-                assert abs(bndwth - bandwidth) / bandwidth < 0.1
-        else:
-            raise Exception('Execute command %s error: %s' % (cmd, ret))
+                pos = -4
+            summ = ret.split('\n')[pos]
+            bndwth = float(summ.split()[-3])
+            if summ.split()[-2] == 'Kbits/sec':
+                bndwth /= 1024
+            elif summ.split()[-2] == 'Gbits/sec':
+                bndwth *= 1024
+            if status == 0:
+                if excepted_bandwidth == 1000:
+                    assert bndwth < excepted_bandwidth
+                    break
+                else:
+                    if abs(bndwth - excepted_bandwidth) / excepted_bandwidth < 0.1:
+                        actual_bandwidth = bndwth
+                        break
+                    else:
+                        time.sleep(10)
+            else:
+                raise Exception('Execute command %s error: %s' % (cmd, ret))
+        if not bndwth:
+            test_util.test_fail("Get VIP bandwidth failed")
+        if excepted_bandwidth < 1000 and actual_bandwidth == 0:
+            test_util.test_fail('Except bandwidth: %s, actual bandwidth: %s.' % (excepted_bandwidth, bndwth))
 
     def check_outbound_bandwidth(self, vm_ip=None):
         if not vm_ip:
             vm_ip = self.vm_ip
         if self.iperf_port:
             if self.port:
-                cmd = "iperf3 -c %s -p %s --cport %s --bind %s -i 20 -t 200 -R" % (self.vip_ip, self.iperf_port, self.port, self.mn_ip)
+                cmd = "iperf3 -c %s -p %s --cport %s --bind %s -t 2 -R" % (self.vip_ip, self.iperf_port, self.port, self.mn_ip)
             else:
-                cmd = "iperf3 -c %s -p %s -i 20 -t 200 -R " % (self.vip_ip, self.iperf_port)
+                cmd = "iperf3 -c %s -p %s -t 2 -R " % (self.vip_ip, self.iperf_port)
         else:
-            cmd = "iperf3 -c %s -i 20 -t 200 -R" % self.vip_ip
+            cmd = "iperf3 -c %s -t 2 -R" % self.vip_ip
         self.check_bandwidth(vm_ip, 'out', cmd, self.outbound_width/(1024 * 1024))
 
     def check_inbound_bandwidth(self, vm_ip=None):
@@ -933,11 +944,11 @@ class VIPQOS(object):
             vm_ip = self.vm_ip
         if self.iperf_port:
             if self.port:
-                cmd = "iperf3 -c %s -p %s --cport %s --bind %s -i 20 -t 200 --get-server-output" % (self.vip_ip, self.iperf_port, self.port, self.mn_ip)
+                cmd = "iperf3 -c %s -p %s --cport %s --bind %s -t 2 --get-server-output" % (self.vip_ip, self.iperf_port, self.port, self.mn_ip)
             else:
-                cmd = "iperf3 -c %s -p %s -i 20 -t 200 --get-server-output" % (self.vip_ip, self.iperf_port)
+                cmd = "iperf3 -c %s -p %s -t 2 --get-server-output" % (self.vip_ip, self.iperf_port)
         else:
-            cmd = "iperf3 -c %s -i 20 -t 200 --get-server-output" % self.vip_ip
+            cmd = "iperf3 -c %s -t 2 --get-server-output" % self.vip_ip
         self.check_bandwidth(vm_ip, 'in', cmd, self.inbound_width/(1024 * 1024))
 
 
@@ -990,7 +1001,7 @@ class MulISO(object):
             self.vm2.check()
 
     def create_windows_vm(self):
-        new_offering = test_lib.lib_create_instance_offering(cpuNum = 2, memorySize = 2048 * 1024 * 1024)
+        new_offering = test_lib.lib_create_instance_offering(cpuNum = 6, memorySize = 2048 * 1024 * 1024)
         new_offering_uuid = new_offering.uuid
         self.vm1 = create_windows_vm_2(instance_offering_uuid = new_offering_uuid)
         vm_ops.delete_instance_offering(new_offering_uuid)
@@ -1067,14 +1078,25 @@ class MulISO(object):
         test_lib.lib_wait_target_up(vm_ip, '23', 300)
         vm_username = os.environ.get('winImageUsername')
         vm_password = os.environ.get('winImagePassword')
-        tn = telnetlib.Telnet(vm_ip)
+        
+        for i in range(10):
+            try:
+                tn = telnetlib.Telnet(vm_ip, timeout=120)
+                break
+            except:
+                test_util.test_logger("retry id: %s" %(int(i)))
+                continue
+
         tn.read_until("login: ")
         tn.write(vm_username+"\r\n")
+
         tn.read_until("password: ")
         tn.write(vm_password+"\r\n")
-        tn.read_until(vm_username+">")
+        #tn.read_until(vm_username+">")
+        tn.read_until("tor>")
         tn.write("wmic cdrom get volumename\r\n")
-        ret = tn.read_until(vm_username+">")
+        #ret = tn.read_until(vm_username+">")
+        ret = tn.read_until("tor>")
         tn.write("exit\r\n")
         tn.close()
         cdrome_list = ret.split('\r')

@@ -208,8 +208,8 @@
         <case timeout='1200' repeat='1'>pub_l3_vm/test_pub_vm_ops.py</case>
         <case timeout='1200' repeat='1'>pub_l3_vm/test_pub_vm_vip.py</case>
         <case timeout='1200' repeat='1'>pub_l3_vm/test_pub_vm_vol_attach.py</case>
-		<case timeout='600' repeat='1'>test_change_vm_image.py</case>
-		<case timeout='600' repeat='1'>test_change_vm_image_to_windows.py</case>
+	<case timeout='800' repeat='1'>test_change_vm_image.py</case>
+	<case timeout='1200' repeat='1'>test_change_vm_image_to_windows.py</case>
         <!--<case timeout='600' repeat='1'>test_create_vyos_vm_time.py</case>
         <case timeout='600' repeat='1'>test_vrouter_route.py</case>-->
         <case timeout='600' repeat='1'>multi_iso/test_2_iso_change_order.py</case>

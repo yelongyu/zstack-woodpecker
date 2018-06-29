@@ -51,6 +51,7 @@ def test():
 
     client = api.connect(console.hostIp+":"+display)
     client.keyPress('esc')
+    time.sleep(2)
     client.expectRegion(boot_option_picture,0,100)
 
     vm.destroy()

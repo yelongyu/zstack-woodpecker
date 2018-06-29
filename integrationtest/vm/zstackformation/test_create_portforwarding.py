@@ -14,7 +14,7 @@ def test():
 	test_util.test_dsc("Test Resource template Apis")
 	
 	resource_stack_option = test_util.ResourceStackOption()
-	resource_stack_option.set_name("Create_EIP")
+	resource_stack_option.set_name("Create_PortForward")
 	templateContent = '''
 {
 	"ZStackTemplateFormatVersion": "2018-06-18",
@@ -41,7 +41,7 @@ def test():
 		"VmInstance": {
 			"Type": "ZStack::Resource::VmInstance",
 			"Properties": {
-				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"},"VM"]]},
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "VM"]]},
 				"instanceOfferingUuid": {"Ref":"InstanceOfferingUuid"},
 				"imageUuid":{"Ref":"ImageUuid"},
 				"l3NetworkUuids":[{"Ref":"PrivateNetworkUuid"}],
@@ -51,16 +51,21 @@ def test():
 		"VIP": {
 			"Type": "ZStack::Resource::Vip",
 			"Properties": {
-				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"},"VIP"]]},
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "VIP"]]},
 				"l3NetworkUuid":{"Ref":"PublicNetworkUuid"}
 			}
 		},
-		"EIP":{
-			"Type": "ZStack::Resource::Eip",
+		"PortForwardingRule":{
+			"Type": "ZStack::Resource::PortForwardingRule",
 			"Properties": {
-				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"},"EIP"]]},
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "PortForwarding"]]},
 				"vipUuid":{"Fn::GetAtt":["VIP","uuid"]},
-				"vmNicUuid":{"Fn::GetAtt":[{"Fn::Select":[0,{"Fn::GetAtt":["VmInstance","vmNics"]}]},"uuid"]}
+				"vmNicUuid":{"Fn::GetAtt":[{"Fn::Select":[0,{"Fn::GetAtt":["VmInstance","vmNics"]}]},"uuid"]},
+				"vipPortStart":100,
+				"vipPortEnd":100,
+				"privatePortStart":22,
+				"privatePortEnd":22,
+				"protocolType":"TCP"
 			}
 		}
 	},
@@ -77,10 +82,10 @@ def test():
 	parameter = '''
 {
 	"InstanceOfferingUuid": "d8779004827c4eab9165be05dd9a21fc",
-	"ImageUuid":"6d1fbfdd200749aaa1de3d0edf4f79a3",
-	"PrivateNetworkUuid":"27d87b240aab411890059715e08ed092",
-	"PublicNetworkUuid":"f6f17ccd25694b3992bf8172246bd16d",
-	"RootDiskOfferingUuid":"cd8d228190304745a88b404c21c87d50"
+	"ImageUuid":"3b978207351027b980ea887677c654da",
+	"PrivateNetworkUuid":"896d05bcbb884b40881be9418ab3c198",
+	"PublicNetworkUuid":"f92af7311f4646659a8866ef826f9afe",
+	"RootDiskOfferingUuid":"9e5f705feaee498b8ff570544bd27a04"
 }
 '''
 	resource_stack_option.set_templateContent(templateContent)
