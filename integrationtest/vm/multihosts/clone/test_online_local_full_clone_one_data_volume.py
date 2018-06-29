@@ -30,7 +30,7 @@ def test():
     volume_uuid = volume.volume.uuid
     vol_size = volume.volume.size
     image_name = os.environ.get('imageName_s')
-    l3_name = os.environ.get('l3VlanNetworkName1')
+    l3_name = os.environ.get('l3PublicNetworkName')
     vm = test_stub.create_vm("test_vm", image_name, l3_name)
     #vm.check()
     test_obj_dict.add_vm(vm)
@@ -40,7 +40,7 @@ def test():
     test_obj_dict.add_vm(new_vm)
 
     volumes_number = len(test_lib.lib_get_all_volumes(new_vm.vm))
-    if volumes_number != 23:
+    if volumes_number != 2:
         test_util.test_fail('Did not find 2 volumes for [vm:] %s. But we assigned 2 data volume when create the vm. We only catch %s volumes' % (new_vm.vm.uuid, volumes_number))
     else:
         test_util.test_logger('Find 2 volumes for [vm:] %s.' % new_vm.vm.uuid)
