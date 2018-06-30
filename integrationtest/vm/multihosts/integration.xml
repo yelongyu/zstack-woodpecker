@@ -90,7 +90,8 @@
 	<case timeout='600' repeat='1'>zwatch/test_all_get_op.py</case>
         <case timeout='600' repeat='1'>zwatch/test_event_host_bs_ps_disconnected_with_email.py</case>
         <case timeout='600' repeat='1'>zwatch/test_sns_text_template_with_email.py</case>
-	<case timeout='600' repeat='1'>zwatch/test_alarm_change_state.py</case>
+	<case timeout='600' repeat='2'>zwatch/test_alarm_change_state.py</case>
+	<case timeout='600' repeat='1'>zwatch/test_alarm_with_dingtalk.py</case>
         <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_host.py::kill_kvmagent</case>
         <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_host.py::stop_kvmagent</case>
         <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_ceph.py::kill_bs</case>
