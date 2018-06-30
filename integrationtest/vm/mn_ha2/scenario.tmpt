@@ -1,0 +1,8 @@
+import ../scenario.tmpt
+import ./deploy.tmpt
+vmName1 = test_vm1
+vmName2 = test_vm2
+vmName3 = test_vm3
+vmInstranceOfferingUuid2 = 234567
+imageUuid2 = 234567
+cephStorageOfferingUuid = 123456
