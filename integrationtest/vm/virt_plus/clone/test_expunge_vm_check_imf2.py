@@ -40,7 +40,7 @@ def test():
         test_util.test_skip('Not find image store type backup storage.')
     primary_storage_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
     for ps in primary_storage_list:
-        if ps.type == "SharedBlock":
+        if ps.type == "SharedBlock" or ps.type == "AliyunNAS":
             vm.destroy()
             vm.expunge()
             test_util.test_skip('The test is not support sharedblock storage.')

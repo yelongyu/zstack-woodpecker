@@ -289,6 +289,19 @@ def create_l2_vlan(name, nic, zone_uuid, vlan, session_uuid = None):
     test_util.action_logger("[Vlan L2:] %s is created" % evt.uuid)
     return evt   
 
+def update_l2(l2_uuid, name=None, description=None, session_uuid = None):
+    '''
+    Update name or desrciption of l2 network
+    '''
+    action = api_actions.UpdateL2NetworkAction()
+    action.name = name
+    action.description = description
+    action.uuid = l2_uuid
+    action.timeout = 300000
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("[L2:] %s is updated" % evt.uuid)
+    return evt
+
 def delete_l2(l2_uuid, session_uuid = None):
     '''
     Delete L2 will stop all VMs which is using this L2. When VM started again, 
@@ -646,6 +659,69 @@ def detach_network_service_from_l3network(l3_uuid, service_uuid, session_uuid=No
     action = api_actions.DetachNetworkServiceFromL3NetworkAction()
     action.l3NetworkUuid = l3_uuid
     providers[service_uuid] = ['VRouterRoute']
+    action.networkServices = providers
+    action.timeout = 12000
+    test_util.action_logger('Detach [Network Service]: %s from [l3]: %s' % (service_uuid, l3_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+
+def attach_pf_service_to_l3network(l3_uuid, service_uuid, session_uuid=None):
+    providers = {}
+    action = api_actions.AttachNetworkServiceToL3NetworkAction()
+    action.l3NetworkUuid = l3_uuid
+    providers[service_uuid] = ['PortForwarding']
+    action.networkServices = providers
+    action.timeout = 12000
+    test_util.action_logger('Attach [Network Service]: %s to [l3]: %s' % (service_uuid, l3_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt
+
+def detach_pf_service_from_l3network(l3_uuid, service_uuid, session_uuid=None):
+    providers = {}
+    action = api_actions.DetachNetworkServiceFromL3NetworkAction()
+    action.l3NetworkUuid = l3_uuid
+    providers[service_uuid] = ['PortForwarding']
+    action.networkServices = providers
+    action.timeout = 12000
+    test_util.action_logger('Detach [Network Service]: %s from [l3]: %s' % (service_uuid, l3_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+
+def attach_lb_service_to_l3network(l3_uuid, service_uuid, session_uuid=None):
+    providers = {}
+    action = api_actions.AttachNetworkServiceToL3NetworkAction()
+    action.l3NetworkUuid = l3_uuid
+    providers[service_uuid] = ['LoadBalancer']
+    action.networkServices = providers
+    action.timeout = 12000
+    test_util.action_logger('Attach [Network Service]: %s to [l3]: %s' % (service_uuid, l3_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt
+
+def detach_lb_service_from_l3network(l3_uuid, service_uuid, session_uuid=None):
+    providers = {}
+    action = api_actions.DetachNetworkServiceFromL3NetworkAction()
+    action.l3NetworkUuid = l3_uuid
+    providers[service_uuid] = ['LoadBalancer']
+    action.networkServices = providers
+    action.timeout = 12000
+    test_util.action_logger('Detach [Network Service]: %s from [l3]: %s' % (service_uuid, l3_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+
+def attach_sg_service_to_l3network(l3_uuid, service_uuid, session_uuid=None):
+    providers = {}
+    action = api_actions.AttachNetworkServiceToL3NetworkAction()
+    action.l3NetworkUuid = l3_uuid
+    providers[service_uuid] = ['SecurityGroup']
+    action.networkServices = providers
+    action.timeout = 12000
+    test_util.action_logger('Attach [Network Service]: %s to [l3]: %s' % (service_uuid, l3_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt
+
+def detach_sg_service_from_l3network(l3_uuid, service_uuid, session_uuid=None):
+    providers = {}
+    action = api_actions.DetachNetworkServiceFromL3NetworkAction()
+    action.l3NetworkUuid = l3_uuid
+    providers[service_uuid] = ['SecurityGroup']
     action.networkServices = providers
     action.timeout = 12000
     test_util.action_logger('Detach [Network Service]: %s from [l3]: %s' % (service_uuid, l3_uuid))

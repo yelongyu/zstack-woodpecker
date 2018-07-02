@@ -12,82 +12,64 @@
     <host uuid="$hostUuid">
       <vms>
         <vm name="$vmName1" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
-          imageUuid="$imageUuid" imageUsername="$imageUsername" imagePassword="$imagePassword">
-          <l3Networks>
-            <l3Network uuid="$vmL3Uuid">
-              <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
-              <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
-              <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
-            </l3Network>
-          </l3Networks>
-          <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
-          <primaryStorageRef type="iscsiTarget" disk_offering_uuid="$iscsiDiskOfferingUuid">$iscsiPrimaryStorageName</primaryStorageRef>
-        </vm>
-      </vms>
-    </host>
-    <host uuid="$hostUuid2">
-      <vms>
-        <vm name="$vmName2" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
-          imageUuid="$imageUuid" imageUsername="$imageUsername" imagePassword="$imagePassword">
-          <l3Networks>
-            <l3Network uuid="$vmL3Uuid">
-              <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
-              <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
-              <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
-            </l3Network>
-          </l3Networks>
-	  <nodeRef>$node1Name</nodeRef>
-        </vm>
-      </vms>
-    </host>
-    <host uuid="$hostUuid3">
-      <vms>
-        <vm name="$vmName3" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
             <l3Network uuid="$vmL3Uuid">
+	      <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
               <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
           </l3Networks>
           <hostRef>$hostName</hostRef>
-          <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
-          <primaryStorageRef type="iscsiInitiator" >$iscsiPrimaryStorageName</primaryStorageRef>
+          <mnHostRef>$hostName</mnHostRef>
+	  <backupStorageRef type="ceph" offering_uuid="$cephStorageOfferingUuid">$cephBackupStorageName</backupStorageRef>
+	  <primaryStorageRef type="ceph">$cephPrimaryStorageName</primaryStorageRef>
         </vm>
-      </vms>
-    </host>
-    <host uuid="$hostUuid4">
-      <vms>
-        <vm name="$vmName4" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
+        <vm name="$vmName2" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
             <l3Network uuid="$vmL3Uuid">
+	      <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
               <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
           </l3Networks>
           <hostRef>$hostName2</hostRef>
-          <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
-          <primaryStorageRef type="iscsiInitiator" >$iscsiPrimaryStorageName</primaryStorageRef>
+          <mnHostRef>$hostName2</mnHostRef>
+	  <backupStorageRef type="ceph" offering_uuid="$cephStorageOfferingUuid">$cephBackupStorageName</backupStorageRef>
+	  <primaryStorageRef type="ceph">$cephPrimaryStorageName</primaryStorageRef>
         </vm>
-      </vms>
-    </host>
-    <host uuid="$hostUuid5">
-      <vms>
-        <vm name="$vmName5" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
+        <vm name="$vmName3" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
             <l3Network uuid="$vmL3Uuid">
+	      <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
               <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
           </l3Networks>
           <hostRef>$hostName3</hostRef>
-          <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
-          <primaryStorageRef type="iscsiInitiator" >$iscsiPrimaryStorageName</primaryStorageRef>
+          <mnHostRef>$hostName3</mnHostRef>
+	  <backupStorageRef type="ceph" offering_uuid="$cephStorageOfferingUuid">$cephBackupStorageName</backupStorageRef>
+	  <primaryStorageRef type="ceph">$cephPrimaryStorageName</primaryStorageRef>
+        </vm>
+        <vm name="$vmName4" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
+          imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
+          <l3Networks>
+            <l3Network uuid="$vmL3Uuid">
+	      <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
+              <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
+              <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
+              <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
+            </l3Network>
+          </l3Networks>
+          <hostRef>$hostName4</hostRef>
+          <mnHostRef>$hostName4</mnHostRef>
+	  <backupStorageRef type="ceph" offering_uuid="$cephStorageOfferingUuid">$cephBackupStorageName</backupStorageRef>
+	  <primaryStorageRef type="ceph">$cephPrimaryStorageName</primaryStorageRef>
         </vm>
       </vms>
     </host>

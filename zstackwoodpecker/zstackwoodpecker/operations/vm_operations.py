@@ -270,11 +270,12 @@ def recover_vm(vm_uuid, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def clone_vm(vm_uuid, vm_names, strategy, systemtag = None, session_uuid = None):
+def clone_vm(vm_uuid, vm_names, strategy, full = False, systemtag = None, session_uuid = None):
     action = api_actions.CloneVmInstanceAction()
     action.vmInstanceUuid = vm_uuid
     action.names=vm_names
     action.strategy=strategy
+    action.full=full
     action.timeout = 2000000
     action.systemTags = systemtag
     test_util.action_logger('Clone VM [uuid:] %s to %s' % (vm_uuid, vm_names))

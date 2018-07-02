@@ -27,9 +27,6 @@ def test():
 		"ImageUuid":{
 			"Type": "String"
 		},
-		"ImageUuid":{
-			"Type": "String"
-		},
 		"PrivateNetworkUuid":{
 			"Type": "String"
 		},
@@ -44,7 +41,7 @@ def test():
 		"VmInstance": {
 			"Type": "ZStack::Resource::VmInstance",
 			"Properties": {
-				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, {"Ref":"ZStack::StackUuid"},{"Ref":"ZStack::AccountUuid"},{"Ref":"ZStack::AccountName"},"VM"]]},
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"},"VM"]]},
 				"instanceOfferingUuid": {"Ref":"InstanceOfferingUuid"},
 				"imageUuid":{"Ref":"ImageUuid"},
 				"l3NetworkUuids":[{"Ref":"PrivateNetworkUuid"}],
@@ -54,16 +51,16 @@ def test():
 		"VIP": {
 			"Type": "ZStack::Resource::Vip",
 			"Properties": {
-				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, {"Ref":"ZStack::StackUuid"},{"Ref":"ZStack::AccountUuid"},{"Ref":"ZStack::AccountName"},"VIP"]]},
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"},"VIP"]]},
 				"l3NetworkUuid":{"Ref":"PublicNetworkUuid"}
 			}
 		},
 		"EIP":{
 			"Type": "ZStack::Resource::Eip",
 			"Properties": {
-				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, {"Ref":"ZStack::StackUuid"},{"Ref":"ZStack::AccountUuid"},{"Ref":"ZStack::AccountName"},"EIP"]]},
+				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"},"EIP"]]},
 				"vipUuid":{"Fn::GetAtt":["VIP","uuid"]},
-				"vmNicUuid":{"Fn::GetAtt":[{"Fn::Select":["0",[{"Fn::GetAtt":["VmInstance","vmNics"]}]]},"uuid"]}
+				"vmNicUuid":{"Fn::GetAtt":[{"Fn::Select":[0,{"Fn::GetAtt":["VmInstance","vmNics"]}]},"uuid"]}
 			}
 		}
 	},
@@ -79,8 +76,8 @@ def test():
 
 	parameter = '''
 {
-	"InstanceOfferingUuid": "8e1fb8ceed434829a892f32142d3cfd9",
-	"ImageUuid":"ca0778d072a41bc39d5257493c025e71",
+	"InstanceOfferingUuid": "d8779004827c4eab9165be05dd9a21fc",
+	"ImageUuid":"6d1fbfdd200749aaa1de3d0edf4f79a3",
 	"PrivateNetworkUuid":"27d87b240aab411890059715e08ed092",
 	"PublicNetworkUuid":"f6f17ccd25694b3992bf8172246bd16d",
 	"RootDiskOfferingUuid":"cd8d228190304745a88b404c21c87d50"

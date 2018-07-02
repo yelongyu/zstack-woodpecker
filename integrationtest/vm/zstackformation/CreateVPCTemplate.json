@@ -1,10 +1,11 @@
 {
 	"ZStackTemplateFormatVersion": "2018-06-18",
-	"Description": "本示例会创建一个简单的VPC网络，需要用户提供下面正确的数据i\n公有网络Uuid\n管理网络Uuid: 如果只有公有网络，则把公有网络当作管理网即可.\n"
+	"Description": "本示例会创建一个简单的VPC网络，需要用户提供下面正确的数据i\n公有网络Uuid\n管理网络Uuid: 如果只有公有网络，则把公有网络当作管理网即可.\n",
 	"Parameters": {
 		"VrouterImageUrl": {
 			"Type": "String",
-			"Description":"云路由镜像链接地址"
+			"Description":"云路由镜像链接地址",
+			"DefaultValue": "http://cdn.zstack.io/product_downloads/vrouter/2.3/zstack-vrouter-2.3.2.qcow2"
 		},
 		"VmImageUrl": {
 			"Type": "String",
@@ -46,9 +47,6 @@
 		"EndVni":{
 			"Type": "Number",
 			"DefaultValue":300
-		},
-		"PhysicalInterface":{
-			"Type": "String"
 		},
 		"StartIp":{
 			"Type": "String",
@@ -110,8 +108,7 @@
 			"Type":"ZStack::Resource::L2VxlanNetworkPool",
 			"Properties":{
 				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "L2VxlanNetworkPool"]]},
-				"zoneUuid":{"Ref":"ZoneUuid"},
-				"physicalInterface":{"Ref":"PhysicalInterface"}
+				"zoneUuid":{"Ref":"ZoneUuid"}
 			}
 		},
 		"VniRange":{
@@ -129,8 +126,7 @@
 				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"}, "L2VxlanNetwork"]]},
 				"poolUuid":{"Fn::GetAtt":["L2VxlanNetworkPool","uuid"]},
 				"zoneUuid":{"Ref":"ZoneUuid"},
-				"vni":{"Ref":"Vni"},
-				"physicalInterface":{"Ref":"PhysicalInterface"}
+				"vni":{"Ref":"Vni"}
 			}
 		},
 		"VpcL3Network":{
@@ -173,7 +169,7 @@
 		"AttachL2NetworkToCluster":{
 			"Type":"ZStack::Action::AttachL2NetworkToCluster",
 			"Properties":{
-				"l2NetworkUuid":{"Fn::GetAtt":["L2VxlanNetwork","uuid"]},
+				"l2NetworkUuid":{"Fn::GetAtt":["L2VxlanNetworkPool","uuid"]},
 				"clusterUuid":{"Ref":"ClusterUuid"},
 				"systemTags":[{"Fn::Join":["::",["l2NetworkUuid",{"Fn::GetAtt":["L2VxlanNetwork","uuid"]},"clusterUuid",{"Ref":"ClusterUuid"},"cidr",{"Ref":"Cidr"}]]}]
 			}
@@ -197,4 +193,3 @@
 		}
 	}
 }
-
