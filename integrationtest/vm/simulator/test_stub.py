@@ -82,6 +82,7 @@ def create_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None,
             os.environ.get('instanceOfferingName_s')).uuid
         cond = res_ops.gen_query_conditions('mediaType', '!=', 'ISO')
         cond = res_ops.gen_query_conditions('platform', '=', 'Linux', cond)
+        cond = res_ops.gen_query_conditions('system','=','false',cond)
         l3net_uuid = test_lib.lib_get_l3_by_name(
             os.environ.get('l3VlanNetworkName3')).uuid
 	if image_uuid:
