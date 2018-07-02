@@ -21,7 +21,7 @@ alarm_uuid = None
 def test():
     global endpoint_uuid, sns_topic_uuid, alarm_uuid, test_dict, test_stub
     url = 'https://oapi.dingtalk.com/robot/send?access_token' \
-          '=0be899d4bd0a7629961a5ccd3035dfba30d084b57944897838f1b601006dd151'
+          '=0be899d4bd0a7629961a5ccd3035dfba30d084b57944897838f1b60100dddddd'
     name = 'dingtalkendpointTest'
     endpoint_uuid = zwt_ops.create_sns_dingtalk_endpoint(url, name, at_all=True).uuid
 
