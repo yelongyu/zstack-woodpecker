@@ -2,6 +2,8 @@
 '''
 
 New Integration Test for zstack cloudformation.
+Create a Basic vm with eip.
+Cover resource:VM,VIP,EIP
 
 @author: Lei Liu
 '''
@@ -11,18 +13,35 @@ import zstackwoodpecker.operations.resource_stack as resource_stack_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 
 def test():
-	test_util.test_dsc("Test Resource template Apis")
-	
-	resource_stack_option = test_util.ResourceStackOption()
-	resource_stack_option.set_name("Create_EIP")
-	templateContent = '''
+    test_util.test_dsc("Test Resource template Apis")
+    
+    cond = res_ops.gen_query_conditions('status', '=', 'Ready')
+    cond = res_ops.gen_query_conditions('state', '=', 'Enabled', cond)
+    cond = res_ops.gen_query_conditions('system', '=', 'false', cond)
+    image_queried = res_ops.query_resource(res_ops.IMAGE, cond)
+
+    cond = res_ops.gen_query_conditions("category", '=', "Public")
+    l3_pub_queried = res_ops.query_resource(res_ops.L3_NETWORK, cond)
+    
+    cond = res_ops.gen_query_conditions("category", '=', "Private")
+    cond = res_ops.gen_query_conditions('networkServices.networkServiceType', '=', 'EIP')
+    l3_pri_queried = res_ops.query_resource(res_ops.L3_NETWORK, cond)
+
+    cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
+    cond = res_ops.gen_query_conditions('type', '=', 'UserVm', cond)
+    instance_offering_queried = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond)  
+
+    resource_stack_option = test_util.ResourceStackOption()
+    resource_stack_option.set_name("Create_STACK")
+    resource_stack_option.set_rollback("true")
+    templateContent = '''
 {
 	"ZStackTemplateFormatVersion": "2018-06-18",
-	"Description": "Just create a flat network & VM",
+	"Description": "Just create a VM with eip",
 	"Parameters": {
 		"InstanceOfferingUuid": {
 			"Type": "String",
-			"Lable": "vm instance offering"
+			"Label": "vm instance offering"
 		},
 		"ImageUuid":{
 			"Type": "String"
@@ -31,9 +50,6 @@ def test():
 			"Type": "String"
 		},
 		"PublicNetworkUuid":{
-			"Type": "String"
-		},
-		"RootDiskOfferingUuid":{
 			"Type": "String"
 		}
 	},
@@ -44,8 +60,7 @@ def test():
 				"name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"},"VM"]]},
 				"instanceOfferingUuid": {"Ref":"InstanceOfferingUuid"},
 				"imageUuid":{"Ref":"ImageUuid"},
-				"l3NetworkUuids":[{"Ref":"PrivateNetworkUuid"}],
-				"rootDiskOfferingUuid":{"Ref":"RootDiskOfferingUuid"}
+				"l3NetworkUuids":[{"Ref":"PrivateNetworkUuid"}]
 			}
 		},
 		"VIP": {
@@ -73,43 +88,78 @@ def test():
 	}
 }
 '''
+    #1.create resource stack 
+    test_util.test_logger('{"PrivateNetworkUuid":"%s","PublicNetworkUuid":"%s","ImageUuid":"%s","InstanceOfferingUuid":"%s"}' % (l3_pri_queried[0].uuid, l3_pub_queried[0].uuid, image_queried[0].uuid, instance_offering_queried[0].uuid))
+    parameter = '{"PrivateNetworkUuid":"%s","PublicNetworkUuid":"%s","ImageUuid":"%s","InstanceOfferingUuid":"%s"}' % (l3_pri_queried[0].uuid, l3_pub_queried[0].uuid, image_queried[0].uuid, instance_offering_queried[0].uuid)
+    
+    resource_stack_option.set_templateContent(templateContent)
+    resource_stack_option.set_parameters(parameter)
+    preview_resource_stack = resource_stack_ops.preview_resource_stack(resource_stack_option)
+    resource_stack = resource_stack_ops.create_resource_stack(resource_stack_option)
+    
 
-	parameter = '''
-{
-	"InstanceOfferingUuid": "d8779004827c4eab9165be05dd9a21fc",
-	"ImageUuid":"6d1fbfdd200749aaa1de3d0edf4f79a3",
-	"PrivateNetworkUuid":"27d87b240aab411890059715e08ed092",
-	"PublicNetworkUuid":"f6f17ccd25694b3992bf8172246bd16d",
-	"RootDiskOfferingUuid":"cd8d228190304745a88b404c21c87d50"
-}
-'''
-	resource_stack_option.set_templateContent(templateContent)
-	resource_stack_option.set_parameters(parameter)
+    #2.query resource stack
+    cond = res_ops.gen_query_conditions('uuid', '=', resource_stack.uuid)
+    resource_stack_queried = res_ops.query_resource(res_ops.RESOURCE_STACK, cond)
 
-	preview_resource_stack = resource_stack_ops.preview_resource_stack(resource_stack_option)
+    cond = res_ops.gen_query_conditions('name', '=', 'Create_STACK-VM')
+    vm_queried = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
 
-	resource_stack = resource_stack_ops.create_resource_stack(resource_stack_option)
+    cond = res_ops.gen_query_conditions('name', '=', 'Create_STACK-VIP')
+    vip_queried = res_ops.query_resource(res_ops.VIP, cond)
 
-	cond = res_ops.gen_query_conditions('uuid', '=', resource_stack.uuid)
-	resource_stack_queried = res_ops.query_resource(res_ops.RESOURCE_STACK, cond)
+    cond = res_ops.gen_query_conditions('name', '=', 'Create_STACK-EIP')
+    eip_queried = res_ops.query_resource(res_ops.EIP, cond)
 
-	if len(resource_stack_queried) == 0:
-		test_util.test_fail("Fail to query stack template")
-	#Add a template via text.
+    if len(resource_stack_queried) == 0:
+        test_util.test_fail("Fail to query resource stack")
 
-	resource = resource_stack_ops.get_resource_from_resource_stack(resource_stack.uuid)
-	print resource
-	if resource == None:
-		test_util.test_fail("Fail to get resource from resource_stack")
+    if resource_stack_queried[0].status == 'Created':
+        if len(vm_queried) == 0 or len(vip_queried) == 0 or len(eip_queried) == 0:
+            test_util.test_fail("Fail to create all resource when resource stack status is Created")
+    elif len(vm_queried) != 0 or len(vip_queried) != 0 or len(eip_queried) != 0:
+        test_util.test_fail("Fail to delete all resource when resource stack status is Rollbacked or Deleted")
+    
+    
+    #3.get resource from resource stack
+    resource = resource_stack_ops.get_resource_from_resource_stack(resource_stack.uuid)
+    if resource == None or len(resource) != 3:
+        test_util.test_fail("Fail to get resource from resource_stack")
+    
+    #4.query event from resource stack
+    cond = res_ops.gen_query_conditions('stackUuid', '=', resource_stack.uuid)
+    event = res_ops.query_event_from_resource_stack(cond)
+    if event == None or len(event) != 6:
+        test_util.test_fail("Fail to get event from resource_stack")
 
-	print resource_stack.uuid
-	cond = res_ops.gen_query_conditions('stackUuid', '=', resource_stack.uuid)
-	event = res_ops.query_event_from_resource_stack(cond)
-	print event
-	if event == None:
-		test_util.test_fail("Fail to get event from resource_stack")
-	test_util.test_pass('Create Stack Template Test Success')
+    #5.delete resource stack
+    resource_stack_ops.delete_resource_stack(resource_stack.uuid)
+
+    cond = res_ops.gen_query_conditions('uuid', '=', resource_stack.uuid)
+    resource_stack_queried = res_ops.query_resource(res_ops.RESOURCE_STACK, cond)
+
+    cond = res_ops.gen_query_conditions('name', '=', 'Create_STACK-VM')
+    vm_queried = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
+
+    cond = res_ops.gen_query_conditions('name', '=', 'Create_STACK-VIP')
+    vip_queried = res_ops.query_resource(res_ops.VIP, cond)
+
+    cond = res_ops.gen_query_conditions('name', '=', 'Create_STACK-EIP')
+    eip_queried = res_ops.query_resource(res_ops.EIP, cond)
+
+
+    if len(resource_stack_queried) != 0 :
+        test_util.test_fail("Fail to delete resource stack") 
+    elif len(vm_queried) != 0 or len(vip_queried) != 0 or len(eip_queried) != 0:
+        test_util.test_fail("Fail to delete resource when resource stack is deleted")   
+   
+
+    test_util.test_pass('Create Resource Stack Test Success')
+
+
+
 
 #Will be called only if exception happens in test().
 def error_cleanup():
-	print "Ignore cleanup"
+    print "Ignore cleanup"
+
