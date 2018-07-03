@@ -149,7 +149,8 @@
           />
           <aliyunNASPrimaryStorage name="$aliyunNASPrimaryStorageName"
             description="Test Aliyun NAS Primary Storage"
-            url="$aliyunNASPrimaryStorageUrl" />
+            url="$aliyunNASPrimaryStorageUrl"
+          />
         </primaryStorages>
 
         <clusters>
