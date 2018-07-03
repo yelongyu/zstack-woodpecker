@@ -1,0 +1,11 @@
+<integrationTest>
+    <suite name="zstackformation" setupCase="suite_setup.py" teardownCase="" repeat="1" parallel="1">
+        <case timeout='600' repeat='1' noparallel='True'>test_create_basic_vm.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_create_eip.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_create_loadbalancer.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_create_portforwarding.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_create_securitygroup.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_create_vpc_network.py</case>
+
+    </suite>
+</integrationTest>
