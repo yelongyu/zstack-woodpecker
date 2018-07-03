@@ -21,9 +21,11 @@ test_stub = test_lib.lib_get_test_stub()
 
 def test():
     global vm, kvm_host 
-    ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0]
-    if ps.type != inventory.LOCAL_STORAGE_TYPE:
-        test_util.test_skip('Skip test on non-localstorage')
+    #ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0]
+    #if ps.type != inventory.LOCAL_STORAGE_TYPE:
+    #    test_util.test_skip('Skip test on non-localstorage')
+    if "test-config-local-ps.xml" != os.path.basename(os.environ.get('WOODPECKER_TEST_CONFIG_FILE')).strip():
+	 test_util.test_skip('Skip test on non-localstoreage')
 #query all hosts and change password
     conditions = res_ops.gen_query_conditions('state', '=', 'Enabled')
     if res_ops.query_resource(res_ops.HOST, conditions):
