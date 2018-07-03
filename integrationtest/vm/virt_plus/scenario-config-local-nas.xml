@@ -1,4 +1,0 @@
-<testConfig>
-    <scenarioConfig>scenario-local-nas.xml</scenarioConfig>
-    <scenarioConfigTemplate>scenario-local-nas.tmpt</scenarioConfigTemplate>
-</testConfig>

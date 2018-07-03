@@ -1,4 +1,5 @@
 import ../scenario.tmpt
+import ./deploy-local-nas.tmpt
 
 vmName0 = test_vm0
 vmName1 = test_vm1
