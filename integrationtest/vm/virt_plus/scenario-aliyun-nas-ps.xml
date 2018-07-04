@@ -56,7 +56,7 @@
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef> -->
             </l3Network>
           </l3Networks>
-          <hostRef>$hostName</hostRef>
+          <hostRef>$hostName2</hostRef>
           <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
         </vm>
       </vms>
