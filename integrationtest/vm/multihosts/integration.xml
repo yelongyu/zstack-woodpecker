@@ -106,11 +106,19 @@
         <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_vr.py::kill_virtualrouter_agent</case>
         <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_vr.py::kill_vrouter_agent</case>
         <case timeout='600' repeat='1'>test_instance_offering_soft_hard.py</case>
+        <case timeout='4000' repeat='1'>clone/test_online_local_full_clone_no_data_volume.py</case>
         <case timeout='4000' repeat='1'>clone/test_online_local_full_clone_one_data_volume.py</case>
         <case timeout='4000' repeat='1'>clone/test_online_local_full_clone_two_data_volume.py</case>
-        <case timeout='4000' repeat='1'>clone/test_online_local_full_clone_no_data_volume.py</case>
         <case timeout='4000' repeat='1'>clone/test_online_local_full_clone_3vms_one_data_volume.py</case>
         <case timeout='4000' repeat='1'>clone/test_online_local_full_clone_3vms_two_data_volume.py</case>
+        <case timeout='4000' repeat='1'>clone/test_stop_local_full_clone_no_data_volume.py</case>
+        <case timeout='4000' repeat='1'>clone/test_stop_local_full_clone_one_data_volume.py</case>
+        <case timeout='4000' repeat='1'>clone/test_stop_local_full_clone_two_data_volume.py</case>
+        <case timeout='4000' repeat='1'>clone/test_stop_local_full_clone_3vms_two_data_volume.py</case>
+        <case timeout='4000' repeat='1'>clone/test_pause_local_full_clone_no_data_volume.py</case>
+        <case timeout='4000' repeat='1'>clone/test_pause_local_full_clone_one_data_volume.py</case>
+        <case timeout='4000' repeat='1'>clone/test_pause_local_full_clone_two_data_volume.py</case>
+        <case timeout='4000' repeat='1'>clone/test_pause_local_full_clone_3vms_two_data_volume.py</case>
         <case timeout='1200' repeat='1'>migrate/test_cold_migrate_change_host_special_password.py</case>
     </suite>
 </integrationTest>
