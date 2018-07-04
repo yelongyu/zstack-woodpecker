@@ -57,7 +57,6 @@
           </l3Networks>
           <hostRef>$hostName</hostRef>
           <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
-          <primaryStorageRef type="local">$localPrimaryStorageName</primaryStorageRef>
         </vm>
       </vms>
     </host>
