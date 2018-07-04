@@ -46,7 +46,7 @@
     </host>
     <host uuid="$hostUuid3">
       <vms>
-        <vm name="$vmName3" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
+        <vm name="$vmName2" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
             <l3Network uuid="$vmL3Uuid">
