@@ -51,8 +51,9 @@
           <l3Networks>
             <l3Network uuid="$vmL3Uuid">
               <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
-              <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
-              <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
+              <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
+              <!-- <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
+              <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef> -->
             </l3Network>
           </l3Networks>
           <hostRef>$hostName</hostRef>
