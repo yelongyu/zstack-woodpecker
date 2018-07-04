@@ -403,6 +403,40 @@ def update_230_iso(vm_ip, tmp_file, iso_230_path, upgrade_script_path):
     else:
        test_util.test_logger('update the 2.3.0 iso success')
 
+def update_232_iso(vm_ip, tmp_file, iso_232_path, upgrade_script_path):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    vm_username = os.environ['imageUsername']
+    vm_password = os.environ['imagePassword']
+    #cmd = '%s "rm -f /opt/zstack_20.iso"' % ssh_cmd
+    #process_result = execute_shell_in_process(cmd, tmp_file)
+    ssh.scp_file(iso_230_path, '/opt/zstack_232.iso', vm_ip, vm_username, vm_password)
+    ssh.scp_file(upgrade_script_path, '/opt/zstack-upgrade', vm_ip, vm_username, vm_password)
+    cmd = '%s "mkdir -p /opt/zstack-dvd"' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
+    cmd = '%s "bash /opt/zstack-upgrade -r /opt/zstack_232.iso"' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
+    if process_result != 0:
+         test_util.test_fail('zstack upgrade iso failed')
+    else:
+       test_util.test_logger('update the 2.3.2 iso success')
+
+def update_240_iso(vm_ip, tmp_file, iso_240_path, upgrade_script_path):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    vm_username = os.environ['imageUsername']
+    vm_password = os.environ['imagePassword']
+    #cmd = '%s "rm -f /opt/zstack_20.iso"' % ssh_cmd
+    #process_result = execute_shell_in_process(cmd, tmp_file)
+    ssh.scp_file(iso_230_path, '/opt/zstack_240.iso', vm_ip, vm_username, vm_password)
+    ssh.scp_file(upgrade_script_path, '/opt/zstack-upgrade', vm_ip, vm_username, vm_password)
+    cmd = '%s "mkdir -p /opt/zstack-dvd"' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
+    cmd = '%s "bash /opt/zstack-upgrade -r /opt/zstack_240.iso"' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
+    if process_result != 0:
+         test_util.test_fail('zstack upgrade iso failed')
+    else:
+       test_util.test_logger('update the 2.4.0 iso success')
+
 def prepare_mevoco_test_env(vm_inv):
     all_in_one_pkg = os.environ['zstackPkg']
     scp_file_to_vm(vm_ip, all_in_one_pkg, '/root/zizhu.bin')
