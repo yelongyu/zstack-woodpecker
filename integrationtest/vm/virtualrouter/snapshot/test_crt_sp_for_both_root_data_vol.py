@@ -12,6 +12,7 @@ import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_vol_header
 import zstackwoodpecker.zstack_test.zstack_test_image as zstack_img_header
 import zstackwoodpecker.header.volume as vol_header
 import apibinding.inventory as inventory
+import zstackwoodpecker.operations.resource_operations as res_ops
 
 import os
 
@@ -19,6 +20,11 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
 def test():
+    primary_storage_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+    for ps in primary_storage_list:
+        if ps.type == "AliyunNAS":
+            test_util.test_skip('The test is not supported by AliyunNAS primary storage.')
+
     test_util.test_dsc('Create original vm')
     vm = test_stub.create_vlan_vm()
     test_obj_dict.add_vm(vm)
