@@ -63,7 +63,7 @@ def test():
     #If set_size != vol_size_after:
     #    test_util.test_fail('Resize Data Volume failed, size = %s' % vol_size_after)
 
-    Test_lib.lib_error_cleanup(test_obj_dict)
+    test_lib.lib_error_cleanup(test_obj_dict)
     test_util.test_pass('Test clone vm with one data volume Success')
 
 #Will be called only if exception happens in test().
