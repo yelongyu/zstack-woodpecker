@@ -25,7 +25,6 @@ def test():
     vm = test_stub.create_vm("test_vm", image_name, l3_name)
     #vm.check()
     test_obj_dict.add_vm(vm)
-    volume.attach(vm)
     vm.suspend()
 
     new_vm = vm.clone(['test_vm_clone_with_on_data_volume'], full=True)[0]
