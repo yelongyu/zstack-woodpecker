@@ -66,6 +66,15 @@
                               memoryCapacity="$instanceOfferingMemory_s"
                               cpuNum="$instanceOfferingCpuNum_s"
             />
+            <virtualRouterOffering name="$virtualRouterOfferingName_s"
+                                   memoryCapacity="$virtualRouterOfferingMemory_s"
+                                   cpuSpeed="$virtualRouterOfferingCpuSpeed_s"
+                                   cpuNum="$virtualRouterOfferingCpuNum_s" isDefault="true">
+                <zoneRef>$zoneName</zoneRef>
+                <managementL3NetworkRef>$l3PublicNetworkName</managementL3NetworkRef>
+                <publicL3NetworkRef>$l3PublicNetworkName</publicL3NetworkRef>
+                <imageRef>$virtualRouterImageName</imageRef>
+            </virtualRouterOffering>
         </instanceOfferings>
 
         <backupStorages>
@@ -75,6 +84,13 @@
                                      password="$sftpBackupStoragePassword"
                                      hostname="$imageStoreBackupStorageHostname"
                                      port="$sftpBackupStoragePort"/>
+
+            <sftpBackupStorage name="$sftpBackupStorageName"
+                               description="Test" url="$sftpBackupStorageUrl"
+                               username="$sftpBackupStorageUsername"
+                               password="$sftpBackupStoragePassword"
+                               hostname="$sftpBackupStorageHostname"/>
+
         </backupStorages>
 
         <images>
@@ -82,11 +98,33 @@
                    url="$imageUrl_s" mediaType="$rootMediaType">
                 <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
             </image>
+            <image name="$imageName_net" description="Test Image2"
+                   format="$rootImageFormat" url="$imageUrl_net"
+                   mediaType="$rootMediaType"
+                   username="$imageUsername" password="$imagePassword">
+                <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
+            </image>
+            <image name="$virtualRouterImageName"
+                   description="virtual router image" format="$rootImageFormat"
+                   username="$vrImageUsername" password="$vrImagePassword"
+                   mediaType="$rootMediaType"
+                   hypervisorType='KVM' url="$virtualRouterImageUrl" system="True">
+                <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+            </image>
         </images>
 
         <diskOfferings>
             <diskOffering name="$rootDiskOfferingName" description="Test"
                           diskSize="$rootDiskOfferingSize"/>
+
+            <diskOffering name="$largeDiskOfferingName"
+                          description="large Disk Offering"
+                          diskSize="$largeDiskOfferingSize"/>
+
+            <diskOffering name="$mediumDiskOfferingName"
+                          description="Medium Disk Offering"
+                          diskSize="$mediumDiskOfferingSize"/>
+
             <diskOffering name="$smallDiskOfferingName"
                           description="Small Disk Offering"
                           diskSize="$smallDiskOfferingSize"/>
@@ -103,28 +141,37 @@
                             <host name="$hostName2" description="Test2" managementIp="$hostIp2"
                                   username="$hostUsername2" password="$hostPassword2" port="$hostPort2"/>
                             <!--<host name="$hostName3" description="Test3" managementIp="$hostIp3"-->
-                                  <!--username="$hostUsername3" password="$hostPassword3"/>-->
+                            <!--username="$hostUsername3" password="$hostPassword3"/>-->
                         </hosts>
                         <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
+                        <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
+
                         <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
+                        <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
+                    </cluster>
+                    <cluster name="$clusterName2" description="Test"
+                             hypervisorType="$clusterHypervisorType">
+                        <hosts>
+                            <!--<host name="$hostName" description="Test" managementIp="$hostIp"-->
+                            <!--username="$hostUsername" password="$hostPassword"/>-->
+                            <!--<host name="$hostName2" description="Test2" managementIp="$hostIp2"-->
+                            <!--username="$hostUsername2" password="$hostPassword2" port="$hostPort2"/>-->
+                            <!--<host name="$hostName3" description="Test3" managementIp="$hostIp3"-->
+                            <!--username="$hostUsername3" password="$hostPassword3"/>-->
+                            <host name="$hostName4" description="Test4" managementIp="$hostIp4"
+                                  username="$hostUsername4" password="$hostPassword4" port="$hostPort4"/>
+                        </hosts>
+                        <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
+                        <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
+
+                        <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
+                        <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
+                        <l2NetworkRef>$l2VlanNetworkName2</l2NetworkRef>
                     </cluster>
                 </clusters>
 
+
                 <l2Networks>
-                    <l2NoVlanNetwork name="$l2ManagementNetworkName" description="Basic L2 for management network"
-                                     physicalInterface="$l2ManagementNetworkInterface">
-                        <l3Networks>
-                            <l3BasicNetwork name="$l3ManagementNetworkName" category="System"
-                                            description="Management L3 Network without Vlan and no special services"
-                                            system="True">
-                                <ipRange name="$ipRangeManagementName" description="Test"
-                                         startIp="$ipRangeManagementStartIp" endIp="$ipRangeManagementEndIp"
-                                         gateway="$ipRangeManagementGateway"
-                                         netmask="$ipRangeManagementNetmask"/>
-                                <dns>$DNSServer</dns>
-                            </l3BasicNetwork>
-                        </l3Networks>
-                    </l2NoVlanNetwork>
 
                     <l2NoVlanNetwork name="$l2PublicNetworkName" description="Test"
                                      physicalInterface="$l2PublicNetworkInterface">
@@ -144,14 +191,69 @@
                     </l2NoVlanNetwork>
 
 
+                    <l2VlanNetwork name="$l2VlanNetworkName1"
+                                   description="guest l2 vlan network1"
+                                   physicalInterface="$l2NetworkPhysicalInterface"
+                                   vlan="$l2Vlan1">
+                        <l3Networks>
+                            <l3BasicNetwork name="$l3VlanNetworkName1"
+                                            description="guest test vlan network with DHCP DNS and SNAT"
+                                            domain_name="$L3VlanNetworkDomainName1">
+                                <ipRange name="$vlanIpRangeName1"
+                                         startIp="$vlanIpRangeStart1"
+                                         endIp="$vlanIpRangeEnd1"
+                                         gateway="$vlanIpRangeGateway1"
+                                         netmask="$vlanIpRangeNetmask1"/>
+                                <dns>$DNSServer</dns>
+                                <networkService provider="Flat Network Service Provider">
+                                    <serviceType>DHCP</serviceType>
+                                    <serviceType>DNS</serviceType>
+                                    <serviceType>Eip</serviceType>
+                                </networkService>
+                                <networkService provider="SecurityGroup">
+                                    <serviceType>SecurityGroup</serviceType>
+                                </networkService>
+                            </l3BasicNetwork>
+                        </l3Networks>
+                    </l2VlanNetwork>
+
+                    <l2VlanNetwork name="$l2VlanNetworkName2"
+                                   description="guest l2 vlan network 2"
+                                   physicalInterface="$l2NetworkPhysicalInterface"
+                                   vlan="$l2Vlan2">
+                        <l3Networks>
+                            <l3BasicNetwork name="$l3VlanNetworkName2"
+                                            description="guest test vlan network 2"
+                                            domain_name="$L3VlanNetworkDomainName2">
+                                <ipRange name="$vlanIpRangeName2" startIp="$vlanIpRangeStart2" endIp="$vlanIpRangeEnd2"
+                                         gateway="$vlanIpRangeGateway2" netmask="$vlanIpRangeNetmask2"/>
+                                <dns>$DNSServer</dns>
+                                <networkService provider="VirtualRouter">
+                                    <serviceType>DHCP</serviceType>
+                                    <serviceType>DNS</serviceType>
+                                    <serviceType>SNAT</serviceType>
+                                    <serviceType>PortForwarding</serviceType>
+                                    <serviceType>Eip</serviceType>
+                                </networkService>
+                                <networkService provider="SecurityGroup">
+                                    <serviceType>SecurityGroup</serviceType>
+                                </networkService>
+                            </l3BasicNetwork>
+                        </l3Networks>
+                    </l2VlanNetwork>
+
                 </l2Networks>
 
                 <primaryStorages>
                     <localPrimaryStorage name="$localPrimaryStorageName"
                                          description="Test Local Primary Storage"
                                          url="$localPrimaryStorageUrl"/>
+                    <nfsPrimaryStorage name="$nfsPrimaryStorageName"
+                                       description="Test" url="$nfsPrimaryStorageUrl"/>
                 </primaryStorages>
                 <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
+                <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+
             </zone>
         </zones>
     </deployerConfig>

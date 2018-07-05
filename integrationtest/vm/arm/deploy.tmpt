@@ -1,16 +1,27 @@
 import ../deploy.tmpt
 
-hostName2 = centos2
+clusterName = arm_cluster
+clusterName2 = x86_cluster
+
+hostName2 = arm_host2
 hostIp2 = 127.1.101.33
 hostUsername2 = root
 hostPassword2 = 1
 hostPort2 = 22
 
-hostName3 = centos3
+hostName3 = arm_host3
 hostIp3 = 127.1.101.34
 hostUsername3 = root
 hostPassword3 = 1
 hostPort3 = 22
+
+hostName4 = centos
+hostIp4 = 127.1.101.1
+hostUsername4 = root
+hostPassword4 = 1
+hostPort4 = 22
+
+l3VlanNetworkName2 = l3VlanNetwork2
 
 imageStoreBackupStorageName = ImageStore
 imageStoreBackupStorageUrl = /home/imageStore
@@ -18,3 +29,10 @@ imageStoreBackupStorageHostname = 127.101.0.32
 
 localPrimaryStorageName = local-ps
 localPrimaryStorageUrl = /home/zstack-local
+
+largeDiskOfferingName = largeDiskOffering
+largeDiskOfferingSize = 1G
+
+mediumDiskOfferingName = mediumDiskOffering
+mediumDiskOfferingSize = 100M
+

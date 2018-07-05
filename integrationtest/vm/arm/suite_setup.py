@@ -20,8 +20,5 @@ def test():
     if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
     deploy_operations.deploy_initial_database(test_lib.deploy_config)
-    delete_policy = test_lib.lib_set_delete_policy('vm', 'Direct')
-    delete_policy = test_lib.lib_set_delete_policy('volume', 'Direct')
-    delete_policy = test_lib.lib_set_delete_policy('image', 'Direct')
     test_util.test_pass('Suite Setup Success')
 
