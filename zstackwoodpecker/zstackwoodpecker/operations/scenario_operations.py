@@ -160,6 +160,10 @@ def get_ref_l2_nic_name(l2network_name, deploy_config):
             for l2vlannetwork in xmlobject.safe_list(zone.l2Networks.l2VlanNetwork):
                 if l2vlannetwork.name_ == l2network_name:
                     return l2vlannetwork.physicalInterface_
+        if hasattr(zone.l2Networks, 'l2VxlanNetwork'):
+            for l2vxlannetwork in xmlobject.safe_list(zone.l2Networks.l2VxlanNetwork):
+                if l2vxlannetwork.name_ == l2network_name:
+                    return 'eth0'
     return None
 
 def get_deploy_host(vm_name, deploy_config):
