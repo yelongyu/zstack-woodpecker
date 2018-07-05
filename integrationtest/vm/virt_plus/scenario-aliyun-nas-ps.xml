@@ -22,7 +22,8 @@
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>-->
             </l3Network>
           </l3Networks>
-	  <primaryStorageRef type="nas">$aliyunNASPrimaryStorageName</primaryStorageRef>
+          <hostRef>$hostName</hostRef>
+          <primaryStorageRef type="nas">$aliyunNASPrimaryStorageName</primaryStorageRef>
         </vm>
       </vms>
     </host>
@@ -40,7 +41,7 @@
             </l3Network>
           </l3Networks>
 	  <nodeRef>$node1Name</nodeRef>
-          <hostRef>$hostName</hostRef>
+          <hostRef>$hostName2</hostRef>
         </vm>
       </vms>
     </host>
@@ -56,7 +57,7 @@
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef> -->
             </l3Network>
           </l3Networks>
-          <hostRef>$hostName2</hostRef>
+          <hostRef>$hostName3</hostRef>
           <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
         </vm>
       </vms>
