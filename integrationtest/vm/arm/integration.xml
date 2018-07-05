@@ -1,0 +1,5 @@
+<integrationTest>
+    <suite name="arm test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
+        <case timeout='300' repeat='1'>test_create_x86_vm.py</case>
+    </suite>
+</integrationTest>
