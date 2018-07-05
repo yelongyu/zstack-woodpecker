@@ -20,6 +20,11 @@ test_obj_dict = test_state.TestStateDict()
 
 def test():
     global test_obj_dict
+    #judge whether BS is imagestore
+    bs = res_ops.query_resource(res_ops.IMAGE_STORE_BACKUP_STORAGE_TYPE)[0]
+    if bs.type != inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+        test_util.test_skip('Skip test on non-imagestore')
+
     volume_creation_option = test_util.VolumeOption()
     test_util.test_dsc('Create volume and check')
     disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
