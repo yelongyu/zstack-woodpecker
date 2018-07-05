@@ -11,6 +11,8 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
+import apibinding.inventory as inventory
+import apibinding.api_actions as api_actions
 import time
 import os
 
@@ -21,7 +23,7 @@ test_obj_dict = test_state.TestStateDict()
 def test():
     global test_obj_dict
     #judge whether BS is imagestore
-    bs = res_ops.query_resource(res_ops.IMAGE_STORE_BACKUP_STORAGE_TYPE)[0]
+    bs = res_ops.query_resource(res_ops.IMAGE_STORE_BACKUP_STORAGE)[0]
     if bs.type != inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
         test_util.test_skip('Skip test on non-imagestore')
 
