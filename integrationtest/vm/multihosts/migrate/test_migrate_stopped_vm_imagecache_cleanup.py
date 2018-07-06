@@ -15,6 +15,7 @@ import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import apibinding.inventory as inventory
+import time
 
 vm = None
 test_stub = test_lib.lib_get_test_stub()
