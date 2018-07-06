@@ -44,6 +44,7 @@ def create_x86_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=Non
         vm_creation_option.set_image_uuid(image_uuid)
         vm_creation_option.set_l3_uuids([l3_net_uuid])
         vm_creation_option.set_cluster_uuid(cluster_uuid)
+        vm_creation_option.set_name("x86_test_vm")
     if volume_uuids:
         if isinstance(volume_uuids, list):
             vm_creation_option.set_data_disk_uuids(volume_uuids)
@@ -65,16 +66,39 @@ def create_x86_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=Non
     vm.create()
     return vm
 
-def create_vm(vm_name, image_name, l3_name):
-    vm_creation_option = test_util.VmOption()
-    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
-    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
-    conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
-    instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
-    vm_creation_option.set_l3_uuids([l3_net_uuid])
-    vm_creation_option.set_image_uuid(image_uuid)
-    vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
-    vm_creation_option.set_name(vm_name)
+def create_arm_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None,
+              image_uuid=None, session_uuid=None):
+    if not vm_creation_option:
+        instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(
+            os.environ.get('instanceOfferingName_s')).uuid
+        image_name = os.environ.get('imageName_s')
+        image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+        l3_name = os.environ.get('l3VlanNetworkName1')
+        l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+        conditions = res_ops.gen_query_conditions('name', '=', 'arm_cluster')
+        cluster_uuid = res_ops.query_resource(res_ops.CLUSTER, conditions)[0].uuid
+        vm_creation_option = test_util.VmOption()
+        vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+        vm_creation_option.set_image_uuid(image_uuid)
+        vm_creation_option.set_l3_uuids([l3_net_uuid])
+        vm_creation_option.set_cluster_uuid(cluster_uuid)
+        vm_creation_option.set_name("arm_test_vm")
+    if volume_uuids:
+        if isinstance(volume_uuids, list):
+            vm_creation_option.set_data_disk_uuids(volume_uuids)
+        else:
+            test_util.test_fail(
+                'volume_uuids type: %s is not "list".' % type(volume_uuids))
+
+    if root_disk_uuid:
+        vm_creation_option.set_root_disk_uuid(root_disk_uuid)
+
+    if image_uuid:
+        vm_creation_option.set_image_uuid(image_uuid)
+
+    if session_uuid:
+        vm_creation_option.set_session_uuid(session_uuid)
+
     vm = test_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
     vm.create()
@@ -84,9 +108,15 @@ def create_vm(vm_name, image_name, l3_name):
 def create_volume(volume_creation_option=None, session_uuid = None):
     if not volume_creation_option:
         disk_offering = test_lib.lib_get_disk_offering_by_name(os.getenv('smallDiskOfferingName'))
+        host_uuid = res_ops.get_resource(res_ops.HOST)[0].uuid
+        cond = res_ops.gen_query_conditions('type','=','LocalStorage')
+        ps_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE,cond)[0].uuid
+        system_tags = ["localStorage::hostUuid::%s"%host_uuid]
         volume_creation_option = test_util.VolumeOption()
         volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
-        volume_creation_option.set_name('vr_test_volume')
+        volume_creation_option.set_name('test_volume')
+        volume_creation_option.set_primary_storage_uuid(ps_uuid)
+        volume_creation_option.set_system_tags(system_tags)
 
     volume_creation_option.set_session_uuid(session_uuid)
     volume = zstack_volume_header.ZstackTestVolume()
