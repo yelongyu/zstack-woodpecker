@@ -92,28 +92,3 @@ def error_cleanup():
     global vm_inv
     os.system('rm -f %s' % tmp_file)
     test_stub.destroy_vm_scenario(vm_inv.uuid)
-        test_util.test_logger('Upgrade zstack to %s' % pkg_num)
-        upgrade_pkg = os.environ.get('zstackPkg_%s' % pkg_num)
-        test_stub.upgrade_zstack(vm_ip, upgrade_pkg, tmp_file) 
-        test_stub.start_mn(vm_ip, tmp_file)
-        test_stub.check_zstack_version(vm_ip, tmp_file, str(pkg_num))
-        #test_stub.check_installation(vm_ip, tmp_file)
-        #pkg_num = pkg_num + 0.1
-
-    test_util.test_dsc('Upgrade zstack to latest') 
-    test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
-    test_stub.upgrade_zstack(vm_ip, zstack_latest_path, tmp_file) 
-    test_stub.start_mn(vm_ip, tmp_file)
-    test_stub.check_mn_running(vm_ip, tmp_file)
-    test_stub.check_zstack_version(vm_ip, tmp_file, zstack_latest_version)
-    test_stub.check_installation(vm_ip, tmp_file)
-
-    os.system('rm -f %s' % tmp_file)
-    test_stub.destroy_vm_scenario(vm_inv.uuid)
-    test_util.test_pass('ZStack upgrade Test Success')
-
-#Will be called only if exception happens in test().
-def error_cleanup():
-    global vm_inv
-    os.system('rm -f %s' % tmp_file)
-    test_stub.destroy_vm_scenario(vm_inv.uuid)
