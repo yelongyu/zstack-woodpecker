@@ -1,6 +1,6 @@
 '''
 
-Test for full clone 3vms with two data volume on local
+Test for full clone vm with windows two data volume 
 
 @author: yetian
 '''
@@ -41,20 +41,20 @@ def test():
     volume = test_stub.create_volume(volume_creation_option)
     volume2 = test_stub.create_volume(volume_creation_option)
     test_obj_dict.add_volume(volume)
-    test_obj_dict.add_volume(volume2)
     volume.check()
     volume2.check()
+    #volume_uuid = volume.volume.uuid
+    #image_name = os.environ.get('imageName_s')
+    #l3_name = os.environ.get('l3PublicNetworkName')
+    vm = test_stub.create_windows_vm()
 
-    image_name = os.environ.get('imageName_s')
-    l3_name = os.environ.get('l3PublicNetworkName')
-    vm = test_stub.create_vm("test_vm", image_name, l3_name)
     #vm.check()
     test_obj_dict.add_vm(vm)
     volume.attach(vm)
     volume2.attach(vm)
     vm.stop()
 
-    new_vm = vm.clone(['test_vm_clone_vm1_with_two_data_volume','test_vm_clone_vm2_with_two_data_volume','test_vm_clone_vm3_with_two_data_volume'], full=True)
+    new_vm = vm.clone(['test_vm_windows_clone_vm1_with_two_data_volume','test_vm_windows_clone_vm2_with_two_data_volume','test_vm_windows_clone_vm3_with_two_data_volume'], full=True)
     for i in new_vm:
     	test_obj_dict.add_vm(i)
     	volumes_number = len(test_lib.lib_get_all_volumes(i.vm))
@@ -64,7 +64,7 @@ def test():
         	test_util.test_logger('Find 3 volumes for [vm:] %s.' % i.vm.uuid)
 
     test_lib.lib_error_cleanup(test_obj_dict)
-    test_util.test_pass('Test full clone 3vms with two data volume Success')
+    test_util.test_pass('Test clone vm with windows two data volume Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():

@@ -23,14 +23,9 @@ test_obj_dict = test_state.TestStateDict()
 def test():
     global test_obj_dict, bs
     #judge whether BS is imagestore
-    #bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
-    #if bs.type != inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
-    #    test_util.test_skip('Skip test on non-imagestore')
-    if  res_ops.query_resource(res_ops.BACKUP_STORAGE):
-        bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)
-        for i in bs:
-           i.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE
-    else:
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)
+    for i in bs:
+        if i.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE
            test_util.test_skip('Skip test on non-imagestore')
 
     volume_creation_option = test_util.VolumeOption()
