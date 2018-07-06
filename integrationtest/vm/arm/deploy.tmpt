@@ -36,3 +36,5 @@ largeDiskOfferingSize = 1G
 mediumDiskOfferingName = mediumDiskOffering
 mediumDiskOfferingSize = 100M
 
+imageName_arm = test_arm_image
+imageUrl_arm = file:///opt/zstack-dvd-altarch/zstack-image-1.4.qcow2

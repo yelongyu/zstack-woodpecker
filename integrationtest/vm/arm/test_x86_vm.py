@@ -18,14 +18,18 @@ def test():
     global test_stub,test_obj_dict
     vm = test_stub.create_x86_vm()
     test_obj_dict.add_vm(vm)
-    vm.suspend()
-    vm.resume()
-    vm.reboot()
 
+    vm.check()
+    vm.suspend()
+    vm.check()
+    vm.resume()
+    vm.check()
+    vm.reboot()
+    vm.check()
     l3_name=os.environ.get('l3VlanNetworkName2')
     l3_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     vm.add_nic(l3_uuid)
-
+    # vm.check()
     cpuNum = 2
     memorySize = 666 * 1024 * 1024
     new_offering = test_lib.lib_create_instance_offering(cpuNum = cpuNum,\
@@ -34,13 +38,14 @@ def test():
 
     vm.stop()
     vm.change_instance_offering(new_offering.uuid)
+    vm.check()
     vm.start()
-
     vm.stop()
+    vm.check()
     vm.reinit()
+    vm.check()
     #time.sleep(5)
-    # vm.check()
-    vm.clean()
+    test_lib.lib_robot_cleanup(test_obj_dict)
     test_util.test_pass('Create VM Test Success')
 
 #Will be called only if exception happens in test().

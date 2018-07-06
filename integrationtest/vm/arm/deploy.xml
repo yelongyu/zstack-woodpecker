@@ -105,6 +105,11 @@
                    username="$imageUsername" password="$imagePassword">
                 <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
             </image>
+            <image name="$imageName_arm" description="Test arm image" format="$rootImageFormat"
+                   url="$imageUrl_arm" mediaType="$rootMediaType"
+                   username="$imageUsername" password="$imagePassword">
+                <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+            </image>
             <image name="$virtualRouterImageName"
                    description="virtual router image" format="$rootImageFormat"
                    username="$vrImageUsername" password="$vrImagePassword"
