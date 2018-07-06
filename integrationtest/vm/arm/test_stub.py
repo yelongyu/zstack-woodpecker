@@ -71,7 +71,7 @@ def create_arm_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=Non
     if not vm_creation_option:
         instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(
             os.environ.get('instanceOfferingName_s')).uuid
-        image_name = os.environ.get('imageName_s')
+        image_name = os.environ.get('imageName_arm')
         image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
         l3_name = os.environ.get('l3VlanNetworkName1')
         l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid

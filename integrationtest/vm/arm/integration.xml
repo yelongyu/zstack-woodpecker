@@ -1,6 +1,7 @@
 <integrationTest>
     <suite name="arm test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
         <case timeout='300' repeat='1'>test_x86_vm.py</case>
+        <case timeout='300' repeat='1'>test_arm_vm.py</case>
         <case timeout='300' repeat='1'>test_volume.py</case>
     </suite>
 </integrationTest>
