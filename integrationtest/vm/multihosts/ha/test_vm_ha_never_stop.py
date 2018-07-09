@@ -38,7 +38,7 @@ def test():
     host_username = os.environ.get('hostUsername')
     host_password = os.environ.get('hostPassword')
 
-    allow_ps_list = [inventory.CEPH_PRIMARY_STORAGE_TYPE, inventory.NFS_PRIMARY_STORAGE_TYPE, 'SharedMountPoint']
+    allow_ps_list = [inventory.CEPH_PRIMARY_STORAGE_TYPE, inventory.NFS_PRIMARY_STORAGE_TYPE, 'SharedMountPoint', 'AliyunNAS']
     test_lib.skip_test_when_ps_type_not_in_list(allow_ps_list)
 
     if test_lib.lib_get_ha_enable() != 'true':

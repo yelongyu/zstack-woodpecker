@@ -41,7 +41,7 @@ def test():
     global storagechecker_timeout
   
     test_lib.lib_skip_if_ps_num_is_not_eq_number(1)
-    allow_ps_list = [inventory.CEPH_PRIMARY_STORAGE_TYPE, inventory.NFS_PRIMARY_STORAGE_TYPE, 'SharedMountPoint', inventory.FUSIONSTOR_PRIMARY_STORAGE_TYPE]
+    allow_ps_list = [inventory.CEPH_PRIMARY_STORAGE_TYPE, inventory.NFS_PRIMARY_STORAGE_TYPE, 'SharedMountPoint', 'AliyunNAS', inventory.FUSIONSTOR_PRIMARY_STORAGE_TYPE]
     test_lib.skip_test_when_ps_type_not_in_list(allow_ps_list)
 
     test_lib.lib_cur_env_is_not_scenario()

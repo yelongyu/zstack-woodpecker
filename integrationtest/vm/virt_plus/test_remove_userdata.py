@@ -46,9 +46,13 @@ def test():
     else:
         test_util.test_fail('Failed to get system tags.')
 
-    system_tag_uuid = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0].uuid
+    sys_tags = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
+    system_tag_uuid = [tag.uuid for tag in sys_tags if 'userdata' in tag.tag][0]
+#     system_tag_uuid = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0].uuid
     tag_ops.delete_tag(system_tag_uuid)
-    system_tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
+#     system_tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
+    system_tag_after = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
+    system_tag = [tag for tag in system_tag_after if 'userdata' in tag.tag]
     if system_tag == []:
         test_util.test_logger ('Success delete system tags.')
     else:
