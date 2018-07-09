@@ -31,8 +31,8 @@ def test():
     #judge whether PS is SharedBlock
     ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
     for i in ps:
-        if i.type == 'SharedBlock':
-            test_util.test_skip('Skip test on SharedBlock PS')
+        if i.type in ['SharedBlock', 'AliyunNAS']:
+            test_util.test_skip('Skip test on SharedBlock and PS')
 
     image_name = os.environ.get('imageName_s')
     l3_name = os.environ.get('l3PublicNetworkName')
