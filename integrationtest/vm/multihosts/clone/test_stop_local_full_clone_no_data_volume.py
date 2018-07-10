@@ -34,6 +34,12 @@ def test():
     #    if i.type == 'SharedBlock':
     #        test_util.test_skip('Skip test on SharedBlock PS')
 
+    #Skip for AliyunNAS PS
+    ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+    for i in ps:
+        if i.type == 'AliyunNAS':
+            test_util.test_skip('Skip test on AliyunNAS PS')
+
     image_name = os.environ.get('imageName_s')
     l3_name = os.environ.get('l3PublicNetworkName')
     vm = test_stub.create_vm("test_vm", image_name, l3_name)

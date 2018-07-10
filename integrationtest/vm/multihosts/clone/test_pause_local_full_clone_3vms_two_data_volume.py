@@ -25,8 +25,14 @@ def test():
     #judge whether BS is imagestore
     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)
     for i in bs:
-        if i.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE
+        if i.type != inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
            test_util.test_skip('Skip test on non-imagestore')
+
+    #Skip for AliyunNAS PS
+    ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+    for i in ps:
+        if i.type == 'AliyunNAS':
+            test_util.test_skip('Skip test on SharedBlock and AliyunNAS PS')
 
     volume_creation_option = test_util.VolumeOption()
     test_util.test_dsc('Create volume and check')
