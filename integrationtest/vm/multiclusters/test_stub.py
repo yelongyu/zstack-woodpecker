@@ -223,7 +223,7 @@ class DataMigration(object):
         if bs.type.lower() == 'ceph':
             bs_mon_ip = bs.mons[0].monAddr
             os.environ['cephBackupStorageMonUrls'] = 'root:password@%s' % bs_mon_ip
-        self._image.check()
+#         self._image.check()
 
     def get_ps_candidate(self, vol_uuid=None):
         if not vol_uuid:
