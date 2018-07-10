@@ -85,6 +85,7 @@ MONITOR_TRIGGER_ACTION = 'MonitorTriggerAction'
 PXE_SERVER = 'PxeServer'
 CHASSIS = 'Chassis'
 HWINFO = 'HardwareInfo'
+BAREMETAL_INS = 'BaremetalInstance'
 LONGJOB = 'LongJob'
 ALARM = 'Alarm'
 EVENT_SUBSCRIPTION = 'EventSubscription'
@@ -558,6 +559,8 @@ def _gen_query_action(resource, condition=None):
         action = api_actions.QueryBaremetalChassisAction()
     elif resource == HWINFO:
         action = api_actions.QueryBaremetalHardwareInfoAction()
+    elif resource == BAREMETAL_INS:
+        action = api_actions.QueryBaremetalInstanceAction()
     elif resource == LONGJOB:
         action = api_actions.QueryLongJobAction()
     elif resource == ALARM:

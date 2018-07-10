@@ -23,7 +23,6 @@ def create_pxe(pxe_option, session_uuid=None):
         action.name = 'pxe_default_name'
     else:
         action.name = name
-
     action.dhcpInterface = pxe_option.get_dhcp_interface()
     action.dhcpRangeBegin = pxe_option.get_dhcp_range_begin()
     action.dhcpRangeEnd = pxe_option.get_dhcp_range_end()
@@ -31,13 +30,13 @@ def create_pxe(pxe_option, session_uuid=None):
     action.description = pxe_option.get_description()
     action.systemTags = pxe_option.get_system_tags()
     action.userTags = pxe_option.get_user_tags()
-
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Add PXE Server [uuid:] %s [name:] %s' % \
                                         (evt.inventory.uuid, action.name))
     return evt.inventory
 
 def create_hostcfg(hostcfg_option, session_uuid=None):
+    '''The function is dropped'''
     action = api_actions.CreateBaremetalHostCfgAction()
     action.timeout = 30000
     action.chassisUuid = hostcfg_option.get_chassis_uuid()
@@ -60,16 +59,15 @@ def delete_pxe(pxe_uuid, delete_mode="Permissive", session_uuid=None):
     action.deleteMode = delete_mode
     test_util.action_logger('Delete PXE [uuid:] %s' % pxe_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventory
+    return evt
 
-def stop_pxe(pxe_uuid, force=None, session_uuid=None):
+def stop_pxe(pxe_uuid, session_uuid=None):
     action = api_actions.StopBaremetalPxeServerAction()
     action.uuid = pxe_uuid
-    action.type = force
     action.timeout = 30000
     test_util.action_logger('Stop PXE [uuid:] %s' % pxe_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventory
+    return evt
 
 def start_pxe(pxe_uuid, session_uuid=None):
     action = api_actions.StartBaremetalPxeServerAction()
@@ -77,9 +75,10 @@ def start_pxe(pxe_uuid, session_uuid=None):
     action.timeout = 30000
     test_util.action_logger('Start PXE [uuid:] %s' % pxe_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventory
+    return evt
 
-def update_pxe(pxe_uuid, begin=None, end=None, netmask=None, interface=None, session_uuid=None):
+def update_pxe(pxe_uuid, begin=None, end=None, netmask=None, interface=None, \
+        name=None, description=None, session_uuid=None):
     action = api_actions.UpdateBaremetalPxeServerAction()
     action.uuid = pxe_uuid
     if begin:
@@ -90,6 +89,10 @@ def update_pxe(pxe_uuid, begin=None, end=None, netmask=None, interface=None, ses
         action.dhcpRangeNetmask = netmask
     if interface:
         action.dhcpInterface = interface
+    if name:
+        action.name = name
+    if description:
+        action.description = description
     action.timeout = 240000
     test_util.action_logger('Update PXE [uuid:] %s' % pxe_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
@@ -107,8 +110,7 @@ def create_chassis(chassis_option, session_uuid=None):
     action.ipmiAddress = chassis_option.get_ipmi_address()
     action.ipmiUsername = chassis_option.get_ipmi_username()
     action.ipmiPassword = chassis_option.get_ipmi_password()
-    if chassis_option.get_ipmi_port():
-        action.ipmiPort = chassis_option.get_ipmi_port()
+    action.ipmiPort = chassis_option.get_ipmi_port()
     if chassis_option.get_description():
         action.description = chassis_option.get_description()
     action.systemTags = chassis_option.get_system_tags()
@@ -119,7 +121,7 @@ def create_chassis(chassis_option, session_uuid=None):
                             (evt.inventory.uuid, action.name))
     return evt.inventory
 
-def update_chassis(chassis_uuid, address=None, username=None, password=None, port=None, name=None session_uuid=None):
+def update_chassis(chassis_uuid, address=None, username=None, password=None, port=None, name=None, description=None, session_uuid=None):
     action = api_actions.UpdateBaremetalChassisAction()
     action.uuid = chassis_uuid
     action.timeout = 30000
@@ -133,6 +135,8 @@ def update_chassis(chassis_uuid, address=None, username=None, password=None, por
         action.ipmiPort = port
     if name:
         action.name = name
+    if description:
+        action.description = description
     test_util.action_logger('Update Chassis [uuid:] %s' % chassis_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
@@ -144,9 +148,10 @@ def delete_chassis(chassis_uuid, delete_mode="Permissive", session_uuid=None):
     action.timeout = 30000
     test_util.action_logger('Delete Chassis [uuid:] %s' % chassis_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventory
+    return evt
 
 def provision_baremetal(chassis_uuid, session_uuid=None):
+    '''The function is dropped'''
     action = api_actions.ProvisionBaremetalHostAction()
     action.chassisUuid = chassis_uuid
     action.timeout = 30000
@@ -155,6 +160,7 @@ def provision_baremetal(chassis_uuid, session_uuid=None):
     return evt
 
 def power_on_baremetal(chassis_uuid, session_uuid=None):
+    '''The function is dropped'''
     action = api_actions.PowerOnBaremetalHostAction()
     action.chassisUuid = chassis_uuid
     action.timeout = 30000
@@ -163,6 +169,7 @@ def power_on_baremetal(chassis_uuid, session_uuid=None):
     return evt
 
 def power_off_baremetal(chassis_uuid, session_uuid=None):
+    '''The function is dropped'''
     action = api_actions.PowerOffBaremetalHostAction()
     action.chassisUuid = chassis_uuid
     action.timeout = 30000
@@ -171,6 +178,7 @@ def power_off_baremetal(chassis_uuid, session_uuid=None):
     return evt
 
 def power_reset_baremetal(chassis_uuid, session_uuid=None):
+    '''The function is dropped'''
     action = api_actions.PowerResetBaremetalHostAction()
     action.chassisUuid = chassis_uuid
     action.timeout = 30000
@@ -179,6 +187,7 @@ def power_reset_baremetal(chassis_uuid, session_uuid=None):
     return evt
 
 def get_power_status(chassis_uuid, session_uuid=None):
+    '''The function is dropped'''
     action = api_actions.PowerStatusBaremetalHostAction()
     action.chassisUuid = chassis_uuid
     action.timeout = 30000
@@ -186,8 +195,15 @@ def get_power_status(chassis_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
+def change_baremetal_chassis_state(chassis_uuid, state_event, session_uuid=None):
+    action = api_actions.ChangeBaremetalChassisStateAction()
+    action.uuid = chassis_uuid
+    action.stateEvent = state_event
+    test_util.action_logger('Change State of Chassis [uuid:] %s' % chassis_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
 def create_baremetal_instance(baremetal_ins_option, session_uuid=None):
-    chassis_uuid, image_uuid, password, name=None, description=None, nic_cfgs=None, strategy=None, resourceUuid=None,)
     action = api_actions.CreateBaremetalInstanceAction()
     if baremetal_ins_option.get_name():
         action.name = baremetal_ins_option.get_name()
@@ -201,6 +217,7 @@ def create_baremetal_instance(baremetal_ins_option, session_uuid=None):
         action.nicCfgs = baremetal_ins_option.get_nic_cfgs()
     if baremetal_ins_option.get_nic_cfgs():
         action.strategy = baremetal_ins_option.get_strategy()
+    action.description = baremetal_ins_option.get_description()
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.action_logger('Create Baremetal Instance [uuid:] %s [name:] %s' % (evt.inventory.uuid, evt.inventory.name)) 
     return evt.inventory 
@@ -212,7 +229,7 @@ def destory_baremetal_instance(uuid, delete_mode="Permissive", session_uuid=None
     action.timeout = 30000
     test_util.action_logger('Destory Baremetal Instance [uuid:] %s' % uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    return evt.inventory
+    return evt
 
 def expunge_baremetal_instance(uuid, session_uuid=None):
     action = api_actions.ExpungeBaremetalInstanceAction()
@@ -220,7 +237,7 @@ def expunge_baremetal_instance(uuid, session_uuid=None):
     action.timeout = 30000
     test_util.action_logger('Expunge Baremetal Instance [uuid:] %s' % uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventory
+    return evt
 
 def start_baremetal_instance(uuid, pxe_boot=None, session_uuid=None):
     action = api_actions.StartBaremetalInstanceAction()
@@ -230,7 +247,7 @@ def start_baremetal_instance(uuid, pxe_boot=None, session_uuid=None):
         action.pxeBoot = pxe_boot
     test_util.action_logger('Start Baremetal Instance [uuid:] %s' % uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt
+    return evt.inventory
 
 def stop_baremetal_instance(uuid, stop_type=None, session_uuid=None):
     action = api_actions.StopBaremetalInstanceAction()
@@ -240,7 +257,7 @@ def stop_baremetal_instance(uuid, stop_type=None, session_uuid=None):
         action.type = stop_type
     test_util.action_logger('Stop Baremetal Instance [uuid:] %s' % uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt
+    return evt.inventory
 
 def reboot_baremetal_instance(uuid, session_uuid=None):
     action = api_actions.RebootBaremetalInstanceAction()
@@ -248,7 +265,7 @@ def reboot_baremetal_instance(uuid, session_uuid=None):
     action.timeout = 30000
     test_util.action_logger('Reboot Baremetal Instance [uuid:] %s' % uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt
+    return evt.inventory
 
 def recover_baremetal_instance(uuid, session_uuid=None):
     action = api_actions.RecoverBaremetalInstanceAction()
@@ -256,7 +273,7 @@ def recover_baremetal_instance(uuid, session_uuid=None):
     action.timeout = 30000
     test_util.action_logger('Recover Baremetal Instance [uuid:] %s' % uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt
+    return evt.inventory
 
 def request_baremetal_console_access(baremetal_instance_uuid, session_uuid=None):
     action = api_actions.RequestBaremetalConsoleAccessAction()
@@ -264,7 +281,7 @@ def request_baremetal_console_access(baremetal_instance_uuid, session_uuid=None)
     action.timeout = 30000
     test_util.action_logger('Request Baremetal Instance Console Access [uuid:] %s' % uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt
+    return evt.inventory
 
 def update_baremetal_instance(uuid, name=None, description=None, password=None, platform=None, session_uuid=None):
     action = api_actions.UpdateBaremetalInstanceAction()
@@ -279,5 +296,5 @@ def update_baremetal_instance(uuid, name=None, description=None, password=None, 
         action.platform = platform
     test_util.action_logger('Update Baremetal Instance [uuid:] %s' % uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt
+    return evt.inventory
 

@@ -1149,6 +1149,7 @@ class ChassisOption(DataOption):
         self.ipmiUsername = None
         self.ipmiPassword = None
         self.ipmiPort = 623
+        self.clusterUuid = None
         super(ChassisOption, self).__init__()
 
     def set_ipmi_address(self, ipmiAddress):
@@ -1174,6 +1175,51 @@ class ChassisOption(DataOption):
 
     def get_ipmi_port(self):
         return self.ipmiPort
+
+    def set_cluster_uuid(self, clusterUuid):
+        self.clusterUuid = clusterUuid
+
+    def get_cluster_uuid(self):
+        return self.clusterUuid
+
+class BaremetalInstanceOption(DataOption):
+    def __init__(self):
+        self.chassisUuid = None
+        self.imageUuid = None
+        self.password = 'password'
+        self.nicCfgs = None
+        self.strategy = None
+        super(BaremetalInstanceOption, self).__init__()
+
+    def set_chassis_uuid(self, chassisUuid):
+        self.chassisUuid = chassisUuid
+
+    def get_chassis_uuid(self):
+        return self.chassisUuid
+
+    def set_image_uuid(self, imageUuid):
+        self.imageUuid = imageUuid
+
+    def get_image_uuid(self):
+        return self.imageUuid
+
+    def set_password(self, password):
+        self.password = password
+
+    def get_password(self):
+        return self.password
+
+    def set_nic_cfgs(self, nicCfgs):
+        self.nicCfgs = nicCfgs
+
+    def get_nic_cfgs(self):
+        return self.nicCfgs
+
+    def set_strategy(self, strategy):
+        relf.strategy = strategy
+
+    def get_strategy(self):
+        return self.strategy
 
 class StackTemplateOption(DataOption):
     def __init__(self):
