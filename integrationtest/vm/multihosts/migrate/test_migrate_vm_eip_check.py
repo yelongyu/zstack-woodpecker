@@ -47,6 +47,8 @@ def test():
     for _ in xrange(300):
         if not test_lib.lib_check_directly_ping(vip.get_vip().ip):
             test_util.test_fail('expected to be able to ping vip while it fail')
+        time.sleep(1)
+
     vm.destroy()
     test_obj_dict.rm_vm(vm)
 
