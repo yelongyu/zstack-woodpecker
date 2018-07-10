@@ -46,10 +46,10 @@ def test():
 	                                                       threshold_3, namespace,
 	                                                       disk_all_write_bytes,
 	                                                       name='disk_all_write_bytes',
-	                                                       repeat_interval=20,
+	                                                       repeat_interval=15,
 	                                                       actions=actions).uuid
 	image_name = os.environ.get('imageName_s')
-	l3_name = os.environ.get('l3VlanNetworkName1')
+	l3_name = os.environ.get('l3PublicNetworkName')
 	vm = test_stub.create_vm('test_vm', image_name, l3_name)
 
 	# wait for send email
