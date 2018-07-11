@@ -10,6 +10,8 @@ import os
 import apibinding.api_actions as api_actions
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
+import zstackwoodpecker.operations.zone_operations as zone_ops
+import zstackwoodpecker.operations.iam2_ticket_operations as ticket_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm
 import zstackwoodpecker.zstack_test.zstack_test_volume as test_volume
 import zstackwoodpecker.operations.image_operations as img_ops
@@ -188,6 +190,39 @@ def create_vm_with_previous_iso(vm_creation_option=None, session_uuid=None):
     return create_vm(vm_creation_option, None, root_disk_uuid, image_uuid,
                      session_uuid=session_uuid)
 
+def create_zone(name=None,description=None,session_uuid=None):
+    zone_create_option = test_util.ZoneOption()
+    zone_create_option.set_name('new_test_zone')
+    zone_create_option.set_description('a new zone for deleted test')
+    if name:
+        zone_create_option.set_name(name)
+    if description:
+        zone_create_option.set_description(description)
+    zone_inv = zone_ops.create_zone(zone_create_option,session_uuid)
+    return zone_inv
+
+def create_vm_ticket(virtual_id_uuid , project_uuid , session_uuid , name=None , request_name=None ,execute_times=None,instance_offering_uuid=None , image_uuid = None, l3_network_uuid=None ):
+    if not instance_offering_uuid:
+        conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+        instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+    if not image_uuid:
+        image_name = os.environ.get('imageName_s')
+        image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    if not l3_network_uuid:
+        l3_name = os.environ.get('l3VlanNetworkName1')
+        l3_network_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    api_body = {"name": "vm", "instanceOfferingUuid": instance_offering_uuid, "imageUuid": image_uuid,
+                "l3NetworkUuids": [l3_network_uuid]}
+    api_name = 'org.zstack.header.vm.APICreateVmInstanceMsg'
+    if not execute_times:
+        execute_times = 1
+    if not name:
+        name = 'ticket_for_test'
+    if not request_name:
+        request_name = 'create-vm-ticket'
+    account_system_type = 'iam2'
+    ticket = ticket_ops.create_ticket(name, request_name, api_body, api_name, execute_times, account_system_type,virtual_id_uuid, project_uuid, session_uuid=session_uuid)
+    return ticket
 
 def share_admin_resource(account_uuid_list):
     instance_offerings = res_ops.get_resource(res_ops.INSTANCE_OFFERING)
