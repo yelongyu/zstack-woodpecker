@@ -564,7 +564,11 @@ def send_boundary_email(boundary_words,smtp_server,from_addr,password,to_addr):
     server.quit()
 
 def get_boundary_words():
-    import time
+    import time,random
     time_stamp=str(int(time.time()))
+    boundary_words_list = []
     boundary_words='this is a boundary message,with time stamp:%s'%time_stamp
-    return boundary_words
+    boundary_words_02='this message is used to make a distinction between new email and old email,with time stamp %s'%time_stamp
+    boundary_words_list.append(boundary_words)
+    boundary_words_list.append(boundary_words_02)
+    return random.choice(boundary_words_list)

@@ -41,14 +41,14 @@ def test():
                                       repeat_interval=repeat_interval).uuid
 
     # Create volume
-    for i in range(threshold):
+    for i in range(threshold+1):
         volume = test_stub.create_volume()
         test_dict.add_volume(volume)
 
     time.sleep(20)
     cond = res_ops.gen_query_conditions('uuid','=',alarm_uuid)
-    alarm_inv = res_ops.query_resource(res_ops.ALARM)[0]
-    if alarm_inv.state != 'Alarm':
+    alarm_inv = res_ops.query_resource(res_ops.ALARM,cond)[0]
+    if alarm_inv.status != 'Alarm':
         test_util.test_fail("Alarm did't change status to alarm.Test fail")
 
     test_lib.lib_robot_cleanup(test_dict)

@@ -1076,7 +1076,7 @@ class MulISO(object):
         l3_uuid = test_lib.lib_get_l3s_uuid_by_vm(self.vm1.get_vm())[0]
         self.add_route_to_bridge(l3_uuid)
         
-        test_lib.lib_wait_target_up(vm_ip, '23', 300)
+        test_lib.lib_wait_target_up(vm_ip, '23', 1200)
         vm_username = os.environ.get('winImageUsername')
         vm_password = os.environ.get('winImagePassword')
         
