@@ -16,6 +16,10 @@ test_obj_dict = test_state.TestStateDict()
 
 def test():
    test_util.test_dsc('Test Change VM Image Function')
+   primary_storage_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+   for ps in primary_storage_list:
+       if ps.type == "SharedBlock":
+           test_util.test_skip('SharedBlock primary storage does not support overProvision')
    global vm
    #set overProvisioning.primaryStorage's value as 10
    con_ops.change_global_config('mevoco','overProvisioning.primaryStorage',10)
