@@ -30,6 +30,15 @@ import time
 import re
 import random
 
+def remove_all_vpc_vrouter():
+    cond = res_ops.gen_query_conditions('applianceVmType', '=', 'vpcvrouter')
+    vr_vm_list = res_ops.query_resource(res_ops.APPLIANCE_VM, cond)
+    if vr_vm_list:
+        for vr_vm in vr_vm_list:
+            nic_uuid_list = [nic.uuid for nic in vr_vm.vmNics if nic.metaData == '4']
+            for nic_uuid in nic_uuid_list:
+                net_ops.detach_l3(nic_uuid)
+            vm_ops.destroy_vm(vr_vm.uuid)
 
 def share_admin_resource_include_vxlan_pool(account_uuid_list, session_uuid=None):
     instance_offerings = res_ops.get_resource(res_ops.INSTANCE_OFFERING)
@@ -452,10 +461,18 @@ def create_vpc_vrouter(vr_name='test_vpc'):
     vr_inv =  vpc_ops.create_vpc_vrouter(name=vr_name, virtualrouter_offering_uuid=vr_offering.uuid)
     return ZstackTestVR(vr_inv)
 
+def query_vpc_vrouter(vr_name):
+    conf = res_ops.gen_query_conditions('name', '=', vr_name)
+    vr_list = res_ops.query_resource(res_ops.APPLIANCE_VM, conf)
+    if vr_list:
+        return ZstackTestVR(vr_list[0])
 
 def attach_l3_to_vpc_vr(vpc_vr, l3_list):
     for l3 in l3_list:
         vpc_vr.add_nic(l3.uuid)
+
+def attach_l3_to_vpc_vr_by_uuid(vpc_vr, l3_uuid):
+    vpc_vr.add_nic(l3_uuid)
 
 class ZstackTestVR(vm_header.TestVm):
     def __init__(self, vr_inv):
