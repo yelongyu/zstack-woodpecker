@@ -204,11 +204,6 @@ def test():
     global test_obj_dict, VM_RUNGGING_OPS, VM_STOPPED_OPS, VM_STATE_OPS, backup
 
     ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0]
-    if ps.type == inventory.LOCAL_STORAGE_TYPE:
-        VM_RUNGGING_OPS.append("VM_TEST_MIGRATE")
-        VM_STOPPED_OPS.append("VM_TEST_MIGRATE")
-    else:
-        VM_RUNGGING_OPS.append("VM_TEST_MIGRATE")
 
     vm_name = "test_vm"
     cond = res_ops.gen_query_conditions("system", '=', "false")
@@ -219,42 +214,33 @@ def test():
     l3_name = res_ops.query_resource(res_ops.L3_NETWORK,cond)[0].name
     vm = test_stub.create_vm(vm_name, img_name, l3_name)
 
-    i = 0
-    while True:
-        i += 1
-	if i == 10:
-            vm_op_test(vm, "VM_TEST_STOP")
-	    vm_op_test(vm, "VM_TEST_RESET")
-            vm.start()
-            time.sleep(60)
-            vm.check()
-	    i = 0
+    path = "VM_TEST_REBOOT --> VM_TEST_MIGRATE --> VM_TEST_BACKUP --> VM_TEST_NONE --> VM_TEST_CREATE_IMG --> VM_TEST_BACKUP"
+    path_array = path.split(" --> ")
 
-        vm_op_test(vm, random.choice(VM_STATE_OPS))
-        VM_OPS = VM_STATE_OPS
-        if vm.state == "Running":
-            VM_OPS = VM_RUNGGING_OPS
-        elif vm.state == "Stopped":
-            VM_OPS = VM_STOPPED_OPS
-
-        vm_op_test(vm, random.choice(VM_OPS))
+    for i in path_array:
+        if i == "VM_TEST_MIGRATE" and ps.type == inventory.LOCAL_STORAGE_TYPE:
+            vm.stop()
+            vm_op_test(vm, i)
+            continue
 
         if vm.state == "Stopped":
             vm.start()
 
-	if test_lib.lib_is_vm_l3_has_vr(vm.vm):
-	    test_lib.TestHarness = test_lib.TestHarnessVR
-	time.sleep(60)
-	cmd = "echo 111 > /root/" + str(int(time.time()))
-	test_lib.lib_execute_command_in_vm(vm.vm,cmd)
-        vm.suspend()
-        # create_snapshot/backup
-        vm_op_test(vm, "VM_TEST_BACKUP")
-        # compare vm & image created by backup
-        compare(ps, vm, backup)
-
-        vm.resume()
-
+        if i == "VM_TEST_BACKUP":
+            if test_lib.lib_is_vm_l3_has_vr(vm.vm):
+                test_lib.TestHarness = test_lib.TestHarnessVR
+            time.sleep(60)
+            cmd = "echo 111 > /root/" + str(int(time.time()))
+            test_lib.lib_execute_command_in_vm(vm.vm,cmd)
+            vm.suspend()
+            # create_snapshot/backup
+            vm_op_test(vm, "VM_TEST_BACKUP")
+            # compare vm & image created by backup
+            compare(ps, vm, backup)
+            vm.resume()
+        else:
+            vm_op_test(vm, i)
+    test_util.test_pass("path: " + path + " test pass")
 
 def error_cleanup():
     global test_obj_dict

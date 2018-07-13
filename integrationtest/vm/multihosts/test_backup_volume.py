@@ -170,7 +170,7 @@ def test():
             test_lib.TestHarness = test_lib.TestHarnessVR
         time.sleep(60)
         
-        cmd = "dd if=/dev/random of=/dev/vdb bs=512k count=1" 
+        cmd = "dd if=/dev/urandom of=/dev/vdb bs=512k count=1" 
 	test_lib.lib_execute_command_in_vm(vm.vm,cmd)
 
         vm.suspend()
