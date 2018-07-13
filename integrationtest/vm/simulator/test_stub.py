@@ -249,6 +249,12 @@ def share_admin_resource(account_uuid_list):
     acc_ops.share_resources(
         account_uuid_list, [l3net_uuid, root_disk_uuid, data_disk_uuid])
 
+def check_resource_not_exist(uuid,resource_type):
+    conditions = res_ops.gen_query_conditions('uuid', '=', uuid)
+    resource_inv = res_ops.query_resource(resource_type,conditions)
+    if resource_inv:
+        test_util.test_fail("resource [%s] is still exist,uuid [%s]"%(resource_type,uuid))
+
 
 def check_libvirt_host_uuid():
     libvirt_dir = "/etc/libvirt/libvirtd.conf"
