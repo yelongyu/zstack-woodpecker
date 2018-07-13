@@ -119,6 +119,8 @@ EVENT_FROM_STACK = "EventFromStack"
 TICKET = 'Ticket'
 TICKET_HISTORY = 'TicketHistory'
 QUOTA = 'Quota'
+CERTIFICATE = 'certificate'
+
 
 def find_item_by_uuid(inventories, uuid):
     for item in inventories:
@@ -627,6 +629,8 @@ def _gen_query_action(resource, condition=None):
         action = api_actions.QueryTicketHistoryAction()
     elif resource == QUOTA:
         action = api_actions.QueryQuotaAction()
+    elif resource == CERTIFICATE:
+        action = api_actions.QueryCertificateAction()
 
     return action
 
