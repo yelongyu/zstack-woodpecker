@@ -140,6 +140,15 @@ def change_iam2_project_state(uuid, state_event, session_uuid=None):
     return evt.inventory
 
 
+def recover_iam2_project(uuid,session_uuid=None):
+    action = api_actions.RecoverIAM2ProjectAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    test_util.action_logger('recover iam2 project : %s'%uuid)
+    evt = account_operations.execute_action_with_session(action , session_uuid)
+    return  evt
+
+
 def change_iam2_virtual_id_group_state(uuid, state_event, session_uuid=None):
     action = api_actions.ChangeIAM2VirtualIDGroupStateAction()
     action.timeout = 30000
