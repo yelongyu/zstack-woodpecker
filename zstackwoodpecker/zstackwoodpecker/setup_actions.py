@@ -807,9 +807,13 @@ default one' % self.zstack_properties)
             
     def _enable_jacoco_agent(self):
         for node in self.nodes:
-            if os.path.exists('/home/%s/jacocoagent.jar' % node.ip_):
-                fd_r = open('/home/%s/zstack-utility/zstackctl/zstackctl/ctl.py' % node.ip_, 'r')
-                fd_w = open('/var/lib/zstack/virtualenv/zstackctl/lib/python2.7/site-packages/zstackctl/ctl.py', 'w')
+            import commands
+            status, woodpecker_ip = commands.getstatusoutput("ip addr show zsn0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'")
+            src_file = '/home/%s/zstack-utility/zstackctl/zstackctl/ctl.py' % woodpecker_ip
+            dst_file = '/var/lib/zstack/virtualenv/zstackctl/lib/python2.7/site-packages/zstackctl/ctl.py'
+            if os.path.exists('/home/%s/jacocoagent.jar' % woodpecker_ip):
+                fd_r = open(src_file, 'r')
+                fd_w = open(dst_file, 'w')
                 ctl_content = '' 
                 for line in fd_r:
                     if line.find('with open(setenv_path') != -1:
@@ -819,19 +823,23 @@ default one' % self.zstack_properties)
                 fd_r.close()
                 fd_w.write(ctl_content)
                 fd_w.close()
+                ssh.scp_file(dst_file, dst_file, node.ip_, node.username_, node.password_)
                 print 'Inject jacoco agent into ctl.py'
             else:
                 print 'Here is no jacocoagent.jar, skip to inject jacoco agent'
 
     def _enable_jacoco_dump(self):
+        import commands
+        status, woodpecker_ip = commands.getstatusoutput("ip addr show zsn0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'")
         for node in self.nodes:
             import subprocess
             dump_str = 'java -jar /home/%s/jacococli.jar dump --address %s --port 6300 --reset\
-                --destfile /home/%s/zstack-woodpecker/dailytest/config_xml/code_coverage.exec' %(node.ip_, node.ip_, node.ip_)
+                --destfile /home/%s/zstack-woodpecker/dailytest/config_xml/code_coverage.exec' %(woodpecker_ip, node.ip_, woodpecker_ip)
             cmd = 'while true; do sleep 15; %s; done' %dump_str
-            #if os.system('ps -ef|grep jacococli|grep while'): 
-            subprocess.Popen(cmd, shell=True)
-            print 'jacoco dump starting'
+            (status, output) = commands.getstatusoutput('ps -ef|grep jacococli|grep while') 
+            if status == 0 and output.find('while true') == -1:
+                subprocess.Popen(cmd, shell=True)
+            print 'jacoco dump started'
 
     def execute_plan_without_deploy_test_agent(self):
         self._enable_jacoco_agent()

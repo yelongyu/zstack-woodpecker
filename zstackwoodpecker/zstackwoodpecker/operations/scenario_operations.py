@@ -149,6 +149,12 @@ def execute_action_with_session(http_server_ip, action, session_uuid, async=True
 def setup_node_vm(vm_inv, vm_config, deploy_config):
     for nodeRef in xmlobject.safe_list(vm_config.nodeRef):
         print nodeRef.text_
+        import commands
+        vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
+        status, woodpecker_ip = commands.getstatusoutput("ip addr show zsn0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'")
+        src_file = '/home/%s/jacocoagent.jar' %woodpecker_ip
+        dst_path = '/home/%s/jacocoagent.jar' %vm_ip
+        ssh.scp_file(src_file, dst_path, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
 
 def get_ref_l2_nic_name(l2network_name, deploy_config):
     for zone in xmlobject.safe_list(deploy_config.zones.zone):
