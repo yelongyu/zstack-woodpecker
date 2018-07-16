@@ -198,8 +198,8 @@ def compare(ps, vm, dvol, backup):
         vol_path = "/dev/" + current_volume.installPath.split("/")[2] + "/" + current_volume.installPath.split("/")[3]
     test_util.test_logger(vol_path)
 
-    name = backup.installPath.split("/")[2]
-    id = backup.installPath.split("/")[3]
+    name = backup.backupStorageRefs[0].installPath.split("/")[2]
+    id = backup.backupStorageRefs[0].installPath.split("/")[3]
     # compare vm_root_volume & image
     cmd = "mkdir /root/%s;" \
           "/usr/local/zstack/imagestore/bin/zstcli " \
