@@ -33,11 +33,11 @@ def test():
         test_util.test_fail('VM: %s is not reboot in 120 seconds. Fail to reboot it with scheduler. ' % vm.get_vm().uuid)
 
     for i in range(0, 58):
-        if test_lib.lib_find_in_local_management_server_log(start_date+i, '[msg received]: {"org.zstack.header.vm.RebootVmInstanceMsg', vm.get_vm().uuid):
+        if test_lib.lib_find_in_local_management_server_log(start_date+i, '[msg received]: org.zstack.header.vm.RebootVmInstanceMsg {"org.zstack.header.vm.RebootVmInstanceMsg', vm.get_vm().uuid):
             test_util.test_fail('VM is expected to reboot start from %s' (start_date+60))
 
     test_stub.sleep_util(start_date+59)
-    if not test_lib.lib_find_in_local_management_server_log(start_date+60, '[msg received]: {"org.zstack.header.vm.RebootVmInstanceMsg', vm.get_vm().uuid):
+    if not test_lib.lib_find_in_local_management_server_log(start_date+60, '[msg received]: org.zstack.header.vm.RebootVmInstanceMsg {"org.zstack.header.vm.RebootVmInstanceMsg', vm.get_vm().uuid):
         test_util.test_fail('VM is expected to reboot start from %s' % (start_date+60))
 
     schd_ops.del_scheduler_job(schd_job.uuid)
