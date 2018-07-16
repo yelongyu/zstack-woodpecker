@@ -9,6 +9,7 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.config_operations as con_ops
+import zstackwoodpecker.operations.resource_operations as res_ops
 import time
 vm = None
 test_stub = test_lib.lib_get_test_stub()
