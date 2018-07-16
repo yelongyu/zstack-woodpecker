@@ -120,7 +120,7 @@ TICKET = 'Ticket'
 TICKET_HISTORY = 'TicketHistory'
 QUOTA = 'Quota'
 CERTIFICATE = 'certificate'
-
+VOLUME_BACKUP = 'VolumeBackup'
 
 def find_item_by_uuid(inventories, uuid):
     for item in inventories:
@@ -631,7 +631,8 @@ def _gen_query_action(resource, condition=None):
         action = api_actions.QueryQuotaAction()
     elif resource == CERTIFICATE:
         action = api_actions.QueryCertificateAction()
-
+    elif resource == VOLUME_BACKUP:
+        action = api_actions.QueryVolumeBackupAction()
     return action
 
 def query_event_from_resource_stack(conditions = [], resource=EVENT_FROM_STACK, session_uuid=None, count='false'):
