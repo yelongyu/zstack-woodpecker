@@ -27,13 +27,6 @@ def remove_dns_from_vpc_router(vpc_router_uuid, dns, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def query_vpc_router(vpc_router_uuid, session_uuid=None):
-    action = api_actions.QueryVpcRouterAction()
-    action.timeout = 300000
-    action.uuid = vpc_router_uuid
-    evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventory
-
 def add_dns_to_l3_network(vpc_network_uuid, dns, system_tags=None, use_tags=None, session_uuid=None):
     action = api_actions.AddDnsToL3NetworkAction()
     action.timeout = 300000

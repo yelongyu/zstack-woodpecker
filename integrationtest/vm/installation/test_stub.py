@@ -409,7 +409,7 @@ def update_232_iso(vm_ip, tmp_file, iso_232_path, upgrade_script_path):
     vm_password = os.environ['imagePassword']
     #cmd = '%s "rm -f /opt/zstack_20.iso"' % ssh_cmd
     #process_result = execute_shell_in_process(cmd, tmp_file)
-    ssh.scp_file(iso_230_path, '/opt/zstack_232.iso', vm_ip, vm_username, vm_password)
+    ssh.scp_file(iso_232_path, '/opt/zstack_232.iso', vm_ip, vm_username, vm_password)
     ssh.scp_file(upgrade_script_path, '/opt/zstack-upgrade', vm_ip, vm_username, vm_password)
     cmd = '%s "mkdir -p /opt/zstack-dvd"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
@@ -426,7 +426,7 @@ def update_240_iso(vm_ip, tmp_file, iso_240_path, upgrade_script_path):
     vm_password = os.environ['imagePassword']
     #cmd = '%s "rm -f /opt/zstack_20.iso"' % ssh_cmd
     #process_result = execute_shell_in_process(cmd, tmp_file)
-    ssh.scp_file(iso_230_path, '/opt/zstack_240.iso', vm_ip, vm_username, vm_password)
+    ssh.scp_file(iso_240_path, '/opt/zstack_240.iso', vm_ip, vm_username, vm_password)
     ssh.scp_file(upgrade_script_path, '/opt/zstack-upgrade', vm_ip, vm_username, vm_password)
     cmd = '%s "mkdir -p /opt/zstack-dvd"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)

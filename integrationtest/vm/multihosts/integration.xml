@@ -119,6 +119,8 @@
         <case timeout='4000' repeat='1'>clone/test_pause_local_full_clone_one_data_volume.py</case>
         <case timeout='4000' repeat='1'>clone/test_pause_local_full_clone_two_data_volume.py</case>
         <case timeout='4000' repeat='1'>clone/test_pause_local_full_clone_3vms_two_data_volume.py</case>
-        <case timeout='1200' repeat='1'>migrate/test_cold_migrate_change_host_special_password.py</case>
+        <case timeout='2200' repeat='1'>migrate/test_cold_migrate_change_host_special_password.py</case>
+        <case timeout='2200' repeat='1'>migrate/test_cold_migrate_change_host_special_password_1.py</case>
+        <case timeout='2200' repeat='1'>migrate/test_cold_migrate_change_host_special_password_2.py</case>
     </suite>
 </integrationTest>

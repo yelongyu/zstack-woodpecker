@@ -31,7 +31,8 @@ def test():
     #judge whether PS is SharedBlock
     ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
     for i in ps:
-        if i.type == 'SharedBlock':
+#         if i.type == 'SharedBlock':
+        if i.type in ['SharedBlock', 'AliyunNAS']:
             test_util.test_skip('Skip test on SharedBlock PS')
 
     volume_creation_option = test_util.VolumeOption()

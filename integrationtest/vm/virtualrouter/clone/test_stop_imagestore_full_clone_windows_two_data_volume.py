@@ -34,6 +34,11 @@ def test():
     #    if i.type == 'SharedBlock':
     #        test_util.test_skip('Skip test on SharedBlock PS')
 
+    ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+    for i in ps:
+        if i.type == 'AliyunNAS':
+            test_util.test_skip('Skip test on AliyunNAS PS')
+
     volume_creation_option = test_util.VolumeOption()
     test_util.test_dsc('Create volume and check')
     disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))

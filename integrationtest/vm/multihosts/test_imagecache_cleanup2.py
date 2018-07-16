@@ -89,7 +89,10 @@ def test():
         if not test_lib.lib_check_sharedblock_file_exist(host, path):
             test_util.test_fail('image cache is expected to exist')
     else:
-        image_cache_path = "%s/imagecache/template/%s" % (ps.mountPath, new_image.image.uuid)
+        if ps.type == "AliyunNAS":
+            image_cache_path = "%s/datas/imagecache/template/%s" % (ps.mountPath, new_image.image.uuid)
+        else:
+            image_cache_path = "%s/imagecache/template/%s" % (ps.mountPath, new_image.image.uuid)
         if not test_lib.lib_check_file_exist(host, image_cache_path):
             test_util.test_fail('image cache is expected to exist')
         if bss[0].type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:

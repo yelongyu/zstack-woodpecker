@@ -124,8 +124,7 @@
           </hosts>
           <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
           <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
-          <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
-          <l2NetworkRef>$l2VlanNetworkName2</l2NetworkRef>
+          <l2NetworkRef>$l2VpcNetworkName1</l2NetworkRef>
         </cluster>
       </clusters>
 
