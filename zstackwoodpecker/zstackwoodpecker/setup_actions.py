@@ -805,7 +805,36 @@ default one' % self.zstack_properties)
             if not linux.wait_callback_success(_wait_echo, target.managementIp, 5, 0.2):
                 raise ActionError('testagent is not start up in 5s on %s, after it is deployed by ansible.' % target.managementIp)
             
+    def _enable_jacoco_agent(self):
+        for node in self.nodes:
+            if os.path.exists('/home/%s/jacocoagent.jar' % node.ip_):
+                fd_r = open('/home/%s/zstack-utility/zstackctl/zstackctl/ctl.py' % node.ip_, 'r')
+                fd_w = open('/var/lib/zstack/virtualenv/zstackctl/lib/python2.7/site-packages/zstackctl/ctl.py', 'w')
+                ctl_content = '' 
+                for line in fd_r:
+                    if line.find('with open(setenv_path') != -1:
+                        line = '            catalina_opts.append("-javaagent:/home/%s/jacocoagent.jar=output=tcpserver,address=%s,port=6300")\n%s'\
+                            %(node.ip_, node.ip_, line)
+                    ctl_content += line
+                fd_r.close()
+                fd_w.write(ctl_content)
+                fd_w.close()
+                print 'Inject jacoco agent into ctl.py'
+            else:
+                print 'Here is no jacocoagent.jar, skip to inject jacoco agent'
+
+    def _enable_jacoco_dump(self):
+        for node in self.nodes:
+            import subprocess
+            dump_str = 'java -jar /home/%s/jacococli.jar dump --address %s --port 6300 --reset\
+                --destfile /home/%s/zstack-woodpecker/dailytest/config_xml/code_coverage.exec' %(node.ip_, node.ip_, node.ip_)
+            cmd = 'while true; do sleep 15; %s; done' %dump_str
+            #if os.system('ps -ef|grep jacococli|grep while'): 
+            subprocess.Popen(cmd, shell=True)
+            print 'jacoco dump starting'
+
     def execute_plan_without_deploy_test_agent(self):
+        self._enable_jacoco_agent()
         if os.environ.get('ZSTACK_ALREADY_INSTALLED') != "yes":
             try:
                 self._stop_nodes()
@@ -830,6 +859,7 @@ default one' % self.zstack_properties)
             pass
 
         self._start_multi_nodes(restart=True)
+        self._enable_jacoco_dump()
 
     def execute_plan_ha(self):
 	self._install_zstack_nodes_ha()
