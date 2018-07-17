@@ -157,27 +157,30 @@ def test():
     dvol = test_stub.create_volume()
     dvol.attach(vm)
  
-    i = 0
-    while True:
-        OPS = VOL_OPS + VM_STATE_OPS
 
-        vm_op_test(vm, dvol, random.choice(OPS))
+    path = "VM_TEST_NONE --> DVOL_BACKUP --> DVOL_TEST_CREATE_IMG --> DVOL_BACKUP --> VM_TEST_NONE --> DVOL_BACKUP --> VM_TEST_NONE --> DVOL_BACKUP --> DVOL_TEST_CREATE_IMG --> DVOL_BACKUP --> DVOL_TEST_RESIZE --> DVOL_BACKUP"
+    path_array = path.split(" --> ")
 
+    for i in path_array:
         if vm.state == "Stopped":
             vm.start()
 
-	if test_lib.lib_is_vm_l3_has_vr(vm.vm):
-            test_lib.TestHarness = test_lib.TestHarnessVR
-        time.sleep(60)
-        
-        cmd = "dd if=/dev/urandom of=/dev/vdb bs=512k count=1" 
-	test_lib.lib_execute_command_in_vm(vm.vm,cmd)
+        if i == "DVOL_BACKUP":
+            if test_lib.lib_is_vm_l3_has_vr(vm.vm):
+                test_lib.TestHarness = test_lib.TestHarnessVR
+            time.sleep(60)
+            
+            cmd = "dd if=/dev/urandom of=/dev/vdb bs=512k count=1" 
+            test_lib.lib_execute_command_in_vm(vm.vm,cmd)
 
-        vm.suspend()
-        vm_op_test(vm, dvol, "DVOL_BACKUP")
-        compare(ps, vm, dvol, backup)
+            vm.suspend()
+            vm_op_test(vm, dvol, "DVOL_BACKUP")
+            compare(ps, vm, dvol, backup)
 
-        vm.resume()
+            vm.resume()
+        else:
+            vm_op_test(vm, dvol, i)
+
 
 
 def error_cleanup():
