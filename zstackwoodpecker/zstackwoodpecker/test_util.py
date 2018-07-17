@@ -1283,9 +1283,9 @@ class ResourceStackOption(DataOption):
     def get_rollback(self):
         return self.rollback
     def set_template_uuid(self, template_uuid):
-        self.template_uuid = template_uuid
+        self.templateUuid = template_uuid
     def get_template_uuid(self):
-        return self.template_uuid
+        return self.templateUuid
     def set_parameters(self, parameters):
         self.parameters = parameters
     def get_parameters(self):

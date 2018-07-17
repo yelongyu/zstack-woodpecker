@@ -9,8 +9,10 @@ import apibinding.inventory as inventory
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
-import time
 import apibinding.inventory as inventory
+import random
+import time
+import os
 
 _config_ = {
         'timeout' : 3000,
@@ -21,13 +23,14 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 VOLUME_NUMBER = 10
 delete_ps_list = []
-
+disk_uuid=[]
 
 @test_stub.skip_if_only_one_ps
 def test():
     ps_env = test_stub.PSEnvChecker()
 
     ps1, ps2 = ps_env.get_two_ps()
+    disk_uuid.append(ps2.sharedBlocks[0].diskUuid)
 
     vm_list = []
     for root_vol_ps in [ps1, ps2]:
@@ -79,7 +82,17 @@ def env_recover():
             new_ps = ps_ops.create_local_primary_storage(ps_config)
         elif delete_ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
             new_ps = ps_ops.create_nfs_primary_storage(ps_config)
+        elif delete_ps.type == "SharedBlock":
+            host = random.choice(res_ops.query_resource(res_ops.HOST))
+            cmd = "vgchange --lock-start %s && vgremove %s -y" % (delete_ps.uuid, delete_ps.uuid)
+            host_username = os.environ.get('hostUsername')
+            host_password = os.environ.get('hostPassword')
+            rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host_username, host_password, cmd, 240)
+            if not rsp:
+                test_util.test_logger("vgremove failed")
+            new_ps = ps_ops.create_sharedblock_primary_storage(ps_config, disk_uuid)
         else:
             new_ps = None
 
         ps_ops.attach_primary_storage(new_ps.uuid, res_ops.get_resource(res_ops.CLUSTER)[0].uuid)
+
