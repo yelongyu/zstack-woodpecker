@@ -790,6 +790,7 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                                               description='ks_for_nas_test',
                                               key=os.getenv('aliyunKey'),
                                               secret=os.getenv('aliyunSecret'),
+                                              sync='false',
                                               session_uuid=session_uuid)
                 # Add DataCenter
                 hyb_ops.add_datacenter_from_remote(datacenter_type=os.getenv('datacenterType'),
