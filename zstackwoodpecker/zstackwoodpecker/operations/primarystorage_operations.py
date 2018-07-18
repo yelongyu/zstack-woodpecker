@@ -115,7 +115,7 @@ def attach_primary_storage(primary_storage_uuid, cluster_uuid, session_uuid=None
     action = api_actions.AttachPrimaryStorageToClusterAction()
     action.clusterUuid = cluster_uuid
     action.primaryStorageUuid = primary_storage_uuid
-    action.timeout = 30000
+    action.timeout = 300000
     test_util.action_logger('Attach Primary Storage [uuid:] %s to Cluster [uuid:] %s' % \
             (primary_storage_uuid, cluster_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)

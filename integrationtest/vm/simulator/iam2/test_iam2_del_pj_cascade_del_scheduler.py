@@ -68,6 +68,33 @@ def test():
 
     # 4 delete project
     iam2_ops.delete_iam2_project(project_uuid)
+    try:
+        schd_job1_inv = res_ops.get_resource(res_ops.SCHEDULERJOB,uuid=schd_job1.uuid)[0]
+    except:
+        test_util.test_fail("delete project but not expunge,the schedulerjob [%s] is lost"%schd_job1.uuid)
+    try:
+        res_ops.get_resource(res_ops.SCHEDULERJOB,uuid=schd_job2.uuid)[0]
+    except:
+        test_util.test_fail("delete project but not expunge,the schedulerjob [%s] is lost"%schd_job2.uuid)
+    try:
+        schd_trigger1_inv = res_ops.get_resource(res_ops.SCHEDULERTRIGGER,uuid=schd_trigger1.uuid)[0]
+    except:
+        test_util.test_fail("delete project but not expunge,the scheduler trigger [%s] is lost"%schd_job1.uuid)
+    try:
+        res_ops.get_resource(res_ops.SCHEDULERTRIGGER,uuid=schd_trigger2.uuid)[0]
+    except:
+        test_util.test_fail("delete project but not expunge,the scheduler trigger [%s] is lost"%schd_job1.uuid)
+
+    iam2_ops.recover_iam2_project(project_uuid)
+
+    try:
+        project_admin_session_uuid = iam2_ops.login_iam2_virtual_id(project_admin_name,password)
+        project_admin_session_uuid = iam2_ops.login_iam2_project(project_name,project_admin_session_uuid).uuid
+    except:
+        test_util.test_fail("recover the deleted project , but can't login in")
+
+
+    iam2_ops.delete_iam2_project(project_uuid)
     iam2_ops.expunge_iam2_project(project_uuid)
 
     # 5 check for cascade delete

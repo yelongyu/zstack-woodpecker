@@ -22,6 +22,7 @@ import zstackwoodpecker.operations.vpc_operations as vpc_ops
 import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
 import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
+import zstackwoodpecker.zstack_test.zstack_test_eip as zstack_eip_header
 import zstackwoodpecker.zstack_test.zstack_test_image as test_image
 import zstackwoodpecker.header.vm as vm_header
 from zstackwoodpecker.operations import vm_operations as vm_ops
@@ -449,6 +450,22 @@ def create_vip(vip_name=None, l3_uuid=None, session_uuid = None, required_ip=Non
     vip.set_creation_option(vip_creation_option)
     vip.create()
     return vip
+
+def create_eip(vip_uuid,eip_name=None,vnic_uuid=None, vm_obj=None, \
+        session_uuid = None):
+
+    eip_option = test_util.EipOption()
+    eip_option.set_name(eip_name)
+    eip_option.set_vip_uuid(vip_uuid)
+    eip_option.set_vm_nic_uuid(vnic_uuid)
+    eip_option.set_session_uuid(session_uuid)
+    eip = zstack_eip_header.ZstackTestEip()
+    eip.set_creation_option(eip_option)
+    if vnic_uuid and not vm_obj:
+        test_util.test_fail('vm_obj can not be None in create_eip() API, when setting vm_nic_uuid.')
+    eip.create(vm_obj)
+    return eip
+
 
 def delete_vip(vip_uuid, session_uuid = None):
     action = api_actions.DeleteVipAction()

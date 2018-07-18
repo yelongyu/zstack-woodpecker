@@ -16,13 +16,14 @@ import config_operations
 import os
 import inspect
 
-def add_hybrid_key_secret(name, description, key, secret, ks_type='aliyun', session_uuid=None):
+def add_hybrid_key_secret(name, description, key, secret, ks_type='aliyun', sync='true', session_uuid=None):
     action = api_actions.AddHybridKeySecretAction()
     action.name = name
     action.description = description
     action.key = key
     action.secret = secret
     action.type = ks_type
+    action.sync = sync
     test_util.action_logger('Add [aliyun key secret:] %s' % key)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[aliyun key secret:] %s is added.' % key)

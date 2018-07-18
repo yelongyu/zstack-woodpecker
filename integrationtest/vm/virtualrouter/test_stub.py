@@ -115,7 +115,7 @@ def create_windows_vm_2(l3_name=None, disk_offering_uuids=None, session_uuid = N
         l3_name = os.environ.get('l3VlanNetworkName1')
 
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
-    return create_vm([l3_net_uuid], image_uuid, 'windows_vm', disk_offering_uuids, instance_offering_uuid = instance_offering_uuid, session_uuid = session_uuid)
+    return create_vm([l3_net_uuid], image_uuid, 'windows_vm', disk_offering_uuids, instance_offering_uuid = instance_offering_uuid, session_uuid = session_uuid, timeout=1200000)
 
 def create_other_vm(l3_name=None, disk_offering_uuids=None, session_uuid = None):
     '''
@@ -180,7 +180,7 @@ def create_vm_with_user_args(system_tags = None, session_uuid = None):
 # parameter: vmname; l3_net: l3_net_description, or [l3_net_uuid,]; image_uuid:
 def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
         disk_offering_uuids = None, default_l3_uuid = None, \
-        system_tags = None, instance_offering_uuid = None, session_uuid = None, ps_uuid=None):
+        system_tags = None, instance_offering_uuid = None, session_uuid = None, ps_uuid=None, timeout=None):
     vm_creation_option = test_util.VmOption()
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     if not instance_offering_uuid:
@@ -194,6 +194,8 @@ def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
     vm_creation_option.set_system_tags(system_tags)
     vm_creation_option.set_session_uuid(session_uuid)
     vm_creation_option.set_ps_uuid(ps_uuid)
+    if timeout:
+        vm_creation_option.set_timeout(timeout)
     vm = zstack_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
     vm.create()
@@ -1045,8 +1047,6 @@ class MulISO(object):
             cmd_mount = 'sshpass -p password ssh -o StrictHostKeyChecking=no root@%s "umount -f /mnt &> /dev/null;mount /dev/sr%s /mnt"' % (vm_ip, i)
             _ret = commands.getoutput(cmd_mount)
             ret = _ret.split('\n')[-1]
-            print '*' * 80
-            print _ret, ret
             if 'no medium found' in ret:
                 actual_no_media_cdrom += 1
         if check:
@@ -1071,38 +1071,49 @@ class MulISO(object):
         test_util.test_logger(add_route_cmd)
         os.system(add_route_cmd)
 
+    def get_wmic_volumenames(self, vm_ip):
+        vm_username = os.environ.get('winImageUsername')
+        vm_password = os.environ.get('winImagePassword')
+        for i in range(15):
+            try:
+                tn = telnetlib.Telnet(vm_ip, timeout=120)
+                tn.read_until("login: ", 10)
+                tn.write(vm_username+"\r\n")
+
+                tn.read_until("password: ", 10)
+                tn.write(vm_password+"\r\n")
+                tn.read_until(vm_username + ">", 10)
+                tn.write("wmic cdrom get volumename\r\n")
+                ret = tn.read_until(vm_username + ">", 10)
+                if ret:
+                    tn.write("exit\r\n")
+                    tn.close()
+                    break
+                else:
+                    tn.close()
+            except:
+                test_util.test_logger("retry id: %s" %(int(i)))
+                time.sleep(5)
+                continue
+        cdrome_list = ret.split('\r')
+        test_util.test_logger(ret)
+        _cdroms_with_media = [x.strip('\n| ') for x in cdrome_list if x.strip('\n| ')][2:-1]
+        test_util.test_logger(_cdroms_with_media)
+        return len(_cdroms_with_media)
+
     def check_windows_vm_cdrom(self, cdroms_with_media):
         vm_ip = self.vm1.get_vm().vmNics[0].ip
         l3_uuid = test_lib.lib_get_l3s_uuid_by_vm(self.vm1.get_vm())[0]
         self.add_route_to_bridge(l3_uuid)
-        
+
         test_lib.lib_wait_target_up(vm_ip, '23', 1200)
-        vm_username = os.environ.get('winImageUsername')
-        vm_password = os.environ.get('winImagePassword')
-        
-        for i in range(10):
-            try:
-                tn = telnetlib.Telnet(vm_ip, timeout=120)
+        for _ in range(5):
+            actual_cdroms_with_media = self.get_wmic_volumenames(vm_ip)
+            if actual_cdroms_with_media == cdroms_with_media:
                 break
-            except:
-                test_util.test_logger("retry id: %s" %(int(i)))
-                continue
-
-        tn.read_until("login: ")
-        tn.write(vm_username+"\r\n")
-
-        tn.read_until("password: ")
-        tn.write(vm_password+"\r\n")
-        #tn.read_until(vm_username+">")
-        tn.read_until("tor>")
-        tn.write("wmic cdrom get volumename\r\n")
-        #ret = tn.read_until(vm_username+">")
-        ret = tn.read_until("tor>")
-        tn.write("exit\r\n")
-        tn.close()
-        cdrome_list = ret.split('\r')
-        _cdroms_with_media = [x.strip('\n| ') for x in cdrome_list if x.strip('\n| ')][2:-1]
-        assert len(_cdroms_with_media) == cdroms_with_media
+            else:
+                time.sleep(3)
+        assert actual_cdroms_with_media == cdroms_with_media
 
 
 class Longjob(object):
