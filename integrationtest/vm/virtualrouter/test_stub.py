@@ -1047,8 +1047,6 @@ class MulISO(object):
             cmd_mount = 'sshpass -p password ssh -o StrictHostKeyChecking=no root@%s "umount -f /mnt &> /dev/null;mount /dev/sr%s /mnt"' % (vm_ip, i)
             _ret = commands.getoutput(cmd_mount)
             ret = _ret.split('\n')[-1]
-            print '*' * 80
-            print _ret, ret
             if 'no medium found' in ret:
                 actual_no_media_cdrom += 1
         if check:
@@ -1078,30 +1076,33 @@ class MulISO(object):
         l3_uuid = test_lib.lib_get_l3s_uuid_by_vm(self.vm1.get_vm())[0]
         self.add_route_to_bridge(l3_uuid)
         
-        test_lib.lib_wait_target_up(vm_ip, '23', 1200)
+        test_lib.lib_wait_target_up(vm_ip, '23', 900)
         vm_username = os.environ.get('winImageUsername')
         vm_password = os.environ.get('winImagePassword')
         
-        for i in range(10):
+        for i in range(15):
             try:
                 tn = telnetlib.Telnet(vm_ip, timeout=120)
-                break
+                tn.read_until("login: ", 10)
+                tn.write(vm_username+"\r\n")
+
+                tn.read_until("password: ", 10)
+                tn.write(vm_password+"\r\n")
+                #tn.read_until(vm_username+">")
+                tn.read_until("tor>", 10)
+                tn.write("wmic cdrom get volumename\r\n")
+                #ret = tn.read_until(vm_username+">")
+                ret = tn.read_until("tor>", 10)
+                if ret:
+                    tn.write("exit\r\n")
+                    tn.close()
+                    break
+                else:
+                    tn.close()
             except:
                 test_util.test_logger("retry id: %s" %(int(i)))
+                time.sleep(5)
                 continue
-
-        tn.read_until("login: ")
-        tn.write(vm_username+"\r\n")
-
-        tn.read_until("password: ")
-        tn.write(vm_password+"\r\n")
-        #tn.read_until(vm_username+">")
-        tn.read_until("tor>")
-        tn.write("wmic cdrom get volumename\r\n")
-        #ret = tn.read_until(vm_username+">")
-        ret = tn.read_until("tor>")
-        tn.write("exit\r\n")
-        tn.close()
         cdrome_list = ret.split('\r')
         _cdroms_with_media = [x.strip('\n| ') for x in cdrome_list if x.strip('\n| ')][2:-1]
         assert len(_cdroms_with_media) == cdroms_with_media
