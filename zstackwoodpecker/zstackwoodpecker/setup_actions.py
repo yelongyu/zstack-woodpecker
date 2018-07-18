@@ -807,34 +807,65 @@ default one' % self.zstack_properties)
             
     def _enable_jacoco_agent(self):
         for node in self.nodes:
+            woodpecker_ip = ''
             import commands
-            status, woodpecker_ip = commands.getstatusoutput("ip addr show zsn0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'")
-            src_file = '/home/%s/zstack-utility/zstackctl/zstackctl/ctl.py' % woodpecker_ip
+            (status, output) = commands.getstatusoutput("ip addr show zsn0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'")
             dst_file = '/var/lib/zstack/virtualenv/zstackctl/lib/python2.7/site-packages/zstackctl/ctl.py'
-            if os.path.exists('/home/%s/jacocoagent.jar' % woodpecker_ip):
-                fd_r = open(src_file, 'r')
-                fd_w = open(dst_file, 'w')
-                ctl_content = '' 
-                for line in fd_r:
-                    if line.find('with open(setenv_path') != -1:
-                        line = '            catalina_opts.append("-javaagent:/home/%s/jacocoagent.jar=output=tcpserver,address=%s,port=6300")\n%s'\
-                            %(node.ip_, node.ip_, line)
-                    ctl_content += line
-                fd_r.close()
-                fd_w.write(ctl_content)
-                fd_w.close()
-                ssh.scp_file(dst_file, dst_file, node.ip_, node.username_, node.password_)
-                print 'Inject jacoco agent into ctl.py'
+            if output.startswith('172'):
+                woodpecker_ip = output
+            if woodpecker_ip != '':
+                #Separate woodpecker condition
+                if os.path.exists('/home/%s/jacocoagent.jar' % woodpecker_ip):
+                    src_file = '/home/%s/zstack-utility/zstackctl/zstackctl/ctl.py' % woodpecker_ip
+                    fd_r = open(src_file, 'r')
+                    fd_w = open(dst_file, 'w')
+                    ctl_content = '' 
+                    for line in fd_r:
+                        if line.find('with open(setenv_path') != -1:
+                            line = '            catalina_opts.append("-javaagent:/home/%s/jacocoagent.jar=output=tcpserver,address=%s,port=6300")\n%s'\
+                                %(node.ip_, node.ip_, line)
+                        ctl_content += line
+                    fd_r.close()
+                    fd_w.write(ctl_content)
+                    fd_w.close()
+                    ssh.scp_file(dst_file, dst_file, node.ip_, node.username_, node.password_)
+                    print 'Inject jacoco agent into ctl.py'
+                else:
+                    print 'Here is no jacocoagent.jar, skip to inject jacoco agent'
             else:
-                print 'Here is no jacocoagent.jar, skip to inject jacoco agent'
+                #Incorporate wookpecker condition
+                if os.path.exists('/home/%s/jacocoagent.jar' % node.ip_):
+                    src_file = '/home/%s/zstack-utility/zstackctl/zstackctl/ctl.py' % node.ip_
+                    fd_r = open(src_file, 'r')
+                    fd_w = open(dst_file, 'w')
+                    ctl_content = ''
+                    for line in fd_r:
+                        if line.find('with open(setenv_path') != -1:
+                            line = '            catalina_opts.append("-javaagent:/home/%s/jacocoagent.jar=output=tcpserver,address=127.0.0.1,port=6300")\n%s'\
+                                %(node.ip_, line)
+                        ctl_content += line
+                    fd_r.close()
+                    fd_w.write(ctl_content)
+                    fd_w.close()
+                    print 'Inject jacoco agent into ctl.py'
+                else:
+                    print 'Here is no jacocoagent.jar, skip to inject jacoco agent'
+
 
     def _enable_jacoco_dump(self):
+        woodpecker_ip = ''
         import commands
-        status, woodpecker_ip = commands.getstatusoutput("ip addr show zsn0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'")
+        (status, output) = commands.getstatusoutput("ip addr show zsn0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'")
+        if output.startswith('172'):
+            woodpecker_ip = output
         for node in self.nodes:
             import subprocess
-            dump_str = 'java -jar /home/%s/jacococli.jar dump --address %s --port 6300 --reset\
-                --destfile /home/%s/zstack-woodpecker/dailytest/config_xml/code_coverage.exec' %(woodpecker_ip, node.ip_, woodpecker_ip)
+            if woodpecker_ip != '':
+                dump_str = 'java -jar /home/%s/jacococli.jar dump --address %s --port 6300 --reset\
+                    --destfile /home/%s/zstack-woodpecker/dailytest/config_xml/code_coverage.exec' %(woodpecker_ip, node.ip_, woodpecker_ip)
+            else:
+                dump_str = 'java -jar /home/%s/jacococli.jar dump --address 127.0.0.1 --port 6300 --reset\
+                    --destfile /home/%s/zstack-woodpecker/dailytest/config_xml/code_coverage.exec' %(node.ip_, node.ip_)
             cmd = 'while true; do sleep 15; %s; done' %dump_str
             (status, output) = commands.getstatusoutput('ps -ef|grep jacococli|grep while') 
             if status == 0 and output.find('while true') == -1:
@@ -934,9 +965,9 @@ default one' % self.zstack_properties)
                 # startup speed is slow. Increase timeout to 180s.
                 if linux.is_ip_existing(node.ip_):
                     if os.environ.get('ZSTACK_SIMULATOR') == "yes":
-                        cmd = 'zstack-ctl stop; zstack-ctl configure unitTestOn=true; nohup zstack-ctl start_node --simulator -DredeployDB=true'
+                        cmd = 'zstack-ctl stop_node; zstack-ctl configure unitTestOn=true; nohup zstack-ctl start_node --simulator -DredeployDB=true'
                     else:
-                        cmd = 'zstack-ctl stop; nohup zstack-ctl start'
+                        cmd = 'zstack-ctl stop_node; nohup zstack-ctl start_node'
                     thread = threading.Thread(target=shell_cmd_thread, args=(cmd, True, ))
                 elif not linux.is_ip_existing(node1.ip_):
                     # when first node1 ip is not local, it usualy means woodpecker is running on hosts other than MN
