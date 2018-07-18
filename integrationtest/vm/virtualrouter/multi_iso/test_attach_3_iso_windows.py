@@ -27,8 +27,9 @@ def test():
 
     multi_iso.detach_iso(multi_iso.iso_uuids[1])
     multi_iso.check_windows_vm_cdrom(2)
-    multi_iso.vm1.reboot()
+#     multi_iso.vm1.reboot()
     multi_iso.detach_iso(multi_iso.iso_uuids[0])
+    multi_iso.check_windows_vm_cdrom(1)
     multi_iso.detach_iso(multi_iso.iso_uuids[2])
     multi_iso.check_windows_vm_cdrom(0)
 

@@ -1071,15 +1071,9 @@ class MulISO(object):
         test_util.test_logger(add_route_cmd)
         os.system(add_route_cmd)
 
-    def check_windows_vm_cdrom(self, cdroms_with_media):
-        vm_ip = self.vm1.get_vm().vmNics[0].ip
-        l3_uuid = test_lib.lib_get_l3s_uuid_by_vm(self.vm1.get_vm())[0]
-        self.add_route_to_bridge(l3_uuid)
-        
-        test_lib.lib_wait_target_up(vm_ip, '23', 900)
+    def get_wmic_volumenames(self, vm_ip):
         vm_username = os.environ.get('winImageUsername')
         vm_password = os.environ.get('winImagePassword')
-        
         for i in range(15):
             try:
                 tn = telnetlib.Telnet(vm_ip, timeout=120)
@@ -1088,11 +1082,9 @@ class MulISO(object):
 
                 tn.read_until("password: ", 10)
                 tn.write(vm_password+"\r\n")
-                #tn.read_until(vm_username+">")
-                tn.read_until("tor>", 10)
+                tn.read_until(vm_username + ">", 10)
                 tn.write("wmic cdrom get volumename\r\n")
-                #ret = tn.read_until(vm_username+">")
-                ret = tn.read_until("tor>", 10)
+                ret = tn.read_until(vm_username + ">", 10)
                 if ret:
                     tn.write("exit\r\n")
                     tn.close()
@@ -1104,8 +1096,24 @@ class MulISO(object):
                 time.sleep(5)
                 continue
         cdrome_list = ret.split('\r')
+        test_util.test_logger(ret)
         _cdroms_with_media = [x.strip('\n| ') for x in cdrome_list if x.strip('\n| ')][2:-1]
-        assert len(_cdroms_with_media) == cdroms_with_media
+        test_util.test_logger(_cdroms_with_media)
+        return len(_cdroms_with_media)
+
+    def check_windows_vm_cdrom(self, cdroms_with_media):
+        vm_ip = self.vm1.get_vm().vmNics[0].ip
+        l3_uuid = test_lib.lib_get_l3s_uuid_by_vm(self.vm1.get_vm())[0]
+        self.add_route_to_bridge(l3_uuid)
+
+        test_lib.lib_wait_target_up(vm_ip, '23', 1200)
+        for _ in range(5):
+            actual_cdroms_with_media = self.get_wmic_volumenames(vm_ip)
+            if actual_cdroms_with_media == cdroms_with_media:
+                break
+            else:
+                time.sleep(3)
+        assert actual_cdroms_with_media == cdroms_with_media
 
 
 class Longjob(object):
