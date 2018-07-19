@@ -1014,12 +1014,14 @@ class MulISO(object):
             vm_uuid = self.vm1.vm.uuid
         img_ops.attach_iso(iso_uuid, vm_uuid)
         self.check_vm_systag(iso_uuid, vm_uuid)
+        time.sleep(5)
 
     def detach_iso(self, iso_uuid, vm_uuid=None):
         if not vm_uuid:
             vm_uuid = self.vm1.vm.uuid
         img_ops.detach_iso(vm_uuid, iso_uuid)
         self.check_vm_systag(iso_uuid, vm_uuid, attach=False)
+        time.sleep(5)
 
     def set_iso_first(self, iso_uuid, vm_uuid=None):
         if not vm_uuid:
@@ -1077,14 +1079,14 @@ class MulISO(object):
         for i in range(15):
             try:
                 tn = telnetlib.Telnet(vm_ip, timeout=120)
-                tn.read_until("login: ", 10)
+                tn.read_until("login: ", 30)
                 tn.write(vm_username+"\r\n")
 
-                tn.read_until("password: ", 10)
+                tn.read_until("password: ", 30)
                 tn.write(vm_password+"\r\n")
-                tn.read_until(vm_username + ">", 10)
+                tn.read_until(vm_username + ">", 30)
                 tn.write("wmic cdrom get volumename\r\n")
-                ret = tn.read_until(vm_username + ">", 10)
+                ret = tn.read_until(vm_username + ">", 30)
                 if ret:
                     tn.write("exit\r\n")
                     tn.close()
@@ -1107,12 +1109,12 @@ class MulISO(object):
         self.add_route_to_bridge(l3_uuid)
 
         test_lib.lib_wait_target_up(vm_ip, '23', 1200)
-        for _ in range(5):
+        for _ in range(10):
             actual_cdroms_with_media = self.get_wmic_volumenames(vm_ip)
             if actual_cdroms_with_media == cdroms_with_media:
                 break
             else:
-                time.sleep(3)
+                time.sleep(15)
         assert actual_cdroms_with_media == cdroms_with_media
 
 
