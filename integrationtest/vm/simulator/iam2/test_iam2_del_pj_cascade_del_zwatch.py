@@ -20,10 +20,10 @@ http_endpoint_uuid = None
 alarm_uuid = None
 ps_event_sub_uuid =None
 sns_topic_uuid = None
-
+alarm_template_uuid = None
 
 def test():
-    global email_platform_uuid,email_endpoint_uuid,dingtalk_endpoint_uuid,http_endpoint_uuid,alarm_uuid,ps_event_sub_uuid,sns_topic_uuid
+    global email_platform_uuid,email_endpoint_uuid,dingtalk_endpoint_uuid,http_endpoint_uuid,alarm_uuid,ps_event_sub_uuid,sns_topic_uuid,alarm_template_uuid
     iam2_ops.clean_iam2_enviroment()
 
     zone_uuid = res_ops.get_resource(res_ops.ZONE)[0].uuid
@@ -87,6 +87,18 @@ def test():
     ps_disconnected = 'PrimaryStorageDisconnected'
     ps_event_sub_uuid = zwt_ops.subscribe_event(ps_namespace, ps_disconnected, ps_actions).uuid
 
+    application_platform_type = 'Email'
+    alarm_template_name = 'my-alarm-template'
+    alarm_template = '${ALARM_NAME} Change status to ${ALARM_CURRENT_STATUS}' \
+                     'ALARM_UUID:${ALARM_UUID}' \
+                     'keyword1:ThisWordIsKeyWord' \
+                     'keyword2:TemplateForAlarmOn' \
+                     '(Using for template changes email check)'
+    alarm_template_uuid = zwt_ops.create_sns_text_template(alarm_template_name,
+                                                             application_platform_type,
+                                                             alarm_template,
+                                                             default_template=False).uuid
+
     acc_ops.logout(project_admin_session_uuid)
 
     # 6 delete project
@@ -104,7 +116,7 @@ def test():
     test_stub.check_resource_not_exist(alarm_uuid,res_ops.ALARM)
     test_stub.check_resource_not_exist(ps_event_sub_uuid,res_ops.EVENT_SUBSCRIPTION)
     test_stub.check_resource_not_exist(sns_topic_uuid,res_ops.SNS_TOPIC)
-
+    test_stub.check_resource_not_exist(alarm_template_uuid,res_ops.SNS_TEXT_TEMPLATE)
 
     zwt_ops.delete_sns_application_platform(email_platform_uuid)
 
@@ -113,7 +125,7 @@ def test():
 
 
 def error_cleanup():
-    global email_platform_uuid,email_endpoint_uuid,dingtalk_endpoint_uuid,http_endpoint_uuid,alarm_uuid,ps_event_sub_uuid,sns_topic_uuid
+    global email_platform_uuid,email_endpoint_uuid,dingtalk_endpoint_uuid,http_endpoint_uuid,alarm_uuid,ps_event_sub_uuid,sns_topic_uuid,alarm_template_uuid
     iam2_ops.clean_iam2_enviroment()
     if email_platform_uuid:
         zwt_ops.delete_sns_application_platform(email_platform_uuid)
@@ -129,4 +141,5 @@ def error_cleanup():
         zwt_ops.unsubscribe_event(ps_event_sub_uuid)
     if sns_topic_uuid:
         zwt_ops.delete_sns_topic(sns_topic_uuid)
-
+    if alarm_template_uuid:
+        zwt_ops.delete_sns_text_template(alarm_template_uuid)

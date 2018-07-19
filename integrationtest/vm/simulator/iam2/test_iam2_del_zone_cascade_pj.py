@@ -95,22 +95,21 @@ def test():
         test_util.test_fail('the attributes:uuid[%s] name[%s] is still exist after delete the new zone[%s]' % (
             attributes[0].uuid, attributes[0].name, new_zone_uuid))
 
-    # # TODO:check for login virtual id
-    # platform_admin_session = iam2_ops.login_iam2_virtual_id(platform_admin_name, password)
-    # project_admin_session = iam2_ops.login_iam2_virtual_id(project_admin_name, password)
-    # virtual_id_session = iam2_ops.login_iam2_virtual_id(username, password)
-    #
-    # try:
-    #     iam2_ops.login_iam2_project(project_name, project_admin_session)
-    #     test_util.test_fail("can't login deleted project ,fail!")
-    # except:
-    #     test_util.test_logger("can't login deleted project ,success!")
-    #
-    # try:
-    #     iam2_ops.login_iam2_project(project_name, virtual_id_session)
-    #     test_util.test_fail("can't login deleted project ,fail!")
-    # except:
-    #     test_util.test_logger("can't login deleted project ,success!")
+    platform_admin_session = iam2_ops.login_iam2_virtual_id(platform_admin_name, password)
+    project_admin_session = iam2_ops.login_iam2_virtual_id(project_admin_name, password)
+    virtual_id_session = iam2_ops.login_iam2_virtual_id(username, password)
+
+    try:
+        iam2_ops.login_iam2_project(project_name, project_admin_session)
+        test_util.test_fail("can't login deleted project ,fail!")
+    except:
+        test_util.test_logger("can't login deleted project ,success!")
+
+    try:
+        iam2_ops.login_iam2_project(project_name, virtual_id_session)
+        test_util.test_fail("can't login deleted project ,fail!")
+    except:
+        test_util.test_logger("can't login deleted project ,success!")
 
     # test for ticket
 

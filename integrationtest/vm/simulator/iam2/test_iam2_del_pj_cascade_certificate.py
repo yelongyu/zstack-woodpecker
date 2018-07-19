@@ -51,12 +51,8 @@ def test():
     iam2_ops.expunge_iam2_project(project_uuid)
 
     # 5 check for cascade delete
-    cond = res_ops.gen_query_conditions('uuid','=',cert.uuid)
-    cert_inv = res_ops.query_resource(res_ops.CERTIFICATE,cond)
-    if not cert_inv:
-        test_util.test_fail("certificate should not be cascade delete after delete project,test fail ")
+    test_stub.check_resource_not_exist(cert.uuid,res_ops.CERTIFICATE)
 
-    net_ops.delete_certificate(cert.uuid)
     iam2_ops.clean_iam2_enviroment()
     test_util.test_pass('Create Simple VM Stop Start Scheduler Success')
 
