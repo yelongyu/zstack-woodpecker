@@ -12,7 +12,7 @@ vm = None
 
 def test():
     global vm
-    vm = test_stub.create_justcreate_vm()
+    vm = test_stub.create_vlan_vm(strategy_type='JustCreate')
     if vm.vm.state == "Created":
        print "vm state is Created"
     else:

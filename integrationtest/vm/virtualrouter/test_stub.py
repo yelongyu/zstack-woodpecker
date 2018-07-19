@@ -54,7 +54,7 @@ denied_ports = Port.get_denied_ports()
 #test_stub.denied_ports = [101, 4999, 8990, 15000, 30001, 49999]
 target_ports = rule1_ports + rule2_ports + rule3_ports + rule4_ports + rule5_ports + denied_ports
 
-def create_vlan_vm(l3_name=None, disk_offering_uuids=None, system_tags=None, session_uuid = None, instance_offering_uuid = None):
+def create_vlan_vm(l3_name=None, disk_offering_uuids=None, system_tags=None, strategy_type='InstantStart', session_uuid = None, instance_offering_uuid = None):
     image_name = os.environ.get('imageName_net')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     if not l3_name:
@@ -63,7 +63,8 @@ def create_vlan_vm(l3_name=None, disk_offering_uuids=None, system_tags=None, ses
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     return create_vm([l3_net_uuid], image_uuid, 'vlan_vm', \
             disk_offering_uuids, system_tags=system_tags, \
-            instance_offering_uuid = instance_offering_uuid,
+            instance_offering_uuid = instance_offering_uuid,\
+            strategy_type=strategy_type,
             session_uuid = session_uuid)
 
 def create_lb_vm(l3_name=None, disk_offering_uuids=None, session_uuid = None):
@@ -237,16 +238,6 @@ def create_volume(volume_creation_option=None, session_uuid = None):
     volume.set_creation_option(volume_creation_option)
     volume.create()
     return volume
-
-def create_stop_vm(vm_creation_option=None, strategy_type='CreateStopped',
-                          session_uuid=None):
-    return create_vm(vm_creation_option=vm_creation_option, strategy_type=strategy_type,
-                     session_uuid=session_uuid)
-
-def create_justcreate_vm(vm_creation_option=None, strategy_type='JustCreate',
-                          session_uuid=None):
-    return create_vm(vm_creation_option=vm_creation_option, strategy_type=strategy_type,
-                     session_uuid=session_uuid)
 
 def create_sg(sg_creation_option=None, session_uuid = None):
     if not sg_creation_option:
