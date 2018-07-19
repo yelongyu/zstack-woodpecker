@@ -128,6 +128,35 @@ def create_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None,
     vm.create()
     return vm
 
+def create_vr_vm(test_obj_dict,l3_uuid, session_uuid = None):
+    '''
+    '''
+    vrs = test_lib.lib_find_vr_by_l3_uuid(l3_uuid)
+    if not vrs:
+        #create temp_vm1 for getting vlan1's vr for test pf_vm portforwarding
+        instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(
+            os.environ.get('instanceOfferingName_s')).uuid
+        cond = res_ops.gen_query_conditions('mediaType', '!=', 'ISO')
+        cond = res_ops.gen_query_conditions('platform', '=', 'Linux', cond)
+        cond = res_ops.gen_query_conditions('system','=','false',cond)
+        image_uuid = res_ops.query_resource(res_ops.IMAGE, cond, session_uuid=session_uuid)[0].uuid
+
+        vm_creation_option = test_util.VmOption()
+        vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+        vm_creation_option.set_image_uuid(image_uuid)
+        vm_creation_option.set_l3_uuids([l3_uuid])
+        temp_vm = create_vm(vm_creation_option,session_uuid=session_uuid)
+        test_obj_dict.add_vm(temp_vm)
+        vr = test_lib.lib_find_vr_by_vm(temp_vm.vm)[0]
+        temp_vm.destroy(session_uuid)
+        test_obj_dict.rm_vm(temp_vm)
+    else:
+        vr = vrs[0]
+        if not test_lib.lib_is_vm_running(vr):
+            test_lib.lib_robot_cleanup(test_obj_dict)
+            test_util.test_skip('vr: %s is not running. Will skip test.' % vr.uuid)
+    return vr
+
 def create_windows_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None, image_uuid=None, session_uuid=None):
     if not vm_creation_option:
         instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(
