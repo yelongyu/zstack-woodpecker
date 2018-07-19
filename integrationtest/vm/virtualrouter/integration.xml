@@ -221,6 +221,8 @@
         <case timeout='600' repeat='1'>multi_iso/test_iso_candidate.py</case>
         <case timeout='600' repeat='1'>test_add_image_longjob.py</case>
         <case timeout='600' repeat='1'>test_create_vm_image_longjob.py</case>
+        <case timeout='600' repeat='1'>test_create_stop_vm.py</case>
+        <case timeout='600' repeat='1'>test_create_justcreate_vm.py</case>
         <case timeout='600' repeat='1'>test_create_volume_image_longjob.py</case>
         <case timeout='600' repeat='1' noparallel='True'>ceph_pool_capacity/test_ceph_data_pool_cap.py</case>
         <case timeout='600' repeat='1' noparallel='True'>ceph_pool_capacity/test_ceph_data_pool_cap_crt_pool.py</case>

@@ -180,7 +180,7 @@ def create_vm_with_user_args(system_tags = None, session_uuid = None):
 # parameter: vmname; l3_net: l3_net_description, or [l3_net_uuid,]; image_uuid:
 def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
         disk_offering_uuids = None, default_l3_uuid = None, \
-        system_tags = None, instance_offering_uuid = None, session_uuid = None, ps_uuid=None, timeout=None):
+        system_tags = None, instance_offering_uuid = None, strategy_type='InstantStart', session_uuid = None, ps_uuid=None, timeout=None):
     vm_creation_option = test_util.VmOption()
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     if not instance_offering_uuid:
@@ -194,8 +194,10 @@ def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
     vm_creation_option.set_system_tags(system_tags)
     vm_creation_option.set_session_uuid(session_uuid)
     vm_creation_option.set_ps_uuid(ps_uuid)
+    vm_creation_option.set_strategy_type(strategy_type)
     if timeout:
         vm_creation_option.set_timeout(timeout)
+
     vm = zstack_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
     vm.create()
@@ -235,6 +237,16 @@ def create_volume(volume_creation_option=None, session_uuid = None):
     volume.set_creation_option(volume_creation_option)
     volume.create()
     return volume
+
+def create_stop_vm(vm_creation_option=None, strategy_type='CreateStopped',
+                          session_uuid=None):
+    return create_vm(vm_creation_option=vm_creation_option, strategy_type=strategy_type,
+                     session_uuid=session_uuid)
+
+def create_justcreate_vm(vm_creation_option=None, strategy_type='JustCreate',
+                          session_uuid=None):
+    return create_vm(vm_creation_option=vm_creation_option, strategy_type=strategy_type,
+                     session_uuid=session_uuid)
 
 def create_sg(sg_creation_option=None, session_uuid = None):
     if not sg_creation_option:
