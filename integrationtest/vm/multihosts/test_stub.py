@@ -1321,7 +1321,7 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
     if vm_ops_test_choice == "VM_TEST_ALL" or vm_ops_test_choice == "VM_TEST_MIGRATE":
         test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_MIGRATE")
         ps = test_lib.lib_get_primary_storage_by_vm(vm_obj.get_vm())
-        if ps.type in [ inventory.CEPH_PRIMARY_STORAGE_TYPE, 'SharedMountPoint', inventory.NFS_PRIMARY_STORAGE_TYPE, 'SharedBlock' ]:
+        if ps.type in [ inventory.CEPH_PRIMARY_STORAGE_TYPE, 'SharedMountPoint', inventory.NFS_PRIMARY_STORAGE_TYPE, 'SharedBlock', 'AliyunNAS']:
             target_host = test_lib.lib_find_random_host(vm_obj.vm)
             vm_obj.migrate(target_host.uuid)
         elif ps.type in [ inventory.LOCAL_STORAGE_TYPE ]:
@@ -1579,7 +1579,7 @@ def dvol_ops_test(dvol_obj,vm_obj, dvol_ops_test_choice="DVOL_TEST_NONE"):
             vol_ops.migrate_volume(dvol_obj.uuid, target_host.uuid)
             target_host2 = test_lib.lib_find_host_by_vm(vm_obj.get_vm())
             vol_ops.migrate_volume(dvol_obj.uuid, target_host2.uuid)
-        elif ps.type in [inventory.CEPH_PRIMARY_STORAGE_TYPE, 'SharedMountPoint', inventory.NFS_PRIMARY_STORAGE_TYPE, 'SharedBlock']:
+        elif ps.type in [inventory.CEPH_PRIMARY_STORAGE_TYPE, 'SharedMountPoint', inventory.NFS_PRIMARY_STORAGE_TYPE, 'SharedBlock', 'AliyunNAS']:
             test_util.test_dsc("skip migrate if ps type is not local")
         else:
             test_util.test_fail("FOUND NEW STORAGTE TYPE. FAILED")
