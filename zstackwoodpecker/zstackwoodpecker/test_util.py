@@ -676,6 +676,7 @@ class VmOption(DataOption):
             self.console_password = None
             self.ps_uuid = None
             self.root_password = None
+            self.strategy_type = 'InstantStart'
             super(VmOption, self).__init__()
         else:
             self.l3_uuids = vm_opt.get_l3_uuids()
@@ -696,6 +697,7 @@ class VmOption(DataOption):
             self.default_l3_uuid = vm_opt.get_default_l3_uuid()
             self.system_tags = vm_opt.get_system_tags()
             self.user_tags = vm_opt.get_user_tags()
+            self.strategy_type = vm_opt.get_strategy_type()
             super(VmOption, self).__init__()
 
     def set_l3_uuids(self, l3_uuids):
@@ -790,6 +792,11 @@ class VmOption(DataOption):
     def get_root_password(self):
         return self.root_password
 
+    def set_strategy_type(self, strategy_type):
+        self.strategy_type = strategy_type
+
+    def get_strategy_type(self):
+        return self.strategy_type
 
 class VolumeOption(DataOption):
     def __init__(self):

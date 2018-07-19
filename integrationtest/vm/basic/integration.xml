@@ -3,6 +3,8 @@
         <case timeout="60" >test_get_current_time.py</case>
         <case timeout="60" >test_nested_virt.py</case>
         <case timeout="270" >test_create_vm.py</case>
+        <case timeout="270" >test_create_stop_vm.py</case>
+        <case timeout="270" >test_create_justcreate_vm.py</case>
         <case timeout="180" >test_create_spice_vm.py</case>
         <case timeout="180" >test_create_vnc_vm.py</case>
         <case timeout="180" >test_create_spice_all_vm.py</case>

@@ -19,7 +19,7 @@ import re
 
 
 def create_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None,
-              image_uuid=None, session_uuid=None):
+              image_uuid=None, strategy_type='InstantStart', session_uuid=None):
     if not vm_creation_option:
         instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(
             os.environ.get('instanceOfferingName_s')).uuid
@@ -49,6 +49,8 @@ def create_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None,
 
     if session_uuid:
         vm_creation_option.set_session_uuid(session_uuid)
+
+    vm_creation_option.set_strategy_type(strategy_type)
 
     vm = test_vm.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
@@ -99,6 +101,15 @@ def create_vm_with_volume(vm_creation_option=None, data_volume_uuids=None,
     return create_vm(vm_creation_option, data_volume_uuids,
                      session_uuid=session_uuid)
 
+def create_stop_vm(vm_creation_option=None, strategy_type='CreateStopped',
+                          session_uuid=None):
+    return create_vm(vm_creation_option=vm_creation_option, strategy_type=strategy_type,
+                     session_uuid=session_uuid)
+
+def create_justcreate_vm(vm_creation_option=None, strategy_type='JustCreate',
+                          session_uuid=None):
+    return create_vm(vm_creation_option=vm_creation_option, strategy_type=strategy_type,
+                     session_uuid=session_uuid)
 
 def create_vm_with_iso(vm_creation_option=None, session_uuid=None):
     img_option = test_util.ImageOption()

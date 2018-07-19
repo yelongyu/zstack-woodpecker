@@ -47,6 +47,9 @@ def create_vm(vm_create_option):
     else:
         create_vm.timeout = timeout
 
+    strategy_type = vm_create_option.get_strategy_type()
+    create_vm.strategy = strategy_type
+
     create_vm.dataDiskOfferingUuids = vm_create_option.get_data_disk_uuids()
     create_vm.rootDiskOfferingUuid = vm_create_option.get_root_disk_uuid()
     create_vm.consolePassword = vm_create_option.get_console_password()
