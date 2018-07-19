@@ -153,8 +153,23 @@ def setup_node_vm(vm_inv, vm_config, deploy_config):
         vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
         status, woodpecker_ip = commands.getstatusoutput("ip addr show zsn0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'")
         src_file = '/home/%s/jacocoagent.jar' %woodpecker_ip
-        dst_path = '/home/%s/jacocoagent.jar' %vm_ip
-        ssh.scp_file(src_file, dst_path, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
+        dst_file = '/home/%s/jacocoagent.jar' %vm_ip
+        check_exist_cmd = 'ls %s' %dst_file
+        check_folder_cmd = 'ls /home/%s' %vm_ip
+        try:
+            (retcode, output, erroutput) = ssh.execute(check_folder_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
+        except Exception as e:
+            test_util.test_logger("Folder /home/%s does not exist, try to create it" %vm_ip)
+            cmd = 'mkdir /home/%s' %vm_ip
+            try:
+                ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
+            except Exception as e:
+                test_util.test_logger("Create folder /home/%s on %s failed: %s" %(vm_ip, vm_ip, e))        
+        try:
+            (retcode, output, erroutput) = ssh.execute(check_exist_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
+        except Exception as e:
+            test_util.test_logger("Copy file %s from woodpecker node to %s on mn node" %(src_file, dst_file))
+            ssh.scp_file(src_file, dst_file, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
 
 def get_ref_l2_nic_name(l2network_name, deploy_config):
     for zone in xmlobject.safe_list(deploy_config.zones.zone):
