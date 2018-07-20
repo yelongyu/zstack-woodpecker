@@ -22,5 +22,8 @@ def destroy_initial_database():
 
 def test():
     if os.environ.get('ZSTACK_SIMULATOR') == "yes":
-        destroy_initial_database()
-        deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
+        if os.environ.get('WOODPECKER_PARALLEL') != None and os.environ.get('WOODPECKER_PARALLEL') == '0':
+            destroy_initial_database()
+            deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
+        else:
+            test_util.test_logger('Skip case setup since parallel testing')

@@ -93,6 +93,7 @@ class TestCase(object):
         self.type = None
         #if test case is global safe for parallel execution. Default is True.
         self.parallel = True
+        self.noparallelkey = None
         self.flavor = ''
 
 class WoodPecker(object):
@@ -196,6 +197,9 @@ class WoodPecker(object):
                     if case_config.has_key(test_case.NO_PARALLEL) and \
                             case_config[test_case.NO_PARALLEL]:
                         case.parallel = False
+                    if case_config.has_key(test_case.NO_PARALLEL_KEY) and \
+                            case_config[test_case.NO_PARALLEL_KEY]:
+                        case.noparallelkey = case_config[test_case.NO_PARALLEL_KEY]
 
     def get_case_log_path(self, case, suite_repeat, case_repeat):
         log_path = os.path.join(self.log_dir, case.suite.name + '.' + str(suite_repeat), case.name + '_id' + str(case.id) + '.' + str(case_repeat) + '.log')
@@ -397,6 +401,94 @@ class WoodPecker(object):
 		        self.stop_when_fail = True
 			break
 		logfd.close()
+
+
+        def run_cases_noparallelkey(cases, suite_repeat):
+            run_case_thread = dict()
+            def wait_for_queue(parallel=0):
+                while threading.active_count() > parallel + 1:
+                    time.sleep(0.5)
+
+            def add_to_dict(origin_dict, case):
+                for case in cases:
+                    for key in case.noparallelkey:
+                        if origin_dict.has_key(key):
+                            if case not in origin_dict[key]:
+                                origin_dict[key].append(case)
+                        else:
+                            origin_dict[key] = [ case ]
+                return origin_dict
+
+            def gen_dict(cases):
+                cases_dict = dict()
+                for case in cases:
+                    cases_dict = add_to_dict(cases_dict, case)
+                return cases_dict
+    
+            def count_from_dict(origin_dict):
+                count = 0
+                for key in origin_dict:
+                    count += len(origin_dict[key])
+                return count
+    
+            def remove_from_dict(origin_dict, value):
+                for key in origin_dict:
+                    if value in origin_dict[key]:
+                        origin_dict[key].remove(value)
+                return origin_dict
+
+            def clean_thread_from_dict(run_case_thread):
+                cases_to_remove = []
+                for case in run_case_thread:
+                    if not run_case_thread[case].isAlive():
+                        cases_to_remove.append(case)
+
+                for case in cases_to_remove:
+                    run_case_thread.pop(case, None)
+                return run_case_thread
+
+            def has_conflict_key(run_case_thread, case):
+                for key in case.noparallelkey:
+                    for case in run_case_thread:
+                        if key in case.noparallelkey:
+                            return True
+                return False
+
+            print cases
+            cases_dict = gen_dict(cases)
+
+            # For case with (parallel=True and noparallel != None) cannot run with other case right now and we cannot handle cross suite
+            wait_for_queue()
+            while count_from_dict(cases_dict) > 0:
+                if sig_flag:
+                    return
+
+                wait_for_queue(suite.parallel - 1)
+                for key in cases_dict:
+                    for case in cases_dict[key]:
+                        run_case_thread = clean_thread_from_dict(run_case_thread)
+                        if has_conflict_key(run_case_thread, case):
+                            continue
+                        if sig_flag:
+                            return
+
+                        wait_for_queue(suite.parallel - 1)
+                        if self.case_failure \
+                                and self.stop_when_fail:
+                            break
+                        # case_repeat not support for noparallelkey
+                        thread = threading.Thread(target=run_case, \
+                                args=(suite, case, suite_repeat, \
+                                0, suite.parallel, ))
+                        
+                        thread.start()
+                        run_case_thread[case] = thread
+                        cases_dict = remove_from_dict(cases_dict, case)
+
+                        break
+                time.sleep(0.1)
+            # Need to make sure all cases with (parallel=True and noparallel != None) completes
+            wait_for_queue()
         
         def run_suite(suite):
             def wait_for_queue(parallel=0):
@@ -420,7 +512,16 @@ class WoodPecker(object):
                         return
     
                 if suite.parallel != 0:
+                    case_noparallelkey = []
                     for case in suite.cases:
+                        if case.parallel and case.noparallelkey != None:
+                            case_noparallelkey.append(case)
+
+                    # 1. For case with (parallel=True and noparallel != None), we need run them in groups without conflict
+                    run_cases_noparallelkey(case_noparallelkey, suite_repeat)
+
+                    # 2. For case without (parallel=True and noparallel != None), we run them as usual
+                    for case in list(set(suite.cases) - set(case_noparallelkey)):
                         if self.case_failure and self.stop_when_fail:
                             break
                         if case.type == None:
