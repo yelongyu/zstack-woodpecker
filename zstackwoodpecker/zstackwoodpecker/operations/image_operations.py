@@ -253,7 +253,7 @@ def create_root_template_from_backup(backupStorageUuid,backupUuid,name=None,sess
     action.backupStorageUuid = backupStorageUuid
     action.backupUuid = backupUuid
     if not name:
-    name = "backup_image_%s" % backupUuid
+        name = "backup_image_%s" % backupUuid
     action.name = name
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger("Create image from [backup:] %s in [backup Storage:] %s" % (backupUuid, backupStorageUuid))
