@@ -60,6 +60,7 @@ def test():
 
     agent_url = flavor['agent_url']
     script = '{entity -> sleep((24*60*60-60)*1000)}'
+    dep_ops.remove_simulator_agent_script(agent_url)
     dep_ops.deploy_simulator_agent_script(agent_url, script)
     image_creation_option = test_util.ImageOption()
     backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
@@ -75,7 +76,7 @@ def test():
 
 def env_recover():
     global agent_url
-    dep_ops.remove_simulator_agent_script(CREATE_TEMPLATE_FROM_VOLUME_PATH)
+    dep_ops.remove_simulator_agent_script(agent_url)
     global vm
     if vm != None:
         vm.destroy()
