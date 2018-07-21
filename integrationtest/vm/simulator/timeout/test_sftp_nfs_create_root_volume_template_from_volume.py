@@ -35,7 +35,7 @@ CREATE_TEMPLATE_FROM_VOLUME_PATH = "/nfsprimarystorage/sftp/createtemplatefromvo
 UPLOAD_TO_SFTP_PATH = "/nfsprimarystorage/uploadtosftpbackupstorage"
 
 _config_ = {
-        'timeout' : 12000,
+        'timeout' : 24*60*60+1200,
         'noparallel' : False,
         'noparallelkey': [ CREATE_TEMPLATE_FROM_VOLUME_PATH, UPLOAD_TO_SFTP_PATH ]
         }
@@ -59,7 +59,7 @@ def test():
     vm = test_stub.create_vm()
 
     agent_url = flavor['agent_url']
-    script = '{entity -> sleep(3000)}'
+    script = '{entity -> sleep((24*60*60-60)*1000)}'
     dep_ops.deploy_simulator_agent_script(agent_url, script)
     image_creation_option = test_util.ImageOption()
     backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
