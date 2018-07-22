@@ -828,7 +828,7 @@ default one' % self.zstack_properties)
                     fd_r.close()
                     fd_w.write(ctl_content)
                     fd_w.close()
-                    ssh.scp_file(dst_file, dst_file, node.ip_, node.username_, node.password_)
+                    #ssh.scp_file(dst_file, dst_file, node.ip_, node.username_, node.password_)
                     print 'Inject jacoco agent into ctl.py'
                 else:
                     print 'Here is no jacocoagent.jar, skip to inject jacoco agent'
