@@ -822,13 +822,13 @@ default one' % self.zstack_properties)
                     ctl_content = '' 
                     for line in fd_r:
                         if line.find('with open(setenv_path') != -1:
-                            line = '            catalina_opts.append("-javaagent:/home/%s/jacocoagent.jar=output=tcpserver,address=%s,port=6300")\n%s'\
+                            line = '            catalina_opts.append("-javaagent:/var/lib/zstack/jacocoagent.jar=output=tcpserver,address=%s,port=6300")\n%s'\
                                 %(node.ip_, node.ip_, line)
                         ctl_content += line
                     fd_r.close()
                     fd_w.write(ctl_content)
                     fd_w.close()
-                    #ssh.scp_file(dst_file, dst_file, node.ip_, node.username_, node.password_)
+                    ssh.scp_file(dst_file, dst_file, node.ip_, node.username_, node.password_)
                     print 'Inject jacoco agent into ctl.py'
                 else:
                     print 'Here is no jacocoagent.jar, skip to inject jacoco agent'
