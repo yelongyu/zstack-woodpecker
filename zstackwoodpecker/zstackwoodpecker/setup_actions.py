@@ -823,7 +823,7 @@ default one' % self.zstack_properties)
                     for line in fd_r:
                         if line.find('with open(setenv_path') != -1:
                             line = '            catalina_opts.append("-javaagent:/var/lib/zstack/jacocoagent.jar=output=tcpserver,address=%s,port=6300")\n%s'\
-                                %(node.ip_, node.ip_, line)
+                                %(node.ip_, line)
                         ctl_content += line
                     fd_r.close()
                     fd_w.write(ctl_content)
