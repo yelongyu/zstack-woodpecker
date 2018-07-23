@@ -9,6 +9,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.vpcdns_operations as vpcdns_ops
+import os
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
@@ -30,6 +31,8 @@ dns_list = ['223.5.5.5', '1.1.1.1', '4.2.2.2', '8.8.8.8']
 
 
 def test():
+    if "test-config-vpc-dns.xml" != os.path.basename(os.environ.get('WOODPECKER_TEST_CONFIG_FILE')).strip():
+        test_util.test_skip('Skip test on test config except test-config-vpc-dns.xml')
     test_util.test_dsc("1. create vpc vrouter")
     vr = test_stub.create_vpc_vrouter(vpc_vr_name)
     vr_uuid = vr.inv.uuid
