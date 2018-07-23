@@ -75,12 +75,12 @@ def vm_op_test(vm, op):
         "VM_TEST_NONE": do_nothing,
         "VM_TEST_MIGRATE": migrate,
         "VM_TEST_SNAPSHOT": create_snapshot,
-        #"VM_TEST_CREATE_IMG": create_image,
+        "VM_TEST_CREATE_IMG": create_image,
         "VM_TEST_RESIZE_RVOL": resize_rvol,
         "VM_TEST_CHANGE_OS": change_os,
         "VM_TEST_RESET": reset,
         "VM_TEST_BACKUP": back_up,
-    "VM_TEST_REVERT_BACKUP": revert_backup,
+        "VM_TEST_REVERT_BACKUP": revert_backup,
         "VM_TEST_BACKUP_IMAGE": backup_image 
     }
     ops[op](vm)
@@ -104,8 +104,8 @@ def reset(vm):
 
 def migrate(vm_obj):
     ps = test_lib.lib_get_primary_storage_by_vm(vm_obj.get_vm())
-    if ps.type in [inventory.CEPH_PRIMARY_STORAGE_TYPE, 'SharedMountPoint', inventory.NFS_PRIMARY_STORAGE_TYPE,
-                   'SharedBlock']:
+    if vm_obj.vm.state == "Running" and ps.type in [inventory.CEPH_PRIMARY_STORAGE_TYPE, 'SharedMountPoint', inventory.NFS_PRIMARY_STORAGE_TYPE,
+                   'SharedBlock', inventory.LOCAL_STORAGE_TYPE]:
         target_host = test_lib.lib_find_random_host(vm_obj.vm)
         vm_obj.migrate(target_host.uuid)
     elif ps.type in [inventory.LOCAL_STORAGE_TYPE]:
@@ -238,13 +238,13 @@ def test():
     i = 0
     while True:
         i += 1
-    if i == 10:
+        if i == 10:
             vm_op_test(vm, "VM_TEST_STOP")
-        vm_op_test(vm, "VM_TEST_RESET")
+            vm_op_test(vm, "VM_TEST_RESET")
             vm.start()
             time.sleep(60)
             vm.check()
-        i = 0
+            i = 0
 
         vm_op_test(vm, random.choice(VM_STATE_OPS))
         VM_OPS = VM_STATE_OPS
@@ -255,17 +255,19 @@ def test():
         elif vm.state == "Stopped":
             VM_OPS = VM_STOPPED_OPS
             if not backup_list:
-        VM_OPS.remove("VM_TEST_REVERT_BACKUP")
-        VM_OPS.remove("VM_TEST_BACKUP_IMAGE")       
+                VM_OPS.remove("VM_TEST_REVERT_BACKUP")
+                VM_OPS.remove("VM_TEST_BACKUP_IMAGE")       
+
+        vm_op_test(vm, random.choice(VM_OPS))
 
         if vm.state == "Stopped":
             vm.start()
 
-    if test_lib.lib_is_vm_l3_has_vr(vm.vm):
-        test_lib.TestHarness = test_lib.TestHarnessVR
-    time.sleep(60)
-    cmd = "echo 111 > /root/" + str(int(time.time()))
-    test_lib.lib_execute_command_in_vm(vm.vm,cmd)
+        if test_lib.lib_is_vm_l3_has_vr(vm.vm):
+            test_lib.TestHarness = test_lib.TestHarnessVR
+        time.sleep(60)
+        cmd = "echo 111 > /root/" + str(int(time.time()))
+        test_lib.lib_execute_command_in_vm(vm.vm,cmd)
         vm.suspend()
         # create_snapshot/backup
         vm_op_test(vm, "VM_TEST_BACKUP")
