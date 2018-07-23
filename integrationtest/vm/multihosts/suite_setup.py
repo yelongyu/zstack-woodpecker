@@ -73,12 +73,6 @@ def test():
     for host in testHosts:
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd)
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd2)
-   
-    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
-    for host in testHosts:
-        if host.managementIp_ != mn_ip:
-            cmd = "echo 'export LANG=\"zh_CN.GB18030\"' >> /etc/profile && sudo ls /root && source /etc/profile"
-            os.system('sshpass -p password ssh root@%s "%s"' %(host.managementIp_,cmd))
 
     test_lib.setup_plan.execute_plan_without_deploy_test_agent()
     if test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
@@ -87,6 +81,16 @@ def test():
             os.system("bash %s '%s'" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ips))
     elif os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % (EXTRA_SUITE_SETUP_SCRIPT))
+
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    if test_lib.scenario_config != None and test_lib.scenario_file != None and not os.path.exists(test_lib.scenario_file):
+        host_ips = scenario_operations.dump_scenario_file_ips(test_lib.scenario_file)
+    else:
+        host_ips = testHosts
+    #for host in host_ips:
+    #    if host.managementIp_ != mn_ip:
+    #        cmd = "echo 'export LANG=\"zh_CN.GB18030\"' >> /etc/profile && sudo ls /root && source /etc/profile"
+    #        os.system('sshpass -p password ssh root@%s "%s"' %(host.managementIp_,cmd))
 
     deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
     for host in testHosts:
