@@ -83,7 +83,11 @@ def test():
         os.system("bash %s" % (EXTRA_SUITE_SETUP_SCRIPT))
 
     mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
-    for host in testHosts:
+    if test_lib.scenario_config != None and test_lib.scenario_file != None and not os.path.exists(test_lib.scenario_file):
+        host_ips = scenario_operations.dump_scenario_file_ips(test_lib.scenario_file)
+    else:
+        host_ips = testHosts
+    for host in host_ips:
         if host.managementIp_ != mn_ip:
             cmd = "echo 'export LANG=\"zh_CN.GB18030\"' >> /etc/profile && sudo ls /root && source /etc/profile"
             os.system('sshpass -p password ssh root@%s "%s"' %(host.managementIp_,cmd))
