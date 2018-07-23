@@ -87,10 +87,10 @@ def test():
         host_ips = scenario_operations.dump_scenario_file_ips(test_lib.scenario_file)
     else:
         host_ips = testHosts
-    for host in host_ips:
-        if host.managementIp_ != mn_ip:
-            cmd = "echo 'export LANG=\"zh_CN.GB18030\"' >> /etc/profile && sudo ls /root && source /etc/profile"
-            os.system('sshpass -p password ssh root@%s "%s"' %(host.managementIp_,cmd))
+    #for host in host_ips:
+    #    if host.managementIp_ != mn_ip:
+    #        cmd = "echo 'export LANG=\"zh_CN.GB18030\"' >> /etc/profile && sudo ls /root && source /etc/profile"
+    #        os.system('sshpass -p password ssh root@%s "%s"' %(host.managementIp_,cmd))
 
     deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
     for host in testHosts:
