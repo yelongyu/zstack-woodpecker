@@ -12,7 +12,7 @@ vm = None
 
 def test():
     global vm
-    vm = test_stub.create_stop_vm()
+    vm = test_stub.create_vlan_vm(strategy_type='CreateStopped')
     if vm.vm.state == "Stopped":
        print "vm state is Stopped"
     else:

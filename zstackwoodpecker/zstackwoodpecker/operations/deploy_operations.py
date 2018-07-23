@@ -2344,6 +2344,19 @@ def deploy_simulator_database(deploy_config, scenario_config = None, scenario_fi
 
     test_util.test_logger('[Done] zstack simulator database was created successfully.')
 
+def deploy_simulator_agent_script(url_path, script):
+    data = dict()
+    data['urlPath'] = url_path
+    data['script'] = script
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    url = "http://%s:8080/zstack/simulators/agent-pre-handlers/add" % (mn_ip)
+    ret = json_post(url, simplejson.dumps(data))
+
+def remove_simulator_agent_script(url_path):
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    url = "http://%s:8080/zstack/simulators/agent-pre-handlers/remove" % (mn_ip)
+    ret = json_post(url, url_path)
+
 def deploy_initial_database(deploy_config, scenario_config = None, scenario_file = None):
     operations = [
             add_backup_storage,

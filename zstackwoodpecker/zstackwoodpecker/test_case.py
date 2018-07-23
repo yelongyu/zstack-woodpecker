@@ -15,6 +15,7 @@ cleanup_times = 0
 TEST_CASE_CONFIG = '_config_'
 TIME_OUT = 'timeout'
 NO_PARALLEL = 'noparallel'
+NO_PARALLEL_KEY = 'noparallelkey'
 
 def get_case_config(test_case_path):
     sys.path.append(os.path.dirname(test_case_path))

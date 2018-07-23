@@ -24,6 +24,7 @@ Path = [[]]
 index = 0
 tag = "VM_TEST_REBOOT"
 backup = None
+backup_list = []
 
 def record(fun):
     def recorder(vm, op):
@@ -43,7 +44,8 @@ VM_RUNGGING_OPS = [
     "VM_TEST_SNAPSHOT",
     "VM_TEST_CREATE_IMG",
     "VM_TEST_RESIZE_RVOL",
-    "VM_TEST_NONE"
+    "VM_TEST_NONE",
+    "VM_TEST_BACKUP_IMAGE"
 ]
 
 VM_STOPPED_OPS = [
@@ -52,7 +54,9 @@ VM_STOPPED_OPS = [
     "VM_TEST_RESIZE_RVOL",
     "VM_TEST_CHANGE_OS",
     "VM_TEST_RESET",
-    "VM_TEST_NONE"
+    "VM_TEST_NONE",
+    "VM_TEST_REVERT_BACKUP",
+    "VM_TEST_BACKUP_IMAGE"
 ]
 
 VM_STATE_OPS = [
@@ -71,11 +75,13 @@ def vm_op_test(vm, op):
         "VM_TEST_NONE": do_nothing,
         "VM_TEST_MIGRATE": migrate,
         "VM_TEST_SNAPSHOT": create_snapshot,
-        "VM_TEST_CREATE_IMG": create_image,
+        #"VM_TEST_CREATE_IMG": create_image,
         "VM_TEST_RESIZE_RVOL": resize_rvol,
         "VM_TEST_CHANGE_OS": change_os,
         "VM_TEST_RESET": reset,
-        "VM_TEST_BACKUP": back_up
+        "VM_TEST_BACKUP": back_up,
+    "VM_TEST_REVERT_BACKUP": revert_backup,
+        "VM_TEST_BACKUP_IMAGE": backup_image 
     }
     ops[op](vm)
 
@@ -186,6 +192,16 @@ def back_up(vm_obj):
      backup_option.set_volume_uuid(test_lib.lib_get_root_volume(vm_obj.get_vm()).uuid)
      backup_option.set_backupStorage_uuid(bs.uuid)
      backup = vol_ops.create_backup(backup_option)
+     backup_list.append(backup)
+
+def revert_backup(vm_obj):
+    backup_uuid = backup_list.pop(random.randint(0, len(backup_list)-1)).uuid
+    vol_ops.revert_volume_from_backup(backup_uuid) 
+
+def backup_image(vm_obj):
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0] 
+    backup = random.choice(backup_list)
+    image = img_ops.create_root_template_from_backup(bs.uuid, backup.uuid)
 
 def print_path(Path):
     print("=" * 43 + "PATH" + "=" * 43)
@@ -222,31 +238,34 @@ def test():
     i = 0
     while True:
         i += 1
-	if i == 10:
+    if i == 10:
             vm_op_test(vm, "VM_TEST_STOP")
-	    vm_op_test(vm, "VM_TEST_RESET")
+        vm_op_test(vm, "VM_TEST_RESET")
             vm.start()
             time.sleep(60)
             vm.check()
-	    i = 0
+        i = 0
 
         vm_op_test(vm, random.choice(VM_STATE_OPS))
         VM_OPS = VM_STATE_OPS
         if vm.state == "Running":
             VM_OPS = VM_RUNGGING_OPS
+            if not backup_list:
+                VM_OPS.remove("VM_TEST_BACKUP_IMAGE")
         elif vm.state == "Stopped":
             VM_OPS = VM_STOPPED_OPS
-
-        vm_op_test(vm, random.choice(VM_OPS))
+            if not backup_list:
+        VM_OPS.remove("VM_TEST_REVERT_BACKUP")
+        VM_OPS.remove("VM_TEST_BACKUP_IMAGE")       
 
         if vm.state == "Stopped":
             vm.start()
 
-	if test_lib.lib_is_vm_l3_has_vr(vm.vm):
-	    test_lib.TestHarness = test_lib.TestHarnessVR
-	time.sleep(60)
-	cmd = "echo 111 > /root/" + str(int(time.time()))
-	test_lib.lib_execute_command_in_vm(vm.vm,cmd)
+    if test_lib.lib_is_vm_l3_has_vr(vm.vm):
+        test_lib.TestHarness = test_lib.TestHarnessVR
+    time.sleep(60)
+    cmd = "echo 111 > /root/" + str(int(time.time()))
+    test_lib.lib_execute_command_in_vm(vm.vm,cmd)
         vm.suspend()
         # create_snapshot/backup
         vm_op_test(vm, "VM_TEST_BACKUP")
@@ -254,7 +273,6 @@ def test():
         compare(ps, vm, backup)
 
         vm.resume()
-
 
 def error_cleanup():
     global test_obj_dict

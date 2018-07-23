@@ -248,6 +248,28 @@ def create_template_from_snapshot(image_creation_option, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, image_creation_option.get_session_uuid())
     return evt.inventory
 
+def create_root_template_from_backup(backupStorageUuid,backupUuid,name=None,session_uuid=None):
+    action = api_actions.CreateRootVolumeTemplateFromVolumeBackupAction()
+    action.backupStorageUuid = backupStorageUuid
+    action.backupUuid = backupUuid
+    if not name:
+        name = "backup_image_%s" % backupUuid
+    action.name = name
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("Create image from [backup:] %s in [backup Storage:] %s" % (backupUuid, backupStorageUuid))
+    return evt.inventory    
+
+def create_data_template_from_backup(backupStorageUuid,backupUuid,name=None,session_uuid=None):
+    action = api_actions.CreateDataVolumeTemplateFromVolumeBackupAction()
+    action.backupStorageUuid = backupStorageUuid
+    action.backupUuid = backupUuid
+    if not name:
+        name = "backup_image_%s" % backupUuid
+    action.name = name
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("Create image from [backup:] %s in [backup Storage:] %s" % (backupUuid, backupStorageUuid))
+    return evt.inventory
+
 def reconnect_sftp_backup_storage(bs_uuid, session_uuid = None):
     action = api_actions.ReconnectSftpBackupStorageAction()
     action.uuid = bs_uuid

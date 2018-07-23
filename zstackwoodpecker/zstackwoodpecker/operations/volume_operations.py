@@ -177,7 +177,14 @@ def create_backup(backup_option, session_uuid=None):
             (action.name, backup.uuid, action.volumeUuid))
     return backup
 
-
+def revert_volume_from_backup(backup_uuid, session_uuid=None):
+    action = api_actions.RevertVolumeFromVolumeBackupAction()
+    action.uuid = backup_uuid
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('Revert [volume_uuid:] %s ' %  backup_uuid)
+    return evt.inventory
+    
 def create_snapshot_scheduler(snapshot_option, type, name, start_time=None, interval=None, repeatCount=None, cron=None, session_uuid=None):
     action = api_actions.CreateVolumeSnapshotSchedulerAction()
     action.volumeUuid = snapshot_option.get_volume_uuid()
