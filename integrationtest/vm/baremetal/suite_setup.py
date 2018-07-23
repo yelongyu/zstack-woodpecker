@@ -23,9 +23,8 @@ def deploy_vbmc(vm_ip=None):
         shell.call('%s %s yum --nogpg -y reinstall python-pip' %(ssh_cmd, vm_ip))
         shell.call('%s %s pip install --upgrade pip' %(ssh_cmd, vm_ip))
         shell.call('%s %s pip install virtualbmc' %(ssh_cmd, vm_ip))
-        #shell.call('scp %s/integrationtest/vm/baremetal/vbmc.py \
-        #       %s:/var/lib/zstack/virtualenv/woodpecker/lib/python2.7/site-packages/virtualbmc/vbmc.py -fr' \
-        #       % (os.environ.get('woodpecker_root_path'),vm_ip))
+        shell.call('scp -rf %s/integrationtest/vm/baremetal/vbmc.py %s:/usr/lib/python2.7/site-packages/virtualbmc/vbmc.py'\
+                % (os.environ.get('woodpecker_root_path'),vm_ip))
     else:
         shell.call('yum --disablerepo=epel install -y libvirt-devel')
         shell.call('%s %s yum -y reinstall python-pip' %(ssh_cmd, vm_ip))
@@ -42,10 +41,6 @@ def test():
         test_util.test_skip('Suite Setup Success')
     if test_lib.scenario_config != None and test_lib.scenario_destroy != None:
         scenario_operations.destroy_scenario(test_lib.all_scenario_config, test_lib.scenario_destroy)
-
-    #setup = setup_actions.SetupAction()
-    #setup.plan = test_lib.all_config
-    #setup.run()
 
     test_lib.setup_plan.deploy_test_agent()
 
