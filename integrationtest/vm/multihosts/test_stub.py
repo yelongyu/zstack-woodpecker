@@ -70,7 +70,7 @@ def create_vr_vm(vm_name, image_name, l3_name):
     vm = create_vm(vm_name, imagename, l3name)
     return vm
 
-def create_vm(vm_name, image_name, l3_name, host_uuid = None):
+def create_vm(vm_name, image_name, l3_name, host_uuid = None, disk_offering_uuids=None):
     vm_creation_option = test_util.VmOption()
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
@@ -83,6 +83,8 @@ def create_vm(vm_name, image_name, l3_name, host_uuid = None):
     vm_creation_option.set_timeout(600000)
     if host_uuid:
         vm_creation_option.set_host_uuid(host_uuid)
+    if disk_offering_uuids:
+        vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
     vm = test_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
     vm.create()

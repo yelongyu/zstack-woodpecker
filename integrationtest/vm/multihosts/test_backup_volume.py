@@ -16,6 +16,7 @@ import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
 import zstackwoodpecker.zstack_test.zstack_test_snapshot as zstack_sp_header
 import zstackwoodpecker.operations.scenario_operations as sce_ops
 import zstackwoodpecker.header.host as host_header
+import zstackwoodpecker.header.volume as volume_header
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
@@ -25,6 +26,7 @@ index = 0
 tag = "VM_TEST_REBOOT"
 utility_vm = None
 backup = None
+backup_list = []
 
 def record(fun):
     def recorder(vm, dvol, op):
@@ -43,7 +45,8 @@ def record(fun):
 VOL_OPS = [
     "DVOL_TEST_CREATE_IMG",
     "DVOL_TEST_SNAPSHOT",
-    "DVOL_TEST_RESIZE"
+    "DVOL_TEST_RESIZE",
+    "VM_TEST_BACKUP_IMAGE"
 ]
 
 VM_STATE_OPS = [
@@ -64,6 +67,8 @@ def vm_op_test(vm, dvol, op):
         "DVOL_TEST_CREATE_IMG": create_image,
         "DVOL_TEST_RESIZE": resize_rvol,
 	"DVOL_BACKUP": back_up,
+        "VM_TEST_REVERT_BACKUP": revert_backup,
+        "VM_TEST_BACKUP_IMAGE": backup_image
     }
     ops[op](vm, dvol)
 
@@ -102,6 +107,14 @@ def create_image(vm_obj, dvol):
     new_image.delete()
     new_image.expunge()
 
+def revert_backup(vm_obj, dvol):
+    backup_uuid = backup_list.pop(random.randint(0, len(backup_list)-1)).uuid
+    vol_ops.revert_volume_from_backup(backup_uuid)
+
+def backup_image(vm_obj, dvol):
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
+    backup = random.choice(backup_list)
+    image = img_ops.create_data_template_from_backup(bs.uuid, backup.uuid)
 
 def resize_rvol(vm_obj, dvol):
     vol_size = dvol.volume.size
@@ -123,7 +136,7 @@ def back_up(vm_obj, dvol):
     backup_option.set_volume_uuid(dvol.volume.uuid)
     backup_option.set_backupStorage_uuid(bs.uuid)
     backup = vol_ops.create_backup(backup_option) 
-
+    backup_list.append(backup)
 
 def print_path(Path):
     print("=" * 43 + "PATH" + "=" * 43)
@@ -136,7 +149,6 @@ def print_path(Path):
                 path += (Path[i][j] + " --> ")
         print(path)
     print("=" * 90)
-
 
 def test():
     global test_obj_dict, VOL_OPS, VM_STATE_OPS, utility_vm, backup
@@ -152,18 +164,25 @@ def test():
     img_name = res_ops.query_resource(res_ops.IMAGE, cond)[0].name
     cond = res_ops.gen_query_conditions("category", '=', "Private")
     l3_name = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0].name
-    vm = test_stub.create_vm(vm_name, img_name, l3_name)
+    disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
+    disk_offering_uuids = [disk_offering.uuid]
+    vm = test_stub.create_vm(vm_name, img_name, l3_name, disk_offering_uuids=disk_offering_uuids)
     utility_vm = test_stub.create_vm(utility_vm_name, img_name, l3_name)
-    dvol = test_stub.create_volume()
-    dvol.attach(vm)
- 
-    i = 0
+
+    dvol = zstack_volume_header.ZstackTestVolume()
+    dvol.set_volume(test_lib.lib_get_data_volumes(vm.get_vm())[0])
+    dvol.set_state(volume_header.ATTACHED)
+
     while True:
         OPS = VOL_OPS + VM_STATE_OPS
+        if not backup_list:
+            OPS.remove("VM_TEST_BACKUP_IMAGE")
 
         vm_op_test(vm, dvol, random.choice(OPS))
 
         if vm.state == "Stopped":
+            if backup_list:
+                vm_op_test(vm, dvol, "VM_TEST_REVERT_BACKUP")
             vm.start()
 
 	if test_lib.lib_is_vm_l3_has_vr(vm.vm):
