@@ -65,7 +65,7 @@ def vm_op_test(vm, dvol, op):
         "VM_TEST_NONE": do_nothing,
         "DVOL_TEST_SNAPSHOT": create_snapshot,
         "DVOL_TEST_CREATE_IMG": create_image,
-        "DVOL_TEST_RESIZE": resize_rvol,
+        "DVOL_TEST_RESIZE": resize_dvol,
 	"DVOL_BACKUP": back_up,
         "VM_TEST_REVERT_BACKUP": revert_backup,
         "VM_TEST_BACKUP_IMAGE": backup_image
@@ -116,7 +116,7 @@ def backup_image(vm_obj, dvol):
     backup = random.choice(backup_list)
     image = img_ops.create_data_template_from_backup(bs.uuid, backup.uuid)
 
-def resize_rvol(vm_obj, dvol):
+def resize_dvol(vm_obj, dvol):
     vol_size = dvol.volume.size
     volume_uuid = dvol.volume.uuid
     set_size = 1024 * 1024 * 1024 + int(vol_size)
@@ -124,8 +124,8 @@ def resize_rvol(vm_obj, dvol):
     vm_obj.update()
     # if set_size/vol_size_after > 0.9:
     #     test_util.test_fail('Resize Root Volume failed, size = %s' % vol_size_after)
-    vm_obj.check()
-    test_lib.lib_wait_target_up(vm_obj.get_vm().vmNics[0].ip, 22, 300)
+    #vm_obj.check()
+    #test_lib.lib_wait_target_up(vm_obj.get_vm().vmNics[0].ip, 22, 300)
 
 
 def back_up(vm_obj, dvol):
@@ -172,11 +172,18 @@ def test():
     dvol = zstack_volume_header.ZstackTestVolume()
     dvol.set_volume(test_lib.lib_get_data_volumes(vm.get_vm())[0])
     dvol.set_state(volume_header.ATTACHED)
+    dvol.set_target_vm(vm)
 
     while True:
         OPS = VOL_OPS + VM_STATE_OPS
         if not backup_list:
             OPS.remove("VM_TEST_BACKUP_IMAGE")
+
+        dvol = zstack_volume_header.ZstackTestVolume()
+        dvol.set_volume(test_lib.lib_get_data_volumes(vm.get_vm())[0])
+        dvol.set_state(volume_header.ATTACHED)
+        dvol.set_target_vm(vm)
+
 
         vm_op_test(vm, dvol, random.choice(OPS))
 
