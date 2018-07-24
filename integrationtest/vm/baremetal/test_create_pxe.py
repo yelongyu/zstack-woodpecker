@@ -3,7 +3,6 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import test_stub
-import os
 
 def test():
     pxe_servers = res_ops.query_resource(res_ops.PXE_SERVER)
