@@ -48,9 +48,12 @@ agent_url = None
 vm = None
 image = None
 
-case_flavor = dict(take_volume_snapshot_default=       dict(agent_url=KVM_TAKE_VOLUME_SNAPSHOT_PATH),
-                   commit_to_imagestore_default=       dict(agent_url=COMMIT_TO_IMAGESTORE_PATH),
-                   upload_to_imagestore_default=       dict(agent_url=UPLOAD_TO_IMAGESTORE_PATH),
+case_flavor = dict(take_volume_snapshot_default=       dict(agent_url=KVM_TAKE_VOLUME_SNAPSHOT_PATH, agent_time=(24*60*60-60)*1000),
+                   commit_to_imagestore_default=       dict(agent_url=COMMIT_TO_IMAGESTORE_PATH, agent_time=(24*60*60-60)*1000),
+                   upload_to_imagestore_default=       dict(agent_url=UPLOAD_TO_IMAGESTORE_PATH, agent_time=(24*60*60-60)*1000),
+                   take_volume_snapshot_default_6min=  dict(agent_url=KVM_TAKE_VOLUME_SNAPSHOT_PATH, agent_time=360*1000),
+                   commit_to_imagestore_default_6min=  dict(agent_url=COMMIT_TO_IMAGESTORE_PATH, agent_time=360*1000),
+                   upload_to_imagestore_default_6min=  dict(agent_url=UPLOAD_TO_IMAGESTORE_PATH, agent_time=360*1000),
                    )
 
 def test():
@@ -61,7 +64,8 @@ def test():
     vm = test_stub.create_vm()
 
     agent_url = flavor['agent_url']
-    script = '{entity -> sleep((24*60*60-60)*1000)}'
+    agent_time = flavor['agent_time']
+    script = '{entity -> sleep(%s)}' % (agent_time)
     dep_ops.remove_simulator_agent_script(agent_url)
     dep_ops.deploy_simulator_agent_script(agent_url, script)
     image_creation_option = test_util.ImageOption()
