@@ -234,11 +234,5 @@
         <case timeout='600' repeat='1' noparallel='True'>ceph_pool_capacity/test_ceph_root_pool_cap.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_add_image_file_url.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_add_qcow2_image_file_url.py</case>
-        <case timeout='5000' repeat='1' noparallel='True'>clone/test_online_imagestore_full_clone_one_data_volume.py</case>
-        <case timeout='5000' repeat='1' noparallel='True'>clone/test_online_imagestore_full_clone_windows_one_data_volume.py</case>
-        <case timeout='5000' repeat='1' noparallel='True'>clone/test_pause_imagestore_full_clone_3vms_windows_two_data_volume.py</case>
-        <case timeout='5000' repeat='1' noparallel='True'>clone/test_pause_imagestore_full_clone_windows_two_data_volume.py</case>
-        <case timeout='5000' repeat='1' noparallel='True'>clone/test_stop_imagestore_full_clone_3vms_windows_two_data_volume.py</case>
-        <case timeout='5000' repeat='1' noparallel='True'>clone/test_stop_imagestore_full_clone_windows_two_data_volume.py</case>
     </suite>
 </integrationTest>
