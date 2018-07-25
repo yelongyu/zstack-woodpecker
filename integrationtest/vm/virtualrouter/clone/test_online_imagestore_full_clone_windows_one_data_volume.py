@@ -25,8 +25,11 @@ def test():
     #judge whether BS is imagestore
     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)
     for i in bs:
-        if i.type != inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
-            test_util.test_skip('Skip test on non-imagestore')
+        if i.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+	    break
+    else:
+        test_util.test_logger('BS is type %s.' % i.type)
+        test_util.test_skip('Skip test on non-imagestore')
 
     #judge whether PS is SharedBlock
     ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
