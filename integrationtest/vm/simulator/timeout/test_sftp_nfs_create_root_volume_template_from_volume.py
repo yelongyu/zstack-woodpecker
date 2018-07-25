@@ -47,8 +47,10 @@ agent_url = None
 vm = None
 image = None
 
-case_flavor = dict(create_tempate_default=       dict(agent_url=CREATE_TEMPLATE_FROM_VOLUME_PATH),
-                   upload_to_sftp_default=       dict(agent_url=UPLOAD_TO_SFTP_PATH),
+case_flavor = dict(create_tempate_default=                    dict(agent_url=CREATE_TEMPLATE_FROM_VOLUME_PATH, agent_time=(24*60*60-60)*1000),
+                   upload_to_sftp_default=                    dict(agent_url=UPLOAD_TO_SFTP_PATH, agent_time=(24*60*60-60)*1000),
+                   create_tempate_default_default_6min=       dict(agent_url=CREATE_TEMPLATE_FROM_VOLUME_PATH, agent_time=360*1000),
+                   upload_to_sftp_default_6min=               dict(agent_url=UPLOAD_TO_SFTP_PATH, agent_time=360*1000),
                    )
 
 def test():
@@ -59,7 +61,8 @@ def test():
     vm = test_stub.create_vm()
 
     agent_url = flavor['agent_url']
-    script = '{entity -> sleep((24*60*60-60)*1000)}'
+    agent_time = flavor['agent_time']
+    script = '{entity -> sleep(%s)}' % (agent_time)
     dep_ops.remove_simulator_agent_script(agent_url)
     dep_ops.deploy_simulator_agent_script(agent_url, script)
     image_creation_option = test_util.ImageOption()
