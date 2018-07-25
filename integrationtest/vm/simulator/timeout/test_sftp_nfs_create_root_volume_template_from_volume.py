@@ -67,6 +67,7 @@ def test():
     image_creation_option.set_backup_storage_uuid_list([backup_storage_list[0].uuid])
     image_creation_option.set_root_volume_uuid(vm.vm.rootVolumeUuid)
     image_creation_option.set_name('test_create_root_volume_template_timeout')
+    image_creation_option.set_timeout(24*60*60*1000)
     bs_type = backup_storage_list[0].type
 
     image = zstack_image_header.ZstackTestImage()

@@ -134,6 +134,7 @@ def create_root_volume_template(image_creation_option):
     action.guestOsType = image_creation_option.get_guest_os_type()
     action.system = image_creation_option.get_system()
     action.platform = image_creation_option.get_platform()
+    action.timeout = image_creation_option.get_timeout()
 
     description = image_creation_option.get_description()
     if not description:
