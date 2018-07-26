@@ -1,0 +1,32 @@
+import ./deploy.tmpt
+cephPrimaryStorageName = ceph-ps
+cephPrimaryStorageMonUrls = root:password@127.127.127.2;root:password@127.127.127.3;root:password@127.127.127.4
+cephPrimaryStorageDataVolumePoolName =
+cephPrimaryStorageRootVolumePoolName =
+cephPrimaryStorageImageCachePoolName =
+
+cephBackupStorageName = ceph-bs
+cephBackupStorageMonUrls = root:password@127.127.127.2;root:password@127.127.127.3;root:password@127.127.127.4
+cephBackupStoragePoolName =
+
+imageStoreBackupStorageName = imagestore
+sftpBackupStorageName2 = sftp
+
+localPrimaryStorageName = local
+localPrimaryStorageName2 = local2
+localPrimaryStorageUrl = /local_ps
+localPrimaryStorageUrl2 = /local_ps2
+
+sharedMountPointPrimaryStorageName = smp
+sharedMountPointPrimaryStorageName2 = smp2
+sharedMountPointPrimaryStorageUrl = /home/smp-ps
+sharedMountPointPrimaryStorageUrl2 = /home/smp-ps2
+
+nfsPrimaryStorageName = nfs
+nfsPrimaryStorageName2 = nfs2
+
+clusterName2 = cluster2
+clusterName3 = cluster3
+clusterName4 = cluster4
+
+disasterBsUrls = root:password@127.10.1.2
