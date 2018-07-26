@@ -64,7 +64,7 @@ def test():
         test_util.test_fail('Did not find 3 volumes for [vm:] %s. But we assigned 3 data volume when create the vm. We only catch %s volumes' % (new_vm.vm.uuid, volumes_number))
     else:
         test_util.test_logger('Find 3 volumes for [vm:] %s.' % new_vm.vm.uuid)
-
+    vm.resume()
     test_lib.lib_error_cleanup(test_obj_dict)
     test_util.test_pass('Test clone vm with two data volume Success')
 

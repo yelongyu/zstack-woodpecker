@@ -26,14 +26,10 @@ def test():
     #judge whether BS is imagestore
     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)
     for i in bs:
-        if i.type != inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
-            test_util.test_skip('Skip test on non-imagestore')
-
-    #judge whether PS is SharedBlock
-    #ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
-    #for i in ps:
-    #    if i.type == 'SharedBlock':
-    #        test_util.test_skip('Skip test on SharedBlock PS')
+        if i.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+	    break
+    else:
+        test_util.test_skip('Skip test on non-imagestore')
 
     #Skip for AliyunNAS PS
     ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
@@ -83,7 +79,7 @@ def test():
     #Vol_size_after = data_volume[0].size
     #If set_size != vol_size_after:
     #    test_util.test_fail('Resize Data Volume failed, size = %s' % vol_size_after)
-
+    vm.resume()
     test_lib.lib_error_cleanup(test_obj_dict)
     test_util.test_pass('Test clone vm with one data volume Success')
 

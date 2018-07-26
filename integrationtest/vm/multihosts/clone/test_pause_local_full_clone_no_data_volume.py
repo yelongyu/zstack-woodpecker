@@ -59,6 +59,7 @@ def test():
     else:
         test_util.test_logger('Find 1 volumes for [vm:] %s.' % new_vm.vm.uuid)
 
+    vm.resume()
     test_lib.lib_error_cleanup(test_obj_dict)
     test_util.test_pass('Test clone vm with one data volume Success')
 
