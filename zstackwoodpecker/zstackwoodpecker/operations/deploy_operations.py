@@ -557,7 +557,11 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
             zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, \
                     name=zone.name_)
             zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
-            disk_uuids = get_disk_uuid(scenarioFile)
+            if os.environ.get('ZSTACK_SIMULATOR') != "yes":
+                disk_uuids = get_disk_uuid(scenarioFile)
+            else:
+                # TODO: hardcoded right now
+                disk_uuids = ['1234567890'] * 1000
 
             for pr in xmlobject.safe_list(zone.primaryStorages.sharedBlockPrimaryStorage):
                 if ps_name and ps_name != pr.name_:
