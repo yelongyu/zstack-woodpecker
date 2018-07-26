@@ -31,6 +31,15 @@
           <hostRef>$hostName2</hostRef>
           <mnHostRef>$hostName2</mnHostRef>
         </vm>
+        <vm name="$vmName3" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
+          imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
+          <l3Networks>
+            <l3Network uuid="$vmL3Uuid">
+              <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
+            </l3Network>
+          </l3Networks>
+          <hostRef>$hostName3</hostRef>
+        </vm>
       </vms>
     </host>
   </hosts>
