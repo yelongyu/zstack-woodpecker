@@ -25,6 +25,15 @@ sharedMountPointPrimaryStorageUrl2 = /home/smp-ps2
 nfsPrimaryStorageName = nfs
 nfsPrimaryStorageName2 = nfs2
 
+iscsiFileSystemBackendPrimaryStorageName = iscsi-ps
+iscsiFileSystemBackendPrimaryStorageUrl = /home/btrfs
+iscsiChapUserName = 
+iscsiChapPassword = 
+iscsiFilesystem = btrfs
+iscsiHostname = 10.0.101.1
+iscsiUserName = root
+iscsiPassword = 1
+
 clusterName2 = cluster2
 clusterName3 = cluster3
 clusterName4 = cluster4
