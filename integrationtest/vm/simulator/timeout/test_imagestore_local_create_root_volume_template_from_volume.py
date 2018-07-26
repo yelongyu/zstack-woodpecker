@@ -31,13 +31,14 @@ import time
 import simplejson
 import zstackwoodpecker.operations.deploy_operations as dep_ops
 
-CREATE_TEMPLATE_FROM_VOLUME = "/localstorage/volume/createtemplate"
+KVM_TAKE_VOLUME_SNAPSHOT_PATH = "/vm/volume/takesnapshot"
+COMMIT_TO_IMAGESTORE_PATH = "/localstorage/imagestore/commit"
 UPLOAD_TO_IMAGESTORE_PATH = "/localstorage/imagestore/upload"
 
 _config_ = {
         'timeout' : 24*60*60+1200,
         'noparallel' : False,
-        'noparallelkey': [ CREATE_TEMPLATE_FROM_VOLUME, UPLOAD_TO_IMAGESTORE_PATH ]
+        'noparallelkey': [ KVM_TAKE_VOLUME_SNAPSHOT_PATH, COMMIT_TO_IMAGESTORE_PATH, UPLOAD_TO_IMAGESTORE_PATH ]
         }
 
 
@@ -47,9 +48,11 @@ agent_url = None
 vm = None
 image = None
 
-case_flavor = dict(create_template_default=            dict(agent_url=CREATE_TEMPLATE_FROM_VOLUME, agent_time=(24*60*60-60)*1000),
+case_flavor = dict(take_volume_snapshot_default=       dict(agent_url=KVM_TAKE_VOLUME_SNAPSHOT_PATH, agent_time=(24*60*60-60)*1000),
+                   commit_to_imagestore_default=       dict(agent_url=COMMIT_TO_IMAGESTORE_PATH, agent_time=(24*60*60-60)*1000),
                    upload_to_imagestore_default=       dict(agent_url=UPLOAD_TO_IMAGESTORE_PATH, agent_time=(24*60*60-60)*1000),
-                   create_template_default_6min=       dict(agent_url=CREATE_TEMPLATE_FROM_VOLUME, agent_time=360*1000),
+                   take_volume_snapshot_default_6min=  dict(agent_url=KVM_TAKE_VOLUME_SNAPSHOT_PATH, agent_time=360*1000),
+                   commit_to_imagestore_default_6min=  dict(agent_url=COMMIT_TO_IMAGESTORE_PATH, agent_time=360*1000),
                    upload_to_imagestore_default_6min=  dict(agent_url=UPLOAD_TO_IMAGESTORE_PATH, agent_time=360*1000),
                    )
 
