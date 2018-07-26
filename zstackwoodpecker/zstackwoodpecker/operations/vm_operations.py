@@ -279,7 +279,7 @@ def clone_vm(vm_uuid, vm_names, strategy, full = False, systemtag = None, sessio
     action.names=vm_names
     action.strategy=strategy
     action.full=full
-    action.timeout = 8000000
+    action.timeout = 80000000
     action.systemTags = systemtag
     test_util.action_logger('Clone VM [uuid:] %s to %s' % (vm_uuid, vm_names))
     evt = account_operations.execute_action_with_session(action, session_uuid)
