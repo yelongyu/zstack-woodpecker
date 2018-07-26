@@ -23,20 +23,6 @@ USER_PATH = os.path.expanduser('~')
 EXTRA_SUITE_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_suite_setup_config.sh' % USER_PATH
 EXTRA_HOST_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_host_setup_config.sh' % USER_PATH
 
-def add_ps_network_gateway_sys_tag():
-    '''
-        Add system tag for mn to monitor the storage network in network separated.
-        Currently, not support multiple PS case
-    '''
-    pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
-    if len(pss) > 1:
-        test_util.test_logger("add ps gateway skip for multiple ps case.")
-        return
-
-    ps = pss[0]
-    test_util.test_logger("add system tag: resourceUuid=%s tag=%s" %(ps.uuid, "primaryStorage::gateway::cidr::192.168.0.0/16"))
-    tag_ops.create_system_tag('PrimaryStorageVO', ps.uuid, "primaryStorage::gateway::cidr::192.168.0.0/16")
-
 
 def test():
     if test_lib.scenario_config == None or test_lib.scenario_file ==None:
@@ -74,10 +60,7 @@ def test():
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd2)
 
 
-
-    ha_deploy_tool = os.environ.get('zstackHaInstaller')
-    mn_img = os.environ.get('mnImage')
-    test_stub.deploy_2ha()
+    test_stub.deploy_2ha(test_lib.all_scenario_config, test_lib.scenario_file)
 
     test_stub.wrapper_of_wait_for_management_server_start(600, EXTRA_SUITE_SETUP_SCRIPT)
     test_util.test_logger("@@@DEBUG->suite_setup@@@ os\.environ\[\'ZSTACK_BUILT_IN_HTTP_SERVER_IP\'\]=%s; os\.environ\[\'zstackHaVip\'\]=%s"	\

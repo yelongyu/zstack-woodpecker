@@ -452,5 +452,15 @@ def wrapper_of_wait_for_management_server_start(wait_start_timeout, EXTRA_SUITE_
         restart_mn_node_with_long_timeout()
 
 
-def deploy_2ha():
-    pass
+def deploy_2ha(scenarioConfig, scenarioFile):
+    mn_ip1 = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, 0).ip_
+    mn_ip2 = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, 1).ip_
+    vip = os.environ['zstackHaVip']
+
+    woodpecker_vm_ip = shell.call("ip r | grep src | head -1 | awk '{print $NF}'").strip()
+    zsha2_path = "/home/%s/zsha2_9" % woodpecker_vm_ip
+    ssh.scp_file(zsha2_path, "/root/zsha2_9", mn_ip1, "root", "password")
+    cmd = '/root/zsha2_9 install-ha -bridge br_zsn0 -gateway 172.20.0.1 -repinfo "slave:slave123" -slave "root:password@' + mn_ip2 + '" -vip ' + vip + ' -db-root-pw zstack.mysql.password'
+    ret, output, stderr = ssh.execute(cmd, mn_ip1, "root", "password", False, 22)
+    if ret!=0:
+        test_util.test_logger("cmd=%s; ret=%s; output=%s; stderr=%s" %(cmd, ret, output, stderr))
