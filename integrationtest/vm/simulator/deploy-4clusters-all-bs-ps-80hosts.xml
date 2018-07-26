@@ -182,15 +182,8 @@
           <sharedMountPointPrimaryStorage name="$sharedMountPointPrimaryStorageName2"
             description="Test SMP PS 2"
             url="$sharedMountPointPrimaryStorageUrl2" />
-          <IscsiFileSystemBackendPrimaryStorage name="$iscsiFileSystemBackendPrimaryStorageName"
-            description="Test" url="$iscsiFileSystemBackendPrimaryStorageUrl"
-            chapUsername="$iscsiChapUserName"
-            chapPassword="$iscsiChapPassword"
-            filesystemType="$iscsiFilesystem"
-            hostname="$iscsiHostname"
-            sshUsername="$iscsiUserName"
-            sshPassword="$iscsiPassword"
-          />
+	  <sharedBlockPrimaryStorage name="$iscsiPrimaryStorageName"
+            description="ISCSI PS" />
         </primaryStorages>
   
         <clusters>
@@ -327,7 +320,7 @@
               <host name="$hostName5" description="Test5" managementIp="$hostIp5"
                 username="$hostUsername5" password="$hostPassword5" port="$hostPort5" duplication='20'/>
             </hosts>
-            <primaryStorageRef>$iscsiFileSystemBackendPrimaryStorageName</primaryStorageRef>
+            <primaryStorageRef>$iscsiPrimaryStorageName</primaryStorageRef>
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
