@@ -41,6 +41,15 @@ def start_host(host_vm, scenarioConfig):
         test_util.test_logger("Fail to start host [%s]" % host_vm.ip_)
         return False
 
+def query_host(host_ip, scenarioConfig):
+    mn_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
+    try:
+        host_inv = sce_ops.get_vm_inv_by_vm_ip(mn_ip, host_ip)
+        return host_inv
+    except:
+        test_util.test_logger("Fail to query host [%s]" % host_ip)
+        return False
+
 def recover_host(host_vm, scenarioConfig, deploy_config):
     stop_host(host_vm, scenarioConfig)
     host_inv = start_host(host_vm, scenarioConfig)
@@ -48,6 +57,21 @@ def recover_host(host_vm, scenarioConfig, deploy_config):
        return False
     host_ip = host_vm.ip_
     test_lib.lib_wait_target_up(host_ip, '22', 120)
+    host_config = sce_ops.get_scenario_config_vm(host_inv.name,scenarioConfig)
+    for l3network in xmlobject.safe_list(host_config.l3Networks.l3Network):
+        if hasattr(l3network, 'l2NetworkRef'):
+            for l2networkref in xmlobject.safe_list(l3network.l2NetworkRef):
+                nic_name = sce_ops.get_ref_l2_nic_name(l2networkref.text_, deploy_config)
+                if nic_name.find('.') >= 0 :
+                    vlan = nic_name.split('.')[1]
+                    test_util.test_logger('[vm:] %s %s is created.' % (host_ip, nic_name.replace("eth","zsn")))
+                    cmd = 'vconfig add %s %s' % (nic_name.split('.')[0].replace("eth","zsn"), vlan)
+                    test_lib.lib_execute_ssh_cmd(host_ip, host_config.imageUsername_, host_config.imagePassword_, cmd)
+    return True
+
+
+def recover_vlan_in_host(host_ip, scenarioConfig, deploy_config):
+    host_inv = query_host(host_ip, scenarioConfig)
     host_config = sce_ops.get_scenario_config_vm(host_inv.name,scenarioConfig)
     for l3network in xmlobject.safe_list(host_config.l3Networks.l3Network):
         if hasattr(l3network, 'l2NetworkRef'):
