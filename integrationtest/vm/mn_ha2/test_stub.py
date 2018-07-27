@@ -471,6 +471,8 @@ def deploy_2ha(scenarioConfig, scenarioFile):
 
     host_ip1 = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, 2).ip_
     os.environ['sftpBackupStorageHostname'] = host_ip1
+    cmd = r"sed -i \"s/sftpBackupStorageHostname = .*$/sftpBackupStorageHostname = %s/g\" /root/.zstackwoodpecker/integrationtest/vm/deploy.tmpt" %(host_ip1)
+    shell.call(cmd)
 
     woodpecker_vm_ip = shell.call("ip r | grep src | head -1 | awk '{print $NF}'").strip()
     zsha2_path = "/home/%s/zsha2" % woodpecker_vm_ip
