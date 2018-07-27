@@ -87,8 +87,16 @@ def revoke_admin_resource(account_uuid_list, session_uuid=None):
     volume_offerings = res_ops.get_resource(res_ops.DISK_OFFERING)
     for volume_offering in volume_offerings:
         acc_ops.revoke_resources(account_uuid_list, [volume_offering.uuid], session_uuid)
+
+def get_image_by_bs(bs_uuid):
+    cond = res_ops.gen_query_conditions('mediaType', '!=', 'ISO')
+    cond = res_ops.gen_query_conditions('platform', '=', 'Linux', cond)
+    cond = res_ops.gen_query_conditions('system','=','false', cond)
+    cond = res_ops.gen_query_conditions('backupStorageRefs.backupStorageUuid', '=', bs_uuid, cond)
+    image_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
+
 def create_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None,
-              image_uuid=None, session_uuid=None):
+              image_uuid=None, ps_uuid=None, session_uuid=None):
     if not vm_creation_option:
         instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(
             os.environ.get('instanceOfferingName_s')).uuid
@@ -119,6 +127,9 @@ def create_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None,
 
     if image_uuid:
         vm_creation_option.set_image_uuid(image_uuid)
+
+    if ps_uuid:
+        vm_creation_option.set_ps_uuid(ps_uuid)
 
     if session_uuid:
         vm_creation_option.set_session_uuid(session_uuid)

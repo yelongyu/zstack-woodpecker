@@ -58,7 +58,15 @@ def test():
     global agent_url
     global vm
     global image
-    vm = test_stub.create_vm()
+    imagestore = test_lib.lib_get_image_store_backup_storage()
+    if imagestore == None:
+        test_util.test_skip('Required imagestore to test')
+    image_uuid = test_stub.get_image_by_bs(imagestore.uuid)
+    ceph_pss = res_ops.query_resource(res_ops.CEPH_PRIMARY_STORAGE, [])
+    if len(ceph_pss) == 0:
+        test_util.test_skip('Required ceph ps to test')
+    ps_uuid = ceph_pss[0].uuid
+    vm = test_stub.create_vm(image_uuid=image_uuid, ps_uuid=ps_uuid)
 
     agent_url = flavor['agent_url']
     agent_time = flavor['agent_time']
@@ -66,12 +74,10 @@ def test():
     dep_ops.remove_simulator_agent_script(agent_url)
     dep_ops.deploy_simulator_agent_script(agent_url, script)
     image_creation_option = test_util.ImageOption()
-    backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
-    image_creation_option.set_backup_storage_uuid_list([backup_storage_list[0].uuid])
+    image_creation_option.set_backup_storage_uuid_list([imagestore.uuid])
     image_creation_option.set_root_volume_uuid(vm.vm.rootVolumeUuid)
     image_creation_option.set_name('test_create_root_volume_template_timeout')
     image_creation_option.set_timeout(24*60*60*1000)
-    bs_type = backup_storage_list[0].type
 
     image = zstack_image_header.ZstackTestImage()
     image.set_creation_option(image_creation_option)
