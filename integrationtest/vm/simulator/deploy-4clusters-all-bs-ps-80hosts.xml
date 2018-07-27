@@ -182,8 +182,8 @@
           <sharedMountPointPrimaryStorage name="$sharedMountPointPrimaryStorageName2"
             description="Test SMP PS 2"
             url="$sharedMountPointPrimaryStorageUrl2" />
-	  <sharedBlockPrimaryStorage name="$iscsiPrimaryStorageName"
-            description="ISCSI PS" />
+	  <!--<sharedBlockPrimaryStorage name="$iscsiPrimaryStorageName"
+            description="ISCSI PS" />-->
         </primaryStorages>
   
         <clusters>
@@ -314,7 +314,7 @@
             <l2NetworkRef>$l2VlanNetworkName19</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName20</l2NetworkRef>
           </cluster>
-<cluster name="$clusterName5" description="Test"
+<!--<cluster name="$clusterName5" description="Test"
             hypervisorType="$clusterHypervisorType">
             <hosts>
               <host name="$hostName5" description="Test5" managementIp="$hostIp5"
@@ -344,7 +344,7 @@
             <l2NetworkRef>$l2VlanNetworkName18</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName19</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName20</l2NetworkRef>
-          </cluster>
+          </cluster>-->
         </clusters>
         <l2Networks>
            <l2NoVlanNetwork name="$l2ManagementNetworkName" description="Basic L2 for management network"
