@@ -456,10 +456,18 @@ def deploy_2ha(scenarioConfig, scenarioFile):
     mn_ip1 = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, 0).ip_
     mn_ip2 = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, 1).ip_
     vip = os.environ['zstackHaVip']
+
     change_ip_cmd1 = "zstack-ctl change_ip --ip=" + mn_ip1
     ssh.execute(change_ip_cmd1, mn_ip1, "root", "password", False, 22)
+
+    iptables_cmd1 = "iptables -I INPUT -d " + vip + " -j ACCEPT" 
+    ssh.execute(iptables_cmd1, mn_ip1, "root", "password", False, 22)
+
     change_ip_cmd2 = "zstack-ctl change_ip --ip=" + mn_ip2
     ssh.execute(change_ip_cmd2, mn_ip2, "root", "password", False, 22)
+
+    iptables_cmd2 = "iptables -I INPUT -d " + vip + " -j ACCEPT"
+    ssh.execute(iptables_cmd2, mn_ip2, "root", "password", False, 22)
 
     woodpecker_vm_ip = shell.call("ip r | grep src | head -1 | awk '{print $NF}'").strip()
     zsha2_path = "/home/%s/zsha2" % woodpecker_vm_ip
