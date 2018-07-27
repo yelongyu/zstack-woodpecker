@@ -139,19 +139,19 @@
       <images>
         <image name="$image_dhcp_name" description="Test Image1"
           format="$vcenterrootImageFormat" url="$image_centos_dhcp"
-          mediaType="$rootMediaType" systemTags="vcenter::datacenter::undefined">
+          mediaType="$rootMediaType">
           <backupStorageRef>$vcnasdatastore</backupStorageRef>
         </image>
         <image name="$image_static_name" description="Test Image2"
           format="$vcenterrootImageFormat" url="$image_centos_static"
-          mediaType="$rootMediaType" systemTags="vcenter::datacenter::undefined">
+          mediaType="$rootMediaType">
           <backupStorageRef>$vcnasdatastore</backupStorageRef>
         </image>
         <image name="$vCenterVirtualRouterImageName"
           description="virtual router image for vcenter"
           mediaType="$rootMediaType" format="$vcenterrootImageFormat"
           username="$vCenterVRImageUsername" password="$vCenterVRImagePassword"
-          url="$vCenterVirtualRouterImageUrl" system="True" systemTags="vcenter::datacenter::undefined">
+          url="$vCenterVirtualRouterImageUrl" system="True">
           <backupStorageRef>$vcnasdatastore</backupStorageRef>
         </image>
       </images>

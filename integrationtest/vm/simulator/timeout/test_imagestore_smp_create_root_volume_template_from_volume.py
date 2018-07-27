@@ -31,33 +31,58 @@ import time
 import simplejson
 import zstackwoodpecker.operations.deploy_operations as dep_ops
 
-CREATE_TEMPLATE_FROM_VOLUME_PATH = "/nfsprimarystorage/sftp/createtemplatefromvolume"
-UPLOAD_TO_SFTP_PATH = "/nfsprimarystorage/uploadtosftpbackupstorage"
+CREATE_TEMPLATE_FROM_VOLUME_PATH = "/sharedmountpointprimarystorage/createtemplatefromvolume"
+COMMIT_BITS_TO_IMAGESTORE_PATH = "/sharedmountpointprimarystorage/imagestore/commit"
+UPLOAD_BITS_TO_IMAGESTORE_PATH = "/sharedmountpointprimarystorage/imagestore/upload"
 
 _config_ = {
-        'timeout' : 12000,
+        'timeout' : 24*60*60+1200,
         'noparallel' : False,
-        'noparallelkey': [ CREATE_TEMPLATE_FROM_VOLUME_PATH, UPLOAD_TO_SFTP_PATH ]
+        'noparallelkey': [ CREATE_TEMPLATE_FROM_VOLUME_PATH, COMMIT_BITS_TO_IMAGESTORE_PATH, UPLOAD_BITS_TO_IMAGESTORE_PATH ]
         }
 
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
+agent_url = None
 vm = None
 image = None
 
+case_flavor = dict(create_template_default=       dict(agent_url=CREATE_TEMPLATE_FROM_VOLUME_PATH, agent_time=(24*60*60-60)*1000),
+                   commit_to_imagestore_default=       dict(agent_url=COMMIT_BITS_TO_IMAGESTORE_PATH, agent_time=(24*60*60-60)*1000),
+                   upload_to_imagestore_default=       dict(agent_url=UPLOAD_BITS_TO_IMAGESTORE_PATH, agent_time=(24*60*60-60)*1000),
+                   create_template_default_6min=  dict(agent_url=CREATE_TEMPLATE_FROM_VOLUME_PATH, agent_time=360*1000),
+                   commit_to_imagestore_default_6min=  dict(agent_url=COMMIT_BITS_TO_IMAGESTORE_PATH, agent_time=360*1000),
+                   upload_to_imagestore_default_6min=  dict(agent_url=UPLOAD_BITS_TO_IMAGESTORE_PATH, agent_time=360*1000),
+                   )
+
 def test():
+    flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
+    global agent_url
     global vm
     global image
-    vm = test_stub.create_vm()
+    imagestore = test_lib.lib_get_image_store_backup_storage()
+    if imagestore == None:
+        test_util.test_skip('Required imagestore to test')
+    image_uuid = test_stub.get_image_by_bs(imagestore.uuid)
+    cond = res_ops.gen_query_conditions('type', '=', 'SharedMountPoint')
+    pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
+    if len(pss) == 0:
+        test_util.test_skip('Required smp ps to test')
+    ps_uuid = pss[0].uuid
+    vm = test_stub.create_vm(image_uuid=image_uuid, ps_uuid=ps_uuid)
 
-    script = '{entity -> sleep(3000)}'
-    dep_ops.deploy_simulator_agent_script(CREATE_TEMPLATE_FROM_VOLUME_PATH, script)
+    agent_url = flavor['agent_url']
+    agent_time = flavor['agent_time']
+    script = '{entity -> sleep(%s)}' % (agent_time)
+    dep_ops.remove_simulator_agent_script(agent_url)
+    dep_ops.deploy_simulator_agent_script(agent_url, script)
     image_creation_option = test_util.ImageOption()
     backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
     image_creation_option.set_backup_storage_uuid_list([backup_storage_list[0].uuid])
     image_creation_option.set_root_volume_uuid(vm.vm.rootVolumeUuid)
     image_creation_option.set_name('test_create_root_volume_template_timeout')
+    image_creation_option.set_timeout(24*60*60*1000)
     bs_type = backup_storage_list[0].type
 
     image = zstack_image_header.ZstackTestImage()
@@ -66,7 +91,8 @@ def test():
 
 
 def env_recover():
-    dep_ops.remove_simulator_agent_script(CREATE_TEMPLATE_FROM_VOLUME_PATH)
+    global agent_url
+    dep_ops.remove_simulator_agent_script(agent_url)
     global vm
     if vm != None:
         vm.destroy()

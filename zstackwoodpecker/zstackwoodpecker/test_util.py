@@ -1266,7 +1266,7 @@ class ResourceStackOption(DataOption):
         self.type = "zstack"
         self.rollback = False
         self.templateContent = None
-        self.template_uuid = None
+        self.templateUuid = None
         self.parameters = None
         self.uuid = None
         super(ResourceStackOption, self).__init__()
