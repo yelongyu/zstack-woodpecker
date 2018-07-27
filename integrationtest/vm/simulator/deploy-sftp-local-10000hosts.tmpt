@@ -3,3 +3,12 @@ import ./deploy.tmpt
 localPrimaryStorageName = local
 localPrimaryStorageUrl = /local_ps
 
+hostName = centos1
+hostIp = 127.1.101.1
+hostName2 = centos2
+hostIp2 = 127.1.102.1
+hostName3 = centos3
+hostIp3 = 127.1.103.1
+hostName4 = centos4
+hostIp4 = 127.1.104.1
+
