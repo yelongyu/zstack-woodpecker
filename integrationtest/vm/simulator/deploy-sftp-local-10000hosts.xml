@@ -156,7 +156,7 @@
             hypervisorType="$clusterHypervisorType">
             <hosts>
               <host name="$hostName" description="Test" managementIp="$hostIp"
-                username="$hostUsername" password="$hostPassword" duplication='10000'/>
+                username="$hostUsername" password="$hostPassword" duplication='1000'/>
             </hosts>
             <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
