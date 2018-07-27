@@ -460,7 +460,10 @@ def deploy_2ha(scenarioConfig, scenarioFile):
     woodpecker_vm_ip = shell.call("ip r | grep src | head -1 | awk '{print $NF}'").strip()
     zsha2_path = "/home/%s/zsha2" % woodpecker_vm_ip
     ssh.scp_file(zsha2_path, "/root/zsha2", mn_ip1, "root", "password")
+    ssh.execute("chmod a+x /root/zsha2", mn_ip1, "root", "password", False, 22)
     cmd = '/root/zsha2 install-ha -bridge br_zsn0 -gateway 172.20.0.1 -repinfo "slave:slave123" -slave "root:password@' + mn_ip2 + '" -vip ' + vip + ' -db-root-pw zstack.mysql.password'
+    test_util.test_logger("deploy 2ha by cmd: %s" %(cmd))
     ret, output, stderr = ssh.execute(cmd, mn_ip1, "root", "password", False, 22)
+    test_util.test_logger("cmd=%s; ret=%s; output=%s; stderr=%s" %(cmd, ret, output, stderr))
     if ret!=0:
-        test_util.test_logger("cmd=%s; ret=%s; output=%s; stderr=%s" %(cmd, ret, output, stderr))
+        test_util.test_fail("deploy 2ha failed")
