@@ -61,7 +61,16 @@ def test():
     global agent_url
     global vm
     global image
-    vm = test_stub.create_vm()
+    imagestore = test_lib.lib_get_image_store_backup_storage()
+    if imagestore == None:
+        test_util.test_skip('Required imagestore to test')
+    image_uuid = test_stub.get_image_by_bs(imagestore.uuid)
+    cond = res_ops.gen_query_conditions('type', '=', 'LocalStorage')
+    local_pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
+    if len(local_pss) == 0:
+        test_util.test_skip('Required ceph ps to test')
+    ps_uuid = local_pss[0].uuid
+    vm = test_stub.create_vm(image_uuid=image_uuid, ps_uuid=ps_uuid)
 
     agent_url = flavor['agent_url']
     agent_time = flavor['agent_time']
