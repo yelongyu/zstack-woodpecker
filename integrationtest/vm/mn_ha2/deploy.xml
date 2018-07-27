@@ -82,10 +82,12 @@
     </instanceOfferings>
   
     <backupStorages>
-      <cephBackupStorage name="$cephBackupStorageName"
-          description="Test" 
-          monUrls="$cephBackupStorageMonUrls" 
-      />
+      <imageStoreBackupStorage name="$sftpBackupStorageName"
+        description="Test" url="$sftpBackupStorageUrl"
+	username="$sftpBackupStorageUsername"
+	password="$sftpBackupStoragePassword"
+	hostname="$sftpBackupStorageHostname"
+	port="$sftpBackupStoragePort"/>
     </backupStorages>
 
     <images>
@@ -132,11 +134,11 @@
   
     <zones>
       <zone name="$zoneName" description="Test">
-        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
         <primaryStorages>
-          <cephPrimaryStorage name="$cephPrimaryStorageName"
-	      description="Test Ceph PS" 
-	      monUrls="$cephPrimaryStorageMonUrls" />
+	  <localPrimaryStorage name="$localPrimaryStorageName"
+            description="Test Local Primary Storage"
+            url="$localPrimaryStorageUrl" />
         </primaryStorages>
   
         <clusters>
@@ -150,7 +152,7 @@
               <host name="$hostName3" description="Test3" managementIp="$hostIp3"
                 username="$hostUsername" password="$hostPassword" />
             </hosts>
-            <primaryStorageRef>$cephPrimaryStorageName</primaryStorageRef>
+            <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
             <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
