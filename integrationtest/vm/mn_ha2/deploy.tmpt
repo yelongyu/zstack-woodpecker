@@ -202,3 +202,7 @@ zstackHaVip3 = 10.0.0.10
 localPrimaryStorageName = local-ps
 localPrimaryStorageUrl = /home/local-ps
 imageStoreBackupStorageName = imagestore1
+mnVmName1 = mn_vm_name1
+mnVmName2 = mn_vm_name2
+mnHostName1 = mn_host_name1
+mnHostName2 = mn_host_name2
