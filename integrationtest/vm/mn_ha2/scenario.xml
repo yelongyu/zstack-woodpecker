@@ -21,7 +21,6 @@
             </l3Network>
           </l3Networks>
           <mnHostRef>$mnHostName1</mnHostRef>
-          <hostRef>$mnHostName1</hostRef>
         </vm>
         <vm name="$mnVmName2" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid" imageUsername="$imageUsername" imagePassword="$imagePassword">
@@ -33,7 +32,6 @@
             </l3Network>
           </l3Networks>
           <mnHostRef>$mnHostName2</mnHostRef>
-          <hostRef>$mnHostName2</hostRef>
         </vm>
         <vm name="$vmName1" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
