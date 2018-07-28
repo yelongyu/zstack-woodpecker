@@ -493,11 +493,6 @@ def deploy_2ha(scenarioConfig, scenarioFile):
     iptables_cmd2 = "iptables -I INPUT -d " + vip + " -j ACCEPT"
     ssh.execute(iptables_cmd2, mn_ip2, "root", "password", False, 22)
 
-    host_ip1 = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, 2).ip_
-    os.environ['sftpBackupStorageHostname'] = host_ip1
-    cmd = r'sed -i "s/sftpBackupStorageHostname = .*$/sftpBackupStorageHostname = %s/g" /root/.zstackwoodpecker/integrationtest/vm/deploy.tmpt' %(host_ip1)
-    shell.call(cmd)
-
     woodpecker_vm_ip = shell.call("ip r | grep src | head -1 | awk '{print $NF}'").strip()
     zsha2_path = "/home/%s/zsha2" % woodpecker_vm_ip
     ssh.scp_file(zsha2_path, "/root/zsha2", mn_ip1, "root", "password")

@@ -82,7 +82,7 @@
     </instanceOfferings>
   
     <backupStorages>
-      <imageStoreBackupStorage name="$sftpBackupStorageName"
+      <imageStoreBackupStorage name="$imageStoreBackupStorageName"
         description="Test" url="$sftpBackupStorageUrl"
 	username="$sftpBackupStorageUsername"
 	password="$sftpBackupStoragePassword"
@@ -95,26 +95,26 @@
         format="$rootImageFormat" url="$imageUrl_s" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName_net" description="Test Image2" 
         format="$rootImageFormat" url="$imageUrl_net" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName3" description="Test Image3" 
         format="$rootImageFormat" url="$imageUrl3" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       </image>
       <image name="$virtualRouterImageName" 
         description="virtual router image" format="$rootImageFormat" 
         username="$vrImageUsername" password="$vrImagePassword"
         mediaType="$rootMediaType"
         hypervisorType='KVM' url="$virtualRouterImageUrl" system="True">
-        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       </image>
     </images>
   
@@ -134,7 +134,7 @@
   
     <zones>
       <zone name="$zoneName" description="Test">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
         <primaryStorages>
 	  <localPrimaryStorage name="$localPrimaryStorageName"
             description="Test Local Primary Storage"
