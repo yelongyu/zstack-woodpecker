@@ -82,7 +82,7 @@
     </instanceOfferings>
   
     <backupStorages>
-      <imageStoreBackupStorage name="$sftpBackupStorageName"
+      <imageStoreBackupStorage name="$imageStoreBackupStorageName"
         description="Test" url="$sftpBackupStorageUrl"
 	username="$sftpBackupStorageUsername"
 	password="$sftpBackupStoragePassword"
@@ -95,26 +95,26 @@
         format="$rootImageFormat" url="$imageUrl_s" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName_net" description="Test Image2" 
         format="$rootImageFormat" url="$imageUrl_net" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName3" description="Test Image3" 
         format="$rootImageFormat" url="$imageUrl3" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       </image>
       <image name="$virtualRouterImageName" 
         description="virtual router image" format="$rootImageFormat" 
         username="$vrImageUsername" password="$vrImagePassword"
         mediaType="$rootMediaType"
         hypervisorType='KVM' url="$virtualRouterImageUrl" system="True">
-        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       </image>
     </images>
   
@@ -134,7 +134,7 @@
   
     <zones>
       <zone name="$zoneName" description="Test">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
         <primaryStorages>
 	  <localPrimaryStorage name="$localPrimaryStorageName"
             description="Test Local Primary Storage"
@@ -156,7 +156,7 @@
             <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
-            <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
+            <!--<l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>-->
             <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName2</l2NetworkRef>
           </cluster>
@@ -212,7 +212,7 @@
             </l3Networks>
           </l2NoVlanNetwork>
   
-          <l2NoVlanNetwork name="$l2NoVlanNetworkName2" description="guest l2 network2"
+          <!--<l2NoVlanNetwork name="$l2NoVlanNetworkName2" description="guest l2 network2"
             physicalInterface="$l2NoVlanNetworkInterface2">
             <l3Networks>
               <l3BasicNetwork name="$l3NoVlanNetworkName2" description = "guest l3 network2 with user defined vlan">
@@ -234,7 +234,7 @@
                 </networkService>
               </l3BasicNetwork>
             </l3Networks>
-          </l2NoVlanNetwork>
+          </l2NoVlanNetwork>-->
   
           <l2VlanNetwork name="$l2VlanNetworkName1" 
             description="guest l2 vlan network1"

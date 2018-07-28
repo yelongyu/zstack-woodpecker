@@ -39,6 +39,8 @@
             </l3Network>
           </l3Networks>
           <hostRef>$hostName3</hostRef>
+          <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
+          <primaryStorageRef type="local" url="$localPrimaryStorageUrl">$localPrimaryStorageName</primaryStorageRef>
         </vm>
       </vms>
     </host>
