@@ -81,7 +81,11 @@ def test():
 
     image = zstack_image_header.ZstackTestImage()
     image.set_creation_option(image_creation_option)
+    start = time.time()
     image.create()
+    end = time.time()
+    if end - start < agent_time / 2 / 1000:
+        test_util.test_fail('execution time too short %s' % (end - start))
 
 
 def env_recover():
