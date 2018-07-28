@@ -1111,13 +1111,16 @@ class MulISO(object):
         l3_uuid = test_lib.lib_get_l3s_uuid_by_vm(self.vm1.get_vm())[0]
         self.add_route_to_bridge(l3_uuid)
 
-        test_lib.lib_wait_target_up(vm_ip, '23', 1200)
-        for _ in range(10):
-            actual_cdroms_with_media = self.get_wmic_volumenames(vm_ip)
-            if actual_cdroms_with_media == cdroms_with_media:
-                break
+        for r in range(2):
+            test_lib.lib_wait_target_up(vm_ip, '23', 1200)
+            for _ in range(10):
+                actual_cdroms_with_media = self.get_wmic_volumenames(vm_ip)
+                if actual_cdroms_with_media == cdroms_with_media:
+                    break
+                else:
+                    time.sleep(15)
             else:
-                time.sleep(15)
+                self.vm1.reboot()
         assert actual_cdroms_with_media == cdroms_with_media
 
 
