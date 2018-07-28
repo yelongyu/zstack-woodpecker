@@ -166,8 +166,15 @@ def test():
                 "publicNetworkUuid":{"Fn::GetAtt":["PublicNetwork","uuid"]},
                 "imageUuid":{"Fn::GetAtt":["VrouterImage", "uuid"]},
                 "cpuNum":2,
-                "memorySize":2147483648,
-                "systemTags":[{"Fn::Join": ["::", ["guestL3Network", {"Fn::GetAtt":["PrivateNetwork","uuid"]}]]}]
+                "memorySize":2147483648
+            }
+        },
+        "SystemTag":{
+            "Type":"ZStack::Resource::SystemTag",
+            "Properties":{
+                "resourceUuid":{"Fn::GetAtt":["VirtualRouterOffering","uuid"]},
+                "resourceType":"InstanceOfferingVO",
+                "tag":{"Fn::Join": ["::", ["guestL3Network", {"Fn::GetAtt":["PrivateNetwork","uuid"]}]]}
             }
         },
         "AttachNoVlanNetworkToCluster":{
