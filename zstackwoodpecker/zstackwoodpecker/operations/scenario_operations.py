@@ -2342,7 +2342,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     else:
                         test_util.test_logger("@@@DEBUG-WARNING@@@: vm_storage_ip is null, failed")
 
-                if xmlobject.has_element(vm, '2haMnRef'):
+                if xmlobject.has_element(vm, 'ha2MnRef'):
                     setup_2ha_mn_vm(zstack_management_ip, vm_inv, vm, deploy_config)
 
                 if xmlobject.has_element(vm, 'mnHostRef'):
