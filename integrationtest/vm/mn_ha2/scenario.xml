@@ -21,6 +21,7 @@
             </l3Network>
           </l3Networks>
 	  <nodeRef>$node1Name</nodeRef>
+          <2haMnRef>$node1Name</2haMnRef>
           <mnHostRef>$node1Name</mnHostRef>
         </vm>
         <vm name="$mnVmName2" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
@@ -33,6 +34,7 @@
             </l3Network>
           </l3Networks>
 	  <nodeRef>$node2Name</nodeRef>
+          <2haMnRef>$node2Name</2haMnRef>
           <mnHostRef>$node2Name</mnHostRef>
         </vm>
         <vm name="$vmName1" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
