@@ -30,7 +30,8 @@ def test():
     ps_env = test_stub.PSEnvChecker()
 
     ps1, ps2 = ps_env.get_two_ps()
-    disk_uuid.append(ps2.sharedBlocks[0].diskUuid)
+    if ps2.type == 'SharedBlock':
+        disk_uuid.append(ps2.sharedBlocks[0].diskUuid)
 
     vm_list = []
     for root_vol_ps in [ps1, ps2]:
