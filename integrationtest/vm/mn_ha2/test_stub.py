@@ -71,16 +71,24 @@ def recover_host(host_vm, scenarioConfig, deploy_config):
 
 
 def recover_vlan_in_host(host_ip, scenarioConfig, deploy_config):
+    test_util.test_logger("func: recover_vlan_in_host; host_ip=%s" %(host_ip))
+
     host_inv = query_host(host_ip, scenarioConfig)
+    test_lib.lib_wait_target_up(host_ip, '22', 120)
     host_config = sce_ops.get_scenario_config_vm(host_inv.name,scenarioConfig)
     for l3network in xmlobject.safe_list(host_config.l3Networks.l3Network):
+        test_util.test_logger("loop in for l3network")
         if hasattr(l3network, 'l2NetworkRef'):
+            test_util.test_logger("below if l2NetworkRef")
             for l2networkref in xmlobject.safe_list(l3network.l2NetworkRef):
+                test_util.test_logger("loop in l2networkref")
                 nic_name = sce_ops.get_ref_l2_nic_name(l2networkref.text_, deploy_config)
+                test_util.test_logger("nic_name=%s; l2networkref.text_=%s" %(nic_name, l2networkref.text_))
                 if nic_name.find('.') >= 0 :
                     vlan = nic_name.split('.')[1]
                     test_util.test_logger('[vm:] %s %s is created.' % (host_ip, nic_name.replace("eth","zsn")))
                     cmd = 'vconfig add %s %s' % (nic_name.split('.')[0].replace("eth","zsn"), vlan)
+                    test_util.test_logger("vconfig cmd=%s" %(cmd))
                     test_lib.lib_execute_ssh_cmd(host_ip, host_config.imageUsername_, host_config.imagePassword_, cmd)
     return True
 
@@ -497,7 +505,7 @@ def deploy_2ha(scenarioConfig, scenarioFile):
     zsha2_path = "/home/%s/zsha2" % woodpecker_vm_ip
     ssh.scp_file(zsha2_path, "/root/zsha2", mn_ip1, "root", "password")
     ssh.execute("chmod a+x /root/zsha2", mn_ip1, "root", "password", False, 22)
-    cmd = '/root/zsha2 install-ha -bridge br_zsn0 -gateway 172.20.0.1 -repinfo "slave:slave123" -slave "root:password@' + mn_ip2 + '" -vip ' + vip + ' -db-root-pw zstack.mysql.password'
+    cmd = '/root/zsha2 install-ha -bridge br_zsn0 -gateway 172.20.0.1 -slave "root:password@' + mn_ip2 + '" -vip ' + vip + ' -db-root-pw zstack.mysql.password -yes'
     test_util.test_logger("deploy 2ha by cmd: %s" %(cmd))
     ret, output, stderr = ssh.execute(cmd, mn_ip1, "root", "password", False, 22)
     test_util.test_logger("cmd=%s; ret=%s; output=%s; stderr=%s" %(cmd, ret, output, stderr))

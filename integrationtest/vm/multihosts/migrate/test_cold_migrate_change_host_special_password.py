@@ -21,9 +21,17 @@ test_stub = test_lib.lib_get_test_stub()
 
 def test():
     global vm, kvm_host 
-    ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0]
-    if ps.type != inventory.LOCAL_STORAGE_TYPE:
-        test_util.test_skip('Skip test on non-localstorage')
+
+    ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+    for i in ps:
+        if i.type == inventory.LOCAL_STORAGE_TYPE:
+ 	    break
+    else:
+        test_util.test_skip('Skip test on non-localstoreate PS')
+
+    #ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0]
+    #if ps.type != inventory.LOCAL_STORAGE_TYPE:
+    #    test_util.test_skip('Skip test on non-localstorage')
     #if "test-config-local-ps.xml" != os.path.basename(os.environ.get('WOODPECKER_TEST_CONFIG_FILE')).strip():
 	# test_util.test_skip('Skip test on non-localstoreage')
 #query all hosts and change password
@@ -71,18 +79,18 @@ def test():
 def error_cleanup():
     global vm
 
-    conditions = res_ops.gen_query_conditions('state', '=', 'Enabled')
-    if res_ops.query_resource(res_ops.HOST, conditions):
-        kvm_host = res_ops.query_resource(res_ops.HOST, conditions)
-        for i in kvm_host:
-                host_ops.update_kvm_host(i.uuid, 'password', 'password')
-                cmd = 'echo "password"| passwd --stdin root'
-                test_lib.lib_execute_ssh_cmd(i.managementIp,"root","password*()",cmd)
-                host_ops.reconnect_host(i.uuid)
-    else:
-        test_util.test_skip("There is no host. Skip test")
+    #conditions = res_ops.gen_query_conditions('state', '=', 'Enabled')
+    #if res_ops.query_resource(res_ops.HOST, conditions):
+    #    kvm_host = res_ops.query_resource(res_ops.HOST, conditions)
+    #    for i in kvm_host:
+    #            host_ops.update_kvm_host(i.uuid, 'password', 'password')
+    #            cmd = 'echo "password"| passwd --stdin root'
+    #            test_lib.lib_execute_ssh_cmd(i.managementIp,"root","password*()",cmd)
+    #            host_ops.reconnect_host(i.uuid)
+    #else:
+    #    test_util.test_skip("There is no host. Skip test")
 
-    test_util.test_dsc('Test KVM Host Infomation: password')
+    #test_util.test_dsc('Test KVM Host Infomation: password')
 
     if vm:
         try:

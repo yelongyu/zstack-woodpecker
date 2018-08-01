@@ -75,7 +75,7 @@
         memoryCapacity="$virtualRouterOfferingMemory_s" 
         cpuNum="$virtualRouterOfferingCpuNum_s" isDefault="true">
         <zoneRef>$zoneName</zoneRef>
-        <managementL3NetworkRef>$l3ManagementNetworkName</managementL3NetworkRef>
+        <managementL3NetworkRef>$l3PublicNetworkName</managementL3NetworkRef>
         <publicL3NetworkRef>$l3PublicNetworkName</publicL3NetworkRef>
         <imageRef>$virtualRouterImageName</imageRef>
       </virtualRouterOffering>
@@ -153,10 +153,10 @@
                 username="$hostUsername" password="$hostPassword" />
             </hosts>
             <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
-            <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
+            <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
-            <!--<l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>-->
+            <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName2</l2NetworkRef>
           </cluster>
@@ -212,7 +212,7 @@
             </l3Networks>
           </l2NoVlanNetwork>
   
-          <!--<l2NoVlanNetwork name="$l2NoVlanNetworkName2" description="guest l2 network2"
+          <l2NoVlanNetwork name="$l2NoVlanNetworkName2" description="guest l2 network2"
             physicalInterface="$l2NoVlanNetworkInterface2">
             <l3Networks>
               <l3BasicNetwork name="$l3NoVlanNetworkName2" description = "guest l3 network2 with user defined vlan">
@@ -234,7 +234,7 @@
                 </networkService>
               </l3BasicNetwork>
             </l3Networks>
-          </l2NoVlanNetwork>-->
+          </l2NoVlanNetwork>
   
           <l2VlanNetwork name="$l2VlanNetworkName1" 
             description="guest l2 vlan network1"

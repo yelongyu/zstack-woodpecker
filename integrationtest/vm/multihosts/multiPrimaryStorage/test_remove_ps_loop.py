@@ -30,8 +30,9 @@ def test():
     ps_env = test_stub.PSEnvChecker()
 
     ps1, ps2 = ps_env.get_two_ps()
-    volumegroup_uuid = ps2.sharedBlocks[0].sharedBlockGroupUuid
-    disk_uuid.append(ps2.sharedBlocks[0].diskUuid)
+    if ps2.type == 'SharedBlock':
+        volumegroup_uuid = ps2.sharedBlocks[0].sharedBlockGroupUuid
+        disk_uuid.append(ps2.sharedBlocks[0].diskUuid)
 
     for _ in xrange(5):
         test_util.test_dsc('Remove ps2')

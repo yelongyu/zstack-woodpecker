@@ -1,6 +1,6 @@
 '''
 
-New Integration test for testing stopped vm migration after change the password "Aa1!@#$%^&*()?" between hosts.
+New Integration test for testing stopped vm migration after change the password "Qq8!@#88%88?88" between hosts.
 
 @author: yetian
 '''
@@ -21,6 +21,7 @@ test_stub = test_lib.lib_get_test_stub()
 
 def test():
     global vm, kvm_host 
+
     ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
     for i in ps:
         if i.type == inventory.LOCAL_STORAGE_TYPE:
@@ -38,8 +39,8 @@ def test():
     if res_ops.query_resource(res_ops.HOST, conditions):
         kvm_host = res_ops.query_resource(res_ops.HOST, conditions)
         for i in kvm_host:
-        	host_ops.update_kvm_host(i.uuid, 'password', 'Aa1!@#$%^&*()?')
- 		cmd = 'echo "Aa1!@#$%^&*()?"| passwd --stdin root'
+        	host_ops.update_kvm_host(i.uuid, 'password', 'Qq8!@#88%88?88')
+ 		cmd = 'echo "Qq8!@#88%88?88"| passwd --stdin root'
     		test_lib.lib_execute_ssh_cmd(i.managementIp,"root","password",cmd)
     		host_ops.reconnect_host(i.uuid)
     else:
@@ -65,7 +66,7 @@ def test():
         for i in kvm_host:
                 host_ops.update_kvm_host(i.uuid, 'password', 'password')
                 cmd = 'echo "password"| passwd --stdin root'
-                test_lib.lib_execute_ssh_cmd(i.managementIp,"root","Aa1!@#$%^&*()?",cmd)
+                test_lib.lib_execute_ssh_cmd(i.managementIp,"root","Qq8!@#88%88?88",cmd)
                 host_ops.reconnect_host(i.uuid)
     else:
         test_util.test_skip("There is no host. Skip test")
@@ -84,7 +85,7 @@ def error_cleanup():
     #    for i in kvm_host:
     #            host_ops.update_kvm_host(i.uuid, 'password', 'password')
     #            cmd = 'echo "password"| passwd --stdin root'
-    #            test_lib.lib_execute_ssh_cmd(i.managementIp,"root","Aa1!@#$%^&*()?",cmd)
+    #            test_lib.lib_execute_ssh_cmd(i.managementIp,"root","Aa1~!@#$%^&*()?_+-{};:,.<>",cmd)
     #            host_ops.reconnect_host(i.uuid)
     #else:
     #    test_util.test_skip("There is no host. Skip test")

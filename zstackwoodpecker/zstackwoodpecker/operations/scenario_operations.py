@@ -252,6 +252,81 @@ def ensure_nic_all_have_cfg(vm_inv, vm_config, num_of_cfg):
         ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
     
 
+def setup_2ha_mn_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
+    vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
+    cmd = 'hostnamectl set-hostname %s' % (vm_ip.replace('.', '-'))
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+
+    udev_config = ''
+    change_nic_back_cmd = ''
+    nic_id = 0
+    modify_cfg = []
+    modify_cfg.append(r"cp /etc/sysconfig/network-scripts/ifcfg-eth0 /root/ifcfg-eth0;sync;sync;sync")
+    for l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
+        if hasattr(l3network, 'scenl3NetworkRef'):
+            for scenl3networkref in xmlobject.safe_list(l3network.scenl3NetworkRef):
+                conf = res_ops.gen_query_conditions('name', '=', '%s' % (scenl3networkref.text_))
+                l3_network = query_resource(zstack_management_ip, res_ops.L3_NETWORK, conf).inventories[0]
+                for vmnic in vm_inv.vmNics:
+                    if vmnic.l3NetworkUuid == l3_network.uuid:
+                        vmnic_mac = vmnic.mac
+                        break
+        else:
+            for vmnic in vm_inv.vmNics:
+                if vmnic.l3NetworkUuid == l3network.uuid_:
+                    vmnic_mac = vmnic.mac
+                    break
+        nic_name = "zsn%s" % (nic_id)
+        udev_config = udev_config + r'\\nACTION==\"add\", SUBSYSTEM==\"net\", DRIVERS==\"?*\", ATTR{type}==\"1\", ATTR{address}==\"%s\", NAME=\"%s\"' % (vmnic_mac, nic_name)
+        modify_cfg.append(r"rm -rf /etc/sysconfig/network-scripts/ifcfg-eth%s || True" %(nic_id))
+        modify_cfg.append(r"cp /root/ifcfg-eth0 /etc/sysconfig/network-scripts/ifcfg-zsn%s" %(nic_id))
+        modify_cfg.append(r"sed -i 's:eth0:zsn%s:g' /etc/sysconfig/network-scripts/ifcfg-zsn%s" %(nic_id, nic_id))
+        nic_id += 1
+
+    cmd = 'echo -e %s > /etc/udev/rules.d/70-persistent-net.rules' % (udev_config)
+    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+    modify_cfg.append(r"sleep 1")
+    modify_cfg.append(r"sync")
+    modify_cfg.append(r"sync")
+    modify_cfg.append(r"sync")
+
+    for cmd in modify_cfg:
+        test_util.test_logger("execute cmd: %s" %(cmd))
+        ret, output, stderr = ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+        if int(ret) != 0:
+            test_util.test_fail("cmd %s failed" %(cmd))
+
+
+    # NOTE: need to make filesystem in sync in VM before cold stop VM
+    stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
+    start_vm(zstack_management_ip, vm_inv.uuid)
+    if not test_lib.lib_wait_target_up(vm_ip, '22', 360):
+        test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
+
+    for l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
+        if hasattr(l3network, 'l2NetworkRef'):
+            for l2networkref in xmlobject.safe_list(l3network.l2NetworkRef):
+                nic_name = get_ref_l2_nic_name(l2networkref.text_, deploy_config)
+                if nic_name.find('.') >= 0:
+                    vlan = nic_name.split('.')[1]
+                    test_util.test_logger('[vm:] %s %s is created.' % (vm_ip, nic_name.replace("eth", "zsn")))
+                    cmd = 'vconfig add %s %s' % (nic_name.split('.')[0].replace("eth", "zsn"), vlan)
+                    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+
+    #host = get_deploy_host(vm_config.hostRef.text_, deploy_config)
+    #if hasattr(host, 'port_') and host.port_ != '22':
+    #    cmd = "sed -i 's/#Port 22/Port %s/g' /etc/ssh/sshd_config && iptables -I INPUT -p tcp -m tcp --dport %s -j ACCEPT && service sshd restart" % (host.port_, host.port_)
+    #    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+    #else:
+    #    host.port_ = '22'
+
+    #if host.username_ != 'root':
+    #    cmd = 'adduser %s && echo -e %s\\\\n%s | passwd %s' % (host.username_, host.password_, host.password_, host.username_)
+    #    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host.port_))
+    #    cmd = "echo '%s        ALL=(ALL)       NOPASSWD: ALL' >> /etc/sudoers" % (host.username_)
+    #    ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host.port_))
+
+
 def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
     cmd = 'hostnamectl set-hostname %s' % (vm_ip.replace('.', '-'))
@@ -2266,6 +2341,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                         vm_xml.set('storageIp', vm_storage_ip)
                     else:
                         test_util.test_logger("@@@DEBUG-WARNING@@@: vm_storage_ip is null, failed")
+
+                if xmlobject.has_element(vm, 'ha2MnRef'):
+                    setup_2ha_mn_vm(zstack_management_ip, vm_inv, vm, deploy_config)
+
                 if xmlobject.has_element(vm, 'mnHostRef'):
                     setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm)
 

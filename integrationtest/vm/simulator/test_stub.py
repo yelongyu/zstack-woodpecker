@@ -92,8 +92,11 @@ def get_image_by_bs(bs_uuid):
     cond = res_ops.gen_query_conditions('mediaType', '!=', 'ISO')
     cond = res_ops.gen_query_conditions('platform', '=', 'Linux', cond)
     cond = res_ops.gen_query_conditions('system','=','false', cond)
-    cond = res_ops.gen_query_conditions('backupStorageRefs.backupStorageUuid', '=', bs_uuid, cond)
-    image_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
+    images = res_ops.query_resource(res_ops.IMAGE, cond)
+    for image in images:
+        for bs_ref in image.backupStorageRefs:
+            if bs_ref.backupStorageUuid == bs_uuid:
+                return image.uuid
 
 def create_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None,
               image_uuid=None, ps_uuid=None, session_uuid=None):

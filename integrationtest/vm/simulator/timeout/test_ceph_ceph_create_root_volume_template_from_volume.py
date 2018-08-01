@@ -31,14 +31,13 @@ import time
 import simplejson
 import zstackwoodpecker.operations.deploy_operations as dep_ops
 
-KVM_TAKE_VOLUME_SNAPSHOT_PATH = "/vm/volume/takesnapshot"
-COMMIT_TO_IMAGESTORE_PATH = "/nfsprimarystorage/imagestore/commit"
-UPLOAD_TO_IMAGESTORE_PATH = "/nfsprimarystorage/imagestore/upload"
+CREATE_SNAPSHOT_PATH = "/ceph/primarystorage/snapshot/create"
+CP_PATH = "/ceph/primarystorage/volume/cp"
 
 _config_ = {
         'timeout' : 24*60*60+1200,
         'noparallel' : False,
-        'noparallelkey': [ KVM_TAKE_VOLUME_SNAPSHOT_PATH, COMMIT_TO_IMAGESTORE_PATH, UPLOAD_TO_IMAGESTORE_PATH ]
+        'noparallelkey': [ CREATE_SNAPSHOT_PATH, CP_PATH ]
         }
 
 
@@ -48,12 +47,10 @@ agent_url = None
 vm = None
 image = None
 
-case_flavor = dict(take_volume_snapshot_default=       dict(agent_url=KVM_TAKE_VOLUME_SNAPSHOT_PATH, agent_time=(24*60*60-60)*1000),
-                   commit_to_imagestore_default=       dict(agent_url=COMMIT_TO_IMAGESTORE_PATH, agent_time=(24*60*60-60)*1000),
-                   upload_to_imagestore_default=       dict(agent_url=UPLOAD_TO_IMAGESTORE_PATH, agent_time=(24*60*60-60)*1000),
-                   take_volume_snapshot_default_6min=  dict(agent_url=KVM_TAKE_VOLUME_SNAPSHOT_PATH, agent_time=360*1000),
-                   commit_to_imagestore_default_6min=  dict(agent_url=COMMIT_TO_IMAGESTORE_PATH, agent_time=360*1000),
-                   upload_to_imagestore_default_6min=  dict(agent_url=UPLOAD_TO_IMAGESTORE_PATH, agent_time=360*1000),
+case_flavor = dict(create_snapshot_default=         dict(agent_url=CREATE_SNAPSHOT_PATH, agent_time=(24*60*60-60)*1000),
+                   cp_default=       dict(agent_url=CP_PATH, agent_time=(24*60*60-60)*1000),
+                   create_snapshot_default_6min=    dict(agent_url=CREATE_SNAPSHOT_PATH, agent_time=360*1000),
+                   cp_default_6min=  dict(agent_url=CP_PATH, agent_time=360*1000),
                    )
 
 def test():
@@ -65,11 +62,10 @@ def test():
     if imagestore == None:
         test_util.test_skip('Required imagestore to test')
     image_uuid = test_stub.get_image_by_bs(imagestore.uuid)
-    cond = res_ops.gen_query_conditions('type', '=', 'NFS')
-    local_pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
-    if len(local_pss) == 0:
-        test_util.test_skip('Required nfs ps to test')
-    ps_uuid = local_pss[0].uuid
+    ceph_pss = res_ops.query_resource(res_ops.CEPH_PRIMARY_STORAGE, [])
+    if len(ceph_pss) == 0:
+        test_util.test_skip('Required ceph ps to test')
+    ps_uuid = ceph_pss[0].uuid
     vm = test_stub.create_vm(image_uuid=image_uuid, ps_uuid=ps_uuid)
 
     agent_url = flavor['agent_url']
@@ -78,12 +74,15 @@ def test():
     dep_ops.remove_simulator_agent_script(agent_url)
     dep_ops.deploy_simulator_agent_script(agent_url, script)
     image_creation_option = test_util.ImageOption()
-    backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
-    image_creation_option.set_backup_storage_uuid_list([backup_storage_list[0].uuid])
+    bss = res_ops.query_resource(res_ops.CEPH_BACKUP_STORAGE, [])
+    if len(bss) == 0:
+        test_util.test_skip('Required ceph bs to test')
+    bs_uuid = bss[0].uuid
+
+    image_creation_option.set_backup_storage_uuid_list([bs_uuid])
     image_creation_option.set_root_volume_uuid(vm.vm.rootVolumeUuid)
     image_creation_option.set_name('test_create_root_volume_template_timeout')
     image_creation_option.set_timeout(24*60*60*1000)
-    bs_type = backup_storage_list[0].type
 
     image = zstack_image_header.ZstackTestImage()
     image.set_creation_option(image_creation_option)
@@ -92,7 +91,6 @@ def test():
     end = time.time()
     if end - start < agent_time / 2 / 1000:
         test_util.test_fail('execution time too short %s' % (end - start))
-
 
 def env_recover():
     global agent_url
