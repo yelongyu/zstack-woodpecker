@@ -46,7 +46,7 @@ def test():
         clusterUuid = hosts[i].clusterUuid
         cond = res_ops.gen_query_conditions('cluster.uuid', '=', clusterUuid)
         psUuid = res_ops.query_resource_fields(res_ops.PRIMARY_STORAGE, cond)[0].uuid
-        for j in range(0, 10):
+        for j in range(0, 20):
             counter += 1
             if counter > num:
                 test_util.test_pass("Create %s volumes finished" %num)

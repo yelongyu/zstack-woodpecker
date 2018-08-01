@@ -46,7 +46,7 @@ def test():
     for i in range(0, 500):
         hostUuid = hosts[i].uuid
         hostName = hosts[i].name
-        for j in range(0, 10):
+        for j in range(0, 20):
             counter += 1
             if counter > num:
                 test_util.test_pass("Create %s vms finished" %num)
