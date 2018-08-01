@@ -12,11 +12,8 @@ import time
 import os
 
 def test():
-    gateway_ip = os.environ.get('ipRangeGateway')
-    #test_util.test_logger('gateway_ip:%s' % gateway_ip)
 
-
-    cmd = "ip a | grep 172 | awk '{print $5}'"
+    cmd = "ip a | grep 172 | awk '{print $NF}'"
     ethernet = os.popen(cmd).read()
     cmd = 'arping -I ' + ethernet.strip() + ' 172.20.0.1 -c 5'
     print cmd
