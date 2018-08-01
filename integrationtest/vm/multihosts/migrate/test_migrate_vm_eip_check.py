@@ -40,14 +40,20 @@ def test():
     
     vm.check()
 
+    ping_ret = []
+    cycle = 180
     migration_pid = os.fork()
     if migration_pid == 0:
         test_stub.migrate_vm_to_random_host(vm)
         sys.exit(0)
-    for _ in xrange(180):
-        if not test_lib.lib_check_directly_ping(vip.get_vip().ip):
-            test_util.test_fail('expected to be able to ping vip while it fail')
+    for _ in xrange(cycle):
+        ping_ret.append(test_lib.lib_check_directly_ping(vip.get_vip().ip))
         time.sleep(1)
+
+    package_loss = float(cycle - ping_ret.count(True)) / cycle
+
+    if package_loss > 0.03:
+        test_util.test_fail('expected to be able to ping vip while it fail')
 
     vm.destroy()
     test_obj_dict.rm_vm(vm)
