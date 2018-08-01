@@ -21,7 +21,7 @@ test_obj_dict = test_state.TestStateDict()
 
 def test():
     test_util.test_dsc('Create test vm migration with EIP and check.')
-    vm = test_stub.create_vr_vm('migrate_vm', 'imageName_s', 'l3VlanNetwork2')
+    vm = test_stub.create_vr_vm('migrate_vm', 'imageName_net', 'l3VlanNetwork2')
     test_obj_dict.add_vm(vm)
     
     pri_l3_name = os.environ.get('l3VlanNetwork2')
@@ -44,7 +44,7 @@ def test():
     if migration_pid == 0:
         test_stub.migrate_vm_to_random_host(vm)
         sys.exit(0)
-    for _ in xrange(300):
+    for _ in xrange(180):
         if not test_lib.lib_check_directly_ping(vip.get_vip().ip):
             test_util.test_fail('expected to be able to ping vip while it fail')
         time.sleep(1)
