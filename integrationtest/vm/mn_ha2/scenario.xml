@@ -11,7 +11,7 @@
   <hosts>
     <host uuid="$hostUuid">
       <vms>
-        <vm name="$mnVmName1" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
+        <vm name="$vmName4" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
             <l3Network uuid="$vmL3Uuid">
@@ -24,7 +24,7 @@
           <ha2MnRef>$node1Name</ha2MnRef>
           <mnHostRef>$node1Name</mnHostRef>
         </vm>
-        <vm name="$mnVmName2" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
+        <vm name="$vmName5" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
             <l3Network uuid="$vmL3Uuid">
