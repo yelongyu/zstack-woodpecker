@@ -33,8 +33,11 @@ def create_vol(vol_name, disk_offering_uuid, host_uuid, ps_uuid, session_uuid=No
     test_stub.create_volume(vol_option)
 
 def test():
-    flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
-    num = flavor['vol_num']
+    if os.environ.get('CASE_FLAVOR'):
+        flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
+        num = flavor['vol_num']
+    else:
+        num = 10000
     hostUuid = ''
     hostName = ''
     diskOfferingUuid = res_ops.query_resource_fields(res_ops.DISK_OFFERING)[0].uuid
