@@ -5,7 +5,7 @@ New Integration test for testing imagecache cleanup after vm live migration betw
 @author: quarkonics
 '''
 import os
-
+import time
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
