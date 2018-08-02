@@ -34,12 +34,17 @@ def create_vm(name, image_uuid, host_uuid, instance_offering_uuid, l3_uuid, sess
     test_stub.create_vm(vm_creation_option)
 
 def test():
-    flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
-    num = flavor['vm_num']
+    if os.environ.get('CASE_FLAVOR'):
+        flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
+        num = flavor['vm_num']
+    else:
+        num = 10000
+
     imageUuid = res_ops.query_resource_fields(res_ops.IMAGE)[0].uuid
     hostUuid = ''
     hostName = ''
-    instanceOfferingUuid = res_ops.query_resource_fields(res_ops.INSTANCE_OFFERING)[0].uuid
+    cond = res_ops.gen_query_conditions('type', '=',  'UserVm')
+    instanceOfferingUuid = res_ops.query_resource_fields(res_ops.INSTANCE_OFFERING, cond)[0].uuid
     l3NetworkUuids = res_ops.query_resource_fields(res_ops.L3_NETWORK)[0].uuid
     hosts = res_ops.query_resource_fields(res_ops.HOST)
     counter = 0
@@ -52,7 +57,7 @@ def test():
                 test_util.test_pass("Create %s vms finished" %num)
             vm_name = 'vm-'+str(j)+'-on-host-'+hostName
             thread = threading.Thread(target=create_vm, args=(vm_name, imageUuid, hostUuid, instanceOfferingUuid, l3NetworkUuids))
-            while threading.active_count() > 100:
+            while threading.active_count() > 10:
                 time.sleep(5)
             thread.start()
     test_util.test_fail("Fail to create vms")
