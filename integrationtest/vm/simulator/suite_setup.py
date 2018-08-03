@@ -11,12 +11,14 @@ import zstackwoodpecker.operations.config_operations as config_operations
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 
+CREATE_SNAPSHOT_PATH = "/ceph/primarystorage/snapshot/create"
+CP_PATH = "/ceph/primarystorage/volume/cp"
+
 USER_PATH = os.path.expanduser('~')
 EXTRA_SUITE_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_suite_setup_config.sh' % USER_PATH
 def test():
     os.system('pkill -f ./test_rest_server.py')
     process = subprocess.Popen("./test_rest_server.py", cwd=os.environ.get('woodpecker_root_path')+'/dailytest/', universal_newlines=True)
-    test_util.test_pass('Suite Setup Success')
     if test_lib.scenario_config != None and test_lib.scenario_file != None and not os.path.exists(test_lib.scenario_file):
         scenario_operations.deploy_scenario(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
         test_util.test_skip('Suite Setup Success')
@@ -35,4 +37,69 @@ def test():
     if os.environ.get('ZSTACK_SIMULATOR') == "yes":
         deploy_operations.deploy_simulator_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
     deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
+
+    agent_url = CP_PATH
+    script = '''
+{ entity -> 
+	slurper = new groovy.json.JsonSlurper();
+	entity_body_json = slurper.parseText(entity.body);
+        src_path = entity_body_json["srcPath"].split('/')[3].split('@')[0]
+	def get = new URL("http://127.0.0.1:8888/test/api/v1.0/store/"+src_path).openConnection(); 
+	get.setRequestMethod("GET");
+	def getRC = get.getResponseCode();
+	if (!getRC.equals(200)) {
+		return;
+		//throw new Exception("shuang")
+	}; 
+	reply = get.getInputStream().getText();
+        reply_json = slurper.parseText(reply);
+        try {
+	        item = reply_json['result']
+        	item_json = slurper.parseText(item);
+		action = item_json['%s']
+        } catch(Exception ex) {
+		return
+	}
+	if (action == 1) {
+		sleep((24*60*60-60)*1000)
+	} else if (action == 2) {
+		sleep(360*1000)
+	}
+}
+''' % (agent_url)
+    deploy_operations.remove_simulator_agent_script(agent_url)
+    deploy_operations.deploy_simulator_agent_script(agent_url, script)
+
+    agent_url = CREATE_SNAPSHOT_PATH
+    script = '''
+{ entity -> 
+	slurper = new groovy.json.JsonSlurper();
+	entity_body_json = slurper.parseText(entity.body);
+        volume_uuid = entity_body_json["volumeUuid"]
+	def get = new URL("http://127.0.0.1:8888/test/api/v1.0/store/"+volume_uuid).openConnection(); 
+	get.setRequestMethod("GET");
+	def getRC = get.getResponseCode();
+	if (!getRC.equals(200)) {
+		return;
+		//throw new Exception("shuang")
+	}; 
+	reply = get.getInputStream().getText();
+        reply_json = slurper.parseText(reply);
+        try {
+	        item = reply_json['result']
+        	item_json = slurper.parseText(item);
+		action = item_json['%s']
+        } catch(Exception ex) {
+		return
+	}
+	if (action == 1) {
+		sleep((24*60*60-60)*1000)
+	} else if (action == 2) {
+		sleep(360*1000)
+	}
+}
+''' % (agent_url)
+    deploy_operations.remove_simulator_agent_script(agent_url)
+    deploy_operations.deploy_simulator_agent_script(agent_url, script)
+
     test_util.test_pass('Suite Setup Success')
