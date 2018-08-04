@@ -47,9 +47,9 @@ vm = None
 image = None
 
 case_flavor = dict(create_snapshot_default=         dict(agent_url=CREATE_SNAPSHOT_PATH, agent_action=1),
-                   upload_imagestore_default=       dict(agent_url=UPLOAD_IMAGESTORE_PATH, agent_action=(24*60*60-60)*1000),
-                   create_snapshot_default_6min=    dict(agent_url=CREATE_SNAPSHOT_PATH, agent_action=360*1000),
-                   upload_imagestore_default_6min=  dict(agent_url=UPLOAD_IMAGESTORE_PATH, agent_action=360*1000),
+                   upload_imagestore_default=       dict(agent_url=UPLOAD_IMAGESTORE_PATH, agent_action=1),
+                   create_snapshot_default_6min=    dict(agent_url=CREATE_SNAPSHOT_PATH, agent_action=2),
+                   upload_imagestore_default_6min=  dict(agent_url=UPLOAD_IMAGESTORE_PATH, agent_action=2),
                    )
 
 def test():

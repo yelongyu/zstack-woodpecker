@@ -13,6 +13,7 @@ import zstackwoodpecker.test_util as test_util
 
 CREATE_SNAPSHOT_PATH = "/ceph/primarystorage/snapshot/create"
 CP_PATH = "/ceph/primarystorage/volume/cp"
+UPLOAD_IMAGESTORE_PATH = "/ceph/primarystorage/imagestore/backupstorage/commit"
 
 USER_PATH = os.path.expanduser('~')
 EXTRA_SUITE_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_suite_setup_config.sh' % USER_PATH
@@ -77,6 +78,38 @@ def test():
 	entity_body_json = slurper.parseText(entity.body);
         volume_uuid = entity_body_json["volumeUuid"]
 	def get = new URL("http://127.0.0.1:8888/test/api/v1.0/store/"+volume_uuid).openConnection(); 
+	get.setRequestMethod("GET");
+	def getRC = get.getResponseCode();
+	if (!getRC.equals(200)) {
+		return;
+		//throw new Exception("shuang")
+	}; 
+	reply = get.getInputStream().getText();
+        reply_json = slurper.parseText(reply);
+        try {
+	        item = reply_json['result']
+        	item_json = slurper.parseText(item);
+		action = item_json['%s']
+        } catch(Exception ex) {
+		return
+	}
+	if (action == 1) {
+		sleep((24*60*60-60)*1000)
+	} else if (action == 2) {
+		sleep(360*1000)
+	}
+}
+''' % (agent_url)
+    deploy_operations.remove_simulator_agent_script(agent_url)
+    deploy_operations.deploy_simulator_agent_script(agent_url, script)
+
+    agent_url = UPLOAD_IMAGESTORE_PATH
+    script = '''
+{ entity -> 
+	slurper = new groovy.json.JsonSlurper();
+	entity_body_json = slurper.parseText(entity.body);
+        src_path = entity_body_json["srcPath"].split('/')[3].split('@')[0]
+	def get = new URL("http://127.0.0.1:8888/test/api/v1.0/store/"+src_path).openConnection(); 
 	get.setRequestMethod("GET");
 	def getRC = get.getResponseCode();
 	if (!getRC.equals(200)) {
