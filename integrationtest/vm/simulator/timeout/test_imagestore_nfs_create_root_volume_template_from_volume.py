@@ -77,17 +77,18 @@ def test():
         agent_time = (24*60*60-60)*1000
     elif agent_action == 2:
         agent_time = 360 * 1000
-    image_uuid = '41d885f97869142f8fcd7dbae872a8a0'
-    rsp = dep_ops.json_post("http://127.0.0.1:8888/test/api/v1.0/store/create", simplejson.dumps({"key": image_uuid, "value": '{"%s":%s}' % (agent_url, agent_action)}))
+    if agent_url == KVM_TAKE_VOLUME_SNAPSHOT_PATH:
+        rsp = dep_ops.json_post("http://127.0.0.1:8888/test/api/v1.0/store/create", simplejson.dumps({"key": vm.get_vm().rootVolumeUuid, "value": '{"%s":%s}' % (agent_url, agent_action)}))
+    else:
+        image_uuid = '41d885f97869142f8fcd7dbae872a8a0'
+        rsp = dep_ops.json_post("http://127.0.0.1:8888/test/api/v1.0/store/create", simplejson.dumps({"key": image_uuid, "value": '{"%s":%s}' % (agent_url, agent_action)}))
 
     image_creation_option = test_util.ImageOption()
-    backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
     image_creation_option.set_uuid(image_uuid)
-    image_creation_option.set_backup_storage_uuid_list([backup_storage_list[0].uuid])
+    image_creation_option.set_backup_storage_uuid_list([imagestore.uuid])
     image_creation_option.set_root_volume_uuid(vm.vm.rootVolumeUuid)
     image_creation_option.set_name('test_create_root_volume_template_timeout')
     image_creation_option.set_timeout(24*60*60*1000)
-    bs_type = backup_storage_list[0].type
 
     image = zstack_image_header.ZstackTestImage()
     image.set_creation_option(image_creation_option)

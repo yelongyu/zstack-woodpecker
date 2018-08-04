@@ -19,7 +19,6 @@ KVM_TAKE_VOLUME_SNAPSHOT_PATH = "/vm/volume/takesnapshot"
 LOCAL_COMMIT_TO_IMAGESTORE_PATH = "/localstorage/imagestore/commit"
 LOCAL_UPLOAD_TO_IMAGESTORE_PATH = "/localstorage/imagestore/upload"
 NFS_CREATE_TEMPLATE_FROM_VOLUME_PATH = "/nfsprimarystorage/sftp/createtemplatefromvolume"
-KVM_TAKE_VOLUME_SNAPSHOT_PATH = "/vm/volume/takesnapshot"
 NFS_COMMIT_TO_IMAGESTORE_PATH = "/nfsprimarystorage/imagestore/commit"
 NFS_UPLOAD_TO_IMAGESTORE_PATH = "/nfsprimarystorage/imagestore/upload"
 
@@ -176,6 +175,38 @@ def test():
     deploy_operations.remove_simulator_agent_script(agent_url)
     deploy_operations.deploy_simulator_agent_script(agent_url, script)
 
+    agent_url = NFS_COMMIT_TO_IMAGESTORE_PATH
+    script = '''
+{ entity -> 
+	slurper = new groovy.json.JsonSlurper();
+	entity_body_json = slurper.parseText(entity.body);
+        image_uuid = entity_body_json["imageUuid"]
+	def get = new URL("http://127.0.0.1:8888/test/api/v1.0/store/"+image_uuid).openConnection(); 
+	get.setRequestMethod("GET");
+	def getRC = get.getResponseCode();
+	if (!getRC.equals(200)) {
+		return;
+		//throw new Exception("shuang")
+	}; 
+	reply = get.getInputStream().getText();
+        reply_json = slurper.parseText(reply);
+        try {
+	        item = reply_json['result']
+        	item_json = slurper.parseText(item);
+		action = item_json['%s']
+        } catch(Exception ex) {
+		return
+	}
+	if (action == 1) {
+		sleep((24*60*60-60)*1000)
+	} else if (action == 2) {
+		sleep(360*1000)
+	}
+}
+''' % (agent_url)
+    deploy_operations.remove_simulator_agent_script(agent_url)
+    deploy_operations.deploy_simulator_agent_script(agent_url, script)
+
     agent_url = NFS_UPLOAD_TO_IMAGESTORE_PATH
     script = '''
 { entity -> 
@@ -240,6 +271,39 @@ def test():
     deploy_operations.remove_simulator_agent_script(agent_url)
     deploy_operations.deploy_simulator_agent_script(agent_url, script)
 
+    agent_url = LOCAL_COMMIT_TO_IMAGESTORE_PATH
+    script = '''
+{ entity -> 
+	slurper = new groovy.json.JsonSlurper();
+	entity_body_json = slurper.parseText(entity.body);
+        image_uuid = entity_body_json["imageUuid"]
+	def get = new URL("http://127.0.0.1:8888/test/api/v1.0/store/"+image_uuid).openConnection(); 
+	get.setRequestMethod("GET");
+	def getRC = get.getResponseCode();
+	if (!getRC.equals(200)) {
+		return;
+		//throw new Exception("shuang")
+	}; 
+	reply = get.getInputStream().getText();
+        reply_json = slurper.parseText(reply);
+        try {
+	        item = reply_json['result']
+        	item_json = slurper.parseText(item);
+		action = item_json['%s']
+        } catch(Exception ex) {
+		return
+	}
+	if (action == 1) {
+		sleep((24*60*60-60)*1000)
+	} else if (action == 2) {
+		sleep(360*1000)
+	}
+}
+''' % (agent_url)
+    deploy_operations.remove_simulator_agent_script(agent_url)
+    deploy_operations.deploy_simulator_agent_script(agent_url, script)
+
+
     agent_url = LOCAL_UPLOAD_TO_IMAGESTORE_PATH
     script = '''
 { entity -> 
@@ -271,5 +335,38 @@ def test():
 ''' % (agent_url)
     deploy_operations.remove_simulator_agent_script(agent_url)
     deploy_operations.deploy_simulator_agent_script(agent_url, script)
+
+    agent_url = KVM_TAKE_VOLUME_SNAPSHOT_PATH
+    script = '''
+{ entity -> 
+	slurper = new groovy.json.JsonSlurper();
+	entity_body_json = slurper.parseText(entity.body);
+        volume_uuid = entity_body_json["volumeUuid"]
+	def get = new URL("http://127.0.0.1:8888/test/api/v1.0/store/"+volume_uuid).openConnection(); 
+	get.setRequestMethod("GET");
+	def getRC = get.getResponseCode();
+	if (!getRC.equals(200)) {
+		return;
+		//throw new Exception("shuang")
+	}; 
+	reply = get.getInputStream().getText();
+        reply_json = slurper.parseText(reply);
+        try {
+	        item = reply_json['result']
+        	item_json = slurper.parseText(item);
+		action = item_json['%s']
+        } catch(Exception ex) {
+		return
+	}
+	if (action == 1) {
+		sleep((24*60*60-60)*1000)
+	} else if (action == 2) {
+		sleep(360*1000)
+	}
+}
+''' % (agent_url)
+    deploy_operations.remove_simulator_agent_script(agent_url)
+    deploy_operations.deploy_simulator_agent_script(agent_url, script)
+
 
     test_util.test_pass('Suite Setup Success')
