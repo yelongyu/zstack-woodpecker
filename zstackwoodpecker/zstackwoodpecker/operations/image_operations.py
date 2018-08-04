@@ -122,6 +122,7 @@ def create_root_volume_template(image_creation_option):
     Create Root Volume Template from a root volume
     '''
     action = api_actions.CreateRootVolumeTemplateFromRootVolumeAction()
+    action.resourceUuid = image_creation_option.get_uuid()
     action.rootVolumeUuid = image_creation_option.get_root_volume_uuid()
     action.backupStorageUuids = image_creation_option.get_backup_storage_uuid_list()
 
@@ -188,6 +189,7 @@ def create_root_volume_template_apiid(image_creation_option, apiid):
     action.guestOsType = image_creation_option.get_guest_os_type()
     action.system = image_creation_option.get_system()
     action.platform = image_creation_option.get_platform()
+    action.resourceUuid = image_creation_option.get_uuid()
 
     description = image_creation_option.get_description()
     if not description:
@@ -287,6 +289,7 @@ def commit_volume_as_image(image_creation_option, session_uuid = None):
     action.guestOsType = image_creation_option.get_guest_os_type()
     action.system = image_creation_option.get_system()
     action.platform = image_creation_option.get_platform()
+    action.resourceUuid = image_creation_option.get_uuid()
 
     description = image_creation_option.get_description()
     if not description:
@@ -307,6 +310,7 @@ def commit_volume_as_image_apiid(image_creation_option, apiid, session_uuid = No
     action.guestOsType = image_creation_option.get_guest_os_type()
     action.system = image_creation_option.get_system()
     action.platform = image_creation_option.get_platform()
+    action.uuid = image_creation_option.get_uuid()
 
     description = image_creation_option.get_description()
     if not description:

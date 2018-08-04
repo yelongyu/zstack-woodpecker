@@ -31,14 +31,14 @@ import time
 import simplejson
 import zstackwoodpecker.operations.deploy_operations as dep_ops
 
-KVM_TAKE_VOLUME_SNAPSHOT_PATH = "/vm/volume/takesnapshot"
-COMMIT_TO_IMAGESTORE_PATH = "/localstorage/imagestore/commit"
+CREATE_TEMPLATE_FROM_VOLUME = "/localstorage/volume/createtemplate"
+#KVM_TAKE_VOLUME_SNAPSHOT_PATH = "/vm/volume/takesnapshot"
+#COMMIT_TO_IMAGESTORE_PATH = "/localstorage/imagestore/commit"
 UPLOAD_TO_IMAGESTORE_PATH = "/localstorage/imagestore/upload"
 
 _config_ = {
         'timeout' : 24*60*60+1200,
         'noparallel' : False,
-        'noparallelkey': [ KVM_TAKE_VOLUME_SNAPSHOT_PATH, COMMIT_TO_IMAGESTORE_PATH, UPLOAD_TO_IMAGESTORE_PATH ]
         }
 
 
@@ -48,12 +48,14 @@ agent_url = None
 vm = None
 image = None
 
-case_flavor = dict(take_volume_snapshot_default=       dict(agent_url=KVM_TAKE_VOLUME_SNAPSHOT_PATH, agent_time=(24*60*60-60)*1000),
-                   commit_to_imagestore_default=       dict(agent_url=COMMIT_TO_IMAGESTORE_PATH, agent_time=(24*60*60-60)*1000),
-                   upload_to_imagestore_default=       dict(agent_url=UPLOAD_TO_IMAGESTORE_PATH, agent_time=(24*60*60-60)*1000),
-                   take_volume_snapshot_default_6min=  dict(agent_url=KVM_TAKE_VOLUME_SNAPSHOT_PATH, agent_time=360*1000),
-                   commit_to_imagestore_default_6min=  dict(agent_url=COMMIT_TO_IMAGESTORE_PATH, agent_time=360*1000),
-                   upload_to_imagestore_default_6min=  dict(agent_url=UPLOAD_TO_IMAGESTORE_PATH, agent_time=360*1000),
+case_flavor = dict(create_template_default=            dict(agent_url=CREATE_TEMPLATE_FROM_VOLUME, agent_action=1),
+                   #take_volume_snapshot_default=       dict(agent_url=KVM_TAKE_VOLUME_SNAPSHOT_PATH, agent_action=1),
+                   #commit_to_imagestore_default=       dict(agent_url=COMMIT_TO_IMAGESTORE_PATH, agent_action=1),
+                   upload_to_imagestore_default=       dict(agent_url=UPLOAD_TO_IMAGESTORE_PATH, agent_action=1),
+                   create_template_default_6min=            dict(agent_url=CREATE_TEMPLATE_FROM_VOLUME, agent_action=2),
+                   #take_volume_snapshot_default_6min=  dict(agent_url=KVM_TAKE_VOLUME_SNAPSHOT_PATH, agent_action=2),
+                   #commit_to_imagestore_default_6min=  dict(agent_url=COMMIT_TO_IMAGESTORE_PATH, agent_action=2),
+                   upload_to_imagestore_default_6min=  dict(agent_url=UPLOAD_TO_IMAGESTORE_PATH, agent_action=2),
                    )
 
 def test():
@@ -73,17 +75,19 @@ def test():
     vm = test_stub.create_vm(image_uuid=image_uuid, ps_uuid=ps_uuid)
 
     agent_url = flavor['agent_url']
-    agent_time = flavor['agent_time']
-    script = '{entity -> sleep(%s)}' % (agent_time)
-    dep_ops.remove_simulator_agent_script(agent_url)
-    dep_ops.deploy_simulator_agent_script(agent_url, script)
+    agent_action = flavor['agent_action']
+    if agent_action == 1:
+        agent_time = (24*60*60-60)*1000
+    elif agent_action == 2:
+        agent_time = 360 * 1000
+    image_uuid = '8be4892dffc25a6db1cca2c82a5675bf'
+    rsp = dep_ops.json_post("http://127.0.0.1:8888/test/api/v1.0/store/create", simplejson.dumps({"key": image_uuid, "value": '{"%s":%s}' % (agent_url, agent_action)}))
     image_creation_option = test_util.ImageOption()
-    backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
-    image_creation_option.set_backup_storage_uuid_list([backup_storage_list[0].uuid])
+    image_creation_option.set_uuid(image_uuid)
+    image_creation_option.set_backup_storage_uuid_list([imagestore.uuid])
     image_creation_option.set_root_volume_uuid(vm.vm.rootVolumeUuid)
     image_creation_option.set_name('test_create_root_volume_template_timeout')
     image_creation_option.set_timeout(24*60*60*1000)
-    bs_type = backup_storage_list[0].type
 
     image = zstack_image_header.ZstackTestImage()
     image.set_creation_option(image_creation_option)
@@ -95,8 +99,6 @@ def test():
 
 
 def env_recover():
-    global agent_url
-    dep_ops.remove_simulator_agent_script(agent_url)
     global vm
     if vm != None:
         vm.destroy()

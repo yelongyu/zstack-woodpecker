@@ -851,7 +851,14 @@ class ImageOption(DataOption):
         self.format = None #qcow/raw for KVM, simulator, 
         self.system = None #used for system image
         self.system_tags = None #used for system tags
+        self.uuid = None
         super(ImageOption, self).__init__()
+
+    def set_uuid(self, uuid):
+        self.uuid = uuid
+
+    def get_uuid(self):
+        return self.uuid
 
     def set_root_volume_uuid(self, root_volume_uuid):
         self.root_volume_uuid = root_volume_uuid
