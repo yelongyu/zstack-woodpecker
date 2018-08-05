@@ -25,6 +25,8 @@ SMP_CREATE_TEMPLATE_FROM_VOLUME_PATH = "/sharedmountpointprimarystorage/createte
 SMP_COMMIT_BITS_TO_IMAGESTORE_PATH = "/sharedmountpointprimarystorage/imagestore/commit"
 SMP_UPLOAD_BITS_TO_IMAGESTORE_PATH = "/sharedmountpointprimarystorage/imagestore/upload"
 LOCAL_UPLOAD_BIT_PATH = "/localstorage/sftp/upload"
+NFS_UPLOAD_TO_SFTP_PATH = "/nfsprimarystorage/uploadtosftpbackupstorage"
+SMP_UPLOAD_BITS_TO_SFTP_BACKUPSTORAGE_PATH = "/sharedmountpointprimarystorage/sftp/upload"
 
 
 USER_PATH = os.path.expanduser('~')
@@ -153,6 +155,38 @@ def test():
 	slurper = new groovy.json.JsonSlurper();
 	entity_body_json = slurper.parseText(entity.body);
         src_path = entity_body_json["rootVolumePath"].split('vol-')[1].split('/')[0]
+	def get = new URL("http://127.0.0.1:8888/test/api/v1.0/store/"+src_path).openConnection(); 
+	get.setRequestMethod("GET");
+	def getRC = get.getResponseCode();
+	if (!getRC.equals(200)) {
+		return;
+		//throw new Exception("shuang")
+	}; 
+	reply = get.getInputStream().getText();
+        reply_json = slurper.parseText(reply);
+        try {
+	        item = reply_json['result']
+        	item_json = slurper.parseText(item);
+		action = item_json['%s']
+        } catch(Exception ex) {
+		return
+	}
+	if (action == 1) {
+		sleep((24*60*60-60)*1000)
+	} else if (action == 2) {
+		sleep(360*1000)
+	}
+}
+''' % (agent_url)
+    deploy_operations.remove_simulator_agent_script(agent_url)
+    deploy_operations.deploy_simulator_agent_script(agent_url, script)
+
+    agent_url = SMP_CREATE_TEMPLATE_FROM_VOLUME_PATH
+    script = '''
+{ entity -> 
+	slurper = new groovy.json.JsonSlurper();
+	entity_body_json = slurper.parseText(entity.body);
+        src_path = entity_body_json["volumePath"].split('vol-')[1].split('/')[0]
 	def get = new URL("http://127.0.0.1:8888/test/api/v1.0/store/"+src_path).openConnection(); 
 	get.setRequestMethod("GET");
 	def getRC = get.getResponseCode();
@@ -471,5 +505,68 @@ def test():
     deploy_operations.remove_simulator_agent_script(agent_url)
     deploy_operations.deploy_simulator_agent_script(agent_url, script)
 
+    agent_url = NFS_UPLOAD_TO_SFTP_PATH
+    script = '''
+{ entity -> 
+	slurper = new groovy.json.JsonSlurper();
+	entity_body_json = slurper.parseText(entity.body);
+        src_path = entity_body_json["primaryStorageInstallPath"].split('image-')[1].split('/')[0]
+	def get = new URL("http://127.0.0.1:8888/test/api/v1.0/store/"+src_path).openConnection(); 
+	get.setRequestMethod("GET");
+	def getRC = get.getResponseCode();
+	if (!getRC.equals(200)) {
+		return;
+		//throw new Exception("shuang")
+	}; 
+	reply = get.getInputStream().getText();
+        reply_json = slurper.parseText(reply);
+        try {
+	        item = reply_json['result']
+        	item_json = slurper.parseText(item);
+		action = item_json['%s']
+        } catch(Exception ex) {
+		return
+	}
+	if (action == 1) {
+		sleep((24*60*60-60)*1000)
+	} else if (action == 2) {
+		sleep(360*1000)
+	}
+}
+''' % (agent_url)
+    deploy_operations.remove_simulator_agent_script(agent_url)
+    deploy_operations.deploy_simulator_agent_script(agent_url, script)
+
+    agent_url = SMP_UPLOAD_BITS_TO_SFTP_BACKUPSTORAGE_PATH
+    script = '''
+{ entity -> 
+	slurper = new groovy.json.JsonSlurper();
+	entity_body_json = slurper.parseText(entity.body);
+        src_path = entity_body_json["primaryStorageInstallPath"].split('image-')[1].split('/')[0]
+	def get = new URL("http://127.0.0.1:8888/test/api/v1.0/store/"+src_path).openConnection(); 
+	get.setRequestMethod("GET");
+	def getRC = get.getResponseCode();
+	if (!getRC.equals(200)) {
+		return;
+		//throw new Exception("shuang")
+	}; 
+	reply = get.getInputStream().getText();
+        reply_json = slurper.parseText(reply);
+        try {
+	        item = reply_json['result']
+        	item_json = slurper.parseText(item);
+		action = item_json['%s']
+        } catch(Exception ex) {
+		return
+	}
+	if (action == 1) {
+		sleep((24*60*60-60)*1000)
+	} else if (action == 2) {
+		sleep(360*1000)
+	}
+}
+''' % (agent_url)
+    deploy_operations.remove_simulator_agent_script(agent_url)
+    deploy_operations.deploy_simulator_agent_script(agent_url, script)
 
     test_util.test_pass('Suite Setup Success')

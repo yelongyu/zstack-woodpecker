@@ -37,7 +37,6 @@ UPLOAD_BITS_TO_SFTP_BACKUPSTORAGE_PATH = "/sharedmountpointprimarystorage/sftp/u
 _config_ = {
         'timeout' : 24*60*60+1200,
         'noparallel' : False,
-        'noparallelkey': [ CREATE_TEMPLATE_FROM_VOLUME_PATH, UPLOAD_BITS_TO_SFTP_BACKUPSTORAGE_PATH ]
         }
 
 
@@ -47,10 +46,10 @@ agent_url = None
 vm = None
 image = None
 
-case_flavor = dict(create_tempate_default=                    dict(agent_url=CREATE_TEMPLATE_FROM_VOLUME_PATH, agent_time=(24*60*60-60)*1000),
-                   upload_to_sftp_default=                    dict(agent_url=UPLOAD_BITS_TO_SFTP_BACKUPSTORAGE_PATH, agent_time=(24*60*60-60)*1000),
-                   create_tempate_default_default_6min=       dict(agent_url=CREATE_TEMPLATE_FROM_VOLUME_PATH, agent_time=360*1000),
-                   upload_to_sftp_default_6min=               dict(agent_url=UPLOAD_BITS_TO_SFTP_BACKUPSTORAGE_PATH, agent_time=360*1000),
+case_flavor = dict(create_tempate_default=                    dict(agent_url=CREATE_TEMPLATE_FROM_VOLUME_PATH, agent_action=1),
+                   upload_to_sftp_default=                    dict(agent_url=UPLOAD_BITS_TO_SFTP_BACKUPSTORAGE_PATH, agent_action=1),
+                   create_tempate_default_default_6min=       dict(agent_url=CREATE_TEMPLATE_FROM_VOLUME_PATH, agent_action=2),
+                   upload_to_sftp_default_6min=               dict(agent_url=UPLOAD_BITS_TO_SFTP_BACKUPSTORAGE_PATH, agent_action=2),
                    )
 
 def test():
@@ -70,16 +69,25 @@ def test():
     vm = test_stub.create_vm(image_uuid=image_uuid, ps_uuid=ps_uuid)
 
     agent_url = flavor['agent_url']
-    agent_time = flavor['agent_time']
-    script = '{entity -> sleep(%s)}' % (agent_time)
-    dep_ops.remove_simulator_agent_script(agent_url)
-    dep_ops.deploy_simulator_agent_script(agent_url, script)
+    agent_action = flavor['agent_action']
+    if agent_action == 1:
+        agent_time = (24*60*60-60)*1000
+    elif agent_action == 2:
+        agent_time = 360 * 1000
+
+    image_uuid = str(uuid.uuid4()).replace('-', '')
+    if agent_url == CREATE_TEMPLATE_FROM_VOLUME_PATH:
+        rsp = dep_ops.json_post("http://127.0.0.1:8888/test/api/v1.0/store/create", simplejson.dumps({"key": vm.get_vm().rootVolumeUuid, "value": '{"%s":%s}' % (agent_url, agent_action)}))
+    else:
+        rsp = dep_ops.json_post("http://127.0.0.1:8888/test/api/v1.0/store/create", simplejson.dumps({"key": image_uuid, "value": '{"%s":%s}' % (agent_url, agent_action)}))
+
     image_creation_option = test_util.ImageOption()
     bss = res_ops.query_resource(res_ops.SFTP_BACKUP_STORAGE, [])
     if len(bss) == 0:
         test_util.test_skip('Required sftp bs to test')
     bs_uuid = bss[0].uuid
 
+    image_creation_option.set_uuid(image_uuid)
     image_creation_option.set_backup_storage_uuid_list([bs_uuid])
     image_creation_option.set_root_volume_uuid(vm.vm.rootVolumeUuid)
     image_creation_option.set_name('test_create_root_volume_template_timeout')
@@ -95,8 +103,6 @@ def test():
 
 
 def env_recover():
-    global agent_url
-    dep_ops.remove_simulator_agent_script(agent_url)
     global vm
     if vm != None:
         vm.destroy()
