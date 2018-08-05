@@ -32,7 +32,7 @@ import simplejson
 import zstackwoodpecker.operations.deploy_operations as dep_ops
 
 KVM_TAKE_VOLUME_SNAPSHOT_PATH = "/vm/volume/takesnapshot"
-#COMMIT_TO_IMAGESTORE_PATH = "/nfsprimarystorage/imagestore/commit"
+COMMIT_TO_IMAGESTORE_PATH = "/nfsprimarystorage/imagestore/commit"
 UPLOAD_TO_IMAGESTORE_PATH = "/nfsprimarystorage/imagestore/upload"
 
 _config_ = {
@@ -48,10 +48,10 @@ vm = None
 image = None
 
 case_flavor = dict(take_volume_snapshot_default=       dict(agent_url=KVM_TAKE_VOLUME_SNAPSHOT_PATH, agent_action=1),
-                   #commit_to_imagestore_default=       dict(agent_url=COMMIT_TO_IMAGESTORE_PATH, agent_action=1),
+                   commit_to_imagestore_default=       dict(agent_url=COMMIT_TO_IMAGESTORE_PATH, agent_action=1),
                    upload_to_imagestore_default=       dict(agent_url=UPLOAD_TO_IMAGESTORE_PATH, agent_action=1),
                    take_volume_snapshot_default_6min=  dict(agent_url=KVM_TAKE_VOLUME_SNAPSHOT_PATH, agent_action=2),
-                   #commit_to_imagestore_default_6min=  dict(agent_url=COMMIT_TO_IMAGESTORE_PATH, agent_action=2),
+                   commit_to_imagestore_default_6min=  dict(agent_url=COMMIT_TO_IMAGESTORE_PATH, agent_action=2),
                    upload_to_imagestore_default_6min=  dict(agent_url=UPLOAD_TO_IMAGESTORE_PATH, agent_action=2),
                    )
 
@@ -77,10 +77,10 @@ def test():
         agent_time = (24*60*60-60)*1000
     elif agent_action == 2:
         agent_time = 360 * 1000
+    image_uuid = str(uuid.uuid4()).replace('-', '')
     if agent_url == KVM_TAKE_VOLUME_SNAPSHOT_PATH:
         rsp = dep_ops.json_post("http://127.0.0.1:8888/test/api/v1.0/store/create", simplejson.dumps({"key": vm.get_vm().rootVolumeUuid, "value": '{"%s":%s}' % (agent_url, agent_action)}))
     else:
-        image_uuid = '41d885f97869142f8fcd7dbae872a8a0'
         rsp = dep_ops.json_post("http://127.0.0.1:8888/test/api/v1.0/store/create", simplejson.dumps({"key": image_uuid, "value": '{"%s":%s}' % (agent_url, agent_action)}))
 
     image_creation_option = test_util.ImageOption()

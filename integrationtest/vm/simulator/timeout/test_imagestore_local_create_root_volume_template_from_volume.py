@@ -81,10 +81,10 @@ def test():
     elif agent_action == 2:
         agent_time = 360 * 1000
 
+    image_uuid = str(uuid.uuid4()).replace('-', '')
     if agent_url == KVM_TAKE_VOLUME_SNAPSHOT_PATH:
         rsp = dep_ops.json_post("http://127.0.0.1:8888/test/api/v1.0/store/create", simplejson.dumps({"key": vm.get_vm().rootVolumeUuid, "value": '{"%s":%s}' % (agent_url, agent_action)}))
     else:
-        image_uuid = '8be4892dffc25a6db1cca2c82a5675bf'
         rsp = dep_ops.json_post("http://127.0.0.1:8888/test/api/v1.0/store/create", simplejson.dumps({"key": image_uuid, "value": '{"%s":%s}' % (agent_url, agent_action)}))
     image_creation_option = test_util.ImageOption()
     image_creation_option.set_uuid(image_uuid)
