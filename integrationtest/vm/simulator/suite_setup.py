@@ -21,6 +21,9 @@ LOCAL_UPLOAD_TO_IMAGESTORE_PATH = "/localstorage/imagestore/upload"
 NFS_CREATE_TEMPLATE_FROM_VOLUME_PATH = "/nfsprimarystorage/sftp/createtemplatefromvolume"
 NFS_COMMIT_TO_IMAGESTORE_PATH = "/nfsprimarystorage/imagestore/commit"
 NFS_UPLOAD_TO_IMAGESTORE_PATH = "/nfsprimarystorage/imagestore/upload"
+SMP_CREATE_TEMPLATE_FROM_VOLUME_PATH = "/sharedmountpointprimarystorage/createtemplatefromvolume"
+SMP_COMMIT_BITS_TO_IMAGESTORE_PATH = "/sharedmountpointprimarystorage/imagestore/commit"
+SMP_UPLOAD_BITS_TO_IMAGESTORE_PATH = "/sharedmountpointprimarystorage/imagestore/upload"
 
 
 USER_PATH = os.path.expanduser('~')
@@ -207,6 +210,11 @@ def test():
     deploy_operations.remove_simulator_agent_script(agent_url)
     deploy_operations.deploy_simulator_agent_script(agent_url, script)
 
+    agent_url = SMP_COMMIT_BITS_TO_IMAGESTORE_PATH
+    deploy_operations.remove_simulator_agent_script(agent_url)
+    deploy_operations.deploy_simulator_agent_script(agent_url, script)
+
+
     agent_url = NFS_UPLOAD_TO_IMAGESTORE_PATH
     script = '''
 { entity -> 
@@ -236,6 +244,10 @@ def test():
 	}
 }
 ''' % (agent_url)
+    deploy_operations.remove_simulator_agent_script(agent_url)
+    deploy_operations.deploy_simulator_agent_script(agent_url, script)
+
+    agent_url = SMP_UPLOAD_BITS_TO_IMAGESTORE_PATH
     deploy_operations.remove_simulator_agent_script(agent_url)
     deploy_operations.deploy_simulator_agent_script(agent_url, script)
 
