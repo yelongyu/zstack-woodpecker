@@ -32,8 +32,8 @@ import simplejson
 import zstackwoodpecker.operations.deploy_operations as dep_ops
 
 KVM_TAKE_VOLUME_SNAPSHOT_PATH = "/vm/volume/takesnapshot"
-COMMIT_BITS_TO_IMAGESTORE_PATH = "/sharedmountpointprimarystorage/imagestore/commit"
-UPLOAD_BITS_TO_IMAGESTORE_PATH = "/sharedmountpointprimarystorage/imagestore/upload"
+COMMIT_BITS_TO_IMAGESTORE_PATH = "/sharedblock/imagestore/commit"
+UPLOAD_BITS_TO_IMAGESTORE_PATH = "/sharedblock/imagestore/upload"
 
 _config_ = {
         'timeout' : 24*60*60+1200,
@@ -64,7 +64,7 @@ def test():
     if imagestore == None:
         test_util.test_skip('Required imagestore to test')
     image_uuid = test_stub.get_image_by_bs(imagestore.uuid)
-    cond = res_ops.gen_query_conditions('type', '=', 'SharedMountPoint')
+    cond = res_ops.gen_query_conditions('type', '=', 'SharedBlock')
     pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
     if len(pss) == 0:
         test_util.test_skip('Required smp ps to test')
