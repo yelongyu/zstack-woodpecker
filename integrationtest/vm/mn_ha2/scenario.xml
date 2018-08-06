@@ -37,7 +37,7 @@
           <ha2MnRef>$node2Name</ha2MnRef>
           <mnHostRef>$node2Name</mnHostRef>
         </vm>
-        <vm name="$vmName1" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
+        <vm name="$vmName1" vmInstranceOfferingUuid="$vmInstranceOfferingUuid3" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
             <l3Network uuid="$vmL3Uuid">
@@ -50,7 +50,7 @@
           <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
           <primaryStorageRef type="local" url="$localPrimaryStorageUrl">$localPrimaryStorageName</primaryStorageRef>
         </vm>
-        <vm name="$vmName2" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
+        <vm name="$vmName2" vmInstranceOfferingUuid="$vmInstranceOfferingUuid3" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
             <l3Network uuid="$vmL3Uuid">
@@ -63,7 +63,7 @@
           <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
           <primaryStorageRef type="local" url="$localPrimaryStorageUrl">$localPrimaryStorageName</primaryStorageRef>
         </vm>
-        <vm name="$vmName3" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
+        <vm name="$vmName3" vmInstranceOfferingUuid="$vmInstranceOfferingUuid3" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
             <l3Network uuid="$vmL3Uuid">
