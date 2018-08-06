@@ -6,5 +6,5 @@ vmName3 = test_vm3
 vmName4 = test_vm4
 vmName5 = test_vm5
 vmInstranceOfferingUuid2 = 234567
-vmInstranceOfferingUuid3 = 567890
+vm2haHostInstranceOfferingUuid = 567890
 imageUuid2 = 234567
