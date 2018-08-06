@@ -93,8 +93,10 @@ def test():
     os.system('bash -ex %s %s' % (os.environ.get('hostForceStopScript'), host_ip))
     test_util.test_logger("host is expected to shutdown for a while")
 
-    test_util.test_logger("wait for 360 seconds")
-    time.sleep(360)
+#     test_util.test_logger("wait for 360 seconds")
+#     time.sleep(360)
+    test_util.test_logger("wait for 600 seconds")
+    time.sleep(600)
     vm.update()
     if test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp == host_ip:
 	test_util.test_fail("VM is expected to start running on another host")
@@ -104,11 +106,17 @@ def test():
     if test_lib.lib_get_vm_last_host(vm.get_vm()).managementIp != host_ip:
         test_util.test_fail("Migrated VM's last host is expected to be the last host[ip:%s]" % (host_ip))
 
-    vm.destroy()
+#     vm.destroy()
 
     os.system('bash -ex %s %s' % (os.environ.get('hostRecoverScript'), host_ip))
     host_ops.reconnect_host(host_uuid)
     test_util.test_pass('Test VM ha on host failure Success')
+
+def env_recover():
+    try:
+        vm.destroy()
+    except:
+        pass
 
 #Will be called only if exception happens in test().
 def error_cleanup():
