@@ -47,15 +47,15 @@ vm = None
 live_migration = None
 
 case_flavor = dict(ceph_migrate_default=         dict(ps="Ceph", agent_url=KVM_MIGRATE_VM_PATH, agent_action=1),
-                   sblk_migrate_default=         dict(ps="Sharedblock", agent_url=KVM_MIGRATE_VM_PATH, agent_action=1),
-                   smp_migrate_default=          dict(ps="ShareMountPoint", agent_url=KVM_MIGRATE_VM_PATH, agent_action=1),
+                   sblk_migrate_default=         dict(ps="SharedBlock", agent_url=KVM_MIGRATE_VM_PATH, agent_action=1),
+                   smp_migrate_default=          dict(ps="SharedMountPoint", agent_url=KVM_MIGRATE_VM_PATH, agent_action=1),
                    nfs_migrate_default=          dict(ps="NFS", agent_url=KVM_MIGRATE_VM_PATH, agent_action=1),
-                   local_migrate_default=        dict(ps="Local", agent_url=KVM_MIGRATE_VM_PATH, agent_action=1),
+                   local_migrate_default=        dict(ps="LocalStorage", agent_url=KVM_MIGRATE_VM_PATH, agent_action=1),
                    ceph_migrate_default_6min=    dict(ps="Ceph", agent_url=KVM_MIGRATE_VM_PATH, agent_action=2),
-                   sblk_migrate_default_6min=    dict(ps="Sharedblock", agent_url=KVM_MIGRATE_VM_PATH, agent_action=2),
-                   smp_migrate_default_6min=     dict(ps="ShareMountPoint", agent_url=KVM_MIGRATE_VM_PATH, agent_action=2),
+                   sblk_migrate_default_6min=    dict(ps="SharedBlock", agent_url=KVM_MIGRATE_VM_PATH, agent_action=2),
+                   smp_migrate_default_6min=     dict(ps="SharedMountPoint", agent_url=KVM_MIGRATE_VM_PATH, agent_action=2),
                    nfs_migrate_default_6min=     dict(ps="NFS", agent_url=KVM_MIGRATE_VM_PATH, agent_action=2),
-                   local_migrate_default_6min=   dict(ps="Local", agent_url=KVM_MIGRATE_VM_PATH, agent_action=2),
+                   local_migrate_default_6min=   dict(ps="LocalStorage", agent_url=KVM_MIGRATE_VM_PATH, agent_action=2),
                    )
 
 def test():
