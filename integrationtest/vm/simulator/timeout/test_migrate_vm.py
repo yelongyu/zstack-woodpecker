@@ -44,6 +44,7 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 agent_url = None
 vm = None
+live_migration = None
 
 case_flavor = dict(ceph_migrate_default=         dict(ps="Ceph", agent_url=KVM_MIGRATE_VM_PATH, agent_action=1),
                    sblk_migrate_default=         dict(ps="Sharedblock", agent_url=KVM_MIGRATE_VM_PATH, agent_action=1),
@@ -61,7 +62,11 @@ def test():
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     global agent_url
     global vm
+    global live_migration
     ps_type = flavor['ps']
+    if ps_type == "Local":
+        live_migration = config_ops.get_global_config_value('localStoragePrimaryStorage', 'liveMigrationWithStorage.allow')
+        config_ops.change_global_config('localStoragePrimaryStorage', 'liveMigrationWithStorage.allow', 'true')
     imagestore = test_lib.lib_get_image_store_backup_storage()
     if imagestore == None:
         test_util.test_skip('Required imagestore to test')
@@ -99,3 +104,7 @@ def env_recover():
     if vm != None:
         vm.destroy()
         vm.expunge()
+    global live_migration
+    if ps_type == "Local":
+        config_ops.change_global_config('localStoragePrimaryStorage','liveMigrationWithStorage.allow', live_migration)
+
