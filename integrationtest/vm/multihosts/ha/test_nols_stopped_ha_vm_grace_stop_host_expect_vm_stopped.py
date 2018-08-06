@@ -88,7 +88,7 @@ def test():
     #vm ha natural feature:
     host_list = test_stub.get_sce_hosts(test_lib.all_scenario_config, test_lib.scenario_file)
     for host in host_list:
-        if host.ip_ == host_ip or host.managementIp_ == host_ip:
+        if host.ip_ == host_ip or hasattr(host, 'managementIp_') and host.managementIp_ == host_ip:
             test_host = host
             break
     if not test_host:
