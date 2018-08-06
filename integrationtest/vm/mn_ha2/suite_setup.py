@@ -81,7 +81,7 @@ def test():
         os.system("bash %s %s" % (EXTRA_HOST_SETUP_SCRIPT, host.managementIp_))
 
     test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
-    test_lib.lib_set_reserved_memory('8G')
+    #test_lib.lib_set_reserved_memory('1G')
     
 
     test_util.test_pass('Suite Setup Success')
