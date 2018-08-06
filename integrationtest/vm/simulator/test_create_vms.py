@@ -39,13 +39,14 @@ def test():
         num = flavor['vm_num']
     else:
         num = 10000
-
-    imageUuid = res_ops.query_resource_fields(res_ops.IMAGE)[0].uuid
+    cond = res_ops.gen_query_conditions('system', '=',  'false')
+    imageUuid = res_ops.query_resource_fields(res_ops.IMAGE, cond)[0].uuid
     hostUuid = ''
     hostName = ''
     cond = res_ops.gen_query_conditions('type', '=',  'UserVm')
     instanceOfferingUuid = res_ops.query_resource_fields(res_ops.INSTANCE_OFFERING, cond)[0].uuid
-    l3NetworkUuids = res_ops.query_resource_fields(res_ops.L3_NETWORK)[0].uuid
+    cond = res_ops.gen_query_conditions('system', '=',  'false')
+    l3NetworkUuids = res_ops.query_resource_fields(res_ops.L3_NETWORK, cond)[0].uuid
     hosts = res_ops.query_resource_fields(res_ops.HOST)
     counter = 0
     for i in range(0, 500):
