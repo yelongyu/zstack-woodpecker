@@ -34,6 +34,9 @@ CEPH_DOWNLOAD_IMAGE_PATH = "/ceph/backupstorage/image/download"
 IMAGESTORE_IMPORT = "/imagestore/import/"
 SFTP_DOWNLOAD_IMAGE_PATH = "/sftpbackupstorage/download"
 KVM_MIGRATE_VM_PATH = "/vm/migrate"
+GET_MD5_PATH = "/localstorage/getmd5"
+CHECK_MD5_PATH = "/localstorage/checkmd5"
+COPY_TO_REMOTE_BITS_PATH = "/localstorage/copytoremote"
 
 
 USER_PATH = os.path.expanduser('~')
@@ -803,5 +806,100 @@ def test():
     deploy_operations.remove_simulator_agent_script(agent_url)
     deploy_operations.deploy_simulator_agent_script(agent_url, script)
 
+    agent_url = GET_MD5_PATH
+    script = '''
+{ entity -> 
+	slurper = new groovy.json.JsonSlurper();
+	entity_body_json = slurper.parseText(entity.body);
+        volume_uuid = entity_body_json["volumeUuid"]
+	def get = new URL("http://127.0.0.1:8888/test/api/v1.0/store/"+volume_uuid).openConnection(); 
+	get.setRequestMethod("GET");
+	def getRC = get.getResponseCode();
+	if (!getRC.equals(200)) {
+		return;
+		//throw new Exception("shuang")
+	}; 
+	reply = get.getInputStream().getText();
+        reply_json = slurper.parseText(reply);
+        try {
+	        item = reply_json['result']
+        	item_json = slurper.parseText(item);
+		action = item_json['%s']
+        } catch(Exception ex) {
+		return
+	}
+	if (action == 1) {
+		sleep((24*60*60-60)*1000)
+	} else if (action == 2) {
+		sleep(360*1000)
+	}
+}
+''' % (agent_url)
+    deploy_operations.remove_simulator_agent_script(agent_url)
+    deploy_operations.deploy_simulator_agent_script(agent_url, script)
+
+    agent_url = CHECK_MD5_PATH
+    script = '''
+{ entity -> 
+	slurper = new groovy.json.JsonSlurper();
+	entity_body_json = slurper.parseText(entity.body);
+        volume_uuid = entity_body_json["volumeUuid"]
+	def get = new URL("http://127.0.0.1:8888/test/api/v1.0/store/"+volume_uuid).openConnection(); 
+	get.setRequestMethod("GET");
+	def getRC = get.getResponseCode();
+	if (!getRC.equals(200)) {
+		return;
+		//throw new Exception("shuang")
+	}; 
+	reply = get.getInputStream().getText();
+        reply_json = slurper.parseText(reply);
+        try {
+	        item = reply_json['result']
+        	item_json = slurper.parseText(item);
+		action = item_json['%s']
+        } catch(Exception ex) {
+		return
+	}
+	if (action == 1) {
+		sleep((24*60*60-60)*1000)
+	} else if (action == 2) {
+		sleep(360*1000)
+	}
+}
+''' % (agent_url)
+    deploy_operations.remove_simulator_agent_script(agent_url)
+    deploy_operations.deploy_simulator_agent_script(agent_url, script)
+
+    agent_url = COPY_TO_REMOTE_BITS_PATH
+    script = '''
+{ entity -> 
+	slurper = new groovy.json.JsonSlurper();
+	entity_body_json = slurper.parseText(entity.body);
+        volume_uuid = entity_body_json["paths"].split('vol-')[1].split('/')[0]
+	def get = new URL("http://127.0.0.1:8888/test/api/v1.0/store/"+volume_uuid).openConnection(); 
+	get.setRequestMethod("GET");
+	def getRC = get.getResponseCode();
+	if (!getRC.equals(200)) {
+		return;
+		//throw new Exception("shuang")
+	}; 
+	reply = get.getInputStream().getText();
+        reply_json = slurper.parseText(reply);
+        try {
+	        item = reply_json['result']
+        	item_json = slurper.parseText(item);
+		action = item_json['%s']
+        } catch(Exception ex) {
+		return
+	}
+	if (action == 1) {
+		sleep((24*60*60-60)*1000)
+	} else if (action == 2) {
+		sleep(360*1000)
+	}
+}
+''' % (agent_url)
+    deploy_operations.remove_simulator_agent_script(agent_url)
+    deploy_operations.deploy_simulator_agent_script(agent_url, script)
 
     test_util.test_pass('Suite Setup Success')
