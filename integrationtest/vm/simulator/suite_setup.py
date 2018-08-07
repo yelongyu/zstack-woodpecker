@@ -875,7 +875,7 @@ def test():
 { entity -> 
 	slurper = new groovy.json.JsonSlurper();
 	entity_body_json = slurper.parseText(entity.body);
-        volume_uuid = entity_body_json["paths"].split('vol-')[1].split('/')[0]
+        volume_uuid = entity_body_json["paths"][0].split('vol-')[1].split('/')[0]
 	def get = new URL("http://127.0.0.1:8888/test/api/v1.0/store/"+volume_uuid).openConnection(); 
 	get.setRequestMethod("GET");
 	def getRC = get.getResponseCode();
