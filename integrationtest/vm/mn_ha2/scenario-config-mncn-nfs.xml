@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-mncn-nfs.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario.tmpt</scenarioConfigTemplate>
+</testConfig>
