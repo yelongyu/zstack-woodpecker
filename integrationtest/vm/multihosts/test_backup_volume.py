@@ -45,6 +45,7 @@ def record(fun):
 VOL_OPS = [
     "DVOL_TEST_CREATE_IMG",
     "DVOL_TEST_SNAPSHOT",
+    "DVOL_DEL_SNAPSHOT",
     "DVOL_TEST_RESIZE",
     "VM_TEST_BACKUP_IMAGE"
 ]
@@ -64,6 +65,7 @@ def vm_op_test(vm, dvol, op):
         "VM_TEST_REBOOT": reboot,
         "VM_TEST_NONE": do_nothing,
         "DVOL_TEST_SNAPSHOT": create_snapshot,
+        "DVOL_DEL_SNAPSHOT": delete_snapshot,
         "DVOL_TEST_CREATE_IMG": create_image,
         "DVOL_TEST_RESIZE": resize_dvol,
 	"DVOL_BACKUP": back_up,
@@ -91,6 +93,13 @@ def create_snapshot(vm_obj, dvol):
     snapshots_root.set_target_volume(dvol)
     snapshots_root.create_snapshot('create_data_snapshot1')
 
+def delete_snapshot(vm_obj, dvol):
+    snapshots_root = zstack_sp_header.ZstackVolumeSnapshot()
+    snapshots_root.set_utility_vm(utility_vm)
+    snapshots_root.set_target_volume(dvol)
+    sp_list = snapshots_root.get_snapshot_list()
+    if sp_list:
+        snapshots_root.delete_snapshot(random.choice(sp_list))
 
 def create_image(vm_obj, dvol):
     volume_uuid = dvol.volume.uuid
