@@ -37,6 +37,7 @@ def add_image(image_option):
     action.platform = image_option.get_platform()
     action.backupStorageUuids = image_option.get_backup_storage_uuid_list()
     action.resourceUuid = image_option.get_uuid()
+    action.timeout = image_option.get_timeout()
     test_util.action_logger('Add [Image:] %s from [url:] %s ' % (action.name, action.url))
     evt = account_operations.execute_action_with_session(action, image_option.get_session_uuid())
     test_util.test_logger('[image:] %s is added.' % evt.inventory.uuid)
