@@ -106,5 +106,18 @@
         <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_vr.py::kill_virtualrouter_agent</case>
         <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_vr.py::kill_vrouter_agent</case>
         <case timeout='600' repeat='1'>test_instance_offering_soft_hard.py</case>
+        <case timeout='2400' repeat='1'>test_backup_vm.py::snapshot_running</case>
+        <case timeout='2400' repeat='1'>test_backup_vm.py::create_img_running</case>
+        <case timeout='2400' repeat='1'>test_backup_vm.py::resize_running</case>
+        <case timeout='2400' repeat='1'>test_backup_vm.py::create_img_from_backup_running</case>
+        <case timeout='2400' repeat='1'>test_backup_vm.py::migrate_running</case>
+        <case timeout='2400' repeat='1'>test_backup_vm.py::snapshot_stopped</case>
+        <case timeout='2400' repeat='1'>test_backup_vm.py::create_img_stopped</case>
+        <case timeout='2400' repeat='1'>test_backup_vm.py::resize_stopped</case>
+        <case timeout='2400' repeat='1'>test_backup_vm.py::change_os_stopped</case>
+        <case timeout='2400' repeat='1'>test_backup_vm.py::reset_stopped</case>
+        <case timeout='2400' repeat='1'>test_backup_vm.py::revert_backup_stopped</case>
+        <case timeout='2400' repeat='1'>test_backup_vm.py::create_img_from_backup_stopped</case>
+        <case timeout='2400' repeat='1'>test_backup_vm.py::migrate_stopped</case>
     </suite>
 </integrationTest>
