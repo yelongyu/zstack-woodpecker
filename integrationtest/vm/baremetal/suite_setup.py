@@ -50,9 +50,10 @@ def test():
         mn_ips = deploy_operations.get_nodes_from_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
         if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
             os.system("bash %s '%s'" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ips))
+	    os.system("bash %s '%s' %s" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ips, 'baremetal'))
             deploy_vbmc(mn_ips)
     elif os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
-        os.system("bash %s" % (EXTRA_SUITE_SETUP_SCRIPT))
+        os.system("bash %s" % (EXTRA_SUITE_SETUP_SCRIPT, 'baremetal'))
         deploy_vbmc()
 
     deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
