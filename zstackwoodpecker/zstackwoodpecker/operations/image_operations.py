@@ -192,6 +192,7 @@ def create_root_volume_template_apiid(image_creation_option, apiid):
     action.system = image_creation_option.get_system()
     action.platform = image_creation_option.get_platform()
     action.resourceUuid = image_creation_option.get_uuid()
+    action.timeout = image_creation_option.get_timeout()
 
     description = image_creation_option.get_description()
     if not description:
@@ -312,7 +313,8 @@ def commit_volume_as_image_apiid(image_creation_option, apiid, session_uuid = No
     action.guestOsType = image_creation_option.get_guest_os_type()
     action.system = image_creation_option.get_system()
     action.platform = image_creation_option.get_platform()
-    action.uuid = image_creation_option.get_uuid()
+    action.resourceUuid = image_creation_option.get_uuid()
+    action.timeout = image_creation_option.get_timeout()
 
     description = image_creation_option.get_description()
     if not description:
