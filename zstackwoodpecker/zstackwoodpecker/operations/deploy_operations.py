@@ -2375,7 +2375,7 @@ def deploy_initial_database(deploy_config, scenario_config = None, scenario_file
             add_disk_offering,
             add_instance_offering,
             add_virtual_router,
-            add_pxe_server,
+            #add_pxe_server,
             add_vcenter,
             add_vcenter_image,
 	    add_vcenter_l2l3_network,
