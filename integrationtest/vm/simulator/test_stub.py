@@ -117,6 +117,7 @@ def create_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None,
         vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
         vm_creation_option.set_image_uuid(image_uuid)
         vm_creation_option.set_l3_uuids([l3net_uuid])
+        vm_creation_option.set_timeout(864000000)
 
     if volume_uuids:
         if isinstance(volume_uuids, list):
