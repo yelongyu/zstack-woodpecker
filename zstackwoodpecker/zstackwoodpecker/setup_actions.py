@@ -965,7 +965,7 @@ default one' % self.zstack_properties)
                 # startup speed is slow. Increase timeout to 180s.
                 if linux.is_ip_existing(node.ip_):
                     if os.environ.get('ZSTACK_SIMULATOR') == "yes":
-                        cmd = 'zstack-ctl stop_node; zstack-ctl configure unitTestOn=true; nohup zstack-ctl start_node --simulator -DredeployDB=true'
+                        cmd = 'zstack-ctl stop_node; zstack-ctl configure unitTestOn=true; zstack-ctl configure ThreadFacade.maxThreadNum=1000; nohup zstack-ctl start_node --simulator -DredeployDB=true'
                     else:
                         cmd = 'zstack-ctl stop_node; nohup zstack-ctl start_node'
                     thread = threading.Thread(target=shell_cmd_thread, args=(cmd, True, ))
