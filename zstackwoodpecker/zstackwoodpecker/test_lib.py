@@ -5560,3 +5560,21 @@ def check_vcenter_host(ip):
 	    _result = lib_execute_ssh_cmd(ip,"root","password", command)
             return
     test_util.test_logger("The esxi host: %s checks faild" % ip)
+
+def lib_check_pid(pid_name):
+    '''
+    Check if process is alive.
+    '''
+
+    try:
+        out = shell.call('ps -ef | grep -v "grep" | grep %s' % pid_name)
+    except:
+        test_util.test_logger('no process %s found' % pid_name)
+        return False
+
+    if out.find(pid_name) >= 0:
+        test_util.test_logger('process %s is up' % pid_name)
+        return True
+    else:
+        test_util.test_logger('process %s is not up' % pid_name)
+        return False

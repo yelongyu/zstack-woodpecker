@@ -29,6 +29,7 @@ from zstackwoodpecker.operations import vm_operations as vm_ops
 import zstackwoodpecker.operations.longjob_operations as longjob_ops
 import time
 import re
+import json
 import random
 
 def remove_all_vpc_vrouter():
@@ -786,3 +787,163 @@ class Longjob(object):
         self.submit_longjob(job_data, name, job_type='crt_vol_image')
 
 
+def generate_collectd_conf(host, collectdPath, list_port, host_disks = None,
+                           host_nics = None, vm_disks = None, vm_nics = None):
+
+    hostUuid = ''
+    hostInstance = ''
+    hostCpu = ''
+    hostDisks = []
+    hostMem = ''
+    hostNics = []
+
+    vmUuid = ''
+    vmCpu = ''
+    vmDisks = []
+    vmMem = ''
+    vmNics = []
+
+    collectdFile = ''
+    collectdModule = ''
+
+    hostInstance = host.managementIp.replace('.','-')
+    hostUuid = host.uuid
+    hostCpu = host.cpuNum
+    hostMem = int(int(host.totalMemoryCapacity) / 1024 / 1024)
+    hostDisks = ' '.join(host_disks)
+    hostNics = ' '.join(host_nics)
+ 
+    cond = res_ops.gen_query_conditions('hostUuid', '=', hostUuid)
+    vminstances = res_ops.query_resource_fields(res_ops.VM_INSTANCE, cond)
+ 
+    collectdFile = os.path.join(collectdPath, hostInstance + '.conf')
+    collectdModule = os.path.join(collectdPath, 'modules')
+    test_util.test_logger('generate collectd file %s for %s with cpu %s mem %s'\
+                          % (collectdFile, hostInstance, hostCpu, hostMem))
+ 
+    fd = open(collectdFile, 'w+')
+    fd.write('Interval 10\nFQDNLookup false\nLoadPlugin python\nLoadPlugin network\n')
+    fd.write('<Plugin network>\n')
+    fd.write('Server \"localhost\" \"' + str(list_port) + '\"\n')
+    fd.write('</Plugin>\n')
+    fd.write('<Plugin python>\n')
+    fd.write('ModulePath \"' + collectdModule + '\"\n')
+    fd.write('LogTraces true\n')
+    fd.write('Import \"cpu\"\n')
+    fd.write('Import \"disk\"\n')
+    fd.write('Import \"interface\"\n')
+    fd.write('Import \"memory\"\n')
+    fd.write('Import \"virt\"\n')
+ 
+    fd.write('<Module cpu>\n')
+    fd.write('Instance \"' + hostInstance + '\"\n')
+    fd.write('Cpu_Num \"' + str(hostCpu) + '\"\n')
+    fd.write('</Module>\n')
+ 
+    fd.write('<Module disk>\n')
+    fd.write('Instance \"' + hostInstance + '\"\n')
+    fd.write('Disk_Instances \"' + hostDisks + '\"\n')
+    fd.write('</Module>\n')
+ 
+    fd.write('<Module interface>\n')
+    fd.write('Instance \"' + hostInstance + '\"\n')
+    fd.write('Net_Interfaces \"' + hostNics + '\"\n')
+    fd.write('</Module>\n')
+ 
+    fd.write('<Module memory>\n')
+    fd.write('Instance \"' + hostInstance + '\"\n')
+    fd.write('Memory \"' + str(hostMem) + '\"\n')
+    fd.write('</Module>\n')
+ 
+    if vminstances:
+        fd.write('<Module virt>\n')
+        for j in range(0, len(vminstances)):
+            vmUuid = vminstances[j].uuid
+            vmCpu = vminstances[j].cpuNum
+            vmDisks = ' '.join(vm_disks)
+            vmMem = int(int(vminstances[j].memorySize ) / 1025 / 1024)
+            vmNics = ' '.join(vm_nics) 
+ 
+            fd.write('VM_Instance' + str(j) + '_Name \"' + vmUuid + '\"\n')
+            fd.write('VM_Instance' + str(j) + '_Cpu_Num \"' + str(vmCpu) + '\"\n')
+            fd.write('VM_Instance' + str(j) + '_Memory \"' + str(vmMem) + '\"\n')
+            fd.write('VM_Instance' + str(j) + '_Disks \"' + vmDisks + '\"\n')
+            fd.write('VM_Instance' + str(j) + '_Net_Interfaces \"' + vmNics + '\"\n')
+ 
+        fd.write('</Module>\n')
+ 
+    fd.write('</Plugin>\n')
+    fd.close()
+
+    return collectdFile
+
+def collectd_trigger(collectdFile):
+
+    cmd = 'collectd -C ' + collectdFile + ' -f'
+    try:
+        #shell.call(cmd)
+        os.system(cmd)
+        test_util.test_logger('successfully trigger collectd for conf %s' % collectdFile)
+    except:
+        test_util.test_logger('fail to execute command %s' % cmd)
+        return False
+
+    return True
+
+def collectdmon_trigger(collectdFile):
+
+    cmd = 'collectdmon -- -C ' + collectdFile
+    try:
+        #shell.call(cmd)
+        os.system(cmd)
+        test_util.test_logger('successfully trigger collectdmon for conf %s' % collectdFile)
+    except:
+        test_util.test_logger('fail to execute command %s' % cmd)
+        return False
+
+    return True
+
+def collectd_exporter_trigger(list_port, web_port):
+    cmd = ''
+
+    if os.path.exists('/var/lib/zstack/kvm/collectd_exporter'):
+        cmd = '/var/lib/zstack/kvm/collectd_exporter -collectd.listen-address :' + str(list_port) + ' -web.listen-address :' + str(web_port)
+        try:
+            os.system(cmd)
+            #shell.call(cmd)
+            test_util.test_logger('successfully trigger collectd_exporter with listen port %s and web port %s' % (list_port, web_port))
+        except:
+            test_util.test_logger('fail to execute command %s' % cmd)
+            return False
+    else:
+        test_util.test_logger('no collectd_exporter found under /var/lib/zstack/kvm/')
+        return False
+
+    return True
+
+def prometheus_conf_generate(host, web_port, address = None):
+    hostInstance = ''
+    hostUuid = ''
+    dict_prometheus = {}
+
+    prometheus_dir = '/usr/local/zstacktest/prometheus/discovery/hosts/'
+
+    if address:
+        ip_addr = address
+    else:
+        ip_addr = '127.0.0.1'
+
+    hostInstance = host.managementIp.replace('.','-')
+    hostUuid = host.uuid
+
+    dict_prometheus['labels'] = {'hostUuid':hostUuid}
+    dict_prometheus['targets'] = [str(ip_addr) + ':9100', str(ip_addr) + ':' + str(web_port), str(ip_addr) + ':7069']
+
+    file_path = os.path.join(prometheus_dir, hostUuid + '-' + hostInstance + '.json')
+
+    with open(file_path, 'w+') as fd:
+        fd.write('[' + json.dumps(dict_prometheus) + ']')
+
+    test_util.test_logger('successfully deploy host %s with port %s for prometheus' % (hostInstance, web_port))
+
+    return True
