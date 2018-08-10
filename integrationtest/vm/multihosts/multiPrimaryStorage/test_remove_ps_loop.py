@@ -13,7 +13,7 @@ import random
 import os
 
 _config_ = {
-        'timeout' : 3000,
+        'timeout' : 4200,
         'noparallel' : True
         }
 
@@ -57,7 +57,10 @@ def test():
             host_password = os.environ.get('hostPassword')
             rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host_username, host_password, cmd, 240)
             if not rsp:
-                test_util.test_logger("vgremove failed")
+                cmd = "vgs"
+                rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host_username, host_password, cmd, 240)
+                test_util.test_logger(rsp)
+                test_util.test_fail("vgremove failed")
             ps2 = ps_ops.create_sharedblock_primary_storage(ps_config, disk_uuid)
             volumegroup_uuid = ps2.uuid
         else:
@@ -67,7 +70,7 @@ def test():
         time.sleep(5)
         delete_ps_list.pop()
     test_util.test_dsc('create VM by default para')
-    vm1 = test_stub.create_multi_vms(name_prefix='vm1', count=1, data_volume_number=VOLUME_NUMBER)[0]
+    vm1 = test_stub.create_multi_vms(name_prefix='vm1', count=1, data_volume_number=VOLUME_NUMBER, timeout=1200000)[0]
     test_obj_dict.add_vm(vm1)
 
     if ps_env.is_local_nfs_env:
@@ -77,7 +80,7 @@ def test():
     else:
         test_util.test_dsc('create VM in ps2')
         vm2 = test_stub.create_multi_vms(name_prefix='vm2', count=1, ps_uuid=ps2.uuid,
-                                        data_volume_number=VOLUME_NUMBER)[0]
+                                        data_volume_number=VOLUME_NUMBER, timeout=1200000)[0]
         test_obj_dict.add_vm(vm2)
 
     test_util.test_pass('Multi PrimaryStorage Test Pass')

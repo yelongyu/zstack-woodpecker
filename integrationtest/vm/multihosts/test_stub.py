@@ -254,7 +254,7 @@ def create_iso_vm_with_random_offering(vm_name, l3_name=None, session_uuid=None,
 
 def create_vm_with_random_offering(vm_name, image_name=None, l3_name=None, session_uuid=None,
                                    instance_offering_uuid=None, host_uuid=None, disk_offering_uuids=None,
-                                   root_password=None, ps_uuid=None, system_tags=None):
+                                   root_password=None, ps_uuid=None, system_tags=None, timeout=None):
     if image_name:
         imagename = os.environ.get(image_name)
         image_uuid = test_lib.lib_get_image_by_name(imagename).uuid
@@ -291,6 +291,8 @@ def create_vm_with_random_offering(vm_name, image_name=None, l3_name=None, sessi
         vm_creation_option.set_session_uuid(session_uuid)
     if ps_uuid:
         vm_creation_option.set_ps_uuid(ps_uuid)
+    if timeout:
+        vm_creation_option.set_timeout(timeout)
 
     vm = test_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
@@ -298,12 +300,12 @@ def create_vm_with_random_offering(vm_name, image_name=None, l3_name=None, sessi
     return vm
 
 
-def create_multi_vms(name_prefix='', count=10, host_uuid=None, ps_uuid=None, data_volume_number=0, ps_uuid_for_data_vol=None):
+def create_multi_vms(name_prefix='', count=10, host_uuid=None, ps_uuid=None, data_volume_number=0, ps_uuid_for_data_vol=None, timeout=None):
     vm_list = []
     for i in xrange(count):
         if not data_volume_number:
             vm = create_vm_with_random_offering(name_prefix+"{}".format(i), image_name='imageName_net',
-                                                l3_name='l3VlanNetwork2', host_uuid=host_uuid, ps_uuid=ps_uuid)
+                                                l3_name='l3VlanNetwork2', host_uuid=host_uuid, ps_uuid=ps_uuid, timeout=timeout)
         else:
             disk_offering_list = res_ops.get_resource(res_ops.DISK_OFFERING)
             disk_offering_uuids = [random.choice(disk_offering_list).uuid for _ in xrange(data_volume_number)]
@@ -311,11 +313,11 @@ def create_multi_vms(name_prefix='', count=10, host_uuid=None, ps_uuid=None, dat
                 vm = create_vm_with_random_offering(name_prefix+"{}".format(i), image_name='imageName_net',
                                                     l3_name='l3VlanNetwork2', host_uuid=host_uuid, ps_uuid=ps_uuid,
                                                     disk_offering_uuids=disk_offering_uuids,
-                                                    system_tags=['primaryStorageUuidForDataVolume::{}'.format(ps_uuid_for_data_vol)])
+                                                    system_tags=['primaryStorageUuidForDataVolume::{}'.format(ps_uuid_for_data_vol)], timeout=timeout)
             else:
                 vm = create_vm_with_random_offering(name_prefix+"{}".format(i), image_name='imageName_net',
                                                     l3_name='l3VlanNetwork2', host_uuid=host_uuid, ps_uuid=ps_uuid,
-                                                    disk_offering_uuids=disk_offering_uuids)
+                                                    disk_offering_uuids=disk_offering_uuids, timeout=timeout)
 
         vm_list.append(vm)
     for vm in vm_list:

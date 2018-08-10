@@ -15,7 +15,7 @@ import time
 import os
 
 _config_ = {
-        'timeout' : 3000,
+        'timeout' : 4200,
         'noparallel' : True
         }
 
@@ -38,7 +38,7 @@ def test():
         for data_vol_ps in [ps1, ps2]:
             vm = test_stub.create_multi_vms(name_prefix='test_vm', count=1,
                                             ps_uuid=root_vol_ps.uuid, data_volume_number=VOLUME_NUMBER,
-                                            ps_uuid_for_data_vol=data_vol_ps.uuid)[0]
+                                            ps_uuid_for_data_vol=data_vol_ps.uuid, timeout=1200000)[0]
             test_obj_dict.add_vm(vm)
             vm_list.append(vm)
 
