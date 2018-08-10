@@ -28,7 +28,8 @@ def test():
     test_util.test_dsc('Test storage over provision method')
     primary_storage_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
     for ps in primary_storage_list:
-        if ps.type == "SharedBlock":
+#         if ps.type == "SharedBlock":
+        if ps.type in ["SharedBlock", "AliyunNAS"]:
             test_util.test_skip('SharedBlock primary storage does not support overProvision')
 
     test_lib.lib_skip_if_ps_num_is_not_eq_number(1)
