@@ -242,7 +242,7 @@ def test():
     ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0]
     if ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE or ps.type == "AliyunNAS":
         test_util.test_skip("VolumeBackup does not support Ceph and AliyunNAS for now")
-    if ps.type != inventory.LOCAL_STORAGE_TYPE and 'VM_TEST_MIGRATE' in VM_OP:
+    if ps.type != inventory.LOCAL_STORAGE_TYPE and 'VM_TEST_MIGRATE' in VM_OP and "VM_TEST_STOP" in STATE_OP:
         test_util.test_skip("Shared Storage does not support migration")
 
     vm_name = "test_vm"
