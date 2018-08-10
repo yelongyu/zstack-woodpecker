@@ -429,6 +429,8 @@ def recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config):
 def get_mn_ha_nfs_url(scenario_config, scenario_file, deploy_config, use_nas=False):
     for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
         for vm in xmlobject.safe_list(host.vms.vm):
+            if hasattr(vm, 'primaryStorageRef'):
+            #if xmlobject.has_element(vm, 'primaryStorageRef'):
 	        for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
 	            for zone in xmlobject.safe_list(deploy_config.zones.zone):
 	                if primaryStorageRef.type_ == 'nfs':
