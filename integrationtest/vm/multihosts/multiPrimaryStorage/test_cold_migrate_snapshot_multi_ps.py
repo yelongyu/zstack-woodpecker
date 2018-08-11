@@ -22,6 +22,7 @@ disabled_ps_list = []
 
 @test_stub.skip_if_multi_nfs
 @test_stub.skip_if_only_one_ps
+@test_stub.skip_if_not_have_local
 def test():
     ps_env = test_stub.PSEnvChecker()
 

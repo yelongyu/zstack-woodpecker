@@ -1035,6 +1035,13 @@ def skip_if_multi_ps(test_method):
         return test_method()
     return wrapper
 
+def skip_if_not_have_local(test_method):
+    @wraps(test_method)
+    def wrapper():
+        if not PSEnvChecker().have_local:
+            test_util.test_skip("Skip test if not have local PrimaryStorage")
+        return test_method()
+    return wrapper
 
 def skip_if_not_local_nfs(test_method):
     @wraps(test_method)

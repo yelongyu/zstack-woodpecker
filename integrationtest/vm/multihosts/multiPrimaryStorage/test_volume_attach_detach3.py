@@ -9,7 +9,7 @@ import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import random
 
 _config_ = {
-        'timeout' : 3000,
+        'timeout' : 5400,
         'noparallel' : True
         }
 
