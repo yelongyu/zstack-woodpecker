@@ -11,6 +11,7 @@
         <case timeout="4000" >test_zstack_install_on_cos74.py</case>
         <case timeout="4400" >upgrade/test_zs_upgd_2.1.0_latest_repo_on_cos7.py</case>
         <case timeout="4400" >upgrade/test_zs_upgd_2.2.0_latest_repo_on_cos7.py</case>
+        <case timeout="4400" >upgrade/test_zs_upgd_2.5.1_latest_repo_on_cos74.py</case>
         <case timeout="2400" >upgrade/test_zs_upgd_1.7_latest_on_cos7.py</case>
         <case timeout="2400" >upgrade/test_zs_upgd_1.8_latest_on_cos7.py</case>
         <case timeout="2400" >upgrade/test_zs_upgd_1.9_latest_on_cos7.py</case>
