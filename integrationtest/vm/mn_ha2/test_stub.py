@@ -510,7 +510,7 @@ def deploy_2ha(scenarioConfig, scenarioFile):
     ssh.scp_file(zstack_hamon_path, "/root/zstack-hamon", mn_ip1, "root", "password")
     ssh.execute("chmod a+x /root/zstack-hamon", mn_ip1, "root", "password", False, 22)
 
-    cmd = '/root/zsha2 install-ha -bridge br_zsn0 -gateway 172.20.0.1 -slave "root:password@' + mn_ip2 + '" -vip ' + vip + ' -db-root-pw zstack.mysql.password -yes'
+    cmd = '/root/zsha2 install-ha -nic br_zsn0 -gateway 172.20.0.1 -slave "root:password@' + mn_ip2 + '" -vip ' + vip + ' -db-root-pw zstack.mysql.password -yes'
     test_util.test_logger("deploy 2ha by cmd: %s" %(cmd))
     ret, output, stderr = ssh.execute(cmd, mn_ip1, "root", "password", False, 22)
     test_util.test_logger("cmd=%s; ret=%s; output=%s; stderr=%s" %(cmd, ret, output, stderr))
