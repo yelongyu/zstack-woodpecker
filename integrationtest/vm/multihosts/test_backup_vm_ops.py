@@ -256,22 +256,23 @@ def test():
     vm.check()
     test_obj_dict.add_vm(vm)
 
+    if "VM_TEST_BACKUP_IMAGE" in VM_OP or "VM_TEST_REVERT_BACKUP" in VM_OP:
+        vm_op_test(vm, "VM_TEST_BACKUP")
+
+
     for i in VM_OP:
-        if "VM_TEST_BACKUP_IMAGE" in VM_OP or "VM_TEST_REVERT_BACKUP" in VM_OP:
-            vm_op_test(vm, "VM_TEST_BACKUP")
         vm_op_test(vm, random.choice(STATE_OP))
         VM_OPS = STATE_OP
         if vm.state == "Running":
             VM_OPS = VM_OP
-            if not backup_list and "VM_TEST_BACKUP_IMAGE" in VM_OPS:
-                VM_OPS.remove("VM_TEST_BACKUP_IMAGE")
+            if not backup_list and "VM_TEST_BACKUP_IMAGE" == i:
+                i = "VM_TEST_NONE"
         elif vm.state == "Stopped":
             VM_OPS = VM_OP
-            if not backup_list and ("VM_TEST_BACKUP_IMAGE" in VM_OPS or "VM_TEST_REVERT_BACKUP" in VM_OPS):
-                VM_OPS.remove("VM_TEST_REVERT_BACKUP")
-                VM_OPS.remove("VM_TEST_BACKUP_IMAGE")       
+            if not backup_list and ("VM_TEST_BACKUP_IMAGE" == i or "VM_TEST_REVERT_BACKUP" == i):
+                i = "VM_TEST_NONE"
 
-        vm_op_test(vm, random.choice(VM_OPS))
+        vm_op_test(vm, i)
 
         if vm.state == "Stopped":
             vm.start()
