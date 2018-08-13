@@ -49,6 +49,7 @@ def test():
 
     image_creation_option.set_root_volume_uuid(vm_root_volume_inv.uuid)
     image_creation_option.set_name('test_create_vm_images_vm1')
+    image_creation_option.set_timeout(600000)
     #image_creation_option.set_platform('Linux')
 #     bs_type = backup_storage_list[0].type
 #     if bs_type == 'Ceph':
