@@ -29,11 +29,13 @@ backup_list = []
 case_flavor = dict(snapshot_running=                dict(vm_op=['VM_TEST_SNAPSHOT'], state_op=['VM_TEST_NONE']),
                    create_img_running=              dict(vm_op=['VM_TEST_CREATE_IMG'], state_op=['VM_TEST_NONE']),
                    resize_running=                  dict(vm_op=['VM_TEST_RESIZE_RVOL'], state_op=['VM_TEST_NONE']),
+                   del_snapshot_running=            dict(vm_op=['RVOL_DEL_SNAPSHOT'], state_op=['VM_TEST_NONE']),
                    create_img_from_backup_running=  dict(vm_op=['VM_TEST_BACKUP_IMAGE'], state_op=['VM_TEST_NONE']),
                    migrate_running=                 dict(vm_op=['VM_TEST_MIGRATE'], state_op=['VM_TEST_NONE']),
                    snapshot_stopped=                dict(vm_op=['VM_TEST_SNAPSHOT'], state_op=['VM_TEST_STOP']),
                    create_img_stopped=              dict(vm_op=['VM_TEST_CREATE_IMG'], state_op=['VM_TEST_STOP']),
                    resize_stopped=                  dict(vm_op=['VM_TEST_RESIZE_RVOL'], state_op=['VM_TEST_STOP']),
+                   del_snapshot_stopped=            dict(vm_op=['RVOL_DEL_SNAPSHOT'], state_op=['VM_TEST_STOP']),
                    change_os_stopped=               dict(vm_op=['VM_TEST_CHANGE_OS'], state_op=['VM_TEST_STOP']),
                    reset_stopped=                   dict(vm_op=['VM_TEST_RESET'], state_op=['VM_TEST_STOP']),
                    revert_backup_stopped=           dict(vm_op=['VM_TEST_REVERT_BACKUP'], state_op=['VM_TEST_STOP']),
@@ -60,6 +62,7 @@ VM_RUNNING_OPS = [
     "VM_TEST_SNAPSHOT",
     "VM_TEST_CREATE_IMG",
     "VM_TEST_RESIZE_RVOL",
+    "RVOL_DEL_SNAPSHOT",
     "VM_TEST_NONE",
     "VM_TEST_BACKUP_IMAGE"
 ]
@@ -68,6 +71,7 @@ VM_STOPPED_OPS = [
     "VM_TEST_SNAPSHOT",
     "VM_TEST_CREATE_IMG",
     "VM_TEST_RESIZE_RVOL",
+    "RVOL_DEL_SNAPSHOT",
     "VM_TEST_CHANGE_OS",
     "VM_TEST_RESET",
     "VM_TEST_NONE",
@@ -93,6 +97,7 @@ def vm_op_test(vm, op):
         "VM_TEST_SNAPSHOT": create_snapshot,
         "VM_TEST_CREATE_IMG": create_image,
         "VM_TEST_RESIZE_RVOL": resize_rvol,
+        "RVOL_DEL_SNAPSHOT": delete_snapshot,
         "VM_TEST_CHANGE_OS": change_os,
         "VM_TEST_RESET": reset,
         "VM_TEST_BACKUP": back_up,
@@ -149,6 +154,15 @@ def create_snapshot(vm_obj):
     #vm_obj.start()
     #test_lib.lib_wait_target_up(vm_obj.get_vm().vmNics[0].ip, 22, 300)
 
+def delete_snapshot(vm_obj):
+    vol_obj = zstack_volume_header.ZstackTestVolume()
+    vol_obj.set_volume(test_lib.lib_get_root_volume(vm_obj.get_vm()))
+    snapshots_root = zstack_sp_header.ZstackVolumeSnapshot()
+    snapshots_root.set_utility_vm(utility_vm)
+    snapshots_root.set_target_volume(vol_obj)
+    sp_list = snapshots_root.get_snapshot_list()
+    if sp_list:
+        snapshots_root.delete_snapshot(random.choice(sp_list))
 
 def create_image(vm_obj):
     volume_uuid = test_lib.lib_get_root_volume(vm_obj.get_vm()).uuid
@@ -259,6 +273,8 @@ def test():
     if "VM_TEST_BACKUP_IMAGE" in VM_OP or "VM_TEST_REVERT_BACKUP" in VM_OP:
         vm_op_test(vm, "VM_TEST_BACKUP")
 
+    if "RVOL_DEL_SNAPSHOT" in VM_OP:
+        vm_op_test(vm, "VM_TEST_SNAPSHOT")
 
     for i in VM_OP:
         vm_op_test(vm, random.choice(STATE_OP))

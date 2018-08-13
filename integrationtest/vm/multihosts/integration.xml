@@ -109,11 +109,13 @@
         <case timeout='2400' repeat='1'>test_backup_vm_ops.py::snapshot_running</case>
         <case timeout='2400' repeat='1'>test_backup_vm_ops.py::create_img_running</case>
         <case timeout='2400' repeat='1'>test_backup_vm_ops.py::resize_running</case>
+        <case timeout='2400' repeat='1'>test_backup_vm_ops.py::del_snapshot_running</case>
         <case timeout='2400' repeat='1'>test_backup_vm_ops.py::create_img_from_backup_running</case>
         <case timeout='2400' repeat='1'>test_backup_vm_ops.py::migrate_running</case>
         <case timeout='2400' repeat='1'>test_backup_vm_ops.py::snapshot_stopped</case>
         <case timeout='2400' repeat='1'>test_backup_vm_ops.py::create_img_stopped</case>
         <case timeout='2400' repeat='1'>test_backup_vm_ops.py::resize_stopped</case>
+        <case timeout='2400' repeat='1'>test_backup_vm_ops.py::del_snapshot_stopped</case>
         <case timeout='2400' repeat='1'>test_backup_vm_ops.py::change_os_stopped</case>
         <case timeout='2400' repeat='1'>test_backup_vm_ops.py::reset_stopped</case>
         <case timeout='2400' repeat='1'>test_backup_vm_ops.py::revert_backup_stopped</case>
