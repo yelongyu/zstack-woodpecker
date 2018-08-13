@@ -41,6 +41,8 @@ case_flavor = dict(snapshot_running=                dict(vm_op=['VM_TEST_SNAPSHO
                    revert_backup_stopped=           dict(vm_op=['VM_TEST_REVERT_BACKUP'], state_op=['VM_TEST_STOP']),
                    create_img_from_backup_stopped=  dict(vm_op=['VM_TEST_BACKUP_IMAGE'], state_op=['VM_TEST_STOP']),
                    migrate_stopped=                 dict(vm_op=['VM_TEST_MIGRATE'], state_op=['VM_TEST_STOP']),
+                   change_os_snapshot_stopped=      dict(vm_op=['VM_TEST_CHANGE_OS', 'VM_TEST_SNAPSHOT'], state_op=['VM_TEST_STOP']),
+                   backup_reboot=                   dict(vm_op=['VM_TEST_NONE', 'VM_TEST_SNAPSHOT'], state_op=['VM_TEST_NONE', 'VM_TEST_REBOOT']),
                    )
 
 
@@ -276,15 +278,12 @@ def test():
     if "RVOL_DEL_SNAPSHOT" in VM_OP:
         vm_op_test(vm, "VM_TEST_SNAPSHOT")
 
-    for i in VM_OP:
-        vm_op_test(vm, random.choice(STATE_OP))
-        VM_OPS = STATE_OP
+    for i,j in VM_OP,STATE_OP:
+        vm_op_test(vm, j)
         if vm.state == "Running":
-            VM_OPS = VM_OP
             if not backup_list and "VM_TEST_BACKUP_IMAGE" == i:
                 i = "VM_TEST_NONE"
         elif vm.state == "Stopped":
-            VM_OPS = VM_OP
             if not backup_list and ("VM_TEST_BACKUP_IMAGE" == i or "VM_TEST_REVERT_BACKUP" == i):
                 i = "VM_TEST_NONE"
 
