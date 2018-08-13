@@ -278,7 +278,7 @@ def test():
     if "RVOL_DEL_SNAPSHOT" in VM_OP:
         vm_op_test(vm, "VM_TEST_SNAPSHOT")
 
-    for i,j in VM_OP,STATE_OP:
+    for i,j in zip(VM_OP,STATE_OP):
         vm_op_test(vm, j)
         if vm.state == "Running":
             if not backup_list and "VM_TEST_BACKUP_IMAGE" == i:
