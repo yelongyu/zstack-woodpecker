@@ -196,8 +196,7 @@ def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
     vm_creation_option.set_session_uuid(session_uuid)
     vm_creation_option.set_ps_uuid(ps_uuid)
     vm_creation_option.set_strategy_type(strategy_type)
-    if timeout:
-        vm_creation_option.set_timeout(timeout)
+    vm_creation_option.set_timeout(600000)
 
     vm = zstack_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
@@ -221,6 +220,7 @@ def create_vm_with_iso(l3_uuid_list, image_uuid, vm_name = None, root_disk_uuids
     vm_creation_option.set_system_tags(system_tags)
     vm_creation_option.set_session_uuid(session_uuid)
     vm_creation_option.set_ps_uuid(ps_uuid)
+    vm_creation_option.set_timeout(600000)
     vm = zstack_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
     vm.create()
@@ -598,6 +598,7 @@ def create_vm_with_random_offering(vm_name, image_name=None, l3_name=None, sessi
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
     vm_creation_option.set_name(vm_name)
+    vm_creation_option.set_timeout(600000)
     if system_tags:
         vm_creation_option.set_system_tags(system_tags)
     if disk_offering_uuids:
