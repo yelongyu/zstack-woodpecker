@@ -723,6 +723,7 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 thread = threading.Thread(target=_thread_for_action, args=(action,))
                 wait_for_thread_queue()
                 thread.start()
+            time.sleep(60) # To walk around "nfs4_discover_server_trunking unhandled error -512. Exiting with error EIO" in c74
 
         if xmlobject.has_element(zone, 'primaryStorages.simulatorPrimaryStorage'):
             if zone.duplication__ == None:
