@@ -1,8 +1,10 @@
 '''
+Test Steps:
+    1. force stop host where vip located.
+    2. check vip switch to another MN.
+    3. create vm to validate everything goes on well. 
 
-Integration Test for creating KVM VM in MN HA mode with one mn host, which MN-VM is running on, force shutdown and recovery.
-
-@author: Mirabel
+@author: SyZhao
 '''
 
 import zstackwoodpecker.test_util as test_util
