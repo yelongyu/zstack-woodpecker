@@ -218,7 +218,7 @@ def delete_snapshot(snapshot_uuid, session_uuid=None):
 def use_snapshot(snapshot_uuid, session_uuid=None):
     action = api_actions.RevertVolumeFromSnapshotAction()
     action.uuid = snapshot_uuid
-    action.timeout = 24000
+    action.timeout = 240000
     test_util.action_logger('Revert Volume by [Snapshot:] %s ' % snapshot_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt

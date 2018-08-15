@@ -110,7 +110,7 @@ def test():
     # image_option.set_mediaType('ISO')
     image_option.set_url(os.environ.get('imageServer')+"/diskimages/zstack-image-1.2-flat.vmdk")
     image_option.set_backup_storage_uuid_list([bss[0].uuid])
-    image_option.set_timeout(60000)
+    image_option.set_timeout(120000)
     image=img_ops.add_image(image_option)
 
     new_image = zstack_image_header.ZstackTestImage()

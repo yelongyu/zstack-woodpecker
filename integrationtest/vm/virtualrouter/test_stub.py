@@ -751,7 +751,7 @@ def get_another_ip_of_host(ip, username, password):
 
 def set_httpd_in_vm(ip, username, password):
     cmd = "yum install httpd -y"
-    if not test_lib.lib_execute_ssh_cmd(ip, username, password, cmd, timeout=300):
+    if not test_lib.lib_execute_ssh_cmd(ip, username, password, cmd, timeout=600):
        test_util.test_fail('install httpd in vm failed')
     cmd = "systemctl start httpd; iptables -F; echo %s > /var/www/html/index.html" % ip
     test_lib.lib_execute_ssh_cmd(ip, username, password, cmd, timeout=300)
