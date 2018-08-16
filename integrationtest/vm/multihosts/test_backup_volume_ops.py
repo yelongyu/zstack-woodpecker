@@ -103,12 +103,14 @@ def do_nothing(vm, dvol):
 
 
 def create_snapshot(vm_obj, dvol):
+    global utility_vm
     snapshots_root = zstack_sp_header.ZstackVolumeSnapshot()
     snapshots_root.set_utility_vm(utility_vm)
     snapshots_root.set_target_volume(dvol)
     snapshots_root.create_snapshot('create_data_snapshot1')
 
 def delete_snapshot(vm_obj, dvol):
+    global utility_vm
     snapshots_root = zstack_sp_header.ZstackVolumeSnapshot()
     snapshots_root.set_utility_vm(utility_vm)
     snapshots_root.set_target_volume(dvol)

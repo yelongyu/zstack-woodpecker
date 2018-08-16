@@ -160,7 +160,7 @@ def delete_snapshot(vm_obj):
     vol_obj = zstack_volume_header.ZstackTestVolume()
     vol_obj.set_volume(test_lib.lib_get_root_volume(vm_obj.get_vm()))
     snapshots_root = zstack_sp_header.ZstackVolumeSnapshot()
-    snapshots_root.set_utility_vm(utility_vm)
+    snapshots_root.set_utility_vm(vm_obj)
     snapshots_root.set_target_volume(vol_obj)
     sp_list = snapshots_root.get_snapshot_list()
     if sp_list:
