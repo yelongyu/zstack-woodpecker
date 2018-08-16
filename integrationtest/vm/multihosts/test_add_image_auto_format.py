@@ -45,7 +45,7 @@ def test():
     # image_option.set_mediaType('ISO')
     image_option.set_url(os.environ.get('imageServer')+"/iso/CentOS-x86_64-7.2-Minimal.iso")
     image_option.set_backup_storage_uuid_list([bss[0].uuid])
-    image_option.set_timeout(60000)
+    image_option.set_timeout(120000)
     image=img_ops.add_image(image_option)
 
     new_image = zstack_image_header.ZstackTestImage()
@@ -66,7 +66,7 @@ def test():
     # image_option.set_mediaType('ISO')
     image_option.set_url(os.environ.get('imageServer')+"/diskimages/core-image-minimal-qemux86-64_v1.qcow2")
     image_option.set_backup_storage_uuid_list([bss[0].uuid])
-    image_option.set_timeout(60000)
+    image_option.set_timeout(120000)
     image=img_ops.add_image(image_option)
 
     new_image = zstack_image_header.ZstackTestImage()
@@ -90,7 +90,7 @@ def test():
     # image_option.set_mediaType('ISO')
     image_option.set_url(os.environ.get('imageServer')+"/diskimages/zstack_image_test.raw")
     image_option.set_backup_storage_uuid_list([bss[0].uuid])
-    image_option.set_timeout(60000)
+    image_option.set_timeout(120000)
     image=img_ops.add_image(image_option)
 
     new_image = zstack_image_header.ZstackTestImage()

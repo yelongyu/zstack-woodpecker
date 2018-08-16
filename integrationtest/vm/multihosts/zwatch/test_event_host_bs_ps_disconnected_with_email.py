@@ -142,7 +142,7 @@ def test():
         bs_status = res_ops.query_resource(res_ops.HOST, cond)[0].status
 
     # wait for send email
-    time.sleep(60)
+    time.sleep(120)
 
     ps_ops.delete_primary_storage(ps_uuid)
     if hostname:
