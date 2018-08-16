@@ -805,52 +805,13 @@ default one' % self.zstack_properties)
             if not linux.wait_callback_success(_wait_echo, target.managementIp, 5, 0.2):
                 raise ActionError('testagent is not start up in 5s on %s, after it is deployed by ansible.' % target.managementIp)
             
-    def _enable_jacoco_agent(self):
-        for node in self.nodes:
-            woodpecker_ip = ''
-            import commands
-            (status, output) = commands.getstatusoutput("ip addr show zsn0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'")
-            dst_file = '/var/lib/zstack/virtualenv/zstackctl/lib/python2.7/site-packages/zstackctl/ctl.py'
-            if output.startswith('172'):
-                woodpecker_ip = output
-            if woodpecker_ip != '':
-                #Separate woodpecker condition
-                if os.path.exists('/home/%s/jacocoagent.jar' % woodpecker_ip):
-                    src_file = '/home/%s/zstack-utility/zstackctl/zstackctl/ctl.py' % woodpecker_ip
-                    fd_r = open(src_file, 'r')
-                    fd_w = open(dst_file, 'w')
-                    ctl_content = '' 
-                    for line in fd_r:
-                        if line.find('with open(setenv_path') != -1:
-                            line = '            catalina_opts.append("-javaagent:/var/lib/zstack/jacocoagent.jar=output=tcpserver,address=%s,port=6300")\n%s'\
-                                %(node.ip_, line)
-                        ctl_content += line
-                    fd_r.close()
-                    fd_w.write(ctl_content)
-                    fd_w.close()
-                    ssh.scp_file(dst_file, dst_file, node.ip_, node.username_, node.password_)
-                    print 'Inject jacoco agent into ctl.py'
-                else:
-                    print 'Here is no jacocoagent.jar, skip to inject jacoco agent'
-            else:
-                #Incorporate wookpecker condition
-                if os.path.exists('/home/%s/jacocoagent.jar' % node.ip_):
-                    src_file = '/home/%s/zstack-utility/zstackctl/zstackctl/ctl.py' % node.ip_
-                    fd_r = open(src_file, 'r')
-                    fd_w = open(dst_file, 'w')
-                    ctl_content = ''
-                    for line in fd_r:
-                        if line.find('with open(setenv_path') != -1:
-                            line = '            catalina_opts.append("-javaagent:/home/%s/jacocoagent.jar=output=tcpserver,address=127.0.0.1,port=6300")\n%s'\
-                                %(node.ip_, line)
-                        ctl_content += line
-                    fd_r.close()
-                    fd_w.write(ctl_content)
-                    fd_w.close()
-                    print 'Inject jacoco agent into ctl.py'
-                else:
-                    print 'Here is no jacocoagent.jar, skip to inject jacoco agent'
-
+    def _enable_jacoco_agent_cmd(self):
+        if os.path.exists('/home/jacocoagent.jar'):
+            print 'Inject jacoco agent into ctl.py'
+	    return 'zstack-ctl setenv CATALINA_OPTS=" -javaagent:/home/jacocoagent.jar=output=tcpserver,address=0.0.0.0,port=6300";'
+        else:
+            print 'Here is no jacocoagent.jar, skip to inject jacoco agent'
+	    return ''
 
     def _enable_jacoco_dump(self):
         woodpecker_ip = ''
@@ -873,7 +834,6 @@ default one' % self.zstack_properties)
             print 'jacoco dump started'
 
     def execute_plan_without_deploy_test_agent(self):
-        self._enable_jacoco_agent()
         if os.environ.get('ZSTACK_ALREADY_INSTALLED') != "yes":
             try:
                 self._stop_nodes()
@@ -965,7 +925,7 @@ default one' % self.zstack_properties)
                 # startup speed is slow. Increase timeout to 180s.
                 if linux.is_ip_existing(node.ip_):
                     if os.environ.get('ZSTACK_SIMULATOR') == "yes":
-                        cmd = 'zstack-ctl stop_node; zstack-ctl configure unitTestOn=true; zstack-ctl configure ThreadFacade.maxThreadNum=1000; nohup zstack-ctl start_node --simulator -DredeployDB=true'
+                        cmd = 'zstack-ctl stop_node; %s zstack-ctl configure unitTestOn=true; zstack-ctl configure ThreadFacade.maxThreadNum=1000; nohup zstack-ctl start_node --simulator -DredeployDB=true' % (self._enable_jacoco_agent_cmd())
                     else:
                         cmd = 'zstack-ctl stop_node; nohup zstack-ctl start_node'
                     thread = threading.Thread(target=shell_cmd_thread, args=(cmd, True, ))

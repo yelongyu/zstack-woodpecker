@@ -151,9 +151,8 @@ def setup_node_vm(vm_inv, vm_config, deploy_config):
         print nodeRef.text_
         import commands
         vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
-        status, woodpecker_ip = commands.getstatusoutput("ip addr show zsn0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'")
-        src_file = '/home/%s/jacocoagent.jar' %woodpecker_ip
-        dst_file = '/var/lib/zstack/jacocoagent.jar' 
+        src_file = '/home/jacocoagent.jar'
+        dst_file = '/home/jacocoagent.jar' 
         check_exist_cmd = 'ls %s' %dst_file
         try:
             (retcode, output, erroutput) = ssh.execute(check_exist_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
