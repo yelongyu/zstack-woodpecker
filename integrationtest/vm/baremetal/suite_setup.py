@@ -20,8 +20,10 @@ def deploy_vbmc(vm_ip=None):
         ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null'
         shell.call('%s %s yum --disablerepo=epel install -y libvirt-devel' %(ssh_cmd, vm_ip))
         #To avoid bug behind, reinstall python-pip before upgrade. bug: ImportError: 'module' object has no attribute 'main'
-        shell.call('%s %s yum --nogpg -y reinstall python-pip' %(ssh_cmd, vm_ip))
-        shell.call('%s %s pip install --upgrade pip' %(ssh_cmd, vm_ip))
+        #shell.call('%s %s yum --nogpg -y reinstall python-pip' %(ssh_cmd, vm_ip))
+        #shell.call('%s %s pip install --upgrade pip' %(ssh_cmd, vm_ip))
+	shell.call('%s %s wget http://192.168.200.100/mirror/scripts/get-pip.py'%(ssh_cmd, vm_ip))
+        shell.call('%s %s python  get-pip.py' %(ssh_cmd, vm_ip))
         shell.call('%s %s pip install virtualbmc' %(ssh_cmd, vm_ip))
         shell.call('scp %s/integrationtest/vm/baremetal/vbmc.py %s:/usr/lib/python2.7/site-packages/virtualbmc/vbmc.py'\
                 % (os.environ.get('woodpecker_root_path'),vm_ip))
