@@ -1,4 +1,4 @@
 <testConfig>
-    <scenarioConfig>scenario-mn-on-cn.xml</scenarioConfig>
+    <scenarioConfig>scenario-local.xml</scenarioConfig>
     <scenarioConfigTemplate>scenario.tmpt</scenarioConfigTemplate>
 </testConfig>
