@@ -72,8 +72,8 @@ def test():
         except:
             test_util.test_logger('Retry until VM change to running')
 
-    if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == vm_header.RUNNING:
-        test_util.test_pass('set HA after stopped VM test pass')
+    if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state != vm_header.RUNNING:
+        test_util.test_fail('set HA after stopped VM test fail')
 
     no_exception = True
     try:
@@ -85,13 +85,12 @@ def test():
     if no_exception:
         test_util.test_fail('Expect exception while there is none') 
     
-    origin_value = config_ops.change_global_config('ha','neverStopVm.scan.interval', 30)
-
+    origin_value = config_ops.change_global_config('ha','neverStopVm.scan.interval', '30')
 
     config_ops.change_global_config('ha','enable', 'false')
     vm.stop()
     cond = res_ops.gen_query_conditions('uuid', '=', vm.get_vm().uuid)
-    for i in range(config_ops.get_global_config_value('ha','neverStopVm.scan.interval')):
+    for i in range(int(config_ops.get_global_config_value('ha','neverStopVm.scan.interval'))):
         time.sleep(1)
         try:
             if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state != vm_header.STOPPED:
