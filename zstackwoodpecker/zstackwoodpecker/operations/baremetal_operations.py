@@ -150,14 +150,13 @@ def delete_chassis(chassis_uuid, delete_mode="Permissive", session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def provision_baremetal(chassis_uuid, session_uuid=None):
-    '''The function is dropped'''
-    action = api_actions.ProvisionBaremetalHostAction()
-    action.chassisUuid = chassis_uuid
+def inspect_chassis(chassis_uuid, session_uuid=None):
+    action = api_actions.InspectBaremetalChassisAction()
+    action.uuid = chassis_uuid
     action.timeout = 30000
-    test_util.action_logger('Provision Chassis [uuid:] %s' % chassis_uuid)
+    test_util.action_logger('Inspect Chassis [uuid:] %s' % chassis_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt
+    return evt.inventory
 
 def power_on_baremetal(chassis_uuid, session_uuid=None):
     '''The function is dropped'''
