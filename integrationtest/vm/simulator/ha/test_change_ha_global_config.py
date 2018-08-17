@@ -91,7 +91,7 @@ def test():
     config_ops.change_global_config('ha','enable', 'false')
     vm.stop()
     cond = res_ops.gen_query_conditions('uuid', '=', vm.get_vm().uuid)
-    for i in range(5):
+    for i in range(config_ops.get_global_config_value('ha','neverStopVm.scan.interval')):
         time.sleep(1)
         try:
             if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state != vm_header.STOPPED:
