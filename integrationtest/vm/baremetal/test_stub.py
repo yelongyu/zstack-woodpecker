@@ -155,15 +155,16 @@ def generate_cfgItems(chassis_uuid=None, nic_num=1, nic_flag=True, bond_num=0, s
         cfgItems["bondings"] = map(str, bondCfg)
     return cfgItems, nicCfg[0]["mac"]
     
-def create_vbmc(vm=None, port=None):
+def create_vbmc(vm, host_ip, port):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null'
     vm_uuid = vm.vm.uuid
     ipmi_port = port
-    shell.call('vbmc add %s --port  %d' % (vm_uuid,ipmi_port))
-    os.system('vbmc start %s' % vm_uuid)
+    shell.call('%s %s vbmc add %s --port  %d' % (ssh_cmd, host_ip, vm_uuid, ipmi_port))
+    os.system('%s %s vbmc start %s' % (ssh_cmd, host_ip, vm_uuid))
 
-def delete_vbmc(vm = None):
+def delete_vbmc(vm, host_ip):
     vm_uuid = vm.vm.uuid
-    shell.call('vbmc delete %s' % vm_uuid)
+    shell.call('ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s vbmc delete %s' %(host_ip, vm_uuid))
 
 def hack_ks(port = 623, ks_file='zs_host_ks.cfg'):
     path = '/var/lib/zstack/baremetal/ftp/ks'
