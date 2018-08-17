@@ -34,14 +34,43 @@ def sce_is_sep_pub():
         return False
 
 
-def get_vip_host_list(scenarioConfig, scenarioFile):
-    mha_host_list = get_mha_host_list_from_scenario_file(scenarioConfig, scenarioFile)
-    if len(mha_host_list) < 1:
-        return []
-    test_util.test_logger("@@DEBUG@@: mha_host_list=<%s>" %(str(mha_host_list)))
+def check_if_vip_is_on_host(scenarioConfig, scenarioFile, host_ip):
+    """
+    It checks whether vip is on host_ip
+    """
+    mha_s_vm_list = get_mha_s_vm_list_from_scenario_file(scenarioConfig, scenarioFile)
+    if len(mha_s_vm_list) < 1:
+        test_util.test_fail("not found mha host in check_if_vip_is_on_host")
+
+    test_util.test_logger("@@DEBUG@@: mha_s_vm_list=<%s>" %(str(mha_s_vm_list)))
     host_list = []
     vip = os.environ['zstackHaVip']
-    for host in mha_host_list:
+    cmd = "ip a|grep " + vip
+
+    for host in mha_s_vm_list:
+        if host.ip_ == host_ip:
+            host_config = sce_ops.get_scenario_config_vm(host.name_, scenarioConfig)
+            is_find = test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
+            if is_find:
+                return True
+
+    test_util.test_logger("not find vip in host_ip:%s" %(host_ip))
+    return False
+
+
+
+
+def get_s_vm_cfg_lst_vip_bind(scenarioConfig, scenarioFile):
+    """
+    It gets host with vip bound, while returned a s_vm config
+    """
+    mha_s_vm_list = get_mha_s_vm_list_from_scenario_file(scenarioConfig, scenarioFile)
+    if len(mha_s_vm_list) < 1:
+        return []
+    test_util.test_logger("@@DEBUG@@: mha_s_vm_list=<%s>" %(str(mha_s_vm_list)))
+    host_list = []
+    vip = os.environ['zstackHaVip']
+    for host in mha_s_vm_list:
         host_config = sce_ops.get_scenario_config_vm(host.name_, scenarioConfig)
         cmd = "ip a|grep " + vip
         try:
@@ -58,6 +87,19 @@ def get_vip_host_list(scenarioConfig, scenarioFile):
     test_util.test_logger("@@DEBUG@@: host_list=<%s>" %(str(host_list)))
     return host_list
 
+
+def get_expected_vip_host_after_switch(scenarioConfig, scenarioFile, vip_host_ip):
+    """
+    It will return another mHa host ip by vip_host_ip excluded in mha_s_vm_list
+    """
+    mha_s_vm_list = get_mha_s_vm_list_from_scenario_file(scenarioConfig, scenarioFile)
+    for host in mha_s_vm_list:
+        if host.ip_ != vip_host_ip:
+            test_util.test_logger("find a candidate host ip that vip can be used:%s" %(host.ip_))
+            return host.ip_
+    else:
+        test_util.test_fail("not found the differ host ip vip can be used")
+        
 
 def stop_host(host_vm, scenarioConfig, force=None):
     host_vm_uuid = host_vm.uuid_
@@ -134,19 +176,19 @@ def recover_vlan_in_host(host_ip, scenarioConfig, deploy_config):
 def get_host_by_mn_vm_process(scenarioConfig, scenarioFile):
     zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
 
-    mn_host_list = get_mha_host_list_from_scenario_file(scenarioConfig, scenarioFile)
-    if len(mn_host_list) < 1:
+    mha_s_vm_list = get_mha_s_vm_list_from_scenario_file(scenarioConfig, scenarioFile)
+    if len(mha_s_vm_list) < 1:
         return []
     host_vm_inv = dict()
     host_inv = dict()
-    for host in mn_host_list:
+    for host in mha_s_vm_list:
         cond = res_ops.gen_query_conditions('vmNics.ip', '=', host.ip_)
         host_vm_inv[host] = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0]
         cond = res_ops.gen_query_conditions('uuid', '=', host_vm_inv[host].hostUuid)
         host_inv[host] = sce_ops.query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
 
     host_list = []
-    for host in mn_host_list:
+    for host in mha_s_vm_list:
         cmd = "ps axjf |grep kvm | grep mnvm.img | grep -v grep"
         try:
             query_kvm_process = sce_ops.execute_in_vm_console(zstack_management_ip, host_inv[host].managementIp, host_vm_inv[host].uuid, host, cmd)
@@ -159,13 +201,13 @@ def get_host_by_mn_vm_process(scenarioConfig, scenarioFile):
 
 
 
-def get_mha_host_list_from_scenario_file(scenarioConfig, scenarioFile):
-    mn_host_list = []
+def get_mha_s_vm_list_from_scenario_file(scenarioConfig, scenarioFile):
+    mha_s_vm_list = []
 
     test_util.test_logger("@@DEBUG@@:<scenarioConfig:%s><scenarioFile:%s><scenarioFile is existed: %s>" \
                           %(str(scenarioConfig), str(scenarioFile), str(os.path.exists(scenarioFile))))
     if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
-        return mn_host_list
+        return mha_s_vm_list
 
     test_util.test_logger("@@DEBUG@@: after config file exist check")
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
@@ -177,15 +219,15 @@ def get_mha_host_list_from_scenario_file(scenarioConfig, scenarioFile):
                     scenario_file = xmlobject.loads(xmlstr)
                     for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
                         if s_vm.name_ == vm.name_:
-                            mn_host_list.append(s_vm)
-    test_util.test_logger("@@DEBUG@@: %s" %(str(mn_host_list)))
-    return mn_host_list
+                            mha_s_vm_list.append(s_vm)
+    test_util.test_logger("@@DEBUG@@: %s" %(str(mha_s_vm_list)))
+    return mha_s_vm_list
 
 def get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, index):
     test_util.test_logger("@@DEBUG@@:<scenarioConfig:%s><scenarioFile:%s><scenarioFile is existed: %s>" \
                           %(str(scenarioConfig), str(scenarioFile), str(os.path.exists(scenarioFile))))
     if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
-        return mn_host_list
+        return mha_s_vm_list
 
     test_util.test_logger("@@DEBUG@@: after config file exist check")
     with open(scenarioFile, 'r') as fd:
@@ -196,16 +238,16 @@ def get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, index):
 
 
 def prepare_etc_hosts(scenarioConfig, scenarioFile, deploy_config, config_json):
-    mn_host_list = get_mha_host_list_from_scenario_file(scenarioConfig, scenarioFile)
-    if len(mn_host_list) < 1:
+    mha_s_vm_list = get_mha_s_vm_list_from_scenario_file(scenarioConfig, scenarioFile)
+    if len(mha_s_vm_list) < 1:
         return False
 
-    for i in range(len(mn_host_list)):
-        os.system('echo %s %s >> /etc/hosts' % (mn_host_list[i].ip_, mn_host_list[i].ip_.replace('.', '-')))
+    for i in range(len(mha_s_vm_list)):
+        os.system('echo %s %s >> /etc/hosts' % (mha_s_vm_list[i].ip_, mha_s_vm_list[i].ip_.replace('.', '-')))
 
-    for i in range(len(mn_host_list)):
-        test_host_config = sce_ops.get_scenario_config_vm(mn_host_list[i].name_, scenarioConfig)
-        ssh.scp_file('/etc/hosts', '/etc/hosts', mn_host_list[i].ip_, test_host_config.imageUsername_, test_host_config.imagePassword_)
+    for i in range(len(mha_s_vm_list)):
+        test_host_config = sce_ops.get_scenario_config_vm(mha_s_vm_list[i].name_, scenarioConfig)
+        ssh.scp_file('/etc/hosts', '/etc/hosts', mha_s_vm_list[i].ip_, test_host_config.imageUsername_, test_host_config.imagePassword_)
 
 
 l2network_nic = None
@@ -375,9 +417,9 @@ def ensure_bss_host_connected_from_stop(scenarioFile, scenarioConfig, deploy_con
             if test_lib.lib_wait_target_up(bs_host_ip, '22', 300):
                 bss_host_ip.remove(bs_host_ip)
 
-        mn_host_list = get_mha_host_list_from_scenario_file(scenarioConfig, scenarioFile)
+        mha_s_vm_list = get_mha_s_vm_list_from_scenario_file(scenarioConfig, scenarioFile)
         for bs_host_ip in bss_host_ip:
-            for mn_host in mn_host_list:
+            for mn_host in mha_s_vm_list:
                 if mn_host.managementIp_ == bs_host_ip or mn_host.ip_ == bs_host_ip:
                     recover_host(mn_host, scenarioConfig, deploy_config)
 
@@ -410,9 +452,9 @@ def ensure_bss_host_connected_from_sep_net_down(scenarioFile, scenarioConfig, do
         else:
             l2network_nic = test_lib.lib_get_l2_pub_nic_by_vr_offering()
 
-        mn_host_list = get_mha_host_list_from_scenario_file(scenarioConfig, scenarioFile)
+        mha_s_vm_list = get_mha_s_vm_list_from_scenario_file(scenarioConfig, scenarioFile)
         for bs_host_ip in bss_host_ip:
-            for mn_host in mn_host_list:
+            for mn_host in mha_s_vm_list:
                 if mn_host.managementIp_ == bs_host_ip or mn_host.ip_ == bs_host_ip:
                     reopen_host_network(mn_host, scenarioConfig, param_l2_nic=l2network_nic)
 

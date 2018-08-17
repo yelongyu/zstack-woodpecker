@@ -17,43 +17,32 @@ import time
 import os
 
 vm = None
-mn_host = None
+vip_s_vm_cfg_lst = None
 
 def test():
     global vm
-    global mn_host
-    mn_host = test_stub.get_host_by_mn_vm(test_lib.all_scenario_config, test_lib.scenario_file)
-    if len(mn_host) != 1:
-        test_util.test_fail('MN VM is running on %d host(s)' % len(mn_host))
-    test_util.test_logger("force shutdown host [%s] that mn vm is running on" % (mn_host[0].ip_))
-    test_stub.stop_host(mn_host[0], test_lib.all_scenario_config, 'cold')
-    test_util.test_logger("wait for 20 seconds to see if management node VM starts on another host")
+    global vip_s_vm_cfg_lst
+
+    vip_s_vm_cfg_lst = test_stub.get_s_vm_cfg_lst_vip_bind(test_lib.all_scenario_config, test_lib.scenario_file)
+    if len(vip_s_vm_cfg_lst) != 1:
+        test_util.test_fail('vip has been running on %d host(s)' % len(vip_s_vm_cfg_lst))
+
+    test_util.test_logger("force shutdown host [%s]" % (vip_s_vm_cfg_lst[0].ip_))
+    test_stub.stop_host(vip_s_vm_cfg_lst[0], test_lib.all_scenario_config, 'cold')
+
     time.sleep(20)
 
-    new_mn_host_ip = test_stub.get_host_by_consul_leader(test_lib.all_scenario_config, test_lib.scenario_file)
-    if new_mn_host_ip == "" or new_mn_host_ip == mn_host[0].ip_:
-        test_util.test_fail("management node VM not run correctly on [%s] after its former host [%s] down for 20s" % (new_mn_host_ip, mn_host[0].ip_))
+    expected_vip_s_vm_cfg_lst_ip = get_expected_vip_s_vm_cfg_lst_after_switch(test_lib.all_scenario_config, test_lib.scenario_file, vip_s_vm_cfg_lst[0].ip_)
+    if check_if_vip_is_on_host(test_lib.all_scenario_config, test_lib.scenario_file, expected_vip_s_vm_cfg_lst_ip):
+        test_util.test_fail("find vip should drift on ip%s, but is not" %(expected_vip_s_vm_cfg_lst_ip))
 
-    count = 60
-    while count > 0:
-        new_mn_host = test_stub.get_host_by_mn_vm(test_lib.all_scenario_config, test_lib.scenario_file)
-        if len(new_mn_host) == 1:
-            test_util.test_logger("management node VM run after its former host down for 30s")
-            break
-        elif len(new_mn_host) > 1:
-            test_util.test_fail("management node VM runs on more than one host after its former host down")
-        time.sleep(5)
-        count -= 1
+    vip_s_vm_cfg_lst = test_stub.get_s_vm_cfg_lst_vip_bind(test_lib.all_scenario_config, test_lib.scenario_file)
+    if len(vip_s_vm_cfg_lst) != 1:
+        test_util.test_fail('vip has been running on %d host(s)' % len(vip_s_vm_cfg_lst))
 
-    if len(new_mn_host) == 0:
-        test_util.test_fail("management node VM does not run after its former host down for 30s")
-    elif len(new_mn_host) > 1:
-        test_util.test_fail("management node VM runs on more than one host after its former host down")
-
-    #node_ops.wait_for_management_server_start(300)
     test_stub.wrapper_of_wait_for_management_server_start(600)
 
-    test_stub.ensure_hosts_connected(exclude_host=[mn_host[0]])
+    test_stub.ensure_hosts_connected(exclude_host=[vip_s_vm_cfg_lst[0]])
     test_stub.ensure_bss_host_connected_from_stop(test_lib.scenario_file, test_lib.all_scenario_config, test_lib.deploy_config)
     test_stub.ensure_bss_connected()
     test_stub.ensure_pss_connected()
@@ -67,8 +56,8 @@ def test():
 
 #Will be called what ever test result is
 def env_recover():
-    test_util.test_logger("recover host: %s" % (mn_host[0].ip_))
-    test_stub.recover_host(mn_host[0], test_lib.all_scenario_config, test_lib.deploy_config)
+    test_util.test_logger("recover host: %s" % (vip_s_vm_cfg_lst[0].ip_))
+    test_stub.recover_host(vip_s_vm_cfg_lst[0], test_lib.all_scenario_config, test_lib.deploy_config)
     test_stub.wait_for_mn_ha_ready(test_lib.all_scenario_config, test_lib.scenario_file)
 
 #Will be called only if exception happens in test().
