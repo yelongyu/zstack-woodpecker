@@ -25,7 +25,7 @@ def test():
     #judge whether BS is imagestore
     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)
     for i in bs:
-        if i.type != inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+        if i.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
 	    break
     else:
         test_util.test_skip('Skip test on non-imagestore')
