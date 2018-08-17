@@ -218,7 +218,8 @@ def change_os(vm_obj):
 
 def back_up(vm_obj):
      global backup
-     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
+     cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
+     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0]
      backup_option = test_util.BackupOption()
      backup_option.set_name("test_compare")
      backup_option.set_volume_uuid(test_lib.lib_get_root_volume(vm_obj.get_vm()).uuid)
@@ -231,7 +232,8 @@ def revert_backup(vm_obj):
     vol_ops.revert_volume_from_backup(backup_uuid) 
 
 def backup_image(vm_obj):
-    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0] 
+    cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0] 
     backup = random.choice(backup_list)
     image = img_ops.create_root_template_from_backup(bs.uuid, backup.uuid)
 
@@ -316,7 +318,8 @@ def compare(ps, vm, backup):
     test_util.test_logger("-----------------compare----------------")
     # find vm_host
     host = test_lib.lib_find_host_by_vm(vm.vm)
-    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
+    cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0]
 
     root_volume = test_lib.lib_get_root_volume(vm.get_vm())
     vm_path = root_volume.installPath

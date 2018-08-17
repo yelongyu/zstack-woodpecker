@@ -138,7 +138,8 @@ def revert_backup(vm_obj, dvol):
     vol_ops.revert_volume_from_backup(backup_uuid)
 
 def backup_image(vm_obj, dvol):
-    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
+    cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0]
     backup = random.choice(backup_list)
     image = img_ops.create_data_template_from_backup(bs.uuid, backup.uuid)
 
@@ -156,7 +157,8 @@ def resize_dvol(vm_obj, dvol):
 
 def back_up(vm_obj, dvol):
     global backup
-    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
+    cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0]
     backup_option = test_util.BackupOption()
     backup_option.set_name("test_compare")
     backup_option.set_volume_uuid(dvol.volume.uuid)
@@ -253,7 +255,8 @@ def compare(ps, vm, dvol, backup):
     test_util.test_logger("-----------------compare----------------")
     # find vm_host
     host = test_lib.lib_find_host_by_vm(vm.vm)
-    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
+    cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0]
 
     cond = res_ops.gen_query_conditions("uuid", '=', dvol.volume.uuid)
     current_volume = res_ops.query_resource(res_ops.VOLUME, cond)[0]
