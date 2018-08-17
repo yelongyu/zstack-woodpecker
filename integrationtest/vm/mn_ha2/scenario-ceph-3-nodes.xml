@@ -23,6 +23,7 @@
           <nodeRef>$node1Name</nodeRef>
           <hostRef>$hostName</hostRef>
           <mnHostRef>$hostName</mnHostRef>
+          <mHaHostRef>$hostName</mHaHostRef>
 	  <backupStorageRef type="ceph" offering_uuid="$cephStorageOfferingUuid">$cephBackupStorageName</backupStorageRef>
 	  <primaryStorageRef type="ceph">$cephPrimaryStorageName</primaryStorageRef>
         </vm>
@@ -38,6 +39,7 @@
           <nodeRef>$node2Name</nodeRef>
           <hostRef>$hostName2</hostRef>
           <mnHostRef>$hostName2</mnHostRef>
+          <mHaHostRef>$hostName2</mHaHostRef>
 	  <backupStorageRef type="ceph" offering_uuid="$cephStorageOfferingUuid">$cephBackupStorageName</backupStorageRef>
 	  <primaryStorageRef type="ceph">$cephPrimaryStorageName</primaryStorageRef>
         </vm>

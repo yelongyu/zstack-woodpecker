@@ -23,6 +23,7 @@
 	  <nodeRef>$node1Name</nodeRef>
           <ha2MnRef>$node1Name</ha2MnRef>
           <mnHostRef>$node1Name</mnHostRef>
+          <mHaHostRef>$node1Name</mHaHostRef>
         </vm>
         <vm name="$vmName5" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid" imageUsername="$imageUsername" imagePassword="$imagePassword">
@@ -36,6 +37,7 @@
 	  <nodeRef>$node2Name</nodeRef>
           <ha2MnRef>$node2Name</ha2MnRef>
           <mnHostRef>$node2Name</mnHostRef>
+          <mHaHostRef>$node2Name</mHaHostRef>
         </vm>
         <vm name="$vmName1" vmInstranceOfferingUuid="$vm2haHostInstranceOfferingUuid" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
