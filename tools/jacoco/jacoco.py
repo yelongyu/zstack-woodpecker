@@ -8,7 +8,16 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
-def get_commit_id(zstack_root, repo):
+
+def get_commit_id_from_build(build_dir, repo):
+    version_txt = os.path.join(build_dir, 'versions.txt')
+    (status, output) = commands.getstatusoutput("cat %s |grep %s:|awk '{print $2}'"% (version_txt, repo))
+    if status == 0:
+        print 'Commit id is %s' %output    
+        return output
+    return False
+
+def get_commit_id_from_env(zstack_root, repo):
     if repo == 'zstack':
         version_file = 'git-commit'
     elif repo == 'premium':
@@ -44,12 +53,11 @@ def reset_src_files(report_root_path, repo, branch, commit_id):
         return True
     return False
 
-def reset_class_files(zstack_root, war, classes):
-    war_path = os.path.join(zstack_root, war_file)
+def reset_class_files(war_file, classes):
     if os.path.exists(classes):
         os.system('rm -rf %s' %classes)
-    if os.path.exists(war_path):
-        (status, output) = commands.getstatusoutput('unzip %s -d %s' %(war_path, classes))
+    if os.path.exists(war_file):
+        (status, output) = commands.getstatusoutput('unzip %s -d %s' %(war_file, classes))
         if status == 0:
             print output
             return True
@@ -83,6 +91,7 @@ def generate_class_ini(report_root_path, class_path, class_ini_path, repo):
                     module_lst.append(module.text)
     lib_path = os.path.join(class_path, 'WEB-INF', 'lib') 
     for module in module_lst:
+        print module
         if module == 'baremetal':
             continue
         (status, output) = commands.getstatusoutput('ls %s|grep "^%s-[0-9]"' %(lib_path, module))
@@ -112,7 +121,6 @@ def filter_class(class_ini_file):
         os.system('zip -r %s temp' % (class_file))
 
 def generate_report(report_root_path, repo, class_ini_file, exec_file, source_ini_file):
-    cli_path = os.path.join('/home/', 'jacococli.jar')
     report_path = os.path.join(report_root_path, 'report', repo)
 
     class_fd = open(class_ini_file, 'r')
@@ -124,7 +132,7 @@ def generate_report(report_root_path, repo, class_ini_file, exec_file, source_in
     cmd = 'java -jar %s report ' %cli_path
     #for exec_file in exec_fd:
     #   cmd += '%s '%exec_file.replace("\n", "")
-    cmd += '/home/1.exec'
+    cmd += exec_file
 
     cmd = cmd+' --html %s '% report_path
     for class_file in class_fd:
@@ -137,12 +145,7 @@ def generate_report(report_root_path, repo, class_ini_file, exec_file, source_in
     os.system(cmd)
 
 if __name__ == "__main__":
-    zstack_root = '/usr/local/zstacktest/'
-    #buildtype = 'mevoco_2.6.0'
-    #buildid = '136'
-    repo = 'zstack' #zstack/premium
     branch = 'master'
-    exec_file = '/home/1.exec'
     #if len(sys.argv) == 4:
     #    buildtype = sys.argv[1]
     #    buildid = sys.argv[2]
@@ -150,25 +153,37 @@ if __name__ == "__main__":
     #elif len(sys.argv) != 4 and len(sys.argv) != 1:
     #    print "please provide buildtype buildid and repo, for example:jacoco.py mevoco_2.6.0 136 zstack"
     #    sys.exit(1)
-    report_root_path = '/home/'
+
+    if True:
+        zstack_root = '/usr/local/zstacktest/'
+        war_file = '/usr/local/zstacktest/zstack.war'
+        exec_file = '/home/1.exec'
+        zstack_commit_id = get_commit_id_from_env(zstack_root, 'zstack')
+        premium_commit_id = get_commit_id_from_env(zstack_root, 'premium')
+        report_root_path = '/home/'
+        cli_path = os.path.join('/home/', 'jacococli.jar')
+    else:
+        build_dir = '/var/www/html/mirror/mevoco_2.6.0/136/'
+        war_file = os.path.join(build_dir, 'zstack.war')
+        exec_file = os.path.join(build_dir, 'merged.exec')
+        zstack_commit_id = get_commit_id_from_build(build_dir, 'zstack')
+        premium_commit_id = get_commit_id_from_build(build_dir, 'premium')
+        report_root_path = '/mnt/coverage/'
+        cli_path = os.path.join('/mnt/jacoco/', 'jacococli.jar')
+
     class_folder = 'class_files'
     class_ini_file = 'class.ini'
     source_ini_file = 'source.ini'
     exec_ini_file = 'exec.ini'
-    war_file = 'zstack.war'
     result_folder = 'report'
 
     class_ini_path = os.path.join(report_root_path, class_ini_file)
     exec_ini_path = os.path.join(report_root_path, exec_ini_file)
     source_ini_path = os.path.join(report_root_path, source_ini_file)
-    src_path =  os.path.join(report_root_path, repo)
-    war_path = os.path.join(zstack_root, war_file)
     class_path = os.path.join(report_root_path, class_folder)
 
-    reset_class_files(zstack_root, war_path, class_path)
-    zstack_commit_id = get_commit_id(zstack_root, 'zstack')
+    reset_class_files(war_file, class_path)
     reset_src_files(report_root_path, 'zstack', branch, zstack_commit_id)
-    premium_commit_id = get_commit_id(zstack_root, 'premium')
     reset_src_files(report_root_path, 'premium', branch, premium_commit_id)
     #TODO merge exec here
     generate_class_ini(report_root_path, class_path, class_ini_path, 'zstack')
