@@ -92,6 +92,25 @@ def generate_class_ini(report_root_path, class_path, class_ini_path, repo):
     fd.write(class_str)
     fd.close()
 
+def filter_class(class_ini_file):
+    class_fd = open(class_ini_file, 'r')
+    for class_file in class_fd:
+        class_file = class_file.replace("\n", "")
+        (status, output) = commands.getstatusoutput('unzip -l %s | grep Doc_zh_cn' % class_file)
+        print 'unzip -l %s | grep Doc_zh_cn' % class_file
+        if status != 0:
+            continue
+        os.system('rm -rf temp')
+        os.system('mkdir -p temp')
+        print 'unzip %s -d temp' % (class_file)
+        os.system('unzip %s -d temp' % (class_file))
+        print 'find temp | grep Doc_zh_cn | xargs rm -rf'
+        os.system('find temp | grep Doc_zh_cn | xargs rm -rf')
+        print 'rm -rf %s' % (class_file)
+        os.system('rm -rf %s' % (class_file))
+        print 'zip -r %s temp' % (class_file)
+        os.system('zip -r %s temp' % (class_file))
+
 def generate_report(report_root_path, repo, class_ini_file, exec_file, source_ini_file):
     cli_path = os.path.join('/home/', 'jacococli.jar')
     report_path = os.path.join(report_root_path, 'report', repo)
@@ -153,6 +172,8 @@ if __name__ == "__main__":
     reset_src_files(report_root_path, 'premium', branch, premium_commit_id)
     #TODO merge exec here
     generate_class_ini(report_root_path, class_path, class_ini_path, 'zstack')
-    generate_report(report_root_path, 'zstack', class_ini_file, exec_file, source_ini_path)
+    filter_class(class_ini_path)
+    generate_report(report_root_path, 'zstack', class_ini_path, exec_file, source_ini_path)
     generate_class_ini(report_root_path, class_path, class_ini_path, 'premium')
-    generate_report(report_root_path, 'premium', class_ini_file, exec_file, source_ini_path)
+    filter_class(class_ini_path)
+    generate_report(report_root_path, 'premium', class_ini_path, exec_file, source_ini_path)
