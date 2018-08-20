@@ -53,7 +53,7 @@ def test():
 	vm = test_stub.create_vm('test_vm', image_name, l3_name)
 
 	# wait for send email
-	time.sleep(30)
+	time.sleep(60)
 	flag = zwt_ops.check_keywords_in_email(pop_server, username, password, disk_all_write_bytes,
 	                                       disk_all_write_bytes_alarm_uuid)
 	if not flag:

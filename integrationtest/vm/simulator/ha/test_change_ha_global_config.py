@@ -36,7 +36,7 @@ import zstackwoodpecker.operations.deploy_operations as dep_ops
 
 _config_ = {
         'timeout' : 24*60*60+1200,
-        'noparallel' : False,
+        'noparallel' : True,
         }
 
 

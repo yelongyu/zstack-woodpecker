@@ -1,6 +1,6 @@
 '''
 Test Steps:
-    1. force stop host where vip located.
+    1. grace stop host where vip located.
     2. check vip switch to another MN.
     3. create vm to validate everything goes on well. 
 
@@ -28,7 +28,7 @@ def test():
         test_util.test_fail('vip has been running on %d host(s)' % len(vip_s_vm_cfg_lst))
 
     test_util.test_logger("force shutdown host [%s]" % (vip_s_vm_cfg_lst[0].ip_))
-    test_stub.stop_host(vip_s_vm_cfg_lst[0], test_lib.all_scenario_config, 'cold')
+    test_stub.stop_host(vip_s_vm_cfg_lst[0], test_lib.all_scenario_config)
 
     time.sleep(20)
 

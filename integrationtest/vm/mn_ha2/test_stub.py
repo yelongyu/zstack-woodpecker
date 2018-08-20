@@ -43,7 +43,6 @@ def check_if_vip_is_on_host(scenarioConfig, scenarioFile, host_ip):
         test_util.test_fail("not found mha host in check_if_vip_is_on_host")
 
     test_util.test_logger("@@DEBUG@@: mha_s_vm_list=<%s>" %(str(mha_s_vm_list)))
-    host_list = []
     vip = os.environ['zstackHaVip']
     cmd = "ip a|grep " + vip
 
@@ -88,7 +87,7 @@ def get_s_vm_cfg_lst_vip_bind(scenarioConfig, scenarioFile):
     return host_list
 
 
-def get_expected_vip_host_after_switch(scenarioConfig, scenarioFile, vip_host_ip):
+def get_expected_vip_s_vm_cfg_lst_after_switch(scenarioConfig, scenarioFile, vip_host_ip):
     """
     It will return another mHa host ip by vip_host_ip excluded in mha_s_vm_list
     """
