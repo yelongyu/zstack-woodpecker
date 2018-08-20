@@ -22,6 +22,11 @@ rootMediaType = RootVolumeTemplate
 imageUsername = root
 imagePassword = password
 
+imageName_iso = iso-image
+isoImageFormat = iso
+imageUrl_iso = http://192.168.200.100/mirror/iso/CentOS-7-x86_64-Minimal-1611-Auto.iso
+isoMediaType = ISO
+
 ZSTACK_ALREADY_INSTALLED = yes
 pxename = Pxe_Test
 dhcpinterface = br_eth0
