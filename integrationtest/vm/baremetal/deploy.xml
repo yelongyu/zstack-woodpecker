@@ -157,7 +157,7 @@
         <l2VxlanNetwork name="$l2BaremetalNetworkName" description="guest L2 Vxlan network 4, it is for test small ip range.">
           <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
           <l3Networks>
-            <l3BasicNetwork name="$l3PublicNetworkName" description="Test">
+            <l3BasicNetwork name="$l3BaremetalNetworkName" description="Test">
               <ipRange name="$ipRangeName" description="Test" 
                 startIp="$ipRangeStartIp" endIp="$ipRangeEndIp"
                 gateway="$ipRangeGateway"

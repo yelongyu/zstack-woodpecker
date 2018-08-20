@@ -60,6 +60,7 @@ hostName3 = host3
 hostIp3 = 127.1.101.43
 
 l2BaremetalNetworkName = l2-baremetal
+l3BaremetalNetworkName = l3-baremetal
 l2VxlanNetworkPoolName = l2_vxlan_network_pool
 vniRangeName = vni_range
 startVni = 10
