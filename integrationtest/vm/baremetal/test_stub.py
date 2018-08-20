@@ -166,7 +166,7 @@ def delete_vbmc(vm, host_ip):
     vm_uuid = vm.vm.uuid
     shell.call('ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s vbmc delete %s' %(host_ip, vm_uuid))
 
-def hack_ks(port = 623, ks_file='zs_host_ks.cfg'):
+def hack_ks(port = 623, ks_file='inspector_ks.cfg'):
     path = '/var/lib/zstack/baremetal/ftp/ks'
     ks = os.path.join(path, ks_file)
     with open(ks, 'r') as ks_in:
@@ -175,10 +175,12 @@ def hack_ks(port = 623, ks_file='zs_host_ks.cfg'):
         for line in lines:
             if 'status1:' in line:
                 line = re.sub('if not status1:', 'if status1:', line)
-            if 'ipmiAddress' in line:
-                line = re.sub('ipmiAddress = .*$', 'ipmiAddress = "%s"' % os.environ.get('ipmiaddress'), line)
-            if 'ipmiPort'in line:
-                line = re.sub('ipmiPort = .*$','ipmiPort = "%s"' % str(port), line)
+            if 'ipmiPort = 623' in line:
+                line = line + '\nipmiAddress = "127.0.0.1"\nipmiPort = 623' 
+            #if 'ipmiAddress' in line:
+            #    line = re.sub('ipmiAddress = .*$', 'ipmiAddress = "%s"' % os.environ.get('ipmiaddress'), line)
+            #if 'ipmiPort'in line:
+            #    line = re.sub('ipmiPort = .*$','ipmiPort = "%s"' % str(port), line)
             ks_out.write(line)
 
 def check_hwinfo(chassis_uuid):
