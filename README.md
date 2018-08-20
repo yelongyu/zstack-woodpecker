@@ -2,6 +2,9 @@
 The automated testing framework for project ZStack http://zstack.org
 
 #1. Download all source
+#1. Download all source
+#1. Download all source
+#1. Download all source
  * `mkdir /home/zstack`  
  * `cd /home/zstack`  
  * `git clone https://github.com/zstackorg/zstack`  
