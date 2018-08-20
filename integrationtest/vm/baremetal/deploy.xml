@@ -84,10 +84,9 @@
     </image>
     <image name="$imageName_iso" description="Test ISO"
         format="$isoImageFormat" url="$imageUrl_iso"
-        mediaType="$isoMediaType"
+        mediaType="$isoMediaType">
         <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
-      </image>
-
+    </image>
   </images>
 
   <diskOfferings>
