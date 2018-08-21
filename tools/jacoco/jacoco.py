@@ -146,6 +146,7 @@ def generate_report(report_root_path, repo, class_ini_file, exec_file, source_in
 
 if __name__ == "__main__":
     branch = 'master'
+    os.system('yum install -y --disablerepo=epel zip')
     #if len(sys.argv) == 4:
     #    buildtype = sys.argv[1]
     #    buildid = sys.argv[2]
@@ -179,7 +180,7 @@ if __name__ == "__main__":
 
     class_ini_path = os.path.join(report_root_path, class_ini_file)
     exec_ini_path = os.path.join(report_root_path, exec_ini_file)
-    source_ini_path = os.path.join(report_root_path, source_ini_file)
+    source_ini_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), source_ini_file)
     class_path = os.path.join(report_root_path, class_folder)
 
     reset_class_files(war_file, class_path)
