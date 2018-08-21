@@ -1,4 +1,5 @@
 import zstackwoodpecker.operations.baremetal_operations as bare_operations
+import zstackwoodpecker.operations.cluster_operations as cluster_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
 import zstacklib.utils.jsonobject as jsonobject
 import zstackwoodpecker.test_util as test_util
@@ -8,71 +9,95 @@ import os
 import re
 import time
 
-def create_pxe(pxe_option=None, session_uuid=None):
-    if not pxe_option:
-    	pxe_option = test_util.PxeOption()
-        pxe_option.set_dhcp_interface(os.environ.get('dhcpinterface'))
-        pxe_option.set_dhcp_range_end(os.environ.get('dhcpend'))
-        pxe_option.set_dhcp_range_begin(os.environ.get('dhcpbegin'))
-        pxe_option.set_dhcp_netmask(os.environ.get('dhcpnetmask'))
+def create_cluster(zone_uuid, cluster_name = None, session_uuid = None):
+    if not cluster_name:
+        cluster_name = 'baremetal_cluster'
+    cluster_option = test_util.ClusterOption()
+    cluster_option.set_name(cluster_name)
+    cluster_option.set_hypervisor_type('baremetal')
+    cluster_option.set_type('baremetal')
+    cluster_option.set_zone_uuid(zone_uuid)
+    cluster_option.set_session_uuid(session_uuid)
+    cluster = cluster_ops.create_cluster(cluster_option)
+    return cluster
+
+def create_pxe(dhcp_interface = None, name = None, range_begin = None, \
+		range_end = None, netmask = None, session_uuid = None):
+    pxe_option = test_util.PxeOption()
+    if not dhcp_interface:
+        dhcp_interface = os.environ.get('dhcpinterface')
+    if not range_begin:
+        range_begin = os.environ.get('dhcpbegin')
+    if not range_end:
+        range_end = os.environ.get('dhcpend')
+    if not netmask:
+        netmask = os.environ.get('dhcpnetmask')
+    pxe_option.set_dhcp_interface(dhcp_interface)
+    pxe_option.set_dhcp_range_end(range_end)
+    pxe_option.set_dhcp_range_begin(range_begin)
+    pxe_option.set_dhcp_netmask(netmask)
     if session_uuid:
         pxe_option.set_session_uuid(session_uuid)
     pxe = bare_operations.create_pxe(pxe_option)
     return pxe
 
-def create_vm(vm_name = 'vm1', image_name = None, \
+def create_vm(vm_name = 'vm_for_baremetal', image_name = None, \
              l3_name = None, instance_offering_uuid = None, \
-             host_uuid = None, disk_offering_uuid = None, \
+             host_uuid = None, disk_offering_uuid = None, cluster_uuid = None, \
              system_tags = None, password = None, session_uuid = None):
-
-    if not image_name:
-        image_name = os.environ.get('imageName_s')
-
-    if not l3_name:
-        l3_name1 = os.environ.get('l3PublicNetworkName')
-        l3_name2 = os.environ.get('l3VlanNetworkName1')
-        l3_name3 = os.environ.get('l3VlanNetworkName3')
-
-    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
-    l3_uuid1 = test_lib.lib_get_l3_by_name(l3_name1).uuid
-    l3_uuid2 = test_lib.lib_get_l3_by_name(l3_name2).uuid
-    l3_uuid3 = test_lib.lib_get_l3_by_name(l3_name3).uuid
-
     if not instance_offering_uuid:
         instance_offering_name = os.environ.get('instanceOfferingName_m')
+        instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(instance_offering_name).uuid
+    if not image_name:
+        image_name = os.environ.get('imageName_s')
+    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    if not l3_name:
+        l3_name = os.environ.get('l3PublicNetworkName')
+    l3_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
 
-    instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(instance_offering_name).uuid
-    
     vm_creation_option = test_util.VmOption()
-    vm_creation_option.set_l3_uuids([l3_uuid1, l3_uuid2, l3_uuid3])
-    vm_creation_option.set_image_uuid(image_uuid)
-    vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
     vm_creation_option.set_name(vm_name)
-    vm_creation_option.set_system_tags(system_tags)
-    vm_creation_option.set_data_disk_uuids(disk_offering_uuid)
+    vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+    vm_creation_option.set_image_uuid(image_uuid)
+    vm_creation_option.set_l3_uuids([l3_uuid])
+    if cluster_uuid:
+        vm_creation_option.set_cluster_uuid(cluster_uuid)
+    if system_tags: 
+        vm_creation_option.set_system_tags(system_tags)
+    if disk_offering_uuid:
+        vm_creation_option.set_data_disk_uuids(disk_offering_uuid)
     if password:
         vm_creation_option.set_root_password(password)
     if host_uuid:
         vm_creation_option.set_host_uuid(host_uuid)
     if session_uuid:
         vm_creation_option.set_session_uuid(session_uuid)
-
     vm = zstack_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
     vm.create()
     return vm
 
-def create_chassis(chassis_name = "Chassis_Test", chassis_option=None, session_uuid=None):
-    if not chassis_option:
-        chassis_option = test_util.ChassisOption()
-        chassis_option.set_name(chassis_name)
-        chassis_option.set_ipmi_address(os.environ.get('ipmiaddress'))
-        chassis_option.set_ipmi_username(os.environ.get('ipmiusername'))
-        chassis_option.set_ipmi_password(os.environ.get('ipmipassword'))
-        chassis_option.set_ipmi_port(os.environ.get('ipmiport'))
-    if session_uuid:
-        chassis_option.set_session_uuid(session_uuid)
-    chassis = bare_operations.create_chassis(chassis_option, session_uuid)
+def create_chassis(cluster_uuid, ipmi_name = None, address = None, username = None, \
+     password = None, port = None, session_uuid=None):
+
+    if not name:
+        name = os.environ.get('ipminame')
+    if not address:
+        address = os.environ.get('ipmiaddress')
+    if not username:
+        username = os.environ.get('ipmiusername')
+    if not password:
+        password = os.environ.get('ipmipassword')
+    if not port:
+        port = os.environ.get('ipmiport')
+    chassis_option = test_util.ChassisOption()
+    chassis_option.set_name(name)
+    chassis_option.set_ipmi_address(address)
+    chassis_option.set_ipmi_username(username)
+    chassis_option.set_ipmi_password(password)
+    chassis_option.set_ipmi_port(port)
+    chassis_option.set_cluster_uuid(baremetal_cluster_uuid)
+    chassis = baremetal_operations.create_chassis(chassis_option, session_uuid)
     return chassis
 
 def create_hostcfg(chassis_uuid=None, unattended=True, vnc=True, \
@@ -164,7 +189,8 @@ def create_vbmc(vm, host_ip, port):
 
 def delete_vbmc(vm, host_ip):
     vm_uuid = vm.vm.uuid
-    shell.call('ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s vbmc delete %s' %(host_ip, vm_uuid))
+    shell.call('ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null \
+		%s vbmc delete %s' %(host_ip, vm_uuid))
 
 def hack_ks(port = 623, ks_file='inspector_ks.cfg'):
     path = '/var/lib/zstack/baremetal/ftp/ks'
@@ -211,8 +237,3 @@ def verify_chassis_status(chassis_uuid, status):
 	    break
         current_status = check_chassis_status(chassis_uuid)
     return (current_status == expect_status)
-
-    
-
-
-
