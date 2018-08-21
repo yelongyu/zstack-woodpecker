@@ -27,7 +27,7 @@ def test():
     baremetal_cluster_uuid = res_ops.query_resource(res_ops.CLUSTER, cond)[0].uuid
     test_stub.create_vbmc(vm, host.managementIp, 623)
     chassis = test_stub.create_chassis(baremetal_cluster_uuid)
-    test_stub.hack_ks(port = 623)
+    test_stub.hack_ks(mn_ip)
     chassis_uuid = chassis.uuid 
     baremetal_operations.inspect_chassis(chassis_uuid)
     #hwinfo = test_stub.check_hwinfo(chassis_uuid)
