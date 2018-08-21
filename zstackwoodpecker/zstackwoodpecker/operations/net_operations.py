@@ -342,10 +342,11 @@ def delete_l3(l3_uuid, session_uuid = None):
     test_util.action_logger("[L3:] %s is deleted" % l3_uuid)
     return evt
 
-def attach_l2(l2_uuid, cluster_uuid, session_uuid = None):
+def attach_l2(l2_uuid, cluster_uuid, systemTags = None, session_uuid = None):
     action = api_actions.AttachL2NetworkToClusterAction()
     action.clusterUuid = cluster_uuid
     action.l2NetworkUuid = l2_uuid
+    action.systemTags = systemTags
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger("Attach [L2:] %s to [Cluster:] %s " \
             % (l2_uuid, cluster_uuid))
