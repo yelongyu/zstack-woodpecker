@@ -5,6 +5,7 @@ import zstacklib.utils.jsonobject as jsonobject
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstacklib.utils.shell as shell
+import subprocess
 import os
 import re
 import time
@@ -52,7 +53,7 @@ def create_vm(vm_name = 'vm_for_baremetal', image_name = None, \
         image_name = os.environ.get('imageName_s')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     if not l3_name:
-        l3_name = os.environ.get('l3PublicNetworkName')
+        l3_name = os.environ.get('l3BaremetalNetworkName')
     l3_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
 
     vm_creation_option = test_util.VmOption()
@@ -77,7 +78,7 @@ def create_vm(vm_name = 'vm_for_baremetal', image_name = None, \
     vm.create()
     return vm
 
-def create_chassis(cluster_uuid, ipmi_name = None, address = None, username = None, \
+def create_chassis(cluster_uuid, name = None, address = None, username = None, \
      password = None, port = None, session_uuid=None):
 
     if not name:
@@ -96,8 +97,9 @@ def create_chassis(cluster_uuid, ipmi_name = None, address = None, username = No
     chassis_option.set_ipmi_username(username)
     chassis_option.set_ipmi_password(password)
     chassis_option.set_ipmi_port(port)
-    chassis_option.set_cluster_uuid(baremetal_cluster_uuid)
-    chassis = baremetal_operations.create_chassis(chassis_option, session_uuid)
+    chassis_option.set_cluster_uuid(cluster_uuid)
+    chassis_option.set_session_uuid(session_uuid)
+    chassis = bare_operations.create_chassis(chassis_option)
     return chassis
 
 def create_hostcfg(chassis_uuid=None, unattended=True, vnc=True, \
@@ -184,17 +186,25 @@ def create_vbmc(vm, host_ip, port):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null'
     vm_uuid = vm.vm.uuid
     ipmi_port = port
-    shell.call('%s %s vbmc add %s --port  %d' % (ssh_cmd, host_ip, vm_uuid, ipmi_port))
-    os.system('%s %s vbmc start %s' % (ssh_cmd, host_ip, vm_uuid))
+    #vmbc process unable to exit, so use subprocess
+    child = subprocess.Popen('%s %s vbmc add %s --port  %d' % (ssh_cmd, host_ip, vm_uuid, ipmi_port),shell=True)
+    time.sleep(1)
+    child.kill()
+    child = subprocess.Popen('%s %s vbmc start %s' % (ssh_cmd, host_ip, vm_uuid), shell=True)
+    time.sleep(1)
+    child.kill()
 
 def delete_vbmc(vm, host_ip):
     vm_uuid = vm.vm.uuid
-    shell.call('ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null \
-		%s vbmc delete %s' %(host_ip, vm_uuid))
+    child = subprocess.Popen('ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null \
+                %s vbmc delete %s' %(host_ip, vm_uuid), shell=True)
+    time.sleep(1)
+    child.kill()
 
-def hack_ks(port = 623, ks_file='inspector_ks.cfg'):
+def hack_ks(host_ip, port = 623, ks_file='inspector_ks.cfg'):
     path = '/var/lib/zstack/baremetal/ftp/ks'
-    ks = os.path.join(path, ks_file)
+    shell.call('scp %s:%s/%s .' %(host_ip, path, ks_file))
+    ks = ks_file
     with open(ks, 'r') as ks_in:
         lines = ks_in.readlines()
     with open(ks, 'w') as ks_out:
@@ -203,11 +213,8 @@ def hack_ks(port = 623, ks_file='inspector_ks.cfg'):
                 line = re.sub('if not status1:', 'if status1:', line)
             if 'ipmiPort = 623' in line:
                 line = line + '\nipmiAddress = "127.0.0.1"\nipmiPort = 623' 
-            #if 'ipmiAddress' in line:
-            #    line = re.sub('ipmiAddress = .*$', 'ipmiAddress = "%s"' % os.environ.get('ipmiaddress'), line)
-            #if 'ipmiPort'in line:
-            #    line = re.sub('ipmiPort = .*$','ipmiPort = "%s"' % str(port), line)
             ks_out.write(line)
+    shell.call('scp %s %s:%s'  %(ks_file, host_ip, path))
 
 def check_hwinfo(chassis_uuid):
     count =0
