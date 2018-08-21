@@ -116,7 +116,7 @@
           <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
           <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
           <l2NetworkRef>$l2BaremetalNetworkName</l2NetworkRef>
-          <l2VxlanNetworkPoolRef cidr="$l2VxlanNetworkCidr">$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
+          <!--<l2VxlanNetworkPoolRef cidr="$l2VxlanNetworkCidr">$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>-->
         </cluster>
       </clusters>
       <l2Networks>
@@ -141,11 +141,8 @@
                 gateway="$noVlanIpRangeGateway1"
                 netmask="$noVlanIpRangeNetmask1"/>
               <dns>$DNSServer</dns>
-              <networkService provider="VirtualRouter">
+              <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
-                <serviceType>DNS</serviceType>
-                <serviceType>SNAT</serviceType>
-                <serviceType>PortForwarding</serviceType>
                 <serviceType>Eip</serviceType>
               </networkService>
               <networkService provider="SecurityGroup">
@@ -154,20 +151,20 @@
             </l3BasicNetwork>
           </l3Networks>
         </l2NoVlanNetwork>
-        <l2VxlanNetwork name="$l2BaremetalNetworkName" description="guest L2 Vxlan network 4, it is for test small ip range.">
-          <l2VxlanNetworkPoolRef>$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
+        <l2NoVlanNetwork name="$l2BaremetalNetworkName" description="baremetal deploy l3 network, it is for barametal deply."
+          physicalInterface="$l2BaremetalNetworkInterface">
           <l3Networks>
             <l3BasicNetwork name="$l3BaremetalNetworkName" description="Test">
-              <ipRange name="$ipRangeName" description="Test" 
-                startIp="$ipRangeStartIp" endIp="$ipRangeEndIp"
-                gateway="$ipRangeGateway"
-                netmask="$ipRangeNetmask" />
+              <ipRange name="$BaremetalIpRangeName" description="Test" 
+                startIp="$BaremetalIpRangeStartIp" endIp="$BaremetalIpRangeEndIp"
+                gateway="$BaremetalIpRangeGateway"
+                netmask="$BaremetalIpRangeNetmask" />
               <networkService provider="SecurityGroup">
                 <serviceType>SecurityGroup</serviceType>
               </networkService>
             </l3BasicNetwork>
           </l3Networks>
-        </l2VxlanNetwork>
+        </l2NoVlanNetwork>
       </l2Networks>
       <primaryStorages>
         <localPrimaryStorage name="$localPrimaryStorageName"
