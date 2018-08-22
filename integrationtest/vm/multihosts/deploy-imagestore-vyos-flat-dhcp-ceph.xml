@@ -83,14 +83,14 @@
       </virtualRouterOffering>
     </instanceOfferings>
   
-    <backupStorages>^M
-      <imageStoreBackupStorage name="$sftpBackupStorageName"^M
-        description="Test" url="$sftpBackupStorageUrl"^M
-        username="$sftpBackupStorageUsername"^M
-        password="$sftpBackupStoragePassword"^M
-        hostname="$sftpBackupStorageHostname"^M
-        port="$sftpBackupStoragePort"/>^M
-    </backupStorages>^M
+    <backupStorages>
+      <imageStoreBackupStorage name="$sftpBackupStorageName"
+        description="Test" url="$sftpBackupStorageUrl"
+        username="$sftpBackupStorageUsername"
+        password="$sftpBackupStoragePassword"
+        hostname="$sftpBackupStorageHostname"
+        port="$sftpBackupStoragePort"/>
+    </backupStorages>
   
     <images>
       <image name="$imageName_s" description="Test Image1" 
