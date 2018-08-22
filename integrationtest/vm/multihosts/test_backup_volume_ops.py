@@ -195,6 +195,7 @@ def test():
     cond = res_ops.gen_query_conditions("system", '=', "false")
     cond = res_ops.gen_query_conditions("mediaType", '=', "RootVolumeTemplate", cond)
     cond = res_ops.gen_query_conditions("platform", '=', "Linux", cond)
+    cond = res_ops.gen_query_conditions("name", '=', "image_for_sg_test", cond)
     img_name = res_ops.query_resource(res_ops.IMAGE, cond)[0].name
     cond = res_ops.gen_query_conditions("category", '=', "Private")
     l3_name = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0].name
