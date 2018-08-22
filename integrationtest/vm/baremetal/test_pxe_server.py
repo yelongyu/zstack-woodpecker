@@ -12,11 +12,13 @@ import test_stub
 pxe_uuid = None
 def test():
     global pxe_uuid
-    #Check if another pxe server created
+    test_util.test_dsc('Check if another pxe server created')
     pxe_servers = res_ops.query_resource(res_ops.PXE_SERVER)
     if pxe_servers != None:
         for pxe in pxe_servers:
             baremetal_ops.delete_pxe(pxe.uuid)
+ 
+    test_util_test_dsc('Create pxe server and stop/start it')
     pxe_uuid = test_stub.create_pxe().uuid
     pxe = res_ops.query_resource(res_ops.PXE_SERVER)[0]
     if pxe == None:
@@ -26,6 +28,9 @@ def test():
     if pxe.status != "Stopped":
         test_util.test_fail('Stop PXE Server Failed')
     baremetal_ops.start_pxe(pxe_uuid)
+    if pxe.status != "Started":
+        test_util.test_fail('Start PXE Server Failed')
+
     baremetal_ops.delete_pxe(pxe_uuid)
     test_util.test_pass('Test PXE Server Success')
 
