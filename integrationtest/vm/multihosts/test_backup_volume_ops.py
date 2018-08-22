@@ -203,8 +203,9 @@ def test():
     vm = test_stub.create_vm(vm_name, img_name, l3_name, disk_offering_uuids=disk_offering_uuids)
     vm.check()
     test_obj_dict.add_vm(vm)
-    utility_vm = test_stub.create_vm(utility_vm_name, img_name, l3_name)
-    vm.check()
+    hostuuid = vm.get_vm().hostUuid
+    utility_vm = test_stub.create_vm(utility_vm_name, img_name, l3_name, host_uuid=hostuuid)
+    utility_vm.check()
     test_obj_dict.add_vm(utility_vm)
 
     dvol = zstack_volume_header.ZstackTestVolume()

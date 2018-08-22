@@ -257,9 +257,7 @@ def check_deployed_vcenter(deploy_config, scenario_config = None, scenario_file 
                 if xmlobject.has_element(host, "dswitchRef"):
                     sign = 1
                 for vm in xmlobject.safe_list(host.vms.vm):
-                    assert vm.name_ == vc_ops.lib_get_vm_by_name(vm.name_).name
-                    assert vc_ops.lib_get_vm_by_name(vm.name_).hypervisorType == "ESX"
-                    assert vc_ops.lib_get_vm_by_name(vm.name_).state == "Running"
+                    assert vc_ops.lib_get_vm_by_name(vm.name_) == None
             if xmlobject.has_element(cluster, "templates"):
                 for template in xmlobject.safe_list(cluster.templates.template):
                     templ_name = template.path_

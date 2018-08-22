@@ -218,6 +218,7 @@
                 <networkService provider="VirtualRouter">
                   <serviceType>DHCP</serviceType>
                   <serviceType>Eip</serviceType>
+                  <serviceType>SNAT</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
@@ -239,6 +240,7 @@
                 <networkService provider="VirtualRouter">
                   <serviceType>DHCP</serviceType>
                   <serviceType>Eip</serviceType>
+                  <serviceType>SNAT</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
@@ -264,6 +266,7 @@
                 <networkService provider="VirtualRouter">
                   <serviceType>DHCP</serviceType>
                   <serviceType>Eip</serviceType>
+                  <serviceType>SNAT</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
@@ -285,6 +288,7 @@
                 <networkService provider="VirtualRouter">
                   <serviceType>DHCP</serviceType>
                   <serviceType>Eip</serviceType>
+                  <serviceType>SNAT</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
@@ -306,6 +310,7 @@
                 <networkService provider="VirtualRouter">
                   <serviceType>DHCP</serviceType>
                   <serviceType>Eip</serviceType>
+                  <serviceType>SNAT</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
@@ -327,6 +332,7 @@
                 <networkService provider="VirtualRouter">
                   <serviceType>DHCP</serviceType>
                   <serviceType>Eip</serviceType>
+                  <serviceType>SNAT</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
@@ -347,6 +353,7 @@
                 <networkService provider="VirtualRouter">
                   <serviceType>DHCP</serviceType>
                   <serviceType>Eip</serviceType>
+                  <serviceType>SNAT</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
@@ -367,6 +374,7 @@
                 <networkService provider="VirtualRouter">
                   <serviceType>DHCP</serviceType>
                   <serviceType>Eip</serviceType>
+                  <serviceType>SNAT</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
@@ -387,6 +395,7 @@
                 <networkService provider="VirtualRouter">
                   <serviceType>DHCP</serviceType>
                   <serviceType>Eip</serviceType>
+                  <serviceType>SNAT</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
@@ -407,6 +416,7 @@
                 <networkService provider="VirtualRouter">
                   <serviceType>DHCP</serviceType>
                   <serviceType>Eip</serviceType>
+                  <serviceType>SNAT</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
@@ -427,6 +437,7 @@
                 <networkService provider="VirtualRouter">
                   <serviceType>DHCP</serviceType>
                   <serviceType>Eip</serviceType>
+                  <serviceType>SNAT</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
@@ -447,6 +458,7 @@
                 <networkService provider="VirtualRouter">
                   <serviceType>DHCP</serviceType>
                   <serviceType>Eip</serviceType>
+                  <serviceType>SNAT</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
@@ -467,6 +479,7 @@
                 <networkService provider="VirtualRouter">
                   <serviceType>DHCP</serviceType>
                   <serviceType>Eip</serviceType>
+                  <serviceType>SNAT</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
@@ -487,6 +500,7 @@
                 <networkService provider="VirtualRouter">
                   <serviceType>DHCP</serviceType>
                   <serviceType>Eip</serviceType>
+                  <serviceType>SNAT</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
@@ -507,6 +521,7 @@
                 <networkService provider="VirtualRouter">
                   <serviceType>DHCP</serviceType>
                   <serviceType>Eip</serviceType>
+                  <serviceType>SNAT</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
@@ -527,6 +542,7 @@
                 <networkService provider="VirtualRouter">
                   <serviceType>DHCP</serviceType>
                   <serviceType>Eip</serviceType>
+                  <serviceType>SNAT</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
@@ -547,6 +563,7 @@
                 <networkService provider="VirtualRouter">
                   <serviceType>DHCP</serviceType>
                   <serviceType>Eip</serviceType>
+                  <serviceType>SNAT</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
@@ -567,6 +584,7 @@
                 <networkService provider="VirtualRouter">
                   <serviceType>DHCP</serviceType>
                   <serviceType>Eip</serviceType>
+                  <serviceType>SNAT</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
@@ -587,6 +605,7 @@
                 <networkService provider="VirtualRouter">
                   <serviceType>DHCP</serviceType>
                   <serviceType>Eip</serviceType>
+                  <serviceType>SNAT</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
@@ -607,6 +626,7 @@
                 <networkService provider="VirtualRouter">
                   <serviceType>DHCP</serviceType>
                   <serviceType>Eip</serviceType>
+                  <serviceType>SNAT</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
@@ -627,6 +647,7 @@
                 <networkService provider="VirtualRouter">
                   <serviceType>DHCP</serviceType>
                   <serviceType>Eip</serviceType>
+                  <serviceType>SNAT</serviceType>
                 </networkService>
                 <networkService provider="SecurityGroup">
                   <serviceType>SecurityGroup</serviceType>
