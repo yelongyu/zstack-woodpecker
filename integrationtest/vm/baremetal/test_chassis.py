@@ -20,8 +20,8 @@ pxe_uuid = None
 host_ip = None
 def test():
     global vm, cluster_uuid, pxe_uuid, host_ip
+    test_util.test_dsc('Create baremetal cluster and attach network')
     zone_uuid = res_ops.query_resource(res_ops.ZONE)[0].uuid
-    #Create baremetal cluster and attach network
     cond = res_ops.gen_query_conditions('type', '=', 'baremetal')
     cluster = res_ops.query_resource(res_ops.CLUSTER, cond)
     if not cluster:
@@ -35,11 +35,13 @@ def test():
     l2_uuid = res_ops.query_resource(res_ops.L2_NETWORK, cond)[0].uuid
     sys_tags = "l2NetworkUuid::%s::clusterUuid::%s::cidr::{%s}" %(l2_uuid, cluster_uuid, cidr)
     net_ops.attach_l2(l2_uuid, cluster_uuid, [sys_tags])
-    #Create pxe server
+
+    test_util.test_dsc('Create pxe server')
     pxe_servers = res_ops.query_resource(res_ops.PXE_SERVER)
     if not pxe_servers:
         pxe_uuid = test_stub.create_pxe().uuid
  
+    test_util.test_dsc('Create a vm to simulate baremetal host')
     mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
     cond = res_ops.gen_query_conditions('managementIp', '=', mn_ip) 
     host = res_ops.query_resource(res_ops.HOST, cond)[0]
@@ -49,12 +51,16 @@ def test():
     cluster_uuid = res_ops.query_resource(res_ops.CLUSTER, cond)[0].uuid
     vm = test_stub.create_vm(host_uuid = host_uuid, cluster_uuid = cluster_uuid)
 
+    test_util.test_dsc('Create chassis')
     cond = res_ops.gen_query_conditions('hypervisorType', '=', 'baremetal')
     baremetal_cluster_uuid = res_ops.query_resource(res_ops.CLUSTER, cond)[0].uuid
     test_stub.create_vbmc(vm, host_ip, 623)
     chassis = test_stub.create_chassis(baremetal_cluster_uuid)
-    test_stub.hack_ks(mn_ip)
     chassis_uuid = chassis.uuid 
+    test_stub.hack_ks(mn_ip)
+
+    test_util.test_dsc('Inspect chassis, Because vbmc have bugs, \
+	reset vm unable to enable boot options, power off/on then reset is worked')
     baremetal_operations.inspect_chassis(chassis_uuid)
     baremetal_operations.power_off_baremetal(chassis_uuid)
     time.sleep(3)
@@ -66,6 +72,8 @@ def test():
     status = baremetal_operations.get_power_status(chassis_uuid).status
     if status != "Chassis Power is on":
         test_util.test_fail('Fail to power on chassis %s, current status is %s' %(chassis_uuid, status))
+
+    test_util.test_dsc('Disable/Enable chassis and check')
     cond = res_ops.gen_query_conditions('uuid','=', chassis_uuid)
     baremetal_operations.change_baremetal_chassis_state(chassis_uuid, 'disable')
     state = res_ops.query_resource(res_ops.CHASSIS, cond)[0].state
@@ -75,12 +83,17 @@ def test():
     state = res_ops.query_resource(res_ops.CHASSIS, cond)[0].state
     if state != 'Enabled':
         test_util.test_fail('Enable chassis %s failed, current state is %s' %(chassis_uuid, state))
+
+    test_util.test_dsc('Inspect chassis and check hardware info')
     baremetal_operations.inspect_chassis(chassis_uuid)
     hwinfo = test_stub.check_hwinfo(chassis_uuid)
     if not hwinfo:
         test_util.test_fail('Fail to get hardware info during the first inspection')
+
     baremetal_operations.power_reset_baremetal(chassis_uuid)
     time.sleep(30)
+
+    test_util.test_dsc('Clear env')
     test_stub.delete_vbmc(vm, host_ip)
     baremetal_operations.delete_chassis(chassis_uuid)
     vm.destroy()
