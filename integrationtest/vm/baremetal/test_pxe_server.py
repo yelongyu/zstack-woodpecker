@@ -18,7 +18,7 @@ def test():
         for pxe in pxe_servers:
             baremetal_ops.delete_pxe(pxe.uuid)
  
-    test_util_test_dsc('Create pxe server and stop/start it')
+    test_util.test_dsc('Create pxe server and stop/start it')
     pxe_uuid = test_stub.create_pxe().uuid
     pxe = res_ops.query_resource(res_ops.PXE_SERVER)[0]
     if pxe == None:
