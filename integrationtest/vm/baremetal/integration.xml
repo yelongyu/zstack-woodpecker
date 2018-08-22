@@ -1,5 +1,9 @@
 <integrationTest>
     <suite name="baremetal test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
+        <case timeout='1200' repeat='1'>test_cluster.py</case>
+        <case timeout='1200' repeat='1'>test_pxe_server.py</case>
+        <case timeout='1200' repeat='1'>test_chassis.py</case>
+       <!-- 
         <case timeout='1200' repeat='1'>update_pxe_server.py</case>
         <case timeout='1200' repeat='1'>test_power_on.py</case>
         <case timeout='1200' repeat='1'>test_power_off.py</case>
@@ -13,5 +17,6 @@
 	<case timeout='4800' repeat='1'>test_single_baremetal_installation_1_nic_1_bond.py</case>
 	<case timeout='4800' repeat='1'>test_single_baremetal_installation_2_bonds.py</case>
 	<case timeout='4800' repeat='1'>test_single_baremetal_installation_3_nics.py</case>
+        -->
     </suite>
 </integrationTest>
