@@ -2337,10 +2337,10 @@ def lib_get_chassis_by_name(name):
         return chassis[0]
 
 def lib_get_hwinfo(chassis_uuid):
-    conditions = res_ops.gen_query_conditions('chassisUuid', '=', chassis_uuid)
-    hwinfo = res_ops.query_resource(res_ops.HWINFO, conditions)
-    if hwinfo:
-        return hwinfo
+    conditions = res_ops.gen_query_conditions('uuid', '=', chassis_uuid)
+    chassis = res_ops.query_resource(res_ops.CHASSIS, conditions)
+    if chassis:
+        return chassis[0].hardwareInfos, chassis[0].status
 
 def lib_get_chassis_by_uuid(chassis_uuid):
     conditions = res_ops.gen_query_conditions('uuid', '=', chassis_uuid)

@@ -5,44 +5,100 @@ Test chassis operation
 '''
 import zstackwoodpecker.operations.baremetal_operations as baremetal_operations
 import zstackwoodpecker.operations.resource_operations as res_ops
+import zstackwoodpecker.operations.cluster_operations as cluster_ops
+import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import test_stub
+import time
 import os
 
 vm = None
-
+cluster_uuid = None
+pxe_uuid = None
+host_ip = None
 def test():
-    global vm
+    global vm, cluster_uuid, pxe_uuid, host_ip
+    zone_uuid = res_ops.query_resource(res_ops.ZONE)[0].uuid
+    #Create baremetal cluster and attach network
+    cond = res_ops.gen_query_conditions('type', '=', 'baremetal')
+    cluster = res_ops.query_resource(res_ops.CLUSTER, cond)
+    if not cluster:
+        cluster_uuid = test_stub.create_cluster(zone_uuid).uuid
+    else:
+        cluster_uuid = cluster[0].uuid
+    cond = res_ops.gen_query_conditions('name', '=', os.environ.get('l3NoVlanNetworkName1'))
+    l3_network = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0]
+    cidr = l3_network.ipRanges[0].networkCidr
+    cond = res_ops.gen_query_conditions('l3Network.uuid', '=', l3_network.uuid)
+    l2_uuid = res_ops.query_resource(res_ops.L2_NETWORK, cond)[0].uuid
+    sys_tags = "l2NetworkUuid::%s::clusterUuid::%s::cidr::{%s}" %(l2_uuid, cluster_uuid, cidr)
+    net_ops.attach_l2(l2_uuid, cluster_uuid, [sys_tags])
+    #Create pxe server
+    pxe_servers = res_ops.query_resource(res_ops.PXE_SERVER)
+    if not pxe_servers:
+        pxe_uuid = test_stub.create_pxe().uuid
+ 
     mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
     cond = res_ops.gen_query_conditions('managementIp', '=', mn_ip) 
     host = res_ops.query_resource(res_ops.HOST, cond)[0]
     host_uuid = host.uuid
+    host_ip = host.managementIp
     cond = res_ops.gen_query_conditions('hypervisorType', '=', 'KVM')
     cluster_uuid = res_ops.query_resource(res_ops.CLUSTER, cond)[0].uuid
     vm = test_stub.create_vm(host_uuid = host_uuid, cluster_uuid = cluster_uuid)
 
     cond = res_ops.gen_query_conditions('hypervisorType', '=', 'baremetal')
     baremetal_cluster_uuid = res_ops.query_resource(res_ops.CLUSTER, cond)[0].uuid
-    test_stub.create_vbmc(vm, host.managementIp, 623)
+    test_stub.create_vbmc(vm, host_ip, 623)
     chassis = test_stub.create_chassis(baremetal_cluster_uuid)
     test_stub.hack_ks(mn_ip)
     chassis_uuid = chassis.uuid 
     baremetal_operations.inspect_chassis(chassis_uuid)
-    #hwinfo = test_stub.check_hwinfo(chassis_uuid)
-    #if not hwinfo:
-    #    test_util.test_fail('Fail to get hardware info during the first provision')
-    #test_stub.delete_vbmc(vm, host.managementIp)
-    #baremetal_operations.delete_chassis(chassis_uuid)
-    #vm.destroy()
+    baremetal_operations.power_off_baremetal(chassis_uuid)
+    time.sleep(3)
+    status = baremetal_operations.get_power_status(chassis_uuid).status
+    if status != "Chassis Power is off":
+        test_util.test_fail('Fail to power off chassis %s, current status is %s' %(chassis_uuid, status))
+    baremetal_operations.power_on_baremetal(chassis_uuid)
+    time.sleep(3)
+    status = baremetal_operations.get_power_status(chassis_uuid).status
+    if status != "Chassis Power is on":
+        test_util.test_fail('Fail to power on chassis %s, current status is %s' %(chassis_uuid, status))
+    cond = res_ops.gen_query_conditions('uuid','=', chassis_uuid)
+    baremetal_operations.change_baremetal_chassis_state(chassis_uuid, 'disable')
+    state = res_ops.query_resource(res_ops.CHASSIS, cond)[0].state
+    if state != 'Disabled':
+        test_util.test_fail('Disable chassis %s failed, current state is %s' %(chassis_uuid, state))
+    baremetal_operations.change_baremetal_chassis_state(chassis_uuid, 'enable')
+    state = res_ops.query_resource(res_ops.CHASSIS, cond)[0].state
+    if state != 'Enabled':
+        test_util.test_fail('Enable chassis %s failed, current state is %s' %(chassis_uuid, state))
+    baremetal_operations.inspect_chassis(chassis_uuid)
+    hwinfo = test_stub.check_hwinfo(chassis_uuid)
+    if not hwinfo:
+        test_util.test_fail('Fail to get hardware info during the first inspection')
+    baremetal_operations.power_reset_baremetal(chassis_uuid)
+    time.sleep(30)
+    test_stub.delete_vbmc(vm, host_ip)
+    baremetal_operations.delete_chassis(chassis_uuid)
+    vm.destroy()
+    baremetal_ops.delete_pxe(pxe_uuid)
+    cluster_ops.delete_cluster(cluster_uuid)
     test_util.test_pass('Create chassis Test Success')
 
 def error_cleanup():
-    global vm
+    global vm, cluster_uuid, pex_uuid
     if vm:
         test_stub.delete_vbmc(vm = vm)
         chassis = os.environ.get('ipminame')
         chassis_uuid = test_lib.lib_get_chassis_by_name(chassis).uuid
         baremetal_operations.delete_chassis(chassis_uuid)
         vm.destroy()
+        if host_ip:
+            test_stub.delete_vbmc(vm, host_ip)
+    if cluster_uuid:
+        cluster_ops.delete_cluster(cluster_uuid)
+    if pex_uuid:
+        baremetal_ops.delete_pxe(pxe_uuid)

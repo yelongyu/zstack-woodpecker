@@ -160,7 +160,7 @@ def inspect_chassis(chassis_uuid, session_uuid=None):
 
 def power_on_baremetal(chassis_uuid, session_uuid=None):
     '''The function is dropped'''
-    action = api_actions.PowerOnBaremetalHostAction()
+    action = api_actions.PowerOnBaremetalChassisAction()
     action.chassisUuid = chassis_uuid
     action.timeout = 30000
     test_util.action_logger('PowerOn Chassis [uuid:] %s' % chassis_uuid)
@@ -169,7 +169,7 @@ def power_on_baremetal(chassis_uuid, session_uuid=None):
 
 def power_off_baremetal(chassis_uuid, session_uuid=None):
     '''The function is dropped'''
-    action = api_actions.PowerOffBaremetalHostAction()
+    action = api_actions.PowerOffBaremetalChassisAction()
     action.chassisUuid = chassis_uuid
     action.timeout = 30000
     test_util.action_logger('PowerOff Chassis [uuid:] %s' % chassis_uuid)
@@ -178,7 +178,7 @@ def power_off_baremetal(chassis_uuid, session_uuid=None):
 
 def power_reset_baremetal(chassis_uuid, session_uuid=None):
     '''The function is dropped'''
-    action = api_actions.PowerResetBaremetalHostAction()
+    action = api_actions.PowerResetBaremetalChassisAction()
     action.chassisUuid = chassis_uuid
     action.timeout = 30000
     test_util.action_logger('PowerReset Chassis [uuid:] %s' % chassis_uuid)
@@ -187,8 +187,8 @@ def power_reset_baremetal(chassis_uuid, session_uuid=None):
 
 def get_power_status(chassis_uuid, session_uuid=None):
     '''The function is dropped'''
-    action = api_actions.PowerStatusBaremetalHostAction()
-    action.chassisUuid = chassis_uuid
+    action = api_actions.GetBaremetalChassisPowerStatusAction()
+    action.uuid = chassis_uuid
     action.timeout = 30000
     test_util.action_logger('Get Power Status of Chassis [uuid:] %s' % chassis_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)

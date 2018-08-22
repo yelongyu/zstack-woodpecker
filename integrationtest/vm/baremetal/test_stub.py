@@ -188,11 +188,11 @@ def create_vbmc(vm, host_ip, port):
     ipmi_port = port
     #vmbc process unable to exit, so use subprocess
     child = subprocess.Popen('%s %s vbmc add %s --port  %d' % (ssh_cmd, host_ip, vm_uuid, ipmi_port),shell=True)
-    time.sleep(1)
-    child.kill()
+    time.sleep(10)
+    #child.kill()
     child = subprocess.Popen('%s %s vbmc start %s' % (ssh_cmd, host_ip, vm_uuid), shell=True)
-    time.sleep(1)
-    child.kill()
+    #time.sleep(1)
+    #child.kill()
 
 def delete_vbmc(vm, host_ip):
     vm_uuid = vm.vm.uuid
@@ -217,15 +217,20 @@ def hack_ks(host_ip, port = 623, ks_file='inspector_ks.cfg'):
     shell.call('scp %s %s:%s'  %(ks_file, host_ip, path))
 
 def check_hwinfo(chassis_uuid):
-    count =0
-    while not test_lib.lib_get_hwinfo(chassis_uuid):
-        time.sleep(6)
-        count += 1
-        if count > 100:
-            test_util.test_logger('Fail: Get Hardware Info timeout')
+    count = 0
+    hwinfo = None
+    while not hwinfo:
+        hwinfo, status = test_lib.lib_get_hwinfo(chassis_uuid)
+        if status == "PxeBootFailed":
+            test_util.test_logger('Fail: Get Hardware Info Failed')
             break
-    test_util.test_logger('Get Hardware Info')
-    return test_lib.lib_get_hwinfo(chassis_uuid)
+        time.sleep(30)
+        count += 1
+        if count > 20:
+            test_util.test_logger('Fail: Get Hardware Info 10 mins Timeout')
+            break
+    test_util.test_logger('Get Hardware Info Success')
+    return hwinfo
 
 def check_chassis_status(chassis_uuid):
     chassis = test_lib.lib_get_chassis_by_uuid(chassis_uuid)
