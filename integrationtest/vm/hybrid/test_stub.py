@@ -820,11 +820,11 @@ class HybridObject(object):
         if not allocate_eip:
 #             image = ecs_image_self[0] if ecs_image_self else ecs_image_centos_64[0]
             self.ecs_instance = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, self.vswitch.uuid, ecs_bandwidth=1, ecs_security_group_uuid=self.sg.uuid, 
-                                                                 instance_type=ecs_instance_type[0].typeId, name=TEST_ECS_NAME, ecs_console_password='A1B2c3')
+                                                                 instance_type=ecs_instance_type[1].typeId, name=TEST_ECS_NAME, ecs_console_password='A1B2c3')
         else:
 #             image = ecs_image_system_64[0]
             self.ecs_instance = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, self.vswitch.uuid, ecs_bandwidth=1, ecs_security_group_uuid=self.sg.uuid, 
-                                                                 instance_type=ecs_instance_type[0].typeId, allocate_public_ip='true', name=TEST_ECS_NAME, ecs_console_password='a1B2c3')
+                                                                 instance_type=ecs_instance_type[1].typeId, allocate_public_ip='true', name=TEST_ECS_NAME, ecs_console_password='a1B2c3')
         time.sleep(10)
         self.ecs_create = True
 
