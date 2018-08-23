@@ -102,6 +102,23 @@ def create_chassis(cluster_uuid, name = None, address = None, username = None, \
     chassis = bare_operations.create_chassis(chassis_option)
     return chassis
 
+def create_baremetal_ins(image_uuid, chassis_uuid, password = 'password', \
+	nic_cfgs = None, strategy = None, name = None, session_uuid = None):
+    if not name:
+        name = 'baremetal_instance'
+
+    baremetal_ins_option = test_util.BaremetalInstanceOption()
+    baremetal_ins_option.set_name(name)
+    baremetal_ins_option.set_password(password)
+    baremetal_ins_option.set_image_uuid(image_uuid)
+    baremetal_ins_option.set_chassis_uuid(chassis_uuid)
+    if nic_cfgs:
+        baremetal_ins_option.set_nic_cfgs(nic_cfgs)
+    if strategy:
+        baremetal_ins_option.set_strategy(strategy)
+    baremetal_ins = bare_operations.create_baremetal_instance(baremetal_ins_option, session_uuid)
+    return baremetal_ins
+
 def create_hostcfg(chassis_uuid=None, unattended=True, vnc=True, \
                    password="password", cfgItems=None, session_uuid=None):
     hostcfg_option = test_util.BaremetalHostCfgOption()
@@ -201,7 +218,7 @@ def delete_vbmc(vm, host_ip):
     time.sleep(1)
     child.kill()
 
-def hack_ks(host_ip, port = 623, ks_file='inspector_ks.cfg'):
+def hack_inspect_ks(host_ip, port = 623, ks_file='inspector_ks.cfg'):
     path = '/var/lib/zstack/baremetal/ftp/ks'
     shell.call('scp %s:%s/%s .' %(host_ip, path, ks_file))
     ks = ks_file
@@ -215,6 +232,19 @@ def hack_ks(host_ip, port = 623, ks_file='inspector_ks.cfg'):
                 line = line + '\nipmiAddress = "127.0.0.1"\nipmiPort = 623' 
             ks_out.write(line)
     shell.call('scp %s %s:%s'  %(ks_file, host_ip, path))
+
+def hack_generic_ks(host_ip):
+    path = '/usr/local/zstacktest/apache-tomcat/webapps/zstack/WEB-INF/classes/baremetal/kickstart/generic_ks_tmpl'
+    shell.call('scp %s:%s .' %(host_ip, path))
+    ks = 'generic_ks_tmpl'
+    with open(ks, 'r') as ks_in:
+        lines = ks_in.readlines()
+    with open(ks, 'w') as ks_out:
+        for line in lines:
+            if '#EXTRA_REPO' in line:
+                line = 'clearpart --all --initlabel\nautopart --type=lvm\n%packages\n@^minimal\n%end\n' + line
+            ks_out.write(line)
+    shell.call('scp %s %s:%s'  %(ks, host_ip, path))
 
 def check_hwinfo(chassis_uuid):
     count = 0
@@ -231,6 +261,19 @@ def check_hwinfo(chassis_uuid):
             break
     test_util.test_logger('Get Hardware Info Success')
     return hwinfo
+
+def check_baremetal_ins(ins_uuid, ins_ip):
+    count = 0
+    status = None
+    while not status:
+        shell.call('ping -c 1 %s' %ins_ip)
+        time.sleep(60)
+        count += 1
+        if count > 30:
+            test_util.test_logger('Fail: Get Hardware Info 30 mins Timeout')
+            break
+    test_util.test_logger('Baremetal Instance Installation Success')
+    return status
 
 def check_chassis_status(chassis_uuid):
     chassis = test_lib.lib_get_chassis_by_uuid(chassis_uuid)

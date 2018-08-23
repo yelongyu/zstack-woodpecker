@@ -1,5 +1,5 @@
 '''
-Test chassis operation
+Test baremetal instance operation
 
 @author Glody
 '''
@@ -65,41 +65,50 @@ def test():
     baremetal_operations.inspect_chassis(chassis_uuid)
     baremetal_operations.power_off_baremetal(chassis_uuid)
     time.sleep(3)
-    status = baremetal_operations.get_power_status(chassis_uuid).status
-    if status != "Chassis Power is off":
-        test_util.test_fail('Fail to power off chassis %s, current status is %s' %(chassis_uuid, status))
     baremetal_operations.power_on_baremetal(chassis_uuid)
     time.sleep(3)
     status = baremetal_operations.get_power_status(chassis_uuid).status
-    if status != "Chassis Power is on":
-        test_util.test_fail('Fail to power on chassis %s, current status is %s' %(chassis_uuid, status))
-
-    test_util.test_dsc('Disable/Enable chassis and check')
-    cond = res_ops.gen_query_conditions('uuid','=', chassis_uuid)
-    baremetal_operations.change_baremetal_chassis_state(chassis_uuid, 'disable')
-    state = res_ops.query_resource(res_ops.CHASSIS, cond)[0].state
-    if state != 'Disabled':
-        test_util.test_fail('Disable chassis %s failed, current state is %s' %(chassis_uuid, state))
-    baremetal_operations.change_baremetal_chassis_state(chassis_uuid, 'enable')
-    state = res_ops.query_resource(res_ops.CHASSIS, cond)[0].state
-    if state != 'Enabled':
-        test_util.test_fail('Enable chassis %s failed, current state is %s' %(chassis_uuid, state))
-
-    test_util.test_dsc('Inspect chassis and check hardware info')
     baremetal_operations.inspect_chassis(chassis_uuid)
     hwinfo = test_stub.check_hwinfo(chassis_uuid)
     if not hwinfo:
         test_util.test_fail('Fail to get hardware info during the first inspection')
 
-    baremetal_operations.power_reset_baremetal(chassis_uuid)
-    time.sleep(30)
+    test_util.test_dsc('Create baremetal instance')
+    #Hack iso ks file to support unattended installation
+    test_stub.hack_generic_ks(mn_ip)
+    cond = res_ops.gen_query_conditions('name', '=', os.environ.get('imageName_iso')) 
+    image_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
+    baremetal_ins = test_stub.create_baremetal_ins(image_uuid, chassis_uuid)
+    baremetal_ins_uuid = baremetal_ins.uuid
+    ins_status = test_stub.check_baremetal_ins(baremetal_ins_uuid, baremetal_ins.managementIp)
+    if not ins_status:
+        test_util.test_fail('Baremetal instance installation failed')
 
-    test_util.test_dsc('Clear env')
-    test_stub.delete_vbmc(vm, host_ip)
-    baremetal_operations.delete_chassis(chassis_uuid)
-    vm.destroy()
-    baremetal_operations.delete_pxe(pxe_uuid)
-    cluster_ops.delete_cluster(cluster_uuid)
+    test_util.test_dsc('Check baremetal instance operations')
+    cond = res_ops.gen_query_conditions('uuid', '=', baremetal_ins_uuid)
+    new_name = 'New Baremetal Instance'
+    baremetal_operations.update_baremetal_instance(baremetal_ins_uuid, name = new_name)
+    udated_name = res_ops.query_resource(res_ops.BAREMETAL_INS, cond)[0].name
+    if udated_name != new_name:
+        test_util.test_fail('Update baremetal instance name failed, expected: %s, real: %s'%(new_name, udated_name))
+    baremetal_operations.stop_baremetal_instance(baremetal_ins_uuid)
+    status = res_ops.query_resource(res_ops.BAREMETAL_INS, cond)[0].status
+    if status != 'Stopped':
+        test_util.test_fail('Fail to stop baremetal instance, current status: %s'%status)
+    baremetal_operations.start_baremetal_instance(baremetal_ins_uuid)
+    status = res_ops.query_resource(res_ops.BAREMETAL_INS, cond)[0].status
+    if status != 'Stopped':
+        test_util.test_fail('Fail to stop baremetal instance, current status: %s'%status)
+    baremetal_operations.reboot_baremetal_instance(baremetal_ins_uuid)
+
+    #test_util.test_dsc('Clear env')
+    #baremetal_operations.destory_baremetal_instance(baremetal_ins_uuid)
+    #baremetal_operations.expunge_baremetal_instanc(baremetal_ins_uuid)
+    #test_stub.delete_vbmc(vm, host_ip)
+    #baremetal_operations.delete_chassis(chassis_uuid)
+    #vm.destroy()
+    #baremetal_ops.delete_pxe(pxe_uuid)
+    #cluster_ops.delete_cluster(cluster_uuid)
     test_util.test_pass('Create chassis Test Success')
 
 def error_cleanup():
