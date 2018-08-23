@@ -59,7 +59,7 @@ def test():
     chassis = test_stub.create_chassis(baremetal_cluster_uuid)
     chassis_uuid = chassis.uuid 
     #Hack inspect ks file to support vbmc, include ipmi device logic and ipmi addr to 127.0.0.1
-    test_stub.hack_inspect_ks(mn_ip)
+    test_stub.hack_inspect_ks(host_ip)
 
     test_util.test_dsc('Inspect chassis, Because vbmc have bugs, \
 	reset vm unable to enable boot options, power off/on then reset is worked')
@@ -76,15 +76,15 @@ def test():
 
     test_util.test_dsc('Create baremetal instance')
     #Hack iso ks file to support unattended installation
-    test_stub.hack_generic_ks(mn_ip)
-    test_stub.ca_pem_workaround(mn_ip)
+    test_stub.hack_generic_ks(host_ip)
+    test_stub.ca_pem_workaround(host_ip)
     cond = res_ops.gen_query_conditions('name', '=', os.environ.get('imageName_iso')) 
     image_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
     time.sleep(30)
     baremetal_ins = test_stub.create_baremetal_ins(image_uuid, chassis_uuid)
     baremetal_ins_uuid = baremetal_ins.uuid
     ins_status = test_stub.check_baremetal_ins(baremetal_ins_uuid, 'password', \
-	baremetal_ins.managementIp, mn_ip, chassis_uuid, os.environ.get('ipmiaddress'))
+	baremetal_ins.managementIp, host_ip, chassis_uuid, os.environ.get('ipmiaddress'))
     if not ins_status:
         test_util.test_fail('Baremetal instance installation failed')
 
@@ -107,13 +107,13 @@ def test():
     baremetal_operations.reboot_baremetal_instance(baremetal_ins_uuid)
 
     #test_util.test_dsc('Clear env')
-    #baremetal_operations.destory_baremetal_instance(baremetal_ins_uuid)
-    #baremetal_operations.expunge_baremetal_instanc(baremetal_ins_uuid)
-    #test_stub.delete_vbmc(vm, host_ip)
-    #baremetal_operations.delete_chassis(chassis_uuid)
-    #vm.destroy()
-    #baremetal_ops.delete_pxe(pxe_uuid)
-    #cluster_ops.delete_cluster(cluster_uuid)
+    baremetal_operations.destory_baremetal_instance(baremetal_ins_uuid)
+    baremetal_operations.expunge_baremetal_instanc(baremetal_ins_uuid)
+    test_stub.delete_vbmc(vm, host_ip)
+    baremetal_operations.delete_chassis(chassis_uuid)
+    vm.destroy()
+    baremetal_ops.delete_pxe(pxe_uuid)
+    cluster_ops.delete_cluster(cluster_uuid)
     test_util.test_pass('Create chassis Test Success')
 
 def error_cleanup():
