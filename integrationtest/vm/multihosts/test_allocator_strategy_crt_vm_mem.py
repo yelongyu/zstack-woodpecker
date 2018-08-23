@@ -168,6 +168,7 @@ def test():
     vm_creation_option = test_util.VmOption()
     vm_creation_option.set_l3_uuids([l3_net_uuid])
     vm_creation_option.set_image_uuid(image_uuid)
+    vm_creation_option.set_timeout(600000)
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
 
     #create different mem usage of hosts scenario
