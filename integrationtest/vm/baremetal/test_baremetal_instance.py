@@ -76,24 +76,15 @@ def test():
 
     test_util.test_dsc('Create baremetal instance')
     #Hack iso ks file to support unattended installation
-<<<<<<< HEAD
     test_stub.hack_generic_ks(host_ip)
     test_stub.ca_pem_workaround(host_ip)
-=======
-    test_stub.hack_generic_ks(mn_ip)
-    test_stub.ca_pem_workaround(mn_ip)
->>>>>>> upstream/master
     cond = res_ops.gen_query_conditions('name', '=', os.environ.get('imageName_iso')) 
     image_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
     time.sleep(30)
     baremetal_ins = test_stub.create_baremetal_ins(image_uuid, chassis_uuid)
     baremetal_ins_uuid = baremetal_ins.uuid
     ins_status = test_stub.check_baremetal_ins(baremetal_ins_uuid, 'password', \
-<<<<<<< HEAD
 	baremetal_ins.managementIp, host_ip, chassis_uuid, os.environ.get('ipmiaddress'))
-=======
-	baremetal_ins.managementIp, mn_ip, chassis_uuid, os.environ.get('ipmiaddress'))
->>>>>>> upstream/master
     if not ins_status:
         test_util.test_fail('Baremetal instance installation failed')
 
