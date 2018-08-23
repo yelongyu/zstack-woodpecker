@@ -26,10 +26,11 @@ def test():
     baremetal_ops.stop_pxe(pxe_uuid)
     pxe = res_ops.query_resource(res_ops.PXE_SERVER)[0]
     if pxe.status != "Stopped":
-        test_util.test_fail('Stop PXE Server Failed')
+        test_util.test_fail('Stop PXE Server Failed, PXE status: %s' %pxe.status)
     baremetal_ops.start_pxe(pxe_uuid)
+    pxe = res_ops.query_resource(res_ops.PXE_SERVER)[0]
     if pxe.status != "Running":
-        test_util.test_fail('Start PXE Server Failed')
+        test_util.test_fail('Start PXE Server Failed, PXE status: %s' %pxe.status)
 
     baremetal_ops.delete_pxe(pxe_uuid)
     test_util.test_pass('Test PXE Server Success')
