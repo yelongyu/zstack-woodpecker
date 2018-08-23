@@ -28,7 +28,7 @@ def test():
     if pxe.status != "Stopped":
         test_util.test_fail('Stop PXE Server Failed')
     baremetal_ops.start_pxe(pxe_uuid)
-    if pxe.status != "Started":
+    if pxe.status != "Running":
         test_util.test_fail('Start PXE Server Failed')
 
     baremetal_ops.delete_pxe(pxe_uuid)
