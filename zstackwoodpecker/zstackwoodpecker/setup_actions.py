@@ -817,21 +817,15 @@ default one' % self.zstack_properties)
         woodpecker_ip = ''
         import commands
         (status, output) = commands.getstatusoutput("ip addr show zsn0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'")
+        os.system('rm -rf /home/node_ips' % (woodpecker_ip))
         if output.startswith('172'):
             woodpecker_ip = output
+
+        if woodpecker_ip != '':
+            os.system('echo %s >> /home/node_ips' % (woodpecker_ip))
+
         for node in self.nodes:
-            import subprocess
-            if woodpecker_ip != '':
-                dump_str = 'java -jar /home/%s/jacococli.jar dump --address %s --port 6300 --reset\
-                    --destfile /home/%s/zstack-woodpecker/dailytest/config_xml/code_coverage.exec' %(woodpecker_ip, node.ip_, woodpecker_ip)
-            else:
-                dump_str = 'java -jar /home/%s/jacococli.jar dump --address 127.0.0.1 --port 6300 --reset\
-                    --destfile /home/%s/zstack-woodpecker/dailytest/config_xml/code_coverage.exec' %(node.ip_, node.ip_)
-            cmd = 'while true; do sleep 15; %s; done' %dump_str
-            (status, output) = commands.getstatusoutput('ps -ef|grep jacococli|grep while') 
-            if status == 0 and output.find('while true') == -1:
-                subprocess.Popen(cmd, shell=True)
-            print 'jacoco dump started'
+            os.system('echo %s >> /home/node_ips' % (node.ip_))
 
     def execute_plan_without_deploy_test_agent(self):
         if os.environ.get('ZSTACK_ALREADY_INSTALLED') != "yes":
