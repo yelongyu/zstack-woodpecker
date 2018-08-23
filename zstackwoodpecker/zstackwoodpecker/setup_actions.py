@@ -817,7 +817,7 @@ default one' % self.zstack_properties)
         woodpecker_ip = ''
         import commands
         (status, output) = commands.getstatusoutput("ip addr show zsn0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'")
-        os.system('rm -rf /home/node_ips'))
+        os.system('rm -rf /home/node_ips')
         if output.startswith('172'):
             woodpecker_ip = output
 
