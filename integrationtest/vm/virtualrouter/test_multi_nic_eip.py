@@ -112,7 +112,7 @@ def test():
     vip3.check()
     eip3.attach(vm3_nic_uuid, vm3)
     
-    time.sleep(5) #waiting for eip binding
+    time.sleep(10) #waiting for eip binding
 
     #Check if the network is able to ping with eip
     user_name = "root"
