@@ -12,6 +12,7 @@ import zstackwoodpecker.operations.tag_operations as tag_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstacklib.utils.ssh as ssh
 import os
+import time
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
@@ -111,28 +112,22 @@ def test():
     vip3.check()
     eip3.attach(vm3_nic_uuid, vm3)
     
+    time.sleep(20) #waiting for eip binding
+
     #Check if the network is able to ping with eip
     user_name = "root"
     user_password = "password"
     rsp_ping = os.system("sshpass -p '%s' ssh %s@%s 'ping -c 4 %s'"%(user_password, user_name, vm1_ip, eip2_pub_ip))
     if rsp_ping != 0:
-        if vr1_second_pub_nic_uuid != '':
-            net_ops.detach_l3(vr1_second_pub_nic_uuid)
         test_util.test_fail('Exception: [vm ip:] %s ping [Eip:] %s fail. But it should ping successfully.' % (vm1_ip, eip2_pub_ip))
     rsp_ping = os.system("sshpass -p '%s' ssh %s@%s 'ping -c 4 %s'"%(user_password, user_name, vm1_ip, eip3_pub_ip))
     if rsp_ping != 0:
-        if vr1_second_pub_nic_uuid != '':
-            net_ops.detach_l3(vr1_second_pub_nic_uuid)
         test_util.test_fail('Exception: [vm ip:] %s ping [Eip:] %s fail. But it should ping successfully.' % (vm1_ip, eip3_pub_ip))
     rsp_ping = os.system("sshpass -p '%s' ssh %s@%s 'ping -c 4 %s'"%(user_password, user_name, vm2_ip, eip11_pub_ip))
     if rsp_ping != 0:
-        if vr1_second_pub_nic_uuid != '':
-            net_ops.detach_l3(vr1_second_pub_nic_uuid)
         test_util.test_fail('Exception: [vm ip:] %s ping [Eip:] %s fail. But it should ping successfully.' % (vm2_ip, eip11_pub_ip))
     rsp_ping = os.system("sshpass -p '%s' ssh %s@%s 'ping -c 4 %s'"%(user_password, user_name, vm3_ip, eip12_pub_ip))
     if rsp_ping != 0:
-        if vr1_second_pub_nic_uuid != '':
-            net_ops.detach_l3(vr1_second_pub_nic_uuid)
         test_util.test_fail('Exception: [vm ip:] %s ping [Eip:] %s fail. But it should ping successfully.' % (vm3_ip, eip12_pub_ip))
 
     #Delete vips and vr offering
