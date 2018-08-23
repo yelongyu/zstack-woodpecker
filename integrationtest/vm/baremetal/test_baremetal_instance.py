@@ -24,10 +24,11 @@ def test():
     zone_uuid = res_ops.query_resource(res_ops.ZONE)[0].uuid
     cond = res_ops.gen_query_conditions('type', '=', 'baremetal')
     cluster = res_ops.query_resource(res_ops.CLUSTER, cond)
-    if not cluster:
+    if cluster == []:
         cluster_uuid = test_stub.create_cluster(zone_uuid).uuid
     else:
         cluster_uuid = cluster[0].uuid
+        test_util.test_dsc('cluster uuis is %s '% cluster_uuid)
     cond = res_ops.gen_query_conditions('name', '=', os.environ.get('l3NoVlanNetworkName1'))
     l3_network = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0]
     cidr = l3_network.ipRanges[0].networkCidr
@@ -76,11 +77,14 @@ def test():
     test_util.test_dsc('Create baremetal instance')
     #Hack iso ks file to support unattended installation
     test_stub.hack_generic_ks(mn_ip)
+    test_stub.ca_pem_workaround(mn_ip)
     cond = res_ops.gen_query_conditions('name', '=', os.environ.get('imageName_iso')) 
     image_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
+    time.sleep(30)
     baremetal_ins = test_stub.create_baremetal_ins(image_uuid, chassis_uuid)
     baremetal_ins_uuid = baremetal_ins.uuid
-    ins_status = test_stub.check_baremetal_ins(baremetal_ins_uuid, baremetal_ins.managementIp)
+    ins_status = test_stub.check_baremetal_ins(baremetal_ins_uuid, 'password', \
+	baremetal_ins.managementIp, mn_ip, chassis_uuid, os.environ.get('ipmiaddress'))
     if not ins_status:
         test_util.test_fail('Baremetal instance installation failed')
 
@@ -92,13 +96,14 @@ def test():
     if udated_name != new_name:
         test_util.test_fail('Update baremetal instance name failed, expected: %s, real: %s'%(new_name, udated_name))
     baremetal_operations.stop_baremetal_instance(baremetal_ins_uuid)
-    status = res_ops.query_resource(res_ops.BAREMETAL_INS, cond)[0].status
-    if status != 'Stopped':
-        test_util.test_fail('Fail to stop baremetal instance, current status: %s'%status)
+    state = res_ops.query_resource(res_ops.BAREMETAL_INS, cond)[0].state
+    if state != 'Stopped':
+        test_util.test_fail('Fail to stop baremetal instance, current status: %s'%state)
     baremetal_operations.start_baremetal_instance(baremetal_ins_uuid)
-    status = res_ops.query_resource(res_ops.BAREMETAL_INS, cond)[0].status
-    if status != 'Stopped':
-        test_util.test_fail('Fail to stop baremetal instance, current status: %s'%status)
+    time.sleep(60)
+    state = res_ops.query_resource(res_ops.BAREMETAL_INS, cond)[0].state
+    if state != 'Running':
+        test_util.test_fail('Fail to start baremetal instance, current status: %s'%state)
     baremetal_operations.reboot_baremetal_instance(baremetal_ins_uuid)
 
     #test_util.test_dsc('Clear env')

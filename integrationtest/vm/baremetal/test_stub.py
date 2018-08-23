@@ -229,7 +229,7 @@ def hack_inspect_ks(host_ip, port = 623, ks_file='inspector_ks.cfg'):
             if 'status1:' in line:
                 line = re.sub('if not status1:', 'if status1:', line)
             if 'ipmiPort = 623' in line:
-                line = line + '\nipmiAddress = "127.0.0.1"\nipmiPort = 623' 
+                line = line + '\nipmiAddress = "127.0.0.1"\nipmiPort = 623\n' 
             ks_out.write(line)
     shell.call('scp %s %s:%s'  %(ks_file, host_ip, path))
 
@@ -245,6 +245,12 @@ def hack_generic_ks(host_ip):
                 line = 'clearpart --all --initlabel\nautopart --type=lvm\n%packages\n@^minimal\n%end\n' + line
             ks_out.write(line)
     shell.call('scp %s %s:%s'  %(ks, host_ip, path))
+
+def ca_pem_workaround(host_ip):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null'
+    dst_folder = '/usr/local/zstack/imagestore/bin/certs'
+    src_file = '/usr/local/zstacktest/imagestore/bin/certs/ca.pem'
+    shell.call('%s %s mkdir -p %s && cp %s %s ' % (ssh_cmd, host_ip, dst_folder, src_file, dst_folder))
 
 def check_hwinfo(chassis_uuid):
     count = 0
@@ -262,18 +268,31 @@ def check_hwinfo(chassis_uuid):
     test_util.test_logger('Get Hardware Info Success')
     return hwinfo
 
-def check_baremetal_ins(ins_uuid, ins_ip):
+def check_baremetal_ins(ins_uuid, password, ins_ip, mn_ip, chassis_uuid, ipmi):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null'
     count = 0
-    status = None
-    while not status:
-        shell.call('ping -c 1 %s' %ins_ip)
+    result = False
+    while not result:
+        status = bare_operations.get_power_status(chassis_uuid).status
+        if status.find('off') != -1:
+            test_util.test_logger('Power on Baremetal instance %s' %ins_uuid)
+            shell.call('%s %s ipmitool -I lanplus -H %s -U admin -P password \
+		chassis bootdev disk' %(ssh_cmd, mn_ip, ipmi))
+            time.sleep(60)
+            bare_operations.power_on_baremetal(chassis_uuid)
+        else:
+            output = os.system('sshpass -p %s ssh %s exit' %(password, ins_ip))
+            if output == 0:
+                result = True
+                test_util.test_logger('SSH Baremetal Instance Success')
+                break
         time.sleep(60)
         count += 1
-        if count > 30:
-            test_util.test_logger('Fail: Get Hardware Info 30 mins Timeout')
+        if count > 20:
+            test_util.test_logger('Fail: Get Hardware Info 20 mins Timeout')
             break
     test_util.test_logger('Baremetal Instance Installation Success')
-    return status
+    return result
 
 def check_chassis_status(chassis_uuid):
     chassis = test_lib.lib_get_chassis_by_uuid(chassis_uuid)
