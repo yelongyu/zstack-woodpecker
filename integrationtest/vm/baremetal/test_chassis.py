@@ -15,26 +15,26 @@ import time
 import os
 
 vm = None
-cluster_uuid = None
+baremetal_cluster_uuid = None
 pxe_uuid = None
 host_ip = None
 def test():
-    global vm, cluster_uuid, pxe_uuid, host_ip
+    global vm, baremetal_cluster_uuid, pxe_uuid, host_ip
     test_util.test_dsc('Create baremetal cluster and attach network')
     zone_uuid = res_ops.query_resource(res_ops.ZONE)[0].uuid
     cond = res_ops.gen_query_conditions('type', '=', 'baremetal')
     cluster = res_ops.query_resource(res_ops.CLUSTER, cond)
     if not cluster:
-        cluster_uuid = test_stub.create_cluster(zone_uuid).uuid
+        baremetal_cluster_uuid = test_stub.create_cluster(zone_uuid).uuid
     else:
-        cluster_uuid = cluster[0].uuid
+        baremetal_cluster_uuid = cluster[0].uuid
     cond = res_ops.gen_query_conditions('name', '=', os.environ.get('l3NoVlanNetworkName1'))
     l3_network = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0]
     cidr = l3_network.ipRanges[0].networkCidr
     cond = res_ops.gen_query_conditions('l3Network.uuid', '=', l3_network.uuid)
     l2_uuid = res_ops.query_resource(res_ops.L2_NETWORK, cond)[0].uuid
-    sys_tags = "l2NetworkUuid::%s::clusterUuid::%s::cidr::{%s}" %(l2_uuid, cluster_uuid, cidr)
-    net_ops.attach_l2(l2_uuid, cluster_uuid, [sys_tags])
+    sys_tags = "l2NetworkUuid::%s::clusterUuid::%s::cidr::{%s}" %(l2_uuid, baremetal_cluster_uuid, cidr)
+    net_ops.attach_l2(l2_uuid, baremetal_cluster_uuid, [sys_tags])
 
     test_util.test_dsc('Create pxe server')
     pxe_servers = res_ops.query_resource(res_ops.PXE_SERVER)
@@ -52,8 +52,6 @@ def test():
     vm = test_stub.create_vm(host_uuid = host_uuid, cluster_uuid = cluster_uuid)
 
     test_util.test_dsc('Create chassis')
-    cond = res_ops.gen_query_conditions('hypervisorType', '=', 'baremetal')
-    baremetal_cluster_uuid = res_ops.query_resource(res_ops.CLUSTER, cond)[0].uuid
     test_stub.create_vbmc(vm, host_ip, 623)
     chassis = test_stub.create_chassis(baremetal_cluster_uuid)
     chassis_uuid = chassis.uuid 
@@ -99,11 +97,11 @@ def test():
     baremetal_operations.delete_chassis(chassis_uuid)
     vm.destroy()
     baremetal_operations.delete_pxe(pxe_uuid)
-    cluster_ops.delete_cluster(cluster_uuid)
+    cluster_ops.delete_cluster(baremetal_cluster_uuid)
     test_util.test_pass('Create chassis Test Success')
 
 def error_cleanup():
-    global vm, cluster_uuid, pxe_uuid, host_ip
+    global vm, baremetal_cluster_uuid, pxe_uuid, host_ip
     if vm:
         test_stub.delete_vbmc(vm, host_ip)
         chassis = os.environ.get('ipminame')
@@ -112,7 +110,7 @@ def error_cleanup():
         vm.destroy()
         if host_ip:
             test_stub.delete_vbmc(vm, host_ip)
-    if cluster_uuid:
-        cluster_ops.delete_cluster(cluster_uuid)
+    if baremetal_cluster_uuid:
+        cluster_ops.delete_cluster(baremetal_cluster_uuid)
     if pxe_uuid:
         baremetal_ops.delete_pxe(pxe_uuid)
