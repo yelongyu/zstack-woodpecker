@@ -23,12 +23,11 @@ def test():
     test_util.test_dsc('Create baremetal cluster and attach network')
     zone_uuid = res_ops.query_resource(res_ops.ZONE)[0].uuid
     cond = res_ops.gen_query_conditions('type', '=', 'baremetal')
-    cluster = res_ops.query_resource(res_ops.CLUSTER, cond)
-    if cluster == []:
-        cluster_uuid = test_stub.create_cluster(zone_uuid).uuid
-    else:
-        cluster_uuid = cluster[0].uuid
-        test_util.test_dsc('cluster uuis is %s '% cluster_uuid)
+    origin_clusters = res_ops.query_resource(res_ops.CLUSTER, cond)
+    if origin_clusters != []:
+        for i in range(len(origin_clusters))：
+            cluster_ops.delete_cluster(origin_clusters[i].uuid)
+    cluster_uuid = test_stub.create_cluster(zone_uuid).uuid
     cond = res_ops.gen_query_conditions('name', '=', os.environ.get('l3NoVlanNetworkName1'))
     l3_network = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0]
     cidr = l3_network.ipRanges[0].networkCidr
