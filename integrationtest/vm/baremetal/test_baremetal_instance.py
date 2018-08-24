@@ -65,10 +65,9 @@ def test():
 	reset vm unable to enable boot options, power off/on then reset is worked')
     baremetal_operations.inspect_chassis(chassis_uuid)
     baremetal_operations.power_off_baremetal(chassis_uuid)
-    time.sleep(3)
+    time.sleep(10)
     baremetal_operations.power_on_baremetal(chassis_uuid)
-    time.sleep(3)
-    status = baremetal_operations.get_power_status(chassis_uuid).status
+    time.sleep(30)
     baremetal_operations.inspect_chassis(chassis_uuid)
     hwinfo = test_stub.check_hwinfo(chassis_uuid)
     if not hwinfo:
@@ -102,17 +101,17 @@ def test():
     baremetal_operations.start_baremetal_instance(baremetal_ins_uuid)
     time.sleep(60)
     state = res_ops.query_resource(res_ops.BAREMETAL_INS, cond)[0].state
-    if state != 'Running':
+    if state != 'Running' and state != 'Starting':
         test_util.test_fail('Fail to start baremetal instance, current status: %s'%state)
     baremetal_operations.reboot_baremetal_instance(baremetal_ins_uuid)
 
     #test_util.test_dsc('Clear env')
     baremetal_operations.destory_baremetal_instance(baremetal_ins_uuid)
-    baremetal_operations.expunge_baremetal_instanc(baremetal_ins_uuid)
+    baremetal_operations.expunge_baremetal_instance(baremetal_ins_uuid)
     test_stub.delete_vbmc(vm, host_ip)
     baremetal_operations.delete_chassis(chassis_uuid)
     vm.destroy()
-    baremetal_ops.delete_pxe(pxe_uuid)
+    baremetal_operations.delete_pxe(pxe_uuid)
     cluster_ops.delete_cluster(cluster_uuid)
     test_util.test_pass('Create chassis Test Success')
 

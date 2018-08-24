@@ -250,7 +250,7 @@ def ca_pem_workaround(host_ip):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null'
     dst_folder = '/usr/local/zstack/imagestore/bin/certs'
     src_file = '/usr/local/zstacktest/imagestore/bin/certs/ca.pem'
-    shell.call('%s %s mkdir -p %s && cp %s %s ' % (ssh_cmd, host_ip, dst_folder, src_file, dst_folder))
+    shell.call('%s %s "mkdir -p %s && cp %s %s" ' % (ssh_cmd, host_ip, dst_folder, src_file, dst_folder))
 
 def check_hwinfo(chassis_uuid):
     count = 0
