@@ -103,9 +103,9 @@ def test():
     test_util.test_pass('Create chassis Test Success')
 
 def error_cleanup():
-    global vm, cluster_uuid, pex_uuid
+    global vm, cluster_uuid, pxe_uuid, host_ip
     if vm:
-        test_stub.delete_vbmc(vm = vm)
+        test_stub.delete_vbmc(vm, host_ip)
         chassis = os.environ.get('ipminame')
         chassis_uuid = test_lib.lib_get_chassis_by_name(chassis).uuid
         baremetal_operations.delete_chassis(chassis_uuid)
@@ -114,5 +114,5 @@ def error_cleanup():
             test_stub.delete_vbmc(vm, host_ip)
     if cluster_uuid:
         cluster_ops.delete_cluster(cluster_uuid)
-    if pex_uuid:
+    if pxe_uuid:
         baremetal_ops.delete_pxe(pxe_uuid)

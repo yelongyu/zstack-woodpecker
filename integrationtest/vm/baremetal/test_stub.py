@@ -265,7 +265,6 @@ def check_hwinfo(chassis_uuid):
         if count > 20:
             test_util.test_logger('Fail: Get Hardware Info 10 mins Timeout')
             break
-    test_util.test_logger('Get Hardware Info Success')
     return hwinfo
 
 def check_baremetal_ins(ins_uuid, password, ins_ip, mn_ip, chassis_uuid, ipmi):
@@ -291,7 +290,6 @@ def check_baremetal_ins(ins_uuid, password, ins_ip, mn_ip, chassis_uuid, ipmi):
         if count > 20:
             test_util.test_logger('Fail: Get Hardware Info 20 mins Timeout')
             break
-    test_util.test_logger('Baremetal Instance Installation Success')
     return result
 
 def check_chassis_status(chassis_uuid):
