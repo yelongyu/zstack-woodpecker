@@ -258,8 +258,8 @@ def test():
     STATE_OP = flavor['state_op']
 
     ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0]
-    if ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE or ps.type == "AliyunNAS":
-        test_util.test_skip("VolumeBackup does not support Ceph and AliyunNAS for now")
+    if ps.type == "AliyunNAS":
+        test_util.test_skip("VolumeBackup does not support AliyunNAS for now")
     if ps.type != inventory.LOCAL_STORAGE_TYPE and 'VM_TEST_MIGRATE' in VM_OP and "VM_TEST_STOP" in STATE_OP:
         test_util.test_skip("Shared Storage does not support migration")
 
@@ -303,7 +303,8 @@ def test():
         # create_snapshot/backup
         vm_op_test(vm, "VM_TEST_BACKUP")
         # compare vm & image created by backup
-        compare(ps, vm, backup)
+        if ps.type != inventory.CEPH_PRIMARY_STORAGE_TYPE:
+            compare(ps, vm, backup)
 
         vm.resume()
     print_path(Path)
