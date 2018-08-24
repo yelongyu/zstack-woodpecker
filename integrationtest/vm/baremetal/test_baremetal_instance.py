@@ -40,6 +40,8 @@ def test():
     pxe_servers = res_ops.query_resource(res_ops.PXE_SERVER)
     if not pxe_servers:
         pxe_uuid = test_stub.create_pxe().uuid
+    else:
+        pxe_uuid = pxe_servers[0].uuid
  
     test_util.test_dsc('Create a vm to simulate baremetal host')
     mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
