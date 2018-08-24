@@ -86,7 +86,7 @@ def test():
     res_ops.change_recource_owner(new_account.uuid, volume.get_volume().uuid)
 
     test_util.test_dsc('check scheduler state after changing the owner of volume')
-    check_scheduler_state(schd_job, 'Disabled')
+    check_scheduler_state(schd_job, 'Enabled')
 
     current_time = int(time.time())
     except_start_time =  start_date + 120 * (((current_time - start_date) % 120) + 1)
