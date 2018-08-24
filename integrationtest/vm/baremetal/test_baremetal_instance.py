@@ -25,7 +25,7 @@ def test():
     cond = res_ops.gen_query_conditions('type', '=', 'baremetal')
     origin_clusters = res_ops.query_resource(res_ops.CLUSTER, cond)
     if origin_clusters != []:
-        for i in range(len(origin_clusters))：
+        for i in range(len(origin_clusters)):
             cluster_ops.delete_cluster(origin_clusters[i].uuid)
     cluster_uuid = test_stub.create_cluster(zone_uuid).uuid
     cond = res_ops.gen_query_conditions('name', '=', os.environ.get('l3NoVlanNetworkName1'))
