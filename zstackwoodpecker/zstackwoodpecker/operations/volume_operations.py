@@ -201,6 +201,15 @@ def revert_volume_from_backup(backup_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('Revert [volume_uuid:] %s ' %  backup_uuid)
     return evt.inventory
+
+
+def revert_vm_from_backup(group_uuid, session_uuid=None):
+    action = api_actions.RevertVmFromVmBackupAction()
+    action.groupUuid = group_uuid
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('Revert [volume_uuid:] %s ' %  backup_uuid)
+    return evt.inventory
     
 def create_snapshot_scheduler(snapshot_option, type, name, start_time=None, interval=None, repeatCount=None, cron=None, session_uuid=None):
     action = api_actions.CreateVolumeSnapshotSchedulerAction()
