@@ -27,6 +27,7 @@ index = 0
 tag = "VM_TEST_REBOOT"
 backup = []
 backup_list = []
+dvol = None
 
 #case_flavor = dict(snapshot_running=                dict(vm_op=['VM_TEST_SNAPSHOT'], state_op=['VM_TEST_NONE']),
 #                   create_img_running=              dict(vm_op=['VM_TEST_CREATE_IMG'], state_op=['VM_TEST_NONE']),
@@ -53,7 +54,7 @@ def record(fun):
         global index
         if op != tag:
             Path[index].append(op)
-        elif op == tag:
+        alif op == tag:
             Path.append([op])
             Path[index].append(op)
             index += 1
@@ -68,7 +69,13 @@ VM_RUNNING_OPS = [
     "VM_TEST_RESIZE_RVOL",
     "RVOL_DEL_SNAPSHOT",
     "VM_TEST_NONE",
-    "VM_TEST_BACKUP_IMAGE"
+    "VM_TEST_BACKUP_IMAGE",
+    "DVOL_TEST_CREATE_IMG",
+    "DVOL_TEST_SNAPSHOT",
+    "DVOL_DEL_SNAPSHOT",
+    "DVOL_TEST_RESIZE",
+    "DVOL_TEST_BACKUP_IMAGE",
+    "CREATE_ATTACH_VOLUME"
 ]
 
 VM_STOPPED_OPS = [
@@ -81,7 +88,14 @@ VM_STOPPED_OPS = [
     "VM_TEST_NONE",
     "VM_TEST_REVERT_BACKUP",
     "VM_TEST_REVERT_VM_BACKUP",
-    "VM_TEST_BACKUP_IMAGE"
+    "VM_TEST_BACKUP_IMAGE",
+    "DVOL_TEST_CREATE_IMG",
+    "DVOL_TEST_SNAPSHOT",
+    "DVOL_DEL_SNAPSHOT",
+    "DVOL_TEST_RESIZE",
+    "DVOL_TEST_BACKUP_IMAGE",
+    "DVOL_TEST_REVERT_BACKUP",
+    "CREATE_ATTACH_VOLUME"
 ]
 
 VM_STATE_OPS = [
@@ -109,6 +123,14 @@ def vm_op_test(vm, op):
         "VM_TEST_REVERT_BACKUP": revert_backup,
         "VM_TEST_REVERT_VM_BACKUP": revert_vm_backup,
         "VM_TEST_BACKUP_IMAGE": backup_image 
+        "DVOL_TEST_SNAPSHOT": create_dvol_snapshot,
+        "DVOL_DEL_SNAPSHOT": delete_dvol_snapshot,
+        "DVOL_TEST_CREATE_IMG": create_dvol_image,
+        "DVOL_TEST_RESIZE": resize_dvol,
+        "DVOL_BACKUP": dvol_back_up,
+        "DVOL_TEST_BACKUP_IMAGE": dvol_backup_image,
+        "CREATE_ATTACH_VOLUME": create_attach_volume
+
     }
     ops[op](vm)
 
@@ -232,7 +254,7 @@ def back_up(vm_obj):
      backup_list.append(backup)
 
 def revert_backup(vm_obj):
-    backup_uuid = backup_list.pop(random.randint(0, len(backup_list)-1)).uuid
+    backup_uuid = random.choice(backup_list.pop(random.randint(0, len(backup_list)-1))).uuid
     vol_ops.revert_volume_from_backup(backup_uuid)
 
 def revert_vm_backup(vm_obj):
@@ -243,7 +265,79 @@ def backup_image(vm_obj):
     cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0] 
     backup = random.choice(backup_list)
-    image = img_ops.create_root_template_from_backup(bs.uuid, backup.uuid)
+    image = img_ops.create_root_template_from_backup(bs.uuid, backup[0].uuid)
+
+def create_attach_volume(vm_obj):
+    global test_obj_dict
+    disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
+    volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
+    volume = test_stub.create_volume(volume_creation_option)
+    test_obj_dict.add_volume(volume)
+    volume.check()
+    volume.attach(vm_obj)
+
+
+def create_dvol_snapshot(vm_obj):
+    global utility_vm, dvol
+    snapshots_root = zstack_sp_header.ZstackVolumeSnapshot()
+    snapshots_root.set_utility_vm(utility_vm)
+    snapshots_root.set_target_volume(dvol)
+    snapshots_root.create_snapshot('create_data_snapshot1')
+
+def delete_dvol_snapshot(vm_obj):
+    global utility_vm, dvol
+    snapshots_root = zstack_sp_header.ZstackVolumeSnapshot()
+    snapshots_root.set_utility_vm(utility_vm)
+    snapshots_root.set_target_volume(dvol)
+    sp_list = snapshots_root.get_snapshot_list()
+    if sp_list:
+        snapshots_root.delete_snapshot(random.choice(sp_list))
+
+def create_dvol_image(vm_obj):
+    global dvol
+    volume_uuid = dvol.volume.uuid
+    bs_list = test_lib.lib_get_backup_storage_list_by_vm(vm_obj.vm)
+    image_option = test_util.ImageOption()
+    image_option.set_data_volume_uuid(volume_uuid)
+    image_option.set_name('image_resize_template')
+    image_option.set_backup_storage_uuid_list([bs_list[0].uuid])
+    image = img_ops.create_data_volume_template(image_option)
+    new_image = zstack_image_header.ZstackTestImage()
+    new_image.set_creation_option(image_option)
+    new_image.set_image(image)
+    new_image.check()
+    new_image.delete()
+    new_image.expunge()
+
+def dvol_backup_image(vm_obj):
+    cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0]
+    backup = random.choice(backup_list)
+    if type(backup) != list:
+        image = img_ops.create_data_template_from_backup(bs.uuid, backup.uuid)
+    else:
+        image = img_ops.create_data_template_from_backup(bs.uuid, backup[1].uuid)
+
+def resize_dvol(vm_obj):
+    global dvol
+    vol_size = dvol.volume.size
+    volume_uuid = dvol.volume.uuid
+    set_size = 1024 * 1024 * 1024 + int(vol_size)
+    vol_ops.resize_data_volume(volume_uuid, set_size)
+    vm_obj.update()
+
+
+def dvol_back_up(vm_obj):
+    global backup,dvol
+    cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0]
+    backup_option = test_util.BackupOption()
+    backup_option.set_name("test_compare")
+    backup_option.set_volume_uuid(dvol.volume.uuid)
+    backup_option.set_backupStorage_uuid(bs.uuid)
+    backup = vol_ops.create_backup(backup_option)
+    backup_list.append(backup)
+
 
 def print_path(Path):
     print("=" * 43 + "PATH" + "=" * 43)
@@ -259,7 +353,7 @@ def print_path(Path):
 
 
 def test():
-    global test_obj_dict, VM_RUNNING_OPS, VM_STOPPED_OPS, VM_STATE_OPS, backup
+    global test_obj_dict, VM_RUNNING_OPS, VM_STOPPED_OPS, VM_STATE_OPS, backup, dvol
     #flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
 
     #VM_OP = flavor['vm_op']
@@ -315,6 +409,7 @@ def test():
             if not backup_list:
                 VM_OPS.remove("VM_TEST_REVERT_BACKUP")
                 VM_OPS.remove("VM_TEST_BACKUP_IMAGE")
+                VM_OPS.remove("VM_TEST_REVERT_VM_BACKUP")
 
 
         vm_op_test(vm, random.choice(VM_OPS))
@@ -327,6 +422,9 @@ def test():
             test_lib.TestHarness = test_lib.TestHarnessVR
         cmd = "echo 111 > /home/" + str(int(time.time()))
         test_lib.lib_execute_command_in_vm(vm.vm,cmd)
+        cmd = "dd if=/dev/urandom of=/dev/vdb bs=512k count=1"
+        test_lib.lib_execute_command_in_vm(vm.vm,cmd)
+
         vm.suspend()
         # create_snapshot/backup
         vm_op_test(vm, "VM_TEST_BACKUP")
