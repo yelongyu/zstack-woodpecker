@@ -91,6 +91,7 @@ def test():
     current_time = int(time.time())
     except_start_time =  start_date + 120 * (((current_time - start_date) % 120) + 1)
 
+    snapshot_num = (except_start_time - start_date) // 120
     for i in range(0, 3):
         test_util.test_logger('round %s' % (i))
         test_stub.sleep_util(except_start_time + 60 + 120*i - 2)
@@ -98,6 +99,7 @@ def test():
         new_snapshot_num = query_snapshot_number(volume.get_volume().uuid)
         if snapshot_num != new_snapshot_num:
             test_util.test_fail('there sholuld be %s snapshots' % (snapshot_num))
+        snapshot_num += 1
 
         test_stub.sleep_util(except_start_time + 60 + 120*i + 60)
         test_util.test_logger('check volume snapshot number at %s, there should be %s' % (except_start_time + 60 + 120*i + 65, snapshot_num+1))
