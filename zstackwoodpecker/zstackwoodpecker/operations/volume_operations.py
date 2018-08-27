@@ -189,9 +189,7 @@ def create_vm_backup(backup_option, session_uuid=None):
     if backup_option.get_session_uuid():
         session_uuid = backup_option.get_session_uuid()
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    backup = evt.inventory
-    test_util.action_logger('Create [Backup:] %s [uuid:] %s for [volume:] %s' % \
-            (action.name, backup.uuid, action.volumeUuid))
+    backup = evt.inventories
     return backup
 
 def revert_volume_from_backup(backup_uuid, session_uuid=None):
@@ -208,7 +206,7 @@ def revert_vm_from_backup(group_uuid, session_uuid=None):
     action.groupUuid = group_uuid
     action.timeout = 1800000
     evt = account_operations.execute_action_with_session(action, session_uuid) 
-    test_util.test_logger('Revert [volume_uuid:] %s ' %  backup_uuid)
+    test_util.test_logger('Revert [volume_uuid:] %s ' %  group_uuid)
     return evt.inventory
     
 def create_snapshot_scheduler(snapshot_option, type, name, start_time=None, interval=None, repeatCount=None, cron=None, session_uuid=None):
