@@ -28,6 +28,7 @@ tag = "VM_TEST_REBOOT"
 backup = []
 backup_list = []
 dvol = None
+utility_vm = None
 
 #case_flavor = dict(snapshot_running=                dict(vm_op=['VM_TEST_SNAPSHOT'], state_op=['VM_TEST_NONE']),
 #                   create_img_running=              dict(vm_op=['VM_TEST_CREATE_IMG'], state_op=['VM_TEST_NONE']),
@@ -94,7 +95,6 @@ VM_STOPPED_OPS = [
     "DVOL_DEL_SNAPSHOT",
     "DVOL_TEST_RESIZE",
     "DVOL_TEST_BACKUP_IMAGE",
-    "DVOL_TEST_REVERT_BACKUP",
     "CREATE_ATTACH_VOLUME"
 ]
 
@@ -265,7 +265,14 @@ def backup_image(vm_obj):
     cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0] 
     backup = random.choice(backup_list)
-    image = img_ops.create_root_template_from_backup(bs.uuid, backup[0].uuid)
+    if type(backup) != list:
+        image = img_ops.create_root_template_from_backup(bs.uuid, backup.uuid)
+        return
+    if type(backup) == list and backup[0].type == "Root":
+        image = img_ops.create_root_template_from_backup(bs.uuid, backup[0].uuid)
+    else:
+        image = img_ops.create_root_template_from_backup(bs.uuid, backup[1].uuid)
+    
 
 def create_attach_volume(vm_obj):
     global test_obj_dict
@@ -325,7 +332,7 @@ def resize_dvol(vm_obj):
     volume_uuid = dvol.volume.uuid
     set_size = 1024 * 1024 * 1024 + int(vol_size)
     vol_ops.resize_data_volume(volume_uuid, set_size)
-    vm_obj.update()
+    dvol.set_volume(test_lib.lib_get_volume_by_uuid(volume_uuid))
 
 
 def dvol_back_up(vm_obj):
@@ -354,7 +361,7 @@ def print_path(Path):
 
 
 def test():
-    global test_obj_dict, VM_RUNNING_OPS, VM_STOPPED_OPS, VM_STATE_OPS, backup, dvol
+    global test_obj_dict, VM_RUNNING_OPS, VM_STOPPED_OPS, VM_STATE_OPS, backup, dvol, utility_vm
     #flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
 
     #VM_OP = flavor['vm_op']
@@ -450,7 +457,10 @@ def compare(ps, vm, backup):
     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0]
 
     root_volume = test_lib.lib_get_root_volume(vm.get_vm())
-    data_volume = test_lib.lib_get_data_volumes(vm.get_vm())[0]
+    for i in test_lib.lib_get_data_volumes(vm.get_vm()):
+        if i.name == "DATA-for-test_vm":
+            data_volume = i
+
     vm_path = root_volume.installPath
     data_path = data_volume.installPath
     if ps.type == "SharedBlock":
@@ -463,7 +473,7 @@ def compare(ps, vm, backup):
         if i.type == "Root":
             name = i.backupStorageRefs[0].installPath.split("/")[2]
             id = i.backupStorageRefs[0].installPath.split("/")[3]
-        if i.type == "Data":
+        if i.type == "Data" and "DATA-for-test_vm" in i.metadata:
             name1 = i.backupStorageRefs[0].installPath.split("/")[2]
             id1 = i.backupStorageRefs[0].installPath.split("/")[3]
 
