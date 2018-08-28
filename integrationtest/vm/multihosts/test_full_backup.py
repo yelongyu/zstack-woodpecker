@@ -54,7 +54,7 @@ def record(fun):
         global index
         if op != tag:
             Path[index].append(op)
-        alif op == tag:
+        elif op == tag:
             Path.append([op])
             Path[index].append(op)
             index += 1
@@ -122,7 +122,7 @@ def vm_op_test(vm, op):
         "VM_TEST_BACKUP": back_up,
         "VM_TEST_REVERT_BACKUP": revert_backup,
         "VM_TEST_REVERT_VM_BACKUP": revert_vm_backup,
-        "VM_TEST_BACKUP_IMAGE": backup_image 
+        "VM_TEST_BACKUP_IMAGE": backup_image, 
         "DVOL_TEST_SNAPSHOT": create_dvol_snapshot,
         "DVOL_DEL_SNAPSHOT": delete_dvol_snapshot,
         "DVOL_TEST_CREATE_IMG": create_dvol_image,
@@ -269,6 +269,7 @@ def backup_image(vm_obj):
 
 def create_attach_volume(vm_obj):
     global test_obj_dict
+    volume_creation_option = test_util.VolumeOption()
     disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
     volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
     volume = test_stub.create_volume(volume_creation_option)
