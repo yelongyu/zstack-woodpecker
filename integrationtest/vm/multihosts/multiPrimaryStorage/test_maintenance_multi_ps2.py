@@ -34,7 +34,7 @@ def test():
         for data_vol_ps in [ps1, ps2]:
             vm = test_stub.create_multi_vms(name_prefix='test_vm', count=1,
                                             ps_uuid=root_vol_ps.uuid, data_volume_number=VOLUME_NUMBER,
-                                            ps_uuid_for_data_vol=data_vol_ps.uuid)[0]
+                                            ps_uuid_for_data_vol=data_vol_ps.uuid, timeout=600000)[0]
             test_obj_dict.add_vm(vm)
             vm_list.append(vm)
 

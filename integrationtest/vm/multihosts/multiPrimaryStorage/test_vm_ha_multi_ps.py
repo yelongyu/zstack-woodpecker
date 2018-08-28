@@ -44,7 +44,7 @@ def test():
 
     test_util.test_dsc("Create {0} vm each with {1} datavolume".format(VM_COUNT, DATA_VOLUME_NUMBER))
     vm_list = test_stub.create_multi_vms(name_prefix='test-', count=VM_COUNT,
-                                         data_volume_number=DATA_VOLUME_NUMBER, host_uuid=host.uuid)
+                                         data_volume_number=DATA_VOLUME_NUMBER, host_uuid=host.uuid, timeout=600000)
 
     for vm in vm_list:
         test_obj_dict.add_vm(vm)

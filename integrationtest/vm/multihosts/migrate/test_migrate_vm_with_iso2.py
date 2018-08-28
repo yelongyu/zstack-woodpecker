@@ -58,7 +58,7 @@ def test():
     iso_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
     img_ops.attach_iso(iso_uuid, vm_uuid)
     
-    time.sleep(5)
+    time.sleep(10)
     cmd = "mount /dev/sr0 /mnt"
     exec_cmd_in_vm(vm, cmd, "Failed to mount /dev/sr0 /mnt.")
 
@@ -72,7 +72,7 @@ def test():
     img_ops.detach_iso(vm_uuid)
     img_ops.attach_iso(iso_uuid, vm_uuid)
 
-    time.sleep(5)
+    time.sleep(10)
     cmd = "mount /dev/sr0 /mnt"
     exec_cmd_in_vm(vm, cmd, "Failed to mount /dev/sr0 /mnt.")
 
