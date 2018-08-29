@@ -816,7 +816,8 @@ class HybridObject(object):
         ecs_image_self = hyb_ops.query_ecs_image_local(cond_image_self)
         ecs_image_system_all = hyb_ops.query_ecs_image_local(cond_image_system)
         ecs_image_system_64 = [i for i in ecs_image_system_all if '64' in i.name]
-        image = ecs_image_system_64[0]
+        ecs_image_system_centos = [i for i in ecs_image_system_all if i.platform == 'CentOS' and 'vhd' in i.name]
+        image = ecs_image_system_centos[0]
         if not allocate_eip:
 #             image = ecs_image_self[0] if ecs_image_self else ecs_image_centos_64[0]
             self.ecs_instance = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, self.vswitch.uuid, ecs_bandwidth=1, ecs_security_group_uuid=self.sg.uuid, 
