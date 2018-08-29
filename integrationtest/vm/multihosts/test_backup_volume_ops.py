@@ -186,8 +186,8 @@ def test():
     STATE_OP = flavor['state_op']
 
     ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0]
-    if ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE or ps.type == "AliyunNAS":
-        test_util.test_skip("VolumeBackup does not support Ceph and AliyunNAS for now")
+    if ps.type == "AliyunNAS":
+        test_util.test_skip("VolumeBackup does not support AliyunNAS for now")
 
     vm_name = "test_vm"
     utility_vm_name = "utility_vm"
@@ -240,7 +240,8 @@ def test():
 
         vm.suspend()
         vm_op_test(vm, dvol, "DVOL_BACKUP")
-        compare(ps, vm, dvol, backup)
+        if ps.type != inventory.CEPH_PRIMARY_STORAGE_TYPE:
+            compare(ps, vm, dvol, backup)
 
         vm.resume()
         print_path(Path)

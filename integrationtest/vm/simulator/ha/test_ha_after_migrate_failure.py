@@ -62,7 +62,7 @@ def test():
         test_util.test_skip('Required %s ps to test' % (ps_type))
     ps_uuid = pss[0].uuid
     vm = test_stub.create_vm(image_uuid=image_uuid, ps_uuid=ps_uuid)
-
+    ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid,'NeverStop')
 
     agent_url = KVM_MIGRATE_VM_PATH
     script = '''
@@ -87,7 +87,6 @@ def test():
         test_util.test_skip('Required migratable host to test')
     if no_exception:
         test_util.test_fail('Expect exception for migration while there is none')
-    ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid,'NeverStop')
     vm.stop()
     cond = res_ops.gen_query_conditions('uuid', '=', vm.get_vm().uuid)
     for i in range(5):

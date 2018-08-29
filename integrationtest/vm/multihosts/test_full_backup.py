@@ -16,6 +16,8 @@ import zstackwoodpecker.zstack_test.zstack_test_snapshot as zstack_sp_header
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
 import zstackwoodpecker.operations.scenario_operations as sce_ops
 import zstackwoodpecker.header.host as host_header
+import zstackwoodpecker.header.volume as volume_header
+
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
@@ -23,27 +25,29 @@ test_obj_dict = test_state.TestStateDict()
 Path = [[]]
 index = 0
 tag = "VM_TEST_REBOOT"
-backup = None
+backup = []
 backup_list = []
+dvol = None
+utility_vm = None
 
-case_flavor = dict(snapshot_running=                dict(vm_op=['VM_TEST_SNAPSHOT'], state_op=['VM_TEST_NONE']),
-                   create_img_running=              dict(vm_op=['VM_TEST_CREATE_IMG'], state_op=['VM_TEST_NONE']),
-                   resize_running=                  dict(vm_op=['VM_TEST_RESIZE_RVOL'], state_op=['VM_TEST_NONE']),
-                   del_snapshot_running=            dict(vm_op=['RVOL_DEL_SNAPSHOT'], state_op=['VM_TEST_NONE']),
-                   create_img_from_backup_running=  dict(vm_op=['VM_TEST_BACKUP_IMAGE'], state_op=['VM_TEST_NONE']),
-                   migrate_running=                 dict(vm_op=['VM_TEST_MIGRATE'], state_op=['VM_TEST_NONE']),
-                   snapshot_stopped=                dict(vm_op=['VM_TEST_SNAPSHOT'], state_op=['VM_TEST_STOP']),
-                   create_img_stopped=              dict(vm_op=['VM_TEST_CREATE_IMG'], state_op=['VM_TEST_STOP']),
-                   resize_stopped=                  dict(vm_op=['VM_TEST_RESIZE_RVOL'], state_op=['VM_TEST_STOP']),
-                   del_snapshot_stopped=            dict(vm_op=['RVOL_DEL_SNAPSHOT'], state_op=['VM_TEST_STOP']),
-                   change_os_stopped=               dict(vm_op=['VM_TEST_CHANGE_OS'], state_op=['VM_TEST_STOP']),
-                   reset_stopped=                   dict(vm_op=['VM_TEST_RESET'], state_op=['VM_TEST_STOP']),
-                   revert_backup_stopped=           dict(vm_op=['VM_TEST_REVERT_BACKUP'], state_op=['VM_TEST_STOP']),
-                   create_img_from_backup_stopped=  dict(vm_op=['VM_TEST_BACKUP_IMAGE'], state_op=['VM_TEST_STOP']),
-                   migrate_stopped=                 dict(vm_op=['VM_TEST_MIGRATE'], state_op=['VM_TEST_STOP']),
-                   change_os_snapshot_stopped=      dict(vm_op=['VM_TEST_CHANGE_OS', 'VM_TEST_SNAPSHOT'], state_op=['VM_TEST_STOP']),
-                   backup_reboot=                   dict(vm_op=['VM_TEST_NONE', 'VM_TEST_SNAPSHOT'], state_op=['VM_TEST_NONE', 'VM_TEST_REBOOT']),
-                   )
+#case_flavor = dict(snapshot_running=                dict(vm_op=['VM_TEST_SNAPSHOT'], state_op=['VM_TEST_NONE']),
+#                   create_img_running=              dict(vm_op=['VM_TEST_CREATE_IMG'], state_op=['VM_TEST_NONE']),
+#                   resize_running=                  dict(vm_op=['VM_TEST_RESIZE_RVOL'], state_op=['VM_TEST_NONE']),
+#                   del_snapshot_running=            dict(vm_op=['RVOL_DEL_SNAPSHOT'], state_op=['VM_TEST_NONE']),
+#                   create_img_from_backup_running=  dict(vm_op=['VM_TEST_BACKUP_IMAGE'], state_op=['VM_TEST_NONE']),
+#                   migrate_running=                 dict(vm_op=['VM_TEST_MIGRATE'], state_op=['VM_TEST_NONE']),
+#                   snapshot_stopped=                dict(vm_op=['VM_TEST_SNAPSHOT'], state_op=['VM_TEST_STOP']),
+#                   create_img_stopped=              dict(vm_op=['VM_TEST_CREATE_IMG'], state_op=['VM_TEST_STOP']),
+#                   resize_stopped=                  dict(vm_op=['VM_TEST_RESIZE_RVOL'], state_op=['VM_TEST_STOP']),
+#                   del_snapshot_stopped=            dict(vm_op=['RVOL_DEL_SNAPSHOT'], state_op=['VM_TEST_STOP']),
+#                   change_os_stopped=               dict(vm_op=['VM_TEST_CHANGE_OS'], state_op=['VM_TEST_STOP']),
+#                   reset_stopped=                   dict(vm_op=['VM_TEST_RESET'], state_op=['VM_TEST_STOP']),
+#                   revert_backup_stopped=           dict(vm_op=['VM_TEST_REVERT_BACKUP'], state_op=['VM_TEST_STOP']),
+#                   create_img_from_backup_stopped=  dict(vm_op=['VM_TEST_BACKUP_IMAGE'], state_op=['VM_TEST_STOP']),
+#                   migrate_stopped=                 dict(vm_op=['VM_TEST_MIGRATE'], state_op=['VM_TEST_STOP']),
+#                   change_os_snapshot_stopped=      dict(vm_op=['VM_TEST_CHANGE_OS', 'VM_TEST_SNAPSHOT'], state_op=['VM_TEST_STOP']),
+#                   backup_reboot=                   dict(vm_op=['VM_TEST_NONE', 'VM_TEST_SNAPSHOT'], state_op=['VM_TEST_NONE', 'VM_TEST_REBOOT']),
+#                   )
 
 
 def record(fun):
@@ -66,7 +70,13 @@ VM_RUNNING_OPS = [
     "VM_TEST_RESIZE_RVOL",
     "RVOL_DEL_SNAPSHOT",
     "VM_TEST_NONE",
-    "VM_TEST_BACKUP_IMAGE"
+    "VM_TEST_BACKUP_IMAGE",
+    "DVOL_TEST_CREATE_IMG",
+    "DVOL_TEST_SNAPSHOT",
+    "DVOL_DEL_SNAPSHOT",
+    "DVOL_TEST_RESIZE",
+    "DVOL_TEST_BACKUP_IMAGE",
+    "CREATE_ATTACH_VOLUME"
 ]
 
 VM_STOPPED_OPS = [
@@ -78,7 +88,14 @@ VM_STOPPED_OPS = [
     "VM_TEST_RESET",
     "VM_TEST_NONE",
     "VM_TEST_REVERT_BACKUP",
-    "VM_TEST_BACKUP_IMAGE"
+    "VM_TEST_REVERT_VM_BACKUP",
+    "VM_TEST_BACKUP_IMAGE",
+    "DVOL_TEST_CREATE_IMG",
+    "DVOL_TEST_SNAPSHOT",
+    "DVOL_DEL_SNAPSHOT",
+    "DVOL_TEST_RESIZE",
+    "DVOL_TEST_BACKUP_IMAGE",
+    "CREATE_ATTACH_VOLUME"
 ]
 
 VM_STATE_OPS = [
@@ -104,7 +121,16 @@ def vm_op_test(vm, op):
         "VM_TEST_RESET": reset,
         "VM_TEST_BACKUP": back_up,
         "VM_TEST_REVERT_BACKUP": revert_backup,
-        "VM_TEST_BACKUP_IMAGE": backup_image 
+        "VM_TEST_REVERT_VM_BACKUP": revert_vm_backup,
+        "VM_TEST_BACKUP_IMAGE": backup_image, 
+        "DVOL_TEST_SNAPSHOT": create_dvol_snapshot,
+        "DVOL_DEL_SNAPSHOT": delete_dvol_snapshot,
+        "DVOL_TEST_CREATE_IMG": create_dvol_image,
+        "DVOL_TEST_RESIZE": resize_dvol,
+        "DVOL_BACKUP": dvol_back_up,
+        "DVOL_TEST_BACKUP_IMAGE": dvol_backup_image,
+        "CREATE_ATTACH_VOLUME": create_attach_volume
+
     }
     ops[op](vm)
 
@@ -224,18 +250,102 @@ def back_up(vm_obj):
      backup_option.set_name("test_compare")
      backup_option.set_volume_uuid(test_lib.lib_get_root_volume(vm_obj.get_vm()).uuid)
      backup_option.set_backupStorage_uuid(bs.uuid)
-     backup = vol_ops.create_backup(backup_option)
+     backup = vol_ops.create_vm_backup(backup_option)
      backup_list.append(backup)
 
 def revert_backup(vm_obj):
-    backup_uuid = backup_list.pop(random.randint(0, len(backup_list)-1)).uuid
-    vol_ops.revert_volume_from_backup(backup_uuid) 
+    backup_uuid = random.choice(backup_list.pop(random.randint(0, len(backup_list)-1))).uuid
+    vol_ops.revert_volume_from_backup(backup_uuid)
+
+def revert_vm_backup(vm_obj):
+    group_uuid = backup[0].groupUuid
+    vol_ops.revert_vm_from_backup(group_uuid) 
 
 def backup_image(vm_obj):
     cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0] 
     backup = random.choice(backup_list)
-    image = img_ops.create_root_template_from_backup(bs.uuid, backup.uuid)
+    if type(backup) != list:
+        image = img_ops.create_root_template_from_backup(bs.uuid, backup.uuid)
+        return
+    if type(backup) == list and backup[0].type == "Root":
+        image = img_ops.create_root_template_from_backup(bs.uuid, backup[0].uuid)
+    else:
+        image = img_ops.create_root_template_from_backup(bs.uuid, backup[1].uuid)
+    
+
+def create_attach_volume(vm_obj):
+    global test_obj_dict
+    volume_creation_option = test_util.VolumeOption()
+    disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
+    volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
+    volume = test_stub.create_volume(volume_creation_option)
+    test_obj_dict.add_volume(volume)
+    volume.check()
+    volume.attach(vm_obj)
+
+
+def create_dvol_snapshot(vm_obj):
+    global utility_vm, dvol
+    snapshots_root = zstack_sp_header.ZstackVolumeSnapshot()
+    snapshots_root.set_utility_vm(utility_vm)
+    snapshots_root.set_target_volume(dvol)
+    snapshots_root.create_snapshot('create_data_snapshot1')
+
+def delete_dvol_snapshot(vm_obj):
+    global utility_vm, dvol
+    snapshots_root = zstack_sp_header.ZstackVolumeSnapshot()
+    snapshots_root.set_utility_vm(utility_vm)
+    snapshots_root.set_target_volume(dvol)
+    sp_list = snapshots_root.get_snapshot_list()
+    if sp_list:
+        snapshots_root.delete_snapshot(random.choice(sp_list))
+
+def create_dvol_image(vm_obj):
+    global dvol
+    volume_uuid = dvol.volume.uuid
+    bs_list = test_lib.lib_get_backup_storage_list_by_vm(vm_obj.vm)
+    image_option = test_util.ImageOption()
+    image_option.set_data_volume_uuid(volume_uuid)
+    image_option.set_name('image_resize_template')
+    image_option.set_backup_storage_uuid_list([bs_list[0].uuid])
+    image = img_ops.create_data_volume_template(image_option)
+    new_image = zstack_image_header.ZstackTestImage()
+    new_image.set_creation_option(image_option)
+    new_image.set_image(image)
+    new_image.check()
+    new_image.delete()
+    new_image.expunge()
+
+def dvol_backup_image(vm_obj):
+    cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0]
+    backup = random.choice(backup_list)
+    if type(backup) != list:
+        image = img_ops.create_data_template_from_backup(bs.uuid, backup.uuid)
+    else:
+        image = img_ops.create_data_template_from_backup(bs.uuid, backup[1].uuid)
+
+def resize_dvol(vm_obj):
+    global dvol
+    vol_size = dvol.volume.size
+    volume_uuid = dvol.volume.uuid
+    set_size = 1024 * 1024 * 1024 + int(vol_size)
+    vol_ops.resize_data_volume(volume_uuid, set_size)
+    dvol.set_volume(test_lib.lib_get_volume_by_uuid(volume_uuid))
+
+
+def dvol_back_up(vm_obj):
+    global backup,dvol
+    cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0]
+    backup_option = test_util.BackupOption()
+    backup_option.set_name("test_compare")
+    backup_option.set_volume_uuid(dvol.volume.uuid)
+    backup_option.set_backupStorage_uuid(bs.uuid)
+    backup = vol_ops.create_backup(backup_option)
+    backup_list.append(backup)
+
 
 def print_path(Path):
     print("=" * 43 + "PATH" + "=" * 43)
@@ -251,45 +361,66 @@ def print_path(Path):
 
 
 def test():
-    global test_obj_dict, VM_RUNNING_OPS, VM_STOPPED_OPS, VM_STATE_OPS, backup
-    flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
+    global test_obj_dict, VM_RUNNING_OPS, VM_STOPPED_OPS, VM_STATE_OPS, backup, dvol, utility_vm
+    #flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
 
-    VM_OP = flavor['vm_op']
-    STATE_OP = flavor['state_op']
+    #VM_OP = flavor['vm_op']
+    #STATE_OP = flavor['state_op']
 
     ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0]
     if ps.type == "AliyunNAS":
         test_util.test_skip("VolumeBackup does not support AliyunNAS for now")
-    if ps.type != inventory.LOCAL_STORAGE_TYPE and 'VM_TEST_MIGRATE' in VM_OP and "VM_TEST_STOP" in STATE_OP:
-        test_util.test_skip("Shared Storage does not support migration")
+#    if ps.type != inventory.LOCAL_STORAGE_TYPE and 'VM_TEST_MIGRATE' in VM_OP and "VM_TEST_STOP" in STATE_OP:
+#        test_util.test_skip("Shared Storage does not support migration")
 
     vm_name = "test_vm"
+    utility_vm_name = "utility_vm"
+
     cond = res_ops.gen_query_conditions("system", '=', "false")
     cond = res_ops.gen_query_conditions("mediaType", '=', "RootVolumeTemplate", cond)
     cond = res_ops.gen_query_conditions("platform", '=', "Linux", cond)
+    cond = res_ops.gen_query_conditions("name", '=', "image_for_sg_test", cond)
     img_name = res_ops.query_resource(res_ops.IMAGE, cond)[0].name
     cond = res_ops.gen_query_conditions("category", '=', "Private")
-    l3_name = res_ops.query_resource(res_ops.L3_NETWORK,cond)[0].name
-    vm = test_stub.create_vm(vm_name, img_name, l3_name)
+    l3_name = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0].name
+    disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
+    disk_offering_uuids = [disk_offering.uuid]
+    vm = test_stub.create_vm(vm_name, img_name, l3_name, disk_offering_uuids=disk_offering_uuids)
     vm.check()
     test_obj_dict.add_vm(vm)
+    hostuuid = vm.get_vm().hostUuid
+    utility_vm = test_stub.create_vm(utility_vm_name, img_name, l3_name, host_uuid=hostuuid)
+    utility_vm.check()
+    test_obj_dict.add_vm(utility_vm)
 
-    if "VM_TEST_BACKUP_IMAGE" in VM_OP or "VM_TEST_REVERT_BACKUP" in VM_OP:
-        vm_op_test(vm, "VM_TEST_BACKUP")
+    dvol = zstack_volume_header.ZstackTestVolume()
+    dvol.set_volume(test_lib.lib_get_data_volumes(vm.get_vm())[0])
+    dvol.set_state(volume_header.ATTACHED)
+    dvol.set_target_vm(vm)
+    test_obj_dict.add_volume(dvol)
 
-    if "RVOL_DEL_SNAPSHOT" in VM_OP:
-        vm_op_test(vm, "VM_TEST_SNAPSHOT")
-
-    for i,j in zip(VM_OP,STATE_OP):
-        vm_op_test(vm, j)
+    i = 0
+    while True:
+        if i == 10:
+            vm_op_test(vm, "VM_TEST_STOP")
+            vm_op_test(vm, "VM_TEST_RESET")
+            vm.start()
+            vm.check()
+            i = 0
+        vm_op_test(vm, random.choice(VM_STATE_OPS))
         if vm.state == "Running":
-            if not backup_list and "VM_TEST_BACKUP_IMAGE" == i:
-                i = "VM_TEST_NONE"
+            VM_OPS = VM_RUNNING_OPS
+            if not backup_list:
+                VM_OPS.remove("VM_TEST_BACKUP_IMAGE")
         elif vm.state == "Stopped":
-            if not backup_list and ("VM_TEST_BACKUP_IMAGE" == i or "VM_TEST_REVERT_BACKUP" == i):
-                i = "VM_TEST_NONE"
+            VM_OPS = VM_STOPPED_OPS
+            if not backup_list:
+                VM_OPS.remove("VM_TEST_REVERT_BACKUP")
+                VM_OPS.remove("VM_TEST_BACKUP_IMAGE")
+                VM_OPS.remove("VM_TEST_REVERT_VM_BACKUP")
 
-        vm_op_test(vm, i)
+
+        vm_op_test(vm, random.choice(VM_OPS))
 
         if vm.state == "Stopped":
             vm.start()
@@ -299,6 +430,9 @@ def test():
             test_lib.TestHarness = test_lib.TestHarnessVR
         cmd = "echo 111 > /home/" + str(int(time.time()))
         test_lib.lib_execute_command_in_vm(vm.vm,cmd)
+        cmd = "dd if=/dev/urandom of=/dev/vdb bs=512k count=1"
+        test_lib.lib_execute_command_in_vm(vm.vm,cmd)
+
         vm.suspend()
         # create_snapshot/backup
         vm_op_test(vm, "VM_TEST_BACKUP")
@@ -313,7 +447,7 @@ def test():
 def error_cleanup():
     global test_obj_dict
     print_path(Path)
-    test_lib.lib_error_cleanup(test_obj_dict)
+    #test_lib.lib_error_cleanup(test_obj_dict)
 
 def compare(ps, vm, backup):
     test_util.test_logger("-----------------compare----------------")
@@ -323,13 +457,26 @@ def compare(ps, vm, backup):
     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0]
 
     root_volume = test_lib.lib_get_root_volume(vm.get_vm())
+    for i in test_lib.lib_get_data_volumes(vm.get_vm()):
+        if i.name == "DATA-for-test_vm":
+            data_volume = i
+
     vm_path = root_volume.installPath
+    data_path = data_volume.installPath
     if ps.type == "SharedBlock":
         vm_path = "/dev/" + root_volume.installPath.split("/")[2] + "/" + root_volume.installPath.split("/")[3]
+        data_path = "/dev/" + data_volume.installPath.split("/")[2] + "/" + data_volume.installPath.split("/")[3]
     test_util.test_logger(vm_path)
+    test_util.test_logger(data_path)
 
-    name = backup.backupStorageRefs[0].installPath.split("/")[2]
-    id = backup.backupStorageRefs[0].installPath.split("/")[3]
+    for i in backup:
+        if i.type == "Root":
+            name = i.backupStorageRefs[0].installPath.split("/")[2]
+            id = i.backupStorageRefs[0].installPath.split("/")[3]
+        if i.type == "Data" and "DATA-for-test_vm" in i.metadata:
+            name1 = i.backupStorageRefs[0].installPath.split("/")[2]
+            id1 = i.backupStorageRefs[0].installPath.split("/")[3]
+
     # compare vm_root_volume & image
     cmd = "mkdir /root/%s;" \
           "/usr/local/zstack/imagestore/bin/zstcli " \
@@ -337,7 +484,16 @@ def compare(ps, vm, backup):
           "-url=%s:8000 " \
           "pull -installpath /root/%s/old.qcow2 %s:%s;" \
           "qemu-img compare %s /root/%s/old.qcow2;" % (id, bs.hostname, id, name, id, vm_path, id)
+    cmd1 = "mkdir /root/%s;" \
+          "/usr/local/zstack/imagestore/bin/zstcli " \
+          "-rootca=/var/lib/zstack/imagestorebackupstorage/package/certs/ca.pem " \
+          "-url=%s:8000 " \
+          "pull -installpath /root/%s/old.qcow2 %s:%s;" \
+          "qemu-img compare %s /root/%s/old.qcow2;" % (id1, bs.hostname, id1, name1, id1, data_path, id1)
     # clean image
     result = test_lib.lib_execute_ssh_cmd(host.managementIp, "root", "password", cmd, timeout=300)
     if result != "Images are identical.\n":
         test_util.test_fail("compare vm_root_volume & image created by backup")
+    result = test_lib.lib_execute_ssh_cmd(host.managementIp, "root", "password", cmd1, timeout=300)
+    if result != "Images are identical.\n":
+        test_util.test_fail("compare vm_data_volume & image created by backup")
