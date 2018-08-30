@@ -6,6 +6,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import os
+import time
 from itertools import izip
 
 VLAN1_NAME, VLAN2_NAME = ['l3VlanNetworkName1', "l3VlanNetwork2"]
@@ -36,6 +37,7 @@ def test():
     test_util.test_dsc("create vpc vrouter and attach vpc l3 to vpc")
     for vpc_name in vpc_name_list:
         vr_list.append(test_stub.create_vpc_vrouter(vpc_name))
+    time.sleep(120)	#waiting for vrouter boot up
     for vr, l3_list in izip(vr_list, vpc_l3_list):
         test_stub.attach_l3_to_vpc_vr(vr, l3_list)
 
@@ -56,6 +58,7 @@ def test():
         eip = test_stub.create_eip('eip_{}'.format(vm.get_vm().name), vip_uuid=vip.get_vip().uuid)
         vip.attach_eip(eip)
         eip.attach(vm.get_vm().vmNics[0].uuid, vm)
+        time.sleep(10)	#waiting for eip attach to vm
         vip.check()
         vm.check()
 
@@ -78,8 +81,6 @@ def test():
     test_lib.lib_check_ports_in_a_command(vm2_inv, vip2.get_vip().ip,
                                           vip1.get_vip().ip, ["22"], [], vm1_inv)
 
-    test_lib.lib_error_cleanup(test_obj_dict)
-    test_stub.remove_all_vpc_vrouter()
 
 
 def env_recover():
