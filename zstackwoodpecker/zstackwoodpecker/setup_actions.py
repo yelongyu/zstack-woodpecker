@@ -919,7 +919,7 @@ default one' % self.zstack_properties)
                 # startup speed is slow. Increase timeout to 180s.
                 if linux.is_ip_existing(node.ip_):
                     if os.environ.get('ZSTACK_SIMULATOR') == "yes":
-                        cmd = 'zstack-ctl stop_node; %s zstack-ctl configure unitTestOn=true; zstack-ctl setenv SIMULATOR=True; zstack-ctl configure ThreadFacade.maxThreadNum=1000; nohup zstack-ctl start_node -DredeployDB=true' % (self._enable_jacoco_agent_cmd())
+                        cmd = 'zstack-ctl stop_node; %s zstack-ctl configure unitTestOn=true; zstack-ctl configure ThreadFacade.maxThreadNum=1000; nohup zstack-ctl start_node --simulator -DredeployDB=true' % (self._enable_jacoco_agent_cmd())
                     else:
                         cmd = 'zstack-ctl stop_node; %s nohup zstack-ctl start_node' % (self._enable_jacoco_agent_cmd())
                     thread = threading.Thread(target=shell_cmd_thread, args=(cmd, True, ))
