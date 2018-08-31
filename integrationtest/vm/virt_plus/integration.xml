@@ -89,6 +89,7 @@
         <case timeout='600' repeat='1' noparallel='True'>image_store/test_clone_vm.py</case>
         <case timeout='600' repeat='1' noparallel='True'>image_store/test_clone_vm2.py</case>
         <case timeout='500' repeat='1' noparallel='True'>image_store/test_clone_vm_sp_ops.py</case>
+        <case timeout='500' repeat='1' noparallel='True'>image_store/test_add_imagestore_import_image.py</case>
         <case timeout='180' repeat='1'>image_store/test_win_vm_boot_option.py</case>
 		<case timeout='600' repeat='1'>test_change_vm_image.py</case>
 		<case timeout='1200' repeat='1'>test_change_vm_image_to_windows.py</case>
