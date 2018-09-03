@@ -299,6 +299,46 @@ def reopen_host_network(host_vm, scenarioConfig, param_l2_nic=""):
     sce_ops.execute_in_vm_console(zstack_management_ip, host_inv.managementIp, host_vm_inv.uuid, host_vm_config, cmd)
 
 
+host_username = os.environ.get('physicalHostUsername')
+host_password = os.environ.get('physicalHostPassword')
+host_password2 = os.environ.get('physicalHostPassword2')
+
+def down_host_network(host_ip, scenarioConfig):
+    zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
+    cond = res_ops.gen_query_conditions('vmNics.ip', '=', host_ip)
+    host_vm_inv = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0]
+    cond = res_ops.gen_query_conditions('uuid', '=', host_vm_inv.hostUuid)
+    host_inv = sce_ops.query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
+
+    host_vm_config = sce_ops.get_scenario_config_vm(host_vm_inv.name_, scenarioConfig)
+
+    cmd = "virsh domiflist %s|sed -n '3p'|awk '{print $1}'|xargs -i virsh domif-setlink %s {} down" % (host_vm_inv.uuid, host_vm_inv.uuid)
+    if test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, "pwd"):
+        test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, cmd)
+    elif test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, "pwd"):
+        test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, cmd)
+    else:
+        test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s with username %s" %(host_inv.managementIp, host_password, host_password2, host_username))
+
+def up_host_network(host_ip, scenarioConfig):
+    zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
+    cond = res_ops.gen_query_conditions('vmNics.ip', '=', host_ip)
+    host_vm_inv = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0]
+    cond = res_ops.gen_query_conditions('uuid', '=', host_vm_inv.hostUuid)
+    host_inv = sce_ops.query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
+
+    host_vm_config = sce_ops.get_scenario_config_vm(host_vm_inv.name_, scenarioConfig)
+
+    cmd = "virsh domiflist %s|sed -n '3p'|awk '{print $1}'|xargs -i virsh domif-setlink %s {} up" % (host_vm_inv.uuid, host_vm_inv.uuid)
+    if test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, "pwd"):
+        test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, cmd)
+    elif test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, "pwd"):
+        test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, cmd)
+    else:
+        test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s with username %s" %(host_inv.managementIp, host_password, host_password2, host_username))
+
+
+
 def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
               disk_offering_uuids = None, default_l3_uuid = None, \
               system_tags = None, instance_offering_uuid = None, session_uuid = None):
