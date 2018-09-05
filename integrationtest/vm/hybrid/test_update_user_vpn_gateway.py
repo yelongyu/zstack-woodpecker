@@ -21,12 +21,18 @@ def test():
     hybrid.update_user_vpn_gateway(name='Vpc-User-Vpn-Gateway')
     hybrid.update_user_vpn_gateway(description='test-Vpc-User-Vpn-Gateway')
 
+    time.sleep(60)
+    hybrid.del_user_vpn_gateway()
+
     test_util.test_pass('Update Vpc User Vpn Gateway Remote Test Success')
 
 def env_recover():
     if hybrid.user_vpn_gateway:
         time.sleep(60)
-        hybrid.del_user_vpn_gateway()
+        try:
+            hybrid.del_user_vpn_gateway()
+        except:
+            pass
     hybrid.tear_down()
 
 #Will be called only if exception happens in test().
