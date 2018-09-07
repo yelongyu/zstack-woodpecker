@@ -41,7 +41,7 @@ def test():
     test_util.test_dsc('Update MN IP')
     test_stub.update_mn_ip(vm_ip, tmp_file)
     test_stub.start_mn(vm_ip, tmp_file)
-    test_stub.check_installation(vm_ip, tmp_file)
+    #test_stub.check_installation(vm_ip, tmp_file)
 
     test_util.test_dsc('Upgrade zstack to latest mevoco') 
     test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
