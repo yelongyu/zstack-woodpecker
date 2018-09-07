@@ -47,7 +47,7 @@ def test():
     test_stub.update_mn_ip(vm_ip, tmp_file)
     test_stub.reset_rabbitmq(vm_ip, tmp_file)
     test_stub.start_mn(vm_ip, tmp_file)
-    test_stub.check_installation(vm_ip, tmp_file)
+    #test_stub.check_installation(vm_ip, tmp_file)
 
     test_stub.update_19_iso(vm_ip, tmp_file, iso_19_path, upgrade_script_path)
 
