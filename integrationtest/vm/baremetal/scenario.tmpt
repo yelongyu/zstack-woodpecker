@@ -1,5 +1,18 @@
 import ../scenario.tmpt
 import ./deploy.tmpt
 vmName1 = debug_scenario1
-vmBaremetalL3Uuid = 123456
-
+cenvpcZoneUuid = 12345
+scenvpcVrouterName1 = vpc_vrouter_for_scenario_test
+scenvpcVrouterCleanPattern = vpc_vrouter_for_scenario_test
+virtualRouterOfferingUuid1 = 12345
+scenl2VlanNetworkName1 = vpc_vrouter_for_scenario_test
+scenl2NetworkPhysicalInterface = eth0
+scenl2Vlan1 = 3000
+scenl2Clusters = 12345,23456
+scenl3VPCNetworkName1 = vpc_vrouter_for_scenario_test
+scenL3VPCNetworkDomainName1 = zstack.org
+scenvpcIpRangeName1 = scenario_test
+scenvpcIpRangeStart1 = 192.168.123.2
+scenvpcIpRangeEnd1 = 192.168.123.253
+scenvpcIpRangeGateway1 = 192.168.123.1
+scenvpcIpRangeNetmask1 = 255.255.255.0
