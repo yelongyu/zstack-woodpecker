@@ -1,7 +1,8 @@
 import ../scenario.tmpt
 import ./deploy.tmpt
 vmName1 = debug_scenario1
-cenvpcZoneUuid = 12345
+scenvpcZoneUuid = 12345
+scenvpcPoolUuid = 12345
 scenvpcVrouterName1 = vpc_vrouter_for_scenario_test
 scenvpcVrouterCleanPattern = vpc_vrouter_for_scenario_test
 virtualRouterOfferingUuid1 = 12345
