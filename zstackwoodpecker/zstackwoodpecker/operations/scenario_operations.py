@@ -2225,6 +2225,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
         cond = res_ops.gen_query_conditions('vmNics.ip', '=', woodpecker_vm_ip)
         woodpecker_vm = query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0]
         attach_l3(zstack_management_ip, l3_inv.uuid, woodpecker_vm.uuid)
+	shell.call("if [ `ps -ef|grep dhclient|grep -v 'grep'|wc -l` -ne 0 ]; then pkill -9 dhclient;fi") #kill dhclient process if exist
         shell.call('dhclient eth0')
         shell.call('ip route del default || true')
         shell.call('ip route add default via %s dev eth0' % last_ip_gateway)
