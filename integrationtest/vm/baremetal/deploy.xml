@@ -144,7 +144,7 @@
           </l3Networks>
         </l2NoVlanNetwork>
         <l2NoVlanNetwork name="$scenl2VlanNetworkName1" description="baremetal deploy l3 network, it is for barametal deply."
-          physicalInterface="$scenl2VlanNetworkInterface">
+          physicalInterface="$scenl2NetworkPhysicalInterface">
           <l3Networks>
             <l3BasicNetwork name="$l3BaremetalNetworkName" description="Test">
               <ipRange name="$BaremetalIpRangeName" description="Test" 
