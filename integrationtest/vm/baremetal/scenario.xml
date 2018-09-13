@@ -26,12 +26,14 @@
             gateway="$scenvpcIpRangeGateway1"
             netmask="$scenvpcIpRangeNetmask1"/>
           <dns>$DNSServer</dns>
-          <networkService provider="vrouter">
+	  <networkService provider="Flat Network Service Provider">
             <serviceType>DHCP</serviceType>
+            <serviceType>Eip</serviceType>
+          </networkService>
+          <networkService provider="vrouter">
             <serviceType>DNS</serviceType>
             <serviceType>SNAT</serviceType>
             <serviceType>PortForwarding</serviceType>
-            <serviceType>Eip</serviceType>
           </networkService>
           <networkService provider="SecurityGroup">
             <serviceType>SecurityGroup</serviceType>
