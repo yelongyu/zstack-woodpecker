@@ -28,11 +28,11 @@ def create_pxe(dhcp_interface = None, name = None, range_begin = None, \
     if not dhcp_interface:
         dhcp_interface = os.environ.get('dhcpinterface')
     if not range_begin:
-        range_begin = os.environ.get('dhcpbegin')
+        range_begin = os.environ.get('scenvpcIpRangeStart1')
     if not range_end:
-        range_end = os.environ.get('dhcpend')
+        range_end = os.environ.get('scenvpcIpRangeEnd1')
     if not netmask:
-        netmask = os.environ.get('dhcpnetmask')
+        netmask = os.environ.get('scenvpcIpRangeNetmask1')
     pxe_option.set_dhcp_interface(dhcp_interface)
     pxe_option.set_dhcp_range_end(range_end)
     pxe_option.set_dhcp_range_begin(range_begin)
