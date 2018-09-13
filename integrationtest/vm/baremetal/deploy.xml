@@ -146,11 +146,11 @@
         <l2NoVlanNetwork name="$scenl2VlanNetworkName1" description="baremetal deploy l3 network, it is for barametal deply."
           physicalInterface="$scenl2NetworkPhysicalInterface">
           <l3Networks>
-            <l3BasicNetwork name="$l3BaremetalNetworkName" description="Test">
-              <ipRange name="$BaremetalIpRangeName" description="Test" 
-                startIp="$BaremetalIpRangeStartIp" endIp="$BaremetalIpRangeEndIp"
-                gateway="$BaremetalIpRangeGateway"
-                netmask="$BaremetalIpRangeNetmask" />
+            <l3BasicNetwork name="$scenl3VPCNetworkName1" description="Test">
+              <ipRange name="$scenvpcIpRangeName1" description="Test" 
+                startIp="$scenvpcIpRangeStart1" endIp="$scenvpcIpRangeEnd1"
+                gateway="$scenvpcIpRangeGateway1"
+                netmask="$scenvpcIpRangeNetmask1" />
               <networkService provider="SecurityGroup">
                 <serviceType>SecurityGroup</serviceType>
               </networkService>
