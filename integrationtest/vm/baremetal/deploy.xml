@@ -108,7 +108,6 @@
           <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
           <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
           <l2NetworkRef>$scenl2VlanNetworkName1</l2NetworkRef>
-          <!--<l2VxlanNetworkPoolRef cidr="$l2VxlanNetworkCidr">$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>-->
         </cluster>
       </clusters>
       <l2Networks>
