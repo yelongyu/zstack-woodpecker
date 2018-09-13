@@ -27,7 +27,8 @@ isoImageFormat = iso
 imageUrl_iso = http://192.168.200.100/mirror/iso/CentOS-7-x86_64-Minimal-1611-Auto.iso
 isoMediaType = ISO
 
-
+scenl2VlanNetworkName1 = vpc_vrouter_for_scenario_test
+scenl2NetworkPhysicalInterface = eth0
 
 ZSTACK_ALREADY_INSTALLED = yes
 pxename = Pxe_Test

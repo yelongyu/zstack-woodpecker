@@ -107,7 +107,7 @@
           <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
           <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
           <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
-          <l2NetworkRef>$l2BaremetalNetworkName</l2NetworkRef>
+          <l2NetworkRef>$scenl2VlanNetworkName1</l2NetworkRef>
           <!--<l2VxlanNetworkPoolRef cidr="$l2VxlanNetworkCidr">$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>-->
         </cluster>
       </clusters>
@@ -143,8 +143,8 @@
             </l3BasicNetwork>
           </l3Networks>
         </l2NoVlanNetwork>
-        <l2NoVlanNetwork name="$l2BaremetalNetworkName" description="baremetal deploy l3 network, it is for barametal deply."
-          physicalInterface="$l2BaremetalNetworkInterface">
+        <l2NoVlanNetwork name="$scenl2VlanNetworkName1" description="baremetal deploy l3 network, it is for barametal deply."
+          physicalInterface="$scenl2VlanNetworkInterface">
           <l3Networks>
             <l3BasicNetwork name="$l3BaremetalNetworkName" description="Test">
               <ipRange name="$BaremetalIpRangeName" description="Test" 
