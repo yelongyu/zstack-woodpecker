@@ -53,7 +53,7 @@ def create_vm(vm_name = 'vm_for_baremetal', image_name = None, \
         image_name = os.environ.get('imageName_s')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     if not l3_name:
-        l3_name = os.environ.get('l3BaremetalNetworkName')
+        l3_name = os.environ.get('scenl3VPCNetworkName1')
     l3_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
 
     vm_creation_option = test_util.VmOption()
