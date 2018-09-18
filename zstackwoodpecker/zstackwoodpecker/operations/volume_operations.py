@@ -192,6 +192,22 @@ def create_vm_backup(backup_option, session_uuid=None):
     backup = evt.inventories
     return backup
 
+def delete_vm_backup(bs_uuids, group_uuid, session_uuid=None):
+    action = api_actions.DeleteVmBackupAction()
+    action.groupUuid = group_uuid
+    action.backupStorageUuids = bs_uuids
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def delete_volume_backup(bs_uuids, uuid, session_uuid=None):
+    action = api_actions.DeleteVolumeBackupAction()
+    action.uuid = uuid
+    action.backupStorageUuids = bs_uuids
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
 def revert_volume_from_backup(backup_uuid, session_uuid=None):
     action = api_actions.RevertVolumeFromVolumeBackupAction()
     action.uuid = backup_uuid
@@ -207,6 +223,24 @@ def revert_vm_from_backup(group_uuid, session_uuid=None):
     action.timeout = 1800000
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('Revert [volume_uuid:] %s ' %  group_uuid)
+    return evt.inventory
+    
+def sync_backup_to_remote(backup_uuid, src, dst, session_uuid=None):
+    action = api_actions.SyncBackupFromImageStoreBackupStorageAction()
+    action.uuid = backup_uuid
+    action.srcBackupStorageUuid = src
+    action.dstBackupStorageUuid = dst
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def recover_backup_from_remote(backup_uuid, src, dst, session_uuid=None):
+    action = api_actions.RecoverBackupFromImageStoreBackupStorageAction()
+    action.uuid = backup_uuid
+    action.srcBackupStorageUuid = src
+    action.dstBackupStorageUuid = dst
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
     
 def create_snapshot_scheduler(snapshot_option, type, name, start_time=None, interval=None, repeatCount=None, cron=None, session_uuid=None):
