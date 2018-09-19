@@ -225,7 +225,7 @@ def revert_vm_from_backup(group_uuid, session_uuid=None):
     test_util.test_logger('Revert [volume_uuid:] %s ' %  group_uuid)
     return evt.inventory
     
-def sync_backup_to_remote(backup_uuid, src, dst, session_uuid=None):
+def sync_volume_backup_to_remote(backup_uuid, src, dst, session_uuid=None):
     action = api_actions.SyncBackupFromImageStoreBackupStorageAction()
     action.uuid = backup_uuid
     action.srcBackupStorageUuid = src
@@ -234,9 +234,27 @@ def sync_backup_to_remote(backup_uuid, src, dst, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def recover_backup_from_remote(backup_uuid, src, dst, session_uuid=None):
+def recover_volume_backup_from_remote(backup_uuid, src, dst, session_uuid=None):
     action = api_actions.RecoverBackupFromImageStoreBackupStorageAction()
     action.uuid = backup_uuid
+    action.srcBackupStorageUuid = src
+    action.dstBackupStorageUuid = dst
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def sync_vm_backup_to_remote(group_uuid, src, dst, session_uuid=None):
+    action = api_actions.SyncVmBackupFromImageStoreBackupStorageAction()
+    action.groupUuid= = group_uuid
+    action.srcBackupStorageUuid = src
+    action.dstBackupStorageUuid = dst
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def recover_vm_backup_from_remote(group_uuid, src, dst, session_uuid=None):
+    action = api_actions.RecoverVmBackupFromImageStoreBackupStorageAction()
+    action.groupUuid= = group_uuid
     action.srcBackupStorageUuid = src
     action.dstBackupStorageUuid = dst
     action.timeout = 1800000

@@ -248,25 +248,45 @@ def delete_vm_backup(bs_uuids, group_uuid):
 def delete_volume_backup(bs_uuids, uuid):
     vol_ops.delete_volume_backup(bs_uuids, uuid)
     
-def sync_backup_to_remote(vm_obj):
+def sync_volume_backup_to_remote(vm_obj):
     backup_uuid = random.choice(backup_list.pop(random.randint(0, len(backup_list)-1))).uuid
     cond = res_ops.gen_query_conditions("uuid", '=', backup_uuid)
     src = res_ops.query_resource(res_ops.VOLUME_BACKUP, cond)[0].backupStorageRefs[0].backupStorageUuid
     cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
-    dst = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0]
+    dst = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
     if src == dst:
-        dst = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[1]
+        dst = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[1].uuid
     vol_ops.sync_backup_to_remote(backup_uuid, src, dst)
     
-def recover_backup_from_remote(vm_obj):
+def recover_volume_backup_from_remote(vm_obj):
     backup_uuid = random.choice(backup_list.pop(random.randint(0, len(backup_list)-1))).uuid
     cond = res_ops.gen_query_conditions("uuid", '=', backup_uuid)
     src = res_ops.query_resource(res_ops.VOLUME_BACKUP, cond)[0].backupStorageRefs[0].backupStorageUuid
     cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
-    dst = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0]
+    dst = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
     if src == dst:
-        dst = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[1]
+        dst = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[1].uuid
     vol_ops.recover_backup_from_remote(backup_uuid, src, dst)
+
+def sync_vm_backup_to_remote(vm_obj):
+    backup_groupuuid = random.choice(backup_list.pop(random.randint(0, len(backup_list)-1))).groupUuid
+    cond = res_ops.gen_query_conditions("groupUuid", '=', backup_groupuuid)
+    src = res_ops.query_resource(res_ops.VOLUME_BACKUP, cond)[0].backupStorageRefs[0].backupStorageUuid
+    cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
+    dst = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
+    if src == dst:
+        dst = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[1].uuid
+    vol_ops.sync_backup_to_remote(backup_groupuuid, src, dst)
+
+def recover_vm_backup_from_remote(vm_obj):
+    backup_groupuuid = random.choice(backup_list.pop(random.randint(0, len(backup_list)-1))).groupUuid
+    cond = res_ops.gen_query_conditions("groupUuid", '=', backup_groupuuid)
+    src = res_ops.query_resource(res_ops.VOLUME_BACKUP, cond)[0].backupStorageRefs[0].backupStorageUuid
+    cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
+    dst = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
+    if src == dst:
+        dst = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[1].uuid
+    vol_ops.recover_backup_from_remote(backup_groupuuid, src, dst)
 
 def back_up(vm_obj, bs=None):
      global backup
@@ -450,9 +470,9 @@ def test():
 
     vm_op_test(vm, "VM_TEST_BACKUP")
     bs = add_backup_storage()
-    sync_backup_to_remote()
+    sync_vm_backup_to_remote(vm)
     assert len(res_ops.query_resource(res_ops.VOLUME_BACKUP)[0].backupStorageRefs) == 2
-    delete_volume_backup(bs.uuid, backup.uuid)
+    delete_volume_backup(bs.uuid, backup[0].uuid)
     assert len(res_ops.query_resource(res_ops.VOLUME_BACKUP)[0].backupStorageRefs) == 1
 
     print_path(Path)
