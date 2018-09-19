@@ -245,7 +245,7 @@ def recover_volume_backup_from_remote(backup_uuid, src, dst, session_uuid=None):
 
 def sync_vm_backup_to_remote(group_uuid, src, dst, session_uuid=None):
     action = api_actions.SyncVmBackupFromImageStoreBackupStorageAction()
-    action.groupUuid= = group_uuid
+    action.groupUuid = group_uuid
     action.srcBackupStorageUuid = src
     action.dstBackupStorageUuid = dst
     action.timeout = 1800000
@@ -254,7 +254,7 @@ def sync_vm_backup_to_remote(group_uuid, src, dst, session_uuid=None):
 
 def recover_vm_backup_from_remote(group_uuid, src, dst, session_uuid=None):
     action = api_actions.RecoverVmBackupFromImageStoreBackupStorageAction()
-    action.groupUuid= = group_uuid
+    action.groupUuid = group_uuid
     action.srcBackupStorageUuid = src
     action.dstBackupStorageUuid = dst
     action.timeout = 1800000
