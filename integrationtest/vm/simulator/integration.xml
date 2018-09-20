@@ -18,5 +18,7 @@
 	<case timeout='600' repeat='1' >config/test_config_category_ceph.py</case>
 	<case timeout='600' repeat='1' >config/test_config_category_aliyun.py</case>
 	<case timeout='600' repeat='1' >config/test_config_category_loadbalancer.py</case>
+	<case timeout='600' repeat='1' >config/test_config_category_primarystorage.py</case>
+	<case timeout='600' repeat='1' >config/test_config_category_sharedblock.py</case>
     </suite>
 </integrationTest>
