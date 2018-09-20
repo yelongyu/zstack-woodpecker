@@ -1379,6 +1379,38 @@ class BaremetalHostCfgOption(DataOption):
 
     def get_cfgItems(self):
         return self.cfgItems
+
+class IscsiOption(DataOption):
+    def __init__(self):
+        self.ip = None
+        self.port = None
+        self.chapUserName = None
+        self.chapUserPassword = None
+        super(IscsiOption, self).__init__()
+
+    def set_ip(self, ip):
+        self.ip = ip
+
+    def get_ip(self):
+        return self.ip
+
+    def set_port(self, port):
+        self.port = port
+
+    def get_port(self):
+        return self.port
+
+    def set_chapUserName(self, chapUserName):
+        self.chapUserName = chapUserName
+
+    def get_chapUserName(self):
+        return self.chapUserName
+
+    def set_chapUserPassword(self, chapUserName):
+        self.chapUserPassword = chapUserPassword
+
+    def get_chapUserPassword(self):
+        return self.chapUserPassword
  
 class VidOption(DataOption):
     def __init__(self):

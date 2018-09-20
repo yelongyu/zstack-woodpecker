@@ -869,7 +869,8 @@ def setup_iscsi_target(vm_inv, vm_config, deploy_config):
     cmd = "yum --disablerepo=* --enablerepo=alibase install targetcli -y"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    cmd = "iptables -I INPUT -p tcp -m tcp --dport 3260 -j ACCEPT"
+    #cmd = "iptables -I INPUT -p tcp -m tcp --dport 3260 -j ACCEPT"
+    cmd = "iptables -F"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
     cmd = "service iptables save"
