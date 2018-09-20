@@ -256,7 +256,7 @@ def sync_volume_backup_to_remote(vm_obj):
     dst = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
     if src == dst:
         dst = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[1].uuid
-    vol_ops.sync_backup_to_remote(backup_uuid, src, dst)
+    vol_ops.sync_volume_backup_to_remote(backup_uuid, src, dst)
     
 def recover_volume_backup_from_remote(vm_obj):
     backup_uuid = random.choice(backup_list.pop(random.randint(0, len(backup_list)-1))).uuid
@@ -266,7 +266,7 @@ def recover_volume_backup_from_remote(vm_obj):
     dst = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
     if src == dst:
         dst = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[1].uuid
-    vol_ops.recover_backup_from_remote(backup_uuid, src, dst)
+    vol_ops.recover_volume_backup_from_remote(backup_uuid, src, dst)
 
 def sync_vm_backup_to_remote(vm_obj):
     backup_groupuuid = random.choice(backup_list.pop(random.randint(0, len(backup_list)-1))).groupUuid
@@ -276,7 +276,7 @@ def sync_vm_backup_to_remote(vm_obj):
     dst = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
     if src == dst:
         dst = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[1].uuid
-    vol_ops.sync_backup_to_remote(backup_groupuuid, src, dst)
+    vol_ops.sync_vm_backup_to_remote(backup_groupuuid, src, dst)
 
 def recover_vm_backup_from_remote(vm_obj):
     backup_groupuuid = random.choice(backup_list.pop(random.randint(0, len(backup_list)-1))).groupUuid
@@ -286,7 +286,7 @@ def recover_vm_backup_from_remote(vm_obj):
     dst = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
     if src == dst:
         dst = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[1].uuid
-    vol_ops.recover_backup_from_remote(backup_groupuuid, src, dst)
+    vol_ops.recover_vm_backup_from_remote(backup_groupuuid, src, dst)
 
 def back_up(vm_obj, bs=None):
      global backup
@@ -472,7 +472,7 @@ def test():
     bs = add_backup_storage()
     sync_vm_backup_to_remote(vm)
     assert len(res_ops.query_resource(res_ops.VOLUME_BACKUP)[0].backupStorageRefs) == 2
-    delete_volume_backup(bs.uuid, backup[0].uuid)
+    delete_vm_backup([bs.uuid], res_ops.query_resource(res_ops.VOLUME_BACKUP)[0].groupUuid)
     assert len(res_ops.query_resource(res_ops.VOLUME_BACKUP)[0].backupStorageRefs) == 1
 
     print_path(Path)
