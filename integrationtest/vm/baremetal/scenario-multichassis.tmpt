@@ -1,0 +1,15 @@
+import ../scenario.tmpt
+import ./deploy.tmpt
+vmName1 = test_vm1
+vmName2 = test_vm2
+vmName3 = test_vm3
+vmName4 = test_vm4
+scenvpcZoneUuid = 12345
+scenvpcPoolUuid = 12345
+scenvpcVrouterName1 = vpc_vrouter_for_scenario_test
+scenvpcVrouterCleanPattern = vpc_vrouter_for_scenario_test
+virtualRouterOfferingUuid1 = 12345
+scenl2Vlan1 = 3000
+scenl2Clusters = 12345,23456
+scenL3VPCNetworkDomainName1 = zstack.org
+

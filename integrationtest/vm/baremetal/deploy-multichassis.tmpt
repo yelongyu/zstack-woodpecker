@@ -1,0 +1,90 @@
+import ../deploy.tmpt
+
+localPrimaryStorageName = local-ps
+localPrimaryStorageUrl = /home/local-ps
+
+instanceOfferingName_m = medium-vm
+instanceOfferingMemory_m = 2G
+instanceOfferingCpuNum_m = 2
+
+imageStoreBackupStorageName = imageStore
+imageStoreBackupStorageUrl = /home/imageStoreBackupStorage
+imageStoreBackupStorageUsername = root
+imageStoreBackupStoragePassword = password
+imageStoreBackupStorageHostname = 10.0.147.239
+imageStoreBackupStoragePort = 22
+
+hostName2 = centos2
+hostUuid2 = 123456
+hostIp2 = 10.1.101.41
+hostUsername2 = root
+hostPassword2 = password
+hostPort2 = 22
+
+hostName3 = centos3
+hostUuid3 = 123456
+hostIp3 = 10.1.101.42
+hostUsername3 = root
+hostPassword3 = password
+hostPort3 = 22
+
+hostName4 = centos4
+hostUuid4 = 123456
+hostIp4 = 10.1.101.43
+hostUsername4 = root
+hostPassword4 = password
+hostPort4 = 22
+
+imageName_s = medium-image
+rootImageFormat = qcow2
+imageUrl_s = http://192.168.200.100/mirror/diskimages/baremetal_10G.qcow2
+rootMediaType = RootVolumeTemplate
+imageUsername = root
+imagePassword = password
+
+imageName_iso = iso-image
+isoImageFormat = iso
+imageUrl_iso = http://192.168.200.100/mirror/iso/CentOS-7-x86_64-Minimal-1611-Auto.iso
+isoMediaType = ISO
+
+scenl2VlanNetworkName1 = vpc_vrouter_for_scenario_test
+scenl2NetworkPhysicalInterface = zsn1
+
+ZSTACK_ALREADY_INSTALLED = yes
+pxename = Pxe_Test
+dhcpinterface = br_zsn1
+dhcpbegin = 10.0.0.1
+dhcpend = 10.0.0.254
+dhcpnetmask = 255.0.0.0
+
+pxename_2 = Pxe_Test_2
+dhcpbegin_2 = 10.0.0.100
+dhcpend_2 = 10.0.0.150
+dhcpnetmask_2 = 255.0.0.0
+
+ipmiaddress = 10.0.147.239
+ipminame = ipmi1
+ipmiusername = admin
+ipmipassword = password
+ipmiport = 6230
+
+ipminame2 = ipmi2
+ipmiport2 = 6231
+
+nicip0 = 10.0.118.1
+nicnetmask0 =255.255.255.0
+bondip0 = 10.0.118.2
+bondmask0 = 255.255.255.0
+bondname0 = bond0
+
+hostName2 = host2
+hostIp2 = 127.1.101.42
+hostName3 = host3
+hostIp3 = 127.1.101.43
+
+scenl3VPCNetworkName1 = vpc_vrouter_for_scenario_test
+scenvpcIpRangeName1 = scenario_test
+scenvpcIpRangeStart1 = 10.0.0.2
+scenvpcIpRangeEnd1 = 10.0.0.232
+scenvpcIpRangeGateway1 = 10.0.0.1
+scenvpcIpRangeNetmask1 = 255.255.255.0
