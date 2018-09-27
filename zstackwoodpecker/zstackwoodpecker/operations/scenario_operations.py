@@ -396,17 +396,18 @@ def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
                     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
 
     host = get_deploy_host(vm_config.hostRef.text_, deploy_config)
-    if hasattr(host, 'port_') and host.port_ != '22':
-        cmd = "sed -i 's/#Port 22/Port %s/g' /etc/ssh/sshd_config && iptables -I INPUT -p tcp -m tcp --dport %s -j ACCEPT && service sshd restart" % (host.port_, host.port_)
-        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
-    else:
-        host.port_ = '22'
+    if host:
+        if hasattr(host, 'port_') and host.port_ != '22':
+            cmd = "sed -i 's/#Port 22/Port %s/g' /etc/ssh/sshd_config && iptables -I INPUT -p tcp -m tcp --dport %s -j ACCEPT && service sshd restart" % (host.port_, host.port_)
+            ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+        else:
+            host.port_ = '22'
 
-    if host.username_ != 'root':
-        cmd = 'adduser %s && echo -e %s\\\\n%s | passwd %s' % (host.username_, host.password_, host.password_, host.username_)
-        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host.port_))
-        cmd = "echo '%s        ALL=(ALL)       NOPASSWD: ALL' >> /etc/sudoers" % (host.username_)
-        ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host.port_))
+        if host.username_ != 'root':
+            cmd = 'adduser %s && echo -e %s\\\\n%s | passwd %s' % (host.username_, host.password_, host.password_, host.username_)
+            ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host.port_))
+            cmd = "echo '%s        ALL=(ALL)       NOPASSWD: ALL' >> /etc/sudoers" % (host.username_)
+            ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host.port_))
 
 def recover_after_host_vm_reboot(vm_inv, vm_config, deploy_config):
     vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
