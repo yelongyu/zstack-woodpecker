@@ -56,8 +56,8 @@ def test():
 	#	test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
         if str(pkg_num) == '2.2.0':
 		test_stub.update_230_iso(vm_ip, tmp_file, iso_230_path, upgrade_script_path)
-        if str(pkg_num) == '2.3.1':
-		test_stub.update_232_iso(vm_ip, tmp_file, iso_232_path, upgrade_script_path)
+        #if str(pkg_num) == '2.3.1':
+	#	test_stub.update_232_iso(vm_ip, tmp_file, iso_232_path, upgrade_script_path)
         if str(pkg_num) == '2.4.0':
 		test_stub.update_240_iso(vm_ip, tmp_file, iso_240_path, upgrade_script_path)
         test_util.test_logger('Upgrade zstack to %s' % pkg_num)
