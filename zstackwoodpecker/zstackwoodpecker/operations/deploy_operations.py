@@ -1151,6 +1151,26 @@ def get_host_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, deplo
                                     return s_vm.ip_
     return None
 
+def get_hosts_from_scenario_file(scenarioConfig, scenarioFile, deployConfig):
+    if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
+        return None
+
+    host_ips = ''
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            if xmlobject.has_element(vm, 'hostRef'):
+                    with open(scenarioFile, 'r') as fd:
+                        xmlstr = fd.read()
+                        fd.close()
+                        scenario_file = xmlobject.loads(xmlstr)
+                        for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                            if s_vm.name_ == vm.name_:
+                                if xmlobject.has_element(s_vm, 'managementIp_') and s_vm.managementIp_ != s_vm.ip_:
+                                    host_ips += ' %s' % s_vm.managementIp_
+                                else:
+                                    host_ips += ' %s' % s_vm.ip_
+    return host_ips
+
 def get_iscsi_nfs_host_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, deployConfig):
     if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
         return None
