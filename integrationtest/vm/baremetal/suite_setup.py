@@ -11,31 +11,10 @@ import zstackwoodpecker.operations.config_operations as config_operations
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 import zstacklib.utils.shell as shell
+import test_stub
 
 USER_PATH = os.path.expanduser('~')
 EXTRA_SUITE_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_suite_setup_config.sh' % USER_PATH
-
-def deploy_vbmc(vm_ip=None):
-    if vm_ip != None:
-        ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null'
-        shell.call('%s %s yum --disablerepo=epel install -y libvirt-devel' %(ssh_cmd, vm_ip))
-        #To avoid bug behind, reinstall python-pip before upgrade. bug: ImportError: 'module' object has no attribute 'main'
-        #shell.call('%s %s yum --nogpg -y reinstall python-pip' %(ssh_cmd, vm_ip))
-        #shell.call('%s %s pip install --upgrade pip' %(ssh_cmd, vm_ip))
-	shell.call('%s %s wget http://192.168.200.100/mirror/scripts/get-pip.py'%(ssh_cmd, vm_ip))
-        shell.call('%s %s python  get-pip.py' %(ssh_cmd, vm_ip))
-        shell.call('%s %s pip install virtualbmc' %(ssh_cmd, vm_ip))
-        #shell.call('scp %s/integrationtest/vm/baremetal/vbmc.py %s:/usr/lib/python2.7/site-packages/virtualbmc/vbmc.py'\
-        #        % (os.environ.get('woodpecker_root_path'),vm_ip))
-    else:
-        shell.call('yum --disablerepo=epel install -y libvirt-devel')
-        shell.call('%s %s yum -y reinstall python-pip' %(ssh_cmd, vm_ip))
-        shell.call('pip install --upgrade pip')
-        shell.call('pip install virtualbmc')
-        shell.call('cp %s/integrationtest/vm/baremetal/vbmc.py \
-               /var/lib/zstack/virtualenv/woodpecker/lib/python2.7/site-packages/virtualbmc/vbmc.py' \
-               % os.environ.get('woodpecker_root_path'))
-    test_util.test_logger('Virtualbmc has been deployed on Host')
 
 def test():
     if test_lib.scenario_config != None and test_lib.scenario_file != None and not os.path.exists(test_lib.scenario_file):
@@ -45,17 +24,14 @@ def test():
         scenario_operations.destroy_scenario(test_lib.all_scenario_config, test_lib.scenario_destroy)
 
     test_lib.setup_plan.deploy_test_agent()
-
     test_lib.setup_plan.execute_plan_without_deploy_test_agent()
 
     if test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
         mn_ips = deploy_operations.get_nodes_from_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
+        host_ips = deploy_operations.get_hosts_from_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
         if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
 	    os.system("bash %s '%s' %s" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ips, 'baremetal'))
-            deploy_vbmc(mn_ips)
-    elif os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
-        os.system("bash %s %s" % (EXTRA_SUITE_SETUP_SCRIPT, 'baremetal'))
-        deploy_vbmc()
+            test_stub.deploy_vbmc(host_ips)
 
     deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
     delete_policy = test_lib.lib_set_delete_policy('vm', 'Direct')

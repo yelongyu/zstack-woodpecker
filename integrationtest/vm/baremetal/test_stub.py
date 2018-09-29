@@ -1,5 +1,6 @@
 import zstackwoodpecker.operations.baremetal_operations as bare_operations
 import zstackwoodpecker.operations.cluster_operations as cluster_ops
+import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
 import zstacklib.utils.jsonobject as jsonobject
 import zstackwoodpecker.test_util as test_util
@@ -9,6 +10,27 @@ import subprocess
 import os
 import re
 import time
+
+def deploy_vbmc(host_ips):
+    for host_ip in host_ips.strip().split(' '):
+        test_util.test_logger('Candidate host ip is %s' %host_ip)
+        ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null'
+        shell.call('%s %s yum --disablerepo=epel install -y libvirt-devel' %(ssh_cmd, host_ip))
+        shell.call('%s %s wget http://192.168.200.100/mirror/scripts/get-pip.py'%(ssh_cmd, host_ip))
+        shell.call('%s %s python  get-pip.py' %(ssh_cmd, host_ip))
+        shell.call('%s %s pip install virtualbmc' %(ssh_cmd, host_ip))
+    test_util.test_logger('Virtualbmc has been deployed on Host')
+
+def add_hosts(host_ips):
+    for host_ip in host_ips:
+        host_option = test_tuil.HostOption()
+        host_option = set_cluster_uuid()
+        host_option = set_username('root')
+        host_option = set_password('password')
+        host_option = set_management_ip(host_ip) 
+        host_option = set_name(host_ip) 
+        host_ops.add_kvm_host(host_option)
+    test_util.test_logger('Add KVM hosts finished')
 
 def create_cluster(zone_uuid, cluster_name = None, session_uuid = None):
     if not cluster_name:
