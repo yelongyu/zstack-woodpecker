@@ -1,6 +1,6 @@
 '''
-
-@author: Mirabel
+TestSuite for basic infrustrature
+@author: SyZhao
 '''
 import os.path
 import zstacklib.utils.linux as linux
