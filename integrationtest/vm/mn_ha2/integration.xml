@@ -4,5 +4,6 @@
         <case timeout='1200' noparallel='True'>test_mnha2_1_mn_host_grace_stop_crt_vm.py</case>
         <case timeout='1200' noparallel='True'>test_mnha2_1_mn_host_net_dis_crt_vm.py</case>
         <case timeout='1200' noparallel='True'>test_mnha2_2_mn_host_stop_recover_crt_vm.py</case>
+        <case timeout='1200' noparallel='True'>test_mnha2_2_mn_host_net_dis_recover_crt_vm.py</case>
     </suite>
 </integrationTest>
