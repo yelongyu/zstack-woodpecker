@@ -42,6 +42,7 @@ def test():
 
     test_stub.wrapper_of_wait_for_management_server_start(600)
 
+    test_stub.ensure_hosts_connected(exclude_host=[vip_s_vm_cfg_lst[0]])
     test_stub.ensure_bss_connected()
     test_stub.ensure_pss_connected()
 
