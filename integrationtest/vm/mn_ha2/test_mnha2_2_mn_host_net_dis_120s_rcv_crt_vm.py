@@ -37,7 +37,7 @@ def test():
 
     test_stub.down_host_network(s_vm0.ip_, test_lib.all_scenario_config)  
     test_stub.down_host_network(s_vm1.ip_, test_lib.all_scenario_config)  
-    time.sleep(5)
+    time.sleep(120)
     test_stub.up_host_network(s_vm0.ip_, test_lib.all_scenario_config)  
     test_stub.up_host_network(s_vm1.ip_, test_lib.all_scenario_config)  
 
