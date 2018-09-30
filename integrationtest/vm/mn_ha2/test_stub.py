@@ -87,6 +87,34 @@ def get_s_vm_cfg_lst_vip_bind(scenarioConfig, scenarioFile):
     return host_list
 
 
+def get_s_vm_cfg_lst_vip_not_bind(scenarioConfig, scenarioFile):
+    """
+    It gets host without vip bound, while returned a s_vm config
+    """
+    mha_s_vm_list = get_mha_s_vm_list_from_scenario_file(scenarioConfig, scenarioFile)
+    if len(mha_s_vm_list) < 1:
+        return []
+    test_util.test_logger("@@DEBUG@@: mha_s_vm_list=<%s>" %(str(mha_s_vm_list)))
+    host_list = []
+    vip = os.environ['zstackHaVip']
+    for host in mha_s_vm_list:
+        host_config = sce_ops.get_scenario_config_vm(host.name_, scenarioConfig)
+        cmd = "ip a|grep " + vip
+        try:
+            if sce_is_sep_pub():
+                vm_list = test_lib.lib_execute_ssh_cmd(host.managementIp_, host_config.imageUsername_, host_config.imagePassword_,cmd)
+            else:
+                vm_list = test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
+            if not vm_list:
+                host_list.append(host)
+        except Exception, e:
+            test_util.test_logger("@@get host exception@@:%s" %(str(e)))
+            continue
+
+    test_util.test_logger("@@DEBUG@@: host_list=<%s>" %(str(host_list)))
+    return host_list
+
+
 def get_expected_vip_s_vm_cfg_lst_after_switch(scenarioConfig, scenarioFile, vip_host_ip):
     """
     It will return another mHa host ip by vip_host_ip excluded in mha_s_vm_list
