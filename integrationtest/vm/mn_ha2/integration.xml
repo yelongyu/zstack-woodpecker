@@ -6,5 +6,9 @@
         <case timeout='1200' noparallel='True'>test_mnha2_2_mn_host_stop_recover_crt_vm.py</case>
         <case timeout='1200' noparallel='True'>test_mnha2_2_mn_host_net_dis_10s_rcv_crt_vm.py</case>
         <case timeout='1200' noparallel='True'>test_mnha2_2_mn_host_net_dis_120s_rcv_crt_vm.py</case>
+	<case timeout='1200' noparallel='True'>test_mnha2_slave_mn_host_force_stop_crt_vm.py</case>
+	<case timeout='1200' noparallel='True'>test_mnha2_slave_mn_host_net_dis_10s_rcv_crt_vm.py</case>
+	<case timeout='1200' noparallel='True'>test_mnha2_slave_mn_host_net_dis_120s_rcv_crt_vm.py</case>
+	<case timeout='1200' noparallel='True'>test_mnha2_slave_mn_host_net_dis_crt_vm.py</case>
     </suite>
 </integrationTest>
