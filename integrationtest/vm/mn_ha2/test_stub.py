@@ -57,6 +57,9 @@ def check_if_vip_is_on_host(scenarioConfig, scenarioFile, host_ip):
     return False
 
 
+def exec_zsha2_demote(host_ip, username, password)
+    cmd = "zsha2 demote"
+    test_lib.lib_execute_ssh_cmd(host_ip, username, password, cmd)
 
 
 def get_s_vm_cfg_lst_vip_bind(scenarioConfig, scenarioFile):
