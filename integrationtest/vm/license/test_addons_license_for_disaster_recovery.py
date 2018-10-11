@@ -16,8 +16,8 @@ import os
 import base64
 
 test_stub = test_lib.lib_get_test_stub()
-node_uuid = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].uuid
 def test():
+    node_uuid = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].uuid
     test_stub.reload_default_license()
     test_util.test_logger('Check default community license')
     test_stub.check_license(None, None, 2147483647, False, 'Community')
