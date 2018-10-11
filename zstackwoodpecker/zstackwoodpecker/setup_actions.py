@@ -852,6 +852,8 @@ default one' % self.zstack_properties)
             pass
 
         self._start_multi_nodes(restart=True)
+        #NOTE: Only one key pair will take effect
+        self._copy_sshkey_from_node()
         self._enable_jacoco_dump()
 
     def execute_plan_ha(self):
@@ -975,6 +977,28 @@ default one' % self.zstack_properties)
         zstack_home = '%s/apache-tomcat/webapps/zstack/' % self.install_path
         cmd = 'zstack-ctl setenv ZSTACK_HOME=%s' % zstack_home
         shell.call(cmd)
+
+    def _copy_sshkey_from_node(self):
+        node = self.nodes[0]
+        if not node.dockerImage__:
+            print 'Copy sshkey from mn node'
+            #consider some zstack-server is running in vm, the server 
+            # startup speed is slow. Increase timeout to 180s.
+            private_key_path = '%s/webapps/zstack/WEB-INF/classes/ansible/rsaKeys/id_rsa' % self.catalina_home
+            public_key_path = '%s/webapps/zstack/WEB-INF/classes/ansible/rsaKeys/id_rsa.pub' % self.catalina_home
+            if linux.is_ip_existing(node.ip_):
+                cmd = 'scp %s /root/.ssh/id_rsa' % (private_key_path)
+                shell.call(cmd)
+                cmd = 'scp %s /root/.ssh/id_rsa.pub' % (public_key_path)
+                shell.call(cmd)
+            elif not linux.is_ip_existing(node1.ip_):
+                ssh.scp_file(private_key_path, "/root/.ssh/id_rsa", node.ip_, node.username_, node.password_)
+                ssh.scp_file(public_key_path, "/root/.ssh/id_rsa", node.ip_, node.username_, node.password_)
+            else:
+                cmd = 'scp %s /root/.ssh/id_rsa' % (private_key_path)
+                shell.call(cmd)
+                cmd = 'scp %s /root/.ssh/id_rsa.pub' % (public_key_path)
+                shell.call(cmd)
 
     def stop_node(self):
         print 'Begin to stop node ...'
