@@ -979,7 +979,7 @@ default one' % self.zstack_properties)
         shell.call(cmd)
 
     def _copy_sshkey_from_node(self):
-        node1 = self.nodes[0]
+        node = self.nodes[0]
         if not node.dockerImage__:
             print 'Copy sshkey from mn node'
             #consider some zstack-server is running in vm, the server 
