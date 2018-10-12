@@ -22,6 +22,13 @@ def test():
     test_util.test_logger('Check default community license')
     test_stub.check_license(None, None, 2147483647, False, 'Community')
 
+    test_util.test_logger('Load and Check Hybrid license with 3 day and 2 HOST')
+    file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '3', 'Hybrid', '', '1')
+    test_stub.load_license(file_path)
+    issued_date = test_stub.get_license_info().issuedDate
+    expired_date = test_stub.license_date_cal(issued_date, 86400 * 3)
+    test_stub.check_license("woodpecker@zstack.io", None, 1, False, 'Hybrid', issued_date=issued_date, expired_date=expired_date)
+
     test_util.test_logger('load and check addon license v2v with 2 day ')
     file_path = test_stub.gen_addons_license('woodpecker', 'woodpecker@zstack.io', '2', 'Addon', '', '', 'v2v')
     node_uuid = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].uuid
