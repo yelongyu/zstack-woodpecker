@@ -24,6 +24,7 @@
         <case timeout="2400" >upgrade/test_zs_upgd_2.3.2_latest_on_cos7.py</case>
         <case timeout="2400" >upgrade/test_zs_upgd_2.4.0_latest_on_cos7.py</case>
         <case timeout="2400" >upgrade/test_zs_upgd_2.6.0_latest_on_cos7.py</case>
+        <case timeout="2400" >upgrade/test_zs_upgd_3.0.0_latest_on_cos7.py</case>
         <!--<case timeout="2400" >upgrade/test_zs_upgd_2.2.3_latest_iso_on_cos7.py</case> -->
         <case timeout="2400" >upgrade/test_zs_upgd_2.2.3_latest_on_cos71.py</case>
         <case timeout="2400" >upgrade/test_zs_upgd_2.2.2_latest_on_cos72.py</case>
