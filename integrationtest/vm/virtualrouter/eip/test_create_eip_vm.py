@@ -13,6 +13,7 @@ Test step:
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
+import zstackwoodpecker.operations.config_operations as conf_ops
 import os
 
 test_stub = test_lib.lib_get_test_stub()
@@ -20,6 +21,7 @@ test_obj_dict = test_state.TestStateDict()
 
 def test():
     test_util.test_dsc('Create test vm with EIP and check.')
+    conf_ops.change_global_config('virtualRouter', 'ssh.passwordAuth', 'true')
     vm = test_stub.create_vlan_vm(os.environ.get('l3VlanNetworkName1'))
     test_obj_dict.add_vm(vm)
     

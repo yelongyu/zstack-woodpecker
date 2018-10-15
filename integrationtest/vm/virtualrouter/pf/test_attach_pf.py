@@ -8,6 +8,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.zstack_test.zstack_test_port_forwarding as zstack_pf_header
+import zstackwoodpecker.operations.config_operations as conf_ops
 import apibinding.inventory as inventory
 
 import os
@@ -18,6 +19,7 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
 def test():
+    conf_ops.change_global_config('virtualRouter', 'ssh.passwordAuth', 'true')
     pf_vm1 = test_stub.create_dnat_vm()
     test_obj_dict.add_vm(pf_vm1)
 
