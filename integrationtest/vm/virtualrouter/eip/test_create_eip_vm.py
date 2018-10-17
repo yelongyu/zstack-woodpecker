@@ -21,7 +21,10 @@ test_obj_dict = test_state.TestStateDict()
 
 def test():
     test_util.test_dsc('Create test vm with EIP and check.')
-    conf_ops.change_global_config('virtualRouter', 'ssh.passwordAuth', 'true')
+    try:
+        conf_ops.change_global_config('virtualRouter', 'ssh.passwordAuth', 'true')
+    except:
+        test_lib.test_logger("No global config ssh.passwordAuth")
     vm = test_stub.create_vlan_vm(os.environ.get('l3VlanNetworkName1'))
     test_obj_dict.add_vm(vm)
     

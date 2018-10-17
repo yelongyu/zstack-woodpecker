@@ -19,7 +19,10 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
 def test():
-    conf_ops.change_global_config('virtualRouter', 'ssh.passwordAuth', 'true')
+    try:
+        conf_ops.change_global_config('virtualRouter', 'ssh.passwordAuth', 'true')
+    except:
+        test_lib.test_logger('No global config ssh.passwordAuth')
     pf_vm1 = test_stub.create_dnat_vm()
     test_obj_dict.add_vm(pf_vm1)
 
