@@ -993,7 +993,7 @@ default one' % self.zstack_properties)
                 shell.call(cmd)
             elif not linux.is_ip_existing(node.ip_):
                 ssh.scp_file(private_key_path, "/root/.ssh/id_rsa", node.ip_, node.username_, node.password_)
-                ssh.scp_file(public_key_path, "/root/.ssh/id_rsa", node.ip_, node.username_, node.password_)
+                ssh.scp_file(public_key_path, "/root/.ssh/id_rsa.pub", node.ip_, node.username_, node.password_)
             else:
                 cmd = 'scp %s /root/.ssh/id_rsa' % (private_key_path)
                 shell.call(cmd)
