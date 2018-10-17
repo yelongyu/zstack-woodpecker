@@ -45,6 +45,11 @@ def test():
     time.sleep(5)
     zone_ops.delete_zone(zone_uuid)
 
+    node_uuid = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].uuid
+    test_util.test_logger('start to delete the license')
+    uuid = test_stub.get_license_info().uuid
+    lic_ops.delete_license(node_uuid, uuid)
+    test_util.test_logger('delete the license [uuid:] %s' % uuid)
 
     test_util.test_pass('Check License and add/del vcenter Test Success')
 
