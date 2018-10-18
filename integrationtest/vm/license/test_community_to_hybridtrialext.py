@@ -9,6 +9,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.license_operations as lic_ops
+import zstackwoodpecker.operations.resource_operations as res_ops
 import time
 import datetime
 import os
