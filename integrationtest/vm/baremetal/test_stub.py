@@ -14,7 +14,7 @@ import time
 def deploy_vbmc(host_ips):
     for host_ip in host_ips.strip().split(' '):
         test_util.test_logger('Candidate host ip is %s' %host_ip)
-        ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null'
+        ssh_cmd = 'sshpass -p password ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null'
         shell.call('%s %s yum --disablerepo=epel install -y libvirt-devel' %(ssh_cmd, host_ip))
         shell.call('%s %s wget http://192.168.200.100/mirror/scripts/get-pip.py'%(ssh_cmd, host_ip))
         shell.call('%s %s python  get-pip.py' %(ssh_cmd, host_ip))
