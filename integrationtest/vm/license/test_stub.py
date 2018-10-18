@@ -116,7 +116,7 @@ def execute_shell_in_process_stdout(cmd, tmp_file, timeout = 1200, no_timeout_ex
     return (process.returncode, stdout)
 
 def reload_default_license():
-    execute_shell_in_process('rm -rf /var/lib/zstack/license/license*.txt')
+    execute_shell_in_process('rm -rf /var/lib/zstack/license/license*')
     result = lic_ops.reload_license()
 
 def gen_license(customer_name, user_name, duration, lic_type, cpu_num, host_num):
