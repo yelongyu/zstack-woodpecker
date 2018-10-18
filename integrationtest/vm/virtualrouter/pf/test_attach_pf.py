@@ -22,7 +22,7 @@ def test():
     try:
         conf_ops.change_global_config('virtualRouter', 'ssh.passwordAuth', 'true')
     except:
-        test_lib.test_logger('No global config ssh.passwordAuth')
+        test_util.test_logger('No global config ssh.passwordAuth')
     pf_vm1 = test_stub.create_dnat_vm()
     test_obj_dict.add_vm(pf_vm1)
 
