@@ -36,7 +36,7 @@ def test():
     conditions = res_ops.gen_query_conditions('name', '=', zone_name)
     zone_uuid = res_ops.query_resource(res_ops.ZONE, conditions)[0].uuid
     https = "true"
-    vcenterdomain = "172.20.1.203"
+    vcenterdomain = "172.20.0.50"
     vct_ops.add_vcenter("vcenter_test", vcenterdomain, username, password, https, zone_uuid)
     vcenter_uuid = res_ops.get_resource(res_ops.VCENTER)[0].uuid
     time.sleep(5)
