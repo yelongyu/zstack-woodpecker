@@ -41,9 +41,9 @@ def test():
     test_stub.up_host_network(s_vm0.ip_, test_lib.all_scenario_config)  
     test_stub.up_host_network(s_vm1.ip_, test_lib.all_scenario_config)  
 
-    vip_s_vm_cfg_lst = test_stub.get_s_vm_cfg_lst_vip_bind(test_lib.all_scenario_config, test_lib.scenario_file)
-    if len(vip_s_vm_cfg_lst) != 1:
-        test_util.test_fail('vip has been running on %d host(s)' % len(vip_s_vm_cfg_lst))
+    vip_s_vm_cfg_lst_new = test_stub.get_s_vm_cfg_lst_vip_bind(test_lib.all_scenario_config, test_lib.scenario_file)
+    if len(vip_s_vm_cfg_lst_new) != 1:
+        test_util.test_fail('vip has been running on %d host(s)' % len(vip_s_vm_cfg_lst_new))
 
     test_stub.wrapper_of_wait_for_management_server_start(600)
 

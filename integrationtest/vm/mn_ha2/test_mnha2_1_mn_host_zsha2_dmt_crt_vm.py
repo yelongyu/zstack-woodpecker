@@ -37,9 +37,9 @@ def test():
     if not test_stub.check_if_vip_is_on_host(test_lib.all_scenario_config, test_lib.scenario_file, expected_vip_s_vm_cfg_lst_ip):
         test_util.test_fail("find vip should drift on ip %s, but is not on it." %(expected_vip_s_vm_cfg_lst_ip))
 
-    vip_s_vm_cfg_lst = test_stub.get_s_vm_cfg_lst_vip_bind(test_lib.all_scenario_config, test_lib.scenario_file)
-    if len(vip_s_vm_cfg_lst) != 1:
-        test_util.test_fail('vip has been running on %d host(s)' % len(vip_s_vm_cfg_lst))
+    vip_s_vm_cfg_lst_new = test_stub.get_s_vm_cfg_lst_vip_bind(test_lib.all_scenario_config, test_lib.scenario_file)
+    if len(vip_s_vm_cfg_lst_new) != 1:
+        test_util.test_fail('vip has been running on %d host(s)' % len(vip_s_vm_cfg_lst_new))
 
     test_stub.wrapper_of_wait_for_management_server_start(600)
 
