@@ -24,12 +24,12 @@ def test():
     test_util.test_logger('Check default community license')
     test_stub.check_license(None, None, 2147483647, False, 'Community')
 
-    test_util.test_logger('Load and Check TrialExt license with 10 day and 1 CPU')
-    file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '10', 'Prepaid', '1', '')
+    test_util.test_logger('Load and Check TrialExt license with 10 day and 3 CPU')
+    file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '10', 'Prepaid', '3', '')
     test_stub.load_license(file_path)
     issued_date = test_stub.get_license_info().issuedDate
     expired_date = test_stub.license_date_cal(issued_date, 86400 * 10)
-    test_stub.check_license("woodpecker@zstack.io", 1, None, False, 'Paid', issued_date=issued_date, expired_date=expired_date)
+    test_stub.check_license("woodpecker@zstack.io", 3, None, False, 'Paid', issued_date=issued_date, expired_date=expired_date)
 
     # add the vcenter 1.203
 
