@@ -29,7 +29,7 @@ def test():
 
     test_util.test_logger("disconnect host [%s]" % (vip_s_vm_cfg_lst[0].ip_))
     #test_stub.down_host_network(vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config)  
-    exec_zsha2_demote(vip_s_vm_cfg_lst[0].ip_, "root", "password")
+    test_stub.exec_zsha2_demote(vip_s_vm_cfg_lst[0].ip_, "root", "password")
 
     time.sleep(5)
 
