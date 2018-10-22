@@ -40,6 +40,7 @@ def test():
     time.sleep(10)
     test_stub.up_host_network(s_vm0.ip_, test_lib.all_scenario_config)  
     test_stub.up_host_network(s_vm1.ip_, test_lib.all_scenario_config)  
+    time.sleep(10)
 
     vip_s_vm_cfg_lst_new = test_stub.get_s_vm_cfg_lst_vip_bind(test_lib.all_scenario_config, test_lib.scenario_file)
     if len(vip_s_vm_cfg_lst_new) != 1:
