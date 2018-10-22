@@ -992,8 +992,13 @@ default one' % self.zstack_properties)
                 cmd = 'scp %s /root/.ssh/id_rsa.pub' % (public_key_path)
                 shell.call(cmd)
             elif not linux.is_ip_existing(node.ip_):
-                ssh.scp_file(private_key_path, "/root/.ssh/id_rsa", node.ip_, node.username_, node.password_)
-                ssh.scp_file(public_key_path, "/root/.ssh/id_rsa.pub", node.ip_, node.username_, node.password_)
+                import zstackwoodpecker.test_lib as test_lib
+                if test_lib.lib_wait_target_up(node.ip_, '22', 120):
+                    node_ip = node.ip_
+                else:
+                    node_ip = os.environ['zstackHaVip']
+                ssh.scp_file(private_key_path, "/root/.ssh/id_rsa", node_ip, node.username_, node.password_)
+                ssh.scp_file(public_key_path, "/root/.ssh/id_rsa.pub", node_ip, node.username_, node.password_)
                 cmd = 'scp %s /root/.ssh/id_rsa' % (private_key_path)
                 shell.call(cmd)
                 cmd = 'scp %s /root/.ssh/id_rsa.pub' % (public_key_path)
