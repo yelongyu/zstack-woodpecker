@@ -52,7 +52,7 @@ def test():
     test_stub.update_license(node_uuid, file_path)
     issued_date = test_stub.get_license_addons_info().issuedDate
     expired_date = test_stub.license_date_cal(issued_date, 86400 * 2)
-    test_stub.check_license_addons(2, None, False, 'AddOn', issued_date=issued_date, expired_date=expired_date)
+    test_stub.check_license_addons(1, None, False, 'AddOn', issued_date=issued_date, expired_date=expired_date)
     
     vct_ops.add_vcenter("vcenter_test", vcenterdomain, username, password, https, zone_uuid)
 
