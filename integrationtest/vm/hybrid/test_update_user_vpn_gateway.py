@@ -16,7 +16,7 @@ hybrid = test_stub.HybridObject()
 
 def test():
     hybrid.add_datacenter_iz(add_datacenter_only=True)
-    hybrid.create_user_vpn_gateway()
+    hybrid.create_user_vpn_gateway(gc=True)
 
     hybrid.update_user_vpn_gateway(name='Vpc-User-Vpn-Gateway')
     hybrid.update_user_vpn_gateway(description='test-Vpc-User-Vpn-Gateway')

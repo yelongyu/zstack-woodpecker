@@ -669,9 +669,20 @@ class HybridObject(object):
         else:
             hyb_ops.update_vbr(self.vbr.uuid, name=self.vbr_name, description=self.vbr_desc)
 
-    def create_user_vpn_gateway(self):
+    def create_user_vpn_gateway(self, gc=False):
         if not self.user_gw_ip:
             self.user_gw_ip = '192.168.%s.%s' % (random.randint(1,254), random.randint(1,254))
+        if gc:
+            cond = res_ops.gen_query_conditions('name', '=', 'zstack-test-user-vpn-gateway')
+            cond2 = res_ops.gen_query_conditions('name', '=', 'Vpc-User-Vpn-Gateway')
+            self.sync_user_vpn_gateway()
+            user_vpn_local = hyb_ops.query_vpc_user_vpn_gateway_local(cond)
+            user_vpn_local.extend(hyb_ops.query_vpc_user_vpn_gateway_local(cond2))
+            for vpn in user_vpn_local:
+                try:
+                    hyb_ops.del_vpc_user_vpn_gateway_remote(vpn.uuid)
+                except:
+                    pass
         self.user_vpn_gateway = hyb_ops.create_vpc_user_vpn_gateway(self.datacenter.uuid, gw_ip=self.user_gw_ip, gw_name="zstack-test-user-vpn-gateway")
         time.sleep(10)
         self.check_resource('create', 'gatewayId', self.user_vpn_gateway.gatewayId, 'query_vpc_user_vpn_gateway_local')
@@ -766,9 +777,17 @@ class HybridObject(object):
                 image_attr_eq = "self.ecs_image.%s == '%s'" % (k, image_attr[k])
                 assert eval(image_attr_eq)
 
-    def create_route_entry(self):
+    def create_route_entry(self, gc=False):
         self.get_vr()
         self.dst_cidr_block = '172.27.%s.0/24' % random.randint(1,254)
+        if gc:
+            route_entry = self.sync_route_entry(return_val=True)
+            for rt in route_entry:
+                if rt.nextHopType == 'VpnGateway':
+                    try:
+                        hyb_ops.del_aliyun_route_entry_remote(rt.uuid)
+                    except:
+                        pass
         self.route_entry = hyb_ops.create_aliyun_vpc_virtualrouter_entry_remote(self.dst_cidr_block, self.vr.uuid, vrouter_type='vrouter', next_hop_type='VpnGateway', next_hop_uuid=self.vpn_gateway.uuid)
         time.sleep(30)
         self.check_resource('create', 'destinationCidrBlock', self.dst_cidr_block, 'query_aliyun_route_entry_local')
@@ -776,15 +795,19 @@ class HybridObject(object):
     def del_route_entry(self, remote=True):
         if remote:
             hyb_ops.del_aliyun_route_entry_remote(self.route_entry.uuid)
+            time.sleep(20)
             hyb_ops.sync_route_entry_from_remote(self.vr.uuid, vrouter_type='vrouter')
         else:
             pass
         self.check_resource('delete', 'destinationCidrBlock', self.dst_cidr_block, 'query_aliyun_route_entry_local')
 
-    def sync_route_entry(self):
+    def sync_route_entry(self, return_val=False):
         hyb_ops.sync_route_entry_from_remote(self.vr.uuid, vrouter_type='vrouter')
         condition = res_ops.gen_query_conditions('virtualRouterUuid', '=', self.vr.uuid)
-        assert hyb_ops.query_aliyun_route_entry_local(condition)
+        route_entry = hyb_ops.query_aliyun_route_entry_local(condition)
+        assert route_entry
+        if return_val:
+            return route_entry
 
     def create_ecs_instance(self, need_vpn_gateway=False, allocate_eip=False, region_id=None, connect=False):
         if need_vpn_gateway:

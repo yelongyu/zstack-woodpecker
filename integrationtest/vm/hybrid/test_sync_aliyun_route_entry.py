@@ -18,7 +18,7 @@ hybrid = test_stub.HybridObject()
 def test():
     hybrid.add_datacenter_iz(check_vpn_gateway=True)
     hybrid.get_vpc(has_vpn_gateway=True)
-    hybrid.create_route_entry()
+    hybrid.create_route_entry(gc=True)
     hybrid.sync_route_entry()
     time.sleep(90)
     hybrid.del_route_entry()
