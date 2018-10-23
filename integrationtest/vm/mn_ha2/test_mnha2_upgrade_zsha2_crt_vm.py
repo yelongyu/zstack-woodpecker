@@ -1,6 +1,6 @@
 '''
 Test Steps:
-    1. zsha2 demote in host where vip located.
+    1. upgrade zsha2 in host where vip located.
     2. check vip switch to another MN.
     3. create vm to validate everything goes on well. 
 
@@ -29,7 +29,8 @@ def test():
 
     test_util.test_logger("disconnect host [%s]" % (vip_s_vm_cfg_lst[0].ip_))
     #test_stub.down_host_network(vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config)  
-    exec_zsha2_demote(vip_s_vm_cfg_lst[0].ip_, "root", "password")
+    zsha2_path="/root/zsha2"
+    test_stub.exec_upgrade_zsha2(vip_s_vm_cfg_lst[0].ip_, "root", "password", zsha2_path)
 
     time.sleep(5)
 

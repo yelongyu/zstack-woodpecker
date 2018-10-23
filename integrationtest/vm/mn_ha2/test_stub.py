@@ -62,6 +62,59 @@ def exec_zsha2_demote(host_ip, username, password):
     test_lib.lib_execute_ssh_cmd(host_ip, username, password, cmd)
 
 
+def exec_upgrade_mn(host_ip, username, password, zstack_bin_path):
+    cmd = "zsha2 upgrade-mn -peerpass password " + zstack_bin_path
+    test_lib.lib_execute_ssh_cmd(host_ip, username, password, cmd)
+
+
+def exec_upgrade_iso(host_ip, username, password, zstack_iso_path):
+    cmd = "zsha2 upgrade-mn -peerpass password " + zstack_iso_path
+    test_lib.lib_execute_ssh_cmd(host_ip, username, password, cmd)
+
+
+def exec_upgrade_zsha2(host_ip, username, password, zsha2_path):
+    cmd = "chmod a+x " + zsha2_path
+    test_lib.lib_execute_ssh_cmd(host_ip, username, password, cmd)
+    cmd = zsha2_path + " upgrade-ha"
+    test_lib.lib_execute_ssh_cmd(host_ip, username, password, cmd)
+
+
+def get_buildtype_by_sce_file(scenarioFile):
+    """
+    It gets host with vip bound, while returned a s_vm config
+    """
+    with open(scenarioFile, 'r') as fd:
+        xmlstr = fd.read()
+        fd.close()
+        scenario_file = xmlobject.loads(xmlstr)
+        for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+            raw_name = s_vm.name_
+            test_util.test_logger("raw name from s_vm is %s", raw_name)
+            sub_name_lst = raw_name.split('_')
+            buildtype = sub_name_lst[2] + '_' + sub_name_lst[3]
+            test_util.test_logger("get buildtype is %s", buildtype)
+
+            return buildtype
+
+
+def get_buildid_by_sce_file(scenarioFile):
+    """
+    It gets host with vip bound, while returned a s_vm config
+    """
+    with open(scenarioFile, 'r') as fd:
+        xmlstr = fd.read()
+        fd.close()
+        scenario_file = xmlobject.loads(xmlstr)
+        for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+            raw_name = s_vm.name_
+            test_util.test_logger("raw name from s_vm is %s", raw_name)
+            sub_name_lst = raw_name.split('_')
+            buildid = sub_name_lst[6]
+            test_util.test_logger("get buildtype is %s", buildtype)
+
+            return buildid
+
+
 def get_s_vm_cfg_lst_vip_bind(scenarioConfig, scenarioFile):
     """
     It gets host with vip bound, while returned a s_vm config

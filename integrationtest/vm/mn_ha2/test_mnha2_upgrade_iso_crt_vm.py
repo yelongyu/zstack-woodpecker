@@ -1,6 +1,6 @@
 '''
 Test Steps:
-    1. zsha2 demote in host where vip located.
+    1. upgrade iso in host where vip located.
     2. check vip switch to another MN.
     3. create vm to validate everything goes on well. 
 

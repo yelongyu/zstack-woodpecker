@@ -1,6 +1,6 @@
 '''
 Test Steps:
-    1. zsha2 demote in host where vip located.
+    1. upgrade mn in host where vip located.
     2. check vip switch to another MN.
     3. create vm to validate everything goes on well. 
 
@@ -29,7 +29,19 @@ def test():
 
     test_util.test_logger("disconnect host [%s]" % (vip_s_vm_cfg_lst[0].ip_))
     #test_stub.down_host_network(vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config)  
-    exec_zsha2_demote(vip_s_vm_cfg_lst[0].ip_, "root", "password")
+
+    buildtype = test_stub.get_buildtype_by_sce_file(test_lib.scenario_file)
+    buildid = test_stub.get_buildid_by_sce_file(test_lib.scenario_file)
+    build_server = os.environ.get['BUILD_SERVER']
+
+    cmd = "cd /root/mirror/" + buildtype+ "/" + buildid + "/ && ls ZStack-enterprise-installer-*.bin"
+    zstack_bin_name = test_lib.lib_execute_ssh_cmd(build_server, "root", "password", cmd)
+
+    zstack_bin_path = "/root/" + zstack_bin_name
+    cmd = "wget -c http://" + build_server + "/mirror/" + buildtype + "/" + buildid + "/" + zstack_bin_name + " -O " + zstack_bin_path
+    test_lib.lib_execute_ssh_cmd(vip_s_vm_cfg_lst[0].ip_, "root", "password", cmd)
+
+    test_stub.exec_upgrade_mn(vip_s_vm_cfg_lst[0].ip_, "root", "password", zstack_bin_path)
 
     time.sleep(5)
 

@@ -2,7 +2,7 @@
 
 New Integration Test for License.
 
-@author: ye.tian 20181005
+@author: ye.tian 20181020
 '''
 
 import zstackwoodpecker.test_util as test_util
@@ -24,12 +24,12 @@ def test():
     test_util.test_logger('Check default community license')
     test_stub.check_license(None, None, 2147483647, False, 'Community')
 
-    test_util.test_logger('Load and Check TrialExt license with 10 day and 3 CPU')
-    file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '10', 'Prepaid', '3', '')
+    test_util.test_logger('Load and Check TrialExt license with 10 day and 1 CPU')
+    file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '10', 'Prepaid', '1', '')
     test_stub.load_license(file_path)
     issued_date = test_stub.get_license_info().issuedDate
     expired_date = test_stub.license_date_cal(issued_date, 86400 * 10)
-    test_stub.check_license("woodpecker@zstack.io", 3, None, False, 'Paid', issued_date=issued_date, expired_date=expired_date)
+    test_stub.check_license("woodpecker@zstack.io", 1, None, False, 'Paid', issued_date=issued_date, expired_date=expired_date)
 
     # add the vcenter 1.203
 
@@ -41,13 +41,33 @@ def test():
     zone_uuid = res_ops.query_resource(res_ops.ZONE, conditions)[0].uuid
     https = "true"
     vcenterdomain = "172.20.0.50"
+    try:
+        vct_ops.add_vcenter("vcenter_test", vcenterdomain, username, password, https, zone_uuid)
+    except Exception:
+	pass
+
+    test_util.test_logger('load and check addon license vmware with 2 day and 1 CPU ')
+    file_path = test_stub.gen_addons_license('woodpecker', 'woodpecker@zstack.io', '2', 'Addon', '1', '', 'vmware')
+    node_uuid = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].uuid
+    test_stub.update_license(node_uuid, file_path)
+    issued_date = test_stub.get_license_addons_info().issuedDate
+    expired_date = test_stub.license_date_cal(issued_date, 86400 * 2)
+    test_stub.check_license_addons(1, None, False, 'AddOn', issued_date=issued_date, expired_date=expired_date)
+    
     vct_ops.add_vcenter("vcenter_test", vcenterdomain, username, password, https, zone_uuid)
+
     vcenter_uuid = res_ops.get_resource(res_ops.VCENTER)[0].uuid
     time.sleep(5)
     vct_ops.delete_vcenter(vcenter_uuid)
 
     time.sleep(5)
     zone_ops.delete_zone(zone_uuid)
+
+    test_util.test_logger('start to delete the addons vmware license')
+    uuid = test_stub.get_license_addons_info().uuid
+    lic_ops.delete_license(node_uuid, uuid)
+    test_util.test_logger('delete the addons license [uuid:] %s' % uuid)
+
 
     test_util.test_pass('Check License and add the vcenter Test Success')
 
