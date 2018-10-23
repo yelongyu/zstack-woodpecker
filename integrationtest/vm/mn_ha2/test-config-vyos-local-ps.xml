@@ -1,5 +1,5 @@
 <testConfig>
-    <deployConfig>deploy.xml</deployConfig>
+    <deployConfig>deploy-local-ps.xml</deployConfig>
     <deployConfigTemplate>deploy.tmpt</deployConfigTemplate>
     <!-- suite special test variables -->
     <pingTestTarget>zstack.yyk.net</pingTestTarget>
