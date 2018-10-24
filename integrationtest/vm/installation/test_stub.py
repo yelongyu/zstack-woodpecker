@@ -277,7 +277,7 @@ def update_c74_iso(vm_ip, tmp_file, c74_iso_path, upgrade_script_path):
     process_result = execute_shell_in_process(cmd, tmp_file)
     ssh.scp_file(c74_iso_path, '/opt/zstack-c74.iso', vm_ip, vm_username, vm_password)
     ssh.scp_file(upgrade_script_path, '/opt/zstack-upgrade', vm_ip, vm_username, vm_password)
-    cmd = '%s "mkdir -p /opt/zstack-dvd"' % ssh_cmd
+    cmd = '%s "rm -rf /opt/zstack-dvd"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
     cmd = '%s "bash /opt/zstack-upgrade -r -f /opt/zstack-c74.iso"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
