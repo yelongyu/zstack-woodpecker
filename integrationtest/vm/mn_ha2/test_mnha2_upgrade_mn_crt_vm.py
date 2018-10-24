@@ -32,7 +32,7 @@ def test():
 
     buildtype = test_stub.get_buildtype_by_sce_file(test_lib.scenario_file)
     buildid = test_stub.get_buildid_by_sce_file(test_lib.scenario_file)
-    build_server = os.environ.get['BUILD_SERVER']
+    build_server = os.environ.get('BUILD_SERVER')
 
     cmd = "cd /root/mirror/" + buildtype+ "/" + buildid + "/ && ls ZStack-enterprise-installer-*.bin"
     zstack_bin_name = test_lib.lib_execute_ssh_cmd(build_server, "root", "password", cmd)
