@@ -34,7 +34,7 @@ def sce_is_sep_pub():
         return False
 
 
-def check_if_vip_is_on_host(scenarioConfig, scenarioFile, host_ip):
+def check_if_vip_is_on_host(scenarioConfig, scenarioFile, host_ip, retry_times=1):
     """
     It checks whether vip is on host_ip
     """
@@ -46,12 +46,14 @@ def check_if_vip_is_on_host(scenarioConfig, scenarioFile, host_ip):
     vip = os.environ['zstackHaVip']
     cmd = "ip a|grep " + vip
 
-    for host in mha_s_vm_list:
-        if host.ip_ == host_ip:
-            host_config = sce_ops.get_scenario_config_vm(host.name_, scenarioConfig)
-            is_find = test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
-            if is_find:
-                return True
+    for retry_cnt in range(retry_times):
+        for host in mha_s_vm_list:
+            if host.ip_ == host_ip:
+                host_config = sce_ops.get_scenario_config_vm(host.name_, scenarioConfig)
+                is_find = test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
+                if is_find:
+                    return True
+        time.sleep(1)
 
     test_util.test_logger("not find vip in host_ip:%s" %(host_ip))
     return False
