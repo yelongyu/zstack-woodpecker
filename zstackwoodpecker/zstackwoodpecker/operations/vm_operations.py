@@ -332,11 +332,12 @@ def del_vm_nic_qos(nic_uuid, direction, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def set_vm_disk_qos(volume_uuid, volumeBandwidth=None, session_uuid = None):
+def set_vm_disk_qos(volume_uuid, volumeBandwidth=None, mode=None, session_uuid = None):
     action = api_actions.SetVolumeQosAction()
     action.uuid = volume_uuid
     action.volumeBandwidth = volumeBandwidth
-
+    if mode:
+        action.mode = mode
     test_util.action_logger('SetVolumeQos [volume:] %s' % (volume_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
@@ -349,10 +350,11 @@ def get_vm_disk_qos(volume_uuid, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def del_vm_disk_qos(volume_uuid, session_uuid = None):
+def del_vm_disk_qos(volume_uuid, mode=None, session_uuid = None):
     action = api_actions.DeleteVolumeQosAction()
     action.uuid = volume_uuid
-
+    if mode:
+        action.mode = mode
     test_util.action_logger('DeleteVolumeQos [volume:] %s' % (volume_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt

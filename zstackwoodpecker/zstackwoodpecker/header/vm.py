@@ -8,6 +8,8 @@ PAUSED = inventory.PAUSED
 EXPUNGED = 'EXPUNGED'
 
 VOLUME_BANDWIDTH = 'volumeTotalBandwidth'
+READ_BANDWIDTH = 'volumeReadBandwidth'
+WRITE_BANDWIDTH = 'volumeWriteBandwidth'
 VOLUME_IOPS = 'volumeTotalIops'
 NETWORK_OUTBOUND_BANDWIDTH = 'networkOutboundBandwidth'
 NETWORK_INBOUND_BANDWIDTH = 'networkInboundBandwidth'

@@ -214,7 +214,6 @@ def lib_install_testagent_to_vr_with_vr_vm(vr_vm):
         vr.machine_id = vr_vm.uuid
         lib_wait_target_up(vr.managementIp, '22', 180)
         test_util.test_logger('Testagent is not running on [VR:] %s with username: %s password: %s. Will install Testagent.\n' % (vr.managementIp, vr.username, vr.password))
-        setup_plan._copy_sshkey_from_node()
         setup_plan.deploy_test_agent(vr)
 
 def lib_install_testagent_to_vr(vm):
@@ -4998,6 +4997,34 @@ def lib_limit_volume_bandwidth(instance_offering_uuid, bandwidth, \
             '%s::%d' % (vm_header.VOLUME_BANDWIDTH, bandwidth),\
             session_uuid)
 
+def lib_limit_read_bandwidth(instance_offering_uuid, bandwidth, \
+        session_uuid = None):
+    return tag_ops.create_system_tag('InstanceOfferingVO', \
+            instance_offering_uuid, \
+            '%s::%d' % (vm_header.READ_BANDWIDTH, bandwidth),\
+            session_uuid)
+
+def lib_limit_write_bandwidth(instance_offering_uuid, bandwidth, \
+        session_uuid = None):
+    return tag_ops.create_system_tag('InstanceOfferingVO', \
+            instance_offering_uuid, \
+            '%s::%d' % (vm_header.WRITE_BANDWIDTH, bandwidth),\
+            session_uuid)
+
+def lib_limit_volume_read_bandwidth(instance_offering_uuid, bandwidth, \
+        session_uuid = None):
+    return tag_ops.create_system_tag('DiskOfferingVO', \
+            instance_offering_uuid, \
+            '%s::%d' % (vm_header.READ_BANDWIDTH, bandwidth),\
+            session_uuid)
+
+def lib_limit_volume_write_bandwidth(instance_offering_uuid, bandwidth, \
+        session_uuid = None):
+    return tag_ops.create_system_tag('DiskOfferingVO', \
+            instance_offering_uuid, \
+            '%s::%d' % (vm_header.WRITE_BANDWIDTH, bandwidth),\
+            session_uuid)
+
 def lib_limit_vm_network_bandwidth(instance_offering_uuid, bandwidth, \
         outbound = True, session_uuid = None):
     if outbound:
@@ -5020,13 +5047,18 @@ def lib_limit_disk_bandwidth(disk_offering_uuid, bandwidth, \
             session_uuid)
 
 def lib_create_disk_offering(diskSize = 1073741824, \
-        name = 'new_disk_offering', volume_bandwidth = None):
+        name = 'new_disk_offering', volume_bandwidth = None,\
+        read_bandwidth=None, write_bandwidth=None):
     new_offering_option = test_util.DiskOfferingOption()
     new_offering_option.set_diskSize(diskSize)
     new_offering_option.set_name(name)
     new_offering = vol_ops.create_volume_offering(new_offering_option)
     if volume_bandwidth:
         lib_limit_disk_bandwidth(new_offering.uuid, volume_bandwidth)
+    if read_bandwidth:
+        lib_limit_volume_read_bandwidth(new_offering.uuid, read_bandwidth)
+    if write_bandwidth:
+        lib_limit_volume_write_bandwidth(new_offering.uuid, write_bandwidth)
     return new_offering
 
 
@@ -5034,7 +5066,7 @@ def lib_create_disk_offering(diskSize = 1073741824, \
 #def lib_create_instance_offering(cpuNum = 1, cpuSpeed = 16, \
 def lib_create_instance_offering(cpuNum = 1, \
         memorySize = 536870912, name = 'new_instance', \
-        volume_iops = None, volume_bandwidth = None, \
+        volume_iops = None, volume_bandwidth = None, read_bandwidth=None, write_bandwidth=None, \
         net_outbound_bandwidth = None, net_inbound_bandwidth = None):
     new_offering_option = test_util.InstanceOfferingOption()
     new_offering_option.set_cpuNum(cpuNum)
@@ -5046,6 +5078,10 @@ def lib_create_instance_offering(cpuNum = 1, \
         lib_limit_volume_total_iops(new_offering.uuid, volume_iops)
     if volume_bandwidth:
         lib_limit_volume_bandwidth(new_offering.uuid, volume_bandwidth)
+    if read_bandwidth:
+        lib_limit_read_bandwidth(new_offering.uuid, read_bandwidth)
+    if write_bandwidth:
+        lib_limit_write_bandwidth(new_offering.uuid, write_bandwidth)
     if net_outbound_bandwidth:
         lib_limit_vm_network_bandwidth(new_offering.uuid, net_outbound_bandwidth, outbound = True)
     if net_inbound_bandwidth:

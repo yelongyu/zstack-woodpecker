@@ -316,11 +316,17 @@ def test_fio_bandwidth(vm_inv, bandwidth, path = '/tmp', raise_exception=True):
     vm_ip = vm_inv.vmNics[0].ip
 
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
-    cmd1 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=write -size=100M -filename=%s/test1.img -name='EBS 1M write' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
-            % (ssh_cmd, path)
-    cmd2 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=write -size=900M -filename=%s/test2.img -name='EBS 1M write' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
-            % (ssh_cmd, path)
 
+    if '/dev/' in path:
+        cmd1 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=read -size=100M -filename=%s -name='EBS 1M read' -iodepth=16 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
+                % (ssh_cmd, path)
+        cmd2 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=read -size=900M -filename=%s -name='EBS 1M read' -iodepth=16 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
+                % (ssh_cmd, path)
+    else:
+        cmd1 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=write -size=100M -filename=%s/test1.img -name='EBS 1M write' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
+                % (ssh_cmd, path)
+        cmd2 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=write -size=900M -filename=%s/test2.img -name='EBS 1M write' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
+                % (ssh_cmd, path)
 
     tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
     logfd = open(tmp_file, 'w', 0)
@@ -596,4 +602,3 @@ def remove_fake_ceph(host):
     rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, "ls /usr/bin/ceph.real")
     if rsp.return_code == 0:
         rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, 'rm -rf /usr/bin/ceph; ln -s /usr/bin/ceph.real /usr/bin/ceph')
-
