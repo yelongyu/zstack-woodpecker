@@ -112,7 +112,7 @@ def get_buildid_by_sce_file(scenarioFile):
             test_util.test_logger("raw name from s_vm is %s" %(raw_name))
             sub_name_lst = raw_name.split('_')
             buildid = sub_name_lst[6]
-            test_util.test_logger("get buildtype is %s" %(buildtype))
+            test_util.test_logger("get buildtype is %s" %(buildid))
 
             return buildid
 
