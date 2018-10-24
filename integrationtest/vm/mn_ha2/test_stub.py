@@ -117,7 +117,7 @@ def get_buildid_by_sce_file(scenarioFile):
             return buildid
 
 
-def get_s_vm_cfg_lst_vip_bind(scenarioConfig, scenarioFile):
+def get_s_vm_cfg_lst_vip_bind(scenarioConfig, scenarioFile, retry_times=1):
     """
     It gets host with vip bound, while returned a s_vm config
     """
@@ -130,13 +130,18 @@ def get_s_vm_cfg_lst_vip_bind(scenarioConfig, scenarioFile):
     for host in mha_s_vm_list:
         host_config = sce_ops.get_scenario_config_vm(host.name_, scenarioConfig)
         cmd = "ip a|grep " + vip
+
         try:
-            if sce_is_sep_pub():
-                vm_list = test_lib.lib_execute_ssh_cmd(host.managementIp_, host_config.imageUsername_, host_config.imagePassword_,cmd)
-            else:
-                vm_list = test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
-            if vm_list:
-                host_list.append(host)
+            for retry_cnt in range(retry_times):
+                if sce_is_sep_pub():
+                    vm_list = test_lib.lib_execute_ssh_cmd(host.managementIp_, host_config.imageUsername_, host_config.imagePassword_,cmd)
+                else:
+                    vm_list = test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
+                if vm_list:
+                    host_list.append(host)
+                    break
+                time.sleep(1)
+
         except Exception, e:
             test_util.test_logger("@@get host exception@@:%s" %(str(e)))
             continue
