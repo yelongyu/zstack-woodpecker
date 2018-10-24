@@ -8,6 +8,7 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
 import zstackwoodpecker.operations.scenario_operations as scen_ops
+import zstackwoodpecker.operations.license_operations as lic_ops
 
 def create_vlan_vm(image_name, l3_name=None, disk_offering_uuids=None):
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
@@ -170,6 +171,18 @@ def update_mn_hostname(vm_ip, tmp_file):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     cmd = '%s "hostnamectl set-hostname zs-test" ' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
+
+def update_console_ip(vm_ip, tmp_file):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd = '%s "zstack-ctl configure consoleProxyOverriddenIp=%s" ' % (ssh_cmd, vm_ip)
+    process_result = execute_shell_in_process(cmd, tmp_file)
+
+def reload_default_license(vm_ip, tmp_file):
+
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd = '''%s 'rm -rf /var/lib/zstack/license/license*' ''' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
+    lic_ops.reload_license()
 
 def update_repo(vm_ip, tmp_file):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
@@ -874,17 +887,17 @@ def create_zone1(vm_ip, tmp_file):
 
     return zone_inv
 
-def create_cluster1(vm_ip, zone_uuid, tmp_file):
+def create_cluster1(vm_ip, cluster_name, zone_uuid, tmp_file):
     cluster_option = test_util.ClusterOption()
-    cluster_option.name = 'Cluster1'
-    cluster_option.description = 'Cluster1'
+    cluster_option.name = cluster_name
+    cluster_option.description = 'Cluster'
     cluster_option.hypervisor_type = 'KVM'
     cluster_option.zone_uuid = zone_uuid
     cluster_inv = scen_ops.create_cluster(vm_ip, cluster_option)
 
     return cluster_inv
 
-def add_kvm_host1(vm_ip, cluster_uuid, tmp_file):
+def add_kvm_host1(vm_ip, host_ip, host_name, cluster_uuid, tmp_file):
     
     vm_username = os.environ['imageUsername']
     vm_password = os.environ['imagePassword']
@@ -893,9 +906,9 @@ def add_kvm_host1(vm_ip, cluster_uuid, tmp_file):
     host_option.clusterUuid = cluster_uuid
     host_option.username = vm_username
     host_option.password = vm_password
-    host_option.managementIp = vm_ip
+    host_option.managementIp = host_ip
     host_option.sshPort = '22'
-    host_option.name = 'HOST1'
+    host_option.name = host_name
     host_inv = scen_ops.add_kvm_host(vm_ip, host_option)
 
     return host_inv
