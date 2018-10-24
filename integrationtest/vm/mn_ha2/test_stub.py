@@ -91,10 +91,10 @@ def get_buildtype_by_sce_file(scenarioFile):
         scenario_file = xmlobject.loads(xmlstr)
         for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
             raw_name = s_vm.name_
-            test_util.test_logger("raw name from s_vm is %s", raw_name)
+            test_util.test_logger("raw name from s_vm is %s" %(raw_name))
             sub_name_lst = raw_name.split('_')
             buildtype = sub_name_lst[2] + '_' + sub_name_lst[3]
-            test_util.test_logger("get buildtype is %s", buildtype)
+            test_util.test_logger("get buildtype is %s" %(buildtype))
 
             return buildtype
 
@@ -109,10 +109,10 @@ def get_buildid_by_sce_file(scenarioFile):
         scenario_file = xmlobject.loads(xmlstr)
         for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
             raw_name = s_vm.name_
-            test_util.test_logger("raw name from s_vm is %s", raw_name)
+            test_util.test_logger("raw name from s_vm is %s" %(raw_name))
             sub_name_lst = raw_name.split('_')
             buildid = sub_name_lst[6]
-            test_util.test_logger("get buildtype is %s", buildtype)
+            test_util.test_logger("get buildtype is %s" %(buildtype))
 
             return buildid
 
