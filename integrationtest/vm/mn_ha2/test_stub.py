@@ -622,7 +622,7 @@ def ensure_vr_is_running_connected(l3_uuid):
         test_util.test_fail("current vr type not support in ensure_vr_is_connected.")
 
     cond = res_ops.gen_query_conditions('uuid', '=', vr_list[0].uuid)
-    for i in range(300):
+    for i in range(600):
         time.sleep(1)
         vr1 = res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0]
         if vr1.state == "Running" and vr1.status == "Connected":
