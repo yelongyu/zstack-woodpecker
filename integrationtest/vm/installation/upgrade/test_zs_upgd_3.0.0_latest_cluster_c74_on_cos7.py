@@ -66,12 +66,10 @@ def test():
     test_stub.start_mn(vm_ip, tmp_file)
     test_stub.check_installation(vm_ip, tmp_file)
 
-    test_util.test_logger('Load and Check Prepaid license with 20 day and 10 CPUs')
-    file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '20', 'Prepaid','10', '')
-    test_stub.load_license(file_path)
+    #test_util.test_logger('Load and Check Prepaid license with 20 day and 10 CPUs')
+    #file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '20', 'Prepaid','10', '')
+    #test_stub.load_license(file_path)
 
-    vm_ip = '172.20.195.221'
-    vm2_ip = '172.20.197.253'
     test_util.test_logger('reload default license community')
     test_stub.reload_default_license(vm_ip, tmp_file)
 
