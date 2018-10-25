@@ -318,9 +318,9 @@ def test_fio_bandwidth(vm_inv, bandwidth, path = '/tmp', raise_exception=True):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
 
     if '/dev/' in path:
-        cmd1 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=read -size=100M -filename=%s -name='EBS 1M read' -iodepth=16 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
+        cmd1 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=read -size=100M -filename=%s -name='EBS 1M read' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
                 % (ssh_cmd, path)
-        cmd2 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=read -size=900M -filename=%s -name='EBS 1M read' -iodepth=16 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
+        cmd2 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=read -size=900M -filename=%s -name='EBS 1M read' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
                 % (ssh_cmd, path)
     else:
         cmd1 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=write -size=100M -filename=%s/test1.img -name='EBS 1M write' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
