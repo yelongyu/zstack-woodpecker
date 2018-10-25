@@ -26,12 +26,19 @@ def test():
     global volume_offering_uuid,new_offering_uuid
     test_util.test_dsc('Test VM data volume bandwidth QoS by 20MB')
 
+    # Only imagestore supports full clone
     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)
     for i in bs:
         if i.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
             break
     else:
         test_util.test_skip('Skip test on non-imagestore')
+
+    # SharedBlock and AliyunNAS not support full clone
+    ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+    for i in ps:
+        if i.type in ['SharedBlock', 'AliyunNAS']:
+            test_util.test_skip('Skip test on SharedBlock and AliyunNAS PS')
 
     #unit is KB
     write_bandwidth = 10*1024*1024
