@@ -43,16 +43,18 @@ def test():
     volume = test_stub.create_volume(volume_creation_option)
     test_obj_dict.add_volume(volume)
     vm_inv = vm.get_vm()
-    test_lib.lib_mkfs_for_volume(volume.get_volume().uuid, vm_inv)
-    mount_point = '/tmp/zstack/test'
-    test_stub.attach_mount_volume(volume, vm, mount_point)
+#     test_lib.lib_mkfs_for_volume(volume.get_volume().uuid, vm_inv)
+#     mount_point = '/tmp/zstack/test'
+#     test_stub.attach_mount_volume(volume, vm, mount_point)
 
     test_stub.make_ssh_no_password(vm_inv)
     test_stub.install_fio(vm_inv)
-    test_stub.test_fio_bandwidth(vm_inv, write_bandwidth, mount_point)
+
     if vm_ops.get_vm_disk_qos(test_lib.lib_get_root_volume(vm_inv).uuid).volumeBandwidthRead != -1 and \
     vm_ops.get_vm_disk_qos(test_lib.lib_get_root_volume(vm_inv).uuid).volumeBandwidthWrite != write_bandwidth:
         test_util.test_fail('Retrieved disk qos not match')
+    test_stub.test_fio_bandwidth(vm_inv, write_bandwidth)
+
     if test_stub.test_fio_bandwidth(vm_inv, write_bandwidth/2, '/dev/vda', raise_exception=False):
         test_util.test_fail('disk write read is not expected to have limit as only write qos was set')
     vm_ops.delete_instance_offering(new_offering_uuid)

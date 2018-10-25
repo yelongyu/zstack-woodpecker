@@ -354,7 +354,10 @@ def test_fio_bandwidth(vm_inv, bandwidth, path = '/tmp', raise_exception=True):
             results = line.split()
             for result in results:
                 if 'bw=' in result:
-                    bw = int(float(result[3:].split('KB')[0]))
+                    if 'MB' in result:
+                        bw = int(float(result[3:].split('MB')[0])) * 1024
+                    else:
+                        bw = int(float(result[3:].split('KB')[0]))
 
     #cleanup_log()
     if bw == 0:

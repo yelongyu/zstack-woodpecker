@@ -45,9 +45,9 @@ def test():
     volume = test_stub.create_volume(volume_creation_option)
     test_obj_dict.add_volume(volume)
     vm_inv = vm.get_vm()
-    test_lib.lib_mkfs_for_volume(volume.get_volume().uuid, vm_inv)
-    mount_point = '/tmp/zstack/test'
-    test_stub.attach_mount_volume(volume, vm, mount_point)
+#     test_lib.lib_mkfs_for_volume(volume.get_volume().uuid, vm_inv)
+#     mount_point = '/tmp/zstack/test'
+#     test_stub.attach_mount_volume(volume, vm, mount_point)
 
     test_stub.make_ssh_no_password(vm_inv)
     test_stub.install_fio(vm_inv)
@@ -56,7 +56,7 @@ def test():
         test_util.test_fail('Retrieved disk qos not match')
     test_stub.test_fio_bandwidth(vm_inv, read_bandwidth, '/dev/vda')
     time.sleep(10)
-    test_stub.test_fio_bandwidth(vm_inv, write_bandwidth, mount_point)
+    test_stub.test_fio_bandwidth(vm_inv, write_bandwidth)
     vm_ops.delete_instance_offering(new_offering_uuid)
     test_lib.lib_robot_cleanup(test_obj_dict)
 
