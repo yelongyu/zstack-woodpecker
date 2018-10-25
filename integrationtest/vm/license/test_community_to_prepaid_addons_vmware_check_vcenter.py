@@ -43,6 +43,7 @@ def test():
     vcenterdomain = "172.20.0.50"
     try:
         vct_ops.add_vcenter("vcenter_test", vcenterdomain, username, password, https, zone_uuid)
+        test_util.test_fail('vCenter can not add success')
     except Exception:
 	pass
 
