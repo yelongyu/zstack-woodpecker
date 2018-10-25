@@ -214,6 +214,7 @@ def lib_install_testagent_to_vr_with_vr_vm(vr_vm):
         vr.machine_id = vr_vm.uuid
         lib_wait_target_up(vr.managementIp, '22', 180)
         test_util.test_logger('Testagent is not running on [VR:] %s with username: %s password: %s. Will install Testagent.\n' % (vr.managementIp, vr.username, vr.password))
+        setup_plan._copy_sshkey_from_node()
         setup_plan.deploy_test_agent(vr)
 
 def lib_install_testagent_to_vr(vm):
