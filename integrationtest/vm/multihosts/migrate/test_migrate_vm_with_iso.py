@@ -22,6 +22,9 @@ def test():
     global vm
     vm = test_stub.create_vr_vm('migrate_vm', 'imageName_s', 'l3VlanNetwork2')
     vm.check()
+    ps = test_lib.lib_get_primary_storage_by_uuid(vm.get_vm().allVolumes[0].primaryStorageUuid)
+    if ps.type == inventory.LOCAL_STORAGE_TYPE:
+        test_util.test_skip('Skip test on localstorage PS')
 
     vm_inv = vm.get_vm()
     vm_uuid = vm_inv.uuid

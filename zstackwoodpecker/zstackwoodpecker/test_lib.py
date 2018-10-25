@@ -3672,7 +3672,19 @@ def lib_check_ports_in_a_command(src_vm, src_ip, target_ip, allowed_ports, \
             % (target_ip, target_ports, target_ports)
 
     test_util.test_logger("Doing port checking, might need 1 min or longer.")
-    test_result = lib_execute_command_in_vm(src_vm, port_checking_cmd, l3_uuid)
+#    test_result = lib_execute_command_in_vm(src_vm, port_checking_cmd, l3_uuid)
+    username = lib_get_vm_username(src_vm)
+    password = lib_get_vm_password(src_vm)
+    if lib_is_vm_vr(src_vm):
+        src_vm_ip = lib_find_vr_mgmt_ip(src_vm)
+    else:
+        if not l3_uuid:
+            src_vm_ip = src_vm.vmNics[0].ip
+        else:
+            src_vm_ip = lib_get_vm_nic_by_l3(src_vm, l3_uuid).ip
+    test_util.test_logger("Do testing to ssh vm: %s, ip: %s, execute cmd: %s" % (src_vm.uuid, src_vm_ip, port_checking_cmd))
+    test_result = lib_execute_ssh_cmd(src_vm_ip, username, password, port_checking_cmd, 240)
+
     if not test_result:
         test_util.test_fail("check [ip:] %s ports failure. Please check the failure information. " % target_ip)
     test_result = test_result.strip()
