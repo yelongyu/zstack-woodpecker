@@ -351,8 +351,18 @@ class HybridObject(object):
                     disk_attr_eq = "self.disk.%s == '%s'" % (k, disk_attr[k])
                     assert eval(disk_attr_eq)
 
-    def create_aliyun_snapshot(self, disk_type='data'):
-        snapshot_name = 'zstack-test-aliyun-snapshot-%s' % _postfix
+    def create_aliyun_snapshot(self, disk_type='data', gc=False):
+        sp_name_prefix = 'zstack-test-aliyun-snapshot-'
+        snapshot_name = sp_name_prefix + _postfix
+        if gc:
+            last_sps = hyb_ops.sync_aliyun_snapshot_from_remote(self.datacenter.uuid)
+            if last_sps:
+                for sp in last_sps:
+                    if sp_name_prefix in sp.name:
+                        try:
+                            hyb_ops.del_aliyun_snapshot_remote(sp.uuid)
+                        except:
+                            pass
         if disk_type == 'system':
             condition = res_ops.gen_query_conditions('ecsInstanceUuid', '=', self.ecs_instance.uuid)
             self.system_disk = hyb_ops.query_aliyun_disk_local(condition)[0]

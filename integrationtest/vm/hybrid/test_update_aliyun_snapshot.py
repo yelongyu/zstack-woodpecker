@@ -19,7 +19,7 @@ def test():
     test_obj_dict.add_hybrid_obj(hybrid)
     hybrid.create_aliyun_disk()
     hybrid.attach_aliyun_disk()
-    hybrid.create_aliyun_snapshot()
+    hybrid.create_aliyun_snapshot(gc=True)
 
     hybrid.update_aliyun_snapshot(name='Aliyun-Snapshot')
     hybrid.update_aliyun_snapshot(description='test-Aliyun-Snapshot')
