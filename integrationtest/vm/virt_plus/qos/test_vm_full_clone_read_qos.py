@@ -60,7 +60,7 @@ def test():
     os.system("sshpass -p '%s' ssh %s@%s 'mount /dev/vdb1 %s'"%(user_password, user_name, vm_inv.vmNics[0].ip, path))
     vm.check()
     test_stub.make_ssh_no_password(vm_inv)
-    test_stub.install_fio(vm_inv)
+#     test_stub.install_fio(vm_inv)
 
     vm_ops.set_vm_disk_qos(test_lib.lib_get_data_volumes(vm_inv)[0].uuid, read_bandwidth*2, 'read')
     vm_ops.set_vm_disk_qos(test_lib.lib_get_root_volume(vm_inv).uuid, read_bandwidth*2, 'read')
@@ -76,6 +76,7 @@ def test():
         test_util.test_logger('Find 2 volumes for [vm:] %s.' % new_vm.vm.uuid)
 
     new_vm_inv = new_vm.get_vm()
+    test_stub.install_fio(new_vm_inv)
 
     if vm_ops.get_vm_disk_qos(test_lib.lib_get_data_volumes(new_vm_inv)[0].uuid).volumeBandwidthRead != read_bandwidth*2:
         test_util.test_fail('Retrieved disk qos not match')
