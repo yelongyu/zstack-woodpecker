@@ -67,7 +67,7 @@ def test():
 
 #Will be called what ever test result is
 def env_recover():
-    pass
+    test_stub.exec_zsha2_version(vip_s_vm_cfg_lst[0].ip_, "root", "password")
     #test_util.test_logger("recover host: %s" % (vip_s_vm_cfg_lst[0].ip_))
     #test_stub.up_host_network(vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config)  
     #test_stub.recover_host(vip_s_vm_cfg_lst[0], test_lib.all_scenario_config, test_lib.deploy_config)

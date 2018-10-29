@@ -66,6 +66,7 @@ def env_recover():
     test_stub.up_host_network(s_vm0.ip_, test_lib.all_scenario_config)  
     test_stub.up_host_network(s_vm1.ip_, test_lib.all_scenario_config)  
     test_stub.wait_for_mn_ha_ready(test_lib.all_scenario_config, test_lib.scenario_file)
+    test_stub.exec_zsha2_version(vip_s_vm_cfg_lst[0].ip_, "root", "password")
 
 #Will be called only if exception happens in test().
 def error_cleanup():

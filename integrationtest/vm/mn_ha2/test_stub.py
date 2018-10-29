@@ -59,6 +59,12 @@ def check_if_vip_is_on_host(scenarioConfig, scenarioFile, host_ip, retry_times=1
     return False
 
 
+def exec_zsha2_version(host_ip, username, password):
+    cmd = "zsha2 version"
+    version_info = test_lib.lib_execute_ssh_cmd(host_ip, username, password, cmd)
+    test_util.test_logger("current zsha2 version is %s" %(version_info))
+
+
 def exec_zsha2_demote(host_ip, username, password):
     cmd = "zsha2 demote"
     test_lib.lib_execute_ssh_cmd(host_ip, username, password, cmd)
