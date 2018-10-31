@@ -2283,6 +2283,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 iscsi_cluster_uuid = os.environ.get('iscsiClusterUuid')
                 if iscsi_cluster_uuid:
                     vm_creation_option.set_cluster_uuid(iscsi_cluster_uuid)
+                vm_create_option.set_ps_uuid('bc97708bd0dd4a40b8a5c2da6b845b14')
 
                 vm_inv = create_vm(zstack_management_ip, vm_creation_option)
                 vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, default_l3_uuid).ip
