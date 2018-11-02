@@ -90,6 +90,9 @@ def test():
     except Exception as e:
         test_util.test_logger(e)
 
+    cond = res_ops.gen_query_conditions('name', '=', hosts[3].managementIp)
+    host_uuid = res_ops.query_resource(res_ops.HOST, cond)[0].uuid
+    host_ops.delete_host(host_uuid)
     host_option.set_cluster_uuid(clusters[2].uuid)
     try:
         _hosts.append(host_ops.add_kvm_host(host_option))

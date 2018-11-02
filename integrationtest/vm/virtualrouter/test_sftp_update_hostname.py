@@ -53,7 +53,7 @@ def test():
     test_lib.lib_execute_command_in_vm(vm.get_vm(), 'mkdir /home/sftpBackupStorage')
 
     bs_ops.update_sftp_backup_storage_info(sftp_backup_storage_uuid, 'hostname', vm_ip)
-    host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid, timeout=600000)
+    host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid)
 
     test_util.test_dsc('Recover Sftp Hostname')
     bs_ops.update_sftp_backup_storage_info(sftp_backup_storage_uuid, 'hostname', sftp_backup_storage_hostname)
