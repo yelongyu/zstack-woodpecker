@@ -10,6 +10,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.account_operations as acc_ops
 import poplib
 from email.parser import Parser
+import base64
 
 from email import encoders
 from email.header import Header
@@ -526,8 +527,20 @@ def check_keywords_in_email(pop_server, username, password, first_keyword, secon
     test_util.action_logger('Check Keywords In Email:[keyword]:%s [keyword]:%s'% (first_keyword,second_keyword))
     for mail in mail_list:
         #msg_content = b'\r\n'.join(mail).decode('utf-8') #python3.x
-        msg_content = '\r\n'.join(mail)  #python2.x
-        msg = Parser().parsestr(msg_content)
+        #msg_content1 = '\r\n'.join(mail[-6:])  #python2.x
+	line1 = mail[-6:]
+	line2 = mail[:-7]
+	for i in range(0, 6):
+	    if (len(line1[i]) % 3 == 1):
+		line1[i] += "=="
+	    elif(len(line1[i]) % 3 == 2):
+		line1[i] += "="
+        msg_content1 = '\r\n'.join(line1)  #python2.x
+        msg1 = base64.b64decode(msg_content1)
+        msg_content2 = '\r\n'.join(line2)  #python2.x
+        msg2 = Parser().parsestr(msg_content2)
+        msg = str(msg2) + msg1
+        test_util.test_logger('find boundary_words,Search words is terminated .')
         content=str(msg)
         #test_util.test_logger(msg)
         if boundary_words:
