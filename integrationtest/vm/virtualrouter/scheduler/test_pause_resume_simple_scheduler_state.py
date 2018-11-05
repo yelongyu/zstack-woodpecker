@@ -68,7 +68,7 @@ def test():
     schd_ops.change_scheduler_state(schd_job2.uuid, 'disable')
    
     current_time = int(time.time())
-    except_start_time =  start_date + 20 * (((current_time - start_date) % 20) + 1) 
+    except_start_time =  start_date + 20 * (((current_time - start_date) // 20) + 1) 
     test_stub.sleep_util(except_start_time+45)
  
     test_util.test_dsc('check scheduler state after pause scheduler')
@@ -83,7 +83,7 @@ def test():
     schd_ops.change_scheduler_state(schd_job2.uuid, 'enable')
 
     current_time = int(time.time())
-    except_start_time =  start_date + 20 * (((current_time - start_date) % 20) + 1)
+    except_start_time =  start_date + 20 * (((current_time - start_date) // 20) + 1)
     test_stub.sleep_util(except_start_time+45)
 
     test_util.test_dsc('check scheduler state after resume scheduler')
