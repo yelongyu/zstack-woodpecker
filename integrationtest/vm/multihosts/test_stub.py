@@ -22,6 +22,8 @@ import apibinding.inventory as inventory
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.ha_operations as ha_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
+import zstackwoodpecker.operations.vpc_operations as vpc_ops
+import zstackwoodpecker.header.vm as vm_header
 import zstacklib.utils.xmlobject as xmlobject
 import threading
 import time
@@ -103,6 +105,90 @@ def create_vm_with_instance_offering(vm_name, image_name, l3_name, instance_offe
     vm.set_creation_option(vm_creation_option)
     vm.create()
     return vm
+
+def create_vpc_vrouter(vr_name='test_vpc'):
+    conf = res_ops.gen_query_conditions('name', '=', 'test_vpc')
+    vr_list = res_ops.query_resource(res_ops.APPLIANCE_VM, conf)
+    if vr_list:
+        return ZstackTestVR(vr_list[0])
+    vr_offering = res_ops.get_resource(res_ops.VR_OFFERING)[0]
+    vr_inv =  vpc_ops.create_vpc_vrouter(name=vr_name, virtualrouter_offering_uuid=vr_offering.uuid)
+    return ZstackTestVR(vr_inv)
+
+def query_vpc_vrouter(vr_name):
+    conf = res_ops.gen_query_conditions('name', '=', vr_name)
+    vr_list = res_ops.query_resource(res_ops.APPLIANCE_VM, conf)
+    if vr_list:
+        return ZstackTestVR(vr_list[0])
+
+def attach_l3_to_vpc_vr(vpc_vr, l3_list):
+    for l3 in l3_list:
+        vpc_vr.add_nic(l3.uuid)
+
+def attach_l3_to_vpc_vr_by_uuid(vpc_vr, l3_uuid):
+    vpc_vr.add_nic(l3_uuid)
+
+class ZstackTestVR(vm_header.TestVm):
+    def __init__(self, vr_inv):
+        super(ZstackTestVR, self).__init__()
+        self._inv = vr_inv
+
+    def __hash__(self):
+        return hash(self.inv.uuid)
+
+    def __eq__(self, other):
+        return self.inv.uuid == other.inv.uuid
+
+    @property
+    def inv(self):
+        return self._inv
+
+    @inv.setter
+    def inv(self, value):
+        self._inv = value
+
+    def destroy(self, session_uuid = None):
+        vm_ops.destroy_vm(self.inv.uuid, session_uuid)
+        super(ZstackTestVR, self).destroy()
+
+    def reboot(self, session_uuid = None):
+        self.inv = vm_ops.reboot_vm(self.inv.uuid, session_uuid)
+        super(ZstackTestVR, self).reboot()
+
+    def reconnect(self, session_uuid = None):
+        self.inv = vm_ops.reconnect_vr(self.inv.uuid, session_uuid)
+
+    def migrate(self, host_uuid, timeout = None, session_uuid = None):
+        self.inv = vm_ops.migrate_vm(self.inv.uuid, host_uuid, timeout, session_uuid)
+        super(ZstackTestVR, self).migrate(host_uuid)
+
+    def migrate_to_random_host(self, timeout = None, session_uuid = None):
+        host_uuid = random.choice([host.uuid for host in res_ops.get_resource(res_ops.HOST)
+                                                      if host.uuid != test_lib.lib_find_host_by_vm(self.inv).uuid])
+        self.inv = vm_ops.migrate_vm(self.inv.uuid, host_uuid, timeout, session_uuid)
+        super(ZstackTestVR, self).migrate(host_uuid)
+
+    def update(self):
+        '''
+        If vm's status was changed by none vm operations, it needs to call
+        vm.update() to update vm's infromation.
+
+        The none vm operations: host.maintain() host.delete(), zone.delete()
+        cluster.delete()
+        '''
+        super(ZstackTestVR, self).update()
+        if self.get_state != vm_header.EXPUNGED:
+            update_inv = test_lib.lib_get_vm_by_uuid(self.inv.uuid)
+            if update_inv:
+                self.inv = update_inv
+                #vm state need to chenage to stopped, if host is deleted
+                host = test_lib.lib_find_host_by_vm(update_inv)
+                if not host and self.inv.state != vm_header.STOPPED:
+                    self.set_state(vm_header.STOPPED)
+            else:
+                self.set_state(vm_header.EXPUNGED)
+            return self.inv
+
 
 def add_test_minimal_iso(iso_name):
     import zstackwoodpecker.zstack_test.zstack_test_image as test_image
