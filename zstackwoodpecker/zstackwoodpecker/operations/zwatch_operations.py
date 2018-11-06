@@ -524,6 +524,12 @@ def check_keywords_in_email(pop_server, username, password, first_keyword, secon
     :return: 1 for found or 0 for not found
     '''
     mail_list = get_mail_list(pop_server, username, password)
+    if boundary_words:
+        for m in mail_list:
+            for i in m:
+                if boundary_words in i:
+                    index_id = mail_list.index(m)
+                    mail_list = mail_list[:index_id]
     test_util.action_logger('Check Keywords In Email:[keyword]:%s [keyword]:%s'% (first_keyword,second_keyword))
     for mail in mail_list:
         #msg_content = b'\r\n'.join(mail).decode('utf-8') #python3.x
