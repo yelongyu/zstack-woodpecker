@@ -92,6 +92,9 @@ def test():
     #        cmd = "echo 'export LANG=\"zh_CN.GB18030\"' >> /etc/profile && sudo ls /root && source /etc/profile"
     #        os.system('sshpass -p password ssh root@%s "%s"' %(host.managementIp_,cmd))
 
+    for host in testHosts:
+        cmd = 'rpm -qa > rpm_list.txt;pip list > pip_list.txt'
+        test_lib.lib_execute_ssh_cmd(host.managementIp_, 'root', 'password', cmd, 180)
     deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
     for host in testHosts:
         os.system("bash %s %s" % (EXTRA_HOST_SETUP_SCRIPT, host.managementIp_))

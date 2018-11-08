@@ -38,7 +38,7 @@ def check_host_prometheus_conf():
         host_ip = host.managementIp_
         host_hostname = host_ip.replace('.', '-')
         host_uuid = test_lib.lib_get_host_by_ip(host_ip).uuid
-        if host.ip_ == mn_ip:
+        if host_ip == mn_ip:
             cmd = "jq -r '.[].targets[]' /usr/local/zstacktest/prometheus/discovery/management-node/management-server-exporter.json"
             cmd_out = test_lib.lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd, 180)
             expect_result = mn_ip + ':' + str(8081)
