@@ -107,5 +107,6 @@
         <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_vr.py::kill_vrouter_agent</case>
         <case timeout='600' repeat='1'>test_instance_offering_soft_hard.py</case>
         <case timeout='600' repeat='1'>test_prometheus.py</case>
+        <case timeout='600' repeat='1'>test_pkg_list.py</case>
     </suite>
 </integrationTest>

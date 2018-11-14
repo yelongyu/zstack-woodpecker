@@ -45,5 +45,6 @@
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_2_pub_nic_vrouter_route.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_sg_ingress.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_6vm_connection.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_prometheus.py</case>
     </suite>
 </integrationTest>

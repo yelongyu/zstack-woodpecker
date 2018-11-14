@@ -61,6 +61,31 @@ rule5_ports = Port.get_ports(Port.rule5_ports)
 denied_ports = Port.get_denied_ports()
 target_ports = rule1_ports + rule2_ports + rule3_ports + rule4_ports + rule5_ports + denied_ports
 
+def create_vr_vm(vm_name, image_name, l3_name):
+    imagename = os.environ.get(image_name)
+    l3name = os.environ.get(l3_name)
+    vm = create_vm(vm_name, imagename, l3name)
+    return vm
+
+def create_vm(vm_name, image_name, l3_name, host_uuid = None, disk_offering_uuids=None):
+    vm_creation_option = test_util.VmOption()
+    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+    instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+    vm_creation_option.set_l3_uuids([l3_net_uuid])
+    vm_creation_option.set_image_uuid(image_uuid)
+    vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+    vm_creation_option.set_name(vm_name)
+    vm_creation_option.set_timeout(600000)
+    if host_uuid:
+        vm_creation_option.set_host_uuid(host_uuid)
+    if disk_offering_uuids:
+        vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
+    vm = test_vm_header.ZstackTestVm()
+    vm.set_creation_option(vm_creation_option)
+    vm.create()
+    return vm
 
 def create_vpc_vrouter(vr_name='test_vpc'):
     conf = res_ops.gen_query_conditions('name', '=', 'test_vpc')
