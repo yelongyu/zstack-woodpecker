@@ -44,6 +44,7 @@
         <case timeout='800' repeat='1'>vlan/test_attach_nic.py</case>
         <case timeout='800' repeat='1'>vlan/test_attach_nic_stopped_vm.py</case>
         <case timeout='800' repeat='1'>vlan/test_attach_nic_reboot_vm.py</case>
+        <case timeout='800' repeat='1'>vlan/test_windows_detach_nic_stop_run_vm.py</case>
         <case timeout='800' repeat='1'>vlan/test_chg_static_ip_vm.py</case>
         <case timeout='800' repeat='1'>vlan/test_attach_nic_with_static_ip.py</case>
         <case timeout='900' repeat='1'>volume/test_add_volume.py</case>
