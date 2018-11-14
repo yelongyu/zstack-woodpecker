@@ -399,14 +399,7 @@ def test():
     dvol.set_target_vm(vm)
     test_obj_dict.add_volume(dvol)
 
-    i = 0
-    while True:
-        if i == 10:
-            vm_op_test(vm, "VM_TEST_STOP")
-            vm_op_test(vm, "VM_TEST_RESET")
-            vm.start()
-            vm.check()
-            i = 0
+    for i in range(1,20):
         vm_op_test(vm, random.choice(VM_STATE_OPS))
         if vm.state == "Running":
             VM_OPS = VM_RUNNING_OPS
