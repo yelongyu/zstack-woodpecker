@@ -2434,8 +2434,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
         setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst)
         setup_fusionstor_storages(scenario_config, scenario_file, deploy_config)
         if vm_ip_to_post and mn_ip_to_post:
+            ak_id = (mn_ip_to_post + str(time.time())).replace('.', '')
+            os.environ['NASAKID'] = ak_id
             uri = 'http://' + os.getenv('apiEndPoint').split('::')[-1] + '/mntarget'
-            http.json_dump_post(uri, {"mn_ip": mn_ip_to_post, "nfs_ip": vm_ip_to_post})
+            http.json_dump_post(uri, {"ak_id": ak_id, "mn_ip": mn_ip_to_post, "nfs_ip": vm_ip_to_post})
     else:
         setup_xsky_storages(scenario_config, scenario_file, deploy_config)
     #setup_zbs_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst)
