@@ -773,6 +773,7 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
             zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
 
             for pr in xmlobject.safe_list(zone.primaryStorages.aliyunNASPrimaryStorage):
+                ak_id = None
                 if ps_name and ps_name != pr.name_:
                     continue
                 hostname_list = get_primary_storage_from_scenario_file(pr.name_, scenarioConfig, scenarioFile, deployConfig)
@@ -785,7 +786,9 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                     mn_ip = res_ops.get_resource(res_ops.MANAGEMENT_NODE, session_uuid=session_uuid)[0].hostName
                     if mn_ip:
                         uri = 'http://' + os.getenv('apiEndPoint').split('::')[-1] + '/mntarget'
-                        http.json_dump_post(uri, {"mn_ip": mn_ip, "nfs_ip": mn_ip})
+                        ak_id = (mn_ip + str(time.time())).replace('.', '')
+                        http.json_dump_post(uri, {"ak_id": ak_id, "mn_ip": mn_ip, "nfs_ip": mn_ip})
+#                         http.json_dump_post(uri, {"mn_ip": mn_ip, "nfs_ip": mn_ip})
                 # Update Global Config: user.define.api.endpoint
                 cfg_ops.change_global_config(category='aliyun',
                                              name='user.define.api.endpoint',
@@ -794,7 +797,7 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 # Add KS
                 hyb_ops.add_hybrid_key_secret(name='ks_for_nas_test',
                                               description='ks_for_nas_test',
-                                              key=os.getenv('aliyunKey'),
+                                              key= ak_id if ak_id else os.getenv('aliyunKey'),
                                               secret=os.getenv('aliyunSecret'),
                                               sync='false',
                                               session_uuid=session_uuid)
