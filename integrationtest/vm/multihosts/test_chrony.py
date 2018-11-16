@@ -55,7 +55,7 @@ def test():
     host_ops.change_host_state(host_uuid_list[0], "enable")
 
     test_lib.lib_error_cleanup(test_obj_dict)
-    test_util.test_pass('Test prometheus Success')
+    test_util.test_pass('Test chrony Success')
 
 def env_recover():
     test_lib.lib_error_cleanup(test_obj_dict)
