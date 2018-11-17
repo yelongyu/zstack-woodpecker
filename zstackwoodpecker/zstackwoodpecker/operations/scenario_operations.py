@@ -718,6 +718,9 @@ def get_primary_storage_type(deploy_config, ps_name):
         for primaryStorage in zone.primaryStorages.get_child_node_as_list('aliyunNASPrimaryStorage'):
             if primaryStorage.name_ == ps_name:
                 return 'nas'
+        for primaryStorage in zone.primaryStorages.get_child_node_as_list('aliyunEBSPrimaryStorage'):
+            if primaryStorage.name_ == ps_name:
+                return 'ebs'
 
     return None
 
@@ -2123,6 +2126,15 @@ def map_ip_gateway(ip_addr):
     net_addr[-1] = '1'
     return ('.').join(net_addr)
 
+def install_ebs_pkg_in_host(hostname, username, password):
+    vrbd_pkg = os.getenv('ebsVrbd')
+    tdc_pkg = os.getenv('ebdTdc')
+    scp_vrbd = 'sshpass -p password scp -o StrictHostKeyChecking=no -o LogLevel=quiet -o UserKnownHostsFile=/dev/null %s .' % (vrbd_pkg)
+    scp_tdc = 'sshpass -p password scp -o StrictHostKeyChecking=no -o LogLevel=quiet -o UserKnownHostsFile=/dev/null %s .' % (tdc_pkg)
+    for cmd in [scp_vrbd, scp_tdc, 'rpm -ivh *.rpm', 'service tdc start']:
+        ssh.execute(cmd, hostname, username, password, True, 22)
+        time.sleep(1)
+
 def deploy_scenario(scenario_config, scenario_file, deploy_config):
     vm_inv_lst = []
     vm_cfg_lst = []
@@ -2426,6 +2438,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                 share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
                                 zbs_virtio_scsi_volume_is_created = True
                                 attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
+                        elif ps_ref.type_ == 'ebs':
+                            install_ebs_pkg_in_host(vm_ip, vm.imageUsername_, vm.imagePassword_)
 
         xml_string = etree.tostring(root_xml, 'utf-8')
         xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")

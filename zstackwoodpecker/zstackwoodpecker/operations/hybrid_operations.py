@@ -70,10 +70,13 @@ def get_oss_bucket_name_from_remote(data_center_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt.inventories
 
-def add_oss_bucket_from_remote(data_center_uuid, oss_bucket_name, session_uuid=None):
+def add_oss_bucket_from_remote(data_center_uuid, oss_bucket_name, oss_domain=None, oss_key=None, oss_secret=None, session_uuid=None):
     action = api_actions.AddOssBucketFromRemoteAction()
     action.dataCenterUuid = data_center_uuid
     action.bucketName = oss_bucket_name
+    action.ossDomain = oss_domain
+    action.ossKey = oss_key
+    action.ossSecret = oss_secret
     test_util.action_logger('Add [Oss Bucket From Remote:] %s %s' % (data_center_uuid, oss_bucket_name))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Oss Bucket:] %s %s is added.' % (data_center_uuid, oss_bucket_name))
@@ -171,10 +174,11 @@ def detach_oss_bucket_from_ecs_datacenter(oss_bucket_uuid, session_uuid=None):
     test_util.test_logger('[Oss bucket:] %s is detached from Datacenter.' % oss_bucket_uuid)
     return evt
 
-def get_identity_zone_from_remote(datacenter_type, region_id, session_uuid=None):
+def get_identity_zone_from_remote(datacenter_type, region_id=None, dc_uuid=None, session_uuid=None):
     action = api_actions.GetIdentityZoneFromRemoteAction()
     action.type = datacenter_type
     action.regionId = region_id
+    action.dataCenterUuid = dc_uuid
     test_util.action_logger('Get [Identity zone From Remote:] %s %s' % (datacenter_type, region_id))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt.inventories

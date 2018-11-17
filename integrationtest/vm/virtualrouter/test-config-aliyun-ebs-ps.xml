@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-aliyun-ebs-ps.xml</deployConfig>
+    <deployConfigTemplate>deploy-aliyun-ebs-ps.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.yyk.net</pingTestTarget>
+</testConfig>

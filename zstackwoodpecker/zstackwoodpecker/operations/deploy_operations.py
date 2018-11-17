@@ -215,6 +215,44 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
             wait_for_thread_queue()
             thread.start()
 
+    if xmlobject.has_element(deployConfig, 'backupStorages.aliyunEbsBackupStorage'):
+        # Add KS
+        hyb_ops.add_hybrid_key_secret(name='ks_for_ebs_test',
+                                        description='ks_for_ebs_test',
+                                        key= 'zstack',
+                                        secret='C8yz6qLPus7VuwLtGYdxUkMg',
+                                        sync='false',
+                                        session_uuid=session_uuid)
+
+        # Add DataCenter
+        dc_inv = hyb_ops.add_datacenter_from_remote(datacenter_type=os.getenv('datacenterType'),
+                                            description='dc_for_ebs_test',
+                                            region_id=os.getenv('regionId'),
+                                            session_uuid=session_uuid)
+
+        # Add Identity Zone
+        iz_inv = hyb_ops.get_identity_zone_from_remote(datacenter_type=os.getenv('datacenterType'), dc_uuid=dc_inv.uuid)
+        hyb_ops.add_identity_zone_from_remote(iz_type=os.getenv('datacenterType'), datacenter_uuid=dc_inv.uuid, zone_id=iz_inv.zoneId)
+
+        # Add OSS bucket
+        oss_buckt_inv = hyb_ops.add_oss_bucket_from_remote(data_center_uuid=dc_inv.uuid,
+                                                           oss_bucket_name='ebs',
+                                                           oss_domain=os.getenv('ebsOSSEndPoint'),
+                                                           oss_key='ebs',
+                                                           oss_secret='zstack')
+
+        for bs in xmlobject.safe_list(deployConfig.backupStorages.aliyunEbsBackupStorage):
+            action = api_actions.AddAliyunEbsBackupStorage()
+            action.sessionUuid = session_uuid
+            action.ossBucketUuid = oss_buckt_inv.uuid
+            action.name = bs.name_
+            action.description = bs.description__
+            action.timeout = AddKVMHostTimeOut #for some platform slowly salt execution
+            action.type = 'AliyunEBS'
+            action.url = os.getenv('ebsOSSEndPoint')
+            thread = threading.Thread(target = _thread_for_action, args = (action, ))
+            wait_for_thread_queue()
+            thread.start()
 
     if xmlobject.has_element(deployConfig, 'backupStorages.fusionstorBackupStorage'):
         for bs in xmlobject.safe_list(deployConfig.backupStorages.fusionstorBackupStorage):
@@ -835,6 +873,36 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 action.nasUuid = nasinv.uuid
                 action.accessGroupUuid = grpinv.uuid
                 action.url = '/' + str(time.time()).split('.')[0]
+                action.zoneUuid = zinv.uuid
+                action.sessionUuid = session_uuid
+                thread = threading.Thread(target=_thread_for_action, args=(action,))
+                wait_for_thread_queue()
+                thread.start()
+
+        if xmlobject.has_element(zone, 'primaryStorages.aliyunEBSPrimaryStorage'):
+            zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, \
+                    name=zone.name_)
+            zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
+
+            for pr in xmlobject.safe_list(zone.primaryStorages.aliyunEBSPrimaryStorage):
+                if ps_name and ps_name != pr.name_:
+                    continue
+
+                # Add AliyunEBS PS
+                action = api_actions.AddAliyunEbsPrimaryStorageAction()
+                action.name = 'ebs'
+                iz_inv = hyb_ops.query_iz_local()
+                if iz_inv:
+                    action.identityZoneUuid = iz_inv[0].uuid
+                else:
+                    test_util.test_fail("No identity zone found in local")
+                action.type = os.getenv('datacenterType')
+                action.url = os.getenv('aliyunEBSPrimaryStorageUrl')
+                action.tdcConfigContent = '{"tdcPort": "20120","tdcRegion": "region1",\
+                                            "riverMaster": "nuwa://ECS-river/sys/houyi/river_master",\
+                                            "server": "192.168.0.1:10240,192.168.0.2:10240,192.168.0.3:10240",\
+                                            "proxy": "192.168.1.1:10240,192.168.1.2:10240,192.168.1.3:10240",\
+                                            "cluster": "ECS-river"}'
                 action.zoneUuid = zinv.uuid
                 action.sessionUuid = session_uuid
                 thread = threading.Thread(target=_thread_for_action, args=(action,))
