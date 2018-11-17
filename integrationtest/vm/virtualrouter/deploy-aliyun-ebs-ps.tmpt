@@ -5,4 +5,4 @@ aliyunEBSPrimaryStorageName = ebs
 aliyunEbsBackupStorageName = ebs-oss
 regionId = nasRegionID
 ebsOSSEndPoint = localhost
-aliyunEBSPrimaryStorageUrl = http://localhost:18080/ocean/api
+ebsEndPoint = http://localhost:18080/ocean/api

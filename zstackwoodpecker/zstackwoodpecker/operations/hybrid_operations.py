@@ -138,11 +138,12 @@ def get_ecs_instance_type_from_remote(iz_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt.types
 
-def add_datacenter_from_remote(datacenter_type, region_id, description, session_uuid=None):
+def add_datacenter_from_remote(datacenter_type, region_id, description, end_point=None, session_uuid=None):
     action = api_actions.AddDataCenterFromRemoteAction()
     action.type = datacenter_type
     action.regionId = region_id
     action.description = description
+    action.endpoint = end_point
     test_util.action_logger('Add [datacenter from remote:] %s %s' % (datacenter_type, region_id))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[datacenter from remote:] %s %s is added.' % (datacenter_type, region_id))

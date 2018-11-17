@@ -229,6 +229,7 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
         dc_inv = hyb_ops.add_datacenter_from_remote(datacenter_type=os.getenv('datacenterType'),
                                             description='dc_for_ebs_test',
                                             region_id=os.getenv('regionId'),
+                                            end_point=os.getenv('ebsEndPoint'),
                                             session_uuid=session_uuid)
 
         # Add Identity Zone
@@ -250,7 +251,7 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
             action.description = bs.description__
             action.timeout = AddKVMHostTimeOut #for some platform slowly salt execution
             action.type = 'AliyunEBS'
-            action.url = os.getenv('ebsOSSEndPoint')
+            action.url = os.getenv('ebsEndPoint')
             thread = threading.Thread(target = _thread_for_action, args = (action, ))
             wait_for_thread_queue()
             thread.start()
@@ -898,7 +899,7 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 else:
                     test_util.test_fail("No identity zone found in local")
                 action.type = os.getenv('datacenterType')
-                action.url = os.getenv('aliyunEBSPrimaryStorageUrl')
+                action.url = os.getenv('ebsEndPoint')
                 action.tdcConfigContent = '{"tdcPort": "20120","tdcRegion": "region1",\
                                             "riverMaster": "nuwa://ECS-river/sys/houyi/river_master",\
                                             "server": "192.168.0.1:10240,192.168.0.2:10240,192.168.0.3:10240",\
