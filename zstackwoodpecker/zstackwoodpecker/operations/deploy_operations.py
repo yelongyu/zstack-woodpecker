@@ -248,7 +248,7 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
                                                            oss_secret='zstack')
 
         for bs in xmlobject.safe_list(deployConfig.backupStorages.aliyunEbsBackupStorage):
-            action = api_actions.AddAliyunEbsBackupStorage()
+            action = api_actions.AddAliyunEbsBackupStorageAction()
             action.sessionUuid = session_uuid
             action.ossBucketUuid = oss_buckt_inv.uuid
             action.name = bs.name_
