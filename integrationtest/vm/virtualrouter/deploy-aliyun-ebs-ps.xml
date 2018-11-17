@@ -80,7 +80,7 @@
     </instanceOfferings>
   
     <backupStorages>
-      <aliyunEbsBackupStorage name="$aliyunEbsBackupStorage"
+      <aliyunEbsBackupStorage name="$aliyunEbsBackupStorageName"
         description="Test" url="$sftpBackupStorageUrl"
         username="$sftpBackupStorageUsername"
         password="$sftpBackupStoragePassword"

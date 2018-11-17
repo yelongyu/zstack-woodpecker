@@ -221,6 +221,7 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
                                         description='ks_for_ebs_test',
                                         key= 'zstack',
                                         secret='C8yz6qLPus7VuwLtGYdxUkMg',
+                                        ks_type=os.getenv('datacenterType'),
                                         sync='false',
                                         session_uuid=session_uuid)
 

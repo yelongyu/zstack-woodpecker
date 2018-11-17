@@ -1,5 +1,5 @@
 import ../scenario.tmpt
-import ./deploy-aliyun-nas-ps.tmpt
+import ./deploy-aliyun-ebs-ps.tmpt
 
 vmName0 = test_vm0
 vmName1 = test_vm1

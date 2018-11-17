@@ -1,7 +1,7 @@
 import ./scenario.tmpt
 
 datacenterType = AliyunEBS
-aliyunNASPrimaryStorageName = ebs
+aliyunEBSPrimaryStorageName = ebs
 aliyunEbsBackupStorageName = ebs-oss
 regionId = nasRegionID
 ebsOSSEndPoint = localhost
