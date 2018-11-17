@@ -234,7 +234,11 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
 
         # Add Identity Zone
         iz_inv = hyb_ops.get_identity_zone_from_remote(datacenter_type=os.getenv('datacenterType'), dc_uuid=dc_inv.uuid)
-        hyb_ops.add_identity_zone_from_remote(iz_type=os.getenv('datacenterType'), datacenter_uuid=dc_inv.uuid, zone_id=iz_inv.zoneId)
+        if iz_inv:
+            ebs_iz = iz_inv[0]
+        else:
+            test_util.test_fail('EBS Identity Zone was not found')
+        hyb_ops.add_identity_zone_from_remote(iz_type=os.getenv('datacenterType'), datacenter_uuid=dc_inv.uuid, zone_id=ebs_iz.zoneId)
 
         # Add OSS bucket
         oss_buckt_inv = hyb_ops.add_oss_bucket_from_remote(data_center_uuid=dc_inv.uuid,
