@@ -676,6 +676,8 @@ class VmOption(DataOption):
             self.console_password = None
             self.ps_uuid = None
             self.root_password = None
+            self.rootVolumeSystemTags = None
+            self.dataVolumeSystemTags = None
             self.strategy_type = 'InstantStart'
             super(VmOption, self).__init__()
         else:
@@ -698,6 +700,8 @@ class VmOption(DataOption):
             self.system_tags = vm_opt.get_system_tags()
             self.user_tags = vm_opt.get_user_tags()
             self.strategy_type = vm_opt.get_strategy_type()
+            self.rootVolumeSystemTags = vm_opt.get_rootVolume_systemTags()
+            self.dataVolumeSystemTags = vm_opt.get_dataVolume_systemTags()
             super(VmOption, self).__init__()
 
     def set_l3_uuids(self, l3_uuids):
@@ -797,6 +801,18 @@ class VmOption(DataOption):
 
     def get_strategy_type(self):
         return self.strategy_type
+
+    def set_rootVolume_systemTags(self, rootVolume_systemTags):
+        self.rootVolumeSystemTags = rootVolume_systemTags
+
+    def get_rootVolume_systemTags(self):
+        return self.rootVolumeSystemTags
+
+    def set_dataVolume_systemTags(self, dataVolume_systemTags):
+        self.dataVolumeSystemTags = dataVolume_systemTags
+
+    def get_dataVolume_systemTags(self):
+        return self.dataVolumeSystemTags
 
 class VolumeOption(DataOption):
     def __init__(self):
