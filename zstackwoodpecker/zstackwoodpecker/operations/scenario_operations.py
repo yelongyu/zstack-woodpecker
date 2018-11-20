@@ -2127,11 +2127,13 @@ def map_ip_gateway(ip_addr):
     return ('.').join(net_addr)
 
 def install_ebs_pkg_in_host(hostname, username, password):
+    extra_ev_path = '/opt/zstack-dvd/Extra/qemu-kvm-ev'
     vrbd_pkg = os.getenv('ebsVrbd')
     tdc_pkg = os.getenv('ebdTdc')
-    scp_vrbd = 'sshpass -p password scp -o StrictHostKeyChecking=no -o LogLevel=quiet -o UserKnownHostsFile=/dev/null %s .' % (vrbd_pkg)
-    scp_tdc = 'sshpass -p password scp -o StrictHostKeyChecking=no -o LogLevel=quiet -o UserKnownHostsFile=/dev/null %s .' % (tdc_pkg)
-    for cmd in [scp_vrbd, scp_tdc, 'rpm -ivh *.rpm', 'service tdc start']:
+    scp_vrbd = 'sshpass -p password scp -o StrictHostKeyChecking=no -o LogLevel=quiet -o UserKnownHostsFile=/dev/null %s %s' % (vrbd_pkg, extra_ev_path)
+    scp_tdc = 'sshpass -p password scp -o StrictHostKeyChecking=no -o LogLevel=quiet -o UserKnownHostsFile=/dev/null %s %s' % (tdc_pkg, extra_ev_path)
+    createrepo_cmd = 'createrepo ' + extra_ev_path
+    for cmd in [scp_vrbd, scp_tdc, createrepo_cmd]:
         ssh.execute(cmd, hostname, username, password, True, 22)
         time.sleep(1)
 
@@ -2351,6 +2353,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                         vm_xml.set('managementIp', vm_management_ip)
                         if xmlobject.has_element(vm, 'nodeRef'):
                             mn_ip_to_post = vm_management_ip
+                            install_ebs_pkg_in_host(vm_ip, vm.imageUsername_, vm.imagePassword_)
                     else:
                         test_util.test_logger("@@@DEBUG-WARNING@@@: vm_management_ip is null, failed")
                     vm_storage_ip = get_host_storage_network_ip(scenario_config, scenario_file, deploy_config, vm_inv, vm)
@@ -2438,8 +2441,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                 share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
                                 zbs_virtio_scsi_volume_is_created = True
                                 attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
-                        elif ps_ref.type_ == 'ebs':
-                            install_ebs_pkg_in_host(vm_ip, vm.imageUsername_, vm.imagePassword_)
+#                         elif ps_ref.type_ == 'ebs':
+#                             install_ebs_pkg_in_host(vm_ip, vm.imageUsername_, vm.imagePassword_)
 
         xml_string = etree.tostring(root_xml, 'utf-8')
         xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
