@@ -23,6 +23,8 @@
 	<case timeout='1200' repeat='1'>migrate/test_expunge_img_vm_migrate.py</case>
 	<case timeout='600' repeat='1'>ps/test_disable_ps_live_migrate.py</case>
 	<case timeout='600' repeat='1'>ps/test_create_ceph_pool.py</case>
+	<case timeout='600' repeat='1'>ps/test_create_root_volume_ceph_pool.py</case>
+	<case timeout='600' repeat='1'>ps/test_vm_life_cycle_on_specified_ceph_pool.py</case>
         <case timeout='360' repeat='1' noparallel='True'>test_reconnect_ps.py</case>
         <case timeout='600' repeat='1' noparallel='True'>migrate/test_maintain_host.py</case>
         <case timeout='600' repeat='1' noparallel='True'>migrate/test_maintain_host2.py</case>
