@@ -90,6 +90,12 @@ def test():
     vm = test_vm.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
     vm.create()
+    test_util.test_dsc('Create ssd VM Test Success')
+
+    vm_creation_option.set_rootVolume_systemTags([])
+    vm = test_vm.ZstackTestVm()
+    vm.set_creation_option(vm_creation_option)
+    vm.create()
     test_util.test_pass('Create ssd VM Test Success')
 
 #Will be called only if exception happens in test().
