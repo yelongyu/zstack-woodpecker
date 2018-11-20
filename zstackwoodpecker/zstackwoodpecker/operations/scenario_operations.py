@@ -2132,8 +2132,9 @@ def install_ebs_pkg_in_host(hostname, username, password):
     tdc_pkg = os.getenv('ebdTdc')
     scp_vrbd = 'sshpass -p password scp -o StrictHostKeyChecking=no -o LogLevel=quiet -o UserKnownHostsFile=/dev/null %s %s' % (vrbd_pkg, extra_ev_path)
     scp_tdc = 'sshpass -p password scp -o StrictHostKeyChecking=no -o LogLevel=quiet -o UserKnownHostsFile=/dev/null %s %s' % (tdc_pkg, extra_ev_path)
+    install_createrepo = 'yum --nogpgcheck localinstall -y /opt/zstack-dvd/Packages/createrepo*.rpm'
     createrepo_cmd = 'createrepo ' + extra_ev_path
-    for cmd in [scp_vrbd, scp_tdc, createrepo_cmd]:
+    for cmd in [install_createrepo, scp_vrbd, scp_tdc, createrepo_cmd]:
         ssh.execute(cmd, hostname, username, password, True, 22)
         time.sleep(1)
 
