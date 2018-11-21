@@ -35,6 +35,8 @@ def test():
     for i in ps:
         if i.type == 'AliyunNAS':
             test_util.test_skip('Skip test on AliyunNAS PS')
+        elif i.type == 'AliyunEBS':
+            test_util.test_skip('Skip test on AliyunEBS PS')
 
     volume_creation_option = test_util.VolumeOption()
     test_util.test_dsc('Create volume and check')
