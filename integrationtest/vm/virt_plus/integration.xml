@@ -6,6 +6,7 @@
         <case timeout='600' repeat='1'>test_create_vm.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_create_vm_with_userdata.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_create_vm_with_userdata_and_sshkey.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_create_UEFI_vm.py</case>
         <case timeout='900' repeat='1' noparallel='True'>test_create_vm_with_long_userdata.py</case>
         <case timeout='800' repeat='1' noparallel='True'>test_set_l3_mtu.py</case>
         <case timeout='800' repeat='1' noparallel='True'>test_update_l3_mtu.py</case>
