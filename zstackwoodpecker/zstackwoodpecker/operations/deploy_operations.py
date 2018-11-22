@@ -1514,7 +1514,7 @@ def add_l3_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l3_
 
         #add ip range. 
         if xmlobject.has_element(l3, 'ipRange'):
-            do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid)
+            do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid, ipversion = 4)
 
         #add network service.
         providers = {}
@@ -1577,7 +1577,7 @@ def add_l3_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l3_
 
 #Add Iprange
 def add_ip_range(deployConfig, session_uuid, ip_range_name = None, \
-        zone_name= None, l3_name = None):
+        zone_name= None, l3_name = None, ipversion = 4):
     '''
     Call by only adding an IP range. If the IP range is in L3 config, 
     add_l3_network will add ip range direclty. 
@@ -1626,30 +1626,47 @@ def add_ip_range(deployConfig, session_uuid, ip_range_name = None, \
             l3_invs = res_ops.get_resource(res_ops.L3_NETWORK, session_uuid, name = l3Name)
             l3_inv = get_first_item_from_list(l3_invs, 'L3 Network', l3Name, 'IP range')
             do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid, \
-                    ip_range_name)
+                    ip_range_name, ipversion = 4)
 
 def do_add_ip_range(ip_range_xml_obj, l3_uuid, session_uuid, \
-        ip_range_name = None):
+        ip_range_name = None, ipversion = 4):
 
     for ir in xmlobject.safe_list(ip_range_xml_obj):
         if ip_range_name and ip_range_name != ir.name_:
             continue
 
-        action = api_actions.AddIpRangeAction()
-        action.sessionUuid = session_uuid
-        action.description = ir.description__
-        action.endIp = ir.endIp_
-        action.gateway = ir.gateway_
-        action.l3NetworkUuid = l3_uuid
-        action.name = ir.name_
-        action.netmask = ir.netmask_
-        action.startIp = ir.startIp_
-        try:
-            evt = action.run()
-        except Exception as e:
-            exc_info.append(sys.exc_info())
-            raise e
-        test_util.test_logger(jsonobject.dumps(evt))
+        if ipversion == 4:
+            action = api_actions.AddIpRangeAction()
+            action.sessionUuid = session_uuid
+            action.description = ir.description__
+            action.endIp = ir.endIp_
+            action.gateway = ir.gateway_
+            action.l3NetworkUuid = l3_uuid
+            action.name = ir.name_
+            action.netmask = ir.netmask_
+            action.startIp = ir.startIp_
+            try:
+                evt = action.run()
+            except Exception as e:
+                exc_info.append(sys.exc_info())
+                raise e
+            test_util.test_logger(jsonobject.dumps(evt))
+        else:
+            action = api_actions.AddIpv6RangeAction()
+            action.sessionUuid = session_uuid
+            action.description = ir.description__
+            action.endIp = ir.endIp_
+            action.gateway = ir.gateway_
+            action.l3NetworkUuid = l3_uuid
+            action.name = ir.name_
+            action.netmask = ir.netmask_
+            action.startIp = ir.startIp_
+            try:
+                evt = action.run()
+            except Exception as e:
+                exc_info.append(sys.exc_info())
+                raise e
+            test_util.test_logger(jsonobject.dumps(evt))
 
 #Add Network Service
 def add_network_service(deployConfig, session_uuid):
@@ -2060,7 +2077,7 @@ def add_vcenter_l3_network(l2, session_uuid):
 
         #add ip range.
         if xmlobject.has_element(l3, 'ipRange'):
-            do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid)
+            do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid, ipversion =4)
         #add network service.
         providers = {}
         action = api_actions.QueryNetworkServiceProviderAction()
@@ -2462,7 +2479,7 @@ def remove_simulator_agent_script(url_path):
     url = "http://%s:8080/zstack/simulators/agent-pre-handlers/remove" % (mn_ip)
     ret = json_post(url, url_path)
 
-def deploy_initial_database(deploy_config, scenario_config = None, scenario_file = None):
+def deploy_initial_database(deploy_config, scenario_config = None, scenario_file = None, ipversion = 4):
     operations = [
             add_backup_storage,
             add_zone,
@@ -2485,7 +2502,10 @@ def deploy_initial_database(deploy_config, scenario_config = None, scenario_file
     for operation in operations:
         session_uuid = account_operations.login_as_admin()
         try:
-            operation(scenario_config, scenario_file, deploy_config, session_uuid)
+            if ipversion == 6:
+                operation(scenario_config, scenario_file, deploy_config, session_uuid, ipversion =6)
+            else:
+                operation(scenario_config, scenario_file, deploy_config, session_uuid)
         except Exception as e:
             test_util.test_logger('[Error] zstack deployment meets exception when doing: %s . The real exception are:.' % operation.__name__)
             print('----------------------Exception Reason------------------------')

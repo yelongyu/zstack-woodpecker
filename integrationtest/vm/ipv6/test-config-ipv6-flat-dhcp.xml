@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-ipv6-flat-dhcp.xml</deployConfig>
+    <deployConfigTemplate>../deploy.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.yyk.net</pingTestTarget>
+</testConfig>
