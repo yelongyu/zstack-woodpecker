@@ -7,7 +7,6 @@ New Integration Test for normal account change the qos  volume and network.
 
 import hashlib
 import zstackwoodpecker.test_util as test_util
-import test_stub
 import os
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
