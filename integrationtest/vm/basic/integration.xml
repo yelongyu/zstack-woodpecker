@@ -35,6 +35,7 @@
         <case timeout="180" >account/test_crt_vm_by_normal_account2.py</case>
         <case timeout="180" >account/test_vm_ops_by_normal_account.py</case>
         <case timeout="180" >account/test_multi_accounts_vm_ops.py</case>
+        <case timeout="180" >account/test_normal_change_qos.py</case>
         <case timeout="180" >test_ldap_login.py</case>
         <case timeout="180" >test_ldap_tls_login.py</case>
         <case timeout="180" >test_ldap_filter.py</case>
