@@ -31,16 +31,24 @@ def test():
                 test_lib.lib_execute_ssh_cmd(host_ip, 'root', 'password', cmd, 180)
             
                 if flag != 1:
-                    cmd = "diff /home/c74_expect_pkg_list.txt /root/change_list.txt"
-                    output = test_lib.lib_execute_ssh_cmd(host_ip, 'root', 'password', cmd, 180)            
-                    if output != "":
-                        test_util.test_fail('Host pkg list changed after been added in MN')
-                else:
-                    cmd = "diff /home/c72_expect_pkg_list.txt /root/change_list.txt"
+                    cmd = "grep -vFf /home/c74_expect_pkg_list.txt /root/change_list.txt"
                     output = test_lib.lib_execute_ssh_cmd(host_ip, 'root', 'password', cmd, 180)
-                    if output != "":
-                        test_util.test_fail('Host pkg list changed after been added in MN')
-  
+                    if output != False:
+                        test_util.test_fail('There are some thing more than before in the pkg list.')
+                    cmd = "grep -vFf /root/change_list.txt /home/c74_expect_pkg_list.txt"
+                    output = test_lib.lib_execute_ssh_cmd(host_ip, 'root', 'password', cmd, 180)
+                    if output != False:
+                        test_util.test_fail('There are some thing less than before in the pkg list.')
+                else:
+                    cmd = "grep -vFf /home/c72_expect_pkg_list.txt /root/change_list.txt"
+                    output = test_lib.lib_execute_ssh_cmd(host_ip, 'root', 'password', cmd, 180)
+                    if output != False:
+                        test_util.test_fail('There are some thing more than before in the pkg list.')
+                    cmd = "grep -vFf /root/change_list.txt /home/c72_expect_pkg_list.txt"
+                    output = test_lib.lib_execute_ssh_cmd(host_ip, 'root', 'password', cmd, 180)
+                    if output != False:
+                        test_util.test_fail('There are some thing less than before in the pkg list.') 
+ 
 #Will be called only if exception happens in test().
 def error_cleanup():
     pass
