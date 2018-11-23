@@ -18,57 +18,12 @@ import sys
 import traceback
 
 
-def attach_l3_network_to_vm_nic(l3NetworkUuid, vmNicUuid, staticIp, session_uuid=None):
-    action = api_actions.AttachL3NetworkToVmNicAction()
-    action.timeout = 300000
-    action.l3NetworkUuid = l3NetworkUuid
-    action.vmNicUuid = vmNicUuid
-    action.staticIp = staticIp
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
-    return evt.inventory
-
-def detach_ip_address_from_vm_nic(vmNicUuid, usedIpUuid, session_uuid=None):
-    action = api_actions.DetachIpAddressFromVmNicAction()
-    action.timeout = 300000
-    action.vmNicUuid = vmNicUuid
-    action.usedIpUuid = usedIpUuid
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
-    return evt.inventory
-
-def add_ipv6_range_by_network_cidr(name, l3NetworkUuid, networkCidr, mode, session_uuid=None):
-    action = api_actions.AddIpv6RangeByNetworkCidrAction()
-    action.timeout = 300000
-    action.name = name
-    action.l3NetworkUuid = l3NetworkUuid
-    action.networkCidr = networkCidr
-    action.mode = mode
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
-    return evt.inventory
-
-def add_ipv6_range(name, l3NetworkUuid, startIP, endIP, prefixLen, gateway, mode="Stateful-DHCP", session_uuid=None):
-    action = api_actions.AddIpv6RangeAction()
-    action.timeout = 300000
-    action.name = name
-    action.l3NetworkUuid = l3NetworkUuid
-    action.startIP = startIP
-    action.endIP = endIP
-    action.prefixLen = prefixLen
-    action.gateway = gateway
-    action.mode = mode
-    evt = acc_ops.execute_action_with_session(action, session_uuid)
-    return evt.inventory
-
 def create_security_group(sg_creation_option):
     action = api_actions.CreateSecurityGroupAction()
     if not sg_creation_option.get_name():
         action.name = 'test_sg'
     else:
         action.name = sg_creation_option.get_name()
-
-    if not sg_creation_option.get_ipVersion():
-        action.ipVersion = 4
-    else:
-        action.ipVersion = sg_creation_option.get_ipVersion()
 
     if not sg_creation_option.get_description():
         action.description = 'Test Security Group'
@@ -872,10 +827,9 @@ def delete_certificate(uuid, session_uuid = None):
     test_util.test_logger('Delete [Certificate]: %s' % uuid)
     return evt.inventory
 
-def create_l3(name, ipVersion=4, l2_uuid, session_uuid = None):
+def create_l3(name, l2_uuid, session_uuid = None):
     action = api_actions.CreateL3NetworkAction()
     action.name = name
-    action.ipVersion = ipVersion
     action.l2NetworkUuid = l2_uuid
     action.timeout = 300000
     evt = acc_ops.execute_action_with_session(action, session_uuid)
