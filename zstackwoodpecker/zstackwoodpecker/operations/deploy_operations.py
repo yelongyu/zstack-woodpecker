@@ -1485,6 +1485,8 @@ def add_l3_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l3_
         if l3.domain_name__:
             action.dnsDomain = l3.domain_name__
 
+        if l3.hasattr('ipVersion_'):
+            action.ipVersion = l3.ipVersion_
         if l3.hasattr('category_'):
             action.category = l3.category_
         elif not l3.hasattr('system_') or l3.system_ == False:
@@ -1499,22 +1501,37 @@ def add_l3_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l3_
         test_util.test_logger(jsonobject.dumps(evt))
         l3_inv = evt.inventory
 
+        if l3.hasattr('ipVersion_'):
         #add dns
-        if xmlobject.has_element(l3, 'dns'):
-            for dns in xmlobject.safe_list(l3.dns):
-                action = api_actions.AddDnsToL3NetworkAction()
-                action.sessionUuid = session_uuid
-                action.dns = dns.text_
-                action.l3NetworkUuid = l3_inv.uuid
-                try:
-                    evt = action.run()
-                except:
-                    exc_info.append(sys.exc_info())
-                test_util.test_logger(jsonobject.dumps(evt))
-
-        #add ip range. 
-        if xmlobject.has_element(l3, 'ipRange'):
-            do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid, ipversion = 4)
+            if xmlobject.has_element(l3, 'dns'):
+                for dns in xmlobject.safe_list(l3.dns):
+                    action = api_actions.AddDnsToL3NetworkAction()
+                    action.sessionUuid = session_uuid
+                    action.dns = dns.text_
+                    action.l3NetworkUuid = l3_inv.uuid
+                    try:
+                        evt = action.run()
+                    except:
+                        exc_info.append(sys.exc_info())
+                    test_util.test_logger(jsonobject.dumps(evt))
+            #add ip range. 
+            if xmlobject.has_element(l3, 'ipRange'):
+                do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid, ipversion = 6)
+        else:
+            if xmlobject.has_element(l3, 'dns'):
+                for dns in xmlobject.safe_list(l3.dns):
+                    action = api_actions.AddDnsToL3NetworkAction()
+                    action.sessionUuid = session_uuid
+                    action.dns = dns.text_
+                    action.l3NetworkUuid = l3_inv.uuid
+                    try:
+                        evt = action.run()
+                    except:
+                        exc_info.append(sys.exc_info())
+                    test_util.test_logger(jsonobject.dumps(evt))
+            #add ip range. 
+            if xmlobject.has_element(l3, 'ipRange'):
+                do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid, ipversion = 4)
 
         #add network service.
         providers = {}
@@ -1625,8 +1642,12 @@ def add_ip_range(deployConfig, session_uuid, ip_range_name = None, \
 
             l3_invs = res_ops.get_resource(res_ops.L3_NETWORK, session_uuid, name = l3Name)
             l3_inv = get_first_item_from_list(l3_invs, 'L3 Network', l3Name, 'IP range')
-            do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid, \
-                    ip_range_name, ipversion = 4)
+            if ipversion == 4:
+                do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid, \
+                        ip_range_name, ipversion = 4)
+            else:
+                do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid, \
+                        ip_range_name, ipversion = 6)
 
 def do_add_ip_range(ip_range_xml_obj, l3_uuid, session_uuid, \
         ip_range_name = None, ipversion = 4):
@@ -1659,8 +1680,9 @@ def do_add_ip_range(ip_range_xml_obj, l3_uuid, session_uuid, \
             action.gateway = ir.gateway_
             action.l3NetworkUuid = l3_uuid
             action.name = ir.name_
-            action.netmask = ir.netmask_
             action.startIp = ir.startIp_
+            action.addressMode = ir.addressMode__
+            action.prefixLen = ir.prefixLen_
             try:
                 evt = action.run()
             except Exception as e:
@@ -2077,7 +2099,7 @@ def add_vcenter_l3_network(l2, session_uuid):
 
         #add ip range.
         if xmlobject.has_element(l3, 'ipRange'):
-            do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid, ipversion =4)
+            do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid, ipversion = 4)
         #add network service.
         providers = {}
         action = api_actions.QueryNetworkServiceProviderAction()
@@ -2502,8 +2524,8 @@ def deploy_initial_database(deploy_config, scenario_config = None, scenario_file
     for operation in operations:
         session_uuid = account_operations.login_as_admin()
         try:
-            if ipversion == 6:
-                operation(scenario_config, scenario_file, deploy_config, session_uuid, ipversion =6)
+            if ipversion == 6 and operation == "add_l3_network":
+                operation(scenario_config, scenario_file, deploy_config, session_uuid, ipversion = 6)
             else:
                 operation(scenario_config, scenario_file, deploy_config, session_uuid)
         except Exception as e:

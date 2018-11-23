@@ -23,17 +23,13 @@ EXTRA_HOST_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_host_setup_config.sh' % US
 
 def test():
     if test_lib.scenario_config != None and test_lib.scenario_file != None and not os.path.exists(test_lib.scenario_file):
-        print "pengtao debug 1"
         scenario_operations.deploy_scenario(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
         test_util.test_skip('Suite Setup Success')
     if test_lib.scenario_config != None and test_lib.scenario_destroy != None:
-        print "pengtao debug 2"
         scenario_operations.destroy_scenario(test_lib.all_scenario_config, test_lib.scenario_destroy)
 
     nic_name = "eth0"
-    print "pengtao test_lib.scenario_config : %s , test_lib.scenario_file: %s, test_lib.deploy_config: %s" %(test_lib.scenario_config, test_lib.scenario_file, test_lib.deploy_config)
     if test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
-        print "pengtao debug 3"
         nic_name = "zsn0"
         linux.create_vlan_eth(nic_name, 1010)
         linux.create_vlan_eth(nic_name, 1011)
@@ -65,7 +61,7 @@ def test():
     elif os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % (EXTRA_SUITE_SETUP_SCRIPT))
 
-    deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file, ipversion = 6)
+    deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
     for host in hosts:
         os.system("bash %s %s" % (EXTRA_HOST_SETUP_SCRIPT, host.managementIp_))
 

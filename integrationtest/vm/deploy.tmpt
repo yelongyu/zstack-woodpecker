@@ -173,6 +173,14 @@ ipRangeEndIp = 10.0.101.250
 ipRangeNetmask = 255.255.255.0
 ipRangeGateway = 10.0.101.1
 
+#IPv6
+ipv6RangeName = host IPv6 range
+ipv6RangeStartIp = 1000::2
+ipv6RangeEndIp = 1000::20
+ipv6prefix_length = 64
+ipv6RangeGateway = 1000::1
+ipv6DNSServer = 240c::6666
+
 noVlanIpRangeName1 = guest novlan range 1
 noVlanIpRangeStart1 = 10.250.0.2
 noVlanIpRangeEnd1 = 10.250.0.199
