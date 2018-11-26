@@ -55,18 +55,18 @@ def test():
     curren_num = float(os.environ.get('releasePkgNum'))
     for pkg_num in release_ver:
     #while pkg_num <= curren_num:
-	if str(pkg_num) == '2.3.1':
-		test_stub.update_iso(vm_ip, tmp_file, iso_path = iso_232_path, upgrade_script_path)
 	if str(pkg_num) == '2.3.2':
-		test_stub.update_iso(vm_ip, tmp_file, iso_path = iso_240_path, upgrade_script_path)
+		test_stub.update_iso(vm_ip, tmp_file, iso_232_path, upgrade_script_path)
 	if str(pkg_num) == '2.4.0':
-		test_stub.update_iso(vm_ip, tmp_file, iso_path = iso_250_path, upgrade_script_path)
+		test_stub.update_iso(vm_ip, tmp_file, iso_240_path, upgrade_script_path)
 	if str(pkg_num) == '2.5.0':
-		test_stub.update_iso(vm_ip, tmp_file, iso_path = iso_260_path, upgrade_script_path)
-	if str(pkg_num) == '3.0.0':
-		test_stub.update_iso(vm_ip, tmp_file, iso_path = iso_301_path, upgrade_script_path)
+		test_stub.update_iso(vm_ip, tmp_file, iso_250_path, upgrade_script_path)
+	if str(pkg_num) == '2.6.0':
+		test_stub.update_iso(vm_ip, tmp_file, iso_260_path, upgrade_script_path)
 	if str(pkg_num) == '3.0.1':
-		test_stub.update_iso(vm_ip, tmp_file, iso_path = iso_310_path, upgrade_script_path)
+		test_stub.update_iso(vm_ip, tmp_file, iso_301_path, upgrade_script_path)
+	if str(pkg_num) == '3.1.0':
+		test_stub.update_iso(vm_ip, tmp_file, iso_310_path, upgrade_script_path)
         test_util.test_logger('Upgrade zstack to %s' % pkg_num)
         upgrade_pkg = os.environ.get('zstackPkg_%s' % pkg_num)
         test_stub.upgrade_zstack(vm_ip, upgrade_pkg, tmp_file) 
