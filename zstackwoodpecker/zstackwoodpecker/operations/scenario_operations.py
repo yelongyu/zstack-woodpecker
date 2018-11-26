@@ -2455,9 +2455,9 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                 zbs_virtio_scsi_volume_is_created = True
                                 attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
                         elif ps_ref.type_ == 'ebs':
-                            cond = res_ops.gen_query_conditions('uuid', '=', vm.hostUuid)
+                            cond = res_ops.gen_query_conditions('uuid', '=', vm_inv.hostUuid)
                             host_inv = query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
-                            ebs_host[(vm.uuid, vm.hostUuid)] = {'cpu': host_inv.availableCpuCapacity, 'mem': int(vm.availableMemoryCapacity)/1024/1024/1024}
+                            ebs_host[(vm_inv.uuid, host_inv.uuid)] = {'cpu': host_inv.availableCpuCapacity, 'mem': int(vm.availableMemoryCapacity)/1024/1024/1024}
 #                             install_ebs_pkg_in_host(vm_ip, vm.imageUsername_, vm.imagePassword_)
 
         xml_string = etree.tostring(root_xml, 'utf-8')
