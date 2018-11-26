@@ -30,6 +30,11 @@ def test():
     if not bss:
         test_util.test_skip("not find available backup storage. Skip test")
 
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)
+    for i in bs:
+        if i.type == 'AliyunEBS':
+            test_util.test_skip('Skip test on AliyunEBS backup storage')
+
     image_option = test_util.ImageOption()
     image_option.set_name('test_image_cache_cleanup')
     image_option.set_format('qcow2')
