@@ -2489,7 +2489,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                         if key[1] != target_host:
                             stop_vm(zstack_management_ip, key[0])
                             migrate_vm(zstack_management_ip, key[0], target_host[0])
-                            start_vm(zstack_management_ip, vm_to_migr)
+                            start_vm(zstack_management_ip, key[0])
                 else:
                     test_util.test_fail('Cannot migrate ebs host vm to the same real host')
     else:
