@@ -1,0 +1,4 @@
+<integrationTest>
+    <suite name="vpc" setupCase="suite_setup.py" teardownCase="" repeat="1" parallel="1">
+    </suite>
+</integrationTest>
