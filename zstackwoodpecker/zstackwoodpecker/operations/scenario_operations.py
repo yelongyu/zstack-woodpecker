@@ -1981,6 +1981,17 @@ def change_instance_offering_state(http_server_ip, offering_uuid, state_event, s
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     return evt
 
+def migrate_vm(http_server_ip, vm_uuid, host_uuid, timeout = 480000, session_uuid = None):
+    action = api_actions.MigrateVmAction()
+    action.vmInstanceUuid = vm_uuid
+    action.hostUuid = host_uuid
+    if not timeout:
+        timeout = 480000
+    action.timeout = timeout
+    test_util.action_logger('Migrate VM [uuid:] %s to Host [uuid:] %s, in timeout: %s' % (vm_uuid, host_uuid, timeout))
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    return evt.inventory
+
 def create_l2_vlan(http_server_ip, name, physicalInterface, vlan, zone_uuid, session_uuid = None):
     action = api_actions.CreateL2VlanNetworkAction()
     action.name = name
@@ -2254,6 +2265,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 
     mn_ip_to_post, vm_ip_to_post = (None, None)
     if hasattr(scenario_config.deployerConfig, 'hosts'):
+        ebs_host = {}
         for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
             for vm in xmlobject.safe_list(host.vms.vm):
                 vm_creation_option = test_util.VmOption()
@@ -2442,7 +2454,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                 share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
                                 zbs_virtio_scsi_volume_is_created = True
                                 attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
-#                         elif ps_ref.type_ == 'ebs':
+                        elif ps_ref.type_ == 'ebs':
+                            cond = res_ops.gen_query_conditions('uuid', '=', vm.hostUuid)
+                            host_inv = query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
+                            ebs_host[(vm.uuid, vm.hostUuid)] = {'cpu': host_inv.availableCpuCapacity, 'mem': int(vm.availableMemoryCapacity)/1024/1024/1024}
 #                             install_ebs_pkg_in_host(vm_ip, vm.imageUsername_, vm.imagePassword_)
 
         xml_string = etree.tostring(root_xml, 'utf-8')
@@ -2456,6 +2471,27 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
             os.environ['NASAKID'] = ak_id
             uri = 'http://' + os.getenv('apiEndPoint').split('::')[-1] + '/mntarget'
             http.json_dump_post(uri, {"ak_id": ak_id, "mn_ip": mn_ip_to_post, "nfs_ip": vm_ip_to_post})
+        if ebs_host:
+            target_host = None
+            host_list= [h[1] for h in ebs_host.keys()]
+            host_set = set(host_list)
+            if 1 < len(host_set) < len(ebs_host.keys()):
+                vm_to_migr, host_to_escape = [v[0] for (v, _h) in ebs_host.keys() if host_list.count(_h) < 2]
+                host_set.remove(host_to_escape)
+                target_host = list(host_set)[0]
+                stop_vm(zstack_management_ip, vm_to_migr)
+                migrate_vm(zstack_management_ip, vm_to_migr, target_host)
+                start_vm(zstack_management_ip, vm_to_migr)
+            elif len(host_set) == len(ebs_host.keys()):
+                target_host = [k[1] for k, v in ebs_host.items() if int(v['cpu']) >= 14 and v['mem'] > 30]
+                if target_host:
+                    for key in ebs_host.keys():
+                        if key[1] != target_host:
+                            stop_vm(zstack_management_ip, key[0])
+                            migrate_vm(zstack_management_ip, key[0], target_host[0])
+                            start_vm(zstack_management_ip, vm_to_migr)
+                else:
+                    test_util.test_fail('Cannot migrate ebs host vm to the same real host')
     else:
         setup_xsky_storages(scenario_config, scenario_file, deploy_config)
     #setup_zbs_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst)
