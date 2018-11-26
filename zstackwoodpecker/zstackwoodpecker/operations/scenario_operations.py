@@ -2457,7 +2457,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                         elif ps_ref.type_ == 'ebs':
                             cond = res_ops.gen_query_conditions('uuid', '=', vm_inv.hostUuid)
                             host_inv = query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
-                            ebs_host[(vm_inv.uuid, host_inv.uuid)] = {'cpu': host_inv.availableCpuCapacity, 'mem': int(vm.availableMemoryCapacity)/1024/1024/1024}
+                            ebs_host[(vm_inv.uuid, host_inv.uuid)] = {'cpu': host_inv.availableCpuCapacity, 'mem': int(host_inv.availableMemoryCapacity)/1024/1024/1024}
 #                             install_ebs_pkg_in_host(vm_ip, vm.imageUsername_, vm.imagePassword_)
 
         xml_string = etree.tostring(root_xml, 'utf-8')
