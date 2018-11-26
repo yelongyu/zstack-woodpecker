@@ -61,6 +61,18 @@ def test():
     deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
     for host in hosts:
         os.system("bash %s %s" % (EXTRA_HOST_SETUP_SCRIPT, host.managementIp_))
+    
+    test_util.test_dsc("create vpc vrouter")
+    vr = test_stub.create_vpc_vrouter()
+    test_util.test_dsc("Try to create one vm in random L3 not attached")
+    with test_lib.expected_failure("create one vm in random L3 not attached", Exception):
+        test_stub.create_vm_with_random_offering(vm_name='vpc_vm1', l3_name=random.choice(test_stub.L3_SYSTEM_NAME_LIST))
+    test_util.test_dsc("attach vpc l3 to vpc vrouter")
+    test_stub.attach_l3_to_vpc_vr(vr, test_stub.L3_SYSTEM_NAME_LIST)
+
+    test_util.test_dsc("create cloud router")
+    vm1 = test_stub.create_vlan_vm(os.environ.get('l3VlanNetworkName1'))
+    test_obj_dict.add_vm(vm1)
 
     delete_policy = test_lib.lib_set_delete_policy('vm', 'Direct')
     delete_policy = test_lib.lib_set_delete_policy('volume', 'Direct')

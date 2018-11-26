@@ -290,6 +290,45 @@ def check_tcp_between_vms(vm1, vm2, allowed_port_list, denied_port_list):
     test_lib.lib_check_ports_in_a_command(vm2_inv, vm2_inv.vmNics[0].ip,
                                           vm1_inv.vmNics[0].ip, allowed_port_list, denied_port_list, vm1_inv)
 
+def create_vlan_vm(l3_name=None, disk_offering_uuids=None, system_tags=None, strategy_type='InstantStart', session_uuid = None, instance_offering_uuid = None):
+    image_name = os.environ.get('imageName_net')
+    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    if not l3_name:
+        l3_name = os.environ.get('l3VlanNetworkName1')
+
+    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    return create_vm([l3_net_uuid], image_uuid, 'vlan_vm', \
+            disk_offering_uuids, system_tags=system_tags, \
+            instance_offering_uuid = instance_offering_uuid,\
+            strategy_type=strategy_type,
+            session_uuid = session_uuid)
+
+def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
+        disk_offering_uuids = None, default_l3_uuid = None, \
+        system_tags = None, instance_offering_uuid = None, strategy_type='InstantStart', session_uuid = None, ps_uuid=None, timeout=None):
+    vm_creation_option = test_util.VmOption()
+    conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+    if not instance_offering_uuid:
+        instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+    vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+    vm_creation_option.set_l3_uuids(l3_uuid_list)
+    vm_creation_option.set_image_uuid(image_uuid)
+    vm_creation_option.set_name(vm_name)
+    vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
+    vm_creation_option.set_default_l3_uuid(default_l3_uuid)
+    vm_creation_option.set_system_tags(system_tags)
+    vm_creation_option.set_session_uuid(session_uuid)
+    vm_creation_option.set_ps_uuid(ps_uuid)
+    vm_creation_option.set_strategy_type(strategy_type)
+    vm_creation_option.set_timeout(600000)
+
+    vm = zstack_vm_header.ZstackTestVm()
+    vm.set_creation_option(vm_creation_option)
+    vm.create()
+    return vm
+
+
+
 
 class ZstackTestVR(vm_header.TestVm):
     def __init__(self, vr_inv):
