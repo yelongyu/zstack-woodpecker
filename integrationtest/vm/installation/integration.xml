@@ -41,8 +41,8 @@
         <case timeout="4500" >upgrade/test_zs_upgd_cnt_2.0_latest_on_cos7.py</case>
         <case timeout="3400" >upgrade/test_zs_upgd_cnt_2.1_latest_on_cos7.py</case>
         <case timeout="3400" >upgrade/test_zs_upgd_cnt_2.2_latest_on_cos7.py</case>
-        <case timeout="2400" >upgrade/test_zs_upgd_cnt_2.3.0_latest_on_cos7.py</case>
-        <case timeout="3400" >upgrade/test_zs_upgd_cnt_2.3.0_repo_latest_on_cos7.py</case>
+        <case timeout="5400" >upgrade/test_zs_upgd_cnt_2.3.0_latest_on_cos7.py</case>
+        <case timeout="4400" >upgrade/test_zs_upgd_cnt_2.3.0_repo_latest_on_cos7.py</case>
         <case timeout="2400" >upgrade/test_zs_upgd_z_1.7_to_m_latest_on_cos7.py</case>
         <case timeout="2400" >upgrade/test_zs_upgd_z_1.8_to_m_latest_on_cos7.py</case>
         <case timeout="2400" >upgrade/test_zs_upgd_z_1.9_to_m_latest_on_cos7.py</case>
