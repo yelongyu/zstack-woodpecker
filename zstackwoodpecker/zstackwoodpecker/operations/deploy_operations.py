@@ -540,6 +540,11 @@ def get_disk_uuid(scenarioFile):
     ret, disk_uuid, stderr = ssh.execute(cmd, host_ips[-1], "root", "password", True, 22)
     return disk_uuid.strip().split('\n')
 
+def get_scsi_target_ip(scenarioFile):
+    import scenario_operations as sce_ops
+    host_ips = sce_ops.dump_scenario_file_ips(scenarioFile)
+    return host_ips[0]
+
 #Add Primary Storage
 def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid, ps_name = None, \
         zone_name = None):
@@ -922,6 +927,28 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
 
     wait_for_thread_done()
 
+def add_iscsi_server(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluster_name = None, zone_name = None):
+    if not xmlobject.has_element(deployConfig, "zones.zone"):
+        return
+    if xmlobject.has_element(zone, 'iscsiLun'):
+        target_ip = get_scsi_target_ip(scenarioFile)
+
+    def _add_iscsi_server(target_ip):
+        action = api_actions.AddIscsiServerAction()
+        action.ip = target_ip
+        action.port = 3260
+        action.chapUserName = None
+        action.chapUserPassword = None
+        try:
+            evt = action.run()
+            test_util.test_logger(jsonobject.dumps(evt))
+        except Exception as e:
+            exc_info.append(sys.exc_info())
+
+    thread = threading.Thread(target=_add_iscsi_server, args=(target_ip,))
+    wait_for_thread_queue()
+    thread.start()
+    wait_for_thread_done()
 #Add Cluster
 def add_cluster(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluster_name = None, \
         zone_name = None):

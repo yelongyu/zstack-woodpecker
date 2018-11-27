@@ -140,6 +140,7 @@
 	  <sharedBlockPrimaryStorage name="$iscsiPrimaryStorageName"
             description="ISCSI PS" />
         </primaryStorages>
+        <iscsiLun name="$iscsiPrimaryStorageName2"/>
         <clusters>
           <cluster name="$clusterName" description="Test"
             hypervisorType="$clusterHypervisorType">
@@ -152,6 +153,7 @@
                 username="$hostUsername3" password="$hostPassword3" />
             </hosts>
             <primaryStorageRef>$iscsiPrimaryStorageName</primaryStorageRef>
+            <iscsiLunRef>$iscsiPrimaryStorageName2</iscsiLunRef>
             <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>

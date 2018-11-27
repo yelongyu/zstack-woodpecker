@@ -41,3 +41,29 @@ def attach_iscsi_to_cluster(iscsi_uuid, cluster_uuid, session_uuid=None):
     test_util.action_logger('Attach ISCSI [uuid:] %s to [Cluster:] %s' % (iscsi_uuid, cluster_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
+
+def attach_scsi_lun_to_vm(lun_uuid, vm_uuid, session_uuid=None):
+    action = api_actions.AttachScsiLunToVmInstanceAction()
+    action.uuid = lun_uuid
+    action.vmInstanceUuid = vm_uuid
+    action.timeout = 240000
+    test_util.action_logger('Attach SCSI LUN [uuid:] %s to [VM:] %s' % (lun_uuid, vm_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def detach_scsi_lun_from_vm(lun_uuid, vm_uuid, session_uuid=None):
+    action = api_actions.DetachScsiLunFromVmInstanceAction()
+    action.uuid = lun_uuid
+    action.vmInstanceUuid = vm_uuid
+    action.timeout = 240000
+    test_util.action_logger('Detach SCSI LUN [uuid:] %s from [VM:] %s' % (lun_uuid, vm_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def get_scsi_lun_candidate_to_attach_vm(vm_uuid, session_uuid=None):
+    action = api_actions.GetScsiLunCandidatesForAttachingVmAction()
+    action.vmInstanceUuid = vm_uuid
+    action.timeout = 240000
+    test_util.action_logger('Get SCSI Lun Candidate to [VM:] %s' % (vm_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
