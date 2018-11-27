@@ -2305,6 +2305,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 #vm_creation_option.set_system_tags(system_tags)
                 #vm_creation_option.set_ps_uuid(ps_uuid)
                 #vm_creation_option.set_session_uuid(session_uuid)
+                if ebs_host:
+                    for k, v in ebs_host.items():
+                        if int(v['cpu']) > 6 and v['mem'] > 12:
+                            vm_creation_option.set_host_uuid(k[1])
 
                 #if iscsiClusterUuid has been set, vm will be assigned to iscsiCluster.
                 iscsi_cluster_uuid = os.environ.get('iscsiClusterUuid')
@@ -2476,13 +2480,13 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
             host_list= [h[1] for h in ebs_host.keys()]
             host_set = set(host_list)
             if 1 < len(host_set) < len(ebs_host.keys()):
-                vm_to_migr, host_to_escape = [v for (v, _h) in ebs_host.keys() if host_list.count(_h) < 2]
+                vm_to_migr, host_to_escape, _vm_ip = [v for (v, _h) in ebs_host.keys() if host_list.count(_h) < 2]
                 host_set.remove(host_to_escape)
                 target_host = list(host_set)[0]
-                migrate_vm(zstack_management_ip, vm_to_migr[0], target_host)
-                stop_vm(zstack_management_ip, vm_to_migr[0])
-                start_vm(zstack_management_ip, vm_to_migr[0])
-                test_lib.lib_wait_target_up(vm_to_migr[-1], '22', 360)
+                migrate_vm(zstack_management_ip, vm_to_migr, target_host)
+                stop_vm(zstack_management_ip, vm_to_migr)
+                start_vm(zstack_management_ip, vm_to_migr)
+                test_lib.lib_wait_target_up(_vm_ip, '22', 360)
             elif len(host_set) == len(ebs_host.keys()):
                 target_host = [k[1] for k, v in ebs_host.items() if int(v['cpu']) >= 16 and v['mem'] > 30]
                 if target_host:
