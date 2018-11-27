@@ -2457,7 +2457,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                         elif ps_ref.type_ == 'ebs':
                             cond = res_ops.gen_query_conditions('uuid', '=', vm_inv.hostUuid)
                             host_inv = query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
-                            ebs_host[(vm_inv.uuid, host_inv.uuid)] = {'cpu': host_inv.availableCpuCapacity, 'mem': int(host_inv.availableMemoryCapacity)/1024/1024/1024}
+                            ebs_host[(vm_inv.uuid, host_inv.uuid, vm_ip)] = {'cpu': host_inv.availableCpuCapacity, 'mem': int(host_inv.availableMemoryCapacity)/1024/1024/1024}
 #                             install_ebs_pkg_in_host(vm_ip, vm.imageUsername_, vm.imagePassword_)
 
         xml_string = etree.tostring(root_xml, 'utf-8')
@@ -2476,12 +2476,13 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
             host_list= [h[1] for h in ebs_host.keys()]
             host_set = set(host_list)
             if 1 < len(host_set) < len(ebs_host.keys()):
-                vm_to_migr, host_to_escape = [v[0] for (v, _h) in ebs_host.keys() if host_list.count(_h) < 2]
+                vm_to_migr, host_to_escape = [v for (v, _h) in ebs_host.keys() if host_list.count(_h) < 2]
                 host_set.remove(host_to_escape)
                 target_host = list(host_set)[0]
-                migrate_vm(zstack_management_ip, vm_to_migr, target_host)
-                stop_vm(zstack_management_ip, vm_to_migr)
-                start_vm(zstack_management_ip, vm_to_migr)
+                migrate_vm(zstack_management_ip, vm_to_migr[0], target_host)
+                stop_vm(zstack_management_ip, vm_to_migr[0])
+                start_vm(zstack_management_ip, vm_to_migr[0])
+                test_lib.lib_wait_target_up(vm_to_migr[-1], '22', 360)
             elif len(host_set) == len(ebs_host.keys()):
                 target_host = [k[1] for k, v in ebs_host.items() if int(v['cpu']) >= 16 and v['mem'] > 30]
                 if target_host:
@@ -2490,6 +2491,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             migrate_vm(zstack_management_ip, key[0], target_host[0])
                             stop_vm(zstack_management_ip, key[0])
                             start_vm(zstack_management_ip, key[0])
+                            test_lib.lib_wait_target_up(key[-1], '22', 360)
                 else:
                     test_util.test_fail('Cannot migrate ebs host vm to the same real host')
     else:
