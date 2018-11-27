@@ -40,8 +40,8 @@ import itertools
 #import traceback
 
 l3_vlan_system_name_list=['l3VlanNetworkName1', "l3VlanNetwork2"]
-l3_vxlan_system_name_list= ["l3VxlanNetwork11", "l3VxlanNetwork12"]
-L3_SYSTEM_NAME_LIST = tuple(l3_vlan_system_name_list + l3_vxlan_system_name_list)
+#l3_vxlan_system_name_list= ["l3VxlanNetwork11", "l3VxlanNetwork12"]
+L3_SYSTEM_NAME_LIST = tuple(l3_vlan_system_name_list)
 
 vpc1_l3_list = ['l3VlanNetworkName1', "l3VlanNetwork2", "l3VxlanNetwork11", "l3VxlanNetwork12"]
 vpc2_l3_list = ['l3VlanNetwork3', "l3VlanNetwork4", "l3VxlanNetwork13", "l3VxlanNetwork14"]
@@ -322,7 +322,8 @@ def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
     vm_creation_option.set_strategy_type(strategy_type)
     vm_creation_option.set_timeout(600000)
 
-    vm = zstack_vm_header.ZstackTestVm()
+    #vm = zstack_vm_header.ZstackTestVm()
+    vm = test_vm_header.ZstackTestVm()	
     vm.set_creation_option(vm_creation_option)
     vm.create()
     return vm

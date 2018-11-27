@@ -16,12 +16,14 @@ import zstackwoodpecker.operations.deploy_operations as deploy_operations
 import zstackwoodpecker.operations.config_operations as config_operations
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
+import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.config_operations as conf_ops
 
 USER_PATH = os.path.expanduser('~')
 EXTRA_SUITE_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_suite_setup_config.sh' % USER_PATH
 EXTRA_HOST_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_host_setup_config.sh' % USER_PATH
-
+test_stub = test_lib.lib_get_test_stub()
+test_obj_dict = test_state.TestStateDict()
 def test():
     if test_lib.scenario_config != None and test_lib.scenario_file != None and not os.path.exists(test_lib.scenario_file):
         scenario_operations.deploy_scenario(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
@@ -71,8 +73,9 @@ def test():
     test_stub.attach_l3_to_vpc_vr(vr, test_stub.L3_SYSTEM_NAME_LIST)
 
     test_util.test_dsc("create cloud router")
-    vm1 = test_stub.create_vlan_vm(os.environ.get('l3VlanNetworkName1'))
+    vm1 = test_stub.create_vlan_vm(os.environ.get('l3NoVlanNetworkName2'))
     test_obj_dict.add_vm(vm1)
+    vm1.destroy()
 
     delete_policy = test_lib.lib_set_delete_policy('vm', 'Direct')
     delete_policy = test_lib.lib_set_delete_policy('volume', 'Direct')
