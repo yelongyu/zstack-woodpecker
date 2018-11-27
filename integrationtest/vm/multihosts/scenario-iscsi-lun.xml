@@ -21,7 +21,7 @@
             </l3Network>
           </l3Networks>
           <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
-          <iscsiLunRef type="iscsiTarget" disk_offering_uuid="$iscsiDiskOfferingUuid">$iscsiPrimaryStorageName2</primaryStorageRef>
+          <iscsiLunRef type="iscsiTarget" disk_offering_uuid="$iscsiDiskOfferingUuid">$iscsiPrimaryStorageName2</iscsiLunRef>
         </vm>
       </vms>
     </host>
