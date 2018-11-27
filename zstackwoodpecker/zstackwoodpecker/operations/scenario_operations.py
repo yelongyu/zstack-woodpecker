@@ -2479,16 +2479,16 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 vm_to_migr, host_to_escape = [v[0] for (v, _h) in ebs_host.keys() if host_list.count(_h) < 2]
                 host_set.remove(host_to_escape)
                 target_host = list(host_set)[0]
-                stop_vm(zstack_management_ip, vm_to_migr)
                 migrate_vm(zstack_management_ip, vm_to_migr, target_host)
+                stop_vm(zstack_management_ip, vm_to_migr)
                 start_vm(zstack_management_ip, vm_to_migr)
             elif len(host_set) == len(ebs_host.keys()):
-                target_host = [k[1] for k, v in ebs_host.items() if int(v['cpu']) >= 14 and v['mem'] > 30]
+                target_host = [k[1] for k, v in ebs_host.items() if int(v['cpu']) >= 16 and v['mem'] > 30]
                 if target_host:
                     for key in ebs_host.keys():
-                        if key[1] != target_host:
-                            stop_vm(zstack_management_ip, key[0])
+                        if key[1] != target_host[0]:
                             migrate_vm(zstack_management_ip, key[0], target_host[0])
+                            stop_vm(zstack_management_ip, key[0])
                             start_vm(zstack_management_ip, key[0])
                 else:
                     test_util.test_fail('Cannot migrate ebs host vm to the same real host')
