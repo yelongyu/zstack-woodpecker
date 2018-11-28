@@ -180,6 +180,8 @@ ipv6RangeEndIp = 1000::20
 ipv6prefix_length = 64
 ipv6RangeGateway = 1000::1
 ipv6DNSServer = 240c::6666
+ipv6CidrName = host IPv6 Cidr
+ipv6Cidr = 1000:2000:3000:4000::1/64
 
 noVlanIpRangeName1 = guest novlan range 1
 noVlanIpRangeStart1 = 10.250.0.2

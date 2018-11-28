@@ -1544,6 +1544,8 @@ def add_l3_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l3_
             #add ip range. 
             if xmlobject.has_element(l3, 'ipRange'):
                 do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid, ipversion = 6)
+            else:
+                do_add_ip_cidr(l3.ipv6Cidr, l3_inv.uuid, session_uuid, ipversion = 6)
         else:
             if xmlobject.has_element(l3, 'dns'):
                 for dns in xmlobject.safe_list(l3.dns):
@@ -1673,8 +1675,12 @@ def add_ip_range(deployConfig, session_uuid, ip_range_name = None, \
                 do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid, \
                         ip_range_name, ipversion = 4)
             else:
-                do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid, \
+                if xmlobject.has_element(l3, 'ipRange'):
+                    do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid, \
                         ip_range_name, ipversion = 6)
+                else:
+                    do_add_ip_cidr(l3.ipv6Cidr, l3_inv.uuid, session_uuid, \
+                        ip_cidr_name, ipversion = 6)
 
 def do_add_ip_range(ip_range_xml_obj, l3_uuid, session_uuid, \
         ip_range_name = None, ipversion = 4):
@@ -1710,6 +1716,44 @@ def do_add_ip_range(ip_range_xml_obj, l3_uuid, session_uuid, \
             action.startIp = ir.startIp_
             action.addressMode = ir.addressMode__
             action.prefixLen = ir.prefixLen_
+            try:
+                evt = action.run()
+            except Exception as e:
+                exc_info.append(sys.exc_info())
+                raise e
+            test_util.test_logger(jsonobject.dumps(evt))
+
+def do_add_ip_cidr(ip_cidr_xml_obj, l3_uuid, session_uuid, \
+        ip_cidr_name = None, ipversion = 4):
+
+    for ic in xmlobject.safe_list(ip_cidr_xml_obj):
+        if ip_cidr_name and ip_cidr_name != ic.name_:
+            continue
+
+        if ipversion == 4:
+            action = api_actions.AddIpRangeByNetworkCidrAction()
+            action.sessionUuid = session_uuid
+            action.description = ic.description__
+            action.endIp = ir.endIp_
+            action.gateway = ir.gateway_
+            action.l3NetworkUuid = l3_uuid
+            action.name = ir.name_
+            action.netmask = ir.netmask_
+            action.startIp = ir.startIp_
+            try:
+                evt = action.run()
+            except Exception as e:
+                exc_info.append(sys.exc_info())
+                raise e
+            test_util.test_logger(jsonobject.dumps(evt))
+        else:
+            action = api_actions.AddIpv6RangeByNetworkCidrAction()
+            action.sessionUuid = session_uuid
+            action.description = ic.description__
+            action.l3NetworkUuid = l3_uuid
+            action.name = ic.name_
+            action.networkCidr = ic.ipv6Cidr__
+            action.addressMode = ic.addressMode__
             try:
                 evt = action.run()
             except Exception as e:
