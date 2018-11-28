@@ -32,11 +32,24 @@ session_uuid = None
 session_to = None
 session_mc = None
 
+time_interval = 0
+
 if os.environ.get('CASE_FLAVOR'):
-   flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
-   num = flavor['vm_num']
+    flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
+    num = flavor['vm_num']
 else:
-   num = 10000
+    num = 10000
+
+if num == 100 or num == 200:
+    time_interval = 200
+elif num == 500:
+    time_interval = 500
+elif num == 1000:
+    time_interval = 720
+elif num == 10000:
+    time_interval = 1800
+else:
+    time_interval = 300
 
 os.environ['ZSTACK_THREAD_THRESHOLD']=str(num)
 os.environ['ZSTACK_TEST_NUM']=str(num)
@@ -46,6 +59,12 @@ if not thread_threshold:
     thread_threshold = 1000
 else:
     thread_threshold = int(thread_threshold)
+
+perf_loop = os.environ.get('ZSTACK_PERF_LOOP')
+if not perf_loop:
+    perf_loop = 3
+else:
+    perf_loop = int(perf_loop)
 
 exc_info = []
 
@@ -129,24 +148,73 @@ def time_convert(log_str):
     time_tuple = time.strptime(time_str, "%Y-%m-%d %H:%M:%S")
     return int(time.mktime(time_tuple)*1000+int(time_microscond))
 
-def get_begin_time(vm_name_prefix):
+def get_begin_time(vm_name_prefix, operation):
+
+    begin_time = 0
+    start_line = 0
     mn_server_log = "/usr/local/zstacktest/apache-tomcat/logs/management-server.log"
     file_obj = open(mn_server_log)
-    for line in file_obj.readlines():
-        if line.find('SimpleFlowChain') != -1 and line.find('create-vm') != -1 and line.find('starts') != -1 and line.find(vm_name_prefix) != -1:
-            begin_time = time_convert(line)
-            break
+
+    if operation == 'create':
+        for line in file_obj.readlines():
+            if line.find('APICreateVmInstanceMsg') != -1 and line.find(vm_name_prefix) != -1:
+                begin_time = time_convert(line)
+                break
+    elif operation == 'destroy':
+        for (num, line) in enumerate(file_obj):
+            if line.find('APICreateVmInstanceMsg') != -1 and line.find(vm_name_prefix) != -1:
+		start_line = num
+                continue
+            if line.find('APIDestroyVmInstanceMsg') != -1 and line.find('msg send') != -1:
+		if num > start_line and start_line != 0:
+                    begin_time = time_convert(line)
+                    break
+    elif operation == 'expunge':
+        for (num, line) in enumerate(file_obj):
+            if line.find('APICreateVmInstanceMsg') != -1 and line.find(vm_name_prefix) != -1:
+		start_line = num
+                continue
+            if line.find('APIExpungeVmInstanceMsg') != -1 and line.find('msg send') != -1:
+		if num > start_line and start_line != 0:
+                    begin_time = time_convert(line)
+                    break
+    else:
+        test_util.test_logger('Unknown option %s' % operation)
 
     file_obj.close()
     log_str = ''
     return begin_time
 
-def get_end_time(vm_name_prefix):
+def get_end_time(vm_name_prefix, operation):
+    
+    end_time = 0
+    start_line = 0
     mn_server_log = "/usr/local/zstacktest/apache-tomcat/logs/management-server.log"
     file_obj = open(mn_server_log)
-    for line in file_obj.readlines():
-        if line.find('event publish') != -1 and line.rfind('APICreateVmInstanceEvent') != -1 and line.rfind(vm_name_prefix) != -1:
-            end_time = time_convert(line)
+
+    if operation == 'create':
+        for line in file_obj.readlines():
+            if line.find('event received') != -1 and line.find('APICreateVmInstanceEvent') != -1 and line.find(vm_name_prefix) != -1:
+                end_time = time_convert(line)
+    elif operation == 'destroy':
+        for (num, line) in enumerate(file_obj):
+            if line.find('event received') != -1 and line.find('APICreateVmInstanceEvent') != -1 and line.find(vm_name_prefix) != -1:
+		start_line = num
+                continue
+            if line.find('event received') != -1 and line.find('APIDestroyVmInstanceEvent') != -1:
+		if num > start_line and start_line != 0:
+                    end_time = time_convert(line)
+    elif operation == 'expunge':
+        for (num, line) in enumerate(file_obj):
+            if line.find('event received') != -1 and line.find('APICreateVmInstanceEvent') != -1 and line.find(vm_name_prefix) != -1:
+		start_line = num
+                continue
+            if line.find('event received') != -1 and line.find('APIExpungeVmInstanceEvent') != -1:
+		if num > start_line and start_line != 0:
+                    end_time = time_convert(line)
+    else:
+        test_util.test_logger('Unknown option %s' % operation)
+
 
     file_obj.close()
     log_str = ''
@@ -159,6 +227,11 @@ def Create(vm_name_prefix):
     global session_uuid
     global session_to
     global session_mc
+
+    session_uuid = None
+    session_to = None
+    session_mc = None
+
     vm_num = os.environ.get('ZSTACK_TEST_NUM')
     if not vm_num:
        vm_num = 1000
@@ -212,31 +285,70 @@ def Create(vm_name_prefix):
 
 def test():
 
+    total_create_vms_time = 0
+    total_destroy_vms_time = 0
+    total_expunge_vms_time = 0
+
+    create_vms_time = []
+    destroy_vms_time = []
+    expunge_vms_time = []
+
     test_lib.lib_set_provision_memory_rate(20)
     test_lib.lib_set_provision_storage_rate(20)
     lib_set_provision_cpu_rate(20)
 
-    vm_name_prefix = 'multi_vms_%s' % str(get_random_name(4))
-    Create(vm_name_prefix)
-    time.sleep(300)
+    for i in range(0, perf_loop):
+        test_util.test_dsc("start the %d interation" % i)
+        vm_name_prefix = 'multi_vms_%s' % str(get_random_name(4))
+        Create(vm_name_prefix)
+        time.sleep(time_interval)
 
-    create_vm_begin_time = get_begin_time(vm_name_prefix)
-    create_vm_end_time = get_end_time(vm_name_prefix)
-    print ("begin time = %s") % create_vm_begin_time
-    print ("end time = %s") % create_vm_end_time
+        create_vm_begin_time = get_begin_time(vm_name_prefix, 'create')
+        create_vm_end_time = get_end_time(vm_name_prefix, 'create')
+        print ("vm creation begin time = %s") % create_vm_begin_time
+        print ("vm creation end time = %s") % create_vm_end_time
 
-    if create_vm_end_time != 0 and create_vm_begin_time != 0:
-        create_vms_time = create_vm_end_time - create_vm_begin_time
-    test_util.test_dsc("create_vm_time is "+str(create_vms_time))
+        if create_vm_end_time != 0 and create_vm_begin_time != 0:
+            create_vms_time.append(create_vm_end_time - create_vm_begin_time)
+        test_util.test_dsc("create_vm_time is "+str(create_vms_time[i]))
 
-    Destroy_VM()
-    time.sleep(180)
-    Expunge_VM()
-    time.sleep(180)
+        Destroy_VM()
+        time.sleep(180)
+
+        destroy_vm_begin_time = get_begin_time(vm_name_prefix, 'destroy')
+        destroy_vm_end_time = get_end_time(vm_name_prefix, 'destroy')
+        print ("vm destroy begin time = %s") % destroy_vm_begin_time
+        print ("vm destroy end time = %s") % destroy_vm_end_time
+
+        if destroy_vm_end_time != 0 and destroy_vm_begin_time != 0:
+            destroy_vms_time.append(destroy_vm_end_time - destroy_vm_begin_time)
+        test_util.test_dsc("destroy_vm_time is "+str(destroy_vms_time[i]))
+
+        Expunge_VM()
+        time.sleep(180)
+        
+        expunge_vm_begin_time = get_begin_time(vm_name_prefix, 'expunge')
+        expunge_vm_end_time = get_end_time(vm_name_prefix, 'expunge')
+        print ("vm expunge begin time = %s") % expunge_vm_begin_time
+        print ("vm expunge end time = %s") % expunge_vm_end_time
+
+        if expunge_vm_end_time != 0 and expunge_vm_begin_time != 0:
+            expunge_vms_time.append(expunge_vm_end_time - expunge_vm_begin_time)
+        test_util.test_dsc("expunge_vm_time is "+str(expunge_vms_time[i]))
+
+    print ("totally %d iterations executed") % perf_loop
+    print "\t\tCre\tDes\tExp"
+    for i in range(0, perf_loop):
+        print "Iteration%d\t%d\t%d\t%d" % (i, create_vms_time[i], destroy_vms_time[i], expunge_vms_time[i])
+        total_create_vms_time = total_create_vms_time + create_vms_time[i]
+        total_destroy_vms_time = total_destroy_vms_time + destroy_vms_time[i]
+        total_expunge_vms_time = total_expunge_vms_time + expunge_vms_time[i]
+    print "Average\t\t%d\t%d\t%d" % (int(total_create_vms_time/perf_loop), int(total_destroy_vms_time/perf_loop), int(total_expunge_vms_time/perf_loop))
+
     #zone_name = os.environ.get('zoneName')
     #zone = res_ops.get_resource(res_ops.ZONE, name = zone_name)[0]
     #zone_ops.delete_zone(zone.uuid)
-    test_util.test_pass('Create %d vms success,takes %s ms' % (num, create_vms_time))
+    #test_util.test_pass('Create %d vms success,takes %s ms' % (num, create_vms_time))
 
 def error_cleanup():
     if session_to:
