@@ -235,6 +235,7 @@ def lib_get_ceph_info(monUrls):
     '''
     mons = monUrls.split(';')
     mon1 = mons[0]
+    print "debug message: monUrls are %s, mons are %s and mon1 is %s" % (monUrls,mons,mon1)
     user_pass, ceph_host = mon1.split('@')
     username, password = user_pass.split(':')
     return ceph_host, username, password
