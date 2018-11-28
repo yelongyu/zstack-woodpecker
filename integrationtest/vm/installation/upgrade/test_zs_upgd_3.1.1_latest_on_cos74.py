@@ -24,7 +24,7 @@ def test():
     test_util.test_dsc('Create test vm to test zstack upgrade by -u.')
 
     image_name = os.environ.get('imageNameBase_311_mn_c74')
-    c74_iso_path = os.environ.get('iso_path')
+    c74_iso_path = os.environ.get('c74_iso_path')
     #iso_21_path = os.environ.get('iso_21_path')
     zstack_latest_version = os.environ.get('zstackLatestVersion')
     zstack_latest_path = os.environ.get('zstackLatestInstaller')
