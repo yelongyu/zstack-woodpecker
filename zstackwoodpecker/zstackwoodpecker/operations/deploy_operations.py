@@ -928,7 +928,7 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
     wait_for_thread_done()
 
 def add_iscsi_server(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluster_name = None, zone_name = None):
-    if not xmlobject.has_element(deployConfig, "zones.zone"):
+    if not xmlobject.has_element(deployConfig, "zones.zone.iscsiLun"):
         return
     target_ip = get_scsi_target_ip(scenarioFile)
     pr = xmlobject.safe_list(deployConfig.zones.zone.iscsiLun)[0]
@@ -936,7 +936,6 @@ def add_iscsi_server(scenarioConfig, scenarioFile, deployConfig, session_uuid, c
     def _add_iscsi_server(target_ip):
         action = api_actions.AddIscsiServerAction()
         action.name = pr.name_
-        action.ip = target_ip
         action.ip = target_ip
         action.port = 3260
         action.chapUserName = None
