@@ -129,7 +129,7 @@ class HybridObject(object):
             elif len(err_list) == len(regions):
                 raise hyb_ops.ApiError("Failed to add DataCenter: %s" % err_list)
             # Add Identity Zone
-            iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, r)
+            iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, r, datacenter.uuid)
             vpn_gateway_normal = []
             prepaid_ecs_list = []
             for iz in iz_list:
