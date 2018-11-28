@@ -622,7 +622,7 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 action.description = pr.description__
                 action.zoneUuid = zinv.uuid
                 action.diskUuids = [disk_uuids.pop()]
-                action.systemTags = ["primaryStorageVolumeProvisioningStrategy::ThinProvisioning"]
+                action.systemTags = ["primaryStorageVolumeProvisioningStrategy::ThinProvisioning", "forceWipe"]
                 thread = threading.Thread(target=_thread_for_action, args=(action,))
                 wait_for_thread_queue()
                 thread.start()
@@ -930,15 +930,18 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
 def add_iscsi_server(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluster_name = None, zone_name = None):
     if not xmlobject.has_element(deployConfig, "zones.zone"):
         return
-    if xmlobject.has_element(zone, 'iscsiLun'):
-        target_ip = get_scsi_target_ip(scenarioFile)
+    target_ip = get_scsi_target_ip(scenarioFile)
+    pr = xmlobject.safe_list(deployConfig.zones.zone.iscsiLun)[0]
 
     def _add_iscsi_server(target_ip):
         action = api_actions.AddIscsiServerAction()
+        action.name = pr.name_
+        action.ip = target_ip
         action.ip = target_ip
         action.port = 3260
         action.chapUserName = None
         action.chapUserPassword = None
+        action.sessionUuid = session_uuid
         try:
             evt = action.run()
             test_util.test_logger(jsonobject.dumps(evt))
@@ -976,6 +979,21 @@ def add_cluster(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluste
                     test_util.test_logger(jsonobject.dumps(evt))
         except:
             exc_info.append(sys.exc_info())
+     
+        try:
+            if xmlobject.has_element(cluster, 'iscsiLunRef'):
+                for lun in xmlobject.safe_list(cluster.iscsiLunRef):
+                    iscsi_server = generate_dup_name(generate_dup_name(lun.text_, zone_ref, 'z'), cluster_ref, 'c')
+                    iscsi_uuid = res_ops.get_resource(res_ops.ISCSI_SERVER, session_uuid, name=iscsi_server)[0].uuid
+                    action_iscsi = api_actions.AttachIscsiServerToClusterAction()
+                    action_iscsi.sessionUuid = session_uuid
+                    action_iscsi.uuid = iscsi_uuid
+                    action_iscsi.clusterUuid = cinv.uuid
+                    evt = action_iscsi.run()
+                    test_util.test_logger(jsonobject.dumps(evt))
+        except:
+            exc_info.append(sys.exc_info())
+                    
 
         if cluster.allL2NetworkRef__ == 'true':
             #find all L2 network in zone and attach to cluster
@@ -2578,6 +2596,7 @@ def deploy_initial_database(deploy_config, scenario_config = None, scenario_file
             add_zone,
             add_l2_network,
             add_primary_storage,
+            add_iscsi_server,
             add_cluster,
             add_host,
             add_sanlock,

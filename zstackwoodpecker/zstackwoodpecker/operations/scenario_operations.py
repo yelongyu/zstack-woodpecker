@@ -2417,10 +2417,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
                             break
                     setup_backupstorage_vm(vm_inv, vm, deploy_config)
-                if xmlobject.has_element(vm, 'iscsilunRef'):
+                if xmlobject.has_element(vm, 'iscsiLunRef'):
                     for lun_ref in xmlobject.safe_list(vm.iscsiLunRef):
                         if lun_ref.type_ == 'iscsiTarget':
-                            iscsi_disk_offering_uuid = ps_ref.disk_offering_uuid_
+                            iscsi_disk_offering_uuid = lun_ref.disk_offering_uuid_
                             volume_option.set_disk_offering_uuid(iscsi_disk_offering_uuid)
                             iscsi_share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv)
                             attach_volume(zstack_management_ip, iscsi_share_volume_inv.uuid, vm_inv.uuid)
