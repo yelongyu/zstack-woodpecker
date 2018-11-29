@@ -84,6 +84,7 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
         monHost = ps.mons[0].hostname
         for key in os.environ.keys():
             if monHost in os.environ.get(key):
+                print "debug message monHost and key is %s and %s" % (monHost,key)
                 ceph_host, username, password = \
                         test_lib.lib_get_ceph_info(os.environ.get(key))
                 break
