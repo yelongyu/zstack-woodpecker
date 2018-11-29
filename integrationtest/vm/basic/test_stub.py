@@ -247,3 +247,42 @@ def create_vnc_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=Non
     vm.create()
     return vm
 
+
+def create_vip(vip_name=None, l3_uuid=None, session_uuid = None, required_ip=None):
+    if not vip_name:
+        vip_name = 'test vip'
+    if not l3_uuid:
+        l3_name = os.environ.get('l3PublicNetworkName')
+        l3_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+
+    vip_creation_option = test_util.VipOption()
+    vip_creation_option.set_name(vip_name)
+    vip_creation_option.set_l3_uuid(l3_uuid)
+    vip_creation_option.set_session_uuid(session_uuid)
+    vip_creation_option.set_requiredIp(required_ip)
+
+    vip = zstack_vip_header.ZstackTestVip()
+    vip.set_creation_option(vip_creation_option)
+    vip.create()
+
+    return vip
+
+def create_eip(eip_name=None, vip_uuid=None, vnic_uuid=None, vm_obj=None, \
+        session_uuid = None):
+    if not vip_uuid:
+        l3_name = os.environ.get('l3PublicNetworkName')
+        l3_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+        vip_uuid = net_ops.acquire_vip(l3_uuid).uuid
+
+    eip_option = test_util.EipOption()
+    eip_option.set_name(eip_name)
+    eip_option.set_vip_uuid(vip_uuid)
+    eip_option.set_vm_nic_uuid(vnic_uuid)
+    eip_option.set_session_uuid(session_uuid)
+    eip = zstack_eip_header.ZstackTestEip()
+    eip.set_creation_option(eip_option)
+    if vnic_uuid and not vm_obj:
+        test_util.test_fail('vm_obj can not be None in create_eip() API, when setting vm_nic_uuid.')
+    eip.create(vm_obj)
+    return eip
+
