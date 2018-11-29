@@ -8,11 +8,18 @@ New Integration Test for reinit VM with snapshot.
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
+import zstackwoodpecker.operations.resource_operations as res_ops
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
 def test():
+
+    ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+    for i in ps:
+        if i.type == 'AliyunEBS':
+            test_util.test_skip('Skip vm reinit test on AliyunEBS')
+
     vm = test_stub.create_user_vlan_vm()
     test_obj_dict.add_vm(vm)
     vm.check()
