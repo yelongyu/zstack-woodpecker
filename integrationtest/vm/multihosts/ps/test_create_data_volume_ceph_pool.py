@@ -53,7 +53,7 @@ def test():
     ps_ops.add_ceph_primary_storage_pool(ps_uuid, rootPoolName, aliasName, isCreate, poolType="Root")
     dataPoolName = 'for_test_data_sas_pool'
     aliasName = 'test_aliasName_new_data'
-    ps_ops.add_ceph_primary_storage_pool(ps_uuid, dataPoolName, aliasName, isCreate, poolType="Root")
+    ps_ops.add_ceph_primary_storage_pool(ps_uuid, dataPoolName, aliasName, isCreate, poolType="Data")
     #create vm on sas pool
     instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(
        os.environ.get('instanceOfferingName_s')).uuid
@@ -62,10 +62,11 @@ def test():
     disk_offering = test_lib.lib_get_disk_offering_by_name(
         os.environ.get('smallDiskOfferingName')).uuid
 
-    image_uuid = res_ops.query_resource(
-        res_ops.IMAGE, cond)[0].uuid
-    l3net_uuid = res_ops.get_resource(
-        res_ops.L3_NETWORK)[0].uuid
+    image_uuid = test_lib.lib_get_image_by_name(
+        os.environ.get('imageName_s')).uuid
+    l3net_uuid = test_lib.lib_get_l3_by_name(
+        os.environ.get('l3PublicNetworkName')).uuid
+       
     vm_creation_option = test_util.VmOption()
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
     vm_creation_option.set_image_uuid(image_uuid)
