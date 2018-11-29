@@ -127,6 +127,8 @@
                 netmask="$ipRangeNetmask" />
               <networkService provider="SecurityGroup">
                 <serviceType>SecurityGroup</serviceType>
+                <serviceType>Eip</serviceType>
+                <serviceType>DHCP</serviceType>
               </networkService>
             </l3BasicNetwork>
           </l3Networks>
