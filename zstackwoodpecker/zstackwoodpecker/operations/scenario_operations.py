@@ -2087,6 +2087,18 @@ def expunge_image(http_server_ip, image_uuid, session_uuid=None):
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     return evt
 
+def delete_vol(http_server_ip, vol_uuid, session_uuid=None):
+    action = api_actions.DeleteDataVolumeAction()
+    action.uuid = vol_uuid
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    return evt
+
+def expunge_vol(http_server_ip, vol_uuid, session_uuid=None):
+    action = api_actions.ExpungeDataVolumeAction()
+    action.uuid = vol_uuid
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    return evt
+
 def attach_l3(http_server_ip, l3_uuid, vm_uuid, session_uuid = None):
     action = api_actions.AttachL3NetworkToVmAction()
     action.l3NetworkUuid = l3_uuid
@@ -2616,6 +2628,10 @@ def destroy_scenario(scenario_config, scenario_file):
                 for img in ebs_test_image:
                     delete_image(zstack_management_ip, img.uuid)
                     expunge_image(zstack_management_ip, img.uuid)
+                ebs_test_data_volume = query_resource(zstack_management_ip, res_ops.VOLUME, cond).inventories
+                for vol in ebs_test_data_volume:
+                    delete_vol(zstack_management_ip, vol.uuid)
+                    expunge_vol(zstack_management_ip, vol.uuid)
             except:
                 pass
 
