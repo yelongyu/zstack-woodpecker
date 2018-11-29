@@ -2075,6 +2075,18 @@ def add_network_service(http_server_ip, l3_uuid, allservices, session_uuid=None)
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     return evt
 
+def delete_image(http_server_ip, image_uuid, session_uuid=None):
+    action = api_actions.DeleteImageAction()
+    action.uuid = image_uuid
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    return evt
+
+def expunge_image(http_server_ip, image_uuid, session_uuid=None):
+    action = api_actions.ExpungeImageAction()
+    action.imageUuid = image_uuid
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    return evt
+
 def attach_l3(http_server_ip, l3_uuid, vm_uuid, session_uuid = None):
     action = api_actions.AttachL3NetworkToVmAction()
     action.l3NetworkUuid = l3_uuid
@@ -2598,4 +2610,12 @@ def destroy_scenario(scenario_config, scenario_file):
                     for vip in vip_lst:
                         vip.delete()
             destroy_vm(zstack_management_ip, vm.uuid_)
+            try:
+                cond = res_ops.gen_query_conditions('name', 'like', vm.uuid_)
+                ebs_test_image = query_resource(zstack_management_ip, res_ops.IMAGE, cond).inventories
+                for img in ebs_test_image:
+                    delete_image(zstack_management_ip, img.uuid)
+                    expunge_image(zstack_management_ip, img.uuid)
+            except:
+                pass
 
