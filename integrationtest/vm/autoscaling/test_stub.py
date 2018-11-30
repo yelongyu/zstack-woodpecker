@@ -328,6 +328,39 @@ def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
     vm.create()
     return vm
 
+def check_autoscaling_init_vmm_number(initvm_number,autoscaling_groupUuid):
+    for i in range(10):
+        conf = res_ops.gen_query_conditions('state', '=','Running')
+        mix_vmm_total = res_ops.query_resource_count(res_ops.VM_INSTANCE, conf)
+        test_util.test_logger("%s" %(mix_vmm_total))
+        vmm_virtualrouter_total = res_ops.query_resource_count(res_ops.VIRTUALROUTER_VM, conf)
+        vmm_total = mix_vmm_total - vmm_virtualrouter_total
+        if vmm_total != initvm_number:
+            if i < 9:
+                time.sleep(5)
+                continue
+            test_util.test_dsc("autoscaling group init vmm fail")
+            autoscaling.delete_autoScaling_group(autoscaling_groupUuid)
+        else:
+            test_util.test_logger("autoscaling group init vmm sucessfully")
+            break
+
+def check_deleteautoscaling_vmm_number():
+    for i in range(10):
+        conf = res_ops.gen_query_conditions('state', '=','Running')
+        mix_vmm_total = res_ops.query_resource_count(res_ops.VM_INSTANCE, conf)
+        test_util.test_logger("%s" %(mix_vmm_total))
+        vmm_virtualrouter_total = res_ops.query_resource_count(res_ops.VIRTUALROUTER_VM, conf)
+        if mix_vmm_total != vmm_virtualrouter_total:
+            if i < 9:
+                time.sleep(5)
+                continue
+            test_util.test_dsc("autoscaling delete vmm fail")
+            test_util.test_fail("Test AutoScaling Group Failed")
+        else:
+            test_util.test_logger("autoscaling delete vmm sucessfully")
+            break
+
 
 
 
