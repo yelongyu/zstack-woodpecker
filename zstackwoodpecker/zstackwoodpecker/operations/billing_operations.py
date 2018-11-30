@@ -21,17 +21,15 @@ def calculate_account_spending(account_uuid, session_uuid = None):
 
     return result
 
-def delete_resource_price(resource_name, date_in_long, delete_mode = None, session_uuid = None):
+def delete_resource_price(price_uuid, delete_mode = None, session_uuid = None):
     action = api_actions.DeleteResourcePriceAction()
-    action.resourceName = resource_name
-    action.dateInLong = date_in_long
+    action.uuid = price_uuid
     action.deleteMode = delete_mode
-    test_util.action_logger('Delete resource %s price, date in long: %s' \
-            % (resource_name, date_in_long))
+    test_util.action_logger('Delete resource price uuid: %s' \
+            % (price_uuid))                       
     result = account_operations.execute_action_with_session(action, \
-            session_uuid)
-
-    return result
+            session_uuid)                         
+    return result                                 
 
 def create_resource_price(resource_name, time_unit, price, resource_unit = None, date_in_long = None, account_uuid = None, session_uuid = None):
     action = api_actions.CreateResourcePriceAction()
@@ -48,11 +46,9 @@ def create_resource_price(resource_name, time_unit, price, resource_unit = None,
 
     return result.inventory
 
-def query_resource_price(resource_name, session_uuid = None):
+def query_resource_price(cond, session_uuid= None):
     action = api_actions.QueryResourcePriceAction()
-    action.resourceName = resource_name
-    test_util.action_logger('Query resource %s price' % (resource_name))
+    action.conditions = cond
     result = account_operations.execute_action_with_session(action, \
             session_uuid)
-
-    return result.inventories
+    return result
