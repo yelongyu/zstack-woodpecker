@@ -2623,13 +2623,14 @@ def destroy_scenario(scenario_config, scenario_file):
                         vip.delete()
             destroy_vm(zstack_management_ip, vm.uuid_)
             try:
-                cond = res_ops.gen_query_conditions('name', 'like', vm.uuid_)
-                ebs_test_image = query_resource(zstack_management_ip, res_ops.IMAGE, cond).inventories
+                cond_image = res_ops.gen_query_conditions('name', 'like', 'ebs-test-image-' + vm.uuid_ + '%')
+                ebs_test_image = query_resource(zstack_management_ip, res_ops.IMAGE, cond_image).inventories
                 for img in ebs_test_image:
                     delete_image(zstack_management_ip, img.uuid)
                     expunge_image(zstack_management_ip, img.uuid)
-                ebs_test_data_volume = query_resource(zstack_management_ip, res_ops.VOLUME, cond).inventories
-                for vol in ebs_test_data_volume:
+                cond_disk = res_ops.gen_query_conditions('name', 'like', 'ebs-test-disk-' + vm.uuid_ + '%')
+                ebs_test_disk = query_resource(zstack_management_ip, res_ops.VOLUME, cond_disk).inventories
+                for vol in ebs_test_disk:
                     delete_vol(zstack_management_ip, vol.uuid)
                     expunge_vol(zstack_management_ip, vol.uuid)
             except:
