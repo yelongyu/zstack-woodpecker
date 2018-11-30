@@ -75,6 +75,33 @@ def test():
     pro_uuid = net_provider_list.uuid
     sce_ops.attach_flat_network_service_to_l3network(zstack_management_ip, l3_uuid, pro_uuid)
     
+    l2_inv2 = sce_ops.create_l2_vlan(zstack_management_ip, 'L2_vlan_2206', 'eth0', '2206', zone_uuid)
+    l2_uuid2 = l2_inv2.inventory.uuid
+
+    test_util.test_dsc('attach L2 netowrk to cluster')
+    sce_ops.attach_l2(zstack_management_ip, l2_uuid2, cluster_uuid)
+
+    test_util.test_dsc('create L3_flat_network names is L3_flat_network')
+    l3_inv2 = sce_ops.create_l3(zstack_management_ip, 'l3_flat_2', 'L3BasicNetwork', l2_uuid2, 'local.com')
+    l3_uuid2 = l3_inv2.inventory.uuid
+
+    l3_dns2 = '223.5.5.5'
+    start_ip2 = '192.168.110.2'
+    end_ip2 = '192.168.110.10'
+    gateway2 = '192.168.110.1'
+    netmask2 = '255.255.255.0'
+
+    test_util.test_dsc('add DNS and IP_Range for L3_flat_network')
+    sce_ops.add_dns_to_l3(zstack_management_ip, l3_uuid2, l3_dns2)
+    sce_ops.add_ip_range(zstack_management_ip,'IP_range2', l3_uuid2, start_ip2, end_ip2, gateway2, netmask2)
+
+    test_util.test_dsc('query flat provider and attach network service to  L3_flat_network')
+    provider_name = 'Flat Network Service Provider'
+    conditions = res_ops.gen_query_conditions('name', '=', provider_name)
+    net_provider_list = sce_ops.query_resource(zstack_management_ip, res_ops.NETWORK_SERVICE_PROVIDER, conditions).inventories[0]
+    pro_uuid = net_provider_list.uuid
+    sce_ops.attach_flat_network_service_to_l3network(zstack_management_ip, l3_uuid2, pro_uuid)
+    
     #share admin resoure to normal account
     test_util.test_dsc('share admin resoure to normal account')
     cond = res_ops.gen_query_conditions('name', '=', 'l3_flat_network')
@@ -91,7 +118,6 @@ def test():
     for image in images:
         acc_ops.share_resources([test_account_uuid], [image.uuid])
 
-
     #create vm
     test_util.test_dsc('create vm by normal account a')
     vm = test_stub.create_vm(session_uuid = test_account_session)
@@ -99,7 +125,7 @@ def test():
     vm_nic = vm.vm.vmNics[0]
     vm_nic_uuid = vm_nic.uuid
 
-    vip = test_stub.create_vip('vip')
+    vip = test_stub.create_vip('vip', l3_uuid2)
     res_ops.change_recource_owner(test_account_uuid, vip.vip.uuid)
     eip = test_stub.create_eip('eip_a', vip_uuid=vip.vip.uuid, session_uuid = test_account_session)
 
@@ -111,16 +137,18 @@ def test():
     vm.check()
     vm.destroy(test_account_session)
     net_ops.delete_l2(l2_uuid)
+    net_ops.delete_l2(l2_uuid2)
     vm.check()
     acc_ops.delete_account(test_account_uuid)    
     test_util.test_pass('normal account create eip by admin shared vip Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
-    global vm, test_account_uuid, test_account_session, vip, eip, l2_uuid
+    global vm, test_account_uuid, test_account_session, vip, eip, l2_uuid, l2_uuid
     if vm:
         vm.destroy(test_account_session)
     acc_ops.delete_account(test_account_uuid)
     vip.delete()
     net_ops.delete_eip(eip.eip.uuid, session_uuid = test_account_session)
     net_ops.delete_l2(l2_uuid)
+    net_ops.delete_l2(l2_uuid2)
