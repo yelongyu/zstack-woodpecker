@@ -689,6 +689,9 @@ def get_backup_storage_type(deploy_config, bs_name):
     for backupStorage in deploy_config.backupStorages.get_child_node_as_list('cephBackupStorage'):
         if backupStorage.name_ == bs_name:
             return 'ceph'
+    for backupStorage in deploy_config.backupStorages.get_child_node_as_list('xskycephBackupStorage'):
+        if backupStorage.name_ == bs_name:
+            return 'ceph'
     for backupStorage in deploy_config.backupStorages.get_child_node_as_list('fusionstorBackupStorage'):
         if backupStorage.name_ == bs_name:
             return 'fusionstor'
@@ -698,6 +701,9 @@ def get_backup_storage_type(deploy_config, bs_name):
 def get_primary_storage_type(deploy_config, ps_name):
     for zone in xmlobject.safe_list(deploy_config.zones.zone):
         for primaryStorage in zone.primaryStorages.get_child_node_as_list('cephPrimaryStorage'):
+            if primaryStorage.name_ == ps_name:
+                return 'ceph'
+        for primaryStorage in zone.primaryStorages.get_child_node_as_list('xskycephPrimaryStorage'):
             if primaryStorage.name_ == ps_name:
                 return 'ceph'
         for primaryStorage in zone.primaryStorages.get_child_node_as_list('fusionPrimaryStorage'):
@@ -1193,6 +1199,85 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
         ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ceph_h_nodes.sh'), '/tmp/setup_ceph_h_nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host_port))
         cmd = "bash -ex /tmp/setup_ceph_nodes.sh %s" % (vm_ips)
         ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host_port))
+
+def setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config):
+    ceph_storages = dict()
+    for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            vm_name = vm.name_
+            if hasattr(vm, 'backupStorageRef'):
+                for backupStorageRef in xmlobject.safe_list(vm.backupStorageRef):
+                    print backupStorageRef.text_
+                    backup_storage_type = get_backup_storage_type(deploy_config, backupStorageRef.text_)
+                    test_util.test_logger("pengtao @@@DEBUG-> backup_storage_type %s" %(backup_storage_type))
+                    if backup_storage_type == 'ceph':
+                        if ceph_storages.has_key(backupStorageRef.text_):
+                            if vm_name in ceph_storages[backupStorageRef.text_]:
+                                continue
+                            else:
+                                ceph_storages[backupStorageRef.text_].append(vm_name)
+                        else:
+                            ceph_storages[backupStorageRef.text_] = [ vm_name ]
+            if hasattr(vm, 'primaryStorageRef'):
+                for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
+                    print primaryStorageRef.text_
+                    primary_storage_type = get_primary_storage_type(deploy_config, primaryStorageRef.text_)
+                    test_util.test_logger("pengtao @@@DEBUG-> primary_storage_type %s" %(primary_storage_type))
+                    for zone in xmlobject.safe_list(deploy_config.zones.zone):
+                        if primary_storage_type == 'ceph':
+                            if ceph_storages.has_key(backupStorageRef.text_):
+                                if vm_name in ceph_storages[backupStorageRef.text_]:
+                                    continue
+                                else:
+                                    ceph_storages[backupStorageRef.text_].append(vm_name)
+                            else:
+                                ceph_storages[backupStorageRef.text_] = [ vm_name ]
+    for ceph_storage in ceph_storages:
+        test_util.test_logger('setup ceph [%s] service.' % (ceph_storage))
+        node1_name = ceph_storages[ceph_storage][0]
+        node1_config = get_scenario_config_vm(node1_name, scenario_config)
+        node1_ip = get_scenario_file_vm(node1_name, scenario_file).ip_
+        if not hasattr(node1_config, 'hostRef'):
+            node_host_port = '22'
+        else:
+            node_host = get_deploy_host(node1_config.hostRef.text_, deploy_config)
+            if not hasattr(node_host, 'port_') or node_host.port_ == '22':
+                node_host_port = '22'
+            else:
+                node_host_port = node_host.port_
+
+        vm_ips = ''
+        for ceph_node in ceph_storages[ceph_storage]:
+            vm_nic_id = get_ceph_storages_nic_id(ceph_storage, scenario_config)
+            vm = get_scenario_file_vm(ceph_node, scenario_file)
+            if vm_nic_id == None:
+                vm_ips += vm.ip_ + ' '
+            else:
+                vm_ips += vm.ips.ip[vm_nic_id].ip_ + ' '
+        ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup-xsky-3nodes.sh'), '/root/setup-xsky-3nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host_port))
+        os.system("sshpass -p password ssh root@%s \"bash -ex /root/setup-xsky-3nodes.sh %s > /root/setup.log 2>&1 \"" %(node1_ip, vm_ips))
+        time.sleep(20)
+        cmd1 = "rados lspools"
+        (retcode, output, erroutput) = ssh.execute(cmd1, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host_port))
+        output += "\n"
+        dvpn = "cephPrimaryStorageDataVolumePoolName ="
+        rvpn = "cephPrimaryStorageRootVolumePoolName ="
+        icpn = "cephPrimaryStorageImageCachePoolName ="
+        cbsp = "cephBackupStoragePoolName ="
+        data_volume_name = "%s %s" % (dvpn, output)
+        root_volume_name = "%s %s" % (rvpn, output)
+        image_cache_name = "%s %s" % (icpn, output)
+        backup_storage_pool = "%s %s" % (cbsp, output)
+        with open('/root/.zstackwoodpecker/integrationtest/vm/multihosts/deploy-xsky-ceph-ps.tmpt') as infile, open('/root/.zstackwoodpecker/integrationtest/vm/multihosts/ofile.tmpt', 'w') as outfile:
+                lines = infile.readlines()
+                print "line is %s" % (lines)
+                lines[3] = data_volume_name
+                lines[4] = root_volume_name
+                lines[5] = image_cache_name
+                lines[6] = backup_storage_pool
+                for i in lines:
+                        outfile.write(i)
+        os.system('cp -f /root/.zstackwoodpecker/integrationtest/vm/multihosts/ofile.tmpt /root/.zstackwoodpecker/integrationtest/vm/multihosts/deploy-xsky-ceph-ps.tmpt')
 
 def setup_xsky_storages(scenario_config, scenario_file, deploy_config):
     #Stop nodes
@@ -1841,8 +1926,9 @@ def lib_get_cluster_hosts(http_server_ip, cluster_uuid = None):
     return hosts
 
 
-def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_inv, session_uuid=None):
+def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_inv, session_uuid=None, deploy_config=None):
 
+    deploy_config = deploy_config
     action = api_actions.CreateDataVolumeAction()
     action.diskOfferingUuid = volume_option.get_disk_offering_uuid()
     action.description = volume_option.get_description()
@@ -1856,7 +1942,10 @@ def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_in
         action.primaryStorageUuid = ps.uuid
         #host = lib_find_random_host(http_server_ip)
         #action.systemTags = ["localStorage::hostUuid::%s" % host.uuid]
-        action.systemTags = ["localStorage::hostUuid::%s" % vm_inv.hostUuid]
+        if xmlobject.has_element(deploy_config, 'backupStorages.xskycephBackupStorage'):
+            action.systemTags = ["capability::virtio-scsi", "localStorage::hostUuid::%s" % vm_inv.hostUuid]
+        else:
+            action.systemTags = ["localStorage::hostUuid::%s" % vm_inv.hostUuid]
     elif ps.type in [ 'SharedBlock' ]:
         action.primaryStorageUuid = ps.uuid
     else:
@@ -2426,7 +2515,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             if poolName != None and poolName != "":
                                 volume_option.set_system_tags(['ceph::pool::%s' % (poolName)])
                             #volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
-                            volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
+                            if xmlobject.has_element(deploy_config, 'backupStorages.xskycephBackupStorage'):
+                                volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config)
+                            else:
+                                volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
                             attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
                             break
                         if bs_ref.type_ == 'fusionstor':
@@ -2501,7 +2593,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
         xml_string = etree.tostring(root_xml, 'utf-8')
         xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
         open(scenario_file, 'w+').write(xml_string)
-        setup_ceph_storages(scenario_config, scenario_file, deploy_config)
+        if xmlobject.has_element(deploy_config, 'backupStorages.xskycephBackupStorage'):
+            setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config)
+        else:
+            setup_ceph_storages(scenario_config, scenario_file, deploy_config)
         setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst)
         setup_fusionstor_storages(scenario_config, scenario_file, deploy_config)
         if vm_ip_to_post and mn_ip_to_post:
