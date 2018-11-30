@@ -39,19 +39,19 @@ def test():
     except Exception as e:
         test_util.test_dsc(str(e))
         test_util.test_fail('Fail to get mon ip')
-    create_pool_cmd = 'ceph osd pool create for_test_root_ssd_pool 4'
+    create_pool_cmd = 'ceph osd pool create test_create_data_ssd_pool 4'
     try:
         (ret, out, eout) = ssh.execute(create_pool_cmd, ceph_node_ip, 'root', 'password')
     except Exception as e:
         test_util.test_dsc(str(e))
         test_util.test_fail('Fail to create pool by using ceph command')
     aliasName = 'test_aliasName_new_root'
-    rootPoolName = 'for_test_root_sas_pool'
+    rootPoolName = 'test_create_data_sas_pool'
     description = 'test_description'
     isCreate = 'true'
     test_util.test_dsc('add new pool by zstack')
     ps_ops.add_ceph_primary_storage_pool(ps_uuid, rootPoolName, aliasName, isCreate, poolType="Root")
-    dataPoolName = 'for_test_data_sas_pool'
+    dataPoolName = 'for_test_create_data_sas_pool'
     aliasName = 'test_aliasName_new_data'
     ps_ops.add_ceph_primary_storage_pool(ps_uuid, dataPoolName, aliasName, isCreate, poolType="Data")
     #create vm on sas pool
@@ -72,8 +72,8 @@ def test():
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_data_disk_uuids([disk_offering])
     vm_creation_option.set_l3_uuids([l3net_uuid])
-    vm_creation_option.set_rootVolume_systemTags(["ceph::rootPoolName::for_test_root_sas_pool"])
-    vm_creation_option.set_dataVolume_systemTags(["ceph::pool::for_test_data_sas_pool"])
+    vm_creation_option.set_rootVolume_systemTags(["ceph::rootPoolName::test_create_data_ssd_pool"])
+    vm_creation_option.set_dataVolume_systemTags(["ceph::pool::for_test_create_data_sas_pool"])
     vm = test_vm.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
     vm.create()

@@ -36,7 +36,7 @@ def test():
     ps_uuid = ps.uuid
 
     aliasName = 'test_aliasName_new'
-    poolName = 'for_test_root_sas_pool'
+    poolName = 'for_test_vm_life_cycle_sas_pool'
     description = 'test_description'
     isCreate = 'true'
     test_util.test_dsc('add new pool by zstack')
@@ -62,7 +62,7 @@ def test():
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_l3_uuids([l3net_uuid])
-    vm_creation_option.set_rootVolume_systemTags(["ceph::rootPoolName::for_test_root_sas_pool"])
+    vm_creation_option.set_rootVolume_systemTags(["ceph::rootPoolName::for_test_vm_life_cycle_sas_pool"])
     vm = test_vm.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
     vm.create()

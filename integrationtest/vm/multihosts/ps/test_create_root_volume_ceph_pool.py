@@ -39,14 +39,14 @@ def test():
     except Exception as e:
         test_util.test_dsc(str(e))
         test_util.test_fail('Fail to get mon ip')
-    create_pool_cmd = 'ceph osd pool create for_test_root_ssd_pool 4'
+    create_pool_cmd = 'ceph osd pool create test_create_root_ssd_pool 4'
     try:
         (ret, out, eout) = ssh.execute(create_pool_cmd, ceph_node_ip, 'root', 'password')
     except Exception as e:
         test_util.test_dsc(str(e))
         test_util.test_fail('Fail to create pool by using ceph command')
     aliasName = 'test_aliasName_new'
-    poolName = 'for_test_root_sas_pool'
+    poolName = 'test_create_root_sas_pool'
     description = 'test_description'
     isCreate = 'true'
     test_util.test_dsc('add new pool by zstack')
@@ -60,12 +60,12 @@ def test():
 
     test_util.test_dsc('add exist pool by zstack')
     aliasName = 'test_aliasName_exist'
-    ps_ops.add_ceph_primary_storage_pool(ps_uuid, 'for_test_root_ssd_pool', aliasName, poolType="Root")
+    ps_ops.add_ceph_primary_storage_pool(ps_uuid, 'test_create_root_ssd_pool', aliasName, poolType="Root")
     cond = res_ops.gen_query_conditions('aliasName', '=', aliasName)
     pool = res_ops.query_resource(res_ops.CEPH_PRIMARY_STORAGE_POOL, cond)[0]
     test_util.test_dsc("poolName: " + str(pool.poolName))
-    if pool.poolName != 'for_test_root_ssd_pool':
-        test_util.test_fail('Find wrong pool should find: for_test_pool_create But find: ' + str(pool.poolName))
+    if pool.poolName != 'test_create_root_ssd_pool':
+        test_util.test_fail('Find wrong pool should find: test_create_root_ssd_pool But find: ' + str(pool.poolName))
 
     #create vm on sas pool
     instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(
@@ -82,13 +82,13 @@ def test():
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_l3_uuids([l3net_uuid])
-    vm_creation_option.set_rootVolume_systemTags(["ceph::rootPoolName::for_test_root_sas_pool"])
+    vm_creation_option.set_rootVolume_systemTags(["ceph::rootPoolName::test_create_root_sas_pool"])
     vm = test_vm.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
     vm.create()
     test_util.test_dsc('Create sas VM Test Success')
 
-    vm_creation_option.set_rootVolume_systemTags(["ceph::rootPoolName::for_test_root_ssd_pool"])
+    vm_creation_option.set_rootVolume_systemTags(["ceph::rootPoolName::test_create_root_ssd_pool"])
     vm = test_vm.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
     vm.create()
