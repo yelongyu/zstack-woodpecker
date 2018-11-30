@@ -35,7 +35,7 @@ def test():
         test_util.test_skip('Skip for not finding ceph ps')
     ps_uuid = ps.uuid
 
-    aliasName = 'test_aliasName_new'
+    aliasName = 'test_aliasName_new_vm_life'
     poolName = 'for_test_vm_life_cycle_sas_pool'
     description = 'test_description'
     isCreate = 'true'

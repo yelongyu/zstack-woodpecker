@@ -45,7 +45,7 @@ def test():
     except Exception as e:
         test_util.test_dsc(str(e))
         test_util.test_fail('Fail to create pool by using ceph command')
-    aliasName = 'test_aliasName_new_root'
+    aliasName = 'test_aliasName_create_data_sas'
     rootPoolName = 'test_create_data_sas_pool'
     description = 'test_description'
     isCreate = 'true'
