@@ -31,7 +31,7 @@ vm = None
 
 def test():
     global vm, session_uuid
-    global test_account_uuid
+    global test_account_uuid, test_account_session
     
     test_util.test_dsc('Test normal account change the qos network and volume ')
 

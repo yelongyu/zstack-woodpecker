@@ -15,6 +15,8 @@ import zstackwoodpecker.zstack_test.zstack_test_volume as test_volume
 import zstackwoodpecker.operations.image_operations as img_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
+import zstackwoodpecker.zstack_test.zstack_test_eip as zstack_eip_header
+import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
 import re
 
 
