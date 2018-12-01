@@ -142,6 +142,7 @@ l2Vlan6 = 26
 #L3 network names should be same, test case will rely on name. 
 l3ManagementNetworkName = management network
 l3PublicNetworkName = public network
+l3PublicNetworkName1 = public network IPv4
 l3NoVlanNetworkName1 = l3_user_defined_vlan1
 l3NoVlanNetworkName2 = l3_user_defined_vlan2
 l3VlanNetworkName1 = l3VlanNetwork1
