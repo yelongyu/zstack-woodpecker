@@ -341,6 +341,7 @@ def check_autoscaling_init_vmm_number(initvm_number,autoscaling_groupUuid):
                 continue
             test_util.test_dsc("autoscaling group init vmm fail")
             autoscaling.delete_autoScaling_group(autoscaling_groupUuid)
+            test_util.test_fail("autoscaling group init vmm fail")
         else:
             test_util.test_logger("autoscaling group init vmm sucessfully")
             break
@@ -361,8 +362,20 @@ def check_deleteautoscaling_vmm_number():
             test_util.test_logger("autoscaling delete vmm sucessfully")
             break
 
-
-
+def check_add_newinstance_vmm_number(max_number,expect_number,autoscaling_groupUuid):
+        conf = res_ops.gen_query_conditions('state', '=','Running')
+        vmm_total = res_ops.query_resource_count(res_ops.VM_INSTANCE, conf)
+        test_util.test_logger("%s" %(vmm_total))
+        vmm_virtualrouter_total = res_ops.query_resource_count(res_ops.VIRTUALROUTER_VM, conf)
+	vmm_total = vmm_total - vmm_virtualrouter_total
+        if vmm_total == expect_number and vmm_total <= max_number:
+             test_util.test_dsc("autoscaling add new instance successfully")
+	elif vmm_total > max_number:
+             autoscaling.delete_autoScaling_group(autoscaling_groupUuid)
+	     test_util.test_fail("autoscaling create vm can not GreaterThan %s" %(max_number))
+        elif vmm_total != expect_number:
+             autoscaling.delete_autoScaling_group(autoscaling_groupUuid)
+             test_util.test_fail("autoscaling add new instance fail")
 
 class ZstackTestVR(vm_header.TestVm):
     def __init__(self, vr_inv):

@@ -161,24 +161,70 @@ def delete_autoScaling_template(uuid,session_uuid=None):
         evt = acc_ops.execute_action_with_session(action, session_uuid)
         return evt.success
 
+def update_alarm(uuid,period=None,threshold=None,session_uuid=None):
+	action = api_actions.UpdateAlarmAction()
+	action.time = 3000
+	action.uuid = uuid
+	if period:
+		action.period = period
+	if threshold:
+		action.threshold = threshold
+	test_util.action_logger("update alarm: %s " %(action.uuid))
+	evt = acc_ops.execute_action_with_session(action, session_uuid)
+	return evt.inventory
 
+def update_autoscalinggroup_addingnewinstance(uuid,adjustmentValue=None,cooldown=None,session_uuid=None):
+	action = api_actions.UpdateAutoScalingGroupAddingNewInstanceRuleAction()
+	action.time = 3000
+	action.uuid = uuid
+	if adjustmentValue:
+		action.adjustmentValue = adjustmentValue
+	if cooldown:
+		action.cooldown = cooldown
+	test_util.action_logger("update autoscaling add new instance: %s " %(action.uuid))
+	evt = acc_ops.execute_action_with_session(action, session_uuid)
+	return evt.inventory
 
-
-
-
-
-
-
-
-
-
-  
+def update_autoscalinggroup_removalinstance(uuid,adjustmentValue=None,cooldown=None,removalPolicy=None,session_uuid=None):
+	action = api_actions.UpdateAutoScalingGroupRemovalInstanceRuleAction()
+	action.time = 3000
+	action.uuid = uuid
+        if adjustmentValue:
+                action.adjustmentValue = adjustmentValue
+        if cooldown:
+                action.cooldown = cooldown
+	if removalPolicy:
+		action.removalPolicy = removalPolicy
+	test_util.action_logger("update autoscaling removal instance: %s " %(action.uuid))
 	
+	evt = acc_ops.execute_action_with_session(action, session_uuid)
+	return evt.inventory
 
+def update_autoscalinggroup(uuid,maxResourceSize=None,minResourceSize=None,removalPolicy=None,systemTags=None,session_uuid=None):
+	action = api_actions.UpdateAutoScalingGroupAction()
+	action.time = 3000
+	action.uuid = uuid
+	if maxResourceSize:
+		action.maxResourceSize = maxResourceSize
+	if minResourceSize:
+		action.minResourceSize = minResourceSize
+	if removalPolicy:
+		action.removalPolicy = removalPolicy
+	if systemTags:
+		action.systemTags = systemTags
+	test_util.action_logger("update autoscaling group: %s" %(action.uuid))
+	evt = acc_ops.execute_action_with_session(action, session_uuid)
+	return evt.inventory
 
-
-	
-
-
-
+def update_autoscalingRule(uuid,cooldown=None,systemTags=None,session_uuid=None):
+	action = api_actions.UpdateAutoScalingRule()
+	action.time = 3000
+	action.uuid = uuid
+	if cooldown:
+		action.cooldown = cooldown
+	if systemTags:
+		action.systemTags = systemTags
+	test_util.action_logger("update autoscaling rule: %s" %(action.uuid))
+	evt = acc_ops.execute_action_with_session(action, session_uuid)
+	return evt.inventory
 
