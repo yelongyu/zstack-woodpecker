@@ -2483,7 +2483,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                         vm_xml.set('managementIp', vm_management_ip)
                         if xmlobject.has_element(vm, 'nodeRef'):
                             mn_ip_to_post = vm_management_ip
-                            install_ebs_pkg_in_host(vm_ip, vm.imageUsername_, vm.imagePassword_)
+#                             install_ebs_pkg_in_host(vm_ip, vm.imageUsername_, vm.imagePassword_)
                     else:
                         test_util.test_logger("@@@DEBUG-WARNING@@@: vm_management_ip is null, failed")
                     vm_storage_ip = get_host_storage_network_ip(scenario_config, scenario_file, deploy_config, vm_inv, vm)
