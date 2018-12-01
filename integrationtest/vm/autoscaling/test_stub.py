@@ -377,6 +377,22 @@ def check_add_newinstance_vmm_number(max_number,expect_number,autoscaling_groupU
              autoscaling.delete_autoScaling_group(autoscaling_groupUuid)
              test_util.test_fail("autoscaling add new instance fail")
 
+def check_removalinstance_vmm_number(min_number,expect_number,autoscaling_groupUuid):
+	conf = res_ops.gen_query_conditions('state', '=','Running')
+        vmm_total = res_ops.query_resource_count(res_ops.VM_INSTANCE, conf)
+        test_util.test_logger("%s" %(vmm_total))
+        vmm_virtualrouter_total = res_ops.query_resource_count(res_ops.VIRTUALROUTER_VM, conf)
+        vmm_total = vmm_total - vmm_virtualrouter_total
+        if vmm_total == expect_number and vmm_total >= min_number:
+             test_util.test_dsc("autoscaling add new instance successfully")
+        elif vmm_total < min_number:
+             autoscaling.delete_autoScaling_group(autoscaling_groupUuid)
+             test_util.test_fail("autoscaling create vm can not LessThan %s" %(min_number))
+        elif vmm_total != expect_number:
+             autoscaling.delete_autoScaling_group(autoscaling_groupUuid)
+             test_util.test_fail("autoscaling add new instance fail")
+
+
 class ZstackTestVR(vm_header.TestVm):
     def __init__(self, vr_inv):
         super(ZstackTestVR, self).__init__()
