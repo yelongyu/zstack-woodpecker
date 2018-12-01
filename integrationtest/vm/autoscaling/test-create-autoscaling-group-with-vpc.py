@@ -58,8 +58,8 @@ def test():
         test_util.test_logger("add new instance rule to autoscaling group")
         groupnewinstanceruleUuid = autoscaling.create_autoScaling_group_addingNewInstanceRule(1,autoscaling_groupUuid,30).uuid
         autoscaling.create_autoScaling_ruleAlarmTrigger(alarm_1Uuid,groupnewinstanceruleUuid)
-
-        time.sleep(60)
+        
+	test_util.test_logger("check vmm instance number")
         test_stub.check_autoscaling_init_vmm_number(initvm_number,autoscaling_groupUuid)
 
         test_util.test_dsc("Delete autoscaling group")
