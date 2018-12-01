@@ -1,5 +1,5 @@
 '''
-create autoscaling with vpc router ,and verify expansion strategy
+create autoscaling with vpc router ,and verify Shrinkage capacity
 
 
 @author: Antony WeiJiang
@@ -72,7 +72,7 @@ def test():
 	
 	test_util.test_logger("update modify removal instance number")
 	autoscaling.update_autoscalinggroup_removalinstance(groupremovalinstanceruleUuid,adjustment_number,cooldown_time)
-	time.sleep(120)
+	time.sleep(30)
 	test_util.test_logger("check removal instance number")
 	test_stub.check_removalinstance_vmm_number(minvm_number,minvm_number,autoscaling_groupUuid)
 	
