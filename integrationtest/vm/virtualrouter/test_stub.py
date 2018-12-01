@@ -12,6 +12,7 @@ import time
 import threading
 
 import zstacklib.utils.ssh as ssh
+import zstacklib.utils.jsonobject as jsonobject
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
@@ -35,6 +36,7 @@ import functools
 from zstackwoodpecker.operations import vm_operations as vm_ops
 import commands
 from lib2to3.pgen2.token import STAR
+from zstacklib.utils import shell
 import telnetlib
 
 PfRule = test_state.PfRule
@@ -1264,7 +1266,7 @@ CEPHPOOLTESTIMAGENAME = 'ceph_pool_capacity_test_image'
 CEPHPOOLTESTISONAME = 'ceph_pool_capacity_test_iso'
 
 class PoolCapacity(Longjob):
-    def __init__(self):
+    def __init__(self, poolName=None, replicatedSize=None, crushRuleSet=None):
         super(PoolCapacity, self).__init__()
         self.vm = None
         self.data_volume = None
@@ -1272,6 +1274,106 @@ class PoolCapacity(Longjob):
         self.image = None
         self.pool = None
         self.pool_name = 'data-pool-' + str(time.time()).replace('.', '-')
+        self.poolName = poolName
+        self.replicatedSize = replicatedSize
+        self.crushRuleSet = crushRuleSet
+        self.availableCapacity = 0
+        self.usedCapacity = 0
+        self.crushRuleItemName = None
+        self.crushItemOsds = []
+        self.crushItemOsdsTotalSize = 0
+        self.poolTotalSize = 0
+
+    def get_ceph_pools_cap(self, ceph_mon_cmd):
+        result = []
+        o = shell.call(ceph_mon_cmd + ' ceph osd dump -f json')
+        df = jsonobject.loads(o)
+        if not df.pools:
+            return result
+        for pool in df.pools:
+            crush_rule = None
+            if pool.crush_ruleset is None:
+                crush_rule = pool.crush_rule
+            else:
+                crush_rule = pool.crush_ruleset
+            poolCapacity = PoolCapacity(pool.pool_name, pool.size, crush_rule)
+            result.append(poolCapacity)
+        # fill crushRuleItemName
+        o = shell.call(ceph_mon_cmd + ' ceph osd crush rule dump -f json')
+        crushRules = jsonobject.loads(o)
+        if not crushRules:
+            return result
+        for poolCapacity in result:
+            if poolCapacity.crushRuleSet is None:
+                continue
+            def setCrushRuleName(crushRule):
+                if not crushRule:
+                    return
+                for step in crushRule.steps:
+                    if step.op == "take":
+                        poolCapacity.crushRuleItemName = step.item_name
+            [setCrushRuleName(crushRule) for crushRule in crushRules if crushRule.rule_id == poolCapacity.crushRuleSet]
+        # fill crushItemOsds
+        o = shell.call(ceph_mon_cmd + ' ceph osd tree -f json')
+        tree = jsonobject.loads(o)
+        if not tree.nodes:
+            return result
+        def findNodeById(id):
+            for node in tree.nodes:
+                if node.id == id:
+                    return node
+        def findAllChilds(node):
+            childs = []
+            if not node.children:
+                return childs
+            for childId in node.children:
+                child = findNodeById(childId)
+                if not child:
+                    continue
+                childs.append(child)
+                if child.children:
+                    grandson_childs = findAllChilds(child)
+                    childs.extend(grandson_childs)
+            return childs
+        for poolCapacity in result:
+            if not poolCapacity.crushRuleItemName:
+                continue
+            for node in tree.nodes:
+                if node.name != poolCapacity.crushRuleItemName:
+                    continue
+                if not node.children:
+                    continue
+                osdNodes = []
+                nodes = findAllChilds(node)
+                for node in nodes:
+                    if node.type != "osd":
+                        continue
+                    if node.name in osdNodes:
+                        continue
+                    osdNodes.append(node.name)
+                poolCapacity.crushItemOsds = osdNodes
+        # fill crushItemOsdsTotalSize, poolTotalSize
+        o = shell.call(ceph_mon_cmd + ' ceph osd df -f json')
+        osds = jsonobject.loads(o)
+        if not osds.nodes:
+            return result
+        for poolCapacity in result:
+            if not poolCapacity.crushItemOsds:
+                continue
+            for osdName in poolCapacity.crushItemOsds:
+                for osd in osds.nodes:
+                    if osd.name != osdName:
+                        continue
+                    poolCapacity.crushItemOsdsTotalSize = poolCapacity.crushItemOsdsTotalSize + osd.kb * 1024
+                    poolCapacity.availableCapacity = poolCapacity.availableCapacity + osd.kb_avail * 1024
+                    poolCapacity.usedCapacity = poolCapacity.usedCapacity + osd.kb_used * 1024
+            if poolCapacity.crushItemOsdsTotalSize != 0 and poolCapacity.replicatedSize != 0:
+                poolCapacity.poolTotalSize = poolCapacity.crushItemOsdsTotalSize / poolCapacity.replicatedSize
+            if poolCapacity.availableCapacity != 0 and poolCapacity.replicatedSize != 0:
+                poolCapacity.availableCapacity = poolCapacity.availableCapacity / poolCapacity.replicatedSize
+            if poolCapacity.usedCapacity != 0 and poolCapacity.replicatedSize != 0:
+                poolCapacity.usedCapacity = poolCapacity.usedCapacity / poolCapacity.replicatedSize
+        return result
 
     def get_bs(self, bs_type='Ceph'):
         cond_bs_type = res_ops.gen_query_conditions('type', '=', bs_type)
@@ -1295,12 +1397,20 @@ class PoolCapacity(Longjob):
             self.image.expunge()
 
     def get_pool_cap_remote(self, pool_name):
+        self.used_cap = None
+        self.avail_cap = None
         self.get_bs()
         mon_ip = self.bs.mons[0].monAddr
-        used_cmd = "sshpass -p password ssh -o StrictHostKeyChecking=no root@%s ceph df | grep %s | awk '{print $3}'" % (mon_ip, pool_name)
-        avail_cmd = "sshpass -p password ssh -o StrictHostKeyChecking=no root@%s ceph df | grep %s | awk '{print $5}'" % (mon_ip, pool_name)
-        self.used_cap = commands.getoutput(used_cmd).split('\n')[-1]
-        self.avail_cap = commands.getoutput(avail_cmd).split('\n')[-1]
+        login_cmd = "sshpass -p password ssh -o StrictHostKeyChecking=no root@%s" % mon_ip
+        ret = self.get_ceph_pools_cap(login_cmd)
+        for poolCap in ret:
+            if poolCap.poolName == pool_name:
+                self.used_cap = str(poolCap.usedCapacity)
+                self.avail_cap = str(poolCap.availableCapacity)
+#         used_cmd = "sshpass -p password ssh -o StrictHostKeyChecking=no root@%s ceph df | grep %s | awk '{print $3}'" % (mon_ip, pool_name)
+#         avail_cmd = "sshpass -p password ssh -o StrictHostKeyChecking=no root@%s ceph df | grep %s | awk '{print $5}'" % (mon_ip, pool_name)
+#         self.used_cap = commands.getoutput(used_cmd).split('\n')[-1]
+#         self.avail_cap = commands.getoutput(avail_cmd).split('\n')[-1]
 
     def get_replicated_size(self):
         cmd = "sshpass -p password ssh -o StrictHostKeyChecking=no root@%s ceph osd pool get %s size | awk '{print $2}'" % (self.bs.mons[0].monAddr, self.bs.poolName)
@@ -1330,7 +1440,8 @@ class PoolCapacity(Longjob):
         elif 'G' in self.used_cap:
             assert cap[0] // 1024 //1024 // 1024 == int(self.used_cap[:-1])
         else:
-            assert cap[0] == int(self.used_cap)
+            assert cap[0] / 1024 / 1024 == int(self.used_cap) / 1024 / 1024
+#             assert cap[0] == int(self.used_cap)
         if 'M' in self.avail_cap:
             assert cap[1] // 1024 //1024 == int(self.avail_cap[:-1])
         elif 'k' in self.avail_cap:
@@ -1338,7 +1449,8 @@ class PoolCapacity(Longjob):
         elif 'G' in self.avail_cap:
             assert cap[1] // 1024 //1024 // 1024 == int(self.avail_cap[:-1])
         else:
-            assert cap[1] == int(self.avail_cap)
+            assert cap[1] / 1024 / 1024 == int(self.avail_cap) / 1024 / 1024
+#             assert cap[1] == int(self.avail_cap)
 
     def attach_iso(self):
         image_uuid = test_lib.lib_get_image_by_name('ceph_pool_capacity_test_iso').uuid
