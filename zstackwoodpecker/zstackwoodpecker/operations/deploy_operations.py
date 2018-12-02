@@ -895,12 +895,16 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                                              value=os.getenv('apiEndPoint'),
                                              session_uuid=session_uuid)
                 # Add KS
-                new_ak_id = os.getenv('NASAKID')
+#                 new_ak_id = os.getenv('NASAKID')
+                if os.path.exists('/home/nas_ak_id'):
+                    with open('/home/nas_ak_id', 'r') as f:
+                        new_ak_id = f.read()
                 default_ak_id = new_ak_id if new_ak_id else os.getenv('aliyunKey')
                 hyb_ops.add_hybrid_key_secret(name='ks_for_nas_test',
                                               description='ks_for_nas_test',
                                               key= ak_id if ak_id else default_ak_id,
                                               secret=os.getenv('aliyunSecret'),
+                                              ks_type=os.getenv('datacenterType'),
                                               sync='false',
                                               session_uuid=session_uuid)
                 # Add DataCenter
