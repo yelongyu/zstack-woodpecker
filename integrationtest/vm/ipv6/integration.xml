@@ -1,0 +1,5 @@
+<integrationTest>
+    <suite name="IPv6 test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" parallel="1">
+        <case timeout="900" >test_ipv6_2_stack.py</case>
+    </suite>
+</integrationTest>

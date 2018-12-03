@@ -142,7 +142,7 @@ l2Vlan6 = 26
 #L3 network names should be same, test case will rely on name. 
 l3ManagementNetworkName = management network
 l3PublicNetworkName = public network
-l3PublicNetworkName1 = public network IPv4
+l3PublicNetworkName1 = public network IPv6
 l3NoVlanNetworkName1 = l3_user_defined_vlan1
 l3NoVlanNetworkName2 = l3_user_defined_vlan2
 l3VlanNetworkName1 = l3VlanNetwork1
@@ -183,6 +183,7 @@ ipv6RangeGateway = 1000::1
 ipv6DNSServer = 240c::6666
 ipv6CidrName = host IPv6 Cidr
 ipv6Cidr = 1000:2000:3000:4000::1/64
+ipv6ImageUrl = http://192.168.200.100/mirror/diskimages/CentOS-7-x86_64-Minimal-1708-IPv6.qcow2
 
 noVlanIpRangeName1 = guest novlan range 1
 noVlanIpRangeStart1 = 10.250.0.2
