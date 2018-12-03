@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+<basicConfig>
+  <!-- The following configurations are path in test machine. 
+        zstackPkg is zstack all in one package tar.gz file.
+        zstackInstallScript is the installation script, which could be 
+    downloaded from zstack website or get from zstack-utility/installation/
+        zstackInstallPath is the path zstackPkg will be installed. It should be
+    carefully set. The contents in this folder will be deleted permanently in 
+    testing. 
+        zstackProperties is optional. It is zstack.properties. Tester could 
+    assign special zstack.properties. If not providing this line, testing will
+    just use zstack default property file. 
+        testAgent is the woodpecker test agent tar.gz package. It will be widely
+    used in woodpecker testing.
+        db.admin is the database admin user. Usually it is root.
+        db.username is the user who will operate zstack database. Usually it is
+    zstack. 
+        db.server_root_password is the root password for the database's host OS.
+    woodpecker uses it to install and config database. 
+        rabbitmq.password is the root password for rabbitmq's host OS. 
+    woodpecker uses it to install and start rabbitmq-server
+
+        This config file could be used to deploy zstack cloud environment by
+    zstack-cli, after zstack server is started. The detailed information could
+    be found in zstack-cli help manual.
+  -->
+  <zstackPkg>$zstackPkg</zstackPkg>
+  <zstackInstallScript>$zstackInstallScript</zstackInstallScript>
+  <zstackInstallPath>$zstackInstallPath</zstackInstallPath>
+  <zstackProperties>$zstackPropertiesPath</zstackProperties>
+  <testAgent>$zstackTestAgentPkgPath</testAgent>
+  <db>
+    <!-- Database server IP address or hostname -->
+    <server>$DBServer</server>
+    <admin>$DBAdminUser</admin>
+    <adminPassword>$DBAdminPassword</adminPassword>
+    <username>$DBUserName</username>
+    <server_root_password>$hostPassword</server_root_password>
+    <!-- <password>$DBPassword</password>
+    <port>$DBPort</port> -->
+  </db>
+  <rabbitmq>
+      <server>$rabbitmqServerIp</server>
+      <password>$hostPassword</password>
+  </rabbitmq>
+</basicConfig>
+<deployerConfig xmlns="http://zstack.org/schema/zstack">
+  <nodes description="Woodpecker will send zstack command to the 1st node. 
+      multi nodes support real hosts or docker (if providing dockerImage and 
+      it is found in `docker images`). "> 
+    <node name="$node1Name" ip="$node1Ip"
+      username="$nodeUserName" password="$nodePassword"
+      description="The default node 1. It could be same as test machine."/>
+    <!-- multi node setting
+    <node name="$node2Name" dockerImage="$node2DockerImage" ip="$node2Ip" 
+      username="$nodeUserName" password="$nodePassword"
+      description="multi nodes have same catalinaHome as node 1" />
+    <node name="$node3Name" dockerImage="$node3DockerImage" ip="$node3Ip" 
+      username="$nodeUserName" password="$nodePassword"
+      description="multi nodes have same catalinaHome as node 1"
+      reserve='True'/> -->
+  </nodes>
+
+  <instanceOfferings>
+    <instanceOffering name="$instanceOfferingName_s"
+      description="Test" memoryCapacity="$instanceOfferingMemory_s" cpuNum="$instanceOfferingCpuNum_s"
+      />
+  </instanceOfferings>
+
+  <backupStorages>
+    <imageStoreBackupStorage name="$sftpBackupStorageName"
+      description="Test" url="$sftpBackupStorageUrl" username="$sftpBackupStorageUsername"
+      password="$sftpBackupStoragePassword" hostname="$sftpBackupStorageHostname" port="22"/>
+  </backupStorages>
+
+  <images>
+    <image name="$imageName_s" 
+      description="Small Test Image Template" 
+      mediaType="$rootMediaType" format="$rootImageFormat"
+      url="$imageUrl_s" 
+      username="$imageUsername" password="$imagePassword">
+      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+    </image>
+    <image name="$imageName_net" 
+      description="Test Image Template for network test" 
+      mediaType="$rootMediaType" format="$rootImageFormat"
+      url="$imageUrl_net" 
+      username="$imageUsername" password="$imagePassword">
+      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+    </image>
+    <image name="$virtualRouterImageName" 
+      description="virtual router image" 
+      mediaType="$rootMediaType" format="$rootImageFormat" 
+      username="$vrImageUsername" password="$vrImagePassword"
+      url="$virtualRouterImageUrl" system="True">
+      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+    </image>
+  </images>
+
+  <diskOfferings>
+    <diskOffering name="$rootDiskOfferingName" 
+      description="Root Disk Offering"
+      diskSize="$rootDiskOfferingSize" />
+
+    <diskOffering name="$smallDiskOfferingName" 
+      description="Small Disk Offering"
+      diskSize="$smallDiskOfferingSize" /> 
+  </diskOfferings>
+
+  <zones>
+    <zone name="$zoneName" description="Test">
+      <clusters>
+        <cluster name="$clusterName" description="Test"
+          hypervisorType="$clusterHypervisorType">
+          <hosts>
+            <host name="$hostName" description="Test" managementIp="$hostIp"
+              username="$hostUsername" password="$hostPassword" />
+          </hosts>
+          <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
+          <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
+          <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
+        </cluster>
+      </clusters>
+
+      <l2Networks>
+
+        <l2NoVlanNetwork name="$l2PublicNetworkName" description="Basic L2 for public network"
+          physicalInterface="$l2PublicNetworkInterface">
+          <l3Networks>
+            <l3BasicNetwork name="$l3PublicNetworkName" category="Public" description="Basic L3 Network without Vlan for IPv6 public network">
+              <ipRange name="$ipRangeName" description="Test"
+                startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
+                netmask="$ipRangeNetmask" />
+              <dns>$DNSServer</dns>
+              <networkService provider="Flat Network Service Provider">
+                <serviceType>DHCP</serviceType>
+                <serviceType>Userdata</serviceType>
+              </networkService>
+              <networkService provider="SecurityGroup">
+                <serviceType>SecurityGroup</serviceType>
+              </networkService>
+            </l3BasicNetwork>
+            <l3BasicNetwork name="$l3PublicNetworkName1" category="Public" ipVersion="6" description="Basic L3 Network without Vlan for IPv6 public network">
+              <ipv6Cidr name="$ipv6CidrName" description="Test"
+                ipv6Cidr="$ipv6Cidr" addressMode="Stateful-DHCP"  />
+              <dns>$ipv6DNSServer</dns>
+              <networkService provider="Flat Network Service Provider">
+                <serviceType>DHCP</serviceType>
+              </networkService>
+              <networkService provider="SecurityGroup">
+                <serviceType>SecurityGroup</serviceType>
+              </networkService>
+            </l3BasicNetwork>
+          </l3Networks>
+        </l2NoVlanNetwork>
+
+      </l2Networks>
+        <primaryStorages>
+          <localPrimaryStorage name="$localPrimaryStorageName"
+            description="Test Local Primary Storage" url="$localPrimaryStorageUrl"
+          />
+        </primaryStorages>
+
+      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+    </zone>
+  </zones>
+</deployerConfig>
+</config>
