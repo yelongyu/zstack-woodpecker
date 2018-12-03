@@ -912,20 +912,24 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                                                    description='dc_for_nas_test',
                                                    region_id=os.getenv('regionId'),
                                                    session_uuid=session_uuid)
-                # Add NAS File System
-                dcinvs = res_ops.get_resource(res_ops.DATACENTER, session_uuid=session_uuid)
-                if dcinvs:
-                    dcinv = dcinvs[0]
-                else:
-                    raise test_util.TestError("Can't find Any DataCenter.")
-                nas_ops.add_aliyun_nas_file_system(datacenter_uuid=dcinv.uuid,
-                                                   fsid=os.getenv('fileSystemId'),
-                                                   name='setup_nasfs',
-                                                   session_uuid=session_uuid)
-                # Add Aliyun Access Group
-                nas_ops.add_aliyun_nas_access_group(datacenter_uuid=dcinv.uuid,
-                                                    group_name=os.getenv('groupName'),
-                                                    session_uuid=session_uuid)
+                # NAS file system and access group will be synced from remote automatically since 3.2.0
+                try:
+                    # Add NAS File System
+                    dcinvs = res_ops.get_resource(res_ops.DATACENTER, session_uuid=session_uuid)
+                    if dcinvs:
+                        dcinv = dcinvs[0]
+                    else:
+                        raise test_util.TestError("Can't find Any DataCenter.")
+                    nas_ops.add_aliyun_nas_file_system(datacenter_uuid=dcinv.uuid,
+                                                       fsid=os.getenv('fileSystemId'),
+                                                       name='setup_nasfs',
+                                                       session_uuid=session_uuid)
+                    # Add Aliyun Access Group
+                    nas_ops.add_aliyun_nas_access_group(datacenter_uuid=dcinv.uuid,
+                                                        group_name=os.getenv('groupName'),
+                                                        session_uuid=session_uuid)
+                except:
+                    pass
                 # Add AliyunNas PS
                 grpinvs = res_ops.get_resource(res_ops.ALIYUNNAS_ACCESSGROUP, session_uuid=session_uuid)
                 nasinvs = res_ops.get_resource(res_ops.NAS_FILESYSTEM, session_uuid=session_uuid)
