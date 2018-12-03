@@ -12,32 +12,32 @@ import zstackwoodpecker.operations.account_operations as acc_ops
 import base64
 import os
 
-
-def create_alarm(comparisonOperator, period, threshold, namespace, metric_name, name=None, repeat_interval=None, labels=None, actions=None, resource_uuid=None, session_uuid=None):
-	action = api_actions.CreateAlarmAction()
-	test_util.test_logger("%s" %(comparisonOperator))
-	action.timeout = 30000
-	if name:
-		action.name = name
-	if not name:
-		action.name = 'alarm_01'
-	action.comparisonOperator = comparisonOperator
-	action.period = period
-	action.threshold = threshold
-	action.namespace = namespace
-	action.metricName = metric_name
-	if actions:
-		action.actions = actions
-	if repeat_interval:
-		action.repeatInterval = repeat_interval
-	if labels:
-		action.labels = labels
-	if resource_uuid:
-		action.resourceUuid = resource_uuid
-	test_util.action_logger('Create Alarm: %s ' % name)
-	evt = acc_ops.execute_action_with_session(action, session_uuid)
-	return evt.inventory
-
+def create_alarm(comparisonOperator, period, threshold, namespace, metric_name, type_alarm=None, name=None, repeat_interval=None, labels=None, actions=None, resource_uuid=None, session_uuid=None):
+        action = api_actions.CreateAlarmAction()
+        test_util.test_logger("%s" %(comparisonOperator))
+        action.timeout = 30000
+        if name:
+                action.name = name
+        if not name:
+                action.name = 'alarm_01'
+        action.comparisonOperator = comparisonOperator
+        action.period = period
+        action.threshold = threshold
+        action.namespace = namespace
+        action.metricName = metric_name
+        if actions:
+                action.actions = actions
+        if repeat_interval:
+                action.repeatInterval = repeat_interval
+        if labels:
+                action.labels = labels
+        if resource_uuid:
+                action.resourceUuid = resource_uuid
+        if type_alarm:
+                action.type = type_alarm
+        test_util.action_logger('Create Alarm: %s ' % name)
+        evt = acc_ops.execute_action_with_session(action, session_uuid)
+        return evt.inventory
 
 def create_autoScaling_vmTemplate(l3NetworkUuids,vmInstanceOfferingUuid,imageUuid,defaultL3NetworkUuid,systemTags=None,vmTemplateName=None,vmInstanceName=None,session_uuid=None):
 	action = api_actions.CreateAutoScalingVmTemplateAction()

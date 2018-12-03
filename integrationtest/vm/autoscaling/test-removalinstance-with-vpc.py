@@ -17,7 +17,7 @@ maxvm_number = 6
 minvm_number = 2
 initvm_number = 3
 adjustment_number = 4
-cooldown_time = 120
+cooldown_time = 20 
 memory_threshold =99
 period = 20
 
@@ -25,8 +25,9 @@ def test():
         test_util.test_dsc("create autoscaling group")
 
         test_util.test_dsc("create alarm")
-        alarm_1Uuid = autoscaling.create_alarm('GreaterThan', 60, 99, 'ZStack/VM', 'MemoryUsedInPercent').uuid
-        alarm_2Uuid = autoscaling.create_alarm('LessThan', 60, 1, 'ZStack/VM', 'MemoryUsedInPercent').uuid
+
+	alarm_1Uuid = autoscaling.create_alarm('GreaterThan', 60, 99, 'ZStack/VM', 'MemoryUsedInPercent','Average','alarm_add',10).uuid
+	alarm_2Uuid = autoscaling.create_alarm('LessThan', 60, 1, 'ZStack/VM', 'MemoryUsedInPercent','Average','alarm_removal',10).uuid
 
         test_util.test_dsc("get l3 network uuid")
         l3_public_name = os.environ.get(test_stub.L3_SYSTEM_NAME_LIST[0])
@@ -39,7 +40,7 @@ def test():
         test_util.test_logger("%s" %(vmInstanceOfferingUuid))
 
         test_util.test_logger("get vm Image uuid")
-        imageUuid = res_ops.get_resource(res_ops.IMAGE,None,None,os.environ.get('imageName3'))[0].uuid
+        imageUuid = res_ops.get_resource(res_ops.IMAGE,None,None,os.environ.get('imageName_s'))[0].uuid
         test_util.test_logger("%s" %(imageUuid))
 
         test_util.test_logger("get vm template uuid")
@@ -67,12 +68,11 @@ def test():
 	test_stub.check_autoscaling_init_vmm_number(initvm_number,autoscaling_groupUuid)
 
 	test_util.test_logger("update memory percent")
-	autoscaling.update_alarm(alarm_1Uuid,period,memory_threshold)
 	autoscaling.update_alarm(alarm_2Uuid,period,memory_threshold)
 	
 	test_util.test_logger("update modify removal instance number")
 	autoscaling.update_autoscalinggroup_removalinstance(groupremovalinstanceruleUuid,adjustment_number,cooldown_time)
-	time.sleep(30)
+	time.sleep(120)
 	test_util.test_logger("check removal instance number")
 	test_stub.check_removalinstance_vmm_number(minvm_number,minvm_number,autoscaling_groupUuid)
 	
