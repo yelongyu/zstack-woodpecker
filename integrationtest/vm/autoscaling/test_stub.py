@@ -19,6 +19,7 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.image_operations as img_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
+import zstackwoodpecker.operations.autoscaling_operations as autoscaling
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.scenario_operations as sce_ops

@@ -76,7 +76,7 @@ def test():
     test_util.test_dsc("create cloud router")
     vm1 = test_stub.create_vlan_vm(os.environ.get('l3NoVlanNetworkName2'))
     test_obj_dict.add_vm(vm1)
-    vm1.destroy()
+    vm1.clean()
 
     test_util.test_dsc("create load balance")
     l3_public_name = os.environ.get('l3PublicNetworkName')
