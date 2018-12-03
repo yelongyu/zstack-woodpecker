@@ -13,6 +13,7 @@ import json
 import xml.etree.cElementTree as etree
 import apibinding.inventory as inventory
 import os
+import re
 import sys
 import traceback
 import time
