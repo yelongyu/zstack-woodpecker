@@ -1209,7 +1209,7 @@ def setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config):
                 for backupStorageRef in xmlobject.safe_list(vm.backupStorageRef):
                     print backupStorageRef.text_
                     backup_storage_type = get_backup_storage_type(deploy_config, backupStorageRef.text_)
-                    test_util.test_logger("pengtao @@@DEBUG-> backup_storage_type %s" %(backup_storage_type))
+                    test_util.test_logger("@@@DEBUG-> backup_storage_type %s" %(backup_storage_type))
                     if backup_storage_type == 'ceph':
                         if ceph_storages.has_key(backupStorageRef.text_):
                             if vm_name in ceph_storages[backupStorageRef.text_]:
@@ -1222,7 +1222,7 @@ def setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config):
                 for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
                     print primaryStorageRef.text_
                     primary_storage_type = get_primary_storage_type(deploy_config, primaryStorageRef.text_)
-                    test_util.test_logger("pengtao @@@DEBUG-> primary_storage_type %s" %(primary_storage_type))
+                    test_util.test_logger(" @@@DEBUG-> primary_storage_type %s" %(primary_storage_type))
                     for zone in xmlobject.safe_list(deploy_config.zones.zone):
                         if primary_storage_type == 'ceph':
                             if ceph_storages.has_key(backupStorageRef.text_):
@@ -1260,6 +1260,7 @@ def setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config):
         cmd1 = "rados lspools"
         (retcode, output, erroutput) = ssh.execute(cmd1, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host_port))
         output += "\n"
+        print "output is %s" % (output)
         dvpn = "cephPrimaryStorageDataVolumePoolName ="
         rvpn = "cephPrimaryStorageRootVolumePoolName ="
         icpn = "cephPrimaryStorageImageCachePoolName ="
@@ -1270,13 +1271,23 @@ def setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config):
         backup_storage_pool = "%s %s" % (cbsp, output)
         with open('/root/.zstackwoodpecker/integrationtest/vm/multihosts/deploy-xsky-ceph-ps.tmpt') as infile, open('/root/.zstackwoodpecker/integrationtest/vm/multihosts/ofile.tmpt', 'w') as outfile:
                 lines = infile.readlines()
-                print "line is %s" % (lines)
-                lines[3] = data_volume_name
-                lines[4] = root_volume_name
-                lines[5] = image_cache_name
-                lines[6] = backup_storage_pool
-                for i in lines:
-                        outfile.write(i)
+                print "lines is %s" % (lines)
+                for line in lines:
+                    line.rstrip()
+                    if dvpn in line:
+                        print "line is : %s"%(line)
+                        line = re.sub(dvpn, data_volume_name, line)
+                    elif rvpn in line:
+                        print "line is : %s"%(line)
+                        line = re.sub(rvpn, root_volume_name, line)
+                    elif icpn in line:
+                        print "line is : %s"%(line)
+                        line = re.sub(icpn, image_cache_name, line)
+                    elif cbsp in line:
+                        print "line is : %s"%(line)
+                        line = re.sub(cbsp, backup_storage_pool, line)
+                    outfile.write(line)
+
         os.system('cp -f /root/.zstackwoodpecker/integrationtest/vm/multihosts/ofile.tmpt /root/.zstackwoodpecker/integrationtest/vm/multihosts/deploy-xsky-ceph-ps.tmpt')
 
 def setup_xsky_storages(scenario_config, scenario_file, deploy_config):
