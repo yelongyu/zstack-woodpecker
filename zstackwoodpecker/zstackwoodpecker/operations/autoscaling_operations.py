@@ -217,7 +217,7 @@ def update_autoscalinggroup(uuid,maxResourceSize=None,minResourceSize=None,remov
 	return evt.inventory
 
 def update_autoscalingRule(uuid,cooldown=None,systemTags=None,session_uuid=None):
-	action = api_actions.UpdateAutoScalingRule()
+	action = api_actions.UpdateAutoScalingRuleAction()
 	action.time = 3000
 	action.uuid = uuid
 	if cooldown:
@@ -227,4 +227,12 @@ def update_autoscalingRule(uuid,cooldown=None,systemTags=None,session_uuid=None)
 	test_util.action_logger("update autoscaling rule: %s" %(action.uuid))
 	evt = acc_ops.execute_action_with_session(action, session_uuid)
 	return evt.inventory
+
+def query_vm_install(conditions,session_uuid=None):
+	action = api_actions.QueryVmInstanceAction()
+	action.conditions = conditions
+	action.time = 3000
+	test_util.action_logger("query vm instance")
+	evt = acc_ops.execute_action_with_session(action, session_uuid)
+	return evt
 

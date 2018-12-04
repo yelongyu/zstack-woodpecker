@@ -393,6 +393,14 @@ def check_removalinstance_vmm_number(min_number,expect_number,autoscaling_groupU
              autoscaling.delete_autoScaling_group(autoscaling_groupUuid)
              test_util.test_fail("autoscaling removal instance fail")
 
+def query_autoscaling_vm_instance(imageUuid):
+        Result = autoscaling.query_vm_install([{'name': 'uuid', 'op': '!=', 'value': 'NULL'}])
+        for evt in Result:
+                if evt.imageUuid == imageUuid:
+                        test_util.test_logger("%s" %(evt.imageUuid))
+                        vm_ops.stop_vm(evt.uuid, None, None)
+                        test_util.test_logger("stop autoscaling vmm instance")
+
 
 class ZstackTestVR(vm_header.TestVm):
     def __init__(self, vr_inv):

@@ -21,8 +21,8 @@ def test():
         test_util.test_dsc("create autoscaling group")
 
         test_util.test_dsc("create alarm")
-        alarm_1Uuid = autoscaling.create_alarm('GreaterThan', 60, 99, 'ZStack/VM', 'MemoryUsedInPercent').uuid
-        alarm_2Uuid = autoscaling.create_alarm('LessThan', 60, 1, 'ZStack/VM', 'MemoryUsedInPercent').uuid
+	alarm_1Uuid = autoscaling.create_alarm('GreaterThan', 60, 99, 'ZStack/VM', 'MemoryUsedInPercent').uuid
+	alarm_2Uuid = autoscaling.create_alarm('LessThan', 60, 1, 'ZStack/VM', 'MemoryUsedInPercent').uuid
 
         test_util.test_dsc("get l3 network uuid")
         l3_public_name = os.environ.get(test_stub.L3_SYSTEM_NAME_LIST[0])
