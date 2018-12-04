@@ -722,12 +722,13 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                         action.monUrls.append("root:password@%s" % (hostname))
                 else:
                     action.monUrls = pr.monUrls_.split(';')
-                if pr.dataVolumePoolName_:
-                    action.dataVolumePoolName = pr.dataVolumePoolName_
-                if pr.rootVolumePoolName_:
-                    action.rootVolumePoolName = pr.rootVolumePoolName_
-                if pr.imageCachePoolName_:
-                    action.imageCachePoolName = pr.imageCachePoolName_
+                xsky_mn_ip = hostname_list[1]
+                cmd = "rados lspools"
+                (retcode, output, erroutput) = ssh.execute(cmd, xsky_mn_ip, "root", "password", True, 22)
+
+                action.dataVolumePoolName = output
+                action.rootVolumePoolName = output
+                action.imageCachePoolName = output
                 action.zoneUuid = zinv.uuid
                 thread = threading.Thread(target=_thread_for_action, args=(action,))
                 wait_for_thread_queue()
