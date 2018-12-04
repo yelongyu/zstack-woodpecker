@@ -15,6 +15,7 @@ import zstacklib.utils.xmlobject as xmlobject
 import zstacklib.utils.lock as lock
 import zstacklib.utils.http as http
 import apibinding.inventory as inventory
+import zstacklib.utils.ssh as ssh
 import os
 import sys
 import traceback
@@ -204,8 +205,10 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
                     action.monUrls.append("root:password@%s" % (hostname))
             else:
                 action.monUrls = bs.monUrls_.split(';')
-            if bs.poolName_:
-                action.poolName = bs.poolName_
+            xsky_mn_ip = hostname_list[1]
+            cmd = "rados lspools"
+            (retcode, output, erroutput) = ssh.execute(cmd, xsky_mn_ip, "root", "password", True, 22)
+            action.poolName = output
             action.timeout = AddKVMHostTimeOut #for some platform slowly salt execution
             action.type = inventory.CEPH_BACKUP_STORAGE_TYPE
             thread = threading.Thread(target = _thread_for_action, args = (action, ))
