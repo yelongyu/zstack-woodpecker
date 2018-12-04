@@ -30,6 +30,11 @@ def create_pxe(pxe_option, session_uuid=None):
     action.description = pxe_option.get_description()
     action.systemTags = pxe_option.get_system_tags()
     action.userTags = pxe_option.get_user_tags()
+    action.hostname = pxe_option.get_hostname()
+    action.storagePath = pxe_option.get_storagePath()
+    action.sshUsername = pxe_option.get_sshUsername()
+    action.sshPassword = pxe_option.get_sshPassword()
+    action.sshPort = pxe_option.get_sshPort()
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Add PXE Server [uuid:] %s [name:] %s' % \
                                         (evt.inventory.uuid, action.name))

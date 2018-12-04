@@ -1331,6 +1331,11 @@ class PxeOption(DataOption):
         self.dhcpRangeBegin = None
         self.dhcpRangeEnd = None
         self.dhcpRangeNetmask = None
+        self.hostname = None
+        self.storagePath = None
+        self.sshUsername = None
+        self.sshPassword = None
+        self.sshPort = None
         super(PxeOption, self).__init__()
 
     def set_dhcp_interface(self, dhcpInterface):
@@ -1356,6 +1361,36 @@ class PxeOption(DataOption):
 
     def get_dhcp_netmask(self):
         return self.dhcpRangeNetmask
+
+    def set_hostname(self, hostname):
+        self.hostname = hostname
+
+    def get_hostname(self):
+        return self.hostname
+
+    def set_storagePath(self, storagePath):
+        self.storagePath = storagePath
+
+    def get_storagePath(self):
+        return self.storagePath
+
+    def set_sshUsername(self, sshUsername):
+        self.sshUsername = sshUsername
+
+    def get_sshUsername(self):
+        return self.sshUsername
+
+    def set_sshPassword(self, sshPassword):
+        self.sshPassword = sshPassword
+
+    def get_sshPassword(self):
+        return self.sshPassword
+
+    def set_sshPort(self, sshPort):
+        self.sshPort = sshPort
+
+    def get_sshPort(self):
+        return self.sshPort
 
 class BaremetalHostCfgOption(DataOption):
     def __init__(self):
