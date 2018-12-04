@@ -13,7 +13,6 @@ import json
 import xml.etree.cElementTree as etree
 import apibinding.inventory as inventory
 import os
-import re
 import sys
 import traceback
 import time
@@ -1257,7 +1256,7 @@ def setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config):
                 vm_ips += vm.ips.ip[vm_nic_id].ip_ + ' '
         ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup-xsky-3nodes.sh'), '/root/setup-xsky-3nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host_port))
         os.system("sshpass -p password ssh root@%s \"bash -ex /root/setup-xsky-3nodes.sh %s > /root/setup.log 2>&1 \"" %(node1_ip, vm_ips))
-        time.sleep(20)
+        time.sleep(2)
         cmd1 = "rados lspools"
         (retcode, output, erroutput) = ssh.execute(cmd1, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host_port))
         output += "\n"
@@ -1270,26 +1269,14 @@ def setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config):
         root_volume_name = "%s %s" % (rvpn, output)
         image_cache_name = "%s %s" % (icpn, output)
         backup_storage_pool = "%s %s" % (cbsp, output)
-        with open('/root/.zstackwoodpecker/integrationtest/vm/multihosts/deploy-xsky-ceph-ps.tmpt') as infile, open('/root/.zstackwoodpecker/integrationtest/vm/multihosts/ofile.tmpt', 'w') as outfile:
+        print "data_volume_name is %s" % (data_volume_name)
+        with open('/root/.zstackwoodpecker/integrationtest/vm/multihosts/deploy-xsky-ceph-ps.tmpt', 'a+') as infile:
                 lines = infile.readlines()
                 print "lines is %s" % (lines)
-                for line in lines:
-                    line.rstrip()
-                    if dvpn in line:
-                        print "line is : %s"%(line)
-                        line = re.sub(dvpn, data_volume_name, line)
-                    elif rvpn in line:
-                        print "line is : %s"%(line)
-                        line = re.sub(rvpn, root_volume_name, line)
-                    elif icpn in line:
-                        print "line is : %s"%(line)
-                        line = re.sub(icpn, image_cache_name, line)
-                    elif cbsp in line:
-                        print "line is : %s"%(line)
-                        line = re.sub(cbsp, backup_storage_pool, line)
-                    outfile.write(line)
-
-        os.system('cp -f /root/.zstackwoodpecker/integrationtest/vm/multihosts/ofile.tmpt /root/.zstackwoodpecker/integrationtest/vm/multihosts/deploy-xsky-ceph-ps.tmpt')
+                infile.write(data_volume_name)
+                infile.write(root_volume_name)
+                infile.write(image_cache_name)
+                infile.write(backup_storage_pool)
 
 def setup_xsky_storages(scenario_config, scenario_file, deploy_config):
     #Stop nodes
