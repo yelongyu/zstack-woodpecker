@@ -3,5 +3,7 @@
 	   <case timeout='1200' repeat='1' noparallel='True'>test-create-autoscaling-group-with-vrouter.py</case>
            <case timeout='1200' repeat='1' noparallel='True'>test-create-autoscaling-group-with-vpc.py</case>
            <case timeout='1200' repeat='1' noparallel='True'>test-add-newinstance-with-vpc.py</case>
+	   <case timeout='1200' repeat='1' noparallel='True'>test-removalinstance-with-vpc.py</case>
+	   <case timeout='1200' repeat='1' noparallel='True'>test-check-vmm-healthy.py</case>
     </suite>
 </integrationTest>
