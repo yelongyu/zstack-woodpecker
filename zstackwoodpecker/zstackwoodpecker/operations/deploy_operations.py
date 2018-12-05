@@ -875,9 +875,9 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
             zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, \
                     name=zone.name_)
             zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
-
+            ak_id = None
+            new_ak_id = None
             for pr in xmlobject.safe_list(zone.primaryStorages.aliyunNASPrimaryStorage):
-                ak_id = None
                 if ps_name and ps_name != pr.name_:
                     continue
                 hostname_list = get_primary_storage_from_scenario_file(pr.name_, scenarioConfig, scenarioFile, deployConfig)
