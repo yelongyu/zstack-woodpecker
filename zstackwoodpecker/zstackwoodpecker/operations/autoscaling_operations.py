@@ -236,3 +236,19 @@ def query_vm_install(conditions,session_uuid=None):
 	evt = acc_ops.execute_action_with_session(action, session_uuid)
 	return evt
 
+def AttachNetworkServiceToL3Network(l3_network_uuid,allservices,networkserviceprovider_uuid,session_uuid = None):
+	action = api_actions.AttachNetworkServiceToL3NetworkAction()
+	action.sessionUuid = session_uuid
+	action.l3NetworkUuid = l3_network_uuid
+	action.networkServices = {networkserviceprovider_uuid:allservices}
+	evt = acc_ops.execute_action_with_session(action,session_uuid)
+	test_util.action_logger('add network services to l3 network: %s' % l3_network_uuid)
+	return evt
+
+def deltet_loadbalancer(uuid,session_uuid = None):
+	action = api_actions.DeleteLoadBalancerAction()
+	action.uuid = uuid
+	action.time = 10000
+	test_util.action_logger("delete load balancer %s" %(action.uuid))
+	evt = acc_ops.execute_action_with_session(action,session_uuid)
+	return evt

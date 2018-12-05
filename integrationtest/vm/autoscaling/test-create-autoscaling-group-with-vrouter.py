@@ -25,7 +25,7 @@ def test():
 	alarm_2Uuid = autoscaling.create_alarm('LessThan', 60, 1, 'ZStack/VM', 'MemoryUsedInPercent').uuid
 
 	test_util.test_dsc("get l3 network uuid")
-	l3_public_name = os.environ.get('l3PublicNetworkName')
+	l3_public_name = os.environ.get('l3NoVlanNetworkName2')
 	l3NetworkUuids = test_lib.lib_get_l3_by_name(l3_public_name).uuid
  	test_util.test_logger("%s" %(l3NetworkUuids))
 	

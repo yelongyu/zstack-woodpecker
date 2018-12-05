@@ -401,6 +401,13 @@ def query_autoscaling_vm_instance(imageUuid):
                         vm_ops.stop_vm(evt.uuid, None, None)
                         test_util.test_logger("stop autoscaling vmm instance")
 
+def attach_networkService_toL3Network(l3NetworkUuids):
+	allservices = ["LoadBalancer"]
+	cond = res_ops.gen_query_conditions("type","=","vrouter")
+	network_service_provider_uuid = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER,cond)[0].uuid
+	test_util.test_logger("%s" %(network_service_provider_uuid))
+	autoscaling.AttachNetworkServiceToL3Network(l3NetworkUuids,allservices,network_service_provider_uuid)
+
 
 class ZstackTestVR(vm_header.TestVm):
     def __init__(self, vr_inv):
