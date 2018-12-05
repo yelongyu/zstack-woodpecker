@@ -7,11 +7,13 @@ New Integration test for testing create a vm with UEFI BIOS.
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
-import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
-import zstackwoodpecker.operations.image_operations as img_ops
-import zstackwoodpecker.zstack_test.zstack_test_image as test_image
 import zstackwoodpecker.header.vm as vm_header
+import zstackwoodpecker.operations.image_operations as img_ops
+import zstackwoodpecker.operations.tag_operations as tag_ops
+import zstackwoodpecker.zstack_test.zstack_test_image as test_image
+import zstackwoodpecker.operations.resource_operations as res_ops
+import zstacklib.utils.ssh as ssh
 import subprocess
 import time
 import os
@@ -21,13 +23,25 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
 def test():
-    image_name = 'UEFI-image'
+    img_option = test_util.ImageOption()
+    UEFI_image_url = os.environ.get('imageUrl_linux_UEFI')
+    image_name = os.environ.get('imageName_linux_UEFI')
+    img_option.set_name(image_name)
+    bs_uuid = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, [], None)[0].uuid
+    img_option.set_backup_storage_uuid_list([bs_uuid])
+    img_option.set_format('qcow2')
+    img_option.set_url(UEFI_image_url)
+    img_option.set_system_tags("bootMode::UEFI")
+    image_inv = img_ops.add_root_volume_template(img_option)
+    image = test_image.ZstackTestImage()
+    image.set_image(image_inv)
+    image.set_creation_option(img_option)
+    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    test_obj_dict.add_image(image)
     vm = test_stub.create_vm(image_name = os.environ.get('imageName_linux_UEFI'))
     test_obj_dict.add_vm(vm)
     vm.check()
-    time.sleep(90)
     vm_ip = vm.get_vm().vmNics[0].ip
-    print "vm_ip is : %s" % (vm_ip)
     retcode = subprocess.call(["ping", "-c","4",vm_ip])
     if retcode != 0:
         test_util.test_fail('Create VM Test linux UEFI failed.')
