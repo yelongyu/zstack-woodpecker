@@ -35,6 +35,7 @@ def create_pxe(pxe_option, session_uuid=None):
     action.sshUsername = pxe_option.get_sshUsername()
     action.sshPassword = pxe_option.get_sshPassword()
     action.sshPort = pxe_option.get_sshPort()
+    action.zoneUuid = pxe_option.get_zoneUuid()
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Add PXE Server [uuid:] %s [name:] %s' % \
                                         (evt.inventory.uuid, action.name))
@@ -299,6 +300,14 @@ def update_baremetal_instance(uuid, name=None, description=None, password=None, 
     if platform:
         action.platform = platform
     test_util.action_logger('Update Baremetal Instance [uuid:] %s' % uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def attach_pxe_to_cluster(pxe_uuid, cluster_uuid, session_uuid=None):
+    action = api_actions.AttachBaremetalPxeServerToClusterAction()
+    action.clusterUuid = cluster_uuid
+    action.pxeServerUuid = pxe_uuid
+    test_util.action_logger('Attach pxe server [%s] to cluster [%s]' %(pxe_uuid, cluster_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
