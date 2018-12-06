@@ -83,10 +83,12 @@ def test():
 	time.sleep(200)	
         test_util.test_logger("check vmm instance numkber")
         test_stub.check_autoscaling_init_vmm_number(minvm_number,autoscaling_groupUuid)
-
+	
+	
+	autoscaling.delete_loadbalancer(lb.get_load_balancer().uuid)
+	time.sleep(20)
         test_util.test_dsc("Delete autoscaling group")
         autoscaling.delete_autoScaling_group(autoscaling_groupUuid)
-	autoscaling.deltet_loadbalancer(lb.get_load_balancer().uuid)
         test_util.test_pass("Test AutoScaling Group Successfully")
 
 

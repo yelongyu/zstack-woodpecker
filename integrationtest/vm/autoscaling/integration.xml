@@ -5,5 +5,7 @@
            <case timeout='1200' repeat='1' noparallel='True'>test-add-newinstance-with-vpc.py</case>
 	   <case timeout='1200' repeat='1' noparallel='True'>test-removalinstance-with-vpc.py</case>
 	   <case timeout='1200' repeat='1' noparallel='True'>test-check-vmm-healthy.py</case>
+	   <case timeout='1200' repeat='1' noparallel='True'>test-check-loadbalance-healthy.py</case>
+	   <case timeout='1200' repeat='1' noparallel='True'>test-check-security-group.py</case>
     </suite>
 </integrationTest>

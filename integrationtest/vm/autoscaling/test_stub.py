@@ -401,12 +401,32 @@ def query_autoscaling_vm_instance(imageUuid):
                         vm_ops.stop_vm(evt.uuid, None, None)
                         test_util.test_logger("stop autoscaling vmm instance")
 
+def query_autoscaling_vm_instance_and_destroy_vmm(imageUuid):
+        Result = autoscaling.query_vm_install([{'name': 'uuid', 'op': '!=', 'value': 'NULL'}])
+        for evt in Result:
+                if evt.imageUuid == imageUuid:
+                        test_util.test_logger("%s" %(evt.imageUuid))
+                        vm_ops.destroy_vm(evt.uuid, None, None)
+			vm_ops.expunge_vm(evt.uuid, None, None)
+                        test_util.test_logger("stop autoscaling vmm instance")
+
 def attach_networkService_toL3Network(l3NetworkUuids):
 	allservices = ["LoadBalancer"]
 	cond = res_ops.gen_query_conditions("type","=","vrouter")
 	network_service_provider_uuid = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER,cond)[0].uuid
 	test_util.test_logger("%s" %(network_service_provider_uuid))
 	autoscaling.AttachNetworkServiceToL3Network(l3NetworkUuids,allservices,network_service_provider_uuid)
+
+def create_sg(sg_creation_option=None, session_uuid = None):
+	if not sg_creation_option:
+		sg_creation_option = test_util.SecurityGroupOption()
+		sg_creation_option.set_name('test_sg')
+		sg_creation_option.set_description('test sg description')
+    	sg_creation_option.set_session_uuid(session_uuid)
+    	sg = zstack_sg_header.ZstackTestSecurityGroup()
+    	sg.set_creation_option(sg_creation_option)
+    	sg.create()
+    	return sg
 
 
 class ZstackTestVR(vm_header.TestVm):

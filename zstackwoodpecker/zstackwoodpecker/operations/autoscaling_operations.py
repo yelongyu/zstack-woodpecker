@@ -74,7 +74,7 @@ def create_autoScaling_vmTemplate(l3NetworkUuids,vmInstanceOfferingUuid,imageUui
 
 def create_autoScaling_group(maxResourceSize,minResourceSize,systemTags=None,autoScaling_group_name=None,session_uuid=None,removalPolicy="OldestInstance",defaultCooldown = 0,scalingResourceType="VmInstance",defaultEnable="true"):
 	action = api_actions.CreateAutoScalingGroupAction()
-	action.time = 3000
+	action.time = 30000
 	action.removalPolicy = removalPolicy
 	action.defaultCooldown = defaultCooldown
 	action.maxResourceSize = maxResourceSize
@@ -94,7 +94,7 @@ def create_autoScaling_group(maxResourceSize,minResourceSize,systemTags=None,aut
 
 def attach_autoScaling_templateToGroup(groupUuid,uuid,session_uuid=None):
 	action = api_actions.AttachAutoScalingTemplateToGroupAction()
-	action.time = 3000
+	action.time = 30000
 	action.groupUuid = groupUuid
 	action.uuid = uuid
 	test_util.action_logger('attach vm template to autoscaling group')
@@ -103,7 +103,7 @@ def attach_autoScaling_templateToGroup(groupUuid,uuid,session_uuid=None):
 
 def create_autoScaling_group_removalInstanceRule(adjustmentValue,cooldown,autoScalingGroupUuid,removalInstanceRule_name=None,session_uuid=None,adjustmentType="QuantityChangeInCapacity",removalPolicy="OldestInstance"):
 	action = api_actions.CreateAutoScalingGroupRemovalInstanceRuleAction()
-	action.time = 3000
+	action.time = 30000
 	action.adjustmentType = adjustmentType
 	action.adjustmentValue = adjustmentValue
 	action.removalPolicy = removalPolicy
@@ -119,7 +119,7 @@ def create_autoScaling_group_removalInstanceRule(adjustmentValue,cooldown,autoSc
 
 def create_autoScaling_group_addingNewInstanceRule(adjustmentValue,autoScalingGroupUuid,cooldown,addingNewInstanceRule_name=None,session_uuid=None,adjustmentType="QuantityChangeInCapacity"):
 	action = api_actions.CreateAutoScalingGroupAddingNewInstanceRuleAction()
-	action.time = 3000
+	action.time = 30000
 	action.adjustmentType = adjustmentType
 	action.adjustmentValue = adjustmentValue
 	action.cooldown = cooldown
@@ -134,7 +134,7 @@ def create_autoScaling_group_addingNewInstanceRule(adjustmentValue,autoScalingGr
 
 def create_autoScaling_ruleAlarmTrigger(alarmUuid,ruleUuid,ruleAlarmTrigger_name=None,session_uuid=None):
 	action = api_actions.CreateAutoScalingRuleAlarmTriggerAction()
-	action.time = 3000
+	action.time = 30000
 	action.alarmUuid = alarmUuid
 	action.ruleUuid = ruleUuid
 	if ruleAlarmTrigger_name:
@@ -147,7 +147,7 @@ def create_autoScaling_ruleAlarmTrigger(alarmUuid,ruleUuid,ruleAlarmTrigger_name
 
 def delete_autoScaling_group(uuid,session_uuid=None):
 	action = api_actions.DeleteAutoScalingGroupAction()
-	action.time = 3000
+	action.time = 30000
 	action.uuid = uuid
 	test_util.action_logger('Delete autoscaling group :%s' % action.uuid)
 	evt = acc_ops.execute_action_with_session(action, session_uuid)
@@ -155,7 +155,7 @@ def delete_autoScaling_group(uuid,session_uuid=None):
 
 def delete_autoScaling_template(uuid,session_uuid=None):
 	action = api_actions.DeleteAutoScalingTemplateAction()
-        action.time = 3000
+        action.time = 30000
         action.uuid = uuid
         test_util.action_logger('Delete autoscaling VM Template :%s' % action.uuid)
         evt = acc_ops.execute_action_with_session(action, session_uuid)
@@ -163,7 +163,7 @@ def delete_autoScaling_template(uuid,session_uuid=None):
 
 def update_alarm(uuid,period=None,threshold=None,session_uuid=None):
 	action = api_actions.UpdateAlarmAction()
-	action.time = 3000
+	action.time = 30000
 	action.uuid = uuid
 	if period:
 		action.period = period
@@ -175,7 +175,7 @@ def update_alarm(uuid,period=None,threshold=None,session_uuid=None):
 
 def update_autoscalinggroup_addingnewinstance(uuid,adjustmentValue=None,cooldown=None,session_uuid=None):
 	action = api_actions.UpdateAutoScalingGroupAddingNewInstanceRuleAction()
-	action.time = 3000
+	action.time = 30000
 	action.uuid = uuid
 	if adjustmentValue:
 		action.adjustmentValue = adjustmentValue
@@ -187,7 +187,7 @@ def update_autoscalinggroup_addingnewinstance(uuid,adjustmentValue=None,cooldown
 
 def update_autoscalinggroup_removalinstance(uuid,adjustmentValue=None,cooldown=None,removalPolicy=None,session_uuid=None):
 	action = api_actions.UpdateAutoScalingGroupRemovalInstanceRuleAction()
-	action.time = 3000
+	action.time = 30000
 	action.uuid = uuid
         if adjustmentValue:
                 action.adjustmentValue = adjustmentValue
@@ -202,7 +202,7 @@ def update_autoscalinggroup_removalinstance(uuid,adjustmentValue=None,cooldown=N
 
 def update_autoscalinggroup(uuid,maxResourceSize=None,minResourceSize=None,removalPolicy=None,systemTags=None,session_uuid=None):
 	action = api_actions.UpdateAutoScalingGroupAction()
-	action.time = 3000
+	action.time = 30000
 	action.uuid = uuid
 	if maxResourceSize:
 		action.maxResourceSize = maxResourceSize
@@ -218,7 +218,7 @@ def update_autoscalinggroup(uuid,maxResourceSize=None,minResourceSize=None,remov
 
 def update_autoscalingRule(uuid,cooldown=None,systemTags=None,session_uuid=None):
 	action = api_actions.UpdateAutoScalingRuleAction()
-	action.time = 3000
+	action.time = 30000
 	action.uuid = uuid
 	if cooldown:
 		action.cooldown = cooldown
@@ -231,7 +231,7 @@ def update_autoscalingRule(uuid,cooldown=None,systemTags=None,session_uuid=None)
 def query_vm_install(conditions,session_uuid=None):
 	action = api_actions.QueryVmInstanceAction()
 	action.conditions = conditions
-	action.time = 3000
+	action.time = 30000
 	test_util.action_logger("query vm instance")
 	evt = acc_ops.execute_action_with_session(action, session_uuid)
 	return evt
@@ -245,10 +245,23 @@ def AttachNetworkServiceToL3Network(l3_network_uuid,allservices,networkservicepr
 	test_util.action_logger('add network services to l3 network: %s' % l3_network_uuid)
 	return evt
 
-def deltet_loadbalancer(uuid,session_uuid = None):
+def delete_loadbalancer(uuid,session_uuid = None):
 	action = api_actions.DeleteLoadBalancerAction()
 	action.uuid = uuid
-	action.time = 10000
+	action.time = 30000
 	test_util.action_logger("delete load balancer %s" %(action.uuid))
 	evt = acc_ops.execute_action_with_session(action,session_uuid)
 	return evt
+
+def attach_securityGroup_toL3Network(l3NetworkUuid,securityGroupUuid,session_uuid=None):
+	action = api_actions.AttachSecurityGroupToL3NetworkAction()
+	action.time = 30000
+	action.l3NetworkUuid = l3NetworkUuid
+	action.securityGroupUuid = securityGroupUuid
+	test_util.action_logger("attach l3Network to security group")
+	evt = acc_ops.execute_action_with_session(action,session_uuid)
+	return evt
+
+
+
+
