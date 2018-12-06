@@ -262,6 +262,33 @@ def attach_securityGroup_toL3Network(l3NetworkUuid,securityGroupUuid,session_uui
 	evt = acc_ops.execute_action_with_session(action,session_uuid)
 	return evt
 
+def query_vmNic_insecurityGroup(conditions,securityGroupUuid=None , count = None,vmNicUuid =None,vmInstanceUuid =None, session_uuid=None):
+	action = api_actions.QueryVmNicInSecurityGroupAction()
+	action.conditions = conditions
+	action.time = 30000
+	if count:
+		action.count = count
+	if securityGroupUuid:
+		action.securityGroupUuid = securityGroupUuid
+	if vmNicUuid:
+		action.vmNicUuid = vmNicUuid
+	if vmInstanceUuid:
+		action.vmInstanceUuid = vmInstanceUuid
+	test_util.action_logger("query vm in security group")
+	evt = acc_ops.execute_action_with_session(action,session_uuid)
+	return evt
 
-
+def query_autoScalingGroupInstance(conditions,scalingGroupUuid = None,templateUuid = None,instanceUuid = None, session_uuid=None):
+	action = api_actions.QueryAutoScalingGroupInstanceAction()
+	action.conditions = conditions
+	action.time = 30000
+	if scalingGroupUuid:
+		action.scalingGroupUuid = scalingGroupUuid
+	if templateUuid:
+		action.templateUuid = templateUuid
+	if instanceUuid:
+		action.instanceUuid = instanceUuid
+	test_util.action_logger("query auto scaling group status")
+	evt = acc_ops.execute_action_with_session(action,session_uuid)
+	return evt	
 

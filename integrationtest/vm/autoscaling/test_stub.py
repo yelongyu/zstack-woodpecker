@@ -428,6 +428,18 @@ def create_sg(sg_creation_option=None, session_uuid = None):
     	sg.create()
     	return sg
 
+def check_security_group_vm_instance(scalingGroupUuid,initvm_number):
+	for i in range(10):
+		result = autoscaling.query_vmNic_insecurityGroup([{'name': 'vmNicUuid', 'op': '!=', 'value': 'NULL'}],scalingGroupUuid)
+		test_util.test_logger("antony %s" %(len(result)))
+		if len(result) == initvm_number:
+			test_util.test_logger("add nic vmm to security group successfully")
+			break
+		elif i <  9 and len(result) != initvm_number:
+			time.sleep(5)
+			continue
+		elif i == 9 and len(result) != initvm_number:
+			test_util.test_fail("add nic vmm to security group fail")
 
 class ZstackTestVR(vm_header.TestVm):
     def __init__(self, vr_inv):
