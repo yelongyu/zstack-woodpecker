@@ -33,12 +33,9 @@ def test():
     image = test_image.ZstackTestImage()
     image.set_image(image_inv)
     image.set_creation_option(img_option)
-    image.add_root_volume_template()
     test_obj_dict.add_image(image)
-    pub_ipv4_l3_uuid = test_lib.lib_get_l3_by_name(os.environ.get('l3PublicNetworkName')).uuid
-    pub_ipv6_l3_uuid = test_lib.lib_get_l3_by_name(os.environ.get('l3PublicNetworkName1')).uuid
-    vm1 = test_stub.create_vm(l3_uuid_list = [pub_ipv6_l3_uuid, pub_ipv4_l3_uuid], vm_name = 'IPv6 2 stack test',image_uuid = image.get_image().uuid)
-    vm2 = test_stub.create_vm(l3_uuid_list = [pub_ipv6_l3_uuid], vm_name = 'IPv6 2 stack test',image_uuid = image.get_image().uuid)
+    vm1 = test_stub.create_vm(l3_name = "%s,%s" %(os.environ.get('l3PublicNetworkName1'), os.environ.get('l3PublicNetworkName')), vm_name = 'IPv6 2 stack test ipv4 and ipv6', image_name = image_name)
+    vm2 = test_stub.create_vm(l3_name = os.environ.get('l3PublicNetworkName1'), vm_name = 'IPv6 2 stack test ipv6', image_name = image_name)
     time.sleep(90) #waiting for vm bootup
     vm1_nic1 = vm1.get_vm().vmNics[0].ip
     vm1_nic2 = vm1.get_vm().vmNics[1].ip
@@ -53,6 +50,6 @@ def test():
     if retcode != 0:
         test_util.test_fail('Test Create IPv6 VM Failed.')
 
-
-def env_recover():
+#Will be called only if exception happens in test().
+def error_cleanup():
     test_lib.lib_error_cleanup(test_obj_dict)

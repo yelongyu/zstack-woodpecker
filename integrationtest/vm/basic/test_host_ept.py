@@ -55,7 +55,7 @@ def test():
         if host_state != "Maintenance":
             host_ops.change_host_state(host_uuid, "maintain")
             time.sleep(10)
-        tag_ops.delete_tag(tag.uuid)
+        tag_ops.delete_tag(tag[0].uuid)
         host_ops.change_host_state(host_uuid, "enable")
         time.sleep(60)
 
