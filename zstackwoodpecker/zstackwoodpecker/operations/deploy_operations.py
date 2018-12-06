@@ -1466,7 +1466,9 @@ def add_host(scenarioConfig, scenarioFile, deployConfig, session_uuid, host_ip =
         
         cinvs = res_ops.get_resource(res_ops.CLUSTER, session_uuid, name=cluster_name)
         cinv = get_first_item_from_list(cinvs, 'Cluster', cluster_name, 'L3 network')
+        count = 0
         for host in xmlobject.safe_list(cluster.hosts.host):
+            count += 1
             if host_ip and host_ip != host.managementIp_:
                 continue
 
@@ -1506,11 +1508,14 @@ def add_host(scenarioConfig, scenarioFile, deployConfig, session_uuid, host_ip =
                     action.description = generate_dup_name(generate_dup_name(generate_dup_name(host.description__, zone_ref, 'z'), cluster_ref, 'c'), i, 'h')
                     action.managementIp = generate_dup_host_ip(host.managementIp_, zone_ref, cluster_ref, i)
 
-                thread = threading.Thread(target=_thread_for_action, args = (action, ))
-                wait_for_thread_queue()
-                thread.start()
-                if i != 1:
-                   time.sleep(1)
+                if count == 1 and xmlobject.has_element(deployConfig, 'backupStorages.xskycephBackupStorage'):
+                    print "skip xsky MN host add to computational node"
+                else:
+                    thread = threading.Thread(target=_thread_for_action, args = (action, ))
+                    wait_for_thread_queue()
+                    thread.start()
+                    if i != 1:
+                        time.sleep(1)
 
     for zone in xmlobject.safe_list(deployConfig.zones.zone):
         if zone_name and zone_name != zone.name_:
