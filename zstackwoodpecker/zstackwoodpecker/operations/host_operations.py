@@ -10,6 +10,7 @@ import zstackwoodpecker.test_util as test_util
 import account_operations
 import resource_operations
 import apibinding.inventory as inventory
+import zstacklib.utils.shell as shell
 import time
 
 def add_kvm_host(host_option, session_uuid=None):
@@ -100,3 +101,14 @@ def update_kvm_host(hostUuid, infoType, infoValue, session_uuid = None):
         action.username = infoValue
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
+
+def get_ept_status(ip, username, password, port):
+    ssh_cmd = 'sshpass -p %s ssh -p %s -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null' %(password, port)
+    ret1 = shell.call("%s %s@%s cat /etc/modprobe.d/intel-ept.conf|awk -F'=' '{print $2}'" %(ssh_cmd, username, ip)).strip()
+    ret2 = shell.call("%s %s@%s cat /sys/module/kvm_intel/parameters/ept" %(ssh_cmd, username, ip)).strip()
+    if ret1 == "0" and ret2 == "N":
+        return "disable"
+    elif ret1 == "1" and ret2 == "Y":
+        return "enable"
+    else:
+        return ret2+ret1

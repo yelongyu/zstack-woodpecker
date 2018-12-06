@@ -15,6 +15,7 @@ def deploy_vbmc(host_ips):
     for host_ip in host_ips.strip().split(' '):
         test_util.test_logger('Candidate host ip is %s' %host_ip)
         ssh_cmd = 'sshpass -p password ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null'
+        #time.sleep(600)
         shell.call('%s %s yum --disablerepo=epel --enablerepo=qemu-kvm-ev install -y \
              /opt/zstack-dvd/Extra/qemu-kvm-ev/libvirt-4.1.0/libvirt-devel-*' %(ssh_cmd, host_ip))
         shell.call('%s %s wget http://192.168.200.100/mirror/scripts/get-pip.py'%(ssh_cmd, host_ip))
