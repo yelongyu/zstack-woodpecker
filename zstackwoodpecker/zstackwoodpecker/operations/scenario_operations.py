@@ -2417,6 +2417,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 #vm_creation_option.set_system_tags(system_tags)
                 #vm_creation_option.set_ps_uuid(ps_uuid)
                 #vm_creation_option.set_session_uuid(session_uuid)
+                if os.getenv('datacenterType') == 'AliyunEBS':
+                    vm_creation_option.set_ps_uuid(os.getenv('PSUUIDFOREBS'))
 #                 if ebs_host:
 #                     for k, v in ebs_host.items():
 #                         if int(v['cpu']) > 6 and v['mem'] > 12:

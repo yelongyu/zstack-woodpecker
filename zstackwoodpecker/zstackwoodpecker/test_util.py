@@ -1336,6 +1336,7 @@ class PxeOption(DataOption):
         self.sshUsername = None
         self.sshPassword = None
         self.sshPort = None
+        self.zoneUuid = None
         super(PxeOption, self).__init__()
 
     def set_dhcp_interface(self, dhcpInterface):
@@ -1391,6 +1392,12 @@ class PxeOption(DataOption):
 
     def get_sshPort(self):
         return self.sshPort
+
+    def set_zoneUuid(self, zoneUuid):
+        self.zoneUuid = zoneUuid
+
+    def get_zoneUuid(self):
+        return self.zoneUuid
 
 class BaremetalHostCfgOption(DataOption):
     def __init__(self):

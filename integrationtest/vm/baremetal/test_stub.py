@@ -15,8 +15,8 @@ def deploy_vbmc(host_ips):
     for host_ip in host_ips.strip().split(' '):
         test_util.test_logger('Candidate host ip is %s' %host_ip)
         ssh_cmd = 'sshpass -p password ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null'
-        shell.call('%s %s yum --disablerepo=epel install -y /opt/zstack-dvd/Extra/\
-             qemu-kvm-ev/libvirt-4.1.0/libvirt-devel-4.1.0-2.el7.x86_64.rpm' %(ssh_cmd, host_ip))
+        shell.call('%s %s yum --disablerepo=epel --enablerepo=qemu-kvm-ev install -y \
+             /opt/zstack-dvd/Extra/qemu-kvm-ev/libvirt-4.1.0/libvirt-devel-*' %(ssh_cmd, host_ip))
         shell.call('%s %s wget http://192.168.200.100/mirror/scripts/get-pip.py'%(ssh_cmd, host_ip))
         shell.call('%s %s python  get-pip.py' %(ssh_cmd, host_ip))
         shell.call('%s %s pip install virtualbmc' %(ssh_cmd, host_ip))
@@ -264,14 +264,14 @@ def hack_inspect_ks(host_ip, port = 623, ks_file='inspector_ks.cfg'):
     shell.call('scp %s %s:%s'  %(ks_file, host_ip, path))
 
 def hack_generic_ks(host_ip):
-    path = '/usr/local/zstacktest/apache-tomcat/webapps/zstack/WEB-INF/classes/baremetal/kickstart/generic_ks_tmpl'
+    path = '/var/lib/zstack/virtualenv/baremetalpxeserver/lib/python2.7/site-packages/baremetalpxeserver/ks_tmpl/generic_ks_tmpl'
     shell.call('scp %s:%s .' %(host_ip, path))
     ks = 'generic_ks_tmpl'
     with open(ks, 'r') as ks_in:
         lines = ks_in.readlines()
     with open(ks, 'w') as ks_out:
         for line in lines:
-            if '#EXTRA_REPO' in line:
+            if 'EXTRA_REPO' in line:
                 line = 'clearpart --all --initlabel\nautopart --type=lvm\n%packages\n@^minimal\n%end\n' + line
             ks_out.write(line)
     shell.call('scp %s %s:%s'  %(ks, host_ip, path))

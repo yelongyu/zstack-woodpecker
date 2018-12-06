@@ -228,7 +228,7 @@ def start_mn(vm_ip, tmp_file):
 
 def start_node(vm_ip, tmp_file):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
-    cmd = '%s "zstack-ctl start_node"' % ssh_cmd
+    cmd = '%s "zstack-ctl start_node --timeout 600"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
     time.sleep(40)
 

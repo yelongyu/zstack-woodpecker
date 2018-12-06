@@ -13,13 +13,16 @@ pxe_uuid = None
 def test():
     global pxe_uuid
     test_util.test_dsc('Check if another pxe server created')
+    zone_uuid = res_ops.query_resource(res_ops.ZONE)[0].uuid
     pxe_servers = res_ops.query_resource(res_ops.PXE_SERVER)
     if pxe_servers != None:
         for pxe in pxe_servers:
             baremetal_ops.delete_pxe(pxe.uuid)
  
     test_util.test_dsc('Create pxe server and stop/start it')
-    pxe_uuid = test_stub.create_pxe().uuid
+    pxe_uuid = test_stub.create_pxe(zoneUuid = zone_uuid).uuid
+    #baremetal_operations.attach_pxe_to_cluster(pxe_uuid, baremetal_cluster_uuid)
+
     pxe = res_ops.query_resource(res_ops.PXE_SERVER)[0]
     if pxe == None:
         test_util.test_fail('Create PXE Server Failed')
