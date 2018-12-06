@@ -48,7 +48,7 @@ def create_cluster(zone_uuid, cluster_name = None, session_uuid = None):
 
 def create_pxe(dhcp_interface = None, name = None, range_begin = None, \
 		hostname = '127.0.0.1', storagePath = 'pxe_store', sshUsername = 'root', \
-		sshPassword = 'password', sshPort = 22, 
+		sshPassword = 'password', sshPort = 22, zoneUuid = None,  
 		range_end = None, netmask = None, session_uuid = None):
     pxe_option = test_util.PxeOption()
     if not dhcp_interface:
@@ -68,6 +68,7 @@ def create_pxe(dhcp_interface = None, name = None, range_begin = None, \
     pxe_option.set_sshUsername(sshUsername)
     pxe_option.set_sshPassword(sshPassword)
     pxe_option.set_sshPort(sshPort)
+    pxe_option.set_zoneUuid(zoneUuid)
     if session_uuid:
         pxe_option.set_session_uuid(session_uuid)
     pxe = bare_operations.create_pxe(pxe_option)
