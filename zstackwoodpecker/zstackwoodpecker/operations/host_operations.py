@@ -108,7 +108,7 @@ def get_ept_status(ip, username, password, port):
     ret2 = shell.call("%s %s@%s cat /sys/module/kvm_intel/parameters/ept" %(ssh_cmd, username, ip)).strip()
     if ret1 == "0" and ret2 == "N":
         return "disable"
-    elif ret1 == "1" and ret2 == "Y":
+    elif ret2 == "Y":
         return "enable"
     else:
         return ret2+ret1
