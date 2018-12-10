@@ -51,7 +51,7 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
         req = urllib2.Request(url)
         ebs_domain = urllib2.urlopen(req).read().split('"')[-2]
         vol_name = volume_installPath.split(';')[1].replace('volumeId=', 'ebs-test-disk-')
-        cond = res_ops.gen_query_conditions('name', '=', vol_name)
+        cond = res_ops.gen_query_conditions('name', 'like', vol_name + '%')
         ret = sce_ops.query_resource(ebs_domain, res_ops.VOLUME, cond).inventories
         if ret:
             return self.judge(True)
