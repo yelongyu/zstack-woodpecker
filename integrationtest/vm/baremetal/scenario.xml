@@ -27,7 +27,6 @@
             netmask="$scenvpcIpRangeNetmask1"/>
           <dns>$DNSServer</dns>
 	  <networkService provider="Flat Network Service Provider">
-            <serviceType>DHCP</serviceType>
             <serviceType>Eip</serviceType>
           </networkService>
           <networkService provider="vrouter">
