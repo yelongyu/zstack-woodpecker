@@ -2448,10 +2448,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     setup_vm_console(vm_inv, vm, deploy_config)
                     ensure_nic_all_have_cfg(vm_inv, vm, len(l3_uuid_list+l3_uuid_list_ge_3))
                     # NOTE: need to make filesystem in sync in VM before cold stop VM
-                    if os.getenv('datacenterType') == 'AliyunEBS':
-                        stop_vm(zstack_management_ip, vm_inv.uuid)
-                    else:
-                        stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
+                    stop_vm(zstack_management_ip, vm_inv.uuid)
                     start_vm(zstack_management_ip, vm_inv.uuid)
                     test_lib.lib_wait_target_up(vm_ip, '22', 360)
 
