@@ -151,8 +151,6 @@
                 username="$hostUsername" password="$hostPassword" port="22"/>
               <host name="$hostName3" description="Test3" managementIp="$hostIp3"
                 username="$hostUsername" password="$hostPassword" port="22"/>
-              <host name="$hostName4" description="Test4" managementIp="$hostIp4"
-                username="$hostUsername" password="$hostPassword" port="22"/>
             </hosts>
             <l2VxlanNetworkPoolRef cidr="$l2VxlanNetworkCidr">$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
             <primaryStorageRef>$cephPrimaryStorageName</primaryStorageRef>

@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-upgrade-3.1.1.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-upgrade-3.1.1.tmpt</scenarioConfigTemplate>
+</testConfig>

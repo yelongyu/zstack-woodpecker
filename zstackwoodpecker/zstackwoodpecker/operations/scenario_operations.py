@@ -2369,7 +2369,11 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
         cond = res_ops.gen_query_conditions('vmNics.ip', '=', woodpecker_vm_ip)
         woodpecker_vm = query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0]
         attach_l3(zstack_management_ip, l3_inv.uuid, woodpecker_vm.uuid)
+<<<<<<< HEAD
         if not has_dhcp_service:
+=======
+        if ! has_dhcp_service:
+>>>>>>> upstream/master
             cond = res_ops.gen_query_conditions('vmInstanceUuid', '=', woodpecker_vm.uuid)
             cond = res_ops.gen_query_conditions('usedIp.gateway', '=', last_ip_gateway, cond)
             vm_nic = query_resource(zstack_management_ip, res_ops.VM_NIC, cond).inventories[0]
