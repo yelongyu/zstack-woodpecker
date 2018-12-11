@@ -1,5 +1,5 @@
 <testConfig>
     <deployConfig>deploy-2sftp-nfs-4host.xml</deployConfig>
     <deployConfigTemplate>deploy-2sftp-nfs-4host.tmpt</deployConfigTemplate>
-    <pingTestTarget>zstack.yyk.net</pingTestTarget>
+    <pingTestTarget>zstack.org</pingTestTarget>
 </testConfig>

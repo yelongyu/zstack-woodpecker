@@ -2,5 +2,5 @@
     <deployConfig>deploy-vcenter-ipsec.xml</deployConfig>
     <deployConfigTemplate>deploy.tmpt</deployConfigTemplate>
     <!-- suite special test variables -->
-    <pingTestTarget>zstack.yyk.net</pingTestTarget>
+    <pingTestTarget>zstack.org</pingTestTarget>
 </testConfig>

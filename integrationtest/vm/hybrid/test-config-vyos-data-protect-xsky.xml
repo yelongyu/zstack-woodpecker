@@ -1,5 +1,5 @@
 <testConfig>
     <deployConfig>deploy-vyos-data-protect-xsky.xml</deployConfig>
     <deployConfigTemplate>deploy-vyos-data-protect-xsky.tmpt</deployConfigTemplate>
-    <pingTestTarget>zstack.yyk.net</pingTestTarget>
+    <pingTestTarget>zstack.org</pingTestTarget>
 </testConfig>

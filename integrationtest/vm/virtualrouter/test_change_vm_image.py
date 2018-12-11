@@ -21,8 +21,8 @@ def test():
    #set overProvisioning.primaryStorage's value as 10
    primary_storage_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
    for ps in primary_storage_list:
-       if ps.type == "SharedBlock":
-           test_util.test_skip('SharedBlock primary storage does not support overProvision')
+       if ps.type == "SharedBlock" or ps.type == "AliyunEBS":
+           test_util.test_skip('SharedBlock/AliyunEBS primary storage does not support overProvision')
    con_ops.change_global_config('mevoco','overProvisioning.primaryStorage',10)
    global vm
    test_lib.lib_create_disk_offering(diskSize=1099511627776,name="1T")

@@ -1,5 +1,5 @@
 <testConfig>
     <deployConfig>deploy-vpc-dns.xml</deployConfig>
     <deployConfigTemplate>deploy-vpc-dns.tmpt</deployConfigTemplate>
-    <pingTestTarget>zstack.yyk.net</pingTestTarget>
+    <pingTestTarget>zstack.org</pingTestTarget>
 </testConfig>
