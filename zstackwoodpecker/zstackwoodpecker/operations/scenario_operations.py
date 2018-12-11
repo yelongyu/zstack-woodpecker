@@ -2343,12 +2343,14 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                 ip_ranges.append(map_ip_range(ir.gateway_))
                                 last_ip_range = map_ip_range(ir.gateway_)
                                 last_ip_gateway = map_ip_gateway(ir.gateway_)
+                                last_ip_netmask = ir.netmask_
                     if xmlobject.has_element(l3network, 'networkService'):
                         network_provider_list = query_resource(zstack_management_ip, res_ops.NETWORK_SERVICE_PROVIDER, []).inventories
                         providers = {}
                         for network_provider in network_provider_list:
                             providers[network_provider.name] = network_provider.uuid
                         allservices = {}
+                        has_dhcp_service = False
                         for ns in xmlobject.safe_list(l3network.networkService):
                             puuid = providers.get(ns.provider_)
                             if not puuid:
@@ -2357,6 +2359,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             servs = []
                             for nst in xmlobject.safe_list(ns.serviceType):
                                 servs.append(nst.text_)
+                                if nst.text_ == "DHCP":
+                                    has_dhcp_service = True
                             allservices[puuid] = servs
 
                         add_network_service(zstack_management_ip, l3_inv.uuid, allservices)
@@ -2365,7 +2369,14 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
         cond = res_ops.gen_query_conditions('vmNics.ip', '=', woodpecker_vm_ip)
         woodpecker_vm = query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0]
         attach_l3(zstack_management_ip, l3_inv.uuid, woodpecker_vm.uuid)
-	shell.call("if [ `ps -ef|grep dhclient|grep -v 'grep'|wc -l` -ne 0 ]; then pkill -9 dhclient;fi") #kill dhclient process if exist
+        if ! has_dhcp_service:
+            cond = res_ops.gen_query_conditions('vmInstanceUuid', '=', woodpecker_vm.uuid)
+            cond = res_ops.gen_query_conditions('usedIp.gateway', '=', last_ip_gateway, cond)
+            vm_nic = query_resource(zstack_management_ip, res_ops.VM_NIC, cond).inventories[0]
+            ip_addr = vm_nic.ip
+            shell.call("zs-network-setting -i eth0 %s %s" %(ip_addr, last_ip_netmask) )
+
+        shell.call("if [ `ps -ef|grep dhclient|grep -v 'grep'|wc -l` -ne 0 ]; then pkill -9 dhclient;fi") #kill dhclient process if exist
         shell.call('dhclient eth0')
         shell.call('ip route del default || true')
         shell.call('ip route add default via %s dev eth0' % last_ip_gateway)
