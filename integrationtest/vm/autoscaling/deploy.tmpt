@@ -4,7 +4,7 @@ nfsPrimaryStorageName2 = nfs2
 nfsPrimaryStorageUrl2 = zstack:/home/nfs2
 
 imageName3 = centos
-imageUrl3 = http://zstack.yyk.net/image/centos_400m_140527.img
+imageUrl3 = http://192.168.200.100/mirror/diskimages/centos7-test.qcow2
 
 largeDiskOfferingName = largeDiskOffering
 largeDiskOfferingSize = 1G
