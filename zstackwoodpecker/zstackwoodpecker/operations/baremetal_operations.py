@@ -17,7 +17,7 @@ import inspect
 
 def create_pxe(pxe_option, session_uuid=None):
     action = api_actions.CreateBaremetalPxeServerAction()
-    action.timeout = 30000
+    action.timeout = 120000
     name = pxe_option.get_name()
     if not name:
         action.name = 'pxe_default_name'
