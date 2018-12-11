@@ -48,7 +48,7 @@ def create_cluster(zone_uuid, cluster_name = None, session_uuid = None):
     return cluster
 
 def create_pxe(dhcp_interface = None, name = None, range_begin = None, \
-		hostname = '127.0.0.1', storagePath = 'pxe_store', sshUsername = 'root', \
+		hostname = '127.0.0.1', storagePath = '/pxe_store', sshUsername = 'root', \
 		sshPassword = 'password', sshPort = 22, zoneUuid = None,  
 		range_end = None, netmask = None, session_uuid = None):
     pxe_option = test_util.PxeOption()
