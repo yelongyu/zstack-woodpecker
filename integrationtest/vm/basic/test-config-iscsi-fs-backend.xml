@@ -1,5 +1,5 @@
 <testConfig>
     <deployConfig>deploy-iscsi-fs.xml</deployConfig>
     <deployConfigTemplate>deploy-iscsi-fs.tmpt</deployConfigTemplate>
-    <pingTestTarget>zstack.yyk.net</pingTestTarget>
+    <pingTestTarget>zstack.org</pingTestTarget>
 </testConfig>

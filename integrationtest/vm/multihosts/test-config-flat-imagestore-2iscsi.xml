@@ -1,5 +1,5 @@
 <testConfig>
     <deployConfig>deploy-imagestore-flat-2iscsi.xml</deployConfig>
     <deployConfigTemplate>deploy-imagestore-flat-iscsi.tmpt</deployConfigTemplate>
-    <pingTestTarget>zstack.yyk.net</pingTestTarget>
+    <pingTestTarget>zstack.org</pingTestTarget>
 </testConfig>

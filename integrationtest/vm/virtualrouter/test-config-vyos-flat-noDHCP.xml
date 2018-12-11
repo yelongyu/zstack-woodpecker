@@ -1,5 +1,5 @@
 <testConfig>
     <deployConfig>deploy-vyos-flat-noDHCP.xml</deployConfig>
     <deployConfigTemplate>../deploy.tmpt</deployConfigTemplate>
-    <pingTestTarget>zstack.yyk.net</pingTestTarget>
+    <pingTestTarget>zstack.org</pingTestTarget>
 </testConfig>
