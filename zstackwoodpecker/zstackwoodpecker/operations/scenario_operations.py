@@ -2374,7 +2374,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
             cond = res_ops.gen_query_conditions('usedIp.gateway', '=', last_ip_gateway, cond)
             vm_nic = query_resource(zstack_management_ip, res_ops.VM_NIC, cond).inventories[0]
             ip_addr = vm_nic.ip
-            shell.call("zs-network-setting -i eth0 %s %s" %(ip_addr, last_ip_netmask) )
+            shell.call("zs-network-setting -i eth0 %s %s|exit 0" %(ip_addr, last_ip_netmask) )
 
         shell.call("if [ `ps -ef|grep dhclient|grep -v 'grep'|wc -l` -ne 0 ]; then pkill -9 dhclient;fi") #kill dhclient process if exist
         shell.call('dhclient eth0')
