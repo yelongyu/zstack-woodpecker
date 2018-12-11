@@ -61,7 +61,7 @@ def create_hostcfg(hostcfg_option, session_uuid=None):
 def delete_pxe(pxe_uuid, delete_mode="Permissive", session_uuid=None):
     action = api_actions.DeleteBaremetalPxeServerAction()
     action.uuid = pxe_uuid
-    action.timeout = 30000
+    action.timeout = 120000
     action.deleteMode = delete_mode
     test_util.action_logger('Delete PXE [uuid:] %s' % pxe_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
@@ -70,7 +70,7 @@ def delete_pxe(pxe_uuid, delete_mode="Permissive", session_uuid=None):
 def stop_pxe(pxe_uuid, session_uuid=None):
     action = api_actions.StopBaremetalPxeServerAction()
     action.uuid = pxe_uuid
-    action.timeout = 30000
+    action.timeout = 120000
     test_util.action_logger('Stop PXE [uuid:] %s' % pxe_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
@@ -78,7 +78,7 @@ def stop_pxe(pxe_uuid, session_uuid=None):
 def start_pxe(pxe_uuid, session_uuid=None):
     action = api_actions.StartBaremetalPxeServerAction()
     action.uuid = pxe_uuid
-    action.timeout = 30000
+    action.timeout = 120000
     test_util.action_logger('Start PXE [uuid:] %s' % pxe_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
@@ -130,7 +130,7 @@ def create_chassis(chassis_option, session_uuid=None):
 def update_chassis(chassis_uuid, address=None, username=None, password=None, port=None, name=None, description=None, session_uuid=None):
     action = api_actions.UpdateBaremetalChassisAction()
     action.uuid = chassis_uuid
-    action.timeout = 30000
+    action.timeout = 240000
     if address:
         action.ipmiAddress = address
     if username:
@@ -159,7 +159,7 @@ def delete_chassis(chassis_uuid, delete_mode="Permissive", session_uuid=None):
 def inspect_chassis(chassis_uuid, session_uuid=None):
     action = api_actions.InspectBaremetalChassisAction()
     action.uuid = chassis_uuid
-    action.timeout = 30000
+    action.timeout = 120000
     test_util.action_logger('Inspect Chassis [uuid:] %s' % chassis_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
@@ -168,7 +168,7 @@ def power_on_baremetal(chassis_uuid, session_uuid=None):
     '''The function is dropped'''
     action = api_actions.PowerOnBaremetalChassisAction()
     action.chassisUuid = chassis_uuid
-    action.timeout = 30000
+    action.timeout = 120000
     test_util.action_logger('PowerOn Chassis [uuid:] %s' % chassis_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
@@ -177,7 +177,7 @@ def power_off_baremetal(chassis_uuid, session_uuid=None):
     '''The function is dropped'''
     action = api_actions.PowerOffBaremetalChassisAction()
     action.chassisUuid = chassis_uuid
-    action.timeout = 30000
+    action.timeout = 120000
     test_util.action_logger('PowerOff Chassis [uuid:] %s' % chassis_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
@@ -186,7 +186,7 @@ def power_reset_baremetal(chassis_uuid, session_uuid=None):
     '''The function is dropped'''
     action = api_actions.PowerResetBaremetalChassisAction()
     action.chassisUuid = chassis_uuid
-    action.timeout = 30000
+    action.timeout = 120000
     test_util.action_logger('PowerReset Chassis [uuid:] %s' % chassis_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
@@ -203,6 +203,7 @@ def get_power_status(chassis_uuid, session_uuid=None):
 def change_baremetal_chassis_state(chassis_uuid, state_event, session_uuid=None):
     action = api_actions.ChangeBaremetalChassisStateAction()
     action.uuid = chassis_uuid
+    action.timeout = 120000
     action.stateEvent = state_event
     test_util.action_logger('Change State of Chassis [uuid:] %s' % chassis_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
@@ -217,7 +218,7 @@ def create_baremetal_instance(baremetal_ins_option, session_uuid=None):
     action.chassisUuid = baremetal_ins_option.get_chassis_uuid()
     action.imageUuid = baremetal_ins_option.get_image_uuid()
     action.password = baremetal_ins_option.get_password()
-    action.timeout = 30000
+    action.timeout = 240000
     if baremetal_ins_option.get_nic_cfgs():
         action.nicCfgs = baremetal_ins_option.get_nic_cfgs()
     if baremetal_ins_option.get_nic_cfgs():
@@ -231,7 +232,7 @@ def destory_baremetal_instance(uuid, delete_mode="Permissive", session_uuid=None
     action = api_actions.DestroyBaremetalInstanceAction()
     action.uuid = uuid
     action.deleteMode = delete_mode
-    action.timeout = 30000
+    action.timeout = 120000
     test_util.action_logger('Destory Baremetal Instance [uuid:] %s' % uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt
@@ -239,7 +240,7 @@ def destory_baremetal_instance(uuid, delete_mode="Permissive", session_uuid=None
 def expunge_baremetal_instance(uuid, session_uuid=None):
     action = api_actions.ExpungeBaremetalInstanceAction()
     action.uuid = uuid
-    action.timeout = 30000
+    action.timeout = 120000
     test_util.action_logger('Expunge Baremetal Instance [uuid:] %s' % uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
@@ -247,7 +248,7 @@ def expunge_baremetal_instance(uuid, session_uuid=None):
 def start_baremetal_instance(uuid, pxe_boot=None, session_uuid=None):
     action = api_actions.StartBaremetalInstanceAction()
     action.uuid = uuid
-    action.timeout = 30000
+    action.timeout = 240000
     if pxe_boot:
         action.pxeBoot = pxe_boot
     test_util.action_logger('Start Baremetal Instance [uuid:] %s' % uuid)
@@ -257,7 +258,7 @@ def start_baremetal_instance(uuid, pxe_boot=None, session_uuid=None):
 def stop_baremetal_instance(uuid, stop_type=None, session_uuid=None):
     action = api_actions.StopBaremetalInstanceAction()
     action.uuid = uuid
-    action.timeout = 30000
+    action.timeout = 120000
     if stop_type:
         action.type = stop_type
     test_util.action_logger('Stop Baremetal Instance [uuid:] %s' % uuid)
@@ -267,7 +268,7 @@ def stop_baremetal_instance(uuid, stop_type=None, session_uuid=None):
 def reboot_baremetal_instance(uuid, session_uuid=None):
     action = api_actions.RebootBaremetalInstanceAction()
     action.uuid = uuid
-    action.timeout = 30000
+    action.timeout = 240000
     test_util.action_logger('Reboot Baremetal Instance [uuid:] %s' % uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
@@ -275,7 +276,7 @@ def reboot_baremetal_instance(uuid, session_uuid=None):
 def recover_baremetal_instance(uuid, session_uuid=None):
     action = api_actions.RecoverBaremetalInstanceAction()
     action.uuid = uuid
-    action.timeout = 30000
+    action.timeout = 120000
     test_util.action_logger('Recover Baremetal Instance [uuid:] %s' % uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
