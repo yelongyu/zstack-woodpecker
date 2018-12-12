@@ -33,6 +33,10 @@ def test():
 	    os.system("bash %s '%s' %s" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ips, 'baremetal'))
             test_stub.deploy_vbmc(host_ips)
 
+    #Deploy network has not DHCP service, which need to setup static ip
+    if os.path.exists(test_lib.scenario_file):
+        test_stub.setup_static_ip(test_lib.scenario_file)
+
     deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
     delete_policy = test_lib.lib_set_delete_policy('vm', 'Direct')
     delete_policy = test_lib.lib_set_delete_policy('volume', 'Direct')
