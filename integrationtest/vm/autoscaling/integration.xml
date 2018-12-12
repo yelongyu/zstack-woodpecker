@@ -1,5 +1,5 @@
 <integrationTest>
-    <suite name="vpc" setupCase="suite_setup.py" teardownCase="" repeat="1" parallel="1">
+    <suite name="autoscaling test" setupCase="suite_setup.py" teardownCase="" repeat="1" parallel="1">
 	   <case timeout='1200' repeat='1' noparallel='True'>test-create-autoscaling-group-with-vrouter.py</case>
            <case timeout='1200' repeat='1' noparallel='True'>test-create-autoscaling-group-with-vpc.py</case>
            <case timeout='1200' repeat='1' noparallel='True'>test-add-newinstance-with-vpc.py</case>
