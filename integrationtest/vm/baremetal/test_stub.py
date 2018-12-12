@@ -347,16 +347,16 @@ def verify_chassis_status(chassis_uuid, status):
 def setup_static_ip(scenario_file):
     ssh_cmd = 'sshpass -p password ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null'
     with open(scenario_file, 'r') as fd:
-    xmlstr = fd.read()
-    fd.close()
-    scenario_file = xmlobject.loads(xmlstr)
-    for vm in xmlobject.safe_list(scenario_file.vms.vm):
-        mnip = vm.managementIp_
-        if xmlobject.has_element(vm, 'ips'): 
-            for ip in xmlobject.safe_list(vm.ips.ip):
-                nic_ip = ip.ip_
-                if nic_ip.startswith("10"):
-                    nic = "br_zsn1"
-                    netmask = "255.255.255.0"
-                    shell.call("%s %s zs-network-setting -i %s %s %s|exit 0" %(ssh_cmd, mnip, nic, nic_ip, netmask) )
+        xmlstr = fd.read()
+        fd.close()
+        scenario_file = xmlobject.loads(xmlstr)
+        for vm in xmlobject.safe_list(scenario_file.vms.vm):
+            mnip = vm.managementIp_
+            if xmlobject.has_element(vm, 'ips'): 
+                for ip in xmlobject.safe_list(vm.ips.ip):
+                    nic_ip = ip.ip_
+                    if nic_ip.startswith("10"):
+                        nic = "br_zsn1"
+                        netmask = "255.255.255.0"
+                        shell.call("%s %s zs-network-setting -i %s %s %s|exit 0" %(ssh_cmd, mnip, nic, nic_ip, netmask) )
     return
