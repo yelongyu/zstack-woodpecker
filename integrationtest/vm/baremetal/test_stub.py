@@ -3,6 +3,7 @@ import zstackwoodpecker.operations.cluster_operations as cluster_ops
 import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
 import zstacklib.utils.jsonobject as jsonobject
+import zstacklib.utils.xmlobject as xmlobject
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstacklib.utils.shell as shell
@@ -342,3 +343,20 @@ def verify_chassis_status(chassis_uuid, status):
 	    break
         current_status = check_chassis_status(chassis_uuid)
     return (current_status == expect_status)
+
+def setup_static_ip(scenario_file):
+    ssh_cmd = 'sshpass -p password ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null'
+    with open(scenario_file, 'r') as fd:
+    xmlstr = fd.read()
+    fd.close()
+    scenario_file = xmlobject.loads(xmlstr)
+    for vm in xmlobject.safe_list(scenario_file.vms.vm):
+        mnip = vm.managementIp_
+        if xmlobject.has_element(vm, 'ips'): 
+            for ip in xmlobject.safe_list(vm.ips.ip):
+                nic_ip = ip.ip_
+                if nic_ip.startswith("10"):
+                    nic = "br_zsn1"
+                    netmask = "255.255.255.0"
+                    shell.call("%s %s zs-network-setting -i %s %s %s|exit 0" %(ssh_cmd, mnip, nic, nic_ip, netmask) )
+    return
