@@ -1,6 +1,9 @@
 import ../scenario.tmpt
 import ./deploy.tmpt
 vmName1 = debug_scenario1
+vmName2 = debug_scenario2
+vmName3 = debug_scenario3
+vmName4 = debug_scenario4
 scenvpcZoneUuid = 12345
 scenvpcPoolUuid = 12345
 scenvpcVrouterName1 = vpc_vrouter_for_scenario_test
@@ -9,3 +12,5 @@ virtualRouterOfferingUuid1 = 12345
 scenl2Vlan1 = 3000
 scenl2Clusters = 12345,23456
 scenL3VPCNetworkDomainName1 = zstack.org
+pxeInstranceOfferingUuid = 123456
+vmInstranceOfferingUuid2 = 123456 
