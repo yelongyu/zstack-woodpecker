@@ -114,6 +114,91 @@ def create_vm(vm_name = 'vm_for_baremetal', image_name = None, \
     vm.create()
     return vm
 
+def create_vm_with_random_offering(vm_name, image_name=None, l3_name=None, session_uuid=None,
+                                   instance_offering_uuid=None, host_uuid=None, disk_offering_uuids=None,
+                                   root_password=None, ps_uuid=None, system_tags=None, timeout=None):
+    if image_name:
+        image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    else:
+        conf = res_ops.gen_query_conditions('format', '!=', 'iso')
+        conf = res_ops.gen_query_conditions('mediaType', '!=', 'ISO', conf)
+        conf = res_ops.gen_query_conditions('system', '=', 'false', conf)
+        image_uuid = random.choice(res_ops.query_resource(res_ops.IMAGE, conf)).uuid
+
+    if l3_name:
+        l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    else:
+        l3_net_uuid = random.choice(res_ops.get_resource(res_ops.L3_NETWORK)).uuid
+
+    if not instance_offering_uuid:
+        conf = res_ops.gen_query_conditions('type', '=', 'UserVM')
+        instance_offering_uuid = random.choice(res_ops.query_resource(res_ops.INSTANCE_OFFERING, conf)).uuid
+
+    vm_creation_option = test_util.VmOption()
+    vm_creation_option.set_l3_uuids([l3_net_uuid])
+    vm_creation_option.set_image_uuid(image_uuid)
+    vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+    vm_creation_option.set_name(vm_name)
+    if system_tags:
+        vm_creation_option.set_system_tags(system_tags)
+    if disk_offering_uuids:
+        vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
+    if root_password:
+        vm_creation_option.set_root_password(root_password)
+    if host_uuid:
+        vm_creation_option.set_host_uuid(host_uuid)
+    if session_uuid:
+        vm_creation_option.set_session_uuid(session_uuid)
+    if ps_uuid:
+        vm_creation_option.set_ps_uuid(ps_uuid)
+    if timeout:
+        vm_creation_option.set_timeout(timeout)
+
+    vm = test_vm_header.ZstackTestVm()
+    vm.set_creation_option(vm_creation_option)
+    vm.create()
+    return vm
+
+def create_multi_vms(name_prefix='', count=None, host_uuid=None,image_name=None, l3_name=None, ps_uuid=None, data_volume_number=0, ps_uuid_for_data_vol=None, timeout=None):
+    vm_list = []
+    if not image_name:
+        image_name = os.environ.get('imageName_s')
+    if not l3_name:
+        l3_name = os.environ.get('scenl3VPCNetworkName1')
+    for i in xrange(count):
+        if not data_volume_number:
+            vm = create_vm_with_random_offering(name_prefix+"{}".format(i), image_name=image_name,
+                                                l3_name=l3_name, host_uuid=host_uuid, ps_uuid=ps_uuid, timeout=timeout)
+        else:
+            disk_offering_list = res_ops.get_resource(res_ops.DISK_OFFERING)
+            disk_offering_uuids = [random.choice(disk_offering_list).uuid for _ in xrange(data_volume_number)]
+            if ps_uuid_for_data_vol:
+                vm = create_vm_with_random_offering(name_prefix+"{}".format(i), image_name=image_name,
+                                                    l3_name=l3_name, host_uuid=host_uuid, ps_uuid=ps_uuid,
+                                                    disk_offering_uuids=disk_offering_uuids,
+                                                    system_tags=['primaryStorageUuidForDataVolume::{}'.format(ps_uuid_for_data_vol)], timeout=timeout)
+            else:
+                vm = create_vm_with_random_offering(name_prefix+"{}".format(i), image_name=image_name,
+                                                    l3_name=l3_name, host_uuid=host_uuid, ps_uuid=ps_uuid,
+                                                    disk_offering_uuids=disk_offering_uuids, timeout=timeout)
+
+        vm_list.append(vm)
+    if host_uuid:
+        for vm in vm_list:
+            assert vm.get_vm().hostUuid == host_uuid
+    if ps_uuid:
+        for vm in vm_list:
+            root_volume = test_lib.lib_get_root_volume(vm.get_vm())
+            assert root_volume.primaryStorageUuid == ps_uuid
+
+    if ps_uuid_for_data_vol:
+        for vm in vm_list:
+            data_volume_list = [volume for volume in vm.get_vm().allVolumes if volume.type != 'Root']
+            for data_volume in data_volume_list:
+                assert data_volume.primaryStorageUuid == ps_uuid_for_data_vol
+
+    return vm_list
+
 def create_chassis(cluster_uuid, name = None, address = None, username = None, \
      password = None, port = None, session_uuid=None):
 

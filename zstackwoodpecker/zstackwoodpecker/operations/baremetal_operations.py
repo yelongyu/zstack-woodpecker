@@ -127,6 +127,15 @@ def create_chassis(chassis_option, session_uuid=None):
                             (evt.inventory.uuid, action.name))
     return evt.inventory
 
+def batch_create_chassis(baremetalChassisInfo, session_uuid=None):
+    action = api_actions.BatchCreateBaremetalChassisAction()
+    action.timeout = 240000
+    action.baremetalChassisInfo = baremetalChassisInfo
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Add Chassis [info:] %s' % \
+                            action.baremetalChassisInfo)
+    return evt.inventory
+
 def update_chassis(chassis_uuid, address=None, username=None, password=None, port=None, name=None, description=None, session_uuid=None):
     action = api_actions.UpdateBaremetalChassisAction()
     action.uuid = chassis_uuid
