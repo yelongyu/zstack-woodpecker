@@ -2,11 +2,13 @@ import zstackwoodpecker.operations.baremetal_operations as bare_operations
 import zstackwoodpecker.operations.cluster_operations as cluster_ops
 import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
+import zstackwoodpecker.operations.scenario_operations as sce_ops
 import zstacklib.utils.jsonobject as jsonobject
 import zstacklib.utils.xmlobject as xmlobject
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstacklib.utils.shell as shell
+import zstacklib.utils.ssh as ssh
 import subprocess
 import os
 import re
@@ -360,3 +362,80 @@ def setup_static_ip(scenario_file):
                         netmask = "255.255.255.0"
                         shell.call("%s %s zs-network-setting -i %s %s %s|exit 0" %(ssh_cmd, mnip, nic, nic_ip, netmask) )
     return
+
+def get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, index):
+    test_util.test_logger("@@DEBUG@@:<scenarioConfig:%s><scenarioFile:%s><scenarioFile is existed: %s>" \
+                          %(str(scenarioConfig), str(scenarioFile), str(os.path.exists(scenarioFile))))
+    if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
+        return [] 
+
+    test_util.test_logger("@@DEBUG@@: after config file exist check")
+    with open(scenarioFile, 'r') as fd:
+        xmlstr = fd.read()
+        fd.close()
+        scenario_file = xmlobject.loads(xmlstr)
+        return xmlobject.safe_list(scenario_file.vms.vm)[index]
+
+def query_host(host_ip, scenarioConfig):
+    mn_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
+    try:
+        host_inv = sce_ops.get_vm_inv_by_vm_ip(mn_ip, host_ip)
+        return host_inv
+    except:
+        test_util.test_logger("Fail to query host [%s]" % host_ip)
+        return False
+
+def recover_vlan_in_host(host_ip, scenarioConfig, deploy_config):
+    test_util.test_logger("func: recover_vlan_in_host; host_ip=%s" %(host_ip))
+
+    host_inv = query_host(host_ip, scenarioConfig)
+    test_lib.lib_wait_target_up(host_ip, '22', 120)
+    host_config = sce_ops.get_scenario_config_vm(host_inv.name,scenarioConfig)
+    for l3network in xmlobject.safe_list(host_config.l3Networks.l3Network):
+        test_util.test_logger("loop in for l3network")
+        if hasattr(l3network, 'l2NetworkRef'):
+            test_util.test_logger("below if l2NetworkRef")
+            for l2networkref in xmlobject.safe_list(l3network.l2NetworkRef):
+                test_util.test_logger("loop in l2networkref")
+                nic_name = sce_ops.get_ref_l2_nic_name(l2networkref.text_, deploy_config)
+                test_util.test_logger("nic_name=%s; l2networkref.text_=%s" %(nic_name, l2networkref.text_))
+                if nic_name.find('.') >= 0 :
+                    vlan = nic_name.split('.')[1]
+                    test_util.test_logger('[vm:] %s %s is created.' % (host_ip, nic_name.replace("eth","zsn")))
+                    cmd = 'vconfig add %s %s' % (nic_name.split('.')[0].replace("eth","zsn"), vlan)
+                    test_util.test_logger("vconfig cmd=%s" %(cmd))
+                    test_lib.lib_execute_ssh_cmd(host_ip, host_config.imageUsername_, host_config.imagePassword_, cmd)
+    return True
+
+def deploy_2ha(scenarioConfig, scenarioFile):
+    mn_ip1 = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, 0).ip_
+    mn_ip2 = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, 1).ip_
+    node3_ip = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, 2).ip_
+    vip = os.environ['zstackHaVip']
+
+    change_ip_cmd1 = "zstack-ctl change_ip --ip=" + mn_ip1
+    ssh.execute(change_ip_cmd1, mn_ip1, "root", "password", False, 22)
+    iptables_cmd1 = "iptables -I INPUT -d " + vip + " -j ACCEPT"
+    ssh.execute(iptables_cmd1, mn_ip1, "root", "password", False, 22)
+
+    change_ip_cmd2 = "zstack-ctl change_ip --ip=" + mn_ip2
+    ssh.execute(change_ip_cmd2, mn_ip2, "root", "password", False, 22)
+    iptables_cmd2 = "iptables -I INPUT -d " + vip + " -j ACCEPT"
+    ssh.execute(iptables_cmd2, mn_ip2, "root", "password", False, 22)
+
+    woodpecker_vm_ip = shell.call("ip r | grep src | head -1 | awk '{print $NF}'").strip()
+    zsha2_path = "/home/%s/zsha2" % woodpecker_vm_ip
+    ssh.scp_file(zsha2_path, "/root/zsha2", mn_ip1, "root", "password")
+    ssh.execute("chmod a+x /root/zsha2", mn_ip1, "root", "password", False, 22)
+
+    zstack_hamon_path = "/home/%s/zstack-hamon" % woodpecker_vm_ip
+    ssh.scp_file(zstack_hamon_path, "/root/zstack-hamon", mn_ip1, "root", "password")
+    ssh.execute("chmod a+x /root/zstack-hamon", mn_ip1, "root", "password", False, 22)
+
+    cmd = '/root/zsha2 install-ha -nic br_zsn0 -gateway 172.20.0.1 -slave "root:password@' + mn_ip2 + '" -vip ' + vip + ' -time-server ' + node3_ip + ' -db-root-pw zstack.mysql.password -yes'
+    test_util.test_logger("deploy 2ha by cmd: %s" %(cmd))
+    ret, output, stderr = ssh.execute(cmd, mn_ip1, "root", "password", False, 22)
+    test_util.test_logger("cmd=%s; ret=%s; output=%s; stderr=%s" %(cmd, ret, output, stderr))
+    if ret!=0:
+        test_util.test_fail("deploy 2ha failed")
+
