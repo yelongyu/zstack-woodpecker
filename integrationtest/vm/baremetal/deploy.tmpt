@@ -68,3 +68,5 @@ scenvpcIpRangeStart1 = 10.0.0.2
 scenvpcIpRangeEnd1 = 10.0.0.232
 scenvpcIpRangeGateway1 = 10.0.0.1
 scenvpcIpRangeNetmask1 = 255.255.255.0
+
+zstackHaVip = 10.0.0.1
