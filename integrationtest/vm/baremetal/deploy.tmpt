@@ -70,3 +70,8 @@ scenvpcIpRangeGateway1 = 10.0.0.1
 scenvpcIpRangeNetmask1 = 255.255.255.0
 
 zstackHaVip = 10.0.0.1
+nodeNetMask = 255.255.0.0
+zstackHaVip = 192.168.0.10
+nodeGateway = 172.20.0.1
+nodeNic = eth0
+nodeBridge = br_eth0
