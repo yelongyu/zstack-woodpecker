@@ -27,6 +27,7 @@ import zstackwoodpecker.zstack_test.zstack_test_image as test_image
 import zstackwoodpecker.header.vm as vm_header
 from zstackwoodpecker.operations import vm_operations as vm_ops
 import zstackwoodpecker.operations.longjob_operations as longjob_ops
+import zstackwoodpecker.operations.billing_operations as bill_ops
 import time
 import re
 import json
@@ -785,6 +786,187 @@ class Longjob(object):
         job_data = '{"name"="%s", "guestOsType":"Linux","system"="false","platform"="Linux","backupStorageUuids"=["%s"], \
         "volumeUuid"="%s"}' %(self.vol_create_image_name, res_ops.query_resource(res_ops.BACKUP_STORAGE)[0].uuid, self.data_volume.get_volume().uuid)
         self.submit_longjob(job_data, name, job_type='crt_vol_image')
+
+
+class Billing(object):
+	def __init__(self):
+		self.resourceName = None
+		self.timeUnit = "s"
+		self.price = 5
+	
+	def set_resourceName(self,resourceName):
+		self.resourceName = resourceName
+
+	def get_resourceName(self):
+		return self.resourceName
+
+	def set_price(self,price):
+		self.price = price
+
+	def get_price(self):
+		return self.price
+
+	def set_timeUnit(self,timeUnit):
+		self.timeUnit = timeUnit
+
+	def get_timeUnit(self):
+		return self.timeUnit		
+
+class CpuBilling(Billing):
+	def __init__(self):
+		super(CpuBilling, self).__init__()
+		self.resourceName = "cpu"
+
+	def create_resource_type(self):
+		return bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price)
+
+class MemoryBilling(Billing):
+	def __init__(self):
+		super(MemoryBilling, self).__init__()
+		self.resourceName = "memory"
+		self.resourceUnit = "G"
+	
+	def set_resourceUnit(self,resourceUnit):
+		self.resourceUnit = resourceUnit
+
+	def get_resourceUnit(self):
+		return self.resourceUnit
+	
+	def create_resource_type(self):
+		return bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit)
+
+class RootVolumeBilling(Billing):
+	def __init__(self):
+		super(RootVolumeBilling, self).__init__()
+		self.resourceName = "rootVolume"
+		self.resourceUnit = "G"
+	
+        def set_resourceUnit(self,resourceUnit):
+                self.resourceUnit = resourceUnit
+
+        def get_resourceUnit(self):
+                return self.resourceUnit
+
+	def create_resource_type(self):
+		return bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit)
+
+class DataVolumeBilling(Billing):
+        def __init__(self):
+                super(RootVolumeBilling, self).__init__()
+                self.resourceName = "dataVolume"
+                self.resourceUnit = "G"
+
+        def set_resourceUnit(self,resourceUnit):
+                self.resourceUnit = resourceUnit
+
+        def get_resourceUnit(self):
+                return self.resourceUnit
+
+        def create_resource_type(self):
+                return bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit)
+
+class PublicIpBilling(Billing):
+	def __init__(self):
+		super(PublicIpBilling, self).__init__()
+		self.resourceName = "pubIpVmNicBandwidthIn"
+		self.resourceUnit = "M"
+		self.uuid = None
+	
+	def set_resourceUnit(self,resourceUnit):
+		self.resourceUnit = resourceUnit
+
+	def get_resourceUnit(self):
+		return self.resourceUnit
+
+        def create_resource_type(self):
+		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit)
+		self.uuid = evt.uuid
+		return evt
+
+	def delete_resource(self):
+		return bill_ops.delete_resource_price(self.uuid)
+
+	def query_resource_price(self):
+		cond = []
+		if self.uuid:
+			cond = res_ops.gen_query_conditions('uuid', "=", self.uuid, cond)
+		if self.price:
+			cond = res_ops.gen_query_conditions('price', "=", self.price, cond)
+		if self.resourceName:
+			cond = res_ops.gen_query_conditions('resourceName', "=",self.resourceName, cond)
+		if self.timeUnit:
+			cond = res_ops.gen_query_conditions('timeUnit', "=",self.timeUnit, cond)
+		if self.resourceUnit:
+			cond = res_ops.gen_query_conditions('resourceUnit', "=",self.resourceUnit, cond)
+		return bill_ops.query_resource_price(cond)
+		
+
+'''
+to be define
+'''
+class GPUBilling(Billing):
+        def __init__(self):
+                super(PublicIpBilling, self).__init__()
+
+def create_vm_billing(name, image_uuid, host_uuid, instance_offering_uuid, l3_uuid, session_uuid=None):
+	vm_creation_option = test_util.VmOption()
+	vm_creation_option.set_name(name)
+	vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+	vm_creation_option.set_image_uuid(image_uuid)
+	vm_creation_option.set_l3_uuids([l3_uuid])
+	if host_uuid:
+		vm_creation_option.set_host_uuid(host_uuid)
+	if session_uuid:
+		vm_creation_option.set_session_uuid(session_uuid)
+	vm = create_vm(vm_creation_option)
+	return vm
+
+def compare(user_uuid,status):
+	prices = bill_ops.calculate_account_spending(user_uuid)
+	time.sleep(1)
+	prices1 = bill_ops.calculate_account_spending(user_uuid) 
+	if status == "clean":
+		if prices1.total != prices.total:
+			test_util.test_fail("test billing fail,maybe can not calculate when vm %s" %(status))
+	else:
+		if prices1.total <= prices.total:
+			test_util.test_fail("test billing fail,maybe can not calculate when vm %s" %(status))
+
+def get_resource_from_vmm(resource_type,zone_uuid,host_uuid_from_vmm)
+	cond = res_ops.gen_query_conditions('zoneUuid', '=', zone_uuid)
+        resource_list = res_ops.query_resource(res_ops.resource_type, cond)
+	if resource_type == "LocalStorage":
+		return judge_PrimaryStorage(resource_list)
+	if resource_type == "HOST":
+		return judge_HostResource(resource_list,host_uuid_from_vmm)
+	
+
+def judge_PrimaryStorage(PrimaryStorageSource):
+	flag = 0
+        for childStorge in PrimaryStorageSource:
+                test_util.test_logger("type is %s" %(childStorge.type))
+                if childStorge.type == "LocalStorage"
+                        flag = 1
+                        break
+	return flag
+
+def judge_HostResource(HostSource,host_uuid):
+	for host in hosts:
+		test_util.test_logger("host uuid is %s" %(host.uuid))
+		if host.uuid != host_uuid:
+			return host.uuid
+		else:
+			return None
+	
+
+
+
+
+
+
+
+
+
 
 
 def generate_collectd_conf(host, collectdPath, list_port, host_disks = None,
