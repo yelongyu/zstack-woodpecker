@@ -19,13 +19,14 @@ import time
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
-def check_chrony_status(node_ip):
+def check_chrony_status(node_ip, port):
     test_util.test_dsc("Check all hosts chrony status.")
     node_ip = node_ip
+    port = port
     cmd1 = "chronyc tracking"
     cmd2 = "chronyc sources"
-    (retcode1, output, erroutput) = ssh.execute(cmd1, node_ip, 'root', 'password', True, 22)
-    (retcode2, output, erroutput) = ssh.execute(cmd2, node_ip, 'root', 'password', True, 22)
+    (retcode1, output, erroutput) = ssh.execute(cmd1, node_ip, 'root', 'password', True, port)
+    (retcode2, output, erroutput) = ssh.execute(cmd2, node_ip, 'root', 'password', True, port)
     if retcode1 == 0 and retcode2 == 0:
         test_util.test_logger('@@@DEBUG-> check chrony "chronyc tracking", "chronyc sources" pass')
     else:
@@ -35,23 +36,29 @@ def test():
     test_util.test_dsc("check all hosts chrony status")
     host_uuid_list = []
     host_ip_list = []
-    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
-    host_list = test_lib.lib_get_all_hosts_from_plan()
-    for host in host_list:
-        host_ip = host.managementIp_
-        host_hostname = host_ip.replace('.', '-')
-        host_uuid = test_lib.lib_get_host_by_ip(host_ip).uuid
-        host_uuid_list.append(host_uuid)
-        host_ip_list.append(host_ip)
-    for ip in host_ip_list:
-        check_chrony_status(ip)
+    host_port_list = []
+    hosts = {}
+
+    for host_id in range(len(res_ops.query_resource(res_ops.HOST))):
+        managementIp = res_ops.query_resource(res_ops.HOST)[host_id].managementIp
+        sshPort = res_ops.query_resource(res_ops.HOST)[host_id].sshPort
+        uuid = res_ops.query_resource(res_ops.HOST)[host_id].uuid
+        host_ip_list.append(managementIp)
+        host_port_list.append(sshPort)
+        host_uuid_list.append(uuid)
+    hosts = dict(zip(host_ip_list, host_port_list))
+    print "hosts is %s" %(hosts)
+    for k, v in hosts.items():
+        check_chrony_status(k, v)
     for host_uuid in host_uuid_list:
         host_ops.reconnect_host(host_uuid)
         time.sleep(5)
-    for ip in host_ip_list:
-        check_chrony_status(ip)
+    for k, v in hosts.items():
+        check_chrony_status(k, v)
+
     host_ops.change_host_state(host_uuid_list[0], "disable")
-    check_chrony_status(host_ip_list[0])
+    for k, v in hosts.items():
+        check_chrony_status(k, v)
     host_ops.change_host_state(host_uuid_list[0], "enable")
 
     test_lib.lib_error_cleanup(test_obj_dict)

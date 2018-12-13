@@ -71,13 +71,15 @@ def exec_zsha2_demote(host_ip, username, password):
 
 
 def exec_upgrade_mn(host_ip, username, password, zstack_bin_path):
-    cmd = "zsha2 upgrade-mn -peerpass password " + zstack_bin_path
-    test_lib.lib_execute_ssh_cmd(host_ip, username, password, cmd)
+    cmd = "TERM=xterm zsha2 upgrade-mn -yes -peerpass password " + zstack_bin_path
+    if not test_lib.lib_execute_ssh_cmd(host_ip, username, password, cmd, 1800):
+        test_util.test_fail('%s failed' %(cmd))
 
 
 def exec_upgrade_iso(host_ip, username, password, zstack_iso_path):
-    cmd = "zsha2 upgrade-mn -peerpass password " + zstack_iso_path
-    test_lib.lib_execute_ssh_cmd(host_ip, username, password, cmd)
+    cmd = "TERM=xterm zsha2 upgrade-mn -yes -peerpass password " + zstack_iso_path
+    if not test_lib.lib_execute_ssh_cmd(host_ip, username, password, cmd, 1800):
+        test_util.test_fail('%s failed' %(cmd))
 
 
 def exec_upgrade_zsha2(host_ip, username, password, zsha2_path):
