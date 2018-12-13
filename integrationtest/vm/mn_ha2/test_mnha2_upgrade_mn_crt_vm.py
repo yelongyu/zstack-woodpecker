@@ -15,6 +15,7 @@ import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import test_stub
 import time
 import os
+import sys
 
 vm = None
 vip_s_vm_cfg_lst = None
@@ -35,7 +36,7 @@ def test():
     build_server = os.environ.get('BUILD_SERVER')
 
     cmd = "cd /root/mirror/" + buildtype+ "/" + buildid + "/ && ls ZStack*-installer-*.bin"
-    zstack_bin_name = test_lib.lib_execute_ssh_cmd(build_server, "root", "password", cmd)
+    zstack_bin_name = test_lib.lib_execute_ssh_cmd(build_server, "root", "password", cmd).replace("\n", "")
 
     zstack_bin_path = "/root/" + zstack_bin_name
     cmd = "wget -c http://" + build_server + "/mirror/" + buildtype + "/" + buildid + "/" + zstack_bin_name + " -O " + zstack_bin_path
@@ -43,6 +44,7 @@ def test():
 
     test_stub.exec_upgrade_mn(vip_s_vm_cfg_lst[0].ip_, "root", "password", zstack_bin_path)
 
+    print ":%s:" %(cmd)
     time.sleep(5)
 
     #expected_vip_s_vm_cfg_lst_ip = test_stub.get_expected_vip_s_vm_cfg_lst_after_switch(test_lib.all_scenario_config, test_lib.scenario_file, vip_s_vm_cfg_lst[0].ip_)
