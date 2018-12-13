@@ -165,3 +165,19 @@ def reconnect_primary_storage(primary_storage_uuid, session_uuid=None):
     test_util.action_logger('Reconnect Primary Storage [uuid:] %s' % primary_storage_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
+
+def get_trash_on_primary_storage(primary_storage_uuid, session_uuid=None):
+    action = api_actions.GetTrashOnPrimaryStorageAction()
+    action.uuid = primary_storage_uuid
+    action.timeout = 6000000
+    test_util.action_logger('Get Trash On Primary Storage [uuid:] %s' % primary_storage_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.storageTrashes
+
+def clean_up_trash_on_primary_storage(primary_storage_uuid, session_uuid=None):
+    action = api_actions.CleanUpTrashOnPrimaryStorageAction()
+    action.uuid = primary_storage_uuid
+    action.timeout = 6000000
+    test_util.action_logger('Clean Up Trash On Primary Storage [uuid:] %s' % primary_storage_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt

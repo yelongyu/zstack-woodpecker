@@ -18,11 +18,16 @@ import zstackwoodpecker.operations.longjob_operations as longjob_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.operations.nas_operations as nas_ops
 import zstackwoodpecker.operations.hybrid_operations as hyb_ops
+import zstackwoodpecker.operations.primarystorage_operations as ps_ops
+import zstackwoodpecker.operations.backupstorage_operations as bs_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.header.host as host_header
+import zstacklib.utils.jsonobject as jsonobject
+from zstacklib.utils import shell
 import threading
 import time
 import sys
+import commands
 #import traceback
 
 hybrid_test_stub = test_lib.lib_get_test_stub('hybrid')
@@ -100,6 +105,9 @@ class DataMigration(object):
         self.ceph_bs_name_2 = os.getenv('cephBackupStorageName2')
         self.vol_job_name = "APIPrimaryStorageMigrateVolumeMsg"
         self.image_job_name = "APIBackupStorageMigrateImageMsg"
+        self.origin_ps = None
+        self.root_vol_install_path = None
+        self.root_vol_size = None
 
     def get_current_ps(self):
         _ps1 = [os.getenv('cephPrimaryStorageName'), os.getenv('nfsPrimaryStorageName')]
@@ -110,6 +118,8 @@ class DataMigration(object):
     def get_image(self):
         conditions = res_ops.gen_query_conditions('name', '=', self.image_name_net)
         self.image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
+        self.origin_bs = self.get_bs_inv(self.image.backupStorageRefs[0].backupStorageUuid)
+        self.image_origin_path = self.image.backupStorageRefs[0].installPath
 
     def get_ps(self):
         self.get_current_ps()
@@ -117,6 +127,16 @@ class DataMigration(object):
         self.ps_1 = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)[0]
         cond2 = res_ops.gen_query_conditions('name', '=', self.ps_2_name)
         self.ps_2 = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond2)[0]
+
+    def get_ps_inv(self, uuid):
+        cond = res_ops.gen_query_conditions('uuid', '=', uuid)
+        ps_inv = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)[0]
+        return ps_inv
+
+    def get_bs_inv(self, uuid):
+        cond = res_ops.gen_query_conditions('uuid', '=', uuid)
+        bs_inv = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0]
+        return bs_inv
 
     def get_bs(self):
         if self.ceph_bs_name:
@@ -132,6 +152,9 @@ class DataMigration(object):
         self.vm = create_vm('multicluster_basic_vm', image_name, os.getenv('l3PublicNetworkName'))
         self.vm.check()
         self.root_vol_uuid = self.vm.vm.rootVolumeUuid
+        self.root_vol_size = self.vm.vm.allVolumes[0].size
+        self.root_vol_install_path = self.vm.vm.allVolumes[0].installPath
+        self.origin_ps = self.get_ps_inv(self.vm.vm.allVolumes[0].primaryStorageUuid)
         return self.vm
 
     def clone_vm(self):
@@ -195,6 +218,64 @@ class DataMigration(object):
 
     def del_obsoleted_data_volume(self):
         vol_ops.delete_volume(self.data_volume_obsoleted.uuid)
+
+    def copy_data(self):
+        cmd = "find /home -iname 'zstack-woodpecker.*'"
+        file_path = commands.getoutput(cmd).split('\n')[0]
+        cp_cmd = 'sshpass -p password scp -o StrictHostKeyChecking=no %s root@%s:/mnt/' % (file_path, self.vm.get_vm().vmNics[0].ip)
+        commands.getoutput(cp_cmd)
+
+    def check_data(self):
+        check_cmd = '''sshpass -p password ssh -o LogLevel=quiet -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@%s \
+        "tar xvf /mnt/zstack-woodpecker.tar -C /mnt > /dev/null &>1; grep scenario_config_path /mnt/zstackwoodpecker/zstackwoodpecker/test_lib.py && echo 0 || echo 1" \
+        ''' % (self.vm.get_vm().vmNics[0].ip)
+        ret = commands.getoutput(check_cmd).split('\n')[-1]
+        assert ret == '0', "data check failed!, the return code is %s, 0 is expected" % ret
+
+    def check_origin_data_exist(self):
+        if self.origin_ps.type == 'Ceph':
+            ceph_mon_ip = self.origin_ps.mons[0].monAddr
+            self.rbd_cmd = 'sshpass -p password ssh -o LogLevel=quiet -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@%s "rbd info %s --format=json"' \
+                        % (ceph_mon_ip, self.root_vol_install_path.split('ceph://')[-1])
+            data_info = shell.call(self.rbd_cmd)
+            origin_meta = jsonobject.loads(data_info)
+            assert origin_meta.name == self.root_vol_uuid
+            assert origin_meta.size == self.root_vol_size
+            assert 'rbd_data' in origin_meta.block_name_prefix
+            ps_trash = ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid)
+            trash_install_path_list = [trsh.installPath for trsh in ps_trash]
+            assert self.root_vol_install_path in trash_install_path_list
+
+    def check_origin_image_exist(self):
+        self.rbd_cmd_img = 'sshpass -p password ssh -o LogLevel=quiet -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@%s "rbd info %s --format=json"' \
+                        % (self.origin_bs.mons[0].monAddr, self.image_origin_path.split('ceph://')[-1])
+        img_info = shell.call(self.rbd_cmd_img)
+        origin_meta = jsonobject.loads(img_info)
+        assert origin_meta.name == self.image.uuid
+        assert origin_meta.size == self.image.size
+        assert 'rbd_data' in origin_meta.block_name_prefix
+
+    def clean_up_bs_trash_and_check(self):
+        bs_ops.clean_up_trash_on_backup_storage(self.origin_bs.uuid)
+        assert not bs_ops.get_trash_on_backup_storage(self.origin_bs.uuid)
+        try:
+            shell.call(self.rbd_cmd_img)
+        except Exception as e:
+            if 'No such file or directory' in str(e):
+                pass
+            else:
+                raise e
+
+    def clean_up_ps_trash_and_check(self):
+        ps_ops.clean_up_trash_on_primary_storage(self.origin_ps.uuid)
+        assert not ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid)
+        try:
+            shell.call(self.rbd_cmd)
+        except Exception as e:
+            if 'No such file or directory' in str(e):
+                pass
+            else:
+                raise e
 
     def migrate_image(self):
         self.get_image()
@@ -274,6 +355,14 @@ class DataMigration(object):
         else:
             self.data_volume.attach(self.vm)
         self.data_volume.check()
+        test_lib.lib_mkfs_for_volume(self.data_volume.get_volume().uuid, self.vm.vm, '/mnt')
+
+    def mount_disk_in_vm(self):
+        import tempfile
+        script_file = tempfile.NamedTemporaryFile(delete=False)
+        script_file.write('''device="/dev/`ls -ltr --file-type /dev | awk '$4~/disk/ {print $NF}' | grep -v '[[:digit:]]' | tail -1`" \n mount ${device}1 /mnt''')
+        script_file.close()
+        test_lib.lib_execute_shell_script_in_vm(self.vm.vm, script_file.name)
 
     def set_ceph_mon_env(self, ps_uuid):
         cond_vol = res_ops.gen_query_conditions('uuid', '=', ps_uuid)

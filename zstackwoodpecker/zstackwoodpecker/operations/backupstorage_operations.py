@@ -192,3 +192,19 @@ def add_disaster_image_store_bs(url, hostname, username, password, sshport=None,
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.test_logger('[Disaster ImageStore Backup Storage] %s is added' %action.name )
     return evt.inventory
+
+def get_trash_on_backup_storage(backup_storage_uuid, session_uuid=None):
+    action = api_actions.GetTrashOnBackupStorageAction()
+    action.uuid = backup_storage_uuid
+    action.timeout = 6000000
+    test_util.action_logger('Get Trash On Backup Storage [uuid:] %s' % backup_storage_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.storageTrashes
+
+def clean_up_trash_on_backup_storage(backup_storage_uuid, session_uuid=None):
+    action = api_actions.CleanUpTrashOnBackupStorageAction()
+    action.uuid = backup_storage_uuid
+    action.timeout = 6000000
+    test_util.action_logger('Clean Up Trash On Backup Storage [uuid:] %s' % backup_storage_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt

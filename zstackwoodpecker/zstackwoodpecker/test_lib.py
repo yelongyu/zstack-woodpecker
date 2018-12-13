@@ -3322,7 +3322,7 @@ def lib_get_ShareableVolume_Vm(volume_uuid):
     vms = res_ops.query_resource(res_ops.SHARE_VOLUME, conditions)
     return vms
 
-def lib_mkfs_for_volume(volume_uuid, vm_inv):
+def lib_mkfs_for_volume(volume_uuid, vm_inv, mount_point=None):
     '''
     Will check if volume's 1st partition could be mountable. If not, it will try
     to make a partition and make an ext3 file system on it. 
@@ -3352,7 +3352,8 @@ def lib_mkfs_for_volume(volume_uuid, vm_inv):
 
     lib_attach_volume(volume_uuid, vm_inv.uuid)
 
-    mount_point = '/tmp/zstack/mnt'
+    if not mount_point:
+        mount_point = '/tmp/zstack/mnt'
     import tempfile
     script_file = tempfile.NamedTemporaryFile(delete=False)
     script_file.write('''

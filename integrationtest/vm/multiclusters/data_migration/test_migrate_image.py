@@ -15,7 +15,9 @@ data_migration = test_stub.DataMigration()
 
 def test():
     data_migration.migrate_image()
+    data_migration.check_origin_image_exist()
     data_migration.create_vm()
+    data_migration.clean_up_bs_trash_and_check()
     data_migration.vm.destroy()
     test_util.test_pass('Migrate Image Test Success')
 
