@@ -82,7 +82,11 @@ def test():
 
     test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
     #test_lib.lib_set_reserved_memory('1G')
-    
+
+    if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-local-ps.xml"], ["scenario-config-upgrade-3.1.1.xml"]):
+        cmd = r"sed -i '$a\172.20.198.8 rsync.repo.zstack.io' /etc/hosts"
+        ssh.execute(cmd, mn_ip1, "root", "password", False, 22)
+        ssh.execute(cmd, mn_ip2, "root", "password", False, 22)
 
     test_util.test_pass('Suite Setup Success')
 

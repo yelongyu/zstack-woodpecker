@@ -31,6 +31,7 @@
         <case timeout="180" >test_detach_iso_vm.py</case>
         <case timeout="600" >test_online_change_cpu_mem.py</case>
         <case timeout="600" >test_crt_vm_with_volumes_and_detach_attach_reboot_detach_attach_volume.py</case>
+        <case timeout="600" >test_crt_vm_with_noscsi_volumes_and_detach_attach_reboot_detach_attach_volume.py</case>
         <case timeout="180" >account/test_multi_accounts_cli_login.py</case>
         <case timeout="180" >account/test_multi_users_cli_login.py</case>
         <case timeout="180" >account/test_crt_vm_by_normal_account.py</case>
