@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-mnha2.xml</deployConfig>
+    <deployConfigTemplate>deploy.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
