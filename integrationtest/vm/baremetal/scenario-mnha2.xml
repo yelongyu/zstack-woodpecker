@@ -52,10 +52,6 @@
               <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
             </l3Network>
-            <l3Network>
-              <scenl3NetworkRef>$scenl3VPCNetworkName1</scenl3NetworkRef>
-              <l2NetworkRef>$scenl2VlanNetworkName1</l2NetworkRef>
-             </l3Network>
           </l3Networks>
           <hostRef>$hostName</hostRef>
           <mnHostRef>$hostName</mnHostRef>
@@ -68,10 +64,6 @@
               <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
             </l3Network>
-            <l3Network>
-              <scenl3NetworkRef>$scenl3VPCNetworkName1</scenl3NetworkRef>
-              <l2NetworkRef>$scenl2VlanNetworkName1</l2NetworkRef>
-             </l3Network>
           </l3Networks>
           <hostRef>$hostName2</hostRef>
           <mnHostRef>$hostName2</mnHostRef>
@@ -84,6 +76,10 @@
               <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
             </l3Network>
+            <l3Network>
+              <scenl3NetworkRef>$scenl3VPCNetworkName1</scenl3NetworkRef>
+              <l2NetworkRef>$scenl2VlanNetworkName1</l2NetworkRef>
+             </l3Network>
           </l3Networks>
         </vm>
         <vm name="$vmName4" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2"
