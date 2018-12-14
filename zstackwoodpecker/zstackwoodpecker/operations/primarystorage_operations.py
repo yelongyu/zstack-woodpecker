@@ -172,7 +172,7 @@ def get_trash_on_primary_storage(primary_storage_uuid, session_uuid=None):
     action.timeout = 6000000
     test_util.action_logger('Get Trash On Primary Storage [uuid:] %s' % primary_storage_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.storageTrashes
+    return evt
 
 def clean_up_trash_on_primary_storage(primary_storage_uuid, session_uuid=None):
     action = api_actions.CleanUpTrashOnPrimaryStorageAction()
