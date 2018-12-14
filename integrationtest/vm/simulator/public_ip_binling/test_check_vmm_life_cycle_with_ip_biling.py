@@ -3,7 +3,8 @@ New Test For bill Operations
 	1.test vm stop
 	2.test vm destory
 	3.test vm live migration
-	4.test vm suspend
+	4.test vm clean
+@author Antony WeiJiang
 '''
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
@@ -18,6 +19,7 @@ import os
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
+vm = None
 
 def test():
 	test_util.test_logger("start check vm lifecycle")
@@ -40,6 +42,7 @@ def test():
 				res_ops.gen_query_conditions('type', '=',  'UserVm'))[0].uuid
 	l3NetworkUuids = res_ops.query_resource_fields(res_ops.L3_NETWORK, \
 				res_ops.gen_query_conditions('name', '=',  'public network'))[0].uuid
+	global vm
 	vm = test_stub.create_vm_billing("test_vmm", imageUuid, None,instanceOfferingUuid, l3NetworkUuids)
 	vm_nic = test_lib.lib_get_vm_nic_by_l3(vm.get_vm(), l3NetworkUuids)
 	
@@ -62,19 +65,41 @@ def test():
 	compare(admin_uuid,"stop")
 
 	test_util.test_logger("destory vm instance")
-	vm.destory()
+	vm.destroy()
 	compare(admin_uuid,"destory")
 
-	test_util.test_logger("livemigration vm instance")
-	cond = res_ops.gen_query_conditions('zoneUuid', '=', vm.get_vm().zoneUuid)
-	Host = res_ops.query_resource(res_ops.HOST, cond)
-	Host_uuid = get_resource_from_vmm("Host",vm.get_vm().zoneUuid,vm.get_vm().hostUuid)
- 		
-	PrimaryFlag = get_resource_from_vmm("LocalStorage",vm.get_vm().zoneUuid,vm.get_vm().hostUuid)
+	test_util.test_logger("recover vm instance")
+	vm.recover()
+	vm.start()
+	compare(admin_uuid,"recover")
+
+	test_util.test_logger("get host total and primarystorge type")
+	Host_uuid = test_stub.get_resource_from_vmm(res_ops.HOST,vm.get_vm().zoneUuid,vm.get_vm().hostUuid)
+	PrimaryFlag = test_stub.get_resource_from_vmm(res_ops.PRIMARY_STORAGE,vm.get_vm().zoneUuid,\
+										vm.get_vm().hostUuid)
 	if Host_uuid  and PrimaryFlag == 0:
+		test_util.test_logger("migration vm instance")
+		prices = bill_ops.calculate_account_spending(admin_uuid)
 		vm.migrate(Host_uuid)
-		compare(admin_uuid,"migration")
+		prices1 = bill_ops.calculate_account_spending(admin_uuid)
+		if prices1.total >  prices.total:
+			compare(admin_uuid,"migration")
+		else:
+			test_util.test_fail("test bill fail, maybe can not calculate when vm live migration")
+
 	test_util.test_logger("clean vm instance")
 	vm.clean()
 	compare(admin_uuid,"clean")
+	
+	test_util.test_logger("delete  public ip resource")
+	resourcePrices = test_stub.query_resource_price()
+	for resource_price in resourcePrices:
+		test_stub.delete_price(resource_price.uuid)
 
+	test_util.test_pass("check vm lifecycle with public ip billing pass")
+
+
+def error_cleanup():
+	global vm
+	if vm:
+		vm.clean()

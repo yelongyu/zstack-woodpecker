@@ -918,7 +918,9 @@ def create_vm_billing(name, image_uuid, host_uuid, instance_offering_uuid, l3_uu
 		vm_creation_option.set_host_uuid(host_uuid)
 	if session_uuid:
 		vm_creation_option.set_session_uuid(session_uuid)
-	vm = create_vm(vm_creation_option)
+	vm = test_vm.ZstackTestVm()
+	vm.set_creation_option(vm_creation_option)
+	vm.create()
 	return vm
 
 def compare(user_uuid,status):
@@ -927,17 +929,17 @@ def compare(user_uuid,status):
 	prices1 = bill_ops.calculate_account_spending(user_uuid) 
 	if status == "clean":
 		if prices1.total != prices.total:
-			test_util.test_fail("test billing fail,maybe can not calculate when vm %s" %(status))
+			test_util.test_fail("test billing fail,maybe can not calculate when vm %s" %(status))	
 	else:
 		if prices1.total <= prices.total:
 			test_util.test_fail("test billing fail,maybe can not calculate when vm %s" %(status))
 
-def get_resource_from_vmm(resource_type,zone_uuid,host_uuid_from_vmm)
+def get_resource_from_vmm(resource_type,zone_uuid,host_uuid_from_vmm):
 	cond = res_ops.gen_query_conditions('zoneUuid', '=', zone_uuid)
-        resource_list = res_ops.query_resource(res_ops.resource_type, cond)
-	if resource_type == "LocalStorage":
+        resource_list = res_ops.query_resource(resource_type, cond)
+	if resource_type == "PrimaryStorage":
 		return judge_PrimaryStorage(resource_list)
-	if resource_type == "HOST":
+	if resource_type == "Host":
 		return judge_HostResource(resource_list,host_uuid_from_vmm)
 	
 
@@ -945,29 +947,38 @@ def judge_PrimaryStorage(PrimaryStorageSource):
 	flag = 0
         for childStorge in PrimaryStorageSource:
                 test_util.test_logger("type is %s" %(childStorge.type))
-                if childStorge.type == "LocalStorage"
+                if childStorge.type == "LocalStorage":
                         flag = 1
                         break
 	return flag
 
 def judge_HostResource(HostSource,host_uuid):
-	for host in hosts:
+	for host in HostSource:
 		test_util.test_logger("host uuid is %s" %(host.uuid))
 		if host.uuid != host_uuid:
 			return host.uuid
 		else:
 			return None
-	
 
+def query_resource_price(uuid = None, price = None, resource_name = None, time_unit = None, resource_unit = None):
+	cond = []
+	if uuid:
+		cond = res_ops.gen_query_conditions('uuid', "=", uuid, cond)
+	if price:
+		cond = res_ops.gen_query_conditions('price', "=", price, cond)
+	if resource_name:
+		cond = res_ops.gen_query_conditions('resourceName', "=", resource_name, cond)
+	if time_unit:
+		cond = res_ops.gen_query_conditions('timeUnit', "=", time_unit, cond)
+	if resource_unit:
+		cond = res_ops.gen_query_conditions('resourceUnit', "=", resource_unit, cond)
+	result = bill_ops.query_resource_price(cond)
+	return result
 
-
-
-
-
-
-
-
-
+def delete_price(price_uuid, delete_mode = None):
+	test_util.test_logger('Delete resource price')
+	result = bill_ops.delete_resource_price(price_uuid, delete_mode)
+	return result
 
 def generate_collectd_conf(host, collectdPath, list_port, host_disks = None,
                            host_nics = None, vm_disks = None, vm_nics = None):
