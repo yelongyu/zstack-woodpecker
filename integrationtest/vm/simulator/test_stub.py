@@ -32,6 +32,7 @@ import time
 import re
 import json
 import random
+import threading
 
 def remove_all_vpc_vrouter():
     cond = res_ops.gen_query_conditions('applianceVmType', '=', 'vpcvrouter')
@@ -810,15 +811,30 @@ class Billing(object):
 		self.timeUnit = timeUnit
 
 	def get_timeUnit(self):
-		return self.timeUnit		
+		return self.timeUnit
+
+	def get_price(self):
+		cond = res_ops.gen_query_conditions('name', '=',  'admin')
+		admin_uuid = res_ops.query_resource_fields(res_ops.ACCOUNT, cond)[0].uuid
+		prices = bill_ops.calculate_account_spending(admin_uuid)
+		return 	prices	
 
 class CpuBilling(Billing):
 	def __init__(self):
 		super(CpuBilling, self).__init__()
 		self.resourceName = "cpu"
+		self.uuid = None
 
-	def create_resource_type(self):
-		return bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price)
+	def get_uuid(self):
+		return self.uuid
+	
+        def create_resource_type(self):
+                evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price)
+                self.uuid = evt.uuid
+                return evt
+
+	def delete_resource(self):
+		return bill_ops.delete_resource_price(self.uuid)
 
 class MemoryBilling(Billing):
 	def __init__(self):
@@ -883,23 +899,11 @@ class PublicIpBilling(Billing):
 		self.uuid = evt.uuid
 		return evt
 
+	def get_uuid(self):
+                return self.uuid
+
 	def delete_resource(self):
 		return bill_ops.delete_resource_price(self.uuid)
-
-	def query_resource_price(self):
-		cond = []
-		if self.uuid:
-			cond = res_ops.gen_query_conditions('uuid', "=", self.uuid, cond)
-		if self.price:
-			cond = res_ops.gen_query_conditions('price', "=", self.price, cond)
-		if self.resourceName:
-			cond = res_ops.gen_query_conditions('resourceName', "=",self.resourceName, cond)
-		if self.timeUnit:
-			cond = res_ops.gen_query_conditions('timeUnit', "=",self.timeUnit, cond)
-		if self.resourceUnit:
-			cond = res_ops.gen_query_conditions('resourceUnit', "=",self.resourceUnit, cond)
-		return bill_ops.query_resource_price(cond)
-		
 
 '''
 to be define
@@ -907,6 +911,15 @@ to be define
 class GPUBilling(Billing):
         def __init__(self):
                 super(PublicIpBilling, self).__init__()
+
+def set_vm_resource():
+	imageUuid = res_ops.query_resource_fields(res_ops.IMAGE, \
+				res_ops.gen_query_conditions('system', '=',  'false'))[0].uuid
+	instanceOfferingUuid = res_ops.query_resource_fields(res_ops.INSTANCE_OFFERING, \
+				res_ops.gen_query_conditions('type', '=',  'UserVm'))[0].uuid
+	l3NetworkUuids = res_ops.query_resource_fields(res_ops.L3_NETWORK, \
+				res_ops.gen_query_conditions('name', '=',  'public network'))[0].uuid
+	return (imageUuid,instanceOfferingUuid,l3NetworkUuids)
 
 def create_vm_billing(name, image_uuid, host_uuid, instance_offering_uuid, l3_uuid, session_uuid=None):
 	vm_creation_option = test_util.VmOption()
@@ -959,7 +972,33 @@ def judge_HostResource(HostSource,host_uuid):
 			return host.uuid
 		else:
 			return None
-
+'''
+create many billing instantiation
+'''
+def create_option_billing(billing_option,count):
+        length_step = count/2
+        for i in range(0, count):
+                billing_option.set_price(i)
+                if i >= count/2:
+                        billing_option.set_timeUnit("m")
+                threading.Thread(target=billing_option.create_resource_type()).start()
+                if threading.active_count() > length_step:
+                        time.sleep(3)
+                        length_step += count/4
+'''
+query many billing and delete these
+'''
+def verify_option_billing(billing_count):
+	for i in range(0,5):
+		resourcePrices = query_resource_price()
+		if len(resourcePrices) == billing_count:
+                        break
+                if  i == 4 and len(resourcePrices) != billing_count:
+                        test_util.test_fail("create %s cpu billing fail ,actual create is %s" %(billing_count,len(resourcePrices)))
+                time.sleep(3)
+	for resourceprice in resourcePrices:
+		delete_price(resourceprice.uuid)
+	
 def query_resource_price(uuid = None, price = None, resource_name = None, time_unit = None, resource_unit = None):
 	cond = []
 	if uuid:

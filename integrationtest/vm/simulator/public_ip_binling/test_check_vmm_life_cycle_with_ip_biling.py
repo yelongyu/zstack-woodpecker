@@ -28,7 +28,7 @@ def test():
 	
 	bill_ip = test_stub.PublicIpBilling()
 	ipin = threading.Thread(target=bill_ip.create_resource_type(),\
-				args=(bill_ip.set_resourceName("pubIpVmNicBandwidthIn")))
+				args=(bill_ip.get_resourceName()))
 	bill_ip.set_resourceName("pubIpVmNicBandwidthOut")
 	ipout = threading.Thread(target=bill_ip.create_resource_type(),\
 				args=(bill_ip.get_resourceName()))
