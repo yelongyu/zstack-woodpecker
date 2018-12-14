@@ -135,6 +135,7 @@
         <case timeout='900'  repeat='1'>regression/test_data_volume_with_vm_ops.py</case>
         <case timeout='1000'  repeat='1' noparallel='True'>vr/test_ping_vms_reboot_vr.py</case>
         <case timeout='600'  repeat='1'>vr/test_vr_ha.py</case>
+        <case timeout='600'  repeat='1'>host/test_chrony.py</case>
         <case timeout='1000'  repeat='1' noparallel='True'>vr/test_reconnect_vr.py</case>
 	<case timeout='1000'  repeat='1' noparallel='True'>vr/test_stop_start_vr.py</case>
 	<case timeout='1000'  repeat='1' noparallel='True'>vr/test_destroy_vr.py</case>
