@@ -36,28 +36,20 @@ def test():
 	ipout.start()
 	
 	test_util.test_logger("create vm instance")
-    	imageUuid = res_ops.query_resource_fields(res_ops.IMAGE, \
-				res_ops.gen_query_conditions('system', '=',  'false'))[0].uuid
-	instanceOfferingUuid = res_ops.query_resource_fields(res_ops.INSTANCE_OFFERING, \
-				res_ops.gen_query_conditions('type', '=',  'UserVm'))[0].uuid
-	l3NetworkUuids = res_ops.query_resource_fields(res_ops.L3_NETWORK, \
-				res_ops.gen_query_conditions('name', '=',  'public network'))[0].uuid
+
 	global vm
-	vm = test_stub.create_vm_billing("test_vmm", imageUuid, None,instanceOfferingUuid, l3NetworkUuids)
-	vm_nic = test_lib.lib_get_vm_nic_by_l3(vm.get_vm(), l3NetworkUuids)
+	vm = test_stub.create_vm_billing("test_vmm", test_stub.set_vm_resource()[0], None,\
+                                                test_stub.set_vm_resource()[1], test_stub.set_vm_resource()[2])
+
+	vm_nic = test_lib.lib_get_vm_nic_by_l3(vm.get_vm(), test_stub.set_vm_resource()[2])
 	
 	test_util.test_logger("set vm nic bandwidth")
 	net_bandwidth = 10*1024*1024
 	vm_ops.set_vm_nic_qos(vm_nic.uuid, outboundBandwidth = net_bandwidth, inboundBandwidth = net_bandwidth)
 	
-	test_util.test_logger("calculate ip cost")
-	cond = res_ops.gen_query_conditions('name', '=',  'admin')
     	time.sleep(1)
-    	admin_uuid = res_ops.query_resource_fields(res_ops.ACCOUNT, cond)[0].uuid
-	prices = bill_ops.calculate_account_spending(admin_uuid)
-	
 	test_util.test_logger("verify calculate if right is")
-	if prices.total < 100:
+	if bill_ip.get_price().total < 100:
 		test_util.test_fail("test billing fail, bill is %s ,less than 100" %(prices.total))
 	
 	test_util.test_logger("stop vm instance")
