@@ -26,14 +26,8 @@ def test():
 	
 	test_util.test_logger("create public ip billing")
 	
-	bill_ip = test_stub.PublicIpBilling()
-	ipin = threading.Thread(target=bill_ip.create_resource_type(),\
-				args=(bill_ip.get_resourceName()))
-	bill_ip.set_resourceName("pubIpVmNicBandwidthOut")
-	ipout = threading.Thread(target=bill_ip.create_resource_type(),\
-				args=(bill_ip.get_resourceName()))
-	ipin.start()
-	ipout.start()
+	bill_cpu = test_stub.CpuBilling()
+	bill_cpu.create_resource_type()
 	
 	test_util.test_logger("create vm instance")
 
@@ -41,29 +35,23 @@ def test():
 	vm = test_stub.create_vm_billing("test_vmm", test_stub.set_vm_resource()[0], None,\
                                                 test_stub.set_vm_resource()[1], test_stub.set_vm_resource()[2])
 
-	vm_nic = test_lib.lib_get_vm_nic_by_l3(vm.get_vm(), test_stub.set_vm_resource()[2])
-	
-	test_util.test_logger("set vm nic bandwidth")
-	net_bandwidth = 10*1024*1024
-	vm_ops.set_vm_nic_qos(vm_nic.uuid, outboundBandwidth = net_bandwidth, inboundBandwidth = net_bandwidth)
-	
     	time.sleep(1)
 	test_util.test_logger("verify calculate if right is")
-	if bill_ip.get_price().total < 100:
-		test_util.test_fail("test billing fail, bill is %s ,less than 100" %(prices.total))
+	if bill_cpu.get_price().total < 5:
+		test_util.test_fail("test billing fail, bill is %s ,less than 5" %(prices.total))
 	
 	test_util.test_logger("stop vm instance")
 	vm.stop()
-	bill_ip.compare("stop")
+	bill_cpu.compare("stop")
 
 	test_util.test_logger("destory vm instance")
 	vm.destroy()
-	bill_ip.compare("destory")
+	bill_cpu.compare("destory")
 
-	test_util.test_logger("recover vm instance")
-	vm.recover()
-	vm.start()
-	bill_ip.compare("recover")
+	#test_util.test_logger("recover vm instance")
+	#vm.recover()
+	#vm.start()
+	#bill_cpu.compare("recover")
 
 	test_util.test_logger("get host total and primarystorge type")
 	Host_uuid = test_stub.get_resource_from_vmm(res_ops.HOST,vm.get_vm().zoneUuid,vm.get_vm().hostUuid)
@@ -71,17 +59,17 @@ def test():
 										vm.get_vm().hostUuid)
 	if Host_uuid  and PrimaryFlag == 0:
 		test_util.test_logger("migration vm instance")
-		prices = bill_ip.get_price()
+		prices = bill_cpu.get_price()
 		vm.migrate(Host_uuid)
-		prices1 = bill_ip.get_price()
+		prices1 = bill_cpu.get_price()
 		if prices1.total >  prices.total:
-			bill_ip.compare("migration")
+			bill_cpu.compare("migration")
 		else:
 			test_util.test_fail("test bill fail, maybe can not calculate when vm live migration")
 
 	test_util.test_logger("clean vm instance")
 	vm.clean()
-	bill_ip.compare("clean")
+	bill_cpu.compare("clean")
 	
 	test_util.test_logger("delete  public ip resource")
 	resourcePrices = test_stub.query_resource_price()
@@ -95,3 +83,4 @@ def error_cleanup():
 	global vm
 	if vm:
 		vm.clean()
+
