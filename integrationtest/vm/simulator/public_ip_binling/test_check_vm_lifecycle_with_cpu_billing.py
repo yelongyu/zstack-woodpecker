@@ -48,15 +48,17 @@ def test():
 	vm.destroy()
 	bill_cpu.compare("destory")
 
-	#test_util.test_logger("recover vm instance")
-	#vm.recover()
-	#vm.start()
-	#bill_cpu.compare("recover")
+	test_util.test_logger("recover vm instance")
+	vm.recover()
+	vm.start()
+	bill_cpu.compare("recover")
 
 	test_util.test_logger("get host total and primarystorge type")
 	Host_uuid = test_stub.get_resource_from_vmm(res_ops.HOST,vm.get_vm().zoneUuid,vm.get_vm().hostUuid)
 	PrimaryFlag = test_stub.get_resource_from_vmm(res_ops.PRIMARY_STORAGE,vm.get_vm().zoneUuid,\
 										vm.get_vm().hostUuid)
+	test_util.test_logger("antony %s" %(Host_uuid))
+	test_util.test_logger("antony %s" %(PrimaryFlag))
 	if Host_uuid  and PrimaryFlag == 0:
 		test_util.test_logger("migration vm instance")
 		prices = bill_cpu.get_price()

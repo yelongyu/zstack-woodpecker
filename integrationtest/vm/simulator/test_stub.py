@@ -852,7 +852,7 @@ class CpuBilling(Billing):
 		prices = super(CpuBilling, self).get_price()
 		time.sleep(1)
 		prices1 = super(CpuBilling, self).get_price()
-		if status == "migration":
+		if status == "migration" or status == "recover":
 			if prices1 <= prices.total:
 				test_util.test_fail("test billing fail,maybe can not calculate when vm %s"\
 						 %(status))
