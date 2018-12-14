@@ -23,10 +23,15 @@ def test():
     snapshots.set_utility_vm(data_migration.vm)
     snapshots.create_snapshot('create_data_snapshot1')
     snapshots.check()
-
     snapshot1 = snapshots.get_current_snapshot()
+    
     snapshots.create_snapshot('create_data_snapshot2')
     snapshots.check()
+    snapshot2 = snapshots.get_current_snapshot()
+
+    snapshots.create_snapshot('create_data_snapshot3')
+    snapshots.check()
+    snapshot3 = snapshots.get_current_snapshot()
 
     data_migration.mount_disk_in_vm()
     data_migration.copy_data()
@@ -38,6 +43,9 @@ def test():
     data_migration.data_volume.attach(data_migration.vm)
     data_migration.mount_disk_in_vm()
     data_migration.check_data()
+    data_migration.check_origin_data_exist(root_vol=False)
+    data_migration.clean_up_ps_trash_and_check()
+    data_migration.check_vol_sp(data_migration.data_volume_uuid, 3)
 
     snapshots.delete_snapshot(snapshot1)
 #     data_migration.del_obsoleted_data_volume()
