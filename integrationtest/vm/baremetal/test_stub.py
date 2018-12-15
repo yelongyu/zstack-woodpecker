@@ -2,6 +2,7 @@ import zstackwoodpecker.operations.baremetal_operations as bare_operations
 import zstackwoodpecker.operations.cluster_operations as cluster_ops
 import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
+import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.operations.scenario_operations as sce_ops
 import zstacklib.utils.jsonobject as jsonobject
 import zstacklib.utils.xmlobject as xmlobject
@@ -10,6 +11,7 @@ import zstackwoodpecker.test_lib as test_lib
 import zstacklib.utils.shell as shell
 import zstacklib.utils.ssh as ssh
 import subprocess
+import random
 import os
 import re
 import time
@@ -51,10 +53,12 @@ def create_cluster(zone_uuid, cluster_name = None, session_uuid = None):
     return cluster
 
 def create_pxe(dhcp_interface = None, name = None, range_begin = None, \
-		hostname = '127.0.0.1', storagePath = '/pxe_store', sshUsername = 'root', \
+		hostname = None, storagePath = '/pxe_store', sshUsername = 'root', \
 		sshPassword = 'password', sshPort = 22, zoneUuid = None,  
 		range_end = None, netmask = None, session_uuid = None):
     pxe_option = test_util.PxeOption()
+    if not hostname:
+        hostname = '127.0.0.1'
     if not dhcp_interface:
         dhcp_interface = os.environ.get('dhcpinterface')
     if not range_begin:
