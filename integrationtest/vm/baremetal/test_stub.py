@@ -512,7 +512,7 @@ def deploy_2ha(scenarioConfig, scenarioFile):
     iptables_cmd2 = "iptables -I INPUT -d " + vip + " -j ACCEPT"
     ssh.execute(iptables_cmd2, mn_ip2, "root", "password", False, 22)
 
-    woodpecker_vm_ip = shell.call("ip r | grep src | head -1 | awk '{print $NF}'").strip()
+    woodpecker_vm_ip = shell.call("ip r | grep src | grep '^172.20' | head -1 | awk '{print $NF}'").strip()
     zsha2_path = "/home/%s/zsha2" % woodpecker_vm_ip
     ssh.scp_file(zsha2_path, "/root/zsha2", mn_ip1, "root", "password")
     ssh.execute("chmod a+x /root/zsha2", mn_ip1, "root", "password", False, 22)
