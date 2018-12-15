@@ -817,19 +817,7 @@ class Billing(object):
 		cond = res_ops.gen_query_conditions('name', '=',  'admin')
 		admin_uuid = res_ops.query_resource_fields(res_ops.ACCOUNT, cond)[0].uuid
 		prices = bill_ops.calculate_account_spending(admin_uuid)
-		return 	prices	
-
-#	def compare():
-#        	prices = get_price()
-#        	time.sleep(1)
-#        	prices1 = get_price()
-#        	if status == "clean":
-#                	if prices1.total != prices.total:
-#                        	test_util.test_fail("test billing fail,maybe can not calculate when vm %s" %(status))
-#        	else:
-#                	if prices1.total <= prices.total:
-#                        	test_util.test_fail("test billing fail,maybe can not calculate when vm %s" %(status))
-#
+		return 	prices
 
 class CpuBilling(Billing):
 	def __init__(self):
@@ -866,6 +854,7 @@ class MemoryBilling(Billing):
 		super(MemoryBilling, self).__init__()
 		self.resourceName = "memory"
 		self.resourceUnit = "G"
+		self.uuid = None
 	
 	def set_resourceUnit(self,resourceUnit):
 		self.resourceUnit = resourceUnit
@@ -873,8 +862,29 @@ class MemoryBilling(Billing):
 	def get_resourceUnit(self):
 		return self.resourceUnit
 	
+	def get_uuid(self):
+		return self.uuid
+
 	def create_resource_type(self):
-		return bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit)
+		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit)
+		self.uuid = evt.uuid
+		return evt
+	
+	def delete_resource(self):
+		return bill_ops.delete_resource_price(self.uuid)
+
+        def compare(self,status):
+		prices = super(CpuBilling, self).get_price()
+		time.sleep(1)
+		prices1 = super(CpuBilling, self).get_price()
+		if status == "migration" or status == "recover":
+			if prices1 <= prices.total:
+				test_util.test_fail("test billing fail,maybe can not calculate when vm %s"\
+					%(status))
+		else:
+			if prices1.total != prices.total:
+				test_util.test_fail("test billing fail,maybe can not calculate when vm %s" \
+					%(status))
 
 class RootVolumeBilling(Billing):
 	def __init__(self):
