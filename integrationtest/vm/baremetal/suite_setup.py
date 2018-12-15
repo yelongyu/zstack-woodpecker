@@ -27,9 +27,6 @@ def test():
     if test_lib.scenario_config != None and test_lib.scenario_destroy != None:
         scenario_operations.destroy_scenario(test_lib.all_scenario_config, test_lib.scenario_destroy)
 
-    test_lib.setup_plan.deploy_test_agent()
-    test_lib.setup_plan.execute_plan_without_deploy_test_agent()
-
     #Suite setup for mnha2 scenario
     if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-mnha2.xml":
         nic_name = "eth0"
@@ -74,6 +71,9 @@ def test():
             test_stub.deploy_vbmc(host_ip1)
 
     elif test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
+        test_lib.setup_plan.deploy_test_agent()
+        test_lib.setup_plan.execute_plan_without_deploy_test_agent()
+
         mn_ips = deploy_operations.get_nodes_from_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
         host_ips = deploy_operations.get_hosts_from_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
         if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
