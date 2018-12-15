@@ -232,24 +232,49 @@ class DataMigration(object):
         ret = commands.getoutput(check_cmd).split('\n')[-1]
         assert ret == '0', "data check failed!, the return code is %s, 0 is expected" % ret
 
-    def check_origin_data_exist(self):
+    def check_origin_data_exist(self, root_vol=True):
+        if root_vol:
+            vol_installPath = self.root_vol_install_path
+            vol_uuid = self.root_vol_uuid
+            vol_size = self.root_vol_size
+        else:
+            vol_installPath = self.data_vol_installPath
+            vol_uuid = self.data_volume_uuid
+            vol_size = self.data_volume_size
         if self.origin_ps.type == 'Ceph':
             ceph_mon_ip = self.origin_ps.mons[0].monAddr
-            self.rbd_cmd = 'sshpass -p password ssh -o LogLevel=quiet -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@%s "rbd info %s --format=json"' \
-                        % (ceph_mon_ip, self.root_vol_install_path.split('ceph://')[-1])
-            data_info = shell.call(self.rbd_cmd)
+            self.chk_cmd = 'sshpass -p password ssh -o LogLevel=quiet -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@%s "rbd info %s --format=json"' \
+                        % (ceph_mon_ip, vol_installPath.split('ceph://')[-1])
+            data_info = shell.call(self.chk_cmd)
             origin_meta = jsonobject.loads(data_info)
-            assert origin_meta.name == self.root_vol_uuid
-            assert origin_meta.size == self.root_vol_size
+            assert origin_meta.name == vol_uuid
+            if root_vol:
+                assert origin_meta.size == vol_size
+            else:
+                assert origin_meta.size >= vol_size
             assert 'rbd_data' in origin_meta.block_name_prefix
-            ps_trash = ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid)
+            ps_trash = ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid).storageTrashes
             trash_install_path_list = [trsh.installPath for trsh in ps_trash]
-            assert self.root_vol_install_path in trash_install_path_list
+            assert vol_installPath in trash_install_path_list
+        else:
+            nfs_ip, mount_path = self.origin_ps.url.split(':')
+            self.chk_cmd = 'sshpass -p password ssh -o LogLevel=quiet -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
+                            root@%s "qemu-img info %s"' % (nfs_ip, mount_path + vol_installPath.split(self.origin_ps.uuid)[-1])
+            data_info = shell.call(self.chk_cmd)
+            assert str(vol_size) in data_info
+            ps_trash = ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid).storageTrashSpecs
+            trash_install_path_list = [trsh.installPath for trsh in ps_trash]
+            assert vol_installPath[:-39] in trash_install_path_list
+
+    def check_vol_sp(self, vol_uuid, count):
+        cond = res_ops.gen_query_conditions('volumeUuid', '=', vol_uuid)
+        vol_sp_tree = res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, cond)
+        assert len(vol_sp_tree) == count
 
     def check_origin_image_exist(self):
-        self.rbd_cmd_img = 'sshpass -p password ssh -o LogLevel=quiet -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@%s "rbd info %s --format=json"' \
+        self.chk_cmd_img = 'sshpass -p password ssh -o LogLevel=quiet -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@%s "rbd info %s --format=json"' \
                         % (self.origin_bs.mons[0].monAddr, self.image_origin_path.split('ceph://')[-1])
-        img_info = shell.call(self.rbd_cmd_img)
+        img_info = shell.call(self.chk_cmd_img)
         origin_meta = jsonobject.loads(img_info)
         assert origin_meta.name == self.image.uuid
         assert origin_meta.size == self.image.size
@@ -259,7 +284,7 @@ class DataMigration(object):
         bs_ops.clean_up_trash_on_backup_storage(self.origin_bs.uuid)
         assert not bs_ops.get_trash_on_backup_storage(self.origin_bs.uuid)
         try:
-            shell.call(self.rbd_cmd_img)
+            shell.call(self.chk_cmd_img)
         except Exception as e:
             if 'No such file or directory' in str(e):
                 pass
@@ -268,9 +293,12 @@ class DataMigration(object):
 
     def clean_up_ps_trash_and_check(self):
         ps_ops.clean_up_trash_on_primary_storage(self.origin_ps.uuid)
-        assert not ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid)
+        if self.origin_ps.type == 'Ceph':
+            assert not ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid).storageTrashes
+        else:
+            assert not ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid).storageTrashSpecs
         try:
-            shell.call(self.rbd_cmd)
+            shell.call(self.chk_cmd)
         except Exception as e:
             if 'No such file or directory' in str(e):
                 pass
@@ -355,7 +383,10 @@ class DataMigration(object):
         else:
             self.data_volume.attach(self.vm)
         self.data_volume.check()
-        test_lib.lib_mkfs_for_volume(self.data_volume.get_volume().uuid, self.vm.vm, '/mnt')
+        self.data_volume_uuid = self.data_volume.get_volume().uuid
+        self.data_volume_size = self.data_volume.get_volume().size
+        self.data_vol_installPath = self.data_volume.get_volume().installPath
+        test_lib.lib_mkfs_for_volume(self.data_volume_uuid, self.vm.vm, '/mnt')
 
     def mount_disk_in_vm(self):
         import tempfile

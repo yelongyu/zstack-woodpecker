@@ -28,6 +28,8 @@ def test():
     data_migration.data_volume.attach(data_migration.vm)
     data_migration.mount_disk_in_vm()
     data_migration.check_data()
+    data_migration.check_origin_data_exist(root_vol=False)
+    data_migration.clean_up_ps_trash_and_check()
 
 #     data_migration.del_obsoleted_data_volume()
     test_lib.lib_robot_cleanup(test_obj_dict)
