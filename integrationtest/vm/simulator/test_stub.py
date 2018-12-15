@@ -813,7 +813,7 @@ class Billing(object):
 	def get_timeUnit(self):
 		return self.timeUnit
 
-	def get_price(self):
+	def get_price_total(self):
 		cond = res_ops.gen_query_conditions('name', '=',  'admin')
 		admin_uuid = res_ops.query_resource_fields(res_ops.ACCOUNT, cond)[0].uuid
 		prices = bill_ops.calculate_account_spending(admin_uuid)
@@ -837,9 +837,9 @@ class CpuBilling(Billing):
 		return bill_ops.delete_resource_price(self.uuid)
 	
 	def compare(self,status):
-		prices = super(CpuBilling, self).get_price()
+		prices = super(CpuBilling, self).get_price_total()
 		time.sleep(1)
-		prices1 = super(CpuBilling, self).get_price()
+		prices1 = super(CpuBilling, self).get_price_total()
 		if status == "migration" or status == "recover":
 			if prices1 <= prices.total:
 				test_util.test_fail("test billing fail,maybe can not calculate when vm %s"\
@@ -874,9 +874,9 @@ class MemoryBilling(Billing):
 		return bill_ops.delete_resource_price(self.uuid)
 
         def compare(self,status):
-		prices = super(CpuBilling, self).get_price()
+		prices = super(MemoryBilling, self).get_price_total()
 		time.sleep(1)
-		prices1 = super(CpuBilling, self).get_price()
+		prices1 = super(MemoryBilling, self).get_price_total()
 		if status == "migration" or status == "recover":
 			if prices1 <= prices.total:
 				test_util.test_fail("test billing fail,maybe can not calculate when vm %s"\
@@ -941,9 +941,9 @@ class PublicIpBilling(Billing):
 		return bill_ops.delete_resource_price(self.uuid)
 	
 	def compare(self,status):
-		prices = super(PublicIpBilling, self).get_price()
+		prices = super(PublicIpBilling, self).get_price_total()
 		time.sleep(1)
-		prices1 = super(PublicIpBilling, self).get_price()
+		prices1 = super(PublicIpBilling, self).get_price_total()
 		if status == "clean":
 			if prices1.total != prices.total:
 				test_util.test_fail("test billing fail,maybe can not calculate when vm %s" \

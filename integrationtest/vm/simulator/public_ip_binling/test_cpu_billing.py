@@ -1,5 +1,5 @@
 '''
-New Test For bill Operations
+New Test For cpu bill Operations
         1.create cpu billing operations
         2.deltet cpu billing operations
 @author Antony WeiJiang
@@ -40,12 +40,15 @@ def test():
 	global vm
         vm = test_stub.create_vm_billing("test_vmm", test_stub.set_vm_resource()[0], None,\
 						test_stub.set_vm_resource()[1], test_stub.set_vm_resource()[2])
-#	test_util.test_logger("antony @@@@debug price is %s " %(bill_cpu.get_price().total))	
+	
+	cpuNum = res_ops.query_resource_fields(res_ops.INSTANCE_OFFERING, \
+			res_ops.gen_query_conditions('uuid', '=',\
+				test_stub.set_vm_resource()[1]))[0].cpuNum
 	time.sleep(1)
-	if bill_cpu.get_price().total < 5:
-		test_util.test_fail("calculate cpu cost fail,actual result is %s" %(bill_cpu.get_price().total))
+	if bill_cpu.get_price_total().total < cpuNum * int(bill_cpu.get_price()):
+		test_util.test_fail("calculate cpu cost fail,actual result is %s" %(bill_cpu.get_price_total().total))
 	vm.clean()
-#	test_util.test_logger("antony @@@debug uuid is %s" %(bill_cpu.get_uuid()))
+
 	bill_cpu.delete_resource()
 	test_util.test_pass("check cpu billing pass")
 

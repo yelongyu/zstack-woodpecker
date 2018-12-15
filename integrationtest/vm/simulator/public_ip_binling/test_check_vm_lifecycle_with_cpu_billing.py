@@ -1,5 +1,5 @@
 '''
-New Test For bill Operations
+New Test For cpu bill Operations
 	1.test vm stop
 	2.test vm destory
 	3.test vm live migration
@@ -34,11 +34,14 @@ def test():
 	global vm
 	vm = test_stub.create_vm_billing("test_vmm", test_stub.set_vm_resource()[0], None,\
                                                 test_stub.set_vm_resource()[1], test_stub.set_vm_resource()[2])
-
+        cpuNum = res_ops.query_resource_fields(res_ops.INSTANCE_OFFERING, \
+                        res_ops.gen_query_conditions('uuid', '=',\
+                                test_stub.set_vm_resource()[1]))[0].cpuNum
     	time.sleep(1)
 	test_util.test_logger("verify calculate if right is")
-	if bill_cpu.get_price().total < 5:
-		test_util.test_fail("test billing fail, bill is %s ,less than 5" %(prices.total))
+	if bill_cpu.get_price_total().total < cpuNum * int(bill_cpu.get_price()):
+		test_util.test_fail("test billing fail, bill is %s ,less than %s"\
+					 %(bill_cpu.get_price_total().total,cpuNum * bill_cpu.get_price()))
 	
 	test_util.test_logger("stop vm instance")
 	vm.stop()
@@ -61,9 +64,9 @@ def test():
 	test_util.test_logger("antony %s" %(PrimaryFlag))
 	if Host_uuid  and PrimaryFlag == 0:
 		test_util.test_logger("migration vm instance")
-		prices = bill_cpu.get_price()
+		prices = bill_cpu.get_price_total()
 		vm.migrate(Host_uuid)
-		prices1 = bill_cpu.get_price()
+		prices1 = bill_cpu.get_price_total()
 		if prices1.total >  prices.total:
 			bill_cpu.compare("migration")
 		else:

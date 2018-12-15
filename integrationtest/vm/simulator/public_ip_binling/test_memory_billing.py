@@ -1,7 +1,7 @@
 '''
 New Test For bill Operations
-        1.create cpu billing operations
-        2.deltet cpu billing operations
+        1.create memory billing operations
+        2.deltet memory billing operations
 @author Antony WeiJiang
 '''
 import zstackwoodpecker.test_lib as test_lib
@@ -40,12 +40,15 @@ def test():
 	global vm
         vm = test_stub.create_vm_billing("test_vmm", test_stub.set_vm_resource()[0], None,\
 						test_stub.set_vm_resource()[1], test_stub.set_vm_resource()[2])
+	vm_memory_size_ratio = res_ops.query_resource_fields(res_ops.INSTANCE_OFFERING, \
+					res_ops.gen_query_conditions('uuid', '=',\
+						test_stub.set_vm_resource()[1]))[0].memorySize / 1024 / 1024 / float(1024)
 	time.sleep(1)
-#	test_util.test_logger("antony @@@@debug price is %s " %(bill_memory.get_price().total))	
-	if bill_memory.get_price().total < 2.5:
-		test_util.test_fail("calculate memory cost fail,actual result is %s" %(bill_memory.get_price().total))
+	if float(bill_memory.get_price()) * vm_memory_size_ratio > bill_memory.get_price_total().total:
+		test_util.test_fail("calculate memory cost fail,actual result is %s" %(bill_memory.get_price_total().total))
+
 	vm.clean()
-#	test_util.test_logger("antony @@@debug uuid is %s" %(bill_memory.get_uuid()))
+
 	bill_memory.delete_resource()
 	test_util.test_pass("check memory billing pass")
 

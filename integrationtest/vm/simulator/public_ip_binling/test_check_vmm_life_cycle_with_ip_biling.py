@@ -1,5 +1,5 @@
 '''
-New Test For bill Operations
+New Test For ip bill Operations
 	1.test vm stop
 	2.test vm destory
 	3.test vm live migration
@@ -49,8 +49,8 @@ def test():
 	
     	time.sleep(1)
 	test_util.test_logger("verify calculate if right is")
-	if bill_ip.get_price().total < 100:
-		test_util.test_fail("test billing fail, bill is %s ,less than 100" %(prices.total))
+	if bill_ip.get_price_total().total < 100:
+		test_util.test_fail("test billing fail, bill is %s ,less than 100" %(bill_ip.get_price_total().total))
 	
 	test_util.test_logger("stop vm instance")
 	vm.stop()
@@ -71,9 +71,9 @@ def test():
 										vm.get_vm().hostUuid)
 	if Host_uuid  and PrimaryFlag == 0:
 		test_util.test_logger("migration vm instance")
-		prices = bill_ip.get_price()
+		prices = bill_ip.get_price_total()
 		vm.migrate(Host_uuid)
-		prices1 = bill_ip.get_price()
+		prices1 = bill_ip.get_price_total()
 		if prices1.total >  prices.total:
 			bill_ip.compare("migration")
 		else:
