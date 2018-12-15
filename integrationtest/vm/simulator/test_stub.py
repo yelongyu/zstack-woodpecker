@@ -819,6 +819,18 @@ class Billing(object):
 		prices = bill_ops.calculate_account_spending(admin_uuid)
 		return 	prices	
 
+#	def compare():
+#        	prices = get_price()
+#        	time.sleep(1)
+#        	prices1 = get_price()
+#        	if status == "clean":
+#                	if prices1.total != prices.total:
+#                        	test_util.test_fail("test billing fail,maybe can not calculate when vm %s" %(status))
+#        	else:
+#                	if prices1.total <= prices.total:
+#                        	test_util.test_fail("test billing fail,maybe can not calculate when vm %s" %(status))
+#
+
 class CpuBilling(Billing):
 	def __init__(self):
 		super(CpuBilling, self).__init__()
@@ -835,6 +847,19 @@ class CpuBilling(Billing):
 
 	def delete_resource(self):
 		return bill_ops.delete_resource_price(self.uuid)
+	
+	def compare(self,status):
+		prices = super(CpuBilling, self).get_price()
+		time.sleep(1)
+		prices1 = super(CpuBilling, self).get_price()
+		if status == "migration" or status == "recover":
+			if prices1 <= prices.total:
+				test_util.test_fail("test billing fail,maybe can not calculate when vm %s"\
+						 %(status))
+		else:
+			if prices1.total != prices.total:
+				test_util.test_fail("test billing fail,maybe can not calculate when vm %s" \
+						%(status))
 
 class MemoryBilling(Billing):
 	def __init__(self):
@@ -904,6 +929,19 @@ class PublicIpBilling(Billing):
 
 	def delete_resource(self):
 		return bill_ops.delete_resource_price(self.uuid)
+	
+	def compare(self,status):
+		prices = super(PublicIpBilling, self).get_price()
+		time.sleep(1)
+		prices1 = super(PublicIpBilling, self).get_price()
+		if status == "clean":
+			if prices1.total != prices.total:
+				test_util.test_fail("test billing fail,maybe can not calculate when vm %s" \
+							%(status))
+		else:
+			if prices1.total <= prices.total:
+				test_util.test_fail("test billing fail,maybe can not calculate when vm %s" \
+							%(status))
 
 '''
 to be define
@@ -936,16 +974,16 @@ def create_vm_billing(name, image_uuid, host_uuid, instance_offering_uuid, l3_uu
 	vm.create()
 	return vm
 
-def compare(user_uuid,status):
-	prices = bill_ops.calculate_account_spending(user_uuid)
-	time.sleep(1)
-	prices1 = bill_ops.calculate_account_spending(user_uuid) 
-	if status == "clean":
-		if prices1.total != prices.total:
-			test_util.test_fail("test billing fail,maybe can not calculate when vm %s" %(status))	
-	else:
-		if prices1.total <= prices.total:
-			test_util.test_fail("test billing fail,maybe can not calculate when vm %s" %(status))
+#def compare(user_uuid,status):
+#	prices = bill_ops.calculate_account_spending(user_uuid)
+#	time.sleep(1)
+#	prices1 = bill_ops.calculate_account_spending(user_uuid) 
+#	if status == "clean":
+#		if prices1.total != prices.total:
+#			test_util.test_fail("test billing fail,maybe can not calculate when vm %s" %(status))	
+#	else:
+#		if prices1.total <= prices.total:
+#			test_util.test_fail("test billing fail,maybe can not calculate when vm %s" %(status))
 
 def get_resource_from_vmm(resource_type,zone_uuid,host_uuid_from_vmm):
 	cond = res_ops.gen_query_conditions('zoneUuid', '=', zone_uuid)

@@ -45,7 +45,7 @@ def test():
 	if bill_cpu.get_price().total < 5:
 		test_util.test_fail("calculate cpu cost fail,actual result is %s" %(bill_cpu.get_price().total))
 	vm.clean()
-	#test_util.test_logger("antony @@@debug uuid is %s" %(bill_cpu.get_uuid()))
+#	test_util.test_logger("antony @@@debug uuid is %s" %(bill_cpu.get_uuid()))
 	bill_cpu.delete_resource()
 	test_util.test_pass("check cpu billing pass")
 
