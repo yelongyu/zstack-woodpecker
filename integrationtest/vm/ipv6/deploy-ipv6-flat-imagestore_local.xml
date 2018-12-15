@@ -75,25 +75,11 @@
   </backupStorages>
 
   <images>
-    <image name="$imageName_s" 
-      description="Small Test Image Template" 
+    <image name="$ipv6ImageName"
+      description="Test Image for IPv6"
       mediaType="$rootMediaType" format="$rootImageFormat"
-      url="$imageUrl_s" 
+      url="$ipv6ImageUrl"
       username="$imageUsername" password="$imagePassword">
-      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
-    </image>
-    <image name="$imageName_net" 
-      description="Test Image Template for network test" 
-      mediaType="$rootMediaType" format="$rootImageFormat"
-      url="$imageUrl_net" 
-      username="$imageUsername" password="$imagePassword">
-      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
-    </image>
-    <image name="$virtualRouterImageName" 
-      description="virtual router image" 
-      mediaType="$rootMediaType" format="$rootImageFormat" 
-      username="$vrImageUsername" password="$vrImagePassword"
-      url="$virtualRouterImageUrl" system="True">
       <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
     </image>
   </images>

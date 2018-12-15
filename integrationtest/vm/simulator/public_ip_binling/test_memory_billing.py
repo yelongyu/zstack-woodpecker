@@ -21,41 +21,36 @@ vm = None
 count = 400
 
 def test():
-	test_util.test_logger("start cpu billing")
-	test_util.test_logger("create man cpu billing instantiation")
-	bill_cpu = test_stub.CpuBilling()
+	test_util.test_logger("start memory billing")
+	test_util.test_logger("create man memory billing instantiation")
+	bill_memory = test_stub.MemoryBilling()
 
-	test_util.test_logger("loop 400 to create cpu billing")
-	test_stub.create_option_billing(bill_cpu, count)
+	test_util.test_logger("loop 400 to create memory billing")
+	test_stub.create_option_billing(bill_memory, count)
 	
-	test_util.test_logger("verify cpu billing instantiation if is right,and then delete all")
+	test_util.test_logger("verify memory billing instantiation if is right,and then delete all")
 	test_stub.verify_option_billing(count)
 	
-	test_util.test_logger("create cpu billing instantiation")
-        bill_cpu.set_timeUnit("s")
-	bill_cpu.set_price("5")
-	bill_cpu.create_resource_type()
+	test_util.test_logger("create memory billing instantiation")
+        bill_memory.set_timeUnit("s")
+	bill_memory.set_price("5")
+	bill_memory.create_resource_type()
 	test_util.test_logger("create vm instance")
         
 	global vm
         vm = test_stub.create_vm_billing("test_vmm", test_stub.set_vm_resource()[0], None,\
 						test_stub.set_vm_resource()[1], test_stub.set_vm_resource()[2])
-#	test_util.test_logger("antony @@@@debug price is %s " %(bill_cpu.get_price().total))	
 	time.sleep(1)
-	if bill_cpu.get_price().total < 5:
-		test_util.test_fail("calculate cpu cost fail,actual result is %s" %(bill_cpu.get_price().total))
+#	test_util.test_logger("antony @@@@debug price is %s " %(bill_memory.get_price().total))	
+	if bill_memory.get_price().total < 2.5:
+		test_util.test_fail("calculate memory cost fail,actual result is %s" %(bill_memory.get_price().total))
 	vm.clean()
-#	test_util.test_logger("antony @@@debug uuid is %s" %(bill_cpu.get_uuid()))
-	bill_cpu.delete_resource()
-	test_util.test_pass("check cpu billing pass")
+#	test_util.test_logger("antony @@@debug uuid is %s" %(bill_memory.get_uuid()))
+	bill_memory.delete_resource()
+	test_util.test_pass("check memory billing pass")
 
 def error_cleanup():
 	global vm
 	if vm:
 		vm.clean()
-			
-		
-
-
-	
 
