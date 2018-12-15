@@ -10,7 +10,11 @@ import zstackwoodpecker.operations.deploy_operations as deploy_operations
 import zstackwoodpecker.operations.config_operations as config_operations
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
+import zstacklib.utils.http as  http
+import zstacklib.utils.linux as linux
 import zstacklib.utils.shell as shell
+import zstacktestagent.plugins.host as host_plugin
+import zstacktestagent.testagent as testagent
 import test_stub
 
 USER_PATH = os.path.expanduser('~')
@@ -26,7 +30,33 @@ def test():
     test_lib.setup_plan.deploy_test_agent()
     test_lib.setup_plan.execute_plan_without_deploy_test_agent()
 
+    #Suite setup for mnha2 scenario
     if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-mnha2.xml":
+        nic_name = "eth0"
+        if test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
+            nic_name = "zsn0"
+    
+        #This vlan creation is not a must, if testing is under nested virt env. But it is required on physical host without enough physcial network devices and your test execution machine is not the same one as Host machine.
+        #no matter if current host is a ZStest host, we need to create 2 vlan devs for future testing connection for novlan test cases.
+        linux.create_vlan_eth(nic_name, 10)
+        linux.create_vlan_eth(nic_name, 11)
+    
+        #If test execution machine is not the same one as Host machine, deploy work is needed to separated to 2 steps(deploy_test_agent, execute_plan_without_deploy_test_agent). And it can not directly call SetupAction.run()
+        test_lib.setup_plan.deploy_test_agent()
+        cmd = host_plugin.CreateVlanDeviceCmd()
+        cmd.ethname = nic_name
+        cmd.vlan = 10
+    
+        cmd2 = host_plugin.CreateVlanDeviceCmd()
+        cmd2.ethname = nic_name
+        cmd2.vlan = 11
+        testHosts = test_lib.lib_get_all_hosts_from_plan()
+        if type(testHosts) != type([]):
+            testHosts = [testHosts]
+        for host in testHosts:
+            http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd)
+            http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd2)
+
         test_stub.deploy_2ha(test_lib.all_scenario_config, test_lib.scenario_file)
         mn_ip1 = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, 0).ip_
         mn_ip2 = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, 1).ip_
