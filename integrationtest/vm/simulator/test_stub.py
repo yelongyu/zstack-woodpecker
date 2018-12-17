@@ -983,7 +983,7 @@ to be define
 '''
 class GPUBilling(Billing):
         def __init__(self):
-                super(PublicIpBilling, self).__init__()
+                super(GPUBilling, self).__init__()
 
 def set_vm_resource():
 	imageUuid = res_ops.query_resource_fields(res_ops.IMAGE, \
