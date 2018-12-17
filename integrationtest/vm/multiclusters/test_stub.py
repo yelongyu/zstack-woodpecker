@@ -253,7 +253,7 @@ class DataMigration(object):
             else:
                 assert origin_meta.size >= vol_size
             assert 'rbd_data' in origin_meta.block_name_prefix
-            ps_trash = ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid).storageTrashes
+            ps_trash = ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid).storageTrashSpecs
             trash_install_path_list = [trsh.installPath for trsh in ps_trash]
             assert vol_installPath in trash_install_path_list
         else:
@@ -293,10 +293,7 @@ class DataMigration(object):
 
     def clean_up_ps_trash_and_check(self):
         ps_ops.clean_up_trash_on_primary_storage(self.origin_ps.uuid)
-        if self.origin_ps.type == 'Ceph':
-            assert not ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid).storageTrashes
-        else:
-            assert not ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid).storageTrashSpecs
+        assert not ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid).storageTrashSpecs
         try:
             shell.call(self.chk_cmd)
         except Exception as e:
