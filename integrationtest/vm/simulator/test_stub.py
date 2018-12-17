@@ -20,7 +20,6 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.operations.vpc_operations as vpc_ops
 import zstackwoodpecker.operations.net_operations as net_ops
-import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
 import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
 import zstackwoodpecker.zstack_test.zstack_test_eip as zstack_eip_header
 import zstackwoodpecker.zstack_test.zstack_test_image as test_image
@@ -928,9 +927,12 @@ class RootVolumeBilling(Billing):
 
 class DataVolumeBilling(Billing):
         def __init__(self):
-                super(RootVolumeBilling, self).__init__()
+                super(DataVolumeBilling, self).__init__()
                 self.resourceName = "dataVolume"
                 self.resourceUnit = "G"
+		self.uuid = None
+		self.volume = None
+		self.disk = None
 
         def set_resourceUnit(self,resourceUnit):
                 self.resourceUnit = resourceUnit
@@ -938,9 +940,44 @@ class DataVolumeBilling(Billing):
         def get_resourceUnit(self):
                 return self.resourceUnit
 
-        def create_resource_type(self):
-                return bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit)
+	def create_resource_type(self):
+		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit)
+		self.uuid = evt.uuid
+		return evt
 
+	def delete_resource(self):
+		return bill_ops.delete_resource_price(self.uuid)
+
+	def compare(self,status):
+		prices = super(RootVolumeBilling, self).get_price_total()
+                time.sleep(1)
+                prices1 = super(RootVolumeBilling, self).get_price_total()
+                if status == "clean":
+                        if prices1.total != prices.total:
+                                test_util.test_fail("test billing fail,maybe can not calculate when vm %s" \
+                                        %(status))
+                else:
+                        if prices1.total <= prices.total:
+                                test_util.test_fail("test billing fail,maybe can not calculate when vm %s"\
+                                        %(status))
+	
+	def create_volume_and_attach_vmm(self,disk_offering_uuid,volume_name,vm_instance):
+		volume = test_volume.ZstackTestVolume()
+		volume.volume_creation_option.set_disk_offering_uuid(disk_offering_uuid)
+		volume.volume_creation_option.set_name(volume_name)
+		volume.create()
+		time.sleep(1)
+		volume.attach(vm_instance)
+		self.volume = volume
+		return volume.volume
+	
+	def create_disk_offer(self,diskSize,disk_name):
+		disk_offer = test_util.DiskOfferingOption()
+		disk_offer.set_diskSize(diskSize)
+		disk_offer.set_name(disk_name)
+		self.disk = disk_offer		
+		return vol_ops.create_volume_offering(disk_offer)
+		
 class PublicIpBilling(Billing):
 	def __init__(self):
 		super(PublicIpBilling, self).__init__()
@@ -1056,7 +1093,7 @@ def verify_option_billing(billing_count):
 		if len(resourcePrices) == billing_count:
                         break
                 if  i == 4 and len(resourcePrices) != billing_count:
-                        test_util.test_fail("create %s cpu billing fail ,actual create is %s" %(billing_count,len(resourcePrices)))
+                        test_util.test_fail("create %s  billing fail ,actual create is %s" %(billing_count,len(resourcePrices)))
                 time.sleep(3)
 	for resourceprice in resourcePrices:
 		delete_price(resourceprice.uuid)
