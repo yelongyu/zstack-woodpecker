@@ -253,7 +253,7 @@ class DataMigration(object):
             else:
                 assert origin_meta.size >= vol_size
             assert 'rbd_data' in origin_meta.block_name_prefix
-            ps_trash = ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid).storageTrashes
+            ps_trash = ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid).storageTrashSpecs
             trash_install_path_list = [trsh.installPath for trsh in ps_trash]
             assert vol_installPath in trash_install_path_list
         else:
