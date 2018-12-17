@@ -293,10 +293,7 @@ class DataMigration(object):
 
     def clean_up_ps_trash_and_check(self):
         ps_ops.clean_up_trash_on_primary_storage(self.origin_ps.uuid)
-        if self.origin_ps.type == 'Ceph':
-            assert not ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid).storageTrashes
-        else:
-            assert not ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid).storageTrashSpecs
+        assert not ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid).storageTrashSpecs
         try:
             shell.call(self.chk_cmd)
         except Exception as e:
