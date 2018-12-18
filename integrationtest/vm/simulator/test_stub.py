@@ -949,10 +949,10 @@ class DataVolumeBilling(Billing):
 		return bill_ops.delete_resource_price(self.uuid)
 
 	def compare(self,status):
-		prices = super(RootVolumeBilling, self).get_price_total()
+		prices = super(DataVolumeBilling, self).get_price_total()
                 time.sleep(1)
-                prices1 = super(RootVolumeBilling, self).get_price_total()
-                if status == "clean":
+                prices1 = super(DataVolumeBilling, self).get_price_total()
+                if status == "volume_clean":
                         if prices1.total != prices.total:
                                 test_util.test_fail("test billing fail,maybe can not calculate when vm %s" \
                                         %(status))
