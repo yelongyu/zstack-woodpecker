@@ -496,6 +496,13 @@ def recover_vlan_in_host(host_ip, scenarioConfig, deploy_config):
                     test_lib.lib_execute_ssh_cmd(host_ip, host_config.imageUsername_, host_config.imagePassword_, cmd)
     return True
 
+def wrapper_of_wait_for_management_server_start(wait_start_timeout, EXTRA_SUITE_SETUP_SCRIPT=None):
+    import zstackwoodpecker.operations.node_operations as node_operations
+    try:
+        node_operations.wait_for_management_server_start(wait_start_timeout)
+    except:
+        restart_mn_node_with_long_timeout()
+
 def deploy_2ha(scenarioConfig, scenarioFile):
     mn_ip1 = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, 0).ip_
     mn_ip2 = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, 1).ip_
