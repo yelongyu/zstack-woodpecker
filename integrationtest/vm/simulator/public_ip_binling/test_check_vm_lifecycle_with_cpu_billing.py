@@ -89,3 +89,12 @@ def error_cleanup():
 	if vm:
 		vm.clean()
 
+def env_recover():
+        global vm
+        if vm:
+                vm.clean()
+        resourcePrices = test_stub.query_resource_price()
+        if resourcePrices:
+                for resourceprice in resourcePrices:
+                        test_stub.delete_price(resourceprice.uuid)
+
