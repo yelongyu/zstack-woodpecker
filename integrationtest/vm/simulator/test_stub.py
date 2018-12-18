@@ -1056,7 +1056,7 @@ def get_resource_from_vmm(resource_type,zone_uuid = None,host_uuid_from_vmm = No
 		return judge_PrimaryStorage(resource_list)
 	if resource_type == "Host":
 		return judge_HostResource(resource_list,host_uuid_from_vmm)
-	if resource_type == "BackupStorage"
+	if resource_type == "BackupStorage":
 		return judge_BackStorage(resource_list)
 
 def judge_PrimaryStorage(PrimaryStorageSource):
@@ -1080,7 +1080,7 @@ def judge_BackStorage(BackStorageSource):
 	flag = 0
 	for backstorage in BackStorageSource:
 		test_util.test_logger("backstorage uuid is %s" %(backstorage))
-		if backstorage.type == "ImageStoreBackupStorage" and backstorage.type == "CephBackupStorage":
+		if backstorage.type == "ImageStoreBackupStorage" or backstorage.type == "CephBackupStorage":
 			flag = 1
 	return flag
 

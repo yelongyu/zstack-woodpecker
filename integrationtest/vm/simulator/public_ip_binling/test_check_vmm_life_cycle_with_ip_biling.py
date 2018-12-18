@@ -77,10 +77,9 @@ def test():
 			bill_ip.compare("migration")
 		else:
 			test_util.test_fail("test bill fail, maybe can not calculate when vm live migration")
-
 	BackStorageFlag = test_stub.get_resource_from_vmm(res_ops.BACKUP_STORAGE)
 	if BackStorageFlag == 1:
-		clone = vm.clone("clone-1")	
+		clone = vm.clone(["clone-1"])
 		vm.clean()
 		bill_ip.compare("clone")
 		clone[0].clean()
