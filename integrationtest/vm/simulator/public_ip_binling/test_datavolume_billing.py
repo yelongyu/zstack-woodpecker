@@ -11,6 +11,7 @@ import zstackwoodpecker.operations.billing_operations as bill_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.net_operations as net_ops
+import zstackwoodpecker.operations.volume_operations as vol_ops
 import threading
 import time
 import os
@@ -18,7 +19,7 @@ import os
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 vm = None
-count = 10
+count = 400
 
 def test():
 	test_util.test_logger("start data volume billing")
@@ -47,28 +48,34 @@ def test():
 	test_util.test_logger("antony @@@@debug %s" %(bill_datavolume.disk.get_name()))
 	dataVolumeSize = res_ops.query_resource(res_ops.DISK_OFFERING, \
 					res_ops.gen_query_conditions('name', '=',\
-			                        bill_datavolume.disk.get_name())).diskSize / 1024 / float(1024)
-#	test_util.test_logger("antony @@@@debug %s" %(dataVolumeSize))
-#
-#	time.sleep(1)
-#	if bill_datavolume.get_price_total().total < dataVolumeSize * int(bill_datavolume.get_price()):
-#		test_util.test_fail("calculate data volume cost fail,actual result is %s" %(bill_datavolume.get_price_total().total))
-#	vm.clean()
-#
-#	bill_datavolume.delete_resource()
-#	test_util.test_pass("check data volume billing pass")
+			                        bill_datavolume.disk.get_name()))[0].diskSize / 1024 / float(1024)
+	test_util.test_logger("antony @@@@debug %s" %(dataVolumeSize))
 
-#def error_cleanup():
-#	global vm
-#	if vm:
-#		vm.clean()
-#
-#def env_recover():
-#	global vm
-#	if vm:
-#		vm.clean()
-#	resourcePrices = test_stub.query_resource_price()
-#	if resourcePrices:
-#		for resourceprice in resourcePrices:
-#			test_stub.delete_price(resourceprice.uuid)
+	time.sleep(1)
+	if bill_datavolume.get_price_total().total < dataVolumeSize * int(bill_datavolume.get_price()):
+		test_util.test_fail("calculate data volume cost fail,actual result is %s" %(bill_datavolume.get_price_total().total))
+	vm.clean()
+	time.sleep(1)		
+	test_util.test_logger("delete data volume")
+	bill_datavolume.volume.clean()
+	
+	test_util.test_logger("delete disk offering")
+	vol_ops.delete_disk_offering(disk_offering_uuid)
 
+	test_util.test_logger("delete bill resource")
+	bill_datavolume.delete_resource()
+	test_util.test_pass("check data volume billing pass")
+
+def error_cleanup():
+	global vm
+	if vm:
+		vm.clean()
+
+def env_recover():
+	global vm
+	if vm:
+		vm.clean()
+	resourcePrices = test_stub.query_resource_price()
+	if resourcePrices:
+		for resourceprice in resourcePrices:
+			test_stub.delete_price(resourceprice.uuid)
