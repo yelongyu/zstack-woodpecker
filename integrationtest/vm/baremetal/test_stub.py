@@ -496,8 +496,88 @@ def recover_vlan_in_host(host_ip, scenarioConfig, deploy_config):
                     test_lib.lib_execute_ssh_cmd(host_ip, host_config.imageUsername_, host_config.imagePassword_, cmd)
     return True
 
+def restart_mn_node_with_long_timeout():
+
+    mn_ip = os.environ['zstackHaVip']
+
+    test_lib.lib_wait_target_up(mn_ip, '22', 120)
+
+    cmd = "zstack-ctl status|grep 'MN status'|awk '{print $3}'"
+    ret, stdout, stderr = ssh.execute(cmd, mn_ip, "root", "password", False, 22)
+
+    if stdout.strip().strip('\n').lower() != "running":
+
+        check_mn_tool_path = "%s/%s" %(os.environ.get('woodpecker_root_path'), '/tools/check_mn_start.sh')
+        test_util.test_logger("check_mn_tool_path:[%s],mn_ip:[%s]" %(check_mn_tool_path, mn_ip))
+        ssh.scp_file(check_mn_tool_path, "/home/check_mn_start.sh", mn_ip, "root", "password")
+
+        cmd = "bash /home/check_mn_start.sh"
+        ret1, stdout1, stderr1 = ssh.execute(cmd, mn_ip, "root", "password", False, 22)
+        test_util.test_logger("check_mn_start.sh stdout1:[%s],stderr1:[%s]" %(stdout1,stderr1))
+
+        if str(ret1) == "0" :
+            cmd = "zstack-ctl stop"
+            ret, stdout, stderr = ssh.execute(cmd, mn_ip, "root", "password", True, 22)
+            cmd = "zstack-ctl configure ThreadFacade.maxThreadNum=200"
+            ret, stdout, stderr = ssh.execute(cmd, mn_ip, "root", "password", True, 22)
+            cmd = "zstack-ctl start_node --timeout 3000"
+            ret, stdout, stderr = ssh.execute(cmd, mn_ip, "root", "password", True, 22)
+            cmd = "zstack-ctl start_ui"
+            ret, stdout, stderr = ssh.execute(cmd, mn_ip, "root", "password", True, 22)
+
+            #modify zstack start script
+            cmd = r'sed -i "s:zstack-ctl start:zstack-ctl start_node --timeout 3000:g" /etc/init.d/zstack-server'
+            test_lib.lib_execute_ssh_cmd(mn_ip, "root", "password", cmd)
+            time.sleep(1)
+            cmd = r'sed -i "/zstack-ctl start_node --timeout 3000/ a\    ZSTACK_HOME=\$zstack_app zstack-ctl start_ui" /etc/init.d/zstack-server'
+            test_lib.lib_execute_ssh_cmd(mn_ip, "root", "password", cmd)
+
+        else:
+            test_util.test_logger("find mn not self-started as expected, checked by /home/check_mn_start.sh")
+
+    else:
+        test_util.test_logger("find zstack MN is running.")
+
+def auto_set_mn_ip(scenario_file):
+    import re
+    host_ip_lst = sce_ops.dump_scenario_file_ips(scenario_file)
+    host_ip = host_ip_lst[0]
+    #for i in range(60):
+    #    time.sleep(10)
+    #    #cmd = "zsha status|head -n 2|tail -n 1|cut -d: -f1"
+    #    cmd = "zsha status|head -n 5|grep -v stale|grep running|tail -n 1|cut -d: -f1"
+    #    test_util.test_logger("@@@DEBUG->cmd=<%s>;host_ip=<%s>" %(cmd, host_ip))
+    #    ret, mn_host_ip, stderr = ssh.execute(cmd, host_ip, "root", "password", False, 22)
+    #    if re.match(r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$", mn_host_ip):
+    #        test_util.test_logger("find mn_host_ip=%s" %(mn_host_ip))
+    #        break
+    #else:
+    #    test_util.test_fail("not find valid mn_host_ip within 300s")
+
+    mn_host_ip_lst = mn_host_ip.split('.')
+    mn_host_ip_lst[3] = '200'
+    mn_ip = '.'.join(mn_host_ip_lst)
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mn_ip
+    os.environ['zstackHaVip'] = mn_ip
+    test_util.test_logger("@@@DEBUG->in auto_set_mn_ip@@@ os\.environ\[\'ZSTACK_BUILT_IN_HTTP_SERVER_IP\'\]=%s; os\.environ\[\'zstackHaVip\'\]=%s"      \
+                          %(os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'], os.environ['zstackHaVip']) )
+    cmd = 'sed -i "s/zstackHaVip = .*$/zstackHaVip = %s/g" /root/.zstackwoodpecker/integrationtest/vm/mn_ha/deploy.tmpt' %(mn_ip)
+    test_util.test_logger("@@@DEBUG->replace zstackHaVip @@@: %s" %cmd)
+    os.system(cmd)
+
+
 def wrapper_of_wait_for_management_server_start(wait_start_timeout, EXTRA_SUITE_SETUP_SCRIPT=None):
     import zstackwoodpecker.operations.node_operations as node_operations
+    if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-mnha2.xml":
+        test_util.test_logger("@@@DEBUG->IS MNHA2@@@")
+        if os.environ.get('zstackHaVip'):
+            old_mn_ip = os.environ['zstackHaVip']
+        auto_set_mn_ip(test_lib.scenario_file)
+        if EXTRA_SUITE_SETUP_SCRIPT and EXTRA_SUITE_SETUP_SCRIPT != "":
+            cmd = 'sed -i "s/%s/%s/g" %s' %(old_mn_ip, os.environ['zstackHaVip'], EXTRA_SUITE_SETUP_SCRIPT)
+            test_util.test_logger("@@@DEBUG-> run cmd: %s @@@ " %(cmd))
+            os.system(cmd)
+
     try:
         node_operations.wait_for_management_server_start(wait_start_timeout)
     except:

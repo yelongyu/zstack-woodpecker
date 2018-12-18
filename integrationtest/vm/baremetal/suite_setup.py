@@ -13,6 +13,7 @@ import zstackwoodpecker.test_util as test_util
 import zstacklib.utils.http as  http
 import zstacklib.utils.linux as linux
 import zstacklib.utils.shell as shell
+import zstacklib.utils.ssh as ssh
 import zstacktestagent.plugins.host as host_plugin
 import zstacktestagent.testagent as testagent
 import test_stub
