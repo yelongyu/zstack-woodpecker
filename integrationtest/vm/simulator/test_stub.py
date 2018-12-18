@@ -1046,14 +1046,18 @@ def create_vm_billing(name, image_uuid, host_uuid, instance_offering_uuid, l3_uu
 	vm.create()
 	return vm
 
-def get_resource_from_vmm(resource_type,zone_uuid,host_uuid_from_vmm):
-	cond = res_ops.gen_query_conditions('zoneUuid', '=', zone_uuid)
+def get_resource_from_vmm(resource_type,zone_uuid = None,host_uuid_from_vmm = None):
+	if zone_uuid:
+		cond = res_ops.gen_query_conditions('zoneUuid', '=', zone_uuid)
+	else:
+		cond = res_ops.gen_query_conditions('name', '!=', 'NULL')
         resource_list = res_ops.query_resource(resource_type, cond)
 	if resource_type == "PrimaryStorage":
 		return judge_PrimaryStorage(resource_list)
 	if resource_type == "Host":
 		return judge_HostResource(resource_list,host_uuid_from_vmm)
-	
+	if resource_type == "BackupStorage"
+		return judge_BackStorage(resource_list)
 
 def judge_PrimaryStorage(PrimaryStorageSource):
 	flag = 0
@@ -1071,6 +1075,15 @@ def judge_HostResource(HostSource,host_uuid):
 			return host.uuid
 		else:
 			return None
+
+def judge_BackStorage(BackStorageSource):
+	flag = 0
+	for backstorage in BackStorageSource:
+		test_util.test_logger("backstorage uuid is %s" %(backstorage))
+		if backstorage.type == "ImageStoreBackupStorage" and backstorage.type == "CephBackupStorage":
+			flag = 1
+	return flag
+
 '''
 create many billing instantiation
 '''

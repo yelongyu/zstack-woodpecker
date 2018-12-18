@@ -67,8 +67,7 @@ def test():
 
 	test_util.test_logger("get host total and primarystorge type")
 	Host_uuid = test_stub.get_resource_from_vmm(res_ops.HOST,vm.get_vm().zoneUuid,vm.get_vm().hostUuid)
-	PrimaryFlag = test_stub.get_resource_from_vmm(res_ops.PRIMARY_STORAGE,vm.get_vm().zoneUuid,\
-										vm.get_vm().hostUuid)
+	PrimaryFlag = test_stub.get_resource_from_vmm(res_ops.PRIMARY_STORAGE,vm.get_vm().zoneUuid)
 	if Host_uuid  and PrimaryFlag == 0:
 		test_util.test_logger("migration vm instance")
 		prices = bill_ip.get_price_total()
@@ -79,9 +78,16 @@ def test():
 		else:
 			test_util.test_fail("test bill fail, maybe can not calculate when vm live migration")
 
-	test_util.test_logger("clean vm instance")
-	vm.clean()
-	bill_ip.compare("clean")
+	BackStorageFlag = test_stub.get_resource_from_vmm(res_ops.BACKUP_STORAGE)
+	if BackStorageFlag == 1:
+		clone = vm.clone("clone-1")	
+		vm.clean()
+		bill_ip.compare("clone")
+		clone[0].clean()
+	else:	
+		test_util.test_logger("clean vm instance")
+		vm.clean()
+		bill_ip.compare("clean")
 	
 	test_util.test_logger("delete  public ip resource")
 	resourcePrices = test_stub.query_resource_price()
@@ -89,7 +95,6 @@ def test():
 		test_stub.delete_price(resource_price.uuid)
 
 	test_util.test_pass("check vm lifecycle with public ip billing pass")
-
 
 def error_cleanup():
 	global vm
