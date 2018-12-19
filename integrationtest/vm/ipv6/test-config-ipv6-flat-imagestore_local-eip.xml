@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-ipv6-flat-imagestore_local-eip.xml</deployConfig>
+    <deployConfigTemplate>deploy-ipv6-flat-imagestore_local.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
