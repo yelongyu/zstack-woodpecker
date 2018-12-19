@@ -20,8 +20,15 @@
 	<case timeout='600' repeat='1' >config/test_config_category_loadbalancer.py</case>
 	<case timeout='600' repeat='1' >config/test_config_category_primarystorage.py</case>
 	<case timeout='600' repeat='1' >config/test_config_category_sharedblock.py</case>
-	<case timeout='600' repeat='1' >public_ip_binling/test_public_ip_biling.py</case>
-	<case timeout='600' repeat='1' >public_ip_binling/test_check_vmm_life_cycle_with_ip_biling.py</case>
-	<case timeout='600' repeat='1' >public_ip_binling/test_cpu_billing.py</case>
+	<case timeout='600' repeat='1' >public_billing/test_public_ip_biling.py</case>
+	<case timeout='600' repeat='1' >public_billing/test_cpu_billing.py</case>
+	<case timeout='600' repeat='1' >public_billing/test_memory_billing.py</case>
+	<case timeout='600' repeat='1' >public_billing/test_rootvolume_billing.py</case>
+	<case timeout='600' repeat='1' >public_billing/test_datavolume_billing.py</case>
+	<case timeout='600' repeat='1' >public_billing/test_check_vmm_life_cycle_with_ip_biling.py</case>
+	<case timeout='600' repeat='1' >public_billing/test_check_vm_lifecycle_with_cpu_billing.py</case>
+	<case timeout='600' repeat='1' >public_billing/test_check_vm_lifecycle_with_memory_billing.py</case>
+	<case timeout='600' repeat='1' >public_billing/test_check_vm_lifecycle_with_rootvolume_billing.py</case>
+	<case timeout='600' repeat='1' >public_billing/test_check_vm_lifecycle_with_datavolume_billing.py</case>
     </suite>
 </integrationTest>
