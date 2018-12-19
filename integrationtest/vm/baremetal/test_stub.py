@@ -539,24 +539,21 @@ def restart_mn_node_with_long_timeout():
         test_util.test_logger("find zstack MN is running.")
 
 def auto_set_mn_ip(scenario_file):
-    import re
     host_ip_lst = sce_ops.dump_scenario_file_ips(scenario_file)
     host_ip = host_ip_lst[0]
-    #for i in range(60):
-    #    time.sleep(10)
-    #    #cmd = "zsha status|head -n 2|tail -n 1|cut -d: -f1"
-    #    cmd = "zsha status|head -n 5|grep -v stale|grep running|tail -n 1|cut -d: -f1"
-    #    test_util.test_logger("@@@DEBUG->cmd=<%s>;host_ip=<%s>" %(cmd, host_ip))
-    #    ret, mn_host_ip, stderr = ssh.execute(cmd, host_ip, "root", "password", False, 22)
-    #    if re.match(r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$", mn_host_ip):
-    #        test_util.test_logger("find mn_host_ip=%s" %(mn_host_ip))
-    #        break
-    #else:
-    #    test_util.test_fail("not find valid mn_host_ip within 300s")
+    for i in range(60):
+        time.sleep(10)
+        #cmd = "zsha2 status |grep -B 2 'Owns virtual address: *yes'|grep 'Status report from'|awk -F' ' '{print $4}'"
+        cmd = "zsha2 status|grep VIP|head -n 1|awk -F' ' '{print $2}'"
+        test_util.test_logger("@@@DEBUG->cmd=<%s>;host_ip=<%s>" %(cmd, host_ip))
+        ret, mn_vip, stderr = ssh.execute(cmd, host_ip, "root", "password", False, 22)
+        if re.match(r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$", mn_vip):
+            test_util.test_logger("find mn_host_ip=%s" %(mn_vip))
+            break
+    else:
+        test_util.test_fail("not find valid mn_host_ip within 300s")
 
-    mn_host_ip_lst = mn_host_ip.split('.')
-    mn_host_ip_lst[3] = '200'
-    mn_ip = '.'.join(mn_host_ip_lst)
+    mn_ip = mn_vip.strip()
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mn_ip
     os.environ['zstackHaVip'] = mn_ip
     test_util.test_logger("@@@DEBUG->in auto_set_mn_ip@@@ os\.environ\[\'ZSTACK_BUILT_IN_HTTP_SERVER_IP\'\]=%s; os\.environ\[\'zstackHaVip\'\]=%s"      \
@@ -564,7 +561,6 @@ def auto_set_mn_ip(scenario_file):
     cmd = 'sed -i "s/zstackHaVip = .*$/zstackHaVip = %s/g" /root/.zstackwoodpecker/integrationtest/vm/mn_ha/deploy.tmpt' %(mn_ip)
     test_util.test_logger("@@@DEBUG->replace zstackHaVip @@@: %s" %cmd)
     os.system(cmd)
-
 
 def wrapper_of_wait_for_management_server_start(wait_start_timeout, EXTRA_SUITE_SETUP_SCRIPT=None):
     import zstackwoodpecker.operations.node_operations as node_operations
@@ -577,7 +573,6 @@ def wrapper_of_wait_for_management_server_start(wait_start_timeout, EXTRA_SUITE_
             cmd = 'sed -i "s/%s/%s/g" %s' %(old_mn_ip, os.environ['zstackHaVip'], EXTRA_SUITE_SETUP_SCRIPT)
             test_util.test_logger("@@@DEBUG-> run cmd: %s @@@ " %(cmd))
             os.system(cmd)
-
     try:
         node_operations.wait_for_management_server_start(wait_start_timeout)
     except:
