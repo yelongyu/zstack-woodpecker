@@ -1,6 +1,9 @@
 <integrationTest>
     <suite name="multi hosts test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
         <case timeout='300' repeat='1'>test_create_vm.py</case>
+        <case timeout='600' repeat='1'>test_prometheus.py</case>
+        <case timeout='600' repeat='1'>test_pkg_list.py</case>
+        <case timeout='600' repeat='1'>test_chrony.py</case>
         <case timeout='300' repeat='1'>test_create_iso_vm.py</case>
         <case timeout='600' repeat='1'>test_imagecache_size.py</case>
         <case timeout='600' repeat='1'>test_imagecache_size2.py</case>
@@ -108,8 +111,5 @@
         <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_vr.py::kill_virtualrouter_agent</case>
         <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_vr.py::kill_vrouter_agent</case>
         <case timeout='600' repeat='1'>test_instance_offering_soft_hard.py</case>
-        <case timeout='600' repeat='1'>test_prometheus.py</case>
-        <case timeout='600' repeat='1'>test_pkg_list.py</case>
-        <case timeout='600' repeat='1'>test_chrony.py</case>
     </suite>
 </integrationTest>
