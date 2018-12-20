@@ -34,6 +34,7 @@ class TestAction(object):
     expunge_vm = 'expunge_vm'
 
     create_volume = 'create_volume'
+    create_scsi_volume = 'create_scsi_volume'
     attach_volume = 'attach_volume'
     delete_volume = 'delete_volume'
     detach_volume = 'detach_volume'
@@ -84,7 +85,7 @@ class TestAction(object):
     vm_actions = [create_vm, stop_vm, start_vm, reboot_vm, destroy_vm, \
             migrate_vm, expunge_vm]
 
-    volume_actions = [create_volume, attach_volume, delete_volume, \
+    volume_actions = [create_scsi_volume, create_volume, attach_volume, delete_volume, \
             detach_volume, create_data_vol_template_from_volume, expunge_volume]
 
     image_actions = [create_image_from_volume, delete_image, \
@@ -251,7 +252,7 @@ class TestStage(object):
 
     #state transition table for vm_state, volume_state and image_state
     normal_action_transition_table = {
-        Any: [ta.create_vm, ta.create_volume, ta.idel], 
+        Any: [ta.create_vm, ta.create_scsi_volume, ta.create_volume, ta.idel], 
     20002: [ta.stop_vm, ta.reboot_vm, ta.destroy_vm, ta.migrate_vm],
     30002: [ta.stop_vm, ta.reboot_vm, ta.destroy_vm],
     20003: [ta.start_vm, ta.destroy_vm, ta.create_data_vol_template_from_volume], 

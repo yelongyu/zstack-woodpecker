@@ -2834,7 +2834,7 @@ def lib_create_volume_from_offering(volume_creation_option=test_util.VolumeOptio
     volume.create()
 
     return volume
-          
+
 def lib_delete_volume(volume_uuid, session_uuid=None):
     result = vol_ops.delete_volume(volume_uuid, session_uuid)
     test_util.test_logger('[volume] uuid: %s is deleted.' % volume_uuid)
@@ -4578,6 +4578,16 @@ into robot_test_obj.exclusive_actions_list.')
     elif next_action == TestAction.create_volume :
         test_util.test_dsc('Robot Action: %s ' % next_action)
         new_volume = lib_create_volume_from_offering()
+        test_dict.add_volume(new_volume)
+
+        test_util.test_dsc('Robot Action Result: %s; new Volume: %s' % \
+            (next_action, new_volume.get_volume().uuid))
+
+    elif next_action == TestAction.create_scsi_volume :
+        test_util.test_dsc('Robot Action: %s ' % next_action)
+        volume_option = test_util.VolumeOption()
+        volume_option.set_system_tags("capability::virtio-scsi")
+        new_volume = lib_create_volume_from_offering(volume_option)
         test_dict.add_volume(new_volume)
 
         test_util.test_dsc('Robot Action Result: %s; new Volume: %s' % \
