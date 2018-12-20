@@ -606,8 +606,9 @@ def deploy_2ha(scenarioConfig, scenarioFile):
 
     cmd = '/root/zsha2 install-ha -nic br_zsn0 -gateway 172.20.0.1 -slave "root:password@' + mn_ip2 + '" -vip ' + vip + ' -time-server ' + node3_ip + ' -db-root-pw zstack.mysql.password -yes'
     test_util.test_logger("deploy 2ha by cmd: %s" %(cmd))
-    ret, output, stderr = ssh.execute(cmd, mn_ip1, "root", "password", False, 22)
-    test_util.test_logger("cmd=%s; ret=%s; output=%s; stderr=%s" %(cmd, ret, output, stderr))
-    if ret!=0:
-        test_util.test_fail("deploy 2ha failed")
-
+    ssh_cmd = 'sshpass -p password ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null'
+    if shell.run("%s %s zsha2 status" %(ssh_cmd, mn_ip1)) != 0:
+        ret, output, stderr = ssh.execute(cmd, mn_ip1, "root", "password", False, 22)
+        test_util.test_logger("cmd=%s; ret=%s; output=%s; stderr=%s" %(cmd, ret, output, stderr))
+        if ret!=0:
+            test_util.test_fail("deploy 2ha failed")
