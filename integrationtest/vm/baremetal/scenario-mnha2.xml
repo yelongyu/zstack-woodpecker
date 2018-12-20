@@ -53,6 +53,7 @@
               <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
             </l3Network>
           </l3Networks>
+          <hostRef>$hostName</hostRef>
           <mnHostRef>$hostName</mnHostRef>
           <mHaHostRef>$hostName</mHaHostRef>
         </vm>
@@ -64,6 +65,7 @@
               <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
             </l3Network>
           </l3Networks>
+          <hostRef>$hostName2</hostRef>
           <mnHostRef>$hostName2</mnHostRef>
           <mHaHostRef>$hostName2</mHaHostRef>
         </vm>
