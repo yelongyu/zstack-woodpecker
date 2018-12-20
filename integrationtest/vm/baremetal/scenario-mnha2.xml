@@ -81,6 +81,7 @@
               <l2NetworkRef>$scenl2VlanNetworkName1</l2NetworkRef>
              </l3Network>
           </l3Networks>
+          <hostRef>$hostName2</hostRef>
         </vm>
         <vm name="$vmName4" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2"
           imageUuid="$imageUuid" imageUsername="$imageUsername" imagePassword="$imagePassword">
