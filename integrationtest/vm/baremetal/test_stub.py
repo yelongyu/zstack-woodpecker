@@ -612,3 +612,5 @@ def deploy_2ha(scenarioConfig, scenarioFile):
         test_util.test_logger("cmd=%s; ret=%s; output=%s; stderr=%s" %(cmd, ret, output, stderr))
         if ret!=0:
             test_util.test_fail("deploy 2ha failed")
+    else:
+        shell.call("%s %s zsha2 start-node"%(ssh_cmd, mn_ip1))
