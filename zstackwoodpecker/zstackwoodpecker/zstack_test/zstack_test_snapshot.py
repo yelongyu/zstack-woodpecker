@@ -259,7 +259,8 @@ umount %s
             self.backuped_snapshots.remove(snapshot)
 
         #only Hypervisor based snapshot will clean child
-        if 'Storage' == snapshot.get_snapshot().type:
+        if 'Storage' == snapshot.get_snapshot().type and \
+        'ebs' not in snapshot.get_snapshot().primaryStorageInstallPath:
             self._update_delete()
             return 
 
