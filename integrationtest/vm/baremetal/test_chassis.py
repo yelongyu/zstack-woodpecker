@@ -56,7 +56,7 @@ def test():
 
     test_util.test_dsc('Create chassis')
     test_stub.create_vbmc(vm, host_ip, 623)
-    chassis = test_stub.create_chassis(baremetal_cluster_uuid)
+    chassis = test_stub.create_chassis(baremetal_cluster_uuid, address = host_ip)
     chassis_uuid = chassis.uuid 
     #Hack inspect ks file to support vbmc, include ipmi device logic and ipmi addr to 127.0.0.1
     test_stub.hack_inspect_ks(mn_ip)
