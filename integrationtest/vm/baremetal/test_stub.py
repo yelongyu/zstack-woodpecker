@@ -357,7 +357,7 @@ def hack_inspect_ks(pxe_ip, host_ip, port = 623, ks_file='inspector_ks.cfg'):
             if 'ipmiPort = 623' in line:
                 line = '%s\nipmiAddress = "%s"\nipmiPort = %s\n' %(line, host_ip, port) 
             ks_out.write(line)
-    shell.call('scp %s %s:%s'  %(ks_file, host_ip, path))
+    shell.call('scp %s %s:%s'  %(ks_file, pxe_ip, path))
 
 def hack_generic_ks(host_ip):
     path = '/var/lib/zstack/virtualenv/baremetalpxeserver/lib/python2.7/site-packages/baremetalpxeserver/ks_tmpl/generic_ks_tmpl'
