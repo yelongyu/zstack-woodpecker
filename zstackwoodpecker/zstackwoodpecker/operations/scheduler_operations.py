@@ -33,13 +33,14 @@ def del_scheduler_job(uuid, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Scheduler Job:] %s is deleted.' % uuid)
 
-def create_scheduler_trigger(name, start_time, repeat_count, interval, type, session_uuid = None):
+def create_scheduler_trigger(name, type, start_time = None, repeat_count = None, interval = None, cron = None, session_uuid = None):
     action = api_actions.CreateSchedulerTriggerAction()
     action.name = name
     action.startTime = start_time
     action.repeatCount = repeat_count
     action.schedulerInterval = interval
     action.schedulerType = type
+    action.cron = cron 
     test_util.action_logger('Create [Scheduler Trigger:] %s [%s] %s %s' % (name, start_time, repeat_count, interval))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Scheduler Trigger:] %s is created.' % evt.inventory.uuid)
@@ -105,3 +106,47 @@ def get_current_time(session_uuid = None):
     test_util.action_logger('GetCurrentTime')
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt
+
+def query_db_backup(condition = [], uuid = None, name = None, session_uuid = None):
+    action = api_actions.QueryDatabaseBackupAction()
+    action.conditions = condition
+    action.uuid = uuid
+    action.name = name
+    test_util.action_logger('QueryDatabaseBackup')
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    return evt
+
+def get_db_backup_from_imagestore(url, session_uuid = None):
+    action = api_actions.GetDatabaseBackupFromImageStoreAction()
+    action.url = url
+    test_util.action_logger('GetDatabaseBackupFromImageStore')
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    return evt
+
+def export_db_backup_from_bs(backupStorageUuid, databaseBackupUuid, session_uuid = None):
+    action = api_actions.ExportDatabaseBackupFromBackupStorageAction()
+    action.backupStorageUuid = backupStorageUuid
+    action.databaseBackupUuid = databaseBackupUuid
+    test_util.action_logger('ExportDatabaseBackupFromBackupStorage')
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    return evt
+
+def recover_db_from_backup(uuid = None, mysqlRootPassword = None, backupStorageUrl = None, backupInstallPath = None, session_uuid = None):
+    action = api_actions.RecoverDatabaseFromBackupAction()
+    action.uuid = uuid
+    action.mysqlRootPassword = mysqlRootPassword
+    action.backupStorageUrl = backupStorageUrl
+    action.backupInstallPath = backupInstallPath
+    test_util.action_logger('RecoverDatabaseFromBackup')
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    return evt
+
+def sync_db_from_imagestore_bs(dstBackupStorageUuid, srcBackupStorageUuid, uuid, session_uuid = None):
+    action = api_actions.SyncDatabaseBackupFromImageStoreBackupStorageAction()
+    action.dstBackupStorageUuid = dstBackupStorageUuid
+    action.srcBackupStorageUuid = srcBackupStorageUuid
+    action.uuid = uuid
+    test_util.action_logger('SyncDatabaseBackupFromImageStoreBackupStorage')
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    return evt
+

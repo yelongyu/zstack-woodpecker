@@ -208,3 +208,10 @@ def clean_up_trash_on_backup_storage(backup_storage_uuid, session_uuid=None):
     test_util.action_logger('Clean Up Trash On Backup Storage [uuid:] %s' % backup_storage_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
+
+def reclaim_space_from_bs(bsckup_storage_uuid, session_uuiud=None):
+    action = api_actions.ReclaimSpaceFromImageStoreAction()
+    action.uuid = backup_storage_uuid
+    test_util.action_logger('Reclaim Space From Backup Storage [uuid:] %s' % backup_storage_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt

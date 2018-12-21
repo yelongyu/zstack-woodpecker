@@ -6,6 +6,7 @@ Create an unified test_stub to share test operations
 '''
 import os
 import random
+import apibinding.api_actions as api_actions
 import zstackwoodpecker.test_util  as test_util
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
 import zstackwoodpecker.zstack_test.zstack_test_eip as zstack_eip_header
@@ -1714,3 +1715,24 @@ def dvol_ops_test(dvol_obj,vm_obj, dvol_ops_test_choice="DVOL_TEST_NONE"):
         set_size = 1024*1024*1024*1 + vol_size_before
         vol_ops.resize_data_volume(dvol_obj.uuid, set_size)
         dvol_obj.size = set_size
+def create_image_store_backup_storage(bs_name, bs_hostname, bs_username, bs_password, bs_url, bs_sshport, session_uuid=None):
+    action = api_actions.AddImageStoreBackupStorageAction()
+    action.name = bs_name
+    action.url = bs_url
+    action.hostname = bs_hostname
+    action.username = bs_username
+    action.password = bs_password
+    action.sshPort = bs_sshport
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Create Sftp Backup Storage [uuid:] %s [name:] %s' % \
+            (evt.inventory.uuid, action.name))
+    return evt.inventory
+
+def wait_until_vm_reachable(vm, timeout=120):
+    vm_ip = vm.get_vm().vmNics[0].ip
+    ping_cmd = "ping %s -c 1 | grep 'ttl='" % vm_ip
+    for _ in xrange(timeout):
+        if shell.call(ping_cmd, exception=False):
+            break
+        else:
+            time.sleep(interval)
