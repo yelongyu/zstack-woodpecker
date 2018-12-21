@@ -448,7 +448,10 @@ def setup_static_ip(scenario_file):
                 for ip in xmlobject.safe_list(vm.ips.ip):
                     nic_ip = ip.ip_
                     if nic_ip.startswith("10"):
-                        nic = "br_zsn1"
+                        if shell.run("%s %s 'ip a|grep br_zsn1'"%(ssh_cmd, mnip))== 0:
+                            nic = "br_zsn1"
+                        else:
+                            nic = "zsn1"
                         netmask = "255.255.255.0"
                         shell.call("%s %s zs-network-setting -i %s %s %s|exit 0" %(ssh_cmd, mnip, nic, nic_ip, netmask) )
     return
@@ -612,5 +615,12 @@ def deploy_2ha(scenarioConfig, scenarioFile):
         test_util.test_logger("cmd=%s; ret=%s; output=%s; stderr=%s" %(cmd, ret, output, stderr))
         if ret!=0:
             test_util.test_fail("deploy 2ha failed")
+
+def get_pxe_info():
+    if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-mnha2.xml":
+        ip = get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, 2).ip_
+        nic = "zsn1"
     else:
-        shell.call("%s %s zsha2 start-node"%(ssh_cmd, mn_ip1))
+        ip = get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, 0).ip_
+        nic = "br_zsn1"
+    return [ip, nic] 
