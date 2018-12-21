@@ -16,11 +16,14 @@ data_migration = test_stub.DataMigration()
 def test():
     data_migration.create_vm(data_migration.image_name_net)
     data_migration.create_data_volume()
+    data_migration.mount_disk_in_vm()
+    data_migration.copy_data()
     data_migration.data_volume.detach()
-    data_migration.migrate_data_volume()
-    data_migration.migrate_vm()
     test_obj_dict.add_vm(data_migration.vm)
     test_obj_dict.add_volume(data_migration.data_volume)
+
+    data_migration.migrate_data_volume()
+    data_migration.migrate_vm()
 
     snapshots = test_obj_dict.get_volume_snapshot(data_migration.data_volume.get_volume().uuid)
     snapshots.set_utility_vm(data_migration.vm)
@@ -33,13 +36,6 @@ def test():
     snapshots.create_snapshot('create_data_snapshot3')
     snapshots.check()
     snapshot3 = snapshots.get_current_snapshot()
-
-    data_migration.mount_disk_in_vm()
-    data_migration.copy_data()
-
-#     data_migration.data_volume.detach()
-    data_migration.migrate_data_volume()
-    data_migration.migrate_vm()
 
     data_migration.data_volume.attach(data_migration.vm)
     data_migration.mount_disk_in_vm()
