@@ -10,6 +10,7 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.zstack_test.zstack_test_image as test_image
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm
+import zstackwoodpecker.operations.resource_operations as res_ops
 
 test_stub = test_lib.lib_get_test_stub()
 #test_obj_dict is to track test resource. They will be cleanup if there will be any exception in testing.
@@ -19,6 +20,10 @@ def test():
     global test_obj_dict
 
     test_util.test_dsc('Create test vm and check')
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)
+    for i in bs:
+        if i.type == 'AliyunEBS':
+            test_util.test_skip('Skip test on AliyunEBS')
     vm1 = test_stub.create_vlan_vm()
     #Without this checking, the image (created later) might be not able to get a DHCP IP, when using to create a new vm. 
     vm1.check()
