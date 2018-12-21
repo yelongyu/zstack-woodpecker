@@ -38,14 +38,16 @@ def test():
 
     test_util.test_dsc('Create pxe server')
     pxe_servers = res_ops.query_resource(res_ops.PXE_SERVER)
+    [pxe_ip, interface] = test_stub.get_pxe_info()
     if not pxe_servers:
-        pxe_uuid = test_stub.create_pxe(zoneUuid = zone_uuid).uuid
+        pxe_uuid = test_stub.create_pxe(dhcp_interface = interface, hostname = pxe_ip, zoneUuid = zone_uuid).uuid
         baremetal_operations.attach_pxe_to_cluster(pxe_uuid, baremetal_cluster_uuid)
  
     test_util.test_dsc('Create a vm to simulate baremetal host')
-    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
-    cond = res_ops.gen_query_conditions('managementIp', '=', mn_ip) 
-    host = res_ops.query_resource(res_ops.HOST, cond)[0]
+    #mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    #cond = res_ops.gen_query_conditions('managementIp', '=', mn_ip) 
+    #host = res_ops.query_resource(res_ops.HOST, cond)[0]
+    host = res_ops.query_resource(res_ops.HOST)[0]
     host_uuid = host.uuid
     host_ip = host.managementIp
     cond = res_ops.gen_query_conditions('hypervisorType', '=', 'KVM')
