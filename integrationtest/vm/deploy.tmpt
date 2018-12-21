@@ -111,6 +111,7 @@ l2NetworkPhysicalInterface = eth0
 
 l2PublicNetworkName = l2-public
 l2PublicNetworkInterface = eth0
+l2PublicNetworkInterface1 = eth1
 
 l2ManagementNetworkName = l2-management
 l2ManagementNetworkInterface = eth1
