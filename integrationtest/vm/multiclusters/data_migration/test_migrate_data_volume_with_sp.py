@@ -47,7 +47,43 @@ def test():
     data_migration.clean_up_ps_trash_and_check()
     data_migration.check_vol_sp(data_migration.data_volume_uuid, 3)
 
-    snapshots.delete_snapshot(snapshot1)
+    data_migration.vm.stop()
+    snapshots.use_snapshot(snapshot1)
+    data_migration.vm.start()
+    snapshots.create_snapshot('create_snapshot1.1.1')
+    snapshots.check()
+    snapshots.create_snapshot('create_snapshot1.1.2')
+    snapshots.check()
+
+    data_migration.vm.stop()
+    snapshots.use_snapshot(snapshot1)
+    data_migration.vm.start()
+    snapshots.create_snapshot('create_snapshot1.2.1')
+    snapshots.check()
+    snapshot1_2_1 = snapshots.get_current_snapshot()
+    snapshots.create_snapshot('create_snapshot1.2.2')
+    snapshots.check()
+
+    data_migration.vm.stop()
+    snapshots.use_snapshot(snapshot3)
+    data_migration.vm.start()
+    snapshots.check()
+    snapshots.create_snapshot('create_snapshot4')
+    snapshots.check()
+
+    test_util.test_dsc('Delete snapshot, volume and check')
+    snapshots.delete_snapshot(snapshot3)
+    snapshots.check()
+
+    snapshots.delete_snapshot(snapshot1_2_1)
+    snapshots.check()
+
+    snapshots.delete()
+
+    test_obj_dict.rm_volume_snapshot(snapshots)
+    data_migration.data_volume.check()
+    data_migration.data_volume.delete()
+
 #     data_migration.del_obsoleted_data_volume()
     test_lib.lib_robot_cleanup(test_obj_dict)
     test_util.test_pass('Create Snapshot of Migrate Data Volume Test Success')
