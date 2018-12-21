@@ -70,10 +70,10 @@
     </pxe>
   
     <instanceOfferings>
-      <instanceOffering name="$instanceOfferingName_s"
-        description="Test" 
-        memoryCapacity="$instanceOfferingMemory_s" 
-        cpuNum="$instanceOfferingCpuNum_s"
+      <instanceOffering name="$instanceOfferingName_m"
+        description="medium install offering"
+        memoryCapacity="$instanceOfferingMemory_m"
+        cpuNum="$instanceOfferingCpuNum_m" />
         />
     </instanceOfferings>
   
