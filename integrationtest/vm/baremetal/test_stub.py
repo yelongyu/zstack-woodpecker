@@ -344,9 +344,9 @@ def delete_vbmc(vm, host_ip):
     time.sleep(1)
     child.kill()
 
-def hack_inspect_ks(host_ip, port = 623, ks_file='inspector_ks.cfg'):
+def hack_inspect_ks(pxe_ip, host_ip, port = 623, ks_file='inspector_ks.cfg'):
     path = '/var/lib/zstack/baremetal/ftp/ks'
-    shell.call('scp %s:%s/%s .' %(host_ip, path, ks_file))
+    shell.call('scp %s:%s/%s .' %(pxe_ip, path, ks_file))
     ks = ks_file
     with open(ks, 'r') as ks_in:
         lines = ks_in.readlines()
@@ -355,7 +355,7 @@ def hack_inspect_ks(host_ip, port = 623, ks_file='inspector_ks.cfg'):
             if 'status1:' in line:
                 line = re.sub('if not status1:', 'if status1:', line)
             if 'ipmiPort = 623' in line:
-                line = line + '\nipmiAddress = "127.0.0.1"\nipmiPort = 623\n' 
+                line = '%s\nipmiAddress = "%s"\nipmiPort = %s\n' %(line, host_ip, port) 
             ks_out.write(line)
     shell.call('scp %s %s:%s'  %(ks_file, host_ip, path))
 

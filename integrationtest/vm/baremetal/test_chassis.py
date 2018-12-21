@@ -59,7 +59,7 @@ def test():
     chassis = test_stub.create_chassis(baremetal_cluster_uuid, address = host_ip)
     chassis_uuid = chassis.uuid 
     #Hack inspect ks file to support vbmc, include ipmi device logic and ipmi addr to 127.0.0.1
-    test_stub.hack_inspect_ks(mn_ip)
+    test_stub.hack_inspect_ks(pxe_ip, host_ip)
 
     test_util.test_dsc('Inspect chassis, Because vbmc have bugs, \
 	reset vm unable to enable boot options, power off/on then reset is worked')
