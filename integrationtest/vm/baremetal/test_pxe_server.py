@@ -20,7 +20,8 @@ def test():
             baremetal_ops.delete_pxe(pxe.uuid)
 
     test_util.test_dsc('Create pxe server and stop/start it')
-    pxe_uuid = test_stub.create_pxe(zoneUuid = zone_uuid).uuid
+    [pxe_ip, interface] = test_stub.get_pxe_info()
+    pxe_uuid = test_stub.create_pxe(dhcp_interface = interface, hostname = pxe_ip, zoneUuid = zone_uuid).uuid
     #baremetal_operations.attach_pxe_to_cluster(pxe_uuid, baremetal_cluster_uuid)
 
     pxe = res_ops.query_resource(res_ops.PXE_SERVER)[0]
