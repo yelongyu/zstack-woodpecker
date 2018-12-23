@@ -4301,6 +4301,7 @@ def lib_vm_random_operation(robot_test_obj):
     ready_volume = None
     snapshot_volume = None
     target_snapshot = None
+    candidate_resource_list = []
 
     #Firstly, choose a target VM state for operation. E.g. Running. 
     if test_dict.get_vm_list(vm_header.STOPPED):
@@ -4343,6 +4344,7 @@ def lib_vm_random_operation(robot_test_obj):
 
         test_util.test_logger('target vm is : %s' % target_vm.get_vm().uuid)
         test_util.test_logger('target test obj: %s' % test_dict)
+        candidate_resource_list += target_vm.get_vm().uuid
 
         host_inv = lib_find_host_by_vm(vm)
         if host_inv:
@@ -4387,6 +4389,7 @@ def lib_vm_random_operation(robot_test_obj):
             test_stage_obj.set_volume_state(test_stage.free_volume)
         else:
             test_stage_obj.set_volume_state(test_stage.deleted_volume)
+        candidate_resource_list += ready_volume.get_volume().uuid
     else:
         test_stage_obj.set_volume_state(test_stage.no_free_volume)
 
@@ -4455,6 +4458,7 @@ def lib_vm_random_operation(robot_test_obj):
     if target_snapshot:
         if target_snapshot.get_target_volume().get_state() == vol_header.DELETED or target_snapshot.get_target_volume().get_state() == vol_header.EXPUNGED:
             test_stage_obj.set_snapshot_state(test_stage.no_volume_file)
+        candidate_resource_list += target_snapshot.get_snapshot().uuid
     if target_volume_snapshots:
         if target_volume_snapshots.get_target_volume().get_state() == vol_header.DELETED or target_volume_snapshots.get_target_volume().get_state() == vol_header.EXPUNGED:
             test_stage_obj.set_snapshot_state(test_stage.no_volume_file)
@@ -4484,6 +4488,7 @@ into robot_test_obj.exclusive_actions_list.')
             test_stage_obj.set_image_state(test_stage.new_template_image)
         else:
             test_stage_obj.set_image_state(test_stage.deleted_image)
+        candidate_resource_list += target_image.get_image().uuid
     else:
         test_stage_obj.set_image_state(test_stage.Any)
 
@@ -4520,13 +4525,14 @@ into robot_test_obj.exclusive_actions_list.')
     test_util.test_logger('action list: %s' % action_list)
 
     # Currently is randomly picking up.
-    next_action = lib_robot_pickup_action(action_list, \
-            robot_test_obj.get_action_history(), priority_actions, random_type)
+    next_action = lib_robot_pickup_action(candidate_resource_list, action_list, \
+            robot_test_obj.get_action_history(), robot_test_obj.get_resource_action_history(), priority_actions, random_type)
     robot_test_obj.add_action_history(next_action)
 
     if next_action == TestAction.create_vm:
         test_util.test_dsc('Robot Action: %s ' % next_action)
         new_vm = lib_create_vm(cre_vm_opt)
+        robot_test_obj.add_resource_action_history(new_vm.get_vm().uuid, next_action)
         test_dict.add_vm(new_vm)
 
         test_util.test_dsc('Robot Action Result: %s; new VM: %s' % \
@@ -4537,6 +4543,7 @@ into robot_test_obj.exclusive_actions_list.')
     elif next_action == TestAction.stop_vm:
         test_util.test_dsc('Robot Action: %s; on VM: %s' \
                 % (next_action, target_vm.get_vm().uuid))
+        robot_test_obj.add_resource_action_history(target_vm.get_vm().uuid, next_action)
 
         target_vm.stop()
         test_dict.mv_vm(target_vm, vm_header.RUNNING, vm_header.STOPPED)
@@ -4544,6 +4551,7 @@ into robot_test_obj.exclusive_actions_list.')
     elif next_action == TestAction.start_vm :
         test_util.test_dsc('Robot Action: %s; on VM: %s' \
                 % (next_action, target_vm.get_vm().uuid))
+        robot_test_obj.add_resource_action_history(target_vm.get_vm().uuid, next_action)
 
         target_vm.start()
         test_dict.mv_vm(target_vm, vm_header.STOPPED, vm_header.RUNNING)
@@ -4551,24 +4559,28 @@ into robot_test_obj.exclusive_actions_list.')
     elif next_action == TestAction.reboot_vm :
         test_util.test_dsc('Robot Action: %s; on VM: %s' \
                 % (next_action, target_vm.get_vm().uuid))
+        robot_test_obj.add_resource_action_history(target_vm.get_vm().uuid, next_action)
 
         target_vm.reboot()
 
     elif next_action == TestAction.destroy_vm :
         test_util.test_dsc('Robot Action: %s; on VM: %s' \
                 % (next_action, target_vm.get_vm().uuid))
+        robot_test_obj.add_resource_action_history(target_vm.get_vm().uuid, next_action)
         target_vm.destroy()
         test_dict.rm_vm(target_vm, vm_current_state)
 
     elif next_action == TestAction.expunge_vm :
         test_util.test_dsc('Robot Action: %s; on VM: %s' \
                 % (next_action, target_vm.get_vm().uuid))
+        robot_test_obj.add_resource_action_history(target_vm.get_vm().uuid, next_action)
         target_vm.expunge()
         test_dict.rm_vm(target_vm, vm_current_state)
 
     elif next_action == TestAction.migrate_vm :
         test_util.test_dsc('Robot Action: %s; on VM: %s' \
                 % (next_action, target_vm.get_vm().uuid))
+        robot_test_obj.add_resource_action_history(target_vm.get_vm().uuid, next_action)
         target_host = lib_find_random_host(target_vm.vm)
         if not target_host:
             test_util.test_logger('no avaiable host was found for doing vm migration')
@@ -4578,6 +4590,7 @@ into robot_test_obj.exclusive_actions_list.')
     elif next_action == TestAction.create_volume :
         test_util.test_dsc('Robot Action: %s ' % next_action)
         new_volume = lib_create_volume_from_offering()
+        robot_test_obj.add_resource_action_history(new_volume.get_volume().uuid, next_action)
         test_dict.add_volume(new_volume)
 
         test_util.test_dsc('Robot Action Result: %s; new Volume: %s' % \
@@ -4588,6 +4601,7 @@ into robot_test_obj.exclusive_actions_list.')
         volume_option = test_util.VolumeOption()
         volume_option.set_system_tags(["capability::virtio-scsi"])
         new_volume = lib_create_volume_from_offering(volume_option)
+        robot_test_obj.add_resource_action_history(new_volume.get_volume().uuid, next_action)
         test_dict.add_volume(new_volume)
 
         test_util.test_dsc('Robot Action Result: %s; new Volume: %s' % \
@@ -4609,12 +4623,16 @@ into robot_test_obj.exclusive_actions_list.')
                     test_util.test_logger('need to migrate volume: %s to host: %s, before attach it to vm: %s' % (ready_volume.get_volume().uuid, vm_host_uuid, target_vm.vm.uuid))
                     ready_volume.migrate(vm_host_uuid)
 
+        robot_test_obj.add_resource_action_history(ready_volume.get_volume().uuid, next_action)
+        robot_test_obj.add_resource_action_history(target_vm.get_vm().uuid, next_action)
         ready_volume.attach(target_vm)
         test_dict.mv_volume(ready_volume, test_stage.free_volume, target_vm.vm.uuid)
 
     elif next_action == TestAction.detach_volume:
         test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
             (next_action, attached_volume.get_volume().uuid))
+        robot_test_obj.add_resource_action_history(attached_volume.get_volume().uuid, next_action)
+        robot_test_obj.add_resource_action_history(target_vm.get_vm().uuid, next_action)
 
         attached_volume.detach()
         test_dict.mv_volume(attached_volume, target_vm.vm.uuid, test_stage.free_volume)
@@ -4624,7 +4642,9 @@ into robot_test_obj.exclusive_actions_list.')
         # the target volume is attached volume.
         if not ready_volume:
             ready_volume = attached_volume
+            robot_test_obj.add_resource_action_history(target_vm.get_vm().uuid, next_action)
 
+        robot_test_obj.add_resource_action_history(ready_volume.get_volume().uuid, next_action)
         test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
             (next_action, ready_volume.get_volume().uuid))
         ready_volume.delete()
@@ -4633,12 +4653,15 @@ into robot_test_obj.exclusive_actions_list.')
     elif next_action == TestAction.expunge_volume:
         test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
             (next_action, ready_volume.get_volume().uuid))
+        robot_test_obj.add_resource_action_history(ready_volume.get_volume().uuid, next_action)
         ready_volume.expunge()
         test_dict.rm_volume(ready_volume)
 
     elif next_action == TestAction.migrate_volume :
         #TODO: add normal initialized data volume into migration target.
         root_volume_uuid = lib_get_root_volume(target_vm.get_vm()).uuid
+        robot_test_obj.add_resource_action_history(root_volume_uuid, next_action)
+        robot_test_obj.add_resource_action_history(target_vm.get_vm().uuid, next_action)
         test_util.test_dsc('Robot Action: %s; on Volume: %s; on VM: %s' \
                 % (next_action, root_volume_uuid, target_vm.get_vm().uuid))
         target_host = lib_find_random_host_by_volume_uuid(root_volume_uuid)
@@ -4656,11 +4679,12 @@ into robot_test_obj.exclusive_actions_list.')
 
         test_util.test_dsc('Robot Action: %s; on Volume: %s; on VM: %s' % \
             (next_action, root_volume_uuid, target_vm.get_vm().uuid))
+        robot_test_obj.add_resource_action_history(root_volume_uuid, next_action)
 
         new_image = lib_create_template_from_volume(root_volume_uuid)
         test_util.test_dsc('Robot Action Result: %s; new RootVolume Image: %s'\
                 % (next_action, new_image.get_image().uuid))
-
+        robot_test_obj.add_resource_action_history(new_image.get_image().uuid, next_action)
         test_dict.add_image(new_image)
 
     elif next_action == TestAction.create_data_vol_template_from_volume:
@@ -4672,17 +4696,21 @@ into robot_test_obj.exclusive_actions_list.')
         vm_target_vol = random.choice(vm_target_vol_candidates)
         test_util.test_dsc('Robot Action: %s; on Volume: %s; on VM: %s' % \
             (next_action, vm_target_vol.uuid, target_vm.get_vm().uuid))
+        robot_test_obj.add_resource_action_history(vm_target_vol.uuid, next_action)
+        robot_test_obj.add_resource_action_history(target_vm.get_vm().uuid, next_action)
         new_data_vol_temp = lib_create_data_vol_template_from_volume(target_vm, vm_target_vol)
         test_util.test_dsc('Robot Action Result: %s; new DataVolume Image: %s' \
                 % (next_action, new_data_vol_temp.get_image().uuid))
-
+        robot_test_obj.add_resource_action_history(new_data_vol_temp.get_image().uuid, next_action)
         test_dict.add_image(new_data_vol_temp)
 
     elif next_action == TestAction.create_data_volume_from_image:
         test_util.test_dsc('Robot Action: %s; on Image: %s' % \
             (next_action, target_image.get_image().uuid))
 
+        robot_test_obj.add_resource_action_history(target_image.get_image().uuid, next_action)
         new_volume = lib_create_data_volume_from_image(target_image)
+        robot_test_obj.add_resource_action_history(new_volume.get_volume().uuid, next_action)
 
         test_util.test_dsc('Robot Action Result: %s; new Volume: %s' % \
             (next_action, new_volume.get_volume().uuid))
@@ -4691,6 +4719,7 @@ into robot_test_obj.exclusive_actions_list.')
     elif next_action == TestAction.delete_image:
         test_util.test_dsc('Robot Action: %s; on Image: %s' % \
             (next_action, target_image.get_image().uuid))
+        robot_test_obj.add_resource_action_history(target_image.get_image().uuid, next_action)
 
         target_image.delete()
         test_dict.rm_image(target_image)
@@ -4700,6 +4729,7 @@ into robot_test_obj.exclusive_actions_list.')
     elif next_action == TestAction.expunge_image:
         test_util.test_dsc('Robot Action: %s; on Image: %s' % \
             (next_action, target_image.get_image().uuid))
+        robot_test_obj.add_resource_action_history(target_image.get_image().uuid, next_action)
 
         bss = target_image.get_image().backupStorageRefs
         bs_uuid_list = []
@@ -4714,6 +4744,7 @@ into robot_test_obj.exclusive_actions_list.')
         sg_creation_option = test_util.SecurityGroupOption()
         sg_creation_option.set_name('robot security group')
         new_sg = sg_vm.create_sg(sg_creation_option)
+        robot_test_obj.add_resource_action_history(new_sg.get_security_group().uuid, next_action)
         test_util.test_dsc(\
             'Robot Action Result: %s; new SG: %s' % \
             (next_action, new_sg.get_security_group().uuid))
@@ -4724,6 +4755,7 @@ into robot_test_obj.exclusive_actions_list.')
         test_util.test_dsc(\
             'Robot Action: %s; on SG: %s' % \
             (next_action, target_sg.get_security_group().uuid))
+        robot_test_obj.add_resource_action_history(target_sg.get_security_group().uuid, next_action)
 
         sg_vm.delete_sg(target_sg)
 
@@ -4766,12 +4798,16 @@ into robot_test_obj.exclusive_actions_list.')
             test_util.test_dsc('Robot Action: %s; on Root Volume: %s; on VM: %s' % \
                    (next_action, \
                     target_volume_inv.uuid, target_volume_inv.vmInstanceUuid))
+            robot_test_obj.add_resource_action_history(target_volume_inv.uuid, next_action)
+            robot_test_obj.add_resource_action_history(target_volume_inv.vmInstanceUuid, next_action)
         else:
             test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
                    (next_action, \
                     target_volume_inv.uuid))
+            robot_test_obj.add_resource_action_history(target_volume_inv.uuid, next_action)
 
         new_snapshot = lib_create_volume_snapshot_from_volume(target_volume_snapshots, robot_test_obj, test_dict, cre_vm_opt)
+        robot_test_obj.add_resource_action_history(new_snapshot.get_snapshot().uuid, next_action)
 
         test_util.test_dsc('Robot Action Result: %s; new SP: %s' % \
             (next_action, new_snapshot.get_snapshot().uuid))
@@ -4783,6 +4819,8 @@ into robot_test_obj.exclusive_actions_list.')
             target_volume_snapshots.get_target_volume().get_volume().uuid, \
             target_snapshot.get_snapshot().uuid))
 
+        robot_test_obj.add_resource_action_history(target_snapshot.get_snapshot().uuid, next_action)
+        robot_test_obj.add_resource_action_history(target_volume_snapshots.get_target_volume().get_volume().uuid, next_action)
         #If both volume and snapshots are deleted, volume_snapshot obj could be 
         # removed.
         if not target_volume_snapshots.get_backuped_snapshots():
@@ -4799,6 +4837,8 @@ into robot_test_obj.exclusive_actions_list.')
             (next_action, \
             target_volume_snapshots.get_target_volume().get_volume().uuid, \
             target_snapshot.get_snapshot().uuid))
+        robot_test_obj.add_resource_action_history(target_snapshot.get_snapshot().uuid, next_action)
+        robot_test_obj.add_resource_action_history(target_volume_snapshots.get_target_volume().get_volume().uuid, next_action)
 
         target_volume_snapshots.use_snapshot(target_snapshot)
 
@@ -4838,9 +4878,11 @@ into robot_test_obj.exclusive_actions_list.')
             (next_action, \
             target_volume_snapshots.get_target_volume().get_volume().uuid, \
             target_snapshot.get_snapshot().uuid))
+        robot_test_obj.add_resource_action_history(target_snapshot.get_snapshot().uuid, next_action)
 
         new_volume_obj = target_snapshot.create_data_volume()
         test_dict.add_volume(new_volume_obj)
+        robot_test_obj.add_resource_action_history(new_volume_obj.get_volume().uuid, next_action)
         test_util.test_dsc('Robot Action Result: %s; new Volume: %s; on SP: %s'\
                 % (next_action, new_volume_obj.get_volume().uuid,\
                 target_snapshot.get_snapshot().uuid))
@@ -4850,8 +4892,10 @@ into robot_test_obj.exclusive_actions_list.')
             (next_action, \
             target_volume_snapshots.get_target_volume().get_volume().uuid, \
             target_snapshot.get_snapshot().uuid))
+        robot_test_obj.add_resource_action_history(target_snapshot.get_snapshot().uuid, next_action)
 
         new_image_obj = lib_create_image_from_snapshot(target_snapshot)
+        robot_test_obj.add_resource_action_history(new_image_obj.get_image().uuid, next_action)
 
         test_dict.add_image(new_image_obj)
         test_util.test_dsc('Robot Action Result: %s; new Image: %s; on SP: %s'\
@@ -4861,16 +4905,38 @@ into robot_test_obj.exclusive_actions_list.')
     test_util.test_logger('Finsih action: %s execution' % next_action)
 
 #TODO: add more action pickup strategy
-def lib_robot_pickup_action(action_list, pre_robot_actions, \
+def lib_robot_pickup_action(resource_list, action_list, pre_robot_actions, pre_resource_robot_actions, \
         priority_actions, selector_type):
 
     test_util.test_logger('Action history: %s' % pre_robot_actions)
+    test_util.test_logger('Resource Action history: %s' % pre_resource_robot_actions)
 
     if not selector_type:
         selector_type = action_select.default_strategy
 
     action_selector = action_select.action_selector_table[selector_type]
-    return action_selector(action_list, pre_robot_actions, \
+    if selector_type == action_select.resource_path_strategy and pre_resource_robot_actions:
+        history_len_dict = dict()
+        # default to select least resource history action
+        for key in pre_resource_robot_actions:
+            for res in resource_list:
+                if key == res:
+                    next_action = action_selector(action_list, pre_resource_robot_actions[key], priority_actions).select()
+                    history_len = len(pre_resource_robot_actions[key])
+                    if history_len_dict.has_key(history_len):
+                        history_len_dict[history_len] += next_action
+                    else:
+                        history_len_dict[history_len] = [ next_action ]
+        if history_len_dict:
+            all_history_len = history_len_dict.keys()
+            all_history_len.sort()
+            next_action = random.choice(history_len_dict[all_history_len[0]])
+            return next_action
+        else:
+            return action_selector(action_list, pre_robot_actions, \
+                priority_actions).select()
+    else:
+        return action_selector(action_list, pre_robot_actions, \
             priority_actions).select()
 
 def lib_get_test_stub(suite_name=None):

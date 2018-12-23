@@ -1623,6 +1623,8 @@ class Robot_Test_Object(object):
         self.random_type = None #Preserve 
         self.public_l3 = None   #For VIP
         self.action_history = []
+        self.resource_action_history = dict()
+        self.required_path_list = []
         self.utility_vm_dict = {} #per primary storage
         #DMZ resource will not be selected to be deleted or moved, so utiltiy 
         # vms will be put there safely. This will be important when doing robot
@@ -1642,6 +1644,15 @@ class Robot_Test_Object(object):
 
     def get_action_history(self):
         return self.action_history
+
+    def add_resource_action_history(self, uuid, action):
+        if self.resource_action_history.has_key(uuid):
+            self.resource_action_history[uuid].append(action)
+        else:
+            self.resource_action_history[uuid] = [ action ]
+
+    def get_resource_action_history(self):
+        return self.resource_action_history
 
     def set_test_dict(self, test_dict):
         self.test_dict = test_dict
@@ -1736,6 +1747,11 @@ class Robot_Test_Object(object):
         if not resource in self.get_dmz_backup_storage(self.bs):
             self.dmz_resource[self.bs].append(resource)
 
+    def set_required_path_list(self, path_list):
+        self.required_path_list = path_list
+
+    def get_required_path_list(self):
+        return self.required_path_list
 
 class ComponentLoader(object):
     def __init__(self):
