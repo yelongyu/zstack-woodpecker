@@ -4344,7 +4344,7 @@ def lib_vm_random_operation(robot_test_obj):
 
         test_util.test_logger('target vm is : %s' % target_vm.get_vm().uuid)
         test_util.test_logger('target test obj: %s' % test_dict)
-        candidate_resource_list += target_vm.get_vm().uuid
+        candidate_resource_list += [ target_vm.get_vm().uuid ]
 
         host_inv = lib_find_host_by_vm(vm)
         if host_inv:
@@ -4387,9 +4387,9 @@ def lib_vm_random_operation(robot_test_obj):
         ready_volume = random.choice(avail_volumes)
         if ready_volume.get_state() != vol_header.DELETED:
             test_stage_obj.set_volume_state(test_stage.free_volume)
+            candidate_resource_list += [ ready_volume.get_volume().uuid ]
         else:
             test_stage_obj.set_volume_state(test_stage.deleted_volume)
-        candidate_resource_list += ready_volume.get_volume().uuid
     else:
         test_stage_obj.set_volume_state(test_stage.no_free_volume)
 
@@ -4458,7 +4458,7 @@ def lib_vm_random_operation(robot_test_obj):
     if target_snapshot:
         if target_snapshot.get_target_volume().get_state() == vol_header.DELETED or target_snapshot.get_target_volume().get_state() == vol_header.EXPUNGED:
             test_stage_obj.set_snapshot_state(test_stage.no_volume_file)
-        candidate_resource_list += target_snapshot.get_snapshot().uuid
+        candidate_resource_list += [ target_snapshot.get_snapshot().uuid ]
     if target_volume_snapshots:
         if target_volume_snapshots.get_target_volume().get_state() == vol_header.DELETED or target_volume_snapshots.get_target_volume().get_state() == vol_header.EXPUNGED:
             test_stage_obj.set_snapshot_state(test_stage.no_volume_file)
@@ -4488,7 +4488,7 @@ into robot_test_obj.exclusive_actions_list.')
             test_stage_obj.set_image_state(test_stage.new_template_image)
         else:
             test_stage_obj.set_image_state(test_stage.deleted_image)
-        candidate_resource_list += target_image.get_image().uuid
+        candidate_resource_list += [ target_image.get_image().uuid ]
     else:
         test_stage_obj.set_image_state(test_stage.Any)
 
@@ -4525,7 +4525,7 @@ into robot_test_obj.exclusive_actions_list.')
     test_util.test_logger('action list: %s' % action_list)
 
     # Currently is randomly picking up.
-    next_action = lib_robot_pickup_action(candidate_resource_list, action_list, \
+    next_action = lib_robot_pickup_action(robot_test_obj.get_required_path_list(), candidate_resource_list, action_list, \
             robot_test_obj.get_action_history(), robot_test_obj.get_resource_action_history(), priority_actions, random_type)
     robot_test_obj.add_action_history(next_action)
 
@@ -4902,31 +4902,83 @@ into robot_test_obj.exclusive_actions_list.')
                 % (next_action, new_image_obj.get_image().uuid,\
                 target_snapshot.get_snapshot().uuid))
 
+    required_path = robot_test_obj.get_required_path_list()
+    resource_action_history = robot_test_obj.get_resource_action_history()
+    for key in resource_action_history:
+        if lib_evaluate_path_execution(required_path, resource_action_history[key]) == len(required_path):
+            test_util.test_logger('Required path executed: %s' % required_path)
+            robot_test_obj.set_required_path_list([])
+
     test_util.test_logger('Finsih action: %s execution' % next_action)
 
+def lib_evaluate_path_execution(required_path, action_history):
+    if not required_path or not action_history:
+        return 0
+    required_path_reverse = list(required_path)
+    required_path_reverse.reverse()
+    action_history_reverse = list(action_history)
+    action_history_reverse.reverse()
+    for offset in range(0, len(required_path)):
+        if len(required_path)-offset > len(action_history):
+            continue
+        mismatch = False
+        for index in range(0, len(required_path)-offset):
+            if required_path_reverse[offset+index] != action_history_reverse[index]:
+                mismatch = True
+                break
+        if mismatch:
+            continue
+        return len(required_path)-offset
+            
+    return 0
+
+
 #TODO: add more action pickup strategy
-def lib_robot_pickup_action(resource_list, action_list, pre_robot_actions, pre_resource_robot_actions, \
+def lib_robot_pickup_action(required_path, resource_list, action_list, pre_robot_actions, pre_resource_robot_actions, \
         priority_actions, selector_type):
+
+    def _next_action_for_required_path(required_path, exec_len):
+        return required_path[exec_len]
 
     test_util.test_logger('Action history: %s' % pre_robot_actions)
     test_util.test_logger('Resource Action history: %s' % pre_resource_robot_actions)
+    test_util.test_logger('Required path: %s' % required_path)
+    for key in pre_resource_robot_actions:
+        test_util.test_logger('Required path exec len (%s): %s' % (key, lib_evaluate_path_execution(required_path, pre_resource_robot_actions[key])))
 
     if not selector_type:
         selector_type = action_select.default_strategy
 
+    test_util.test_logger('resource_list: %s' % resource_list)
     action_selector = action_select.action_selector_table[selector_type]
     if selector_type == action_select.resource_path_strategy and pre_resource_robot_actions:
         history_len_dict = dict()
+        required_path_exec_len_dict = dict()
         # default to select least resource history action
         for key in pre_resource_robot_actions:
             for res in resource_list:
                 if key == res:
+                    if required_path:
+                        required_path_exec_len = lib_evaluate_path_execution(required_path, pre_resource_robot_actions[key])
+                        next_action = _next_action_for_required_path(required_path, required_path_exec_len)
+                        if next_action in action_list:
+                            if required_path_exec_len_dict.has_key(required_path_exec_len):
+                                required_path_exec_len_dict[required_path_exec_len] += key
+                            else:
+                                required_path_exec_len_dict[required_path_exec_len] = [ key ]
                     next_action = action_selector(action_list, pre_resource_robot_actions[key], priority_actions).select()
                     history_len = len(pre_resource_robot_actions[key])
                     if history_len_dict.has_key(history_len):
                         history_len_dict[history_len] += next_action
                     else:
                         history_len_dict[history_len] = [ next_action ]
+        test_util.test_logger('Required path exec len dict: %s' % (required_path_exec_len_dict))
+        if required_path_exec_len_dict:
+            all_exec_len = required_path_exec_len_dict.keys()
+            all_exec_len.sort(reverse=True)
+            res = random.choice(required_path_exec_len_dict[all_exec_len[0]])
+            next_action = _next_action_for_required_path(required_path, all_exec_len[0])
+            return next_action
         if history_len_dict:
             all_history_len = history_len_dict.keys()
             all_history_len.sort()
