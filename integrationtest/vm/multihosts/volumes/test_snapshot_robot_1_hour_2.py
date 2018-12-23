@@ -11,6 +11,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.header.vm as vm_header
+import zstackwoodpecker.test_state as ts_header
 import os
 import time
 
@@ -21,6 +22,7 @@ _config_ = {
         }
 
 test_dict = test_state.TestStateDict()
+TestAction = ts_header.TestAction
     
 def test():
     test_util.test_dsc('''Will mainly doing random test for all kinds of snapshot operations. VM, Volume and Image operations will also be tested. If reach 1 hour successful running condition, testing will success and quit.  SG actions, and VIP actions are removed in this robot test.
@@ -59,6 +61,8 @@ def test():
     robot_test_obj.set_public_l3(public_l3)
     robot_test_obj.set_utility_vm(utility_vm)
     robot_test_obj.set_random_type(action_select.resource_path_strategy)
+    path_list = [TestAction.create_vm, TestAction.stop_vm, TestAction.start_vm, TestAction.attach_volume, TestAction.detach_volume, TestAction.destroy_vm, TestAction.expunge_vm]
+    robot_test_obj.set_required_path_list(path_list)
 
     rounds = 1
     current_time = time.time()
@@ -69,8 +73,10 @@ def test():
         test_util.test_dsc('===============Round %s finished. Begin status checking.================' % rounds)
         rounds += 1
         test_lib.lib_robot_status_check(test_dict)
+        if not robot_test_obj.get_required_path_list():
+            test_util.test_dsc('Reach test pass exit criterial: Required path executed %s' % (path_list))
+            break
 
-    test_util.test_dsc('Reach test pass exit criterial: 1 hour.')
     test_lib.lib_robot_cleanup(test_dict)
     test_util.test_pass('Snapshots Robot Test Success')
 
