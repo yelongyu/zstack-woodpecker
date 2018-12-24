@@ -4286,248 +4286,290 @@ def lib_vm_random_operation(robot_test_obj):
     '''
         Random operations for robot testing
     '''
-    test_dict = robot_test_obj.get_test_dict()
-    print 'target test dict for random operation: %s' % test_dict
-    excluded_actions_list = robot_test_obj.get_exclusive_actions_list()
-    cre_vm_opt = robot_test_obj.get_vm_creation_option()
-    priority_actions = robot_test_obj.get_priority_actions()
-    random_type = robot_test_obj.get_random_type()
-    public_l3 = robot_test_obj.get_public_l3()
 
-    test_stage_obj = test_stage()
-
-    target_vm = None
-    attached_volume = None
-    ready_volume = None
-    snapshot_volume = None
-    target_snapshot = None
-    candidate_resource_list = []
-
-    #Firstly, choose a target VM state for operation. E.g. Running. 
-    if test_dict.get_vm_list(vm_header.STOPPED):
-        if test_dict.get_vm_list(vm_header.DESTROYED):
-            target_vm_state = random.choice([vm_header.RUNNING, \
-                    vm_header.STOPPED, vm_header.DESTROYED])
-        else:
-            target_vm_state = random.choice([vm_header.RUNNING, \
-                    vm_header.STOPPED])
-    else:
-        if test_dict.get_vm_list(vm_header.DESTROYED):
-            target_vm_state = random.choice([vm_header.RUNNING, \
-                    vm_header.DESTROYED])
-        else:
-            target_vm_state = vm_header.RUNNING 
-
-    #Secondly, choose a target VM from target status. 
-    target_vm_list = test_dict.get_vm_list(target_vm_state)
-    if target_vm_list:
-        target_vm = random.choice(target_vm_list)
-
-        # vm state in db may become inconsistent due to VM may become paused for a short period and vm sync to ZStack
-        retry_count = 0
-        while retry_count < 120:
-            vm = lib_get_vm_by_uuid(target_vm.get_vm().uuid)
-            #vm state in db
-            vm_current_state = vm.state
-            if target_vm_state == vm_current_state:
-                break
-            test_util.test_logger('[retry:] %s [vm:] %s current [state:] %s is not aligned with random test record [state:] \
-%s .' % (retry_count, target_vm.get_vm().uuid, vm_current_state, target_vm_state))
-            time.sleep(2)
-            retry_count += 1
-        if target_vm_state != vm_current_state:
-            test_util.test_fail('\
-[vm:] %s current [state:] %s is not aligned with random test record [state:] \
-%s .' % (target_vm.get_vm().uuid, vm_current_state, target_vm_state))
+    for resource_uuid in dict(robot_test_obj.get_resource_action_history().items()+{None:None}.items()):
+        test_dict = robot_test_obj.get_test_dict()
+        print 'Try calculate possible path execution for resource %s' % resource_uuid
+        print 'target test dict for random operation: %s' % test_dict
+        excluded_actions_list = robot_test_obj.get_exclusive_actions_list()
+        cre_vm_opt = robot_test_obj.get_vm_creation_option()
+        priority_actions = robot_test_obj.get_priority_actions()
+        random_type = robot_test_obj.get_random_type()
+        public_l3 = robot_test_obj.get_public_l3()
     
-        test_stage_obj.set_vm_state(vm_current_state)
-
-        test_util.test_logger('target vm is : %s' % target_vm.get_vm().uuid)
-        test_util.test_logger('target test obj: %s' % test_dict)
-        candidate_resource_list += [ target_vm.get_vm().uuid ]
-
-        host_inv = lib_find_host_by_vm(vm)
-        if host_inv:
-            bs = lib_get_backup_storage_list_by_vm(vm)[0]
-            
-            if lib_check_live_snapshot_cap(host_inv) and bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
-                test_stage_obj.set_vm_live_template_cap(test_stage.template_live_creation)
-            else:
-                test_stage_obj.set_vm_live_template_cap(test_stage.template_no_live_creation)
-
-        #Thirdly, check VM's volume status. E.g. if could add a new volume.
-        vm_volumes = test_dict.get_volume_list(target_vm.get_vm().uuid)
-        if vm_volumes:
-	    vm_volume_number = len(vm_volumes)
-	else:
-	    vm_volume_number = 0
-
-        if vm_volume_number > 0 and vm_volume_number < 24:
-            test_stage_obj.set_vm_volume_state(test_stage.vm_volume_att_not_full)
-            attached_volume = random.choice(vm_volumes)
-        elif vm_volume_number == 0:
-            test_stage_obj.set_vm_volume_state(test_stage.vm_no_volume_att)
-        else:
-            test_stage_obj.set_vm_volume_state(test_stage.vm_volume_att_full)
-            attached_volume = random.choice(vm_volumes)
+        test_stage_obj = test_stage()
     
-        if lib_check_vm_live_migration_cap(vm):
-            test_stage_obj.set_vm_live_migration_cap(test_stage.vm_live_migration)
-        else:
-            test_stage_obj.set_vm_live_migration_cap(test_stage.no_vm_live_migration)
-    else:
-        test_stage_obj.set_vm_state(test_stage.Any)
-        test_stage_obj.set_vm_volume_state(test_stage.Any)
-        test_stage_obj.set_vm_live_migration_cap(test_stage.Any)
+        target_vm = None
+        attached_volume = None
+        ready_volume = None
+        snapshot_volume = None
+        target_snapshot = None
+        candidate_resource_list = []
+    
+        #Firstly, choose a target VM state for operation. E.g. Running. 
+        target_vm_list = None
+        if resource_uuid != None:
+            for candidate_vm in test_dict.get_all_vm_list():
+                if candidate_vm.get_vm().uuid == resource_uuid:
+                    target_vm_list = [ candidate_vm ]
+                    target_vm_state = lib_get_vm_by_uuid(candidate_vm.get_vm().uuid).state
+                    break
+                for vm_volume in test_dict.get_volume_list(candidate_vm.get_vm().uuid):
+                    if vm_volume.get_volume().uuid == resource_uuid:
+                        target_vm_list = [ candidate_vm ]
+                        target_vm_state = lib_get_vm_by_uuid(candidate_vm.get_vm().uuid).state
+                        break
+                if target_vm_list != None:
+                    break
 
-    #Fourthly, choose a available volume for possibly attach or delete
-    avail_volumes = list(test_dict.get_volume_list(test_stage.free_volume))
-    avail_volumes.extend(test_dict.get_volume_list(test_stage.deleted_volume))
-    if avail_volumes:
-        ready_volume = random.choice(avail_volumes)
-        if ready_volume.get_state() != vol_header.DELETED:
-            test_stage_obj.set_volume_state(test_stage.free_volume)
-            candidate_resource_list += [ ready_volume.get_volume().uuid ]
-        else:
-            test_stage_obj.set_volume_state(test_stage.deleted_volume)
-    else:
-        test_stage_obj.set_volume_state(test_stage.no_free_volume)
-
-    #Fifthly, choose a volume for possible snasphot operation 
-    target_volume_snapshots = None
-    all_volume_snapshots = test_dict.get_all_available_snapshots()
-    if all_volume_snapshots:
-        target_volume_snapshots = random.choice(all_volume_snapshots)
-        snapshot_volume_obj = target_volume_snapshots.get_target_volume()
-        snapshot_volume = snapshot_volume_obj.get_volume()
-
-        if snapshot_volume_obj.get_state() == vol_header.CREATED:
-            #It means the volume is just created and not attached to any VM yet.
-            #This volume can not create any snapshot. 
-            test_stage_obj.set_snapshot_state(test_stage.no_volume_file)
-        else:
-            #if volume is not attached to any VM, we assume vm state is stopped
-            # or we assume its hypervisor support live snapshot creation
-            if snapshot_volume_obj.get_state() != vol_header.ATTACHED:
-                test_stage_obj.set_snapshot_live_cap(test_stage.snapshot_live_creation)
-                test_stage_obj.set_volume_vm_state(vm_header.STOPPED)
-            elif snapshot_volume_obj.get_target_vm().get_state() == vm_header.DESTROYED:
-                test_stage_obj.set_snapshot_live_cap(test_stage.Any)
-                test_stage_obj.set_volume_vm_state(vm_header.DESTROYED)
-            else:
-                volume_vm = snapshot_volume_obj.get_target_vm()
-                test_stage_obj.set_volume_vm_state(volume_vm.get_state())
-                target_vm_inv = volume_vm.get_vm()
-                host_inv = lib_find_host_by_vm(target_vm_inv)
-                if host_inv:
-                    if lib_check_live_snapshot_cap(host_inv):
-                        test_stage_obj.set_snapshot_live_cap(test_stage.snapshot_live_creation)
-                    else:
-                        test_stage_obj.set_snapshot_live_cap(test_stage.snapshot_no_live_creation)
-
-            #random pick up an available snapshot. Firstly choose from primary snapshot.
-            target_snapshot = None
-
-            #If volume is expunged, there isn't snapshot in primary storage 
-            if target_volume_snapshots.get_primary_snapshots() \
-                    and snapshot_volume_obj.get_state() != vol_header.DELETED\
-                    and snapshot_volume_obj.get_state() != vol_header.EXPUNGED:
-                target_snapshot = random.choice(target_volume_snapshots.get_primary_snapshots())
-                if target_snapshot in target_volume_snapshots.get_backuped_snapshots():
-                    if target_snapshot.get_volume_type() \
-                            == vol_header.ROOT_VOLUME:
-                        test_stage_obj.set_snapshot_state(test_stage.root_snapshot_in_both_ps_bs)
-                    else:
-                        test_stage_obj.set_snapshot_state(test_stage.data_snapshot_in_both_ps_bs)
+        if target_vm_list == None:
+            if test_dict.get_vm_list(vm_header.STOPPED):
+                if test_dict.get_vm_list(vm_header.DESTROYED):
+                    target_vm_state = random.choice([vm_header.RUNNING, \
+                            vm_header.STOPPED, vm_header.DESTROYED])
                 else:
-                    if target_snapshot.get_volume_type() \
-                            == vol_header.ROOT_VOLUME:
-                        test_stage_obj.set_snapshot_state(test_stage.root_snapshot_in_ps)
-                    else:
-                        test_stage_obj.set_snapshot_state(test_stage.data_snapshot_in_ps)
+                    target_vm_state = random.choice([vm_header.RUNNING, \
+                            vm_header.STOPPED])
             else:
-                if target_volume_snapshots.get_backuped_snapshots():
-                    target_snapshot = random.choice(target_volume_snapshots.get_backuped_snapshots())
-                    if target_snapshot.get_volume_type() \
-                            == vol_header.ROOT_VOLUME:
-                        test_stage_obj.set_snapshot_state(test_stage.root_snapshot_in_bs)
-                    else:
-                        test_stage_obj.set_snapshot_state(test_stage.data_snapshot_in_bs)
+                if test_dict.get_vm_list(vm_header.DESTROYED):
+                    target_vm_state = random.choice([vm_header.RUNNING, \
+                            vm_header.DESTROYED])
                 else:
-                    test_stage_obj.set_snapshot_state(test_stage.no_snapshot)
-    if target_snapshot:
-        if target_snapshot.get_target_volume().get_state() == vol_header.DELETED or target_snapshot.get_target_volume().get_state() == vol_header.EXPUNGED:
-            test_stage_obj.set_snapshot_state(test_stage.no_volume_file)
-        candidate_resource_list += [ target_snapshot.get_snapshot().uuid ]
-    if target_volume_snapshots:
-        if target_volume_snapshots.get_target_volume().get_state() == vol_header.DELETED or target_volume_snapshots.get_target_volume().get_state() == vol_header.EXPUNGED:
-            test_stage_obj.set_snapshot_state(test_stage.no_volume_file)
-
-
-    #Sixly, check system vip resource
-    vip_available = False
-    if not TestAction.create_vip in excluded_actions_list:
-        if not public_l3:
-            test_util.test_fail('\
-Test Case need to set robot_test_obj.public_l3, before call \
-lib_vm_random_operation(robot_test_obj), otherwise robot can not judge if there\
-is available free vip resource in system. Or you can add "create_vip" action \
-into robot_test_obj.exclusive_actions_list.')
-
-        #check if system has available IP resource for allocation. 
-        available_ip_evt = net_ops.get_ip_capacity_by_l3s([public_l3])
-        if available_ip_evt and available_ip_evt.availableCapacity > 0:
-            vip_available = True
-
-    #Add template image actions
-    avail_images = list(test_dict.get_image_list(test_stage.new_template_image))
-    avail_images.extend(test_dict.get_image_list(test_stage.deleted_image))
-    if avail_images:
-        target_image = random.choice(avail_images)
-        if target_image.get_state() != image_header.DELETED:
-            test_stage_obj.set_image_state(test_stage.new_template_image)
+                    target_vm_state = vm_header.RUNNING 
+        
+            #Secondly, choose a target VM from target status. 
+            target_vm_list = test_dict.get_vm_list(target_vm_state)
+        if target_vm_list:
+            target_vm = random.choice(target_vm_list)
+    
+            # vm state in db may become inconsistent due to VM may become paused for a short period and vm sync to ZStack
+            retry_count = 0
+            while retry_count < 120:
+                vm = lib_get_vm_by_uuid(target_vm.get_vm().uuid)
+                #vm state in db
+                vm_current_state = vm.state
+                if target_vm_state == vm_current_state:
+                    break
+                test_util.test_logger('[retry:] %s [vm:] %s current [state:] %s is not aligned with random test record [state:] \
+    %s .' % (retry_count, target_vm.get_vm().uuid, vm_current_state, target_vm_state))
+                time.sleep(2)
+                retry_count += 1
+            if target_vm_state != vm_current_state:
+                test_util.test_fail('\
+    [vm:] %s current [state:] %s is not aligned with random test record [state:] \
+    %s .' % (target_vm.get_vm().uuid, vm_current_state, target_vm_state))
+        
+            test_stage_obj.set_vm_state(vm_current_state)
+    
+            test_util.test_logger('target vm is : %s' % target_vm.get_vm().uuid)
+            test_util.test_logger('target test obj: %s' % test_dict)
+            candidate_resource_list += [ target_vm.get_vm().uuid ]
+    
+            host_inv = lib_find_host_by_vm(vm)
+            if host_inv:
+                bs = lib_get_backup_storage_list_by_vm(vm)[0]
+                
+                if lib_check_live_snapshot_cap(host_inv) and bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+                    test_stage_obj.set_vm_live_template_cap(test_stage.template_live_creation)
+                else:
+                    test_stage_obj.set_vm_live_template_cap(test_stage.template_no_live_creation)
+    
+            #Thirdly, check VM's volume status. E.g. if could add a new volume.
+            vm_volumes = test_dict.get_volume_list(target_vm.get_vm().uuid)
+            if vm_volumes:
+                vm_volume_number = len(vm_volumes)
+            else:
+    	        vm_volume_number = 0
+    
+            if vm_volume_number > 0 and vm_volume_number < 24:
+                test_stage_obj.set_vm_volume_state(test_stage.vm_volume_att_not_full)
+                attached_volume = random.choice(vm_volumes)
+            elif vm_volume_number == 0:
+                test_stage_obj.set_vm_volume_state(test_stage.vm_no_volume_att)
+            else:
+                test_stage_obj.set_vm_volume_state(test_stage.vm_volume_att_full)
+                attached_volume = random.choice(vm_volumes)
+        
+            if lib_check_vm_live_migration_cap(vm):
+                test_stage_obj.set_vm_live_migration_cap(test_stage.vm_live_migration)
+            else:
+                test_stage_obj.set_vm_live_migration_cap(test_stage.no_vm_live_migration)
         else:
-            test_stage_obj.set_image_state(test_stage.deleted_image)
-        candidate_resource_list += [ target_image.get_image().uuid ]
-    else:
-        test_stage_obj.set_image_state(test_stage.Any)
-
-    #Add SG actions
-    if test_dict.get_sg_list():
-        test_stage_obj.set_sg_state(test_stage.has_sg)
-    else:
-        test_stage_obj.set_sg_state(test_stage.no_sg)
-
-    #Add VIP actions
-    if test_dict.get_vip_list():
-        if vip_available:
-            test_stage_obj.set_vip_state(test_stage.has_vip)
+            test_stage_obj.set_vm_state(test_stage.Any)
+            test_stage_obj.set_vm_volume_state(test_stage.Any)
+            test_stage_obj.set_vm_live_migration_cap(test_stage.Any)
+    
+        #Fourthly, choose a available volume for possibly attach or delete
+        avail_volumes = None
+        if resource_uuid != None:
+            for candidate_volume in test_dict.get_all_volume_list():
+                if candidate_volume.get_volume().uuid == resource_uuid:
+                    avail_volumes = [ candidate_volume ]
+                    break
+        if avail_volumes == None:
+            avail_volumes = list(test_dict.get_volume_list(test_stage.free_volume))
+            avail_volumes.extend(test_dict.get_volume_list(test_stage.deleted_volume))
+        if avail_volumes:
+            ready_volume = random.choice(avail_volumes)
+            if ready_volume.get_state() != vol_header.DELETED:
+                test_stage_obj.set_volume_state(test_stage.free_volume)
+                candidate_resource_list += [ ready_volume.get_volume().uuid ]
+            else:
+                test_stage_obj.set_volume_state(test_stage.deleted_volume)
         else:
-            test_stage_obj.set_vip_state(test_stage.no_more_vip_res)
-    else:
-        if vip_available:
-            test_stage_obj.set_vip_state(test_stage.no_vip)
+            test_stage_obj.set_volume_state(test_stage.no_free_volume)
+    
+        #Fifthly, choose a volume for possible snasphot operation 
+        all_volume_snapshots = None
+        if resource_uuid != None:
+            for candidate_snapshots in test_dict.get_all_available_snapshots():
+                for candidate_snapshot in candidate_snapshots.get_primary_snapshots():
+                    if candidate_snapshot.get_snapshot().uuid == resource_uuid:
+                        all_volume_snapshots = [ candidate_snapshots ]
+                        break
+        target_volume_snapshots = None
+        if all_volume_snapshots == None:
+            all_volume_snapshots = test_dict.get_all_available_snapshots()
+        if all_volume_snapshots:
+            target_volume_snapshots = random.choice(all_volume_snapshots)
+            snapshot_volume_obj = target_volume_snapshots.get_target_volume()
+            snapshot_volume = snapshot_volume_obj.get_volume()
+    
+            if snapshot_volume_obj.get_state() == vol_header.CREATED:
+                #It means the volume is just created and not attached to any VM yet.
+                #This volume can not create any snapshot. 
+                test_stage_obj.set_snapshot_state(test_stage.no_volume_file)
+            else:
+                #if volume is not attached to any VM, we assume vm state is stopped
+                # or we assume its hypervisor support live snapshot creation
+                if snapshot_volume_obj.get_state() != vol_header.ATTACHED:
+                    test_stage_obj.set_snapshot_live_cap(test_stage.snapshot_live_creation)
+                    test_stage_obj.set_volume_vm_state(vm_header.STOPPED)
+                elif snapshot_volume_obj.get_target_vm().get_state() == vm_header.DESTROYED:
+                    test_stage_obj.set_snapshot_live_cap(test_stage.Any)
+                    test_stage_obj.set_volume_vm_state(vm_header.DESTROYED)
+                else:
+                    volume_vm = snapshot_volume_obj.get_target_vm()
+                    test_stage_obj.set_volume_vm_state(volume_vm.get_state())
+                    target_vm_inv = volume_vm.get_vm()
+                    host_inv = lib_find_host_by_vm(target_vm_inv)
+                    if host_inv:
+                        if lib_check_live_snapshot_cap(host_inv):
+                            test_stage_obj.set_snapshot_live_cap(test_stage.snapshot_live_creation)
+                        else:
+                            test_stage_obj.set_snapshot_live_cap(test_stage.snapshot_no_live_creation)
+    
+                #random pick up an available snapshot. Firstly choose from primary snapshot.
+                target_snapshot = None
+    
+                #If volume is expunged, there isn't snapshot in primary storage 
+                if target_volume_snapshots.get_primary_snapshots() \
+                        and snapshot_volume_obj.get_state() != vol_header.DELETED\
+                        and snapshot_volume_obj.get_state() != vol_header.EXPUNGED:
+                    if resource_uuid != None:
+                        for candidate_snapshot in candidate_snapshots.get_primary_snapshots():
+                            if candidate_snapshot.get_snapshot().uuid == resource_uuid:
+                                target_snapshot = candidate_snapshot
+                                break
+                    if target_snapshot == None:
+                        target_snapshot = random.choice(target_volume_snapshots.get_primary_snapshots())
+                    if target_snapshot in target_volume_snapshots.get_backuped_snapshots():
+                        if target_snapshot.get_volume_type() \
+                                == vol_header.ROOT_VOLUME:
+                            test_stage_obj.set_snapshot_state(test_stage.root_snapshot_in_both_ps_bs)
+                        else:
+                            test_stage_obj.set_snapshot_state(test_stage.data_snapshot_in_both_ps_bs)
+                    else:
+                        if target_snapshot.get_volume_type() \
+                                == vol_header.ROOT_VOLUME:
+                            test_stage_obj.set_snapshot_state(test_stage.root_snapshot_in_ps)
+                        else:
+                            test_stage_obj.set_snapshot_state(test_stage.data_snapshot_in_ps)
+                else:
+                    if target_volume_snapshots.get_backuped_snapshots():
+                        target_snapshot = random.choice(target_volume_snapshots.get_backuped_snapshots())
+                        if target_snapshot.get_volume_type() \
+                                == vol_header.ROOT_VOLUME:
+                            test_stage_obj.set_snapshot_state(test_stage.root_snapshot_in_bs)
+                        else:
+                            test_stage_obj.set_snapshot_state(test_stage.data_snapshot_in_bs)
+                    else:
+                        test_stage_obj.set_snapshot_state(test_stage.no_snapshot)
+        if target_snapshot:
+            if target_snapshot.get_target_volume().get_state() == vol_header.DELETED or target_snapshot.get_target_volume().get_state() == vol_header.EXPUNGED:
+                test_stage_obj.set_snapshot_state(test_stage.no_volume_file)
+            candidate_resource_list += [ target_snapshot.get_snapshot().uuid ]
+        if target_volume_snapshots:
+            if target_volume_snapshots.get_target_volume().get_state() == vol_header.DELETED or target_volume_snapshots.get_target_volume().get_state() == vol_header.EXPUNGED:
+                test_stage_obj.set_snapshot_state(test_stage.no_volume_file)
+
+
+        #Sixly, check system vip resource
+        vip_available = False
+        if not TestAction.create_vip in excluded_actions_list:
+            if not public_l3:
+                test_util.test_fail('\
+    Test Case need to set robot_test_obj.public_l3, before call \
+    lib_vm_random_operation(robot_test_obj), otherwise robot can not judge if there\
+    is available free vip resource in system. Or you can add "create_vip" action \
+    into robot_test_obj.exclusive_actions_list.')
+    
+            #check if system has available IP resource for allocation. 
+            available_ip_evt = net_ops.get_ip_capacity_by_l3s([public_l3])
+            if available_ip_evt and available_ip_evt.availableCapacity > 0:
+                vip_available = True
+    
+        #Add template image actions
+        avail_images = list(test_dict.get_image_list(test_stage.new_template_image))
+        avail_images.extend(test_dict.get_image_list(test_stage.deleted_image))
+        if avail_images:
+            target_image = random.choice(avail_images)
+            if target_image.get_state() != image_header.DELETED:
+                test_stage_obj.set_image_state(test_stage.new_template_image)
+            else:
+                test_stage_obj.set_image_state(test_stage.deleted_image)
+            candidate_resource_list += [ target_image.get_image().uuid ]
         else:
-            test_stage_obj.set_vip_state(test_stage.no_vip_res)
-
-    test_util.test_logger("action state_dict: %s" % test_stage_obj.get_state())
-    if avail_images and target_image != None and target_image.get_image().mediaType == 'RootVolumeTemplate':
-        if excluded_actions_list == None:
-            excluded_actions_list2 = [TestAction.create_data_volume_from_image]
+            test_stage_obj.set_image_state(test_stage.Any)
+    
+        #Add SG actions
+        if test_dict.get_sg_list():
+            test_stage_obj.set_sg_state(test_stage.has_sg)
         else:
-            excluded_actions_list2 = excluded_actions_list + [TestAction.create_data_volume_from_image]
-        action_list = ts_header.generate_action_list(test_stage_obj, \
-                excluded_actions_list2)
-    else:
-        action_list = ts_header.generate_action_list(test_stage_obj, \
-                excluded_actions_list)
-
-    test_util.test_logger('action list: %s' % action_list)
-
-    # Currently is randomly picking up.
-    next_action = lib_robot_pickup_action(robot_test_obj.get_required_path_list(), candidate_resource_list, action_list, \
-            robot_test_obj.get_action_history(), robot_test_obj.get_resource_action_history(), priority_actions, random_type)
-    robot_test_obj.add_action_history(next_action)
+            test_stage_obj.set_sg_state(test_stage.no_sg)
+    
+        #Add VIP actions
+        if test_dict.get_vip_list():
+            if vip_available:
+                test_stage_obj.set_vip_state(test_stage.has_vip)
+            else:
+                test_stage_obj.set_vip_state(test_stage.no_more_vip_res)
+        else:
+            if vip_available:
+                test_stage_obj.set_vip_state(test_stage.no_vip)
+            else:
+                test_stage_obj.set_vip_state(test_stage.no_vip_res)
+    
+        test_util.test_logger("action state_dict: %s" % test_stage_obj.get_state())
+        if avail_images and target_image != None and target_image.get_image().mediaType == 'RootVolumeTemplate':
+            if excluded_actions_list == None:
+                excluded_actions_list2 = [TestAction.create_data_volume_from_image]
+            else:
+                excluded_actions_list2 = excluded_actions_list + [TestAction.create_data_volume_from_image]
+            action_list = ts_header.generate_action_list(test_stage_obj, \
+                    excluded_actions_list2)
+        else:
+            action_list = ts_header.generate_action_list(test_stage_obj, \
+                    excluded_actions_list)
+    
+        test_util.test_logger('action list: %s' % action_list)
+    
+        # Currently is randomly picking up.
+        (next_action, path_execution) = lib_robot_pickup_action(robot_test_obj.get_required_path_list(), candidate_resource_list, action_list, \
+                robot_test_obj.get_action_history(), robot_test_obj.get_resource_action_history(), priority_actions, random_type)
+        if resource_uuid != None and not path_execution:
+            continue
+        robot_test_obj.add_action_history(next_action)
 
     if next_action == TestAction.create_vm:
         test_util.test_dsc('Robot Action: %s ' % next_action)
@@ -4978,18 +5020,18 @@ def lib_robot_pickup_action(required_path, resource_list, action_list, pre_robot
             all_exec_len.sort(reverse=True)
             res = random.choice(required_path_exec_len_dict[all_exec_len[0]])
             next_action = _next_action_for_required_path(required_path, all_exec_len[0])
-            return next_action
+            return (next_action, True)
         if history_len_dict:
             all_history_len = history_len_dict.keys()
             all_history_len.sort()
             next_action = random.choice(history_len_dict[all_history_len[0]])
-            return next_action
+            return (next_action, False)
         else:
-            return action_selector(action_list, pre_robot_actions, \
-                priority_actions).select()
+            return (action_selector(action_list, pre_robot_actions, \
+                priority_actions).select(), False)
     else:
-        return action_selector(action_list, pre_robot_actions, \
-            priority_actions).select()
+        return (action_selector(action_list, pre_robot_actions, \
+            priority_actions).select(), False)
 
 def lib_get_test_stub(suite_name=None):
     '''test_stub lib is not global test library. It is test suite level common
