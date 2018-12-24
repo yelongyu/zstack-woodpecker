@@ -198,7 +198,8 @@ def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
     vm_creation_option.set_session_uuid(session_uuid)
     vm_creation_option.set_ps_uuid(ps_uuid)
     vm_creation_option.set_strategy_type(strategy_type)
-    vm_creation_option.set_timeout(600000)
+    vm_creation_option.set_timeout(900000)
+#     vm_creation_option.set_timeout(600000)
 
     vm = zstack_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
