@@ -146,7 +146,7 @@
         <l2VlanNetwork name="$l2VlanNetworkName_ipv6" description="guest l2 vlan network"
           physicalInterface="$l2PublicNetworkInterface1"  vlan="$l2Vlan_ipv6" >
           <l3Networks>
-            <l3BasicNetwork name="$l3PublicNetworkName1" ipVersion="6" description="Basic L3 Network with Vlan for IPv6 private network">
+            <l3BasicNetwork name="$l3PrivateNetworkName" ipVersion="6" description="Basic L3 Network with Vlan for IPv6 private network">
               <ipv6Cidr name="$ipv6CidrName_private" description="Test"
                 ipv6Cidr="$ipv6Cidr_private" addressMode="Stateful-DHCP"  />
               <dns>$ipv6DNSServer</dns>
