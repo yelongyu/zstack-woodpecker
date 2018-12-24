@@ -38,16 +38,17 @@ def test():
 
     test_util.test_dsc('Create pxe server')
     pxe_servers = res_ops.query_resource(res_ops.PXE_SERVER)
+    [pxe_ip, interface] = test_stub.get_pxe_info()
     if not pxe_servers:
-        pxe_uuid = test_stub.create_pxe(zoneUuid = zone_uuid).uuid
+        pxe_uuid = test_stub.create_pxe(dhcp_interface = interface, hostname = pxe_ip, zoneUuid = zone_uuid).uuid
         baremetal_operations.attach_pxe_to_cluster(pxe_uuid, baremetal_cluster_uuid)
     else:
         pxe_uuid = pxe_servers[0].uuid
  
     test_util.test_dsc('Create a vm to simulate baremetal host')
-    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
-    cond = res_ops.gen_query_conditions('managementIp', '=', mn_ip) 
-    host = res_ops.query_resource(res_ops.HOST, cond)[0]
+    #mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    #cond = res_ops.gen_query_conditions('managementIp', '=', mn_ip) 
+    host = res_ops.query_resource(res_ops.HOST)[0]
     host_uuid = host.uuid
     host_ip = host.managementIp
     cond = res_ops.gen_query_conditions('hypervisorType', '=', 'KVM')
@@ -56,10 +57,10 @@ def test():
 
     test_util.test_dsc('Create chassis')
     test_stub.create_vbmc(vm, host_ip, 623)
-    chassis = test_stub.create_chassis(baremetal_cluster_uuid)
-    chassis_uuid = chassis.uuid 
+    chassis = test_stub.create_chassis(baremetal_cluster_uuid, address = host_ip)
+    chassis_uuid = chassis.uuid
     #Hack inspect ks file to support vbmc, include ipmi device logic and ipmi addr to 127.0.0.1
-    test_stub.hack_inspect_ks(host_ip)
+    test_stub.hack_inspect_ks(pxe_ip, host_ip)
 
     test_util.test_dsc('Inspect chassis, Because vbmc have bugs, \
 	reset vm unable to enable boot options, power off/on then reset is worked')
