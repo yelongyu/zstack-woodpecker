@@ -359,9 +359,9 @@ def hack_inspect_ks(pxe_ip, host_ip, port = 623, ks_file='inspector_ks.cfg'):
             ks_out.write(line)
     shell.call('scp %s %s:%s'  %(ks_file, pxe_ip, path))
 
-def hack_generic_ks(host_ip):
+def hack_generic_ks(pxe_ip):
     path = '/var/lib/zstack/virtualenv/baremetalpxeserver/lib/python2.7/site-packages/baremetalpxeserver/ks_tmpl/generic_ks_tmpl'
-    shell.call('scp %s:%s .' %(host_ip, path))
+    shell.call('scp %s:%s .' %(pxe_ip, path))
     ks = 'generic_ks_tmpl'
     with open(ks, 'r') as ks_in:
         lines = ks_in.readlines()
@@ -370,7 +370,7 @@ def hack_generic_ks(host_ip):
             if 'EXTRA_REPO' in line:
                 line = 'clearpart --all --initlabel\nautopart --type=lvm\n%packages\n@^minimal\n%end\n' + line
             ks_out.write(line)
-    shell.call('scp %s %s:%s'  %(ks, host_ip, path))
+    shell.call('scp %s %s:%s'  %(ks, pxe_ip, path))
 
 def ca_pem_workaround(host_ip):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null'
