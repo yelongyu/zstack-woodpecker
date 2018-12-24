@@ -52,6 +52,10 @@ class zstack_kvm_snapshot_checker(checker_header.TestChecker):
             test_util.test_logger('Checking Result: skip snapshot checking, since target volume: %s is Root volme' % target_volume.get_volume().uuid)
             return self.judge(self.exp_result)
 
+        if 'ebs://' in  target_volume.get_volume().installPath:
+            test_util.test_logger('Checking Result: skip snapshot checking, since target volume: %s is EBS volume' % target_volume.get_volume().uuid)
+            return self.judge(self.exp_result)
+
         #snapshots = self.test_obj.get_snapshot_list()
         sp = self.test_obj.get_current_snapshot()
         if not sp:
