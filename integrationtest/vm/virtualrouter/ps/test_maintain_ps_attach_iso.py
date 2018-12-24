@@ -83,7 +83,17 @@ def test():
     #vm_ops.reconnect_vr(vr_uuid)
     vrs = test_lib.lib_get_all_vrs()
     for vr in vrs:
-        vm_ops.start_vm(vr.uuid)  
+        vr_cond = res_ops.gen_query_conditions('uuid', '=', vr.uuid)
+        vr_inv = res_ops.query_resource(res_ops.VM_INSTANCE, vr_cond)[0]
+        if vr_inv.state == 'Stopped':
+            vm_ops.start_vm(vr.uuid)
+        else:
+            test_lib.lib_wait_target_up(vr_inv.vmNics[0].ip, '22', 360)
+            for _ in xrange(100):
+                if res_ops.query_resource(res_ops.VM_INSTANCE, vr_cond)[0].state != 'Running':
+                    time.sleep(3)
+                else:
+                    break
 
     vm.start()
     vm.check()

@@ -6,11 +6,13 @@ New Integration Test for delete vm under PS maintain mode.
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
+import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.header.vm as vm_header
 import os
+import time
 
 _config_ = {
         'timeout' : 1000,
@@ -63,7 +65,17 @@ def test():
     #vm_ops.reconnect_vr(vr_uuid)
     vrs = test_lib.lib_get_all_vrs()
     for vr in vrs:
-        vm_ops.start_vm(vr.uuid)  
+        vr_cond = res_ops.gen_query_conditions('uuid', '=', vr.uuid)
+        vr_inv = res_ops.query_resource(res_ops.VM_INSTANCE, vr_cond)[0]
+        if vr_inv.state == 'Stopped':
+            vm_ops.start_vm(vr.uuid)
+        else:
+            test_lib.lib_wait_target_up(vr_inv.vmNics[0].ip, '22', 360)
+            for _ in xrange(100):
+                if res_ops.query_resource(res_ops.VM_INSTANCE, vr_cond)[0].state != 'Running':
+                    time.sleep(3)
+                else:
+                    break
 
     test_lib.lib_set_delete_policy('vm', 'Direct')
     test_lib.lib_set_delete_policy('volume', 'Direct')
