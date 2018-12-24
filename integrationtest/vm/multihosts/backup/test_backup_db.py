@@ -9,6 +9,7 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.backupstorage_operations as bs_ops
+import zstackwoodpecker.operations.zone_operations as zone_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.tag_operations as tag_ops
@@ -70,11 +71,13 @@ def test():
     if not vm:
         test_util.test_fail('there sholuld be a vm after recovering db from remote backup bs')
     
+    schd_ops.change_scheduler_state(schd_job.uuid, 'disable')
+    db_backup3 = schd_ops.query_db_backup()
+    zone = res_ops.query_resource(res_ops.ZONE)[0]
+    zone_ops.delete_zone(zone.uuid)
+    recover_db = schd_ops.recover_db_from_backup(uuid=db_backup3[0].uuid, mysqlRootPassword='zstack.mysql.password')
     #wait for db recover
     time.sleep(60)
-    db_backup3 = schd_ops.query_db_backup()
-    zone.delete()
-    recover_db = schd_ops.recover_db_from_backup(uuid=db_backup3[0].uuid, mysqlRootPassword='zstack.mysql.password')
     vm = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
     if not vm:
         test_util.test_fail('there sholuld be a vm after recovering db from local backup bs')
@@ -85,7 +88,8 @@ def test():
     tag_ops.delete_tag(add_local_bs_tag.uuid)
     bs_ops.delete_backup_storage(remote_bs.uuid)    
     bs_ops.reclaim_space_from_bs(bs[0].uuid)
-    remote_vm.destroy()
+    remote_bs_vm.destroy()
+    test_vm.destroy()
 
 def error_cleanup():
     test_lib.lib_error_cleanup(test_obj_dict)

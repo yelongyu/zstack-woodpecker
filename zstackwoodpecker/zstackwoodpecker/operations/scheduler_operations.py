@@ -33,7 +33,7 @@ def del_scheduler_job(uuid, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Scheduler Job:] %s is deleted.' % uuid)
 
-def create_scheduler_trigger(name, type, start_time = None, repeat_count = None, interval = None, cron = None, session_uuid = None):
+def create_scheduler_trigger(name, start_time = None, repeat_count = None, interval = None, type = None, cron = None, session_uuid = None):
     action = api_actions.CreateSchedulerTriggerAction()
     action.name = name
     action.startTime = start_time
