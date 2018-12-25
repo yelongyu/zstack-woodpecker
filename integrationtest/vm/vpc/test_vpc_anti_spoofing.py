@@ -19,21 +19,12 @@ vpc2_l3_list = [VXLAN1_NAME, VXLAN2_NAME]
 vpc_l3_list = [vpc1_l3_list, vpc2_l3_list]
 vpc_name_list = ['vpc1','vpc2']
 
-
-case_flavor = dict(vm1_vm2_one_vpc_1vlan=   dict(vm1l3=VLAN1_NAME, vm2l3=VLAN1_NAME, one_vpc=True),
-                   vm1_vm2_one_vpc_2vlan=   dict(vm1l3=VLAN1_NAME, vm2l3=VLAN2_NAME, one_vpc=True),
-                   vm1_vm2_two_vpc=         dict(vm1l3=VLAN1_NAME, vm2l3=VXLAN2_NAME, one_vpc=False),
-                   vm1_classic_vm2_vpc  =   dict(vm1l3=CLASSIC_L3, vm2l3=VXLAN2_NAME, one_vpc=False)
-                   )
-
-
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 vr_list = []
 
 
 def test():
-    flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
 
     test_util.test_dsc("set global config anti-spoofing value to true ")
     cfg_ops.change_global_config(category="vm", name="cleanTraffic", value="true")
@@ -44,11 +35,11 @@ def test():
     for vr, l3_list in izip(vr_list, vpc_l3_list):
         test_stub.attach_l3_to_vpc_vr(vr, l3_list)
 
-    test_util.test_dsc("create two vm, vm1 in l3 {}, vm2 in l3 {}".format(flavor['vm1l3'], flavor['vm2l3']))
-    vm1 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(flavor['vm1l3']), l3_name=flavor['vm1l3'])
+    test_util.test_dsc("create two vm, vm1 in l3 {}, vm2 in l3 {}".format(VLAN1_NAME, VLAN2_NAME))
+    vm1 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(VLAN1_NAME), l3_name=VLAN1_NAME)
     test_obj_dict.add_vm(vm1)
     vm1.check()
-    vm2 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(flavor['vm2l3']), l3_name=flavor['vm2l3'])
+    vm2 = test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(VLAN2_NAME), l3_name=VLAN2_NAME)
     test_obj_dict.add_vm(vm2)
     vm2.check()
 
@@ -63,28 +54,8 @@ def test():
     vip.attach_eip(eip)
     vip.check()
 
-
-    if flavor['one_vpc']:
-        for vm in (vm1, vm2):
-            eip.attach(vm.get_vm().vmNics[0].uuid, vm)
-            vip.check()
-            eip.detach()
-            vip.check()
-    else:
-        eip.attach(vm1.get_vm().vmNics[0].uuid, vm1)
-        vip.check()
-        eip.detach()
-        vip.check()
-        eip.delete()
-        test_util.test_dsc("Create a new eip")
-        eip = test_stub.create_eip('eip2', vip_uuid=vip.get_vip().uuid)
-        vip.attach_eip(eip)
-        vip.check()
-        eip.attach(vm2.get_vm().vmNics[0].uuid, vm2)
-        vip.check()
-        eip.detach()
-        vip.check()
-        eip.delete()
+    test_util.test_dsc("set global config anti-spoofing value to default value false ")
+    cfg_ops.change_global_config(category="vm", name="cleanTraffic", value="false")
 
     test_lib.lib_error_cleanup(test_obj_dict)
     test_stub.remove_all_vpc_vrouter()
@@ -93,4 +64,3 @@ def test():
 def env_recover():
     test_lib.lib_error_cleanup(test_obj_dict)
     test_stub.remove_all_vpc_vrouter()
-
