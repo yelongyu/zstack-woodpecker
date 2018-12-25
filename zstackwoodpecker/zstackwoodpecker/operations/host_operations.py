@@ -23,6 +23,7 @@ def add_kvm_host(host_option, session_uuid=None):
     action.name = host_option.get_name()
     action.description = host_option.get_description()
     action.hostTags = host_option.get_host_tags()
+    action.systemTags = host_option.get_system_tags()
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Add KVM Host [uuid:] %s with [ip:] %s' % \
             (evt.uuid, action.managementIp))
