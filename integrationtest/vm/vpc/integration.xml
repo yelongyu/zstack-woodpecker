@@ -47,5 +47,6 @@
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_6vm_connection.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_prometheus.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_anti_spoofing.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_sg_anti_spoofing_reconnect_host.py</case>
     </suite>
 </integrationTest>
