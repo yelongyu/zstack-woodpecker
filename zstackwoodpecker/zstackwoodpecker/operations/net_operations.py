@@ -453,6 +453,7 @@ def add_ip_range(ip_range_option, session_uuid = None):
     action.gateway = ip_range_option.get_gateway()
     action.l3NetworkUuid = ip_range_option.get_l3_uuid()
     action.description = ip_range_option.get_description()
+    action.systemTags = ip_range_option.get_system_tags()
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger("[IP Range:] %s is add" % evt.inventory.uuid)
     return evt.inventory
@@ -830,9 +831,11 @@ def delete_certificate(uuid, session_uuid = None):
     test_util.test_logger('Delete [Certificate]: %s' % uuid)
     return evt.inventory
 
-def create_l3(name, l2_uuid, session_uuid = None):
+def create_l3(name, l2_uuid, ipVersion = None, session_uuid = None):
     action = api_actions.CreateL3NetworkAction()
     action.name = name
+    if ipVersion:
+        action.ipVersion = ipVersion
     action.l2NetworkUuid = l2_uuid
     action.timeout = 300000
     evt = acc_ops.execute_action_with_session(action, session_uuid)
