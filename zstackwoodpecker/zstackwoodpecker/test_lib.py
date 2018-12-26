@@ -3796,16 +3796,20 @@ def lib_get_sg_direction_rules(sg_uuid, direction, session_uuid=None):
             rules.append(sg_rule)
     return rules
 
-def lib_gen_sg_rule(port, protocol, type, addr):
+def lib_gen_sg_rule(port, protocol, type, addr, ipVersion = None):
     '''
     will return a rule object by giving parameters
     port: rule key, like Port.rule1_ports
     '''
     startPort, endPort = Port.get_start_end_ports(port)
     rule = inventory.SecurityGroupRuleAO()
-    rule.allowedCidr = '%s/32' % addr
     rule.endPort = endPort
     rule.startPort = startPort
+    if ipVersion == 6:
+        rule.ipVersion = ipVersion
+        rule.allowedCidr = '%s/64' % addr
+    else:
+        rule.allowedCidr = '%s/32' % addr
     rule.protocol = protocol
     rule.type = type
     return rule

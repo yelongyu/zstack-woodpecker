@@ -189,6 +189,8 @@ l2VlanNetworkName_ipv6 = ipv6_private_network
 l2Vlan_ipv6 = 1111
 ipv6Cidr_private = 2000:3000:4000:5000::1/64
 ipv6CidrName_private = host IPv6 Cidr private
+ipv6ImagesgUrl = http://192.168.200.100/mirror/diskimages/centos7_ipv6_sg.qcow2
+ipv6ImageNamesg = IPv6 test SG
 l3PrivateNetworkName = private network IPv6
 l3PublicNetworkName1 = public network IPv6
 

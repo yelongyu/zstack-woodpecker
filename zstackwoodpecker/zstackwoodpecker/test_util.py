@@ -231,6 +231,7 @@ class DataOption(object):
         self.session_uuid = None
         self.timeout = 300000   #5 mins
         self.name = None
+        self.ipVersion = None
         self.description = None
         self.resourceUUID = None
         #system tag is an array
@@ -246,6 +247,12 @@ class DataOption(object):
 
     def set_name(self, name):
         self.name = name
+
+    def set_ipVersion(self, ipVersion):
+        self.ipVersion = ipVersion
+
+    def get_ipVersion(self):
+        return self.ipVersion
 
     def get_name(self):
         return self.name
@@ -1056,13 +1063,18 @@ class BackupOption(DataOption):
 class SecurityGroupOption(DataOption):
     def __init__(self):
         self.name = None
+        self.ipVersion = None
         super(SecurityGroupOption, self).__init__()
 
     def set_name(self, name):
         self.name = name
+    def set_ipVersion(self, ipVersion):
+        self.ipVersion = ipVersion
 
     def get_name(self):
         return self.name
+    def get_ipVersion(self):
+        return self.ipVersion
 
 
 class LoadBalancerListenerOption(DataOption):

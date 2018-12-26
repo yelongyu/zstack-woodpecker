@@ -25,6 +25,9 @@ def create_security_group(sg_creation_option):
     else:
         action.name = sg_creation_option.get_name()
 
+    if sg_creation_option.get_ipVersion():
+        action.ipVersion = sg_creation_option.get_ipVersion()
+
     if not sg_creation_option.get_description():
         action.description = 'Test Security Group'
     else:
