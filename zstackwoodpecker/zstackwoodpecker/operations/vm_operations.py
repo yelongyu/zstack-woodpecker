@@ -14,6 +14,15 @@ import zstackwoodpecker.operations.config_operations as config_operations
 import os
 import inspect
 
+def set_vm_clean_traffic(vm_uuid, clean_traffic_enable=True, session_uuid=None):
+    action = api_actions.SetVmCleanTrafficAction()
+    action.uuid = vm_uuid
+    action.enable = clean_traffic_enable
+    action.timeout = 240000
+    test_util.action_logger('Set VM clean traffic [uuid:] %s' % vm_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
 def create_vm(vm_create_option):
     create_vm = api_actions.CreateVmInstanceAction()
     name = vm_create_option.get_name()
