@@ -860,6 +860,11 @@ class VolumeOption(DataOption):
     def get_system_tags(self):
         return self.system_tags
 
+    def set_volume_template_uuid(self, volume_template_uuid):
+        self.volume_template_uuid = volume_template_uuid
+
+    def get_volume_template_uuid(self):
+        return self.volume_template_uuid
 
 class ImageOption(DataOption):
     def __init__(self):
