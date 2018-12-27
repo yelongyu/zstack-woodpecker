@@ -458,6 +458,50 @@ def add_ip_range(ip_range_option, session_uuid = None):
     test_util.action_logger("[IP Range:] %s is add" % evt.inventory.uuid)
     return evt.inventory
 
+def add_ipv6_range(ipv6_range_option, session_uuid = None):
+    action = api_actions.AddIpv6RangeAction()
+    action.sessionUuid = session_uuid
+    action.timeout = 30000
+    action.name = ipv6_range_option.get_name()
+    action.startIp = ipv6_range_option.get_startIp()
+    action.endIp = ipv6_range_option.get_endIp()
+    action.netmask = ipv6_range_option.get_netmask()
+    action.gateway = ipv6_range_option.get_gateway()
+    action.addressMode = ipv6_range_option.get_addressMode()
+    action.l3NetworkUuid = ipv6_range_option.get_l3_uuid()
+    action.description = ipv6_range_option.get_description()
+    action.systemTags = ipv6_range_option.get_system_tags()
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("[IP Range:] %s is add" % evt.inventory.uuid)
+    return evt.inventory
+
+def add_ip_by_networkcidr(ip_by_networkcidr_option, session_uuid = None):
+    action = api_actions.AddIpRangeByNetworkCidrAction()
+    action.sessionUuid = session_uuid
+    action.timeout = 30000
+    action.name = ip_by_networkcidr_option.get_name()
+    action.networkCidr = ip_by_networkcidr_option.get_networkCidr()
+    action.l3NetworkUuid = ip_by_networkcidr_option.get_l3_uuid()
+    action.description = ip_by_networkcidr_option.get_description()
+    action.systemTags = ip_by_networkcidr_option.get_system_tags()
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("[IP v6 Range:] %s is add" % evt.inventory.uuid)
+    return evt.inventory
+
+def add_ipv6_by_networkcidr(ipv6_by_networkcidr_option, session_uuid = None):
+    action = api_actions.AddIpv6RangeByNetworkCidrAction()
+    action.sessionUuid = session_uuid
+    action.timeout = 30000
+    action.name = ipv6_by_networkcidr_option.get_name()
+    action.networkCidr = ipv6_by_networkcidr_option.get_networkCidr()
+    action.addressMode = ipv6_by_networkcidr_option.get_addressMode()
+    action.l3NetworkUuid = ipv6_by_networkcidr_option.get_l3_uuid()
+    action.description = ipv6_by_networkcidr_option.get_description()
+    action.systemTags = ipv6_by_networkcidr_option.get_system_tags()
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("[IP v6 Range:] %s is add" % evt.inventory.uuid)
+    return evt.inventory
+
 def detach_l2(l2_uuid, cluster_uuid, session_uuid = None):
     action = api_actions.DetachL2NetworkFromClusterAction()
     action.sessionUuid = session_uuid

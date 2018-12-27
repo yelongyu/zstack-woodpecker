@@ -367,6 +367,102 @@ class IpRangeOption(DataOption):
     def get_netmask(self):
         return self.netmask
 
+class IpV6RangeOption(DataOption):
+    def __init__(self):
+        self.l3_uuid = None
+        self.startIp = None
+        self.endIp = None
+        self.gateway = None
+        self.netmask = None
+        self.addressMode = None
+	self.prefixLen = None
+        super(IpV6RangeOption, self).__init__()
+
+    def set_l3_uuid(self, l3_uuid):
+        self.l3_uuid = l3_uuid
+
+    def get_l3_uuid(self):
+        return self.l3_uuid
+
+    def set_startIp(self, startIp):
+        self.startIp = startIp
+
+    def get_startIp(self):
+        return self.startIp
+
+    def set_endIp(self, endIp):
+        self.endIp = endIp
+
+    def get_endIp(self):
+        return self.endIp
+
+    def set_gateway(self, gateway):
+        self.gateway = gateway
+
+    def get_gateway(self):
+        return self.gateway
+
+    def set_netmask(self, netmask):
+        self.netmask = netmask
+
+    def get_netmask(self):
+        return self.netmask
+
+    def set_addressMode(self, addressMode):
+        self.addressMode = addressMode
+
+    def get_addressMode(self):
+        return self.addressMode
+  
+    def set_prefixLen(self, prefixLen):
+        self.prefixLen = prefixLen
+
+    def get_prefixLen(self):
+        return self.prefixLen
+
+class Ip_By_NetworkCidrOption(DataOption):
+    def __init__(self):
+        self.l3_uuid = None
+        self.networkCidr = None
+        super(Ip_By_NetworkCidrOption, self).__init__()
+
+    def set_l3_uuid(self, l3_uuid):
+        self.l3_uuid = l3_uuid
+
+    def get_l3_uuid(self):
+        return self.l3_uuid
+
+    def set_networkCidr(self, networkCidr):
+        self.networkCidr = networkCidr
+	
+    def get_networkCidr(self):
+        return self.networkCidr
+
+class IpV6_By_NetworkCidrOption(DataOption):
+    def __init__(self):
+        self.l3_uuid = None
+        self.networkCidr = None
+        self.addressMode = None
+        super(IpV6_By_NetworkCidrOption, self).__init__()
+
+    def set_l3_uuid(self, l3_uuid):
+        self.l3_uuid = l3_uuid
+
+    def get_l3_uuid(self):
+        return self.l3_uuid
+
+    def set_networkCidr(self, networkCidr):
+        self.networkCidr = networkCidr
+
+    def get_networkCidr(self):
+        return self.networkCidr
+
+    def set_addressMode(self, addressMode):
+        self.addressMode = addressMode
+
+    def get_addressMode(self):
+        return self.addressMode
+
 class VipOption(DataOption):
     def __init__(self):
         self.l3_uuid = None
@@ -860,11 +956,6 @@ class VolumeOption(DataOption):
     def get_system_tags(self):
         return self.system_tags
 
-    def set_volume_template_uuid(self, volume_template_uuid):
-        self.volume_template_uuid = volume_template_uuid
-
-    def get_volume_template_uuid(self):
-        return self.volume_template_uuid
 
 class ImageOption(DataOption):
     def __init__(self):
