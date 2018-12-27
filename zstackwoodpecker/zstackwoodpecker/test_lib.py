@@ -832,14 +832,11 @@ def lib_execute_shell_script_in_vm(vm_inv, script_file, l3_uuid=None, timeout=SS
     ssh.execute('rm -f %s' % temp_script, host_ip, h_username, h_password, port=h_port)
     return rsp
 
-def lib_execute_command_in_vm(vm, cmd, l3_uuid=None, ipv6 = None):
+def lib_execute_command_in_vm(vm, cmd, l3_uuid=None):
     '''
     The cmd was assumed to be returned as soon as possible.
     '''
-    ipv6 = ipv6
-    if not ipv6:
-        vr_vm = lib_find_vr_by_vm(vm)
-        vr_vm = vr_vm[0]
+    vr_vm = lib_find_vr_by_vm(vm)
     ret = True
     #if vr_vm[0].uuid == vm.uuid:
     #    lib_install_testagent_to_vr_with_vr_vm(vm)
@@ -886,6 +883,7 @@ def lib_execute_command_in_vm(vm, cmd, l3_uuid=None, ipv6 = None):
     #    else:
     #        ret = str(rsp.result)
 
+    vr_vm = vr_vm[0]
     if TestHarness == TestHarnessHost:
         #assign host l2 bridge ip.
         lib_set_vm_host_l2_ip(vm)
@@ -3505,38 +3503,28 @@ def lib_is_sg_rule_exist_in_sg_invs(sg_invs, protocol=None, target_ip=None, dire
 
 #assume vm is behind vr. vr image was assume to have required commands, e.g. nc, telnet, ssh etc. We will use nc to open vm's port.
 #will check and open all ports for vm
-def lib_open_vm_listen_ports(vm, ports, l3_uuid=None, target_ip = None, target_ipv6 = None):
-    target_ipv6 = target_ipv6
-    if not target_ipv6:
-        if not l3_uuid:
-            target_ip = vm.vmNics[0].ip
+def lib_open_vm_listen_ports(vm, ports, l3_uuid=None):
+    if not l3_uuid:
+        target_ip = vm.vmNics[0].ip
+    else:
+        for nic in vm.vmNics:
+            if nic.l3NetworkUuid == l3_uuid:
+                target_ip = nic.ip
+                break
         else:
-            for nic in vm.vmNics:
-                if nic.l3NetworkUuid == l3_uuid:
-                    target_ip = nic.ip
-                    break
-            else:
-                test_util.test_fail("Can not find [vm:] %s IP for [l3 uuid:] %s. Can not open ports for it." % (vm.uuid, l3_uuid))
-        lib_check_nc_exist(vm, l3_uuid)
+            test_util.test_fail("Can not find [vm:] %s IP for [l3 uuid:] %s. Can not open ports for it." % (vm.uuid, l3_uuid))
+
+    lib_check_nc_exist(vm, l3_uuid)
     flush_iptables_cmd = 'iptables -F; iptables -F -t nat'
 
     test_util.test_logger("Flush iptables rules")
-    if not target_ipv6:
-        test_result = lib_execute_command_in_vm(vm, flush_iptables_cmd)
-    else:
-        test_result = lib_execute_command_in_vm(vm, flush_iptables_cmd, ipv6 = target_ipv6)
+    test_result = lib_execute_command_in_vm(vm, flush_iptables_cmd)
 
     target_ports = ' '.join(str(port) for port in ports)
-    if target_ipv6:
-        port_checking_cmd = 'result=""; for port in `echo %s`; do echo "hello" | nc -w1 %s $port >/dev/null 2>&1; if [ $? -eq 0 ]; then result="${result}0";else result="${result}1"; (nohup nc -k -l %s $port >/dev/null 2>&1 </dev/null &); fi ; done; echo $result' % (target_ports, target_ipv6, target_ipv6)
-    else:
-        port_checking_cmd = 'result=""; for port in `echo %s`; do echo "hello" | nc -w1 %s $port >/dev/null 2>&1; if [ $? -eq 0 ]; then result="${result}0";else result="${result}1"; (nohup nc -k -l %s $port >/dev/null 2>&1 </dev/null &); fi ; done; echo $result' % (target_ports, target_ip, target_ip)
+    port_checking_cmd = 'result=""; for port in `echo %s`; do echo "hello" | nc -w1 %s $port >/dev/null 2>&1; if [ $? -eq 0 ]; then result="${result}0";else result="${result}1"; (nohup nc -k -l %s $port >/dev/null 2>&1 </dev/null &); fi ; done; echo $result' % (target_ports, target_ip, target_ip)
 
     test_util.test_logger("Doing opening vm port operations, might need 1 min")
-    if not target_ipv6:
-        test_result = lib_execute_command_in_vm(vm, flush_iptables_cmd)
-    else:
-        test_result = lib_execute_command_in_vm(vm, flush_iptables_cmd, ipv6 = target_ipv6)
+    test_result = lib_execute_command_in_vm(vm, port_checking_cmd)
     if not test_result:
         test_util.test_fail("check [vm:] %s ports failure. Please check the failure information. " % vm.uuid)
     test_result = test_result.strip()
@@ -3633,16 +3621,13 @@ def lib_check_vm_port(src_vm, dst_vm, port):
         test_util.test_logger('Fail to connect [vm:] %s [ip:] %s [port:] %s from [vm:] %s' % (dst_vm, target_ip, port, src_vm_ip))
         return False
 
-def lib_check_vm_ports_in_a_command(src_vm, dst_vm, allowed_ports, denied_ports, target_ipv6 = None):
+def lib_check_vm_ports_in_a_command(src_vm, dst_vm, allowed_ports, denied_ports):
     '''
     Check VM a group of ports connectibility within 1 ssh command.
     1 means connection refused. 0 means connection success. 
     '''
     common_l3 = lib_find_vms_same_l3_uuid([src_vm, dst_vm])
-    if target_ipv6:
-        target_ip = target_ipv6
-    else:
-        target_ip = lib_get_vm_nic_by_l3(dst_vm, common_l3).ip
+    target_ip = lib_get_vm_nic_by_l3(dst_vm, common_l3).ip
     src_ip = lib_get_vm_nic_by_l3(src_vm, common_l3).ip
     test_util.test_logger("[target vm:] %s [ip:] %s" % (dst_vm.uuid, target_ip))
     lib_check_ports_in_a_command(src_vm, src_ip, target_ip, allowed_ports, denied_ports, dst_vm, common_l3)
