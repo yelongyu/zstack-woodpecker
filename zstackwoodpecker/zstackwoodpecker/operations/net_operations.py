@@ -875,11 +875,13 @@ def delete_certificate(uuid, session_uuid = None):
     test_util.test_logger('Delete [Certificate]: %s' % uuid)
     return evt.inventory
 
-def create_l3(name, l2_uuid, ipVersion = None, session_uuid = None):
+def create_l3(name, l2_uuid, ipVersion = None, category = None, session_uuid = None):
     action = api_actions.CreateL3NetworkAction()
     action.name = name
     if ipVersion:
         action.ipVersion = ipVersion
+    if category:
+	action.category = category
     action.l2NetworkUuid = l2_uuid
     action.timeout = 300000
     evt = acc_ops.execute_action_with_session(action, session_uuid)

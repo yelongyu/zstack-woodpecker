@@ -63,31 +63,40 @@ class Dhcp_Ip_Server(object):
 		return self.ipv6_by_networkcidroption
 
 	def get_l2uuid(self):
-		for l2_network in res_ops.get_resource(self.get_l2_type):
-			if l2_network.type == self.get_l2_type()
+		for l2_network in res_ops.get_resource(self.get_l2_query_resource()):
+			if l2_network.type == self.get_l2_type():
 				self.l2_uuid = l2_network.uuid
 		return self.l2_uuid
 
 class Public_Ip_For_Dhcp(Dhcp_Ip_Server):
 	def __init__(self):
-		super(Dhcp_Ip_Server, self).__init__()
+		super(Public_Ip_For_Dhcp, self).__init__()
 		self.ipVersion = None
 		self.l3_uuid = None
-	
+		self.category = "Public"
+		
 	def set_ipVersion(self, ipVersion):
 		self.ipVersion = ipVersion
 
 	def get_ipVersion(self):
 		return self.ipVersion
 
-	def create_l3uuid(self):
-		self.l3_uuid = net_ops.create_l3("test_l3_dhcp",self.get_l2uuid,self.get_ipVersion).uuid
+	def create_l3uuid(self,name):
+		self.l3_uuid = net_ops.create_l3(name,self.get_l2uuid(),self.get_ipVersion(),self.category).uuid
 	
 	def get_l3uuid(self):
 		return self.l3_uuid
 
-	def add_ip_range(self):
-		net_ops.add_ip_range(self.ip_range_option)
+	def add_ip_range(self, name, start_ip, end_ip, gateway, netmask, ipversion = 4, systemTags = []):
+		self.ip_range_option.set_name(name)
+		self.ip_range_option.set_startIp(start_ip)
+		self.ip_range_option.set_endIp(end_ip)
+		self.ip_range_option.set_gateway(gateway)
+		self.ip_range_option.set_netmask(netmask)
+		self.ip_range_option.set_ipVersion(ipversion)
+		self.ip_range_option.set_system_tags(systemTags)
+		self.ip_range_option.set_l3_uuid(self.get_l3uuid())	
+		uuid = net_ops.add_ip_range(self.ip_range_option).uuid
 
 	def add_ipv6_range(self):
 		net_ops.add_ipv6_range(self.ipv6_range_option)		
@@ -101,11 +110,11 @@ class Public_Ip_For_Dhcp(Dhcp_Ip_Server):
 		
 class Private_IP_For_Dhcp(Dhcp_Ip_Server):
 	def __init__(self):
-		super(Dhcp_Ip_Server, self).__init__()
+		super(Private_IP_For_Dhcp, self).__init__()
 
 class VpcNetwork_IP_For_Dhcp(Dhcp_Ip_Server):
 	def __init__(self):
-		super(Dhcp_Ip_Server, self).__init__()
+		super(VpcNetwork_IP_For_Dhcp, self).__init__()
 
 
 
