@@ -21,8 +21,11 @@ class ZstackTestVolume(volume_header.TestVolume):
         self.delete_policy = test_lib.lib_get_delete_policy('volume')
         self.delete_delay_time = test_lib.lib_get_expunge_time('volume')
 
-    def create(self):
-        self.set_volume(vol_ops.create_volume_from_offering(self.volume_creation_option))
+    def create(self, from_offering=True):
+        if from_offering:
+            self.set_volume(vol_ops.create_volume_from_offering(self.volume_creation_option))
+        else:
+            self.set_volume(vol_ops._create_volume_from_template(self.volume_creation_option))
         super(ZstackTestVolume, self).create()
 
     def migrate(self, host_uuid, session_uuid = None):
