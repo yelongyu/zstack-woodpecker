@@ -11,7 +11,32 @@ import os
 import time
 import datetime
 import uuid
+import json
+import urllib2
+
 test_stub = test_lib.lib_get_test_stub()
+ding_url = "https://oapi.dingtalk.com/robot/send?access_token=d4a90949d4e4a0b1dc0dbb57989a58480795d67b82fb86ce848b801602cabe76"
+def sendMsg_to_Ding():
+	header = {
+			"Content-Type": "application/json",
+			"Charset": "UTF-8"
+		}
+	data = {
+                        "at": {
+                                "isAtAll": True
+                                },
+			"msgtype": "text",
+			"text": {
+					"content": "1.zstack global config  has changed on  latest nightly test.\n\
+2.need to doulbe confirm ui if has change example :Garbled words\n\
+3.antony(weijiang),you should double confirm with developer and then fix this issue."
+				}
+		}
+	sendData = json.dumps(data)
+	sendData = sendData.encode("utf-8")
+	request = urllib2.Request(url=ding_url, data=sendData, headers=header)
+	opener = urllib2.urlopen(request)
+	test_util.test_logger(opener.read())
 
 def environment(management_ip):
 	test_lib.lib_execute_ssh_cmd(management_ip, 'root', 'password', 'zstack-cli LogInByAccount accountName=admin password=password', 180)
@@ -35,6 +60,7 @@ def check(file1_path,file2_path):
 	output_result=test_stub.execute_shell_in_process_stdout('diff %s %s' %(file1_path,file2_path),'/tmp/%s' % uuid.uuid1().get_hex())
 	if output_result[0] != 0:
 		if output_result[1].strip():
+			sendMsg_to_Ding()
 			test_util.test_fail("global config has changes ,more detalis as follow\n %s" %(output_result[1]))
 
 def verify_config(management_ip):
