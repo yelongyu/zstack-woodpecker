@@ -612,3 +612,8 @@ not be created to a new template' % \
         Should not be called by test cases
         '''
         super(ZstackTestSnapshot, self).check()
+
+    def create_from(self, uuid):
+        self.volume = test_lib.lib_get_volume_by_uuid(uuid)
+        self.set_state(self.volume.state)
+        self.update()

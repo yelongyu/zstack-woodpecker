@@ -1746,6 +1746,9 @@ class Robot_Test_Object(object):
                 self.ps: [],
                 self.bs: []
                 } 
+        self.initial_formation = None
+        self.initial_formation_parameters = None
+        self.constant_path_list = []
 
     def add_action_history(self, action):
         self.action_history.append(action)
@@ -1860,6 +1863,28 @@ class Robot_Test_Object(object):
 
     def get_required_path_list(self):
         return self.required_path_list
+
+    def set_initial_formation(self, formation):
+        self.initial_formation = formation
+
+    def get_initial_formation(self):
+        return self.initial_formation
+
+    def set_initial_formation_parameters(self, parameters):
+        self.initial_formation_parameters = parameters
+
+    def get_initial_formation_parameters(self):
+        return self.initial_formation_parameters
+
+    def get_constant_path_list(self):
+        return self.constant_path_list
+
+    def set_constant_path_list(self, path_list):
+        self.constant_path_list = path_list
+
+    def get_constant_path_list(self):
+        return self.constant_path_list
+
 
 class ComponentLoader(object):
     def __init__(self):

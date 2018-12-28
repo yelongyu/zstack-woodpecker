@@ -28,6 +28,7 @@ import zstackwoodpecker.operations.node_operations as node_ops
 import zstackwoodpecker.operations.config_operations as conf_ops
 import zstackwoodpecker.operations.console_operations as cons_ops
 import zstackwoodpecker.operations.license_operations as lic_ops
+import zstackwoodpecker.operations.resource_stack as resource_stack_ops
 
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.header.volume as vol_header
@@ -4956,6 +4957,160 @@ def lib_vm_random_operation(robot_test_obj):
             robot_test_obj.set_required_path_list([])
 
     test_util.test_logger('Finsih action: %s execution' % next_action)
+
+def lib_robot_import_resource_from_formation(robot_test_obj, resource_list):
+     # import VM
+    test_dict = robot_test_obj.get_test_dict()
+    for resource in resource_list:
+        if resource.hasattr("VmInstance"):
+            test_util.test_logger("debug VmInstance %s" % (resource["VmInstance"]["uuid"]))
+            test_util.test_logger("debug VmInstance %s" % (resource["VmInstance"]["name"]))
+            import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
+            new_vm = zstack_vm_header.ZstackTestVm()
+            new_vm.create_from(resource["VmInstance"]["uuid"])
+            test_dict.add_vm(new_vm)
+
+    # import Volume
+    for resource in resource_list:
+        if resource.hasattr("Volume"):
+            test_util.test_logger("debug Volume list %s" % (resource["Volume"]["uuid"]))
+            test_util.test_logger("debug Volume list %s" % (resource["Volume"]["name"]))
+            import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
+            new_volume = zstack_volume_header.ZstackTestVolume()
+            new_volume.create_from(resource["Volume"]["uuid"])
+            test_dict.add_volume(new_volume)
+            if new_volume.get_volume().hasattr("vmInstanceUuid"):
+                test_dict.mv_volume(new_volume, test_stage.free_volume, new_volume.get_volume().vmInstanceUuid)
+
+
+    # import VIP
+
+    # import EIP
+
+    # import PF
+    robot_test_obj.set_test_dict(test_dict)
+
+
+def lib_robot_create_initial_formation(robot_test_obj):
+    '''
+        Create initial zstack formation for robot testing
+    '''
+
+    resource_stack_option = test_util.ResourceStackOption()
+    resource_stack_option.set_name("robot_test")
+    resource_stack_option.set_rollback("true")
+    resource_stack_option.set_templateContent(robot_test_obj.get_initial_formation())
+    resource_stack_option.set_parameters(robot_test_obj.get_initial_formation_parameters())
+    preview_resource_stack = resource_stack_ops.preview_resource_stack(resource_stack_option)
+    resource_stack = resource_stack_ops.create_resource_stack(resource_stack_option)
+
+    # Import resources from zstack formation so checkers could work for them
+    resource_list = resource_stack_ops.get_resource_from_resource_stack(resource_stack.uuid)
+    lib_robot_import_resource_from_formation(robot_test_obj, resource_list)
+
+
+def lib_robot_constant_path_operation(robot_test_obj):
+    '''
+        Constant path operations for robot testing
+    '''
+
+    test_dict = robot_test_obj.get_test_dict()
+    constant_path_list = robot_test_obj.get_constant_path_list()
+    if len(constant_path_list) > 0:
+        next_action = constant_path_list[0][0]
+        if next_action == TestAction.stop_vm:
+            target_vm = None
+            if len(constant_path_list[0]) > 1:
+                target_vm_name = constant_path_list[0][1]
+                all_vm_list = test_dict.get_all_vm_list()
+                for vm in all_vm_list:
+                    if vm.get_vm().name == target_vm_name:
+                        target_vm = vm
+                        break
+            if not target_vm:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+            test_util.test_dsc('Robot Action: %s; on VM: %s' \
+                    % (next_action, target_vm.get_vm().uuid))
+            target_vm.stop()
+            test_dict.mv_vm(target_vm, vm_header.RUNNING, vm_header.STOPPED)
+        elif next_action == TestAction.start_vm:
+            target_vm = None
+            if len(constant_path_list[0]) > 1:
+                target_vm_name = constant_path_list[0][1]
+                all_vm_list = test_dict.get_all_vm_list()
+                for vm in all_vm_list:
+                    if vm.get_vm().name == target_vm_name:
+                        target_vm = vm
+                        break
+            if not target_vm:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            test_util.test_dsc('Robot Action: %s; on VM: %s' \
+                    % (next_action, target_vm.get_vm().uuid))
+            robot_test_obj.add_resource_action_history(target_vm.get_vm().uuid, next_action)
+
+            target_vm.start()
+            test_dict.mv_vm(target_vm, vm_header.STOPPED, vm_header.RUNNING)
+        elif next_action == TestAction.attach_volume:
+            target_vm = None
+            target_volume = None
+            if len(constant_path_list[0]) > 2:
+                target_vm_name = constant_path_list[0][1]
+                target_volume_name = constant_path_list[0][2]
+                all_vm_list = test_dict.get_all_vm_list()
+                for vm in all_vm_list:
+                    if vm.get_vm().name == target_vm_name:
+                        target_vm = vm
+                        break
+                all_volume_list = test_dict.get_all_volume_list()
+                for volume in all_volume_list:
+                    if volume.get_volume().name == target_volume_name:
+                        target_volume = volume
+                        break
+
+            if not target_vm or not target_volume:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            test_util.test_dsc('Robot Action: %s; on Volume: %s; on VM: %s' % \
+                (next_action, target_volume.get_volume().uuid, \
+                target_vm.get_vm().uuid))
+    
+            root_volume = lib_get_root_volume(target_vm.get_vm())
+            ps = lib_get_primary_storage_by_uuid(root_volume.primaryStorageUuid)
+            if not lib_check_vm_live_migration_cap(target_vm.vm) or ps.type == inventory.LOCAL_STORAGE_TYPE:
+                ls_ref = lib_get_local_storage_reference_information(target_volume.get_volume().uuid)
+                if ls_ref:
+                    volume_host_uuid = ls_ref[0].hostUuid
+                    vm_host_uuid = lib_get_vm_host(target_vm.vm).uuid
+                    if vm_host_uuid and volume_host_uuid != vm_host_uuid:
+                        test_util.test_logger('need to migrate volume: %s to host: %s, before attach it to vm: %s' % (target_volume.get_volume().uuid, vm_host_uuid, target_vm.vm.uuid))
+                        target_volume.migrate(vm_host_uuid)
+    
+            target_volume.attach(target_vm)
+            test_dict.mv_volume(target_volume, test_stage.free_volume, target_vm.vm.uuid)
+        elif next_action == TestAction.detach_volume:
+            target_volume = None
+            if len(constant_path_list[0]) > 1:
+                target_volume_name = constant_path_list[0][1]
+                all_volume_list = test_dict.get_all_volume_list()
+                for volume in all_volume_list:
+                    if volume.get_volume().name == target_volume_name:
+                        target_volume = volume
+                        break
+
+            if not target_volume:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
+                (next_action, target_volume.get_volume().uuid))
+
+            target_vm_uuid = target_volume.get_volume().vmInstanceUuid
+            target_volume.detach()
+            test_dict.mv_volume(target_volume, target_vm_uuid, test_stage.free_volume)
+
+        constant_path_list.pop(0)
+        robot_test_obj.set_constant_path_list(constant_path_list)
+
 
 def lib_evaluate_path_execution(required_path, action_history):
     if not required_path or not action_history:
