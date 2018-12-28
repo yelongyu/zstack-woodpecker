@@ -66,4 +66,4 @@ def get_scsi_lun_candidate_to_attach_vm(vm_uuid, session_uuid=None):
     action.timeout = 240000
     test_util.action_logger('Get SCSI Lun Candidate to [VM:] %s' % (vm_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventory
+    return evt.inventories

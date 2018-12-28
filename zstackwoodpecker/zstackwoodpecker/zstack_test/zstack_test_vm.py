@@ -194,3 +194,8 @@ class ZstackTestVm(vm_header.TestVm):
     def set_delete_delay_time(self, delay_time):
         test_lib.lib_set_expunge_time(category = 'vm', value = delay_time)
         super(ZstackTestVm, self).set_delete_delay_time(delay_time)
+
+    def create_from(self, uuid):
+        self.vm = test_lib.lib_get_vm_by_uuid(uuid)
+        self.set_state(self.vm.state)
+        self.update()

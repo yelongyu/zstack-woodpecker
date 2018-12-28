@@ -134,3 +134,7 @@ class ZstackTestVolume(volume_header.TestVolume):
         test_lib.lib_set_expunge_time(category = 'volume', value = delay_time)
         super(ZstackTestVolume, self).set_delete_delay_time(delay_time)
 
+    def create_from(self, uuid):
+        self.volume = test_lib.lib_get_volume_by_uuid(uuid)
+        self.set_state(self.volume.state)
+        self.update()
