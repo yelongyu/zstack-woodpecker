@@ -932,6 +932,12 @@ class VolumeOption(DataOption):
     def get_disk_offering_uuid(self):
         return self.disk_offering_uuid
 
+    def set_volume_template_uuid(self, volume_template_uuid):
+        self.volume_template_uuid = volume_template_uuid
+
+    def get_volume_template_uuid(self):
+        return self.volume_template_uuid
+
     def set_primary_storage_uuid(self, primary_storage_uuid):
         self.primary_storage_uuid = primary_storage_uuid
 

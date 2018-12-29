@@ -15,7 +15,7 @@ test_stub = test_lib.lib_get_test_stub()
 data_migration = test_stub.DataMigration()
 
 def test():
-    chain1 = test_chain.TestChain(data_migration, 'create_vm')
+    chain1 = test_chain.TestChain(data_migration, ['create_vm', 'create_data_volume'])
     chain1.make_chain()
     test_util.test_dsc('Current test chain is [%s]' % chain1.test_chain)
     chain1.run_test()

@@ -69,7 +69,7 @@ def create_volume_from_template(image_uuid, ps_uuid, name = None, \
 def _create_volume_from_template(volume_option):
     action = api_actions.CreateDataVolumeFromVolumeTemplateAction()
     action.imageUuid = volume_option.get_volume_template_uuid()
-    action.primaryStorageUuid = volume_option.get_ps_uuid()
+    action.primaryStorageUuid = volume_option.get_primary_storage_uuid()
     name = volume_option.get_name()
     if not name:
         action.name = 'test_volume'

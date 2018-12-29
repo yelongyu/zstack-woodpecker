@@ -6,6 +6,7 @@ zstack vm test class
 import zstackwoodpecker.header.header as zstack_header
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.operations.vm_operations as vm_ops
+import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.tag_operations as tag_ops
@@ -199,3 +200,10 @@ class ZstackTestVm(vm_header.TestVm):
         self.vm = test_lib.lib_get_vm_by_uuid(uuid)
         self.set_state(self.vm.state)
         self.update()
+
+    def detach_volume(self):
+        data_vols = self.get_vm().allVolumes
+        vm_uuid = self.get_vm().uuid
+        data_vols = [vol for vol in data_vols if vol.type == 'Data']
+        for volume in data_vols:
+            vol_ops.detach_volume(volume.uuid, vm_uuid)

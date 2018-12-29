@@ -62,7 +62,7 @@ def migrate_vm_to_differnt_cluster(vm):
 
     vm.migrate(candidate_hosts[0].uuid)
 
-def create_volume(volume_creation_option=None, session_uuid = None):
+def create_volume(volume_creation_option=None, session_uuid = None, from_offering=True):
     if not volume_creation_option:
         disk_offering = test_lib.lib_get_disk_offering_by_name(os.getenv('smallDiskOfferingName'))
         volume_creation_option = test_util.VolumeOption()
@@ -72,7 +72,7 @@ def create_volume(volume_creation_option=None, session_uuid = None):
     volume_creation_option.set_session_uuid(session_uuid)
     volume = zstack_volume_header.ZstackTestVolume()
     volume.set_creation_option(volume_creation_option)
-    volume.create()
+    volume.create(from_offering)
     return volume
 
 def migrate_vm_to_random_host(vm):
@@ -156,8 +156,7 @@ class DataMigration(object):
 
     def create_vm(self, image_name=None):
         '''
-        {"step": "1",
-         "next": ["create_snapshot", "create_image", "migrate_vm", "clone_vm"],
+        {"next": ["create_snapshot", "create_image", "migrate_vm", "clone_vm", "migrate_image"],
          "skip": ["migrate_data_volume", "create_data_volume(from_offering=False)"]}
         '''
 #         if self.vm:
@@ -200,6 +199,7 @@ class DataMigration(object):
         if not vms:
             if not cloned:
                 self.vm.stop()
+                self.vm.detach_volume()
                 ps_uuid_to_migrate = self.get_ps_candidate().uuid
                 datamigr_ops.ps_migrage_root_volume(ps_uuid_to_migrate, self.vm.vm.rootVolumeUuid)
                 conditions = res_ops.gen_query_conditions('uuid', '=', self.vm.vm.uuid)
@@ -240,8 +240,9 @@ class DataMigration(object):
     def migrate_data_volume(self):
         '''
         {"must": 
-                {"before": ["copy_data", "migrate_vm"],
-                 "after": ["check_data", "check_origin_data_exist", "clean_up_ps_trash_and_check"]},
+                {"before": ["mount_disk_in_vm", "copy_data", "detach_vm", "migrate_vm"],
+                 "after": ["attach_vm", "mount_disk_in_vm", "check_data",
+                           "check_origin_data_exist", "clean_up_ps_trash_and_check"]},
          "next": ["create_image"],
          "weight": 2}
          '''
@@ -271,6 +272,7 @@ class DataMigration(object):
         if not self.data_volume:
             vol_uuid = self.vm.vm.rootVolumeUuid
         else:
+            test_obj_dict.add_volume(self.data_volume)
             vol_uuid = self.data_volume.get_volume().uuid
         self.snapshots = test_obj_dict.get_volume_snapshot(vol_uuid)
         self.snapshots.set_utility_vm(self.vm)
@@ -383,7 +385,7 @@ class DataMigration(object):
         '''
         {"must": 
                 {"after": ["check_origin_image_exist", "clean_up_bs_trash_and_check"]},
-         "next": ["create_vm", "migrate_image"],
+         "next": ["create_vm", "create_data_volume(from_offering=False)"],
          "weight": 1}
         '''
         self.get_image()
@@ -403,6 +405,13 @@ class DataMigration(object):
         all_bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)
         return [bs for bs in all_bs if bs.fsid == ps_fsid][0]
 
+    def get_ps_for_volume_creation(self):
+        image_bs_uuid = self.image.backupStorageRefs[0].backupStorageUuid
+        bs_cond = res_ops.gen_query_conditions('uuid', '=', image_bs_uuid)
+        bs_fsid = res_ops.query_resource(res_ops.BACKUP_STORAGE, bs_cond)[0].fsid
+        all_ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+        return [ps for ps in all_ps if ps.fsid == bs_fsid][0]
+
     def create_image(self):
         '''
         {"next": ["migrate_image", "create_vm", "create_data_volume(from_offering=False)"]}
@@ -417,13 +426,15 @@ class DataMigration(object):
         if not self.data_volume:
             self._image_name = 'root-volume-created-image-%s' % time.strftime('%y%m%d-%H%M%S', time.localtime())
             image_creation_option.set_root_volume_uuid(self.vm.vm.rootVolumeUuid)
+            root = True
         else:
             self._image_name = 'data-volume-created-image-%s' % time.strftime('%y%m%d-%H%M%S', time.localtime())
             image_creation_option.set_data_volume_uuid(self.data_volume.get_volume().uuid)
+            root = False
         image_creation_option.set_name(self._image_name)
         self._image = test_image.ZstackTestImage()
         self._image.set_creation_option(image_creation_option)
-        self._image.create()
+        self._image.create(root=root)
         self.image = self._image.image
         if bs.type.lower() == 'ceph':
             bs_mon_ip = bs.mons[0].monAddr
@@ -464,31 +475,41 @@ class DataMigration(object):
 
     def create_data_volume(self, sharable=False, vms=[], from_offering=True):
         '''
-        {"step": 1,
-         "next": ["migrate_data_volume", "create_image", "create_snapshot"],
+        {"next": ["migrate_data_volume", "create_image", "create_snapshot"],
          "skip": ["create_vm", "clone_vm", "migrate_vm"]}
         '''
         conditions = res_ops.gen_query_conditions('name', '=', os.getenv('largeDiskOfferingName'))
         disk_offering_uuid = res_ops.query_resource(res_ops.DISK_OFFERING, conditions)[0].uuid
-        ps_uuid = self.vm.vm.allVolumes[0].primaryStorageUuid
         volume_option = test_util.VolumeOption()
         if from_offering:
             volume_option.set_disk_offering_uuid(disk_offering_uuid)
+            ps_uuid = self.vm.vm.allVolumes[0].primaryStorageUuid
         else:
             volume_option.set_volume_template_uuid(self.image.uuid)
+            ps_uuid = self.get_ps_for_volume_creation().uuid
         volume_option.set_name('data_volume_for_migration')
         volume_option.set_primary_storage_uuid(ps_uuid)
         if sharable:
             volume_option.set_system_tags(['ephemeral::shareable', 'capability::virtio-scsi'])
-        self.data_volume = create_volume(volume_option)
+        self.data_volume = create_volume(volume_option, from_offering=from_offering)
         self.set_ceph_mon_env(ps_uuid)
         if vms:
             for vm in vms:
                 self.data_volume.attach(vm)
         else:
+            if ps_uuid != self.vm.vm.allVolumes[0].primaryStorageUuid:
+                self.migrate_vm()
             self.data_volume.attach(self.vm)
         self.data_volume.check()
-        test_lib.lib_mkfs_for_volume(self.data_volume_uuid, self.vm.vm, '/mnt')
+        test_lib.lib_mkfs_for_volume(self.data_volume.get_volume().uuid, self.vm.vm, '/mnt')
+        return self
+
+    def attach_vm(self):
+        self.data_volume.attach(self.vm)
+        return self
+
+    def detach_vm(self):
+        self.data_volume.detach()
         return self
 
     def mount_disk_in_vm(self):
@@ -497,6 +518,7 @@ class DataMigration(object):
         script_file.write('''device="/dev/`ls -ltr --file-type /dev | awk '$4~/disk/ {print $NF}' | grep -v '[[:digit:]]' | tail -1`" \n mount ${device}1 /mnt''')
         script_file.close()
         test_lib.lib_execute_shell_script_in_vm(self.vm.vm, script_file.name)
+        return self
 
     def set_ceph_mon_env(self, ps_uuid):
         cond_vol = res_ops.gen_query_conditions('uuid', '=', ps_uuid)
