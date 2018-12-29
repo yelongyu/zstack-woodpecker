@@ -4,16 +4,18 @@ Run test in a chain, the chained actions would be picked up randomly or by some 
 @author: Legion
 '''
 
-import random
+import types, random
 import zstacklib.utils.jsonobject as jsonobject
+import zstackwoodpecker.test_util  as test_util
 
 class TestChain(object):
-    def __init__(self, test_obj, chain_length=20):
+    def __init__(self, test_obj, chain_head, chain_length=20):
         self.test_obj = test_obj
         test_ops = filter(lambda x, obj=test_obj: not x.startswith('_') 
-                          and hasattr(eval('obj.%s' % x), '__call__'), dir(test_obj))
-        self.chain_list = [o for o in test_ops if eval('test_obj.%s.__doc__' % o) is not None]
-        self.test_list = [f for f in self.chain_list if jsonobject.loads(eval('test_obj.%s.__doc__' % f)).step == '1']
+                          and hasattr(eval('obj.%s' % x), '__call__'), 
+                          dir(test_obj))
+        self.chain_list = [ops for ops in test_ops if eval('test_obj.%s.__doc__' % ops) is not None]
+        self.test_list = chain_head if isinstance(chain_head, types.ListType) else [chain_head]
         self.chain_length = chain_length
         self.test_chain = ''
         self.weights = {}
@@ -21,7 +23,9 @@ class TestChain(object):
 
     def make_chain(self, delay_added=None):
         test = jsonobject.loads(eval('self.test_obj.%s.__doc__' % 
-                                     (self.test_list[-2] if delay_added else self.test_list[-1])))
+                                     (self.test_list[-2].split('(')[0] 
+                                      if delay_added 
+                                      else self.test_list[-1].split('(')[0])))
         if test.skip:
             self.skip.extend(test.skip)
         if test.weight:
@@ -53,4 +57,8 @@ class TestChain(object):
         self.test_chain = 'self.test_obj' + '.' + '().'.join(self.test_list) + '()'
 
     def run_test(self):
+        for action in self.chain_list:
+            if action in self.test_list:
+                test_util.test_dsc('Action [%s] will be run [%s] times' % 
+                                   (action, self.test_list.count(action)))
         eval(self.test_chain)
