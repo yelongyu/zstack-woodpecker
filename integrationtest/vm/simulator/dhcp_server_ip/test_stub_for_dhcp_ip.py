@@ -8,6 +8,7 @@ import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.deploy_operations as dep_ops
 import zstackwoodpecker.test_util as test_util
+import zstackwoodpecker.operations.autoscaling_operations as aut_ops 
 
 class Dhcp_Ip_Server(object):
 	def __init__(self):
@@ -74,7 +75,11 @@ class Public_Ip_For_Dhcp(Dhcp_Ip_Server):
 		self.ipVersion = None
 		self.l3_uuid = None
 		self.category = "Public"
-		
+		self.l3_DHCP = "DHCP"
+		self.l3_SecurityGroup = "SecurityGroup" 
+		self.l3_Userdata = "Userdata"
+		self.networkservice_type = ["Flat","SecurityGroup"]
+
 	def set_ipVersion(self, ipVersion):
 		self.ipVersion = ipVersion
 
@@ -86,7 +91,50 @@ class Public_Ip_For_Dhcp(Dhcp_Ip_Server):
 	
 	def get_l3uuid(self):
 		return self.l3_uuid
+	
+	def del_l3uuid(self):
+		net_ops.delete_l3(self.get_l3uuid())
 
+	def set_category(self, category):
+		self.category = category
+	
+	def get_category(self):
+		return self.category
+
+	def set_l3_DHCP(self, l3_DHCP):
+		self.l3_DHCP = l3_DHCP
+
+	def get_l3_DHCP(self):
+		return self.l3_DHCP
+
+	def set_l3_SecurityGroup(self, l3_SecurityGroup):
+		self.l3_SecurityGroup = l3_SecurityGroup
+
+	def get_l3_SecurityGroup(self):
+		return self.l3_SecurityGroup
+
+	def set_l3_Userdata(self, l3_Userdata):
+		self.l3_Userdata = l3_Userdata
+
+	def get_l3_Userdata(self):
+		return self.l3_Userdata
+
+	def add_service_to_l3network(self):
+		for networkservice in self.networkservice_type:
+			if networkservice == "Flat":
+				allservices = [self.l3_DHCP,self.l3_Userdata]
+				cond = res_ops.gen_query_conditions("type", "=", networkservice)
+			elif networkservice == "SecurityGroup":
+				allservices = [self.l3_SecurityGroup]
+				cond = res_ops.gen_query_conditions("type", "=", networkservice)
+			network_service_provider_uuid = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER,cond)[0].uuid
+			test_util.test_logger("%s" %(network_service_provider_uuid))
+			aut_ops.AttachNetworkServiceToL3Network(self.get_l3uuid(),allservices,network_service_provider_uuid)
+
+	def check_dhcp_ipaddress(self):
+		cond = res_ops.gen_query_conditions("resourceUuid", "=", self.get_l3uuid())
+		return res_ops.query_resource(res_ops.SYSTEM_TAG,cond)[0].tag
+		
 	def add_ip_range(self, name, start_ip, end_ip, gateway, netmask, ipversion = 4, systemTags = []):
 		self.ip_range_option.set_name(name)
 		self.ip_range_option.set_startIp(start_ip)
@@ -96,7 +144,7 @@ class Public_Ip_For_Dhcp(Dhcp_Ip_Server):
 		self.ip_range_option.set_ipVersion(ipversion)
 		self.ip_range_option.set_system_tags(systemTags)
 		self.ip_range_option.set_l3_uuid(self.get_l3uuid())	
-		uuid = net_ops.add_ip_range(self.ip_range_option).uuid
+		return net_ops.add_ip_range(self.ip_range_option).uuid
 
 	def add_ipv6_range(self):
 		net_ops.add_ipv6_range(self.ipv6_range_option)		
