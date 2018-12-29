@@ -263,7 +263,7 @@ class DataMigration(object):
 
     def create_snapshot(self):
         '''
-        {"next": ["create_image", "migrate_vm", "clone_vm"],
+        {"next": ["create_image", "migrate_vm", "clone_vm", "migrate_data_volume"],
          "delay": "delete_snapshot",
          "weight": 1}
         '''
