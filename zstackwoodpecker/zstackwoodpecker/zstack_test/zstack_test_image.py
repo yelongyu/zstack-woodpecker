@@ -21,7 +21,7 @@ class ZstackTestImage(image_header.TestImage):
         self.delete_policy = test_lib.lib_get_delete_policy('image')
         self.delete_delay_time = test_lib.lib_get_expunge_time('image')
 
-    def create(self, apiid=None):
+    def create(self, apiid=None, root=True):
         '''
         Create image template from Root Volume using CreateRootVolumeTemplateFromRootVolume
         '''
@@ -31,7 +31,10 @@ class ZstackTestImage(image_header.TestImage):
             else:
                 self.image = img_ops.create_root_volume_template_apiid(self.image_creation_option, apiid)
         else:
-            self.image = img_ops.create_root_volume_template_apiid(self.image_creation_option, apiid)
+            if root:
+                self.image = img_ops.create_root_volume_template_apiid(self.image_creation_option, apiid)
+            else:
+                self.image = img_ops.create_data_volume_template(self.image_creation_option)
         super(ZstackTestImage, self).create()
 
     def delete(self):

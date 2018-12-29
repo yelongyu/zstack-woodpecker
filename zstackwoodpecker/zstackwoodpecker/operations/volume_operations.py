@@ -66,6 +66,20 @@ def create_volume_from_template(image_uuid, ps_uuid, name = None, \
     test_util.test_logger('[Volume:] %s is created from [Volume Template:] %s on [Primary Storage:] %s.' % (evt.inventory.uuid, image_uuid, ps_uuid))
     return evt.inventory
 
+def _create_volume_from_template(volume_option):
+    action = api_actions.CreateDataVolumeFromVolumeTemplateAction()
+    action.imageUuid = volume_option.get_volume_template_uuid()
+    action.primaryStorageUuid = volume_option.get_ps_uuid()
+    name = volume_option.get_name()
+    if not name:
+        action.name = 'test_volume'
+    else:
+        action.name = name
+    test_util.action_logger('Create [Volume:] %s with [volume template:] %s ' % (action.name, action.imageUuid))
+    evt = account_operations.execute_action_with_session(action, volume_option.get_session_uuid())
+    test_util.test_logger('[volume:] %s is created.' % evt.inventory.uuid)
+    return evt.inventory
+
 def stop_volume(volume_uuid, session_uuid=None):
     action = api_actions.ChangeVolumeStateAction()
     action.uuid = volume_uuid

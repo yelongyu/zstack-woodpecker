@@ -23,6 +23,7 @@ import zstackwoodpecker.operations.backupstorage_operations as bs_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.header.host as host_header
 import zstacklib.utils.jsonobject as jsonobject
+import zstackwoodpecker.test_state as test_state
 from zstacklib.utils import shell
 import threading
 import time
@@ -106,8 +107,14 @@ class DataMigration(object):
         self.vol_job_name = "APIPrimaryStorageMigrateVolumeMsg"
         self.image_job_name = "APIBackupStorageMigrateImageMsg"
         self.origin_ps = None
-        self.root_vol_install_path = None
-        self.root_vol_size = None
+        self.former_root_vol_install_path = None
+        self.former_root_vol_size = None
+        self.image = None
+        self.test_chain = None
+        self.cloned_vms = None
+
+    def __call__(self):
+        return self
 
     def get_current_ps(self):
         _ps1 = [os.getenv('cephPrimaryStorageName'), os.getenv('nfsPrimaryStorageName')]
@@ -116,8 +123,9 @@ class DataMigration(object):
         self.ps_2_name = [pn2 for pn2 in _ps2 if pn2][0]
 
     def get_image(self):
-        conditions = res_ops.gen_query_conditions('name', '=', self.image_name_net)
-        self.image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
+        if not self.image:
+            conditions = res_ops.gen_query_conditions('name', '=', self.image_name_net)
+            self.image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
         self.origin_bs = self.get_bs_inv(self.image.backupStorageRefs[0].backupStorageUuid)
         self.image_origin_path = self.image.backupStorageRefs[0].installPath
 
@@ -147,29 +155,53 @@ class DataMigration(object):
             self.ceph_bs_2 = res_ops.query_resource(res_ops.BACKUP_STORAGE, conditions)[0]
 
     def create_vm(self, image_name=None):
-        if not image_name:
-            image_name = self.image_name_net
-        self.vm = create_vm('multicluster_basic_vm', image_name, os.getenv('l3PublicNetworkName'))
+        '''
+        {"step": "1",
+         "next": ["create_snapshot", "create_image", "migrate_vm", "clone_vm"],
+         "skip": ["migrate_data_volume", "create_data_volume(from_offering=False)"]}
+        '''
+#         if self.vm:
+#             self.vm.destroy()
+        if self.cloned_vms:
+            try:
+                for vm in self.cloned_vms:
+                    vm.destroy()
+            except:
+                pass
+        self.get_image()
+        self.vm = create_vm('multicluster_basic_vm', self.image.name, os.getenv('l3PublicNetworkName'))
         self.vm.check()
-        self.root_vol_uuid = self.vm.vm.rootVolumeUuid
-        self.root_vol_size = self.vm.vm.allVolumes[0].size
-        self.root_vol_install_path = self.vm.vm.allVolumes[0].installPath
         self.origin_ps = self.get_ps_inv(self.vm.vm.allVolumes[0].primaryStorageUuid)
-        return self.vm
+        return self
 
     def clone_vm(self):
+        '''
+        {"next": ["create_image", "migrate_vm", "create_snapshot"]}
+        '''
         self.root_vol_uuid_list = []
         self.cloned_vms = self.vm.clone(['cloned-vm1', 'cloned-vm2'])
         for vm in self.cloned_vms:
             self.root_vol_uuid_list.append(vm.vm.rootVolumeUuid)
+        self.vm = self.cloned_vms[-1]
+        return self
 
     def migrate_vm(self, cloned=False, vms=[], start=True):
+        '''
+        {"must": 
+                {"before": "copy_data",
+                 "after": ["check_data", "check_origin_data_exist", "clean_up_ps_trash_and_check"]},
+         "next": ["create_snapshot", "create_image", "migrate_vm", "clone_vm"],
+         "weight": 2}
+        '''
 #         self.dst_ps = self.get_ps_candidate()
+        self.former_root_vol_uuid = self.vm.vm.rootVolumeUuid
+        self.former_root_vol_size = self.vm.vm.allVolumes[0].size
+        self.former_root_vol_install_path = self.vm.vm.allVolumes[0].installPath
         if not vms:
             if not cloned:
                 self.vm.stop()
                 ps_uuid_to_migrate = self.get_ps_candidate().uuid
-                datamigr_ops.ps_migrage_root_volume(ps_uuid_to_migrate, self.root_vol_uuid)
+                datamigr_ops.ps_migrage_root_volume(ps_uuid_to_migrate, self.vm.vm.rootVolumeUuid)
                 conditions = res_ops.gen_query_conditions('uuid', '=', self.vm.vm.uuid)
                 self.vm.vm = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)[0]
                 if start:
@@ -203,8 +235,19 @@ class DataMigration(object):
                     vm.check()
                 vms2.append(vm)
             return vms2
+        return self
 
     def migrate_data_volume(self):
+        '''
+        {"must": 
+                {"before": ["copy_data", "migrate_vm"],
+                 "after": ["check_data", "check_origin_data_exist", "clean_up_ps_trash_and_check"]},
+         "next": ["create_image"],
+         "weight": 2}
+         '''
+        self.former_data_volume_uuid = self.data_volume.get_volume().uuid
+        self.former_data_volume_size = self.data_volume.get_volume().size
+        self.former_data_vol_installPath = self.data_volume.get_volume().installPath
         if not self.dst_ps:
             self.dst_ps = self.get_ps_candidate(self.data_volume.get_volume().uuid)
         vol_migr_inv = datamigr_ops.ps_migrage_data_volume(self.dst_ps.uuid, self.data_volume.get_volume().uuid)
@@ -215,6 +258,33 @@ class DataMigration(object):
         self.data_volume.set_volume(res_ops.query_resource(res_ops.VOLUME, conditions)[0])
         assert self.data_volume.get_volume().primaryStorageUuid == self.dst_ps.uuid
         self.set_ceph_mon_env(self.dst_ps.uuid)
+        return self
+
+    def create_snapshot(self):
+        '''
+        {"next": ["create_image", "migrate_vm", "clone_vm"],
+         "delay": "delete_snapshot",
+         "weight": 1}
+        '''
+        test_obj_dict = test_state.TestStateDict()
+        test_obj_dict.add_vm(self.vm)
+        if not self.data_volume:
+            vol_uuid = self.vm.vm.rootVolumeUuid
+        else:
+            vol_uuid = self.data_volume.get_volume().uuid
+        self.snapshots = test_obj_dict.get_volume_snapshot(vol_uuid)
+        self.snapshots.set_utility_vm(self.vm)
+        self.snapshots.create_snapshot('create_snapshot_of_volume_%s' % vol_uuid)
+        self.snapshots.check()
+        self.snapshot = self.snapshots.get_current_snapshot()
+        return self
+
+    def delete_snapshot(self):
+        '''
+        {"next": ["create_image", "migrate_vm", "clone_vm", "migrate_data_volume"]}
+        '''
+        self.snapshots.delete_snapshot(self.snapshot)
+        return self
 
     def del_obsoleted_data_volume(self):
         vol_ops.delete_volume(self.data_volume_obsoleted.uuid)
@@ -224,6 +294,7 @@ class DataMigration(object):
         file_path = commands.getoutput(cmd).split('\n')[0]
         cp_cmd = 'sshpass -p password scp -o StrictHostKeyChecking=no %s root@%s:/mnt/' % (file_path, self.vm.get_vm().vmNics[0].ip)
         commands.getoutput(cp_cmd)
+        return self
 
     def check_data(self):
         check_cmd = '''sshpass -p password ssh -o LogLevel=quiet -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@%s \
@@ -231,16 +302,17 @@ class DataMigration(object):
         ''' % (self.vm.get_vm().vmNics[0].ip)
         ret = commands.getoutput(check_cmd).split('\n')[-1]
         assert ret == '0', "data check failed!, the return code is %s, 0 is expected" % ret
+        return self
 
     def check_origin_data_exist(self, root_vol=True):
         if root_vol:
-            vol_installPath = self.root_vol_install_path
-            vol_uuid = self.root_vol_uuid
-            vol_size = self.root_vol_size
+            vol_installPath = self.former_root_vol_install_path
+            vol_uuid = self.former_root_vol_uuid
+            vol_size = self.former_root_vol_size
         else:
-            vol_installPath = self.data_vol_installPath
-            vol_uuid = self.data_volume_uuid
-            vol_size = self.data_volume_size
+            vol_installPath = self.former_data_vol_installPath
+            vol_uuid = self.former_data_volume_uuid
+            vol_size = self.former_data_volume_size
         if self.origin_ps.type == 'Ceph':
             ceph_mon_ip = self.origin_ps.mons[0].monAddr
             self.chk_cmd = 'sshpass -p password ssh -o LogLevel=quiet -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@%s "rbd info %s --format=json"' \
@@ -265,6 +337,7 @@ class DataMigration(object):
             ps_trash = ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid).storageTrashSpecs
             trash_install_path_list = [trsh.installPath for trsh in ps_trash]
             assert vol_installPath[:-39] in trash_install_path_list
+        return self
 
     def check_vol_sp(self, vol_uuid, count):
         cond = res_ops.gen_query_conditions('volumeUuid', '=', vol_uuid)
@@ -276,9 +349,11 @@ class DataMigration(object):
                         % (self.origin_bs.mons[0].monAddr, self.image_origin_path.split('ceph://')[-1])
         img_info = shell.call(self.chk_cmd_img)
         origin_meta = jsonobject.loads(img_info)
-        assert origin_meta.name == self.image.uuid
+        test_util.test_dsc('origin image meta: %s' % origin_meta)
+        assert origin_meta.name == self.image_origin_path.split('/')[-1]
         assert origin_meta.size == self.image.size
         assert 'rbd_data' in origin_meta.block_name_prefix
+        return self
 
     def clean_up_bs_trash_and_check(self):
         bs_ops.clean_up_trash_on_backup_storage(self.origin_bs.uuid)
@@ -290,6 +365,7 @@ class DataMigration(object):
                 pass
             else:
                 raise e
+        return self
 
     def clean_up_ps_trash_and_check(self):
         ps_ops.clean_up_trash_on_primary_storage(self.origin_ps.uuid)
@@ -301,8 +377,15 @@ class DataMigration(object):
                 pass
             else:
                 raise e
+        return self
 
     def migrate_image(self):
+        '''
+        {"must": 
+                {"after": ["check_origin_image_exist", "clean_up_bs_trash_and_check"]},
+         "next": ["create_vm", "migrate_image"],
+         "weight": 1}
+        '''
         self.get_image()
         dst_bs = self.get_bs_candidate()
         image_migr_inv = datamigr_ops.bs_migrage_image(dst_bs.uuid, self.image.backupStorageRefs[0].backupStorageUuid, self.image.uuid)
@@ -311,29 +394,46 @@ class DataMigration(object):
         conditions = res_ops.gen_query_conditions('uuid', '=', image_migr_inv.uuid)
         self.image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
         assert self.image.backupStorageRefs[0].backupStorageUuid == dst_bs.uuid
+        return self
+
+    def get_bs_for_image_creation(self):
+        vm_ps_uuid = self.vm.vm.allVolumes[0].primaryStorageUuid
+        ps_cond = res_ops.gen_query_conditions('uuid', '=', vm_ps_uuid)
+        ps_fsid = res_ops.query_resource(res_ops.PRIMARY_STORAGE, ps_cond)[0].fsid
+        all_bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)
+        return [bs for bs in all_bs if bs.fsid == ps_fsid][0]
 
     def create_image(self):
+        '''
+        {"next": ["migrate_image", "create_vm", "create_data_volume(from_offering=False)"]}
+        '''
         _bs = self.query_bs()
         if _bs.type == 'Ceph':
-            bs = self.get_bs_candidate()
+            bs = self.get_bs_for_image_creation()
         else:
             bs = _bs
-        self._image_name = 'vm-created-image-%s' % time.strftime('%y%m%d-%H%M%S', time.localtime())
         image_creation_option = test_util.ImageOption()
         image_creation_option.set_backup_storage_uuid_list([bs.uuid])
-        image_creation_option.set_root_volume_uuid(self.vm.vm.rootVolumeUuid)
+        if not self.data_volume:
+            self._image_name = 'root-volume-created-image-%s' % time.strftime('%y%m%d-%H%M%S', time.localtime())
+            image_creation_option.set_root_volume_uuid(self.vm.vm.rootVolumeUuid)
+        else:
+            self._image_name = 'data-volume-created-image-%s' % time.strftime('%y%m%d-%H%M%S', time.localtime())
+            image_creation_option.set_data_volume_uuid(self.data_volume.get_volume().uuid)
         image_creation_option.set_name(self._image_name)
         self._image = test_image.ZstackTestImage()
         self._image.set_creation_option(image_creation_option)
         self._image.create()
+        self.image = self._image.image
         if bs.type.lower() == 'ceph':
             bs_mon_ip = bs.mons[0].monAddr
             os.environ['cephBackupStorageMonUrls'] = 'root:password@%s' % bs_mon_ip
 #         self._image.check()
+        return self
 
     def get_ps_candidate(self, vol_uuid=None):
         if not vol_uuid:
-            vol_uuid = self.root_vol_uuid
+            vol_uuid = self.vm.vm.rootVolumeUuid
         ps_to_migrate = random.choice(datamigr_ops.get_ps_candidate_for_vol_migration(vol_uuid))
 #         assert len(self.cand_ps) == 1
 #         self.get_ps()
@@ -362,12 +462,20 @@ class DataMigration(object):
             bs_to_migrate = self.get_bs_candidate()
             assert self.cand_bs[0].uuid == bs_to_migrate.uuid
 
-    def create_data_volume(self, sharable=False, vms=[]):
+    def create_data_volume(self, sharable=False, vms=[], from_offering=True):
+        '''
+        {"step": 1,
+         "next": ["migrate_data_volume", "create_image", "create_snapshot"],
+         "skip": ["create_vm", "clone_vm", "migrate_vm"]}
+        '''
         conditions = res_ops.gen_query_conditions('name', '=', os.getenv('largeDiskOfferingName'))
         disk_offering_uuid = res_ops.query_resource(res_ops.DISK_OFFERING, conditions)[0].uuid
         ps_uuid = self.vm.vm.allVolumes[0].primaryStorageUuid
         volume_option = test_util.VolumeOption()
-        volume_option.set_disk_offering_uuid(disk_offering_uuid)
+        if from_offering:
+            volume_option.set_disk_offering_uuid(disk_offering_uuid)
+        else:
+            volume_option.set_volume_template_uuid(self.image.uuid)
         volume_option.set_name('data_volume_for_migration')
         volume_option.set_primary_storage_uuid(ps_uuid)
         if sharable:
@@ -380,10 +488,8 @@ class DataMigration(object):
         else:
             self.data_volume.attach(self.vm)
         self.data_volume.check()
-        self.data_volume_uuid = self.data_volume.get_volume().uuid
-        self.data_volume_size = self.data_volume.get_volume().size
-        self.data_vol_installPath = self.data_volume.get_volume().installPath
         test_lib.lib_mkfs_for_volume(self.data_volume_uuid, self.vm.vm, '/mnt')
+        return self
 
     def mount_disk_in_vm(self):
         import tempfile
