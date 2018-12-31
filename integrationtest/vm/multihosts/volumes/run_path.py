@@ -76,7 +76,13 @@ templateContent = '''
 
 '''
 
+
+case_flavor = dict(path1=           dict(initial_formation=templateContent, path_list=[[TestAction.stop_vm, "vm1"], [TestAction.start_vm, "vm1"], [TestAction.delete_volume, "vm1-volume1"], [TestAction.create_image_from_volume, "vm1", "image1"], [TestAction.resize_volume, "vm1", 5*1024*1024], [TestAction.detach_volume, "vm1-volume2"], [TestAction.stop_vm, "vm1"], [TestAction.reinit_vm, "vm1"], [TestAction.start_vm, "vm1"], [TestAction.resize_volume, "vm1", 5*1024*1024], [TestAction.detach_volume, "vm1-volume3"], [TestAction.stop_vm, "vm1"], [TestAction.change_vm_image, "vm1"], [TestAction.create_data_vol_template_from_volume, "vm1-volume2", "image2"], [TestAction.reboot_vm, "vm1"]]))
+
 def test():
+    flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
+    initial_formation = flavor['initial_formation']
+    path_list = flavor['path_list']
 
     test_util.test_dsc('''Will mainly doing random test for all kinds of snapshot operations. VM, Volume and Image operations will also be tested. If reach 1 hour successful running condition, testing will success and quit.  SG actions, and VIP actions are removed in this robot test.
         VM resources: a special Utility vm is required to do volume attach/detach operation. 
@@ -104,14 +110,13 @@ def test():
     if os.environ.get('ZSTACK_SIMULATOR') != "yes":
         utility_vm.check()
     parameter = '{"PrivateNetworkUuid":"%s","ImageUuid":"%s","InstanceOfferingUuid":"%s","DiskofferingUuid":"%s"}' % (public_l3.uuid, image_uuid, instance_offering_queried[0].uuid, disk_offering.uuid)
-    constant_path_list = [[TestAction.stop_vm, "vm1"], [TestAction.start_vm, "vm1"], [TestAction.delete_volume, "vm1-volume1"], [TestAction.create_image_from_volume, "vm1", "image1"], [TestAction.resize_volume, "vm1", 5*1024*1024], [TestAction.detach_volume, "vm1-volume2"], [TestAction.stop_vm, "vm1"], [TestAction.reinit_vm, "vm1"], [TestAction.start_vm, "vm1"], [TestAction.resize_volume, "vm1", 5*1024*1024], [TestAction.detach_volume, "vm1-volume3"], [TestAction.stop_vm, "vm1"], [TestAction.change_vm_image, "vm1"], [TestAction.create_data_vol_template_from_volume, "vm1-volume2", "image2"], [TestAction.reboot_vm, "vm1"]]
 
     test_util.test_dsc('Constant Path Test Begin.')
     robot_test_obj = test_util.Robot_Test_Object()
     robot_test_obj.set_utility_vm(utility_vm)
-    robot_test_obj.set_initial_formation(templateContent)
+    robot_test_obj.set_initial_formation(initial_formation)
     robot_test_obj.set_initial_formation_parameters(parameter)
-    robot_test_obj.set_constant_path_list(constant_path_list)
+    robot_test_obj.set_constant_path_list(path_list)
 
     test_lib.lib_robot_create_initial_formation(robot_test_obj)
     rounds = 1
@@ -124,7 +129,7 @@ def test():
         rounds += 1
         test_lib.lib_robot_status_check(test_dict)
         if not robot_test_obj.get_constant_path_list():
-            test_util.test_dsc('Reach test pass exit criterial: Required path executed %s' % (constant_path_list))
+            test_util.test_dsc('Reach test pass exit criterial: Required path executed %s' % (path_list))
             break
 
     test_lib.lib_robot_cleanup(test_dict)
