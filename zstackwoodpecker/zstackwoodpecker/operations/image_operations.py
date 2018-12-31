@@ -434,3 +434,11 @@ def change_image_state(uuid, state, session_uuid):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory   
 
+def update_image(uuid, name, description, session_uuid = None):
+    action = api_actions.UpdateImageAction()
+    action.uuid = uuid
+    action.name = name
+    action.description = description
+    test_util.action_logger('Update image: %s Size' % uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory

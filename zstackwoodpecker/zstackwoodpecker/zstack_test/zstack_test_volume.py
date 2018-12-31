@@ -137,7 +137,15 @@ class ZstackTestVolume(volume_header.TestVolume):
         test_lib.lib_set_expunge_time(category = 'volume', value = delay_time)
         super(ZstackTestVolume, self).set_delete_delay_time(delay_time)
 
-    def create_from(self, uuid):
+    def resize(self, size):
+        if self.get_volume() == "Data":
+            vol_ops.resize_data_volume(self.get_volume().uuid, size)
+        elif self.get_volume() == "Root":
+            vol_ops.resize_volume(self.get_volume().uuid, size)
+
+    def create_from(self, uuid, target_vm=None):
         self.volume = test_lib.lib_get_volume_by_uuid(uuid)
         self.set_state(self.volume.state)
+        if target_vm:
+            super(ZstackTestVolume, self).attach(target_vm)
         self.update()

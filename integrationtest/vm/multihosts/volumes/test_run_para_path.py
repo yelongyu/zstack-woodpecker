@@ -59,21 +59,9 @@ templateContent = '''
                 "name": "vm1",
                 "instanceOfferingUuid": {"Ref":"InstanceOfferingUuid"},
                 "imageUuid":{"Ref":"ImageUuid"},
-                "l3NetworkUuids":[{"Ref":"PrivateNetworkUuid"}]
-            }
-        },
-        "DataVolume": {
-            "Type": "ZStack::Resource::DataVolume",
-            "Properties": {
-                "name": "volume1",
-                "diskOfferingUuid":{"Ref":"DiskofferingUuid"}
-            }
-        },
-        "AttachDataVolumeToVm": {
-            "Type": "ZStack::Action::AttachDataVolumeToVm",
-            "Properties": {
-                "vmInstanceUuid": {"Fn::GetAtt":["VmInstance","uuid"]},
-                "volumeUuid": {"Fn::GetAtt":["DataVolume","uuid"]}
+                "l3NetworkUuids":[{"Ref":"PrivateNetworkUuid"}],
+                "dataDiskOfferingUuids": [{"Ref":"DiskofferingUuid"},{"Ref":"DiskofferingUuid"},{"Ref":"DiskofferingUuid"},{"Ref":"DiskofferingUuid"},{"Ref":"DiskofferingUuid"},{"Ref":"DiskofferingUuid"},{"Ref":"DiskofferingUuid"},{"Ref":"DiskofferingUuid"}],
+                "systemTags":[{"Fn::Join":["::",["virtio","diskOffering",{"Ref":"DiskofferingUuid"},"num","8"]]}]
             }
         }
     },
@@ -116,7 +104,7 @@ def test():
     if os.environ.get('ZSTACK_SIMULATOR') != "yes":
         utility_vm.check()
     parameter = '{"PrivateNetworkUuid":"%s","ImageUuid":"%s","InstanceOfferingUuid":"%s","DiskofferingUuid":"%s"}' % (public_l3.uuid, image_uuid, instance_offering_queried[0].uuid, disk_offering.uuid)
-    constant_path_list = [[TestAction.stop_vm, "vm1"],[TestAction.start_vm, "vm1"], [TestAction.detach_volume, "volume1"], [TestAction.attach_volume, "vm1", "volume1"]]
+    constant_path_list = [[TestAction.stop_vm, "vm1"], [TestAction.start_vm, "vm1"], [TestAction.delete_volume, "vm1-volume1"], [TestAction.create_image_from_volume, "vm1", "image1"], [TestAction.resize_volume, "vm1", 5*1024*1024], [TestAction.detach_volume, "vm1-volume2"], [TestAction.stop_vm, "vm1"], [TestAction.reinit_vm, "vm1"], [TestAction.start_vm, "vm1"], [TestAction.resize_volume, "vm1", 5*1024*1024], [TestAction.detach_volume, "vm1-volume3"], [TestAction.stop_vm, "vm1"], [TestAction.change_vm_image, "vm1"], [TestAction.create_data_vol_template_from_volume, "vm1-volume2", "image2"], [TestAction.reboot_vm, "vm1"]]
 
     test_util.test_dsc('Constant Path Test Begin.')
     robot_test_obj = test_util.Robot_Test_Object()
@@ -130,7 +118,7 @@ def test():
     current_time = time.time()
     timeout_time = current_time + 3600
     while time.time() <= timeout_time:
-        test_util.test_dsc('New round %s starts: random operation pickup.' % rounds)
+        test_util.test_dsc('New round %s starts:' % rounds)
         test_lib.lib_robot_constant_path_operation(robot_test_obj)
         test_util.test_dsc('===============Round %s finished. Begin status checking.================' % rounds)
         rounds += 1

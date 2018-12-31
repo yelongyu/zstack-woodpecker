@@ -32,6 +32,8 @@ class TestAction(object):
     destroy_vm = 'destroy_vm'
     migrate_vm = 'migrate_vm'
     expunge_vm = 'expunge_vm'
+    reinit_vm = 'reinit_vm'
+    change_vm_image = 'change_vm_image'
 
     create_volume = 'create_volume'
     create_scsi_volume = 'create_scsi_volume'
@@ -40,6 +42,8 @@ class TestAction(object):
     detach_volume = 'detach_volume'
     expunge_volume = 'expunge_volume'
     migrate_volume = 'migrate_volume'
+    resize_volume = 'resize_volume'
+    resize_data_volume = 'resize_data_volume'
 
     create_data_vol_template_from_volume = \
             'create_data_volume_template_from_volume'
