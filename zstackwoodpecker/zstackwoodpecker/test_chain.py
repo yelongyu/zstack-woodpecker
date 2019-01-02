@@ -20,16 +20,14 @@ class TestChain(object):
         self.test_chain = ''
         self.weights = {}
         self.skip = []
+        self.delay = {}
         self.runned_chain = []
 
     def __call__(self):
         return self
 
     def make_chain(self, delay_added=None):
-        test = jsonobject.loads(eval('self.%s.__doc__' % 
-                                     (self.test_list[-2].split('(')[0] 
-                                      if delay_added 
-                                      else self.test_list[-1].split('(')[0])))
+        test = jsonobject.loads(eval('self.%s.__doc__' % self.test_list[-1].split('(')[0]))
         if test.skip:
             self.skip.extend(test.skip)
         if test.weight:
@@ -55,10 +53,15 @@ class TestChain(object):
             random.shuffle(_next_list)
             self.test_list.append(random.choice(_next_list))
         if test.delay:
-            self.test_list.append(test.delay)
+            for dly in test.delay:
+                self.delay[dly] = len(self.test_list)
         self.chain_length -= 1
         if self.chain_length > 0:
             self.make_chain(test.delay)
+        else:
+            for dl in self.delay.keys():
+                pos_to_insert = random.randint(self.delay[dl] + 1, len(self.test_list))
+                self.test_list.insert(pos_to_insert, dl)
         self.test_chain = 'self.' + '().'.join(self.test_list) + '()'
 
     def run_test(self):
