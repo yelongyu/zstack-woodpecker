@@ -95,7 +95,7 @@ def migrate_vm_to_random_host(vm):
 
 
 class DataMigration(TestChain):
-    def __init__(self, chain_head):
+    def __init__(self, chain_head=None):
         self.vm = None
         self.data_volume = None
         self.dst_ps = None
