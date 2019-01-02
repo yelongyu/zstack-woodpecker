@@ -21,6 +21,7 @@ import zstackwoodpecker.operations.hybrid_operations as hyb_ops
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.backupstorage_operations as bs_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
+from zstackwoodpecker.test_chain import TestChain
 import zstackwoodpecker.header.host as host_header
 import zstacklib.utils.jsonobject as jsonobject
 import zstackwoodpecker.test_state as test_state
@@ -93,8 +94,8 @@ def migrate_vm_to_random_host(vm):
         test_util.test_logger('[vm:] %s has been migrated from [host:] %s to [host:] %s' % (vm.vm.uuid, current_host.uuid, target_host.uuid))
 
 
-class DataMigration(object):
-    def __init__(self):
+class DataMigration(TestChain):
+    def __init__(self, chain_head):
         self.vm = None
         self.data_volume = None
         self.dst_ps = None
@@ -112,6 +113,7 @@ class DataMigration(object):
         self.image = None
         self.test_chain = None
         self.cloned_vms = None
+        super(DataMigration, self).__init__(chain_head)
 
     def __call__(self):
         return self
@@ -171,6 +173,8 @@ class DataMigration(object):
         self.vm = create_vm('multicluster_basic_vm', self.image.name, os.getenv('l3PublicNetworkName'))
         self.vm.check()
         self.origin_ps = self.get_ps_inv(self.vm.vm.allVolumes[0].primaryStorageUuid)
+        self.runned_chain.append(sys._getframe().f_code.co_name)
+        test_util.test_dsc('runned chain: %s' % self.runned_chain)
         return self
 
     def clone_vm(self):
@@ -182,12 +186,14 @@ class DataMigration(object):
         for vm in self.cloned_vms:
             self.root_vol_uuid_list.append(vm.vm.rootVolumeUuid)
         self.vm = self.cloned_vms[-1]
+        self.runned_chain.append(sys._getframe().f_code.co_name)
+        test_util.test_dsc('runned chain: %s' % self.runned_chain)
         return self
 
     def migrate_vm(self, cloned=False, vms=[], start=True):
         '''
         {"must": 
-                {"before": "copy_data",
+                {"before": ["copy_data"],
                  "after": ["check_data", "check_origin_data_exist", "clean_up_ps_trash_and_check"]},
          "next": ["create_snapshot", "create_image", "migrate_vm", "clone_vm"],
          "weight": 2}
@@ -196,6 +202,7 @@ class DataMigration(object):
         self.former_root_vol_uuid = self.vm.vm.rootVolumeUuid
         self.former_root_vol_size = self.vm.vm.allVolumes[0].size
         self.former_root_vol_install_path = self.vm.vm.allVolumes[0].installPath
+        self.origin_ps = self.get_ps_inv(self.vm.vm.allVolumes[0].primaryStorageUuid)
         if not vms:
             if not cloned:
                 self.vm.stop()
@@ -235,6 +242,8 @@ class DataMigration(object):
                     vm.check()
                 vms2.append(vm)
             return vms2
+        self.runned_chain.append(sys._getframe().f_code.co_name)
+        test_util.test_dsc('runned chain: %s' % self.runned_chain)
         return self
 
     def migrate_data_volume(self):
@@ -259,6 +268,8 @@ class DataMigration(object):
         self.data_volume.set_volume(res_ops.query_resource(res_ops.VOLUME, conditions)[0])
         assert self.data_volume.get_volume().primaryStorageUuid == self.dst_ps.uuid
         self.set_ceph_mon_env(self.dst_ps.uuid)
+        self.runned_chain.append(sys._getframe().f_code.co_name)
+        test_util.test_dsc('runned chain: %s' % self.runned_chain)
         return self
 
     def create_snapshot(self):
@@ -279,6 +290,8 @@ class DataMigration(object):
         self.snapshots.create_snapshot('create_snapshot_of_volume_%s' % vol_uuid)
         self.snapshots.check()
         self.snapshot = self.snapshots.get_current_snapshot()
+        self.runned_chain.append(sys._getframe().f_code.co_name)
+        test_util.test_dsc('runned chain: %s' % self.runned_chain)
         return self
 
     def delete_snapshot(self):
@@ -286,6 +299,8 @@ class DataMigration(object):
         {"next": ["create_image", "migrate_vm", "clone_vm", "migrate_data_volume"]}
         '''
         self.snapshots.delete_snapshot(self.snapshot)
+        self.runned_chain.append(sys._getframe().f_code.co_name)
+        test_util.test_dsc('runned chain: %s' % self.runned_chain)
         return self
 
     def del_obsoleted_data_volume(self):
@@ -396,6 +411,8 @@ class DataMigration(object):
         conditions = res_ops.gen_query_conditions('uuid', '=', image_migr_inv.uuid)
         self.image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
         assert self.image.backupStorageRefs[0].backupStorageUuid == dst_bs.uuid
+        self.runned_chain.append(sys._getframe().f_code.co_name)
+        test_util.test_dsc('runned chain: %s' % self.runned_chain)
         return self
 
     def get_bs_for_image_creation(self):
@@ -440,6 +457,8 @@ class DataMigration(object):
             bs_mon_ip = bs.mons[0].monAddr
             os.environ['cephBackupStorageMonUrls'] = 'root:password@%s' % bs_mon_ip
 #         self._image.check()
+        self.runned_chain.append(sys._getframe().f_code.co_name)
+        test_util.test_dsc('runned chain: %s' % self.runned_chain)
         return self
 
     def get_ps_candidate(self, vol_uuid=None):
@@ -502,6 +521,8 @@ class DataMigration(object):
             self.data_volume.attach(self.vm)
         self.data_volume.check()
         test_lib.lib_mkfs_for_volume(self.data_volume.get_volume().uuid, self.vm.vm, '/mnt')
+        self.runned_chain.append(sys._getframe().f_code.co_name)
+        test_util.test_dsc('runned chain: %s' % self.runned_chain)
         return self
 
     def attach_vm(self):
