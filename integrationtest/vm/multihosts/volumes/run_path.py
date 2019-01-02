@@ -1,11 +1,9 @@
 #coding:utf-8
 '''
 
-Robot Test only includes Vm operations, Volume operations and Snapshot operations
+Robot Test run specified path 
 
-Case will run 1 hour with fair strategy. 
-
-@author: Youyk
+@author: Quarkonics
 '''
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.action_select as action_select
@@ -87,13 +85,6 @@ def test():
     test_util.test_dsc('''Will mainly doing random test for all kinds of snapshot operations. VM, Volume and Image operations will also be tested. If reach 1 hour successful running condition, testing will success and quit.  SG actions, and VIP actions are removed in this robot test.
         VM resources: a special Utility vm is required to do volume attach/detach operation. 
         ''')
-    cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
-    cond = res_ops.gen_query_conditions('type', '=', 'UserVm', cond)
-    instance_offering_queried = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond)  
-    disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
-
-
-    public_l3 = test_lib.lib_get_l3_by_name(os.environ.get('l3PublicNetworkName'))
 
     vm_create_option = test_util.VmOption()
     #image has to use virtual router image, as it needs to do port checking
@@ -109,13 +100,11 @@ def test():
     test_dict.add_utility_vm(utility_vm)
     if os.environ.get('ZSTACK_SIMULATOR') != "yes":
         utility_vm.check()
-    parameter = '{"PrivateNetworkUuid":"%s","ImageUuid":"%s","InstanceOfferingUuid":"%s","DiskofferingUuid":"%s"}' % (public_l3.uuid, image_uuid, instance_offering_queried[0].uuid, disk_offering.uuid)
 
     test_util.test_dsc('Constant Path Test Begin.')
     robot_test_obj = test_util.Robot_Test_Object()
     robot_test_obj.set_utility_vm(utility_vm)
     robot_test_obj.set_initial_formation(initial_formation)
-    robot_test_obj.set_initial_formation_parameters(parameter)
     robot_test_obj.set_constant_path_list(path_list)
 
     test_lib.lib_robot_create_initial_formation(robot_test_obj)

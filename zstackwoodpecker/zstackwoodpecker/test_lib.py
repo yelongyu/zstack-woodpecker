@@ -5039,18 +5039,114 @@ def lib_robot_import_resource_from_formation(robot_test_obj, resource_list):
     # import PF
     robot_test_obj.set_test_dict(test_dict)
 
+def lib_robot_initial_formation_auto_parameter(robot_test_obj, template_uuid):
+    if robot_test_obj.get_initial_formation_parameters():
+        return
+
+    import zstackwoodpecker.operations.stack_template as stack_template_ops
+    import zstackwoodpecker.operations.resource_stack as resource_stack_ops
+    para_invs = stack_template_ops.check_stack_template(template_uuid)
+    instance_offering_dict = dict()
+    image_dict = dict()
+    pub_l3network_dict = dict()
+    pri_l3network_dict = dict()
+    disk_offering_dict = dict()
+    for para_inv in para_invs.parametes:
+        print para_inv
+        if para_inv.resourceType == "InstanceOffering":
+            if para_inv.paramName in instance_offering_dict:
+                test_util.test_fail("duplicate parameter name found, should be a bug")
+            cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
+            cond = res_ops.gen_query_conditions('type', '=', 'UserVm', cond)
+            for paraname in instance_offering_dict:
+                cond = res_ops.gen_query_conditions('uuid', '!=', instance_offering_dict[paraname], cond)
+            instance_offerings = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond)  
+            if not instance_offerings:
+                test_util.test_fail("Not enough disinct resource for so many parameters")
+            instance_offering_dict[para_inv.paramName] = instance_offerings[0].uuid
+        elif para_inv.resourceType == "Image":
+            if para_inv.paramName in image_dict:
+                test_util.test_fail("duplicate parameter name found, should be a bug")
+
+            cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
+            cond = res_ops.gen_query_conditions('status', '=', 'Ready', cond)
+            if not image_dict:
+                cond = res_ops.gen_query_conditions('name', '=', os.environ.get('imageName_net'), cond)
+                images = res_ops.query_resource(res_ops.IMAGE, cond)
+            else:
+                for paraname in instance_offering_dict:
+                    cond = res_ops.gen_query_conditions('uuid', '!=', image_dict[paraname], cond)
+                images = res_ops.query_resource(res_ops.IMAGE, cond)
+            if not images:
+                test_util.test_fail("Not enough disinct resource for so many parameters")
+
+            image_dict[para_inv.paramName] = images[0].uuid
+        elif para_inv.resourceType == "L3Network":
+            if para_inv.paramName.lower().find('pub'):
+                if para_inv.paramName in pub_l3network_dict:
+                    test_util.test_fail("duplicate parameter name found, should be a bug")
+                if not pub_l3network_dict:
+                    public_l3 = lib_get_l3_by_name(os.environ.get('l3PublicNetworkName'))
+                else:
+                    test_util.test_fail("No more public l3")
+                if not public_l3:
+                    test_util.test_fail("Not enough disinct resource for so many parameters")
+
+                pub_l3network_dict[para_inv.paramName] = public_l3.uuid
+            else:
+                if para_inv.paramName in pri_l3network_dict:
+                    test_util.test_fail("duplicate parameter name found, should be a bug")
+                
+                public_l3 = lib_get_l3_by_name(os.environ.get('l3PublicNetworkName'))
+                cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
+                cond = res_ops.gen_query_conditions('uuid', '!=', public_l3.uuid, cond)
+                for paraname in pri_l3network_dict:
+                    cond = res_ops.gen_query_conditions('uuid', '!=', pri_l3network_dict[paraname], cond)
+                pri_l3s = res_ops.query_resource(res_ops.L3_NETWORK, cond)  
+                if not pri_l3s:
+                    test_util.test_fail("Not enough disinct resource for so many parameters")
+
+                pri_l3network_dict[para_inv.paramName] = pri_l3s[0].uuid
+        elif para_inv.resourceType == "DiskOffering":
+            if para_inv.paramName in disk_offering_dict:
+                test_util.test_fail("duplicate parameter name found, should be a bug")
+ 
+            if not disk_offering_dict:
+                cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
+                cond = res_ops.gen_query_conditions('name', '=', os.environ.get('smallDiskOfferingName'), cond)
+	        disk_offerings = res_ops.query_resource(res_ops.DISK_OFFERING, cond)
+            else:
+                cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
+                for paraname in disk_offering_dict:
+                    cond = res_ops.gen_query_conditions('uuid', '!=', disk_offering_dict[paraname], cond)
+                disk_offerings = res_ops.query_resource(res_ops.DISK_OFFERING, cond)
+            if not disk_offerings:
+                test_util.test_fail("Not enough disinct resource for so many parameters")
+
+            disk_offering_dict[para_inv.paramName] = disk_offerings[0].uuid
+        all_dict = instance_offering_dict.copy()
+        all_dict.update(image_dict)
+        all_dict.update(pub_l3network_dict)
+        all_dict.update(pri_l3network_dict)
+        all_dict.update(disk_offering_dict)
+        robot_test_obj.set_initial_formation_parameters(str(all_dict).replace("u'", "'"))
 
 def lib_robot_create_initial_formation(robot_test_obj):
     '''
         Create initial zstack formation for robot testing
     '''
 
+    stack_template_option = test_util.StackTemplateOption()
+    stack_template_option.set_name("robot_test")
+    stack_template_option.set_templateContent(robot_test_obj.get_initial_formation())
+    import zstackwoodpecker.operations.stack_template as stack_template_ops
+    import zstackwoodpecker.operations.resource_stack as resource_stack_ops
+
+    stack_template = stack_template_ops.add_stack_template(stack_template_option)
+    lib_robot_initial_formation_auto_parameter(robot_test_obj, stack_template.uuid)
     resource_stack_option = test_util.ResourceStackOption()
-    resource_stack_option.set_name("robot_test")
-    resource_stack_option.set_rollback("true")
-    resource_stack_option.set_templateContent(robot_test_obj.get_initial_formation())
+    resource_stack_option.set_template_uuid(stack_template.uuid)
     resource_stack_option.set_parameters(robot_test_obj.get_initial_formation_parameters())
-    preview_resource_stack = resource_stack_ops.preview_resource_stack(resource_stack_option)
     resource_stack = resource_stack_ops.create_resource_stack(resource_stack_option)
 
     # Import resources from zstack formation so checkers could work for them
