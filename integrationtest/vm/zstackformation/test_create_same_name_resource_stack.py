@@ -11,9 +11,10 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.resource_stack as resource_stack_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 
+
 def test():
     test_util.test_dsc("Test Resource template Apis")
-    
+
     cond = res_ops.gen_query_conditions('status', '=', 'Connected')
     cond = res_ops.gen_query_conditions('state', '=', 'Enabled', cond)
     bs_queried = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)
@@ -78,16 +79,16 @@ def test():
     }
 }
 '''
-    #1.create resource stack 5 times with the same name
+    # 1.create resource stack 5 times with the same name
     parameter = '{"L3NetworkUuid":"%s","BackupStorageUuid":"%s"}' % (l3_queried[0].uuid, bs_queried[0].uuid)
     for i in range(5):
         resource_stack_option.set_templateContent(templateContent)
         resource_stack_option.set_parameters(parameter)
         preview_resource_stack = resource_stack_ops.preview_resource_stack(resource_stack_option)
         resource_stack = resource_stack_ops.create_resource_stack(resource_stack_option)
-    
 
-    #2.query resource stack
+
+    # 2.query resource stack
     cond = res_ops.gen_query_conditions('name', '=', 'Create_VM')
     resource_stack_queried = res_ops.query_resource(res_ops.RESOURCE_STACK, cond)
 
@@ -131,13 +132,13 @@ def test():
         test_util.test_fail("Fail to delete all resource stack and there are still %s resource stacks not deleted.") % len(resource_stack_queried)
     elif len(vm_queried) != 0 or len(instance_offering_queried) != 0 or len(image_queried) != 0:
         test_util.test_fail("Fail to delete resource when resource stack is deleted and there are still %s vm, %s instance offering, %s image not deleted.") % (len(vm_queried), len(instance_offering_queried), len(image_queried)) 
-   
+
 
     test_util.test_pass('Create Resource Stack With The Same Name Test Success')
 
 
 
 
-#Will be called only if exception happens in test().
+# Will be called only if exception happens in test().
 def error_cleanup():
     print "Ignore cleanup"

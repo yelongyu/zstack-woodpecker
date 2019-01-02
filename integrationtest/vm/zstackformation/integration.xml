@@ -6,6 +6,20 @@
         <case timeout='600' repeat='1' noparallel='True'>test_create_portforwarding.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_create_securitygroup.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_create_vpc_network.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_stack_with_wrong_parameters.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_create_resource_stack_rollback.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_create_resource_stack_timeout.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_create_same_name_resource_stack.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_create_stack_template_state_false.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_cr_public_network.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_cr_volume_from_template.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_cr_volume_from_template.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_resource_all_properties_preview.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_resource_stack_basic_operation.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_rollback_without_required_parameters.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_action_all_properties_preview.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_resource_all_properties_preview.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_restart_resource_stack.py</case>
 
     </suite>
 </integrationTest>
