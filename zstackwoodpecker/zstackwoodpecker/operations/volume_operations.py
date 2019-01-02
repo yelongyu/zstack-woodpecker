@@ -424,6 +424,15 @@ def update_volume(volume_uuid, name, description, session_uuid = None):
     action.uuid = volume_uuid
     action.name = name
     action.description = description
-    test_util.action_logger('Update Volume: %s Size' % volume_uuid)
+    test_util.action_logger('Update Volume: %s' % volume_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def update_snapshot(snapshot_uuid, name, description, session_uuid = None):
+    action = api_actions.UpdateVolumeSnapshotAction()
+    action.uuid = volume_uuid
+    action.name = name
+    action.description = description
+    test_util.action_logger('Update Snapshot: %s' % volume_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory

@@ -74,8 +74,52 @@ templateContent = '''
 
 '''
 
+templateContent2 = '''
+{
+    "ZStackTemplateFormatVersion": "2018-06-18",
+    "Description": "本示例将创建一个云盘，并将云盘加载到云主机上(基于本地存储), 创建示例前提环境：\n计算规格，镜像，云盘规格，私有网络，可用物理机",
+    "Parameters": {
+        "InstanceOfferingUuid": {
+            "Type": "String",
+            "Label": "计算规格",
+            "Description": "The instance offering uuid"
+        },
+        "ImageUuid":{
+            "Type": "String",
+            "Label": "镜像",
+            "Description": "The Image uuid for creating VmInstance, Please choose an image not iso"
+        },
+        "PrivateNetworkUuid":{
+            "Type": "String",
+            "Label": "私有网络",
+            "Description" : "The private network uuid for creating VmInstance"
+        }
+    },
+    "Resources": {
+        "VmInstance": {
+            "Type": "ZStack::Resource::VmInstance",
+            "Properties": {
+                "name": "vm1",
+                "instanceOfferingUuid": {"Ref":"InstanceOfferingUuid"},
+                "imageUuid":{"Ref":"ImageUuid"},
+                "l3NetworkUuids":[{"Ref":"PrivateNetworkUuid"}]
+            }
+        }
+    },
+    "Outputs": {
+        "VmInstance": {
+            "Value": {
+                "Ref": "VmInstance"
+            }
+        }
+    }
+}
 
-case_flavor = dict(path1=           dict(initial_formation=templateContent, path_list=[[TestAction.stop_vm, "vm1"], [TestAction.start_vm, "vm1"], [TestAction.delete_volume, "vm1-volume1"], [TestAction.create_image_from_volume, "vm1", "image1"], [TestAction.resize_volume, "vm1", 5*1024*1024], [TestAction.detach_volume, "vm1-volume2"], [TestAction.stop_vm, "vm1"], [TestAction.reinit_vm, "vm1"], [TestAction.start_vm, "vm1"], [TestAction.resize_volume, "vm1", 5*1024*1024], [TestAction.detach_volume, "vm1-volume3"], [TestAction.stop_vm, "vm1"], [TestAction.change_vm_image, "vm1"], [TestAction.create_data_vol_template_from_volume, "vm1-volume2", "image2"], [TestAction.reboot_vm, "vm1"]]))
+'''
+
+
+case_flavor = dict(path1=           dict(initial_formation=templateContent, path_list=[[TestAction.stop_vm, "vm1"], [TestAction.start_vm, "vm1"], [TestAction.delete_volume, "vm1-volume1"], [TestAction.create_image_from_volume, "vm1", "image1"], [TestAction.resize_volume, "vm1", 5*1024*1024], [TestAction.detach_volume, "vm1-volume2"], [TestAction.stop_vm, "vm1"], [TestAction.reinit_vm, "vm1"], [TestAction.start_vm, "vm1"], [TestAction.resize_volume, "vm1", 5*1024*1024], [TestAction.detach_volume, "vm1-volume3"], [TestAction.stop_vm, "vm1"], [TestAction.change_vm_image, "vm1"], [TestAction.create_data_vol_template_from_volume, "vm1-volume2", "image2"], [TestAction.reboot_vm, "vm1"]]),
+                   path2=           dict(initial_formation=templateContent2, path_list=[[TestAction.create_data_volume_from_image, "volume1"], [TestAction.create_data_volume_from_image, "volume2"], [TestAction.create_data_volume_from_image, "volume3"], [TestAction.create_data_volume_from_image, "volume4"], [TestAction.create_data_volume_from_image, "volume5"], [TestAction.create_data_volume_from_image, "volume6"], [TestAction.create_data_volume_from_image, "volume7"], [TestAction.create_data_volume_from_image, "volume8"], [TestAction.attach_volume, "vm1", "volume1"], [TestAction.attach_volume, "vm1", "volume2"], [TestAction.attach_volume, "vm1", "volume3"], [TestAction.attach_volume, "vm1", "volume4"], [TestAction.attach_volume, "vm1", "volume5"], [TestAction.attach_volume, "vm1", "volume6"], [TestAction.attach_volume, "vm1", "volume7"], [TestAction.attach_volume, "vm1", "volume8"], [TestAction.detach_volume, "volume2"], [TestAction.migrate_vm, "vm1"], [TestAction.ps_migrate_volume, "volume2"], [TestAction.delete_volume, "volume2"], [TestAction.create_image_from_volume, "vm1", "image1"], [TestAction.create_volume_snapshot, "volume3", 'snapshot1'], [TestAction.detach_volume, "volume3"], [TestAction.cleanup_ps_cache], [TestAction.create_volume_snapshot, "volume3", 'snapshot2'], [TestAction.reboot_vm, "vm1"]]))
 
 def test():
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]

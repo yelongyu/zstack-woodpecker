@@ -86,6 +86,9 @@ class TestAction(object):
     attach_primary_storage = 'attach_primary_storage_to_cluster'
     detach_primary_storage = 'detach_primary_storage_from_cluster'    
 
+    cleanup_ps_cache = 'cleanup_ps_cache'
+    ps_migrate_volume = 'ps_migrate_volume'
+
     vm_actions = [create_vm, stop_vm, start_vm, reboot_vm, destroy_vm, \
             migrate_vm, expunge_vm]
 
