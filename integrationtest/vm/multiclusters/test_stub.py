@@ -166,7 +166,8 @@ class DataMigration(TestChain):
         if self.cloned_vms:
             try:
                 for vm in self.cloned_vms:
-                    vm.destroy()
+                    vm.stop()
+#                     vm.destroy()
             except:
                 pass
         self.get_image()
@@ -258,8 +259,8 @@ class DataMigration(TestChain):
         self.former_data_volume_uuid = self.data_volume.get_volume().uuid
         self.former_data_volume_size = self.data_volume.get_volume().size
         self.former_data_vol_installPath = self.data_volume.get_volume().installPath
-        if not self.dst_ps:
-            self.dst_ps = self.get_ps_candidate(self.data_volume.get_volume().uuid)
+#         if not self.dst_ps:
+        self.dst_ps = self.get_ps_candidate(self.data_volume.get_volume().uuid)
         vol_migr_inv = datamigr_ops.ps_migrage_data_volume(self.dst_ps.uuid, self.data_volume.get_volume().uuid)
         cond_vol = res_ops.gen_query_conditions('uuid', '=', self.data_volume.get_volume().uuid)
         assert res_ops.query_resource(res_ops.VOLUME, cond_vol)
@@ -275,7 +276,7 @@ class DataMigration(TestChain):
     def create_snapshot(self):
         '''
         {"next": ["create_image", "migrate_vm", "clone_vm", "migrate_data_volume"],
-         "delay": "delete_snapshot",
+         "delay": ["delete_snapshot"],
          "weight": 1}
         '''
         test_obj_dict = test_state.TestStateDict()
@@ -336,7 +337,7 @@ class DataMigration(TestChain):
                         % (ceph_mon_ip, vol_installPath.split('ceph://')[-1])
             data_info = shell.call(self.chk_cmd)
             origin_meta = jsonobject.loads(data_info)
-            assert origin_meta.name == vol_uuid
+#             assert origin_meta.name == vol_uuid
             if root_vol:
                 assert origin_meta.size == vol_size
             else:
@@ -372,6 +373,32 @@ class DataMigration(TestChain):
         assert 'rbd_data' in origin_meta.block_name_prefix
         return self
 
+    def clean_up_single_image_trash(self):
+        trashes = bs_ops.get_trash_on_backup_storage(self.origin_bs.uuid)
+        for t in trashes:
+            if self.image.uuid in t.installPath:
+                trash_id = t.trashId
+                break
+        bs_ops.clean_up_trash_on_backup_storage(self.origin_bs.uuid, trash_id)
+        trashes = bs_ops.get_trash_on_backup_storage(self.origin_bs.uuid)
+        if trashes:
+            for t in trashes:
+                if self.image.uuid in t.installPath:
+                    test_util.test_fail('image trash cleanup failed!')
+
+    def clean_up_single_volume_trash(self):
+        trashes = ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid)
+        for t in trashes:
+            if self.vm.vm.rootVolumeUuid in t.installPath:
+                trash_id = t.trashId
+                break
+        ps_ops.clean_up_trash_on_primary_storage(self.origin_ps.uuid, trash_id)
+        trashes = ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid)
+        if trashes:
+            for t in trashes:
+                if self.image.uuid in t.installPath:
+                    test_util.test_fail('image trash cleanup failed!')
+
     def clean_up_bs_trash_and_check(self):
         bs_ops.clean_up_trash_on_backup_storage(self.origin_bs.uuid)
         assert not bs_ops.get_trash_on_backup_storage(self.origin_bs.uuid)
@@ -382,6 +409,8 @@ class DataMigration(TestChain):
                 pass
             else:
                 raise e
+        self.runned_chain.append(sys._getframe().f_code.co_name)
+        test_util.test_dsc('runned chain: %s' % self.runned_chain)
         return self
 
     def clean_up_ps_trash_and_check(self, target_ps_uuid=None):
@@ -396,7 +425,9 @@ class DataMigration(TestChain):
                     pass
                 else:
                     raise e
-            return self
+        self.runned_chain.append(sys._getframe().f_code.co_name)
+        test_util.test_dsc('runned chain: %s' % self.runned_chain)
+        return self
 
     def migrate_image(self):
         '''

@@ -12,14 +12,13 @@ import zstackwoodpecker.test_lib as test_lib
 
 test_obj_dict = test_state.TestStateDict()
 test_stub = test_lib.lib_get_test_stub()
-data_migration = test_stub.DataMigration()
+data_migration = test_stub.DataMigration('create_vm')
 
 def test():
-    chain1 = test_chain.TestChain(data_migration, 'create_vm')
-    chain1.make_chain()
-    test_util.test_dsc('Current test chain is [%s]' % chain1.test_chain)
-    chain1.run_test()
-    test_util.test_pass('chain1 [%s] Test Success' % chain1.test_chain)
+    data_migration.make_chain()
+    test_util.test_dsc('Current test chain is [%s]' % data_migration.test_chain)
+    data_migration.run_test()
+    test_util.test_pass('Root Volume Migration chain: [%s] Test Success' % data_migration.test_chain)
 
 #Will be called only if exception happens in test().
 def error_cleanup():

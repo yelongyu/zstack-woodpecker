@@ -199,11 +199,12 @@ def get_trash_on_backup_storage(backup_storage_uuid, session_uuid=None):
     action.timeout = 6000000
     test_util.action_logger('Get Trash On Backup Storage [uuid:] %s' % backup_storage_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.storageTrashes
+    return evt.storageTrashSpecs
 
-def clean_up_trash_on_backup_storage(backup_storage_uuid, session_uuid=None):
+def clean_up_trash_on_backup_storage(backup_storage_uuid, trash_id=None, session_uuid=None):
     action = api_actions.CleanUpTrashOnBackupStorageAction()
     action.uuid = backup_storage_uuid
+    action.trashId = trash_id
     action.timeout = 6000000
     test_util.action_logger('Clean Up Trash On Backup Storage [uuid:] %s' % backup_storage_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
