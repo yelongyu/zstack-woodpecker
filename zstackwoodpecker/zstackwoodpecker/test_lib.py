@@ -3058,6 +3058,31 @@ def lib_create_template_from_volume(volume_uuid, session_uuid=None):
 
     return image
 
+def lib_create_template_from_data_volume(volume_uuid, session_uuid=None):
+    bss = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid)
+    volume = lib_get_volume_by_uuid(volume_uuid)
+    bs_uuid = None
+    if volume.vmInstanceUuid != None:
+        vm = lib_get_vm_by_uuid(volume.vmInstanceUuid)
+        if vm.state == vm_header.RUNNING:
+            for bs in bss:
+                if hasattr(inventory, 'IMAGE_STORE_BACKUP_STORAGE_TYPE') and bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+                    bs_uuid = bs.uuid
+                    break
+    if bs_uuid == None:
+        bs_uuid = bss[random.randint(0, len(bss)-1)].uuid
+    #[Inlined import]
+    import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
+    image = zstack_image_header.ZstackTestImage()
+    image_creation_option = test_util.ImageOption()
+    image_creation_option.set_backup_storage_uuid_list([bs_uuid])
+    image_creation_option.set_name('test_image')
+    image.set_creation_option(image_creation_option)
+    image.create(apiid=None, root=False)
+
+    return image
+
+
 def lib_get_root_volume(vm):
     '''
     get root volume inventory by vm inventory
@@ -4959,22 +4984,46 @@ def lib_vm_random_operation(robot_test_obj):
     test_util.test_logger('Finsih action: %s execution' % next_action)
 
 def lib_robot_import_resource_from_formation(robot_test_obj, resource_list):
-     # import VM
+    # import VM
+    imported_resource = []
     test_dict = robot_test_obj.get_test_dict()
     for resource in resource_list:
         if resource.hasattr("VmInstance"):
             test_util.test_logger("debug VmInstance %s" % (resource["VmInstance"]["uuid"]))
             test_util.test_logger("debug VmInstance %s" % (resource["VmInstance"]["name"]))
+            if resource["VmInstance"]["uuid"] in imported_resource:
+                continue
+
+            imported_resource.append(resource["VmInstance"]["uuid"])
             import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
             new_vm = zstack_vm_header.ZstackTestVm()
             new_vm.create_from(resource["VmInstance"]["uuid"])
             test_dict.add_vm(new_vm)
+            # import Volume already attached
+            volume_index = 1
+            for volume in new_vm.get_vm().allVolumes:
+                if volume.type != "Data":
+                    continue
+                if volume.uuid in imported_resource:
+                    continue
+                vol_ops.update_volume(volume.uuid, "%s-volume%s" % (resource["VmInstance"]["name"], volume_index),  None)
+                imported_resource.append(volume.uuid)
+                import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
+                new_volume = zstack_volume_header.ZstackTestVolume()
+                new_volume.create_from(volume.uuid, new_vm)
+                test_dict.add_volume(new_volume)
+                test_dict.mv_volume(new_volume, test_stage.free_volume, new_volume.get_volume().vmInstanceUuid)
+                volume_index += 1
 
     # import Volume
     for resource in resource_list:
         if resource.hasattr("Volume"):
             test_util.test_logger("debug Volume list %s" % (resource["Volume"]["uuid"]))
             test_util.test_logger("debug Volume list %s" % (resource["Volume"]["name"]))
+            if resource["Volume"]["uuid"] in imported_resource:
+                continue
+
+            imported_resource.append(resource["Volume"]["uuid"])
             import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
             new_volume = zstack_volume_header.ZstackTestVolume()
             new_volume.create_from(resource["Volume"]["uuid"])
@@ -4990,18 +5039,114 @@ def lib_robot_import_resource_from_formation(robot_test_obj, resource_list):
     # import PF
     robot_test_obj.set_test_dict(test_dict)
 
+def lib_robot_initial_formation_auto_parameter(robot_test_obj, template_uuid):
+    if robot_test_obj.get_initial_formation_parameters():
+        return
+
+    import zstackwoodpecker.operations.stack_template as stack_template_ops
+    import zstackwoodpecker.operations.resource_stack as resource_stack_ops
+    para_invs = stack_template_ops.check_stack_template(template_uuid)
+    instance_offering_dict = dict()
+    image_dict = dict()
+    pub_l3network_dict = dict()
+    pri_l3network_dict = dict()
+    disk_offering_dict = dict()
+    for para_inv in para_invs.parametes:
+        print para_inv
+        if para_inv.resourceType == "InstanceOffering":
+            if para_inv.paramName in instance_offering_dict:
+                test_util.test_fail("duplicate parameter name found, should be a bug")
+            cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
+            cond = res_ops.gen_query_conditions('type', '=', 'UserVm', cond)
+            for paraname in instance_offering_dict:
+                cond = res_ops.gen_query_conditions('uuid', '!=', instance_offering_dict[paraname], cond)
+            instance_offerings = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond)  
+            if not instance_offerings:
+                test_util.test_fail("Not enough disinct resource for so many parameters")
+            instance_offering_dict[para_inv.paramName] = instance_offerings[0].uuid
+        elif para_inv.resourceType == "Image":
+            if para_inv.paramName in image_dict:
+                test_util.test_fail("duplicate parameter name found, should be a bug")
+
+            cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
+            cond = res_ops.gen_query_conditions('status', '=', 'Ready', cond)
+            if not image_dict:
+                cond = res_ops.gen_query_conditions('name', '=', os.environ.get('imageName_net'), cond)
+                images = res_ops.query_resource(res_ops.IMAGE, cond)
+            else:
+                for paraname in instance_offering_dict:
+                    cond = res_ops.gen_query_conditions('uuid', '!=', image_dict[paraname], cond)
+                images = res_ops.query_resource(res_ops.IMAGE, cond)
+            if not images:
+                test_util.test_fail("Not enough disinct resource for so many parameters")
+
+            image_dict[para_inv.paramName] = images[0].uuid
+        elif para_inv.resourceType == "L3Network":
+            if para_inv.paramName.lower().find('pub'):
+                if para_inv.paramName in pub_l3network_dict:
+                    test_util.test_fail("duplicate parameter name found, should be a bug")
+                if not pub_l3network_dict:
+                    public_l3 = lib_get_l3_by_name(os.environ.get('l3PublicNetworkName'))
+                else:
+                    test_util.test_fail("No more public l3")
+                if not public_l3:
+                    test_util.test_fail("Not enough disinct resource for so many parameters")
+
+                pub_l3network_dict[para_inv.paramName] = public_l3.uuid
+            else:
+                if para_inv.paramName in pri_l3network_dict:
+                    test_util.test_fail("duplicate parameter name found, should be a bug")
+                
+                public_l3 = lib_get_l3_by_name(os.environ.get('l3PublicNetworkName'))
+                cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
+                cond = res_ops.gen_query_conditions('uuid', '!=', public_l3.uuid, cond)
+                for paraname in pri_l3network_dict:
+                    cond = res_ops.gen_query_conditions('uuid', '!=', pri_l3network_dict[paraname], cond)
+                pri_l3s = res_ops.query_resource(res_ops.L3_NETWORK, cond)  
+                if not pri_l3s:
+                    test_util.test_fail("Not enough disinct resource for so many parameters")
+
+                pri_l3network_dict[para_inv.paramName] = pri_l3s[0].uuid
+        elif para_inv.resourceType == "DiskOffering":
+            if para_inv.paramName in disk_offering_dict:
+                test_util.test_fail("duplicate parameter name found, should be a bug")
+ 
+            if not disk_offering_dict:
+                cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
+                cond = res_ops.gen_query_conditions('name', '=', os.environ.get('smallDiskOfferingName'), cond)
+	        disk_offerings = res_ops.query_resource(res_ops.DISK_OFFERING, cond)
+            else:
+                cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
+                for paraname in disk_offering_dict:
+                    cond = res_ops.gen_query_conditions('uuid', '!=', disk_offering_dict[paraname], cond)
+                disk_offerings = res_ops.query_resource(res_ops.DISK_OFFERING, cond)
+            if not disk_offerings:
+                test_util.test_fail("Not enough disinct resource for so many parameters")
+
+            disk_offering_dict[para_inv.paramName] = disk_offerings[0].uuid
+        all_dict = instance_offering_dict.copy()
+        all_dict.update(image_dict)
+        all_dict.update(pub_l3network_dict)
+        all_dict.update(pri_l3network_dict)
+        all_dict.update(disk_offering_dict)
+        robot_test_obj.set_initial_formation_parameters(str(all_dict).replace("u'", "'"))
 
 def lib_robot_create_initial_formation(robot_test_obj):
     '''
         Create initial zstack formation for robot testing
     '''
 
+    stack_template_option = test_util.StackTemplateOption()
+    stack_template_option.set_name("robot_test")
+    stack_template_option.set_templateContent(robot_test_obj.get_initial_formation())
+    import zstackwoodpecker.operations.stack_template as stack_template_ops
+    import zstackwoodpecker.operations.resource_stack as resource_stack_ops
+
+    stack_template = stack_template_ops.add_stack_template(stack_template_option)
+    lib_robot_initial_formation_auto_parameter(robot_test_obj, stack_template.uuid)
     resource_stack_option = test_util.ResourceStackOption()
-    resource_stack_option.set_name("robot_test")
-    resource_stack_option.set_rollback("true")
-    resource_stack_option.set_templateContent(robot_test_obj.get_initial_formation())
+    resource_stack_option.set_template_uuid(stack_template.uuid)
     resource_stack_option.set_parameters(robot_test_obj.get_initial_formation_parameters())
-    preview_resource_stack = resource_stack_ops.preview_resource_stack(resource_stack_option)
     resource_stack = resource_stack_ops.create_resource_stack(resource_stack_option)
 
     # Import resources from zstack formation so checkers could work for them
@@ -5018,7 +5163,70 @@ def lib_robot_constant_path_operation(robot_test_obj):
     constant_path_list = robot_test_obj.get_constant_path_list()
     if len(constant_path_list) > 0:
         next_action = constant_path_list[0][0]
-        if next_action == TestAction.stop_vm:
+        if next_action == TestAction.create_image_from_volume:
+            target_vm = None
+            image_name = None
+            if len(constant_path_list[0]) > 2:
+                target_vm_name = constant_path_list[0][1]
+                image_name = constant_path_list[0][2]
+                all_vm_list = test_dict.get_all_vm_list()
+                for vm in all_vm_list:
+                    if vm.get_vm().name == target_vm_name:
+                        target_vm = vm
+                        break
+
+            if not target_vm or not image_name:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            root_volume_uuid = lib_get_root_volume(target_vm.vm).uuid
+            test_util.test_dsc('Robot Action: %s; on Volume: %s; on VM: %s' % \
+                (next_action, root_volume_uuid, target_vm.get_vm().uuid))
+   
+            new_image = lib_create_template_from_volume(root_volume_uuid)
+            import zstackwoodpecker.operations.image_operations as img_ops
+            img_ops.update_image(new_image.get_image().uuid, image_name, None)
+            test_util.test_dsc('Robot Action Result: %s; new RootVolume Image: %s'\
+                    % (next_action, new_image.get_image().uuid))
+            test_dict.add_image(new_image)
+        elif next_action == TestAction.create_data_vol_template_from_volume:
+            target_volume = None
+            image_name = None
+            if len(constant_path_list[0]) > 2:
+                target_volume_name = constant_path_list[0][1]
+                image_name = constant_path_list[0][2]
+                all_volume_list = test_dict.get_all_volume_list()
+                for volume in all_volume_list:
+                    if volume.get_volume().name == target_volume_name:
+                        target_volume = volume
+                        break
+
+            if not target_volume:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            test_util.test_dsc('Robot Action: %s; on Volume: %s;' % \
+                (next_action, target_volume.get_volume().uuid))
+            new_data_vol_temp = lib_create_data_vol_template_from_volume(None, target_volume.get_volume())
+            import zstackwoodpecker.operations.image_operations as img_ops
+            img_ops.update_image(new_data_vol_temp.get_image().uuid, image_name, None)
+            test_util.test_dsc('Robot Action Result: %s; new DataVolume Image: %s' \
+                    % (next_action, new_data_vol_temp.get_image().uuid))
+            robot_test_obj.add_resource_action_history(new_data_vol_temp.get_image().uuid, next_action)
+            test_dict.add_image(new_data_vol_temp)
+        elif next_action == TestAction.reinit_vm:
+            target_vm = None
+            if len(constant_path_list[0]) > 1:
+                target_vm_name = constant_path_list[0][1]
+                all_vm_list = test_dict.get_all_vm_list()
+                for vm in all_vm_list:
+                    if vm.get_vm().name == target_vm_name:
+                        target_vm = vm
+                        break
+            if not target_vm:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+            test_util.test_dsc('Robot Action: %s; on VM: %s' \
+                    % (next_action, target_vm.get_vm().uuid))
+            target_vm.reinit()
+        elif next_action == TestAction.stop_vm:
             target_vm = None
             if len(constant_path_list[0]) > 1:
                 target_vm_name = constant_path_list[0][1]
@@ -5047,10 +5255,42 @@ def lib_robot_constant_path_operation(robot_test_obj):
 
             test_util.test_dsc('Robot Action: %s; on VM: %s' \
                     % (next_action, target_vm.get_vm().uuid))
-            robot_test_obj.add_resource_action_history(target_vm.get_vm().uuid, next_action)
 
             target_vm.start()
             test_dict.mv_vm(target_vm, vm_header.STOPPED, vm_header.RUNNING)
+        elif next_action == TestAction.change_vm_image:
+            target_vm = None
+            target_image = None
+            if len(constant_path_list[0]) > 2:
+                target_vm_name = constant_path_list[0][1]
+                image_name = constant_path_list[0][2]
+                all_vm_list = test_dict.get_all_vm_list()
+                for vm in all_vm_list:
+                    if vm.get_vm().name == target_vm_name:
+                        target_vm = vm
+                        break
+                target_image = lib_get_image_by_name(image_name)
+            elif len(constant_path_list[0]) > 1:
+                target_vm_name = constant_path_list[0][1]
+                all_vm_list = test_dict.get_all_vm_list()
+                for vm in all_vm_list:
+                    if vm.get_vm().name == target_vm_name:
+                        target_vm = vm
+                        break
+                vm_root_image_uuid = target_vm.get_vm().imageUuid
+                cond = res_ops.gen_query_conditions('uuid', '!=', vm_root_image_uuid)
+                cond = res_ops.gen_query_conditions('mediaType', '=', "RootVolumeTemplate", cond)
+                cond = res_ops.gen_query_conditions('system', '=', "false", cond)
+                target_image = res_ops.query_resource(res_ops.IMAGE, cond)[0]
+
+            if not target_vm or not target_image:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            test_util.test_dsc('Robot Action: %s; on VM: %s' \
+                    % (next_action, target_vm.get_vm().uuid))
+
+            target_vm.change_vm_image(target_image.uuid)
+            target_vm.update()
         elif next_action == TestAction.attach_volume:
             target_vm = None
             target_volume = None
@@ -5107,6 +5347,63 @@ def lib_robot_constant_path_operation(robot_test_obj):
             target_vm_uuid = target_volume.get_volume().vmInstanceUuid
             target_volume.detach()
             test_dict.mv_volume(target_volume, target_vm_uuid, test_stage.free_volume)
+        elif next_action == TestAction.delete_volume:
+            target_volume = None
+            if len(constant_path_list[0]) > 1:
+                target_volume_name = constant_path_list[0][1]
+                all_volume_list = test_dict.get_all_volume_list()
+                for volume in all_volume_list:
+                    if volume.get_volume().name == target_volume_name:
+                        target_volume = volume
+                        break
+
+            if not target_volume:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+   
+            test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
+                (next_action, target_volume.get_volume().uuid))
+            target_volume.delete()
+            test_dict.rm_volume(target_volume)
+        elif next_action == TestAction.resize_volume:
+            target_vm = None
+            if len(constant_path_list[0]) > 2:
+                target_vm_name = constant_path_list[0][1]
+                delta = constant_path_list[0][2]
+                all_vm_list = test_dict.get_all_vm_list()
+                for vm in all_vm_list:
+                    if vm.get_vm().name == target_vm_name:
+                        target_vm = vm
+                        break
+            if not target_vm:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            root_volume_uuid = lib_get_root_volume(target_vm.vm).uuid
+            current_size = lib_get_root_volume(target_vm.vm).size
+            new_size = current_size + int(delta)
+            import zstackwoodpecker.operations.volume_operations as vol_ops
+            vol_ops.resize_volume(root_volume_uuid, new_size)
+        elif next_action == TestAction.resize_data_volume:
+            target_volume = None
+            if len(constant_path_list[0]) > 2:
+                target_volume_name = constant_path_list[0][1]
+                delta = constant_path_list[0][2]
+                all_volume_list = test_dict.get_all_volume_list()
+                for volume in all_volume_list:
+                    if volume.get_volume().name == target_volume_name:
+                        target_volume = volume
+                        break
+
+            if not target_volume:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            root_volume_uuid = lib_get_root_volume(target_vm.vm).uuid
+
+            test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
+                (next_action, target_volume.get_volume().uuid))
+            current_size = target_volume.get_volume().size
+            new_size = current_size + int(delta)
+            target_volume.resize(new_size)
+            target_volume.update()
 
         constant_path_list.pop(0)
         robot_test_obj.set_constant_path_list(constant_path_list)
@@ -5211,11 +5508,16 @@ def lib_get_test_stub(suite_name=None):
 
 #---------------------------------------------------------------
 #Robot actions.
-def lib_create_data_vol_template_from_volume(target_vm, vm_target_vol=None):
+def lib_create_data_vol_template_from_volume(target_vm=None, vm_target_vol=None):
     import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
-    vm_inv = target_vm.get_vm()
+    if target_vm:
+        vm_inv = target_vm.get_vm()
 
-    backup_storage_uuid_list = lib_get_backup_storage_uuid_list_by_zone(vm_inv.zoneUuid)
+        backup_storage_uuid_list = lib_get_backup_storage_uuid_list_by_zone(vm_inv.zoneUuid)
+    else:
+        ps_uuid = vm_target_vol.primaryStorageUuid
+        
+        backup_storage_uuid_list = lib_get_backup_storage_uuid_list_by_zone(lib_get_primary_storage_by_uuid(ps_uuid).zoneUuid)
     new_data_vol_inv = vol_ops.create_volume_template(vm_target_vol.uuid, \
             backup_storage_uuid_list, \
             'vol_temp_for_volume_%s' % vm_target_vol.uuid)

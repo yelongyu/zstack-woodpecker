@@ -49,3 +49,10 @@ def update_stack_template(uuid, stack_template_option, session_uuid=None):
             % instance_offering_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
+
+def check_stack_template(uuid, session_uuid=None):
+    action = api_actions.CheckStackTemplateParametersAction()
+    action.uuid = uuid
+    test_util.action_logger('Check Stack template [uuid:] %s' % uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt

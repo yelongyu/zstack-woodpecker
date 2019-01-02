@@ -418,3 +418,12 @@ def sync_volume_size(volume_uuid, session_uuid = None):
     test_util.action_logger('Sync Volume: %s Size' % volume_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
+
+def update_volume(volume_uuid, name, description, session_uuid = None):
+    action = api_actions.UpdateVolumeAction()
+    action.uuid = volume_uuid
+    action.name = name
+    action.description = description
+    test_util.action_logger('Update Volume: %s Size' % volume_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory

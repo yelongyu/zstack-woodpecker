@@ -64,6 +64,9 @@ class ZstackTestVm(vm_header.TestVm):
 
         return self.change_instance_offering_uuid
 
+    def change_vm_image(self, image_uuid, session_uuid = None):
+        vm_ops.change_vm_image(self.vm.uuid, image_uuid, session_uuid)
+
     def create(self):
         self.vm = vm_ops.create_vm(self.vm_creation_option)
         super(ZstackTestVm, self).create()

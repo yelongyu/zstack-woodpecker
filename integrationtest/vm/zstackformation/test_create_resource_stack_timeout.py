@@ -12,9 +12,10 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.resource_stack as resource_stack_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 
+
 def test():
     test_util.test_dsc("Test Resource template Apis")
-    
+
     cond = res_ops.gen_query_conditions('status', '=', 'Ready')
     cond = res_ops.gen_query_conditions('state', '=', 'Enabled', cond)
     cond = res_ops.gen_query_conditions('system', '=', 'false', cond)
@@ -22,7 +23,7 @@ def test():
 
     cond = res_ops.gen_query_conditions("category", '=', "Public")
     l3_pub_queried = res_ops.query_resource(res_ops.L3_NETWORK, cond)
-    
+
     cond = res_ops.gen_query_conditions("category", '=', "Private")
     cond = res_ops.gen_query_conditions('networkServices.networkServiceType', '=', 'EIP')
     l3_pri_queried = res_ops.query_resource(res_ops.L3_NETWORK, cond)
@@ -84,8 +85,8 @@ def test():
 }
 '''
     parameter = '{"PrivateNetworkUuid":"%s","PublicNetworkUuid":"%s","ImageUuid":"%s","InstanceOfferingUuid":"%s"}' % (l3_pri_queried[0].uuid, l3_pub_queried[0].uuid, image_queried[0].uuid, instance_offering_queried[0].uuid)
- 
-    #1.create resource stack when rollback
+
+    # 1.create resource stack when rollback
     resource_stack_option_rollback = test_util.ResourceStackOption()
     resource_stack_option_rollback.set_name("Create_STACK-Rollback")
     resource_stack_option_rollback.set_rollback("true")
@@ -96,7 +97,7 @@ def test():
     preview_resource_stack = resource_stack_ops.preview_resource_stack(resource_stack_option_rollback)
     resource_stack_rollback = resource_stack_ops.create_resource_stack(resource_stack_option_rollback)
 
-    #2.get resource from resource stack when rollback
+    # 2.get resource from resource stack when rollback
     resource_rollback = resource_stack_ops.get_resource_from_resource_stack(resource_stack_rollback.uuid)
     if len(resource_rollback) != 0:
         test_util.test_fail("There still has resources when rollback")
@@ -126,7 +127,7 @@ def test():
     preview_resource_stack = resource_stack_ops.preview_resource_stack(resource_stack_option_norollback)
     try:
        resource_stack_norollback = resource_stack_ops.create_resource_stack(resource_stack_option_norollback)
-    except: 
+    except:
        pass
     else:
        test_util.test_fail('Resource Stack Rollback Test Success')
@@ -161,14 +162,10 @@ def test():
     resource_norollback = resource_stack_ops.get_resource_from_resource_stack(resource_stack_norollback[0].uuid)
     if len(resource_norollback) == 0:
         test_util.test_fail("There has no resources when not rollback")
-    
+
     test_util.test_pass('Resource Stack Rollback Test Success')
 
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     print "Ignore cleanup"
-
-
-
-

@@ -13,9 +13,10 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.resource_stack as resource_stack_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 
+
 def test():
     test_util.test_dsc("Test Resource template Apis")
-    
+
     cond = res_ops.gen_query_conditions('status', '=', 'Ready')
     cond = res_ops.gen_query_conditions('state', '=', 'Enabled', cond)
     cond = res_ops.gen_query_conditions('system', '=', 'false', cond)
@@ -23,7 +24,7 @@ def test():
 
     cond = res_ops.gen_query_conditions("category", '=', "Public")
     l3_pub_queried = res_ops.query_resource(res_ops.L3_NETWORK, cond)
-    
+
     cond = res_ops.gen_query_conditions("category", '=', "Private")
     cond = res_ops.gen_query_conditions('networkServices.networkServiceType', '=', 'EIP')
     l3_pri_queried = res_ops.query_resource(res_ops.L3_NETWORK, cond)
@@ -85,8 +86,8 @@ def test():
 }
 '''
     parameter = '{"PrivateNetworkUuid":"%s","PublicNetworkUuid":"%s","ImageUuid":"%s","InstanceOfferingUuid":"%s"}' % (l3_pri_queried[0].uuid, l3_pub_queried[0].uuid, image_queried[0].uuid, instance_offering_queried[0].uuid)
- 
-    #1.create resource stack when rollback
+
+    # 1.create resource stack when rollback
     resource_stack_option_rollback = test_util.ResourceStackOption()
     resource_stack_option_rollback.set_name("Create_STACK-Rollback")
     resource_stack_option_rollback.set_rollback("true")
@@ -131,7 +132,7 @@ def test():
     else:
        test_util.test_fail('Resource Stack Rollback Test Success')
 
-    #4.get resource from resource stack when not rollback
+    # 4.get resource from resource stack when not rollback
     resource_stack_ops.delete_resource_stack(resource_stack_rollback.uuid)
 
     cond = res_ops.gen_query_conditions('name', '=', 'Create_STACK')
@@ -168,7 +169,3 @@ def test():
 #Will be called only if exception happens in test().
 def error_cleanup():
     print "Ignore cleanup"
-
-
-
-

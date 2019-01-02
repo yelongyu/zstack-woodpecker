@@ -11,6 +11,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.resource_stack as resource_stack_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 
+
 def test():
     test_util.test_dsc("Test Resource template Apis")
     
@@ -165,7 +166,7 @@ def test():
     else:
         test_util.test_fail('Create resource stack successfully with wrong parameter.')
 
-    #2.query resource stack
+    # 2.query resource stack
     cond = res_ops.gen_query_conditions('name', '=', 'Create_STACK')
     resource_stack_queried = res_ops.query_resource(res_ops.RESOURCE_STACK, cond)
 
@@ -185,10 +186,7 @@ def test():
         if len(vm_queried) == 0 or len(vip_queried) == 0 or len(lb_queried) == 0 or len(lbl_queried) == 0:
             test_util.test_fail("Fail to delete resources.")
 
-    
+
 #Will be called only if exception happens in test().
 def error_cleanup():
     print "Ignore cleanup"
-
-        
-    
