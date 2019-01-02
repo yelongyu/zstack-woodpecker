@@ -32,7 +32,13 @@ def test():
     snapshot3 = snapshots.get_current_snapshot()
 
     data_migration.copy_data()
-    data_migration.migrate_vm()
+    try:
+        data_migration.migrate_vm()
+        test_util.test_fail("migrate back should be failed, but no exception has been caught")
+    except:
+        data_migration.clean_up_ps_trash_and_check(data_migration.get_ps_candidate().uuid)
+    finally:
+        data_migration.migrate_vm()
     data_migration.check_data()
 
     data_migration.check_origin_data_exist()

@@ -384,17 +384,19 @@ class DataMigration(TestChain):
                 raise e
         return self
 
-    def clean_up_ps_trash_and_check(self):
-        ps_ops.clean_up_trash_on_primary_storage(self.origin_ps.uuid)
-        assert not ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid).storageTrashSpecs
-        try:
-            shell.call(self.chk_cmd)
-        except Exception as e:
-            if 'No such file or directory' in str(e):
-                pass
-            else:
-                raise e
-        return self
+    def clean_up_ps_trash_and_check(self, target_ps_uuid=None):
+        target_ps_uuid = target_ps_uuid if target_ps_uuid else self.origin_ps.uuid
+        ps_ops.clean_up_trash_on_primary_storage(target_ps_uuid)
+        if not target_ps_uuid:
+            assert not ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid).storageTrashSpecs
+            try:
+                shell.call(self.chk_cmd)
+            except Exception as e:
+                if 'No such file or directory' in str(e):
+                    pass
+                else:
+                    raise e
+            return self
 
     def migrate_image(self):
         '''
