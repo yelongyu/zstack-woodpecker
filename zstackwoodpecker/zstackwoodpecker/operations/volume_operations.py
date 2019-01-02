@@ -50,10 +50,11 @@ def create_volume_template(volume_uuid, backup_storage_uuid_list, name = None, \
     return evt.inventory
 
 def create_volume_from_template(image_uuid, ps_uuid, name = None, \
-        host_uuid = None, session_uuid = None):
+        host_uuid = None, systemtags = None, session_uuid = None):
     action = api_actions.CreateDataVolumeFromVolumeTemplateAction()
     action.imageUuid = image_uuid
     action.primaryStorageUuid = ps_uuid
+    action.systemTags = systemtags
     if name:
         action.name = name
     else:

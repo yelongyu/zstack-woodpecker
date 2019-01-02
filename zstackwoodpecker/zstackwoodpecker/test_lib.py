@@ -5158,6 +5158,17 @@ def lib_robot_constant_path_operation(robot_test_obj):
     '''
         Constant path operations for robot testing
     '''
+    def _parse_args(all_args):
+        normal_args = []
+        extra_args = []
+        for aa in all_args:
+            print 'shuang %s' % (aa)
+            if not cmp(aa[0:1], "="):
+                for a in aa[1:].split(','):
+                    extra_args.append(a)
+            else:
+                normal_args.append(aa)
+        return (normal_args, extra_args)
 
     test_dict = robot_test_obj.get_test_dict()
     constant_path_list = robot_test_obj.get_constant_path_list()
@@ -5426,19 +5437,27 @@ def lib_robot_constant_path_operation(robot_test_obj):
             target_volume.update()
         elif next_action == TestAction.create_data_volume_from_image:
             target_images = None
-            if len(constant_path_list[0]) > 2:
-                target_volume_name = constant_path_list[0][1]
-                target_image_name = constant_path_list[0][2]
+            (normal_args, extra_args) = _parse_args(constant_path_list[0])
+            test_util.test_logger("shuang %s" % normal_args)
+            test_util.test_logger("shuang %s" % extra_args)
+            if len(normal_args) > 2:
+                target_volume_name = normal_args[1]
+                target_image_name = normal_args[2]
                 cond = res_ops.gen_query_conditions('name', '=', target_image_name)
                 cond = res_ops.gen_query_conditions('mediaType', '=', "DataVolumeTemplate", cond)
                 target_images = res_ops.query_resource(res_ops.IMAGE, cond)
-            elif len(constant_path_list[0]) > 1:
-                target_volume_name = constant_path_list[0][1]
+            elif len(normal_args) > 1:
+                target_volume_name = normal_args[1]
                 cond = res_ops.gen_query_conditions('mediaType', '=', "DataVolumeTemplate")
                 target_images = res_ops.query_resource(res_ops.IMAGE, cond)
             if not target_images:
                 test_util.test_fail("no resource available for next action: %s" % (next_action))
-
+            systemtags = []
+            for ea in extra_args:
+                if ea == "shareable":
+                    systemtags.append("ephemeral::shareable")
+                if ea == "scsi":
+                    systemtags.append("capability::virtio-scsi")
             test_util.test_dsc('Robot Action: %s; on Image: %s' % \
                 (next_action, target_images[0]['uuid']))
             target_image = lib_get_image_by_uuid(target_images[0]['uuid'])
@@ -5448,7 +5467,7 @@ def lib_robot_constant_path_operation(robot_test_obj):
 
             import zstackwoodpecker.operations.volume_operations as vol_ops
             import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
-            volume_inv = vol_ops.create_volume_from_template(target_images[0]['uuid'], ps_uuid, target_volume_name, None)
+            volume_inv = vol_ops.create_volume_from_template(target_images[0]['uuid'], ps_uuid, target_volume_name, None, systemtags)
             new_volume = zstack_volume_header.ZstackTestVolume()
             new_volume.create_from(volume_inv.uuid, None)
             test_dict.add_volume(new_volume)
