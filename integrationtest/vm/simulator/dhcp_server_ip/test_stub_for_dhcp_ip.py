@@ -149,11 +149,16 @@ class Public_Ip_For_Dhcp(Dhcp_Ip_Server):
 		self.ip_range_option.set_l3_uuid(self.get_l3uuid())	
 		return net_ops.add_ip_range(self.ip_range_option).uuid
 
-	def add_ipv6_range(self):
-		net_ops.add_ipv6_range(self.ipv6_range_option)		
+	def add_ipv6_range(self, name ,start_ip, end_ip, gateway, netmask, ipversion = 6, systemTags = []):
+		return net_ops.add_ipv6_range(self.ipv6_range_option)		
 
-	def add_ip_by_networkcidr(self):
-		net_ops.add_ip_by_networkcidr(self.ip_by_networkcidroption)
+	def add_ip_by_networkcidr(self, name, networkcidr, ipversion = 4, systemTags = []):
+		self.ip_by_networkcidroption.set_name(name)
+		self.ip_by_networkcidroption.set_ipVersion(ipversion)
+		self.ip_by_networkcidroption.set_set_networkCidr(networkcidr)
+		self.ip_by_networkcidroption.set_set_system_tags(systemTags)
+		self.ip_by_networkcidroption.set_l3_uuid(self.get_l3uuid())
+		return net_ops.add_ip_by_networkcidr(self.ip_by_networkcidroption).uuid
 
 	def add_ipv6_by_networkcidr(self):
 		net_ops.add_ipv6_by_networkcidr(self.ipv6_by_networkcidroption)
