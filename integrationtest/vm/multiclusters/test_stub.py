@@ -274,7 +274,7 @@ class DataMigration(TestChain):
         '''
         if not self.test_obj_dict:
             self.test_obj_dict = test_state.TestStateDict()
-            self.test_obj_dict.add_vm(self.vm)
+        self.test_obj_dict.add_vm(self.vm)
         if not self.data_volume:
             vol_uuid = self.vm.vm.rootVolumeUuid
         else:

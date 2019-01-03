@@ -21,7 +21,7 @@ class TestChain(object):
         self.weights = {}
         self.skip = []
         self.delay = {}
-        self.runned_chain = []
+        self.passed_chain = []
 
     def __call__(self):
         return self
@@ -72,6 +72,6 @@ class TestChain(object):
         for test in self.test_list:
             test_util.test_dsc("Next Action is [%s]" % test)
             eval('self.%s()' % test)
-            self.runned_chain.append(test)
-            test_util.test_dsc("Passed chain: %s" % self.runned_chain)
-            test_util.test_dsc("Left chain: %s" % list(set(self.test_list) - set(self.runned_chain)))
+            self.passed_chain.append(test)
+            test_util.test_dsc("Passed chain: %s" % self.passed_chain)
+            test_util.test_dsc("Left chain: %s" % self.test_list[self.test_list.index(self.passed_chain[-1]) + 1:])
