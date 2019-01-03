@@ -3053,6 +3053,12 @@ def lib_create_template_from_volume(volume_uuid, session_uuid=None):
                 if hasattr(inventory, 'IMAGE_STORE_BACKUP_STORAGE_TYPE') and bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
                     bs_uuid = bs.uuid
                     break
+    ps = lib_get_primary_storage_by_uuid(volume.primaryStorageUuid)
+    if ps.type == "Ceph":
+        for bs in bss:
+            if bs.fsid == ps.fsid:
+                bs_uuid = bs.uuid
+                break
     if bs_uuid == None:
         bs_uuid = bss[random.randint(0, len(bss)-1)].uuid
     #[Inlined import]
@@ -3062,6 +3068,7 @@ def lib_create_template_from_volume(volume_uuid, session_uuid=None):
     image_creation_option.set_backup_storage_uuid_list([bs_uuid])
     image_creation_option.set_root_volume_uuid(volume_uuid)
     image_creation_option.set_name('test_image')
+    image_creation_option.set_timeout(7200000)
     image.set_creation_option(image_creation_option)
     image.create()
 
