@@ -1172,9 +1172,16 @@ def lib_get_primary_storage_uuid_list_by_backup_storage(bs_uuid):
     if bss:
         zone_uuids = bss[0].attachedZoneUuids
         cond = res_ops.gen_query_conditions('zoneUuid', 'in', ','.join(zone_uuids))
+
         pss = res_ops.query_resource_fields(res_ops.PRIMARY_STORAGE, cond, \
-                None, ['uuid'])
+                None)
         ps_uuids = []
+        if bss[0].type == "Ceph":
+            for ps in pss:
+                if ps.fsid == bss[0].fsid:
+                    ps_uuids.append(ps.uuid)
+            return ps_uuids
+
         for ps in pss:
             ps_uuids.append(ps.uuid)
 
@@ -5172,7 +5179,6 @@ def lib_robot_constant_path_operation(robot_test_obj):
         normal_args = []
         extra_args = []
         for aa in all_args:
-            print 'shuang %s' % (aa)
             if not cmp(aa[0:1], "="):
                 for a in aa[1:].split(','):
                     extra_args.append(a)
@@ -5447,9 +5453,8 @@ def lib_robot_constant_path_operation(robot_test_obj):
             target_volume.update()
         elif next_action == TestAction.create_data_volume_from_image:
             target_images = None
+            target_image_name = None
             (normal_args, extra_args) = _parse_args(constant_path_list[0])
-            test_util.test_logger("shuang %s" % normal_args)
-            test_util.test_logger("shuang %s" % extra_args)
             if len(normal_args) > 2:
                 target_volume_name = normal_args[1]
                 target_image_name = normal_args[2]
@@ -5461,7 +5466,30 @@ def lib_robot_constant_path_operation(robot_test_obj):
                 cond = res_ops.gen_query_conditions('mediaType', '=', "DataVolumeTemplate")
                 target_images = res_ops.query_resource(res_ops.IMAGE, cond)
             if not target_images:
-                test_util.test_fail("no resource available for next action: %s" % (next_action))
+                if not target_image_name:
+                    image_option = test_util.ImageOption()
+                    image_option.set_format('qcow2')
+                    image_option.set_name('data_volume_image')
+                    bs_cond = res_ops.gen_query_conditions("status", '=', "Connected")
+                    bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, bs_cond)
+                    if not bss:
+                        test_util.test_fail("not find available backup storage. Skip test")
+
+                    image_option.set_url(os.environ.get('imageUrl_s'))
+                    image_option.set_backup_storage_uuid_list([bss[0].uuid])
+                    image_option.set_timeout(120000)
+                    image_option.set_mediaType("DataVolumeTemplate")
+                    import zstackwoodpecker.operations.image_operations as img_ops
+                    image = img_ops.add_image(image_option)
+                
+                    import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
+                    new_image = zstack_image_header.ZstackTestImage()
+                    new_image.set_creation_option(image_option)
+                    new_image.set_image(image)
+                    test_dict.add_image(new_image)
+                    target_images = [new_image]
+                else:
+                    test_util.test_fail("no resource available for next action: %s" % (next_action))
             systemtags = []
             for ea in extra_args:
                 if ea == "shareable":
