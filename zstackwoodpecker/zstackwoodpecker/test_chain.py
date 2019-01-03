@@ -54,14 +54,13 @@ class TestChain(object):
             self.test_list.append(random.choice(_next_list))
         if test.delay:
             for dly in test.delay:
-                self.delay[dly] = len(self.test_list)
+                self.delay[len(self.test_list)] = dly
         self.chain_length -= 1
         if self.chain_length > 0:
             self.make_chain(test.delay)
         else:
-            for dl in self.delay.keys():
-                pos_to_insert = random.randint(self.delay[dl] + 1, len(self.test_list))
-                self.test_list.insert(pos_to_insert, dl)
+            for pos in self.delay.keys():
+                self.test_list.insert(random.randint(pos, len(self.test_list)), self.delay[pos])
         self.test_chain = 'self.' + '().'.join(self.test_list) + '()'
 
     def run_test(self):
@@ -69,4 +68,10 @@ class TestChain(object):
             if action in self.test_list:
                 test_util.test_dsc('Action [%s] will be run [%s] times' % 
                                    (action, self.test_list.count(action)))
-        eval(self.test_chain)
+#         eval(self.test_chain)
+        for test in self.test_list:
+            test_util.test_dsc("Next Action is [%s]" % test)
+            eval('self.%s()' % test)
+            self.runned_chain.append(test)
+            test_util.test_dsc("Passed chain: %s" % self.runned_chain)
+            test_util.test_dsc("Left chain: %s" % list(set(self.test_list) - set(self.runned_chain)))

@@ -6,19 +6,18 @@ New Integration Test for migrate between clusters
 '''
 
 import zstackwoodpecker.test_util as test_util
-import zstackwoodpecker.test_chain as test_chain
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
 
 test_obj_dict = test_state.TestStateDict()
 test_stub = test_lib.lib_get_test_stub()
-data_migration = test_stub.DataMigration(['create_vm', 'create_data_volume'])
+data_migration = test_stub.DataMigration(['create_vm', 'create_data_volume'], 30)
 
 def test():
     data_migration.make_chain()
-    test_util.test_dsc('Current test chain is [%s]' % data_migration.test_chain)
+    test_util.test_dsc('Current test chain is %s' % data_migration.test_list)
     data_migration.run_test()
-    test_util.test_pass('Root Volume Migration chain: [%s] Test Success' % data_migration.test_chain)
+    test_util.test_pass('Data Volume Migration chain: %s Test Success' % data_migration.test_list)
 
 #Will be called only if exception happens in test().
 def error_cleanup():
