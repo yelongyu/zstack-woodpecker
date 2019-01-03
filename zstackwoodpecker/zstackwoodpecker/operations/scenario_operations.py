@@ -29,6 +29,17 @@ import zstackwoodpecker.operations.volume_operations as volume_ops
 import zstackwoodpecker.zstack_test.zstack_test_eip as zstack_eip_header
 import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
 
+def wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_uuid)
+    retry_count = 0
+    while retry_count < 3 and not test_lib.lib_wait_target_up(vm_ip, '22', 360):
+        test_util.test_warn("Could not reach target vm: %s %s, retry after reboot it" % (vm_ip, vm_uuid))
+        stop_vm(zstack_management_ip, vm_uuid)
+        start_vm(zstack_management_ip, vm_uuid)
+        retry_count += 1
+
+    if test_lib.lib_wait_target_up(vm_ip, '22', 360):
+        return True
+    return False
 
 def replace_env_params_if_scenario():
     """
@@ -299,7 +310,7 @@ def setup_2ha_mn_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
     # NOTE: need to make filesystem in sync in VM before cold stop VM
     stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
     start_vm(zstack_management_ip, vm_inv.uuid)
-    if not test_lib.lib_wait_target_up(vm_ip, '22', 360):
+    if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
         test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
 
     for l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
@@ -382,7 +393,8 @@ def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
     # NOTE: need to make filesystem in sync in VM before cold stop VM
     stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
     start_vm(zstack_management_ip, vm_inv.uuid)
-    if not test_lib.lib_wait_target_up(vm_ip, '22', 360):
+
+    if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
         test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
 
     for l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
@@ -1326,7 +1338,8 @@ def setup_xsky_storages(scenario_config, scenario_file, deploy_config):
         for node in xmlobject.safe_list(scenario_config.deployerConfig.xsky.nodes.node):
             vmUuid = node.uuid_
             vmIp = node.nodeIP_
-            test_lib.lib_wait_target_up(vmIp, '22', 360)
+            if not wait_for_target_vm_retry_after_reboot(xskyNodesMN, vmIp, vmUuid):
+                test_util.test_fail('VM:%s can not be accessible as expected' %(vmIp))
 
         #check xsky ENV
         xskyUser = scenario_config.deployerConfig.xsky.account.user.text_
@@ -2443,7 +2456,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 
                 vm_inv = create_vm(zstack_management_ip, vm_creation_option)
                 vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, default_l3_uuid).ip
-                test_lib.lib_wait_target_up(vm_ip, '22', 360)
+                if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
+                    test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
 
                 #this is a walk around due to create vm with 3 networks, one network will not get ip due to 2 ifcfg-eth* file
                 for l3_uuid in l3_uuid_list_ge_3:
@@ -2461,7 +2475,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     # NOTE: need to make filesystem in sync in VM before cold stop VM
                     stop_vm(zstack_management_ip, vm_inv.uuid)
                     start_vm(zstack_management_ip, vm_inv.uuid)
-                    test_lib.lib_wait_target_up(vm_ip, '22', 360)
+                    if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
+                        test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
 
                 ips_xml = etree.SubElement(vm_xml, 'ips')
                 l3_id = 0
