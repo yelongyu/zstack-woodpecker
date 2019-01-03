@@ -37,7 +37,7 @@ class ZstackTestSecurityGroup(sg_header.TestSecurityGroup):
         super(ZstackTestSecurityGroup, self).create()
 
     #target_nics are nic_uuid list. The attach() API should not be directly called by test case. Test case should call zstack_test_sg_vm.ZstackTestSgVm.attach() API. 
-    def attach(self, target_nic_uuids):
+    def attach(self, target_nic_uuids, ipv6 = None):
         added_l3_uuid = []
         for nic in target_nic_uuids:
             l3_uuid = test_lib.lib_get_l3_uuid_by_nic(nic)
@@ -53,7 +53,8 @@ class ZstackTestSecurityGroup(sg_header.TestSecurityGroup):
                 continue
             added_l3_uuid.append(l3_uuid)
             
-            net_ops.attach_security_group_to_l3(self.security_group.uuid, l3_uuid)
+            if not ipv6:
+                net_ops.attach_security_group_to_l3(self.security_group.uuid, l3_uuid)
 
         net_ops.add_nic_to_security_group(self.security_group.uuid, target_nic_uuids)
         super(ZstackTestSecurityGroup, self).attach(target_nic_uuids)

@@ -28,7 +28,7 @@ def test():
         VR image is a good candiate to be the guest image.
     '''
     test_util.test_dsc("Create 2 VMs with IPv6 L3 network and using VR image.")
-    image_name = os.environ.get('ipv6ImageNamesg')
+    image_name = os.environ.get('ipv6ImageName')
     vm1 = test_stub.create_vm(l3_name = "%s,%s" %(os.environ.get('l3PublicNetworkName1'), os.environ.get('l3PublicNetworkName')), vm_name = 'IPv6 2 stack test ipv4 and ipv6', image_name = image_name)
     vm2 = test_stub.create_vm(l3_name = os.environ.get('l3PublicNetworkName1'), vm_name = 'IPv6 2 stack test ipv6', image_name = image_name)
     time.sleep(60) #waiting for vm bootup

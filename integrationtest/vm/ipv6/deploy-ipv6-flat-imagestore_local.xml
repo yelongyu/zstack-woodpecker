@@ -82,13 +82,6 @@
       username="$imageUsername" password="$imagePassword">
       <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
     </image>
-    <image name="$ipv6ImageNamesg"
-      description="Test Image for IPv6 SG"
-      mediaType="$rootMediaType" format="$rootImageFormat"
-      url="$ipv6ImagesgUrl"
-      username="$imageUsername" password="$imagePassword">
-      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
-    </image>
   </images>
 
   <diskOfferings>
