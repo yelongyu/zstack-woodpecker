@@ -29,7 +29,7 @@ import zstackwoodpecker.operations.volume_operations as volume_ops
 import zstackwoodpecker.zstack_test.zstack_test_eip as zstack_eip_header
 import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
 
-def wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_uuid)
+def wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_uuid):
     retry_count = 0
     while retry_count < 3 and not test_lib.lib_wait_target_up(vm_ip, '22', 360):
         test_util.test_warn("Could not reach target vm: %s %s, retry after reboot it" % (vm_ip, vm_uuid))
