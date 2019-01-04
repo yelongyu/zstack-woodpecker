@@ -1199,6 +1199,7 @@ def lib_get_backup_storage_uuid_list_by_zone(zone_uuid):
     Get backup storage uuid list which attached to zone uuid
     '''
     cond = res_ops.gen_query_conditions('attachedZoneUuids', 'in', zone_uuid)
+    cond = res_ops.gen_query_conditions('name', '!=', "only_for_robot_backup_test", cond)
     bss = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, cond, None, ['uuid'])
     bs_list = []
     for bs in bss:
@@ -3043,7 +3044,8 @@ def lib_get_backup_storage_list_by_vm(vm, session_uuid=None):
         return bss
 
 def lib_create_template_from_volume(volume_uuid, session_uuid=None):
-    bss = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid)
+    cond = res_ops.gen_query_conditions('name', '!=', "only_for_robot_backup_test")
+    bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond, session_uuid)
     volume = lib_get_volume_by_uuid(volume_uuid)
     bs_uuid = None
     if volume.vmInstanceUuid != None:
@@ -5335,7 +5337,13 @@ def lib_robot_constant_path_operation(robot_test_obj):
                 cond = res_ops.gen_query_conditions('uuid', '!=', vm_root_image_uuid)
                 cond = res_ops.gen_query_conditions('mediaType', '=', "RootVolumeTemplate", cond)
                 cond = res_ops.gen_query_conditions('system', '=', "false", cond)
-                target_image = res_ops.query_resource(res_ops.IMAGE, cond)[0]
+                target_images = res_ops.query_resource(res_ops.IMAGE, cond)
+                for ti in target_images:
+                    for tbs in ti.backupStorageRefs:
+                        bs_inv = lib_get_backup_storage_by_uuid(tbs.backupStorageUuid)
+                        if bs_inv.name != "only_for_robot_backup_test":
+                            target_image = ti
+                            break
 
             if not target_vm or not target_image:
                 test_util.test_fail("no resource available for next action: %s" % (next_action))
@@ -5580,6 +5588,57 @@ def lib_robot_constant_path_operation(robot_test_obj):
     
             test_util.test_dsc('Robot Action Result: %s; new SP: %s' % \
                 (next_action, new_snapshot.get_snapshot().uuid))
+        elif next_action == TestAction.create_vm_backup:
+            backup_name = None
+            target_vm = None
+            if len(constant_path_list[0]) > 2:
+                target_vm_name = constant_path_list[0][1]
+                backup_name = constant_path_list[0][2]
+                all_vm_list = test_dict.get_all_vm_list()
+                for vm in all_vm_list:
+                    if vm.get_vm().name == target_vm_name:
+                        target_vm = vm
+                        break
+
+            if not target_vm or not backup_name:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
+            cond = res_ops.gen_query_conditions("name", '=', "only_for_robot_backup_test", cond)
+            bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)
+            if not bss:
+                cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
+                bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)
+                if not bss:
+                    cond = res_ops.gen_query_conditions("state", '=', "Enabled")
+                    cond = res_ops.gen_query_conditions("status", '=', "Connected")
+                    hosts = res_ops.query_resource(res_ops.HOST, cond)
+                    if not hosts:
+                        test_util.test_fail("No host available for adding imagestore for backup test")
+                    host = hosts[0]
+                    import zstackwoodpecker.operations.backupstorage_operations as bs_ops
+                    bs_option = test_util.ImageStoreBackupStorageOption()
+                    bs_option.set_name("only_for_robot_backup_test")
+                    bs_option.set_url("/home/sftpBackupStorage")
+                    bs_option.set_hostname(host.managementIp)
+                    bs_option.set_password('password')
+                    bs_option.set_sshPort(host.sshPort)
+                    bs_option.set_username(host.username)
+                    bs_inv = bs_ops.create_image_store_backup_storage(bs_option)
+                
+                    bs_ops.attach_backup_storage(bs_inv.uuid, host.zoneUuid)
+                    bss = [bs_inv]
+            bs = bss[0]
+               
+            backup_option = test_util.BackupOption()
+            backup_option.set_name(backup_name)
+            backup_option.set_volume_uuid(lib_get_root_volume(target_vm.get_vm()).uuid)
+            backup_option.set_backupStorage_uuid(bs.uuid)
+            import zstackwoodpecker.operations.volume_operations as vol_ops
+            test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
+                (next_action, target_vm.get_vm()).uuid))
+
+            backup = vol_ops.create_vm_backup(backup_option)
 
         constant_path_list.pop(0)
         robot_test_obj.set_constant_path_list(constant_path_list)
