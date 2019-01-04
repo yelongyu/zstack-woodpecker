@@ -5494,7 +5494,7 @@ def lib_robot_constant_path_operation(robot_test_obj):
                     new_image.set_creation_option(image_option)
                     new_image.set_image(image)
                     test_dict.add_image(new_image)
-                    target_images = [new_image]
+                    target_images = [image]
                 else:
                     test_util.test_fail("no resource available for next action: %s" % (next_action))
             systemtags = []
@@ -5690,12 +5690,23 @@ def lib_create_data_vol_template_from_volume(target_vm=None, vm_target_vol=None)
         vm_inv = target_vm.get_vm()
 
         backup_storage_uuid_list = lib_get_backup_storage_uuid_list_by_zone(vm_inv.zoneUuid)
+        ps_uuid = lib_get_primary_storage_by_vm(vm_inv).uuid
     else:
         ps_uuid = vm_target_vol.primaryStorageUuid
-        
         backup_storage_uuid_list = lib_get_backup_storage_uuid_list_by_zone(lib_get_primary_storage_by_uuid(ps_uuid).zoneUuid)
+
+    bs_list = []
+    for bsu in backup_storage_uuid_list:
+        bs = lib_get_backup_storage_by_uuid(bsu)
+        if bs.type == "Ceph":
+            ps_list = lib_get_primary_storage_uuid_list_by_backup_storage(bsu)
+            ps = lib_get_primary_storage_by_uuid(ps_uuid)
+            if ps.uuid not in ps_list:
+                continue
+        bs_list.append(bsu)
+
     new_data_vol_inv = vol_ops.create_volume_template(vm_target_vol.uuid, \
-            backup_storage_uuid_list, \
+            bs_list, \
             'vol_temp_for_volume_%s' % vm_target_vol.uuid)
     new_data_vol_temp = zstack_image_header.ZstackTestImage()
     new_data_vol_temp.set_image(new_data_vol_inv)

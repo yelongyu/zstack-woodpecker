@@ -33,7 +33,9 @@ class TestAction(object):
     migrate_vm = 'migrate_vm'
     expunge_vm = 'expunge_vm'
     reinit_vm = 'reinit_vm'
+    clone_vm = 'clone_vm'
     change_vm_image = 'change_vm_image'
+    create_vm_backup = 'create_vm_backup'
 
     create_volume = 'create_volume'
     create_scsi_volume = 'create_scsi_volume'
