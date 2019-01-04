@@ -5157,6 +5157,71 @@ def lib_robot_initial_formation_auto_parameter(robot_test_obj, template_uuid):
         all_dict.update(disk_offering_dict)
         robot_test_obj.set_initial_formation_parameters(str(all_dict).replace("u'", "'"))
 
+def lib_robot_create_utility_vm(robot_test_obj):
+    '''
+        Create utility vm for all ps for robot testing
+    '''
+    cond = res_ops.gen_query_conditions('state', '=', "Enabled")
+    cond = res_ops.gen_query_conditions('status', '=', "Connected", cond)
+    pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
+    for ps in pss:
+        utility_vm = None
+        cond = res_ops.gen_query_conditions('name', '=', "utility_vm_for_robot_test")
+        cond = res_ops.gen_query_conditions('state', '=', "Running", cond)
+        vms = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
+        for vm in vms:
+            ps_uuid = lib_get_root_volume(vm).primaryStorageUuid
+            if ps_uuid == ps.uuid:
+                utility_vm = vm
+        if not utility_vm:
+            utility_vm_image = None
+            vm_create_option = test_util.VmOption()
+            bs_uuids = lib_get_backup_storage_uuid_list_by_zone(ps.zoneUuid)
+            cond = res_ops.gen_query_conditions('name', '=', os.environ.get('imageName_net'))
+            cond = res_ops.gen_query_conditions('state', '=', "Enabled", cond)
+            cond = res_ops.gen_query_conditions('status', '=', "Ready", cond)
+            images = res_ops.query_resource(res_ops.IMAGE, cond)
+            for bs_uuid in bs_uuids:
+                temp_list = lib_get_primary_storage_uuid_list_by_backup_storage(bs_uuid)
+                if ps.uuid not in temp_list:
+                    continue
+                for image in images:
+                    for bs_ref in image.backupStorageRefs:
+                        if bs_ref.uuid == bs_uuid:
+                            utility_vm_image = image
+                            break
+            if not utility_vm_image:
+                image_option = test_util.ImageOption()
+                image_option.set_format('qcow2')
+                image_option.set_url(os.environ.get('imageUrl_net'))
+                image_option.set_name(os.environ.get('imageName_net'))
+                for bs_uuid in bs_uuids:
+                    temp_list = lib_get_primary_storage_uuid_list_by_backup_storage(bs_uuid)
+                    if ps.uuid in temp_list:
+                       target_bs_uuid = bs_uuid
+                       break
+
+                image_option.set_backup_storage_uuid_list([target_bs_uuid])
+                image_option.set_timeout(7200000)
+                image_option.set_mediaType("RootVolumeTemplate")
+                import zstackwoodpecker.operations.image_operations as img_ops
+                utility_vm_image = img_ops.add_image(image_option)
+
+            utility_vm_create_option = test_util.VmOption()
+            utility_vm_create_option.set_name('utility_vm_for_robot_test')
+            utility_vm_create_option.set_image_uuid(utility_vm_image.uuid)
+            l3_uuid = lib_get_l3_by_name(os.environ.get('l3VlanNetworkName1')).uuid
+            utility_vm_create_option.set_l3_uuids([l3_uuid])
+        
+            utility_vm = lib_create_vm(utility_vm_create_option)
+            #test_dict.add_utility_vm(utility_vm)
+
+        if os.environ.get('ZSTACK_SIMULATOR') != "yes":
+            utility_vm.check()
+              
+        robot_test_obj.set_utility_vm(utility_vm)
+
+
 def lib_robot_create_initial_formation(robot_test_obj):
     '''
         Create initial zstack formation for robot testing

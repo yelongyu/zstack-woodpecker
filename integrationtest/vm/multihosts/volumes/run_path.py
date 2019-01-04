@@ -179,28 +179,13 @@ def test():
         VM resources: a special Utility vm is required to do volume attach/detach operation. 
         ''')
 
-    vm_create_option = test_util.VmOption()
-    #image has to use virtual router image, as it needs to do port checking
-    vm_create_option.set_image_uuid(test_lib.lib_get_image_by_name(img_name=os.environ.get('imageName_net')).uuid)
-
-    utility_vm_create_option = test_util.VmOption()
-    image_uuid = test_lib.lib_get_image_by_name(img_name=os.environ.get('imageName_net')).uuid
-    utility_vm_create_option.set_image_uuid(image_uuid)
-    l3_uuid = test_lib.lib_get_l3_by_name(os.environ.get('l3VlanNetworkName1')).uuid
-    utility_vm_create_option.set_l3_uuids([l3_uuid])
-
-    utility_vm = test_lib.lib_create_vm(utility_vm_create_option)
-    test_dict.add_utility_vm(utility_vm)
-    if os.environ.get('ZSTACK_SIMULATOR') != "yes":
-        utility_vm.check()
-
     test_util.test_dsc('Constant Path Test Begin.')
     robot_test_obj = test_util.Robot_Test_Object()
-    robot_test_obj.set_utility_vm(utility_vm)
     robot_test_obj.set_initial_formation(initial_formation)
     robot_test_obj.set_constant_path_list(path_list)
 
     test_lib.lib_robot_create_initial_formation(robot_test_obj)
+    test_lib.lib_robot_create_utility_vm(robot_test_obj)
     rounds = 1
     current_time = time.time()
     timeout_time = current_time + 3600
