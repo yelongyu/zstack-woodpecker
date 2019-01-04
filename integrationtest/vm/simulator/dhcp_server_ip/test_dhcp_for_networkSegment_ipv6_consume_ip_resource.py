@@ -21,7 +21,7 @@ test_obj_dict = test_state.TestStateDict()
 l2_query_resource = res_ops.L2_NETWORK
 type_l2 = ["L2NoVlanNetwork", "L2VlanNetwork"]
 start_ip, endip = ("CDCD:910A:2222:5498:8475:1111:3900:2020",
-                   ¦   ¦   ¦   ¦  "CDCD:910A:2222:5498:8475:1111:3900:2022")
+                   "CDCD:910A:2222:5498:8475:1111:3900:2022")
 start_ip1, endip1 = ("CDCD:910A:2222:5498:8475:1111:3900:2024",
                      "CDCD:910A:2222:5498:8475:1111:3900:2025")
 gate_way = "CDCD:910A:2222:5498:8475:1111:3900:2023"
@@ -36,7 +36,7 @@ ip_range_for_networksegment = [start_ip1, end_ip1]
 dhcp_ip_for_public = ip_range_for_public[random.randint(
     0, len(ip_range_for_public)-1
 )]
-dhcp_system_tags = ["flatNetwork::DhcpServer::" + ¦   ¦   ¦   ¦   dhcp_ip_for_public+"::ipUuid::null"]
+dhcp_system_tags = ["flatNetwork::DhcpServer::" + dhcp_ip_for_public+"::ipUuid::null"]
 
 
 def test():
