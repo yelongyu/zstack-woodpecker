@@ -5675,19 +5675,28 @@ def lib_robot_constant_path_operation(robot_test_obj):
     
             test_util.test_dsc('Robot Action Result: %s; new SP: %s' % \
                 (next_action, new_snapshot.get_snapshot().uuid))
-        elif next_action == TestAction.create_vm_backup:
+        elif next_action == TestAction.create_backup:
             backup_name = None
-            target_vm = None
+            target_volume_uuid = None
             if len(constant_path_list[0]) > 2:
-                target_vm_name = constant_path_list[0][1]
+                target_volume_name = constant_path_list[0][1]
                 backup_name = constant_path_list[0][2]
-                all_vm_list = test_dict.get_all_vm_list()
-                for vm in all_vm_list:
-                    if vm.get_vm().name == target_vm_name:
-                        target_vm = vm
+                for volume in all_volume_list:
+                    if volume.get_volume().name == target_volume_name:
+                        target_volume_uuid = volume.get_volume().uuid
+                        ps_uuid = volume.get_volume().primaryStorageUuid
                         break
+                if not target_volume_uuid:
+                    all_vm_list = test_dict.get_all_vm_list()
+                    for vm in all_vm_list:
+                        if "%s-root" % vm.get_vm().name == target_volume_name:
+                            target_volume = lib_get_root_volume(vm.get_vm())
+                            target_volume_uuid = target_volume.uuid
+                            ps_uuid = target_volume.primaryStorageUuid
+                            break
 
-            if not target_vm or not backup_name:
+
+            if not target_volume_uuid or not backup_name:
                 test_util.test_fail("no resource available for next action: %s" % (next_action))
 
             cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
@@ -5719,11 +5728,11 @@ def lib_robot_constant_path_operation(robot_test_obj):
                
             backup_option = test_util.BackupOption()
             backup_option.set_name(backup_name)
-            backup_option.set_volume_uuid(lib_get_root_volume(target_vm.get_vm()).uuid)
+            backup_option.set_volume_uuid(target_volume_uuid)
             backup_option.set_backupStorage_uuid(bs.uuid)
             import zstackwoodpecker.operations.volume_operations as vol_ops
             test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
-                (next_action, target_vm.get_vm()).uuid)
+                (next_action, target_volume_uuid)
 
             backup = vol_ops.create_vm_backup(backup_option)
 
