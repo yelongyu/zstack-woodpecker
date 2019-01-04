@@ -47,7 +47,7 @@ def test():
     public_network.add_service_to_l3network()
 
     test_util.test_logger("add ip v4 range to l3 network")
-    public_network.add_ip_range(
+    public_network.add_ip_by_networkcidr(
         ip_range_name,
         networkcidr,
         ip_Version[0],
