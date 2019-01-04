@@ -5732,7 +5732,7 @@ def lib_robot_constant_path_operation(robot_test_obj):
             backup_option.set_backupStorage_uuid(bs.uuid)
             import zstackwoodpecker.operations.volume_operations as vol_ops
             test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
-                (next_action, target_volume_uuid)
+                (next_action, target_volume_uuid))
 
             backup = vol_ops.create_vm_backup(backup_option)
 
