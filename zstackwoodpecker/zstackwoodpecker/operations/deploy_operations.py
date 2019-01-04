@@ -648,7 +648,7 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 action.zoneUuid = zinv.uuid
                 action.diskUuids = [disk_uuids.pop()]
                 if pr.hasattr('systemtags_'):
-                    action.systemTags = pr.systemtags_
+                    action.systemTags = pr.systemtags_.split(',')
                 else:
                     action.systemTags = ["primaryStorageVolumeProvisioningStrategy::ThinProvisioning", "forceWipe"]
                 thread = threading.Thread(target=_thread_for_action, args=(action,))
