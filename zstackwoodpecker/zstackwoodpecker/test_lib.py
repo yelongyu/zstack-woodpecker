@@ -5436,6 +5436,7 @@ def lib_robot_constant_path_operation(robot_test_obj):
                         target_vm = vm
                         break
                 vm_root_image_uuid = target_vm.get_vm().imageUuid
+                ps_uuid = target_vm.get_vm().allVolumes[0].primaryStorageUuid
                 cond = res_ops.gen_query_conditions('uuid', '!=', vm_root_image_uuid)
                 cond = res_ops.gen_query_conditions('mediaType', '=', "RootVolumeTemplate", cond)
                 cond = res_ops.gen_query_conditions('system', '=', "false", cond)
@@ -5443,6 +5444,9 @@ def lib_robot_constant_path_operation(robot_test_obj):
                 for ti in target_images:
                     for tbs in ti.backupStorageRefs:
                         bs_inv = lib_get_backup_storage_by_uuid(tbs.backupStorageUuid)
+                        ps_uuid_list = lib_get_primary_storage_uuid_list_by_backup_storage(bs_inv.uuid)
+                        if ps_uuid not in ps_uuid_list:
+                            continue
                         if bs_inv.name != "only_for_robot_backup_test":
                             target_image = ti
                             break
@@ -5559,8 +5563,6 @@ def lib_robot_constant_path_operation(robot_test_obj):
 
             if not target_volume:
                 test_util.test_fail("no resource available for next action: %s" % (next_action))
-
-            root_volume_uuid = lib_get_root_volume(target_vm.vm).uuid
 
             test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
                 (next_action, target_volume.get_volume().uuid))
