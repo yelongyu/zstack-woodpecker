@@ -5009,6 +5009,41 @@ def lib_vm_random_operation(robot_test_obj):
 
     test_util.test_logger('Finsih action: %s execution' % next_action)
 
+def lib_robot_update_configs(robot_test_obj, resource_type, resource):
+    def _already_registered(uuid_dict, uuid):
+        for key in uuid_dict:
+            if uuid_dict[key] == uuid:
+                return True
+        return False
+
+    for cd_key in robot_test_obj.configs_dict:
+        for key in robot_test_obj.configs_dict[cd_key]:
+            if robot_test_obj.configs_dict[cd_key][key] == None:
+                if cd_key == "PS":
+                    if resource_type == "VmInstance":
+                        if _already_registered(robot_test_obj.configs_dict[cd_key], resource.allVolumes[0].primaryStorageUuid):
+                            return
+                        robot_test_obj.configs_dict[cd_key][key] = resource.allVolumes[0].primaryStorageUuid
+                        return
+                    if resource_type == "Volume":
+                        if _already_registered(robot_test_obj.configs_dict[cd_key], resource.primaryStorageUuid):
+                            return
+                        robot_test_obj.configs_dict[cd_key][key] = resource.primaryStorageUuid
+                        return
+           
+def lib_robot_get_default_configs(robot_test_obj, resource_type):
+    if robot_test_obj.configs_dict.has_key(resource_type):
+        if not robot_test_obj.configs_dict[resource_type]:
+            return None
+        if not robot_test_obj.configs_dict[resource_type].has_key("default"):
+            return None
+        if not robot_test_obj.configs_dict[resource_type]["default"]:
+            return None
+        if not robot_test_obj.configs_dict[resource_type].has_key(robot_test_obj.configs_dict[resource_type]["default"]):
+            return None
+        return robot_test_obj.configs_dict[resource_type][robot_test_obj.configs_dict[resource_type]["default"]]
+    return None
+
 def lib_robot_import_resource_from_formation(robot_test_obj, resource_list):
     # import VM
     imported_resource = []
@@ -5040,6 +5075,7 @@ def lib_robot_import_resource_from_formation(robot_test_obj, resource_list):
                 test_dict.add_volume(new_volume)
                 test_dict.mv_volume(new_volume, test_stage.free_volume, new_volume.get_volume().vmInstanceUuid)
                 volume_index += 1
+            lib_robot_update_configs(robot_test_obj, "VmInstance", new_vm.get_vm())
 
     # import Volume
     for resource in resource_list:
@@ -5056,6 +5092,7 @@ def lib_robot_import_resource_from_formation(robot_test_obj, resource_list):
             test_dict.add_volume(new_volume)
             if new_volume.get_volume().hasattr("vmInstanceUuid"):
                 test_dict.mv_volume(new_volume, test_stage.free_volume, new_volume.get_volume().vmInstanceUuid)
+            lib_robot_update_configs(robot_test_obj, "Volume", new_volume.get_volume())
 
 
     # import VIP
@@ -5100,7 +5137,7 @@ def lib_robot_initial_formation_auto_parameter(robot_test_obj, template_uuid):
                 cond = res_ops.gen_query_conditions('name', '=', os.environ.get('imageName_net'), cond)
                 images = res_ops.query_resource(res_ops.IMAGE, cond)
             else:
-                for paraname in instance_offering_dict:
+                for paraname in image_dict:
                     cond = res_ops.gen_query_conditions('uuid', '!=', image_dict[paraname], cond)
                 images = res_ops.query_resource(res_ops.IMAGE, cond)
             if not images:
@@ -5547,16 +5584,26 @@ def lib_robot_constant_path_operation(robot_test_obj):
                 target_images = res_ops.query_resource(res_ops.IMAGE, cond)
             if not target_images:
                 if not target_image_name:
+                    test_util.test_logger("shuang %s" % robot_test_obj.configs_dict)
+                    ps_uuid = lib_robot_get_default_configs(robot_test_obj, "PS")
+                    test_util.test_logger("shuang %s" % ps_uuid)
+                    
                     image_option = test_util.ImageOption()
                     image_option.set_format('qcow2')
                     image_option.set_name('data_volume_image')
                     bs_cond = res_ops.gen_query_conditions("status", '=', "Connected")
                     bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, bs_cond)
-                    if not bss:
+                    filtered_bss = []
+                    for bs in bss:
+                        ps_uuid_list = lib_get_primary_storage_uuid_list_by_backup_storage(bs.uuid)
+                        if ps_uuid in ps_uuid_list:
+                            filtered_bss.append(bs)
+                        
+                    if not filtered_bss:
                         test_util.test_fail("not find available backup storage. Skip test")
 
                     image_option.set_url(os.environ.get('imageUrl_s'))
-                    image_option.set_backup_storage_uuid_list([bss[0].uuid])
+                    image_option.set_backup_storage_uuid_list([filtered_bss[0].uuid])
                     image_option.set_timeout(120000)
                     image_option.set_mediaType("DataVolumeTemplate")
                     import zstackwoodpecker.operations.image_operations as img_ops
@@ -5620,6 +5667,7 @@ def lib_robot_constant_path_operation(robot_test_obj):
                 test_util.test_fail("no resource available for next action: %s" % (next_action))
             datamigr_ops.ps_migrage_volume(target_pss[0].uuid, target_volume_uuid)
         elif next_action == TestAction.create_volume :
+            ps_uuid = lib_robot_get_default_configs(robot_test_obj, "PS")
             target_volume_name = None
             if len(constant_path_list[0]) > 1:
                 target_volume_name = constant_path_list[0][1]
@@ -5629,6 +5677,7 @@ def lib_robot_constant_path_operation(robot_test_obj):
             test_util.test_dsc('Robot Action: %s ' % next_action)
             volume_creation_option = test_util.VolumeOption()
             volume_creation_option.set_name(target_volume_name)
+            volume_creation_option.set_primary_storage_uuid(ps_uuid)
             new_volume = lib_create_volume_from_offering(volume_creation_option)
             test_dict.add_volume(new_volume)
     

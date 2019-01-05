@@ -1755,6 +1755,7 @@ class Robot_Test_Object(object):
         self.initial_formation = None
         self.initial_formation_parameters = None
         self.constant_path_list = []
+        self.configs_dict = {}
 
     def add_action_history(self, action):
         self.action_history.append(action)
@@ -1891,6 +1892,30 @@ class Robot_Test_Object(object):
     def get_constant_path_list(self):
         return self.constant_path_list
 
+    def set_config(self, configs):
+        print "shuang %s" % configs
+        for config in configs:
+            for key in config:
+                print "shuang %s" % config
+                if config[key] == "default":
+                    continue
+                if self.configs_dict.has_key(config[key]):
+                    print "shuang2 %s" % config[key]
+                    self.configs_dict[config[key]][key] = None
+                else:
+                    print "shuang3 %s" % config[key]
+                    self.configs_dict[config[key]] = {key: None}
+        for config in configs:
+            for key in config:
+                if config[key] == "default":
+                    for cd_key in self.configs_dict:
+                        if self.configs_dict[cd_key].has_key(key):
+                            self.configs_dict[cd_key]['default'] = key
+                            break
+        print "shuang %s" % self.configs_dict
+
+    def get_config(self):
+        return self.config
 
 class ComponentLoader(object):
     def __init__(self):
