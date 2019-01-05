@@ -5281,6 +5281,11 @@ def lib_robot_create_initial_formation(robot_test_obj):
     resource_list = resource_stack_ops.get_resource_from_resource_stack(resource_stack.uuid)
     lib_robot_import_resource_from_formation(robot_test_obj, resource_list)
 
+def lib_get_backup_by_uuid(uuid):
+    cond = res_ops.gen_query_conditions('uuid', '=', uuid)
+    volume_backup = res_ops.query_resource(res_ops.VOLUME_BACKUP, cond)[0]
+    return volume_backup
+
 
 def lib_robot_constant_path_operation(robot_test_obj):
     '''
@@ -5732,6 +5737,7 @@ def lib_robot_constant_path_operation(robot_test_obj):
             if len(constant_path_list[0]) > 2:
                 target_volume_name = constant_path_list[0][1]
                 backup_name = constant_path_list[0][2]
+                all_volume_list = test_dict.get_all_volume_list()
                 for volume in all_volume_list:
                     if volume.get_volume().name == target_volume_name:
                         target_volume_uuid = volume.get_volume().uuid
@@ -5785,7 +5791,27 @@ def lib_robot_constant_path_operation(robot_test_obj):
             test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
                 (next_action, target_volume_uuid))
 
-            backup = vol_ops.create_vm_backup(backup_option)
+            backup = vol_ops.create_backup(backup_option)
+            test_dict.add_backup(backup.uuid)
+        elif next_action == TestAction.use_backup:
+            target_backup = None
+            backup_name = None
+            if len(constant_path_list[0]) > 1:
+                backup_name = constant_path_list[0][1]
+                backup_list = test_dict.get_backup_list()
+                for backup_uuid in backup_list:
+                    backup = lib_get_backup_by_uuid(backup_uuid)
+                    if backup.name == backup_name:
+                        target_backup = backup
+                        break
+
+            if not target_backup or not backup_name:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+            import zstackwoodpecker.operations.volume_operations as vol_ops
+            test_util.test_dsc('Robot Action: %s; on Backup: %s' % \
+                (next_action, target_backup.uuid))
+
+            backup = vol_ops.revert_volume_from_backup(target_backup.uuid)
 
         constant_path_list.pop(0)
         robot_test_obj.set_constant_path_list(constant_path_list)

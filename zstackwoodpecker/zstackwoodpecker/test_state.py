@@ -36,6 +36,7 @@ class TestAction(object):
     clone_vm = 'clone_vm'
     change_vm_image = 'change_vm_image'
     create_backup = 'create_backup'
+    use_backup = 'use_backup'
 
     create_volume = 'create_volume'
     create_scsi_volume = 'create_scsi_volume'
@@ -677,6 +678,7 @@ class TestStateDict(object):
         self.load_balancer_dict = {'Deleted': []}
         self.instance_offering_dict = {'Deleted': []}
         self.disk_offering_dict = {'Deleted': []}
+        self.backup_list = []
     
     def __repr__(self):
         return str({
@@ -1190,6 +1192,17 @@ class TestStateDict(object):
         for image in self.get_image_list():
             if image.get_state() != image_header.EXPUNGED:
                 image.set_delete_delay_time(delay_time)
+
+    def add_backup(self, uuid):
+        if uuid not in self.backup_list:
+            self.backup_list.append(uuid)
+
+    def rm_backup(self, uuid):
+        if uuid in self.backup_list:
+            self.backup_list.remove(uuid)
+
+    def get_backup_list(self):
+        return self.backup_list
 
 class Port(object):
     '''
