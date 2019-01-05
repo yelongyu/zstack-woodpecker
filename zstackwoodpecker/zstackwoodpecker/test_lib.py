@@ -5187,7 +5187,7 @@ def lib_robot_create_utility_vm(robot_test_obj):
                     continue
                 for image in images:
                     for bs_ref in image.backupStorageRefs:
-                        if bs_ref.uuid == bs_uuid:
+                        if bs_ref.backupStorageUuid == bs_uuid:
                             utility_vm_image = image
                             break
             if not utility_vm_image:
