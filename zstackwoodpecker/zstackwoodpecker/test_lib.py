@@ -5648,18 +5648,22 @@ def lib_robot_constant_path_operation(robot_test_obj):
                 (next_action, new_volume.get_volume().uuid))
             test_dict.add_volume(new_volume)
         elif next_action == TestAction.ps_migrate_volume:
+            target_volume = None
+            target_vm = None
             target_volume_uuid = None
             if len(constant_path_list[0]) > 1:
                 target_volume_name = constant_path_list[0][1]
                 all_volume_list = test_dict.get_all_volume_list()
                 for volume in all_volume_list:
                     if volume.get_volume().name == target_volume_name:
+                        target_volume = volume
                         target_volume_uuid = volume.get_volume().uuid
                         break
                 if not target_volume_uuid:
                     all_vm_list = test_dict.get_all_vm_list()
                     for vm in all_vm_list:
                         if "%s-root" % vm.get_vm().name == target_volume_name:
+                            target_vm = target_vm
                             target_volume_uuid = lib_get_root_volume(vm.get_vm()).uuid
                             break
 
@@ -5673,6 +5677,10 @@ def lib_robot_constant_path_operation(robot_test_obj):
             if not target_pss:
                 test_util.test_fail("no resource available for next action: %s" % (next_action))
             datamigr_ops.ps_migrage_volume(target_pss[0].uuid, target_volume_uuid)
+            if target_vm:
+                target_vm.update()
+            if target_volume:
+                target_volume.update_volume()
         elif next_action == TestAction.create_volume :
             ps_uuid = lib_robot_get_default_configs(robot_test_obj, "PS")
             target_volume_name = None
