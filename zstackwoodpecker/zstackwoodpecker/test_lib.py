@@ -1438,7 +1438,7 @@ def lib_get_primary_storage_by_uuid(ps_uuid):
 
 def lib_is_ps_iscsi_backend(ps_uuid):
 #    ps = lib_get_primary_storage_by_uuid(ps_uuid)
-#    if ps.type == inventory.ISCSI_FILE_SYSTEM_BACKEND_PRIMARY_STORAGE_TYPE:
+#    if ps.type == "SharedBlock":
 #        return True
     return False
 

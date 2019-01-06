@@ -26,6 +26,7 @@ import zstackwoodpecker.zstack_test.kvm_checker.zstack_kvm_eip_checker as eip_ch
 import zstackwoodpecker.zstack_test.kvm_checker.zstack_kvm_vip_checker as vip_checker
 import zstackwoodpecker.zstack_test.kvm_checker.zstack_kvm_snapshot_checker as sp_checker
 import zstackwoodpecker.zstack_test.kvm_checker.zstack_kvm_load_balancer_checker as lb_checker
+import zstackwoodpecker.zstack_test.kvm_checker.zstack_kvm_data_checker as data_checker
 import zstackwoodpecker.test_util as test_util
 import apibinding.inventory as inventory
 
