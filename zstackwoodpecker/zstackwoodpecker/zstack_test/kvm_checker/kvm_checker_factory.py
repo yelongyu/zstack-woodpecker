@@ -29,11 +29,13 @@ import zstackwoodpecker.zstack_test.kvm_checker.zstack_kvm_load_balancer_checker
 import zstackwoodpecker.zstack_test.kvm_checker.zstack_kvm_data_checker as data_checker
 import zstackwoodpecker.test_util as test_util
 import apibinding.inventory as inventory
+import collections
 
 class KvmVmCheckerFactory(checker_header.CheckerFactory):
     def create_checker(self, test_obj):
         kvm_vm_checker_chain = checker_header.CheckerChain()
         checker_dict = {}
+        checker_dict = collections.OrderedDict()
 
         if test_obj.state == vm_header.RUNNING:
             checker_dict[vm_checker.zstack_kvm_vm_set_host_vlan_ip] = True
@@ -102,6 +104,8 @@ class KvmVolumeCheckerFactory(checker_header.CheckerFactory):
     def create_checker(self, test_obj):
         kvm_volume_checker_chain = checker_header.CheckerChain()
         checker_dict = {}
+        checker_dict = collections.OrderedDict()
+
         if test_obj.state == volume_header.CREATED:
             checker_dict[db_checker.zstack_volume_db_checker] = True
             checker_dict[volume_checker.zstack_kvm_volume_file_checker] = False
@@ -137,6 +141,8 @@ class KvmSharableVolumeCheckerFactory(checker_header.CheckerFactory):
     def create_checker(self, test_obj):
         kvm_volume_checker_chain = checker_header.CheckerChain()
         checker_dict = {}
+        checker_dict = collections.OrderedDict()
+
         if test_obj.state == volume_header.CREATED:
             checker_dict[db_checker.zstack_volume_db_checker] = True
             checker_dict[share_volume_checker.zstack_kvm_share_volume_file_checker] = False
@@ -173,6 +179,7 @@ class KvmImageCheckerFactory(checker_header.CheckerFactory):
     def create_checker(self, test_obj):
         kvm_image_checker_chain = checker_header.CheckerChain()
         checker_dict = {}
+
         if test_obj.state == image_header.CREATED:
             checker_dict[db_checker.zstack_image_db_checker] = True
             checker_dict[image_checker.zstack_kvm_image_file_checker] = True
@@ -192,6 +199,7 @@ class KvmSecurityGroupCheckerFactory(checker_header.CheckerFactory):
     def create_checker(self, test_obj):
         kvm_sg_checker_chain = checker_header.CheckerChain()
         checker_dict = {}
+
         for nic_uuid in test_obj.get_all_nics():
             target_vm = test_obj.get_vm_by_nic(nic_uuid)
             if target_vm.state == vm_header.RUNNING:
