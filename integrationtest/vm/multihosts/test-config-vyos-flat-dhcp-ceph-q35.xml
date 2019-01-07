@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-vyos-flat-dhcp-ceph-q35.xml</deployConfig>
+    <deployConfigTemplate>deploy-ceph-ps.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
