@@ -5258,7 +5258,7 @@ def lib_robot_create_utility_vm(robot_test_obj):
             import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
             utility_vm_uuid = utility_vm.uuid
             utility_vm = zstack_vm_header.ZstackTestVm()
-            utility_vm = utility_vm.create_from(utility_vm_uuid)
+            utility_vm.create_from(utility_vm_uuid)
               
         robot_test_obj.set_utility_vm(utility_vm)
 
