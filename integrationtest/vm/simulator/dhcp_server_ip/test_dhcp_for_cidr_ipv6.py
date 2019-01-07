@@ -51,7 +51,6 @@ def test():
     public_network.add_ipv6_by_networkcidr(
         ip_range_name,
         networkcidr,
-        ip_Version[1],
         dhcp_system_tags)
     if public_network.check_dhcp_ipaddress().find(dhcp_ip_for_public.lower()) == -1:
         test_util.test_fail("dhcp server ip create fail")

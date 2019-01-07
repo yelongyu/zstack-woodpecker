@@ -40,6 +40,7 @@ def test():
     test_util.test_logger("antony @@@debug : %s" % (l2_no_vlan_uuid))
 
     test_util.test_logger("create l3 network")
+    public_network.set_ipVersion(ip_Version[0])
     public_network.create_l3uuid(l3_name)
     test_util.test_logger(
         "antony @@@debug : %s" %
@@ -50,7 +51,6 @@ def test():
     public_network.add_ip_by_networkcidr(
         ip_range_name,
         networkcidr,
-        ip_Version[0],
         dhcp_system_tags)
     if public_network.check_dhcp_ipaddress().find(dhcp_ip_for_public) == -1:
         test_util.test_fail("dhcp server ip create fail")

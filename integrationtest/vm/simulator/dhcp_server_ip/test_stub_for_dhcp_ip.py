@@ -15,8 +15,8 @@ import os
 
 class Dhcp_Ip_Server(object):
 	def __init__(self):
-		self.ip_version = None
 		self.l2_type = None
+		self.ipVersion = None
 		self.l2_query_resource = None
 		self.ip_range_option = test_util.IpRangeOption()
 		self.ipv6_range_option = test_util.IpV6RangeOption()
@@ -24,11 +24,11 @@ class Dhcp_Ip_Server(object):
 		self.ipv6_by_networkcidroption = test_util.IpV6_By_NetworkCidrOption()
 		self.l2_uuid = None
 
-	def set_ipversion(self, ip_verison):
-		self.ip_version = ip_version
+	def set_ipVersion(self, ipVersion):
+		self.ipVersion = ipVersion
 
-	def get_ipversion(self):
-		return self.ip_verison
+	def get_ipVersion(self):
+		return self.ipVersion
 	
 	def set_l2_type(self, l2_type):
 		self.l2_type = l2_type
@@ -72,22 +72,57 @@ class Dhcp_Ip_Server(object):
 				self.l2_uuid = l2_network.uuid
 		return self.l2_uuid
 
+        def add_ip_range(self, name, start_ip, end_ip, gateway, netmask, systemTags = []):
+                self.ip_range_option.set_name(name)
+                self.ip_range_option.set_startIp(start_ip)
+                self.ip_range_option.set_endIp(end_ip)
+                self.ip_range_option.set_gateway(gateway)
+                self.ip_range_option.set_netmask(netmask)
+                self.ip_range_option.set_ipVersion(self.get_ipVersion())
+                self.ip_range_option.set_system_tags(systemTags)
+                self.ip_range_option.set_l3_uuid(self.get_l3uuid())
+                return net_ops.add_ip_range(self.ip_range_option).uuid
+
+        def add_ipv6_range(self, name ,start_ip, end_ip, gateway, prefixLen, systemTags = [],  addressMode = "Stateful-DHCP",netmask = None):
+                self.ipv6_range_option.set_name(name)
+                self.ipv6_range_option.set_startIp(start_ip)
+                self.ipv6_range_option.set_endIp(end_ip)
+                self.ipv6_range_option.set_gateway(gateway)
+                self.ipv6_range_option.set_ipVersion(self.get_ipVersion())
+                self.ipv6_range_option.set_system_tags(systemTags)
+                self.ipv6_range_option.set_addressMode(addressMode)
+                self.ipv6_range_option.set_prefixLen(prefixLen)
+                self.ipv6_range_option.set_l3_uuid(self.get_l3uuid())
+                if netmask:
+                        self.ipv6_range_option.set_netmask(netmask)
+                return net_ops.add_ipv6_range(self.ipv6_range_option)
+
+        def add_ip_by_networkcidr(self, name, networkcidr, systemTags = []):
+                self.ip_by_networkcidroption.set_name(name)
+                self.ip_by_networkcidroption.set_ipVersion(self.get_ipVersion())
+                self.ip_by_networkcidroption.set_networkCidr(networkcidr)
+                self.ip_by_networkcidroption.set_system_tags(systemTags)
+                self.ip_by_networkcidroption.set_l3_uuid(self.get_l3uuid())
+                return net_ops.add_ip_by_networkcidr(self.ip_by_networkcidroption).uuid
+
+        def add_ipv6_by_networkcidr(self, name, networkcidr, systemTags = [], addressMode = "Stateful-DHCP"):
+                self.ipv6_by_networkcidroption.set_name(name)
+                self.ipv6_by_networkcidroption.set_ipVersion(self.get_ipVersion())
+                self.ipv6_by_networkcidroption.set_networkCidr(networkcidr)
+                self.ipv6_by_networkcidroption.set_system_tags(systemTags)
+                self.ipv6_by_networkcidroption.set_addressMode(addressMode)
+                self.ipv6_by_networkcidroption.set_l3_uuid(self.get_l3uuid())
+                return net_ops.add_ipv6_by_networkcidr(self.ipv6_by_networkcidroption)
+
 class Public_Ip_For_Dhcp(Dhcp_Ip_Server):
 	def __init__(self):
 		super(Public_Ip_For_Dhcp, self).__init__()
-		self.ipVersion = None
 		self.l3_uuid = None
 		self.category = "Public"
 		self.l3_DHCP = "DHCP"
 		self.l3_SecurityGroup = "SecurityGroup" 
 		self.l3_Userdata = "Userdata"
 		self.networkservice_type = ["Flat","SecurityGroup"]
-
-	def set_ipVersion(self, ipVersion):
-		self.ipVersion = ipVersion
-
-	def get_ipVersion(self):
-		return self.ipVersion
 
 	def create_l3uuid(self,name):
 		self.l3_uuid = net_ops.create_l3(name,self.get_l2uuid(),self.get_ipVersion(),self.category).uuid
@@ -138,51 +173,66 @@ class Public_Ip_For_Dhcp(Dhcp_Ip_Server):
 		cond = res_ops.gen_query_conditions("resourceUuid", "=", self.get_l3uuid())
 		return res_ops.query_resource(res_ops.SYSTEM_TAG,cond)[0].tag
 		
-	def add_ip_range(self, name, start_ip, end_ip, gateway, netmask, ipversion = 4, systemTags = []):
-		self.ip_range_option.set_name(name)
-		self.ip_range_option.set_startIp(start_ip)
-		self.ip_range_option.set_endIp(end_ip)
-		self.ip_range_option.set_gateway(gateway)
-		self.ip_range_option.set_netmask(netmask)
-		self.ip_range_option.set_ipVersion(ipversion)
-		self.ip_range_option.set_system_tags(systemTags)
-		self.ip_range_option.set_l3_uuid(self.get_l3uuid())	
-		return net_ops.add_ip_range(self.ip_range_option).uuid
-
-	def add_ipv6_range(self, name ,start_ip, end_ip, gateway, prefixLen, systemTags = [], ipversion = 6,  addressMode = "Stateful-DHCP",netmask = None):
-		self.ipv6_range_option.set_name(name)
-		self.ipv6_range_option.set_startIp(start_ip)
-		self.ipv6_range_option.set_endIp(end_ip)
-		self.ipv6_range_option.set_gateway(gateway)
-		self.ipv6_range_option.set_ipVersion(ipversion)
-		self.ipv6_range_option.set_system_tags(systemTags)
-		self.ipv6_range_option.set_addressMode(addressMode)
-		self.ipv6_range_option.set_prefixLen(prefixLen)
-		self.ipv6_range_option.set_l3_uuid(self.get_l3uuid())
-		if netmask:
-			self.ipv6_range_option.set_netmask(netmask)
-		return net_ops.add_ipv6_range(self.ipv6_range_option)		
-
-	def add_ip_by_networkcidr(self, name, networkcidr, ipversion = 4, systemTags = []):
-		self.ip_by_networkcidroption.set_name(name)
-		self.ip_by_networkcidroption.set_ipVersion(ipversion)
-		self.ip_by_networkcidroption.set_networkCidr(networkcidr)
-		self.ip_by_networkcidroption.set_system_tags(systemTags)
-		self.ip_by_networkcidroption.set_l3_uuid(self.get_l3uuid())
-		return net_ops.add_ip_by_networkcidr(self.ip_by_networkcidroption).uuid
-
-	def add_ipv6_by_networkcidr(self, name, networkcidr, ipversion = 6, systemTags = [], addressMode = "Stateful-DHCP"):
-		self.ipv6_by_networkcidroption.set_name(name)
-		self.ipv6_by_networkcidroption.set_ipVersion(ipversion)
-		self.ipv6_by_networkcidroption.set_networkCidr(networkcidr)
-		self.ipv6_by_networkcidroption.set_system_tags(systemTags)
-		self.ipv6_by_networkcidroption.set_addressMode(addressMode)
-		self.ipv6_by_networkcidroption.set_l3_uuid(self.get_l3uuid())
-		return net_ops.add_ipv6_by_networkcidr(self.ipv6_by_networkcidroption)
 
 class Private_IP_For_Dhcp(Dhcp_Ip_Server):
 	def __init__(self):
 		super(Private_IP_For_Dhcp, self).__init__()
+		self.l3_uuid = None
+		self.category = "Private"
+		self.l3_DHCP = "DHCP"
+		self.l3_SecurityGroup = "SecurityGroup" 
+		self.l3_Userdata = "Userdata"
+		self.networkservice_type = ["Flat","SecurityGroup"]
+
+	def create_l3uuid(self,name):
+		self.l3_uuid = net_ops.create_l3(name,self.get_l2uuid(),self.get_ipVersion(),self.category).uuid
+	
+	def get_l3uuid(self):
+		return self.l3_uuid
+	
+	def del_l3uuid(self):
+		net_ops.delete_l3(self.get_l3uuid())
+
+	def set_category(self, category):
+		self.category = category
+	
+	def get_category(self):
+		return self.category
+
+	def set_l3_DHCP(self, l3_DHCP):
+		self.l3_DHCP = l3_DHCP
+
+	def get_l3_DHCP(self):
+		return self.l3_DHCP
+
+	def set_l3_SecurityGroup(self, l3_SecurityGroup):
+		self.l3_SecurityGroup = l3_SecurityGroup
+
+	def get_l3_SecurityGroup(self):
+		return self.l3_SecurityGroup
+
+	def set_l3_Userdata(self, l3_Userdata):
+		self.l3_Userdata = l3_Userdata
+
+	def get_l3_Userdata(self):
+		return self.l3_Userdata
+
+	def add_service_to_l3network(self):
+		for networkservice in self.networkservice_type:
+			if networkservice == "Flat":
+				allservices = [self.l3_DHCP,self.l3_Userdata]
+				cond = res_ops.gen_query_conditions("type", "=", networkservice)
+			elif networkservice == "SecurityGroup":
+				allservices = [self.l3_SecurityGroup]
+				cond = res_ops.gen_query_conditions("type", "=", networkservice)
+			network_service_provider_uuid = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER,cond)[0].uuid
+			test_util.test_logger("%s" %(network_service_provider_uuid))
+			aut_ops.AttachNetworkServiceToL3Network(self.get_l3uuid(),allservices,network_service_provider_uuid)
+
+	def check_dhcp_ipaddress(self):
+		cond = res_ops.gen_query_conditions("resourceUuid", "=", self.get_l3uuid())
+		return res_ops.query_resource(res_ops.SYSTEM_TAG,cond)[0].tag
+		
 
 class VpcNetwork_IP_For_Dhcp(Dhcp_Ip_Server):
 	def __init__(self):

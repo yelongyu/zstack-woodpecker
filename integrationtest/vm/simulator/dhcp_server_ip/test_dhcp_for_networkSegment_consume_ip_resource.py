@@ -41,16 +41,17 @@ def test():
 	l2_no_vlan_uuid = public_network.get_l2uuid()
 	
 	test_util.test_logger("create l3 network")
+	public_network.set_ipVersion(ip_Version[0])
 	public_network.create_l3uuid(l3_name)
 	public_network.add_service_to_l3network()
 
 	test_util.test_logger("add ip v4 range to l3 network")
-	public_network.add_ip_range(ip_range_name, start_ip, end_ip, gate_way, net_mask, ip_Version[0],dhcp_system_tags)
+	public_network.add_ip_range(ip_range_name, start_ip, end_ip, gate_way, net_mask, dhcp_system_tags)
 	if public_network.check_dhcp_ipaddress().find(dhcp_ip_for_public) == -1:
 		test_util.test_fail("dhcp server ip create fail")
 	
 	test_util.test_logger("add extra networksegment")
-	public_network.add_ip_range(ip_range_name, start_ip1, end_ip1, gate_way, net_mask, ip_Version[0])
+	public_network.add_ip_range(ip_range_name, start_ip1, end_ip1, gate_way, net_mask)
 	test_util.test_logger("add vm install")
 	vm_object = test_stub_dhcp.Create_Vm_Instance()
 	list_vm = []
