@@ -166,8 +166,8 @@ class Public_Ip_For_Dhcp(Dhcp_Ip_Server):
 	def add_ip_by_networkcidr(self, name, networkcidr, ipversion = 4, systemTags = []):
 		self.ip_by_networkcidroption.set_name(name)
 		self.ip_by_networkcidroption.set_ipVersion(ipversion)
-		self.ip_by_networkcidroption.set_set_networkCidr(networkcidr)
-		self.ip_by_networkcidroption.set_set_system_tags(systemTags)
+		self.ip_by_networkcidroption.set_networkCidr(networkcidr)
+		self.ip_by_networkcidroption.set_system_tags(systemTags)
 		self.ip_by_networkcidroption.set_l3_uuid(self.get_l3uuid())
 		return net_ops.add_ip_by_networkcidr(self.ip_by_networkcidroption).uuid
 

@@ -481,7 +481,6 @@ def add_ip_by_networkcidr(ip_by_networkcidr_option, session_uuid = None):
     action.sessionUuid = session_uuid
     action.timeout = 30000
     action.name = ip_by_networkcidr_option.get_name()
-    action.addressMode = ip_by_networkcidr_option.get_addressMode()
     action.networkCidr = ip_by_networkcidr_option.get_networkCidr()
     action.l3NetworkUuid = ip_by_networkcidr_option.get_l3_uuid()
     action.description = ip_by_networkcidr_option.get_description()
