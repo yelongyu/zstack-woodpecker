@@ -171,10 +171,15 @@ class Public_Ip_For_Dhcp(Dhcp_Ip_Server):
 		self.ip_by_networkcidroption.set_l3_uuid(self.get_l3uuid())
 		return net_ops.add_ip_by_networkcidr(self.ip_by_networkcidroption).uuid
 
-	def add_ipv6_by_networkcidr(self):
-		net_ops.add_ipv6_by_networkcidr(self.ipv6_by_networkcidroption)
+	def add_ipv6_by_networkcidr(self, name, networkcidr, ipversion = 6, systemTags = [], addressMode = "Stateful-DHCP"):
+		self.ipv6_by_networkcidroption.set_name(name)
+		self.ipv6_by_networkcidroption.set_ipVersion(ipversion)
+		self.ipv6_by_networkcidroption.set_networkCidr(networkcidr)
+		self.ipv6_by_networkcidroption.set_system_tags(systemTags)
+		self.ipv6_by_networkcidroption.set_addressMode(addressMode)
+		self.ipv6_by_networkcidroption.set_l3_uuid(self.get_l3uuid())
+		return net_ops.add_ipv6_by_networkcidr(self.ipv6_by_networkcidroption)
 
-		
 class Private_IP_For_Dhcp(Dhcp_Ip_Server):
 	def __init__(self):
 		super(Private_IP_For_Dhcp, self).__init__()
