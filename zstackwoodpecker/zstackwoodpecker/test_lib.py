@@ -5252,9 +5252,13 @@ def lib_robot_create_utility_vm(robot_test_obj):
         
             utility_vm = lib_create_vm(utility_vm_create_option)
             #test_dict.add_utility_vm(utility_vm)
-
-        if os.environ.get('ZSTACK_SIMULATOR') != "yes":
-            utility_vm.check()
+            if os.environ.get('ZSTACK_SIMULATOR') != "yes":
+                utility_vm.check()
+        else:
+            import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
+            utility_vm_uuid = utility_vm.uuid
+            utility_vm = zstack_vm_header.ZstackTestVm()
+            utility_vm = utility_vm.create_from(utility_vm_uuid)
               
         robot_test_obj.set_utility_vm(utility_vm)
 
