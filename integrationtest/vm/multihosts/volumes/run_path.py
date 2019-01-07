@@ -237,7 +237,10 @@ default_config = [{"ps1": "PS"}, {"ps1": "default"}]
 def test():
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     initial_formation = flavor['initial_formation']
-    config = flavor['config']
+    if flavor.has_key('config'):
+        config = flavor['config']
+    else:
+        config = None
     path_list = flavor['path_list']
 
     test_util.test_dsc('''Will mainly doing random test for all kinds of snapshot operations. VM, Volume and Image operations will also be tested. If reach 1 hour successful running condition, testing will success and quit.  SG actions, and VIP actions are removed in this robot test.
