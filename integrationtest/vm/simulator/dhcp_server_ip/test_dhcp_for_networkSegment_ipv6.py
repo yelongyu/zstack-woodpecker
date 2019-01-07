@@ -44,6 +44,7 @@ def test():
     test_util.test_logger("antony @@@debug : %s" % (l2_no_vlan_uuid))
 
     test_util.test_logger("create l3 network")
+    public_network.set_ipVersion(ip_Version[1])
     public_network.create_l3uuid(l3_name)
     test_util.test_logger("antony @@@debug : %s" %
                           (public_network.get_l3uuid()))
@@ -52,7 +53,7 @@ def test():
     test_util.test_logger("add ip v4 range to l3 network")
     public_network.add_ipv6_range(
         ip_range_name, start_ip, endip, gate_way, prifixLen, dhcp_system_tags)
-    if public_network.check_dhcp_ipaddress().find(dhcp_ip_for_public) == -1:
+    if public_network.check_dhcp_ipaddress().find(dhcp_ip_for_public.lower()) == -1:
         test_util.test_fail("dhcp server ip create fail")
 
     test_util.test_logger("delete l3 network")

@@ -151,7 +151,7 @@ class Public_Ip_For_Dhcp(Dhcp_Ip_Server):
 
 	def add_ipv6_range(self, name ,start_ip, end_ip, gateway, prefixLen, systemTags = [], ipversion = 6,  addressMode = "Stateful-DHCP",netmask = None):
 		self.ipv6_range_option.set_name(name)
-		self.ipv6_range_option.set_startIp(set_startIp)
+		self.ipv6_range_option.set_startIp(start_ip)
 		self.ipv6_range_option.set_endIp(end_ip)
 		self.ipv6_range_option.set_gateway(gateway)
 		self.ipv6_range_option.set_ipVersion(ipversion)
