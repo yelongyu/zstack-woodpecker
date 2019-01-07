@@ -10,6 +10,7 @@ import apibinding.api_actions as api_actions
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.account_operations as account_operations
 import zstackwoodpecker.operations.config_operations as config_operations
+import zstackwoodpecker.operations.resource_operations as res_ops
 
 import os
 import inspect
@@ -49,6 +50,13 @@ def create_vm(vm_create_option):
         create_vm.type = vm_type
 
     create_vm.systemTags = vm_create_option.get_system_tags()
+    cond = res_ops.gen_query_conditions('resourceUuid', '=', create_vm.imageUuid)
+    systags = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
+    for tags in systags:
+        if tags.tag == "bootMode::UEFI":
+            create_vm.systemTags.append("vmMachineType::q35")
+            break
+
     create_vm.userTags = vm_create_option.get_user_tags()
     create_vm.rootVolumeSystemTags = vm_create_option.get_rootVolume_systemTags()
     create_vm.dataVolumeSystemTags = vm_create_option.get_dataVolume_systemTags()
