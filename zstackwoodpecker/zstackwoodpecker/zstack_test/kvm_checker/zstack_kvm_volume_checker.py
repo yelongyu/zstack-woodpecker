@@ -60,13 +60,10 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
 
     def check_sharedblock(self, volume, volume_installPath, ps):
         devPath = "/dev/" + volume_installPath.split("sharedblock://")[1]
-        cmd = 'lvscan'
-        conditions = res_ops.gen_query_conditions('primaryStorage.uuid', '=', ps.uuid)
-        cluster = res_ops.query_resource(res_ops.CLUSTER, conditions)[0]
-        conditions = res_ops.gen_query_conditions('clusterUuid', '=', cluster.uuid)
-        host = res_ops.query_resource(res_ops.HOST, conditions)[0]
+        cmd = "lvmlockctl -i | grep `lvs --nolocking --noheadings -ouuid -Slv_active=active %s` | awk '{print $3}'" % devPath
+        host = test_lib.lib_get_volume_object_host(self.test_obj)
         result = test_lib.lib_execute_ssh_cmd(host.managementIp, 'root', 'password', cmd)
-        if devPath in result:
+        if "ex" in result:
             return self.judge(True)
         else:
             return self.judge(False)
