@@ -105,9 +105,9 @@
         <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName3" description="Test Image3" 
-        format="$rootImageFormat" url="$imageUrl3" 
+        format="$rootImageFormat" url="$imageUrl_linux_UEFI" 
         mediaType="$rootMediaType"
-        username="$imageUsername" password="$imagePassword">
+        username="$imageUsername" password="$imagePassword" systemTags="bootMode::UEFI">
         <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       </image>
       <image name="$virtualRouterImageName" 
