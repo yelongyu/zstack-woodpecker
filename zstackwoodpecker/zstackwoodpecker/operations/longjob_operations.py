@@ -27,3 +27,20 @@ def get_task_progress(api_id, session_uuid=None):
     test_util.action_logger('Get task [apiId: %s] progress' % api_id)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt.inventories
+
+def cancel_longjob(uuid, systemTags=None, timeout=None, userTags=None, session_uuid=None):
+    action = api_actions.CancelLongJobAction()
+    action.uuid = uuid
+    action.systemTags = systemTags
+    action.timeout = timeout
+    action.userTags = userTags
+    test_util.action_logger('Cancel job [uuid: %s]' % uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventories
+
+def rerun_longjob(uuid, session_uuid = None):
+    action = api_actions.RerunLongJobAction()
+    action.uuid = uuid
+    test_util.action_logger('Rerun longjob [uuid:] %s' % uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory

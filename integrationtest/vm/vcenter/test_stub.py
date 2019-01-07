@@ -333,3 +333,59 @@ def set_flat_vm_ip(vm,ipaddr,gateway,netmask):
     arguments = "%s %s %s" % (ipaddr,gateway,netmask)
     content.guestOperationsManager.processManager.StartProgramInGuest(
         vm=vm, auth=auth, spec=vim.vm.guest.ProcessManager.ProgramSpec(arguments=arguments, programPath=path))
+
+def execute_shell_in_process(cmd, timeout=10, logfd=None):
+    if not logfd:
+        process = subprocess.Popen(cmd, executable='/bin/sh', shell=True, universal_newlines=True)
+    else:
+        process = subprocess.Popen(cmd, executable='/bin/sh', shell=True, stdout=logfd, stderr=logfd, universal_newlines=True)
+
+    start_time = time.time()
+    while process.poll() is None:
+        curr_time = time.time()
+        TEST_TIME = curr_time - start_time
+        if TEST_TIME > timeout:
+            process.kill()
+            test_util.test_logger('[shell:] %s timeout ' % cmd)
+            return False
+        time.sleep(1)
+
+    test_util.test_logger('[shell:] %s is finished.' % cmd)
+    return process.returncode
+
+def rerun_logjobs(jobUuid, session_uuid = None):
+    action = api_actions.rerunLongJobAction()
+    action.jobUuid = jobUuid
+    test_util.action_logger('Rerun longjob [uuid:] %s' % jobUuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def convert_vm_from_foreign_hypervisor(name, url, cpuNum, memorySize, primaryStorageUuid, l3NetworkUuids, cluster_uuid = None, conversionHostUuid = None, convertStrategy = None, type = None, platform = None, strategy = None, systemTags = None, session_uuid = None):
+    action = api_actions.ConvertVmFromForeignHypervisorAction()
+    action.name = name
+    action.url = url
+    action.cpuNum = cpuNum
+    action.memorySize = memorySize
+    action.primaryStorageUuid = primaryStorageUuid
+    action.l3NetworkUuids = l3NetworkUuids
+    action.clusterUuid = cluster_uuid
+    action.convertStrategy = convertStrategy
+    action.type = type
+    action.platform = platform
+    action.conversionHostUuid = conversionHostUuid
+    action.strategy = strategy
+    action.systemTags = systemTags
+    test_util.action_logger('Convert Vm From Foreign Hypervisor.')
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def add_v2v_conversion_host(name, hostUuid, storagePath, type, systemTags = None, session_uuid = None):
+    action = api_actions.AddV2VConversionHostAction()
+    action.name = name
+    action.hostUuid = hostUuid
+    action.storagePath = storagePath
+    action.type = type
+    action.systemTags = systemTags
+    test_util.action_logger('Add v2v Conversion Host [uuid:] %s' % hostUuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt.inventory
