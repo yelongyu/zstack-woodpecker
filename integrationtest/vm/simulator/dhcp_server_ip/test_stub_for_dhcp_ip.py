@@ -182,7 +182,13 @@ class Private_IP_For_Dhcp(Dhcp_Ip_Server):
 		self.l3_DHCP = "DHCP"
 		self.l3_SecurityGroup = "SecurityGroup" 
 		self.l3_Userdata = "Userdata"
-		self.networkservice_type = ["Flat","SecurityGroup"]
+		self.l3_DNS = "DNS"
+		self.l3_SNAT = "SNAT"
+		self.l3_LoadBalancer = "LoadBalancer"
+		self.l3_PortForwarding = "PortForwarding"
+		self.l3_Eip = "Eip"
+		self.networkservice_type = ["Flat", "SecurityGroup"]
+		self.networkservice_type_vr = ["VirtualRouter", "SecurityGroup", "Flat"]
 
 	def create_l3uuid(self,name):
 		self.l3_uuid = net_ops.create_l3(name,self.get_l2uuid(),self.get_ipVersion(),self.category).uuid
@@ -217,6 +223,36 @@ class Private_IP_For_Dhcp(Dhcp_Ip_Server):
 	def get_l3_Userdata(self):
 		return self.l3_Userdata
 
+	def set_l3_DNS(self, l3_DNS):
+		self.l3_DNS = l3_DNS
+
+	def get_l3_DNS(self):
+		return self.l3_DNS
+
+	def set_l3_SNAT(self, l3_SNAT):
+		self.l3_SNAT = l3_SNAT
+
+	def get_l3_SNAT(self):
+		self.l3_SNAT = l3_SNAT
+
+	def set_l3_LoadBalancer(self, l3_LoadBalancer):
+		self.l3_LoadBalancer = l3_LoadBalancer
+
+	def get_l3_LoadBalancer(self):
+		return self.l3_LoadBalancer
+	
+	def set_l3_PortForwarding(self, l3_PortForwarding):
+		self.l3_PortForwarding = l3_PortForwarding
+
+	def get_l3_PortForwarding(self):
+		return self.l3_PortForwarding
+
+	def set_l3_Eip(self, l3_Eip):
+		self.l3_Eip = l3_Eip
+
+	def get_l3_Eip(self):
+		return self.l3_Eip
+
 	def add_service_to_l3network(self):
 		for networkservice in self.networkservice_type:
 			if networkservice == "Flat":
@@ -225,6 +261,22 @@ class Private_IP_For_Dhcp(Dhcp_Ip_Server):
 			elif networkservice == "SecurityGroup":
 				allservices = [self.l3_SecurityGroup]
 				cond = res_ops.gen_query_conditions("type", "=", networkservice)
+			network_service_provider_uuid = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER,cond)[0].uuid
+			test_util.test_logger("%s" %(network_service_provider_uuid))
+			aut_ops.AttachNetworkServiceToL3Network(self.get_l3uuid(),allservices,network_service_provider_uuid)
+
+	def add_service_to_l3network_vr(self):
+		for networkservice in self.networkservice_type_vr:
+			if networkservice == "VirtualRouter":
+				allservices = [self.l3_DNS , self.l3_SNAT, self.l3_LoadBalancer, self.l3_PortForwarding, self.l3_Eip]
+				cond = res_ops.gen_query_conditions("type", "=", networkservice)
+			elif networkservice == "SecurityGroup":
+				allservices = [self.l3_SecurityGroup]
+				cond = res_ops.gen_query_conditions("type", "=", networkservice)
+			elif networkservice == "Flat":
+				allservices = [self.l3_Userdata, self.l3_DHCP]
+                                cond = res_ops.gen_query_conditions("type", "=", networkservice)
+
 			network_service_provider_uuid = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER,cond)[0].uuid
 			test_util.test_logger("%s" %(network_service_provider_uuid))
 			aut_ops.AttachNetworkServiceToL3Network(self.get_l3uuid(),allservices,network_service_provider_uuid)
