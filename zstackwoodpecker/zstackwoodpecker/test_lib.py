@@ -5291,6 +5291,16 @@ def lib_robot_constant_path_operation(robot_test_obj):
     '''
         Constant path operations for robot testing
     '''
+
+
+    def _update_bs_for_robot_state(state):
+        cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
+        cond = res_ops.gen_query_conditions("name", '=', "only_for_robot_backup_test", cond)
+        bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)
+        for bs in bss:
+            import zstackwoodpecker.operations.backupstorage_operations as bs_ops
+            bs_ops.change_backup_storage_state(bs.uuid, state)
+
     def _parse_args(all_args):
         normal_args = []
         extra_args = []
@@ -5302,6 +5312,7 @@ def lib_robot_constant_path_operation(robot_test_obj):
                 normal_args.append(aa)
         return (normal_args, extra_args)
 
+    #_update_bs_for_robot_state("disable")
     test_dict = robot_test_obj.get_test_dict()
     constant_path_list = robot_test_obj.get_constant_path_list()
     if len(constant_path_list) > 0:
@@ -5404,6 +5415,20 @@ def lib_robot_constant_path_operation(robot_test_obj):
                     % (next_action, target_vm.get_vm().uuid))
             target_vm.stop()
             test_dict.mv_vm(target_vm, vm_header.RUNNING, vm_header.STOPPED)
+        elif next_action == TestAction.reboot_vm:
+            target_vm = None
+            if len(constant_path_list[0]) > 1:
+                target_vm_name = constant_path_list[0][1]
+                all_vm_list = test_dict.get_all_vm_list()
+                for vm in all_vm_list:
+                    if vm.get_vm().name == target_vm_name:
+                        target_vm = vm
+                        break
+            if not target_vm:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+            test_util.test_dsc('Robot Action: %s; on VM: %s' \
+                    % (next_action, target_vm.get_vm().uuid))
+            target_vm.reboot()
         elif next_action == TestAction.start_vm:
             target_vm = None
             if len(constant_path_list[0]) > 1:
@@ -5799,7 +5824,9 @@ def lib_robot_constant_path_operation(robot_test_obj):
             test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
                 (next_action, target_volume_uuid))
 
+            #_update_bs_for_robot_state("enable")
             backup = vol_ops.create_backup(backup_option)
+            #_update_bs_for_robot_state("disable")
             test_dict.add_backup(backup.uuid)
         elif next_action == TestAction.use_backup:
             target_backup = None
@@ -5819,7 +5846,9 @@ def lib_robot_constant_path_operation(robot_test_obj):
             test_util.test_dsc('Robot Action: %s; on Backup: %s' % \
                 (next_action, target_backup.uuid))
 
+            #_update_bs_for_robot_state("enable")
             backup = vol_ops.revert_volume_from_backup(target_backup.uuid)
+            #_update_bs_for_robot_state("disable")
         elif next_action == TestAction.clone_vm:
             target_vm = None
             vm_name = None
@@ -5843,7 +5872,7 @@ def lib_robot_constant_path_operation(robot_test_obj):
                 if ea == "full":
                     full = True
 
-            new_vm = target_vm.clone([vm_name], full=full)
+            new_vm = target_vm.clone([vm_name], full=full)[0]
             test_util.test_dsc('Robot Action Result: %s; new VM: %s'\
                     % (next_action, new_vm.get_vm().uuid))
             test_dict.add_vm(new_vm)
