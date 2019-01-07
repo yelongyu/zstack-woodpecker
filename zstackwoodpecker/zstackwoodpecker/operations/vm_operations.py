@@ -54,7 +54,10 @@ def create_vm(vm_create_option):
     systags = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
     for tags in systags:
         if tags.tag == "bootMode::UEFI":
-            create_vm.systemTags.append("vmMachineType::q35")
+            if create_vm.systemTags:
+                create_vm.systemTags.append("vmMachineType::q35")
+            else:
+                create_vm.systemTags = ["vmMachineType::q35"]
             break
 
     create_vm.userTags = vm_create_option.get_user_tags()
