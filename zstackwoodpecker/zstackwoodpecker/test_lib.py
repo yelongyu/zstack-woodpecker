@@ -5820,6 +5820,35 @@ def lib_robot_constant_path_operation(robot_test_obj):
                 (next_action, target_backup.uuid))
 
             backup = vol_ops.revert_volume_from_backup(target_backup.uuid)
+        elif next_action == TestAction.clone_vm:
+            target_vm = None
+            vm_name = None
+            full = False
+            (normal_args, extra_args) = _parse_args(constant_path_list[0])
+            if len(normal_args) > 2:
+                target_vm_name = normal_args[1]
+                vm_name = normal_args[2]
+                all_vm_list = test_dict.get_all_vm_list()
+                for vm in all_vm_list:
+                    if vm.get_vm().name == target_vm_name:
+                        target_vm = vm
+                        break
+
+            if not target_vm or not vm_name:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            test_util.test_dsc('Robot Action: %s; on VM: %s' % \
+                (next_action, target_vm.get_vm().uuid))
+            for ea in extra_args:
+                if ea == "full":
+                    full = True
+
+            new_vm = target_vm.clone([vm_name], full=full)
+            test_util.test_dsc('Robot Action Result: %s; new VM: %s'\
+                    % (next_action, new_vm.get_vm().uuid))
+            test_dict.add_vm(new_vm)
+        else:
+            test_util.test_fail("Robot action not supported")
 
         constant_path_list.pop(0)
         robot_test_obj.set_constant_path_list(constant_path_list)
