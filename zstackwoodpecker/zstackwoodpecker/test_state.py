@@ -1017,7 +1017,11 @@ class TestStateDict(object):
                 self.rm_volume(root_volume_obj)
 
     def get_all_snapshots(self):
-        return self.volume_snapshot_dict.values()
+        all_items = []
+        for key,value in self.volume_snapshot_dict.iteritems():
+            if key != 'Deleted':
+                all_items.append(value)
+        return all_items
 
     def get_all_available_snapshots(self):
         all_items = []
