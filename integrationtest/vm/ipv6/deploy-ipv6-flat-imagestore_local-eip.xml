@@ -152,6 +152,7 @@
               <dns>$ipv6DNSServer</dns>
               <networkService provider="Flat Network Service Provider">
                 <serviceType>DHCP</serviceType>
+                <serviceType>Eip</serviceType>
               </networkService>
               <networkService provider="SecurityGroup">
                 <serviceType>SecurityGroup</serviceType>
