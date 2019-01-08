@@ -311,6 +311,7 @@ class VpcNetwork_IP_For_Dhcp(Dhcp_Ip_Server):
 		super(VpcNetwork_IP_For_Dhcp, self).__init__()
 		self.l3_uuid = None
                 self.category = "Private"
+		self.l3_type = "L3VpcNetwork"
                 self.l3_DHCP = "DHCP"
                 self.l3_SecurityGroup = "SecurityGroup"
                 self.l3_Userdata = "Userdata"
@@ -326,7 +327,7 @@ class VpcNetwork_IP_For_Dhcp(Dhcp_Ip_Server):
 		self.networkservice_type_vpc = ["vrouter", "SecurityGroup", "Flat"]
 
 	def create_l3uuid(self,name):
-		self.l3_uuid = net_ops.create_l3(name,self.get_l2uuid(),self.get_ipVersion(),self.category).uuid
+		self.l3_uuid = net_ops.create_l3(name,self.get_l2uuid(),self.get_ipVersion(),self.get_category(), self.get_l3_type()).uuid
 
 	def get_l3uuid(self):
 		return self.l3_uuid
@@ -339,6 +340,12 @@ class VpcNetwork_IP_For_Dhcp(Dhcp_Ip_Server):
 
         def get_category(self):
                 return self.category
+
+	def set_l3_type(self, l3_type):
+		self.l3_type = l3_type
+
+	def get_l3_type(self):
+		return self.l3_type
 
         def set_l3_DHCP(self, l3_DHCP):
                 self.l3_DHCP = l3_DHCP
