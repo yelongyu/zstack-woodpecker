@@ -45,7 +45,7 @@ def test():
 	if private_vpcnetwork.check_dhcp_ipaddress().find(dhcp_ip_for_private_vpc) == -1:
 		test_util.test_fail("dhcp server ip create fail")
 	test_util.test_logger("delete l3 network")
-	#private_vpcnetwork.del_l3uuid()
+	private_vpcnetwork.del_l3uuid()
 	test_util.test_pass("dhcp server ip create successfully")
 
 '''
