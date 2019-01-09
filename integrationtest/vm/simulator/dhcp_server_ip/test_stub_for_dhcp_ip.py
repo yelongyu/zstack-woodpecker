@@ -428,7 +428,7 @@ class VpcNetwork_IP_For_Dhcp(Dhcp_Ip_Server):
                                 allservices = [self.l3_SecurityGroup]
                                 cond = res_ops.gen_query_conditions("type", "=", networkservice)
 			elif networkservice == "vrouter":
-                                allservices = [self.l3_IPsec, self.l3_VRouterRoute, self.l3_CentralizedDNS, self.l3_VipQos, self.l3_DNS, self.l3_SNAT, self.l3_LoadBalancer, self.l3_PortForwarding, self.l3_Eip, self.l3_DHCP]
+                                allservices = [self.l3_IPsec, self.l3_VRouterRoute, self.l3_CentralizedDNS, self.l3_VipQos, self.l3_DNS, self.l3_SNAT, self.l3_LoadBalancer, self.l3_PortForwarding, self.l3_Eip]
                                 cond = res_ops.gen_query_conditions("type", "=", networkservice)
                         network_service_provider_uuid = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER,cond)[0].uuid
                         test_util.test_logger("%s" %(network_service_provider_uuid))
