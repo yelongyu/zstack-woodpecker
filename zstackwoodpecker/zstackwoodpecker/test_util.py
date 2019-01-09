@@ -1931,3 +1931,33 @@ component_loader = ComponentLoader()
 
 def get_component_loader():
     return component_loader
+
+class SPTREE(object):
+    '''
+    Data structure of volume snapshot tree
+    '''
+    def __init__(self):
+        self.sp_tree = {}
+        self.curr = None
+        self.sp_curr = []
+
+    def add(self, uuid):
+        if self.sp_tree and uuid not in self.sp_curr:
+            self.sp_curr.append(uuid)
+        if uuid not in self.sp_tree:
+            self.sp_tree[uuid] = self.sp_curr = []
+            self.curr = uuid
+
+    def revert(self, uuid):
+        self.sp_curr = self.sp_tree[uuid]
+        self.curr = uuid
+
+    def delete(self, uuid):
+        for s in self.sp_tree[uuid]:
+            self.sp_tree.pop(s)
+        self.sp_tree.pop(uuid)
+        for k, v in self.sp_tree.iteritems():
+            if uuid in v:
+                v.remove(uuid)
+                self.sp_curr = self.sp_tree[k]
+                self.curr = k
