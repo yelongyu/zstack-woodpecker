@@ -173,6 +173,7 @@ class DataMigration(TestChain):
                 pass
         self.get_image()
         self.vm = create_vm('multicluster_basic_vm', self.image.name, os.getenv('l3PublicNetworkName'))
+        self.root_vol_uuid = self.vm.vm.rootVolumeUuid
         self.vm.check()
         self.origin_ps = self.get_ps_inv(self.vm.vm.allVolumes[0].primaryStorageUuid)
         return self
