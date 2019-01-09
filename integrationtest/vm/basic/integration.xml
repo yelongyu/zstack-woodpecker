@@ -58,6 +58,7 @@
         <case timeout="220" >test_check_mysql_host_password.py</case>
         <case timeout="220" >test_host_ept.py</case>
         <case timeout="220" >test_add_host_ept.py</case>
+        <case timeout="220" >test_elaboration.py</case>
         <case timeout="180" noparallel='True'>test_get_vm_console_address.py</case>
 	<case timeout="600" noparallel='True'>vga/test_vm_vga.py</case>
 	<case timeout="600" noparallel='True'>vga/test_vm_qxl.py</case>
