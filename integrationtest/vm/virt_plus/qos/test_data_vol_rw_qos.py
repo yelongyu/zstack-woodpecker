@@ -31,6 +31,7 @@ def test():
     new_volume_offering = test_lib.lib_create_disk_offering(read_bandwidth=read_bandwidth, write_bandwidth=write_bandwidth)
     volume_offering_uuid = new_volume_offering.uuid
     vm = test_stub.create_vm(vm_name='vm_volume_qos', disk_offering_uuids = [volume_offering_uuid])
+    vm.check()
     test_obj_dict.add_vm(vm)
     vm_inv = vm.get_vm()
     cond = res_ops.gen_query_conditions("vmInstanceUuid", '=', vm_inv.uuid) 
