@@ -1,5 +1,5 @@
 '''
-1.create private vpc router network with Network segment
+1.create private vpc router network with cidr
 2.check dhcp ip address
 
 @author Antony WeiJiang
@@ -17,14 +17,11 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 l2_query_resource = res_ops.L2_NETWORK
 type_l2 = ["L2NoVlanNetwork","L2VlanNetwork"]
-start_ip, endip = ("192.168.1.2","192.168.1.4")
-gate_way = "192.168.1.1"
-net_mask = "255.255.255.0"
 l3_name = "test_dhcp_server"
 ip_range_name = "dhcp_ip_range"
 ip_Version = [4,6]
-ip_range_for_private_vpc = [start_ip,"192.168.1.3",endip]
-dhcp_ip_for_private_vpc = ip_range_for_private_vpc[random.randint(0,len(ip_range_for_private_vpc)-1)]
+networkcidr = "192.168.1.0/24"
+dhcp_ip_for_private_vpc = "192.168.1.3"
 dhcp_system_tags = ["flatNetwork::DhcpServer::"+dhcp_ip_for_private_vpc+"::ipUuid::null"]
 
 def test():
@@ -44,11 +41,11 @@ def test():
 	private_vpcnetwork.add_service_to_l3_vpcnetwork()
 
 	test_util.test_logger("add ip v4 range to l3 network")
-	private_vpcnetwork.add_ip_range(ip_range_name, start_ip, endip, gate_way, net_mask, dhcp_system_tags)
+	private_vpcnetwork.add_ip_by_networkcidr(ip_range_name, networkcidr, dhcp_system_tags)
 	if private_vpcnetwork.check_dhcp_ipaddress().find(dhcp_ip_for_private_vpc) == -1:
 		test_util.test_fail("dhcp server ip create fail")
 	test_util.test_logger("delete l3 network")
-	private_vpcnetwork.del_l3uuid()
+	#private_vpcnetwork.del_l3uuid()
 	test_util.test_pass("dhcp server ip create successfully")
 
 '''
