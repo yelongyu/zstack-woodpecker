@@ -347,7 +347,7 @@ class DataMigration(TestChain):
             assert str(vol_size) in data_info
             ps_trash = ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid).storageTrashSpecs
             trash_install_path_list = [trsh.installPath for trsh in ps_trash]
-            assert vol_installPath[:-39] in trash_install_path_list
+            assert '/'.join(vol_installPath.split('/')[:8]) in trash_install_path_list
         return self
 
     def check_vol_sp(self, vol_uuid, count):
