@@ -18,7 +18,7 @@ import time
 #Will sent 4000s as timeout, since case need to run at least ~3700s
 _config_ = {
         'timeout' : 4600,
-        'noparallel' : False
+        'noparallel' : True
         }
 
 test_dict = test_state.TestStateDict()
