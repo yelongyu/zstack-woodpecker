@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 
 Create an unified test_stub to share test operations
@@ -288,3 +289,40 @@ def create_eip(eip_name=None, vip_uuid=None, vnic_uuid=None, vm_obj=None, \
     eip.create(vm_obj)
     return eip
 
+def construct_elaboration_json(json):
+    json_path = json.rsplit("/", 1)[0]
+    json_file = json.rsplit("/", 1)[1]
+    if not os.path.isdir(json_path):
+        os.makedirs(json_path)
+    if os.path.exists(json):
+        os.remove(json)
+    os.mknod(json, 0666)
+    fd = open(json, "w")
+
+    str = """[
+  {
+    "category": "ACCOUNT",
+    "code": "1000",
+    "regex": "wrong account name or password",
+    "message_cn": "登陆帐号/密码出错",
+    "message_en": "wrong account name or password",
+    "operation_cn": "检查输入的登陆帐号或密码",
+    "operation_en": "check the account / password for login"
+  },
+  {
+    "category": "ACCOUNT",
+    "code": "1000",
+    "regex": "The session is invalid, either wrong session id or the session has been expired",
+    "message_cn": "session过期，或者提供了不正确的session id",
+    "message_en": "The session is invalid, either wrong session id or the session has been expired",
+    "operation_cn": "重新登陆",
+    "operation_en": "need login again"
+  },
+  {
+    "category": "HOST",
+    "operation_en": "test"
+  }
+]"""
+    fd.write(str)
+    fd.flush()
+    fd.close()
