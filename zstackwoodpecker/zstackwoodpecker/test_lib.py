@@ -5527,9 +5527,11 @@ def lib_robot_constant_path_operation(robot_test_obj):
                     if vm_host_uuid and volume_host_uuid != vm_host_uuid:
                         test_util.test_logger('need to migrate volume: %s to host: %s, before attach it to vm: %s' % (target_volume.get_volume().uuid, vm_host_uuid, target_vm.vm.uuid))
                         target_volume.migrate(vm_host_uuid)
-    
+   
             target_volume.attach(target_vm)
-            test_dict.mv_volume(target_volume, test_stage.free_volume, target_vm.vm.uuid)
+            test_dict.mv_volume_with_snapshots(target_volume, test_stage.free_volume, target_vm.vm.uuid)
+            all_volume_snapshots = test_dict.get_all_available_snapshots()
+
         elif next_action == TestAction.detach_volume:
             target_volume = None
             if len(constant_path_list[0]) > 1:
@@ -5545,10 +5547,13 @@ def lib_robot_constant_path_operation(robot_test_obj):
 
             test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
                 (next_action, target_volume.get_volume().uuid))
+            all_volume_snapshots = test_dict.get_all_available_snapshots()
 
             target_vm_uuid = target_volume.get_volume().vmInstanceUuid
             target_volume.detach()
-            test_dict.mv_volume(target_volume, target_vm_uuid, test_stage.free_volume)
+            test_dict.mv_volume_with_snapshots(target_volume, target_vm_uuid, test_stage.free_volume)
+            all_volume_snapshots = test_dict.get_all_available_snapshots()
+
         elif next_action == TestAction.delete_volume:
             target_volume = None
             if len(constant_path_list[0]) > 1:
@@ -5620,9 +5625,7 @@ def lib_robot_constant_path_operation(robot_test_obj):
                 target_images = res_ops.query_resource(res_ops.IMAGE, cond)
             if not target_images:
                 if not target_image_name:
-                    test_util.test_logger("shuang %s" % robot_test_obj.configs_dict)
                     ps_uuid = lib_robot_get_default_configs(robot_test_obj, "PS")
-                    test_util.test_logger("shuang %s" % ps_uuid)
                     
                     image_option = test_util.ImageOption()
                     image_option.set_format('qcow2')
@@ -5768,6 +5771,29 @@ def lib_robot_constant_path_operation(robot_test_obj):
     
             test_util.test_dsc('Robot Action Result: %s; new SP: %s' % \
                 (next_action, new_snapshot.get_snapshot().uuid))
+        elif next_action == TestAction.use_volume_snapshot:
+            target_volume_snapshots = None
+            target_snapshot = None
+            target_snapshot_name = None
+            if len(constant_path_list[0]) > 1:
+                target_snapshot_name = constant_path_list[0][1]
+           
+                all_volume_snapshots = test_dict.get_all_available_snapshots()
+                for candidate_snapshots in all_volume_snapshots:
+                    for candidate_snapshot in candidate_snapshots.get_primary_snapshots():
+                        if candidate_snapshot.get_snapshot().name == target_snapshot_name:
+                            target_volume_snapshots = candidate_snapshots
+                            target_snapshot = candidate_snapshot
+                            break
+
+            if not target_snapshot:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            test_util.test_dsc('Robot Action: %s; on Volume: %s; on SP: %s' % \
+                (next_action, \
+                target_snapshot.get_target_volume().get_volume().uuid, \
+                target_snapshot.get_snapshot().uuid))
+            target_volume_snapshots.use_snapshot(target_snapshot)
         elif next_action == TestAction.create_backup:
             backup_name = None
             target_volume_uuid = None

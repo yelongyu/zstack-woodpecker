@@ -828,6 +828,35 @@ class TestStateDict(object):
         self.rm_volume(volume, src_state)
         self.add_volume(volume, dst_state)
 
+    def mv_volume_with_snapshots(self, volume, src_state, dst_state):
+        def _add_volume(self, volume, state=TestStage.free_volume):
+            if not self.volume_dict.has_key(state):
+                self.volume_dict[state] = []
+    
+            if not volume in self.volume_dict[state]:
+                self.volume_dict[state].append(volume)
+
+        def _rm_volume(self, volume, state=None):
+            if state:
+                if volume in self.volume_dict[state]:
+                    self.volume_dict[state].remove(volume)
+                    if volume.get_state() == volume_header.DELETED:
+                        self.add_volume(volume, TestStage.deleted_volume)
+                    return True
+                return False
+    
+            for key,values in self.volume_dict.iteritems():
+                if volume in values:
+                    self.volume_dict[key].remove(volume)
+                    if volume.get_state() == volume_header.DELETED:
+                        self.add_volume(volume, TestStage.deleted_volume)
+                    return True
+            else:
+                return False
+
+        _rm_volume(self, volume, src_state)
+        _add_volume(self, volume, dst_state)
+
     def mv_volumes(self, src_state, dst_state):
         '''
         move all volumes from source state to destination state.
@@ -845,15 +874,11 @@ class TestStateDict(object):
             self.volume_dict[vm_uuid] = []
 
     def attach_volume(self, volume, vm_uuid):
-        self.rm_volume(volume)
-        if not self.volume_dict.has_key(vm_uuid):
-            self.volume_dict[vm_uuid] = volume
-        else:
-            self.volume_dict[vm_uuid].append(volume)
+        self.mv_volume_with_snapshots(volume, TestStage.free_volume, vm_uuid)
 
     def detach_volume(self, volume):
         vm_uuid = volume.target_vm.vm.uuid
-        self.mv_volume(volume, vm_uuid, TestStage.free_volume)
+        self.mv_volume_with_snapshots(volume, vm_uuid, TestStage.free_volume)
 
     def get_volume_list(self, volume_state=TestStage.free_volume):
         if self.volume_dict.has_key(volume_state):
