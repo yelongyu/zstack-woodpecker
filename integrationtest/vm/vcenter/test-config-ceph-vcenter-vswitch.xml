@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-ceph-vcenter-vswitch.xml</deployConfig>
+    <deployConfigTemplate>deploy.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
