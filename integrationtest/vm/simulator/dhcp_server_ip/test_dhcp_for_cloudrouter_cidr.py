@@ -36,7 +36,7 @@ def test():
 	test_util.test_logger("antony @@@debug : %s" %(l2_no_vlan_uuid))
 	
 	test_util.test_logger("create l3 network")
-	private_network.set_ipVersion(ip_Version[1])
+	private_network.set_ipVersion(ip_Version[0])
 	private_network.create_l3uuid(l3_name)
 	test_util.test_logger("antony @@@debug : %s" %(private_network.get_l3uuid()))
 	private_network.add_service_to_l3network_vr()

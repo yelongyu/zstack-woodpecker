@@ -74,6 +74,7 @@ class Dhcp_Ip_Server(object):
         for l2_network in res_ops.get_resource(self.get_l2_query_resource()):
             if l2_network.type == self.get_l2_type():
                 self.l2_uuid = l2_network.uuid
+                break
         return self.l2_uuid
 
     def add_ip_range(
