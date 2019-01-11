@@ -5114,7 +5114,7 @@ def lib_robot_initial_formation_auto_parameter(robot_test_obj, template_uuid):
     pub_l3network_dict = dict()
     pri_l3network_dict = dict()
     disk_offering_dict = dict()
-    for para_inv in para_invs.parametes:
+    for para_inv in para_invs.parameters:
         print para_inv
         if para_inv.resourceType == "InstanceOffering":
             if para_inv.paramName in instance_offering_dict:
