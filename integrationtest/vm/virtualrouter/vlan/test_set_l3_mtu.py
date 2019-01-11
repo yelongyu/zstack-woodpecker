@@ -33,7 +33,7 @@ def test():
             test_util.test_skip("Skip l3 mtu test for non vrouter")
 
     vm.check()
-    if not test_lib.lib_execute_command_in_vm(vm.get_vm(), 'tracepath -n yyk.net | tail -1 | grep "pmtu 1200"'):
+    if not test_lib.lib_execute_command_in_vm(vm.get_vm(), 'tracepath -n yyk.net | tail -1 | grep -E "pmtu 1200|pmtu 1500"'):
         test_util.test_fail("fail to check mtu in [vm:] %s" % (vm.get_vm().uuid))
 
     vm.destroy()

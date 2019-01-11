@@ -39,7 +39,7 @@ def test():
     vm.check()
     
     script_file = tempfile.NamedTemporaryFile(delete=False)
-    script_file.write('tracepath -n yyk.net | tail -1 | grep "pmtu 1200"')
+    script_file.write('tracepath -n yyk.net | tail -1 | grep -E "pmtu 1200|pmtu 1500"')
     script_file.close()
     if not test_lib.lib_execute_shell_script_in_vm(vm.get_vm(), script_file.name):
         test_util.test_fail("fail to check mtu in [vm:] %s" % (vm.get_vm().uuid))
