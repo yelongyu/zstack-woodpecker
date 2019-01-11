@@ -117,9 +117,9 @@ def validate(disklist):
             print "All old disks have been removed,skip validation"
             return "False"
         for i in disklist.keys():
-            _,o,_=bash_roe("ls /%s/| grep md5sum_%s" % ('/'+os.path.basename(i),os.path.basename(i)))
+            _,o,_=bash_roe("ls -t /%s/| grep md5sum_%s | head -n 2" % ('/'+os.path.basename(i),os.path.basename(i)))
             result,_,_=bash_roe("diff /%s/%s /%s/%s" % ('/'+os.path.basename(i),o.strip().split()[0],'/'+os.path.basename(i),o.strip().split()[1]))
-            bash_roe("rm /%s/md5sum*" % os.path.basename(i))
+            #bash_roe("rm /%s/md5sum*" % os.path.basename(i))
             bash_roe("umount /%s" % os.path.basename(i))
             bash_roe("rm -fr /%s" % os.path.basename(i))
             if result != 0:
@@ -223,5 +223,6 @@ if __name__ == "__main__":
             mkdir_disk(disklist)
         generate(disklist)
         if FILE_BASED:
+            random_str=''.join(random.sample('abcdefghijklmnopqrstuvwxyz',3))
             md5sum(disklist,random_str)
             clear_disk(disklist)
