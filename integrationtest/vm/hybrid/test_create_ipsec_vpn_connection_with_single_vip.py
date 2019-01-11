@@ -41,7 +41,10 @@ def env_recover():
         hybrid.del_sg()
 
     if hybrid.eip:
-        hybrid.del_eip()
+        try:
+            hybrid.del_eip()
+        except:
+            pass
 
     if hybrid.route_entry:
         hybrid.del_route_entry()

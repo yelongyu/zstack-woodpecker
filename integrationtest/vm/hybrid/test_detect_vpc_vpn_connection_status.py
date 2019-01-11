@@ -35,7 +35,10 @@ def env_recover():
         hybrid.del_vpn_connection()
 
     if hybrid.user_vpn_gateway:
-        hybrid.del_user_vpn_gateway()
+        try:
+            hybrid.del_user_vpn_gateway()
+        except:
+            pass
     hybrid.tear_down()
 
 #Will be called only if exception happens in test().

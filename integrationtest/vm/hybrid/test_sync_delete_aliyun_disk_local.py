@@ -15,7 +15,7 @@ test_stub = test_lib.lib_get_test_stub()
 hybrid = test_stub.HybridObject()
 
 def test():
-    hybrid.add_datacenter_iz()
+    hybrid.add_datacenter_iz(check_prepaid_ecs=True, ks2=True)
     hybrid.create_aliyun_disk()
     hybrid.del_aliyun_disk(remote=False)
     hybrid.sync_aliyun_disk()
