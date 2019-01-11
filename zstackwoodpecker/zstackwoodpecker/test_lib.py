@@ -5021,16 +5021,16 @@ def lib_robot_update_configs(robot_test_obj, resource_type, resource):
             if robot_test_obj.configs_dict[cd_key][key] == None:
                 if cd_key == "PS":
                     if resource_type == "VmInstance":
-                        if _already_registered(robot_test_obj.configs_dict[cd_key], resource.allVolumes[0].primaryStorageUuid):
-                            return
-                        robot_test_obj.configs_dict[cd_key][key] = resource.allVolumes[0].primaryStorageUuid
-                        return
+                        if not _already_registered(robot_test_obj.configs_dict[cd_key], resource.allVolumes[0].primaryStorageUuid):
+                            robot_test_obj.configs_dict[cd_key][key] = resource.allVolumes[0].primaryStorageUuid
                     if resource_type == "Volume":
-                        if _already_registered(robot_test_obj.configs_dict[cd_key], resource.primaryStorageUuid):
-                            return
-                        robot_test_obj.configs_dict[cd_key][key] = resource.primaryStorageUuid
-                        return
-           
+                        if not _already_registered(robot_test_obj.configs_dict[cd_key], resource.primaryStorageUuid):
+                            robot_test_obj.configs_dict[cd_key][key] = resource.primaryStorageUuid
+                if cd_key == "HOST":
+                    if resource_type == "VmInstance":
+                        if not _already_registered(robot_test_obj.configs_dict[cd_key], resource.hostUuid):
+                            robot_test_obj.configs_dict[cd_key][key] = resource.hostUuid
+          
 def lib_robot_get_default_configs(robot_test_obj, resource_type):
     if robot_test_obj.configs_dict.has_key(resource_type):
         if not robot_test_obj.configs_dict[resource_type]:
@@ -5611,6 +5611,7 @@ def lib_robot_constant_path_operation(robot_test_obj):
             target_volume.resize(new_size)
             target_volume.update()
         elif next_action == TestAction.create_data_volume_from_image:
+            ps_uuid = lib_robot_get_default_configs(robot_test_obj, "PS")
             target_images = None
             target_image_name = None
             (normal_args, extra_args) = _parse_args(constant_path_list[0])
@@ -5663,6 +5664,13 @@ def lib_robot_constant_path_operation(robot_test_obj):
                     systemtags.append("ephemeral::shareable")
                 if ea == "scsi":
                     systemtags.append("capability::virtio-scsi")
+
+            if ps_uuid:
+                ps = lib_get_primary_storage_by_uuid(ps_uuid)
+                if ps.type == inventory.LOCAL_STORAGE_TYPE:
+                    host_uuid = lib_robot_get_default_configs(robot_test_obj, "HOST")
+                    systemtags.append("localStorage::hostUuid::%s" % (host_uuid))
+
             test_util.test_dsc('Robot Action: %s; on Image: %s' % \
                 (next_action, target_images[0]['uuid']))
             target_image = lib_get_image_by_uuid(target_images[0]['uuid'])
@@ -5717,8 +5725,9 @@ def lib_robot_constant_path_operation(robot_test_obj):
         elif next_action == TestAction.create_volume :
             ps_uuid = lib_robot_get_default_configs(robot_test_obj, "PS")
             target_volume_name = None
-            if len(constant_path_list[0]) > 1:
-                target_volume_name = constant_path_list[0][1]
+            (normal_args, extra_args) = _parse_args(constant_path_list[0])
+            if len(normal_args) > 1:
+                target_volume_name = normal_args[1]
             if not target_volume_name:
                 test_util.test_fail("no resource available for next action: %s" % (next_action))
 
@@ -5726,6 +5735,20 @@ def lib_robot_constant_path_operation(robot_test_obj):
             volume_creation_option = test_util.VolumeOption()
             volume_creation_option.set_name(target_volume_name)
             volume_creation_option.set_primary_storage_uuid(ps_uuid)
+            systemtags = []
+            for ea in extra_args:
+                if ea == "shareable":
+                    systemtags.append("ephemeral::shareable")
+                if ea == "scsi":
+                    systemtags.append("capability::virtio-scsi")
+
+            if ps_uuid:
+                ps = lib_get_primary_storage_by_uuid(ps_uuid)
+                if ps.type == inventory.LOCAL_STORAGE_TYPE:
+                    host_uuid = lib_robot_get_default_configs(robot_test_obj, "HOST")
+                    systemtags.append("localStorage::hostUuid::%s" % (host_uuid))
+            if systemtags:
+                volume_creation_option.set_system_tags(systemtags)
             new_volume = lib_create_volume_from_offering(volume_creation_option)
             test_dict.add_volume(new_volume)
     
