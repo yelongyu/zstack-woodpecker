@@ -38,7 +38,7 @@ def test():
     net_ops.set_l3_mtu(l3_net_uuid, 1200)
     vm.reboot()
     vm.check()
-    if not test_lib.lib_execute_command_in_vm(vm.get_vm(), 'tracepath -n yyk.net | tail -1 | grep -E "pmtu 1200|pmtu 1500"'):
+    if not test_lib.lib_execute_command_in_vm(vm.get_vm(), 'tracepath -n yyk.net | tail -1 | grep "pmtu 1200"'):
         test_util.test_fail("fail to check mtu in [vm:] %s" % (vm.get_vm().uuid))
 
     vm.destroy()
