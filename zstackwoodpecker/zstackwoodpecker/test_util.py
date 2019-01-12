@@ -1953,14 +1953,25 @@ class SPTREE(object):
         self.curr = uuid
 
     def delete(self, uuid):
-        for s in self.sp_tree[uuid]:
-            self.sp_tree.pop(s)
         self.sp_tree.pop(uuid)
         for k, v in self.sp_tree.iteritems():
             if uuid in v:
                 v.remove(uuid)
                 self.sp_curr = self.sp_tree[k]
                 self.curr = k
+        self.clean_tree(len(self.sp_tree.keys()))
+
+    def clean_tree(self, r=0):
+        keys = self.sp_tree.keys()
+        vals = self.sp_tree.values()
+        nodes = [n for node in vals for n in node]
+        nodes.append(self.root)
+        for k in keys:
+            if k not in nodes:
+                self.tree.pop(k)
+        r -= 1
+        if r > 0:
+            self.clean_tree(r)
 
     def parent(self, uuid):
         for k, v in self.sp_tree.iteritems():
