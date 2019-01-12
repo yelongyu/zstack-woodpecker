@@ -5790,8 +5790,9 @@ def lib_robot_constant_path_operation(robot_test_obj):
             test_util.test_dsc('Robot Action: %s; on Volume: %s' % (next_action, target_volume_uuid))
 
             snapshots = test_dict.get_volume_snapshot(target_volume_uuid)
-            snapshots.set_utility_vm(robot_test_obj.get_utility_vm(ps_uuid))
-            new_snapshot = snapshots.create_snapshot(target_snapshot_name)
+            cre_vm_opt = robot_test_obj.get_vm_creation_option()
+            cre_vm_opt.set_name("utility_vm_for_robot_test")
+            new_snapshot = lib_create_volume_snapshot_from_volume(snapshots, robot_test_obj, test_dict, cre_vm_opt, target_snapshot_name)
     
             test_util.test_dsc('Robot Action Result: %s; new SP: %s' % \
                 (next_action, new_snapshot.get_snapshot().uuid))
@@ -6065,49 +6066,70 @@ def lib_create_data_vol_template_from_volume(target_vm=None, vm_target_vol=None)
     new_data_vol_temp.set_state(image_header.CREATED)
     return new_data_vol_temp
 
-def lib_create_volume_snapshot_from_volume(target_volume_snapshots, robot_test_obj, test_dict, cre_vm_opt=None):
+def lib_create_volume_snapshot_from_volume(target_volume_snapshots, robot_test_obj, test_dict, cre_vm_opt=None, snapshot_name=None):
+    vol_utiltiy_vm = None
     target_volume_inv = \
             target_volume_snapshots.get_target_volume().get_volume()
-    if not target_volume_snapshots.get_utility_vm():
-        ps_uuid = target_volume_inv.primaryStorageUuid
+    ps_uuid = target_volume_inv.primaryStorageUuid
+    ps = lib_get_primary_storage_by_uuid(ps_uuid)
+    if target_volume_snapshots.get_utility_vm():
+        vol_utiltiy_vm = target_volume_snapshots.get_utility_vm()
+        if ps.type == inventory.LOCAL_STORAGE_TYPE:
+            if vol_utiltiy_vm.get_vm().hostUuid != lib_get_local_storage_volume_host(target_volume_inv.uuid).uuid:
+                vol_utiltiy_vm = None
+
+    if not vol_utiltiy_vm:
         vol_utiltiy_vm = robot_test_obj.get_utility_vm(ps_uuid)
-        if not vol_utiltiy_vm:
-            #create utiltiy_vm on given primary storage.
-            util_vm_opt = test_util.VmOption(cre_vm_opt)
-            instance_offering_uuid = util_vm_opt.get_instance_offering_uuid()
-            if not instance_offering_uuid:
-                instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING)[0].uuid
-            tag = tag_ops.create_system_tag('InstanceOfferingVO', \
-                    instance_offering_uuid, \
-                    'primaryStorage::allocator::uuid::%s' % ps_uuid)
-            possible_cluster = target_volume_inv.clusterUuid
-            if not possible_cluster:
-                possible_cluster = res_ops.query_resource_with_num(\
-                        res_ops.CLUSTER, [], None, 0, 1)[0].uuid
+        if ps.type == inventory.LOCAL_STORAGE_TYPE:
+            if vol_utiltiy_vm.get_vm().hostUuid != lib_get_local_storage_volume_host(target_volume_inv.uuid).uuid:
+                vol_utiltiy_vm = None
 
-            cond = res_ops.gen_query_conditions('attachedClusterUuids', \
-                    '=', possible_cluster)
-            possible_l2 = res_ops.query_resource(res_ops.L2_VLAN_NETWORK, \
-                    cond)[0].uuid
-            cond = res_ops.gen_query_conditions('l2NetworkUuid', '=', \
-                    possible_l2)
-            possible_l3 = res_ops.query_resource(res_ops.L3_NETWORK, \
-                    cond)[0].uuid
-            util_vm_opt.set_l3_uuids([possible_l3])
-            #need to set host_uuid == target_volume host uuid if local ps,
-            #  as there will attach testing for snapshot creation
-            if lib_get_primary_storage_by_uuid(ps_uuid).type == inventory.LOCAL_STORAGE_TYPE:
-                util_vm_opt.set_host_uuid(lib_get_local_storage_volume_host(target_volume_inv.uuid).uuid)
+    if not vol_utiltiy_vm:
+        cond = res_ops.gen_query_conditions('name', '=', "utility_vm_for_robot_test")
+        cond = res_ops.gen_query_conditions('state', '=', "Running", cond)
+        vms = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
+        for vm in vms:
+            if ps.type == inventory.LOCAL_STORAGE_TYPE:
+                if ps_uuid == ps.uuid and vm.hostUuid == lib_get_local_storage_volume_host(target_volume_inv.uuid).uuid:
+                    vol_utility_vm = vm
+            else:
+                if ps_uuid == ps.uuid:
+                    vol_utility_vm = vm
 
-            vol_utiltiy_vm  = lib_create_vm(util_vm_opt)
-            tag_ops.delete_tag(tag.uuid)
-            robot_test_obj.set_utility_vm(vol_utiltiy_vm)
-            test_dict.add_utility_vm(vol_utiltiy_vm)
-            vol_utiltiy_vm.check()
+    if not vol_utiltiy_vm:
+        #create utiltiy_vm on given primary storage.
+        util_vm_opt = test_util.VmOption(cre_vm_opt)
+        instance_offering_uuid = util_vm_opt.get_instance_offering_uuid()
+        if not instance_offering_uuid:
+            instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING)[0].uuid
+        possible_cluster = target_volume_inv.clusterUuid
+        if not possible_cluster:
+            possible_cluster = res_ops.query_resource_with_num(\
+                    res_ops.CLUSTER, [], None, 0, 1)[0].uuid
+
+        cond = res_ops.gen_query_conditions('attachedClusterUuids', \
+                '=', possible_cluster)
+        possible_l2 = res_ops.query_resource(res_ops.L2_VLAN_NETWORK, \
+                cond)[0].uuid
+        cond = res_ops.gen_query_conditions('l2NetworkUuid', '=', \
+                possible_l2)
+        possible_l3 = res_ops.query_resource(res_ops.L3_NETWORK, \
+                cond)[0].uuid
+        util_vm_opt.set_l3_uuids([possible_l3])
+        util_vm_opt.set_ps_uuid(ps_uuid)
+        #need to set host_uuid == target_volume host uuid if local ps,
+        #  as there will attach testing for snapshot creation
+        if lib_get_primary_storage_by_uuid(ps_uuid).type == inventory.LOCAL_STORAGE_TYPE:
+            util_vm_opt.set_host_uuid(lib_get_local_storage_volume_host(target_volume_inv.uuid).uuid)
+
+        vol_utiltiy_vm  = lib_create_vm(util_vm_opt)
+        robot_test_obj.set_utility_vm(vol_utiltiy_vm)
+        test_dict.add_utility_vm(vol_utiltiy_vm)
+        vol_utiltiy_vm.check()
             
-        target_volume_snapshots.set_utility_vm(vol_utiltiy_vm)
+    target_volume_snapshots.set_utility_vm(vol_utiltiy_vm)
 
-    return target_volume_snapshots.create_snapshot()
+    return target_volume_snapshots.create_snapshot(snapshot_name)
 
 def lib_create_image_from_snapshot(target_snapshot):
     snapshot_volume = target_snapshot.get_target_volume()
