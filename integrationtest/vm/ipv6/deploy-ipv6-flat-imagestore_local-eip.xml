@@ -105,6 +105,7 @@
           </hosts>
           <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
           <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
+          <l2NetworkRef>$l2PublicNetworkName_1</l2NetworkRef>
           <l2NetworkRef>$l2VlanNetworkName_ipv6</l2NetworkRef>
           <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
         </cluster>
@@ -112,8 +113,8 @@
 
       <l2Networks>
 
-        <l2NoVlanNetwork name="$l2PublicNetworkName" description="Basic L2 for public network"
-          physicalInterface="$l2PublicNetworkInterface1">
+        <l2NoVlanNetwork name="$l2PublicNetworkName_1" description="Basic L2 for public network"
+          physicalInterface="$l2PublicNetworkInterface">
           <l3Networks>
             <l3BasicNetwork name="$l3PublicNetworkName" category="Public" description="Basic L3 Network without Vlan for IPv6 public network">
               <ipRange name="$ipRangeName" description="Test"
@@ -129,6 +130,12 @@
                 <serviceType>SecurityGroup</serviceType>
               </networkService>
             </l3BasicNetwork>
+          </l3Networks>
+        </l2NoVlanNetwork>
+
+        <l2NoVlanNetwork name="$l2PublicNetworkName" description="Basic L2 for public network"
+          physicalInterface="$l2PublicNetworkInterface1">
+          <l3Networks>
             <l3BasicNetwork name="$l3PublicNetworkName1" category="Public" ipVersion="6" description="Basic L3 Network without Vlan for IPv6 public network">
               <ipv6Cidr name="$ipv6CidrName" description="Test"
                 ipv6Cidr="$ipv6Cidr" addressMode="Stateful-DHCP"  />
@@ -143,6 +150,7 @@
             </l3BasicNetwork>
           </l3Networks>
         </l2NoVlanNetwork>
+
         <l2VlanNetwork name="$l2VlanNetworkName_ipv6" description="guest l2 vlan network"
           physicalInterface="$l2PublicNetworkInterface1"  vlan="$l2Vlan_ipv6" >
           <l3Networks>
