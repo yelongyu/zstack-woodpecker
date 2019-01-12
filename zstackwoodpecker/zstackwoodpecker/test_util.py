@@ -1961,3 +1961,11 @@ class SPTREE(object):
                 v.remove(uuid)
                 self.sp_curr = self.sp_tree[k]
                 self.curr = k
+
+    def parent(self, uuid):
+        for k, v in self.sp_tree.iteritems():
+            if uuid in v:
+                return k
+
+    def children(self, uuid):
+        return self.sp_tree[uuid]
