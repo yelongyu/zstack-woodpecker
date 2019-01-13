@@ -5611,7 +5611,6 @@ def lib_robot_constant_path_operation(robot_test_obj):
             target_volume.resize(new_size)
             target_volume.update()
         elif next_action == TestAction.create_data_volume_from_image:
-            ps_uuid = lib_robot_get_default_configs(robot_test_obj, "PS")
             target_images = None
             target_image_name = None
             (normal_args, extra_args) = _parse_args(constant_path_list[0])
@@ -5665,11 +5664,6 @@ def lib_robot_constant_path_operation(robot_test_obj):
                 if ea == "scsi":
                     systemtags.append("capability::virtio-scsi")
 
-            if ps_uuid:
-                ps = lib_get_primary_storage_by_uuid(ps_uuid)
-                if ps.type == inventory.LOCAL_STORAGE_TYPE:
-                    host_uuid = lib_robot_get_default_configs(robot_test_obj, "HOST")
-                    systemtags.append("localStorage::hostUuid::%s" % (host_uuid))
 
             test_util.test_dsc('Robot Action: %s; on Image: %s' % \
                 (next_action, target_images[0]['uuid']))
@@ -5677,10 +5671,14 @@ def lib_robot_constant_path_operation(robot_test_obj):
             bs_uuid = target_image.backupStorageRefs[0].backupStorageUuid
             ps_uuid_list = lib_get_primary_storage_uuid_list_by_backup_storage(bs_uuid)
             ps_uuid = random.choice(ps_uuid_list)
+            ps = lib_get_primary_storage_by_uuid(ps_uuid)
+            host_uuid = None
+            if ps.type == inventory.LOCAL_STORAGE_TYPE:
+                host_uuid = lib_robot_get_default_configs(robot_test_obj, "HOST")
 
             import zstackwoodpecker.operations.volume_operations as vol_ops
             import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
-            volume_inv = vol_ops.create_volume_from_template(target_images[0]['uuid'], ps_uuid, target_volume_name, None, systemtags)
+            volume_inv = vol_ops.create_volume_from_template(target_images[0]['uuid'], ps_uuid, target_volume_name, host_uuid, systemtags)
             new_volume = zstack_volume_header.ZstackTestVolume()
             new_volume.create_from(volume_inv.uuid, None)
             test_dict.add_volume(new_volume)
