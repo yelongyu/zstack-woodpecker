@@ -526,7 +526,7 @@ def print_runtime_test_log(folder, nofollow=False):
     latest_log = _find_latest_file(test_result_folder)
         
     if nofollow:
-        os.system('tail %s' % latest_log)
+        os.system('tail -n 100 %s' % latest_log)
     else:
         os.system('tail -f %s' % latest_log)
 
