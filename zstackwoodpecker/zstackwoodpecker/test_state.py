@@ -828,34 +828,34 @@ class TestStateDict(object):
         self.rm_volume(volume, src_state)
         self.add_volume(volume, dst_state)
 
+    def add_volume_with_snapshots(self, volume, state=TestStage.free_volume):
+        if not self.volume_dict.has_key(state):
+            self.volume_dict[state] = []
+
+        if not volume in self.volume_dict[state]:
+            self.volume_dict[state].append(volume)
+
+    def rm_volume_with_snapshots(self, volume, state=None):
+        if state:
+            if volume in self.volume_dict[state]:
+                self.volume_dict[state].remove(volume)
+                if volume.get_state() == volume_header.DELETED:
+                    self.add_volume(volume, TestStage.deleted_volume)
+                return True
+            return False
+
+        for key,values in self.volume_dict.iteritems():
+            if volume in values:
+                self.volume_dict[key].remove(volume)
+                if volume.get_state() == volume_header.DELETED:
+                    self.add_volume(volume, TestStage.deleted_volume)
+                return True
+        else:
+            return False
+
     def mv_volume_with_snapshots(self, volume, src_state, dst_state):
-        def _add_volume(self, volume, state=TestStage.free_volume):
-            if not self.volume_dict.has_key(state):
-                self.volume_dict[state] = []
-    
-            if not volume in self.volume_dict[state]:
-                self.volume_dict[state].append(volume)
-
-        def _rm_volume(self, volume, state=None):
-            if state:
-                if volume in self.volume_dict[state]:
-                    self.volume_dict[state].remove(volume)
-                    if volume.get_state() == volume_header.DELETED:
-                        self.add_volume(volume, TestStage.deleted_volume)
-                    return True
-                return False
-    
-            for key,values in self.volume_dict.iteritems():
-                if volume in values:
-                    self.volume_dict[key].remove(volume)
-                    if volume.get_state() == volume_header.DELETED:
-                        self.add_volume(volume, TestStage.deleted_volume)
-                    return True
-            else:
-                return False
-
-        _rm_volume(self, volume, src_state)
-        _add_volume(self, volume, dst_state)
+        rm_volume_with_snapshots(self, volume, src_state)
+        add_volume_with_snapshots(self, volume, dst_state)
 
     def mv_volumes(self, src_state, dst_state):
         '''

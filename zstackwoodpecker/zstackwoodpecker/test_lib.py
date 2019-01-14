@@ -5530,12 +5530,29 @@ def lib_robot_constant_path_operation(robot_test_obj):
                         target_volume.migrate(vm_host_uuid)
    
             target_volume.attach(target_vm)
-            test_dict.mv_volume_with_snapshots(target_volume, test_stage.free_volume, target_vm.vm.uuid)
+            if target_volume.get_volume().isShareable:
+                test_dict.add_volume_with_snapshots(target_volume, target_vm.vm.uuid)
+            else:
+                test_dict.mv_volume_with_snapshots(target_volume, test_stage.free_volume, target_vm.vm.uuid)
             all_volume_snapshots = test_dict.get_all_available_snapshots()
 
         elif next_action == TestAction.detach_volume:
             target_volume = None
-            if len(constant_path_list[0]) > 1:
+            target_vm = None
+            if len(constant_path_list[0]) > 2:
+                target_volume_name = constant_path_list[0][1]
+                target_vm_name = constant_path_list[0][2]
+                all_volume_list = test_dict.get_all_volume_list()
+                for volume in all_volume_list:
+                    if volume.get_volume().name == target_volume_name:
+                        target_volume = volume
+                        break
+                all_vm_list = test_dict.get_all_vm_list()
+                for vm in all_vm_list:
+                    if vm.get_vm().name == target_vm_name:
+                        target_vm = vm
+                        break
+            elif len(constant_path_list[0]) > 1:
                 target_volume_name = constant_path_list[0][1]
                 all_volume_list = test_dict.get_all_volume_list()
                 for volume in all_volume_list:
@@ -5545,14 +5562,21 @@ def lib_robot_constant_path_operation(robot_test_obj):
 
             if not target_volume:
                 test_util.test_fail("no resource available for next action: %s" % (next_action))
+            if target_volume.get_volume().isShareable and not target_vm:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
 
             test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
                 (next_action, target_volume.get_volume().uuid))
             all_volume_snapshots = test_dict.get_all_available_snapshots()
 
             target_vm_uuid = target_volume.get_volume().vmInstanceUuid
-            target_volume.detach()
-            test_dict.mv_volume_with_snapshots(target_volume, target_vm_uuid, test_stage.free_volume)
+            if target_volume.get_volume().isShareable:
+                target_vm_uuid = target_vm.get_vm().uuid
+                target_volume.detach(target_vm_uuid)
+                test_dict.rm_volume_with_snapshots(target_volume, target_vm.get_vm().uuid)
+            else:
+                target_volume.detach()
+                test_dict.mv_volume_with_snapshots(target_volume, target_vm_uuid, test_stage.free_volume)
             all_volume_snapshots = test_dict.get_all_available_snapshots()
 
         elif next_action == TestAction.delete_volume:
