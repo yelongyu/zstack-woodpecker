@@ -854,8 +854,8 @@ class TestStateDict(object):
             return False
 
     def mv_volume_with_snapshots(self, volume, src_state, dst_state):
-        rm_volume_with_snapshots(self, volume, src_state)
-        add_volume_with_snapshots(self, volume, dst_state)
+        self.rm_volume_with_snapshots(volume, src_state)
+        self.add_volume_with_snapshots(volume, dst_state)
 
     def mv_volumes(self, src_state, dst_state):
         '''
