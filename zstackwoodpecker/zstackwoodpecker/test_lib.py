@@ -5073,7 +5073,7 @@ def lib_robot_import_resource_from_formation(robot_test_obj, resource_list):
                 new_volume = zstack_volume_header.ZstackTestVolume()
                 new_volume.create_from(volume.uuid, new_vm)
                 test_dict.add_volume(new_volume)
-                test_dict.mv_volume(new_volume, test_stage.free_volume, new_volume.get_volume().vmInstanceUuid)
+                test_dict.mv_volume_with_snapshots(new_volume, test_stage.free_volume, new_volume.get_volume().vmInstanceUuid)
                 volume_index += 1
             lib_robot_update_configs(robot_test_obj, "VmInstance", new_vm.get_vm())
 
