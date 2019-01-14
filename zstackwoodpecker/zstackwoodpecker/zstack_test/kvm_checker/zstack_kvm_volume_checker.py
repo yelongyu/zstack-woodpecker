@@ -59,14 +59,26 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
             return self.judge(False)
 
     def check_sharedblock(self, volume, volume_installPath, ps):
+        import zstackwoodpecker.header.volume as volume_header
         devPath = "/dev/" + volume_installPath.split("sharedblock://")[1]
-        cmd = "lvmlockctl -i | grep `lvs --nolocking --noheadings -ouuid -Slv_active=active %s` | awk '{print $3}'" % devPath
+        cmd = "lvmlockctl -i | grep `lvs --nolocking --noheadings -ouuid %s` | awk '{print $3}'" % devPath
         host = test_lib.lib_get_volume_object_host(self.test_obj)
         result = test_lib.lib_execute_ssh_cmd(host.managementIp, 'root', 'password', cmd)
-        if "ex" in result:
-            return self.judge(True)
+        if self.test_obj.state == volume_header.ATTACHED:
+            if "ex" in result:
+                return self.judge(True)
+            else:
+                return self.judge(False)
+        elif self.test_obj.state == volume_header.DETACHED or self.test_obj.state == volume_header.DELETED: 
+            if "un" in result:
+                return self.judge(True)
+            else:
+                return self.judge(False)
         else:
-            return self.judge(False)
+            if "Failed to find logical volume" in result:
+                return self.judge(False)
+            else:
+                return self.judge(True)
 
     def check_iscsi(self, volume, volume_installPath, ps):
         host = test_lib.lib_find_host_by_iscsi_ps(ps)
