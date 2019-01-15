@@ -5145,7 +5145,7 @@ def lib_robot_initial_formation_auto_parameter(robot_test_obj, template_uuid):
 
             image_dict[para_inv.paramName] = images[0].uuid
         elif para_inv.resourceType == "L3Network":
-            if para_inv.paramName.lower().find('pub'):
+            if "pub" in para_inv.paramName.lower():
                 if para_inv.paramName in pub_l3network_dict:
                     test_util.test_fail("duplicate parameter name found, should be a bug")
                 if not pub_l3network_dict:
