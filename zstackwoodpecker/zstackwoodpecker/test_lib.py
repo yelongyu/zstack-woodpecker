@@ -5842,7 +5842,7 @@ def lib_robot_constant_path_operation(robot_test_obj):
                 target_snapshot.get_target_volume().get_volume().uuid, \
                 target_snapshot.get_snapshot().uuid))
             target_volume_snapshots.use_snapshot(target_snapshot)
-        elif next_action == TestAction.create_backup:
+        elif next_action == TestAction.create_volume_backup:
             backup_name = None
             target_volume_uuid = None
             if len(constant_path_list[0]) > 2:
@@ -5906,7 +5906,7 @@ def lib_robot_constant_path_operation(robot_test_obj):
             backup = vol_ops.create_backup(backup_option)
             #_update_bs_for_robot_state("disable")
             test_dict.add_backup(backup.uuid)
-        elif next_action == TestAction.use_backup:
+        elif next_action == TestAction.use_volume_backup:
             target_backup = None
             backup_name = None
             if len(constant_path_list[0]) > 1:
