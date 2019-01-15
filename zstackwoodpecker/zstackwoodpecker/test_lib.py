@@ -5162,6 +5162,7 @@ def lib_robot_initial_formation_auto_parameter(robot_test_obj, template_uuid):
                 
                 public_l3 = lib_get_l3_by_name(os.environ.get('l3PublicNetworkName'))
                 cond = res_ops.gen_query_conditions('state', '=', 'Enabled')
+                cond = res_ops.gen_query_conditions('system', '=', 'false')
                 cond = res_ops.gen_query_conditions('uuid', '!=', public_l3.uuid, cond)
                 for paraname in pri_l3network_dict:
                     cond = res_ops.gen_query_conditions('uuid', '!=', pri_l3network_dict[paraname], cond)
