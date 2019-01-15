@@ -55,6 +55,7 @@ class TestAction(object):
     create_image_from_volume = 'create_image_from_volume'
     delete_image = 'delete_image'
     expunge_image = 'expunge_image'
+    create_data_template_from_backup = 'create_data_template_from_backup'
 
     create_sg = 'create_security_group'
     delete_sg = 'delete_security_group'

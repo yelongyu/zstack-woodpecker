@@ -5927,6 +5927,39 @@ def lib_robot_constant_path_operation(robot_test_obj):
             #_update_bs_for_robot_state("enable")
             backup = vol_ops.revert_volume_from_backup(target_backup.uuid)
             #_update_bs_for_robot_state("disable")
+        elif next_action == TestAction.create_data_template_from_backup:
+            target_backup = None
+            backup_name = None
+            image_name = None
+            if len(constant_path_list[0]) > 2:
+                backup_name = constant_path_list[0][1]
+                image_name = constant_path_list[0][2]
+                backup_list = test_dict.get_backup_list()
+                for backup_uuid in backup_list:
+                    backup = lib_get_backup_by_uuid(backup_uuid)
+                    if backup.name == backup_name:
+                        target_backup = backup
+                        break
+            if not target_backup or not image_name:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+            test_util.test_dsc('Robot Action: %s; on Backup: %s' % \
+                (next_action, target_backup.uuid))
+
+            ps_uuid = lib_robot_get_default_configs(robot_test_obj, "PS")
+            
+            bs_cond = res_ops.gen_query_conditions("status", '=', "Connected")
+            bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, bs_cond)
+            filtered_bss = []
+            for bs in bss:
+                ps_uuid_list = lib_get_primary_storage_uuid_list_by_backup_storage(bs.uuid)
+                if ps_uuid in ps_uuid_list:
+                    filtered_bss.append(bs)
+                
+            if not filtered_bss:
+                test_util.test_fail("not find available backup storage. Skip test")
+
+            import zstackwoodpecker.operations.image_operations as img_ops
+            img_ops.create_data_template_from_backup(filtered_bss[0].uuid, target_backup.uuid, image_name)
         elif next_action == TestAction.clone_vm:
             target_vm = None
             vm_name = None
