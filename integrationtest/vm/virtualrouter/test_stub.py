@@ -12,6 +12,7 @@ import time
 import threading
 
 import zstacklib.utils.ssh as ssh
+import apibinding.api_actions as api_actions
 import zstacklib.utils.jsonobject as jsonobject
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
@@ -22,6 +23,7 @@ import zstackwoodpecker.zstack_test.zstack_test_eip as zstack_eip_header
 import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
 import zstackwoodpecker.zstack_test.zstack_test_load_balancer as zstack_lb_header
 import zstackwoodpecker.zstack_test.zstack_test_port_forwarding as zstack_pf_header
+import zstackwoodpecker.operations.account_operations as  account_operations
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
@@ -34,9 +36,11 @@ import apibinding.inventory as inventory
 import random
 import functools
 from zstackwoodpecker.operations import vm_operations as vm_ops
+from zstackwoodpecker.test_chain import TestChain
 import commands
 from lib2to3.pgen2.token import STAR
 from zstacklib.utils import shell
+from collections import OrderedDict
 import telnetlib
 
 PfRule = test_state.PfRule
@@ -133,12 +137,12 @@ def create_other_vm(l3_name=None, disk_offering_uuids=None, session_uuid = None)
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     return create_vm([l3_net_uuid], image_uuid, 'other_vm', disk_offering_uuids, session_uuid = session_uuid)
 
-def create_basic_vm(disk_offering_uuids=None, session_uuid = None):
+def create_basic_vm(disk_offering_uuids=None, system_tags=None, session_uuid = None):
     image_name = os.environ.get('imageName_net')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     l3_name = os.environ.get('l3VlanNetworkName1')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
-    return create_vm([l3_net_uuid], image_uuid, 'basic_no_vlan_vm', disk_offering_uuids, session_uuid = session_uuid)
+    return create_vm([l3_net_uuid], image_uuid, 'basic_no_vlan_vm', disk_offering_uuids, system_tags=system_tags, session_uuid = session_uuid)
 
 def create_user_vlan_vm(l3_name=None, disk_offering_uuids=None, session_uuid = None):
     image_name = os.environ.get('imageName_net')
@@ -1003,11 +1007,11 @@ class MulISO(object):
         else:
             assert iso_name not in cand_name_list
 
-    def create_vm(self, vm2=False):
-        self.vm1 = create_basic_vm()
+    def create_vm(self, vm2=False, system_tags=["cdroms::Empty::Empty::Empty"]):
+        self.vm1 = create_basic_vm(system_tags=system_tags)
         self.vm1.check()
         if vm2:
-            self.vm2 = create_basic_vm()
+            self.vm2 = create_basic_vm(system_tags=system_tags)
             self.vm2.check()
 
     def create_windows_vm(self):
