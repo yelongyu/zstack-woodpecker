@@ -32,6 +32,7 @@ import zstackwoodpecker.operations.image_operations as img_ops
 import zstackwoodpecker.operations.longjob_operations as longjob_ops
 import zstackwoodpecker.zstack_test.zstack_test_image as test_image
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
+import zstackwoodpecker.operations.cdrom_operations as cdrom_ops
 import apibinding.inventory as inventory
 import random
 import functools
@@ -111,7 +112,7 @@ def create_windows_vm(l3_name=None, disk_offering_uuids=None, session_uuid = Non
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     return create_vm([l3_net_uuid], image_uuid, 'windows_vm', disk_offering_uuids, session_uuid = session_uuid)
 
-def create_windows_vm_2(l3_name=None, disk_offering_uuids=None, session_uuid = None, instance_offering_uuid = None):
+def create_windows_vm_2(l3_name=None, disk_offering_uuids=None, session_uuid = None, instance_offering_uuid = None, system_tags=None):
     '''
         Create windows platform type vm.
     '''
@@ -122,7 +123,7 @@ def create_windows_vm_2(l3_name=None, disk_offering_uuids=None, session_uuid = N
         l3_name = os.environ.get('l3VlanNetworkName1')
 
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
-    return create_vm([l3_net_uuid], image_uuid, 'windows_vm', disk_offering_uuids, instance_offering_uuid = instance_offering_uuid, session_uuid = session_uuid, timeout=1200000)
+    return create_vm([l3_net_uuid], image_uuid, 'windows_vm', disk_offering_uuids, instance_offering_uuid = instance_offering_uuid, session_uuid = session_uuid, system_tags=system_tags, timeout=1200000)
 
 def create_other_vm(l3_name=None, disk_offering_uuids=None, session_uuid = None):
     '''
@@ -1014,10 +1015,10 @@ class MulISO(object):
             self.vm2 = create_basic_vm(system_tags=system_tags)
             self.vm2.check()
 
-    def create_windows_vm(self):
+    def create_windows_vm(self, system_tags=["cdroms::Empty::Empty::Empty"]):
         new_offering = test_lib.lib_create_instance_offering(cpuNum = 6, memorySize = 2048 * 1024 * 1024)
         new_offering_uuid = new_offering.uuid
-        self.vm1 = create_windows_vm_2(instance_offering_uuid = new_offering_uuid)
+        self.vm1 = create_windows_vm_2(instance_offering_uuid = new_offering_uuid, system_tags=system_tags)
         vm_ops.delete_instance_offering(new_offering_uuid)
 
     def attach_iso(self, iso_uuid, vm_uuid=None):
@@ -1037,15 +1038,21 @@ class MulISO(object):
     def set_iso_first(self, iso_uuid, vm_uuid=None):
         if not vm_uuid:
             vm_uuid = self.vm1.vm.uuid
-        system_tags = ['iso::%s::0' % iso_uuid]
-        vm_ops.update_vm(vm_uuid, system_tags=system_tags)
+        cond = res_ops.gen_query_conditions('vmInstanceUuid', '=', vm_uuid)
+        cdroms = cdrom_ops.query_vm_cdrom(cond)
+        cdrom_uuid = [cdrom.uuid for cdrom in cdroms if cdrom.isoUuid == iso_uuid][0]
+        cdrom_ops.set_default_cdrom(vm_uuid, cdrom_uuid)
+#         system_tags = ['iso::%s::0' % iso_uuid]
+#         vm_ops.update_vm(vm_uuid, system_tags=system_tags)
 
     def check_vm_systag(self, iso_uuid, vm_uuid=None, attach=True, order=None):
         if not vm_uuid:
             vm_uuid = self.vm1.vm.uuid
-        cond = res_ops.gen_query_conditions('resourceUuid', '=', vm_uuid)
-        systags = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
-        iso_orders = {t.tag.split('::')[-2]: t.tag.split('::')[-1] for t in systags if 'iso' in t.tag}
+        cond = res_ops.gen_query_conditions('vmInstanceUuid', '=', vm_uuid)
+        cdroms = cdrom_ops.query_vm_cdrom(cond)
+        iso_orders = {cdrom.isoUuid: str(cdrom.deviceId) for cdrom in cdroms if cdrom.isoUuid}
+#         systags = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
+#         iso_orders = {t.tag.split('::')[-2]: t.tag.split('::')[-1] for t in systags if 'iso' in t.tag}
         if attach:
             assert iso_uuid in iso_orders
         else:
@@ -1065,8 +1072,11 @@ class MulISO(object):
         if check:
             assert actual_no_media_cdrom == no_media_cdrom
 
-    def add_route_to_bridge(self, l3_uuid):
+    def check_cdroms_number(self, num=1):
+        cmd_cdrom = 'sshpass -p password ssh -o LogLevel=quiet -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@%s "ls /dev/ | grep sr | wc -l"' % self.vm1.vm.vmNics[0].ip
+        assert int(commands.getoutput(cmd_cdrom)) == num
 
+    def add_route_to_bridge(self, l3_uuid):
         cond = res_ops.gen_query_conditions('uuid', '=', l3_uuid)
         l3_inv = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0]
 
