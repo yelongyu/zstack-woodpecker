@@ -5960,6 +5960,83 @@ def lib_robot_constant_path_operation(robot_test_obj):
 
             import zstackwoodpecker.operations.image_operations as img_ops
             img_ops.create_data_template_from_backup(filtered_bss[0].uuid, target_backup.uuid, image_name)
+        elif next_action == TestAction.create_vm_backup:
+            backup_name = None
+            target_vm = None
+            if len(constant_path_list[0]) > 2:
+                target_vm_name = constant_path_list[0][1]
+                backup_name = constant_path_list[0][2]
+                all_vm_list = test_dict.get_all_vm_list()
+                for vm in all_vm_list:
+                    if vm.get_vm().name == target_vm_name:
+                        target_vm = vm
+                        break
+
+            if not target_vm or not backup_name:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
+            cond = res_ops.gen_query_conditions("name", '=', "only_for_robot_backup_test", cond)
+            bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)
+            if not bss:
+                cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
+                bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)
+                if not bss:
+                    cond = res_ops.gen_query_conditions("state", '=', "Enabled")
+                    cond = res_ops.gen_query_conditions("status", '=', "Connected")
+                    hosts = res_ops.query_resource(res_ops.HOST, cond)
+                    if not hosts:
+                        test_util.test_fail("No host available for adding imagestore for backup test")
+                    host = hosts[0]
+                    import zstackwoodpecker.operations.backupstorage_operations as bs_ops
+                    bs_option = test_util.ImageStoreBackupStorageOption()
+                    bs_option.set_name("only_for_robot_backup_test")
+                    bs_option.set_url("/home/sftpBackupStorage")
+                    bs_option.set_hostname(host.managementIp)
+                    bs_option.set_password('password')
+                    bs_option.set_sshPort(host.sshPort)
+                    bs_option.set_username(host.username)
+                    bs_inv = bs_ops.create_image_store_backup_storage(bs_option)
+                
+                    bs_ops.attach_backup_storage(bs_inv.uuid, host.zoneUuid)
+                    bss = [bs_inv]
+            bs = bss[0]
+               
+            backup_option = test_util.BackupOption()
+            backup_option.set_name(backup_name)
+            backup_option.set_volume_uuid(lib_get_root_volume(vm.get_vm()).uuid)
+            backup_option.set_backupStorage_uuid(bs.uuid)
+            test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
+                (next_action, target_vm.get_vm().uuid))
+
+            #_update_bs_for_robot_state("enable")
+            backups = vm_ops.create_vm_backup(backup_option)
+            #_update_bs_for_robot_state("disable")
+            for backup in backups:
+                test_dict.add_backup(backup.uuid)
+
+        elif next_action == TestAction.use_vm_backup:
+            target_backup = None
+            backup_name = None
+            if len(constant_path_list[0]) > 1:
+                backup_name = constant_path_list[0][1]
+                backup_list = test_dict.get_backup_list()
+                for backup_uuid in backup_list:
+                    backup = lib_get_backup_by_uuid(backup_uuid)
+                    if backup.name == backup_name:
+                        target_backup = backup
+                        break
+
+            if not target_backup or not backup_name:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+            import zstackwoodpecker.operations.volume_operations as vol_ops
+            test_util.test_dsc('Robot Action: %s; on Backup: %s' % \
+                (next_action, target_backup.uuid))
+
+            #_update_bs_for_robot_state("enable")
+            backup = vol_ops.revert_vm_from_backup(target_backup.groupUuid)
+            #_update_bs_for_robot_state("disable")
+
         elif next_action == TestAction.clone_vm:
             target_vm = None
             vm_name = None
