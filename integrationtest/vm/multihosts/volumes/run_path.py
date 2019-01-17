@@ -281,6 +281,7 @@ def test():
     if not config:
         config = default_config
     robot_test_obj.set_config(config)
+    robot_test_obj.set_test_dict(test_dict)
     robot_test_obj.set_initial_formation(initial_formation)
     robot_test_obj.set_constant_path_list(path_list)
 
