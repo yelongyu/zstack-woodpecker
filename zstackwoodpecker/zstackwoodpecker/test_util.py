@@ -9,6 +9,7 @@ import string
 import sys
 import traceback
 import string
+import pkgutil
 
 import zstacklib.utils.xmlobject as xmlobject
 import apibinding.inventory as inventory
@@ -1980,3 +1981,22 @@ class SPTREE(object):
 
     def children(self, uuid):
         return self.sp_tree[uuid]
+
+def load_paths(template_dirname, path_dirname):
+    paths = dict()
+    templates_dict = dict()
+    for importer, package_name, _ in pkgutil.iter_modules([template_dirname]):
+        full_package_name = '%s.%s' % (template_dirname, package_name)
+        if full_package_name not in sys.modules:
+            templates_dict[package_name] = importer.find_module(package_name).load_module(full_package_name)
+
+    paths_dict = dict()
+    for importer, package_name, _ in pkgutil.iter_modules([path_dirname]):
+        full_package_name = '%s.%s' % (path_dirname, package_name)
+        if full_package_name not in sys.modules:
+            paths_dict[package_name] = importer.find_module(package_name).load_module(full_package_name)
+            paths[package_name] = dict()
+            paths[package_name]['initial_formation'] = templates_dict[paths_dict[package_name].path()['initial_formation']].template()
+            paths[package_name]['path_list'] = paths_dict[package_name].path()['path_list']
+
+    return paths
