@@ -4306,9 +4306,6 @@ def lib_robot_status_check(test_dict):
     test_util.test_logger("- - - Robot check skip - - -" )
     return
     print 'target checking test dict: %s' % test_dict
-    test_util.test_logger('- - - check running VMs status - - -')
-    for vm in test_dict.get_vm_list(vm_header.RUNNING):
-        vm.check()
 
     test_util.test_logger('- - - check stopped vm status - - -')
     for vm in test_dict.get_vm_list(vm_header.STOPPED):
@@ -4335,6 +4332,10 @@ def lib_robot_status_check(test_dict):
     volume_snapshots = test_dict.get_all_available_snapshots()
     for snapshots in volume_snapshots:
         snapshots.check()
+
+    test_util.test_logger('- - - check running VMs status - - -')
+    for vm in test_dict.get_vm_list(vm_header.RUNNING):
+        vm.check()
 
     test_util.test_logger("- - - Robot check pass - - -" )
 
@@ -5059,7 +5060,6 @@ def lib_robot_import_resource_from_formation(robot_test_obj, resource_list):
             import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
             new_vm = zstack_vm_header.ZstackTestVm()
             new_vm.create_from(resource["VmInstance"]["uuid"])
-            test_dict.add_vm(new_vm)
             # import Volume already attached
             volume_index = 1
             for volume in new_vm.get_vm().allVolumes:
@@ -5069,12 +5069,14 @@ def lib_robot_import_resource_from_formation(robot_test_obj, resource_list):
                     continue
                 vol_ops.update_volume(volume.uuid, "%s-volume%s" % (resource["VmInstance"]["name"], volume_index),  None)
                 imported_resource.append(volume.uuid)
-                import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
-                new_volume = zstack_volume_header.ZstackTestVolume()
-                new_volume.create_from(volume.uuid, new_vm)
-                test_dict.add_volume(new_volume)
-                test_dict.mv_volume_with_snapshots(new_volume, test_stage.free_volume, new_volume.get_volume().vmInstanceUuid)
+                #import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
+                #new_volume = zstack_volume_header.ZstackTestVolume()
+                #new_volume.create_from(volume.uuid, new_vm)
+                #test_dict.add_volume(new_volume)
+                #test_dict.mv_volume_with_snapshots(new_volume, test_stage.free_volume, new_volume.get_volume().vmInstanceUuid)
                 volume_index += 1
+            new_vm.update()
+            test_dict.add_vm(new_vm)
             lib_robot_update_configs(robot_test_obj, "VmInstance", new_vm.get_vm())
 
     # import Volume

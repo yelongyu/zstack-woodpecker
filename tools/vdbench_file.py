@@ -187,6 +187,10 @@ def md5sum(disklist,flag):
     for i in disklist.keys():
         md5sum_per_disk(os.path.basename(i))
 
+def print_disklist(disklist):
+    for i in disklist.keys():
+        print "present disks:%s:%s" % (i,disklist[i])
+
 if __name__ == "__main__":
     format_disk()
     diff_add,diff_remove=print_disk_diff()
@@ -194,7 +198,7 @@ if __name__ == "__main__":
     random_str=''.join(random.sample('abcdefghijklmnopqrstuvwxyz',3))
     if not disklist:
         disklist=scan_disk()
-
+        print_disklist(disklist)
         if len(sys.argv) == 2:
             for i in disklist.keys():
                 print "disklist:%s:%s" % (i,disklist[i])
@@ -208,6 +212,8 @@ if __name__ == "__main__":
             clear_disk(disklist)
     else:
         if len(sys.argv) == 2:
+            disklist=scan_disk()
+            print_disklist(disklist)
             sys.exit(0)
         if diff_remove:
            for key,value in diff_remove.items():

@@ -79,6 +79,7 @@ class KvmVmCheckerFactory(checker_header.CheckerFactory):
 
             if test_obj.get_creation_option().get_default_l3_uuid():
                 checker_dict[vm_checker.zstack_kvm_vm_default_l3_checker] = True
+  
 
         elif test_obj.state == vm_header.STOPPED:
             checker_dict[db_checker.zstack_vm_db_checker] = True
@@ -125,6 +126,7 @@ class KvmVolumeCheckerFactory(checker_header.CheckerFactory):
             checker_dict[db_checker.zstack_volume_attach_db_checker] = False
             checker_dict[volume_checker.zstack_kvm_volume_attach_checker] = False
             checker_dict[volume_checker.zstack_kvm_volume_file_checker] = True
+
 
         elif test_obj.state == volume_header.DELETED:
             checker_dict[db_checker.zstack_volume_db_checker] = True
