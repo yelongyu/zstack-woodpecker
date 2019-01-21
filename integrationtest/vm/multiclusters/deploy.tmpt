@@ -44,6 +44,12 @@ hostUsername5 = root
 hostPassword5 = password
 hostPort5 = 22
 
+hostName6 = ubuntu
+hostIp6 = 10.1.101.46
+hostUsername6 = root
+hostPassword6 = password
+hostPort6 = 22
+
 l2VlanNetworkName4 = vlan-test4
 l2VlanNetworkName5 = vlan-test5
 l2VlanNetworkName6 = vlan-test6
