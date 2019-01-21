@@ -1,0 +1,4 @@
+import ../scenario.tmpt
+import ./deploy.tmpt
+import ./scenario.tmpt
+import ./scenario-2xsky-ps.tmpt
