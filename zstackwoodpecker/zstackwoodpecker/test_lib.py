@@ -5544,11 +5544,8 @@ def lib_robot_constant_path_operation(robot_test_obj):
             target_vm = None
             if len(constant_path_list[0]) > 2:
                 target_volume_name = constant_path_list[0][1]
-		test_util.test_logger("antony @@@debug target_volume_name:%s" %(target_volume_name))
                 target_vm_name = constant_path_list[0][2]
-		test_util.test_logger("antony @@@debug target_vm_name:%s" %(target_vm_name))
                 all_volume_list = test_dict.get_all_volume_list()
-		test_util.test_logger("antony @@@debug all_volume_list:%s" %(all_volume_list))
                 for volume in all_volume_list:
                     if volume.get_volume().name == target_volume_name:
                         target_volume = volume
