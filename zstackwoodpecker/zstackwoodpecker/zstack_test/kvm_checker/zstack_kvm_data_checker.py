@@ -87,7 +87,7 @@ class zstack_kvm_vm_attach_volume_checker(checker_header.TestChecker):
             if "add:/dev/disk/by-id/wwn-"+wwn+"-part1:"+size in cmd_result:
                 test_util.test_logger("Checker result: Success to check wwn of attached virtioscsi volume [%s] in vm" % wwn)
                 return self.judge(True)
-            if if "present disks:/dev/disk/by-id/wwn-"+wwn+"-part1:"+size in cmd_result:
+            if "present disks:/dev/disk/by-id/wwn-"+wwn+"-part1:"+size in cmd_result:
                 test_util.test_logger("Checker result: Success to find volume [%s] in vm" % wwn)
                 return self.judge(True)
 
@@ -155,7 +155,7 @@ class zstack_kvm_vm_detach_volume_checker(checker_header.TestChecker):
                 test_util.test_logger("Checker result: Success to check wwn of detached virtioscsi volume [%s] in vm" % wwn)
                 return self.judge(True)
             
-            if "present disks:/dev/disk/by-id/wwn-"+wwn+"-part1:"+size not in cmd_result::
+            if "present disks:/dev/disk/by-id/wwn-"+wwn+"-part1:"+size not in cmd_result:
                 test_util.test_logger("Checker result: Success to detach virtioscsi volume [%s] in vm" % wwn)
                 return self.judge(True)
 
