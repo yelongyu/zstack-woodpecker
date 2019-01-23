@@ -896,6 +896,9 @@ def setup_iscsi_target(vm_inv, vm_config, deploy_config):
     cmd = "sysctl -p"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
+    cmd = "sed -i 's/enabled=1/enabled=0/g' /etc/yum/pluginconf.d/fastestmirror.conf"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     #scp_iscsi_repo_to_host(vm_config, vm_ip)
     cmd = "yum --disablerepo=* --enablerepo=alibase install targetcli -y"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
