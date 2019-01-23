@@ -887,6 +887,15 @@ def setup_iscsi_target(vm_inv, vm_config, deploy_config):
         host_port = '22'
 
     #TODO: install with local repo
+    cmd = "sysctl -w vm.dirty_ratio=10"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+    cmd = "sysctl -w vm.dirty_background_ratio=5"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+    
+    cmd = "sysctl -p"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     #scp_iscsi_repo_to_host(vm_config, vm_ip)
     cmd = "yum --disablerepo=* --enablerepo=alibase install targetcli -y"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
@@ -968,6 +977,15 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
         host_port = '22'
 
     #scp_iscsi_repo_to_host(vm_config, vm_ip)
+    cmd = "sysctl -w vm.dirty_ratio=10"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+    cmd = "sysctl -w vm.dirty_background_ratio=5"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+    
+    cmd = "sysctl -p"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "yum -y install iscsi-initiator-utils"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
