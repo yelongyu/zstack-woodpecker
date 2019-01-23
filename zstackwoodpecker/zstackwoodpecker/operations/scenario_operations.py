@@ -1004,6 +1004,16 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
     cmd = "yum -y install device-mapper device-mapper-multipath"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
+    #add longer timeout for ping and heartbeat to avoid iscsi connection issue
+    cmd = "sed -i 's/noop_out_interval = 5/noop_out_interval = 30/g' /etc/iscsi/iscsid.conf; sync; sync"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+    cmd = "sed -i 's/noop_out_timeout = 5/noop_out_timeout = 30/g' /etc/iscsi/iscsid.conf; sync; sync"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+    cmd = "service iscsid restart"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     #cmd = "chkconfig --level 2345 multipathd on"
     #exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
  
