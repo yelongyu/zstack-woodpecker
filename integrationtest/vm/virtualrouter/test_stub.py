@@ -138,10 +138,11 @@ def create_other_vm(l3_name=None, disk_offering_uuids=None, session_uuid = None)
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     return create_vm([l3_net_uuid], image_uuid, 'other_vm', disk_offering_uuids, session_uuid = session_uuid)
 
-def create_basic_vm(disk_offering_uuids=None, system_tags=None, session_uuid = None):
+def create_basic_vm(disk_offering_uuids=None, system_tags=None, l3_name=None, session_uuid = None):
     image_name = os.environ.get('imageName_net')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
-    l3_name = os.environ.get('l3VlanNetworkName1')
+    if not l3_name:
+        l3_name = os.environ.get('l3VlanNetworkName1')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     return create_vm([l3_net_uuid], image_uuid, 'basic_no_vlan_vm', disk_offering_uuids, system_tags=system_tags, session_uuid = session_uuid)
 
@@ -1009,11 +1010,16 @@ class MulISO(object):
             assert iso_name not in cand_name_list
 
     def create_vm(self, vm2=False, system_tags=["cdroms::Empty::Empty::Empty"]):
-        self.vm1 = create_basic_vm(system_tags=system_tags)
+        self.vm1 = create_basic_vm(system_tags=system_tags, l3_name=os.environ.get('l3PublicNetworkName'))
         self.vm1.check()
         if vm2:
-            self.vm2 = create_basic_vm(system_tags=system_tags)
+            self.vm2 = create_basic_vm(system_tags=system_tags, l3_name=os.environ.get('l3PublicNetworkName'))
             self.vm2.check()
+
+    def clone_vm(self):
+        self.cloned_vm = self.vm1.clone(['cloned-vm1'])
+        self.vm1 = self.cloned_vm[0]
+        self.vm1.check()
 
     def create_windows_vm(self, system_tags=["cdroms::Empty::Empty::Empty"]):
         new_offering = test_lib.lib_create_instance_offering(cpuNum = 6, memorySize = 2048 * 1024 * 1024)
@@ -1059,6 +1065,16 @@ class MulISO(object):
             assert iso_uuid not in iso_orders
         if order:
             assert iso_orders[iso_uuid] == order
+
+    def del_cdrom(self, num=1, vm_uuid=None):
+        if not vm_uuid:
+            vm_uuid = self.vm1.vm.uuid
+        cond = res_ops.gen_query_conditions('vmInstanceUuid', '=', vm_uuid)
+        cdroms = cdrom_ops.query_vm_cdrom(cond)
+        if num > len(cdroms):
+            test_util.test_fail("The number of cdrom to be deleted is greater than its actually cdroms")
+        for _ in range(num):
+            cdrom_ops.del_vm_cdrom(cdroms.pop().uuid)
 
     def check_vm_cdrom(self, no_media_cdrom=0, check=False):
         actual_no_media_cdrom = 0

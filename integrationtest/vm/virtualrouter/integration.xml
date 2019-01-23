@@ -219,6 +219,13 @@
         <case timeout='600' repeat='1'>multi_iso/test_attach_2_iso.py</case>
         <case timeout='600' repeat='1'>multi_iso/test_attach_3_iso.py</case>
         <case timeout='1200' repeat='1'>multi_iso/test_attach_3_iso_windows.py</case>
+        <case timeout='1200' repeat='1'>multi_iso/test_create_vm_with_iso.py</case>
+        <case timeout='1200' repeat='1'>multi_iso/test_create_vm_with_iso2.py</case>
+        <case timeout='1200' repeat='1'>multi_iso/test_create_vm_with_iso3.py</case>
+        <case timeout='1200' repeat='1'>multi_iso/test_clone_vm_with_1_cdrom.py</case>
+        <case timeout='1200' repeat='1'>multi_iso/test_clone_vm_with_2_cdrom.py</case>
+        <case timeout='1200' repeat='1'>multi_iso/test_clone_vm_with_3_cdrom.py</case>
+        <case timeout='1200' repeat='1'>multi_iso/test_vm_del_cdrom.py</case>
         <case timeout='600' repeat='1'>multi_iso/test_iso_candidate.py</case>
         <case timeout='600' repeat='1'>test_add_image_longjob.py</case>
         <case timeout='600' repeat='1'>test_create_vm_image_longjob.py</case>
