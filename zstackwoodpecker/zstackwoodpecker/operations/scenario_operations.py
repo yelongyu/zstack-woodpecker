@@ -870,6 +870,33 @@ def scp_iscsi_repo_to_host(vm_config, vm_ip):
     iscsi_repo_cfg_dst = "/etc/yum.repos.d/zstack-internal-yum.repo"
     ssh.scp_file(iscsi_repo_cfg_src, iscsi_repo_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
 
+def setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm_config, deploy_config):
+    vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
+    if hasattr(vm_config, 'hostRef'):
+        host = get_deploy_host(vm_config.hostRef.text_, deploy_config)
+        if not hasattr(host, 'port_') or host.port_ == '22':
+            host_port = '22'
+        else:
+            host_port = host.port_
+    else:
+        host_port = '22'
+
+    cmd = "wget http://172.20.1.15/kernel-ml-4.20.3-1.el7.elrepo.x86_64.rpm"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+    cmd = "rpm -ivh kernel-ml-4.20.3-1.el7.elrepo.x86_64.rpm"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+    cmd = 'grub2-set-default "CentOS Linux (4.20.3-1.el7.elrepo.x86_64) 7 (Core)"'
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+    cmd = 'sync; sync; sync'
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+    stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
+    start_vm(zstack_management_ip, vm_inv.uuid)
+    if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
+        test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
 
 ISCSI_TARGET_IP = []
 ISCSI_TARGET_UUID = []
@@ -2615,6 +2642,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             iscsi_share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv)
                             attach_volume(zstack_management_ip, iscsi_share_volume_inv.uuid, vm_inv.uuid)
                             setup_iscsi_target(vm_inv, vm, deploy_config)
+			    setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm, deploy_config)
                             break
 
                 if xmlobject.has_element(vm, 'primaryStorageRef'):
@@ -2640,6 +2668,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             iscsi_share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
                             attach_volume(zstack_management_ip, iscsi_share_volume_inv.uuid, vm_inv.uuid)
                             setup_iscsi_target(vm_inv, vm, deploy_config)
+			    setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm, deploy_config)
                             break
                         elif ps_ref.type_ == 'iscsiInitiator':
                             setup_iscsi_initiator(zstack_management_ip, vm_inv, vm, deploy_config)
