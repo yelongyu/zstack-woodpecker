@@ -2474,6 +2474,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 vm_creation_option.set_image_uuid(vm.imageUuid_)
                 vm_creation_option.set_name(vm.name_)
                 vm_creation_option.set_timeout(1200000)
+                if vm.dataDiskOfferingUuid_:
+                    vm_creation_option.set_data_disk_uuids([vm.dataDiskOfferingUuid_])
                 #vm_creation_option.set_host_uuid(host.uuid_)
                 #vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
                 #vm_creation_option.set_default_l3_uuid(default_l3_uuid)

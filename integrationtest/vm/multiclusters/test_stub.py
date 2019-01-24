@@ -99,7 +99,7 @@ class DataMigration(TestChain):
         self.vm = None
         self.data_volume = None
         self.dst_ps = None
-        self.image_name = os.getenv('imageName_s')
+        self.image_name = os.getenv('imageName_windows')
         self.image_name_net = os.getenv('imageName_net')
         self.ceph_ps_name = os.getenv('cephPrimaryStorageName')
         self.ceph_ps_name_2 = os.getenv('cephPrimaryStorageName2')
@@ -125,9 +125,11 @@ class DataMigration(TestChain):
         self.ps_1_name = [pn for pn in _ps1 if pn][0]
         self.ps_2_name = [pn2 for pn2 in _ps2 if pn2][0]
 
-    def get_image(self):
+    def get_image(self, image_name=None):
+        if not image_name:
+            image_name = self.image_name_net
         if not self.image:
-            conditions = res_ops.gen_query_conditions('name', '=', self.image_name_net)
+            conditions = res_ops.gen_query_conditions('name', '=', image_name)
             self.image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
         self.origin_bs = self.get_bs_inv(self.image.backupStorageRefs[0].backupStorageUuid)
         self.image_origin_path = self.image.backupStorageRefs[0].installPath
@@ -419,14 +421,14 @@ class DataMigration(TestChain):
                     raise e
         return self
 
-    def migrate_image(self):
+    def migrate_image(self, image_name=None):
         '''
         {"must": 
                 {"after": ["check_origin_image_exist", "clean_up_bs_trash_and_check"]},
          "next": ["create_vm", "create_snapshot", "create_data_volume(from_offering=False)"],
          "weight": 1}
         '''
-        self.get_image()
+        self.get_image(image_name)
         dst_bs = self.get_bs_candidate()
         image_migr_inv = datamigr_ops.bs_migrage_image(dst_bs.uuid, self.image.backupStorageRefs[0].backupStorageUuid, self.image.uuid)
         conditions = res_ops.gen_query_conditions('uuid', '=', self.image.uuid)
