@@ -5295,11 +5295,12 @@ def lib_get_backup_by_uuid(uuid):
     return volume_backup
 
 
+default_snapshot_depth = "128"
 def lib_robot_constant_path_operation(robot_test_obj):
     '''
         Constant path operations for robot testing
     '''
-
+    global default_snapshot_depth
 
     def _update_bs_for_robot_state(state):
         cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
@@ -5325,7 +5326,34 @@ def lib_robot_constant_path_operation(robot_test_obj):
     constant_path_list = robot_test_obj.get_constant_path_list()
     if len(constant_path_list) > 0:
         next_action = constant_path_list[0][0]
-        if next_action == TestAction.migrate_vm :
+        if next_action == TestAction.change_global_config_sp_depth :
+             test_depth = None
+             if len(constant_path_list[0]) > 1:
+                 test_depth = constant_path_list[0][1]
+             if not test_depth:
+                 test_util.test_fail("no snapshot depth available for next action: %s" % (next_action))
+             default_snapshot_depth = conf_ops.change_global_config('volumeSnapshot', \
+                                               'incrementalSnapshot.maxNum', test_depth)
+        elif next_action == TestAction.recover_global_config_sp_depth :
+             conf_ops.change_global_config('volumeSnapshot', \
+                                   'incrementalSnapshot.maxNum', default_snapshot_depth)
+        elif next_action == TestAction.idel :
+            test_util.test_dsc('Robot Action: %s ' % next_action)
+            lib_vm_random_idel_time(1, 5)
+        elif next_action == TestAction.cleanup_imagecache_on_ps :
+            target_vm = None
+            if len(constant_path_list[0]) > 1:
+                target_vm_name = constant_path_list[0][1]
+                all_vm_list = test_dict.get_all_vm_list()
+                for vm in all_vm_list:
+                    if vm.get_vm().name == target_vm_name:
+                        target_vm = vm
+                        break
+            if not target_vm:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+            ps = test_lib.lib_get_primary_storage_by_vm(target_vm.get_vm())
+            ps_ops.cleanup_imagecache_on_primary_storage(ps.uuid)
+        elif next_action == TestAction.migrate_vm :
             target_vm = None
             if len(constant_path_list[0]) > 1:
                 target_vm_name = constant_path_list[0][1]
@@ -5821,6 +5849,42 @@ def lib_robot_constant_path_operation(robot_test_obj):
     
             test_util.test_dsc('Robot Action Result: %s; new SP: %s' % \
                 (next_action, new_snapshot.get_snapshot().uuid))
+        elif next_action == TestAction.delete_volume_snapshot:
+            target_volume_snapshots = None
+            target_snapshot = None
+            target_snapshot_name = None
+            if len(constant_path_list[0]) > 1:
+                target_snapshot_name = constant_path_list[0][1]
+           
+                all_volume_snapshots = test_dict.get_all_available_snapshots()
+                for candidate_snapshots in all_volume_snapshots:
+                    for candidate_snapshot in candidate_snapshots.get_primary_snapshots():
+                        if candidate_snapshot.get_snapshot().name == target_snapshot_name:
+                            target_volume_snapshots = candidate_snapshots
+                            target_snapshot = candidate_snapshot
+                            break
+
+            if not target_snapshot:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            target_volume_snapshots.delete_snapshot(target_snapshot)
+            test_util.test_dsc('Robot Action: %s; on Volume: %s; on SP: %s' % \
+                (next_action, \
+                target_volume_snapshots.get_target_volume().get_volume().uuid, \
+                target_snapshot.get_snapshot().uuid))
+
+            robot_test_obj.add_resource_action_history(target_snapshot.get_snapshot().uuid, next_action)
+            robot_test_obj.add_resource_action_history(target_volume_snapshots.get_target_volume().get_volume().uuid, next_action)
+            #If both volume and snapshots are deleted, volume_snapshot obj could be 
+            # removed.
+            if not target_volume_snapshots.get_backuped_snapshots():
+                target_volume_obj = target_volume_snapshots.get_target_volume()
+                if target_volume_obj.get_state() == vol_header.EXPUNGED \
+                        or (target_volume_snapshots.get_volume_type() == \
+                            vol_header.ROOT_VOLUME \
+                            and target_volume_obj.get_target_vm().get_state() == \
+                                vm_header.EXPUNGED):
+                    test_dict.rm_volume_snapshot(target_volume_snapshots)
         elif next_action == TestAction.use_volume_snapshot:
             target_volume_snapshots = None
             target_snapshot = None

@@ -28,7 +28,7 @@ import zstackwoodpecker.operations.vpc_operations as vpc_ops
 import zstackwoodpecker.operations.volume_operations as volume_ops
 import zstackwoodpecker.zstack_test.zstack_test_eip as zstack_eip_header
 import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
-from multiprocessing import Pool
+from threading import Thread
 
 def wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_uuid):
     retry_count = 0
@@ -1276,7 +1276,7 @@ def setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config):
                                     ceph_storages[backupStorageRef.text_].append(vm_name)
                             else:
                                 ceph_storages[backupStorageRef.text_] = [ vm_name ]
-    def deploy_xsky(ceph_storage):
+    def deploy_xsky(ceph_storages, ceph_storage):
         test_util.test_logger('setup ceph [%s] service.' % (ceph_storage))
         node1_name = ceph_storages[ceph_storage][0]
         node1_config = get_scenario_config_vm(node1_name, scenario_config)
@@ -1321,11 +1321,13 @@ def setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config):
                 infile.write(root_volume_name)
                 infile.write(image_cache_name)
                 infile.write(backup_storage_pool)
-    pool = Pool(len(ceph_storages))
+    thread_list = []
     for ceph_storage in ceph_storages:
-        pool.apply_async(deploy_xsky, args=(ceph_storage, ))
-    pool.close()
-    pool.join()
+        thread_list.append(Thread(target=deploy_xsky, args=(ceph_storages, ceph_storage)))
+    for thrd in thread_list:
+        thrd.start()
+    for _thrd in thread_list:
+        _thrd.join()
 
 def setup_xsky_storages(scenario_config, scenario_file, deploy_config):
     #Stop nodes
