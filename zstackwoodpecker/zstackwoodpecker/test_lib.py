@@ -5295,11 +5295,12 @@ def lib_get_backup_by_uuid(uuid):
     return volume_backup
 
 
+default_snapshot_depth = "128"
 def lib_robot_constant_path_operation(robot_test_obj):
     '''
         Constant path operations for robot testing
     '''
-
+    global default_snapshot_depth
 
     def _update_bs_for_robot_state(state):
         cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
@@ -5325,7 +5326,14 @@ def lib_robot_constant_path_operation(robot_test_obj):
     constant_path_list = robot_test_obj.get_constant_path_list()
     if len(constant_path_list) > 0:
         next_action = constant_path_list[0][0]
-        if next_action == TestAction.migrate_vm :
+        if next_action == TestAction.change_global_config_sp_depth :
+             test_depth = constant_path_list[0][1]
+             default_snapshot_depth = conf_ops.change_global_config('volumeSnapshot', \
+                                               'incrementalSnapshot.maxNum', test_depth)
+        elif next_action == TestAction.recover_global_config_sp_depth :
+             conf_ops.change_global_config('volumeSnapshot', \
+                                   'incrementalSnapshot.maxNum', default_snapshot_depth)
+        elif next_action == TestAction.migrate_vm :
             target_vm = None
             if len(constant_path_list[0]) > 1:
                 target_vm_name = constant_path_list[0][1]

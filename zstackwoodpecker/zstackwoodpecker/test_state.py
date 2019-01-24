@@ -24,6 +24,8 @@ class TestAction(object):
         Possible test Actions defination.
     '''
     #actions
+    change_global_config_sp_depth = 'change_global_config_sp_depth'
+    recover_global_config_sp_depth = 'recover_global_config_sp_depth'
     idel = 'idel'
     create_vm = 'create_vm'
     stop_vm = 'stop_vm'
