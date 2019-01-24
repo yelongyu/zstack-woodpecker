@@ -2474,8 +2474,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 vm_creation_option.set_image_uuid(vm.imageUuid_)
                 vm_creation_option.set_name(vm.name_)
                 vm_creation_option.set_timeout(1200000)
-                if vm.dataDiskOfferingUuid__:
-                    vm_creation_option.set_data_disk_uuids([vm.dataDiskOfferingUuid_])
+#                 if vm.dataDiskOfferingUuid__:
+#                     vm_creation_option.set_data_disk_uuids([vm.dataDiskOfferingUuid_])
                 #vm_creation_option.set_host_uuid(host.uuid_)
                 #vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
                 #vm_creation_option.set_default_l3_uuid(default_l3_uuid)
@@ -2497,6 +2497,12 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 
                 vm_inv = create_vm(zstack_management_ip, vm_creation_option)
                 vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, default_l3_uuid).ip
+                if vm.dataDiskOfferingUuid__:
+                    volume_option = test_util.VolumeOption()
+                    volume_option.set_name('data_volume')
+                    volume_option.set_disk_offering_uuid(vm.dataDiskOfferingUuid__)
+                    volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv)
+                    attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
                 if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
                     test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
 
