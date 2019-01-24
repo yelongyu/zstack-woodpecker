@@ -6,7 +6,7 @@ def path():
            path_list=[[TestAction.create_volume_snapshot, "vm1-root", "snapshot1"], \
                       [TestAction.stop_vm, "vm1"], \
                       [TestAction.use_volume_snapshot, "snapshot1"], \
-                      [TestAction.start_vm, "vm1"] \
+                      [TestAction.start_vm, "vm1"], \
                       [TestAction.stop_vm, "vm1"], \
                       [TestAction.create_volume_snapshot, "vm1-root", "snapshot2"], \
                       [TestAction.start_vm, "vm1"] \
