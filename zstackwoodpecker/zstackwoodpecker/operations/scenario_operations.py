@@ -884,13 +884,7 @@ def setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm_config, deploy_co
     cmd = "wget http://172.20.1.15/kernel-ml-4.20.3-1.el7.elrepo.x86_64.rpm"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    cmd = "rpm -ivh kernel-ml-4.20.3-1.el7.elrepo.x86_64.rpm"
-    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
-
-    cmd = 'grub2-set-default "CentOS Linux (4.20.3-1.el7.elrepo.x86_64) 7 (Core)"'
-    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
-
-    cmd = 'sync; sync; sync'
+    cmd = 'rpm -ivh kernel-ml-4.20.3-1.el7.elrepo.x86_64.rpm && grub2-set-default "CentOS Linux (4.20.3-1.el7.elrepo.x86_64) 7 (Core)" && sync && sync && sync'
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
     stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
