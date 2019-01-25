@@ -8,6 +8,8 @@ New Integration Test for Multi-ISO.
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
+import apibinding.inventory as inventory
+import zstackwoodpecker.operations.resource_operations as res_ops
 import time
 
 test_obj_dict = test_state.TestStateDict()
@@ -15,6 +17,13 @@ test_stub = test_lib.lib_get_test_stub()
 multi_iso = test_stub.MulISO()
 
 def test():
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)
+    for i in bs:
+        if i.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+            break
+    else:
+        test_util.test_logger('BS is type %s.' % i.type)
+        test_util.test_skip('Skip test on non-imagestore')
     multi_iso.add_iso_image()
     multi_iso.get_all_iso_uuids()
     multi_iso.create_vm(system_tags=["cdroms::Empty::Empty::None"])
