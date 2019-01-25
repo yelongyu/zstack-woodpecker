@@ -956,6 +956,9 @@ def setup_iscsi_target(vm_inv, vm_config, deploy_config):
     cmd = "echo 'targetcli saveconfig 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
+    cmd = "echo 'echo 0 > /proc/sys/kernel/hung_task_timeout_secs' >>/etc/rc.local"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "bash -x /etc/rc.local"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
