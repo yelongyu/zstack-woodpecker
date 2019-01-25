@@ -12,7 +12,7 @@ import zstackwoodpecker.test_util as test_util
 import account_operations
 
 
-def create_vm_cdrom(name, vm_uuid, iso_uuid, session_uuid=None):
+def create_vm_cdrom(name, vm_uuid, iso_uuid=None, session_uuid=None):
     action = api_actions.CreateVmCdRomAction()
     action.name = name
     action.vmInstanceUuid = vm_uuid

@@ -972,6 +972,7 @@ class MulISO(object):
     def __init__(self):
         self.vm1 = None
         self.vm2 = None
+        self.cdroms = None
         self.iso_uuids = None
         self.iso = [{'name': 'iso1', 'url': os.getenv('testIsoUrl')},
                     {'name': 'iso2', 'url': os.getenv('testIsoUrl')},
@@ -1055,8 +1056,8 @@ class MulISO(object):
         if not vm_uuid:
             vm_uuid = self.vm1.vm.uuid
         cond = res_ops.gen_query_conditions('vmInstanceUuid', '=', vm_uuid)
-        cdroms = cdrom_ops.query_vm_cdrom(cond)
-        iso_orders = {cdrom.isoUuid: str(cdrom.deviceId) for cdrom in cdroms if cdrom.isoUuid}
+        self.cdroms = cdrom_ops.query_vm_cdrom(cond)
+        iso_orders = {cdrom.isoUuid: str(cdrom.deviceId) for cdrom in self.cdroms if cdrom.isoUuid}
 #         systags = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
 #         iso_orders = {t.tag.split('::')[-2]: t.tag.split('::')[-1] for t in systags if 'iso' in t.tag}
         if attach:
@@ -1065,6 +1066,11 @@ class MulISO(object):
             assert iso_uuid not in iso_orders
         if order:
             assert iso_orders[iso_uuid] == order
+
+    def check_cdrom_not_exist(self):
+        for cdrom in self.cdroms:
+            cond = res_ops.gen_query_conditions('uuid', '=', cdrom.uuid)
+            assert not cdrom_ops.query_vm_cdrom(cond)
 
     def del_cdrom(self, num=1, vm_uuid=None):
         if not vm_uuid:
@@ -1075,6 +1081,11 @@ class MulISO(object):
             test_util.test_fail("The number of cdrom to be deleted is greater than its actually cdroms")
         for _ in range(num):
             cdrom_ops.del_vm_cdrom(cdroms.pop().uuid)
+
+    def create_cdrom(self, vm_uuid=None, iso_uuid=None):
+        if not vm_uuid:
+            vm_uuid = self.vm1.vm.uuid
+        cdrom_ops.create_vm_cdrom('new_cdrom', vm_uuid, iso_uuid=iso_uuid)
 
     def check_vm_cdrom(self, no_media_cdrom=0, check=False):
         actual_no_media_cdrom = 0
