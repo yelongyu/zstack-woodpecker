@@ -309,7 +309,7 @@ def setup_2ha_mn_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
 
 
     # NOTE: need to make filesystem in sync in VM before cold stop VM
-    stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
+    stop_vm(zstack_management_ip, vm_inv.uuid)
     start_vm(zstack_management_ip, vm_inv.uuid)
     if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
         test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
@@ -392,7 +392,7 @@ def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
 
 
     # NOTE: need to make filesystem in sync in VM before cold stop VM
-    stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
+    stop_vm(zstack_management_ip, vm_inv.uuid)
     start_vm(zstack_management_ip, vm_inv.uuid)
 
     if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
@@ -887,7 +887,7 @@ def setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm_config, deploy_co
     cmd = 'rpm -ivh kernel-ml-4.20.3-1.el7.elrepo.x86_64.rpm && grub2-set-default "CentOS Linux (4.20.3-1.el7.elrepo.x86_64) 7 (Core)" && sync && sync && sync'
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
+    stop_vm(zstack_management_ip, vm_inv.uuid)
     start_vm(zstack_management_ip, vm_inv.uuid)
     if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
         test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
@@ -1363,7 +1363,7 @@ def setup_xsky_storages(scenario_config, scenario_file, deploy_config):
             vmUuid = node.uuid_
             print "vm uuid %s" % (str(vmUuid))
             # NOTE: need to make filesystem in sync in VM before cold stop VM
-            stop_vm(xskyNodesMN, vmUuid, 'cold')
+            stop_vm(xskyNodesMN, vmUuid)
 
         #Wait nodes down
         for node in xmlobject.safe_list(scenario_config.deployerConfig.xsky.nodes.node):
