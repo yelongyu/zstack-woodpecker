@@ -12,6 +12,7 @@
 	<case timeout='600' repeat='1'>test_update_vm_cpu_memory2.py</case>-->
         <case timeout='1200' repeat='1'>account/test_vm_ops_by_normal_account.py</case>
         <case timeout='3600' repeat='1'>test_create_vm_install_iso.py</case>
+        <case timeout='3600' repeat='1'>test_create_vm_install_iso_3_cdrom.py</case>
         <case timeout='2400' repeat='1'>test_heartbeat_ceph.py</case>
         <case timeout='3600' repeat='1'>test_cachemode_writeback.py</case>
         <case timeout='2400' repeat='1'>test_cachemode_writethrough.py</case>
