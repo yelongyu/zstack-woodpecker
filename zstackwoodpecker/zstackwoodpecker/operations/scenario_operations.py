@@ -2695,7 +2695,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
         open(scenario_file, 'w+').write(xml_string)
         if xmlobject.has_element(deploy_config, 'backupStorages.xskycephBackupStorage'):
             setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config)
-        else:
+#         else:
+        if xmlobject.has_element(deploy_config, 'backupStorages.cephBackupStorage'):
             setup_ceph_storages(scenario_config, scenario_file, deploy_config)
         setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst)
         setup_fusionstor_storages(scenario_config, scenario_file, deploy_config)
