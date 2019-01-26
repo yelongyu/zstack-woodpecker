@@ -1246,7 +1246,7 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
 
 #     for ceph_storage in ceph_storages:
     def deploy_ceph(ceph_storages, ceph_storage):
-        test_util.test_logger('setup ceph [%s] service.' % (ceph_storage))
+        test_util.test_logger('setup ceph [%s] service.' % (ceph_storage[0]))
         node1_name = ceph_storages[ceph_storage][0]
         node1_config = get_scenario_config_vm(node1_name, scenario_config)
         node1_ip = get_scenario_file_vm(node1_name, scenario_file).ip_
@@ -1313,7 +1313,7 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
 #                             else:
 #                                 ceph_storages[backupStorageRef.text_] = [ vm_name ]
     def deploy_xsky(ceph_storages, ceph_storage):
-        test_util.test_logger('setup ceph [%s] service.' % (ceph_storage))
+        test_util.test_logger('setup ceph [%s] service.' % (ceph_storage[0]))
         node1_name = ceph_storages[ceph_storage][0]
         node1_config = get_scenario_config_vm(node1_name, scenario_config)
         node1_ip = get_scenario_file_vm(node1_name, scenario_file).ip_
