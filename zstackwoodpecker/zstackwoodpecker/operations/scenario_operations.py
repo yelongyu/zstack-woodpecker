@@ -1240,7 +1240,8 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
                             else:
                                 ceph_storages[backupStorageRef.text_] = [ vm_name ]
 
-    for ceph_storage in ceph_storages:
+#     for ceph_storage in ceph_storages:
+    def deploy_ceph(ceph_storages, ceph_storage):
         test_util.test_logger('setup ceph [%s] service.' % (ceph_storage))
         node1_name = ceph_storages[ceph_storage][0]
         node1_config = get_scenario_config_vm(node1_name, scenario_config)
@@ -1267,6 +1268,13 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
         ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ceph_h_nodes.sh'), '/tmp/setup_ceph_h_nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host_port))
         cmd = "bash -ex /tmp/setup_ceph_nodes.sh %s" % (vm_ips)
         ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host_port))
+    thread_list = []
+    for ceph_storage in ceph_storages:
+        thread_list.append(Thread(target=deploy_ceph, args=(ceph_storages, ceph_storage)))
+    for thrd in thread_list:
+        thrd.start()
+    for _thrd in thread_list:
+        _thrd.join()
 
 def setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config):
     ceph_storages = dict()
