@@ -2,23 +2,23 @@ import ../scenario.tmpt
 import ./deploy.tmpt
 import ./scenario.tmpt
 
-cephPrimaryStorageName = xsky-ps
+cephPrimaryStorageName = ceph-ps
 cephPrimaryStorageMonUrls = root:password@ceph01;root:password@ceph02;root:password@ceph03
 cephPrimaryStorageDataVolumePoolName =
 cephPrimaryStorageRootVolumePoolName =
 cephPrimaryStorageImageCachePoolName =
 
-cephBackupStorageName = xsky-bs
+cephBackupStorageName = ceph-bs
 cephBackupStorageMonUrls = root:password@ceph01;root:password@ceph02;root:password@ceph03
 cephBackupStoragePoolName =
 
-cephPrimaryStorageName2 = xsky-ps-2
+cephPrimaryStorageName2 = xsky-ps
 cephPrimaryStorageMonUrls2 = root:password@ceph01;root:password@ceph02;root:password@ceph03
 cephPrimaryStorageDataVolumePoolName2 =
 cephPrimaryStorageRootVolumePoolName2 =
 cephPrimaryStorageImageCachePoolName2 =
 
-cephBackupStorageName2 = xsky-bs-2
+cephBackupStorageName2 = xsky-bs
 cephBackupStorageMonUrls2 = root:password@ceph01;root:password@ceph02;root:password@ceph03
 cephBackupStoragePoolName2 =
 
