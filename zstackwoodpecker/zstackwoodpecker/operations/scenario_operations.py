@@ -704,7 +704,7 @@ def get_backup_storage_type(deploy_config, bs_name):
             return 'ceph'
     for backupStorage in deploy_config.backupStorages.get_child_node_as_list('xskycephBackupStorage'):
         if backupStorage.name_ == bs_name:
-            return 'ceph'
+            return 'xsky'
     for backupStorage in deploy_config.backupStorages.get_child_node_as_list('fusionstorBackupStorage'):
         if backupStorage.name_ == bs_name:
             return 'fusionstor'
@@ -718,7 +718,7 @@ def get_primary_storage_type(deploy_config, ps_name):
                 return 'ceph'
         for primaryStorage in zone.primaryStorages.get_child_node_as_list('xskycephPrimaryStorage'):
             if primaryStorage.name_ == ps_name:
-                return 'ceph'
+                return 'xsky'
         for primaryStorage in zone.primaryStorages.get_child_node_as_list('fusionPrimaryStorage'):
             if primaryStorage.name_ == ps_name:
                 return 'fusionstor'
@@ -1217,28 +1217,32 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
                 for backupStorageRef in xmlobject.safe_list(vm.backupStorageRef):
                     print backupStorageRef.text_
                     backup_storage_type = get_backup_storage_type(deploy_config, backupStorageRef.text_)
-                    if backup_storage_type == 'ceph':
-                        if ceph_storages.has_key(backupStorageRef.text_):
-                            if vm_name in ceph_storages[backupStorageRef.text_]:
+                    if backup_storage_type in ['ceph', 'xsky']:
+#                     if backup_storage_type == 'ceph':
+                        key = (backupStorageRef.text_, backup_storage_type)
+                        if ceph_storages.has_key(key):
+                            if vm_name in ceph_storages[key]:
                                 continue
                             else:
-                                ceph_storages[backupStorageRef.text_].append(vm_name)
+                                ceph_storages[key].append(vm_name)
                         else:
-                            ceph_storages[backupStorageRef.text_] = [ vm_name ]
+                            ceph_storages[key] = [ vm_name ]
 
             if hasattr(vm, 'primaryStorageRef'):
                 for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
                     print primaryStorageRef.text_
                     primary_storage_type = get_primary_storage_type(deploy_config, primaryStorageRef.text_)
                     for zone in xmlobject.safe_list(deploy_config.zones.zone):
-                        if primary_storage_type == 'ceph':
-                            if ceph_storages.has_key(backupStorageRef.text_):
-                                if vm_name in ceph_storages[backupStorageRef.text_]:
+#                         if primary_storage_type == 'ceph':
+                        if primary_storage_type in ['ceph', 'xsky']:
+                            key = (backupStorageRef.text_, backup_storage_type)
+                            if ceph_storages.has_key(key):
+                                if vm_name in ceph_storages[key]:
                                     continue
                                 else:
-                                    ceph_storages[backupStorageRef.text_].append(vm_name)
+                                    ceph_storages[key].append(vm_name)
                             else:
-                                ceph_storages[backupStorageRef.text_] = [ vm_name ]
+                                ceph_storages[key] = [ vm_name ]
 
 #     for ceph_storage in ceph_storages:
     def deploy_ceph(ceph_storages, ceph_storage):
@@ -1257,7 +1261,7 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
 
         vm_ips = ''
         for ceph_node in ceph_storages[ceph_storage]:
-            vm_nic_id = get_ceph_storages_nic_id(ceph_storage, scenario_config)
+            vm_nic_id = get_ceph_storages_nic_id(ceph_storage[0], scenario_config)
             vm = get_scenario_file_vm(ceph_node, scenario_file)
             if vm_nic_id == None:
                 vm_ips += vm.ip_ + ' '
@@ -1268,46 +1272,46 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
         ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ceph_h_nodes.sh'), '/tmp/setup_ceph_h_nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host_port))
         cmd = "bash -ex /tmp/setup_ceph_nodes.sh %s" % (vm_ips)
         ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host_port))
-    thread_list = []
-    for ceph_storage in ceph_storages:
-        thread_list.append(Thread(target=deploy_ceph, args=(ceph_storages, ceph_storage)))
-    for thrd in thread_list:
-        thrd.start()
-    for _thrd in thread_list:
-        _thrd.join()
+#     thread_list = []
+#     for ceph_storage in ceph_storages:
+#         thread_list.append(Thread(target=deploy_ceph, args=(ceph_storages, ceph_storage)))
+#     for thrd in thread_list:
+#         thrd.start()
+#     for _thrd in thread_list:
+#         _thrd.join()
 
-def setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config):
-    ceph_storages = dict()
-    for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
-        for vm in xmlobject.safe_list(host.vms.vm):
-            vm_name = vm.name_
-            if hasattr(vm, 'backupStorageRef'):
-                for backupStorageRef in xmlobject.safe_list(vm.backupStorageRef):
-                    print backupStorageRef.text_
-                    backup_storage_type = get_backup_storage_type(deploy_config, backupStorageRef.text_)
-                    test_util.test_logger("@@@DEBUG-> backup_storage_type %s" %(backup_storage_type))
-                    if backup_storage_type == 'ceph':
-                        if ceph_storages.has_key(backupStorageRef.text_):
-                            if vm_name in ceph_storages[backupStorageRef.text_]:
-                                continue
-                            else:
-                                ceph_storages[backupStorageRef.text_].append(vm_name)
-                        else:
-                            ceph_storages[backupStorageRef.text_] = [ vm_name ]
-            if hasattr(vm, 'primaryStorageRef'):
-                for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
-                    print primaryStorageRef.text_
-                    primary_storage_type = get_primary_storage_type(deploy_config, primaryStorageRef.text_)
-                    test_util.test_logger(" @@@DEBUG-> primary_storage_type %s" %(primary_storage_type))
-                    for zone in xmlobject.safe_list(deploy_config.zones.zone):
-                        if primary_storage_type == 'ceph':
-                            if ceph_storages.has_key(backupStorageRef.text_):
-                                if vm_name in ceph_storages[backupStorageRef.text_]:
-                                    continue
-                                else:
-                                    ceph_storages[backupStorageRef.text_].append(vm_name)
-                            else:
-                                ceph_storages[backupStorageRef.text_] = [ vm_name ]
+# def setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config):
+#     ceph_storages = dict()
+#     for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+#         for vm in xmlobject.safe_list(host.vms.vm):
+#             vm_name = vm.name_
+#             if hasattr(vm, 'backupStorageRef'):
+#                 for backupStorageRef in xmlobject.safe_list(vm.backupStorageRef):
+#                     print backupStorageRef.text_
+#                     backup_storage_type = get_backup_storage_type(deploy_config, backupStorageRef.text_)
+#                     test_util.test_logger("@@@DEBUG-> backup_storage_type %s" %(backup_storage_type))
+#                     if backup_storage_type == 'ceph':
+#                         if ceph_storages.has_key(backupStorageRef.text_):
+#                             if vm_name in ceph_storages[backupStorageRef.text_]:
+#                                 continue
+#                             else:
+#                                 ceph_storages[backupStorageRef.text_].append(vm_name)
+#                         else:
+#                             ceph_storages[backupStorageRef.text_] = [ vm_name ]
+#             if hasattr(vm, 'primaryStorageRef'):
+#                 for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
+#                     print primaryStorageRef.text_
+#                     primary_storage_type = get_primary_storage_type(deploy_config, primaryStorageRef.text_)
+#                     test_util.test_logger(" @@@DEBUG-> primary_storage_type %s" %(primary_storage_type))
+#                     for zone in xmlobject.safe_list(deploy_config.zones.zone):
+#                         if primary_storage_type == 'ceph':
+#                             if ceph_storages.has_key(backupStorageRef.text_):
+#                                 if vm_name in ceph_storages[backupStorageRef.text_]:
+#                                     continue
+#                                 else:
+#                                     ceph_storages[backupStorageRef.text_].append(vm_name)
+#                             else:
+#                                 ceph_storages[backupStorageRef.text_] = [ vm_name ]
     def deploy_xsky(ceph_storages, ceph_storage):
         test_util.test_logger('setup ceph [%s] service.' % (ceph_storage))
         node1_name = ceph_storages[ceph_storage][0]
@@ -1324,7 +1328,7 @@ def setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config):
 
         vm_ips = ''
         for ceph_node in ceph_storages[ceph_storage]:
-            vm_nic_id = get_ceph_storages_nic_id(ceph_storage, scenario_config)
+            vm_nic_id = get_ceph_storages_nic_id(ceph_storage[0], scenario_config)
             vm = get_scenario_file_vm(ceph_node, scenario_file)
             if vm_nic_id == None:
                 vm_ips += vm.ip_ + ' '
@@ -1355,7 +1359,10 @@ def setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config):
                 infile.write(backup_storage_pool)
     thread_list = []
     for ceph_storage in ceph_storages:
-        thread_list.append(Thread(target=deploy_xsky, args=(ceph_storages, ceph_storage)))
+        if 'xsky' in ceph_storage:
+            thread_list.append(Thread(target=deploy_xsky, args=(ceph_storages, ceph_storage)))
+        else:
+            thread_list.append(Thread(target=deploy_ceph, args=(ceph_storages, ceph_storage)))
     for thrd in thread_list:
         thrd.start()
     for _thrd in thread_list:
@@ -2613,7 +2620,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     volume_option = test_util.VolumeOption()
                     volume_option.set_name(os.environ.get('volumeName'))
                     for bs_ref in xmlobject.safe_list(vm.backupStorageRef):
-                        if bs_ref.type_ == 'ceph':
+                        if bs_ref.type_ in ['ceph', 'xsky']:
+#                         if bs_ref.type_ == 'ceph':
                             disk_offering_uuid = bs_ref.offering_uuid_
                             volume_option.set_disk_offering_uuid(disk_offering_uuid)
                             if primaryStorageUuid != None and primaryStorageUuid != "":
@@ -2701,10 +2709,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
         xml_string = etree.tostring(root_xml, 'utf-8')
         xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
         open(scenario_file, 'w+').write(xml_string)
-        if xmlobject.has_element(deploy_config, 'backupStorages.xskycephBackupStorage'):
-            setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config)
-#         else:
-        if xmlobject.has_element(deploy_config, 'backupStorages.cephBackupStorage'):
+        if xmlobject.has_element(deploy_config, 'backupStorages.xskycephBackupStorage') or xmlobject.has_element(deploy_config, 'backupStorages.cephBackupStorage'):
+#             setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config)
+# #         else:
+#         if xmlobject.has_element(deploy_config, 'backupStorages.cephBackupStorage'):
             setup_ceph_storages(scenario_config, scenario_file, deploy_config)
         setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst)
         setup_fusionstor_storages(scenario_config, scenario_file, deploy_config)
