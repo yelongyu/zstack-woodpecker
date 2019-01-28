@@ -11,16 +11,17 @@ def path():
 		[TestAction.attach_volume, "vm1", "volume1"], \
 		[TestAction.create_volume_backup, "volume1", "backup1"], \
 		[TestAction.detach_volume, "volume1"], \
+		[TestAction.clone_vm, "vm1", "vm2", "=full"], \
+		[TestAction.stop_vm, "vm2"], \
 		[TestAction.stop_vm, "vm1"], \
-		[TestAction.ps_migrate_volume, "vm1-root"], \
+		[TestAction.ps_migrate_volume, "vm2-root"], \
 		[TestAction.create_data_vol_template_from_volume, "volume1", "image1"], \
 		[TestAction.delete_volume, "volume1"], \
-		[TestAction.ps_migrate_volume, "vm1-root"], \
 		[TestAction.change_vm_image, "vm1"], \
 		[TestAction.start_vm, "vm1"], \
-		[TestAction.create_volume, "volume1","=scsi"], \
-                [TestAction.attach_volume, "vm1", "volume1"], \
-                [TestAction.create_volume_backup, "volume1", "backup2"], \
+		[TestAction.create_volume, "volume2","=scsi"], \
+                [TestAction.attach_volume, "vm1", "volume2"], \
+                [TestAction.create_volume_backup, "volume2", "backup2"], \
 		[TestAction.stop_vm, "vm1"], \
 		[TestAction.use_volume_backup, "backup2"], \
 		[TestAction.start_vm, "vm1"], \
