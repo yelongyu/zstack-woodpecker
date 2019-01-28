@@ -31,8 +31,10 @@ def path():
 		[TestAction.detach_volume, "volume7"], \
 		[TestAction.detach_volume, "volume8"], \
 		[TestAction.detach_volume, "volume9"], \
+		[TestAction.clone_vm, "vm1", "vm2", "=full"], \
 		[TestAction.stop_vm, "vm1"], \
-		[TestAction.ps_migrate_volume, "vm1-root"], \
+		[TestAction.stop_vm, "vm2"], \
+		[TestAction.ps_migrate_volume, "vm2-root"], \
 		[TestAction.reinit_vm, "vm1"], \
 		[TestAction.start_vm, "vm1"], \
 		[TestAction.create_volume, "volume10","=scsi"], \
