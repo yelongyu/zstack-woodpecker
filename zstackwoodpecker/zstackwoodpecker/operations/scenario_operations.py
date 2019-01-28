@@ -2629,10 +2629,13 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             if poolName != None and poolName != "":
                                 volume_option.set_system_tags(['ceph::pool::%s' % (poolName)])
                             #volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
-                            if bs_ref.type_ != 'ceph' and xmlobject.has_element(deploy_config, 'backupStorages.xskycephBackupStorage'):
-                                volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config)
+                            if bs_ref.type_ == 'ceph':
+                                if xmlobject.has_element(deploy_config, 'backupStorages.cephBackupStorage'):
+                                    volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv)
+                                else:
+                                    volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config)
                             else:
-                                volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
+                                volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config)
                             attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
                             break
                         if bs_ref.type_ == 'fusionstor':
