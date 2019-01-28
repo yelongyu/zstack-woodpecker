@@ -11,3 +11,4 @@ shareVolumeDiskOfferingUuid = 123456
 volumeName = test_volume
 iscsiDiskOfferingUuid = 333333
 #iscsiClusterUuid = 222222
+iscsiImageUuid = 123456

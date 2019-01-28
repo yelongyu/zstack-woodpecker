@@ -1049,7 +1049,7 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
         cmd = "echo 'iscsiadm -m discovery -t sendtargets -p %s:3260 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local; sync" %(i)
         exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-        cmd = "echo 'iscsiadm -m node -T iqn.2018-06.org.disk1 -p %s:3260 -l >>/tmp/tgtadm.log' >>/etc/rc.local; sync" %(i)
+        cmd = "echo 'iscsiadm -m node -T iqn.2016-06.io.spdk:disk1 -p %s:3260 -l >>/tmp/tgtadm.log' >>/etc/rc.local; sync" %(i)
         exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
     cmd = "bash -x /etc/rc.local"
@@ -2657,8 +2657,13 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             volume_option.set_disk_offering_uuid(iscsi_disk_offering_uuid)
                             iscsi_share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv)
                             attach_volume(zstack_management_ip, iscsi_share_volume_inv.uuid, vm_inv.uuid)
-                            setup_iscsi_target(vm_inv, vm, deploy_config)
-			    setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm, deploy_config)
+                            global ISCSI_TARGET_IP
+                            global ISCSI_TARGET_UUID
+                            ISCSI_TARGET_UUID.append(vm_inv.uuid)
+                            ISCSI_TARGET_IP.append(vm_ip)
+                            test_util.test_logger("ISCSI_TARGET_IP=%s" %(vm_ip))
+                            #setup_iscsi_target(vm_inv, vm, deploy_config)
+			    #setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm, deploy_config)
                             break
 
                 if xmlobject.has_element(vm, 'primaryStorageRef'):
@@ -2683,8 +2688,13 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             volume_option.set_disk_offering_uuid(iscsi_disk_offering_uuid)
                             iscsi_share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
                             attach_volume(zstack_management_ip, iscsi_share_volume_inv.uuid, vm_inv.uuid)
-                            setup_iscsi_target(vm_inv, vm, deploy_config)
-			    setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm, deploy_config)
+                            global ISCSI_TARGET_IP
+                            global ISCSI_TARGET_UUID
+                            ISCSI_TARGET_UUID.append(vm_inv.uuid)
+                            ISCSI_TARGET_IP.append(vm_ip)
+                            test_util.test_logger("ISCSI_TARGET_IP=%s" %(vm_ip))
+                            #setup_iscsi_target(vm_inv, vm, deploy_config)
+			    #setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm, deploy_config)
                             break
                         elif ps_ref.type_ == 'iscsiInitiator':
                             setup_iscsi_initiator(zstack_management_ip, vm_inv, vm, deploy_config)
