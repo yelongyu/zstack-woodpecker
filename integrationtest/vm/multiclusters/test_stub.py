@@ -609,6 +609,7 @@ class DataMigration(TestChain):
 
     def longjob_migr_image(self):
         self.dst_bs = self.get_bs_candidate()
+        self.get_image(os.getenv('imageName_windows'))
         name = "long_job_of_%s" % self.image.name
         job_data = '{"imageUuid": %s, "srcBackupStorageUuid": %s, "dstBackupStorageUuid": %s}' % (self.image.uuid, self.image.backupStorageRefs[0].backupStorageUuid, self.dst_bs.uuid)
         self.submit_longjob(job_data, name, job_type='image')
