@@ -119,6 +119,13 @@
         hypervisorType='KVM' url="$virtualRouterImageUrl" system="True">
         <backupStorageRef>$cephBackupStorageName</backupStorageRef>
       </image>
+      <image name="$imageName_windows"
+        description="Small Test Image Template for windows platform"
+        mediaType="$rootMediaType" format="$rootImageFormat"
+        url="$imageUrl_windows" platform="Windows"
+        username="$winImageUsername" password="$winImagePassword">
+        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+     </image>
     </images>
   
     <diskOfferings>
