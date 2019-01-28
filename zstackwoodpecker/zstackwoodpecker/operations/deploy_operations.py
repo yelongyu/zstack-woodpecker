@@ -30,7 +30,7 @@ import config_operations as cfg_ops
 
 #global exception information for thread usage
 exc_info = []
-AddKVMHostTimeOut = 15*60*1000
+AddKVMHostTimeOut = 30*60*1000
 IMAGE_THREAD_LIMIT = 2
 DEPLOY_THREAD_LIMIT = 500
 
