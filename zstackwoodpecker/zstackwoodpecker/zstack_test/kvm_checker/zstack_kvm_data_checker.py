@@ -69,7 +69,7 @@ class zstack_kvm_vm_attach_volume_checker(checker_header.TestChecker):
         vr = test_lib.lib_find_vr_by_pri_l3(default_l3_uuid)
         nic = test_lib.lib_get_vm_nic_by_vr(vm, vr)
 
-        command = 'python /root/vdbench_file.py dryrun'
+        command = 'cat /root/result'
         cmd_result = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, nic.ip, test_lib.lib_get_vm_username(vm), test_lib.lib_get_vm_password(vm), command, self.exp_result)
         test_util.test_logger("czhou: %s" % cmd_result)
         
@@ -84,15 +84,21 @@ class zstack_kvm_vm_attach_volume_checker(checker_header.TestChecker):
                 if re.split("::",i.tag)[0] == "kvm":
                     wwn = re.split("::",i.tag)[2]
 
-            if "add:/dev/disk/by-id/wwn-"+wwn+"-part1:"+size in cmd_result:
-                test_util.test_logger("Checker result: Success to check wwn of attached virtioscsi volume [%s] in vm" % wwn)
-                return self.judge(True)
-            if "present disks:/dev/disk/by-id/wwn-"+wwn+"-part1:"+size in cmd_result:
-                test_util.test_logger("Checker result: Success to find volume [%s] in vm" % wwn)
-                return self.judge(True)
+            for output in cmd_result.splitlines():
+                if "old disks:/dev/disk/by-id/wwn-"+wwn+"-part1:"+size in output:
+                    disk_md5 = re.split(":",output)[3]
+                    vol_md5 = self.test_obj.get_md5sum()
+                    if disk_md5 != vol_md5:
+                        test_util.test_logger("Checker result: Fail to check wwn of attached virtioscsi volume [%s] in vm " % wwn)
+                        return self.judge(False)
+                    
+                if "new disks:/dev/disk/by-id/wwn-"+wwn+"-part1:"+size in output:
+                    disk_md5 = re.split(":",output)[3]
+                    self.test_obj.set_md5sum(disk_md5)
 
-            test_util.test_logger("Checker result: Fail to check wwn of attached virtioscsi volume [%s] in vm " % wwn)
-            return self.judge(False)
+            test_util.test_logger("Checker result: Success to check wwn of attached virtioscsi volume [%s] in vm" % wwn)
+
+            return self.judge(True)
 
         #If it's a virtio-blk volume, we can only check the volume size and 'add' label in the output
         if not systemtag:
@@ -151,16 +157,18 @@ class zstack_kvm_vm_detach_volume_checker(checker_header.TestChecker):
                 if re.split("::",i.tag)[0] == "kvm":
                     wwn = re.split("::",i.tag)[2]
 
-            if "remove:/dev/disk/by-id/wwn-"+wwn+"-part1:"+size in cmd_result:
-                test_util.test_logger("Checker result: Success to check wwn of detached virtioscsi volume [%s] in vm" % wwn)
-                return self.judge(True)
-            
-            if "present disks:/dev/disk/by-id/wwn-"+wwn+"-part1:"+size not in cmd_result:
-                test_util.test_logger("Checker result: Success to detach virtioscsi volume [%s] in vm" % wwn)
-                return self.judge(True)
+            for output in cmd_result.splitlines():
+                if "old disks:/dev/disk/by-id/wwn-"+wwn+"-part1:"+size in output:
+                    test_util.test_logger("Checker result: Fail to check wwn of detached virtioscsi volume [%s] in vm " % wwn)
+                    return self.judge(False)
 
-            test_util.test_logger("Checker result: Fail to check wwn of detached virtioscsi volume [%s] in vm " % wwn)
-            return self.judge(False)
+                if "new disks:/dev/disk/by-id/wwn-"+wwn+"-part1:"+size in output:
+                    test_util.test_logger("Checker result: Fail to check wwn of detached virtioscsi volume [%s] in vm " % wwn)
+                    return self.judge(False)
+
+            test_util.test_logger("Checker result: Success to check wwn of detached virtioscsi volume [%s] in vm" % wwn)
+
+            return self.judge(True)
 
         #If it's a virtio-blk volume, we can only check the volume size and 'remove' label in the output
         if isinstance(cmd_result, str) and not systemtag:
@@ -255,6 +263,8 @@ class zstack_kvm_vm_data_integrity_checker(checker_header.TestChecker):
 
         if vm.state != "Running":
             test_util.test_logger('Check result: Skip attach_volume_checker since VM is not in Running state')
+     
+        time.sleep(30)
 
         test_lib.lib_install_testagent_to_vr(vm)
         host = test_lib.lib_get_vm_host(vm)
@@ -264,29 +274,9 @@ class zstack_kvm_vm_data_integrity_checker(checker_header.TestChecker):
         vr = test_lib.lib_find_vr_by_pri_l3(default_l3_uuid)
         nic = test_lib.lib_get_vm_nic_by_vr(vm, vr)
        
-        command = 'python /root/vdbench_file.py'
+        command = 'python /root/vdbench_test.py | tee result'
         cmd_result = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, nic.ip, test_lib.lib_get_vm_username(vm), test_lib.lib_get_vm_password(vm), command, self.exp_result)
         test_util.test_logger("czhou: %s" % cmd_result)
-
-        if isinstance(cmd_result, str) and "All old disks have been removed,skip validation" in cmd_result:
-            if "generate successfully" in cmd_result or "skip generating" in cmd_result:
-                test_util.test_logger("Checker result: Skip validation checker since all disks have been removed")
-                return self.judge(True)
-            else:
-                test_util.test_logger("Checker result: Skip validation checker since all disks have been removed, but generating data failed on volume output: %s" % cmd_result)
-                return self.judge(False)
-
-        if isinstance(cmd_result, str) and "validate successfully" in cmd_result:
-            if "generate successfully" in cmd_result or "skip generating" in cmd_result:
-                test_util.test_logger("Checker result: Success to validate data integrity, output: %s" % cmd_result)
-                return self.judge(True)
-            else:
-                test_util.test_logger("Checker result: Success to validate data integrity, but generating data failed on volume output: %s" % cmd_result)
-                return self.judge(False)
- 
-        if isinstance(cmd_result, str) and "validate failed on" in cmd_result:
-            test_util.test_logger("Checker result: Fail to validate data integrity, output: %s" % cmd_result)
-            return self.judge(False)
 
         if isinstance(cmd_result, str) and "generate successfully" in cmd_result:
             test_util.test_logger("Checker result: Success to validate data integrity, output: %s" % cmd_result)
@@ -295,5 +285,26 @@ class zstack_kvm_vm_data_integrity_checker(checker_header.TestChecker):
         if isinstance(cmd_result, str) and "no disk attached, skip generating" in cmd_result:
             test_util.test_logger("Checker result: No validationg and no generating, output: %s" % cmd_result)
             return self.judge(True)
+
+        #if isinstance(cmd_result, str) and "All old disks have been removed,skip validation" in cmd_result:
+        #    if "generate successfully" in cmd_result or "skip generating" in cmd_result:
+        #        test_util.test_logger("Checker result: Skip validation checker since all disks have been removed")
+        #        return self.judge(True)
+        #    else:
+        #        test_util.test_logger("Checker result: Skip validation checker since all disks have been removed, but generating data failed on volume output: %s" % cmd_result)
+        #        return self.judge(False)
+
+        #if isinstance(cmd_result, str) and "validate successfully" in cmd_result:
+        #    if "generate successfully" in cmd_result or "skip generating" in cmd_result:
+        #        test_util.test_logger("Checker result: Success to validate data integrity, output: %s" % cmd_result)
+        #        return self.judge(True)
+        #    else:
+        #        test_util.test_logger("Checker result: Success to validate data integrity, but generating data failed on volume output: %s" % cmd_result)
+        #        return self.judge(False)
+ 
+        #if isinstance(cmd_result, str) and "validate failed on" in cmd_result:
+        #    test_util.test_logger("Checker result: Fail to validate data integrity, output: %s" % cmd_result)
+        #    return self.judge(False)
+
 
         return self.judge(False)

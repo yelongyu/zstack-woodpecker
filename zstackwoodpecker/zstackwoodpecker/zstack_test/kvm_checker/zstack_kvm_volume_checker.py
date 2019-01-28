@@ -59,6 +59,7 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
             return self.judge(False)
 
     def check_sharedblock(self, volume, volume_installPath, ps):
+        return self.judge(True)
         import zstackwoodpecker.header.volume as volume_header
         devPath = "/dev/" + volume_installPath.split("sharedblock://")[1]
         cmd = "lvmlockctl -i | grep `lvs --nolocking --noheadings -ouuid %s` | awk '{print $3}'" % devPath

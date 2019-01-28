@@ -59,7 +59,7 @@ TestAction = ts_header.TestAction
 SgRule = ts_header.SgRule
 Port = ts_header.Port
 WOODPECKER_MOUNT_POINT = '/tmp/zstack/mnt'
-SSH_TIMEOUT = 60
+SSH_TIMEOUT = 600
 
 class FakeObject(object):
     '''
@@ -4307,6 +4307,10 @@ def lib_robot_status_check(test_dict):
     return
     print 'target checking test dict: %s' % test_dict
 
+    test_util.test_logger('- - - check running VMs status - - -')
+    for vm in test_dict.get_vm_list(vm_header.RUNNING):
+        vm.check()
+
     test_util.test_logger('- - - check stopped vm status - - -')
     for vm in test_dict.get_vm_list(vm_header.STOPPED):
         vm.check()
@@ -4332,10 +4336,6 @@ def lib_robot_status_check(test_dict):
     volume_snapshots = test_dict.get_all_available_snapshots()
     for snapshots in volume_snapshots:
         snapshots.check()
-
-    test_util.test_logger('- - - check running VMs status - - -')
-    for vm in test_dict.get_vm_list(vm_header.RUNNING):
-        vm.check()
 
     test_util.test_logger("- - - Robot check pass - - -" )
 
@@ -5846,6 +5846,10 @@ def lib_robot_constant_path_operation(robot_test_obj):
             cre_vm_opt = robot_test_obj.get_vm_creation_option()
             cre_vm_opt.set_name("utility_vm_for_robot_test")
             new_snapshot = lib_create_volume_snapshot_from_volume(snapshots, robot_test_obj, test_dict, cre_vm_opt, target_snapshot_name)
+ 
+            target_volume = new_snapshot.get_target_volume()
+            md5sum = target_volume.get_md5sum()
+            new_snapshot.set_md5sum(md5sum)
     
             test_util.test_dsc('Robot Action Result: %s; new SP: %s' % \
                 (next_action, new_snapshot.get_snapshot().uuid))
@@ -5907,7 +5911,10 @@ def lib_robot_constant_path_operation(robot_test_obj):
                 (next_action, \
                 target_snapshot.get_target_volume().get_volume().uuid, \
                 target_snapshot.get_snapshot().uuid))
+            md5sum = target_snapshot.get_md5sum()
             target_volume_snapshots.use_snapshot(target_snapshot)
+            target_snapshot.get_target_volume().set_md5sum(md5sum)
+            
         elif next_action == TestAction.create_volume_backup:
             backup_name = None
             target_volume_uuid = None

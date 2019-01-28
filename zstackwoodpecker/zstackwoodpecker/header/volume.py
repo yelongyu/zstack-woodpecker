@@ -17,6 +17,7 @@ class TestVolume(zstack_header.ZstackObject):
         self.target_vm = None
         self.delete_policy = None
         self.delete_delay_time = None
+        self.md5sum = ''
 
     def __repr__(self):
         if self.volume:
@@ -87,6 +88,12 @@ class TestVolume(zstack_header.ZstackObject):
 
     def set_delete_delay_time(self, time):
         self.delete_delay_time = time
+
+    def get_md5sum(self):
+        return self.md5sum
+
+    def set_md5sum(self, md5sum):
+        self.md5sum = md5sum
 
     def get_delete_delay_time(self):
         return self.delete_delay_time

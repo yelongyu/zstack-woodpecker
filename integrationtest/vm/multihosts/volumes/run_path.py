@@ -54,6 +54,14 @@ def test():
     current_time = time.time()
     timeout_time = current_time + 3600
     while time.time() <= timeout_time:
+        print "DEBUG:",test_dict
+        all_volume_list = test_dict.get_all_volume_list()
+        for volume in all_volume_list:
+            sp = test_dict.get_volume_snapshot(volume.get_volume().uuid)
+            sp_list = sp.get_snapshot_list()
+            for i in sp_list:
+                print "spspspsp, %s,%s" % (i.get_snapshot().uuid, i.md5sum)
+            print "vovovovo, %s,%s" % (volume.get_volume().uuid, volume.md5sum)
         test_util.test_dsc('New round %s starts:' % rounds)
         test_lib.lib_robot_constant_path_operation(robot_test_obj)
         test_util.test_dsc('===============Round %s finished. Begin status checking.================' % rounds)
