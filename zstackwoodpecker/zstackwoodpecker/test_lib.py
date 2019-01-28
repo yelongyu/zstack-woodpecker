@@ -5697,7 +5697,7 @@ def lib_robot_constant_path_operation(robot_test_obj):
                     if not filtered_bss:
                         test_util.test_fail("not find available backup storage. Skip test")
 
-                    image_option.set_url(os.environ.get('imageUrl_s'))
+                    image_option.set_url(os.environ.get('emptyimageUrl'))
                     image_option.set_backup_storage_uuid_list([filtered_bss[0].uuid])
                     image_option.set_timeout(120000)
                     image_option.set_mediaType("DataVolumeTemplate")

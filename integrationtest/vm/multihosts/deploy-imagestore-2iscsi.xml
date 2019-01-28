@@ -93,19 +93,13 @@
     </backupStorages>
     <images>
       <image name="$imageName_s" description="Test Image1" 
-        format="$rootImageFormat" url="$imageUrl_s" 
+        format="$rootImageFormat" url="$imageUrl_vdbench" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName_net" description="Test Image2" 
-        format="$rootImageFormat" url="$imageUrl_net" 
-        mediaType="$rootMediaType"
-        username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
-      </image>
-      <image name="$imageName3" description="Test Image3" 
-        format="$rootImageFormat" url="$imageUrl3" 
+        format="$rootImageFormat" url="$imageUrl_vdbench" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
@@ -126,11 +120,11 @@
   
       <diskOffering name="$mediumDiskOfferingName" 
         description="Medium Disk Offering" 
-        diskSize="$mediumDiskOfferingSize" />
+        diskSize="$largeDiskOfferingSize" />
   
       <diskOffering name="$smallDiskOfferingName" 
         description="Small Disk Offering" 
-        diskSize="$smallDiskOfferingSize" /> 
+        diskSize="$largeDiskOfferingSize" /> 
     </diskOfferings>
   
     <zones>
