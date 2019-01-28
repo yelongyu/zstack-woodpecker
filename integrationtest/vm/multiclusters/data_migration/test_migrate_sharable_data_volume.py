@@ -15,8 +15,8 @@ test_stub = test_lib.lib_get_test_stub()
 data_migration = test_stub.DataMigration()
 
 def test():
-    vm1 = data_migration.create_vm(data_migration.image_name_net)
-    vm2 = data_migration.create_vm(data_migration.image_name_net)
+    vm1 = data_migration.create_vm(data_migration.image_name_net).vm
+    vm2 = data_migration.create_vm(data_migration.image_name_net).vm
     data_migration.create_data_volume(sharable=True, vms=[vm1, vm2])
 
     data_migration.data_volume.detach(vm1.get_vm().uuid)
