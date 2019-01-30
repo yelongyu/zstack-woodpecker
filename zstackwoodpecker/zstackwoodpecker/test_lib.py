@@ -5341,6 +5341,7 @@ def lib_robot_constant_path_operation(robot_test_obj):
             test_util.test_dsc('Robot Action: %s ' % next_action)
             lib_vm_random_idel_time(1, 5)
         elif next_action == TestAction.cleanup_imagecache_on_ps :
+            import zstackwoodpecker.operations.primarystorage_operations as ps_ops
             target_vm = None
             if len(constant_path_list[0]) > 1:
                 target_vm_name = constant_path_list[0][1]
@@ -5351,7 +5352,7 @@ def lib_robot_constant_path_operation(robot_test_obj):
                         break
             if not target_vm:
                 test_util.test_fail("no resource available for next action: %s" % (next_action))
-            ps = test_lib.lib_get_primary_storage_by_vm(target_vm.get_vm())
+            ps = lib_get_primary_storage_by_vm(target_vm.get_vm())
             ps_ops.cleanup_imagecache_on_primary_storage(ps.uuid)
         elif next_action == TestAction.migrate_vm :
             target_vm = None
