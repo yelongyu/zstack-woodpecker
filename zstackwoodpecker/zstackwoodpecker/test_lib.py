@@ -5741,7 +5741,6 @@ def lib_robot_constant_path_operation(robot_test_obj):
     
             test_util.test_dsc('Robot Action Result: %s; new Volume: %s' % \
                 (next_action, new_volume.get_volume().uuid))
-            test_dict.add_volume(new_volume)
         elif next_action == TestAction.ps_migrate_volume:
             target_volume = None
             target_vm = None
