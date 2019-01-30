@@ -141,7 +141,7 @@ class zstack_kvm_vm_detach_volume_checker(checker_header.TestChecker):
         vr = test_lib.lib_find_vr_by_pri_l3(default_l3_uuid)
         nic = test_lib.lib_get_vm_nic_by_vr(vm, vr)
 
-        command = 'python /root/vdbench_file.py dryrun'
+        command = 'cat /root/result'
         cmd_result = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, nic.ip, test_lib.lib_get_vm_username(vm), test_lib.lib_get_vm_password(vm), command, self.exp_result)
         test_util.test_logger("czhou: %s" % cmd_result)
 
@@ -209,7 +209,7 @@ class zstack_kvm_vm_resize_volume_checker(checker_header.TestChecker):
         vr = test_lib.lib_find_vr_by_pri_l3(default_l3_uuid)
         nic = test_lib.lib_get_vm_nic_by_vr(vm, vr)
 
-        command = 'python /root/vdbench_file.py dryrun'
+        command = 'cat /root/result'
         cmd_result = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, nic.ip, test_lib.lib_get_vm_username(vm), test_lib.lib_get_vm_password(vm), command, self.exp_result)
         test_util.test_logger("czhou: %s" % cmd_result)
 
