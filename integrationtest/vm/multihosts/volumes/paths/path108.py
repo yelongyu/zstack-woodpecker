@@ -17,6 +17,7 @@ def path():
 		[TestAction.detach_volume, "volume2"], \
 		[TestAction.attach_volume, "vm1", "volume2"], \
 		[TestAction.detach_volume, "volume2"], \
+		[TestAction.attach_volume, "vm1", "volume2"], \
 		[TestAction.stop_vm, "vm1"], \
 		[TestAction.use_volume_snapshot, "snapshot1"], \
 		[TestAction.use_volume_backup, "backup1"], \
