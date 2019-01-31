@@ -19,11 +19,8 @@ multi_iso = test_stub.MulISO()
 def test():
     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)
     for i in bs:
-        if i.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
-            break
-    else:
-        test_util.test_logger('BS is type %s.' % i.type)
-        test_util.test_skip('Skip test on non-imagestore')
+        if i.type == inventory.SFTP_BACKUP_STORAGE_TYPE:
+            test_util.test_skip('BS is type %s, not support vm cloning test, skip.' % i.type)
     multi_iso.add_iso_image()
     multi_iso.get_all_iso_uuids()
     multi_iso.create_vm(system_tags=["cdroms::Empty::Empty::Empty"])
