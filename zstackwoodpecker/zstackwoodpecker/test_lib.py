@@ -5217,7 +5217,7 @@ def lib_robot_create_utility_vm(robot_test_obj):
             utility_vm_image = None
             vm_create_option = test_util.VmOption()
             bs_uuids = lib_get_backup_storage_uuid_list_by_zone(ps.zoneUuid)
-            cond = res_ops.gen_query_conditions('name', '=', os.environ.get('imageName_net'))
+            cond = res_ops.gen_query_conditions('name', '=', 'image_for_robot_test')
             cond = res_ops.gen_query_conditions('state', '=', "Enabled", cond)
             cond = res_ops.gen_query_conditions('status', '=', "Ready", cond)
             images = res_ops.query_resource(res_ops.IMAGE, cond)
@@ -5231,10 +5231,24 @@ def lib_robot_create_utility_vm(robot_test_obj):
                             utility_vm_image = image
                             break
             if not utility_vm_image:
+                cond = res_ops.gen_query_conditions('name', '=', os.environ.get('imageName_net'))
+                cond = res_ops.gen_query_conditions('state', '=', "Enabled", cond)
+                cond = res_ops.gen_query_conditions('status', '=', "Ready", cond)
+                images = res_ops.query_resource(res_ops.IMAGE, cond)
+                for bs_uuid in bs_uuids:
+                    temp_list = lib_get_primary_storage_uuid_list_by_backup_storage(bs_uuid)
+                    if ps.uuid not in temp_list:
+                        continue
+                    for image in images:
+                        for bs_ref in image.backupStorageRefs:
+                            if bs_ref.backupStorageUuid == bs_uuid:
+                                utility_vm_image = image
+                                break
+            if not utility_vm_image:
                 image_option = test_util.ImageOption()
                 image_option.set_format('qcow2')
                 image_option.set_url(os.environ.get('imageUrl_net'))
-                image_option.set_name(os.environ.get('imageName_net'))
+                image_option.set_name('image_for_robot_test')
                 for bs_uuid in bs_uuids:
                     temp_list = lib_get_primary_storage_uuid_list_by_backup_storage(bs_uuid)
                     if ps.uuid in temp_list:
