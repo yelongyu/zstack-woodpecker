@@ -1966,7 +1966,7 @@ def add_image(scenarioConfig, scenarioFile, deployConfig, session_uuid):
             action.hypervisorType = i.hypervisorType__
             action.name = i.name_
             action.url = i.url_
-            action.timeout = 1800000
+            action.timeout = 3600000
             if i.hasattr('system_'):
                 action.system = i.system__
             if i.hasattr('systemTags_'):
