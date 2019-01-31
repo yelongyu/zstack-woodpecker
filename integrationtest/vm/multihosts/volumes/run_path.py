@@ -17,7 +17,7 @@ import time
 
 #Will sent 4000s as timeout, since case need to run at least ~3700s
 _config_ = {
-        'timeout' : 4600,
+        'timeout' : 7200,
         'noparallel' : True
         }
 
@@ -52,7 +52,7 @@ def test():
     test_lib.lib_robot_create_utility_vm(robot_test_obj)
     rounds = 1
     current_time = time.time()
-    timeout_time = current_time + 3600
+    timeout_time = current_time + 7200
     while time.time() <= timeout_time:
         print "DEBUG:",test_dict
         all_volume_list = test_dict.get_all_volume_list()
