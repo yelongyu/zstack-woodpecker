@@ -65,7 +65,7 @@ def test():
         os.system("bash %s %s" % (EXTRA_HOST_SETUP_SCRIPT, host.managementIp_))
         version = test_lib.lib_execute_ssh_cmd(host.managementIp_, host.username_, host.password_, cmd, 180)
         # Some host are installed in expert mode without virsh
-        if dicts[host.managementIp_] != "":
+        if dicts[host.managementIp_].strip() != "":
             assert version == dicts[host.managementIp_]
 
     if test_lib.lib_get_ha_selffencer_maxattempts() != None:
