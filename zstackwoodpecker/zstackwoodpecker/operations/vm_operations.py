@@ -528,6 +528,7 @@ def create_vm_backup(backup_option, session_uuid=None):
     action = api_actions.CreateVmBackupAction()
     action.backupStorageUuid = backup_option.get_backupStorage_uuid()
     action.name = backup_option.get_name()
+    action.timeout = 7200000
     action.rootVolumeUuid = backup_option.get_volume_uuid()
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventories
