@@ -15,7 +15,7 @@ def ps_migrage_volume(dst_ps_uuid, vol_uuid, volume_type=None, session_uuid=None
     action = api_actions.PrimaryStorageMigrateVolumeAction()
     action.dstPrimaryStorageUuid = dst_ps_uuid
     action.volumeUuid = vol_uuid
-    action.timeout = 3600000
+    action.timeout = 7200000
     test_util.action_logger('Migrate [%s Volume: %s] to [Primary Storage: %s]' % (volume_type, vol_uuid, dst_ps_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt.inventory
