@@ -80,7 +80,8 @@ class KvmVmCheckerFactory(checker_header.CheckerFactory):
             if test_obj.get_creation_option().get_default_l3_uuid():
                 checker_dict[vm_checker.zstack_kvm_vm_default_l3_checker] = True
 
-            #checker_dict[data_checker.zstack_kvm_vm_data_integrity_checker] = True
+            if test_lib.ROBOT:
+                checker_dict[data_checker.zstack_kvm_vm_data_integrity_checker] = True
   
 
         elif test_obj.state == vm_header.STOPPED:
@@ -120,7 +121,8 @@ class KvmVolumeCheckerFactory(checker_header.CheckerFactory):
                 checker_dict[db_checker.zstack_volume_attach_db_checker] = True
                 if test_obj.target_vm.state == vm_header.RUNNING:
                     checker_dict[volume_checker.zstack_kvm_volume_attach_checker] = True
-                    #checker_dict[data_checker.zstack_kvm_vm_attach_volume_checker] = True
+                    if test_lib.ROBOT:
+                        checker_dict[data_checker.zstack_kvm_vm_attach_volume_checker] = True
             else:
                 checker_dict[db_checker.zstack_volume_attach_db_checker] = False
 
@@ -129,7 +131,8 @@ class KvmVolumeCheckerFactory(checker_header.CheckerFactory):
             checker_dict[db_checker.zstack_volume_attach_db_checker] = False
             checker_dict[volume_checker.zstack_kvm_volume_attach_checker] = False
             checker_dict[volume_checker.zstack_kvm_volume_file_checker] = True
-            #checker_dict[data_checker.zstack_kvm_vm_detach_volume_checker] = True
+            if test_lib.ROBOT:
+                checker_dict[data_checker.zstack_kvm_vm_detach_volume_checker] = True
 
 
         elif test_obj.state == volume_header.DELETED:

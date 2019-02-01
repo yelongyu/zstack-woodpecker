@@ -5308,13 +5308,16 @@ def lib_get_backup_by_uuid(uuid):
     volume_backup = res_ops.query_resource(res_ops.VOLUME_BACKUP, cond)[0]
     return volume_backup
 
-
+ROBOT = 0
 default_snapshot_depth = "128"
 def lib_robot_constant_path_operation(robot_test_obj):
     '''
         Constant path operations for robot testing
     '''
     global default_snapshot_depth
+    global ROBOT
+    
+    ROBOT = 1
 
     def _update_bs_for_robot_state(state):
         cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
@@ -6151,6 +6154,9 @@ def lib_robot_constant_path_operation(robot_test_obj):
             test_util.test_dsc('Robot Action Result: %s; new VM: %s'\
                     % (next_action, new_vm.get_vm().uuid))
             test_dict.add_vm(new_vm)
+            for volume in test_dict.get_all_volume_list():
+                volume.update()
+                volume.update_volume()
         else:
             test_util.test_fail("Robot action not supported")
 
