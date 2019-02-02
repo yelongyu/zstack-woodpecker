@@ -88,23 +88,26 @@ class zstack_kvm_vm_attach_volume_checker(checker_header.TestChecker):
                 if "old disks:/dev/disk/by-id/wwn-"+wwn+"-part1:"+size in output:
                     disk_md5 = re.split(":",output)[3]
                     vol_md5 = self.test_obj.get_md5sum()
-                    if disk_md5 != vol_md5:
-                        test_util.test_logger("Checker result: Fail to check wwn of attached virtioscsi volume [%s] in vm " % wwn)
+                    if disk_md5 == vol_md5:
+                        test_util.test_logger("Checker result: Success to check md5sum of attached virtioscsi volume [%s] in vm " % wwn)
+                        continue
+                    else:
+                        test_util.test_logger("Checker result: Fail to check md5sum of attached virtioscsi volume [%s] in vm " % wwn)
                         return self.judge(False)
                     
                 if "new disks:/dev/disk/by-id/wwn-"+wwn+"-part1:"+size in output:
                     disk_md5 = re.split(":",output)[3]
                     self.test_obj.set_md5sum(disk_md5)
+                    return self.judge(True)
 
-            test_util.test_logger("Checker result: Success to check wwn of attached virtioscsi volume [%s] in vm" % wwn)
-
-            return self.judge(True)
+            test_util.test_logger("Checker result: Fail to check wwn of attached virtioscsi volume [%s] in vm" % wwn)
+            return self.judge(False)
 
         #If it's a virtio-blk volume, we can only check the volume size and 'add' label in the output
         if not systemtag:
             #Skip virtio-blk check until we have a proper solution
             test_util.test_logger("Checker result: Skip to check wwn of attached virtioscsi volume [%s] in vm " % cmd_result)
-            return self.judge(True)
+            return self.judge(False)
 
             if re.split(":",cmd_result)[0] == "add" and re.split(":",cmd_result)[2] == size:
                 test_util.test_logger("Checker result: Success to check virtioblk attached volume [%s] in vm" % cmd_result)
@@ -119,6 +122,7 @@ class zstack_kvm_vm_attach_volume_checker(checker_header.TestChecker):
 
             test_util.test_logger("Checker result: Fail to check virtioblk attached volume [%s] in vm" % cmd_result)
             return self.judge(False)
+        return self.judge(False)
         
 
 class zstack_kvm_vm_detach_volume_checker(checker_header.TestChecker):
@@ -157,24 +161,19 @@ class zstack_kvm_vm_detach_volume_checker(checker_header.TestChecker):
                 if re.split("::",i.tag)[0] == "kvm":
                     wwn = re.split("::",i.tag)[2]
 
-            for output in cmd_result.splitlines():
-                if "old disks:/dev/disk/by-id/wwn-"+wwn+"-part1:"+size in output:
-                    test_util.test_logger("Checker result: Fail to check wwn of detached virtioscsi volume [%s] in vm " % wwn)
-                    return self.judge(False)
+            if "old disks:/dev/disk/by-id/wwn-"+wwn+"-part1:"+size not in cmd_result and "new disks:/dev/disk/by-id/wwn-"+wwn+"-part1:"+size not in cmd_result:
+                test_util.test_logger("Checker result: Success to check wwn of detached virtioscsi volume [%s] in vm " % wwn)
+                return self.judge(True)
 
-                if "new disks:/dev/disk/by-id/wwn-"+wwn+"-part1:"+size in output:
-                    test_util.test_logger("Checker result: Fail to check wwn of detached virtioscsi volume [%s] in vm " % wwn)
-                    return self.judge(False)
+            test_util.test_logger("Checker result: Fail to check wwn of detached virtioscsi volume [%s] in vm" % wwn)
 
-            test_util.test_logger("Checker result: Success to check wwn of detached virtioscsi volume [%s] in vm" % wwn)
-
-            return self.judge(True)
+            return self.judge(False)
 
         #If it's a virtio-blk volume, we can only check the volume size and 'remove' label in the output
         if isinstance(cmd_result, str) and not systemtag:
             #Skip virtio-blk check until we have a proper solution
             test_util.test_logger("Checker result: Skip to check wwn of detached virtioscsi volume [%s] in vm " % cmd_result)
-            return self.judge(True)
+            return self.judge(False)
 
             if re.split(":",cmd_result)[0] == "remove" and re.split(":",cmd_result)[2] == size:
                 test_util.test_logger("Checker result: Success to check virtioblk detached volume [%s] in vm" % cmd_result)
@@ -188,62 +187,8 @@ class zstack_kvm_vm_detach_volume_checker(checker_header.TestChecker):
 
             test_util.test_logger("Checker result: Fail to check virtioblk detached volume [%s] in vm" % cmd_result)
             return self.judge(False)
-
-class zstack_kvm_vm_resize_volume_checker(checker_header.TestChecker):
-    '''
-        Check if volume is properly resized inside vm
-    '''
-    def check(self):
-        super(zstack_kvm_vm_resize_volume_checker, self).check()
-        volume = self.test_obj.volume
-        vm = self.test_obj.target_vm.vm
-
-        if vm.state != "Running":
-            test_util.test_logger('Check result: Skip attach_volume_checker since VM is not in Running state')
-
-        test_lib.lib_install_testagent_to_vr(vm)
-        host = test_lib.lib_get_vm_host(vm)
-        test_lib.lib_install_testagent_to_host(host)
-        test_lib.lib_set_vm_host_l2_ip(vm)
-        default_l3_uuid = vm.defaultL3NetworkUuid
-        vr = test_lib.lib_find_vr_by_pri_l3(default_l3_uuid)
-        nic = test_lib.lib_get_vm_nic_by_vr(vm, vr)
-
-        command = 'cat /root/result'
-        cmd_result = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, nic.ip, test_lib.lib_get_vm_username(vm), test_lib.lib_get_vm_password(vm), command, self.exp_result)
-        test_util.test_logger("czhou: %s" % cmd_result)
-
-        conditions = res_ops.gen_query_conditions('tag', '=', 'capability::virtio-scsi')
-        conditions = res_ops.gen_query_conditions('resourceUuid', '=', volume.uuid, conditions)
-        systemtag = res_ops.query_resource(res_ops.SYSTEM_TAG, conditions)
-        size = str(int(volume.size)/1024/1024)+'M' if int(volume.size)/1024/1024 < 1024 else str(int(volume.size)/1024/1024/1024)+'G'
-
-        #If it's a virtio-scsi volume, check the wwn in the output
-        if isinstance(cmd_result, str) and systemtag:
-            condition = res_ops.gen_query_conditions("resourceUuid", '=', volume.uuid)
-            for i in res_ops.query_resource(res_ops.SYSTEM_TAG, condition):
-                if re.split("::",i.tag)[0] == "kvm":
-                    wwn = re.split("::",i.tag)[2]
-
-            if "resize:/dev/disk/by-id/wwn-"+wwn+"-part1:"+size in cmd_result:
-                test_util.test_logger("Checker result: Success to check wwn of resized virtioscsi volume [%s] in vm" % wwn)
-                return self.judge(True)
-
-            test_util.test_logger("Checker result: Fail to check wwn of resized virtioscsi volume [%s] in vm " % wwn)
-            return self.judge(False)
-
-        #If it's a virtio-blk volume, we can only check the volume size and 'remove' label in the output
-        if isinstance(cmd_result, str) and not systemtag:
-            #Skip virtio-blk check until we have a proper solution
-            test_util.test_logger("Checker result: Skip to check wwn of resized virtioscsi volume [%s] in vm " % cmd_result)
-            return self.judge(True)
-
-            if re.split(":",cmd_result)[0] == "resize" and re.split(":",cmd_result)[2] == size:
-                test_util.test_logger("Checker result: Success to check virtioblk resized volume [%s] in vm" % cmd_result)
-                return self.judge(True)
-
-            test_util.test_logger("Checker result: Fail to check virtioblk resized volume [%s] in vm" % cmd_result)
-            return self.judge(False)
+  
+        return self.judge(False)
 
 class zstack_kvm_vm_data_integrity_checker(checker_header.TestChecker):
     '''
