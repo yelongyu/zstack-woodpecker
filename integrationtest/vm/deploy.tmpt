@@ -269,3 +269,6 @@ popServer = pop3.domain.com
 smtpPort = 25
 mailUsername = test@domain.com
 mailPassword = 0
+
+imageUrl_vdbench = http://10.1.101.1/diskimages/centos_vdbench.qcow2
+emptyimageUrl = http://10.1.101.1/diskimages/empty_disk.qcow2
