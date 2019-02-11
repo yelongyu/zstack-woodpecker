@@ -63,7 +63,7 @@ def test():
                 print "spspspsp, %s,%s" % (i.get_snapshot().uuid, i.md5sum)
             print "vovovovo, %s,%s" % (volume.get_volume().uuid, volume.md5sum)
         test_util.test_dsc('New round %s starts:' % rounds)
-        test_lib.lib_robot_constant_path_operation(robot_test_obj)
+        test_lib.lib_robot_constant_path_operation(robot_test_obj, set_robot=False)
         test_util.test_dsc('===============Round %s finished. Begin status checking.================' % rounds)
         rounds += 1
         test_lib.lib_robot_status_check(test_dict)

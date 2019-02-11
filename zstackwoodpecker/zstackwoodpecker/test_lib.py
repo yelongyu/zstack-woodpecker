@@ -5310,14 +5310,15 @@ def lib_get_backup_by_uuid(uuid):
 
 ROBOT = 0
 default_snapshot_depth = "128"
-def lib_robot_constant_path_operation(robot_test_obj):
+def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
     '''
         Constant path operations for robot testing
     '''
     global default_snapshot_depth
     global ROBOT
     
-    ROBOT = 1
+    if set_robot:
+        ROBOT = 1
 
     def _update_bs_for_robot_state(state):
         cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
