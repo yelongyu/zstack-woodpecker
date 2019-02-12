@@ -1893,16 +1893,24 @@ class Robot_Test_Object(object):
             tmp_path_list = path_list
             for list_group_name in self.constant_path_list_group_dict.keys():
                 tmp_constant_path_list = []
+
                 while True:
-                    if list_group_name in tmp_path_list:
-                        idx = tmp_path_list.index(list_group_name)
-                        tmp_constant_path_list = tmp_constant_path_list + tmp_path_list[:idx] + self.constant_path_list_group_dict[list_group_name]
+                    tmp_path_list_no_param = []
+                    for action_with_param in tmp_path_list:
+                        tmp_path_list_no_param.append(action_with_param[0]) 
+
+                    if list_group_name in tmp_path_list_no_param:
+                        idx = tmp_path_list_no_param.index(list_group_name)
+                        tmp_constant_path_list.extend(tmp_path_list[:idx] + self.constant_path_list_group_dict[list_group_name])
                         del tmp_path_list[:idx+1]
                     else:
-                        tmp_constant_path_list = tmp_constant_path_list + tmp_path_list
+                        tmp_constant_path_list.extend(tmp_path_list)
                         break
+
                 tmp_path_list = tmp_constant_path_list
+
             self.constant_path_list = tmp_path_list
+
         else:
             self.constant_path_list = path_list
 
