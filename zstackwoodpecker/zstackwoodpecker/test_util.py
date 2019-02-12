@@ -1756,6 +1756,7 @@ class Robot_Test_Object(object):
         self.initial_formation = None
         self.initial_formation_parameters = None
         self.constant_path_list = []
+        self.constant_path_list_group_dict = {}
         self.configs_dict = {}
 
     def add_action_history(self, action):
@@ -1888,10 +1889,28 @@ class Robot_Test_Object(object):
         return self.constant_path_list
 
     def set_constant_path_list(self, path_list):
-        self.constant_path_list = path_list
+        if self.constant_path_list_group_dict:
+            tmp_path_list = path_list
+            for list_group_name in self.constant_path_list_group_dict.keys():
+                tmp_constant_path_list = []
+                while True:
+                    if list_group_name in tmp_path_list:
+                        idx = tmp_path_list.index(list_group_name)
+                        tmp_constant_path_list = tmp_constant_path_list + tmp_path_list[:idx] + self.constant_path_list_group_dict[list_group_name]
+                        del tmp_path_list[:idx+1]
+                    else:
+                        tmp_constant_path_list = tmp_constant_path_list + tmp_path_list
+                        break
+                tmp_path_list = tmp_constant_path_list
+            self.constant_path_list = tmp_path_list
+        else:
+            self.constant_path_list = path_list
 
-    def get_constant_path_list(self):
-        return self.constant_path_list
+    def get_constant_path_list_group_dict(self):
+        return self.constant_path_list_group_dict
+
+    def set_constant_path_list_group_dict(self, list_group_dict):
+        self.constant_path_list_group_dict = list_group_dict
 
     def set_config(self, configs):
         print "shuang %s" % configs
