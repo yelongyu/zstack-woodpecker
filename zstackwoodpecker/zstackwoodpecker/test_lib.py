@@ -6159,7 +6159,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                 volume.update()
                 volume.update_volume()
         else:
-            test_util.test_fail("Robot action not supported")
+            test_util.test_fail("Robot action: <%s> not supported" %(next_action))
 
         constant_path_list.pop(0)
         robot_test_obj.set_constant_path_list(constant_path_list)
