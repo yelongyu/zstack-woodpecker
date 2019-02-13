@@ -46,9 +46,11 @@ def test():
     robot_test_obj.set_config(config)
     robot_test_obj.set_test_dict(test_dict)
     robot_test_obj.set_initial_formation(initial_formation)
-    robot_test_obj.set_constant_path_list(path_list)
     list_group_dict = {'VM_OPS':[TestAction.start_vm, TestAction.stop_vm, TestAction.reinit_vm]}
     robot_test_obj.set_constant_path_list_group_dict(list_group_dict)
+    robot_test_obj.set_constant_path_list(path_list)
+    print "constant_path_list=%s" %(str(robot_test_obj.get_constant_path_list()))
+    print "constant_path_list_group_dict=%s" %(str(robot_test_obj.get_constant_path_list_group_dict()))
 
     test_lib.lib_robot_create_initial_formation(robot_test_obj)
     test_lib.lib_robot_create_utility_vm(robot_test_obj)
