@@ -1901,7 +1901,11 @@ class Robot_Test_Object(object):
 
                     if list_group_name in tmp_path_list_no_param:
                         idx = tmp_path_list_no_param.index(list_group_name)
-                        tmp_constant_path_list.extend(tmp_path_list[:idx] + self.constant_path_list_group_dict[list_group_name])
+                        replaced_unpacked_list = []
+                        params_list = tmp_path_list[idx][1:]
+                        for idx1 in range(len(self.constant_path_list_group_dict[list_group_name])):
+                            replaced_unpacked_list.append(self.constant_path_list_group_dict[list_group_name][idx1]+params_list)
+                        tmp_constant_path_list.extend(tmp_path_list[:idx] + replaced_unpacked_list)
                         del tmp_path_list[:idx+1]
                     else:
                         tmp_constant_path_list.extend(tmp_path_list)
