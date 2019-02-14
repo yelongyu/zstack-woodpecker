@@ -31,6 +31,8 @@ class TestAction(object):
     create_vm = 'create_vm'
     stop_vm = 'stop_vm'
     start_vm = 'start_vm'
+    suspend_vm = 'suspend_vm'
+    resume_vm = 'resume_vm'
     reboot_vm = 'reboot_vm'
     destroy_vm = 'destroy_vm'
     migrate_vm = 'migrate_vm'
@@ -91,6 +93,9 @@ class TestAction(object):
 
     create_l3 = 'create_l3'
     delete_l3 = 'delete_l3'
+
+    attach_iso = 'attach_iso'
+    detach_iso = 'detach_iso'
 
     attach_primary_storage = 'attach_primary_storage_to_cluster'
     detach_primary_storage = 'detach_primary_storage_from_cluster'    
