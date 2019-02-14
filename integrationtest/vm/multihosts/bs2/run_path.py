@@ -46,7 +46,7 @@ def test():
     robot_test_obj.set_config(config)
     robot_test_obj.set_test_dict(test_dict)
     robot_test_obj.set_initial_formation(initial_formation)
-    list_group_dict = {'VM_OPS':[[TestAction.start_vm], [TestAction.stop_vm], [TestAction.reinit_vm]]}
+    list_group_dict = {'VM_OPS':[[TestAction.stop_vm, "vm1"], [TestAction.reinit_vm, "vm1"], [TestAction.start_vm, "vm1"]]}
     robot_test_obj.set_constant_path_list_group_dict(list_group_dict)
     robot_test_obj.set_constant_path_list(path_list)
     print "constant_path_list=%s" %(str(robot_test_obj.get_constant_path_list()))
