@@ -5578,6 +5578,70 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
 
             target_vm.change_vm_image(target_image.uuid)
             target_vm.update()
+        elif next_action == TestAction.attach_iso:
+            target_vm = None
+            target_volume = None
+            if len(constant_path_list[0]) > 2:
+                target_vm_name = constant_path_list[0][1]
+                target_volume_name = constant_path_list[0][2]
+                all_vm_list = test_dict.get_all_vm_list()
+                for vm in all_vm_list:
+                    if vm.get_vm().name == target_vm_name:
+                        target_vm = vm
+                        break
+
+            if not target_vm:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            test_util.test_dsc('Robot Action: %s; on VM: %s' % \
+                (next_action, target_vm.get_vm().uuid))
+
+            cond = res_ops.gen_query_conditions("status", '=', "Connected")
+            bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
+            img_option = test_util.ImageOption()
+            img_option.set_name('iso')
+            img_option.set_backup_storage_uuid_list([bs_uuid])
+            mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+            if os.system("sshpass -p password ssh %s 'ls  %s/apache-tomcat/webapps/zstack/static/zstack-repo/'" % (mn_ip, os.environ.get('zstackInstallPath'))) == 0:
+                os.system("sshpass -p password ssh %s 'echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/zstack-repo/7/x86_64/os/test.iso'" % (mn_ip, os.environ.get('zstackInstallPath')))
+                img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/test.iso' % (mn_ip))
+            else:
+                os.system("sshpass -p password ssh %s 'echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/test.iso'" % (mn_ip, os.environ.get('zstackInstallPath')))
+                img_option.set_url('http://%s:8080/zstack/static/test.iso' % (mn_ip))
+            image_inv = img_ops.add_iso_template(img_option)
+            image = test_image.ZstackTestImage()
+            image.set_image(image_inv)
+            image.set_creation_option(img_option)
+
+            cond = res_ops.gen_query_conditions('name', '=', 'iso')
+            iso_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
+            img_ops.attach_iso(iso_uuid, target_vm.vm.uuid)
+            lib_wait_target_up(target_vm.get_vm().vmNics[0].ip, 22, 300)
+
+        elif next_action == TestAction.detach_iso:
+            target_vm = None
+            target_volume = None
+            if len(constant_path_list[0]) > 2:
+                target_vm_name = constant_path_list[0][1]
+                target_volume_name = constant_path_list[0][2]
+                all_vm_list = test_dict.get_all_vm_list()
+                for vm in all_vm_list:
+                    if vm.get_vm().name == target_vm_name:
+                        target_vm = vm
+                        break
+
+            if not target_vm:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            test_util.test_dsc('Robot Action: %s; on VM: %s' % \
+                (next_action, \
+                target_vm.get_vm().uuid))
+
+            cond = res_ops.gen_query_conditions('name', '=', 'iso')
+            iso_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
+            img_ops.detach_iso(target_vm.vm.uuid, iso_uuid)
+            test_lib.lib_wait_target_up(target_vm.get_vm().vmNics[0].ip, 22, 300)
+
         elif next_action == TestAction.attach_volume:
             target_vm = None
             target_volume = None
