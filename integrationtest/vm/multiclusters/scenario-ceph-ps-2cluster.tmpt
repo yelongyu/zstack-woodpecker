@@ -1,0 +1,16 @@
+import ../scenario.tmpt
+import ./deploy.tmpt
+import ./scenario.tmpt
+
+cephPrimaryStorageName = ceph-ps
+cephPrimaryStorageMonUrls = root:password@ceph01;root:password@ceph02;root:password@ceph03
+cephPrimaryStorageDataVolumePoolName =
+cephPrimaryStorageRootVolumePoolName =
+cephPrimaryStorageImageCachePoolName =
+
+cephBackupStorageName = ceph-bs
+cephBackupStorageMonUrls = root:password@ceph01;root:password@ceph02;root:password@ceph03
+cephBackupStoragePoolName =
+
+
+cephStorageOfferingUuid = 123456
