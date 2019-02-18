@@ -6054,6 +6054,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                     if volume.get_volume().name == target_volume_name:
                         target_volume_uuid = volume.get_volume().uuid
                         ps_uuid = volume.get_volume().primaryStorageUuid
+                        md5sum = volume.get_md5sum()
                         break
                 if not target_volume_uuid:
                     all_vm_list = test_dict.get_all_vm_list()
@@ -6107,6 +6108,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             backup = vol_ops.create_backup(backup_option)
             #_update_bs_for_robot_state("disable")
             test_dict.add_backup(backup.uuid)
+            test_dict.add_backup_md5sum(backup.uuid, md5sum)
         elif next_action == TestAction.use_volume_backup:
             target_backup = None
             backup_name = None
@@ -6128,6 +6130,13 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             #_update_bs_for_robot_state("enable")
             backup = vol_ops.revert_volume_from_backup(target_backup.uuid)
             #_update_bs_for_robot_state("disable")
+            for volume in test_dict.get_all_volume_list():
+                if volume.get_volume().uuid == target_backup.volumeUuid:
+                    volume.update()
+                    volume.update_volume()
+                    break
+            md5sum = test_dict.get_backup_md5sum(target_backup.uuid)
+            volume.get_volume().set_md5sum(md5sum)
         elif next_action == TestAction.create_data_template_from_backup:
             target_backup = None
             backup_name = None
@@ -6237,6 +6246,9 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             #_update_bs_for_robot_state("enable")
             backup = vol_ops.revert_vm_from_backup(target_backup.groupUuid)
             #_update_bs_for_robot_state("disable")
+            for volume in test_dict.get_all_volume_list():
+                volume.update()
+                volume.update_volume()
 
         elif next_action == TestAction.clone_vm:
             target_vm = None

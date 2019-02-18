@@ -106,7 +106,7 @@ class zstack_kvm_vm_attach_volume_checker(checker_header.TestChecker):
         #If it's a virtio-blk volume, we can only check the volume size and 'add' label in the output
         if not systemtag:
             #Skip virtio-blk check until we have a proper solution
-            test_util.test_logger("Checker result: Skip to check wwn of attached virtioscsi volume [%s] in vm " % cmd_result)
+            test_util.test_logger("Checker result: Skip to check wwn of attached virtioblk volume [%s] in vm " % cmd_result)
             return self.judge(False)
 
             if re.split(":",cmd_result)[0] == "add" and re.split(":",cmd_result)[2] == size:
@@ -172,7 +172,7 @@ class zstack_kvm_vm_detach_volume_checker(checker_header.TestChecker):
         #If it's a virtio-blk volume, we can only check the volume size and 'remove' label in the output
         if isinstance(cmd_result, str) and not systemtag:
             #Skip virtio-blk check until we have a proper solution
-            test_util.test_logger("Checker result: Skip to check wwn of detached virtioscsi volume [%s] in vm " % cmd_result)
+            test_util.test_logger("Checker result: Skip to check wwn of detached virtioblk volume [%s] in vm " % cmd_result)
             return self.judge(False)
 
             if re.split(":",cmd_result)[0] == "remove" and re.split(":",cmd_result)[2] == size:

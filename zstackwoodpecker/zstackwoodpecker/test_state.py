@@ -689,6 +689,7 @@ class TestStateDict(object):
         self.load_balancer_dict = {'Deleted': []}
         self.instance_offering_dict = {'Deleted': []}
         self.disk_offering_dict = {'Deleted': []}
+        self.backup_dict = {}
         self.backup_list = []
     
     def __repr__(self):
@@ -701,7 +702,8 @@ class TestStateDict(object):
                 'vip_dict': self.vip_dict,
                 'volume_snapshot_dict': self.volume_snapshot_dict,
                 'utiltiy_vm_dict': self.utility_vm_dict,
-                'accout_dict': self.account_dict
+                'accout_dict': self.account_dict,
+                'backup_dict': self.backup_dict
         })
 
     def add_vm(self, vm, state=vm_header.RUNNING, create_snapshots = True):
@@ -1233,9 +1235,16 @@ class TestStateDict(object):
             if image.get_state() != image_header.EXPUNGED:
                 image.set_delete_delay_time(delay_time)
 
-    def add_backup(self, uuid):
-        if uuid not in self.backup_list:
-            self.backup_list.append(uuid)
+    def add_backup(self, backup_uuid):
+        cond = res_ops.gen_query_conditions("uuid", '=', backup_uuid)
+        volume_uuid = res_ops.query_resource(res_ops.VOLUME_BACKUP, cond)[0].volumeUuid
+        if not self.backup_dict.has_key(volume_uuid):
+            self.backup_dict[volume_uuid] = backup_uuid
+            self.backup_list.append(backup_uuid)
+ 
+    def get_volume_backup(self, volume_uuid):
+        if self.backup_dict.has_key(volume_uuid):
+            return self.backup_dict[volume_uuid]
 
     def rm_backup(self, uuid):
         if uuid in self.backup_list:
@@ -1243,6 +1252,12 @@ class TestStateDict(object):
 
     def get_backup_list(self):
         return self.backup_list
+
+    def add_backup_md5sum(self, backup_uuid, md5sum):
+        self.backup_dict[backup_uuid] = md5sum
+
+    def get_backup_md5sum(self, backup_uuid):
+        return self.backup_dict[backup_uuid]
 
 class Port(object):
     '''
