@@ -3439,16 +3439,28 @@ fi
 
 #-----------Snapshot Operations-----------
 def lib_get_volume_snapshot_tree(volume_uuid = None, tree_uuid = None, session_uuid = None):
-    if not volume_uuid and not tree_uuid:
-        test_util.test_logger("volume_uuid and tree_uuid should not be None at the same time")
-        return 
+    #if not volume_uuid and not tree_uuid:
+    #    test_util.test_logger("volume_uuid and tree_uuid should not be None at the same time")
+    #    return 
 
-    import apibinding.api_actions as api_actions
-    action = api_actions.GetVolumeSnapshotTreeAction()
-    action.volumeUuid = volume_uuid
-    action.treeUuid = tree_uuid
-    ret = acc_ops.execute_action_with_session(action, session_uuid).inventories
-    return ret
+    #import apibinding.api_actions as api_actions
+    #action = api_actions.GetVolumeSnapshotTreeAction()
+    #action.volumeUuid = volume_uuid
+    #action.treeUuid = tree_uuid
+    #ret = acc_ops.execute_action_with_session(action, session_uuid).inventories
+    #return ret
+
+    if volume_uuid:
+        cond = res_ops.gen_query_conditions('volumeUuid', '=', volume_uuid)
+    elif tree_uuid:
+        cond = res_ops.gen_query_conditions('uuid', '=', tree_uuid)
+    else:
+        test_util.test_logger("volume_uuid and tree_uuid should not be None at the same time")
+        return
+
+    result = res_ops.query_resource(res_ops.VOLUME_SNAPSHOT_TREE, cond, session_uuid)
+
+    return result
 
 #-----------Security Group Operations-------------
 def lib_create_security_group(name=None, desc=None, session_uuid=None):
