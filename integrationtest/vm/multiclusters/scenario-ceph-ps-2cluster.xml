@@ -61,8 +61,8 @@
             </l3Network>
           </l3Networks>
           <hostRef>$hostName4</hostRef>
-	  <backupStorageRef type="ceph" offering_uuid="$cephStorageOfferingUuid">$cephBackupStorageName</backupStorageRef>
-	  <primaryStorageRef type="ceph">$cephPrimaryStorageName</primaryStorageRef>
+	  <backupStorageRef type="ceph" offering_uuid="$cephStorageOfferingUuid">$cephBackupStorageName2</backupStorageRef>
+	  <primaryStorageRef type="ceph">$cephPrimaryStorageName2</primaryStorageRef>
         </vm>
       </vms>
     </host>
