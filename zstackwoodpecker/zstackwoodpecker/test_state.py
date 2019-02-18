@@ -16,6 +16,7 @@ import zstackwoodpecker.header.vip as vip_header
 import zstackwoodpecker.header.eip as eip_header
 import zstackwoodpecker.header.port_forwarding as pf_header
 import zstackwoodpecker.operations.net_operations as net_ops
+import zstackwoodpecker.operations.resource_operations as res_ops
 
 import zstacklib.utils.list_ops as list_ops
 #Define general test actions
