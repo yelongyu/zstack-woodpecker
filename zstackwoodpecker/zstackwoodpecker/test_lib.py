@@ -6134,9 +6134,9 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                 if volume.get_volume().uuid == target_backup.volumeUuid:
                     volume.update()
                     volume.update_volume()
+                    md5sum = test_dict.get_backup_md5sum(target_backup.uuid)
+                    volume.get_volume().set_md5sum(md5sum)
                     break
-            md5sum = test_dict.get_backup_md5sum(target_backup.uuid)
-            volume.get_volume().set_md5sum(md5sum)
         elif next_action == TestAction.create_data_template_from_backup:
             target_backup = None
             backup_name = None
