@@ -244,6 +244,12 @@ class DataMigration(TestChain):
                 vms2.append(vm)
             return vms2
         return self
+    
+    def resize_vm(self, new_size):
+
+        self.root_vol_uuid = self.vm.vm.rootVolumeUuid
+        vol_ops.resize_volume(self.root_vol_uuid, new_size)
+        return self
 
     def migrate_data_volume(self):
         '''
