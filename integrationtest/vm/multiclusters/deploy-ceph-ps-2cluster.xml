@@ -152,10 +152,8 @@
           <cluster name="$clusterName" description="Test"
             hypervisorType="$clusterHypervisorType">
             <hosts>
-              <host name="$hostName" description="Test" managementIp="$hostIp"
-                username="$hostUsername" password="$hostPassword" />
-              <host name="$hostName2" description="Test2" managementIp="$hostIp2"
-                username="$hostUsername2" password="$hostPassword2" port="$hostPort2"/>
+              <host name="$hostName3" description="Test3" managementIp="$hostIp3"
+                username="$hostUsername3" password="$hostPassword3" port="$hostPort3"/>
             </hosts>
             <primaryStorageRef>$cephPrimaryStorageName</primaryStorageRef>
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
@@ -185,8 +183,6 @@
           <cluster name="$clusterName2" description="Test"
             hypervisorType="$clusterHypervisorType">
             <hosts>
-              <host name="$hostName3" description="Test3" managementIp="$hostIp3"
-                username="$hostUsername3" password="$hostPassword3"/>
               <host name="$hostName4" description="Test4" managementIp="$hostIp4"
                 username="$hostUsername4" password="$hostPassword4" port="$hostPort4"/>
             </hosts>

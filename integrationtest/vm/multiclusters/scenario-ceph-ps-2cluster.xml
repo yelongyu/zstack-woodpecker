@@ -38,7 +38,7 @@
 	  <backupStorageRef type="ceph" offering_uuid="$cephStorageOfferingUuid">$cephBackupStorageName</backupStorageRef>
 	  <primaryStorageRef type="ceph">$cephPrimaryStorageName</primaryStorageRef>
         </vm>
-        <vm name="$vmName3" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
+        <vm name="$vmName3" vmInstranceOfferingUuid="$vmInstranceOfferingUuid" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
             <l3Network uuid="$vmL3Uuid">
@@ -50,7 +50,7 @@
           </l3Networks>
           <hostRef>$hostName3</hostRef>
         </vm>
-        <vm name="$vmName4" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
+        <vm name="$vmName4" vmInstranceOfferingUuid="$vmInstranceOfferingUuid" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
             <l3Network uuid="$vmL3Uuid">
@@ -61,8 +61,6 @@
             </l3Network>
           </l3Networks>
           <hostRef>$hostName4</hostRef>
-	  <backupStorageRef type="ceph" offering_uuid="$cephStorageOfferingUuid">$cephBackupStorageName2</backupStorageRef>
-	  <primaryStorageRef type="ceph">$cephPrimaryStorageName2</primaryStorageRef>
         </vm>
       </vms>
     </host>
