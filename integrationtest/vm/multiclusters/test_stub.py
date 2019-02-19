@@ -30,6 +30,7 @@ import threading
 import time
 import sys
 import commands
+import subprocess
 #import traceback
 
 hybrid_test_stub = test_lib.lib_get_test_stub('hybrid')
@@ -712,4 +713,31 @@ class AliyunNAS(hybrid_test_stub.HybridObject):
         mtarget = nas_ops.get_aliyun_nas_mount_target_remote(nas_fs.uuid)[0]
         assert mtarget.mountDomain == os.getenv('mountDomain')
 
+def execute_shell_in_process(cmd, tmp_file, timeout = 3600, no_timeout_excep = False):
+    logfd = open(tmp_file, 'w', 0)
+    process = subprocess.Popen(cmd, executable='/bin/sh', shell=True, stdout=logfd, stderr=logfd, universal_newlines=True)
 
+    start_time = time.time()
+    while process.poll() is None:
+        curr_time = time.time()
+        test_time = curr_time - start_time
+        if test_time > timeout:
+            process.kill()
+            logfd.close()
+            logfd = open(tmp_file, 'r')
+            test_util.test_logger('[shell:] %s [timeout logs:] %s' % (cmd, '\n'.join(logfd.readlines())))
+            logfd.close()
+            if no_timeout_excep:
+                test_util.test_logger('[shell:] %s timeout, after %d seconds' % (cmd, test_time))
+                return 1
+            else:
+                os.system('rm -f %s' % tmp_file)
+                test_util.test_fail('[shell:] %s timeout, after %d seconds' % (cmd, timeout))
+        if test_time%10 == 0:
+            print('shell script used: %ds' % int(test_time))
+        time.sleep(1)
+    logfd.close()
+    logfd = open(tmp_file, 'r')
+    test_util.test_logger('[shell:] %s [logs]: %s' % (cmd, '\n'.join(logfd.readlines())))
+    logfd.close()
+    return process.returncode
