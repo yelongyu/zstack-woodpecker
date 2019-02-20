@@ -6009,14 +6009,14 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             robot_test_obj.add_resource_action_history(target_volume_snapshots.get_target_volume().get_volume().uuid, next_action)
             #If both volume and snapshots are deleted, volume_snapshot obj could be 
             # removed.
-            if not target_volume_snapshots.get_backuped_snapshots():
-                target_volume_obj = target_volume_snapshots.get_target_volume()
-                if target_volume_obj.get_state() == vol_header.EXPUNGED \
-                        or (target_volume_snapshots.get_volume_type() == \
-                            vol_header.ROOT_VOLUME \
-                            and target_volume_obj.get_target_vm().get_state() == \
-                                vm_header.EXPUNGED):
-                    test_dict.rm_volume_snapshot(target_volume_snapshots)
+            #if not target_volume_snapshots.get_backuped_snapshots():
+            #    target_volume_obj = target_volume_snapshots.get_target_volume()
+            #    if target_volume_obj.get_state() == vol_header.EXPUNGED \
+            #            or (target_volume_snapshots.get_volume_type() == \
+            #                vol_header.ROOT_VOLUME \
+            #                and target_volume_obj.get_target_vm().get_state() == \
+            #                    vm_header.EXPUNGED):
+            #        test_dict.rm_volume_snapshot(target_volume_snapshots)
         elif next_action == TestAction.use_volume_snapshot:
             target_volume_snapshots = None
             target_snapshot = None
