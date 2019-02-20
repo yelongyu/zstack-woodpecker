@@ -36,7 +36,8 @@ def test():
     image_name = os.environ.get('imageName_s')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     #l3_name = os.environ.get('l3NoVlanNetworkName1')
-    l3_name = os.environ.get('l3VlanNetworkName1')
+    #l3_name = os.environ.get('l3VlanNetworkName1')
+    l3_name = os.environ.get('l3PublicNetworkName')
     host3_name = os.environ.get('hostName3')
     host4_name = os.environ.get('hostName4')
 
@@ -68,14 +69,14 @@ def test():
     cmd = '%s "poweroff" ' % ssh_cmd1
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
         
-    time.sleep(300)
+    time.sleep(360)
     host3_status = res_ops.query_resource(res_ops.HOST, conditions1)[0].status    
     if host3_status == "Disconnected":
         conditions3 = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid)
         vm_status = res_ops.query_resource(res_ops.VM_INSTANCE, conditions3)[0].state
         vm_host_uuid = res_ops.query_resource(res_ops.VM_INSTANCE, conditions3)[0].host_Uuid
         if vm_status != "Running" or vm_host_uuid != host4_uuid:         
-            test_util.test_fail("Test fail ")
+            test_util.test_fail('Test fail vm status: %s, vm_host_uuid: %s,' %(vm_status, vm_host_uuid))
     vm.destroy()
     conf_ops.change_global_config('ha', 'allow.slibing.cross.clusters', 'false')
 
