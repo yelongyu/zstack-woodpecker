@@ -754,8 +754,8 @@
               </l3BasicNetwork>
             </l3Networks>
           </l2VlanNetwork>
-        </l2Networks>
+        </l2Networks> -->
       </zone>
     </zones>
   </deployerConfig>
-</config> -->
+</config> 
