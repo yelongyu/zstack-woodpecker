@@ -157,11 +157,11 @@
             </hosts>
             <primaryStorageRef>$cephPrimaryStorageName</primaryStorageRef>
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
-            <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
-            <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
+            <!--<l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
+            <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef> -->
             <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName2</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName3</l2NetworkRef>
+            <!--<l2NetworkRef>$l2VlanNetworkName3</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName4</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName5</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName6</l2NetworkRef>
@@ -178,7 +178,7 @@
             <l2NetworkRef>$l2VlanNetworkName17</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName18</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName19</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName20</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName20</l2NetworkRef> -->
           </cluster>
           <cluster name="$clusterName2" description="Test"
             hypervisorType="$clusterHypervisorType">
@@ -188,11 +188,11 @@
             </hosts>
             <primaryStorageRef>$cephPrimaryStorageName</primaryStorageRef>
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
-            <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
-            <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
+            <!--<l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
+            <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef> -->
             <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName2</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName3</l2NetworkRef>
+            <!-- <l2NetworkRef>$l2VlanNetworkName3</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName4</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName5</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName6</l2NetworkRef>
@@ -209,7 +209,7 @@
             <l2NetworkRef>$l2VlanNetworkName17</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName18</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName19</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName20</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName20</l2NetworkRef> -->
           </cluster>
         </clusters>
         <l2Networks>
@@ -241,7 +241,7 @@
             </l3Networks>
           </l2NoVlanNetwork>
           
-          <l2NoVlanNetwork name="$l2NoVlanNetworkName1" description="guest l2 network"
+          <!--<l2NoVlanNetwork name="$l2NoVlanNetworkName1" description="guest l2 network"
             physicalInterface="$l2NoVlanNetworkInterface1">
             <l3Networks>
               <l3BasicNetwork name="$l3NoVlanNetworkName1" description = "guest l3 network with user defined vlan">
@@ -287,7 +287,7 @@
                 </networkService>
               </l3BasicNetwork>
             </l3Networks>
-          </l2NoVlanNetwork>
+          </l2NoVlanNetwork> -->
   
           <l2VlanNetwork name="$l2VlanNetworkName1" 
             description="guest l2 vlan network1"
@@ -341,7 +341,7 @@
             </l3Networks>
           </l2VlanNetwork>
   
-          <l2VlanNetwork name="$l2VlanNetworkName3" 
+         <!-- <l2VlanNetwork name="$l2VlanNetworkName3" 
             description="guest l2 vlan network 3"
             physicalInterface="$l2NetworkPhysicalInterface" 
             vlan="$l2Vlan3">
@@ -758,4 +758,4 @@
       </zone>
     </zones>
   </deployerConfig>
-</config>
+</config> -->
