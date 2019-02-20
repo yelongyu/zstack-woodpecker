@@ -13,6 +13,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.operations.ha_operations as ha_ops
 import zstackwoodpecker.operations.config_operations as conf_ops
+import zstackwoodpecker.operations.scenario_operations as sce_ops
 import time
 import os
 import tempfile
@@ -21,9 +22,10 @@ import uuid
 test_stub = test_lib.lib_get_test_stub()
 vm = None
 tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
+zstack_management_ip = os.environ.get('zstackManagementIp')
 
 def test():
-    global vm
+    global vm, host3_uuid
 
     if test_lib.lib_get_ha_enable() != 'true':
         test_util.test_skip("vm ha not enabled. Skip test")
@@ -42,7 +44,7 @@ def test():
     host3_uuid = res_ops.query_resource(res_ops.HOST, conditions1)[0].uuid
     host3_ip = res_ops.query_resource(res_ops.HOST, conditions1)[0].managementIp
 
-    conditions2 = res_ops.gen_query_conditions('name', '=', host3_name)
+    conditions2 = res_ops.gen_query_conditions('name', '=', host4_name)
     host4_uuid = res_ops.query_resource(res_ops.HOST, conditions2)[0].uuid
     host4_ip = res_ops.query_resource(res_ops.HOST, conditions2)[0].managementIp
 
@@ -57,7 +59,7 @@ def test():
     vm = test_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
     vm.create()
-    time.sleep(60)
+    time.sleep(30)
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
     time.sleep(5)
     vm.check()
@@ -66,23 +68,30 @@ def test():
     cmd = '%s "poweroff" ' % ssh_cmd1
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
         
-    time.sleep(400)
+    time.sleep(300)
     host3_status = res_ops.query_resource(res_ops.HOST, conditions1)[0].status    
     if host3_status == "Disconnected":
         conditions3 = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid)
         vm_status = res_ops.query_resource(res_ops.VM_INSTANCE, conditions3)[0].state
         vm_host_uuid = res_ops.query_resource(res_ops.VM_INSTANCE, conditions3)[0].host_Uuid
-        if vm_status == "Running" and vm_host_uuid == host4_uuid:         
-            test_util.test_pass("vm auto ha Success ")
+        if vm_status != "Running" or vm_host_uuid != host4_uuid:         
+            test_util.test_fail("Test fail ")
     vm.destroy()
     conf_ops.change_global_config('ha', 'allow.slibing.cross.clusters', 'false')
+
+    conditions4 = res_ops.gen_query_conditions('vmNics.ip', '=', host3_ip)
+    vm3_uuid = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, conditions4).inventories[0].uuid
+    sce_ops.start_vm(zstack_management_ip, vm3_uuid)
     test_util.test_pass('VM auto ha across cluster Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
-    global vm
+    global vm, host3_ip
     if vm:
         try:
+    	    conditions4 = res_ops.gen_query_conditions('vmNics.ip', '=', host3_ip)
+    	    vm3_uuid = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, conditions4).inventories[0].uuid
+    	    sce_ops.start_vm(zstack_management_ip, vm3_uuid)
             vm.destroy()
         except:
             pass
