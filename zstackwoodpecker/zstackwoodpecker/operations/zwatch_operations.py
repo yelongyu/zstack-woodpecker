@@ -11,7 +11,7 @@ import zstackwoodpecker.operations.account_operations as acc_ops
 import poplib
 from email.parser import Parser
 import base64
-
+import quopri
 from email import encoders
 from email.header import Header
 from email.mime.text import MIMEText
@@ -501,8 +501,24 @@ def check_sns_email(pop_server, username, password, name, uuid):
         if flag == 1:
             break
         #msg_content = b'\r\n'.join(mail).decode('utf-8') #python3.x
-        msg_content = '\r\n'.join(mail)  #python2.x
-        msg = Parser().parsestr(msg_content)
+        if 'Content-Transfer-Encoding: base64' in mail: 
+            line1 = mail[-6:]
+       	    line2 = mail[:-7]
+	    for i in range(0, 6):
+	        if (len(line1[i]) % 3 == 1):
+                    line1[i] += "=="
+	        elif(len(line1[i]) % 3 == 2):
+       	            line1[i] += "="
+            msg_content1 = '\r\n'.join(line1)  #python2.x
+            msg1 = base64.b64decode(msg_content1)
+            msg_content2 = '\r\n'.join(line2)  #python2.x
+            msg2 = Parser().parsestr(msg_content2)
+            msg = str(msg2) + msg1
+            test_util.test_logger('find boundary_words,Search words is terminated .')
+        elif 'Content-Transfer-Encoding: quoted-printable' in mail:        
+            msg_content = '\r\n'.join(mail)  #python2.x
+            msg1 = quopri.decodestring(msg_content)
+            msg = Parser().parsestr(msg1)
         content=str(msg)
         if (username in content) and (name in content) and (uuid in content):
             flag = 1
@@ -534,19 +550,24 @@ def check_keywords_in_email(pop_server, username, password, first_keyword, secon
     for mail in mail_list:
         #msg_content = b'\r\n'.join(mail).decode('utf-8') #python3.x
         #msg_content1 = '\r\n'.join(mail[-6:])  #python2.x
-	line1 = mail[-6:]
-	line2 = mail[:-7]
-	for i in range(0, 6):
-	    if (len(line1[i]) % 3 == 1):
-		line1[i] += "=="
-	    elif(len(line1[i]) % 3 == 2):
-		line1[i] += "="
-        msg_content1 = '\r\n'.join(line1)  #python2.x
-        msg1 = base64.b64decode(msg_content1)
-        msg_content2 = '\r\n'.join(line2)  #python2.x
-        msg2 = Parser().parsestr(msg_content2)
-        msg = str(msg2) + msg1
-        test_util.test_logger('find boundary_words,Search words is terminated .')
+        if 'Content-Transfer-Encoding: base64' in mail:
+	    line1 = mail[-6:]
+	    line2 = mail[:-7]
+	    for i in range(0, 6):
+	        if (len(line1[i]) % 3 == 1):
+	            line1[i] += "=="
+	        elif(len(line1[i]) % 3 == 2):
+		    line1[i] += "="
+            msg_content1 = '\r\n'.join(line1)  #python2.x
+            msg1 = base64.b64decode(msg_content1)
+            msg_content2 = '\r\n'.join(line2)  #python2.x
+            msg2 = Parser().parsestr(msg_content2)
+            msg = str(msg2) + msg1
+            test_util.test_logger('find boundary_words,Search words is terminated .')
+        elif 'Content-Transfer-Encoding: quoted-printable' in mail:
+            msg_content = '\n'.join(mail)  #python2.x
+            msg1 = quopri.decodestring(msg_content)
+            msg = Parser().parsestr(msg1)
         content=str(msg)
         #test_util.test_logger(msg)
         if boundary_words:
