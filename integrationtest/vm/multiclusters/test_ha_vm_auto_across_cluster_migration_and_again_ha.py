@@ -75,7 +75,7 @@ def test():
         vm_status = res_ops.query_resource(res_ops.VM_INSTANCE, conditions3)[0].state
         vm_host_uuid = res_ops.query_resource(res_ops.VM_INSTANCE, conditions3)[0].hostUuid
         if vm_status != "Running" or vm_host_uuid != host4_uuid:         
-            test_util.test_fail('Test ha vm auto across cluster start failed vm_status: %s, vm_host_uuid: %s', % (vm_status, vm_host_uuid))
+            test_util.test_fail('Test ha vm auto across cluster start failed vm_status: %s, vm_host_uuid: %s' % (vm_status, vm_host_uuid))
     #vm.destroy()
     #conf_ops.change_global_config('ha', 'allow.slibing.cross.clusters', 'false')
 
