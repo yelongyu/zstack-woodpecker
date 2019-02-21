@@ -62,7 +62,7 @@ def test():
     time.sleep(30)
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
     time.sleep(5)
-    #vm.check()
+    vm.check()
     
     ssh_cmd1 = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % host3_ip    
     cmd = '%s "poweroff" ' % ssh_cmd1
@@ -76,8 +76,6 @@ def test():
         vm_host_uuid = res_ops.query_resource(res_ops.VM_INSTANCE, conditions3)[0].hostUuid
         if vm_status != "Running" or vm_host_uuid != host4_uuid:         
             test_util.test_fail('Test ha vm auto across cluster start failed vm_status: %s, vm_host_uuid: %s' % (vm_status, vm_host_uuid))
-    #vm.destroy()
-    #conf_ops.change_global_config('ha', 'allow.slibing.cross.clusters', 'false')
 
     conditions4 = res_ops.gen_query_conditions('vmNics.ip', '=', host3_ip)
     vm3_uuid = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, conditions4).inventories[0].uuid
@@ -102,7 +100,8 @@ def test():
     conditions5 = res_ops.gen_query_conditions('vmNics.ip', '=', host4_ip)
     vm4_uuid = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, conditions5).inventories[0].uuid
     sce_ops.start_vm(zstack_management_ip, vm4_uuid)
-    #vm.destroy()
+
+    vm.destroy()
     conf_ops.change_global_config('ha', 'allow.slibing.cross.clusters', 'false')
     test_util.test_pass('VM auto ha across cluster new Test Success')
 
