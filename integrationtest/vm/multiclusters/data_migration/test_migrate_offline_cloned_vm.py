@@ -19,7 +19,7 @@ def test():
     data_migration.clone_vm()
 
     data_migration.migrate_vm(cloned=True)
-    data_migration.migrate_vm()
+#     data_migration.migrate_vm()
     test_obj_dict.add_vm(data_migration.vm)
     [test_obj_dict.add_vm(vm) for vm in data_migration.cloned_vms]
 
