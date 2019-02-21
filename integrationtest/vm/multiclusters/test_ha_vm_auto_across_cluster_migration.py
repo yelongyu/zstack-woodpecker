@@ -74,7 +74,7 @@ def test():
     if host3_status == "Disconnected":
         conditions3 = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid)
         vm_status = res_ops.query_resource(res_ops.VM_INSTANCE, conditions3)[0].state
-        vm_host_uuid = res_ops.query_resource(res_ops.VM_INSTANCE, conditions3)[0].host_Uuid
+        vm_host_uuid = res_ops.query_resource(res_ops.VM_INSTANCE, conditions3)[0].hostUuid
         if vm_status != "Running" or vm_host_uuid != host4_uuid:         
             test_util.test_fail('Test fail vm status: %s, vm_host_uuid: %s,' %(vm_status, vm_host_uuid))
     vm.destroy()
