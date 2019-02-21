@@ -1,5 +1,11 @@
 <integrationTest>
     <suite name="IPv6 test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" parallel="1">
         <case timeout="900" >test_ipv6_2_stack.py</case>
+        <case timeout="900" >test_2sg_ingress.py</case>
+        <case timeout="900" >test_dualStackNic_clone.py</case>
+        <case timeout="900" >test_dualStackNic.py</case>
+        <case timeout="900" >test_ingress.py</case>
+        <case timeout="900" >test_egress.py</case>
+        <case timeout="900" >test_ipv6_eip.py</case>
     </suite>
 </integrationTest>

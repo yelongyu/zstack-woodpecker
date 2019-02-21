@@ -9,8 +9,10 @@ IP[2]=$3
 #cd /tmp
 wget http://192.168.200.100/mirror/pengtao/cluster.json
 #wget http://192.168.200.100/mirror/pengtao/sds-installer-3.2.14.3_Zstack_WithLicense.tar.gz
-wget http://192.168.200.100/mirror/pengtao/oem-x-ebs-basic-installer-3.2.15.1_RTMVersion_ZStack_WithLicense.tar.gz
-tar zxvf oem-x-ebs-basic-installer-3.2.15.1_RTMVersion_ZStack_WithLicense.tar.gz
+# wget http://192.168.200.100/mirror/pengtao/oem-x-ebs-basic-installer-3.2.15.1_RTMVersion_ZStack_WithLicense.tar.gz
+# tar zxvf oem-x-ebs-basic-installer-3.2.15.1_RTMVersion_ZStack_WithLicense.tar.gz
+wget http://192.168.200.100/mirror/pengtao/oem-x-ebs-basic-installer-3.2.17.0_RTMVersion_ZStack.tar.gz
+tar zxvf oem-x-ebs-basic-installer-3.2.17.0_RTMVersion_ZStack.tar.gz
 
 sed -i "s/10.0.0.x/${IP[0]}/" tools/ansible/hosts
 sed -i "s/10.0.1.x/${IP[1]}/" tools/ansible/hosts

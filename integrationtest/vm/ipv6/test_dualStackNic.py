@@ -28,10 +28,14 @@ def test():
     vm1 = test_stub.create_vm(l3_name = os.environ.get('l3PublicNetworkName'), vm_name = 'vm_1 IPv6 2 stack test', system_tags = ["dualStackNic::%s::%s" %(ipv4_net_uuid, ipv6_net_uuid)], image_name = image_name)
     vm2 = test_stub.create_vm(l3_name = os.environ.get('l3PublicNetworkName'), vm_name = 'vm_2 IPv6 2 stack test', system_tags = ["dualStackNic::%s::%s" %(ipv4_net_uuid, ipv6_net_uuid)], image_name = image_name)
     time.sleep(120) #waiting for vm bootup
-    vm1_nic1 = vm1.get_vm().vmNics[0].usedIps[0].ip
-    vm1_nic2 = vm1.get_vm().vmNics[0].usedIps[1].ip
-    vm2_nic1 = vm2.get_vm().vmNics[0].usedIps[0].ip
-    vm2_nic2 = vm2.get_vm().vmNics[0].usedIps[1].ip
+    ipv4 = None
+    ipv6 = None
+    vms = res_ops.query_resource(res_ops.VM_INSTANCE)
+    vm1_nic1 = vms[1].vmNics[0].usedIps[0].ip
+    vm1_nic2 = vms[1].vmNics[0].usedIps[1].ip
+    vm2_nic1 = vms[0].vmNics[0].usedIps[0].ip
+    vm2_nic2 = vms[0].vmNics[0].usedIps[1].ip
+
     for ip in [vm1_nic1, vm1_nic2]:
         if "172.20" in ip:
             ipv4 = ip

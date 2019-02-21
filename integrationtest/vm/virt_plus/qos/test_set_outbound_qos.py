@@ -19,6 +19,7 @@ def test():
     test_util.test_dsc('Test change VM network bandwidth QoS by 1MB')
 
     vm = test_stub.create_vm(vm_name = 'vm_net_qos')
+    vm.check()
     l3_uuid = vm.get_vm().vmNics[0].l3NetworkUuid
     test_obj_dict.add_vm(vm)
 

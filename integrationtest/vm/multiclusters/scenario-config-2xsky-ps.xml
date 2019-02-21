@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-2xsky-ps.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-2xsky-ps.tmpt</scenarioConfigTemplate>
+</testConfig>

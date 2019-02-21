@@ -17,8 +17,9 @@ def test():
     data_migration.create_vm()
     data_migration.clone_vm()
 
+    data_migration.clean_up_ps_trash_and_check(data_migration.get_ps_candidate().uuid)
     data_migration.migrate_vm(cloned=True)
-    data_migration.migrate_vm()
+#     data_migration.migrate_vm()
     test_obj_dict.add_vm(data_migration.vm)
     [test_obj_dict.add_vm(vm) for vm in data_migration.cloned_vms]
 

@@ -69,26 +69,20 @@
   </instanceOfferings>
 
   <backupStorages>
-    <sftpBackupStorage name="$sftpBackupStorageName"
+    <imageStoreBackupStorage name="$sftpBackupStorageName"
       description="Test" url="$sftpBackupStorageUrl" username="$sftpBackupStorageUsername"
       password="$sftpBackupStoragePassword" hostname="$sftpBackupStorageHostname" port="22"/>
   </backupStorages>
 
   <images>
-    <image name="$imageName_s" 
-      description="Small Test Image Template" 
+    <image name="$ipv6ImageName"
+      description="Test Image for IPv6"
       mediaType="$rootMediaType" format="$rootImageFormat"
-      url="$imageUrl_s" 
+      url="$ipv6ImageUrl"
       username="$imageUsername" password="$imagePassword">
       <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
     </image>
-    <image name="$imageName_net" 
-      description="Test Image Template for network test" 
-      mediaType="$rootMediaType" format="$rootImageFormat"
-      url="$imageUrl_net" 
-      username="$imageUsername" password="$imagePassword">
-      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
-    </image>
+
   </images>
 
   <diskOfferings>
@@ -121,7 +115,21 @@
         <l2NoVlanNetwork name="$l2PublicNetworkName" description="Basic L2 for public network"
           physicalInterface="$l2PublicNetworkInterface">
           <l3Networks>
-            <l3BasicNetwork name="$l3PublicNetworkName" category="Public" ipVersion="6" description="Basic L3 Network without Vlan for public network">
+            <l3BasicNetwork name="$l3PublicNetworkName" category="Public" description="Basic L3 Network without Vlan for IPv6 public network">
+              <ipRange name="$ipRangeName" description="Test"
+                startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
+                netmask="$ipRangeNetmask" />
+              <dns>$DNSServer</dns>
+              <networkService provider="Flat Network Service Provider">
+                <serviceType>DHCP</serviceType>
+                <serviceType>Userdata</serviceType>
+              </networkService>
+              <networkService provider="SecurityGroup">
+                <serviceType>SecurityGroup</serviceType>
+              </networkService>
+            </l3BasicNetwork>
+
+            <l3BasicNetwork name="$l3PublicNetworkName1" category="Public" ipVersion="6" description="Basic L3 Network without Vlan for public network">
               <ipv6Cidr name="$ipv6CidrName" description="Test"
                 ipv6Cidr="$ipv6Cidr" addressMode="Stateless-DHCP"  />
               <dns>$ipv6DNSServer</dns>

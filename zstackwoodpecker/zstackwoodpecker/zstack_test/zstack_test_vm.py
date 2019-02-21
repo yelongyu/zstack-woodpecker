@@ -138,6 +138,8 @@ class ZstackTestVm(vm_header.TestVm):
                 self.expunge()
             elif self.get_state() == vm_header.EXPUNGED:
                 pass
+            elif hasattr(self.vm, "applianceVmType") and (self.vm.applianceVmType == "vrouter" or self.vm.applianceVmType == "VirtualRouter"):
+                self.destroy()
             else:
                 self.destroy()
                 self.expunge()

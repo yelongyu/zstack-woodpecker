@@ -191,6 +191,7 @@ ipv6Cidr_private = 2000:3000:4000:5000::1/64
 ipv6CidrName_private = host IPv6 Cidr private
 ipv6ImagesgUrl = http://192.168.200.100/mirror/diskimages/centos7_ipv6_sg.qcow2
 ipv6ImageNamesg = IPv6 test SG
+l2PublicNetworkName_1 = l2-public-1
 l3PrivateNetworkName = private network IPv6
 l3PublicNetworkName1 = public network IPv6
 
@@ -268,3 +269,6 @@ popServer = pop3.domain.com
 smtpPort = 25
 mailUsername = test@domain.com
 mailPassword = 0
+
+imageUrl_vdbench = http://10.1.101.1/diskimages/centos_vdbench.qcow2
+emptyimageUrl = http://10.1.101.1/diskimages/empty_disk.qcow2

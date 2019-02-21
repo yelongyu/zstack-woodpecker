@@ -30,6 +30,7 @@ import threading
 import time
 import sys
 import commands
+import subprocess
 #import traceback
 
 hybrid_test_stub = test_lib.lib_get_test_stub('hybrid')
@@ -99,7 +100,7 @@ class DataMigration(TestChain):
         self.vm = None
         self.data_volume = None
         self.dst_ps = None
-        self.image_name = os.getenv('imageName_s')
+        self.image_name = os.getenv('imageName_windows')
         self.image_name_net = os.getenv('imageName_net')
         self.ceph_ps_name = os.getenv('cephPrimaryStorageName')
         self.ceph_ps_name_2 = os.getenv('cephPrimaryStorageName2')
@@ -125,9 +126,11 @@ class DataMigration(TestChain):
         self.ps_1_name = [pn for pn in _ps1 if pn][0]
         self.ps_2_name = [pn2 for pn2 in _ps2 if pn2][0]
 
-    def get_image(self):
+    def get_image(self, image_name=None):
+        if not image_name:
+            image_name = self.image_name_net
         if not self.image:
-            conditions = res_ops.gen_query_conditions('name', '=', self.image_name_net)
+            conditions = res_ops.gen_query_conditions('name', '=', image_name)
             self.image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
         self.origin_bs = self.get_bs_inv(self.image.backupStorageRefs[0].backupStorageUuid)
         self.image_origin_path = self.image.backupStorageRefs[0].installPath
@@ -173,6 +176,7 @@ class DataMigration(TestChain):
                 pass
         self.get_image()
         self.vm = create_vm('multicluster_basic_vm', self.image.name, os.getenv('l3PublicNetworkName'))
+        self.root_vol_uuid = self.vm.vm.rootVolumeUuid
         self.vm.check()
         self.origin_ps = self.get_ps_inv(self.vm.vm.allVolumes[0].primaryStorageUuid)
         return self
@@ -240,6 +244,16 @@ class DataMigration(TestChain):
                     vm.check()
                 vms2.append(vm)
             return vms2
+        return self
+    
+    def resize_vm(self, new_size):
+        self.root_vol_uuid = self.vm.vm.rootVolumeUuid
+        vol_ops.resize_volume(self.root_vol_uuid, new_size)
+        return self
+
+    def resize_data_volume(self,new_size):
+        self.data_vol_uuid = self.data_volume.get_volume().uuid
+        vol_ops.resize_data_volume(self.data_vol_uuid, new_size)
         return self
 
     def migrate_data_volume(self):
@@ -347,7 +361,7 @@ class DataMigration(TestChain):
             assert str(vol_size) in data_info
             ps_trash = ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid).storageTrashSpecs
             trash_install_path_list = [trsh.installPath for trsh in ps_trash]
-            assert vol_installPath[:-39] in trash_install_path_list
+            assert '/'.join(vol_installPath.split('/')[:8]) in trash_install_path_list
         return self
 
     def check_vol_sp(self, vol_uuid, count):
@@ -418,14 +432,14 @@ class DataMigration(TestChain):
                     raise e
         return self
 
-    def migrate_image(self):
+    def migrate_image(self, image_name=None):
         '''
         {"must": 
                 {"after": ["check_origin_image_exist", "clean_up_bs_trash_and_check"]},
          "next": ["create_vm", "create_snapshot", "create_data_volume(from_offering=False)"],
          "weight": 1}
         '''
-        self.get_image()
+        self.get_image(image_name)
         dst_bs = self.get_bs_candidate()
         image_migr_inv = datamigr_ops.bs_migrage_image(dst_bs.uuid, self.image.backupStorageRefs[0].backupStorageUuid, self.image.uuid)
         conditions = res_ops.gen_query_conditions('uuid', '=', self.image.uuid)
@@ -606,6 +620,7 @@ class DataMigration(TestChain):
 
     def longjob_migr_image(self):
         self.dst_bs = self.get_bs_candidate()
+        self.get_image(os.getenv('imageName_windows'))
         name = "long_job_of_%s" % self.image.name
         job_data = '{"imageUuid": %s, "srcBackupStorageUuid": %s, "dstBackupStorageUuid": %s}' % (self.image.uuid, self.image.backupStorageRefs[0].backupStorageUuid, self.dst_bs.uuid)
         self.submit_longjob(job_data, name, job_type='image')
@@ -698,4 +713,31 @@ class AliyunNAS(hybrid_test_stub.HybridObject):
         mtarget = nas_ops.get_aliyun_nas_mount_target_remote(nas_fs.uuid)[0]
         assert mtarget.mountDomain == os.getenv('mountDomain')
 
+def execute_shell_in_process(cmd, tmp_file, timeout = 3600, no_timeout_excep = False):
+    logfd = open(tmp_file, 'w', 0)
+    process = subprocess.Popen(cmd, executable='/bin/sh', shell=True, stdout=logfd, stderr=logfd, universal_newlines=True)
 
+    start_time = time.time()
+    while process.poll() is None:
+        curr_time = time.time()
+        test_time = curr_time - start_time
+        if test_time > timeout:
+            process.kill()
+            logfd.close()
+            logfd = open(tmp_file, 'r')
+            test_util.test_logger('[shell:] %s [timeout logs:] %s' % (cmd, '\n'.join(logfd.readlines())))
+            logfd.close()
+            if no_timeout_excep:
+                test_util.test_logger('[shell:] %s timeout, after %d seconds' % (cmd, test_time))
+                return 1
+            else:
+                os.system('rm -f %s' % tmp_file)
+                test_util.test_fail('[shell:] %s timeout, after %d seconds' % (cmd, timeout))
+        if test_time%10 == 0:
+            print('shell script used: %ds' % int(test_time))
+        time.sleep(1)
+    logfd.close()
+    logfd = open(tmp_file, 'r')
+    test_util.test_logger('[shell:] %s [logs]: %s' % (cmd, '\n'.join(logfd.readlines())))
+    logfd.close()
+    return process.returncode

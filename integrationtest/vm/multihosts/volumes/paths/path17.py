@@ -1,0 +1,4 @@
+import zstackwoodpecker.test_state as ts_header
+TestAction = ts_header.TestAction
+def path():
+    return dict(initial_formation="template4", path_list=[[TestAction.create_volume, "volume2", "=scsi"], [TestAction.create_volume, "volume3", "=scsi"], [TestAction.attach_volume, "vm1", "volume2"], [TestAction.create_image_from_volume, "vm1", "image1"], [TestAction.detach_volume, "volume2"], [TestAction.ps_migrate_volume, "volume2"], [TestAction.attach_volume, "vm1", "volume3"], [TestAction.stop_vm, "vm1"], [TestAction.change_vm_image, "vm1"], [TestAction.create_volume_snapshot, "volume3", "snapshot1"], [TestAction.detach_volume, "volume3"], [TestAction.attach_volume, "vm1", "volume3"], [TestAction.clone_vm, "vm1", "vm2", "=full"], [TestAction.start_vm, "vm1"], [TestAction.create_volume_backup, "vm1-volume1", "backup1"], [TestAction.reboot_vm, "vm1"]])

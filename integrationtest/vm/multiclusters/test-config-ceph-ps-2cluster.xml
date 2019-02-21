@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-ceph-ps-2cluster.xml</deployConfig>
+    <deployConfigTemplate>deploy-ceph-ps-2cluster.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

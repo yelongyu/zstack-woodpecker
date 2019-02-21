@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-xsky-ceph-ps.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-xsky-ceph-ps.tmpt</scenarioConfigTemplate>
+</testConfig>

@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-ceph-ps-2cluster.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-ceph-ps-2cluster.tmpt</scenarioConfigTemplate>
+</testConfig>

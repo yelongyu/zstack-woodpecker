@@ -13,3 +13,4 @@ volumeName = test_volume
 iscsiDiskOfferingUuid = 333333
 iscsiClusterUuid = 222222
 hostUuid6 = 123456
+iscsiImageUuid = 123456

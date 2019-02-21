@@ -17,225 +17,15 @@ import time
 
 #Will sent 4000s as timeout, since case need to run at least ~3700s
 _config_ = {
-        'timeout' : 4600,
-        'noparallel' : False
+        'timeout' : 7200,
+        'noparallel' : True
         }
 
 test_dict = test_state.TestStateDict()
 TestAction = ts_header.TestAction
 
-templateContent = '''
-{
-    "ZStackTemplateFormatVersion": "2018-06-18",
-    "Description": "本示例将创建一个云盘，并将云盘加载到云主机上(基于本地存储), 创建示例前提环境：\n计算规格，镜像，云盘规格，私有网络，可用物理机",
-    "Parameters": {
-        "InstanceOfferingUuid": {
-            "Type": "String",
-            "Label": "计算规格",
-            "Description": "The instance offering uuid"
-        },
-        "ImageUuid":{
-            "Type": "String",
-            "Label": "镜像",
-            "Description": "The Image uuid for creating VmInstance, Please choose an image not iso"
-        },
-        "PrivateNetworkUuid":{
-            "Type": "String",
-            "Label": "私有网络",
-            "Description" : "The private network uuid for creating VmInstance"
-        },
-        "DiskofferingUuid":{
-            "Type": "String",
-            "Label": "云盘规格",
-            "Description":"镜像服务器Uuid"
-        }
-    },
-    "Resources": {
-        "VmInstance": {
-            "Type": "ZStack::Resource::VmInstance",
-            "Properties": {
-                "name": "vm1",
-                "instanceOfferingUuid": {"Ref":"InstanceOfferingUuid"},
-                "imageUuid":{"Ref":"ImageUuid"},
-                "l3NetworkUuids":[{"Ref":"PrivateNetworkUuid"}],
-                "dataDiskOfferingUuids": [{"Ref":"DiskofferingUuid"},{"Ref":"DiskofferingUuid"},{"Ref":"DiskofferingUuid"},{"Ref":"DiskofferingUuid"},{"Ref":"DiskofferingUuid"},{"Ref":"DiskofferingUuid"},{"Ref":"DiskofferingUuid"},{"Ref":"DiskofferingUuid"}],
-                "systemTags":[{"Fn::Join":["::",["virtio","diskOffering",{"Ref":"DiskofferingUuid"},"num","8"]]}]
-            }
-        }
-    },
-    "Outputs": {
-        "VmInstance": {
-            "Value": {
-                "Ref": "VmInstance"
-            }
-        }
-    }
-}
-
-'''
-
-templateContent2 = '''
-{
-    "ZStackTemplateFormatVersion": "2018-06-18",
-    "Description": "本示例将创建一个云盘，并将云盘加载到云主机上(基于本地存储), 创建示例前提环境：\n计算规格，镜像，云盘规格，私有网络，可用物理机",
-    "Parameters": {
-        "InstanceOfferingUuid": {
-            "Type": "String",
-            "Label": "计算规格",
-            "Description": "The instance offering uuid"
-        },
-        "ImageUuid":{
-            "Type": "String",
-            "Label": "镜像",
-            "Description": "The Image uuid for creating VmInstance, Please choose an image not iso"
-        },
-        "PrivateNetworkUuid":{
-            "Type": "String",
-            "Label": "私有网络",
-            "Description" : "The private network uuid for creating VmInstance"
-        }
-    },
-    "Resources": {
-        "VmInstance": {
-            "Type": "ZStack::Resource::VmInstance",
-            "Properties": {
-                "name": "vm1",
-                "instanceOfferingUuid": {"Ref":"InstanceOfferingUuid"},
-                "imageUuid":{"Ref":"ImageUuid"},
-                "l3NetworkUuids":[{"Ref":"PrivateNetworkUuid"}]
-            }
-        }
-    },
-    "Outputs": {
-        "VmInstance": {
-            "Value": {
-                "Ref": "VmInstance"
-            }
-        }
-    }
-}
-
-'''
-
-templateContent3 = '''
-{
-    "ZStackTemplateFormatVersion": "2018-06-18",
-    "Description": "本示例将创建一个云盘，并将云盘加载到云主机上(基于本地存储), 创建示例前提环境：\n计算规格，镜像，云盘规格，私有网络，可用物理机",
-    "Parameters": {
-        "InstanceOfferingUuid": {
-            "Type": "String",
-            "Label": "计算规格",
-            "Description": "The instance offering uuid"
-        },
-        "ImageUuid":{
-            "Type": "String",
-            "Label": "镜像",
-            "Description": "The Image uuid for creating VmInstance, Please choose an image not iso"
-        },
-        "PrivateNetworkUuid":{
-            "Type": "String",
-            "Label": "私有网络",
-            "Description" : "The private network uuid for creating VmInstance"
-        },
-        "DiskofferingUuid":{
-            "Type": "String",
-            "Label": "云盘规格",
-            "Description":"镜像服务器Uuid"
-        }
-    },
-    "Resources": {
-        "VmInstance": {
-            "Type": "ZStack::Resource::VmInstance",
-            "Properties": {
-                "name": "vm1",
-                "instanceOfferingUuid": {"Ref":"InstanceOfferingUuid"},
-                "imageUuid":{"Ref":"ImageUuid"},
-                "l3NetworkUuids":[{"Ref":"PrivateNetworkUuid"}],
-                "dataDiskOfferingUuids": [{"Ref":"DiskofferingUuid"}]
-            }
-        }
-    },
-    "Outputs": {
-        "VmInstance": {
-            "Value": {
-                "Ref": "VmInstance"
-            }
-        }
-    }
-}
-'''
-
-templateContent4 = '''
-{
-    "ZStackTemplateFormatVersion": "2018-06-18",
-    "Description": "本示例将创建一个云盘，并将云盘加载到云主机上(基于本地存储), 创建示例前提环境：\n计算规格，镜像，云盘规格，私有网络，可用物理机",
-    "Parameters": {
-        "InstanceOfferingUuid": {
-            "Type": "String",
-            "Label": "计算规格",
-            "Description": "The instance offering uuid"
-        },
-        "ImageUuid":{
-            "Type": "String",
-            "Label": "镜像",
-            "Description": "The Image uuid for creating VmInstance, Please choose an image not iso"
-        },
-        "PrivateNetworkUuid":{
-            "Type": "String",
-            "Label": "私有网络",
-            "Description" : "The private network uuid for creating VmInstance"
-        },
-        "DiskofferingUuid":{
-            "Type": "String",
-            "Label": "云盘规格",
-            "Description":"镜像服务器Uuid"
-        }
-    },
-    "Resources": {
-        "VmInstance": {
-            "Type": "ZStack::Resource::VmInstance",
-            "Properties": {
-                "name": "vm1",
-                "instanceOfferingUuid": {"Ref":"InstanceOfferingUuid"},
-                "imageUuid":{"Ref":"ImageUuid"},
-                "l3NetworkUuids":[{"Ref":"PrivateNetworkUuid"}],
-                "dataDiskOfferingUuids": [{"Ref":"DiskofferingUuid"}],
-                "systemTags":[{"Fn::Join":["::",["virtio","diskOffering",{"Ref":"DiskofferingUuid"},"num","1"]]}]
-            }
-        }
-    },
-    "Outputs": {
-        "VmInstance": {
-            "Value": {
-                "Ref": "VmInstance"
-            }
-        }
-    }
-}
-'''
-
-case_flavor = dict(path1=           dict(initial_formation=templateContent, path_list=[[TestAction.stop_vm, "vm1"], [TestAction.start_vm, "vm1"], [TestAction.delete_volume, "vm1-volume1"], [TestAction.create_image_from_volume, "vm1", "image1"], [TestAction.resize_volume, "vm1", 5*1024*1024], [TestAction.detach_volume, "vm1-volume2"], [TestAction.stop_vm, "vm1"], [TestAction.reinit_vm, "vm1"], [TestAction.start_vm, "vm1"], [TestAction.resize_volume, "vm1", 5*1024*1024], [TestAction.detach_volume, "vm1-volume3"], [TestAction.stop_vm, "vm1"], [TestAction.change_vm_image, "vm1"], [TestAction.create_data_vol_template_from_volume, "vm1-volume2", "image2"], [TestAction.reboot_vm, "vm1"]]),
-                   path2=           dict(initial_formation=templateContent2, path_list=[[TestAction.create_data_volume_from_image, "volume1", "=scsi"], [TestAction.create_data_volume_from_image, "volume2", "=scsi"], [TestAction.create_data_volume_from_image, "volume3", "=scsi"], [TestAction.create_data_volume_from_image, "volume4", "=scsi"], [TestAction.create_data_volume_from_image, "volume5", "=scsi"], [TestAction.create_data_volume_from_image, "volume6", "=scsi"], [TestAction.create_data_volume_from_image, "volume7", "=scsi"], [TestAction.create_data_volume_from_image, "volume8", "=scsi"], [TestAction.attach_volume, "vm1", "volume1"], [TestAction.attach_volume, "vm1", "volume2"], [TestAction.attach_volume, "vm1", "volume3"], [TestAction.attach_volume, "vm1", "volume4"], [TestAction.attach_volume, "vm1", "volume5"], [TestAction.attach_volume, "vm1", "volume6"], [TestAction.attach_volume, "vm1", "volume7"], [TestAction.attach_volume, "vm1", "volume8"], [TestAction.detach_volume, "volume2"], [TestAction.migrate_vm, "vm1"], [TestAction.ps_migrate_volume, "volume2"], [TestAction.delete_volume, "volume2"], [TestAction.create_image_from_volume, "vm1", "image1"], [TestAction.create_volume_snapshot, "volume3", 'snapshot1'], [TestAction.detach_volume, "volume3"], [TestAction.cleanup_ps_cache], [TestAction.create_volume_snapshot, "volume3", 'snapshot2'], [TestAction.reboot_vm, "vm1"]]),
-                   path3=           dict(initial_formation=templateContent2, path_list=[[TestAction.create_data_volume_from_image, "volume1", "=scsi,shareable"], [TestAction.attach_volume, "vm1", "volume1"], [TestAction.reboot_vm, "vm1"], [TestAction.create_backup, "vm1-root", "backup1"], [TestAction.detach_volume, "volume1"], [TestAction.create_image_from_volume, "vm1", "image1"], [TestAction.create_data_vol_template_from_volume, "volume1", "image2"], [TestAction.delete_volume, "volume1"], [TestAction.clone_vm, "vm1", "vm2", "=full"], [TestAction.create_data_volume_from_image, "volume2", "=scsi,shareable"], [TestAction.ps_migrate_volume, "volume2"], [TestAction.reboot_vm, "vm1"]]),
-                   path4=           dict(initial_formation=templateContent3, path_list=[[TestAction.delete_volume, "vm1-volume1"], [TestAction.stop_vm, "vm1"], [TestAction.ps_migrate_volume, "vm1-root"], [TestAction.start_vm, "vm1"], [TestAction.create_volume, "volume2"], [TestAction.attach_volume, "vm1", "volume2"], [TestAction.detach_volume, "volume2"], [TestAction.create_volume_snapshot, "volume2", "snapshot1"], [TestAction.attach_volume, "vm1", "volume2"], [TestAction.create_volume_snapshot, "vm1-root", "snapshot2"], [TestAction.use_volume_snapshot, "snapshot1"], [TestAction.delete_volume, "volume2"], [TestAction.cleanup_ps_cache], [TestAction.use_volume_snapshot, "snapshot1"], [TestAction.reboot_vm, "vm1"]]),
-                   path5=           dict(initial_formation=templateContent, path_list=[[TestAction.delete_volume, "vm1-volume1"], [TestAction.reinit_vm, "vm1"], [TestAction.create_data_vol_template_from_volume, "vm1-volume2", "image1"], [TestAction.delete_volume, "vm-volume2"], [TestAction.reboot_vm, "vm1"], [TestAction.create_backup, "vm1-volume3", "backup1"], [TestAction.detach_volume, "vm1-volume3"], [TestAction.reinit_vm, "vm1"], [TestAction.ps_migrate_volume, "vm1-volume3"], [TestAction.reboot_vm, "vm1"]]),
-                   path6=           dict(initial_formation=templateContent2, path_list=[[TestAction.create_data_volume_from_image, "volume1", "=scsi,shareable"], [TestAction.create_data_volume_from_image, "volume2", "=scsi,shareable"], [TestAction.create_data_volume_from_image, "volume3", "=scsi,shareable"], [TestAction.create_data_volume_from_image, "volume4", "=scsi,shareable"], [TestAction.create_data_volume_from_image, "volume5", "=scsi,shareable"], [TestAction.create_data_volume_from_image, "volume6", "=scsi,shareable"], [TestAction.create_data_volume_from_image, "volume7", "=scsi,shareable"], [TestAction.create_data_volume_from_image, "volume8", "=scsi,shareable"], [TestAction.attach_volume, "vm1", "volume1"], [TestAction.attach_volume, "vm1", "volume2"], [TestAction.attach_volume, "vm1", "volume3"], [TestAction.attach_volume, "vm1", "volume4"], [TestAction.attach_volume, "vm1", "volume5"], [TestAction.attach_volume, "vm1", "volume6"], [TestAction.attach_volume, "vm1", "volume7"], [TestAction.attach_volume, "vm1", "volume8"], [TestAction.delete_volume, "volume2"], [TestAction.cleanup_ps_cache], [TestAction.detach_volume, "volume3"], [TestAction.ps_migrate_volume, "volume3"], [TestAction.create_volume, "volume9"], [TestAction.stop_vm, "vm1"], [TestAction.change_vm_image, "vm1"], [TestAction.detach_volume, "volume1"], [TestAction.detach_volume, "volume4"], [TestAction.ps_migrate_volume, "volume4"], [TestAction.detach_volume, "volume5"], [TestAction.detach_volume, "volume6"], [TestAction.detach_volume, "volume7"], [TestAction.detach_volume, "volume8"], [TestAction.ps_migrate_volume, "vm1-root"], [TestAction.start_vm, "vm1"], [TestAction.resize_data_volume, "volume5", 5*1024*1024], [TestAction.reboot_vm, "vm1"]]),
-                   path7=           dict(initial_formation=templateContent2, path_list=[[TestAction.create_volume, "volume1", "=scsi"], [TestAction.attach_volume, "vm1", "volume1"], [TestAction.create_volume, "volume2", "=scsi"], [TestAction.attach_volume, "vm1", "volume2"], [TestAction.detach_volume, "volume1"], [TestAction.stop_vm, "vm1"], [TestAction.reinit_vm, "vm1"], [TestAction.start_vm, "vm1"], [TestAction.create_backup, "volume2", "backup1"], [TestAction.detach_volume, "volume2"], [TestAction.reboot_vm, "vm1"], [TestAction.ps_migrate_volume, "volume1"], [TestAction.delete_volume, "volume1"], [TestAction.create_image_from_volume, "vm1", "image1"], [TestAction.attach_volume, "vm1", "volume2"], [TestAction.stop_vm, "vm1"], [TestAction.use_backup, "backup1"], [TestAction.start_vm, "vm1"], [TestAction.reboot_vm, "vm1"]]),
-                   path8=           dict(initial_formation=templateContent2, path_list=[[TestAction.create_data_volume_from_image, "volume1", "=scsi"], [TestAction.attach_volume, "vm1", "volume1"], [TestAction.stop_vm, "vm1"], [TestAction.change_vm_image, "vm1"], [TestAction.resize_data_volume, "volume1", 5*1024*1024], [TestAction.create_data_volume_from_image, "volume2", "=scsi"], [TestAction.attach_volume, "vm1", "volume2"], [TestAction.clone_vm, "vm1", "vm2", "=full"], [TestAction.start_vm, "vm1"], [TestAction.create_backup, "volume1", "backup1"], [TestAction.delete_volume, "volume2"], [TestAction.migrate_vm, "vm1"], [TestAction.create_volume_snapshot, "volume1", "snapshot1"], [TestAction.reboot_vm, "vm1"]]),
-                   path9=           dict(initial_formation=templateContent2, path_list=[[TestAction.create_volume, "volume1"], [TestAction.attach_volume, "vm1", "volume1"], [TestAction.create_volume, "volume2"], [TestAction.attach_volume, "vm1", "volume2"], [TestAction.migrate_vm, "vm1"], [TestAction.create_data_vol_template_from_volume, "volume1", "image1"], [TestAction.detach_volume, "volume1"], [TestAction.stop_vm, "vm1"], [TestAction.change_vm_image, "vm1"], [TestAction.create_volume_snapshot, "volume1", "snapshot1"], [TestAction.create_volume_snapshot, "volume2", "snapshot2"],[TestAction.delete_volume, "volume2"], [TestAction.ps_migrate_volume, "vm1-root"], [TestAction.use_volume_snapshot, "snapshot1"], [TestAction.reboot_vm, "vm1"]]),
-                   path10=          dict(initial_formation=templateContent2, path_list=[[TestAction.create_volume, "volume1", "=scsi"], [TestAction.attach_volume, "vm1", "volume1"], [TestAction.create_volume, "volume2", "=scsi"], [TestAction.delete_volume, "volume1"], [TestAction.stop_vm, "vm1"], [TestAction.ps_migrate_volume, "vm1-root"], [TestAction.ps_migrate_volume, "volume2"], [TestAction.start_vm, "vm1"], [TestAction.attach_volume, "vm1", "volume2"], [TestAction.detach_volume, "volume2"], [TestAction.create_image_from_volume, "vm1", "image1"], [TestAction.create_data_vol_template_from_volume, "volume2", "image2"], [TestAction.attach_volume, "vm1", "volume2"], [TestAction.create_volume_snapshot, "vm1-root", "snapshot1"], [TestAction.create_data_vol_template_from_volume, "volume2", "image3"], [TestAction.reboot_vm, "vm1"]]),
-                   path11=          dict(initial_formation=templateContent2, path_list=[[TestAction.create_data_volume_from_image, "volume1", "=scsi"], [TestAction.create_data_volume_from_image, "volume2", "=scsi"], [TestAction.attach_volume, "vm1", "volume1"], [TestAction.detach_volume, "volume1"], [TestAction.create_image_from_volume, "vm1", "image1"], [TestAction.attach_volume, "vm1", "volume1"], [TestAction.create_backup, "volume1", "backup1"], [TestAction.delete_volume, "volume1"], [TestAction.stop_vm, "vm1"], [TestAction.ps_migrate_volume, "vm1-root"], [TestAction.start_vm, "vm1"], [TestAction.create_volume_snapshot, "volume2", "snapshot1"], [TestAction.delete_volume, "volume2"], [TestAction.cleanup_ps_cache], [TestAction.resize_data_volume, "volume2", 5*1024*1024], [TestAction.reboot_vm, "vm1"]]),
-                   path12=          dict(initial_formation=templateContent2, path_list=[[TestAction.create_volume, "volume1", "=scsi"], [TestAction.attach_volume, "vm1", "volume1"], [TestAction.create_volume, "volume2", "=scsi"], [TestAction.attach_volume, "vm1", "volume2"], [TestAction.create_volume, "volume3", "=scsi"], [TestAction.attach_volume, "vm1", "volume3"], [TestAction.create_volume, "volume4", "=scsi"], [TestAction.attach_volume, "vm1", "volume4"], [TestAction.create_volume, "volume5", "=scsi"], [TestAction.attach_volume, "vm1", "volume5"], [TestAction.create_volume, "volume6", "=scsi"], [TestAction.attach_volume, "vm1", "volume6"], [TestAction.create_volume, "volume7", "=scsi"], [TestAction.attach_volume, "vm1", "volume7"], [TestAction.create_volume, "volume8", "=scsi"], [TestAction.attach_volume, "vm1", "volume8"], [TestAction.delete_volume, "volume1"], [TestAction.reboot_vm, "vm1"], [TestAction.create_volume_snapshot, "volume2", "snapshot1"], [TestAction.detach_volume, "volume2"], [TestAction.stop_vm, "vm1"], [TestAction.reinit_vm, "vm1"], [TestAction.ps_migrate_volume, "volume2"], [TestAction.start_vm, "vm1"], [TestAction.delete_volume, "volume3"], [TestAction.reboot_vm, "vm1"], [TestAction.use_volume_snapshot, "snapshot1"], [TestAction.reboot_vm, "vm1"]]),
-                   path13=          dict(initial_formation=templateContent2, path_list=[[TestAction.create_volume, "volume1", "=scsi"], [TestAction.attach_volume, "vm1", "volume1"], [TestAction.create_volume, "volume2", "=scsi"], [TestAction.attach_volume, "vm1", "volume2"], [TestAction.create_volume, "volume3", "=scsi"], [TestAction.delete_volume, "volume1"], [TestAction.reboot_vm, "vm1"], [TestAction.create_backup, "volume2", "backup1"], [TestAction.attach_volume, "vm1", "volume3"], [TestAction.migrate_vm, "vm1"], [TestAction.create_volume_snapshot, "volume3", "snapshot1"], [TestAction.delete_volume, "volume3"], [TestAction.stop_vm, "vm1"], [TestAction.change_vm_image, "vm1"], [TestAction.use_backup, "backup1"], [TestAction.start_vm, "vm1"], [TestAction.reboot_vm, "vm1"]]),
-                   path14=          dict(initial_formation=templateContent2, path_list=[[TestAction.create_data_volume_from_image, "volume1", "=scsi"], [TestAction.create_data_volume_from_image, "volume2", "=scsi"], [TestAction.attach_volume, "vm1", "volume1"], [TestAction.clone_vm, "vm1", "vm2", "=full"], [TestAction.create_volume_snapshot, "volume1", "snapshot1"], [TestAction.attach_volume, "vm1", "volume2"], [TestAction.create_image_from_volume, "vm1", "image1"], [TestAction.detach_volume, "volume1"], [TestAction.use_volume_snapshot, "snapshot1"], [TestAction.delete_volume, "volume2"], [TestAction.stop_vm, "vm1"], [TestAction.ps_migrate_volume, "vm1-root"], [TestAction.start_vm, "vm1"], [TestAction.resize_data_volume, "volume1", 5*1024*1024], [TestAction.reboot_vm, "vm1"]]),
-                   path15=          dict(initial_formation=templateContent2, path_list=[[TestAction.create_volume, "volume1", "=scsi"], [TestAction.attach_volume, "vm1", "volume1"], [TestAction.create_volume, "volume2", "=scsi"], [TestAction.attach_volume, "vm1", "volume2"], [TestAction.create_volume, "volume3", "=scsi"], [TestAction.attach_volume, "vm1", "volume3"], [TestAction.create_volume, "volume4", "=scsi"], [TestAction.attach_volume, "vm1", "volume4"], [TestAction.create_volume, "volume5", "=scsi"], [TestAction.attach_volume, "vm1", "volume5"], [TestAction.create_volume, "volume6", "=scsi"], [TestAction.attach_volume, "vm1", "volume6"], [TestAction.create_volume, "volume7", "=scsi"], [TestAction.attach_volume, "vm1", "volume7"], [TestAction.create_volume, "volume8", "=scsi"], [TestAction.attach_volume, "vm1", "volume8"], [TestAction.detach_volume, "volume1"], [TestAction.create_volume_snapshot, "vm1-root", "snapshot1"], [TestAction.ps_migrate_volume, "volume1"], [TestAction.create_volume, "volume9", "=scsi"], [TestAction.attach_volume, "vm1", "volume9"], [TestAction.stop_vm, "vm1"], [TestAction.use_volume_snapshot, "snapshot1"], [TestAction.detach_volume, "volume2"], [TestAction.ps_migrate_volume, "volume2"], [TestAction.delete_volume, "volume3"], [TestAction.cleanup_ps_cache], [TestAction.start_vm, "vm1"], [TestAction.create_backup, "volume4", "backup2"], [TestAction.reboot_vm, "vm1"]]),
-                   path16=          dict(initial_formation=templateContent2, path_list=[[TestAction.create_data_volume_from_image, "volume1", "=scsi"], [TestAction.create_data_volume_from_image, "volume2", "=scsi"], [TestAction.attach_volume, "vm1", "volume1"], [TestAction.stop_vm, "vm1"], [TestAction.change_vm_image, "vm1"], [TestAction.ps_migrate_volume, "volume2"], [TestAction.detach_volume, "volume1"], [TestAction.create_image_from_volume, "vm1", "snapshot1"], [TestAction.resize_data_volume, "volume2", 5*1024*1024], [TestAction.delete_volume, "volume2"], [TestAction.start_vm, "vm1"], [TestAction.migrate_vm, "vm1"], [TestAction.create_data_vol_template_from_volume, "volume1", "image1"], [TestAction.reboot_vm, "vm1"]]),
-                   path17=          dict(initial_formation=templateContent4, path_list=[[TestAction.create_volume, "volume2", "=scsi"], [TestAction.create_volume, "volume3", "=scsi"], [TestAction.attach_volume, "vm1", "volume2"], [TestAction.create_image_from_volume, "vm1", "image1"], [TestAction.detach_volume, "volume2"], [TestAction.ps_migrate_volume, "volume2"], [TestAction.attach_volume, "vm1", "volume3"], [TestAction.stop_vm, "vm1"], [TestAction.change_vm_image, "vm1"], [TestAction.create_volume_snapshot, "volume3", "snapshot1"], [TestAction.detach_volume, "volume3"], [TestAction.attach_volume, "vm1", "volume3"], [TestAction.clone_vm, "vm1", "vm2", "=full"], [TestAction.start_vm, "vm1"], [TestAction.create_backup, "vm1-volume1", "backup1"], [TestAction.reboot_vm, "vm1"]]),
-                   path18=           dict(initial_formation=templateContent2, path_list=[[TestAction.create_data_volume_from_image, "volume1", "=scsi"], [TestAction.create_data_volume_from_image, "volume2", "=scsi"], [TestAction.create_data_volume_from_image, "volume3", "=scsi"], [TestAction.create_data_volume_from_image, "volume4", "=scsi"], [TestAction.create_data_volume_from_image, "volume5", "=scsi"], [TestAction.create_data_volume_from_image, "volume6", "=scsi"], [TestAction.create_data_volume_from_image, "volume7", "=scsi"], [TestAction.create_data_volume_from_image, "volume8", "=scsi"], [TestAction.attach_volume, "vm1", "volume1"], [TestAction.attach_volume, "vm1", "volume2"], [TestAction.attach_volume, "vm1", "volume3"], [TestAction.attach_volume, "vm1", "volume4"], [TestAction.attach_volume, "vm1", "volume5"], [TestAction.attach_volume, "vm1", "volume6"], [TestAction.attach_volume, "vm1", "volume7"], [TestAction.attach_volume, "vm1", "volume8"], [TestAction.create_data_volume_from_image, "volume9", "=scsi"], [TestAction.delete_volume, "volume1"], [TestAction.stop_vm, "vm1"], [TestAction.reinit_vm, "vm1"], [TestAction.create_volume_snapshot, "volume2", "snapshto1"], [TestAction.attach_volume, "vm1", "volume9"], [TestAction.detach_volume, "volume2"], [TestAction.detach_volume, "volume3"], [TestAction.create_volume_snapshot, "volume3", "snapshot1"], [TestAction.detach_volume, "volume4"], [TestAction.detach_volume, "volume5"], [TestAction.detach_volume, "volume6"], [TestAction.detach_volume, "volume7"], [TestAction.detach_volume, "volume8"], [TestAction.detach_volume, "volume9"], [TestAction.ps_migrate_volume, "vm1-root"], [TestAction.ps_migrate_volume, "volume2"], [TestAction.attach_volume, "vm1", "volume2"], [TestAction.start_vm, "vm1"], [TestAction.create_backup, "volume2", "backup1"], [TestAction.ps_migrate_volume, "volume3"], [TestAction.attach_volume, "vm1", "volume3"], [TestAction.create_image_from_volume, "vm1", "image1"], [TestAction.use_volume_snapshot, "snapshot1"], [TestAction.reboot_vm, "vm1"]]))
-
-default_config = [{"ps1": "PS"}, {"ps1": "default"}]
-                   
-
+case_flavor = test_util.load_paths(os.path.join(os.path.dirname(__file__), "templates"), os.path.join(os.path.dirname(__file__), "paths"))
+default_config = [{"ps1": "PS"}, {"ps1": "default"}, {"host1": "HOST"}, {"host1": "default"}]
 def test():
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     initial_formation = flavor['initial_formation']
@@ -254,6 +44,7 @@ def test():
     if not config:
         config = default_config
     robot_test_obj.set_config(config)
+    robot_test_obj.set_test_dict(test_dict)
     robot_test_obj.set_initial_formation(initial_formation)
     robot_test_obj.set_constant_path_list(path_list)
 
@@ -261,13 +52,22 @@ def test():
     test_lib.lib_robot_create_utility_vm(robot_test_obj)
     rounds = 1
     current_time = time.time()
-    timeout_time = current_time + 3600
+    timeout_time = current_time + 7200
     while time.time() <= timeout_time:
+        print "DEBUG:",test_dict
+        all_volume_list = test_dict.get_all_volume_list()
+        for volume in all_volume_list:
+            sp = test_dict.get_volume_snapshot(volume.get_volume().uuid)
+            sp_list = sp.get_snapshot_list()
+            for i in sp_list:
+                print "spspspsp, %s,%s" % (i.get_snapshot().uuid, i.md5sum)
+            print "vovovovo, %s,%s" % (volume.get_volume().uuid, volume.md5sum)
         test_util.test_dsc('New round %s starts:' % rounds)
-        test_lib.lib_robot_constant_path_operation(robot_test_obj)
+        test_lib.lib_robot_constant_path_operation(robot_test_obj, set_robot=False)
         test_util.test_dsc('===============Round %s finished. Begin status checking.================' % rounds)
         rounds += 1
         test_lib.lib_robot_status_check(test_dict)
+        test_util.test_logger("Remaining constant path: %s" % robot_test_obj.get_constant_path_list())
         if not robot_test_obj.get_constant_path_list():
             test_util.test_dsc('Reach test pass exit criterial: Required path executed %s' % (path_list))
             break

@@ -28,6 +28,7 @@ import zstackwoodpecker.operations.vpc_operations as vpc_ops
 import zstackwoodpecker.operations.volume_operations as volume_ops
 import zstackwoodpecker.zstack_test.zstack_test_eip as zstack_eip_header
 import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
+from threading import Thread
 
 def wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_uuid):
     retry_count = 0
@@ -308,7 +309,7 @@ def setup_2ha_mn_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
 
 
     # NOTE: need to make filesystem in sync in VM before cold stop VM
-    stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
+    stop_vm(zstack_management_ip, vm_inv.uuid)
     start_vm(zstack_management_ip, vm_inv.uuid)
     if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
         test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
@@ -391,7 +392,7 @@ def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
 
 
     # NOTE: need to make filesystem in sync in VM before cold stop VM
-    stop_vm(zstack_management_ip, vm_inv.uuid, 'cold')
+    stop_vm(zstack_management_ip, vm_inv.uuid)
     start_vm(zstack_management_ip, vm_inv.uuid)
 
     if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
@@ -703,7 +704,7 @@ def get_backup_storage_type(deploy_config, bs_name):
             return 'ceph'
     for backupStorage in deploy_config.backupStorages.get_child_node_as_list('xskycephBackupStorage'):
         if backupStorage.name_ == bs_name:
-            return 'ceph'
+            return 'xsky'
     for backupStorage in deploy_config.backupStorages.get_child_node_as_list('fusionstorBackupStorage'):
         if backupStorage.name_ == bs_name:
             return 'fusionstor'
@@ -717,7 +718,7 @@ def get_primary_storage_type(deploy_config, ps_name):
                 return 'ceph'
         for primaryStorage in zone.primaryStorages.get_child_node_as_list('xskycephPrimaryStorage'):
             if primaryStorage.name_ == ps_name:
-                return 'ceph'
+                return 'xsky'
         for primaryStorage in zone.primaryStorages.get_child_node_as_list('fusionPrimaryStorage'):
             if primaryStorage.name_ == ps_name:
                 return 'fusionstor'
@@ -869,6 +870,27 @@ def scp_iscsi_repo_to_host(vm_config, vm_ip):
     iscsi_repo_cfg_dst = "/etc/yum.repos.d/zstack-internal-yum.repo"
     ssh.scp_file(iscsi_repo_cfg_src, iscsi_repo_cfg_dst, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_)
 
+def setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm_config, deploy_config):
+    vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
+    if hasattr(vm_config, 'hostRef'):
+        host = get_deploy_host(vm_config.hostRef.text_, deploy_config)
+        if not hasattr(host, 'port_') or host.port_ == '22':
+            host_port = '22'
+        else:
+            host_port = host.port_
+    else:
+        host_port = '22'
+
+    cmd = "wget http://172.20.1.15/kernel-ml-4.20.3-1.el7.elrepo.x86_64.rpm"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+    cmd = 'rpm -ivh kernel-ml-4.20.3-1.el7.elrepo.x86_64.rpm && grub2-set-default "CentOS Linux (4.20.3-1.el7.elrepo.x86_64) 7 (Core)" && sync && sync && sync'
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+    stop_vm(zstack_management_ip, vm_inv.uuid)
+    start_vm(zstack_management_ip, vm_inv.uuid)
+    if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
+        test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
 
 ISCSI_TARGET_IP = []
 ISCSI_TARGET_UUID = []
@@ -887,6 +909,18 @@ def setup_iscsi_target(vm_inv, vm_config, deploy_config):
         host_port = '22'
 
     #TODO: install with local repo
+    cmd = "sysctl -w vm.dirty_ratio=10"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+    cmd = "sysctl -w vm.dirty_background_ratio=5"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+    
+    cmd = "sysctl -p"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+    cmd = "sed -i 's/enabled=1/enabled=0/g' /etc/yum/pluginconf.d/fastestmirror.conf"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     #scp_iscsi_repo_to_host(vm_config, vm_ip)
     cmd = "yum --disablerepo=* --enablerepo=alibase install targetcli -y"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
@@ -920,6 +954,9 @@ def setup_iscsi_target(vm_inv, vm_config, deploy_config):
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
     cmd = "echo 'targetcli saveconfig 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+    cmd = "echo 'echo 0 > /proc/sys/kernel/hung_task_timeout_secs' >>/etc/rc.local"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
     cmd = "bash -x /etc/rc.local"
@@ -968,6 +1005,15 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
         host_port = '22'
 
     #scp_iscsi_repo_to_host(vm_config, vm_ip)
+    cmd = "sysctl -w vm.dirty_ratio=10"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+    cmd = "sysctl -w vm.dirty_background_ratio=5"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+    
+    cmd = "sysctl -p"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "yum -y install iscsi-initiator-utils"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
@@ -986,6 +1032,16 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
     cmd = "yum -y install device-mapper device-mapper-multipath"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
+    #add longer timeout for ping and heartbeat to avoid iscsi connection issue
+    cmd = "sed -i 's/noop_out_interval = 5/noop_out_interval = 30/g' /etc/iscsi/iscsid.conf; sync; sync"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+    cmd = "sed -i 's/noop_out_timeout = 5/noop_out_timeout = 30/g' /etc/iscsi/iscsid.conf; sync; sync"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+    cmd = "service iscsid restart"
+    exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     #cmd = "chkconfig --level 2345 multipathd on"
     #exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
  
@@ -993,7 +1049,7 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
         cmd = "echo 'iscsiadm -m discovery -t sendtargets -p %s:3260 2>&1 >>/tmp/tgtadm.log' >>/etc/rc.local; sync" %(i)
         exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-        cmd = "echo 'iscsiadm -m node -T iqn.2018-06.org.disk1 -p %s:3260 -l >>/tmp/tgtadm.log' >>/etc/rc.local; sync" %(i)
+        cmd = "echo 'iscsiadm -m node -T iqn.2016-06.io.spdk:disk1 -p %s:3260 -l >>/tmp/tgtadm.log' >>/etc/rc.local; sync" %(i)
         exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
     cmd = "bash -x /etc/rc.local"
@@ -1161,31 +1217,36 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
                 for backupStorageRef in xmlobject.safe_list(vm.backupStorageRef):
                     print backupStorageRef.text_
                     backup_storage_type = get_backup_storage_type(deploy_config, backupStorageRef.text_)
-                    if backup_storage_type == 'ceph':
-                        if ceph_storages.has_key(backupStorageRef.text_):
-                            if vm_name in ceph_storages[backupStorageRef.text_]:
+                    if backup_storage_type in ['ceph', 'xsky']:
+#                     if backup_storage_type == 'ceph':
+                        key = (backupStorageRef.text_, backup_storage_type)
+                        if ceph_storages.has_key(key):
+                            if vm_name in ceph_storages[key]:
                                 continue
                             else:
-                                ceph_storages[backupStorageRef.text_].append(vm_name)
+                                ceph_storages[key].append(vm_name)
                         else:
-                            ceph_storages[backupStorageRef.text_] = [ vm_name ]
+                            ceph_storages[key] = [ vm_name ]
 
             if hasattr(vm, 'primaryStorageRef'):
                 for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
                     print primaryStorageRef.text_
                     primary_storage_type = get_primary_storage_type(deploy_config, primaryStorageRef.text_)
                     for zone in xmlobject.safe_list(deploy_config.zones.zone):
-                        if primary_storage_type == 'ceph':
-                            if ceph_storages.has_key(backupStorageRef.text_):
-                                if vm_name in ceph_storages[backupStorageRef.text_]:
+#                         if primary_storage_type == 'ceph':
+                        if primary_storage_type in ['ceph', 'xsky']:
+                            key = (backupStorageRef.text_, backup_storage_type)
+                            if ceph_storages.has_key(key):
+                                if vm_name in ceph_storages[key]:
                                     continue
                                 else:
-                                    ceph_storages[backupStorageRef.text_].append(vm_name)
+                                    ceph_storages[key].append(vm_name)
                             else:
-                                ceph_storages[backupStorageRef.text_] = [ vm_name ]
+                                ceph_storages[key] = [ vm_name ]
 
-    for ceph_storage in ceph_storages:
-        test_util.test_logger('setup ceph [%s] service.' % (ceph_storage))
+#     for ceph_storage in ceph_storages:
+    def deploy_ceph(ceph_storages, ceph_storage):
+        test_util.test_logger('setup ceph [%s] service.' % (ceph_storage[0]))
         node1_name = ceph_storages[ceph_storage][0]
         node1_config = get_scenario_config_vm(node1_name, scenario_config)
         node1_ip = get_scenario_file_vm(node1_name, scenario_file).ip_
@@ -1200,7 +1261,7 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
 
         vm_ips = ''
         for ceph_node in ceph_storages[ceph_storage]:
-            vm_nic_id = get_ceph_storages_nic_id(ceph_storage, scenario_config)
+            vm_nic_id = get_ceph_storages_nic_id(ceph_storage[0], scenario_config)
             vm = get_scenario_file_vm(ceph_node, scenario_file)
             if vm_nic_id == None:
                 vm_ips += vm.ip_ + ' '
@@ -1211,41 +1272,48 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
         ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup_ceph_h_nodes.sh'), '/tmp/setup_ceph_h_nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host_port))
         cmd = "bash -ex /tmp/setup_ceph_nodes.sh %s" % (vm_ips)
         ssh.execute(cmd, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host_port))
+#     thread_list = []
+#     for ceph_storage in ceph_storages:
+#         thread_list.append(Thread(target=deploy_ceph, args=(ceph_storages, ceph_storage)))
+#     for thrd in thread_list:
+#         thrd.start()
+#     for _thrd in thread_list:
+#         _thrd.join()
 
-def setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config):
-    ceph_storages = dict()
-    for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
-        for vm in xmlobject.safe_list(host.vms.vm):
-            vm_name = vm.name_
-            if hasattr(vm, 'backupStorageRef'):
-                for backupStorageRef in xmlobject.safe_list(vm.backupStorageRef):
-                    print backupStorageRef.text_
-                    backup_storage_type = get_backup_storage_type(deploy_config, backupStorageRef.text_)
-                    test_util.test_logger("@@@DEBUG-> backup_storage_type %s" %(backup_storage_type))
-                    if backup_storage_type == 'ceph':
-                        if ceph_storages.has_key(backupStorageRef.text_):
-                            if vm_name in ceph_storages[backupStorageRef.text_]:
-                                continue
-                            else:
-                                ceph_storages[backupStorageRef.text_].append(vm_name)
-                        else:
-                            ceph_storages[backupStorageRef.text_] = [ vm_name ]
-            if hasattr(vm, 'primaryStorageRef'):
-                for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
-                    print primaryStorageRef.text_
-                    primary_storage_type = get_primary_storage_type(deploy_config, primaryStorageRef.text_)
-                    test_util.test_logger(" @@@DEBUG-> primary_storage_type %s" %(primary_storage_type))
-                    for zone in xmlobject.safe_list(deploy_config.zones.zone):
-                        if primary_storage_type == 'ceph':
-                            if ceph_storages.has_key(backupStorageRef.text_):
-                                if vm_name in ceph_storages[backupStorageRef.text_]:
-                                    continue
-                                else:
-                                    ceph_storages[backupStorageRef.text_].append(vm_name)
-                            else:
-                                ceph_storages[backupStorageRef.text_] = [ vm_name ]
-    for ceph_storage in ceph_storages:
-        test_util.test_logger('setup ceph [%s] service.' % (ceph_storage))
+# def setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config):
+#     ceph_storages = dict()
+#     for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
+#         for vm in xmlobject.safe_list(host.vms.vm):
+#             vm_name = vm.name_
+#             if hasattr(vm, 'backupStorageRef'):
+#                 for backupStorageRef in xmlobject.safe_list(vm.backupStorageRef):
+#                     print backupStorageRef.text_
+#                     backup_storage_type = get_backup_storage_type(deploy_config, backupStorageRef.text_)
+#                     test_util.test_logger("@@@DEBUG-> backup_storage_type %s" %(backup_storage_type))
+#                     if backup_storage_type == 'ceph':
+#                         if ceph_storages.has_key(backupStorageRef.text_):
+#                             if vm_name in ceph_storages[backupStorageRef.text_]:
+#                                 continue
+#                             else:
+#                                 ceph_storages[backupStorageRef.text_].append(vm_name)
+#                         else:
+#                             ceph_storages[backupStorageRef.text_] = [ vm_name ]
+#             if hasattr(vm, 'primaryStorageRef'):
+#                 for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
+#                     print primaryStorageRef.text_
+#                     primary_storage_type = get_primary_storage_type(deploy_config, primaryStorageRef.text_)
+#                     test_util.test_logger(" @@@DEBUG-> primary_storage_type %s" %(primary_storage_type))
+#                     for zone in xmlobject.safe_list(deploy_config.zones.zone):
+#                         if primary_storage_type == 'ceph':
+#                             if ceph_storages.has_key(backupStorageRef.text_):
+#                                 if vm_name in ceph_storages[backupStorageRef.text_]:
+#                                     continue
+#                                 else:
+#                                     ceph_storages[backupStorageRef.text_].append(vm_name)
+#                             else:
+#                                 ceph_storages[backupStorageRef.text_] = [ vm_name ]
+    def deploy_xsky(ceph_storages, ceph_storage):
+        test_util.test_logger('setup ceph [%s] service.' % (ceph_storage[0]))
         node1_name = ceph_storages[ceph_storage][0]
         node1_config = get_scenario_config_vm(node1_name, scenario_config)
         node1_ip = get_scenario_file_vm(node1_name, scenario_file).ip_
@@ -1260,7 +1328,7 @@ def setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config):
 
         vm_ips = ''
         for ceph_node in ceph_storages[ceph_storage]:
-            vm_nic_id = get_ceph_storages_nic_id(ceph_storage, scenario_config)
+            vm_nic_id = get_ceph_storages_nic_id(ceph_storage[0], scenario_config)
             vm = get_scenario_file_vm(ceph_node, scenario_file)
             if vm_nic_id == None:
                 vm_ips += vm.ip_ + ' '
@@ -1289,6 +1357,16 @@ def setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config):
                 infile.write(root_volume_name)
                 infile.write(image_cache_name)
                 infile.write(backup_storage_pool)
+    thread_list = []
+    for ceph_storage in ceph_storages:
+        if 'xsky' in ceph_storage:
+            thread_list.append(Thread(target=deploy_xsky, args=(ceph_storages, ceph_storage)))
+        else:
+            thread_list.append(Thread(target=deploy_ceph, args=(ceph_storages, ceph_storage)))
+    for thrd in thread_list:
+        thrd.start()
+    for _thrd in thread_list:
+        _thrd.join()
 
 def setup_xsky_storages(scenario_config, scenario_file, deploy_config):
     #Stop nodes
@@ -1303,7 +1381,7 @@ def setup_xsky_storages(scenario_config, scenario_file, deploy_config):
             vmUuid = node.uuid_
             print "vm uuid %s" % (str(vmUuid))
             # NOTE: need to make filesystem in sync in VM before cold stop VM
-            stop_vm(xskyNodesMN, vmUuid, 'cold')
+            stop_vm(xskyNodesMN, vmUuid)
 
         #Wait nodes down
         for node in xmlobject.safe_list(scenario_config.deployerConfig.xsky.nodes.node):
@@ -2435,6 +2513,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 vm_creation_option.set_image_uuid(vm.imageUuid_)
                 vm_creation_option.set_name(vm.name_)
                 vm_creation_option.set_timeout(1200000)
+#                 if vm.dataDiskOfferingUuid__:
+#                     vm_creation_option.set_data_disk_uuids([vm.dataDiskOfferingUuid_])
                 #vm_creation_option.set_host_uuid(host.uuid_)
                 #vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
                 #vm_creation_option.set_default_l3_uuid(default_l3_uuid)
@@ -2456,6 +2536,12 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 
                 vm_inv = create_vm(zstack_management_ip, vm_creation_option)
                 vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, default_l3_uuid).ip
+                if vm.dataDiskOfferingUuid__:
+                    volume_option = test_util.VolumeOption()
+                    volume_option.set_name('data_volume')
+                    volume_option.set_disk_offering_uuid(vm.dataDiskOfferingUuid__)
+                    volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv)
+                    attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
                 if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
                     test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
 
@@ -2534,7 +2620,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     volume_option = test_util.VolumeOption()
                     volume_option.set_name(os.environ.get('volumeName'))
                     for bs_ref in xmlobject.safe_list(vm.backupStorageRef):
-                        if bs_ref.type_ == 'ceph':
+                        if bs_ref.type_ in ['ceph', 'xsky']:
+#                         if bs_ref.type_ == 'ceph':
                             disk_offering_uuid = bs_ref.offering_uuid_
                             volume_option.set_disk_offering_uuid(disk_offering_uuid)
                             if primaryStorageUuid != None and primaryStorageUuid != "":
@@ -2542,10 +2629,13 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             if poolName != None and poolName != "":
                                 volume_option.set_system_tags(['ceph::pool::%s' % (poolName)])
                             #volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
-                            if xmlobject.has_element(deploy_config, 'backupStorages.xskycephBackupStorage'):
-                                volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config)
+                            if bs_ref.type_ == 'ceph':
+                                if xmlobject.has_element(deploy_config, 'backupStorages.cephBackupStorage'):
+                                    volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv)
+                                else:
+                                    volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config)
                             else:
-                                volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
+                                volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config)
                             attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
                             break
                         if bs_ref.type_ == 'fusionstor':
@@ -2567,7 +2657,13 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             volume_option.set_disk_offering_uuid(iscsi_disk_offering_uuid)
                             iscsi_share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv)
                             attach_volume(zstack_management_ip, iscsi_share_volume_inv.uuid, vm_inv.uuid)
-                            setup_iscsi_target(vm_inv, vm, deploy_config)
+                            global ISCSI_TARGET_IP
+                            global ISCSI_TARGET_UUID
+                            ISCSI_TARGET_UUID.append(vm_inv.uuid)
+                            ISCSI_TARGET_IP.append(vm_ip)
+                            test_util.test_logger("ISCSI_TARGET_IP=%s" %(vm_ip))
+                            #setup_iscsi_target(vm_inv, vm, deploy_config)
+			    #setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm, deploy_config)
                             break
 
                 if xmlobject.has_element(vm, 'primaryStorageRef'):
@@ -2592,7 +2688,13 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             volume_option.set_disk_offering_uuid(iscsi_disk_offering_uuid)
                             iscsi_share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
                             attach_volume(zstack_management_ip, iscsi_share_volume_inv.uuid, vm_inv.uuid)
-                            setup_iscsi_target(vm_inv, vm, deploy_config)
+                            global ISCSI_TARGET_IP
+                            global ISCSI_TARGET_UUID
+                            ISCSI_TARGET_UUID.append(vm_inv.uuid)
+                            ISCSI_TARGET_IP.append(vm_ip)
+                            test_util.test_logger("ISCSI_TARGET_IP=%s" %(vm_ip))
+                            #setup_iscsi_target(vm_inv, vm, deploy_config)
+			    #setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm, deploy_config)
                             break
                         elif ps_ref.type_ == 'iscsiInitiator':
                             setup_iscsi_initiator(zstack_management_ip, vm_inv, vm, deploy_config)
@@ -2620,9 +2722,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
         xml_string = etree.tostring(root_xml, 'utf-8')
         xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
         open(scenario_file, 'w+').write(xml_string)
-        if xmlobject.has_element(deploy_config, 'backupStorages.xskycephBackupStorage'):
-            setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config)
-        else:
+        if xmlobject.has_element(deploy_config, 'backupStorages.xskycephBackupStorage') or xmlobject.has_element(deploy_config, 'backupStorages.cephBackupStorage'):
+#             setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config)
+# #         else:
+#         if xmlobject.has_element(deploy_config, 'backupStorages.cephBackupStorage'):
             setup_ceph_storages(scenario_config, scenario_file, deploy_config)
         setup_ocfs2smp_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst)
         setup_fusionstor_storages(scenario_config, scenario_file, deploy_config)

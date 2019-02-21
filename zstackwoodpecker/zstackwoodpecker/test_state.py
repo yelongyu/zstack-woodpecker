@@ -16,6 +16,7 @@ import zstackwoodpecker.header.vip as vip_header
 import zstackwoodpecker.header.eip as eip_header
 import zstackwoodpecker.header.port_forwarding as pf_header
 import zstackwoodpecker.operations.net_operations as net_ops
+import zstackwoodpecker.operations.resource_operations as res_ops
 
 import zstacklib.utils.list_ops as list_ops
 #Define general test actions
@@ -24,10 +25,15 @@ class TestAction(object):
         Possible test Actions defination.
     '''
     #actions
+    change_global_config_sp_depth = 'change_global_config_sp_depth'
+    recover_global_config_sp_depth = 'recover_global_config_sp_depth'
+    cleanup_imagecache_on_ps = "cleanup_imagecache_on_ps"
     idel = 'idel'
     create_vm = 'create_vm'
     stop_vm = 'stop_vm'
     start_vm = 'start_vm'
+    suspend_vm = 'suspend_vm'
+    resume_vm = 'resume_vm'
     reboot_vm = 'reboot_vm'
     destroy_vm = 'destroy_vm'
     migrate_vm = 'migrate_vm'
@@ -35,8 +41,10 @@ class TestAction(object):
     reinit_vm = 'reinit_vm'
     clone_vm = 'clone_vm'
     change_vm_image = 'change_vm_image'
-    create_backup = 'create_backup'
-    use_backup = 'use_backup'
+    create_vm_backup = 'create_vm_backup'
+    use_vm_backup = 'use_vm_backup'
+    create_volume_backup = 'create_volume_backup'
+    use_volume_backup = 'use_volume_backup'
 
     create_volume = 'create_volume'
     create_scsi_volume = 'create_scsi_volume'
@@ -55,6 +63,7 @@ class TestAction(object):
     create_image_from_volume = 'create_image_from_volume'
     delete_image = 'delete_image'
     expunge_image = 'expunge_image'
+    create_data_template_from_backup = 'create_data_template_from_backup'
 
     create_sg = 'create_security_group'
     delete_sg = 'delete_security_group'
@@ -85,6 +94,9 @@ class TestAction(object):
 
     create_l3 = 'create_l3'
     delete_l3 = 'delete_l3'
+
+    attach_iso = 'attach_iso'
+    detach_iso = 'detach_iso'
 
     attach_primary_storage = 'attach_primary_storage_to_cluster'
     detach_primary_storage = 'detach_primary_storage_from_cluster'    
@@ -678,6 +690,7 @@ class TestStateDict(object):
         self.load_balancer_dict = {'Deleted': []}
         self.instance_offering_dict = {'Deleted': []}
         self.disk_offering_dict = {'Deleted': []}
+        self.backup_dict = {}
         self.backup_list = []
     
     def __repr__(self):
@@ -690,7 +703,8 @@ class TestStateDict(object):
                 'vip_dict': self.vip_dict,
                 'volume_snapshot_dict': self.volume_snapshot_dict,
                 'utiltiy_vm_dict': self.utility_vm_dict,
-                'accout_dict': self.account_dict
+                'accout_dict': self.account_dict,
+                'backup_dict': self.backup_dict
         })
 
     def add_vm(self, vm, state=vm_header.RUNNING, create_snapshots = True):
@@ -828,6 +842,35 @@ class TestStateDict(object):
         self.rm_volume(volume, src_state)
         self.add_volume(volume, dst_state)
 
+    def add_volume_with_snapshots(self, volume, state=TestStage.free_volume):
+        if not self.volume_dict.has_key(state):
+            self.volume_dict[state] = []
+
+        if not volume in self.volume_dict[state]:
+            self.volume_dict[state].append(volume)
+
+    def rm_volume_with_snapshots(self, volume, state=None):
+        if state:
+            if volume in self.volume_dict[state]:
+                self.volume_dict[state].remove(volume)
+                if volume.get_state() == volume_header.DELETED:
+                    self.add_volume(volume, TestStage.deleted_volume)
+                return True
+            return False
+
+        for key,values in self.volume_dict.iteritems():
+            if volume in values:
+                self.volume_dict[key].remove(volume)
+                if volume.get_state() == volume_header.DELETED:
+                    self.add_volume(volume, TestStage.deleted_volume)
+                return True
+        else:
+            return False
+
+    def mv_volume_with_snapshots(self, volume, src_state, dst_state):
+        self.rm_volume_with_snapshots(volume, src_state)
+        self.add_volume_with_snapshots(volume, dst_state)
+
     def mv_volumes(self, src_state, dst_state):
         '''
         move all volumes from source state to destination state.
@@ -845,15 +888,11 @@ class TestStateDict(object):
             self.volume_dict[vm_uuid] = []
 
     def attach_volume(self, volume, vm_uuid):
-        self.rm_volume(volume)
-        if not self.volume_dict.has_key(vm_uuid):
-            self.volume_dict[vm_uuid] = volume
-        else:
-            self.volume_dict[vm_uuid].append(volume)
+        self.mv_volume_with_snapshots(volume, TestStage.free_volume, vm_uuid)
 
     def detach_volume(self, volume):
         vm_uuid = volume.target_vm.vm.uuid
-        self.mv_volume(volume, vm_uuid, TestStage.free_volume)
+        self.mv_volume_with_snapshots(volume, vm_uuid, TestStage.free_volume)
 
     def get_volume_list(self, volume_state=TestStage.free_volume):
         if self.volume_dict.has_key(volume_state):
@@ -1017,7 +1056,11 @@ class TestStateDict(object):
                 self.rm_volume(root_volume_obj)
 
     def get_all_snapshots(self):
-        return self.volume_snapshot_dict.values()
+        all_items = []
+        for key,value in self.volume_snapshot_dict.iteritems():
+            if key != 'Deleted':
+                all_items.append(value)
+        return all_items
 
     def get_all_available_snapshots(self):
         all_items = []
@@ -1193,9 +1236,16 @@ class TestStateDict(object):
             if image.get_state() != image_header.EXPUNGED:
                 image.set_delete_delay_time(delay_time)
 
-    def add_backup(self, uuid):
-        if uuid not in self.backup_list:
-            self.backup_list.append(uuid)
+    def add_backup(self, backup_uuid):
+        cond = res_ops.gen_query_conditions("uuid", '=', backup_uuid)
+        volume_uuid = res_ops.query_resource(res_ops.VOLUME_BACKUP, cond)[0].volumeUuid
+        if not self.backup_dict.has_key(volume_uuid):
+            self.backup_dict[volume_uuid] = backup_uuid
+            self.backup_list.append(backup_uuid)
+ 
+    def get_volume_backup(self, volume_uuid):
+        if self.backup_dict.has_key(volume_uuid):
+            return self.backup_dict[volume_uuid]
 
     def rm_backup(self, uuid):
         if uuid in self.backup_list:
@@ -1203,6 +1253,12 @@ class TestStateDict(object):
 
     def get_backup_list(self):
         return self.backup_list
+
+    def add_backup_md5sum(self, backup_uuid, md5sum):
+        self.backup_dict[backup_uuid] = md5sum
+
+    def get_backup_md5sum(self, backup_uuid):
+        return self.backup_dict[backup_uuid]
 
 class Port(object):
     '''

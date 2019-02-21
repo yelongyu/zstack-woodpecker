@@ -23,12 +23,28 @@ def bash_roe(cmd, errorout=False, ret_code = 0, pipe_fail=False):
     return r, o, e
 
 def format_disk():
+    def _format_disk(disk=None):
+        if disk:
+            bash_roe("echo -ne 'n\np\n1\n\n\nw\nq\n' | fdisk %s && mkfs.xfs -f %s1" % (disk, disk))
+        else:
+            _,o1,_ = bash_roe("fdisk -l | grep Disk | grep dev | grep -v vda | grep -v mapper | awk '{print $2}' | awk -F':' '{print $1}'")
     
-    _,o1,_ = bash_roe("fdisk -l | grep Disk | grep dev | grep -v vda | grep -v mapper | awk '{print $2}' | awk -F':' '{print $1}'")
+            for k in o1.split():
+                bash_roe("echo -ne 'n\np\n1\n\n\nw\nq\n' | fdisk %s && mkfs.xfs %s1" % (k, k))
 
-    for k in o1.split():
-        bash_roe("echo -ne 'n\np\n1\n\n\nw\nq\n' | fdisk %s && mkfs.xfs %s1" % (k, k))
-
+    #_,o,_ = bash_roe("lsblk -I 252,8,253 -n -d -r -p --output NAME,SIZE|grep -v vda")
+    _,tmp,_ = bash_roe("ls -l /dev/disk/by-uuid/ | grep -v vda | grep -v total | awk -F '/' '{print $3}'")
+    _format_disk()
+    if tmp:
+        for k in tmp.split():
+            bash_roe("mount /dev/%s /mnt" % k)
+            if os.path.exists("/mnt/dir1"):
+                bash_roe("umount /mnt")
+                continue
+            else:
+                bash_roe("umount /mnt")
+                _format_disk(disk="/dev/"+k.strip("1"))
+            
 def scan_disk():
     import time
     time.sleep(1)
@@ -117,9 +133,9 @@ def validate(disklist):
             print "All old disks have been removed,skip validation"
             return "False"
         for i in disklist.keys():
-            _,o,_=bash_roe("ls /%s/| grep md5sum_%s" % ('/'+os.path.basename(i),os.path.basename(i)))
+            _,o,_=bash_roe("ls -t /%s/| grep md5sum_%s | head -n 2" % ('/'+os.path.basename(i),os.path.basename(i)))
             result,_,_=bash_roe("diff /%s/%s /%s/%s" % ('/'+os.path.basename(i),o.strip().split()[0],'/'+os.path.basename(i),o.strip().split()[1]))
-            bash_roe("rm /%s/md5sum*" % os.path.basename(i))
+            #bash_roe("rm /%s/md5sum*" % os.path.basename(i))
             bash_roe("umount /%s" % os.path.basename(i))
             bash_roe("rm -fr /%s" % os.path.basename(i))
             if result != 0:
@@ -187,6 +203,10 @@ def md5sum(disklist,flag):
     for i in disklist.keys():
         md5sum_per_disk(os.path.basename(i))
 
+def print_disklist(disklist):
+    for i in disklist.keys():
+        print "present disks:%s:%s" % (i,disklist[i])
+
 if __name__ == "__main__":
     format_disk()
     diff_add,diff_remove=print_disk_diff()
@@ -194,7 +214,7 @@ if __name__ == "__main__":
     random_str=''.join(random.sample('abcdefghijklmnopqrstuvwxyz',3))
     if not disklist:
         disklist=scan_disk()
-
+        print_disklist(disklist)
         if len(sys.argv) == 2:
             for i in disklist.keys():
                 print "disklist:%s:%s" % (i,disklist[i])
@@ -208,6 +228,8 @@ if __name__ == "__main__":
             clear_disk(disklist)
     else:
         if len(sys.argv) == 2:
+            disklist=scan_disk()
+            print_disklist(disklist)
             sys.exit(0)
         if diff_remove:
            for key,value in diff_remove.items():
@@ -223,5 +245,6 @@ if __name__ == "__main__":
             mkdir_disk(disklist)
         generate(disklist)
         if FILE_BASED:
+            random_str=''.join(random.sample('abcdefghijklmnopqrstuvwxyz',3))
             md5sum(disklist,random_str)
             clear_disk(disklist)

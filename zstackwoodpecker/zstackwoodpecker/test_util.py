@@ -9,6 +9,7 @@ import string
 import sys
 import traceback
 import string
+import pkgutil
 
 import zstacklib.utils.xmlobject as xmlobject
 import apibinding.inventory as inventory
@@ -1755,6 +1756,7 @@ class Robot_Test_Object(object):
         self.initial_formation = None
         self.initial_formation_parameters = None
         self.constant_path_list = []
+        self.constant_path_list_group_dict = {}
         self.configs_dict = {}
 
     def add_action_history(self, action):
@@ -1887,10 +1889,41 @@ class Robot_Test_Object(object):
         return self.constant_path_list
 
     def set_constant_path_list(self, path_list):
-        self.constant_path_list = path_list
+        if self.constant_path_list_group_dict:
+            tmp_path_list = path_list
+            for list_group_name in self.constant_path_list_group_dict.keys():
+                tmp_constant_path_list = []
 
-    def get_constant_path_list(self):
-        return self.constant_path_list
+                while True:
+                    tmp_path_list_no_param = []
+                    for action_with_param in tmp_path_list:
+                        tmp_path_list_no_param.append(action_with_param[0]) 
+
+                    if list_group_name in tmp_path_list_no_param:
+                        idx = tmp_path_list_no_param.index(list_group_name)
+                        #replaced_unpacked_list = []
+                        #params_list = tmp_path_list[idx][1:]
+                        #for idx1 in range(len(self.constant_path_list_group_dict[list_group_name])):
+                        #    replaced_unpacked_list.append(self.constant_path_list_group_dict[list_group_name][idx1]+params_list)
+                        #tmp_constant_path_list.extend(tmp_path_list[:idx] + replaced_unpacked_list)
+                        tmp_constant_path_list.extend(tmp_path_list[:idx] + self.constant_path_list_group_dict[list_group_name])
+                        del tmp_path_list[:idx+1]
+                    else:
+                        tmp_constant_path_list.extend(tmp_path_list)
+                        break
+
+                tmp_path_list = tmp_constant_path_list
+
+            self.constant_path_list = tmp_path_list
+
+        else:
+            self.constant_path_list = path_list
+
+    def get_constant_path_list_group_dict(self):
+        return self.constant_path_list_group_dict
+
+    def set_constant_path_list_group_dict(self, list_group_dict):
+        self.constant_path_list_group_dict = list_group_dict
 
     def set_config(self, configs):
         print "shuang %s" % configs
@@ -1931,3 +1964,71 @@ component_loader = ComponentLoader()
 
 def get_component_loader():
     return component_loader
+
+class SPTREE(object):
+    '''
+    Data structure of volume snapshot tree
+    '''
+    def __init__(self):
+        self.sp_tree = {}
+        self.curr = None
+        self.sp_curr = []
+
+    def add(self, uuid):
+        if self.sp_tree and uuid not in self.sp_curr:
+            self.sp_curr.append(uuid)
+        if uuid not in self.sp_tree:
+            self.sp_tree[uuid] = self.sp_curr = []
+            self.curr = uuid
+
+    def revert(self, uuid):
+        self.sp_curr = self.sp_tree[uuid]
+        self.curr = uuid
+
+    def delete(self, uuid):
+        self.sp_tree.pop(uuid)
+        for k, v in self.sp_tree.iteritems():
+            if uuid in v:
+                v.remove(uuid)
+                self.sp_curr = self.sp_tree[k]
+                self.curr = k
+        self.clean_tree(len(self.sp_tree.keys()))
+
+    def clean_tree(self, r=0):
+        keys = self.sp_tree.keys()
+        vals = self.sp_tree.values()
+        nodes = [n for node in vals for n in node]
+        nodes.append(self.root)
+        for k in keys:
+            if k not in nodes:
+                self.tree.pop(k)
+        r -= 1
+        if r > 0:
+            self.clean_tree(r)
+
+    def parent(self, uuid):
+        for k, v in self.sp_tree.iteritems():
+            if uuid in v:
+                return k
+
+    def children(self, uuid):
+        return self.sp_tree[uuid]
+
+def load_paths(template_dirname, path_dirname):
+    paths = dict()
+    templates_dict = dict()
+    for importer, package_name, _ in pkgutil.iter_modules([template_dirname]):
+        full_package_name = '%s.%s' % (template_dirname, package_name)
+        if full_package_name not in sys.modules:
+            templates_dict[package_name] = importer.find_module(package_name).load_module(full_package_name)
+
+    paths_dict = dict()
+    for importer, package_name, _ in pkgutil.iter_modules([path_dirname]):
+        full_package_name = '%s.%s' % (path_dirname, package_name)
+        if full_package_name not in sys.modules:
+            paths_dict[package_name] = importer.find_module(package_name).load_module(full_package_name)
+            paths[package_name] = dict()
+            paths[package_name]['initial_formation'] = templates_dict[paths_dict[package_name].path()['initial_formation']].template()
+            paths[package_name]['path_list'] = paths_dict[package_name].path()['path_list']
+
+    return paths

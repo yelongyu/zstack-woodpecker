@@ -50,6 +50,7 @@ def test():
 
     vm = test_stub.create_vm(vm_name='vm_volume_qos', disk_offering_uuids = [volume_offering_uuid])
     test_obj_dict.add_vm(vm)
+    vm.check()
     vm_inv = vm.get_vm()
     cond = res_ops.gen_query_conditions("vmInstanceUuid", '=', vm_inv.uuid) 
     cond = res_ops.gen_query_conditions("type", '=', 'Data', cond)

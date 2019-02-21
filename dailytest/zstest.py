@@ -514,7 +514,7 @@ def print_info(information):
 def print_warn(information):
     print '\n\033[31m WARN: %s\033[0m\n' % information
 
-def print_runtime_test_log(folder):
+def print_runtime_test_log(folder, nofollow=False):
     import glob
     def _find_latest_file(t_folder):
         latest_result = max(glob.iglob('%s/*' % t_folder), key=os.path.getctime)
@@ -525,7 +525,10 @@ def print_runtime_test_log(folder):
     test_result_folder = '%s/%s/test-result/latest/logs' % (folder, CONFIG_XML)
     latest_log = _find_latest_file(test_result_folder)
         
-    os.system('tail -f %s' % latest_log)
+    if nofollow:
+        os.system('tail -n 100 %s' % latest_log)
+    else:
+        os.system('tail -f %s' % latest_log)
 
 def parse_test_args(options):
     test_args = []
@@ -688,6 +691,12 @@ def main():
             action='store_true', 
             help="[Optional] print current test case log. When next test case is run, this command needs to reexecuted to get related log.")
 
+    parser.add_option(
+            "--no-follow", dest="noFollow", 
+            default=None, 
+            action='store_true', 
+            help="[Optional] do not follow logs when print current test case log.")
+
     option_group = optparse.OptionGroup(parser, "Test Options", "Following options are only available when run initegration test case or test suite.")
 
     option_group.add_option(
@@ -841,7 +850,7 @@ def main():
         os.environ['ZSTACK_PYPI_URL'] = options.pypiIndex
 
     if options.showLog:
-        print_runtime_test_log(current_folder)
+        print_runtime_test_log(current_folder, options.noFollow)
 
     if options.needBuild or options.needBuildPremium:
         if options.vrImagePath:
