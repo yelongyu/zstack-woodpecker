@@ -656,7 +656,8 @@ class TestStateDict(object):
                 vm_header.RUNNING:[], 
                 vm_header.STOPPED:[], 
                 vm_header.DESTROYED:[],
-                vm_header.EXPUNGED:[]
+                vm_header.EXPUNGED:[],
+                vm_header.PAUSED:[]
                 }
 
         self.volume_dict = {
