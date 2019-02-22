@@ -251,8 +251,8 @@ umount %s
         self.current_snapshot = snapshot
         snapshot.set_checking_points(self.get_checking_points(snapshot))
 
-    def delete_snapshot(self, snapshot):
-        snapshot.delete()
+    def delete_snapshot(self, snapshot, action=True):
+        snapshot.delete(action)
         if snapshot in self.primary_snapshots:
             self.primary_snapshots.remove(snapshot)
         if snapshot in self.backuped_snapshots:
@@ -459,12 +459,13 @@ Its [parent:] %s' % \
         else:
             test_util.test_logger('[snapshot:] %s checking file: %s is created.'% (self.snapshot_option.get_name(), self.checking_point))
 
-    def delete(self):
+    def delete(self, action=True):
         '''
         Not recommended to be directly called by test case. Test case needs to
         call ZstackVolumeSnapshot.delete_snapshot()
         '''
-        vol_ops.delete_snapshot(self.snapshot.uuid)
+        if action:
+            vol_ops.delete_snapshot(self.snapshot.uuid)
         self.delete2()
 
     def delete2(self):

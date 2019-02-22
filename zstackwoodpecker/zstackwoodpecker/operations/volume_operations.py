@@ -306,6 +306,14 @@ def delete_snapshot(snapshot_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
+def batch_delete_snapshot(snapshot_uuid_list, session_uuid=None):
+    action = api_actions.BatchDeleteVolumeSnapshotAction()
+    action.uuids = snapshot_uuid_list
+    action.timeout = 300000
+    test_util.action_logger('Batch Delete [Snapshots:] %s ' % snapshot_uuid_list)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
 def use_snapshot(snapshot_uuid, session_uuid=None):
     action = api_actions.RevertVolumeFromSnapshotAction()
     action.uuid = snapshot_uuid
