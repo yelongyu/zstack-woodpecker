@@ -44,10 +44,11 @@ class TestAction(object):
     change_vm_image = 'change_vm_image'
     create_vm_backup = 'create_vm_backup'
     use_vm_backup = 'use_vm_backup'
+    recover_volume_backup_from_remote = 'recover_volume_backup_from_remote'
+    sync_backup_to_remote = 'sync_backup_to_remote'
     create_volume_backup = 'create_volume_backup'
     use_volume_backup = 'use_volume_backup'
     create_vm_from_vmbackup = 'create_vm_from_vmbackup'
-
     create_volume = 'create_volume'
     create_scsi_volume = 'create_scsi_volume'
     attach_volume = 'attach_volume'

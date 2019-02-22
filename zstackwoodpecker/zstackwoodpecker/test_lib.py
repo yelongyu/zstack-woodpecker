@@ -6922,13 +6922,25 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                     bs_ops.attach_backup_storage(bs_inv.uuid, host.zoneUuid)
                     bss = [bs_inv]
             bs = bss[0]
-               
+
             backup_option = test_util.BackupOption()
             backup_option.set_name(backup_name)
             backup_option.set_volume_uuid(lib_get_root_volume(vm.get_vm()).uuid)
             backup_option.set_backupStorage_uuid(bs.uuid)
             if len(constant_path_list[0]) == 3:
                 backup_option.set_mode("full")
+            try:
+                exist_bss = constant_path_list[0][3]
+            except:
+                exist_bss = None
+            if not exist_bss:
+                cond = res_ops.gen_query_conditions("tag", '=', "allowbackup")
+                tags = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
+                local_storage_uuid = tags[0].resourceUuid
+                if not tags or not local_storage_uuid:
+                    test_util.test_fail("no local backup storage found")
+                backup_option.set_backupStorage_uuid(local_storage_uuid)
+
             test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
                 (next_action, target_vm.get_vm().uuid))
 
@@ -7086,6 +7098,75 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                     target_volume = new_snapshot.get_target_volume()
                     md5sum = target_volume.get_md5sum()
                     new_snapshot.set_md5sum(md5sum)
+        elif next_action == TestAction.sync_backup_to_remote:
+            backup_name = None
+            local_storage = None
+            remote_storage = None
+            if len(constant_path_list[0]) > 1:
+                backup_name = constant_path_list[0][1]
+                backup_list = test_dict.get_backup_list()
+                for backup_uuid in backup_list:
+                    backup = lib_get_backup_by_uuid(backup_uuid)
+                    if backup.name == backup_name:
+                        target_backup = backup
+                        break
+
+            if not target_backup or not backup_name:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            cond = res_ops.gen_query_conditions("tag", '=', "allowbackup")
+            tags = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
+            local_storage_uuid = tags[0].resourceUuid
+            if not tags or not local_storage_uuid:
+                test_util.test_fail("no local backup storage for syncing backup to remote")
+
+            cond = res_ops.gen_query_conditions("tag", '=', "remotebackup")
+            tags = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
+            remote_storage_uuid = tags[0].resourceUuid
+            if not tags or not remote_storage_uuid:
+                test_util.test_fail("no remote backup storage for syncing backup to remote")
+
+            import zstackwoodpecker.operations.volume_operations as vol_ops
+            test_util.test_dsc('Robot Action: %s; on Backup: %s' % \
+                (next_action, target_backup.uuid))
+
+            #_update_bs_for_robot_state("enable")
+            backup = vol_ops.sync_volume_backup_to_remote(target_backup.groupUuid, local_storage_uuid, remote_storage_uuid)
+
+        elif next_action == TestAction.recover_volume_backup_from_remote:
+            backup_name = None
+            local_storage = None
+            remote_storage = None
+            if len(constant_path_list[0]) > 1:
+                backup_name = constant_path_list[0][1]
+                backup_list = test_dict.get_backup_list()
+                for backup_uuid in backup_list:
+                    backup = lib_get_backup_by_uuid(backup_uuid)
+                    if backup.name == backup_name:
+                        target_backup = backup
+                        break
+
+            if not target_backup or not backup_name:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            cond = res_ops.gen_query_conditions("tag", '=', "allowbackup")
+            tags = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
+            local_storage_uuid = tags[0].resourceUuid
+            if not tags or not local_storage_uuid:
+                test_util.test_fail("no local backup storage for syncing backup to local")
+
+            cond = res_ops.gen_query_conditions("tag", '=', "remotebackup")
+            tags = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
+            remote_storage_uuid = tags[0].resourceUuid
+            if not tags or not remote_storage_uuid:
+                test_util.test_fail("no remote backup storage for syncing backup to local")
+
+            import zstackwoodpecker.operations.volume_operations as vol_ops
+            test_util.test_dsc('Robot Action: %s; on Backup: %s' % \
+                (next_action, target_backup.uuid))
+
+            #_update_bs_for_robot_state("enable")
+            backup = vol_ops.recover_volume_backup_from_remote(target_backup.groupUuid, local_storage_uuid, remote_storage_uuid)
 
         else:
             test_util.test_fail("Robot action: <%s> not supported" %(next_action))
