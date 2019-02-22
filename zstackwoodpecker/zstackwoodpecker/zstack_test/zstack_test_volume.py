@@ -138,9 +138,9 @@ class ZstackTestVolume(volume_header.TestVolume):
         super(ZstackTestVolume, self).set_delete_delay_time(delay_time)
 
     def resize(self, size):
-        if self.get_volume() == "Data":
+        if self.get_volume().type == "Data":
             vol_ops.resize_data_volume(self.get_volume().uuid, size)
-        elif self.get_volume() == "Root":
+        elif self.get_volume().type == "Root":
             vol_ops.resize_volume(self.get_volume().uuid, size)
 
     def create_from(self, uuid, target_vm=None):

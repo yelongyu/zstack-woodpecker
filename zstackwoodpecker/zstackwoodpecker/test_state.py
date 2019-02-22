@@ -1240,8 +1240,9 @@ class TestStateDict(object):
         cond = res_ops.gen_query_conditions("uuid", '=', backup_uuid)
         volume_uuid = res_ops.query_resource(res_ops.VOLUME_BACKUP, cond)[0].volumeUuid
         if not self.backup_dict.has_key(volume_uuid):
-            self.backup_dict[volume_uuid] = backup_uuid
-            self.backup_list.append(backup_uuid)
+            self.backup_dict[volume_uuid] = []
+        self.backup_dict[volume_uuid].append(backup_uuid)
+        self.backup_list.append(backup_uuid)
  
     def get_volume_backup(self, volume_uuid):
         if self.backup_dict.has_key(volume_uuid):

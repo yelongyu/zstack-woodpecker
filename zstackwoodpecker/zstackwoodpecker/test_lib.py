@@ -6219,11 +6219,13 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
                 (next_action, target_vm.get_vm().uuid))
 
-            #_update_bs_for_robot_state("enable")
             backups = vm_ops.create_vm_backup(backup_option)
-            #_update_bs_for_robot_state("disable")
             for backup in backups:
                 test_dict.add_backup(backup.uuid)
+                for volume in test_dict.get_all_volume_list():
+                    if backup.volumeUuid == volume.get_volume().uuid:
+                        md5sum = volume.get_md5sum()
+                        test_dict.add_backup_md5sum(backup.uuid, md5sum)
 
         elif next_action == TestAction.use_vm_backup:
             target_backup = None
@@ -6244,11 +6246,17 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                 (next_action, target_backup.uuid))
 
             #_update_bs_for_robot_state("enable")
-            backup = vol_ops.revert_vm_from_backup(target_backup.groupUuid)
+            vol_ops.revert_vm_from_backup(target_backup.groupUuid)
+            cond = res_ops.gen_query_conditions("groupUuid", '=', target_backup.groupUuid)
+            backups = res_ops.query_resource(res_ops.VOLUME_BACKUP, cond)
             #_update_bs_for_robot_state("disable")
-            for volume in test_dict.get_all_volume_list():
-                volume.update()
-                volume.update_volume()
+            for backup in backups:
+                for volume in test_dict.get_all_volume_list():
+                    volume.update()
+                    volume.update_volume()
+                    if backup.volumeUuid == volume.get_volume().uuid:
+                        md5sum = test_dict.get_backup_md5sum(target_backup.uuid)
+                        volume.set_md5sum(md5sum)
 
         elif next_action == TestAction.clone_vm:
             target_vm = None

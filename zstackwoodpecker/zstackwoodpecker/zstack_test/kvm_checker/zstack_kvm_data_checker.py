@@ -60,6 +60,7 @@ class zstack_kvm_vm_attach_volume_checker(checker_header.TestChecker):
         
         if vm.state != "Running":
             test_util.test_logger('Check result: Skip attach_volume_checker since VM is not in Running state')
+            return self.judge(True)
         
         test_lib.lib_install_testagent_to_vr(vm)
         host = test_lib.lib_get_vm_host(vm)
@@ -136,6 +137,7 @@ class zstack_kvm_vm_detach_volume_checker(checker_header.TestChecker):
 
         if vm.state != "Running":
             test_util.test_logger('Check result: Skip attach_volume_checker since VM is not in Running state')
+            return self.judge(True)
 
         test_lib.lib_install_testagent_to_vr(vm)
         host = test_lib.lib_get_vm_host(vm)
@@ -208,6 +210,7 @@ class zstack_kvm_vm_data_integrity_checker(checker_header.TestChecker):
 
         if vm.state != "Running":
             test_util.test_logger('Check result: Skip attach_volume_checker since VM is not in Running state')
+            return self.judge(True)
      
         time.sleep(30)
 
