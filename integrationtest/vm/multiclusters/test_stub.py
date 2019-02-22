@@ -249,11 +249,15 @@ class DataMigration(TestChain):
     def resize_vm(self, new_size):
         self.root_vol_uuid = self.vm.vm.rootVolumeUuid
         vol_ops.resize_volume(self.root_vol_uuid, new_size)
+        conditions = res_ops.gen_query_conditions('uuid', '=', self.vm.vm.uuid)
+        self.vm.vm = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)[0]
         return self
 
     def resize_data_volume(self,new_size):
         self.data_vol_uuid = self.data_volume.get_volume().uuid
         vol_ops.resize_data_volume(self.data_vol_uuid, new_size)
+	conditions = res_ops.gen_query_conditions('uuid', '=', self.data_vol_uuid)
+	self.data_volume.data_volume = res_ops.query_resource(res_ops.VOLUME, conditions)[0]
         return self
 
     def migrate_data_volume(self):

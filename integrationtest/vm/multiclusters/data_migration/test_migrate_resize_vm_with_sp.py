@@ -41,7 +41,7 @@ def test():
 
     data_migration.check_origin_data_exist()
     data_migration.clean_up_ps_trash_and_check()
-    data_migration.check_vol_sp(data_migration.root_vol_uuid, 3)
+    data_migration.check_vol_sp(data_migration.root_vol_uuid, 4)
 
     data_migration.vm.stop()
     snapshots.use_snapshot(snapshot1)
