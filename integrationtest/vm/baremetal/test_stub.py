@@ -27,7 +27,10 @@ def deploy_vbmc(host_ips):
                  /opt/zstack-dvd/Extra/qemu-kvm-ev/libvirt-4.1.0/libvirt-devel-*' %(ssh_cmd, host_ip))
             shell.call('%s %s wget http://192.168.200.100/mirror/scripts/get-pip.py'%(ssh_cmd, host_ip))
             shell.call('%s %s python  get-pip.py' %(ssh_cmd, host_ip))
-            shell.call('%s %s pip install virtualbmc' %(ssh_cmd, host_ip))
+            #shell.call('%s %s pip install virtualbmc' %(ssh_cmd, host_ip))
+            shell.call('%s %s wget http://192.168.200.100/mirror/scripts/virtualbmc_190223.tar.gz' %(ssh_cmd, host_ip))
+            shell.call('%s %s "tar zxvf virtualbmc_190223.tar.gz && cd virtualbmc && pip install *"' %(ssh_cmd, host_ip))
+            
     test_util.test_logger('Virtualbmc has been deployed on Host')
 
 def add_hosts(host_ips):
