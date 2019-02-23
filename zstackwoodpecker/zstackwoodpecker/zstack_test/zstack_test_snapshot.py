@@ -251,6 +251,48 @@ umount %s
         self.current_snapshot = snapshot
         snapshot.set_checking_points(self.get_checking_points(snapshot))
 
+    def remove_children_snapshots(self, snapshot):
+        def _find_children_nodes(node_list, snapshot_uuid):
+            for node in node_list:
+                if snapshot_uuid == node.inventory.uuid:
+                    return node
+                if node.tree.children:
+                    _find_children_nodes(node.tree.children)
+            else:
+                print "not found snapshot uuid %s." %(snapshot_uuid)
+                    
+        sp_subtree_uuid = []
+        def _collect_children_snapshots(sub_node_list):
+            for node in sub_node_list:
+                if node.tree.children:
+                    _collect_children_snapshots(node.tree.children)
+                else:
+                    sp_subtree_uuid.append(node.inventory.uuid) 
+            else:
+                print "not found snapshot uuid %s." %(snapshot_uuid)
+            
+        packed_sp_trees = test_lib.lib_get_volume_snapshot_tree(self.target_volume.get_volume().uuid)
+        if not packed_sp_trees:
+            print "not found snapshot tree on target volume"
+            return
+
+        sp_trees = packed_sp_trees[0].inventories
+        if sp_trees:
+            sp_subtree = _find_children_nodes(sp_trees, snapshot.get_snapshot().uuid)
+            _collect_children_snapshots(sp_subtree)
+
+        sp_list = get_snapshot_family(snapshot)
+        for sp in sp_list:
+            if sp.get_state() == sp_header.DELETED:
+                continue
+            sp.delete2()
+            print "DEBUG>>>sp.name:snapshot.name=%s:%s" %(sp.get_snapshot().name, snapshot.get_snapshot().name)
+            if sp.get_snapshot().uuid in sp_subtree_uuid:
+                self.primary_snapshots.remove(sp)
+            if sp in self.backuped_snapshots:
+                self.backuped_snapshots.remove(sp)
+        
+
     def delete_snapshot(self, snapshot, action=True):
         snapshot.delete(action)
         if snapshot in self.primary_snapshots:
@@ -264,15 +306,16 @@ umount %s
             self._update_delete()
             return 
 
-        sp_list = get_snapshot_family(snapshot)
-        for sp in sp_list:
-            if sp.get_state() == sp_header.DELETED:
-                continue
-            sp.delete2()
-            if sp in self.primary_snapshots:
-                self.primary_snapshots.remove(sp)
-            if sp in self.backuped_snapshots:
-                self.backuped_snapshots.remove(sp)
+        #sp_list = get_snapshot_family(snapshot)
+        #for sp in sp_list:
+        #    if sp.get_state() == sp_header.DELETED:
+        #        continue
+        #    sp.delete2()
+        #    if sp in self.primary_snapshots:
+        #        self.primary_snapshots.remove(sp)
+        #    if sp in self.backuped_snapshots:
+        #        self.backuped_snapshots.remove(sp)
+        self.remove_children_snapshots(snapshot)
 
         self._update_delete()
 
@@ -618,3 +661,4 @@ not be created to a new template' % \
         self.volume = test_lib.lib_get_volume_by_uuid(uuid)
         self.set_state(self.volume.state)
         self.update()
+
