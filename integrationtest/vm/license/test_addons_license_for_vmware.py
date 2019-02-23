@@ -57,11 +57,11 @@ def test():
     lic_ops.delete_license(node_uuid, uuid)
     test_util.test_logger('delete the addons license [uuid:] %s' % uuid)
 
-    test_util.test_logger('Load and Check Hybrid license with 20 day and 10 CPU')
-    file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '20', 'Hybrid', '10', '')
+    test_util.test_logger('Load and Check Hybrid license with 12 day and 10 CPU')
+    file_path = test_stub.gen_license('woodpecker', 'woodpecker@zstack.io', '12', 'Hybrid', '10', '')
     test_stub.load_license(file_path)
     issued_date = test_stub.get_license_info().issuedDate
-    expired_date = test_stub.license_date_cal(issued_date, 86400 * 20)
+    expired_date = test_stub.license_date_cal(issued_date, 86400 * 12)
     test_stub.check_license("woodpecker@zstack.io", 10, None, False, 'Hybrid', issued_date=issued_date, expired_date=expired_date)
 
     test_util.test_logger('start to delete the license')
