@@ -1,3 +1,4 @@
+#coding:utf-8
 '''
 
 @author: Frank
@@ -2015,7 +2016,8 @@ class SPTREE(object):
         _fork = self.fork[:]
         for f in _fork:
             if (f not in nodes) or len(self.children(f)) <= 1:
-                for _ in range(_fork.count(f)):
+                f_count = self.fork.count(f)
+                for _ in range(f_count):
                     self.fork.remove(f)
         depth_keys = self._depth.keys()
         for dk in depth_keys:
@@ -2028,7 +2030,8 @@ class SPTREE(object):
     def get_all_nodes(self):
         vals = self.tree.values()
         nodes = [n for node in vals for n in node]
-        nodes.append(self.root)
+        if self.root in self.tree:
+            nodes.append(self.root)
         return nodes
 
     def parent(self, node):
@@ -2075,7 +2078,7 @@ class SPTREE(object):
                 else:
                     g.remove(tr)
                     g.insert(0, ' ' * len(nd[0]))
-                    g.insert(1, '©¦' + ' ' * (len(tr) - len(nd[0]) - 1))
+                    g.insert(1, 'â”‚' + ' ' * (len(tr) - len(nd[0]) - 1))
             if len(ubr) > 0:
                 link_branch(ubr, rendtr)
 
@@ -2099,12 +2102,12 @@ class SPTREE(object):
                 if self.parent(n) in self.fork:
                     if self.fork.count(self.parent(n)) > 1 and n in self.children(self.parent(n))[1:-1]:
                         _g.insert(_g.index(n), ' ' * (len(indent[self.parent(n)]) - 2))
-                        _g.insert(_g.index(n), '©À©¤')
+                        _g.insert(_g.index(n), 'â”œâ”€')
                     if len(self.children(self.parent(n))) > 1 and n == self.children(self.parent(n))[-1]:
                         _g.insert(_g.index(n), ' ' * (len(indent[self.parent(n)]) - 2))
-                        _g.insert(_g.index(n), '©¸©¤')
+                        _g.insert(_g.index(n), 'â””â”€')
                 if n in self.fork:
-                    _g.insert(_g.index(n) + 1, '©¤©Ð©¤')
+                    _g.insert(_g.index(n) + 1, 'â”€â”¬â”€')
                     if n not in indent:
                         indent[n] = indent[self.parent(n)] + ' ' * len(self.parent(n)) + '   '
                     for c in self.children(n):
@@ -2114,7 +2117,7 @@ class SPTREE(object):
                             dent = '  '
                         indent[c] = indent[n] + ' ' * len(c) + dent
                 elif self.children(n):
-                    _g.insert(_g.index(n) + 1, '©¤©¤')
+                    _g.insert(_g.index(n) + 1, 'â”€â”€')
                     if n not in indent:
                         indent[n] = indent[self.parent(n)] + ' ' * len(n) + '  '
                 else:
@@ -2123,7 +2126,8 @@ class SPTREE(object):
         get_unlinked_branch(copy.deepcopy(rendered_tree))
         if unlinked_branch:
             link_branch(unlinked_branch, rendered_tree)
-        test_dsc('The snapshot tree is: \n\n%s' % ''.join([s for t in rendered_tree for s in t]))
+        sp_tree = ''.join([s for t in rendered_tree for s in t])
+        test_dsc('The snapshot tree is: \n\n%s' % sp_tree)
 
 def load_paths(template_dirname, path_dirname):
     paths = dict()
