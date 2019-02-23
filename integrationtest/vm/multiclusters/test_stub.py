@@ -118,6 +118,7 @@ class DataMigration(TestChain):
         self.snapshots = None
         self.vol_uuid = None
         self.snapshot = []
+        self.sp_tree = test_util.SPTREE()
         super(DataMigration, self).__init__(chain_head, chain_length)
 
     def get_current_ps(self):
@@ -304,6 +305,15 @@ class DataMigration(TestChain):
         self.snapshots.create_snapshot('snapshot-%s' % time.strftime('%m%d-%H%M%S', time.localtime()))
 #         self.snapshots.check()
         self.snapshot.append(self.snapshots.get_current_snapshot())
+        curr_sp = self.snapshots.get_current_snapshot()
+        self.snapshot.append(curr_sp)
+        if curr_sp.get_snapshot().type == 'Storage':
+            self.sp_type = curr_sp.get_snapshot().type
+            if not self.sp_tree.root:
+                self.sp_tree.add('root')
+            self.sp_tree.revert(self.sp_tree.root)
+        self.sp_tree.add(curr_sp.get_snapshot().uuid)
+        self.sp_tree.show_tree()
         return self
 
     def delete_snapshot(self):
@@ -559,6 +569,78 @@ class DataMigration(TestChain):
         self.data_volume.check()
         if from_offering:
             test_lib.lib_mkfs_for_volume(self.data_volume.get_volume().uuid, self.vm.vm, '/mnt')
+        return self
+
+    def revert_sp(self, sp=None, start_vm=False):
+        '''
+        {"must":{"before": ["create_sp"]},
+        "next": ["create_sp", "batch_del_sp"],
+        "weight": 2}
+        '''
+        if self.data_volume:
+            try:
+                self.data_volume.detach()
+            except:
+                pass
+        else:
+            self.vm.stop()
+        if not sp:
+            sp = random.choice(self.snapshot)
+        self.snapshots.use_snapshot(sp)
+        if start_vm:
+            self.vm.start()
+            self.vm.check()
+        if self.sp_type != 'Storage':
+            self.sp_tree.revert(sp.get_snapshot().uuid)
+        if self.data_volume:
+            try:
+                self.data_volume.attach(self.vm)
+            except:
+                pass
+        self.sp_tree.show_tree()
+        return self
+
+    def batch_del_sp(self, snapshot_uuid_list=None, exclude_root=True):
+        '''
+        {"must":{"before": ["create_sp"]},
+        "next": ["create_sp", "revert_sp(start_vm=True)"],
+        "weight": 1}
+        '''
+        for _ in range(5):
+            random.shuffle(self.snapshot)
+        if not snapshot_uuid_list:
+            snapshot_list = self.snapshot[:random.randint(2, len(self.snapshot))]
+            snapshot_uuid_list = [spt.get_snapshot().uuid for spt in snapshot_list]
+        spd = {_sp.get_snapshot().uuid: _sp for _sp in self.snapshot}
+        if exclude_root:
+            if self.sp_tree.root in snapshot_uuid_list:
+                snapshot_uuid_list.remove(self.sp_tree.root)
+        vol_ops.batch_delete_snapshot(snapshot_uuid_list)
+        for spuuid in snapshot_uuid_list:
+            assert not res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, res_ops.gen_query_conditions('uuid', '=', spuuid)), \
+            'The snapshot with uuid [%s] is still exist!' % spuuid
+            if self.sp_tree.delete(spuuid):
+                self.snapshots.delete_snapshot(spd[spuuid], False)
+        print self.sp_tree.tree
+        remained_sp =  self.sp_tree.tree.keys()
+        if self.sp_type == 'Storage':
+            remained_sp.remove(self.sp_tree.root)
+        for sud in spd.keys():
+            if sud not in remained_sp:
+                self.snapshot.remove(spd[sud])
+        for sp_uuid in remained_sp:
+            assert res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, res_ops.gen_query_conditions('uuid', '=', sp_uuid)), \
+            'The snapshot with uuid [%s] was not found!' % sp_uuid
+        remained_sp_num = len(self.sp_tree.get_all_nodes())
+        if self.sp_type == 'Storage':
+            remained_sp_num -= 1
+        if not self.data_volume:
+            actual_sp_num = len(res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, res_ops.gen_query_conditions('volumeUuid', '=', self.vm.get_vm().allVolumes[0].uuid)))
+        else:
+            actual_sp_num = len(res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, res_ops.gen_query_conditions('volumeUuid', '=', self.data_volume.get_volume().uuid)))
+        assert actual_sp_num == remained_sp_num, 'actual remained snapshots number: %s, snapshot number in sp tree: %s' % (actual_sp_num, remained_sp_num)
+        self.sp_tree.show_tree()
+        self.snapshots.check()
         return self
 
     def attach_vm(self):
