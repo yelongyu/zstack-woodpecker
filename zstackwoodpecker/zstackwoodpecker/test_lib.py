@@ -6278,7 +6278,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                     volume.update()
                     volume.update_volume()
                     if backup.volumeUuid == volume.get_volume().uuid:
-                        md5sum = test_dict.get_backup_md5sum(target_backup.uuid)
+                        md5sum = test_dict.get_backup_md5sum(backup.uuid)
                         volume.set_md5sum(md5sum)
 
         elif next_action == TestAction.clone_vm:
