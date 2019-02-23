@@ -1592,19 +1592,19 @@ class BATCHDELSP(TestChain):
         self.snapshots.check()
         return self
 
-    def revert_sp(self, sp=None, root_vol=True, start_vm=False):
+    def revert_sp(self, sp=None, start_vm=False):
         '''
         {"must":{"before": ["create_sp"]},
         "next": ["create_sp", "batch_del_sp"],
         "weight": 2}
         '''
-        if root_vol:
-            self.vm.stop()
-        else:
+        if self.data_volume:
             try:
                 self.data_volume.detach()
             except:
                 pass
+        else:
+            self.vm.stop()
         if not sp:
             sp = random.choice(self.snapshot)
         self.snapshots.use_snapshot(sp)
@@ -1613,7 +1613,7 @@ class BATCHDELSP(TestChain):
             self.vm.check()
         if self.sp_type != 'Storage':
             self.sp_tree.revert(sp.get_snapshot().uuid)
-        if not root_vol:
+        if self.data_volume:
             try:
                 self.data_volume.attach(self.vm)
             except:

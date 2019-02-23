@@ -33,7 +33,7 @@ def test():
     bat_del_sp.sp_check()
     bat_del_sp.batch_del_sp()
 
-    test_util.test_pass('Batch Delete VM Snapshot Test Successful')
+    test_util.test_pass('Batch Delete Volume Snapshot Test Successful')
 
 
 #Will be called only if exception happens in test().

@@ -1979,6 +1979,7 @@ class SPTREE(object):
         self.curr_depth = 0
         self.curr_node = []
         self.fork = []
+        self.branch_root = None
 
     def add(self, node, parent=None):
         if not self.tree:
@@ -1995,16 +1996,31 @@ class SPTREE(object):
         if self.children(node):
             self.fork.append(node)
 
+    def get_branch_root(self, node):
+        up_node = self.parent(node)
+        if len(self.children(up_node)) == 1:
+            self.get_branch_root(up_node)
+        else:
+            self.branch_root = up_node
+
+    def get_curr_node(self):
+        for k in self.tree.keys():
+            if self.tree[k] is self.curr_node:
+                return k
+
     def delete(self, node):
         if node not in self.tree:
             print('No such node in this tree!')
             return
         self.tree.pop(node)
+        key = ''
         for k, v in self.tree.iteritems():
             if node in v:
                 v.remove(node)
-                self.curr_node = self.tree[k]
+                key = k
         self.clean_up(self.depth())
+        if not self.get_curr_node():
+            self.curr_node = self.tree[key]
         return True
 
     def clean_up(self, r=0):
