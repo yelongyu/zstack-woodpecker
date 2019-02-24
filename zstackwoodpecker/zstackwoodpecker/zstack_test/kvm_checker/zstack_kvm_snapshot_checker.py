@@ -342,6 +342,157 @@ allowed depth is : %s. But we get: %s' % (volume_uuid, tree['inventory'].uuid, \
 depth is : %s. The real snapshot max depth is: %s' % \
             (volume_uuid, tree_allowed_depth, str(tree_max_depth - 1)))
 
+        elif ps.type == "LocalStorage":
+            for snapshot in snapshots:
+                backing_list = []
+                backing_file = ''
+                sp_covered = 0
+                activate_host = ''
+
+                devPath = snapshot.get_snapshot().primaryStorageInstallPath
+
+                for i in sp_tree_actual:
+                    if devPath in i:
+                        test_util.test_logger('%s already in sp list %s' % (devPath, backing_list))
+                        sp_covered = 1
+
+                if sp_covered == '1':
+                    continue
+                else:
+                    test_util.test_logger('%s not in current sp list, start checking its backing chain' % (devPath))
+
+                backing_list.append(devPath)
+
+                cmd_info = "ls %s" % devPath
+
+                for host in test_lib.lib_find_hosts_by_ps_uuid(ps_uuid):
+                    result = test_lib.lib_execute_ssh_cmd(host.managementIp, 'root', 'password', cmd_info)
+                    if result:
+                        activate_host = host.managementIp
+                        break
+
+                if not activate_host:
+                    test_util.test_logger('No activate host found for %s' % (snapshot))
+                    return self.judge(self.exp_result)
+
+                while True:
+                    cmd_info = "ls %s" % devPath
+
+                    result = test_lib.lib_execute_ssh_cmd(activate_host, 'root', 'password', cmd_info)
+                    if result:
+                        backing_file = get_qcow_backing_file_by_ip(devPath, activate_host)
+                    else:
+                        test_util.test_logger('No activate host found for %s' % (snapshot))
+                        return self.judge(self.exp_result)
+                    backing_file = backing_file.replace("\n", "")
+
+                    if not backing_file:
+                        break
+                    else:
+                        backing_list.append(backing_file)
+                        devPath = backing_file
+
+                backing_list = list(reversed(backing_list))
+
+                if not sp_tree_actual:
+                    test_util.test_logger('current sp list is empty, add %s into it' % (backing_list))
+                    sp_tree_actual.append(backing_list)
+                    continue
+
+                for i in sp_tree_actual:
+                    if backing_list == i:
+                        sp_covered = 1
+
+                if sp_covered == '1':
+                    test_util.test_logger('%s already in current sp list %s, no need to add it anymore' % (backing_list, sp_tree_actual))
+                    continue
+                else:
+                    test_util.test_logger('%s not in current sp list %s, start comparing detailed list items' % (backing_list, sp_tree_actual))
+
+                for i in sp_tree_actual:
+                    count = min(len(backing_list), len(i)) - 1
+                    tmp_count = 0
+                    while tmp_count <= count:
+                        if backing_list[tmp_count] == i[tmp_count]:
+                            tmp_count += 1
+                            sp_covered = 1
+                            continue
+                        elif backing_list[tmp_count] != i[tmp_count]:
+                            sp_covered = 0
+                            break
+
+                    if sp_covered == 0:
+                        if i == sp_tree_actual[-1]:
+                            test_util.test_logger('%s not in current sp list %s, add it into sp list' % (backing_list, sp_tree_actual))
+                            sp_tree_actual.append(backing_list)
+                            break
+                    elif sp_covered == 1 and len(backing_list) > len(i):
+                        test_util.test_logger('%s is the superset of the list %s in current sp list %s, update current sp list' % (backing_list, i, sp_tree_actual))
+                        sp_tree_actual.remove(i)
+                        sp_tree_actual.append(backing_list)
+                        break
+                    elif sp_covered == 1 and len(backing_list) <= len(i):
+                        test_util.test_logger('%s already in current sp list %s, no need to add it anymore' % (backing_list, sp_tree_actual))
+                        break
+
+            test_util.test_logger('sp_tree_actual is %s' % (sp_tree_actual))
+        
+            vol_trees = test_lib.lib_get_volume_snapshot_tree(volume_uuid)
+            tree_allowed_depth = cfg_ops.get_global_config_value('volumeSnapshot', \
+                    'incrementalSnapshot.maxNum')
+
+            for vol_tree in vol_trees:
+                tree = json.loads(jsonobject.dumps(vol_tree))['tree']
+
+                for leaf_node in get_leaf_nodes(tree):
+                    backing_list = []
+                    backing_file = ''
+                    current_node = ''
+
+                    backing_file = leaf_node['inventory']['primaryStorageInstallPath']
+                    backing_list.append(backing_file.encode('utf-8'))
+                    current_node = leaf_node
+
+                    while True:
+                        parent_node = get_parent_node(tree, current_node)
+
+                        if not parent_node:
+                            break
+
+                        backing_file = parent_node['inventory']['primaryStorageInstallPath']
+                        backing_list.append(backing_file.encode('utf-8'))
+
+                        if parent_node.has_key('parentUuid'):
+                            current_node = parent_node
+                            continue
+                        else:
+                            break
+
+                    backing_list = list(reversed(backing_list))
+                    sp_tree_zs.append(backing_list)
+
+            test_util.test_logger('sp_tree_zs is %s' % (sp_tree_zs))
+
+            test_util.test_logger('compare the 2 sp lists - %s and %s' % (sp_tree_actual, sp_tree_zs))
+            sp_covered = 0
+
+            if len(sp_tree_actual) != len(sp_tree_zs):
+                test_util.test_logger('%s is not same length as %s' % (sp_tree_actual, sp_tree_zs))
+                return self.judge(False)
+
+            for i in sp_tree_actual:
+                if i in sp_tree_zs:
+                    sp_covered = 1
+                    test_util.test_logger('%s is in zs sp list %s' % (i, sp_tree_zs))
+                    if i == sp_tree_actual[-1]:
+                        test_util.test_logger('all the items in %s are in zs sp list %s' % (sp_tree_actual, sp_tree_zs))
+                    continue
+                elif i not in sp_tree_zs:
+                    sp_covered = 0
+                    test_util.test_logger('%s is not in zs sp list %s' % (i, sp_tree_zs))
+                    return self.judge(False)
+            
+
         return self.judge(True)
 
 def find_tree_max_depth(tree):
