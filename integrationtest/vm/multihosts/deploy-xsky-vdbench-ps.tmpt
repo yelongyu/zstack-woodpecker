@@ -1,0 +1,13 @@
+import ./deploy.tmpt
+cephPrimaryStorageName = ceph-ps
+cephPrimaryStorageMonUrls = root:password@ceph1;root:password@ceph2;root:password@ceph3
+cephBackupStorageName = ceph-bs
+cephBackupStorageMonUrls = root:password@ceph1;root:password@ceph2;root:password@ceph3
+cephPrimaryStorageDataVolumePoolName =
+cephPrimaryStorageRootVolumePoolName =
+cephPrimaryStorageImageCachePoolName =
+cephBackupStoragePoolName =
+instanceOfferingMemory_l = 2G
+instanceOfferingCPU_l = 2
+emptyimageUrl = http://172.20.1.28/mirror/diskimages/empty_disk.qcow2
+imageUrl_vdbench = http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2
