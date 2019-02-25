@@ -1642,7 +1642,6 @@ class BATCHDELSP(TestChain):
             'The snapshot with uuid [%s] is still exist!' % spuuid
             if self.sp_tree.delete(spuuid):
                 self.snapshots.delete_snapshot(spd[spuuid], False)
-        print self.sp_tree.tree
         remained_sp =  self.sp_tree.tree.keys()
         if self.sp_type == 'Storage':
             remained_sp.remove(self.sp_tree.root)
@@ -1650,8 +1649,10 @@ class BATCHDELSP(TestChain):
             if sud not in remained_sp:
                 self.snapshot.remove(spd[sud])
         for sp_uuid in remained_sp:
-            assert res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, res_ops.gen_query_conditions('uuid', '=', sp_uuid)), \
-            'The snapshot with uuid [%s] was not found!' % sp_uuid
+            snapshot = res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, res_ops.gen_query_conditions('uuid', '=', sp_uuid))
+            assert snapshot, 'The snapshot with uuid [%s] was not found!' % sp_uuid
+            if snapshot[0].parentUuid:
+                assert snapshot[0].parentUuid == self.sp_tree.parent(sp_uuid)
         remained_sp_num = len(self.sp_tree.get_all_nodes())
         if self.sp_type == 'Storage':
             remained_sp_num -= 1

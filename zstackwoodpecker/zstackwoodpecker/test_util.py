@@ -1982,6 +1982,8 @@ class SPTREE(object):
         self.branch_root = None
 
     def add(self, node, parent=None):
+        if parent:
+            self.revert(parent)
         if not self.tree:
             self.root = node
         elif node not in self.curr_node:

@@ -119,6 +119,7 @@ class DataMigration(TestChain):
         self.vol_uuid = None
         self.snapshot = []
         self.sp_tree = test_util.SPTREE()
+        self.sp_type =None
         super(DataMigration, self).__init__(chain_head, chain_length)
 
     def get_current_ps(self):
@@ -304,7 +305,6 @@ class DataMigration(TestChain):
         self.snapshots.set_utility_vm(self.vm)
         self.snapshots.create_snapshot('snapshot-%s' % time.strftime('%m%d-%H%M%S', time.localtime()))
 #         self.snapshots.check()
-        self.snapshot.append(self.snapshots.get_current_snapshot())
         curr_sp = self.snapshots.get_current_snapshot()
         self.snapshot.append(curr_sp)
         if curr_sp.get_snapshot().type == 'Storage':
@@ -600,6 +600,10 @@ class DataMigration(TestChain):
         self.sp_tree.show_tree()
         return self
 
+    def sp_check(self):
+        self.snapshots.check()
+        return self
+
     def batch_del_sp(self, snapshot_uuid_list=None, exclude_root=True):
         '''
         {"must":{"before": ["create_sp"]},
@@ -629,8 +633,10 @@ class DataMigration(TestChain):
             if sud not in remained_sp:
                 self.snapshot.remove(spd[sud])
         for sp_uuid in remained_sp:
-            assert res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, res_ops.gen_query_conditions('uuid', '=', sp_uuid)), \
-            'The snapshot with uuid [%s] was not found!' % sp_uuid
+            snapshot = res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, res_ops.gen_query_conditions('uuid', '=', sp_uuid))
+            assert snapshot, 'The snapshot with uuid [%s] was not found!' % sp_uuid
+            if snapshot[0].parentUuid:
+                assert snapshot[0].parentUuid == self.sp_tree.parent(sp_uuid)
         remained_sp_num = len(self.sp_tree.get_all_nodes())
         if self.sp_type == 'Storage':
             remained_sp_num -= 1

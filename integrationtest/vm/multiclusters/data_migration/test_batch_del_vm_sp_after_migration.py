@@ -28,7 +28,7 @@ def test():
     for i in range(10):
         data_migration.create_snapshot()
         if i % 2 == 1:
-            data_migration.revert_sp(root_vol=False)
+            data_migration.revert_sp()
 
     data_migration.sp_check()
     data_migration.batch_del_sp()
