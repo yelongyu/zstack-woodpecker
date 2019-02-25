@@ -331,8 +331,18 @@ class DataMigration(TestChain):
     def copy_data(self):
         cmd = "find /home -iname 'zstack-woodpecker.*'"
         file_path = commands.getoutput(cmd).split('\n')[0]
-        cp_cmd = 'sshpass -p password scp -o StrictHostKeyChecking=no %s root@%s:/mnt/' % (file_path, self.vm.get_vm().vmNics[0].ip)
-        commands.getoutput(cp_cmd)
+        src_file_md5 = commands.getoutput('md5sum %s' % file_path).split(' ')[0]
+        vm_ip = self.vm.get_vm().vmNics[0].ip
+        cp_cmd = 'sshpass -p password scp -o StrictHostKeyChecking=no %s root@%s:/mnt/' % (file_path, vm_ip)
+        sync_cmd = 'sshpass -p password ssh -o LogLevel=quiet -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
+                   root@%s "sync;sync;sleep 60;sync"' % vm_ip
+        for cmd in [cp_cmd, sync_cmd]:
+            os.system(cmd)
+        md5_cmd = 'sshpass -p password ssh -o LogLevel=quiet -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
+                   root@%s md5sum /mnt/%s' % (vm_ip, file_path.split('/')[-1])
+        dst_file_md5 = commands.getoutput(md5_cmd).split(' ')[0]
+        test_util.test_dsc('src_file_md5: [%s], dst_file_md5: [%s]' % (src_file_md5, dst_file_md5))
+        assert dst_file_md5 == src_file_md5, 'dst_file_md5 [%s] and src_file_md5 [%s] is not match, stop test' % (src_file_md5, dst_file_md5)
         return self
 
     def check_data(self):
@@ -660,7 +670,7 @@ class DataMigration(TestChain):
     def mount_disk_in_vm(self):
         import tempfile
         script_file = tempfile.NamedTemporaryFile(delete=False)
-        script_file.write('''device="/dev/`ls -ltr --file-type /dev | awk '$4~/disk/ {print $NF}' | grep -v '[[:digit:]]' | tail -1`" \n mount ${device}1 /mnt''')
+        script_file.write('''device="/dev/`ls -ltr --file-type /dev | awk '$4~/disk/ {print $NF}' | grep -v '[[:digit:]]'| sort | tail -1`" \n mount ${device}1 /mnt''')
         script_file.close()
         test_lib.lib_execute_shell_script_in_vm(self.vm.vm, script_file.name)
         return self
