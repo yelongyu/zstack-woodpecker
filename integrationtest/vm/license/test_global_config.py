@@ -15,7 +15,6 @@ import json
 import urllib2
 
 test_stub = test_lib.lib_get_test_stub()
-test_obj_dict = test_state.TestStateDict()
 
 ding_url = "https://oapi.dingtalk.com/robot/send?access_token=d4a90949d4e4a0b1dc0dbb57989a58480795d67b82fb86ce848b801602cabe76"
 def sendMsg_to_Ding():
