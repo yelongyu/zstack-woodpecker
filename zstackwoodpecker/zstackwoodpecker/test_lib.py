@@ -5817,6 +5817,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             new_size = current_size + int(delta)
             target_volume.resize(new_size)
             target_volume.update()
+            target_volume.update_volume()
         elif next_action == TestAction.create_data_volume_from_image:
             target_images = None
             target_image_name = None
