@@ -176,7 +176,168 @@ class zstack_kvm_snapshot_tree_checker(checker_header.TestChecker):
 
         # Only Ceph has raw image format for non-Root volume
         if ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
-            return
+            for snapshot in snapshots:
+                backing_list = []
+                backing_file = ''
+                sp_covered = 0
+                activate_host = ''
+
+                devPath = snapshot.get_snapshot().primaryStorageInstallPath.split("ceph://")[1]
+                volumePath = snapshot.get_snapshot().primaryStorageInstallPath.split("ceph://")[1].split("@")[0]
+
+                for i in sp_tree_actual:
+                    if devPath in i:
+                        test_util.test_logger('%s already in sp list %s' % (devPath, backing_list))
+                        sp_covered = 1
+
+                if sp_covered == 1:
+                    continue
+                else:
+                    test_util.test_logger('%s not in current sp list, start checking its backing chain' % (devPath))
+
+                backing_list.append(devPath)
+
+                cmd_info = "rbd info %s" % devPath
+
+                for host in test_lib.lib_find_hosts_by_ps_uuid(ps_uuid):
+                    result = test_lib.lib_execute_ssh_cmd(host.managementIp, 'root', 'password', cmd_info)
+                    if result:
+                        activate_host = host.managementIp
+                        break
+
+                if not activate_host:
+                    test_util.test_logger('No activate host found for %s' % (snapshot))
+                    return self.judge(self.exp_result)
+
+                while True:
+                    cmd_info = "rbd info %s" % devPath
+
+                    result = test_lib.lib_execute_ssh_cmd(activate_host, 'root', 'password', cmd_info)
+                    if result:
+                        tmp_list = get_snaps_for_raw_by_ip(volumePath, activate_host)
+                    else:
+                        test_util.test_logger('No activate host found for %s' % (snapshot))
+                        return self.judge(self.exp_result)
+
+                    if tmp_list:
+                        for i in tmp_list:
+                            i = i.replace("\n", "")
+                            if i == snapshot.get_snapshot().primaryStorageInstallPath.split("ceph://")[1].split("@")[1]:
+                                test_util.test_logger('%s is found for volume %s' % (devPath, volumePath))
+                                sp_covered = 1
+                    elif not tmp_list:
+                        test_util.test_logger('No snapshots found for volume %s' % (volumePath))
+                        return self.judge(False)
+
+                    #backing_file = backing_file.replace("\n", "")
+
+                    if sp_covered == 1:
+                        break
+                    else:
+                        test_util.test_logger('%s is not found for volume %s' % (devPath, volumePath))
+                        return self.judge(False)
+
+                sp_covered = 0
+
+                #backing_list = list(reversed(backing_list))
+
+                if not sp_tree_actual:
+                    test_util.test_logger('current sp list is empty, add %s into it' % (backing_list))
+                    sp_tree_actual.append(backing_list)
+                    continue
+
+                for i in sp_tree_actual:
+                    if backing_list == i:
+                        sp_covered = 1
+
+                if sp_covered == 1:
+                    test_util.test_logger('%s already in current sp list %s, no need to add it anymore' % (backing_list, sp_tree_actual))
+                    continue
+                else:
+                    test_util.test_logger('%s not in current sp list %s, start comparing detailed list items' % (backing_list, sp_tree_actual))
+
+                for i in sp_tree_actual:
+                    count = min(len(backing_list), len(i)) - 1
+                    tmp_count = 0
+                    while tmp_count <= count:
+                        if backing_list[tmp_count] == i[tmp_count]:
+                            tmp_count += 1
+                            sp_covered = 1
+                            continue
+                        elif backing_list[tmp_count] != i[tmp_count]:
+                            sp_covered = 0
+                            break
+
+                    if sp_covered == 0:
+                        if i == sp_tree_actual[-1]:
+                            test_util.test_logger('%s not in current sp list %s, add it into sp list' % (backing_list, sp_tree_actual))
+                            sp_tree_actual.append(backing_list)
+                            break
+                    elif sp_covered == 1 and len(backing_list) > len(i):
+                        test_util.test_logger('%s is the superset of the list %s in current sp list %s, update current sp list' % (backing_list, i, sp_tree_actual))
+                        sp_tree_actual.remove(i)
+                        sp_tree_actual.append(backing_list)
+                        break
+                    elif sp_covered == 1 and len(backing_list) <= len(i):
+                        test_util.test_logger('%s already in current sp list %s, no need to add it anymore' % (backing_list, sp_tree_actual))
+                        break
+
+            test_util.test_logger('sp_tree_actual is %s' % (sp_tree_actual))
+        
+            vol_trees = test_lib.lib_get_volume_snapshot_tree(volume_uuid)
+            tree_allowed_depth = cfg_ops.get_global_config_value('volumeSnapshot', \
+                    'incrementalSnapshot.maxNum')
+
+            for vol_tree in vol_trees:
+                tree = json.loads(jsonobject.dumps(vol_tree))['tree']
+
+                for leaf_node in get_leaf_nodes(tree):
+                    backing_list = []
+                    backing_file = ''
+                    current_node = ''
+
+                    backing_file = leaf_node['inventory']['primaryStorageInstallPath'].split("ceph://")[1]
+                    backing_list.append(backing_file.encode('utf-8'))
+                    current_node = leaf_node
+
+                    while True:
+                        parent_node = get_parent_node(tree, current_node)
+
+                        if not parent_node:
+                            break
+
+                        backing_file = parent_node['inventory']['primaryStorageInstallPath'].split("ceph://")[1]
+                        backing_list.append(backing_file.encode('utf-8'))
+
+                        if parent_node.has_key('parentUuid'):
+                            current_node = parent_node
+                            continue
+                        else:
+                            break
+
+                    backing_list = list(reversed(backing_list))
+                    sp_tree_zs.append(backing_list)
+
+            test_util.test_logger('sp_tree_zs is %s' % (sp_tree_zs))
+
+            test_util.test_logger('compare the 2 sp lists - %s and %s' % (sp_tree_actual, sp_tree_zs))
+            sp_covered = 0
+
+            if len(sp_tree_actual) != len(sp_tree_zs):
+                test_util.test_logger('%s is not same length as %s' % (sp_tree_actual, sp_tree_zs))
+                return self.judge(False)
+
+            for i in sp_tree_actual:
+                if i in sp_tree_zs:
+                    sp_covered = 1
+                    test_util.test_logger('%s is in zs sp list %s' % (i, sp_tree_zs))
+                    if i == sp_tree_actual[-1]:
+                        test_util.test_logger('all the items in %s are in zs sp list %s' % (sp_tree_actual, sp_tree_zs))
+                    continue
+                elif i not in sp_tree_zs:
+                    sp_covered = 0
+                    test_util.test_logger('%s is not in zs sp list %s' % (i, sp_tree_zs))
+                    return self.judge(False)
         elif ps.type == 'SharedBlock':
             for snapshot in snapshots:
                 backing_list = []
@@ -191,7 +352,7 @@ class zstack_kvm_snapshot_tree_checker(checker_header.TestChecker):
                         test_util.test_logger('%s already in sp list %s' % (devPath, backing_list))
                         sp_covered = 1
 
-                if sp_covered == '1':
+                if sp_covered == 1:
                     continue
                 else:
                     test_util.test_logger('%s not in current sp list, start checking its backing chain' % (devPath))
@@ -243,7 +404,7 @@ class zstack_kvm_snapshot_tree_checker(checker_header.TestChecker):
                     if backing_list == i:
                         sp_covered = 1
 
-                if sp_covered == '1':
+                if sp_covered == 1:
                     test_util.test_logger('%s already in current sp list %s, no need to add it anymore' % (backing_list, sp_tree_actual))
                     continue
                 else:
@@ -576,3 +737,25 @@ def get_qcow_backing_file_by_ip(installPath, hostIp):
 
     cmd = 'qemu-img info %s | grep "backing file:" | awk \'{print $3}\'' % installPath
     return test_lib.lib_execute_ssh_cmd(hostIp, 'root', 'password', cmd)
+
+def get_snaps_for_raw_by_ip(installPath, hostIp):
+    '''
+    return all the snapshots for a given volume Path via Host IP
+    '''
+
+    snaps = []
+    cmd_lines = 'rbd snap ls %s | wc -l' % installPath
+    rsp = test_lib.lib_execute_ssh_cmd(hostIp, 'root', 'password', cmd_lines)
+
+    if rsp:
+        lines = int(rsp)
+        i = 2
+        while i <= lines:
+            cmd = 'rbd snap ls %s | sed -n %s\'p\' | awk \'{print $2}\'' % (installPath, i)
+            result = test_lib.lib_execute_ssh_cmd(hostIp, 'root', 'password', cmd)
+            snaps.append(result)
+            i += 1
+    elif not rsp:
+        return 0
+
+    return snaps
