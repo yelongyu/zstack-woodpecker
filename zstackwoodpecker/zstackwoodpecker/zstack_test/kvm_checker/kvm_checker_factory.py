@@ -442,11 +442,11 @@ class SnapshotCheckerFactory(checker_header.CheckerFactory):
             #target volume is not deleted.
             sp_checker_chain.add_checker(\
                     sp_checker.zstack_kvm_snapshot_checker(), True, test_obj)
-            ps_uuid = test_obj.get_target_volume().get_volume().primaryStorageUuid
-            if test_lib.lib_is_ps_iscsi_backend(ps_uuid):
-                sp_checker_chain.add_checker(\
-                        sp_checker.zstack_kvm_snapshot_tree_checker(), True, \
-                        test_obj)
+            #ps_uuid = test_obj.get_target_volume().get_volume().primaryStorageUuid
+            #if test_lib.lib_is_ps_iscsi_backend(ps_uuid):
+            sp_checker_chain.add_checker(\
+                    sp_checker.zstack_kvm_snapshot_tree_checker(), True, \
+                    test_obj)
         if test_obj.get_backuped_snapshots():
             sp_checker_chain.add_checker(\
                     sp_checker.zstack_kvm_backuped_snapshot_checker(), \
