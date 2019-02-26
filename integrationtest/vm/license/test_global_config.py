@@ -30,7 +30,7 @@ def sendMsg_to_Ding():
 			"text": {
 					"content": "1.zstack global config  has changed on  latest nightly test.\n\
 2.need to doulbe confirm ui if has change example :Garbled words\n\
-3.antony(weijiang),you should double confirm with developer and then fix this issue."
+3.you should double confirm with developer and then fix this issue."
 				}
 		}
 	sendData = json.dumps(data)

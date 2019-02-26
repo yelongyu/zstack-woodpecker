@@ -14,8 +14,8 @@
         <case timeout="180" >test_suspend_vm.py</case>
         <case timeout="180" >test_suspended_vm_ops.py</case>
         <case timeout="180" >test_start_vm.py</case>
-        <case timeout="180" >test_support_vm_boot_option.py</case>
-        <case timeout="180" >test_vm_with_volumes_boot_option.py</case>
+        <case timeout="300" >test_support_vm_boot_option.py</case>
+        <case timeout="300" >test_vm_with_volumes_boot_option.py</case>
         <case timeout="600" >test_reboot_vm.py</case>
         <case timeout="300" >test_add_volume.py</case> 
         <case timeout="200" >test_add_vol_to_stopvm.py</case> 
@@ -43,21 +43,21 @@
         <case timeout="180" >test_ldap_login.py</case>
         <case timeout="180" >test_ldap_tls_login.py</case>
         <case timeout="180" >test_ldap_filter.py</case>
-        <case timeout="180" >test_ldap_filter2.py</case>
+        <case timeout="300" >test_ldap_filter2.py</case>
         <case timeout="180" >test_ad_admin_login.py</case>
         <case timeout="180" >test_ad_user_login.py</case>
         <case timeout="180" >test_ad_group_login.py</case>
         <case timeout="480" >test_get_multi_vm_console_address.py</case>
         <case timeout="900" >test_vm_ha_never_stop.py</case>
-        <case timeout="600" >test_set_vm_console_password.py</case>
-        <case timeout="600" >test_set_vm_console_password_create.py</case>
+        <case timeout="900" >test_set_vm_console_password.py</case>
+        <case timeout="900" >test_set_vm_console_password_create.py</case>
         <case timeout="600" >test_set_vm_hostname.py</case>
-        <case timeout="600" >test_delete_vm_console_password.py</case>
+        <case timeout="900" >test_delete_vm_console_password.py</case>
         <case timeout="220" >test_add_image_file_url.py</case>
         <case timeout="220" >test_add_qcow2_image_file_url.py</case>
         <case timeout="220" >test_check_mysql_host_password.py</case>
         <case timeout="220" >test_host_ept.py</case>
-        <case timeout="220" >test_add_host_ept.py</case>
+        <case timeout="360" >test_add_host_ept.py</case>
         <case timeout="220" >test_elaboration.py</case>
         <case timeout="180" noparallel='True'>test_get_vm_console_address.py</case>
 	<case timeout="600" noparallel='True'>vga/test_vm_vga.py</case>
