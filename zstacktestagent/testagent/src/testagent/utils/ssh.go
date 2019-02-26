@@ -37,6 +37,7 @@ func ExecuteCommand(host string, port string, username string, password string, 
 	session.Stdout = &b
 	err = session.Run(command)
 	if err != nil {
+		client.Close()
 		return "", err
 	}
 
@@ -52,6 +53,7 @@ func ScpFile(host string, port string, username string, password string, filePat
 	defer session.Close()
 	err = scp.CopyPath(filePath, destPath, session)
 	if err != nil {
+		client.Close()
 		return err
 	}
 
