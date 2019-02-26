@@ -387,7 +387,7 @@ class zstack_kvm_snapshot_tree_checker(checker_header.TestChecker):
                     if not backing_file:
                         if volume_obj.get_volume().type == 'Root':
                             test_util.test_logger('%s is against the Root volume, need to pop up the image cache %s' % (snapshot, devPath))
-                            backing_list.pop(devPath)
+                            backing_list.pop()
                         break
                     else:
                         backing_list.append(backing_file)
@@ -553,7 +553,7 @@ depth is : %s. The real snapshot max depth is: %s' % \
                     if not backing_file:
                         if volume_obj.get_volume().type == 'Root':
                             test_util.test_logger('%s is against the Root volume, need to pop up the image cache %s' % (snapshot, devPath))
-                            backing_list.pop(devPath)
+                            backing_list.pop()
                         break
                     else:
                         backing_list.append(backing_file)
