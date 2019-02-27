@@ -1230,12 +1230,11 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
 
             if hasattr(vm, 'primaryStorageRef'):
                 for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
-                    print primaryStorageRef.text_
                     primary_storage_type = get_primary_storage_type(deploy_config, primaryStorageRef.text_)
                     for zone in xmlobject.safe_list(deploy_config.zones.zone):
 #                         if primary_storage_type == 'ceph':
                         if primary_storage_type in ['ceph', 'xsky']:
-                            key = (backupStorageRef.text_, backup_storage_type)
+                            key = (primaryStorageRef.text_, primary_storage_type)
                             if ceph_storages.has_key(key):
                                 if vm_name in ceph_storages[key]:
                                     continue
@@ -2032,7 +2031,7 @@ def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_in
         action.primaryStorageUuid = ps.uuid
         #host = lib_find_random_host(http_server_ip)
         #action.systemTags = ["localStorage::hostUuid::%s" % host.uuid]
-        if xmlobject.has_element(deploy_config, 'backupStorages.xskycephBackupStorage'):
+        if xmlobject.has_element(deploy_config, 'zones.zone.primaryStorages.xskycephPrimaryStorage'):
             action.systemTags = ["capability::virtio-scsi", "localStorage::hostUuid::%s" % vm_inv.hostUuid]
         else:
             action.systemTags = ["localStorage::hostUuid::%s" % vm_inv.hostUuid]
@@ -2713,6 +2712,16 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                 share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
                                 zbs_virtio_scsi_volume_is_created = True
                                 attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
+                        elif ps_ref.type_ == 'xskyceph':
+                            disk_offering_uuid = ps_ref.offering_uuid_
+                            volume_option.set_disk_offering_uuid(disk_offering_uuid)
+                            if primaryStorageUuid != None and primaryStorageUuid != "":
+                                volume_option.set_primary_storage_uuid(primaryStorageUuid)
+                            if poolName != None and poolName != "":
+                                volume_option.set_system_tags(['ceph::pool::%s' % (poolName)])
+                                volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config)
+                            attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
+                            break
                         elif ps_ref.type_ == 'ebs':
                             cond = res_ops.gen_query_conditions('uuid', '=', vm_inv.hostUuid)
                             host_inv = query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
@@ -2722,7 +2731,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
         xml_string = etree.tostring(root_xml, 'utf-8')
         xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
         open(scenario_file, 'w+').write(xml_string)
-        if xmlobject.has_element(deploy_config, 'backupStorages.xskycephBackupStorage') or xmlobject.has_element(deploy_config, 'backupStorages.cephBackupStorage'):
+        if xmlobject.has_element(deploy_config, 'zones.zone.primaryStorages.xskycephPrimaryStorage') or xmlobject.has_element(deploy_config, 'backupStorages.cephBackupStorage'):
 #             setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config)
 # #         else:
 #         if xmlobject.has_element(deploy_config, 'backupStorages.cephBackupStorage'):
