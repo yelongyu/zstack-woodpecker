@@ -247,7 +247,7 @@ class DataMigration(TestChain):
                 vms2.append(vm)
             return vms2
         return self
-    
+
     def resize_vm(self, new_size):
         self.root_vol_uuid = self.vm.vm.rootVolumeUuid
         vol_ops.resize_volume(self.root_vol_uuid, new_size)
@@ -284,6 +284,28 @@ class DataMigration(TestChain):
         self.data_volume.set_volume(res_ops.query_resource(res_ops.VOLUME, conditions)[0])
         assert self.data_volume.get_volume().primaryStorageUuid == self.dst_ps.uuid
         self.set_ceph_mon_env(self.dst_ps.uuid)
+        return self
+
+    def migrate_full_vm(self):
+        '''
+        {"must": 
+                {"before": ["mount_disk_in_vm", "copy_data", "detach_vm", "migrate_vm"],
+                 "after": ["attach_vm", "mount_disk_in_vm", "check_data",
+                           "check_origin_data_exist", "clean_up_ps_trash_and_check"]},
+         "next": ["create_image", "create_snapshot"],
+         "weight": 2}
+         '''
+#         if not self.dst_ps:
+        self.vm.stop()
+        ps_uuid_to_migrate = self.get_vm_ps_candidate().uuid
+        datamigr_ops.ps_migrage_vm(ps_uuid_to_migrate, self.vm.vm.uuid)
+        conditions = res_ops.gen_query_conditions('uuid', '=', self.vm.vm.uuid)
+        self.vm.vm = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)[0]
+        if start:
+            self.vm.start()
+            self.vm.check()
+ 	    assert self.vm.vm.allVolumes[0].primaryStorageUuid == ps_uuid_to_migrate
+            self.root_vol_uuid = self.vm.vm.rootVolumeUuid
         return self
 
     def create_snapshot(self):
@@ -526,6 +548,12 @@ class DataMigration(TestChain):
 #         ps_to_migrate = self.ps_1 if self.ps_1.uuid != self.vm.vm.allVolumes[0].primaryStorageUuid else self.ps_2
         return ps_to_migrate
 
+    def get_vm_ps_candidate(self, vm_uuid=None):
+        if not vm_uuid:
+            vm_uuid = self.vm.vm.uuid
+        ps_to_migrate = random.choice(datamigr_ops.get_ps_candidate_for_vm_migration(vm_uuid))
+        return ps_to_migrate
+
     def get_bs_candidate(self):
         self.get_image()
         self.cand_bs = datamigr_ops.get_bs_candidate_for_image_migration(self.image.backupStorageRefs[0].backupStorageUuid)
@@ -729,7 +757,6 @@ class DataMigration(TestChain):
         cond_image = res_ops.gen_query_conditions('uuid', '=', self.image.uuid)
         self.image = res_ops.query_resource(res_ops.IMAGE, cond_image)[0]
         assert self.image.backupStorageRefs[0].backupStorageUuid == self.dst_bs.uuid
-
 
 def get_host_cpu_model(ip):
     cmd = 'virsh capabilities | grep "<arch>.*.</arch>" -C 1 | tail -1'
