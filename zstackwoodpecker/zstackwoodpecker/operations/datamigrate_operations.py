@@ -59,3 +59,9 @@ def get_bs_candidate_for_image_migration(src_bs_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt.inventories
 
+def get_ps_candidate_for_vm_migration(vm_uuid, session_uuid=None):
+    action = api_actions.GetPrimaryStorageCandidatesForVmMigrationAction()
+    action.vmInstanceUuid = vm_uuid
+    test_util.action_logger('Get Primary Storage Candidates for Vm Migration')
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    return evt.inventories
