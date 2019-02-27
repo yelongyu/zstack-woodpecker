@@ -76,6 +76,7 @@ class TestAction(object):
     create_volume_snapshot = 'create_volume_snapshot'
     delete_volume_snapshot = 'delete_volume_snapshot'
     use_volume_snapshot = 'use_volume_snapshot'
+    batch_delete_volume_snapshot = 'batch_delete_volume_snapshot'
     backup_volume_snapshot = 'backup_volume_snapshot'
     delete_backup_volume_snapshot = 'delete_backup_volume_snapshot'
     create_volume_from_snapshot = 'create_volume_from_snapshot'
