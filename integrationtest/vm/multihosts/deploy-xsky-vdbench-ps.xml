@@ -121,11 +121,11 @@
   
       <diskOffering name="$mediumDiskOfferingName" 
         description="Medium Disk Offering" 
-        diskSize="$mediumDiskOfferingSize" />
+        diskSize="$largeDiskOfferingSize" />
   
       <diskOffering name="$smallDiskOfferingName" 
         description="Small Disk Offering" 
-        diskSize="$smallDiskOfferingSize" /> 
+        diskSize="$largeDiskOfferingSize" /> 
     </diskOfferings>
   
     <zones>
