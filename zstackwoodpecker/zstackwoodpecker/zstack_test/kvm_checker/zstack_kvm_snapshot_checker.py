@@ -165,11 +165,14 @@ class zstack_kvm_snapshot_tree_checker(checker_header.TestChecker):
         #    test_util.test_logger('Check result: [installPath] is Null for [volume uuid: ] %s. Can not check volume file existence' % volume.uuid)
         #    return self.judge(self.exp_result)
 
-        if volume_obj.get_state() == vl_header.DELETED or \
-                (volume_obj.get_volume().type == 'Root' and \
-                volume_obj.get_target_vm().get_state() == vm_header.DESTROYED):
+        if volume_obj.get_state() == vl_header.DELETED:
             test_util.test_logger('Checker result: target volume is deleted, can not get get and check snapshot tree status')
             return self.judge(self.exp_result)
+
+        if volume_obj.get_target_vm():
+            if volume_obj.get_volume().type == 'Root' and volume_obj.get_target_vm().get_state() == vm_header.DESTROYED:
+                test_util.test_logger('Checker result: target volume is deleted, can not get get and check snapshot tree status')
+                return self.judge(self.exp_result)
 
         ps_uuid = volume_obj.get_volume().primaryStorageUuid
         ps = test_lib.lib_get_primary_storage_by_uuid(ps_uuid)
