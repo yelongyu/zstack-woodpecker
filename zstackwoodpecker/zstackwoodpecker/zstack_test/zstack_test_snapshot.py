@@ -273,7 +273,16 @@ umount %s
             
         packed_sp_trees = test_lib.lib_get_volume_snapshot_tree(self.target_volume.get_volume().uuid)
         if not packed_sp_trees:
-            print "not found snapshot tree on target volume"
+            print "not found snapshot tree on target volume, clear the children of the snapshot"
+            sp_list = get_snapshot_family(snapshot)
+            for sp in sp_list:
+                if sp.get_state() == sp_header.DELETED:
+                    continue
+                sp.delete2()
+                if sp in self.primary_snapshots:
+                    self.primary_snapshots.remove(sp)
+                if sp in self.backuped_snapshots:
+                    self.backuped_snapshots.remove(sp)
             return
 
         sp_trees = packed_sp_trees[0].inventories
