@@ -30,6 +30,7 @@ class TestAction(object):
     cleanup_imagecache_on_ps = "cleanup_imagecache_on_ps"
     idel = 'idel'
     create_vm = 'create_vm'
+    create_vm_by_image = 'create_vm_by_image'
     stop_vm = 'stop_vm'
     start_vm = 'start_vm'
     suspend_vm = 'suspend_vm'
@@ -65,6 +66,7 @@ class TestAction(object):
     expunge_image = 'expunge_image'
     create_data_template_from_backup = 'create_data_template_from_backup'
 
+    add_image = 'add_image'
     create_sg = 'create_security_group'
     delete_sg = 'delete_security_group'
     sg_rule_operations = 'security_group_rules_operations'

@@ -6223,6 +6223,81 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
 
             import zstackwoodpecker.operations.image_operations as img_ops
             img_ops.create_data_template_from_backup(filtered_bss[0].uuid, target_backup.uuid, image_name)
+        elif next_action == TestAction.add_image:
+            target_backup = None
+            backup_name = None
+            image_name = None
+            image_format = None
+            image_url = None
+            
+            if len(constant_path_list[0]) > 4:
+                backup_name = constant_path_list[0][1]
+                image_name = constant_path_list[0][2]
+                image_format = constant_path_list[0][3]
+                image_url = constant_path_list[0][4]
+                backup_list = test_dict.get_backup_list()
+                for backup_uuid in backup_list:
+                    backup = lib_get_backup_by_uuid(backup_uuid)
+                    if backup.name == backup_name:
+                        target_backup = backup
+                        break
+            if not target_backup or not image_name or not image_format or not image_url:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+            test_util.test_dsc('Robot Action: %s; on Backup: %s' % \
+                (next_action, target_backup.uuid))
+
+            #ps_uuid = lib_robot_get_default_configs(robot_test_obj, "PS")
+            
+            bs_cond = res_ops.gen_query_conditions("status", '=', "Connected")
+            bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, bs_cond)
+            #filtered_bss = []
+            bs_uuid = None
+            for bs in bss:
+                #ps_uuid_list = lib_get_primary_storage_uuid_list_by_backup_storage(bs.uuid)
+                #if ps_uuid in ps_uuid_list:
+                #    filtered_bss.append(bs)
+                test_util.test_logger("DEBUG>>>bs.name=%s vs. backup_name=%s" %(bs.name, backup_name))
+                if bs.name == backup_name:
+                    bs_uuid = bs.uuid
+            else:
+                test_util.test_skip("not find bs with assigned name")
+                
+            if not filtered_bss:
+                test_util.test_fail("not find available backup storage. Skip test")
+
+            image_option = test_util.ImageOption()
+            image_option.set_uuid(image_uuid)
+            image_option.set_name(image_name)
+            image_option.set_description('Description->'+ image_name)
+            image_option.set_format(image_format)
+            image_option.set_mediaType('RootVolumeTemplate')
+            image_option.set_backup_storage_uuid_list([bs_uuid])
+            image_option.url = image_url
+            image_option.set_timeout(24*60*60*1000)
+            import zstackwoodpecker.operations.image_operations as img_ops
+            image = img_ops.add_image(image_option)
+            test_dict.add_image(image)
+
+        elif next_action == TestAction.create_vm_by_image:
+            vm_name = None
+            target_image = None
+            if len(constant_path_list[0]) > 3:
+                target_image_name = constant_path_list[0][1]
+                vm_name = constant_path_list[0][2]
+                image_list = test_dict.get_image_list()
+                for image in image_list:
+                    if image.name == target_image_name:
+                        target_image = image
+                        break
+
+            if not target_image or not vm_name:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            vm_creation_option = test_util.VmOption()
+            vm_creation_option.set_image_uuid(target_image.get_image().uuid)
+            vm = lib_create_vm(vm_creation_option)
+            test_obj_dict.add_vm(vm)
+
         elif next_action == TestAction.create_vm_backup:
             backup_name = None
             target_vm = None
