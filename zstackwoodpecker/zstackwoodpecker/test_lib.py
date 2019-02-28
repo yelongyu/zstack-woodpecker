@@ -6234,6 +6234,13 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                 image_name = constant_path_list[0][2]
                 image_format = constant_path_list[0][3]
                 image_url = constant_path_list[0][4]
+                #image_list = test_dict.get_image_list()
+                #for image in image_list:
+                #    if image.name == image_name:
+                #        image_uuid = image.get_image().uuid
+                #        break
+                #else:
+                #    test_util.test_fail("not find candidate image.")
             else:
                 test_util.test_fail("candidate argument number is less than 4.")
 
@@ -6243,20 +6250,17 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             
             bs_cond = res_ops.gen_query_conditions("status", '=', "Connected")
             bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, bs_cond)
-            #filtered_bss = []
             bs_uuid = None
             for bs in bss:
-                test_util.test_logger("DEBUG>>>bs.name=%s vs. backup_name=%s" %(bs.name, backup_name))
-                if bs.name == backup_name:
+                test_util.test_logger("DEBUG>>>bs.name=(%s) vs. backup_name=(%s)" %(bs.name, backup_name))
+                if bs.name.strip() == backup_name.strip():
                     bs_uuid = bs.uuid
+                    break
             else:
                 test_util.test_skip("not find bs with assigned name")
                 
-            if not filtered_bss:
-                test_util.test_fail("not find available backup storage. Skip test")
-
             image_option = test_util.ImageOption()
-            image_option.set_uuid(image_uuid)
+            #image_option.set_uuid(image_uuid)
             image_option.set_name(image_name)
             image_option.set_description('Description->'+ image_name)
             image_option.set_format(image_format)
@@ -6266,17 +6270,22 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             image_option.set_timeout(24*60*60*1000)
             import zstackwoodpecker.operations.image_operations as img_ops
             image = img_ops.add_image(image_option)
-            test_dict.add_image(image)
+
+            import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
+            new_image = zstack_image_header.ZstackTestImage()
+            new_image.set_creation_option(image_option)
+            new_image.set_image(image)
+            test_dict.add_image(new_image)
 
         elif next_action == TestAction.create_vm_by_image:
             vm_name = None
             target_image = None
-            if len(constant_path_list[0]) > 3:
+            if len(constant_path_list[0]) > 2:
                 target_image_name = constant_path_list[0][1]
                 vm_name = constant_path_list[0][2]
                 image_list = test_dict.get_image_list()
                 for image in image_list:
-                    if image.name == target_image_name:
+                    if image.get_image().name == target_image_name:
                         target_image = image
                         break
 
@@ -6286,7 +6295,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             vm_creation_option = test_util.VmOption()
             vm_creation_option.set_image_uuid(target_image.get_image().uuid)
             vm = lib_create_vm(vm_creation_option)
-            test_obj_dict.add_vm(vm)
+            test_dict.add_vm(vm)
 
         elif next_action == TestAction.create_vm_backup:
             backup_name = None
