@@ -6224,7 +6224,6 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             import zstackwoodpecker.operations.image_operations as img_ops
             img_ops.create_data_template_from_backup(filtered_bss[0].uuid, target_backup.uuid, image_name)
         elif next_action == TestAction.add_image:
-            target_backup = None
             backup_name = None
             image_name = None
             image_format = None
@@ -6235,16 +6234,10 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                 image_name = constant_path_list[0][2]
                 image_format = constant_path_list[0][3]
                 image_url = constant_path_list[0][4]
-                backup_list = test_dict.get_backup_list()
-                for backup_uuid in backup_list:
-                    backup = lib_get_backup_by_uuid(backup_uuid)
-                    if backup.name == backup_name:
-                        target_backup = backup
-                        break
-            if not target_backup or not image_name or not image_format or not image_url:
-                test_util.test_fail("no resource available for next action: %s" % (next_action))
-            test_util.test_dsc('Robot Action: %s; on Backup: %s' % \
-                (next_action, target_backup.uuid))
+            else:
+                test_util.test_fail("candidate argument number is less than 4.")
+
+            test_util.test_dsc('Robot Action: %s;' %(next_action))
 
             #ps_uuid = lib_robot_get_default_configs(robot_test_obj, "PS")
             
@@ -6253,9 +6246,6 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             #filtered_bss = []
             bs_uuid = None
             for bs in bss:
-                #ps_uuid_list = lib_get_primary_storage_uuid_list_by_backup_storage(bs.uuid)
-                #if ps_uuid in ps_uuid_list:
-                #    filtered_bss.append(bs)
                 test_util.test_logger("DEBUG>>>bs.name=%s vs. backup_name=%s" %(bs.name, backup_name))
                 if bs.name == backup_name:
                     bs_uuid = bs.uuid
