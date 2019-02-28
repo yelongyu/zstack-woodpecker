@@ -1,0 +1,27 @@
+import ../scenario.tmpt
+import ./deploy-imagestore-ceph-san.tmpt
+
+vmName1 = ocfs2_scenario1
+vmName2 = ocfs2_scenario2
+vmName3 = ocfs2_scenario3
+vmName4 = ocfs2_scenario4
+vmName5 = ocfs2_scenario5
+vmInstranceOfferingUuid2 = 123456
+imageUuid2 = 123456
+shareVolumeDiskOfferingUuid = 123456
+volumeName = test_volume
+iscsiDiskOfferingUuid = 333333
+#iscsiClusterUuid = 222222
+iscsiImageUuid = 123456
+
+cephPrimaryStorageName = ceph-ps
+cephPrimaryStorageMonUrls = root:password@ceph01;root:password@ceph02;root:password@ceph03
+cephPrimaryStorageDataVolumePoolName =
+cephPrimaryStorageRootVolumePoolName =
+cephPrimaryStorageImageCachePoolName =
+
+cephBackupStorageName = ceph-bs
+cephBackupStorageMonUrls = root:password@ceph01;root:password@ceph02;root:password@ceph03
+cephBackupStoragePoolName =
+
+cephStorageOfferingUuid = 123456

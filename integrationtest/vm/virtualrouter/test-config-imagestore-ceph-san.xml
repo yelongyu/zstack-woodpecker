@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-imagestore-ceph-san.xml</deployConfig>
+    <deployConfigTemplate>deploy-imagestore-ceph-san.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
