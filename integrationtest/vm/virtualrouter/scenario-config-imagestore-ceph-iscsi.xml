@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-imagestore-ceph-iscsi.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-imagestore-ceph-iscsi.tmpt</scenarioConfigTemplate>
+</testConfig>

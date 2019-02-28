@@ -1,4 +1,0 @@
-<testConfig>
-    <scenarioConfig>scenario-imagestore-ceph-san.xml</scenarioConfig>
-    <scenarioConfigTemplate>scenario-imagestore-ceph-san.tmpt</scenarioConfigTemplate>
-</testConfig>
