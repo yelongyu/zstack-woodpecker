@@ -296,6 +296,11 @@ class DataMigration(TestChain):
          "weight": 2}
          '''
 #         if not self.dst_ps:
+        self.former_root_vol_uuid = self.vm.vm.rootVolumeUuid
+        self.former_root_vol_size = self.vm.vm.allVolumes[0].size
+        self.former_root_vol_install_path = self.vm.vm.allVolumes[0].installPath
+        self.origin_ps = self.get_ps_inv(self.vm.vm.allVolumes[0].primaryStorageUuid)
+
         self.vm.stop()
         ps_uuid_to_migrate = self.get_vm_ps_candidate().uuid
         datamigr_ops.ps_migrage_vm(ps_uuid_to_migrate, self.vm.vm.uuid)
@@ -304,7 +309,7 @@ class DataMigration(TestChain):
         self.vm.start()
         self.vm.check()
  	assert self.vm.vm.allVolumes[0].primaryStorageUuid == ps_uuid_to_migrate
-        self.root_vol_uuid = self.vm.vm.rootVolumeUuid
+        self.former_root_vol_uuid = self.vm.vm.rootVolumeUuid
 
         return self
 
