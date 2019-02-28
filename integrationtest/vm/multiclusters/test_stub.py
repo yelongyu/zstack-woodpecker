@@ -301,11 +301,11 @@ class DataMigration(TestChain):
         datamigr_ops.ps_migrage_vm(ps_uuid_to_migrate, self.vm.vm.uuid)
         conditions = res_ops.gen_query_conditions('uuid', '=', self.vm.vm.uuid)
         self.vm.vm = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)[0]
-        if start:
-            self.vm.start()
-            self.vm.check()
- 	    assert self.vm.vm.allVolumes[0].primaryStorageUuid == ps_uuid_to_migrate
-            self.root_vol_uuid = self.vm.vm.rootVolumeUuid
+        self.vm.start()
+        self.vm.check()
+ 	assert self.vm.vm.allVolumes[0].primaryStorageUuid == ps_uuid_to_migrate
+        self.root_vol_uuid = self.vm.vm.rootVolumeUuid
+
         return self
 
     def create_snapshot(self):
