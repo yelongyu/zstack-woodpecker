@@ -874,6 +874,8 @@ def main():
             raise TestExc('Build ZStack Failure, can not continue testing. Exit code: %s' % ret)
 
         print_info('ZStack Build And Deployment Completed')
+    else:
+        os.system("touch /tmp/woodpecker_setup")
 
     if options.restartZstack:
         test_lib.restart_zstack(options.restartZstack)
