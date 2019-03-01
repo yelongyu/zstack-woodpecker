@@ -51,9 +51,8 @@
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
           </l3Networks>
-          <hostRef>$hostName</hostRef>
-          <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
-          <primaryStorageRef type="iscsiInitiator" >$iscsiPrimaryStorageName</primaryStorageRef>
+          <backupStorageRef type="ceph" offering_uuid="$cephStorageOfferingUuid">$cephBackupStorageName</backupStorageRef>
+          <primaryStorageRef type="ceph">$cephPrimaryStorageName</primaryStorageRef>
         </vm>
       </vms>
     </host>
@@ -68,7 +67,7 @@
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
           </l3Networks>
-          <hostRef>$hostName2</hostRef>
+          <hostRef>$hostName</hostRef>
           <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
           <primaryStorageRef type="iscsiInitiator" >$iscsiPrimaryStorageName</primaryStorageRef>
         </vm>
@@ -85,13 +84,13 @@
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
           </l3Networks>
-          <hostRef>$hostName3</hostRef>
+          <hostRef>$hostName2</hostRef>
           <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
           <primaryStorageRef type="iscsiInitiator" >$iscsiPrimaryStorageName</primaryStorageRef>
         </vm>
       </vms>
     </host>
-     <host uuid="$hostUuid6">
+    <host uuid="$hostUuid6">
       <vms>
         <vm name="$vmName6" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2"
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
@@ -102,8 +101,9 @@
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
           </l3Networks>
-          <backupStorageRef type="ceph" offering_uuid="$cephStorageOfferingUuid">$cephBackupStorageName</backupStorageRef>
-          <primaryStorageRef type="ceph">$cephPrimaryStorageName</primaryStorageRef>
+          <hostRef>$hostName3</hostRef>
+          <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
+          <primaryStorageRef type="iscsiInitiator" >$iscsiPrimaryStorageName</primaryStorageRef>
         </vm>
       </vms>
     </host>
