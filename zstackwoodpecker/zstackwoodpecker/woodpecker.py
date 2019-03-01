@@ -276,7 +276,7 @@ class WoodPecker(object):
 
             try:
                 if case_name == 'suite_setup' or self.startDebugger == False:
-                    test_env_variables = 'WOODPECKER_PARALLEL=%s WOODPECKER_SCENARIO_CONFIG_FILE=%s WOODPECKER_SCENARIO_FILE=%s WOODPECKER_SCENARIO_DESTROY=%s WOODPECKER_TEST_CONFIG_FILE=%s WOODPECKER_CASE_ACTION_LOG_PATH=%s WOODPECKER_NO_ERROR_CLEANUP=%s WOODPECKER_ONLY_ACTION_LOG=%s CASE_FLAVOR=%s' % (parallel, self.scenario_config, self.scenario_file, self.scenario_destroy, self._check_test_config(suite.test_config, case.path), case_action_log_path, self.noCleanup, self.onlyActionLog, case.flavor)
+                    test_env_variables = 'WOODPECKER_PARALLEL=%s WOODPECKER_SCENARIO_CONFIG_FILE=%s WOODPECKER_SCENARIO_FILE=%s WOODPECKER_SCENARIO_DESTROY=%s WOODPECKER_TEST_CONFIG_FILE=%s WOODPECKER_CASE_ACTION_LOG_PATH=%s WOODPECKER_NO_ERROR_CLEANUP=%s WOODPECKER_ONLY_ACTION_LOG=%s CASE_FLAVOR=%s' % (parallel, self.scenario_config, self.scenario_file, self.scenario_destroy, self._check_test_config(suite.test_config, case.path), case_action_log_path, True, self.onlyActionLog, case.flavor)
                 else:
                     test_env_variables = 'WOODPECKER_PARALLEL=%s WOODPECKER_SCENARIO_CONFIG_FILE=%s WOODPECKER_SCENARIO_FILE=%s WOODPECKER_SCENARIO_DESTROY=%s WOODPECKER_TEST_CONFIG_FILE=%s WOODPECKER_CASE_ACTION_LOG_PATH=%s WOODPECKER_NO_ERROR_CLEANUP=%s WOODPECKER_ONLY_ACTION_LOG=%s WOODPECKER_START_DEBUGGER=%s CASE_FLAVOR=%s' % (parallel, self.scenario_config, self.scenario_file, self.scenario_destroy, self._check_test_config(suite.test_config, case.path), case_action_log_path, self.noCleanup, self.onlyActionLog, self.startDebugger, case.flavor)
                 #self.info('\n test environment variables: %s \n' % test_env_variables)
@@ -504,6 +504,7 @@ class WoodPecker(object):
                     if sig_flag:
                         return
                     if self.case_failure and self.stop_when_fail:
+                        os.system("touch /tmp/woodpecker_setup_fail")
                         return
                     #self.info('running setup case: %s' % suite.setup_case.name)
                     run_case(suite, suite.setup_case, suite_repeat, 0)
