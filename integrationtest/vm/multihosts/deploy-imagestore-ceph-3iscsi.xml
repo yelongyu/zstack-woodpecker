@@ -115,7 +115,6 @@
         mediaType="$rootMediaType"
         hypervisorType='KVM' url="$virtualRouterImageUrl" system="True">
         <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
-        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
       </image>
     </images>
   
