@@ -9,6 +9,14 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
 import zstackwoodpecker.operations.scenario_operations as scen_ops
 import zstackwoodpecker.operations.license_operations as lic_ops
+import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
+import zstackwoodpecker.test_state as test_state
+import commands
+from lib2to3.pgen2.token import STAR
+from zstacklib.utils import shell
+from collections import OrderedDict
+
+zstack_management_ip = os.environ.get('zstackManagementIp`')
 
 def create_vlan_vm(image_name, l3_name=None, disk_offering_uuids=None):
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
@@ -36,7 +44,7 @@ def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
     return vm
 
 def create_vm_scenario(image_name, vm_name = None):
-    zstack_management_ip = test_lib.all_scenario_config.basicConfig.zstackManagementIp.text_
+    #zstack_management_ip = test_lib.all_scenario_config.basicConfig.zstackManagementIp.text_
     vm_creation_option = test_util.VmOption()
     conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('instanceOfferingName_m'))
     instance_offering_uuid = scen_ops.query_resource(zstack_management_ip, res_ops.INSTANCE_OFFERING, conditions).inventories[0].uuid
@@ -52,7 +60,7 @@ def create_vm_scenario(image_name, vm_name = None):
     return scen_ops.create_vm(zstack_management_ip, vm_creation_option)
 
 def destroy_vm_scenario(vm_uuid):
-    zstack_management_ip = test_lib.all_scenario_config.basicConfig.zstackManagementIp.text_
+    #zstack_management_ip = test_lib.all_scenario_config.basicConfig.zstackManagementIp.text_
     scen_ops.destroy_vm(zstack_management_ip, vm_uuid)
 
 def create_instance_vm(image_name, instance_offering_uuid, l3_name=None, disk_offering_uuids = None, default_l3_uuid = None):
@@ -466,6 +474,21 @@ def update_240_iso(vm_ip, tmp_file, iso_240_path, upgrade_script_path):
     cmd = '%s "mkdir -p /opt/zstack-dvd"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
     cmd = '%s "bash /opt/zstack-upgrade -r /opt/zstack_240.iso"' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
+    if process_result != 0:
+         test_util.test_fail('zstack upgrade iso failed')
+    else:
+       test_util.test_logger('update the 2.4.0 iso success')
+
+def update_local_iso(vm_ip, tmp_file, local_iso_path, upgrade_script_path):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    vm_username = os.environ['imageUsername']
+    vm_password = os.environ['imagePassword']
+    #ssh.scp_file(iso_240_path, '/opt/zstack_240.iso', vm_ip, vm_username, vm_password)
+    ssh.scp_file(upgrade_script_path, '/opt/zstack-upgrade', vm_ip, vm_username, vm_password)
+    #cmd = '%s "mkdir -p /opt/zstack-dvd"' % ssh_cmd
+    #process_result = execute_shell_in_process(cmd, tmp_file)
+    cmd = '%s "bash /opt/zstack-upgrade -r %s"' % (ssh_cmd,local_iso_path)
     process_result = execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
          test_util.test_fail('zstack upgrade iso failed')
@@ -974,4 +997,20 @@ def create_vm_offering(vm_ip, tmp_file):
     vmoffering_inv = scen_ops.create_instance_offering1(vm_ip, vmoffering_option)
 
     return vmoffering_inv
+
+def attach_mount_volume(volume, vm, mount_point):
+    volume.attach(vm)
+    import tempfile
+    script_file = tempfile.NamedTemporaryFile(delete=False)
+    script_file.write('''
+mkdir -p %s
+device="/dev/`ls -ltr --file-type /dev | awk '$4~/disk/ {print $NF}' | grep -v '[[:digit:]]' | tail -1`"
+mount ${device}1 %s
+''' % (mount_point, mount_point))
+    script_file.close()
+
+    vm_inv = vm.get_vm()
+    if not test_lib.lib_execute_shell_script_in_vm(vm_inv, script_file.name):
+        test_util.test_fail("mount operation failed in [volume:] %s in [vm:] %s" % (volume.get_volume().uuid, vm_inv.uuid))
+        os.unlink(script_file.name)
 
