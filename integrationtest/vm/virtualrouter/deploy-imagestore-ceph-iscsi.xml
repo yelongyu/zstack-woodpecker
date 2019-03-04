@@ -125,7 +125,7 @@
       url="$imageUrl_windows" platform="Windows"
       username="$winImageUsername" password="$winImagePassword">
       <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
-      <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+      <!-- <backupStorageRef>$cephBackupStorageName</backupStorageRef> -->
     </image>
     <image name="$imageName_other"
       description="Small Test Image Template for other platform"
