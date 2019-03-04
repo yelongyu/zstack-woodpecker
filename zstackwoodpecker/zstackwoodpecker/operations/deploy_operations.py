@@ -1514,7 +1514,7 @@ def add_host(scenarioConfig, scenarioFile, deployConfig, session_uuid, host_ip =
                 if count == 1 and xmlobject.has_element(deployConfig, 'backupStorages.xskycephBackupStorage'):
                     print "skip xsky MN host add to computational node"
                 else:
-                    thread = threading.Thread(target=_thread_for_action, args = (action, ))
+                    thread = threading.Thread(target=_thread_for_action, args = (action, True))
                     wait_for_thread_queue()
                     thread.start()
                     if i != 1:
@@ -2320,12 +2320,15 @@ def add_vcenter_vrouter(scenarioConfig, scenarioFile, deployConfig, session_uuid
 
 
 
-def _thread_for_action(action):
+def _thread_for_action(action, retry=False):
     try:
         evt = action.run()
         test_util.test_logger(jsonobject.dumps(evt))
     except:
-        exc_info.append(sys.exc_info())
+        if retry:
+            _thread_for_action(action)
+        else:
+            exc_info.append(sys.exc_info())
 
 #Add Virtual Router Offering
 def add_virtual_router(scenarioConfig, scenarioFile, deployConfig, session_uuid, l3_name = None, \
