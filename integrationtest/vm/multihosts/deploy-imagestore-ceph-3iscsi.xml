@@ -140,11 +140,9 @@
         <sharedBlockPrimaryStorage name="$iscsiPrimaryStorageName"
             description="ISCSI PS" />
         <sharedBlockPrimaryStorage name="$iscsiPrimaryStorageName2"
-            description="ISCSI PS 2" />
-        <sharedBlockPrimaryStorage name="$iscsiPrimaryStorageName"
-            description="ISCSI PS" />
+            description="ISCSI PS2" />
         <sharedBlockPrimaryStorage name="$iscsiPrimaryStorageName3"
-            description="ISCSI PS 3" />
+            description="ISCSI PS3" />
         <cephPrimaryStorage name="$cephPrimaryStorageName"
             description="Ceph PS" 
             monUrls="$cephPrimaryStorageMonUrls" />
