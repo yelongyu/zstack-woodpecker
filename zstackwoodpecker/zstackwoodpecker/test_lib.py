@@ -5321,6 +5321,44 @@ def lib_robot_create_utility_vm(robot_test_obj):
               
         robot_test_obj.set_utility_vm(utility_vm)
 
+def lib_dload_server_is_ready(dload_server_type):
+    """
+         Check and configure image download server.
+    """
+    if dload_server_type == "LOCAL":
+        return True
+    elif dload_server_type == "FTP":
+        return True
+    elif dload_server_type == "SFTP":
+        return True
+    elif dload_server_type == "HTTPS":
+        if test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
+            host_ips = scenario_operations.dump_scenario_file_ips(test_lib.scenario_file)
+            for host in host_ips:
+                cmd = "cat /etc/hosts|grep example.com||sed -i '$a 172.20.196.251 example.com' /etc/hosts"
+                os.system('sshpass -p password ssh root@%s "%s"' %(host.managementIp_,cmd))
+                os.system('sshpass -p password scp root@%s:/https-portal/dload.zstack.com/local/signed.crt /root/' %("172.20.196.251"))
+                os.system('sshpass -p password scp /root/signed.crt root@%s:/etc/pki/ca-trust/source/anchors/' %(host.managementIp_))
+                os.system('sshpass -p password ssh root@%s update-ca-trust' %(host.managementIp_))
+        else:
+            cond = res_ops.gen_query_conditions("state", '=', "Enabled")
+            cond = res_ops.gen_query_conditions("status", '=', "Connected")
+            hosts = res_ops.query_resource(res_ops.HOST, cond)
+            for host in hosts:
+                cmd = "cat /etc/hosts|grep example.com||sed -i '$a 172.20.196.251 example.com' /etc/hosts"
+                os.system('sshpass -p password ssh root@%s "%s"' %(host.managementIp,cmd))
+                os.system('sshpass -p password scp root@%s:/https-portal/dload.zstack.com/local/signed.crt /root/' %("172.20.196.251"))
+                os.system('sshpass -p password scp /root/signed.crt root@%s:/etc/pki/ca-trust/source/anchors/' %(host.managementIp))
+                os.system('sshpass -p password ssh root@%s update-ca-trust' %(host.managementIp))
+            else:
+                test_util.test_fail("No host available for adding imagestore for backup test")
+            
+        cmd = "wget -c https://example.com/ttylinux.raw"
+        if not os.system(cmd):
+            return False
+
+        return True
+
 
 def lib_robot_create_initial_formation(robot_test_obj):
     '''
@@ -6228,12 +6266,14 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             image_name = None
             image_format = None
             image_url = None
+            dload_server_type = None
             
-            if len(constant_path_list[0]) > 4:
+            if len(constant_path_list[0]) > 5:
                 backup_name = constant_path_list[0][1]
                 image_name = constant_path_list[0][2]
                 image_format = constant_path_list[0][3]
                 image_url = constant_path_list[0][4]
+                dload_server_type = constant_path_list[0][5]
                 #image_list = test_dict.get_image_list()
                 #for image in image_list:
                 #    if image.name == image_name:
@@ -6247,7 +6287,9 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             test_util.test_dsc('Robot Action: %s;' %(next_action))
 
             #ps_uuid = lib_robot_get_default_configs(robot_test_obj, "PS")
-            
+            if not lib_dload_server_is_ready(dload_server_type):
+                test_util.test_fail("download server is not ready yet, please check type=%s" %(str(dload_server_type)))
+
             bs_cond = res_ops.gen_query_conditions("status", '=', "Connected")
             bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, bs_cond)
             bs_uuid = None
