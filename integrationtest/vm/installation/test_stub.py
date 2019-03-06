@@ -43,7 +43,7 @@ def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
     vm.create()
     return vm
 
-def create_vm_scenario(image_name, vm_name = None):
+def create_vm_scenario(image_name, vm_name = None, host_name = None):
     #zstack_management_ip = test_lib.all_scenario_config.basicConfig.zstackManagementIp.text_
     vm_creation_option = test_util.VmOption()
     conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('instanceOfferingName_m'))
@@ -55,8 +55,11 @@ def create_vm_scenario(image_name, vm_name = None):
     vm_creation_option.set_default_l3_uuid(l3_uuid)
     conditions = res_ops.gen_query_conditions('name', '=', image_name)
     image_uuid = scen_ops.query_resource(zstack_management_ip, res_ops.IMAGE, conditions).inventories[0].uuid
+    conditions = res_ops.gen_query_conditions('name', '=', host_name)
+    host_uuid = scen_ops.query_resource(zstack_management_ip, res_ops.HOST, conditions).inventories[0].uuid
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_name(vm_name)
+    vm_creation_option.set_host_uuid(host_name)
     return scen_ops.create_vm(zstack_management_ip, vm_creation_option)
 
 def destroy_vm_scenario(vm_uuid):
@@ -87,7 +90,6 @@ def check_str(string):
     if string == None:
         return ""
     return string
-
 
 def execute_shell_in_process(cmd, tmp_file, timeout = 3600, no_timeout_excep = False):
     logfd = open(tmp_file, 'w', 0)
@@ -883,9 +885,6 @@ def delete_backup_storage(vm_ip, tmp_file):
 
 def check_zstack_version(vm_ip, tmp_file, pkg_version):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
-
-def check_zstack_version(vm_ip, tmp_file, pkg_version):
-    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     cmd = '%s "/usr/bin/zstack-ctl status" | grep ^version | awk \'{print $2}\'' % ssh_cmd
     (process_result, version) = execute_shell_in_process_stdout(cmd, tmp_file)
     if process_result != 0:
@@ -905,7 +904,6 @@ def check_zstack_or_mevoco(vm_ip, tmp_file, zom):
     test_util.test_dsc("current version: %s" % version)
     if version != zom:
         test_util.test_fail('try to install %s, but current version is %s' % (zom, version))
-
 
 def create_zone1(vm_ip, tmp_file):
     zone_option = test_util.ZoneOption()
@@ -949,7 +947,6 @@ def create_local_ps(vm_ip, zone_uuid, tmp_file):
     ps_inv = scen_ops.create_local_primary_storage(vm_ip, ps_option)
 
     return ps_inv
-
 
 def create_sftp_backup_storage(vm_ip, tmp_file):
     vm_username = os.environ['imageUsername']
@@ -1013,4 +1010,22 @@ mount ${device}1 %s
     if not test_lib.lib_execute_shell_script_in_vm(vm_inv, script_file.name):
         test_util.test_fail("mount operation failed in [volume:] %s in [vm:] %s" % (volume.get_volume().uuid, vm_inv.uuid))
         os.unlink(script_file.name)
+
+def mount_volume(vm_ip, mount_point, tmp_file):
+
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd = '%s " mkdir -p  %s && mount /dev/vdb1  %s" ' % (ssh_cmd, mount_point, mount_point)
+    process_result = execute_shell_in_process(cmd, tmp_file)
+
+def upgrade_old_zstack(vm_ip, old_bin, tmp_file):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    env_var = "WEBSITE='%s'" % 'localhost'
+    cmd = '%s "%s bash %s -u"' % (ssh_cmd, env_var, old_bin)
+
+    process_result = execute_shell_in_process(cmd, tmp_file)
+
+    if process_result != 0:
+         test_util.test_fail('zstack upgrade failed')
+    else:
+       test_util.test_logger('upgrade zstack success')
 
