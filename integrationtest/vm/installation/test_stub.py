@@ -16,7 +16,7 @@ from lib2to3.pgen2.token import STAR
 from zstacklib.utils import shell
 from collections import OrderedDict
 
-#zstack_management_ip = os.environ.get('zstackManagementIp`')
+zstack_management_ip = os.environ.get('zstackManagementIp')
 
 def create_vlan_vm(image_name, l3_name=None, disk_offering_uuids=None):
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
@@ -44,7 +44,7 @@ def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
     return vm
 
 def create_vm_scenario(image_name, vm_name = None):
-    zstack_management_ip = test_lib.all_scenario_config.basicConfig.zstackManagementIp.text_
+    #zstack_management_ip = test_lib.all_scenario_config.basicConfig.zstackManagementIp.text_
     vm_creation_option = test_util.VmOption()
     conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('instanceOfferingName_m'))
     instance_offering_uuid = scen_ops.query_resource(zstack_management_ip, res_ops.INSTANCE_OFFERING, conditions).inventories[0].uuid
@@ -60,7 +60,7 @@ def create_vm_scenario(image_name, vm_name = None):
     return scen_ops.create_vm(zstack_management_ip, vm_creation_option)
 
 def destroy_vm_scenario(vm_uuid):
-    zstack_management_ip = test_lib.all_scenario_config.basicConfig.zstackManagementIp.text_
+    #zstack_management_ip = test_lib.all_scenario_config.basicConfig.zstackManagementIp.text_
     scen_ops.destroy_vm(zstack_management_ip, vm_uuid)
 
 def create_instance_vm(image_name, instance_offering_uuid, l3_name=None, disk_offering_uuids = None, default_l3_uuid = None):
