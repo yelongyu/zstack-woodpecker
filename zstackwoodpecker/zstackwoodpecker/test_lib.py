@@ -5378,11 +5378,17 @@ def lib_robot_create_utility_vm(robot_test_obj):
               
         robot_test_obj.set_utility_vm(utility_vm)
 
+dload_svr = "172.20.194.5"
 def lib_dload_server_is_ready(dload_server_type):
     """
          Check and configure image download server.
     """
+    global dload_svr
     if dload_server_type == "LOCAL":
+        cmd = "sshpass -p password scp root@%s:/image-pool/ttylinux.raw /tmp/" %(dload_svr)
+        os.system(cmd)
+        cmd = "sshpass -p password scp root@%s:/image-pool/CentOS-x86_64-7.2-Minimal.iso /tmp/" %(dload_svr)
+        os.system(cmd)
         return True
     elif dload_server_type == "FTP":
         return True
@@ -5392,9 +5398,9 @@ def lib_dload_server_is_ready(dload_server_type):
         if test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
             host_ips = scenario_operations.dump_scenario_file_ips(test_lib.scenario_file)
             for host in host_ips:
-                cmd = "cat /etc/hosts|grep example.com||sed -i '$a 172.20.196.251 example.com' /etc/hosts"
+                cmd = "cat /etc/hosts|grep example.com||sed -i '$a " + dload_svr + " example.com' /etc/hosts"
                 os.system('sshpass -p password ssh root@%s "%s"' %(host.managementIp_,cmd))
-                os.system('sshpass -p password scp root@%s:/https-portal/dload.zstack.com/local/signed.crt /root/' %("172.20.196.251"))
+                os.system('sshpass -p password scp root@%s:/https-portal/dload.zstack.com/local/signed.crt /root/' %(dload_svr))
                 os.system('sshpass -p password scp /root/signed.crt root@%s:/etc/pki/ca-trust/source/anchors/' %(host.managementIp_))
                 os.system('sshpass -p password ssh root@%s update-ca-trust' %(host.managementIp_))
         else:
@@ -5402,9 +5408,9 @@ def lib_dload_server_is_ready(dload_server_type):
             cond = res_ops.gen_query_conditions("status", '=', "Connected")
             hosts = res_ops.query_resource(res_ops.HOST, cond)
             for host in hosts:
-                cmd = "cat /etc/hosts|grep example.com||sed -i '$a 172.20.196.251 example.com' /etc/hosts"
+                cmd = "cat /etc/hosts|grep example.com||sed -i '$a " + dload_svr + " example.com' /etc/hosts"
                 os.system('sshpass -p password ssh root@%s "%s"' %(host.managementIp,cmd))
-                os.system('sshpass -p password scp root@%s:/https-portal/dload.zstack.com/local/signed.crt /root/' %("172.20.196.251"))
+                os.system('sshpass -p password scp root@%s:/https-portal/dload.zstack.com/local/signed.crt /root/' %(dload_svr))
                 os.system('sshpass -p password scp /root/signed.crt root@%s:/etc/pki/ca-trust/source/anchors/' %(host.managementIp))
                 os.system('sshpass -p password ssh root@%s update-ca-trust' %(host.managementIp))
             else:
@@ -6361,12 +6367,35 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             image_url = None
             dload_server_type = None
             
-            if len(constant_path_list[0]) > 5:
+            global dload_svr
+            def _get_image_name(dload_server_type, image_format):
+                if dload_server_type == "LOCAL" and image_format == "raw":
+                    return "file:///tmp/ttylinux.raw"
+                elif dload_server_type == "LOCAL" and image_format == "iso":
+                    return "file:///tmp/CentOS-x86_64-7.2-Minimal.iso"
+                elif dload_server_type == "FTP" and image_format == "raw":
+                    return "ftp://test:password@" + dload_svr + ":21/ttylinux.raw"
+                elif dload_server_type == "FTP" and image_format == "iso":
+                    return "ftp://test:password@" + dload_svr + ":21/CentOS-x86_64-7.2-Minimal.iso"
+                elif dload_server_type == "SFTP" and image_format == "raw":
+                    return "sftp://test:password@" + dload_svr + ":2294/ttylinux.raw"
+                elif dload_server_type == "SFTP" and image_format == "iso":
+                    return "sftp://test:password@" + dload_svr + ":2294/CentOS-x86_64-7.2-Minimal.iso"
+                elif dload_server_type == "HTTPS" and image_format == "raw":
+                    return "https://dload.zstack.com/ttylinux.raw"
+                elif dload_server_type == "HTTPS" and image_format == "iso":
+                    return "https://dload.zstack.com/CentOS-x86_64-7.2-Minimal.iso"
+                else:
+                    test_util.test_logger("dload_server_type=" + dload_server_type)
+                    test_util.test_logger("image_format=" + image_format)
+                    test_util.test_fail("not found matched image")
+                    return 
+
+            if len(constant_path_list[0]) > 4:
                 backup_name = constant_path_list[0][1]
                 image_name = constant_path_list[0][2]
                 image_format = constant_path_list[0][3]
-                image_url = constant_path_list[0][4]
-                dload_server_type = constant_path_list[0][5]
+                dload_server_type = constant_path_list[0][4]
                 #image_list = test_dict.get_image_list()
                 #for image in image_list:
                 #    if image.name == image_name:
@@ -6401,7 +6430,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             image_option.set_format(image_format)
             image_option.set_mediaType('RootVolumeTemplate')
             image_option.set_backup_storage_uuid_list([bs_uuid])
-            image_option.url = image_url
+            image_option.url = _get_image_name(dload_server_type, image_format)
             image_option.set_timeout(24*60*60*1000)
             import zstackwoodpecker.operations.image_operations as img_ops
             image = img_ops.add_image(image_option)
