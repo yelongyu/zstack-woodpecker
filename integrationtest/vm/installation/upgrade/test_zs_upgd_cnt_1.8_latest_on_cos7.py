@@ -33,7 +33,7 @@ def test():
 
     zstack_latest_version = os.environ.get('zstackLatestVersion')
     zstack_latest_path = os.environ.get('zstackLatestInstaller')
-    vm_name = os.environ.get('imageName_i_c7_z_1.8')
+    vm_name = os.environ.get('vmName')
     upgrade_script_path = os.environ.get('upgradeScript')
     #host_name = 'dell-sh51-ls'
     vm_inv = test_stub.create_vm_scenario(image_name, vm_name)
