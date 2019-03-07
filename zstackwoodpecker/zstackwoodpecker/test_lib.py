@@ -3462,6 +3462,63 @@ def lib_get_volume_snapshot_tree(volume_uuid = None, tree_uuid = None, session_u
 
     return result
 
+def lib_get_volume_snapshot(snapshot_uuid = None, session_uuid = None):
+
+    if snapshot_uuid:
+        cond = res_ops.gen_query_conditions('uuid', '=', snapshot_uuid)
+    else:
+        test_util.test_logger("snapshot_uuid should not be None")
+        return
+
+    result = res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, cond, session_uuid)
+
+    return result
+
+def lib_get_child_snapshots(snapshot):
+    '''
+    return child snapshots for a given snapshot
+    '''
+
+    import json
+    import zstacklib.utils.jsonobject as jsonobject
+
+    def _get_leaf_nodes(tree):
+        if not tree:
+            return 0
+
+        leaf_nodes = []
+
+        if not tree.has_key('children'):
+            test_util.test_fail('Snapshot tree has invalid format, it does not has key for children.')
+
+        if tree['children']:
+            for child in tree['children']:
+                leaf_node = _get_leaf_nodes(child)
+                for i in leaf_node:
+                    leaf_nodes.append(i)
+        else:
+            leaf_nodes.append(tree)
+
+        return leaf_nodes
+
+
+    snapshot_volume = snapshot.get_snapshot().volumeUuid
+    vol_trees = lib_get_volume_snapshot_tree(snapshot_volume)
+
+    if not vol_trees:
+        test_util.test_logger("No snapshot tree found for %s" % (snapshot))
+        return
+
+    for vol_tree in vol_trees:
+        tree = json.loads(jsonobject.dumps(vol_tree))['tree']
+
+        for i in _get_leaf_nodes(tree):
+            if snapshot.get_snapshot().uuid == i['inventory']['parentUuid']:
+                test_util.test_logger("child snapshot %s found for %s" % (i, snapshot))
+                return i
+
+    test_util.test_fail('No child found for %s' % (snapshot))
+
 #-----------Security Group Operations-------------
 def lib_create_security_group(name=None, desc=None, session_uuid=None):
     if not name:
@@ -5848,6 +5905,8 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             test_dict.rm_volume(target_volume)
         elif next_action == TestAction.resize_volume:
             target_vm = None
+            target_snapshot = None
+
             if len(constant_path_list[0]) > 2:
                 target_vm_name = constant_path_list[0][1]
                 delta = constant_path_list[0][2]
@@ -5864,8 +5923,26 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             new_size = current_size + int(delta)
             import zstackwoodpecker.operations.volume_operations as vol_ops
             vol_ops.resize_volume(root_volume_uuid, new_size)
+
+            snapshots = test_dict.get_volume_snapshot(root_volume_uuid)
+
+            if test_dict.get_volume_snapshot(root_volume_uuid).get_current_snapshot():
+                target_snapshot = lib_get_child_snapshots(test_dict.get_volume_snapshot(root_volume_uuid).get_current_snapshot())
+            else:
+                target_snapshot = lib_get_volume_snapshot_tree(root_volume_uuid)[0].tree
+
+            cre_vm_opt = robot_test_obj.get_vm_creation_option()
+            cre_vm_opt.set_name("utility_vm_for_robot_test")
+            new_snapshot = lib_get_volume_snapshot_by_snapshot(snapshots, target_snapshot, robot_test_obj, test_dict, cre_vm_opt)
+
+            target_volume = new_snapshot.get_target_volume()
+            md5sum = target_volume.get_md5sum()
+            new_snapshot.set_md5sum(md5sum)
+
         elif next_action == TestAction.resize_data_volume:
             target_volume = None
+            target_snapshot = None
+
             if len(constant_path_list[0]) > 2:
                 target_volume_name = constant_path_list[0][1]
                 delta = constant_path_list[0][2]
@@ -5885,6 +5962,22 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             target_volume.resize(new_size)
             target_volume.update()
             target_volume.update_volume()
+
+            snapshots = test_dict.get_volume_snapshot(target_volume.get_volume().uuid)
+
+            if test_dict.get_volume_snapshot(target_volume.get_volume().uuid).get_current_snapshot():
+                target_snapshot = lib_get_child_snapshots(test_dict.get_volume_snapshot(target_volume.get_volume().uuid).get_current_snapshot())
+            else:
+                target_snapshot = lib_get_volume_snapshot_tree(target_volume.get_volume().uuid)[0].tree
+
+            cre_vm_opt = robot_test_obj.get_vm_creation_option()
+            cre_vm_opt.set_name("utility_vm_for_robot_test")
+            new_snapshot = lib_get_volume_snapshot_by_snapshot(snapshots, target_snapshot, robot_test_obj, test_dict, cre_vm_opt)
+
+            target_volume = new_snapshot.get_target_volume()
+            md5sum = target_volume.get_md5sum()
+            new_snapshot.set_md5sum(md5sum)
+
         elif next_action == TestAction.create_data_volume_from_image:
             target_images = None
             target_image_name = None
@@ -6656,6 +6749,75 @@ def lib_create_volume_snapshot_from_volume(target_volume_snapshots, robot_test_o
     target_volume_snapshots.set_utility_vm(vol_utiltiy_vm)
 
     return target_volume_snapshots.create_snapshot(snapshot_name)
+
+def lib_get_volume_snapshot_by_snapshot(target_volume_snapshots, target_snapshot, robot_test_obj, test_dict, cre_vm_opt=None):
+    vol_utiltiy_vm = None
+    snapshot_name = None
+    snapshot_uuid = None
+    target_volume_inv = \
+            target_volume_snapshots.get_target_volume().get_volume()
+    ps_uuid = target_volume_inv.primaryStorageUuid
+    ps = lib_get_primary_storage_by_uuid(ps_uuid)
+    if target_volume_snapshots.get_utility_vm():
+        vol_utiltiy_vm = target_volume_snapshots.get_utility_vm()
+        if ps.type == inventory.LOCAL_STORAGE_TYPE:
+            if vol_utiltiy_vm.get_vm().hostUuid != lib_get_local_storage_volume_host(target_volume_inv.uuid).uuid:
+                vol_utiltiy_vm = None
+
+    if not vol_utiltiy_vm:
+        vol_utiltiy_vm = robot_test_obj.get_utility_vm(ps_uuid)
+        if ps.type == inventory.LOCAL_STORAGE_TYPE:
+            if vol_utiltiy_vm.get_vm().hostUuid != lib_get_local_storage_volume_host(target_volume_inv.uuid).uuid:
+                vol_utiltiy_vm = None
+
+    if not vol_utiltiy_vm:
+        cond = res_ops.gen_query_conditions('name', '=', "utility_vm_for_robot_test")
+        cond = res_ops.gen_query_conditions('state', '=', "Running", cond)
+        vms = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
+        for vm in vms:
+            if ps.type == inventory.LOCAL_STORAGE_TYPE:
+                if ps_uuid == ps.uuid and vm.hostUuid == lib_get_local_storage_volume_host(target_volume_inv.uuid).uuid:
+                    vol_utility_vm = vm
+            else:
+                if ps_uuid == ps.uuid:
+                    vol_utility_vm = vm
+
+    if not vol_utiltiy_vm:
+        #create utiltiy_vm on given primary storage.
+        util_vm_opt = test_util.VmOption(cre_vm_opt)
+        instance_offering_uuid = util_vm_opt.get_instance_offering_uuid()
+        if not instance_offering_uuid:
+            instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING)[0].uuid
+        possible_cluster = target_volume_inv.clusterUuid
+        if not possible_cluster:
+            possible_cluster = res_ops.query_resource_with_num(\
+                    res_ops.CLUSTER, [], None, 0, 1)[0].uuid
+
+        cond = res_ops.gen_query_conditions('attachedClusterUuids', \
+                '=', possible_cluster)
+        possible_l2 = res_ops.query_resource(res_ops.L2_VLAN_NETWORK, \
+                cond)[0].uuid
+        cond = res_ops.gen_query_conditions('l2NetworkUuid', '=', \
+                possible_l2)
+        possible_l3 = res_ops.query_resource(res_ops.L3_NETWORK, \
+                cond)[0].uuid
+        util_vm_opt.set_l3_uuids([possible_l3])
+        util_vm_opt.set_ps_uuid(ps_uuid)
+        #need to set host_uuid == target_volume host uuid if local ps,
+        #  as there will attach testing for snapshot creation
+        if lib_get_primary_storage_by_uuid(ps_uuid).type == inventory.LOCAL_STORAGE_TYPE:
+            util_vm_opt.set_host_uuid(lib_get_local_storage_volume_host(target_volume_inv.uuid).uuid)
+
+        vol_utiltiy_vm  = lib_create_vm(util_vm_opt)
+        robot_test_obj.set_utility_vm(vol_utiltiy_vm)
+        test_dict.add_utility_vm(vol_utiltiy_vm)
+        vol_utiltiy_vm.check()
+            
+    target_volume_snapshots.set_utility_vm(vol_utiltiy_vm)
+
+    snapshot_name = target_snapshot['inventory']['name']
+    snapshot_uuid = target_snapshot['inventory']['uuid']
+    return target_volume_snapshots.create_snapshot(name = snapshot_name, target_snapshot_uuid = snapshot_uuid)
 
 def lib_create_image_from_snapshot(target_snapshot):
     snapshot_volume = target_snapshot.get_target_volume()

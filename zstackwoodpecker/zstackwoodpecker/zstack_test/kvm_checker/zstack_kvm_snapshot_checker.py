@@ -185,8 +185,8 @@ class zstack_kvm_snapshot_tree_checker(checker_header.TestChecker):
                 sp_covered = 0
                 activate_host = ''
 
-                devPath = snapshot.get_snapshot().primaryStorageInstallPath.split("ceph://")[1]
-                volumePath = snapshot.get_snapshot().primaryStorageInstallPath.split("ceph://")[1].split("@")[0]
+                devPath = snapshot.get_snapshot().primaryStorageInstallPath.encode('utf-8').split("ceph://")[1]
+                volumePath = snapshot.get_snapshot().primaryStorageInstallPath.encode('utf-8').split("ceph://")[1].split("@")[0]
 
                 for i in sp_tree_actual:
                     if devPath in i:
@@ -348,7 +348,7 @@ class zstack_kvm_snapshot_tree_checker(checker_header.TestChecker):
                 sp_covered = 0
                 activate_host = ''
 
-                devPath = "/dev/" + snapshot.get_snapshot().primaryStorageInstallPath.split("sharedblock://")[1]
+                devPath = "/dev/" + snapshot.get_snapshot().primaryStorageInstallPath.encode('utf-8').split("sharedblock://")[1]
 
                 for i in sp_tree_actual:
                     if devPath in i:
@@ -516,7 +516,7 @@ depth is : %s. The real snapshot max depth is: %s' % \
                 sp_covered = 0
                 activate_host = ''
 
-                devPath = snapshot.get_snapshot().primaryStorageInstallPath
+                devPath = snapshot.get_snapshot().primaryStorageInstallPath.encode('utf-8')
 
                 for i in sp_tree_actual:
                     if devPath in i:

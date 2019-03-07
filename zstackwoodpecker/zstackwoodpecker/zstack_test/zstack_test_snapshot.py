@@ -198,7 +198,7 @@ umount %s
         self._remove_checking_file()
         volume_obj.detach()
 
-    def create_snapshot(self, name = None, add_check = True):
+    def create_snapshot(self, name = None, add_check = True, target_snapshot_uuid = None):
         if not self.target_volume:
             test_util.test_fail(
                     'Can not create snapshot, before set target_volume')
@@ -215,7 +215,11 @@ umount %s
         snapshot.set_snapshot_creation_option(sp_option)
         snapshot.set_utility_vm(self.utility_vm)
         snapshot.set_target_volume(self.target_volume)
-        snapshot.create(add_check)
+        if not target_snapshot_uuid:
+            snapshot.create(add_check)
+        else:
+            super(ZstackTestSnapshot, snapshot).create()
+            snapshot.snapshot = test_lib.lib_get_volume_snapshot(target_snapshot_uuid)[0]
         self.add_snapshot(snapshot)
         return snapshot
 
