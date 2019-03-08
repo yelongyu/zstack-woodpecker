@@ -6403,7 +6403,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                     return 
 
             if len(constant_path_list[0]) > 4:
-                backup_name = constant_path_list[0][1]
+                bs_type = constant_path_list[0][1]
                 image_name = constant_path_list[0][2]
                 image_format = constant_path_list[0][3]
                 dload_server_type = constant_path_list[0][4]
@@ -6427,8 +6427,8 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, bs_cond)
             bs_uuid = None
             for bs in bss:
-                test_util.test_logger("DEBUG>>>bs.name=(%s) vs. backup_name=(%s)" %(bs.name, backup_name))
-                if bs.name.strip() == backup_name.strip():
+                test_util.test_logger("DEBUG>>>bs.type=(%s) vs. bs_type=(%s)" %(bs.type, bs_type))
+                if bs.type.strip() == bs_type.strip():
                     bs_uuid = bs.uuid
                     break
             else:
@@ -6454,10 +6454,12 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
 
         elif next_action == TestAction.create_vm_by_image:
             vm_name = None
+            image_format = None
             target_image = None
-            if len(constant_path_list[0]) > 2:
+            if len(constant_path_list[0]) > 3:
                 target_image_name = constant_path_list[0][1]
-                vm_name = constant_path_list[0][2]
+                image_format = constant_path_list[0][2]
+                vm_name = constant_path_list[0][3]
                 image_list = test_dict.get_image_list()
                 for image in image_list:
                     if image.get_image().name == target_image_name:
@@ -6468,7 +6470,17 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                 test_util.test_fail("no resource available for next action: %s" % (next_action))
 
             vm_creation_option = test_util.VmOption()
+
+            if image_format == "iso":
+                root_disk_uuid = lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName')).uuid
+                vm_creation_option.set_instance_offering_uuid(root_disk_uuid)
+
             vm_creation_option.set_image_uuid(target_image.get_image().uuid)
+
+            conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+            instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+            vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+
             vm = lib_create_vm(vm_creation_option)
             test_dict.add_vm(vm)
 
