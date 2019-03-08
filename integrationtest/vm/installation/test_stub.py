@@ -43,7 +43,8 @@ def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
     vm.create()
     return vm
 
-def create_vm_scenario(image_name, vm_name = None, host_name = None):
+#def create_vm_scenario(image_name, vm_name = None, host_name = None):
+def create_vm_scenario(image_name, vm_name = None):
     #zstack_management_ip = test_lib.all_scenario_config.basicConfig.zstackManagementIp.text_
     vm_creation_option = test_util.VmOption()
     conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('instanceOfferingName_m'))
@@ -55,11 +56,11 @@ def create_vm_scenario(image_name, vm_name = None, host_name = None):
     vm_creation_option.set_default_l3_uuid(l3_uuid)
     conditions = res_ops.gen_query_conditions('name', '=', image_name)
     image_uuid = scen_ops.query_resource(zstack_management_ip, res_ops.IMAGE, conditions).inventories[0].uuid
-    conditions = res_ops.gen_query_conditions('name', '=', host_name)
-    host_uuid = scen_ops.query_resource(zstack_management_ip, res_ops.HOST, conditions).inventories[0].uuid
+    #conditions = res_ops.gen_query_conditions('name', '=', host_name)
+    #host_uuid = scen_ops.query_resource(zstack_management_ip, res_ops.HOST, conditions).inventories[0].uuid
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_name(vm_name)
-    vm_creation_option.set_host_uuid(host_name)
+    #vm_creation_option.set_host_uuid(host_name)
     return scen_ops.create_vm(zstack_management_ip, vm_creation_option)
 
 def destroy_vm_scenario(vm_uuid):
