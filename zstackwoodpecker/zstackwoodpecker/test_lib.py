@@ -5385,15 +5385,26 @@ def lib_dload_server_is_ready(dload_server_type):
     """
     global dload_svr
     if dload_server_type == "LOCAL":
-        cmd = "sshpass -p password scp root@%s:/image-pool/ttylinux.raw /tmp/" %(dload_svr)
-        os.system(cmd)
-        cmd = "sshpass -p password scp root@%s:/image-pool/CentOS-x86_64-7.2-Minimal.iso /tmp/" %(dload_svr)
-        os.system(cmd)
+        bs_cond = res_ops.gen_query_conditions("status", '=', "Connected")
+        bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, bs_cond)
+        for bs in bss:
+            host = lib_get_backup_storage_host(bs.uuid)
+            cmd = "sshpass -p password scp root@%s:/image-pool/ttylinux.raw /tmp/" %(dload_svr)
+            os.system(cmd)
+            cmd = "sshpass -p password scp /tmp/ttylinux.raw root@%s:/tmp/ttylinux.raw" %(host.managementIp)
+            os.system(cmd)
+            cmd = "sshpass -p password scp root@%s:/image-pool/CentOS-x86_64-7.2-Minimal.iso /tmp/" %(dload_svr)
+            os.system(cmd)
+            cmd = "sshpass -p password scp /tmp/CentOS-x86_64-7.2-Minimal.iso root@%s:/tmp/CentOS-x86_64-7.2-Minimal.iso" %(host.managementIp)
+            os.system(cmd)
         return True
+
     elif dload_server_type == "FTP":
         return True
+
     elif dload_server_type == "SFTP":
         return True
+
     elif dload_server_type == "HTTPS":
         if test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
             host_ips = scenario_operations.dump_scenario_file_ips(test_lib.scenario_file)
