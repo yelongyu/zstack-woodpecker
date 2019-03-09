@@ -67,9 +67,12 @@ class TestAction(object):
     create_data_template_from_backup = 'create_data_template_from_backup'
     add_image = 'add_image'
     export_image = 'export_image'
+    sync_image_from_imagestore = 'sync_image_from_imagestore'
 
     reconnect_bs = 'reconnect_bs'
     reclaim_space_from_bs = 'reclaim_space_from_bs'
+
+    ps_migrage_vm = 'ps_migrage_vm'
 
     create_sg = 'create_security_group'
     delete_sg = 'delete_security_group'

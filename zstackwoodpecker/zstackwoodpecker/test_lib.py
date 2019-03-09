@@ -1194,6 +1194,17 @@ def lib_get_backup_storage_by_uuid(bs_uuid):
         test_util.test_logger('can not find bs which uuid is: %s' % bs_uuid)
     return bss[0]
 
+def lib_get_another_imagestore_by_uuid(bs_uuid):
+    cond = res_ops.gen_query_conditions('uuid', '=', bs_uuid)
+    cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage", cond)
+    bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)
+    for bs in bss:
+        test_util.test_logger("bs.uuid=%s vs bs_uuid=%s" %(bs.uuid, bs_uuid))
+        if bs.uuid != bs_uuid:
+            return bs
+    else:
+        test_util.test_fail("not found candidate bs")
+
 def lib_get_backup_storage_uuid_list_by_zone(zone_uuid):
     '''
     Get backup storage uuid list which attached to zone uuid
@@ -5463,6 +5474,7 @@ def lib_get_backup_by_uuid(uuid):
     volume_backup = res_ops.query_resource(res_ops.VOLUME_BACKUP, cond)[0]
     return volume_backup
 
+
 ROBOT = 0
 default_snapshot_depth = "128"
 def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
@@ -6478,6 +6490,41 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
 
             target_image.export()
 
+        elif next_action == TestAction.delete_image:
+            target_image = None
+            if len(constant_path_list[0]) > 1:
+                target_image_name = constant_path_list[0][1]
+                image_list = test_dict.get_image_list()
+                for image in image_list:
+                    if image.get_image().name == target_image_name:
+                        target_image = image
+                        break
+
+            if not target_image:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            target_image.delete()
+            test_dict.rm_image(target_image)
+
+        elif next_action == TestAction.expunge_image:
+            target_image = None
+            if len(constant_path_list[0]) > 1:
+                target_image_name = constant_path_list[0][1]
+                image_list = test_dict.get_image_list()
+                for image in image_list:
+                    if image.get_image().name == target_image_name:
+                        target_image = image
+                        break
+
+            if not target_image:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+            bss = target_image.get_image().backupStorageRefs
+            bs_uuid_list = []
+            for bs in bss:
+                bs_uuid_list.append(bs.backupStorageUuid)
+            target_image.expunge(bs_uuid_list)
+            test_dict.rm_image(target_image)
+
         elif next_action == TestAction.reclaim_space_from_bs:
             cond = res_ops.gen_query_conditions("status", '=', "Connected")
             cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage", cond)
@@ -6498,6 +6545,47 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
 
             for bs in bss:
                 bs_ops.reconnect_backup_storage(bs.uuid)
+
+        elif next_action == TestAction.ps_migrage_vm:
+            import zstackwoodpecker.operations.datamigrate_operations as datamigr_ops
+            def _get_vm_ps_candidate(vm_uuid):
+                ps_to_migrate = random.choice(datamigr_ops.get_ps_candidate_for_vm_migration(vm_uuid))
+                return ps_to_migrate
+
+            target_vm = None
+            if len(constant_path_list[0]) > 1:
+                target_vm_name = constant_path_list[0][1]
+                all_vm_list = test_dict.get_all_vm_list()
+                for vm in all_vm_list:
+                    if vm.get_vm().name == target_vm_name:
+                        target_vm = vm
+                        break
+
+            if not target_vm:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            target_vm_uuid = target_vm.get_vm().uuid
+            ps_uuid_to_migrate = _get_vm_ps_candidate(target_vm_uuid).uuid
+            datamigr_ops.ps_migrage_vm(ps_uuid_to_migrate, target_vm_uuid)
+
+        elif next_action == TestAction.sync_image_from_imagestore:
+            target_image = None
+            if len(constant_path_list[0]) > 1:
+                target_image_name = constant_path_list[0][1]
+                image_list = test_dict.get_image_list()
+                for image in image_list:
+                    if image.get_image().name == target_image_name:
+                        target_image = image
+                        break
+
+            if not target_image:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            image_uuid_local = target_image.get_image().uuid 
+            local_bs_uuid = target_image.get_image().backupStorageRefs[0].backupStorageUuid
+            disaster_bs_uuid = lib_get_another_imagestore_by_uuid(local_bs_uuid)
+            import zstackwoodpecker.operations.image_operations as img_ops
+            image_uuid = img_ops.sync_image_from_image_store_backup_storage(disaster_bs_uuid, local_bs_uuid, image_uuid_local)
 
         elif next_action == TestAction.create_vm_by_image:
             vm_name = None
