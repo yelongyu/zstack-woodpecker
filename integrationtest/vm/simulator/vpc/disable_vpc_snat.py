@@ -37,7 +37,7 @@ def test():
     vpc_ops.set_vpc_vrouter_network_service_state(vr_uuid, networkService='SNAT', state='disable')
 
     test_util.test_dsc("4. check vpc snat service")
-    serviceState = vpc_ops.get_vpc_vrouter_network_service_state(vr_uuid, networkService='SNAT', session_uuid=None)
+    serviceState = vpc_ops.get_vpc_vrouter_network_service_state(vr_uuid, networkService='SNAT')
     if serviceState.env.state != 'disable':
         test_util.test_fail("disable SNAT failed.")
 
