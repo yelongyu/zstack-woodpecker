@@ -6376,6 +6376,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             image_name = None
             image_format = None
             image_url = None
+            image_type = None
             dload_server_type = None
             
             global dload_svr
@@ -6406,7 +6407,8 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                 bs_type = constant_path_list[0][1]
                 image_name = constant_path_list[0][2]
                 image_format = constant_path_list[0][3]
-                dload_server_type = constant_path_list[0][4]
+                image_type = constant_path_list[0][4]
+                dload_server_type = constant_path_list[0][5]
                 #image_list = test_dict.get_image_list()
                 #for image in image_list:
                 #    if image.name == image_name:
@@ -6439,7 +6441,14 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             image_option.set_name(image_name)
             image_option.set_description('Description->'+ image_name)
             image_option.set_format(image_format)
-            image_option.set_mediaType('RootVolumeTemplate')
+
+            if image_type == "RootVolumeTemplate":
+                image_option.set_mediaType('RootVolumeTemplate')
+            elif image_type == "DataVolumeTemplate":
+                image_option.set_mediaType('DataVolumeTemplate')
+            else:
+                test_util.test_fail("imageMediaType is not in RootVolumeTemplate|DataVolumeTemplate, actual is [%s]" %(image_type))
+
             image_option.set_backup_storage_uuid_list([bs_uuid])
             image_option.url = _get_image_name(dload_server_type, image_format)
             image_option.set_timeout(24*60*60*1000)
