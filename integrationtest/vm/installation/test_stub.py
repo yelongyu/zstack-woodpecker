@@ -188,6 +188,20 @@ def update_console_ip(vm_ip, tmp_file):
     cmd = '%s "zstack-ctl configure consoleProxyOverriddenIp=%s" ' % (ssh_cmd, vm_ip)
     process_result = execute_shell_in_process(cmd, tmp_file)
 
+def change_mysql_password(vm_ip, tmp_file):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd = '%s " zstack-ctl change_mysql_password --user-name zstack --new-password  zstack.123 --root-password zstack.mysql.password" ' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
+
+def update_zstack_mysql_password(vm_ip, tmp_file):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd = '''%s 'sed -i "s/zstack.password/zstack.123/g" /usr/local/zstack/apache-tomcat/webapps/zstack/WEB-INF/classes/zstack.properties' ''' % ssh_cmd 
+    process_result = execute_shell_in_process(cmd, tmp_file)
+    if process_result != 0:
+        test_util.test_fail('update zstack mysql password failed')
+    else:
+        test_util.test_logger('update zstack mysql password success')
+
 def reload_default_license(vm_ip, tmp_file):
 
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
@@ -260,9 +274,9 @@ def check_mn_running(vm_ip, tmp_file):
     cmd = '%s "zstack-ctl status|grep Stopped"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
     if process_result != 1:
-       test_util.test_fail('zstack upgrade failed ')
+        test_util.test_fail('zstack upgrade failed ')
     else:
-       test_util.test_logger('zstack-ctl status are all running')
+        test_util.test_logger('zstack-ctl status are all running')
     #cmd = '%s "zstack-ctl status|grep Running "' % ssh_cmd
     #process_result1 = execute_shell_in_process(cmd, tmp_file)
     #test_util.test_logger('zstack-ctl status  %s' % process_result)   
@@ -294,9 +308,9 @@ def update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path):
     #cmd = '%s "yum -y --disablerepo=* --enablerepo=zstack-local,qemu-kvm-ev update"' % ssh_cmd
     #process_result = execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
-         test_util.test_fail('zstack upgrade iso failed')
+        test_util.test_fail('zstack upgrade iso failed')
     else:
-       test_util.test_logger('update the iso success')
+        test_util.test_logger('update the iso success')
 
 def update_c74_iso(vm_ip, tmp_file, c74_iso_path, upgrade_script_path):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
@@ -311,9 +325,9 @@ def update_c74_iso(vm_ip, tmp_file, c74_iso_path, upgrade_script_path):
     cmd = '%s "bash /opt/zstack-upgrade -r -f /opt/zstack-c74.iso"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
-         test_util.test_fail('zstack upgrade iso failed')
+        test_util.test_fail('zstack upgrade iso failed')
     else:
-       test_util.test_logger('update the iso success')
+        test_util.test_logger('update the iso success')
 
 def upgrade_by_iso(vm_ip, tmp_file, iso_path, upgrade_script_path):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
@@ -328,9 +342,9 @@ def upgrade_by_iso(vm_ip, tmp_file, iso_path, upgrade_script_path):
     cmd = '%s "bash /opt/zstack-upgrade /opt/zstack.iso"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
-         test_util.test_fail('zstack upgrade iso failed')
+        test_util.test_fail('zstack upgrade iso failed')
     else:
-       test_util.test_logger('upgrade iso success')
+        test_util.test_logger('upgrade iso success')
 
 def update_19_iso(vm_ip, tmp_file, iso_19_path, upgrade_script_path):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
