@@ -5406,10 +5406,10 @@ def lib_dload_server_is_ready(dload_server_type):
         return True
 
     elif dload_server_type == "HTTPS":
-        if test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
-            host_ips = scenario_operations.dump_scenario_file_ips(test_lib.scenario_file)
+        if scenario_config != None and scenario_file != None and os.path.exists(scenario_file):
+            host_ips = scenario_operations.dump_scenario_file_ips(scenario_file)
             for host in host_ips:
-                cmd = "cat /etc/hosts|grep example.com||sed -i '$a " + dload_svr + " example.com' /etc/hosts"
+                cmd = "cat /etc/hosts|grep dload.zstack.com||sed -i '$a " + dload_svr + " dload.zstack.com' /etc/hosts"
                 os.system('sshpass -p password ssh root@%s "%s"' %(host.managementIp_,cmd))
                 os.system('sshpass -p password scp root@%s:/https-portal/dload.zstack.com/local/signed.crt /root/' %(dload_svr))
                 os.system('sshpass -p password scp /root/signed.crt root@%s:/etc/pki/ca-trust/source/anchors/' %(host.managementIp_))
@@ -5419,7 +5419,7 @@ def lib_dload_server_is_ready(dload_server_type):
             cond = res_ops.gen_query_conditions("status", '=', "Connected")
             hosts = res_ops.query_resource(res_ops.HOST, cond)
             for host in hosts:
-                cmd = "cat /etc/hosts|grep example.com||sed -i '$a " + dload_svr + " example.com' /etc/hosts"
+                cmd = "cat /etc/hosts|grep dload.zstack.com||sed -i '$a " + dload_svr + " dload.zstack.com' /etc/hosts"
                 os.system('sshpass -p password ssh root@%s "%s"' %(host.managementIp,cmd))
                 os.system('sshpass -p password scp root@%s:/https-portal/dload.zstack.com/local/signed.crt /root/' %(dload_svr))
                 os.system('sshpass -p password scp /root/signed.crt root@%s:/etc/pki/ca-trust/source/anchors/' %(host.managementIp))
@@ -5427,7 +5427,7 @@ def lib_dload_server_is_ready(dload_server_type):
             else:
                 test_util.test_fail("No host available for adding imagestore for backup test")
             
-        cmd = "wget -c https://example.com/ttylinux.raw"
+        cmd = "wget -c https://%s/ttylinux.raw" %(dload_svr)
         if not os.system(cmd):
             return False
 
