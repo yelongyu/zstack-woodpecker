@@ -346,7 +346,6 @@ class zstack_kvm_snapshot_tree_checker(checker_header.TestChecker):
                 backing_list = []
                 backing_file = ''
                 sp_covered = 0
-                activate_host = ''
 
                 devPath = "/dev/" + snapshot.get_snapshot().primaryStorageInstallPath.encode('utf-8').split("sharedblock://")[1]
 
@@ -362,29 +361,25 @@ class zstack_kvm_snapshot_tree_checker(checker_header.TestChecker):
 
                 backing_list.append(devPath)
 
-                cmd_info = "lvs --nolocking --noheadings %s | awk '{print $3}'" % devPath
-
-                for host in test_lib.lib_find_hosts_by_ps_uuid(ps_uuid):
-                    result = test_lib.lib_execute_ssh_cmd(host.managementIp, 'root', 'password', cmd_info)
-                    if "-a-" in result or "-ao-" in result:
-                        activate_host = host.managementIp
-                        break
-
-                if not activate_host:
-                    activate_host = test_lib.lib_find_hosts_by_ps_uuid(ps_uuid)[0].managementIp
-
                 while True:
+                    activate_host = ''
                     cmd_info = "lvs --nolocking --noheadings %s | awk '{print $3}'" % devPath
                     cmd_activate = "lvchange -a y %s" % devPath
                     cmd_unactivate = "lvchange -a y %s" % devPath
 
-                    result = test_lib.lib_execute_ssh_cmd(activate_host, 'root', 'password', cmd_info)
-                    if "-a-" in result or "-ao-" in result:
-                        backing_file = get_qcow_backing_file_by_ip(devPath, activate_host)
-                    else:
+                    for host in test_lib.lib_find_hosts_by_ps_uuid(ps_uuid):
+                        result = test_lib.lib_execute_ssh_cmd(host.managementIp, 'root', 'password', cmd_info)
+                        if "-a-" in result or "-ao-" in result:
+                            activate_host = host.managementIp
+                            backing_file = get_qcow_backing_file_by_ip(devPath, activate_host)
+                            break
+
+                    if not activate_host:
+                        activate_host = test_lib.lib_find_hosts_by_ps_uuid(ps_uuid)[0].managementIp
                         test_lib.lib_execute_ssh_cmd(activate_host, 'root', 'password', cmd_activate)
                         backing_file = get_qcow_backing_file_by_ip(devPath, activate_host)
                         test_lib.lib_execute_ssh_cmd(activate_host, 'root', 'password', cmd_unactivate)
+
                     backing_file = backing_file.replace("\n", "")
 
                     if not backing_file:

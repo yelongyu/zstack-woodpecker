@@ -6737,6 +6737,28 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             for volume in test_dict.get_all_volume_list():
                 volume.update()
                 volume.update_volume()
+
+            if full:
+                target_volumes = target_vm.get_vm().allVolumes
+            elif not full:
+                target_volumes = [lib_get_root_volume(target_vm.get_vm())]
+
+            for target_volume in target_volumes:
+                snapshots = test_dict.get_volume_snapshot(target_volume.uuid)
+
+                if test_dict.get_volume_snapshot(target_volume.uuid).get_current_snapshot():
+                    target_snapshot = lib_get_child_snapshots(test_dict.get_volume_snapshot(target_volume.uuid).get_current_snapshot())
+                else:
+                    target_snapshot = lib_get_volume_snapshot_tree(target_volume.uuid)[0].tree
+
+                cre_vm_opt = robot_test_obj.get_vm_creation_option()
+                cre_vm_opt.set_name("utility_vm_for_robot_test")
+                new_snapshot = lib_get_volume_snapshot_by_snapshot(snapshots, target_snapshot, robot_test_obj, test_dict, cre_vm_opt)
+
+                target_volume = new_snapshot.get_target_volume()
+                md5sum = target_volume.get_md5sum()
+                new_snapshot.set_md5sum(md5sum)
+
         else:
             test_util.test_fail("Robot action: <%s> not supported" %(next_action))
 
