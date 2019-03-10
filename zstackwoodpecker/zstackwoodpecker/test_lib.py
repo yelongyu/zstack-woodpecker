@@ -4807,6 +4807,8 @@ def lib_vm_random_operation(robot_test_obj):
         ready_volume.attach(target_vm)
         test_dict.mv_volume(ready_volume, test_stage.free_volume, target_vm.vm.uuid)
 
+        target_vm.update()
+
     elif next_action == TestAction.detach_volume:
         test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
             (next_action, attached_volume.get_volume().uuid))
@@ -4815,6 +4817,8 @@ def lib_vm_random_operation(robot_test_obj):
 
         attached_volume.detach()
         test_dict.mv_volume(attached_volume, target_vm.vm.uuid, test_stage.free_volume)
+
+        target_vm.update()
 
     elif next_action == TestAction.delete_volume:
         #if there is no free volume, but action is delete_volume. It means the 
@@ -4829,12 +4833,16 @@ def lib_vm_random_operation(robot_test_obj):
         ready_volume.delete()
         test_dict.rm_volume(ready_volume)
 
+        target_vm.update()
+
     elif next_action == TestAction.expunge_volume:
         test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
             (next_action, ready_volume.get_volume().uuid))
         robot_test_obj.add_resource_action_history(ready_volume.get_volume().uuid, next_action)
         ready_volume.expunge()
         test_dict.rm_volume(ready_volume)
+
+        target_vm.update()
 
     elif next_action == TestAction.migrate_volume :
         #TODO: add normal initialized data volume into migration target.
@@ -5874,6 +5882,8 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                 test_dict.mv_volume_with_snapshots(target_volume, test_stage.free_volume, target_vm.vm.uuid)
             all_volume_snapshots = test_dict.get_all_available_snapshots()
 
+            target_vm.update()
+
         elif next_action == TestAction.detach_volume:
             target_volume = None
             target_vm = None
@@ -5917,6 +5927,8 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                 test_dict.mv_volume_with_snapshots(target_volume, target_vm_uuid, test_stage.free_volume)
             all_volume_snapshots = test_dict.get_all_available_snapshots()
 
+            target_vm.update()
+
         elif next_action == TestAction.delete_volume:
             target_volume = None
             if len(constant_path_list[0]) > 1:
@@ -5934,6 +5946,9 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                 (next_action, target_volume.get_volume().uuid))
             target_volume.delete()
             test_dict.rm_volume(target_volume)
+
+            target_vm.update()
+
         elif next_action == TestAction.resize_volume:
             target_vm = None
             target_snapshot = None
