@@ -34,8 +34,7 @@ def wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_uuid):
     retry_count = 0
     while retry_count < 3 and not test_lib.lib_wait_target_up(vm_ip, '22', 360):
         test_util.test_warn("Could not reach target vm: %s %s, retry after reboot it" % (vm_ip, vm_uuid))
-        stop_vm(zstack_management_ip, vm_uuid)
-        start_vm(zstack_management_ip, vm_uuid)
+        reboot_vm(zstack_management_ip, vm_uuid)
         retry_count += 1
 
     if test_lib.lib_wait_target_up(vm_ip, '22', 360):
@@ -309,8 +308,7 @@ def setup_2ha_mn_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
 
 
     # NOTE: need to make filesystem in sync in VM before cold stop VM
-    stop_vm(zstack_management_ip, vm_inv.uuid)
-    start_vm(zstack_management_ip, vm_inv.uuid)
+    reboot_vm(zstack_management_ip, vm_inv.uuid)
     if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
         test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
 
@@ -392,8 +390,7 @@ def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
 
 
     # NOTE: need to make filesystem in sync in VM before cold stop VM
-    stop_vm(zstack_management_ip, vm_inv.uuid)
-    start_vm(zstack_management_ip, vm_inv.uuid)
+    reboot_vm(zstack_management_ip, vm_inv.uuid)
 
     if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
         test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
@@ -887,8 +884,7 @@ def setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm_config, deploy_co
     cmd = 'rpm -ivh kernel-ml-4.20.3-1.el7.elrepo.x86_64.rpm && grub2-set-default "CentOS Linux (4.20.3-1.el7.elrepo.x86_64) 7 (Core)" && sync && sync && sync'
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    stop_vm(zstack_management_ip, vm_inv.uuid)
-    start_vm(zstack_management_ip, vm_inv.uuid)
+    reboot_vm(zstack_management_ip, vm_inv.uuid)
     if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
         test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
 
@@ -1912,6 +1908,15 @@ def destroy_vm(http_server_ip, vm_uuid, session_uuid=None):
     test_util.action_logger('Destroy VM [uuid:] %s' % vm_uuid)
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
 
+
+def reboot_vm(http_server_ip, vm_uuid, force=None, session_uuid=None):
+    action = api_actions.RebootVmInstanceAction()
+    action.uuid = vm_uuid
+    action.timeout = 600000
+    test_util.action_logger('Reboot VM [uuid:] %s' % vm_uuid)
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    return evt.inventory
+
 def stop_vm(http_server_ip, vm_uuid, force=None, session_uuid=None):
     action = api_actions.StopVmInstanceAction()
     action.uuid = vm_uuid
@@ -2566,8 +2571,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     setup_vm_console(vm_inv, vm, deploy_config)
                     ensure_nic_all_have_cfg(vm_inv, vm, len(l3_uuid_list+l3_uuid_list_ge_3))
                     # NOTE: need to make filesystem in sync in VM before cold stop VM
-                    stop_vm(zstack_management_ip, vm_inv.uuid)
-                    start_vm(zstack_management_ip, vm_inv.uuid)
+                    reboot_vm(zstack_management_ip, vm_inv.uuid)
                     if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
                         test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
 
