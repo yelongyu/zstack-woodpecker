@@ -2521,7 +2521,15 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 #vm_creation_option.set_ps_uuid(ps_uuid)
                 #vm_creation_option.set_session_uuid(session_uuid)
                 if os.getenv('datacenterType') == 'AliyunEBS':
-                    vm_creation_option.set_ps_uuid(os.getenv('PSUUIDFOREBS'))
+#                     vm_creation_option.set_ps_uuid(os.getenv('PSUUIDFOREBS'))
+                    cond = res_ops.gen_query_conditions('type', '=', 'SharedBlock')
+                    cond = res_ops.gen_query_conditions('status', '=', 'Connected', cond)
+                    cond = res_ops.gen_query_conditions('state', '=', 'Enabled', cond)
+                    sblk_ps_avail = query_resource(res_ops.PRIMARY_STORAGE, cond).inventories
+                    if sblk_ps_avail:
+                        vm_creation_option.set_ps_uuid(sblk_ps_avail[0].uuid)
+                    else:
+                        test_util.test_fail('no available sblk primary storage which is enabled and connected for ebs test')
 #                 if ebs_host:
 #                     for k, v in ebs_host.items():
 #                         if int(v['cpu']) > 6 and v['mem'] > 12:
