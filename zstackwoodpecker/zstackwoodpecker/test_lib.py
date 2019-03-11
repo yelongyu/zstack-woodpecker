@@ -5164,6 +5164,8 @@ def lib_robot_import_resource_from_formation(robot_test_obj, resource_list):
 
             imported_resource.append(resource["VmInstance"]["uuid"])
             import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
+            if resource["VmInstance"]["type"] == "ApplianceVm":
+                continue
             new_vm = zstack_vm_header.ZstackTestVm()
             new_vm.create_from(resource["VmInstance"]["uuid"])
             # import Volume already attached

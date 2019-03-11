@@ -22,8 +22,12 @@
             </l3Network>
           </l3Networks>
 	  <nodeRef>$node1Name</nodeRef>
-          <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
+          <hostRef>$hostName</hostRef>
         </vm>
+      </vms>
+    </host>
+    <host uuid="$hostUuid2">
+      <vms>
         <vm name="$vmName2" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
@@ -36,8 +40,12 @@
           </l3Networks>
           <hostRef>$hostName2</hostRef>
           <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
-	  <primaryStorageRef type="xskyceph" offering_uuid="$cephStorageOfferingUuid">$cephPrimaryStorageName</primaryStorageRef>
+	  <primaryStorageRef type="ceph">$cephPrimaryStorageName</primaryStorageRef>
         </vm>
+      </vms>
+    </host>
+    <host uuid="$hostUuid3">
+      <vms>
         <vm name="$vmName3" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
@@ -50,8 +58,12 @@
           </l3Networks>
           <hostRef>$hostName3</hostRef>
           <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
-	  <primaryStorageRef type="xskyceph" offering_uuid="$cephStorageOfferingUuid">$cephPrimaryStorageName</primaryStorageRef>
+	  <primaryStorageRef type="ceph">$cephPrimaryStorageName</primaryStorageRef>
         </vm>
+      </vms>
+    </host>
+    <host uuid="$hostUuid4">
+      <vms>
         <vm name="$vmName4" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
           <l3Networks>
@@ -64,7 +76,7 @@
           </l3Networks>
           <hostRef>$hostName4</hostRef>
           <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
-	  <primaryStorageRef type="xskyceph" offering_uuid="$cephStorageOfferingUuid">$cephPrimaryStorageName</primaryStorageRef>
+	  <primaryStorageRef type="ceph">$cephPrimaryStorageName</primaryStorageRef>
         </vm>
       </vms>
     </host>

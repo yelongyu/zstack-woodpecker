@@ -2036,7 +2036,7 @@ def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_in
         action.primaryStorageUuid = ps.uuid
         #host = lib_find_random_host(http_server_ip)
         #action.systemTags = ["localStorage::hostUuid::%s" % host.uuid]
-        if xmlobject.has_element(deploy_config, 'zones.zone.primaryStorages.xskycephPrimaryStorage'):
+        if xmlobject.has_element(deploy_config, 'zones.zone.primaryStorages.xskycephPrimaryStorage') or xmlobject.has_element(deploy_config, 'zones.zone.primaryStorages.cephPrimaryStorage'):
             action.systemTags = ["capability::virtio-scsi", "localStorage::hostUuid::%s" % vm_inv.hostUuid]
         else:
             action.systemTags = ["localStorage::hostUuid::%s" % vm_inv.hostUuid]
@@ -2743,7 +2743,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
         xml_string = etree.tostring(root_xml, 'utf-8')
         xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
         open(scenario_file, 'w+').write(xml_string)
-        if xmlobject.has_element(deploy_config, 'zones.zone.primaryStorages.xskycephPrimaryStorage') or xmlobject.has_element(deploy_config, 'backupStorages.cephBackupStorage'):
+        if xmlobject.has_element(deploy_config, 'zones.zone.primaryStorages.xskycephPrimaryStorage') or xmlobject.has_element(deploy_config, 'backupStorages.cephBackupStorage') or xmlobject.has_element(deploy_config, 'zones.zone.primaryStorages.cephPrimaryStorage'):
 #             setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config)
 # #         else:
 #         if xmlobject.has_element(deploy_config, 'backupStorages.cephBackupStorage'):
