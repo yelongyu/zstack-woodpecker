@@ -39,6 +39,7 @@ class TestVolume(zstack_header.ZstackObject):
     def attach(self, target_vm):
         self.state = ATTACHED
         self.target_vm = target_vm
+        self.target_vm.update()
 
     def detach(self):
         self.state = DETACHED
@@ -49,9 +50,11 @@ class TestVolume(zstack_header.ZstackObject):
             self.state = DELETED
         else:
             self.state = EXPUNGED
+        self.target_vm.update()
 
     def expunge(self):
         self.state = EXPUNGED
+        self.target_vm.update()
 
     def check(self):
         pass
