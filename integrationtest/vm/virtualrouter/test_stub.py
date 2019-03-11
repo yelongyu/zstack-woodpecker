@@ -236,6 +236,17 @@ def create_vm_with_iso(l3_uuid_list, image_uuid, vm_name = None, root_disk_uuids
     vm.create()
     return vm
 
+def get_other_ps_uuid():
+    cond_ps = res_ops.gen_query_conditions('status', '=', 'connected')
+    cond_ps = res_ops.gen_query_conditions('state', '=', 'Enabled', cond_ps)
+    all_ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond_ps)
+    all_ps_uuids = [ps.uuid for ps in all_ps]
+    cond_vm = res_ops.gen_query_conditions('state', '=', 'Running')
+    running_vm = res_ops.query_resource(res_ops.VM_INSTANCE, cond_vm)
+    ext_ps_uuids = [vm.allVolumes[0].primaryStorageUuid for vm in running_vm]
+    other_ps_uuids = list(set(all_ps_uuids) - set(ext_ps_uuids))
+    return random.choice(other_ps_uuids if other_ps_uuids else all_ps_uuids)
+
 def create_volume(volume_creation_option=None, session_uuid = None):
     if not volume_creation_option:
         disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
@@ -244,6 +255,8 @@ def create_volume(volume_creation_option=None, session_uuid = None):
         volume_creation_option.set_name('vr_test_volume')
 
     volume_creation_option.set_session_uuid(session_uuid)
+    if not volume_creation_option.get_primary_storage_uuid():
+        volume_creation_option.set_primary_storage_uuid(get_other_ps_uuid())
     volume = zstack_volume_header.ZstackTestVolume()
     volume.set_creation_option(volume_creation_option)
     volume.create()
