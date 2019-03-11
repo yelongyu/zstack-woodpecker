@@ -329,8 +329,32 @@ umount %s
         #    if sp in self.backuped_snapshots:
         #        self.backuped_snapshots.remove(sp)
         self.remove_children_snapshots(snapshot)
-
         self._update_delete()
+
+    def delete_snapshots_dict_record(self, snapshot_list):
+        for snapshot in snapshot_list:
+            if snapshot in self.primary_snapshots:
+                self.primary_snapshots.remove(snapshot)
+            if snapshot in self.backuped_snapshots:
+                self.backuped_snapshots.remove(snapshot)
+
+            #only Hypervisor based snapshot will clean child
+            if 'Storage' == snapshot.get_snapshot().type and \
+            'ebs' not in snapshot.get_snapshot().primaryStorageInstallPath:
+                self._update_delete()
+                return 
+
+            #sp_list = get_snapshot_family(snapshot)
+            #for sp in sp_list:
+            #    if sp.get_state() == sp_header.DELETED:
+            #        continue
+            #    sp.delete2()
+            #    if sp in self.primary_snapshots:
+            #        self.primary_snapshots.remove(sp)
+            #    if sp in self.backuped_snapshots:
+            #        self.backuped_snapshots.remove(sp)
+            self.remove_children_snapshots(snapshot)
+            self._update_delete()
 
     def delete(self):
         if self.snapshot_head:

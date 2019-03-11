@@ -5024,31 +5024,26 @@ def lib_vm_random_operation(robot_test_obj):
         target_volume_snapshots = None
         target_snapshot = None
         target_snapshot_name = None
+        target_snapshot_uuid_list = []
         target_snapshot_list = []
-        '''
-        if len(constant_path_list[0]) > 1:
-            target_snapshot_name = constant_path_list[0][1]
 
         all_volume_snapshots = test_dict.get_all_available_snapshots()
-        for candidate_snapshots in all_volume_snapshots:
-            for candidate_snapshot in candidate_snapshots.get_primary_snapshots():
-                if candidate_snapshot.get_snapshot().name == target_snapshot_name:
-                    target_volume_snapshots = candidate_snapshots
-                    target_snapshot = candidate_snapshot
-                    break
- 
-        if not target_snapshot:
-            test_util.test_fail("no resource available for next action: %s" % (next_action))
-        '''
         import zstackwoodpecker.operations.volume_operations as vol_ops
         for snapshot_name in constant_path_list[0][1]:
-            cond = res_ops.gen_query_conditions('name', '=', snapshot_name)
+            cond = res_ops.gen_query_conditions('name','=',snapshot_name)
             target_snapshot = res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, cond)
             if not target_snapshot:
                 test_util.test_logger("Can not find target snapshot: %s" % snapshot_name)
             else:
-                target_snapshot_list.append(target_snapshot[0].uuid)
-        vol_ops.batch_delete_snapshot(target_snapshot_list)
+                target_snapshot_uuid_list.append(target_snapshot[0].uuid)
+                for candidate_snapshots in all_volume_snapshots:
+                    for candidate_snapshot in candidate_snapshots.get_primary_snapshots():
+                        if candidate_snapshot.get_snapshot().name == snapshot_name:
+                            target_volume_snapshots = candidate_snapshots
+                            target_snapshot_list.append(candidate_snapshot)
+                            break
+        target_volume_snapshots.delete_snapshots_dict_record(target_snapshot_list)
+        vol_ops.batch_delete_snapshot(target_snapshot_uuid_list)
 
     elif next_action == TestAction.use_volume_snapshot:
         test_util.test_dsc('Robot Action: %s; on Volume: %s; on SP: %s' % \
@@ -6249,6 +6244,32 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             #                and target_volume_obj.get_target_vm().get_state() == \
             #                    vm_header.EXPUNGED):
             #        test_dict.rm_volume_snapshot(target_volume_snapshots)
+        elif next_action == TestAction.batch_delete_volume_snapshot:
+            target_volume_snapshots = None
+            target_snapshot = None
+            target_snapshot_name = None
+            target_snapshot_uuid_list = []
+            target_snapshot_list = []
+
+            all_volume_snapshots = test_dict.get_all_available_snapshots()
+            import zstackwoodpecker.operations.volume_operations as vol_ops
+            for snapshot_name in constant_path_list[0][1]:
+                cond = res_ops.gen_query_conditions('name','=',snapshot_name)
+                target_snapshot = res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, cond)
+                if not target_snapshot:
+                    test_util.test_logger("Can not find target snapshot: %s" % snapshot_name)
+                else:
+                    target_snapshot_uuid_list.append(target_snapshot[0].uuid)
+                    for candidate_snapshots in all_volume_snapshots:
+                        for candidate_snapshot in candidate_snapshots.get_primary_snapshots():
+                            if candidate_snapshot.get_snapshot().name == snapshot_name:
+                                target_volume_snapshots = candidate_snapshots
+                                target_snapshot_list.append(candidate_snapshot)
+                                break
+            target_volume_snapshots.delete_snapshots_dict_record(target_snapshot_list)
+            vol_ops.batch_delete_snapshot(target_snapshot_uuid_list)
+            test_util.test_dsc(test_dict)
+
         elif next_action == TestAction.use_volume_snapshot:
             target_volume_snapshots = None
             target_snapshot = None
