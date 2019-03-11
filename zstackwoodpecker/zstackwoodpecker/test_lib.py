@@ -3264,11 +3264,13 @@ def lib_get_image_by_desc(img_desc):
         if image.description == img_desc:
             return image
 
-def lib_get_image_by_name(img_name):
+def lib_get_image_by_name(img_name, bs_type=None):
     cond = res_ops.gen_query_conditions('name', '=', img_name)
+    if bs_type:
+        cond = res_ops.gen_query_conditions('backupStorageRefs.installPath', 'like', bs_type, cond)
     images = res_ops.query_resource(res_ops.IMAGE, cond)
     if images:
-        return images[0]
+        return random.choice[images]
 
     test_util.test_logger("not find image with name: %s" % img_name)
     return False
