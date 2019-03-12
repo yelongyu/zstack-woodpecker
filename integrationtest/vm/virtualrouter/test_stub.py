@@ -200,6 +200,25 @@ def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_name(vm_name)
     vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
+    if disk_offering_uuids:
+        cond_ps = res_ops.gen_query_conditions('status', '=', 'connected')
+        cond_ps = res_ops.gen_query_conditions('state', '=', 'Enabled', cond_ps)
+        all_vail_ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond_ps)
+        if len(all_vail_ps) > 1:
+            cond_image = res_ops.gen_query_conditions('uuid', '=', image_uuid)
+            if 'ceph' in res_ops.query_resource(res_ops.IMAGE, cond_image)[0].backupStorageRefs[0].installPath:
+                ps_uuid_list = [ps.uuid for ps in all_vail_ps if ps.type != 'Ceph']
+            else:
+                ceph_ps = [ps for ps in all_vail_ps if ps.type == 'Ceph']
+                if ceph_ps:
+                    ps_uuid_list = [ps.uuid for ps in all_vail_ps if ps.type == 'Ceph']
+                else:
+                    ps_uuid_list = [ps.uuid for ps in all_vail_ps]
+            systags = ["primaryStorageUuidForDataVolume::%s" % random.choice(ps_uuid_list)]
+            if system_tags:
+                system_tags.extend(systags)
+            else:
+                system_tags = systags
     vm_creation_option.set_default_l3_uuid(default_l3_uuid)
     vm_creation_option.set_system_tags(system_tags)
     vm_creation_option.set_session_uuid(session_uuid)
