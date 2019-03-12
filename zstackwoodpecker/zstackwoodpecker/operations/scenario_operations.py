@@ -2020,7 +2020,7 @@ def lib_get_cluster_hosts(http_server_ip, cluster_uuid = None):
     return hosts
 
 
-def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_inv, session_uuid=None, deploy_config=None):
+def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_inv, session_uuid=None, deploy_config=None, ps_ref_type=None):
 
     deploy_config = deploy_config
     action = api_actions.CreateDataVolumeAction()
@@ -2037,6 +2037,10 @@ def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_in
         #host = lib_find_random_host(http_server_ip)
         #action.systemTags = ["localStorage::hostUuid::%s" % host.uuid]
         if xmlobject.has_element(deploy_config, 'zones.zone.primaryStorages.xskycephPrimaryStorage') or xmlobject.has_element(deploy_config, 'zones.zone.primaryStorages.cephPrimaryStorage'):
+            action.systemTags = ["capability::virtio-scsi", "localStorage::hostUuid::%s" % vm_inv.hostUuid]
+        else:
+            action.systemTags = ["localStorage::hostUuid::%s" % vm_inv.hostUuid]
+        if ps_ref_type == 'xskyceph':
             action.systemTags = ["capability::virtio-scsi", "localStorage::hostUuid::%s" % vm_inv.hostUuid]
         else:
             action.systemTags = ["localStorage::hostUuid::%s" % vm_inv.hostUuid]
@@ -2724,14 +2728,14 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                 share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
                                 zbs_virtio_scsi_volume_is_created = True
                                 attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
-                        elif ps_ref.type_ == 'xskyceph':
+                        elif ps_ref.type_ in ['xskyceph','ceph']:
                             disk_offering_uuid = ps_ref.offering_uuid_
                             volume_option.set_disk_offering_uuid(disk_offering_uuid)
                             if primaryStorageUuid != None and primaryStorageUuid != "":
                                 volume_option.set_primary_storage_uuid(primaryStorageUuid)
                             if poolName != None and poolName != "":
                                 volume_option.set_system_tags(['ceph::pool::%s' % (poolName)])
-                                volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config)
+                                volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config, ps_ref_type=ps_ref.type_)
                             attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
                             break
                         elif ps_ref.type_ == 'ebs':
