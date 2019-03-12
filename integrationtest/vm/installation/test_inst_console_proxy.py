@@ -26,7 +26,7 @@ def create_vm(image):
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     image_uuid = image.uuid
     #vm_name = 'zs_install_inst_console_proxy_%s' % image.name
-    vm_nme = os.environ.get('vmName')
+    vm_nme = os.environ.get('vmName') + os.environ.get('imageNameBase_21_ex')
     vm_instrance_offering_uuid = os.environ.get('instanceOfferingUuid')
 
     vm_creation_option = test_util.VmOption()

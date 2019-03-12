@@ -26,25 +26,24 @@ def test():
     global vm_inv,host_name, host_uuid, host_management_ip, vm_ip, bs_name, bs_uuid
     test_util.test_dsc('Create test vm to test zstack upgrade by -u.')
 
-    #image_name = os.environ.get('imageTestAlarm_230_mn')
+    image_name = os.environ.get('imageTestAlarm_230_mn')
     iso_path = os.environ.get('iso_path')
-    #iso_21_path = os.environ.get('iso_21_path')
     zstack_latest_version = os.environ.get('zstackLatestVersion')
     zstack_latest_path = os.environ.get('zstackLatestInstaller')
-    #vm_name = os.environ.get('vmName')
+    vm_name = os.environ.get('vmName') + image_name
     upgrade_script_path = os.environ.get('upgradeScript')
 
-    #vm_inv = test_stub.create_vm_scenario(image_name, vm_name)
-    #vm_ip = vm_inv.vmNics[0].ip
-    #test_lib.lib_wait_target_up(vm_ip, 22)
-    vm_ip = '172.20.197.159'
+    vm_inv = test_stub.create_vm_scenario(image_name, vm_name)
+    vm_ip = vm_inv.vmNics[0].ip
+    test_lib.lib_wait_target_up(vm_ip, 22)
+    #vm_ip = '172.20.197.159'
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = vm_ip
-    #test_stub.make_ssh_no_password(vm_ip, tmp_file)
+    test_stub.make_ssh_no_password(vm_ip, tmp_file)
 
-    #test_util.test_logger('Update MN IP')
-    #test_stub.update_mn_hostname(vm_ip, tmp_file)
-    #test_stub.update_mn_ip(vm_ip, tmp_file)
-    #test_stub.start_mn(vm_ip, tmp_file)
+    test_util.test_logger('Update MN IP')
+    test_stub.update_mn_hostname(vm_ip, tmp_file)
+    test_stub.update_mn_ip(vm_ip, tmp_file)
+    test_stub.start_mn(vm_ip, tmp_file)
 
 
     test_util.test_logger('Update host management IP and reconnect host')
@@ -74,20 +73,19 @@ def test():
 
     test_util.test_logger('Upgrade zstack to latest') 
     test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
-    #test_stub.updatei_21_iso(vm_ip, tmp_file, iso_21_path, upgrade_script_path)
     test_stub.upgrade_zstack(vm_ip, zstack_latest_path, tmp_file) 
     test_stub.check_zstack_version(vm_ip, tmp_file, zstack_latest_version)
     test_stub.start_mn(vm_ip, tmp_file)
-    #test_stub.check_installation(vm_ip, tmp_file)
+    test_stub.check_installation(vm_ip, tmp_file)
 
     os.system('rm -f %s' % tmp_file)
-    #test_stub.destroy_vm_scenario(vm_inv.uuid)
+    test_stub.destroy_vm_scenario(vm_inv.uuid)
     test_util.test_pass('ZStack upgrade Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     global vm_inv
-    #os.system('rm -f %s' % tmp_file)
-    #if vm_inv:
-        #test_stub.destroy_vm_scenario(vm_inv.uuid)
-    #test_lib.lib_error_cleanup(test_obj_dict)
+    os.system('rm -f %s' % tmp_file)
+    if vm_inv:
+        test_stub.destroy_vm_scenario(vm_inv.uuid)
+    test_lib.lib_error_cleanup(test_obj_dict)
