@@ -2036,7 +2036,7 @@ def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_in
         action.primaryStorageUuid = ps.uuid
         #host = lib_find_random_host(http_server_ip)
         #action.systemTags = ["localStorage::hostUuid::%s" % host.uuid]
-        if xmlobject.has_element(deploy_config, 'zones.zone.primaryStorages.xskycephPrimaryStorage') or xmlobject.has_element(deploy_config, 'zones.zone.primaryStorages.cephPrimaryStorage'):
+        if xmlobject.has_element(deploy_config, 'zones.zone.primaryStorages.xskycephPrimaryStorage'):
             action.systemTags = ["capability::virtio-scsi", "localStorage::hostUuid::%s" % vm_inv.hostUuid]
         else:
             action.systemTags = ["localStorage::hostUuid::%s" % vm_inv.hostUuid]
