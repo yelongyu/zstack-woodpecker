@@ -35,8 +35,9 @@ def test():
     zstack_latest_path = os.environ.get('zstackLatestInstaller')
     vm_name = os.environ.get('vmName') + image_name
     upgrade_script_path = os.environ.get('upgradeScript')
-    host_name = 'hpe-sh27-ls'
-    vm_inv = test_stub.create_vm_scenario(image_name, vm_name, host_name)
+    #host_name = 'hpe-sh27-ls'
+    #vm_inv = test_stub.create_vm_scenario(image_name, vm_name, host_name)
+    vm_inv = test_stub.create_vm_scenario(image_name, vm_name)
     vm_uuid = vm_inv.uuid
     ps_uuid = vm_inv.allVolumes[0].primaryStorageUuid
     print ps_uuid
@@ -47,15 +48,15 @@ def test():
     test_lib.lib_wait_target_up(vm_ip, 22)
 
     test_stub.make_ssh_no_password(vm_ip, tmp_file)
-    #test_util.test_dsc('create data volume from template') 
-    #data_volume_name='Test_installation_data_volume_for_nightly'
-    #data_volume_inv = vol_ops.create_volume_from_template(data_image_uuid, ps_uuid, data_volume_name, host_uuid)
-    #data_volume_uuid = data_volume_inv.uuid
+    test_util.test_dsc('create data volume from template') 
+    data_volume_name='Test_installation_data_volume_for_nightly'
+    data_volume_inv = vol_ops.create_volume_from_template(data_image_uuid, ps_uuid, data_volume_name, host_uuid)
+    data_volume_uuid = data_volume_inv.uuid
 
-    test_util.test_dsc('query data volume') 
-    data_volume_name = 'Test_installation_data_volume_for_nightly'
-    conditions = res_ops.gen_query_conditions('name', '=', data_volume_name)
-    data_volume_uuid = res_ops.query_resource(res_ops.VOLUME, conditions)[0].uuid
+    #test_util.test_dsc('query data volume') 
+    #data_volume_name = 'Test_installation_data_volume_for_nightly'
+    #conditions = res_ops.gen_query_conditions('name', '=', data_volume_name)
+    #data_volume_uuid = res_ops.query_resource(res_ops.VOLUME, conditions)[0].uuid
 
     test_util.test_dsc('attach the data volume to vm') 
     vol_ops.attach_volume(data_volume_uuid, vm_uuid)
