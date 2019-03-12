@@ -188,6 +188,11 @@ def update_console_ip(vm_ip, tmp_file):
     cmd = '%s "zstack-ctl configure consoleProxyOverriddenIp=%s" ' % (ssh_cmd, vm_ip)
     process_result = execute_shell_in_process(cmd, tmp_file)
 
+def change_root_mysql_password(vm_ip, tmp_file):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd = '%s " zstack-ctl change_mysql_password --user-name root --new-password  zstack.123 --root-password zstack.mysql.password" ' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
+
 def change_mysql_password(vm_ip, tmp_file):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     cmd = '%s " zstack-ctl change_mysql_password --user-name zstack --new-password  zstack.123 --root-password zstack.mysql.password" ' % ssh_cmd
@@ -588,6 +593,20 @@ def upgrade_zstack(vm_ip, target_file, tmp_file):
        #         test_util.test_logger("mn node is still not started up, wait for another 10 seconds...")
        #     else:
        #         test_util.test_fail('zstack upgrade failed')
+
+def upgrade_zstack_with_root_mysql_password(vm_ip, target_file, tmp_file):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    vm_username = os.environ['imageUsername']
+    vm_password = os.environ['imagePassword']
+    ssh.scp_file(target_file, '/opt/zstack_installer', vm_ip, vm_username, vm_password)
+    env_var = "WEBSITE='%s'" % 'localhost'
+    cmd = '%s "%s bash %s -u -P zstack.123"' % (ssh_cmd, env_var, '/opt/zstack_installer')
+    process_result = execute_shell_in_process(cmd, tmp_file)
+
+    if process_result != 0:
+         test_util.test_fail('zstack upgrade failed')
+    else:
+       test_util.test_logger('upgrade zstack success')
 
 def execute_mevoco_aliyun_install(ssh_cmd, tmp_file):
     target_file = '/root/zizhu.bin'
