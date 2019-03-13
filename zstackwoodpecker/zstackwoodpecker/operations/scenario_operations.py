@@ -2488,6 +2488,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
     mn_ip_to_post, vm_ip_to_post = (None, None)
     if hasattr(scenario_config.deployerConfig, 'hosts'):
         ebs_host = {}
+        ceph_disk_created = False
         for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
             for vm in xmlobject.safe_list(host.vms.vm):
                 vm_creation_option = test_util.VmOption()
@@ -2652,6 +2653,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             else:
                                 volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config)
                             attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
+                            ceph_disk_created = True
                             break
                         if bs_ref.type_ == 'fusionstor':
                             disk_offering_uuid = bs_ref.offering_uuid_
@@ -2728,7 +2730,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                 share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
                                 zbs_virtio_scsi_volume_is_created = True
                                 attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
-                        elif ps_ref.type_ in ['xskyceph','ceph']:
+                        elif (not ceph_disk_created) and ps_ref.type_ in ['xskyceph','ceph']:
                             disk_offering_uuid = ps_ref.offering_uuid_
                             volume_option.set_disk_offering_uuid(disk_offering_uuid)
                             if primaryStorageUuid != None and primaryStorageUuid != "":
