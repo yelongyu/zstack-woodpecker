@@ -201,21 +201,17 @@ def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
     vm_creation_option.set_name(vm_name)
     vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
     if disk_offering_uuids:
-        cond_ps = res_ops.gen_query_conditions('status', '=', 'connected')
+        cond_ps = res_ops.gen_query_conditions('status', '=', 'Connected')
         cond_ps = res_ops.gen_query_conditions('state', '=', 'Enabled', cond_ps)
         all_vail_ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond_ps)
+        vail_ps_dict = {ps.uuid: ps.type for ps in all_vail_ps}
         if len(all_vail_ps) > 1:
-            cond_image = res_ops.gen_query_conditions('uuid', '=', image_uuid)
-            if 'ceph' in res_ops.query_resource(res_ops.IMAGE, cond_image)[0].backupStorageRefs[0].installPath:
-                ps_uuid_list = [ps.uuid for ps in all_vail_ps if ps.type != 'Ceph']
-            else:
-                ceph_ps = [ps for ps in all_vail_ps if ps.type == 'Ceph']
-                if ceph_ps:
-                    ps_uuid_list = [ps.uuid for ps in all_vail_ps if ps.type == 'Ceph']
-                else:
-                    ps_uuid_list = [ps.uuid for ps in all_vail_ps]
-            systags = ["primaryStorageUuidForDataVolume::%s" % random.choice(ps_uuid_list)]
-            if system_tags:
+            vail_ps_uuid_list = vail_ps_dict.keys()
+            ps_uuid_for_root_vol = vail_ps_uuid_list.pop()
+            ps_uuid_for_data_vol = random.choice(vail_ps_uuid_list)
+            ps_uuid = ps_uuid if ps_uuid else ps_uuid_for_root_vol
+            systags = ["primaryStorageUuidForDataVolume::%s" % ps_uuid_for_data_vol]
+            if system_tags and not [d for d in system_tags if "primaryStorageUuidForDataVolume" in d]:
                 system_tags.extend(systags)
             else:
                 system_tags = systags
@@ -255,16 +251,31 @@ def create_vm_with_iso(l3_uuid_list, image_uuid, vm_name = None, root_disk_uuids
     vm.create()
     return vm
 
-def get_other_ps_uuid():
-    cond_ps = res_ops.gen_query_conditions('status', '=', 'connected')
-    cond_ps = res_ops.gen_query_conditions('state', '=', 'Enabled', cond_ps)
-    all_ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond_ps)
-    all_ps_uuids = [ps.uuid for ps in all_ps]
-    cond_vm = res_ops.gen_query_conditions('state', '=', 'Running')
-    running_vm = res_ops.query_resource(res_ops.VM_INSTANCE, cond_vm)
-    ext_ps_uuids = [vm.allVolumes[0].primaryStorageUuid for vm in running_vm]
-    other_ps_uuids = list(set(all_ps_uuids) - set(ext_ps_uuids))
-    return random.choice(other_ps_uuids if other_ps_uuids else all_ps_uuids)
+def _set_ps_uuid(volume_creation_option):
+    cond = res_ops.gen_query_conditions('status', '=', 'connected')
+    cond = res_ops.gen_query_conditions('state', '=', 'Enabled', cond)
+    all_vail_ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
+    if len(all_vail_ps) > 1:
+        all_vail_ps_dict = {ps.uuid:ps.type for ps in all_vail_ps}
+        all_ps_uuids = all_vail_ps_dict.keys()
+        cond_vm = res_ops.gen_query_conditions('state', '=', 'Running')
+        running_vm = res_ops.query_resource(res_ops.VM_INSTANCE, cond_vm)
+        ext_ps_uuids = [vol.primaryStorageUuid for vm in running_vm for vol in vm.allVolumes]
+        other_ps_uuids = list(set(all_ps_uuids) - set(ext_ps_uuids))
+        if other_ps_uuids:
+            ps_uuid_for_data_vol = random.choice(other_ps_uuids)
+        else:
+            ps_uuid_for_data_vol = random.choice(all_ps_uuids)
+        if all_vail_ps_dict[ps_uuid_for_data_vol] == 'LocalStorage':
+            all_vail_host = res_ops.query_resource(res_ops.HOST, cond)
+            sys_tags = ['localStorage::hostUuid::%s' % random.choice([host.uuid for host in all_vail_host])]
+            vol_systags = volume_creation_option.get_system_tags()
+            if vol_systags and not [dl for dl in vol_systags if 'localStorage::hostUuid' in dl]:
+                new_systags = vol_systags.append(sys_tags)
+            else:
+                new_systags = sys_tags
+            volume_creation_option.set_system_tags(new_systags)
+        volume_creation_option.set_primary_storage_uuid(ps_uuid_for_data_vol)
 
 def create_volume(volume_creation_option=None, session_uuid = None):
     if not volume_creation_option:
@@ -275,7 +286,7 @@ def create_volume(volume_creation_option=None, session_uuid = None):
 
     volume_creation_option.set_session_uuid(session_uuid)
     if not volume_creation_option.get_primary_storage_uuid():
-        volume_creation_option.set_primary_storage_uuid(get_other_ps_uuid())
+        _set_ps_uuid(volume_creation_option)
     volume = zstack_volume_header.ZstackTestVolume()
     volume.set_creation_option(volume_creation_option)
     volume.create()
