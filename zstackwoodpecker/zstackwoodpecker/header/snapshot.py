@@ -72,10 +72,11 @@ class TestSnapshot(zstack_header.ZstackObject):
 
     def set_target_volume(self, target_volume):
         self.target_volume = target_volume
-        if target_volume.get_volume().type == volume_header.ROOT_VOLUME:
-            self.set_volume_type(volume_header.ROOT_VOLUME)
-        else:
-            self.set_volume_type(volume_header.DATA_VOLUME)
+        if target_volume:
+            if target_volume.get_volume().type == volume_header.ROOT_VOLUME:
+                self.set_volume_type(volume_header.ROOT_VOLUME)
+            else:
+                self.set_volume_type(volume_header.DATA_VOLUME)
 
     def get_target_volume(self):
         return self.target_volume
