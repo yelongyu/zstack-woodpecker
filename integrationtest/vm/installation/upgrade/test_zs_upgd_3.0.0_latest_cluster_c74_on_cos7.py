@@ -63,6 +63,7 @@ def test():
     test_stub.update_mn_hostname(vm_ip, tmp_file)
     test_stub.update_mn_ip(vm_ip, tmp_file)
     test_stub.update_console_ip(vm_ip, tmp_file)
+    test_stub.start_node(vm_ip, tmp_file)
     test_stub.start_mn(vm_ip, tmp_file)
     test_stub.check_installation(vm_ip, tmp_file)
 
@@ -75,6 +76,7 @@ def test():
 
     test_stub.update_console_ip(vm_ip, tmp_file)
     test_stub.stop_mn(vm_ip, tmp_file)
+    test_stub.start_node(vm_ip, tmp_file)
     test_stub.start_mn(vm_ip, tmp_file)
     test_util.test_dsc('create zone names is zone1')
     zone_inv = test_stub.create_zone1(vm_ip, tmp_file)
@@ -161,6 +163,7 @@ def test():
 
     test_stub.upgrade_zstack(vm_ip, zstack_latest_path, tmp_file) 
     test_stub.check_zstack_version(vm_ip, tmp_file, zstack_latest_version)
+    test_stub.start_node(vm_ip, tmp_file)
     test_stub.start_mn(vm_ip, tmp_file)
     test_stub.check_mn_running(vm_ip, tmp_file)
     test_stub.check_installation(vm_ip, tmp_file)
