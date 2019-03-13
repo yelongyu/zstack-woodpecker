@@ -69,8 +69,8 @@
     <instanceOfferings>
       <instanceOffering name="$instanceOfferingName_s"
         description="Test" 
-        memoryCapacity="$instanceOfferingMemory_s" 
-        cpuNum="$instanceOfferingCpuNum_s"
+        memoryCapacity="$instanceOfferingMemory_l" 
+        cpuNum="$instanceOfferingCpuNum_l"
         />
       <virtualRouterOffering name="$virtualRouterOfferingName_s"
         memoryCapacity="$virtualRouterOfferingMemory_s" 
@@ -120,11 +120,11 @@
   
       <diskOffering name="$mediumDiskOfferingName" 
         description="Medium Disk Offering" 
-        diskSize="$mediumDiskOfferingSize" />
+        diskSize="$largeDiskOfferingSize" />
   
       <diskOffering name="$smallDiskOfferingName" 
         description="Small Disk Offering" 
-        diskSize="$smallDiskOfferingSize" /> 
+        diskSize="$largeDiskOfferingSize" /> 
     </diskOfferings>
   
     <zones>
