@@ -3266,12 +3266,11 @@ def lib_get_image_by_desc(img_desc):
 
 def lib_get_image_by_name(img_name, bs_type=None):
     cond = res_ops.gen_query_conditions('name', '=', img_name)
-    if bs_type:
-        cond = res_ops.gen_query_conditions('backupStorageRefs.installPath', 'like', bs_type, cond)
     images = res_ops.query_resource(res_ops.IMAGE, cond)
+    if bs_type:
+        images = [img for img in images if res_ops.query_resource(res_ops.BACKUP_STORAGE, res_ops.gen_query_conditions('uuid', '=', img.backupStorageRefs[0].backupStorageUuid))[0].type == bs_type]
     if images:
         return random.choice(images)
-
     test_util.test_logger("not find image with name: %s" % img_name)
     return False
 
