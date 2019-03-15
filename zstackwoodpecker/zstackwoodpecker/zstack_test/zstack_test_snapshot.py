@@ -428,6 +428,10 @@ umount %s
 
         self._update_delete()
 
+        if self.get_snapshot_list():
+            for sp in self.get_snapshot_list():
+                sp.snapshot = test_lib.lib_get_volume_snapshot(sp.get_snapshot().uuid)[0]
+
     def get_primary_snapshots(self):
         return self.primary_snapshots
 

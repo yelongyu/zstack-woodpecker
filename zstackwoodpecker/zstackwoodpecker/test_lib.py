@@ -6311,6 +6311,8 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             if not target_volume_uuid:
                 test_util.test_fail("no resource available for next action: %s" % (next_action))
 
+            target_snapshots = test_dict.get_volume_snapshot(target_volume_uuid)
+
             test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
                 (next_action, target_volume_uuid))
             import zstackwoodpecker.operations.datamigrate_operations as datamigr_ops
@@ -6322,6 +6324,9 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                 target_vm.update()
             if target_volume:
                 target_volume.update_volume()
+            if target_snapshots:
+                target_snapshots.update()
+
         elif next_action == TestAction.create_volume :
             ps_uuid = lib_robot_get_default_configs(robot_test_obj, "PS")
             target_volume_name = None
