@@ -131,13 +131,13 @@
       <zone name="$zoneName" description="Test">
         <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
         <primaryStorages>
-          <cephPrimaryStorage name="$cephPrimaryStorageName"
-            description="Test Ceph PS" 
-            monUrls="$cephPrimaryStorageMonUrls"
-          />
           <xskycephPrimaryStorage name="$cephPrimaryStorageName2"
             description="Test Ceph PS2" 
             monUrls="$cephPrimaryStorageMonUrls2"
+          />
+          <cephPrimaryStorage name="$cephPrimaryStorageName"
+            description="Test Ceph PS" 
+            monUrls="$cephPrimaryStorageMonUrls"
           />
         </primaryStorages>
   
