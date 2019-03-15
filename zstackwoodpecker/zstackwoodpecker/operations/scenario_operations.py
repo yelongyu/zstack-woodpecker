@@ -2040,10 +2040,11 @@ def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_in
             action.systemTags = ["capability::virtio-scsi", "localStorage::hostUuid::%s" % vm_inv.hostUuid]
         else:
             action.systemTags = ["localStorage::hostUuid::%s" % vm_inv.hostUuid]
-        if ps_ref_type == 'xskyceph':
-            action.systemTags = ["capability::virtio-scsi", "localStorage::hostUuid::%s" % vm_inv.hostUuid]
-        else:
-            action.systemTags = ["localStorage::hostUuid::%s" % vm_inv.hostUuid]
+        if ps_ref_type:
+            if ps_ref_type == 'xskyceph':
+                action.systemTags = ["capability::virtio-scsi", "localStorage::hostUuid::%s" % vm_inv.hostUuid]
+            else:
+                action.systemTags = ["localStorage::hostUuid::%s" % vm_inv.hostUuid]
     elif ps.type in [ 'SharedBlock' ]:
         action.primaryStorageUuid = ps.uuid
     else:
