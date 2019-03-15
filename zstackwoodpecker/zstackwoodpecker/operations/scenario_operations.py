@@ -2535,7 +2535,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     cond = res_ops.gen_query_conditions('type', '=', 'SharedBlock')
                     cond = res_ops.gen_query_conditions('status', '=', 'Connected', cond)
                     cond = res_ops.gen_query_conditions('state', '=', 'Enabled', cond)
-                    sblk_ps_avail = query_resource(res_ops.PRIMARY_STORAGE, cond).inventories
+                    sblk_ps_avail = query_resource(zstack_management_ip, res_ops.PRIMARY_STORAGE, cond).inventories
                     if sblk_ps_avail:
                         vm_creation_option.set_ps_uuid(sblk_ps_avail[0].uuid)
                     else:
@@ -2688,10 +2688,19 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     for ps_ref in xmlobject.safe_list(vm.primaryStorageRef):
                         if ps_ref.type_ == 'ocfs2smp':
                             if ocfs2smp_shareable_volume_is_created == False and hasattr(ps_ref, 'disk_offering_uuid_'):
+				# Only sharedblock or ceph support shared volume right now
+                                cond = res_ops.gen_query_conditions('type', '=', 'SharedBlock')
+                                cond = res_ops.gen_query_conditions('status', '=', 'Connected', cond)
+                                cond = res_ops.gen_query_conditions('state', '=', 'Enabled', cond)
+                                sblk_ps_avail = query_resource(zstack_management_ip, res_ops.PRIMARY_STORAGE, cond).inventories
+                                if sblk_ps_avail:
+                                    vm_creation_option.set_ps_uuid(sblk_ps_avail[0].uuid)
+				    volume_option.set_primary_storage_uuid(sblk_ps_avail[0].uuid)
+                                else:
+                                    test_util.test_fail('no available sblk primary storage which is enabled and connected for ebs test')
+
                                 ocfs2smp_disk_offering_uuid = ps_ref.disk_offering_uuid_
                                 volume_option.set_disk_offering_uuid(ocfs2smp_disk_offering_uuid)
-                                if primaryStorageUuid != None and primaryStorageUuid != "":
-                                    volume_option.set_primary_storage_uuid(primaryStorageUuid)
                                 if poolName != None and poolName != "":
                                     volume_option.set_system_tags(['ephemeral::shareable', 'capability::virtio-scsi', 'ceph::pool::%s' % (poolName)])
                                 else:
