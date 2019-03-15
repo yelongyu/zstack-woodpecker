@@ -509,6 +509,7 @@ class WoodPecker(object):
                     #self.info('running setup case: %s' % suite.setup_case.name)
                     run_case(suite, suite.setup_case, suite_repeat, 0)
                     if suite.setup_case.success[suite_repeat][0] != TestCase.PASS and not self.dry_run:
+                        os.system("touch /tmp/woodpecker_setup_fail")
                         self.info('setup_case[%s] in suite[%s] failed to execute, skipping test cases in this suite' % (suite.setup_case.name, suite.name + "_r" + str(suite_repeat)))
                         return
     
