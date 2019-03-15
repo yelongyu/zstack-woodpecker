@@ -62,7 +62,7 @@
           </l3Networks>
           <hostRef>$hostName4</hostRef>
 	  <backupStorageRef type="xsky" offering_uuid="$xskyStorageOfferingUuid">$cephBackupStorageName2</backupStorageRef>
-	  <primaryStorageRef type="xsky">$cephPrimaryStorageName2</primaryStorageRef>
+	  <primaryStorageRef type="xskyceph" offering_uuid="$xskyStorageOfferingUuid">$cephPrimaryStorageName2</primaryStorageRef>
         </vm>
         <vm name="$vmName5" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2"
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
@@ -76,7 +76,7 @@
           </l3Networks>
           <hostRef>$hostName5</hostRef>
 	  <backupStorageRef type="xsky" offering_uuid="$xskyStorageOfferingUuid">$cephBackupStorageName2</backupStorageRef>
-	  <primaryStorageRef type="xsky">$cephPrimaryStorageName2</primaryStorageRef>
+	  <primaryStorageRef type="xskyceph" offering_uuid="$xskyStorageOfferingUuid">$cephPrimaryStorageName2</primaryStorageRef>
         </vm>
         <vm name="$vmName6" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2"
           imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
@@ -90,7 +90,7 @@
           </l3Networks>
           <hostRef>$hostName6</hostRef>
 	  <backupStorageRef type="xsky" offering_uuid="$xskyStorageOfferingUuid">$cephBackupStorageName2</backupStorageRef>
-	  <primaryStorageRef type="xsky">$cephPrimaryStorageName2</primaryStorageRef>
+	  <primaryStorageRef type="xskyceph" offering_uuid="$xskyStorageOfferingUuid">$cephPrimaryStorageName2</primaryStorageRef>
         </vm>
       </vms>
     </host>
