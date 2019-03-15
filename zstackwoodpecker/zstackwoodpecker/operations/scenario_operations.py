@@ -2694,7 +2694,6 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                 cond = res_ops.gen_query_conditions('state', '=', 'Enabled', cond)
                                 sblk_ps_avail = query_resource(zstack_management_ip, res_ops.PRIMARY_STORAGE, cond).inventories
                                 if sblk_ps_avail:
-                                    vm_creation_option.set_ps_uuid(sblk_ps_avail[0].uuid)
 				    volume_option.set_primary_storage_uuid(sblk_ps_avail[0].uuid)
                                 else:
                                     test_util.test_fail('no available sblk primary storage which is enabled and connected for ebs test')
