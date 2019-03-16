@@ -428,9 +428,19 @@ umount %s
 
         self._update_delete()
 
+        if self.utility_vm:
+            cond = res_ops.gen_query_conditions('name', '=', "utility_vm_for_robot_test")
+            cond = res_ops.gen_query_conditions('state', '=', "Running", cond)
+            vms = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
+            for vm in vms:
+                if self.get_target_volume().get_volume().primaryStorageUuid == vm.allVolumes[0].primaryStorageUuid:
+                    self.get_utility_vm().set_vm(vm)
+
         if self.get_snapshot_list():
             for sp in self.get_snapshot_list():
                 sp.snapshot = test_lib.lib_get_volume_snapshot(sp.get_snapshot().uuid)[0]
+                if self.utility_vm:
+                    sp.set_utility_vm(self.utility_vm)
 
     def get_primary_snapshots(self):
         return self.primary_snapshots
