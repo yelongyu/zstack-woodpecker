@@ -142,7 +142,7 @@
         </primaryStorages>
   
         <clusters>
-          <cluster name="$clusterName" description="Test"
+          <cluster name="$clusterName2" description="Test"
             hypervisorType="$clusterHypervisorType">
             <hosts>
               <host name="$hostName" description="Test" managementIp="$hostIp"
@@ -152,7 +152,7 @@
               <host name="$hostName3" description="Test3" managementIp="$hostIp3"
                 username="$hostUsername3" password="$hostPassword3" port="$hostPort3"/>
             </hosts>
-            <primaryStorageRef>$cephPrimaryStorageName2</primaryStorageRef>
+            <primaryStorageRef>$cephPrimaryStorageName</primaryStorageRef>
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
@@ -177,7 +177,7 @@
             <l2NetworkRef>$l2VlanNetworkName19</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName20</l2NetworkRef>
           </cluster>
-          <cluster name="$clusterName2" description="Test"
+          <cluster name="$clusterName" description="Test"
             hypervisorType="$clusterHypervisorType">
             <hosts>
               <host name="$hostName4" description="Test4" managementIp="$hostIp4"
@@ -187,7 +187,7 @@
               <host name="$hostName6" description="Test6" managementIp="$hostIp6"
                 username="$hostUsername6" password="$hostPassword6" port="$hostPort6"/>
             </hosts>
-            <primaryStorageRef>$cephPrimaryStorageName</primaryStorageRef>
+            <primaryStorageRef>$cephPrimaryStorageName2</primaryStorageRef>
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
