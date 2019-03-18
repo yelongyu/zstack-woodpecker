@@ -862,13 +862,20 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         virtual_id = self.test_obj.get_vid()
         self.check_login(virtual_id.name, password)
         actions = self.test_obj.get_vid_statements()[0]['actions']
-        if 'org.zstack.header.vm.**' in actions and \
+        effect = self.test_obj.get_vid_statements()[0]['effect']
+        checker_runned = False
+        if effect == "Allow" and \
+           'org.zstack.header.vm.**' in actions and \
                 'org.zstack.ha.**' in actions:
+            checker_runned = True
             self.check_vm_operation()
-        if 'org.zstack.header.image.**' in actions and \
+        if effect == "Allow" and \
+           'org.zstack.header.image.**' in actions and \
                 'org.zstack.storage.backup.imagestore.APIGetImagesFromImageStoreBackupStorageMsg' in actions:
+            checker_runned = True
             self.check_image_operation()
-        if 'org.zstack.header.volume.APICreateDataVolumeFromVolumeTemplateMsg' in actions and \
+        if effect == "Allow" and \
+                'org.zstack.header.volume.APICreateDataVolumeFromVolumeTemplateMsg' in actions and \
                 'org.zstack.header.volume.APIGetVolumeQosMsg' in actions and \
                 'org.zstack.header.volume.APISyncVolumeSizeMsg' in actions and \
                 'org.zstack.header.volume.APICreateDataVolumeFromVolumeSnapshotMsg' in actions and \
@@ -889,8 +896,10 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
                 'org.zstack.header.volume.APIUpdateVolumeMsg' in actions and \
                 'org.zstack.header.volume.APIChangeVolumeStateMsg' in actions and \
                 'org.zstack.header.volume.APIQueryVolumeMsg' in actions: 
+            checker_runned = True
             self.check_volume_operation()
-        if 'org.zstack.header.vm.**' not in actions and \
+        if effect == "Allow" and \
+                'org.zstack.header.vm.**' not in actions and \
                 'org.zstack.header.vm.APIGetVmQgaMsg' in actions and \
                 'org.zstack.header.vm.APIChangeVmImageMsg' in actions and \
                 'org.zstack.header.vm.APISetVmSshKeyMsg' in actions and \
@@ -949,13 +958,19 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
                 'org.zstack.header.vm.APIDetachIsoFromVmInstanceMsg' in actions and \
                 'org.zstack.header.vm.APIGetVmRDPMsg' in actions and \
                 'org.zstack.header.vm.APIPauseVmInstanceMsg' in actions:
+            checker_runned = True
             self.check_vm_operation_without_create_permission()
-        if 'org.zstack.header.storage.snapshot.**' in actions and \
+        if effect == "Allow" and \
+                'org.zstack.header.storage.snapshot.**' in actions and \
                 'org.zstack.header.volume.APICreateVolumeSnapshotMsg' in actions:
+            checker_runned = True
             self.check_snapshot()
-        if 'org.zstack.header.affinitygroup.**' in actions:
+        if effect == "Allow" and \
+                'org.zstack.header.affinitygroup.**' in actions:
+            checker_runned = True
             self.check_affinity_group()
-        if 'org.zstack.header.network.l3.**' in actions and \
+        if effect == "Allow" and \
+                'org.zstack.header.network.l3.**' in actions and \
                 'org.zstack.network.service.flat.**' in actions and \
                 'org.zstack.header.network.l2.APIUpdateL2NetworkMsg' in actions and \
                 'org.zstack.header.network.service.APIQueryNetworkServiceProviderMsg' in actions and \
@@ -964,33 +979,55 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
                 'org.zstack.network.l2.vxlan.vxlanNetwork.APIQueryL2VxlanNetworkMsg' in actions and \
                 'org.zstack.network.l2.vxlan.vxlanNetwork.APICreateL2VxlanNetworkMsg' in actions and \
                 'org.zstack.network.l2.vxlan.vxlanNetworkPool.APIQueryL2VxlanNetworkPoolMsg' in actions:
+            checker_runned = True
             self.check_networks()
-        if 'org.zstack.network.service.vip.**' in actions and \
+        if effect == "Allow" and \
+                'org.zstack.network.service.vip.**' in actions and \
                 'org.zstack.network.service.eip.**' in actions and \
                 'org.zstack.header.vipQos.**' in actions:
+            checker_runned = True
             self.check_eip()
-        if 'org.zstack.network.securitygroup.**' in actions:
+        if effect == "Allow" and \
+                'org.zstack.network.securitygroup.**' in actions:
+            checker_runned = True
             self.check_security_group()
-        if 'org.zstack.network.service.lb.**' in actions and \
+        if effect == "Allow" and \
+                'org.zstack.network.service.lb.**' in actions and \
                 'org.zstack.network.service.vip.**' in actions and \
                 'org.zstack.header.vipQos.**' in actions:
+            checker_runned = True
             self.check_load_balancer()
-        if 'org.zstack.network.service.portforwarding.**' in actions and \
+        if effect == "Allow" and \
+                'org.zstack.network.service.portforwarding.**' in actions and \
                 'org.zstack.network.service.vip.**' in actions and \
                 'org.zstack.header.vipQos.**' in actions:
+            checker_runned = True
             self.check_port_forwarding()
-        if 'org.zstack.scheduler.**' in actions:
+        if effect == "Allow" and \
+                'org.zstack.scheduler.**' in actions:
+            checker_runned = True
             self.check_scheduler()
-        if 'org.zstack.pciDevice.APIAttachPciDeviceToVmMsg' in actions and \
+        if effect == "Allow" and \
+                'org.zstack.pciDevice.APIAttachPciDeviceToVmMsg' in actions and \
                 'org.zstack.pciDevice.APIUpdateHostIommuStateMsg' in actions and \
                 'org.zstack.pciDevice.APIGetPciDeviceCandidatesForNewCreateVmMsg' in actions and \
                 'org.zstack.pciDevice.APIDetachPciDeviceFromVmMsg' in actions and \
                 'org.zstack.pciDevice.APIQueryPciDeviceMsg' in actions and \
                 'org.zstack.pciDevice.APIGetPciDeviceCandidatesForAttachingVmMsg' in actions:
+            checker_runned = True
             self.check_pci()
-        if 'org.zstack.zwatch.**' in actions and \
+        if effect == "Allow" and \
+                'org.zstack.zwatch.**' in actions and \
                 'org.zstack.sns.**' in actions:
+            checker_runned = True
             self.check_zwatch()
-        if 'org.zstack.sns.**' in actions:
+        if effect == "Allow" and \
+                'org.zstack.sns.**' in actions:
+            checker_runned = True
             self.check_sns()  
+
+        if checker_runned == False
+            test_util.test_fail("found vid checker not runned")
+
+
         return self.judge(True)
