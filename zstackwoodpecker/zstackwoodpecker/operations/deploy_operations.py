@@ -1276,6 +1276,19 @@ def get_node_from_scenario_file(nodeRefName, scenarioConfig, scenarioFile, deplo
                                     for ip in xmlobject.safe_list(s_vm.ips.ip):
                                         if ip.uuid_ == s_l3_uuid:
                                             return ip.ip_
+
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            if xmlobject.has_element(vm, 'nodeRef'):
+                if vm.nodeRef.text_ == nodeRefName:
+                    with open(scenarioFile, 'r') as fd:
+                        xmlstr = fd.read()
+                        fd.close()
+                        scenario_file = xmlobject.loads(xmlstr)
+                        for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                            if s_vm.name_ == vm.name_:
+                                return s_vm.ip_
+
     return None
 
 def get_nodes_from_scenario_file(scenarioConfig, scenarioFile, deployConfig):
@@ -1318,6 +1331,17 @@ def get_nodes_from_scenario_file(scenarioConfig, scenarioFile, deployConfig):
                                 for ip in xmlobject.safe_list(s_vm.ips.ip):
                                     if ip.uuid_ == s_l3_uuid:
                                         return ip.ip_
+
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            if xmlobject.has_element(vm, 'nodeRef'):
+                with open(scenarioFile, 'r') as fd:
+                    xmlstr = fd.read()
+                    fd.close()
+                    scenario_file = xmlobject.loads(xmlstr)
+                    for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                        if s_vm.name_ == vm.name_:
+                            nodes_ip += ' %s' % s_vm.ip_
 
     return nodes_ip
 
