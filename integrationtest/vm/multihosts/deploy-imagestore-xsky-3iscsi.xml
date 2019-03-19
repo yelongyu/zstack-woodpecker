@@ -90,7 +90,7 @@
         password="$sftpBackupStoragePassword"
         hostname="$sftpBackupStorageHostname"
         port="$sftpBackupStoragePort"/>
-      <cephBackupStorage name="$cephBackupStorageName"
+      <xskycephBackupStorage name="$cephBackupStorageName"
         description="Test Ceph BS" 
         monUrls="$cephBackupStorageMonUrls" />
     </backupStorages>
