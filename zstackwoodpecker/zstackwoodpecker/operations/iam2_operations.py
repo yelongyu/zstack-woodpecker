@@ -90,6 +90,16 @@ def add_policy_statements_to_role(uuid,statements, session_uuid=None):
     return evt
 
 
+def attach_policy_to_role(policy_uuid, role_uuid, session_uuid=None):
+    action = api_actions.AttachPolicyToRoleAction()
+    action.timeout = 30000
+    action.policyUuid = policy_uuid
+    action.roleUuid = role_uuid
+    test_util.action_logger('Attach policy: %s to role:%s' % (policy_uuid, role_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+
 def add_roles_to_iam2_virtual_id_group(role_uuids, group_uuid, session_uuid=None):
     action = api_actions.AddRolesToIAM2VirtualIDGroupAction()
     action.timeout = 30000
@@ -287,6 +297,26 @@ def create_role(name, statements=None,session_uuid=None):
     if statements:
         action.statements = statements
     test_util.action_logger('create role : %s ' % name)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def update_role(uuid, statements=None,session_uuid=None):
+    action = api_actions.UpdateRoleAction()
+    action.timeout = 30000
+    action.uuid = uuid
+    if statements:
+        action.statements = statements
+    test_util.action_logger('update role : %s ' % uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def create_policy(name, statements=None,session_uuid=None):
+    action = api_actions.CreatePolicyAction()
+    action.timeout = 30000
+    action.name = name
+    if statements:
+        action.statements = statements
+    test_util.action_logger('create policy : %s ' % name)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
