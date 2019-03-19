@@ -165,7 +165,7 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
                 action.sshPort = bs.port_
             action.timeout = AddKVMHostTimeOut #for some platform slowly salt execution
             action.type = inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE
-            thread = threading.Thread(target = _thread_for_action, args = (action, ))
+            thread = threading.Thread(target = _thread_for_action, args = (action, True))
             wait_for_thread_queue()
             thread.start()
 
