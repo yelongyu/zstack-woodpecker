@@ -352,7 +352,10 @@ umount %s
             if 'Storage' == snapshot.get_snapshot().type and \
             'ebs' not in snapshot.get_snapshot().primaryStorageInstallPath:
                 self._update_delete()
-                return 
+                if snapshot == snapshot_list[-1]:
+                    return
+                else:
+                    continue
 
             #sp_list = get_snapshot_family(snapshot)
             #for sp in sp_list:
