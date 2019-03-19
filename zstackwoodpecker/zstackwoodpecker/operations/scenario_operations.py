@@ -1237,7 +1237,10 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
                                 else:
                                     ceph_storages[key].append(vm_name)
                             else:
-                                ceph_storages[key] = [ vm_name ]
+                                vals = ceph_storages.values()
+                                val_list = [v for pv in vals for v in pv]
+                                if vm_name not in val_list:
+                                    ceph_storages[key] = [ vm_name ]
 
 #     for ceph_storage in ceph_storages:
     def deploy_ceph(ceph_storages, ceph_storage):
