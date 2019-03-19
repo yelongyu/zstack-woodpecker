@@ -1026,7 +1026,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             checker_runned = True
             self.check_sns()  
 
-        if checker_runned == False
+        if checker_runned == False:
             test_util.test_fail("found vid checker not runned")
 
 
