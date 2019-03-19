@@ -921,16 +921,16 @@ default one' % self.zstack_properties)
                 # startup speed is slow. Increase timeout to 180s.
                 if linux.is_ip_existing(node.ip_):
                     if os.environ.get('ZSTACK_SIMULATOR') == "yes":
-                        cmd = 'zstack-ctl stop_node; %s zstack-ctl configure unitTestOn=true; zstack-ctl configure ThreadFacade.maxThreadNum=1000; nohup zstack-ctl start_node --simulator -DredeployDB=true' % (self._enable_jacoco_agent_cmd())
+                        cmd = 'zstack-ctl stop_node; %s zstack-ctl configure unitTestOn=true; zstack-ctl configure ThreadFacade.maxThreadNum=1000; nohup zstack-ctl start_node --simulator -DredeployDB=true; zstack-ctl stop_ui' % (self._enable_jacoco_agent_cmd())
                     else:
-                        cmd = 'zstack-ctl stop_node; %s nohup zstack-ctl start_node' % (self._enable_jacoco_agent_cmd())
+                        cmd = 'zstack-ctl stop_node; %s nohup zstack-ctl start_node; zstack-ctl stop_ui' % (self._enable_jacoco_agent_cmd())
                     thread = threading.Thread(target=shell_cmd_thread, args=(cmd, True, ))
                 elif not linux.is_ip_existing(node1.ip_):
                     # when first node1 ip is not local, it usualy means woodpecker is running on hosts other than MN
-                    cmd = 'zstack-ctl stop_node --host=%s ; %s zstack-ctl start_node --host=%s' % (node.ip_, self._enable_jacoco_agent_cmd(), node.ip_)
+                    cmd = 'zstack-ctl stop_node --host=%s ; %s zstack-ctl start_node --host=%s; zstack-ctl stop_ui --host=%s' % (node.ip_, self._enable_jacoco_agent_cmd(), node.ip_, node.ip_)
                     thread = threading.Thread(target=ssh.execute, args=(cmd, node1.ip_, node1.username_, node1.password_, ))
                 else:
-                    cmd = 'zstack-ctl stop_node --host=%s ; %s zstack-ctl start_node --host=%s' % (node.ip_, self._enable_jacoco_agent_cmd(), node.ip_)
+                    cmd = 'zstack-ctl stop_node --host=%s ; %s zstack-ctl start_node --host=%s; zstack-ctl stop_ui --host=%s' % (node.ip_, self._enable_jacoco_agent_cmd(), node.ip_, node.ip_)
                     thread = threading.Thread(target=shell_cmd_thread, args=(cmd, True, ))
                 threads.append(thread)
             else:
