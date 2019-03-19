@@ -1,5 +1,5 @@
 <testConfig>
-    <deployConfig>deploy-imagestore-ceph-3iscsi.xml</deployConfig>
+    <deployConfig>deploy-imagestore-xsky-3iscsi.xml</deployConfig>
     <deployConfigTemplate>deploy-imagestore-ceph-3iscsi.tmpt</deployConfigTemplate>
     <pingTestTarget>zstack.org</pingTestTarget>
 </testConfig>
