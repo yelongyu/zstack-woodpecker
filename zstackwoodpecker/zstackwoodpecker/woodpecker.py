@@ -512,6 +512,7 @@ class WoodPecker(object):
                         os.system("touch /tmp/woodpecker_setup_fail")
                         self.info('setup_case[%s] in suite[%s] failed to execute, skipping test cases in this suite' % (suite.setup_case.name, suite.name + "_r" + str(suite_repeat)))
                         return
+                    os.system("rm -rf /tmp/woodpecker_setup_fail")
     
                 if suite.parallel != 0:
                     case_noparallelkey = []
