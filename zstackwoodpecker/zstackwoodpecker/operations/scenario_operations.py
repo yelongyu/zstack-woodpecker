@@ -2641,7 +2641,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     volume_option = test_util.VolumeOption()
                     volume_option.set_name(os.environ.get('volumeName'))
                     for bs_ref in xmlobject.safe_list(vm.backupStorageRef):
-                        if bs_ref.type_ in ['ceph', 'xskyceph']:
+                        if bs_ref.type_ in ['ceph', 'xsky']:
 #                         if bs_ref.type_ == 'ceph':
                             disk_offering_uuid = bs_ref.offering_uuid_
                             volume_option.set_disk_offering_uuid(disk_offering_uuid)
@@ -2709,8 +2709,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                     volume_option.set_system_tags(['ephemeral::shareable', 'capability::virtio-scsi', 'ceph::pool::%s' % (poolName)])
                                 else:
                                     volume_option.set_system_tags(['ephemeral::shareable', 'capability::virtio-scsi'])
-                                #share_volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
-                                share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
+                                share_volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
+				#share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
                                 ocfs2smp_shareable_volume_is_created = True
                             attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
                         elif ps_ref.type_ == 'iscsiTarget':

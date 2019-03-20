@@ -785,9 +785,6 @@ class VmOption(DataOption):
             self.rootVolumeSystemTags = None
             self.dataVolumeSystemTags = None
             self.strategy_type = 'InstantStart'
-            self.cpu_num = None
-            self.memory_size = None
-            self.root_disk_size = None
             super(VmOption, self).__init__()
         else:
             self.l3_uuids = vm_opt.get_l3_uuids()
@@ -811,9 +808,6 @@ class VmOption(DataOption):
             self.strategy_type = vm_opt.get_strategy_type()
             self.rootVolumeSystemTags = vm_opt.get_rootVolume_systemTags()
             self.dataVolumeSystemTags = vm_opt.get_dataVolume_systemTags()
-            self.cpu_num = vm_opt.get_cpu_num()
-            self.memory_size = vm_opt.get_memory_size()
-            self.root_disk_size = vm_opt.get_root_disk_size()
             super(VmOption, self).__init__()
 
     def set_l3_uuids(self, l3_uuids):
@@ -925,24 +919,6 @@ class VmOption(DataOption):
 
     def get_dataVolume_systemTags(self):
         return self.dataVolumeSystemTags
-
-    def set_cpu_num(self, cpu_num):
-        self.cpu_num = cpu_num
-
-    def get_cpu_num(self):
-        return self.cpu_num
-
-    def set_memory_size(self, memory_size):
-        self.memory_size = memory_size
-
-    def get_memory_size(self):
-        return self.memory_size
-
-    def set_root_disk_size(self, root_disk_size):
-        self.root_disk_size = root_disk_size
-
-    def get_root_disk_size(self):
-        return self.root_disk_size
 
 class VolumeOption(DataOption):
     def __init__(self):

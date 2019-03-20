@@ -82,8 +82,8 @@
             </l3Network>
           </l3Networks>
           <hostRef>$hostName</hostRef>
-          <backupStorageRef type="xskyceph" offering_uuid="$xskyStorageOfferingUuid">$cephBackupStorageName</backupStorageRef>
-          <primaryStorageRef type="xskyceph">$cephPrimaryStorageName</primaryStorageRef>
+          <backupStorageRef type="xsky" offering_uuid="$xskyStorageOfferingUuid">$cephBackupStorageName</backupStorageRef>
+          <primaryStorageRef type="xsky">$cephPrimaryStorageName</primaryStorageRef>
           <primaryStorageRef type="iscsiInitiator" >$iscsiPrimaryStorageName</primaryStorageRef>
           <primaryStorageRef type="iscsiInitiator" >$iscsiPrimaryStorageName2</primaryStorageRef>
           <primaryStorageRef type="iscsiInitiator" >$iscsiPrimaryStorageName3</primaryStorageRef>
@@ -102,8 +102,8 @@
             </l3Network>
           </l3Networks>
           <hostRef>$hostName2</hostRef>
-          <backupStorageRef type="xskyceph" offering_uuid="$xskyStorageOfferingUuid">$cephBackupStorageName</backupStorageRef>
-          <primaryStorageRef type="xskyceph">$cephPrimaryStorageName</primaryStorageRef>
+          <backupStorageRef type="xsky" offering_uuid="$xskyStorageOfferingUuid">$cephBackupStorageName</backupStorageRef>
+          <primaryStorageRef type="xsky">$cephPrimaryStorageName</primaryStorageRef>
           <primaryStorageRef type="iscsiInitiator" >$iscsiPrimaryStorageName</primaryStorageRef>
           <primaryStorageRef type="iscsiInitiator" >$iscsiPrimaryStorageName2</primaryStorageRef>
           <primaryStorageRef type="iscsiInitiator" >$iscsiPrimaryStorageName3</primaryStorageRef>
@@ -122,8 +122,8 @@
             </l3Network>
           </l3Networks>
           <hostRef>$hostName3</hostRef>
-          <backupStorageRef type="xskyceph" offering_uuid="$xskyStorageOfferingUuid">$cephBackupStorageName</backupStorageRef>
-          <primaryStorageRef type="xskyceph">$cephPrimaryStorageName</primaryStorageRef>
+          <backupStorageRef type="xsky" offering_uuid="$xskyStorageOfferingUuid">$cephBackupStorageName</backupStorageRef>
+          <primaryStorageRef type="xsky">$cephPrimaryStorageName</primaryStorageRef>
           <primaryStorageRef type="iscsiInitiator" >$iscsiPrimaryStorageName</primaryStorageRef>
           <primaryStorageRef type="iscsiInitiator" >$iscsiPrimaryStorageName2</primaryStorageRef>
           <primaryStorageRef type="iscsiInitiator" >$iscsiPrimaryStorageName3</primaryStorageRef>
