@@ -162,11 +162,11 @@ def test():
         policy_uuid = iam2_ops.create_policy('noDeletePolicy', statements).uuid
         iam2_ops.attach_policy_to_role(policy_uuid, role_uuid)
         iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], policy_check_vid.get_vid().uuid)
-        policy_check_vid.set_vid_statements(statements)
+        policy_check_vid.set_customized("noDeleteAdminPermission")
         policy_check_vid.check()
         iam2_ops.update_role(uuid, [])
         iam2_ops.add_policy_statements_to_role(uuid, statements)
-        policy_check_vid.set_vid_statements(statements)
+        policy_check_vid.set_customized("noDeleteAdminPermission")
         policy_check_vid.check()
 
     if flavor['target_admin'] == 'readOnlyAdmin':

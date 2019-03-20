@@ -132,7 +132,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             test_util.test_logger('Check Result: [Virtual ID:] %s login failed' % username)
             return self.judge(False)
 
-    def check_vm_operation(self):
+    def check_vm_operation(self, hasDeletePermission=True):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
         conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
@@ -169,13 +169,28 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             vm_ops.start_vm(vm_uuid, session_uuid=project_login_session_uuid)
             vm_ops.suspend_vm(vm_uuid, session_uuid=project_login_session_uuid)
             vm_ops.resume_vm(vm_uuid, session_uuid=project_login_session_uuid)
-            vm_ops.destroy_vm(vm_uuid, session_uuid=project_login_session_uuid)
-            vm_ops.expunge_vm(vm_uuid, session_uuid=project_login_session_uuid)
+            if hasDeletePermission == True:
+                vm_ops.destroy_vm(vm_uuid, session_uuid=project_login_session_uuid)
+                vm_ops.expunge_vm(vm_uuid, session_uuid=project_login_session_uuid)
+            else:
+                try:
+                    vm_ops.destroy_vm(vm_uuid, session_uuid=project_login_session_uuid)
+                    test_util.test_logger("destroy_vm should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+                try:
+                    vm_ops.expunge_vm(vm_uuid, session_uuid=project_login_session_uuid)
+                    test_util.test_logger("expunge_vm should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    return self.judge(True)
         except Exception as e:
             test_util.test_logger('Check Result: [Virtual ID:] %s has permission for vm but vm check failed' % virtual_id.name)    
             test_util.test_logger('Excepiton info: %s' %e)
             return self.judge(False)
         return self.judge(True)
+
 
     def check_vm_operation_without_create_permission(self):
         virtual_id = self.test_obj.get_vid()
@@ -222,7 +237,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             return self.judge(False)
         return self.judge(True)
 
-    def check_image_operation(self):
+    def check_image_operation(self, hasDeletePermission=True):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
         conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
@@ -254,15 +269,29 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             if image == None:
                 test_util.test_fail('fail to query image just added')
                 return self.judge(False)
-            img_ops.delete_image(image_uuid, session_uuid=project_login_session_uuid)
-            img_ops.expunge_image(image_uuid, session_uuid=project_login_session_uuid)
+            if hasDeletePermission == True:
+                img_ops.delete_image(image_uuid, session_uuid=project_login_session_uuid)
+                img_ops.expunge_image(image_uuid, session_uuid=project_login_session_uuid)
+            else:
+                try:
+                    img_ops.delete_image(image_uuid, session_uuid=project_login_session_uuid)
+                    test_util.test_logger("delete_image should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+                try:
+                    img_ops.expunge_image(image_uuid, session_uuid=project_login_session_uuid)
+                    test_util.test_logger("expunge_image should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    return self.judge(True)
         except Exception as e:
             test_util.test_logger('Check Result: [Virtual ID:] %s has permission for image but image check failed' % virtual_id.name)
             test_util.test_logger('Excepiton info: %s' %e)
             return self.judge(False)
         return self.judge(True)
 
-    def check_snapshot(self):
+    def check_snapshot(self, hasDeletePermission=True):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
         conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
@@ -311,11 +340,47 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             #vol_ops.backup_snapshot(snapshot_uuid, bs.uuid, project_login_session_uuid)
             #new_volume = vol_ops.create_volume_from_snapshot(snapshot_uuid)
             #vol_ops.delete_snapshot_from_backupstorage(snapshot_uuid, [bs.uuid], session_uuid=project_login_session_uuid)
-            vol_ops.delete_snapshot(snapshot_uuid, project_login_session_uuid)
-            vol_ops.delete_volume(data_volume.uuid)
-            vol_ops.expunge_volume(data_volume.uuid)
-            vm_ops.destroy_vm(vm_uuid)
-            vm_ops.expunge_vm(vm_uuid)
+            if hasDeletePermission == True:
+                vol_ops.delete_snapshot(snapshot_uuid, project_login_session_uuid)
+                vol_ops.delete_volume(data_volume.uuid)
+                vol_ops.expunge_volume(data_volume.uuid)
+                vm_ops.destroy_vm(vm_uuid)
+                vm_ops.expunge_vm(vm_uuid)
+            else:
+                try:
+                    vol_ops.delete_snapshot(snapshot_uuid, project_login_session_uuid)
+                    test_util.test_logger("delete_snapshot should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    vol_ops.delete_volume(data_volume.uuid)
+                    test_util.test_logger("delete_volume should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    vol_ops.expunge_volume(data_volume.uuid)
+                    test_util.test_logger("expunge_volume should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    vm_ops.destroy_vm(vm_uuid)
+                    test_util.test_logger("destroy_vm should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    vm_ops.expunge_vm(vm_uuid)
+                    test_util.test_logger("expunge_vm should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    return self.judge(True)
 
         except Exception as e:
             test_util.test_logger('Check Result: [Virtual ID:] %s has permission for snapshot but snapshot check failed' % virtual_id.name)
@@ -323,7 +388,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             return self.judge(False)
         return self.judge(True)
 
-    def check_volume_operation(self):
+    def check_volume_operation(self, hasDeletePermission=True):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
         conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
@@ -364,10 +429,40 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             res_ops.change_recource_owner(project_linked_account_uuid, vm_uuid)
             vol_ops.attach_volume(data_volume.uuid, vm_uuid, session_uuid=project_login_session_uuid)
             vol_ops.detach_volume(data_volume.uuid, vm_uuid, session_uuid=project_login_session_uuid)
-            vol_ops.delete_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
-            vol_ops.expunge_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
-            vm_ops.destroy_vm(vm_uuid)
-            vm_ops.expunge_vm(vm_uuid)
+            if hasDeletePermission == True:
+                vol_ops.delete_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
+                vol_ops.expunge_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
+                vm_ops.destroy_vm(vm_uuid)
+                vm_ops.expunge_vm(vm_uuid)
+            else:
+                try:
+                    vol_ops.delete_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
+                    test_util.test_logger("delete_volume should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    vol_ops.expunge_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
+                    test_util.test_logger("expunge_volume should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    vm_ops.destroy_vm(vm_uuid)
+                    test_util.test_logger("destroy_vm should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    vm_ops.expunge_vm(vm_uuid)
+                    test_util.test_logger("expunge_vm should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    return self.judge(True)
+
             
         except Exception as e:
             test_util.test_logger('Check Result: [Virtual ID:] %s has permission for volume but volume check failed' % virtual_id.name)
@@ -375,7 +470,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             return self.judge(False)
         return self.judge(True)
 
-    def check_affinity_group(self):
+    def check_affinity_group(self, hasDeletePermission=True):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
         conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
@@ -405,16 +500,39 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             ag_uuid = ag_ops.create_affinity_group('affinity_group_policy_checker', 'antiHard', session_uuid=project_login_session_uuid).uuid
             ag_ops.add_vm_to_affinity_group(ag_uuid, vm_uuid, session_uuid=project_login_session_uuid)
             ag_ops.remove_vm_from_affinity_group(ag_uuid, vm_uuid, session_uuid=project_login_session_uuid)
-            ag_ops.delete_affinity_group(ag_uuid, session_uuid=project_login_session_uuid)
-            vm_ops.destroy_vm(vm_uuid)
-            vm_ops.expunge_vm(vm_uuid)
+            if hasDeletePermission == True:
+                ag_ops.delete_affinity_group(ag_uuid, session_uuid=project_login_session_uuid)
+                vm_ops.destroy_vm(vm_uuid)
+                vm_ops.expunge_vm(vm_uuid)
+            else:
+                try:
+                    ag_ops.delete_affinity_group(ag_uuid, session_uuid=project_login_session_uuid)
+                    test_util.test_logger("delete_affinity_group should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    vm_ops.destroy_vm(vm_uuid)
+                    test_util.test_logger("destroy_vm should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    vm_ops.expunge_vm(vm_uuid)
+                    test_util.test_logger("expunge_vm should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    return self.judge(True)
+                return self.judge(False)
         except Exception as e:
             test_util.test_logger('Check Result: [Virtual ID:] %s has permission for affinity group but affinity group check failed' % virtual_id.name)
             test_util.test_logger('Excepiton info: %s' %e)
             return self.judge(False)
         return self.judge(True)
 
-    def check_networks(self):
+    def check_networks(self, hasDeletePermission=True):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
         conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
@@ -439,17 +557,41 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             l3_uuid = net_ops.create_l3('l3_network_for_policy_checker', vxlan_l2_uuid, session_uuid=project_login_session_uuid).uuid
             net_ops.attach_network_service_to_l3network(l3_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
             #net_ops.detach_network_service_from_l3network(l3_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
-            net_ops.delete_l3(l3_uuid, session_uuid=project_login_session_uuid)
-            if clear_vxlan_pool:
-                vxlan_ops.delete_vni_range(vni_uuid, session_uuid=project_login_session_uuid)
-            net_ops.delete_l2(vxlan_l2_uuid, session_uuid=project_login_session_uuid)
+            if hasDeletePermission == True:
+                net_ops.delete_l3(l3_uuid, session_uuid=project_login_session_uuid)
+                if clear_vxlan_pool:
+                    vxlan_ops.delete_vni_range(vni_uuid, session_uuid=project_login_session_uuid)
+                net_ops.delete_l2(vxlan_l2_uuid, session_uuid=project_login_session_uuid)
+            else:
+                try:
+                    net_ops.delete_l3(l3_uuid, session_uuid=project_login_session_uuid)
+                    test_util.test_logger("delete_l3 should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    if clear_vxlan_pool:
+                        vxlan_ops.delete_vni_range(vni_uuid, session_uuid=project_login_session_uuid)
+                        test_util.test_logger("delete_vni_range should not be runned")
+                        return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    net_ops.delete_l2(vxlan_l2_uuid, session_uuid=project_login_session_uuid)
+                    test_util.test_logger("delete_l2 should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    return self.judge(True)
+            
         except Exception as e:
             test_util.test_logger('Check Result: [Virtual ID:] %s has permission for networks but networks check failed' % virtual_id.name)
             test_util.test_logger('Excepiton info: %s' %e)
             return self.judge(False)
         return self.judge(True)
 
-    def check_eip(self):
+    def check_eip(self, hasDeletePermission=True):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
         conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
@@ -494,18 +636,51 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             eip = net_ops.create_eip(eip_option)
             net_ops.detach_eip(eip.uuid, session_uuid=project_login_session_uuid)
             net_ops.attach_eip(eip.uuid, vm_nic_uuid, session_uuid=project_login_session_uuid)
-            net_ops.delete_eip(eip.uuid)
-            net_ops.delete_vip(vip.uuid)
-            vm_ops.destroy_vm(vm_uuid)
-            vm_ops.expunge_vm(vm_uuid)
-            acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
+            if hasDeletePermission == True:
+                net_ops.delete_eip(eip.uuid)
+                net_ops.delete_vip(vip.uuid)
+                vm_ops.destroy_vm(vm_uuid)
+                vm_ops.expunge_vm(vm_uuid)
+                acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
+            else:
+                try:
+                    net_ops.delete_eip(eip.uuid)
+                    test_util.test_logger("delete_eip should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    net_ops.delete_vip(vip.uuid)
+                    test_util.test_logger("delete_vip should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    vm_ops.destroy_vm(vm_uuid)
+                    test_util.test_logger("destroy_vm should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    vm_ops.expunge_vm(vm_uuid)
+                    test_util.test_logger("expunge_vm should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
+                test_util.test_logger("revoke_resources should not be runned")
+
         except Exception as e:
             test_util.test_logger('Check Result: [Virtual ID:] %s has permission for eip but eip check failed' % virtual_id.name)
             test_util.test_logger('Excepiton info: %s' %e)
             return self.judge(False)
         return self.judge(True)
 
-    def check_security_group(self):
+    def check_security_group(self, hasDeletePermission=True):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
         conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
@@ -559,12 +734,38 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             net_ops.add_nic_to_security_group(sg_uuid, [vm_nic_uuid], session_uuid=project_login_session_uuid)
             net_ops.remove_nic_from_security_group(sg_uuid, [vm_nic_uuid], session_uuid=project_login_session_uuid)
             net_ops.detach_security_group_from_l3(sg_uuid, l3_net_uuid, session_uuid=project_login_session_uuid)
-            net_ops.delete_security_group(sg_uuid, session_uuid=project_login_session_uuid)
-            vm_ops.destroy_vm(vm_uuid)
-            vm_ops.expunge_vm(vm_uuid)
-            if sg_service_need_detach:
-                net_ops.detach_sg_service_from_l3network(l3_net_uuid, sg_service_providor_uuid, session_uuid=project_login_session_uuid)
-            acc_ops.revoke_resources([project_linked_account_uuid], [l3_net_uuid, image_uuid, instance_offering_uuid])
+            if hasDeletePermission == True:
+                net_ops.delete_security_group(sg_uuid, session_uuid=project_login_session_uuid)
+                vm_ops.destroy_vm(vm_uuid)
+                vm_ops.expunge_vm(vm_uuid)
+                if sg_service_need_detach:
+                    net_ops.detach_sg_service_from_l3network(l3_net_uuid, sg_service_providor_uuid, session_uuid=project_login_session_uuid)
+                acc_ops.revoke_resources([project_linked_account_uuid], [l3_net_uuid, image_uuid, instance_offering_uuid])
+            else:
+                try:
+                    net_ops.delete_security_group(sg_uuid, session_uuid=project_login_session_uuid)
+                    test_util.test_logger("delete_security_group should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    vm_ops.destroy_vm(vm_uuid)
+                    test_util.test_logger("destroy_vm should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    vm_ops.expunge_vm(vm_uuid)
+                    test_util.test_logger("expunge_vm should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                if sg_service_need_detach:
+                    net_ops.detach_sg_service_from_l3network(l3_net_uuid, sg_service_providor_uuid, session_uuid=project_login_session_uuid)
+                acc_ops.revoke_resources([project_linked_account_uuid], [l3_net_uuid, image_uuid, instance_offering_uuid])
 
         except Exception as e:
             test_util.test_logger('Check Result: [Virtual ID:] %s has permission for security group but security group check failed' % virtual_id.name)
@@ -572,7 +773,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             return self.judge(False)
         return self.judge(True)
 
-    def check_load_balancer(self):
+    def check_load_balancer(self, hasDeletePermission=True):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
         conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
@@ -632,21 +833,62 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             net_ops.add_nic_to_load_balancer(lbl_uuid, [vm_nic_uuid], session_uuid=project_login_session_uuid)
             net_ops.remove_nic_from_load_balancer(lbl_uuid, [vm_nic_uuid], session_uuid=project_login_session_uuid)
             net_ops.refresh_load_balancer(lb_uuid, session_uuid=project_login_session_uuid) 
-            net_ops.delete_load_balancer_listener(lbl_uuid, session_uuid=project_login_session_uuid)
-            net_ops.delete_load_balancer(lb_uuid, session_uuid=project_login_session_uuid)
-            net_ops.delete_vip(vip.uuid)
-            vm_ops.destroy_vm(vm_uuid)
-            vm_ops.expunge_vm(vm_uuid)
-            if lb_service_need_detach:
-                net_ops.detach_lb_service_from_l3network(l3_net_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
-            acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
+            if hasDeletePermission == True:
+                net_ops.delete_load_balancer_listener(lbl_uuid, session_uuid=project_login_session_uuid)
+                net_ops.delete_load_balancer(lb_uuid, session_uuid=project_login_session_uuid)
+                net_ops.delete_vip(vip.uuid)
+                vm_ops.destroy_vm(vm_uuid)
+                vm_ops.expunge_vm(vm_uuid)
+                if lb_service_need_detach:
+                    net_ops.detach_lb_service_from_l3network(l3_net_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
+                acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
+            else:
+                try:
+                    net_ops.delete_load_balancer_listener(lbl_uuid, session_uuid=project_login_session_uuid)
+                    test_util.test_logger("delete_load_balancer_listener should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    net_ops.delete_load_balancer(lb_uuid, session_uuid=project_login_session_uuid)
+                    test_util.test_logger("delete_load_balancer should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    net_ops.delete_vip(vip.uuid)
+                    test_util.test_logger("delete_vip should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    vm_ops.destroy_vm(vm_uuid)
+                    test_util.test_logger("destroy_vm should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    vm_ops.expunge_vm(vm_uuid)
+                    test_util.test_logger("expunge_vm should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                if lb_service_need_detach:
+                    net_ops.detach_lb_service_from_l3network(l3_net_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
+                acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
+                
         except Exception as e:
             test_util.test_logger('Check Result: [Virtual ID:] %s has permission for load balancer but load balancer check failed' % virtual_id.name)
             test_util.test_logger('Excepiton info: %s' %e)
             return self.judge(False)
         return self.judge(True)
 
-    def check_port_forwarding(self):
+    def check_port_forwarding(self, hasDeletePermission=True):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
         conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
@@ -705,20 +947,53 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             pf_rule_uuid = net_ops.create_port_forwarding(pf_rule_creation_option).uuid
             net_ops.attach_port_forwarding(pf_rule_uuid, vm_nic_uuid, session_uuid=project_login_session_uuid)
             net_ops.detach_port_forwarding(pf_rule_uuid, session_uuid=project_login_session_uuid)
-            net_ops.delete_port_forwarding(pf_rule_uuid, session_uuid=project_login_session_uuid)
-            net_ops.delete_vip(vip.uuid)
-            vm_ops.destroy_vm(vm_uuid)
-            vm_ops.expunge_vm(vm_uuid)
-            if pf_service_need_detach:
-                net_ops.detach_pf_service_from_l3network(l3_net_uuid, pf_service_providor_uuid, session_uuid=project_login_session_uuid)
-            acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
+            if hasDeletePermission == True:
+                net_ops.delete_port_forwarding(pf_rule_uuid, session_uuid=project_login_session_uuid)
+                net_ops.delete_vip(vip.uuid)
+                vm_ops.destroy_vm(vm_uuid)
+                vm_ops.expunge_vm(vm_uuid)
+                if pf_service_need_detach:
+                    net_ops.detach_pf_service_from_l3network(l3_net_uuid, pf_service_providor_uuid, session_uuid=project_login_session_uuid)
+                acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
+            else:
+                try:
+                    net_ops.delete_port_forwarding(pf_rule_uuid, session_uuid=project_login_session_uuid)
+                    test_util.test_logger("delete_port_forwarding should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    net_ops.delete_vip(vip.uuid)
+                    test_util.test_logger("delete_vip should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    vm_ops.destroy_vm(vm_uuid)
+                    test_util.test_logger("destroy_vm should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    vm_ops.expunge_vm(vm_uuid)
+                    test_util.test_logger("expunge_vm should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                if pf_service_need_detach:
+                    net_ops.detach_pf_service_from_l3network(l3_net_uuid, pf_service_providor_uuid, session_uuid=project_login_session_uuid)
+                acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
         except Exception as e:
             test_util.test_logger('Check Result: [Virtual ID:] %s has permission for port forwarding but port forwarding check failed' % virtual_id.name)
             test_util.test_logger('Excepiton info: %s' %e)
             return self.judge(False)
         return self.judge(True)
 
-    def check_scheduler(self):
+    def check_scheduler(self, hasDeletePermission=True):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
         conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
@@ -753,11 +1028,44 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             schd_ops.change_scheduler_state(schd_job.uuid, 'disable', session_uuid=project_login_session_uuid)
             schd_ops.change_scheduler_state(schd_job.uuid, 'enable', session_uuid=project_login_session_uuid)
             schd_ops.remove_scheduler_job_from_trigger(schd_trigger.uuid, schd_job.uuid, session_uuid=project_login_session_uuid)
-            schd_ops.del_scheduler_job(schd_job.uuid, session_uuid=project_login_session_uuid)
-            schd_ops.del_scheduler_trigger(schd_trigger.uuid, session_uuid=project_login_session_uuid)
-            schd_ops.get_current_time()
-            vm_ops.destroy_vm(vm_uuid)
-            vm_ops.expunge_vm(vm_uuid)
+
+            if hasDeletePermission == True:
+                schd_ops.del_scheduler_job(schd_job.uuid, session_uuid=project_login_session_uuid)
+                schd_ops.del_scheduler_trigger(schd_trigger.uuid, session_uuid=project_login_session_uuid)
+                schd_ops.get_current_time()
+                vm_ops.destroy_vm(vm_uuid)
+                vm_ops.expunge_vm(vm_uuid)
+            else:
+                try:
+                    schd_ops.del_scheduler_job(schd_job.uuid, session_uuid=project_login_session_uuid)
+                    test_util.test_logger("del_scheduler_job should not be runned with project_login_session_uuid")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    schd_ops.del_scheduler_trigger(schd_trigger.uuid, session_uuid=project_login_session_uuid)
+                    test_util.test_logger("del_scheduler_trigger should not be runned with project_login_session_uuid")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                schd_ops.get_current_time()
+
+                try:
+                    vm_ops.destroy_vm(vm_uuid)
+                    test_util.test_logger("destroy_vm should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    vm_ops.expunge_vm(vm_uuid)
+                    test_util.test_logger("expunge_vm should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
         except Exception as e:
             test_util.test_logger('Check Result: [Virtual ID:] %s has permission for scheduler but scheduler check failed' % virtual_id.name)
             test_util.test_logger('Excepiton info: %s' %e)
@@ -768,7 +1076,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         #Haven't simulator pci device, skip to check 
         pass
 
-    def check_zwatch(self):
+    def check_zwatch(self, hasDeletePermission=True):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
         conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
@@ -800,12 +1108,44 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             zwt_ops.change_alarm_state(alarm_uuid, 'disable', session_uuid=project_login_session_uuid)
             zwt_ops.change_sns_topic_state(sns_topic_uuid, 'disable', session_uuid=project_login_session_uuid)
             zwt_ops.change_sns_application_endpoint_state(http_endpoint_uuid, 'disable', session_uuid=project_login_session_uuid)
-            zwt_ops.delete_alarm(alarm_uuid, session_uuid=project_login_session_uuid) 
-            zwt_ops.unsubscribe_event(event_sub_uuid, session_uuid=project_login_session_uuid)
-            zwt_ops.unsubscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
-            zwt_ops.delete_sns_topic(sns_topic_uuid, session_uuid=project_login_session_uuid)
-            zwt_ops.delete_sns_topic(sns_topic_uuid1, session_uuid=project_login_session_uuid)
-            zwt_ops.delete_sns_application_endpoint(http_endpoint_uuid, session_uuid=project_login_session_uuid)
+            if hasDeletePermission == True:
+                zwt_ops.delete_alarm(alarm_uuid, session_uuid=project_login_session_uuid) 
+                zwt_ops.unsubscribe_event(event_sub_uuid, session_uuid=project_login_session_uuid)
+                zwt_ops.unsubscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
+                zwt_ops.delete_sns_topic(sns_topic_uuid, session_uuid=project_login_session_uuid)
+                zwt_ops.delete_sns_topic(sns_topic_uuid1, session_uuid=project_login_session_uuid)
+                zwt_ops.delete_sns_application_endpoint(http_endpoint_uuid, session_uuid=project_login_session_uuid)
+            else:
+                try:
+                    zwt_ops.delete_alarm(alarm_uuid, session_uuid=project_login_session_uuid) 
+                    test_util.test_logger("delete_alarm should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                zwt_ops.unsubscribe_event(event_sub_uuid, session_uuid=project_login_session_uuid)
+                zwt_ops.unsubscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
+
+                try:
+                    zwt_ops.delete_sns_topic(sns_topic_uuid, session_uuid=project_login_session_uuid)
+                    test_util.test_logger("delete_sns_topic should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    zwt_ops.delete_sns_topic(sns_topic_uuid1, session_uuid=project_login_session_uuid)
+                    test_util.test_logger("delete_sns_topic should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    zwt_ops.delete_sns_application_endpoint(http_endpoint_uuid, session_uuid=project_login_session_uuid)
+                    test_util.test_logger("delete_sns_application_endpoint should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
 
         except Exception as e:
             test_util.test_logger('Check Result: [Virtual ID:] %s has permission for zwatch but zwatch check failed' % virtual_id.name)
@@ -813,7 +1153,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             return self.judge(False)
         return self.judge(True)
 
-    def check_sns(self):
+    def check_sns(self, hasDeletePermission=True):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
         conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
@@ -843,18 +1183,66 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             zwt_ops.remove_action_from_alarm(alarm_uuid, sns_topic_uuid)
             zwt_ops.change_sns_topic_state(sns_topic_uuid, 'disable', session_uuid=project_login_session_uuid)
             zwt_ops.change_sns_application_endpoint_state(http_endpoint_uuid, 'disable', session_uuid=project_login_session_uuid)
-            zwt_ops.delete_alarm(alarm_uuid)
-            zwt_ops.unsubscribe_event(event_sub_uuid)
-            zwt_ops.unsubscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
-            zwt_ops.delete_sns_topic(sns_topic_uuid, session_uuid=project_login_session_uuid)
-            zwt_ops.delete_sns_topic(sns_topic_uuid1, session_uuid=project_login_session_uuid)
-            zwt_ops.delete_sns_application_endpoint(http_endpoint_uuid, session_uuid=project_login_session_uuid)
+            if hasDeletePermission == True:
+                zwt_ops.delete_alarm(alarm_uuid)
+                zwt_ops.unsubscribe_event(event_sub_uuid)
+                zwt_ops.unsubscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
+                zwt_ops.delete_sns_topic(sns_topic_uuid, session_uuid=project_login_session_uuid)
+                zwt_ops.delete_sns_topic(sns_topic_uuid1, session_uuid=project_login_session_uuid)
+                zwt_ops.delete_sns_application_endpoint(http_endpoint_uuid, session_uuid=project_login_session_uuid)
+            else:
+                try:
+                    zwt_ops.delete_alarm(alarm_uuid)
+                    test_util.test_logger("delete_alarm should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                zwt_ops.unsubscribe_event(event_sub_uuid)
+                zwt_ops.unsubscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
+
+                try:
+                    zwt_ops.delete_sns_topic(sns_topic_uuid, session_uuid=project_login_session_uuid)
+                    test_util.test_logger("delete_sns_topic should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    zwt_ops.delete_sns_topic(sns_topic_uuid1, session_uuid=project_login_session_uuid)
+                    test_util.test_logger("delete_sns_topic should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
+
+                try:
+                    zwt_ops.delete_sns_application_endpoint(http_endpoint_uuid, session_uuid=project_login_session_uuid)
+                    test_util.test_logger("delete_sns_application_endpoint should not be runned")
+                    return self.judge(False)
+                except Exception as e:
+                    pass
 
         except Exception as e:
             test_util.test_logger('Check Result: [Virtual ID:] %s has permission for sns but sns check failed' % virtual_id.name)
             test_util.test_logger('Excepiton info: %s' %e)
             return self.judge(False)
         return self.judge(True)
+
+    def check_no_delete_admin_permission(self):
+        test_util.test_logger("check_no_delete_admin_permission")
+        self.check_vm_operation(False)
+        self.check_image_operation(False)
+        self.check_snapshot(False)
+        self.check_volume_operation(False)
+        self.check_affinity_group(False)
+        self.check_networks(False)
+        self.check_eip(False)
+        self.check_security_group(False)
+        self.check_load_balancer(False)
+        self.check_port_forwarding(False)
+        self.check_scheduler(False)
+        self.check_pcicheck_zwatch(False)
+        self.check_sns(False)
 
     def check(self):
         super(zstack_vid_policy_checker, self).check()
@@ -863,6 +1251,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         self.check_login(virtual_id.name, password)
         actions = self.test_obj.get_vid_statements()[0]['actions']
         effect = self.test_obj.get_vid_statements()[0]['effect']
+        customized = self.test_obj.get_customized()
         checker_runned = False
         if effect == "Allow" and \
            'org.zstack.header.vm.**' in actions and \
@@ -1025,6 +1414,9 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
                 'org.zstack.sns.**' in actions:
             checker_runned = True
             self.check_sns()  
+
+        if customized == "noDeleteAdminPermission":
+            self.check_no_delete_admin_permission()
 
         if checker_runned == False:
             test_util.test_fail("found vid checker not runned")

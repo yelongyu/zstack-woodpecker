@@ -8,6 +8,7 @@ class TestVid(zstack_header.ZstackObject):
     def __init__(self):
         self.vid = None
         self.state = None
+        self.customized = None
         self.attributes = []
         self.statements = []
 
@@ -36,6 +37,12 @@ class TestVid(zstack_header.ZstackObject):
 
     def set_vid(self, vid):
         self.vid = vid
+
+    def get_customized(self):
+        return self.customized
+
+    def set_customized(self, customized):
+        self.customized = customized
 
     def get_state(self):
         return self.state
