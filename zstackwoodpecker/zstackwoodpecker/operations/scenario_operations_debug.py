@@ -2757,15 +2757,15 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                 volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config)
                             attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
                             break
-                        elif ps_ref.type_ == 'ebs':
-                            cond = res_ops.gen_query_conditions('uuid', '=', vm_inv.hostUuid)
-                            host_inv = query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
-                            ebs_host[(vm_inv.uuid, host_inv.uuid, vm_ip)] = {'cpu': host_inv.availableCpuCapacity, 'mem': int(host_inv.availableMemoryCapacity)/1024/1024/1024}
+                        # elif ps_ref.type_ == 'ebs':
+                        #     cond = res_ops.gen_query_conditions('uuid', '=', vm_inv.hostUuid)
+                        #     host_inv = query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
+                        #     ebs_host[(vm_inv.uuid, host_inv.uuid, vm_ip)] = {'cpu': host_inv.availableCpuCapacity, 'mem': int(host_inv.availableMemoryCapacity)/1024/1024/1024}
 #                             install_ebs_pkg_in_host(vm_ip, vm.imageUsername_, vm.imagePassword_)
         thread_list = []
         for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
             for vm in xmlobject.safe_list(host.vms.vm):
-                thread_list.append(Thread(prepare_host_vm, (vm, )))
+                thread_list.append(Thread(target=prepare_host_vm, args=(vm, )))
 
         for vm_thread in thread_list:
             vm_thread.start()
