@@ -102,6 +102,30 @@ class zstack_vid_attr_checker(checker_header.TestChecker):
             return self.judge(False)
         return self.judge(True)
 
+    def check_system_admin_permission(self, username, password):
+        session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
+        try:
+            pass
+        except:
+            test_util.test_logger('Check Result: [Virtual ID:] %s is System Admin, but create project failed' % username)
+            return self.judge(False)
+
+    def check_security_admin_permission(self, username, password):
+        session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
+        try:
+            pass
+        except:
+            test_util.test_logger('Check Result: [Virtual ID:] %s is Security Admin, but create project failed' % username)
+            return self.judge(False)
+
+    def check_audit_admin_permission(self, username, password):
+        session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
+        try:
+            pass
+        except:
+            test_util.test_logger('Check Result: [Virtual ID:] %s is Audit Admin, but create project failed' % username)
+            return self.judge(False)
+
     def check(self):
         super(zstack_vid_attr_checker, self).check()
         password = 'b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86'
@@ -114,6 +138,14 @@ class zstack_vid_attr_checker(checker_header.TestChecker):
                 self.check_project_admin_permission(virtual_id.name, password)
             elif lst['name']  == '__ProjectOperator__':
                 self.check_project_operator_permission(virtual_id.name, password)
+            elif lst['name']  == '__SystemAdmin__':
+                self.check_system_admin_permission(virtual_id.name, password)
+            elif lst['name']  == '__SecurityAdmin__':
+                self.check_security_admin_permission(virtual_id.name, password)
+            elif lst['name']  == '__AuditAdmin__':
+                self.check_audit_admin_permission(virtual_id.name, password)
+            else:
+                test_util.test_fail("not found matched candidate attribute %s" %(str(lst['name'])))
         return self.judge(True)
 
 class zstack_vid_policy_checker(checker_header.TestChecker):

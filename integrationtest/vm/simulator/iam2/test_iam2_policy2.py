@@ -9,7 +9,7 @@ import zstackwoodpecker.zstack_test.zstack_test_vid as test_vid
 import os
 
 case_flavor = dict(predefined_no_delete_admin=		          dict(target_admin='noDeleteAdmin'),
-                   predefined_read_only_admin=		          dict(target_admin='readOnlyAdmin'),
+                   #predefined_read_only_admin=		          dict(target_admin='readOnlyAdmin'),
                    )
 
 project_uuid = None
@@ -169,16 +169,16 @@ def test():
         policy_check_vid.set_customized("noDeleteAdminPermission")
         policy_check_vid.check()
 
-    if flavor['target_admin'] == 'readOnlyAdmin':
-        username = 'readOnlyAdmin'
-        password = 'b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86'
-        vid_uuid = iam2_ops.create_iam2_virtual_id(username, password).uuid
-        attributes = [{"name": "__AuditAdmin__"}]
-        iam2_ops.add_attributes_to_iam2_virtual_id(vid_uuid, attributes)
-        read_only_admin_session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
+    #if flavor['target_admin'] == 'readOnlyAdmin':
+    #    username = 'readOnlyAdmin'
+    #    password = 'b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86'
+    #    vid_uuid = iam2_ops.create_iam2_virtual_id(username, password).uuid
+    #    attributes = [{"name": "__AuditAdmin__"}]
+    #    iam2_ops.add_attributes_to_iam2_virtual_id(vid_uuid, attributes)
+    #    read_only_admin_session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
 
-        policy_check_vid.set_vid_statements(statements)
-        policy_check_vid.check()
+    #    policy_check_vid.set_vid_statements(statements)
+    #    policy_check_vid.check()
 
 
     policy_check_vid.delete()
