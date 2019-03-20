@@ -39,6 +39,9 @@ def create_vm(vm_create_option):
     create_vm.instanceOfferingUuid = vm_create_option.get_instance_offering_uuid()
     create_vm.l3NetworkUuids = vm_create_option.get_l3_uuids()
     create_vm.defaultL3NetworkUuid = vm_create_option.get_default_l3_uuid()
+    create_vm.cpuNum = vm_create_option.get_cpu_num()
+    create_vm.memorySize = vm_create_option.get_memory_size()
+    create_vm.rootDiskSize = vm_create_option.get_root_disk_size()
     #If there are more than 1 network uuid, the 1st one will be the default l3.
     if len(create_vm.l3NetworkUuids) > 1 and not create_vm.defaultL3NetworkUuid:
         create_vm.defaultL3NetworkUuid = create_vm.l3NetworkUuids[0]
