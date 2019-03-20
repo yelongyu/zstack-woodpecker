@@ -108,7 +108,7 @@ class zstack_vid_attr_checker(checker_header.TestChecker):
         virtual_id = self.test_obj.get_vid()
         self.check_login(virtual_id.name, password)
         for lst in self.test_obj.get_vid_attributes():
-            if lst['name'] == '__PlatformAdmin__':
+            if lst['name'] == '__PlatformAdmin__' and self.test_obj.get_customized != "noDeleteAdminPermission":
                 self.check_platform_admin_permission(virtual_id.name, password)
             elif lst['name']  == '__ProjectAdmin__':
                 self.check_project_admin_permission(virtual_id.name, password)
