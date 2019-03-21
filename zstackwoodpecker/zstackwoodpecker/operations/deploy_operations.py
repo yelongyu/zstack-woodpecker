@@ -342,6 +342,54 @@ def add_zone(scenarioConfig, scenarioFile, deployConfig, session_uuid, zone_name
         except:
             exc_info.append(sys.exc_info())
      
+#        if xmlobject.has_element(zone, 'backupStorageRef'):
+#            for ref in xmlobject.safe_list(zone.backupStorageRef):
+#                bss = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid, name=ref.text_)
+#                bs = get_first_item_from_list(bss, 'Backup Storage', ref.text_, 'attach backup storage to zone')
+
+#                action = api_actions.AttachBackupStorageToZoneAction()
+#                action.sessionUuid = session_uuid
+#                action.backupStorageUuid = bs.uuid
+#                action.zoneUuid = zinv.uuid
+#                try:
+#                    evt = action.run()
+#                    test_util.test_logger(jsonobject.dumps(evt))
+#                except:
+#                    exc_info.append(sys.exc_info())
+
+
+    if not xmlobject.has_element(deployConfig, 'zones.zone'):
+        return
+
+    for zone in xmlobject.safe_list(deployConfig.zones.zone):
+        if zone_name and zone_name != zone.name_:
+            continue 
+
+        if zone.duplication__ == None:
+            duplication = 1
+        else:
+            duplication = int(zone.duplication__)
+
+        for i in range(duplication):
+            thread = threading.Thread(target=_add_zone, args=(zone, i, ))
+            wait_for_thread_queue()
+            thread.start()
+
+    wait_for_thread_done()
+
+
+def attach_bs_to_zone(scenarioConfig, scenarioFile, deployConfig, session_uuid, zone_name = None):
+    def _attach_bs_to_zone(zone, zone_duplication):
+        if zone_duplication == 0:
+            zone_name = zone.name_
+            zone_description = zone.description__
+        else:
+            zone_name = generate_dup_name(zone.name_, zone_duplication, 'z')
+            zone_description = generate_dup_name(zone.description__, zone_duplication, 'zone')
+
+        zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, name=zone_name)
+        zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'attach backup storage to zone')
+
         if xmlobject.has_element(zone, 'backupStorageRef'):
             for ref in xmlobject.safe_list(zone.backupStorageRef):
                 bss = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid, name=ref.text_)
@@ -363,7 +411,7 @@ def add_zone(scenarioConfig, scenarioFile, deployConfig, session_uuid, zone_name
 
     for zone in xmlobject.safe_list(deployConfig.zones.zone):
         if zone_name and zone_name != zone.name_:
-            continue 
+            continue
 
         if zone.duplication__ == None:
             duplication = 1
@@ -371,7 +419,7 @@ def add_zone(scenarioConfig, scenarioFile, deployConfig, session_uuid, zone_name
             duplication = int(zone.duplication__)
 
         for i in range(duplication):
-            thread = threading.Thread(target=_add_zone, args=(zone, i, ))
+            thread = threading.Thread(target=_attach_bs_to_zone, args=(zone, i, ))
             wait_for_thread_queue()
             thread.start()
 
@@ -2689,13 +2737,14 @@ def remove_simulator_agent_script(url_path):
 
 def deploy_initial_database(deploy_config, scenario_config = None, scenario_file = None, ipversion = 4):
     operations = [
-            add_backup_storage,
             add_zone,
             add_l2_network,
             add_primary_storage,
             add_iscsi_server,
             add_cluster,
             add_host,
+            add_backup_storage,
+            attach_bs_to_zone,
             add_sanlock,
             add_l3_network,
             add_image,
