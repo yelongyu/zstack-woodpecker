@@ -683,7 +683,17 @@ class zstack_vid_attr_checker(checker_header.TestChecker):
     def check_security_admin_permission(self, username, password):
         session_uuid = acc_ops.login_by_account(username, password)
         try:
-            pass
+            vid = self.test_obj.get_vid()
+            role_uuid = iam2_ops.create_role('security_created_role').uuid
+            statements = []
+            policy_uuid = iam2_ops.create_policy('policy', statements).uuid
+            iam2_ops.attach_policy_to_role(policy_uuid, role_uuid)
+            iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], vid)
+            #policy_check_vid.check()
+            iam2_ops.update_role(role_uuid, [])
+            iam2_ops.add_policy_statements_to_role(role_uuid, statements)
+            #policy_check_vid.check()
+
         except:
             test_util.test_logger('Check Result: [Virtual ID:] %s is Security Admin, but create project failed' % username)
             return self.judge(False)
