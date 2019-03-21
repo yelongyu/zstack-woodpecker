@@ -56,9 +56,10 @@ class ZstackTestVolume(volume_header.TestVolume):
         #TODO: remove vm_uuid
         if not vm_uuid:
             self.set_volume(vol_ops.detach_volume(self.volume.uuid))
+            super(ZstackTestVolume, self).detach()
         else:
             self.set_volume(vol_ops.detach_volume(self.volume.uuid, vm_uuid))
-        super(ZstackTestVolume, self).detach()
+            super(ZstackTestVolume, self).detach(vm_uuid)
 
     def delete(self):
         vol_ops.delete_volume(self.volume.uuid)
@@ -98,17 +99,25 @@ class ZstackTestVolume(volume_header.TestVolume):
         return self.volume_creation_option
 
     def update(self):
-        if self.state == volume_header.ATTACHED \
-                and self.get_target_vm() \
-                and (self.get_target_vm().get_state() \
-                    == vm_header.DESTROYED \
-                    or self.get_target_vm().get_state() \
-                    == vm_header.EXPUNGED):
-            if self.get_volume().type != 'Root':
-                self.set_volume(test_lib.lib_get_volume_by_uuid(self.get_volume().uuid))
-                super(ZstackTestVolume, self).detach()
+        if self.state == volume_header.ATTACHED:
+            if test_lib.lib_is_sharable_volume(self.get_volume()):
+                for vm in self.get_target_vm():
+                    if vm.get_state() == vm_header.DESTROYED \
+                            or vm.get_state() == vm_header.EXPUNGED:
+                        if self.get_volume().type != 'Root':
+                            self.set_volume(test_lib.lib_get_volume_by_uuid(self.get_volume().uuid))
+                            super(ZstackTestVolume, self).detach(vm.get_vm().uuid)
+                            continue
             else:
-                super(ZstackTestVolume, self).delete()
+                if self.get_target_vm().get_state() \
+                        == vm_header.DESTROYED \
+                        or self.get_target_vm().get_state() \
+                        == vm_header.EXPUNGED:
+                    if self.get_volume().type != 'Root':
+                        self.set_volume(test_lib.lib_get_volume_by_uuid(self.get_volume().uuid))
+                        super(ZstackTestVolume, self).detach()
+                    else:
+                        super(ZstackTestVolume, self).delete()
 
     def update_volume(self):
         '''

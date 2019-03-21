@@ -159,13 +159,14 @@ class KvmSharableVolumeCheckerFactory(checker_header.CheckerFactory):
         elif test_obj.state == volume_header.ATTACHED:
             checker_dict[db_checker.zstack_volume_db_checker] = True
             checker_dict[share_volume_checker.zstack_kvm_share_volume_file_checker] = True
-            if not test_obj.target_vm.state == vm_header.DESTROYED:
-                checker_dict[db_checker.zstack_share_volume_attach_db_checker] = True
-                if test_obj.target_vm.state == vm_header.RUNNING:
-                    checker_dict[share_volume_checker.zstack_kvm_share_volume_attach_checker] = True
-                    checker_dict[share_volume_checker.zstack_kvm_virtioscsi_shareable_checker] = True
-            else:
-                checker_dict[db_checker.zstack_share_volume_attach_db_checker] = False
+            for vm in test_obj.sharable_target_vms:
+                if not vm.state == vm_header.DESTROYED:
+                    checker_dict[db_checker.zstack_share_volume_attach_db_checker] = True
+                    if vm.state == vm_header.RUNNING:
+                        checker_dict[share_volume_checker.zstack_kvm_share_volume_attach_checker] = True
+                        checker_dict[share_volume_checker.zstack_kvm_virtioscsi_shareable_checker] = True
+                else:
+                    checker_dict[db_checker.zstack_share_volume_attach_db_checker] = False
 
         elif test_obj.state == volume_header.DETACHED:
             checker_dict[db_checker.zstack_volume_db_checker] = True

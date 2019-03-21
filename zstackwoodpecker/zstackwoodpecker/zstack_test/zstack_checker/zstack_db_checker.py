@@ -129,20 +129,22 @@ class zstack_share_volume_attach_db_checker(checker_header.TestChecker):
 
         if not share_volume_vm_uuids:
             #update self.test_obj, due to vm destroyed. 
-            if self.test_obj.target_vm.state == vm_header.DESTROYED or \
-                    self.test_obj.target_vm.state == vm_header.EXPUNGED:
-                test_util.test_warn('Update test [volume:] %s state, since attached VM was destroyed.' % volume.uuid)
-                self.test_obj.update()
-            else:
-                test_util.test_warn('Check warn: [volume:] %s state is not aligned with DB. DB did not record any attached VM, but test volume has attached vm record: %s.' % (volume.uuid, volume.vmInstanceUuid))
+            for vm in self.test_obj.sharable_target_vms:
+                if vm.state == vm_header.DESTROYED or \
+                        vm.state == vm_header.EXPUNGED:
+                    test_util.test_warn('Update test [volume:] %s state, since attached VM was destroyed.' % volume.uuid)
+                    self.test_obj.update()
+                else:
+                    test_util.test_warn('Check warn: [volume:] %s state is not aligned with DB. DB did not record any attached VM, but test volume has attached vm record: %s.' % (volume.uuid, volume.vmInstanceUuid))
             test_util.test_logger('Check result: [volume:] %s does NOT have vmInstanceUuid in Database. It is not attached to any vm.' % volume.uuid)
             return self.judge(False)
 
-        if not self.test_obj.target_vm:
+        if not self.test_obj.sharable_target_vms:
             test_util.test_logger('Check result: test [volume:] %s does NOT have vmInstance record in test structure. Can not do furture checking.' % volume.uuid)
             return self.judge(False)
 
-        vm = self.test_obj.target_vm.vm
+        # Take only one VM for check
+        vm = self.test_obj.sharable_target_vms[0].vm
 
         if vm.uuid not in share_volume_vm_uuids:
             test_util.test_logger('Check result: [volume:] %s is attached to [vm:] %s in zstack database.' % (volume.uuid, vm.uuid))
