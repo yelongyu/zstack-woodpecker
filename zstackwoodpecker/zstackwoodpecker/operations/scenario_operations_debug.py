@@ -2494,7 +2494,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 
     
     if hasattr(scenario_config.deployerConfig, 'hosts'):
-        def prepare_host_vm(vm, order):
+        def prepare_host_vm(vm):
                 vm_creation_option = test_util.VmOption()
                 l3_uuid_list = []
                 l3_uuid_list_ge_3 = []
