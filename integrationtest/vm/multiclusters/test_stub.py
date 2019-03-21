@@ -374,7 +374,7 @@ class DataMigration(TestChain):
 
     def check_data(self):
         check_cmd = '''sshpass -p password ssh -o LogLevel=quiet -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@%s \
-        "tar xvf /mnt/zstack-woodpecker.tar -C /mnt > /dev/null &>1; grep scenario_config_path /mnt/zstackwoodpecker/zstackwoodpecker/test_lib.py && echo 0 || echo 1" \
+        "tar xvf /mnt/zstack-woodpecker.tar -C /mnt > /dev/null 2>&1; grep scenario_config_path /mnt/zstackwoodpecker/zstackwoodpecker/test_lib.py > /dev/null 2>&1 && echo 0 || echo 1" \
         ''' % (self.vm.get_vm().vmNics[0].ip)
         ret = commands.getoutput(check_cmd).split('\n')[-1]
         assert ret == '0', "data check failed!, the return code is %s, 0 is expected" % ret
