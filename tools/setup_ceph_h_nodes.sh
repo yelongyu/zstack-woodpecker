@@ -196,6 +196,11 @@ osd crush chooseleaf type = 0
 EOF
 fi
 
+#check if the extra_probe_peers and public network are in the same network segment
+if [[ ${IP[0]} =~ "10.0" ]]; then
+        sed -i 's/172.20.0.0\/16/10.0.0.0\/8/g' ceph.conf
+fi
+
 set +e
 for I in `seq 3`; do
 	if [ "${CEPH_ONE_NODE}" != "yes" ]; then 
