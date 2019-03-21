@@ -2689,13 +2689,13 @@ def remove_simulator_agent_script(url_path):
 
 def deploy_initial_database(deploy_config, scenario_config = None, scenario_file = None, ipversion = 4):
     operations = [
+            add_backup_storage,
             add_zone,
             add_l2_network,
             add_primary_storage,
             add_iscsi_server,
             add_cluster,
             add_host,
-            add_backup_storage,
             add_sanlock,
             add_l3_network,
             add_image,
