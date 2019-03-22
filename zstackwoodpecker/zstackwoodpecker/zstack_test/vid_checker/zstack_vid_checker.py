@@ -1680,10 +1680,6 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
                 net_ops.detach_lb_service_from_l3network(l3_net_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
             #acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
                 
-        except Exception as e:
-            test_util.test_logger('Check Result: [Virtual ID:] %s has permission for load balancer but load balancer check failed' % virtual_id.name)
-            test_util.test_logger('Excepiton info: %s' %e)
-            return self.judge(False)
         return self.judge(True)
 
     def check_port_forwarding(self):
