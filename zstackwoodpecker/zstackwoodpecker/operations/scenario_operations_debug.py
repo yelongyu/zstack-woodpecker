@@ -890,6 +890,7 @@ def setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm_config, deploy_co
 
 ISCSI_TARGET_IP = []
 ISCSI_TARGET_UUID = []
+ISCSI_INITIATOR_TO_SETUP = []
 def setup_iscsi_target(vm_inv, vm_config, deploy_config):
     global ISCSI_TARGET_IP
     global ISCSI_TARGET_UUID
@@ -2683,6 +2684,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 
                 if xmlobject.has_element(vm, 'primaryStorageRef'):
                     vm_ip_to_post = setup_primarystorage_vm(vm_inv, vm, deploy_config)
+                    initiator = 0
                     for ps_ref in xmlobject.safe_list(vm.primaryStorageRef):
                         if ps_ref.type_ == 'ocfs2smp':
                             if ocfs2smp_shareable_volume_is_created == False and hasattr(ps_ref, 'disk_offering_uuid_'):
@@ -2720,7 +2722,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 			                #setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm, deploy_config)
                             break
                         elif ps_ref.type_ == 'iscsiInitiator':
-                            setup_iscsi_initiator(zstack_management_ip, vm_inv, vm, deploy_config)
+                            initiator += 1
+                            global ISCSI_INITIATOR_TO_SETUP
+#                             ISCSI_INITIATOR_TO_SETUP.append([])
+#                             setup_iscsi_initiator(zstack_management_ip, vm_inv, vm, deploy_config)
                             break
                         elif ps_ref.type_ == 'ZSES':
                             if zbs_virtio_scsi_volume_is_created == False and hasattr(ps_ref, 'disk_offering_uuid_'):
@@ -2753,11 +2758,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                 volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config)
                             attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
                             break
-                        # elif ps_ref.type_ == 'ebs':
-                        #     cond = res_ops.gen_query_conditions('uuid', '=', vm_inv.hostUuid)
-                        #     host_inv = query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
-                        #     ebs_host[(vm_inv.uuid, host_inv.uuid, vm_ip)] = {'cpu': host_inv.availableCpuCapacity, 'mem': int(host_inv.availableMemoryCapacity)/1024/1024/1024}
-#                             install_ebs_pkg_in_host(vm_ip, vm.imageUsername_, vm.imagePassword_)
+                    if initiator > 0:
+                        while len(ISCSI_TARGET_IP) < initiator:
+                            time.sleep(1)
+                        setup_iscsi_initiator(zstack_management_ip, vm_inv, vm, deploy_config)
         thread_list = []
         for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
             for vm in xmlobject.safe_list(host.vms.vm):
