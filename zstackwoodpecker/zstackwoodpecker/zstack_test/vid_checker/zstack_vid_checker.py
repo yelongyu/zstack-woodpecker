@@ -690,8 +690,11 @@ class zstack_vid_attr_checker(checker_header.TestChecker):
             iam2_ops.attach_policy_to_role(policy_uuid, role_uuid)
             iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], vid)
             #policy_check_vid.check()
+            iam2_ops.detach_policy_from_role(policy_uuid, role_uuid)
             iam2_ops.update_role(role_uuid, [])
             iam2_ops.add_policy_statements_to_role(role_uuid, statements)
+            iam2_ops.remove_roles_from_iam2_virtual_id([role_uuid], virtual_id_uuid)
+            iam2_ops.delete_role(role_uuid)
             #policy_check_vid.check()
 
         except:
