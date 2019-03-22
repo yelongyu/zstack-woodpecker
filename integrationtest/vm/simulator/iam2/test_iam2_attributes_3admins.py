@@ -36,7 +36,7 @@ def test():
     vid_tst_obj.create(username, password)
     vid_uuid = vid_tst_obj.get_vid().uuid
     iam2_ops.add_attributes_to_iam2_virtual_id(vid_uuid, attributes)
-    read_only_admin_session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
+    #read_only_admin_session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
 
     vid.set_vid_attributes(attributes)
     vid_tst_obj.check()
