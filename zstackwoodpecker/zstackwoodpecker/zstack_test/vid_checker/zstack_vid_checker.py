@@ -846,7 +846,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             iam2_ops.login_iam2_project(project_name, plain_user_session_uuid)
 
 
-    def check_vm_operation(self, hasDeletePermission=True):
+    def check_vm_operation(self):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
         if self.test_obj.get_customized() == None:
@@ -861,17 +861,26 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         conditions = res_ops.gen_query_conditions('system', '=', 'false')
         conditions = res_ops.gen_query_conditions('category', '=', 'Private', conditions)
         l3_net_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
-        acc_ops.share_resources([project_linked_account_uuid], [l3_net_uuid])
+
+        if self.test_obj.get_customized() == None:
+            acc_ops.share_resources([project_linked_account_uuid], [l3_net_uuid])
+
         vm_creation_option.set_l3_uuids([l3_net_uuid])
         conditions = res_ops.gen_query_conditions('platform', '=', 'Linux')
         conditions = res_ops.gen_query_conditions('system', '=', 'false', conditions)
         image_uuid = res_ops.query_resource(res_ops.IMAGE, conditions)[0].uuid
         vm_creation_option.set_image_uuid(image_uuid)
-        acc_ops.share_resources([project_linked_account_uuid], [image_uuid])
+
+        if self.test_obj.get_customized() == None:
+            acc_ops.share_resources([project_linked_account_uuid], [image_uuid])
+
         conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
         instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
         vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
-        acc_ops.share_resources([project_linked_account_uuid], [instance_offering_uuid])
+
+        if self.test_obj.get_customized() == None:
+            acc_ops.share_resources([project_linked_account_uuid], [instance_offering_uuid])
+
         vm_creation_option.set_name('vm_policy_checker')
         vm_creation_option.set_session_uuid(project_login_session_uuid)
         vm = vm_ops.create_vm(vm_creation_option)
@@ -886,7 +895,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         vm_ops.start_vm(vm_uuid, session_uuid=project_login_session_uuid)
         vm_ops.suspend_vm(vm_uuid, session_uuid=project_login_session_uuid)
         vm_ops.resume_vm(vm_uuid, session_uuid=project_login_session_uuid)
-        if hasDeletePermission == True:
+        if self.test_obj.get_customized() == None:
             vm_ops.destroy_vm(vm_uuid, session_uuid=project_login_session_uuid)
             vm_ops.expunge_vm(vm_uuid, session_uuid=project_login_session_uuid)
         else:
@@ -951,650 +960,725 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             return self.judge(False)
         return self.judge(True)
 
-    def check_image_operation(self, hasDeletePermission=True):
+    def check_image_operation(self):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
-        conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
-        project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
-        project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
-        project_linked_account_uuid = project_ins.linkedAccountUuid
+        if self.test_obj.get_customized() == None:
+            conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
+            project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
+            project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
+            project_linked_account_uuid = project_ins.linkedAccountUuid
+        else:
+            project_login_session_uuid = plain_user_session_uuid
 
-        try:
-            bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
-            image_option = test_util.ImageOption()
-            image_option.set_name('image_policy_checker')
-            image_option.set_description('image for policy check')
-            image_option.set_format('raw')
-            image_option.set_mediaType('RootVolumeTemplate')
-            image_option.set_backup_storage_uuid_list([bs.uuid])
-            image_option.url = "http://fake_iamge/image.raw"
-            image_option.set_session_uuid(project_login_session_uuid)
-            image_uuid = img_ops.add_image(image_option).uuid
-            img_ops.sync_image_size(image_uuid, session_uuid=project_login_session_uuid)
-            img_ops.change_image_state(image_uuid, 'disable', session_uuid=project_login_session_uuid)
-            img_ops.change_image_state(image_uuid, 'enable', session_uuid=project_login_session_uuid)
-            if bs.type == 'ImageStoreBackupStorage':
-                img_ops.export_image_from_backup_storage(image_uuid, bs.uuid, session_uuid=project_login_session_uuid)
-                img_ops.delete_exported_image_from_backup_storage(image_uuid, bs.uuid, session_uuid=project_login_session_uuid)
-            img_ops.set_image_qga_enable(image_uuid, session_uuid=project_login_session_uuid)
-            img_ops.set_image_qga_disable(image_uuid, session_uuid=project_login_session_uuid)
-            cond = res_ops.gen_query_conditions('name', '=', "image_policy_checker")
-            image = res_ops.query_resource(res_ops.IMAGE, cond, session_uuid=project_login_session_uuid)
-            if image == None:
-                test_util.test_fail('fail to query image just added')
-                return self.judge(False)
-            if hasDeletePermission == True:
-                img_ops.delete_image(image_uuid, session_uuid=project_login_session_uuid)
-                img_ops.expunge_image(image_uuid, session_uuid=project_login_session_uuid)
-            else:
-                try:
-                    img_ops.delete_image(image_uuid, session_uuid=project_login_session_uuid)
-                    test_util.test_logger("delete_image should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-                try:
-                    img_ops.expunge_image(image_uuid, session_uuid=project_login_session_uuid)
-                    test_util.test_logger("expunge_image should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    return self.judge(True)
-        except Exception as e:
-            test_util.test_logger('Check Result: [Virtual ID:] %s has permission for image but image check failed' % virtual_id.name)
-            test_util.test_logger('Excepiton info: %s' %e)
+        bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
+        image_option = test_util.ImageOption()
+        image_option.set_name('image_policy_checker')
+        image_option.set_description('image for policy check')
+        image_option.set_format('raw')
+        image_option.set_mediaType('RootVolumeTemplate')
+        image_option.set_backup_storage_uuid_list([bs.uuid])
+        image_option.url = "http://fake_iamge/image.raw"
+        image_option.set_session_uuid(project_login_session_uuid)
+        image_uuid = img_ops.add_image(image_option).uuid
+        img_ops.sync_image_size(image_uuid, session_uuid=project_login_session_uuid)
+        img_ops.change_image_state(image_uuid, 'disable', session_uuid=project_login_session_uuid)
+        img_ops.change_image_state(image_uuid, 'enable', session_uuid=project_login_session_uuid)
+        if bs.type == 'ImageStoreBackupStorage':
+            img_ops.export_image_from_backup_storage(image_uuid, bs.uuid, session_uuid=project_login_session_uuid)
+            img_ops.delete_exported_image_from_backup_storage(image_uuid, bs.uuid, session_uuid=project_login_session_uuid)
+        img_ops.set_image_qga_enable(image_uuid, session_uuid=project_login_session_uuid)
+        img_ops.set_image_qga_disable(image_uuid, session_uuid=project_login_session_uuid)
+        cond = res_ops.gen_query_conditions('name', '=', "image_policy_checker")
+        image = res_ops.query_resource(res_ops.IMAGE, cond, session_uuid=project_login_session_uuid)
+        if image == None:
+            test_util.test_fail('fail to query image just added')
             return self.judge(False)
+        if self.test_obj.get_customized() == None:
+            img_ops.delete_image(image_uuid, session_uuid=project_login_session_uuid)
+            img_ops.expunge_image(image_uuid, session_uuid=project_login_session_uuid)
+        else:
+            try:
+                img_ops.delete_image(image_uuid, session_uuid=project_login_session_uuid)
+                test_util.test_logger("delete_image should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+            try:
+                img_ops.expunge_image(image_uuid, session_uuid=project_login_session_uuid)
+                test_util.test_logger("expunge_image should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                return self.judge(True)
         return self.judge(True)
 
-    def check_snapshot(self, hasDeletePermission=True):
+    def check_snapshot(self):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
-        conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
-        project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
-        project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
-        project_linked_account_uuid = project_ins.linkedAccountUuid
 
-        try:
-            bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
-            disk_offering_uuid = res_ops.query_resource(res_ops.DISK_OFFERING)[0].uuid
+        if self.test_obj.get_customized() == None:
+            conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
+            project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
+            project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
+            project_linked_account_uuid = project_ins.linkedAccountUuid
+        else:
+            project_login_session_uuid = plain_user_session_uuid
+
+        bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
+        disk_offering_uuid = res_ops.query_resource(res_ops.DISK_OFFERING)[0].uuid
+
+        if self.test_obj.get_customized() == None:
             acc_ops.share_resources([project_linked_account_uuid], [disk_offering_uuid])
-            volume_option = test_util.VolumeOption()
-            volume_option.set_disk_offering_uuid(disk_offering_uuid)
-            volume_option.set_name('data_volume_for_snapshot_policy_checker')
-            data_volume = vol_ops.create_volume_from_offering(volume_option)
+
+        volume_option = test_util.VolumeOption()
+        volume_option.set_disk_offering_uuid(disk_offering_uuid)
+        volume_option.set_name('data_volume_for_snapshot_policy_checker')
+        data_volume = vol_ops.create_volume_from_offering(volume_option)
+
+        if self.test_obj.get_customized() == None:
             res_ops.change_recource_owner(project_linked_account_uuid, data_volume.uuid)
 
-            vm_creation_option = test_util.VmOption()
-            conditions = res_ops.gen_query_conditions('system', '=', 'false')
-            conditions = res_ops.gen_query_conditions('category', '=', 'Private', conditions)
-            l3_net_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
-            acc_ops.share_resources([project_linked_account_uuid], [l3_net_uuid])
-            vm_creation_option.set_l3_uuids([l3_net_uuid])
-            conditions = res_ops.gen_query_conditions('platform', '=', 'Linux')
-            conditions = res_ops.gen_query_conditions('system', '=', 'false', conditions)
-            image_uuid = res_ops.query_resource(res_ops.IMAGE, conditions)[0].uuid
-            vm_creation_option.set_image_uuid(image_uuid)
-            acc_ops.share_resources([project_linked_account_uuid], [image_uuid])
-            conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
-            instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
-            vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
-            acc_ops.share_resources([project_linked_account_uuid], [instance_offering_uuid])
-            vm_creation_option.set_name('vm_without_create_policy_checker')
-            vm = vm_ops.create_vm(vm_creation_option)
-            vm_uuid = vm.uuid
-            vol_ops.attach_volume(data_volume.uuid, vm_uuid)
+        vm_creation_option = test_util.VmOption()
+        conditions = res_ops.gen_query_conditions('system', '=', 'false')
+        conditions = res_ops.gen_query_conditions('category', '=', 'Private', conditions)
+        l3_net_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
 
-            snapshot_option = test_util.SnapshotOption()
-            snapshot_option.set_volume_uuid(data_volume.uuid)
-            snapshot_option.set_name('snapshot_policy_checker')
-            snapshot_option.set_description('snapshot for policy check')
-            snapshot_option.set_session_uuid(project_login_session_uuid)
-            snapshot_uuid = vol_ops.create_snapshot(snapshot_option).uuid
-            vm_ops.stop_vm(vm_uuid, force='cold')
-            vol_ops.use_snapshot(snapshot_uuid, project_login_session_uuid)
-            #vol_ops.backup_snapshot(snapshot_uuid, bs.uuid, project_login_session_uuid)
-            #new_volume = vol_ops.create_volume_from_snapshot(snapshot_uuid)
-            #vol_ops.delete_snapshot_from_backupstorage(snapshot_uuid, [bs.uuid], session_uuid=project_login_session_uuid)
-            if hasDeletePermission == True:
+        if self.test_obj.get_customized() == None:
+            acc_ops.share_resources([project_linked_account_uuid], [l3_net_uuid])
+
+        vm_creation_option.set_l3_uuids([l3_net_uuid])
+        conditions = res_ops.gen_query_conditions('platform', '=', 'Linux')
+        conditions = res_ops.gen_query_conditions('system', '=', 'false', conditions)
+        image_uuid = res_ops.query_resource(res_ops.IMAGE, conditions)[0].uuid
+        vm_creation_option.set_image_uuid(image_uuid)
+
+        if self.test_obj.get_customized() == None:
+            acc_ops.share_resources([project_linked_account_uuid], [image_uuid])
+
+        conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+        instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+        vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+
+        if self.test_obj.get_customized() == None:
+            acc_ops.share_resources([project_linked_account_uuid], [instance_offering_uuid])
+
+        vm_creation_option.set_name('vm_without_create_policy_checker')
+        vm = vm_ops.create_vm(vm_creation_option)
+        vm_uuid = vm.uuid
+        vol_ops.attach_volume(data_volume.uuid, vm_uuid)
+
+        snapshot_option = test_util.SnapshotOption()
+        snapshot_option.set_volume_uuid(data_volume.uuid)
+        snapshot_option.set_name('snapshot_policy_checker')
+        snapshot_option.set_description('snapshot for policy check')
+        snapshot_option.set_session_uuid(project_login_session_uuid)
+        snapshot_uuid = vol_ops.create_snapshot(snapshot_option).uuid
+        vm_ops.stop_vm(vm_uuid, force='cold')
+        vol_ops.use_snapshot(snapshot_uuid, project_login_session_uuid)
+        #vol_ops.backup_snapshot(snapshot_uuid, bs.uuid, project_login_session_uuid)
+        #new_volume = vol_ops.create_volume_from_snapshot(snapshot_uuid)
+        #vol_ops.delete_snapshot_from_backupstorage(snapshot_uuid, [bs.uuid], session_uuid=project_login_session_uuid)
+        if self.test_obj.get_customized() == None:
+            vol_ops.delete_snapshot(snapshot_uuid, project_login_session_uuid)
+            vol_ops.delete_volume(data_volume.uuid)
+            vol_ops.expunge_volume(data_volume.uuid)
+            vm_ops.destroy_vm(vm_uuid)
+            vm_ops.expunge_vm(vm_uuid)
+        else:
+            try:
                 vol_ops.delete_snapshot(snapshot_uuid, project_login_session_uuid)
-                vol_ops.delete_volume(data_volume.uuid)
-                vol_ops.expunge_volume(data_volume.uuid)
-                vm_ops.destroy_vm(vm_uuid)
-                vm_ops.expunge_vm(vm_uuid)
-            else:
-                try:
-                    vol_ops.delete_snapshot(snapshot_uuid, project_login_session_uuid)
-                    test_util.test_logger("delete_snapshot should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                try:
-                    vol_ops.delete_volume(data_volume.uuid)
-                    test_util.test_logger("delete_volume should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                try:
-                    vol_ops.expunge_volume(data_volume.uuid)
-                    test_util.test_logger("expunge_volume should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                try:
-                    vm_ops.destroy_vm(vm_uuid)
-                    test_util.test_logger("destroy_vm should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                try:
-                    vm_ops.expunge_vm(vm_uuid)
-                    test_util.test_logger("expunge_vm should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    return self.judge(True)
-
-        except Exception as e:
-            test_util.test_logger('Check Result: [Virtual ID:] %s has permission for snapshot but snapshot check failed' % virtual_id.name)
-            test_util.test_logger('Excepiton info: %s' %e)
-            return self.judge(False)
-        return self.judge(True)
-
-    def check_volume_operation(self, hasDeletePermission=True):
-        virtual_id = self.test_obj.get_vid()
-        plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
-        conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
-        project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
-        project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
-        project_linked_account_uuid = project_ins.linkedAccountUuid
-
-        try:
-            # Volume related ops: Create, Delete, Expunge, Attach, Dettach, Enable, Disable
-            disk_offering_uuid = res_ops.query_resource(res_ops.DISK_OFFERING)[0].uuid
-            acc_ops.share_resources([project_linked_account_uuid], [disk_offering_uuid])
-            volume_option = test_util.VolumeOption()
-            volume_option.set_disk_offering_uuid(disk_offering_uuid)
-            volume_option.set_name('data_volume_policy_checker')
-            volume_option.set_session_uuid(project_login_session_uuid)
-            data_volume = vol_ops.create_volume_from_offering(volume_option)
-            vol_ops.stop_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
-            vol_ops.start_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
-            vm_creation_option = test_util.VmOption()
-            conditions = res_ops.gen_query_conditions('system', '=', 'false')
-            conditions = res_ops.gen_query_conditions('category', '=', 'Private', conditions)
-            l3_net_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
-            acc_ops.share_resources([project_linked_account_uuid], [l3_net_uuid])
-            vm_creation_option.set_l3_uuids([l3_net_uuid])
-            conditions = res_ops.gen_query_conditions('platform', '=', 'Linux')
-            conditions = res_ops.gen_query_conditions('system', '=', 'false', conditions)
-            image_uuid = res_ops.query_resource(res_ops.IMAGE, conditions)[0].uuid
-            vm_creation_option.set_image_uuid(image_uuid)
-            acc_ops.share_resources([project_linked_account_uuid], [image_uuid])
-            conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
-            instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
-            vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
-            acc_ops.share_resources([project_linked_account_uuid], [instance_offering_uuid])
-            vm_creation_option.set_name('vm_for_vol_policy_checker')
-            #vm_creation_option.set_session_uuid(project_login_session_uuid)
-            vm = vm_ops.create_vm(vm_creation_option)
-            vm_uuid = vm.uuid
-            res_ops.change_recource_owner(project_linked_account_uuid, vm_uuid)
-            vol_ops.attach_volume(data_volume.uuid, vm_uuid, session_uuid=project_login_session_uuid)
-            vol_ops.detach_volume(data_volume.uuid, vm_uuid, session_uuid=project_login_session_uuid)
-            if hasDeletePermission == True:
-                vol_ops.delete_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
-                vol_ops.expunge_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
-                vm_ops.destroy_vm(vm_uuid)
-                vm_ops.expunge_vm(vm_uuid)
-            else:
-                try:
-                    vol_ops.delete_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
-                    test_util.test_logger("delete_volume should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                try:
-                    vol_ops.expunge_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
-                    test_util.test_logger("expunge_volume should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                try:
-                    vm_ops.destroy_vm(vm_uuid)
-                    test_util.test_logger("destroy_vm should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                try:
-                    vm_ops.expunge_vm(vm_uuid)
-                    test_util.test_logger("expunge_vm should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    return self.judge(True)
-
-            
-        except Exception as e:
-            test_util.test_logger('Check Result: [Virtual ID:] %s has permission for volume but volume check failed' % virtual_id.name)
-            test_util.test_logger('Excepiton info: %s' %e)
-            return self.judge(False)
-        return self.judge(True)
-
-    def check_affinity_group(self, hasDeletePermission=True):
-        virtual_id = self.test_obj.get_vid()
-        plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
-        conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
-        project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
-        project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
-        project_linked_account_uuid = project_ins.linkedAccountUuid
-        try:
-            vm_creation_option = test_util.VmOption()
-            conditions = res_ops.gen_query_conditions('system', '=', 'false')
-            conditions = res_ops.gen_query_conditions('category', '=', 'Private', conditions)
-            l3_net_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
-            acc_ops.share_resources([project_linked_account_uuid], [l3_net_uuid])
-            vm_creation_option.set_l3_uuids([l3_net_uuid])
-            conditions = res_ops.gen_query_conditions('platform', '=', 'Linux')
-            conditions = res_ops.gen_query_conditions('system', '=', 'false', conditions)
-            image_uuid = res_ops.query_resource(res_ops.IMAGE, conditions)[0].uuid
-            vm_creation_option.set_image_uuid(image_uuid)
-            acc_ops.share_resources([project_linked_account_uuid], [image_uuid])
-            conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
-            instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
-            vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
-            acc_ops.share_resources([project_linked_account_uuid], [instance_offering_uuid])
-            vm_creation_option.set_name('vm_for_affinity_group_policy_checker')
-            vm = vm_ops.create_vm(vm_creation_option)
-            vm_uuid = vm.uuid
-            res_ops.change_recource_owner(project_linked_account_uuid, vm_uuid)
-            ag_uuid = ag_ops.create_affinity_group('affinity_group_policy_checker', 'antiHard', session_uuid=project_login_session_uuid).uuid
-            ag_ops.add_vm_to_affinity_group(ag_uuid, vm_uuid, session_uuid=project_login_session_uuid)
-            ag_ops.remove_vm_from_affinity_group(ag_uuid, vm_uuid, session_uuid=project_login_session_uuid)
-            if hasDeletePermission == True:
-                ag_ops.delete_affinity_group(ag_uuid, session_uuid=project_login_session_uuid)
-                vm_ops.destroy_vm(vm_uuid)
-                vm_ops.expunge_vm(vm_uuid)
-            else:
-                try:
-                    ag_ops.delete_affinity_group(ag_uuid, session_uuid=project_login_session_uuid)
-                    test_util.test_logger("delete_affinity_group should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                try:
-                    vm_ops.destroy_vm(vm_uuid)
-                    test_util.test_logger("destroy_vm should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                try:
-                    vm_ops.expunge_vm(vm_uuid)
-                    test_util.test_logger("expunge_vm should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    return self.judge(True)
+                test_util.test_logger("delete_snapshot should not be runned")
                 return self.judge(False)
-        except Exception as e:
-            test_util.test_logger('Check Result: [Virtual ID:] %s has permission for affinity group but affinity group check failed' % virtual_id.name)
-            test_util.test_logger('Excepiton info: %s' %e)
+            except Exception as e:
+                pass
+
+            try:
+                vol_ops.delete_volume(data_volume.uuid)
+                test_util.test_logger("delete_volume should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
+                vol_ops.expunge_volume(data_volume.uuid)
+                test_util.test_logger("expunge_volume should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
+                vm_ops.destroy_vm(vm_uuid)
+                test_util.test_logger("destroy_vm should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
+                vm_ops.expunge_vm(vm_uuid)
+                test_util.test_logger("expunge_vm should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                return self.judge(True)
+
+        return self.judge(True)
+
+    def check_volume_operation(self):
+        virtual_id = self.test_obj.get_vid()
+        plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
+
+        if self.test_obj.get_customized() == None:
+            conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
+            project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
+            project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
+            project_linked_account_uuid = project_ins.linkedAccountUuid
+        else:
+            project_login_session_uuid = plain_user_session_uuid
+
+        # Volume related ops: Create, Delete, Expunge, Attach, Dettach, Enable, Disable
+        disk_offering_uuid = res_ops.query_resource(res_ops.DISK_OFFERING)[0].uuid
+
+        if self.test_obj.get_customized() == None:
+            acc_ops.share_resources([project_linked_account_uuid], [disk_offering_uuid])
+
+        volume_option = test_util.VolumeOption()
+        volume_option.set_disk_offering_uuid(disk_offering_uuid)
+        volume_option.set_name('data_volume_policy_checker')
+        volume_option.set_session_uuid(project_login_session_uuid)
+        data_volume = vol_ops.create_volume_from_offering(volume_option)
+        vol_ops.stop_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
+        vol_ops.start_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
+        vm_creation_option = test_util.VmOption()
+        conditions = res_ops.gen_query_conditions('system', '=', 'false')
+        conditions = res_ops.gen_query_conditions('category', '=', 'Private', conditions)
+        l3_net_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
+
+        if self.test_obj.get_customized() == None:
+            acc_ops.share_resources([project_linked_account_uuid], [l3_net_uuid])
+
+        vm_creation_option.set_l3_uuids([l3_net_uuid])
+        conditions = res_ops.gen_query_conditions('platform', '=', 'Linux')
+        conditions = res_ops.gen_query_conditions('system', '=', 'false', conditions)
+        image_uuid = res_ops.query_resource(res_ops.IMAGE, conditions)[0].uuid
+        vm_creation_option.set_image_uuid(image_uuid)
+
+        if self.test_obj.get_customized() == None:
+            acc_ops.share_resources([project_linked_account_uuid], [image_uuid])
+
+        conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+        instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+        vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+
+        if self.test_obj.get_customized() == None:
+            acc_ops.share_resources([project_linked_account_uuid], [instance_offering_uuid])
+
+        vm_creation_option.set_name('vm_for_vol_policy_checker')
+        #vm_creation_option.set_session_uuid(project_login_session_uuid)
+        vm = vm_ops.create_vm(vm_creation_option)
+        vm_uuid = vm.uuid
+
+        if self.test_obj.get_customized() == None:
+            res_ops.change_recource_owner(project_linked_account_uuid, vm_uuid)
+
+        vol_ops.attach_volume(data_volume.uuid, vm_uuid, session_uuid=project_login_session_uuid)
+        vol_ops.detach_volume(data_volume.uuid, vm_uuid, session_uuid=project_login_session_uuid)
+        if self.test_obj.get_customized() == None:
+            vol_ops.delete_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
+            vol_ops.expunge_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
+            vm_ops.destroy_vm(vm_uuid)
+            vm_ops.expunge_vm(vm_uuid)
+        else:
+            try:
+                vol_ops.delete_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
+                test_util.test_logger("delete_volume should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
+                vol_ops.expunge_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
+                test_util.test_logger("expunge_volume should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
+                vm_ops.destroy_vm(vm_uuid)
+                test_util.test_logger("destroy_vm should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
+                vm_ops.expunge_vm(vm_uuid)
+                test_util.test_logger("expunge_vm should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                return self.judge(True)
+
+        return self.judge(True)
+
+    def check_affinity_group(self):
+        virtual_id = self.test_obj.get_vid()
+        plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
+        if self.test_obj.get_customized() == None:
+            conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
+            project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
+            project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
+            project_linked_account_uuid = project_ins.linkedAccountUuid
+        else:
+            project_login_session_uuid = plain_user_session_uuid
+
+        vm_creation_option = test_util.VmOption()
+        conditions = res_ops.gen_query_conditions('system', '=', 'false')
+        conditions = res_ops.gen_query_conditions('category', '=', 'Private', conditions)
+        l3_net_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
+
+        if self.test_obj.get_customized() == None:
+            acc_ops.share_resources([project_linked_account_uuid], [l3_net_uuid])
+
+        vm_creation_option.set_l3_uuids([l3_net_uuid])
+        conditions = res_ops.gen_query_conditions('platform', '=', 'Linux')
+        conditions = res_ops.gen_query_conditions('system', '=', 'false', conditions)
+        image_uuid = res_ops.query_resource(res_ops.IMAGE, conditions)[0].uuid
+        vm_creation_option.set_image_uuid(image_uuid)
+
+        if self.test_obj.get_customized() == None:
+            acc_ops.share_resources([project_linked_account_uuid], [image_uuid])
+
+        conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+        instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+        vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+
+        if self.test_obj.get_customized() == None:
+            acc_ops.share_resources([project_linked_account_uuid], [instance_offering_uuid])
+
+        vm_creation_option.set_name('vm_for_affinity_group_policy_checker')
+        vm = vm_ops.create_vm(vm_creation_option)
+        vm_uuid = vm.uuid
+
+        if self.test_obj.get_customized() == None:
+            res_ops.change_recource_owner(project_linked_account_uuid, vm_uuid)
+
+        ag_uuid = ag_ops.create_affinity_group('affinity_group_policy_checker', 'antiHard', session_uuid=project_login_session_uuid).uuid
+        ag_ops.add_vm_to_affinity_group(ag_uuid, vm_uuid, session_uuid=project_login_session_uuid)
+        ag_ops.remove_vm_from_affinity_group(ag_uuid, vm_uuid, session_uuid=project_login_session_uuid)
+        if self.test_obj.get_customized() == None:
+            ag_ops.delete_affinity_group(ag_uuid, session_uuid=project_login_session_uuid)
+            vm_ops.destroy_vm(vm_uuid)
+            vm_ops.expunge_vm(vm_uuid)
+        else:
+            try:
+                ag_ops.delete_affinity_group(ag_uuid, session_uuid=project_login_session_uuid)
+                test_util.test_logger("delete_affinity_group should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
+                vm_ops.destroy_vm(vm_uuid)
+                test_util.test_logger("destroy_vm should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
+                vm_ops.expunge_vm(vm_uuid)
+                test_util.test_logger("expunge_vm should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                return self.judge(True)
             return self.judge(False)
         return self.judge(True)
 
-    def check_networks(self, hasDeletePermission=True):
+    def check_networks(self):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
-        conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
-        project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
-        project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
-        project_linked_account_uuid = project_ins.linkedAccountUuid
-        try:
-            zone_uuid = res_ops.query_resource(res_ops.ZONE)[0].uuid
-            vxlan_pool = res_ops.get_resource(res_ops.L2_VXLAN_NETWORK_POOL)
-            clear_vxlan_pool = False
-            if vxlan_pool == None or len(vxlan_pool) == 0:
-                vxlan_pool_uuid = vxlan_ops.create_l2_vxlan_network_pool('vxlan_poll_for networks_polocy_checker', zone_uuid).uuid
-                vni_uuid = vxlan_ops.create_vni_range('vni_range_for_networks_policy_checker', '10000', '20000', vxlan_pool_uuid).uuid
-                clear_vxlan_pool = True
-            else:
-                vxlan_pool_uuid = vxlan_pool[0].uuid
+        if self.test_obj.get_customized() == None:
+            conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
+            project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
+            project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
+            project_linked_account_uuid = project_ins.linkedAccountUuid
+        else:
+            project_login_session_uuid = plain_user_session_uuid
+
+        zone_uuid = res_ops.query_resource(res_ops.ZONE)[0].uuid
+        vxlan_pool = res_ops.get_resource(res_ops.L2_VXLAN_NETWORK_POOL)
+        clear_vxlan_pool = False
+        if vxlan_pool == None or len(vxlan_pool) == 0:
+            vxlan_pool_uuid = vxlan_ops.create_l2_vxlan_network_pool('vxlan_poll_for networks_polocy_checker', zone_uuid).uuid
+            vni_uuid = vxlan_ops.create_vni_range('vni_range_for_networks_policy_checker', '10000', '20000', vxlan_pool_uuid).uuid
+            clear_vxlan_pool = True
+        else:
+            vxlan_pool_uuid = vxlan_pool[0].uuid
+
+        if self.test_obj.get_customized() == None:
             acc_ops.share_resources([project_linked_account_uuid], [vxlan_pool_uuid])
-            vxlan_pool_uuid = res_ops.get_resource(res_ops.L2_VXLAN_NETWORK_POOL, session_uuid=project_login_session_uuid)[0].uuid
-            vxlan_l2_uuid = vxlan_ops.create_l2_vxlan_network('vxlan_for_policy_checker', vxlan_pool_uuid, zone_uuid, session_uuid=project_login_session_uuid).uuid
-            conditions = res_ops.gen_query_conditions('name', '=', 'vrouter')
-            service_providor_uuid = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER, conditions, session_uuid=project_login_session_uuid)[0].uuid
-            l3_uuid = net_ops.create_l3('l3_network_for_policy_checker', vxlan_l2_uuid, session_uuid=project_login_session_uuid).uuid
-            net_ops.attach_network_service_to_l3network(l3_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
-            #net_ops.detach_network_service_from_l3network(l3_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
-            if hasDeletePermission == True:
+
+        vxlan_pool_uuid = res_ops.get_resource(res_ops.L2_VXLAN_NETWORK_POOL, session_uuid=project_login_session_uuid)[0].uuid
+        vxlan_l2_uuid = vxlan_ops.create_l2_vxlan_network('vxlan_for_policy_checker', vxlan_pool_uuid, zone_uuid, session_uuid=project_login_session_uuid).uuid
+        conditions = res_ops.gen_query_conditions('name', '=', 'vrouter')
+        service_providor_uuid = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER, conditions, session_uuid=project_login_session_uuid)[0].uuid
+        l3_uuid = net_ops.create_l3('l3_network_for_policy_checker', vxlan_l2_uuid, session_uuid=project_login_session_uuid).uuid
+        net_ops.attach_network_service_to_l3network(l3_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
+        #net_ops.detach_network_service_from_l3network(l3_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
+        if self.test_obj.get_customized() == None:
+            net_ops.delete_l3(l3_uuid, session_uuid=project_login_session_uuid)
+            if clear_vxlan_pool:
+                vxlan_ops.delete_vni_range(vni_uuid, session_uuid=project_login_session_uuid)
+            net_ops.delete_l2(vxlan_l2_uuid, session_uuid=project_login_session_uuid)
+        else:
+            try:
                 net_ops.delete_l3(l3_uuid, session_uuid=project_login_session_uuid)
+                test_util.test_logger("delete_l3 should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
                 if clear_vxlan_pool:
                     vxlan_ops.delete_vni_range(vni_uuid, session_uuid=project_login_session_uuid)
+                    test_util.test_logger("delete_vni_range should not be runned")
+                    return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
                 net_ops.delete_l2(vxlan_l2_uuid, session_uuid=project_login_session_uuid)
-            else:
-                try:
-                    net_ops.delete_l3(l3_uuid, session_uuid=project_login_session_uuid)
-                    test_util.test_logger("delete_l3 should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                try:
-                    if clear_vxlan_pool:
-                        vxlan_ops.delete_vni_range(vni_uuid, session_uuid=project_login_session_uuid)
-                        test_util.test_logger("delete_vni_range should not be runned")
-                        return self.judge(False)
-                except Exception as e:
-                    pass
-
-                try:
-                    net_ops.delete_l2(vxlan_l2_uuid, session_uuid=project_login_session_uuid)
-                    test_util.test_logger("delete_l2 should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    return self.judge(True)
-            
-        except Exception as e:
-            test_util.test_logger('Check Result: [Virtual ID:] %s has permission for networks but networks check failed' % virtual_id.name)
-            test_util.test_logger('Excepiton info: %s' %e)
-            return self.judge(False)
+                test_util.test_logger("delete_l2 should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                return self.judge(True)
+        
         return self.judge(True)
 
-    def check_eip(self, hasDeletePermission=True):
+    def check_eip(self):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
-        conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
-        project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
-        project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
-        project_linked_account_uuid = project_ins.linkedAccountUuid
-        try:
-            vm_creation_option = test_util.VmOption()
-            conditions = res_ops.gen_query_conditions('category', '=', 'Public')
-            l3_pub_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
-            conditions = res_ops.gen_query_conditions('system', '=', 'false')
-            conditions = res_ops.gen_query_conditions('category', '=', 'Private', conditions)
-            l3_net_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
+        if self.test_obj.get_customized() == None:
+            conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
+            project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
+            project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
+            project_linked_account_uuid = project_ins.linkedAccountUuid
+        else:
+            project_login_session_uuid = plain_user_session_uuid
+
+        vm_creation_option = test_util.VmOption()
+        conditions = res_ops.gen_query_conditions('category', '=', 'Public')
+        l3_pub_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
+        conditions = res_ops.gen_query_conditions('system', '=', 'false')
+        conditions = res_ops.gen_query_conditions('category', '=', 'Private', conditions)
+        l3_net_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
+
+        if self.test_obj.get_customized() == None:
             acc_ops.share_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid])
-            vm_creation_option.set_l3_uuids([l3_net_uuid])
-            conditions = res_ops.gen_query_conditions('platform', '=', 'Linux')
-            conditions = res_ops.gen_query_conditions('system', '=', 'false', conditions)
-            image_uuid = res_ops.query_resource(res_ops.IMAGE, conditions)[0].uuid
-            vm_creation_option.set_image_uuid(image_uuid)
+
+        vm_creation_option.set_l3_uuids([l3_net_uuid])
+        conditions = res_ops.gen_query_conditions('platform', '=', 'Linux')
+        conditions = res_ops.gen_query_conditions('system', '=', 'false', conditions)
+        image_uuid = res_ops.query_resource(res_ops.IMAGE, conditions)[0].uuid
+        vm_creation_option.set_image_uuid(image_uuid)
+
+        if self.test_obj.get_customized() == None:
             acc_ops.share_resources([project_linked_account_uuid], [image_uuid])
-            conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
-            instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
-            vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+
+        conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+        instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+        vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+
+        if self.test_obj.get_customized() == None:
             acc_ops.share_resources([project_linked_account_uuid], [instance_offering_uuid])
-            vm_creation_option.set_name('vm_for_eip_policy_checker')
-            vm = vm_ops.create_vm(vm_creation_option)
-            vm_uuid = vm.uuid
+
+        vm_creation_option.set_name('vm_for_eip_policy_checker')
+        vm = vm_ops.create_vm(vm_creation_option)
+        vm_uuid = vm.uuid
+
+        if self.test_obj.get_customized() == None:
             res_ops.change_recource_owner(project_linked_account_uuid, vm_uuid)
-            vip_option = test_util.VipOption()
-            vip_option.set_name("vip_for_eip_policy_checker")
-            vip_option.set_session_uuid(project_login_session_uuid)
-            vip_option.set_l3_uuid(l3_pub_uuid)
-            vip = net_ops.create_vip(vip_option) 
-            conditions = res_ops.gen_query_conditions('vmInstance.uuid', '=', vm_uuid)
-            vm_nic_uuid = res_ops.query_resource(res_ops.VM_NIC, conditions)[0].uuid
-            test_util.test_logger('vip creation finished, vm nic uuid is %s' %vm_nic_uuid)
-            eip_option = test_util.EipOption()
-            eip_option.set_name('eip_policy_checker')
-            eip_option.set_session_uuid(project_login_session_uuid)
-            eip_option.set_vip_uuid(vip.uuid)
-            eip_option.set_vm_nic_uuid(vm_nic_uuid)
-            eip = net_ops.create_eip(eip_option)
-            net_ops.detach_eip(eip.uuid, session_uuid=project_login_session_uuid)
-            net_ops.attach_eip(eip.uuid, vm_nic_uuid, session_uuid=project_login_session_uuid)
-            if hasDeletePermission == True:
+
+        vip_option = test_util.VipOption()
+        vip_option.set_name("vip_for_eip_policy_checker")
+        vip_option.set_session_uuid(project_login_session_uuid)
+        vip_option.set_l3_uuid(l3_pub_uuid)
+        vip = net_ops.create_vip(vip_option) 
+        conditions = res_ops.gen_query_conditions('vmInstance.uuid', '=', vm_uuid)
+        vm_nic_uuid = res_ops.query_resource(res_ops.VM_NIC, conditions)[0].uuid
+        test_util.test_logger('vip creation finished, vm nic uuid is %s' %vm_nic_uuid)
+        eip_option = test_util.EipOption()
+        eip_option.set_name('eip_policy_checker')
+        eip_option.set_session_uuid(project_login_session_uuid)
+        eip_option.set_vip_uuid(vip.uuid)
+        eip_option.set_vm_nic_uuid(vm_nic_uuid)
+        eip = net_ops.create_eip(eip_option)
+        net_ops.detach_eip(eip.uuid, session_uuid=project_login_session_uuid)
+        net_ops.attach_eip(eip.uuid, vm_nic_uuid, session_uuid=project_login_session_uuid)
+        if self.test_obj.get_customized() == None:
+            net_ops.delete_eip(eip.uuid)
+            net_ops.delete_vip(vip.uuid)
+            vm_ops.destroy_vm(vm_uuid)
+            vm_ops.expunge_vm(vm_uuid)
+            acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
+        else:
+            try:
                 net_ops.delete_eip(eip.uuid)
+                test_util.test_logger("delete_eip should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
                 net_ops.delete_vip(vip.uuid)
+                test_util.test_logger("delete_vip should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
                 vm_ops.destroy_vm(vm_uuid)
+                test_util.test_logger("destroy_vm should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
                 vm_ops.expunge_vm(vm_uuid)
-                acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
-            else:
-                try:
-                    net_ops.delete_eip(eip.uuid)
-                    test_util.test_logger("delete_eip should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
+                test_util.test_logger("expunge_vm should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
 
-                try:
-                    net_ops.delete_vip(vip.uuid)
-                    test_util.test_logger("delete_vip should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
+            #acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
+            test_util.test_logger("revoke_resources should not be runned")
 
-                try:
-                    vm_ops.destroy_vm(vm_uuid)
-                    test_util.test_logger("destroy_vm should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                try:
-                    vm_ops.expunge_vm(vm_uuid)
-                    test_util.test_logger("expunge_vm should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
-                test_util.test_logger("revoke_resources should not be runned")
-
-        except Exception as e:
-            test_util.test_logger('Check Result: [Virtual ID:] %s has permission for eip but eip check failed' % virtual_id.name)
-            test_util.test_logger('Excepiton info: %s' %e)
-            return self.judge(False)
         return self.judge(True)
 
-    def check_security_group(self, hasDeletePermission=True):
+    def check_security_group(self):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
-        conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
-        project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
-        project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
-        project_linked_account_uuid = project_ins.linkedAccountUuid
-        try:
-            vm_creation_option = test_util.VmOption()
-            conditions = res_ops.gen_query_conditions('system', '=', 'false')
-            conditions = res_ops.gen_query_conditions('category', '=', 'Private', conditions)
-            l3_net_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
-            conditions = res_ops.gen_query_conditions('name', '=', 'SecurityGroup')
-            sg_service_providor_uuid = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER, conditions)[0].uuid
+        if self.test_obj.get_customized() == None:
+            conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
+            project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
+            project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
+            project_linked_account_uuid = project_ins.linkedAccountUuid
+        else:
+            project_login_session_uuid = plain_user_session_uuid
+
+        vm_creation_option = test_util.VmOption()
+        conditions = res_ops.gen_query_conditions('system', '=', 'false')
+        conditions = res_ops.gen_query_conditions('category', '=', 'Private', conditions)
+        l3_net_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
+        conditions = res_ops.gen_query_conditions('name', '=', 'SecurityGroup')
+        sg_service_providor_uuid = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER, conditions)[0].uuid
+
+        if self.test_obj.get_customized() == None:
             acc_ops.share_resources([project_linked_account_uuid], [l3_net_uuid])
-            conditions = res_ops.gen_query_conditions('l3Network.uuid', '=', l3_net_uuid)
-            network_service_list = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER_L3_REF, conditions)
-            sg_service_need_attach = True
-            sg_service_need_detach = False
-            for service in network_service_list:
-                if service.networkServiceType == 'SecurityGroup':
-                    sg_service_need_attach = False
-            if sg_service_need_attach:
-                net_ops.attach_sg_service_to_l3network(l3_net_uuid, sg_service_providor_uuid, session_uuid=project_login_session_uuid)
-                sg_service_need_detach = True
-            vm_creation_option = test_util.VmOption()
-            conditions = res_ops.gen_query_conditions('system', '=', 'false')
-            conditions = res_ops.gen_query_conditions('category', '=', 'Private', conditions)
-            l3_net_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
+
+        conditions = res_ops.gen_query_conditions('l3Network.uuid', '=', l3_net_uuid)
+        network_service_list = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER_L3_REF, conditions)
+        sg_service_need_attach = True
+        sg_service_need_detach = False
+        for service in network_service_list:
+            if service.networkServiceType == 'SecurityGroup':
+                sg_service_need_attach = False
+        if sg_service_need_attach:
+            net_ops.attach_sg_service_to_l3network(l3_net_uuid, sg_service_providor_uuid, session_uuid=project_login_session_uuid)
+            sg_service_need_detach = True
+        vm_creation_option = test_util.VmOption()
+        conditions = res_ops.gen_query_conditions('system', '=', 'false')
+        conditions = res_ops.gen_query_conditions('category', '=', 'Private', conditions)
+        l3_net_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
+
+        if self.test_obj.get_customized() == None:
             acc_ops.share_resources([project_linked_account_uuid], [l3_net_uuid])
-            vm_creation_option.set_l3_uuids([l3_net_uuid])
-            conditions = res_ops.gen_query_conditions('platform', '=', 'Linux')
-            conditions = res_ops.gen_query_conditions('system', '=', 'false', conditions)
-            image_uuid = res_ops.query_resource(res_ops.IMAGE, conditions)[0].uuid
-            vm_creation_option.set_image_uuid(image_uuid)
+
+        vm_creation_option.set_l3_uuids([l3_net_uuid])
+        conditions = res_ops.gen_query_conditions('platform', '=', 'Linux')
+        conditions = res_ops.gen_query_conditions('system', '=', 'false', conditions)
+        image_uuid = res_ops.query_resource(res_ops.IMAGE, conditions)[0].uuid
+        vm_creation_option.set_image_uuid(image_uuid)
+
+        if self.test_obj.get_customized() == None:
             acc_ops.share_resources([project_linked_account_uuid], [image_uuid])
-            conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
-            instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
-            vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+
+        conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+        instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+        vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+
+        if self.test_obj.get_customized() == None:
             acc_ops.share_resources([project_linked_account_uuid], [instance_offering_uuid])
-            vm_creation_option.set_name('vm_for_security_group_policy_checker')
-            vm = vm_ops.create_vm(vm_creation_option)
-            vm_uuid = vm.uuid
+
+        vm_creation_option.set_name('vm_for_security_group_policy_checker')
+        vm = vm_ops.create_vm(vm_creation_option)
+        vm_uuid = vm.uuid
+
+        if self.test_obj.get_customized() == None:
             res_ops.change_recource_owner(project_linked_account_uuid, vm_uuid)
-            sg_creation_option = test_util.SecurityGroupOption()
-            sg_creation_option.set_name('security_group_policy_checker')
-            sg_creation_option.set_session_uuid(session_uuid=project_login_session_uuid)
-            sg_uuid = net_ops.create_security_group(sg_creation_option).uuid
-            net_ops.attach_security_group_to_l3(sg_uuid, l3_net_uuid, session_uuid=project_login_session_uuid)
-            conditions = res_ops.gen_query_conditions('vmInstance.uuid', '=', vm_uuid)
-            vm_nic_uuid = res_ops.query_resource(res_ops.VM_NIC, conditions)[0].uuid
-            net_ops.add_nic_to_security_group(sg_uuid, [vm_nic_uuid], session_uuid=project_login_session_uuid)
-            net_ops.remove_nic_from_security_group(sg_uuid, [vm_nic_uuid], session_uuid=project_login_session_uuid)
-            net_ops.detach_security_group_from_l3(sg_uuid, l3_net_uuid, session_uuid=project_login_session_uuid)
-            if hasDeletePermission == True:
+
+        sg_creation_option = test_util.SecurityGroupOption()
+        sg_creation_option.set_name('security_group_policy_checker')
+        sg_creation_option.set_session_uuid(session_uuid=project_login_session_uuid)
+        sg_uuid = net_ops.create_security_group(sg_creation_option).uuid
+        net_ops.attach_security_group_to_l3(sg_uuid, l3_net_uuid, session_uuid=project_login_session_uuid)
+        conditions = res_ops.gen_query_conditions('vmInstance.uuid', '=', vm_uuid)
+        vm_nic_uuid = res_ops.query_resource(res_ops.VM_NIC, conditions)[0].uuid
+        net_ops.add_nic_to_security_group(sg_uuid, [vm_nic_uuid], session_uuid=project_login_session_uuid)
+        net_ops.remove_nic_from_security_group(sg_uuid, [vm_nic_uuid], session_uuid=project_login_session_uuid)
+        net_ops.detach_security_group_from_l3(sg_uuid, l3_net_uuid, session_uuid=project_login_session_uuid)
+        if self.test_obj.get_customized() == None:
+            net_ops.delete_security_group(sg_uuid, session_uuid=project_login_session_uuid)
+            vm_ops.destroy_vm(vm_uuid)
+            vm_ops.expunge_vm(vm_uuid)
+            if sg_service_need_detach:
+                net_ops.detach_sg_service_from_l3network(l3_net_uuid, sg_service_providor_uuid, session_uuid=project_login_session_uuid)
+            acc_ops.revoke_resources([project_linked_account_uuid], [l3_net_uuid, image_uuid, instance_offering_uuid])
+        else:
+            try:
                 net_ops.delete_security_group(sg_uuid, session_uuid=project_login_session_uuid)
+                test_util.test_logger("delete_security_group should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
                 vm_ops.destroy_vm(vm_uuid)
+                test_util.test_logger("destroy_vm should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
                 vm_ops.expunge_vm(vm_uuid)
-                if sg_service_need_detach:
-                    net_ops.detach_sg_service_from_l3network(l3_net_uuid, sg_service_providor_uuid, session_uuid=project_login_session_uuid)
-                acc_ops.revoke_resources([project_linked_account_uuid], [l3_net_uuid, image_uuid, instance_offering_uuid])
-            else:
-                try:
-                    net_ops.delete_security_group(sg_uuid, session_uuid=project_login_session_uuid)
-                    test_util.test_logger("delete_security_group should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
+                test_util.test_logger("expunge_vm should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
 
-                try:
-                    vm_ops.destroy_vm(vm_uuid)
-                    test_util.test_logger("destroy_vm should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
+            if sg_service_need_detach:
+                net_ops.detach_sg_service_from_l3network(l3_net_uuid, sg_service_providor_uuid, session_uuid=project_login_session_uuid)
+            #acc_ops.revoke_resources([project_linked_account_uuid], [l3_net_uuid, image_uuid, instance_offering_uuid])
 
-                try:
-                    vm_ops.expunge_vm(vm_uuid)
-                    test_util.test_logger("expunge_vm should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                if sg_service_need_detach:
-                    net_ops.detach_sg_service_from_l3network(l3_net_uuid, sg_service_providor_uuid, session_uuid=project_login_session_uuid)
-                acc_ops.revoke_resources([project_linked_account_uuid], [l3_net_uuid, image_uuid, instance_offering_uuid])
-
-        except Exception as e:
-            test_util.test_logger('Check Result: [Virtual ID:] %s has permission for security group but security group check failed' % virtual_id.name)
-            test_util.test_logger('Excepiton info: %s' %e)
-            return self.judge(False)
         return self.judge(True)
 
-    def check_load_balancer(self, hasDeletePermission=True):
+    def check_load_balancer(self):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
-        conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
-        project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
-        project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
-        project_linked_account_uuid = project_ins.linkedAccountUuid
-        try:
-            conditions = res_ops.gen_query_conditions('category', '=', 'Public')
-            l3_pub_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
-            vm_creation_option = test_util.VmOption()
-            conditions = res_ops.gen_query_conditions('system', '=', 'false')
-            conditions = res_ops.gen_query_conditions('category', '=', 'Private', conditions)
-            l3_net_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
-            conditions = res_ops.gen_query_conditions('name', '=', 'vrouter')
-            service_providor_uuid = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER, conditions)[0].uuid
+        if self.test_obj.get_customized() == None:
+            conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
+            project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
+            project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
+            project_linked_account_uuid = project_ins.linkedAccountUuid
+        else:
+            project_login_session_uuid = plain_user_session_uuid
+        conditions = res_ops.gen_query_conditions('category', '=', 'Public')
+        l3_pub_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
+        vm_creation_option = test_util.VmOption()
+        conditions = res_ops.gen_query_conditions('system', '=', 'false')
+        conditions = res_ops.gen_query_conditions('category', '=', 'Private', conditions)
+        l3_net_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
+        conditions = res_ops.gen_query_conditions('name', '=', 'vrouter')
+        service_providor_uuid = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER, conditions)[0].uuid
+        if self.test_obj.get_customized() == None:
             acc_ops.share_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid])
-            conditions = res_ops.gen_query_conditions('l3Network.uuid', '=', l3_net_uuid)
-            network_service_list = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER_L3_REF, conditions)
-            lb_service_need_attach = True
-            lb_service_need_detach = False
-            for service in network_service_list:
-                if service.networkServiceType == 'LoadBalancer':
-                    lb_service_need_attach = False
-            if lb_service_need_attach:
-                net_ops.attach_lb_service_to_l3network(l3_net_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
-                lb_service_need_detach = True
-            vm_creation_option.set_l3_uuids([l3_net_uuid])
-            conditions = res_ops.gen_query_conditions('platform', '=', 'Linux')
-            conditions = res_ops.gen_query_conditions('system', '=', 'false', conditions)
-            image_uuid = res_ops.query_resource(res_ops.IMAGE, conditions)[0].uuid
-            vm_creation_option.set_image_uuid(image_uuid)
+        conditions = res_ops.gen_query_conditions('l3Network.uuid', '=', l3_net_uuid)
+        network_service_list = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER_L3_REF, conditions)
+        lb_service_need_attach = True
+        lb_service_need_detach = False
+        for service in network_service_list:
+            if service.networkServiceType == 'LoadBalancer':
+                lb_service_need_attach = False
+        if lb_service_need_attach:
+            net_ops.attach_lb_service_to_l3network(l3_net_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
+            lb_service_need_detach = True
+        vm_creation_option.set_l3_uuids([l3_net_uuid])
+        conditions = res_ops.gen_query_conditions('platform', '=', 'Linux')
+        conditions = res_ops.gen_query_conditions('system', '=', 'false', conditions)
+        image_uuid = res_ops.query_resource(res_ops.IMAGE, conditions)[0].uuid
+        vm_creation_option.set_image_uuid(image_uuid)
+
+        if self.test_obj.get_customized() == None:
             acc_ops.share_resources([project_linked_account_uuid], [image_uuid])
-            conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
-            instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
-            vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+
+        conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+        instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+        vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+
+        if self.test_obj.get_customized() == None:
             acc_ops.share_resources([project_linked_account_uuid], [instance_offering_uuid])
-            vm_creation_option.set_name('vm_for_load_balancer_policy_checker')
-            vm = vm_ops.create_vm(vm_creation_option)
-            vm_uuid = vm.uuid
+
+        vm_creation_option.set_name('vm_for_load_balancer_policy_checker')
+        vm = vm_ops.create_vm(vm_creation_option)
+        vm_uuid = vm.uuid
+
+        if self.test_obj.get_customized() == None:
             res_ops.change_recource_owner(project_linked_account_uuid, vm_uuid)
-            vip_option = test_util.VipOption()
-            vip_option.set_name("vip_for_load_balancer_policy_checker")
-            vip_option.set_session_uuid(project_login_session_uuid)
-            vip_option.set_l3_uuid(l3_pub_uuid)
-            vip = net_ops.create_vip(vip_option)
-            lb_uuid = net_ops.create_load_balancer(vip.uuid, 'load_balancer_policy_checker', session_uuid=project_login_session_uuid).uuid
-            lb_listener_option = test_util.LoadBalancerListenerOption()
-            lb_listener_option.set_name('load_balancer_listener_policy_checker')
-            lb_listener_option.set_load_balancer_uuid(lb_uuid)
-            lb_listener_option.set_load_balancer_port('2222')
-            lb_listener_option.set_instance_port('80')
-            lb_listener_option.set_protocol('http')
-            lb_listener_option.set_session_uuid(session_uuid=project_login_session_uuid)
-            lbl_uuid = net_ops.create_load_balancer_listener(lb_listener_option).uuid
-            conditions = res_ops.gen_query_conditions('vmInstance.uuid', '=', vm_uuid)
-            vm_nic_uuid = res_ops.query_resource(res_ops.VM_NIC, conditions)[0].uuid
-            net_ops.add_nic_to_load_balancer(lbl_uuid, [vm_nic_uuid], session_uuid=project_login_session_uuid)
-            net_ops.remove_nic_from_load_balancer(lbl_uuid, [vm_nic_uuid], session_uuid=project_login_session_uuid)
-            net_ops.refresh_load_balancer(lb_uuid, session_uuid=project_login_session_uuid) 
-            if hasDeletePermission == True:
+
+        vip_option = test_util.VipOption()
+        vip_option.set_name("vip_for_load_balancer_policy_checker")
+        vip_option.set_session_uuid(project_login_session_uuid)
+        vip_option.set_l3_uuid(l3_pub_uuid)
+        vip = net_ops.create_vip(vip_option)
+        lb_uuid = net_ops.create_load_balancer(vip.uuid, 'load_balancer_policy_checker', session_uuid=project_login_session_uuid).uuid
+        lb_listener_option = test_util.LoadBalancerListenerOption()
+        lb_listener_option.set_name('load_balancer_listener_policy_checker')
+        lb_listener_option.set_load_balancer_uuid(lb_uuid)
+        lb_listener_option.set_load_balancer_port('2222')
+        lb_listener_option.set_instance_port('80')
+        lb_listener_option.set_protocol('http')
+        lb_listener_option.set_session_uuid(session_uuid=project_login_session_uuid)
+        lbl_uuid = net_ops.create_load_balancer_listener(lb_listener_option).uuid
+        conditions = res_ops.gen_query_conditions('vmInstance.uuid', '=', vm_uuid)
+        vm_nic_uuid = res_ops.query_resource(res_ops.VM_NIC, conditions)[0].uuid
+        net_ops.add_nic_to_load_balancer(lbl_uuid, [vm_nic_uuid], session_uuid=project_login_session_uuid)
+        net_ops.remove_nic_from_load_balancer(lbl_uuid, [vm_nic_uuid], session_uuid=project_login_session_uuid)
+        net_ops.refresh_load_balancer(lb_uuid, session_uuid=project_login_session_uuid) 
+
+        if self.test_obj.get_customized() == None:
+            net_ops.delete_load_balancer_listener(lbl_uuid, session_uuid=project_login_session_uuid)
+            net_ops.delete_load_balancer(lb_uuid, session_uuid=project_login_session_uuid)
+            net_ops.delete_vip(vip.uuid)
+            vm_ops.destroy_vm(vm_uuid)
+            vm_ops.expunge_vm(vm_uuid)
+            if lb_service_need_detach:
+                net_ops.detach_lb_service_from_l3network(l3_net_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
+            acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
+        else:
+            try:
                 net_ops.delete_load_balancer_listener(lbl_uuid, session_uuid=project_login_session_uuid)
+                test_util.test_logger("delete_load_balancer_listener should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
                 net_ops.delete_load_balancer(lb_uuid, session_uuid=project_login_session_uuid)
+                test_util.test_logger("delete_load_balancer should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
                 net_ops.delete_vip(vip.uuid)
+                test_util.test_logger("delete_vip should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
                 vm_ops.destroy_vm(vm_uuid)
+                test_util.test_logger("destroy_vm should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
                 vm_ops.expunge_vm(vm_uuid)
-                if lb_service_need_detach:
-                    net_ops.detach_lb_service_from_l3network(l3_net_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
-                acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
-            else:
-                try:
-                    net_ops.delete_load_balancer_listener(lbl_uuid, session_uuid=project_login_session_uuid)
-                    test_util.test_logger("delete_load_balancer_listener should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
+                test_util.test_logger("expunge_vm should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
 
-                try:
-                    net_ops.delete_load_balancer(lb_uuid, session_uuid=project_login_session_uuid)
-                    test_util.test_logger("delete_load_balancer should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                try:
-                    net_ops.delete_vip(vip.uuid)
-                    test_util.test_logger("delete_vip should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                try:
-                    vm_ops.destroy_vm(vm_uuid)
-                    test_util.test_logger("destroy_vm should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                try:
-                    vm_ops.expunge_vm(vm_uuid)
-                    test_util.test_logger("expunge_vm should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                if lb_service_need_detach:
-                    net_ops.detach_lb_service_from_l3network(l3_net_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
-                acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
+            if lb_service_need_detach:
+                net_ops.detach_lb_service_from_l3network(l3_net_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
+            #acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
                 
         except Exception as e:
             test_util.test_logger('Check Result: [Virtual ID:] %s has permission for load balancer but load balancer check failed' % virtual_id.name)
@@ -1602,361 +1686,379 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             return self.judge(False)
         return self.judge(True)
 
-    def check_port_forwarding(self, hasDeletePermission=True):
+    def check_port_forwarding(self):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
-        conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
-        project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
-        project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
-        project_linked_account_uuid = project_ins.linkedAccountUuid
+        if self.test_obj.get_customized() == None:
+            conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
+            project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
+            project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
+            project_linked_account_uuid = project_ins.linkedAccountUuid
+        else:
+            project_login_session_uuid = plain_user_session_uuid
         
-        try:
-            conditions = res_ops.gen_query_conditions('category', '=', 'Public')
-            l3_pub_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
-            vm_creation_option = test_util.VmOption()
-            conditions = res_ops.gen_query_conditions('system', '=', 'false')
-            conditions = res_ops.gen_query_conditions('category', '=', 'Private', conditions)
-            l3_net_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
-            conditions = res_ops.gen_query_conditions('name', '=', 'vrouter')
-            pf_service_providor_uuid = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER, conditions)[0].uuid 
+        conditions = res_ops.gen_query_conditions('category', '=', 'Public')
+        l3_pub_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
+        vm_creation_option = test_util.VmOption()
+        conditions = res_ops.gen_query_conditions('system', '=', 'false')
+        conditions = res_ops.gen_query_conditions('category', '=', 'Private', conditions)
+        l3_net_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
+        conditions = res_ops.gen_query_conditions('name', '=', 'vrouter')
+        pf_service_providor_uuid = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER, conditions)[0].uuid 
+        if self.test_obj.get_customized() == None:
             acc_ops.share_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid])
-            conditions = res_ops.gen_query_conditions('l3Network.uuid', '=', l3_net_uuid)
-            network_service_list = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER_L3_REF, conditions)
-            pf_service_need_attach = True
-            pf_service_need_detach = False
-            for service in network_service_list:
-                if service.networkServiceType == 'PortForwarding':
-                    pf_service_need_attach = False
-            if pf_service_need_attach:
-                net_ops.attach_pf_service_to_l3network(l3_net_uuid, pf_service_providor_uuid, session_uuid=project_login_session_uuid)
-                pf_service_need_detach = True   
-            vm_creation_option.set_l3_uuids([l3_net_uuid])
-            conditions = res_ops.gen_query_conditions('platform', '=', 'Linux')
-            conditions = res_ops.gen_query_conditions('system', '=', 'false', conditions)
-            image_uuid = res_ops.query_resource(res_ops.IMAGE, conditions)[0].uuid
-            vm_creation_option.set_image_uuid(image_uuid)
+        conditions = res_ops.gen_query_conditions('l3Network.uuid', '=', l3_net_uuid)
+        network_service_list = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER_L3_REF, conditions)
+        pf_service_need_attach = True
+        pf_service_need_detach = False
+        for service in network_service_list:
+            if service.networkServiceType == 'PortForwarding':
+                pf_service_need_attach = False
+        if pf_service_need_attach:
+            net_ops.attach_pf_service_to_l3network(l3_net_uuid, pf_service_providor_uuid, session_uuid=project_login_session_uuid)
+            pf_service_need_detach = True   
+        vm_creation_option.set_l3_uuids([l3_net_uuid])
+        conditions = res_ops.gen_query_conditions('platform', '=', 'Linux')
+        conditions = res_ops.gen_query_conditions('system', '=', 'false', conditions)
+        image_uuid = res_ops.query_resource(res_ops.IMAGE, conditions)[0].uuid
+        vm_creation_option.set_image_uuid(image_uuid)
+
+        if self.test_obj.get_customized() == None:
             acc_ops.share_resources([project_linked_account_uuid], [image_uuid])
-            conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
-            instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
-            vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+
+        conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+        instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+        vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+
+        if self.test_obj.get_customized() == None:
             acc_ops.share_resources([project_linked_account_uuid], [instance_offering_uuid])
-            vm_creation_option.set_name('vm_for_port_forwarding_policy_checker')
-            vm = vm_ops.create_vm(vm_creation_option)
-            vm_uuid = vm.uuid
+
+        vm_creation_option.set_name('vm_for_port_forwarding_policy_checker')
+        vm = vm_ops.create_vm(vm_creation_option)
+        vm_uuid = vm.uuid
+
+        if self.test_obj.get_customized() == None:
             res_ops.change_recource_owner(project_linked_account_uuid, vm_uuid)
-            conditions = res_ops.gen_query_conditions('vmInstance.uuid', '=', vm_uuid)
-            vm_nic_uuid = res_ops.query_resource(res_ops.VM_NIC, conditions)[0].uuid
-            vip_option = test_util.VipOption()
-            vip_option.set_name("vip_for_port_forwarding_policy_checker")
-            vip_option.set_session_uuid(project_login_session_uuid)
-            vip_option.set_l3_uuid(l3_pub_uuid)
-            vip = net_ops.create_vip(vip_option)
-            pf_rule_creation_option = test_util.PortForwardingRuleOption()
-            pf_rule_creation_option.set_vip_uuid(vip.uuid)
-            pf_rule_creation_option.set_protocol('TCP')
-            pf_rule_creation_option.set_vip_ports('8080', '8088')
-            pf_rule_creation_option.set_private_ports('8080', '8088')
-            pf_rule_creation_option.set_name('port_forwarding_rule_policy_checker')
-            pf_rule_creation_option.set_session_uuid(session_uuid=project_login_session_uuid)
-            pf_rule_uuid = net_ops.create_port_forwarding(pf_rule_creation_option).uuid
-            net_ops.attach_port_forwarding(pf_rule_uuid, vm_nic_uuid, session_uuid=project_login_session_uuid)
-            net_ops.detach_port_forwarding(pf_rule_uuid, session_uuid=project_login_session_uuid)
-            if hasDeletePermission == True:
+
+        conditions = res_ops.gen_query_conditions('vmInstance.uuid', '=', vm_uuid)
+        vm_nic_uuid = res_ops.query_resource(res_ops.VM_NIC, conditions)[0].uuid
+        vip_option = test_util.VipOption()
+        vip_option.set_name("vip_for_port_forwarding_policy_checker")
+        vip_option.set_session_uuid(project_login_session_uuid)
+        vip_option.set_l3_uuid(l3_pub_uuid)
+        vip = net_ops.create_vip(vip_option)
+        pf_rule_creation_option = test_util.PortForwardingRuleOption()
+        pf_rule_creation_option.set_vip_uuid(vip.uuid)
+        pf_rule_creation_option.set_protocol('TCP')
+        pf_rule_creation_option.set_vip_ports('8080', '8088')
+        pf_rule_creation_option.set_private_ports('8080', '8088')
+        pf_rule_creation_option.set_name('port_forwarding_rule_policy_checker')
+        pf_rule_creation_option.set_session_uuid(session_uuid=project_login_session_uuid)
+        pf_rule_uuid = net_ops.create_port_forwarding(pf_rule_creation_option).uuid
+        net_ops.attach_port_forwarding(pf_rule_uuid, vm_nic_uuid, session_uuid=project_login_session_uuid)
+        net_ops.detach_port_forwarding(pf_rule_uuid, session_uuid=project_login_session_uuid)
+        if self.test_obj.get_customized() == None:
+            net_ops.delete_port_forwarding(pf_rule_uuid, session_uuid=project_login_session_uuid)
+            net_ops.delete_vip(vip.uuid)
+            vm_ops.destroy_vm(vm_uuid)
+            vm_ops.expunge_vm(vm_uuid)
+            if pf_service_need_detach:
+                net_ops.detach_pf_service_from_l3network(l3_net_uuid, pf_service_providor_uuid, session_uuid=project_login_session_uuid)
+            acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
+        else:
+            try:
                 net_ops.delete_port_forwarding(pf_rule_uuid, session_uuid=project_login_session_uuid)
+                test_util.test_logger("delete_port_forwarding should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
                 net_ops.delete_vip(vip.uuid)
+                test_util.test_logger("delete_vip should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
                 vm_ops.destroy_vm(vm_uuid)
+                test_util.test_logger("destroy_vm should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
                 vm_ops.expunge_vm(vm_uuid)
-                if pf_service_need_detach:
-                    net_ops.detach_pf_service_from_l3network(l3_net_uuid, pf_service_providor_uuid, session_uuid=project_login_session_uuid)
-                acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
-            else:
-                try:
-                    net_ops.delete_port_forwarding(pf_rule_uuid, session_uuid=project_login_session_uuid)
-                    test_util.test_logger("delete_port_forwarding should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
+                test_util.test_logger("expunge_vm should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
 
-                try:
-                    net_ops.delete_vip(vip.uuid)
-                    test_util.test_logger("delete_vip should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                try:
-                    vm_ops.destroy_vm(vm_uuid)
-                    test_util.test_logger("destroy_vm should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                try:
-                    vm_ops.expunge_vm(vm_uuid)
-                    test_util.test_logger("expunge_vm should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                if pf_service_need_detach:
-                    net_ops.detach_pf_service_from_l3network(l3_net_uuid, pf_service_providor_uuid, session_uuid=project_login_session_uuid)
-                acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
-        except Exception as e:
-            test_util.test_logger('Check Result: [Virtual ID:] %s has permission for port forwarding but port forwarding check failed' % virtual_id.name)
-            test_util.test_logger('Excepiton info: %s' %e)
-            return self.judge(False)
+            if pf_service_need_detach:
+                net_ops.detach_pf_service_from_l3network(l3_net_uuid, pf_service_providor_uuid, session_uuid=project_login_session_uuid)
+            #acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
         return self.judge(True)
 
-    def check_scheduler(self, hasDeletePermission=True):
+    def check_scheduler(self):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
-        conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
-        project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
-        project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
-        project_linked_account_uuid = project_ins.linkedAccountUuid
 
-        try:
-            vm_creation_option = test_util.VmOption()
-            conditions = res_ops.gen_query_conditions('system', '=', 'false')
-            l3_net_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
+        if self.test_obj.get_customized() == None:
+            conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
+            project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
+            project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
+            project_linked_account_uuid = project_ins.linkedAccountUuid
+        else:
+            project_login_session_uuid = plain_user_session_uuid
+
+        vm_creation_option = test_util.VmOption()
+        conditions = res_ops.gen_query_conditions('system', '=', 'false')
+        l3_net_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
+
+        if self.test_obj.get_customized() == None:
             acc_ops.share_resources([project_linked_account_uuid], [l3_net_uuid])
-            vm_creation_option.set_l3_uuids([l3_net_uuid])
-            conditions = res_ops.gen_query_conditions('platform', '=', 'Linux')
-            conditions = res_ops.gen_query_conditions('system', '=', 'false', conditions)
-            image_uuid = res_ops.query_resource(res_ops.IMAGE, conditions)[0].uuid
-            vm_creation_option.set_image_uuid(image_uuid)
+
+        vm_creation_option.set_l3_uuids([l3_net_uuid])
+        conditions = res_ops.gen_query_conditions('platform', '=', 'Linux')
+        conditions = res_ops.gen_query_conditions('system', '=', 'false', conditions)
+        image_uuid = res_ops.query_resource(res_ops.IMAGE, conditions)[0].uuid
+        vm_creation_option.set_image_uuid(image_uuid)
+
+        if self.test_obj.get_customized() == None:
             acc_ops.share_resources([project_linked_account_uuid], [image_uuid])
-            conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
-            instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
-            vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+
+        conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+        instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+        vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+
+        if self.test_obj.get_customized() == None:
             acc_ops.share_resources([project_linked_account_uuid], [instance_offering_uuid])
-            vm_creation_option.set_name('vm_for_scheduler_policy_checker')
-            vm = vm_ops.create_vm(vm_creation_option)
-            vm_uuid = vm.uuid
+
+        vm_creation_option.set_name('vm_for_scheduler_policy_checker')
+        vm = vm_ops.create_vm(vm_creation_option)
+        vm_uuid = vm.uuid
+
+        if self.test_obj.get_customized() == None:
             res_ops.change_recource_owner(project_linked_account_uuid, vm_uuid)
 
-            start_date = int(time.time())
-            schd_job = schd_ops.create_scheduler_job('start_vm_scheduler_policy_checker', 'start vm scheduler policy checker', vm_uuid, 'startVm', None, session_uuid=project_login_session_uuid)
-            schd_trigger = schd_ops.create_scheduler_trigger('start_vm_scheduler_policy_checker', start_date+5, None, 15, 'simple', session_uuid=project_login_session_uuid)
-            schd_ops.add_scheduler_job_to_trigger(schd_trigger.uuid, schd_job.uuid, session_uuid=project_login_session_uuid)
-            schd_ops.change_scheduler_state(schd_job.uuid, 'disable', session_uuid=project_login_session_uuid)
-            schd_ops.change_scheduler_state(schd_job.uuid, 'enable', session_uuid=project_login_session_uuid)
-            schd_ops.remove_scheduler_job_from_trigger(schd_trigger.uuid, schd_job.uuid, session_uuid=project_login_session_uuid)
+        start_date = int(time.time())
+        schd_job = schd_ops.create_scheduler_job('start_vm_scheduler_policy_checker', 'start vm scheduler policy checker', vm_uuid, 'startVm', None, session_uuid=project_login_session_uuid)
+        schd_trigger = schd_ops.create_scheduler_trigger('start_vm_scheduler_policy_checker', start_date+5, None, 15, 'simple', session_uuid=project_login_session_uuid)
+        schd_ops.add_scheduler_job_to_trigger(schd_trigger.uuid, schd_job.uuid, session_uuid=project_login_session_uuid)
+        schd_ops.change_scheduler_state(schd_job.uuid, 'disable', session_uuid=project_login_session_uuid)
+        schd_ops.change_scheduler_state(schd_job.uuid, 'enable', session_uuid=project_login_session_uuid)
+        schd_ops.remove_scheduler_job_from_trigger(schd_trigger.uuid, schd_job.uuid, session_uuid=project_login_session_uuid)
 
-            if hasDeletePermission == True:
+        if self.test_obj.get_customized() == None:
+            schd_ops.del_scheduler_job(schd_job.uuid, session_uuid=project_login_session_uuid)
+            schd_ops.del_scheduler_trigger(schd_trigger.uuid, session_uuid=project_login_session_uuid)
+            schd_ops.get_current_time()
+            vm_ops.destroy_vm(vm_uuid)
+            vm_ops.expunge_vm(vm_uuid)
+        else:
+            try:
                 schd_ops.del_scheduler_job(schd_job.uuid, session_uuid=project_login_session_uuid)
+                test_util.test_logger("del_scheduler_job should not be runned with project_login_session_uuid")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
                 schd_ops.del_scheduler_trigger(schd_trigger.uuid, session_uuid=project_login_session_uuid)
-                schd_ops.get_current_time()
+                test_util.test_logger("del_scheduler_trigger should not be runned with project_login_session_uuid")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            schd_ops.get_current_time()
+
+            try:
                 vm_ops.destroy_vm(vm_uuid)
+                test_util.test_logger("destroy_vm should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
                 vm_ops.expunge_vm(vm_uuid)
-            else:
-                try:
-                    schd_ops.del_scheduler_job(schd_job.uuid, session_uuid=project_login_session_uuid)
-                    test_util.test_logger("del_scheduler_job should not be runned with project_login_session_uuid")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
+                test_util.test_logger("expunge_vm should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
 
-                try:
-                    schd_ops.del_scheduler_trigger(schd_trigger.uuid, session_uuid=project_login_session_uuid)
-                    test_util.test_logger("del_scheduler_trigger should not be runned with project_login_session_uuid")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                schd_ops.get_current_time()
-
-                try:
-                    vm_ops.destroy_vm(vm_uuid)
-                    test_util.test_logger("destroy_vm should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                try:
-                    vm_ops.expunge_vm(vm_uuid)
-                    test_util.test_logger("expunge_vm should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-        except Exception as e:
-            test_util.test_logger('Check Result: [Virtual ID:] %s has permission for scheduler but scheduler check failed' % virtual_id.name)
-            test_util.test_logger('Excepiton info: %s' %e)
-            return self.judge(False)
         return self.judge(True)
 
     def check_pci(self):
         #Haven't simulator pci device, skip to check 
         pass
 
-    def check_zwatch(self, hasDeletePermission=True):
+    def check_zwatch(self):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
-        conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
-        project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
-        project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
-        project_linked_account_uuid = project_ins.linkedAccountUuid
-        try:
-            http_endpoint_name='http_endpoint_for zwatch_policy_checker'
-            url = 'http://localhost:8080/webhook-url'
-            http_endpoint=zwt_ops.create_sns_http_endpoint(url, http_endpoint_name, session_uuid=project_login_session_uuid)
-            http_endpoint_uuid=http_endpoint.uuid
-            sns_topic_uuid = zwt_ops.create_sns_topic('sns_topic_for zwatch_policy_checker', session_uuid=project_login_session_uuid).uuid        
-            sns_topic_uuid1 = zwt_ops.create_sns_topic('sns_topic_for zwatch_policy_checker_01', session_uuid=project_login_session_uuid).uuid        
-            zwt_ops.subscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
-            namespace = 'ZStack/VM'
-            actions = [{"actionUuid": sns_topic_uuid, "actionType": "sns"}]
-            period = 60
-            comparison_operator = 'GreaterThanOrEqualTo'
-            threshold = 10
-            metric_name = 'CPUUsedUtilization'
-            labels = [{"key": "NewState", "op": "Equal", "value": "Disconnected"}]
-            event_name = 'VMStateChangedOnHost'
-            alarm_uuid = zwt_ops.create_alarm(comparison_operator, period, threshold, namespace, metric_name, session_uuid=project_login_session_uuid).uuid
-            event_sub_uuid = zwt_ops.subscribe_event(namespace, event_name, actions, labels, session_uuid=project_login_session_uuid).uuid
-            zwt_ops.update_alarm(alarm_uuid, comparison_operator='GreaterThan', session_uuid=project_login_session_uuid)
-            zwt_ops.update_sns_application_endpoint(http_endpoint_uuid, 'new_endpoint_name', 'new description', session_uuid=project_login_session_uuid)
-            zwt_ops.add_action_to_alarm(alarm_uuid, sns_topic_uuid1, 'sns', session_uuid=project_login_session_uuid) 
-            zwt_ops.remove_action_from_alarm(alarm_uuid, sns_topic_uuid, session_uuid=project_login_session_uuid)
-            zwt_ops.change_alarm_state(alarm_uuid, 'disable', session_uuid=project_login_session_uuid)
-            zwt_ops.change_sns_topic_state(sns_topic_uuid, 'disable', session_uuid=project_login_session_uuid)
-            zwt_ops.change_sns_application_endpoint_state(http_endpoint_uuid, 'disable', session_uuid=project_login_session_uuid)
-            if hasDeletePermission == True:
+        if self.test_obj.get_customized() == None:
+            conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
+            project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
+            project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
+            project_linked_account_uuid = project_ins.linkedAccountUuid
+        else:
+            project_login_session_uuid = plain_user_session_uuid
+
+        http_endpoint_name='http_endpoint_for zwatch_policy_checker'
+        url = 'http://localhost:8080/webhook-url'
+        http_endpoint=zwt_ops.create_sns_http_endpoint(url, http_endpoint_name, session_uuid=project_login_session_uuid)
+        http_endpoint_uuid=http_endpoint.uuid
+        sns_topic_uuid = zwt_ops.create_sns_topic('sns_topic_for zwatch_policy_checker', session_uuid=project_login_session_uuid).uuid        
+        sns_topic_uuid1 = zwt_ops.create_sns_topic('sns_topic_for zwatch_policy_checker_01', session_uuid=project_login_session_uuid).uuid        
+        zwt_ops.subscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
+        namespace = 'ZStack/VM'
+        actions = [{"actionUuid": sns_topic_uuid, "actionType": "sns"}]
+        period = 60
+        comparison_operator = 'GreaterThanOrEqualTo'
+        threshold = 10
+        metric_name = 'CPUUsedUtilization'
+        labels = [{"key": "NewState", "op": "Equal", "value": "Disconnected"}]
+        event_name = 'VMStateChangedOnHost'
+        alarm_uuid = zwt_ops.create_alarm(comparison_operator, period, threshold, namespace, metric_name, session_uuid=project_login_session_uuid).uuid
+        event_sub_uuid = zwt_ops.subscribe_event(namespace, event_name, actions, labels, session_uuid=project_login_session_uuid).uuid
+        zwt_ops.update_alarm(alarm_uuid, comparison_operator='GreaterThan', session_uuid=project_login_session_uuid)
+        zwt_ops.update_sns_application_endpoint(http_endpoint_uuid, 'new_endpoint_name', 'new description', session_uuid=project_login_session_uuid)
+        zwt_ops.add_action_to_alarm(alarm_uuid, sns_topic_uuid1, 'sns', session_uuid=project_login_session_uuid) 
+        zwt_ops.remove_action_from_alarm(alarm_uuid, sns_topic_uuid, session_uuid=project_login_session_uuid)
+        zwt_ops.change_alarm_state(alarm_uuid, 'disable', session_uuid=project_login_session_uuid)
+        zwt_ops.change_sns_topic_state(sns_topic_uuid, 'disable', session_uuid=project_login_session_uuid)
+        zwt_ops.change_sns_application_endpoint_state(http_endpoint_uuid, 'disable', session_uuid=project_login_session_uuid)
+
+        if self.test_obj.get_customized() == None:
+            zwt_ops.delete_alarm(alarm_uuid, session_uuid=project_login_session_uuid) 
+            zwt_ops.unsubscribe_event(event_sub_uuid, session_uuid=project_login_session_uuid)
+            zwt_ops.unsubscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
+            zwt_ops.delete_sns_topic(sns_topic_uuid, session_uuid=project_login_session_uuid)
+            zwt_ops.delete_sns_topic(sns_topic_uuid1, session_uuid=project_login_session_uuid)
+            zwt_ops.delete_sns_application_endpoint(http_endpoint_uuid, session_uuid=project_login_session_uuid)
+        else:
+            try:
                 zwt_ops.delete_alarm(alarm_uuid, session_uuid=project_login_session_uuid) 
-                zwt_ops.unsubscribe_event(event_sub_uuid, session_uuid=project_login_session_uuid)
-                zwt_ops.unsubscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
+                test_util.test_logger("delete_alarm should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            zwt_ops.unsubscribe_event(event_sub_uuid, session_uuid=project_login_session_uuid)
+            zwt_ops.unsubscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
+
+            try:
                 zwt_ops.delete_sns_topic(sns_topic_uuid, session_uuid=project_login_session_uuid)
+                test_util.test_logger("delete_sns_topic should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
                 zwt_ops.delete_sns_topic(sns_topic_uuid1, session_uuid=project_login_session_uuid)
+                test_util.test_logger("delete_sns_topic should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
                 zwt_ops.delete_sns_application_endpoint(http_endpoint_uuid, session_uuid=project_login_session_uuid)
-            else:
-                try:
-                    zwt_ops.delete_alarm(alarm_uuid, session_uuid=project_login_session_uuid) 
-                    test_util.test_logger("delete_alarm should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
+                test_util.test_logger("delete_sns_application_endpoint should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
 
-                zwt_ops.unsubscribe_event(event_sub_uuid, session_uuid=project_login_session_uuid)
-                zwt_ops.unsubscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
-
-                try:
-                    zwt_ops.delete_sns_topic(sns_topic_uuid, session_uuid=project_login_session_uuid)
-                    test_util.test_logger("delete_sns_topic should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                try:
-                    zwt_ops.delete_sns_topic(sns_topic_uuid1, session_uuid=project_login_session_uuid)
-                    test_util.test_logger("delete_sns_topic should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                try:
-                    zwt_ops.delete_sns_application_endpoint(http_endpoint_uuid, session_uuid=project_login_session_uuid)
-                    test_util.test_logger("delete_sns_application_endpoint should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-        except Exception as e:
-            test_util.test_logger('Check Result: [Virtual ID:] %s has permission for zwatch but zwatch check failed' % virtual_id.name)
-            test_util.test_logger('Excepiton info: %s' %e)
-            return self.judge(False)
         return self.judge(True)
 
-    def check_sns(self, hasDeletePermission=True):
+    def check_sns(self):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
-        conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
-        project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
-        project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
-        project_linked_account_uuid = project_ins.linkedAccountUuid
-        try:
-            http_endpoint_name='http_endpoint_for zwatch_policy_checker'
-            url = 'http://localhost:8080/webhook-url'
-            http_endpoint=zwt_ops.create_sns_http_endpoint(url, http_endpoint_name)
-            http_endpoint_uuid=http_endpoint.uuid
-            sns_topic_uuid = zwt_ops.create_sns_topic('sns_topic_for zwatch_policy_checker', session_uuid=project_login_session_uuid).uuid
-            sns_topic_uuid1 = zwt_ops.create_sns_topic('sns_topic_for zwatch_policy_checker_01', session_uuid=project_login_session_uuid).uuid
-            zwt_ops.subscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
-            namespace = 'ZStack/VM'
-            actions = [{"actionUuid": sns_topic_uuid, "actionType": "sns"}]
-            period = 60
-            comparison_operator = 'GreaterThanOrEqualTo'
-            threshold = 10
-            metric_name = 'CPUUsedUtilization'
-            alarm_uuid = zwt_ops.create_alarm(comparison_operator, period, threshold, namespace, metric_name).uuid
-            labels = [{"key": "NewState", "op": "Equal", "value": "Disconnected"}]
-            event_name = 'VMStateChangedOnHost'
-            event_sub_uuid = zwt_ops.subscribe_event(namespace, event_name, actions, labels).uuid
-            zwt_ops.update_sns_application_endpoint(http_endpoint_uuid, 'new_endpoint_name', 'new description', session_uuid=project_login_session_uuid)
-            zwt_ops.add_action_to_alarm(alarm_uuid, sns_topic_uuid1, 'sns')
-            zwt_ops.remove_action_from_alarm(alarm_uuid, sns_topic_uuid)
-            zwt_ops.change_sns_topic_state(sns_topic_uuid, 'disable', session_uuid=project_login_session_uuid)
-            zwt_ops.change_sns_application_endpoint_state(http_endpoint_uuid, 'disable', session_uuid=project_login_session_uuid)
-            if hasDeletePermission == True:
+        if self.test_obj.get_customized() == None:
+            conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
+            project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
+            project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
+            project_linked_account_uuid = project_ins.linkedAccountUuid
+        else:
+            project_login_session_uuid = plain_user_session_uuid
+
+        http_endpoint_name='http_endpoint_for zwatch_policy_checker'
+        url = 'http://localhost:8080/webhook-url'
+        http_endpoint=zwt_ops.create_sns_http_endpoint(url, http_endpoint_name)
+        http_endpoint_uuid=http_endpoint.uuid
+        sns_topic_uuid = zwt_ops.create_sns_topic('sns_topic_for zwatch_policy_checker', session_uuid=project_login_session_uuid).uuid
+        sns_topic_uuid1 = zwt_ops.create_sns_topic('sns_topic_for zwatch_policy_checker_01', session_uuid=project_login_session_uuid).uuid
+        zwt_ops.subscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
+        namespace = 'ZStack/VM'
+        actions = [{"actionUuid": sns_topic_uuid, "actionType": "sns"}]
+        period = 60
+        comparison_operator = 'GreaterThanOrEqualTo'
+        threshold = 10
+        metric_name = 'CPUUsedUtilization'
+        alarm_uuid = zwt_ops.create_alarm(comparison_operator, period, threshold, namespace, metric_name).uuid
+        labels = [{"key": "NewState", "op": "Equal", "value": "Disconnected"}]
+        event_name = 'VMStateChangedOnHost'
+        event_sub_uuid = zwt_ops.subscribe_event(namespace, event_name, actions, labels).uuid
+        zwt_ops.update_sns_application_endpoint(http_endpoint_uuid, 'new_endpoint_name', 'new description', session_uuid=project_login_session_uuid)
+        zwt_ops.add_action_to_alarm(alarm_uuid, sns_topic_uuid1, 'sns')
+        zwt_ops.remove_action_from_alarm(alarm_uuid, sns_topic_uuid)
+        zwt_ops.change_sns_topic_state(sns_topic_uuid, 'disable', session_uuid=project_login_session_uuid)
+        zwt_ops.change_sns_application_endpoint_state(http_endpoint_uuid, 'disable', session_uuid=project_login_session_uuid)
+
+        if self.test_obj.get_customized() == None:
+            zwt_ops.delete_alarm(alarm_uuid)
+            zwt_ops.unsubscribe_event(event_sub_uuid)
+            zwt_ops.unsubscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
+            zwt_ops.delete_sns_topic(sns_topic_uuid, session_uuid=project_login_session_uuid)
+            zwt_ops.delete_sns_topic(sns_topic_uuid1, session_uuid=project_login_session_uuid)
+            zwt_ops.delete_sns_application_endpoint(http_endpoint_uuid, session_uuid=project_login_session_uuid)
+        else:
+            try:
                 zwt_ops.delete_alarm(alarm_uuid)
-                zwt_ops.unsubscribe_event(event_sub_uuid)
-                zwt_ops.unsubscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
+                test_util.test_logger("delete_alarm should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            zwt_ops.unsubscribe_event(event_sub_uuid)
+            zwt_ops.unsubscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
+
+            try:
                 zwt_ops.delete_sns_topic(sns_topic_uuid, session_uuid=project_login_session_uuid)
+                test_util.test_logger("delete_sns_topic should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
                 zwt_ops.delete_sns_topic(sns_topic_uuid1, session_uuid=project_login_session_uuid)
+                test_util.test_logger("delete_sns_topic should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+
+            try:
                 zwt_ops.delete_sns_application_endpoint(http_endpoint_uuid, session_uuid=project_login_session_uuid)
-            else:
-                try:
-                    zwt_ops.delete_alarm(alarm_uuid)
-                    test_util.test_logger("delete_alarm should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
+                test_util.test_logger("delete_sns_application_endpoint should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
 
-                zwt_ops.unsubscribe_event(event_sub_uuid)
-                zwt_ops.unsubscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
-
-                try:
-                    zwt_ops.delete_sns_topic(sns_topic_uuid, session_uuid=project_login_session_uuid)
-                    test_util.test_logger("delete_sns_topic should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                try:
-                    zwt_ops.delete_sns_topic(sns_topic_uuid1, session_uuid=project_login_session_uuid)
-                    test_util.test_logger("delete_sns_topic should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-                try:
-                    zwt_ops.delete_sns_application_endpoint(http_endpoint_uuid, session_uuid=project_login_session_uuid)
-                    test_util.test_logger("delete_sns_application_endpoint should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-
-        except Exception as e:
-            test_util.test_logger('Check Result: [Virtual ID:] %s has permission for sns but sns check failed' % virtual_id.name)
-            test_util.test_logger('Excepiton info: %s' %e)
-            return self.judge(False)
         return self.judge(True)
 
     def check_no_delete_admin_permission(self):
         test_util.test_logger("check_no_delete_admin_permission")
-        self.check_vm_operation(False)
-        self.check_image_operation(False)
-        self.check_snapshot(False)
-        self.check_volume_operation(False)
-        self.check_affinity_group(False)
-        self.check_networks(False)
-        self.check_eip(False)
-        self.check_security_group(False)
-        self.check_load_balancer(False)
-        self.check_port_forwarding(False)
-        self.check_scheduler(False)
-        self.check_pcicheck_zwatch(False)
-        self.check_sns(False)
+        self.check_vm_operation()
+        self.check_image_operation()
+        self.check_snapshot()
+        self.check_volume_operation()
+        self.check_affinity_group()
+        self.check_networks()
+        self.check_eip()
+        self.check_security_group()
+        self.check_load_balancer()
+        self.check_port_forwarding()
+        self.check_scheduler()
+        self.check_pcicheck_zwatch()
+        self.check_sns()
 
     def check(self):
         super(zstack_vid_policy_checker, self).check()
@@ -1967,6 +2069,11 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         effect = self.test_obj.get_vid_statements()[0]['effect']
         customized = self.test_obj.get_customized()
         checker_runned = False
+
+        if customized == "noDeleteAdminPermission":
+            self.check_no_delete_admin_permission()
+            self.judge(True)
+
         if effect == "Allow" and \
            'org.zstack.header.vm.**' in actions and \
                 'org.zstack.ha.**' in actions:
@@ -2128,12 +2235,5 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
                 'org.zstack.sns.**' in actions:
             checker_runned = True
             self.check_sns()  
-
-        if customized == "noDeleteAdminPermission":
-            self.check_no_delete_admin_permission()
-
-        if checker_runned == False:
-            test_util.test_fail("found vid checker not runned")
-
 
         return self.judge(True)
