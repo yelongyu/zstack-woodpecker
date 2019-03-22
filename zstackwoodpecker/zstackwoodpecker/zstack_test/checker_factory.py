@@ -116,7 +116,7 @@ class VolumeCheckerFactory(checker.CheckerFactory):
         if not test_obj.volume:
             test_util.test_fail('test_obj.volume is None, can not create checker')
 
-        if not test_obj.target_vm:
+        if not test_obj.target_vm and not test_obj.sharable_target_vms:
             #only check db. 
             return sim_checker.SimVolumeCheckerFactory().create_checker(test_obj)
         else:
