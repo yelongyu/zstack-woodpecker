@@ -834,73 +834,75 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         super(zstack_vid_policy_checker, self).__init__()
 
     def check_login(self, username, password):
-        try:
+        customized = self.test_obj.get_customized()
+        if customized == None:
             virtual_id = self.test_obj.get_vid()
             conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=', virtual_id.uuid)
             project_name = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0].name
-            plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
+
+        plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
+
+        if customized == None:
             iam2_ops.login_iam2_project(project_name, plain_user_session_uuid)
-        except:
-            test_util.test_logger('Check Result: [Virtual ID:] %s login failed' % username)
-            return self.judge(False)
+
 
     def check_vm_operation(self, hasDeletePermission=True):
         virtual_id = self.test_obj.get_vid()
         plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(virtual_id.name, self.password)
-        conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
-        project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
-        project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
-        project_linked_account_uuid = project_ins.linkedAccountUuid
-        try:
-            vm_creation_option = test_util.VmOption()
-            conditions = res_ops.gen_query_conditions('system', '=', 'false')
-            conditions = res_ops.gen_query_conditions('category', '=', 'Private', conditions)
-            l3_net_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
-            acc_ops.share_resources([project_linked_account_uuid], [l3_net_uuid])
-            vm_creation_option.set_l3_uuids([l3_net_uuid])
-            conditions = res_ops.gen_query_conditions('platform', '=', 'Linux')
-            conditions = res_ops.gen_query_conditions('system', '=', 'false', conditions)
-            image_uuid = res_ops.query_resource(res_ops.IMAGE, conditions)[0].uuid
-            vm_creation_option.set_image_uuid(image_uuid)
-            acc_ops.share_resources([project_linked_account_uuid], [image_uuid])
-            conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
-            instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
-            vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
-            acc_ops.share_resources([project_linked_account_uuid], [instance_offering_uuid])
-            vm_creation_option.set_name('vm_policy_checker')
-            vm_creation_option.set_session_uuid(project_login_session_uuid)
-            vm = vm_ops.create_vm(vm_creation_option)
-            vm_uuid = vm.uuid
-            # VM related ops: Create, Delete, Expunge, Start, Stop, Suspend, Resume, Migrate
-            vm_ops.stop_vm(vm_uuid, session_uuid=project_login_session_uuid)
-            vm_ops.start_vm(vm_uuid, session_uuid=project_login_session_uuid)
-            candidate_hosts = vm_ops.get_vm_migration_candidate_hosts(vm_uuid)
-            if candidate_hosts != None and test_lib.lib_check_vm_live_migration_cap(vm):
-                vm_ops.migrate_vm(vm_uuid, candidate_hosts.inventories[0].uuid, session_uuid=project_login_session_uuid)
-            vm_ops.stop_vm(vm_uuid, force='cold', session_uuid=project_login_session_uuid)
-            vm_ops.start_vm(vm_uuid, session_uuid=project_login_session_uuid)
-            vm_ops.suspend_vm(vm_uuid, session_uuid=project_login_session_uuid)
-            vm_ops.resume_vm(vm_uuid, session_uuid=project_login_session_uuid)
-            if hasDeletePermission == True:
+        if self.test_obj.get_customized() == None:
+            conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=',virtual_id.uuid)
+            project_ins = res_ops.query_resource(res_ops.IAM2_PROJECT, conditions)[0]
+            project_login_session_uuid = iam2_ops.login_iam2_project(project_ins.name, plain_user_session_uuid).uuid
+            project_linked_account_uuid = project_ins.linkedAccountUuid
+        else:
+            project_login_session_uuid = plain_user_session_uuid
+
+        vm_creation_option = test_util.VmOption()
+        conditions = res_ops.gen_query_conditions('system', '=', 'false')
+        conditions = res_ops.gen_query_conditions('category', '=', 'Private', conditions)
+        l3_net_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
+        acc_ops.share_resources([project_linked_account_uuid], [l3_net_uuid])
+        vm_creation_option.set_l3_uuids([l3_net_uuid])
+        conditions = res_ops.gen_query_conditions('platform', '=', 'Linux')
+        conditions = res_ops.gen_query_conditions('system', '=', 'false', conditions)
+        image_uuid = res_ops.query_resource(res_ops.IMAGE, conditions)[0].uuid
+        vm_creation_option.set_image_uuid(image_uuid)
+        acc_ops.share_resources([project_linked_account_uuid], [image_uuid])
+        conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+        instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+        vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+        acc_ops.share_resources([project_linked_account_uuid], [instance_offering_uuid])
+        vm_creation_option.set_name('vm_policy_checker')
+        vm_creation_option.set_session_uuid(project_login_session_uuid)
+        vm = vm_ops.create_vm(vm_creation_option)
+        vm_uuid = vm.uuid
+        # VM related ops: Create, Delete, Expunge, Start, Stop, Suspend, Resume, Migrate
+        vm_ops.stop_vm(vm_uuid, session_uuid=project_login_session_uuid)
+        vm_ops.start_vm(vm_uuid, session_uuid=project_login_session_uuid)
+        candidate_hosts = vm_ops.get_vm_migration_candidate_hosts(vm_uuid)
+        if candidate_hosts != None and test_lib.lib_check_vm_live_migration_cap(vm):
+            vm_ops.migrate_vm(vm_uuid, candidate_hosts.inventories[0].uuid, session_uuid=project_login_session_uuid)
+        vm_ops.stop_vm(vm_uuid, force='cold', session_uuid=project_login_session_uuid)
+        vm_ops.start_vm(vm_uuid, session_uuid=project_login_session_uuid)
+        vm_ops.suspend_vm(vm_uuid, session_uuid=project_login_session_uuid)
+        vm_ops.resume_vm(vm_uuid, session_uuid=project_login_session_uuid)
+        if hasDeletePermission == True:
+            vm_ops.destroy_vm(vm_uuid, session_uuid=project_login_session_uuid)
+            vm_ops.expunge_vm(vm_uuid, session_uuid=project_login_session_uuid)
+        else:
+            try:
                 vm_ops.destroy_vm(vm_uuid, session_uuid=project_login_session_uuid)
+                test_util.test_logger("destroy_vm should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                pass
+            try:
                 vm_ops.expunge_vm(vm_uuid, session_uuid=project_login_session_uuid)
-            else:
-                try:
-                    vm_ops.destroy_vm(vm_uuid, session_uuid=project_login_session_uuid)
-                    test_util.test_logger("destroy_vm should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    pass
-                try:
-                    vm_ops.expunge_vm(vm_uuid, session_uuid=project_login_session_uuid)
-                    test_util.test_logger("expunge_vm should not be runned")
-                    return self.judge(False)
-                except Exception as e:
-                    return self.judge(True)
-        except Exception as e:
-            test_util.test_logger('Check Result: [Virtual ID:] %s has permission for vm but vm check failed' % virtual_id.name)    
-            test_util.test_logger('Excepiton info: %s' %e)
-            return self.judge(False)
+                test_util.test_logger("expunge_vm should not be runned")
+                return self.judge(False)
+            except Exception as e:
+                return self.judge(True)
+
         return self.judge(True)
 
 

@@ -20,17 +20,17 @@ def test():
     statements = []
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
 
-    policy_check_vid = test_vid.ZstackTestVid()
-    policy_check_vid.create('policy_check', password)
-    virtual_id_uuid = policy_check_vid.get_vid().uuid    
+    vid_test_obj = test_vid.ZstackTestVid()
 
     if flavor['target_admin'] == 'noDeleteAdmin':
         username = 'noDeleteAdmin'
         password = 'b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86'
-        platform_admin_uuid = iam2_ops.create_iam2_virtual_id(username, password).uuid
+        vid_test_obj.create(username, password)
+        vid_uuid = vid_test_obj.get_vid().uuid    
+        #platform_admin_uuid = iam2_ops.create_iam2_virtual_id(username, password).uuid
         attributes = [{"name": "__PlatformAdmin__"}]
-        iam2_ops.add_attributes_to_iam2_virtual_id(platform_admin_uuid, attributes)
-        platform_admin_session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
+        iam2_ops.add_attributes_to_iam2_virtual_id(vid_uuid, attributes)
+        #platform_admin_session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
         role_uuid = iam2_ops.create_role('noDeleteRole').uuid
         statements = [{"effect": "Deny", "actions": ["org.zstack.monitoring.media.APIDeleteMediaMsg",
                             "org.zstack.ticket.api.APIDeleteTicketMsg",
@@ -161,13 +161,15 @@ def test():
                             "org.zstack.header.storage.primary.APIDeletePrimaryStorageMsg" ]}]
         policy_uuid = iam2_ops.create_policy('noDeletePolicy', statements).uuid
         iam2_ops.attach_policy_to_role(policy_uuid, role_uuid)
-        iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], policy_check_vid.get_vid().uuid)
-        policy_check_vid.set_customized("noDeleteAdminPermission")
-        policy_check_vid.check()
+        iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], vid_test_obj.get_vid().uuid)
+        vid_test_obj.set_customized("noDeleteAdminPermission")
+        vid_test_obj.set_vid_statements(statements)
+        vid_test_obj.check()
         iam2_ops.update_role(role_uuid, [])
         iam2_ops.add_policy_statements_to_role(role_uuid, statements)
-        policy_check_vid.set_customized("noDeleteAdminPermission")
-        policy_check_vid.check()
+        vid_test_obj.set_customized("noDeleteAdminPermission")
+        vid_test_obj.set_vid_statements(statements)
+        vid_test_obj.check()
 
     if flavor['target_admin'] == 'readOnlyAdmin':
         username = 'readOnlyAdmin'
@@ -177,11 +179,11 @@ def test():
         iam2_ops.add_attributes_to_iam2_virtual_id(vid_uuid, attributes)
         read_only_admin_session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
 
-        policy_check_vid.set_vid_statements(statements)
-        policy_check_vid.check()
+        vid_test_obj.set_vid_statements(statements)
+        vid_test_obj.check()
 
 
-    policy_check_vid.delete()
+    vid_test_obj.delete()
     test_util.test_pass('success test iam2 policy!')
 
 
