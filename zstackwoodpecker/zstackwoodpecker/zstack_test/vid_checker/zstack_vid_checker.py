@@ -1180,8 +1180,8 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             res_ops.change_recource_owner(project_linked_account_uuid, vm_uuid)
 
         vol_ops.attach_volume(data_volume.uuid, vm_uuid, session_uuid=project_login_session_uuid)
-        vol_ops.detach_volume(data_volume.uuid, vm_uuid, session_uuid=project_login_session_uuid)
         if self.test_obj.get_customized() == None:
+            vol_ops.detach_volume(data_volume.uuid, vm_uuid, session_uuid=project_login_session_uuid)
             vol_ops.delete_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
             vol_ops.expunge_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
             vm_ops.destroy_vm(vm_uuid)
@@ -1409,9 +1409,9 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         eip_option.set_vip_uuid(vip.uuid)
         eip_option.set_vm_nic_uuid(vm_nic_uuid)
         eip = net_ops.create_eip(eip_option)
-        net_ops.detach_eip(eip.uuid, session_uuid=project_login_session_uuid)
-        net_ops.attach_eip(eip.uuid, vm_nic_uuid, session_uuid=project_login_session_uuid)
         if self.test_obj.get_customized() == None:
+            net_ops.detach_eip(eip.uuid, session_uuid=project_login_session_uuid)
+            net_ops.attach_eip(eip.uuid, vm_nic_uuid, session_uuid=project_login_session_uuid)
             net_ops.delete_eip(eip.uuid)
             net_ops.delete_vip(vip.uuid)
             vm_ops.destroy_vm(vm_uuid)
@@ -1522,8 +1522,8 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         vm_nic_uuid = res_ops.query_resource(res_ops.VM_NIC, conditions)[0].uuid
         net_ops.add_nic_to_security_group(sg_uuid, [vm_nic_uuid], session_uuid=project_login_session_uuid)
         net_ops.remove_nic_from_security_group(sg_uuid, [vm_nic_uuid], session_uuid=project_login_session_uuid)
-        net_ops.detach_security_group_from_l3(sg_uuid, l3_net_uuid, session_uuid=project_login_session_uuid)
         if self.test_obj.get_customized() == None:
+            net_ops.detach_security_group_from_l3(sg_uuid, l3_net_uuid, session_uuid=project_login_session_uuid)
             net_ops.delete_security_group(sg_uuid, session_uuid=project_login_session_uuid)
             vm_ops.destroy_vm(vm_uuid)
             vm_ops.expunge_vm(vm_uuid)
@@ -1752,8 +1752,8 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         pf_rule_creation_option.set_session_uuid(session_uuid=project_login_session_uuid)
         pf_rule_uuid = net_ops.create_port_forwarding(pf_rule_creation_option).uuid
         net_ops.attach_port_forwarding(pf_rule_uuid, vm_nic_uuid, session_uuid=project_login_session_uuid)
-        net_ops.detach_port_forwarding(pf_rule_uuid, session_uuid=project_login_session_uuid)
         if self.test_obj.get_customized() == None:
+            net_ops.detach_port_forwarding(pf_rule_uuid, session_uuid=project_login_session_uuid)
             net_ops.delete_port_forwarding(pf_rule_uuid, session_uuid=project_login_session_uuid)
             net_ops.delete_vip(vip.uuid)
             vm_ops.destroy_vm(vm_uuid)
