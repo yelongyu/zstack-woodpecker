@@ -2028,8 +2028,15 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             except Exception as e:
                 pass
 
-            zwt_ops.unsubscribe_event(event_sub_uuid)
-            zwt_ops.unsubscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
+            try:
+                zwt_ops.unsubscribe_event(event_sub_uuid)
+            except Exception as e:
+                pass
+
+            try:
+                zwt_ops.unsubscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
+            except Exception as e:
+                pass
 
             try:
                 zwt_ops.delete_sns_topic(sns_topic_uuid, session_uuid=project_login_session_uuid)
