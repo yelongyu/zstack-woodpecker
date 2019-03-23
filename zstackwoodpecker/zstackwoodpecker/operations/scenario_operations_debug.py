@@ -890,7 +890,6 @@ def setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm_config, deploy_co
 
 ISCSI_TARGET_IP = []
 ISCSI_TARGET_UUID = []
-ISCSI_INITIATOR_TO_SETUP = {}
 def setup_iscsi_target(vm_inv, vm_config, deploy_config):
     global ISCSI_TARGET_IP
     global ISCSI_TARGET_UUID
@@ -2373,6 +2372,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
     vip_lst = []
     mn_ip_to_post = None
     vm_ip_to_post = None
+    iscsi_initiator_to_setup = {}
     ocfs2smp_shareable_volume_is_created = False
     zstack_management_ip = scenario_config.basicConfig.zstackManagementIp.text_
     root_xml = etree.Element("deployerConfig")
@@ -2721,8 +2721,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 			                #setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm, deploy_config)
                             break
                         elif ps_ref.type_ == 'iscsiInitiator':
-                            global ISCSI_INITIATOR_TO_SETUP
-                            ISCSI_INITIATOR_TO_SETUP[vm_inv] = vm
+                            iscsi_initiator_to_setup[vm_inv] = vm
 #                             setup_iscsi_initiator(zstack_management_ip, vm_inv, vm, deploy_config)
                             break
                         elif ps_ref.type_ == 'ZSES':
@@ -2767,7 +2766,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
         for vm_thrd in thread_list:
             vm_thrd.join()
 
-        for k, v in ISCSI_INITIATOR_TO_SETUP.iteritems():
+        for k, v in iscsi_initiator_to_setup.iteritems():
             setup_iscsi_initiator(zstack_management_ip, k, v, deploy_config)
 
         root_xml.getchildren()[0][:] = sorted(root_xml.getchildren()[0], key=lambda child: child.get('name'))

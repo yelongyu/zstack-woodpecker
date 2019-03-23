@@ -36,6 +36,7 @@
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
           </l3Networks>
+          <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
           <primaryStorageRef type="iscsiTarget" disk_offering_uuid="$iscsiDiskOfferingUuid2">$iscsiPrimaryStorageName2</primaryStorageRef>
         </vm>
       </vms>
@@ -51,6 +52,7 @@
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
           </l3Networks>
+          <backupStorageRef type="imageStore">$imageStoreBackupStorageName</backupStorageRef>
           <primaryStorageRef type="iscsiTarget" disk_offering_uuid="$iscsiDiskOfferingUuid3">$iscsiPrimaryStorageName3</primaryStorageRef>
         </vm>
       </vms>
