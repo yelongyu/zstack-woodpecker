@@ -859,7 +859,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
 
         vm_creation_option = test_util.VmOption()
         conditions = res_ops.gen_query_conditions('system', '=', 'false')
-        #conditions = res_ops.gen_query_conditions('category', '=', 'Private', conditions)
+        conditions = res_ops.gen_query_conditions('category', '=', 'Private', conditions)
         l3_net_uuid = res_ops.query_resource(res_ops.L3_NETWORK, conditions)[0].uuid
 
         if self.test_obj.get_customized() == None:
