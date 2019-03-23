@@ -1846,9 +1846,9 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         schd_ops.add_scheduler_job_to_trigger(schd_trigger.uuid, schd_job.uuid, session_uuid=project_login_session_uuid)
         schd_ops.change_scheduler_state(schd_job.uuid, 'disable', session_uuid=project_login_session_uuid)
         schd_ops.change_scheduler_state(schd_job.uuid, 'enable', session_uuid=project_login_session_uuid)
-        schd_ops.remove_scheduler_job_from_trigger(schd_trigger.uuid, schd_job.uuid, session_uuid=project_login_session_uuid)
 
         if self.test_obj.get_customized() == None:
+            schd_ops.remove_scheduler_job_from_trigger(schd_trigger.uuid, schd_job.uuid, session_uuid=project_login_session_uuid)
             schd_ops.del_scheduler_job(schd_job.uuid, session_uuid=project_login_session_uuid)
             schd_ops.del_scheduler_trigger(schd_trigger.uuid, session_uuid=project_login_session_uuid)
             schd_ops.get_current_time()
@@ -1922,12 +1922,13 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         zwt_ops.update_alarm(alarm_uuid, comparison_operator='GreaterThan', session_uuid=project_login_session_uuid)
         zwt_ops.update_sns_application_endpoint(http_endpoint_uuid, 'new_endpoint_name', 'new description', session_uuid=project_login_session_uuid)
         zwt_ops.add_action_to_alarm(alarm_uuid, sns_topic_uuid1, 'sns', session_uuid=project_login_session_uuid) 
-        zwt_ops.remove_action_from_alarm(alarm_uuid, sns_topic_uuid, session_uuid=project_login_session_uuid)
+        #zwt_ops.remove_action_from_alarm(alarm_uuid, sns_topic_uuid, session_uuid=project_login_session_uuid)
         zwt_ops.change_alarm_state(alarm_uuid, 'disable', session_uuid=project_login_session_uuid)
         zwt_ops.change_sns_topic_state(sns_topic_uuid, 'disable', session_uuid=project_login_session_uuid)
         zwt_ops.change_sns_application_endpoint_state(http_endpoint_uuid, 'disable', session_uuid=project_login_session_uuid)
 
         if self.test_obj.get_customized() == None:
+            zwt_ops.remove_action_from_alarm(alarm_uuid, sns_topic_uuid, session_uuid=project_login_session_uuid)
             zwt_ops.delete_alarm(alarm_uuid, session_uuid=project_login_session_uuid) 
             zwt_ops.unsubscribe_event(event_sub_uuid, session_uuid=project_login_session_uuid)
             zwt_ops.unsubscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
@@ -1998,11 +1999,12 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         event_sub_uuid = zwt_ops.subscribe_event(namespace, event_name, actions, labels).uuid
         zwt_ops.update_sns_application_endpoint(http_endpoint_uuid, 'new_endpoint_name', 'new description', session_uuid=project_login_session_uuid)
         zwt_ops.add_action_to_alarm(alarm_uuid, sns_topic_uuid1, 'sns')
-        zwt_ops.remove_action_from_alarm(alarm_uuid, sns_topic_uuid)
+        #zwt_ops.remove_action_from_alarm(alarm_uuid, sns_topic_uuid)
         zwt_ops.change_sns_topic_state(sns_topic_uuid, 'disable', session_uuid=project_login_session_uuid)
         zwt_ops.change_sns_application_endpoint_state(http_endpoint_uuid, 'disable', session_uuid=project_login_session_uuid)
 
         if self.test_obj.get_customized() == None:
+            zwt_ops.remove_action_from_alarm(alarm_uuid, sns_topic_uuid)
             zwt_ops.delete_alarm(alarm_uuid)
             zwt_ops.unsubscribe_event(event_sub_uuid)
             zwt_ops.unsubscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
