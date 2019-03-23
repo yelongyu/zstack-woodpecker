@@ -1261,8 +1261,8 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
 
         ag_uuid = ag_ops.create_affinity_group('affinity_group_policy_checker', 'antiHard', session_uuid=project_login_session_uuid).uuid
         ag_ops.add_vm_to_affinity_group(ag_uuid, vm_uuid, session_uuid=project_login_session_uuid)
-        ag_ops.remove_vm_from_affinity_group(ag_uuid, vm_uuid, session_uuid=project_login_session_uuid)
         if self.test_obj.get_customized() == None:
+            ag_ops.remove_vm_from_affinity_group(ag_uuid, vm_uuid, session_uuid=project_login_session_uuid)
             ag_ops.delete_affinity_group(ag_uuid, session_uuid=project_login_session_uuid)
             vm_ops.destroy_vm(vm_uuid)
             vm_ops.expunge_vm(vm_uuid)
