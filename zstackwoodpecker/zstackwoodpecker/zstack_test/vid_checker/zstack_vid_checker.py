@@ -1628,10 +1628,10 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         conditions = res_ops.gen_query_conditions('vmInstance.uuid', '=', vm_uuid)
         vm_nic_uuid = res_ops.query_resource(res_ops.VM_NIC, conditions)[0].uuid
         net_ops.add_nic_to_load_balancer(lbl_uuid, [vm_nic_uuid], session_uuid=project_login_session_uuid)
-        net_ops.remove_nic_from_load_balancer(lbl_uuid, [vm_nic_uuid], session_uuid=project_login_session_uuid)
-        net_ops.refresh_load_balancer(lb_uuid, session_uuid=project_login_session_uuid) 
 
         if self.test_obj.get_customized() == None:
+            net_ops.remove_nic_from_load_balancer(lbl_uuid, [vm_nic_uuid], session_uuid=project_login_session_uuid)
+            net_ops.refresh_load_balancer(lb_uuid, session_uuid=project_login_session_uuid) 
             net_ops.delete_load_balancer_listener(lbl_uuid, session_uuid=project_login_session_uuid)
             net_ops.delete_load_balancer(lb_uuid, session_uuid=project_login_session_uuid)
             net_ops.delete_vip(vip.uuid)
