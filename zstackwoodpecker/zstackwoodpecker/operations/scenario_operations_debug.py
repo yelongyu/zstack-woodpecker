@@ -2370,7 +2370,6 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
     vm_cfg_lst = []
     eip_lst = []
     vip_lst = []
-    exc_info = []
     mn_ip_to_post = None
     vm_ip_to_post = None
     iscsi_initiator_to_setup = {}
@@ -2496,8 +2495,23 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 
 
     if hasattr(scenario_config.deployerConfig, 'hosts'):
-        def prepare_host_vm(vm):
-            try:
+        class HostVmThread(Thread):
+            def __init__(self, vm):
+                super(HostVmThread, self).__init__()
+                self.exitcode = 0
+                self.exception = None
+                self.exc_traceback = ''
+                self.vm = vm
+
+            def run(self):
+                try:
+                    self.prepare_host_vm(self.vm)
+                except Exception as e:
+                    self.exitcode = 1
+                    self.exception = e
+                    self.exc_traceback = ''.join(traceback.format_exception(*sys.exc_info()))
+
+            def prepare_host_vm(self, vm):
                 vm_creation_option = test_util.VmOption()
                 l3_uuid_list = []
                 l3_uuid_list_ge_3 = []
@@ -2757,24 +2771,21 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                 volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config)
                             attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
                             break
-            except:
-                exc_info.append(sys.exc_info())
         thread_list = []
         for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
             for vm in xmlobject.safe_list(host.vms.vm):
-                thread_list.append(Thread(target=prepare_host_vm, args=(vm, )))
+                thread_list.append(HostVmThread(vm))
 
         for vm_thread in thread_list:
-            try:
-                vm_thread.start()
-            except Exception as e:
-                print('----------------------Exception Reason------------------------')
-                traceback.print_exc(file=sys.stdout)
-                print('-------------------------Reason End---------------------------\n')
-                raise e
+            vm_thread.start()
 
         for vm_thrd in thread_list:
             vm_thrd.join()
+            if vm_thrd.exitcode != 0:
+                test_util.test_logger('Error happened while preparing host vm: [%s]' % vm_thrd.vm.name_)
+                print('----------------------Exception Reason------------------------')
+                print(vm_thrd.exc_traceback)
+                print('-------------------------Reason End---------------------------\n')
 
         test_util.test_logger('iscsi_initiator_to_setup dict: %s' % iscsi_initiator_to_setup)
         for k, v in iscsi_initiator_to_setup.iteritems():
