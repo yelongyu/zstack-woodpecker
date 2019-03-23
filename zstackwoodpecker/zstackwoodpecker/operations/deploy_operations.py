@@ -241,29 +241,11 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
             thread.start()
 
     if xmlobject.has_element(deployConfig, 'backupStorages.aliyunEbsBackupStorage'):
-        # Add KS
-        hyb_ops.add_hybrid_key_secret(name='ks_for_ebs_test',
-                                        description='ks_for_ebs_test',
-                                        key= 'zstack',
-                                        secret='C8yz6qLPus7VuwLtGYdxUkMg',
-                                        ks_type=os.getenv('datacenterType'),
-                                        sync='false',
-                                        session_uuid=session_uuid)
-
-        # Add DataCenter
-        dc_inv = hyb_ops.add_datacenter_from_remote(datacenter_type=os.getenv('datacenterType'),
-                                            description='dc_for_ebs_test',
-                                            region_id=os.getenv('regionId'),
-                                            end_point=os.getenv('ebsEndPoint'),
-                                            session_uuid=session_uuid)
-
-        # Add Identity Zone
-        iz_inv = hyb_ops.get_identity_zone_from_remote(datacenter_type=os.getenv('datacenterType'), dc_uuid=dc_inv.uuid)
-        if iz_inv:
-            ebs_iz = iz_inv[0]
+        dc_inv = hyb_ops.query_datacenter_local()
+        if dc_inv:
+            dc_inv = dc_inv[0]
         else:
-            test_util.test_fail('EBS Identity Zone was not found')
-        hyb_ops.add_identity_zone_from_remote(iz_type=os.getenv('datacenterType'), datacenter_uuid=dc_inv.uuid, zone_id=ebs_iz.zoneId)
+            test_util.test_fail("No datacenter found in local")
 
         # Add OSS bucket
         oss_buckt_inv = hyb_ops.add_oss_bucket_from_remote(data_center_uuid=dc_inv.uuid,
@@ -1009,6 +991,30 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                     name=zone.name_)
             zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
 
+            # Add KS
+            hyb_ops.add_hybrid_key_secret(name='ks_for_ebs_test',
+                                            description='ks_for_ebs_test',
+                                            key= 'zstack',
+                                            secret='C8yz6qLPus7VuwLtGYdxUkMg',
+                                            ks_type=os.getenv('datacenterType'),
+                                            sync='false',
+                                            session_uuid=session_uuid)
+
+            # Add DataCenter
+            dc_inv = hyb_ops.add_datacenter_from_remote(datacenter_type=os.getenv('datacenterType'),
+                                                description='dc_for_ebs_test',
+                                                region_id=os.getenv('regionId'),
+                                                end_point=os.getenv('ebsEndPoint'),
+                                                session_uuid=session_uuid)
+
+            # Add Identity Zone
+            iz_inv = hyb_ops.get_identity_zone_from_remote(datacenter_type=os.getenv('datacenterType'), dc_uuid=dc_inv.uuid)
+            if iz_inv:
+                ebs_iz = iz_inv[0]
+            else:
+                test_util.test_fail('EBS Identity Zone was not found')
+            hyb_ops.add_identity_zone_from_remote(iz_type=os.getenv('datacenterType'), datacenter_uuid=dc_inv.uuid, zone_id=ebs_iz.zoneId)
+
             for pr in xmlobject.safe_list(zone.primaryStorages.aliyunEBSPrimaryStorage):
                 if ps_name and ps_name != pr.name_:
                     continue
@@ -1030,7 +1036,7 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                                             "cluster": "ECS-river"}'
                 action.zoneUuid = zinv.uuid
                 action.sessionUuid = session_uuid
-                thread = threading.Thread(target=_thread_for_action, args=(action,))
+                thread = threading.Thread(target=_thread_for_action, args=(action, True))
                 wait_for_thread_queue()
                 thread.start()
 
