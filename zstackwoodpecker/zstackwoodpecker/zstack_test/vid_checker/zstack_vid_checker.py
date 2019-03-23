@@ -1676,8 +1676,11 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             except Exception as e:
                 pass
 
-            if lb_service_need_detach:
-                net_ops.detach_lb_service_from_l3network(l3_net_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
+            try:
+                if lb_service_need_detach:
+                    net_ops.detach_lb_service_from_l3network(l3_net_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
+            except Exception as e:
+                pass
             #acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
                 
         return self.judge(True)
