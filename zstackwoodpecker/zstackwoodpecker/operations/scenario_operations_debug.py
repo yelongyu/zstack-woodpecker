@@ -2370,6 +2370,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
     vm_cfg_lst = []
     eip_lst = []
     vip_lst = []
+    exc_info = []
     mn_ip_to_post = None
     vm_ip_to_post = None
     iscsi_initiator_to_setup = {}
@@ -2496,6 +2497,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 
     if hasattr(scenario_config.deployerConfig, 'hosts'):
         def prepare_host_vm(vm):
+            try:
                 vm_creation_option = test_util.VmOption()
                 l3_uuid_list = []
                 l3_uuid_list_ge_3 = []
@@ -2755,14 +2757,22 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                 volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config)
                             attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
                             break
+            except:
+                exc_info.append(sys.exc_info())
         thread_list = []
         for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
             for vm in xmlobject.safe_list(host.vms.vm):
                 thread_list.append(Thread(target=prepare_host_vm, args=(vm, )))
 
         for vm_thread in thread_list:
-            vm_thread.start()
-        
+            try:
+                vm_thread.start()
+            except Exception as e:
+                print('----------------------Exception Reason------------------------')
+                traceback.print_exc(file=sys.stdout)
+                print('-------------------------Reason End---------------------------\n')
+                raise e
+
         for vm_thrd in thread_list:
             vm_thrd.join()
 
