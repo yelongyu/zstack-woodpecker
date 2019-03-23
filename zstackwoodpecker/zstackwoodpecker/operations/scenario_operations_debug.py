@@ -2493,7 +2493,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 #                shell.call('ip route del %s/24 || true' % ip_range)
 #                shell.call('ip route add %s/24 via %s dev eth0' % (ip_range, last_ip_gateway))
 
-    
+
     if hasattr(scenario_config.deployerConfig, 'hosts'):
         def prepare_host_vm(vm):
                 vm_creation_option = test_util.VmOption()
@@ -2766,6 +2766,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
         for vm_thrd in thread_list:
             vm_thrd.join()
 
+        test_util.test_logger('iscsi_initiator_to_setup dict: %s' % iscsi_initiator_to_setup)
         for k, v in iscsi_initiator_to_setup.iteritems():
             setup_iscsi_initiator(zstack_management_ip, k, v, deploy_config)
 
