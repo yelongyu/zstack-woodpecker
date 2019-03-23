@@ -2058,7 +2058,8 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         self.check_load_balancer()
         self.check_port_forwarding()
         self.check_scheduler()
-        self.check_pcicheck_zwatch()
+        self.check_pci()
+        self.check_zwatch()
         self.check_sns()
 
     def check(self):
