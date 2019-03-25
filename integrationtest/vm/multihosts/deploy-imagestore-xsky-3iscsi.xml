@@ -100,7 +100,7 @@
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
-        <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+        <!-- <backupStorageRef>$cephBackupStorageName</backupStorageRef> -->
       </image>
       <image name="$imageName_net" description="Test Image2" 
         format="$rootImageFormat" url="$imageUrl_vdbench" 
