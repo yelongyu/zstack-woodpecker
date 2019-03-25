@@ -23,12 +23,11 @@ class zstack_vid_attr_checker(checker_header.TestChecker):
     def __init__(self):
         super(zstack_vid_attr_checker, self).__init__()
 
-    def check_login(self, username, password):
-        try:
-            session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
-        except:
-            test_util.test_logger('Check Result: [Virtual ID:] %s login failed' % username)
-            return self.judge(False)
+    def check_login_by_vid(self, username, password):
+        session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
+
+    def check_login_by_account(self, username, password):
+        session_uuid = acc_ops.login_by_account(username, password)
 
     def check_vm_operation(self, session_uuid=None):
         try:
@@ -810,19 +809,24 @@ class zstack_vid_attr_checker(checker_header.TestChecker):
         super(zstack_vid_attr_checker, self).check()
         password = 'b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86'
         virtual_id = self.test_obj.get_vid()
-        self.check_login(virtual_id.name, password)
         for lst in self.test_obj.get_vid_attributes():
             if lst['name'] == '__PlatformAdmin__' and self.test_obj.get_customized != "noDeleteAdminPermission":
+                self.check_login_by_vid(virtual_id.name, password)
                 self.check_platform_admin_permission(virtual_id.name, password)
             elif lst['name']  == '__ProjectAdmin__':
+                self.check_login_by_vid(virtual_id.name, password)
                 self.check_project_admin_permission(virtual_id.name, password)
             elif lst['name']  == '__ProjectOperator__':
+                self.check_login_by_vid(virtual_id.name, password)
                 self.check_project_operator_permission(virtual_id.name, password)
             elif lst['name']  == '__AuditAdmin__':
+                self.check_login_by_account(virtual_id.name, password)
                 self.check_audit_admin_permission(virtual_id.name, password)
             elif lst['name']  == '__SecurityAdmin__':
+                self.check_login_by_account(virtual_id.name, password)
                 self.check_security_admin_permission(virtual_id.name, password)
             elif lst['name']  == '__SystemAdmin__':
+                self.check_login_by_account(virtual_id.name, password)
                 self.check_system_admin_permission(virtual_id.name, password)
             else:
                 test_util.test_fail("not found matched attribute %s" %(str(lst['name'])))
