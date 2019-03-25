@@ -30,39 +30,64 @@ def test():
     ps_env = test_stub.PSEnvChecker()
 
     ps1, ps2 = ps_env.get_two_ps()
-    if ps2.type == 'SharedBlock':
-        disk_uuid.append(ps2.sharedBlocks[0].diskUuid)
+    if ps_env.is_sb_ceph_env:
+        disk_uuid.append(ps1.sharedBlocks[0].diskUuid)
+    else:
+        if ps2.type == 'SharedBlock':
+            disk_uuid.append(ps2.sharedBlocks[0].diskUuid)
 
     vm_list = []
     for root_vol_ps in [ps1, ps2]:
         for data_vol_ps in [ps1, ps2]:
-            vm = test_stub.create_multi_vms(name_prefix='test_vm', count=1,
-                                            ps_uuid=root_vol_ps.uuid, data_volume_number=VOLUME_NUMBER,
-                                            ps_uuid_for_data_vol=data_vol_ps.uuid, timeout=1200000)[0]
+            if ps_env.is_sb_ceph_env:
+                vm = test_stub.create_multi_vms(name_prefix='test_vm', count=1,
+                                                ps_uuid=root_vol_ps.uuid, data_volume_number=VOLUME_NUMBER,
+                                                ps_uuid_for_data_vol=data_vol_ps.uuid, timeout=1200000,
+                                                bs_type="ImageStoreBackupStorage" if root_vol_ps.type == "SharedBlock" else "Ceph")[0]
+            else:
+                vm = test_stub.create_multi_vms(name_prefix='test_vm', count=1,
+                                                ps_uuid=root_vol_ps.uuid, data_volume_number=VOLUME_NUMBER,
+                                                ps_uuid_for_data_vol=data_vol_ps.uuid, timeout=1200000)[0]
             test_obj_dict.add_vm(vm)
             vm_list.append(vm)
 
     vm1, vm2, vm3, vm4 = vm_list
 
-    ps_ops.detach_primary_storage(ps2.uuid, res_ops.get_resource(res_ops.CLUSTER)[0].uuid)
-    delete_ps_list.append(ps2)
+    if ps_env.is_sb_ceph_env:
+        ps_ops.detach_primary_storage(ps1.uuid, res_ops.get_resource(res_ops.CLUSTER)[0].uuid)
+        delete_ps_list.append(ps1)
+    else:
+        ps_ops.detach_primary_storage(ps2.uuid, res_ops.get_resource(res_ops.CLUSTER)[0].uuid)
+        delete_ps_list.append(ps2)
     time.sleep(30)
     for vm in vm_list:
         vm.update()
 
-    assert vm1.get_vm().state == inventory.RUNNING
-    assert vm2.get_vm().state == inventory.STOPPED
-    assert vm3.get_vm().state == inventory.STOPPED
-    assert vm4.get_vm().state == inventory.STOPPED
+    if ps_env.is_sb_ceph_env:
+        assert vm1.get_vm().state == inventory.STOPPED
+        assert vm2.get_vm().state == inventory.STOPPED
+        assert vm3.get_vm().state == inventory.STOPPED
+        assert vm4.get_vm().state == inventory.RUNNING
+        ps_ops.delete_primary_storage(ps1.uuid)
+    else:
+        assert vm1.get_vm().state == inventory.RUNNING
+        assert vm2.get_vm().state == inventory.STOPPED
+        assert vm3.get_vm().state == inventory.STOPPED
+        assert vm4.get_vm().state == inventory.STOPPED
+        ps_ops.delete_primary_storage(ps2.uuid)
 
-    ps_ops.delete_primary_storage(ps2.uuid)
+    
     time.sleep(10)
     conf = res_ops.gen_query_conditions('type', '=', 'UserVM')
     left_vm_list = res_ops.query_resource(res_ops.VM_INSTANCE, conf)
     assert len(left_vm_list) == 2
     left_vm_uuid_list = [vm.uuid for vm in left_vm_list]
-    assert vm1.get_vm().uuid in left_vm_uuid_list
-    assert vm2.get_vm().uuid in left_vm_uuid_list
+    if ps_env.is_sb_ceph_env:
+        assert vm3.get_vm().uuid in left_vm_uuid_list
+        assert vm4.get_vm().uuid in left_vm_uuid_list
+    else:
+        assert vm1.get_vm().uuid in left_vm_uuid_list
+        assert vm2.get_vm().uuid in left_vm_uuid_list
 
     assert len(res_ops.query_resource(res_ops.VOLUME)) == \
            VOLUME_NUMBER * 2 + len(res_ops.query_resource(res_ops.VM_INSTANCE))

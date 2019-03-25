@@ -25,11 +25,19 @@ detached_ps_list = []
 
 
 def test():
-    env = test_stub.TwoPrimaryStorageEnv(test_object_dict=test_obj_dict,
-                                         first_ps_vm_number=VM_COUNT,
-                                         second_ps_vm_number=VM_COUNT,
-                                         first_ps_volume_number=VOLUME_NUMBER,
-                                         second_ps_volume_number=VOLUME_NUMBER)
+    ps_env = test_stub.PSEnvChecker()
+    if ps_env.is_sb_ceph_env:
+        env = test_stub.SanAndCephPrimaryStorageEnv(test_object_dict=test_obj_dict,
+                                             first_ps_vm_number=VM_COUNT,
+                                             second_ps_vm_number=VM_COUNT,
+                                             first_ps_volume_number=VOLUME_NUMBER,
+                                             second_ps_volume_number=VOLUME_NUMBER)
+    else:
+        env = test_stub.TwoPrimaryStorageEnv(test_object_dict=test_obj_dict,
+                                             first_ps_vm_number=VM_COUNT,
+                                             second_ps_vm_number=VM_COUNT,
+                                             first_ps_volume_number=VOLUME_NUMBER,
+                                             second_ps_volume_number=VOLUME_NUMBER)
     env.check_env()
     env.deploy_env()
     first_ps_vm_list = env.first_ps_vm_list
@@ -63,7 +71,13 @@ def test():
         test_stub.create_multi_vms(name_prefix='test-vm', count=1, ps_uuid=selected_ps.uuid)
 
     test_util.test_dsc("Create 5 vms and check all should be in enabled PS")
-    vm_list = test_stub.create_multi_vms(name_prefix='test_vm', count=5)
+    if ps_env.is_sb_ceph_env:
+        if selected_ps.type == "SharedBlock":
+            vm_list = test_stub.create_multi_vms(name_prefix='test_vm', count=5, bs_type='Ceph')
+        else:
+            vm_list = test_stub.create_multi_vms(name_prefix='test_vm', count=5, bs_type='ImageStoreBackupStorage')
+    else:
+        vm_list = test_stub.create_multi_vms(name_prefix='test_vm', count=5)
     for vm in vm_list:
         test_obj_dict.add_vm(vm)
     for vm in vm_list:

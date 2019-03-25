@@ -291,7 +291,17 @@ def create_iso_vm_with_random_offering(vm_name, l3_name=None, session_uuid=None,
                                        root_password=None, ps_uuid=None, system_tags=None):
     img_option = test_util.ImageOption()
     img_option.set_name('fake_iso')
-    bs_uuid = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, [], session_uuid)[0].uuid
+    ps_list = res_ops.query_resource_fields(res_ops.PRIMARY_STORAGE, [], session_uuid)
+    bs_list = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, [], session_uuid)
+    ps = None
+    if ps_uuid:
+        ps = random.choice([ps for ps in ps_list if ps.uuid == ps_uuid])
+    if ps and (ps.type == "SharedBlock" or ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE):
+        bs = random.choice([bs for bs in bs_list if (ps.type == "SharedBlock" and bs.type == 'ImageStoreBackupStorage') or (ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE and bs.type == 'Ceph')])
+        bs_uuid = bs.uuid
+    else:
+        bs_uuid = bs_list[0].uuid 
+
     img_option.set_backup_storage_uuid_list([bs_uuid])
     mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
     if os.system("sshpass -p password ssh %s 'ls  %s/apache-tomcat/webapps/zstack/static/zstack-repo/'" % (mn_ip, os.environ.get('zstackInstallPath'))) == 0:
@@ -341,10 +351,10 @@ def create_iso_vm_with_random_offering(vm_name, l3_name=None, session_uuid=None,
 
 def create_vm_with_random_offering(vm_name, image_name=None, l3_name=None, session_uuid=None,
                                    instance_offering_uuid=None, host_uuid=None, disk_offering_uuids=None,
-                                   root_password=None, ps_uuid=None, system_tags=None, timeout=None):
+                                   root_password=None, ps_uuid=None, system_tags=None, timeout=None, bs_type=None):
     if image_name:
         imagename = os.environ.get(image_name)
-        image_uuid = test_lib.lib_get_image_by_name(imagename).uuid
+        image_uuid = test_lib.lib_get_image_by_name(imagename, bs_type).uuid
     else:
         conf = res_ops.gen_query_conditions('format', '!=', 'iso')
         conf = res_ops.gen_query_conditions('mediaType', '!=', 'ISO', conf)
@@ -366,6 +376,7 @@ def create_vm_with_random_offering(vm_name, image_name=None, l3_name=None, sessi
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
     vm_creation_option.set_name(vm_name)
+    vm_creation_option.set_timeout(1200000)
     if system_tags:
         vm_creation_option.set_system_tags(system_tags)
     if disk_offering_uuids:
@@ -387,12 +398,12 @@ def create_vm_with_random_offering(vm_name, image_name=None, l3_name=None, sessi
     return vm
 
 
-def create_multi_vms(name_prefix='', count=10, host_uuid=None, ps_uuid=None, data_volume_number=0, ps_uuid_for_data_vol=None, timeout=None):
+def create_multi_vms(name_prefix='', count=10, host_uuid=None, ps_uuid=None, data_volume_number=0, ps_uuid_for_data_vol=None, timeout=None, bs_type=None):
     vm_list = []
     for i in xrange(count):
         if not data_volume_number:
             vm = create_vm_with_random_offering(name_prefix+"{}".format(i), image_name='imageName_net',
-                                                l3_name='l3VlanNetwork2', host_uuid=host_uuid, ps_uuid=ps_uuid, timeout=timeout)
+                                                l3_name='l3VlanNetwork2', host_uuid=host_uuid, ps_uuid=ps_uuid, timeout=timeout, bs_type=bs_type)
         else:
             disk_offering_list = res_ops.get_resource(res_ops.DISK_OFFERING)
             disk_offering_uuids = [random.choice(disk_offering_list).uuid for _ in xrange(data_volume_number)]
@@ -400,11 +411,11 @@ def create_multi_vms(name_prefix='', count=10, host_uuid=None, ps_uuid=None, dat
                 vm = create_vm_with_random_offering(name_prefix+"{}".format(i), image_name='imageName_net',
                                                     l3_name='l3VlanNetwork2', host_uuid=host_uuid, ps_uuid=ps_uuid,
                                                     disk_offering_uuids=disk_offering_uuids,
-                                                    system_tags=['primaryStorageUuidForDataVolume::{}'.format(ps_uuid_for_data_vol)], timeout=timeout)
+                                                    system_tags=['primaryStorageUuidForDataVolume::{}'.format(ps_uuid_for_data_vol)], timeout=timeout, bs_type=bs_type)
             else:
                 vm = create_vm_with_random_offering(name_prefix+"{}".format(i), image_name='imageName_net',
                                                     l3_name='l3VlanNetwork2', host_uuid=host_uuid, ps_uuid=ps_uuid,
-                                                    disk_offering_uuids=disk_offering_uuids, timeout=timeout)
+                                                    disk_offering_uuids=disk_offering_uuids, timeout=timeout, bs_type=bs_type)
 
         vm_list.append(vm)
     for vm in vm_list:
@@ -446,6 +457,7 @@ def create_multi_volumes(count=10, host_uuid=None, ps=None):
         for volume in volume_list:
             assert volume.get_volume().primaryStorageUuid == ps.uuid
     return volume_list
+
 
 def add_primaryStorage(first_ps=None):
     cluster_uuid = first_ps.attachedClusterUuids[0]
@@ -671,6 +683,103 @@ class TwoPrimaryStorageEnv(object):
         else:
             raise NameError
 
+class SanAndCephPrimaryStorageEnv(object):
+    def __init__(self, test_object_dict, first_ps_vm_number=0, second_ps_vm_number=0, first_ps_volume_number=0, second_ps_volume_number=0,
+                 vm_creation_with_volume_number=0):
+        self._first_ps_vm_number = first_ps_vm_number
+        self._second_ps_vm_number = second_ps_vm_number
+        self._first_ps_volume_number = first_ps_volume_number
+        self._second_ps_volume_number = second_ps_volume_number
+        self._vm_creation_with_volume_number = vm_creation_with_volume_number
+        self._test_object_dict = test_object_dict
+        self._host_uuid = None
+        self._first_ps = None #San PS
+        self._second_ps = None #Ceph PS
+        self._first_ps_vm_list = []
+        self._second_ps_vm_list = []
+        self._first_ps_volume_list = []
+        self._second_ps_volume_list = []
+        self._new_ps = False
+        
+    def check_env(self):
+        ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
+        self._first_ps = random.choice([ps for ps in ps_list if ps.type == "SharedBlock"])
+        # if len(ps_list) == 2:
+        self._second_ps = random.choice([ps for ps in ps_list if ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE])
+        if self._first_ps.type == inventory.LOCAL_STORAGE_TYPE or self._second_ps.type == inventory.LOCAL_STORAGE_TYPE:
+            self._host_uuid = random.choice(res_ops.get_resource(res_ops.HOST)).uuid
+
+    def deploy_env(self):
+        if self._first_ps_vm_number:
+            self._first_ps_vm_list = create_multi_vms(name_prefix="vm_in_first_ps-", count=self._first_ps_vm_number,
+                                                     host_uuid=self._host_uuid, ps_uuid=self._first_ps.uuid,
+                                                     data_volume_number=self._vm_creation_with_volume_number, 
+                                                     bs_type='ImageStoreBackupStorage')
+            for vm in self._first_ps_vm_list:
+                self._test_object_dict.add_vm(vm)
+
+        if self._first_ps_volume_number:
+            self._first_ps_volume_list = create_multi_volumes(count=self._first_ps_volume_number, host_uuid=self._host_uuid,
+                                                            ps=self._first_ps)
+            for volume in self._first_ps_volume_list:
+                self._test_object_dict.add_volume(volume)
+
+        if not self._second_ps:
+            self._second_ps = add_primaryStorage(self._first_ps)
+            self._new_ps = True
+
+        if self._second_ps_vm_number:
+            self._second_ps_vm_list = create_multi_vms(name_prefix="vm_in_second_ps-", count=self._second_ps_vm_number,
+                                                      host_uuid=self._host_uuid, ps_uuid=self._second_ps.uuid, 
+                                                      bs_type='Ceph')
+            for vm in self._second_ps_vm_list:
+                self._test_object_dict.add_vm(vm)
+
+        if self._second_ps_volume_number:
+            self._second_ps_volume_list = create_multi_volumes(count=self._second_ps_volume_number, host_uuid=self._host_uuid,
+                                                             ps=self._second_ps)
+            for volume in self._second_ps_volume_list:
+                self._test_object_dict.add_volume(volume)
+
+    @property
+    def host_uuid(self):
+        return self._host_uuid
+
+    @property
+    def first_ps(self):
+        return self._first_ps
+
+    @property
+    def second_ps(self):
+        return self._second_ps
+
+    @property
+    def first_ps_vm_list(self):
+        return self._first_ps_vm_list
+
+    @property
+    def second_ps_vm_list(self):
+        return self._second_ps_vm_list
+
+    @property
+    def first_ps_volume_list(self):
+        return self._first_ps_volume_list
+
+    @property
+    def second_ps_volume_list(self):
+        return self._second_ps_volume_list
+
+    @property
+    def new_ps(self):
+        return self._new_ps
+
+    def get_vm_list_from_ps(self, ps):
+        if ps is self._first_ps:
+            return self._first_ps_vm_list
+        elif ps is self._second_ps:
+            return self._second_ps_vm_list
+        else:
+            raise NameError
 
 def check_vm_running_on_host(vm_uuid, host_ip):
     cmd = "virsh list|grep %s|awk '{print $3}'" %(vm_uuid)
@@ -1010,8 +1119,16 @@ class PSEnvChecker(object):
         return self.is_one_ps_env and self.ps_list[0].type == inventory.NFS_PRIMARY_STORAGE_TYPE
 
     @property
+    def is_one_ceph_env(self):
+        return self.is_one_ps_env and self.ps_list[0].type == inventory.CEPH_PRIMARY_STORAGE_TYPE
+
+    @property
     def is_one_smp_env(self):
         return self.is_one_ps_env and self.ps_list[0].type == "SharedMountPoint"
+    
+    @property
+    def is_one_sb_env(self):
+        return self.is_one_ps_env and self.ps_list[0].type == "SharedBlock"
 
     @property
     def is_multi_ps_env(self):
@@ -1036,6 +1153,15 @@ class PSEnvChecker(object):
         return True
 
     @property
+    def is_multi_ceph_env(self):
+        if not self.is_multi_ps_env:
+            return False
+        for ps in self.ps_list:
+            if ps.type != inventory.CEPH_PRIMARY_STORAGE_TYPE:
+                return False
+        return True
+
+    @property
     def is_multi_smp_env(self):
         if not self.is_multi_ps_env:
             return False
@@ -1045,8 +1171,21 @@ class PSEnvChecker(object):
         return True
 
     @property
+    def is_multi_sb_env(self):
+        if not self.is_multi_ps_env:
+            return False
+        for ps in self.ps_list:
+            if ps.type != "SharedBlock":
+                return False
+        return True
+
+    @property
     def is_local_nfs_env(self):
         return self.have_local and self.have_nfs
+
+    @property
+    def is_sb_ceph_env(self):
+        return self.have_sb and self.have_ceph
 
     @property
     def is_local_smp_env(self):
@@ -1070,9 +1209,23 @@ class PSEnvChecker(object):
         return False
 
     @property
+    def have_sb(self):
+        for ps in self.ps_list:
+            if ps.type == "SharedBlock":
+                return True
+        return False
+
+    @property
     def have_nfs(self):
         for ps in self.ps_list:
             if ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
+                return True
+        return False
+
+    @property
+    def have_ceph(self):
+        for ps in self.ps_list:
+            if ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
                 return True
         return False
 
@@ -1089,10 +1242,20 @@ class PSEnvChecker(object):
             raise EnvironmentError
         return random.choice([ps for ps in self.ps_list if ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE])
 
+    def get_random_ceph(self):
+        if not self.have_ceph:
+            raise EnvironmentError
+        return random.choice([ps for ps in self.ps_list if ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE])
+
     def get_random_smp(self):
         if not self.have_smp:
             raise EnvironmentError
         return random.choice([ps for ps in self.ps_list if ps.type == "SharedMountPoint"])
+
+    def get_random_sb(self):
+        if not self.have_sb:
+            raise EnvironmentError
+        return random.choice([ps for ps in self.ps_list if ps.type == "SharedBlock"])
 
     def get_two_ps(self):
         if not self.is_multi_ps_env:
@@ -1101,6 +1264,8 @@ class PSEnvChecker(object):
             return self.get_random_local(), self.get_random_nfs()
         elif self.is_local_smp_env:
             return self.get_random_local(), self.get_random_smp()
+        elif self.is_sb_ceph_env:
+            return self.get_random_sb(), self.get_random_ceph()
         else:
             return random.sample(self.ps_list, 2)
 

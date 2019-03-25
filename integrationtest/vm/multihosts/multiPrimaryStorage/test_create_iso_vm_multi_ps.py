@@ -9,7 +9,7 @@ import zstackwoodpecker.test_state as test_state
 import random
 
 _config_ = {
-        'timeout' : 3000,
+        'timeout' : 7200,
         'noparallel' : True
         }
 
@@ -29,7 +29,7 @@ def test():
 
     for root_volume_ps_uuid in [None, ps.uuid]:
         for data_vol_ps_uuid in [None, another.uuid]:
-            if ps_env.is_local_shared_env:
+            if ps_env.is_local_shared_env or ps_env.is_sb_ceph_env:
                 if type(root_volume_ps_uuid) != type(data_vol_ps_uuid):
                     continue
             vm = test_stub.create_iso_vm_with_random_offering(vm_name='test_iso_vm',

@@ -22,11 +22,19 @@ disabled_ps_list = []
 
 
 def test():
-    env = test_stub.TwoPrimaryStorageEnv(test_object_dict=test_obj_dict,
-                                         first_ps_vm_number=VM_COUNT,
-                                         second_ps_vm_number=VM_COUNT,
-                                         first_ps_volume_number=VOLUME_NUMBER,
-                                         second_ps_volume_number=VOLUME_NUMBER)
+    ps_env = test_stub.PSEnvChecker()
+    if ps_env.is_sb_ceph_env:
+        env = test_stub.SanAndCephPrimaryStorageEnv(test_object_dict=test_obj_dict,
+                                             first_ps_vm_number=VM_COUNT,
+                                             second_ps_vm_number=VM_COUNT,
+                                             first_ps_volume_number=VOLUME_NUMBER,
+                                             second_ps_volume_number=VOLUME_NUMBER)
+    else:
+        env = test_stub.TwoPrimaryStorageEnv(test_object_dict=test_obj_dict,
+                                             first_ps_vm_number=VM_COUNT,
+                                             second_ps_vm_number=VM_COUNT,
+                                             first_ps_volume_number=VOLUME_NUMBER,
+                                             second_ps_volume_number=VOLUME_NUMBER)
     env.check_env()
     env.deploy_env()
     first_ps_vm_list = env.first_ps_vm_list
@@ -60,8 +68,12 @@ def test():
         disabled_ps_list.remove(ps)
 
     test_util.test_dsc("Try to create vm in both PrimaryStorage")
-    vm1 = test_stub.create_multi_vms(name_prefix='test-vm_first_ps', count=1, ps_uuid=env.first_ps.uuid)[0]
-    vm2 = test_stub.create_multi_vms(name_prefix='test-vm_second_ps', count=1, ps_uuid=env.second_ps.uuid)[0]
+    if ps_env.is_sb_ceph_env:
+        vm1 = test_stub.create_multi_vms(name_prefix='test-vm_first_ps', count=1, ps_uuid=env.first_ps.uuid, bs_type='ImageStoreBackupStorage')[0]
+        vm2 = test_stub.create_multi_vms(name_prefix='test-vm_second_ps', count=1, ps_uuid=env.second_ps.uuid, bs_type='Ceph')[0]
+    else:
+        vm1 = test_stub.create_multi_vms(name_prefix='test-vm_first_ps', count=1, ps_uuid=env.first_ps.uuid)[0]
+        vm2 = test_stub.create_multi_vms(name_prefix='test-vm_second_ps', count=1, ps_uuid=env.second_ps.uuid)[0]
     test_obj_dict.add_vm(vm1)
     test_obj_dict.add_vm(vm2)
 

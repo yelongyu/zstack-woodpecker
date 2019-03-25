@@ -7,10 +7,11 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
+import apibinding.inventory as inventory
 import random
 
 _config_ = {
-        'timeout' : 3000,
+        'timeout' : 7200,
         'noparallel' : True
         }
 
@@ -22,9 +23,15 @@ VM_COUNT = 1
 
 def test():
     test_util.test_dsc("Create {0} vm in the first primaryStorage".format(VM_COUNT))
+    ps_env = test_stub.PSEnvChecker()
     ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
-    first_ps = random.choice(ps_list)
-    vm_list = test_stub.create_multi_vms(name_prefix='vm_in_fist_ps', count=VM_COUNT, ps_uuid=first_ps.uuid)
+    if ps_env.is_sb_ceph_env:
+        first_ps = random.choice([ps for ps in ps_list if ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE])
+        vm_list = test_stub.create_multi_vms(name_prefix='vm_in_fist_ps', count=VM_COUNT, ps_uuid=first_ps.uuid, bs_type='Ceph')
+    else:
+        first_ps = random.choice(ps_list)
+        vm_list = test_stub.create_multi_vms(name_prefix='vm_in_fist_ps', count=VM_COUNT, ps_uuid=first_ps.uuid)
+    
     for vm in vm_list:
         test_obj_dict.add_vm(vm)
 
@@ -36,7 +43,11 @@ def test():
         second_ps = random.choice([ps for ps in ps_list if ps.uuid != first_ps.uuid])
 
     test_util.test_dsc("Create {0} vm in the second primaryStorage".format(VM_COUNT))
-    vm_list = test_stub.create_multi_vms(name_prefix='vm_in_second_ps', count=VM_COUNT, ps_uuid=second_ps.uuid)
+    if ps_env.is_sb_ceph_env:
+        vm_list = test_stub.create_multi_vms(name_prefix='vm_in_second_ps', count=VM_COUNT, ps_uuid=second_ps.uuid, bs_type='ImageStoreBackupStorage')
+    else:
+        vm_list = test_stub.create_multi_vms(name_prefix='vm_in_second_ps', count=VM_COUNT, ps_uuid=second_ps.uuid)
+
     for vm in vm_list:
         test_obj_dict.add_vm(vm)
 
