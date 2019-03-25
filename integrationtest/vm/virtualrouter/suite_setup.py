@@ -29,10 +29,10 @@ def test():
         scenario_operations.destroy_scenario(test_lib.all_scenario_config, test_lib.scenario_destroy)
 
     #nic_name = "eth0"
-    #if test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
-    #    nic_name = "zsn0"
-    #    linux.create_vlan_eth(nic_name, 1010)
-    #    linux.create_vlan_eth(nic_name, 1011)
+    if test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
+        nic_name = "zsn0"
+        linux.create_vlan_eth(nic_name, 1010)
+        linux.create_vlan_eth(nic_name, 1011)
     #This vlan creation is not a must, if testing is under nested virt env. But it is required on physical host without enough physcial network devices and your test execution machine is not the same one as Host machine. 
     #linux.create_vlan_eth("eth0", 10, "10.0.0.200", "255.255.255.0")
     #linux.create_vlan_eth("eth0", 11, "10.0.1.200", "255.255.255.0")
