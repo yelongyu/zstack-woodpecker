@@ -2496,12 +2496,13 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 
     if hasattr(scenario_config.deployerConfig, 'hosts'):
         class HostVmThread(Thread):
-            def __init__(self, vm):
+            def __init__(self, vm, iscsi_initiator):
                 super(HostVmThread, self).__init__()
                 self.exitcode = 0
                 self.exception = None
                 self.exc_traceback = ''
                 self.vm = vm
+                self.iscsi_initiator_to_setup = iscsi_initiator
 
             def run(self):
                 try:
@@ -2737,7 +2738,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 			                #setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm, deploy_config)
                             break
                         elif ps_ref.type_ == 'iscsiInitiator':
-                            iscsi_initiator_to_setup[vm_inv] = vm
+                            self.iscsi_initiator_to_setup[vm_inv] = vm
 #                             setup_iscsi_initiator(zstack_management_ip, vm_inv, vm, deploy_config)
                             break
                         elif ps_ref.type_ == 'ZSES':
@@ -2774,7 +2775,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
         thread_list = []
         for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
             for vm in xmlobject.safe_list(host.vms.vm):
-                thread_list.append(HostVmThread(vm))
+                thread_list.append(HostVmThread(vm, iscsi_initiator_to_setup))
 
         for vm_thread in thread_list:
             vm_thread.start()
