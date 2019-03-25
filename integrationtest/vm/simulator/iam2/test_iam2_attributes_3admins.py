@@ -38,7 +38,7 @@ def test():
     iam2_ops.add_attributes_to_iam2_virtual_id(vid_uuid, attributes)
     #read_only_admin_session_uuid = iam2_ops.login_iam2_virtual_id(username, password)
 
-    vid.set_vid_attributes(attributes)
+    vid_tst_obj.set_vid_attributes(attributes)
     vid_tst_obj.check()
 
     test_util.test_pass('success test 3 admins attributes!')
