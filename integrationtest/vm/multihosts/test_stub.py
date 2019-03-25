@@ -6,6 +6,7 @@ Create an unified test_stub to share test operations
 '''
 import os
 import random
+import commands
 import apibinding.api_actions as api_actions
 import zstackwoodpecker.test_util  as test_util
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
@@ -21,11 +22,15 @@ import zstackwoodpecker.operations.scenario_operations as sce_ops
 import zstackwoodpecker.header.host as host_header
 import apibinding.inventory as inventory
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
+import zstackwoodpecker.operations.datamigrate_operations as datamigr_ops
+import zstackwoodpecker.operations.volume_operations as vol_ops
+import zstackwoodpecker.zstack_test.zstack_test_image as test_image
 import zstackwoodpecker.operations.ha_operations as ha_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.vpc_operations as vpc_ops
 import zstackwoodpecker.header.vm as vm_header
 import zstacklib.utils.xmlobject as xmlobject
+import zstacklib.utils.ssh as ssh
 import threading
 import time
 import sys
@@ -1901,3 +1906,275 @@ def wait_until_vm_reachable(vm, timeout=120):
             break
         else:
             time.sleep(interval)
+
+
+class MultiSharedPS(object):
+    def __init__(self):
+        self.vm = []
+        self.image = None
+        self.data_volume = None
+        self.ceph = None
+        self.san = []
+        self.bs = []
+        self.ps = []
+#         self.l3_name =  os.getenv('l3PublicNetworkName')
+        self.l3_name = os.getenv('l3VlanNetworkName1')
+        self.image_name_net = os.getenv('imageName_net')
+        self.sp_tree = {}
+        self.ps_type_dict = None
+        self.ps_types = []
+        self.snapshot = {}
+        self.test_obj_dict = None
+        self.vol_uuid = None
+
+    def create_vm(self, vm_name=None, image_name=None, l3_name=None, ceph_image=False, with_data_vol=False, one_volume=False,
+                  reverse=False, set_ps_uuid=True, ps_type=None, except_ps_type=None):
+        vm_name = vm_name if vm_name else 'multi_shared_ps_test_vm'
+        image_name = image_name if image_name else self.image_name_net
+        l3_name = l3_name if l3_name else self.l3_name
+        vm_creation_option = test_util.VmOption()
+        if ceph_image:
+            image_uuid = test_lib.lib_get_image_by_name(image_name, 'Ceph').uuid
+        else:
+            image_uuid = test_lib.lib_get_image_by_name(image_name, 'ImageStoreBackupStorage').uuid
+        l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+        conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+        instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+        vm_creation_option.set_l3_uuids([l3_net_uuid])
+        vm_creation_option.set_image_uuid(image_uuid)
+        vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+        vm_creation_option.set_name(vm_name)
+        cond_ps = res_ops.gen_query_conditions('status', '=', 'Connected')
+        cond_ps = res_ops.gen_query_conditions('state', '=', 'Enabled', cond_ps)
+        all_vail_ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond_ps)
+        self.ps_type_dict = {ps.type: [] for ps in all_vail_ps}
+        map(lambda x: self.ps_type_dict[x[0]].append(x[1]), [(ps.type, ps.uuid) for ps in all_vail_ps])
+        if set_ps_uuid:
+            self.ps_types = sorted(self.ps_type_dict.keys()) if not self.ps_types else self.ps_types
+            if reverse:
+                self.ps_types.reverse()
+            ps_type = ps_type if ps_type else self.ps_types[0]
+            if except_ps_type:
+                ps_uuid_for_root_vol = self.get_ps(except_type=except_ps_type)
+            else:
+                ps_uuid_for_root_vol = random.choice(self.ps_type_dict[ps_type])
+            if with_data_vol:
+                self.ps_types.remove(ps_type)
+                ps_uuid_for_data_vol = random.choice(self.ps_type_dict[random.choice(self.ps_types)])
+                systags = ["primaryStorageUuidForDataVolume::%s" % ps_uuid_for_data_vol]
+                if one_volume:
+                    disk_offering1 = test_lib.lib_get_disk_offering_by_name(os.environ.get('largeDiskOfferingName'))
+                    disk_offering_uuids = [disk_offering1.uuid]
+                    system_tags=["virtio::diskOffering::%s::num::1" % (disk_offering1.uuid)]
+                else:
+                    disk_offering1 = test_lib.lib_get_disk_offering_by_name(os.environ.get('mediumDiskOfferingName'))
+                    disk_offering_uuids = [disk_offering1.uuid]
+                    disk_offering2 = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
+                    disk_offering_uuids.append(disk_offering2.uuid)
+                    disk_offering_uuids.append(disk_offering2.uuid)
+                    disk_offering_uuids.append(disk_offering2.uuid)
+                    system_tags=["virtio::diskOffering::%s::num::2" % (disk_offering2.uuid) ,"virtio::diskOffering::%s::num::1" % (disk_offering1.uuid)]
+                system_tags.extend(systags)
+                vm_creation_option.set_system_tags(system_tags)
+                vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
+            vm_creation_option.set_ps_uuid(ps_uuid_for_root_vol)
+        vm_creation_option.set_timeout(900000)
+        vm = test_vm_header.ZstackTestVm()
+        vm.set_creation_option(vm_creation_option)
+        vm.create()
+        vm.check()
+        if with_data_vol:
+            vol_uuid = [vol for vol in vm.vm.allVolumes if vol.type == 'Data'][0].uuid
+            volume = res_ops.query_resource(res_ops.VOLUME, res_ops.gen_query_conditions('uuid', '=', vol_uuid))[0]
+            self.data_volume = zstack_volume_header.ZstackTestVolume()
+            self.data_volume.set_volume(volume)
+            self.data_volume.set_target_vm(vm)
+        self.vm.append(vm)
+
+    def check_vol_seperated(self):
+        ps_uuids = {vol.primaryStorageUuid for vol in self.vm[0].vm.allVolumes}
+        assert len(ps_uuids) > 1
+
+    def copy_data(self, vm):
+        vm_ip = vm.get_vm().vmNics[0].ip
+        test_lib.lib_wait_target_up(vm_ip, '22', timeout=600)
+        cmd = "find /home -iname 'zstack-woodpecker.*'"
+        file_path = commands.getoutput(cmd).split('\n')[0]
+        file_name = os.path.basename(file_path)
+        dst_file = os.path.join('/mnt', file_name)
+        src_file_md5 = commands.getoutput('md5sum %s' % file_path).split(' ')[0]
+        ssh.scp_file(file_path, dst_file, vm_ip, 'root', 'password')
+        (_, dst_md5, _)= ssh.execute('sync; sync; sleep 30; md5sum %s' % dst_file, vm_ip, 'root', 'password')
+        dst_file_md5 = dst_md5.split(' ')[0]
+        test_util.test_dsc('src_file_md5: [%s], dst_file_md5: [%s]' % (src_file_md5, dst_file_md5))
+        assert dst_file_md5 == src_file_md5, 'dst_file_md5 [%s] and src_file_md5 [%s] is not match, stop test' % (src_file_md5, dst_file_md5)
+        return self
+
+    def check_data(self, vm):
+        vm_ip = vm.get_vm().vmNics[0].ip
+        test_lib.lib_wait_target_up(vm_ip, '22', timeout=600)
+        check_cmd = "if [ ! -d /mnt/zstackwoodpecker ];then tar xvf /mnt/zstack-woodpecker.tar -C /mnt > /dev/null 2>&1; fi; \
+                     grep scenario_config_path /mnt/zstackwoodpecker/zstackwoodpecker/test_lib.py > /dev/null 2>&1 && echo 0 || echo 1"
+        (_, ret, _)= ssh.execute(check_cmd, vm_ip, 'root', 'password')
+        ret = ret.split('\n')[0]
+        assert ret == '0', "data check failed!, the return code is %s, 0 is expected" % ret
+        return self
+
+    def get_ps_candidate(self, vol_uuid=None):
+        if not vol_uuid:
+            vol_uuid = self.vm[0].vm.rootVolumeUuid
+        ps_to_migrate = random.choice(datamigr_ops.get_ps_candidate_for_vol_migration(vol_uuid))
+        return ps_to_migrate
+
+    def migrate_data_volume(self):
+        self.dst_ps = self.get_ps_candidate(self.data_volume.get_volume().uuid)
+        vol_migr_inv = datamigr_ops.ps_migrage_data_volume(self.dst_ps.uuid, self.data_volume.get_volume().uuid)
+        conditions = res_ops.gen_query_conditions('uuid', '=', vol_migr_inv.uuid)
+        self.data_volume.set_volume(res_ops.query_resource(res_ops.VOLUME, conditions)[0])
+        assert self.data_volume.get_volume().primaryStorageUuid == self.dst_ps.uuid
+        self.set_ceph_mon_env(self.dst_ps.uuid)
+
+    def migrate_vm(self, vm=None):
+        if not vm:
+            vm = [self.vm[0]]
+        for vmobj in vm:
+            ps_to_migrate = self.get_ps_candidate(vmobj.get_vm().rootVolumeUuid)
+            datamigr_ops.ps_migrage_root_volume(ps_to_migrate.uuid, vmobj.get_vm().rootVolumeUuid)
+            vmobj.update()
+
+    def resize_vm(self, new_size):
+        self.root_vol_uuid = self.vm.vm.rootVolumeUuid
+        vol_ops.resize_volume(self.root_vol_uuid, new_size)
+        conditions = res_ops.gen_query_conditions('uuid', '=', self.vm.vm.uuid)
+        self.vm.vm = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)[0]
+        return self
+
+    def set_ceph_mon_env(self, ps_uuid):
+        cond_vol = res_ops.gen_query_conditions('uuid', '=', ps_uuid)
+        ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond_vol)[0]
+        if ps.type.lower() == 'ceph':
+            ps_mon_ip = ps.mons[0].monAddr
+            os.environ['cephBackupStorageMonUrls'] = 'root:password@%s' % ps_mon_ip
+
+    def get_bs(self, bs_type):
+        conditions = res_ops.gen_query_conditions('type', '=', bs_type)
+        bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, conditions)[0]
+        return bs
+
+    def get_ps(self, ps_type=None, except_type=None):
+        if ps_type:
+            conditions = res_ops.gen_query_conditions('type', '=', ps_type)
+            ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, conditions)
+            return ps[0]
+        elif except_type:
+            conditions = res_ops.gen_query_conditions('type', '!=', except_type)
+            ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, conditions)
+            return random.choice(ps)
+        else:
+            ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+            return random.choice(ps)
+
+    def mount_disk_in_vm(self, vm):
+        import tempfile
+        test_lib.lib_wait_target_up(vm.get_vm().vmNics[0].ip, '22', timeout=600)
+        script_file = tempfile.NamedTemporaryFile(delete=False)
+#         script_file.write('''device="/dev/`ls -ltr --file-type /dev | awk '$4~/disk/ {print $NF}' | grep -v '[[:digit:]]'| sort | tail -1`" \n mount ${device}1 /mnt''')
+        script_file.write('''device="/dev/`ls -ltr --file-type /dev | awk '$4~/disk/ {print $NF}' | tail -1`" \n mount ${device} /mnt''')
+        script_file.close()
+        test_lib.lib_execute_shell_script_in_vm(vm.vm, script_file.name)
+        return self
+
+    def create_image(self, vm=None, data_volume=None, imagestore=True):
+        if imagestore:
+            bs = self.get_bs('ImageStoreBackupStorage')
+        else:
+            bs = self.get_bs('Ceph')
+        image_creation_option = test_util.ImageOption()
+        image_creation_option.set_timeout(600000)
+        image_creation_option.set_backup_storage_uuid_list([bs.uuid])
+        if vm:
+            self._image_name = 'root-volume-created-image-%s' % time.strftime('%y%m%d-%H%M%S', time.localtime())
+            image_creation_option.set_root_volume_uuid(vm.vm.rootVolumeUuid)
+            root = True
+        else:
+            self._image_name = 'data-volume-created-image-%s' % time.strftime('%y%m%d-%H%M%S', time.localtime())
+            image_creation_option.set_data_volume_uuid(data_volume.get_volume().uuid)
+            root = False
+        image_creation_option.set_name(self._image_name)
+        self._image = test_image.ZstackTestImage()
+        self._image.set_creation_option(image_creation_option)
+        self._image.create(root=root)
+        self.image = self._image.image
+        if bs.type.lower() == 'ceph':
+            bs_mon_ip = bs.mons[0].monAddr
+            os.environ['cephBackupStorageMonUrls'] = 'root:password@%s' % bs_mon_ip
+#         self._image.check()
+
+    def create_data_volume(self, shared=False, vms=[], from_offering=True, ps_type=None, except_ps_type=None):
+        conditions = res_ops.gen_query_conditions('name', '=', os.getenv('largeDiskOfferingName'))
+        disk_offering_uuid = res_ops.query_resource(res_ops.DISK_OFFERING, conditions)[0].uuid
+        volume_option = test_util.VolumeOption()
+        if from_offering:
+            volume_option.set_disk_offering_uuid(disk_offering_uuid)
+        else:
+            volume_option.set_volume_template_uuid(self.image.uuid)
+        volume_option.set_name('multi_ps_data_volume')
+        if ps_type:
+            ps_uuid = self.get_ps(ps_type).uuid
+            volume_option.set_primary_storage_uuid(ps_uuid)
+            self.set_ceph_mon_env(ps_uuid)
+        elif except_ps_type:
+                ps = self.get_ps(except_type=except_ps_type)
+                ps_type = ps.type
+                volume_option.set_primary_storage_uuid(ps.uuid)
+        if shared:
+            if ps_type == 'SharedBlock':
+                sys_tags = ['ephemeral::shareable', 'capability::virtio-scsi', 'volumeProvisioningStrategy::ThickProvisioning']
+            else:
+                sys_tags = ['ephemeral::shareable', 'capability::virtio-scsi']
+            volume_option.set_system_tags(sys_tags)
+        self.data_volume = create_volume(volume_option, from_offering=from_offering)
+        if vms:
+            for vm in vms:
+                self.data_volume.attach(vm)
+#         self.data_volume.check()
+        if from_offering:
+            test_lib.lib_mkfs_for_volume(self.data_volume.get_volume().uuid, vms[0].vm, '/mnt')
+        return self
+
+    def create_snapshot(self, vm=None, data_volume=None):
+        if not self.test_obj_dict:
+            self.test_obj_dict = test_state.TestStateDict()
+        if vm:
+            vol_uuid = vm.vm.rootVolumeUuid
+            self.test_obj_dict.add_vm(vm)
+        elif data_volume:
+            self.test_obj_dict.add_volume(data_volume)
+            vol_uuid = data_volume.get_volume().uuid
+        self.snapshots = self.test_obj_dict.get_volume_snapshot(vol_uuid) if self.vol_uuid != vol_uuid else self.snapshots
+        self.vol_uuid = vol_uuid
+        self.snapshots.set_utility_vm(self.vm[0])
+        self.snapshots.create_snapshot('snapshot-%s' % time.strftime('%m%d-%H%M%S', time.localtime()))
+        self.snapshots.check()
+        curr_sp = self.snapshots.get_current_snapshot()
+        self.snapshot[vol_uuid] = curr_sp
+
+    def delete_snapshot(self, vol_uuid):
+        snapshot = self.snapshot[vol_uuid]
+        self.snapshot.pop(vol_uuid)
+        self.snapshots.delete_snapshot(snapshot)
+        for vol in self.snapshot.keys():
+            cond = res_ops.gen_query_conditions('volumeUuid', '=', vol)
+            assert res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, cond)
+        return self
+
+    def revert_sp(self, vol_uuid):
+        sp = self.snapshot[vol_uuid]
+        for vm in self.vm:
+            vm.stop()
+        self.snapshots.use_snapshot(sp)
+        return self
+
+    def sp_check(self):
+        self.snapshots.check()
+        return self
