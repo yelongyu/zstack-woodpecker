@@ -3264,6 +3264,18 @@ def lib_get_image_by_desc(img_desc):
         if image.description == img_desc:
             return image
 
+def lib_get_ready_image_by_name(img_name, bs_type=None):
+    cond = res_ops.gen_query_conditions('name', '=', img_name)
+    cond = res_ops.gen_query_conditions('status', '=', 'Ready', cond)
+    cond = res_ops.gen_query_conditions('state', '=', 'Enabled', cond)
+    images = res_ops.query_resource(res_ops.IMAGE, cond)
+    if bs_type:
+        images = [img for img in images if res_ops.query_resource(res_ops.BACKUP_STORAGE, res_ops.gen_query_conditions('uuid', '=', img.backupStorageRefs[0].backupStorageUuid))[0].type == bs_type]
+    if images:
+        return random.choice(images)
+    test_util.test_logger("not find image with name: %s" % img_name)
+    return False
+
 def lib_get_image_by_name(img_name, bs_type=None):
     cond = res_ops.gen_query_conditions('name', '=', img_name)
     images = res_ops.query_resource(res_ops.IMAGE, cond)

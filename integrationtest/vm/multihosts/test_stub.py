@@ -95,7 +95,7 @@ def create_vm(vm_name, image_name, l3_name, host_uuid = None, disk_offering_uuid
 
 def create_vm_with_instance_offering(vm_name, image_name, l3_name, instance_offering):
     vm_creation_option = test_util.VmOption()
-    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    image_uuid = test_lib.lib_get_ready_image_by_name(image_name).uuid
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     vm_creation_option.set_l3_uuids([l3_net_uuid])
     vm_creation_option.set_image_uuid(image_uuid)
