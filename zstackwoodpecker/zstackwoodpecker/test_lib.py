@@ -4908,6 +4908,7 @@ def lib_vm_random_operation(robot_test_obj):
         if not target_host:
             test_util.test_logger('no avaiable host was found for doing vm migration')
         else:
+            import zstackwoodpecker.operations.volume_operations as vol_ops
             vol_ops.migrate_volume(root_volume_uuid, target_host.uuid)
 
     elif next_action == TestAction.idel :
