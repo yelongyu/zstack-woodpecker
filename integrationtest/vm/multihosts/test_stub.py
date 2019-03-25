@@ -1741,7 +1741,7 @@ def vm_ops_test(vm_obj, vm_ops_test_choice="VM_TEST_NONE"):
         test_util.test_dsc("@@@_FUNC_:vm_ops_test   @@@_IF_BRANCH_:VM_TEST_ALL|VM_TEST_RESIZE_RVOL")
         vol_size = test_lib.lib_get_root_volume(vm_obj.get_vm()).size
         volume_uuid = test_lib.lib_get_root_volume(vm_obj.get_vm()).uuid
-        set_size = 1024*1024*1024*15
+        set_size = 1024*1024*1024*45
         vm_obj.stop()
         vm_obj.check()
         vol_ops.resize_volume(volume_uuid, set_size)
