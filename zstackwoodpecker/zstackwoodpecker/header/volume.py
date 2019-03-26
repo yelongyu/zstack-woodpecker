@@ -118,10 +118,11 @@ class TestVolume(zstack_header.ZstackObject):
         return self.storage_state
 
     def get_target_vm(self):
+        return self.target_vm
+
+    def get_target_vms(self):
         if str(self.get_volume().isShareable).strip().lower() == "true":
-            return self.sharable_target_vms[0] if self.sharable_target_vms else None
-        else:
-            return self.target_vm
+            return self.sharable_target_vms
 
     def set_delete_policy(self, policy):
         self.delete_policy = policy

@@ -101,7 +101,7 @@ class ZstackTestVolume(volume_header.TestVolume):
     def update(self):
         if self.state == volume_header.ATTACHED:
             if test_lib.lib_is_sharable_volume(self.get_volume()):
-                for vm in self.get_target_vm():
+                for vm in self.get_target_vms():
                     if vm.get_state() == vm_header.DESTROYED \
                             or vm.get_state() == vm_header.EXPUNGED:
                         if self.get_volume().type != 'Root':

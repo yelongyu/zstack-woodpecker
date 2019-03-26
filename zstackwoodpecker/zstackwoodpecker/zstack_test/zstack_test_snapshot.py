@@ -191,6 +191,10 @@ umount %s
             test_util.test_logger('Can not add checking point file for Root Volume: %s, since it can not be detached and reattached to utility vm for checking.' % volume.uuid)
             return
 
+        if test_lib.lib_is_sharable_volume(volume):
+            test_util.test_logger('Can not add checking point file for Sharable Volume: %s' % volume.uuid)
+            return
+
         volume_vm = volume_obj.get_target_vm()
         #check if volume has been attached to the living VM.
         if volume_obj.get_state() == volume_header.ATTACHED:
@@ -516,6 +520,10 @@ class ZstackTestSnapshot(sp_header.TestSnapshot):
             test_util.test_logger('Can not add checking point file for Root Volume: %s, since it can not be detached and reattached to utility vm for checking.' % volume.uuid)
             return
 
+        if test_lib.lib_is_sharable_volume(volume):
+            test_util.test_logger('Can not add checking point file for Sharable Volume: %s' % volume.uuid)
+            return
+
         volume_vm = volume_obj.get_target_vm()
         #check if volume has been attached to the living VM.
         if volume_obj.get_state() == volume_header.ATTACHED:
@@ -640,7 +648,7 @@ be created to a new data volume' % self.target_volume.get_volume().uuid)
         volume_obj.set_volume(volume_inv)
         volume_obj.set_state(volume_header.DETACHED)
         #ROOT Volume won't create checking point. So skip.
-        if self.get_volume_type() != volume_header.ROOT_VOLUME:
+        if self.get_volume_type() != volume_header.ROOT_VOLUME and not test_lib.lib_is_sharable_volume(self.get_target_volume().get_volume()):
             volume_obj.set_original_checking_points(self.get_checking_points())
         return volume_obj
 
@@ -670,7 +678,7 @@ not be created to a new template' % \
         img_obj.set_image(img_inv)
         img_obj.set_state(image_header.CREATED)
         #ROOT Volume won't create checking point. So skip.
-        if self.get_volume_type() != volume_header.ROOT_VOLUME:
+        if self.get_volume_type() != volume_header.ROOT_VOLUME and not test_lib.lib_is_sharable_volume(self.get_target_volume().get_volume()):
             img_obj.set_original_checking_points(self.get_checking_points())
         return img_obj
 
