@@ -29,7 +29,7 @@ def test():
 
     #change the vm's mem when host's cpu negative number
     test_util.test_logger('change the vm mem when host cpu negative number')
-    big_cpu = 30
+    big_cpu = 20
     vm_ops.update_vm(vm_uuid, cpu=big_cpu)   
     conf_ops.change_global_config('host', 'cpu.overProvisioning.ratio', '5')
     new_mem = 2*1024*1024*1024
@@ -40,12 +40,12 @@ def test():
     conf_ops.change_global_config('mevoco', 'overProvisioning.memory', '3')
     vm.stop()
     small_cpu = 2
-    big_mem = 10*1024*1024*1024
+    big_mem = 6*1024*1024*1024
     vm_ops.update_vm(vm_uuid, cpu=small_cpu,  memory=big_mem)
 
     vm.start()
     conf_ops.change_global_config('mevoco', 'overProvisioning.memory', '1')
-    new_cpu = 4
+    new_cpu = 2
     vm_ops.update_vm(vm_uuid, cpu=new_cpu)
 
     #change the vm's cpu when host's memory  negative number
