@@ -832,12 +832,14 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         else:
             try:
                 vm_ops.destroy_vm(vm_uuid, session_uuid=project_login_session_uuid)
-                test_util.test_fail("destroy_vm should not be runned")
+                test_util.test_logger("destroy_vm should not be runned")
+                return 1
             except Exception as e:
                 pass
             try:
                 vm_ops.expunge_vm(vm_uuid, session_uuid=project_login_session_uuid)
-                test_util.test_fail("expunge_vm should not be runned")
+                test_util.test_logger("expunge_vm should not be runned")
+                return 1
             except Exception as e:
                 pass
 
@@ -929,14 +931,16 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         else:
             try:
                 img_ops.delete_image(image_uuid, session_uuid=project_login_session_uuid)
-                test_util.test_fail("delete_image should not be runned")
+                test_util.test_logger("delete_image should not be runned")
+                return 1
             except Exception as e:
                 pass
             try:
                 img_ops.expunge_image(image_uuid, session_uuid=project_login_session_uuid)
-                test_util.test_fail("expunge_image should not be runned")
+                test_util.test_logger("expunge_image should not be runned")
+                return 1
             except Exception as e:
-                return self.judge(True)
+                pass
         return self.judge(True)
 
     def check_snapshot(self):
@@ -1014,31 +1018,36 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         else:
             try:
                 vol_ops.delete_snapshot(snapshot_uuid, project_login_session_uuid)
-                test_util.test_fail("delete_snapshot should not be runned")
+                test_util.test_logger("delete_snapshot should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 vol_ops.delete_volume(data_volume.uuid)
-                test_util.test_fail("delete_volume should not be runned")
+                test_util.test_logger("delete_volume should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 vol_ops.expunge_volume(data_volume.uuid)
-                test_util.test_fail("expunge_volume should not be runned")
+                test_util.test_logger("expunge_volume should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 vm_ops.destroy_vm(vm_uuid)
-                test_util.test_fail("destroy_vm should not be runned")
+                test_util.test_logger("destroy_vm should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 vm_ops.expunge_vm(vm_uuid)
-                test_util.test_fail("expunge_vm should not be runned")
+                test_util.test_logger("expunge_vm should not be runned")
+                return 1
             except Exception as e:
                 pass
 
@@ -1111,26 +1120,29 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         else:
             try:
                 vol_ops.delete_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
-                test_util.test_fail("delete_volume should not be runned")
+                test_util.test_logger("delete_volume should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 vol_ops.expunge_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
-                test_util.test_fail("expunge_volume should not be runned")
-                return self.judge(False)
+                test_util.test_logger("expunge_volume should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 vm_ops.destroy_vm(vm_uuid)
-                test_util.test_fail("destroy_vm should not be runned")
+                test_util.test_logger("destroy_vm should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 vm_ops.expunge_vm(vm_uuid)
-                test_util.test_fail("expunge_vm should not be runned")
+                test_util.test_logger("expunge_vm should not be runned")
+                return 1
             except Exception as e:
                 pass
 
@@ -1188,20 +1200,22 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         else:
             try:
                 ag_ops.delete_affinity_group(ag_uuid, session_uuid=project_login_session_uuid)
-                test_util.test_fail("delete_affinity_group should not be runned")
+                test_util.test_logger("delete_affinity_group should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 vm_ops.destroy_vm(vm_uuid)
-                test_util.test_fail("destroy_vm should not be runned")
-                return self.judge(False)
+                test_util.test_logger("destroy_vm should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 vm_ops.expunge_vm(vm_uuid)
-                test_util.test_fail("expunge_vm should not be runned")
+                test_util.test_logger("expunge_vm should not be runned")
+                return 1
             except Exception as e:
                 pass
         return self.judge(True)
@@ -1245,20 +1259,23 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         else:
             try:
                 net_ops.delete_l3(l3_uuid, session_uuid=project_login_session_uuid)
-                test_util.test_fail("delete_l3 should not be runned")
+                test_util.test_logger("delete_l3 should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 if clear_vxlan_pool:
                     vxlan_ops.delete_vni_range(vni_uuid, session_uuid=project_login_session_uuid)
-                    test_util.test_fail("delete_vni_range should not be runned")
+                    test_util.test_logger("delete_vni_range should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 net_ops.delete_l2(vxlan_l2_uuid, session_uuid=project_login_session_uuid)
-                test_util.test_fail("delete_l2 should not be runned")
+                test_util.test_logger("delete_l2 should not be runned")
+                return 1
             except Exception as e:
                 pass
         
@@ -1333,25 +1350,29 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         else:
             try:
                 net_ops.delete_eip(eip.uuid)
-                test_util.test_fail("delete_eip should not be runned")
+                test_util.test_logger("delete_eip should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 net_ops.delete_vip(vip.uuid)
-                test_util.test_fail("delete_vip should not be runned")
+                test_util.test_logger("delete_vip should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 vm_ops.destroy_vm(vm_uuid)
-                test_util.test_fail("destroy_vm should not be runned")
+                test_util.test_logger("destroy_vm should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 vm_ops.expunge_vm(vm_uuid)
-                test_util.test_fail("expunge_vm should not be runned")
+                test_util.test_logger("expunge_vm should not be runned")
+                return 1
             except Exception as e:
                 pass
 
@@ -1442,19 +1463,22 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         else:
             try:
                 net_ops.delete_security_group(sg_uuid, session_uuid=project_login_session_uuid)
-                test_util.test_fail("delete_security_group should not be runned")
+                test_util.test_logger("delete_security_group should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 vm_ops.destroy_vm(vm_uuid)
-                test_util.test_fail("destroy_vm should not be runned")
+                test_util.test_logger("destroy_vm should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 vm_ops.expunge_vm(vm_uuid)
-                test_util.test_fail("expunge_vm should not be runned")
+                test_util.test_logger("expunge_vm should not be runned")
+                return 1
             except Exception as e:
                 pass
 
@@ -1549,31 +1573,36 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         else:
             try:
                 net_ops.delete_load_balancer_listener(lbl_uuid, session_uuid=project_login_session_uuid)
-                test_util.test_fail("delete_load_balancer_listener should not be runned")
+                test_util.test_logger("delete_load_balancer_listener should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 net_ops.delete_load_balancer(lb_uuid, session_uuid=project_login_session_uuid)
-                test_util.test_fail("delete_load_balancer should not be runned")
+                test_util.test_logger("delete_load_balancer should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 net_ops.delete_vip(vip.uuid)
-                test_util.test_fail("delete_vip should not be runned")
+                test_util.test_logger("delete_vip should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 vm_ops.destroy_vm(vm_uuid)
-                test_util.test_fail("destroy_vm should not be runned")
+                test_util.test_logger("destroy_vm should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 vm_ops.expunge_vm(vm_uuid)
-                test_util.test_fail("expunge_vm should not be runned")
+                test_util.test_logger("expunge_vm should not be runned")
+                return 1
             except Exception as e:
                 pass
 
@@ -1668,25 +1697,29 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         else:
             try:
                 net_ops.delete_port_forwarding(pf_rule_uuid, session_uuid=project_login_session_uuid)
-                test_util.test_fail("delete_port_forwarding should not be runned")
+                test_util.test_logger("delete_port_forwarding should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 net_ops.delete_vip(vip.uuid)
-                test_util.test_fail("delete_vip should not be runned")
+                test_util.test_logger("delete_vip should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 vm_ops.destroy_vm(vm_uuid)
-                test_util.test_fail("destroy_vm should not be runned")
+                test_util.test_logger("destroy_vm should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 vm_ops.expunge_vm(vm_uuid)
-                test_util.test_fail("expunge_vm should not be runned")
+                test_util.test_logger("expunge_vm should not be runned")
+                return 1
             except Exception as e:
                 pass
 
@@ -1754,13 +1787,15 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         else:
             try:
                 schd_ops.del_scheduler_job(schd_job.uuid, session_uuid=project_login_session_uuid)
-                test_util.test_fail("del_scheduler_job should not be runned with project_login_session_uuid")
+                test_util.test_logger("del_scheduler_job should not be runned with project_login_session_uuid")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 schd_ops.del_scheduler_trigger(schd_trigger.uuid, session_uuid=project_login_session_uuid)
-                test_util.test_fail("del_scheduler_trigger should not be runned with project_login_session_uuid")
+                test_util.test_logger("del_scheduler_trigger should not be runned with project_login_session_uuid")
+                return 1
             except Exception as e:
                 pass
 
@@ -1768,13 +1803,15 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
 
             try:
                 vm_ops.destroy_vm(vm_uuid)
-                test_util.test_fail("destroy_vm should not be runned")
+                test_util.test_logger("destroy_vm should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 vm_ops.expunge_vm(vm_uuid)
-                test_util.test_fail("expunge_vm should not be runned")
+                test_util.test_logger("expunge_vm should not be runned")
+                return 1
             except Exception as e:
                 pass
 
@@ -1831,37 +1868,43 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         else:
             try:
                 zwt_ops.delete_alarm(alarm_uuid, session_uuid=project_login_session_uuid) 
-                test_util.test_fail("delete_alarm should not be runned")
+                test_util.test_logger("delete_alarm should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 zwt_ops.unsubscribe_event(event_sub_uuid, session_uuid=project_login_session_uuid)
-                test_util.test_fail("unsubscribe_event should not be runned")
+                test_util.test_logger("unsubscribe_event should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 zwt_ops.unsubscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
-                test_util.test_fail("unsubscribe_sns_topic should not be runned")
+                test_util.test_logger("unsubscribe_sns_topic should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 zwt_ops.delete_sns_topic(sns_topic_uuid, session_uuid=project_login_session_uuid)
-                test_util.test_fail("delete_sns_topic should not be runned")
+                test_util.test_logger("delete_sns_topic should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 zwt_ops.delete_sns_topic(sns_topic_uuid1, session_uuid=project_login_session_uuid)
-                test_util.test_fail("delete_sns_topic should not be runned")
+                test_util.test_logger("delete_sns_topic should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 zwt_ops.delete_sns_application_endpoint(http_endpoint_uuid, session_uuid=project_login_session_uuid)
-                test_util.test_fail("delete_sns_application_endpoint should not be runned")
+                test_util.test_logger("delete_sns_application_endpoint should not be runned")
+                return 1
             except Exception as e:
                 pass
 
@@ -1912,37 +1955,43 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         else:
             try:
                 zwt_ops.delete_alarm(alarm_uuid)
-                test_util.test_fail("delete_alarm should not be runned")
+                test_util.test_logger("delete_alarm should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 zwt_ops.unsubscribe_event(event_sub_uuid)
-                test_util.test_fail("unsubscribe_event should not be runned")
+                test_util.test_logger("unsubscribe_event should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 zwt_ops.unsubscribe_sns_topic(sns_topic_uuid, http_endpoint_uuid, session_uuid=project_login_session_uuid)
-                test_util.test_fail("unsubscribe_sns_topic should not be runned")
+                test_util.test_logger("unsubscribe_sns_topic should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 zwt_ops.delete_sns_topic(sns_topic_uuid, session_uuid=project_login_session_uuid)
-                test_util.test_fail("delete_sns_topic should not be runned")
+                test_util.test_logger("delete_sns_topic should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 zwt_ops.delete_sns_topic(sns_topic_uuid1, session_uuid=project_login_session_uuid)
-                test_util.test_fail("delete_sns_topic should not be runned")
+                test_util.test_logger("delete_sns_topic should not be runned")
+                return 1
             except Exception as e:
                 pass
 
             try:
                 zwt_ops.delete_sns_application_endpoint(http_endpoint_uuid, session_uuid=project_login_session_uuid)
-                test_util.test_fail("delete_sns_application_endpoint should not be runned")
+                test_util.test_logger("delete_sns_application_endpoint should not be runned")
+                return 1
             except Exception as e:
                 pass
 
@@ -1950,20 +1999,62 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
 
     def check_no_delete_admin_permission(self):
         test_util.test_logger("check_no_delete_admin_permission")
-        self.check_vm_operation()
-        self.check_image_operation()
-        self.check_snapshot()
-        self.check_volume_operation()
-        self.check_affinity_group()
-        self.check_networks()
-        self.check_eip()
-        self.check_security_group()
-        self.check_load_balancer()
-        self.check_port_forwarding()
-        self.check_scheduler()
-        self.check_pci()
-        self.check_zwatch()
-        self.check_sns()
+        retCode = self.check_vm_operation()
+        if retCode == 1:
+            test_util.test_fail("check_vm_operation failed")
+
+        retCode = self.check_image_operation()
+        if retCode == 1:
+            test_util.test_fail("check_image_operation failed")
+
+        retCode = self.check_snapshot()
+        if retCode == 1:
+            test_util.test_fail("check_snapshot failed")
+
+        retCode = self.check_volume_operation()
+        if retCode == 1:
+            test_util.test_fail("check_volume_operation failed")
+
+        retCode = self.check_affinity_group()
+        if retCode == 1:
+            test_util.test_fail("check_affinity_group failed")
+
+        retCode = self.check_networks()
+        if retCode == 1:
+            test_util.test_fail("check_networks failed")
+
+        retCode = self.check_eip()
+        if retCode == 1:
+            test_util.test_fail("check_eip failed")
+
+        retCode = self.check_security_group()
+        if retCode == 1:
+            test_util.test_fail("check_security_group failed")
+
+        retCode = self.check_load_balancer()
+        if retCode == 1:
+            test_util.test_fail("check_load_balancer failed")
+
+        retCode = self.check_port_forwarding()
+        if retCode == 1:
+            test_util.test_fail("check_port_forwarding failed")
+
+        retCode = self.check_scheduler()
+        if retCode == 1:
+            test_util.test_fail("check_scheduler failed")
+
+        retCode = self.check_pci()
+        if retCode == 1:
+            test_util.test_fail("check_pci failed")
+
+        retCode = self.check_zwatch()
+        if retCode == 1:
+            test_util.test_fail("check_zwatch failed")
+
+        retCode = self.check_sns()
+        if retCode == 1:
+            test_util.test_fail("check_sns failed")
+
 
     def check(self):
         super(zstack_vid_policy_checker, self).check()
