@@ -261,7 +261,9 @@ def test():
     if ps.type == "AliyunNAS":
         test_util.test_skip("VolumeBackup does not support AliyunNAS for now")
     if ps.type != inventory.LOCAL_STORAGE_TYPE and 'VM_TEST_MIGRATE' in VM_OP and "VM_TEST_STOP" in STATE_OP:
-        test_util.test_skip("Shared Storage does not support migration")
+        test_util.test_skip("Shared Storage does not support cold migration")
+    if ps.type == inventory.LOCAL_STORAGE_TYPE and 'VM_TEST_MIGRATE' in VM_OP and "VM_TEST_NONE" in STATE_OP:
+        test_util.test_skip("Local Storage does not support live migration")
 
     vm_name = "test_vm"
     cond = res_ops.gen_query_conditions("system", '=', "false")
