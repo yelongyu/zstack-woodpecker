@@ -2496,13 +2496,13 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 
     if hasattr(scenario_config.deployerConfig, 'hosts'):
         class HostVmThread(Thread):
-            def __init__(self, vm, iscsi_initiator):
+            def __init__(self, vm):
                 super(HostVmThread, self).__init__()
                 self.exitcode = 0
                 self.exception = None
                 self.exc_traceback = ''
                 self.vm = vm
-                self.iscsi_initiator_to_setup = iscsi_initiator
+                self.iscsi_initiator_to_setup = {}
 
             def run(self):
                 try:
@@ -2775,15 +2775,18 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
         thread_list = []
         for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
             for vm in xmlobject.safe_list(host.vms.vm):
-                thread_list.append(HostVmThread(vm, iscsi_initiator_to_setup))
+                thread_list.append(HostVmThread(vm))
 
         for vm_thread in thread_list:
             vm_thread.start()
 
         for vm_thrd in thread_list:
             vm_thrd.join()
+            if vm_thrd.iscsi_initiator_to_setup:
+                for ky in vm_thrd.iscsi_initiator_to_setup.keys:
+                    iscsi_initiator_to_setup[ky] = iscsi_initiator_to_setup[ky]
             if vm_thrd.exitcode != 0:
-                test_util.test_logger('Error happened while preparing host vm: [%s]' % vm_thrd.vm.name_)
+                test_util.test_fail('Error happened while preparing host vm: [%s]' % vm_thrd.vm.name_)
                 print('----------------------Exception Reason------------------------')
                 print(vm_thrd.exc_traceback)
                 print('-------------------------Reason End---------------------------\n')
