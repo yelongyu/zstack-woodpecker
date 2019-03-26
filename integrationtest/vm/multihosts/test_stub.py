@@ -60,7 +60,7 @@ denied_ports = Port.get_denied_ports()
 #test_stub.denied_ports = [101, 4999, 8990, 15000, 30001, 49999]
 target_ports = rule1_ports + rule2_ports + rule3_ports + rule4_ports + rule5_ports + denied_ports
 
-def create_volume(volume_creation_option=None):
+def create_volume(volume_creation_option=None, from_offering=True):
     if not volume_creation_option:
         disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
         volume_creation_option = test_util.VolumeOption()
@@ -69,7 +69,7 @@ def create_volume(volume_creation_option=None):
 
     volume = zstack_volume_header.ZstackTestVolume()
     volume.set_creation_option(volume_creation_option)
-    volume.create()
+    volume.create(from_offering)
     return volume
 
 def create_vr_vm(vm_name, image_name, l3_name):
@@ -1926,6 +1926,7 @@ class MultiSharedPS(object):
         self.snapshot = {}
         self.test_obj_dict = None
         self.vol_uuid = None
+        self.snapshots = None
 
     def create_vm(self, vm_name=None, image_name=None, l3_name=None, ceph_image=False, with_data_vol=False, one_volume=False,
                   reverse=False, set_ps_uuid=True, ps_type=None, except_ps_type=None):
@@ -1955,7 +1956,7 @@ class MultiSharedPS(object):
                 self.ps_types.reverse()
             ps_type = ps_type if ps_type else self.ps_types[0]
             if except_ps_type:
-                ps_uuid_for_root_vol = self.get_ps(except_type=except_ps_type)
+                ps_uuid_for_root_vol = self.get_ps(except_type=except_ps_type).uuid
             else:
                 ps_uuid_for_root_vol = random.choice(self.ps_type_dict[ps_type])
             if with_data_vol:
@@ -1989,6 +1990,7 @@ class MultiSharedPS(object):
             self.data_volume = zstack_volume_header.ZstackTestVolume()
             self.data_volume.set_volume(volume)
             self.data_volume.set_target_vm(vm)
+            self.data_volume.check()
         self.vm.append(vm)
 
     def check_vol_seperated(self):
@@ -2137,30 +2139,32 @@ class MultiSharedPS(object):
         if vms:
             for vm in vms:
                 self.data_volume.attach(vm)
-#         self.data_volume.check()
+        self.data_volume.check()
         if from_offering:
             test_lib.lib_mkfs_for_volume(self.data_volume.get_volume().uuid, vms[0].vm, '/mnt')
         return self
 
-    def create_snapshot(self, vm=None, data_volume=None):
+    def create_snapshot(self, vol_uuid=None, vm=None, data_volume=None):
         if not self.test_obj_dict:
             self.test_obj_dict = test_state.TestStateDict()
-        if vm:
-            vol_uuid = vm.vm.rootVolumeUuid
-            self.test_obj_dict.add_vm(vm)
-        elif data_volume:
-            self.test_obj_dict.add_volume(data_volume)
-            vol_uuid = data_volume.get_volume().uuid
-        self.snapshots = self.test_obj_dict.get_volume_snapshot(vol_uuid) if self.vol_uuid != vol_uuid else self.snapshots
+        if not  vol_uuid:
+            if vm:
+                vol_uuid = vm.vm.rootVolumeUuid
+                self.test_obj_dict.add_vm(vm)
+            elif data_volume:
+                self.test_obj_dict.add_volume(data_volume)
+                vol_uuid = data_volume.get_volume().uuid
+        self.snapshots = self.test_obj_dict.get_volume_snapshot(vol_uuid)
         self.vol_uuid = vol_uuid
         self.snapshots.set_utility_vm(self.vm[0])
         self.snapshots.create_snapshot('snapshot-%s' % time.strftime('%m%d-%H%M%S', time.localtime()))
-        self.snapshots.check()
+#         self.snapshots.check()
         curr_sp = self.snapshots.get_current_snapshot()
         self.snapshot[vol_uuid] = curr_sp
 
     def delete_snapshot(self, vol_uuid):
         snapshot = self.snapshot[vol_uuid]
+        self.snapshots = self.test_obj_dict.get_volume_snapshot(vol_uuid)
         self.snapshot.pop(vol_uuid)
         self.snapshots.delete_snapshot(snapshot)
         for vol in self.snapshot.keys():
@@ -2172,7 +2176,11 @@ class MultiSharedPS(object):
         sp = self.snapshot[vol_uuid]
         for vm in self.vm:
             vm.stop()
+        self.snapshots = self.test_obj_dict.get_volume_snapshot(vol_uuid)
         self.snapshots.use_snapshot(sp)
+        for vm in self.vm:
+            vm.start()
+            vm.check()
         return self
 
     def sp_check(self):
