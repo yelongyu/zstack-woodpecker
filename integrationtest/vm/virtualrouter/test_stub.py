@@ -214,7 +214,7 @@ def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
             if system_tags and not [d for d in system_tags if "primaryStorageUuidForDataVolume" in d]:
                 system_tags.extend(systags)
             else:
-                system_tags = systags
+                system_tags = system_tags
     vm_creation_option.set_default_l3_uuid(default_l3_uuid)
     vm_creation_option.set_system_tags(system_tags)
     vm_creation_option.set_session_uuid(session_uuid)
