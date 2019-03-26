@@ -119,7 +119,7 @@ class TestVolume(zstack_header.ZstackObject):
 
     def get_target_vm(self):
         if str(self.get_volume().isShareable).strip().lower() == "true":
-            return self.sharable_target_vms
+            return self.sharable_target_vms[0] if self.sharable_target_vms else None
         else:
             return self.target_vm
 
