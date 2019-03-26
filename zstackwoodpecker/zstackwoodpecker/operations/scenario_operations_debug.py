@@ -2372,7 +2372,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
     vip_lst = []
     mn_ip_to_post = None
     vm_ip_to_post = None
-    iscsi_initiator_to_setup = {}
+    iscsi_initiator_to_setup = []
     ocfs2smp_shareable_volume_is_created = False
     zstack_management_ip = scenario_config.basicConfig.zstackManagementIp.text_
     root_xml = etree.Element("deployerConfig")
@@ -2502,7 +2502,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 self.exception = None
                 self.exc_traceback = ''
                 self.vm = vm
-                self.iscsi_initiator_to_setup = {}
+                self.iscsi_initiator_to_setup = []
 
             def run(self):
                 try:
@@ -2738,7 +2738,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 			                #setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm, deploy_config)
                             break
                         elif ps_ref.type_ == 'iscsiInitiator':
-                            self.iscsi_initiator_to_setup[vm_inv] = vm
+                            self.iscsi_initiator_to_setup = [vm_inv, vm]
 #                             setup_iscsi_initiator(zstack_management_ip, vm_inv, vm, deploy_config)
                             break
                         elif ps_ref.type_ == 'ZSES':
@@ -2783,17 +2783,16 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
         for vm_thrd in thread_list:
             vm_thrd.join()
             if vm_thrd.iscsi_initiator_to_setup:
-                for ky in vm_thrd.iscsi_initiator_to_setup.keys:
-                    iscsi_initiator_to_setup[ky] = iscsi_initiator_to_setup[ky]
+                iscsi_initiator_to_setup.append(vm_thrd.iscsi_initiator_to_setup)
             if vm_thrd.exitcode != 0:
                 test_util.test_fail('Error happened while preparing host vm: [%s]' % vm_thrd.vm.name_)
                 print('----------------------Exception Reason------------------------')
                 print(vm_thrd.exc_traceback)
                 print('-------------------------Reason End---------------------------\n')
 
-        test_util.test_logger('iscsi_initiator_to_setup dict: %s' % iscsi_initiator_to_setup)
-        for k, v in iscsi_initiator_to_setup.iteritems():
-            setup_iscsi_initiator(zstack_management_ip, k, v, deploy_config)
+        test_util.test_logger('iscsi_initiator_to_setup: %s' % iscsi_initiator_to_setup)
+        for (_vm_inv, _vm) in iscsi_initiator_to_setup:
+            setup_iscsi_initiator(zstack_management_ip, _vm_inv, _vm, deploy_config)
 
         root_xml.getchildren()[0][:] = sorted(root_xml.getchildren()[0], key=lambda child: child.get('name'))
         xml_string = etree.tostring(root_xml, 'utf-8')
