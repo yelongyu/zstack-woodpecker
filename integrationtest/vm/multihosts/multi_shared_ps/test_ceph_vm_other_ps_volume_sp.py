@@ -29,16 +29,15 @@ def test():
         multi_ps.create_vm(ceph_image=True, with_data_vol=True, one_volume=True)
     else:
         multi_ps.create_vm(ceph_image=True, set_ps_uuid=False)
-    multi_ps.create_data_volume(vms=multi_ps.vm, except_ps_type='Ceph')
+        multi_ps.create_data_volume(except_ps_type='Ceph')
     if flavor['root_sp']:
-        for vm in multi_ps.vm:
-            multi_ps.create_snapshot(vm=vm)
+        multi_ps.create_snapshot(target='vm')
     else:
-        multi_ps.create_snapshot(data_volume=multi_ps.data_volume)
+        multi_ps.create_snapshot(target='volume')
     for vol_uuid in multi_ps.snapshot.keys():
         multi_ps.revert_sp(vol_uuid)
-        multi_ps.create_snapshot(vol_uuid=vol_uuid)
-        multi_ps.create_snapshot(vol_uuid=vol_uuid)
+        multi_ps.create_snapshot(vol_uuid_list=[vol_uuid])
+        multi_ps.create_snapshot(vol_uuid_list=[vol_uuid])
 
     for vol_uuid in multi_ps.snapshot.keys():
         multi_ps.revert_sp(vol_uuid)

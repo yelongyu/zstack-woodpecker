@@ -40,6 +40,7 @@ from contextlib import contextmanager
 from functools import wraps
 import itertools
 import types
+import copy
 #import traceback
 
 
@@ -1928,6 +1929,7 @@ class MultiSharedPS(object):
         self.test_obj_dict = test_state.TestStateDict()
         self.vol_uuid = None
         self.snapshots = None
+        self.sp_tree = test_util.SPTREE()
 
     def create_vm(self, vm_name=None, image_name=None, l3_name=None, ceph_image=False, with_data_vol=False, one_volume=False,
                   reverse=False, set_ps_uuid=True, ps_type=None, except_ps_type=None):
@@ -2139,15 +2141,15 @@ class MultiSharedPS(object):
                 sys_tags = ['ephemeral::shareable', 'capability::virtio-scsi']
             volume_option.set_system_tags(sys_tags)
         data_volume = create_volume(volume_option, from_offering=from_offering)
-        if vms:
-            for vm in vms:
-                data_volume.attach(vm)
+        self.test_obj_dict.add_volume(data_volume)
         data_volume.check()
+        vms = list(vms) if vms else self.vm
+        for vm in vms:
+            data_volume.attach(vm)
         vol_uuid = data_volume.get_volume().uuid
         if from_offering:
             test_lib.lib_mkfs_for_volume(vol_uuid, vms[0].vm, '/mnt')
         self.data_volume[vol_uuid] = data_volume
-        self.test_obj_dict.add_volume(data_volume)
         return self
 
     def create_snapshot(self, vol_uuid_list=[], target=None):
@@ -2166,6 +2168,13 @@ class MultiSharedPS(object):
             self.snapshots.create_snapshot('snapshot-%s' % time.strftime('%m%d-%H%M%S', time.localtime()))
     #         self.snapshots.check()
             curr_sp = self.snapshots.get_current_snapshot()
+            if curr_sp.get_snapshot().type == 'Storage':
+                self.sp_type = curr_sp.get_snapshot().type
+                if not self.sp_tree.root:
+                    self.sp_tree.add('root')
+                self.sp_tree.revert(self.sp_tree.root)
+            self.sp_tree.add(curr_sp.get_snapshot().uuid)
+            self.sp_tree.show_tree()
             if vol_uuid not in self.snapshot:
                 self.snapshot[vol_uuid] = [curr_sp]
             else:
@@ -2173,13 +2182,16 @@ class MultiSharedPS(object):
 
     def delete_snapshot(self, vol_uuid):
         snapshot = random.choice(self.snapshot[vol_uuid])
+        sp_uuid = snapshot.get_snapshot().uuid
         self.snapshots = self.test_obj_dict.get_volume_snapshot(vol_uuid)
-        self.snapshot[vol_uuid].remove(snapshot)
         self.snapshots.delete_snapshot(snapshot)
-        left_snapshots = [sp for v in self.snapshot.values() for sp in v]
-        for sp in left_snapshots:
-            cond = res_ops.gen_query_conditions('uuid', '=', sp.get_snapshot().uuid)
+        self.snapshot[vol_uuid].remove(snapshot)
+        self.sp_tree.delete(sp_uuid)
+        left_sp_uuids = self.sp_tree.tree.keys()
+        for uuid in left_sp_uuids:
+            cond = res_ops.gen_query_conditions('uuid', '=', uuid)
             assert res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, cond)
+        assert not res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, res_ops.gen_query_conditions('uuid', '=', sp_uuid))
         return self
 
     def get_vol_type(self, vol_uuid):
@@ -2192,6 +2204,8 @@ class MultiSharedPS(object):
             sp = random.choice(self.snapshot[vol_uuid])
             self.snapshots = self.test_obj_dict.get_volume_snapshot(vol_uuid)
             self.snapshots.use_snapshot(sp)
+            if sp.get_snapshot().type != 'Storage':
+                self.sp_tree.revert(sp.get_snapshot().uuid)
         return self
 
     def sp_check(self):
@@ -2208,7 +2222,7 @@ class REVERTSP(object):
     def __enter__(self):
         if self.vol_uuid in self.data_volume:
             data_volume = self.data_volume[self.vol_uuid]
-            self.target_vm_list = [data_volume.get_target_vm()] if data_volume.get_target_vm() else data_volume.get_target_vms()
+            self.target_vm_list = [data_volume.get_target_vm()] if data_volume.get_target_vm() else data_volume.get_target_vms()[:]
             if self.target_vm_list:
                 for vm in self.target_vm_list:
                     data_volume.detach(vm.get_vm().uuid)
