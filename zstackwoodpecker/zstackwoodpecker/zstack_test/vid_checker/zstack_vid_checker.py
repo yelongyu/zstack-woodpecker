@@ -829,6 +829,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         if self.test_obj.get_customized() == None:
             vm_ops.destroy_vm(vm_uuid, session_uuid=project_login_session_uuid)
             vm_ops.expunge_vm(vm_uuid, session_uuid=project_login_session_uuid)
+            return self.judge(True)
         else:
             try:
                 vm_ops.destroy_vm(vm_uuid, session_uuid=project_login_session_uuid)
@@ -843,7 +844,8 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             except Exception as e:
                 pass
 
-        return self.judge(True)
+            return
+
 
 
     def check_vm_operation_without_create_permission(self):
@@ -928,6 +930,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         if self.test_obj.get_customized() == None:
             img_ops.delete_image(image_uuid, session_uuid=project_login_session_uuid)
             img_ops.expunge_image(image_uuid, session_uuid=project_login_session_uuid)
+            return self.judge(True)
         else:
             try:
                 img_ops.delete_image(image_uuid, session_uuid=project_login_session_uuid)
@@ -941,7 +944,6 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
                 return 1
             except Exception as e:
                 pass
-        return self.judge(True)
 
     def check_snapshot(self):
         virtual_id = self.test_obj.get_vid()
@@ -1015,6 +1017,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             vol_ops.expunge_volume(data_volume.uuid)
             vm_ops.destroy_vm(vm_uuid)
             vm_ops.expunge_vm(vm_uuid)
+            return self.judge(True)
         else:
             try:
                 vol_ops.delete_snapshot(snapshot_uuid, project_login_session_uuid)
@@ -1051,7 +1054,6 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             except Exception as e:
                 pass
 
-        return self.judge(True)
 
     def check_volume_operation(self):
         virtual_id = self.test_obj.get_vid()
@@ -1117,6 +1119,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             vol_ops.expunge_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
             vm_ops.destroy_vm(vm_uuid)
             vm_ops.expunge_vm(vm_uuid)
+            return self.judge(True)
         else:
             try:
                 vol_ops.delete_volume(data_volume.uuid, session_uuid=project_login_session_uuid)
@@ -1146,7 +1149,6 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             except Exception as e:
                 pass
 
-        return self.judge(True)
 
     def check_affinity_group(self):
         virtual_id = self.test_obj.get_vid()
@@ -1197,6 +1199,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             ag_ops.delete_affinity_group(ag_uuid, session_uuid=project_login_session_uuid)
             vm_ops.destroy_vm(vm_uuid)
             vm_ops.expunge_vm(vm_uuid)
+            return self.judge(True)
         else:
             try:
                 ag_ops.delete_affinity_group(ag_uuid, session_uuid=project_login_session_uuid)
@@ -1218,7 +1221,6 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
                 return 1
             except Exception as e:
                 pass
-        return self.judge(True)
 
     def check_networks(self):
         virtual_id = self.test_obj.get_vid()
@@ -1256,6 +1258,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             if clear_vxlan_pool:
                 vxlan_ops.delete_vni_range(vni_uuid, session_uuid=project_login_session_uuid)
             net_ops.delete_l2(vxlan_l2_uuid, session_uuid=project_login_session_uuid)
+            return self.judge(True)
         else:
             try:
                 net_ops.delete_l3(l3_uuid, session_uuid=project_login_session_uuid)
@@ -1279,7 +1282,6 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             except Exception as e:
                 pass
         
-        return self.judge(True)
 
     def check_eip(self):
         virtual_id = self.test_obj.get_vid()
@@ -1347,6 +1349,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             vm_ops.destroy_vm(vm_uuid)
             vm_ops.expunge_vm(vm_uuid)
             acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
+            return self.judge(True)
         else:
             try:
                 net_ops.delete_eip(eip.uuid)
@@ -1379,7 +1382,6 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             #acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
             test_util.test_logger("revoke_resources should not be runned")
 
-        return self.judge(True)
 
     def check_security_group(self):
         virtual_id = self.test_obj.get_vid()
@@ -1460,6 +1462,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             if sg_service_need_detach:
                 net_ops.detach_sg_service_from_l3network(l3_net_uuid, sg_service_providor_uuid, session_uuid=project_login_session_uuid)
             acc_ops.revoke_resources([project_linked_account_uuid], [l3_net_uuid, image_uuid, instance_offering_uuid])
+            return self.judge(True)
         else:
             try:
                 net_ops.delete_security_group(sg_uuid, session_uuid=project_login_session_uuid)
@@ -1486,7 +1489,6 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
                 net_ops.detach_sg_service_from_l3network(l3_net_uuid, sg_service_providor_uuid, session_uuid=project_login_session_uuid)
             #acc_ops.revoke_resources([project_linked_account_uuid], [l3_net_uuid, image_uuid, instance_offering_uuid])
 
-        return self.judge(True)
 
     def check_load_balancer(self):
         virtual_id = self.test_obj.get_vid()
@@ -1570,6 +1572,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             if lb_service_need_detach:
                 net_ops.detach_lb_service_from_l3network(l3_net_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
             acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
+            return self.judge(True)
         else:
             try:
                 net_ops.delete_load_balancer_listener(lbl_uuid, session_uuid=project_login_session_uuid)
@@ -1613,7 +1616,6 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
                 pass
             #acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
                 
-        return self.judge(True)
 
     def check_port_forwarding(self):
         virtual_id = self.test_obj.get_vid()
@@ -1694,6 +1696,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             if pf_service_need_detach:
                 net_ops.detach_pf_service_from_l3network(l3_net_uuid, pf_service_providor_uuid, session_uuid=project_login_session_uuid)
             acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
+            return self.judge(True)
         else:
             try:
                 net_ops.delete_port_forwarding(pf_rule_uuid, session_uuid=project_login_session_uuid)
@@ -1726,7 +1729,6 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             if pf_service_need_detach:
                 net_ops.detach_pf_service_from_l3network(l3_net_uuid, pf_service_providor_uuid, session_uuid=project_login_session_uuid)
             #acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
-        return self.judge(True)
 
     def check_scheduler(self):
         virtual_id = self.test_obj.get_vid()
@@ -1784,6 +1786,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             schd_ops.get_current_time()
             vm_ops.destroy_vm(vm_uuid)
             vm_ops.expunge_vm(vm_uuid)
+            return self.judge(True)
         else:
             try:
                 schd_ops.del_scheduler_job(schd_job.uuid, session_uuid=project_login_session_uuid)
@@ -1815,7 +1818,6 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             except Exception as e:
                 pass
 
-        return self.judge(True)
 
     def check_pci(self):
         #Haven't simulator pci device, skip to check 
@@ -1865,6 +1867,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             zwt_ops.delete_sns_topic(sns_topic_uuid, session_uuid=project_login_session_uuid)
             zwt_ops.delete_sns_topic(sns_topic_uuid1, session_uuid=project_login_session_uuid)
             zwt_ops.delete_sns_application_endpoint(http_endpoint_uuid, session_uuid=project_login_session_uuid)
+            return self.judge(True)
         else:
             try:
                 zwt_ops.delete_alarm(alarm_uuid, session_uuid=project_login_session_uuid) 
@@ -1908,7 +1911,6 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             except Exception as e:
                 pass
 
-        return self.judge(True)
 
     def check_sns(self):
         virtual_id = self.test_obj.get_vid()
@@ -1952,6 +1954,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             zwt_ops.delete_sns_topic(sns_topic_uuid, session_uuid=project_login_session_uuid)
             zwt_ops.delete_sns_topic(sns_topic_uuid1, session_uuid=project_login_session_uuid)
             zwt_ops.delete_sns_application_endpoint(http_endpoint_uuid, session_uuid=project_login_session_uuid)
+            return self.judge(True)
         else:
             try:
                 zwt_ops.delete_alarm(alarm_uuid)
@@ -1995,7 +1998,6 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             except Exception as e:
                 pass
 
-        return self.judge(True)
 
     def check_no_delete_admin_permission(self):
         test_util.test_logger("check_no_delete_admin_permission")
