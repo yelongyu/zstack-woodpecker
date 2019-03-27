@@ -1271,7 +1271,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
                 if clear_vxlan_pool:
                     vxlan_ops.delete_vni_range(vni_uuid, session_uuid=project_login_session_uuid)
                     test_util.test_logger("delete_vni_range should not be runned")
-                return 1
+                    return 1
             except Exception as e:
                 pass
 
@@ -1964,21 +1964,21 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             return self.judge(True)
         else:
             try:
-                zwt_ops.remove_action_from_alarm(alarm_uuid, sns_topic_uuid, project_login_session_uuid)
+                zwt_ops.remove_action_from_alarm(alarm_uuid, sns_topic_uuid, session_uuid=project_login_session_uuid)
                 test_util.test_logger("remove_action_from_alarm should not be runned")
                 return 1
             except Exception as e:
                 pass
 
             try:
-                zwt_ops.delete_alarm(alarm_uuid, project_login_session_uuid)
+                zwt_ops.delete_alarm(alarm_uuid, session_uuid=project_login_session_uuid)
                 test_util.test_logger("delete_alarm should not be runned")
                 return 1
             except Exception as e:
                 pass
 
             try:
-                zwt_ops.unsubscribe_event(event_sub_uuid, project_login_session_uuid)
+                zwt_ops.unsubscribe_event(event_sub_uuid, session_uuid=project_login_session_uuid)
                 test_util.test_logger("unsubscribe_event should not be runned")
                 return 1
             except Exception as e:
