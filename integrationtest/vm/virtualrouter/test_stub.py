@@ -205,16 +205,14 @@ def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
         cond_ps = res_ops.gen_query_conditions('state', '=', 'Enabled', cond_ps)
         all_vail_ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond_ps)
         vail_ps_dict = {ps.uuid: ps.type for ps in all_vail_ps}
-        if len(all_vail_ps) > 1:
+        if len(vail_ps_dict) > 1:
+            tc_len = len(os.getenv('TESTCASENAME') if os.getenv('TESTCASENAME') else range(8))
             vail_ps_uuid_list = vail_ps_dict.keys()
-            ps_uuid_for_root_vol = vail_ps_uuid_list.pop()
-            ps_uuid_for_data_vol = random.choice(vail_ps_uuid_list)
-            ps_uuid = ps_uuid if ps_uuid else ps_uuid_for_root_vol
-            systags = ["primaryStorageUuidForDataVolume::%s" % ps_uuid_for_data_vol]
-            if system_tags and not [d for d in system_tags if "primaryStorageUuidForDataVolume" in d]:
-                system_tags.extend(systags)
-            else:
-                system_tags = system_tags
+            combo = [[root_ps, data_ps] for root_ps in vail_ps_uuid_list for data_ps in vail_ps_uuid_list]
+            index = tc_len % len(combo)
+            if index != 1:
+                ps_uuid = ps_uuid if ps_uuid else combo[index][0]
+                system_tags.extend(["primaryStorageUuidForDataVolume::%s" % combo[index][-1]] if not [d for d in system_tags if "primaryStorageUuidForDataVolume" in d] else [])
     vm_creation_option.set_default_l3_uuid(default_l3_uuid)
     vm_creation_option.set_system_tags(system_tags)
     vm_creation_option.set_session_uuid(session_uuid)

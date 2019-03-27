@@ -7121,6 +7121,8 @@ def lib_get_test_stub(suite_name=None):
     import zstacklib.utils.component_loader as component_loader
     caller_info_list = inspect.getouterframes(inspect.currentframe())[1]
     caller_path = os.path.realpath(caller_info_list[1])
+    tc_name = caller_path.split('/')[-1].split('.')[0]
+    os.environ['TESTCASENAME'] = tc_name
     curr_dir = os.path.dirname(caller_path)
     if suite_name:
         suite_path = '/'.join([os.path.dirname(curr_dir), suite_name])
