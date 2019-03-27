@@ -15,8 +15,11 @@ class ZstackTestVid(vid_header.TestVid):
         self.session_uuid = None
         super(ZstackTestVid, self).__init__()
 
-    def create(self, name, password, session_uuid=None):
-        self.set_vid(iam2_ops.create_iam2_virtual_id(name, password, session_uuid))
+    def create(self, name, password, session_uuid=None, without_default_role="false"):
+        if without_default_role == "true":
+            self.set_vid(iam2_ops.create_iam2_virtual_id(name, password, session_uuid, without_default_role="true"))
+        else:
+            self.set_vid(iam2_ops.create_iam2_virtual_id(name, password, session_uuid))
         self.session_uuid = session_uuid
         super(ZstackTestVid, self).create()
 

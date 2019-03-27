@@ -297,7 +297,7 @@ def create_iam2_virtual_id_group(project_uuid, name, description=None, attribute
 
 
 def create_iam2_virtual_id(name, password, description=None, attributes=None, project_uuid=None, organization_uuid=None,
-                           session_uuid=None):
+                           session_uuid=None, without_default_role="false"):
     action = api_actions.CreateIAM2VirtualIDAction()
     action.timeout = 30000
     action.name = name
@@ -310,6 +310,8 @@ def create_iam2_virtual_id(name, password, description=None, attributes=None, pr
         action.attributes = attributes
     if organization_uuid:
         action.organizationUuid = organization_uuid
+    if without_default_role == "true":
+        action.withoutDefaultRole = without_default_role
     test_util.action_logger('create iam2 virtual id : %s ' % name)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory

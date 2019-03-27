@@ -27,7 +27,7 @@ def test():
     if flavor['target_admin'] == 'noDeleteAdmin':
         username = 'noDeleteAdmin'
         password = 'b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86'
-        vid_test_obj.create(username, password)
+        vid_test_obj.create(username, password, without_default_role="true")
         vid_uuid = vid_test_obj.get_vid().uuid    
         #platform_admin_uuid = iam2_ops.create_iam2_virtual_id(username, password).uuid
         attributes = [{"name": "__PlatformAdmin__"}, {"name":"__PlatformAdminRelatedZone__", "value": "ALL_ZONES"}]
