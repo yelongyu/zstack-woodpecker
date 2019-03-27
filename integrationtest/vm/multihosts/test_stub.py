@@ -381,7 +381,7 @@ def create_vm_with_random_offering(vm_name, image_name=None, l3_name=None, sessi
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
     vm_creation_option.set_name(vm_name)
-    vm_creation_option.set_timeout(1200000)
+    vm_creation_option.set_timeout(1800000)
     if system_tags:
         vm_creation_option.set_system_tags(system_tags)
     if disk_offering_uuids:

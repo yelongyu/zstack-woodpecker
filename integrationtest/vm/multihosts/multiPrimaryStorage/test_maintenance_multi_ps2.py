@@ -40,7 +40,7 @@ def test():
                 bs_type = None
             vm = test_stub.create_multi_vms(name_prefix='test_vm', count=1,
                                             ps_uuid=root_vol_ps.uuid, data_volume_number=VOLUME_NUMBER,
-                                            ps_uuid_for_data_vol=data_vol_ps.uuid, timeout=600000, bs_type=bs_type)[0]
+                                            ps_uuid_for_data_vol=data_vol_ps.uuid, timeout=1800000, bs_type=bs_type)[0]
             test_obj_dict.add_vm(vm)
             vm_list.append(vm)
 

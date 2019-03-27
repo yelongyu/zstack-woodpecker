@@ -50,10 +50,10 @@ def test():
         ps = random.choice(ps_list)
         ps_uuid = ps.uuid
         vm_list = test_stub.create_multi_vms(name_prefix='test-', count=VM_COUNT,
-                                             data_volume_number=DATA_VOLUME_NUMBER, host_uuid=host.uuid, ps_uuid=ps_uuid, timeout=600000, bs_type="ImageStoreBackupStorage" if ps.type == "SharedBlock" else "Ceph")
+                                             data_volume_number=DATA_VOLUME_NUMBER, host_uuid=host.uuid, ps_uuid=ps_uuid, timeout=1800000, bs_type="ImageStoreBackupStorage" if ps.type == "SharedBlock" else "Ceph")
     else:
         vm_list = test_stub.create_multi_vms(name_prefix='test-', count=VM_COUNT,
-                                             data_volume_number=DATA_VOLUME_NUMBER, host_uuid=host.uuid, timeout=600000)
+                                             data_volume_number=DATA_VOLUME_NUMBER, host_uuid=host.uuid, timeout=1800000)
 
     for vm in vm_list:
         test_obj_dict.add_vm(vm)
