@@ -1027,28 +1027,28 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
                 pass
 
             try:
-                vol_ops.delete_volume(data_volume.uuid)
+                vol_ops.delete_volume(data_volume.uuid, project_login_session_uuid)
                 test_util.test_logger("delete_volume should not be runned")
                 return 1
             except Exception as e:
                 pass
 
             try:
-                vol_ops.expunge_volume(data_volume.uuid)
+                vol_ops.expunge_volume(data_volume.uuid, project_login_session_uuid)
                 test_util.test_logger("expunge_volume should not be runned")
                 return 1
             except Exception as e:
                 pass
 
             try:
-                vm_ops.destroy_vm(vm_uuid)
+                vm_ops.destroy_vm(vm_uuid, project_login_session_uuid)
                 test_util.test_logger("destroy_vm should not be runned")
                 return 1
             except Exception as e:
                 pass
 
             try:
-                vm_ops.expunge_vm(vm_uuid)
+                vm_ops.expunge_vm(vm_uuid, project_login_session_uuid)
                 test_util.test_logger("expunge_vm should not be runned")
                 return 1
             except Exception as e:
@@ -1136,14 +1136,14 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
                 pass
 
             try:
-                vm_ops.destroy_vm(vm_uuid)
+                vm_ops.destroy_vm(vm_uuid, project_login_session_uuid)
                 test_util.test_logger("destroy_vm should not be runned")
                 return 1
             except Exception as e:
                 pass
 
             try:
-                vm_ops.expunge_vm(vm_uuid)
+                vm_ops.expunge_vm(vm_uuid, project_login_session_uuid)
                 test_util.test_logger("expunge_vm should not be runned")
                 return 1
             except Exception as e:
@@ -1209,14 +1209,14 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
                 pass
 
             try:
-                vm_ops.destroy_vm(vm_uuid)
+                vm_ops.destroy_vm(vm_uuid, project_login_session_uuid)
                 test_util.test_logger("destroy_vm should not be runned")
                 return 1
             except Exception as e:
                 pass
 
             try:
-                vm_ops.expunge_vm(vm_uuid)
+                vm_ops.expunge_vm(vm_uuid, project_login_session_uuid)
                 test_util.test_logger("expunge_vm should not be runned")
                 return 1
             except Exception as e:
@@ -1352,28 +1352,35 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             return self.judge(True)
         else:
             try:
-                net_ops.delete_eip(eip.uuid)
+                net_ops.detach_eip(eip.uuid, project_login_session_uuid)
+                test_util.test_logger("detach_eip should not be runned")
+                return 1
+            except Exception as e:
+                pass
+
+            try:
+                net_ops.delete_eip(eip.uuid, project_login_session_uuid)
                 test_util.test_logger("delete_eip should not be runned")
                 return 1
             except Exception as e:
                 pass
 
             try:
-                net_ops.delete_vip(vip.uuid)
+                net_ops.delete_vip(vip.uuid, project_login_session_uuid)
                 test_util.test_logger("delete_vip should not be runned")
                 return 1
             except Exception as e:
                 pass
 
             try:
-                vm_ops.destroy_vm(vm_uuid)
+                vm_ops.destroy_vm(vm_uuid, project_login_session_uuid)
                 test_util.test_logger("destroy_vm should not be runned")
                 return 1
             except Exception as e:
                 pass
 
             try:
-                vm_ops.expunge_vm(vm_uuid)
+                vm_ops.expunge_vm(vm_uuid, project_login_session_uuid)
                 test_util.test_logger("expunge_vm should not be runned")
                 return 1
             except Exception as e:
@@ -1472,14 +1479,14 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
                 pass
 
             try:
-                vm_ops.destroy_vm(vm_uuid)
+                vm_ops.destroy_vm(vm_uuid, project_login_session_uuid)
                 test_util.test_logger("destroy_vm should not be runned")
                 return 1
             except Exception as e:
                 pass
 
             try:
-                vm_ops.expunge_vm(vm_uuid)
+                vm_ops.expunge_vm(vm_uuid, project_login_session_uuid)
                 test_util.test_logger("expunge_vm should not be runned")
                 return 1
             except Exception as e:
@@ -1589,21 +1596,21 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
                 pass
 
             try:
-                net_ops.delete_vip(vip.uuid)
+                net_ops.delete_vip(vip.uuid, project_login_session_uuid)
                 test_util.test_logger("delete_vip should not be runned")
                 return 1
             except Exception as e:
                 pass
 
             try:
-                vm_ops.destroy_vm(vm_uuid)
+                vm_ops.destroy_vm(vm_uuid, project_login_session_uuid)
                 test_util.test_logger("destroy_vm should not be runned")
                 return 1
             except Exception as e:
                 pass
 
             try:
-                vm_ops.expunge_vm(vm_uuid)
+                vm_ops.expunge_vm(vm_uuid, project_login_session_uuid)
                 test_util.test_logger("expunge_vm should not be runned")
                 return 1
             except Exception as e:
@@ -1706,21 +1713,21 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
                 pass
 
             try:
-                net_ops.delete_vip(vip.uuid)
+                net_ops.delete_vip(vip.uuid, project_login_session_uuid)
                 test_util.test_logger("delete_vip should not be runned")
                 return 1
             except Exception as e:
                 pass
 
             try:
-                vm_ops.destroy_vm(vm_uuid)
+                vm_ops.destroy_vm(vm_uuid, project_login_session_uuid)
                 test_util.test_logger("destroy_vm should not be runned")
                 return 1
             except Exception as e:
                 pass
 
             try:
-                vm_ops.expunge_vm(vm_uuid)
+                vm_ops.expunge_vm(vm_uuid, project_login_session_uuid)
                 test_util.test_logger("expunge_vm should not be runned")
                 return 1
             except Exception as e:
@@ -1805,14 +1812,14 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             schd_ops.get_current_time()
 
             try:
-                vm_ops.destroy_vm(vm_uuid)
+                vm_ops.destroy_vm(vm_uuid, project_login_session_uuid)
                 test_util.test_logger("destroy_vm should not be runned")
                 return 1
             except Exception as e:
                 pass
 
             try:
-                vm_ops.expunge_vm(vm_uuid)
+                vm_ops.expunge_vm(vm_uuid, project_login_session_uuid)
                 test_util.test_logger("expunge_vm should not be runned")
                 return 1
             except Exception as e:
@@ -1957,14 +1964,21 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             return self.judge(True)
         else:
             try:
-                zwt_ops.delete_alarm(alarm_uuid)
+                zwt_ops.remove_action_from_alarm(alarm_uuid, sns_topic_uuid)
+                test_util.test_logger("remove_action_from_alarm should not be runned")
+                return 1
+            except Exception as e:
+                pass
+
+            try:
+                zwt_ops.delete_alarm(alarm_uuid, project_login_session_uuid)
                 test_util.test_logger("delete_alarm should not be runned")
                 return 1
             except Exception as e:
                 pass
 
             try:
-                zwt_ops.unsubscribe_event(event_sub_uuid)
+                zwt_ops.unsubscribe_event(event_sub_uuid, project_login_session_uuid)
                 test_util.test_logger("unsubscribe_event should not be runned")
                 return 1
             except Exception as e:
