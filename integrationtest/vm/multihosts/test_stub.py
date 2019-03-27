@@ -39,6 +39,7 @@ import random
 from contextlib import contextmanager
 from functools import wraps
 import itertools
+import types
 #import traceback
 
 
@@ -1912,7 +1913,7 @@ class MultiSharedPS(object):
     def __init__(self):
         self.vm = []
         self.image = None
-        self.data_volume = None
+        self.data_volume = {}
         self.ceph = None
         self.san = []
         self.bs = []
@@ -1924,7 +1925,7 @@ class MultiSharedPS(object):
         self.ps_type_dict = None
         self.ps_types = []
         self.snapshot = {}
-        self.test_obj_dict = None
+        self.test_obj_dict = test_state.TestStateDict()
         self.vol_uuid = None
         self.snapshots = None
 
@@ -1986,11 +1987,13 @@ class MultiSharedPS(object):
         vm.check()
         if with_data_vol:
             vol_uuid = [vol for vol in vm.vm.allVolumes if vol.type == 'Data'][0].uuid
-            volume = res_ops.query_resource(res_ops.VOLUME, res_ops.gen_query_conditions('uuid', '=', vol_uuid))[0]
-            self.data_volume = zstack_volume_header.ZstackTestVolume()
-            self.data_volume.set_volume(volume)
-            self.data_volume.set_target_vm(vm)
-            self.data_volume.check()
+            volume = res_ops.query_resource(res_ops.VOLUME, res_ops.gen_query_conditions('uuid', '=', vol_uuid))
+            for vol in volume:
+                data_volume = zstack_volume_header.ZstackTestVolume()
+                data_volume.set_volume(vol)
+                data_volume.set_target_vm(vm)
+                data_volume.check()
+                self.data_volume[data_volume.get_volume().uuid] = data_volume
         self.vm.append(vm)
 
     def check_vol_seperated(self):
@@ -2029,12 +2032,12 @@ class MultiSharedPS(object):
         return ps_to_migrate
 
     def migrate_data_volume(self):
-        self.dst_ps = self.get_ps_candidate(self.data_volume.get_volume().uuid)
-        vol_migr_inv = datamigr_ops.ps_migrage_data_volume(self.dst_ps.uuid, self.data_volume.get_volume().uuid)
-        conditions = res_ops.gen_query_conditions('uuid', '=', vol_migr_inv.uuid)
-        self.data_volume.set_volume(res_ops.query_resource(res_ops.VOLUME, conditions)[0])
-        assert self.data_volume.get_volume().primaryStorageUuid == self.dst_ps.uuid
-        self.set_ceph_mon_env(self.dst_ps.uuid)
+        for vol_uuid, data_volume in self.data_volume.iteritems():
+            dst_ps = self.get_ps_candidate(vol_uuid)
+            datamigr_ops.ps_migrage_data_volume(dst_ps.uuid, vol_uuid)
+            data_volume.update()
+            assert data_volume.get_volume().primaryStorageUuid == dst_ps.uuid
+            self.set_ceph_mon_env(dst_ps.uuid)
 
     def migrate_vm(self, vm=None):
         if not vm:
@@ -2110,7 +2113,7 @@ class MultiSharedPS(object):
         if bs.type.lower() == 'ceph':
             bs_mon_ip = bs.mons[0].monAddr
             os.environ['cephBackupStorageMonUrls'] = 'root:password@%s' % bs_mon_ip
-#         self._image.check()
+        self._image.check()
 
     def create_data_volume(self, shared=False, vms=[], from_offering=True, ps_type=None, except_ps_type=None):
         conditions = res_ops.gen_query_conditions('name', '=', os.getenv('largeDiskOfferingName'))
@@ -2135,54 +2138,91 @@ class MultiSharedPS(object):
             else:
                 sys_tags = ['ephemeral::shareable', 'capability::virtio-scsi']
             volume_option.set_system_tags(sys_tags)
-        self.data_volume = create_volume(volume_option, from_offering=from_offering)
+        data_volume = create_volume(volume_option, from_offering=from_offering)
         if vms:
             for vm in vms:
-                self.data_volume.attach(vm)
-        self.data_volume.check()
+                data_volume.attach(vm)
+        data_volume.check()
+        vol_uuid = data_volume.get_volume().uuid
         if from_offering:
-            test_lib.lib_mkfs_for_volume(self.data_volume.get_volume().uuid, vms[0].vm, '/mnt')
+            test_lib.lib_mkfs_for_volume(vol_uuid, vms[0].vm, '/mnt')
+        self.data_volume[vol_uuid] = data_volume
+        self.test_obj_dict.add_volume(data_volume)
         return self
 
-    def create_snapshot(self, vol_uuid=None, vm=None, data_volume=None):
-        if not self.test_obj_dict:
-            self.test_obj_dict = test_state.TestStateDict()
-        if not  vol_uuid:
-            if vm:
-                vol_uuid = vm.vm.rootVolumeUuid
+    def create_snapshot(self, vol_uuid_list=[], target=None):
+        if not isinstance(vol_uuid_list, types.ListType):
+            vol_uuid_list = [vol_uuid_list]
+        if target is 'vm':
+            for vm in self.vm:
+                vol_uuid_list.append(vm.vm.rootVolumeUuid)
                 self.test_obj_dict.add_vm(vm)
-            elif data_volume:
-                self.test_obj_dict.add_volume(data_volume)
-                vol_uuid = data_volume.get_volume().uuid
-        self.snapshots = self.test_obj_dict.get_volume_snapshot(vol_uuid)
-        self.vol_uuid = vol_uuid
-        self.snapshots.set_utility_vm(self.vm[0])
-        self.snapshots.create_snapshot('snapshot-%s' % time.strftime('%m%d-%H%M%S', time.localtime()))
-#         self.snapshots.check()
-        curr_sp = self.snapshots.get_current_snapshot()
-        self.snapshot[vol_uuid] = curr_sp
+        elif target is 'volume':
+            for volume in self.data_volume.values():
+                vol_uuid_list.append(volume.get_volume().uuid)
+        for vol_uuid in vol_uuid_list:
+            self.snapshots = self.test_obj_dict.get_volume_snapshot(vol_uuid)
+            self.snapshots.set_utility_vm(self.vm[0])
+            self.snapshots.create_snapshot('snapshot-%s' % time.strftime('%m%d-%H%M%S', time.localtime()))
+    #         self.snapshots.check()
+            curr_sp = self.snapshots.get_current_snapshot()
+            if vol_uuid not in self.snapshot:
+                self.snapshot[vol_uuid] = [curr_sp]
+            else:
+                self.snapshot[vol_uuid].append(curr_sp)
 
     def delete_snapshot(self, vol_uuid):
-        snapshot = self.snapshot[vol_uuid]
+        snapshot = random.choice(self.snapshot[vol_uuid])
         self.snapshots = self.test_obj_dict.get_volume_snapshot(vol_uuid)
-        self.snapshot.pop(vol_uuid)
+        self.snapshot[vol_uuid].remove(snapshot)
         self.snapshots.delete_snapshot(snapshot)
-        for vol in self.snapshot.keys():
-            cond = res_ops.gen_query_conditions('volumeUuid', '=', vol)
+        left_snapshots = [sp for v in self.snapshot.values() for sp in v]
+        for sp in left_snapshots:
+            cond = res_ops.gen_query_conditions('uuid', '=', sp.get_snapshot().uuid)
             assert res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, cond)
         return self
 
+    def get_vol_type(self, vol_uuid):
+        conditions = res_ops.gen_query_conditions('uuid', '=', vol_uuid)
+        vol = res_ops.query_resource(res_ops.VOLUME, conditions)[0]
+        return vol.type
+
     def revert_sp(self, vol_uuid):
-        sp = self.snapshot[vol_uuid]
-        for vm in self.vm:
-            vm.stop()
-        self.snapshots = self.test_obj_dict.get_volume_snapshot(vol_uuid)
-        self.snapshots.use_snapshot(sp)
-        for vm in self.vm:
-            vm.start()
-            vm.check()
+        with REVERTSP(self.vm, self.data_volume, vol_uuid):
+            sp = random.choice(self.snapshot[vol_uuid])
+            self.snapshots = self.test_obj_dict.get_volume_snapshot(vol_uuid)
+            self.snapshots.use_snapshot(sp)
         return self
 
     def sp_check(self):
         self.snapshots.check()
         return self
+
+class REVERTSP(object):
+    def __init__(self, vm, data_volume, vol_uuid):
+        self.vm = vm
+        self.data_volume = data_volume
+        self.vol_uuid = vol_uuid
+        self.target_vm_list = []
+
+    def __enter__(self):
+        if self.vol_uuid in self.data_volume:
+            data_volume = self.data_volume[self.vol_uuid]
+            self.target_vm_list = [data_volume.get_target_vm()] if data_volume.get_target_vm() else data_volume.get_target_vms()
+            if self.target_vm_list:
+                for vm in self.target_vm_list:
+                    data_volume.detach(vm.get_vm().uuid)
+        else:
+            for vm in self.vm:
+                vm.stop()
+        return self
+
+    def __exit__(self, *args):
+        if self.target_vm_list:
+            data_volume = self.data_volume[self.vol_uuid]
+            for vm in self.target_vm_list:
+                data_volume.attach(vm)
+        else:
+            for vm in self.vm:
+                vm.start()
+                vm.check()
