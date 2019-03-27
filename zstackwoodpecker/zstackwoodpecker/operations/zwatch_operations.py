@@ -568,6 +568,8 @@ def check_keywords_in_email(pop_server, username, password, first_keyword, secon
             msg_content = '\n'.join(mail)  #python2.x
             msg1 = quopri.decodestring(msg_content)
             msg = Parser().parsestr(msg1)
+        else:
+            test_util.test_logger(msg)
         content=str(msg)
         #test_util.test_logger(msg)
         if boundary_words:
