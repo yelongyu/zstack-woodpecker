@@ -13,6 +13,8 @@ import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
 
 import uuid
 import os
+import time
+import copy
 
 checking_point_folder = '%s/checking_point' % test_lib.WOODPECKER_MOUNT_POINT
 
@@ -35,13 +37,26 @@ class ZstackSnapshot(sp_header.TestSnapshot):
         self.checking_points = []
         self.name = None
         self.depth = 1
+        self.md5sum = None
         super(ZstackSnapshot, self).__init__()
+
+    def __repr__(self):
+        return self.name
 
     def set_name(self, name):
         self.name = name
 
     def get_name(self):
         return self.name
+
+    def get_md5sum(self):
+        return self.md5sum
+
+    def set_md5sum(self, md5sum):
+        self.md5sum = md5sum
+
+    def set_snapshot(self, snapshot):
+        self.snapshot = snapshot
 
     def add_child(self, snapshot):
         self.children.append(snapshot)
@@ -63,17 +78,19 @@ class ZstackSnapshot(sp_header.TestSnapshot):
 
     def get_all_child_list(self):
         all_child = []
-        temp = self.get_children()
+        temp = self.children
+        all_child.extend(temp)
         for i in temp:
-            all_child.extend(self.get_all_child_list(i))
+            _t = i.get_all_child_list()
+            all_child.extend(_t)
         return all_child
 
     def get_children_tree_list(self):
-        children = []
-        temp = self.get_children()
-        for i in temp:
-            children.append(self.get_all_child_list(i))
-        return children
+        c_tree = {}
+        p = self.children
+        for i in range(len(p)):
+            c_tree[p[i]] = p[i].get_children_tree_list()
+        return c_tree
 
     def get_parent(self):
         return self.parent
@@ -86,13 +103,15 @@ class ZstackSnapshot(sp_header.TestSnapshot):
         for child in children:
             child.state = sp_header.DELETED
             self.snapshot_tree.deleted.append(child)
-        self.child = None
+        self.children = None
 
     def get_all_parent(self):
-        parents = []
-        if self.get_parent:
-            parents.append(self.get_all_parent())
-        return parents
+        _all = []
+        p = self.parent
+        while p:
+            _all.append(p)
+            p = p.parent
+        return _all
 
     def set_utility_vm(self, vm):
         self.utility_vm = vm
@@ -121,29 +140,29 @@ class ZstackSnapshot(sp_header.TestSnapshot):
                 test_lib.lib_mkfs_for_volume(self.target_volume.get_volume().uuid, \
                                              self.utility_vm.get_vm())
 
-        import tempfile
-        with tempfile.NamedTemporaryFile() as script:
-            script.write('''
+            import tempfile
+            with tempfile.NamedTemporaryFile() as script:
+                script.write('''
 device=/dev/`ls -ltr --file-type /dev | awk '$4~/disk/ {print $NF}' | grep -v '[[:digit:]]' | tail -1`1
 mkdir -p %s
 mount $device %s
 mkdir -p %s
 touch %s/%s
 umount %s
-	            ''' % (test_lib.WOODPECKER_MOUNT_POINT, \
-                       test_lib.WOODPECKER_MOUNT_POINT, \
-                       checking_point_folder, checking_point_folder, \
-                       self.checking_point, test_lib.WOODPECKER_MOUNT_POINT))
-            script.flush()
-            test_lib.lib_execute_shell_script_in_vm(self.utility_vm.get_vm(),
-                                                    script.name)
+                    ''' % (test_lib.WOODPECKER_MOUNT_POINT, \
+                           test_lib.WOODPECKER_MOUNT_POINT, \
+                           checking_point_folder, checking_point_folder, \
+                           self.checking_point, test_lib.WOODPECKER_MOUNT_POINT))
+                script.flush()
+                test_lib.lib_execute_shell_script_in_vm(self.utility_vm.get_vm(),
+                                                        script.name)
 
-        if self.parent:
-            test_util.test_logger('[snapshot:] %s checking file: %s is created. Its [parent:] %s' % \
-                                  (self.snapshot.name, \
-                                   self.checking_point, self.parent.get_snapshot().uuid))
-        else:
-            test_util.test_logger('[snapshot:] %s checking file: %s is created.' % (self.name, self.checking_point))
+            if self.parent:
+                test_util.test_logger('[snapshot:] %s checking file: %s is created. Its [parent:] %s' % \
+                                      (self.name, \
+                                       self.checking_point, self.parent.get_snapshot().uuid))
+            else:
+                test_util.test_logger('[snapshot:] %s checking file: %s is created.' % (self.name, self.checking_point))
 
         test_volume = self.get_target_volume()
         volume = test_volume.get_volume()
@@ -169,7 +188,7 @@ umount %s
             _create_checking_file()
             test_volume.detach(self.utility_vm.get_vm().uuid)
 
-            self.checking_points.append(self.checking_point)
+        self.checking_points.append(self.checking_point)
 
     def create_data_volume(self, name=None, ps_uuid=None):
 
@@ -216,8 +235,13 @@ class ZstackSnapshotTree(object):
         self.snapshot_list = []
         self.utility_vm = None
         self.Maxdepth = None
+        self.checking_points = []
         # reimage / reinit
         self.Newhead = None
+
+    def __repr__(self):
+        str = '[snapshot tree for volume %s]' % self.target_volume.get_volume().uuid
+        return str
 
     def _config_sp_depth(self):
         Maxdepth = conf_ops.get_global_config_value("volumeSnapshot", 'incrementalSnapshot.maxNum')
@@ -235,11 +259,26 @@ class ZstackSnapshotTree(object):
     def get_current_snapshot(self):
         return self.current_snapshot
 
+    def _get_checking_points(self):
+        return self.checking_points
+
+    def _set_checking_points(self, checking_points):
+        self.checking_points = checking_points
+
+    def get_utility_vm(self):
+        return self.utility_vm
+
+    def set_utility_vm(self, vm):
+        self.utility_vm = vm
+
     def add_heads(self, snapshot):
         self.heads.append(snapshot)
 
-    def get_heads(self):
+    def get_snapshot_head(self):
         return self.heads
+
+    def get_backuped_snapshots(self):
+        return
 
     def get_target_volume(self):
         return self.target_volume
@@ -250,7 +289,7 @@ class ZstackSnapshotTree(object):
     def get_checking_points(self, snapshot=None):
         if snapshot:
             return snapshot.get_checking_points()
-        return self.current_snapshot.get_checking_points()
+        return self._get_checking_points()
 
     def create_snapshot(self, name):
         self.Maxdepth = self._config_sp_depth()
@@ -274,7 +313,7 @@ class ZstackSnapshotTree(object):
 
         if self.current_snapshot:
             current_depth = self.current_snapshot.get_depth()
-            next_depth = 1 if self.current_snapshot + 1 > self.Maxdepth else current_depth + 1
+            next_depth = 1 if current_depth + 1 > self.Maxdepth else current_depth + 1
         else:
             next_depth = 1
 
@@ -285,12 +324,13 @@ class ZstackSnapshotTree(object):
             snapshot.set_parent(self.current_snapshot)
 
         if os.environ.get('ZSTACK_SIMULATOR') != "yes":
-            if self.current_snapshot:
-                snapshot.set_checking_points(self.current_snapshot.get_checking_points())
+            # if self.current_snapshot:
+            #     snapshot.set_checking_points(self.current_snapshot.get_checking_points())
+            snapshot.set_checking_points(copy.deepcopy(self._get_checking_points()))
             snapshot.set_checking_point()
+            self.checking_points.append(snapshot.get_checking_point())
 
         snapshot.snapshot = vol_ops.create_snapshot(sp_option)
-        self.target_volume.update_volume()
 
         self.snapshot_list.append(snapshot)
         self.set_current_snapshot(snapshot)
@@ -298,6 +338,7 @@ class ZstackSnapshotTree(object):
         snapshot.set_depth(next_depth)
 
         self.Newhead = False
+
         return snapshot
 
     # resize reinit clone  create_image/template will auto create a snapshot
@@ -310,12 +351,11 @@ class ZstackSnapshotTree(object):
         super(ZstackSnapshot, snapshot).create()
         snapshot.snapshot = test_lib.lib_get_volume_snapshot(snapshot_uuid)[0]
         snapshot.set_name(snapshot.get_snapshot().name)
-        self.target_volume.update_volume()
 
         # known issue if ps_type is ceph, snapshot do not have children and parent, every snapshot is a head node
         ps_uuid = self.target_volume.get_volume().primaryStorageUuid
         cond = res_ops.gen_query_conditions('uuid', '=', ps_uuid)
-        ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
+        ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)[0]
 
         # if it is the first snapshot or it is in ceph ps
         if ps.type in ['Ceph']:
@@ -323,17 +363,17 @@ class ZstackSnapshotTree(object):
 
         if self.current_snapshot:
             current_depth = self.current_snapshot.get_depth()
-            next_depth = 1 if self.current_snapshot + 1 > self.Maxdepth else current_depth + 1
+            next_depth = 1 if current_depth + 1 > self.Maxdepth else current_depth + 1
         else:
             next_depth = 1
 
         if next_depth == 1 or self.Newhead:
             self.heads.append(snapshot)
-        else:  # if snapshot is auto created it have the same checking_points with current_snapshot
-            snapshot.set_checking_points(self.current_snapshot.get_checking_points())
+        else:
+            snapshot.set_checking_points(copy.deepcopy(self.get_checking_points()))
             self.current_snapshot.add_child(snapshot)
             snapshot.set_parent(self.current_snapshot)
-            snapshot.set_depth(self.current_snapshot.depth+1)
+            snapshot.set_depth(self.current_snapshot.depth + 1)
 
         self.snapshot_list.append(snapshot)
         self.set_current_snapshot(snapshot)
@@ -349,13 +389,13 @@ class ZstackSnapshotTree(object):
             vol_ops.delete_snapshot(snapshot.get_snapshot().uuid)
 
         snapshot.state = sp_header.DELETED
-        self.deleted.append(self)
+        self.deleted.append(snapshot)
         snapshot.remove_children()
 
         # snapshot is head, snapshot.parent == None, head will be deleted
         if snapshot in self.heads:
             # current is in deleted-snapshot children
-            if self.current_snapshot in snapshot.get_all_child_list():
+            if self.current_snapshot and (snapshot == self.current_snapshot or snapshot in self.current_snapshot.get_all_parent()):
                 self.current_snapshot = None
             # current is not in deleted-snapshot children
             self.heads.remove(snapshot)
@@ -368,31 +408,37 @@ class ZstackSnapshotTree(object):
         self.snapshot_list.remove(snapshot)
 
     # when snapshot_tree is the first created and ps_migrate must update snapshot tree
-    def update(self):
-        cond = res_ops.gen_query_conditions('name', '=', "utility_vm_for_robot_test")
-        cond = res_ops.gen_query_conditions('state', '=', "Running", cond)
-        vms = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
-        for vm in vms:
-            if self.get_target_volume().get_volume().primaryStorageUuid == vm.allVolumes[0].primaryStorageUuid:
-                import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
-                utility_vm_uuid = vm.uuid
-                utility_vm = zstack_vm_header.ZstackTestVm()
-                utility_vm.create_from(utility_vm_uuid)
+    def update(self, update_utility=False):
+        if not self.utility_vm or update_utility:
+            cond = res_ops.gen_query_conditions('name', '=', "utility_vm_for_robot_test")
+            cond = res_ops.gen_query_conditions('state', '=', "Running", cond)
+            vms = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
+            for vm in vms:
+                if self.get_target_volume().get_volume().primaryStorageUuid == vm.allVolumes[0].primaryStorageUuid:
+                    import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
+                    utility_vm_uuid = vm.uuid
+                    utility_vm = zstack_vm_header.ZstackTestVm()
+                    utility_vm.create_from(utility_vm_uuid)
 
-                self.utility_vm = utility_vm
+                    self.utility_vm = utility_vm
 
         for snapshot in self.snapshot_list:
             snapshot.update()
             snapshot.set_utility_vm(self.utility_vm)
+            test_util.test_logger("children for snapshot: %s" % snapshot)
+            test_util.test_logger(snapshot.get_children_tree_list())
 
         new_snap = self.find_new_auto_create_snapshot()
         if new_snap:
-            self.add_snapshot(new_snap)
+            self.add_snapshot(new_snap.uuid)
+
+        test_util.test_logger(self.snapshot_list)
 
     def use(self, snapshot):
         vol_ops.use_snapshot(snapshot.get_snapshot().uuid)
         snapshot.target_volume.update_volume()
         self.set_current_snapshot(snapshot)
+        self.checking_points = copy.deepcopy(snapshot.get_checking_points())
 
     def batch_delete_snapshots(self, snapshots):
         for snapshot in snapshots:
@@ -401,9 +447,15 @@ class ZstackSnapshotTree(object):
 
     def find_new_auto_create_snapshot(self):
         cond = res_ops.gen_query_conditions('volumeUuid', '=', self.target_volume.get_volume().uuid)
-        cond = res_ops.gen_query_conditions('sortBy', '=', 'createDate', cond)
         snaps = res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, cond)
+        snaps = sorted(snaps, key=lambda a: int(time.mktime(time.strptime(a.createDate, "%b %d, %Y %I:%M:%S %p"))))
         test_util.test_logger([snap.name for snap in snaps])
         if len(snaps) == len(self.get_snapshot_list()):
             return
         return snaps[-1]
+
+    def check(self):
+        import zstackwoodpecker.zstack_test.checker_factory as checker_factory
+        self.update()
+        checker = checker_factory.CheckerFactory().create_checker(self)
+        checker.check()

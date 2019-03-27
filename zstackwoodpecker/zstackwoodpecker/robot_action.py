@@ -34,6 +34,10 @@ import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.header.volume as vol_header
 import zstackwoodpecker.header.image as image_header
 
+import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_vol_header
+import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
+import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
+
 import apibinding.api as api
 import zstacklib.utils.http as http
 import zstacklib.utils.jsonobject as jsonobject
@@ -64,23 +68,26 @@ SSH_TIMEOUT = 600
 
 class robot_test_dict(object):
     def __init__(self):
-        self.vm = {} # {name:volume_obj}
-        self.volume = {} # {name: volume_obj}
-        self.snapshot = {} # {name: snapshot_obj}
-        self.backup = {} # {name:{'backup':backup,'volume':volume,'md5':md5}}
-        self.image = {} # {name: image_obj}
+        self.vm = {}  # {name:volume_obj}
+        self.volume = {}  # {name: volume_obj}
+        self.snapshot = {}  # {name: snapshot_obj}
+        self.backup = {}  # {name:{'backup':backup,'volume':volume,'md5':md5}}
+        self.image = {}  # {name: image_obj}
+        self.snap_tree = {}  # {vol_name: snap_tree}
 
     def __repr__(self):
         str = 'Dict:: \n'
-        for k, v in self.vm:
+        for k, v in self.vm.items():
             str += ('\tName: %s, Uuid: %s\n' % (k, v.get_vm().uuid))
-        for k, v in self.volume:
+        for k, v in self.volume.items():
             str += ('\tName: %s, Uuid: %s\n' % (k, v.get_volume().uuid))
-        for k, v in self.snapshot:
-            str += ('\tName: %s, Uuid: %s, Tree: %s\n' % (k, v.get_volume().uuid, v.snapshot_tree))
-        for k, v in self.backup:
-            str += ('\tName: %s, Uuid: %s, volume: %s, Md5: %s\n' % (k, v['backup'].uuid, v['backup'].volumeUuid, v['md5']))
-        for k, v in self.image:
+        for k, v in self.snapshot.items():
+            str += ('\tName: %s, Uuid: %s, Tree: %s, Md5: %s\n' % (
+                k, v.get_target_volume().get_volume().uuid, v.snapshot_tree, v.md5sum))
+        for k, v in self.backup.items():
+            str += ('\tName: %s, Uuid: %s, Volume: %s, Md5: %s\n' % (
+                k, v['backup'].uuid, v['backup'].volumeUuid, v['md5']))
+        for k, v in self.image.items():
             str += ('\tName: %s, Uuid: %s\n' % (k, v.image.uuid))
         return str
 
@@ -88,7 +95,7 @@ class robot_test_dict(object):
         self.vm[name] = vm_obj
 
     def remove_vm(self, vm_obj):
-        for k, v in self.vm:
+        for k, v in self.vm.items():
             if v == vm_obj:
                 self.vm.pop(k)
 
@@ -96,33 +103,61 @@ class robot_test_dict(object):
         self.volume[name] = vol_obj
 
     def remove_volume(self, vol_obj):
-        for k, v in self.volume:
+        for k, v in self.volume.items():
             if v == vol_obj:
-                self.vm.pop(k)
+                self.volume.pop(k)
+                self.remove_snap_tree(name=k)
 
     def add_snapshot(self, name, snap_obj):
         self.snapshot[name] = snap_obj
 
     def remove_snapshot(self, snap_obj):
-        for k, v in self.snapshot:
+        for k, v in self.snapshot.items():
             if v == snap_obj:
-                self.vm.pop(k)
+                self.snapshot.pop(k)
 
     def add_backup(self, name, backup, volume):
-        self.backup[name] = {'backup':backup,'volume':volume,'md5':''}
+        self.backup[name] = {'backup': backup, 'volume': volume, 'md5': ''}
 
     def remove_backup(self, backup):
-        for k, v in self.backup:
+        for k, v in self.backup.items():
             if v['backup'] == backup:
-                self.vm.pop(k)
+                self.backup.pop(k)
+
+    def set_backup_md5sum(self, name, md5sum):
+        self.backup[name]['md5'] = md5sum
+
+    def get_backup_md5sum(self, name):
+        return self.backup[name]['md5']
 
     def add_image(self, name, image_obj):
         self.image[name] = image_obj
 
-    def remove(self, image_obj):
-        for k, v in self.image:
+    def remove_image(self, image_obj):
+        for k, v in self.image.items():
             if v == image_obj:
-                self.vm.pop(k)
+                self.image.pop(k)
+
+    def add_snap_tree(self, name, snap_tree):
+        self.snap_tree[name] = snap_tree
+
+    def remove_snap_tree(self, snap_tree=None, name=None):
+        if name:
+            self.snap_tree.pop(name)
+        for k, v in self.snap_tree.items():
+            if v == snap_tree:
+                self.snap_tree.pop(k)
+
+    def check(self):
+        # vm.check
+        for k, vm in self.vm.items():
+            vm.check()
+        # volume.check
+        for k, volume in self.volume.items():
+            volume.check()
+        # snap_tree.check
+        for k, snap_tree in self.snap_tree.items():
+            snap_tree.check()
 
 
 class robot(object):
@@ -165,7 +200,7 @@ class robot(object):
     def initial_resource(self):
         # bs
         cond = res_ops.gen_query_conditions('type', '=', 'ImageStoreBackupStorage')
-        bss = res_ops.query_resource(res_ops.BACKUP_STOTRAGE, cond)
+        bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)
         self.robot_resource['bs'] = []
         if not bss:
             test_util.test_fail("Robot test must have imagestore bs")
@@ -181,7 +216,7 @@ class robot(object):
             self.robot_resource['ps'].append(ps.uuid)
 
         # vol_image
-        cond = res_ops.gen_query_conditions('mediaType', '=', 'DataVolumeTemplate'),
+        cond = res_ops.gen_query_conditions('mediaType', '=', 'DataVolumeTemplate')
         images = res_ops.query_resource(res_ops.IMAGE, cond)
         self.robot_resource['vol_image'] = []
         if not images:
@@ -208,7 +243,7 @@ class robot(object):
             self.robot_resource['vm_image'].append(image.uuid)
 
         # host
-        hosts = res_ops.query_resource(res_ops.HOST, cond)
+        hosts = res_ops.query_resource(res_ops.HOST)
         self.robot_resource['host'] = []
         for host in hosts:
             test_util.test_logger("Robot resource:: host: [%s], uuid: [%s}" % (host.name, host.uuid))
@@ -220,7 +255,7 @@ class robot(object):
         stack_template_option.set_name("robot_test")
         stack_template_option.set_templateContent(self.resource_stack_template)
         stack_template = stack_template_ops.add_stack_template(stack_template_option)
-        self.initial_formation_parameters(stack_template.uuid)
+        self.initial_formation_auto_parameter(stack_template.uuid)
         resource_stack_option = test_util.ResourceStackOption()
         resource_stack_option.set_template_uuid(stack_template.uuid)
         resource_stack_option.set_parameters(self.get_initial_formation_parameters())
@@ -334,9 +369,10 @@ class robot(object):
 
                 if resource["VmInstance"]["type"] == "ApplianceVm":
                     continue
-                new_vm = vm_header.ZstackTestVm()
+                new_vm = zstack_vm_header.ZstackTestVm()
                 new_vm.create_from(resource["VmInstance"]["uuid"])
-                root_volume = vol_header.ZstackTestVolume()
+                new_vm.update()
+                root_volume = zstack_vol_header.ZstackTestVolume()
                 root_volume.create_from(new_vm.vm.allVolumes[0].uuid)
 
                 new_vm.test_volumes.append(root_volume)
@@ -344,6 +380,7 @@ class robot(object):
                 root_snap_tree.update()
                 root_volume.snapshot_tree = root_snap_tree
                 self.test_dict.add_volume(name=new_vm.vm.name + "-root", vol_obj=root_volume)
+                self.test_dict.add_snap_tree(name=new_vm.vm.name + "-root", snap_tree=root_snap_tree)
                 self.default_config['HOST'] = new_vm.get_vm().HostUuid
                 self.default_config['PS'] = root_volume.get_volume().primaryStorageUuid
 
@@ -360,7 +397,6 @@ class robot(object):
                     volume_index += 1
                 new_vm.update()
                 self.test_dict.add_vm(resource["VmInstance"]["name"], new_vm)
-                test_lib.lib_robot_update_configs(self, "VmInstance", new_vm.get_vm())
 
         # import Volume
         for resource in resource_list:
@@ -372,11 +408,10 @@ class robot(object):
 
                 imported_resource.append(resource["Volume"]["uuid"])
 
-                new_volume = vol_header.ZstackTestVolume()
+                new_volume = zstack_vol_header.ZstackTestVolume()
                 new_volume.create_from(resource["Volume"]["uuid"])
 
                 self.test_dict.add_volume(resource["Volume"]['name'], new_volume)
-                test_lib.lib_robot_update_configs(self, "Volume", new_volume.get_volume())
 
         # import VIP
 
@@ -399,10 +434,11 @@ class robot(object):
 
 def robot_run_constant_path(robot_test_obj, set_robot=True):
     test_lib.ROBOT = set_robot
-    constant_path = robot_test_obj.get_path()
+    constant_path = robot_test_obj.get_path_list()
 
     path = robot_test_obj.path()
     test_util.test_logger("Robot action start!")
+    index = 1
     while True:
         test_dict = robot_test_obj.get_test_dict()
         resource_dict = robot_test_obj.get_robot_resource()
@@ -410,22 +446,26 @@ def robot_run_constant_path(robot_test_obj, set_robot=True):
         test_util.test_logger(constant_path)
         test_util.test_logger(resource_dict)
         test_util.test_logger(test_dict)
-
         try:
             tmpt = next(path)
             action = tmpt[0]
             args = tmpt[1:]
-            run_action(robot_test_obj, action, args)
+            run_action(robot_test_obj, action, args, index)
+            index += 1
         except StopIteration:
             break
+
+        debug(robot_test_obj)
+        if set_robot:
+            robot_test_obj.test_dict.check()
 
     test_util.test_logger("Robot action run over!")
 
 
-def run_action(robot_test_obj, action, args):
-    test_util.test_logger("New round: Start Robot action [ %s ] with args [%s] " % (action, args))
+def run_action(robot_test_obj, action, args, index):
+    test_util.test_logger("New Round: Start Robot action %s step [ %s ] with args [%s] " % (index, action, args))
     action_dict[action](robot_test_obj, args)
-    test_util.test_logger("New round: Finish Robot action [ %s ] :" % action)
+    test_util.test_logger("Finish Robot action [ %s ] " % action)
 
 
 default_snapshot_depth = 8
@@ -576,7 +616,7 @@ def reinit_vm(robot_test_obj, args):
         volume.update()
         volume.update_volume()
 
-    robot_test_obj.get_test_dict.volume[args[0] + '-root'].snapshot_tree.Newhead = True
+    robot_test_obj.test_dict.volume[args[0] + '-root'].snapshot_tree.Newhead = True
 
 
 def clone_vm(robot_test_obj, args):
@@ -632,50 +672,156 @@ def change_vm_image(robot_test_obj, args):
 
 
 def create_vm_backup(robot_test_obj, args):
-    pass
+    if len(args) < 2:
+        test_util.test_fail("no resource available for next action: create vm backup")
 
+    target_vm = robot_test_obj.get_test_dict().vm[args[0]]
+    backup_name = args[1]
+
+    bs_uuid = robot_test_obj.get_robot_resource()['bs'][0]
+
+    backup_option = test_util.BackupOption()
+    backup_option.set_name(backup_name)
+    backup_option.set_volume_uuid(test_lib.lib_get_root_volume(target_vm.get_vm()).uuid)
+    backup_option.set_backupStorage_uuid(bs_uuid)
+
+    if len(args) == 3:
+        backup_option.set_mode('full')
+
+    backups = vm_ops.create_vm_backup(backup_option)
+
+    for backup in backups:
+        for test_volume in target_vm.test_volumes:
+            if backup.volumeUuid == test_volume.get_volume().uuid:
+                robot_test_obj.test_dict.add_backup(backup_name + '-' + backup.volumeUuid, backup, test_volume)
+                md5sum = test_volume.get_md5sum()
+                robot_test_obj.test_dict.set_backup_md5sum(backup_name + '-' + backup.volumeUuid, md5sum)
 
 
 def use_vm_backup(robot_test_obj, args):
-    pass
+    if len(args) != 1:
+        test_util.test_fail("no resource available for next action: use vm backup")
 
+    backup_name = args[0]
+
+    cond = res_ops.gen_query_conditions("name", '=', backup_name)
+    groupUuid = res_ops.query_resource(res_ops.VOLUME_BACKUP, cond)[0].groupUuid
+    vol_ops.revert_vm_from_backup(groupUuid)
+
+    test_dict = robot_test_obj.get_test_dict()
+    for name, backup_dict in test_dict.backup.items():
+        if backup_name in name:
+            test_volume = backup_dict['volume']
+            test_volume.update()
+            test_volume.update_volume()
+            md5sum = test_dict.get_backup_md5sum(name)
+            test_volume.set_md5sum(md5sum)
+            test_volume.snapshot_tree.Newhead = True
+
+
+def create_vm_from_vmbackup(robot_test_obj, args):
+    if len(args) != 1:
+        test_util.test_fail("no resource available for next action: create vm from vm_backup")
+
+    test_dict = robot_test_obj.get_test_dict()
+    backup_dict = None
+    for k, v in test_dict.backup.items():
+        if args[0] in k:
+            backup_dict = v
+            d_backup_name = k
+
+    target_backup = backup_dict['backup']
+
+    l3_uuid = test_lib.lib_get_l3_by_name(os.environ.get('l3VlanNetworkName1')).uuid
+    instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(os.environ.get('instanceOfferingName_s')).uuid
+    backup_vm = vol_ops.create_vm_from_vm_backup("vm_create_from_backup", target_backup.groupUuid,
+                                                 instance_offering_uuid, l3_uuid, [l3_uuid])
+    new_vm = zstack_vm_header.ZstackTestVm()
+    new_vm.create_from(backup_vm.uuid)
+
+    root_volume = zstack_vol_header.ZstackTestVolume()
+    root_volume.create_from(test_lib.lib_get_root_volume(new_vm.get_vm()).uuid)
+
+    new_vm.test_volumes.append(root_volume)
+    root_snap_tree = robot_snapshot_header.ZstackSnapshotTree(root_volume)
+    root_snap_tree.update()
+    root_volume.snapshot_tree = root_snap_tree
+    robot_test_obj.test_dict.add_volume(name=new_vm.vm.name + "-root", vol_obj=root_volume)
+    robot_test_obj.test_dict.add_snap_tree(name=new_vm.vm.name + "-root", snap_tree=root_snap_tree)
+
+    cond = res_ops.gen_query_conditions("groupUuid", '=', target_backup.groupUuid)
+    backups = res_ops.query_resource(res_ops.VOLUME_BACKUP, cond)
+
+    for backup in backups:
+        for _, volume in test_dict.volume.items():
+            volume.update()
+            volume.update_volume()
+            if backup.volumeUuid == volume.get_volume().uuid:
+                new_volume_name = "data-volume-create-from-backup-" + backup.uuid
+                cond = res_ops.gen_query_conditions("name", '=', new_volume_name)
+                vol = res_ops.query_resource(res_ops.VOLUME, cond)[0]
+                new_volume = zstack_vol_header.ZstackTestVolume()
+                new_volume.create_from(vol.uuid, new_vm)
+                new_vm.test_volumes.append(new_volume)
+                robot_test_obj.test_dict.add_volume(new_volume_name, new_volume)
+                md5sum = test_dict.get_backup_md5sum(backup.name + '-' + backup.volumeUuid)
+                new_volume.set_md5sum(md5sum)
+
+                snap_tree = robot_snapshot_header.ZstackSnapshotTree(new_volume)
+                snap_tree.update()
+                robot_test_obj.test_dict.add_snap_tree(new_volume_name, snap_tree)
+                new_volume.update()
+                new_volume.update_volume()
 
 
 def create_volume_backup(robot_test_obj, args):
-    if len(args) != 2:
+    if len(args) < 2:
         test_util.test_fail("no resource available for next action: create volume backup")
 
     target_volume = robot_test_obj.get_test_dict().volume[args[0]]
     backup_name = args[1]
 
-    bs = robot_test_obj.get_robot_resource()['bs'][0]
+    bs_uuid = robot_test_obj.get_robot_resource()['bs'][0]
 
     backup_option = test_util.BackupOption()
     backup_option.set_name(backup_name)
     backup_option.set_volume_uuid(target_volume.get_volume().uuid)
-    backup_option.set_backupStorage_uuid(bs.uuid)
+    backup_option.set_backupStorage_uuid(bs_uuid)
 
     backup = vol_ops.create_backup(backup_option)
 
     robot_test_obj.test_dict.add_backup(backup_name, backup, target_volume)
+
+    md5sum = target_volume.get_md5sum()
+    robot_test_obj.test_dict.set_backup_md5sum(backup_name, md5sum)
 
 
 def use_volume_backup(robot_test_obj, args):
     if len(args) != 1:
         test_util.test_fail("no resource available for next action: use volume backup")
 
-    backup_dict = robot_test_obj.get_test_dict().backup[args[0]]
-    backup = backup_dict['backup']
+    test_dict = robot_test_obj.get_test_dict()
+    backup_dict = None
+    for k, v in test_dict.backup.items():
+        if args[0] in k:
+            backup_dict = v
+            d_backup_name = k
 
-    backup = vol_ops.revert_volume_from_backup(backup.uuid)
+    target_backup = backup_dict['backup']
+
+    backup = vol_ops.revert_volume_from_backup(target_backup.uuid)
 
     target_volume = backup_dict['volume']
     target_volume.update()
     target_volume.update_volume()
 
+    md5sum = robot_test_obj.test_dict.get_backup_md5sum(d_backup_name)
+    target_volume.set_md5sum(md5sum)
+    target_volume.snapshot_tree.Newhead = True
+
 
 def create_volume(robot_test_obj, args):
-    if len(args) <1 :
+    if len(args) < 1:
         test_util.test_fail("no resource available for next action: create volume")
     target_volume_name = args[0]
     ps_uuid = robot_test_obj.get_default_config()['PS']
@@ -705,6 +851,7 @@ def create_volume(robot_test_obj, args):
     snap_tree.update()
     new_volume.snapshot_tree = snap_tree
     robot_test_obj.test_dict.add_volume(target_volume_name, new_volume)
+    robot_test_obj.test_dict.add_snap_tree(target_volume_name, snap_tree)
 
 
 def create_scsi_volume():
@@ -769,13 +916,13 @@ def detach_volume(robot_test_obj, args):
     if not target_vm:
         target_vm = target_volume.target_vm
 
-    target_volume(target_vm.get_vm().uuid)
-    target_vm.remove(target_volume)
+    target_volume.detach(target_vm.get_vm().uuid)
+    target_vm.test_volumes.remove(target_volume)
 
     target_volume.update()
     target_volume.update_volume()
 
-    for volume in target_volume.test_volumes:
+    for volume in target_vm.test_volumes:
         volume.update()
         volume.update_volume()
 
@@ -795,8 +942,8 @@ def resize_volume(robot_test_obj, args):
     target_vm = robot_test_obj.get_test_dict().vm[args[0]]
     delta = args[1]
 
-    root_volume_uuid = target_vm.get_vm().allVolumes[0].uuid
-    current_size = target_vm.get_vm().allVolumes[0].size
+    root_volume_uuid = test_lib.lib_get_root_volume(target_vm.get_vm()).uuid
+    current_size = test_lib.lib_get_root_volume(target_vm.get_vm()).size
     new_size = current_size + int(delta)
 
     vol_ops.resize_volume(root_volume_uuid, new_size)
@@ -828,7 +975,7 @@ def create_data_vol_template_from_volume(robot_test_obj, args):
     target_volume = robot_test_obj.get_test_dict().volume[args[0]]
     image_name = args[1]
 
-    new_data_vol_temp = test_lib.lib_create_data_vol_template_from_volume(None, target_volume.get_volume())
+    new_data_vol_temp = test_lib.lib_create_data_vol_template_from_volume(vm_target_vol=target_volume.get_volume())
     img_ops.update_image(new_data_vol_temp.get_image().uuid, image_name, None)
 
     robot_test_obj.get_test_dict().add_image(image_name, new_data_vol_temp)
@@ -872,15 +1019,12 @@ def create_data_volume_from_image(robot_test_obj, args):
         image_option.set_timeout(120000)
         image_option.set_mediaType("DataVolumeTemplate")
         image = img_ops.add_image(image_option)
-        new_image = image_header.ZstackTestImage()
+        new_image = zstack_image_header.ZstackTestImage()
         new_image.set_creation_option(image_option)
         new_image.set_image(image)
         robot_test_obj.test_dict.add_image(new_image)
         target_images = [image]
-    target_image = target_images[0].get_image()
-    bs_uuid = target_image.backupStorageRefs[0].backupStorageUuid
-    ps_uuid_list = test_lib.lib_get_primary_storage_uuid_list_by_backup_storage(bs_uuid)
-    ps_uuid = random.choice(ps_uuid_list)
+    ps_uuid = robot_test_obj.get_default_config()['PS']
     ps = test_lib.lib_get_primary_storage_by_uuid(ps_uuid)
     host_uuid = None
     if ps.type == inventory.LOCAL_STORAGE_TYPE:
@@ -888,12 +1032,13 @@ def create_data_volume_from_image(robot_test_obj, args):
 
     volume_inv = vol_ops.create_volume_from_template(target_images[0]['uuid'], ps_uuid, target_volume_name, host_uuid,
                                                      systemtags)
-    new_volume = vol_header.ZstackTestVolume()
+    new_volume = zstack_vol_header.ZstackTestVolume()
     new_volume.create_from(volume_inv.uuid, None)
     snap_tree = robot_snapshot_header.ZstackSnapshotTree(new_volume)
     snap_tree.update()
     new_volume.snapshot_tree = snap_tree
     robot_test_obj.test_dict.add_volume(target_volume_name, new_volume)
+    robot_test_obj.test_dict.add_snap_tree(target_volume_name, snap_tree)
 
 
 def create_image_from_volume(robot_test_obj, args):
@@ -903,7 +1048,7 @@ def create_image_from_volume(robot_test_obj, args):
     target_vm = robot_test_obj.get_test_dict().vm[args[0]]
     image_name = args[1]
 
-    new_image = test_lib.lib_create_template_from_volume(target_vm.get_vm().allVolumes[0].uuid)
+    new_image = test_lib.lib_create_template_from_volume(test_lib.lib_get_root_volume(target_vm.get_vm()).uuid)
     img_ops.update_image(new_image.get_image().uuid, image_name, None)
 
     robot_test_obj.test_dict.add_image(image_name, new_image)
@@ -946,15 +1091,15 @@ def reclaim_space_from_bs():
     pass
 
 
-def ps_migrage_vm(robot_test_obj, args):
+def ps_migrate_volume(robot_test_obj, args):
     if len(args) != 1:
-        test_util.test_fail("no resource available for next action: ps_migrate vm")
+        test_util.test_fail("no resource available for next action: ps_migrate volume")
     target_volume = robot_test_obj.get_test_dict().volume[args[0]]
 
     target_pss = datamigr_ops.get_ps_candidate_for_vol_migration(target_volume.get_volume().uuid)
 
     if not target_pss:
-        test_util.test_fail("no resource available for next action: ps_migrate vm")
+        test_util.test_fail("no resource available for next action: ps_migrate volume")
 
     datamigr_ops.ps_migrage_volume(target_pss[0].uuid, target_volume.get_volume().uuid)
 
@@ -964,6 +1109,7 @@ def ps_migrage_vm(robot_test_obj, args):
         test_vm.update()
     target_volume.update()
     target_volume.update_volume()
+    target_volume.snapshot_tree.update(update_utility=True)
 
 
 def create_sg():
@@ -997,20 +1143,22 @@ def create_volume_snapshot(robot_test_obj, args):
     target_volume = robot_test_obj.get_test_dict().volume[args[0]]
     snapshot_name = args[1]
 
-    target_volume.snapshot_tree.create_snapshot(snapshot_name)
+    snapshot = target_volume.snapshot_tree.create_snapshot(snapshot_name)
 
+    robot_test_obj.test_dict.add_snapshot(snapshot_name, snapshot)
     target_volume.update()
     target_volume.update_volume()
-
+    md5sum = target_volume.get_md5sum()
+    snapshot.set_md5sum(md5sum)
 
 
 def delete_volume_snapshot(robot_test_obj, args):
     if len(args) != 1:
         test_util.test_fail("no resource available for next action: delete volume snapshot")
 
-    target_snapshot_name = args[1]
+    target_snapshot_name = args[0]
     target_snapshot = robot_test_obj.get_test_dict().snapshot[target_snapshot_name]
-    target_snapshot_tree = target_snapshot.target_snapshot_tree
+    target_snapshot_tree = target_snapshot.snapshot_tree
 
     target_snapshot_tree.delete(target_snapshot)
 
@@ -1018,22 +1166,25 @@ def delete_volume_snapshot(robot_test_obj, args):
     target_volume.update()
     target_volume.update_volume()
 
-    robot_test_obj.test_dict.remove(target_snapshot)
+    robot_test_obj.test_dict.remove_snapshot(target_snapshot)
 
 
 def use_volume_snapshot(robot_test_obj, args):
     if len(args) != 1:
         test_util.test_fail("no resource available for next action: use volume snapshot")
 
-    target_snapshot_name = args[1]
+    target_snapshot_name = args[0]
     target_snapshot = robot_test_obj.get_test_dict().snapshot[target_snapshot_name]
-    target_snapshot_tree = target_snapshot.target_snapshot_tree
+    target_snapshot_tree = target_snapshot.snapshot_tree
 
     target_snapshot_tree.use(target_snapshot)
 
     target_volume = target_snapshot_tree.target_volume
     target_volume.update()
     target_volume.update_volume()
+
+    md5sum = target_snapshot.get_md5sum()
+    target_volume.set_md5sum(md5sum)
 
 
 def batch_delete_volume_snapshot(robot_test_obj, args):
@@ -1051,10 +1202,10 @@ def batch_delete_volume_snapshot(robot_test_obj, args):
 
     for name in args[0]:
         target_snapshot = robot_test_obj.get_test_dict().snapshot[name]
-        if not snapshot_tree_list.has_key(target_snapshot.target_snapshot_tree):
-            snapshot_tree_list[target_snapshot.target_snapshot_tree] = []
-        snapshot_tree_list[target_snapshot.target_snapshot_tree].append(target_snapshot)
-    for snap_tree, snaps in snapshot_tree_list:
+        if not snapshot_tree_list.has_key(target_snapshot.snapshot_tree):
+            snapshot_tree_list[target_snapshot.snapshot_tree] = []
+        snapshot_tree_list[target_snapshot.snapshot_tree].append(target_snapshot)
+    for snap_tree, snaps in snapshot_tree_list.items():
         snap_tree.batch_delete_snapshots(snaps)
 
 
@@ -1139,7 +1290,7 @@ def cleanup_ps_cache(robot_test_obj, args):
         ps_ops.cleanup_imagecache_on_primary_storage(ps.uuid)
 
 
-def ps_migrate_volume():
+def ps_migrate_vm(robot_test_obj, args):
     pass
 
 
@@ -1166,6 +1317,8 @@ action_dict = {
     'create_volume_backup': create_volume_backup,
     'use_volume_backup': use_volume_backup,
 
+    'create_vm_from_vmbackup': create_vm_from_vmbackup,
+
     'create_volume': create_volume,
     'create_scsi_volume': create_scsi_volume,
     'attach_volume': attach_volume,
@@ -1190,7 +1343,7 @@ action_dict = {
     'reconnect_bs': reconnect_bs,
     'reclaim_space_from_bs': reclaim_space_from_bs,
 
-    'ps_migrage_vm': ps_migrage_vm,
+    'ps_migrate_vm': ps_migrate_vm,
 
     'create_security_group': create_sg,
     'delete_security_group': delete_sg,
@@ -1233,3 +1386,122 @@ action_dict = {
     'ps_migrate_volume': ps_migrate_volume,
 
 }
+
+
+def robot_create_utility_vm():
+    '''
+            Create utility vm for all ps for robot testing
+        '''
+    cond = res_ops.gen_query_conditions('state', '=', "Enabled")
+    cond = res_ops.gen_query_conditions('status', '=', "Connected", cond)
+    pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
+    for ps in pss:
+        utility_vm = None
+        cond = res_ops.gen_query_conditions('name', '=', "utility_vm_for_robot_test")
+        cond = res_ops.gen_query_conditions('state', '=', "Running", cond)
+        vms = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
+        for vm in vms:
+            ps_uuid = test_lib.lib_get_root_volume(vm).primaryStorageUuid
+            if ps_uuid == ps.uuid:
+                utility_vm = vm
+        if not utility_vm:
+            utility_vm_image = None
+            vm_create_option = test_util.VmOption()
+            bs_uuids = test_lib.lib_get_backup_storage_uuid_list_by_zone(ps.zoneUuid)
+            cond = res_ops.gen_query_conditions('name', '=', 'image_for_robot_test')
+            cond = res_ops.gen_query_conditions('state', '=', "Enabled", cond)
+            cond = res_ops.gen_query_conditions('status', '=', "Ready", cond)
+            images = res_ops.query_resource(res_ops.IMAGE, cond)
+            for bs_uuid in bs_uuids:
+                temp_list = test_lib.lib_get_primary_storage_uuid_list_by_backup_storage(bs_uuid)
+                if ps.uuid not in temp_list:
+                    continue
+                for image in images:
+                    for bs_ref in image.backupStorageRefs:
+                        if bs_ref.backupStorageUuid == bs_uuid:
+                            utility_vm_image = image
+                            break
+            if not utility_vm_image:
+                cond = res_ops.gen_query_conditions('name', '=', os.environ.get('imageName_net'))
+                cond = res_ops.gen_query_conditions('state', '=', "Enabled", cond)
+                cond = res_ops.gen_query_conditions('status', '=', "Ready", cond)
+                images = res_ops.query_resource(res_ops.IMAGE, cond)
+                for bs_uuid in bs_uuids:
+                    temp_list = test_lib.lib_get_primary_storage_uuid_list_by_backup_storage(bs_uuid)
+                    if ps.uuid not in temp_list:
+                        continue
+                    for image in images:
+                        for bs_ref in image.backupStorageRefs:
+                            if bs_ref.backupStorageUuid == bs_uuid:
+                                utility_vm_image = image
+                                break
+            if not utility_vm_image:
+                image_option = test_util.ImageOption()
+                image_option.set_format('qcow2')
+                image_option.set_url(os.environ.get('imageUrl_net'))
+                image_option.set_name('image_for_robot_test')
+                for bs_uuid in bs_uuids:
+                    temp_list = test_lib.lib_get_primary_storage_uuid_list_by_backup_storage(bs_uuid)
+                    if ps.uuid in temp_list:
+                        target_bs_uuid = bs_uuid
+                        break
+
+                image_option.set_backup_storage_uuid_list([target_bs_uuid])
+                image_option.set_timeout(7200000)
+                image_option.set_mediaType("RootVolumeTemplate")
+                import zstackwoodpecker.operations.image_operations as img_ops
+                utility_vm_image = img_ops.add_image(image_option)
+
+            utility_vm_create_option = test_util.VmOption()
+            utility_vm_create_option.set_name('utility_vm_for_robot_test')
+            utility_vm_create_option.set_image_uuid(utility_vm_image.uuid)
+            utility_vm_create_option.set_ps_uuid(ps.uuid)
+            l3_uuid = test_lib.lib_get_l3_by_name(os.environ.get('l3VlanNetworkName1')).uuid
+            utility_vm_create_option.set_l3_uuids([l3_uuid])
+
+            utility_vm = test_lib.lib_create_vm(utility_vm_create_option)
+            # test_dict.add_utility_vm(utility_vm)
+            if os.environ.get('ZSTACK_SIMULATOR') != "yes":
+                utility_vm.check()
+        else:
+            import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
+            utility_vm_uuid = utility_vm.uuid
+            utility_vm = zstack_vm_header.ZstackTestVm()
+            utility_vm.create_from(utility_vm_uuid)
+
+
+def debug(robot_test_obj):
+    '''
+# vm: name uuid
+#   volume: name uuid installPath
+#     snapshot: name uuid installPath md5sum
+#     backup: name uuid md5sum
+#
+...
+    '''
+    test_dict = robot_test_obj.get_test_dict()
+
+    _str = 'Debug::\n'
+    _str += " [Vm]:\n"
+    for k, v in test_dict.vm.items():
+        _str += "\t[name]: %s [uuid]: %s\n" % (k, v.get_vm().uuid)
+    _str += " [Volume]:\n"
+    for vol_name, test_volume in test_dict.volume.items():
+        vol_inv = test_volume.get_volume()
+        _str += "\t[name]: %s [uuid]: %s [installPath]: %s [md5sum]: %s\n" % (
+            vol_inv.name, vol_inv.uuid, vol_inv.installPath, test_volume.get_md5sum())
+        _str += "\t\t[Snapshot]:\n"
+        for snap in test_volume.snapshot_tree.get_snapshot_list():
+            _str += "\t\t\t[name]: %s [uuid]: %s [installPath]: %s [parent]: %s [md5sum]: %s\n" % (
+                snap.snapshot.name, snap.snapshot.uuid, snap.snapshot.primaryStorageInstallPath, snap.parent,
+                snap.md5sum
+            )
+        _str += "\t\t[Backup]:\n"
+        for name, backup_dict in test_dict.backup.items():
+            back_volume = backup_dict['volume']
+            backup = backup_dict['backup']
+            md5sum = backup_dict['md5']
+            if back_volume == test_volume:
+                _str += "\t\t\t[name]: %s [uuid] %s [md5sum]: %s\n" % (name, backup.uuid, md5sum)
+
+    test_util.test_logger(_str)
