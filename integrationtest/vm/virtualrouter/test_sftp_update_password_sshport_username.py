@@ -111,6 +111,12 @@ def test():
     os.system(cmd)
     cmd = 'echo "password"| passwd --stdin test'
     os.system(cmd)
+    cmd = 'chmod u+w /etc/sudoers'
+    os.system(cmd)
+    cmd = 'echo \"test    ALL=(ALL)       ALL\" >> /etc/sudoers'
+    os.system(cmd)
+    cmd = 'chmod u-w /etc/sudoers'
+    os.system(cmd)
     host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid, timeout=recnt_timeout)
 
     test_util.test_dsc('Recover sftp username')
