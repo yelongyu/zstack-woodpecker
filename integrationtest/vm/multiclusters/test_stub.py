@@ -491,6 +491,8 @@ class DataMigration(TestChain):
          "weight": 1}
         '''
         self.get_image(image_name)
+        if self.origin_bs.type != 'Ceph':
+            return self
         dst_bs = self.get_bs_candidate()
         image_migr_inv = datamigr_ops.bs_migrage_image(dst_bs.uuid, self.image.backupStorageRefs[0].backupStorageUuid, self.image.uuid)
         conditions = res_ops.gen_query_conditions('uuid', '=', self.image.uuid)
