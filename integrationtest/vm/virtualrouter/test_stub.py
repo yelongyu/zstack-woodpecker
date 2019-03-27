@@ -611,6 +611,22 @@ def find_ps_nfs():
     test_util.test_logger("Can not find NFS primary storage ")
     return None
 
+def ensure_pss_connected():
+    for i in range(300):
+        #time.sleep(1)
+        ps_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+        for ps in ps_list:
+            ps_ops.reconnect_primary_storage(ps.uuid)
+            cond = res_ops.gen_query_conditions('uuid', '=', ps.uuid)
+            pss = res_ops.query_resource_fields(res_ops.PRIMARY_STORAGE, cond, None)
+            if not "connected" in pss[0].status.lower():
+                test_util.test_logger("time %s found not connected ps status: %s" %(str(i), pss[0].status))
+                break
+        else:
+            return
+    else:
+        test_util.test_fail("ps status didn't change to Connected within 300s, therefore, failed")
+
 def ensure_hosts_connected(wait_time):
     for i in range(wait_time):
         time.sleep(1)
