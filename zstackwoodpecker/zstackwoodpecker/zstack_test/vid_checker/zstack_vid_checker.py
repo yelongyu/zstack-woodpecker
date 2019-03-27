@@ -1964,7 +1964,7 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             return self.judge(True)
         else:
             try:
-                zwt_ops.remove_action_from_alarm(alarm_uuid, sns_topic_uuid)
+                zwt_ops.remove_action_from_alarm(alarm_uuid, sns_topic_uuid, project_login_session_uuid)
                 test_util.test_logger("remove_action_from_alarm should not be runned")
                 return 1
             except Exception as e:
