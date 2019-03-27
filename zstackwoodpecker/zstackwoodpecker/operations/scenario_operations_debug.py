@@ -2785,10 +2785,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
             if vm_thrd.iscsi_initiator_to_setup:
                 iscsi_initiator_to_setup.append(vm_thrd.iscsi_initiator_to_setup)
             if vm_thrd.exitcode != 0:
-                test_util.test_fail('Error happened while preparing host vm: [%s]' % vm_thrd.vm.name_)
                 print('----------------------Exception Reason------------------------')
                 print(vm_thrd.exc_traceback)
                 print('-------------------------Reason End---------------------------\n')
+                test_util.test_fail('Error happened while preparing host vm: [%s]' % vm_thrd.vm.name_)
 
         test_util.test_logger('iscsi_initiator_to_setup: %s' % iscsi_initiator_to_setup)
         for (_vm_inv, _vm) in iscsi_initiator_to_setup:
