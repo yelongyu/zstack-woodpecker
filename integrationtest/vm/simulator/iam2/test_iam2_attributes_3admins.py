@@ -17,6 +17,9 @@ vid_uuid = None
 
 def test():
     global vid_uuid
+
+    iam2_ops.clean_iam2_enviroment()
+
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]   
 
     vid_tst_obj = test_vid.ZstackTestVid()
