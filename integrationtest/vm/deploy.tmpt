@@ -38,7 +38,7 @@ instanceOfferingMemory_win = 8G
 instanceOfferingCpuNum_win = 8
 
 imageName_linux_UEFI = image_for_UEFI
-imageUrl_linux_UEFI = http://192.168.200.100/mirror/diskimages/CentOS74_UEFI.qcow2
+imageUrl_linux_UEFI = http://192.168.200.100/mirror/diskimages/CentOS74_UEFI_40G.qcow2
 
 virtualRouterOfferingName_s = virtual-router-vm
 virtualRouterOfferingMemory_s = 512M
