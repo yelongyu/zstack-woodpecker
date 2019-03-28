@@ -35,6 +35,7 @@ test_stub = test_lib.lib_get_test_stub()
 case_flavor = dict(project_admin=                   dict(target_role='project_admin'),
                    project_operator=                dict(target_role='project_operator'),
                    project_member=                  dict(target_role='project_member'),
+                   system_admin=                    dict(target_role='system_admin'),
                    )
 
 def test():
@@ -42,10 +43,11 @@ def test():
 
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     # 1 create project
-    project_name = 'test_project'
-    project = iam2_ops.create_iam2_project(project_name)
-    project_uuid = project.uuid
-    project_linked_account_uuid = project.linkedAccountUuid
+    if flavor['target_role'] != 'system_admin':
+        project_name = 'test_project'
+        project = iam2_ops.create_iam2_project(project_name)
+        project_uuid = project.uuid
+        project_linked_account_uuid = project.linkedAccountUuid
 
     if flavor['target_role'] == 'project_admin':
         # 2 create virtual id
@@ -88,6 +90,13 @@ def test():
 	# 4 login in project
 	#project_inv=iam2_ops.get_iam2_projects_of_virtual_id(plain_user_session_uuid)
 	project_login_uuid = iam2_ops.login_iam2_project(project_name, plain_user_session_uuid).uuid
+    elif flavor['target_role'] == 'system_admin':
+        username = "systemAdmin"
+        password = 'b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86'
+        vid_tst_obj = test_vid.ZstackTestVid()
+        virtual_id_uuid = vid_tst_obj.get_vid().uuid
+        test_stub.create_system_admin(username, password, vid_tst_obj)
+        project_login_uuid = acc_ops.login_by_account(username, password)
 
     zone_uuid = res_ops.get_resource(res_ops.ZONE)[0].uuid
 
@@ -111,7 +120,8 @@ def test():
     if vxlan_pool == None or len(vxlan_pool) == 0:
         test_util.test_skip('Vxlan is required for testing')
     vxlan_pool_uuid = vxlan_pool[0].uuid
-    acc_ops.share_resources([project_linked_account_uuid], [vxlan_pool_uuid])
+    if flavor['target_role'] != 'system_admin':
+        acc_ops.share_resources([project_linked_account_uuid], [vxlan_pool_uuid])
     vxlan_pool_uuid = res_ops.get_resource(res_ops.L2_VXLAN_NETWORK_POOL, session_uuid=project_login_uuid)[0].uuid
     vxlan_l2_uuid = vxlan_ops.create_l2_vxlan_network('vxlan_for_pm', vxlan_pool_uuid, zone_uuid, session_uuid=project_login_uuid).uuid
     l3_uuid = net_ops.create_l3('l3_for_pm', vxlan_l2_uuid, session_uuid=project_login_uuid).uuid
@@ -129,8 +139,9 @@ def test():
     if plain_user_uuid != None:
         iam2_ops.delete_iam2_virtual_id(plain_user_uuid)
 
-    iam2_ops.delete_iam2_project(project_uuid)
-    iam2_ops.expunge_iam2_project(project_uuid)
+    if flavor['target_role'] != 'system_admin':
+        iam2_ops.delete_iam2_project(project_uuid)
+        iam2_ops.expunge_iam2_project(project_uuid)
 
     test_util.test_pass('success test iam2 login in by project admin!')
 
