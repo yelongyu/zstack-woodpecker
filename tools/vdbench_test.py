@@ -225,6 +225,13 @@ def collect_md5sum(disklist):
     clear_disk(disklist)
     return md5sum_list
 
+def print_dir(disklist):
+    directory = {}
+    for i in disklist.keys():
+        _,o,_=bash_roe("ls -t /%s/| grep md5sum_%s" % ('/'+os.path.basename(i),os.path.basename(i)))
+        directory[i] = o.strip()
+    return directory
+
 if __name__ == "__main__":
     format_disk() 
     random_str=''.join(random.sample('abcdefghijklmnopqrstuvwxyz',3))
@@ -237,5 +244,7 @@ if __name__ == "__main__":
     generate(disklist)
     if FILE_BASED:
         new_md5_list = md5sum(disklist,random_str)
+        directory = print_dir(disklist)
         print_disklist("new", disklist, new_md5_list)
+        print_disklist("directory", disklist, directory)
         clear_disk(disklist)
