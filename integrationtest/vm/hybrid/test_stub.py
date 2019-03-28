@@ -731,7 +731,13 @@ class HybridObject(object):
             hyb_ops.del_vpc_user_vpn_gateway_local(self.user_vpn_gateway.uuid)
         self.check_resource('delete', 'gatewayId', self.user_vpn_gateway.gatewayId, 'query_vpc_user_vpn_gateway_local')
 
-    def create_ecs_image(self, check_progress=False):
+    def create_ecs_image(self, check_progress=False, gc=False):
+        if gc:
+            hyb_ops.sync_ecs_image_from_remote(self.datacenter.uuid)
+            condition = res_ops.gen_query_conditions('name', '=', ECS_IMAGE_NAME)
+            ecs_img = hyb_ops.query_ecs_image_local(condition)
+            for img in ecs_img:
+                hyb_ops.del_ecs_image_remote(img.uuid)
         cond_image = res_ops.gen_query_conditions('name', '=', os.getenv('imageName_s'))
         image =  res_ops.query_resource(res_ops.IMAGE, cond_image)[0]
         bs_uuid = image.backupStorageRefs[0].backupStorageUuid

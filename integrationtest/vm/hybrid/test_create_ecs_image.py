@@ -17,7 +17,7 @@ hybrid = test_stub.HybridObject()
 def test():
     hybrid.add_datacenter_iz(add_datacenter_only=True)
     hybrid.add_bucket()
-    hybrid.create_ecs_image()
+    hybrid.create_ecs_image(gc=True)
     time.sleep(180)
     hybrid.del_ecs_image()
     test_util.test_pass('Create Delete Ecs Image Test Success')
