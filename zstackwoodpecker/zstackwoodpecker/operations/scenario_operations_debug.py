@@ -2364,15 +2364,15 @@ def install_ebs_pkg_in_host(hostname, username, password):
         ssh.execute(cmd, hostname, username, password, True, 22)
         time.sleep(1)
 
-
+iscsi_initiator_to_setup = []
 def deploy_scenario(scenario_config, scenario_file, deploy_config):
+    global iscsi_initiator_to_setup
     vm_inv_lst = []
     vm_cfg_lst = []
     eip_lst = []
     vip_lst = []
     mn_ip_to_post = None
     vm_ip_to_post = None
-    iscsi_initiator_to_setup = []
     ocfs2smp_shareable_volume_is_created = False
     zstack_management_ip = scenario_config.basicConfig.zstackManagementIp.text_
     root_xml = etree.Element("deployerConfig")
@@ -2513,6 +2513,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     self.exc_traceback = ''.join(traceback.format_exception(*sys.exc_info()))
 
             def prepare_host_vm(self, vm):
+                global iscsi_initiator_to_setup
                 vm_creation_option = test_util.VmOption()
                 l3_uuid_list = []
                 l3_uuid_list_ge_3 = []
@@ -2738,7 +2739,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 			                #setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm, deploy_config)
                             break
                         elif ps_ref.type_ == 'iscsiInitiator':
-                            self.iscsi_initiator_to_setup = [vm_inv, vm]
+                            iscsi_initiator_to_setup.append([vm_inv, vm])
 #                             setup_iscsi_initiator(zstack_management_ip, vm_inv, vm, deploy_config)
                             break
                         elif ps_ref.type_ == 'ZSES':
