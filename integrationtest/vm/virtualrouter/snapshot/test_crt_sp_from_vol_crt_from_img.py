@@ -60,6 +60,7 @@ def test():
     image_option.set_guest_os_type(vm_img_inv.guestOsType)
     image_option.set_bits(vm_img_inv.bits)
     image_option.set_root_volume_uuid(root_volume_uuid)
+    image_option.set_timeout('600000')
     backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.get_vm())
     bs_uuid_list = []
     for bs in backup_storage_list:
