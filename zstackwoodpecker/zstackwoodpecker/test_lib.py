@@ -2831,8 +2831,11 @@ def lib_get_all_vr_l3_uuid():
     vr_l3 = []
     all_l3 = lib_get_l3s()
     for l3 in all_l3:
-        if len(l3.networkServices) != 0:
-            vr_l3.append(l3.uuid)
+        if l3.category == "Private":
+            sp = lib_get_l3_service_providers(l3)
+            for i in sp:
+                if i.type != "Flat" and i.type != "SecurityGroup":
+                    vr_l3.append(l3.uuid)
 
     return vr_l3
 
