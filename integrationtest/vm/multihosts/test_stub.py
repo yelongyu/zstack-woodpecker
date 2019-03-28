@@ -1967,7 +1967,7 @@ class MultiSharedPS(object):
                 ps_uuid_for_data_vol = random.choice(self.ps_type_dict[random.choice(self.ps_types)])
                 systags = ["primaryStorageUuidForDataVolume::%s" % ps_uuid_for_data_vol]
                 if one_volume:
-                    disk_offering1 = test_lib.lib_get_disk_offering_by_name(os.environ.get('largeDiskOfferingName'))
+                    disk_offering1 = test_lib.lib_get_disk_offering_by_name(os.environ.get('mediumDiskOfferingName'))
                     disk_offering_uuids = [disk_offering1.uuid]
                     system_tags=["virtio::diskOffering::%s::num::1" % (disk_offering1.uuid)]
                 else:
@@ -1997,6 +1997,7 @@ class MultiSharedPS(object):
                 data_volume.check()
                 self.data_volume[data_volume.get_volume().uuid] = data_volume
         self.vm.append(vm)
+        self.test_obj_dict.add_vm(vm)
 
     def check_vol_seperated(self):
         ps_uuids = {vol.primaryStorageUuid for vol in self.vm[0].vm.allVolumes}
@@ -2033,11 +2034,18 @@ class MultiSharedPS(object):
         ps_to_migrate = random.choice(datamigr_ops.get_ps_candidate_for_vol_migration(vol_uuid))
         return ps_to_migrate
 
-    def migrate_data_volume(self):
+    def migrate_data_volume(self, detach=True, attach=True):
         for vol_uuid, data_volume in self.data_volume.iteritems():
             dst_ps = self.get_ps_candidate(vol_uuid)
+            if detach:
+                target_vm_list = [data_volume.get_target_vm()] if data_volume.get_target_vm() else data_volume.get_target_vms()[:]
+                for vm in target_vm_list:
+                        data_volume.detach(vm.get_vm().uuid)
             datamigr_ops.ps_migrage_data_volume(dst_ps.uuid, vol_uuid)
             data_volume.update()
+            if attach:
+                for vm in target_vm_list:
+                        data_volume.attach(vm)
             assert data_volume.get_volume().primaryStorageUuid == dst_ps.uuid
             self.set_ceph_mon_env(dst_ps.uuid)
 
@@ -2046,7 +2054,10 @@ class MultiSharedPS(object):
             vm = [self.vm[0]]
         for vmobj in vm:
             ps_to_migrate = self.get_ps_candidate(vmobj.get_vm().rootVolumeUuid)
+            vmobj.stop()
             datamigr_ops.ps_migrage_root_volume(ps_to_migrate.uuid, vmobj.get_vm().rootVolumeUuid)
+            vmobj.start()
+            vmobj.check()
             vmobj.update()
 
     def resize_vm(self, new_size):
@@ -2118,7 +2129,7 @@ class MultiSharedPS(object):
         self._image.check()
 
     def create_data_volume(self, shared=False, vms=[], from_offering=True, ps_type=None, except_ps_type=None):
-        conditions = res_ops.gen_query_conditions('name', '=', os.getenv('largeDiskOfferingName'))
+        conditions = res_ops.gen_query_conditions('name', '=', os.getenv('mediumDiskOfferingName'))
         disk_offering_uuid = res_ops.query_resource(res_ops.DISK_OFFERING, conditions)[0].uuid
         volume_option = test_util.VolumeOption()
         if from_offering:
@@ -2147,8 +2158,8 @@ class MultiSharedPS(object):
         for vm in vms:
             data_volume.attach(vm)
         vol_uuid = data_volume.get_volume().uuid
-        if from_offering:
-            test_lib.lib_mkfs_for_volume(vol_uuid, vms[0].vm, '/mnt')
+#         if from_offering:
+#             test_lib.lib_mkfs_for_volume(vol_uuid, vms[0].vm, '/mnt')
         self.data_volume[vol_uuid] = data_volume
         return self
 
@@ -2158,7 +2169,6 @@ class MultiSharedPS(object):
         if target is 'vm':
             for vm in self.vm:
                 vol_uuid_list.append(vm.vm.rootVolumeUuid)
-                self.test_obj_dict.add_vm(vm)
         elif target is 'volume':
             for volume in self.data_volume.values():
                 vol_uuid_list.append(volume.get_volume().uuid)
@@ -2187,8 +2197,13 @@ class MultiSharedPS(object):
         self.snapshots.delete_snapshot(snapshot)
         self.snapshot[vol_uuid].remove(snapshot)
         self.sp_tree.delete(sp_uuid)
-        left_sp_uuids = self.sp_tree.tree.keys()
+        nodes = self.sp_tree.tree.keys()
+        if 'root' in nodes:
+            nodes.remove('root')
+        left_sp_uuids = nodes
+        self.sp_tree.show_tree()
         for uuid in left_sp_uuids:
+            test_util.test_logger('Check if snapshot[uuid: %s] exist' % uuid)
             cond = res_ops.gen_query_conditions('uuid', '=', uuid)
             assert res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, cond)
         assert not res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, res_ops.gen_query_conditions('uuid', '=', sp_uuid))

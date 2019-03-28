@@ -52,6 +52,20 @@ def test():
     if not flavor['shared']:
         multi_ps.sp_check()
 
+    if flavor['shared']:
+        for data_volume in multi_ps.data_volume.values():
+            for vm in multi_ps.vm:
+                data_volume.detach(vm.get_vm().uuid)
+        if flavor['ps2_vm']:
+            multi_ps.migrate_vm()
+        else:
+            multi_ps.migrate_vm(multi_ps.vm)
+        for data_volume in multi_ps.data_volume.values():
+            for vm in multi_ps.vm:
+                data_volume.attach(vm)
+    else:
+        multi_ps.migrate_vm()
+
     for vol_uuid in multi_ps.snapshot.keys():
         multi_ps.revert_sp(vol_uuid)
         multi_ps.delete_snapshot(vol_uuid)

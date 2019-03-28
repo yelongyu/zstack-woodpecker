@@ -15,10 +15,8 @@ test_obj_dict = test_state.TestStateDict()
 test_stub = test_lib.lib_get_test_stub()
 multi_ps = test_stub.MultiSharedPS()
 
-case_flavor = dict(volume_created_with_vm = dict(with_vm=True, running=True, shared=False, ps2_vm=False),
-                   volume_single_created = dict(with_vm=False, running=False, shared=False, ps2_vm=False),
-                   shared_volume_ceph_vm = dict(with_vm=False, running=True, shared=True, ps2_vm=False),
-                   shared_volume_2ps_vm = dict(with_vm=False, running=True, shared=True, ps2_vm=True)
+case_flavor = dict(volume_created_with_vm = dict(with_vm=True, root_sp=False),
+                   volume_single_created = dict(with_vm=False, root_sp=True)
                    )
 
 def test():
@@ -28,41 +26,26 @@ def test():
         test_util.test_skip('Skip test as there is not Ceph primary storage')
     flavor = case_flavor[os.getenv('CASE_FLAVOR')]
     if flavor['with_vm']:
-        multi_ps.create_vm(ceph_image=True, with_data_vol=True)
+        multi_ps.create_vm(ceph_image=True, with_data_vol=True, one_volume=True)
     else:
         multi_ps.create_vm(ceph_image=True, set_ps_uuid=False)
-    if flavor['shared']:
-        if flavor['ps2_vm']:
-            multi_ps.create_vm(except_ps_type='Ceph')
-        else:
-            multi_ps.create_vm(ceph_image=True, set_ps_uuid=False)
-        multi_ps.create_data_volume(shared=True, vms=multi_ps.vm, except_ps_type='Ceph')
+        multi_ps.create_data_volume(except_ps_type='Ceph')
+    if flavor['root_sp']:
+        multi_ps.create_snapshot(target='vm')
     else:
-        multi_ps.create_data_volume(vms=multi_ps.vm, except_ps_type='Ceph')
-        for vm in multi_ps.vm:
-            multi_ps.mount_disk_in_vm(vm)
-        multi_ps.copy_data(multi_ps.vm[0])
-    if flavor['running']:
-        for vm in multi_ps.vm:
-            multi_ps.data_volume.detach(vm.get_vm().uuid)
-        multi_ps.migrate_data_volume()
-        for vm in multi_ps.vm:
-            multi_ps.data_volume.attach(vm)
-        for vm in multi_ps.vm:
-            multi_ps.mount_disk_in_vm(vm)
-            multi_ps.check_data(vm)
-    else:
-        for vm in multi_ps.vm:
-            vm.stop()
-        multi_ps.migrate_data_volume()
-        for vm in multi_ps.vm:
-            vm.start()
-        for vm in multi_ps.vm:
-            vm.check()
-            multi_ps.mount_disk_in_vm(vm)
-            multi_ps.check_data(vm)
+        multi_ps.create_snapshot(target='volume')
+    for vol_uuid in multi_ps.snapshot.keys():
+        multi_ps.revert_sp(vol_uuid)
+        multi_ps.create_snapshot(vol_uuid_list=[vol_uuid])
+        multi_ps.create_snapshot(vol_uuid_list=[vol_uuid])
 
-    test_util.test_pass('Ceph VM with other PS Volume Migration Test Success')
+    multi_ps.migrate_data_volume()
+
+    for vol_uuid in multi_ps.snapshot.keys():
+        multi_ps.revert_sp(vol_uuid)
+        multi_ps.delete_snapshot(vol_uuid)
+
+    test_util.test_pass('Ceph VM with other PS Volume Snapshot Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():

@@ -43,24 +43,14 @@ def test():
             multi_ps.mount_disk_in_vm(vm)
         multi_ps.copy_data(multi_ps.vm[0])
     if flavor['running']:
-        for vm in multi_ps.vm:
-            multi_ps.data_volume.detach(vm.get_vm().uuid)
         multi_ps.migrate_data_volume()
-        for vm in multi_ps.vm:
-            multi_ps.data_volume.attach(vm)
-        for vm in multi_ps.vm:
-            multi_ps.mount_disk_in_vm(vm)
-            multi_ps.check_data(vm)
     else:
         for vm in multi_ps.vm:
             vm.stop()
-        multi_ps.migrate_data_volume()
+        multi_ps.migrate_data_volume(detach=False, attach=False)
         for vm in multi_ps.vm:
             vm.start()
-        for vm in multi_ps.vm:
             vm.check()
-            multi_ps.mount_disk_in_vm(vm)
-            multi_ps.check_data(vm)
 
     test_util.test_pass('Ceph VM with other PS Volume Migration Test Success')
 

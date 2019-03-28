@@ -40,32 +40,20 @@ def test():
     else:
         if not flavor['with_vm']:
             multi_ps.create_data_volume(vms=multi_ps.vm, except_ps_type='SharedBlock')
-            for vm in multi_ps.vm:
-                multi_ps.mount_disk_in_vm(vm)
-            multi_ps.copy_data(multi_ps.vm[0])
 
-    for vm in multi_ps.vm:
-        vm.stop()
     if flavor['shared']:
-        for vm in multi_ps.vm:
-            multi_ps.data_volume.detach(vm.get_vm().uuid)
+        for data_volume in multi_ps.data_volume.values():
+            for vm in multi_ps.vm:
+                data_volume.detach(vm.get_vm().uuid)
         if flavor['ps2_vm']:
-            multi_ps.migrate_vm(multi_ps.vm)
-        else:
             multi_ps.migrate_vm()
-        for vm in multi_ps.vm:
-            vm.start()
-            vm.check()
-            multi_ps.data_volume.attach(vm)
-            multi_ps.mount_disk_in_vm(vm)
-            multi_ps.check_data(vm)
+        else:
+            multi_ps.migrate_vm(multi_ps.vm)
+        for data_volume in multi_ps.data_volume.values():
+            for vm in multi_ps.vm:
+                data_volume.attach(vm)
     else:
         multi_ps.migrate_vm()
-        for vm in multi_ps.vm:
-            vm.start()
-            vm.check()
-            multi_ps.mount_disk_in_vm(vm)
-            multi_ps.check_data(vm)
 
     test_util.test_pass('SAN VM PS Migration with other PS Volume Test Success')
 
