@@ -618,17 +618,17 @@ class zstack_vid_attr_checker(checker_header.TestChecker):
         session_uuid = acc_ops.login_by_account(username, password)
 
         vid_uuid = self.test_obj.get_vid().uuid
-        role_uuid = iam2_ops.create_role('security_created_role').uuid
+        role_uuid = iam2_ops.create_role('security_created_role', session_uuid=session_uuid).uuid
         statements = [{"effect":"Allow","actions":["org.zstack.header.image.**"]}]
-        policy_uuid = iam2_ops.create_policy('policy', statements).uuid
-        iam2_ops.attach_policy_to_role(policy_uuid, role_uuid)
-        iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], vid_uuid)
+        policy_uuid = iam2_ops.create_policy('policy', statements, session_uuid=session_uuid).uuid
+        iam2_ops.attach_policy_to_role(policy_uuid, role_uuid, session_uuid=session_uuid)
+        iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], vid_uuid, session_uuid=session_uuid)
         #policy_check_vid.check()
-        iam2_ops.detach_policy_from_role(policy_uuid, role_uuid)
-        iam2_ops.update_role(role_uuid, [{"effect":"Allow","actions":[]}])
-        iam2_ops.add_policy_statements_to_role(role_uuid, statements)
-        iam2_ops.remove_roles_from_iam2_virtual_id([role_uuid], vid_uuid)
-        iam2_ops.delete_role(role_uuid)
+        iam2_ops.detach_policy_from_role(policy_uuid, role_uuid, session_uuid=session_uuid)
+        iam2_ops.update_role(role_uuid, [{"effect":"Allow","actions":[]}], session_uuid=session_uuid)
+        iam2_ops.add_policy_statements_to_role(role_uuid, statements, session_uuid=session_uuid)
+        iam2_ops.remove_roles_from_iam2_virtual_id([role_uuid], vid_uuid, session_uuid=session_uuid)
+        iam2_ops.delete_role(role_uuid, session_uuid=session_uuid)
         #policy_check_vid.check()
 
 
