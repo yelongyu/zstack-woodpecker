@@ -48,7 +48,7 @@ class zstack_kvm_snapshot_checker(checker_header.TestChecker):
         '''
         super(zstack_kvm_snapshot_checker, self).check()
         target_volume = self.test_obj.get_target_volume()
-        if not self.test_obj.get_snapshot_head():
+        if not self.test_obj.get_current_snapshot():
             test_util.test_logger('Snapshot is not created, skipped checking')
             return self.judge(self.exp_result)
 
