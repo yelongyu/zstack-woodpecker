@@ -28,6 +28,7 @@ from zstackwoodpecker.operations import vm_operations as vm_ops
 import zstackwoodpecker.operations.longjob_operations as longjob_ops
 import zstackwoodpecker.operations.billing_operations as bill_ops
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header 
+import zstackwoodpecker.operations.iam2_operations as iam2_ops 
 import time
 import re
 import json
@@ -1096,10 +1097,10 @@ def create_system_admin(username, password, vid_tst_obj):
                    "org.zstack.header.baremetal.preconfiguration.APIDeletePreconfigurationTemplateMsg",
                    "org.zstack.header.aliyun.network.connection.APIGetConnectionAccessPointFromRemoteMsg",
                    "org.zstack.network.service.lb.APIQueryCertificateMsg",
-                   "org.zstack.header.aliyun.oss.APIDeleteOssBucketRemoteMsg"]
+                   "org.zstack.header.aliyun.oss.APIDeleteOssBucketRemoteMsg"]}]
 
     iam2_ops.add_policy_statements_to_role(role_uuid, statements)
-    iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], vid_test_obj.get_vid().uuid)
+    iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], vid_tst_obj.get_vid().uuid)
 
 
 def share_admin_resource_include_vxlan_pool(account_uuid_list, session_uuid=None):
