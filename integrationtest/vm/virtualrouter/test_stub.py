@@ -205,6 +205,7 @@ def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
         cond_ps = res_ops.gen_query_conditions('state', '=', 'Enabled', cond_ps)
         all_vail_ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond_ps)
         vail_ps_dict = {ps.uuid: ps.type for ps in all_vail_ps}
+        system_tags = system_tags if system_tags else []
         if len(vail_ps_dict) > 1:
             tc_len = len(os.getenv('TESTCASENAME') if os.getenv('TESTCASENAME') else range(8))
             vail_ps_uuid_list = vail_ps_dict.keys()
