@@ -11,7 +11,6 @@
 	<case timeout='600' repeat='1'>test_create_volume_from_template_attach_vm.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_vm.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_stopped_vm.py</case>
-	<case timeout='720' repeat='1'>migrate/test_migrate_stopped_vm_iso.py</case>
         <case timeout='720' repeat='1'>migrate/test_migrate_vm_ops.py</case>
 	<case timeout='720' repeat='1'>migrate/test_migrate_vm_console_access.py</case>
 	<case timeout='720' repeat='1'>migrate/test_migrate_vm_console_access2.py</case>
