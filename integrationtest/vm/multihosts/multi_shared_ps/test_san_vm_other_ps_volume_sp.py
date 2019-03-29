@@ -23,22 +23,22 @@ case_flavor = dict(volume_created_with_vm = dict(with_vm=True, root_sp=True, sha
 
 def test():
     ps_inv = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
-    ceph_ps = [ps for ps in ps_inv if ps.type == 'SharedBlock']
-    if not ceph_ps:
-        test_util.test_skip('Skip test as there is not Ceph primary storage')
+    sblk_ps = [ps for ps in ps_inv if ps.type == 'SharedBlock']
+    if not sblk_ps:
+        test_util.test_skip('Skip test as there is not SharedBlock primary storage')
     flavor = case_flavor[os.getenv('CASE_FLAVOR')]
     if flavor['with_vm']:
         multi_ps.create_vm(ps_type='SharedBlock', with_data_vol=True, one_volume=True)
     else:
         multi_ps.create_vm(ps_type='SharedBlock')
-    if flavor['shared']:
-        if flavor['ps2_vm']:
-            multi_ps.create_vm(except_ps_type='SharedBlock')
+        if flavor['shared']:
+            if flavor['ps2_vm']:
+                multi_ps.create_vm(except_ps_type='SharedBlock')
+            else:
+                multi_ps.create_vm(ps_type='SharedBlock')
+            multi_ps.create_data_volume(shared=True, except_ps_type='SharedBlock')
         else:
-            multi_ps.create_vm(ps_type='SharedBlock')
-        multi_ps.create_data_volume(shared=True, except_ps_type='SharedBlock')
-    else:
-        multi_ps.create_data_volume(except_ps_type='SharedBlock')
+            multi_ps.create_data_volume(except_ps_type='SharedBlock')
 
     if flavor['root_sp']:
         multi_ps.create_snapshot(target='vm')

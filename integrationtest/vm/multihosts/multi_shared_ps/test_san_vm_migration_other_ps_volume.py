@@ -23,9 +23,9 @@ case_flavor = dict(volume_created_with_vm = dict(with_vm=True, shared=False, ps2
 
 def test():
     ps_inv = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
-    ceph_ps = [ps for ps in ps_inv if ps.type == 'Ceph']
-    if not ceph_ps:
-        test_util.test_skip('Skip test as there is not Ceph primary storage')
+    sblk_ps = [ps for ps in ps_inv if ps.type == 'SharedBlock']
+    if not sblk_ps:
+        test_util.test_skip('Skip test as there is not SharedBlock primary storage')
     flavor = case_flavor[os.getenv('CASE_FLAVOR')]
     if flavor['with_vm']:
         multi_ps.create_vm(ps_type='SharedBlock', with_data_vol=True, one_volume=True)
