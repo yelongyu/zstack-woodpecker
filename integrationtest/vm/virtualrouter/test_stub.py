@@ -190,7 +190,7 @@ def create_vm_with_user_args(system_tags = None, session_uuid = None):
 # parameter: vmname; l3_net: l3_net_description, or [l3_net_uuid,]; image_uuid:
 def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
         disk_offering_uuids = None, default_l3_uuid = None, \
-        system_tags = None, instance_offering_uuid = None, strategy_type='InstantStart', session_uuid = None, ps_uuid=None, timeout=None):
+        system_tags = [], instance_offering_uuid = None, strategy_type='InstantStart', session_uuid = None, ps_uuid=None, timeout=None):
     vm_creation_option = test_util.VmOption()
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     if not instance_offering_uuid:
