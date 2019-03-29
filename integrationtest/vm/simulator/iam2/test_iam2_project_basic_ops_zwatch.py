@@ -151,7 +151,8 @@ def test():
     cond = res_ops.gen_query_conditions('name', '=', 'system-alarm')
     system_alarm_topic = res_ops.query_resource(res_ops.SNS_TOPIC, cond)[0]
     system_alarm_topic_uuid=system_alarm_topic.uuid
-    acc_ops.share_resources([project_linked_account_uuid], [system_alarm_topic_uuid])
+    if flavor['target_role'] != 'system_admin':
+        acc_ops.share_resources([project_linked_account_uuid], [system_alarm_topic_uuid])
     cond = res_ops.gen_query_conditions('name', '=', 'system-alarm')
     system_alarm_topic = res_ops.query_resource(res_ops.SNS_TOPIC, cond)[0]
     system_alarm_topic_uuid=system_alarm_topic.uuid
@@ -163,7 +164,8 @@ def test():
     cond = res_ops.gen_query_conditions('name','=','api')
     api_topic= res_ops.query_resource(res_ops.SNS_TOPIC,cond)[0]
     api_topic_uuid=api_topic.uuid
-    acc_ops.share_resources([project_linked_account_uuid], [api_topic_uuid])
+    if flavor['target_role'] != 'system_admin':
+        acc_ops.share_resources([project_linked_account_uuid], [api_topic_uuid])
     cond = res_ops.gen_query_conditions('name','=','api')
     api_topic= res_ops.query_resource(res_ops.SNS_TOPIC,cond, session_uuid=project_login_uuid)[0]
     api_topic_uuid=api_topic.uuid
