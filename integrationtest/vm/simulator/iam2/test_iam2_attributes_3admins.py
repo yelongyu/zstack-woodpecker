@@ -66,7 +66,7 @@ def test():
     vid_tst_obj.delete()
 
     if vid_tst_obj2:
-        vid_tst_obj2.delete()
+        iam2_ops.delete_iam2_virtual_id(vid_uuid2)
 
     test_util.test_pass('success test 3 admins attributes!')
 

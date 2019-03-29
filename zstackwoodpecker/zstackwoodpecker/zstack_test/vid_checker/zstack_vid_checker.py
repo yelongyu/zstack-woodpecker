@@ -452,7 +452,7 @@ class zstack_vid_attr_checker(checker_header.TestChecker):
 
         return self.judge(True)
 
-    def check_pci(self, username, password):
+    def check_pci(self, session_uuid=None):
         #Haven't simulator pci device, skip to check 
         pass
 
