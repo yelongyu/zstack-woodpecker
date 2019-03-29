@@ -23,6 +23,7 @@ import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.operations.scheduler_operations as schd_ops
 import zstackwoodpecker.operations.zwatch_operations as zwt_ops
 import zstackwoodpecker.test_lib as test_lib
+import zstackwoodpecker.zstack_test.zstack_test_vid as test_vid
 
 project_uuid = None
 virtual_id_uuid = None
