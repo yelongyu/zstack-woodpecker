@@ -94,8 +94,8 @@ def test():
         username = "systemAdmin"
         password = 'b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86'
         vid_tst_obj = test_vid.ZstackTestVid()
-        virtual_id_uuid = vid_tst_obj.get_vid().uuid
         test_stub.create_system_admin(username, password, vid_tst_obj)
+        virtual_id_uuid = vid_tst_obj.get_vid().uuid
         project_login_uuid = acc_ops.login_by_account(username, password)
 
 
