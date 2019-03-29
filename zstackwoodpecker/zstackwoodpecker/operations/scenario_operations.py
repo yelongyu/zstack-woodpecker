@@ -298,6 +298,7 @@ def setup_2ha_mn_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
     modify_cfg.append(r"sleep 1")
     modify_cfg.append(r"sync")
+    modify_cfg.append(r"fsfreeze -f /")
     modify_cfg.append(r"sync")
     modify_cfg.append(r"sync")
 
