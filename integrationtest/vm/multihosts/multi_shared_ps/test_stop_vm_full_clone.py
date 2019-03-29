@@ -15,10 +15,10 @@ test_obj_dict = test_state.TestStateDict()
 test_stub = test_lib.lib_get_test_stub()
 multi_ps = test_stub.MultiSharedPS()
 
-case_flavor = dict(shared_vm_ceph_volume = dict(shared_vm=True, one_volume=True, shared_volume=False),
-                   shared_vm_2volume = dict(shared_vm=True, one_volume=False),
-                   ceph_vm_shared_volume = dict(shared_vm=False, one_volume=True, shared_volume=True),
-                   ceph_vm_2volume = dict(shared_vm=False, one_volume=False)
+case_flavor = dict(shared_vm_to_shared_vm_ceph_volume = dict(shared_vm=True, to_shared_vm=True, to_shared_volume=False),
+                   shared_vm_to_ceph_vm_shared_volume = dict(shared_vm=True, to_shared_vm=False, to_shared_volume=True),
+                   ceph_vm_to_shared_vm_ceph_volume = dict(shared_vm=False, to_shared_vm=True, to_shared_volume=False),
+                   ceph_vm_to_ceph_vm_shared_volume = dict(shared_vm=False, to_shared_vm=False, to_shared_volume=True)
                    )
 
 def test():
@@ -33,31 +33,44 @@ def test():
         multi_ps.create_vm(ps_type="SharedBlock")
     else:
         multi_ps.create_vm(ps_type="Ceph")
-    if flavor['one_volume']:
-        if flavor['shared_volume']:
-            multi_ps.create_data_volume(vms=multi_ps.vm, ps_type='SharedBlock')
-        else:
-            multi_ps.create_data_volume(vms= multi_ps.vm, ps_type='Ceph')
-    else:
-        multi_ps.create_data_volume(vms=multi_ps.vm, ps_type='SharedBlock')
-        multi_ps.create_data_volume(vms= multi_ps.vm, ps_type='Ceph')
+    multi_ps.create_data_volume(vms=multi_ps.vm, ps_type='SharedBlock')
+    multi_ps.create_data_volume(vms= multi_ps.vm, ps_type='Ceph')
 
     vm = multi_ps.vm[0]
     vm.stop()
-    cloned_vm = vm.clone(['test_stop_vm_full_clone'], full=True)[0]
-    multi_ps.vm.append(cloned_vm)
 
-    volumes_number = len(test_lib.lib_get_all_volumes(cloned_vm))
-    if flavor['one_volume']:
-        if volumes_number != 2:
-            test_util.test_fail('Did not just find 2 volumes for [vm:] %s. But we assigned 1 data volume to the vm. We only catch %s volumes' % (cloned_vm.uuid, volumes_number))
-        else:
-            test_util.test_logger('Find 2 volumes for [vm:] %s.' % cloned_vm.uuid)
+    shared_ps = multi_ps.get_ps(ps_type='SharedBlock')
+    ceph_ps = multi_ps.get_ps(ps_type='Ceph')
+    if flavor['to_shared_vm']:
+        if not flavor['to_shared_volume']:
+            ps_uuid_for_root_volume = shared_ps.uuid
+            ps_uuid_for_data_volume = ceph_ps.uuid
     else:
-        if volumes_number != 3:
-            test_util.test_fail('Did not just find 3 volumes for [vm:] %s. But we assigned 2 data volume to the vm. We only catch %s volumes' % (cloned_vm.uuid, volumes_number))
+        if flavor['to_shared_volume']:
+            ps_uuid_for_root_volume = ceph_ps.uuid
+            ps_uuid_for_data_volume = shared_ps.uuid
+    root_volume_systag = []
+    data_volume_systag = ["volumeProvisioningStrategy::ThinProvisioning"]
+    cloned_vm = vm.clone(['test_stop_vm_full_clone'], full=True, ps_uuid_for_root_volume=ps_uuid_for_root_volume, ps_uuid_for_data_volume=ps_uuid_for_data_volume, root_volume_systag=root_volume_systag, data_volume_systag=data_volume_systag)[0]
+    multi_ps.vm.append(cloned_vm.vm)
+
+    volumes_list = test_lib.lib_get_all_volumes(cloned_vm.vm)
+    volumes_number = len(volumes_list)
+    if volumes_number != 3:
+        test_util.test_fail('Did not just find 3 volumes for [vm:] %s. But we assigned 2 data volume to the vm. We only catch %s volumes' % (cloned_vm.vm.uuid, volumes_number))
+    else:
+        test_util.test_logger('Find 3 volumes for [vm:] %s.' % cloned_vm.vm.uuid)
+        ps = test_lib.lib_get_primary_storage_by_uuid(test_lib.lib_get_root_volume(cloned_vm.vm).primaryStorageUuid)
+        data_volume_ps1 = test_lib.lib_get_primary_storage_by_uuid(test_lib.lib_get_data_volumes(cloned_vm.vm)[0].primaryStorageUuid)
+        data_volume_ps2 = test_lib.lib_get_primary_storage_by_uuid(test_lib.lib_get_data_volumes(cloned_vm.vm)[1].primaryStorageUuid)
+        if flavor['to_shared_vm']:
+            if not flavor['to_shared_volume']:
+                test_util.test_logger(ps.type + data_volume_ps1.type + data_volume_ps2.type)
+                assert ps.type == 'SharedBlock' and data_volume_ps1.type == 'Ceph' and data_volume_ps2.type == 'Ceph'
         else:
-            test_util.test_logger('Find 3 volumes for [vm:] %s.' % cloned_vm.uuid)    
+            if flavor['to_shared_volume']:
+                test_util.test_logger(ps.type + data_volume_ps1.type + data_volume_ps2.type)
+                assert ps.type == 'Ceph' and data_volume_ps1.type == 'SharedBlock' and data_volume_ps2.type == 'SharedBlock'
     
     test_util.test_pass('Full Clone Stopped VM Test Success')
 

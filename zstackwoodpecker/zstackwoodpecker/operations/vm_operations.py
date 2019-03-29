@@ -298,13 +298,17 @@ def recover_vm(vm_uuid, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def clone_vm(vm_uuid, vm_names, strategy, full = False, systemtag = None, session_uuid = None):
+def clone_vm(vm_uuid, vm_names, strategy, full = False, ps_uuid_for_root_volume = None, ps_uuid_for_data_volume = None, root_volume_systag = None, data_volume_systag = None, systemtag = None, session_uuid = None):
     action = api_actions.CloneVmInstanceAction()
     action.vmInstanceUuid = vm_uuid
     action.names=vm_names
     action.strategy=strategy
     action.full=full
     action.timeout = 80000000
+    action.primaryStorageUuidForRootVolume = ps_uuid_for_root_volume
+    action.primaryStorageUuidForDataVolume = ps_uuid_for_data_volume
+    action.rootVolumeSystemTags = root_volume_systag
+    action.dataVolumeSystemTags = data_volume_systag
     action.systemTags = systemtag
     test_util.action_logger('Clone VM [uuid:] %s to %s' % (vm_uuid, vm_names))
     evt = account_operations.execute_action_with_session(action, session_uuid)

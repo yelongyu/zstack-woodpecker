@@ -15,10 +15,10 @@ test_obj_dict = test_state.TestStateDict()
 test_stub = test_lib.lib_get_test_stub()
 multi_ps = test_stub.MultiSharedPS()
 
-case_flavor = dict(running_shared_vm = dict(shared_vm=True, running=True),
-                   stopped_shared_vm = dict(shared_vm=True, running=False),
-                   running_ceph_vm = dict(shared_vm=False, running=True),
-                   stopped_ceph_vm = dict(shared_vm=False, running=False)
+case_flavor = dict(running_shared_vm_to_ceph_vm = dict(shared_vm=True, running=True, to_shared_vm=False),
+                   stopped_shared_vm_to_ceph_vm = dict(shared_vm=True, running=False, to_shared_vm=False),
+                   running_ceph_vm_to_shared_vm = dict(shared_vm=False, running=True, to_shared_vm=True),
+                   stopped_ceph_vm_to_shared_vm = dict(shared_vm=False, running=False, to_shared_vm=True)
                    )
 
 def test():
@@ -37,9 +37,15 @@ def test():
     if not flavor['running']:
         vm.stop()
     
-    
-    cloned_vm = vm.clone(['test_stop_vm_full_clone'], full=True)[0]
-    multi_ps.vm.append(cloned_vm)
+    shared_ps = multi_ps.get_ps(ps_type='SharedBlock')
+    ceph_ps = multi_ps.get_ps(ps_type='Ceph')
+    if flavor['to_shared_vm']:
+        ps_uuid_for_root_volume = shared_ps.uuid
+    else:
+        ps_uuid_for_root_volume = ceph_ps.uuid
+    root_volume_systag = []
+    cloned_vm = vm.clone(['test_stop_vm_full_clone'], full=True, ps_uuid_for_root_volume=ps_uuid_for_root_volume, root_volume_systag=root_volume_systag)[0]
+    multi_ps.vm.append(cloned_vm.vm)
 
     volumes_list = test_lib.lib_get_all_volumes(cloned_vm.vm)
     volumes_number = len(volumes_list)
@@ -47,8 +53,8 @@ def test():
         test_util.test_fail('Did not just find 1 volumes for [vm:] %s.' % cloned_vm.vm.uuid)
     else:
         test_util.test_logger('Find 1 volumes for [vm:] %s.' % cloned_vm.vm.uuid)
-        ps = test_lib.lib_get_primary_storage_by_uuid(volumes_list[0].primaryStorageUuid)
-        if flavor['shared_vm']:
+        ps = test_lib.lib_get_primary_storage_by_uuid(test_lib.lib_get_root_volume(cloned_vm.vm).primaryStorageUuid)
+        if flavor['to_shared_vm']:
             assert ps.type == 'SharedBlock' 
         else:
             assert ps.type == 'Ceph'
