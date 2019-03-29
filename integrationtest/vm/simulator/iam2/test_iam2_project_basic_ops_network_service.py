@@ -116,7 +116,8 @@ def test():
         acc_ops.share_resources([project_linked_account_uuid], [image_uuid])
     instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(os.environ.get('instanceOfferingName_s')).uuid
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
-    acc_ops.share_resources([project_linked_account_uuid], [instance_offering_uuid])
+    if flavor['target_role'] != 'system_admin':
+        acc_ops.share_resources([project_linked_account_uuid], [instance_offering_uuid])
     vm_creation_option.set_name('vm_for_project_management')
     vm_creation_option.set_session_uuid(project_login_uuid)
     vm = test_stub.create_vm(image_uuid = image_uuid, session_uuid=project_login_uuid) 
