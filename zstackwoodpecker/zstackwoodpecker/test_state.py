@@ -46,6 +46,7 @@ class TestAction(object):
     use_vm_backup = 'use_vm_backup'
     create_volume_backup = 'create_volume_backup'
     use_volume_backup = 'use_volume_backup'
+    create_vm_from_vmbackup = 'create_vm_from_vmbackup'
 
     create_volume = 'create_volume'
     create_scsi_volume = 'create_scsi_volume'

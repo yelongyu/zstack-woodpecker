@@ -4459,9 +4459,9 @@ def lib_error_cleanup(test_dict):
             pass
 
 def lib_robot_status_check(test_dict):
+    print 'target checking test dict: %s' % test_dict
     test_util.test_logger("- - - Robot check skip - - -" )
     return
-    print 'target checking test dict: %s' % test_dict
 
     test_util.test_logger('- - - check running VMs status - - -')
     for vm in test_dict.get_vm_list(vm_header.RUNNING):
@@ -6566,6 +6566,8 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             backup_option.set_name(backup_name)
             backup_option.set_volume_uuid(target_volume_uuid)
             backup_option.set_backupStorage_uuid(bs.uuid)
+            if len(constant_path_list[0]) == 3:
+                backup_option.set_mode("full")
             import zstackwoodpecker.operations.volume_operations as vol_ops
             test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
                 (next_action, target_volume_uuid))
@@ -6575,6 +6577,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             #_update_bs_for_robot_state("disable")
             test_dict.add_backup(backup.uuid)
             test_dict.add_backup_md5sum(backup.uuid, md5sum)
+           
         elif next_action == TestAction.use_volume_backup:
             target_backup = None
             backup_name = None
@@ -6916,6 +6919,8 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             backup_option.set_name(backup_name)
             backup_option.set_volume_uuid(lib_get_root_volume(vm.get_vm()).uuid)
             backup_option.set_backupStorage_uuid(bs.uuid)
+            if len(constant_path_list[0]) == 3:
+                backup_option.set_mode("full")
             test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
                 (next_action, target_vm.get_vm().uuid))
 
@@ -6926,6 +6931,38 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                     if backup.volumeUuid == volume.get_volume().uuid:
                         md5sum = volume.get_md5sum()
                         test_dict.add_backup_md5sum(backup.uuid, md5sum)
+
+        elif next_action == TestAction.create_vm_from_vmbackup:
+            target_backup = None
+            backup_name = None
+            if len(constant_path_list[0]) > 1:
+                backup_name = constant_path_list[0][1]
+                backup_list = test_dict.get_backup_list()
+                for backup_uuid in backup_list:
+                    backup = lib_get_backup_by_uuid(backup_uuid)
+                    if backup.name == backup_name:
+                        target_backup = backup
+                        break
+
+            if not target_backup or not backup_name:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+            import zstackwoodpecker.operations.volume_operations as vol_ops
+            test_util.test_dsc('Robot Action: %s; on Backup: %s' % \
+                (next_action, target_backup.uuid))
+
+            l3_uuid = lib_get_l3_by_name(os.environ.get('l3VlanNetworkName1')).uuid
+            instance_offering_uuid = lib_get_instance_offering_by_name(os.environ.get('instanceOfferingName_s')).uuid
+            vol_ops.create_vm_from_vm_backup("vm_create_from_backup", target_backup.groupUuid, instance_offering_uuid, [l3_uuid])
+            cond = res_ops.gen_query_conditions("groupUuid", '=', target_backup.groupUuid)
+            backups = res_ops.query_resource(res_ops.VOLUME_BACKUP, cond)
+            #_update_bs_for_robot_state("disable")
+            #for backup in backups:
+            #    for volume in test_dict.get_all_volume_list():
+            #        volume.update()
+            #        volume.update_volume()
+            #        if backup.volumeUuid == volume.get_volume().uuid:
+            #            md5sum = test_dict.get_backup_md5sum(backup.uuid)
+            #            volume.set_md5sum(md5sum)
 
         elif next_action == TestAction.use_vm_backup:
             target_backup = None

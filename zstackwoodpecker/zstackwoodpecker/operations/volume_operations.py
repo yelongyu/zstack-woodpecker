@@ -180,6 +180,7 @@ def create_backup(backup_option, session_uuid=None):
     action.volumeUuid = backup_option.get_volume_uuid()
     action.backupStorageUuid = backup_option.get_backupStorage_uuid()
     action.name = backup_option.get_name()
+    action.mode = backup_option.get_mode()
     if not action.name:
         action.name = 'backup_for_volume_%s' % action.volumeUuid
     action.description = backup_option.get_description()
@@ -197,6 +198,7 @@ def create_vm_backup(backup_option, session_uuid=None):
     action.backupStorageUuid = backup_option.get_backupStorage_uuid()
     action.rootVolumeUuid = backup_option.get_volume_uuid()
     action.name = backup_option.get_name()
+    action.mode = backup_option.get_mode()
     if not action.name:
         action.name = 'backup_for_vm_%s' % action.rootVolumeUuid
     action.description = backup_option.get_description()
@@ -272,6 +274,16 @@ def recover_vm_backup_from_remote(group_uuid, src, dst, session_uuid=None):
     action.groupUuid = group_uuid
     action.srcBackupStorageUuid = src
     action.dstBackupStorageUuid = dst
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def create_vm_from_vm_backup(name, group_uuid, instanceOfferingUuid, l3NetworkUuids, session_uuid=None):
+    action = api_actions.CreateVmFromVmBackupAction()
+    action.name = name
+    action.groupUuid = group_uuid
+    action.instanceOfferingUuid = instanceOfferingUuid
+    action.l3NetworkUuids = l3NetworkUuids
     action.timeout = 1800000
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory

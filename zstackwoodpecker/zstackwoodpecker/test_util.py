@@ -1176,6 +1176,7 @@ class BackupOption(DataOption):
         super(BackupOption, self).__init__()
         self.volume_uuid = None
         self.backupStorage_uuid = None
+        self.mode = None
 
     def set_volume_uuid(self, volume_uuid):
         self.volume_uuid = volume_uuid
@@ -1188,6 +1189,12 @@ class BackupOption(DataOption):
 
     def get_backupStorage_uuid(self):
         return self.backupStorage_uuid
+
+    def set_mode(self, mode):
+        self.mode = mode
+
+    def get_mode(self):
+        return self.mode
 
 class SecurityGroupOption(DataOption):
     def __init__(self):
