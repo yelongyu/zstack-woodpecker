@@ -29,7 +29,7 @@ def test():
     command = "command -v genisoimage"
     result = test_lib.lib_execute_ssh_cmd(os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'], 'root', 'password', command)
     if not result:
-        command = "yum -y install genisoimage"
+        command = "yum -y install genisoimage --disablerepo=* --enablerepo=zstack-local"
         test_lib.lib_execute_ssh_cmd(os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'], 'root', 'password', command)
     command = "genisoimage -o %s/apache-tomcat/webapps/zstack/static/zstack-repo/7/x86_64/os/test.iso /tmp/" % os.environ.get('zstackInstallPath')
     test_lib.lib_execute_ssh_cmd(os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'], 'root', 'password', command)
