@@ -1257,7 +1257,8 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         if self.test_obj.get_customized() == None:
             net_ops.delete_l3(l3_uuid, session_uuid=project_login_session_uuid)
             if clear_vxlan_pool:
-                vxlan_ops.delete_vni_range(vni_uuid, session_uuid=project_login_session_uuid)
+                #vxlan_ops.delete_vni_range(vni_uuid, session_uuid=project_login_session_uuid)
+                vxlan_ops.delete_vni_range(vni_uuid)
             net_ops.delete_l2(vxlan_l2_uuid, session_uuid=project_login_session_uuid)
             return self.judge(True)
         else:
