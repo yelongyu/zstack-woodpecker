@@ -1,0 +1,21 @@
+import ./scenario.tmpt
+import ./deploy-imagestore-ceph-3iscsi.tmpt
+vmName1 = ocfs2_scenario1
+vmName2 = ocfs2_scenario2
+vmName3 = ocfs2_scenario3
+vmName4 = ocfs2_scenario4
+vmName5 = ocfs2_scenario5
+vmName6 = ocfs2_scenario6
+vmName7 = ocfs2_scenario7
+vmName8 = ocfs2_scenario8
+vmInstranceOfferingUuid2 = 123456
+imageUuid2 = 123456
+shareVolumeDiskOfferingUuid = 123456
+volumeName = test_volume
+iscsiDiskOfferingUuid = 333333
+iscsiClusterUuid = 222222
+hostUuid6 = 123456
+hostUuid7 = 123456
+hostUuid8 = 123456
+iscsiImageUuid = 123456
+xskyStorageOfferingUuid = 123456

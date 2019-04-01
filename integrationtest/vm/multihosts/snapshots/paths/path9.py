@@ -9,5 +9,6 @@ def path():
                       [TestAction.start_vm, "vm1"], \
                       [TestAction.stop_vm, "vm1"], \
                       [TestAction.use_volume_snapshot, "snapshot1"], \
-                      [TestAction.start_vm, "vm1"] \
+                      [TestAction.start_vm, "vm1"], \
+                      [TestAction.batch_delete_volume_snapshot, ["snapshot1"]] 
                      ])

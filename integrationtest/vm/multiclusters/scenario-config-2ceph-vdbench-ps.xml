@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-2ceph-vdbench-ps.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-2ceph-ps.tmpt</scenarioConfigTemplate>
+</testConfig>

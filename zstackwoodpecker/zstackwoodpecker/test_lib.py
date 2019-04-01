@@ -1194,6 +1194,17 @@ def lib_get_backup_storage_by_uuid(bs_uuid):
         test_util.test_logger('can not find bs which uuid is: %s' % bs_uuid)
     return bss[0]
 
+def lib_get_another_imagestore_by_uuid(bs_uuid):
+    cond = res_ops.gen_query_conditions('uuid', '=', bs_uuid)
+    cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage", cond)
+    bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)
+    for bs in bss:
+        test_util.test_logger("bs.uuid=%s vs bs_uuid=%s" %(bs.uuid, bs_uuid))
+        if bs.uuid != bs_uuid:
+            return bs
+    else:
+        test_util.test_fail("not found candidate bs")
+
 def lib_get_backup_storage_uuid_list_by_zone(zone_uuid):
     '''
     Get backup storage uuid list which attached to zone uuid
@@ -2820,8 +2831,11 @@ def lib_get_all_vr_l3_uuid():
     vr_l3 = []
     all_l3 = lib_get_l3s()
     for l3 in all_l3:
-        if len(l3.networkServices) != 0:
-            vr_l3.append(l3.uuid)
+        if l3.category == "Private":
+            sp = lib_get_l3_service_providers(l3)
+            for i in sp:
+                if i.type != "Flat" and i.type != "SecurityGroup":
+                    vr_l3.append(l3.uuid)
 
     return vr_l3
 
@@ -3253,12 +3267,25 @@ def lib_get_image_by_desc(img_desc):
         if image.description == img_desc:
             return image
 
-def lib_get_image_by_name(img_name):
+def lib_get_ready_image_by_name(img_name, bs_type=None):
+    cond = res_ops.gen_query_conditions('name', '=', img_name)
+    cond = res_ops.gen_query_conditions('status', '=', 'Ready', cond)
+    cond = res_ops.gen_query_conditions('state', '=', 'Enabled', cond)
+    images = res_ops.query_resource(res_ops.IMAGE, cond)
+    if bs_type:
+        images = [img for img in images if res_ops.query_resource(res_ops.BACKUP_STORAGE, res_ops.gen_query_conditions('uuid', '=', img.backupStorageRefs[0].backupStorageUuid))[0].type == bs_type]
+    if images:
+        return random.choice(images)
+    test_util.test_logger("not find image with name: %s" % img_name)
+    return False
+
+def lib_get_image_by_name(img_name, bs_type=None):
     cond = res_ops.gen_query_conditions('name', '=', img_name)
     images = res_ops.query_resource(res_ops.IMAGE, cond)
+    if bs_type:
+        images = [img for img in images if res_ops.query_resource(res_ops.BACKUP_STORAGE, res_ops.gen_query_conditions('uuid', '=', img.backupStorageRefs[0].backupStorageUuid))[0].type == bs_type]
     if images:
-        return images[0]
-
+        return random.choice(images)
     test_util.test_logger("not find image with name: %s" % img_name)
     return False
 
@@ -3462,6 +3489,123 @@ def lib_get_volume_snapshot_tree(volume_uuid = None, tree_uuid = None, session_u
 
     return result
 
+def lib_get_volume_snapshot(snapshot_uuid = None, session_uuid = None):
+
+    if snapshot_uuid:
+        cond = res_ops.gen_query_conditions('uuid', '=', snapshot_uuid)
+    else:
+        test_util.test_logger("snapshot_uuid should not be None")
+        return
+
+    result = res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, cond, session_uuid)
+
+    return result
+
+def lib_get_child_snapshots(snapshot):
+    '''
+    return child snapshots for a given snapshot
+    '''
+
+    import json
+    import zstacklib.utils.jsonobject as jsonobject
+
+    def _get_leaf_nodes(tree):
+        if not tree:
+            return 0
+
+        leaf_nodes = []
+
+        if not tree.has_key('children'):
+            test_util.test_fail('Snapshot tree has invalid format, it does not has key for children.')
+
+        if tree['children']:
+            for child in tree['children']:
+                leaf_node = _get_leaf_nodes(child)
+                for i in leaf_node:
+                    leaf_nodes.append(i)
+        else:
+            leaf_nodes.append(tree)
+
+        return leaf_nodes
+
+
+    snapshot_volume = snapshot.get_snapshot().volumeUuid
+    vol_trees = lib_get_volume_snapshot_tree(snapshot_volume)
+    child_snapshots = []
+
+    if not vol_trees:
+        test_util.test_logger("No snapshot tree found for %s" % (snapshot))
+        return
+
+    for vol_tree in vol_trees:
+        tree = json.loads(jsonobject.dumps(vol_tree))['tree']
+
+        for i in _get_leaf_nodes(tree):
+            if i['inventory'].has_key('parentUuid'):
+                if snapshot.get_snapshot().uuid == i['inventory']['parentUuid']:
+                    test_util.test_logger("child snapshot %s found for %s" % (i, snapshot))
+                    child_snapshots.append(i)
+            else:
+                test_util.test_logger("no parent node found for %s" % (i['inventory']['uuid']))
+
+    if child_snapshots:
+        return child_snapshots
+    else:
+        test_util.test_logger('No child found for %s' % (snapshot))
+        return
+
+def lib_get_diff_snapshots_with_zs(test_dict, volume_uuid):
+    '''
+    check if a snapshot is in a volume's snapshot tree
+    '''
+
+    import json
+    import zstacklib.utils.jsonobject as jsonobject
+
+    def _get_leaf_nodes(tree):
+        if not tree:
+            return 0
+
+        leaf_nodes = []
+
+        if not tree.has_key('children'):
+            test_util.test_fail('Snapshot tree has invalid format, it does not has key for children.')
+
+        if tree['children']:
+            for child in tree['children']:
+                leaf_node = _get_leaf_nodes(child)
+                for i in leaf_node:
+                    leaf_nodes.append(i)
+        else:
+            leaf_nodes.append(tree)
+
+        return leaf_nodes
+
+
+    vol_trees = lib_get_volume_snapshot_tree(volume_uuid)
+    volume_snapshots = test_dict.get_volume_snapshot(volume_uuid)
+    diff_snapshots = []
+
+    if not vol_trees:
+        test_util.test_logger("No snapshot tree found for %s" % (volume_uuid))
+        return
+
+    for vol_tree in vol_trees:
+        tree = json.loads(jsonobject.dumps(vol_tree))['tree']
+
+        for i in _get_leaf_nodes(tree):
+            covered = 0
+            for candidate_snapshot in volume_snapshots.get_primary_snapshots():
+                if i['inventory']['uuid'] == candidate_snapshot.get_snapshot().uuid:
+                    #test_util.test_logger("%s is found in volume snapshot tree %s" % (i['inventory']['uuid'], volume_uuid))
+                    covered = 1
+                    break
+            if covered == 0:
+                test_util.test_logger("check sp diff: %s is not found in volume snapshot tree %s, suppose it should be generated by auto" % (i['inventory']['uuid'], volume_uuid))
+                diff_snapshots.append(i)
+
+    return diff_snapshots
+            
 #-----------Security Group Operations-------------
 def lib_create_security_group(name=None, desc=None, session_uuid=None):
     if not name:
@@ -4315,9 +4459,9 @@ def lib_error_cleanup(test_dict):
             pass
 
 def lib_robot_status_check(test_dict):
+    print 'target checking test dict: %s' % test_dict
     test_util.test_logger("- - - Robot check skip - - -" )
     return
-    print 'target checking test dict: %s' % test_dict
 
     test_util.test_logger('- - - check running VMs status - - -')
     for vm in test_dict.get_vm_list(vm_header.RUNNING):
@@ -4779,6 +4923,7 @@ def lib_vm_random_operation(robot_test_obj):
         if not target_host:
             test_util.test_logger('no avaiable host was found for doing vm migration')
         else:
+            import zstackwoodpecker.operations.volume_operations as vol_ops
             vol_ops.migrate_volume(root_volume_uuid, target_host.uuid)
 
     elif next_action == TestAction.idel :
@@ -4942,6 +5087,30 @@ def lib_vm_random_operation(robot_test_obj):
                         and target_volume_obj.get_target_vm().get_state() == \
                             vm_header.EXPUNGED):
                 test_dict.rm_volume_snapshot(target_volume_snapshots)
+    elif next_action == TestAction.batch_delete_volume_snapshot:
+        target_volume_snapshots = None
+        target_snapshot = None
+        target_snapshot_name = None
+        target_snapshot_uuid_list = []
+        target_snapshot_list = []
+
+        all_volume_snapshots = test_dict.get_all_available_snapshots()
+        import zstackwoodpecker.operations.volume_operations as vol_ops
+        for snapshot_name in constant_path_list[0][1]:
+            cond = res_ops.gen_query_conditions('name','=',snapshot_name)
+            target_snapshot = res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, cond)
+            if not target_snapshot:
+                test_util.test_logger("Can not find target snapshot: %s" % snapshot_name)
+            else:
+                target_snapshot_uuid_list.append(target_snapshot[0].uuid)
+                for candidate_snapshots in all_volume_snapshots:
+                    for candidate_snapshot in candidate_snapshots.get_primary_snapshots():
+                        if candidate_snapshot.get_snapshot().name == snapshot_name:
+                            target_volume_snapshots = candidate_snapshots
+                            target_snapshot_list.append(candidate_snapshot)
+                            break
+        target_volume_snapshots.delete_snapshots_dict_record(target_snapshot_list)
+        vol_ops.batch_delete_snapshot(target_snapshot_uuid_list)
 
     elif next_action == TestAction.use_volume_snapshot:
         test_util.test_dsc('Robot Action: %s; on Volume: %s; on SP: %s' % \
@@ -5070,6 +5239,8 @@ def lib_robot_import_resource_from_formation(robot_test_obj, resource_list):
 
             imported_resource.append(resource["VmInstance"]["uuid"])
             import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
+            if resource["VmInstance"]["type"] == "ApplianceVm":
+                continue
             new_vm = zstack_vm_header.ZstackTestVm()
             new_vm.create_from(resource["VmInstance"]["uuid"])
             # import Volume already attached
@@ -5292,6 +5463,63 @@ def lib_robot_create_utility_vm(robot_test_obj):
               
         robot_test_obj.set_utility_vm(utility_vm)
 
+dload_svr = "172.20.194.5"
+def lib_dload_server_is_ready(dload_server_type):
+    """
+         Check and configure image download server.
+    """
+    global dload_svr
+    if dload_server_type == "LOCAL":
+        bs_cond = res_ops.gen_query_conditions("status", '=', "Connected")
+        bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, bs_cond)
+        for bs in bss:
+            host = lib_get_backup_storage_host(bs.uuid)
+            cmd = "sshpass -p password scp root@%s:/image-pool/ttylinux.raw /tmp/" %(dload_svr)
+            os.system(cmd)
+            cmd = "sshpass -p password scp /tmp/ttylinux.raw root@%s:/tmp/ttylinux.raw" %(host.managementIp)
+            os.system(cmd)
+            cmd = "sshpass -p password scp root@%s:/image-pool/CentOS-x86_64-7.2-Minimal.iso /tmp/" %(dload_svr)
+            os.system(cmd)
+            cmd = "sshpass -p password scp /tmp/CentOS-x86_64-7.2-Minimal.iso root@%s:/tmp/CentOS-x86_64-7.2-Minimal.iso" %(host.managementIp)
+            os.system(cmd)
+        return True
+
+    elif dload_server_type == "FTP":
+        return True
+
+    elif dload_server_type == "SFTP":
+        return True
+
+    elif dload_server_type == "HTTPS":
+        if scenario_config != None and scenario_file != None and os.path.exists(scenario_file):
+            host_ips = scenario_operations.dump_scenario_file_ips(scenario_file)
+            for host in host_ips:
+                cmd = "cat /etc/hosts|grep dload.zstack.com||sed -i '$a " + dload_svr + " dload.zstack.com' /etc/hosts"
+                os.system('sshpass -p password ssh root@%s "%s"' %(host.managementIp_,cmd))
+                os.system('sshpass -p password scp root@%s:/https-portal/dload.zstack.com/local/signed.crt /root/' %(dload_svr))
+                os.system('sshpass -p password scp /root/signed.crt root@%s:/etc/pki/ca-trust/source/anchors/' %(host.managementIp_))
+                os.system('sshpass -p password ssh root@%s update-ca-trust' %(host.managementIp_))
+        else:
+            cond = res_ops.gen_query_conditions("state", '=', "Enabled")
+            cond = res_ops.gen_query_conditions("status", '=', "Connected")
+            hosts = res_ops.query_resource(res_ops.HOST, cond)
+
+            if not hosts:
+                test_util.test_fail("No host available for adding imagestore for backup test")
+
+            for host in hosts:
+                cmd = "cat /etc/hosts|grep dload.zstack.com||sed -i '$a " + dload_svr + " dload.zstack.com' /etc/hosts"
+                os.system('sshpass -p password ssh root@%s "%s"' %(host.managementIp,cmd))
+                os.system('sshpass -p password scp root@%s:/https-portal/dload.zstack.com/local/signed.crt /root/' %(dload_svr))
+                os.system('sshpass -p password scp /root/signed.crt root@%s:/etc/pki/ca-trust/source/anchors/' %(host.managementIp))
+                os.system('sshpass -p password ssh root@%s update-ca-trust' %(host.managementIp))
+            
+        cmd = "wget -c https://%s/ttylinux.raw" %(dload_svr)
+        if not os.system(cmd):
+            return False
+
+        return True
+
 
 def lib_robot_create_initial_formation(robot_test_obj):
     '''
@@ -5319,6 +5547,7 @@ def lib_get_backup_by_uuid(uuid):
     cond = res_ops.gen_query_conditions('uuid', '=', uuid)
     volume_backup = res_ops.query_resource(res_ops.VOLUME_BACKUP, cond)[0]
     return volume_backup
+
 
 ROBOT = 0
 default_snapshot_depth = "128"
@@ -5407,6 +5636,8 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
         elif next_action == TestAction.create_image_from_volume:
             target_vm = None
             image_name = None
+            target_snapshot = None
+            target_snapshots = None
             if len(constant_path_list[0]) > 2:
                 target_vm_name = constant_path_list[0][1]
                 image_name = constant_path_list[0][2]
@@ -5429,9 +5660,44 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             test_util.test_dsc('Robot Action Result: %s; new RootVolume Image: %s'\
                     % (next_action, new_image.get_image().uuid))
             test_dict.add_image(new_image)
+
+            snapshots = test_dict.get_volume_snapshot(root_volume_uuid)
+
+            if test_dict.get_volume_snapshot(root_volume_uuid).get_current_snapshot():
+                target_snapshots = lib_get_child_snapshots(test_dict.get_volume_snapshot(root_volume_uuid).get_current_snapshot())
+
+                if target_snapshots:
+                    for i in target_snapshots:
+                        for sp in snapshots.get_primary_snapshots():
+                            if i['inventory']['uuid'] == sp.get_snapshot().uuid:
+                                test_util.test_logger('%s is already in snapshot list dict, no need to add it' % (i['inventory']['uuid']))
+                                break
+                            if sp == snapshots.get_primary_snapshots()[-1]:
+                                test_util.test_logger('%s is not in snapshot list dict, suppose it should be the new snapshot generated by auto' % (i['inventory']['uuid']))
+                                target_snapshot = i
+
+            if not target_snapshots or not test_dict.get_volume_snapshot(root_volume_uuid).get_current_snapshot():
+                if lib_get_diff_snapshots_with_zs(test_dict, root_volume_uuid):
+                    # Suppose only one new snapshot generated by one action for each volume
+                    target_snapshot = lib_get_diff_snapshots_with_zs(test_dict, root_volume_uuid)[0]
+                    test_util.test_logger('%s is not in snapshot list dict, suppose it should be the new snapshot generated by auto' % (target_snapshot['inventory']['uuid']))
+
+            if target_snapshot:
+                cre_vm_opt = robot_test_obj.get_vm_creation_option()
+                cre_vm_opt.set_name("utility_vm_for_robot_test")
+                new_snapshot = lib_get_volume_snapshot_by_snapshot(snapshots, target_snapshot, robot_test_obj, test_dict, cre_vm_opt)
+
+                target_volume = new_snapshot.get_target_volume()
+                md5sum = target_volume.get_md5sum()
+                new_snapshot.set_md5sum(md5sum)
+            else:
+                test_util.test_logger('No new snapshot found for volume %s, skip the snapshot tree update' % (root_volume_uuid))
+
         elif next_action == TestAction.create_data_vol_template_from_volume:
             target_volume = None
             image_name = None
+            target_snapshot = None
+            target_snapshots = None
             if len(constant_path_list[0]) > 2:
                 target_volume_name = constant_path_list[0][1]
                 image_name = constant_path_list[0][2]
@@ -5453,8 +5719,44 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                     % (next_action, new_data_vol_temp.get_image().uuid))
             robot_test_obj.add_resource_action_history(new_data_vol_temp.get_image().uuid, next_action)
             test_dict.add_image(new_data_vol_temp)
+
+            snapshots = test_dict.get_volume_snapshot(target_volume.get_volume().uuid)
+
+            if test_dict.get_volume_snapshot(target_volume.get_volume().uuid).get_current_snapshot():
+                target_snapshots = lib_get_child_snapshots(test_dict.get_volume_snapshot(target_volume.get_volume().uuid).get_current_snapshot())
+
+                if target_snapshots:
+                    for i in target_snapshots:
+                        for sp in snapshots.get_primary_snapshots():
+                            if i['inventory']['uuid'] == sp.get_snapshot().uuid:
+                                test_util.test_logger('%s is already in snapshot list dict, no need to add it' % (i['inventory']['uuid']))
+                                break
+                            if sp == snapshots.get_primary_snapshots()[-1]:
+                                test_util.test_logger('%s is not in snapshot list dict, suppose it should be the new snapshot generated by auto' % (i['inventory']['uuid']))
+                                target_snapshot = i
+
+            if not target_snapshots or not test_dict.get_volume_snapshot(target_volume.get_volume().uuid).get_current_snapshot():
+                if lib_get_diff_snapshots_with_zs(test_dict, target_volume.get_volume().uuid):
+                    # Suppose only one new snapshot generated by one action for each volume
+                    target_snapshot = lib_get_diff_snapshots_with_zs(test_dict, target_volume.get_volume().uuid)[0]
+                    test_util.test_logger('%s is not in snapshot list dict, suppose it should be the new snapshot generated by auto' % (target_snapshot['inventory']['uuid']))
+
+
+            if target_snapshot:
+                cre_vm_opt = robot_test_obj.get_vm_creation_option()
+                cre_vm_opt.set_name("utility_vm_for_robot_test")
+                new_snapshot = lib_get_volume_snapshot_by_snapshot(snapshots, target_snapshot, robot_test_obj, test_dict, cre_vm_opt)
+
+                target_volume = new_snapshot.get_target_volume()
+                md5sum = target_volume.get_md5sum()
+                new_snapshot.set_md5sum(md5sum)
+            else:
+                test_util.test_logger('No new snapshot found for volume %s, skip the snapshot tree update' % (target_volume.get_volume().uuid))
+
         elif next_action == TestAction.reinit_vm:
             target_vm = None
+            target_snapshot = None
+            target_snapshots = None
             if len(constant_path_list[0]) > 1:
                 target_vm_name = constant_path_list[0][1]
                 all_vm_list = test_dict.get_all_vm_list()
@@ -5467,6 +5769,40 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             test_util.test_dsc('Robot Action: %s; on VM: %s' \
                     % (next_action, target_vm.get_vm().uuid))
             target_vm.reinit()
+
+            root_volume_uuid = lib_get_root_volume(target_vm.vm).uuid
+            snapshots = test_dict.get_volume_snapshot(root_volume_uuid)
+
+            if test_dict.get_volume_snapshot(root_volume_uuid).get_current_snapshot():
+                target_snapshots = lib_get_child_snapshots(test_dict.get_volume_snapshot(root_volume_uuid).get_current_snapshot())
+
+                if target_snapshots:
+                    for i in target_snapshots:
+                        for sp in snapshots.get_primary_snapshots():
+                            if i['inventory']['uuid'] == sp.get_snapshot().uuid:
+                                test_util.test_logger('%s is already in snapshot list dict, no need to add it' % (i['inventory']['uuid']))
+                                break
+                            if sp == snapshots.get_primary_snapshots()[-1]:
+                                test_util.test_logger('%s is not in snapshot list dict, suppose it should be the new snapshot generated by auto' % (i['inventory']['uuid']))
+                                target_snapshot = i
+
+            if not target_snapshots or not test_dict.get_volume_snapshot(root_volume_uuid).get_current_snapshot():
+                if lib_get_diff_snapshots_with_zs(test_dict, root_volume_uuid):
+                    # Suppose only one new snapshot generated by one action for each volume
+                    target_snapshot = lib_get_diff_snapshots_with_zs(test_dict, root_volume_uuid)[0]
+                    test_util.test_logger('%s is not in snapshot list dict, suppose it should be the new snapshot generated by auto' % (target_snapshot['inventory']['uuid']))
+
+            if target_snapshot:
+                cre_vm_opt = robot_test_obj.get_vm_creation_option()
+                cre_vm_opt.set_name("utility_vm_for_robot_test")
+                new_snapshot = lib_get_volume_snapshot_by_snapshot(snapshots, target_snapshot, robot_test_obj, test_dict, cre_vm_opt)
+
+                target_volume = new_snapshot.get_target_volume()
+                md5sum = target_volume.get_md5sum()
+                new_snapshot.set_md5sum(md5sum)
+            else:
+                test_util.test_logger('No new snapshot found for volume %s, skip the snapshot tree update' % (root_volume_uuid))
+
         elif next_action == TestAction.stop_vm:
             target_vm = None
             if len(constant_path_list[0]) > 1:
@@ -5547,6 +5883,29 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
 
             target_vm.resume()
             test_dict.mv_vm(target_vm, vm_header.PAUSED, vm_header.RUNNING)
+            
+        elif next_action == TestAction.destroy_vm:
+            target_vm = None
+            if len(constant_path_list[0]) > 1:
+                target_vm_name = constant_path_list[0][1]
+                all_vm_list = test_dict.get_all_vm_list()
+                for vm in all_vm_list:
+                    if vm.get_vm().name == target_vm_name:
+                        target_vm = vm
+                        break
+            if not target_vm:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+            test_util.test_dsc('Robot Action: %s; on VM: %s' \
+                    % (next_action, target_vm.get_vm().uuid))
+
+            target_vm.destroy()
+
+            vm = lib_get_vm_by_uuid(target_vm.get_vm().uuid)
+            vm_current_state = vm.state
+
+            test_dict.rm_vm(target_vm, vm_current_state)
+    
+            
         elif next_action == TestAction.change_vm_image:
             target_vm = None
             target_image = None
@@ -5754,10 +6113,15 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
    
             test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
                 (next_action, target_volume.get_volume().uuid))
+
             target_volume.delete()
             test_dict.rm_volume(target_volume)
+
         elif next_action == TestAction.resize_volume:
             target_vm = None
+            target_snapshot = None
+            target_snapshots = None
+
             if len(constant_path_list[0]) > 2:
                 target_vm_name = constant_path_list[0][1]
                 delta = constant_path_list[0][2]
@@ -5774,8 +6138,44 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             new_size = current_size + int(delta)
             import zstackwoodpecker.operations.volume_operations as vol_ops
             vol_ops.resize_volume(root_volume_uuid, new_size)
+
+            snapshots = test_dict.get_volume_snapshot(root_volume_uuid)
+
+            if test_dict.get_volume_snapshot(root_volume_uuid).get_current_snapshot():
+                target_snapshots = lib_get_child_snapshots(test_dict.get_volume_snapshot(root_volume_uuid).get_current_snapshot())
+
+                if target_snapshots:
+                    for i in target_snapshots:
+                        for sp in snapshots.get_primary_snapshots():
+                            if i['inventory']['uuid'] == sp.get_snapshot().uuid:
+                                test_util.test_logger('%s is already in snapshot list dict, no need to add it' % (i['inventory']['uuid']))
+                                break
+                            if sp == snapshots.get_primary_snapshots()[-1]:
+                                test_util.test_logger('%s is not in snapshot list dict, suppose it should be the new snapshot generated by auto' % (i['inventory']['uuid']))
+                                target_snapshot = i
+
+            if not target_snapshots or not test_dict.get_volume_snapshot(root_volume_uuid).get_current_snapshot():
+                if lib_get_diff_snapshots_with_zs(test_dict, root_volume_uuid):
+                    # Suppose only one new snapshot generated by one action for each volume
+                    target_snapshot = lib_get_diff_snapshots_with_zs(test_dict, root_volume_uuid)[0]
+                    test_util.test_logger('%s is not in snapshot list dict, suppose it should be the new snapshot generated by auto' % (target_snapshot['inventory']['uuid']))
+
+            if target_snapshot:
+                cre_vm_opt = robot_test_obj.get_vm_creation_option()
+                cre_vm_opt.set_name("utility_vm_for_robot_test")
+                new_snapshot = lib_get_volume_snapshot_by_snapshot(snapshots, target_snapshot, robot_test_obj, test_dict, cre_vm_opt)
+
+                target_volume = new_snapshot.get_target_volume()
+                md5sum = target_volume.get_md5sum()
+                new_snapshot.set_md5sum(md5sum)
+            else:
+                test_util.test_logger('No new snapshot found for volume %s, skip the snapshot tree update' % (root_volume_uuid))
+
         elif next_action == TestAction.resize_data_volume:
             target_volume = None
+            target_snapshot = None
+            target_snapshots = None
+
             if len(constant_path_list[0]) > 2:
                 target_volume_name = constant_path_list[0][1]
                 delta = constant_path_list[0][2]
@@ -5794,6 +6194,41 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             new_size = current_size + int(delta)
             target_volume.resize(new_size)
             target_volume.update()
+            target_volume.update_volume()
+
+            snapshots = test_dict.get_volume_snapshot(target_volume.get_volume().uuid)
+
+            if test_dict.get_volume_snapshot(target_volume.get_volume().uuid).get_current_snapshot():
+                target_snapshots = lib_get_child_snapshots(test_dict.get_volume_snapshot(target_volume.get_volume().uuid).get_current_snapshot())
+
+                if target_snapshots:
+                    for i in target_snapshots:
+                        for sp in snapshots.get_primary_snapshots():
+                            if i['inventory']['uuid'] == sp.get_snapshot().uuid:
+                                test_util.test_logger('%s is already in snapshot list dict, no need to add it' % (i['inventory']['uuid']))
+                                break
+                            if sp == snapshots.get_primary_snapshots()[-1]:
+                                test_util.test_logger('%s is not in snapshot list dict, suppose it should be the new snapshot generated by auto' % (i['inventory']['uuid']))
+                                target_snapshot = i
+
+            if not target_snapshots or not test_dict.get_volume_snapshot(target_volume.get_volume().uuid).get_current_snapshot():
+                if lib_get_diff_snapshots_with_zs(test_dict, target_volume.get_volume().uuid):
+                    # Suppose only one new snapshot generated by one action for each volume
+                    target_snapshot = lib_get_diff_snapshots_with_zs(test_dict, target_volume.get_volume().uuid)[0]
+                    test_util.test_logger('%s is not in snapshot list dict, suppose it should be the new snapshot generated by auto' % (target_snapshot['inventory']['uuid']))
+
+
+            if target_snapshot:
+                cre_vm_opt = robot_test_obj.get_vm_creation_option()
+                cre_vm_opt.set_name("utility_vm_for_robot_test")
+                new_snapshot = lib_get_volume_snapshot_by_snapshot(snapshots, target_snapshot, robot_test_obj, test_dict, cre_vm_opt)
+
+                target_volume = new_snapshot.get_target_volume()
+                md5sum = target_volume.get_md5sum()
+                new_snapshot.set_md5sum(md5sum)
+            else:
+                test_util.test_logger('No new snapshot found for volume %s, skip the snapshot tree update' % (target_volume.get_volume().uuid))
+
         elif next_action == TestAction.create_data_volume_from_image:
             target_images = None
             target_image_name = None
@@ -5892,6 +6327,8 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             if not target_volume_uuid:
                 test_util.test_fail("no resource available for next action: %s" % (next_action))
 
+            target_snapshots = test_dict.get_volume_snapshot(target_volume_uuid)
+
             test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
                 (next_action, target_volume_uuid))
             import zstackwoodpecker.operations.datamigrate_operations as datamigr_ops
@@ -5903,6 +6340,9 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                 target_vm.update()
             if target_volume:
                 target_volume.update_volume()
+            if target_snapshots:
+                target_snapshots.update()
+
         elif next_action == TestAction.create_volume :
             ps_uuid = lib_robot_get_default_configs(robot_test_obj, "PS")
             target_volume_name = None
@@ -6017,6 +6457,32 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             #                and target_volume_obj.get_target_vm().get_state() == \
             #                    vm_header.EXPUNGED):
             #        test_dict.rm_volume_snapshot(target_volume_snapshots)
+        elif next_action == TestAction.batch_delete_volume_snapshot:
+            target_volume_snapshots = None
+            target_snapshot = None
+            target_snapshot_name = None
+            target_snapshot_uuid_list = []
+            target_snapshot_list = []
+
+            all_volume_snapshots = test_dict.get_all_available_snapshots()
+            import zstackwoodpecker.operations.volume_operations as vol_ops
+            for snapshot_name in constant_path_list[0][1]:
+                cond = res_ops.gen_query_conditions('name','=',snapshot_name)
+                target_snapshot = res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, cond)
+                if not target_snapshot:
+                    test_util.test_logger("Can not find target snapshot: %s" % snapshot_name)
+                else:
+                    target_snapshot_uuid_list.append(target_snapshot[0].uuid)
+                    for candidate_snapshots in all_volume_snapshots:
+                        for candidate_snapshot in candidate_snapshots.get_primary_snapshots():
+                            if candidate_snapshot.get_snapshot().name == snapshot_name:
+                                target_volume_snapshots = candidate_snapshots
+                                target_snapshot_list.append(candidate_snapshot)
+                                break
+            target_volume_snapshots.delete_snapshots_dict_record(target_snapshot_list)
+            vol_ops.batch_delete_snapshot(target_snapshot_uuid_list)
+            test_util.test_dsc(test_dict)
+
         elif next_action == TestAction.use_volume_snapshot:
             target_volume_snapshots = None
             target_snapshot = None
@@ -6100,6 +6566,8 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             backup_option.set_name(backup_name)
             backup_option.set_volume_uuid(target_volume_uuid)
             backup_option.set_backupStorage_uuid(bs.uuid)
+            if len(constant_path_list[0]) == 3:
+                backup_option.set_mode("full")
             import zstackwoodpecker.operations.volume_operations as vol_ops
             test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
                 (next_action, target_volume_uuid))
@@ -6109,6 +6577,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             #_update_bs_for_robot_state("disable")
             test_dict.add_backup(backup.uuid)
             test_dict.add_backup_md5sum(backup.uuid, md5sum)
+           
         elif next_action == TestAction.use_volume_backup:
             target_backup = None
             backup_name = None
@@ -6170,6 +6639,240 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
 
             import zstackwoodpecker.operations.image_operations as img_ops
             img_ops.create_data_template_from_backup(filtered_bss[0].uuid, target_backup.uuid, image_name)
+        elif next_action == TestAction.add_image:
+            backup_name = None
+            image_name = None
+            image_format = None
+            image_url = None
+            image_type = None
+            dload_server_type = None
+            
+            global dload_svr
+            def _get_image_name(dload_server_type, image_format):
+                if dload_server_type == "LOCAL" and image_format == "raw":
+                    return "file:///tmp/ttylinux.raw"
+                elif dload_server_type == "LOCAL" and image_format == "iso":
+                    return "file:///tmp/CentOS-x86_64-7.2-Minimal.iso"
+                elif dload_server_type == "FTP" and image_format == "raw":
+                    return "ftp://test:password@" + dload_svr + ":21/ttylinux.raw"
+                elif dload_server_type == "FTP" and image_format == "iso":
+                    return "ftp://test:password@" + dload_svr + ":21/CentOS-x86_64-7.2-Minimal.iso"
+                elif dload_server_type == "SFTP" and image_format == "raw":
+                    return "sftp://test:password@" + dload_svr + ":2294/ttylinux.raw"
+                elif dload_server_type == "SFTP" and image_format == "iso":
+                    return "sftp://test:password@" + dload_svr + ":2294/CentOS-x86_64-7.2-Minimal.iso"
+                elif dload_server_type == "HTTPS" and image_format == "raw":
+                    return "https://dload.zstack.com/ttylinux.raw"
+                elif dload_server_type == "HTTPS" and image_format == "iso":
+                    return "https://dload.zstack.com/CentOS-x86_64-7.2-Minimal.iso"
+                else:
+                    test_util.test_logger("dload_server_type=" + dload_server_type)
+                    test_util.test_logger("image_format=" + image_format)
+                    test_util.test_fail("not found matched image")
+                    return 
+
+            if len(constant_path_list[0]) > 4:
+                bs_type = constant_path_list[0][1]
+                image_name = constant_path_list[0][2]
+                image_format = constant_path_list[0][3]
+                image_type = constant_path_list[0][4]
+                dload_server_type = constant_path_list[0][5]
+                #image_list = test_dict.get_image_list()
+                #for image in image_list:
+                #    if image.name == image_name:
+                #        image_uuid = image.get_image().uuid
+                #        break
+                #else:
+                #    test_util.test_fail("not find candidate image.")
+            else:
+                test_util.test_fail("candidate argument number is less than 4.")
+
+            test_util.test_dsc('Robot Action: %s;' %(next_action))
+
+            #ps_uuid = lib_robot_get_default_configs(robot_test_obj, "PS")
+            if not lib_dload_server_is_ready(dload_server_type):
+                test_util.test_fail("download server is not ready yet, please check type=%s" %(str(dload_server_type)))
+
+            bs_cond = res_ops.gen_query_conditions("status", '=', "Connected")
+            bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, bs_cond)
+            bs_uuid = None
+            for bs in bss:
+                test_util.test_logger("DEBUG>>>bs.type=(%s) vs. bs_type=(%s)" %(bs.type, bs_type))
+                if bs.type.strip() == bs_type.strip():
+                    bs_uuid = bs.uuid
+                    break
+            else:
+                test_util.test_skip("not find bs with assigned name")
+                
+            image_option = test_util.ImageOption()
+            #image_option.set_uuid(image_uuid)
+            image_option.set_name(image_name)
+            image_option.set_description('Description->'+ image_name)
+            image_option.set_format(image_format)
+
+            if image_type == "RootVolumeTemplate":
+                image_option.set_mediaType('RootVolumeTemplate')
+            elif image_type == "DataVolumeTemplate":
+                image_option.set_mediaType('DataVolumeTemplate')
+            else:
+                test_util.test_fail("imageMediaType is not in RootVolumeTemplate|DataVolumeTemplate, actual is [%s]" %(image_type))
+
+            image_option.set_backup_storage_uuid_list([bs_uuid])
+            image_option.url = _get_image_name(dload_server_type, image_format)
+            image_option.set_timeout(24*60*60*1000)
+            import zstackwoodpecker.operations.image_operations as img_ops
+            image = img_ops.add_image(image_option)
+
+            import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
+            new_image = zstack_image_header.ZstackTestImage()
+            new_image.set_creation_option(image_option)
+            new_image.set_image(image)
+            test_dict.add_image(new_image)
+
+        elif next_action == TestAction.export_image:
+            target_image = None
+            if len(constant_path_list[0]) > 1:
+                target_image_name = constant_path_list[0][1]
+                image_list = test_dict.get_image_list()
+                for image in image_list:
+                    if image.get_image().name == target_image_name:
+                        target_image = image
+                        break
+
+            if not target_image:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            target_image.export()
+
+        elif next_action == TestAction.delete_image:
+            target_image = None
+            if len(constant_path_list[0]) > 1:
+                target_image_name = constant_path_list[0][1]
+                image_list = test_dict.get_image_list()
+                for image in image_list:
+                    if image.get_image().name == target_image_name:
+                        target_image = image
+                        break
+
+            if not target_image:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            target_image.delete()
+            test_dict.rm_image(target_image)
+
+        elif next_action == TestAction.expunge_image:
+            target_image = None
+            if len(constant_path_list[0]) > 1:
+                target_image_name = constant_path_list[0][1]
+                image_list = test_dict.get_image_list()
+                for image in image_list:
+                    if image.get_image().name == target_image_name:
+                        target_image = image
+                        break
+
+            if not target_image:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+            bss = target_image.get_image().backupStorageRefs
+            bs_uuid_list = []
+            for bs in bss:
+                bs_uuid_list.append(bs.backupStorageUuid)
+            target_image.expunge(bs_uuid_list)
+            test_dict.rm_image(target_image)
+
+        elif next_action == TestAction.reclaim_space_from_bs:
+            cond = res_ops.gen_query_conditions("status", '=', "Connected")
+            cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage", cond)
+            bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)
+            import zstackwoodpecker.operations.backupstorage_operations as bs_ops
+            if not bss:
+                test_util.test_logger("not found enabled and imagestore bss")
+            else:
+                for bs in bss:
+                    bs_ops.reclaim_space_from_bs(bs.uuid)
+
+        elif next_action == TestAction.reconnect_bs:
+            cond = res_ops.gen_query_conditions("status", '=', "Connected")
+            bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)
+            import zstackwoodpecker.operations.backupstorage_operations as bs_ops
+            if not bss:
+                test_util.test_fail("not found enabled bs")
+
+            for bs in bss:
+                bs_ops.reconnect_backup_storage(bs.uuid)
+
+        elif next_action == TestAction.ps_migrage_vm:
+            import zstackwoodpecker.operations.datamigrate_operations as datamigr_ops
+            def _get_vm_ps_candidate(vm_uuid):
+                ps_to_migrate = random.choice(datamigr_ops.get_ps_candidate_for_vm_migration(vm_uuid))
+                return ps_to_migrate
+
+            target_vm = None
+            if len(constant_path_list[0]) > 1:
+                target_vm_name = constant_path_list[0][1]
+                all_vm_list = test_dict.get_all_vm_list()
+                for vm in all_vm_list:
+                    if vm.get_vm().name == target_vm_name:
+                        target_vm = vm
+                        break
+
+            if not target_vm:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            target_vm_uuid = target_vm.get_vm().uuid
+            ps_uuid_to_migrate = _get_vm_ps_candidate(target_vm_uuid).uuid
+            datamigr_ops.ps_migrage_vm(ps_uuid_to_migrate, target_vm_uuid)
+
+        elif next_action == TestAction.sync_image_from_imagestore:
+            target_image = None
+            if len(constant_path_list[0]) > 1:
+                target_image_name = constant_path_list[0][1]
+                image_list = test_dict.get_image_list()
+                for image in image_list:
+                    if image.get_image().name == target_image_name:
+                        target_image = image
+                        break
+
+            if not target_image:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            image_uuid_local = target_image.get_image().uuid 
+            local_bs_uuid = target_image.get_image().backupStorageRefs[0].backupStorageUuid
+            disaster_bs_uuid = lib_get_another_imagestore_by_uuid(local_bs_uuid)
+            import zstackwoodpecker.operations.image_operations as img_ops
+            image_uuid = img_ops.sync_image_from_image_store_backup_storage(disaster_bs_uuid, local_bs_uuid, image_uuid_local)
+
+        elif next_action == TestAction.create_vm_by_image:
+            vm_name = None
+            image_format = None
+            target_image = None
+            if len(constant_path_list[0]) > 3:
+                target_image_name = constant_path_list[0][1]
+                image_format = constant_path_list[0][2]
+                vm_name = constant_path_list[0][3]
+                image_list = test_dict.get_image_list()
+                for image in image_list:
+                    if image.get_image().name == target_image_name:
+                        target_image = image
+                        break
+
+            if not target_image or not vm_name:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            vm_creation_option = test_util.VmOption()
+
+            if image_format == "iso":
+                root_disk_uuid = lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName')).uuid
+                vm_creation_option.set_instance_offering_uuid(root_disk_uuid)
+
+            vm_creation_option.set_image_uuid(target_image.get_image().uuid)
+
+            conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+            instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+            vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+
+            vm = lib_create_vm(vm_creation_option)
+            test_dict.add_vm(vm)
+
         elif next_action == TestAction.create_vm_backup:
             backup_name = None
             target_vm = None
@@ -6216,14 +6919,50 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             backup_option.set_name(backup_name)
             backup_option.set_volume_uuid(lib_get_root_volume(vm.get_vm()).uuid)
             backup_option.set_backupStorage_uuid(bs.uuid)
+            if len(constant_path_list[0]) == 3:
+                backup_option.set_mode("full")
             test_util.test_dsc('Robot Action: %s; on Volume: %s' % \
                 (next_action, target_vm.get_vm().uuid))
 
-            #_update_bs_for_robot_state("enable")
             backups = vm_ops.create_vm_backup(backup_option)
-            #_update_bs_for_robot_state("disable")
             for backup in backups:
                 test_dict.add_backup(backup.uuid)
+                for volume in test_dict.get_all_volume_list():
+                    if backup.volumeUuid == volume.get_volume().uuid:
+                        md5sum = volume.get_md5sum()
+                        test_dict.add_backup_md5sum(backup.uuid, md5sum)
+
+        elif next_action == TestAction.create_vm_from_vmbackup:
+            target_backup = None
+            backup_name = None
+            if len(constant_path_list[0]) > 1:
+                backup_name = constant_path_list[0][1]
+                backup_list = test_dict.get_backup_list()
+                for backup_uuid in backup_list:
+                    backup = lib_get_backup_by_uuid(backup_uuid)
+                    if backup.name == backup_name:
+                        target_backup = backup
+                        break
+
+            if not target_backup or not backup_name:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+            import zstackwoodpecker.operations.volume_operations as vol_ops
+            test_util.test_dsc('Robot Action: %s; on Backup: %s' % \
+                (next_action, target_backup.uuid))
+
+            l3_uuid = lib_get_l3_by_name(os.environ.get('l3VlanNetworkName1')).uuid
+            instance_offering_uuid = lib_get_instance_offering_by_name(os.environ.get('instanceOfferingName_s')).uuid
+            vol_ops.create_vm_from_vm_backup("vm_create_from_backup", target_backup.groupUuid, instance_offering_uuid, [l3_uuid])
+            cond = res_ops.gen_query_conditions("groupUuid", '=', target_backup.groupUuid)
+            backups = res_ops.query_resource(res_ops.VOLUME_BACKUP, cond)
+            #_update_bs_for_robot_state("disable")
+            #for backup in backups:
+            #    for volume in test_dict.get_all_volume_list():
+            #        volume.update()
+            #        volume.update_volume()
+            #        if backup.volumeUuid == volume.get_volume().uuid:
+            #            md5sum = test_dict.get_backup_md5sum(backup.uuid)
+            #            volume.set_md5sum(md5sum)
 
         elif next_action == TestAction.use_vm_backup:
             target_backup = None
@@ -6244,16 +6983,23 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                 (next_action, target_backup.uuid))
 
             #_update_bs_for_robot_state("enable")
-            backup = vol_ops.revert_vm_from_backup(target_backup.groupUuid)
+            vol_ops.revert_vm_from_backup(target_backup.groupUuid)
+            cond = res_ops.gen_query_conditions("groupUuid", '=', target_backup.groupUuid)
+            backups = res_ops.query_resource(res_ops.VOLUME_BACKUP, cond)
             #_update_bs_for_robot_state("disable")
-            for volume in test_dict.get_all_volume_list():
-                volume.update()
-                volume.update_volume()
+            for backup in backups:
+                for volume in test_dict.get_all_volume_list():
+                    volume.update()
+                    volume.update_volume()
+                    if backup.volumeUuid == volume.get_volume().uuid:
+                        md5sum = test_dict.get_backup_md5sum(backup.uuid)
+                        volume.set_md5sum(md5sum)
 
         elif next_action == TestAction.clone_vm:
             target_vm = None
             vm_name = None
             full = False
+            target_snapshots = None
             (normal_args, extra_args) = _parse_args(constant_path_list[0])
             if len(normal_args) > 2:
                 target_vm_name = normal_args[1]
@@ -6280,6 +7026,46 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             for volume in test_dict.get_all_volume_list():
                 volume.update()
                 volume.update_volume()
+
+            if full:
+                target_volumes = target_vm.get_vm().allVolumes
+            elif not full:
+                target_volumes = [lib_get_root_volume(target_vm.get_vm())]
+
+            for target_volume in target_volumes:
+                snapshots = test_dict.get_volume_snapshot(target_volume.uuid)
+
+                if test_dict.get_volume_snapshot(target_volume.uuid).get_current_snapshot():
+                    target_snapshots = lib_get_child_snapshots(test_dict.get_volume_snapshot(target_volume.uuid).get_current_snapshot())
+
+                    if target_snapshots:
+                        for i in target_snapshots:
+                            for sp in snapshots.get_primary_snapshots():
+                                if i['inventory']['uuid'] == sp.get_snapshot().uuid:
+                                    test_util.test_logger('%s is already in snapshot list dict, no need to add it' % (i['inventory']['uuid']))
+                                    break
+                                if sp == snapshots.get_primary_snapshots()[-1]:
+                                    test_util.test_logger('%s is not in snapshot list dict, suppose it should be the new snapshot generated by auto' % (i['inventory']['uuid']))
+                                    target_snapshot = i
+
+                if not target_snapshots or not test_dict.get_volume_snapshot(target_volume.uuid).get_current_snapshot():
+                    if lib_get_diff_snapshots_with_zs(test_dict, target_volume.uuid):
+                        # Suppose only one new snapshot generated by one action for each volume
+                        target_snapshot = lib_get_diff_snapshots_with_zs(test_dict, target_volume.uuid)[0]
+                        test_util.test_logger('%s is not in snapshot list dict, suppose it should be the new snapshot generated by auto' % (target_snapshot['inventory']['uuid']))
+
+                if not target_snapshot:
+                    test_util.test_logger('No new snapshot found for volume %s, skip the snapshot tree update' % (target_volume.uuid))
+
+                if target_snapshot:
+                    cre_vm_opt = robot_test_obj.get_vm_creation_option()
+                    cre_vm_opt.set_name("utility_vm_for_robot_test")
+                    new_snapshot = lib_get_volume_snapshot_by_snapshot(snapshots, target_snapshot, robot_test_obj, test_dict, cre_vm_opt)
+
+                    target_volume = new_snapshot.get_target_volume()
+                    md5sum = target_volume.get_md5sum()
+                    new_snapshot.set_md5sum(md5sum)
+
         else:
             test_util.test_fail("Robot action: <%s> not supported" %(next_action))
 
@@ -6375,6 +7161,8 @@ def lib_get_test_stub(suite_name=None):
     import zstacklib.utils.component_loader as component_loader
     caller_info_list = inspect.getouterframes(inspect.currentframe())[1]
     caller_path = os.path.realpath(caller_info_list[1])
+    tc_name = caller_path.split('/')[-1].split('.')[0]
+    os.environ['TESTCASENAME'] = tc_name
     curr_dir = os.path.dirname(caller_path)
     if suite_name:
         suite_path = '/'.join([os.path.dirname(curr_dir), suite_name])
@@ -6479,6 +7267,75 @@ def lib_create_volume_snapshot_from_volume(target_volume_snapshots, robot_test_o
     target_volume_snapshots.set_utility_vm(vol_utiltiy_vm)
 
     return target_volume_snapshots.create_snapshot(snapshot_name)
+
+def lib_get_volume_snapshot_by_snapshot(target_volume_snapshots, target_snapshot, robot_test_obj, test_dict, cre_vm_opt=None):
+    vol_utiltiy_vm = None
+    snapshot_name = None
+    snapshot_uuid = None
+    target_volume_inv = \
+            target_volume_snapshots.get_target_volume().get_volume()
+    ps_uuid = target_volume_inv.primaryStorageUuid
+    ps = lib_get_primary_storage_by_uuid(ps_uuid)
+    if target_volume_snapshots.get_utility_vm():
+        vol_utiltiy_vm = target_volume_snapshots.get_utility_vm()
+        if ps.type == inventory.LOCAL_STORAGE_TYPE:
+            if vol_utiltiy_vm.get_vm().hostUuid != lib_get_local_storage_volume_host(target_volume_inv.uuid).uuid:
+                vol_utiltiy_vm = None
+
+    if not vol_utiltiy_vm:
+        vol_utiltiy_vm = robot_test_obj.get_utility_vm(ps_uuid)
+        if ps.type == inventory.LOCAL_STORAGE_TYPE:
+            if vol_utiltiy_vm.get_vm().hostUuid != lib_get_local_storage_volume_host(target_volume_inv.uuid).uuid:
+                vol_utiltiy_vm = None
+
+    if not vol_utiltiy_vm:
+        cond = res_ops.gen_query_conditions('name', '=', "utility_vm_for_robot_test")
+        cond = res_ops.gen_query_conditions('state', '=', "Running", cond)
+        vms = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
+        for vm in vms:
+            if ps.type == inventory.LOCAL_STORAGE_TYPE:
+                if ps_uuid == ps.uuid and vm.hostUuid == lib_get_local_storage_volume_host(target_volume_inv.uuid).uuid:
+                    vol_utility_vm = vm
+            else:
+                if ps_uuid == ps.uuid:
+                    vol_utility_vm = vm
+
+    if not vol_utiltiy_vm:
+        #create utiltiy_vm on given primary storage.
+        util_vm_opt = test_util.VmOption(cre_vm_opt)
+        instance_offering_uuid = util_vm_opt.get_instance_offering_uuid()
+        if not instance_offering_uuid:
+            instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING)[0].uuid
+        possible_cluster = target_volume_inv.clusterUuid
+        if not possible_cluster:
+            possible_cluster = res_ops.query_resource_with_num(\
+                    res_ops.CLUSTER, [], None, 0, 1)[0].uuid
+
+        cond = res_ops.gen_query_conditions('attachedClusterUuids', \
+                '=', possible_cluster)
+        possible_l2 = res_ops.query_resource(res_ops.L2_VLAN_NETWORK, \
+                cond)[0].uuid
+        cond = res_ops.gen_query_conditions('l2NetworkUuid', '=', \
+                possible_l2)
+        possible_l3 = res_ops.query_resource(res_ops.L3_NETWORK, \
+                cond)[0].uuid
+        util_vm_opt.set_l3_uuids([possible_l3])
+        util_vm_opt.set_ps_uuid(ps_uuid)
+        #need to set host_uuid == target_volume host uuid if local ps,
+        #  as there will attach testing for snapshot creation
+        if lib_get_primary_storage_by_uuid(ps_uuid).type == inventory.LOCAL_STORAGE_TYPE:
+            util_vm_opt.set_host_uuid(lib_get_local_storage_volume_host(target_volume_inv.uuid).uuid)
+
+        vol_utiltiy_vm  = lib_create_vm(util_vm_opt)
+        robot_test_obj.set_utility_vm(vol_utiltiy_vm)
+        test_dict.add_utility_vm(vol_utiltiy_vm)
+        vol_utiltiy_vm.check()
+            
+    target_volume_snapshots.set_utility_vm(vol_utiltiy_vm)
+
+    snapshot_name = target_snapshot['inventory']['name']
+    snapshot_uuid = target_snapshot['inventory']['uuid']
+    return target_volume_snapshots.create_snapshot(name = snapshot_name, target_snapshot_uuid = snapshot_uuid)
 
 def lib_create_image_from_snapshot(target_snapshot):
     snapshot_volume = target_snapshot.get_target_volume()

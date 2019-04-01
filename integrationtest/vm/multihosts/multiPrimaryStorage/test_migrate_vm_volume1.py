@@ -23,11 +23,19 @@ new_ps_list = []
 
 @test_stub.skip_if_have_local
 def test():
-    env = test_stub.TwoPrimaryStorageEnv(test_object_dict=test_obj_dict,
-                                         first_ps_vm_number=VM_COUNT,
-                                         second_ps_vm_number=VM_COUNT,
-                                         first_ps_volume_number=VOLUME_NUMBER,
-                                         second_ps_volume_number=VOLUME_NUMBER)
+    ps_env = test_stub.PSEnvChecker()
+    if ps_env.is_sb_ceph_env:
+        env = test_stub.SanAndCephPrimaryStorageEnv(test_object_dict=test_obj_dict,
+                                             first_ps_vm_number=VM_COUNT,
+                                             second_ps_vm_number=VM_COUNT,
+                                             first_ps_volume_number=VOLUME_NUMBER,
+                                             second_ps_volume_number=VOLUME_NUMBER)
+    else:
+        env = test_stub.TwoPrimaryStorageEnv(test_object_dict=test_obj_dict,
+                                             first_ps_vm_number=VM_COUNT,
+                                             second_ps_vm_number=VM_COUNT,
+                                             first_ps_volume_number=VOLUME_NUMBER,
+                                             second_ps_volume_number=VOLUME_NUMBER)
     env.check_env()
     env.deploy_env()
 

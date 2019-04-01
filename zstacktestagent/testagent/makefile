@@ -11,7 +11,7 @@ PKG_TAR_DIR=$(TARGET_DIR)/pkg-tar
 
 DEPS=github.com/Sirupsen/logrus github.com/pkg/errors github.com/fatih/structs golang.org/x/crypto/ssh github.com/tmc/scp
 
-zvr: deps
+zvr:
 	mkdir -p $(TARGET_DIR)
 	$(GO) build -o $(TARGET_DIR)/testagent src/testagent/testagent.go
 

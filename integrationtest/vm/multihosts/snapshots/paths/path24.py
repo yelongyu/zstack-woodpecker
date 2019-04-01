@@ -47,5 +47,6 @@ def path():
                       [TestAction.stop_vm, "vm1"], \
                       [TestAction.use_volume_snapshot, "snapshot1_3"], \
                       [TestAction.start_vm, "vm1"], \
-                      [TestAction.recover_global_config_sp_depth]
+                      [TestAction.recover_global_config_sp_depth], \
+                      [TestAction.batch_delete_volume_snapshot, ["snapshot1_1", "snapshot1_3", "snpshot3_2"]]
                      ])

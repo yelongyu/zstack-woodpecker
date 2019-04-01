@@ -24,7 +24,10 @@ class VidPolicyCheckerFactory(checker_header.CheckerFactory):
     def create_checker(self, test_obj):
         vid_policy_checker_chain = checker_header.CheckerChain()
         checker_dict = {}
-        checker_dict[db_checker.zstack_vid_policy_db_checker] = True
+        if test_obj.customized != None:
+            pass
+        else:
+            checker_dict[db_checker.zstack_vid_policy_db_checker] = True
         checker_dict[vid_checker.zstack_vid_policy_checker] = True
         vid_policy_checker_chain.add_checker_dict(checker_dict, test_obj)
         test_util.test_logger('Add checker: %s for [user:] %s' % (vid_policy_checker_chain, test_obj.get_vid_option().get_name()))

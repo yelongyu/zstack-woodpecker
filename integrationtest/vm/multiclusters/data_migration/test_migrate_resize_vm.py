@@ -30,7 +30,6 @@ def test():
     data_migration.clean_up_ps_trash_and_check()
 
     data_migration.vm.stop()
-    data_migration.vm.start()
 
     #delay start vm
     data_migration.vm.start()

@@ -261,7 +261,9 @@ def test():
     if ps.type == "AliyunNAS":
         test_util.test_skip("VolumeBackup does not support AliyunNAS for now")
     if ps.type != inventory.LOCAL_STORAGE_TYPE and 'VM_TEST_MIGRATE' in VM_OP and "VM_TEST_STOP" in STATE_OP:
-        test_util.test_skip("Shared Storage does not support migration")
+        test_util.test_skip("Shared Storage does not support cold migration")
+    if ps.type == inventory.LOCAL_STORAGE_TYPE and 'VM_TEST_MIGRATE' in VM_OP and "VM_TEST_NONE" in STATE_OP:
+        test_util.test_skip("Local Storage does not support live migration")
 
     vm_name = "test_vm"
     cond = res_ops.gen_query_conditions("system", '=', "false")
@@ -297,8 +299,8 @@ def test():
 
         if test_lib.lib_is_vm_l3_has_vr(vm.vm):
             test_lib.TestHarness = test_lib.TestHarnessVR
-        cmd = "echo 111 > /home/" + str(int(time.time()))
-        test_lib.lib_execute_command_in_vm(vm.vm,cmd)
+            cmd = "echo 111 > /home/" + str(int(time.time()))
+            test_lib.lib_execute_command_in_vm(vm.vm,cmd)
         vm.suspend()
         # create_snapshot/backup
         vm_op_test(vm, "VM_TEST_BACKUP")

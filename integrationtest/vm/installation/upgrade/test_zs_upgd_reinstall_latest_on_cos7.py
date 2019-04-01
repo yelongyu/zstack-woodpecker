@@ -25,7 +25,8 @@ def create_vm(image):
     l3_name = os.environ.get('l3PublicNetworkName')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     image_uuid = image.uuid
-    vm_name = 'zs_install_%s' % image.name
+    #vm_name = 'zs_install_%s' % image.name
+    vm_name = os.environ.get('vmName')
     vm_instrance_offering_uuid = os.environ.get('instanceOfferingUuid')
 
     vm_creation_option = test_util.VmOption()

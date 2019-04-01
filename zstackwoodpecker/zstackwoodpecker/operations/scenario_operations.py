@@ -34,11 +34,11 @@ def wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_uuid):
     retry_count = 0
     while retry_count < 3 and not test_lib.lib_wait_target_up(vm_ip, '22', 360):
         test_util.test_warn("Could not reach target vm: %s %s, retry after reboot it" % (vm_ip, vm_uuid))
-        stop_vm(zstack_management_ip, vm_uuid)
-        start_vm(zstack_management_ip, vm_uuid)
+        reboot_vm(zstack_management_ip, vm_uuid)
         retry_count += 1
 
     if test_lib.lib_wait_target_up(vm_ip, '22', 360):
+        os.system('sshpass -p password ssh root@%s swapoff -a' % vm_ip)
         return True
     return False
 
@@ -298,6 +298,7 @@ def setup_2ha_mn_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
     modify_cfg.append(r"sleep 1")
     modify_cfg.append(r"sync")
+    modify_cfg.append(r"fsfreeze -f /")
     modify_cfg.append(r"sync")
     modify_cfg.append(r"sync")
 
@@ -309,8 +310,7 @@ def setup_2ha_mn_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
 
 
     # NOTE: need to make filesystem in sync in VM before cold stop VM
-    stop_vm(zstack_management_ip, vm_inv.uuid)
-    start_vm(zstack_management_ip, vm_inv.uuid)
+    reboot_vm(zstack_management_ip, vm_inv.uuid)
     if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
         test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
 
@@ -392,8 +392,7 @@ def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
 
 
     # NOTE: need to make filesystem in sync in VM before cold stop VM
-    stop_vm(zstack_management_ip, vm_inv.uuid)
-    start_vm(zstack_management_ip, vm_inv.uuid)
+    reboot_vm(zstack_management_ip, vm_inv.uuid)
 
     if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
         test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
@@ -887,8 +886,7 @@ def setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm_config, deploy_co
     cmd = 'rpm -ivh kernel-ml-4.20.3-1.el7.elrepo.x86_64.rpm && grub2-set-default "CentOS Linux (4.20.3-1.el7.elrepo.x86_64) 7 (Core)" && sync && sync && sync'
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    stop_vm(zstack_management_ip, vm_inv.uuid)
-    start_vm(zstack_management_ip, vm_inv.uuid)
+    reboot_vm(zstack_management_ip, vm_inv.uuid)
     if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
         test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
 
@@ -1230,19 +1228,21 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
 
             if hasattr(vm, 'primaryStorageRef'):
                 for primaryStorageRef in xmlobject.safe_list(vm.primaryStorageRef):
-                    print primaryStorageRef.text_
                     primary_storage_type = get_primary_storage_type(deploy_config, primaryStorageRef.text_)
                     for zone in xmlobject.safe_list(deploy_config.zones.zone):
 #                         if primary_storage_type == 'ceph':
                         if primary_storage_type in ['ceph', 'xsky']:
-                            key = (backupStorageRef.text_, backup_storage_type)
+                            key = (primaryStorageRef.text_, primary_storage_type)
                             if ceph_storages.has_key(key):
                                 if vm_name in ceph_storages[key]:
                                     continue
                                 else:
                                     ceph_storages[key].append(vm_name)
                             else:
-                                ceph_storages[key] = [ vm_name ]
+                                vals = ceph_storages.values()
+                                val_list = [v for pv in vals for v in pv]
+                                if vm_name not in val_list:
+                                    ceph_storages[key] = [ vm_name ]
 
 #     for ceph_storage in ceph_storages:
     def deploy_ceph(ceph_storages, ceph_storage):
@@ -1913,6 +1913,15 @@ def destroy_vm(http_server_ip, vm_uuid, session_uuid=None):
     test_util.action_logger('Destroy VM [uuid:] %s' % vm_uuid)
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
 
+
+def reboot_vm(http_server_ip, vm_uuid, force=None, session_uuid=None):
+    action = api_actions.RebootVmInstanceAction()
+    action.uuid = vm_uuid
+    action.timeout = 600000
+    test_util.action_logger('Reboot VM [uuid:] %s' % vm_uuid)
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    return evt.inventory
+
 def stop_vm(http_server_ip, vm_uuid, force=None, session_uuid=None):
     action = api_actions.StopVmInstanceAction()
     action.uuid = vm_uuid
@@ -2016,7 +2025,7 @@ def lib_get_cluster_hosts(http_server_ip, cluster_uuid = None):
     return hosts
 
 
-def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_inv, session_uuid=None, deploy_config=None):
+def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_inv, session_uuid=None, deploy_config=None, ps_ref_type=None):
 
     deploy_config = deploy_config
     action = api_actions.CreateDataVolumeAction()
@@ -2032,10 +2041,15 @@ def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_in
         action.primaryStorageUuid = ps.uuid
         #host = lib_find_random_host(http_server_ip)
         #action.systemTags = ["localStorage::hostUuid::%s" % host.uuid]
-        if xmlobject.has_element(deploy_config, 'backupStorages.xskycephBackupStorage'):
+        if xmlobject.has_element(deploy_config, 'zones.zone.primaryStorages.xskycephPrimaryStorage'):
             action.systemTags = ["capability::virtio-scsi", "localStorage::hostUuid::%s" % vm_inv.hostUuid]
         else:
             action.systemTags = ["localStorage::hostUuid::%s" % vm_inv.hostUuid]
+        if ps_ref_type:
+            if ps_ref_type == 'xskyceph':
+                action.systemTags = ["capability::virtio-scsi", "localStorage::hostUuid::%s" % vm_inv.hostUuid]
+            else:
+                action.systemTags = ["localStorage::hostUuid::%s" % vm_inv.hostUuid]
     elif ps.type in [ 'SharedBlock' ]:
         action.primaryStorageUuid = ps.uuid
     else:
@@ -2480,6 +2494,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
     mn_ip_to_post, vm_ip_to_post = (None, None)
     if hasattr(scenario_config.deployerConfig, 'hosts'):
         ebs_host = {}
+        ceph_disk_created = False
         for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
             for vm in xmlobject.safe_list(host.vms.vm):
                 vm_creation_option = test_util.VmOption()
@@ -2522,7 +2537,15 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 #vm_creation_option.set_ps_uuid(ps_uuid)
                 #vm_creation_option.set_session_uuid(session_uuid)
                 if os.getenv('datacenterType') == 'AliyunEBS':
-                    vm_creation_option.set_ps_uuid(os.getenv('PSUUIDFOREBS'))
+#                     vm_creation_option.set_ps_uuid(os.getenv('PSUUIDFOREBS'))
+                    cond = res_ops.gen_query_conditions('type', '=', 'SharedBlock')
+                    cond = res_ops.gen_query_conditions('status', '=', 'Connected', cond)
+                    cond = res_ops.gen_query_conditions('state', '=', 'Enabled', cond)
+                    sblk_ps_avail = query_resource(zstack_management_ip, res_ops.PRIMARY_STORAGE, cond).inventories
+                    if sblk_ps_avail:
+                        vm_creation_option.set_ps_uuid(sblk_ps_avail[0].uuid)
+                    else:
+                        test_util.test_fail('no available sblk primary storage which is enabled and connected for ebs test')
 #                 if ebs_host:
 #                     for k, v in ebs_host.items():
 #                         if int(v['cpu']) > 6 and v['mem'] > 12:
@@ -2559,8 +2582,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     setup_vm_console(vm_inv, vm, deploy_config)
                     ensure_nic_all_have_cfg(vm_inv, vm, len(l3_uuid_list+l3_uuid_list_ge_3))
                     # NOTE: need to make filesystem in sync in VM before cold stop VM
-                    stop_vm(zstack_management_ip, vm_inv.uuid)
-                    start_vm(zstack_management_ip, vm_inv.uuid)
+                    reboot_vm(zstack_management_ip, vm_inv.uuid)
                     if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
                         test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
 
@@ -2620,7 +2642,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     volume_option = test_util.VolumeOption()
                     volume_option.set_name(os.environ.get('volumeName'))
                     for bs_ref in xmlobject.safe_list(vm.backupStorageRef):
-                        if bs_ref.type_ in ['ceph', 'xsky']:
+                        if bs_ref.type_ in ['ceph', 'xskyceph']:
 #                         if bs_ref.type_ == 'ceph':
                             disk_offering_uuid = bs_ref.offering_uuid_
                             volume_option.set_disk_offering_uuid(disk_offering_uuid)
@@ -2637,6 +2659,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             else:
                                 volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config)
                             attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
+                            ceph_disk_created = True
                             break
                         if bs_ref.type_ == 'fusionstor':
                             disk_offering_uuid = bs_ref.offering_uuid_
@@ -2671,16 +2694,24 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     for ps_ref in xmlobject.safe_list(vm.primaryStorageRef):
                         if ps_ref.type_ == 'ocfs2smp':
                             if ocfs2smp_shareable_volume_is_created == False and hasattr(ps_ref, 'disk_offering_uuid_'):
+				# Only sharedblock or ceph support shared volume right now
+                                cond = res_ops.gen_query_conditions('type', '=', 'SharedBlock')
+                                cond = res_ops.gen_query_conditions('status', '=', 'Connected', cond)
+                                cond = res_ops.gen_query_conditions('state', '=', 'Enabled', cond)
+                                sblk_ps_avail = query_resource(zstack_management_ip, res_ops.PRIMARY_STORAGE, cond).inventories
+                                if sblk_ps_avail:
+				    volume_option.set_primary_storage_uuid(sblk_ps_avail[0].uuid)
+                                else:
+                                    test_util.test_fail('no available sblk primary storage which is enabled and connected for ebs test')
+
                                 ocfs2smp_disk_offering_uuid = ps_ref.disk_offering_uuid_
                                 volume_option.set_disk_offering_uuid(ocfs2smp_disk_offering_uuid)
-                                if primaryStorageUuid != None and primaryStorageUuid != "":
-                                    volume_option.set_primary_storage_uuid(primaryStorageUuid)
                                 if poolName != None and poolName != "":
                                     volume_option.set_system_tags(['ephemeral::shareable', 'capability::virtio-scsi', 'ceph::pool::%s' % (poolName)])
                                 else:
                                     volume_option.set_system_tags(['ephemeral::shareable', 'capability::virtio-scsi'])
-                                #share_volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
-                                share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
+                                share_volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
+				#share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
                                 ocfs2smp_shareable_volume_is_created = True
                             attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
                         elif ps_ref.type_ == 'iscsiTarget':
@@ -2713,6 +2744,16 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                 share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
                                 zbs_virtio_scsi_volume_is_created = True
                                 attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
+                        elif (not ceph_disk_created) and ps_ref.type_ in ['xskyceph','ceph']:
+                            disk_offering_uuid = ps_ref.offering_uuid_
+                            volume_option.set_disk_offering_uuid(disk_offering_uuid)
+                            if primaryStorageUuid != None and primaryStorageUuid != "":
+                                volume_option.set_primary_storage_uuid(primaryStorageUuid)
+                            if poolName != None and poolName != "":
+                                volume_option.set_system_tags(['ceph::pool::%s' % (poolName)])
+                                volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config, ps_ref_type=ps_ref.type_)
+                            attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
+                            break
                         elif ps_ref.type_ == 'ebs':
                             cond = res_ops.gen_query_conditions('uuid', '=', vm_inv.hostUuid)
                             host_inv = query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
@@ -2722,7 +2763,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
         xml_string = etree.tostring(root_xml, 'utf-8')
         xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
         open(scenario_file, 'w+').write(xml_string)
-        if xmlobject.has_element(deploy_config, 'backupStorages.xskycephBackupStorage') or xmlobject.has_element(deploy_config, 'backupStorages.cephBackupStorage'):
+        if xmlobject.has_element(deploy_config, 'zones.zone.primaryStorages.xskycephPrimaryStorage') or xmlobject.has_element(deploy_config, 'backupStorages.cephBackupStorage') or xmlobject.has_element(deploy_config, 'zones.zone.primaryStorages.cephPrimaryStorage'):
 #             setup_xsky_ceph_storages(scenario_config, scenario_file, deploy_config)
 # #         else:
 #         if xmlobject.has_element(deploy_config, 'backupStorages.cephBackupStorage'):

@@ -1,3 +1,4 @@
+#coding:utf-8
 '''
 
 @author: Frank
@@ -10,6 +11,7 @@ import sys
 import traceback
 import string
 import pkgutil
+import copy
 
 import zstacklib.utils.xmlobject as xmlobject
 import apibinding.inventory as inventory
@@ -783,6 +785,9 @@ class VmOption(DataOption):
             self.rootVolumeSystemTags = None
             self.dataVolumeSystemTags = None
             self.strategy_type = 'InstantStart'
+            self.cpu_num = None
+            self.memory_size = None
+            self.root_disk_size = None
             super(VmOption, self).__init__()
         else:
             self.l3_uuids = vm_opt.get_l3_uuids()
@@ -806,6 +811,9 @@ class VmOption(DataOption):
             self.strategy_type = vm_opt.get_strategy_type()
             self.rootVolumeSystemTags = vm_opt.get_rootVolume_systemTags()
             self.dataVolumeSystemTags = vm_opt.get_dataVolume_systemTags()
+            self.cpu_num = vm_opt.get_cpu_num()
+            self.memory_size = vm_opt.get_memory_size()
+            self.root_disk_size = vm_opt.get_root_disk_size()
             super(VmOption, self).__init__()
 
     def set_l3_uuids(self, l3_uuids):
@@ -917,6 +925,24 @@ class VmOption(DataOption):
 
     def get_dataVolume_systemTags(self):
         return self.dataVolumeSystemTags
+
+    def set_cpu_num(self, cpu_num):
+        self.cpu_num = cpu_num
+
+    def get_cpu_num(self):
+        return self.cpu_num
+
+    def set_memory_size(self, memory_size):
+        self.memory_size = memory_size
+
+    def get_memory_size(self):
+        return self.memory_size
+
+    def set_root_disk_size(self, root_disk_size):
+        self.root_disk_size = root_disk_size
+
+    def get_root_disk_size(self):
+        return self.root_disk_size
 
 class VolumeOption(DataOption):
     def __init__(self):
@@ -1150,6 +1176,7 @@ class BackupOption(DataOption):
         super(BackupOption, self).__init__()
         self.volume_uuid = None
         self.backupStorage_uuid = None
+        self.mode = None
 
     def set_volume_uuid(self, volume_uuid):
         self.volume_uuid = volume_uuid
@@ -1162,6 +1189,12 @@ class BackupOption(DataOption):
 
     def get_backupStorage_uuid(self):
         return self.backupStorage_uuid
+
+    def set_mode(self, mode):
+        self.mode = mode
+
+    def get_mode(self):
+        return self.mode
 
 class SecurityGroupOption(DataOption):
     def __init__(self):
@@ -1970,49 +2003,180 @@ class SPTREE(object):
     Data structure of volume snapshot tree
     '''
     def __init__(self):
-        self.sp_tree = {}
-        self.curr = None
-        self.sp_curr = []
+        self.tree = {}
+        self.root = None
+        self._depth = {}
+        self._sign = {}
+        self.curr_depth = 0
+        self.curr_node = []
+        self.fork = []
+        self.branch_root = None
 
-    def add(self, uuid):
-        if self.sp_tree and uuid not in self.sp_curr:
-            self.sp_curr.append(uuid)
-        if uuid not in self.sp_tree:
-            self.sp_tree[uuid] = self.sp_curr = []
-            self.curr = uuid
+    def add(self, node, parent=None):
+        if parent:
+            self.revert(parent)
+        if not self.tree:
+            self.root = node
+        elif node not in self.curr_node:
+            self.curr_node.append(node)
+        self.curr_depth += 1
+        self.tree[node] = self.curr_node = []
+        self._depth[node] = self.curr_depth
 
-    def revert(self, uuid):
-        self.sp_curr = self.sp_tree[uuid]
-        self.curr = uuid
+    def revert(self, node):
+        self.curr_node = self.tree[node]
+        self.curr_depth = self._depth[node]
+        if self.children(node):
+            self.fork.append(node)
 
-    def delete(self, uuid):
-        self.sp_tree.pop(uuid)
-        for k, v in self.sp_tree.iteritems():
-            if uuid in v:
-                v.remove(uuid)
-                self.sp_curr = self.sp_tree[k]
-                self.curr = k
-        self.clean_tree(len(self.sp_tree.keys()))
+    def get_branch_root(self, node):
+        up_node = self.parent(node)
+        if len(self.children(up_node)) == 1:
+            self.get_branch_root(up_node)
+        else:
+            self.branch_root = up_node
 
-    def clean_tree(self, r=0):
-        keys = self.sp_tree.keys()
-        vals = self.sp_tree.values()
-        nodes = [n for node in vals for n in node]
-        nodes.append(self.root)
+    def get_curr_node(self):
+        for k in self.tree.keys():
+            if self.tree[k] is self.curr_node:
+                return k
+
+    def delete(self, node):
+        if node not in self.tree:
+            print('No such node in this tree!')
+            return
+        self.tree.pop(node)
+        key = ''
+        for k, v in self.tree.iteritems():
+            if node in v:
+                v.remove(node)
+                key = k
+        self.clean_up(self.depth())
+        if not self.get_curr_node():
+            self.curr_node = self.tree[key]
+        return True
+
+    def clean_up(self, r=0):
+        keys = self.tree.keys()
+        nodes = self.get_all_nodes()
         for k in keys:
             if k not in nodes:
                 self.tree.pop(k)
+        _fork = self.fork[:]
+        for f in _fork:
+            if (f not in nodes) or len(self.children(f)) <= 1:
+                f_count = self.fork.count(f)
+                for _ in range(f_count):
+                    self.fork.remove(f)
+        depth_keys = self._depth.keys()
+        for dk in depth_keys:
+            if dk not in nodes:
+                self._depth.pop(dk)
         r -= 1
         if r > 0:
-            self.clean_tree(r)
+            self.clean_up(r)
 
-    def parent(self, uuid):
-        for k, v in self.sp_tree.iteritems():
-            if uuid in v:
+    def get_all_nodes(self):
+        vals = self.tree.values()
+        nodes = [n for node in vals for n in node]
+        if self.root in self.tree:
+            nodes.append(self.root)
+        return nodes
+
+    def parent(self, node):
+        for k, v in self.tree.iteritems():
+            if node in v:
                 return k
 
-    def children(self, uuid):
-        return self.sp_tree[uuid]
+    def children(self, node):
+        return self.tree[node]
+
+    def depth(self):
+        return max(self._depth.values())
+
+    def get_depth(self, node):
+        return self._depth[node]
+
+    def show_tree(self):
+        if not self.tree:
+            print 'The tree is empty'
+            return
+        grp = []
+        nc = []
+        indent = {}
+        rendered_tree = []
+        unlinked_branch = []
+        def get_unlinked_branch(rendtr):
+            if len(rendtr) > 2:
+                if len(rendtr[-1][0]) < len(rendtr[-2][0]):
+                    unlinked_branch.append(rendtr.pop())
+                else:
+                    rendtr.pop()
+                get_unlinked_branch(rendtr)
+
+        def link_branch(ubr, rendtr):
+            nd = ubr.pop()
+            nd_alpha = filter(lambda x: x.isalnum(), nd)
+            upbr = rendtr[1:rendtr.index(nd)]
+            upbr.reverse()
+            for g in upbr:
+                tr = g[0]
+                g_alpha = filter(lambda x: x.isalnum(), g)
+                if self.get_depth(g_alpha[0]) <= self.get_depth(nd_alpha[0]):
+                    break
+                else:
+                    g.remove(tr)
+                    g.insert(0, ' ' * len(nd[0]))
+                    g.insert(1, '│' + ' ' * (len(tr) - len(nd[0]) - 1))
+            if len(ubr) > 0:
+                link_branch(ubr, rendtr)
+
+        def list_all_nodes(tree, root=None):
+            if not root:
+                root = tree.root
+            nc.append(root)
+            cld = tree.children(root)
+            if not cld:
+                _nc = nc[:]
+                _grp = [j for i in grp for j in i]
+                grp.append([x for x in _nc if x not in _grp])
+            for c in cld:
+                list_all_nodes(tree, c)
+        list_all_nodes(self)
+        for g in grp:
+            _g = g[:]
+            for n in g:
+                indent[self.root] = '   ' if len(self.children(self.root)) > 1 or self.root in self.fork else '  '
+                indent[self.root] += ' ' * len(self.root)
+                if self.parent(n) in self.fork:
+                    if self.fork.count(self.parent(n)) > 1 and n in self.children(self.parent(n))[1:-1]:
+                        _g.insert(_g.index(n), ' ' * (len(indent[self.parent(n)]) - 2))
+                        _g.insert(_g.index(n), '├─')
+                    if len(self.children(self.parent(n))) > 1 and n == self.children(self.parent(n))[-1]:
+                        _g.insert(_g.index(n), ' ' * (len(indent[self.parent(n)]) - 2))
+                        _g.insert(_g.index(n), '└─')
+                if n in self.fork:
+                    _g.insert(_g.index(n) + 1, '─┬─')
+                    if n not in indent:
+                        indent[n] = indent[self.parent(n)] + ' ' * len(self.parent(n)) + '   '
+                    for c in self.children(n):
+                        if len(self.children(c)) > 1:
+                            dent = '   '
+                        else:
+                            dent = '  '
+                        indent[c] = indent[n] + ' ' * len(c) + dent
+                elif self.children(n):
+                    _g.insert(_g.index(n) + 1, '──')
+                    if n not in indent:
+                        indent[n] = indent[self.parent(n)] + ' ' * len(n) + '  '
+                else:
+                    _g.insert(_g.index(n) + 1, '\n')
+            rendered_tree.append(_g)
+        get_unlinked_branch(copy.deepcopy(rendered_tree))
+        if unlinked_branch:
+            link_branch(unlinked_branch, rendered_tree)
+        sp_tree = ''.join([s for t in rendered_tree for s in t])
+        test_dsc('The snapshot tree is: \n\n%s' % sp_tree)
 
 def load_paths(template_dirname, path_dirname):
     paths = dict()

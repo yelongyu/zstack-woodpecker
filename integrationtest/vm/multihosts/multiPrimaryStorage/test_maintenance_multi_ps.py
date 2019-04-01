@@ -12,7 +12,7 @@ import time
 import apibinding.inventory as inventory
 
 _config_ = {
-        'timeout' : 3000,
+        'timeout' : 7200,
         'noparallel' : True
         }
 
@@ -28,7 +28,10 @@ def test():
 
     ps, another_ps = ps_env.get_two_ps()
 
-    vm1, vm2 = test_stub.create_multi_vms(name_prefix='test-', count=2, ps_uuid=ps.uuid, timeout=600000)
+    if ps_env.is_sb_ceph_env:
+        vm1, vm2 = test_stub.create_multi_vms(name_prefix='test-', count=2, ps_uuid=ps.uuid, timeout=600000, bs_type='ImageStoreBackupStorage')
+    else:
+        vm1, vm2 = test_stub.create_multi_vms(name_prefix='test-', count=2, ps_uuid=ps.uuid, timeout=600000)
 
     for vm in (vm1, vm2):
         test_obj_dict.add_vm(vm)
@@ -55,7 +58,7 @@ def test():
     if vr_vm_list:
         vr_vm = vr_vm_list[0]
         if vr_vm.allVolumes[0].primaryStorageUuid == another_ps.uuid:
-            assert vr_vm.state == inventory.STOPPED
+            assert vr_vm.state == inventory.STOPPED  or vr_vm.state == inventory.STOPPING
         else:
             assert vr_vm.state == inventory.RUNNING
             vm1.check()

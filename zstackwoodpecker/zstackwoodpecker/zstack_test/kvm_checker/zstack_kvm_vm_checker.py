@@ -118,6 +118,7 @@ class zstack_kvm_vm_set_host_vlan_ip(checker_header.TestChecker):
         This is not a real checker. Its function is to assign an IP address for host vlan device.
     '''
     def check(self):
+        super(zstack_kvm_vm_set_host_vlan_ip, self).check()
         vm = self.test_obj.vm
         test_lib.lib_set_vm_host_l2_ip(vm)
         return self.judge(self.exp_result)

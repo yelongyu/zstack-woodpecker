@@ -73,6 +73,7 @@ def test():
     img_option2.set_backup_storage_uuid_list([bss[0].uuid])
     img_option2.set_root_volume_uuid(vm1.vm.rootVolumeUuid)
     img_option2.set_name(created_vm_img_name)
+    img_option2.set_timeout(3600*1000)
     image2 = test_image.ZstackTestImage()
     image2.set_creation_option(img_option2)
     image2.create()

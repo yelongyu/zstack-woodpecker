@@ -9,6 +9,14 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
 import zstackwoodpecker.operations.scenario_operations as scen_ops
 import zstackwoodpecker.operations.license_operations as lic_ops
+import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
+import zstackwoodpecker.test_state as test_state
+import commands
+from lib2to3.pgen2.token import STAR
+from zstacklib.utils import shell
+from collections import OrderedDict
+
+zstack_management_ip = os.environ.get('zstackManagementIp')
 
 def create_vlan_vm(image_name, l3_name=None, disk_offering_uuids=None):
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
@@ -35,8 +43,9 @@ def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
     vm.create()
     return vm
 
+#def create_vm_scenario(image_name, vm_name = None, host_name = None):
 def create_vm_scenario(image_name, vm_name = None):
-    zstack_management_ip = test_lib.all_scenario_config.basicConfig.zstackManagementIp.text_
+    #zstack_management_ip = test_lib.all_scenario_config.basicConfig.zstackManagementIp.text_
     vm_creation_option = test_util.VmOption()
     conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('instanceOfferingName_m'))
     instance_offering_uuid = scen_ops.query_resource(zstack_management_ip, res_ops.INSTANCE_OFFERING, conditions).inventories[0].uuid
@@ -47,12 +56,15 @@ def create_vm_scenario(image_name, vm_name = None):
     vm_creation_option.set_default_l3_uuid(l3_uuid)
     conditions = res_ops.gen_query_conditions('name', '=', image_name)
     image_uuid = scen_ops.query_resource(zstack_management_ip, res_ops.IMAGE, conditions).inventories[0].uuid
+    #conditions = res_ops.gen_query_conditions('name', '=', host_name)
+    #host_uuid = scen_ops.query_resource(zstack_management_ip, res_ops.HOST, conditions).inventories[0].uuid
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_name(vm_name)
+    #vm_creation_option.set_host_uuid(host_uuid)
     return scen_ops.create_vm(zstack_management_ip, vm_creation_option)
 
 def destroy_vm_scenario(vm_uuid):
-    zstack_management_ip = test_lib.all_scenario_config.basicConfig.zstackManagementIp.text_
+    #zstack_management_ip = test_lib.all_scenario_config.basicConfig.zstackManagementIp.text_
     scen_ops.destroy_vm(zstack_management_ip, vm_uuid)
 
 def create_instance_vm(image_name, instance_offering_uuid, l3_name=None, disk_offering_uuids = None, default_l3_uuid = None):
@@ -79,7 +91,6 @@ def check_str(string):
     if string == None:
         return ""
     return string
-
 
 def execute_shell_in_process(cmd, tmp_file, timeout = 3600, no_timeout_excep = False):
     logfd = open(tmp_file, 'w', 0)
@@ -177,6 +188,25 @@ def update_console_ip(vm_ip, tmp_file):
     cmd = '%s "zstack-ctl configure consoleProxyOverriddenIp=%s" ' % (ssh_cmd, vm_ip)
     process_result = execute_shell_in_process(cmd, tmp_file)
 
+def change_root_mysql_password(vm_ip, tmp_file):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd = '%s " zstack-ctl change_mysql_password --user-name root --new-password  zstack.123 --root-password zstack.mysql.password" ' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
+
+def change_mysql_password(vm_ip, tmp_file):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd = '%s " zstack-ctl change_mysql_password --user-name zstack --new-password  zstack.123 --root-password zstack.mysql.password" ' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
+
+def update_zstack_mysql_password(vm_ip, tmp_file):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd = '''%s 'sed -i "s/zstack.password/zstack.123/g" /usr/local/zstack/apache-tomcat/webapps/zstack/WEB-INF/classes/zstack.properties' ''' % ssh_cmd 
+    process_result = execute_shell_in_process(cmd, tmp_file)
+    if process_result != 0:
+        test_util.test_fail('update zstack mysql password failed')
+    else:
+        test_util.test_logger('update zstack mysql password success')
+
 def reload_default_license(vm_ip, tmp_file):
 
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
@@ -249,9 +279,9 @@ def check_mn_running(vm_ip, tmp_file):
     cmd = '%s "zstack-ctl status|grep Stopped"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
     if process_result != 1:
-       test_util.test_fail('zstack upgrade failed ')
+        test_util.test_fail('zstack upgrade failed ')
     else:
-       test_util.test_logger('zstack-ctl status are all running')
+        test_util.test_logger('zstack-ctl status are all running')
     #cmd = '%s "zstack-ctl status|grep Running "' % ssh_cmd
     #process_result1 = execute_shell_in_process(cmd, tmp_file)
     #test_util.test_logger('zstack-ctl status  %s' % process_result)   
@@ -283,9 +313,9 @@ def update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path):
     #cmd = '%s "yum -y --disablerepo=* --enablerepo=zstack-local,qemu-kvm-ev update"' % ssh_cmd
     #process_result = execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
-         test_util.test_fail('zstack upgrade iso failed')
+        test_util.test_fail('zstack upgrade iso failed')
     else:
-       test_util.test_logger('update the iso success')
+        test_util.test_logger('update the iso success')
 
 def update_c74_iso(vm_ip, tmp_file, c74_iso_path, upgrade_script_path):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
@@ -300,9 +330,9 @@ def update_c74_iso(vm_ip, tmp_file, c74_iso_path, upgrade_script_path):
     cmd = '%s "bash /opt/zstack-upgrade -r -f /opt/zstack-c74.iso"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
-         test_util.test_fail('zstack upgrade iso failed')
+        test_util.test_fail('zstack upgrade iso failed')
     else:
-       test_util.test_logger('update the iso success')
+        test_util.test_logger('update the iso success')
 
 def upgrade_by_iso(vm_ip, tmp_file, iso_path, upgrade_script_path):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
@@ -317,9 +347,9 @@ def upgrade_by_iso(vm_ip, tmp_file, iso_path, upgrade_script_path):
     cmd = '%s "bash /opt/zstack-upgrade /opt/zstack.iso"' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
     if process_result != 0:
-         test_util.test_fail('zstack upgrade iso failed')
+        test_util.test_fail('zstack upgrade iso failed')
     else:
-       test_util.test_logger('upgrade iso success')
+        test_util.test_logger('upgrade iso success')
 
 def update_19_iso(vm_ip, tmp_file, iso_19_path, upgrade_script_path):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
@@ -472,6 +502,21 @@ def update_240_iso(vm_ip, tmp_file, iso_240_path, upgrade_script_path):
     else:
        test_util.test_logger('update the 2.4.0 iso success')
 
+def update_local_iso(vm_ip, tmp_file, local_iso_path, upgrade_script_path):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    vm_username = os.environ['imageUsername']
+    vm_password = os.environ['imagePassword']
+    #ssh.scp_file(iso_240_path, '/opt/zstack_240.iso', vm_ip, vm_username, vm_password)
+    ssh.scp_file(upgrade_script_path, '/opt/zstack-upgrade', vm_ip, vm_username, vm_password)
+    #cmd = '%s "mkdir -p /opt/zstack-dvd"' % ssh_cmd
+    #process_result = execute_shell_in_process(cmd, tmp_file)
+    cmd = '%s "bash /opt/zstack-upgrade -r %s"' % (ssh_cmd,local_iso_path)
+    process_result = execute_shell_in_process(cmd, tmp_file)
+    if process_result != 0:
+         test_util.test_fail('zstack upgrade iso failed')
+    else:
+       test_util.test_logger('update the 2.4.0 iso success')
+
 def prepare_mevoco_test_env(vm_inv):
     all_in_one_pkg = os.environ['zstackPkg']
     scp_file_to_vm(vm_ip, all_in_one_pkg, '/root/zizhu.bin')
@@ -548,6 +593,20 @@ def upgrade_zstack(vm_ip, target_file, tmp_file):
        #         test_util.test_logger("mn node is still not started up, wait for another 10 seconds...")
        #     else:
        #         test_util.test_fail('zstack upgrade failed')
+
+def upgrade_zstack_with_root_mysql_password(vm_ip, target_file, tmp_file):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    vm_username = os.environ['imageUsername']
+    vm_password = os.environ['imagePassword']
+    ssh.scp_file(target_file, '/opt/zstack_installer', vm_ip, vm_username, vm_password)
+    env_var = "WEBSITE='%s'" % 'localhost'
+    cmd = '%s "%s bash %s -u -P zstack.123"' % (ssh_cmd, env_var, '/opt/zstack_installer')
+    process_result = execute_shell_in_process(cmd, tmp_file)
+
+    if process_result != 0:
+         test_util.test_fail('zstack upgrade failed')
+    else:
+       test_util.test_logger('upgrade zstack success')
 
 def execute_mevoco_aliyun_install(ssh_cmd, tmp_file):
     target_file = '/root/zizhu.bin'
@@ -860,9 +919,6 @@ def delete_backup_storage(vm_ip, tmp_file):
 
 def check_zstack_version(vm_ip, tmp_file, pkg_version):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
-
-def check_zstack_version(vm_ip, tmp_file, pkg_version):
-    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     cmd = '%s "/usr/bin/zstack-ctl status" | grep ^version | awk \'{print $2}\'' % ssh_cmd
     (process_result, version) = execute_shell_in_process_stdout(cmd, tmp_file)
     if process_result != 0:
@@ -882,7 +938,6 @@ def check_zstack_or_mevoco(vm_ip, tmp_file, zom):
     test_util.test_dsc("current version: %s" % version)
     if version != zom:
         test_util.test_fail('try to install %s, but current version is %s' % (zom, version))
-
 
 def create_zone1(vm_ip, tmp_file):
     zone_option = test_util.ZoneOption()
@@ -926,7 +981,6 @@ def create_local_ps(vm_ip, zone_uuid, tmp_file):
     ps_inv = scen_ops.create_local_primary_storage(vm_ip, ps_option)
 
     return ps_inv
-
 
 def create_sftp_backup_storage(vm_ip, tmp_file):
     vm_username = os.environ['imageUsername']
@@ -974,4 +1028,38 @@ def create_vm_offering(vm_ip, tmp_file):
     vmoffering_inv = scen_ops.create_instance_offering1(vm_ip, vmoffering_option)
 
     return vmoffering_inv
+
+def attach_mount_volume(volume, vm, mount_point):
+    volume.attach(vm)
+    import tempfile
+    script_file = tempfile.NamedTemporaryFile(delete=False)
+    script_file.write('''
+mkdir -p %s
+device="/dev/`ls -ltr --file-type /dev | awk '$4~/disk/ {print $NF}' | grep -v '[[:digit:]]' | tail -1`"
+mount ${device}1 %s
+''' % (mount_point, mount_point))
+    script_file.close()
+
+    vm_inv = vm.get_vm()
+    if not test_lib.lib_execute_shell_script_in_vm(vm_inv, script_file.name):
+        test_util.test_fail("mount operation failed in [volume:] %s in [vm:] %s" % (volume.get_volume().uuid, vm_inv.uuid))
+        os.unlink(script_file.name)
+
+def mount_volume(vm_ip, mount_point, tmp_file):
+
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd = '%s " mkdir -p  %s && mount /dev/vdb1  %s" ' % (ssh_cmd, mount_point, mount_point)
+    process_result = execute_shell_in_process(cmd, tmp_file)
+
+def upgrade_old_zstack(vm_ip, old_bin, tmp_file):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    env_var = "WEBSITE='%s'" % 'localhost'
+    cmd = '%s "%s bash %s -u"' % (ssh_cmd, env_var, old_bin)
+
+    process_result = execute_shell_in_process(cmd, tmp_file)
+
+    if process_result != 0:
+         test_util.test_fail('zstack upgrade failed')
+    else:
+       test_util.test_logger('upgrade zstack success')
 

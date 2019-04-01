@@ -32,9 +32,15 @@ def test():
     vm_list = []
     for root_vol_ps in [ps1, ps2]:
         for data_vol_ps in [ps1, ps2]:
+            if root_vol_ps.type == "SharedBlock":
+                bs_type = "ImageStoreBackupStorage"
+            elif root_vol_ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
+                bs_type = "Ceph"
+            else:
+                bs_type = None
             vm = test_stub.create_multi_vms(name_prefix='test_vm', count=1,
                                             ps_uuid=root_vol_ps.uuid, data_volume_number=VOLUME_NUMBER,
-                                            ps_uuid_for_data_vol=data_vol_ps.uuid, timeout=600000)[0]
+                                            ps_uuid_for_data_vol=data_vol_ps.uuid, timeout=1800000, bs_type=bs_type)[0]
             test_obj_dict.add_vm(vm)
             vm_list.append(vm)
 
@@ -52,7 +58,7 @@ def test():
     if vr_vm_list:
         vr_vm = vr_vm_list[0]
         if vr_vm.allVolumes[0].primaryStorageUuid == ps2.uuid:
-            assert vr_vm.state == inventory.STOPPED
+            assert vr_vm.state == inventory.STOPPED or vr_vm.state == inventory.STOPPING
         else:
             assert vr_vm.state == inventory.RUNNING
             vm1.check()

@@ -23,6 +23,7 @@ import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.operations.scheduler_operations as schd_ops
 import zstackwoodpecker.operations.zwatch_operations as zwt_ops
 import zstackwoodpecker.test_lib as test_lib
+import zstackwoodpecker.zstack_test.zstack_test_vid as test_vid
 
 project_uuid = None
 virtual_id_uuid = None
@@ -34,6 +35,7 @@ test_stub = test_lib.lib_get_test_stub()
 case_flavor = dict(project_admin=                   dict(target_role='project_admin'),
                    project_operator=                dict(target_role='project_operator'),
                    project_member=                  dict(target_role='project_member'),
+                   system_admin=                    dict(target_role='system_admin'),
                    )
 
 def test():
@@ -41,10 +43,11 @@ def test():
 
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     # 1 create project
-    project_name = 'test_project'
-    project = iam2_ops.create_iam2_project(project_name)
-    project_uuid = project.uuid
-    project_linked_account_uuid = project.linkedAccountUuid
+    if flavor['target_role'] != 'system_admin':
+        project_name = 'test_project'
+        project = iam2_ops.create_iam2_project(project_name)
+        project_uuid = project.uuid
+        project_linked_account_uuid = project.linkedAccountUuid
 
     if flavor['target_role'] == 'project_admin':
         # 2 create virtual id
@@ -87,6 +90,13 @@ def test():
 	# 4 login in project
 	#project_inv=iam2_ops.get_iam2_projects_of_virtual_id(plain_user_session_uuid)
 	project_login_uuid = iam2_ops.login_iam2_project(project_name, plain_user_session_uuid).uuid
+    elif flavor['target_role'] == 'system_admin':
+        username = "systemAdmin"
+        password = 'b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86'
+        vid_tst_obj = test_vid.ZstackTestVid()
+        test_stub.create_system_admin(username, password, vid_tst_obj)
+        virtual_id_uuid = vid_tst_obj.get_vid().uuid
+        project_login_uuid = acc_ops.login_by_account(username, password)
 
 
     # Image related ops: Add, Delete, Expunge, sync image size, Update QGA, delete, expunge
@@ -141,7 +151,8 @@ def test():
     cond = res_ops.gen_query_conditions('name', '=', 'system-alarm')
     system_alarm_topic = res_ops.query_resource(res_ops.SNS_TOPIC, cond)[0]
     system_alarm_topic_uuid=system_alarm_topic.uuid
-    acc_ops.share_resources([project_linked_account_uuid], [system_alarm_topic_uuid])
+    if flavor['target_role'] != 'system_admin':
+        acc_ops.share_resources([project_linked_account_uuid], [system_alarm_topic_uuid])
     cond = res_ops.gen_query_conditions('name', '=', 'system-alarm')
     system_alarm_topic = res_ops.query_resource(res_ops.SNS_TOPIC, cond)[0]
     system_alarm_topic_uuid=system_alarm_topic.uuid
@@ -153,7 +164,8 @@ def test():
     cond = res_ops.gen_query_conditions('name','=','api')
     api_topic= res_ops.query_resource(res_ops.SNS_TOPIC,cond)[0]
     api_topic_uuid=api_topic.uuid
-    acc_ops.share_resources([project_linked_account_uuid], [api_topic_uuid])
+    if flavor['target_role'] != 'system_admin':
+        acc_ops.share_resources([project_linked_account_uuid], [api_topic_uuid])
     cond = res_ops.gen_query_conditions('name','=','api')
     api_topic= res_ops.query_resource(res_ops.SNS_TOPIC,cond, session_uuid=project_login_uuid)[0]
     api_topic_uuid=api_topic.uuid
@@ -293,8 +305,9 @@ def test():
     if plain_user_uuid != None:
         iam2_ops.delete_iam2_virtual_id(plain_user_uuid)
 
-    iam2_ops.delete_iam2_project(project_uuid)
-    iam2_ops.expunge_iam2_project(project_uuid)
+    if flavor['target_role'] != 'system_admin':
+        iam2_ops.delete_iam2_project(project_uuid)
+        iam2_ops.expunge_iam2_project(project_uuid)
 
     test_util.test_pass('success test iam2 login in by project admin!')
 

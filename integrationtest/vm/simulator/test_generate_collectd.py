@@ -71,7 +71,7 @@ def test():
         collectdFile = test_stub.generate_collectd_conf(hosts[i], COLLECTD_CONF_DIR, list_port, HOST_DISKS, HOST_NICS, VM_DISKS, VM_NICS)
 
         thread_1 = threading.Thread(target=test_stub.collectd_trigger, args=(collectdFile,))
-        thread_2 = threading.Thread(target=test_stub.collectd_trigger, args=(collectdFile,))
+        thread_2 = threading.Thread(target=test_stub.collectdmon_trigger, args=(collectdFile,))
         thread_3 = threading.Thread(target=test_stub.collectd_exporter_trigger, args=(list_port, web_port))
         #while threading.active_count() > 10:
         time.sleep(2)

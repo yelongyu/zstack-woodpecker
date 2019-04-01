@@ -10,6 +10,14 @@ import zstackwoodpecker.test_util as test_util
 import account_operations
 import apibinding.inventory as inventory
 
+def ps_migrage_vm(dst_ps_uuid, vm_uuid, session_uuid=None):
+    action = api_actions.PrimaryStorageMigrateVmAction()
+    action.dstPrimaryStorageUuid = dst_ps_uuid
+    action.vmInstanceUuid = vm_uuid
+    action.timeout = 7200000
+    test_util.action_logger('Migrate [vm uuid: %s] to [Primary Storage: %s]' % (vm_uuid, dst_ps_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    return evt.inventory
 
 def ps_migrage_volume(dst_ps_uuid, vol_uuid, volume_type=None, session_uuid=None):
     action = api_actions.PrimaryStorageMigrateVolumeAction()
@@ -51,3 +59,9 @@ def get_bs_candidate_for_image_migration(src_bs_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt.inventories
 
+def get_ps_candidate_for_vm_migration(vm_uuid, session_uuid=None):
+    action = api_actions.GetPrimaryStorageCandidatesForVmMigrationAction()
+    action.vmInstanceUuid = vm_uuid
+    test_util.action_logger('Get Primary Storage Candidates for Vm Migration')
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    return evt.inventories

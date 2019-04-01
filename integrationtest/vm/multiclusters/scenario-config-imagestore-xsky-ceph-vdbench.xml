@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-xsky-ceph-vdbench.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-xsky-ceph-vdbench.tmpt</scenarioConfigTemplate>
+</testConfig>

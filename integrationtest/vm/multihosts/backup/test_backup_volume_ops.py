@@ -235,8 +235,8 @@ def test():
 	if test_lib.lib_is_vm_l3_has_vr(vm.vm):
             test_lib.TestHarness = test_lib.TestHarnessVR
         
-        cmd = "dd if=/dev/urandom of=/dev/vdb bs=512k count=1" 
-	test_lib.lib_execute_command_in_vm(vm.vm,cmd)
+            cmd = "dd if=/dev/urandom of=/dev/vdb bs=512k count=1" 
+    	    test_lib.lib_execute_command_in_vm(vm.vm,cmd)
 
         vm.suspend()
         vm_op_test(vm, dvol, "DVOL_BACKUP")

@@ -69,8 +69,8 @@
     <instanceOfferings>
       <instanceOffering name="$instanceOfferingName_s"
         description="Test" 
-        memoryCapacity="$instanceOfferingMemory_s" 
-        cpuNum="$instanceOfferingCpuNum_s"
+        memoryCapacity="$instanceOfferingMemory_l" 
+        cpuNum="$instanceOfferingCPU_l"
         />
       <virtualRouterOffering name="$virtualRouterOfferingName_s"
         memoryCapacity="$virtualRouterOfferingMemory_s" 

@@ -27,9 +27,14 @@ def test():
    global vm
    test_lib.lib_create_disk_offering(diskSize=1099511627776,name="1T")
    l3_uuid = test_lib.lib_get_l3_by_name("l3VlanNetwork3").uuid
-   image_uuid = test_lib.lib_get_image_by_name("ttylinux").uuid
+   image1 = test_lib.lib_get_image_by_name("ttylinux")
+   image1_uuid = image1.uuid
+   #choose the ps which availableCapacity >= 105G
+   cond = res_ops.gen_query_conditions('availableCapacity', '>=', '112742891520')
+   ps_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)[0].uuid
+   system_tag = "primaryStorageUuidForDataVolume::%s" % ps_uuid
    disk_offering_uuids = [test_lib.lib_get_disk_offering_by_name("smallDiskOffering").uuid,test_lib.lib_get_disk_offering_by_name("root-disk").uuid,test_lib.lib_get_disk_offering_by_name("1T").uuid]
-   vm = test_stub.create_vm(l3_uuid_list = [l3_uuid],image_uuid = image_uuid,vm_name="test-nxs",disk_offering_uuids = disk_offering_uuids)
+   vm = test_stub.create_vm(l3_uuid_list = [l3_uuid],image_uuid = image1_uuid,vm_name="test-nxs",disk_offering_uuids = disk_offering_uuids,system_tags=[system_tag])
    test_obj_dict.add_vm(vm)
    vm.check()
 
@@ -50,8 +55,9 @@ def test():
    vr_mgmt_ip = test_lib.lib_find_vr_mgmt_ip(vr)
    #stop vm's vr
    vm_ops.stop_vm(vr.uuid)
-   image_uuid = test_lib.lib_get_image_by_name("image_for_sg_test").uuid
-   vm_ops.change_vm_image(vm_uuid,image_uuid)
+   image2 = test_lib.lib_get_image_by_name("image_for_sg_test")
+   image2_uuid = image2.uuid
+   vm_ops.change_vm_image(vm_uuid,image2_uuid)
    #check whether vr's status is running
    if vr.applianceVmType == 'vrouter':
       if not test_lib.lib_wait_target_up(vr_mgmt_ip,'7272',240):
@@ -85,17 +91,19 @@ def test():
    ps = test_lib.lib_get_primary_storage_by_uuid(primarystorage_uuid_after)
    avail_cap1 = ps.availableCapacity
    total_cap1 = ps.totalCapacity
+   change_size = (image2.size-image1.size)/10
+   print "debug:%s" % change_size
 
    if total_cap != total_cap1:
-      test_util.test_fail('Primary Storage total capacity is not same,after changing vm image:%s.The previous value:%s, the current value:%s' % (image_uuid,total_cap,total_cap1))
-   if avail_cap <= avail_cap1:
-      test_util.test_fail('Primary Storage available capacity is not correct,after changing larger image:%s.The previous value:%s, the current value:%s' % (image_uuid,avail_cap,avail_cap1))
+      test_util.test_fail('Primary Storage total capacity is not same,after changing vm image:%s.The previous value:%s, the current value:%s' % (image2_uuid,total_cap,total_cap1))
+   if (avail_cap-1) <= (avail_cap1 - change_size) <= (avail_cap+1):
+      test_util.test_fail('Primary Storage available capacity is not correct,after changing larger image:%s.The previous value:%s, the current value:%s' % (image2_uuid,avail_cap,avail_cap1))
 
    vm_ops.stop_vm(vm_uuid)
    #stop vm's vr
    vm_ops.stop_vm(vr.uuid)
-   image_tiny_uuid = test_lib.lib_get_image_by_name("ttylinux").uuid
-   vm_ops.change_vm_image(vm_uuid,image_tiny_uuid)
+#   image_tiny_uuid = test_lib.lib_get_image_by_name("ttylinux").uuid
+   vm_ops.change_vm_image(vm_uuid,image1_uuid)
    #check whether vr's status is running
    if vr.applianceVmType == 'vrouter':
       if not test_lib.lib_wait_target_up(vr_mgmt_ip,'7272',240):
@@ -131,9 +139,9 @@ def test():
    total_cap2 = ps.totalCapacity
 
    if total_cap2 != total_cap1:
-      test_util.test_fail('Primary Storage total capacity is not same,after changing vm image:%s.The previous value:%s, the current value:%s' % (image_uuid,total_cap1,total_cap2))
-   if avail_cap2 <= avail_cap1:
-      test_util.test_fail('Primary Storage available capacity is not correct,after changing smaller image:%s.The previous value:%s, the current value:%s' % (image_uuid,avail_cap1,avail_cap2))
+      test_util.test_fail('Primary Storage total capacity is not same,after changing vm image:%s.The previous value:%s, the current value:%s' % (image1_uuid,total_cap1,total_cap2))
+   if (change_size-1) <= (avail_cap1- avail_cap2) <= (change_size+1):
+      test_util.test_fail('Primary Storage available capacity is not correct,after changing smaller image:%s.The previous value:%s, the current value:%s' % (image1_uuid,avail_cap1,avail_cap2))
 
 
    test_lib.lib_destroy_vm_and_data_volumes(vm.get_vm())

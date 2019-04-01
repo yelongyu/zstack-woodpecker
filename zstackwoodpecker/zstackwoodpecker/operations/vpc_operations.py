@@ -5,6 +5,22 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import net_operations as net_ops
 import vm_operations as vm_ops
 
+def set_vpc_vrouter_network_service_state(uuid, networkService='SNAT', state=None, session_uuid=None):
+    action = api_actions.SetVpcVRouterNetworkServiceStateAction()
+    action.timeout = 300000
+    action.uuid = uuid
+    action.networkService = networkService
+    action.state = state
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def get_vpc_vrouter_network_service_state(uuid, networkService='SNAT', session_uuid=None):
+    action = api_actions.GetVpcVRouterNetworkServiceStateAction()
+    action.timeout = 300000
+    action.uuid = uuid
+    action.networkService = networkService
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
 
 def create_vpc_vrouter(name, virtualrouter_offering_uuid, resource_uuid=None, system_tags=None, use_tags=None, session_uuid=None):
     action = api_actions.CreateVpcVRouterAction()

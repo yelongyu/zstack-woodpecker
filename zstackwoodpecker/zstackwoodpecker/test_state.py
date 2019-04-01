@@ -30,6 +30,7 @@ class TestAction(object):
     cleanup_imagecache_on_ps = "cleanup_imagecache_on_ps"
     idel = 'idel'
     create_vm = 'create_vm'
+    create_vm_by_image = 'create_vm_by_image'
     stop_vm = 'stop_vm'
     start_vm = 'start_vm'
     suspend_vm = 'suspend_vm'
@@ -45,6 +46,7 @@ class TestAction(object):
     use_vm_backup = 'use_vm_backup'
     create_volume_backup = 'create_volume_backup'
     use_volume_backup = 'use_volume_backup'
+    create_vm_from_vmbackup = 'create_vm_from_vmbackup'
 
     create_volume = 'create_volume'
     create_scsi_volume = 'create_scsi_volume'
@@ -64,6 +66,14 @@ class TestAction(object):
     delete_image = 'delete_image'
     expunge_image = 'expunge_image'
     create_data_template_from_backup = 'create_data_template_from_backup'
+    add_image = 'add_image'
+    export_image = 'export_image'
+    sync_image_from_imagestore = 'sync_image_from_imagestore'
+
+    reconnect_bs = 'reconnect_bs'
+    reclaim_space_from_bs = 'reclaim_space_from_bs'
+
+    ps_migrage_vm = 'ps_migrage_vm'
 
     create_sg = 'create_security_group'
     delete_sg = 'delete_security_group'
@@ -76,6 +86,7 @@ class TestAction(object):
     create_volume_snapshot = 'create_volume_snapshot'
     delete_volume_snapshot = 'delete_volume_snapshot'
     use_volume_snapshot = 'use_volume_snapshot'
+    batch_delete_volume_snapshot = 'batch_delete_volume_snapshot'
     backup_volume_snapshot = 'backup_volume_snapshot'
     delete_backup_volume_snapshot = 'delete_backup_volume_snapshot'
     create_volume_from_snapshot = 'create_volume_from_snapshot'
@@ -656,7 +667,8 @@ class TestStateDict(object):
                 vm_header.RUNNING:[], 
                 vm_header.STOPPED:[], 
                 vm_header.DESTROYED:[],
-                vm_header.EXPUNGED:[]
+                vm_header.EXPUNGED:[],
+                vm_header.PAUSED:[]
                 }
 
         self.volume_dict = {
@@ -1240,8 +1252,9 @@ class TestStateDict(object):
         cond = res_ops.gen_query_conditions("uuid", '=', backup_uuid)
         volume_uuid = res_ops.query_resource(res_ops.VOLUME_BACKUP, cond)[0].volumeUuid
         if not self.backup_dict.has_key(volume_uuid):
-            self.backup_dict[volume_uuid] = backup_uuid
-            self.backup_list.append(backup_uuid)
+            self.backup_dict[volume_uuid] = []
+        self.backup_dict[volume_uuid].append(backup_uuid)
+        self.backup_list.append(backup_uuid)
  
     def get_volume_backup(self, volume_uuid):
         if self.backup_dict.has_key(volume_uuid):

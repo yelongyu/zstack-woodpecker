@@ -66,6 +66,9 @@ def test():
     vm.set_creation_option(vm_creation_option)
     vm.create()
 
+    ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
+    if ps.type == inventory.LOCAL_STORAGE_TYPE:
+        test_util.test_skip('unable to live migrate vm with volumes on local storage, skip test.')
     test_stub.ensure_all_vrs_on_host(host_uuid)
 
     #vm.check()

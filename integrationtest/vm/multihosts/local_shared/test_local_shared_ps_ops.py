@@ -70,7 +70,7 @@ def test():
     if flavor['shared_state'] is MAINTENANCE:
         ps_ops.change_primary_storage_state(shared_ps.uuid, state='maintain')
         maintain_ps = shared_ps
-    time.sleep(30)
+    time.sleep(60)
 
     if MAINTENANCE in (flavor['local_state'], flavor['shared_state']):
         vr_vm_list = test_lib.lib_find_vr_by_vm(vm_list[0].get_vm())

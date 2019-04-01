@@ -33,6 +33,7 @@ import zstackwoodpecker.operations.longjob_operations as longjob_ops
 import zstackwoodpecker.zstack_test.zstack_test_image as test_image
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.cdrom_operations as cdrom_ops
+import zstackwoodpecker.operations.volume_operations as vol_ops
 import apibinding.inventory as inventory
 import random
 import functools
@@ -189,7 +190,7 @@ def create_vm_with_user_args(system_tags = None, session_uuid = None):
 # parameter: vmname; l3_net: l3_net_description, or [l3_net_uuid,]; image_uuid:
 def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
         disk_offering_uuids = None, default_l3_uuid = None, \
-        system_tags = None, instance_offering_uuid = None, strategy_type='InstantStart', session_uuid = None, ps_uuid=None, timeout=None):
+        system_tags = [], instance_offering_uuid = None, strategy_type='InstantStart', session_uuid = None, ps_uuid=None, timeout=None):
     vm_creation_option = test_util.VmOption()
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     if not instance_offering_uuid:
@@ -199,6 +200,20 @@ def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_name(vm_name)
     vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
+    if disk_offering_uuids:
+        cond_ps = res_ops.gen_query_conditions('status', '=', 'Connected')
+        cond_ps = res_ops.gen_query_conditions('state', '=', 'Enabled', cond_ps)
+        all_vail_ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond_ps)
+        vail_ps_dict = {ps.uuid: ps.type for ps in all_vail_ps}
+        system_tags = system_tags if system_tags else []
+        if len(vail_ps_dict) > 1:
+            tc_len = len(os.getenv('TESTCASENAME') if os.getenv('TESTCASENAME') else range(8))
+            vail_ps_uuid_list = vail_ps_dict.keys()
+            combo = [[root_ps, data_ps] for root_ps in vail_ps_uuid_list for data_ps in vail_ps_uuid_list]
+            index = tc_len % len(combo)
+            if index != 1:
+                ps_uuid = ps_uuid if ps_uuid else combo[index][0]
+                system_tags.extend(["primaryStorageUuidForDataVolume::%s" % combo[index][-1]] if not [d for d in system_tags if "primaryStorageUuidForDataVolume" in d] else [])
     vm_creation_option.set_default_l3_uuid(default_l3_uuid)
     vm_creation_option.set_system_tags(system_tags)
     vm_creation_option.set_session_uuid(session_uuid)
@@ -235,6 +250,32 @@ def create_vm_with_iso(l3_uuid_list, image_uuid, vm_name = None, root_disk_uuids
     vm.create()
     return vm
 
+def _set_ps_uuid(volume_creation_option):
+    cond = res_ops.gen_query_conditions('status', '=', 'connected')
+    cond = res_ops.gen_query_conditions('state', '=', 'Enabled', cond)
+    all_vail_ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
+    if len(all_vail_ps) > 1:
+        all_vail_ps_dict = {ps.uuid:ps.type for ps in all_vail_ps}
+        all_ps_uuids = all_vail_ps_dict.keys()
+        cond_vm = res_ops.gen_query_conditions('state', '=', 'Running')
+        running_vm = res_ops.query_resource(res_ops.VM_INSTANCE, cond_vm)
+        ext_ps_uuids = [vol.primaryStorageUuid for vm in running_vm for vol in vm.allVolumes]
+        other_ps_uuids = list(set(all_ps_uuids) - set(ext_ps_uuids))
+        if other_ps_uuids:
+            ps_uuid_for_data_vol = random.choice(other_ps_uuids)
+        else:
+            ps_uuid_for_data_vol = random.choice(all_ps_uuids)
+        if all_vail_ps_dict[ps_uuid_for_data_vol] == 'LocalStorage':
+            all_vail_host = res_ops.query_resource(res_ops.HOST, cond)
+            sys_tags = ['localStorage::hostUuid::%s' % random.choice([host.uuid for host in all_vail_host])]
+            vol_systags = volume_creation_option.get_system_tags()
+            if vol_systags and not [dl for dl in vol_systags if 'localStorage::hostUuid' in dl]:
+                new_systags = vol_systags.append(sys_tags)
+            else:
+                new_systags = sys_tags
+            volume_creation_option.set_system_tags(new_systags)
+        volume_creation_option.set_primary_storage_uuid(ps_uuid_for_data_vol)
+
 def create_volume(volume_creation_option=None, session_uuid = None):
     if not volume_creation_option:
         disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
@@ -243,6 +284,8 @@ def create_volume(volume_creation_option=None, session_uuid = None):
         volume_creation_option.set_name('vr_test_volume')
 
     volume_creation_option.set_session_uuid(session_uuid)
+    if not volume_creation_option.get_primary_storage_uuid():
+        _set_ps_uuid(volume_creation_option)
     volume = zstack_volume_header.ZstackTestVolume()
     volume.set_creation_option(volume_creation_option)
     volume.create()
@@ -566,6 +609,22 @@ def find_ps_nfs():
             return ps
     test_util.test_logger("Can not find NFS primary storage ")
     return None
+
+def ensure_pss_connected():
+    for i in range(300):
+        #time.sleep(1)
+        ps_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+        for ps in ps_list:
+            ps_ops.reconnect_primary_storage(ps.uuid)
+            cond = res_ops.gen_query_conditions('uuid', '=', ps.uuid)
+            pss = res_ops.query_resource_fields(res_ops.PRIMARY_STORAGE, cond, None)
+            if not "connected" in pss[0].status.lower():
+                test_util.test_logger("time %s found not connected ps status: %s" %(str(i), pss[0].status))
+                break
+        else:
+            return
+    else:
+        test_util.test_fail("ps status didn't change to Connected within 300s, therefore, failed")
 
 def ensure_hosts_connected(wait_time):
     for i in range(wait_time):
@@ -1502,3 +1561,164 @@ class PoolCapacity(Longjob):
         ps = res_ops.query_resource(res_ops.CEPH_PRIMARY_STORAGE)[0]
         ps_ops.add_ceph_primary_storage_pool(ps.uuid, self.pool_name, isCreate='true')
 
+class BATCHDELSP(TestChain):
+    def __init__(self, chain_head=None, chain_length=20):
+        self.sp_tree = test_util.SPTREE()
+        self.test_obj_dict = None
+        self.vm = None
+        self.data_volume = None
+        self.vol_uuid = None
+        self.snapshots = None
+        self.snapshot = []
+        self.sp_type = 'Hypervisor'
+        super(BATCHDELSP, self).__init__(chain_head, chain_length)
+
+    def create_vm(self):
+        '''
+        {"next": ["create_sp", "revert_sp"]}
+        '''
+        self.vm = create_basic_vm(l3_name=os.environ.get('l3PublicNetworkName'))
+        self.vm.check()
+        return self
+
+    def set_ceph_mon_env(self, ps_uuid):
+        cond_vol = res_ops.gen_query_conditions('uuid', '=', ps_uuid)
+        ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond_vol)[0]
+        if ps.type.lower() == 'ceph':
+            ps_mon_ip = ps.mons[0].monAddr
+            os.environ['cephBackupStorageMonUrls'] = 'root:password@%s' % ps_mon_ip
+        return ps.type
+
+    def create_data_volume(self, sharable=False, vms=[]):
+        '''
+        {"next": ["create_sp", "revert_sp"]}
+        '''
+        if not self.vm:
+            self.create_vm()
+        conditions = res_ops.gen_query_conditions('name', '=', os.getenv('rootDiskOfferingName'))
+        disk_offering_uuid = res_ops.query_resource(res_ops.DISK_OFFERING, conditions)[0].uuid
+        volume_option = test_util.VolumeOption()
+        volume_option.set_disk_offering_uuid(disk_offering_uuid)
+        ps_uuid = self.vm.vm.allVolumes[0].primaryStorageUuid
+        volume_option.set_name('data_volume_for_batch_del_sp_test')
+        volume_option.set_primary_storage_uuid(ps_uuid)
+        ps_type = self.set_ceph_mon_env(ps_uuid)
+        if ps_type == 'LocalStorage':
+            volume_option.set_system_tags(['capability::virtio-scsi', 'localStorage::hostUuid::%s' % self.vm.vm.hostUuid])
+        if sharable:
+            volume_option.set_system_tags(['ephemeral::shareable', 'capability::virtio-scsi'])
+        self.data_volume = create_volume(volume_option)
+        if vms:
+            for vm in vms:
+                self.data_volume.attach(vm)
+        else:
+            self.data_volume.attach(self.vm)
+        self.data_volume.check()
+        test_lib.lib_mkfs_for_volume(self.data_volume.get_volume().uuid, self.vm.vm, '/mnt')
+        return self
+
+    def create_sp(self):
+        '''
+        {"next": ["create_sp", "revert_sp", "batch_del_sp"],
+         "weight": 3}
+        '''
+        if not self.test_obj_dict:
+            self.test_obj_dict = test_state.TestStateDict()
+        self.test_obj_dict.add_vm(self.vm)
+        if not self.data_volume:
+            vol_uuid = self.vm.vm.rootVolumeUuid
+        else:
+            self.test_obj_dict.add_volume(self.data_volume)
+            vol_uuid = self.data_volume.get_volume().uuid
+        self.snapshots = self.test_obj_dict.get_volume_snapshot(vol_uuid) if self.vol_uuid != vol_uuid else self.snapshots
+        self.vol_uuid = vol_uuid
+        self.snapshots.set_utility_vm(self.vm)
+        self.snapshots.create_snapshot('snapshot-%s' % time.strftime('%m%d-%H%M%S', time.localtime()))
+#         self.snapshots.check()
+        curr_sp = self.snapshots.get_current_snapshot()
+        self.snapshot.append(curr_sp)
+        if curr_sp.get_snapshot().type == 'Storage':
+            self.sp_type = curr_sp.get_snapshot().type
+            if not self.sp_tree.root:
+                self.sp_tree.add('root')
+            self.sp_tree.revert(self.sp_tree.root)
+        self.sp_tree.add(curr_sp.get_snapshot().uuid)
+        self.sp_tree.show_tree()
+        return self
+
+    def sp_check(self):
+        self.snapshots.check()
+        return self
+
+    def revert_sp(self, sp=None, start_vm=False):
+        '''
+        {"must":{"before": ["create_sp"]},
+        "next": ["create_sp", "batch_del_sp"],
+        "weight": 2}
+        '''
+        if self.data_volume:
+            try:
+                self.data_volume.detach()
+            except:
+                pass
+        else:
+            self.vm.stop()
+        if not sp:
+            sp = random.choice(self.snapshot)
+        self.snapshots.use_snapshot(sp)
+        if start_vm:
+            self.vm.start()
+            self.vm.check()
+        if self.sp_type != 'Storage':
+            self.sp_tree.revert(sp.get_snapshot().uuid)
+        if self.data_volume:
+            try:
+                self.data_volume.attach(self.vm)
+            except:
+                pass
+        self.sp_tree.show_tree()
+        return self
+
+    def batch_del_sp(self, snapshot_uuid_list=None, exclude_root=True):
+        '''
+        {"must":{"before": ["create_sp"]},
+        "next": ["create_sp", "revert_sp"],
+        "weight": 1}
+        '''
+        for _ in range(5):
+            random.shuffle(self.snapshot)
+        if not snapshot_uuid_list:
+            snapshot_list = self.snapshot[:random.randint(2, len(self.snapshot))]
+            snapshot_uuid_list = [spt.get_snapshot().uuid for spt in snapshot_list]
+        spd = {_sp.get_snapshot().uuid: _sp for _sp in self.snapshot}
+        if exclude_root:
+            if self.sp_tree.root in snapshot_uuid_list:
+                snapshot_uuid_list.remove(self.sp_tree.root)
+        vol_ops.batch_delete_snapshot(snapshot_uuid_list)
+        for spuuid in snapshot_uuid_list:
+            assert not res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, res_ops.gen_query_conditions('uuid', '=', spuuid)), \
+            'The snapshot with uuid [%s] is still exist!' % spuuid
+            if self.sp_tree.delete(spuuid):
+                self.snapshots.delete_snapshot(spd[spuuid], False)
+        remained_sp =  self.sp_tree.tree.keys()
+        if self.sp_type == 'Storage':
+            remained_sp.remove(self.sp_tree.root)
+        for sud in spd.keys():
+            if sud not in remained_sp:
+                self.snapshot.remove(spd[sud])
+        for sp_uuid in remained_sp:
+            snapshot = res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, res_ops.gen_query_conditions('uuid', '=', sp_uuid))
+            assert snapshot, 'The snapshot with uuid [%s] was not found!' % sp_uuid
+            if snapshot[0].parentUuid:
+                assert snapshot[0].parentUuid == self.sp_tree.parent(sp_uuid)
+        remained_sp_num = len(self.sp_tree.get_all_nodes())
+        if self.sp_type == 'Storage':
+            remained_sp_num -= 1
+        if not self.data_volume:
+            actual_sp_num = len(res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, res_ops.gen_query_conditions('volumeUuid', '=', self.vm.get_vm().allVolumes[0].uuid)))
+        else:
+            actual_sp_num = len(res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, res_ops.gen_query_conditions('volumeUuid', '=', self.data_volume.get_volume().uuid)))
+        assert actual_sp_num == remained_sp_num, 'actual remained snapshots number: %s, snapshot number in sp tree: %s' % (actual_sp_num, remained_sp_num)
+        self.sp_tree.show_tree()
+        self.snapshots.check()
+        return self

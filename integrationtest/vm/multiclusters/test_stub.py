@@ -118,6 +118,8 @@ class DataMigration(TestChain):
         self.snapshots = None
         self.vol_uuid = None
         self.snapshot = []
+        self.sp_tree = test_util.SPTREE()
+        self.sp_type =None
         super(DataMigration, self).__init__(chain_head, chain_length)
 
     def get_current_ps(self):
@@ -245,15 +247,19 @@ class DataMigration(TestChain):
                 vms2.append(vm)
             return vms2
         return self
-    
+
     def resize_vm(self, new_size):
         self.root_vol_uuid = self.vm.vm.rootVolumeUuid
         vol_ops.resize_volume(self.root_vol_uuid, new_size)
+        conditions = res_ops.gen_query_conditions('uuid', '=', self.vm.vm.uuid)
+        self.vm.vm = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)[0]
         return self
 
     def resize_data_volume(self,new_size):
         self.data_vol_uuid = self.data_volume.get_volume().uuid
         vol_ops.resize_data_volume(self.data_vol_uuid, new_size)
+	conditions = res_ops.gen_query_conditions('uuid', '=', self.data_vol_uuid)
+	self.data_volume.data_volume = res_ops.query_resource(res_ops.VOLUME, conditions)[0]
         return self
 
     def migrate_data_volume(self):
@@ -280,6 +286,33 @@ class DataMigration(TestChain):
         self.set_ceph_mon_env(self.dst_ps.uuid)
         return self
 
+    def migrate_full_vm(self):
+        '''
+        {"must": 
+                {"before": ["mount_disk_in_vm", "copy_data", "detach_vm", "migrate_vm"],
+                 "after": ["attach_vm", "mount_disk_in_vm", "check_data",
+                           "check_origin_data_exist", "clean_up_ps_trash_and_check"]},
+         "next": ["create_image", "create_snapshot"],
+         "weight": 2}
+         '''
+#         if not self.dst_ps:
+        self.former_root_vol_uuid = self.vm.vm.rootVolumeUuid
+        self.former_root_vol_size = self.vm.vm.allVolumes[0].size
+        self.former_root_vol_install_path = self.vm.vm.allVolumes[0].installPath
+        self.origin_ps = self.get_ps_inv(self.vm.vm.allVolumes[0].primaryStorageUuid)
+
+        self.vm.stop()
+        ps_uuid_to_migrate = self.get_vm_ps_candidate().uuid
+        datamigr_ops.ps_migrage_vm(ps_uuid_to_migrate, self.vm.vm.uuid)
+        conditions = res_ops.gen_query_conditions('uuid', '=', self.vm.vm.uuid)
+        self.vm.vm = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)[0]
+        self.vm.start()
+        self.vm.check()
+ 	assert self.vm.vm.allVolumes[0].primaryStorageUuid == ps_uuid_to_migrate
+        self.former_root_vol_uuid = self.vm.vm.rootVolumeUuid
+
+        return self
+
     def create_snapshot(self):
         '''
         {"next": ["create_image", "migrate_vm", "clone_vm", "migrate_data_volume"],
@@ -299,7 +332,15 @@ class DataMigration(TestChain):
         self.snapshots.set_utility_vm(self.vm)
         self.snapshots.create_snapshot('snapshot-%s' % time.strftime('%m%d-%H%M%S', time.localtime()))
 #         self.snapshots.check()
-        self.snapshot.append(self.snapshots.get_current_snapshot())
+        curr_sp = self.snapshots.get_current_snapshot()
+        self.snapshot.append(curr_sp)
+        if curr_sp.get_snapshot().type == 'Storage':
+            self.sp_type = curr_sp.get_snapshot().type
+            if not self.sp_tree.root:
+                self.sp_tree.add('root')
+            self.sp_tree.revert(self.sp_tree.root)
+        self.sp_tree.add(curr_sp.get_snapshot().uuid)
+        self.sp_tree.show_tree()
         return self
 
     def delete_snapshot(self):
@@ -317,13 +358,23 @@ class DataMigration(TestChain):
     def copy_data(self):
         cmd = "find /home -iname 'zstack-woodpecker.*'"
         file_path = commands.getoutput(cmd).split('\n')[0]
-        cp_cmd = 'sshpass -p password scp -o StrictHostKeyChecking=no %s root@%s:/mnt/' % (file_path, self.vm.get_vm().vmNics[0].ip)
-        commands.getoutput(cp_cmd)
+        src_file_md5 = commands.getoutput('md5sum %s' % file_path).split(' ')[0]
+        vm_ip = self.vm.get_vm().vmNics[0].ip
+        cp_cmd = 'sshpass -p password scp -o StrictHostKeyChecking=no %s root@%s:/mnt/' % (file_path, vm_ip)
+        sync_cmd = 'sshpass -p password ssh -o LogLevel=quiet -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
+                   root@%s "sync;sync;sleep 60;sync"' % vm_ip
+        for cmd in [cp_cmd, sync_cmd]:
+            os.system(cmd)
+        md5_cmd = 'sshpass -p password ssh -o LogLevel=quiet -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
+                   root@%s md5sum /mnt/%s' % (vm_ip, file_path.split('/')[-1])
+        dst_file_md5 = commands.getoutput(md5_cmd).split(' ')[0]
+        test_util.test_dsc('src_file_md5: [%s], dst_file_md5: [%s]' % (src_file_md5, dst_file_md5))
+        assert dst_file_md5 == src_file_md5, 'dst_file_md5 [%s] and src_file_md5 [%s] is not match, stop test' % (src_file_md5, dst_file_md5)
         return self
 
     def check_data(self):
         check_cmd = '''sshpass -p password ssh -o LogLevel=quiet -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@%s \
-        "tar xvf /mnt/zstack-woodpecker.tar -C /mnt > /dev/null &>1; grep scenario_config_path /mnt/zstackwoodpecker/zstackwoodpecker/test_lib.py && echo 0 || echo 1" \
+        "tar xvf /mnt/zstack-woodpecker.tar -C /mnt > /dev/null 2>&1; grep scenario_config_path /mnt/zstackwoodpecker/zstackwoodpecker/test_lib.py > /dev/null 2>&1 && echo 0 || echo 1" \
         ''' % (self.vm.get_vm().vmNics[0].ip)
         ret = commands.getoutput(check_cmd).split('\n')[-1]
         assert ret == '0', "data check failed!, the return code is %s, 0 is expected" % ret
@@ -440,6 +491,8 @@ class DataMigration(TestChain):
          "weight": 1}
         '''
         self.get_image(image_name)
+        if self.origin_bs.type != 'Ceph':
+            return self
         dst_bs = self.get_bs_candidate()
         image_migr_inv = datamigr_ops.bs_migrage_image(dst_bs.uuid, self.image.backupStorageRefs[0].backupStorageUuid, self.image.uuid)
         conditions = res_ops.gen_query_conditions('uuid', '=', self.image.uuid)
@@ -502,6 +555,12 @@ class DataMigration(TestChain):
 #         ps_to_migrate = self.ps_1 if self.ps_1.uuid != self.vm.vm.allVolumes[0].primaryStorageUuid else self.ps_2
         return ps_to_migrate
 
+    def get_vm_ps_candidate(self, vm_uuid=None):
+        if not vm_uuid:
+            vm_uuid = self.vm.vm.uuid
+        ps_to_migrate = random.choice(datamigr_ops.get_ps_candidate_for_vm_migration(vm_uuid))
+        return ps_to_migrate
+
     def get_bs_candidate(self):
         self.get_image()
         self.cand_bs = datamigr_ops.get_bs_candidate_for_image_migration(self.image.backupStorageRefs[0].backupStorageUuid)
@@ -557,6 +616,84 @@ class DataMigration(TestChain):
             test_lib.lib_mkfs_for_volume(self.data_volume.get_volume().uuid, self.vm.vm, '/mnt')
         return self
 
+    def revert_sp(self, sp=None, start_vm=False):
+        '''
+        {"must":{"before": ["create_sp"]},
+        "next": ["create_sp", "batch_del_sp"],
+        "weight": 2}
+        '''
+        if self.data_volume:
+            try:
+                self.data_volume.detach()
+            except:
+                pass
+        else:
+            self.vm.stop()
+        if not sp:
+            sp = random.choice(self.snapshot)
+        self.snapshots.use_snapshot(sp)
+        if start_vm:
+            self.vm.start()
+            self.vm.check()
+        if self.sp_type != 'Storage':
+            self.sp_tree.revert(sp.get_snapshot().uuid)
+        if self.data_volume:
+            try:
+                self.data_volume.attach(self.vm)
+            except:
+                pass
+        self.sp_tree.show_tree()
+        return self
+
+    def sp_check(self):
+        self.snapshots.check()
+        return self
+
+    def batch_del_sp(self, snapshot_uuid_list=None, exclude_root=True):
+        '''
+        {"must":{"before": ["create_sp"]},
+        "next": ["create_sp", "revert_sp(start_vm=True)"],
+        "weight": 1}
+        '''
+        for _ in range(5):
+            random.shuffle(self.snapshot)
+        if not snapshot_uuid_list:
+            snapshot_list = self.snapshot[:random.randint(2, len(self.snapshot))]
+            snapshot_uuid_list = [spt.get_snapshot().uuid for spt in snapshot_list]
+        spd = {_sp.get_snapshot().uuid: _sp for _sp in self.snapshot}
+        if exclude_root:
+            if self.sp_tree.root in snapshot_uuid_list:
+                snapshot_uuid_list.remove(self.sp_tree.root)
+        vol_ops.batch_delete_snapshot(snapshot_uuid_list)
+        for spuuid in snapshot_uuid_list:
+            assert not res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, res_ops.gen_query_conditions('uuid', '=', spuuid)), \
+            'The snapshot with uuid [%s] is still exist!' % spuuid
+            if self.sp_tree.delete(spuuid):
+                self.snapshots.delete_snapshot(spd[spuuid], False)
+        print self.sp_tree.tree
+        remained_sp =  self.sp_tree.tree.keys()
+        if self.sp_type == 'Storage':
+            remained_sp.remove(self.sp_tree.root)
+        for sud in spd.keys():
+            if sud not in remained_sp:
+                self.snapshot.remove(spd[sud])
+        for sp_uuid in remained_sp:
+            snapshot = res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, res_ops.gen_query_conditions('uuid', '=', sp_uuid))
+            assert snapshot, 'The snapshot with uuid [%s] was not found!' % sp_uuid
+            if snapshot[0].parentUuid:
+                assert snapshot[0].parentUuid == self.sp_tree.parent(sp_uuid)
+        remained_sp_num = len(self.sp_tree.get_all_nodes())
+        if self.sp_type == 'Storage':
+            remained_sp_num -= 1
+        if not self.data_volume:
+            actual_sp_num = len(res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, res_ops.gen_query_conditions('volumeUuid', '=', self.vm.get_vm().allVolumes[0].uuid)))
+        else:
+            actual_sp_num = len(res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, res_ops.gen_query_conditions('volumeUuid', '=', self.data_volume.get_volume().uuid)))
+        assert actual_sp_num == remained_sp_num, 'actual remained snapshots number: %s, snapshot number in sp tree: %s' % (actual_sp_num, remained_sp_num)
+        self.sp_tree.show_tree()
+        self.snapshots.check()
+        return self
+
     def attach_vm(self):
         self.data_volume.attach(self.vm)
         return self
@@ -568,7 +705,7 @@ class DataMigration(TestChain):
     def mount_disk_in_vm(self):
         import tempfile
         script_file = tempfile.NamedTemporaryFile(delete=False)
-        script_file.write('''device="/dev/`ls -ltr --file-type /dev | awk '$4~/disk/ {print $NF}' | grep -v '[[:digit:]]' | tail -1`" \n mount ${device}1 /mnt''')
+        script_file.write('''device="/dev/`ls -ltr --file-type /dev | awk '$4~/disk/ {print $NF}' | grep -v '[[:digit:]]'| sort | tail -1`" \n mount ${device}1 /mnt''')
         script_file.close()
         test_lib.lib_execute_shell_script_in_vm(self.vm.vm, script_file.name)
         return self
@@ -627,7 +764,6 @@ class DataMigration(TestChain):
         cond_image = res_ops.gen_query_conditions('uuid', '=', self.image.uuid)
         self.image = res_ops.query_resource(res_ops.IMAGE, cond_image)[0]
         assert self.image.backupStorageRefs[0].backupStorageUuid == self.dst_bs.uuid
-
 
 def get_host_cpu_model(ip):
     cmd = 'virsh capabilities | grep "<arch>.*.</arch>" -C 1 | tail -1'

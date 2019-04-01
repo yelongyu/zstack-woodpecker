@@ -251,7 +251,7 @@ def attach_eip(eip_uuid, nic_uuid, session_uuid=None):
 def detach_eip(eip_uuid, session_uuid=None):
     action = api_actions.DetachEipAction()
     action.uuid = eip_uuid
-    action.timeout = 12000
+    action.timeout = 24000
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger("[EIP:] %s is detached" % eip_uuid)
     return evt.inventory
@@ -259,7 +259,7 @@ def detach_eip(eip_uuid, session_uuid=None):
 def delete_eip(eip_uuid, session_uuid=None):
     action = api_actions.DeleteEipAction()
     action.uuid = eip_uuid
-    action.timeout = 12000
+    action.timeout = 24000
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger("[EIP:] %s is deleted" % eip_uuid)
     return evt

@@ -1,6 +1,6 @@
 import ./deploy.tmpt
 
 sftpBackupStorageName = image-store-backup-storage
-sftpBackupStorageUrl = /home/smp-ps/zstack_bs
+sftpBackupStorageUrl = /home/sftpBackupStorage
 sharedMountPointPrimaryStorageName = sharedMountPoint-ps
 sharedMountPointPrimaryStorageUrl = /home/smp-ps

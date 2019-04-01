@@ -165,7 +165,7 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
                 action.sshPort = bs.port_
             action.timeout = AddKVMHostTimeOut #for some platform slowly salt execution
             action.type = inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE
-            thread = threading.Thread(target = _thread_for_action, args = (action, ))
+            thread = threading.Thread(target = _thread_for_action, args = (action, True))
             wait_for_thread_queue()
             thread.start()
 
@@ -241,29 +241,11 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
             thread.start()
 
     if xmlobject.has_element(deployConfig, 'backupStorages.aliyunEbsBackupStorage'):
-        # Add KS
-        hyb_ops.add_hybrid_key_secret(name='ks_for_ebs_test',
-                                        description='ks_for_ebs_test',
-                                        key= 'zstack',
-                                        secret='C8yz6qLPus7VuwLtGYdxUkMg',
-                                        ks_type=os.getenv('datacenterType'),
-                                        sync='false',
-                                        session_uuid=session_uuid)
-
-        # Add DataCenter
-        dc_inv = hyb_ops.add_datacenter_from_remote(datacenter_type=os.getenv('datacenterType'),
-                                            description='dc_for_ebs_test',
-                                            region_id=os.getenv('regionId'),
-                                            end_point=os.getenv('ebsEndPoint'),
-                                            session_uuid=session_uuid)
-
-        # Add Identity Zone
-        iz_inv = hyb_ops.get_identity_zone_from_remote(datacenter_type=os.getenv('datacenterType'), dc_uuid=dc_inv.uuid)
-        if iz_inv:
-            ebs_iz = iz_inv[0]
+        dc_inv = hyb_ops.query_datacenter_local()
+        if dc_inv:
+            dc_inv = dc_inv[0]
         else:
-            test_util.test_fail('EBS Identity Zone was not found')
-        hyb_ops.add_identity_zone_from_remote(iz_type=os.getenv('datacenterType'), datacenter_uuid=dc_inv.uuid, zone_id=ebs_iz.zoneId)
+            test_util.test_fail("No datacenter found in local")
 
         # Add OSS bucket
         oss_buckt_inv = hyb_ops.add_oss_bucket_from_remote(data_center_uuid=dc_inv.uuid,
@@ -342,6 +324,54 @@ def add_zone(scenarioConfig, scenarioFile, deployConfig, session_uuid, zone_name
         except:
             exc_info.append(sys.exc_info())
      
+#        if xmlobject.has_element(zone, 'backupStorageRef'):
+#            for ref in xmlobject.safe_list(zone.backupStorageRef):
+#                bss = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid, name=ref.text_)
+#                bs = get_first_item_from_list(bss, 'Backup Storage', ref.text_, 'attach backup storage to zone')
+
+#                action = api_actions.AttachBackupStorageToZoneAction()
+#                action.sessionUuid = session_uuid
+#                action.backupStorageUuid = bs.uuid
+#                action.zoneUuid = zinv.uuid
+#                try:
+#                    evt = action.run()
+#                    test_util.test_logger(jsonobject.dumps(evt))
+#                except:
+#                    exc_info.append(sys.exc_info())
+
+
+    if not xmlobject.has_element(deployConfig, 'zones.zone'):
+        return
+
+    for zone in xmlobject.safe_list(deployConfig.zones.zone):
+        if zone_name and zone_name != zone.name_:
+            continue 
+
+        if zone.duplication__ == None:
+            duplication = 1
+        else:
+            duplication = int(zone.duplication__)
+
+        for i in range(duplication):
+            thread = threading.Thread(target=_add_zone, args=(zone, i, ))
+            wait_for_thread_queue()
+            thread.start()
+
+    wait_for_thread_done()
+
+
+def attach_bs_to_zone(scenarioConfig, scenarioFile, deployConfig, session_uuid, zone_name = None):
+    def _attach_bs_to_zone(zone, zone_duplication):
+        if zone_duplication == 0:
+            zone_name = zone.name_
+            zone_description = zone.description__
+        else:
+            zone_name = generate_dup_name(zone.name_, zone_duplication, 'z')
+            zone_description = generate_dup_name(zone.description__, zone_duplication, 'zone')
+
+        zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, name=zone_name)
+        zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'attach backup storage to zone')
+
         if xmlobject.has_element(zone, 'backupStorageRef'):
             for ref in xmlobject.safe_list(zone.backupStorageRef):
                 bss = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid, name=ref.text_)
@@ -363,7 +393,7 @@ def add_zone(scenarioConfig, scenarioFile, deployConfig, session_uuid, zone_name
 
     for zone in xmlobject.safe_list(deployConfig.zones.zone):
         if zone_name and zone_name != zone.name_:
-            continue 
+            continue
 
         if zone.duplication__ == None:
             duplication = 1
@@ -371,7 +401,7 @@ def add_zone(scenarioConfig, scenarioFile, deployConfig, session_uuid, zone_name
             duplication = int(zone.duplication__)
 
         for i in range(duplication):
-            thread = threading.Thread(target=_add_zone, args=(zone, i, ))
+            thread = threading.Thread(target=_attach_bs_to_zone, args=(zone, i, ))
             wait_for_thread_queue()
             thread.start()
 
@@ -961,6 +991,30 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                     name=zone.name_)
             zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
 
+            # Add KS
+            hyb_ops.add_hybrid_key_secret(name='ks_for_ebs_test',
+                                            description='ks_for_ebs_test',
+                                            key= 'zstack',
+                                            secret='C8yz6qLPus7VuwLtGYdxUkMg',
+                                            ks_type=os.getenv('datacenterType'),
+                                            sync='false',
+                                            session_uuid=session_uuid)
+
+            # Add DataCenter
+            dc_inv = hyb_ops.add_datacenter_from_remote(datacenter_type=os.getenv('datacenterType'),
+                                                description='dc_for_ebs_test',
+                                                region_id=os.getenv('regionId'),
+                                                end_point=os.getenv('ebsEndPoint'),
+                                                session_uuid=session_uuid)
+
+            # Add Identity Zone
+            iz_inv = hyb_ops.get_identity_zone_from_remote(datacenter_type=os.getenv('datacenterType'), dc_uuid=dc_inv.uuid)
+            if iz_inv:
+                ebs_iz = iz_inv[0]
+            else:
+                test_util.test_fail('EBS Identity Zone was not found')
+            hyb_ops.add_identity_zone_from_remote(iz_type=os.getenv('datacenterType'), datacenter_uuid=dc_inv.uuid, zone_id=ebs_iz.zoneId)
+
             for pr in xmlobject.safe_list(zone.primaryStorages.aliyunEBSPrimaryStorage):
                 if ps_name and ps_name != pr.name_:
                     continue
@@ -982,7 +1036,7 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                                             "cluster": "ECS-river"}'
                 action.zoneUuid = zinv.uuid
                 action.sessionUuid = session_uuid
-                thread = threading.Thread(target=_thread_for_action, args=(action,))
+                thread = threading.Thread(target=_thread_for_action, args=(action, True))
                 wait_for_thread_queue()
                 thread.start()
 
@@ -1276,6 +1330,19 @@ def get_node_from_scenario_file(nodeRefName, scenarioConfig, scenarioFile, deplo
                                     for ip in xmlobject.safe_list(s_vm.ips.ip):
                                         if ip.uuid_ == s_l3_uuid:
                                             return ip.ip_
+
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            if xmlobject.has_element(vm, 'nodeRef'):
+                if vm.nodeRef.text_ == nodeRefName:
+                    with open(scenarioFile, 'r') as fd:
+                        xmlstr = fd.read()
+                        fd.close()
+                        scenario_file = xmlobject.loads(xmlstr)
+                        for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                            if s_vm.name_ == vm.name_:
+                                return s_vm.ip_
+
     return None
 
 def get_nodes_from_scenario_file(scenarioConfig, scenarioFile, deployConfig):
@@ -1318,6 +1385,17 @@ def get_nodes_from_scenario_file(scenarioConfig, scenarioFile, deployConfig):
                                 for ip in xmlobject.safe_list(s_vm.ips.ip):
                                     if ip.uuid_ == s_l3_uuid:
                                         return ip.ip_
+
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            if xmlobject.has_element(vm, 'nodeRef'):
+                with open(scenarioFile, 'r') as fd:
+                    xmlstr = fd.read()
+                    fd.close()
+                    scenario_file = xmlobject.loads(xmlstr)
+                    for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                        if s_vm.name_ == vm.name_:
+                            nodes_ip += ' %s' % s_vm.ip_
 
     return nodes_ip
 
@@ -1514,7 +1592,7 @@ def add_host(scenarioConfig, scenarioFile, deployConfig, session_uuid, host_ip =
                 if count == 1 and xmlobject.has_element(deployConfig, 'backupStorages.xskycephBackupStorage'):
                     print "skip xsky MN host add to computational node"
                 else:
-                    thread = threading.Thread(target=_thread_for_action, args = (action, ))
+                    thread = threading.Thread(target=_thread_for_action, args = (action, True))
                     wait_for_thread_queue()
                     thread.start()
                     if i != 1:
@@ -2320,12 +2398,15 @@ def add_vcenter_vrouter(scenarioConfig, scenarioFile, deployConfig, session_uuid
 
 
 
-def _thread_for_action(action):
+def _thread_for_action(action, retry=False):
     try:
         evt = action.run()
         test_util.test_logger(jsonobject.dumps(evt))
     except:
-        exc_info.append(sys.exc_info())
+        if retry:
+            _thread_for_action(action)
+        else:
+            exc_info.append(sys.exc_info())
 
 #Add Virtual Router Offering
 def add_virtual_router(scenarioConfig, scenarioFile, deployConfig, session_uuid, l3_name = None, \
@@ -2662,13 +2743,14 @@ def remove_simulator_agent_script(url_path):
 
 def deploy_initial_database(deploy_config, scenario_config = None, scenario_file = None, ipversion = 4):
     operations = [
-            add_backup_storage,
             add_zone,
             add_l2_network,
             add_primary_storage,
             add_iscsi_server,
             add_cluster,
             add_host,
+            add_backup_storage,
+            attach_bs_to_zone,
             add_sanlock,
             add_l3_network,
             add_image,

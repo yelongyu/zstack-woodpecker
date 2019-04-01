@@ -37,7 +37,7 @@ def test():
     if local_ip != sftp_hostname:
         test_util.test_skip("host of sftp and host of MN are not the same one. Skip test") 
 
-    recnt_timeout=5000
+    recnt_timeout=50000
     test_util.test_dsc('Test SFTP Backup Storage Update Infomation: password, sshPort, username')
 
 #====================== Password ======================
@@ -111,7 +111,22 @@ def test():
     os.system(cmd)
     cmd = 'echo "password"| passwd --stdin test'
     os.system(cmd)
+    test_util.test_dsc('add test account to sudo group')
+    cmd = 'chmod u+w /etc/sudoers'
+    os.system(cmd)
+    cmd = 'echo \"test    ALL=(ALL)       ALL\" >> /etc/sudoers'
+    os.system(cmd)
+    cmd = 'chmod u-w /etc/sudoers'
+    os.system(cmd)
     host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid, timeout=recnt_timeout)
+
+    test_util.test_dsc('Recover test account from sudo group')
+    cmd = 'chmod u+w /etc/sudoers'
+    os.system(cmd)
+    cmd = 'sed -i \'s/test    ALL=(ALL)       ALL//\' /etc/sudoers'
+    os.system(cmd)
+    cmd = 'chmod u-w /etc/sudoers'
+    os.system(cmd)
 
     test_util.test_dsc('Recover sftp username')
     bs_ops.update_sftp_backup_storage_info(sftp_backup_storage_uuid, 'username', 'root')

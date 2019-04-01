@@ -129,11 +129,11 @@ class zstack_kvm_share_volume_attach_checker(checker_header.TestChecker):
             test_util.test_logger('Check result: [volume:] %s does NOT have vmInstanceUuid. It is not attached to any vm.' % volume.uuid)
             return self.judge(False)
 
-        if not self.test_obj.target_vm:
+        if not self.test_obj.sharable_target_vms:
             test_util.test_logger('Check result: test [volume:] %s does NOT have vmInstance record in test structure. Can not do furture checking.' % volume.uuid)
             return self.judge(False)
 
-        vm = self.test_obj.target_vm.vm
+        vm = self.test_obj.sharable_target_vms[0].vm
 
         volume_installPath = volume.installPath
         if not volume_installPath:

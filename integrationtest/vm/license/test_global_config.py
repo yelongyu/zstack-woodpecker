@@ -15,6 +15,7 @@ import json
 import urllib2
 
 test_stub = test_lib.lib_get_test_stub()
+
 ding_url = "https://oapi.dingtalk.com/robot/send?access_token=d4a90949d4e4a0b1dc0dbb57989a58480795d67b82fb86ce848b801602cabe76"
 def sendMsg_to_Ding():
 	header = {
@@ -29,7 +30,7 @@ def sendMsg_to_Ding():
 			"text": {
 					"content": "1.zstack global config  has changed on  latest nightly test.\n\
 2.need to doulbe confirm ui if has change example :Garbled words\n\
-3.antony(weijiang),you should double confirm with developer and then fix this issue."
+3.you should double confirm with developer and then fix this issue."
 				}
 		}
 	sendData = json.dumps(data)

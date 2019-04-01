@@ -42,9 +42,9 @@ def test():
     c74_iso_path = os.environ.get('c74_iso_path')
     zstack_latest_version = os.environ.get('zstackLatestVersion')
     zstack_latest_path = os.environ.get('zstackLatestInstaller')
-    vm_name = os.environ.get('vmName')
+    vm_name = os.environ.get('vmName') + image_name
     upgrade_script_path = os.environ.get('upgradeScript')
-    vm_name_c74 = 'Jenkins_Nightly_3.0.0_ex_c74' 
+    vm_name_c74 = os.environ.get('vmName') + image_c74 
     ##create c72 mn
     test_util.test_logger('create c72 mn')
     vm_inv = test_stub.create_vm_scenario(image_name, vm_name)
@@ -63,6 +63,7 @@ def test():
     test_stub.update_mn_hostname(vm_ip, tmp_file)
     test_stub.update_mn_ip(vm_ip, tmp_file)
     test_stub.update_console_ip(vm_ip, tmp_file)
+    test_stub.start_node(vm_ip, tmp_file)
     test_stub.start_mn(vm_ip, tmp_file)
     test_stub.check_installation(vm_ip, tmp_file)
 
@@ -75,6 +76,7 @@ def test():
 
     test_stub.update_console_ip(vm_ip, tmp_file)
     test_stub.stop_mn(vm_ip, tmp_file)
+    test_stub.start_node(vm_ip, tmp_file)
     test_stub.start_mn(vm_ip, tmp_file)
     test_util.test_dsc('create zone names is zone1')
     zone_inv = test_stub.create_zone1(vm_ip, tmp_file)
@@ -161,6 +163,7 @@ def test():
 
     test_stub.upgrade_zstack(vm_ip, zstack_latest_path, tmp_file) 
     test_stub.check_zstack_version(vm_ip, tmp_file, zstack_latest_version)
+    test_stub.start_node(vm_ip, tmp_file)
     test_stub.start_mn(vm_ip, tmp_file)
     test_stub.check_mn_running(vm_ip, tmp_file)
     test_stub.check_installation(vm_ip, tmp_file)

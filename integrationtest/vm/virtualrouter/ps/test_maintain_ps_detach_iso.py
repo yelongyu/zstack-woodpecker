@@ -28,6 +28,16 @@ host_uuid = None
 vr_uuid = None
 
 def test():
+     #skip ceph in c74
+    cmd = "cat /etc/redhat-release | grep '7.4'"
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    rsp = test_lib.lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd, 180)
+    if rsp != False:
+        ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+        for i in ps:
+            if i.type == 'Ceph':
+                test_util.test_skip('cannot hotplug iso to the vm in ceph,it is a libvirt bug:https://bugzilla.redhat.com/show_bug.cgi?id=1541702.')
+
     global test_obj_dict
     global ps_uuid
     global host_uuid
@@ -80,6 +90,7 @@ def test():
     test_stub.enable_all_pss()
     host_ops.reconnect_host(host_uuid)
     #vm_ops.reconnect_vr(vr_uuid)
+    test_stub.ensure_pss_connected()
     vrs = test_lib.lib_get_all_vrs()
     for vr in vrs:
         vr_cond = res_ops.gen_query_conditions('uuid', '=', vr.uuid)

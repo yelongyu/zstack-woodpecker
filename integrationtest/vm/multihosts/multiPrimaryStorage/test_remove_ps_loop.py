@@ -29,7 +29,10 @@ disk_uuid = []
 def test():
     ps_env = test_stub.PSEnvChecker()
 
-    ps1, ps2 = ps_env.get_two_ps()
+    if ps_env.is_sb_ceph_env:
+        ps2, ps1 = ps_env.get_two_ps()
+    else:
+        ps1, ps2 = ps_env.get_two_ps()
     if ps2.type == 'SharedBlock':
         volumegroup_uuid = ps2.sharedBlocks[0].sharedBlockGroupUuid
         disk_uuid.append(ps2.sharedBlocks[0].diskUuid)
@@ -70,7 +73,10 @@ def test():
         time.sleep(5)
         delete_ps_list.pop()
     test_util.test_dsc('create VM by default para')
-    vm1 = test_stub.create_multi_vms(name_prefix='vm1', count=1, data_volume_number=VOLUME_NUMBER, timeout=1200000)[0]
+    if ps_env.is_sb_ceph_env:
+        vm1 = test_stub.create_multi_vms(name_prefix='vm1', count=1, data_volume_number=VOLUME_NUMBER, ps_uuid=ps1.uuid, timeout=1200000, bs_type="Ceph")[0]
+    else:
+        vm1 = test_stub.create_multi_vms(name_prefix='vm1', count=1, data_volume_number=VOLUME_NUMBER, timeout=1200000)[0]
     test_obj_dict.add_vm(vm1)
 
     if ps_env.is_local_nfs_env:
@@ -79,8 +85,12 @@ def test():
         test_obj_dict.add_volume(volume)
     else:
         test_util.test_dsc('create VM in ps2')
-        vm2 = test_stub.create_multi_vms(name_prefix='vm2', count=1, ps_uuid=ps2.uuid,
-                                        data_volume_number=VOLUME_NUMBER, timeout=1200000)[0]
+        if ps_env.is_sb_ceph_env:
+            vm2 = test_stub.create_multi_vms(name_prefix='vm2', count=1, ps_uuid=ps2.uuid,
+                                            data_volume_number=VOLUME_NUMBER, timeout=1200000, bs_type="ImageStoreBackupStorage")[0]
+        else:
+            vm2 = test_stub.create_multi_vms(name_prefix='vm2', count=1, ps_uuid=ps2.uuid,
+                                            data_volume_number=VOLUME_NUMBER, timeout=1200000)[0]
         test_obj_dict.add_vm(vm2)
 
     test_util.test_pass('Multi PrimaryStorage Test Pass')

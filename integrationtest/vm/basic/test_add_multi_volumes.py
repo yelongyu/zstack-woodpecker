@@ -9,7 +9,7 @@ import zstackwoodpecker.test_state as test_state
 import time
 
 test_obj_dict = test_state.TestStateDict()
-vol_num = 19
+vol_num = 20
 volume_list = []
 
 def test():
@@ -30,7 +30,7 @@ def test():
         volume_list[i].check()
     time.sleep(60)
 
-    test_util.test_dsc('Test attach/detach 19 volumes operations.')
+    test_util.test_dsc('Test attach/detach 20 volumes operations.')
     for i in range(vol_num):
         volume_list[i].attach(vm)
 
@@ -41,17 +41,17 @@ def test():
         volume_list[i].detach()
         volume_list[i].check()
 
-    test_util.test_dsc('Redo attach/detach 19 volumes operations.')
+    test_util.test_dsc('Redo attach/detach 20 volumes operations.')
 
     for i in range(vol_num):
         volume_list[i].attach(vm)
         volume_list[i].check()
 
-    test_util.test_dsc('Try to attach the 19th data volume.')
+    test_util.test_dsc('Try to attach the 21th data volume.')
     try:
         additional_vol.attach(vm)
     except:
-        test_util.test_logger('Catch expected exception: try to attach the 19th data [volume:] %s to [vm:] %s fail.' % (additional_vol.volume.uuid, vm.vm.uuid))
+        test_util.test_logger('Catch expected exception: try to attach the 21th data [volume:] %s to [vm:] %s fail.' % (additional_vol.volume.uuid, vm.vm.uuid))
         
         for i in range(vol_num):
             volume_list[i].detach()
@@ -65,7 +65,7 @@ def test():
         test_util.test_pass('Create Multi Data Volumes for VM Test Success')
         return True
 
-    test_util.test_fail('Fail: could attached the 19th data [volume:] %s to [vm:] %s .' % (additional_vol.volume.uuid, vm.vm.uuid))
+    test_util.test_fail('Fail: could attached the 21th data [volume:] %s to [vm:] %s .' % (additional_vol.volume.uuid, vm.vm.uuid))
     return False
 
 def error_cleanup():

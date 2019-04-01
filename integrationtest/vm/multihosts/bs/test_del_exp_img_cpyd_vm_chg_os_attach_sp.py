@@ -32,6 +32,16 @@ test_obj_dict = test_state.TestStateDict()
 image1 = None
 
 def test():
+    #skip ceph in c74
+    cmd = "cat /etc/redhat-release | grep '7.4'"
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    rsp = test_lib.lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd, 180)
+    if rsp != False:
+        ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+        for i in ps:
+            if i.type == 'Ceph':
+                test_util.test_skip('cannot hotplug iso to the vm in ceph,it is a libvirt bug:https://bugzilla.redhat.com/show_bug.cgi?id=1541702.')
+
     global image1
     global test_obj_dict
 

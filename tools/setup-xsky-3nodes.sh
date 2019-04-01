@@ -25,9 +25,10 @@ sed -i "s/172.20.196.210/${IP[0]}/g" cluster.json
 sed -i "s/172.20.195.198/${IP[1]}/g" cluster.json
 sed -i "s/172.20.198.209/${IP[2]}/g" cluster.json
 
-sshpass -p password  ssh root@${IP[1]} "rm -f /root/.ssh/id_rsa*"
-sshpass -p password  ssh root@${IP[2]} "rm -f /root/.ssh/id_rsa*"
-sshpass -p password  ssh root@${IP[0]} "rm -f /root/.ssh/id_rsa*"
+sshpass -p password  ssh root@${IP[1]} "rm -f /root/.ssh/id_rsa*;chown root:root /root;chmod g-w /root"
+sshpass -p password  ssh root@${IP[2]} "rm -f /root/.ssh/id_rsa*;chown root:root /root;chmod g-w /root"
+sshpass -p password  ssh root@${IP[0]} "rm -f /root/.ssh/id_rsa*;chown root:root /root;chmod g-w /root"
+
 #sshpass -p password ssh root@172.20.195.153 "ls /root"
 [ ! -f /root/.ssh/id_rsa ] && ssh-keygen -q -t rsa -N "" -f /root/.ssh/id_rsa
 sleep 2
