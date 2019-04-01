@@ -6933,6 +6933,8 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                         test_dict.add_backup_md5sum(backup.uuid, md5sum)
 
         elif next_action == TestAction.create_vm_from_vmbackup:
+            import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
+            import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
             target_backup = None
             backup_name = None
             if len(constant_path_list[0]) > 1:
@@ -6952,17 +6954,28 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
 
             l3_uuid = lib_get_l3_by_name(os.environ.get('l3VlanNetworkName1')).uuid
             instance_offering_uuid = lib_get_instance_offering_by_name(os.environ.get('instanceOfferingName_s')).uuid
-            vol_ops.create_vm_from_vm_backup("vm_create_from_backup", target_backup.groupUuid, instance_offering_uuid, [l3_uuid])
+            backup_vm = vol_ops.create_vm_from_vm_backup("vm_create_from_backup", target_backup.groupUuid, instance_offering_uuid, l3_uuid, [l3_uuid])
+            new_vm = zstack_vm_header.ZstackTestVm()
+            new_vm.create_from(backup_vm.uuid)
+            test_dict.add_vm(new_vm)
             cond = res_ops.gen_query_conditions("groupUuid", '=', target_backup.groupUuid)
             backups = res_ops.query_resource(res_ops.VOLUME_BACKUP, cond)
-            #_update_bs_for_robot_state("disable")
-            #for backup in backups:
-            #    for volume in test_dict.get_all_volume_list():
-            #        volume.update()
-            #        volume.update_volume()
-            #        if backup.volumeUuid == volume.get_volume().uuid:
-            #            md5sum = test_dict.get_backup_md5sum(backup.uuid)
-            #            volume.set_md5sum(md5sum)
+
+            for backup in backups:
+                for volume in test_dict.get_all_volume_list():
+                    volume.update()
+                    volume.update_volume()
+                    if backup.volumeUuid == volume.get_volume().uuid:
+                        md5sum = test_dict.get_backup_md5sum(backup.uuid)
+                        new_volume_name = "data-volume-create-from-backup-"+backup.uuid
+                        cond = res_ops.gen_query_conditions("name", '=', new_volume_name)
+                        vol = res_ops.query_resource(res_ops.VOLUME, cond)[0]
+                        new_volume = zstack_volume_header.ZstackTestVolume()
+                        new_volume.create_from(vol.uuid, new_vm)
+                        test_dict.add_volume(new_volume)
+                        for volume in test_dict.get_all_volume_list():
+                            if volume.get_volume().uuid == vol.uuid:
+                                volume.set_md5sum(md5sum)
 
         elif next_action == TestAction.use_vm_backup:
             target_backup = None
