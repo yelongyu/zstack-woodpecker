@@ -3057,26 +3057,26 @@ def lib_get_backup_storage_list_by_vm(vm, session_uuid=None):
     else:
         return bss
 
-def lib_create_template_from_volume(volume_uuid, session_uuid=None):
+def lib_create_template_from_volume(volume_uuid, bs_uuid=None, session_uuid=None):
     cond = res_ops.gen_query_conditions('name', '!=', "only_for_robot_backup_test")
     bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond, session_uuid)
     volume = lib_get_volume_by_uuid(volume_uuid)
-    bs_uuid = None
-    if volume.vmInstanceUuid != None:
-        vm = lib_get_vm_by_uuid(volume.vmInstanceUuid)
-        if vm.state == vm_header.RUNNING:
+    if bs_uuid == None:
+        if volume.vmInstanceUuid != None:
+            vm = lib_get_vm_by_uuid(volume.vmInstanceUuid)
+            if vm.state == vm_header.RUNNING:
+                for bs in bss:
+                    if hasattr(inventory, 'IMAGE_STORE_BACKUP_STORAGE_TYPE') and bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+                        bs_uuid = bs.uuid
+                        break
+        ps = lib_get_primary_storage_by_uuid(volume.primaryStorageUuid)
+        if ps.type == "Ceph":
             for bs in bss:
-                if hasattr(inventory, 'IMAGE_STORE_BACKUP_STORAGE_TYPE') and bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+                if bs.fsid == ps.fsid:
                     bs_uuid = bs.uuid
                     break
-    ps = lib_get_primary_storage_by_uuid(volume.primaryStorageUuid)
-    if ps.type == "Ceph":
-        for bs in bss:
-            if bs.fsid == ps.fsid:
-                bs_uuid = bs.uuid
-                break
-    if bs_uuid == None:
-        bs_uuid = bss[random.randint(0, len(bss)-1)].uuid
+        if bs_uuid == None:
+            bs_uuid = bss[random.randint(0, len(bss)-1)].uuid
     #[Inlined import]
     import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
     image = zstack_image_header.ZstackTestImage()
@@ -5445,7 +5445,7 @@ def lib_robot_create_utility_vm(robot_test_obj):
                 utility_vm_image = img_ops.add_image(image_option)
 
             utility_vm_create_option = test_util.VmOption()
-            utility_vm_create_option.set_name('utility_vm_for_robot_test')
+            utility_vm_create_option.set_name('utility_vm_for_robot_test' + '-' + ps.name)
             utility_vm_create_option.set_image_uuid(utility_vm_image.uuid)
             utility_vm_create_option.set_ps_uuid(ps.uuid)
             l3_uuid = lib_get_l3_by_name(os.environ.get('l3VlanNetworkName1')).uuid
@@ -5455,6 +5455,7 @@ def lib_robot_create_utility_vm(robot_test_obj):
             #test_dict.add_utility_vm(utility_vm)
             if os.environ.get('ZSTACK_SIMULATOR') != "yes":
                 utility_vm.check()
+            robot_test_obj.get_test_dict().add_vm(utility_vm)
         else:
             import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
             utility_vm_uuid = utility_vm.uuid
@@ -5634,6 +5635,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             else:
                 target_vm.migrate(target_host.uuid)
         elif next_action == TestAction.create_image_from_volume:
+            bs_uuid = None
             target_vm = None
             image_name = None
             target_snapshot = None
@@ -5641,12 +5643,15 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             if len(constant_path_list[0]) > 2:
                 target_vm_name = constant_path_list[0][1]
                 image_name = constant_path_list[0][2]
+                (_, extra_args) = _parse_args(constant_path_list[0])
                 all_vm_list = test_dict.get_all_vm_list()
                 for vm in all_vm_list:
                     if vm.get_vm().name == target_vm_name:
                         target_vm = vm
                         break
-
+            for ea in extra_args:
+                if ea == "bs_uuid":
+                    bs_uuid = ea.split('::')[-1]
             if not target_vm or not image_name:
                 test_util.test_fail("no resource available for next action: %s" % (next_action))
 
@@ -5654,7 +5659,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             test_util.test_dsc('Robot Action: %s; on Volume: %s; on VM: %s' % \
                 (next_action, root_volume_uuid, target_vm.get_vm().uuid))
    
-            new_image = lib_create_template_from_volume(root_volume_uuid)
+            new_image = lib_create_template_from_volume(root_volume_uuid, bs_uuid=bs_uuid)
             import zstackwoodpecker.operations.image_operations as img_ops
             img_ops.update_image(new_image.get_image().uuid, image_name, None)
             test_util.test_dsc('Robot Action Result: %s; new RootVolume Image: %s'\
@@ -6362,6 +6367,8 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                     systemtags.append("ephemeral::shareable")
                 if ea == "scsi":
                     systemtags.append("capability::virtio-scsi")
+                if 'ps_uuid' in ea:
+                    volume_creation_option.set_primary_storage_uuid(ea.split('::')[-1])
 
             if ps_uuid:
                 ps = lib_get_primary_storage_by_uuid(ps_uuid)
