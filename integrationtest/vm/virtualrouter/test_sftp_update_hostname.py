@@ -48,7 +48,7 @@ def test():
     img_option = test_util.ImageOption()
     UEFI_image_url = os.environ.get('imageUrl_ZStack_UEFI')
     image_name = os.environ.get('imageName_ZStack_UEFI')
-    image_option.set_timeout(1200000)
+    img_option.set_timeout(1200000)
     img_option.set_name(image_name)
     bs_uuid = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, [], None)[0].uuid
     img_option.set_backup_storage_uuid_list([bs_uuid])
