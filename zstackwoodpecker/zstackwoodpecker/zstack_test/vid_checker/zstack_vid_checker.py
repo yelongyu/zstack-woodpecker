@@ -1526,7 +1526,8 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             if service.networkServiceType == 'LoadBalancer':
                 lb_service_need_attach = False
         if lb_service_need_attach:
-            net_ops.attach_lb_service_to_l3network(l3_net_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
+            #net_ops.attach_lb_service_to_l3network(l3_net_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
+            net_ops.attach_lb_service_to_l3network(l3_net_uuid, service_providor_uuid)
             lb_service_need_detach = True
         vm_creation_option.set_l3_uuids([l3_net_uuid])
         conditions = res_ops.gen_query_conditions('platform', '=', 'Linux')
