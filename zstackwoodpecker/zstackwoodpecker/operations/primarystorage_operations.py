@@ -41,6 +41,30 @@ def create_local_primary_storage(primary_storage_option, session_uuid=None):
             (evt.inventory.uuid, action.name))
     return evt.inventory
 
+def add_mon_to_ceph_primary_storage(mon_urls, ceph_ps_uuid, system_tag=None, user_tag=None, session_uuid=None):
+    action = api_actions.AddMonToCephPrimaryStorageAction()
+    action.timeout = 300000
+    action.monUrls = mon_urls
+    action.uuid = ceph_ps_uuid
+    action.systemTags = system_tag
+    action.userTags = user_tag
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Add Mon To Ceph Primary Storage [uuid:] %s [name:] %s' % \
+            (evt.inventory.uuid, action.name))
+    return evt.inventory
+
+def remove_mon_from_ceph_primary_storage(mon_hostnames, ceph_ps_uuid, system_tag=None, user_tag=None, session_uuid=None):
+    action = api_actions.RemoveMonFromCephBackupStorageAction()
+    action.timeout = 300000
+    action.monHostnames = mon_hostnames
+    action.uuid = ceph_ps_uuid
+    action.systemTags = system_tag
+    action.userTags = user_tag
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Add Mon To Ceph Primary Storage [uuid:] %s [name:] %s' % \
+            (evt.inventory.uuid, action.name))
+    return evt.inventory
+
 def create_ceph_primary_storage(primary_storage_option, session_uuid=None):
     action = api_actions.AddCephPrimaryStorageAction()
     action.timeout = 300000
