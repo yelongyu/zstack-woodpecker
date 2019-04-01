@@ -8040,3 +8040,10 @@ def lib_check_pid(pid_name):
     else:
         test_util.test_logger('process %s is not up' % pid_name)
         return False
+
+def lib_get_ospf_area_by_area_id(areaId):
+    cond = res_ops.gen_query_conditions('areaId', '=', areaId)
+    area = res_ops.query_resource(res_ops.VROUTER_OSPF_AREA, cond)
+    if area:
+        return area[0]
+    test_util.test_logger("Did not find ospf area by [area ID:] %s" % areaId)

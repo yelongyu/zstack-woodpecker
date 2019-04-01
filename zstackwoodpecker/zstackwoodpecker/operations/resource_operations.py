@@ -124,6 +124,8 @@ VOLUME_BACKUP = 'VolumeBackup'
 IPSEC_CONNECTION = 'IPsecConnection'
 SCSI_LUN = 'ScsiLun'
 ISCSI_SERVER = 'iScsiServer'
+VROUTER_OSPF_AREA = 'VRouterOspfArea'
+VROUTER_OSPF_NETWORK = 'VRouterOspfNetwork'
 
 def find_item_by_uuid(inventories, uuid):
     for item in inventories:
@@ -642,6 +644,10 @@ def _gen_query_action(resource, condition=None):
         action = api_actions.QueryScsiLunAction()
     elif resource == ISCSI_SERVER:
         action = api_actions.QueryIscsiServerAction()
+    elif resource == VROUTER_OSPF_AREA:
+        action = api_actions.QueryVRouterOspfAreaAction()
+    elif resource == VROUTER_OSPF_NETWORK:
+        action = api_actions.QueryVRouterOspfNetworkAction()
     return action
 
 def query_event_from_resource_stack(conditions = [], resource=EVENT_FROM_STACK, session_uuid=None, count='false'):
