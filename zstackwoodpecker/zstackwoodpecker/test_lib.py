@@ -5664,6 +5664,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             img_ops.update_image(new_image.get_image().uuid, image_name, None)
             test_util.test_dsc('Robot Action Result: %s; new RootVolume Image: %s'\
                     % (next_action, new_image.get_image().uuid))
+            new_image.update()
             test_dict.add_image(new_image)
 
             snapshots = test_dict.get_volume_snapshot(root_volume_uuid)

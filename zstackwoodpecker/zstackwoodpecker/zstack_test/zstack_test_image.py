@@ -45,6 +45,15 @@ class ZstackTestImage(image_header.TestImage):
         img_ops.expunge_image(self.image.uuid, bs_uuid_list)
         super(ZstackTestImage, self).expunge()
 
+    def update(self):
+        if self.get_state() != image_header.EXPUNGED:
+            updated_image = test_lib.lib_get_image_by_uuid(self.image.uuid)
+            if updated_image:
+                self.image = updated_image
+            else:
+                self.set_state(image_header.EXPUNGED)
+        return self.image
+
     def clean(self):
         if self.delete_policy != zstack_header.DELETE_DIRECT:
             if self.get_state() == image_header.DELETED:
