@@ -920,7 +920,8 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         img_ops.change_image_state(image_uuid, 'enable', session_uuid=project_login_session_uuid)
         if bs.type == 'ImageStoreBackupStorage':
             img_ops.export_image_from_backup_storage(image_uuid, bs.uuid, session_uuid=project_login_session_uuid)
-            img_ops.delete_exported_image_from_backup_storage(image_uuid, bs.uuid, session_uuid=project_login_session_uuid)
+            #img_ops.delete_exported_image_from_backup_storage(image_uuid, bs.uuid, session_uuid=project_login_session_uuid)
+            img_ops.delete_exported_image_from_backup_storage(image_uuid, bs.uuid)
         img_ops.set_image_qga_enable(image_uuid, session_uuid=project_login_session_uuid)
         img_ops.set_image_qga_disable(image_uuid, session_uuid=project_login_session_uuid)
         cond = res_ops.gen_query_conditions('name', '=', "image_policy_checker")
@@ -1580,7 +1581,8 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             vm_ops.destroy_vm(vm_uuid)
             vm_ops.expunge_vm(vm_uuid)
             if lb_service_need_detach:
-                net_ops.detach_lb_service_from_l3network(l3_net_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
+                #net_ops.detach_lb_service_from_l3network(l3_net_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
+                net_ops.detach_lb_service_from_l3network(l3_net_uuid, service_providor_uuid)
             acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
             return self.judge(True)
         else:
