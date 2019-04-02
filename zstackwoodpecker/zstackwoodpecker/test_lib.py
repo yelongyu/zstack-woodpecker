@@ -6873,7 +6873,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                 vm_creation_option.set_instance_offering_uuid(root_disk_uuid)
 
             vm_creation_option.set_image_uuid(target_image.get_image().uuid)
-
+            vm_creation_option.set_name(vm_name)
             conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
             instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
             vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
