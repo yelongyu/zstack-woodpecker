@@ -5650,7 +5650,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                         target_vm = vm
                         break
             for ea in extra_args:
-                if ea == "bs_uuid":
+                if "bs_uuid" in ea:
                     bs_uuid = ea.split('::')[-1]
             if not target_vm or not image_name:
                 test_util.test_fail("no resource available for next action: %s" % (next_action))
@@ -6851,6 +6851,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
 
         elif next_action == TestAction.create_vm_by_image:
             vm_name = None
+            ps_uuid = None
             image_format = None
             target_image = None
             if len(constant_path_list[0]) > 3:
@@ -6862,11 +6863,17 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                     if image.get_image().name == target_image_name:
                         target_image = image
                         break
+                (_, extra_args) = _parse_args(constant_path_list[0])
+                for ea in extra_args:
+                    if "ps_uuid" in ea:
+                        ps_uuid = ea.split('::')[-1]
 
             if not target_image or not vm_name:
                 test_util.test_fail("no resource available for next action: %s" % (next_action))
 
             vm_creation_option = test_util.VmOption()
+            if ps_uuid:
+                vm_creation_option.set_ps_uuid(ps_uuid)
 
             if image_format == "iso":
                 root_disk_uuid = lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName')).uuid
