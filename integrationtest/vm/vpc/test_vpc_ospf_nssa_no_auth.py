@@ -22,7 +22,7 @@ case_flavor = dict(vm1_l3_vlan_vm2_l3_vlan=dict(vm1l3=VPC1_VLAN, vm2l3=VPC2_VLAN
                    vm1_l3_vlan_vm2_l3_vxlan=dict(vm1l3=VPC1_VLAN, vm2l3=VPC2_VXLAN),
                    )
 
-ospf_area_id = '1.1.1.1'
+ospf_area_id = '2.2.2.2'
 ospf_area_type = 'NSSA'
 
 test_stub = test_lib.lib_get_test_stub()
@@ -80,9 +80,14 @@ def test():
         vpc_ops.add_vrouter_networks_to_ospf_area(vr_uuid[1], [vpc_l3], area_uuid)
 
     time.sleep(60)
+
     test_util.test_dsc("check ospf neighbor state")
     for vr in vr_uuid:
-        if 'Full' not in vpc_ops.get_vrouter_ospf_neighbor(vr).state:
+        if vpc_ops.get_vrouter_ospf_neighbor(vr):
+            if 'Full' not in vpc_ops.get_vrouter_ospf_neighbor(vr)[0]['state']:
+                print vpc_ops.get_vrouter_ospf_neighbor(vr)[0]['state']
+                test_util.test_fail('cannot form ospf neighbor, test fail')
+        else:
             test_util.test_fail('cannot form ospf neighbor, test fail')
 
     test_util.test_dsc("test vm1 and vm2 connectivity with ospf")
@@ -90,9 +95,10 @@ def test():
 
     test_lib.lib_error_cleanup(test_obj_dict)
     test_stub.remove_all_vpc_vrouter()
-    vpc_ops.delete_vrouter_ospf_area(area_uuid)
+    test_stub.delete_all_ospf_area()
 
 
 def env_recover():
     test_lib.lib_error_cleanup(test_obj_dict)
     test_stub.remove_all_vpc_vrouter()
+    test_stub.delete_all_ospf_area()

@@ -80,20 +80,25 @@ def test():
         vpc_ops.add_vrouter_networks_to_ospf_area(vr_uuid[1], [vpc_l3], area_uuid)
 
     time.sleep(60)
-    '''
+
     test_util.test_dsc("check ospf neighbor state")
     for vr in vr_uuid:
-        if 'Full' not in vpc_ops.get_vrouter_ospf_neighbor(vr).state:
+        if vpc_ops.get_vrouter_ospf_neighbor(vr):
+            if 'Full' not in vpc_ops.get_vrouter_ospf_neighbor(vr)[0]['state']:
+                print vpc_ops.get_vrouter_ospf_neighbor(vr)[0]['state']
+                test_util.test_fail('cannot form ospf neighbor, test fail')
+        else:
             test_util.test_fail('cannot form ospf neighbor, test fail')
-    '''
+
     test_util.test_dsc("test vm1 and vm2 connectivity with ospf")
     test_stub.check_icmp_between_vms(vm1, vm2, expected_result='PASS')
 
     test_lib.lib_error_cleanup(test_obj_dict)
     test_stub.remove_all_vpc_vrouter()
-    vpc_ops.delete_vrouter_ospf_area(area_uuid)
+    test_stub.delete_all_ospf_area()
 
 
 def env_recover():
     test_lib.lib_error_cleanup(test_obj_dict)
     test_stub.remove_all_vpc_vrouter()
+    test_stub.delete_all_ospf_area()

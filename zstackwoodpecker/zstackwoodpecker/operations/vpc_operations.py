@@ -87,12 +87,12 @@ def get_vrouter_route_table(session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def get_vrouter_ospf_neighbor(uuid, session_uuid=None):
+def get_vrouter_ospf_neighbor(vRouterUuid, session_uuid=None):
     action = api_actions.GetVRouterOspfNeighborAction()
     action.timeout = 300000
-    action.uuid = uuid
+    action.vRouterUuid = vRouterUuid
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventory
+    return evt.neighbors
 
 def set_vpc_vrouter_network_service_state(uuid, networkService='SNAT', state=None, session_uuid=None):
     action = api_actions.SetVpcVRouterNetworkServiceStateAction()

@@ -38,6 +38,7 @@ from contextlib import contextmanager
 from functools import wraps
 import itertools
 #import traceback
+import zstackwoodpecker.operations.vpc_operations as vpc_ops
 
 l3_vlan_system_name_list=['l3VlanNetworkName1', "l3VlanNetwork2"]
 l3_vxlan_system_name_list= ["l3VxlanNetwork11", "l3VxlanNetwork12"]
@@ -186,6 +187,12 @@ def remove_all_vpc_vrouter():
                 net_ops.detach_l3(nic_uuid)
             vm_ops.destroy_vm(vr_vm.uuid)
 
+
+def delete_all_ospf_area():
+    ospf_area_list = res_ops.query_resource(res_ops.VROUTER_OSPF_AREA)
+    if ospf_area_list:
+        for ospf_area in ospf_area_list:
+            vpc_ops.delete_vrouter_ospf_area(ospf_area.uuid)
 
 
 def create_eip(eip_name=None, vip_uuid=None, vnic_uuid=None, vm_obj=None, session_uuid = None):
