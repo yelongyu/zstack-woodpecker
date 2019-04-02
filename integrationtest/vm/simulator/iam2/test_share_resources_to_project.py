@@ -48,8 +48,9 @@ def test():
     project_name = 'test_share_project1'
     project = iam2_ops.create_iam2_project(project_name)
     project_uuid = project.uuid
-    cond = res_ops.gen_query_conditions("name",'=',"test_share_project1")
-    linked_account_uuid = res_ops.query_resource(res_ops.ACCOUNT,cond)[0].uuid
+    #cond = res_ops.gen_query_conditions("name",'=',"test_share_project1")
+    #linked_account_uuid = res_ops.query_resource(res_ops.ACCOUNT,cond)[0].uuid
+    linked_account_uuid = project.linkedAccountUuid
 
     # 2 create project operator
     project_operator_name = 'share_username1'
