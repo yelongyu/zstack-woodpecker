@@ -109,6 +109,7 @@ IAM2_VIRTUAL_ID_ATTRIBUTE = 'IAM2VirtualIDAttribute'
 IAM2_PROJECT_ATTRIBUTE = 'IAM2ProjectAttribute'
 IAM2_ORGANIZATION_ATTRIBUTE = 'IAM2OrganizationAttribute'
 ROLE='Role'
+POLICY='Policy'
 DATACENTER = 'DataCenter'
 NAS_FILESYSTEM = 'NasFileSystem'
 NAS_MOUNTTARGET = 'NasMountTarget'
@@ -614,6 +615,8 @@ def _gen_query_action(resource, condition=None):
         action = api_actions.QueryIAM2OrganizationAttributeAction()
     elif resource == ROLE:
         action = api_actions.QueryRoleAction()
+    elif resource == POLICY:
+        action = api_actions.QueryPolicyAction()
     elif resource == DATACENTER:
         action = api_actions.QueryDataCenterFromLocalAction()
     elif resource == ALIYUNNAS_ACCESSGROUP:

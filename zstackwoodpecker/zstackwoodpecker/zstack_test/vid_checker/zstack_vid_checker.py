@@ -623,13 +623,31 @@ class zstack_vid_attr_checker(checker_header.TestChecker):
         policy_uuid = iam2_ops.create_policy('policy', statements, session_uuid=session_uuid).uuid
         iam2_ops.attach_policy_to_role(policy_uuid, role_uuid, session_uuid=session_uuid)
         iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], vid_uuid, session_uuid=session_uuid)
-        #policy_check_vid.check()
         iam2_ops.detach_policy_from_role(policy_uuid, role_uuid, session_uuid=session_uuid)
         iam2_ops.update_role(role_uuid, [{"effect":"Allow","actions":[]}], session_uuid=session_uuid)
         iam2_ops.add_policy_statements_to_role(role_uuid, statements, session_uuid=session_uuid)
         iam2_ops.remove_roles_from_iam2_virtual_id([role_uuid], vid_uuid, session_uuid=session_uuid)
+        disable = 'disable'
+        enable = 'enable'
+        Disabled = 'Disabled'
+        iam2_ops.change_role_state(role_uuid, disable, session_uuid=session_uuid)
+        res_inv = res_ops.get_resource(res_ops.ROLE, uuid=role_uuid, session_uuid=session_uuid)[0]
+        if res_inv.state != Disabled:
+            test_util.test_fail("test change iam2 role state fail")
+        iam2_ops.change_role_state(role_uuid, enable, session_uuid=session_uuid)
+        res_ops.get_resource(res_ops.POLICY, session_uuid=audit_session_uuid)
+        res_ops.get_resource(res_ops.IAM2_VIRTUAL_ID, session_uuid=audit_session_uuid)
+        res_ops.get_resource(res_ops.IAM2_VIRTUAL_ID_GROUP, session_uuid=audit_session_uuid)
+        res_ops.get_resource(res_ops.QUOTA, session_uuid=audit_session_uuid)
+
         iam2_ops.delete_role(role_uuid, session_uuid=session_uuid)
-        #policy_check_vid.check()
+
+        #TODO:
+        # org.zstack.iam2.api.APIUpdateIAM2VirtualIDMsg
+        # org.zstack.iam2.api.APIRemoveRolesFromIAM2VirtualIDGroupMsg
+        # org.zstack.header.identity.APIAttachPolicyToUserGroupMsg
+        # org.zstack.header.identity.APIDetachPolicyFromUserGroupMsg
+        # org.zstack.header.identity.role.api.APIRemovePolicyStatementsFromRoleMsg
 
 
     def check_audit_admin_permission(self, username, password):
@@ -716,6 +734,7 @@ class zstack_vid_attr_checker(checker_header.TestChecker):
         res_ops.get_resource(res_ops.IAM2_PROJECT_ATTRIBUTE, session_uuid=audit_session_uuid)
         res_ops.get_resource(res_ops.IAM2_ORGANIZATION_ATTRIBUTE, session_uuid=audit_session_uuid)
         res_ops.get_resource(res_ops.ROLE, session_uuid=audit_session_uuid)
+        res_ops.get_resource(res_ops.POLICY, session_uuid=audit_session_uuid)
         res_ops.get_resource(res_ops.DATACENTER, session_uuid=audit_session_uuid)
         res_ops.get_resource(res_ops.ALIYUNNAS_ACCESSGROUP, session_uuid=audit_session_uuid)
         res_ops.get_resource(res_ops.NAS_FILESYSTEM, session_uuid=audit_session_uuid)
