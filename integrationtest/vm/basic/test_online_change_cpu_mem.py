@@ -40,7 +40,7 @@ def test():
     conf_ops.change_global_config('mevoco', 'overProvisioning.memory', '3')
     vm.stop()
     small_cpu = 2
-    big_mem = 6*1024*1024*1024
+    big_mem = 3*1024*1024*1024
     vm_ops.update_vm(vm_uuid, cpu=small_cpu,  memory=big_mem)
 
     vm.start()
