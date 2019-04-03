@@ -277,11 +277,12 @@ class DataMigration(TestChain):
 #         if not self.dst_ps:
         self.dst_ps = self.get_ps_candidate(self.data_volume.get_volume().uuid)
         vol_migr_inv = datamigr_ops.ps_migrage_data_volume(self.dst_ps.uuid, self.data_volume.get_volume().uuid)
-        cond_vol = res_ops.gen_query_conditions('uuid', '=', self.data_volume.get_volume().uuid)
-        assert res_ops.query_resource(res_ops.VOLUME, cond_vol)
-        self.data_volume_obsoleted = res_ops.query_resource(res_ops.VOLUME, cond_vol)[0]
-        conditions = res_ops.gen_query_conditions('uuid', '=', vol_migr_inv.uuid)
-        self.data_volume.set_volume(res_ops.query_resource(res_ops.VOLUME, conditions)[0])
+        self.data_volume.update_volume()
+#         cond_vol = res_ops.gen_query_conditions('uuid', '=', self.data_volume.get_volume().uuid)
+#         assert res_ops.query_resource(res_ops.VOLUME, cond_vol)
+#         self.data_volume_obsoleted = res_ops.query_resource(res_ops.VOLUME, cond_vol)[0]
+#         conditions = res_ops.gen_query_conditions('uuid', '=', vol_migr_inv.uuid)
+#         self.data_volume.set_volume(res_ops.query_resource(res_ops.VOLUME, conditions)[0])
         assert self.data_volume.get_volume().primaryStorageUuid == self.dst_ps.uuid
         self.set_ceph_mon_env(self.dst_ps.uuid)
         return self

@@ -16,10 +16,11 @@ data_migration = test_stub.DataMigration()
 
 def test():
     data_migration.create_vm(data_migration.image_name_net)
+    test_obj_dict.add_vm(data_migration.vm)
     data_migration.create_data_volume()
     new_size = 2*1024*1024*1024
     data_migration.resize_data_volume(new_size)
-    test_obj_dict.add_vm(data_migration.vm)
+
     test_obj_dict.add_volume(data_migration.data_volume)
 
     snapshots = test_obj_dict.get_volume_snapshot(data_migration.data_volume.get_volume().uuid)
