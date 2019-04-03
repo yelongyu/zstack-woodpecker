@@ -1,5 +1,7 @@
 import zstackwoodpecker.test_state as ts_header
 import zstackwoodpecker.operations.resource_operations as res_ops
+import random
+
 TestAction = ts_header.TestAction
 
 def path():
@@ -29,7 +31,7 @@ def path():
                            [TestAction.resize_volume, ceph_vms[0], 5*1024*1024], 
                            [TestAction.detach_volume, "volume1"],
                            [TestAction.create_image_from_volume, ceph_vms[0], 'image_created_from_%s' % ceph_vms[0], "=bs_uuid::%s" % imagestore.uuid],
-                           [TestAction.create_vm_by_image, 'image_created_from_%s' % ceph_vms[0], 'qcow2', 'vm4'],
+                           [TestAction.create_vm_by_image, 'image_created_from_%s' % ceph_vms[0], 'qcow2', 'vm4', '=ps_uuid::%s' % random.choice(iscsi_ps)],
                            [TestAction.stop_vm, 'vm4'],
                            [TestAction.ps_migrage_vm, 'vm4'],
                            [TestAction.attach_volume, 'vm4', "volume1"]])
