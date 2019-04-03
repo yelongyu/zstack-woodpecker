@@ -639,15 +639,20 @@ class zstack_vid_attr_checker(checker_header.TestChecker):
         res_ops.get_resource(res_ops.IAM2_VIRTUAL_ID, session_uuid=session_uuid)
         res_ops.get_resource(res_ops.IAM2_VIRTUAL_ID_GROUP, session_uuid=session_uuid)
         res_ops.get_resource(res_ops.QUOTA, session_uuid=session_uuid)
+        virtual_id_new_name = 'virtual_id_new_name'
+        virtual_id_new_des = 'virtual_id_new_des'
+        virtual_id_new_password = 'virtual_id_new_password' 
+        iam2_ops.update_iam2_virtual_id(vid_uuid, virtual_id_new_name, virtual_id_new_des, virtual_id_new_password, session_uuid=session_uuid)
+        action = "org.zstack.header.image.**"
+        statement_uuid = iam2_ops.get_policy_statement_uuid_of_role(role_uuid, action)
+        iam2_ops.remove_policy_statements_from_role(role_uuid, [statement_uuid], session_uuid=session_uuid)
 
         iam2_ops.delete_role(role_uuid, session_uuid=session_uuid)
 
         #TODO:
-        # org.zstack.iam2.api.APIUpdateIAM2VirtualIDMsg
         # org.zstack.iam2.api.APIRemoveRolesFromIAM2VirtualIDGroupMsg
         # org.zstack.header.identity.APIAttachPolicyToUserGroupMsg
         # org.zstack.header.identity.APIDetachPolicyFromUserGroupMsg
-        # org.zstack.header.identity.role.api.APIRemovePolicyStatementsFromRoleMsg
 
 
     def check_audit_admin_permission(self, username, password):
