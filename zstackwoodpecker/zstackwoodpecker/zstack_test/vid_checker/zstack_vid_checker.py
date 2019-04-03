@@ -635,10 +635,10 @@ class zstack_vid_attr_checker(checker_header.TestChecker):
         if res_inv.state != Disabled:
             test_util.test_fail("test change iam2 role state fail")
         iam2_ops.change_role_state(role_uuid, enable, session_uuid=session_uuid)
-        res_ops.get_resource(res_ops.POLICY, session_uuid=audit_session_uuid)
-        res_ops.get_resource(res_ops.IAM2_VIRTUAL_ID, session_uuid=audit_session_uuid)
-        res_ops.get_resource(res_ops.IAM2_VIRTUAL_ID_GROUP, session_uuid=audit_session_uuid)
-        res_ops.get_resource(res_ops.QUOTA, session_uuid=audit_session_uuid)
+        res_ops.get_resource(res_ops.POLICY, session_uuid=session_uuid)
+        res_ops.get_resource(res_ops.IAM2_VIRTUAL_ID, session_uuid=session_uuid)
+        res_ops.get_resource(res_ops.IAM2_VIRTUAL_ID_GROUP, session_uuid=session_uuid)
+        res_ops.get_resource(res_ops.QUOTA, session_uuid=session_uuid)
 
         iam2_ops.delete_role(role_uuid, session_uuid=session_uuid)
 
