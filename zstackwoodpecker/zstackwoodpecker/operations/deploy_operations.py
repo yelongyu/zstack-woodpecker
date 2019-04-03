@@ -2470,6 +2470,31 @@ def add_virtual_router(scenarioConfig, scenarioFile, deployConfig, session_uuid,
 
     wait_for_thread_done()
 
+    for i in xmlobject.safe_list(deployConfig.instanceOfferings.virtualRouterOffering):
+        if xmlobject.has_element(i, 'l3BasicNetwork'):
+            for l3net in xmlobject.safe_list(i.l3BasicNetwork):
+                action = api_actions.CreateSystemTagAction()
+                action.sessionUuid = session_uuid
+                action.timeout = 30000
+                action.resourceType = 'InstanceOfferingVO'
+
+                cond = res_ops.gen_query_conditions('type','=','VirtualRouter')
+                vr_instance_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING,cond)[0].uuid
+                action.resourceUuid = vr_instance_uuid
+
+                zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, name=i.zoneRef.text_)
+                zinv = get_first_item_from_list(zinvs, 'zone', i.zoneRef.text_, 'virtual router offering')
+                cond = res_ops.gen_query_conditions('zoneUuid', '=', zinv.uuid)
+                cond1 = res_ops.gen_query_conditions('name', '=', l3net.text_, cond)
+                l3_network = res_ops.query_resource(res_ops.L3_NETWORK, cond1, session_uuid)
+                action.tag = 'guestL3Network::' + l3_network[0].uuid
+
+                thread = threading.Thread(target = _thread_for_action, args = (action, ))
+                wait_for_thread_queue()
+                thread.start()
+
+    wait_for_thread_done()
+
 def json_post(uri, body=None, headers={}, method='POST', fail_soon=False):
     ret = []
     def post(_):
