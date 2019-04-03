@@ -1726,7 +1726,8 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             vm_ops.destroy_vm(vm_uuid)
             vm_ops.expunge_vm(vm_uuid)
             if pf_service_need_detach:
-                net_ops.detach_pf_service_from_l3network(l3_net_uuid, pf_service_providor_uuid, session_uuid=project_login_session_uuid)
+                #net_ops.detach_pf_service_from_l3network(l3_net_uuid, pf_service_providor_uuid, session_uuid=project_login_session_uuid)
+                net_ops.detach_pf_service_from_l3network(l3_net_uuid, pf_service_providor_uuid)
             acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
             return self.judge(True)
         else:
