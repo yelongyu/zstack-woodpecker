@@ -74,6 +74,7 @@ LOCAL_STORAGE_RESOURCE_REF = 'LocalStorageResourceRef'
 IMAGE_STORE_BACKUP_STORAGE = 'ImageStoreBackupStorage'
 SCHEDULER = 'Scheduler'
 SCHEDULERJOB = 'SchedulerJob'
+SCHEDULERJOBGROUP = 'SchedulerJobGroup'
 SCHEDULERTRIGGER = 'SchedulerTrigger'
 VCENTER = 'VCenter'
 VCENTER_CLUSTER = 'VCenterCluster'
@@ -547,6 +548,8 @@ def _gen_query_action(resource, condition=None):
         action = api_actions.QuerySchedulerAction()
     elif resource == SCHEDULERJOB:
         action = api_actions.QuerySchedulerJobAction()
+    elif resource == SCHEDULERJOBGROUP:
+        action = api_actions.QuerySchedulerJobGroupAction()
     elif resource == SCHEDULERTRIGGER:
         action = api_actions.QuerySchedulerTriggerAction()
     elif resource == VCENTER:
