@@ -123,7 +123,16 @@ def test():
     
     #3.get resource from resource stack
     resource = resource_stack_ops.get_resource_from_resource_stack(resource_stack.uuid)
-    if resource == None or len(resource) != 3:
+    cond = res_ops.gen_query_conditions('l3Network.uuid', '=', l3_pri_queried[0].uuid)
+    l2 = res_ops.query_resource(res_ops.L2_NETWORK, cond)[0]
+    cond1 = res_ops.gen_query_conditions('name', '=', "vrouter")
+    cond2 = res_ops.gen_query_conditions('attachedL2NetworkUuids', '=', l2.uuid, cond1)
+    provider = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER, cond2)
+    if provider:
+        resource_num = 4
+    else:
+        resource_num = 3
+    if resource == None or len(resource) != resource_num:
         test_util.test_fail("Fail to get resource from resource_stack")
     
     #4.query event from resource stack
