@@ -5649,9 +5649,9 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                     if vm.get_vm().name == target_vm_name:
                         target_vm = vm
                         break
-            for ea in extra_args:
-                if "bs_uuid" in ea:
-                    bs_uuid = ea.split('::')[-1]
+                for ea in extra_args:
+                    if "bs_uuid" in ea:
+                        bs_uuid = ea.split('::')[-1]
             if not target_vm or not image_name:
                 test_util.test_fail("no resource available for next action: %s" % (next_action))
 
@@ -5708,17 +5708,22 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                 target_volume_name = constant_path_list[0][1]
                 image_name = constant_path_list[0][2]
                 all_volume_list = test_dict.get_all_volume_list()
+                (_, extra_args) = _parse_args(constant_path_list[0])
                 for volume in all_volume_list:
                     if volume.get_volume().name == target_volume_name:
                         target_volume = volume
                         break
+                for ea in extra_args:
+                    if "bs_uuid" in ea:
+                        bs_uuid = ea.split('::')[-1]
 
             if not target_volume:
                 test_util.test_fail("no resource available for next action: %s" % (next_action))
 
             test_util.test_dsc('Robot Action: %s; on Volume: %s;' % \
                 (next_action, target_volume.get_volume().uuid))
-            new_data_vol_temp = lib_create_data_vol_template_from_volume(None, target_volume.get_volume())
+            bs_list = [bs_uuid] if bs_uuid else []
+            new_data_vol_temp = lib_create_data_vol_template_from_volume(None, bs_list, target_volume.get_volume())
             import zstackwoodpecker.operations.image_operations as img_ops
             img_ops.update_image(new_data_vol_temp.get_image().uuid, image_name, None)
             test_util.test_dsc('Robot Action Result: %s; new DataVolume Image: %s' \
@@ -6236,6 +6241,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                 test_util.test_logger('No new snapshot found for volume %s, skip the snapshot tree update' % (target_volume.get_volume().uuid))
 
         elif next_action == TestAction.create_data_volume_from_image:
+            ps_uuid = None
             target_images = None
             target_image_name = None
             (normal_args, extra_args) = _parse_args(constant_path_list[0])
@@ -6288,6 +6294,8 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                     systemtags.append("ephemeral::shareable")
                 if ea == "scsi":
                     systemtags.append("capability::virtio-scsi")
+                if 'ps_uuid' in ea:
+                    ps_uuid = ea.split('::')[-1]
 
 
             test_util.test_dsc('Robot Action: %s; on Image: %s' % \
@@ -6295,7 +6303,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             target_image = lib_get_image_by_uuid(target_images[0]['uuid'])
             bs_uuid = target_image.backupStorageRefs[0].backupStorageUuid
             ps_uuid_list = lib_get_primary_storage_uuid_list_by_backup_storage(bs_uuid)
-            ps_uuid = random.choice(ps_uuid_list)
+            ps_uuid = random.choice(ps_uuid_list) if not ps_uuid else ps_uuid
             ps = lib_get_primary_storage_by_uuid(ps_uuid)
             host_uuid = None
             if ps.type == inventory.LOCAL_STORAGE_TYPE:
@@ -7283,7 +7291,7 @@ def lib_get_test_stub(suite_name=None):
 
 #---------------------------------------------------------------
 #Robot actions.
-def lib_create_data_vol_template_from_volume(target_vm=None, vm_target_vol=None):
+def lib_create_data_vol_template_from_volume(target_vm=None, bs_list=[], vm_target_vol=None):
     import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
     if target_vm:
         vm_inv = target_vm.get_vm()
@@ -7294,15 +7302,16 @@ def lib_create_data_vol_template_from_volume(target_vm=None, vm_target_vol=None)
         ps_uuid = vm_target_vol.primaryStorageUuid
         backup_storage_uuid_list = lib_get_backup_storage_uuid_list_by_zone(lib_get_primary_storage_by_uuid(ps_uuid).zoneUuid)
 
-    bs_list = []
-    for bsu in backup_storage_uuid_list:
-        bs = lib_get_backup_storage_by_uuid(bsu)
-        if bs.type == "Ceph":
-            ps_list = lib_get_primary_storage_uuid_list_by_backup_storage(bsu)
-            ps = lib_get_primary_storage_by_uuid(ps_uuid)
-            if ps.uuid not in ps_list:
-                continue
-        bs_list.append(bsu)
+#     bs_list = []
+    if not bs_list:
+        for bsu in backup_storage_uuid_list:
+            bs = lib_get_backup_storage_by_uuid(bsu)
+            if bs.type == "Ceph":
+                ps_list = lib_get_primary_storage_uuid_list_by_backup_storage(bsu)
+                ps = lib_get_primary_storage_by_uuid(ps_uuid)
+                if ps.uuid not in ps_list:
+                    continue
+            bs_list.append(bsu)
 
     new_data_vol_inv = vol_ops.create_volume_template(vm_target_vol.uuid, \
             bs_list, \
