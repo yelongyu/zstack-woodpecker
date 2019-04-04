@@ -96,7 +96,7 @@ def test():
 
    if total_cap != total_cap1:
       test_util.test_fail('Primary Storage total capacity is not same,after changing vm image:%s.The previous value:%s, the current value:%s' % (image2_uuid,total_cap,total_cap1))
-   if (avail_cap-1) <= (avail_cap1 - change_size) <= (avail_cap+1):
+   if not (avail_cap1-1) <= (avail_cap - change_size) <= (avail_cap1+1):
       test_util.test_fail('Primary Storage available capacity is not correct,after changing larger image:%s.The previous value:%s, the current value:%s' % (image2_uuid,avail_cap,avail_cap1))
 
    vm_ops.stop_vm(vm_uuid)
@@ -116,7 +116,7 @@ def test():
    vm_ops.start_vm(vm_uuid)
    vm.update()
    #check whether the vm is running successfully
-   if not test_lib.lib_wait_target_up(vm.get_vm().vmNics[0].ip,'22',120):
+   if not test_lib.lib_wait_target_up(vm.get_vm().vmNics[0].ip,'22',180):
       test_util.test_fail('vm:%s is not startup in 120 seconds.Fail to reboot it.' % vm_uuid)
    #check whether data volumes attached to the vm has changed
    data_volumes_after_uuids_tiny = []
@@ -140,7 +140,7 @@ def test():
 
    if total_cap2 != total_cap1:
       test_util.test_fail('Primary Storage total capacity is not same,after changing vm image:%s.The previous value:%s, the current value:%s' % (image1_uuid,total_cap1,total_cap2))
-   if (change_size-1) <= (avail_cap1- avail_cap2) <= (change_size+1):
+   if not (change_size-1) <= (avail_cap2 - avail_cap1) <= (change_size+1):
       test_util.test_fail('Primary Storage available capacity is not correct,after changing smaller image:%s.The previous value:%s, the current value:%s' % (image1_uuid,avail_cap1,avail_cap2))
 
 
