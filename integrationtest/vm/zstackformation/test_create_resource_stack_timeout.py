@@ -15,7 +15,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 
 def test():
     test_util.test_dsc("Test Resource template Apis")
-
+   
     cond = res_ops.gen_query_conditions('status', '=', 'Ready')
     cond = res_ops.gen_query_conditions('state', '=', 'Enabled', cond)
     cond = res_ops.gen_query_conditions('system', '=', 'false', cond)
@@ -37,45 +37,45 @@ def test():
     templateContent = '''
 {
     "ZStackTemplateFormatVersion": "2018-06-18",
-    "Description": "Just create a flat network & VM",
+    "Description": "Just create a VM with eip",
     "Parameters": {
-        "L3NetworkUuid":{
+        "InstanceOfferingUuid": {
             "Type": "String",
-            "Label": "三层网络"
+            "Label": "vm instance offering"
         },
-        "BackupStorageUuid":{
-            "Type": "CommaDelimitedList",
-            "Label": "镜像服务器"
+        "ImageUuid":{
+            "Type": "String"
+        },
+        "PrivateNetworkUuid":{
+            "Type": "String"
+        },
+        "PublicNetworkUuid":{
+            "Type": "String"
         }
     },
     "Resources": {
         "VmInstance": {
             "Type": "ZStack::Resource::VmInstance",
             "Properties": {
-                "name": "VM-STACK",
-                "instanceOfferingUuid": {
-                    "Fn::GetAtt":["InstanceOffering","uuid"]
-                },
-                "imageUuid":{"Fn::GetAtt":["Image","uuid"]},
-                "l3NetworkUuids":[{"Ref":"L3NetworkUuid"}]
+                "name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"},"VM"]]},
+                "instanceOfferingUuid": {"Ref":"InstanceOfferingUuid"},
+                "imageUuid":{"Ref":"ImageUuid"},
+                "l3NetworkUuids":[{"Ref":"PrivateNetworkUuid"}]
             }
         },
-        "InstanceOffering": {
-            "Type": "ZStack::Resource::InstanceOffering",
+        "VIP": {
+            "Type": "ZStack::Resource::Vip",
             "Properties": {
-                "name":"1G-1CPU-STACK",
-                "description":"测试创建计算规格",
-                "cpuNum": 1,
-                "memorySize": 1073741824
+                "name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"},"VIP"]]},
+                "l3NetworkUuid":{"Ref":"PublicNetworkUuid"}
             }
         },
-        "Image": {
-            "Type": "ZStack::Resource::Image",
+        "EIP":{
+            "Type": "ZStack::Resource::Eip",
             "Properties": {
-                "name": "IMAGE-STACK",
-                "backupStorageUuids": {"Ref":"BackupStorageUuid"},
-                "url":"http://172.20.1.22/mirror/diskimages/centos7-test.qcow2",
-                "format": "qcow2"
+                "name": {"Fn::Join":["-",[{"Ref":"ZStack::StackName"},"EIP"]]},
+                "vipUuid":{"Fn::GetAtt":["VIP","uuid"]},
+                "vmNicUuid":{"Fn::GetAtt":[{"Fn::Select":[0,{"Fn::GetAtt":["VmInstance","vmNics"]}]},"uuid"]}
             }
         }
     },

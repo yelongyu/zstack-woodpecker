@@ -54,10 +54,10 @@ def test():
         "InstanceOffering": {
             "Type": "ZStack::Resource::InstanceOffering",
             "Properties": {
-                "name":"1G-1CPU-STACK",
+                "name":"256M-1CPU-STACK",
                 "description":"测试创建计算规格",
                 "cpuNum": 1,
-                "memorySize": 1073741824
+                "memorySize": 268435456
             }
         },
         "Image": {
@@ -95,7 +95,7 @@ def test():
     cond = res_ops.gen_query_conditions('name', '=', 'VM-STACK')
     vm_queried = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
 
-    cond = res_ops.gen_query_conditions('name', '=', '1G-1CPU-STACK')
+    cond = res_ops.gen_query_conditions('name', '=', '256M-1CPU-STACK')
     instance_offering_queried = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond)
 
     cond = res_ops.gen_query_conditions('name', '=', 'IMAGE-STACK')
