@@ -314,7 +314,7 @@ def create_snapshot_scheduler(snapshot_option, type, name, start_time=None, inte
 def delete_snapshot(snapshot_uuid, session_uuid=None):
     action = api_actions.DeleteVolumeSnapshotAction()
     action.uuid = snapshot_uuid
-    action.timeout = 300000
+    action.timeout = 600000
     test_util.action_logger('Delete [Snapshot:] %s ' % snapshot_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt

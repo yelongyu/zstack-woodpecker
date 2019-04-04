@@ -71,6 +71,7 @@ def test():
     test_stub.enable_all_pss()
     host_ops.reconnect_host(host_uuid)
     #vm_ops.reconnect_vr(vr_uuid)
+    test_stub.ensure_pss_connected()
     vrs = test_lib.lib_get_all_vrs()
     time.sleep(5)
     for vr in vrs:
