@@ -5700,6 +5700,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                 test_util.test_logger('No new snapshot found for volume %s, skip the snapshot tree update' % (root_volume_uuid))
 
         elif next_action == TestAction.create_data_vol_template_from_volume:
+            bs_uuid = None
             target_volume = None
             image_name = None
             target_snapshot = None
