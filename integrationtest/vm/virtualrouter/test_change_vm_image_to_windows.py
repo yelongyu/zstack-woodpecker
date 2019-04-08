@@ -97,8 +97,8 @@ def test():
       vm_ops.reconnect_vr(vr.uuid)
    vm_ops.start_vm(vm_uuid)
 
-   if not test_lib.lib_wait_target_up(vm_ip,'22',120):
-      test_util.test_fail('vm:%s is not startup in 120 seconds.Fail to reboot it.' % vm_uuid)
+   if not test_lib.lib_wait_target_up(vm_ip,'22',180):
+      test_util.test_fail('vm:%s is not startup in 180 seconds.Fail to reboot it.' % vm_uuid)
    #check whether data volumes attached to the vm has changed
    data_volumes_after_uuids_linux = []
    data_volumes_after_linux = test_lib.lib_get_data_volumes(vm.get_vm())
