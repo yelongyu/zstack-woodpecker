@@ -30,8 +30,15 @@ def path():
 		[TestAction.resize_data_volume, "volume1", 5*1024*1024],
 		[TestAction.attach_volume, "vm1", "volume1"],
 		[TestAction.create_volume_snapshot, "vm1-root", 'snapshot1'],
+		[TestAction.create_volume_snapshot, "volume2", 'snapshot2-1'],
+		[TestAction.create_volume_snapshot, "volume2", 'snapshot2-2'],
+		[TestAction.create_volume_snapshot, "volume2", 'snapshot2-3'],
+		[TestAction.create_volume_snapshot, "volume2", 'snapshot2-4'],
+		[TestAction.create_volume_snapshot, "volume3", 'snapshot3-1'],
+                [TestAction.delete_volume_snapshot, "snapshot2-4"],
 		[TestAction.delete_volume, "volume1"],
 		[TestAction.reboot_vm, "vm1"],
 		[TestAction.resize_data_volume, "volume2", 5*1024*1024],
+                [TestAction.batch_delete_volume_snapshot, ["snapshot3-1","snapshot2-2","snapshot2-3","snapshot2-4"]],
 		[TestAction.reboot_vm, "vm1"]])
 
