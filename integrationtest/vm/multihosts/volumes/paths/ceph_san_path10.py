@@ -33,10 +33,7 @@ def path():
     ceph_vms = [VM('utility_vm_for_robot_test' + '-' + ps.name) for ps in ps_inv if ps.type == 'Ceph']
     vm2 = VM('vm2')
 
-    if (not imagestore) or (not ceph_bs):
-        return dict(initial_formation="template3", path_list=[])
-
-    else:
+    if imagestore and ceph_bs:
         return dict(initial_formation="template3",
                     path_list=[[TestAction.create_volume, "ceph_volume1", "=ps_uuid::%s" % ceph_ps[0]],
                                [TestAction.create_volume_snapshot, "ceph_volume1", "ceph_volume1_snapshot1"],
@@ -75,4 +72,6 @@ def path():
                                [TestAction.ps_migrate_volume, "iscsi_volume1"],
                                vm2.start()
                                ])
+    else:
+        return dict(initial_formation="template3", path_list=[])
 

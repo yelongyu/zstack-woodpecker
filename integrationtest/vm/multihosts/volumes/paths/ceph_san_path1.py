@@ -17,10 +17,7 @@ def path():
     iscsi_vms = ['utility_vm_for_robot_test' + '-' + ps.name for ps in ps_inv if ps.type == 'SharedBlock']
     ceph_vms = ['utility_vm_for_robot_test' + '-' + ps.name for ps in ps_inv if ps.type == 'Ceph']
 
-    if (not imagestore) or (not ceph_bs):
-        return dict(initial_formation="template3", path_list=[])
-
-    else:
+    if imagestore and ceph_bs:
         return dict(initial_formation="template3",
                     path_list=[[TestAction.create_volume, "volume1", "=ps_uuid::%s" % iscsi_ps[0]],
                                [TestAction.attach_volume, iscsi_vms[-1], "volume1"],
@@ -39,4 +36,5 @@ def path():
                                [TestAction.stop_vm, 'vm4'],
                                [TestAction.ps_migrage_vm, 'vm4'],
                                [TestAction.attach_volume, 'vm4', "volume1"]])
-
+    else:
+        return dict(initial_formation="template3", path_list=[])
