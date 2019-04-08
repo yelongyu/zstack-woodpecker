@@ -10,8 +10,8 @@ def path():
     ps_inv = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
     cond_imagestore = res_ops.gen_query_conditions('type', '=', "ImageStoreBackupStorage", cond)
     cond_ceph = res_ops.gen_query_conditions('type', '=', "Ceph", cond)
-    imagestore = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond_imagestore)[0]
-    ceph_bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond_ceph)[0]
+    imagestore = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond_imagestore)
+    ceph_bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond_ceph)
     iscsi_ps = [ps.uuid for ps in ps_inv if ps.type == 'SharedBlock']
     ceph_ps = [ps.uuid for ps in ps_inv if ps.type == 'Ceph']
     iscsi_vms = ['utility_vm_for_robot_test' + '-' + ps.name for ps in ps_inv if ps.type == 'SharedBlock']
@@ -30,7 +30,7 @@ def path():
                            [TestAction.clone_vm, ceph_vms[0], "vm3"],
                            [TestAction.resize_volume, ceph_vms[0], 5*1024*1024], 
                            [TestAction.detach_volume, "volume1"],
-                           [TestAction.create_image_from_volume, ceph_vms[0], 'image_created_from_%s' % ceph_vms[0], "=bs_uuid::%s" % imagestore.uuid],
+                           [TestAction.create_image_from_volume, ceph_vms[0], 'image_created_from_%s' % ceph_vms[0], "=bs_uuid::%s" % imagestore[0].uuid],
                            [TestAction.create_vm_by_image, 'image_created_from_%s' % ceph_vms[0], 'qcow2', 'vm4', '=ps_uuid::%s' % random.choice(iscsi_ps)],
                            [TestAction.stop_vm, 'vm4'],
                            [TestAction.ps_migrage_vm, 'vm4'],
