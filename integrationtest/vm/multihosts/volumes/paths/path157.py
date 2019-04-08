@@ -11,7 +11,7 @@ def path():
 		[TestAction.resize_data_volume, "volume1", 5*1024*1024], \
 		[TestAction.stop_vm, "vm1"],\
 		[TestAction.use_volume_snapshot, "snapshot1"], \
-		[TestAction.start, "vm1"],\
+		[TestAction.start_vm, "vm1"],\
 		[TestAction.resize_data_volume, "volume1", 5*1024*1024], \
 		[TestAction.create_volume_snapshot, "volume1", "snapshot11"], \
 		[TestAction.create_volume_snapshot, "volume1", "snapshot21"], \
@@ -20,7 +20,7 @@ def path():
 		[TestAction.attach_volume, "vm1", "volume1"], \
 		[TestAction.stop_vm, "vm1"],\
                 [TestAction.use_volume_snapshot, "snapshot1"], \
-                [TestAction.start, "vm1"],\
+                [TestAction.start_vm, "vm1"],\
 		[TestAction.create_data_vol_template_from_volume, "volume1", "image1"], \
 		[TestAction.delete_volume_snapshot, "snapshot31"], \
 		[TestAction.reboot_vm, "vm1"]])
