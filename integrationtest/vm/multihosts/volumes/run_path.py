@@ -24,9 +24,10 @@ _config_ = {
 test_dict = test_state.TestStateDict()
 TestAction = ts_header.TestAction
 
-case_flavor = test_util.load_paths(os.path.join(os.path.dirname(__file__), "templates"), os.path.join(os.path.dirname(__file__), "paths"))
 default_config = [{"ps1": "PS"}, {"ps1": "default"}, {"host1": "HOST"}, {"host1": "default"}]
+
 def test():
+    case_flavor = test_util.load_paths(os.path.join(os.path.dirname(__file__), "templates"), os.path.join(os.path.dirname(__file__), "paths"))
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     initial_formation = flavor['initial_formation']
     if flavor.has_key('config'):
