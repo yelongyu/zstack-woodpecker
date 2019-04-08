@@ -48,7 +48,7 @@ def test():
    vm.update()
    #check whether the vm is running successfully
    if not test_lib.lib_wait_target_up(vm.get_vm().vmNics[0].ip,'22',180):
-      test_util.test_fail('vm:%s is not startup in 120 seconds.Fail to reboot it.' % vm_uuid)
+      test_util.test_fail('vm:%s is not startup in 180 seconds.Fail to reboot it.' % vm_uuid)
    #check whether data volumes attached to the vm has changed
    data_volumes_after_uuids = []
    data_volumes_after = test_lib.lib_get_data_volumes(vm.get_vm())
@@ -81,7 +81,7 @@ def test():
    vm.update()
    #check whether the vm is running successfully
    if not test_lib.lib_wait_target_up(vm.get_vm().vmNics[0].ip,'22',180):
-      test_util.test_fail('vm:%s is not startup in 120 seconds.Fail to reboot it.' % vm_uuid)
+      test_util.test_fail('vm:%s is not startup in 180 seconds.Fail to reboot it.' % vm_uuid)
    #check whether data volumes attached to the vm has changed
    data_volumes_after_uuids_tiny = []
    data_volumes_after_tiny = test_lib.lib_get_data_volumes(vm.get_vm())
