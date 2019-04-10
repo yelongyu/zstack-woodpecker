@@ -2015,7 +2015,7 @@ class MultiSharedPS(object):
         (_, dst_md5, _)= ssh.execute('sync; sync; sleep 30; md5sum %s' % dst_file, vm_ip, 'root', 'password')
         dst_file_md5 = dst_md5.split(' ')[0]
         test_util.test_dsc('src_file_md5: [%s], dst_file_md5: [%s]' % (src_file_md5, dst_file_md5))
-        assert dst_file_md5 == src_file_md5, 'dst_file_md5 [%s] and src_file_md5 [%s] is not match, stop test' % (src_file_md5, dst_file_md5)
+        assert dst_file_md5 == src_file_md5, 'dst_file_md5 [%s] and src_file_md5 [%s] is not match, stop test' % (dst_file_md5, src_file_md5)
         return self
 
     def check_data(self, vm):
