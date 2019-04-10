@@ -7069,10 +7069,16 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                 if ea == "full":
                     full = True
 
-            new_vm = target_vm.clone([vm_name], full=full)[0]
+            # new_vm = target_vm.clone([vm_name], full=full)[0]
+            vm_names = vm_name.split(',')
+            new_vms = target_vm.clone(vm_names, full=full)
+
             test_util.test_dsc('Robot Action Result: %s; new VM: %s'\
-                    % (next_action, new_vm.get_vm().uuid))
-            test_dict.add_vm(new_vm)
+                    % (next_action, [new_vm.get_vm().uuid for new_vm in new_vms]))
+            # test_dict.add_vm(new_vm)
+            for new_vm in new_vms:
+                test_dict.add_vm(new_vm)
+
             for volume in test_dict.get_all_volume_list():
                 volume.update()
                 volume.update_volume()
