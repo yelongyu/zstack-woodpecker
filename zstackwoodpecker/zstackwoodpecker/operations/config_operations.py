@@ -46,3 +46,38 @@ def change_global_config(category, name, value, session_uuid = None):
 
     return pre_value
 
+def change_cluster_config(category, name, value, resourceUuid, session_uuid = None):
+    action = api_actions.UpdateResourceConfigAction()
+    action.category = category
+    action.name = name
+    action.value = value
+    action.resourceUuid = resourceUuid
+    if value:
+        action.value = str(value)
+    test_util.action_logger('change cluster config category: %s, name: %s, to %s' % (category, name, value))
+    account_operations.execute_action_with_session(action, session_uuid)
+
+def query_cluster_config(conditions, session_uuid = None):
+    action = api_actions.QueryResourceConfigAction()
+    action.conditions = conditions
+
+    test_util.action_logger('query cluster config category %s' % conditions)
+    account_operations.execute_action_with_session(action, session_uuid)
+
+def get_cluster_config(category, name, resourceUuid = None, session_uuid = None):
+    action = api_actions.GetResourceConfigAction()
+    action.category = category
+    action.name = name
+    action.resourceUuid = resourceUuid
+    test_util.action_logger('query cluster config category: %s, name: %s, to %s' % (category, name, resourceUuid))
+    ret = account_operations.execute_action_with_session(action, session_uuid)
+    return ret.effectiveConfigs
+
+def delete_cluster_config(category, name, resourceUuid = None, session_uuid = None):
+    action = api_actions.DeleteResourceConfigAction()
+    action.category = category
+    action.name = name
+    action.resourceUuid = resourceUuid
+    test_util.action_logger('query cluster config category: %s, name: %s, to %s' % (category, name, resourceUuid))
+    ret = account_operations.execute_action_with_session(action, session_uuid)
+    return ret.effectiveConfigs
