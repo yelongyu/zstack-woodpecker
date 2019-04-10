@@ -8155,29 +8155,3 @@ def lib_get_ospf_area_by_area_id(areaId):
         return area[0]
     test_util.test_logger("Did not find ospf area by [area ID:] %s" % areaId)
 
-def create_disk_offering(http_server_ip, session_uuid = None):
-    action = api_actions.CreateDiskOfferingAction()
-    action.diskSize = 100
-    action.sortKey = 0.0
-    action.accessKeyId = "Xm1zsbBDosdmGK5IRFma"
-    action.accessKeySecret = "Vp5bzAiw92A7idPQbOwQ8Bs3dMX2BUvk7UVW6A7Q"
-#    action.allocatorStrategy = instance_offering_option.get_allocatorStrategy()
-#    action.type = instance_offering_option.get_type()
-    action.name = 'diskoffering'
-    res = action.call()
-    print "res.value.inventory :%s " % res.value.inventory
-    return res.value.inventory
-
-
-#    action.cpuNum = instance_offering_option.get_cpuNum()
-#    action.memorySize = instance_offering_option.get_memorySize()
-#    action.allocatorStrategy = instance_offering_option.get_allocatorStrategy()
-#    action.type = instance_offering_option.get_type()
-#    action.name = instance_offering_option.get_name()
-#    action.description = instance_offering_option.get_description()
-#
-#    evt = execute_action_with_session(http_server_ip, action, session_uuid)
-#    test_util.action_logger('create instance offering: name: %s cpuNum: %s, memorySize: %s, allocatorStrategy:%s, type: %s '\
-#            % (action.name, action.cpuNum, action.memorySize, action.allocatorStrategy, action.type))
-#    test_util.test_logger('Instance Offering: %s is created' % evt.inventory.uuid)
-#    return evt.inventory
