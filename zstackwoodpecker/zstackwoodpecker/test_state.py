@@ -62,7 +62,7 @@ class TestAction(object):
     create_data_vol_template_from_volume = \
             'create_data_volume_template_from_volume'
     create_data_volume_from_image = 'create_data_volume_from_image'
-
+    delete_vm = 'delete_vm'
     create_image_from_volume = 'create_image_from_volume'
     delete_image = 'delete_image'
     expunge_image = 'expunge_image'

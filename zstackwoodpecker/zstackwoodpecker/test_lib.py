@@ -6130,6 +6130,26 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             target_volume.delete()
             test_dict.rm_volume(target_volume)
 
+        elif next_action == TestAction.delete_vm:
+            target_vm = None
+            if len(constant_path_list[0]) > 1:
+                target_vm_name = constant_path_list[0][1]
+                all_vm_list = test_dict.get_all_vm_list()
+                for vm in all_vm_list:
+                    if vm.get_vm().name == target_vm_name:
+                        target_vm = vm
+                        break
+
+            if not target_vm:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+   
+            test_util.test_dsc('Robot Action: %s; on Vm: %s' % \
+                (next_action, target_vm.get_vm().uuid))
+
+            target_vm.delete()
+            target_vm.expunge()
+            test_dict.rm_vm(target_vm)
+
         elif next_action == TestAction.resize_volume:
             target_vm = None
             target_snapshot = None
