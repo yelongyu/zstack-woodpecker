@@ -74,4 +74,4 @@ class TestChain(object):
             eval('self.%s()' % test)
             self.passed_chain.append(test)
             test_util.test_dsc("Passed chain: %s" % self.passed_chain)
-            test_util.test_dsc("Left chain: %s" % self.test_list[self.test_list.index(self.passed_chain[-1]) + 1:])
+            test_util.test_dsc("Left chain: %s" % self.test_list[len(self.passed_chain):])
