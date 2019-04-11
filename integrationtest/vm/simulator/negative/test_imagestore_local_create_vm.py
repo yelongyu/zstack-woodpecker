@@ -8,6 +8,8 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.resource_operations as res_ops
+import zstackwoodpecker.operations.primarystorage_operations as ps_ops
+import zstackwoodpecker.operations.image_operations as img_ops
 import zstackwoodpecker.operations.tag_operations as tag_ops
 import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
 import zstackwoodpecker.zstack_test.zstack_test_snapshot as zstack_snapshot_header
@@ -20,6 +22,7 @@ import os
 import time
 import MySQLdb
 
+DOWNLOAD_IMAGE = "/localstorage/imagestore/download"
 CHECK_BITS = "/localstorage/checkbits"
 CREATE_VOLUME = "/localstorage/volume/createvolumefromcache"
 FLAT_DHCP_PREPARE = "/flatnetworkprovider/dhcp/prepare"
@@ -29,7 +32,7 @@ FLAT_DHCP_RELEASE = "/flatnetworkprovider/dhcp/release"
 LOCAL_DELETE = "/localstorage/delete"
 
 _config_ = {
-        'timeout' : 60,
+        'timeout' : 720,
         'noparallel' : True,
         }
 
@@ -41,6 +44,7 @@ agent_url2 = None
 vm = None
 
 case_flavor = dict(normal=             dict(agent_url=None),
+                   download_image=     dict(agent_url=DOWNLOAD_IMAGE),
                    check_bits=         dict(agent_url=CHECK_BITS),
                    create_volume=      dict(agent_url=CREATE_VOLUME),
                    dhcp_prepare=       dict(agent_url=FLAT_DHCP_PREPARE),
@@ -70,7 +74,6 @@ def test():
     global agent_url
     global agent_url2
     global vm
-    saved_db_stats = get_db_stats()
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
 
     agent_url = flavor['agent_url']
@@ -91,12 +94,25 @@ def test():
     imagestore = test_lib.lib_get_image_store_backup_storage()
     if imagestore == None:
         test_util.test_skip('Required imagestore to test')
-    image_uuid = test_stub.get_image_by_bs(imagestore.uuid)
     cond = res_ops.gen_query_conditions('type', '=', 'LocalStorage')
     local_pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
     if len(local_pss) == 0:
         test_util.test_skip('Required ceph ps to test')
     ps_uuid = local_pss[0].uuid
+    image_creation_option = test_util.ImageOption()
+    imagestore = test_lib.lib_get_image_store_backup_storage()
+    bs_uuid = imagestore.uuid
+
+    image_option = test_util.ImageOption()
+    image_option.set_name('fake_image')
+    image_option.set_description('fake image')
+    image_option.set_format('raw')
+    image_option.set_mediaType('RootVolumeTemplate')
+    image_option.set_backup_storage_uuid_list([bs_uuid])
+    image_option.url = "http://fake/fake.raw"
+    image = img_ops.add_image(image_option)
+    image_uuid = image.uuid
+    saved_db_stats = get_db_stats()
 
     create_vm_failure = False
     try:
