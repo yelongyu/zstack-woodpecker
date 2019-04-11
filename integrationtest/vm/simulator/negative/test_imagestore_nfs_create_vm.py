@@ -8,6 +8,8 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.resource_operations as res_ops
+import zstackwoodpecker.operations.primarystorage_operations as ps_ops
+import zstackwoodpecker.operations.image_operations as img_ops
 import zstackwoodpecker.operations.tag_operations as tag_ops
 import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
 import zstackwoodpecker.zstack_test.zstack_test_snapshot as zstack_snapshot_header
@@ -30,7 +32,7 @@ FLAT_DHCP_RELEASE = "/flatnetworkprovider/dhcp/release"
 NFS_DELETE = "/nfsprimarystorage/delete"
 
 _config_ = {
-        'timeout' : 60,
+        'timeout' : 720,
         'noparallel' : True,
         }
 
@@ -72,7 +74,6 @@ def test():
     global agent_url
     global agent_url2
     global vm
-    saved_db_stats = get_db_stats()
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
 
     agent_url = flavor['agent_url']
@@ -93,12 +94,24 @@ def test():
     imagestore = test_lib.lib_get_image_store_backup_storage()
     if imagestore == None:
         test_util.test_skip('Required imagestore to test')
-    image_uuid = test_stub.get_image_by_bs(imagestore.uuid)
     cond = res_ops.gen_query_conditions('type', '=', 'NFS')
     local_pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
     if len(local_pss) == 0:
         test_util.test_skip('Required nfs ps to test')
     ps_uuid = local_pss[0].uuid
+    bs_uuid = imagestore.uuid
+
+    image_option = test_util.ImageOption()
+    image_option.set_name('fake_image')
+    image_option.set_description('fake image')
+    image_option.set_format('raw')
+    image_option.set_mediaType('RootVolumeTemplate')
+    image_option.set_backup_storage_uuid_list([bs_uuid])
+    image_option.url = "http://fake/fake.raw"
+    image = img_ops.add_image(image_option)
+    image_uuid = image.uuid
+    saved_db_stats = get_db_stats()
+
     create_vm_failure = False
     try:
         vm = test_stub.create_vm(image_uuid=image_uuid, ps_uuid=ps_uuid)
