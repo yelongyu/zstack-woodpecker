@@ -10,7 +10,7 @@ def path():
                 [TestAction.ps_migrate_volume, "volume1"],\
                 [TestAction.start_vm, "vm1"],\
                 [TestAction.attach_volume, "vm1", "volume1"], \
-                [TestAction.resize_data_volume, "volume1", 510241024], \
+                [TestAction.resize_data_volume, "volume1", 5*1024*1024], \
                 [TestAction.detach_volume, "volume1"], \
                 [TestAction.cleanup_ps_cache], \
                 [TestAction.create_data_vol_template_from_volume, "volume1", "image1"], \
