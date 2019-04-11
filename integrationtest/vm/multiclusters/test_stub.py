@@ -213,6 +213,7 @@ class DataMigration(TestChain):
                 self.vm.stop()
                 self.vm.detach_volume()
                 ps_uuid_to_migrate = self.get_ps_candidate().uuid
+                self.clean_up_single_volume_trash(self.vm.vm.rootVolumeUuid, ps_uuid_to_migrate)
                 datamigr_ops.ps_migrage_root_volume(ps_uuid_to_migrate, self.vm.vm.rootVolumeUuid)
                 conditions = res_ops.gen_query_conditions('uuid', '=', self.vm.vm.uuid)
                 self.vm.vm = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)[0]
@@ -361,7 +362,7 @@ class DataMigration(TestChain):
         vm = vm if vm else self.vm
         vm_ip = vm.get_vm().vmNics[0].ip
         test_lib.lib_wait_target_up(vm_ip, '22', timeout=600)
-        cmd = "find /home -iname 'zstack-woodpecker.*'"
+        cmd = "find /home -iname 'zstack-all-in-one.*'"
         file_path = commands.getoutput(cmd).split('\n')[0]
         file_name = os.path.basename(file_path)
         dst_file = os.path.join('/mnt', file_name)
@@ -371,7 +372,7 @@ class DataMigration(TestChain):
         dst_file_md5 = dst_md5.split(' ')[0]
         test_util.test_dsc('src_file_md5: [%s], dst_file_md5: [%s]' % (src_file_md5, dst_file_md5))
         assert dst_file_md5 == src_file_md5, 'dst_file_md5 [%s] and src_file_md5 [%s] is not match, stop test' % (dst_file_md5, src_file_md5)
-        extract_cmd = 'tar xvf /mnt/zstack-woodpecker.tar -C /mnt > /dev/null 2>&1'
+        extract_cmd = 'tar xvf /mnt/zstack-all-in-one.* -C /mnt > /dev/null 2>&1'
         ssh.execute(extract_cmd, vm_ip, 'root', 'password')
         return self
 
@@ -379,9 +380,9 @@ class DataMigration(TestChain):
         vm = vm if vm else self.vm
         vm_ip = vm.get_vm().vmNics[0].ip
         test_lib.lib_wait_target_up(vm_ip, '22', timeout=600)
-#         check_cmd = "if [ ! -d /mnt/zstackwoodpecker ];then tar xvf /mnt/zstack-woodpecker.tar -C /mnt > /dev/null 2>&1; fi; \
+#         check_cmd = "if [ ! -d /mnt/zstackwoodpecker ];then tar xvf /mnt/zstack-all-in-one.tar -C /mnt > /dev/null 2>&1; fi; \
 #                      grep scenario_config_path /mnt/zstackwoodpecker/zstackwoodpecker/test_lib.py > /dev/null 2>&1 && echo 0 || echo 1"
-        check_cmd = "grep scenario_config_path /mnt/zstackwoodpecker/zstackwoodpecker/test_lib.py > /dev/null 2>&1 && echo 0 || echo 1"
+        check_cmd = "grep APIQueryCephPrimaryStorageMsg /mnt/woodpecker/apibinding/inventory.py > /dev/null 2>&1 && echo 0 || echo 1"
         (_, ret, _)= ssh.execute(check_cmd, vm_ip, 'root', 'password')
         ret = ret.split('\n')[0]
         assert ret == '0', "data check failed!, the return code is %s, 0 is expected" % ret
@@ -451,14 +452,18 @@ class DataMigration(TestChain):
                 if self.image.uuid in t.installPath:
                     test_util.test_fail('image trash cleanup failed!')
 
-    def clean_up_single_volume_trash(self):
-        trashes = ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid).storageTrashSpecs
+    def clean_up_single_volume_trash(self, volume_uuid=None, ps_uuid=None):
+        if not volume_uuid:
+            volume_uuid = self.vm.vm.rootVolumeUuid
+        if not ps_uuid:
+            ps_uuid = self.origin_ps.uuid
+        trashes = ps_ops.get_trash_on_primary_storage(ps_uuid).storageTrashSpecs
         for t in trashes:
-            if self.vm.vm.rootVolumeUuid == t.resourceUuid:
+            if volume_uuid == t.resourceUuid:
                 trash_id = t.trashId
                 break
-        ps_ops.clean_up_trash_on_primary_storage(self.origin_ps.uuid, trash_id)
-        trashes = ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid).storageTrashSpecs
+        ps_ops.clean_up_trash_on_primary_storage(ps_uuid, trash_id)
+        trashes = ps_ops.get_trash_on_primary_storage(ps_uuid).storageTrashSpecs
         if trashes:
             for t in trashes:
                 if self.image.uuid in t.installPath:
