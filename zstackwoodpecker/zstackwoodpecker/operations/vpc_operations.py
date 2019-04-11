@@ -18,7 +18,7 @@ def create_vrouter_ospf_area(areaId='0.0.0.0', areaType='Standard', areaAuth=Non
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def update_vrouter_ospf_area(uuid, areaType, areaAuth, password, keyId, session_uuid=None):
+def update_vrouter_ospf_area(uuid, areaType=None, areaAuth=None, password=None, keyId=None, session_uuid=None):
     action = api_actions.UpdateVRouterOspfAreaAction()
     action.timeout = 300000
     action.uuid = uuid
@@ -64,28 +64,22 @@ def query_vrouter_ospf_network(session_uuid=None):
     action = api_actions.QueryVRouterOspfNetworkAction()
     action.timeout = 300000
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventory
+    return evt.inventories
 
-def set_vrouter_router_id(uuid, routerId, session_uuid=None):
+def set_vrouter_router_id(vRouterUuid, routerId, session_uuid=None):
     action = api_actions.SetVRouterRouterIdAction()
     action.timeout = 300000
-    action.uuid = uuid
+    action.vRouterUuid = vRouterUuid
     action.routerId = routerId
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventory
+    return evt.routerId
 
-def get_vrouter_router_id(uuid, session_uuid=None):
+def get_vrouter_router_id(vRouterUuid, session_uuid=None):
     action = api_actions.GetVRouterRouterIdAction()
     action.timeout = 300000
-    action.uuid = uuid
+    action.vRouterUuid = vRouterUuid
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventory
-
-def get_vrouter_route_table(session_uuid=None):
-    action = api_actions.GetVRouterRouteTableAction()
-    action.timeout = 300000
-    evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventory
+    return evt.routerId
 
 def get_vrouter_ospf_neighbor(vRouterUuid, session_uuid=None):
     action = api_actions.GetVRouterOspfNeighborAction()
@@ -121,7 +115,6 @@ def create_vpc_vrouter(name, virtualrouter_offering_uuid, resource_uuid=None, sy
     action.userTags = use_tags
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
-
 
 def remove_all_vpc_vrouter():
     cond = res_ops.gen_query_conditions('applianceVmType', '=', 'vpcvrouter')
