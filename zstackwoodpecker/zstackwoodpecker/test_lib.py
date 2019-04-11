@@ -5920,17 +5920,20 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
     
             
         elif next_action == TestAction.change_vm_image:
+            bs_type = None
             target_vm = None
             target_image = None
             if len(constant_path_list[0]) > 2:
                 target_vm_name = constant_path_list[0][1]
                 image_name = constant_path_list[0][2]
+                if len(constant_path_list[0]) > 3:
+                    bs_type = constant_path_list[0][3]
                 all_vm_list = test_dict.get_all_vm_list()
                 for vm in all_vm_list:
                     if vm.get_vm().name == target_vm_name:
                         target_vm = vm
                         break
-                target_image = lib_get_image_by_name(image_name)
+                target_image = lib_get_image_by_name(image_name, bs_type=bs_type)
             elif len(constant_path_list[0]) > 1:
                 target_vm_name = constant_path_list[0][1]
                 all_vm_list = test_dict.get_all_vm_list()
