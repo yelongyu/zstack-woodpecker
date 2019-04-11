@@ -20,9 +20,8 @@ import os
 import time
 import MySQLdb
 
-CHECK_BITS = "/nfsprimarystorage/checkbits"
-DOWNLOAD_IMAGE = "/nfsprimarystorage/imagestore/download"
-NFS_SFTP_CREATE_VOLUME_FROM_TEMPLATE = "/nfsprimarystorage/sftp/createvolumefromtemplate"
+CHECK_BITS = "/ceph/primarystorage/snapshot/checkbits"
+VOLUME_CLONE = "/ceph/primarystorage/volume/clone"
 FLAT_DHCP_PREPARE = "/flatnetworkprovider/dhcp/prepare"
 FLAT_DHCP_APPLY = "/flatnetworkprovider/dhcp/apply"
 VM_START = "/vm/start"
@@ -43,8 +42,7 @@ vm = None
 
 case_flavor = dict(normal=             dict(agent_url=None),
                    check_bits=         dict(agent_url=CHECK_BITS),
-                   download_image=     dict(agent_url=DOWNLOAD_IMAGE),
-                   create_volume=      dict(agent_url=NFS_SFTP_CREATE_VOLUME_FROM_TEMPLATE),
+                   volume_clone=       dict(agent_url=VOLUME_CLONE),
                    dhcp_prepare=       dict(agent_url=FLAT_DHCP_PREPARE),
                    dhcp_apply=         dict(agent_url=FLAT_DHCP_APPLY),
                    vm_start=           dict(agent_url=VM_START),
@@ -86,7 +84,7 @@ def test():
         deploy_operations.deploy_simulator_agent_script(agent_url, script)
 
     if agent_url == FLAT_DHCP_RELEASE or agent_url == NFS_DELETE:
-        agent_url2 = NFS_SFTP_CREATE_VOLUME_FROM_TEMPLATE
+        agent_url2 = VOLUME_CLONE
         deploy_operations.remove_simulator_agent_script(agent_url2)
         deploy_operations.deploy_simulator_agent_script(agent_url2, script)
 
@@ -94,11 +92,10 @@ def test():
     if imagestore == None:
         test_util.test_skip('Required imagestore to test')
     image_uuid = test_stub.get_image_by_bs(imagestore.uuid)
-    cond = res_ops.gen_query_conditions('type', '=', 'NFS')
-    local_pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
-    if len(local_pss) == 0:
-        test_util.test_skip('Required nfs ps to test')
-    ps_uuid = local_pss[0].uuid
+    ceph_pss = res_ops.query_resource(res_ops.CEPH_PRIMARY_STORAGE, [])
+    if len(ceph_pss) == 0:
+        test_util.test_skip('Required ceph ps to test')
+    ps_uuid = ceph_pss[0].uuid
     create_vm_failure = False
     try:
         vm = test_stub.create_vm(image_uuid=image_uuid, ps_uuid=ps_uuid)
@@ -113,8 +110,6 @@ def test():
         for key in saved_db_stats2:
             if saved_db_stats2[key] != saved_db_stats[key] and key not in db_tables_white_list:
                 test_util.test_fail("DB Table %s changed %s -> %s" % (key, saved_db_stats[key], saved_db_stats2[key]))
-
-    test_util.test_pass("Test Exception handling for Create VM PASS")
 
 def env_recover():
     global agent_url
