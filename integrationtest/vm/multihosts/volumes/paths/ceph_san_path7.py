@@ -26,9 +26,8 @@ class VM(object):
     def reinit(self):
         return [TestAction.reinit_vm, self.name]
 
-    @property
-    def change_image(self):
-        return [TestAction.change_vm_image, self.name, os.getenv('imageName_s')]
+    def change_image(self, bs_type='ImageStoreBackupStorage'):
+        return [TestAction.change_vm_image, self.name, os.getenv('imageName_s'), bs_type]
 
     def clone(self, clone_num=1, full=False):
         if full:
@@ -68,7 +67,7 @@ def path():
                                [TestAction.create_volume_snapshot, san_vms[1].name + '-root', san_vms[0].name + '-sp1'],
                                [TestAction.create_volume_snapshot, san_vms[2].name + '-root', san_vms[0].name + '-sp1'],
                                [TestAction.resize_volume, san_vms[0].name, 5*1024*1024],
-                               [TestAction.create_volume_snapshot, ceph_vms[-1].name + '-root', san_vms[0].name + '-sp1'],
+                               [TestAction.create_volume_snapshot, ceph_vms[-1].name + '-root', ceph_vms[-1].name + '-sp1'],
                                san_vms[0].stop, 
                                [TestAction.detach_volume, "ceph_shared_volume1", san_vms[0].name],
                                [TestAction.detach_volume, "san_shared_volume1", san_vms[0].name],
@@ -81,15 +80,24 @@ def path():
                                [TestAction.create_volume_snapshot, san_vms[0].name + '-root', san_vms[0].name + '-sp2'],
                                [TestAction.create_volume_snapshot, san_vms[1].name + '-root', san_vms[0].name + '-sp2'],
                                [TestAction.create_volume_snapshot, san_vms[2].name + '-root', san_vms[0].name + '-sp2'],
-                               [TestAction.create_volume_snapshot, ceph_vms[-1].name + '-root', san_vms[0].name + '-sp2'],
+                               [TestAction.create_volume_snapshot, ceph_vms[-1].name + '-root', ceph_vms[-1].name + '-sp2'],
                                [TestAction.create_volume_snapshot, "ceph_shared_volume1", "ceph_volume1_snapshot2"],
                                san_vms[0].clone(5),
                                [TestAction.detach_volume, "ceph_shared_volume1", san_vms[1].name],
                                [TestAction.detach_volume, "ceph_shared_volume1", san_vms[2].name],
                                san_vms[0].stop, san_vms[1].stop, san_vms[2].stop, ceph_vms[-1].stop,
-                               san_vms[0].change_image, san_vms[1].change_image, san_vms[2].change_image, ceph_vms[-1].change_image, 
+                               san_vms[0].change_image(),
+                               san_vms[1].change_image(),
+                               san_vms[2].change_image(),
+                               ceph_vms[-1].change_image(),
                                san_vms[0].start,
+                               san_vms[1].start,
+                               san_vms[2].start,
                                ceph_vms[-1].start,
+                               [TestAction.create_volume_snapshot, san_vms[0].name + '-root', san_vms[0].name + '-sp3'],
+                               [TestAction.create_volume_snapshot, san_vms[1].name + '-root', san_vms[0].name + '-sp3'],
+                               [TestAction.create_volume_snapshot, san_vms[2].name + '-root', san_vms[0].name + '-sp3'],
+                               [TestAction.create_volume_snapshot, ceph_vms[-1].name + '-root', ceph_vms[-1].name + '-sp3'],
                                [TestAction.detach_volume, "san_shared_volume1", san_vms[1].name],
                                [TestAction.detach_volume, "san_shared_volume1", san_vms[2].name],
                                [TestAction.detach_volume, "san_shared_volume1", ceph_vms[-1].name],
@@ -100,6 +108,14 @@ def path():
                                [TestAction.create_volume_snapshot, san_vms[0].name + '-root', san_vms[0].name + '-sp3'],
                                [TestAction.ps_migrate_volume, "san_shared_volume1"],
                                [TestAction.attach_volume, ceph_vms[-1].name, "san_shared_volume1"],
+                               [TestAction.delete_volume_snapshot, san_vms[0].name + '-sp3'],
+                               [TestAction.delete_volume_snapshot, san_vms[1].name + '-sp3'],
+                               [TestAction.delete_volume_snapshot, san_vms[2].name + '-sp3'],
+                               [TestAction.delete_volume_snapshot, ceph_vms[-1].name + '-sp3'],
+                               [TestAction.batch_delete_volume_snapshot, [san_vms[0].name + '-sp2', san_vms[0].name + '-sp1']],
+                               [TestAction.batch_delete_volume_snapshot, [san_vms[1].name + '-sp2', san_vms[1].name + '-sp1']],
+                               [TestAction.batch_delete_volume_snapshot, [san_vms[2].name + '-sp2', san_vms[2].name + '-sp1']],
+                               [TestAction.batch_delete_volume_snapshot, [ceph_vms[-1].name + '-sp2', ceph_vms[-1].name + '-sp1']]
                                ])
     else:
         return dict(initial_formation="template3", path_list=[])
