@@ -20,6 +20,7 @@ def test():
     hybrid.create_ecs_image(gc=True)
     time.sleep(180)
     hybrid.del_ecs_image()
+    hybrid.del_bucket()
     test_util.test_pass('Create Delete Ecs Image Test Success')
 
 def env_recover():
@@ -31,7 +32,10 @@ def env_recover():
             pass
 
     if hybrid.oss_bucket_create:
-        hybrid.del_bucket()
+        try:
+            hybrid.del_bucket()
+        except:
+            pass
 
     hybrid.tear_down()
 

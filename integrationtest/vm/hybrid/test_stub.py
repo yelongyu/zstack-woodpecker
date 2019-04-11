@@ -26,6 +26,7 @@ import zstackwoodpecker.operations.hybrid_operations as hyb_ops
 import zstackwoodpecker.operations.nas_operations as nas_ops
 import zstackwoodpecker.operations.ipsec_operations as ipsec_ops
 from multiprocessing import Process
+from jinja2.bccache import Bucket
 
 Port = test_state.Port
 
@@ -248,10 +249,13 @@ class HybridObject(object):
     def add_bucket(self):
         bucket_remote = hyb_ops.get_oss_bucket_name_from_remote(self.datacenter.uuid)
         if bucket_remote:
-            self.bucket_name = bucket_remote[0].bucketName
-            self.oss_bucket = hyb_ops.add_oss_bucket_from_remote(self.datacenter.uuid, self.bucket_name)
-        else:
-            self.create_bucket()
+#             self.bucket_name = bucket_remote[0].bucketName
+            for bucket in bucket_remote:
+                if 'zstack-test-oss-bucket' in bucket.bucketName:
+                    self.del_bucket(bucket.bucketName)
+#             self.oss_bucket = hyb_ops.add_oss_bucket_from_remote(self.datacenter.uuid, self.bucket_name)
+#         else:
+        self.create_bucket()
         bucket_local = hyb_ops.query_oss_bucket_file_name()
         bucket_name_local = [bk.bucketName for bk in bucket_local]
         assert self.bucket_name in bucket_name_local
@@ -278,11 +282,12 @@ class HybridObject(object):
                 oss_bucket_attr_eq = "self.oss_bucket.%s == '%s'" % (k, oss_bucket_attr[k])
                 assert eval(oss_bucket_attr_eq)
 
-    def del_bucket(self, remote=True):
+    def del_bucket(self, bucket_name=None, remote=True):
+        bucket_name = bucket_name if bucket_name else self.bucket_name
         if remote:
-            condition = res_ops.gen_query_conditions('bucketName', '=', self.bucket_name)
+            condition = res_ops.gen_query_conditions('bucketName', '=', bucket_name)
             if not hyb_ops.query_oss_bucket_file_name(condition):
-                self.oss_bucket = hyb_ops.add_oss_bucket_from_remote(self.datacenter.uuid, self.bucket_name)
+                self.oss_bucket = hyb_ops.add_oss_bucket_from_remote(self.datacenter.uuid, bucket_name)
             bucket_file = hyb_ops.get_oss_bucket_file_from_remote(self.oss_bucket.uuid).files
             if bucket_file:
                 time.sleep(20)
@@ -295,7 +300,7 @@ class HybridObject(object):
                 hyb_ops.del_oss_bucket_name_in_local(self.oss_bucket.uuid)
             elif self.oss_bucket_create:
                 hyb_ops.del_oss_bucket_name_in_local(self.oss_bucket_create.uuid)
-        self.check_resource('delete', 'bucketName', self.bucket_name, 'query_oss_bucket_file_name')
+        self.check_resource('delete', 'bucketName', bucket_name, 'query_oss_bucket_file_name')
 
     def create_aliyun_disk(self):
         disk_name = 'zstack-test-aliyun-disk-%s' % _postfix
@@ -421,7 +426,7 @@ class HybridObject(object):
             self.sync_eip()
             eip_local = hyb_ops.query_hybrid_eip_local()
             for eip in eip_local:
-                self.del_eip()
+                self.del_eip(eip=eip)
         self.eip = hyb_ops.create_hybrid_eip(self.datacenter.uuid, 'zstack-test-eip', '1')
         self.eip_create = True
         self.check_resource('create', 'eipId', self.eip.eipId, 'query_hybrid_eip_local')
@@ -832,11 +837,6 @@ class HybridObject(object):
             return route_entry
 
     def create_ecs_instance(self, need_vpn_gateway=False, allocate_eip=False, region_id=None, connect=False, gc=True):
-        if gc:
-            self.sync_ecs_instance()
-            ecs_local = hyb_ops.query_ecs_instance_local()
-            for ecs in ecs_local:
-                self.del_ecs_instance(ecs_instance=ecs)
         if need_vpn_gateway:
             self.add_datacenter_iz(check_vpn_gateway=True)
             self.get_vpc(has_vpn_gateway=True)
@@ -845,6 +845,11 @@ class HybridObject(object):
         else:
             self.add_datacenter_iz()
             self.get_vpc()
+        if gc:
+            self.sync_ecs_instance()
+            ecs_local = hyb_ops.query_ecs_instance_local()
+            for ecs in ecs_local:
+                self.del_ecs_instance(ecs_instance=ecs)
         self.get_vswitch()
         if connect:
             self.create_sg()
@@ -931,11 +936,9 @@ class HybridObject(object):
         self.wait_ecs_running()
 
     def del_ecs_instance(self, ecs_instance=None, remote=True):
-        self.ecs_instance = self.sync_ecs_instance(return_val=True)
-        ecs_instance = ecs_instance if ecs_instance else self.ecs_instance
+        if not ecs_instance:
+            ecs_instance = self.sync_ecs_instance(return_val=True)
         if remote:
-#             self.stop_ecs()
-#             self.ecs_instance = self.sync_ecs_instance(return_val=True)
             hyb_ops.del_ecs_instance(ecs_instance.uuid)
             self.sync_ecs_instance()
         else:

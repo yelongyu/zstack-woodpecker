@@ -20,6 +20,7 @@ def test():
     test_obj_dict.add_hybrid_obj(hybrid)
 #     hybrid.get_eip(in_use=True)
     hybrid.check_eip_accessibility(hybrid.ecs_instance.publicIpAddress)
+    hybrid.del_ecs_instance()
     test_util.test_pass('Create Ecs Instance with Public IP Test Success')
 
 def env_recover():

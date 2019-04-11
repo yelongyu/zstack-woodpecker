@@ -20,6 +20,7 @@ def test():
     hybrid.get_eip()
     hybrid.attach_eip_to_ecs()
     hybrid.detach_eip_from_ecs()
+    hybrid.del_ecs_instance()
     test_util.test_pass('Attach Detach Hybrid Eip to/from Ecs Test Success')
 
 def env_recover():
