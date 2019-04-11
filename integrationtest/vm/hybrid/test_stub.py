@@ -416,7 +416,12 @@ class HybridObject(object):
                 vpn_gateway_attr_eq = "self.vpn_gateway.%s == '%s'" % (k, vpn_gateway_attr[k])
                 assert eval(vpn_gateway_attr_eq)
 
-    def create_eip(self):
+    def create_eip(self, gc=True):
+        if gc:
+            self.sync_eip()
+            eip_local = hyb_ops.query_hybrid_eip_local()
+            for eip in eip_local:
+                self.del_eip()
         self.eip = hyb_ops.create_hybrid_eip(self.datacenter.uuid, 'zstack-test-eip', '1')
         self.eip_create = True
         self.check_resource('create', 'eipId', self.eip.eipId, 'query_hybrid_eip_local')
@@ -426,13 +431,14 @@ class HybridObject(object):
         if return_val:
             return self.check_resource('sync', 'eipId', self.eip.eipId, 'query_hybrid_eip_local')
 
-    def del_eip(self, remote=True):
+    def del_eip(self, eip=None, remote=True):
+        eip = eip if eip else self.eip
         if remote:
-            hyb_ops.del_hybrid_eip_remote(self.eip.uuid)
+            hyb_ops.del_hybrid_eip_remote(eip.uuid)
             self.sync_eip()
         else:
-            hyb_ops.del_hybrid_eip_local(self.eip.uuid)
-        self.check_resource('delete', 'eipId', self.eip.eipId, 'query_hybrid_eip_local')
+            hyb_ops.del_hybrid_eip_local(eip.uuid)
+        self.check_resource('delete', 'eipId', eip.eipId, 'query_hybrid_eip_local')
 
     def get_eip(self, in_use=False, sync_eip=False):
         self.sync_eip()
@@ -825,7 +831,12 @@ class HybridObject(object):
         if return_val:
             return route_entry
 
-    def create_ecs_instance(self, need_vpn_gateway=False, allocate_eip=False, region_id=None, connect=False):
+    def create_ecs_instance(self, need_vpn_gateway=False, allocate_eip=False, region_id=None, connect=False, gc=True):
+        if gc:
+            self.sync_ecs_instance()
+            ecs_local = hyb_ops.query_ecs_instance_local()
+            for ecs in ecs_local:
+                self.del_ecs_instance(ecs_instance=ecs)
         if need_vpn_gateway:
             self.add_datacenter_iz(check_vpn_gateway=True)
             self.get_vpc(has_vpn_gateway=True)
@@ -919,15 +930,17 @@ class HybridObject(object):
         time.sleep(5)
         self.wait_ecs_running()
 
-    def del_ecs_instance(self, remote=True):
+    def del_ecs_instance(self, ecs_instance=None, remote=True):
+        self.ecs_instance = self.sync_ecs_instance(return_val=True)
+        ecs_instance = ecs_instance if ecs_instance else self.ecs_instance
         if remote:
 #             self.stop_ecs()
-            self.ecs_instance = self.sync_ecs_instance(return_val=True)
-            hyb_ops.del_ecs_instance(self.ecs_instance.uuid)
+#             self.ecs_instance = self.sync_ecs_instance(return_val=True)
+            hyb_ops.del_ecs_instance(ecs_instance.uuid)
             self.sync_ecs_instance()
         else:
-            hyb_ops.del_ecs_instance_local(self.ecs_instance.uuid)
-        self.check_resource('delete', 'ecsInstanceId', self.ecs_instance.ecsInstanceId, 'query_ecs_instance_local')
+            hyb_ops.del_ecs_instance_local(ecs_instance.uuid)
+        self.check_resource('delete', 'ecsInstanceId', ecs_instance.ecsInstanceId, 'query_ecs_instance_local')
 
     def create_ipsec(self, pri_l3_uuid, vip):
         ipsec_conntion = hyb_ops.query_ipsec_connection()
