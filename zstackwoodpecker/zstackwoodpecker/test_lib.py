@@ -5923,6 +5923,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             bs_type = None
             target_vm = None
             target_image = None
+            bs_type = None
             if len(constant_path_list[0]) > 2:
                 target_vm_name = constant_path_list[0][1]
                 image_name = constant_path_list[0][2]
@@ -5933,6 +5934,10 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                     if vm.get_vm().name == target_vm_name:
                         target_vm = vm
                         break
+                (_, extra_args) = _parse_args(constant_path_list[0])
+                for ea in extra_args:
+                    if "bs_type" in ea:
+                        bs_type = ea.split('::')[-1]
                 target_image = lib_get_image_by_name(image_name, bs_type=bs_type)
             elif len(constant_path_list[0]) > 1:
                 target_vm_name = constant_path_list[0][1]
