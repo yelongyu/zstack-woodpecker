@@ -453,6 +453,7 @@ class DataMigration(TestChain):
                     test_util.test_fail('image trash cleanup failed!')
 
     def clean_up_single_volume_trash(self, volume_uuid=None, ps_uuid=None):
+        trash_id = None
         if not volume_uuid:
             volume_uuid = self.vm.vm.rootVolumeUuid
         if not ps_uuid:
@@ -462,7 +463,8 @@ class DataMigration(TestChain):
             if volume_uuid == t.resourceUuid:
                 trash_id = t.trashId
                 break
-        ps_ops.clean_up_trash_on_primary_storage(ps_uuid, trash_id)
+        if trash_id:
+            ps_ops.clean_up_trash_on_primary_storage(ps_uuid, trash_id)
         trashes = ps_ops.get_trash_on_primary_storage(ps_uuid).storageTrashSpecs
         if trashes:
             for t in trashes:
