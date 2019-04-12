@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-imagestore-iscsi.xml</deployConfig>
+    <deployConfigTemplate>deploy-imagestore-iscsi.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
