@@ -2364,7 +2364,7 @@ def prometheus_conf_generate(host, web_port, address = None):
     if address:
         ip_addr = address
     else:
-        ip_addr = '127.0.0.1'
+        ip_addr = '127.0.0.1'[0]
 
     hostInstance = host.managementIp.replace('.','-')
     hostUuid = host.uuid
@@ -2426,13 +2426,17 @@ def check(billing, resource, offset, offset_count, resource_count):
     prices = billing.get_price_total()
     time_now = int(time.time() * 1000)
     table_name, check_time = update_dateinlong(resource, offset, offset_count)
-    #time.sleep(3)
     prices1 = billing.get_price_total(end=time_now)
+    #spending_per_sec = float("%2.f" % (float(int(billing.get_price()) * resource_count * 1000)/float(billing.get_timeUnit_timestamp()))) * 10 #acceptable deviation range
+    spending_per_sec = float(int(billing.get_price()) * resource_count * 1000)/float(billing.get_timeUnit_timestamp()) * 10 #acceptable deviation range
+    test_util.test_logger("@@DEBUG@@: spending_per_sec=%s" % spending_per_sec)
     diff = prices1.total - prices.total
     cal = float(int(billing.get_price()) * resource_count * check_time)/float(billing.get_timeUnit_timestamp())
-    if diff != cal:
-        test_util.test_fail("billing check fail: prices=%s prices1=%s diff=%s cal=%s" % (prices.total,prices1.total,diff,cal))
+    #dc_diff = float("%.2f" % (diff-cal))
+    dc_diff = diff-cal
+    if dc_diff > spending_per_sec:
+        test_util.test_fail("offset time is %s %s \nbilling check fail: prices=%s prices1=%s diff=%s cal=%s diff-cal=%s" % (offset_count, offset, prices.total, prices1.total, diff, cal, str(dc_diff)))
         return False
     else:
-        test_util.test_logger("billing check pass: prices=%s prices1=%s diff=%s cal=%s" % (prices.total,prices1.total,diff,cal))
+        test_util.test_logger("offset time is %s %s \nbilling check pass: prices=%s prices1=%s diff=%s cal=%s diff-cal=%s" % (offset_count, offset, prices.total, prices1.total, diff, cal, str(dc_diff)))
     return True

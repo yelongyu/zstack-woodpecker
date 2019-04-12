@@ -19,27 +19,33 @@ test_obj_dict = test_state.TestStateDict()
 vm = None
 billing_resource = 'vm'
 offset_unit_dict=['sec','min','hou','day','week','month','year']
+time_unit_dict=['s','m','h','d','w','mon']
 
 def test():
-        test_util.test_logger("clear data in  VmUsageVO and PriceVO")
-        test_stub.resource_price_clear(billing_resource)
+	for i in range(0,10):	
+	        test_util.test_logger("clear data in  VmUsageVO and PriceVO")
+	        test_stub.resource_price_clear(billing_resource)
+		test_util.test_logger("=====SPENDING CHECK VM %s=====" % str(i+1))
+		bill_cpu = test_stub.CpuBilling()
+		time_unit = random.choice(time_unit_dict)
+		price = str(random.randint(0,9999))
+		bill_cpu.set_timeUnit(time_unit)
+		bill_cpu.set_price(price)
+		test_util.test_logger("create cpu billing\n price=%s, timeUnit=%s" % (price, time_unit))
+		bill_cpu.create_resource_type()
+		
+		test_util.test_logger("create vm instance")
+		global vm
+		vm = test_stub.create_vm_billing("test_vmm", test_stub.set_vm_resource()[0], None,\
+	                                                test_stub.set_vm_resource()[1], test_stub.set_vm_resource()[2])
+	        cpuNum = res_ops.query_resource_fields(res_ops.INSTANCE_OFFERING, \
+	                        res_ops.gen_query_conditions('uuid', '=',\
+	                                test_stub.set_vm_resource()[1]))[0].cpuNum
 	
-	test_util.test_logger("create cpu billing")
-	bill_cpu = test_stub.CpuBilling()
-	bill_cpu.create_resource_type()
-	
-	test_util.test_logger("create vm instance")
-	global vm
-	vm = test_stub.create_vm_billing("test_vmm", test_stub.set_vm_resource()[0], None,\
-                                                test_stub.set_vm_resource()[1], test_stub.set_vm_resource()[2])
-        cpuNum = res_ops.query_resource_fields(res_ops.INSTANCE_OFFERING, \
-                        res_ops.gen_query_conditions('uuid', '=',\
-                                test_stub.set_vm_resource()[1]))[0].cpuNum
-
-        test_util.test_logger("====check vm spending====")
-	for i in range(1,10):
-		test_util.test_logger('==spending check round %s===\n' % i)
-		test_stub.check(bill_cpu, billing_resource, random.choice(offset_unit_dict), random.randint(0,30), cpuNum)
+	        test_util.test_logger("====check vm spending====")
+		for r in range(0,10):
+			test_util.test_logger('==spending check round %s-%s===' % (str(i+1), str(r+1)))
+			test_stub.check(bill_cpu, billing_resource, random.choice(offset_unit_dict), random.randint(0,30), cpuNum)
 	test_util.test_pass("check vm billing spending pass")
 
 
