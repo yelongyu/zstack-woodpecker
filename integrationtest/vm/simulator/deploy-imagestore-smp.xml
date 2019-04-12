@@ -72,11 +72,6 @@
         memoryCapacity="$instanceOfferingMemory_s" 
         cpuNum="$instanceOfferingCpuNum_s"
         />
-      <instanceOffering name="$instanceOfferingName_m"
-        description="Test2" 
-        memoryCapacity="$instanceOfferingMemory_m" 
-        cpuNum="$instanceOfferingCpuNum_m"
-        />
     </instanceOfferings>
   
     <backupStorages>
@@ -98,11 +93,6 @@
         format="$rootImageFormat" url="$imageUrl_net" 
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
-      </image>
-      <image name="$sshkeyImageName" description="Test Image3" 
-        format="$rootImageFormat" url="$sshkeyImageUrl" 
-	mediaType="$rootMediaType">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
       <image name="$imageName_windows" 
