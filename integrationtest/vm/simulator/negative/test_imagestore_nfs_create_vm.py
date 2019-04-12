@@ -82,14 +82,6 @@ def test():
 	throw new Exception("shuang")
 }
 '''
-    if agent_url != None:
-        deploy_operations.remove_simulator_agent_script(agent_url)
-        deploy_operations.deploy_simulator_agent_script(agent_url, script)
-
-    if agent_url == FLAT_DHCP_RELEASE or agent_url == NFS_DELETE:
-        agent_url2 = NFS_SFTP_CREATE_VOLUME_FROM_TEMPLATE
-        deploy_operations.remove_simulator_agent_script(agent_url2)
-        deploy_operations.deploy_simulator_agent_script(agent_url2, script)
 
     imagestore = test_lib.lib_get_image_store_backup_storage()
     if imagestore == None:
@@ -110,6 +102,20 @@ def test():
     image_option.url = "http://fake/fake.raw"
     image = img_ops.add_image(image_option)
     image_uuid = image.uuid
+
+    vm = test_stub.create_vm(image_uuid=image_uuid, ps_uuid=ps_uuid)
+    vm.destroy()
+    vm.expunge()
+
+    if agent_url != None:
+        deploy_operations.remove_simulator_agent_script(agent_url)
+        deploy_operations.deploy_simulator_agent_script(agent_url, script)
+
+    if agent_url == FLAT_DHCP_RELEASE or agent_url == NFS_DELETE:
+        agent_url2 = NFS_SFTP_CREATE_VOLUME_FROM_TEMPLATE
+        deploy_operations.remove_simulator_agent_script(agent_url2)
+        deploy_operations.deploy_simulator_agent_script(agent_url2, script)
+
     saved_db_stats = get_db_stats()
 
     create_vm_failure = False
