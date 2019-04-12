@@ -34,6 +34,7 @@ import re
 import json
 import random
 import threading
+import commands
 
 def remove_all_vpc_vrouter():
     cond = res_ops.gen_query_conditions('applianceVmType', '=', 'vpcvrouter')
@@ -1890,11 +1891,21 @@ class Billing(object):
 	def get_timeUnit(self):
 		return self.timeUnit
 
-	def get_price_total(self):
+	def get_price_total(self,start=None,end=None):
 		cond = res_ops.gen_query_conditions('name', '=',  'admin')
-		admin_uuid = res_ops.query_resource_fields(res_ops.ACCOUNT, cond)[0].uuid
-		prices = bill_ops.calculate_account_spending(admin_uuid)
+		admin_uuid = res_ops.query_resource_fields(res_ops.ACCOUNT, cond)[0].uuid		
+		prices = bill_ops.calculate_account_spending(admin_uuid,date_start=start,date_end=end)
 		return 	prices
+
+	def get_timeUnit_timestamp(self):
+		timeUnit_dict={"s": 1000,
+                               "m": 60000,
+       			       "h": 3600000,
+        		       "d": 86400000,
+        		       "w": 604800000,
+        	               "mon": 2592000000,}
+		return timeUnit_dict[self.get_timeUnit()]
+
 
 class CpuBilling(Billing):
 	def __init__(self):
@@ -1925,7 +1936,7 @@ class CpuBilling(Billing):
 			if prices1.total != prices.total:
 				test_util.test_fail("test billing fail,maybe can not calculate when vm %s"\
 						%(status))
-
+ 
 class MemoryBilling(Billing):
 	def __init__(self):
 		super(MemoryBilling, self).__init__()
@@ -2368,4 +2379,60 @@ def prometheus_conf_generate(host, web_port, address = None):
 
     test_util.test_logger('successfully deploy host %s with port %s for prometheus' % (hostInstance, web_port))
 
+    return True
+
+def resource_price_clear(resource):
+    usage_tables_dict = {
+        "vm": "VmUsageVO",
+        "rootvolume": "RootVolumeUsageVO",
+        "datavolume": "DataVolumeUsageVO",
+    }
+    cmd = '''echo "delete from zstack.%s;delete from zstack.PriceVO;"|mysql -uzstack -pzstack.password''' % usage_tables_dict[resource]
+    try:
+        os.system(cmd)
+        test_util.test_logger('successfully clear data in %s' % usage_tables_dict[resource])
+    except:
+        test_util.test_logger('fail to execute command %s' % cmd)
+        return False
+    return True
+
+def update_dateinlong(resource, offset,count):
+    usage_tables_dict = {
+        "vm": "VmUsageVO",
+        "rootvolume": "RootVolumeUsageVO",
+        "datavolume": "DataVolumeUsageVO",
+    }
+    offset_dict = {
+        "sec": 1000,
+        "min": 60000,
+        "hou": 3600000,
+        "day": 86400000,
+        "week": 604800000,
+        "month": 2592000000,
+        "year": 31536000000,
+    }
+    offset_sum = offset_dict[offset] * count 
+    cmd = '''echo "update zstack.%s set dateInLong=dateInLong-%s;update zstack.PriceVO set dateInLong=dateInLong-%s;"|mysql -uzstack -pzstack.password''' % \
+             (usage_tables_dict[resource], offset_sum, offset_sum)
+    try:
+        os.system(cmd)
+        test_util.test_logger('successfully update data in %s' % usage_tables_dict[resource])
+    except:
+        test_util.test_logger('fail to execute command %s' % cmd)
+        return False
+    return usage_tables_dict[resource], offset_sum
+
+def check(billing, resource, offset, offset_count, resource_count):
+    prices = billing.get_price_total()
+    time_now = int(time.time() * 1000)
+    table_name, check_time = update_dateinlong(resource, offset, offset_count)
+    #time.sleep(3)
+    prices1 = billing.get_price_total(end=time_now)
+    diff = prices1.total - prices.total
+    cal = float(int(billing.get_price()) * resource_count * check_time)/float(billing.get_timeUnit_timestamp())
+    if diff != cal:
+        test_util.test_fail("billing check fail: prices=%s prices1=%s diff=%s cal=%s" % (prices.total,prices1.total,diff,cal))
+        return False
+    else:
+        test_util.test_logger("billing check pass: prices=%s prices1=%s diff=%s cal=%s" % (prices.total,prices1.total,diff,cal))
     return True
