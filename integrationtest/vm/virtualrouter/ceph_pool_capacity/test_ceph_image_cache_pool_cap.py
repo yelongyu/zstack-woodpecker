@@ -21,7 +21,7 @@ def test():
                        media_type='ISO', image='testIsoUrl')
     test_obj_dict.add_vm(pool_cap.vm)
     pool_cap.attach_iso()
-    time.sleep(200)
+    time.sleep(300)
     pool_cap.get_ceph_pool('ImageCache')
     used1 = pool_cap.pool.usedCapacity
     avail1 = pool_cap.pool.availableCapacity

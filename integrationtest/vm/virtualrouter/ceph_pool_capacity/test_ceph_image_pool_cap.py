@@ -16,14 +16,14 @@ pool_cap = test_stub.PoolCapacity()
 
 def test():
     pool_cap.add_image()
-    time.sleep(90)
+    time.sleep(300)
     pool_cap.get_bs()
     used1 = pool_cap.bs.poolUsedCapacity
     avail1 = pool_cap.bs.poolAvailableCapacity
     pool_cap.check_pool_cap([used1, avail1], bs=True)
 
     pool_cap.del_image()
-    time.sleep(90)
+    time.sleep(300)
     pool_cap.get_bs()
     used2 = pool_cap.bs.poolUsedCapacity
     avail2 = pool_cap.bs.poolAvailableCapacity

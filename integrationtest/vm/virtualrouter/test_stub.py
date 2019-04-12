@@ -1533,7 +1533,7 @@ class PoolCapacity(Longjob):
         if bs:
             pool_name = self.bs.poolName
         self.get_pool_cap_remote(pool_name)
-        test_util.test_dsc('%s, %s, %s' % (cap, self.used_cap, self.avail_cap))
+        test_util.test_dsc('Pool [used, available] capacity get from ZStack: %s, pool  [used, available] capacity get from Ceph [%s, %s]' % (cap, self.used_cap, self.avail_cap))
         if 'M' in self.used_cap:
             assert cap[0] // 1024 //1024 == int(self.used_cap[:-1])
         elif 'k' in self.used_cap:

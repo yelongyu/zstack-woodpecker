@@ -17,7 +17,7 @@ pool_cap = test_stub.PoolCapacity()
 def test():
     pool_cap.create_vm()
     test_obj_dict.add_vm(pool_cap.vm)
-    time.sleep(200)
+    time.sleep(300)
     pool_cap.get_ceph_pool('Root')
     used1 = pool_cap.pool.usedCapacity
     avail1 = pool_cap.pool.availableCapacity
@@ -26,7 +26,7 @@ def test():
 
     pool_cap.vm.destroy()
     test_obj_dict.rm_vm(pool_cap.vm)
-    time.sleep(200)
+    time.sleep(300)
     pool_cap.get_ceph_pool('Root')
     used2 = pool_cap.pool.usedCapacity
     avail2 = pool_cap.pool.availableCapacity

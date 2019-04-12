@@ -19,7 +19,7 @@ def test():
     pool_cap.create_data_volume()
     test_obj_dict.add_vm(pool_cap.vm)
     test_obj_dict.add_volume(pool_cap.data_volume)
-    time.sleep(200)
+    time.sleep(300)
     pool_cap.get_ceph_pool('Data')
     used1 = pool_cap.pool.usedCapacity
     avail1 = pool_cap.pool.availableCapacity
@@ -27,7 +27,7 @@ def test():
     pool_cap.check_pool_cap([used1, avail1], pool_name=pool_name)
 
     test_obj_dict.rm_volume(pool_cap.data_volume)
-    time.sleep(200)
+    time.sleep(300)
     pool_cap.get_ceph_pool('Data')
     used2 = pool_cap.pool.usedCapacity
     avail2 = pool_cap.pool.availableCapacity
