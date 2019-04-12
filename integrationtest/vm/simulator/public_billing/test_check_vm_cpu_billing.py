@@ -44,8 +44,8 @@ def test():
 	
 	        test_util.test_logger("====check vm spending====")
 		for r in range(0,10):
-			test_util.test_logger('==spending check round %s-%s===' % (str(i+1), str(r+1)))
-			test_stub.check(bill_cpu, billing_resource, random.choice(offset_unit_dict), random.randint(0,30), cpuNum)
+			test_util.test_logger('===spending check round %s-%s===' % (str(i+1), str(r+1)))
+			test_stub.check(bill_cpu, billing_resource, random.choice(offset_unit_dict), random.randint(0,3), cpuNum)
 	test_util.test_pass("check vm billing spending pass")
 
 

@@ -2434,7 +2434,7 @@ def check(billing, resource, offset, offset_count, resource_count):
     cal = float(int(billing.get_price()) * resource_count * check_time)/float(billing.get_timeUnit_timestamp())
     #dc_diff = float("%.2f" % (diff-cal))
     dc_diff = diff-cal
-    if dc_diff > spending_per_sec:
+    if abs(dc_diff) > spending_per_sec:
         test_util.test_fail("offset time is %s %s \nbilling check fail: prices=%s prices1=%s diff=%s cal=%s diff-cal=%s" % (offset_count, offset, prices.total, prices1.total, diff, cal, str(dc_diff)))
         return False
     else:
