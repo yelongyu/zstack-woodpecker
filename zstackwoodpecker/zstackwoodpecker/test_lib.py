@@ -5923,7 +5923,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             bs_type = None
             target_vm = None
             target_image = None
-            bs_type = None
+
             if len(constant_path_list[0]) > 2:
                 target_vm_name = constant_path_list[0][1]
                 image_name = constant_path_list[0][2]
