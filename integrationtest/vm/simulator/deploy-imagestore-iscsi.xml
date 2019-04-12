@@ -151,10 +151,11 @@
              <hosts>
               <host name="$hostName" description="Test" managementIp="$hostIp"
                 username="$hostUsername" password="$hostPassword" />
+              <!--
               <host name="$hostName2" description="Test2" managementIp="$hostIp2"
                 username="$hostUsername2" password="$hostPassword2" port="$hostPort2"/>
               <host name="$hostName3" description="Test3" managementIp="$hostIp3"
-                username="$hostUsername3" password="$hostPassword3" />
+                username="$hostUsername3" password="$hostPassword3" />-->
             </hosts>
             <primaryStorageRef>$iscsiPrimaryStorageName</primaryStorageRef>
             <vniRangeRef>$vniRangeName</vniRangeRef>
