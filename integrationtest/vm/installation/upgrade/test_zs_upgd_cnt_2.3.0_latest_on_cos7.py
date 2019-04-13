@@ -82,7 +82,7 @@ def test():
     test_stub.stop_mn(vm_ip, tmp_file)
     #test_stub.check_installation(vm_ip, tmp_file)
 
-    test_stub.update_local_iso(vm_ip, tmp_file, iso_19_path, upgrade_script_path)
+    #test_stub.update_local_iso(vm_ip, tmp_file, iso_19_path, upgrade_script_path)
 
     release_ver=['2.3.1','2.3.2','2.4.0','2.5.0','2.6.0','3.0.0','3.0.1','3.1.0','3.1.3','3.2.0','3.3.0']
     curren_num = float(os.environ.get('releasePkgNum'))
