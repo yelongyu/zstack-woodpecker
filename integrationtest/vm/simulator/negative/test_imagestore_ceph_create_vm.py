@@ -57,7 +57,7 @@ case_flavor = dict(normal=             dict(agent_url=None),
                    ceph_delete=        dict(agent_url=CEPH_DELETE),
                    )
 
-db_tables_white_list = ['VmInstanceSequenceNumberVO', 'TaskProgressVO', 'RootVolumeUsageVO', 'ImageCacheVO']
+db_tables_white_list = ['VmInstanceSequenceNumberVO', 'TaskProgressVO', 'RootVolumeUsageVO', 'ImageCacheVO', 'SecurityGroupFailureHostVO']
 
 def test():
     global agent_url
@@ -100,12 +100,14 @@ def test():
         deploy_operations.remove_simulator_agent_script(agent_url)
         deploy_operations.deploy_simulator_agent_script(agent_url, script)
 
-    if agent_url == FLAT_DHCP_RELEASE or agent_url == NFS_DELETE:
+    if agent_url == FLAT_DHCP_RELEASE or agent_url == CEPH_DELETE:
         agent_url2 = VOLUME_CLONE
         deploy_operations.remove_simulator_agent_script(agent_url2)
         deploy_operations.deploy_simulator_agent_script(agent_url2, script)
 
     saved_db_stats = test_stub.get_db_stats(dhcp_ip)
+    test_stub.print_table('VolumeEO')
+    test_stub.print_table('ResourceVO')
     create_vm_failure = False
     try:
         vm = test_stub.create_vm(image_uuid=image_uuid, ps_uuid=ps_uuid)
@@ -115,6 +117,8 @@ def test():
     if agent_url != None and not create_vm_failure:
         test_util.test_fail("Expect failure during creating VM while it passed. Test Exception handling for Create VM FAIL")
 
+    test_stub.print_table('VolumeEO')
+    test_stub.print_table('ResourceVO')
     if agent_url != None:
         if is_flat:
             try:
