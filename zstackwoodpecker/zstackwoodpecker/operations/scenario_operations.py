@@ -2569,10 +2569,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                         print " mn host skip install drbd"
                         base_url = "http://192.168.200.100/mirror/kefeng.wang/mini-server/"
                         cmd = "curl %s | grep ZStack-mini-server | awk '{print $6}' |awk -F'>' '{print $1}' | awk -F'\"' '{print $2}' | tail -n1" % base_url
-                        (retcode, output, erroutput) = ssh.execute(check_exist_cmd, vm_ip, 'root', 'password')
+                        (retcode, output, erroutput) = ssh.execute(cmd, vm_ip, 'root', 'password')
                         mini_url = base_url + output
-                        cmd = "cd /root; wget mini_url ; bash ZStack-mini-server*" % mini_url
-                        (retcode, output, erroutput) = ssh.execute(check_exist_cmd, vm_ip, 'root', 'password')
+                        cmd = "cd /root; wget %s ; bash %s" % (mini_url, output)
+                        (retcode, output, erroutput) = ssh.execute(cmd, vm_ip, 'root', 'password')
                     else:
                         print "Mini Host need install drbd"
                         time.sleep(60)
