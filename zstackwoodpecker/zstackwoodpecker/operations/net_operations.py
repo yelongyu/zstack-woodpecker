@@ -899,3 +899,10 @@ def delete_l3(uuid, session_uuid = None):
     test_util.action_logger("[L3:] %s is deleted" % uuid)
     return evt   
 
+def get_l3network_dhcp_ip(l3NetworkUuid, session_uuid=None):
+    action = api_actions.GetL3NetworkDhcpIpAddressAction()
+    action.l3NetworkUuid = l3NetworkUuid
+    action.timeout = 12000
+    test_util.test_logger('Get l3 network dhcp ip from L3 uuid: {}'.format(l3NetworkUuid))
+    result = acc_ops.execute_action_with_session(action, session_uuid)
+    return result.ip

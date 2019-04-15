@@ -2150,6 +2150,16 @@ def lib_get_flat_dhcp_by_vm(vm):
                         return True
     return False
 
+def lib_get_flat_dhcp_by_l3_uuid(l3_uuid):
+    l3 = lib_get_l3_by_uuid(l3_uuid)
+    sps = lib_get_l3_service_providers(l3)
+    for service in l3.networkServices:
+        if service.networkServiceType == "DHCP":
+            for temp_sp1 in sps:
+                if temp_sp1.type == 'Flat' and service.networkServiceProviderUuid == temp_sp1.uuid:
+                    return True
+    return False
+
 def lib_check_nic_in_db(vm_inv, l3_uuid):
     '''
     Check if VM has NIC in l3_uuid
