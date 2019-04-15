@@ -25,7 +25,7 @@ def path():
                            [TestAction.stop_vm, iscsi_vms[-1]],
                            [TestAction.reinit_vm, iscsi_vms[-1]], 
                            [TestAction.change_vm_image, iscsi_vms[-1], "windows"], 
-                           [TestAction.change_vm_image, iscsi_vms[-1], "ttylinux", "=bs_type::%s" % "ImageStoreBackupStorage"],
+                           [TestAction.change_vm_image, iscsi_vms[-1], "ttylinux", "ImageStoreBackupStorage"],
                            [TestAction.detach_volume, "volume1"], 
                            [TestAction.ps_migrage_vm, iscsi_vms[-1]], 
                            [TestAction.attach_volume, iscsi_vms[-1], "volume1"], 
