@@ -2525,7 +2525,6 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     self.exc_traceback = ''.join(traceback.format_exception(*sys.exc_info()))
 
             def prepare_host_vm(self, vm):
-                global iscsi_initiator_to_setup
                 vm_creation_option = test_util.VmOption()
                 l3_uuid_list = []
                 l3_uuid_list_ge_3 = []
@@ -2753,6 +2752,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 			                #setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm, deploy_config)
                             break
                         elif ps_ref.type_ == 'iscsiInitiator':
+                            global iscsi_initiator_to_setup
                             iscsi_initiator_to_setup.append([vm_inv, vm])
 #                             setup_iscsi_initiator(zstack_management_ip, vm_inv, vm, deploy_config)
                             break
@@ -2797,8 +2797,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 
         for vm_thrd in thread_list:
             vm_thrd.join()
-            if vm_thrd.iscsi_initiator_to_setup:
-                iscsi_initiator_to_setup.append(vm_thrd.iscsi_initiator_to_setup)
+#             if vm_thrd.iscsi_initiator_to_setup:
+#                 iscsi_initiator_to_setup.append(vm_thrd.iscsi_initiator_to_setup)
             if vm_thrd.exitcode != 0:
                 print('----------------------Exception Reason------------------------')
                 print(vm_thrd.exc_traceback)
