@@ -33,7 +33,7 @@ from threading import Thread
 def wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_uuid):
     retry_count = 0
     while retry_count < 3:
-        if test_lib.lib_wait_target_up(vm_ip, '22', 30):
+        if test_lib.lib_wait_target_up(vm_ip, '22', 60):
             return True
         else:
             test_util.test_warn("Could not reach target vm: %s %s, retry after reboot it" % (vm_ip, vm_uuid))
