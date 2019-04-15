@@ -54,7 +54,7 @@ case_flavor = dict(normal=             dict(agent_url=None),
                    local_delete=       dict(agent_url=LOCAL_DELETE),
                    )
 
-db_tables_white_list = ['VmInstanceSequenceNumberVO', 'TaskProgressVO', 'RootVolumeUsageVO', 'ImageCacheVO']
+db_tables_white_list = ['VmInstanceSequenceNumberVO', 'TaskProgressVO', 'RootVolumeUsageVO', 'ImageCacheVO', 'SystemTagVO', 'UsedIpVO']
 def get_db_stats():
     conn = MySQLdb.connect(host=os.getenv('DBServer'), user='root', passwd='zstack.mysql.password', db='zstack',port=3306)
     cur = conn.cursor()
