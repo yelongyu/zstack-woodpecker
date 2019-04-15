@@ -2052,6 +2052,8 @@ def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_in
                 action.systemTags = ["localStorage::hostUuid::%s" % vm_inv.hostUuid]
     elif ps.type in [ 'SharedBlock' ]:
         action.primaryStorageUuid = ps.uuid
+    elif ps_ref_type in [ 'mini_ps' ]:
+        action.systemTags = ["capability::virtio-scsi", "localStorage::hostUuid::%s" % vm_inv.hostUuid]
     else:
         test_util.test_fail("new ps type in scenario.")
 
@@ -2492,6 +2494,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 #                shell.call('ip route add %s/24 via %s dev eth0' % (ip_range, last_ip_gateway))
 
     mn_ip_to_post, vm_ip_to_post = (None, None)
+    mini_cnt = 0
     if hasattr(scenario_config.deployerConfig, 'hosts'):
         ebs_host = {}
         ceph_disk_created = False
@@ -2559,6 +2562,24 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 
                 vm_inv = create_vm(zstack_management_ip, vm_creation_option)
                 vm_ip = test_lib.lib_get_vm_nic_by_l3(vm_inv, default_l3_uuid).ip
+
+                #for Mini setup
+                if os.getenv('hostType') == 'miniHost':
+                    if mini_cnt == 0:
+                        print " mn host skip install drbd"
+                        base_url = "http://192.168.200.100/mirror/kefeng.wang/mini-server/"
+                        cmd = "curl %s | grep ZStack-mini-server | awk '{print $6}' |awk -F'>' '{print $1}' | awk -F'\"' '{print $2}' | tail -n1" % base_url
+                        (retcode, output, erroutput) = ssh.execute(check_exist_cmd, vm_ip, 'root', 'password')
+                        mini_url = base_url + output
+                        cmd = "cd /root; wget mini_url ; bash ZStack-mini-server*" % mini_url
+                        (retcode, output, erroutput) = ssh.execute(check_exist_cmd, vm_ip, 'root', 'password')
+                    else:
+                        print "Mini Host need install drbd"
+                        time.sleep(60)
+                        cmd = "yum install kmod-drbd84 drbd84-utils -y;depmod -a && modprobe drbd;systemctl enable drbd;systemctl start drbd"
+                        ssh.execute(cmd, vm_ip, 'root', 'password', True, 22)
+                mini_cnt += 1
+
                 if vm.dataDiskOfferingUuid__:
                     volume_option = test_util.VolumeOption()
                     volume_option.set_name('data_volume')
@@ -2661,6 +2682,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
                             ceph_disk_created = True
                             break
+
                         if bs_ref.type_ == 'fusionstor':
                             disk_offering_uuid = bs_ref.offering_uuid_
                             volume_option.set_disk_offering_uuid(disk_offering_uuid)
@@ -2759,6 +2781,12 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             host_inv = query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
                             ebs_host[(vm_inv.uuid, host_inv.uuid, vm_ip)] = {'cpu': host_inv.availableCpuCapacity, 'mem': int(host_inv.availableMemoryCapacity)/1024/1024/1024}
 #                             install_ebs_pkg_in_host(vm_ip, vm.imageUsername_, vm.imagePassword_)
+                        elif ps_ref.type_ == 'mini_ps':
+                            disk_offering_uuid = ps_ref.offering_uuid_
+                            volume_option.set_disk_offering_uuid(disk_offering_uuid)
+                            volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config, ps_ref_type=ps_ref.type_)
+                            attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
+                            break
 
         xml_string = etree.tostring(root_xml, 'utf-8')
         xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")

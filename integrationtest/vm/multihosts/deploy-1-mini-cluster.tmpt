@@ -1,0 +1,4 @@
+import ./deploy.tmpt
+
+miniPrimaryStorageName = mini-ps
+miniBackupStorageName = mini-bs
