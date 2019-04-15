@@ -54,7 +54,7 @@ case_flavor = dict(normal=             dict(agent_url=None),
                    nfs_delete=         dict(agent_url=NFS_DELETE),
                    )
 
-db_tables_white_list = ['VmInstanceSequenceNumberVO', 'TaskProgressVO', 'RootVolumeUsageVO', 'ImageCacheVO']
+db_tables_white_list = ['VmInstanceSequenceNumberVO', 'TaskProgressVO', 'RootVolumeUsageVO', 'ImageCacheVO', 'VolumeEO', 'SecurityGroupFailureHostVO']
 def get_db_stats():
     conn = MySQLdb.connect(host=os.getenv('DBServer'), user='root', passwd='zstack.mysql.password', db='zstack',port=3306)
     cur = conn.cursor()
@@ -82,6 +82,16 @@ def test():
 	throw new Exception("shuang")
 }
 '''
+
+    l3net_uuid = test_lib.lib_get_l3_by_name(os.environ.get('l3VlanNetworkName3')).uuid
+    is_flat = test_lib.lib_get_flat_dhcp_by_l3_uuid(l3net_uuid)
+    if is_flat:
+        try:
+            dhcp_ip = net_ops.get_l3network_dhcp_ip(l3net_uuid)
+        except:
+            dhcp_ip = None
+    else:
+        dhcp_ip = None
 
     imagestore = test_lib.lib_get_image_store_backup_storage()
     if imagestore == None:
@@ -128,10 +138,16 @@ def test():
         test_util.test_fail("Expect failure during creating VM while it passed. Test Exception handling for Create VM FAIL")
 
     if agent_url != None:
-        saved_db_stats2 = get_db_stats()
-        for key in saved_db_stats2:
-            if saved_db_stats2[key] != saved_db_stats[key] and key not in db_tables_white_list:
-                test_util.test_fail("DB Table %s changed %s -> %s" % (key, saved_db_stats[key], saved_db_stats2[key]))
+        if is_flat:
+            try:
+                dhcp_ip = net_ops.get_l3network_dhcp_ip(l3net_uuid)
+            except:
+                dhcp_ip = None
+        else:
+            dhcp_ip = None
+
+        saved_db_stats2 = test_stub.get_db_stats(dhcp_ip)
+        test_stub.compare_db_stats(saved_db_stats, saved_db_stats2, db_tables_white_list)
 
     test_util.test_pass("Test Exception handling for Create VM PASS")
 
