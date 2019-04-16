@@ -35,7 +35,6 @@ import json
 import random
 import threading
 import commands
-import MySQLdb
 
 def remove_all_vpc_vrouter():
     cond = res_ops.gen_query_conditions('applianceVmType', '=', 'vpcvrouter')
@@ -1894,7 +1893,7 @@ class Billing(object):
 
 	def get_price_total(self,start=None,end=None):
 		cond = res_ops.gen_query_conditions('name', '=',  'admin')
-		admin_uuid = res_ops.query_resource_fields(res_ops.ACCOUNT, cond)[0].uuid		
+		admin_uuid = res_ops.query_resource_fields(res_ops.ACCOUNT, cond)[0].uuid
 		prices = bill_ops.calculate_account_spending(admin_uuid,date_start=start,date_end=end)
 		return 	prices
 
@@ -1906,7 +1905,6 @@ class Billing(object):
         		       "w": 604800000,
         	               "mon": 2592000000,}
 		return timeUnit_dict[self.get_timeUnit()]
-
 
 class CpuBilling(Billing):
 	def __init__(self):
@@ -2105,6 +2103,101 @@ class PublicIpBilling(Billing):
 				test_util.test_fail("test billing fail,maybe can not calculate when vm %s" \
 							%(status))
 
+class PublicIpVipInBilling(Billing):
+	def __init__(self):
+		super(PublicIpVipInBilling.self).__init__()
+		self.resourceName = "pubIpVipBandwidthIn"
+		self.resourceUnit = "M"
+		self.uuid = None
+
+	def set_resourceUnit(self,resourceUnit):
+		self.resourceUnit = resourceUnit
+
+	def get_resourceUnit(self):
+		return self.resourceUnit
+	
+	def create_resource_type(self):
+		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit)
+		self.uuid = evt.uuid
+		return evt
+
+	def get_uuid(self):
+		return self.uuid
+	
+	def delete_resource(self):
+		return bill_ops.delete_resource_price(self.uuid)
+
+class PublicIpVipOutBilling(Billing):
+	def __init__(self):
+		super(PublicIpVipOutBilling.self).__init__()
+		self.resourceName = "pubIpVipBandwidthOut"
+		self.resourceUnit = "M"
+		self.uuid = None
+
+	def set_resourceUnit(self,resourceUnit):
+		self.resourceUnit = resourceUnit
+
+	def get_resourceUnit(self):
+		return self.resourceUnit
+	
+	def create_resource_type(self):
+		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit)
+		self.uuid = evt.uuid
+		return evt
+
+	def get_uuid(self):
+		return self.uuid
+	
+	def delete_resource(self):
+		return bill_ops.delete_resource_price(self.uuid)
+
+class PublicIpNicInBilling():
+	def __init__(self):
+		super(PublicIpNicInBilling.self).__init__()
+		self.resourceName = "pubIpNicBandwidthIn"
+		self.resourceUnit = "M"
+		self.uuid = None
+
+	def set_resourceUnit(self,resourceUnit):
+		self.resourceUnit = resourceUnit
+
+	def get_resourceUnit(self):
+		return self.resourceUnit
+	
+	def create_resource_type(self):
+		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit)
+		self.uuid = evt.uuid
+		return evt
+
+	def get_uuid(self):
+		return self.uuid
+	
+	def delete_resource(self):
+		return bill_ops.delete_resource_price(self.uuid)
+
+class PublicIpNicOutBilling():
+	def __init__(self):
+		super(PublicIpNicOutBilling.self).__init__()
+		self.resourceName = "pubIpNicBandwidthOut"
+		self.resourceUnit = "M"
+		self.uuid = None
+
+	def set_resourceUnit(self,resourceUnit):
+		self.resourceUnit = resourceUnit
+
+	def get_resourceUnit(self):
+		return self.resourceUnit
+	
+	def create_resource_type(self):
+		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit)
+		self.uuid = evt.uuid
+		return evt
+
+	def get_uuid(self):
+		return self.uuid
+	
+	def delete_resource(self):
+		return bill_ops.delete_resource_price(self.uuid)
 '''
 to be define
 '''
@@ -2382,19 +2475,33 @@ def prometheus_conf_generate(host, web_port, address = None):
 
     return True
 
+def generate_account_billing(account_uuid):
+    flag = bill_ops.generate_account_billing(account_uuid)["success"]
+    try:
+        if flag:
+            test_util.test_logger("successfully generate account %s billing" % account_uuid)
+        else:
+            test_util.test_fail("fail to generate account %s billing\n %s" % (account_uuid, flag))
+            return False
+    except:
+        test_util.test_logger('fail to generate account %s billing\n %s' % (account_uuid, flag))
+        return False
+    return True
+
 def resource_price_clear(resource):
     usage_tables_dict = {
-        "vm": "VmUsageVO",
-        "rootvolume": "RootVolumeUsageVO",
-        "datavolume": "DataVolumeUsageVO",
+        "vm": "Vm",
+        "rootvolume": "RootVolume",
+        "datavolume": "DataVolume",
     }
-    cmd = '''echo "delete from zstack.%s;delete from zstack.PriceVO;"|mysql -uzstack -pzstack.password''' % usage_tables_dict[resource]
+    cmd = '''echo "delete from zstack.%sUsageVO;delete from zstack.%sUsageHistoryVO;delete from zstack.PriceVO;"|mysql -uzstack -pzstack.password''' % (usage_tables_dict[resource], usage_tables_dict[resource])
     try:
         os.system(cmd)
-        test_util.test_logger('successfully clear data in %s' % usage_tables_dict[resource])
-    except:
-        test_util.test_logger('fail to execute command %s' % cmd)
-        return False
+        test_util.test_logger('successfully clear data in %sUsageVO , %sUsageHistoryVO and PriceVO' % (usage_tables_dict[resource], usage_tables_dict[resource]))
+    except Exception, e:
+        test_util.test_logger(e)
+        test_util.test_fail('fail to execute command %s' % cmd)
+        #return False
     return True
 
 def update_dateinlong(resource, offset,count):
@@ -2419,64 +2526,30 @@ def update_dateinlong(resource, offset,count):
         os.system(cmd)
         test_util.test_logger('successfully update data in %s' % usage_tables_dict[resource])
     except:
-        test_util.test_logger('fail to execute command %s' % cmd)
-        return False
+        test_util.test_fail('fail to execute command %s' % cmd)
+        #return False
     return usage_tables_dict[resource], offset_sum
 
 def check(billing, resource, offset, offset_count, resource_count):
+    cond = res_ops.gen_query_conditions('name', '=',  'admin')
+    admin_uuid = res_ops.query_resource_fields(res_ops.ACCOUNT, cond)[0].uuid
+
     prices = billing.get_price_total()
     time_now = int(time.time() * 1000)
     table_name, check_time = update_dateinlong(resource, offset, offset_count)
+    generate_account_billing(admin_uuid) #update data in tables like %HistoryUsageVO
+
     prices1 = billing.get_price_total(end=time_now)
-    #spending_per_sec = float("%2.f" % (float(int(billing.get_price()) * resource_count * 1000)/float(billing.get_timeUnit_timestamp()))) * 10 #acceptable deviation range
-    spending_per_sec = float(int(billing.get_price()) * resource_count * 1000)/float(billing.get_timeUnit_timestamp()) * 10 #acceptable deviation range
-    test_util.test_logger("@@DEBUG@@: spending_per_sec=%s" % spending_per_sec)
+    spending_diff_range = float(int(billing.get_price()) * resource_count * 1000)/float(billing.get_timeUnit_timestamp()) * 10 #acceptable deviation range
+    test_util.test_logger("@@DEBUG@@: spending_diff_range=%s" % spending_diff_range)
+
     diff = prices1.total - prices.total
     cal = float(int(billing.get_price()) * resource_count * check_time)/float(billing.get_timeUnit_timestamp())
-    #dc_diff = float("%.2f" % (diff-cal))
     dc_diff = diff-cal
-    if abs(dc_diff) > spending_per_sec:
-        test_util.test_fail("offset time is %s %s \nbilling check fail: prices=%s prices1=%s diff=%s cal=%s diff-cal=%s" % (offset_count, offset, prices.total, prices1.total, diff, cal, str(dc_diff)))
+
+    if abs(dc_diff) > spending_diff_range:
+        test_util.test_logger("offset time is %s %s \nbilling check fail: prices=%s prices1=%s diff=%s cal=%s diff-cal=%s" % (offset_count, offset, prices.total, prices1.total, diff, cal, str(dc_diff)))
         return False
     else:
         test_util.test_logger("offset time is %s %s \nbilling check pass: prices=%s prices1=%s diff=%s cal=%s diff-cal=%s" % (offset_count, offset, prices.total, prices1.total, diff, cal, str(dc_diff)))
     return True
-
-def get_db_stats(l3_exclude_ip):
-    conn = MySQLdb.connect(host=os.getenv('DBServer'), user='root', passwd='zstack.mysql.password', db='zstack',port=3306)
-    cur = conn.cursor()
-    count = cur.execute('show tables;')
-    all_tables = cur.fetchall()
-    db_tables_stats = dict()
-    for at in all_tables:
-        if at[0].find('EO') >= 0:
-            continue
-        if at[0].find('UsedIpVO') >= 0:
-                count = cur.execute('select count(*) from %s where ip<>"%s";' % (at[0], l3_exclude_ip))
-        	db_tables_stats[at[0]] = cur.fetchone()[0]
-        elif at[0].find('VO') >= 0:
-        	count = cur.execute('select count(*) from %s;' % (at[0]))
-        	db_tables_stats[at[0]] = cur.fetchone()[0]
-        else:
-                count = cur.execute('checksum table %s;' % (at[0]))
-        	db_tables_stats[at[0]] = cur.fetchone()[1]
-    return db_tables_stats
-
-def print_table(table):
-    conn = MySQLdb.connect(host=os.getenv('DBServer'), user='root', passwd='zstack.mysql.password', db='zstack',port=3306)
-    cur = conn.cursor()
-    count = cur.execute('select * from %s;' % (table))
-    table_contents = cur.fetchall()
-    print 'shuangwaiwai'
-    for tc in table_contents:
-        print tc
-    print 'shuangwaiwai2'
-
-def compare_db_stats(db_stats, db_stats2, white_list):
-    for key in db_stats2:
-        if db_stats2[key] != db_stats[key] and key not in white_list:
-            if key.find('VO') >= 0 or key.find('EO') >= 0:
-                if int(db_stats2[key]) <= int(db_stats[key]):
-                    test_util.test_logger("DB Table %s changed %s -> %s" % (key, db_stats[key], db_stats2[key]))
-                    continue
-            test_util.test_fail("DB Table %s changed %s -> %s" % (key, db_stats[key], db_stats2[key]))

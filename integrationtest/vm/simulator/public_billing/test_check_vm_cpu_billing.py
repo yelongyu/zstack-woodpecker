@@ -22,6 +22,7 @@ offset_unit_dict=['sec','min','hou','day','week','month','year']
 time_unit_dict=['s','m','h','d','w','mon']
 
 def test():
+	success_round = 0
 	for i in range(0,10):	
 	        test_util.test_logger("clear data in  VmUsageVO and PriceVO")
 	        test_stub.resource_price_clear(billing_resource)
@@ -45,8 +46,12 @@ def test():
 	        test_util.test_logger("====check vm spending====")
 		for r in range(0,10):
 			test_util.test_logger('===spending check round %s-%s===' % (str(i+1), str(r+1)))
-			test_stub.check(bill_cpu, billing_resource, random.choice(offset_unit_dict), random.randint(0,3), cpuNum)
-	test_util.test_pass("check vm billing spending pass")
+			if test_stub.check(bill_cpu, billing_resource, random.choice(offset_unit_dict), random.randint(0,3), cpuNum):
+				success_round += 1
+	if success_round != 100:
+		test_util.test_fail("check vm billing spending finished\n success: %s/100" % success_round)	
+	else:
+		test_util.test_pass("check vm billing spending finished\n success: %s/100" % success_round)
 
 
 def error_cleanup():
