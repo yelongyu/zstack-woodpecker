@@ -52,7 +52,7 @@ case_flavor = dict(normal=             dict(agent_url=None),
                    smp_delete=         dict(agent_url=SMP_DELETE),
                    )
 
-db_tables_white_list = ['VmInstanceSequenceNumberVO', 'TaskProgressVO', 'RootVolumeUsageVO', 'ImageCacheVO', 'GarbageCollectorVO', 'SystemTagVO']
+db_tables_white_list = ['VmInstanceSequenceNumberVO', 'TaskProgressVO', 'RootVolumeUsageVO', 'ImageCacheVO', 'GarbageCollectorVO', 'SystemTagVO', 'SecurityGroupFailureHostVO']
 
 def test():
     global agent_url
@@ -66,14 +66,6 @@ def test():
 	throw new Exception("shuang")
 }
 '''
-    if agent_url != None:
-        deploy_operations.remove_simulator_agent_script(agent_url)
-        deploy_operations.deploy_simulator_agent_script(agent_url, script)
-
-    if agent_url == FLAT_DHCP_RELEASE or agent_url == SMP_DELETE:
-        agent_url2 = VM_START
-        deploy_operations.remove_simulator_agent_script(agent_url2)
-        deploy_operations.deploy_simulator_agent_script(agent_url2, script)
 
     l3net_uuid = test_lib.lib_get_l3_by_name(os.environ.get('l3VlanNetworkName3')).uuid
     is_flat = test_lib.lib_get_flat_dhcp_by_l3_uuid(l3net_uuid)
@@ -94,6 +86,20 @@ def test():
     if len(pss) == 0:
         test_util.test_skip('Required smp ps to test')
     ps_uuid = pss[0].uuid
+
+    vm = test_stub.create_vm(image_uuid=image_uuid, ps_uuid=ps_uuid)
+    vm.destroy()
+    vm.expunge()
+
+    if agent_url != None:
+        deploy_operations.remove_simulator_agent_script(agent_url)
+        deploy_operations.deploy_simulator_agent_script(agent_url, script)
+
+    if agent_url == FLAT_DHCP_RELEASE or agent_url == SMP_DELETE:
+        agent_url2 = VM_START
+        deploy_operations.remove_simulator_agent_script(agent_url2)
+        deploy_operations.deploy_simulator_agent_script(agent_url2, script)
+
     saved_db_stats = test_stub.get_db_stats(dhcp_ip)
     create_vm_failure = False
     try:
