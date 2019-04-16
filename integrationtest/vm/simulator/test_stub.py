@@ -35,6 +35,7 @@ import json
 import random
 import threading
 import commands
+import MySQLdb
 
 def remove_all_vpc_vrouter():
     cond = res_ops.gen_query_conditions('applianceVmType', '=', 'vpcvrouter')
@@ -2553,3 +2554,42 @@ def check(billing, resource, offset, offset_count, resource_count):
     else:
         test_util.test_logger("offset time is %s %s \nbilling check pass: prices=%s prices1=%s diff=%s cal=%s diff-cal=%s" % (offset_count, offset, prices.total, prices1.total, diff, cal, str(dc_diff)))
     return True
+
+def get_db_stats(l3_exclude_ip):
+    conn = MySQLdb.connect(host=os.getenv('DBServer'), user='root', passwd='zstack.mysql.password', db='zstack',port=3306)
+    cur = conn.cursor()
+    count = cur.execute('show tables;')
+    all_tables = cur.fetchall()
+    db_tables_stats = dict()
+    for at in all_tables:
+        if at[0].find('EO') >= 0:
+            continue
+        if at[0].find('UsedIpVO') >= 0:
+                count = cur.execute('select count(*) from %s where ip<>"%s";' % (at[0], l3_exclude_ip))
+            db_tables_stats[at[0]] = cur.fetchone()[0]
+        elif at[0].find('VO') >= 0:
+            count = cur.execute('select count(*) from %s;' % (at[0]))
+            db_tables_stats[at[0]] = cur.fetchone()[0]
+        else:
+                count = cur.execute('checksum table %s;' % (at[0]))
+            db_tables_stats[at[0]] = cur.fetchone()[1]
+    return db_tables_stats
+
+def print_table(table):
+    conn = MySQLdb.connect(host=os.getenv('DBServer'), user='root', passwd='zstack.mysql.password', db='zstack',port=3306)
+    cur = conn.cursor()
+    count = cur.execute('select * from %s;' % (table))
+    table_contents = cur.fetchall()
+    print 'shuangwaiwai'
+    for tc in table_contents:
+        print tc
+    print 'shuangwaiwai2'
+
+def compare_db_stats(db_stats, db_stats2, white_list):
+    for key in db_stats2:
+        if db_stats2[key] != db_stats[key] and key not in white_list:
+            if key.find('VO') >= 0 or key.find('EO') >= 0:
+                if int(db_stats2[key]) <= int(db_stats[key]):
+                    test_util.test_logger("DB Table %s changed %s -> %s" % (key, db_stats[key], db_stats2[key]))
+                    continue
+            test_util.test_fail("DB Table %s changed %s -> %s" % (key, db_stats[key], db_stats2[key]))
