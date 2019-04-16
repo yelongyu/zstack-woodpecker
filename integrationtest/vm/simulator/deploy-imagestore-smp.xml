@@ -155,8 +155,6 @@
             </hosts>
             <primaryStorageRef>$sharedMountPointPrimaryStorageName</primaryStorageRef>
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
-            <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
-            <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName2</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName3</l2NetworkRef>
