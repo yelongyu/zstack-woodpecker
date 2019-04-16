@@ -2565,13 +2565,13 @@ def get_db_stats(l3_exclude_ip):
         if at[0].find('EO') >= 0:
             continue
         if at[0].find('UsedIpVO') >= 0:
-                count = cur.execute('select count(*) from %s where ip<>"%s";' % (at[0], l3_exclude_ip))
+            count = cur.execute('select count(*) from %s where ip<>"%s";' % (at[0], l3_exclude_ip))
             db_tables_stats[at[0]] = cur.fetchone()[0]
         elif at[0].find('VO') >= 0:
             count = cur.execute('select count(*) from %s;' % (at[0]))
             db_tables_stats[at[0]] = cur.fetchone()[0]
         else:
-                count = cur.execute('checksum table %s;' % (at[0]))
+            count = cur.execute('checksum table %s;' % (at[0]))
             db_tables_stats[at[0]] = cur.fetchone()[1]
     return db_tables_stats
 
