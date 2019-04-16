@@ -2556,16 +2556,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 vm_creation_option.set_image_uuid(vm.imageUuid_)
                 vm_creation_option.set_name(vm.name_)
                 vm_creation_option.set_timeout(1200000)
-#                 if vm.dataDiskOfferingUuid__:
-#                     vm_creation_option.set_data_disk_uuids([vm.dataDiskOfferingUuid_])
-                #vm_creation_option.set_host_uuid(host.uuid_)
-                #vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
-                #vm_creation_option.set_default_l3_uuid(default_l3_uuid)
-                #vm_creation_option.set_system_tags(system_tags)
-                #vm_creation_option.set_ps_uuid(ps_uuid)
-                #vm_creation_option.set_session_uuid(session_uuid)
                 if os.getenv('datacenterType') == 'AliyunEBS':
-#                     vm_creation_option.set_ps_uuid(os.getenv('PSUUIDFOREBS'))
                     cond = res_ops.gen_query_conditions('type', '=', 'SharedBlock')
                     cond = res_ops.gen_query_conditions('status', '=', 'Connected', cond)
                     cond = res_ops.gen_query_conditions('state', '=', 'Enabled', cond)
@@ -2667,24 +2658,6 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     volume_option = test_util.VolumeOption()
                     volume_option.set_name(os.environ.get('volumeName'))
                     for bs_ref in xmlobject.safe_list(vm.backupStorageRef):
-#                         if bs_ref.type_ in ['ceph', 'xsky']:
-# #                         if bs_ref.type_ == 'ceph':
-#                             disk_offering_uuid = bs_ref.offering_uuid_
-#                             volume_option.set_disk_offering_uuid(disk_offering_uuid)
-#                             if primaryStorageUuid != None and primaryStorageUuid != "":
-#                                 volume_option.set_primary_storage_uuid(primaryStorageUuid)
-#                             if poolName != None and poolName != "":
-#                                 volume_option.set_system_tags(['ceph::pool::%s' % (poolName)])
-#                             #volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
-#                             if bs_ref.type_ == 'ceph':
-#                                 if xmlobject.has_element(deploy_config, 'backupStorages.cephBackupStorage'):
-#                                     volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv)
-#                                 else:
-#                                     volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config)
-#                             else:
-#                                 volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config)
-#                             attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
-#                             break
                         if bs_ref.type_ == 'fusionstor':
                             disk_offering_uuid = bs_ref.offering_uuid_
                             volume_option.set_disk_offering_uuid(disk_offering_uuid)
@@ -2786,7 +2759,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             else:
                                 volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config)
                             attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
-                            break
+#                             break
         thread_list = []
         for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
             for vm in xmlobject.safe_list(host.vms.vm):
