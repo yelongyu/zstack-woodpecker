@@ -4,7 +4,7 @@ check the global_config category is quota
 '''
 
 import zstackwoodpecker.test_util as test_util
-import test_stub
+#import test_stub
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.config_operations as conf_ops
 
