@@ -155,7 +155,28 @@
             </hosts>
             <primaryStorageRef>$sharedMountPointPrimaryStorageName</primaryStorageRef>
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
+            <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
+            <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName2</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName3</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName4</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName5</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName6</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName7</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName8</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName9</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName10</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName11</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName12</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName13</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName14</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName15</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName16</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName17</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName18</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName19</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName20</l2NetworkRef>
           </cluster>
         </clusters>
   

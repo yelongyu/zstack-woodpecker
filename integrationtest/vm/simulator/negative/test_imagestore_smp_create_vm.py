@@ -52,7 +52,7 @@ case_flavor = dict(normal=             dict(agent_url=None),
                    smp_delete=         dict(agent_url=SMP_DELETE),
                    )
 
-db_tables_white_list = ['VmInstanceSequenceNumberVO', 'TaskProgressVO', 'RootVolumeUsageVO', 'ImageCacheVO', 'GarbageCollectorVO']
+db_tables_white_list = ['VmInstanceSequenceNumberVO', 'TaskProgressVO', 'RootVolumeUsageVO', 'ImageCacheVO', 'GarbageCollectorVO', 'SystemTagVO']
 
 def test():
     global agent_url
