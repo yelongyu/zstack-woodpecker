@@ -17,6 +17,7 @@ import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
 import apibinding.api_actions as api_actions
 import apibinding.inventory as inventory
 import zstackwoodpecker.operations.deploy_operations as deploy_operations
+import zstackwoodpecker.operations.net_operations as net_ops
 import uuid
 import os
 import time
@@ -55,20 +56,6 @@ case_flavor = dict(normal=             dict(agent_url=None),
                    )
 
 db_tables_white_list = ['VmInstanceSequenceNumberVO', 'TaskProgressVO', 'RootVolumeUsageVO', 'ImageCacheVO', 'VolumeEO', 'SecurityGroupFailureHostVO']
-def get_db_stats():
-    conn = MySQLdb.connect(host=os.getenv('DBServer'), user='root', passwd='zstack.mysql.password', db='zstack',port=3306)
-    cur = conn.cursor()
-    count = cur.execute('show tables;')
-    all_tables = cur.fetchall()
-    db_tables_stats = dict()
-    for at in all_tables:
-        if at[0].find('VO') >= 0:
-        	count = cur.execute('select count(*) from %s;' % (at[0]))
-        	db_tables_stats[at[0]] = cur.fetchone()[0]
-        else:
-                count = cur.execute('checksum table %s;' % (at[0]))
-        	db_tables_stats[at[0]] = cur.fetchone()[1]
-    return db_tables_stats
 
 def test():
     global agent_url
@@ -126,7 +113,7 @@ def test():
         deploy_operations.remove_simulator_agent_script(agent_url2)
         deploy_operations.deploy_simulator_agent_script(agent_url2, script)
 
-    saved_db_stats = get_db_stats()
+    saved_db_stats = test_stub.get_db_stats(dhcp_ip)
 
     create_vm_failure = False
     try:
