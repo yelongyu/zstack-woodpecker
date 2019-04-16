@@ -192,6 +192,7 @@
                   <serviceType>Eip</serviceType> 
                 </networkService>
               </l3BasicNetwork>
+            </l3Networks>
           </l2VlanNetwork>
           <l2VlanNetwork name="$l2VlanNetworkName2" 
             description="guest l2 vlan network 2"
