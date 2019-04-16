@@ -236,14 +236,14 @@
         <case timeout='600' repeat='1'>test_create_stop_vm.py</case>
         <case timeout='600' repeat='1'>test_justcreate_vm.py</case>
         <case timeout='600' repeat='1'>test_create_volume_image_longjob.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>ceph_pool_capacity/test_ceph_data_pool_cap.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>ceph_pool_capacity/test_ceph_data_pool_cap_crt_pool.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>ceph_pool_capacity/test_ceph_image_cache_pool_cap.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>ceph_pool_capacity/test_ceph_image_pool_cap.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>ceph_pool_capacity/test_ceph_pool_cap_crt_vm_image.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>ceph_pool_capacity/test_ceph_pool_cap_crt_vol_image.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>ceph_pool_capacity/test_ceph_pool_replicated_size.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>ceph_pool_capacity/test_ceph_root_pool_cap.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>ceph_pool_capacity/test_ceph_data_pool_cap.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>ceph_pool_capacity/test_ceph_data_pool_cap_crt_pool.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>ceph_pool_capacity/test_ceph_image_cache_pool_cap.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>ceph_pool_capacity/test_ceph_image_pool_cap.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>ceph_pool_capacity/test_ceph_pool_cap_crt_vm_image.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>ceph_pool_capacity/test_ceph_pool_cap_crt_vol_image.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>ceph_pool_capacity/test_ceph_pool_replicated_size.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>ceph_pool_capacity/test_ceph_root_pool_cap.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_add_image_file_url.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_add_qcow2_image_file_url.py</case>
     </suite>
