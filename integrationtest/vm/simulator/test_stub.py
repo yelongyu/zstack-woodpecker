@@ -2491,14 +2491,14 @@ def generate_account_billing(account_uuid):
 
 def resource_price_clear(resource):
     usage_tables_dict = {
-        "vm": "Vm",
-        "rootvolume": "RootVolume",
-        "datavolume": "DataVolume",
+        "vm": '''echo "delete from zstack.VmUsageVO;delete from zstack.VmUsageHistoryVO;delete from zstack.VmCPUBillingVO;delete from zstack.VmMemoryBillingVO;delete from zstack.PriceVO;delete from zstack.BillingVO;"|mysql -uzstack -pzstack.password''',
+        "rootvolume": '''echo "delete from zstack.RootVolumeUsageVO;delete from zstack.RootVolumeUsageHistoryVO;delete from zstack.RootVolumeBillingVO;delete from zstack.PriceVO;delete from zstack.BillingVO;"|mysql -uzstack -pzstack.password''',
+        "datavolume": '''echo "delete from zstack.DataVolumeUsageVO;delete from zstack.DataVolumeUsageHistoryVO;delete from zstack.DataVolumeBillingVO;delete from zstack.PriceVO;delete from zstack.BillingVO;"|mysql -uzstack -pzstack.password''',
     }
-    cmd = '''echo "delete from zstack.%sUsageVO;delete from zstack.%sUsageHistoryVO;delete from zstack.PriceVO;"|mysql -uzstack -pzstack.password''' % (usage_tables_dict[resource], usage_tables_dict[resource])
+    cmd = usage_tables_dict[resource]
     try:
         os.system(cmd)
-        test_util.test_logger('successfully clear data in %sUsageVO , %sUsageHistoryVO and PriceVO' % (usage_tables_dict[resource], usage_tables_dict[resource]))
+        test_util.test_logger('successfully clear %s data' % resource)
     except Exception, e:
         test_util.test_logger(e)
         test_util.test_fail('fail to execute command %s' % cmd)
@@ -2521,8 +2521,8 @@ def update_dateinlong(resource, offset,count):
         "year": 31536000000,
     }
     offset_sum = offset_dict[offset] * count 
-    cmd = '''echo "update zstack.%s set dateInLong=dateInLong-%s;update zstack.PriceVO set dateInLong=dateInLong-%s;"|mysql -uzstack -pzstack.password''' % \
-             (usage_tables_dict[resource], offset_sum, offset_sum)
+    cmd = '''echo "update zstack.%s set dateInLong=dateInLong-%s;update zstack.PriceVO set dateInLong=0;"|mysql -uzstack -pzstack.password''' % \
+             (usage_tables_dict[resource], offset_sum)
     try:
         os.system(cmd)
         test_util.test_logger('successfully update data in %s' % usage_tables_dict[resource])
@@ -2535,12 +2535,12 @@ def check(billing, resource, offset, offset_count, resource_count):
     cond = res_ops.gen_query_conditions('name', '=',  'admin')
     admin_uuid = res_ops.query_resource_fields(res_ops.ACCOUNT, cond)[0].uuid
 
-    prices = billing.get_price_total()
     time_now = int(time.time() * 1000)
+    prices = billing.get_price_total(end=time_now)
     table_name, check_time = update_dateinlong(resource, offset, offset_count)
     generate_account_billing(admin_uuid) #update data in tables like %HistoryUsageVO
-
     prices1 = billing.get_price_total(end=time_now)
+
     spending_diff_range = float(int(billing.get_price()) * resource_count * 1000)/float(billing.get_timeUnit_timestamp()) * 10 #acceptable deviation range
     test_util.test_logger("@@DEBUG@@: spending_diff_range=%s" % spending_diff_range)
 
