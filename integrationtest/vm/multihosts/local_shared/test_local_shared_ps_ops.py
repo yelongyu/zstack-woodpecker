@@ -109,12 +109,13 @@ def test():
     if flavor['shared_state'] is MAINTENANCE:
         ps_ops.change_primary_storage_state(shared_ps.uuid, state='enable')
 
-    if MAINTENANCE in (flavor['local_state'], flavor['shared_state']):
-        if vr_vm and vr_vm.state == inventory.STOPPED:
-            vm_ops.start_vm(vr_vm.uuid)
+#    if MAINTENANCE in (flavor['local_state'], flavor['shared_state']):
+#        if vr_vm and vr_vm.state == inventory.STOPPED:
+#            vm_ops.start_vm(vr_vm.uuid)
 
     for vm in vm_list:
-        if vm.get_vm().state == inventory.STOPPED:
+        vm.update()
+        if vm.get_vm().state == inventory.STOPPED and vm.get_vm().type != 'ApplianceVm':
             vm.start()
         vm.check()
 
