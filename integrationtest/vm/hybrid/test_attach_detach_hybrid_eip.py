@@ -21,9 +21,17 @@ def test():
     hybrid.attach_eip_to_ecs()
     hybrid.detach_eip_from_ecs()
     hybrid.del_ecs_instance()
+    try:
+        hybrid.del_eip()
+    except:
+        pass
     test_util.test_pass('Attach Detach Hybrid Eip to/from Ecs Test Success')
 
 def env_recover():
+    try:
+        hybrid.del_eip()
+    except:
+        pass
     hybrid.tear_down()
 
 #Will be called only if exception happens in test().
@@ -31,3 +39,7 @@ def error_cleanup():
     global test_obj_dict
     hybrid.tear_down()
     test_lib.lib_error_cleanup(test_obj_dict)
+    try:
+        hybrid.del_eip()
+    except:
+        pass

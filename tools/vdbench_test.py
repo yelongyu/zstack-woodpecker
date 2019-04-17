@@ -26,6 +26,7 @@ def format_disk():
     def _format_disk(disk=None):
         if disk:
             bash_roe("echo -ne 'n\np\n1\n\n\nw\nq\n' | fdisk %s && mkfs.xfs -f %s1" % (disk, disk))
+            print "czhou:mkfs"
         else:
             _,o1,_ = bash_roe("fdisk -l | grep Disk | grep dev | grep -v vda | grep -v mapper | awk '{print $2}' | awk -F':' '{print $1}'")
     
@@ -189,7 +190,9 @@ def mkdir_disk(disklist):
 
 def clear_disk(disklist):
     for i in disklist.keys():
-        bash_roe("umount /%s" % os.path.basename(i))
+        r,o,e=bash_roe("umount /%s" % os.path.basename(i))
+        if r != 0:
+            print "czhou:umount",e
         bash_roe("rm -fr /%s" % os.path.basename(i))
 
 def md5sum(disklist,flag):
@@ -228,7 +231,7 @@ def collect_md5sum(disklist):
 def print_dir(disklist):
     directory = {}
     for i in disklist.keys():
-        _,o,_=bash_roe("ls -t /%s/| grep md5sum_%s" % ('/'+os.path.basename(i),os.path.basename(i)))
+        _,o,_=bash_roe("ls -t /%s/| grep md5sum" % ('/'+os.path.basename(i)))
         directory[i] = o.strip()
     return directory
 

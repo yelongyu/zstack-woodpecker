@@ -17,6 +17,7 @@ import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
 import apibinding.api_actions as api_actions
 import apibinding.inventory as inventory
 import zstackwoodpecker.operations.deploy_operations as deploy_operations
+import zstackwoodpecker.operations.net_operations as net_ops
 import uuid
 import os
 import time
@@ -54,21 +55,7 @@ case_flavor = dict(normal=             dict(agent_url=None),
                    local_delete=       dict(agent_url=LOCAL_DELETE),
                    )
 
-db_tables_white_list = ['VmInstanceSequenceNumberVO', 'TaskProgressVO', 'RootVolumeUsageVO', 'ImageCacheVO']
-def get_db_stats():
-    conn = MySQLdb.connect(host=os.getenv('DBServer'), user='root', passwd='zstack.mysql.password', db='zstack',port=3306)
-    cur = conn.cursor()
-    count = cur.execute('show tables;')
-    all_tables = cur.fetchall()
-    db_tables_stats = dict()
-    for at in all_tables:
-        if at[0].find('VO') >= 0:
-        	count = cur.execute('select count(*) from %s;' % (at[0]))
-        	db_tables_stats[at[0]] = cur.fetchone()[0]
-        else:
-                count = cur.execute('checksum table %s;' % (at[0]))
-        	db_tables_stats[at[0]] = cur.fetchone()[1]
-    return db_tables_stats
+db_tables_white_list = ['VmInstanceSequenceNumberVO', 'TaskProgressVO', 'RootVolumeUsageVO', 'ImageCacheVO', 'SystemTagVO']
 
 def test():
     global agent_url
@@ -91,6 +78,16 @@ def test():
         deploy_operations.remove_simulator_agent_script(agent_url2)
         deploy_operations.deploy_simulator_agent_script(agent_url2, script)
 
+    l3net_uuid = test_lib.lib_get_l3_by_name(os.environ.get('l3VlanNetworkName3')).uuid
+    is_flat = test_lib.lib_get_flat_dhcp_by_l3_uuid(l3net_uuid)
+    if is_flat:
+        try:
+            dhcp_ip = net_ops.get_l3network_dhcp_ip(l3net_uuid)
+        except:
+            dhcp_ip = None
+    else:
+        dhcp_ip = None
+
     imagestore = test_lib.lib_get_image_store_backup_storage()
     if imagestore == None:
         test_util.test_skip('Required imagestore to test')
@@ -112,7 +109,7 @@ def test():
     image_option.url = "http://fake/fake.raw"
     image = img_ops.add_image(image_option)
     image_uuid = image.uuid
-    saved_db_stats = get_db_stats()
+    saved_db_stats = test_stub.get_db_stats(dhcp_ip)
 
     create_vm_failure = False
     try:
@@ -124,10 +121,16 @@ def test():
         test_util.test_fail("Expect failure during creating VM while it passed. Test Exception handling for Create VM FAIL")
 
     if agent_url != None:
-        saved_db_stats2 = get_db_stats()
-        for key in saved_db_stats2:
-            if saved_db_stats2[key] != saved_db_stats[key] and key not in db_tables_white_list:
-                test_util.test_fail("DB Table %s changed %s -> %s" % (key, saved_db_stats[key], saved_db_stats2[key]))
+        if is_flat:
+            try:
+                dhcp_ip = net_ops.get_l3network_dhcp_ip(l3net_uuid)
+            except:
+                dhcp_ip = None
+        else:
+            dhcp_ip = None
+
+        saved_db_stats2 = test_stub.get_db_stats(dhcp_ip)
+        test_stub.compare_db_stats(saved_db_stats, saved_db_stats2, db_tables_white_list)
 
 def env_recover():
     global agent_url

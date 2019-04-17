@@ -394,9 +394,9 @@ def add_backup_storage():
         if host.managementIp != bs_ip:
             bs_option.set_hostname(host.managementIp)
             zone_uuid = host.zoneUuid
+            bs_option.set_sshPort(host.sshPort)
             break;
     bs_option.set_password('password')
-    bs_option.set_sshPort('22')
     bs_option.set_username("root")
     bs_option.set_import_images('true')
     bs_inv = bs_ops.create_image_store_backup_storage(bs_option)

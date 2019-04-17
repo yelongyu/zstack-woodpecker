@@ -61,6 +61,7 @@ l2VlanNetworkName17 = vlan-test17
 l2VlanNetworkName18 = vlan-test18
 l2VlanNetworkName19 = vlan-test19
 l2VlanNetworkName20 = vlan-test20
+l2VlanNetworkName21 = vlan-test21
 
 l2Vlan4 = 24
 l2Vlan5 = 25
@@ -79,6 +80,7 @@ l2Vlan17 = 37
 l2Vlan18 = 38
 l2Vlan19 = 39
 l2Vlan20 = 40
+l2Vlan21 = 41
 l3VlanNetwork2  = l3VlanNetwork2 
 l3VlanNetwork3  = l3VlanNetwork3 
 l3VlanNetwork4  = l3VlanNetwork4 
@@ -98,6 +100,7 @@ l3VlanNetwork17 = l3VlanNetwork17
 l3VlanNetwork18 = l3VlanNetwork18
 l3VlanNetwork19 = l3VlanNetwork19
 l3VlanNetwork20 = l3VlanNetwork20
+l3VlanNetwork21 = l3VlanNetwork21
 
 #l2NoVlanNetworkName3 = vlan12
 #l3NoVlanNetworkName3 = l3_user_defined_vlan3

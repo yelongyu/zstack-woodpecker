@@ -32,13 +32,19 @@ from threading import Thread
 
 def wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_uuid):
     retry_count = 0
-    while retry_count < 3 and not test_lib.lib_wait_target_up(vm_ip, '22', 360):
-        test_util.test_warn("Could not reach target vm: %s %s, retry after reboot it" % (vm_ip, vm_uuid))
-        reboot_vm(zstack_management_ip, vm_uuid)
-        retry_count += 1
+    while retry_count < 3:
+        if test_lib.lib_wait_target_up(vm_ip, '22', 60):
+            return True
+        else:
+            test_util.test_warn("Could not reach target vm: %s %s, retry after reboot it" % (vm_ip, vm_uuid))
+    #         reboot_vm(zstack_management_ip, vm_uuid)
+            stop_vm(zstack_management_ip, vm_uuid)
+            start_vm(zstack_management_ip, vm_uuid)
+            if test_lib.lib_wait_target_up(vm_ip, '22', 300):
+                return True
+            else:
+                retry_count += 1
 
-    if test_lib.lib_wait_target_up(vm_ip, '22', 360):
-        return True
     return False
 
 def replace_env_params_if_scenario():
@@ -308,7 +314,9 @@ def setup_2ha_mn_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
 
 
     # NOTE: need to make filesystem in sync in VM before cold stop VM
-    reboot_vm(zstack_management_ip, vm_inv.uuid)
+#     reboot_vm(zstack_management_ip, vm_inv.uuid)
+    stop_vm(zstack_management_ip, vm_inv.uuid)
+    start_vm(zstack_management_ip, vm_inv.uuid)
     if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
         test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
 
@@ -390,7 +398,9 @@ def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
 
 
     # NOTE: need to make filesystem in sync in VM before cold stop VM
-    reboot_vm(zstack_management_ip, vm_inv.uuid)
+#     reboot_vm(zstack_management_ip, vm_inv.uuid)
+    stop_vm(zstack_management_ip, vm_inv.uuid)
+    start_vm(zstack_management_ip, vm_inv.uuid)
 
     if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
         test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
@@ -884,7 +894,9 @@ def setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm_config, deploy_co
     cmd = 'rpm -ivh kernel-ml-4.20.3-1.el7.elrepo.x86_64.rpm && grub2-set-default "CentOS Linux (4.20.3-1.el7.elrepo.x86_64) 7 (Core)" && sync && sync && sync'
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
-    reboot_vm(zstack_management_ip, vm_inv.uuid)
+#     reboot_vm(zstack_management_ip, vm_inv.uuid)
+    stop_vm(zstack_management_ip, vm_inv.uuid)
+    start_vm(zstack_management_ip, vm_inv.uuid)
     if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
         test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
 
@@ -2513,7 +2525,6 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     self.exc_traceback = ''.join(traceback.format_exception(*sys.exc_info()))
 
             def prepare_host_vm(self, vm):
-                global iscsi_initiator_to_setup
                 vm_creation_option = test_util.VmOption()
                 l3_uuid_list = []
                 l3_uuid_list_ge_3 = []
@@ -2545,16 +2556,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 vm_creation_option.set_image_uuid(vm.imageUuid_)
                 vm_creation_option.set_name(vm.name_)
                 vm_creation_option.set_timeout(1200000)
-#                 if vm.dataDiskOfferingUuid__:
-#                     vm_creation_option.set_data_disk_uuids([vm.dataDiskOfferingUuid_])
-                #vm_creation_option.set_host_uuid(host.uuid_)
-                #vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
-                #vm_creation_option.set_default_l3_uuid(default_l3_uuid)
-                #vm_creation_option.set_system_tags(system_tags)
-                #vm_creation_option.set_ps_uuid(ps_uuid)
-                #vm_creation_option.set_session_uuid(session_uuid)
                 if os.getenv('datacenterType') == 'AliyunEBS':
-#                     vm_creation_option.set_ps_uuid(os.getenv('PSUUIDFOREBS'))
                     cond = res_ops.gen_query_conditions('type', '=', 'SharedBlock')
                     cond = res_ops.gen_query_conditions('status', '=', 'Connected', cond)
                     cond = res_ops.gen_query_conditions('state', '=', 'Enabled', cond)
@@ -2595,7 +2597,9 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     setup_vm_console(vm_inv, vm, deploy_config)
                     ensure_nic_all_have_cfg(vm_inv, vm, len(l3_uuid_list+l3_uuid_list_ge_3))
                     # NOTE: need to make filesystem in sync in VM before cold stop VM
-                    reboot_vm(zstack_management_ip, vm_inv.uuid)
+#                     reboot_vm(zstack_management_ip, vm_inv.uuid)
+                    stop_vm(zstack_management_ip, vm_inv.uuid)
+                    start_vm(zstack_management_ip, vm_inv.uuid)
                     if not wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_inv.uuid):
                         test_util.test_fail('VM:%s can not be accessible as expected' %(vm_ip))
 
@@ -2654,24 +2658,6 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     volume_option = test_util.VolumeOption()
                     volume_option.set_name(os.environ.get('volumeName'))
                     for bs_ref in xmlobject.safe_list(vm.backupStorageRef):
-#                         if bs_ref.type_ in ['ceph', 'xsky']:
-# #                         if bs_ref.type_ == 'ceph':
-#                             disk_offering_uuid = bs_ref.offering_uuid_
-#                             volume_option.set_disk_offering_uuid(disk_offering_uuid)
-#                             if primaryStorageUuid != None and primaryStorageUuid != "":
-#                                 volume_option.set_primary_storage_uuid(primaryStorageUuid)
-#                             if poolName != None and poolName != "":
-#                                 volume_option.set_system_tags(['ceph::pool::%s' % (poolName)])
-#                             #volume_inv = create_volume_from_offering(zstack_management_ip, volume_option)
-#                             if bs_ref.type_ == 'ceph':
-#                                 if xmlobject.has_element(deploy_config, 'backupStorages.cephBackupStorage'):
-#                                     volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv)
-#                                 else:
-#                                     volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config)
-#                             else:
-#                                 volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config)
-#                             attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
-#                             break
                         if bs_ref.type_ == 'fusionstor':
                             disk_offering_uuid = bs_ref.offering_uuid_
                             volume_option.set_disk_offering_uuid(disk_offering_uuid)
@@ -2739,6 +2725,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 			                #setup_iscsi_target_kernel(zstack_management_ip, vm_inv, vm, deploy_config)
                             break
                         elif ps_ref.type_ == 'iscsiInitiator':
+                            global iscsi_initiator_to_setup
                             iscsi_initiator_to_setup.append([vm_inv, vm])
 #                             setup_iscsi_initiator(zstack_management_ip, vm_inv, vm, deploy_config)
                             break
@@ -2772,7 +2759,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             else:
                                 volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config)
                             attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
-                            break
+#                             break
         thread_list = []
         for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
             for vm in xmlobject.safe_list(host.vms.vm):
@@ -2783,8 +2770,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 
         for vm_thrd in thread_list:
             vm_thrd.join()
-            if vm_thrd.iscsi_initiator_to_setup:
-                iscsi_initiator_to_setup.append(vm_thrd.iscsi_initiator_to_setup)
+#             if vm_thrd.iscsi_initiator_to_setup:
+#                 iscsi_initiator_to_setup.append(vm_thrd.iscsi_initiator_to_setup)
             if vm_thrd.exitcode != 0:
                 print('----------------------Exception Reason------------------------')
                 print(vm_thrd.exc_traceback)

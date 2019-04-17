@@ -20,6 +20,7 @@ class ZstackTestVm(vm_header.TestVm):
         self.changed_instance_offering_uuid = None
         self.delete_policy = test_lib.lib_get_delete_policy('vm')
         self.delete_delay_time = test_lib.lib_get_expunge_time('vm')
+        self.test_volumes = []
 
     def __hash__(self):
         return hash(self.vm.uuid)

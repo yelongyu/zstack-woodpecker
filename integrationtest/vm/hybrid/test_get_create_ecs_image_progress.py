@@ -21,8 +21,10 @@ def test():
     test_util.test_pass('Get Create Ecs Image Progress Test Success')
 
 def env_recover():
-    if hybrid.oss_bucket_create:
+    try:
         hybrid.del_bucket()
+    except:
+        pass
 
     if hybrid.ecs_image:
         hybrid.del_ecs_image()
@@ -33,4 +35,8 @@ def env_recover():
 def error_cleanup():
     global test_obj_dict
     hybrid.tear_down()
+    try:
+        hybrid.del_bucket()
+    except:
+        pass
     test_lib.lib_error_cleanup(test_obj_dict)
