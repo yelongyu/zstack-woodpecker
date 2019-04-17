@@ -125,7 +125,7 @@ def stop_vm_scheduler(vm_uuid, type, name, start_time=None, interval=None, repea
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def start_vm(vm_uuid, session_uuid=None, timeout=240000):
+def start_vm(vm_uuid, session_uuid=None, timeout=300000):
     action = api_actions.StartVmInstanceAction()
     action.uuid = vm_uuid
     action.timeout = timeout
