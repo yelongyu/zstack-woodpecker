@@ -24,6 +24,16 @@ import zstackwoodpecker.operations.vm_operations as vm_ops
 test_file = '/tmp/test.img'
 TEST_TIME = 120
 
+def check_icmp_connection_to_public_ip(vm1, pub_ip='223.5.5.5', expected_result='PASS'):
+    vm1_inv = vm1.get_vm()
+    if expected_result is 'PASS':
+        test_lib.lib_check_ping(vm1_inv, pub_ip)
+    elif expected_result is 'FAIL':
+        with test_lib.expected_failure("ping from vm1 to public ", Exception):
+            test_lib.lib_check_ping(vm1_inv, pub_ip)
+    else:
+        test_util.test_fail('The expected result should either PASS or FAIL')
+
 def create_vlan_vm_with_volume(l3_name=None, disk_offering_uuids=None, disk_number=None, session_uuid = None):
     if not disk_offering_uuids:
         disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
