@@ -6160,7 +6160,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             test_util.test_dsc('Robot Action: %s; on Vm: %s' % \
                 (next_action, target_vm.get_vm().uuid))
 
-            target_vm.delete()
+            target_vm.destroy()
             target_vm.expunge()
             test_dict.rm_vm(target_vm)
 
