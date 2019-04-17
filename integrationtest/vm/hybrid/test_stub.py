@@ -769,7 +769,7 @@ class HybridObject(object):
         else:
             self.ecs_image = hyb_ops.create_ecs_image_from_local_image(bs_uuid, self.datacenter.uuid, image.uuid, name=ECS_IMAGE_NAME)
             self.check_resource('create', 'ecsImageId', self.ecs_image.ecsImageId, 'query_ecs_image_local')
-        time.sleep(30)
+        time.sleep(300)
 
     def sync_ecs_image(self, return_val=False):
         hyb_ops.sync_ecs_image_from_remote(self.datacenter.uuid)
