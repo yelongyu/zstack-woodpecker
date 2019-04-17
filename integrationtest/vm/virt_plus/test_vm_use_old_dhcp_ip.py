@@ -34,18 +34,19 @@ def test():
     vm.destroy()
     vm.expunge()
 
+    ip_range=test_lib.lib_get_ip_range_by_l3_uuid(l3NetworkUuid=l3_uuid)
     net_ops.delete_ip_range(ip_range_uuid)
 
     ip_range_option = test_util.IpRangeOption()
     ip_range_option.set_l3_uuid(l3_uuid=l3_uuid)
-    ip_range_option.set_startIp(startIp="172.20.127.96")
-    ip_range_option.set_endIp(endIp="172.20.127.127")
-    ip_range_option.set_gateway(gateway="172.20.0.1")
-    ip_range_option.set_netmask(netmask="255.255.0.0")
-    ip_range_option.set_name(name="range-1")
+    ip_range_option.set_startIp(startIp=ip_range.startIp)
+    ip_range_option.set_endIp(endIp=ip_range.endIp)
+    ip_range_option.set_gateway(gateway=ip_range.gateway)
+    ip_range_option.set_netmask(netmask=ip_range.netmask)
+    ip_range_option.set_name(name=ip_range.name)
     net_ops.add_ip_range(ip_range_option=ip_range_option)
     vm = test_stub.create_vm(vm_name='vm-dhcp-ip', system_tags=sys_tag)
-
+    vm.check()
     vm_ip = vm.vm.vmNics[0].ip
     cmd = "ping -c 4 %s" % (public_ip)
     (retcode, output, erroutput) = ssh.execute(cmd, vm_ip, "root", "password", True, 22)

@@ -8195,3 +8195,9 @@ def lib_get_ospf_area_by_area_id(areaId):
         return area[0]
     test_util.test_logger("Did not find ospf area by [area ID:] %s" % areaId)
 
+def lib_get_ip_range_by_l3_uuid(l3NetworkUuid):
+    cond = res_ops.gen_query_conditions('l3NetworkUuid', '=', l3NetworkUuid)
+    ip_range = res_ops.query_resource(res_ops.IP_RANGE, cond)
+    if ip_range:
+        return ip_range[0]
+    test_util.test_logger("Cannot get ip range by [l3 uuid:] %s" % l3NetworkUuid)
