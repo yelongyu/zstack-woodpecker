@@ -1472,6 +1472,8 @@ class ResourceStackOption(DataOption):
         self.uuid = uuid
     def get_uuid(self):
         return self.uuid
+    def get_timeout(self):
+        return self.timeout
 
 class PxeOption(DataOption):
     def __init__(self):

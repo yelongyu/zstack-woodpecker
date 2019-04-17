@@ -79,10 +79,11 @@ def add_scheduler_job_to_trigger(trigger_uuid, job_uuid, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Scheduler Job:] %s is added to [Scheduler Trigger:] %s.' % (job_uuid, trigger_uuid))
 
-def add_scheduler_job_group_to_trigger(trigger_uuid, group_uuid, session_uuid = None):
+def add_scheduler_job_group_to_trigger(trigger_uuid, group_uuid, triggerNow = False, session_uuid = None):
     action = api_actions.AddSchedulerJobGroupToSchedulerTriggerAction()
     action.schedulerTriggerUuid = trigger_uuid
     action.schedulerJobGroupUuid = group_uuid
+    action.triggerNow = triggerNow
     test_util.action_logger('Add [Scheduler Job Group:] %s to [Scheduler Trigger:] %s ' % (group_uuid, trigger_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.test_logger('[Scheduler Job:] %s is added to [Scheduler Trigger:] %s.' % (group_uuid, trigger_uuid))

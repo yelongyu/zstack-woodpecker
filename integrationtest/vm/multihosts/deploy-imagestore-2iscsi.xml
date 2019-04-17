@@ -89,6 +89,14 @@
 	username="$sftpBackupStorageUsername"
 	password="$sftpBackupStoragePassword"
 	hostname="$sftpBackupStorageHostname"
+        local_backup_storage="local"
+	port="$sftpBackupStoragePort"/>
+      <imageStoreBackupStorage name="$imageStoreBackupStorageName2"
+        description="Test" url="$sftpBackupStorageUrl2"
+	username="$sftpBackupStorageUsername2"
+	password="$sftpBackupStoragePassword2"
+	hostname="$sftpBackupStorageHostname2"
+        remote_backup_storage="remote"
 	port="$sftpBackupStoragePort"/>
     </backupStorages>
     <images>

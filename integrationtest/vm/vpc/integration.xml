@@ -48,7 +48,19 @@
         <case timeout='1200' repeat='1' noparallel='True'>test_prometheus.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_anti_spoofing.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_sg_anti_spoofing_reconnect_host.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_check_snat_state.py::vm1_l3_vlan_vm2_l3_vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_disable_snat.py::vm1_l3_vlan_vm2_l3_vxlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_disable_enable_snat_100_times.py::vm1_l3_vlan_vm2_l3_vxlan</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ospf_standard_no_auth.py::vm1_l3_vlan_vm2_l3_vlan</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ospf_stub_no_auth.py::vm1_l3_vlan_vm2_l3_vlan</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ospf_nssa_no_auth.py::vm1_l3_vlan_vm2_l3_vlan</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ospf_standard_auth_plaintext.py::vm1_l3_vlan_vm2_l3_vlan</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ospf_stub_plaintext.py::vm1_l3_vlan_vm2_l3_vlan</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ospf_nssa_auth_plaintext.py::vm1_l3_vlan_vm2_l3_vlan</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ospf_standard_auth_md5.py::vm1_l3_vlan_vm2_l3_vlan</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ospf_stub_md5.py::vm1_l3_vlan_vm2_l3_vlan</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ospf_nssa_auth_md5.py::vm1_l3_vlan_vm2_l3_vlan</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ospf_change_router_id.py::vm1_l3_vlan_vm2_l3_vlan</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vps_ospf_update_area.py::vm1_l3_vlan_vm2_l3_vlan</case>
     </suite>
 </integrationTest>

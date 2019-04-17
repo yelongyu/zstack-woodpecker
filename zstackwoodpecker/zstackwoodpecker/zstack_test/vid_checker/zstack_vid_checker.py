@@ -623,13 +623,36 @@ class zstack_vid_attr_checker(checker_header.TestChecker):
         policy_uuid = iam2_ops.create_policy('policy', statements, session_uuid=session_uuid).uuid
         iam2_ops.attach_policy_to_role(policy_uuid, role_uuid, session_uuid=session_uuid)
         iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], vid_uuid, session_uuid=session_uuid)
-        #policy_check_vid.check()
         iam2_ops.detach_policy_from_role(policy_uuid, role_uuid, session_uuid=session_uuid)
         iam2_ops.update_role(role_uuid, [{"effect":"Allow","actions":[]}], session_uuid=session_uuid)
         iam2_ops.add_policy_statements_to_role(role_uuid, statements, session_uuid=session_uuid)
         iam2_ops.remove_roles_from_iam2_virtual_id([role_uuid], vid_uuid, session_uuid=session_uuid)
+        disable = 'disable'
+        enable = 'enable'
+        Disabled = 'Disabled'
+        iam2_ops.change_role_state(role_uuid, disable, session_uuid=session_uuid)
+        res_inv = res_ops.get_resource(res_ops.ROLE, uuid=role_uuid, session_uuid=session_uuid)[0]
+        if res_inv.state != Disabled:
+            test_util.test_fail("test change iam2 role state fail")
+        iam2_ops.change_role_state(role_uuid, enable, session_uuid=session_uuid)
+        res_ops.get_resource(res_ops.POLICY, session_uuid=session_uuid)
+        res_ops.get_resource(res_ops.IAM2_VIRTUAL_ID, session_uuid=session_uuid)
+        res_ops.get_resource(res_ops.IAM2_VIRTUAL_ID_GROUP, session_uuid=session_uuid)
+        res_ops.get_resource(res_ops.QUOTA, session_uuid=session_uuid)
+        virtual_id_new_name = 'virtual_id_new_name'
+        virtual_id_new_des = 'virtual_id_new_des'
+        virtual_id_new_password = 'virtual_id_new_password' 
+        iam2_ops.update_iam2_virtual_id(vid_uuid, virtual_id_new_name, virtual_id_new_des, virtual_id_new_password, session_uuid=session_uuid)
+        action = "org.zstack.header.image.**"
+        statement_uuid = iam2_ops.get_policy_statement_uuid_of_role(role_uuid, action)
+        iam2_ops.remove_policy_statements_from_role(role_uuid, [statement_uuid], session_uuid=session_uuid)
+
         iam2_ops.delete_role(role_uuid, session_uuid=session_uuid)
-        #policy_check_vid.check()
+
+        #TODO:
+        # org.zstack.iam2.api.APIRemoveRolesFromIAM2VirtualIDGroupMsg
+        # org.zstack.header.identity.APIAttachPolicyToUserGroupMsg
+        # org.zstack.header.identity.APIDetachPolicyFromUserGroupMsg
 
 
     def check_audit_admin_permission(self, username, password):
@@ -716,6 +739,7 @@ class zstack_vid_attr_checker(checker_header.TestChecker):
         res_ops.get_resource(res_ops.IAM2_PROJECT_ATTRIBUTE, session_uuid=audit_session_uuid)
         res_ops.get_resource(res_ops.IAM2_ORGANIZATION_ATTRIBUTE, session_uuid=audit_session_uuid)
         res_ops.get_resource(res_ops.ROLE, session_uuid=audit_session_uuid)
+        res_ops.get_resource(res_ops.POLICY, session_uuid=audit_session_uuid)
         res_ops.get_resource(res_ops.DATACENTER, session_uuid=audit_session_uuid)
         res_ops.get_resource(res_ops.ALIYUNNAS_ACCESSGROUP, session_uuid=audit_session_uuid)
         res_ops.get_resource(res_ops.NAS_FILESYSTEM, session_uuid=audit_session_uuid)
@@ -920,7 +944,8 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         img_ops.change_image_state(image_uuid, 'enable', session_uuid=project_login_session_uuid)
         if bs.type == 'ImageStoreBackupStorage':
             img_ops.export_image_from_backup_storage(image_uuid, bs.uuid, session_uuid=project_login_session_uuid)
-            img_ops.delete_exported_image_from_backup_storage(image_uuid, bs.uuid, session_uuid=project_login_session_uuid)
+            #img_ops.delete_exported_image_from_backup_storage(image_uuid, bs.uuid, session_uuid=project_login_session_uuid)
+            img_ops.delete_exported_image_from_backup_storage(image_uuid, bs.uuid)
         img_ops.set_image_qga_enable(image_uuid, session_uuid=project_login_session_uuid)
         img_ops.set_image_qga_disable(image_uuid, session_uuid=project_login_session_uuid)
         cond = res_ops.gen_query_conditions('name', '=', "image_policy_checker")
@@ -1257,7 +1282,8 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         if self.test_obj.get_customized() == None:
             net_ops.delete_l3(l3_uuid, session_uuid=project_login_session_uuid)
             if clear_vxlan_pool:
-                vxlan_ops.delete_vni_range(vni_uuid, session_uuid=project_login_session_uuid)
+                #vxlan_ops.delete_vni_range(vni_uuid, session_uuid=project_login_session_uuid)
+                vxlan_ops.delete_vni_range(vni_uuid)
             net_ops.delete_l2(vxlan_l2_uuid, session_uuid=project_login_session_uuid)
             return self.judge(True)
         else:
@@ -1526,7 +1552,8 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             if service.networkServiceType == 'LoadBalancer':
                 lb_service_need_attach = False
         if lb_service_need_attach:
-            net_ops.attach_lb_service_to_l3network(l3_net_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
+            #net_ops.attach_lb_service_to_l3network(l3_net_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
+            net_ops.attach_lb_service_to_l3network(l3_net_uuid, service_providor_uuid)
             lb_service_need_detach = True
         vm_creation_option.set_l3_uuids([l3_net_uuid])
         conditions = res_ops.gen_query_conditions('platform', '=', 'Linux')
@@ -1578,7 +1605,8 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             vm_ops.destroy_vm(vm_uuid)
             vm_ops.expunge_vm(vm_uuid)
             if lb_service_need_detach:
-                net_ops.detach_lb_service_from_l3network(l3_net_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
+                #net_ops.detach_lb_service_from_l3network(l3_net_uuid, service_providor_uuid, session_uuid=project_login_session_uuid)
+                net_ops.detach_lb_service_from_l3network(l3_net_uuid, service_providor_uuid)
             acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
             return self.judge(True)
         else:
@@ -1654,7 +1682,8 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             if service.networkServiceType == 'PortForwarding':
                 pf_service_need_attach = False
         if pf_service_need_attach:
-            net_ops.attach_pf_service_to_l3network(l3_net_uuid, pf_service_providor_uuid, session_uuid=project_login_session_uuid)
+            #net_ops.attach_pf_service_to_l3network(l3_net_uuid, pf_service_providor_uuid, session_uuid=project_login_session_uuid)
+            net_ops.attach_pf_service_to_l3network(l3_net_uuid, pf_service_providor_uuid)
             pf_service_need_detach = True   
         vm_creation_option.set_l3_uuids([l3_net_uuid])
         conditions = res_ops.gen_query_conditions('platform', '=', 'Linux')
@@ -1702,7 +1731,8 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
             vm_ops.destroy_vm(vm_uuid)
             vm_ops.expunge_vm(vm_uuid)
             if pf_service_need_detach:
-                net_ops.detach_pf_service_from_l3network(l3_net_uuid, pf_service_providor_uuid, session_uuid=project_login_session_uuid)
+                #net_ops.detach_pf_service_from_l3network(l3_net_uuid, pf_service_providor_uuid, session_uuid=project_login_session_uuid)
+                net_ops.detach_pf_service_from_l3network(l3_net_uuid, pf_service_providor_uuid)
             acc_ops.revoke_resources([project_linked_account_uuid], [l3_pub_uuid, l3_net_uuid, image_uuid, instance_offering_uuid])
             return self.judge(True)
         else:

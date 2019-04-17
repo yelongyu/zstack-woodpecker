@@ -22,7 +22,7 @@ def test():
     test_obj_dict.add_vm(pool_cap.vm)
     test_obj_dict.add_volume(pool_cap.data_volume)
     pool_cap.crt_vol_image()
-    time.sleep(90)
+    time.sleep(300)
     pool_cap.get_bs()
     used1 = pool_cap.bs.poolUsedCapacity
     avail1 = pool_cap.bs.poolAvailableCapacity

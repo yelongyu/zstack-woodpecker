@@ -19,7 +19,7 @@ def test():
     pool_cap.create_vm()
     test_obj_dict.add_vm(pool_cap.vm)
     pool_cap.crt_vm_image(pool_cap.bs)
-    time.sleep(150)
+    time.sleep(300)
     pool_cap.get_bs()
     used1 = pool_cap.bs.poolUsedCapacity
     avail1 = pool_cap.bs.poolAvailableCapacity

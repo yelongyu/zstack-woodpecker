@@ -115,7 +115,8 @@ def test():
     zone_uuid = zone_inv.uuid
 
     test_util.test_dsc('create cluster names is clsuter1')
-    cluster_inv = test_stub.create_cluster1(vm_ip, zone_uuid, tmp_file)
+    cluster_name = 'Cluster1'
+    cluster_inv = test_stub.create_cluster1(vm_ip, cluster_name, zone_uuid, tmp_file)
     cluster_uuid = cluster_inv.uuid
 
     test_util.test_dsc('add HOST names is HOST1')

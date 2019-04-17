@@ -70,6 +70,7 @@
         <case timeout="220" noparallel='True'>test_vm_ha_never_stop_del_recover.py</case>
         <case timeout="220" noparallel='True'>test_vm_ha_never_stop_del_ha.py</case>
         <case timeout="220" noparallel='True'>test_vm_del_ha_never_stop_recover_auto_start.py</case>
+        <case timeout="220" noparallel='True'>test_cluster_config.py</case>
 		<case timeout="240">test_change_vm_image_with_limited_storage_quota.py</case>
 		
     </suite>

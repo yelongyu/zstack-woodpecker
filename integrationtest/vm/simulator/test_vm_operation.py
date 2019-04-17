@@ -81,7 +81,7 @@ def running_vm_operations(vm,bss):
    vm_ops.update_vm(vm_uuid,2,2048*1024*1024)
 
    #Change vm's status;set ha level/stop/del ha level/reboot/pause/resume/force stop
-   ha_ops.set_vm_instance_ha_level(vm_uuid,'neverstop')
+   ha_ops.set_vm_instance_ha_level(vm_uuid,'NeverStop')
    vm_ops.stop_vm(vm_uuid)
    ha_ops.del_vm_instance_ha_level(vm_uuid)
    vm_ops.stop_vm(vm_uuid)

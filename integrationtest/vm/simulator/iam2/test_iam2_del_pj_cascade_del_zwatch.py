@@ -85,7 +85,7 @@ def test():
     ps_actions = [{"actionUuid": sns_topic_uuid, "actionType": "sns"}]
     ps_namespace = 'ZStack/PrimaryStorage'
     ps_disconnected = 'PrimaryStorageDisconnected'
-    ps_event_sub_uuid = zwt_ops.subscribe_event(ps_namespace, ps_disconnected, ps_actions).uuid
+    ps_event_sub_uuid = zwt_ops.subscribe_event(ps_namespace, ps_disconnected, ps_actions, session_uuid=project_admin_session_uuid).uuid
 
     application_platform_type = 'Email'
     alarm_template_name = 'my-alarm-template'
@@ -97,7 +97,7 @@ def test():
     alarm_template_uuid = zwt_ops.create_sns_text_template(alarm_template_name,
                                                              application_platform_type,
                                                              alarm_template,
-                                                             default_template=False).uuid
+                                                             default_template=False, session_uuid=project_admin_session_uuid).uuid
 
     acc_ops.logout(project_admin_session_uuid)
 

@@ -71,7 +71,7 @@ def test():
     count3 = test_lib.lib_count_in_local_management_server_log(start_date+300+2, '[msg send]: org.zstack.header.vm.StartVmInstanceMsg {"org.zstack.header.vm.StartVmInstanceMsg', vm.get_vm().uuid)
     test_util.test_logger('%s of 1000 scheduler executed at the fourth second' % count2)
 
-    if count0 + count1 + count2 < 900:
+    if count0 + count1 + count2 + count3 < 900:
         test_util.test_fail('only %s of 1000 scheduler executed at the specified first 4 seconds' % (count0 + count1 + count2 + count3))
 
     for schd_job in schd_jobs:

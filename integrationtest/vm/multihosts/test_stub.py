@@ -1932,15 +1932,27 @@ class MultiSharedPS(object):
         self.sp_tree = test_util.SPTREE()
 
     def create_vm(self, vm_name=None, image_name=None, l3_name=None, ceph_image=False, with_data_vol=False, one_volume=False,
-                  reverse=False, set_ps_uuid=True, ps_type=None, except_ps_type=None):
+                  reverse=False, set_ps_uuid=True, ps_type=None, except_ps_type=None, iso_image=False):
         vm_name = vm_name if vm_name else 'multi_shared_ps_test_vm'
         image_name = image_name if image_name else self.image_name_net
         l3_name = l3_name if l3_name else self.l3_name
         vm_creation_option = test_util.VmOption()
-        if ceph_image:
-            image_uuid = test_lib.lib_get_image_by_name(image_name, 'Ceph').uuid
+        if iso_image:
+            img_option = test_util.ImageOption()
+            img_option.set_name('fake_iso')
+            imagestore = res_ops.query_resource(res_ops.IMAGE_STORE_BACKUP_STORAGE)[0]
+            img_option.set_backup_storage_uuid_list([imagestore.uuid])
+            mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+            if os.system("sshpass -p password ssh %s 'ls  %s/apache-tomcat/webapps/zstack/static/zstack-repo/'" % (mn_ip, os.environ.get('zstackInstallPath'))) == 0:
+                img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/ks.cfg' % (mn_ip))
+            else:
+                img_option.set_url('http://%s:8080/zstack/static/zstack-dvd/ks.cfg' % (mn_ip))
+            image_uuid = img_ops.add_iso_template(img_option).uuid
         else:
-            image_uuid = test_lib.lib_get_image_by_name(image_name, 'ImageStoreBackupStorage').uuid
+            if ceph_image:
+                image_uuid = test_lib.lib_get_image_by_name(image_name, 'Ceph').uuid
+            else:
+                image_uuid = test_lib.lib_get_image_by_name(image_name, 'ImageStoreBackupStorage').uuid
         l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
         conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
         instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
@@ -1966,13 +1978,11 @@ class MultiSharedPS(object):
                 self.ps_types.remove(ps_type)
                 ps_uuid_for_data_vol = random.choice(self.ps_type_dict[random.choice(self.ps_types)])
                 systags = ["primaryStorageUuidForDataVolume::%s" % ps_uuid_for_data_vol]
+                disk_offering1 = test_lib.lib_get_disk_offering_by_name(os.environ.get('mediumDiskOfferingName'))
+                disk_offering_uuids = [disk_offering1.uuid]
                 if one_volume:
-                    disk_offering1 = test_lib.lib_get_disk_offering_by_name(os.environ.get('mediumDiskOfferingName'))
-                    disk_offering_uuids = [disk_offering1.uuid]
                     system_tags=["virtio::diskOffering::%s::num::1" % (disk_offering1.uuid)]
                 else:
-                    disk_offering1 = test_lib.lib_get_disk_offering_by_name(os.environ.get('mediumDiskOfferingName'))
-                    disk_offering_uuids = [disk_offering1.uuid]
                     disk_offering2 = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
                     disk_offering_uuids.append(disk_offering2.uuid)
                     disk_offering_uuids.append(disk_offering2.uuid)
@@ -1981,12 +1991,15 @@ class MultiSharedPS(object):
                 system_tags.extend(systags)
                 vm_creation_option.set_system_tags(system_tags)
                 vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
+                if iso_image:
+                    vm_creation_option.set_root_disk_uuid(disk_offering1.uuid)
             vm_creation_option.set_ps_uuid(ps_uuid_for_root_vol)
         vm_creation_option.set_timeout(900000)
         vm = test_vm_header.ZstackTestVm()
         vm.set_creation_option(vm_creation_option)
         vm.create()
-        vm.check()
+        if not iso_image:
+            vm.check()
         if with_data_vol:
             vol_uuid = [vol for vol in vm.vm.allVolumes if vol.type == 'Data'][0].uuid
             volume = res_ops.query_resource(res_ops.VOLUME, res_ops.gen_query_conditions('uuid', '=', vol_uuid))
@@ -2015,7 +2028,7 @@ class MultiSharedPS(object):
         (_, dst_md5, _)= ssh.execute('sync; sync; sleep 30; md5sum %s' % dst_file, vm_ip, 'root', 'password')
         dst_file_md5 = dst_md5.split(' ')[0]
         test_util.test_dsc('src_file_md5: [%s], dst_file_md5: [%s]' % (src_file_md5, dst_file_md5))
-        assert dst_file_md5 == src_file_md5, 'dst_file_md5 [%s] and src_file_md5 [%s] is not match, stop test' % (src_file_md5, dst_file_md5)
+        assert dst_file_md5 == src_file_md5, 'dst_file_md5 [%s] and src_file_md5 [%s] is not match, stop test' % (dst_file_md5, src_file_md5)
         return self
 
     def check_data(self, vm):

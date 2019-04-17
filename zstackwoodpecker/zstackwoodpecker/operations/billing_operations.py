@@ -11,9 +11,11 @@ import apibinding.inventory as inventory
 import account_operations
 import zstackwoodpecker.test_util as test_util
 
-def calculate_account_spending(account_uuid, session_uuid = None):
+def calculate_account_spending(account_uuid, date_start=None, date_end=None, session_uuid = None):
     action = api_actions.CalculateAccountSpendingAction()
     action.accountUuid = account_uuid
+    action.dateStart = date_start
+    action.dateEnd = date_end
     test_util.action_logger('Calculate account spending, uuid: %s' \
             % (account_uuid))
     result = account_operations.execute_action_with_session(action, \

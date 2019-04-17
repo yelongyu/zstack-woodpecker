@@ -30,10 +30,16 @@ def path():
                       [TestAction.detach_volume, "volume7"], 
                       [TestAction.detach_volume, "volume8"], 
                       [TestAction.ps_migrate_volume, "vm1-root"], 
+                      [TestAction.create_volume_snapshot, "volume3", "snapshot1-1"], 
+                      [TestAction.create_volume_snapshot, "volume3", "snapshot1-2"], 
+                      [TestAction.create_volume_snapshot, "volume3", "snapshot1-3"], 
+                      [TestAction.create_volume_snapshot, "volume3", "snapshot1-4"], 
                       [TestAction.ps_migrate_volume, "volume3"], 
+                      [TestAction.batch_delete_volume_snapshot, ["snapshot1-2","snapshot1-4"]], 
                       [TestAction.attach_volume, "vm1", "volume3"], 
                       [TestAction.detach_volume, "volume3"], 
                       [TestAction.clone_vm, "vm1", "vm2"], 
                       [TestAction.create_volume_snapshot, "volume3", "snapshot1"], 
+                      [TestAction.delete_volume_snapshot, "snapshot1"],
                       [TestAction.reboot_vm, "vm1"]
                      ])

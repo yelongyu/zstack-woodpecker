@@ -24,9 +24,10 @@ _config_ = {
 test_dict = test_state.TestStateDict()
 TestAction = ts_header.TestAction
 
-case_flavor = test_util.load_paths(os.path.join(os.path.dirname(__file__), "templates"), os.path.join(os.path.dirname(__file__), "paths"))
 default_config = [{"ps1": "PS"}, {"ps1": "default"}, {"host1": "HOST"}, {"host1": "default"}]
+
 def test():
+    case_flavor = test_util.load_paths(os.path.join(os.path.dirname(__file__), "templates"), os.path.join(os.path.dirname(__file__), "paths"))
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     initial_formation = flavor['initial_formation']
     if flavor.has_key('config'):
@@ -34,6 +35,8 @@ def test():
     else:
         config = None
     path_list = flavor['path_list']
+    if not path_list:
+        test_util.test_skip('skip this test as the path_list is empty')
 
     test_util.test_dsc('''Will mainly doing random test for all kinds of snapshot operations. VM, Volume and Image operations will also be tested. If reach 1 hour successful running condition, testing will success and quit.  SG actions, and VIP actions are removed in this robot test.
         VM resources: a special Utility vm is required to do volume attach/detach operation. 

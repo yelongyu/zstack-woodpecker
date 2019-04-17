@@ -142,7 +142,7 @@ def test():
     if ps.type == "AliyunNAS":
         count = 0
         while True:
-            image_cache_path = "%s/datas/imagecache/template/%s" % (ps.mountPath, new_image.image.uuid)
+            image_cache_path = "%s/datas/imagecache/template/%s/%s.qcow2" % (ps.mountPath, new_image.image.uuid, new_image.image.uuid)
             if not test_lib.lib_check_file_exist(host, image_cache_path):
                 break
             elif count > 5:
@@ -150,6 +150,7 @@ def test():
             test_util.test_logger('check %s times: image cache still exist' % (count))
             time.sleep(5)
             count += 1
+        test_util.test_pass('imagecache cleanup Pass.')
 
     count = 0
     while True:

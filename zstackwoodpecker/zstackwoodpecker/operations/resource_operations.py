@@ -74,6 +74,7 @@ LOCAL_STORAGE_RESOURCE_REF = 'LocalStorageResourceRef'
 IMAGE_STORE_BACKUP_STORAGE = 'ImageStoreBackupStorage'
 SCHEDULER = 'Scheduler'
 SCHEDULERJOB = 'SchedulerJob'
+SCHEDULERJOBGROUP = 'SchedulerJobGroup'
 SCHEDULERTRIGGER = 'SchedulerTrigger'
 VCENTER = 'VCenter'
 VCENTER_CLUSTER = 'VCenterCluster'
@@ -109,6 +110,7 @@ IAM2_VIRTUAL_ID_ATTRIBUTE = 'IAM2VirtualIDAttribute'
 IAM2_PROJECT_ATTRIBUTE = 'IAM2ProjectAttribute'
 IAM2_ORGANIZATION_ATTRIBUTE = 'IAM2OrganizationAttribute'
 ROLE='Role'
+POLICY='Policy'
 DATACENTER = 'DataCenter'
 NAS_FILESYSTEM = 'NasFileSystem'
 NAS_MOUNTTARGET = 'NasMountTarget'
@@ -124,6 +126,8 @@ VOLUME_BACKUP = 'VolumeBackup'
 IPSEC_CONNECTION = 'IPsecConnection'
 SCSI_LUN = 'ScsiLun'
 ISCSI_SERVER = 'iScsiServer'
+VROUTER_OSPF_AREA = 'VRouterOspfArea'
+VROUTER_OSPF_NETWORK = 'VRouterOspfNetwork'
 
 def find_item_by_uuid(inventories, uuid):
     for item in inventories:
@@ -544,6 +548,8 @@ def _gen_query_action(resource, condition=None):
         action = api_actions.QuerySchedulerAction()
     elif resource == SCHEDULERJOB:
         action = api_actions.QuerySchedulerJobAction()
+    elif resource == SCHEDULERJOBGROUP:
+        action = api_actions.QuerySchedulerJobGroupAction()
     elif resource == SCHEDULERTRIGGER:
         action = api_actions.QuerySchedulerTriggerAction()
     elif resource == VCENTER:
@@ -612,6 +618,8 @@ def _gen_query_action(resource, condition=None):
         action = api_actions.QueryIAM2OrganizationAttributeAction()
     elif resource == ROLE:
         action = api_actions.QueryRoleAction()
+    elif resource == POLICY:
+        action = api_actions.QueryPolicyAction()
     elif resource == DATACENTER:
         action = api_actions.QueryDataCenterFromLocalAction()
     elif resource == ALIYUNNAS_ACCESSGROUP:
@@ -642,6 +650,10 @@ def _gen_query_action(resource, condition=None):
         action = api_actions.QueryScsiLunAction()
     elif resource == ISCSI_SERVER:
         action = api_actions.QueryIscsiServerAction()
+    elif resource == VROUTER_OSPF_AREA:
+        action = api_actions.QueryVRouterOspfAreaAction()
+    elif resource == VROUTER_OSPF_NETWORK:
+        action = api_actions.QueryVRouterOspfNetworkAction()
     return action
 
 def query_event_from_resource_stack(conditions = [], resource=EVENT_FROM_STACK, session_uuid=None, count='false'):

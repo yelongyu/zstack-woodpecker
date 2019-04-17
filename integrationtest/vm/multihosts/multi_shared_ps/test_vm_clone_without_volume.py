@@ -44,7 +44,7 @@ def test():
     else:
         ps_uuid_for_root_volume = ceph_ps.uuid
     root_volume_systag = []
-    cloned_vm = vm.clone(['test_stop_vm_full_clone'], full=True, ps_uuid_for_root_volume=ps_uuid_for_root_volume, root_volume_systag=root_volume_systag)[0]
+    cloned_vm = vm.clone(['test_vm_clone_without_volume'], full=True, ps_uuid_for_root_volume=ps_uuid_for_root_volume, root_volume_systag=root_volume_systag)[0]
     multi_ps.vm.append(cloned_vm.vm)
 
     volumes_list = test_lib.lib_get_all_volumes(cloned_vm.vm)

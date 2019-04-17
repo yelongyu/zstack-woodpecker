@@ -78,6 +78,8 @@ def test():
     if flavor['target_role'] == 'vm':
         statements = [{"effect": "Allow", "actions": ["org.zstack.header.vm.**",
                             "org.zstack.ha.**"]}]
+        cond = res_ops.gen_query_conditions('name', '=', "predefined: vm")
+        cond = res_ops.gen_query_conditions('type', '=', "predefined", cond)
 
     if flavor['target_role'] == 'vm_ops_without_creation':
         statements = [{"effect": "Allow", "actions": ["org.zstack.header.vm.APIGetVmQgaMsg",
@@ -138,12 +140,18 @@ def test():
                             "org.zstack.header.vm.APIDetachIsoFromVmInstanceMsg",
                             "org.zstack.header.vm.APIGetVmRDPMsg",
                             "org.zstack.header.vm.APIPauseVmInstanceMsg"]}] 
+        cond = res_ops.gen_query_conditions('name', '=', "predefined: vm-operation-without-create-permission")
+        cond = res_ops.gen_query_conditions('type', '=', "predefined", cond)
     if flavor['target_role'] == 'image':
         statements = [{"effect": "Allow", "actions": ["org.zstack.header.image.**",
                             "org.zstack.storage.backup.imagestore.APIGetImagesFromImageStoreBackupStorageMsg"]}]
+        cond = res_ops.gen_query_conditions('name', '=', "predefined: image")
+        cond = res_ops.gen_query_conditions('type', '=', "predefined", cond)
     if flavor['target_role'] == 'snapshot':
         statements = [{"effect": "Allow", "actions": ["org.zstack.header.storage.snapshot.**",
                             "org.zstack.header.volume.APICreateVolumeSnapshotMsg"]}]
+        cond = res_ops.gen_query_conditions('name', '=', "predefined: snapshot")
+        cond = res_ops.gen_query_conditions('type', '=', "predefined", cond)
     if flavor['target_role'] == 'volume':
         statements = [{"effect": "Allow", "actions": ["org.zstack.header.volume.APICreateDataVolumeFromVolumeTemplateMsg",
                             "org.zstack.header.volume.APIGetVolumeQosMsg",
@@ -166,8 +174,12 @@ def test():
                             "org.zstack.header.volume.APIUpdateVolumeMsg",
                             "org.zstack.header.volume.APIChangeVolumeStateMsg",
                             "org.zstack.header.volume.APIQueryVolumeMsg"]}]
+        cond = res_ops.gen_query_conditions('name', '=', "predefined: volume")
+        cond = res_ops.gen_query_conditions('type', '=', "predefined", cond)
     if flavor['target_role'] == 'affinity_group':
         statements = [{"effect": "Allow", "actions": ["org.zstack.header.affinitygroup.**"]}]
+        cond = res_ops.gen_query_conditions('name', '=', "predefined: affinity-group")
+        cond = res_ops.gen_query_conditions('type', '=', "predefined", cond)
     if flavor['target_role'] == 'networks':
         statements = [{"effect": "Allow", "actions": ["org.zstack.header.network.l3.**",
                             "org.zstack.network.service.flat.**",
@@ -178,22 +190,34 @@ def test():
                             "org.zstack.network.l2.vxlan.vxlanNetwork.APIQueryL2VxlanNetworkMsg",
                             "org.zstack.network.l2.vxlan.vxlanNetwork.APICreateL2VxlanNetworkMsg",
                             "org.zstack.network.l2.vxlan.vxlanNetworkPool.APIQueryL2VxlanNetworkPoolMsg"]}]
+        cond = res_ops.gen_query_conditions('name', '=', "predefined: networks")
+        cond = res_ops.gen_query_conditions('type', '=', "predefined", cond)
     if flavor['target_role'] == 'eip':
         statements = [{"effect": "Allow", "actions": ["org.zstack.network.service.vip.**",
                             "org.zstack.network.service.eip.**",
                             "org.zstack.header.vipQos.**"]}]
+        cond = res_ops.gen_query_conditions('name', '=', "predefined: eip")
+        cond = res_ops.gen_query_conditions('type', '=', "predefined", cond)
     if flavor['target_role'] == 'sg':
         statements = [{"effect": "Allow", "actions": ["org.zstack.network.securitygroup.**"]}]
+        cond = res_ops.gen_query_conditions('name', '=', "predefined: security-group")
+        cond = res_ops.gen_query_conditions('type', '=', "predefined", cond)
     if flavor['target_role'] == 'lb':
         statements = [{"effect": "Allow", "actions": ["org.zstack.network.service.lb.**",
                             "org.zstack.network.service.vip.**",
                             "org.zstack.header.vipQos.**"]}]
+        cond = res_ops.gen_query_conditions('name', '=', "predefined: load-balancer")
+        cond = res_ops.gen_query_conditions('type', '=', "predefined", cond)
     if flavor['target_role'] == 'pf':
         statements = [{"effect": "Allow", "actions": ["org.zstack.network.service.portforwarding.**",
                             "org.zstack.network.service.vip.**",
                             "org.zstack.header.vipQos.**"]}]
+        cond = res_ops.gen_query_conditions('name', '=', "predefined: port-forwarding")
+        cond = res_ops.gen_query_conditions('type', '=', "predefined", cond)
     if flavor['target_role'] == 'scheduler':
         statements = [{"effect": "Allow", "actions": ["org.zstack.scheduler.**"]}]
+        cond = res_ops.gen_query_conditions('name', '=', "predefined: scheduler")
+        cond = res_ops.gen_query_conditions('type', '=', "predefined", cond)
     if flavor['target_role'] == 'pci':
         statements = [{"effect": "Allow", "actions": ["org.zstack.pciDevice.APIAttachPciDeviceToVmMsg",
                             "org.zstack.pciDevice.APIUpdateHostIommuStateMsg",
@@ -201,13 +225,20 @@ def test():
                             "org.zstack.pciDevice.APIDetachPciDeviceFromVmMsg",
                             "org.zstack.pciDevice.APIQueryPciDeviceMsg",
                             "org.zstack.pciDevice.APIGetPciDeviceCandidatesForAttachingVmMsg"]}]
+        cond = res_ops.gen_query_conditions('name', '=', "predefined: pci-device")
+        cond = res_ops.gen_query_conditions('type', '=', "predefined", cond)
     if flavor['target_role'] == 'zwatch':
         statements = [{"effect": "Allow", "actions": ["org.zstack.zwatch.**",
                             "org.zstack.sns.**"]}]
+        cond = res_ops.gen_query_conditions('name', '=', "predefined: zwatch")
+        cond = res_ops.gen_query_conditions('type', '=', "predefined", cond)
     if flavor['target_role'] == 'sns':
         statements = [{"effect": "Allow", "actions": ["org.zstack.sns.**"]}]
+        cond = res_ops.gen_query_conditions('name', '=', "predefined: sns")
+        cond = res_ops.gen_query_conditions('type', '=', "predefined", cond)
 
-    role_uuid = iam2_ops.create_role('test_role', statements).uuid
+    #role_uuid = iam2_ops.create_role('test_role', statements).uuid
+    role_uuid = res_ops.query_resource(res_ops.ROLE, cond)[0].uuid
 
     #iam2_ops.add_policy_statements_to_role(role_uuid, statements)
     #statement_uuid = iam2_ops.get_policy_statement_uuid_of_role(role_uuid, action)

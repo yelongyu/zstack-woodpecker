@@ -24,6 +24,7 @@ def create_resource_stack(resource_stack_option):
     action.templateContent = resource_stack_option.get_templateContent()
     action.templateUuid = resource_stack_option.get_template_uuid()
     action.parameters = resource_stack_option.get_parameters()
+    action.timeout = resource_stack_option.get_timeout()
 
     evt = account_operations.execute_action_with_session(action, resource_stack_option.get_session_uuid())
     return evt.inventory

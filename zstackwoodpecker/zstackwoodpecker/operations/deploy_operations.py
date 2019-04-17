@@ -117,6 +117,16 @@ def get_backup_storage_from_scenario_file(backupStorageRefName, scenarioConfig, 
                                         ip_list.append(s_vm.ip_)
     return ip_list
 
+def get_vm_ip_from_scenariofile(scenarioFile):
+    vm_ip_list = []
+    with open(scenarioFile, 'r') as fd:
+        xmlstr = fd.read()
+        scenario_file = xmlobject.loads(xmlstr)
+        for vm in xmlobject.safe_list(scenario_file.vms.vm):
+            vm_ip_list.append(vm.ip__)
+    return vm_ip_list
+
+
 #Add Backup Storage
 def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid):
     if xmlobject.has_element(deployConfig, 'backupStorages.sftpBackupStorage'):
@@ -158,8 +168,7 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
                 action.hostname = bs.hostname_
             else:
                 action.hostname = hostname_list[0]
-
-	    if hasattr(bs, 'port_'):
+            if hasattr(bs, 'port_'):
                 action.port = bs.port_
                 action.sshport = bs.port_
                 action.sshPort = bs.port_
@@ -168,6 +177,28 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
             thread = threading.Thread(target = _thread_for_action, args = (action, True))
             wait_for_thread_queue()
             thread.start()
+
+    if xmlobject.has_element(deployConfig, 'backupStorages.miniBackupStorage'):
+        for bs in xmlobject.safe_list(deployConfig.backupStorages.miniBackupStorage):
+	    vm_ip_list = get_vm_ip_from_scenariofile(scenarioFile)
+	    action = api_actions.AddImageStoreBackupStorageAction()
+	    action.sessionUuid = session_uuid
+	    action.name = bs.name_
+	    action.description = bs.description__
+	    action.url = bs.url_
+	    action.username = bs.username_
+	    action.password = bs.password_
+	    action.hostname = vm_ip_list[1]
+
+	    if hasattr(bs, 'port_'):
+	        action.port = bs.port_
+	        action.sshport = bs.port_
+	        action.sshPort = bs.port_
+	    action.timeout = AddKVMHostTimeOut #for some platform slowly salt execution
+	    action.type = inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE
+	    thread = threading.Thread(target = _thread_for_action, args = (action, True))
+	    wait_for_thread_queue()
+	    thread.start()
 
     if xmlobject.has_element(deployConfig, 'backupStorages.cephBackupStorage'):
         for bs in xmlobject.safe_list(deployConfig.backupStorages.cephBackupStorage):
@@ -681,6 +712,26 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                     action.systemTags = pr.systemtags_.split(',')
                 else:
                     action.systemTags = ["primaryStorageVolumeProvisioningStrategy::ThinProvisioning", "forceWipe"]
+                thread = threading.Thread(target=_thread_for_action, args=(action,))
+                wait_for_thread_queue()
+                thread.start()
+
+        if xmlobject.has_element(zone, 'primaryStorages.miniPrimaryStorage'):
+            zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, \
+                    name=zone.name_)
+            zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
+
+            for pr in xmlobject.safe_list(zone.primaryStorages.miniPrimaryStorage):
+                if ps_name and ps_name != pr.name_:
+                    continue
+
+                action = api_actions.AddMiniStorageAction()
+                action.sessionUuid = session_uuid
+                action.name = pr.name_
+                action.description = pr.description__
+                action.diskIdentifier = pr.diskIdentifier__
+                action.url = pr.url__
+                action.zoneUuid = zinv.uuid
                 thread = threading.Thread(target=_thread_for_action, args=(action,))
                 wait_for_thread_queue()
                 thread.start()
@@ -1255,10 +1306,51 @@ def add_cluster(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluste
                     wait_for_thread_queue()
                     thread.start()
 
+    def _deploy_mini_cluster(zone):
+        if not xmlobject.has_element(zone, "clusters.cluster"):
+            return
+
+        if zone.duplication__ == None:
+            zone_duplication = 1
+        else:
+            zone_duplication = int(zone.duplication__)
+
+        vm_ip_list = get_vm_ip_from_scenariofile(scenarioFile)
+        for zone_ref in range(zone_duplication):
+            for cluster in xmlobject.safe_list(zone.clusters.cluster):
+                if cluster_name and cluster_name != cluster.name_:
+                    continue
+
+                if cluster.duplication__ == None:
+                    cluster_duplication = 1
+                else:
+                    cluster_duplication = int(cluster.duplication__)
+                for cluster_ref in range(cluster_duplication):
+                    zone_name = generate_dup_name(zone.name_, zone_ref, 'z')
+                    zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, name=zone_name)
+                    zinv = get_first_item_from_list(zinvs, 'Zone', zone_name, 'Cluster')
+                    action = api_actions.CreateMiniClusterAction()
+                    action.sessionUuid = session_uuid
+                    action.name = generate_dup_name(generate_dup_name(cluster.name_, zone_ref, 'z'), cluster_ref, 'c')
+                    action.description = generate_dup_name(generate_dup_name(cluster.description__, zone_ref, 'z'), cluster_ref, 'c')
+                    action.hypervisorType = cluster.hypervisorType_
+                    action.zoneUuid = zinv.uuid
+                    action.password = "password"
+                    action.sshPort = "22"
+                    hostManagementIps = vm_ip_list[1] + ',' + vm_ip_list[2]
+                    action.hostManagementIps = hostManagementIps.split(',')
+                    print " action.hostManagementIps : %s" % action.hostManagementIps
+                    thread = threading.Thread(target=_add_cluster, args=(action, zone_ref, cluster, cluster_ref, ))
+                    wait_for_thread_queue()
+                    thread.start()
+
     for zone in xmlobject.safe_list(deployConfig.zones.zone):
         if zone_name and zone_name != zone.name_:
             continue 
-        _deploy_cluster(zone)
+        if xmlobject.has_element(deployConfig, 'backupStorages.miniBackupStorage'):
+            _deploy_mini_cluster(zone)
+        else:
+            _deploy_cluster(zone)
     wait_for_thread_done()
 
     for zone in xmlobject.safe_list(deployConfig.zones.zone):
@@ -1621,7 +1713,10 @@ def add_host(scenarioConfig, scenarioFile, deployConfig, session_uuid, host_ip =
                     cluster_duplication = int(cluster.duplication__)
 
                 for cluster_ref in range(cluster_duplication):
-                    _deploy_host(cluster, zone_ref, cluster_ref)
+                    if xmlobject.has_element(deployConfig, 'backupStorages.miniBackupStorage'):
+                        print "Mini Host have been added while creating mini cluster"
+                    else:
+                        _deploy_host(cluster, zone_ref, cluster_ref)
 
     wait_for_thread_done()
     test_util.test_logger('All add KVM host actions are done.')
@@ -2412,6 +2507,8 @@ def _thread_for_action(action, retry=False):
 def add_virtual_router(scenarioConfig, scenarioFile, deployConfig, session_uuid, l3_name = None, \
         zone_name = None):
 
+    if xmlobject.has_element(deployConfig, 'backupStorages.miniBackupStorage'):
+        return
     if not xmlobject.has_element(deployConfig, 'instanceOfferings.virtualRouterOffering'):
         return
 
@@ -2467,6 +2564,31 @@ def add_virtual_router(scenarioConfig, scenarioFile, deployConfig, session_uuid,
         thread = threading.Thread(target = _thread_for_action, args = (action, ))
         wait_for_thread_queue()
         thread.start()
+
+    wait_for_thread_done()
+
+    for i in xmlobject.safe_list(deployConfig.instanceOfferings.virtualRouterOffering):
+        if xmlobject.has_element(i, 'l3BasicNetwork'):
+            for l3net in xmlobject.safe_list(i.l3BasicNetwork):
+                action = api_actions.CreateSystemTagAction()
+                action.sessionUuid = session_uuid
+                action.timeout = 30000
+                action.resourceType = 'InstanceOfferingVO'
+
+                cond = res_ops.gen_query_conditions('type','=','VirtualRouter')
+                vr_instance_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING,cond)[0].uuid
+                action.resourceUuid = vr_instance_uuid
+
+                zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, name=i.zoneRef.text_)
+                zinv = get_first_item_from_list(zinvs, 'zone', i.zoneRef.text_, 'virtual router offering')
+                cond = res_ops.gen_query_conditions('zoneUuid', '=', zinv.uuid)
+                cond1 = res_ops.gen_query_conditions('name', '=', l3net.text_, cond)
+                l3_network = res_ops.query_resource(res_ops.L3_NETWORK, cond1, session_uuid)
+                action.tag = 'guestL3Network::' + l3_network[0].uuid
+
+                thread = threading.Thread(target = _thread_for_action, args = (action, ))
+                wait_for_thread_queue()
+                thread.start()
 
     wait_for_thread_done()
 

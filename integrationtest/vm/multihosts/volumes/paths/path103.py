@@ -17,6 +17,10 @@ def path():
 		[TestAction.create_volume_snapshot, "vm1-root", 'snapshot1'], \
 		[TestAction.stop_vm, "vm1"], \
 		[TestAction.use_volume_backup, "backup1"], \
+		[TestAction.create_volume_snapshot, "vm1-root", 'snapshot2'], \
+		[TestAction.create_volume_snapshot, "vm1-root", 'snapshot3'], \
+		[TestAction.create_volume_snapshot, "vm1-root", 'snapshot4'], \
+		[TestAction.delete_volume_snapshot, 'snapshot3'], \
 		[TestAction.start_vm, "vm1"], \
 		[TestAction.detach_volume, "volume2"], \
 		[TestAction.attach_volume, "vm1", "volume2"], \
@@ -24,4 +28,5 @@ def path():
 		[TestAction.use_volume_snapshot, "snapshot1"], \
 		[TestAction.use_volume_backup, "backup2"], \
 		[TestAction.start_vm, "vm1"], \
+		[TestAction.delete_volume_snapshot, 'snapshot1'], \
 		[TestAction.reboot_vm, "vm1"]])

@@ -12,6 +12,7 @@ import zstackwoodpecker.operations.backupstorage_operations as bs_ops
 import apibinding.api_actions as api_actions
 import zstackwoodpecker.operations.account_operations as account_operations
 import zstackwoodpecker.operations.image_operations as img_ops
+import zstackwoodpecker.zstack_test.zstack_test_image as test_image
 import zstacklib.utils.ssh as ssh
 import socket
 
@@ -46,9 +47,9 @@ def test():
     test_util.test_dsc('Create New VM as Sftp')
 #    vm = test_stub.create_basic_vm()
     img_option = test_util.ImageOption()
-    UEFI_image_url = os.environ.get('imageUrl_ZStack_UEFI')
-    image_name = os.environ.get('imageName_ZStack_UEFI')
-    image_option.set_timeout(1200000)
+    UEFI_image_url = os.environ.get('imageUrl_linux_UEFI')
+    image_name = os.environ.get('imageName_linux_UEFI')
+    img_option.set_timeout(1200000)
     img_option.set_name(image_name)
     bs_uuid = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, [], None)[0].uuid
     img_option.set_backup_storage_uuid_list([bs_uuid])
@@ -61,7 +62,10 @@ def test():
     image.set_creation_option(img_option)
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     test_obj_dict.add_image(image)
-    vm = test_stub.create_vm(image_name = os.environ.get('imageName_ZStack_UEFI'))
+    l3_name = os.environ.get('l3VlanNetworkName1')
+    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    vm = test_stub.create_vm([l3_net_uuid], image_uuid, 'UEFI VM')
+    #vm = test_stub.create_vm(image_name = os.environ.get('imageUrl_linux_UEFI'))
     test_obj_dict.add_vm(vm)
     vm.check()
     vm_ip = vm.get_vm().vmNics[0].ip

@@ -14,10 +14,16 @@ def path():
 		[TestAction.start_vm, "vm1"], \
 		[TestAction.attach_volume, "vm1", "volume2"], \
 		[TestAction.create_volume_backup, "volume2", "backup1"], \
+		[TestAction.create_volume_snapshot, "volume2", "snapshot2-1"], \
+		[TestAction.create_volume_snapshot, "volume2", "snapshot2-2"], \
+		[TestAction.create_volume_snapshot, "volume2", "snapshot2-3"], \
+		[TestAction.create_volume_snapshot, "volume2", "snapshot2-4"], \
 		[TestAction.detach_volume, "volume2"], \
+		[TestAction.delete_volume_snapshot, "snapshot2-4"], \
 		[TestAction.attach_volume, "vm1", "volume2"], \
 		[TestAction.detach_volume, "volume2"], \
 		[TestAction.migrate_vm, "vm1"], \
 		[TestAction.migrate_vm, "vm1"], \
 		[TestAction.create_data_vol_template_from_volume, "volume2", "image3"],\
+		[TestAction.batch_delete_volume_snapshot, ["snapshot2-1","snapshot2-2"]], \
 		[TestAction.reboot_vm, "vm1"]])

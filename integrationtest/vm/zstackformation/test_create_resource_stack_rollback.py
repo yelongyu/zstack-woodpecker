@@ -94,7 +94,13 @@ def test():
 
     resource_stack_option_rollback.set_templateContent(templateContent)
     resource_stack_option_rollback.set_parameters(parameter)
-    preview_resource_stack = resource_stack_ops.preview_resource_stack(resource_stack_option_rollback)
+    try:
+        resource_stack_ops.preview_resource_stack(resource_stack_option_rollback)
+    except:
+        pass
+    else:
+        test_util.test_fail("Preview resource stack should be failed with a wrong template.")
+    
     resource_stack_rollback = resource_stack_ops.create_resource_stack(resource_stack_option_rollback)
 
     #2.get resource from resource stack when rollback
@@ -124,7 +130,6 @@ def test():
 
     resource_stack_option_norollback.set_templateContent(templateContent)
     resource_stack_option_norollback.set_parameters(parameter)
-    preview_resource_stack = resource_stack_ops.preview_resource_stack(resource_stack_option_norollback)
     try:
        resource_stack_norollback = resource_stack_ops.create_resource_stack(resource_stack_option_norollback)
     except: 
