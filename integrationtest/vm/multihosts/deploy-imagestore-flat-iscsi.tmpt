@@ -2,6 +2,7 @@ import ./deploy.tmpt
 
 iscsiPrimaryStorageName = iscsi-ps1
 iscsiPrimaryStorageName2 = iscsi-ps2
+iscsiPrimaryStorageName3 = iscsi-ps3
 imageStoreBackupStorageName = imagestore1
 imageStoreBackupStorageName2 = imagestore2
 imageUrl_vdbench = http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2
