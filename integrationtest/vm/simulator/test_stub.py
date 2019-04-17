@@ -2494,6 +2494,8 @@ def resource_price_clear(resource):
         "vm": '''echo "delete from zstack.VmUsageVO;delete from zstack.VmUsageHistoryVO;delete from zstack.VmCPUBillingVO;delete from zstack.VmMemoryBillingVO;delete from zstack.PriceVO;delete from zstack.BillingVO;"|mysql -uzstack -pzstack.password''',
         "rootvolume": '''echo "delete from zstack.RootVolumeUsageVO;delete from zstack.RootVolumeUsageHistoryVO;delete from zstack.RootVolumeBillingVO;delete from zstack.PriceVO;delete from zstack.BillingVO;"|mysql -uzstack -pzstack.password''',
         "datavolume": '''echo "delete from zstack.DataVolumeUsageVO;delete from zstack.DataVolumeUsageHistoryVO;delete from zstack.DataVolumeBillingVO;delete from zstack.PriceVO;delete from zstack.BillingVO;"|mysql -uzstack -pzstack.password''',
+        "vip_in": '''echo "delete from zstack.PubIpVipBandwidthInBillingVO;delete from zstack.PubIpVipBandwidthInBillingVO;delete from zstack.PubIpVipBandwidthUsageHistoryVO;delete from zstack.PubIpVipBandwidthUsageVO;delete from zstack.BillingVO;delete from zstack.PriceVO;"|mysql -uzstack -pzstack.password''',
+        "vip_out": '''echo "delete from zstack.PubIpVipBandwidthOutBillingVO;delete from zstack.PubIpVipBandwidthOutBillingVO;delete from zstack.PubIpVipBandwidthUsageHistoryVO;delete from zstack.PubIpVipBandwidthUsageVO;delete from zstack.BillingVO;delete from zstack.PriceVO;"|mysql -uzstack -pzstack.password''',
     }
     cmd = usage_tables_dict[resource]
     try:
@@ -2510,6 +2512,8 @@ def update_dateinlong(resource, offset,count):
         "vm": "VmUsageVO",
         "rootvolume": "RootVolumeUsageVO",
         "datavolume": "DataVolumeUsageVO",
+        "vip_in": "PubIpVipBandwidthUsageVO",
+        "vip_out": "PubIpVipBandwidthUsageVO",
     }
     offset_dict = {
         "sec": 1000,
