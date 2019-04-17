@@ -45,6 +45,7 @@ def path():
                            [TestAction.attach_volume, "vm8", "volume2"], 
                            [TestAction.stop_vm, "vm8"],
                            [TestAction.clone_vm, "vm8", "vm9", "=full"], 
+                           [TestAction.stop_vm, "vm9"], 
                            [TestAction.reinit_vm, "vm9"], 
                            [TestAction.clone_vm, "vm9", "vm10", "=full"],
                            [TestAction.migrate_vm, "vm10"]])
