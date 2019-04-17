@@ -60,7 +60,6 @@ def path():
                                [TestAction.create_volume_snapshot, san_vms[-1].name + '-root', san_vms[-1].name + '-sp2'],
                                san_vms[-1].stop,
                                [TestAction.reinit_vm, san_vms[-1].name],
-                               [TestAction.ps_migrate_volume, san_vms[-1].name + '-root'],
                                san_vms[-1].start,
                                san_vms[-1].migrate,
                                [TestAction.create_volume_snapshot, "ceph_volume1", "ceph_volume1_snapshot2"],

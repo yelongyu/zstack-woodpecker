@@ -74,14 +74,11 @@ def path():
                                [TestAction.create_vm_by_image, 'image_created_from_%s' % san_vms[0].name, 'qcow2', vm2.name, '=ps_uuid::%s' % random.choice(ceph_ps)],
                                [TestAction.create_volume, "ceph_volume2", "=ps_uuid::%s" % ceph_ps[0]],
                                [TestAction.attach_volume, vm2.name, "ceph_volume2"],
-                               [TestAction.attach_volume, "iscsi_volume1"],
+                               [TestAction.attach_volume, vm2.name, "iscsi_volume1"],
                                vm2.migrate(),
-                               [TestAction.detach_volume, vm2.name, "iscsi_volume1"],
+                               [TestAction.detach_volume, "iscsi_volume1"],
                                [TestAction.create_volume_snapshot, "ceph_volume1", "ceph_volume2_snapshot1"],
                                [TestAction.create_volume_snapshot, "iscsi_volume1", "iscsi_volume1_snapshot4"],
-                               vm2.stop(),
-                               [TestAction.ps_migrate_volume, "iscsi_volume1"],
-                               vm2.start(),
                                vm2.migrate()
                                ])
     else:
