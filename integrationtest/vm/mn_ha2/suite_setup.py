@@ -61,7 +61,7 @@ def test():
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd2)
 
 
-    test_stub.deploy_2ha(test_lib.all_scenario_config, test_lib.scenario_file)
+    test_stub.deploy_2ha(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
     mn_ip1 = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, 0).ip_
     mn_ip2 = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, 1).ip_
 
