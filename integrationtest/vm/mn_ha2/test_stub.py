@@ -702,10 +702,11 @@ def wrapper_of_wait_for_management_server_start(wait_start_timeout, EXTRA_SUITE_
         restart_mn_node_with_long_timeout()
 
 
-def deploy_2ha(scenarioConfig, scenarioFile):
+def deploy_2ha(scenarioConfig, scenarioFile, deployConfig):
     mn_ip1 = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, 0).ip_
     mn_ip2 = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, 1).ip_
-    node3_ip = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, 2).ip_
+    if not xmlobject.has_element(deployConfig, 'backupStorages.miniBackupStorage'):
+        node3_ip = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, 2).ip_
     vip = os.environ['zstackHaVip']
 
     change_ip_cmd1 = "zstack-ctl change_ip --ip=" + mn_ip1
@@ -729,7 +730,10 @@ def deploy_2ha(scenarioConfig, scenarioFile):
     ssh.scp_file(zstack_hamon_path, "/root/zstack-hamon", mn_ip1, "root", "password")
     ssh.execute("chmod a+x /root/zstack-hamon", mn_ip1, "root", "password", False, 22)
 
-    cmd = '/root/zsha2 install-ha -nic br_zsn0 -gateway 172.20.0.1 -slave "root:password@' + mn_ip2 + '" -vip ' + vip + ' -time-server ' + node3_ip + ',' + mn_ip2 + ' -db-root-pw zstack.mysql.password -yes'
+    if xmlobject.has_element(deployConfig, 'backupStorages.miniBackupStorage'):
+        cmd = '/root/zsha2 install-ha -nic br_zsn0 -gateway 172.20.0.1 -slave "root:password@' + mn_ip2 + '" -vip ' + vip + ' -time-server ' + mn_ip2 + ',' + mn_ip2 + ' -db-root-pw zstack.mysql.password -yes'
+    else:
+        cmd = '/root/zsha2 install-ha -nic br_zsn0 -gateway 172.20.0.1 -slave "root:password@' + mn_ip2 + '" -vip ' + vip + ' -time-server ' + node3_ip + ',' + mn_ip2 + ' -db-root-pw zstack.mysql.password -yes'
     test_util.test_logger("deploy 2ha by cmd: %s" %(cmd))
     ret, output, stderr = ssh.execute(cmd, mn_ip1, "root", "password", False, 22)
     test_util.test_logger("cmd=%s; ret=%s; output=%s; stderr=%s" %(cmd, ret, output, stderr))
