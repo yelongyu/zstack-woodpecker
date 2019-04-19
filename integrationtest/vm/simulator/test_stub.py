@@ -2531,8 +2531,8 @@ def update_dateinlong(resource, offset,count):
         "year": 31536000000,
     }
     offset_sum = offset_dict[offset] * count 
-    cmd = '''echo "update zstack.%s set dateInLong=dateInLong-%s;update zstack.PriceVO set dateInLong=0;"|mysql -uzstack -pzstack.password''' % \
-             (usage_tables_dict[resource], offset_sum)
+    cmd = '''echo "update zstack.%s set dateInLong=dateInLong-%s;update zstack.PriceVO set dateInLong=dateInLong-%s-86400000;"|mysql -uzstack -pzstack.password''' % \
+             (usage_tables_dict[resource], offset_sum, offset_sum)
     try:
         os.system(cmd)
         test_util.test_logger('successfully update data in %s' % usage_tables_dict[resource])

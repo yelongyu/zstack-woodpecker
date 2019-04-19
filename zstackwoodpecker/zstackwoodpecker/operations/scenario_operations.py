@@ -2494,7 +2494,6 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 #                shell.call('ip route add %s/24 via %s dev eth0' % (ip_range, last_ip_gateway))
 
     mn_ip_to_post, vm_ip_to_post = (None, None)
-    mini_cnt = 0
     if hasattr(scenario_config.deployerConfig, 'hosts'):
         ebs_host = {}
         ceph_disk_created = False
@@ -2565,23 +2564,18 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 
                 #for Mini setup
                 if os.getenv('hostType') == 'miniHost':
-                    if mini_cnt == 0:
-                        print " mn host skip install drbd"
-                        time.sleep(80)
-                        base_url = "http://192.168.200.100/mirror/kefeng.wang/mini-server/"
-                        cmd = "curl %s | grep ZStack-mini-server | awk '{print $6}' |awk -F'>' '{print $1}' | awk -F'\"' '{print $2}' | tail -n1" % base_url
-                        (retcode, output, erroutput) = ssh.execute(cmd, vm_ip, 'root', 'password')
-                        mini_url = base_url + output
-                        cmd = "wget %s" % (mini_url)
-                        ssh.execute(cmd, vm_ip, 'root', 'password', True, 22)
-                        cmd = "bash %s" % (output)
-                        ssh.execute(cmd, vm_ip, 'root', 'password', True, 22)
-                    else:
-                        print "Mini Host need install drbd"
-                        time.sleep(60)
-                        cmd = "yum install kmod-drbd84 drbd84-utils -y;depmod -a && modprobe drbd;systemctl enable drbd;systemctl start drbd"
-                        ssh.execute(cmd, vm_ip, 'root', 'password', True, 22)
-                mini_cnt += 1
+                    time.sleep(120)
+                    base_url = "http://192.168.200.100/mirror/kefeng.wang/mini-server/"
+                    cmd = "curl %s | grep ZStack-mini-server | awk '{print $6}' |awk -F'>' '{print $1}' | awk -F'\"' '{print $2}' | tail -n1" % base_url
+                    (retcode, output, erroutput) = ssh.execute(cmd, vm_ip, 'root', 'password')
+                    mini_url = base_url + output
+                    cmd = "wget %s" % (mini_url)
+                    ssh.execute(cmd, vm_ip, 'root', 'password', True, 22)
+                    cmd = "bash %s" % (output)
+                    ssh.execute(cmd, vm_ip, 'root', 'password', True, 22)
+                    print "Mini Host need install drbd"
+                    cmd = "yum install kmod-drbd84 drbd84-utils -y;depmod -a && modprobe drbd;systemctl enable drbd;systemctl start drbd"
+                    ssh.execute(cmd, vm_ip, 'root', 'password', True, 22)
 
                 if vm.dataDiskOfferingUuid__:
                     volume_option = test_util.VolumeOption()
