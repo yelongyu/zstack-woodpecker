@@ -615,3 +615,8 @@ def remove_fake_ceph(host):
     rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, "ls /usr/bin/ceph.real")
     if rsp.return_code == 0:
         rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, 'rm -rf /usr/bin/ceph; ln -s /usr/bin/ceph.real /usr/bin/ceph')
+
+def run_command_in_vm(vm_inv, command):
+    managerip = test_lib.lib_find_host_by_vm(vm_inv).managementIp
+    vm_ip = vm_inv.vmNics[0].ip
+    return test_lib.lib_ssh_vm_cmd_by_agent(managerip, vm_ip, 'root', 'password', command)

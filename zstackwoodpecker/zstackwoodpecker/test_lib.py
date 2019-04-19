@@ -8201,3 +8201,50 @@ def lib_get_ip_range_by_l3_uuid(l3NetworkUuid):
     if ip_range:
         return ip_range[0]
     test_util.test_logger("Cannot get ip range by [l3 uuid:] %s" % l3NetworkUuid)
+
+
+def lib_execute_command_in_flat_vm(vm, cmd, l3_uuid=None):
+    '''
+    The cmd was assumed to be returned as soon as possible.
+    '''
+    ret = True
+
+    if TestHarness == TestHarnessHost:
+        # assign host l2 bridge ip.
+        lib_set_vm_host_l2_ip(vm)
+        test_harness_ip = lib_find_host_by_vm(vm).managementIp
+    else:
+        test_harness_ip = lib_find_vr_mgmt_ip(vm)
+        lib_install_testagent_to_vr_with_vr_vm(vm)
+
+    if lib_is_vm_vr(vm):
+        vm_ip = lib_find_vr_mgmt_ip(vm)
+    else:
+        if not l3_uuid:
+            vm_ip = vm.vmNics[0].ip
+        else:
+            vm_ip = lib_get_vm_nic_by_l3(vm, l3_uuid).ip
+
+    username = lib_get_vm_username(vm)
+    password = lib_get_vm_password(vm)
+    test_util.test_logger("Do testing through test agent: %s to ssh vm: %s, ip: %s, with cmd: %s" % (
+    test_harness_ip, vm.uuid, vm_ip, cmd))
+    rsp = lib_ssh_vm_cmd_by_agent(test_harness_ip, vm_ip, username, \
+                                  password, cmd)
+    if not rsp.success:
+        ret = False
+        test_util.test_logger('ssh error info: %s' % rsp.error)
+    else:
+        if rsp.result != None:
+            ret = str(rsp.result)
+            if ret == "":
+                ret = "<no stdout output>"
+        else:
+            ret = rsp.result
+
+    if ret:
+        test_util.test_logger('Successfully execute [command:] >>> %s <<< in [vm:] %s' % (cmd, vm_ip))
+        return ret
+    else:
+        test_util.test_logger('Fail execute [command:] %s in [vm:] %s' % (cmd, vm_ip))
+        return False
