@@ -49,12 +49,10 @@ def test():
     net_ops.add_ip_range(ip_range_option=ip_range_option)
     time.sleep(2)
     vm = test_stub.create_vm(vm_name='vm-dhcp-ip', system_tags=sys_tag)
-    vm.check()
     test_obj_dict.add_vm(vm)
     time.sleep(60)
-
     vm_ip = vm.vm.vmNics[0].ip
-    #test_lib.lib_wait_target_up(ext_host_ip, 22, timeout=10)
+
     cmd = "ping -c 5 %s" % (vm_ip)
     (retcode, output, erroutput) = ssh.execute(cmd, ext_host_ip, "root", ext_host_pwd, True, 22)
     print "retcode is: %s; output is : %s.; erroutput is: %s" % (retcode, output, erroutput)
