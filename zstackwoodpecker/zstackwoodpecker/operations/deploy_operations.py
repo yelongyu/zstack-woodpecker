@@ -758,6 +758,19 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 thread = threading.Thread(target=_thread_for_action, args=(action,))
                 wait_for_thread_queue()
                 thread.start()
+                wait_for_thread_done()
+
+            ps_uuid = res_ops.get_resource(res_ops.PRIMARY_STORAGE, session_uuid, name=pr.name_)[0].uuid
+            action = api_actions.CreateSystemTagAction()
+            action.sessionUuid = session_uuid
+            action.tag = "primaryStorage::gateway::cidr::99.99.99.130/24"
+            action.resourceUuid = ps_uuid
+            action.resourceType = "PrimaryStorageVO"
+            thread = threading.Thread(target=_thread_for_action, args=(action,))
+            wait_for_thread_queue()
+            thread.start()
+            wait_for_thread_queue()
+
 
         if xmlobject.has_element(zone, 'primaryStorages.localPrimaryStorage'):
             zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, \
