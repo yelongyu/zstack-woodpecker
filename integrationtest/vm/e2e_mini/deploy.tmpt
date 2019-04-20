@@ -12,6 +12,9 @@ largeDiskOfferingSize = 1G
 mediumDiskOfferingName = mediumDiskOffering
 mediumDiskOfferingSize = 100M
 
+MINI_SERVER_URL = http://zstack-mini-server/test_bin
+SELENIUM_SERVER = 127.0.0.1
+
 clusterName2 = cluster2
 
 hostName = centos1

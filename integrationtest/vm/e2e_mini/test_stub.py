@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 '''
 
 Create an unified test_stub to share test operations
@@ -21,11 +22,11 @@ class MINI(E2E):
     def login(self):
         self.get_element('#accountName').send_keys('admin')
         self.get_element('#password').send_keys('password')
-        self.click_button(u'µÇ Â¼')
+        self.click_button(u'ç™» å½•')
         self.wait_for_element_appear(css='.ant-notification-notice-message')
-        assert self.get_element('.ant-notification-notice-message').text == u'µÇÂ¼³É¹¦', 'The notification of successful login was not displayed! '
+        assert self.get_element('.ant-notification-notice-message').text == u'ç™»å½•æˆåŠŸ', 'The notification of successful login was not displayed!'
         elem = self.get_element('.active')
-        if elem.text != u'Ê×Ò³':
+        if elem.text != u'é¦–é¡µ':
             test_util.test_logger(elem.err_msg)
             test_util.test_fail('Login failed! %s')
 
