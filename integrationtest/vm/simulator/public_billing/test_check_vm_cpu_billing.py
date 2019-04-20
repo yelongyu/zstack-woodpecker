@@ -40,7 +40,7 @@ def test():
 		test_util.test_logger("create vm instance")
 		global vm
 		vm = test_stub.create_vm_billing("test_vmm", test_stub.set_vm_resource()[0], None,\
-	                                                test_stub.set_vm_resource()[1], test_stub.set_vm_resrouce()[2])
+	                                                test_stub.set_vm_resource()[1], test_stub.set_vm_resource()[2])
 	        cpuNum = res_ops.query_resource_fields(res_ops.INSTANCE_OFFERING, \
 	                        res_ops.gen_query_conditions('uuid', '=',\
 	                                test_stub.set_vm_resource()[1]))[0].cpuNum
