@@ -2154,8 +2154,8 @@ class PublicIpVipOutBilling(Billing):
 
 class PublicIpNicInBilling(Billing):
 	def __init__(self):
-		super(PublicIpVmNicInBilling, self).__init__()
-		self.resourceName = "pubIpNicBandwidthIn"
+		super(PublicIpNicInBilling, self).__init__()
+		self.resourceName = "pubIpVmNicBandwidthIn"
 		self.resourceUnit = "M"
 		self.uuid = None
 
@@ -2178,8 +2178,8 @@ class PublicIpNicInBilling(Billing):
 
 class PublicIpNicOutBilling(Billing):
 	def __init__(self):
-		super(PublicIpVmNicOutBilling, self).__init__()
-		self.resourceName = "pubIpNicBandwidthOut"
+		super(PublicIpNicOutBilling, self).__init__()
+		self.resourceName = "pubIpVmNicBandwidthOut"
 		self.resourceUnit = "M"
 		self.uuid = None
 
