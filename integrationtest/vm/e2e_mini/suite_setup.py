@@ -901,5 +901,6 @@ def test():
 ''' % (agent_url)
     deploy_operations.remove_simulator_agent_script(agent_url)
     deploy_operations.deploy_simulator_agent_script(agent_url, script)
+    deploy_operations.install_mini_server()
 
     test_util.test_pass('Suite Setup Success')

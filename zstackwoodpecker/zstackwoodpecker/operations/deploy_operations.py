@@ -34,6 +34,16 @@ AddKVMHostTimeOut = 30*60*1000
 IMAGE_THREAD_LIMIT = 2
 DEPLOY_THREAD_LIMIT = 500
 
+def install_mini_server():
+    vm_ip = os.getenv('ZSTACK_BUILT_IN_HTTP_SERVER_IP')
+    mini_server_url = os.getenv('MINI_SERVER_URL')
+    http = urllib3.PoolManager()
+    rsp = http.request('GET', mini_server_url)
+    data = rsp.data.split('"')
+    ms_bins = [m for m in data if '.bin' in m]
+    bin_url = os.path.join(mini_server_url, ms_bins[-2])
+    install_cmd = 'wget -c %s -P /tmp; bash /tmp/%s' % (bin_url, ms_bins[-2])
+    ssh.execute(install_cmd, vm_ip, 'root', 'password')
 
 def get_first_item_from_list(list_obj, list_obj_name, list_obj_value, action_name):
     '''

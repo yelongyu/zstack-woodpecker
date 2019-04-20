@@ -15,7 +15,8 @@ from zstackwoodpecker import test_util
 class MINI(E2E):
     def __init__(self):
         super(MINI, self).__init__()
-        self.driver.get('http://172.20.0.201:8200')
+        mini_server_ip = os.getenv('ZSTACK_BUILT_IN_HTTP_SERVER_IP')
+        self.driver.get('http://%s:8200' % mini_server_ip)
         self.driver.set_window_size(1600, 900)
         self.login()
 
