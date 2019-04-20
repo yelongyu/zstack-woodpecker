@@ -6581,6 +6581,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                             target_volume = lib_get_root_volume(vm.get_vm())
                             target_volume_uuid = target_volume.uuid
                             ps_uuid = target_volume.primaryStorageUuid
+                            md5sum = None
                             break
 
 
