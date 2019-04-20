@@ -1045,7 +1045,9 @@ class HybridObject(object):
         assert response.code == 200
 
     def tear_down(self):
-        self.sync_ecs_instance()
+        # sync ecs instance only if identity zone added
+        if self.iz:
+            self.sync_ecs_instance()
         ecs_local = hyb_ops.query_ecs_instance_local()
         ecs_to_clear = [e for e in ecs_local if e.name == TEST_ECS_NAME]
         for ecs in ecs_to_clear:
