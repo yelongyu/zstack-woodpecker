@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+<basicConfig>
+  <zstackManagementIp>$zstackManagementIp</zstackManagementIp>
+  <zstackAdminPassword>$zstackAdminPassword</zstackAdminPassword>
+  <zstackPkg>$zstackPkg</zstackPkg>
+  <zstackISO>$zstackISO</zstackISO>
+</basicConfig>
+
+<deployerConfig xmlns="http://zstack.org/schema/zstack">
+  <vpcVrouters>
+    <vpcVrouter name="$scenvpcVrouterName1" virtualRouterOfferingUuid="$virtualRouterOfferingUuid1">
+    </vpcVrouter>
+  </vpcVrouters>
+  <l2Networks>
+    <l2VlanNetwork name="$scenl2VlanNetworkName1" description="guest l2 vlan network"
+      physicalInterface="$scenl2NetworkPhysicalInterface" vlan="$scenl2Vlan1">
+      <l3Networks>
+        <l3BasicNetwork name="$scenl3VPCNetworkName1"
+          type="L3VpcNetwork"
+          description = "guest test vlan network with DHCP DNS and SNAT"
+          domain_name="$scenL3VPCNetworkDomainName1">
+          <ipRange name="$scenvpcIpRangeName1"
+            startIp="$scenvpcIpRangeStart1"
+            endIp="$scenvpcIpRangeEnd1"
+            gateway="$scenvpcIpRangeGateway1"
+            netmask="$scenvpcIpRangeNetmask1"/>
+          <dns>$DNSServer</dns>
+          <networkService provider="Flat Network Service Provider">
+            <serviceType>Eip</serviceType>
+          </networkService>
+          <networkService provider="vrouter">
+            <serviceType>DNS</serviceType>
+            <serviceType>SNAT</serviceType>
+            <serviceType>PortForwarding</serviceType>
+          </networkService>
+          <networkService provider="SecurityGroup">
+            <serviceType>SecurityGroup</serviceType>
+          </networkService>
+          <vpcvrouterRef>$scenvpcVrouterName1</vpcvrouterRef>
+        </l3BasicNetwork>
+      </l3Networks>
+    </l2VlanNetwork>
+    <l2VlanNetwork name="$scenl2VlanNetworkName2" description="guest l2 vlan network"
+      physicalInterface="$scenl2NetworkPhysicalInterface" vlan="$scenl2Vlan2">
+      <l3Networks>
+        <l3BasicNetwork name="$scenl3VPCNetworkName2"
+          type="L3VpcNetwork"
+          description = "guest test vlan network with DHCP DNS and SNAT"
+          domain_name="$scenL3VPCNetworkDomainName1">
+          <ipRange name="$scenvpcIpRangeName2"
+            startIp="$scenvpcIpRangeStart2"
+            endIp="$scenvpcIpRangeEnd2"
+            gateway="$scenvpcIpRangeGateway2"
+            netmask="$scenvpcIpRangeNetmask2"/>
+          <dns>$DNSServer</dns>
+          <networkService provider="Flat Network Service Provider">
+            <serviceType>Eip</serviceType>
+          </networkService>
+          <networkService provider="vrouter">
+            <serviceType>DHCP</serviceType>
+            <serviceType>DNS</serviceType>
+            <serviceType>SNAT</serviceType>
+            <serviceType>PortForwarding</serviceType>
+          </networkService>
+          <networkService provider="SecurityGroup">
+            <serviceType>SecurityGroup</serviceType>
+          </networkService>
+          <vpcvrouterRef>$scenvpcVrouterName1</vpcvrouterRef>
+        </l3BasicNetwork>
+      </l3Networks>
+    </l2VlanNetwork>
+    <l2VlanNetwork name="$scenl2VlanNetworkName3" description="guest l2 vlan network"
+      physicalInterface="$scenl2NetworkPhysicalInterface" vlan="$scenl2Vlan3">
+      <l3Networks>
+        <l3BasicNetwork name="$scenl3VPCNetworkName3"
+          type="L3VpcNetwork"
+          description = "guest test vlan network with DHCP DNS and SNAT"
+          domain_name="$scenL3VPCNetworkDomainName1">
+          <ipRange name="$scenvpcIpRangeName3"
+            startIp="$scenvpcIpRangeStart3"
+            endIp="$scenvpcIpRangeEnd3"
+            gateway="$scenvpcIpRangeGateway3"
+            netmask="$scenvpcIpRangeNetmask3"/>
+          <dns>$DNSServer</dns>
+          <networkService provider="Flat Network Service Provider">
+            <serviceType>Eip</serviceType>
+          </networkService>
+          <networkService provider="vrouter">
+            <serviceType>DHCP</serviceType>
+            <serviceType>DNS</serviceType>
+            <serviceType>SNAT</serviceType>
+            <serviceType>PortForwarding</serviceType>
+          </networkService>
+          <networkService provider="SecurityGroup">
+            <serviceType>SecurityGroup</serviceType>
+          </networkService>
+          <vpcvrouterRef>$scenvpcVrouterName1</vpcvrouterRef>
+        </l3BasicNetwork>
+      </l3Networks>
+    </l2VlanNetwork>
+  </l2Networks>
+
+  <hosts>
+    <host uuid="$hostUuid">
+      <vms>
+        <vm name="$vmName1" vmInstranceOfferingUuid="$vmInstranceOfferingUuid"
+          imageUuid="$imageUuid" imageUsername="$imageUsername" imagePassword="$imagePassword">
+          <l3Networks>
+            <l3Network uuid="$vmL3Uuid">
+              <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
+              <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
+             </l3Network>
+            <l3Network>
+              <scenl3NetworkRef>$scenl3VPCNetworkName1</scenl3NetworkRef>
+              <l2NetworkRef>$scenl2VlanNetworkName1</l2NetworkRef>
+              <l2NetworkRef>$scenl2VlanNetworkName2</l2NetworkRef>
+              <l2NetworkRef>$scenl2VlanNetworkName3</l2NetworkRef>
+             </l3Network>
+          </l3Networks>
+          <nodeRef>$node1Name</nodeRef>
+          <hostRef>$hostName</hostRef>
+        </vm>
+      </vms>
+    </host>
+    <host uuid="$hostUuid2">
+      <vms>
+        <vm name="$vmName2" vmInstranceOfferingUuid="$vmInstranceOfferingUuid"
+          imageUuid="$imageUuid" imageUsername="$imageUsername" imagePassword="$imagePassword">
+          <l3Networks>
+            <l3Network uuid="$vmL3Uuid">
+              <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
+              <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
+             </l3Network>
+            <l3Network>
+              <scenl3NetworkRef>$scenl3VPCNetworkName1</scenl3NetworkRef>
+              <l2NetworkRef>$scenl2VlanNetworkName1</l2NetworkRef>
+              <l2NetworkRef>$scenl2VlanNetworkName2</l2NetworkRef>
+              <l2NetworkRef>$scenl2VlanNetworkName3</l2NetworkRef>
+             </l3Network>
+          </l3Networks>
+          <hostRef>$hostName2</hostRef>
+        </vm>
+      </vms>
+    </host>
+    <host uuid="$hostUuid3">
+      <vms>
+        <vm name="$vmName3" vmInstranceOfferingUuid="$vmInstranceOfferingUuid"
+          imageUuid="$imageUuid" imageUsername="$imageUsername" imagePassword="$imagePassword">
+          <l3Networks>
+            <l3Network uuid="$vmL3Uuid">
+              <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
+              <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
+             </l3Network>
+            <l3Network>
+              <scenl3NetworkRef>$scenl3VPCNetworkName1</scenl3NetworkRef>
+              <l2NetworkRef>$scenl2VlanNetworkName1</l2NetworkRef>
+              <l2NetworkRef>$scenl2VlanNetworkName2</l2NetworkRef>
+              <l2NetworkRef>$scenl2VlanNetworkName3</l2NetworkRef>
+             </l3Network>
+          </l3Networks>
+          <hostRef>$hostName3</hostRef>
+        </vm>
+      </vms>
+    </host>
+    <host uuid="$hostUuid4">
+      <vms>
+        <vm name="$vmName4" vmInstranceOfferingUuid="$vmInstranceOfferingUuid"
+          imageUuid="$imageUuid" imageUsername="$imageUsername" imagePassword="$imagePassword">
+          <l3Networks>
+            <l3Network uuid="$vmL3Uuid">
+              <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
+              <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
+             </l3Network>
+            <l3Network>
+              <scenl3NetworkRef>$scenl3VPCNetworkName1</scenl3NetworkRef>
+              <l2NetworkRef>$scenl2VlanNetworkName1</l2NetworkRef>
+              <l2NetworkRef>$scenl2VlanNetworkName2</l2NetworkRef>
+              <l2NetworkRef>$scenl2VlanNetworkName3</l2NetworkRef>
+             </l3Network>
+          </l3Networks>
+          <hostRef>$hostName4</hostRef>
+        </vm>
+      </vms>
+    </host>
+  </hosts>
+</deployerConfig>
+</config>

@@ -29,6 +29,8 @@ isoMediaType = ISO
 
 scenl2VlanNetworkName1 = vpc_vrouter_for_scenario_test
 scenl2NetworkPhysicalInterface = zsn1
+scenl2VlanNetworkName2 = vpc_vrouter_for_scenario_test2
+scenl2VlanNetworkName3 = vpc_vrouter_for_scenario_test3
 
 ZSTACK_ALREADY_INSTALLED = yes
 pxename = Pxe_Test
@@ -67,6 +69,20 @@ scenvpcIpRangeName1 = scenario_test
 scenvpcIpRangeStart1 = 10.0.0.2
 scenvpcIpRangeEnd1 = 10.0.0.232
 scenvpcIpRangeGateway1 = 10.0.0.1
+scenvpcIpRangeNetmask1 = 255.255.255.0
+
+scenl3VPCNetworkName1 = vpc_vrouter_for_scenario_test2
+scenvpcIpRangeName1 = scenario_test2
+scenvpcIpRangeStart1 = 10.1.0.2
+scenvpcIpRangeEnd1 = 10.1.0.232
+scenvpcIpRangeGateway1 = 10.1.0.1
+scenvpcIpRangeNetmask1 = 255.255.255.0
+
+scenl3VPCNetworkName1 = vpc_vrouter_for_scenario_test3
+scenvpcIpRangeName1 = scenario_test3
+scenvpcIpRangeStart1 = 10.2.0.2
+scenvpcIpRangeEnd1 = 10.2.0.232
+scenvpcIpRangeGateway1 = 10.2.0.1
 scenvpcIpRangeNetmask1 = 255.255.255.0
 
 zstackHaVip = 10.0.0.1
