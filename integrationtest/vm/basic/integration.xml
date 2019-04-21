@@ -40,6 +40,7 @@
         <case timeout="180" >account/test_multi_accounts_vm_ops.py</case>
         <case timeout="300" >account/test_normal_change_qos.py</case>
         <case timeout="300" >account/test_normal_create_eip.py</case>
+        <case timeout="300" >account/test_normal_create_L3_by_admin_shared_L2.py</case>
         <case timeout="180" >test_ldap_login.py</case>
         <case timeout="180" >test_ldap_tls_login.py</case>
         <case timeout="180" >test_ldap_filter.py</case>
