@@ -1,0 +1,4 @@
+<integrationTest>
+    <suite name="simulator test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
+    </suite>
+</integrationTest>

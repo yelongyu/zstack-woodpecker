@@ -6160,7 +6160,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             test_util.test_dsc('Robot Action: %s; on Vm: %s' % \
                 (next_action, target_vm.get_vm().uuid))
 
-            target_vm.delete()
+            target_vm.destroy()
             target_vm.expunge()
             test_dict.rm_vm(target_vm)
 
@@ -6581,6 +6581,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                             target_volume = lib_get_root_volume(vm.get_vm())
                             target_volume_uuid = target_volume.uuid
                             ps_uuid = target_volume.primaryStorageUuid
+                            md5sum = None
                             break
 
 
@@ -6935,6 +6936,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
         elif next_action == TestAction.create_vm_backup:
             backup_name = None
             target_vm = None
+            full = False
             if len(constant_path_list[0]) > 2:
                 target_vm_name = constant_path_list[0][1]
                 backup_name = constant_path_list[0][2]
@@ -6943,6 +6945,10 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                     if vm.get_vm().name == target_vm_name:
                         target_vm = vm
                         break
+                (normal_args, extra_args) = _parse_args(constant_path_list[0])
+                for ea in extra_args:
+                    if ea == "full":
+                        full = True
 
             if not target_vm or not backup_name:
                 test_util.test_fail("no resource available for next action: %s" % (next_action))
@@ -6978,13 +6984,14 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             backup_option.set_name(backup_name)
             backup_option.set_volume_uuid(lib_get_root_volume(vm.get_vm()).uuid)
             backup_option.set_backupStorage_uuid(bs.uuid)
-            if len(constant_path_list[0]) == 3:
+            if full:
                 backup_option.set_mode("full")
+            
             try:
-                exist_bss = constant_path_list[0][3]
+                exist_bss = normal_args[3]
             except:
-                exist_bss = None
-            if not exist_bss:
+                exist_bss = False
+            if exist_bss:
                 cond = res_ops.gen_query_conditions("tag", '=', "allowbackup")
                 tags = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
                 local_storage_uuid = tags[0].resourceUuid
@@ -8195,3 +8202,56 @@ def lib_get_ospf_area_by_area_id(areaId):
         return area[0]
     test_util.test_logger("Did not find ospf area by [area ID:] %s" % areaId)
 
+def lib_get_ip_range_by_l3_uuid(l3NetworkUuid):
+    cond = res_ops.gen_query_conditions('l3NetworkUuid', '=', l3NetworkUuid)
+    ip_range = res_ops.query_resource(res_ops.IP_RANGE, cond)
+    if ip_range:
+        return ip_range[0]
+    test_util.test_logger("Cannot get ip range by [l3 uuid:] %s" % l3NetworkUuid)
+
+
+def lib_execute_command_in_flat_vm(vm, cmd, l3_uuid=None):
+    '''
+    The cmd was assumed to be returned as soon as possible.
+    '''
+    ret = True
+
+    if TestHarness == TestHarnessHost:
+        # assign host l2 bridge ip.
+        lib_set_vm_host_l2_ip(vm)
+        test_harness_ip = lib_find_host_by_vm(vm).managementIp
+    else:
+        test_harness_ip = lib_find_vr_mgmt_ip(vm)
+        lib_install_testagent_to_vr_with_vr_vm(vm)
+
+    if lib_is_vm_vr(vm):
+        vm_ip = lib_find_vr_mgmt_ip(vm)
+    else:
+        if not l3_uuid:
+            vm_ip = vm.vmNics[0].ip
+        else:
+            vm_ip = lib_get_vm_nic_by_l3(vm, l3_uuid).ip
+
+    username = lib_get_vm_username(vm)
+    password = lib_get_vm_password(vm)
+    test_util.test_logger("Do testing through test agent: %s to ssh vm: %s, ip: %s, with cmd: %s" % (
+    test_harness_ip, vm.uuid, vm_ip, cmd))
+    rsp = lib_ssh_vm_cmd_by_agent(test_harness_ip, vm_ip, username, \
+                                  password, cmd)
+    if not rsp.success:
+        ret = False
+        test_util.test_logger('ssh error info: %s' % rsp.error)
+    else:
+        if rsp.result != None:
+            ret = str(rsp.result)
+            if ret == "":
+                ret = "<no stdout output>"
+        else:
+            ret = rsp.result
+
+    if ret:
+        test_util.test_logger('Successfully execute [command:] >>> %s <<< in [vm:] %s' % (cmd, vm_ip))
+        return ret
+    else:
+        test_util.test_logger('Fail execute [command:] %s in [vm:] %s' % (cmd, vm_ip))
+        return False

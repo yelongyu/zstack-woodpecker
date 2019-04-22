@@ -29,8 +29,8 @@
         <case timeout='600' repeat='1' noparallel='True'>test_sync_delete_vpc_user_vpn_gateway_local.py</case>
         <case timeout='900' repeat='1' noparallel='True'>test_sync_delete_vpc_vpn_connection_local.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_create_delete_vpc_user_vpn_gateway.py</case>
-        <case timeout='900' repeat='1' noparallel='True'>test_create_ipsec_vpn_connection.py</case>
-        <case timeout='900' repeat='1' noparallel='True'>test_create_ipsec_vpn_connection_with_single_vip.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>test_create_ipsec_vpn_connection.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>test_create_ipsec_vpn_connection_with_single_vip.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_create_delete_vpc_route_entry.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_sync_aliyun_route_entry.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_sync_ecs_sg_rule.py</case>

@@ -64,6 +64,7 @@
         <case timeout='800' repeat='1'>eip/test_create_eip_reconnect_host.py</case>
         <case timeout='540' repeat='1' noparallel='True'>other/test_parallel_crt_vm_to_use_all_disk.py</case>
         <case timeout='800' repeat='1'>eip/test_stop_start_eip_vm.py</case>
+        <case timeout='800' repeat='1'>eip/test_eip_gateway_leak.py</case>
         <case timeout='360' repeat='1' noparallel='True'>other/test_parallel_crt_vm_to_use_all_mem.py</case>
         <case timeout='900' repeat='1'>volume/test_add_volume.py</case>
         <case timeout='1350' repeat='1'>volume/test_add_m_vols.py</case>
@@ -115,6 +116,8 @@
 	<case timeout='500' repeat='1'>image_store/test_clone_vm_created.py</case>-->
         <case timeout='600' repeat='1' noparallel='True'>test_add_image_file_url.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_add_qcow2_image_file_url.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_vm_use_old_dhcp_ip.py</case>
+        <case timeout='600' repeat='1' noparallel='True'>test_reconnect_host_with_ebtables_lock.py</case>
 
     </suite>
 </integrationTest>

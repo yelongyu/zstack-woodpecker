@@ -34,6 +34,16 @@ AddKVMHostTimeOut = 30*60*1000
 IMAGE_THREAD_LIMIT = 2
 DEPLOY_THREAD_LIMIT = 500
 
+def install_mini_server():
+    vm_ip = os.getenv('ZSTACK_BUILT_IN_HTTP_SERVER_IP')
+    mini_server_url = os.getenv('MINI_SERVER_URL')
+    http = urllib3.PoolManager()
+    rsp = http.request('GET', mini_server_url)
+    data = rsp.data.split('"')
+    ms_bins = [m for m in data if '.bin' in m]
+    bin_url = os.path.join(mini_server_url, ms_bins[-2])
+    install_cmd = 'wget -c %s -P /tmp; bash /tmp/%s' % (bin_url, ms_bins[-2])
+    ssh.execute(install_cmd, vm_ip, 'root', 'password')
 
 def get_first_item_from_list(list_obj, list_obj_name, list_obj_value, action_name):
     '''
@@ -179,16 +189,18 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
             thread.start()
 
     if xmlobject.has_element(deployConfig, 'backupStorages.miniBackupStorage'):
+	vm_ip_list = get_vm_ip_from_scenariofile(scenarioFile)
+        bs_uuid_list = []
         for bs in xmlobject.safe_list(deployConfig.backupStorages.miniBackupStorage):
-	    vm_ip_list = get_vm_ip_from_scenariofile(scenarioFile)
 	    action = api_actions.AddImageStoreBackupStorageAction()
 	    action.sessionUuid = session_uuid
 	    action.name = bs.name_
+            bs_id = bs.id__
 	    action.description = bs.description__
 	    action.url = bs.url_
 	    action.username = bs.username_
 	    action.password = bs.password_
-	    action.hostname = vm_ip_list[1]
+	    action.hostname = vm_ip_list[int(bs_id)]
 
 	    if hasattr(bs, 'port_'):
 	        action.port = bs.port_
@@ -199,6 +211,27 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
 	    thread = threading.Thread(target = _thread_for_action, args = (action, True))
 	    wait_for_thread_queue()
 	    thread.start()
+            wait_for_thread_done()
+            bs = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid, name=bs.name_)[0].uuid
+            bs_uuid_list.append(bs)
+
+	action = api_actions.CreateImageReplicationGroupAction()
+        action.name = 'IRG'
+	action.sessionUuid = session_uuid
+	thread = threading.Thread(target = _thread_for_action, args = (action, True))
+	wait_for_thread_queue()
+	thread.start()
+        wait_for_thread_done()
+        irg_uuid = res_ops.get_resource(res_ops.REPLICATIONGROUP)[0].uuid
+
+	action = api_actions.AddBackupStoragesToReplicationGroupAction()
+        action.replicationGroupUuid = irg_uuid
+        action.backupStorageUuids = bs_uuid_list
+	action.sessionUuid = session_uuid
+	thread = threading.Thread(target = _thread_for_action, args = (action, True))
+	wait_for_thread_queue()
+	thread.start()
+        wait_for_thread_done()
 
     if xmlobject.has_element(deployConfig, 'backupStorages.cephBackupStorage'):
         for bs in xmlobject.safe_list(deployConfig.backupStorages.cephBackupStorage):
@@ -735,6 +768,19 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 thread = threading.Thread(target=_thread_for_action, args=(action,))
                 wait_for_thread_queue()
                 thread.start()
+                wait_for_thread_done()
+
+            ps_uuid = res_ops.get_resource(res_ops.PRIMARY_STORAGE, session_uuid, name=pr.name_)[0].uuid
+            action = api_actions.CreateSystemTagAction()
+            action.sessionUuid = session_uuid
+            action.tag = "primaryStorage::gateway::cidr::99.99.99.130/24"
+            action.resourceUuid = ps_uuid
+            action.resourceType = "PrimaryStorageVO"
+            thread = threading.Thread(target=_thread_for_action, args=(action,))
+            wait_for_thread_queue()
+            thread.start()
+            wait_for_thread_queue()
+
 
         if xmlobject.has_element(zone, 'primaryStorages.localPrimaryStorage'):
             zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, \
@@ -1337,7 +1383,7 @@ def add_cluster(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluste
                     action.zoneUuid = zinv.uuid
                     action.password = "password"
                     action.sshPort = "22"
-                    hostManagementIps = vm_ip_list[1] + ',' + vm_ip_list[2]
+                    hostManagementIps = vm_ip_list[0] + ',' + vm_ip_list[1]
                     action.hostManagementIps = hostManagementIps.split(',')
                     print " action.hostManagementIps : %s" % action.hostManagementIps
                     thread = threading.Thread(target=_add_cluster, args=(action, zone_ref, cluster, cluster_ref, ))

@@ -54,3 +54,10 @@ def query_resource_price(cond, session_uuid= None):
     result = account_operations.execute_action_with_session(action, \
             session_uuid)
     return result
+
+def generate_account_billing(account_uuid, session_uuid=None):
+    action = api_actions.GenerateAccountBillingAction()
+    action.accountUuid = account_uuid
+    result = account_operations.execute_action_with_session(action, \
+            session_uuid)
+    return result

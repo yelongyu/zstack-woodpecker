@@ -99,7 +99,7 @@ def remove_scheduler_job_group_from_trigger(trigger_uuid, job_group_uuid, sessio
     action = api_actions.RemoveSchedulerJobGroupFromSchedulerTriggerAction()
     action.schedulerTriggerUuid = trigger_uuid
     action.schedulerJobGroupUuid = job_group_uuid
-    test_util.action_logger('Remove [Scheduler Job:] %s from [Scheduler Trigger:] %s ' % (job_uuid, trigger_uuid))
+    test_util.action_logger('Remove [Scheduler Job:] %s from [Scheduler Trigger:] %s ' % (job_group_uuid, trigger_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
 
 def delete_scheduler(uuid, session_uuid = None):

@@ -8,6 +8,7 @@ import zstacklib.utils.http as  http
 import zstacklib.utils.ssh as ssh
 import zstacktestagent.plugins.host as host_plugin
 import zstacktestagent.testagent as testagent
+import zstacklib.utils.xmlobject as xmlobject
 
 import zstackwoodpecker.operations.scenario_operations as scenario_operations
 import zstackwoodpecker.operations.deploy_operations as deploy_operations
@@ -60,12 +61,13 @@ def test():
         http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd2)
 
 
-    test_stub.deploy_2ha(test_lib.all_scenario_config, test_lib.scenario_file)
+    test_stub.deploy_2ha(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
     mn_ip1 = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, 0).ip_
     mn_ip2 = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, 1).ip_
 
-    host_ip1 = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, 2).ip_
-    test_stub.recover_vlan_in_host(host_ip1, test_lib.all_scenario_config, test_lib.deploy_config)
+    if not xmlobject.has_element(test_lib.deploy_config, 'backupStorages.miniBackupStorage'):
+        host_ip1 = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, 2).ip_
+        test_stub.recover_vlan_in_host(host_ip1, test_lib.all_scenario_config, test_lib.deploy_config)
 
     test_stub.wrapper_of_wait_for_management_server_start(600, EXTRA_SUITE_SETUP_SCRIPT)
     test_util.test_logger("@@@DEBUG->suite_setup@@@ os\.environ\[\'ZSTACK_BUILT_IN_HTTP_SERVER_IP\'\]=%s; os\.environ\[\'zstackHaVip\'\]=%s"	\

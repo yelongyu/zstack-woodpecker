@@ -40,9 +40,9 @@ def path():
                            [TestAction.stop_vm, iscsi_vms[-1]], 
                            [TestAction.change_vm_image, iscsi_vms[-1]], 
                            [TestAction.start_vm, iscsi_vms[-1]], 
-                           [TestAction.create_volume_backup, iscsi_vms[-1] + "-root", "backup-1"], 
+                           [TestAction.create_vm_backup, iscsi_vms[-1], "backup-1"], 
                            [TestAction.stop_vm, iscsi_vms[-1]], 
-                           [TestAction.use_volume_backup, "backup-1"], 
+                           [TestAction.use_vm_backup, "backup-1"], 
                            [TestAction.start_vm, iscsi_vms[-1]]])
     else:
         return dict(initial_formation="template3", path_list=[])

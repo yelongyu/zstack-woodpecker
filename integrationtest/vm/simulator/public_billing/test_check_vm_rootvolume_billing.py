@@ -21,10 +21,12 @@ billing_resource = 'rootvolume'
 offset_unit_dict=['sec','min','hou','day','week','month','year']
 time_unit_dict=['s','m','h','d','w','mon']
 resource_unit_dict={"M":1024 * float(1024), "G":1024**2 * float(1024), "T":1024**3 * float(1024)}
-
+vm_max = 10
+round_max = 10
+round_sum = vm_max * round_max
 def test():
 	success_round = 0
-	for i in range(0,10):
+	for i in range(0,vm_max):
 		test_util.test_logger("clear data in RootVolumeUsageVO and PriceVO")
 		test_stub.resource_price_clear(billing_resource)
 		test_util.test_logger("=====SPENDING CHECK VM %s=====" % str(i+1)) 
@@ -49,14 +51,13 @@ def test():
 		test_util.test_logger("@@@@debug %s %s" %(resource_unit, rootVolumeSize))
 
 		test_util.test_logger("====check vm spending====")
-		for r in range(0,10):
+		for r in range(0,round_max):
 			test_util.test_logger("===spending check round %s-%s===" % (str(i+1), str(r+1)))
 			if test_stub.check(bill_rootvolume, billing_resource, random.choice(offset_unit_dict), random.randint(0,3), rootVolumeSize):
 				success_round += 1
-	if success_round != 100:
-		test_util.test_fail("check root volume billing finished\n success: %s/100" % success_round)
-	else:
-		test_util.test_pass("check root volume billing finished\n success: %s/100" % success_round)
+			else:
+				test_util.test_fail("check vm billing spending finished\n success: %s/%s" % (success_round, round_sum))
+	test_util.test_pass("check root volume billing finished\n success: %s/%s" % (success_round,round_sum))
 
 def error_cleanup():
 	global vm

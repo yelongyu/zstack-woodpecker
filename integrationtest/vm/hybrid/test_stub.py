@@ -240,22 +240,25 @@ class HybridObject(object):
         elif ops == 'sync':
             return eval(query_str)[0]
 
-    def create_bucket(self):
+    def create_bucket(self, gc=False):
+        if gc:
+            bucket_remote = hyb_ops.get_oss_bucket_name_from_remote(self.datacenter.uuid)
+            if bucket_remote:
+                for bucket in bucket_remote:
+                    if 'zstack-test-oss-bucket' in bucket.bucketName:
+                        self.del_bucket(bucket.bucketName)
         self.bucket_name = 'zstack-test-oss-bucket-%s-%s' % (_postfix, self.region_id)
         self.oss_bucket = hyb_ops.create_oss_bucket_remote(self.datacenter.uuid, self.bucket_name, 'created-by-zstack-for-test')
         self.oss_bucket_create = True
         self.check_resource('create', 'bucketName', self.bucket_name, 'query_oss_bucket_file_name')
 
-    def add_bucket(self):
+    def add_bucket(self, gc=False):
         bucket_remote = hyb_ops.get_oss_bucket_name_from_remote(self.datacenter.uuid)
-        if bucket_remote:
-#             self.bucket_name = bucket_remote[0].bucketName
-            for bucket in bucket_remote:
-                if 'zstack-test-oss-bucket' in bucket.bucketName:
-                    self.del_bucket(bucket.bucketName)
-#             self.oss_bucket = hyb_ops.add_oss_bucket_from_remote(self.datacenter.uuid, self.bucket_name)
-#         else:
-        self.create_bucket()
+        if bucket_remote and not gc:
+            self.bucket_name = bucket_remote[0].bucketName
+            self.oss_bucket = hyb_ops.add_oss_bucket_from_remote(self.datacenter.uuid, self.bucket_name)
+        else:
+            self.create_bucket(gc=gc)
         bucket_local = hyb_ops.query_oss_bucket_file_name()
         bucket_name_local = [bk.bucketName for bk in bucket_local]
         assert self.bucket_name in bucket_name_local
@@ -288,11 +291,12 @@ class HybridObject(object):
             condition = res_ops.gen_query_conditions('bucketName', '=', bucket_name)
             if not hyb_ops.query_oss_bucket_file_name(condition):
                 self.oss_bucket = hyb_ops.add_oss_bucket_from_remote(self.datacenter.uuid, bucket_name)
-            bucket_file = hyb_ops.get_oss_bucket_file_from_remote(self.oss_bucket.uuid).files
+            bucket_file = hyb_ops.get_oss_bucket_file_from_remote(self.oss_bucket.uuid)
             if bucket_file:
+                files = bucket_file.files
                 time.sleep(20)
-                for i in bucket_file:
-                    hyb_ops.del_oss_bucket_file_remote(self.oss_bucket.uuid, i)
+                for f in files:
+                    hyb_ops.del_oss_bucket_file_remote(self.oss_bucket.uuid, f)
             time.sleep(10)
             hyb_ops.del_oss_bucket_remote(self.oss_bucket.uuid)
         else:
@@ -1045,7 +1049,9 @@ class HybridObject(object):
         assert response.code == 200
 
     def tear_down(self):
-        self.sync_ecs_instance()
+        # sync ecs instance only if identity zone added
+        if self.iz:
+            self.sync_ecs_instance()
         ecs_local = hyb_ops.query_ecs_instance_local()
         ecs_to_clear = [e for e in ecs_local if e.name == TEST_ECS_NAME]
         for ecs in ecs_to_clear:
