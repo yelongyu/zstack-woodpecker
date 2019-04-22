@@ -23,7 +23,7 @@ def test():
     vm_1 = test_lib.lib_create_vm()
     vm_1.check()
     test_obj_dict.add_vm(vm_1)
-    vm.destroy()
+    vm_1.destroy()
     test_util.test_pass('Create VM Test Success')
 
 
