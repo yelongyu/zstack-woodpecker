@@ -6936,6 +6936,7 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
         elif next_action == TestAction.create_vm_backup:
             backup_name = None
             target_vm = None
+            full = False
             if len(constant_path_list[0]) > 2:
                 target_vm_name = constant_path_list[0][1]
                 backup_name = constant_path_list[0][2]
@@ -6944,6 +6945,10 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                     if vm.get_vm().name == target_vm_name:
                         target_vm = vm
                         break
+                (normal_args, extra_args) = _parse_args(constant_path_list[0])
+                for ea in extra_args:
+                    if ea == "full":
+                        full = True
 
             if not target_vm or not backup_name:
                 test_util.test_fail("no resource available for next action: %s" % (next_action))
@@ -6979,13 +6984,14 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             backup_option.set_name(backup_name)
             backup_option.set_volume_uuid(lib_get_root_volume(vm.get_vm()).uuid)
             backup_option.set_backupStorage_uuid(bs.uuid)
-            if len(constant_path_list[0]) == 3:
+            if full:
                 backup_option.set_mode("full")
+            
             try:
-                exist_bss = constant_path_list[0][3]
+                exist_bss = normal_args[3]
             except:
-                exist_bss = None
-            if not exist_bss:
+                exist_bss = False
+            if exist_bss:
                 cond = res_ops.gen_query_conditions("tag", '=', "allowbackup")
                 tags = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
                 local_storage_uuid = tags[0].resourceUuid
