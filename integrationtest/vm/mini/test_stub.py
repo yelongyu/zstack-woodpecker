@@ -153,6 +153,18 @@ def create_basic_vm(disk_offering_uuids=None, session_uuid = None, wait_vr_runni
 
     return create_vm([l3_net_uuid], image_uuid, 'basic_no_vlan_vm', disk_offering_uuids, session_uuid = session_uuid)
 
+def create_vm(disk_offering_uuids=None, session_uuid = None, vm_name = None):
+    image_name = os.environ.get('imageName_net')
+    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    l3_name = os.environ.get('l3VlanNetworkName1')
+    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    if not vm_name:
+        vm_name = "vm_for_test"
+    if wait_vr_running:
+        ensure_vr_is_running_connected(l3_net_uuid)
+
+    return create_vm([l3_net_uuid], image_uuid, vm_name, disk_offering_uuids, session_uuid = session_uuid)
+
 def create_ha_vm(disk_offering_uuids=None, session_uuid = None):
     vm = create_basic_vm(disk_offering_uuids=disk_offering_uuids, session_uuid=session_uuid)
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
