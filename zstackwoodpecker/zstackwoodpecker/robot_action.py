@@ -64,6 +64,8 @@ SgRule = ts_header.SgRule
 Port = ts_header.Port
 WOODPECKER_MOUNT_POINT = '/tmp/zstack/mnt'
 SSH_TIMEOUT = 600
+MINI = False
+STEP = 0
 
 
 class robot_test_dict(object):
@@ -421,11 +423,12 @@ class robot(object):
 
     # Todo:run_actions and check
 
-    def initial(self, path_list, resource_stack):
+    def initial(self, path_list, resource_stack=None):
         self.set_path_list(path_list)
         self.initial_resource()
-        self.set_initial_formation(resource_stack)
-        self.create_resource_stack()
+        if resource_stack:
+            self.set_initial_formation(resource_stack)
+            self.create_resource_stack()
 
     def path(self):
         for _path in self.path_list:
@@ -438,7 +441,7 @@ def robot_run_constant_path(robot_test_obj, set_robot=True):
 
     path = robot_test_obj.path()
     test_util.test_logger("Robot action start!")
-    index = 1
+    global STEP
     while True:
         test_dict = robot_test_obj.get_test_dict()
         resource_dict = robot_test_obj.get_robot_resource()
@@ -450,8 +453,8 @@ def robot_run_constant_path(robot_test_obj, set_robot=True):
             tmpt = next(path)
             action = tmpt[0]
             args = tmpt[1:]
-            run_action(robot_test_obj, action, args, index)
-            index += 1
+            run_action(robot_test_obj, action, args, STEP)
+            STEP += 1
         except StopIteration:
             break
 
@@ -832,6 +835,10 @@ def create_volume(robot_test_obj, args):
             systemtags.append("capability::virtio-scsi")
         if 'shareable' in tags:
             systemtags.append("ephemeral::shareable")
+        if 'Thin' in tags:
+            systemtags.append("volumeProvisioningStrategy::ThinProvisioning")
+        if 'Thick' in tags:
+            systemtags.append("volumeProvisioningStrategy::ThickProvisioning")
 
     volume_creation_option = test_util.VolumeOption()
     volume_creation_option.set_name(target_volume_name)
@@ -839,14 +846,20 @@ def create_volume(robot_test_obj, args):
 
     if ps_uuid:
         ps = test_lib.lib_get_primary_storage_by_uuid(ps_uuid)
-        if ps.type == inventory.LOCAL_STORAGE_TYPE:
+        if ps.type in [inventory.LOCAL_STORAGE_TYPE or 'MiniStorage']:
             host_uuid = robot_test_obj.get_default_config()['HOST']
             systemtags.append("localStorage::hostUuid::%s" % (host_uuid))
 
     if systemtags:
         volume_creation_option.set_system_tags(systemtags)
+    if not MINI:
+        new_volume = test_lib.lib_create_volume_from_offering(volume_creation_option)
+    else:
+        volume_creation_option.set_diskSize(random.choice([1, 2, 3, 4]) * 1024 * 1024 * 1024)
+        volume_inv = vol_ops.create_volume_from_diskSize(volume_creation_option)
+        new_volume = zstack_vol_header.ZstackTestVolume()
+        new_volume.create_from(volume_inv.uuid)
 
-    new_volume = test_lib.lib_create_volume_from_offering(volume_creation_option)
     snap_tree = robot_snapshot_header.ZstackSnapshotTree(new_volume)
     snap_tree.update()
     new_volume.snapshot_tree = snap_tree
@@ -1294,6 +1307,70 @@ def ps_migrate_vm(robot_test_obj, args):
     pass
 
 
+def create_mini_vm(robot_test_obj, args):
+    name = args[0]
+
+    arg_dict = parser_args(args[1:])
+    cpu = 2 if not arg_dict.has_key('cpu') else random.randrange(1, 4, 1)
+    memory = 2 if not arg_dict.has_key('memory') else random.randrange(1, 4, 0.5) * 1024 * 1024 * 1024
+    provisiong = 'Thin' if not arg_dict.has_key('provision') else arg_dict['provision']
+    rootVolumeSystemTag = "volumeProvisioningStrategy::%sProvisioning" % provisiong
+
+    cond = res_ops.gen_query_conditions('state', '=', "Enabled")
+    cluster = res_ops.query_resource(res_ops.CLUSTER, cond)[0]
+    robot_test_obj.default_config['MINI_CLUSTER'] = cluster.uuid
+
+    vm_creation_option = test_util.VmOption()
+    image_name = os.environ.get('imageName_s')
+    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    l3_name = os.environ.get('l3VlanNetworkName1')
+
+    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    vm_creation_option.set_l3_uuids([l3_net_uuid])
+    vm_creation_option.set_image_uuid(image_uuid)
+    vm_creation_option.set_cluster_uuid(cluster.uuid)
+    vm_creation_option.set_name(name)
+    vm_creation_option.set_cpu_num(cpu)
+    vm_creation_option.set_memory_size(memory)
+    vm_creation_option.rootVolumeSystemTags(rootVolumeSystemTag)
+    vm = vm_header.ZstackTestVm()
+    vm.set_creation_option(vm_creation_option)
+    vm.create()
+    root_volume = zstack_vol_header.ZstackTestVolume()
+    root_volume.create_from(vm.vm.allVolumes[0].uuid)
+    vm.test_volumes.append(root_volume)
+    root_snap_tree = robot_snapshot_header.ZstackSnapshotTree(root_volume)
+    root_snap_tree.update()
+    root_volume.snapshot_tree = root_snap_tree
+    robot_test_obj.test_dict.add_volume(name=vm.vm.name + "-root", vol_obj=root_volume)
+    robot_test_obj.add_snap_tree(name=vm.vm.name + "-root", snap_tree=root_snap_tree)
+    robot_test_obj.default_config['PS'] = root_volume.get_volume().primaryStorageUuid
+    robot_test_obj.default_config['HOST'] = vm.get_vm().hostUuid
+    if arg_dict.has_key('data_volume'):
+        create_volume(robot_test_obj, ['data_volume_' + str(STEP), '=' + provisiong])
+        attach_volume(robot_test_obj, [name, 'data_volume_' + str(STEP)])
+
+
+def create_mini_iso_vm(robot_test_obj, args):
+    pass
+
+
+def change_vm_ha(robot_test_obj, args):
+    pass
+
+
+def delete_vm(robot_test_obj, args):
+    pass
+
+
+def delete_volume_backup(robot_test_obj, args):
+    pass
+
+
+def create_mini_volume(robot_test_obj, args):
+    pass
+
+
 action_dict = {
     'change_global_config_sp_depth': change_global_config_sp_depth,
     'recover_global_config_sp_depth': recover_global_config_sp_depth,
@@ -1384,6 +1461,13 @@ action_dict = {
 
     'cleanup_ps_cache': cleanup_ps_cache,
     'ps_migrate_volume': ps_migrate_volume,
+
+    'create_mini_vm': create_mini_vm,
+    'create_mini_iso_vm': create_mini_iso_vm,
+    'change_vm_ha': change_vm_ha,
+    'delete_vm': delete_vm,
+    'delete_volume_backup': delete_volume_backup,
+    'create_mini_volume': create_mini_volume
 
 }
 
@@ -1505,3 +1589,11 @@ def debug(robot_test_obj):
                 _str += "\t\t\t[name]: %s [uuid] %s [md5sum]: %s\n" % (name, backup.uuid, md5sum)
 
     test_util.test_logger(_str)
+
+
+def parser_args(args):
+    args = ['data_volume=true', 'cpu=random', 'memory=random', 'Provisiong=thick']
+    arg_dict = {}
+    for arg in args:
+        arg_dict[arg.split('=')[0]] = arg.split('=')[1]
+    return arg_dict

@@ -34,6 +34,30 @@ def create_volume_from_offering(volume_option):
     test_util.test_logger('[volume:] %s is created.' % evt.inventory.uuid)
     return evt.inventory
 
+def create_volume_from_diskSize(volume_option):
+    action = api_actions.CreateDataVolumeAction()
+    action.primaryStorageUuid = volume_option.get_primary_storage_uuid()
+    action.diskSize = volume_option.get_diskSize()
+    action.description = volume_option.get_description()
+    action.systemTags = volume_option.get_system_tags()
+    timeout = volume_option.get_timeout()
+    if not timeout:
+        action.timeout = 240000
+    else:
+        action.timeout = timeout
+
+    name = volume_option.get_name()
+    if not name:
+        action.name = 'test_volume'
+    else:
+        action.name = name
+
+    test_util.action_logger('Create [Volume:] %s with [disk offering:] %s ' % (action.name, action.diskSize))
+    evt = account_operations.execute_action_with_session(action, volume_option.get_session_uuid())
+
+    test_util.test_logger('[volume:] %s is created.' % evt.inventory.uuid)
+    return evt.inventory
+
 def create_volume_template(volume_uuid, backup_storage_uuid_list, name = None, \
         session_uuid = None):
     action = api_actions.CreateDataVolumeTemplateFromVolumeAction()
@@ -450,7 +474,7 @@ def update_volume(volume_uuid, name, description, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def update_snapshot(snapshot_uuid, name, description, session_uuid = None):
+def update_snapshot(volume_uuid, name, description, session_uuid = None):
     action = api_actions.UpdateVolumeSnapshotAction()
     action.uuid = volume_uuid
     action.name = name

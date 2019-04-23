@@ -951,6 +951,7 @@ class VolumeOption(DataOption):
         self.volume_type = None #used when add volume from url
         self.primary_storage_uuid = None #used when add volume from url
         self.system_tags = None
+        self.diskSize = None
         super(VolumeOption, self).__init__()
 
     def set_disk_offering_uuid(self, disk_offering_uuid):
@@ -958,6 +959,12 @@ class VolumeOption(DataOption):
 
     def get_disk_offering_uuid(self):
         return self.disk_offering_uuid
+
+    def set_diskSize(self, size):
+        self.diskSize = size
+
+    def get_diskSize(self):
+        return self.diskSize
 
     def set_volume_template_uuid(self, volume_template_uuid):
         self.volume_template_uuid = volume_template_uuid
