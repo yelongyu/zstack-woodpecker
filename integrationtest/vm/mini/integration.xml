@@ -1,14 +1,11 @@
 <integrationTest>
     <suite name="mini test" setupCase="../mn_ha2/suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
 	<case timeout='1200' noparallel='True'>test_create_think_provision_vm.py</case>
-<<<<<<< HEAD
 	<case timeout='1200' noparallel='True'>test_maintain_host.py</case>
 	<case timeout='1200' noparallel='True'>test_reconnect_host.py</case>
 	<case timeout='1200' noparallel='True'>test_start_stop_host.py</case>
-=======
 	<case timeout='1200' noparallel='True'>test_create_thin_provision_vm.py</case>
 	<case timeout='1200' noparallel='True'>test_resize_vm_root_volume.py</case>
 	<case timeout='1200' noparallel='True'>test_resize_vm_root_volumethin_provision.py</case>
->>>>>>> dceedd65732316a3f5caafa4d299e32f04529076
     </suite>
 </integrationTest>
