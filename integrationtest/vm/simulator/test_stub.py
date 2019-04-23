@@ -1376,12 +1376,22 @@ def share_admin_resource(account_uuid_list):
     acc_ops.share_resources(
         account_uuid_list, [l3net_uuid, root_disk_uuid, data_disk_uuid])
 
+def share_admin_resource_1(account_uuid_list):
+    instance_offerings = res_ops.get_resource(res_ops.INSTANCE_OFFERING)
+    for instance_offering in instance_offerings:
+        acc_ops.share_resources(account_uuid_list, [instance_offering.uuid])
+    cond = res_ops.gen_query_conditions('mediaType', '!=', 'ISO')
+    images = res_ops.query_resource(res_ops.IMAGE, cond)
+    for image in images:
+        acc_ops.share_resources(account_uuid_list, [image.uuid])
+    l3net_uuid = res_ops.get_resource(res_ops.L3_NETWORK)[0].uuid
+    acc_ops.share_resources(account_uuid_list, [l3net_uuid])
+
 def check_resource_not_exist(uuid,resource_type):
     conditions = res_ops.gen_query_conditions('uuid', '=', uuid)
     resource_inv = res_ops.query_resource(resource_type,conditions)
     if resource_inv:
         test_util.test_fail("resource [%s] is still exist,uuid [%s]"%(resource_type,uuid))
-
 
 def check_libvirt_host_uuid():
     libvirt_dir = "/etc/libvirt/libvirtd.conf"
