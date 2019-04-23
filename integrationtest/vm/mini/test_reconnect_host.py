@@ -43,7 +43,12 @@ def compare_capacity(res1, res2, cpu_free = 0, memory_free = 0):
 
 def test():
     test_util.test_dsc('Test Host Reconnect function and check if the available CPU and memory number are aligned between before and after reconnect action')
-    vm = test_stub.create_basic_vm()
+    vm_cpu = 1
+    vm_memory = 1073741824 #1G
+    cond = res_ops.gen_query_conditions('name', '=', 'ttylinux')
+    image_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
+    l3_network_uuid = res_ops.query_resource(res_ops.L3_NETWORK)[0].uuid
+    vm = test_stub.create_mini_vm([l3_network_uuid], image_uuid, cpu_num = vm_cpu, memory_size = vm_memory)
     test_obj_dict.add_vm(vm)
 
     zone_uuid = vm.get_vm().zoneUuid
@@ -61,34 +66,9 @@ def test():
         test_util.test_logger("the resource consumption are same after reconnect host")
     else:
         test_util.test_fail("the resource consumption are different after reconnect host: %s " % host_uuid)
-
-    vm_offering_uuid = vm.get_vm().instanceOfferingUuid
-    cond = res_ops.gen_query_conditions('uuid', '=', vm_offering_uuid)
-    vm_offering = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond)[0]
-    vm_cpu = vm_offering.cpuNum
-    vm_memory = vm_offering.memorySize
     
     vm.destroy()
     test_obj_dict.rm_vm(vm)
-
-    tot_res3 = test_lib.lib_get_cpu_memory_capacity([zone_uuid])
-    if compare_capacity(tot_res1, tot_res3, vm_cpu, vm_memory):
-        test_util.test_logger("the resource consumption are aligned after destroy a vm")
-    else:
-        test_util.test_fail("the resource consumption are not aligned after destroy vm: %s on host: %s" % (vm.get_vm().uuid, host_uuid))
-
-    vm = test_stub.create_basic_vm()
-    test_obj_dict.add_vm(vm)
-
-    tot_res4 = test_lib.lib_get_cpu_memory_capacity([zone_uuid])
-
-    if compare_capacity(tot_res1, tot_res4):
-        test_util.test_logger("the resource consumption are aligned after create a new vm")
-    else:
-        test_util.test_fail("the resource consumption are not aligned after create a new vm: %s " % vm.get_vm().uuid)
-
-    vm.destroy()
-
     test_util.test_pass('Reconnect Host and Test CPU/Memory Capacity Pass')
 
 #Will be called only if exception happens in test().

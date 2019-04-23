@@ -21,6 +21,7 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
+import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.zstack_test.zstack_test_kvm_host as test_kvm_host
@@ -51,13 +52,16 @@ def test():
     if test_lib.lib_get_active_host_number() < 2:
         test_util.test_fail('Not available host to do maintenance, since there are not 2 hosts')
 
-    vm = test_stub.create_vm(vm_name = 'maintain_host_vm')
+    vm_cpu = 1
+    vm_memory = 1073741824 #1G
+    cond = res_ops.gen_query_conditions('name', '=', 'ttylinux')
+    image_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
+    l3_network_uuid = res_ops.query_resource(res_ops.L3_NETWORK)[0].uuid
+    vm = test_stub.create_mini_vm([l3_network_uuid], image_uuid, cpu_num = vm_cpu, memory_size = vm_memory)
     test_obj_dict.add_vm(vm)
 
-    #vm1.check()
-
-    host = test_lib.lib_get_vm_host(vm.vm)
-    host.maintain()
+    host_uuid = test_lib.lib_get_vm_host(vm.vm).uuid
+    host_ops.change_host_state(host_uuid, 'maintain')
 
     #need to update vm's inventory, since they will be changed by maintenace mode
     vm.update()
@@ -65,16 +69,14 @@ def test():
 
     vm.check()
 
-    host.change_state(test_kvm_host.ENABLE_EVENT)
-    if not linux.wait_callback_success(is_host_connected, host.get_host().uuid, 120):
+    host_ops.change_host_state(host_uuid, 'enable')
+    if not linux.wait_callback_success(is_host_connected, host_uuid, 120):
         test_util.test_fail('host status is not changed to connected, after changing its state to Enable')
 
-    conditions = res_ops.gen_query_conditions('uuid', '!=', target_host.uuid, conditions)
-    rest_hosts = res_ops.query_resource(res_ops.HOST, conditions)
     vm.start()
     vm.check()
     vm.destroy()
-    test_obj_dict.rm_vm(vm1)
+    test_obj_dict.rm_vm(vm)
     test_util.test_pass('Maintain Host Test Success')
 
 #Will be called only if exception happens in test().

@@ -122,19 +122,22 @@ def recover_vlan_in_host(host_ip, scenarioConfig, deploy_config):
                     test_lib.lib_execute_ssh_cmd(host_ip, host_config.imageUsername_, host_config.imagePassword_, cmd)
     return True
 
-def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
-              disk_offering_uuids = None, default_l3_uuid = None, \
+def create_mini_vm(l3_uuid_list, image_uuid, vm_name = None, cpu_num = None, memory_size = None, \
               system_tags = None, instance_offering_uuid = None, session_uuid = None):
+    if not vm_name:
+        vm_name = 'mini_vm'
+    if not cpu_num:
+        cpu_num = 1
+    if not memory_size:
+        # set memory size to 1G
+        memory_size = 1073741824 
     vm_creation_option = test_util.VmOption() 
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
-    if not instance_offering_uuid:     
-        instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
-        vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
     vm_creation_option.set_l3_uuids(l3_uuid_list)
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_name(vm_name)
-    vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
-    vm_creation_option.set_default_l3_uuid(default_l3_uuid)
+    vm_creation_option.set_cpu_num(cpu_num)
+    vm_creation_option.set_memory_size(memory_size)
     vm_creation_option.set_system_tags(system_tags)
     vm_creation_option.set_session_uuid(session_uuid)
     vm = test_vm_header.ZstackTestVm()
