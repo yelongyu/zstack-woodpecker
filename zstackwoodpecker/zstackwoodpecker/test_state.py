@@ -30,6 +30,7 @@ class TestAction(object):
     cleanup_imagecache_on_ps = "cleanup_imagecache_on_ps"
     idel = 'idel'
     create_vm = 'create_vm'
+    create_mini_vm = 'create_mini_vm'
     create_vm_by_image = 'create_vm_by_image'
     stop_vm = 'stop_vm'
     start_vm = 'start_vm'

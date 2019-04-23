@@ -214,13 +214,14 @@ class zstack_kvm_vm_data_integrity_checker(checker_header.TestChecker):
      
         time.sleep(30)
 
-        test_lib.lib_install_testagent_to_vr(vm)
+        #test_lib.lib_install_testagent_to_vr(vm)
         host = test_lib.lib_get_vm_host(vm)
         test_lib.lib_install_testagent_to_host(host)
         test_lib.lib_set_vm_host_l2_ip(vm)
         default_l3_uuid = vm.defaultL3NetworkUuid
-        vr = test_lib.lib_find_vr_by_pri_l3(default_l3_uuid)
-        nic = test_lib.lib_get_vm_nic_by_vr(vm, vr)
+        #vr = test_lib.lib_find_vr_by_pri_l3(default_l3_uuid)
+        #nic = test_lib.lib_get_vm_nic_by_vr(vm, vr)
+        nic = vm.vmNics[0]
         
         #print partition information
         cmd = 'ls -l /dev/disk/by-id/'

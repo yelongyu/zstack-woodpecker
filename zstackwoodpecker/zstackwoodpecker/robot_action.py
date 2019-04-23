@@ -65,7 +65,7 @@ Port = ts_header.Port
 WOODPECKER_MOUNT_POINT = '/tmp/zstack/mnt'
 SSH_TIMEOUT = 600
 MINI = False
-STEP = 0
+STEP = 1
 
 
 class robot_test_dict(object):
@@ -218,22 +218,23 @@ class robot(object):
             self.robot_resource['ps'].append(ps.uuid)
 
         # vol_image
-        cond = res_ops.gen_query_conditions('mediaType', '=', 'DataVolumeTemplate')
-        images = res_ops.query_resource(res_ops.IMAGE, cond)
-        self.robot_resource['vol_image'] = []
-        if not images:
-            test_util.test_logger("Robot resource must hava data_volume_image.")
-            image_option = test_util.ImageOption()
-            image_option.set_format('qcow2')
-            image_option.set_name('data_volume_image')
-            image_option.set_url(os.environ.get('emptyimageUrl'))
-            image_option.set_backup_storage_uuid_list(self.robot_resource['bs'])
-            image_option.set_timeout(120000)
-            image_option.set_mediaType("DataVolumeTemplate")
-            images.append(img_ops.add_image(image_option))
-        for image in images:
-            test_util.test_logger("Robot resource:: vol_image: [%s], uuid: [%s}" % (image.name, image.uuid))
-            self.robot_resource['vol_image'].append(image.uuid)
+        if not MINI:
+            cond = res_ops.gen_query_conditions('mediaType', '=', 'DataVolumeTemplate')
+            images = res_ops.query_resource(res_ops.IMAGE, cond)
+            self.robot_resource['vol_image'] = []
+            if not images:
+                test_util.test_logger("Robot resource must hava data_volume_image.")
+                image_option = test_util.ImageOption()
+                image_option.set_format('qcow2')
+                image_option.set_name('data_volume_image')
+                image_option.set_url(os.environ.get('emptyimageUrl'))
+                image_option.set_backup_storage_uuid_list(self.robot_resource['bs'])
+                image_option.set_timeout(120000)
+                image_option.set_mediaType("DataVolumeTemplate")
+                images.append(img_ops.add_image(image_option))
+            for image in images:
+                test_util.test_logger("Robot resource:: vol_image: [%s], uuid: [%s}" % (image.name, image.uuid))
+                self.robot_resource['vol_image'].append(image.uuid)
 
         # vm_image not include vrouter image
         cond = res_ops.gen_query_conditions('mediaType', '=', 'RootVolumeTemplate')
@@ -1312,7 +1313,8 @@ def create_mini_vm(robot_test_obj, args):
 
     arg_dict = parser_args(args[1:])
     cpu = 2 if not arg_dict.has_key('cpu') else random.randrange(1, 4, 1)
-    memory = 2 if not arg_dict.has_key('memory') else random.randrange(1, 4, 0.5) * 1024 * 1024 * 1024
+    memory = (2 if not arg_dict.has_key('memory') else (
+            random.randrange(1, 4, 1) + round(random.random(), 2))) * 1024 * 1024 * 1024
     provisiong = 'Thin' if not arg_dict.has_key('provision') else arg_dict['provision']
     rootVolumeSystemTag = "volumeProvisioningStrategy::%sProvisioning" % provisiong
 
@@ -1331,9 +1333,9 @@ def create_mini_vm(robot_test_obj, args):
     vm_creation_option.set_cluster_uuid(cluster.uuid)
     vm_creation_option.set_name(name)
     vm_creation_option.set_cpu_num(cpu)
-    vm_creation_option.set_memory_size(memory)
-    vm_creation_option.rootVolumeSystemTags(rootVolumeSystemTag)
-    vm = vm_header.ZstackTestVm()
+    vm_creation_option.set_memory_size(int(memory))
+    vm_creation_option.set_rootVolume_systemTags([rootVolumeSystemTag])
+    vm = zstack_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
     vm.create()
     root_volume = zstack_vol_header.ZstackTestVolume()
@@ -1342,8 +1344,9 @@ def create_mini_vm(robot_test_obj, args):
     root_snap_tree = robot_snapshot_header.ZstackSnapshotTree(root_volume)
     root_snap_tree.update()
     root_volume.snapshot_tree = root_snap_tree
+    robot_test_obj.test_dict.add_vm(name, vm_obj=vm)
     robot_test_obj.test_dict.add_volume(name=vm.vm.name + "-root", vol_obj=root_volume)
-    robot_test_obj.add_snap_tree(name=vm.vm.name + "-root", snap_tree=root_snap_tree)
+    robot_test_obj.test_dict.add_snap_tree(name=vm.vm.name + "-root", snap_tree=root_snap_tree)
     robot_test_obj.default_config['PS'] = root_volume.get_volume().primaryStorageUuid
     robot_test_obj.default_config['HOST'] = vm.get_vm().hostUuid
     if arg_dict.has_key('data_volume'):
