@@ -1361,7 +1361,16 @@ def add_cluster(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluste
         else:
             zone_duplication = int(zone.duplication__)
 
-        vm_ip_list = get_vm_ip_from_scenariofile(scenarioFile)
+        if os.getenv('ZSTACK_SIMULATOR') == 'yes':
+            http = urllib3.PoolManager()
+            mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+            url = "http://%s:8080/zstack/simulators/query" % (mn_ip)
+            query_data = simplejson.dumps({'sql':'select * from KvmHost', 'type':'KvmHost'})
+            rsp = http.request('GET', url, body=query_data)
+            host_obj = jsonobject.loads(rsp.data)
+            vm_ip_list = [host.ip for host in host_obj]
+        else:
+            vm_ip_list = get_vm_ip_from_scenariofile(scenarioFile)
         for zone_ref in range(zone_duplication):
             for cluster in xmlobject.safe_list(zone.clusters.cluster):
                 if cluster_name and cluster_name != cluster.name_:
