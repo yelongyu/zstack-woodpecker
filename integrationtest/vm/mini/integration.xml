@@ -2,5 +2,7 @@
     <suite name="mini test" setupCase="../mn_ha2/suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
 	<case timeout='1200' noparallel='True'>test_create_think_provision_vm.py</case>
 	<case timeout='1200' noparallel='True'>test_create_thin_provision_vm.py</case>
+	<case timeout='1200' noparallel='True'>test_resize_vm_root_volume.py</case>
+	<case timeout='1200' noparallel='True'>test_resize_vm_root_volumethin_provision.py</case>
     </suite>
 </integrationTest>
