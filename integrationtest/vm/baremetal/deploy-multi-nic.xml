@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+<basicConfig>
+  <!-- The following configurations are path in test machine. 
+               zstackPkg is zstack all in one package tar.gz file.
+        zstackInstallScript is the installation script, which could be 
+    downloaded from zstack website or get from zstack-utility/installation/
+        zstackInstallPath is the path zstackPkg will be installed. It should be
+    carefully set. The contents in this folder will be deleted permanently in 
+    testing. 
+        zstackProperties is optional. It is zstack.properties. Tester could 
+    assign special zstack.properties. If not providing this line, testing will
+    just use zstack default property file. 
+        testAgent is the woodpecker test agent tar.gz package. It will be widely
+    used in woodpecker testing.
+        db.admin is the database admin user. Usually it is root.
+        db.username is the user who will operate zstack database. Usually it is
+    zstack. 
+        db.server_root_password is the root password for the database's host OS.
+    woodpecker uses it to install and config database. 
+        rabbitmq.password is the root password for rabbitmq's host OS. 
+    woodpecker uses it to install and start rabbitmq-server
+
+        This config file could be used to deploy zstack cloud environment by
+    zstack-cli, after zstack server is started. The detailed information could
+    be found in zstack-cli help manual.
+  -->
+  <zstackPkg>$zstackPkg</zstackPkg>
+  <zstackInstallScript>$zstackInstallScript</zstackInstallScript>
+  <zstackInstallPath>$zstackInstallPath</zstackInstallPath>
+  <zstackProperties>$zstackPropertiesPath</zstackProperties>
+  <testAgent>$zstackTestAgentPkgPath</testAgent>
+  <db>
+    <!-- Database server IP address or hostname -->
+    <server>$DBServer</server>
+    <admin>$DBAdminUser</admin>
+    <adminPassword>$DBAdminPassword</adminPassword>
+    <username>$DBUserName</username>
+    <server_root_password>$hostPassword</server_root_password>
+    <!-- <password>$DBPassword</password>
+             <port>$DBPort</port> -->
+  </db>
+  <rabbitmq>
+      <server>$rabbitmqServerIp</server>
+      <password>$hostPassword</password>
+  </rabbitmq>
+
+</basicConfig>
+
+<deployerConfig xmlns="http://zstack.org/schema/zstack">
+  <nodes description="Woodpecker will send zstack command to the 1st node. 
+      multi nodes support real hosts or docker (if providing dockerImage and 
+      it is found in `docker images`). "> 
+    <node name="$node1Name" ip="$node1Ip"
+      username="$nodeUserName" password="$nodePassword"
+      description="The default node 1. It could be same as test machine."/>
+  </nodes>
+
+
+  <pxe name="$pxename" dhcpInterface="$dhcpinterface" dhcpRangeBegin="$dhcpbegin"
+	  dhcpRangeEnd="$dhcpend" dhcpRangeNetmask="$dhcpnetmask" description="PXE Test">
+  </pxe>
+
+  <instanceOfferings>
+    <instanceOffering name="$instanceOfferingName_m"
+      description="medium install offering" 
+      memoryCapacity="$instanceOfferingMemory_m" 
+      cpuNum="$instanceOfferingCpuNum_m" />
+  </instanceOfferings>
+
+  <backupStorages>
+    <imageStoreBackupStorage name="$imageStoreBackupStorageName"
+      description="Test" url="$imageStoreBackupStorageUrl" 
+      username="$imageStoreBackupStorageUsername" 
+      password="$imageStoreBackupStoragePassword" 
+      hostname="$imageStoreBackupStorageHostname"/>
+  </backupStorages>
+  
+  <images>
+    <image name="$imageName_s" description="Test" format="$rootImageFormat" 
+        url="$imageUrl_s" mediaType="$rootMediaType"
+	username="$imageUsername" password="$imagePassword">
+      <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
+    </image>
+    <image name="$imageName_iso" description="Test ISO"
+        format="$isoImageFormat" url="$imageUrl_iso"
+        mediaType="$isoMediaType">
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
+    </image>
+  </images>
+
+  <diskOfferings>
+    <diskOffering name="$rootDiskOfferingName" description="Test"
+      diskSize="$rootDiskOfferingSize" />
+  </diskOfferings>
+
+  <zones>
+    <zone name="$zoneName" description="Test">
+      <clusters>
+        <cluster name="$clusterName" description="Test" 
+          hypervisorType="$clusterHypervisorType">
+          <hosts>
+            <host name="$hostName" description="Test"
+              managementIp="$hostIp" username="$hostUsername" 
+              password="$hostPassword" />
+            <host name="$hostName2" description="Test"
+              managementIp="$hostIp2" username="$hostUsername"
+              password="$hostPassword" />
+            <host name="$hostName3" description="Test"
+              managementIp="$hostIp3" username="$hostUsername"
+              password="$hostPassword" />
+            <host name="$hostName4" description="Test"
+              managementIp="$hostIp4" username="$hostUsername"
+              password="$hostPassword" />
+          </hosts>
+          <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
+          <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
+          <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
+          <l2NetworkRef>$scenl2VlanNetworkName1</l2NetworkRef>
+        </cluster>
+      </clusters>
+      <l2Networks>
+        <l2NoVlanNetwork name="$l2PublicNetworkName"
+          description="Test" physicalInterface="$l2PublicNetworkInterface">
+          <l3Networks>
+            <l3BasicNetwork name="$l3PublicNetworkName" category="Public" description="Public Network">
+              <ipRange name="$ipRangeName" description="Test"
+                startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
+                netmask="$ipRangeNetmask" />
+              <dns>$DNSServer</dns>
+            </l3BasicNetwork>
+          </l3Networks>
+        </l2NoVlanNetwork>
+        <l2NoVlanNetwork name="$l2NoVlanNetworkName1" description="guest l2 network"
+          physicalInterface="$l2NoVlanNetworkInterface1">
+          <l3Networks>
+            <l3BasicNetwork name="$l3NoVlanNetworkName1" description = "guest l3 network with user defined vlan">
+              <ipRange name="$noVlanIpRangeName1"
+                startIp="$noVlanIpRangeStart1"
+                endIp="$noVlanIpRangeEnd1"
+                gateway="$noVlanIpRangeGateway1"
+                netmask="$noVlanIpRangeNetmask1"/>
+              <dns>$DNSServer</dns>
+              <networkService provider="Flat Network Service Provider">
+                <serviceType>DHCP</serviceType>
+                <serviceType>Eip</serviceType>
+              </networkService>
+              <networkService provider="SecurityGroup">
+                <serviceType>SecurityGroup</serviceType>
+              </networkService>
+            </l3BasicNetwork>
+          </l3Networks>
+        </l2NoVlanNetwork>
+        <l2NoVlanNetwork name="$scenl2VlanNetworkName1" description="baremetal deploy l3 network, it is for barametal deply."
+          physicalInterface="$scenl2NetworkPhysicalInterface">
+          <l3Networks>
+            <l3BasicNetwork name="$scenl3VPCNetworkName1" description="Test">
+              <ipRange name="$scenvpcIpRangeName1" description="Test" 
+                startIp="$scenvpcIpRangeStart1" endIp="$scenvpcIpRangeEnd1"
+                gateway="$scenvpcIpRangeGateway1"
+                netmask="$scenvpcIpRangeNetmask1" />
+              <networkService provider="SecurityGroup">
+                <serviceType>SecurityGroup</serviceType>
+              </networkService>
+            </l3BasicNetwork>
+          </l3Networks>
+        </l2NoVlanNetwork>
+        <l2NoVlanNetwork name="$scenl2VlanNetworkName2" description="baremetal l3 network, it is for baremetal unattended."
+          physicalInterface="$scenl2NetworkPhysicalInterface">
+          <l3Networks>
+            <l3BasicNetwork name="$scenl3VPCNetworkName2" description="Test">
+              <ipRange name="$scenvpcIpRangeName2" description="Test"
+                startIp="$scenvpcIpRangeStart2" endIp="$scenvpcIpRangeEnd2"
+                gateway="$scenvpcIpRangeGateway2"
+                netmask="$scenvpcIpRangeNetmask2" />
+              <networkService provider="SecurityGroup">
+                <serviceType>SecurityGroup</serviceType>
+              </networkService>
+            </l3BasicNetwork>
+          </l3Networks>
+        </l2NoVlanNetwork>
+        <l2NoVlanNetwork name="$scenl2VlanNetworkName3" description="baremetal l3 network, it is for baremetal unattended."
+          physicalInterface="$scenl2NetworkPhysicalInterface">
+          <l3Networks>
+            <l3BasicNetwork name="$scenl3VPCNetworkName3" description="Test">
+              <ipRange name="$scenvpcIpRangeName3" description="Test"
+                startIp="$scenvpcIpRangeStart3" endIp="$scenvpcIpRangeEnd3"
+                gateway="$scenvpcIpRangeGateway3"
+                netmask="$scenvpcIpRangeNetmask3" />
+              <networkService provider="SecurityGroup">
+                <serviceType>SecurityGroup</serviceType>
+              </networkService>
+            </l3BasicNetwork>
+          </l3Networks>
+        </l2NoVlanNetwork>
+      </l2Networks>
+      <primaryStorages>
+        <localPrimaryStorage name="$localPrimaryStorageName"
+          description="Test" url="$localPrimaryStorageUrl" />
+      </primaryStorages>
+      
+      <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
+    </zone>
+  </zones>
+</deployerConfig>
+</config>
+

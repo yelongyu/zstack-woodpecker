@@ -14,19 +14,3 @@ scenl2Vlan2 = 3094
 scenl2Vlan3 = 3095
 scenl2Clusters = 12345,23456
 scenL3VPCNetworkDomainName1 = zstack.org
-scenl2VlanNetworkName2 = vpc_vrouter_for_scenario_test2
-scenl2VlanNetworkName3 = vpc_vrouter_for_scenario_test3
-
-scenl3VPCNetworkName2 = scenario_test2
-scenl3VPCNetworkName3 = scenario_test3
-scenvpcIpRangeName2 = scenario_test2
-scenvpcIpRangeStart2 = 192.168.124.2
-scenvpcIpRangeEnd2 = 192.168.124.253
-scenvpcIpRangeGateway2 = 192.168.124.1
-scenvpcIpRangeNetmask2 = 255.255.255.0
-
-scenvpcIpRangeName3 = scenario_test3
-scenvpcIpRangeStart3 = 192.168.125.2
-scenvpcIpRangeEnd3 = 192.168.125.253
-scenvpcIpRangeGateway3 = 192.168.125.1
-scenvpcIpRangeNetmask3 = 255.255.255.0
