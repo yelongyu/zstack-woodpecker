@@ -1,0 +1,208 @@
+import ../deploy.tmpt
+
+cephPrimaryStorageName = ceph-ps
+cephPrimaryStorageMonUrls = root:password@ceph01;root:password@ceph02;root:password@ceph03
+cephPrimaryStorageDataVolumePoolName =
+cephPrimaryStorageRootVolumePoolName =
+cephPrimaryStorageImageCachePoolName =
+
+cephBackupStorageName = ceph-bs
+cephBackupStorageMonUrls = root:password@ceph01;root:password@ceph02;root:password@ceph03
+cephBackupStoragePoolName =
+
+imageName3 = centos
+imageUrl3 = http://zstack.yyk.net/image/centos_400m_140527.img
+
+largeDiskOfferingName = largeDiskOffering
+largeDiskOfferingSize = 1G
+
+mediumDiskOfferingName = mediumDiskOffering
+mediumDiskOfferingSize = 100M
+
+clusterName2 = cluster2
+
+hostName = centos5
+hostIp = 10.1.101.44
+
+hostName2 = centos2
+hostIp2 = 10.1.101.41
+
+hostName3 = centos3
+hostIp3 = 10.1.101.42
+
+hostName4 = centos4
+hostIp4 = 10.1.101.43
+
+hostName5 = ubuntu
+hostIp5 = 10.1.101.10
+
+l2VlanNetworkName4 = vlan-test4
+l2VlanNetworkName5 = vlan-test5
+l2VlanNetworkName6 = vlan-test6
+l2VlanNetworkName7 = vlan-test7
+l2VlanNetworkName8 = vlan-test8
+l2VlanNetworkName9 = vlan-test9
+l2VlanNetworkName10 = vlan-test10
+l2VlanNetworkName11 = vlan-test11
+l2VlanNetworkName12 = vlan-test12
+l2VlanNetworkName13 = vlan-test13
+l2VlanNetworkName14 = vlan-test14
+l2VlanNetworkName15 = vlan-test15
+l2VlanNetworkName16 = vlan-test16
+l2VlanNetworkName17 = vlan-test17
+l2VlanNetworkName18 = vlan-test18
+l2VlanNetworkName19 = vlan-test19
+l2VlanNetworkName20 = vlan-test20
+
+l2Vlan4 = 24
+l2Vlan5 = 25
+l2Vlan6 = 26
+l2Vlan7 = 27
+l2Vlan8 = 28
+l2Vlan9 = 29
+l2Vlan10 = 30
+l2Vlan11 = 31
+l2Vlan12 = 32
+l2Vlan13 = 33
+l2Vlan14 = 34
+l2Vlan15 = 35
+l2Vlan16 = 36
+l2Vlan17 = 37
+l2Vlan18 = 38
+l2Vlan19 = 39
+l2Vlan20 = 40
+l3VlanNetwork2  = l3VlanNetwork2 
+l3VlanNetwork3  = l3VlanNetwork3 
+l3VlanNetwork4  = l3VlanNetwork4 
+l3VlanNetwork5  = l3VlanNetwork5 
+l3VlanNetwork6  = l3VlanNetwork6 
+l3VlanNetwork7  = l3VlanNetwork7 
+l3VlanNetwork8  = l3VlanNetwork8 
+l3VlanNetwork9  = l3VlanNetwork9 
+l3VlanNetwork10 = l3VlanNetwork10
+l3VlanNetwork11 = l3VlanNetwork11
+l3VlanNetwork12 = l3VlanNetwork12
+l3VlanNetwork13 = l3VlanNetwork13
+l3VlanNetwork14 = l3VlanNetwork14
+l3VlanNetwork15 = l3VlanNetwork15
+l3VlanNetwork16 = l3VlanNetwork16
+l3VlanNetwork17 = l3VlanNetwork17
+l3VlanNetwork18 = l3VlanNetwork18
+l3VlanNetwork19 = l3VlanNetwork19
+l3VlanNetwork20 = l3VlanNetwork20
+
+vlanIpRangeName4 = guest vlan ip range name 4
+vlanIpRangeStart4 = 10.14.0.2
+vlanIpRangeEnd4 = 10.14.127.255
+vlanIpRangeGateway4 = 10.14.0.1
+vlanIpRangeNetmask4 = 255.255.0.0
+
+vlanIpRangeName5 = guest vlan ip range name 5
+vlanIpRangeStart5 = 10.15.0.2
+vlanIpRangeEnd5 = 10.15.127.255
+vlanIpRangeGateway5 = 10.15.0.1
+vlanIpRangeNetmask5 = 255.255.0.0
+
+vlanIpRangeName6 = guest vlan ip range name 6
+vlanIpRangeStart6 = 10.16.0.2
+vlanIpRangeEnd6 = 10.16.127.255
+vlanIpRangeGateway6 = 10.16.0.1
+vlanIpRangeNetmask6 = 255.255.0.0
+
+vlanIpRangeName7 = guest vlan ip range name 7
+vlanIpRangeStart7 = 10.17.0.2
+vlanIpRangeEnd7 = 10.17.127.255
+vlanIpRangeGateway7 = 10.17.0.1
+vlanIpRangeNetmask7 = 255.255.0.0
+
+vlanIpRangeName8 = guest vlan ip range name 8
+vlanIpRangeStart8 = 10.18.0.2
+vlanIpRangeEnd8 = 10.18.127.255
+vlanIpRangeGateway8 = 10.18.0.1
+vlanIpRangeNetmask8 = 255.255.0.0
+
+vlanIpRangeName9 = guest vlan ip range name 9
+vlanIpRangeStart9 = 10.19.0.2
+vlanIpRangeEnd9 = 10.19.127.255
+vlanIpRangeGateway9 = 10.19.0.1
+vlanIpRangeNetmask9 = 255.255.0.0
+
+vlanIpRangeName10 = guest vlan ip range name 10
+vlanIpRangeStart10 = 10.20.0.2
+vlanIpRangeEnd10 = 10.20.127.255
+vlanIpRangeGateway10 = 10.20.0.1
+vlanIpRangeNetmask10 = 255.255.0.0
+
+vlanIpRangeName11 = guest vlan ip range name 11
+vlanIpRangeStart11 = 10.21.0.2
+vlanIpRangeEnd11 = 10.21.127.255
+vlanIpRangeGateway11 = 10.21.0.1
+vlanIpRangeNetmask11 = 255.255.0.0
+
+vlanIpRangeName12 = guest vlan ip range name 12
+vlanIpRangeStart12 = 10.22.0.2
+vlanIpRangeEnd12 = 10.22.127.255
+vlanIpRangeGateway12 = 10.22.0.1
+vlanIpRangeNetmask12 = 255.255.0.0
+
+vlanIpRangeName13 = guest vlan ip range name 13
+vlanIpRangeStart13 = 10.23.0.2
+vlanIpRangeEnd13 = 10.23.127.255
+vlanIpRangeGateway13 = 10.23.0.1
+vlanIpRangeNetmask13 = 255.255.0.0
+
+vlanIpRangeName14 = guest vlan ip range name 14
+vlanIpRangeStart14 = 10.24.0.2
+vlanIpRangeEnd14 = 10.24.127.255
+vlanIpRangeGateway14 = 10.24.0.1
+vlanIpRangeNetmask14 = 255.255.0.0
+
+vlanIpRangeName15 = guest vlan ip range name 15
+vlanIpRangeStart15 = 10.25.0.2
+vlanIpRangeEnd15 = 10.25.127.255
+vlanIpRangeGateway15 = 10.25.0.1
+vlanIpRangeNetmask15 = 255.255.0.0
+
+vlanIpRangeName16 = guest vlan ip range name 16
+vlanIpRangeStart16 = 10.26.0.2
+vlanIpRangeEnd16 = 10.26.127.255
+vlanIpRangeGateway16 = 10.26.0.1
+vlanIpRangeNetmask16 = 255.255.0.0
+
+vlanIpRangeName17 = guest vlan ip range name 17
+vlanIpRangeStart17 = 10.27.0.2
+vlanIpRangeEnd17 = 10.27.127.255
+vlanIpRangeGateway17 = 10.27.0.1
+vlanIpRangeNetmask17 = 255.255.0.0
+
+vlanIpRangeName18 = guest vlan ip range name 18
+vlanIpRangeStart18 = 10.28.0.2
+vlanIpRangeEnd18 = 10.28.127.255
+vlanIpRangeGateway18 = 10.28.0.1
+vlanIpRangeNetmask18 = 255.255.0.0
+
+vlanIpRangeName19 = guest vlan ip range name 19
+vlanIpRangeStart19 = 10.29.0.2
+vlanIpRangeEnd19 = 10.29.127.255
+vlanIpRangeGateway19 = 10.29.0.1
+vlanIpRangeNetmask19 = 255.255.0.0
+
+vlanIpRangeName20 = guest vlan ip range name 20
+vlanIpRangeStart20 = 10.30.0.2
+vlanIpRangeEnd20 = 10.30.127.255
+vlanIpRangeGateway20 = 10.30.0.1
+vlanIpRangeNetmask20 = 255.255.0.0
+
+hostRecoverScript = /home/host_recover_script.sh
+nodeRecoverScript = /home/node_recover_script.sh
+zstackHaVip = 172.16.0.10
+zstackHaVip2 = 192.168.0.10
+zstackHaVip3 = 10.0.0.10
+
+localPrimaryStorageName = local-ps
+localPrimaryStorageUrl = /home/local-ps
+imageStoreBackupStorageName = imagestore1
+mnVmName1 = mn_vm_name1
+mnVmName2 = mn_vm_name2
+mnHostName1 = mn_host_name1
+mnHostName2 = mn_host_name2
