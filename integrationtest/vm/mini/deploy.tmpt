@@ -206,3 +206,4 @@ mnVmName1 = mn_vm_name1
 mnVmName2 = mn_vm_name2
 mnHostName1 = mn_host_name1
 mnHostName2 = mn_host_name2
+nodeNic = eth0 
