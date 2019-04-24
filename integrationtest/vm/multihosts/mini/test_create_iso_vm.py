@@ -25,6 +25,13 @@ VM_MEM = [268435456, 536870912, 1073741824, 2147483648]
 # 4G, 8G, 16G
 VM_ROOT_DISK = [4294967296, 8589934592, 17179869184]
 
+def deploy_vdbench(vm):
+    host = test_lib.lib_get_vm_host(vm.get_vm())
+    cmd = "yum install -y java wget"
+    cmd_result = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, vm.get_vm().vmNics[0].ip, test_lib.lib_get_vm_username(vm.get_vm()), test_lib.lib_get_vm_password(vm.get_vm()), cmd)
+    cmd = "wget -np -r -nH --cut-dirs=2 http://172.20.1.27/mirror/vdbench/"
+    cmd_result = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, vm.get_vm().vmNics[0].ip, test_lib.lib_get_vm_username(vm.get_vm()), test_lib.lib_get_vm_password(vm.get_vm()), cmd)
+
 def test():
     global vm
     vm_creation_option = test_util.VmOption()
@@ -58,6 +65,7 @@ def test():
         vm.set_creation_option(vm_creation_option)
         vm.create()
         vm.check()
+        deploy_vdbench(vm)
         vm.destroy()
         time.sleep(5)
     test_util.test_pass('Create VM with ISO Test Success')

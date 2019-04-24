@@ -30,6 +30,7 @@ import zstackwoodpecker.operations.config_operations as conf_ops
 import zstackwoodpecker.operations.console_operations as cons_ops
 import zstackwoodpecker.operations.license_operations as lic_ops
 import zstackwoodpecker.operations.resource_stack as resource_stack_ops
+import zstackwoodpecker.operations.image_operations as img_ops
 
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.header.volume as vol_header
@@ -6913,16 +6914,32 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                     if "ps_uuid" in ea:
                         ps_uuid = ea.split('::')[-1]
 
-            if not target_image or not vm_name:
-                test_util.test_fail("no resource available for next action: %s" % (next_action))
-
             vm_creation_option = test_util.VmOption()
-            if ps_uuid:
-                vm_creation_option.set_ps_uuid(ps_uuid)
 
             if image_format == "iso":
                 root_disk_uuid = lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName')).uuid
-                vm_creation_option.set_instance_offering_uuid(root_disk_uuid)
+                vm_creation_option.set_root_disk_uuid(root_disk_uuid)
+                if not target_image:
+                    import zstackwoodpecker.operations.image_operations as img_ops
+                    img_option = test_util.ImageOption()
+                    img_option.set_name(target_image_name)
+                    bs_uuid = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, [], None)[0].uuid
+                    img_option.set_backup_storage_uuid_list([bs_uuid])
+                    img_option.set_url(os.environ.get('isoForVmUrl'))
+                    image_inv = img_ops.add_iso_template(img_option)
+                    import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
+                    new_image = zstack_image_header.ZstackTestImage()
+                    new_image.set_creation_option(img_option)
+                    new_image.set_image(image_inv)
+                    test_dict.add_image(new_image)
+                    target_image = new_image
+
+            if not target_image or not vm_name:
+                test_util.test_fail("no resource available for next action: %s" % (next_action))
+
+            if ps_uuid:
+                vm_creation_option.set_ps_uuid(ps_uuid)
+
 
             vm_creation_option.set_image_uuid(target_image.get_image().uuid)
             vm_creation_option.set_name(vm_name)
@@ -6932,6 +6949,16 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
 
             vm = lib_create_vm(vm_creation_option)
             test_dict.add_vm(vm)
+            if image_format == "iso":
+                host = lib_get_vm_host(vm.get_vm())
+                lib_install_testagent_to_host(host)
+                lib_set_vm_host_l2_ip(vm.get_vm())
+                cmd = 'ping -c 5 -W 5 %s >/tmp/ping_result 2>&1; ret=$?; cat /tmp/ping_result; exit $ret' % vm.get_vm().vmNics[0].ip
+                cmd_result = lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, vm.get_vm().vmNics[0].ip, lib_get_vm_username(vm.get_vm()), lib_get_vm_password(vm.get_vm()), cmd)
+                cmd = "yum install -y java wget"
+                cmd_result = lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, vm.get_vm().vmNics[0].ip, lib_get_vm_username(vm.get_vm()), lib_get_vm_password(vm.get_vm()), cmd)
+                cmd = "wget -np -r -nH --cut-dirs=2 http://172.20.1.27/mirror/vdbench/"
+                cmd_result = lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, vm.get_vm().vmNics[0].ip, lib_get_vm_username(vm.get_vm()), lib_get_vm_password(vm.get_vm()), cmd)
 
         elif next_action == TestAction.create_vm_backup:
             backup_name = None
