@@ -93,7 +93,7 @@ def exec_upgrade_iso(host_ip, username, password, zstack_iso_path):
         test_util.test_fail('%s failed' %(cmd))
 
 
-def exec_upgrade_zsha2(host_ip, username, password, 
+def exec_upgrade_zsha2(host_ip, username, password, zsha2_path): 
     cmd = "chmod a+x " + zsha2_path
     test_lib.lib_execute_ssh_cmd(host_ip, username, password, cmd)
     cmd = zsha2_path + " upgrade-ha"
