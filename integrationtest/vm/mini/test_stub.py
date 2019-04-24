@@ -18,7 +18,20 @@ import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.backupstorage_operations as bs_ops
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.host_operations as host_ops
+import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
 
+
+def create_volume(volume_creation_option=None, from_offering=True):
+    if not volume_creation_option:
+        disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
+        volume_creation_option = test_util.VolumeOption()
+        volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
+        volume_creation_option.set_name('vr_test_volume')
+
+    volume = zstack_volume_header.ZstackTestVolume()
+    volume.set_creation_option(volume_creation_option)
+    volume.create(from_offering)
+    return volume
 
 def exec_zsha2_version(host_ip, username, password):
     cmd = "zsha2 version"
