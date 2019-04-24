@@ -16,6 +16,12 @@ MINI_SERVER_URL = http://zstack-mini-server/test_bin
 SELENIUM_SERVER = 127.0.0.1
 
 imageStoreBackupStorageName = imagestore
+imageStoreBackupStorageName2 = imagestore2
+
+hostPort = 22
+nodeNic = eth0
+nodeNetMask = 255.255.0.0
+nodeGateway = 172.20.0.1
 
 clusterName2 = cluster2
 
