@@ -28,6 +28,7 @@ import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.resource_stack as resource_stack_ops
 import zstackwoodpecker.operations.stack_template as stack_template_ops
 import zstackwoodpecker.operations.datamigrate_operations as datamigr_ops
+import zstackwoodpecker.operations.ha_operations as ha_ops
 import zstackwoodpecker.zstack_test.snap as robot_snapshot_header
 
 import zstackwoodpecker.header.vm as vm_header
@@ -1310,11 +1311,20 @@ def ps_migrate_vm(robot_test_obj, args):
 
 def create_mini_vm(robot_test_obj, args):
     name = args[0]
+    cpu = 2
+    memory = 2 * 1024 * 1024 * 1024
 
     arg_dict = parser_args(args[1:])
-    cpu = 2 if not arg_dict.has_key('cpu') else random.randrange(1, 4, 1)
-    memory = (2 if not arg_dict.has_key('memory') else (
-            random.randrange(1, 4, 1) + round(random.random(), 2))) * 1024 * 1024 * 1024
+    if arg_dict.has_key('cpu'):
+        if arg_dict['cpu'] == 'random':
+            cpu = random.randrange(1, 4, 1)
+        else:
+            cpu = int(arg_dict['cpu'])
+    if arg_dict.has_key('memory'):
+        if arg_dict['memory'] == 'random':
+            memory = (random.randrange(1, 4, 1) + round(random.random(), 2)) * 1024 * 1024 * 1024
+        else:
+            memory = int(arg_dict['memory']) * 1024 * 1024 * 1024
     provisiong = 'Thin' if not arg_dict.has_key('provision') else arg_dict['provision']
     rootVolumeSystemTag = "volumeProvisioningStrategy::%sProvisioning" % provisiong
 
@@ -1349,8 +1359,8 @@ def create_mini_vm(robot_test_obj, args):
     robot_test_obj.test_dict.add_snap_tree(name=vm.vm.name + "-root", snap_tree=root_snap_tree)
     robot_test_obj.default_config['PS'] = root_volume.get_volume().primaryStorageUuid
     robot_test_obj.default_config['HOST'] = vm.get_vm().hostUuid
-    if arg_dict.has_key('data_volume'):
-        create_volume(robot_test_obj, ['data_volume_' + str(STEP), '=' + provisiong])
+    if arg_dict.has_key('data_volume') and arg_dict['data_volume'] == 'true':
+        create_volume(robot_test_obj, ['data_volume_' + str(STEP), '=scsi,' + provisiong])
         attach_volume(robot_test_obj, [name, 'data_volume_' + str(STEP)])
 
 
@@ -1359,19 +1369,53 @@ def create_mini_iso_vm(robot_test_obj, args):
 
 
 def change_vm_ha(robot_test_obj, args):
-    pass
+    if len(args) < 1:
+        test_util.test_fail("no resource available for next action: change vm ha")
+    vm = robot_test_obj.get_test_dict().vm[args[0]]
+    vm_uuid = vm.get_vm().uuid
+    status = vm.get_vm().state
+    test_util.test_logger("VM: %s State: %s" % (args[0], status))
+    ha_inv = ha_ops.get_vm_instance_ha_level(vm_uuid)
+    if ha_inv:
+        ha_ops.del_vm_instance_ha_level(vm_uuid)
+    else:
+        ha_ops.set_vm_instance_ha_level(vm_uuid, "NeverStop")
+        while status != 'Running':
+            vm_inv = test_lib.lib_get_vm_by_uuid(vm_uuid)
+            status = vm_inv.state
+        vm.set_state('Running')
+        test_util.test_logger("VM: %s State: %s" % (args[0], status))
 
 
 def delete_vm(robot_test_obj, args):
-    pass
+    if len(args) < 1:
+        test_util.test_fail("no resource available for next action: delete_vm")
+    vm = robot_test_obj.get_test_dict().vm[args[0]]
+    vm.destroy()
+    vm.test_volumes = vm.test_volumes[0]
+
+
+def recover_vm(robot_test_obj, args):
+    if len(args) < 1:
+        test_util.test_fail("no resource available for next action: recover_vm")
+    vm = robot_test_obj.get_test_dict().vm[args[0]]
+    vm.recover()
+    vm.update()
 
 
 def delete_volume_backup(robot_test_obj, args):
-    pass
-
-
-def create_mini_volume(robot_test_obj, args):
-    pass
+    if len(args) < 1:
+        test_util.test_fail("no resource available for next action: delete_volume_backup")
+    backup_name = args[0]
+    backup_dict = None
+    for k, v in robot_test_obj.get_test_dict().backup.items():
+        if backup_name in k:
+            backup_dict = v
+            d_backup_name = k
+    target_backup = backup_dict['backup']
+    bs_uuid = robot_test_obj.get_robot_resource()['bs'][0]
+    vol_ops.delete_volume_backup([bs_uuid],target_backup.uuid)
+    robot_test_obj.test_dict.remove_backup(target_backup)
 
 
 action_dict = {
@@ -1469,8 +1513,8 @@ action_dict = {
     'create_mini_iso_vm': create_mini_iso_vm,
     'change_vm_ha': change_vm_ha,
     'delete_vm': delete_vm,
+    'recover_vm': recover_vm,
     'delete_volume_backup': delete_volume_backup,
-    'create_mini_volume': create_mini_volume
 
 }
 
@@ -1595,7 +1639,6 @@ def debug(robot_test_obj):
 
 
 def parser_args(args):
-    args = ['data_volume=true', 'cpu=random', 'memory=random', 'Provisiong=thick']
     arg_dict = {}
     for arg in args:
         arg_dict[arg.split('=')[0]] = arg.split('=')[1]

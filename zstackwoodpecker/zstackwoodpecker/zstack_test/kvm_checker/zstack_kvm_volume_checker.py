@@ -44,6 +44,8 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
             self.check_sharedblock(volume, volume_installPath, ps)
         elif ps.type == 'AliyunEBS':
             self.check_ebs(ps, volume_installPath)
+        elif ps.type == 'MiniStorage':
+            self.check_mini(volume, volume_installPath, ps)
 
     def check_ebs(self, ps, volume_installPath):
         import zstackwoodpecker.operations.scenario_operations as sce_ops
@@ -60,6 +62,19 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
 
     def check_sharedblock(self, volume, volume_installPath, ps):
         devPath = "/dev/" + volume_installPath.split("sharedblock://")[1]
+        cmd = 'lvscan'
+        conditions = res_ops.gen_query_conditions('primaryStorage.uuid', '=', ps.uuid)
+        cluster = res_ops.query_resource(res_ops.CLUSTER, conditions)[0]
+        conditions = res_ops.gen_query_conditions('clusterUuid', '=', cluster.uuid)
+        host = res_ops.query_resource(res_ops.HOST, conditions)[0]
+        result = test_lib.lib_execute_ssh_cmd(host.managementIp, 'root', 'password', cmd)
+        if devPath in result:
+            return self.judge(True)
+        else:
+            return self.judge(False)
+
+    def check_mini(self, volume, volume_installPath, ps):
+        devPath = "/dev/" + volume_installPath.split("mini://")[1]
         cmd = 'lvscan'
         conditions = res_ops.gen_query_conditions('primaryStorage.uuid', '=', ps.uuid)
         cluster = res_ops.query_resource(res_ops.CLUSTER, conditions)[0]
@@ -161,6 +176,10 @@ class zstack_kvm_volume_attach_checker(checker_header.TestChecker):
             volume_installPath = volume_installPath.split('fusionstor://')[1]
         elif volume_installPath.startswith('sharedblock'):
             volume_installPath = "/dev/" + volume_installPath.split('sharedblock://')[1]
+        elif volume_installPath.startswith('mini'):
+            _cmd = "drbdsetup show %s | grep device | awk -F';' '{print $1}' | awk '{print $3}'" % volume.uuid
+            result = test_lib.lib_execute_ssh_cmd(host.managementIp,host.username, host.password, _cmd, 180)
+            volume_installPath = '/dev/drbd' + result.strip()
         elif volume_installPath.startswith('ebs'):
             ps_uuid = volume.primaryStorageUuid
             ps = test_lib.lib_get_primary_storage_by_uuid(ps_uuid)

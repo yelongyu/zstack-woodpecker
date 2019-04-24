@@ -62,13 +62,14 @@ class zstack_kvm_vm_attach_volume_checker(checker_header.TestChecker):
             test_util.test_logger('Check result: Skip attach_volume_checker since VM is not in Running state')
             return self.judge(True)
         
-        test_lib.lib_install_testagent_to_vr(vm)
+        # test_lib.lib_install_testagent_to_vr(vm)
         host = test_lib.lib_get_vm_host(vm)
         test_lib.lib_install_testagent_to_host(host)
         test_lib.lib_set_vm_host_l2_ip(vm)
         default_l3_uuid = vm.defaultL3NetworkUuid
-        vr = test_lib.lib_find_vr_by_pri_l3(default_l3_uuid)
-        nic = test_lib.lib_get_vm_nic_by_vr(vm, vr)
+        # vr = test_lib.lib_find_vr_by_pri_l3(default_l3_uuid)
+        # nic = test_lib.lib_get_vm_nic_by_vr(vm, vr)
+        nic = vm.vmNics[0]
 
         command = 'cat /root/result'
         cmd_result = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, nic.ip, test_lib.lib_get_vm_username(vm), test_lib.lib_get_vm_password(vm), command, self.exp_result)
@@ -139,13 +140,14 @@ class zstack_kvm_vm_detach_volume_checker(checker_header.TestChecker):
             test_util.test_logger('Check result: Skip attach_volume_checker since VM is not in Running state')
             return self.judge(True)
 
-        test_lib.lib_install_testagent_to_vr(vm)
+        # test_lib.lib_install_testagent_to_vr(vm)
         host = test_lib.lib_get_vm_host(vm)
         test_lib.lib_install_testagent_to_host(host)
         test_lib.lib_set_vm_host_l2_ip(vm)
         default_l3_uuid = vm.defaultL3NetworkUuid
-        vr = test_lib.lib_find_vr_by_pri_l3(default_l3_uuid)
-        nic = test_lib.lib_get_vm_nic_by_vr(vm, vr)
+        # vr = test_lib.lib_find_vr_by_pri_l3(default_l3_uuid)
+        # nic = test_lib.lib_get_vm_nic_by_vr(vm, vr)
+        nic = vm.vmNics[0]
 
         command = 'cat /root/result'
         cmd_result = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, nic.ip, test_lib.lib_get_vm_username(vm), test_lib.lib_get_vm_password(vm), command, self.exp_result)
