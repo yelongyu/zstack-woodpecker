@@ -124,6 +124,22 @@ def get_buildid_by_sce_file(scenarioFile):
 
             return buildid
 
+def get_sce_hosts(scenarioConfig=test_lib.all_scenario_config, scenarioFile=test_lib.scenario_file):
+    host_list = []
+
+    if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
+        return host_list
+
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            with open(scenarioFile, 'r') as fd:
+                xmlstr = fd.read()
+                fd.close()
+                scenario_file = xmlobject.loads(xmlstr)
+                for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                    if s_vm.name_ == vm.name_:
+                        host_list.append(s_vm)
+    return host_list
 
 def get_s_vm_cfg_lst_vip_bind(scenarioConfig, scenarioFile, retry_times=1):
     """
@@ -198,6 +214,28 @@ def get_expected_vip_s_vm_cfg_lst_after_switch(scenarioConfig, scenarioFile, vip
     else:
         test_util.test_fail("not found the differ host ip vip can be used")
         
+
+def recover_host(host_vm, scenarioConfig, deploy_config):
+    stop_host(host_vm, scenarioConfig)
+    host_inv = start_host(host_vm, scenarioConfig)
+    if not host_inv:
+       return False
+    recover_host_vlan(host_vm, scenarioConfig, deploy_config)
+
+def recover_host_vlan(host_vm, scenarioConfig, deploy_config):
+    host_ip = host_vm.ip_
+    test_lib.lib_wait_target_up(host_ip, '22', 120)
+    host_config = sce_ops.get_scenario_config_vm(host_vm.name_,scenarioConfig)
+    for l3network in xmlobject.safe_list(host_config.l3Networks.l3Network):
+        if hasattr(l3network, 'l2NetworkRef'):
+            for l2networkref in xmlobject.safe_list(l3network.l2NetworkRef):
+                nic_name = sce_ops.get_ref_l2_nic_name(l2networkref.text_, deploy_config)
+                if nic_name.find('.') >= 0 :
+                    vlan = nic_name.split('.')[1]
+                    test_util.test_logger('[vm:] %s %s is created.' % (host_ip, nic_name.replace("eth", "zsn")))
+                    cmd = 'vconfig add %s %s' % (nic_name.split('.')[0].replace("eth", "zsn"), vlan)
+                    test_lib.lib_execute_ssh_cmd(host_ip, host_config.imageUsername_, host_config.imagePassword_, cmd)
+    return True
 
 def stop_host(host_vm, scenarioConfig, force=None):
     host_vm_uuid = host_vm.uuid_
