@@ -913,6 +913,7 @@ def test():
         ''' % (agent_url)
         deploy_operations.remove_simulator_agent_script(agent_url)
         deploy_operations.deploy_simulator_agent_script(agent_url, script)
+        deploy_operations.install_mini_server()
     else:
         if test_lib.scenario_config != None and test_lib.scenario_file != None and not os.path.exists(test_lib.scenario_file):
             scenario_operations.deploy_scenario(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
@@ -983,6 +984,5 @@ def test():
             scenario_operations.replace_env_params_if_scenario()
         else:
             pass
-    deploy_operations.install_mini_server()
 
     test_util.test_pass('Suite Setup Success')
