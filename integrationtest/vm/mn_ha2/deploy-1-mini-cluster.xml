@@ -225,8 +225,7 @@
              </l3Networks>
           </l2NoVlanNetwork>
 
-          <l2VlanNetwork name="$l2PublicNetworkName"
-            vlan="$l2Vlan21"
+          <l2NoVlanNetwork name="$l2PublicNetworkName"
             description="Test" physicalInterface="$l2PublicNetworkInterface">
             <l3Networks>
               <l3BasicNetwork name="$l3PublicNetworkName" category="Public" description="Public Network">
@@ -234,9 +233,16 @@
                   startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
                   netmask="$ipRangeNetmask" />
                 <dns>$DNSServer</dns>
+                <networkService provider="Flat Network Service Provider">
+                  <serviceType>DHCP</serviceType>
+                  <serviceType>Eip</serviceType>
+                </networkService>
+                <networkService provider="SecurityGroup">
+                  <serviceType>SecurityGroup</serviceType>
+                </networkService>
               </l3BasicNetwork>
             </l3Networks>
-          </l2VlanNetwork>
+          </l2NoVlanNetwork>
           
           <l2NoVlanNetwork name="$l2NoVlanNetworkName1" description="guest l2 network"
             physicalInterface="$l2NoVlanNetworkInterface1">
