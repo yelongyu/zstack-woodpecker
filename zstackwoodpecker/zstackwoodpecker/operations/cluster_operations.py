@@ -29,6 +29,21 @@ def create_cluster(cluster_option, session_uuid=None):
             (evt.uuid, action.name))
     return evt.inventory
 
+def create_mini_cluster(mini_cluster_option, session_uuid=None):
+    action = api_actions.CreateMiniClusterAction()
+    action.timeout = 300000
+    action.zoneUuid = mini_cluster_option.get_zone_uuid()
+    action.name = mini_cluster_option.get_name()
+    action.username = mini_cluster_option.get_username()
+    action.password = mini_cluster_option.get_password()
+    action.hostManagementIps = mini_cluster_option.get_host_management_ips()
+    action.sshPort = mini_cluster_option.get_sshPort()
+    action.hypervisorType = mini_cluster_option.get_hypervisor_type()
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Create Mini cluster [uuid:] %s with [ips:] %s' % \
+                (evt.uuid, " ".join(action.hostManagementIps)))
+    return evt.inventory
+
 def delete_cluster(cluster_uuid, session_uuid=None):
     action = api_actions.DeleteClusterAction()
     action.uuid = cluster_uuid

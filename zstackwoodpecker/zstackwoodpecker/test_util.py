@@ -1167,6 +1167,54 @@ class HostOption(DataOption):
     def get_host_tags(self):
         return self.hostTags
 
+class MiniClusterOption(DataOption):
+    def __init__(self):
+        super(MiniClusterOption, self).__init__()
+        self.uuid = None
+        self.hostManagementIps= None
+        self.zoneUuid = None
+        self.username = None
+        self.password = None
+        self.hostTags = None
+        self.sshPort = None
+        self.hypervisorType = None
+
+    def set_sshPort(self, port):
+        self.sshPort = port
+
+    def get_sshPort(self):
+        return self.sshPort
+
+    def set_host_management_ips(self, ips):
+        self.hostManagementIps = ips
+
+    def get_host_management_ips(self):
+        return self.hostManagementIps
+
+    def set_zone_uuid(self, uuid):
+        self.zoneUuid = uuid
+
+    def get_zone_uuid(self):
+        return self.zoneUuid
+
+    def set_username(self, username):
+        self.username = username
+
+    def get_username(self):
+        return self.username
+
+    def set_password(self, password):
+        self.password = password
+
+    def get_password(self):
+        return self.password
+
+    def set_hypervisor_type(self, hypervisor_type):
+        self.hypervisorType = hypervisor_type
+
+    def get_hypervisor_type(self):
+        return self.hypervisorType
+
 class SnapshotOption(DataOption):
     def __init__(self):
         super(SnapshotOption, self).__init__()
