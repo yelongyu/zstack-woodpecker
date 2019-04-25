@@ -30,5 +30,6 @@
 	<case timeout='600' repeat='1' >public_billing/test_check_vm_lifecycle_with_memory_billing.py</case>
 	<case timeout='600' repeat='1' >public_billing/test_check_vm_lifecycle_with_rootvolume_billing.py</case>
 	<case timeout='600' repeat='1' >public_billing/test_check_vm_lifecycle_with_datavolume_billing.py</case>
+	<case timeout='600' repeat='1' >test_twofa_enable_disable.py</case>
     </suite>
 </integrationTest>
