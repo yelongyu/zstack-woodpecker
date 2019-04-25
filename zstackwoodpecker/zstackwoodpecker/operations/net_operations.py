@@ -906,3 +906,12 @@ def get_l3network_dhcp_ip(l3NetworkUuid, session_uuid=None):
     test_util.test_logger('Get l3 network dhcp ip from L3 uuid: {}'.format(l3NetworkUuid))
     result = acc_ops.execute_action_with_session(action, session_uuid)
     return result.ip
+	
+def add_dns_to_l3(l3_uuid, dns, session_uuid=None):
+    action = api_actions.AddDnsToL3NetworkAction()
+    action.sessionUuid = session_uuid
+    action.dns = dns
+    action.l3NetworkUuid = l3_uuid
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt
+

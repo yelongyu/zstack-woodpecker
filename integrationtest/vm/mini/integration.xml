@@ -9,5 +9,6 @@
 	<case timeout='1200' noparallel='True'>test_resize_vm_root_volumethin_provision.py</case>
 	<case timeout='1200' noparallel='True'>test_resize_data_volume.py</case>
 	<case timeout='1200' noparallel='True'>test_resize_data_thin_volume.py</case>
+	<case timeout='1200' noparallel='True'>network/test_create_l3network.py</case>
     </suite>
 </integrationTest>
