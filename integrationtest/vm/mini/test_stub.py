@@ -19,7 +19,30 @@ import zstackwoodpecker.operations.backupstorage_operations as bs_ops
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
+import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
 
+def create_vm_with_iso(l3_uuid_list, image_uuid, vm_name = None, root_disk_uuids = None, instance_offering_uuid = None, \
+                       disk_offering_uuids = None, default_l3_uuid = None, system_tags = None, \
+                       session_uuid = None, ps_uuid=None):
+    vm_creation_option = test_util.VmOption()
+    conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+    if not instance_offering_uuid:
+        instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+    vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+    vm_creation_option.set_l3_uuids(l3_uuid_list)
+    vm_creation_option.set_image_uuid(image_uuid)
+    vm_creation_option.set_name(vm_name)
+    vm_creation_option.set_root_disk_uuid(root_disk_uuids)
+    vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
+    vm_creation_option.set_default_l3_uuid(default_l3_uuid)
+    vm_creation_option.set_system_tags(system_tags)
+    vm_creation_option.set_session_uuid(session_uuid)
+    vm_creation_option.set_ps_uuid(ps_uuid)
+    vm_creation_option.set_timeout(600000)
+    vm = zstack_vm_header.ZstackTestVm()
+    vm.set_creation_option(vm_creation_option)
+    vm.create()
+    return vm
 
 def sce_is_sep_pub():
     sep_pub_sce_list = [ 					\
