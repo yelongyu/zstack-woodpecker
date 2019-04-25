@@ -1357,16 +1357,23 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
                 infile.write(root_volume_name)
                 infile.write(image_cache_name)
                 infile.write(backup_storage_pool)
-    thread_list = []
+
     for ceph_storage in ceph_storages:
         if 'xsky' in ceph_storage:
-            thread_list.append(Thread(target=deploy_xsky, args=(ceph_storages, ceph_storage)))
+            deploy_xsky(ceph_storages, ceph_storage)
         else:
-            thread_list.append(Thread(target=deploy_ceph, args=(ceph_storages, ceph_storage)))
-    for thrd in thread_list:
-        thrd.start()
-    for _thrd in thread_list:
-        _thrd.join()
+            deploy_ceph(ceph_storages, ceph_storage)
+
+#    thread_list = []
+#    for ceph_storage in ceph_storages:
+#        if 'xsky' in ceph_storage:
+#            thread_list.append(Thread(target=deploy_xsky, args=(ceph_storages, ceph_storage)))
+#        else:
+#            thread_list.append(Thread(target=deploy_ceph, args=(ceph_storages, ceph_storage)))
+#    for thrd in thread_list:
+#        thrd.start()
+#    for _thrd in thread_list:
+#        _thrd.join()
 
 def setup_xsky_storages(scenario_config, scenario_file, deploy_config):
     #Stop nodes
