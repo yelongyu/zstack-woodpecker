@@ -16,10 +16,12 @@ def login_as_admin():
     password = inventory.INITIAL_SYSTEM_ADMIN_PASSWORD
     return login_by_account(accountName, password)
 
-def login_by_account(name, password, timeout = 160000):
+def login_by_account(name, password, timeout = 160000, system_tags=None):
     login = api_actions.LogInByAccountAction()
     login.accountName = name
     login.password = password
+    if system_tags:
+        login.systemTags = system_tags
     #login.timeout = 15000
     #since system might be hang for a while, when archive system log in 00:00:00
     #, it is better to increase timeout time to 60000 to avoid of no response
@@ -184,3 +186,12 @@ def update_quota(identity_uuid,name,value,session_uuid=None):
    return evt.inventory	
 
 #result=create_account('c','password','Normal')
+
+def get_twofa_auth_secret(username, password, account_type = "account", session_uuid=None):
+    action = api_actions.GetTwoFactorAuthenticationSecretAction()
+    action.name = username
+    action.password = password
+    action.type = account_type
+    evt = execute_action_with_session(action,session_uuid)
+    test_util.action_logger('Get Twofa for account [name:] %s success' % username)
+    return evt.inventory

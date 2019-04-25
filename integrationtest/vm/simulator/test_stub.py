@@ -2613,3 +2613,10 @@ def compare_db_stats(db_stats, db_stats2, white_list):
                     test_util.test_logger("DB Table %s changed %s -> %s" % (key, db_stats[key], db_stats2[key]))
                     continue
             test_util.test_fail("DB Table %s changed %s -> %s" % (key, db_stats[key], db_stats2[key]))
+
+def get_security_code(secret):
+    cmd = "java -cp %s/tools/auth.jar google.auth.MainApp %s|grep toke" %(os.environ.get('woodpecker_root_path'), secret)
+    status, output = commands.getstatusoutput(cmd)
+    if status != 0:
+        test_util.test_fail("Run command %s failed" %cmd)
+    return output[-6:]
