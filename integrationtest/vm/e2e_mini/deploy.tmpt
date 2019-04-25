@@ -12,8 +12,8 @@ largeDiskOfferingSize = 1G
 mediumDiskOfferingName = mediumDiskOffering
 mediumDiskOfferingSize = 100M
 
-MINI_SERVER_URL = http://zstack-mini-server/test_bin
-SELENIUM_SERVER = 127.0.0.1
+MINI_SERVER_URL = http://192.168.200.100/mirror/kefeng.wang/mini-server/
+SELENIUM_SERVER = 172.20.11.61
 
 imageStoreBackupStorageName = imagestore
 imageStoreBackupStorageName2 = imagestore2
@@ -22,6 +22,10 @@ hostPort = 22
 nodeNic = eth0
 nodeNetMask = 255.255.0.0
 nodeGateway = 172.20.0.1
+
+zstackHaVip = 172.16.0.10
+zstackHaVip2 = 192.168.0.10
+zstackHaVip3 = 10.0.0.10
 
 clusterName2 = cluster2
 
