@@ -3,7 +3,11 @@
 @author: Frank
 '''
 
-import os
+
+import os.path
+import zstacklib.utils.linux as linux
+import zstacklib.utils.http as  http
+import zstacklib.utils.ssh as ssh
 import subprocess
 import zstackwoodpecker.operations.scenario_operations as scenario_operations
 import zstackwoodpecker.operations.deploy_operations as deploy_operations
@@ -12,6 +16,9 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.tag_operations as tag_ops
+import zstacktestagent.plugins.host as host_plugin
+import zstacktestagent.testagent as testagent
+import zstacklib.utils.xmlobject as xmlobject
 
 CREATE_SNAPSHOT_PATH = "/ceph/primarystorage/snapshot/create"
 CP_PATH = "/ceph/primarystorage/volume/cp"
@@ -40,7 +47,7 @@ GET_MD5_PATH = "/localstorage/getmd5"
 CHECK_MD5_PATH = "/localstorage/checkmd5"
 COPY_TO_REMOTE_BITS_PATH = "/localstorage/copytoremote"
 
-
+test_stub = test_lib.lib_get_test_stub('mn_ha2')
 
 def add_ps_network_gateway_sys_tag():
     '''
@@ -915,6 +922,9 @@ def test():
         deploy_operations.deploy_simulator_agent_script(agent_url, script)
         deploy_operations.install_mini_server()
     else:
+        if test_lib.scenario_config == None or test_lib.scenario_file ==None:
+            test_util.test_fail('Suite Setup Fail without scenario')
+    
         if test_lib.scenario_config != None and test_lib.scenario_file != None and not os.path.exists(test_lib.scenario_file):
             scenario_operations.deploy_scenario(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
             test_util.test_skip('Suite Setup Success')
@@ -927,62 +937,53 @@ def test():
     
         #This vlan creation is not a must, if testing is under nested virt env. But it is required on physical host without enough physcial network devices and your test execution machine is not the same one as Host machine. 
         #no matter if current host is a ZStest host, we need to create 2 vlan devs for future testing connection for novlan test cases.
-        #linux.create_vlan_eth(nic_name, 10)
-        #linux.create_vlan_eth(nic_name, 11)
+        linux.create_vlan_eth(nic_name, 10)
+        linux.create_vlan_eth(nic_name, 11)
     
         #If test execution machine is not the same one as Host machine, deploy work is needed to separated to 2 steps(deploy_test_agent, execute_plan_without_deploy_test_agent). And it can not directly call SetupAction.run()
         test_lib.setup_plan.deploy_test_agent()
-        #cmd = host_plugin.CreateVlanDeviceCmd()
-        #cmd.ethname = nic_name
-        #cmd.vlan = 10
+        cmd = host_plugin.CreateVlanDeviceCmd()
+        cmd.ethname = nic_name
+        cmd.vlan = 10
         
-        #cmd2 = host_plugin.CreateVlanDeviceCmd()
-        #cmd2.ethname = nic_name
-        #cmd2.vlan = 11
+        cmd2 = host_plugin.CreateVlanDeviceCmd()
+        cmd2.ethname = nic_name
+        cmd2.vlan = 11
         testHosts = test_lib.lib_get_all_hosts_from_plan()
         if type(testHosts) != type([]):
             testHosts = [testHosts]
-        #for host in testHosts:
-        #    http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd)
-        #    http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd2)
-    
-        test_lib.setup_plan.execute_plan_without_deploy_test_agent()
-        if test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
-            mn_ips = deploy_operations.get_nodes_from_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
-            if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
-                os.system("bash %s '%s' %s" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ips, 'disaster-recovery'))
-        elif os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
-            os.system("bash %s '' '%s'" % (EXTRA_SUITE_SETUP_SCRIPT, 'disaster-recovery'))
-    
-        mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
-        if test_lib.scenario_config != None and test_lib.scenario_file != None and not os.path.exists(test_lib.scenario_file):
-            host_ips = scenario_operations.dump_scenario_file_ips(test_lib.scenario_file)
-        else:
-            host_ips = testHosts
-        #for host in host_ips:
-        #    if host.managementIp_ != mn_ip:
-        #        cmd = "echo 'export LANG=\"zh_CN.GB18030\"' >> /etc/profile && sudo ls /root && source /etc/profile"
-        #        os.system('sshpass -p password ssh root@%s "%s"' %(host.managementIp_,cmd))
-    
         for host in testHosts:
-            cmd = 'rpm -qa > rpm_list.txt;pip list > pip_list.txt'
-            test_lib.lib_execute_ssh_cmd(host.managementIp_, 'root', 'password', cmd, 180)
+            http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd)
+            http.json_dump_post(testagent.build_http_path(host.managementIp_, host_plugin.CREATE_VLAN_DEVICE_PATH), cmd2)
+    
+    
+        test_stub.deploy_2ha(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
+        mn_ip1 = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, 0).ip_
+        mn_ip2 = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, 1).ip_
+    
+        if not xmlobject.has_element(test_lib.deploy_config, 'backupStorages.miniBackupStorage'):
+            host_ip1 = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, 2).ip_
+            test_stub.recover_vlan_in_host(host_ip1, test_lib.all_scenario_config, test_lib.deploy_config)
+    
+        test_stub.wrapper_of_wait_for_management_server_start(600, EXTRA_SUITE_SETUP_SCRIPT)
+        test_util.test_logger("@@@DEBUG->suite_setup@@@ os\.environ\[\'ZSTACK_BUILT_IN_HTTP_SERVER_IP\'\]=%s; os\.environ\[\'zstackHaVip\'\]=%s"    \
+                              %(os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'], os.environ['zstackHaVip']) )
+        ssh.scp_file("/home/license-10host-10days-hp.txt", "/home/license-10host-10days-hp.txt", mn_ip1, 'root', 'password')
+        ssh.scp_file("/home/license-10host-10days-hp.txt", "/home/license-10host-10days-hp.txt", mn_ip2, 'root', 'password')
+        if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
+            os.system("bash %s %s" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ip1))
+            os.system("bash %s %s" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ip2))
+    
         deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
         for host in testHosts:
             os.system("bash %s %s" % (EXTRA_HOST_SETUP_SCRIPT, host.managementIp_))
     
-        mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
-        if test_lib.ver_ge_zstack_2_0(mn_ip):
-            test_lib.lib_set_allow_live_migration_local_storage('true')
         test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
-        test_lib.ensure_recover_script_l2_correct()
+        #test_lib.lib_set_reserved_memory('1G')
     
-        if test_lib.lib_is_storage_network_separate():
-            add_ps_network_gateway_sys_tag()
-    
-        if test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
-            scenario_operations.replace_env_params_if_scenario()
-        else:
-            pass
+        if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-local-ps.xml"], ["scenario-config-upgrade-3.1.1.xml"]):
+            cmd = r"sed -i '$a\172.20.198.8 rsync.repo.zstack.io' /etc/hosts"
+            ssh.execute(cmd, mn_ip1, "root", "password", False, 22)
+            ssh.execute(cmd, mn_ip2, "root", "password", False, 22)
 
     test_util.test_pass('Suite Setup Success')
