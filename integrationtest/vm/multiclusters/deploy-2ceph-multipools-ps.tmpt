@@ -1,0 +1,8 @@
+import ../scenario.tmpt
+import ./deploy.tmpt
+import ./scenario.tmpt
+import ./scenario-2ceph-ps.tmpt
+imageStoreBackupStorageName = imagestore1
+instanceOfferingMemory_l = 2G
+instanceOfferingCPU_l = 2
+emptyimageUrl = http://172.20.1.28/mirror/diskimages/empty_disk.qcow2

@@ -836,6 +836,61 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 wait_for_thread_queue()
                 thread.start()
 
+        if xmlobject.has_element(zone, 'primaryStorages.cephPrimaryMultipoolsStorage'):
+            zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, \
+                    name=zone.name_)
+            zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
+
+            for pr in xmlobject.safe_list(zone.primaryStorages.cephPrimaryMultipoolsStorage):
+                if ps_name and ps_name != pr.name_:
+                    continue
+
+                action = api_actions.AddCephPrimaryStorageAction()
+                action.sessionUuid = session_uuid
+                action.name = pr.name_
+                action.description = pr.description__
+                action.type = inventory.CEPH_PRIMARY_STORAGE_TYPE
+                hostname_list = get_primary_storage_from_scenario_file(pr.name_, scenarioConfig, scenarioFile, deployConfig)
+                if len(hostname_list) != 0:
+                    action.monUrls = []
+                    for hostname in hostname_list:
+                        action.monUrls.append("root:password@%s" % (hostname))
+                else:
+                    action.monUrls = pr.monUrls_.split(';')
+                if pr.dataVolumePoolName__:
+                    action.dataVolumePoolName = pr.dataVolumePoolName__
+                if pr.rootVolumePoolName__:
+                    action.rootVolumePoolName = pr.rootVolumePoolName__
+                if pr.imageCachePoolName__:
+                    action.imageCachePoolName = pr.imageCachePoolName__
+		
+                action.zoneUuid = zinv.uuid
+                thread = threading.Thread(target=_thread_for_action, args=(action,))
+                wait_for_thread_queue()
+                thread.start()
+                thread.join()
+            #add ceph pools
+            for pr in xmlobject.safe_list(zone.primaryStorages.cephPrimaryMultipoolsStorage):
+                if ps_name and ps_name != pr.name_:
+                    continue
+
+                cond = res_ops.gen_query_conditions('name', '=', pr.name_)
+                ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
+                action = api_actions.AddCephPrimaryStoragePoolAction()
+                action.sessionUuid = session_uuid
+                action.isCreate = True
+                if ps:
+                    action.primaryStorageUuid = ps[0].uuid
+                pool_type_list = ['Data', 'Root']
+                for pool_type in pool_type_list:
+                    for i in range(int(pr.poolNum__)):
+                        action.poolName = pr.poolPrefix__ + '-'+ pool_type +'-' + str(i+1) + '-' + ps[0].uuid
+                        action.type = pool_type
+                        thread = threading.Thread(target=_thread_for_action, args=(action,))
+                        wait_for_thread_queue()
+                        thread.start()
+                        thread.join()
+
         if xmlobject.has_element(zone, 'primaryStorages.xskycephPrimaryStorage'):
             zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, name=zone.name_)
             zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
