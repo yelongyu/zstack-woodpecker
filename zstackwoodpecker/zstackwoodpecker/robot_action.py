@@ -525,8 +525,9 @@ def create_vm_by_image(robot_test_obj, args):
     target_image = None
     ps_uuid = robot_test_obj.robot_resource['ps'][0]
 
-    cond = res_ops.gen_query_conditions("mediaType", "=", "RootVolumeTemplate")
-    cond = res_ops.gen_query_conditions("system", "=", "false", cond)
+    cond = res_ops.gen_query_conditions("system", "=", "false")
+    if image_format != 'iso':
+        cond = res_ops.gen_query_conditions("mediaType", "=", "RootVolumeTemplate", cond)
     cond = res_ops.gen_query_conditions("name", "=", target_image_name, cond)
     images = res_ops.query_resource(res_ops.IMAGE, cond)
     if images:
@@ -540,35 +541,24 @@ def create_vm_by_image(robot_test_obj, args):
         else:
             vm_creation_option.set_root_disk_size(4294967296)  # 4G
         if not target_image:
-            img_option = test_util.ImageOption()
-            img_option.set_name(target_image_name)
-            zone = res_ops.query_resource(res_ops.ZONE)[0]
-            cond = res_ops.gen_query_conditions("attachedZoneUuids", "=", zone.uuid)
-            bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
-            img_option.set_backup_storage_uuid_list([bs_uuid])
-            img_option.set_url(os.environ.get('isoForVmUrl'))
-            image_inv = img_ops.add_iso_template(img_option)
-            import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
-            new_image = zstack_image_header.ZstackTestImage()
-            new_image.set_creation_option(img_option)
-            new_image.set_image(image_inv)
-            target_image = new_image
+            target_image = add_image(robot_test_obj, [target_image_name, 'root', os.environ.get('isoForVmUrl')])
     if not MINI:
         vm_creation_option.set_ps_uuid(ps_uuid)
     else:
-        cluster = res_ops.query_resource(res_ops.CLUSTER, cond)[0]
+        cluster = res_ops.query_resource(res_ops.CLUSTER)[0]
         robot_test_obj.default_config['MINI_CLUSTER'] = cluster.uuid
         vm_creation_option.set_cluster_uuid(cluster.uuid)
-    vm_creation_option.set_image_uuid(target_image.get_image().uuid)
+    vm_creation_option.set_image_uuid(target_image.uuid)
     vm_creation_option.set_name(vm_name)
     # conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     #     # instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
     #     # vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
     vm_creation_option.set_cpu_num(2)
     vm_creation_option.set_memory_size(2147483648)
-    l3_name = os.environ.get('l3VlanNetworkName1')
+    l3_name = os.environ.get('l3PublicNetworkName')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     vm_creation_option.set_l3_uuids([l3_net_uuid])
+
     vm = zstack_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
     vm.create()
@@ -921,9 +911,9 @@ def create_volume(robot_test_obj, args):
             systemtags.append("capability::virtio-scsi")
         if 'shareable' in tags:
             systemtags.append("ephemeral::shareable")
-        if 'Thin' in tags:
+        if 'thin' in tags:
             systemtags.append("volumeProvisioningStrategy::ThinProvisioning")
-        if 'Thick' in tags:
+        if 'thick' in tags:
             systemtags.append("volumeProvisioningStrategy::ThickProvisioning")
 
     volume_creation_option = test_util.VolumeOption()
@@ -1170,8 +1160,32 @@ def create_data_template_from_backup():
     pass
 
 
-def add_image():
-    pass
+def add_image(robot_test_obj, args):
+    # name type url
+    if len(args) < 3:
+        test_util.test_fail("no resource available for next action: add image")
+    image_name = args[0]
+    _type = args[1]
+    url = args[2]
+    img_option = test_util.ImageOption()
+    img_option.set_name(image_name)
+    bss = res_ops.query_resource(res_ops.BACKUP_STORAGE)
+    img_option.set_backup_storage_uuid_list([bs.uuid for bs in bss])
+    img_option.set_url(url)
+    if _type == 'data':
+        img_option.set_mediaType = 'DataVolumeTemplate'
+        img_option.set_format('qcow2')
+        image_inv = img_ops.add_add_data_volume_template(img_option)
+        return image_inv
+    if url.split(".")[-1] == 'iso':
+        img_option.set_format('iso')
+        img_option.set_mediaType = 'ISO'
+        image_inv = img_ops.add_iso_template(img_option)
+    else:
+        img_option.set_format('qcow2')
+        img_option.set_mediaType = 'RootVolumeTemplate'
+        image_inv = img_ops.add_root_volume_template(img_option)
+    return image_inv
 
 
 def export_image():
