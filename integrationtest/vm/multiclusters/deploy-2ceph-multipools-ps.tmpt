@@ -1,7 +1,7 @@
 import ../scenario.tmpt
 import ./deploy.tmpt
 import ./scenario.tmpt
-import ./scenario-2ceph-ps.tmpt
+import ./scenario-2ceph-multipools-ps.tmpt
 imageStoreBackupStorageName = imagestore1
 instanceOfferingMemory_l = 2G
 instanceOfferingCPU_l = 2
