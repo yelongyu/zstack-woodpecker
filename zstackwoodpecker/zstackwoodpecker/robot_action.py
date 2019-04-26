@@ -517,7 +517,91 @@ def migrate_vm(robot_test_obj, args):
 
 
 def create_vm_by_image(robot_test_obj, args):
-    pass
+    if len(args) < 3:
+        test_util.test_fail("no resource available for next action: create vm by image")
+    target_image_name = args[0]
+    image_format = args[1]
+    vm_name = args[2]
+    target_image = None
+    ps_uuid = robot_test_obj.robot_resource['ps'][0]
+
+    cond = res_ops.gen_query_conditions("mediaType", "=", "RootVolumeTemplate")
+    cond = res_ops.gen_query_conditions("system", "=", "false", cond)
+    cond = res_ops.gen_query_conditions("name", "=", target_image_name, cond)
+    images = res_ops.query_resource(res_ops.IMAGE, cond)
+    if images:
+        target_image = images[0]
+
+    vm_creation_option = test_util.VmOption()
+    if image_format == "iso":
+        if not MINI:
+            root_disk_uuid = test_lib.lib_get_disk_offering_by_name(os.environ.get('rootDiskOfferingName')).uuid
+            vm_creation_option.set_root_disk_uuid(root_disk_uuid)
+        else:
+            vm_creation_option.set_root_disk_size(4294967296)  # 4G
+        if not target_image:
+            img_option = test_util.ImageOption()
+            img_option.set_name(target_image_name)
+            zone = res_ops.query_resource(res_ops.ZONE)[0]
+            cond = res_ops.gen_query_conditions("attachedZoneUuids", "=", zone.uuid)
+            bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
+            img_option.set_backup_storage_uuid_list([bs_uuid])
+            img_option.set_url(os.environ.get('isoForVmUrl'))
+            image_inv = img_ops.add_iso_template(img_option)
+            import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
+            new_image = zstack_image_header.ZstackTestImage()
+            new_image.set_creation_option(img_option)
+            new_image.set_image(image_inv)
+            target_image = new_image
+    if not MINI:
+        vm_creation_option.set_ps_uuid(ps_uuid)
+    else:
+        cluster = res_ops.query_resource(res_ops.CLUSTER, cond)[0]
+        robot_test_obj.default_config['MINI_CLUSTER'] = cluster.uuid
+        vm_creation_option.set_cluster_uuid(cluster.uuid)
+    vm_creation_option.set_image_uuid(target_image.get_image().uuid)
+    vm_creation_option.set_name(vm_name)
+    # conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+    #     # instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+    #     # vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+    vm_creation_option.set_cpu_num(2)
+    vm_creation_option.set_memory_size(2147483648)
+    l3_name = os.environ.get('l3VlanNetworkName1')
+    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    vm_creation_option.set_l3_uuids([l3_net_uuid])
+    vm = zstack_vm_header.ZstackTestVm()
+    vm.set_creation_option(vm_creation_option)
+    vm.create()
+
+    root_volume = zstack_vol_header.ZstackTestVolume()
+    root_volume.create_from(vm.vm.allVolumes[0].uuid)
+    vm.test_volumes.append(root_volume)
+    root_snap_tree = robot_snapshot_header.ZstackSnapshotTree(root_volume)
+    root_snap_tree.update()
+    root_volume.snapshot_tree = root_snap_tree
+    robot_test_obj.test_dict.add_vm(vm_name, vm_obj=vm)
+    robot_test_obj.test_dict.add_volume(name=vm.vm.name + "-root", vol_obj=root_volume)
+    robot_test_obj.test_dict.add_snap_tree(name=vm.vm.name + "-root", snap_tree=root_snap_tree)
+    robot_test_obj.default_config['PS'] = root_volume.get_volume().primaryStorageUuid
+    robot_test_obj.default_config['HOST'] = vm.get_vm().hostUuid
+
+    if image_format == "iso":
+        host = test_lib.lib_get_vm_host(vm.get_vm())
+        test_lib.lib_install_testagent_to_host(host)
+        test_lib.lib_set_vm_host_l2_ip(vm.get_vm())
+        cmd = 'ping -c 5 -W 5 %s >/tmp/ping_result 2>&1; ret=$?; cat /tmp/ping_result; exit $ret' % vm.get_vm().vmNics[
+            0].ip
+        cmd_result = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, vm.get_vm().vmNics[0].ip,
+                                                                 test_lib.lib_get_vm_username(vm.get_vm()),
+                                                                 test_lib.lib_get_vm_password(vm.get_vm()), cmd)
+        cmd = "yum install -y java wget"
+        cmd_result = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, vm.get_vm().vmNics[0].ip,
+                                                                 test_lib.lib_get_vm_username(vm.get_vm()),
+                                                                 test_lib.lib_get_vm_password(vm.get_vm()), cmd)
+        cmd = "wget -np -r -nH --cut-dirs=2 http://172.20.1.27/mirror/vdbench/"
+        cmd_result = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, vm.get_vm().vmNics[0].ip,
+                                                                 test_lib.lib_get_vm_username(vm.get_vm()),
+                                                                 test_lib.lib_get_vm_password(vm.get_vm()), cmd)
 
 
 def stop_vm(robot_test_obj, args):
@@ -1414,7 +1498,7 @@ def delete_volume_backup(robot_test_obj, args):
             d_backup_name = k
     target_backup = backup_dict['backup']
     bs_uuid = robot_test_obj.get_robot_resource()['bs'][0]
-    vol_ops.delete_volume_backup([bs_uuid],target_backup.uuid)
+    vol_ops.delete_volume_backup([bs_uuid], target_backup.uuid)
     robot_test_obj.test_dict.remove_backup(target_backup)
 
 
@@ -1424,7 +1508,7 @@ action_dict = {
     "cleanup_imagecache_on_ps": cleanup_imagecache_on_ps,
     'idel': idel,
     'create_vm': create_vm,
-    'create_vm_by_image': create_vm,
+    'create_vm_by_image': create_vm_by_image,
     'stop_vm': stop_vm,
     'start_vm': start_vm,
     'suspend_vm': suspend_vm,
