@@ -113,7 +113,7 @@ def test():
     volume.check()
 
     host.change_state(test_kvm_host.ENABLE_EVENT)
-    if not linux.wait_callback_success(is_host_connected, host.get_host().uuid, 120):
+    if not linux.wait_callback_success(is_host_connected, host.get_host().uuid, 180):
         test_util.test_fail('host status is not changed to connected, after changing its state to Enable')
 
     vm1.migrate(target_host.uuid)

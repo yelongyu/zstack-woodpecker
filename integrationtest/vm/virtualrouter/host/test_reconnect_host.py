@@ -77,7 +77,8 @@ def test():
     else:
         test_util.test_fail("the resource consumption are not aligned after destroy vm: %s on host: %s" % (vm.get_vm().uuid, host_uuid))
 
-    
+    test_stub.ensure_hosts_connected(120)
+    test_stub.ensure_pss_connected()    
     vm = test_stub.create_vlan_vm(os.environ.get('l3VlanNetworkName1'))
     test_obj_dict.add_vm(vm)
 
