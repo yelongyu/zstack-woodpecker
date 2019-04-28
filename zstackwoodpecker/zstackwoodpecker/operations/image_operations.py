@@ -213,6 +213,15 @@ def delete_image(image_uuid, backup_storage_uuid_list=None, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
+def recover_image(image_uuid, backup_storage_uuid_list=None, session_uuid=None):
+    action = api_actions.RecoverImageAction()
+    action.imageUuid = image_uuid
+    action.backupStorageUuids = backup_storage_uuid_list
+
+    test_util.action_logger('recover image: %s' % image_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid())
+    return evt.inventory
+
 def expunge_image(image_uuid, backup_storage_uuid_list=None, session_uuid=None):
     action = api_actions.ExpungeImageAction()
     action.imageUuid = image_uuid

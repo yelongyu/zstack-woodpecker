@@ -999,6 +999,22 @@ def delete_volume(robot_test_obj, args):
 
     target_volume.delete()
 
+    target_volume.update()
+    target_volume.update_volume()
+    target_volume.snapshot_tree.update()
+
+
+def recover_volume(robot_test_obj, args):
+    if len(args) != 1:
+        test_util.test_fail("no resource available for next action: recover volume")
+
+    target_volume = robot_test_obj.get_test_dict().volume[args[0]]
+
+    target_volume.recover()
+
+    target_volume.update()
+    target_volume.update_volume()
+    target_volume.snapshot_tree.update()
 
 def detach_volume(robot_test_obj, args):
     if len(args) < 1:
@@ -1169,7 +1185,17 @@ def delete_image(robot_test_obj, args):
     name = args[0]
     target_image = robot_test_obj.get_test_dict().image[name]
     target_image.delete()
+    target_image.update()
 
+
+def recover_image(robot_test_obj, args):
+    if len(args) < 1:
+        test_util.test_fail("no resource available for next action: delete image")
+
+    name = args[0]
+    target_image = robot_test_obj.get_test_dict().image[name]
+    target_image.recover()
+    target_image.update()
 
 def expunge_image(robot_test_obj, args):
     if len(args) < 1:
@@ -1652,6 +1678,8 @@ action_dict = {
     'change_vm_ha': change_vm_ha,
     'delete_vm': delete_vm,
     'recover_vm': recover_vm,
+    'recover_volume': recover_volume,
+    'recover_image': recover_image,
     'delete_volume_backup': delete_volume_backup,
 
 }

@@ -60,8 +60,10 @@ class TestAction(object):
     detach_volume = 'detach_volume'
     expunge_volume = 'expunge_volume'
     migrate_volume = 'migrate_volume'
+    recover_volume = 'recover_volume'
     resize_volume = 'resize_volume'
     resize_data_volume = 'resize_data_volume'
+    delete_volume_backup = 'delete_volume_backup'
 
     create_data_vol_template_from_volume = \
             'create_data_volume_template_from_volume'
@@ -69,6 +71,7 @@ class TestAction(object):
     delete_vm = 'delete_vm'
     create_image_from_volume = 'create_image_from_volume'
     delete_image = 'delete_image'
+    recover_image = 'recover_image'
     expunge_image = 'expunge_image'
     create_data_template_from_backup = 'create_data_template_from_backup'
     add_image = 'add_image'

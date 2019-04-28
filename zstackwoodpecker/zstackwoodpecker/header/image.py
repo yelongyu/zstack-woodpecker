@@ -39,6 +39,9 @@ class TestImage(zstack_header.ZstackObject):
     def expunge(self):
         self.state = EXPUNGED
 
+    def recover(self):
+        self.state = CREATED
+
     def check(self):
         pass
 
