@@ -59,6 +59,28 @@ def check_if_vip_is_on_host(scenarioConfig, scenarioFile, host_ip, retry_times=1
     return False
 
 
+def get_mn_host(scenarioConfig, scenarioFile):
+    mn_host_list = []
+
+    test_util.test_logger("@@DEBUG@@:<scenarioConfig:%s><scenarioFile:%s><scenarioFile is existed: %s>" \
+                          %(str(scenarioConfig), str(scenarioFile), str(os.path.exists(scenarioFile))))
+    if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
+        return mn_host_list
+
+    test_util.test_logger("@@DEBUG@@: after config file exist check")
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            if xmlobject.has_element(vm, 'mnHostRef'):
+                with open(scenarioFile, 'r') as fd:
+                    xmlstr = fd.read()
+                    fd.close()
+                    scenario_file = xmlobject.loads(xmlstr)
+                    for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                        if s_vm.name_ == vm.name_:
+                            mn_host_list.append(s_vm)
+    test_util.test_logger("@@DEBUG@@: %s" %(str(mn_host_list)))
+    return mn_host_list
+
 def exec_zsha2_version(host_ip, username, password):
     cmd = "zsha2 version"
     version_info = test_lib.lib_execute_ssh_cmd(host_ip, username, password, cmd)
