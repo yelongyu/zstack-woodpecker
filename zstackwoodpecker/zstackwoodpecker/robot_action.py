@@ -1029,7 +1029,7 @@ def expunge_volume(robot_test_obj, args):
         test_util.test_fail("no resource available for next action: expunge volume")
 
     name = args[0]
-    target_volume = robot_test_obj.get_test_dict.volume[name]
+    target_volume = robot_test_obj.get_test_dict().volume[name]
     target_volume.expunge()
     robot_test_obj.test_dict.remove_volume(target_volume)
     robot_test_obj.test_dict.remove_snap_tree(name)
@@ -1201,7 +1201,7 @@ def add_image(robot_test_obj, args):
         img_option.set_mediaType = 'DataVolumeTemplate'
         img_option.set_format('qcow2')
         image_inv = img_ops.add_add_data_volume_template(img_option)
-        image = zstack_image_header()
+        image = zstack_image_header.ZstackTestImage()
         image.set_image(image_inv)
         robot_test_obj.test_dict.add_image(image_name, image_obj=image)
         return image_inv
@@ -1213,7 +1213,7 @@ def add_image(robot_test_obj, args):
         img_option.set_format('qcow2')
         img_option.set_mediaType = 'RootVolumeTemplate'
         image_inv = img_ops.add_root_volume_template(img_option)
-    image = zstack_image_header()
+    image = zstack_image_header.ZstackTestImage()
     image.set_image(image_inv)
     robot_test_obj.test_dict.add_image(image_name,image_obj=image)
     return image_inv
@@ -1456,7 +1456,8 @@ def create_mini_vm(robot_test_obj, args):
         else:
             memory = int(arg_dict['memory']) * 1024 * 1024 * 1024
     if arg_dict.has_key('network'):
-        l3s = res_ops.query_resource(res_ops.L3_NETWORK)
+        cond = res_ops.gen_query_conditions("system", "=", "false")
+        l3s = res_ops.query_resource(res_ops.L3_NETWORK, cond)
         l3_uuid = random.choice(l3s).uuid
 
     provisiong = 'Thin' if not arg_dict.has_key('provision') else arg_dict['provision']
