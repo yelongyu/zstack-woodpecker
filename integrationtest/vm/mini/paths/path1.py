@@ -34,4 +34,5 @@ def path():
         [TestAction.add_image, "image3", 'root', "http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2"],
         [TestAction.recover_volume, "volume3"],
         [TestAction.change_vm_ha, 'vm1'],
-        [TestAction.attach_volume, "vm2", "volume2"]])
+        [TestAction.create_volume, "volume4", "=scsi,thin"],
+        [TestAction.attach_volume, "vm2", "volume4"]])
