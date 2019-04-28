@@ -12,5 +12,12 @@ def path():
         [TestAction.add_image, "iso2", 'root', os.environ.get('isoForVmUrl')],
         [TestAction.create_volume, "volume1", "=scsi,thick"],
         [TestAction.attach_volume, "vm1", "volume1"],
-        #[TestAction.change_vm_ha, 'vm1'],
+        [TestAction.create_volume, "volume2", "=scsi,thick"],
+        [TestAction.attach_volume, "vm2", "volume2"],
+        [TestAction.delete_vm, "vm2"],
+        [TestAction.expunge_vm, "vm2"],
+        [TestAction.delete_image, "iso2"],
+        [TestAction.expunge_image, "iso2"],
+        [TestAction.delete_volume, "volume2"],
+        [TestAction.expunge_volume, "volume2"]
         [TestAction.change_vm_ha, 'vm1']])

@@ -679,7 +679,17 @@ def destroy_vm(robot_test_obj, args):
 
 
 def expunge_vm(robot_test_obj, args):
-    pass
+    if len(args) != 1:
+        test_util.test_fail("no resource available for next action: expunge vm")
+
+    target_vm = robot_test_obj.get_test_dict().vm[args[0]]
+
+    target_vm.expunge()
+
+    robot_test_obj.test_dict.remove_volume(target_vm.test_volumes[0])
+    robot_test_obj.test_dict.remove_vm(target_vm)
+    robot_test_obj.test_dict.remove_snap_tree(args[0]+'-root')
+
 
 
 def reinit_vm(robot_test_obj, args):
@@ -989,8 +999,6 @@ def delete_volume(robot_test_obj, args):
 
     target_volume.delete()
 
-    robot_test_obj.test_dict.remove_volume(target_volume)
-
 
 def detach_volume(robot_test_obj, args):
     if len(args) < 1:
@@ -1016,9 +1024,15 @@ def detach_volume(robot_test_obj, args):
         volume.update_volume()
 
 
-def expunge_volume():
-    pass
+def expunge_volume(robot_test_obj, args):
+    if len(args) < 1:
+        test_util.test_fail("no resource available for next action: expunge volume")
 
+    name = args[0]
+    target_volume = robot_test_obj.get_test_dict.volume[name]
+    target_volume.expunge()
+    robot_test_obj.test_dict.remove_volume(target_volume)
+    robot_test_obj.test_dict.remove_snap_tree(name)
 
 def migrate_volume():
     pass
@@ -1148,12 +1162,23 @@ def create_image_from_volume(robot_test_obj, args):
         volume.update_volume()
 
 
-def delete_image():
-    pass
+def delete_image(robot_test_obj, args):
+    if len(args) < 1:
+        test_util.test_fail("no resource available for next action: delete image")
+
+    name = args[0]
+    target_image = robot_test_obj.get_test_dict().image[name]
+    target_image.delete()
 
 
-def expunge_image():
-    pass
+def expunge_image(robot_test_obj, args):
+    if len(args) < 1:
+        test_util.test_fail("no resource available for next action: expunge image")
+
+    name = args[0]
+    target_image = robot_test_obj.get_test_dict().image[name]
+    target_image.expunge()
+    robot_test_obj.test_dict.remove_image(target_image)
 
 
 def create_data_template_from_backup():
@@ -1176,6 +1201,9 @@ def add_image(robot_test_obj, args):
         img_option.set_mediaType = 'DataVolumeTemplate'
         img_option.set_format('qcow2')
         image_inv = img_ops.add_add_data_volume_template(img_option)
+        image = zstack_image_header()
+        image.set_image(image_inv)
+        robot_test_obj.test_dict.add_image(image_name, image_obj=image)
         return image_inv
     if url.split(".")[-1] == 'iso':
         img_option.set_format('iso')
@@ -1185,6 +1213,9 @@ def add_image(robot_test_obj, args):
         img_option.set_format('qcow2')
         img_option.set_mediaType = 'RootVolumeTemplate'
         image_inv = img_ops.add_root_volume_template(img_option)
+    image = zstack_image_header()
+    image.set_image(image_inv)
+    robot_test_obj.test_dict.add_image(image_name,image_obj=image)
     return image_inv
 
 
@@ -1411,6 +1442,7 @@ def create_mini_vm(robot_test_obj, args):
     name = args[0]
     cpu = 2
     memory = 2 * 1024 * 1024 * 1024
+    l3_uuid = None
 
     arg_dict = parser_args(args[1:])
     if arg_dict.has_key('cpu'):
@@ -1423,6 +1455,10 @@ def create_mini_vm(robot_test_obj, args):
             memory = (random.randrange(1, 4, 1) + round(random.random(), 2)) * 1024 * 1024 * 1024
         else:
             memory = int(arg_dict['memory']) * 1024 * 1024 * 1024
+    if arg_dict.has_key('network'):
+        l3s = res_ops.query_resource(res_ops.L3_NETWORK)
+        l3_uuid = random.choice(l3s).uuid
+
     provisiong = 'Thin' if not arg_dict.has_key('provision') else arg_dict['provision']
     rootVolumeSystemTag = "volumeProvisioningStrategy::%sProvisioning" % provisiong
 
@@ -1433,10 +1469,12 @@ def create_mini_vm(robot_test_obj, args):
     vm_creation_option = test_util.VmOption()
     image_name = os.environ.get('imageName_s')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
-    l3_name = os.environ.get('l3VlanNetworkName1')
-
-    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
-    vm_creation_option.set_l3_uuids([l3_net_uuid])
+    if l3_uuid:
+        vm_creation_option.set_l3_uuids([l3_uuid])
+    else:
+        l3_name = os.environ.get('l3VlanNetworkName1')
+        l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+        vm_creation_option.set_l3_uuids([l3_net_uuid])
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_cluster_uuid(cluster.uuid)
     vm_creation_option.set_name(name)
@@ -1490,7 +1528,8 @@ def delete_vm(robot_test_obj, args):
         test_util.test_fail("no resource available for next action: delete_vm")
     vm = robot_test_obj.get_test_dict().vm[args[0]]
     vm.destroy()
-    vm.test_volumes = vm.test_volumes[0]
+    root_volume = robot_test_obj.get_test_dict().volume[args[0] + '-root']
+    vm.test_volumes = [root_volume]
 
 
 def recover_vm(robot_test_obj, args):
