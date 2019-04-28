@@ -40,7 +40,7 @@ class MINI(E2E):
             test_util.test_logger(elem.err_msg)
             test_util.test_fail('Login failed! %s')
 
-    def create_vm(self, name=None, dsc=None, image=None, cpu=2, mem='2 GB', data_size=None,user_data=None,
+    def create_vm(self, name=None, dsc=None, image=os.getenv('imageName_s'), cpu=2, mem='2 GB', data_size=None,user_data=None,
                   network=os.getenv('l3PublicNetworkName'), cluster=os.getenv('clusterName'), provisioning=u'厚置备'):
         self.get_element('a[href="/web/vm"]').click()
         self.wait_for_element(CARDCONTAINER)
@@ -78,7 +78,7 @@ class MINI(E2E):
         assert attr_elems[2].text == 'Linux', "Excepted: 'Linux', actual: %s" % attr_elems[2].text
         assert len(attr_elems[3].text.split('.')) == 4, "Actual vm ip is [%s]" % attr_elems[3].text
 
-    def delete_vm(self, vm_name):
+    def delete_vm(self, vm_name=None):
         self.get_element('a[href="/web/vm"]').click()
         self.wait_for_element(CARDCONTAINER)
         vm_name = vm_name if vm_name else self.vm_name

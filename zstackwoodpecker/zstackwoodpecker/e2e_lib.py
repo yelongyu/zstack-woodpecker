@@ -146,7 +146,7 @@ class E2E(object):
 
     def operate(self, name):
         for op in self.get_elements('li[role="menuitem"]'):
-            if op.displayed() and op.name == name:
+            if op.displayed() and op.text == name:
                 op.click()
 
 class Element(E2E):
