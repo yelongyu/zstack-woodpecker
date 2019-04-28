@@ -83,7 +83,7 @@ class E2E(object):
             test_util.test_fail('Not found the elements [strategy="%s", value="%s"]' % (strategy, value))
         return element_list
 
-    def wait_for_element(self, value, strategy='css selector', timeout=5, target='appear'):
+    def wait_for_element(self, value, strategy='css selector', timeout=10, target='appear'):
         if target == 'appear':
             criteria = 'self.get_elements(value, strategy)'
         else:
@@ -95,7 +95,7 @@ class E2E(object):
             else:
                 time.sleep(0.5)
         else:
-            test_util.test_logger('The element[strategy: %s, value: %s] was not displayed within [%s]s' % (strategy, value, timeout))
+            test_util.test_logger('The element[strategy: "%s", value: "%s"] was not displayed within [%s]s' % (strategy, value, timeout))
 
     def click_button(self, btn_name, retry=3):
         elements = self.get_elements('button', 'tag name')
