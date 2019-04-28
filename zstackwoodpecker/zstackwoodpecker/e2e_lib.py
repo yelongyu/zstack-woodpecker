@@ -7,6 +7,8 @@ Selenium wrapper
 
 import os
 import sys
+import re
+import time
 import types
 import traceback
 from os.path import join
@@ -22,30 +24,42 @@ class E2E(object):
         self.uri = 'http://%s:4444/wd/hub/session' % os.getenv('SELENIUM_SERVER')
         body = '{"desiredCapabilities":{"browserName":"%s"}}' % target_browser
         session = self._post(self.uri, body=body)
-        self.session_id = jsonobject.loads(session).sessionId
+        self.session_id = session.sessionId
         self.uri = join(self.uri, self.session_id)
 
     def route(self, url):
         self._post(join(self.uri, 'url'), body='{"url": "%s"}' % url)
 
     def _post(self, uri, body=None):
-        return json_post(uri=uri, body=body, headers={'charset': 'utf-8'}, fail_soon=True)
+        _rsp = json_post(uri=uri, body=body, headers={'charset': 'utf-8'}, fail_soon=True)
+        rsp = jsonobject.loads(_rsp.replace('null', '"null"'))
+        if rsp.status != 0:
+            test_util.test_fail('URL request failed! uri: %s, body: %s, reason: %s' % (uri, body, rsp.value.message))
+        else:
+            return rsp
 
     def _get(self, uri):
-        return json_post(uri=uri, headers={'charset': 'utf-8'}, method='GET', fail_soon=True)
+        _rsp = json_post(uri=uri, headers={'charset': 'utf-8'}, method='GET', fail_soon=True)
+        rsp = jsonobject.loads(_rsp.replace('null', '"null"'))
+        if rsp.status != 0:
+            test_util.test_fail('URL request failed! uri: %s, reason: %s' % (uri, rsp.value.message))
+        else:
+            return rsp
+
+    def _del(self, uri):
+        return json_post(uri=uri, headers={'charset': 'utf-8'}, method='DELETE', fail_soon=True)
 
     def refresh_page(self):
         self._post(join(self.uri, 'refresh'))
 
     def _get_element(self, uri, value, strategy):
-        if strategy == 'css selector' and '#' not in value:
+        if strategy == 'css selector' and len(re.split('[#=]', value)) == 1:
             _value = value.split(' ')
             _value.insert(0, '')
             value = '.'.join(_value)
-        _rsp = self._post(uri, body='{"using": "%s", "value":"%s"}' % (strategy, value))
-        rsp = jsonobject.loads(_rsp)
-        if rsp.status != 0:
-            test_util.test_logger('Not found the element strategy [%s] with value [%s]' % (strategy, value))
+        if '=' in value:
+            value = value.replace('"', '\\"')
+        rsp = self._post(uri, body='{"using": "%s", "value":"%s"}' % (strategy, value))
         return (rsp, uri[:uri.index('element') + 7])
 
     def get_element(self, value, strategy='css selector'):
@@ -54,13 +68,10 @@ class E2E(object):
         reference: https://github.com/SeleniumHQ/selenium/wiki/JsonWireProtocol
         '''
         rsp, uri = self._get_element(join(self.uri, 'element'), value=value, strategy=strategy)
-        if rsp.status != 0:
-            test_util.test_logger(rsp.value.message)
-        else:
-            element = rsp.value.ELEMENT
-            return Element(join(uri, element))
+        element = rsp.value.ELEMENT
+        return Element(join(uri, element))
 
-    def get_elements(self, value, strategy='css selector', check_element=True):
+    def get_elements(self, value, strategy='css selector', check_result=False):
         rsp, uri = self._get_element(join(self.uri, 'elements'), value=value, strategy=strategy)
         uri = uri.replace('elements', 'element')
         elements = rsp.value
@@ -68,10 +79,26 @@ class E2E(object):
         if elements:
             for elem in elements:
                 element_list.append(Element(join(uri, elem.ELEMENT)))
+        elif check_result:
+            test_util.test_fail('Not found the elements [strategy="%s", value="%s"]' % (strategy, value))
         return element_list
 
+    def wait_for_element(self, value, strategy='css selector', timeout=5, target='appear'):
+        if target == 'appear':
+            criteria = 'self.get_elements(value, strategy)'
+        else:
+            criteria = 'not self.get_elements(value, strategy)'
+        start_time = time.time()
+        while time.time() - start_time <= timeout:
+            if eval(criteria):
+                break
+            else:
+                time.sleep(0.5)
+        else:
+            test_util.test_logger('The element[strategy: %s, value: %s] was not displayed within [%s]s' % (strategy, value, timeout))
+
     def click_button(self, btn_name, retry=3):
-        elements = self.get_elements('button', 'tag_name')
+        elements = self.get_elements('button', 'tag name')
         for element in elements:
             if element.text == btn_name and element.displayed():
                 if element.click():
@@ -81,16 +108,46 @@ class E2E(object):
                     self.click_button(btn_name, retry)
 
     def input(self, item_name, content):
+        selection_rendered = 'ant-select-selection__rendered'
+        def select_opt(elem, opt_value):
+            elem.get_element(selection_rendered).click()
+            for opt in self.get_elements('li[role="option"]'):
+                if opt.displayed() and opt_value in opt.text:
+                    opt.click()
+        def input_content(elem, content):
+            element = elem.get_element('input', 'tag name')
+            element.input(content)
         for elem in self.get_elements('ant-row ant-form-item'):
             if item_name in elem.text:
-                if elem.get_elements('input', 'tag name'):
-                    elem.input(content)
+                if isinstance(content, types.ListType):
+                    select_opt(elem, content[0])
+                    input_content(elem, content[1])
                 else:
-                    elem.get_element('.ant-select-selection__rendered').click()
-                    for opt in self.get_elements('li[role="option"]'):
-                        if opt.text == content:
-                            opt.click()
+                    if elem.get_elements(selection_rendered):
+                        select_opt(elem, content)
+                    else:
+                        input_content(elem, content)
 
+    @property
+    def window_handle(self):
+        uri = join(self.uri, 'window_handles')
+        window_handles = self._get(uri).value
+        return window_handles[0]
+
+    def window_size(self, width, height):
+        uri = join(self.uri, 'window', self.window_handle, 'size')
+        self._post(uri, body='{"width": %s , "height": %s}' % (int(width), int(height)))
+
+    def close(self):
+        self._del(self.uri)
+
+    def confirm(self):
+        self.click_button(u'确 定')
+
+    def operate(self, name):
+        for op in self.get_elements('li[role="menuitem"]'):
+            if op.displayed() and op.name == name:
+                op.click()
 
 class Element(E2E):
     def __init__(self, uri):
@@ -99,21 +156,13 @@ class Element(E2E):
     @property
     def text(self):
         uri = join(self.uri, 'text')
-        _rsp = self._get(uri)
-        rsp = jsonobject.loads(_rsp.replace('null', '"null"'))
-        if rsp.status != 0:
-            print rsp.value.message
-        else:
-            return rsp.value
+        rsp = self._get(uri)
+        return rsp.value
 
     def click(self):
         uri = join(self.uri, 'click')
-        _rsp = self._post(uri)
-        rsp = jsonobject.loads(_rsp.replace('null', '"null"'))
-        if rsp.status != 0:
-            print rsp.value.message
-        else:
-            return True
+        self._post(uri)
+        return True
 
     def input(self, value):
         uri = join(self.uri, 'value')
@@ -121,18 +170,10 @@ class Element(E2E):
             value = str(value)
         _value = [v for v in value]
         body='{"value": %s}' % _value
-        _rsp = self._post(uri, body=body.replace("'", '"'))
-        rsp = jsonobject.loads(_rsp.replace('null', '"null"'))
-        if rsp.status != 0:
-            print rsp.value.message
-        else:
-            return True
+        self._post(uri, body=body.replace("'", '"'))
+        return True
 
     def displayed(self):
         uri = join(self.uri, 'displayed')
-        _rsp = self._get(uri)
-        rsp = jsonobject.loads(_rsp)
-        if rsp.status != 0:
-            print rsp.value.message
-        else:
-            return rsp.value
+        rsp = self._get(uri)
+        return rsp.value
