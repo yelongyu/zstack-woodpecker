@@ -2532,9 +2532,6 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             if len(l3_uuid_list) < 3:
                                 break
 
-                if os.getenv('hostType') == 'miniHost':
-                    l3_uuid_list.append(os.environ.get('miniStorageL3Uuid'))
-
                 vm_creation_option.set_instance_offering_uuid(vm.vmInstranceOfferingUuid_)
                 vm_creation_option.set_l3_uuids(l3_uuid_list)
                 vm_creation_option.set_image_uuid(vm.imageUuid_)
