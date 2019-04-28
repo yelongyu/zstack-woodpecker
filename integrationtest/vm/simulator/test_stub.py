@@ -2500,6 +2500,7 @@ def generate_account_billing(account_uuid):
     return True
 
 def resource_price_clear(resource):
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
     usage_tables_dict = {
         "vm": '''echo "delete from zstack.VmUsageVO;delete from zstack.VmUsageHistoryVO;delete from zstack.VmCPUBillingVO;delete from zstack.VmMemoryBillingVO;delete from zstack.PriceVO;delete from zstack.BillingVO;"|mysql -uzstack -pzstack.password''',
         "rootvolume": '''echo "delete from zstack.RootVolumeUsageVO;delete from zstack.RootVolumeUsageHistoryVO;delete from zstack.RootVolumeBillingVO;delete from zstack.PriceVO;delete from zstack.BillingVO;"|mysql -uzstack -pzstack.password''',
@@ -2512,7 +2513,8 @@ def resource_price_clear(resource):
     }
     cmd = usage_tables_dict[resource]
     try:
-        os.system(cmd)
+        #os.system(cmd)
+        test_lib.lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd)
         test_util.test_logger('successfully clear %s data' % resource)
     except Exception, e:
         test_util.test_logger(e)
@@ -2521,6 +2523,7 @@ def resource_price_clear(resource):
     return True
 
 def update_dateinlong(resource, offset,count):
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
     usage_tables_dict = {
         "vm": "VmUsageVO",
         "rootvolume": "RootVolumeUsageVO",
@@ -2544,7 +2547,8 @@ def update_dateinlong(resource, offset,count):
     cmd = '''echo "update zstack.%s set dateInLong=dateInLong-%s;update zstack.PriceVO set dateInLong=dateInLong-%s-86400000;"|mysql -uzstack -pzstack.password''' % \
              (usage_tables_dict[resource], offset_sum, offset_sum)
     try:
-        os.system(cmd)
+        #os.system(cmd)
+        test_lib.lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd)
         test_util.test_logger('successfully update data in %s' % usage_tables_dict[resource])
     except:
         test_util.test_fail('fail to execute command %s' % cmd)
