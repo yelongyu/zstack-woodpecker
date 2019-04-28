@@ -12,7 +12,6 @@ import zstackwoodpecker.operations.node_operations as node_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.operations.ha_operations as ha_ops
-import test_stub
 import random
 import time
 import os
@@ -20,6 +19,8 @@ import os
 vm = None
 mn_host_list = None
 need_recover_mn_host_list = None
+
+test_stub = test_lib.lib_get_test_stub()
 
 def test():
     global vm
