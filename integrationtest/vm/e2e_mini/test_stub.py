@@ -14,6 +14,7 @@ from zstackwoodpecker import test_util
 
 POSTFIX = time.strftime('%y%m%d-%H%M%S', time.localtime())
 MESSAGETOAST = 'ant-notification-notice-message'
+REFRESHCSS = 'ant-btn square___3vP_2 ant-btn-primary'
 CARDCONTAINER = 'ant-list-item cardContainer___1TO4m'
 
 class MINI(E2E):
@@ -27,7 +28,6 @@ class MINI(E2E):
         self.route('http://%s:8200' % self.mini_server_ip)
         self.window_size(1600, 900)
         self.login()
-
     def login(self):
         self.get_element('#accountName').input('admin')
         self.get_element('#password').input('password')
@@ -39,11 +39,10 @@ class MINI(E2E):
         if elem.text != u'首页':
             test_util.test_logger(elem.err_msg)
             test_util.test_fail('Login failed! %s')
-
     def create_vm(self, name=None, dsc=None, image=os.getenv('imageName_s'), cpu=2, mem='2 GB', data_size=None,user_data=None,
                   network=os.getenv('l3PublicNetworkName'), cluster=os.getenv('clusterName'), provisioning=u'厚置备'):
         self.get_element('a[href="/web/vm"]').click()
-        self.wait_for_element(CARDCONTAINER)
+        self.wait_for_element(REFRESHCSS)
         self.click_button(u'创建云主机')
         self.vm_name = name if name else 'vm-' + POSTFIX
         vm_dict = {u'名称': self.vm_name,
@@ -77,7 +76,6 @@ class MINI(E2E):
         assert attr_elems[1].text == vm_offering, "Excepted: %s, actual: %s" % (vm_offering, attr_elems[1].text)
         assert attr_elems[2].text == 'Linux', "Excepted: 'Linux', actual: %s" % attr_elems[2].text
         assert len(attr_elems[3].text.split('.')) == 4, "Actual vm ip is [%s]" % attr_elems[3].text
-
     def delete_vm(self, vm_name=None):
         self.get_element('a[href="/web/vm"]').click()
         self.wait_for_element(CARDCONTAINER)
@@ -90,6 +88,8 @@ class MINI(E2E):
         vm_elem.get_element('input[type="checkbox"]').click()
         self.click_button(u'更多操作')
         self.operate(u'删除')
+        self.confirm()
+        self.wait_for_element(MESSAGETOAST, timeout=60, target='disappear')
         for vm_elem in self.get_elements(CARDCONTAINER):
             if vm_elem.text == vm_name:
                 test_util.test_fail('VM [%s] is still displayed!' % vm_name)

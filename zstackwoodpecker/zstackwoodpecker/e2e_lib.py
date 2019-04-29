@@ -102,6 +102,7 @@ class E2E(object):
         for element in elements:
             if element.text == btn_name and element.displayed():
                 if element.click():
+                    time.sleep(1)
                     return True
                 else:
                     retry -= 1
@@ -148,6 +149,7 @@ class E2E(object):
         for op in self.get_elements('li[role="menuitem"]'):
             if op.displayed() and op.text == name:
                 op.click()
+                time.sleep(1)
 
 class Element(E2E):
     def __init__(self, uri):
