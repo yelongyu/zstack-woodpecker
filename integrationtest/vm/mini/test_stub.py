@@ -73,6 +73,17 @@ def sce_is_sep_pub():
     else:
         return False
 
+def skip_if_not_storage_network_separate(scenarioConfig):
+    is_storage_network_separated = False
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            for l3Network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                if xmlobject.has_element(l3Network, 'primaryStorageRef'):
+                    is_storage_network_separated = True
+                    break
+    if not is_storage_network_separated:
+        test_util.test_skip("not found separate network in scenario config.")
+
 
 def check_if_vip_is_on_host(scenarioConfig, scenarioFile, host_ip, retry_times=1):
     """
@@ -97,6 +108,29 @@ def check_if_vip_is_on_host(scenarioConfig, scenarioFile, host_ip, retry_times=1
 
     test_util.test_logger("not find vip in host_ip:%s" %(host_ip))
     return False
+
+
+def get_mn_host(scenarioConfig, scenarioFile):
+    mn_host_list = []
+
+    test_util.test_logger("@@DEBUG@@:<scenarioConfig:%s><scenarioFile:%s><scenarioFile is existed: %s>" \
+                          %(str(scenarioConfig), str(scenarioFile), str(os.path.exists(scenarioFile))))
+    if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
+        return mn_host_list
+
+    test_util.test_logger("@@DEBUG@@: after config file exist check")
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            if xmlobject.has_element(vm, 'mnHostRef'):
+                with open(scenarioFile, 'r') as fd:
+                    xmlstr = fd.read()
+                    fd.close()
+                    scenario_file = xmlobject.loads(xmlstr)
+                    for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                        if s_vm.name_ == vm.name_:
+                            mn_host_list.append(s_vm)
+    test_util.test_logger("@@DEBUG@@: %s" %(str(mn_host_list)))
+    return mn_host_list
 
 def create_volume(volume_creation_option=None, from_offering=True):
     if not volume_creation_option:
