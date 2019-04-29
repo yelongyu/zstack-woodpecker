@@ -136,7 +136,7 @@ class MINI(E2E):
         volume_name = volume_name if volume_name else self.volume_name
         for volume_elem in self.get_elements(CARDCONTAINER):
             if volume_name in volume_elem.text:
-                break;
+                break
         else:
             test_util.test_fail('Not found the volume [name: %s]' % volume_name)
         volume_elem.get_element('input[type="checkbox"]').click()
