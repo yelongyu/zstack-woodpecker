@@ -49,6 +49,12 @@ class E2E(object):
     def _del(self, uri):
         return json_post(uri=uri, headers={'charset': 'utf-8'}, method='DELETE', fail_soon=True)
 
+    def go_forward(self):
+        self._post(join(self.uri, 'forward'))
+
+    def go_backward(self):
+        self._post(join(self.uri, 'back'))
+
     def refresh_page(self):
         self._post(join(self.uri, 'refresh'))
 
@@ -144,6 +150,14 @@ class E2E(object):
         sec = int(sec) * 1000
         uri = join(self.uri, 'timeouts', 'implicit_wait')
         self._post(uri, body='{"ms": %s}' % sec)
+        
+    def maximize_window(self):
+        uri = join(self.uri, 'window', self.window_handle, 'maximize')
+        self._post(uri)
+
+    def close_window(self):
+        uri = join(self.uri, 'window')
+        self._del(uri)
 
     def close(self):
         self._del(self.uri)
@@ -166,6 +180,16 @@ class Element(E2E):
         uri = join(self.uri, 'text')
         rsp = self._get(uri)
         return rsp.value
+
+    @property
+    def location(self):
+        uri = join(self.uri, 'location')
+        rsp = self._get(uri).value
+        loc = {
+            "x": round(rsp['x']),
+            "y": round(rsp['y'])
+        }
+        return loc   
 
     def click(self):
         uri = join(self.uri, 'click')

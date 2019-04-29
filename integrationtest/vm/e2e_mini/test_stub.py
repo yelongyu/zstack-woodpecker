@@ -8,10 +8,13 @@ Create an unified test_stub for E2E test operations
 
 import os
 import time
+from os.path import join
 from zstackwoodpecker.e2e_lib import E2E
 import zstackwoodpecker.operations.resource_operations as res_ops 
 from zstackwoodpecker import test_util
+import zstacklib.utils.jsonobject as jsonobject
 
+LOCATION_FILE_PATH = '/root/.zstackwoodpecker/integrationtest/vm/e2e_mini/'
 POSTFIX = time.strftime('%y%m%d-%H%M%S', time.localtime())
 MESSAGETOAST = 'ant-notification-notice-message'
 REFRESHCSS = 'ant-btn square___3vP_2 ant-btn-primary'
@@ -37,7 +40,7 @@ class MINI(E2E):
         self.wait_for_element(MESSAGETOAST)
         # root page
         assert self.get_elements('content___3mo4D ant-layout-content')
-
+    
     def create_vm(self, name=None, dsc=None, image=os.getenv('imageName_s'), cpu=2, mem='2 GB', data_size='2 GB', user_data=None,
                   network=os.getenv('l3PublicNetworkName'), cluster=os.getenv('clusterName'), provisioning=u'厚置备'):
         self.get_element('a[href="/web/vm"]').click()
@@ -77,7 +80,7 @@ class MINI(E2E):
         assert attr_elems[1].text == vm_offering, "Excepted: %s, actual: %s" % (vm_offering, attr_elems[1].text)
         assert attr_elems[2].text == 'Linux', "Excepted: 'Linux', actual: %s" % attr_elems[2].text
         assert len(attr_elems[3].text.split('.')) == 4, "Actual vm ip is [%s]" % attr_elems[3].text
-
+    
     def create_volume(self, name=None, dsc=None, size='2 GB', cluster=os.getenv('clusterName'), vm=None, provisioning=u'厚置备'):
         self.get_element('a[href="/web/volume"]').click()
         self.wait_for_element(REFRESHCSS)
@@ -114,7 +117,7 @@ class MINI(E2E):
         else:
             assert attr_elems[1].text == u'未加载', "Excepted: u'未加载', actual: %s" % attr_elems[1].text
         assert attr_elems[2].text == size, "Excepted: %s, actual: %s" % (size, attr_elems[2].text)
-
+    
     def delete_vm(self, vm_name=None):
         self.get_element('a[href="/web/vm"]').click()
         self.wait_for_element(CARDCONTAINER)
@@ -132,7 +135,7 @@ class MINI(E2E):
         for vm_elem in self.get_elements(CARDCONTAINER):
             if vm_elem.text == vm_name:
                 test_util.test_fail('VM [%s] is still displayed!' % vm_name)
-
+    
     def delete_volume(self, volume_name=None):
         self.get_element('a[href="/web/volume"]').click()
         self.wait_for_element(CARDCONTAINER)
@@ -152,3 +155,15 @@ class MINI(E2E):
                 if volume_elem.text == volume_name:
                     test_util.test_fail('Volume [%s] is still displayed!' % volume_name)
 
+    def save_element_location(self, filename="location.tmpt"):
+        page_list = ["", "monitoringCenter", "minihost", "primaryStorage", "vm", "volume", "image", "network", "alarmMessage"]
+        for page in page_list:
+            loc[page] = self.get_element('a[href="/web/%s"]' % page).location
+            json_loc = jsonobject.dumps(loc)
+            try:
+                with open(join(LOCATION_FILE_PATH, filename), 'ab') as f:
+                    f.write(json_loc)
+            except IOError:
+                return False
+        else:
+            return True
