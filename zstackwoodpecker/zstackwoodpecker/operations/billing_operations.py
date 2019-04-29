@@ -33,7 +33,7 @@ def delete_resource_price(price_uuid, delete_mode = None, session_uuid = None):
             session_uuid)                         
     return result                                 
 
-def create_resource_price(resource_name, time_unit, price, resource_unit = None, date_in_long = None, account_uuid = None, session_uuid = None):
+def create_resource_price(resource_name, time_unit, price, system_tags = None, resource_unit = None, date_in_long = None, account_uuid = None, session_uuid = None):
     action = api_actions.CreateResourcePriceAction()
     action.resourceName = resource_name
     action.timeUnit = time_unit
@@ -41,6 +41,7 @@ def create_resource_price(resource_name, time_unit, price, resource_unit = None,
     action.resourceUnit = resource_unit
     action.dateInLong = date_in_long
     action.accountUuid = account_uuid
+    action.systemTags = system_tags
     test_util.action_logger('Create resource %s price %s, date in long: %s' \
             % (resource_name, price, date_in_long))
     result = account_operations.execute_action_with_session(action, \

@@ -31,6 +31,7 @@ import zstackwoodpecker.operations.console_operations as cons_ops
 import zstackwoodpecker.operations.license_operations as lic_ops
 import zstackwoodpecker.operations.resource_stack as resource_stack_ops
 import zstackwoodpecker.operations.image_operations as img_ops
+import zstackwoodpecker.operations.billing_operations as bill_ops
 
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.header.volume as vol_header
@@ -8282,3 +8283,487 @@ def lib_execute_command_in_flat_vm(vm, cmd, l3_uuid=None):
     else:
         test_util.test_logger('Fail execute [command:] %s in [vm:] %s' % (cmd, vm_ip))
         return False
+
+class Billing(object):
+	def __init__(self):
+		self.resourceName = None
+		self.timeUnit = "s"
+		self.price = 5
+	
+	def set_resourceName(self,resourceName):
+		self.resourceName = resourceName
+
+	def get_resourceName(self):
+		return self.resourceName
+
+	def set_price(self,price):
+		self.price = price
+
+	def get_price(self):
+		return self.price
+
+	def set_timeUnit(self,timeUnit):
+		self.timeUnit = timeUnit
+
+	def get_timeUnit(self):
+		return self.timeUnit
+
+	def set_price_system_tags(self, systemTags):
+		self.systemTags = systemTags
+
+	def get_price_total(self,start=None,end=None):
+		cond = res_ops.gen_query_conditions('name', '=',  'admin')
+		admin_uuid = res_ops.query_resource_fields(res_ops.ACCOUNT, cond)[0].uuid
+		prices = bill_ops.calculate_account_spending(admin_uuid,date_start=start,date_end=end)
+		return 	prices
+
+	def get_timeUnit_timestamp(self):
+		timeUnit_dict={"s": 1000,
+                               "m": 60000,
+       			       "h": 3600000,
+        		       "d": 86400000,
+        		       "w": 604800000,
+        	               "mon": 2592000000,}
+		return timeUnit_dict[self.get_timeUnit()]
+
+class CpuBilling(Billing):
+	def __init__(self):
+		super(CpuBilling, self).__init__()
+		self.resourceName = "cpu"
+		self.uuid = None
+
+	def get_uuid(self):
+		return self.uuid
+	
+        def create_resource_type(self):
+                evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,system_tags=self.systemTags)
+                self.uuid = evt.uuid
+                return evt
+
+	def delete_resource(self):
+		return bill_ops.delete_resource_price(self.uuid)
+	
+	def compare(self,status):
+		prices = super(CpuBilling, self).get_price_total()
+		time.sleep(1)
+		prices1 = super(CpuBilling, self).get_price_total()
+		if status == "migration" or status == "recover":
+			if prices1.total <= prices.total:
+				test_util.test_fail("test billing fail,maybe can not calculate when vm %s"\
+						 %(status))
+		else:
+			if prices1.total != prices.total:
+				test_util.test_fail("test billing fail,maybe can not calculate when vm %s"\
+						%(status))
+ 
+class MemoryBilling(Billing):
+	def __init__(self):
+		super(MemoryBilling, self).__init__()
+		self.resourceName = "memory"
+		self.resourceUnit = "G"
+		self.uuid = None
+	
+	def set_resourceUnit(self,resourceUnit):
+		self.resourceUnit = resourceUnit
+
+	def get_resourceUnit(self):
+		return self.resourceUnit
+	
+	def get_uuid(self):
+		return self.uuid
+
+	def create_resource_type(self):
+		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit,system_tags=self.systemTags)
+		self.uuid = evt.uuid
+		return evt
+	
+	def delete_resource(self):
+		return bill_ops.delete_resource_price(self.uuid)
+
+        def compare(self,status):
+		prices = super(MemoryBilling, self).get_price_total()
+		time.sleep(1)
+		prices1 = super(MemoryBilling, self).get_price_total()
+		if status == "migration" or status == "recover":
+			if prices1.total <= prices.total:
+				test_util.test_fail("test billing fail,maybe can not calculate when vm %s"\
+					%(status))
+		else:
+			if prices1.total != prices.total:
+				test_util.test_fail("test billing fail,maybe can not calculate when vm %s"\
+					%(status))
+
+class RootVolumeBilling(Billing):
+	def __init__(self):
+		super(RootVolumeBilling, self).__init__()
+		self.resourceName = "rootVolume"
+		self.resourceUnit = "G"
+		self.uuid = None
+	
+        def set_resourceUnit(self,resourceUnit):
+                self.resourceUnit = resourceUnit
+
+        def get_resourceUnit(self):
+                return self.resourceUnit
+
+	def create_resource_type(self):
+		return bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit,system_tags=self.systemTags)
+
+        def get_uuid(self):
+                return self.uuid
+
+        def create_resource_type(self):
+                evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit)
+                self.uuid = evt.uuid
+                return evt
+
+	def delete_resource(self):
+		return bill_ops.delete_resource_price(self.uuid)
+
+	def compare(self,status):
+		prices = super(RootVolumeBilling, self).get_price_total()
+		time.sleep(1)
+		prices1 = super(RootVolumeBilling, self).get_price_total()
+		if status == "clean":
+			if prices1.total != prices.total:
+				test_util.test_fail("test billing fail,maybe can not calculate when vm %s" \
+					%(status))
+		else:
+			if prices1.total <= prices.total:
+				test_util.test_fail("test billing fail,maybe can not calculate when vm %s"\
+					%(status))
+
+class DataVolumeBilling(Billing):
+        def __init__(self):
+                super(DataVolumeBilling, self).__init__()
+                self.resourceName = "dataVolume"
+                self.resourceUnit = "G"
+		self.uuid = None
+		self.volume = None
+		self.disk = None
+
+        def set_resourceUnit(self,resourceUnit):
+                self.resourceUnit = resourceUnit
+
+        def get_resourceUnit(self):
+                return self.resourceUnit
+
+	def create_resource_type(self):
+		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,system_tags=self.systemTags,resource_unit=self.resourceUnit)
+		self.uuid = evt.uuid
+		return evt
+
+	def delete_resource(self):
+		return bill_ops.delete_resource_price(self.uuid)
+
+	def compare(self,status):
+		prices = super(DataVolumeBilling, self).get_price_total()
+                time.sleep(1)
+                prices1 = super(DataVolumeBilling, self).get_price_total()
+                if status == "volume_clean":
+                        if prices1.total != prices.total:
+                                test_util.test_fail("test billing fail,maybe can not calculate when vm %s" \
+                                        %(status))
+                else:
+                        if prices1.total <= prices.total:
+                                test_util.test_fail("test billing fail,maybe can not calculate when vm %s"\
+                                        %(status))
+	
+	def create_volume_and_attach_vmm(self,disk_offering_uuid,volume_name,vm_instance):
+                from zstackwoodpecker.zstack_test import zstack_test_volume as test_volume
+		volume = test_volume.ZstackTestVolume()
+		volume.volume_creation_option.set_disk_offering_uuid(disk_offering_uuid)
+		volume.volume_creation_option.set_name(volume_name)
+		volume.create()
+		time.sleep(1)
+		volume.attach(vm_instance)
+		self.volume = volume
+		return volume.volume
+	
+	def create_disk_offer(self,diskSize,disk_name,system_tags):
+		disk_offer = test_util.DiskOfferingOption()
+		disk_offer.set_diskSize(diskSize)
+		disk_offer.set_name(disk_name)
+		disk_offer.set_system_tags(system_tags)
+		self.disk = disk_offer		
+		return vol_ops.create_volume_offering(disk_offer)
+		
+class PublicIpBilling(Billing):
+	def __init__(self):
+		super(PublicIpBilling, self).__init__()
+		self.resourceName = "pubIpVmNicBandwidthIn"
+		self.resourceUnit = "M"
+		self.uuid = None
+	
+	def set_resourceUnit(self,resourceUnit):
+		self.resourceUnit = resourceUnit
+
+	def get_resourceUnit(self):
+		return self.resourceUnit
+
+        def create_resource_type(self):
+		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit,system_tags=self.systemTags)
+		self.uuid = evt.uuid
+		return evt
+
+	def get_uuid(self):
+                return self.uuid
+
+	def delete_resource(self):
+		return bill_ops.delete_resource_price(self.uuid)
+	
+	def compare(self,status):
+		prices = super(PublicIpBilling, self).get_price_total()
+		time.sleep(1)
+		prices1 = super(PublicIpBilling, self).get_price_total()
+		if status == "clean" or status == "destory":
+			if prices1.total != prices.total:
+				test_util.test_fail("test billing fail,maybe can not calculate when vm %s" \
+							%(status))
+		else:
+			if prices1.total <= prices.total:
+				test_util.test_fail("test billing fail,maybe can not calculate when vm %s" \
+							%(status))
+
+class PublicIpVipInBilling(Billing):
+	def __init__(self):
+		super(PublicIpVipInBilling, self).__init__()
+		self.resourceName = "pubIpVipBandwidthIn"
+		self.resourceUnit = "M"
+		self.uuid = None
+
+	def set_resourceUnit(self,resourceUnit):
+		self.resourceUnit = resourceUnit
+
+	def get_resourceUnit(self):
+		return self.resourceUnit
+	
+	def create_resource_type(self):
+		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit,system_tags=self.systemTags)
+		self.uuid = evt.uuid
+		return evt
+
+	def get_uuid(self):
+		return self.uuid
+	
+	def delete_resource(self):
+		return bill_ops.delete_resource_price(self.uuid)
+
+class PublicIpVipOutBilling(Billing):
+	def __init__(self):
+		super(PublicIpVipOutBilling, self).__init__()
+		self.resourceName = "pubIpVipBandwidthOut"
+		self.resourceUnit = "M"
+		self.uuid = None
+
+	def set_resourceUnit(self,resourceUnit):
+		self.resourceUnit = resourceUnit
+
+	def get_resourceUnit(self):
+		return self.resourceUnit
+	
+	def create_resource_type(self):
+		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit,system_tags=self.systemTags)
+		self.uuid = evt.uuid
+		return evt
+
+	def get_uuid(self):
+		return self.uuid
+	
+	def delete_resource(self):
+		return bill_ops.delete_resource_price(self.uuid)
+
+class PublicIpNicInBilling(Billing):
+	def __init__(self):
+		super(PublicIpNicInBilling, self).__init__()
+		self.resourceName = "pubIpVmNicBandwidthIn"
+		self.resourceUnit = "M"
+		self.uuid = None
+
+	def set_resourceUnit(self,resourceUnit):
+		self.resourceUnit = resourceUnit
+
+	def get_resourceUnit(self):
+		return self.resourceUnit
+	
+	def create_resource_type(self):
+		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit,system_tags=self.systemTags)
+		self.uuid = evt.uuid
+		return evt
+
+	def get_uuid(self):
+		return self.uuid
+	
+	def delete_resource(self):
+		return bill_ops.delete_resource_price(self.uuid)
+
+class PublicIpNicOutBilling(Billing):
+	def __init__(self):
+		super(PublicIpNicOutBilling, self).__init__()
+		self.resourceName = "pubIpVmNicBandwidthOut"
+		self.resourceUnit = "M"
+		self.uuid = None
+
+	def set_resourceUnit(self,resourceUnit):
+		self.resourceUnit = resourceUnit
+
+	def get_resourceUnit(self):
+		return self.resourceUnit
+	
+	def create_resource_type(self):
+		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit,system_tags=self.systemTags)
+		self.uuid = evt.uuid
+		return evt
+
+	def get_uuid(self):
+		return self.uuid
+	
+	def delete_resource(self):
+		return bill_ops.delete_resource_price(self.uuid)
+'''
+to be define
+'''
+class GPUBilling(Billing):
+        def __init__(self):
+                super(GPUBilling, self).__init__()
+
+def generate_account_billing(account_uuid):
+    flag = bill_ops.generate_account_billing(account_uuid)["success"]
+    try:
+        if flag:
+            test_util.test_logger("successfully generate account %s billing" % account_uuid)
+        else:
+            test_util.test_fail("fail to generate account %s billing\n %s" % (account_uuid, flag))
+            return False
+    except:
+        test_util.test_logger('fail to generate account %s billing\n %s' % (account_uuid, flag))
+        return False
+    return True
+
+def resource_price_clear(resource):
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    usage_tables_dict = {
+        "vm": '''echo "delete from zstack.VmUsageVO;delete from zstack.VmUsageHistoryVO;delete from zstack.VmCPUBillingVO;delete from zstack.VmMemoryBillingVO;delete from zstack.PriceVO;delete from zstack.BillingVO;"|mysql -uzstack -pzstack.password''',
+        "rootvolume": '''echo "delete from zstack.RootVolumeUsageVO;delete from zstack.RootVolumeUsageHistoryVO;delete from zstack.RootVolumeBillingVO;delete from zstack.PriceVO;delete from zstack.BillingVO;"|mysql -uzstack -pzstack.password''',
+        "datavolume": '''echo "delete from zstack.DataVolumeUsageVO;delete from zstack.DataVolumeUsageHistoryVO;delete from zstack.DataVolumeBillingVO;delete from zstack.PriceVO;delete from zstack.BillingVO;"|mysql -uzstack -pzstack.password''',
+        "vip_in": '''echo "delete from zstack.PubIpVipBandwidthInBillingVO;delete from zstack.PubIpVipBandwidthUsageHistoryVO;delete from zstack.PubIpVipBandwidthUsageVO;delete from zstack.BillingVO;delete from zstack.PriceVO;"|mysql -uzstack -pzstack.password''',
+        "vip_out": '''echo "delete from zstack.PubIpVipBandwidthOutBillingVO;delete from zstack.PubIpVipBandwidthUsageHistoryVO;delete from zstack.PubIpVipBandwidthUsageVO;delete from zstack.BillingVO;delete from zstack.PriceVO;"|mysql -uzstack -pzstack.password''',
+        "ip_in":'''echo "delete from zstack.PubIpVmNicBandwidthUsageVO;delete from zstack.PubIpVmNicBandwidthUsageHistoryVO;delete from zstack.PubIpVmNicBandwidthInBillingVO;delete from zstack.PriceVO;delete from zstack.BillingVO;"|mysql -uzstack -pzstack.password''',
+        "ip_out":'''echo "delete from zstack.PubIpVmNicBandwidthUsageVO;delete from zstack.PubIpVmNicBandwidthUsageHistoryVO;delete from zstack.PubIpVmNicBandwidthOutBillingVO;delete from zstack.PriceVO;delete from zstack.BillingVO"|mysql -uzstack -pzstack.password''',
+        "gpu":'''echo "delete from zstack.PciDeviceUsageVO;delete from zstack.PciDeviceUsageHistoryVO;delete from zstack.PciDeviceBillingVO;delete from zstack.PriceVO;delete from zstack.BillingVO;"|mysql -uzstack -pzstack.password''',
+    }
+    cmd = usage_tables_dict[resource]
+    try:
+        #os.system(cmd)
+        #test_lib.lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd)
+        lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd)
+        test_util.test_logger('successfully clear %s data' % resource)
+    except Exception, e:
+        test_util.test_logger(e)
+        test_util.test_fail('fail to execute command %s' % cmd)
+        #return False
+    return True
+
+def update_dateinlong(resource, offset,count):
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    usage_tables_dict = {
+        "vm": "VmUsageVO",
+        "rootvolume": "RootVolumeUsageVO",
+        "datavolume": "DataVolumeUsageVO",
+        "vip_in": "PubIpVipBandwidthUsageVO",
+        "vip_out": "PubIpVipBandwidthUsageVO",
+        "ip_in": "PubIpVmNicBandwidthUsageVO",
+        "ip_out": "PubIpVmNicBandwidthUsageVO",
+        "gpu": "PciDeviceUsageVO",
+    }
+    offset_dict = {
+        "sec": 1000,
+        "min": 60000,
+        "hou": 3600000,
+        "day": 86400000,
+        "week": 604800000,
+        "month": 2592000000,
+        "year": 31536000000,
+    }
+    offset_sum = offset_dict[offset] * count 
+    cmd = '''echo "update zstack.%s set dateInLong=dateInLong-%s;update zstack.PriceVO set dateInLong=dateInLong-%s-86400000;"|mysql -uzstack -pzstack.password''' % \
+             (usage_tables_dict[resource], offset_sum, offset_sum)
+    try:
+        #os.system(cmd)
+        #test_lib.lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd)
+        lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd)
+        test_util.test_logger('successfully update data in %s' % usage_tables_dict[resource])
+    except:
+        test_util.test_fail('fail to execute command %s' % cmd)
+        #return False
+    return usage_tables_dict[resource], offset_sum
+
+def billing_check(billing, resource, offset, offset_count, resource_count):
+    cond = res_ops.gen_query_conditions('name', '=',  'admin')
+    admin_uuid = res_ops.query_resource_fields(res_ops.ACCOUNT, cond)[0].uuid
+
+    time_now = int(time.time() * 1000)
+    prices = billing.get_price_total(end=time_now)
+    table_name, check_time = update_dateinlong(resource, offset, offset_count)
+    generate_account_billing(admin_uuid) #update data in tables like %HistoryUsageVO
+    prices1 = billing.get_price_total(end=time_now)
+
+    spending_diff_range = float(int(billing.get_price()) * resource_count * 1000)/float(billing.get_timeUnit_timestamp()) * 10 #acceptable deviation range
+    test_util.test_logger("@@DEBUG@@: spending_diff_range=%s" % spending_diff_range)
+
+    diff = prices1.total - prices.total
+    cal = float(int(billing.get_price()) * resource_count * check_time)/float(billing.get_timeUnit_timestamp())
+    dc_diff = diff-cal
+
+    if abs(dc_diff) > spending_diff_range:
+        test_util.test_logger("offset time is %s %s \nbilling check fail: prices=%s prices1=%s diff=%s cal=%s diff-cal=%s" % (offset_count, offset, prices.total, prices1.total, diff, cal, str(dc_diff)))
+        return False
+    else:
+        test_util.test_logger("offset time is %s %s \nbilling check pass: prices=%s prices1=%s diff=%s cal=%s diff-cal=%s" % (offset_count, offset, prices.total, prices1.total, diff, cal, str(dc_diff)))
+    return True
+
+def delete_price(price_uuid, delete_mode = None):
+        test_util.test_logger('Delete resource price')
+        result = bill_ops.delete_resource_price(price_uuid, delete_mode)
+        return result
+
+def create_vm_billing(name, image_uuid, host_uuid, instance_offering_uuid, l3_uuid, session_uuid=None):
+        from zstackwoodpecker.zstack_test import zstack_test_vm as test_vm
+        vm_creation_option = test_util.VmOption()
+        vm_creation_option.set_name(name)
+        vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+        vm_creation_option.set_image_uuid(image_uuid)
+        vm_creation_option.set_l3_uuids([l3_uuid])
+        if host_uuid:
+                vm_creation_option.set_host_uuid(host_uuid)
+        if session_uuid:
+                vm_creation_option.set_session_uuid(session_uuid)
+        vm = test_vm.ZstackTestVm()
+        vm.set_creation_option(vm_creation_option)
+        vm.create()
+        return vm
+
+def set_vm_resource():
+        imageUuid = res_ops.query_resource_fields(res_ops.IMAGE, \
+                                res_ops.gen_query_conditions('system', '=',  'false'))[0].uuid
+        instanceOfferingUuid = res_ops.query_resource_fields(res_ops.INSTANCE_OFFERING, \
+                                res_ops.gen_query_conditions('type', '=',  'UserVm'))[0].uuid
+        l3NetworkUuids = res_ops.query_resource_fields(res_ops.L3_NETWORK, \
+                                res_ops.gen_query_conditions('name', '=',  'public network'))[0].uuid
+        return (imageUuid,instanceOfferingUuid,l3NetworkUuids)
+
+def query_resource_price(uuid = None, price = None, resource_name = None, time_unit = None, resource_unit = None):
+        cond = []
+        if uuid:
+                cond = res_ops.gen_query_conditions('uuid', "=", uuid, cond)
+        if price:
+                cond = res_ops.gen_query_conditions('price', "=", price, cond)
+        if resource_name:
+                cond = res_ops.gen_query_conditions('resourceName', "=", resource_name, cond)
+        if time_unit:
+                cond = res_ops.gen_query_conditions('timeUnit', "=", time_unit, cond)
+        if resource_unit:
+                cond = res_ops.gen_query_conditions('resourceUnit', "=", resource_unit, cond)
+        result = bill_ops.query_resource_price(cond)
+        return result
+

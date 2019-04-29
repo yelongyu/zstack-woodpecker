@@ -406,6 +406,7 @@ def create_volume_offering(disk_offering_option, \
     action.name = disk_offering_option.get_name()
     action.description = disk_offering_option.get_description()
     action.allocatorStrategy = disk_offering_option.get_allocatorStrategy()
+    action.systemTags = disk_offering_option.get_system_tags()
     test_util.action_logger('Create disk offering: name: %s, diskSize: %d' \
             % (action.name, action.diskSize))
     evt = account_operations.execute_action_with_session(action, session_uuid)
