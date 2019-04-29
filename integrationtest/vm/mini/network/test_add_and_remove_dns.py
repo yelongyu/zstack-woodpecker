@@ -12,6 +12,7 @@ import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import time
 import os
 
+l2 = None
 l2_name = 'mini_l2_network_test'
 l3 = None
 l3_name = 'mini_l3_network_test'
@@ -29,7 +30,7 @@ def remove_dns_from_l3_network(l3_uuid, dns, system_tags=None, use_tags=None, se
     return evt.inventory
 
 def test():
-    global l3
+    global l3, l2
     # 1. create l2 vlan network
     test_util.test_dsc('create L2_vlan network mini_l2_network_test')
     zone_uuid = res_ops.query_resource(res_ops.ZONE)[0].uuid
@@ -65,11 +66,14 @@ def test():
             test_util.test_dsc('remove dns from l3network failed')
         else:
             test_util.test_dsc('remove dns from l3network passed')
-        test_util.test_dsc('delete l3 network')
+        test_util.test_dsc('delete l2, l3 network after test')
         net_ops.delete_l3(l3.uuid)
+        net_ops.delete_l2(l2_uuid)
         test_util.test_pass('add dns to network passed')
 
 def error_cleanup():
-    global l3
+    global l3, l2
+    if l2:
+        net_ops.delete_l2(l2.inventory.uuid)
     if l3:
         net_ops.delete_l3(l3.uuid)

@@ -14,6 +14,7 @@ import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import time
 import os
 
+l2 = None
 l3 = None
 
 def attach_network_service_to_l3network(l3_uuid, providers, session_uuid=None):
@@ -29,7 +30,7 @@ def attach_network_service_to_l3network(l3_uuid, providers, session_uuid=None):
 def test():
 
     # create l3 network
-    global l3
+    global l3, l2
 
     name = 'mini_network_test'
     test_util.test_dsc('create L2_vlan network mini_l2_network_test')
@@ -68,10 +69,13 @@ def test():
     attach_network_service_to_l3network(l3.uuid, providers)
     test_util.test_dsc('a network with dns, ip range and network services has been created successfully')
     net_ops.delete_l3(l3.uuid)
+    net_ops.delete_l2(l2_uuid)
     test_util.test_dsc('delete l3 network after test')
 
 def error_cleanup():
-    global l3
+    global l3, l2
+    if l2:
+        net_ops.delete_l2(l2_uuid)
     if l3:
         net_ops.delete_l3(l3.uuid)
                                               
