@@ -75,7 +75,7 @@ def test():
 def error_cleanup():
     global l3, l2
     if l2:
-        net_ops.delete_l2(l2_uuid)
+        net_ops.delete_l2(l2.inventory.uuid)
     if l3:
         net_ops.delete_l3(l3.uuid)
                                               
