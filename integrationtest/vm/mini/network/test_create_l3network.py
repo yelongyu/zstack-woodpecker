@@ -17,7 +17,6 @@ import os
 l3 = None
 
 def attach_network_service_to_l3network(l3_uuid, providers, session_uuid=None):
-    #action.providerUuid = provider_uuid
     #providers = {provider_uuid:['network_service']}
     action = api_actions.AttachNetworkServiceToL3NetworkAction()
     action.networkServices = providers
@@ -32,8 +31,14 @@ def test():
     # create l3 network
     global l3
 
-    name = 'test'
-    l2_uuid=res_ops.get_resource(res_ops.L2_VLAN_NETWORK)[0].uuid
+    name = 'mini_network_test'
+    test_util.test_dsc('create L2_vlan network mini_l2_network_test')
+    zone_uuid = res_ops.query_resource(res_ops.ZONE)[0].uuid
+    cluster_uuid = res_ops.query_resource(res_ops.CLUSTER)[0].uuid
+    l2 = net_ops.create_l2_vlan('l2_vlan', 'zsn0', zone_uuid, '1998')
+    l2_uuid = l2.inventory.uuid
+    net_ops.attach_l2(l2_uuid, cluster_uuid)
+
     type='L3BasicNetwork'
     categry='Private'
     l3=net_ops.create_l3(name, l2_uuid, category=categry, Type=type)
@@ -43,7 +48,7 @@ def test():
     net_ops.add_dns_to_l3(l3.uuid, l3_dns)
     test_util.test_dsc('add DNS and IP_Range for L3_flat_network')
 
- # add ip range to l3 network
+    # add ip range to l3 network
     ip_range_option = test_util.IpRangeOption()
     ip_range_option.set_l3_uuid(l3.uuid)
     ip_range_option.set_startIp('192.168.40.2')
@@ -61,7 +66,9 @@ def test():
     provider2_uuid = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER, cond)[0].uuid
     providers = {provider1_uuid:['DHCP','Eip'], provider2_uuid:['SecurityGroup']}
     attach_network_service_to_l3network(l3.uuid, providers)
-
+    test_util.test_dsc('a network with dns, ip range and network services has been created successfully')
+    net_ops.delete_l3(l3.uuid)
+    test_util.test_dsc('delete l3 network after test')
 
 def error_cleanup():
     global l3
