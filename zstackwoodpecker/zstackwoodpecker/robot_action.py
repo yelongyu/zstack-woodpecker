@@ -162,6 +162,20 @@ class robot_test_dict(object):
         for k, snap_tree in self.snap_tree.items():
             snap_tree.check()
 
+    def cleanup(self):
+        # vm.check
+        for k, vm in self.vm.items():
+            vm.clean()
+        # volume.check
+        for k, volume in self.volume.items():
+            volume.clean()
+        # image
+        for k, image in self.image.items():
+            image.clean()
+        for k, backup_dict in self.backup.items():
+            backup = backup_dict['backup']
+            bs_uuids = [_bs.backupStorageUuid for _bs in backup.backupStorageRefs]
+            vol_ops.delete_volume_backup(bs_uuids, backup.uuid)
 
 class robot(object):
     def __init__(self):
@@ -1581,10 +1595,8 @@ def delete_volume_backup(robot_test_obj, args):
             backup_dict = v
             d_backup_name = k
     target_backup = backup_dict['backup']
-    zone_inv = res_ops.query_resource(res_ops.ZONE)[0]
-    cond = res_ops.gen_query_conditions("attachedZoneUuids", "=", zone_inv.uuid)
-    bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
-    vol_ops.delete_volume_backup([bs_uuid], target_backup.uuid)
+    bs_uuids = [_bs.backupStorageUuid for _bs in target_backup.backupStorageRefs]
+    vol_ops.delete_volume_backup(bs_uuids, target_backup.uuid)
     robot_test_obj.test_dict.remove_backup(target_backup)
 
 
