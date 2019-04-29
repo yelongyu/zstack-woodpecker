@@ -767,7 +767,9 @@ def create_vm_backup(robot_test_obj, args):
     target_vm = robot_test_obj.get_test_dict().vm[args[0]]
     backup_name = args[1]
 
-    bs_uuid = robot_test_obj.get_robot_resource()['bs'][0]
+    zone_inv = res_ops.query_resource(res_ops.ZONE)[0]
+    cond = res_ops.gen_query_conditions("attachedZoneUuids", "=", zone_inv.uuid)
+    bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
 
     backup_option = test_util.BackupOption()
     backup_option.set_name(backup_name)
@@ -870,7 +872,9 @@ def create_volume_backup(robot_test_obj, args):
     target_volume = robot_test_obj.get_test_dict().volume[args[0]]
     backup_name = args[1]
 
-    bs_uuid = robot_test_obj.get_robot_resource()['bs'][0]
+    zone_inv = res_ops.query_resource(res_ops.ZONE)[0]
+    cond = res_ops.gen_query_conditions("attachedZoneUuids","=", zone_inv.uuid)
+    bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
 
     backup_option = test_util.BackupOption()
     backup_option.set_name(backup_name)
@@ -1577,7 +1581,9 @@ def delete_volume_backup(robot_test_obj, args):
             backup_dict = v
             d_backup_name = k
     target_backup = backup_dict['backup']
-    bs_uuid = robot_test_obj.get_robot_resource()['bs'][0]
+    zone_inv = res_ops.query_resource(res_ops.ZONE)[0]
+    cond = res_ops.gen_query_conditions("attachedZoneUuids", "=", zone_inv.uuid)
+    bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
     vol_ops.delete_volume_backup([bs_uuid], target_backup.uuid)
     robot_test_obj.test_dict.remove_backup(target_backup)
 
