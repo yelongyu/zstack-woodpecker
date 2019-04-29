@@ -59,6 +59,7 @@ class E2E(object):
             value = '.'.join(_value)
         if '=' in value:
             value = value.replace('"', '\\"')
+        self.implicit_wait()
         rsp = self._post(uri, body='{"using": "%s", "value":"%s"}' % (strategy, value))
         return (rsp, uri[:uri.index('element') + 7])
 
@@ -138,6 +139,11 @@ class E2E(object):
     def window_size(self, width, height):
         uri = join(self.uri, 'window', self.window_handle, 'size')
         self._post(uri, body='{"width": %s , "height": %s}' % (int(width), int(height)))
+
+    def implicit_wait(self, sec=10):
+        sec = int(sec) * 1000
+        uri = join(self.uri, 'timeouts', 'implicit_wait')
+        self._post(uri, body='{"ms": %s}' % sec)
 
     def close(self):
         self._del(self.uri)
