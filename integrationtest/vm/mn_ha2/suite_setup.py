@@ -76,7 +76,7 @@ def test():
     ssh.scp_file("/home/license-10host-10days-hp.txt", "/home/license-10host-10days-hp.txt", mn_ip2, 'root', 'password')
     if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s '%s' %s" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ip1, 'disaster-recovery'))
-        os.system("bash %s '%s' %s" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ip1, 'disaster-recovery'))
+        os.system("bash %s '%s' %s" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ip2, 'disaster-recovery'))
 
     deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
     for host in testHosts:
