@@ -158,6 +158,7 @@ class MINI(E2E):
     def save_element_location(self, filename="location.tmpt"):
         page_list = ["", "monitoringCenter", "minihost", "primaryStorage", "vm", "volume", "image", "network", "alarmMessage"]
         for page in page_list:
+            loc = {}
             loc[page] = self.get_element('a[href="/web/%s"]' % page).location
             json_loc = jsonobject.dumps(loc)
             try:
@@ -165,5 +166,4 @@ class MINI(E2E):
                     f.write(json_loc)
             except IOError:
                 return False
-        else:
-            return True
+        return True
