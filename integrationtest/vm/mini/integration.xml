@@ -14,19 +14,19 @@
 	<case timeout='1200' noparallel='True'>ha/test_minips_both_mns_force_stop_recover.py</case>
 	<case timeout='1200' noparallel='True'>ha/test_minips_net_sep_vm_ha_mag_dis_vm_run.py</case>
 	<case timeout='1200' noparallel='True'>ha/test_minips_net_sep_vm_ha_ps_net_dis_vm_run.py</case>
-        <case timeout='900' noparallel='True'>test_mnha2_1_mn_host_force_stop_crt_vm.py</case>
-        <case timeout='1200' noparallel='True'>test_mnha2_1_mn_host_grace_stop_crt_vm.py</case>
-        <case timeout='1200' noparallel='True'>test_mnha2_1_mn_host_net_dis_crt_vm.py</case>
-        <case timeout='1200' noparallel='True'>test_mnha2_2_mn_host_stop_recover_crt_vm.py</case>
-        <case timeout='1200' noparallel='True'>test_mnha2_2_mn_host_net_dis_10s_rcv_crt_vm.py</case>
-        <case timeout='1200' noparallel='True'>test_mnha2_2_mn_host_net_dis_120s_rcv_crt_vm.py</case>
-	<case timeout='1200' noparallel='True'>test_mnha2_slave_mn_host_force_stop_crt_vm.py</case>
-	<case timeout='1200' noparallel='True'>test_mnha2_slave_mn_host_net_dis_10s_rcv_crt_vm.py</case>
-	<case timeout='1200' noparallel='True'>test_mnha2_slave_mn_host_net_dis_120s_rcv_crt_vm.py</case>
-	<case timeout='1200' noparallel='True'>test_mnha2_slave_mn_host_net_dis_crt_vm.py</case>
-	<case timeout='1200' noparallel='True'>test_mnha2_1_mn_host_zsha2_dmt_crt_vm.py</case>
-	<case timeout='1200' noparallel='True'>test_mnha2_upgrade_mn_crt_vm.py</case>
-	<case timeout='1200' noparallel='True'>test_mnha2_upgrade_zsha2_crt_vm.py</case>
-	<case timeout='1200' noparallel='True'>test_mnha2_get_all_metric_metadata.py</case>
+        <case timeout='900' noparallel='True'>zsha2/test_mnha2_1_mn_host_force_stop_crt_vm.py</case>
+        <case timeout='1200' noparallel='True'>zsha2/test_mnha2_1_mn_host_grace_stop_crt_vm.py</case>
+        <case timeout='1200' noparallel='True'>zsha2/test_mnha2_1_mn_host_net_dis_crt_vm.py</case>
+        <case timeout='1200' noparallel='True'>zsha2/test_mnha2_2_mn_host_stop_recover_crt_vm.py</case>
+        <case timeout='1200' noparallel='True'>zsha2/test_mnha2_2_mn_host_net_dis_10s_rcv_crt_vm.py</case>
+        <case timeout='1200' noparallel='True'>zsha2/test_mnha2_2_mn_host_net_dis_120s_rcv_crt_vm.py</case>
+	<case timeout='1200' noparallel='True'>zsha2/test_mnha2_slave_mn_host_force_stop_crt_vm.py</case>
+	<case timeout='1200' noparallel='True'>zsha2/test_mnha2_slave_mn_host_net_dis_10s_rcv_crt_vm.py</case>
+	<case timeout='1200' noparallel='True'>zsha2/test_mnha2_slave_mn_host_net_dis_120s_rcv_crt_vm.py</case>
+	<case timeout='1200' noparallel='True'>zsha2/test_mnha2_slave_mn_host_net_dis_crt_vm.py</case>
+	<case timeout='1200' noparallel='True'>zsha2/test_mnha2_1_mn_host_zsha2_dmt_crt_vm.py</case>
+	<case timeout='1200' noparallel='True'>zsha2/test_mnha2_upgrade_mn_crt_vm.py</case>
+	<case timeout='1200' noparallel='True'>zsha2/test_mnha2_upgrade_zsha2_crt_vm.py</case>
+	<case timeout='1200' noparallel='True'>zsha2/test_mnha2_get_all_metric_metadata.py</case>
     </suite>
 </integrationTest>
