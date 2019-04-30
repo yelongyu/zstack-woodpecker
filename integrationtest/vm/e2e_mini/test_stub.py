@@ -33,10 +33,13 @@ MENUDICT = {'homepage': 'a[href="/web/"]',
             'alarm':    'a[href="/web/alarmMessage"]'}
 
 
-def get_vm_inv(vm_name):
-    conditions = res_ops.gen_query_conditions('name', '=', vm_name)
-    vm_inv = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)
-    return vm_inv
+def get_inv(name, res_type):
+    conditions = res_ops.gen_query_conditions('name', '=', name)
+    if res_type == 'vm':
+        inv = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)
+    elif res_type == 'volume':
+        inv = res_ops.query_resource(res_ops.VOLUME, conditions)
+    return inv
 
 class MINI(E2E):
     def __init__(self):
@@ -121,8 +124,8 @@ class MINI(E2E):
                    'clusterUuid': cluster,
                    'provisioning': provisioning }
         vm_elem = self._create(vm_dict, 'vm')
-        vm_inv = get_vm_inv(self.vm_name)
-        check_list = [self.vm_name, cpu, mem, vm_inv.vmNics[0].ip]
+        vm_inv = get_inv(self.vm_name, "vm")
+        check_list = [self.vm_name, str(cpu), mem, vm_inv[0].vmNics[0].ip]
         checker = MINICHECKER(self, vm_elem)
         checker.vm_check(check_list)
 
@@ -137,13 +140,13 @@ class MINI(E2E):
                    'vmUuid' : vm,
                    'provisioning': provisioning }
         volume_elem = self._create(volume_dict, "volume")
-        attr_elems = volume_elem.get_elements('labelContainer___10VVH')
-        assert attr_elems[0].text == u'就绪', "Excepted: u'就绪', actual: %s" % attr_elems[0].text
+        volume_inv = get_inv(self.volume_name, "volume")
         if vm:
-            assert attr_elems[1].text == vm, "Excepted: %s, actual: %s" % (vm, attr_elems[1].text)
+            check_list = [self.volume_name, vm, size]
         else:
-            assert attr_elems[1].text == u'未加载', "Excepted: u'未加载', actual: %s" % attr_elems[1].text
-        assert attr_elems[2].text == size, "Excepted: %s, actual: %s" % (size, attr_elems[2].text)
+            check_list = [self.volume_name, size]
+        checker = MINICHECKER(self, volume_elem)
+        checker.volume_check(check_list, 'detached')
 
     def delete_vm(self, vm_name=None):
         vm_name = vm_name if vm_name else self.vm_name
@@ -212,7 +215,7 @@ class MINICHECKER(object):
         self.obj = obj
         self.elem = elem
 
-    def vm_check(self, check_list=[], ops='create'):
+    def vm_check(self, check_list=[], ops='new_created'):
         if ops == 'new_created':
             check_list.append(u'运行中')
             for v in check_list:
@@ -225,5 +228,11 @@ class MINICHECKER(object):
         elif ops == 'delete':
             pass
 
-    def volume_check(self):
-        pass
+    def volume_check(self, check_list=[], ops='attached'):
+        if ops == 'attached':
+            for v in check_list:
+                assert v in self.elem.text
+        elif ops == 'detached':
+            check_list.append(u'未加载')
+            for v in check_list:
+                assert v in self.elem.text
