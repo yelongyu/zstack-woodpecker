@@ -8317,6 +8317,12 @@ class Billing(object):
 		prices = bill_ops.calculate_account_spending(admin_uuid,date_start=start,date_end=end)
 		return 	prices
 
+        def get_billing_price_total(self,start=None, end=None):
+                cond = res_ops.gen_query_conditions('name', '=',  'admin')
+                admin_uuid = res_ops.query_resource_fields(res_ops.ACCOUNT, cond)[0].uuid
+                prices = bill_ops.calculate_account_billing_spending(admin_uuid,date_start=start,date_end=end)
+                return  prices
+
 	def get_timeUnit_timestamp(self):
 		timeUnit_dict={"s": 1000,
                                "m": 60000,
@@ -8407,7 +8413,7 @@ class RootVolumeBilling(Billing):
                 return self.resourceUnit
 
 	def create_resource_type(self):
-		return bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit,system_tags=self.systemTags)
+		return bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,system_tags=self.systemTagsi,resource_unit=self.resourceUnit)
 
         def get_uuid(self):
                 return self.uuid

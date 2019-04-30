@@ -33,9 +33,11 @@ round_sum = vm_max * round_max
 #cond = res_ops.gen_query_conditions('type', '=', 'ceph')
 ps_uuid = res_ops.query_resource_fields(res_ops.CEPH_PRIMARY_STORAGE)[0].uuid
 data_pool_name = 'test-pool-Data-1-' + ps_uuid
-price_systemtags_json = {"priceUserConfig":{"priceKeyName":"highSpeedDisk"}}
-price_system_tags = ['priceUserConfig::%s' % price_systemtags_json,]
-disk_offering_systemtags_json = {"allocate": {"primaryStorage": {"type": "ceph", "uuid": ps_uuid, "poolNames": [data_pool_name]}}, "priceUserConfig": {"volume": {"priceKeyName": "highSpeedDisk"}}, "displayAttribute": {"volume": {"云盘类型": "高速云盘"}}}
+#price_systemtags_json = {"priceKeyName":"highSpeedDisk"}
+price_systemtags_json = json.dumps({"priceUserConfig":{"priceKeyName":"highSpeedDisk"}})
+price_system_tags = ["priceUserConfig::%s" % price_systemtags_json,]
+#disk_offering_systemtags_json = {"allocate": {"primaryStorage": {"type": "ceph", "uuid": ps_uuid, "poolNames": [data_pool_name]}}, "priceUserConfig": {"volume": {"priceKeyName": "highSpeedDisk"}}, "displayAttribute": {"volume": {"云盘类型": "高速云盘"}}}
+disk_offering_systemtags_json = json.dumps({"allocate": {"primaryStorage": {"type": "ceph", "uuid": ps_uuid, "poolNames": [data_pool_name]}}, "priceUserConfig": {"volume": {"priceKeyName": "highSpeedDisk"}}, "displayAttribute": {"volume": {"云盘类型": "高速云盘"}}})
 disk_offering_system_tags = ["diskOfferingUserConfig::%s"  % disk_offering_systemtags_json,]
 
 def test():
@@ -67,7 +69,8 @@ def test():
 	        #vm = create_vm_billing("test_vmm", set_vm_resource()[0], None,\
 		#					set_vm_resource()[1], set_vm_resource()[2])
 		
-		disk_offering_uuid = bill_datavolume.create_disk_offer(21474836480,"test_disk",disk_offering_system_tags).uuid #20G
+		disk_offering_uuid = bill_datavolume.create_disk_offer(2147483648,"test_disk",disk_offering_system_tags).uuid #20G
+		test_util.test_logger("create disk-offering \n size=%s, name=%s \n systemTags=%s" % (2147483648, "test_disk", disk_offering_system_tags))
 		bill_datavolume.create_volume_and_attach_vmm(disk_offering_uuid,"test_volume",vm)
 		test_util.test_logger("@@@@debug %s" %(bill_datavolume.disk.get_name()))
 		dataVolumeSize = res_ops.query_resource(res_ops.DISK_OFFERING, \
