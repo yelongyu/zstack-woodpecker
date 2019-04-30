@@ -17,10 +17,9 @@ import zstacklib.utils.jsonobject as jsonobject
 LOCATION_FILE_PATH = '/root/.zstackwoodpecker/integrationtest/vm/e2e_mini/'
 POSTFIX = time.strftime('%y%m%d-%H%M%S', time.localtime())
 MESSAGETOAST = 'ant-notification-notice-message'
-REFRESHCSS = 'ant-btn square___3vP_2 ant-btn-primary'
-CARDCONTAINER = 'ant-list-item cardContainer___1TO4m'
-PRIMARYBTN = 'ant-btn ant-btn-primary'
-MOREOPERATIONBTN = 'ant-btn ant-dropdown-trigger'
+CARDCONTAINER = 'ant-list-item'
+PRIMARYBTN = 'ant-btn-primary'
+MOREOPERATIONBTN = 'ant-dropdown-trigger'
 
 MENUDICT = {'homepage': 'a[href="/web/"]',
             'monitor':  'a[href="/web/monitoringCenter"]',
@@ -39,7 +38,10 @@ def get_inv(name, res_type):
         inv = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)
     elif res_type == 'volume':
         inv = res_ops.query_resource(res_ops.VOLUME, conditions)
-    return inv
+    if inv:
+        return inv[0]
+    else:
+        test_util.test_fail('Not found the [%s] with name [%s]' % (res_type, name))
 
 class MINI(E2E):
     def __init__(self):
@@ -66,7 +68,7 @@ class MINI(E2E):
 
     def navigate(self, menu):
         self.get_element(MENUDICT[menu]).click()
-        self.wait_for_element(REFRESHCSS)
+        self.wait_for_element(PRIMARYBTN)
         time.sleep(1)
 
     def click_ok(self):
@@ -125,7 +127,7 @@ class MINI(E2E):
                    'provisioning': provisioning }
         vm_elem = self._create(vm_dict, 'vm')
         vm_inv = get_inv(self.vm_name, "vm")
-        check_list = [self.vm_name, str(cpu), mem, vm_inv[0].vmNics[0].ip]
+        check_list = [self.vm_name, str(cpu), mem, vm_inv.vmNics[0].ip]
         checker = MINICHECKER(self, vm_elem)
         checker.vm_check(check_list, vm_inv)
 
@@ -215,7 +217,7 @@ class MINICHECKER(object):
         self.obj = obj
         self.elem = elem
 
-    def vm_check(self, check_list=[], ops='new_created'):
+    def vm_check(self, inv, check_list=[], ops='new_created'):
         if ops == 'new_created':
             check_list.append(u'运行中')
             for v in check_list:
