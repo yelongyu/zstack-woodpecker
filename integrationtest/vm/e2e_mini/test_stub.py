@@ -29,6 +29,12 @@ MENUDICT = {'vm':       'a[href="/web/vm"]',
             'image':    'a[href="/web/image"]',
             'network':  'a[href="/web/network"]'}
 
+
+def get_vm_inv(vm_name):
+    conditions = res_ops.gen_query_conditions('name', '=', vm_name)
+    vm_inv = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)
+    return vm_inv
+
 class MINI(E2E):
     def __init__(self):
         super(MINI, self).__init__()
@@ -112,12 +118,10 @@ class MINI(E2E):
                    'clusterUuid': cluster,
                    'provisioning': provisioning }
         vm_elem = self._create(vm_dict, 'vm')
-        attr_elems = vm_elem.get_elements('labelContainer___10VVH')
-        vm_offering = u'%s核 %s' % (cpu, mem)
-        assert attr_elems[0].text == u'运行中', "Excepted: u'运行中', actual: %s" % attr_elems[0].text
-        assert attr_elems[1].text == vm_offering, "Excepted: %s, actual: %s" % (vm_offering, attr_elems[1].text)
-        assert attr_elems[2].text == 'Linux', "Excepted: 'Linux', actual: %s" % attr_elems[2].text
-        assert len(attr_elems[3].text.split('.')) == 4, "Actual vm ip is [%s]" % attr_elems[3].text
+        vm_inv = get_vm_inv(self.vm_name)
+        check_list = [self.vm_name, cpu, mem, vm_inv.vmNics[0].ip]
+        checker = MINICHECKER(self, vm_elem)
+        checker.vm_check(check_list)
 
     def create_volume(self, name=None, dsc=None, size='2 GB', cluster=os.getenv('clusterName'), vm=None, provisioning=u'厚置备'):
         self.get_element('a[href="/web/volume"]').click()
@@ -233,4 +237,26 @@ class MINI(E2E):
                 assert start_btn.enabled == False
                 assert stop_btn.enabled == False
         return True
-       
+
+
+
+class MINICHECKER(object):
+    def __init__(self, obj, elem):
+        self.obj = obj
+        self.elem = elem
+
+    def vm_check(self, check_list=[], ops='create'):
+        if ops == 'new_created':
+            check_list.append(u'运行中')
+            for v in check_list:
+                assert v in self.elem.text
+        elif ops == 'start':
+            check_list.append(u'运行中')
+            pass
+        elif ops == 'stop':
+            pass
+        elif ops == 'delete':
+            pass
+
+    def volume_check(self):
+        pass
