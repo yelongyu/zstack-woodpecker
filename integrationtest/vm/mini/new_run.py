@@ -15,6 +15,7 @@ test_dict = None
 
 
 def test():
+    global test_dict
     test_util.test_dsc('''Will mainly doing random test for all kinds of snapshot operations. VM, Volume and Image operations will also be tested. If reach 1 hour successful running condition, testing will success and quit.  SG actions, and VIP actions are removed in this robot test.
             VM resources: a special Utility vm is required to do volume attach/detach operation.
             ''')
@@ -23,7 +24,7 @@ def test():
     Robot.robot_create_utility_vm()
 
     robot_test_obj = Robot.robot()
-    test_dict = robot_test_obj.test_dict
+    test_dict = robot_test_obj.get_test_dict()
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     path_list = flavor['path_list']
 
@@ -32,11 +33,13 @@ def test():
 
 
 def env_recover():
+    global test_dict
     if test_dict:
         test_dict.cleanup()
 
 
 def error_cleanup():
+    global test_dict
     if test_dict:
         # test_dict.cleanup()
         pass
