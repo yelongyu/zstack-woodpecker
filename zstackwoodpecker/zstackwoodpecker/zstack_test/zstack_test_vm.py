@@ -12,6 +12,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.tag_operations as tag_ops
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
+import zstackwoodpecker.operations.ha_operations as ha_ops
 
 class ZstackTestVm(vm_header.TestVm):
     def __init__(self):
@@ -87,6 +88,12 @@ class ZstackTestVm(vm_header.TestVm):
     def stop(self, session_uuid = None):
         self.vm = vm_ops.stop_vm(self.vm.uuid, None, session_uuid)
         super(ZstackTestVm, self).stop()
+        if ha_ops.get_vm_instance_ha_level(self.vm.uuid):
+            status = self.vm.state
+            while status != 'Running':
+                vm_inv = test_lib.lib_get_vm_by_uuid(self.vm.uuid)
+                status = vm_inv.state
+            self.set_state(vm_header.RUNNING)
 
     def suspend(self, session_uuid = None):
         self.vm = vm_ops.suspend_vm(self.vm.uuid, session_uuid)
