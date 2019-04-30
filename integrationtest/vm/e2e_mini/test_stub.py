@@ -22,12 +22,15 @@ CARDCONTAINER = 'ant-list-item cardContainer___1TO4m'
 PRIMARYBTN = 'ant-btn ant-btn-primary'
 MOREOPERATIONBTN = 'ant-btn ant-dropdown-trigger'
 
-MENUDICT = {'vm':       'a[href="/web/vm"]',
+MENUDICT = {'homepage': 'a[href="/web/"]',
+            'monitor':  'a[href="/web/monitoringCenter"]',
+            'vm':       'a[href="/web/vm"]',
             'host':     'a[href="/web/minihost"]',
             'ps':       'a[href="/web/primaryStorage"]',
             'volume':   'a[href="/web/volume"]',
             'image':    'a[href="/web/image"]',
-            'network':  'a[href="/web/network"]'}
+            'network':  'a[href="/web/network"]',
+            'alarm':    'a[href="/web/alarmMessage"]'}
 
 
 def get_vm_inv(vm_name):
@@ -73,21 +76,21 @@ class MINI(E2E):
         self.operate(op_name)
         time.sleep(1)
 
-    def _create(self, para_dict, res_type='vm'):
+    def _create(self, para_dict, res_type):
         self.navigate(res_type)
         self.get_elements(PRIMARYBTN)[-1].click()
         for k, v in para_dict.iteritems():
             if v is not None:
                 self.input(k, v)
         self.click_ok()
-        for vm_elem in self.get_elements(CARDCONTAINER):
-            if para_dict['name'] in vm_elem.text:
+        for elem in self.get_elements(CARDCONTAINER):
+            if para_dict['name'] in elem.text:
                 break
         else:
             test_util.test_fail('Not found the [%s] with name [%s]' % (res_type, para_dict['name']))
-        return vm_elem
+        return elem
 
-    def _del(self, res_name, res_type='vm'):
+    def _del(self, res_name, res_type):
         self.navigate(res_type)
         for _elem in self.get_elements(CARDCONTAINER):
             if res_name in _elem.text:
@@ -101,7 +104,7 @@ class MINI(E2E):
             if _elem.text == res_name:
                 test_util.test_fail('[%s] is still displayed!' % res_name)
 
-    def create_vm(self, name=None, dsc=None, image=None, cpu=2, mem='2 GB', data_size=None,
+    def create_vm(self, name=None, dsc=None, image=None, cpu=2, mem='2 GB', data_size='2 GB',
                   user_data=None, network=None, cluster=None, provisioning=u'厚置备'):
         image = image if image else os.getenv('imageName_s')
         network = network if network else os.getenv('l3PublicNetworkName')
@@ -112,7 +115,7 @@ class MINI(E2E):
                    'imageUuid': image,
                    'cpuNum': cpu,
                    'memorySize': mem.split(),
-                   'dataSize': data_size,
+                   'dataSize': data_size.split(),
                    'userData': user_data,
                    'l3NetworkUuids': network,
                    'clusterUuid': cluster,
@@ -123,35 +126,17 @@ class MINI(E2E):
         checker = MINICHECKER(self, vm_elem)
         checker.vm_check(check_list)
 
-    def create_volume(self, name=None, dsc=None, size='2 GB', cluster=os.getenv('clusterName'), vm=None, provisioning=u'厚置备'):
-        self.get_element('a[href="/web/volume"]').click()
-        self.wait_for_element(REFRESHCSS)
-        time.sleep(5)
-        self.click_button(u'创建数据盘')
+    def create_volume(self, name=None, dsc=None, size='2 GB', cluster=None, vm=None, provisioning=u'厚置备'):
+        cluster = cluster if cluster else os.getenv('clusterName')
         self.volume_name = name if name else 'volume-' + POSTFIX
         volume_dict = {
-            u'名称': self.volume_name,
-            u'简介': dsc,
-            u'容量': size,
-            u'一体机': cluster,
-            u'云主机' : vm,
-            u'置备类型': provisioning
-        }
-        for k, v in volume_dict.iteritems():
-            if v:
-                if k == u'容量':
-                    val = v.split()
-                    val.reverse()
-                    self.input(k, val)
-                else:
-                    self.input(k, v)
-        self.confirm()
-        self.wait_for_element(MESSAGETOAST, timeout=60, target='disappear')
-        for volume_elem in self.get_elements(CARDCONTAINER):
-            if self.volume_name in volume_elem.text:
-                break
-        else:
-            test_util.test_fail('Not found the volume [name: %s]' % self.volume_name)
+                   'name': self.volume_name,
+                   'description': dsc,
+                   'dataSize': size.split(),
+                   'clusterUuid': cluster,
+                   'vmUuid' : vm,
+                   'provisioning': provisioning }
+        volume_elem = self._create(volume_dict, "volume")
         attr_elems = volume_elem.get_elements('labelContainer___10VVH')
         assert attr_elems[0].text == u'就绪', "Excepted: u'就绪', actual: %s" % attr_elems[0].text
         if vm:
@@ -166,29 +151,13 @@ class MINI(E2E):
 
     
     def delete_volume(self, volume_name=None):
-        self.get_element('a[href="/web/volume"]').click()
-        self.wait_for_element(CARDCONTAINER)
         volume_name = volume_name if volume_name else self.volume_name
-        for volume_elem in self.get_elements(CARDCONTAINER):
-            if volume_name in volume_elem.text:
-                break
-        else:
-            test_util.test_fail('Not found the volume [name: %s]' % volume_name)
-        volume_elem.get_element('input[type="checkbox"]').click()
-        self.click_button(u"更多操作")
-        self.operate(u'删除')
-        self.confirm()
-        self.wait_for_element(MESSAGETOAST, timeout=60, target='disappear')
-        for volume_elem in self.get_elements(CARDCONTAINER):
-            if volume_elem in self.get_elements(CARDCONTAINER):
-                if volume_elem.text == volume_name:
-                    test_util.test_fail('Volume [%s] is still displayed!' % volume_name)
+        self._del(volume_name, 'volume')
 
     def save_element_location(self, filename="location.tmpt"):
-        page_list = ["", "monitoringCenter", "minihost", "primaryStorage", "vm", "volume", "image", "network", "alarmMessage"]
-        for page in page_list:
+        for menu, page in MENUDICT.items():
             loc = {}
-            loc[page] = self.get_element('a[href="/web/%s"]' % page).location
+            loc[menu] = self.get_element(page).location
             json_loc = jsonobject.dumps(loc)
             try:
                 with open(join(LOCATION_FILE_PATH, filename), 'ab') as f:
@@ -198,9 +167,7 @@ class MINI(E2E):
         return True
 
     def enabled_status_checker(self):
-        self.get_element('a[href="/web/vm"]').click()
-        self.wait_for_element(CARDCONTAINER)
-
+        self.navigate('vm')
         btn_elems = self.get_elements('button', 'tag name')
         start_btn = [btn_elem for btn_elem in btn_elems if btn_elem.text == u'启动'][0]
         stop_btn = [btn_elem for btn_elem in btn_elems if btn_elem.text == u'停止'][0]
