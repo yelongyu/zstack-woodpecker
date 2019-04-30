@@ -547,6 +547,14 @@ def down_host_network(host_ip, scenarioConfig, network_type):
     else:
         test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s with username %s" %(host_inv.managementIp, host_password, host_password2, host_username))
 
+def check_vm_running_on_host(vm_uuid, host_ip):
+    cmd = "virsh list|grep %s|awk '{print $3}'" %(vm_uuid)
+    host_username = os.environ.get('hostUsername')
+    host_password = os.environ.get('hostPassword')
+    vm_is_exist = True if test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd) else False
+
+    return vm_is_exist
+
 def up_host_network(host_ip, scenarioConfig, network_type):
     zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
     cond = res_ops.gen_query_conditions('vmNics.ip', '=', host_ip)
