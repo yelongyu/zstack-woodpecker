@@ -24,6 +24,7 @@ class MINI(E2E):
     def __init__(self):
         super(MINI, self).__init__()
         self.vm_name = None
+        self.volume_name = None
         if os.getenv('ZSTACK_SIMULATOR'):
             self.mini_server_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
         else:
@@ -167,3 +168,45 @@ class MINI(E2E):
             except IOError:
                 return False
         return True
+
+    def enabled_status_checker(self):
+        self.get_element('a[href="/web/vm"]').click()
+        self.wait_for_element(CARDCONTAINER)
+
+        btn_elems = self.get_elements('button', 'tag name')
+        start_btn = [btn_elem for btn_elem in btn_elems if btn_elem.text == u'启动'][0]
+        stop_btn = [btn_elem for btn_elem in btn_elems if btn_elem.text == u'停止'][0]
+        assert start_btn.enabled == False
+        assert start_btn.enabled == False
+
+        vm_elems = self.get_elements(CARDCONTAINER)
+        vm_checkboxs = self.get_elements('input[type="checkbox"]')
+
+        # the checkboxs clicked will detach to the page document
+        def update_checkboxs():
+            return self.get_elements('input[type="checkbox"]')
+        
+        assert len(vm_elems) == len(vm_checkboxs)
+        vm_checkboxs[0].click()
+        vm_checkboxs = update_checkboxs()
+        assert vm_checkboxs[0].selected == True
+        first_vm_status = vm_elems[0].get_elements('labelContainer___10VVH')[0].text
+        if first_vm_status == u"运行中":
+            assert start_btn.enabled == False
+            assert stop_btn.enbled == True
+        elif first_vm_status == u"已停止":
+            assert start_btn.enabled == True
+            assert stop_btn.enabled == False
+        
+        if len(vm_elems) > 1:
+            vm_checkboxs = update_checkboxs()
+            vm_checkboxs[1].click()
+            vm_checkboxs = update_checkboxs()
+            assert vm_checkboxs[0].selected == True
+            assert vm_checkboxs[1].selected == True
+            second_vm_status = vm_elems[1].get_elements('labelContainer___10VVH')[0].text    
+            if first_vm_status != second_vm_status:
+                assert start_btn.enabled == False
+                assert stop_btn.enabled == False
+        return True
+       

@@ -58,6 +58,10 @@ class E2E(object):
     def refresh_page(self):
         self._post(join(self.uri, 'refresh'))
 
+    def get_page_title(self):
+        rsp = self._get(join(self.uri, 'title'))
+        return rsp.value
+
     def _get_element(self, uri, value, strategy):
         if strategy == 'css selector' and len(re.split('[#=]', value)) == 1:
             _value = value.split(' ')
@@ -65,7 +69,6 @@ class E2E(object):
             value = '.'.join(_value)
         if '=' in value:
             value = value.replace('"', '\\"')
-        self.implicit_wait()
         rsp = self._post(uri, body='{"using": "%s", "value":"%s"}' % (strategy, value))
         return (rsp, uri[:uri.index('element') + 7])
 
@@ -175,9 +178,39 @@ class Element(E2E):
     def __init__(self, uri):
         self.uri = uri
 
+    # Returns the visible text for the element.
     @property
     def text(self):
         uri = join(self.uri, 'text')
+        rsp = self._get(uri)
+        return rsp.value
+
+    # Get the value of an element's attribute.
+    @property
+    def name(self):
+        uri = join(self.uri, 'name')
+        rsp = self._get(uri)
+        return rsp.value
+
+    @property
+    def clear(self):
+        uri = join(self.uri, 'clear')
+        self._post(uri)
+        return True
+
+    '''
+    Determine if an OPTION element, or an INPUT element 
+    of type checkbox or radiobutton is currently selected.
+    '''
+    @property
+    def selected(self):
+        uri = join(self.uri, 'selected')
+        rsp = self._get(uri)
+        return rsp.value 
+
+    @property
+    def enabled(self):
+        uri = join(self.uri, 'enabled')
         rsp = self._get(uri)
         return rsp.value
 
