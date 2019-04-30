@@ -20,7 +20,7 @@
         <case timeout='1200' noparallel='True'>zsha2/test_mnha2_2_mn_host_stop_recover_crt_vm.py</case>
         <case timeout='1200' noparallel='True'>zsha2/test_mnha2_2_mn_host_net_dis_10s_rcv_crt_vm.py</case>
         <case timeout='1200' noparallel='True'>zsha2/test_mnha2_2_mn_host_net_dis_120s_rcv_crt_vm.py</case>
-	<case timeout='1200' noparallel='True'>zsha2/test_mnha2_slave_mn_host_force_stop_crt_vm.py</case>
+    	<case timeout='1200' noparallel='True'>zsha2/test_mnha2_slave_mn_host_force_stop_crt_vm.py</case>
 	<case timeout='1200' noparallel='True'>zsha2/test_mnha2_slave_mn_host_net_dis_10s_rcv_crt_vm.py</case>
 	<case timeout='1200' noparallel='True'>zsha2/test_mnha2_slave_mn_host_net_dis_120s_rcv_crt_vm.py</case>
 	<case timeout='1200' noparallel='True'>zsha2/test_mnha2_slave_mn_host_net_dis_crt_vm.py</case>
@@ -28,5 +28,6 @@
 	<case timeout='1200' noparallel='True'>zsha2/test_mnha2_upgrade_mn_crt_vm.py</case>
 	<case timeout='1200' noparallel='True'>zsha2/test_mnha2_upgrade_zsha2_crt_vm.py</case>
 	<case timeout='1200' noparallel='True'>zsha2/test_mnha2_get_all_metric_metadata.py</case>
+	<case timeout='1200' noparallel='True'>network/test_add_and_remove_dns.py</case>
     </suite>
 </integrationTest>
