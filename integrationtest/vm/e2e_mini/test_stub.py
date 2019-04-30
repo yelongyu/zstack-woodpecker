@@ -104,7 +104,7 @@ class MINI(E2E):
             if _elem.text == res_name:
                 test_util.test_fail('[%s] is still displayed!' % res_name)
 
-    def create_vm(self, name=None, dsc=None, image=None, cpu=2, mem='2 GB', data_size='2 GB',
+    def create_vm(self, name=None, dsc=None, image=None, cpu=2, mem='2 GB', data_size=None,
                   user_data=None, network=None, cluster=None, provisioning=u'厚置备'):
         image = image if image else os.getenv('imageName_s')
         network = network if network else os.getenv('l3PublicNetworkName')
@@ -115,7 +115,7 @@ class MINI(E2E):
                    'imageUuid': image,
                    'cpuNum': cpu,
                    'memorySize': mem.split(),
-                   'dataSize': data_size.split(),
+                   'dataSize': data_size.split() if data_size else None,
                    'userData': user_data,
                    'l3NetworkUuids': network,
                    'clusterUuid': cluster,
@@ -124,7 +124,7 @@ class MINI(E2E):
         vm_inv = get_vm_inv(self.vm_name)
         check_list = [self.vm_name, cpu, mem, vm_inv.vmNics[0].ip]
         checker = MINICHECKER(self, vm_elem)
-        checker.vm_check(check_list)
+        checker.vm_check(check_list, vm_inv)
 
     def create_volume(self, name=None, dsc=None, size='2 GB', cluster=None, vm=None, provisioning=u'厚置备'):
         cluster = cluster if cluster else os.getenv('clusterName')
@@ -212,11 +212,13 @@ class MINICHECKER(object):
         self.obj = obj
         self.elem = elem
 
-    def vm_check(self, check_list=[], ops='create'):
+    def vm_check(self, inv, check_list=[], ops='create'):
         if ops == 'new_created':
             check_list.append(u'运行中')
             for v in check_list:
                 assert v in self.elem.text
+            vm_lnk = 'a[href="/web/vm/%s"]' % inv.uuid
+            self.obj.get_element(vm_lnk).click()
         elif ops == 'start':
             check_list.append(u'运行中')
             pass
