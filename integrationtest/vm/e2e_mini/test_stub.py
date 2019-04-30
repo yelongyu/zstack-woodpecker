@@ -19,6 +19,15 @@ POSTFIX = time.strftime('%y%m%d-%H%M%S', time.localtime())
 MESSAGETOAST = 'ant-notification-notice-message'
 REFRESHCSS = 'ant-btn square___3vP_2 ant-btn-primary'
 CARDCONTAINER = 'ant-list-item cardContainer___1TO4m'
+PRIMARYBTN = 'ant-btn ant-btn-primary'
+MOREOPERATIONBTN = 'ant-btn ant-dropdown-trigger'
+
+MENUDICT = {'vm':       'a[href="/web/vm"]',
+            'host':     'a[href="/web/minihost"]',
+            'ps':       'a[href="/web/primaryStorage"]',
+            'volume':   'a[href="/web/volume"]',
+            'image':    'a[href="/web/image"]',
+            'network':  'a[href="/web/network"]'}
 
 class MINI(E2E):
     def __init__(self):
@@ -39,49 +48,77 @@ class MINI(E2E):
         # Login button
         self.get_element('ant-btn ant-btn-primary ant-btn-block').click()
         self.wait_for_element(MESSAGETOAST)
+        assert self.get_elements(MESSAGETOAST)
         # root page
         assert self.get_elements('content___3mo4D ant-layout-content')
-    
-    def create_vm(self, name=None, dsc=None, image=os.getenv('imageName_s'), cpu=2, mem='2 GB', data_size='2 GB', user_data=None,
-                  network=os.getenv('l3PublicNetworkName'), cluster=os.getenv('clusterName'), provisioning=u'厚置备'):
-        self.get_element('a[href="/web/vm"]').click()
+
+    def navigate(self, menu):
+        self.get_element(MENUDICT[menu]).click()
         self.wait_for_element(REFRESHCSS)
-        time.sleep(3)
-        self.click_button(u'创建云主机')
-        self.vm_name = name if name else 'vm-' + POSTFIX
-        vm_dict = {u'名称': self.vm_name,
-                   u'简介': dsc,
-                   u'镜像': image,
-                   u'CPU': cpu,
-                   u'内存': mem,
-                   u'数据盘容量': data_size,
-                   u'Userdata': user_data,
-                   u'网络': network,
-                   u'一体机': cluster,
-                   u'置备类型': provisioning
-                   }
-        for k, v in vm_dict.iteritems():
-            if v:
-                if k == u'内存' or k == u'数据盘容量':
-                    val = v.split()
-                    val.reverse()
-                    self.input(k, val)
-                else:
-                    self.input(k, v)
-        self.confirm()
+        time.sleep(1)
+
+    def click_ok(self):
+        self.get_elements(PRIMARYBTN)[-1].click()
         self.wait_for_element(MESSAGETOAST, timeout=60, target='disappear')
+
+    def more_operate(self, op_name):
+        self.get_element(MOREOPERATIONBTN).click()
+        time.sleep(1)
+        self.operate(op_name)
+        time.sleep(1)
+
+    def _create(self, para_dict, res_type='vm'):
+        self.navigate(res_type)
+        self.get_elements(PRIMARYBTN)[-1].click()
+        for k, v in para_dict.iteritems():
+            if v is not None:
+                self.input(k, v)
+        self.click_ok()
         for vm_elem in self.get_elements(CARDCONTAINER):
-            if self.vm_name in vm_elem.text:
+            if para_dict['name'] in vm_elem.text:
                 break
         else:
-            test_util.test_fail('Not found the vm [name: %s]' % self.vm_name)
+            test_util.test_fail('Not found the [%s] with name [%s]' % (res_type, para_dict['name']))
+        return vm_elem
+
+    def _del(self, res_name, res_type='vm'):
+        self.navigate(res_type)
+        for _elem in self.get_elements(CARDCONTAINER):
+            if res_name in _elem.text:
+                break
+        else:
+            test_util.test_fail('Not found the [%s] with name [%s]' % (res_type, res_name))
+        _elem.get_element('input[type="checkbox"]').click()
+        self.more_operate(u'删除')
+        self.click_ok()
+        for _elem in self.get_elements(CARDCONTAINER):
+            if _elem.text == res_name:
+                test_util.test_fail('[%s] is still displayed!' % res_name)
+
+    def create_vm(self, name=None, dsc=None, image=None, cpu=2, mem='2 GB', data_size=None,
+                  user_data=None, network=None, cluster=None, provisioning=u'厚置备'):
+        image = image if image else os.getenv('imageName_s')
+        network = network if network else os.getenv('l3PublicNetworkName')
+        cluster = cluster if cluster else os.getenv('clusterName')
+        self.vm_name = name if name else 'vm-' + POSTFIX
+        vm_dict = {'name': self.vm_name,
+                   'description': dsc,
+                   'imageUuid': image,
+                   'cpuNum': cpu,
+                   'memorySize': mem.split(),
+                   'dataSize': data_size,
+                   'userData': user_data,
+                   'l3NetworkUuids': network,
+                   'clusterUuid': cluster,
+                   'provisioning': provisioning }
+        vm_elem = self._create(vm_dict, 'vm')
         attr_elems = vm_elem.get_elements('labelContainer___10VVH')
         vm_offering = u'%s核 %s' % (cpu, mem)
         assert attr_elems[0].text == u'运行中', "Excepted: u'运行中', actual: %s" % attr_elems[0].text
         assert attr_elems[1].text == vm_offering, "Excepted: %s, actual: %s" % (vm_offering, attr_elems[1].text)
         assert attr_elems[2].text == 'Linux', "Excepted: 'Linux', actual: %s" % attr_elems[2].text
         assert len(attr_elems[3].text.split('.')) == 4, "Actual vm ip is [%s]" % attr_elems[3].text
-    
+
     def create_volume(self, name=None, dsc=None, size='2 GB', cluster=os.getenv('clusterName'), vm=None, provisioning=u'厚置备'):
         self.get_element('a[href="/web/volume"]').click()
         self.wait_for_element(REFRESHCSS)
@@ -118,24 +155,11 @@ class MINI(E2E):
         else:
             assert attr_elems[1].text == u'未加载', "Excepted: u'未加载', actual: %s" % attr_elems[1].text
         assert attr_elems[2].text == size, "Excepted: %s, actual: %s" % (size, attr_elems[2].text)
-    
+
     def delete_vm(self, vm_name=None):
-        self.get_element('a[href="/web/vm"]').click()
-        self.wait_for_element(CARDCONTAINER)
         vm_name = vm_name if vm_name else self.vm_name
-        for vm_elem in self.get_elements(CARDCONTAINER):
-            if vm_name in vm_elem.text:
-                break
-        else:
-            test_util.test_fail('Not found the vm [name: %s]' % vm_name)
-        vm_elem.get_element('input[type="checkbox"]').click()
-        self.click_button(u'更多操作')
-        self.operate(u'删除')
-        self.confirm()
-        self.wait_for_element(MESSAGETOAST, timeout=60, target='disappear')
-        for vm_elem in self.get_elements(CARDCONTAINER):
-            if vm_elem.text == vm_name:
-                test_util.test_fail('VM [%s] is still displayed!' % vm_name)
+        self._del(vm_name, 'vm')
+
     
     def delete_volume(self, volume_name=None):
         self.get_element('a[href="/web/volume"]').click()

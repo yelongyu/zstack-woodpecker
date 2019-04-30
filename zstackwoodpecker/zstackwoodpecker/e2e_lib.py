@@ -118,7 +118,8 @@ class E2E(object):
                     retry -= 1
                     self.click_button(btn_name, retry)
 
-    def input(self, item_name, content):
+    def input(self, label, content):
+        css_selector = 'label[for="%s"]' % label
         selection_rendered = 'ant-select-selection__rendered'
         def select_opt(elem, opt_value):
             elem.get_element(selection_rendered).click()
@@ -128,16 +129,21 @@ class E2E(object):
         def input_content(elem, content):
             element = elem.get_element('input', 'tag name')
             element.input(content)
+        title = None
         for elem in self.get_elements('ant-row ant-form-item'):
-            if item_name in elem.text:
-                if isinstance(content, types.ListType):
-                    select_opt(elem, content[0])
-                    input_content(elem, content[1])
-                else:
-                    if elem.get_elements(selection_rendered):
-                        select_opt(elem, content)
-                    else:
-                        input_content(elem, content)
+            title_elem = elem.get_elements(css_selector)
+            if title_elem:
+                title = title_elem[0].text.encode('utf-8')
+                break
+        if isinstance(content, types.ListType):
+            input_content(elem, content[0])
+            select_opt(elem, content[1])
+        else:
+            if elem.get_elements(selection_rendered):
+                select_opt(elem, content)
+            else:
+                test_util.test_dsc('input [%s] for [%s]' % (content, title))
+                input_content(elem, content)
 
     @property
     def window_handle(self):
