@@ -28,7 +28,7 @@ def test():
         test_util.test_fail('vip has been running on %d host(s)' % len(vip_s_vm_cfg_lst))
 
     test_util.test_logger("disconnect host [%s]" % (vip_s_vm_cfg_lst[0].ip_))
-    #test_stub.down_host_network(vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config)  
+    #test_stub.down_host_network(vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config, "managment_net")  
     zsha2_path="/root/zsha2"
     test_stub.exec_upgrade_zsha2(vip_s_vm_cfg_lst[0].ip_, "root", "password", zsha2_path)
 
@@ -58,7 +58,7 @@ def test():
 def env_recover():
     test_stub.exec_zsha2_version(vip_s_vm_cfg_lst[0].ip_, "root", "password")
     #test_util.test_logger("recover host: %s" % (vip_s_vm_cfg_lst[0].ip_))
-    #test_stub.up_host_network(vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config)  
+    #test_stub.up_host_network(vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config, "managment_net")  
     #test_stub.recover_host(vip_s_vm_cfg_lst[0], test_lib.all_scenario_config, test_lib.deploy_config)
     #test_stub.wait_for_mn_ha_ready(test_lib.all_scenario_config, test_lib.scenario_file)
 
