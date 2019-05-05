@@ -35,11 +35,11 @@ def test():
     s_vm1 = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, 1)
     test_util.test_logger("disconnect both hosts [%s] and [%s]" % (s_vm0.ip_, s_vm1.ip_))
 
-    test_stub.down_host_network(s_vm0.ip_, test_lib.all_scenario_config)  
-    test_stub.down_host_network(s_vm1.ip_, test_lib.all_scenario_config)  
+    test_stub.down_host_network(s_vm0.ip_, test_lib.all_scenario_config, "managment_net")  
+    test_stub.down_host_network(s_vm1.ip_, test_lib.all_scenario_config, "managment_net")  
     time.sleep(120)
-    test_stub.up_host_network(s_vm0.ip_, test_lib.all_scenario_config)  
-    test_stub.up_host_network(s_vm1.ip_, test_lib.all_scenario_config)  
+    test_stub.up_host_network(s_vm0.ip_, test_lib.all_scenario_config, "managment_net")  
+    test_stub.up_host_network(s_vm1.ip_, test_lib.all_scenario_config, "managment_net")  
     time.sleep(10)
 
     vip_s_vm_cfg_lst_new = test_stub.get_s_vm_cfg_lst_vip_bind(test_lib.all_scenario_config, test_lib.scenario_file)
@@ -63,8 +63,8 @@ def env_recover():
     global s_vm0
     global s_vm1
     test_util.test_logger("up host: %s and %s" % (s_vm0.ip_, s_vm1.ip_))
-    test_stub.up_host_network(s_vm0.ip_, test_lib.all_scenario_config)  
-    test_stub.up_host_network(s_vm1.ip_, test_lib.all_scenario_config)  
+    test_stub.up_host_network(s_vm0.ip_, test_lib.all_scenario_config, "managment_net")  
+    test_stub.up_host_network(s_vm1.ip_, test_lib.all_scenario_config, "managment_net")  
     #test_stub.wait_for_mn_ha_ready(test_lib.all_scenario_config, test_lib.scenario_file)
     test_stub.exec_zsha2_version(vip_s_vm_cfg_lst[0].ip_, "root", "password")
 

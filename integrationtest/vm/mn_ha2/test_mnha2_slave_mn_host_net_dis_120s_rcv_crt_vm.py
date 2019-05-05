@@ -32,7 +32,7 @@ def test():
         test_util.test_fail('find %d non vip mn hosts.' % len(non_vip_s_vm_cfg_lst))
 
     test_util.test_logger("disconnect host [%s]" % (vip_s_vm_cfg_lst[0].ip_))
-    test_stub.down_host_network(non_vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config)  
+    test_stub.down_host_network(non_vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config, "managment_net")  
     time.sleep(120)
     test_stub.up_host_network(non_vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config)  
 
@@ -60,7 +60,7 @@ def test():
 def env_recover():
     global non_vip_s_vm_cfg_lst
     test_util.test_logger("recover host: %s" % (non_vip_s_vm_cfg_lst[0].ip_))
-    test_stub.up_host_network(non_vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config)  
+    test_stub.up_host_network(non_vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config, "managment_net")  
     test_stub.exec_zsha2_version(vip_s_vm_cfg_lst[0].ip_, "root", "password")
 
 #Will be called only if exception happens in test().
