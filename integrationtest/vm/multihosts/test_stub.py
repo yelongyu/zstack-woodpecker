@@ -90,7 +90,7 @@ def create_vm(vm_name, image_name, l3_name, host_uuid = None, disk_offering_uuid
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
     vm_creation_option.set_name(vm_name)
-    vm_creation_option.set_timeout(600000)
+    vm_creation_option.set_timeout(1200000)
     if host_uuid:
         vm_creation_option.set_host_uuid(host_uuid)
     if disk_offering_uuids:
