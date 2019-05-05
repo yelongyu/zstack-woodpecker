@@ -292,8 +292,8 @@ class HybridObject(object):
             if not hyb_ops.query_oss_bucket_file_name(condition):
                 self.oss_bucket = hyb_ops.add_oss_bucket_from_remote(self.datacenter.uuid, bucket_name)
             bucket_file = hyb_ops.get_oss_bucket_file_from_remote(self.oss_bucket.uuid)
-            if bucket_file:
-                files = bucket_file.files
+            files = bucket_file.files
+            if files:
                 time.sleep(20)
                 for f in files:
                     hyb_ops.del_oss_bucket_file_remote(self.oss_bucket.uuid, f)
