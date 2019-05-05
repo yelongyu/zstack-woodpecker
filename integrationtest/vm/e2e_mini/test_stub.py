@@ -61,7 +61,7 @@ class MINI(E2E):
         self.get_element('#accountName').input('admin')
         self.get_element('#password').input('password')
         # Login button
-        self.get_element('ant-btn ant-btn-primary ant-btn-block').click()
+        self.get_element('button', 'tag name').click()
         self.wait_for_element(MESSAGETOAST)
         assert self.get_elements(MESSAGETOAST)
         # root page
@@ -96,15 +96,17 @@ class MINI(E2E):
             test_util.test_fail('Not found the [%s] with name [%s]' % (res_type, para_dict['name']))
         return elem
 
-    def _del(self, res_name, res_type):
+    def _del(self, res_name, res_type, corner_btn=False):
         self.navigate(res_type)
         for _elem in self.get_elements(CARDCONTAINER):
             if res_name in _elem.text:
                 break
         else:
             test_util.test_fail('Not found the [%s] with name [%s]' % (res_type, res_name))
-        _elem.get_element('input[type="checkbox"]').click()
-        self.more_operate(u'删除')
+        if corner_btn:
+            _elem.get_elements('button', 'tag name')[-1].click()
+        else:
+            self.more_operate(u'删除', res_name=res_name)
         self.click_ok()
         for _elem in self.get_elements(CARDCONTAINER):
             if _elem.text == res_name:
@@ -151,14 +153,13 @@ class MINI(E2E):
         checker = MINICHECKER(self, volume_elem)
         checker.volume_check(check_list, 'detached')
 
-    def delete_vm(self, vm_name=None):
+    def delete_vm(self, vm_name=None, corner_btn=False):
         vm_name = vm_name if vm_name else self.vm_name
-        self._del(vm_name, 'vm')
+        self._del(vm_name, 'vm', corner_btn=corner_btn)
 
-    
-    def delete_volume(self, volume_name=None):
+    def delete_volume(self, volume_name=None, corner_btn=False):
         volume_name = volume_name if volume_name else self.volume_name
-        self._del(volume_name, 'volume')
+        self._del(volume_name, 'volume', corner_btn=corner_btn)
 
     def attach_volume(self, volume_name=None, dest_vm=None):
         volume_name = volume_name if volume_name else self.volume_name
