@@ -128,9 +128,11 @@ class E2E(object):
                     opt.click()
         def input_content(elem, content):
             element = elem.get_element('input', 'tag name')
+            element.clear
             element.input(content)
         def textarea_content(elem, content):
             element = elem.get_element('textarea', 'tag name')
+            element.clear
             element.input(content)
         title = None
         for elem in self.get_elements('ant-row ant-form-item'):
