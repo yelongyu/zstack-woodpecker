@@ -74,15 +74,14 @@ def test():
     image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
     vm_inv = create_vm(image)
     time.sleep(100)
-    #c74_iso_path = os.environ.get('iso_250_c74_path')
-    #upgrade_script_path = os.environ.get('upgradeScript')
+    c74_iso_path = os.environ.get('c74_iso_path')
+    upgrade_script_path = os.environ.get('upgradeScript')
 
     test_util.test_dsc('Install zstack with -o')
     vm_ip = vm_inv.vmNics[0].ip
     test_stub.make_ssh_no_password(vm_ip, tmp_file)
-    #test_util.test_dsc('Upgrade 2.5.0 c74  iso')
-
-    #test_stub.update_c74_iso(vm_ip, tmp_file, c74_iso_path, upgrade_script_path)
+    test_util.test_dsc('Upgrade master c74  iso')
+    test_stub.update_c74_iso(vm_ip, tmp_file, c74_iso_path, upgrade_script_path)
 
     test_stub.update_repo(vm_ip, tmp_file)
     target_file = '/root/zstack-all-in-one.tgz'
