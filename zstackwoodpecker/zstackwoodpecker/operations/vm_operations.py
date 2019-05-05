@@ -103,6 +103,16 @@ def stop_vm(vm_uuid, force=None, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
+def stop_ha_vm(vm_uuid, force=None, stopHA=None, session_uuid=None):
+    action = api_actions.StopVmInstanceAction()
+    action.uuid = vm_uuid
+    action.type = force
+    action.stopHA = stopHA
+    action.timeout = 240000
+    test_util.action_logger('Stop VM [uuid:] %s' % vm_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
 def suspend_vm(vm_uuid, session_uuid=None):
     action = api_actions.PauseVmInstanceAction()
     action.uuid = vm_uuid

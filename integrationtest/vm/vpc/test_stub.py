@@ -336,6 +336,14 @@ class ZstackTestVR(vm_header.TestVm):
         self.inv = vm_ops.reboot_vm(self.inv.uuid, session_uuid)
         super(ZstackTestVR, self).reboot()
 
+    def stop(self, session_uuid = None, stopHA=None):
+        self.inv = vm_ops.stop_ha_vm(self.inv.uuid, session_uuid, stopHA='true')
+        super(ZstackTestVR, self).stop()
+
+    def start(self, session_uuid = None):
+        self.inv = vm_ops.start_vm(self.inv.uuid, session_uuid)
+        super(ZstackTestVR, self).start()
+
     def reconnect(self, session_uuid = None):
         self.inv = vm_ops.reconnect_vr(self.inv.uuid, session_uuid)
 
