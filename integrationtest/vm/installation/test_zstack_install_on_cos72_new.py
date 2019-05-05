@@ -120,7 +120,9 @@ def test():
     cluster_uuid = cluster_inv.uuid
 
     test_util.test_dsc('add HOST names is HOST1')
-    host_inv = test_stub.add_kvm_host1(vm_ip, cluster_uuid, tmp_file)
+    host_ip = vm_ip
+    host_name = 'host1'
+    host_inv = test_stub.add_kvm_host1(vm_ip, host_ip, host_name, cluster_uuid, tmp_file)
     host_uuid = host_inv.uuid
 
     test_util.test_dsc('add ps names is PS1')
