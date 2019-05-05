@@ -20,6 +20,7 @@ MESSAGETOAST = 'ant-notification-notice-message'
 CARDCONTAINER = 'ant-list-item'
 PRIMARYBTN = 'ant-btn-primary'
 MOREOPERATIONBTN = 'ant-dropdown-trigger'
+TABLEROW = 'ant-table-row ant-table-row-level-0'
 
 MENUDICT = {'homepage': 'a[href="/web/"]',
             'monitor':  'a[href="/web/monitoringCenter"]',
@@ -129,7 +130,7 @@ class MINI(E2E):
         vm_inv = get_inv(self.vm_name, "vm")
         check_list = [self.vm_name, str(cpu), mem, vm_inv.vmNics[0].ip]
         checker = MINICHECKER(self, vm_elem)
-        checker.vm_check(check_list, vm_inv)
+        checker.vm_check(vm_inv, check_list)
 
     def create_volume(self, name=None, dsc=None, size='2 GB', cluster=None, vm=None, provisioning=u'厚置备'):
         cluster = cluster if cluster else os.getenv('clusterName')
@@ -158,6 +159,65 @@ class MINI(E2E):
     def delete_volume(self, volume_name=None):
         volume_name = volume_name if volume_name else self.volume_name
         self._del(volume_name, 'volume')
+
+    def attach_volume(self, volume_name=None, dest_vm=None):
+        volume_name = volume_name if volume_name else self.volume_name
+        dest_vm = dest_vm if dest_vm else self.vm_name
+        self.navigate('volume')
+        for _elem in self.get_elements(CARDCONTAINER):
+            if volume_name in _elem.text:
+                if u"未加载" in _elem.text:
+                    break
+                else:
+                    test_util.test_fail('The volume named [%s] is attached' % volume_name)
+        else:
+            test_util.test_fail('Not found the volume with name [%s]' % volume_name)
+        _elem.get_element('input[type="checkbox"]').click()
+        self.more_operate(u'加载')
+        for _row in self.get_elements(TABLEROW):
+            if dest_vm in _row.text:
+                break
+        else:
+            test_util.test_fail('Not found the dest-vm with name [%s]' % dest_vm)
+        _row.get_element('input[type="radio"]').click()
+        self.click_ok()
+        check_list = [dest_vm]
+        MINICHECKER(self, _elem).volume_check(check_list)
+
+    def detach_volume(self, volume_name=None):
+        volume_name = volume_name if volume_name else self.volume_name
+        self.navigate('volume')
+        for _elem in self.get_elements(CARDCONTAINER):
+            if volume_name in _elem.text:
+                if u"未加载" not in _elem.text:
+                    break
+                else:
+                    test_util.test_fail('The volume named [%s] is not attached' % volume_name)
+        else:
+            test_util.test_fail('Not found the volume with name [%s]' % volume_name)
+        _elem.get_element('input[type="checkbox"]').click()
+        self.more_operate(u'卸载')
+        self.click_ok()
+        MINICHECKER(self, _elem).volume_check(ops='detached')
+
+    def modify_volume_info(self, volume_name=None, new_name=None, new_dsc=None):
+        volume_name = volume_name if volume_name else self.volume_name
+        check_list = []
+        self.navigate('volume')
+        for _elem in self.get_elements(CARDCONTAINER):
+            if volume_name in _elem.text:
+               break
+        else:
+            test_util.test_fail('Not found the volume with name [%s]' % volume_name)
+        _elem.get_element('input[type="checkbox"]').click()
+        self.more_operate(u'修改信息')
+        if new_name is not None:
+            self.input('name', new_name)
+            check_list.append(new_name)
+        if new_dsc is not None:
+            self.input('description', new_dsc)
+        self.click_ok()
+        MINICHECKER(self, _elem).volume_check(check_list)
 
     def save_element_location(self, filename="location.tmpt"):
         for menu, page in MENUDICT.items():

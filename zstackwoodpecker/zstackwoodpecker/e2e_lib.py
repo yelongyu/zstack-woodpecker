@@ -129,6 +129,9 @@ class E2E(object):
         def input_content(elem, content):
             element = elem.get_element('input', 'tag name')
             element.input(content)
+        def textarea_content(elem, content):
+            element = elem.get_element('textarea', 'tag name')
+            element.input(content)
         title = None
         for elem in self.get_elements('ant-row ant-form-item'):
             title_elem = elem.get_elements(css_selector)
@@ -141,6 +144,9 @@ class E2E(object):
         else:
             if elem.get_elements(selection_rendered):
                 select_opt(elem, content)
+            elif elem.get_elements('textarea[id="description"]'):
+                test_util.test_dsc('input [%s] for [%s]' % (content, title))
+                textarea_content(elem, content)
             else:
                 test_util.test_dsc('input [%s] for [%s]' % (content, title))
                 input_content(elem, content)
@@ -176,7 +182,7 @@ class E2E(object):
 
     def operate(self, name):
         for op in self.get_elements('li[role="menuitem"]'):
-            if op.displayed() and op.text == name:
+            if op.enabled and op.text == name:
                 op.click()
                 time.sleep(1)
 
