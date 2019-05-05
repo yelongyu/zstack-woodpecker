@@ -12,12 +12,12 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.node_operations as node_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
-import test_stub
 import time
 import os
 
 vm = None
 vip_s_vm_cfg_lst = None
+test_stub = test_lib.lib_get_test_stub()
 
 def test():
     global vm
