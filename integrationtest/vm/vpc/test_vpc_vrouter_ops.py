@@ -43,7 +43,7 @@ def test():
     vr_list = res_ops.query_resource(res_ops.APPLIANCE_VM, conf)[0]
     #vr_uuid = vr_list.uuid
     if vr_list.state == "Stopped" and vr_list.status == "Disconnected":
-        test_util.test_dsc("stop VR sucessfully after wait 120 seconds, VR state : %s . VR status : %s .")%(vr_list.state, vr_list.status)
+        test_util.test_dsc("stop VR sucessfully after wait 120 seconds.")
     else:
         test_util.test_fail('stop VR failed ,VR state : %s . VR status : %s .')%(vr_list.state, vr_list.status)
 
