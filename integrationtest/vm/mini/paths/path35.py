@@ -15,6 +15,7 @@ def path():
         [TestAction.delete_volume_backup, "backup1"],
         [TestAction.delete_image, "image1"],
         [TestAction.recover_image, "image1"],
+        [TestAction.delete_image, "image1"],
         [TestAction.expunge_image, "image1"],
         [TestAction.create_volume_backup, "vm2-root", "backup2"],
         [TestAction.create_mini_vm, "vm4", 'data_volume=false', 'cpu=2', 'memory=2', 'provisiong=thick'],
