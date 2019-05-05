@@ -18,11 +18,6 @@ import os
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
-vm = None
-billing_resource = 'rootvolume'
-offset_unit_dict=['sec','min','hou','day','week','month','year']
-time_unit_dict=['s','m','h','d','w','mon']
-resource_unit_dict={"M":1024 * float(1024), "G":1024**2 * float(1024), "T":1024**3 * float(1024)}
 
 #create instance offering with systemTags
 ps_uuid = res_ops.query_resource_fields(res_ops.CEPH_PRIMARY_STORAGE)[0].uuid
