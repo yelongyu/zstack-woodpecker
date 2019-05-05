@@ -32,14 +32,14 @@ ps_uuid = res_ops.query_resource_fields(res_ops.CEPH_PRIMARY_STORAGE)[0].uuid
 root_pool_name = 'test-pool-Root-1-' + ps_uuid
 #price_systemtags_json = {"priceUserConfig":{"priceKeyName":"highSpeedDisk"}}
 price_systemtags_json = json.dumps({"priceUserConfig":{"priceKeyName":"highSpeedDisk"}})
-price_system_tags = ['priceUserConfig::%s' % price_systemtags_json]
+price_system_tags = ['priceUserConfig::%s' % price_systemtags_jsoni,]
 instance_offering_opt = test_util.InstanceOfferingOption()
 instance_offering_opt.set_cpuNum(2)
 instance_offering_opt.set_memorySize(1073741824)
 instance_offering_opt.set_name('high-speed-billing-test')
 #instance_offering_systemtags_json = {"allocate": {"primaryStorage": {"type": "ceph", "uuid": ps_uuid, "poolNames": [root_pool_name]}}, "priceUserConfig": {"rootVolume": {"priceKeyName": "highSpeedDisk"}}, "displayAttribute": {"rootVolume": {"云盘类型": "高速云盘"}}}
 instance_offering_systemtags_json = json.dumps({"allocate": {"primaryStorage": {"type": "ceph", "uuid": ps_uuid, "poolNames": [root_pool_name]}}, "priceUserConfig": {"rootVolume": {"priceKeyName": "highSpeedDisk"}}, "displayAttribute": {"rootVolume": {"云盘类型": "高速云盘"}}})
-instance_offering_opt.set_system_tags(["instanceOfferingUserConfig::%s" % instance_offering_systemtags_json])
+instance_offering_opt.set_system_tags(["instanceOfferingUserConfig::%s" % instance_offering_systemtags_json,])
 instance_offering_uuid = vm_ops.create_instance_offering(instance_offering_opt).uuid
 
 def test():

@@ -8412,14 +8412,11 @@ class RootVolumeBilling(Billing):
         def get_resourceUnit(self):
                 return self.resourceUnit
 
-	def create_resource_type(self):
-		return bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,system_tags=self.systemTagsi,resource_unit=self.resourceUnit)
-
         def get_uuid(self):
                 return self.uuid
 
         def create_resource_type(self):
-                evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit)
+                evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,system_tags=self.systemTags,resource_unit=self.resourceUnit)
                 self.uuid = evt.uuid
                 return evt
 

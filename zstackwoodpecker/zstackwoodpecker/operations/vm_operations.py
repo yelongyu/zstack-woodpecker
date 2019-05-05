@@ -242,6 +242,7 @@ def create_instance_offering(instance_offering_option, session_uuid = None):
     action.allocatorStrategy = instance_offering_option.get_allocatorStrategy()
     action.type = instance_offering_option.get_type()
     action.name = instance_offering_option.get_name()
+    action.systemTags = instance_offering_option.get_system_tags()
     action.description = instance_offering_option.get_description()
 
     #test_util.action_logger('create instance offering: name: %s cpuNum: %s, cpuSpeed: %s, memorySize: %s, allocatorStrategy: %s, type: %s '\
