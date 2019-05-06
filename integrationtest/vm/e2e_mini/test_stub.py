@@ -176,6 +176,37 @@ class MINI(E2E):
         checker = MINICHECKER(self, vm_elem)
         checker.vm_check(vm_inv, check_list, ops='new_created')
 
+    def add_dns_to_l3(self, network=None, dns='8.8.8.8'):
+        #network = network if network else os.getenv('l3PublicNetworkName')
+        self.navigate('network')
+        time.sleep(3)
+        if self.get_elements(CARDCONTAINER):
+            if network:
+                for _elem in self.get_elements(CARDCONTAINER):
+                    if network in _elem.text:
+                        if dns not in _elem.text:
+                            _elem.get_element('input[type="checkbox"]').click()
+                            break
+                        else:
+                            test_util.test_fail('Network %s already have dns %s' % (network, dns))
+                    else:
+                        test_util.test_fail("Not found network %s" % network)
+            else:
+                for _elem in self.get_elements(CARDCONTAINER):
+                    if dns not in _elem.text:
+                        _elem.get_element('input[type="checkbox"]').click()
+                        break
+                    else:
+                        test_util.test_fail('Network %s already have dns %s' % (network, dns))
+        else:
+            test_util.test_fail("No l3 network")
+        time.sleep(1)
+        self.more_operate(u'添加DNS')
+        time.sleep(1)
+        self.input('DNS',dns)
+        time.sleep(1)
+        self.confirm()
+
     def create_volume(self, name=None, dsc=None, size='2 GB', cluster=None, vm=None, provisioning=u'厚置备'):
         cluster = cluster if cluster else os.getenv('clusterName')
         self.volume_name = name if name else 'volume-' + POSTFIX
