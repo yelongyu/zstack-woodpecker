@@ -27,6 +27,7 @@ def test():
     global s_vm0
     global s_vm1
 
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.environ['zstackHaVip']
     vip_s_vm_cfg_lst = test_stub.get_s_vm_cfg_lst_vip_bind(test_lib.all_scenario_config, test_lib.scenario_file)
     if len(vip_s_vm_cfg_lst) != 1:
         test_util.test_fail('vip has been running on %d host(s)' % len(vip_s_vm_cfg_lst))
