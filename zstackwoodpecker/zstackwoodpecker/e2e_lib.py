@@ -16,6 +16,12 @@ from zstackwoodpecker import test_util
 from zstacklib.utils.http import json_post
 import zstacklib.utils.jsonobject as jsonobject
 
+HEADERS = {'charset': 'utf-8'}
+
+
+def jsonify_rsp(rsp):
+    return jsonobject.loads(rsp.replace('null', '"null"'))
+
 
 class E2E(object):
     def __init__(self):
@@ -27,27 +33,30 @@ class E2E(object):
         self.session_id = session.sessionId
         self.uri = join(self.uri, self.session_id)
 
-    def route(self, url):
-        self._post(join(self.uri, 'url'), body='{"url": "%s"}' % url)
+    def url(self, url):
+        _rsp = self._post(join(self.uri, 'url'), body='{"url": "%s"}' % url)
+        rsp = jsonify_rsp(_rsp)
+        if rsp.status == 0:
+            return True
 
     def _post(self, uri, body=None):
-        _rsp = json_post(uri=uri, body=body, headers={'charset': 'utf-8'}, fail_soon=True)
-        rsp = jsonobject.loads(_rsp.replace('null', '"null"'))
+        _rsp = json_post(uri=uri, body=body, headers=HEADERS, fail_soon=True)
+        rsp = jsonify_rsp(_rsp)
         if rsp.status != 0:
             test_util.test_fail('URL request failed! uri: %s, body: %s, reason: %s' % (uri, body, rsp.value.message))
         else:
             return rsp
 
     def _get(self, uri):
-        _rsp = json_post(uri=uri, headers={'charset': 'utf-8'}, method='GET', fail_soon=True)
-        rsp = jsonobject.loads(_rsp.replace('null', '"null"'))
+        _rsp = json_post(uri=uri, headers=HEADERS, method='GET', fail_soon=True)
+        rsp = jsonify_rsp(_rsp)
         if rsp.status != 0:
             test_util.test_fail('URL request failed! uri: %s, reason: %s' % (uri, rsp.value.message))
         else:
             return rsp
 
     def _del(self, uri):
-        return json_post(uri=uri, headers={'charset': 'utf-8'}, method='DELETE', fail_soon=True)
+        return json_post(uri=uri, headers=HEADERS, method='DELETE', fail_soon=True)
 
     def go_forward(self):
         self._post(join(self.uri, 'forward'))
@@ -83,15 +92,12 @@ class E2E(object):
 
     def get_elements(self, value, strategy='css selector', check_result=False):
         val_list = value.split('|')
-        rsp1, uri1 = self._get_element(join(self.uri, 'elements'), value=val_list[0], strategy=strategy)
-        if len(val_list) > 1 and not rsp1.value:
-            rsp2, uri2 = self._get_element(join(self.uri, 'elements'), value=val_list[1], strategy=strategy)
-            uri2 = uri2.replace('elements', 'element')
-            elements = rsp2.value
-        else:
-            uri = uri1.replace('elements', 'element')
-            elements = rsp1.value
+        rsp, uri = self._get_element(join(self.uri, 'elements'), value=val_list[0], strategy=strategy)
+        if len(val_list) > 1 and not rsp.value:
+            rsp, uri = self._get_element(join(self.uri, 'elements'), value=val_list[1], strategy=strategy)
         element_list = []
+        uri = uri.replace('elements', 'element')
+        elements = rsp.value
         if elements:
             for elem in elements:
                 element_list.append(Element(join(uri, elem.ELEMENT)))
@@ -185,14 +191,13 @@ class E2E(object):
     def close(self):
         self._del(self.uri)
 
-    def confirm(self):
-        self.click_button(u'确 定')
-
     def operate(self, name):
-        for op in self.get_elements('li[role="menuitem"]'):
+        op_selector = 'ant-dropdown-menu-item'
+        self.wait_for_element(op_selector)
+        for op in self.get_elements(op_selector):
             if op.enabled and op.text == name:
                 op.click()
-                time.sleep(1)
+                break
 
 class Element(E2E):
     def __init__(self, uri):

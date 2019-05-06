@@ -62,7 +62,7 @@ class MINI(E2E):
             self.mini_server_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
         else:
             self.mini_server_ip = os.getenv('zstackHaVip')
-        self.route('http://%s:8200' % self.mini_server_ip)
+        self.url('http://%s:8200' % self.mini_server_ip)
         self.window_size(1600, 900)
         self.login()
 
