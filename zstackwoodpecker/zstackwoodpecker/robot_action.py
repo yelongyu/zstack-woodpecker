@@ -602,7 +602,7 @@ def create_vm_by_image(robot_test_obj, args):
         cmd_result = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, vm.get_vm().vmNics[0].ip,
                                                                  test_lib.lib_get_vm_username(vm.get_vm()),
                                                                  test_lib.lib_get_vm_password(vm.get_vm()), cmd)
-        cmd = "wget -np -r -nH --cut-dirs=2 http://172.20.1.27/mirror/vdbench/"
+        cmd = "wget -np -r -nH --cut-dirs=2 http://172.20.1.27/mirror/vdbench/; chmod a+x /root/vdbench/vdbench"
         cmd_result = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, vm.get_vm().vmNics[0].ip,
                                                                  test_lib.lib_get_vm_username(vm.get_vm()),
                                                                  test_lib.lib_get_vm_password(vm.get_vm()), cmd)
