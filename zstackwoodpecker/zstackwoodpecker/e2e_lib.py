@@ -119,16 +119,13 @@ class E2E(object):
         else:
             test_util.test_logger('The element[strategy: "%s", value: "%s"] was not displayed within [%s]s' % (strategy, value, timeout))
 
-    def click_button(self, btn_name, retry=3):
-        elements = self.get_elements('button', 'tag name')
+    def click_button(self, btn_name):
+        elements = self.get_elements('button', 'tag name', check_result=True)
         for element in elements:
             if element.text == btn_name and element.displayed():
                 if element.click():
                     time.sleep(1)
                     return True
-                else:
-                    retry -= 1
-                    self.click_button(btn_name, retry)
 
     def input(self, label, content):
         css_selector = 'label[for="%s"]' % label
@@ -197,7 +194,7 @@ class E2E(object):
         for op in self.get_elements(op_selector):
             if op.enabled and op.text == name:
                 op.click()
-                break
+                return True
 
 class Element(E2E):
     def __init__(self, uri):

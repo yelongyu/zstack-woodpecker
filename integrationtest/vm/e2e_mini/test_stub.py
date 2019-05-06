@@ -35,23 +35,19 @@ MENUDICT = {'homepage': 'a[href="/web/"]',
 
 
 def get_inv(name, res_type):
+    res_dict = {'vm': res_ops.VM_INSTANCE,
+                'volume': res_ops.VOLUME,
+                'minihost': res_ops.CLUSTER,
+                'network': res_ops.L3_NETWORK,
+                'image': res_ops.IMAGE,
+                'primaryStorage': res_ops.PRIMARY_STORAGE}
     conditions = res_ops.gen_query_conditions('name', '=', name)
-    if res_type == 'vm':
-        inv = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)
-    elif res_type == 'volume':
-        inv = res_ops.query_resource(res_ops.VOLUME, conditions)
-    elif res_type == 'minihost':
-        inv = res_ops.query_resource(res_ops.CLUSTER, conditions)
-    elif res_type == 'image':
-        inv = res_ops.query_resource(res_ops.IMAGE, conditions)
-    elif res_type == 'network':
-        inv = res_ops.query_resource(res_ops.L3_NETWORK, conditions)
-    elif res_type == 'primaryStorage':
-        inv = res_ops.query_resource(res_ops.PRIMARY_STORAGE, conditions)
+    inv = res_ops.query_resource(res_dict[res_type], conditions)
     if inv:
         return inv[0]
     else:
         test_util.test_fail('Not found the [%s] with name [%s]' % (res_type, name))
+
 
 class MINI(E2E):
     def __init__(self):
@@ -111,23 +107,9 @@ class MINI(E2E):
             else:
                 test_util.test_fail('Multiple resource can not enter details page together')
         else:
-            for res in res_list:
-                for _elem in self.get_elements(CARDCONTAINER):
-                    if res in _elem.text:
-                        if op_name == u"加载":
-                            if u"未加载" in _elem.text:
-                                break
-                            else:
-                                test_util.test_fail('The volume named [%s] is not attached' % res)
-                        elif op_name == u"卸载":
-                            if u"未加载" not in _elem.text:
-                                break
-                            else:
-                                test_util.test_fail('The volume named [%s] is attached' % res)
-                        break
-                    else:
-                        test_util.test_fail('Not found the element with name [%s]' % res)
-                _elem.get_element('input[type="checkbox"]').click()
+            for _elem in self.get_elements(CARDCONTAINER):
+                if _elem.text in res_list:
+                    _elem.get_element('input[type="checkbox"]').click()
         self.get_element(MOREOPERATIONBTN).click()
         time.sleep(1)
         self.operate(op_name)
@@ -152,8 +134,24 @@ class MINI(E2E):
             test_util.test_fail('Not found the [%s] with name [%s]' % (res_type, para_dict['name']))
         return elem
 
-    def _del(self, res_name, res_type, corner_btn=False):
+    def check_res_item(self, res_name, target='displayed'):
+        for _elem in self.get_elements(CARDCONTAINER):
+            if _elem.text == res_name:
+                if target != 'displayed':
+                    test_util.test_fail('[%s] is still displayed!' % res_name)
+                else:
+                    break
+        else:
+            test_util.test_fail('[%s] is nost displayed!' % res_name)
+
+    def enter_deleted_tab(self):
+        self.get_elements('ant-tabs-tab')[-1].click()
+        self.wait_for_element(CARDCONTAINER)
+
+    def _del(self, res_name, res_type, corner_btn=False, expunge=False):
         self.navigate(res_type)
+        if expunge:
+            self.enter_deleted_tab()
         for _elem in self.get_elements(CARDCONTAINER):
             if res_name in _elem.text:
                 break
@@ -161,12 +159,16 @@ class MINI(E2E):
             test_util.test_fail('Not found the [%s] with name [%s]' % (res_type, res_name))
         if corner_btn:
             _elem.get_elements('button', 'tag name')[-1].click()
+        elif expunge:
+            self.click_button(u'彻底删除')
         else:
             self.more_operate(op_name=u'删除', res_type=res_type, res_name=res_name)
         self.click_ok()
-        for _elem in self.get_elements(CARDCONTAINER):
-            if _elem.text == res_name:
-                test_util.test_fail('[%s] is still displayed!' % res_name)
+        self.check_res_item(res_name, target='notDisplayed')
+        if not expunge and res_type != 'network':
+            # check deleted
+            self.enter_deleted_tab()
+            self.check_res_item(res_name)
 
     def create_vm(self, name=None, dsc=None, image=None, cpu=2, mem='2 GB', data_size=None,
                   user_data=None, network=None, cluster=None, provisioning=u'厚置备'):
