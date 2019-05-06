@@ -891,3 +891,42 @@ def execute_shell_in_process(cmd, tmp_file, timeout = 3600, no_timeout_excep = F
     test_util.test_logger('[shell:] %s [logs]: %s' % (cmd, '\n'.join(logfd.readlines())))
     logfd.close()
     return process.returncode
+
+def get_resource_from_vmm(resource_type,zone_uuid = None,host_uuid_from_vmm = None):
+        if zone_uuid:
+                cond = res_ops.gen_query_conditions('zoneUuid', '=', zone_uuid)
+        else:
+                cond = res_ops.gen_query_conditions('name', '!=', 'NULL')
+        resource_list = res_ops.query_resource(resource_type, cond)
+        if resource_type == "PrimaryStorage":
+                return judge_PrimaryStorage(resource_list)
+        if resource_type == "Host":
+                return judge_HostResource(resource_list,host_uuid_from_vmm)
+        if resource_type == "BackupStorage":
+                return judge_BackStorage(resource_list)
+
+def judge_PrimaryStorage(PrimaryStorageSource):
+        flag = 0
+        for childStorge in PrimaryStorageSource:
+                test_util.test_logger("type is %s" %(childStorge.type))
+                if childStorge.type == "LocalStorage":
+                        flag = 1
+                        break
+        return flag
+
+def judge_HostResource(HostSource,host_uuid):
+        for host in HostSource:
+                test_util.test_logger("host uuid is %s" %(host.uuid))
+                if host.uuid != host_uuid:
+                        return host.uuid
+                else:
+                        return None
+
+def judge_BackStorage(BackStorageSource):
+        flag = 0
+        for backstorage in BackStorageSource:
+                test_util.test_logger("backstorage uuid is %s" %(backstorage))
+                if backstorage.type == "ImageStoreBackupStorage" or backstorage.type == "CephBackupStorage":
+                        flag = 1
+        return flag
+

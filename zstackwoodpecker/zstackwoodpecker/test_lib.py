@@ -8350,9 +8350,13 @@ class CpuBilling(Billing):
 		return bill_ops.delete_resource_price(self.uuid)
 	
 	def compare(self,status):
-		prices = super(CpuBilling, self).get_price_total()
-		time.sleep(1)
-		prices1 = super(CpuBilling, self).get_price_total()
+		cond = res_ops.gen_query_conditions('name', '=', 'admin')
+                admin_uuid = res_ops.query_resource_fields(res_ops.ACCOUNT, cond)[0].uuid
+                generate_account_billing(admin_uuid)
+                prices = super(RootVolumeBilling, self).get_billing_price_total()
+                time.sleep(1)
+                generate_account_billing(admin_uuid)
+                prices1 = super(RootVolumeBilling, self).get_billing_price_total()
 		if status == "migration" or status == "recover":
 			if prices1.total <= prices.total:
 				test_util.test_fail("test billing fail,maybe can not calculate when vm %s"\
@@ -8387,9 +8391,13 @@ class MemoryBilling(Billing):
 		return bill_ops.delete_resource_price(self.uuid)
 
         def compare(self,status):
-		prices = super(MemoryBilling, self).get_price_total()
-		time.sleep(1)
-		prices1 = super(MemoryBilling, self).get_price_total()
+		cond = res_ops.gen_query_conditions('name', '=', 'admin')
+                admin_uuid = res_ops.query_resource_fields(res_ops.ACCOUNT, cond)[0].uuid
+                generate_account_billing(admin_uuid)
+                prices = super(RootVolumeBilling, self).get_billing_price_total()
+                time.sleep(1)
+                generate_account_billing(admin_uuid)
+                prices1 = super(RootVolumeBilling, self).get_billing_price_total()
 		if status == "migration" or status == "recover":
 			if prices1.total <= prices.total:
 				test_util.test_fail("test billing fail,maybe can not calculate when vm %s"\
@@ -8416,7 +8424,7 @@ class RootVolumeBilling(Billing):
                 return self.uuid
 
         def create_resource_type(self):
-                evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,system_tags=self.systemTags,resource_unit=self.resourceUnit)
+		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,system_tags=self.systemTags,resource_unit=self.resourceUnit)
                 self.uuid = evt.uuid
                 return evt
 
@@ -8424,17 +8432,21 @@ class RootVolumeBilling(Billing):
 		return bill_ops.delete_resource_price(self.uuid)
 
 	def compare(self,status):
-		prices = super(RootVolumeBilling, self).get_price_total()
+		cond = res_ops.gen_query_conditions('name', '=', 'admin')
+		admin_uuid = res_ops.query_resource_fields(res_ops.ACCOUNT, cond)[0].uuid
+		generate_account_billing(admin_uuid)
+		prices = super(RootVolumeBilling, self).get_billing_price_total()
 		time.sleep(1)
-		prices1 = super(RootVolumeBilling, self).get_price_total()
+		generate_account_billing(admin_uuid)
+		prices1 = super(RootVolumeBilling, self).get_billing_price_total()
 		if status == "clean":
-			if prices1.total != prices.total:
-				test_util.test_fail("test billing fail,maybe can not calculate when vm %s" \
-					%(status))
-		else:
-			if prices1.total <= prices.total:
-				test_util.test_fail("test billing fail,maybe can not calculate when vm %s"\
-					%(status))
+                        if prices1.total - prices.total > 1:
+                                test_util.test_fail("test billing fail,maybe can not calculate when vm %s\n prices=%s, prices1=%s" \
+                                        %(status, prices.total, prices1.total))
+                else:
+                        if prices1.total <= prices.total:
+                                test_util.test_fail("test billing fail,maybe can not calculate when vm %s\n prices=%s, prices1=%s" \
+                                        %(status, prices.total, prices1.total))
 
 class DataVolumeBilling(Billing):
         def __init__(self):
@@ -8460,17 +8472,21 @@ class DataVolumeBilling(Billing):
 		return bill_ops.delete_resource_price(self.uuid)
 
 	def compare(self,status):
-		prices = super(DataVolumeBilling, self).get_price_total()
+		cond = res_ops.gen_query_conditions('name', '=', 'admin')
+                admin_uuid = res_ops.query_resource_fields(res_ops.ACCOUNT, cond)[0].uuid
+                generate_account_billing(admin_uuid)
+                prices = super(DataVolumeBilling, self).get_billing_price_total()
                 time.sleep(1)
-                prices1 = super(DataVolumeBilling, self).get_price_total()
+                generate_account_billing(admin_uuid)
+                prices1 = super(DataVolumeBilling, self).get_billing_price_total()
                 if status == "volume_clean":
-                        if prices1.total != prices.total:
-                                test_util.test_fail("test billing fail,maybe can not calculate when vm %s" \
-                                        %(status))
+                        if prices1.total - prices.total > 1:
+                                test_util.test_fail("test billing fail,maybe can not calculate when vm %s\n prices=%s, prices1=%s" \
+                                        %(status, prices.total, prices1.total))
                 else:
                         if prices1.total <= prices.total:
-                                test_util.test_fail("test billing fail,maybe can not calculate when vm %s"\
-                                        %(status))
+                                test_util.test_fail("test billing fail,maybe can not calculate when vm %s\n prices=%s, prices1=%s" \
+                                        %(status, prices.total, prices1.total))
 	
 	def create_volume_and_attach_vmm(self,disk_offering_uuid,volume_name,vm_instance):
                 from zstackwoodpecker.zstack_test import zstack_test_volume as test_volume
@@ -8516,9 +8532,13 @@ class PublicIpBilling(Billing):
 		return bill_ops.delete_resource_price(self.uuid)
 	
 	def compare(self,status):
-		prices = super(PublicIpBilling, self).get_price_total()
-		time.sleep(1)
-		prices1 = super(PublicIpBilling, self).get_price_total()
+		cond = res_ops.gen_query_conditions('name', '=', 'admin')
+                admin_uuid = res_ops.query_resource_fields(res_ops.ACCOUNT, cond)[0].uuid
+                generate_account_billing(admin_uuid)
+                prices = super(RootVolumeBilling, self).get_billing_price_total()
+                time.sleep(1)
+                generate_account_billing(admin_uuid)
+                prices1 = super(RootVolumeBilling, self).get_billing_price_total()
 		if status == "clean" or status == "destory":
 			if prices1.total != prices.total:
 				test_util.test_fail("test billing fail,maybe can not calculate when vm %s" \
@@ -8706,10 +8726,10 @@ def billing_check(billing, resource, offset, offset_count, resource_count):
     admin_uuid = res_ops.query_resource_fields(res_ops.ACCOUNT, cond)[0].uuid
 
     time_now = int(time.time() * 1000)
-    prices = billing.get_price_total(end=time_now)
+    prices = billing.get_billing_price_total(end=time_now)
     table_name, check_time = update_dateinlong(resource, offset, offset_count)
     generate_account_billing(admin_uuid) #update data in tables like %HistoryUsageVO
-    prices1 = billing.get_price_total(end=time_now)
+    prices1 = billing.get_billing_price_total(end=time_now)
 
     spending_diff_range = float(int(billing.get_price()) * resource_count * 1000)/float(billing.get_timeUnit_timestamp()) * 10 #acceptable deviation range
     test_util.test_logger("@@DEBUG@@: spending_diff_range=%s" % spending_diff_range)
