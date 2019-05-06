@@ -217,11 +217,6 @@ class Element(E2E):
         rsp = self._get(uri)
         return rsp.value
 
-    def clear(self):
-        uri = join(self.uri, 'clear')
-        self._post(uri)
-        return True
-
     '''
     Determine if an OPTION element, or an INPUT element 
     of type checkbox or radiobutton is currently selected.
@@ -247,6 +242,16 @@ class Element(E2E):
             "y": round(rsp['y'])
         }
         return loc   
+
+    def clear(self):
+        uri = join(self.uri, 'clear')
+        self._post(uri)
+        return True
+
+    def get_attribute(self, name):
+        uri = join(self.uri, 'attribute', name)
+        rsp = self._get(uri)
+        return rsp.value
 
     def click(self):
         uri = join(self.uri, 'click')

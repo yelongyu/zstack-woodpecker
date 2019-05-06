@@ -76,6 +76,20 @@ class MINI(E2E):
         # root page
         assert self.get_elements('content___3mo4D ant-layout-content')
 
+    def login_with_cleartext_password(self):
+        self.get_element('#accountName').input('admin')
+        passwordInput = self.get_element('#password')
+        assert passwordInput.get_attribute('type') == 'password'
+        self.get_element('ant-input-suffix').click()
+        passwordInput.input('password')
+        assert passwordInput.get_attribute('type') == 'text'
+        # Login button
+        self.get_element('button', 'tag name').click()
+        self.wait_for_element(MESSAGETOAST)
+        assert self.get_elements(MESSAGETOAST)
+        # root page
+        assert self.get_elements('content___3mo4D ant-layout-content')
+
     def navigate(self, menu):
         self.get_element(MENUDICT[menu]).click()
         self.wait_for_element(PRIMARYBTN)
