@@ -8,6 +8,7 @@ Create an unified test_stub for E2E test operations
 
 import os
 import time
+import types
 from os.path import join
 from zstackwoodpecker.e2e_lib import E2E
 import zstackwoodpecker.operations.resource_operations as res_ops 
@@ -39,6 +40,14 @@ def get_inv(name, res_type):
         inv = res_ops.query_resource(res_ops.VM_INSTANCE, conditions)
     elif res_type == 'volume':
         inv = res_ops.query_resource(res_ops.VOLUME, conditions)
+    elif res_type == 'minihost':
+        inv = res_ops.query_resource(res_ops.CLUSTER, conditions)
+    elif res_type == 'image':
+        inv = res_ops.query_resource(res_ops.IMAGE, conditions)
+    elif res_type == 'network':
+        inv = res_ops.query_resource(res_ops.L3_NETWORK, conditions)
+    elif res_type == 'primaryStorage':
+        inv = res_ops.query_resource(res_ops.PRIMARY_STORAGE, conditions)
     if inv:
         return inv[0]
     else:
@@ -74,13 +83,46 @@ class MINI(E2E):
 
     def click_ok(self):
         self.get_elements(PRIMARYBTN)[-1].click()
-        self.wait_for_element(MESSAGETOAST, timeout=60, target='disappear')
+        self.wait_for_element(MESSAGETOAST, timeout=120, target='disappear')
 
-    def more_operate(self, op_name):
+    def more_operate(self, op_name, res_type, res_name, details_page=False):
+        res_list = []
+        if isinstance(res_name, types.ListType):
+            res_list = res_name
+        else:
+            res_list.append(res_name)
+        if details_page:
+            if len(res_list) == 1:
+                self.enter_details_page(res_type, res_list[0])
+            else:
+                test_util.test_fail('Multiple resource can not enter details page together')
+        else:
+            for res in res_list:
+                for _elem in self.get_elements(CARDCONTAINER):
+                    if res in _elem.text:
+                        if op_name == u"加载":
+                            if u"未加载" in _elem.text:
+                                break
+                            else:
+                                test_util.test_fail('The volume named [%s] is not attached' % res)
+                        elif op_name == u"卸载":
+                            if u"未加载" not in _elem.text:
+                                break
+                            else:
+                                test_util.test_fail('The volume named [%s] is attached' % res)
+                        break
+                    else:
+                        test_util.test_fail('Not found the element with name [%s]' % res)
+                _elem.get_element('input[type="checkbox"]').click()
         self.get_element(MOREOPERATIONBTN).click()
         time.sleep(1)
         self.operate(op_name)
         time.sleep(1)
+
+    def enter_details_page(self, res_type, name):
+        inv = get_inv(name, res_type)
+        lnk = 'a[href="/web/%s/%s"]' % (res_type, inv.uuid)
+        self.get_element(lnk).click()
 
     def _create(self, para_dict, res_type):
         self.navigate(res_type)
@@ -106,7 +148,7 @@ class MINI(E2E):
         if corner_btn:
             _elem.get_elements('button', 'tag name')[-1].click()
         else:
-            self.more_operate(u'删除', res_name=res_name)
+            self.more_operate(op_name=u'删除', res_type=res_type, res_name=res_name)
         self.click_ok()
         for _elem in self.get_elements(CARDCONTAINER):
             if _elem.text == res_name:
@@ -132,7 +174,7 @@ class MINI(E2E):
         vm_inv = get_inv(self.vm_name, "vm")
         check_list = [self.vm_name, str(cpu), mem, vm_inv.vmNics[0].ip]
         checker = MINICHECKER(self, vm_elem)
-        checker.vm_check(vm_inv, check_list)
+        checker.vm_check(vm_inv, check_list, ops='new_created')
 
     def create_volume(self, name=None, dsc=None, size='2 GB', cluster=None, vm=None, provisioning=u'厚置备'):
         cluster = cluster if cluster else os.getenv('clusterName')
@@ -161,20 +203,15 @@ class MINI(E2E):
         volume_name = volume_name if volume_name else self.volume_name
         self._del(volume_name, 'volume', corner_btn=corner_btn)
 
-    def attach_volume(self, volume_name=None, dest_vm=None):
-        volume_name = volume_name if volume_name else self.volume_name
+    def attach_volume(self, volume_name=[], dest_vm=None, details_page=False):
+        emptyl = []
+        volume_list = volume_name if volume_name != [] else self.volume_name
+        if not isinstance(volume_list, types.ListType):
+            emptyl.append(volume_list)
+            volume_list = emptyl
         dest_vm = dest_vm if dest_vm else self.vm_name
         self.navigate('volume')
-        for _elem in self.get_elements(CARDCONTAINER):
-            if volume_name in _elem.text:
-                if u"未加载" in _elem.text:
-                    break
-                else:
-                    test_util.test_fail('The volume named [%s] is attached' % volume_name)
-        else:
-            test_util.test_fail('Not found the volume with name [%s]' % volume_name)
-        _elem.get_element('input[type="checkbox"]').click()
-        self.more_operate(u'加载')
+        self.more_operate(u'加载', res_type='volume', res_name=volume_list, details_page=details_page)
         for _row in self.get_elements(TABLEROW):
             if dest_vm in _row.text:
                 break
@@ -183,42 +220,55 @@ class MINI(E2E):
         _row.get_element('input[type="radio"]').click()
         self.click_ok()
         check_list = [dest_vm]
-        MINICHECKER(self, _elem).volume_check(check_list)
-
-    def detach_volume(self, volume_name=None):
-        volume_name = volume_name if volume_name else self.volume_name
-        self.navigate('volume')
-        for _elem in self.get_elements(CARDCONTAINER):
-            if volume_name in _elem.text:
-                if u"未加载" not in _elem.text:
+        for vol in volume_list:
+            for _elem in self.get_elements(CARDCONTAINER):
+                if vol in _elem.text:
                     break
-                else:
-                    test_util.test_fail('The volume named [%s] is not attached' % volume_name)
-        else:
-            test_util.test_fail('Not found the volume with name [%s]' % volume_name)
-        _elem.get_element('input[type="checkbox"]').click()
-        self.more_operate(u'卸载')
-        self.click_ok()
-        MINICHECKER(self, _elem).volume_check(ops='detached')
+                MINICHECKER(self, _elem).volume_check(check_list, ops='attached')
 
-    def modify_volume_info(self, volume_name=None, new_name=None, new_dsc=None):
-        volume_name = volume_name if volume_name else self.volume_name
-        check_list = []
+    def detach_volume(self, volume_name=[], details_page=False):
+        emptyl = []
+        volume_list = volume_name if volume_name != [] else self.volume_name
+        if not isinstance(volume_list, types.ListType):
+            emptyl.append(volume_list)
+            volume_list = emptyl
         self.navigate('volume')
+        self.more_operate(u'卸载', res_type='volume', res_name=volume_list, details_page=details_page)        
+        self.click_ok()
+        for vol in volume_list:
+            for _elem in self.get_elements(CARDCONTAINER):
+                if vol in _elem.text:
+                    break
+                MINICHECKER(self, _elem).volume_check(ops='detached')
+
+    def modify_info(self, res_type, res_name, new_name, new_dsc=None, corner_btn=False):
+        check_list = []
+        self.navigate(res_type)
         for _elem in self.get_elements(CARDCONTAINER):
-            if volume_name in _elem.text:
-               break
+            if res_name in _elem.text:
+                break
         else:
-            test_util.test_fail('Not found the volume with name [%s]' % volume_name)
-        _elem.get_element('input[type="checkbox"]').click()
-        self.more_operate(u'修改信息')
+            test_util.test_fail('Not found the [%s] with name [%s]' % (res_type, res_name))
+        if corner_btn:
+            _elem.get_elements('button', 'tag name')[-2].click()
+        else:
+            self.more_operate(u'修改信息', res_type=res_type, res_name=res_name)
         if new_name is not None:
             self.input('name', new_name)
             check_list.append(new_name)
         if new_dsc is not None:
             self.input('description', new_dsc)
         self.click_ok()
-        MINICHECKER(self, _elem).volume_check(check_list)
+        for _elem in self.get_elements(CARDCONTAINER):
+            if new_name in _elem.text:
+                break
+        checker = MINICHECKER(self, _elem)
+        if res_type == 'volume':
+            checker.volume_check()
+        elif res_type == 'vm':
+            checker.vm_check()
+        else:
+            pass
 
     def save_element_location(self, filename="location.tmpt"):
         for menu, page in MENUDICT.items():
@@ -278,13 +328,16 @@ class MINICHECKER(object):
         self.obj = obj
         self.elem = elem
 
-    def vm_check(self, inv, check_list=[], ops='new_created'):
-        if ops == 'new_created':
+    def vm_check(self, inv, check_list=[], ops=None):
+        if not ops:
+            for v in check_list:
+                assert v in self.elem.text
+        elif ops == 'new_created':
             check_list.append(u'运行中')
             for v in check_list:
                 assert v in self.elem.text
-            vm_lnk = 'a[href="/web/vm/%s"]' % inv.uuid
-            self.obj.get_element(vm_lnk).click()
+            # vm_lnk = 'a[href="/web/vm/%s"]' % inv.uuid
+            # self.obj.get_element(vm_lnk).click()
         elif ops == 'start':
             check_list.append(u'运行中')
             pass
@@ -293,8 +346,11 @@ class MINICHECKER(object):
         elif ops == 'delete':
             pass
 
-    def volume_check(self, check_list=[], ops='attached'):
-        if ops == 'attached':
+    def volume_check(self, check_list=[], ops=None):
+        if not ops:
+            for v in check_list:
+                assert v in self.elem.text
+        elif ops == 'attached':
             for v in check_list:
                 assert v in self.elem.text
         elif ops == 'detached':

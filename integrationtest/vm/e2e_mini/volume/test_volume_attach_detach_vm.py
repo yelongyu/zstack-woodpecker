@@ -12,7 +12,7 @@ def test():
     mini = test_stub.MINI()
     mini.create_vm()
     mini.create_volume()
-    mini.attach_volume()
+    mini.attach_volume(details_page=True)
     mini.detach_volume()
     
     test_util.test_pass('Test volume to attach vm and detach vm Successful')
