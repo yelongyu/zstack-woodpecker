@@ -3,7 +3,7 @@ import zstackwoodpecker.robot_action as Robot
 import os
 
 _config_ = {
-    'timeout': 7200,
+    'timeout': 10400,
     'noparallel': True
 }
 Robot.MINI = True
