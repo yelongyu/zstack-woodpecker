@@ -295,7 +295,7 @@ class MINI(E2E):
         else:
             test_util.test_fail('Not found the [%s] with name [%s]' % (res_type, res_name))
         if corner_btn:
-            _elem.get_elements('button', 'tag name')[-2].click()
+            _elem.get_elements('button', 'tag name')[0].click()
         else:
             self.more_operate(u'修改信息', res_type=res_type, res_name=res_name)
         if new_name is not None:

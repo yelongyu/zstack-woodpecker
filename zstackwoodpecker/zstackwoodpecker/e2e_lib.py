@@ -217,12 +217,12 @@ class Element(E2E):
         rsp = self._get(uri)
         return rsp.value
 
-    '''
-    Determine if an OPTION element, or an INPUT element 
-    of type checkbox or radiobutton is currently selected.
-    '''
     @property
     def selected(self):
+        '''
+        Determine if an OPTION element, or an INPUT element 
+        of type checkbox or radiobutton is currently selected.
+        '''
         uri = join(self.uri, 'selected')
         rsp = self._get(uri)
         return rsp.value 
