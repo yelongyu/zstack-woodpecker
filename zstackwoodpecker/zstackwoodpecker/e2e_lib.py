@@ -189,7 +189,7 @@ class E2E(object):
         self._del(self.uri)
 
     def operate(self, name):
-        op_selector = 'ant-dropdown-menu-item'
+        op_selector = 'ant-dropdown-menu-item|ant-menu-item'
         self.wait_for_element(op_selector)
         for op in self.get_elements(op_selector):
             if op.enabled and op.text == name:

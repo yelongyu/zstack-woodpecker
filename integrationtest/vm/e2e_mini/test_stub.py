@@ -22,6 +22,8 @@ CARDCONTAINER = 'ant-card|ant-table-row'
 PRIMARYBTN = 'ant-btn-primary'
 MOREOPERATIONBTN = 'ant-dropdown-trigger'
 TABLEROW = 'ant-table-row ant-table-row-level-0'
+CHECKBOX = 'input[type="checkbox"]'
+
 
 MENUDICT = {'homepage': 'a[href="/web/"]',
             'monitor':  'a[href="/web/monitoringCenter"]',
@@ -70,7 +72,12 @@ class MINI(E2E):
         self.wait_for_element(MESSAGETOAST)
         assert self.get_elements(MESSAGETOAST)
         # root page
-        assert self.get_elements('content___3mo4D ant-layout-content')
+        assert self.get_elements('ant-layout-content')
+
+    def logout(self):
+        self.get_element('img', 'tag name').click()
+        self.operate(u'登出')
+        assert self.get_elements('#password')
 
     def login_with_cleartext_password(self):
         self.get_element('#accountName').input('admin')
@@ -84,7 +91,7 @@ class MINI(E2E):
         self.wait_for_element(MESSAGETOAST)
         assert self.get_elements(MESSAGETOAST)
         # root page
-        assert self.get_elements('content___3mo4D ant-layout-content')
+        assert self.get_elements('ant-layout-content')
 
     def navigate(self, menu):
         self.get_element(MENUDICT[menu]).click()
@@ -109,7 +116,7 @@ class MINI(E2E):
         else:
             for _elem in self.get_elements(CARDCONTAINER):
                 if _elem.text in res_list:
-                    _elem.get_element('input[type="checkbox"]').click()
+                    _elem.get_element(CHECKBOX).click()
         self.get_element(MOREOPERATIONBTN).click()
         time.sleep(1)
         self.operate(op_name)
@@ -201,7 +208,7 @@ class MINI(E2E):
                 for _elem in self.get_elements(CARDCONTAINER):
                     if network in _elem.text:
                         if dns not in _elem.text:
-                            _elem.get_element('input[type="checkbox"]').click()
+                            _elem.get_element(CHECKBOX).click()
                             break
                         else:
                             test_util.test_fail('Network %s already have dns %s' % (network, dns))
@@ -210,7 +217,7 @@ class MINI(E2E):
             else:
                 for _elem in self.get_elements(CARDCONTAINER):
                     if dns not in _elem.text:
-                        _elem.get_element('input[type="checkbox"]').click()
+                        _elem.get_element(CHECKBOX).click()
                         break
                     else:
                         test_util.test_fail('Network %s already have dns %s' % (network, dns))
@@ -338,11 +345,11 @@ class MINI(E2E):
         assert start_btn.enabled == False
 
         vm_elems = self.get_elements(CARDCONTAINER)
-        vm_checkboxs = self.get_elements('input[type="checkbox"]')
+        vm_checkboxs = self.get_elements(CHECKBOX)
 
         # the checkboxs clicked will detach to the page document
         def update_checkboxs():
-            return self.get_elements('input[type="checkbox"]')
+            return self.get_elements(CHECKBOX)
         
         assert len(vm_elems) == len(vm_checkboxs)
         vm_checkboxs[0].click()
