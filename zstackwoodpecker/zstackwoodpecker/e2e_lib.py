@@ -82,9 +82,15 @@ class E2E(object):
         return Element(join(uri, element))
 
     def get_elements(self, value, strategy='css selector', check_result=False):
-        rsp, uri = self._get_element(join(self.uri, 'elements'), value=value, strategy=strategy)
-        uri = uri.replace('elements', 'element')
-        elements = rsp.value
+        val_list = value.split('|')
+        rsp1, uri1 = self._get_element(join(self.uri, 'elements'), value=val_list[0], strategy=strategy)
+        if len(val_list) > 1 and not rsp1.value:
+            rsp2, uri2 = self._get_element(join(self.uri, 'elements'), value=val_list[1], strategy=strategy)
+            uri2 = uri2.replace('elements', 'element')
+            elements = rsp2.value
+        else:
+            uri = uri1.replace('elements', 'element')
+            elements = rsp1.value
         element_list = []
         if elements:
             for elem in elements:

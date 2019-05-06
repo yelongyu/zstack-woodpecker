@@ -17,7 +17,7 @@ import zstacklib.utils.jsonobject as jsonobject
 LOCATION_FILE_PATH = '/root/.zstackwoodpecker/integrationtest/vm/e2e_mini/'
 POSTFIX = time.strftime('%y%m%d-%H%M%S', time.localtime())
 MESSAGETOAST = 'ant-notification-notice-message'
-CARDCONTAINER = 'ant-list-item'
+CARDCONTAINER = 'ant-card|ant-table-row'
 PRIMARYBTN = 'ant-btn-primary'
 MOREOPERATIONBTN = 'ant-dropdown-trigger'
 TABLEROW = 'ant-table-row ant-table-row-level-0'
