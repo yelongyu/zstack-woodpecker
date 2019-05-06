@@ -572,6 +572,7 @@ def ensure_pss_connected():
     for i in range(300):
         #time.sleep(1)
         ps_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+
         for ps in ps_list:
             ps_ops.reconnect_primary_storage(ps.uuid)
             cond = res_ops.gen_query_conditions('uuid', '=', ps.uuid)
@@ -584,10 +585,15 @@ def ensure_pss_connected():
     else:
         test_util.test_fail("ps status didn't change to Connected within 300s, therefore, failed")
 
-def ensure_bss_connected():
+def ensure_bss_connected(exclude_host=[]):
     for i in range(300):
         #time.sleep(1)
         bs_list = res_ops.query_resource(res_ops.BACKUP_STORAGE)
+        for exh in exclude_host:
+            for bs in bs_list:
+                if exh.managementIp_ == bs.hostname or exh.ip_ == bs.hostname:
+                    bs_list.remove(bs)
+
         for bs in bs_list:
             bs_ops.reconnect_backup_storage(bs.uuid)
             cond = res_ops.gen_query_conditions('uuid', '=', bs.uuid)
