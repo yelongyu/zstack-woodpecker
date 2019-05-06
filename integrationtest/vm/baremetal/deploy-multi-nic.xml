@@ -168,7 +168,7 @@
           </l3Networks>
         </l2NoVlanNetwork>
         <l2VlanNetwork name="$scenl2VlanNetworkName2" description="baremetal l3 network, it is for baremetal unattended."
-          physicalInterface="$scenl2NetworkPhysicalInterface" vlan="$scenl2Vlan2">
+          physicalInterface="$scenl2NetworkPhysicalInterface" vlan="$l2Vlan2">
           <l3Networks>
             <l3BasicNetwork name="$scenl3VPCNetworkName2" description="Test">
               <ipRange name="$scenvpcIpRangeName2" description="Test"
@@ -182,7 +182,7 @@
           </l3Networks>
         </l2VlanNetwork>
         <l2VlanNetwork name="$scenl2VlanNetworkName3" description="baremetal l3 network, it is for baremetal unattended."
-          physicalInterface="$scenl2NetworkPhysicalInterface" vlan="$scenl2Vlan3"> 
+          physicalInterface="$scenl2NetworkPhysicalInterface" vlan="$l2Vlan3"> 
           <l3Networks>
             <l3BasicNetwork name="$scenl3VPCNetworkName3" description="Test">
               <ipRange name="$scenvpcIpRangeName3" description="Test"
