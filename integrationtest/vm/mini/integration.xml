@@ -5,10 +5,13 @@
 	<case timeout='1200' noparallel='True'>test_reconnect_host.py</case>
 	<case timeout='1200' noparallel='True'>test_start_stop_host.py</case>
 	<case timeout='1200' noparallel='True'>test_create_thin_provision_vm.py</case>
+	<case timeout='1200' noparallel='True'>test_create_vm_install_iso.py</case>
+	<case timeout='1200' noparallel='True'>test_migrate_vm.py</case>
 	<case timeout='1200' noparallel='True'>test_resize_vm_root_volume.py</case>
 	<case timeout='1200' noparallel='True'>test_resize_vm_root_volumethin_provision.py</case>
 	<case timeout='1200' noparallel='True'>test_resize_data_volume.py</case>
 	<case timeout='1200' noparallel='True'>test_resize_data_thin_volume.py</case>
+	<case timeout='1200' noparallel='True'>test_backup_vm.py</case>
 	<case timeout='1200' noparallel='True'>network/test_create_l3network.py</case>
 	<case timeout='1200' noparallel='True'>ha/test_minips_vm_ha_force_stop.py</case>
 	<case timeout='1200' noparallel='True'>ha/test_minips_both_mns_force_stop_recover.py</case>
