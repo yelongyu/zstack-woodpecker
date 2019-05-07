@@ -160,9 +160,13 @@ class MINI(E2E):
             else:
                 test_util.test_fail('Multiple resource can not enter details page together')
         else:
-            for _elem in self.get_elements(CARDCONTAINER):
-                if _elem.text.split()[0] in res_list:
-                    _elem.get_element(CHECKBOX).click()
+            for res in res_list:
+                for _elem in self.get_elements(CARDCONTAINER):
+                    if res in _elem.text:
+                        _elem.get_element(CHECKBOX).click()
+                        break
+                else:
+                    test_util.test_fail('Not found the [%s]' % res_type)
         self.get_element(MOREOPERATIONBTN).click()
         time.sleep(1)
         self.operate(op_name)
@@ -175,7 +179,7 @@ class MINI(E2E):
         self.get_element(lnk).click()
 
     def cancel_create_operation(self, res_type, close=False):
-        self.nevigate(res_type)
+        self.navigate(res_type)
         self.get_elements(PRIMARYBTN)[-1].click()
         if close:
             self.get_element('ant-modal-close').click()
@@ -217,6 +221,7 @@ class MINI(E2E):
     def _del(self, res_name, res_type, corner_btn=False, expunge=False):
         self.navigate(res_type)
         test_util.test_dsc('Delete %s [name: %s]' % (res_type, res_name))
+        self.wait_for_element(CARDCONTAINER)
         if expunge:
             self.enter_deleted_tab()
         for _elem in self.get_elements(CARDCONTAINER):
