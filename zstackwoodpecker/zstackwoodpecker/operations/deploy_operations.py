@@ -215,25 +215,23 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
             bs = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid, name=bs.name_)[0].uuid
             bs_uuid_list.append(bs)
 
-        ###due to not has been developed completely start###
-	###action = api_actions.CreateImageReplicationGroupAction()
-        ###action.name = 'IRG'
-	###action.sessionUuid = session_uuid
-	###thread = threading.Thread(target = _thread_for_action, args = (action, True))
-	###wait_for_thread_queue()
-	###thread.start()
-        ###wait_for_thread_done()
-        ###irg_uuid = res_ops.get_resource(res_ops.REPLICATIONGROUP)[0].uuid
+	action = api_actions.CreateImageReplicationGroupAction()
+        action.name = 'IRG'
+	action.sessionUuid = session_uuid
+	thread = threading.Thread(target = _thread_for_action, args = (action, True))
+	wait_for_thread_queue()
+	thread.start()
+        wait_for_thread_done()
+        irg_uuid = res_ops.get_resource(res_ops.REPLICATIONGROUP)[0].uuid
 
-	###action = api_actions.AddBackupStoragesToReplicationGroupAction()
-        ###action.replicationGroupUuid = irg_uuid
-        ###action.backupStorageUuids = bs_uuid_list
-	###action.sessionUuid = session_uuid
-	###thread = threading.Thread(target = _thread_for_action, args = (action, True))
-	###wait_for_thread_queue()
-	###thread.start()
-        ###wait_for_thread_done()
-        ###due to not has been developed completely end###
+	action = api_actions.AddBackupStoragesToReplicationGroupAction()
+        action.replicationGroupUuid = irg_uuid
+        action.backupStorageUuids = bs_uuid_list
+	action.sessionUuid = session_uuid
+	thread = threading.Thread(target = _thread_for_action, args = (action, True))
+	wait_for_thread_queue()
+	thread.start()
+        wait_for_thread_done()
 
     if xmlobject.has_element(deployConfig, 'backupStorages.cephBackupStorage'):
         for bs in xmlobject.safe_list(deployConfig.backupStorages.cephBackupStorage):
