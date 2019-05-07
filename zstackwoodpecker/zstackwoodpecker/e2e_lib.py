@@ -38,6 +38,10 @@ class E2E(object):
         if rsp.status == 0:
             return True
 
+    def get_url(self):
+        rsp = self._get(join(self.uri, 'url'))
+        return rsp.value
+
     def _post(self, uri, body=None):
         _rsp = json_post(uri=uri, body=body, headers=HEADERS, fail_soon=True)
         rsp = jsonify_rsp(_rsp)
@@ -251,8 +255,10 @@ class Element(E2E):
 
     def click(self):
         uri = join(self.uri, 'click')
-        self._post(uri)
-        return True
+        rsp = self._post(uri)
+        if rsp.status == 0:
+            time.sleep(1)
+            return True
 
     def input(self, value):
         uri = join(self.uri, 'value')

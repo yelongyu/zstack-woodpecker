@@ -36,6 +36,9 @@ MENUDICT = {'homepage': 'a[href="/web/"]',
             'network':  'a[href="/web/network"]',
             'alarm':    'a[href="/web/alarmMessage"]'}
 
+VIEWDICT = {'list': '#btn_listswitch_s',
+            'card': '#btn_cardswitch_s'}
+
 
 def get_inv(name, res_type):
     res_dict = {'vm': res_ops.VM_INSTANCE,
@@ -79,6 +82,12 @@ class MINI(E2E):
         self.get_element('img', 'tag name').click()
         self.operate(u'登出')
         assert self.get_elements('#password')
+
+    def switch_view(self, view='card'):
+        for elem in self.get_elements('ant-btn square___3vP_2'):
+            if elem.get_elements(VIEWDICT[view]):
+                elem.click()
+                break
 
     def login_with_cleartext_password(self):
         self.get_element('#accountName').input('admin')
@@ -127,11 +136,15 @@ class MINI(E2E):
         assert 'wrong account name or password' in self.get_element('ant-notification-notice-description').text
 
     def navigate(self, menu):
-        self.get_element(MENUDICT[menu]).click()
-        self.wait_for_element(PRIMARYBTN)
-        time.sleep(1)
+        current_url = self.get_url()
+        if menu not in current_url:
+            test_util.test_dsc('Navigate to [%s]' % menu)
+            self.get_element(MENUDICT[menu]).click()
+            self.wait_for_element(PRIMARYBTN)
+            time.sleep(1)
 
     def click_ok(self):
+        test_util.test_dsc('Click OK button')
         self.get_elements(PRIMARYBTN)[-1].click()
         self.wait_for_element(MESSAGETOAST, timeout=120, target='disappear')
 
@@ -148,7 +161,7 @@ class MINI(E2E):
                 test_util.test_fail('Multiple resource can not enter details page together')
         else:
             for _elem in self.get_elements(CARDCONTAINER):
-                if _elem.text in res_list:
+                if _elem.text.split()[0] in res_list:
                     _elem.get_element(CHECKBOX).click()
         self.get_element(MOREOPERATIONBTN).click()
         time.sleep(1)
@@ -158,6 +171,7 @@ class MINI(E2E):
     def enter_details_page(self, res_type, name):
         inv = get_inv(name, res_type)
         lnk = 'a[href="/web/%s/%s"]' % (res_type, inv.uuid)
+        test_util.test_dsc('Enter into details page')
         self.get_element(lnk).click()
 
     def cancel_create_operation(self, res_type, close=False):
@@ -169,13 +183,15 @@ class MINI(E2E):
             self.get_elements('ant-btn')[-1].click()
         self.wait_for_element('ant-modal-content', target='disappear')
 
-    def _create(self, para_dict, res_type):
+    def _create(self, para_dict, res_type, view):
         self.navigate(res_type)
         self.get_elements(PRIMARYBTN)[-1].click()
         for k, v in para_dict.iteritems():
             if v is not None:
                 self.input(k, v)
         self.click_ok()
+        if view == 'list':
+            self.switch_view(view)
         for elem in self.get_elements(CARDCONTAINER):
             if para_dict['name'] in elem.text:
                 break
@@ -191,14 +207,16 @@ class MINI(E2E):
                 else:
                     break
         else:
-            test_util.test_fail('[%s] is nost displayed!' % res_name)
+            test_util.test_fail('[%s] is not displayed!' % res_name)
 
     def enter_deleted_tab(self):
+        test_util.test_dsc('Enter into Deleted tab')
         self.get_elements('ant-tabs-tab')[-1].click()
         self.wait_for_element(CARDCONTAINER)
 
     def _del(self, res_name, res_type, corner_btn=False, expunge=False):
         self.navigate(res_type)
+        test_util.test_dsc('Delete %s [name: %s]' % (res_type, res_name))
         if expunge:
             self.enter_deleted_tab()
         for _elem in self.get_elements(CARDCONTAINER):
@@ -220,7 +238,7 @@ class MINI(E2E):
             self.check_res_item(res_name)
 
     def create_vm(self, name=None, dsc=None, image=None, cpu=2, mem='2 GB', data_size=None,
-                  user_data=None, network=None, cluster=None, provisioning=u'厚置备'):
+                  user_data=None, network=None, cluster=None, provisioning=u'厚置备', view='card'):
         image = image if image else os.getenv('imageName_s')
         network = network if network else os.getenv('l3PublicNetworkName')
         cluster = cluster if cluster else os.getenv('clusterName')
@@ -235,7 +253,7 @@ class MINI(E2E):
                    'l3NetworkUuids': network,
                    'clusterUuid': cluster,
                    'provisioning': provisioning }
-        vm_elem = self._create(vm_dict, 'vm')
+        vm_elem = self._create(vm_dict, 'vm', view=view)
         vm_inv = get_inv(self.vm_name, "vm")
         check_list = [self.vm_name, str(cpu), mem, vm_inv.vmNics[0].ip]
         checker = MINICHECKER(self, vm_elem)
@@ -272,7 +290,7 @@ class MINI(E2E):
         time.sleep(1)
         self.confirm()
 
-    def create_volume(self, name=None, dsc=None, size='2 GB', cluster=None, vm=None, provisioning=u'厚置备'):
+    def create_volume(self, name=None, dsc=None, size='2 GB', cluster=None, vm=None, provisioning=u'厚置备', view='card'):
         cluster = cluster if cluster else os.getenv('clusterName')
         self.volume_name = name if name else 'volume-' + POSTFIX
         volume_dict = {
@@ -282,7 +300,7 @@ class MINI(E2E):
                    'clusterUuid': cluster,
                    'vmUuid' : vm,
                    'provisioning': provisioning }
-        volume_elem = self._create(volume_dict, "volume")
+        volume_elem = self._create(volume_dict, "volume", view=view)
         volume_inv = get_inv(self.volume_name, "volume")
         if vm:
             check_list = [self.volume_name, vm, size]
@@ -291,11 +309,11 @@ class MINI(E2E):
         checker = MINICHECKER(self, volume_elem)
         checker.volume_check(check_list, 'detached')
 
-    def delete_vm(self, vm_name=None, corner_btn=False):
+    def delete_vm(self, vm_name=None, corner_btn=True):
         vm_name = vm_name if vm_name else self.vm_name
         self._del(vm_name, 'vm', corner_btn=corner_btn)
 
-    def delete_volume(self, volume_name=None, corner_btn=False):
+    def delete_volume(self, volume_name=None, corner_btn=True):
         volume_name = volume_name if volume_name else self.volume_name
         self._del(volume_name, 'volume', corner_btn=corner_btn)
 
