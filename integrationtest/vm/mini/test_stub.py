@@ -665,7 +665,7 @@ def ensure_pss_connected():
     else:
         test_util.test_fail("ps status didn't change to Connected within 300s, therefore, failed")
 
-def ensure_bss_connected():
+def ensure_bss_connected(exclude_host=[]):
     for i in range(300):
         #time.sleep(1)
         bs_list = res_ops.query_resource(res_ops.BACKUP_STORAGE)
