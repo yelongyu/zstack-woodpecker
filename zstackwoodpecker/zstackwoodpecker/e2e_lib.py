@@ -34,8 +34,7 @@ class E2E(object):
         self.uri = join(self.uri, self.session_id)
 
     def url(self, url):
-        _rsp = self._post(join(self.uri, 'url'), body='{"url": "%s"}' % url)
-        rsp = jsonify_rsp(_rsp)
+        rsp = self._post(join(self.uri, 'url'), body='{"url": "%s"}' % url)
         if rsp.status == 0:
             return True
 
