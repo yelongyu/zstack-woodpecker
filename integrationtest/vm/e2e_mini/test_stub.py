@@ -23,6 +23,7 @@ PRIMARYBTN = 'ant-btn-primary'
 MOREOPERATIONBTN = 'ant-dropdown-trigger'
 TABLEROW = 'ant-table-row ant-table-row-level-0'
 CHECKBOX = 'input[type="checkbox"]'
+FORMEXPLAIN = 'ant-form-explain'
 
 
 MENUDICT = {'homepage': 'a[href="/web/"]',
@@ -93,6 +94,38 @@ class MINI(E2E):
         # root page
         assert self.get_elements('ant-layout-content')
 
+    def login_without_accountname_or_password(self, with_accountName=False, with_password=False):
+        if with_accountName:
+            self.get_element('#accountName').input('admin')
+        if with_password:
+            self.get_element('#password').input('password')
+        # Login button
+        self.get_element('button', 'tag name').click()
+        # check
+        if not with_accountName or not with_password:
+            self.wait_for_element(FORMEXPLAIN)
+        if not with_accountName and with_password: 
+            assert self.get_element(FORMEXPLAIN).text == u'请输入用户名'
+        elif with_accountName and not with_password:
+            assert self.get_element(FORMEXPLAIN).text == u'请输入密码'
+        elif not with_accountName and not with_password:
+            assert self.get_elements(FORMEXPLAIN)[0].text == u'请输入用户名'
+            assert self.get_elements(FORMEXPLAIN)[1].text == u'请输入密码'
+
+    def login_with_wrong_accountname_or_password(self, waccountName=True, wpassword=True):
+        if waccountName:
+            self.get_element('#accountName').input('wrongadmin')
+        else:
+            self.get_element('#accountName').input('admin')
+        if wpassword:
+            self.get_element('#password').input('wrongpassword')
+        else:
+            self.get_element('#password').input('password')
+        # Login button
+        self.get_element('button', 'tag name').click()
+        self.wait_for_element(MESSAGETOAST, timeout=300)
+        assert 'wrong account name or password' in self.get_element('ant-notification-notice-description').text
+
     def navigate(self, menu):
         self.get_element(MENUDICT[menu]).click()
         self.wait_for_element(PRIMARYBTN)
@@ -126,6 +159,15 @@ class MINI(E2E):
         inv = get_inv(name, res_type)
         lnk = 'a[href="/web/%s/%s"]' % (res_type, inv.uuid)
         self.get_element(lnk).click()
+
+    def cancel_create_operation(self, res_type, close=False):
+        self.nevigate(res_type)
+        self.get_elements(PRIMARYBTN)[-1].click()
+        if close:
+            self.get_element('ant-modal-close').click()
+        else:
+            self.get_elements('ant-btn')[-1].click()
+        self.wait_for_element('ant-modal-content', target='disappear')
 
     def _create(self, para_dict, res_type):
         self.navigate(res_type)
@@ -318,9 +360,9 @@ class MINI(E2E):
                 break
         checker = MINICHECKER(self, _elem)
         if res_type == 'volume':
-            checker.volume_check()
+            checker.volume_check(check_list)
         elif res_type == 'vm':
-            checker.vm_check()
+            checker.vm_check(check_list)
         else:
             pass
 
