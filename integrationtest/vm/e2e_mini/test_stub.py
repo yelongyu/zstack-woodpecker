@@ -229,6 +229,8 @@ class MINI(E2E):
         if expunge:
             self.click_button(u'彻底删除')
             self.click_ok()
+            # check expunge
+            self.check_res_item(res_list, target='notDisplayed')
         elif not corner_btn:
             self.more_operate(op_name=u'删除', res_type=res_type, res_name=res_list)
             self.click_ok()
@@ -237,9 +239,6 @@ class MINI(E2E):
         if not expunge and res_type != 'network':
             # check deleted
             self.check_res_item(res_list)
-        if expunge:
-            # check expunge
-            self.check_res_item(res_list, target='notDisplayed')
 
     def check_res_item(self, res_list, target='displayed'):
         for res in res_list:
