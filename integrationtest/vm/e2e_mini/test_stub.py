@@ -210,7 +210,7 @@ class MINI(E2E):
         self.get_elements('ant-tabs-tab')[-1].click()
         self.wait_for_element(CARDCONTAINER)
 
-    def _del(self, res_name, res_type, corner_btn=False, expunge=False):
+    def _delete(self, res_name, res_type, corner_btn=False, expunge=False):
         res_list = []
         if isinstance(res_name, types.ListType):
             res_list = res_name
@@ -333,21 +333,21 @@ class MINI(E2E):
 
     def delete_vm(self, vm_name=None, corner_btn=False):
         vm_name = vm_name if vm_name else self.vm_list
-        self._del(vm_name, 'vm', corner_btn=corner_btn)
+        self._delete(vm_name, 'vm', corner_btn=corner_btn)
     
     def expunge_vm(self, vm_name=None):
         vm_name = vm_name if vm_name else self.vm_list
         self.delete_vm(vm_name)
-        self._del(vm_name, 'vm', expunge=True)
+        self._delete(vm_name, 'vm', expunge=True)
 
     def delete_volume(self, volume_name=None, corner_btn=False):
         volume_name = volume_name if volume_name else self.volume_list
-        self._del(volume_name, 'volume', corner_btn=corner_btn)
+        self._delete(volume_name, 'volume', corner_btn=corner_btn)
 
     def expunge_volume(self, volume_name=None):
         volume_name = volume_name if volume_name else self.volume_list
         self.delete_volume(volume_name)
-        self._del(volume_name, 'volume', expunge=True)
+        self._delete(volume_name, 'volume', expunge=True)
 
     def attach_volume(self, volume_name=[], dest_vm=None, details_page=False):
         emptyl = []
