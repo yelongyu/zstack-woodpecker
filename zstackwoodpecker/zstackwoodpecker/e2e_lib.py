@@ -137,10 +137,15 @@ class E2E(object):
     def input(self, label, content):
         css_selector = 'label[for="%s"]' % label
         selection_rendered = 'ant-select-selection__rendered'
+        radio_group = 'ant-radio-group'
         def select_opt(elem, opt_value):
             elem.get_element(selection_rendered).click()
             for opt in self.get_elements('li[role="option"]'):
                 if opt.displayed() and opt_value in opt.text:
+                    opt.click()
+        def select_radio(elem, value):
+            for opt in self.get_elements('input[type="radio"]'):
+                if value in opt.text:
                     opt.click()
         def input_content(elem, content):
             element = elem.get_element('input', 'tag name')
@@ -162,6 +167,8 @@ class E2E(object):
         else:
             if elem.get_elements(selection_rendered):
                 select_opt(elem, content)
+            elif elem.get_elements(radio_group):
+                select_radio(elem, content)
             elif elem.get_elements('textarea[id="description"]'):
                 test_util.test_dsc('input [%s] for [%s]' % (content, title))
                 textarea_content(elem, content)

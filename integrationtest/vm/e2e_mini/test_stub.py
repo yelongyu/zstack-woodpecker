@@ -16,6 +16,7 @@ from zstackwoodpecker import test_util
 import zstacklib.utils.jsonobject as jsonobject
 
 LOCATION_FILE_PATH = '/root/.zstackwoodpecker/integrationtest/vm/e2e_mini/'
+COMMONIMAGE = 'http://172.20.1.28/mirror/diskimages/centos7-test.qcow2'
 MESSAGETOAST = 'ant-notification-notice-message'
 CARDCONTAINER = 'ant-card|ant-table-row'
 PRIMARYBTN = 'ant-btn-primary'
@@ -62,8 +63,10 @@ class MINI(E2E):
         super(MINI, self).__init__()
         self.vm_name = None
         self.volume_name = None
+        self.image = None
         self.vm_list = []
         self.volume_list = []
+        self.image_list = []
         if os.getenv('ZSTACK_SIMULATOR'):
             self.mini_server_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
         else:
@@ -214,9 +217,11 @@ class MINI(E2E):
         else:
             res_list.append(res_name)
         self.navigate(res_type)
-        test_util.test_dsc('Delete %s [name: (%s)]' % (res_type, ' '.join(res_list)))
         if expunge:
             self.switch_tab(u'已删除')
+            test_util.test_dsc('Expumge %s [name: (%s)]' % (res_type, ' '.join(res_list)))
+        else:
+            test_util.test_dsc('Delete %s [name: (%s)]' % (res_type, ' '.join(res_list)))
         for res in res_list:
             for _elem in self.get_elements(CARDCONTAINER):
                 if res in _elem.text:
@@ -304,33 +309,40 @@ class MINI(E2E):
             checker = MINICHECKER(self, elem)
             checker.volume_check(volume_check_list, ops='attached')
 
-    def add_dns_to_l3(self, network=None, dns='8.8.8.8', details_page=True):
-        network = network if network else os.getenv('l3PublicNetworkName')
-        self.navigate('network')
-        self.more_operate(u'添加DNS', res_type='network', res_name=network, details_page=details_page)
-        if dns in get_inv(network, 'network').dns:
-            test_util.test_fail('fail: there has been a DNS[%s] on L3 network[%s]' % (dns, network))
-        self.input('DNS',dns)
-        self.click_ok()
-
     def create_volume(self, name=None, dsc=None, size='2 GB', cluster=None, vm=None, provisioning=u'厚置备', view='card'):
         cluster = cluster if cluster else os.getenv('clusterName')
         self.volume_name = name if name else 'volume-' + get_time_postfix()
-        volume_dict = {
-                   'name': self.volume_name,
-                   'description': dsc,
-                   'dataSize': size.split(),
-                   'clusterUuid': cluster,
-                   'vmUuid' : vm,
-                   'provisioning': provisioning }
+        volume_dict = {'name': self.volume_name,
+                       'description': dsc,
+                       'dataSize': size.split(),
+                       'clusterUuid': cluster,
+                       'vmUuid' : vm,
+                       'provisioning': provisioning }
         volume_elem = self._create(volume_dict, "volume", view=view)
-        volume_inv = get_inv(self.volume_name, "volume")
         if vm:
             check_list = [self.volume_name, vm, size]
         else:
             check_list = [self.volume_name, size]
         checker = MINICHECKER(self, volume_elem)
         checker.volume_check(check_list, 'detached')
+
+    def add_image(self, name=None, dsc=None, type='URL', url=COMMONIMAGE, file=None, platform='Linux', view='card'):
+        self.image_name = name if name else 'image-' + get_time_postfix()
+        self.image_list.append(self.image_name)
+        image_dict = {'name': self.image_name,
+                      'description': dsc,
+                      'type': type,
+                      'url': url,
+                      'file': file,
+                      'platform': platform }
+        if type == 'URL':
+            image_dict.pop('file')
+        elif type == u'本地文件':
+            image_dict.pop('url')
+        image_elem = self._create(image_dict, "image", view=view)
+        check_list = [self.image_name, url.split('.')[-1]]
+        checker = MINICHECKER(self, image_elem)
+        checker.volume_check(check_list)
 
     def delete_vm(self, vm_name=None, corner_btn=True):
         vm_name = vm_name if vm_name else self.vm_list
@@ -416,6 +428,15 @@ class MINI(E2E):
             checker.vm_check(check_list)
         else:
             pass
+
+    def add_dns_to_l3(self, network=None, dns='8.8.8.8', details_page=True):
+        network = network if network else os.getenv('l3PublicNetworkName')
+        self.navigate('network')
+        self.more_operate(u'添加DNS', res_type='network', res_name=network, details_page=details_page)
+        if dns in get_inv(network, 'network').dns:
+            test_util.test_fail('fail: there has been a DNS[%s] on L3 network[%s]' % (dns, network))
+        self.input('DNS',dns)
+        self.click_ok()
 
     def save_element_location(self, filename="location.tmpt"):
         for menu, page in MENUDICT.items():
@@ -510,3 +531,9 @@ class MINICHECKER(object):
             for v in check_list:
                 if v not in self.elem.text:
                     test_util.test_fail("Can not find %s in volume checker" % v)
+    
+    def image_check(self, check_list=[]):
+        check_list.append(u'就绪')
+        for v in check_list:
+            if v not in self.elem.text:
+                test_util.test_fail("Can not find %s in image checker" % v)
