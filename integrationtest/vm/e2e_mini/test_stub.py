@@ -24,6 +24,7 @@ MOREOPERATIONBTN = 'ant-dropdown-trigger'
 TABLEROW = 'ant-table-row ant-table-row-level-0'
 CHECKBOX = 'input[type="checkbox"]'
 FORMEXPLAIN = 'ant-form-explain'
+SPINCONTAINER = 'ant-spin-container'
 
 
 MENUDICT = {'homepage': 'a[href="/web/"]',
@@ -226,7 +227,7 @@ class MINI(E2E):
 
     def check_res_item(self, res_name, target='displayed'):
         expected = '[%s] is expected to be [%s]!' % (res_name, target)
-        all_res_text = self.get_element('ant-spin-container').text
+        all_res_text = self.get_element(SPINCONTAINER).text
         if target == 'displayed':
             assert res_name in all_res_text, expected
         else:
@@ -234,18 +235,16 @@ class MINI(E2E):
 
     def switch_tab(self, tab_name):
         test_util.test_dsc('Switch to tab [%s]' % tab_name.encode('utf-8'))
-        
         for tab in self.get_elements('ant-tabs-tab'):
             if tab_name in tab.text:
                 tab.click()
+        src_len = len(self.get_source())
         for _ in range(10):
-            source1 = self.get_source()
-            time.sleep(1)
-            source2 = self.get_source()
-            if source2 != source1:
-                test_util.test_dsc('The page rendering is not finished, check again after 1s')
+            time.sleep(0.5)
+            if len(self.get_source()) == src_len:
+                test_util.test_dsc('The page rendering is not finished, check again')
             else:
-                break
+                return True
 
     def create_vm(self, name=None, dsc=None, image=None, cpu=2, mem='2 GB', data_size=None,
                   user_data=None, network=None, cluster=None, provisioning=u'厚置备', view='card'):
@@ -451,6 +450,7 @@ class MINICHECKER(object):
     def __init__(self, obj, elem):
         self.obj = obj
         self.elem = elem
+        test_util.test_logger('Elemnet text to check:\n%s' % elem.text.encode('utf-8'))
 
     def vm_check(self, inv, check_list=[], ops=None):
         if not ops:
