@@ -46,17 +46,15 @@ class E2E(object):
         _rsp = json_post(uri=uri, body=body, headers=HEADERS, fail_soon=True)
         rsp = jsonify_rsp(_rsp)
         if rsp.status != 0:
-            test_util.test_fail('URL request failed! uri: %s, body: %s, reason: %s' % (uri, body, rsp.value.message))
-        else:
-            return rsp
+            test_util.test_logger('URL request encountered error {uri: %s, body: %s, reason: %s}' % (uri, body, rsp.value.message))
+        return rsp
 
     def _get(self, uri):
         _rsp = json_post(uri=uri, headers=HEADERS, method='GET', fail_soon=True)
         rsp = jsonify_rsp(_rsp)
         if rsp.status != 0:
-            test_util.test_fail('URL request failed! uri: %s, reason: %s' % (uri, rsp.value.message))
-        else:
-            return rsp
+            test_util.test_logger('URL request encountered error {uri: %s, reason: %s}' % (uri, rsp.value.message))
+        return rsp
 
     def _del(self, uri):
         return json_post(uri=uri, headers=HEADERS, method='DELETE', fail_soon=True)
@@ -88,16 +86,18 @@ class E2E(object):
         rsp = self._post(uri, body='{"using": "%s", "value":"%s"}' % (strategy, value))
         return (rsp, uri[:uri.index('element') + 7])
 
-    def get_element(self, value, strategy='css selector'):
+    def get_element(self, value, strategy='css selector', par_uri=None):
         '''
         strategy: 'css selector', 'tag name', 'id', 'link text', 'partial link text'
         reference: https://github.com/SeleniumHQ/selenium/wiki/JsonWireProtocol
         '''
-        rsp, uri = self._get_element(join(self.uri, 'element'), value=value, strategy=strategy)
+        par_uri = par_uri if par_uri else self.uri
+        rsp, uri = self._get_element(join(par_uri, 'element'), value=value, strategy=strategy)
         element = rsp.value.ELEMENT
-        return Element(join(uri, element))
+        return Element(join(uri, element), par_uri, strategy, value)
 
-    def get_elements(self, value, strategy='css selector', check_result=False):
+    def get_elements(self, value, strategy='css selector', check_result=False, par_uri=None):
+        par_uri = par_uri if par_uri else self.uri
         val_list = value.split('|')
         rsp, uri = self._get_element(join(self.uri, 'elements'), value=val_list[0], strategy=strategy)
         if len(val_list) > 1 and not rsp.value:
@@ -107,7 +107,7 @@ class E2E(object):
         elements = rsp.value
         if elements:
             for elem in elements:
-                element_list.append(Element(join(uri, elem.ELEMENT)))
+                element_list.append(Element(join(uri, elem.ELEMENT), par_uri, strategy, value))
         elif check_result:
             test_util.test_fail('Can not find the elements [strategy="%s", value="%s"]' % (strategy, value))
         return element_list
@@ -183,7 +183,7 @@ class E2E(object):
         sec = int(sec) * 1000
         uri = join(self.uri, 'timeouts', 'implicit_wait')
         self._post(uri, body='{"ms": %s}' % sec)
-        
+
     def maximize_window(self):
         uri = join(self.uri, 'window', self.window_handle, 'maximize')
         self._post(uri)
@@ -205,22 +205,33 @@ class E2E(object):
                 return True
 
 class Element(E2E):
-    def __init__(self, uri):
+    def __init__(self, uri, par_uri, par_strategy, par_value):
         self.uri = uri
+        self.par_uri = par_uri
+        self.par_strategy = par_strategy
+        self.par_value = par_value
 
     # Returns the visible text for the element.
     @property
     def text(self):
         uri = join(self.uri, 'text')
         rsp = self._get(uri)
-        return rsp.value
+        if rsp.status == 10:
+            self.refresh_uri()
+            return self.text
+        else:
+            return rsp.value
 
     # Get the value of an element's attribute.
     @property
     def name(self):
         uri = join(self.uri, 'name')
         rsp = self._get(uri)
-        return rsp.value
+        if rsp.status == 10:
+            self.refresh_uri()
+            return self.name
+        else:
+            return rsp.value
 
     @property
     def selected(self):
@@ -230,13 +241,21 @@ class Element(E2E):
         '''
         uri = join(self.uri, 'selected')
         rsp = self._get(uri)
-        return rsp.value 
+        if rsp.status == 10:
+            self.refresh_uri()
+            return self.selected
+        else:
+            return rsp.value
 
     @property
     def enabled(self):
         uri = join(self.uri, 'enabled')
         rsp = self._get(uri)
-        return rsp.value
+        if rsp.status == 10:
+            self.refresh_uri()
+            return self.enabled
+        else:
+            return rsp.value
 
     @property
     def location(self):
@@ -246,22 +265,36 @@ class Element(E2E):
             "x": round(rsp['x']),
             "y": round(rsp['y'])
         }
-        return loc   
+        return loc
+
+    def refresh_uri(self):
+        self.uri = self.get_element(self.par_value, self.par_strategy, self.par_uri).uri
 
     def clear(self):
         uri = join(self.uri, 'clear')
-        self._post(uri)
-        return True
+        rsp = self._post(uri)
+        if rsp.status == 10:
+            self.refresh_uri()
+            return self.clear()
+        else:
+            return True
 
     def get_attribute(self, name):
         uri = join(self.uri, 'attribute', name)
         rsp = self._get(uri)
-        return rsp.value
+        if rsp.status == 10:
+            self.refresh_uri()
+            return self.get_attribute(name)
+        else:
+            return rsp.value
 
     def click(self):
         uri = join(self.uri, 'click')
         rsp = self._post(uri)
-        if rsp.status == 0:
+        if rsp.status == 10:
+            self.refresh_uri()
+            return self.click()
+        else:
             time.sleep(1)
             return True
 
@@ -271,10 +304,18 @@ class Element(E2E):
             value = str(value)
         _value = [v for v in value]
         body='{"value": %s}' % _value
-        self._post(uri, body=body.replace("'", '"'))
-        return True
+        rsp = self._post(uri, body=body.replace("'", '"'))
+        if rsp.status == 10:
+            self.refresh_uri()
+            return self.input(value)
+        else:
+            return True
 
     def displayed(self):
         uri = join(self.uri, 'displayed')
         rsp = self._get(uri)
-        return rsp.value
+        if rsp.status == 10:
+            self.refresh_uri()
+            return self.displayed()
+        else:
+            return rsp.value

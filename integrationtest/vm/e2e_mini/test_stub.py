@@ -151,6 +151,8 @@ class MINI(E2E):
         test_util.test_dsc('Click OK button')
         self.get_elements(PRIMARYBTN)[-1].click()
         self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
+        src_len = len(self.get_source())
+        self.wait_for_page_render(src_len)
 
     def more_operate(self, op_name, res_type, res_name, details_page=False):
         res_list = []
@@ -251,18 +253,21 @@ class MINI(E2E):
             else:
                 assert res not in all_res_text, expected
 
+    def wait_for_page_render(self, src_len):
+        for _ in xrange(10):
+            if len(self.get_source()) == src_len:
+                test_util.test_dsc('The page rendering is not finished, check again')
+                time.sleep(0.5)
+            else:
+                return True
+
     def switch_tab(self, tab_name):
         test_util.test_dsc('Switch to tab [%s]' % tab_name.encode('utf-8'))
         for tab in self.get_elements('ant-tabs-tab'):
             if tab_name in tab.text:
                 tab.click()
         src_len = len(self.get_source())
-        for _ in range(10):
-            time.sleep(0.5)
-            if len(self.get_source()) == src_len:
-                test_util.test_dsc('The page rendering is not finished, check again')
-            else:
-                return True
+        self.wait_for_page_render(src_len)
 
     def create_vm(self, name=None, dsc=None, image=None, cpu=2, mem='2 GB', data_size=None,
                   user_data=None, network=None, cluster=None, provisioning=u'厚置备', view='card'):
