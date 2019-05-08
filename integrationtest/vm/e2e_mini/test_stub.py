@@ -205,18 +205,6 @@ class MINI(E2E):
             test_util.test_fail('Not found the [%s] with name [%s]' % (res_type, para_dict['name']))
         return elem
 
-    def check_res_item(self, res_list, target='displayed'):
-        for res in res_list:
-            for _elem in self.get_elements(CARDCONTAINER):
-                if res in _elem.text:
-                    if target != 'displayed':
-                        test_util.test_fail('[%s] is still displayed!' % res)
-                    else:
-                        break
-            else:
-                if target == 'displayed':
-                    test_util.test_fail('[%s] is not displayed!' % res)
-
     def enter_deleted_tab(self):
         test_util.test_dsc('Enter into Deleted tab')
         self.get_elements('ant-tabs-tab')[-1].click()
@@ -258,13 +246,14 @@ class MINI(E2E):
             # check expunge
             self.check_res_item(res_list, target='notDisplayed')
 
-    def check_res_item(self, res_name, target='displayed'):
-        expected = '[%s] is expected to be [%s]!' % (res_name, target)
-        all_res_text = self.get_element(SPINCONTAINER).text
-        if target == 'displayed':
-            assert res_name in all_res_text, expected
-        else:
-            assert res_name not in all_res_text, expected
+    def check_res_item(self, res_list, target='displayed'):
+        for res in res_list:
+            expected = '[%s] is expected to be [%s]!' % (res, target)
+            all_res_text = self.get_element(SPINCONTAINER).text
+            if target == 'displayed':
+                assert res in all_res_text, expected
+            else:
+                assert res not in all_res_text, expected
 
     def switch_tab(self, tab_name):
         test_util.test_dsc('Switch to tab [%s]' % tab_name.encode('utf-8'))
