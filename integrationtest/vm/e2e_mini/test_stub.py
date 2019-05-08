@@ -205,11 +205,6 @@ class MINI(E2E):
             test_util.test_fail('Not found the [%s] with name [%s]' % (res_type, para_dict['name']))
         return elem
 
-    def enter_deleted_tab(self):
-        test_util.test_dsc('Enter into Deleted tab')
-        self.get_elements('ant-tabs-tab')[-1].click()
-        self.wait_for_element(CARDCONTAINER)
-
     def _delete(self, res_name, res_type, corner_btn=False, expunge=False):
         res_list = []
         if isinstance(res_name, types.ListType):
@@ -219,7 +214,7 @@ class MINI(E2E):
         self.navigate(res_type)
         test_util.test_dsc('Delete %s [name: (%s)]' % (res_type, ' '.join(res_list)))
         if expunge:
-            self.enter_deleted_tab()
+            self.switch_tab(u'已删除')
         for res in res_list:
             for _elem in self.get_elements(CARDCONTAINER):
                 if res in _elem.text:
@@ -238,7 +233,7 @@ class MINI(E2E):
             self.more_operate(op_name=u'删除', res_type=res_type, res_name=res_list)
             self.click_ok()
         self.check_res_item(res_list, target='notDisplayed')
-        self.enter_deleted_tab()
+        self.switch_tab(u'已删除')
         if not expunge and res_type != 'network':
             # check deleted
             self.check_res_item(res_list)
