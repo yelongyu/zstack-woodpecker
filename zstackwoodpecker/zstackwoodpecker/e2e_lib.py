@@ -204,6 +204,7 @@ class E2E(object):
                 op.click()
                 return True
 
+
 class Element(E2E):
     def __init__(self, uri, par_uri, par_strategy, par_value):
         self.uri = uri
@@ -269,6 +270,15 @@ class Element(E2E):
 
     def refresh_uri(self):
         self.uri = self.get_element(self.par_value, self.par_strategy, self.par_uri).uri
+
+    def move_arrow_to_here(self):
+        uri = join(self.uri.split('element')[0], 'moveto')
+        rsp = self._post(uri, body='{"element": "%s"}' % self.uri.split('/')[-1])
+        if rsp.status == 10:
+            self.refresh_uri()
+            return self.move_here()
+        else:
+            return True
 
     def clear(self):
         uri = join(self.uri, 'clear')

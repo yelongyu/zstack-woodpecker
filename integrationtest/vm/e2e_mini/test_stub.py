@@ -83,7 +83,7 @@ class MINI(E2E):
         assert self.get_elements('ant-layout-content')
 
     def logout(self):
-        self.get_element('img', 'tag name').click()
+        self.get_element('img', 'tag name').move_arrow_to_here()
         self.operate(u'登出')
         assert self.get_elements('#password')
 
@@ -150,8 +150,8 @@ class MINI(E2E):
     def click_ok(self):
         test_util.test_dsc('Click OK button')
         self.get_elements(PRIMARYBTN)[-1].click()
-        self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
         src_len = len(self.get_source())
+        self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
         self.wait_for_page_render(src_len)
 
     def more_operate(self, op_name, res_type, res_name, details_page=False):
@@ -171,7 +171,7 @@ class MINI(E2E):
                     if res in _elem.text:
                         _elem.get_element(CHECKBOX).click()
                         break
-        self.get_element(MOREOPERATIONBTN).click()
+        self.get_element(MOREOPERATIONBTN).move_arrow_to_here()
         time.sleep(1)
         self.operate(op_name)
         time.sleep(1)
@@ -332,7 +332,7 @@ class MINI(E2E):
         checker = MINICHECKER(self, volume_elem)
         checker.volume_check(check_list, 'detached')
 
-    def delete_vm(self, vm_name=None, corner_btn=False):
+    def delete_vm(self, vm_name=None, corner_btn=True):
         vm_name = vm_name if vm_name else self.vm_list
         self._delete(vm_name, 'vm', corner_btn=corner_btn)
     
@@ -341,7 +341,7 @@ class MINI(E2E):
         self.delete_vm(vm_name)
         self._delete(vm_name, 'vm', expunge=True)
 
-    def delete_volume(self, volume_name=None, corner_btn=False):
+    def delete_volume(self, volume_name=None, corner_btn=True):
         volume_name = volume_name if volume_name else self.volume_list
         self._delete(volume_name, 'volume', corner_btn=corner_btn)
 
