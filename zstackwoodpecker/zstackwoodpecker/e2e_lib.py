@@ -74,6 +74,10 @@ class E2E(object):
         rsp = self._get(join(self.uri, 'title'))
         return rsp.value
 
+    def get_source(self):
+        rsp = self._get(join(self.uri, 'source'))
+        return rsp.value
+
     def _get_element(self, uri, value, strategy):
         if strategy == 'css selector' and len(re.split('[#=]', value)) == 1:
             _value = value.split(' ')

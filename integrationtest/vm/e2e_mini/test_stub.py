@@ -201,27 +201,11 @@ class MINI(E2E):
             test_util.test_fail('Not found the [%s] with name [%s]' % (res_type, para_dict['name']))
         return elem
 
-    def check_res_item(self, res_name, target='displayed'):
-        for _elem in self.get_elements(CARDCONTAINER):
-            if res_name in _elem.text:
-                if target != 'displayed':
-                    test_util.test_fail('[%s] is still displayed!' % res_name)
-                else:
-                    break
-        else:
-            if target == 'displayed':
-                test_util.test_fail('[%s] is not displayed!' % res_name)
-
-    def enter_deleted_tab(self):
-        test_util.test_dsc('Enter into Deleted tab')
-        self.get_elements('ant-tabs-tab')[-1].click()
-        self.wait_for_element(CARDCONTAINER)
-
-    def _del(self, res_name, res_type, corner_btn=False, expunge=False):
+    def _delete(self, res_name, res_type, corner_btn=False, expunge=False):
         self.navigate(res_type)
         test_util.test_dsc('Delete %s [name: %s]' % (res_type, res_name))
         if expunge:
-            self.enter_deleted_tab()
+            self.switch_tab(u'已删除')
         for _elem in self.get_elements(CARDCONTAINER):
             if res_name in _elem.text:
                 break
@@ -237,8 +221,31 @@ class MINI(E2E):
         self.check_res_item(res_name, target='notDisplayed')
         if not expunge and res_type != 'network':
             # check deleted
-            self.enter_deleted_tab()
+            self.switch_tab(u'已删除')
             self.check_res_item(res_name)
+
+    def check_res_item(self, res_name, target='displayed'):
+        expected = '[%s] is expected to be [%s]!' % (res_name, target)
+        all_res_text = self.get_element('ant-spin-container').text
+        if target == 'displayed':
+            assert res_name in all_res_text, expected
+        else:
+            assert res_name not in all_res_text, expected
+
+    def switch_tab(self, tab_name):
+        test_util.test_dsc('Switch to tab [%s]' % tab_name.encode('utf-8'))
+        
+        for tab in self.get_elements('ant-tabs-tab'):
+            if tab_name in tab.text:
+                tab.click()
+        for _ in range(10):
+            source1 = self.get_source()
+            time.sleep(1)
+            source2 = self.get_source()
+            if source2 != source1:
+                test_util.test_dsc('The page rendering is not finished, check again after 1s')
+            else:
+                break
 
     def create_vm(self, name=None, dsc=None, image=None, cpu=2, mem='2 GB', data_size=None,
                   user_data=None, network=None, cluster=None, provisioning=u'厚置备', view='card'):
@@ -314,11 +321,11 @@ class MINI(E2E):
 
     def delete_vm(self, vm_name=None, corner_btn=True):
         vm_name = vm_name if vm_name else self.vm_name
-        self._del(vm_name, 'vm', corner_btn=corner_btn)
+        self._delete(vm_name, 'vm', corner_btn=corner_btn)
 
     def delete_volume(self, volume_name=None, corner_btn=True):
         volume_name = volume_name if volume_name else self.volume_name
-        self._del(volume_name, 'volume', corner_btn=corner_btn)
+        self._delete(volume_name, 'volume', corner_btn=corner_btn)
 
     def attach_volume(self, volume_name=[], dest_vm=None, details_page=False):
         emptyl = []
