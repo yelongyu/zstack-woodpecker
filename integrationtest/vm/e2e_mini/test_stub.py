@@ -16,7 +16,6 @@ from zstackwoodpecker import test_util
 import zstacklib.utils.jsonobject as jsonobject
 
 LOCATION_FILE_PATH = '/root/.zstackwoodpecker/integrationtest/vm/e2e_mini/'
-POSTFIX = time.strftime('%y%m%d-%H%M%S', time.localtime())
 MESSAGETOAST = 'ant-notification-notice-message'
 CARDCONTAINER = 'ant-card|ant-table-row'
 PRIMARYBTN = 'ant-btn-primary'
@@ -40,6 +39,8 @@ MENUDICT = {'homepage': 'a[href="/web/"]',
 VIEWDICT = {'list': '#btn_listswitch_s',
             'card': '#btn_cardswitch_s'}
 
+def get_time_postfix():
+    return time.strftime('%y%m%d-%H%M%S', time.localtime())
 
 def get_inv(name, res_type):
     res_dict = {'vm': res_ops.VM_INSTANCE,
@@ -61,6 +62,8 @@ class MINI(E2E):
         super(MINI, self).__init__()
         self.vm_name = None
         self.volume_name = None
+        self.vm_list = []
+        self.volume_list = []
         if os.getenv('ZSTACK_SIMULATOR'):
             self.mini_server_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
         else:
@@ -147,7 +150,7 @@ class MINI(E2E):
     def click_ok(self):
         test_util.test_dsc('Click OK button')
         self.get_elements(PRIMARYBTN)[-1].click()
-        self.wait_for_element(MESSAGETOAST, timeout=120, target='disappear')
+        self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
 
     def more_operate(self, op_name, res_type, res_name, details_page=False):
         res_list = []
@@ -202,28 +205,58 @@ class MINI(E2E):
             test_util.test_fail('Not found the [%s] with name [%s]' % (res_type, para_dict['name']))
         return elem
 
-    def _delete(self, res_name, res_type, corner_btn=False, expunge=False):
+    def check_res_item(self, res_list, target='displayed'):
+        for res in res_list:
+            for _elem in self.get_elements(CARDCONTAINER):
+                if res in _elem.text:
+                    if target != 'displayed':
+                        test_util.test_fail('[%s] is still displayed!' % res)
+                    else:
+                        break
+            else:
+                if target == 'displayed':
+                    test_util.test_fail('[%s] is not displayed!' % res)
+
+    def enter_deleted_tab(self):
+        test_util.test_dsc('Enter into Deleted tab')
+        self.get_elements('ant-tabs-tab')[-1].click()
+        self.wait_for_element(CARDCONTAINER)
+
+    def _del(self, res_name, res_type, corner_btn=False, expunge=False):
+        res_list = []
+        if isinstance(res_name, types.ListType):
+            res_list = res_name
+        else:
+            res_list.append(res_name)
         self.navigate(res_type)
-        test_util.test_dsc('Delete %s [name: %s]' % (res_type, res_name))
+        test_util.test_dsc('Delete %s [name: (%s)]' % (res_type, ' '.join(res_list)))
         if expunge:
-            self.switch_tab(u'已删除')
-        for _elem in self.get_elements(CARDCONTAINER):
-            if res_name in _elem.text:
-                break
-        else:
-            test_util.test_fail('Not found the [%s] with name [%s]' % (res_type, res_name))
-        if corner_btn:
-            _elem.get_elements('button', 'tag name')[-1].click()
-        elif expunge:
+            self.enter_deleted_tab()
+        for res in res_list:
+            for _elem in self.get_elements(CARDCONTAINER):
+                if res in _elem.text:
+                    break
+            else:
+                test_util.test_fail('Not found the [%s] with name [%s]' % (res_type, res))
+            if corner_btn:
+                _elem.get_elements('button', 'tag name')[-1].click()
+                self.click_ok()
+            elif expunge:
+                _elem.get_element(CHECKBOX).click()
+        if expunge:
             self.click_button(u'彻底删除')
-        else:
-            self.more_operate(op_name=u'删除', res_type=res_type, res_name=res_name)
-        self.click_ok()
-        self.check_res_item(res_name, target='notDisplayed')
+            self.click_ok()
+        elif not corner_btn:
+            self.more_operate(op_name=u'删除', res_type=res_type, res_name=res_list)
+            self.click_ok()
+        self.check_res_item(res_list, target='notDisplayed')
+        self.enter_deleted_tab()
         if not expunge and res_type != 'network':
             # check deleted
-            self.switch_tab(u'已删除')
-            self.check_res_item(res_name)
+            self.check_res_item(res_list)
+        if expunge:
+            # check expunge
+            self.check_res_item(res_list, target='notDisplayed')
 
     def check_res_item(self, res_name, target='displayed'):
         expected = '[%s] is expected to be [%s]!' % (res_name, target)
@@ -251,7 +284,8 @@ class MINI(E2E):
         image = image if image else os.getenv('imageName_s')
         network = network if network else os.getenv('l3PublicNetworkName')
         cluster = cluster if cluster else os.getenv('clusterName')
-        self.vm_name = name if name else 'vm-' + POSTFIX
+        self.vm_name = name if name else 'vm-' + get_time_postfix()
+        self.vm_list.append(self.vm_name)
         vm_dict = {'name': self.vm_name,
                    'description': dsc,
                    'imageUuid': image,
@@ -267,6 +301,18 @@ class MINI(E2E):
         check_list = [self.vm_name, str(cpu), mem, vm_inv.vmNics[0].ip]
         checker = MINICHECKER(self, vm_elem)
         checker.vm_check(vm_inv, check_list, ops='new_created')
+        if data_size:
+            self.volume_name = 'Disk-' + self.vm_name
+            self.volume_list.append(self.volume_name)
+            volume_check_list = [self.volume_name, data_size]
+            self.navigate('volume')
+            for elem in self.get_elements(CARDCONTAINER):
+                if self.volume_name in elem.text:
+                    break
+            else:
+                test_util.test_fail('Not found the volume named [%s] created with vm' % self.volume_name)
+            checker = MINICHECKER(self, elem)
+            checker.volume_check(volume_check_list, ops='attached')
 
     def add_dns_to_l3(self, network=None, dns='8.8.8.8', details_page=True):
         network = network if network else os.getenv('l3PublicNetworkName')
@@ -279,7 +325,7 @@ class MINI(E2E):
 
     def create_volume(self, name=None, dsc=None, size='2 GB', cluster=None, vm=None, provisioning=u'厚置备', view='card'):
         cluster = cluster if cluster else os.getenv('clusterName')
-        self.volume_name = name if name else 'volume-' + POSTFIX
+        self.volume_name = name if name else 'volume-' + get_time_postfix()
         volume_dict = {
                    'name': self.volume_name,
                    'description': dsc,
@@ -296,13 +342,23 @@ class MINI(E2E):
         checker = MINICHECKER(self, volume_elem)
         checker.volume_check(check_list, 'detached')
 
-    def delete_vm(self, vm_name=None, corner_btn=True):
-        vm_name = vm_name if vm_name else self.vm_name
-        self._delete(vm_name, 'vm', corner_btn=corner_btn)
+    def delete_vm(self, vm_name=None, corner_btn=False):
+        vm_name = vm_name if vm_name else self.vm_list
+        self._del(vm_name, 'vm', corner_btn=corner_btn)
+    
+    def expunge_vm(self, vm_name=None):
+        vm_name = vm_name if vm_name else self.vm_list
+        self.delete_vm(vm_name)
+        self._del(vm_name, 'vm', expunge=True)
 
-    def delete_volume(self, volume_name=None, corner_btn=True):
-        volume_name = volume_name if volume_name else self.volume_name
-        self._delete(volume_name, 'volume', corner_btn=corner_btn)
+    def delete_volume(self, volume_name=None, corner_btn=False):
+        volume_name = volume_name if volume_name else self.volume_list
+        self._del(volume_name, 'volume', corner_btn=corner_btn)
+
+    def expunge_volume(self, volume_name=None):
+        volume_name = volume_name if volume_name else self.volume_list
+        self.delete_volume(volume_name)
+        self._del(volume_name, 'volume', expunge=True)
 
     def attach_volume(self, volume_name=[], dest_vm=None, details_page=False):
         emptyl = []
@@ -433,12 +489,13 @@ class MINICHECKER(object):
     def vm_check(self, inv, check_list=[], ops=None):
         if not ops:
             for v in check_list:
-                assert v in self.elem.text
+                if v not in self.elem.text:
+                    test_util.test_fail("Can not find %s in vm checker" % v)
         elif ops == 'new_created':
             check_list.append(u'运行中')
             for v in check_list:
                 if v not in self.elem.text:
-                    test_util.test_fail("Can not find %s in checker" % v)
+                    test_util.test_fail("Can not find %s in vm checker" % v)
             # vm_lnk = 'a[href="/web/vm/%s"]' % inv.uuid
             # self.obj.get_element(vm_lnk).click()
         elif ops == 'start':
@@ -452,11 +509,14 @@ class MINICHECKER(object):
     def volume_check(self, check_list=[], ops=None):
         if not ops:
             for v in check_list:
-                assert v in self.elem.text
+                if v not in self.elem.text:
+                    test_util.test_fail("Can not find %s in volume checker" % v)
         elif ops == 'attached':
             for v in check_list:
-                assert v in self.elem.text
+                if v not in self.elem.text:
+                    test_util.test_fail("Can not find %s in volume checker" % v)
         elif ops == 'detached':
             check_list.append(u'未加载')
             for v in check_list:
-                assert v in self.elem.text
+                if v not in self.elem.text:
+                    test_util.test_fail("Can not find %s in volume checker" % v)
