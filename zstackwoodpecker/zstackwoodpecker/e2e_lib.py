@@ -188,6 +188,7 @@ class E2E(object):
         uri = join(self.uri, 'window')
         self._del(uri)
 
+    # Delete the session.
     def close(self):
         self._del(self.uri)
 

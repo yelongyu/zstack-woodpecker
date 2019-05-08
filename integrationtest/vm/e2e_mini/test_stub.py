@@ -137,7 +137,7 @@ class MINI(E2E):
 
     def navigate(self, menu):
         current_url = self.get_url()
-        if menu not in current_url:
+        if menu not in current_url.split('/')[-1]:
             test_util.test_dsc('Navigate to [%s]' % menu)
             self.get_element(MENUDICT[menu]).click()
             self.wait_for_element(PRIMARYBTN)
@@ -165,8 +165,6 @@ class MINI(E2E):
                     if res in _elem.text:
                         _elem.get_element(CHECKBOX).click()
                         break
-                else:
-                    test_util.test_fail('Not found the [%s]' % res_type)
         self.get_element(MOREOPERATIONBTN).click()
         time.sleep(1)
         self.operate(op_name)
@@ -205,13 +203,14 @@ class MINI(E2E):
 
     def check_res_item(self, res_name, target='displayed'):
         for _elem in self.get_elements(CARDCONTAINER):
-            if _elem.text == res_name:
+            if res_name in _elem.text:
                 if target != 'displayed':
                     test_util.test_fail('[%s] is still displayed!' % res_name)
                 else:
                     break
         else:
-            test_util.test_fail('[%s] is not displayed!' % res_name)
+            if target == 'displayed':
+                test_util.test_fail('[%s] is not displayed!' % res_name)
 
     def enter_deleted_tab(self):
         test_util.test_dsc('Enter into Deleted tab')
@@ -221,7 +220,6 @@ class MINI(E2E):
     def _del(self, res_name, res_type, corner_btn=False, expunge=False):
         self.navigate(res_type)
         test_util.test_dsc('Delete %s [name: %s]' % (res_type, res_name))
-        self.wait_for_element(CARDCONTAINER)
         if expunge:
             self.enter_deleted_tab()
         for _elem in self.get_elements(CARDCONTAINER):
@@ -454,7 +452,8 @@ class MINICHECKER(object):
         elif ops == 'new_created':
             check_list.append(u'运行中')
             for v in check_list:
-                assert v in self.elem.text
+                if v not in self.elem.text:
+                    test_util.test_fail("Can not find %s in checker" % v)
             # vm_lnk = 'a[href="/web/vm/%s"]' % inv.uuid
             # self.obj.get_element(vm_lnk).click()
         elif ops == 'start':
