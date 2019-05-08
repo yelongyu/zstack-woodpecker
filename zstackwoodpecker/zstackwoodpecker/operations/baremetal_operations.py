@@ -226,16 +226,25 @@ def create_baremetal_instance(baremetal_ins_option, session_uuid=None):
         action.name = 'baremetal_instance'
     action.chassisUuid = baremetal_ins_option.get_chassis_uuid()
     action.imageUuid = baremetal_ins_option.get_image_uuid()
+    action.password = baremetal_ins_option.get_username()
     action.password = baremetal_ins_option.get_password()
+    action.templateUuid = baremetal_ins_option.get_template_uuid()
     action.timeout = 240000
     if baremetal_ins_option.get_nic_cfgs():
         action.nicCfgs = baremetal_ins_option.get_nic_cfgs()
     if baremetal_ins_option.get_nic_cfgs():
         action.strategy = baremetal_ins_option.get_strategy()
+    if baremetal_ins_option.get_bondingCfgs():
+        action.bondingCfgs = baremetal_ins_option.get_bondingCfgs()
+    if baremetal_ins_option.get_systemTags():
+        action.systemTags = baremetal_ins_option.get_systemTags()
+    if baremetal_ins_option.get_customConfigurations():
+        action.customConfigurations = baremetal_ins_option.get_customConfigurations()
     action.description = baremetal_ins_option.get_description()
-    evt = account_operations.execute_action_with_session(action, session_uuid) 
-    test_util.action_logger('Create Baremetal Instance [uuid:] %s [name:] %s' % (evt.inventory.uuid, evt.inventory.name)) 
-    return evt.inventory 
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Create Baremetal Instance [uuid:] %s [name:] %s' % (evt.inventory.uuid, evt.inventory.name))
+    return evt.inventory
+
 
 def destory_baremetal_instance(uuid, delete_mode="Permissive", session_uuid=None):
     action = api_actions.DestroyBaremetalInstanceAction()
@@ -318,6 +327,26 @@ def attach_pxe_to_cluster(pxe_uuid, cluster_uuid, session_uuid=None):
     action.clusterUuid = cluster_uuid
     action.pxeServerUuid = pxe_uuid
     test_util.action_logger('Attach pxe server [%s] to cluster [%s]' %(pxe_uuid, cluster_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def add_preconfiguration_template(name, type, distribution, content, session_uuid=None):
+    action = api_actions.AddPreconfigurationTemplateAction()
+    action.name = name
+    action.type = type
+    action.distribution = distribution
+    action.content = content
+    test_util.action_logger('Add preconfiguration_template [%s]' % name)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def create_baremetal_bonding(chassis_uuid, name, mode, slaves, session_uuid=None):
+    action = api_actions.CreateBaremetalBondingAction()
+    action.name = name
+    action.mode = mode
+    action.slaves = slaves
+    action.chassisUuid = chassis_uuid
+    test_util.action_logger('Create baremetal bonding [%s]' % name)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 

@@ -175,6 +175,11 @@
                 startIp="$scenvpcIpRangeStart2" endIp="$scenvpcIpRangeEnd2"
                 gateway="$scenvpcIpRangeGateway2"
                 netmask="$scenvpcIpRangeNetmask2" />
+              <dns>$DNSServer</dns> 
+              <networkService provider="Flat Network Service Provider">
+                <serviceType>DHCP</serviceType>
+                <serviceType>Eip</serviceType>
+              </networkService>
               <networkService provider="SecurityGroup">
                 <serviceType>SecurityGroup</serviceType>
               </networkService>
@@ -189,6 +194,11 @@
                 startIp="$scenvpcIpRangeStart3" endIp="$scenvpcIpRangeEnd3"
                 gateway="$scenvpcIpRangeGateway3"
                 netmask="$scenvpcIpRangeNetmask3" />
+              <dns>$DNSServer</dns>
+              <networkService provider="Flat Network Service Provider">
+                <serviceType>DHCP</serviceType>
+                <serviceType>Eip</serviceType>
+              </networkService>
               <networkService provider="SecurityGroup">
                 <serviceType>SecurityGroup</serviceType>
               </networkService>

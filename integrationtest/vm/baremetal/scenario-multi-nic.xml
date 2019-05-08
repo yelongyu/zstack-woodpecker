@@ -115,14 +115,6 @@
               <scenl3NetworkRef>$scenl3VPCNetworkName1</scenl3NetworkRef>
               <l2NetworkRef>$scenl2VlanNetworkName1</l2NetworkRef>
              </l3Network>
-            <l3Network>
-              <scenl3NetworkRef>$scenl3VPCNetworkName2</scenl3NetworkRef>
-              <l2NetworkRef>$scenl2VlanNetworkName2</l2NetworkRef>
-             </l3Network>
-            <l3Network>
-              <scenl3NetworkRef>$scenl3VPCNetworkName3</scenl3NetworkRef>
-              <l2NetworkRef>$scenl2VlanNetworkName3</l2NetworkRef>
-             </l3Network>
           </l3Networks>
           <nodeRef>$node1Name</nodeRef>
           <hostRef>$hostName</hostRef>

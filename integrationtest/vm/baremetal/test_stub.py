@@ -86,6 +86,40 @@ def create_pxe(dhcp_interface = None, name = None, range_begin = None, \
     pxe = bare_operations.create_pxe(pxe_option)
     return pxe
 
+def create_vm_multi_l3(l3_uuid_list, default_l3_uuid, vm_name = None, image_name = None, \
+              disk_offering_uuid = None, cluster_uuid = None, host_uuid = None, \
+              system_tags = None, password = None, instance_offering_uuid = None, session_uuid = None):
+    vm_creation_option = test_util.VmOption() 
+    if not instance_offering_uuid:     
+        instance_offering_name = os.environ.get('instanceOfferingName_m')
+        instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(instance_offering_name).uuid
+    if not image_name:
+        image_name = os.environ.get('imageName_s')
+    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    if not vm_name:
+        vm_creation_option.set_name('vm-for-baremetal')
+
+    vm_creation_option.set_l3_uuids(l3_uuid_list)
+    vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+    vm_creation_option.set_image_uuid(image_uuid)
+    vm_creation_option.set_default_l3_uuid(default_l3_uuid)
+    if cluster_uuid:
+        vm_creation_option.set_cluster_uuid(cluster_uuid)
+    if system_tags:
+        vm_creation_option.set_system_tags(system_tags)
+    if disk_offering_uuid:
+        vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
+    if password:
+        vm_creation_option.set_root_password(password)
+    if host_uuid:
+        vm_creation_option.set_host_uuid(host_uuid)
+    if session_uuid:
+        vm_creation_option.set_session_uuid(session_uuid)
+    vm = test_vm_header.ZstackTestVm()
+    vm.set_creation_option(vm_creation_option)
+    vm.create()
+    return vm
+
 def create_vm(vm_name = 'vm_for_baremetal', image_name = None, \
              l3_name = None, instance_offering_uuid = None, \
              host_uuid = None, disk_offering_uuid = None, cluster_uuid = None, \
@@ -231,18 +265,27 @@ def create_chassis(cluster_uuid, name = None, address = None, username = None, \
     chassis = bare_operations.create_chassis(chassis_option)
     return chassis
 
-def create_baremetal_ins(image_uuid, chassis_uuid, password = 'password', \
-	nic_cfgs = None, strategy = None, name = None, session_uuid = None):
+def create_baremetal_ins(image_uuid, chassis_uuid, template_uuid, username, password = None, \
+        nic_cfgs = None, bonding_cfgs = None, customConfigurations = None, systemTags = None, \
+    strategy = None, name = None, session_uuid = None):
     if not name:
         name = 'baremetal_instance'
 
     baremetal_ins_option = test_util.BaremetalInstanceOption()
     baremetal_ins_option.set_name(name)
+    baremetal_ins_option.set_username(username)
     baremetal_ins_option.set_password(password)
     baremetal_ins_option.set_image_uuid(image_uuid)
     baremetal_ins_option.set_chassis_uuid(chassis_uuid)
+    baremetal_ins_option.set_template_uuid(template_uuid)
     if nic_cfgs:
         baremetal_ins_option.set_nic_cfgs(nic_cfgs)
+    if bonding_cfgs:
+        baremetal_ins_option.set_bondingCfgs(bonding_cfgs)
+    if customConfigurations:
+        baremetal_ins_option.set_customConfigurations(customConfigurations)
+    if systemTags:
+        baremetal_ins_option.set_systemTags(systemTags)
     if strategy:
         baremetal_ins_option.set_strategy(strategy)
     baremetal_ins = bare_operations.create_baremetal_instance(baremetal_ins_option, session_uuid)

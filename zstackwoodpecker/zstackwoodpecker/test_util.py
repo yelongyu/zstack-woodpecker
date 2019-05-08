@@ -1422,6 +1422,11 @@ class BaremetalInstanceOption(DataOption):
         self.password = 'password'
         self.nicCfgs = None
         self.strategy = None
+        self.tempplateUuid = None
+        self.bondingCfgs = None
+        self.customConfigurations = None
+        self.username = None
+        self.systemTags = None
         super(BaremetalInstanceOption, self).__init__()
 
     def set_chassis_uuid(self, chassisUuid):
@@ -1453,6 +1458,36 @@ class BaremetalInstanceOption(DataOption):
 
     def get_strategy(self):
         return self.strategy
+
+    def set_template_uuid(self, templateUuid):
+        self.templateUuid = templateUuid
+
+    def get_template_uuid(self):
+        return self.templateUuid
+
+    def set_bondingCfgs(self, bondingCfgs):
+        self.bondingCfgs = bondingCfgs
+
+    def get_bondingCfgs(self):
+        return self.bondingCfgs
+
+    def set_customConfigurations(self, customConfigurations):
+        self.customConfigurations = customConfigurations
+
+    def get_customConfigurations(self):
+        return self.customConfigurations
+
+    def set_username(self, username):
+        self.username = username
+
+    def get_username(self):
+        return self.username
+
+    def set_systemTags(self, systemTags):
+        self.systemTags = systemTags
+
+    def get_systemTags(self):
+        return self.systemTags
 
 class StackTemplateOption(DataOption):
     def __init__(self):
