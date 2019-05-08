@@ -109,7 +109,7 @@ class E2E(object):
             for elem in elements:
                 element_list.append(Element(join(uri, elem.ELEMENT)))
         elif check_result:
-            test_util.test_fail('Not found the elements [strategy="%s", value="%s"]' % (strategy, value))
+            test_util.test_fail('Can not find the elements [strategy="%s", value="%s"]' % (strategy, value))
         return element_list
 
     def wait_for_element(self, value, strategy='css selector', timeout=10, target='appear'):

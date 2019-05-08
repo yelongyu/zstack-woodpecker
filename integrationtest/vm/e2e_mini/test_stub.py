@@ -54,7 +54,7 @@ def get_inv(name, res_type):
     if inv:
         return inv[0]
     else:
-        test_util.test_fail('Not found the [%s] with name [%s]' % (res_type, name))
+        test_util.test_fail('Can not find the [%s] with name [%s]' % (res_type, name))
 
 
 class MINI(E2E):
@@ -202,7 +202,7 @@ class MINI(E2E):
             if para_dict['name'] in elem.text:
                 break
         else:
-            test_util.test_fail('Not found the [%s] with name [%s]' % (res_type, para_dict['name']))
+            test_util.test_fail('Can not find the [%s] with name [%s]' % (res_type, para_dict['name']))
         return elem
 
     def _delete(self, res_name, res_type, corner_btn=False, expunge=False):
@@ -220,7 +220,7 @@ class MINI(E2E):
                 if res in _elem.text:
                     break
             else:
-                test_util.test_fail('Not found the [%s] with name [%s]' % (res_type, res))
+                test_util.test_fail('Can not find the [%s] with name [%s]' % (res_type, res))
             if corner_btn:
                 _elem.get_elements('button', 'tag name')[-1].click()
                 self.click_ok()
@@ -241,6 +241,8 @@ class MINI(E2E):
             self.check_res_item(res_list)
 
     def check_res_item(self, res_list, target='displayed'):
+        if not isinstance(res_list, types.ListType):
+            test_util.test_fail("The first parameter of function[check_res_item] expected list_type")
         for res in res_list:
             expected = '[%s] is expected to be [%s]!' % (res, target)
             all_res_text = self.get_element(SPINCONTAINER).text
@@ -293,7 +295,7 @@ class MINI(E2E):
                 if self.volume_name in elem.text:
                     break
             else:
-                test_util.test_fail('Not found the volume named [%s] created with vm' % self.volume_name)
+                test_util.test_fail('Can not find the volume named [%s] created with vm' % self.volume_name)
             checker = MINICHECKER(self, elem)
             checker.volume_check(volume_check_list, ops='attached')
 
@@ -356,7 +358,7 @@ class MINI(E2E):
             if dest_vm in _row.text:
                 break
         else:
-            test_util.test_fail('Not found the dest-vm with name [%s]' % dest_vm)
+            test_util.test_fail('Can not find the dest-vm with name [%s]' % dest_vm)
         _row.get_element('input[type="radio"]').click()
         self.click_ok()
         check_list = [dest_vm]
@@ -388,7 +390,7 @@ class MINI(E2E):
             if res_name in _elem.text:
                 break
         else:
-            test_util.test_fail('Not found the [%s] with name [%s]' % (res_type, res_name))
+            test_util.test_fail('Can not find the [%s] with name [%s]' % (res_type, res_name))
         if corner_btn:
             _elem.get_elements('button', 'tag name')[0].click()
         else:
