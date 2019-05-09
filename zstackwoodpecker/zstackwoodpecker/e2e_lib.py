@@ -154,7 +154,7 @@ class E2E(object):
                     opt.click()
         def select_radio(elem, value):
             for opt in self.get_elements('input[type="radio"]'):
-                if value in opt.text:
+                if value == opt.get_attribute('value'):
                     opt.click()
         def input_content(elem, content):
             element = elem.get_element('input', 'tag name')

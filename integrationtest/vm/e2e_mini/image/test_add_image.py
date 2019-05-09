@@ -14,11 +14,13 @@ def test():
 
 def env_recover():
     global mini
+    mini.delete_image()
     mini.close()
 
 def error_cleanup():
     global mini
     try:
+        mini.delete_image()
         mini.close()
     except:
         pass

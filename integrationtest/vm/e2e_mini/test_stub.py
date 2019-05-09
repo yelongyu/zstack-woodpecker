@@ -159,33 +159,50 @@ class MINI(E2E):
         self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
         self.wait_for_page_render(src_len)
 
-    def more_operate(self, op_name, res_type, res_name, details_page=False):
+    def more_operate(self, op_name, res_type, res_name, details_page=False, confirm_only=False, switch=None):
         res_list = []
         if isinstance(res_name, types.ListType):
             res_list = res_name
         else:
             res_list.append(res_name)
-        if details_page:
-            if len(res_list) == 1:
-                self.enter_details_page(res_type, res_list[0])
-            else:
-                test_util.test_fail('Multiple resource can not enter details page together')
-        else:
-            for res in res_list:
-                for _elem in self.get_elements(CARDCONTAINER):
-                    if res in _elem.text:
+
+        def more_ops():
+            self.get_element(MOREOPERATIONBTN).move_cursor_here()
+            time.sleep(1)
+            self.operate(op_name)
+            time.sleep(2)
+        
+        if details_page and not confirm_only and (len(res_list) > 1):
+            test_util.test_fail('Only confirm_only multiple res can operate in details_page')
+        if switch and not details_page:
+            test_util.test_fail("Para[switch] is only used when para[details_page] is True")
+        for res in res_list:
+            for _elem in self.get_elements(CARDCONTAINER):
+                if res in _elem.text:
+                    if details_page:
+                        self.enter_details_page(res_type, res)
+                        more_ops()
+                        if confirm_only:
+                            self.click_ok()
+                            test_util.test_dsc('[%s] has completed the operation %s' % (res, op_name.encode('utf-8')))
+                            self.navigate(res_type)
+                        if switch:
+                            self.switch_tab(switch)
+                    else:
                         _elem.get_element(CHECKBOX).click()
-                        break
-        self.get_element(MOREOPERATIONBTN).move_cursor_here()
-        time.sleep(1)
-        self.operate(op_name)
-        time.sleep(1)
+                    break
+        if not details_page:
+            more_ops()
+            if confirm_only:
+                self.click_ok()
+                test_util.test_dsc('[%s] hava completed the operation %s' % (','.join(res_list), op_name.encode('utf-8')))
 
     def enter_details_page(self, res_type, name):
         inv = get_inv(name, res_type)
         lnk = 'a[href="/web/%s/%s"]' % (res_type, inv.uuid)
         test_util.test_dsc('Enter into details page')
         self.get_element(lnk).click()
+        time.sleep(1)
 
     def cancel_create_operation(self, res_type, close=False):
         self.navigate(res_type)
@@ -196,9 +213,13 @@ class MINI(E2E):
             self.get_elements('ant-btn')[-1].click()
         self.wait_for_element('ant-modal-content', target='disappear')
 
-    def _create(self, para_dict, res_type, view):
+    def _create(self, para_dict, res_type, view, priority_dict=None):
         self.navigate(res_type)
         self.get_elements(PRIMARYBTN)[-1].click()
+        if priority_dict:
+            for k, v in priority_dict.iteritems():
+                if v is not None:
+                    self.input(k, v)
         for k, v in para_dict.iteritems():
             if v is not None:
                 self.input(k, v)
@@ -207,6 +228,7 @@ class MINI(E2E):
             self.switch_view(view)
         for elem in self.get_elements(CARDCONTAINER):
             if para_dict['name'] in elem.text:
+                time.sleep(1)
                 break
         else:
             test_util.test_fail('Can not find the [%s] with name [%s]' % (res_type, para_dict['name']))
@@ -219,33 +241,34 @@ class MINI(E2E):
             res_list = res_name
         else:
             res_list.append(res_name)
+        if expunge and corner_btn:
+            test_util.test_fail("Can not expunge by corner btn")
         self.navigate(res_type)
         test_util.test_dsc('%s %s [name: (%s)]' % (('Expunge' if primary_btn_num < PRIMARYBTNNUM else 'Delete'),
                                                    res_type, ' '.join(res_list)))
-        for res in res_list:
-            for _elem in self.get_elements(CARDCONTAINER):
-                if res in _elem.text:
-                    break
-            else:
-                test_util.test_fail('Can not find the [%s] with name [%s]' % (res_type, res))
-            if corner_btn:
-                _elem.get_elements('button', 'tag name')[-1].click()
-            elif expunge and primary_btn_num < PRIMARYBTNNUM:
-                if details_page:
-                    self.more_operate(op_name=u'彻底删除',
-                                      res_type=res_type,
-                                      res_name=res_list,
-                                      details_page=details_page)
+        if corner_btn:
+            for res in res_list:
+                for _elem in self.get_elements(CARDCONTAINER):
+                    if res in _elem.text:
+                        break
                 else:
-                    _elem.get_element(CHECKBOX).click()
-                    self.click_button(u'彻底删除')
-            else:
-                self.more_operate(op_name=u'删除',
-                                  res_type=res_type,
-                                  res_name=res_list,
-                                  details_page=details_page)
-            self.click_ok()
-            self.check_res_item(res_list, target='notDisplayed')
+                    test_util.test_fail('Can not find the [%s] with name [%s]' % (res_type, res))
+                _elem.get_elements('button', 'tag name')[-1].click()
+                self.click_ok()
+        elif expunge and (primary_btn_num < PRIMARYBTNNUM):
+            self.more_operate(op_name=u'彻底删除',
+                              res_type=res_type,
+                              res_name=res_list,
+                              details_page=details_page,
+                              confirm_only=True,
+                              switch=u'已删除')
+        else:
+            self.more_operate(op_name=u'删除',
+                              res_type=res_type,
+                              res_name=res_list,
+                              details_page=details_page,
+                              confirm_only=True)
+        self.check_res_item(res_list, target='notDisplayed')
         if primary_btn_num < PRIMARYBTNNUM:
             return True
         self.switch_tab(u'已删除')
@@ -307,7 +330,7 @@ class MINI(E2E):
         if data_size:
             self.volume_name = 'Disk-' + self.vm_name
             self.volume_list.append(self.volume_name)
-            volume_check_list = [self.volume_name, data_size]
+            volume_check_list = [self.volume_name, data_size, self.vm_name]
             self.navigate('volume')
             for elem in self.get_elements(CARDCONTAINER):
                 if self.volume_name in elem.text:
@@ -334,20 +357,20 @@ class MINI(E2E):
         checker = MINICHECKER(self, volume_elem)
         checker.volume_check(check_list, 'detached')
 
-    def add_image(self, name=None, dsc=None, adding_type='URL', url=COMMONIMAGE, local_file=None, platform='Linux', view='card'):
+    def add_image(self, name=None, dsc=None, adding_type='url', url=COMMONIMAGE, local_file=None, platform='Linux', view='card'):
         self.image_name = name if name else 'image-' + get_time_postfix()
         self.image_list.append(self.image_name)
+        priority_dict = {'type': adding_type}
         image_dict = {'name': self.image_name,
                       'description': dsc,
-                      'type': adding_type,
                       'url': url,
                       'file': local_file,
                       'platform': platform }
-        if adding_type == 'URL':
+        if adding_type == 'url':
             image_dict.pop('file')
-        elif adding_type == u'本地文件':
+        elif adding_type == 'file':
             image_dict.pop('url')
-        image_elem = self._create(image_dict, "image", view=view)
+        image_elem = self._create(image_dict, "image", view=view, priority_dict=priority_dict)
         check_list = [self.image_name, url.split('.')[-1]]
         checker = MINICHECKER(self, image_elem)
         checker.volume_check(check_list)
@@ -355,7 +378,7 @@ class MINI(E2E):
     def delete_vm(self, vm_name=None, corner_btn=True, details_page=False):
         vm_name = vm_name if vm_name else self.vm_list
         self._delete(vm_name, 'vm', corner_btn=corner_btn, details_page=details_page)
-
+    
     def expunge_vm(self, vm_name=None, details_page=False):
         vm_name = vm_name if vm_name else self.vm_list
         self._delete(vm_name, 'vm', expunge=True, details_page=details_page)
@@ -367,6 +390,14 @@ class MINI(E2E):
     def expunge_volume(self, volume_name=None, details_page=False):
         volume_name = volume_name if volume_name else self.volume_list
         self._delete(volume_name, 'volume', expunge=True, details_page=details_page)
+
+    def delete_image(self, image_name=None, corner_btn=True, details_page=False):
+        image_name = image_name if image_name else self.image_list
+        self._delete(image_name, 'image', corner_btn=corner_btn, details_page=details_page)
+
+    def expunge_image(self, image_name=None, details_page=False):
+        image_name = image_name if image_name else self.image_list
+        self._delete(image_name, 'image', expunge=True, details_page=details_page)
 
     def attach_volume(self, volume_name=[], dest_vm=None, details_page=False):
         emptyl = []
@@ -406,9 +437,10 @@ class MINI(E2E):
                     break
                 MINICHECKER(self, _elem).volume_check(ops='detached')
 
-    def modify_info(self, res_type, res_name, new_name, new_dsc=None, corner_btn=False):
+    def modify_info(self, res_type, res_name, new_name, new_dsc=None, corner_btn=False, view='card'):
         check_list = []
         self.navigate(res_type)
+        self.switch_view(view)
         for _elem in self.get_elements(CARDCONTAINER):
             if res_name in _elem.text:
                 break
@@ -432,6 +464,8 @@ class MINI(E2E):
             checker.volume_check(check_list)
         elif res_type == 'vm':
             checker.vm_check(check_list)
+        elif res_type == 'image':
+            checker.image_check(check_list)
         else:
             pass
 
