@@ -42,6 +42,11 @@ class E2E(object):
         rsp = self._get(join(self.uri, 'url'))
         return rsp.value
 
+    def get_active_element(self):
+        rsp = self._post(join(self.uri, 'element', 'active'))
+        elem_id = rsp.value
+        return Element(join(self.uri, 'element', elem_id))
+
     def _post(self, uri, body=None):
         _rsp = json_post(uri=uri, body=body, headers=HEADERS, fail_soon=True)
         rsp = jsonify_rsp(_rsp)
@@ -58,6 +63,10 @@ class E2E(object):
 
     def _del(self, uri):
         return json_post(uri=uri, headers=HEADERS, method='DELETE', fail_soon=True)
+
+    def get_screenshot(self):
+        rsp = self._get(join(self.uri, 'screenshot'))
+        return rsp.value
 
     def go_forward(self):
         self._post(join(self.uri, 'forward'))
@@ -213,7 +222,7 @@ class E2E(object):
 
 
 class Element(E2E):
-    def __init__(self, uri, par_uri, par_strategy, par_value):
+    def __init__(self, uri, par_uri=None, par_strategy=None, par_value=None):
         self.uri = uri
         self.par_uri = par_uri
         self.par_strategy = par_strategy
@@ -278,7 +287,7 @@ class Element(E2E):
     def refresh_uri(self):
         self.uri = self.get_element(self.par_value, self.par_strategy, self.par_uri).uri
 
-    def move_arrow_to_here(self):
+    def move_cursor_here(self):
         uri = join(self.uri.split('element')[0], 'moveto')
         rsp = self._post(uri, body='{"element": "%s"}' % self.uri.split('/')[-1])
         if rsp.status == 10:
@@ -312,7 +321,6 @@ class Element(E2E):
             self.refresh_uri()
             return self.click()
         else:
-            time.sleep(1)
             return True
 
     def input(self, value):
