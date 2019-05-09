@@ -9,6 +9,7 @@ Create an unified test_stub for E2E test operations
 import os
 import time
 import types
+import random
 from os.path import join
 from zstackwoodpecker.e2e_lib import E2E
 import zstackwoodpecker.operations.resource_operations as res_ops 
@@ -43,7 +44,7 @@ VIEWDICT = {'list': '#btn_listswitch_s',
 
 
 def get_time_postfix():
-    return time.strftime('%y%m%d-%H%M%S', time.localtime())
+    return time.strftime('%y%m%d-%H%M%S', time.localtime()) + str(random.random()).split('.')[-1]
 
 def get_inv(name, res_type):
     res_dict = {'vm': res_ops.VM_INSTANCE,
@@ -159,43 +160,27 @@ class MINI(E2E):
         self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
         self.wait_for_page_render(src_len)
 
-    def more_operate(self, op_name, res_type, res_name, details_page=False, confirm_only=False, switch=None):
+    def more_operate(self, op_name, res_type, res_name, details_page=False):
         res_list = []
         if isinstance(res_name, types.ListType):
             res_list = res_name
         else:
             res_list.append(res_name)
-
-        def more_ops():
-            self.get_element(MOREOPERATIONBTN).move_cursor_here()
-            time.sleep(1)
-            self.operate(op_name)
-            time.sleep(2)
-        
-        if details_page and not confirm_only and (len(res_list) > 1):
-            test_util.test_fail('Only confirm_only multiple res can operate in details_page')
-        if switch and not details_page:
-            test_util.test_fail("Para[switch] is only used when para[details_page] is True")
-        for res in res_list:
-            for _elem in self.get_elements(CARDCONTAINER):
-                if res in _elem.text:
-                    if details_page:
-                        self.enter_details_page(res_type, res)
-                        more_ops()
-                        if confirm_only:
-                            self.click_ok()
-                            test_util.test_dsc('[%s] has completed the operation %s' % (res, op_name.encode('utf-8')))
-                            self.navigate(res_type)
-                        if switch:
-                            self.switch_tab(switch)
-                    else:
+        if details_page:
+            if len(res_list) == 1:
+                self.enter_details_page(res_type, res_list[0])
+            else:
+                test_util.test_fail('Multiple resource can not enter details page together')
+        else:
+            for res in res_list:
+                for _elem in self.get_elements(CARDCONTAINER):
+                    if res in _elem.text:
                         _elem.get_element(CHECKBOX).click()
-                    break
-        if not details_page:
-            more_ops()
-            if confirm_only:
-                self.click_ok()
-                test_util.test_dsc('[%s] hava completed the operation %s' % (','.join(res_list), op_name.encode('utf-8')))
+                        break
+        self.get_element(MOREOPERATIONBTN).move_cursor_here()
+        time.sleep(1)
+        self.operate(op_name)
+        time.sleep(1)
 
     def enter_details_page(self, res_type, name):
         inv = get_inv(name, res_type)
@@ -241,33 +226,36 @@ class MINI(E2E):
             res_list = res_name
         else:
             res_list.append(res_name)
-        if expunge and corner_btn:
-            test_util.test_fail("Can not expunge by corner btn")
         self.navigate(res_type)
         test_util.test_dsc('%s %s [name: (%s)]' % (('Expunge' if primary_btn_num < PRIMARYBTNNUM else 'Delete'),
                                                    res_type, ' '.join(res_list)))
-        if corner_btn:
-            for res in res_list:
-                for _elem in self.get_elements(CARDCONTAINER):
-                    if res in _elem.text:
-                        break
-                else:
-                    test_util.test_fail('Can not find the [%s] with name [%s]' % (res_type, res))
+        for res in res_list:
+            for _elem in self.get_elements(CARDCONTAINER):
+                if res in _elem.text:
+                    break
+            else:
+                test_util.test_fail('Can not find the [%s] with name [%s]' % (res_type, res))
+            if corner_btn:
                 _elem.get_elements('button', 'tag name')[-1].click()
-                self.click_ok()
-        elif expunge and (primary_btn_num < PRIMARYBTNNUM):
-            self.more_operate(op_name=u'彻底删除',
-                              res_type=res_type,
-                              res_name=res_list,
-                              details_page=details_page,
-                              confirm_only=True,
-                              switch=u'已删除')
+                break
+            elif expunge and primary_btn_num < PRIMARYBTNNUM:
+                if details_page:
+                    self.more_operate(op_name=u'彻底删除',
+                                      res_type=res_type,
+                                      res_name=res_list,
+                                      details_page=details_page)
+                    break
+                else:
+                    _elem.get_element(CHECKBOX).click()
+            else:
+                self.more_operate(op_name=u'删除',
+                                  res_type=res_type,
+                                  res_name=res_list,
+                                  details_page=details_page)
+                break
         else:
-            self.more_operate(op_name=u'删除',
-                              res_type=res_type,
-                              res_name=res_list,
-                              details_page=details_page,
-                              confirm_only=True)
+            self.click_button(u'彻底删除')
+        self.click_ok()
         self.check_res_item(res_list, target='notDisplayed')
         if primary_btn_num < PRIMARYBTNNUM:
             return True
