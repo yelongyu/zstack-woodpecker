@@ -25,17 +25,19 @@ def test():
     path_list = flavor['path_list']
     repeat = flavor['repeat']
 
+    Robot.robot_create_utility_vm()
+    robot_test_obj = Robot.robot()
+    robot_test_obj.initial(path_list)
+
     while repeat > 0:
         test_util.test_logger("Robot action: Iteration %s" % (repeat))
-        Robot.robot_create_utility_vm()
-        robot_test_obj = Robot.robot()
         test_dict = robot_test_obj.get_test_dict()
-        robot_test_obj.initial(path_list)
         Robot.robot_run_constant_path(robot_test_obj, set_robot=True)
 
         repeat -= 1
         test_dict.cleanup()
-        del robot_test_obj
+        del test_dict
+        robot_test_obj.test_dict = Robot.robot_test_dict()
 
 def env_recover():
     global test_dict
