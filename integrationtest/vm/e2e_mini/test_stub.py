@@ -278,6 +278,38 @@ class MINI(E2E):
         if expunge:
             self._delete(res_list, res_type, expunge=True, details_page=details_page)
 
+    def resume(self, res_name, res_type, details_page=False):
+        self.navigate(res_type)
+        res_list = []
+        if isinstance(res_name, types.ListType):
+            res_list = res_name
+        else:
+            res_list.append(res_name)
+        self.navigate(res_type)
+        self.switch_tab(u'已删除')
+        for res in res_list:
+            for _elem in self.get_elements(CARDCONTAINER):
+                if res in _elem.text:
+                    break
+            else:
+                test_util.test_fail('Can not find the [%s] with name [%s]' % (res_type, res))
+            if details_page:
+                self.more_operate(op_name=u'恢复',
+                                  res_type=res_type,
+                                  res_name=res_list,
+                                  details_page=details_page)
+                break
+            else:
+                _elem.get_element(CHECKBOX).click()
+        else:
+            self.click_button(u'恢复')
+            self.wait_for_element(MESSAGETOAST, timeout=30, target='disappear')
+            self.switch_tab(u'已有')
+        self.navigate(res_type)
+        self.check_res_item(res_list)
+        self.switch_tab(u'已删除')
+        self.check_res_item(res_list, 'notDisplayed')
+
     def check_res_item(self, res_list, target='displayed'):
         if not isinstance(res_list, types.ListType):
             test_util.test_fail("The first parameter of function[check_res_item] expected list_type")

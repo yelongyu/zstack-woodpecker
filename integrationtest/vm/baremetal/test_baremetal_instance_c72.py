@@ -1,7 +1,7 @@
 '''
-Test for baremetal unattended - centos
+Test baremetal instance operation
 
-@author: chenyuan.xu
+@author chenyuan.xu
 '''
 import zstackwoodpecker.operations.baremetal_operations as baremetal_operations
 import zstackwoodpecker.operations.image_operations as img_ops
@@ -196,13 +196,10 @@ kexec-tools
 
 
     test_util.test_dsc('Create baremetal instance')
-    #test_stub.ca_pem_workaround(host_ip)
     cond = res_ops.gen_query_conditions('name', '=', 'centos-7.2')
     image_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
-    time.sleep(30)
-
+    #test_stub.ca_pem_workaround(host_ip)
     vm_inv = vm.get_vm()
-    vm_nic = vm_inv.vmNics[0].mac
     bond0 = baremetal_operations.create_baremetal_bonding(chassis_uuid, 'bond0', '4', slaves='%s,%s'  %(vm_inv.vmNics[1].mac, vm_inv.vmNics[2].mac))
 
     cond = res_ops.gen_query_conditions('name', '=', os.environ.get('l3PublicNetworkName'))
@@ -212,8 +209,11 @@ kexec-tools
     l3_vlan_network2 = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0]
     ip_address2 = net_ops.get_free_ip(l3_vlan_network2.uuid)[0].ip
     tag = ["staticIp::%s::%s" % (l3_vlan_network1.uuid, ip_address1),"staticIp::%s::%s" % (l3_vlan_network2.uuid, ip_address2),"forceInstall"]
-        
-    nic_cfgs = {vm_nic:l3_vlan_network1.uuid}
+
+    cond = res_ops.gen_query_conditions("vmInstanceUuid","=", vm_inv.uuid)
+    cond = res_ops.gen_query_conditions("l3NetworkUuid","=", l3_vlan_network1.uuid, cond)
+    vm_nic_mac = res_ops.query_resource_fields(res_ops.VM_NIC, cond, None, ['mac'])[0].mac        
+    nic_cfgs = {vm_nic_mac:l3_vlan_network1.uuid}
     bonding_cfgs = {bond0.uuid:l3_vlan_network2.uuid}
     customConfigurations={"hostname":"zstack"}
     baremetal_ins = test_stub.create_baremetal_ins(image_uuid, chassis_uuid, template.uuid, 'root', 'password', nic_cfgs, bonding_cfgs, customConfigurations, systemTags=tag)
@@ -221,10 +221,21 @@ kexec-tools
     
     test_util.test_dsc('wait for iso installation')    
 #    vm_ip = vm_inv.vmNics[0].ip
+    for i in range(0, 30):
+        cond = res_ops.gen_query_conditions('uuid', '=', baremetal_ins_uuid)
+        bm_status = res_ops.query_resource(res_ops.BAREMETAL_INS, cond)[0].status
+        if bm_status == 'Provisioned':
+            baremetal_operations.stop_baremetal_instance(baremetal_ins_uuid)
+            time.sleep(10)
+            baremetal_operations.start_baremetal_instance(baremetal_ins_uuid)
+            break
+        else:
+            time.sleep(60)    
+
     cond = res_ops.gen_query_conditions('name', '=', 'vm-for-baremetal')
     vm_inv = res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0]
     vm_ip = vm_inv.vmNics[0].ip
-    if not test_lib.lib_wait_target_up(ip_address1, '22', 1800):
+    if not test_lib.lib_wait_target_up(ip_address1, '22', 180):
         test_util.test_fail("iso has not been failed to installed.")
 
     test_util.test_dsc('Check baremetal instance operations')
@@ -234,7 +245,7 @@ kexec-tools
         test_util.test_fail('Fail to set hostname in vm')
     cmd = 'ip a |grep -C 2 %s' % ip_address1
     result = test_lib.lib_execute_ssh_cmd(ip_address1, 'root', 'password', cmd, 180)
-    if vm_nic not in result:
+    if vm_nic_mac not in result:
         test_util.test_fail('Fail to set static ip to vlan network')
     cmd = 'ip a |grep bond0'
     result = test_lib.lib_execute_ssh_cmd(ip_address1, 'root', 'password', cmd, 180)

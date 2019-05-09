@@ -91,6 +91,7 @@
         <case timeout='600' repeat='1'>migrate/test_migrate_vm_with_iso.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_vm_with_iso2.py</case>
         <case timeout='600' repeat='1'>migrate/test_migrate_vm_eip_check.py</case>
+        <case timeout='1200' repeat='1'>migrate/test_migrate_vm_eject_iso.py</case>
 	<case timeout='600' repeat='1'>zwatch/test_all_get_op.py</case>
         <case timeout='600' repeat='1'>zwatch/test_event_host_bs_ps_disconnected_with_email.py</case>
         <case timeout='600' repeat='1'>zwatch/test_sns_text_template_with_email.py</case>
