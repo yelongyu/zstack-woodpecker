@@ -275,6 +275,7 @@ class MINI(E2E):
             res_list.append(res_name)
         self.navigate(res_type)
         self.switch_tab(u'已删除')
+        test_util.test_dsc('Resume %s [name: (%s)]' % (res_type, ' '.join(res_list)))
         for res in res_list:
             for _elem in self.get_elements(CARDCONTAINER):
                 if res in _elem.text:
