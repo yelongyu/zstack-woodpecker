@@ -330,9 +330,9 @@ class MINI(E2E):
                       'url': url,
                       'file': local_file,
                       'platform': platform }
-        if type == 'URL':
+        if adding_type == 'URL':
             image_dict.pop('file')
-        elif type == u'本地文件':
+        elif adding_type == u'本地文件':
             image_dict.pop('url')
         image_elem = self._create(image_dict, "image", view=view)
         check_list = [self.image_name, url.split('.')[-1]]
