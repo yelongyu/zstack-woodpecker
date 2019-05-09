@@ -21,16 +21,21 @@ def test():
             ''')
     test_util.test_dsc('Constant Path Test Begin.')
 
-    Robot.robot_create_utility_vm()
-
-    robot_test_obj = Robot.robot()
-    test_dict = robot_test_obj.get_test_dict()
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     path_list = flavor['path_list']
+    repeat = flavor['repeat']
 
-    robot_test_obj.initial(path_list)
-    Robot.robot_run_constant_path(robot_test_obj, set_robot=True)
+    while repeat > 0:
+        test_util.test_logger("Robot action: Iteration %s" % (repeat))
+        Robot.robot_create_utility_vm()
+        robot_test_obj = Robot.robot()
+        test_dict = robot_test_obj.get_test_dict()
+        robot_test_obj.initial(path_list)
+        Robot.robot_run_constant_path(robot_test_obj, set_robot=True)
 
+        repeat -= 1
+        test_dict.cleanup()
+        del robot_test_obj
 
 def env_recover():
     global test_dict

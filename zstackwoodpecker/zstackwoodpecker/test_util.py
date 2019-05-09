@@ -2286,5 +2286,9 @@ def load_paths(template_dirname, path_dirname):
             paths[package_name] = dict()
             paths[package_name]['initial_formation'] = templates_dict[paths_dict[package_name].path()['initial_formation']].template()
             paths[package_name]['path_list'] = paths_dict[package_name].path()['path_list']
+            if paths_dict[package_name].path().has_key('repeat'):
+                paths[package_name]['repeat'] = paths_dict[package_name].path()['repeat']
+            else:
+                paths[package_name]['repeat'] = 1
 
     return paths
