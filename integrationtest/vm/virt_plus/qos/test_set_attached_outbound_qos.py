@@ -3,6 +3,7 @@ This case test attach 2nd nic qos together with nic qos
 @author: quarkonics
 '''
 import os
+import time
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state

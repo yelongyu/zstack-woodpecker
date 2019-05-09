@@ -3,6 +3,7 @@ This case can not execute parallelly
 @author: Legion 
 '''
 import os
+import time
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
@@ -38,7 +39,9 @@ def test():
     cond = res_ops.gen_query_conditions("vmInstanceUuid", '=', vm_inv.uuid)
     cond = res_ops.gen_query_conditions("type", '=', 'Data', cond)
     volume_uuid = res_ops.query_resource(res_ops.VOLUME, cond)[0].uuid
+    test_lib.lib_wait_target_up(vm_inv.ip, '22', 120)
     test_lib.lib_mkfs_for_volume(volume_uuid, vm_inv)
+    time.sleep(10)
     path = '/mnt'
     user_name = 'root'
     user_password = 'password'
