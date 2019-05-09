@@ -25,6 +25,7 @@ TABLEROW = 'ant-table-row ant-table-row-level-0'
 CHECKBOX = 'input[type="checkbox"]'
 FORMEXPLAIN = 'ant-form-explain'
 SPINCONTAINER = 'ant-spin-container'
+PRIMARYBTNNUM = 2
 
 
 MENUDICT = {'homepage': 'a[href="/web/"]',
@@ -39,6 +40,7 @@ MENUDICT = {'homepage': 'a[href="/web/"]',
 
 VIEWDICT = {'list': '#btn_listswitch_s',
             'card': '#btn_cardswitch_s'}
+
 
 def get_time_postfix():
     return time.strftime('%y%m%d-%H%M%S', time.localtime())
@@ -153,9 +155,9 @@ class MINI(E2E):
     def click_ok(self):
         test_util.test_dsc('Click OK button')
         self.get_elements(PRIMARYBTN)[-1].click()
-        shot_len = len(self.get_screenshot())
+        src_len = len(self.get_source())
         self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
-        self.wait_for_page_render(shot_len)
+        self.wait_for_page_render(src_len)
 
     def more_operate(self, op_name, res_type, res_name, details_page=False):
         res_list = []
@@ -210,37 +212,48 @@ class MINI(E2E):
             test_util.test_fail('Can not find the [%s] with name [%s]' % (res_type, para_dict['name']))
         return elem
 
-    def _delete(self, res_name, res_type, corner_btn=False, expunge=False, deleted_page=False):
+    def _delete(self, res_name, res_type, corner_btn=False, expunge=False, details_page=False):
+        primary_btn_num = len(self.get_elements(PRIMARYBTN))
         res_list = []
         if isinstance(res_name, types.ListType):
             res_list = res_name
         else:
             res_list.append(res_name)
         self.navigate(res_type)
-        test_util.test_dsc('%s %s [name: (%s)]' % (('Expunge' if deleted_page else 'Delete'),res_type, ' '.join(res_list)))
+        test_util.test_dsc('%s %s [name: (%s)]' % (('Expunge' if primary_btn_num < PRIMARYBTNNUM else 'Delete'),
+                                                   res_type, ' '.join(res_list)))
         for res in res_list:
-                for _elem in self.get_elements(CARDCONTAINER):
-                    if res in _elem.text:
-                        break
+            for _elem in self.get_elements(CARDCONTAINER):
+                if res in _elem.text:
+                    break
+            else:
+                test_util.test_fail('Can not find the [%s] with name [%s]' % (res_type, res))
+            if corner_btn:
+                _elem.get_elements('button', 'tag name')[-1].click()
+            elif expunge and primary_btn_num < PRIMARYBTNNUM:
+                if details_page:
+                    self.more_operate(op_name=u'彻底删除',
+                                      res_type=res_type,
+                                      res_name=res_list,
+                                      details_page=details_page)
                 else:
-                    test_util.test_fail('Can not find the [%s] with name [%s]' % (res_type, res))
-                if corner_btn:
-                    _elem.get_elements('button', 'tag name')[-1].click()
-                elif expunge and deleted_page:
                     _elem.get_element(CHECKBOX).click()
                     self.click_button(u'彻底删除')
-                else:
-                    self.more_operate(op_name=u'删除', res_type=res_type, res_name=res_list)
-                self.click_ok()
-                self.check_res_item(res_list, target='notDisplayed')
-        if deleted_page:
+            else:
+                self.more_operate(op_name=u'删除',
+                                  res_type=res_type,
+                                  res_name=res_list,
+                                  details_page=details_page)
+            self.click_ok()
+            self.check_res_item(res_list, target='notDisplayed')
+        if primary_btn_num < PRIMARYBTNNUM:
             return True
         self.switch_tab(u'已删除')
         if res_type != 'network':
             # check deleted
             self.check_res_item(res_list)
         if expunge:
-            self._delete(res_list, res_type, expunge=True, deleted_page=True)
+            self._delete(res_list, res_type, expunge=True, details_page=details_page)
 
     def check_res_item(self, res_list, target='displayed'):
         if not isinstance(res_list, types.ListType):
@@ -253,9 +266,9 @@ class MINI(E2E):
             else:
                 assert res not in all_res_text, expected
 
-    def wait_for_page_render(self, shot_len):
+    def wait_for_page_render(self, src_len):
         for _ in xrange(10):
-            if len(self.get_screenshot()) == shot_len:
+            if len(self.get_source()) == src_len:
                 test_util.test_dsc('The page rendering is not finished, check again')
                 time.sleep(0.5)
             else:
@@ -266,8 +279,8 @@ class MINI(E2E):
         for tab in self.get_elements('ant-tabs-tab'):
             if tab_name in tab.text:
                 tab.click()
-        shot_len = len(self.get_screenshot())
-        self.wait_for_page_render(shot_len)
+        src_len = len(self.get_source())
+        self.wait_for_page_render(src_len)
 
     def create_vm(self, name=None, dsc=None, image=None, cpu=2, mem='2 GB', data_size=None,
                   user_data=None, network=None, cluster=None, provisioning=u'厚置备', view='card'):
@@ -339,21 +352,21 @@ class MINI(E2E):
         checker = MINICHECKER(self, image_elem)
         checker.volume_check(check_list)
 
-    def delete_vm(self, vm_name=None, corner_btn=True):
+    def delete_vm(self, vm_name=None, corner_btn=True, details_page=False):
         vm_name = vm_name if vm_name else self.vm_list
-        self._delete(vm_name, 'vm', corner_btn=corner_btn)
-    
-    def expunge_vm(self, vm_name=None):
+        self._delete(vm_name, 'vm', corner_btn=corner_btn, details_page=details_page)
+
+    def expunge_vm(self, vm_name=None, details_page=False):
         vm_name = vm_name if vm_name else self.vm_list
-        self._delete(vm_name, 'vm', expunge=True)
+        self._delete(vm_name, 'vm', expunge=True, details_page=details_page)
 
-    def delete_volume(self, volume_name=None, corner_btn=True):
+    def delete_volume(self, volume_name=None, corner_btn=True, details_page=False):
         volume_name = volume_name if volume_name else self.volume_list
-        self._delete(volume_name, 'volume', corner_btn=corner_btn)
+        self._delete(volume_name, 'volume', corner_btn=corner_btn, details_page=details_page)
 
-    def expunge_volume(self, volume_name=None):
+    def expunge_volume(self, volume_name=None, details_page=False):
         volume_name = volume_name if volume_name else self.volume_list
-        self._delete(volume_name, 'volume', expunge=True)
+        self._delete(volume_name, 'volume', expunge=True, details_page=details_page)
 
     def attach_volume(self, volume_name=[], dest_vm=None, details_page=False):
         emptyl = []

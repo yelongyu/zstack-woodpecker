@@ -51,7 +51,7 @@ class E2E(object):
         _rsp = json_post(uri=uri, body=body, headers=HEADERS, fail_soon=True)
         rsp = jsonify_rsp(_rsp)
         if rsp.status != 0:
-            test_util.test_logger('URL request encountered error {uri: %s, body: %s, reason: %s}' % (uri, body, rsp.value.message))
+            test_util.test_logger('URL request encountered error {uri: "%s", body: %s, reason: %s}' % (uri, body, rsp.value.message))
         return rsp
 
     def _get(self, uri):
