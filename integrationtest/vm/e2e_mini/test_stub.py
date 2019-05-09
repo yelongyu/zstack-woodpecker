@@ -9,6 +9,7 @@ Create an unified test_stub for E2E test operations
 import os
 import time
 import types
+import random
 from os.path import join
 from zstackwoodpecker.e2e_lib import E2E
 import zstackwoodpecker.operations.resource_operations as res_ops 
@@ -43,7 +44,7 @@ VIEWDICT = {'list': '#btn_listswitch_s',
 
 
 def get_time_postfix():
-    return time.strftime('%y%m%d-%H%M%S', time.localtime())
+    return time.strftime('%y%m%d-%H%M%S', time.localtime()) + str(random.random()).split('.')[-1]
 
 def get_inv(name, res_type):
     res_dict = {'vm': res_ops.VM_INSTANCE,
