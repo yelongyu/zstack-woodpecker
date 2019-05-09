@@ -5,6 +5,7 @@ Test for migrate vm which installed by iso
 '''
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.image_operations as img_ops
+import os
 import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.zstack_test.zstack_test_image as test_image

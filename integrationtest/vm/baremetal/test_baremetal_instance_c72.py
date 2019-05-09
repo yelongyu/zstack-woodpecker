@@ -1,3 +1,8 @@
+'''
+Test baremetal instance operation
+
+@author chenyuan.xu
+'''
 import zstackwoodpecker.operations.baremetal_operations as baremetal_operations
 import zstackwoodpecker.operations.image_operations as img_ops
 import zstackwoodpecker.test_state as test_state
