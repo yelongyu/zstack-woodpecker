@@ -25,6 +25,7 @@ def test():
 
 def env_recover():
     global mini
+    mini.delete_vm(vm_name)
     mini.expunge_vm(vm_name)
     mini.close()
 
@@ -32,6 +33,7 @@ def env_recover():
 def error_cleanup():
     global mini
     try:
+        mini.delete_vm(vm_name)
         mini.expunge_vm(vm_name)
         mini.close()
     except:

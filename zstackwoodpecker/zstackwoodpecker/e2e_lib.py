@@ -75,7 +75,10 @@ class E2E(object):
         self._post(join(self.uri, 'back'))
 
     def refresh_page(self):
-        self._post(join(self.uri, 'refresh'))
+        test_util.test_dsc('Refresh page')
+        rsp = self._post(join(self.uri, 'refresh'))
+        if rsp.status == 0:
+            return True
 
     def get_page_title(self):
         rsp = self._get(join(self.uri, 'title'))

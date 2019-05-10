@@ -160,9 +160,8 @@ class MINI(E2E):
     def click_ok(self):
         test_util.test_dsc('Click OK button')
         self.get_elements(PRIMARYBTN)[-1].click()
-        src_len = len(self.get_source())
         self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
-        self.wait_for_page_render(src_len)
+        time.sleep(1)
 
     def click_cancel(self):
         test_util.test_dsc('Click cancel button')
@@ -289,7 +288,6 @@ class MINI(E2E):
             self._delete(res_list, res_type, expunge=True, details_page=details_page)
 
     def resume(self, res_name, res_type, details_page=False):
-        self.navigate(res_type)
         res_list = []
         if isinstance(res_name, types.ListType):
             res_list = res_name
@@ -316,8 +314,10 @@ class MINI(E2E):
         self.check_res_item(res_list)
         self.switch_tab(u'已删除')
         self.check_res_item(res_list, 'notDisplayed')
+        self.switch_tab(u'已有')
 
     def check_res_item(self, res_list, target='displayed'):
+        test_util.test_dsc('Check if resource %s %s' % (res_list, target))
         if not isinstance(res_list, types.ListType):
             test_util.test_fail("The first parameter of function[check_res_item] expected list_type")
         for res in res_list:
@@ -327,6 +327,7 @@ class MINI(E2E):
                 assert res in all_res_text, expected
             else:
                 assert res not in all_res_text, expected
+        test_util.test_dsc('%s %s, check Pass' % (res_list, target))
 
     def wait_for_page_render(self, src_len):
         for _ in xrange(10):
@@ -409,6 +410,17 @@ class MINI(E2E):
         check_list = [self.image_name, url.split('.')[-1]]
         checker = MINICHECKER(self, image_elem)
         checker.volume_check(check_list)
+
+    def vm_ops(self, vm_name, action='stop', details_page=False):
+        vm_elem = self.get_res_element(vm_name)
+        if action == 'start':
+            vm_elem.get_element(CHECKBOX).click()
+            self.click_button(u'启动')
+        elif action == 'reboot':
+            self.more_operate(u'重启', 'vm', vm_name, details_page=details_page)
+        else:
+            vm_elem.get_element(CHECKBOX).click()
+            self.click_button(u'停止')
 
     def delete_vm(self, vm_name=None, corner_btn=True, details_page=False):
         vm_name = vm_name if vm_name else self.vm_list
@@ -571,24 +583,14 @@ class MINICHECKER(object):
         test_util.test_logger('Elemnet text to check:\n%s' % elem.text.encode('utf-8'))
 
     def vm_check(self, inv, check_list=[], ops=None):
-        if not ops:
-            for v in check_list:
-                if v not in self.elem.text:
-                    test_util.test_fail("Can not find %s in vm checker" % v)
-        elif ops == 'new_created':
-            check_list.append(u'运行中')
-            for v in check_list:
-                if v not in self.elem.text:
-                    test_util.test_fail("Can not find %s in vm checker" % v)
-            # vm_lnk = 'a[href="/web/vm/%s"]' % inv.uuid
-            # self.obj.get_element(vm_lnk).click()
-        elif ops == 'start':
-            check_list.append(u'运行中')
-            pass
-        elif ops == 'stop':
-            pass
-        elif ops == 'delete':
-            pass
+        ops_dict = {'new_created': u'运行中',
+                    'start': u'运行中',
+                    'stop': u'已停止',
+                    'resume': u'已停止'}
+        check_list.append(ops_dict[ops])
+        for v in check_list:
+            if v not in self.elem.text:
+                test_util.test_fail("Can not find %s in vm checker" % v)
 
     def volume_check(self, check_list=[], ops=None):
         if not ops:
