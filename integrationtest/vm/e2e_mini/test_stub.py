@@ -195,9 +195,7 @@ class MINI(E2E):
                         _elem.get_element(CHECKBOX).click()
                         break
         self.get_element(MOREOPERATIONBTN).move_cursor_here()
-        time.sleep(1)
         self.operate(op_name)
-        time.sleep(1)
 
     def enter_details_page(self, res_type, name):
         inv = get_inv(name, res_type)
@@ -241,6 +239,8 @@ class MINI(E2E):
         res_list = []
         if isinstance(res_name, types.ListType):
             res_list = res_name
+            if corner_btn or details_page:
+                test_util.test_fail("The args 'corner_btn' and 'details_page' are not for batch operation")
         else:
             res_list.append(res_name)
         self.navigate(res_type)
