@@ -516,7 +516,7 @@ class MINI(E2E):
         self.input('DNS',dns)
         if end_action == 'confirm':
             self.click_ok()
-        else end_action == 'cancel';
+        else end_action == 'cancel':
             self.click_cancel()
         else end_action == 'exit':
             self.click_exit()
