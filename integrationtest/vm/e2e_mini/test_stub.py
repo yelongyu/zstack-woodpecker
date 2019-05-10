@@ -21,6 +21,8 @@ COMMONIMAGE = 'http://172.20.1.28/mirror/diskimages/centos7-test.qcow2'
 MESSAGETOAST = 'ant-notification-notice-message'
 CARDCONTAINER = 'ant-card|ant-table-row'
 PRIMARYBTN = 'ant-btn-primary'
+BTN = 'ant-btn'
+EXITTBN = 'ant-modal-close-x'
 MOREOPERATIONBTN = 'ant-dropdown-trigger'
 TABLEROW = 'ant-table-row ant-table-row-level-0'
 CHECKBOX = 'input[type="checkbox"]'
@@ -160,8 +162,23 @@ class MINI(E2E):
         self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
         self.wait_for_page_render(src_len)
 
+    def click_cancel(self):
+        test_util.test_dsc('Click cancel button')
+        btns = self.get_elements(BTN)
+        for _elem in btns:
+            if u'取 消' in _elem.text:
+                _elem.click()
+                break
+        self.wait_for_element(MESSAGETOAST, timeout=120, target='disappear')
+
+    def click_exit(self):
+        test_util.test_dsc('Click exit button')
+        self.get_elements(EXITTBN)[-1].click()
+        self.wait_for_element(MESSAGETOAST, timeout=120, target='disappear')
+
     def more_operate(self, op_name, res_type, res_name, details_page=False):
         res_list = []
+        self.wait_for_element(CARDCONTAINER)
         if isinstance(res_name, types.ListType):
             res_list = res_name
         else:
@@ -490,14 +507,19 @@ class MINI(E2E):
         else:
             pass
 
-    def add_dns_to_l3(self, network=None, dns='8.8.8.8', details_page=True):
+    def add_dns_to_l3(self, network=None, dns='8.8.8.8', details_page=True, end_action='confirm'):
         network = network if network else os.getenv('l3PublicNetworkName')
         self.navigate('network')
         self.more_operate(u'添加DNS', res_type='network', res_name=network, details_page=details_page)
         if dns in get_inv(network, 'network').dns:
             test_util.test_fail('fail: there has been a DNS[%s] on L3 network[%s]' % (dns, network))
         self.input('DNS',dns)
-        self.click_ok()
+        if end_action == 'confirm':
+            self.click_ok()
+        else end_action == 'cancel';
+            self.click_cancel()
+        else end_action == 'exit':
+            self.click_exit()
 
     def save_element_location(self, filename="location.tmpt"):
         for menu, page in MENUDICT.items():
