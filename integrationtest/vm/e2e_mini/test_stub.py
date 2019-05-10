@@ -169,12 +169,12 @@ class MINI(E2E):
             if u'取 消' in _elem.text:
                 _elem.click()
                 break
-        self.wait_for_element(MESSAGETOAST, timeout=120, target='disappear')
+        self.wait_for_element('ant-modal-content', target='disappear')
 
     def click_exit(self):
         test_util.test_dsc('Click exit button')
         self.get_elements(EXITTBN)[-1].click()
-        self.wait_for_element(MESSAGETOAST, timeout=120, target='disappear')
+        self.wait_for_element('ant-modal-content', target='disappear')
 
     def more_operate(self, op_name, res_type, res_name, details_page=False):
         res_list = []
