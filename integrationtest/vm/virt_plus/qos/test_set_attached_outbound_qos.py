@@ -32,7 +32,6 @@ def test():
     test_obj_dict.add_vm(vm1)
     vm1.check()
     vm1_inv = vm1.get_vm()
-    test_stub.make_ssh_no_password(vm1_inv)
     vm1_ip = vm1_inv.vmNics[0].ip
 
     vm2 = test_stub.create_vm(vm_name = 'vm_net_inbound_outbound_qos', l3_name=os.environ.get('l3PublicNetworkName'))
@@ -41,9 +40,15 @@ def test():
     vm2_inv = vm2.get_vm()
     vm2_ip = vm2_inv.vmNics[0].ip
 
+    test_lib.lib_wait_target_up(vm1_ip, '22', 120)
+    test_stub.make_ssh_no_password(vm1_inv)
+    test_lib.lib_wait_target_up(vm2_ip, '22', 120)
     test_stub.make_ssh_no_password(vm2_inv)
+
     test_stub.copy_key_file(vm1_inv)
     test_stub.copy_key_file(vm2_inv)
+    test_stub.copy_pub_key_file(vm1_inv)
+    test_stub.copy_pub_key_file(vm2_inv)
     test_stub.create_test_file(vm1_inv, net_bandwidth)
     test_stub.create_test_file(vm2_inv, net_bandwidth)
     vm1.add_nic(l3_net_uuid2)

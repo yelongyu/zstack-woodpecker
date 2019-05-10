@@ -155,6 +155,14 @@ def copy_key_file(vm_inv):
     if  execute_shell_in_process(cmd, timeout) != 0:
         test_util.test_fail('test file is not created')
 
+def copy_pub_key_file(vm_inv):
+    vm_ip = vm_inv.vmNics[0].ip
+
+    cmd = 'scp  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null /root/.ssh/id_rsa.pub %s:/root/.ssh/id_rsa.pub' % vm_ip
+    timeout = 10
+    if  execute_shell_in_process(cmd, timeout) != 0:
+        test_util.test_fail('test pub key file is not created')
+
 def test_scp_vm_outbound_speed(vm_inv, bandwidth, raise_exception = True):
     '''
     bandwidth unit is KB
