@@ -488,9 +488,9 @@ class MINI(E2E):
     def end_action(self, action_name):
         if action_name == 'confirm':
             self.click_ok()
-        else action_name == 'cancel':
+        elif action_name == 'cancel':
             self.click_cancel()
-        else action_name == 'exit':
+        elif action_name == 'exit':
             self.click_exit()
 
     def add_dns_to_l3(self, network=None, dns='8.8.8.8', details_page=True, end_action='confirm'):
