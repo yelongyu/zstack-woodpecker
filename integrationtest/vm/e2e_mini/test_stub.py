@@ -507,6 +507,14 @@ class MINI(E2E):
         else:
             pass
 
+    def end_action(self, action_name):
+        if action_name == 'confirm':
+            self.click_ok()
+        else action_name == 'cancel':
+            self.click_cancel()
+        else action_name == 'exit':
+            self.click_exit()
+
     def add_dns_to_l3(self, network=None, dns='8.8.8.8', details_page=True, end_action='confirm'):
         network = network if network else os.getenv('l3PublicNetworkName')
         self.navigate('network')
@@ -514,13 +522,8 @@ class MINI(E2E):
         if dns in get_inv(network, 'network').dns:
             test_util.test_fail('fail: there has been a DNS[%s] on L3 network[%s]' % (dns, network))
         self.input('DNS',dns)
-        if end_action == 'confirm':
-            self.click_ok()
-        else end_action == 'cancel':
-            self.click_cancel()
-        else end_action == 'exit':
-            self.click_exit()
-
+        self.end_action(end_action)
+       
     def save_element_location(self, filename="location.tmpt"):
         for menu, page in MENUDICT.items():
             loc = {}
