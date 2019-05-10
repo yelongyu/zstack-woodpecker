@@ -46,7 +46,8 @@ VIEWDICT = {'list': '#btn_listswitch_s',
 
 
 def get_time_postfix():
-    return time.strftime('%y%m%d-%H%M%S', time.localtime()) + str(random.random()).split('.')[-1]
+    rand_postfix = str(random.random()).split('.')[-1]
+    return time.strftime('%y%m%d-%H%M%S', time.localtime()) + '-' + rand_postfix
 
 def get_inv(name, res_type):
     res_dict = {'vm': res_ops.VM_INSTANCE,
@@ -190,10 +191,8 @@ class MINI(E2E):
                 test_util.test_fail('Multiple resource can not enter details page together')
         else:
             for res in res_list:
-                for _elem in self.get_elements(CARDCONTAINER):
-                    if res in _elem.text:
-                        _elem.get_element(CHECKBOX).click()
-                        break
+                elem = self.get_res_element(res)
+                elem.get_element(CHECKBOX).click()
         self.get_element(MOREOPERATIONBTN).move_cursor_here()
         self.operate(op_name)
 
@@ -213,6 +212,12 @@ class MINI(E2E):
             self.get_elements('ant-btn')[-1].click()
         self.wait_for_element('ant-modal-content', target='disappear')
 
+    def get_res_element(self, res_name):
+        for _elem in self.get_elements(CARDCONTAINER):
+            if res_name in _elem.text:
+                return _elem
+        test_util.test_fail('Can not find [%s]' % res_name)
+
     def _create(self, para_dict, res_type, view, priority_dict=None):
         self.navigate(res_type)
         self.get_elements(PRIMARYBTN)[-1].click()
@@ -226,12 +231,7 @@ class MINI(E2E):
         self.click_ok()
         if view == 'list':
             self.switch_view(view)
-        for elem in self.get_elements(CARDCONTAINER):
-            if para_dict['name'] in elem.text:
-                time.sleep(1)
-                break
-        else:
-            test_util.test_fail('Can not find the [%s] with name [%s]' % (res_type, para_dict['name']))
+        elem = self.get_res_element(para_dict['name'])
         return elem
 
     def _delete(self, res_name, res_type, corner_btn=False, expunge=False, details_page=False):
@@ -247,11 +247,7 @@ class MINI(E2E):
         test_util.test_dsc('%s %s [name: (%s)]' % (('Expunge' if primary_btn_num < PRIMARYBTNNUM else 'Delete'),
                                                    res_type, ' '.join(res_list)))
         for res in res_list:
-            for _elem in self.get_elements(CARDCONTAINER):
-                if res in _elem.text:
-                    break
-            else:
-                test_util.test_fail('Can not find the [%s] with name [%s]' % (res_type, res))
+            _elem = self.get_res_element(res)
             if corner_btn:
                 _elem.get_elements('button', 'tag name')[-1].click()
                 break
@@ -294,11 +290,7 @@ class MINI(E2E):
         self.switch_tab(u'已删除')
         test_util.test_dsc('Resume %s [name: (%s)]' % (res_type, ' '.join(res_list)))
         for res in res_list:
-            for _elem in self.get_elements(CARDCONTAINER):
-                if res in _elem.text:
-                    break
-            else:
-                test_util.test_fail('Can not find the [%s] with name [%s]' % (res_type, res))
+            _elem = self.get_res_element(res)
             if details_page:
                 self.more_operate(op_name=u'恢复',
                                   res_type=res_type,
@@ -343,7 +335,7 @@ class MINI(E2E):
         src_len = len(self.get_source())
         self.wait_for_page_render(src_len)
 
-    def create_vm(self, name=None, dsc=None, image=None, cpu=2, mem='2 GB', data_size=None,
+    def create_vm(self, name=None, dsc=None, image=None, cpu=1, mem='1 GB', data_size=None,
                   user_data=None, network=None, cluster=None, provisioning=u'厚置备', view='card'):
         image = image if image else os.getenv('imageName_s')
         network = network if network else os.getenv('l3PublicNetworkName')
@@ -370,11 +362,7 @@ class MINI(E2E):
             self.volume_list.append(self.volume_name)
             volume_check_list = [self.volume_name, data_size, self.vm_name]
             self.navigate('volume')
-            for elem in self.get_elements(CARDCONTAINER):
-                if self.volume_name in elem.text:
-                    break
-            else:
-                test_util.test_fail('Can not find the volume named [%s] created with vm' % self.volume_name)
+            elem = self.get_res_element(self.volume_name)
             checker = MINICHECKER(self, elem)
             checker.volume_check(volume_check_list, ops='attached')
 
@@ -455,10 +443,8 @@ class MINI(E2E):
         self.click_ok()
         check_list = [dest_vm]
         for vol in volume_list:
-            for _elem in self.get_elements(CARDCONTAINER):
-                if vol in _elem.text:
-                    break
-                MINICHECKER(self, _elem).volume_check(check_list, ops='attached')
+            _elem = self.get_res_element(vol)
+            MINICHECKER(self, _elem).volume_check(check_list, ops='attached')
 
     def detach_volume(self, volume_name=[], details_page=False):
         emptyl = []
@@ -470,20 +456,14 @@ class MINI(E2E):
         self.more_operate(u'卸载', res_type='volume', res_name=volume_list, details_page=details_page)        
         self.click_ok()
         for vol in volume_list:
-            for _elem in self.get_elements(CARDCONTAINER):
-                if vol in _elem.text:
-                    break
-                MINICHECKER(self, _elem).volume_check(ops='detached')
+            _elem = self.get_res_element(vol)
+            MINICHECKER(self, _elem).volume_check(ops='detached')
 
     def modify_info(self, res_type, res_name, new_name, new_dsc=None, corner_btn=False, view='card'):
         check_list = []
         self.navigate(res_type)
         self.switch_view(view)
-        for _elem in self.get_elements(CARDCONTAINER):
-            if res_name in _elem.text:
-                break
-        else:
-            test_util.test_fail('Can not find the [%s] with name [%s]' % (res_type, res_name))
+        _elem = self.get_res_element(res_name)
         if corner_btn:
             _elem.get_elements('button', 'tag name')[0].click()
         else:
@@ -494,9 +474,7 @@ class MINI(E2E):
         if new_dsc is not None:
             self.input('description', new_dsc)
         self.click_ok()
-        for _elem in self.get_elements(CARDCONTAINER):
-            if new_name in _elem.text:
-                break
+        _elem = self.get_res_element(new_name)
         checker = MINICHECKER(self, _elem)
         if res_type == 'volume':
             checker.volume_check(check_list)

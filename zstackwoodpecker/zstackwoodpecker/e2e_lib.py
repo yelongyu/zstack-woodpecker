@@ -291,7 +291,7 @@ class Element(E2E):
     def move_cursor_here(self):
         uri = join(self.uri.split('element')[0], 'moveto')
         rsp = self._post(uri, body='{"element": "%s"}' % self.uri.split('/')[-1])
-        time.sleep(1)
+        time.sleep(0.5)
         if rsp.status == 10:
             self.refresh_uri()
             return self.move_cursor_here()
