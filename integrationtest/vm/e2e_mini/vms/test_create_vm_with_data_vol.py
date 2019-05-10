@@ -17,14 +17,14 @@ def test():
 
 def env_recover():
     global mini
-    mini.delete_vm()
+    mini.delete_vm(corner_btn=False)
     mini.close()
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     global mini
     try:
-        mini.delete_vm()
+        mini.delete_vm(corner_btn=False)
         mini.close()
     except:
         pass

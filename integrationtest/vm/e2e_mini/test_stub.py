@@ -20,9 +20,10 @@ LOCATION_FILE_PATH = '/root/.zstackwoodpecker/integrationtest/vm/e2e_mini/'
 COMMONIMAGE = 'http://172.20.1.28/mirror/diskimages/centos7-test.qcow2'
 MESSAGETOAST = 'ant-notification-notice-message'
 CARDCONTAINER = 'ant-card|ant-table-row'
+MODALCONTENT = 'ant-modal-content'
 PRIMARYBTN = 'ant-btn-primary'
 BTN = 'ant-btn'
-EXITTBN = 'ant-modal-close-x'
+EXITBTN = 'ant-modal-close-x'
 MOREOPERATIONBTN = 'ant-dropdown-trigger'
 TABLEROW = 'ant-table-row ant-table-row-level-0'
 CHECKBOX = 'input[type="checkbox"]'
@@ -154,7 +155,7 @@ class MINI(E2E):
             test_util.test_dsc('Navigate to [%s]' % menu)
             self.get_element(MENUDICT[menu]).click()
             self.wait_for_element(PRIMARYBTN)
-            time.sleep(1)
+            time.sleep(2)
 
     def click_ok(self):
         test_util.test_dsc('Click OK button')
@@ -170,12 +171,16 @@ class MINI(E2E):
             if u'取 消' in _elem.text:
                 _elem.click()
                 break
-        self.wait_for_element('ant-modal-content', target='disappear')
+        src_len = len(self.get_source())
+        self.wait_for_element(MODALCONTENT, target='disappear')
+        self.wait_for_page_render(src_len)
 
-    def click_exit(self):
-        test_util.test_dsc('Click exit button')
-        self.get_elements(EXITTBN)[-1].click()
-        self.wait_for_element('ant-modal-content', target='disappear')
+    def click_close(self):
+        test_util.test_dsc('Click close button')
+        self.get_element(EXITBTN).click()
+        src_len = len(self.get_source())
+        self.wait_for_element(MODALCONTENT, target='disappear')
+        self.wait_for_page_render(src_len)
 
     def more_operate(self, op_name, res_type, res_name, details_page=False):
         res_list = []
@@ -207,10 +212,9 @@ class MINI(E2E):
         self.navigate(res_type)
         self.get_elements(PRIMARYBTN)[-1].click()
         if close:
-            self.get_element('ant-modal-close').click()
+            self.click_close()
         else:
-            self.get_elements('ant-btn')[-1].click()
-        self.wait_for_element('ant-modal-content', target='disappear')
+            self.click_cancel()
 
     def get_res_element(self, res_name):
         for _elem in self.get_elements(CARDCONTAINER):
@@ -229,6 +233,11 @@ class MINI(E2E):
             if v is not None:
                 self.input(k, v)
         self.click_ok()
+        if not self.wait_for_element(MODALCONTENT, target='disappear'):
+            if self.wait_for_element(FORMEXPLAIN):
+                for elem in self.get_elements(FORMEXPLAIN):
+                    test_util.test_logger('Error:' + elem.text.encode('utf-8'))
+                test_util.test_fail('Create Error: check the previous error message')
         if view == 'list':
             self.switch_view(view)
         elem = self.get_res_element(para_dict['name'])
@@ -490,8 +499,8 @@ class MINI(E2E):
             self.click_ok()
         elif action_name == 'cancel':
             self.click_cancel()
-        elif action_name == 'exit':
-            self.click_exit()
+        elif action_name == 'close':
+            self.click_close()
 
     def add_dns_to_l3(self, network=None, dns='8.8.8.8', details_page=True, end_action='confirm'):
         network = network if network else os.getenv('l3PublicNetworkName')

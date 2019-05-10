@@ -133,7 +133,9 @@ class E2E(object):
             else:
                 time.sleep(0.5)
         else:
-            test_util.test_logger('The element[strategy: "%s", value: "%s"] was not displayed within [%s]s' % (strategy, value, timeout))
+            test_util.test_logger('The element[strategy: "%s", value: "%s"] was not %s within [%s]s' % (strategy, value, target, timeout))
+            return False
+        return True
 
     def click_button(self, btn_name):
         elements = self.get_elements('button', 'tag name', check_result=True)
