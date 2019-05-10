@@ -5612,7 +5612,11 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
                                    'incrementalSnapshot.maxNum', default_snapshot_depth)
         elif next_action == TestAction.idel :
             test_util.test_dsc('Robot Action: %s ' % next_action)
-            lib_vm_random_idel_time(1, 5)
+            if len(constant_path_list[0]) > 1:
+                idle_time = constant_path_list[0][1]
+                time.sleep(int(idle_time))
+            else:
+                lib_vm_random_idel_time(1, 5)
         elif next_action == TestAction.cleanup_imagecache_on_ps :
             import zstackwoodpecker.operations.primarystorage_operations as ps_ops
             target_vm = None
