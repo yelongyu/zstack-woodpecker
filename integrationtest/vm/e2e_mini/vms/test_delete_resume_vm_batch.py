@@ -15,7 +15,7 @@ def test():
         mini.create_vm(name=vm_name)
     mini.delete_vm(vm_name_list, corner_btn=False)
     mini.resume(vm_name_list, 'vm')
-    test_util.test_pass('Create VM Successful')
+    test_util.test_pass('Batch Delete Resume VM Test Successful')
 
 
 def env_recover():

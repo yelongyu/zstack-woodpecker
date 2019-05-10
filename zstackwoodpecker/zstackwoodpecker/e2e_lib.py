@@ -75,7 +75,7 @@ class E2E(object):
         self._post(join(self.uri, 'back'))
 
     def refresh_page(self):
-        test_util.test_dsc('Refresh page')
+        test_util.test_logger('Refresh page')
         rsp = self._post(join(self.uri, 'refresh'))
         if rsp.status == 0:
             return True
@@ -184,10 +184,10 @@ class E2E(object):
             elif elem.get_elements(radio_group):
                 select_radio(elem, content)
             elif elem.get_elements('textarea[id="description"]'):
-                test_util.test_dsc('input [%s] for [%s]' % (content, title))
+                test_util.test_logger('input [%s] for [%s]' % (content, title))
                 textarea_content(elem, content)
             else:
-                test_util.test_dsc('input [%s] for [%s]' % (content, title))
+                test_util.test_logger('input [%s] for [%s]' % (content, title))
                 input_content(elem, content)
 
     @property

@@ -12,7 +12,7 @@ def test():
     mini = test_stub.MINI()
     mini.cancel_create_operation(res_type='vm', close=False)
     mini.cancel_create_operation(res_type='vm', close=True)
-    test_util.test_pass('Create VM Successful')
+    test_util.test_pass('Cancel VM Creation Test Successful')
 
 
 def env_recover():

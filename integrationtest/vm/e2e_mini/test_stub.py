@@ -154,15 +154,16 @@ class MINI(E2E):
     def navigate(self, menu):
         current_url = self.get_url()
         if menu not in current_url.split('/')[-1]:
-            test_util.test_dsc('Navigate to [%s]' % menu)
+            test_util.test_logger('Navigate to [%s]' % menu)
             self.get_element(MENUDICT[menu]).click()
             self.wait_for_element(PRIMARYBTN)
             time.sleep(2)
 
     def click_ok(self):
-        test_util.test_dsc('Click OK button')
+        test_util.test_logger('Click OK button')
         self.get_elements(PRIMARYBTN)[-1].click()
         self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
+        self.wait_for_page_render()
         time.sleep(1)
 
     def click_cancel(self):
@@ -176,7 +177,7 @@ class MINI(E2E):
         self.wait_for_page_render(src_len)
 
     def click_close(self):
-        test_util.test_dsc('Click close button')
+        test_util.test_logger('Click close button')
         self.get_element(EXITBTN).click()
         src_len = len(self.get_source())
         self.wait_for_element(MODALCONTENT, target='disappear')
@@ -204,7 +205,7 @@ class MINI(E2E):
     def enter_details_page(self, res_type, name):
         inv = get_inv(name, res_type)
         lnk = 'a[href="/web/%s/%s"]' % (res_type, inv.uuid)
-        test_util.test_dsc('Enter into details page')
+        test_util.test_logger('Enter into details page')
         self.get_element(lnk).click()
         time.sleep(1)
 
@@ -253,7 +254,7 @@ class MINI(E2E):
         else:
             res_list.append(res_name)
         self.navigate(res_type)
-        test_util.test_dsc('%s %s [name: (%s)]' % (('Expunge' if primary_btn_num < PRIMARYBTNNUM else 'Delete'),
+        test_util.test_logger('%s %s [name: (%s)]' % (('Expunge' if primary_btn_num < PRIMARYBTNNUM else 'Delete'),
                                                    res_type, ' '.join(res_list)))
         for res in res_list:
             _elem = self.get_res_element(res)
@@ -296,7 +297,7 @@ class MINI(E2E):
             res_list.append(res_name)
         self.navigate(res_type)
         self.switch_tab(u'已删除')
-        test_util.test_dsc('Resume %s [name: (%s)]' % (res_type, ' '.join(res_list)))
+        test_util.test_logger('Resume %s [name: (%s)]' % (res_type, ' '.join(res_list)))
         for res in res_list:
             _elem = self.get_res_element(res)
             if details_page:
@@ -318,7 +319,7 @@ class MINI(E2E):
         self.switch_tab(u'已有')
 
     def check_res_item(self, res_list, target='displayed'):
-        test_util.test_dsc('Check if resource %s %s' % (res_list, target))
+        test_util.test_logger('Check if %s %s' % (res_list, target))
         if not isinstance(res_list, types.ListType):
             test_util.test_fail("The first parameter of function[check_res_item] expected list_type")
         for res in res_list:
@@ -328,23 +329,23 @@ class MINI(E2E):
                 assert res in all_res_text, expected
             else:
                 assert res not in all_res_text, expected
-        test_util.test_dsc('%s %s, check Pass' % (res_list, target))
+        test_util.test_logger('%s %s, check Pass' % (res_list, target))
 
-    def wait_for_page_render(self, src_len):
+    def wait_for_page_render(self):
         for _ in xrange(10):
-            if len(self.get_source()) == src_len:
-                test_util.test_dsc('The page rendering is not finished, check again')
+            # Refresh button element: get_elements(PRIMARYBTN)[0]
+            if self.get_elements(PRIMARYBTN)[0].get_attribute('disabled') == 'true':
+                test_util.test_logger('The page rendering is not finished, check again')
                 time.sleep(0.5)
             else:
                 return True
 
     def switch_tab(self, tab_name):
-        test_util.test_dsc('Switch to tab [%s]' % tab_name.encode('utf-8'))
+        test_util.test_logger('Switch to tab [%s]' % tab_name.encode('utf-8'))
         for tab in self.get_elements('ant-tabs-tab'):
             if tab_name in tab.text:
                 tab.click()
-        src_len = len(self.get_source())
-        self.wait_for_page_render(src_len)
+        self.wait_for_page_render()
 
     def create_vm(self, name=None, dsc=None, image=None, cpu=1, mem='1 GB', data_size=None,
                   user_data=None, network=None, cluster=None, provisioning=u'厚置备', view='card'):

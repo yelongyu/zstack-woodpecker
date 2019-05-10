@@ -12,20 +12,23 @@ def test():
     global mini
     mini = test_stub.MINI()
     mini.create_vm(name=vm_name)
+    # Delete button
     mini.delete_vm(vm_name)
     # Resume button
     mini.resume(vm_name, 'vm')
 
-    mini.delete_vm(vm_name)
+    # Delete via more operation
+    mini.delete_vm(vm_name, corner_btn=False)
     # Resume by more ops
     mini.resume(vm_name, 'vm', details_page=True)
 
-    test_util.test_pass('Create VM Successful')
+    # Delete via more operation in details page
+    mini.delete_vm(vm_name, details_page=True)
+    test_util.test_pass('Delete Resume VM Test Successful')
 
 
 def env_recover():
     global mini
-    mini.delete_vm(vm_name)
     mini.expunge_vm(vm_name)
     mini.close()
 
