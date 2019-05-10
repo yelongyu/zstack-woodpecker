@@ -168,20 +168,13 @@ class MINI(E2E):
 
     def click_cancel(self):
         test_util.test_dsc('Click cancel button')
-        for _elem in self.get_elements(BTN):
-            if u'取 消' in _elem.text:
-                _elem.click()
-                break
-        src_len = len(self.get_source())
+        self.get_elements(BTN)[-1].click()
         self.wait_for_element(MODALCONTENT, target='disappear')
-        self.wait_for_page_render(src_len)
 
     def click_close(self):
         test_util.test_logger('Click close button')
         self.get_element(EXITBTN).click()
-        src_len = len(self.get_source())
         self.wait_for_element(MODALCONTENT, target='disappear')
-        self.wait_for_page_render(src_len)
 
     def more_operate(self, op_name, res_type, res_name, details_page=False):
         res_list = []
@@ -347,24 +340,26 @@ class MINI(E2E):
                 tab.click()
         self.wait_for_page_render()
 
-    def create_vm(self, name=None, dsc=None, image=None, cpu=1, mem='1 GB', data_size=None,
+    def create_vm(self, name=None, dsc=None, image=None, root_size=None, cpu=1, mem='1 GB', data_size=None,
                   user_data=None, network=None, cluster=None, provisioning=u'厚置备', view='card'):
         image = image if image else os.getenv('imageName_s')
         network = network if network else os.getenv('l3PublicNetworkName')
         cluster = cluster if cluster else os.getenv('clusterName')
         self.vm_name = name if name else 'vm-' + get_time_postfix()
         self.vm_list.append(self.vm_name)
+        priority_dict = {'imageUuid': image}
         vm_dict = {'name': self.vm_name,
                    'description': dsc,
-                   'imageUuid': image,
                    'cpuNum': cpu,
                    'memorySize': mem.split(),
                    'dataSize': data_size.split() if data_size else None,
                    'userData': user_data,
                    'l3NetworkUuids': network,
                    'clusterUuid': cluster,
-                   'provisioning': provisioning }
-        vm_elem = self._create(vm_dict, 'vm', view=view)
+                   'provisioning': provisioning}
+        if root_size:
+            vm_dict['rootSize'] = root_size
+        vm_elem = self._create(vm_dict, 'vm', view=view, priority_dict=priority_dict)
         vm_inv = get_inv(self.vm_name, "vm")
         check_list = [self.vm_name, str(cpu), mem, vm_inv.vmNics[0].ip]
         checker = MINICHECKER(self, vm_elem)
@@ -386,7 +381,7 @@ class MINI(E2E):
                        'dataSize': size.split(),
                        'clusterUuid': cluster,
                        'vmUuid' : vm,
-                       'provisioning': provisioning }
+                       'provisioning': provisioning}
         volume_elem = self._create(volume_dict, "volume", view=view)
         if vm:
             check_list = [self.volume_name, vm, size]
@@ -432,7 +427,7 @@ class MINI(E2E):
                       'description': dsc,
                       'url': url,
                       'file': local_file,
-                      'platform': platform }
+                      'platform': platform}
         if adding_type == 'url':
             image_dict.pop('file')
         elif adding_type == 'file':
@@ -443,14 +438,20 @@ class MINI(E2E):
         checker.volume_check(check_list)
 
     def vm_ops(self, vm_name, action='stop', details_page=False):
-        vm_elem = self.get_res_element(vm_name)
-        if action == 'start':
+        vm_list = []
+        if isinstance(vm_name, types.ListType):
+            vm_list = vm_name
+        else:
+            vm_list.append(vm_name)
+        for vm in vm_list:
+            vm_elem = self.get_res_element(vm)
             vm_elem.get_element(CHECKBOX).click()
+        if action == 'start':
             self.click_button(u'启动')
         elif action == 'reboot':
             self.more_operate(u'重启', 'vm', vm_name, details_page=details_page)
+            self.click_ok()
         else:
-            vm_elem.get_element(CHECKBOX).click()
             self.click_button(u'停止')
 
     def delete_vm(self, vm_name=None, corner_btn=True, details_page=False):
@@ -480,6 +481,23 @@ class MINI(E2E):
     def delete_network(self, network_name=None, corner_btn=True, details_page=False):
         network_name = network_name if network_name else self.network_list
         self._delete(network_name, 'network', corner_btn=corner_btn, details_page=details_page)
+    
+    def set_ha_level(self, vm_name, ha=True, details_page=False):
+        check_list = []
+        self.navigate('vm')
+        self.more_operate(u'高可用级别', res_type='vm', res_name=vm_name, details_page=details_page)
+        if ha:
+            assert self.get_element('ant-switch-inner').text == u"关闭"
+            check_list.append('NeverStop')
+        else:
+            assert self.get_element('ant-switch-inner').text == u"打开"
+            check_list.append('None')
+        self.get_element("button[id='haLevel']").click()
+        self.click_ok()
+        self.switch_view('list')
+        vm_elem = self.get_res_element(vm_name)
+        checker = MINICHECKER(self, vm_elem)
+        checker.vm_check(check_list)
 
     def attach_volume(self, volume_name=[], dest_vm=None, details_page=False):
         emptyl = []
@@ -617,7 +635,7 @@ class MINICHECKER(object):
         self.elem = elem
         test_util.test_logger('Elemnet text to check:\n%s' % elem.text.encode('utf-8'))
 
-    def vm_check(self, inv, check_list=[], ops=None):
+    def vm_check(self, inv=None, check_list=[], ops=None):
         ops_dict = {'new_created': u'运行中',
                     'start': u'运行中',
                     'stop': u'已停止',
