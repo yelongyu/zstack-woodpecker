@@ -70,10 +70,12 @@ class MINI(E2E):
         super(MINI, self).__init__()
         self.vm_name = None
         self.volume_name = None
-        self.image = None
+        self.image_name = None
+        self.network_name = None
         self.vm_list = []
         self.volume_list = []
         self.image_list = []
+        self.network_list = []
         if os.getenv('ZSTACK_SIMULATOR'):
             self.mini_server_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
         else:
@@ -165,8 +167,7 @@ class MINI(E2E):
 
     def click_cancel(self):
         test_util.test_dsc('Click cancel button')
-        btns = self.get_elements(BTN)
-        for _elem in btns:
+        for _elem in self.get_elements(BTN):
             if u'取 消' in _elem.text:
                 _elem.click()
                 break
@@ -393,6 +394,35 @@ class MINI(E2E):
         checker = MINICHECKER(self, volume_elem)
         checker.volume_check(check_list, 'detached')
 
+    def create_network(self, name=None, dsc=None, vlan=None, physical_interface=None,
+                       start_ip=None, end_ip=None, netmask=None, gateway=None, dhcp_server=None, dns=None, view='card'):
+        self.network_name = name if name else 'network-' + get_time_postfix()
+        self.netwok_list.append(self.network_name)
+        network_dict = {'name': self.network_name,
+                        'description': dsc,
+                        'vlan': vlan,
+                        'physicalInterface': physical_interface,
+                        'startIp': start_ip,
+                        'endIp': end_ip,
+                        'netmask': netmask,
+                        'gateway': gateway,
+                        'dhcpServer': dhcp_server,
+                        'dns': dns}
+        if dhcp_server or dns:
+            self.get_element('[style~=cursor]').click()
+        else:
+            network_dict.pop('dhcpServer')
+            network_dict.pop('dns')
+        network_elem = self._create(network_dict, "network", view=view)
+        ip_num = int(start_ip.split('.')[-1]) - int(end_ip.split('.')[-1]) + 1
+        check_list = [self.network_name, physical_interface, str(ip_num)]
+        if vlan:
+            check_list.append(vlan)
+        else:
+            check_list.append('-')
+        checker = MINICHECKER(self, network_elem)
+        checker.network_check(check_list)
+
     def add_image(self, name=None, dsc=None, adding_type='url', url=COMMONIMAGE, local_file=None, platform='Linux', view='card'):
         self.image_name = name if name else 'image-' + get_time_postfix()
         self.image_list.append(self.image_name)
@@ -446,6 +476,10 @@ class MINI(E2E):
         image_name = image_name if image_name else self.image_list
         self._delete(image_name, 'image', expunge=True, details_page=details_page)
 
+    def delete_network(self, network_name=None, corner_btn=True, details_page=False):
+        network_name = network_name if network_name else self.network_list
+        self._delete(network_name, 'network', corner_btn=corner_btn, details_page=details_page)
+
     def attach_volume(self, volume_name=[], dest_vm=None, details_page=False):
         emptyl = []
         volume_list = volume_name if volume_name != [] else self.volume_name
@@ -465,7 +499,7 @@ class MINI(E2E):
         check_list = [dest_vm]
         for vol in volume_list:
             _elem = self.get_res_element(vol)
-            MINICHECKER(self, _elem).volume_check(check_list, ops='attached')
+            MINICHECKER(self, _elem).volume_check(check_list)
 
     def detach_volume(self, volume_name=[], details_page=False):
         emptyl = []
@@ -593,22 +627,19 @@ class MINICHECKER(object):
                 test_util.test_fail("Can not find %s in vm checker" % v)
 
     def volume_check(self, check_list=[], ops=None):
-        if not ops:
-            for v in check_list:
-                if v not in self.elem.text:
-                    test_util.test_fail("Can not find %s in volume checker" % v)
-        elif ops == 'attached':
-            for v in check_list:
-                if v not in self.elem.text:
-                    test_util.test_fail("Can not find %s in volume checker" % v)
-        elif ops == 'detached':
+        if ops == 'detached':
             check_list.append(u'未加载')
-            for v in check_list:
-                if v not in self.elem.text:
-                    test_util.test_fail("Can not find %s in volume checker" % v)
+        for v in check_list:
+            if v not in self.elem.text:
+                test_util.test_fail("Can not find %s in volume checker" % v)
     
     def image_check(self, check_list=[]):
         check_list.append(u'就绪')
         for v in check_list:
             if v not in self.elem.text:
                 test_util.test_fail("Can not find %s in image checker" % v)
+    
+    def network_check(self, check_list=[]):
+        for v in check_list:
+            if v not in self.elem.text:
+                test_util.test_fail("Can not find %s in network checker" % v)

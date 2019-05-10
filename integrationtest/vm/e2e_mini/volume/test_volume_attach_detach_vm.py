@@ -15,7 +15,7 @@ def test():
     mini.attach_volume(details_page=True)
     mini.detach_volume()
     
-    test_util.test_pass('Test volume to attach vm and detach vm Successful')
+    test_util.test_pass('Test Volume to Attach VM and Detach VM Successful')
 
 
 def env_recover():

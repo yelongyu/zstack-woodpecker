@@ -17,7 +17,7 @@ def test():
     mini.create_volume(name=volume_name)
     mini.modify_info(res_type='volume', res_name=volume_name, new_name=volume_new_name, new_dsc='test dsc')
     
-    test_util.test_pass('Test volume update info Successful')
+    test_util.test_pass('Test Volume Update Info Successful')
 
 
 def env_recover():

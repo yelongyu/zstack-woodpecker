@@ -26,7 +26,7 @@ def test():
     mini.login_with_wrong_accountname_or_password(waccountName=False, wpassword=True)
     mini.refresh_page()
 
-    test_util.test_pass('Test login exception Successful')
+    test_util.test_pass('Test Login Exception Successful')
 
 
 def env_recover():

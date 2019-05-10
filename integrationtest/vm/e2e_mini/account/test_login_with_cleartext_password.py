@@ -14,7 +14,7 @@ def test():
 
     mini.login_with_cleartext_password()
 
-    test_util.test_pass('Test login exception Successful')
+    test_util.test_pass('Test Login Exception Successful')
 
 
 def env_recover():
