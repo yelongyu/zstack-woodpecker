@@ -19,6 +19,7 @@ def test():
     #path4:exit
     mini.add_dns_to_l3(dns='114.114.114.119',details_page=True,end_action='exit')
     mini.add_dns_to_l3(dns='114.114.115.119',details_page=False,end_action='exit')
+    mini.check_browser_console_log()
     test_util.test_pass('Add DNS to L3network')
 
 def env_recover():

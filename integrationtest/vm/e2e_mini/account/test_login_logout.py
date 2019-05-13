@@ -16,6 +16,7 @@ def test():
         mini.login()
         mini.logout()
         time -= 1
+    mini.check_browser_console_log()
     test_util.test_pass('Test Login and Logout Successful')
 
 

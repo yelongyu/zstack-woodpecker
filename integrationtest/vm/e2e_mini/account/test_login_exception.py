@@ -26,6 +26,7 @@ def test():
     mini.login_with_wrong_accountname_or_password(waccountName=False, wpassword=True)
     mini.refresh_page()
 
+    mini.check_browser_console_log()
     test_util.test_pass('Test Login Exception Successful')
 
 

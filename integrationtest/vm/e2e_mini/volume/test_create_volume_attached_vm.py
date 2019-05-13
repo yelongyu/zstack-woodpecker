@@ -15,6 +15,7 @@ def test():
     mini.create_vm(name=vm_name)
     mini.create_volume(vm=vm_name, provisioning=u'厚置备', view='list')
     mini.create_volume(vm=vm_name, provisioning=u'精简置备', view='list')
+    mini.check_browser_console_log()
     test_util.test_pass('Create Volume Attached VM Successful')
 
 

@@ -15,6 +15,7 @@ def test():
         mini.create_vm(name=vm_name)
     mini.delete_vm(vm_name_list, corner_btn=False)
     mini.resume(vm_name_list, 'vm')
+    mini.check_browser_console_log()
     test_util.test_pass('Batch Delete Resume VM Test Successful')
 
 

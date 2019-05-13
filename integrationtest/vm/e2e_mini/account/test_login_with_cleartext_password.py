@@ -14,6 +14,7 @@ def test():
 
     mini.login_with_cleartext_password()
 
+    mini.check_browser_console_log()
     test_util.test_pass('Test Login Exception Successful')
 
 

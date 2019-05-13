@@ -12,6 +12,7 @@ def test():
     mini = test_stub.MINI()
     mini.cancel_create_operation(res_type='vm', close=False)
     mini.cancel_create_operation(res_type='vm', close=True)
+    mini.check_browser_console_log()
     test_util.test_pass('Cancel VM Creation Test Successful')
 
 

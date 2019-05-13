@@ -14,7 +14,7 @@ def test():
     mini.create_volume()
     mini.attach_volume(details_page=True)
     mini.detach_volume()
-    
+    mini.check_browser_console_log()
     test_util.test_pass('Test Volume to Attach VM and Detach VM Successful')
 
 

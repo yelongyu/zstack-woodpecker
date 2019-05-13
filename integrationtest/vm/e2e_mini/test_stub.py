@@ -324,13 +324,29 @@ class MINI(E2E):
                 assert res not in all_res_text, expected
         test_util.test_logger('%s %s, check Pass' % (res_list, target))
 
+    def check_browser_console_log(self):
+        errors = []
+        logs = self.get_console_log()
+        for log in logs:
+            if log.level == 'SEVERE':
+                errors.append(log.messge)
+        if errors:
+            if os.getenv('FailWhenConsoleError'):
+                test_util.test_fail("Browser console errors: %s" % errors)
+            else:
+                test_util.test_logger("Browser console errors: %s" % errors)
+
     def wait_for_page_render(self):
         for _ in xrange(10):
             # Refresh button element: get_elements(PRIMARYBTN)[0]
-            if self.get_elements(PRIMARYBTN)[0].get_attribute('disabled') == 'true':
-                test_util.test_logger('The page rendering is not finished, check again')
-                time.sleep(0.5)
+            if self.get_elements(PRIMARYBTN):
+                if self.get_elements(PRIMARYBTN)[0].get_attribute('disabled') == 'true':
+                    test_util.test_logger('The page rendering is not finished, check again')
+                    time.sleep(0.5)
+                else:
+                    return True
             else:
+                time.sleep(1)
                 return True
 
     def switch_tab(self, tab_name):

@@ -47,6 +47,11 @@ class E2E(object):
         elem_id = rsp.value
         return Element(join(self.uri, 'element', elem_id))
 
+    def get_console_log(self):
+        uri = join(self.uri, 'log')
+        rsp = self._post(uri, body='{"type":"browser"}')
+        return rsp.value
+
     def _post(self, uri, body=None):
         _rsp = json_post(uri=uri, body=body, headers=HEADERS, fail_soon=True)
         rsp = jsonify_rsp(_rsp)

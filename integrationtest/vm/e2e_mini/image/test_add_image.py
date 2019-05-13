@@ -10,6 +10,7 @@ def test():
     global mini
     mini = test_stub.MINI()
     mini.add_image()
+    mini.check_browser_console_log()
     test_util.test_pass('Add Image Successful')
 
 def env_recover():

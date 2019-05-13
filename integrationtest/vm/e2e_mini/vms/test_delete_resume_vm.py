@@ -24,6 +24,7 @@ def test():
 
     # Delete via more operation in details page
     mini.delete_vm(vm_name, details_page=True)
+    mini.check_browser_console_log()
     test_util.test_pass('Delete Resume VM Test Successful')
 
 

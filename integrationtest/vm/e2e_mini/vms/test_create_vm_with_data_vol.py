@@ -12,6 +12,7 @@ def test():
     mini = test_stub.MINI()
     mini.create_vm(provisioning=u'厚置备', data_size='2 GB')
     mini.create_vm(provisioning=u'精简置备', data_size='2 GB', view='list')
+    mini.check_browser_console_log()
     test_util.test_pass('Create VM with Data Volume Successful')
 
 

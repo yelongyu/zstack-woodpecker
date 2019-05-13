@@ -11,6 +11,7 @@ def test():
     global mini
     mini = test_stub.MINI()
     mini.create_volume()
+    mini.check_browser_console_log()
     test_util.test_pass('Create Volume Successful')
 
 
