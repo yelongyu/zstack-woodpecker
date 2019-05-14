@@ -12,7 +12,7 @@ import types
 import random
 from os.path import join
 from zstackwoodpecker.e2e_lib import E2E
-import zstackwoodpecker.operations.resource_operations as res_ops 
+import zstackwoodpecker.operations.resource_operations as res_ops
 from zstackwoodpecker import test_util
 import zstacklib.utils.jsonobject as jsonobject
 
@@ -85,6 +85,7 @@ class MINI(E2E):
         self.login()
 
     def login(self):
+        test_util.test_logger('Log in normally')
         self.get_element('#accountName').input('admin')
         self.get_element('#password').input('password')
         # Login button
@@ -95,17 +96,20 @@ class MINI(E2E):
         assert self.get_elements('ant-layout-content')
 
     def logout(self):
+        test_util.test_logger('Log out')
         self.get_element('img', 'tag name').move_cursor_here()
         self.operate(u'登出')
         assert self.get_elements('#password')
 
     def switch_view(self, view='card'):
+        test_util.test_logger('switch the view to %s' % view)
         for elem in self.get_elements('ant-btn square___3vP_2'):
             if elem.get_elements(VIEWDICT[view]):
                 elem.click()
                 break
 
     def login_with_cleartext_password(self):
+        test_util.test_logger('Log in with clear-text password')
         self.get_element('#accountName').input('admin')
         passwordInput = self.get_element('#password')
         assert passwordInput.get_attribute('type') == 'password'
@@ -120,6 +124,7 @@ class MINI(E2E):
         assert self.get_elements('ant-layout-content')
 
     def login_without_accountname_or_password(self, with_accountName=False, with_password=False):
+        test_util.test_logger('Log in without account name or password')
         if with_accountName:
             self.get_element('#accountName').input('admin')
         if with_password:
@@ -129,7 +134,7 @@ class MINI(E2E):
         # check
         if not with_accountName or not with_password:
             self.wait_for_element(FORMEXPLAIN)
-        if not with_accountName and with_password: 
+        if not with_accountName and with_password:
             assert self.get_element(FORMEXPLAIN).text == u'请输入用户名'
         elif with_accountName and not with_password:
             assert self.get_element(FORMEXPLAIN).text == u'请输入密码'
@@ -138,6 +143,7 @@ class MINI(E2E):
             assert self.get_elements(FORMEXPLAIN)[1].text == u'请输入密码'
 
     def login_with_wrong_accountname_or_password(self, waccountName=True, wpassword=True):
+        test_util.test_logger('Log in with wrong account name or password')
         if waccountName:
             self.get_element('#accountName').input('wrongadmin')
         else:
@@ -176,7 +182,7 @@ class MINI(E2E):
         self.get_element(EXITBTN).click()
         self.wait_for_element(MODALCONTENT, target='disappear')
 
-    def more_operate(self, op_name, res_type, res_name, details_page=False):
+    def more_operate(self, op_name, res_name, res_type=None, details_page=False):
         res_list = []
         self.wait_for_element(CARDCONTAINER)
         if isinstance(res_name, types.ListType):
@@ -190,6 +196,7 @@ class MINI(E2E):
                 test_util.test_fail('Multiple resource can not enter details page together')
         else:
             for res in res_list:
+                test_util.test_logger('Select [%s]' % res)
                 elem = self.get_res_element(res)
                 elem.get_element(CHECKBOX).click()
         self.get_element(MOREOPERATIONBTN).move_cursor_here()
@@ -203,6 +210,7 @@ class MINI(E2E):
         time.sleep(1)
 
     def cancel_create_operation(self, res_type, close=False):
+        test_util.test_logger('Cancel create operation of %s' % res_type)
         self.navigate(res_type)
         self.get_elements(PRIMARYBTN)[-1].click()
         if close:
@@ -210,7 +218,17 @@ class MINI(E2E):
         else:
             self.click_cancel()
 
+    def cancel_more_operation(self, op_name, res_name, res_type, details_page=False, close=False):
+        test_util.test_logger('Cancel more operation [%s] of %s' % (op_name, res_type))
+        self.navigate(res_type)
+        self.more_operate(op_name, res_name, res_type, details_page)
+        if close:
+            self.click_close()
+        else:
+            self.click_cancel()
+
     def get_res_element(self, res_name):
+        test_util.test_logger('Get the element [%s]' % res_name)
         for _elem in self.get_elements(CARDCONTAINER):
             if res_name in _elem.text:
                 return _elem
@@ -363,9 +381,11 @@ class MINI(E2E):
         cluster = cluster if cluster else os.getenv('clusterName')
         self.vm_name = name if name else 'vm-' + get_time_postfix()
         self.vm_list.append(self.vm_name)
+        test_util.test_logger('Create VM [%s]' % self.vm_name)
         priority_dict = {'imageUuid': image}
         vm_dict = {'name': self.vm_name,
                    'description': dsc,
+                   'rootSize': root_size.split() if root_size else None,
                    'cpuNum': cpu,
                    'memorySize': mem.split(),
                    'dataSize': data_size.split() if data_size else None,
@@ -373,14 +393,13 @@ class MINI(E2E):
                    'l3NetworkUuids': network,
                    'clusterUuid': cluster,
                    'provisioning': provisioning}
-        if root_size:
-            vm_dict['rootSize'] = root_size
         vm_elem = self._create(vm_dict, 'vm', view=view, priority_dict=priority_dict)
         vm_inv = get_inv(self.vm_name, "vm")
         check_list = [self.vm_name, str(cpu), mem, vm_inv.vmNics[0].ip]
         checker = MINICHECKER(self, vm_elem)
         checker.vm_check(vm_inv, check_list, ops='new_created')
         if data_size:
+            test_util.test_logger('Create Volume [%s]' % self.volume_name)
             self.volume_name = 'Disk-' + self.vm_name
             self.volume_list.append(self.volume_name)
             volume_check_list = [self.volume_name, data_size, self.vm_name]
@@ -392,6 +411,7 @@ class MINI(E2E):
     def create_volume(self, name=None, dsc=None, size='2 GB', cluster=None, vm=None, provisioning=u'厚置备', view='card'):
         cluster = cluster if cluster else os.getenv('clusterName')
         self.volume_name = name if name else 'volume-' + get_time_postfix()
+        test_util.test_logger('Create Volume [%s]' % self.volume_name)
         volume_dict = {'name': self.volume_name,
                        'description': dsc,
                        'dataSize': size.split(),
@@ -399,17 +419,19 @@ class MINI(E2E):
                        'vmUuid' : vm,
                        'provisioning': provisioning}
         volume_elem = self._create(volume_dict, "volume", view=view)
+        checker = MINICHECKER(self, volume_elem)
         if vm:
             check_list = [self.volume_name, vm, size]
+            checker.volume_check(check_list)
         else:
             check_list = [self.volume_name, size]
-        checker = MINICHECKER(self, volume_elem)
-        checker.volume_check(check_list, 'detached')
+            checker.volume_check(check_list=check_list, ops='detached')
 
     def create_network(self, name=None, dsc=None, vlan=None, physical_interface=None,
                        start_ip=None, end_ip=None, netmask=None, gateway=None, dhcp_server=None, dns=None, view='card'):
         self.network_name = name if name else 'network-' + get_time_postfix()
         self.netwok_list.append(self.network_name)
+        test_util.test_logger('Create Network [%s]' % self.network_name)
         network_dict = {'name': self.network_name,
                         'description': dsc,
                         'vlan': vlan,
@@ -438,6 +460,7 @@ class MINI(E2E):
     def add_image(self, name=None, dsc=None, adding_type='url', url=COMMONIMAGE, local_file=None, platform='Linux', view='card'):
         self.image_name = name if name else 'image-' + get_time_postfix()
         self.image_list.append(self.image_name)
+        test_util.test_logger('Add Image [%s]' % self.image_name)
         priority_dict = {'type': adding_type}
         image_dict = {'name': self.image_name,
                       'description': dsc,
@@ -451,7 +474,7 @@ class MINI(E2E):
         image_elem = self._create(image_dict, "image", view=view, priority_dict=priority_dict)
         check_list = [self.image_name, url.split('.')[-1]]
         checker = MINICHECKER(self, image_elem)
-        checker.volume_check(check_list)
+        checker.image_check(check_list)
 
     def vm_ops(self, vm_name, action='stop', details_page=False):
         vm_list = []
@@ -463,17 +486,25 @@ class MINI(E2E):
             vm_elem = self.get_res_element(vm)
             vm_elem.get_element(CHECKBOX).click()
         if action == 'start':
-            self.click_button(u'启动')
+            if details_page:
+                self.more_operate(u'启动', vm_list, res_type='vm', details_page=True)
+                self.click_ok()
+            else:
+                self.click_button(u'启动')
         elif action == 'reboot':
-            self.more_operate(u'重启', 'vm', vm_name, details_page=details_page)
+            self.more_operate(u'重启', vm_list, res_type='vm', details_page=details_page)
             self.click_ok()
-        else:
-            self.click_button(u'停止')
+        elif action == 'stop':
+            if details_page:
+                self.more_operate(u'停止', vm_list, res_type='vm', details_page=True)
+                self.click_ok()
+            else:
+                self.click_button(u'停止')
 
     def delete_vm(self, vm_name=None, corner_btn=True, details_page=False):
         vm_name = vm_name if vm_name else self.vm_list
         self._delete(vm_name, 'vm', corner_btn=corner_btn, details_page=details_page)
-    
+
     def expunge_vm(self, vm_name=None, details_page=False):
         vm_name = vm_name if vm_name else self.vm_list
         self._delete(vm_name, 'vm', expunge=True, details_page=details_page)
@@ -497,25 +528,27 @@ class MINI(E2E):
     def delete_network(self, network_name=None, corner_btn=True, details_page=False):
         network_name = network_name if network_name else self.network_list
         self._delete(network_name, 'network', corner_btn=corner_btn, details_page=details_page)
-    
+
     def set_ha_level(self, vm_name, ha=True, details_page=False):
+        test_util.test_logger('Set [%s] ha leval [%s]' % (vm_name, ha))
         check_list = []
         self.navigate('vm')
         self.more_operate(u'高可用级别', res_type='vm', res_name=vm_name, details_page=details_page)
         if ha:
-            assert self.get_element('ant-switch-inner').text == u"关闭"
             check_list.append('NeverStop')
         else:
-            assert self.get_element('ant-switch-inner').text == u"打开"
             check_list.append('None')
-        self.get_element("button[id='haLevel']").click()
+        if ha and (self.get_element('ant-switch-inner').text == u"关闭"):
+            self.get_element("button[id='haLevel']").click()
+        elif not ha and (self.get_element('ant-switch-inner').text == u"打开"):
+            self.get_element("button[id='haLevel']").click()
         self.click_ok()
         self.switch_view('list')
         vm_elem = self.get_res_element(vm_name)
         checker = MINICHECKER(self, vm_elem)
         checker.vm_check(check_list)
 
-    def attach_volume(self, volume_name=[], dest_vm=None, details_page=False):
+    def volume_attach_to_vm(self, volume_name=[], dest_vm=None, details_page=False):
         emptyl = []
         volume_list = volume_name if volume_name != [] else self.volume_name
         if not isinstance(volume_list, types.ListType):
@@ -535,33 +568,39 @@ class MINI(E2E):
         for vol in volume_list:
             _elem = self.get_res_element(vol)
             MINICHECKER(self, _elem).volume_check(check_list)
+            test_util.test_logger('[%s] attach to [%s] successfully' % (vol, dest_vm))
 
-    def detach_volume(self, volume_name=[], details_page=False):
+    def volume_detach_from_vm(self, volume_name=[], details_page=False):
         emptyl = []
         volume_list = volume_name if volume_name != [] else self.volume_name
         if not isinstance(volume_list, types.ListType):
             emptyl.append(volume_list)
             volume_list = emptyl
         self.navigate('volume')
-        self.more_operate(u'卸载', res_type='volume', res_name=volume_list, details_page=details_page)        
+        self.more_operate(u'卸载', res_type='volume', res_name=volume_list, details_page=details_page)
         self.click_ok()
         for vol in volume_list:
             _elem = self.get_res_element(vol)
             MINICHECKER(self, _elem).volume_check(ops='detached')
+            test_util.test_logger('[%s] detach from vm successfully' % vol)
 
-    def modify_info(self, res_type, res_name, new_name, new_dsc=None, corner_btn=False, view='card'):
+    def update_info(self, res_type, res_name, new_name, new_dsc=None, corner_btn=False, details_page=False, view='card'):
         check_list = []
         self.navigate(res_type)
         self.switch_view(view)
         _elem = self.get_res_element(res_name)
         if corner_btn:
             _elem.get_elements('button', 'tag name')[0].click()
+        elif details_page:
+            self.more_operate(u'修改信息', res_name=res_name, res_type=res_type, details_page=True)
         else:
-            self.more_operate(u'修改信息', res_type=res_type, res_name=res_name)
+            self.more_operate(u'修改信息', res_name=res_name)
         if new_name is not None:
+            test_util.test_logger('Update name of %s to %s' % (res_name, new_name))
             self.input('name', new_name)
             check_list.append(new_name)
         if new_dsc is not None:
+            test_util.test_logger('Update dsc of %s to %s' % (res_name, new_dsc))
             self.input('description', new_dsc)
         self.click_ok()
         _elem = self.get_res_element(new_name)
@@ -584,6 +623,7 @@ class MINI(E2E):
             self.click_close()
 
     def add_dns_to_l3(self, network=None, dns='8.8.8.8', details_page=True, end_action='confirm'):
+        test_util.test_logger('Add dns [%s] to l3 [%s]' % (dns, network))
         network = network if network else os.getenv('l3PublicNetworkName')
         self.navigate('network')
         self.more_operate(u'添加DNS', res_type='network', res_name=network, details_page=details_page)
@@ -591,7 +631,7 @@ class MINI(E2E):
             test_util.test_fail('fail: there has been a DNS[%s] on L3 network[%s]' % (dns, network))
         self.input('DNS',dns)
         self.end_action(end_action)
-       
+
     def save_element_location(self, filename="location.tmpt"):
         for menu, page in MENUDICT.items():
             loc = {}
@@ -618,7 +658,7 @@ class MINI(E2E):
         # the checkboxs clicked will detach to the page document
         def update_checkboxs():
             return self.get_elements(CHECKBOX)
-        
+
         assert len(vm_elems) == len(vm_checkboxs)
         vm_checkboxs[0].click()
         vm_checkboxs = update_checkboxs()
@@ -630,7 +670,7 @@ class MINI(E2E):
         elif first_vm_status == u"已停止":
             assert start_btn.enabled == True
             assert stop_btn.enabled == False
-        
+
         if len(vm_elems) > 1:
             vm_checkboxs = update_checkboxs()
             vm_checkboxs[1].click()
@@ -667,13 +707,13 @@ class MINICHECKER(object):
         for v in check_list:
             if v not in self.elem.text:
                 test_util.test_fail("Can not find %s in volume checker" % v)
-    
+
     def image_check(self, check_list=[]):
         check_list.append(u'就绪')
         for v in check_list:
             if v not in self.elem.text:
                 test_util.test_fail("Can not find %s in image checker" % v)
-    
+
     def network_check(self, check_list=[]):
         for v in check_list:
             if v not in self.elem.text:

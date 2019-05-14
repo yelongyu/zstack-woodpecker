@@ -15,7 +15,7 @@ def test():
     global volume_new_name
     mini = test_stub.MINI()
     mini.create_volume(name=volume_name)
-    mini.modify_info(res_type='volume', res_name=volume_name, new_name=volume_new_name, new_dsc='test dsc')
+    mini.update_info(res_type='volume', res_name=volume_name, new_name=volume_new_name, new_dsc='test dsc')
     mini.check_browser_console_log()
     test_util.test_pass('Test Volume Update Info Successful')
 

@@ -223,6 +223,7 @@ class E2E(object):
         self._del(self.uri)
 
     def operate(self, name):
+        test_util.test_logger('Execute operation [%s]' % name.encode('utf-8'))
         op_selector = 'ant-dropdown-menu-item|ant-menu-item'
         self.wait_for_element(op_selector)
         for op in self.get_elements(op_selector):
