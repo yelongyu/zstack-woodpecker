@@ -88,20 +88,24 @@ def test():
     if flavor['local_state'] is MAINTENANCE:
         for vm in (vm_root_local, vm_root_local_data_local,vm_root_local_data_shared, vm_root_local_data_mixed,
                    vm_root_shared_data_mixed,vm_root_shared_data_local):
+            vm.update()
             assert vm.get_vm().state == inventory.STOPPED
             with test_stub.expected_failure("start vm in maintenance ps", Exception):
                 vm.start()
 
         for vm in (vm_root_shared, vm_root_shared_data_shared):
+            vm.update()
             assert vm.get_vm().state == inventory.RUNNING
 
     if flavor['shared_state'] is MAINTENANCE:
         for vm in (vm_root_shared, vm_root_shared_data_shared,vm_root_shared_data_local, vm_root_shared_data_mixed,
                    vm_root_local_data_mixed,vm_root_local_data_shared):
+            vm.update()
             assert vm.get_vm().state == inventory.STOPPED
             with test_stub.expected_failure("start vm in maintenance ps", Exception):
                 vm.start()
         for vm in (vm_root_local, vm_root_local_data_local):
+            vm.update()
             assert vm.get_vm().state == inventory.RUNNING
 
     if flavor['local_state'] is MAINTENANCE:
