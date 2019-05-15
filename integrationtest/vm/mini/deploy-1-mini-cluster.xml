@@ -135,6 +135,7 @@
     <zones>
       <zone name="$zoneName" description="Test">
         <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
+        <backupStorageRef>$imageStoreBackupStorageName2</backupStorageRef>
         <primaryStorages>
           <miniPrimaryStorage name="$miniPrimaryStorageName"
             description="Test Mini PS" 
