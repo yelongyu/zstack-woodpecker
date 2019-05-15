@@ -19,7 +19,7 @@ def path():
         [TestAction.create_volume_backup, "vm2-root", "backup2"],
         [TestAction.delete_vm, "vm1"],
         [TestAction.recover_vm, "vm1"],
-        [TestAction.start_vm, "vm1"]
+        [TestAction.start_vm, "vm1"],
         [TestAction.attach_volume, "vm1", "volume1"],
         [TestAction.detach_volume, "volume1"],
         [TestAction.create_volume, "volume4", "=scsi,thick"],

@@ -69,7 +69,7 @@ class ZstackTestVolume(volume_header.TestVolume):
 
     def recover(self):
         vol_ops.recover_volume(self.volume.uuid)
-        super(ZstackTestVolume, self).delete()
+        super(ZstackTestVolume, self).recover()
 
     def expunge(self):
         vol_ops.expunge_volume(self.volume.uuid)

@@ -90,6 +90,10 @@ class TestVolume(zstack_header.ZstackObject):
 
         self.state = EXPUNGED
 
+    def recover(self):
+        self.state = CREATED
+
+
     def check(self):
         pass
 
