@@ -265,7 +265,7 @@ class Element(E2E):
     @property
     def selected(self):
         '''
-        Determine if an OPTION element, or an INPUT element 
+        Determine if an OPTION element, or an INPUT element
         of type checkbox or radiobutton is currently selected.
         '''
         uri = join(self.uri, 'selected')

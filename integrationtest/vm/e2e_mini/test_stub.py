@@ -260,7 +260,7 @@ class MINI(E2E):
         res_list = []
         if isinstance(res_name, types.ListType):
             res_list = res_name
-            if corner_btn or details_page:
+            if len(res_list) > 1 and (corner_btn or details_page):
                 test_util.test_fail("The args 'corner_btn' and 'details_page' are not for batch operation")
         else:
             res_list.append(res_name)
@@ -272,23 +272,25 @@ class MINI(E2E):
             if corner_btn:
                 _elem.get_elements('button', 'tag name')[-1].click()
                 break
-            elif expunge and primary_btn_num < PRIMARYBTNNUM:
-                if details_page:
+            elif details_page:
+                if expunge and primary_btn_num < PRIMARYBTNNUM:
                     self.more_operate(op_name=u'彻底删除',
-                                      res_type=res_type,
-                                      res_name=res_list,
-                                      details_page=details_page)
-                    break
+                                    res_type=res_type,
+                                    res_name=res_list,
+                                    details_page=details_page)
                 else:
-                    _elem.get_element(CHECKBOX).click()
-            else:
-                self.more_operate(op_name=u'删除',
-                                  res_type=res_type,
-                                  res_name=res_list,
-                                  details_page=details_page)
+                    self.more_operate(op_name=u'删除',
+                                    res_type=res_type,
+                                    res_name=res_list,
+                                    details_page=details_page)
                 break
+            else:
+                _elem.get_element(CHECKBOX).click()
         else:
-            self.click_button(u'彻底删除')
+            if primary_btn_num < PRIMARYBTNNUM:
+                self.click_button(u'彻底删除')
+            else:
+                self.self.more_operate(op_name=u'删除', res_name=res_list)
         self.click_ok()
         self.check_res_item(res_list, target='notDisplayed')
         if primary_btn_num < PRIMARYBTNNUM:
@@ -591,16 +593,14 @@ class MINI(E2E):
         _elem = self.get_res_element(res_name)
         if corner_btn:
             _elem.get_elements('button', 'tag name')[0].click()
-        elif details_page:
-            self.more_operate(u'修改信息', res_name=res_name, res_type=res_type, details_page=True)
         else:
-            self.more_operate(u'修改信息', res_name=res_name)
+            self.more_operate(u'修改信息', res_name=res_name, res_type=res_type, details_page=True)
         if new_name is not None:
-            test_util.test_logger('Update name of %s to %s' % (res_name, new_name))
+            test_util.test_logger('Update the name of [%s] to %s' % (res_name, new_name))
             self.input('name', new_name)
             check_list.append(new_name)
         if new_dsc is not None:
-            test_util.test_logger('Update dsc of %s to %s' % (res_name, new_dsc))
+            test_util.test_logger('Update the dsc of [%s] to %s' % (res_name, new_dsc))
             self.input('description', new_dsc)
         self.click_ok()
         _elem = self.get_res_element(new_name)
@@ -677,7 +677,7 @@ class MINI(E2E):
             vm_checkboxs = update_checkboxs()
             assert vm_checkboxs[0].selected == True
             assert vm_checkboxs[1].selected == True
-            second_vm_status = vm_elems[1].get_elements('labelContainer___10VVH')[0].text    
+            second_vm_status = vm_elems[1].get_elements('labelContainer___10VVH')[0].text
             if first_vm_status != second_vm_status:
                 assert start_btn.enabled == False
                 assert stop_btn.enabled == False
