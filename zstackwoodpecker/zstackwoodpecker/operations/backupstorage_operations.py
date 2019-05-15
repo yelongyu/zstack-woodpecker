@@ -216,3 +216,26 @@ def reclaim_space_from_bs(backup_storage_uuid, session_uuid=None):
     test_util.action_logger('Reclaim Space From Backup Storage [uuid:] %s' % backup_storage_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
+
+def create_image_replication_group(name, description=None, session_uuid=None):
+    action = api_actions.CreateImageReplicationGroupAction()
+    action.name = name
+    action.description = description
+    test_util.action_logger('Create Image Replication Group [name:] %s' % name)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def del_image_replication_group(uuid, session_uuid=None):
+    action = api_actions.DeleteImageReplicationGroupAction()
+    action.uuid = uuid
+    test_util.action_logger('Delete Image Replication Group [uuid:] %s' % uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def add_bs_to_image_replication_group(replication_group_uuid, bs_uuids, session_uuid=None):
+    action = api_actions.AddBackupStoragesToReplicationGroupAction()
+    action.replicationGroupUuid = replication_group_uuid
+    action.backupStorageUuids = bs_uuids
+    test_util.action_logger('Add Backup Storages [uuid:] %s to Image Replication Group [uuid:] %s' % (bs_uuids, replication_group_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
