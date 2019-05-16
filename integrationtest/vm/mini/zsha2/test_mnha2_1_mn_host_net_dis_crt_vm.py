@@ -1,1 +1,0 @@
-../../mn_ha2/test_mnha2_1_mn_host_net_dis_crt_vm.py

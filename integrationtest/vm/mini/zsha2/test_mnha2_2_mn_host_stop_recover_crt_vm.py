@@ -1,1 +1,0 @@
-../../mn_ha2/test_mnha2_2_mn_host_stop_recover_crt_vm.py
