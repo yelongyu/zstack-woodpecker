@@ -57,12 +57,12 @@ if [ "${CEPH_ONE_NODE}" != "yes" ]; then
 fi
 
 ssh  ceph-1 hostnamectl set-hostname ceph-1 && export HOSTNAME=ceph-1
-ssh  ceph-1 ntpdate -d -u 172.20.0.1
+ssh  ceph-1 ntpdate -d -u ntp.api.bz
 if [ "${CEPH_ONE_NODE}" != "yes" ]; then
     ssh  ceph-2 hostnamectl set-hostname ceph-2 && export HOSTNAME=ceph-2
-    ssh  ceph-2 ntpdate -d -u 172.20.0.1
+    ssh  ceph-2 ntpdate -d -u ntp.api.bz
     ssh  ceph-3 hostnamectl set-hostname ceph-3 && export HOSTNAME=ceph-3
-    ssh  ceph-3 ntpdate -d -u 172.20.0.1
+    ssh  ceph-3 ntpdate -d -u ntp.api.bz
 fi
 
 if [ "${CEPH_ONE_NODE}" != "yes" ]; then 
