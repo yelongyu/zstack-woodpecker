@@ -12,10 +12,10 @@ def test():
     global mini
     mini = test_stub.MINI()
     mini.create_vm(name=vm_name)
-    mini.set_ha_level(name=vm_name, ha=True)
-    mini.set_ha_level(name=vm_name, ha=False)
-    mini.set_ha_level(name=vm_name, ha=True, details_page=True)
-    mini.set_ha_level(name=vm_name, ha=False, details_page=True)
+    mini.set_ha_level(vm_name=vm_name, ha=True)
+    mini.set_ha_level(vm_name=vm_name, ha=False)
+    mini.set_ha_level(vm_name=vm_name, ha=True, details_page=True)
+    mini.set_ha_level(vm_name=vm_name, ha=False, details_page=True)
     mini.check_browser_console_log()
     test_util.test_pass('Set VM HA Level Successful')
 

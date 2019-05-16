@@ -13,8 +13,9 @@ def test():
     mini = test_stub.MINI()
     for vm_name in vm_name_list:
         mini.create_vm(name=vm_name)
-    mini.delete_vm(vm_name_list, corner_btn=False)
-    mini.resume(vm_name_list, 'vm')
+    for view in ['card', 'list']:
+        mini.delete_vm(vm_name_list, view=view, corner_btn=False)
+        mini.resume(vm_name_list, 'vm', view=view)
     mini.check_browser_console_log()
     test_util.test_pass('Batch Delete Resume VM Test Successful')
 

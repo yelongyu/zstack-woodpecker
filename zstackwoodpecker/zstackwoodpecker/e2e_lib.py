@@ -201,6 +201,11 @@ class E2E(object):
         window_handles = self._get(uri).value
         return window_handles[0]
 
+    def get_window_handles(self):
+        uri = join(self.uri, 'window_handles')
+        window_handles = self._get(uri).value
+        return window_handles
+
     def window_size(self, width, height):
         uri = join(self.uri, 'window', self.window_handle, 'size')
         self._post(uri, body='{"width": %s , "height": %s}' % (int(width), int(height)))
@@ -213,6 +218,10 @@ class E2E(object):
     def maximize_window(self):
         uri = join(self.uri, 'window', self.window_handle, 'maximize')
         self._post(uri)
+
+    def change_window(self, handle):
+        uri = join(self.uri, 'window')
+        self._post(uri, body='{"name": "%s"}' % str(handle))
 
     def close_window(self):
         uri = join(self.uri, 'window')

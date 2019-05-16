@@ -29,6 +29,7 @@ TABLEROW = 'ant-table-row ant-table-row-level-0'
 CHECKBOX = 'input[type="checkbox"]'
 FORMEXPLAIN = 'ant-form-explain'
 SPINCONTAINER = 'ant-spin-container'
+CONFIRMITEM = 'confirmItem___1ZEQE'
 PRIMARYBTNNUM = 2
 
 
@@ -198,7 +199,8 @@ class MINI(E2E):
             for res in res_list:
                 test_util.test_logger('Select [%s]' % res)
                 elem = self.get_res_element(res)
-                elem.get_element(CHECKBOX).click()
+                if not elem.get_element(CHECKBOX).selected:
+                    elem.get_element(CHECKBOX).click()
         self.get_element(MOREOPERATIONBTN).move_cursor_here()
         self.operate(op_name)
 
@@ -219,7 +221,7 @@ class MINI(E2E):
             self.click_cancel()
 
     def cancel_more_operation(self, op_name, res_name, res_type, details_page=False, close=False):
-        test_util.test_logger('Cancel more operation [%s] of %s' % (op_name, res_type))
+        test_util.test_logger('Cancel more operation [%s] of %s' % (op_name.encode('utf-8'), res_type))
         self.navigate(res_type)
         self.more_operate(op_name, res_name, res_type, details_page)
         if close:
@@ -235,6 +237,11 @@ class MINI(E2E):
         test_util.test_fail('Can not find [%s]' % res_name)
 
     def _create(self, para_dict, res_type, view, priority_dict=None):
+        # Temporarily used util http://jira.zstack.io/browse/MINI-335 is solved
+        self.navigate('image')
+        self.navigate('network')
+        self.navigate('host')
+
         self.navigate(res_type)
         self.get_elements(PRIMARYBTN)[-1].click()
         if priority_dict:
@@ -250,13 +257,11 @@ class MINI(E2E):
                 for elem in self.get_elements(FORMEXPLAIN):
                     test_util.test_logger('Error:' + elem.text.encode('utf-8'))
                 test_util.test_fail('Create Error: check the previous error message')
-        if view == 'list':
-            self.switch_view(view)
+        self.switch_view(view)
         elem = self.get_res_element(para_dict['name'])
         return elem
 
-    def _delete(self, res_name, res_type, corner_btn=False, expunge=False, details_page=False):
-        primary_btn_num = len(self.get_elements(PRIMARYBTN))
+    def _delete(self, res_name, res_type, view, corner_btn=False, expunge=False, details_page=False):
         res_list = []
         if isinstance(res_name, types.ListType):
             res_list = res_name
@@ -265,6 +270,8 @@ class MINI(E2E):
         else:
             res_list.append(res_name)
         self.navigate(res_type)
+        self.switch_view(view)
+        primary_btn_num = len(self.get_elements(PRIMARYBTN))
         test_util.test_logger('%s %s [name: (%s)]' % (('Expunge' if primary_btn_num < PRIMARYBTNNUM else 'Delete'),
                                                    res_type, ' '.join(res_list)))
         for res in res_list:
@@ -272,7 +279,7 @@ class MINI(E2E):
             if corner_btn:
                 _elem.get_elements('button', 'tag name')[-1].click()
                 break
-            elif expunge and primary_btn_num < PRIMARYBTNNUM:
+            elif expunge and (primary_btn_num < PRIMARYBTNNUM):
                 if details_page:
                     self.more_operate(op_name=u'彻底删除',
                                       res_type=res_type,
@@ -286,9 +293,11 @@ class MINI(E2E):
                                   res_type=res_type,
                                   res_name=res_list,
                                   details_page=details_page)
+                self.check_confirm_item(res_list)
                 break
         else:
             self.click_button(u'彻底删除')
+            self.check_confirm_item(res_list)
         self.click_ok()
         self.check_res_item(res_list, target='notDisplayed')
         if primary_btn_num < PRIMARYBTNNUM:
@@ -298,9 +307,9 @@ class MINI(E2E):
             # check deleted
             self.check_res_item(res_list)
         if expunge:
-            self._delete(res_list, res_type, expunge=True, details_page=details_page)
+            self._delete(res_list, res_type, view=view, expunge=True, details_page=details_page)
 
-    def resume(self, res_name, res_type, details_page=False):
+    def resume(self, res_name, res_type, view='card', details_page=False):
         res_list = []
         if isinstance(res_name, types.ListType):
             res_list = res_name
@@ -308,6 +317,7 @@ class MINI(E2E):
             res_list.append(res_name)
         self.navigate(res_type)
         self.switch_tab(u'已删除')
+        self.switch_view(view)
         test_util.test_logger('Resume %s [name: (%s)]' % (res_type, ' '.join(res_list)))
         for res in res_list:
             _elem = self.get_res_element(res)
@@ -328,6 +338,15 @@ class MINI(E2E):
         self.switch_tab(u'已删除')
         self.check_res_item(res_list, 'notDisplayed')
         self.switch_tab(u'已有')
+
+    def check_confirm_item(self, res_list):
+        confirm_items = self.get_elements(CONFIRMITEM)
+        for res in res_list:
+            for item in confirm_items:
+                if res == item.text:
+                    break
+            else:
+                test_util.test_fail('%s should to be confirmed' % res)
 
     def check_res_item(self, res_list, target='displayed'):
         test_util.test_logger('Check if %s %s' % (res_list, target))
@@ -477,18 +496,19 @@ class MINI(E2E):
         checker.image_check(check_list)
 
     def vm_ops(self, vm_name, action='stop', details_page=False):
+        self.navigate('vm')
         vm_list = []
         if isinstance(vm_name, types.ListType):
             vm_list = vm_name
         else:
             vm_list.append(vm_name)
-        for vm in vm_list:
-            vm_elem = self.get_res_element(vm)
-            vm_elem.get_element(CHECKBOX).click()
+        if not details_page:
+            for vm in vm_list:
+                vm_elem = self.get_res_element(vm)
+                vm_elem.get_element(CHECKBOX).click()
         if action == 'start':
             if details_page:
                 self.more_operate(u'启动', vm_list, res_type='vm', details_page=True)
-                self.click_ok()
             else:
                 self.click_button(u'启动')
         elif action == 'reboot':
@@ -497,37 +517,37 @@ class MINI(E2E):
         elif action == 'stop':
             if details_page:
                 self.more_operate(u'停止', vm_list, res_type='vm', details_page=True)
-                self.click_ok()
             else:
                 self.click_button(u'停止')
+        self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
 
-    def delete_vm(self, vm_name=None, corner_btn=True, details_page=False):
+    def delete_vm(self, vm_name=None, view='card', corner_btn=True, details_page=False):
         vm_name = vm_name if vm_name else self.vm_list
-        self._delete(vm_name, 'vm', corner_btn=corner_btn, details_page=details_page)
+        self._delete(vm_name, 'vm', view=view, corner_btn=corner_btn, details_page=details_page)
 
-    def expunge_vm(self, vm_name=None, details_page=False):
+    def expunge_vm(self, vm_name=None, view='card', details_page=False):
         vm_name = vm_name if vm_name else self.vm_list
-        self._delete(vm_name, 'vm', expunge=True, details_page=details_page)
+        self._delete(vm_name, 'vm', view=view, expunge=True, details_page=details_page)
 
-    def delete_volume(self, volume_name=None, corner_btn=True, details_page=False):
+    def delete_volume(self, volume_name=None, view='card', corner_btn=True, details_page=False):
         volume_name = volume_name if volume_name else self.volume_list
-        self._delete(volume_name, 'volume', corner_btn=corner_btn, details_page=details_page)
+        self._delete(volume_name, 'volume', view=view, corner_btn=corner_btn, details_page=details_page)
 
-    def expunge_volume(self, volume_name=None, details_page=False):
+    def expunge_volume(self, volume_name=None, view='card', details_page=False):
         volume_name = volume_name if volume_name else self.volume_list
-        self._delete(volume_name, 'volume', expunge=True, details_page=details_page)
+        self._delete(volume_name, 'volume', view=view, expunge=True, details_page=details_page)
 
-    def delete_image(self, image_name=None, corner_btn=True, details_page=False):
+    def delete_image(self, image_name=None, view='card', corner_btn=True, details_page=False):
         image_name = image_name if image_name else self.image_list
-        self._delete(image_name, 'image', corner_btn=corner_btn, details_page=details_page)
+        self._delete(image_name, 'image', view=view, corner_btn=corner_btn, details_page=details_page)
 
-    def expunge_image(self, image_name=None, details_page=False):
+    def expunge_image(self, image_name=None, view='card', details_page=False):
         image_name = image_name if image_name else self.image_list
-        self._delete(image_name, 'image', expunge=True, details_page=details_page)
+        self._delete(image_name, 'image', view=view, expunge=True, details_page=details_page)
 
-    def delete_network(self, network_name=None, corner_btn=True, details_page=False):
+    def delete_network(self, network_name=None, view='card', corner_btn=True, details_page=False):
         network_name = network_name if network_name else self.network_list
-        self._delete(network_name, 'network', corner_btn=corner_btn, details_page=details_page)
+        self._delete(network_name, 'network', view=view, corner_btn=corner_btn, details_page=details_page)
 
     def set_ha_level(self, vm_name, ha=True, details_page=False):
         test_util.test_logger('Set [%s] ha leval [%s]' % (vm_name, ha))
@@ -547,6 +567,39 @@ class MINI(E2E):
         vm_elem = self.get_res_element(vm_name)
         checker = MINICHECKER(self, vm_elem)
         checker.vm_check(check_list)
+
+    def open_vm_console(self, vm_name, details_page=False):
+        test_util.test_logger('Open the console of [%s]' % vm_name)
+        self.navigate('vm')
+        self.more_operate(u'打开控制台', vm_name, res_type='vm', details_page=details_page)
+        while True:
+            if len(self.get_window_handles()) == 1:
+                time.sleep(0.5)
+            else:
+                break
+        old_handle = self.window_handle
+        for handle in self.get_window_handles():
+            if handle != old_handle:
+                self.change_window(handle)
+        self.wait_for_element('noVNC_status_normal')
+        self.close_window()
+        self.change_window(self.window_handle)
+
+    def set_console_password(self, vm_name, password='password', details_page=False):
+        test_util.test_logger('Set the console password of [%s]' % vm_name)
+        self.navigate('vm')
+        self.more_operate(u'设置控制台密码', vm_name, res_type='vm', details_page=details_page)
+        self.get_element('#newpassword').input(password)
+        self.get_element('#confirmpassword').input(password)
+        self.get_elements(CHECKBOX)[-1].click()
+        self.click_ok()
+        # check
+        self.get_element(MOREOPERATIONBTN).move_cursor_here()
+        op_selector = 'ant-dropdown-menu-item|ant-menu-item'
+        self.wait_for_element(op_selector)
+        for op in self.get_elements(op_selector):
+            if op.text == u'设置控制台密码':
+                assert op.enabled == False
 
     def volume_attach_to_vm(self, volume_name=[], dest_vm=None, details_page=False):
         emptyl = []
@@ -694,7 +747,8 @@ class MINICHECKER(object):
                     'start': u'运行中',
                     'stop': u'已停止',
                     'resume': u'已停止'}
-        check_list.append(ops_dict[ops])
+        if ops:
+            check_list.append(ops_dict[ops])
         for v in check_list:
             if v not in self.elem.text:
                 test_util.test_fail("Can not find %s in vm checker" % v)

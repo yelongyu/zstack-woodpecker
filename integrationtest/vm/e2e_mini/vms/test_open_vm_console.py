@@ -12,22 +12,10 @@ def test():
     global mini
     mini = test_stub.MINI()
     mini.create_vm(name=vm_name)
-
-    for view in ['card', 'list']:
-        # Delete button
-        mini.delete_vm(vm_name, view=view)
-        # Resume button
-        mini.resume(vm_name, 'vm', view=view)
-
-        # Delete via more operation
-        mini.delete_vm(vm_name, view=view, corner_btn=False)
-        # Resume by more ops
-        mini.resume(vm_name, 'vm', view=view, details_page=True)
-
-        # Delete via more operation in details page
-        mini.delete_vm(vm_name, view=view, details_page=True)
+    mini.open_vm_console(vm_name, details_page=False)
+    mini.open_vm_console(vm_name, details_page=True)
     mini.check_browser_console_log()
-    test_util.test_pass('Delete Resume VM Test Successful')
+    test_util.test_pass('Open the Console of VM Successful')
 
 
 def env_recover():
