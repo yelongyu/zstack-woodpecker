@@ -272,25 +272,23 @@ class MINI(E2E):
             if corner_btn:
                 _elem.get_elements('button', 'tag name')[-1].click()
                 break
-            elif details_page:
-                if expunge and primary_btn_num < PRIMARYBTNNUM:
+            elif expunge and primary_btn_num < PRIMARYBTNNUM:
+                if details_page:
                     self.more_operate(op_name=u'彻底删除',
-                                    res_type=res_type,
-                                    res_name=res_list,
-                                    details_page=details_page)
+                                      res_type=res_type,
+                                      res_name=res_list,
+                                      details_page=details_page)
+                    break
                 else:
-                    self.more_operate(op_name=u'删除',
-                                    res_type=res_type,
-                                    res_name=res_list,
-                                    details_page=details_page)
+                    _elem.get_element(CHECKBOX).click()
+            else:
+                self.more_operate(op_name=u'删除',
+                                  res_type=res_type,
+                                  res_name=res_list,
+                                  details_page=details_page)
                 break
-            else:
-                _elem.get_element(CHECKBOX).click()
         else:
-            if primary_btn_num < PRIMARYBTNNUM:
-                self.click_button(u'彻底删除')
-            else:
-                self.self.more_operate(op_name=u'删除', res_name=res_list)
+            self.click_button(u'彻底删除')
         self.click_ok()
         self.check_res_item(res_list, target='notDisplayed')
         if primary_btn_num < PRIMARYBTNNUM:
