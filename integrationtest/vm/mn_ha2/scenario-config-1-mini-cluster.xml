@@ -1,4 +1,0 @@
-<testConfig>
-    <scenarioConfig>scenario-1-mini-cluster.xml</scenarioConfig>
-    <scenarioConfigTemplate>scenario-1-mini-cluster.tmpt</scenarioConfigTemplate>
-</testConfig>

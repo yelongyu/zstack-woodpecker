@@ -1,5 +1,0 @@
-<testConfig>
-    <deployConfig>deploy-1-mini-cluster.xml</deployConfig>
-    <deployConfigTemplate>deploy-1-mini-cluster.tmpt</deployConfigTemplate>
-    <pingTestTarget>zstack.org</pingTestTarget>
-</testConfig>
