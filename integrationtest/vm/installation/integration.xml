@@ -30,6 +30,7 @@
         <case timeout="2400" >upgrade/test_zs_upgd_3.1.3_latest_on_cos74.py</case>
         <case timeout="2400" >upgrade/test_zs_upgd_3.2.0_latest_on_cos74.py</case>
         <case timeout="2400" >upgrade/test_zs_upgd_3.3.0_latest_on_cos74.py</case>
+        <case timeout="3400" >upgrade/test_zs_upgd_3.4.0_latest_on_cos74.py</case>
         <case timeout="3400" >upgrade/test_zs_upgd_3.2.0_change_zstack_mysql_password_latest_on_cos74.py</case>
         <case timeout="3400" >upgrade/test_zs_upgd_3.2.0_change_root_mysql_password_latest_on_cos74.py</case>
         <!--<case timeout="2400" >upgrade/test_zs_upgd_2.2.3_latest_iso_on_cos7.py</case> -->
