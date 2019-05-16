@@ -1771,6 +1771,9 @@ def robot_create_utility_vm():
             utility_vm_create_option.set_name('utility_vm_for_robot_test')
             utility_vm_create_option.set_image_uuid(utility_vm_image.uuid)
             utility_vm_create_option.set_ps_uuid(ps.uuid)
+            if MINI:
+                utility_vm_create_option.set_cpu_num(2)
+                utility_vm_create_option.set_memory_size(int(2 * 1024 * 1024 * 1024))
             l3_uuid = test_lib.lib_get_l3_by_name(os.environ.get('l3VlanNetworkName1')).uuid
             utility_vm_create_option.set_l3_uuids([l3_uuid])
 

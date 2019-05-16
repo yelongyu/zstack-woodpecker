@@ -965,12 +965,13 @@ def lib_check_login_in_vm(vm, username, password, retry_times=5, l3_uuid=None):
     return False
 
 #-----------VM operations-------------
-def lib_create_vm(vm_cre_opt=test_util.VmOption(), session_uuid=None): 
+def lib_create_vm(vm_cre_opt=test_util.VmOption(), session_uuid=None):
+    import zstackwoodpecker.robot_action as robot_action
     '''If not provide vm_cre_opt, it creates random vm '''
     if not vm_cre_opt.get_name():
         vm_cre_opt.set_name('test-vm')
 
-    if not vm_cre_opt.get_instance_offering_uuid():
+    if not robot_action.MINI and not vm_cre_opt.get_instance_offering_uuid():
         #pick up random user vm instance offering.
         instance_offerings = res_ops.get_resource(res_ops.INSTANCE_OFFERING, session_uuid)
         user_vm_offerings = []
