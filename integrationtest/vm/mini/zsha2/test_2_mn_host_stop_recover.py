@@ -53,7 +53,12 @@ def test():
 
     test_stub.wrapper_of_wait_for_management_server_start(600)
 
-    vm.check()
+    cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid)
+    for i in range(0, 60):
+        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Running":
+            break
+        time.sleep(1)
+
     vm.destroy()
 
     test_util.test_pass('Create VM Test Success')
