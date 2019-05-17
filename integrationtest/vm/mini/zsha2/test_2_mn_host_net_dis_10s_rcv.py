@@ -31,6 +31,9 @@ def test():
     if len(vip_s_vm_cfg_lst) != 1:
         test_util.test_fail('vip has been running on %d host(s)' % len(vip_s_vm_cfg_lst))
 
+    test_stub.ensure_hosts_connected()
+    test_stub.ensure_bss_connected()
+    test_stub.ensure_pss_connected()
     vm = test_stub.create_basic_vm()
 
     s_vm0 = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, 0)
@@ -49,10 +52,6 @@ def test():
         test_util.test_fail('vip has been running on %d host(s)' % len(vip_s_vm_cfg_lst_new))
 
     test_stub.wrapper_of_wait_for_management_server_start(600)
-
-    test_stub.ensure_hosts_connected(exclude_host=[vip_s_vm_cfg_lst[0]])
-    test_stub.ensure_bss_connected(exclude_host=[vip_s_vm_cfg_lst[0]])
-    #test_stub.ensure_pss_connected()
 
     vm.check()
     vm.destroy()

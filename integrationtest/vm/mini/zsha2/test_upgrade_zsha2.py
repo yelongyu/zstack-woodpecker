@@ -24,6 +24,9 @@ def test():
 
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.environ['zstackHaVip']
 
+    test_stub.ensure_hosts_connected()
+    test_stub.ensure_bss_connected()
+    test_stub.ensure_pss_connected()
     vm = test_stub.create_basic_vm()
 
     vip_s_vm_cfg_lst = test_stub.get_s_vm_cfg_lst_vip_bind(test_lib.all_scenario_config, test_lib.scenario_file)
@@ -46,10 +49,6 @@ def test():
         test_util.test_fail('vip has been running on %d host(s)' % len(vip_s_vm_cfg_lst_new))
 
     test_stub.wrapper_of_wait_for_management_server_start(600)
-
-    test_stub.ensure_hosts_connected(exclude_host=[vip_s_vm_cfg_lst[0]])
-    test_stub.ensure_bss_connected(exclude_host=[vip_s_vm_cfg_lst[0]])
-    #test_stub.ensure_pss_connected()
 
     vm.check()
     vm.destroy()
