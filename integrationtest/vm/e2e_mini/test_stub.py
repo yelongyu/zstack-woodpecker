@@ -82,6 +82,7 @@ class MINI(E2E):
         else:
             self.mini_server_ip = os.getenv('zstackHaVip')
         self.url('http://%s:8200' % self.mini_server_ip)
+        # self.logout()
         self.window_size(1600, 900)
         self.login()
 
@@ -94,12 +95,13 @@ class MINI(E2E):
         self.wait_for_element(MESSAGETOAST)
         assert self.get_elements(MESSAGETOAST)
         # root page
-        assert self.get_elements('ant-layout-content')
+        # assert self.get_elements('ant-layout-content')
+        # time.sleep(5)
 
     def logout(self):
         test_util.test_logger('Log out')
         self.get_element('img', 'tag name').move_cursor_here()
-        self.operate(u'登出')
+        self.operate(u'退出登陆')
         assert self.get_elements('#password')
 
     def switch_view(self, view='card'):
@@ -108,6 +110,7 @@ class MINI(E2E):
             if elem.get_elements(VIEWDICT[view]):
                 elem.click()
                 break
+        time.sleep(1)
 
     def login_with_cleartext_password(self):
         test_util.test_logger('Log in with clear-text password')
@@ -202,6 +205,7 @@ class MINI(E2E):
                 if not elem.get_element(CHECKBOX).selected:
                     elem.get_element(CHECKBOX).click()
         self.get_element(MOREOPERATIONBTN).move_cursor_here()
+        time.sleep(1)
         self.operate(op_name)
 
     def enter_details_page(self, res_type, name):
@@ -269,6 +273,8 @@ class MINI(E2E):
                 test_util.test_fail("The args 'corner_btn' and 'details_page' are not for batch operation")
         else:
             res_list.append(res_name)
+        if corner_btn and details_page:
+            test_util.test_fail("The args 'corner_btn' and 'details_page' can not be both True")
         self.navigate(res_type)
         self.switch_view(view)
         primary_btn_num = len(self.get_elements(PRIMARYBTN))
@@ -299,7 +305,7 @@ class MINI(E2E):
             self.click_button(u'彻底删除')
             self.check_confirm_item(res_list)
         self.click_ok()
-        self.check_res_item(res_list, target='notDisplayed')
+        # self.check_res_item(res_list, target='notDisplayed')
         if primary_btn_num < PRIMARYBTNNUM:
             return True
         self.switch_tab(u'已删除')
@@ -313,6 +319,8 @@ class MINI(E2E):
         res_list = []
         if isinstance(res_name, types.ListType):
             res_list = res_name
+            if len(res_list) > 1 and details_page:
+                test_util.test_fail("The args 'details_page' are not for batch operation")
         else:
             res_list.append(res_name)
         self.navigate(res_type)
@@ -326,18 +334,16 @@ class MINI(E2E):
                                   res_type=res_type,
                                   res_name=res_list,
                                   details_page=details_page)
+                self.click_ok()
                 break
             else:
                 _elem.get_element(CHECKBOX).click()
         else:
             self.click_button(u'恢复')
             self.wait_for_element(MESSAGETOAST, timeout=30, target='disappear')
-            self.switch_tab(u'已有')
         self.navigate(res_type)
-        self.check_res_item(res_list)
-        self.switch_tab(u'已删除')
-        self.check_res_item(res_list, 'notDisplayed')
         self.switch_tab(u'已有')
+        self.check_res_item(res_list)
 
     def check_confirm_item(self, res_list):
         confirm_items = self.get_elements(CONFIRMITEM)
@@ -392,6 +398,7 @@ class MINI(E2E):
             if tab_name in tab.text:
                 tab.click()
         self.wait_for_page_render()
+        time.sleep(1)
 
     def create_vm(self, name=None, dsc=None, image=None, root_size=None, cpu=1, mem='1 GB', data_size=None,
                   user_data=None, network=None, cluster=None, provisioning=u'厚置备', view='card'):
@@ -612,7 +619,7 @@ class MINI(E2E):
         if not elem.get_element(CHECKBOX).selected:
             elem.get_element(CHECKBOX).click()
         self.get_element(MOREOPERATIONBTN).move_cursor_here()
-        op_selector = 'ant-dropdown-menu-item|ant-menu-item'
+        op_selector = 'ant-dropdown-menu-item'
         self.wait_for_element(op_selector)
         for op in self.get_elements(op_selector):
             if op.text == op_name:

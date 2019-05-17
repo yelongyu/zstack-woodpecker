@@ -2,12 +2,13 @@
 
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
+import os
 
 test_stub = test_lib.lib_get_test_stub()
 
 mini = None
 iso_name = 'test-iso'
-iso_url = 'http://192.168.200.100/mirror/iso/CentOS-7-x86_64-DVD-1810.iso'
+iso_url = os.getenv('isoUrl')
 
 def test():
     global mini
