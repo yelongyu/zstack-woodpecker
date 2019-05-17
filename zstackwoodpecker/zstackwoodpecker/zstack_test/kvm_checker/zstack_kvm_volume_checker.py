@@ -80,7 +80,7 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
         cluster = res_ops.query_resource(res_ops.CLUSTER, conditions)[0]
         conditions = res_ops.gen_query_conditions('clusterUuid', '=', cluster.uuid)
         host = res_ops.query_resource(res_ops.HOST, conditions)[0]
-        result = test_lib.lib_execute_ssh_cmd(host.managementIp, 'root', 'password', cmd)
+        result = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), cmd)
         if devPath in result:
             return self.judge(True)
         else:
@@ -178,7 +178,7 @@ class zstack_kvm_volume_attach_checker(checker_header.TestChecker):
             volume_installPath = "/dev/" + volume_installPath.split('sharedblock://')[1]
         elif volume_installPath.startswith('mini'):
             _cmd = "drbdsetup show %s | grep device | awk -F';' '{print $1}' | awk '{print $3}'" % volume.uuid
-            result = test_lib.lib_execute_ssh_cmd(host.managementIp,host.username, host.password, _cmd, 180)
+            result = test_lib.lib_execute_ssh_cmd(host.managementIp,host.username, os.environ.get('hostPassword'), _cmd, 180)
             volume_installPath = '/dev/drbd' + result.strip()
         elif volume_installPath.startswith('ebs'):
             ps_uuid = volume.primaryStorageUuid
