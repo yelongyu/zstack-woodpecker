@@ -585,21 +585,38 @@ class MINI(E2E):
         self.close_window()
         self.change_window(self.window_handle)
 
-    def set_console_password(self, vm_name, password='password', details_page=False):
+    def set_console_password(self, vm_name, password='123456', details_page=False, end_action='confirm'):
         test_util.test_logger('Set the console password of [%s]' % vm_name)
         self.navigate('vm')
         self.more_operate(u'设置控制台密码', vm_name, res_type='vm', details_page=details_page)
         self.get_element('#newpassword').input(password)
         self.get_element('#confirmpassword').input(password)
         self.get_elements(CHECKBOX)[-1].click()
-        self.click_ok()
+        self.end_action(end_action)
         # check
+        if end_action == 'confirm':
+            self.check_menu_item_enabled(vm_name, 'vm', u'设置控制台密码')
+
+    def cancel_console_password(self, vm_name, details_page=False, end_action='confirm'):
+        test_util.test_logger('Cancel the console password of [%s]' % vm_name)
+        self.navigate('vm')
+        self.more_operate(u'取消控制台密码', vm_name, res_type='vm', details_page=details_page)
+        self.end_action(end_action)
+        # check
+        if end_action == 'confirm':
+            self.check_menu_item_enabled(vm_name, 'vm', u'取消控制台密码')
+
+    def check_menu_item_enabled(self, name, res_type, op_name):
+        self.navigate(res_type)
+        elem = self.get_res_element(name)
+        if not elem.get_element(CHECKBOX).selected:
+            elem.get_element(CHECKBOX).click()
         self.get_element(MOREOPERATIONBTN).move_cursor_here()
         op_selector = 'ant-dropdown-menu-item|ant-menu-item'
         self.wait_for_element(op_selector)
         for op in self.get_elements(op_selector):
-            if op.text == u'设置控制台密码':
-                assert op.enabled == False
+            if op.text == op_name:
+                assert op.get_attribute('aria-disabled') == 'true'
 
     def volume_attach_to_vm(self, volume_name=[], dest_vm=None, details_page=False):
         emptyl = []
@@ -645,7 +662,7 @@ class MINI(E2E):
         if corner_btn:
             _elem.get_elements('button', 'tag name')[0].click()
         else:
-            self.more_operate(u'修改信息', res_name=res_name, res_type=res_type, details_page=True)
+            self.more_operate(u'修改信息', res_name=res_name, res_type=res_type, details_page=details_page)
         if new_name is not None:
             test_util.test_logger('Update the name of [%s] to %s' % (res_name, new_name))
             self.input('name', new_name)

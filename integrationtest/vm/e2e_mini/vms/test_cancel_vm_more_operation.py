@@ -7,7 +7,7 @@ test_stub = test_lib.lib_get_test_stub()
 
 mini = None
 vm_name = 'vm-' + test_stub.get_time_postfix()
-op_list = {u'重启', u'高可用级别'}
+op_list = {u'重启', u'高可用级别', u'修改信息'}
 
 def test():
     global mini
