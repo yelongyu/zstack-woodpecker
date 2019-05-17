@@ -30,6 +30,8 @@ def test():
     must_ps_list = ['MiniStorage']
     test_lib.skip_test_if_any_ps_not_deployed(must_ps_list)
 
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.environ['zstackHaVip']
+
     mn_host_list = test_stub.get_mn_host(test_lib.all_scenario_config, test_lib.scenario_file)
     mn_host_num = len(mn_host_list)
     test_mn_host_list = random.sample(range(mn_host_num), (mn_host_num + 1) / 2)

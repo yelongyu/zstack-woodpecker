@@ -32,6 +32,8 @@ def test():
     must_ps_list = ['MiniStorage']
     test_lib.skip_test_if_any_ps_not_deployed(must_ps_list)
 
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.environ['zstackHaVip']
+
     if test_lib.lib_get_ha_enable() != 'true':
         test_util.test_skip("vm ha not enabled. Skip test")
 

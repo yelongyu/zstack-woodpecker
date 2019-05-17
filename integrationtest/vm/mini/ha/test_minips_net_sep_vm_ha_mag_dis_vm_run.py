@@ -34,6 +34,8 @@ def test():
     must_ps_list = ['MiniStorage']
     test_lib.skip_test_if_any_ps_not_deployed(must_ps_list)    
 
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.environ['zstackHaVip']
+
     test_stub.skip_if_not_storage_network_separate(test_lib.all_scenario_config)
 
     if test_lib.lib_get_ha_enable() != 'true':
