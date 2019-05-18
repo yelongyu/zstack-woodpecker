@@ -18,7 +18,7 @@ def test():
         mini.delete_volume(volume_name_list, view=view, corner_btn=False)
         mini.resume(volume_name_list, 'volume', view=view)
     mini.check_browser_console_log()
-    test_util.test_pass('Batch Delete Resume Volume Test Successful')
+    test_util.test_pass('Batch Delete Resume Volumes Test Successful')
 
 
 def env_recover():

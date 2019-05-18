@@ -17,7 +17,7 @@ def test():
         mini.delete_vm(vm_name_list, view=view, corner_btn=False)
         mini.resume(vm_name_list, 'vm', view=view)
     mini.check_browser_console_log()
-    test_util.test_pass('Batch Delete Resume VM Test Successful')
+    test_util.test_pass('Batch Delete Resume VMs Test Successful')
 
 
 def env_recover():

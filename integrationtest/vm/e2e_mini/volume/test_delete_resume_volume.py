@@ -26,6 +26,8 @@ def test():
 
         # Delete via more operation in details page
         mini.delete_volume(volume_name, view=view, corner_btn=False, details_page=True)
+        # Resume button
+        mini.resume(volume_name, 'volume', view=view)
     mini.check_browser_console_log()
     test_util.test_pass('Delete Resume Volume Test Successful')
 

@@ -102,6 +102,7 @@ class MINI(E2E):
         test_util.test_logger('Log out')
         self.get_element('img', 'tag name').move_cursor_here()
         self.operate(u'退出登陆')
+        time.sleep(1)
         assert self.get_elements('#password')
 
     def switch_view(self, view='card'):
@@ -266,6 +267,7 @@ class MINI(E2E):
         return elem
 
     def _delete(self, res_name, res_type, view, corner_btn=False, expunge=False, details_page=False):
+        isExpunge = False
         res_list = []
         if isinstance(res_name, types.ListType):
             res_list = res_name
@@ -286,6 +288,7 @@ class MINI(E2E):
                 _elem.get_elements('button', 'tag name')[-1].click()
                 break
             elif expunge and (primary_btn_num < PRIMARYBTNNUM):
+                isExpunge = True
                 if details_page:
                     self.more_operate(op_name=u'彻底删除',
                                       res_type=res_type,
@@ -305,10 +308,12 @@ class MINI(E2E):
             self.click_button(u'彻底删除')
             self.check_confirm_item(res_list)
         self.click_ok()
-        # self.check_res_item(res_list, target='notDisplayed')
-        if primary_btn_num < PRIMARYBTNNUM:
-            return True
+        if details_page:
+            self.navigate(res_type)
         self.switch_tab(u'已删除')
+        if isExpunge:
+            self.check_res_item(res_list, target='notDisplayed')
+            return True
         if res_type != 'network':
             # check deleted
             self.check_res_item(res_list)
