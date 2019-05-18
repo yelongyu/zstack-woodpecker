@@ -507,8 +507,13 @@ def cleanup_imagecache_on_ps(robot_test_obj, args):
 
 
 def idel(robot_test_obj, args):
-    test_lib.lib_vm_random_idel_time(1, 5)
-
+    if len(args) > 1:
+        test_util.test_fail("invalid parameter for next action: idle")
+    elif len(args) == 1:
+        idle_time = args[0]
+        time.sleep(int(idle_time))
+    else:
+        test_lib.lib_vm_random_idel_time(1, 5)
 
 def create_vm(robot_test_obj, args):
     pass
