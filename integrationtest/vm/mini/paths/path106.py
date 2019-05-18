@@ -11,5 +11,4 @@ def path():
         [TestAction.create_mini_vm, "vm2", 'data_volume=false', 'cpu=2', 'memory=2', 'provisiong=thin'],
         [TestAction.change_vm_ha, "vm2"],
         [TestAction.create_volume, "volume2", "=scsi,thick"],
-        [TestAction.attach_volume, "vm2", "volume2"]] + [[TestAction.reboot_host, "all", "reboot"]]*5000)
-
+        [TestAction.attach_volume, "vm2", "volume2"]] + [[TestAction.reboot_host, "all", "soft_crash"]]*5000)

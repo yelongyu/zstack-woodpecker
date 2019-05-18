@@ -682,12 +682,18 @@ def reboot_host(robot_test_obj, args):
     hosts = []
     timeout = 1800
 
-    if len(args) == 1:
+    if len(args) == 2:
         target_host = args[0] 
-    elif len(args) > 1:
+        action = args[1]
+    else:
         test_util.test_fail("arguments invalid for next action: reboot host")
 
-    cmd = "reboot"
+    if action == "reboot":
+        cmd = "reboot"
+    elif action == "soft_crash":
+        cmd = "echo c > /proc/sysrq-trigger"
+
+    test_util.test_logger('Reboot Host: Action %s' % (cmd))
 
     if target_host == "all":
         for host in test_lib.lib_find_hosts_by_status("Connected"):
@@ -695,7 +701,7 @@ def reboot_host(robot_test_obj, args):
             rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), cmd)
             if rsp:
                 test_util.test_fail('%s failed on %s' % (cmd, host.managementIp))
-    elif target_host == "":
+    elif target_host == "random":
         host = random.choice(test_lib.lib_find_hosts_by_status("Connected"))
         hosts.append(host)
         rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), cmd)
