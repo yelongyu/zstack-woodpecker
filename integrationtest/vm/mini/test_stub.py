@@ -902,3 +902,37 @@ def deploy_2ha(scenarioConfig, scenarioFile, deployConfig):
     test_util.test_logger("cmd=%s; ret=%s; output=%s; stderr=%s" %(cmd, ret, output, stderr))
     if ret!=0:
         test_util.test_fail("deploy 2ha failed")
+
+
+class ImageReplication(object):
+    def __init__(self):
+        self.replication_grp = None
+        self.bs1 = None
+        self.bs2 = None
+
+    def create_replication_grp(self, name):
+        grp_inv = bs_ops.create_image_replication_group(name)
+        self.replication_grp = grp_inv.inventory
+
+    def del_replication_grp(self, uuid):
+        bs_ops.del_image_replication_group(uuid)
+
+    def get_replication_grp(self, name=None):
+        if name:
+            conditions = res_ops.gen_query_conditions('name', '=', name)
+            grp_inv = res_ops.query_resource(res_ops.REPLICATIONGROUP, conditions)
+        else:
+            grp_inv = res_ops.query_resource(res_ops.REPLICATIONGROUP)
+        return grp_inv
+
+    def cleanup_replication_grp(self):
+        repl_grp = self.get_replication_grp()
+        for grp in repl_grp:
+            self.del_replication_grp(grp.uuid)
+
+    def add_bs_to_repliction_grp(self, grp_uuid=None):
+        if not grp_uuid:
+            grp_uuid = self.get_replication_grp()[0].uuid
+        bs_list = res_ops.query_resource(res_ops.IMAGE_STORE_BACKUP_STORAGE)
+        bs_uuid_list = [bs.uuid for bs in bs_list]
+        bs_ops.add_bs_to_image_replication_group(grp_uuid, bs_uuid_list)

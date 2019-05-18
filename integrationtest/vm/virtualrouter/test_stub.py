@@ -1229,11 +1229,11 @@ class MulISO(object):
 
 
 class Longjob(object):
-    def __init__(self):
+    def __init__(self, name=None, url=None):
         self.vm = None
         self.image_uuid = None
         self.image_name_net = os.getenv('imageName_net')
-        self.url = os.getenv('imageUrl_net')
+        self.url = url if url else os.getenv('imageUrl_net')
         self.add_image_job_name = 'APIAddImageMsg'
         self.crt_vm_image_job_name = 'APICreateRootVolumeTemplateFromRootVolumeMsg'
         self.crt_vol_image_job_name = 'APICreateDataVolumeTemplateFromVolumeMsg'
@@ -1309,12 +1309,12 @@ class Longjob(object):
             assert image_inv[0].mediaType == 'RootVolumeTemplate'
         self.image_uuid = image_inv[0].uuid
 
-    def add_image(self):
+    def add_image(self, platform="Linux"):
         name = "longjob_image"
         bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)
         self.target_bs = bs[random.randint(0, len(bs) - 1)]
-        job_data = '{"name":"%s", "url":"%s", "mediaType"="RootVolumeTemplate", "format"="qcow2", "platform"="Linux", \
-        "backupStorageUuids"=["%s"]}' % (self.image_add_name, self.url, self.target_bs.uuid)
+        job_data = '{"name":"%s", "url":"%s", "mediaType"="RootVolumeTemplate", "format"="qcow2", "platform"="%s", \
+        "backupStorageUuids"=["%s"]}' % (self.image_add_name, self.url, platform, self.target_bs.uuid)
         self.submit_longjob(job_data, name, job_type='image')
 
     def delete_image(self):
