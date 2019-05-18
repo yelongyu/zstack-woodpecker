@@ -93,17 +93,18 @@ class MINI(E2E):
         # Login button
         self.get_element('button', 'tag name').click()
         self.wait_for_element(MESSAGETOAST)
-        assert self.get_elements(MESSAGETOAST)
         # root page
-        # assert self.get_elements('ant-layout-content')
         # time.sleep(5)
+        if not self.get_elements('ant-layout-content'):
+            test_util.test_fail('Fail to Login')
 
     def logout(self):
         test_util.test_logger('Log out')
         self.get_element('img', 'tag name').move_cursor_here()
         self.operate(u'退出登陆')
         time.sleep(1)
-        assert self.get_elements('#password')
+        if not self.get_elements('#password'):
+            test_util.test_fail('Fail to Logout')
 
     def switch_view(self, view='card'):
         test_util.test_logger('switch the view to %s' % view)
