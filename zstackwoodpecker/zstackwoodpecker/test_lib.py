@@ -1428,6 +1428,22 @@ def lib_get_host_port(host_ip):
 
     return h_port
 
+def lib_find_hosts_by_status(status):
+    '''
+    find all hosts by status
+    '''
+    cond = res_ops.gen_query_conditions('status', '=', \
+            status)
+    return res_ops.query_resource(res_ops.HOST, cond)
+
+def lib_find_host_by_HostIp(host_ip):
+    '''
+    find the host by host_ip
+    '''
+    cond = res_ops.gen_query_conditions('managementIp', '=', \
+            host_ip)
+    return res_ops.query_resource(res_ops.HOST, cond)
+
 def lib_find_hosts_by_ps_uuid(ps_uuid):
     '''
     find all hosts which is using given ps

@@ -25,7 +25,7 @@ def test():
     path_list = flavor['path_list']
     repeat = flavor['repeat']
 
-    Robot.robot_create_utility_vm()
+    #Robot.robot_create_utility_vm()
     robot_test_obj = Robot.robot()
     robot_test_obj.initial(path_list)
 

@@ -677,6 +677,105 @@ def reboot_vm(robot_test_obj, args):
         volume.update()
         volume.update_volume()
 
+def reboot_host(robot_test_obj, args):
+    target_host = ""
+    hosts = []
+    timeout = 1800
+
+    if len(args) == 1:
+        target_host = args[0] 
+    elif len(args) > 1:
+        test_util.test_fail("arguments invalid for next action: reboot host")
+
+    cmd = "reboot"
+
+    if target_host == "all":
+        for host in test_lib.lib_find_hosts_by_status("Connected"):
+            hosts.append(host)
+            rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), cmd)
+            if rsp:
+                test_util.test_fail('%s failed on %s' % (cmd, host.managementIp))
+    elif target_host == "":
+        host = random.choice(test_lib.lib_find_hosts_by_status("Connected"))
+        hosts.append(host)
+        rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), cmd)
+        if rsp:
+            test_util.test_fail('%s failed on %s' % (cmd, host.managementIp))
+    else:
+        host = test_lib.lib_find_host_by_HostIp(target_host)
+        hosts.append(host[0])
+        if not host:
+            test_util.test_fail('no host found for IP %s' % (target_host))
+        rsp = test_lib.lib_execute_ssh_cmd(host[0].managementIp, host[0].username, os.environ.get('hostPassword'), cmd)
+        if rsp:
+            test_util.test_fail('%s failed on %s' % (cmd, target_host))
+
+    time.sleep(120)
+
+    while timeout:
+        for host in hosts:
+            try:
+                _host = test_lib.lib_find_host_by_HostIp(host.managementIp)
+            except:
+                timeout -= 15
+                if timeout == 0:
+                    test_util.test_fail('%s is not up in 1800 seconds after reboot' % (host.managementIp))
+                time.sleep(15)
+                continue
+
+            if _host[0].status == "Connected":
+                test_util.test_logger('%s is up and Connected' % (host.managementIp))
+                hosts.remove(host)
+                continue
+            else:
+                timeout -= 15
+                if timeout == 0:
+                    test_util.test_fail('%s is not up in 1800 seconds after reboot' % (host.managementIp))
+                time.sleep(15)
+
+        if not hosts:
+            test_util.test_logger('all the hosts are up and Connected')
+            break
+
+    time.sleep(120)
+
+    timeout = 1800
+    target_vms = []
+
+    for vm_name, target_vm in robot_test_obj.get_test_dict().vm.iteritems():
+        target_vms.append(target_vm)
+
+    while timeout:
+        for target_vm in target_vms:
+            target_vm.update()
+
+            cond = res_ops.gen_query_conditions("resourceUuid", '=', target_vm.get_vm().uuid)
+            cond = res_ops.gen_query_conditions("tag", '=', "ha::NeverStop", cond)
+            tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
+
+            if tag:
+                if target_vm.get_vm().state == "Running":
+                    target_vm.set_state(vm_header.RUNNING)
+                    target_vms.remove(target_vm)
+                    continue
+                else:
+                    timeout -= 15
+                    if timeout == 0:
+                        test_util.test_fail('VM %s is not in Stopped or Running state in 1800 seconds after reboot' % (target_vm.get_vm().name))
+                    time.sleep(15)
+            else:
+                if target_vm.get_vm().state == "Stopped":
+                    target_vm.set_state(vm_header.STOPPED)
+                    target_vms.remove(target_vm)
+                    continue
+                else:
+                    timeout -= 15
+                    if timeout == 0:
+                        test_util.test_fail('VM %s is not in Stopped or Running state in 1800 seconds after reboot' % (target_vm.get_vm().name))
+                    time.sleep(15)
+        if not target_vms:
+            test_util.test_logger('all the VMs are Stopped or Running after reboot')
+            break
 
 def destroy_vm(robot_test_obj, args):
     if len(args) != 1:
@@ -1612,6 +1711,7 @@ action_dict = {
     'suspend_vm': suspend_vm,
     'resume_vm': resume_vm,
     'reboot_vm': reboot_vm,
+    'reboot_host': reboot_host,
     'destroy_vm': destroy_vm,
     'migrate_vm': migrate_vm,
     'expunge_vm': expunge_vm,
