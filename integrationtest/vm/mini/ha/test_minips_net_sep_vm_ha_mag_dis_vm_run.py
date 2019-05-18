@@ -75,7 +75,11 @@ def test():
         test_util.test_fail("VM is expected to start running on another host")
 
     vm.set_state(vm_header.RUNNING)
-    vm.check()
+    cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid)
+    for i in range(0, 60):
+        if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Running":
+            break
+        time.sleep(1)
     vm.destroy()
 
     test_stub.up_host_network(host_ip, test_lib.all_scenario_config, "managment_net")
