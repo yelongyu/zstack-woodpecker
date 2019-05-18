@@ -32,6 +32,10 @@ def test():
 
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.environ['zstackHaVip']
 
+    test_stub.ensure_hosts_connected()
+    test_stub.ensure_bss_connected()
+    test_stub.ensure_pss_connected()
+
     mn_host_list = test_stub.get_mn_host(test_lib.all_scenario_config, test_lib.scenario_file)
     mn_host_num = len(mn_host_list)
     test_mn_host_list = random.sample(range(mn_host_num), (mn_host_num + 1) / 2)

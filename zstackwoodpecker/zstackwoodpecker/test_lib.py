@@ -634,6 +634,8 @@ def lib_check_ping(vm, target, no_exception=None):
     '''target is IP address or hostname'''
     vr_vms = lib_find_vr_by_vm(vm)
     command = 'ping -c 3 -W 5 %s >/tmp/ping_result 2>&1' % target
+    #if os.environ.get('zstackHaVip') != None:
+    #    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.environ['zstackHaVip']
     if lib_is_vm_vr(vm):
         vm_ip = lib_find_vr_pub_ip(vm)
         lib_install_testagent_to_vr_with_vr_vm(vm)

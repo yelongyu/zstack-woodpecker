@@ -36,6 +36,10 @@ def test():
 
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.environ['zstackHaVip']
 
+    test_stub.ensure_hosts_connected()
+    test_stub.ensure_bss_connected()
+    test_stub.ensure_pss_connected()
+
     if test_lib.lib_get_ha_enable() != 'true':
         test_util.test_skip("vm ha not enabled. Skip test")
 
