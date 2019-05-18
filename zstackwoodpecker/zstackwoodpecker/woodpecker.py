@@ -248,6 +248,7 @@ class WoodPecker(object):
 
                 return
             case_log_path = self.get_case_log_path(case, suite_repeat, case_repeat)
+            os.environ['CASELOGPATH'] = case_log_path
             case_action_log_path = self.get_case_action_log_path(case, suite_repeat, case_repeat)
             max_case_name_len = self.case_name_max_len
             if case_repeat == 0:

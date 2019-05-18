@@ -10,6 +10,7 @@ import sys
 import re
 import time
 import types
+import base64
 import traceback
 from os.path import join
 from zstackwoodpecker import test_util
@@ -17,7 +18,6 @@ from zstacklib.utils.http import json_post
 import zstacklib.utils.jsonobject as jsonobject
 
 HEADERS = {'charset': 'utf-8'}
-
 
 def jsonify_rsp(rsp):
     return jsonobject.loads(rsp.replace('null', '"null"'))
@@ -72,6 +72,13 @@ class E2E(object):
     def get_screenshot(self):
         rsp = self._get(join(self.uri, 'screenshot'))
         return rsp.value
+
+    def save_screenshot(self):
+        data = self.get_screenshot().encode('ascii')
+        png_file = '.'.join([os.getenv('CASELOGPATH')[:-4], ''.join(str(time.time()).split('.')), 'png'])
+        png = base64.b64decode(data)
+        with open(png_file, 'wb') as pf:
+            pf.write(png)
 
     def go_forward(self):
         self._post(join(self.uri, 'forward'))
