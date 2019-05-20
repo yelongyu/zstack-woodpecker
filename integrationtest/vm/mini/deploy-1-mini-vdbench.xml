@@ -199,6 +199,7 @@
             </l3Networks>
           </l2NoVlanNetwork>
   
+	  <!--
           <l2VlanNetwork name="$l2VlanNetworkName1" 
             description="guest l2 vlan network1"
             physicalInterface="$l2NetworkPhysicalInterface" 
@@ -406,6 +407,7 @@
               </l3BasicNetwork>
             </l3Networks>
           </l2VlanNetwork>
+	  -->
         </l2Networks>
       </zone>
     </zones>
