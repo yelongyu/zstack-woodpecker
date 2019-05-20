@@ -625,6 +625,13 @@ def get_attribute_uuid_of_project(project_uuid,attribute_name):
         if attribute['name'] == attribute_name:
             return attribute['uuid']
 
+def get_iam2_virtual_id_permission(session_uuid=None):
+    action = api_actions.GetIAM2VirtualIDPermissionAction()
+    action.timeout = 30000
+    test_util.action_logger('get iam2 virtual id permission')
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
 def clean_all_projects():
     project_list=res_ops.query_resource(res_ops.IAM2_PROJECT)
     if project_list:
