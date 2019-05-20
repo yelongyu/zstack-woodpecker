@@ -20,5 +20,6 @@
         <case timeout='1200' repeat='1' noparallel='True'>test_community_to_prepaid_addons_vmware_check_vcenter.py</case>
         <case timeout='1500' repeat='1' noparallel='True'>test_community_to_prepaid_addons_vmware_check_and_sync_vcenter.py</case>
 	<case timeout='1200' repeat='1' noparallel='True'>test_global_config.py</case>
+	<case timeout='1800' repeat='1' noparallel='True'>test_global_config_defaultvalue_issame_value.py</case>
     </suite>
 </integrationTest>
