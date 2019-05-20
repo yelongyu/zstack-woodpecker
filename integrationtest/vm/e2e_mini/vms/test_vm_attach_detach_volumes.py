@@ -23,16 +23,16 @@ def test():
 
 def env_recover():
     global mini
-    mini.delete_vm(vm_name)
-    mini.delete_volume(volume_list)
+    mini.expunge_vm(vm_name)
+    mini.expunge_volume(volume_list)
     mini.close()
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     global mini
     try:
-        mini.delete_vm(vm_name)
-        mini.delete_volume(volume_list)
+        mini.expunge_vm(vm_name)
+        mini.expunge_volume(volume_list)
         mini.close()
     except:
         pass
