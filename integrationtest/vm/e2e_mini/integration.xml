@@ -7,6 +7,7 @@
     <case timeout='1200' noparallel='True'>image/test_delete_resume_image.py</case>
     <case timeout='1200' noparallel='True'>image/test_delete_resume_images_batch.py</case>
     <case timeout='1200' noparallel='True'>networks/test_add_dns_to_l3.py</case>
+    <case timeout='1200' noparallel='True'>stress_test/test_parallel_login_logout.py</case>
     <case timeout='1200' noparallel='True'>vms/test_cancel_create_vm.py</case>
     <case timeout='1200' noparallel='True'>vms/test_cancel_vm_more_operation.py</case>
     <case timeout='1200' noparallel='True'>vms/test_create_vm_with_data_vol.py</case>
@@ -20,6 +21,7 @@
     <case timeout='1200' noparallel='True'>vms/test_start_stop_reboot_vms_batch.py</case>
     <case timeout='1200' noparallel='True'>vms/test_vm_ha_level.py</case>
     <case timeout='1200' noparallel='True'>vms/test_vm_update_info.py</case>
+    <case timeout='1200' noparallel='True'>vms/test_vm_attach_detach_volumes.py</case>
     <case timeout='1200' noparallel='True'>volume/test_create_volume_attached_vm.py</case>
     <case timeout='1200' noparallel='True'>volume/test_create_volume.py</case>
     <case timeout='1200' noparallel='True'>volume/test_delete_resume_volume.py</case>

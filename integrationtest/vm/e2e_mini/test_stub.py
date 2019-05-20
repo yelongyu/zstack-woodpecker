@@ -82,7 +82,6 @@ class MINI(E2E):
         else:
             self.mini_server_ip = os.getenv('zstackHaVip')
         self.url('http://%s:8200' % self.mini_server_ip)
-        # self.logout()
         self.window_size(1600, 900)
         self.login()
 
@@ -94,7 +93,6 @@ class MINI(E2E):
         self.get_element('button', 'tag name').click()
         self.wait_for_element(MESSAGETOAST)
         # root page
-        # time.sleep(5)
         if not self.get_elements('ant-layout-content'):
             test_util.test_fail('Fail to Login')
 
@@ -105,14 +103,6 @@ class MINI(E2E):
         time.sleep(1)
         if not self.get_elements('#password'):
             test_util.test_fail('Fail to Logout')
-
-    def switch_view(self, view='card'):
-        test_util.test_logger('switch the view to %s' % view)
-        for elem in self.get_elements('ant-btn square___3vP_2'):
-            if elem.get_elements(VIEWDICT[view]):
-                elem.click()
-                break
-        time.sleep(1)
 
     def login_with_cleartext_password(self):
         test_util.test_logger('Log in with clear-text password')
@@ -170,6 +160,22 @@ class MINI(E2E):
             self.get_element(MENUDICT[menu]).click()
             self.wait_for_element(PRIMARYBTN)
             time.sleep(2)
+
+    def switch_view(self, view='card'):
+            test_util.test_logger('switch the view to %s' % view)
+            for elem in self.get_elements('ant-btn square___3vP_2'):
+                if elem.get_elements(VIEWDICT[view]):
+                    elem.click()
+                    break
+            time.sleep(1)
+
+    def switch_tab(self, tab_name):
+            test_util.test_logger('Switch to tab [%s]' % tab_name.encode('utf-8'))
+            for tab in self.get_elements('ant-tabs-tab'):
+                if tab_name in tab.text:
+                    tab.click()
+            self.wait_for_page_render()
+            time.sleep(1)
 
     def click_ok(self):
         test_util.test_logger('Click OK button')
@@ -234,13 +240,6 @@ class MINI(E2E):
             self.click_close()
         else:
             self.click_cancel()
-
-    def get_res_element(self, res_name):
-        test_util.test_logger('Get the element [%s]' % res_name)
-        for _elem in self.get_elements(CARDCONTAINER):
-            if res_name in _elem.text:
-                return _elem
-        test_util.test_fail('Can not find [%s]' % res_name)
 
     def _create(self, para_dict, res_type, view, priority_dict=None):
         # Temporarily used util http://jira.zstack.io/browse/MINI-335 is solved
@@ -351,14 +350,21 @@ class MINI(E2E):
         self.switch_tab(u'已有')
         self.check_res_item(res_list)
 
-    def check_confirm_item(self, res_list):
-        confirm_items = self.get_elements(CONFIRMITEM)
+    def get_res_element(self, res_name):
+        test_util.test_logger('Get the element [%s]' % res_name)
+        for _elem in self.get_elements(CARDCONTAINER):
+            if res_name in _elem.text:
+                return _elem
+        test_util.test_fail('Can not find [%s]' % res_name)
+
+    def get_table_row(self, res_list):
         for res in res_list:
-            for item in confirm_items:
-                if res == item.text:
+            for _row in self.get_elements(TABLEROW):
+                if res in _row.text:
+                    _row.get_element('input[type="checkbox"]').click()
                     break
             else:
-                test_util.test_fail('%s should to be confirmed' % res)
+                test_util.test_fail('Can not find the res with name [%s]' % res)
 
     def check_res_item(self, res_list, target='displayed'):
         test_util.test_logger('Check if %s %s' % (res_list, target))
@@ -372,6 +378,27 @@ class MINI(E2E):
             else:
                 assert res not in all_res_text, expected
         test_util.test_logger('%s %s, check Pass' % (res_list, target))
+
+    def check_confirm_item(self, res_list):
+        confirm_items = self.get_elements(CONFIRMITEM)
+        for res in res_list:
+            for item in confirm_items:
+                if res == item.text:
+                    break
+            else:
+                test_util.test_fail('%s should to be confirmed' % res)
+
+    def check_menu_item_enabled(self, name, res_type, op_name):
+        self.navigate(res_type)
+        elem = self.get_res_element(name)
+        if not elem.get_element(CHECKBOX).selected:
+            elem.get_element(CHECKBOX).click()
+        self.get_element(MOREOPERATIONBTN).move_cursor_here()
+        op_selector = 'ant-dropdown-menu-item'
+        self.wait_for_element(op_selector)
+        for op in self.get_elements(op_selector):
+            if op.text == op_name:
+                assert op.get_attribute('aria-disabled') == 'true'
 
     def check_browser_console_log(self):
         errors = []
@@ -398,13 +425,13 @@ class MINI(E2E):
                 time.sleep(1)
                 return True
 
-    def switch_tab(self, tab_name):
-        test_util.test_logger('Switch to tab [%s]' % tab_name.encode('utf-8'))
-        for tab in self.get_elements('ant-tabs-tab'):
-            if tab_name in tab.text:
-                tab.click()
-        self.wait_for_page_render()
-        time.sleep(1)
+    def end_action(self, action_name):
+        if action_name == 'confirm':
+            self.click_ok()
+        elif action_name == 'cancel':
+            self.click_cancel()
+        elif action_name == 'close':
+            self.click_close()
 
     def create_vm(self, name=None, dsc=None, image=None, root_size=None, cpu=1, mem='1 GB', data_size=None,
                   user_data=None, network=None, cluster=None, provisioning=u'厚置备', view='card'):
@@ -448,7 +475,7 @@ class MINI(E2E):
                        'description': dsc,
                        'dataSize': size.split(),
                        'clusterUuid': cluster,
-                       'vmUuid' : vm,
+                       'vmUuid': vm,
                        'provisioning': provisioning}
         volume_elem = self._create(volume_dict, "volume", view=view)
         checker = MINICHECKER(self, volume_elem)
@@ -508,32 +535,6 @@ class MINI(E2E):
         checker = MINICHECKER(self, image_elem)
         checker.image_check(check_list)
 
-    def vm_ops(self, vm_name, action='stop', details_page=False):
-        self.navigate('vm')
-        vm_list = []
-        if isinstance(vm_name, types.ListType):
-            vm_list = vm_name
-        else:
-            vm_list.append(vm_name)
-        if not details_page:
-            for vm in vm_list:
-                vm_elem = self.get_res_element(vm)
-                vm_elem.get_element(CHECKBOX).click()
-        if action == 'start':
-            if details_page:
-                self.more_operate(u'启动', vm_list, res_type='vm', details_page=True)
-            else:
-                self.click_button(u'启动')
-        elif action == 'reboot':
-            self.more_operate(u'重启', vm_list, res_type='vm', details_page=details_page)
-            self.click_ok()
-        elif action == 'stop':
-            if details_page:
-                self.more_operate(u'停止', vm_list, res_type='vm', details_page=True)
-            else:
-                self.click_button(u'停止')
-        self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
-
     def delete_vm(self, vm_name=None, view='card', corner_btn=True, details_page=False):
         vm_name = vm_name if vm_name else self.vm_list
         self._delete(vm_name, 'vm', view=view, corner_btn=corner_btn, details_page=details_page)
@@ -561,6 +562,60 @@ class MINI(E2E):
     def delete_network(self, network_name=None, view='card', corner_btn=True, details_page=False):
         network_name = network_name if network_name else self.network_list
         self._delete(network_name, 'network', view=view, corner_btn=corner_btn, details_page=details_page)
+
+    def update_info(self, res_type, res_name, new_name, new_dsc=None, corner_btn=False, details_page=False, view='card'):
+            check_list = []
+            self.navigate(res_type)
+            self.switch_view(view)
+            _elem = self.get_res_element(res_name)
+            if corner_btn:
+                _elem.get_elements('button', 'tag name')[0].click()
+            else:
+                self.more_operate(u'修改信息', res_name=res_name, res_type=res_type, details_page=details_page)
+            if new_name is not None:
+                test_util.test_logger('Update the name of [%s] to %s' % (res_name, new_name))
+                self.input('name', new_name)
+                check_list.append(new_name)
+            if new_dsc is not None:
+                test_util.test_logger('Update the dsc of [%s] to %s' % (res_name, new_dsc))
+                self.input('description', new_dsc)
+            self.click_ok()
+            _elem = self.get_res_element(new_name)
+            checker = MINICHECKER(self, _elem)
+            if res_type == 'volume':
+                checker.volume_check(check_list)
+            elif res_type == 'vm':
+                checker.vm_check(check_list)
+            elif res_type == 'image':
+                checker.image_check(check_list)
+            else:
+                pass
+
+    def vm_ops(self, vm_name, action='stop', details_page=False):
+            self.navigate('vm')
+            vm_list = []
+            if isinstance(vm_name, types.ListType):
+                vm_list = vm_name
+            else:
+                vm_list.append(vm_name)
+            if not details_page:
+                for vm in vm_list:
+                    vm_elem = self.get_res_element(vm)
+                    vm_elem.get_element(CHECKBOX).click()
+            if action == 'start':
+                if details_page:
+                    self.more_operate(u'启动', vm_list, res_type='vm', details_page=True)
+                else:
+                    self.click_button(u'启动')
+            elif action == 'reboot':
+                self.more_operate(u'重启', vm_list, res_type='vm', details_page=details_page)
+                self.click_ok()
+            elif action == 'stop':
+                if details_page:
+                    self.more_operate(u'停止', vm_list, res_type='vm', details_page=True)
+                else:
+                    self.click_button(u'停止')
+            self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
 
     def set_ha_level(self, vm_name, ha=True, details_page=False):
         test_util.test_logger('Set [%s] ha leval [%s]' % (vm_name, ha))
@@ -619,17 +674,35 @@ class MINI(E2E):
         if end_action == 'confirm':
             self.check_menu_item_enabled(vm_name, 'vm', u'取消控制台密码')
 
-    def check_menu_item_enabled(self, name, res_type, op_name):
-        self.navigate(res_type)
-        elem = self.get_res_element(name)
-        if not elem.get_element(CHECKBOX).selected:
-            elem.get_element(CHECKBOX).click()
-        self.get_element(MOREOPERATIONBTN).move_cursor_here()
-        op_selector = 'ant-dropdown-menu-item'
-        self.wait_for_element(op_selector)
-        for op in self.get_elements(op_selector):
-            if op.text == op_name:
-                assert op.get_attribute('aria-disabled') == 'true'
+    def vm_attach_volume(self, vm_name, volume_name):
+        volume_list = []
+        if isinstance(volume_name, types.ListType):
+            volume_list = volume_name
+        else:
+            volume_list.append(volume_name)
+        self.navigate('vm')
+        self.enter_details_page('vm', vm_name)
+        self.switch_tab(u'配置信息')
+        self.get_elements(MOREOPERATIONBTN)[-1].move_cursor_here()
+        self.operate(u'加载')
+        self.get_table_row(volume_list)
+        self.click_ok()
+        self.check_res_item(volume_list)
+
+    def vm_detach_volume(self, vm_name, volume_name):
+        volume_list = []
+        if isinstance(volume_name, types.ListType):
+            volume_list = volume_name
+        else:
+            volume_list.append(volume_name)
+        self.navigate('vm')
+        self.enter_details_page('vm', vm_name)
+        self.switch_tab(u'配置信息')
+        self.get_table_row(volume_list)
+        self.get_elements(MOREOPERATIONBTN)[-1].move_cursor_here()
+        self.operate(u'卸载')
+        self.click_ok()
+        self.check_res_item(volume_list, target='notDisplayed')
 
     def volume_attach_to_vm(self, volume_name=[], dest_vm=None, details_page=False):
         emptyl = []
@@ -667,42 +740,6 @@ class MINI(E2E):
             MINICHECKER(self, _elem).volume_check(ops='detached')
             test_util.test_logger('[%s] detach from vm successfully' % vol)
 
-    def update_info(self, res_type, res_name, new_name, new_dsc=None, corner_btn=False, details_page=False, view='card'):
-        check_list = []
-        self.navigate(res_type)
-        self.switch_view(view)
-        _elem = self.get_res_element(res_name)
-        if corner_btn:
-            _elem.get_elements('button', 'tag name')[0].click()
-        else:
-            self.more_operate(u'修改信息', res_name=res_name, res_type=res_type, details_page=details_page)
-        if new_name is not None:
-            test_util.test_logger('Update the name of [%s] to %s' % (res_name, new_name))
-            self.input('name', new_name)
-            check_list.append(new_name)
-        if new_dsc is not None:
-            test_util.test_logger('Update the dsc of [%s] to %s' % (res_name, new_dsc))
-            self.input('description', new_dsc)
-        self.click_ok()
-        _elem = self.get_res_element(new_name)
-        checker = MINICHECKER(self, _elem)
-        if res_type == 'volume':
-            checker.volume_check(check_list)
-        elif res_type == 'vm':
-            checker.vm_check(check_list)
-        elif res_type == 'image':
-            checker.image_check(check_list)
-        else:
-            pass
-
-    def end_action(self, action_name):
-        if action_name == 'confirm':
-            self.click_ok()
-        elif action_name == 'cancel':
-            self.click_cancel()
-        elif action_name == 'close':
-            self.click_close()
-
     def add_dns_to_l3(self, network=None, dns='8.8.8.8', details_page=True, end_action='confirm'):
         test_util.test_logger('Add dns [%s] to l3 [%s]' % (dns, network))
         network = network if network else os.getenv('l3PublicNetworkName')
@@ -710,7 +747,7 @@ class MINI(E2E):
         self.more_operate(u'添加DNS', res_type='network', res_name=network, details_page=details_page)
         if dns in get_inv(network, 'network').dns:
             test_util.test_fail('fail: there has been a DNS[%s] on L3 network[%s]' % (dns, network))
-        self.input('DNS',dns)
+        self.input('DNS', dns)
         self.end_action(end_action)
 
     def save_element_location(self, filename="location.tmpt"):
