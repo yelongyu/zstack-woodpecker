@@ -27,12 +27,16 @@ import time
 import nas_operations as nas_ops
 import hybrid_operations as hyb_ops
 import config_operations as cfg_ops
+import backupstorage_operations as bs_ops
 
 #global exception information for thread usage
 exc_info = []
 AddKVMHostTimeOut = 30*60*1000
 IMAGE_THREAD_LIMIT = 2
 DEPLOY_THREAD_LIMIT = 500
+irg_uuid = None
+bs_uuid_list = []
+
 
 def install_mini_server():
     vm_ip = os.getenv('ZSTACK_BUILT_IN_HTTP_SERVER_IP')
@@ -139,6 +143,8 @@ def get_vm_ip_from_scenariofile(scenarioFile):
 
 #Add Backup Storage
 def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid):
+    global irg_uuid
+    global bs_uuid_list
     if xmlobject.has_element(deployConfig, 'backupStorages.sftpBackupStorage'):
         for bs in xmlobject.safe_list(deployConfig.backupStorages.sftpBackupStorage):
             action = api_actions.AddSftpBackupStorageAction()
@@ -224,14 +230,14 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
         wait_for_thread_done()
         irg_uuid = res_ops.get_resource(res_ops.REPLICATIONGROUP)[0].uuid
 
-	action = api_actions.AddBackupStoragesToReplicationGroupAction()
-        action.replicationGroupUuid = irg_uuid
-        action.backupStorageUuids = bs_uuid_list
-	action.sessionUuid = session_uuid
-	thread = threading.Thread(target = _thread_for_action, args = (action, True))
-	wait_for_thread_queue()
-	thread.start()
-        wait_for_thread_done()
+# 	action = api_actions.AddBackupStoragesToReplicationGroupAction()
+#         action.replicationGroupUuid = irg_uuid
+#         action.backupStorageUuids = bs_uuid_list
+# 	action.sessionUuid = session_uuid
+# 	thread = threading.Thread(target = _thread_for_action, args = (action, True))
+# 	wait_for_thread_queue()
+# 	thread.start()
+#         wait_for_thread_done()
 
     if xmlobject.has_element(deployConfig, 'backupStorages.cephBackupStorage'):
         for bs in xmlobject.safe_list(deployConfig.backupStorages.cephBackupStorage):
@@ -425,6 +431,8 @@ def add_zone(scenarioConfig, scenarioFile, deployConfig, session_uuid, zone_name
 
 
 def attach_bs_to_zone(scenarioConfig, scenarioFile, deployConfig, session_uuid, zone_name = None):
+    global irg_uuid
+    global bs_uuid_list
     def _attach_bs_to_zone(zone, zone_duplication):
         if zone_duplication == 0:
             zone_name = zone.name_
@@ -470,6 +478,8 @@ def attach_bs_to_zone(scenarioConfig, scenarioFile, deployConfig, session_uuid, 
             thread.start()
 
     wait_for_thread_done()
+    if irg_uuid is not None:
+        bs_ops.add_bs_to_image_replication_group(irg_uuid, bs_uuid_list)
 
 #Add L2 network
 def add_l2_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l2_name = None, zone_name = None):
