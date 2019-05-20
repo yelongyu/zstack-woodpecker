@@ -17,7 +17,7 @@
 	<case timeout='1800' noparallel='True'>test_life_cycle_vm.py</case>
 	<case timeout='1800' noparallel='True'>test_prometheus_vm.py</case>
 	<case timeout='1200' noparallel='True'>network/test_create_l3network.py</case>
-	<case timeout='1200' noparallel='True'>ha/test_minips_vm_ha_force_stop.py</case>
+	<!--<case timeout='1200' noparallel='True'>ha/test_minips_vm_ha_force_stop.py</case>
 	<case timeout='1200' noparallel='True'>ha/test_minips_both_mns_force_stop_recover.py</case>
 	<case timeout='1200' noparallel='True'>ha/test_minips_net_sep_vm_ha_mag_dis_vm_run.py</case>
 	<case timeout='1200' noparallel='True'>ha/test_minips_net_sep_vm_ha_ps_net_dis_vm_run.py</case>
@@ -34,6 +34,6 @@
         <case timeout='1200' noparallel='True'>zsha2/test_slave_mn_host_net_dis.py</case>
         <case timeout='1200' noparallel='True'>zsha2/test_upgrade_mn.py</case>
         <case timeout='1200' noparallel='True'>zsha2/test_upgrade_zsha2.py</case>
-	<case timeout='1200' noparallel='True'>network/test_add_and_remove_dns.py</case>
+	<case timeout='1200' noparallel='True'>network/test_add_and_remove_dns.py</case>-->
     </suite>
 </integrationTest>
