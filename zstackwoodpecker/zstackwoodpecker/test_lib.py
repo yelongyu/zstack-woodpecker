@@ -7382,7 +7382,7 @@ def lib_get_test_stub(suite_name=None):
     os.environ['TESTCASENAME'] = tc_name
     curr_dir = os.path.dirname(caller_path)
     if suite_name:
-        suite_path = '/'.join([os.path.dirname(curr_dir), suite_name])
+        suite_path = os.path.join(curr_dir.split('vm')[0], 'vm', suite_name)
     else:
         suite_path = curr_dir
     test_stub_cl = component_loader.ComponentLoader('test_stub', suite_path, 4)

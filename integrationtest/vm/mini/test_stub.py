@@ -4,11 +4,13 @@ test_stub to share test operations
 '''
 import os
 import time
+import hashlib
 import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 import zstacklib.utils.shell as shell
 import zstacklib.utils.xmlobject as xmlobject
+import zstacklib.utils.jsonobject as jsonobject
 import zstackwoodpecker.operations.scenario_operations as sce_ops
 import zstackwoodpecker.operations.deploy_operations as dpy_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
@@ -20,6 +22,8 @@ import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
+from zstacklib.utils.http import json_post
+
 
 def migrate_vm_to_random_host(vm):
     test_util.test_dsc("migrate vm to random host")
@@ -936,3 +940,55 @@ class ImageReplication(object):
         bs_list = res_ops.query_resource(res_ops.IMAGE_STORE_BACKUP_STORAGE)
         bs_uuid_list = [bs.uuid for bs in bs_list]
         bs_ops.add_bs_to_image_replication_group(grp_uuid, bs_uuid_list)
+
+    def get_image_inv(self, image_name):
+        conditions = res_ops.gen_query_conditions('name', '=', image_name)
+        image_inv = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
+        return image_inv
+
+    def wait_for_image_replicated(self, image_name):
+        for r in xrange(300):
+            _image = self.get_image_inv(image_name)
+            image_status = [bs_ref.status for bs_ref in _image.backupStorageRefs]
+            if image_status.count('Ready') == 2:
+                break
+            else:
+                if r > 60 and len(image_status) != 2:
+                    test_util.test_fail('Image replication was not started within 3 minutes')
+                else:
+                    time.sleep(3)
+
+    def get_chunk_md5(self, chunk_data):
+        md5 = hashlib.md5(chunk_data)
+        return md5.hexdigest()
+
+    def get_img_manifests(self, uri):
+        rsp = json_post(uri=uri, method='GET', fail_soon=True)
+        return jsonobject.loads(rsp)
+
+    def get_blobs_md5_list(self, bs_ip, img_uuid, digest):
+        md5_list = set()
+        blobs_uri = 'https://%s:8000/v1/%s/blobs/%s' % (bs_ip, img_uuid, digest)
+        blobs = json_post(uri=blobs_uri, method='GET', fail_soon=True)
+        blobs_chunks = jsonobject.loads(blobs).chunks
+        for chunk_hash in blobs_chunks:
+            chunk_uri = 'https://%s:8000/v1/%s/blobs/%s/chunks/%s' % (bs_ip, img_uuid, digest, chunk_hash)
+            chunk_md5 = self.get_chunk_md5(json_post(uri=chunk_uri, method='GET', fail_soon=True))
+            md5_list.add(chunk_md5)
+        return md5_list
+
+    def check_image_data(self, image_name):
+        image = self.get_image_inv(image_name)
+        bs_refs1, bs_refs2 = image.backupStorageRefs
+        assert bs_refs1.installPath == bs_refs2.installPath
+        bs1 = test_lib.lib_get_backup_storage_by_uuid(bs_refs1.backupStorageUuid)
+        bs2 = test_lib.lib_get_backup_storage_by_uuid(bs_refs1.backupStorageUuid)
+        image_url = bs_refs1.installPath
+        image_info = image_url.split('://')[1].split('/')
+        mainfests_uri = 'https://%s:8000/v1/%s/manifests/%s' % (bs1.hostname, image_info[0], image_info[1])
+        blobsum = self.get_img_manifests(mainfests_uri).blobsum
+        md5_list1 = self.get_blobs_md5_list(bs1.hostname, image.uuid, blobsum)
+        md5_list2 = self.get_blobs_md5_list(bs2.hostname, image.uuid, blobsum)
+        assert len(md5_list1) == len(md5_list2), 'Image chunks check failed!'
+        assert set(md5_list1) == set(md5_list2), 'Image chunks check failed!'
+

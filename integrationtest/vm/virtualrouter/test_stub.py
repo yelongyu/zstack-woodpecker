@@ -1239,7 +1239,7 @@ class Longjob(object):
         self.crt_vol_image_job_name = 'APICreateDataVolumeTemplateFromVolumeMsg'
         self.vm_create_image_name = 'test-vm-crt-image'
         self.vol_create_image_name = 'test-vol-crt-image'
-        self.image_add_name = 'test-image-longjob'
+        self.image_add_name = name if name else 'test-image-longjob'
         self.cond_name = "res_ops.gen_query_conditions('name', '=', 'name_to_replace')"
 
     def create_vm(self):
@@ -1319,7 +1319,8 @@ class Longjob(object):
 
     def delete_image(self):
         try:
-            img_ops.delete_image(self.image_uuid, backup_storage_uuid_list=[self.target_bs.uuid])
+            img_ops.delete_image(self.image_uuid)
+#             img_ops.delete_image(self.image_uuid, backup_storage_uuid_list=[self.target_bs.uuid])
         except:
             pass
 

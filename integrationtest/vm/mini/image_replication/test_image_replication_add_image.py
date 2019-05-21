@@ -6,31 +6,28 @@ New Integration test for image replication.
 '''
 
 import os
+import time
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 
+image_name = 'image-replication-test-' + time.strftime('%y%m%d%H%M%S', time.localtime())
 test_stub_vr = test_lib.lib_get_test_stub('virtualrouter')
-longjob = test_stub_vr.Longjob(name='centos_vdbench', url=os.getenv('imageUrl_vdbench'))
+longjob = test_stub_vr.Longjob(name=image_name, url=os.getenv('imageUrl_vdbench'))
 test_stub = test_lib.lib_get_test_stub()
+img_repl = test_stub.ImageReplication()
+
 
 def test():
-    global vm
-    vm = test_lib.lib_create_vm()
-    #vm = test_stub.create_vr_vm('migrate_vm', 'imageName_s', 'l3VlanNetwork2')
-    vm.check()
+    longjob.add_image()
+    img_repl.wait_for_image_replicated(image_name)
+    img_repl.check_image_data(image_name)
+    test_util.test_pass('Image Replication Test Success')
 
-    test_stub.migrate_vm_to_random_host(vm)
 
-    vm.check()
+def env_recover():
+    longjob.delete_image()
 
-    vm.destroy()
-    test_util.test_pass('Migrate VM Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
-    global vm
-    if vm:
-        try:
-            vm.destroy()
-        except:
-            pass
+    longjob.delete_image()
