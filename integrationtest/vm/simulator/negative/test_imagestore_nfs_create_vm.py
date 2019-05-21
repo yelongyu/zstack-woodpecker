@@ -69,7 +69,7 @@ def test():
 	throw new Exception("shuang")
 }
 '''
-
+    deploy_operations.remove_all_simulator_agent_script()
     l3net_uuid = test_lib.lib_get_l3_by_name(os.environ.get('l3VlanNetworkName3')).uuid
     is_flat = test_lib.lib_get_flat_dhcp_by_l3_uuid(l3net_uuid)
     if is_flat:
@@ -105,12 +105,10 @@ def test():
     vm.expunge()
 
     if agent_url != None:
-        deploy_operations.remove_simulator_agent_script(agent_url)
         deploy_operations.deploy_simulator_agent_script(agent_url, script)
 
     if agent_url == FLAT_DHCP_RELEASE or agent_url == NFS_DELETE:
         agent_url2 = NFS_SFTP_CREATE_VOLUME_FROM_TEMPLATE
-        deploy_operations.remove_simulator_agent_script(agent_url2)
         deploy_operations.deploy_simulator_agent_script(agent_url2, script)
 
     saved_db_stats = test_stub.get_db_stats(dhcp_ip)
@@ -139,15 +137,9 @@ def test():
     test_util.test_pass("Test Exception handling for Create VM PASS")
 
 def env_recover():
-    global agent_url
-    global agent_url2
     global vm
     if vm != None:
         vm.destroy()
         vm.expunge()
 
-    if agent_url != None:
-        deploy_operations.remove_simulator_agent_script(agent_url)
-    if agent_url2 != None:
-        deploy_operations.remove_simulator_agent_script(agent_url2)
-
+    deploy_operations.remove_all_simulator_agent_script()

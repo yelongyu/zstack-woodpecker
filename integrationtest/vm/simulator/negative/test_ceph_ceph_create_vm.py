@@ -79,13 +79,12 @@ def test():
 	throw new Exception("shuang")
 }
 '''
+    deploy_operations.remove_all_simulator_agent_script()
     if agent_url != None:
-        deploy_operations.remove_simulator_agent_script(agent_url)
         deploy_operations.deploy_simulator_agent_script(agent_url, script)
 
     if agent_url == FLAT_DHCP_RELEASE or agent_url == NFS_DELETE:
         agent_url2 = VOLUME_CLONE
-        deploy_operations.remove_simulator_agent_script(agent_url2)
         deploy_operations.deploy_simulator_agent_script(agent_url2, script)
 
     imagestore = test_lib.lib_get_image_store_backup_storage()
@@ -112,15 +111,9 @@ def test():
                 test_util.test_fail("DB Table %s changed %s -> %s" % (key, saved_db_stats[key], saved_db_stats2[key]))
 
 def env_recover():
-    global agent_url
-    global agent_url2
     global vm
     if vm != None:
         vm.destroy()
         vm.expunge()
 
-    if agent_url != None:
-        deploy_operations.remove_simulator_agent_script(agent_url)
-    if agent_url2 != None:
-        deploy_operations.remove_simulator_agent_script(agent_url2)
-
+    deploy_operations.remove_all_simulator_agent_script()

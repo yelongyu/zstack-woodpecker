@@ -67,13 +67,12 @@ def test():
 	throw new Exception("shuang")
 }
 '''
+    deploy_operations.remove_all_simulator_agent_script()
     if agent_url != None:
-        deploy_operations.remove_simulator_agent_script(agent_url)
         deploy_operations.deploy_simulator_agent_script(agent_url, script)
 
     if agent_url == FLAT_DHCP_RELEASE or agent_url == SBLK_DELETE:
         agent_url2 = CREATE_VOLUME
-        deploy_operations.remove_simulator_agent_script(agent_url2)
         deploy_operations.deploy_simulator_agent_script(agent_url2, script)
 
     l3net_uuid = test_lib.lib_get_l3_by_name(os.environ.get('l3VlanNetworkName3')).uuid
@@ -119,15 +118,9 @@ def test():
         test_stub.compare_db_stats(saved_db_stats, saved_db_stats2, db_tables_white_list)
 
 def env_recover():
-    global agent_url
-    global agent_url2
     global vm
     if vm != None:
         vm.destroy()
         vm.expunge()
 
-    if agent_url != None:
-        deploy_operations.remove_simulator_agent_script(agent_url)
-    if agent_url2 != None:
-        deploy_operations.remove_simulator_agent_script(agent_url2)
-
+    deploy_operations.remove_all_simulator_agent_script()

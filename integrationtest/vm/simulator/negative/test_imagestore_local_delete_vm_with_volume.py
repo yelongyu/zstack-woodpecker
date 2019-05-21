@@ -55,8 +55,8 @@ def test():
 	throw new Exception("shuang")
 }
 '''
+    deploy_operations.remove_all_simulator_agent_script()
     if agent_url != None:
-        deploy_operations.remove_simulator_agent_script(agent_url)
         deploy_operations.deploy_simulator_agent_script(agent_url, script)
 
     l3net_uuid = test_lib.lib_get_l3_by_name(os.environ.get('l3VlanNetworkName3')).uuid
@@ -103,15 +103,9 @@ def test():
             test_util.test_fail("UsedIpVO is expected to -1, %s -> %s" % (old_ip_count, new_ip_count))
 
 def env_recover():
-    global agent_url
-    global agent_url2
     global vm
     if vm != None:
         vm.destroy()
         vm.expunge()
 
-    if agent_url != None:
-        deploy_operations.remove_simulator_agent_script(agent_url)
-    if agent_url2 != None:
-        deploy_operations.remove_simulator_agent_script(agent_url2)
-
+    deploy_operations.remove_all_simulator_agent_script()
