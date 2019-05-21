@@ -431,8 +431,6 @@ def add_zone(scenarioConfig, scenarioFile, deployConfig, session_uuid, zone_name
 
 
 def attach_bs_to_zone(scenarioConfig, scenarioFile, deployConfig, session_uuid, zone_name = None):
-    global irg_uuid
-    global bs_uuid_list
     def _attach_bs_to_zone(zone, zone_duplication):
         if zone_duplication == 0:
             zone_name = zone.name_
@@ -478,8 +476,6 @@ def attach_bs_to_zone(scenarioConfig, scenarioFile, deployConfig, session_uuid, 
             thread.start()
 
     wait_for_thread_done()
-    if irg_uuid is not None:
-        bs_ops.add_bs_to_image_replication_group(irg_uuid, bs_uuid_list)
 
 #Add L2 network
 def add_l2_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l2_name = None, zone_name = None):
@@ -2219,6 +2215,8 @@ def do_add_network_service(net_service_xml_obj, l3_uuid, providers, \
 
 #Add Image
 def add_image(scenarioConfig, scenarioFile, deployConfig, session_uuid):
+    global irg_uuid
+    global bs_uuid_list
     def _add_image(action):
         increase_image_thread()
         try:
@@ -2228,6 +2226,9 @@ def add_image(scenarioConfig, scenarioFile, deployConfig, session_uuid):
             exc_info.append(sys.exc_info())
         finally:
             decrease_image_thread()
+
+    if irg_uuid is not None:
+        bs_ops.add_bs_to_image_replication_group(irg_uuid, bs_uuid_list)
 
     if not xmlobject.has_element(deployConfig, 'images.image'):
         return
