@@ -16,6 +16,12 @@ def test():
     # path2:checkbox list
     mini.del_network_segment()
     mini.add_network_segment(details_page=False)
+    # path3:cancel
+    mini.add_network_segment(details_page=True, end_action='cancel')
+    mini.add_network_segment(details_page=False, end_action='cancel')
+    # path4:exit
+    mini.add_network_segment(details_page=True, end_action='close')
+    mini.add_network_segment(details_page=False, end_action='close')
     mini.check_browser_console_log()
     test_util.test_pass('Add and Delete NetWork Segment')
 

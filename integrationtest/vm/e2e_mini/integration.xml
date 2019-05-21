@@ -6,7 +6,9 @@
     <case timeout='1200' noparallel='True'>image/test_add_image.py</case>
     <case timeout='1200' noparallel='True'>image/test_delete_resume_image.py</case>
     <case timeout='1200' noparallel='True'>image/test_delete_resume_images_batch.py</case>
+    <case timeout='1200' noparallel='True'>image/test_image_update_info.py</case>
     <case timeout='1200' noparallel='True'>networks/test_add_dns_to_l3.py</case>
+    <case timeout='1200' noparallel='True'>networks/test_add_delete_network_segment.py</case>
     <case timeout='1200' noparallel='True'>stress_test/test_parallel_login_logout.py</case>
     <case timeout='1200' noparallel='True'>vms/test_cancel_create_vm.py</case>
     <case timeout='1200' noparallel='True'>vms/test_cancel_vm_more_operation.py</case>
