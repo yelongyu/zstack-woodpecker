@@ -838,8 +838,6 @@ class MINI(E2E):
         check_list.append(end_ip)
         self.check_res_item(check_list, target='notDisplayed')
 
-    def enable_
-
     def save_element_location(self, filename="location.tmpt"):
         for menu, page in MENUDICT.items():
             loc = {}
