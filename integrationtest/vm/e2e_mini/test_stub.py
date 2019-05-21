@@ -674,7 +674,7 @@ class MINI(E2E):
         if end_action == 'confirm':
             self.check_menu_item_enabled(vm_name, 'vm', u'取消控制台密码')
 
-    def vm_attach_volume(self, vm_name, volume_name):
+    def vm_attach_volume(self, vm_name, volume_name, end_action='confirm'):
         volume_list = []
         if isinstance(volume_name, types.ListType):
             volume_list = volume_name
@@ -686,10 +686,11 @@ class MINI(E2E):
         self.get_elements(MOREOPERATIONBTN)[-1].move_cursor_here()
         self.operate(u'加载')
         self.get_table_row(volume_list)
-        self.click_ok()
-        self.check_res_item(volume_list)
+        self.end_action(end_action)
+        if end_action == 'confirm':
+            self.check_res_item(volume_list)
 
-    def vm_detach_volume(self, vm_name, volume_name):
+    def vm_detach_volume(self, vm_name, volume_name, end_action='confirm'):
         volume_list = []
         if isinstance(volume_name, types.ListType):
             volume_list = volume_name
@@ -701,8 +702,9 @@ class MINI(E2E):
         self.get_table_row(volume_list)
         self.get_elements(MOREOPERATIONBTN)[-1].move_cursor_here()
         self.operate(u'卸载')
-        self.click_ok()
-        self.check_res_item(volume_list, target='notDisplayed')
+        self.end_action(end_action)
+        if end_action == 'confirm':
+            self.check_res_item(volume_list, target='notDisplayed')
 
     def volume_attach_to_vm(self, volume_name=[], dest_vm=None, details_page=False):
         emptyl = []
@@ -830,7 +832,10 @@ class MINICHECKER(object):
     def image_check(self, check_list=[]):
         check_list.append(u'就绪')
         for v in check_list:
-            if v not in self.elem.text:
+            if u'下载中' or u'计算中' or u'解析中' in self.elem.text:
+                time.sleep(1)
+                continue
+            elif v not in self.elem.text:
                 test_util.test_fail("Can not find %s in image checker" % v)
 
     def network_check(self, check_list=[]):

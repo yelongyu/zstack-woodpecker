@@ -15,7 +15,11 @@ def test():
     mini.create_vm(vm_name)
     for vol in volume_list:
         mini.create_volume(vol)
+    mini.vm_attach_volume(vm_name, volume_list, end_action='close')
+    mini.vm_attach_volume(vm_name, volume_list, end_action='cancel')
     mini.vm_attach_volume(vm_name, volume_list)
+    mini.vm_attach_volume(vm_name, volume_list, end_action='close')
+    mini.vm_attach_volume(vm_name, volume_list, end_action='cancel')
     mini.vm_detach_volume(vm_name, volume_list)
     mini.check_browser_console_log()
     test_util.test_pass('Test VM Attach and Detach Volumes Successful')

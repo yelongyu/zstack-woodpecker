@@ -10,18 +10,19 @@ def test():
     global mini
     mini = test_stub.MINI()
     mini.add_image()
+    # mini.add_image(adding_type='file', local_file='C:\\Users\\Administrator\\Desktop\\centos7-test.qcow2')
     mini.check_browser_console_log()
     test_util.test_pass('Add Image Successful')
 
 def env_recover():
     global mini
-    mini.delete_image()
+    mini.expunge_image()
     mini.close()
 
 def error_cleanup():
     global mini
     try:
-        mini.delete_image()
+        mini.expunge_image()
         mini.close()
     except:
         pass
