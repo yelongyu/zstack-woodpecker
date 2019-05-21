@@ -156,14 +156,14 @@
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName2</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName3</l2NetworkRef>
+	    <!--<l2NetworkRef>$l2VlanNetworkName3</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName4</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName5</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName6</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName7</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName8</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName9</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName10</l2NetworkRef>
+	    <l2NetworkRef>$l2VlanNetworkName10</l2NetworkRef>-->
           </cluster>
         </clusters>
   
@@ -199,7 +199,6 @@
             </l3Networks>
           </l2NoVlanNetwork>
   
-	  <!--
           <l2VlanNetwork name="$l2VlanNetworkName1" 
             description="guest l2 vlan network1"
             physicalInterface="$l2NetworkPhysicalInterface" 
@@ -246,6 +245,7 @@
             </l3Networks>
           </l2VlanNetwork>
   
+	  <!--
           <l2VlanNetwork name="$l2VlanNetworkName3" 
             description="guest l2 vlan network 3"
             physicalInterface="$l2NetworkPhysicalInterface" 
