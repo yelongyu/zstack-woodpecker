@@ -7,8 +7,8 @@ import os
 test_stub = test_lib.lib_get_test_stub()
 
 mini = None
-iso_name = 'test-iso'
-iso_url = os.getenv('isoUrl')
+iso_name = os.getenv('testIsoName')
+iso_url = os.getenv('testIsoUrl')
 
 def test():
     global mini

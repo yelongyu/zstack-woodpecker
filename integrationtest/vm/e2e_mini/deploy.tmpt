@@ -263,5 +263,3 @@ vlanIpRangeNetmask20 = 255.255.0.0
 
 hostRecoverScript = /home/host_recover_script.sh
 hostForceStopScript = /home/host_force_stop_script.sh
-
-isoUrl = http://192.168.200.100/mirror/iso/CentOS-7-x86_64-DVD-1810.iso

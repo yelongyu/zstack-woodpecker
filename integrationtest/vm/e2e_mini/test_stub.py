@@ -17,7 +17,6 @@ from zstackwoodpecker import test_util
 import zstacklib.utils.jsonobject as jsonobject
 
 LOCATION_FILE_PATH = '/root/.zstackwoodpecker/integrationtest/vm/e2e_mini/'
-COMMONIMAGE = 'http://172.20.1.28/mirror/diskimages/centos7-test.qcow2'
 MESSAGETOAST = 'ant-notification-notice-message'
 CARDCONTAINER = 'ant-card|ant-table-row'
 MODALCONTENT = 'ant-modal-content'
@@ -516,9 +515,10 @@ class MINI(E2E):
         checker = MINICHECKER(self, network_elem)
         checker.network_check(check_list)
 
-    def add_image(self, name=None, dsc=None, adding_type='url', url=COMMONIMAGE, local_file=None, platform='Linux', view='card'):
+    def add_image(self, name=None, dsc=None, adding_type='url', url=None, local_file=None, platform='Linux', view='card'):
         self.image_name = name if name else 'image-' + get_time_postfix()
         self.image_list.append(self.image_name)
+        url = url if url else os.getenv('imageUrl_net')
         test_util.test_logger('Add Image [%s]' % self.image_name)
         priority_dict = {'type': adding_type}
         image_dict = {'name': self.image_name,
@@ -598,6 +598,7 @@ class MINI(E2E):
                 vm_list = vm_name
             else:
                 vm_list.append(vm_name)
+            test_util.test_logger('VM (%s) execute action[%s]' % (' '.join(vm_list), action))
             if not details_page:
                 for vm in vm_list:
                     vm_elem = self.get_res_element(vm)
@@ -680,6 +681,7 @@ class MINI(E2E):
             volume_list = volume_name
         else:
             volume_list.append(volume_name)
+        test_util.test_logger('VM[%s] attach volume (%s)' % (vm_name, ' '.join(volume_list)))
         self.navigate('vm')
         self.enter_details_page('vm', vm_name)
         self.switch_tab(u'配置信息')
@@ -696,6 +698,7 @@ class MINI(E2E):
             volume_list = volume_name
         else:
             volume_list.append(volume_name)
+        test_util.test_logger('VM[%s] detach volume (%s)' % (vm_name, ' '.join(volume_list)))
         self.navigate('vm')
         self.enter_details_page('vm', vm_name)
         self.switch_tab(u'配置信息')
@@ -743,14 +746,97 @@ class MINI(E2E):
             test_util.test_logger('[%s] detach from vm successfully' % vol)
 
     def add_dns_to_l3(self, network=None, dns='8.8.8.8', details_page=True, end_action='confirm'):
-        test_util.test_logger('Add dns [%s] to l3 [%s]' % (dns, network))
         network = network if network else os.getenv('l3PublicNetworkName')
+        test_util.test_logger('Add dns [%s] to l3 [%s]' % (dns, network))
         self.navigate('network')
-        self.more_operate(u'添加DNS', res_type='network', res_name=network, details_page=details_page)
+        if details_page:
+            self.enter_details_page('network', network)
+            self.switch_tab('DNS')
+            self.get_elements(MOREOPERATIONBTN)[-1].move_cursor_here()
+            self.operate(u'添加DNS')
+        else:
+            self.more_operate(u'添加DNS', res_name=network)
         if dns in get_inv(network, 'network').dns:
-            test_util.test_fail('fail: there has been a DNS[%s] on L3 network[%s]' % (dns, network))
-        self.input('DNS', dns)
+            test_util.test_fail('Fail: There has been the DNS[%s] on L3 network[%s]' % (dns, network))
+        self.input('dns', dns)
         self.end_action(end_action)
+        if end_action == 'confirm':
+            dns_list = []
+            dns_list.append(dns)
+            if not details_page:
+                self.enter_details_page('network', network)
+                self.switch_tab('DNS')
+            self.check_res_item(dns_list)
+
+    def del_dns_from_l3(self, dns, network=None):
+        dns_list = []
+        if isinstance(dns, types.ListType):
+            dns_list = dns
+        else:
+            dns_list.append(dns)
+        network = network if network else os.getenv('l3PublicNetworkName')
+        test_util.test_logger('Delete dns [%s] from l3 [%s]' % (dns, network))
+        self.navigate('network')
+        self.enter_details_page('network', network)
+        self.switch_tab('DNS')
+        self.get_table_row(dns_list)
+        self.get_elements(MOREOPERATIONBTN)[-1].move_cursor_here()
+        self.operate(u'删除DNS')
+        self.click_ok()
+        self.check_res_item(dns_list, target='notDisplayed')
+
+    def add_network_segment(self, network=None, start_ip=None, end_ip=None, netmask=None, gateway=None, details_page=True, end_action='confirm'):
+        network = network if network else os.getenv('l3NoVlanNetworkName1')
+        start_ip = start_ip if start_ip else os.getenv('noVlanIpRangeStart1')
+        end_ip = end_ip if end_ip else os.getenv('noVlanIpRangeEnd1')
+        netmask = netmask if netmask else os.getenv('noVlanIpRangeNetmask1')
+        gateway = gateway if gateway else os.getenv('noVlanIpRangeGateway1')
+        test_util.test_logger('Add network segment [%s] to [%s]' % (start_ip, end_ip))
+        self.navigate('network')
+        if details_page:
+            self.enter_details_page('network', network)
+            self.switch_tab(u'网络段')
+            self.get_elements(MOREOPERATIONBTN)[-1].move_cursor_here()
+            self.operate(u'添加网络段')
+        else:
+            self.more_operate(u'添加网络段', res_name=network)
+        self.input('startIp', start_ip)
+        self.input('endIp', end_ip)
+        self.input('netmask', netmask)
+        self.input('gateway', gateway)
+        self.end_action(end_action)
+        if end_action == 'confirm':
+            check_list = []
+            check_list.append(start_ip)
+            check_list.append(end_ip)
+            check_list.append(netmask)
+            check_list.append(gateway)
+            if not details_page:
+                self.enter_details_page('network', network)
+                self.switch_tab(u'网络段')
+            self.check_res_item(check_list)
+
+    def del_network_segment(self, network=None, start_ip=None, end_ip=None):
+        network = network if network else os.getenv('l3NoVlanNetworkName1')
+        start_ip = start_ip if start_ip else os.getenv('noVlanIpRangeStart1')
+        end_ip = end_ip if end_ip else os.getenv('noVlanIpRangeEnd1')
+        test_util.test_logger('Delete network segment [%s] to [%s]' % (start_ip, end_ip))
+        self.navigate('network')
+        self.enter_details_page('network', network)
+        self.switch_tab(u'网络段')
+        for _row in self.get_elements(TABLEROW):
+            if (start_ip in _row.text) and (end_ip in _row.text):
+                _row.get_element('input[type="checkbox"]').click()
+                break
+        else:
+            test_util.test_fail('Can not find the network segment from %s to %s' % (start_ip, end_ip))
+        self.get_elements(MOREOPERATIONBTN)[-1].move_cursor_here()
+        self.operate(u'删除网络段')
+        self.click_ok()
+        check_list = []
+        check_list.append(start_ip)
+        check_list.append(end_ip)
+        self.check_res_item(check_list, target='notDisplayed')
 
     def save_element_location(self, filename="location.tmpt"):
         for menu, page in MENUDICT.items():

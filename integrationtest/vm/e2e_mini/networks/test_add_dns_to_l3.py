@@ -26,6 +26,7 @@ def test():
 
 def env_recover():
     global mini
+    mini.del_dns_from_l3(dns=['8.8.8.8', '114.114.114.114'])
     mini.close()
 
 

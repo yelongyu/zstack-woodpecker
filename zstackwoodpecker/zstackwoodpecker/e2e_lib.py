@@ -188,7 +188,11 @@ class E2E(object):
             if title_elem:
                 title = title_elem[0].text.encode('utf-8')
                 break
+        if isinstance(content, types.IntType):
+                content = str(content)
         if isinstance(content, types.ListType):
+            if isinstance(content[0], types.IntType):
+                content[0] = str(content[0])
             test_util.test_logger('Input [%s] for [%s]' % (content[0].encode('utf-8'), title))
             test_util.test_logger('Select [%s] for [%s]' % (content[1].encode('utf-8'), title))
             input_content(elem, content[0])
