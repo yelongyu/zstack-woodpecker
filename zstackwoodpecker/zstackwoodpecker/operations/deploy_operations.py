@@ -2984,6 +2984,17 @@ def remove_simulator_agent_script(url_path):
     url = "http://%s:8080/zstack/simulators/agent-pre-handlers/remove" % (mn_ip)
     ret = json_post(url, url_path)
 
+def query_all_simulator_agent_script():
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    url = "http://%s:8080/zstack/simulators/agent-customize-handlers/get" % (mn_ip)
+    ret = json_post(url, None)
+    return ret
+
+def remove_all_simulator_agent_script():
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    url = "http://%s:8080/zstack/simulators/agent-customize-handlers/removeAll" % (mn_ip)
+    ret = json_post(url, None)
+
 def deploy_initial_database(deploy_config, scenario_config = None, scenario_file = None, ipversion = 4):
     operations = [
             add_zone,
