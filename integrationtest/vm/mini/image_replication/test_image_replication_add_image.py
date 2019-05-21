@@ -12,7 +12,7 @@ import zstackwoodpecker.test_lib as test_lib
 
 image_name = 'image-replication-test-' + time.strftime('%y%m%d%H%M%S', time.localtime())
 test_stub_vr = test_lib.lib_get_test_stub('virtualrouter')
-longjob = test_stub_vr.Longjob(name=image_name, url=os.getenv('imageUrl_vdbench'))
+longjob = test_stub_vr.Longjob(name=image_name, url=os.getenv('imageUrl_windows'))
 test_stub = test_lib.lib_get_test_stub()
 img_repl = test_stub.ImageReplication()
 

@@ -947,10 +947,11 @@ class ImageReplication(object):
         return image_inv
 
     def wait_for_image_replicated(self, image_name):
-        for r in xrange(300):
+        for r in xrange(600):
             _image = self.get_image_inv(image_name)
             image_status = [bs_ref.status for bs_ref in _image.backupStorageRefs]
             if image_status.count('Ready') == 2:
+                test_util.test_logger('Image [name: %s] is ready on all BS' % image_name)
                 break
             else:
                 if r > 60 and len(image_status) != 2:
