@@ -18,16 +18,21 @@ img_repl = test_stub.ImageReplication()
 
 
 def test():
-    longjob.add_image()
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.getenv('zstackHaVip')
+    longjob.add_image(platform='Windows')
     img_repl.wait_for_image_replicated(image_name)
     img_repl.check_image_data(image_name)
-    test_util.test_pass('Image Replication Test Success')
+    test_util.test_pass('Windows Image Replication Test Success')
 
 
 def env_recover():
     longjob.delete_image()
+    longjob.expunge_image()
+    img_repl.reclaim_space_from_bs()
 
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     longjob.delete_image()
+    longjob.expunge_image()
+    img_repl.reclaim_space_from_bs()

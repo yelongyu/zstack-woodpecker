@@ -13,8 +13,11 @@ import zstacklib.utils.xmlobject as xmlobject
 import zstacklib.utils.jsonobject as jsonobject
 import zstackwoodpecker.operations.scenario_operations as sce_ops
 import zstackwoodpecker.operations.deploy_operations as dpy_ops
+import zstackwoodpecker.operations.image_operations as img_ops
+import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
+import zstackwoodpecker.zstack_test.zstack_test_image as test_image
 import zstackwoodpecker.operations.ha_operations as ha_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.backupstorage_operations as bs_ops
@@ -23,6 +26,7 @@ import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
 from zstacklib.utils.http import json_post
+import zstackwoodpecker.test_state as test_state
 
 
 def migrate_vm_to_random_host(vm):
@@ -345,6 +349,16 @@ def start_host(host_vm, scenarioConfig):
         test_util.test_logger("Fail to start host [%s]" % host_vm.ip_)
         return False
 
+def reboot_host(host_vm, scenarioConfig):
+    host_vm_uuid = host_vm.uuid_
+    mn_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
+    try:
+        host_inv = sce_ops.reboot_vm(mn_ip, host_vm_uuid)
+        return host_inv
+    except:
+        test_util.test_logger("Fail to start host [%s]" % host_vm.ip_)
+        return False
+
 def query_host(host_ip, scenarioConfig):
     mn_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
     try:
@@ -606,14 +620,14 @@ def create_mini_vm(l3_uuid_list, image_uuid, vm_name = None, cpu_num = None, mem
     vm.create()
     return vm
 
-def create_basic_vm(disk_offering_uuids=None, session_uuid = None, wait_vr_running = True):
-    image_name = os.environ.get('imageName_net')
+def create_basic_vm(disk_offering_uuids=None, session_uuid = None, wait_vr_running = True, image_name=None):
+    image_name = image_name if image_name else os.environ.get('imageName_net')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     l3_name = os.environ.get('l3VlanNetworkName1')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
 
-    if wait_vr_running:
-        ensure_vr_is_running_connected(l3_net_uuid)
+#     if wait_vr_running:
+#         ensure_vr_is_running_connected(l3_net_uuid)
 
     return create_vm([l3_net_uuid], image_uuid, 'basic_no_vlan_vm', disk_offering_uuids, session_uuid = session_uuid)
 
@@ -623,7 +637,7 @@ def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
               system_tags = None, instance_offering_uuid = None, session_uuid = None):
     vm_creation_option = test_util.VmOption() 
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
-    if not instance_offering_uuid:     
+    if not instance_offering_uuid:
         instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
         vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
     vm_creation_option.set_l3_uuids(l3_uuid_list)
@@ -913,6 +927,9 @@ class ImageReplication(object):
         self.replication_grp = None
         self.bs1 = None
         self.bs2 = None
+        self.vm = None
+        self.test_obj_dict = test_state.TestStateDict()
+        self.image = None
 
     def create_replication_grp(self, name):
         grp_inv = bs_ops.create_image_replication_group(name)
@@ -954,8 +971,8 @@ class ImageReplication(object):
                 test_util.test_logger('Image [name: %s] is ready on all BS' % image_name)
                 break
             else:
-                if r > 60 and len(image_status) != 2:
-                    test_util.test_fail('Image replication was not started within 3 minutes')
+                if r > 100 and len(image_status) != 2:
+                    test_util.test_fail('Image replication was not started within 5 minutes')
                 else:
                     time.sleep(3)
 
@@ -988,8 +1005,83 @@ class ImageReplication(object):
         image_info = image_url.split('://')[1].split('/')
         mainfests_uri = 'https://%s:8000/v1/%s/manifests/%s' % (bs1.hostname, image_info[0], image_info[1])
         blobsum = self.get_img_manifests(mainfests_uri).blobsum
+        mainfests_uri2 = 'https://%s:8000/v1/%s/manifests/%s' % (bs2.hostname, image_info[0], image_info[1])
+        blobsum2 = self.get_img_manifests(mainfests_uri2).blobsum
+        assert blobsum == blobsum2
         md5_list1 = self.get_blobs_md5_list(bs1.hostname, image.uuid, blobsum)
+        test_util.test_logger('Image chunks md5 on bs1: %s' % md5_list1)
         md5_list2 = self.get_blobs_md5_list(bs2.hostname, image.uuid, blobsum)
+        test_util.test_logger('Image chunks md5 on bs2: %s' % md5_list2)
         assert len(md5_list1) == len(md5_list2), 'Image chunks check failed!'
         assert set(md5_list1) == set(md5_list2), 'Image chunks check failed!'
+
+    def wait_for_bs_status_change(self, status='Connected', timeout=300):
+        test_util.test_dsc('Wait for BS changing to %s' % status)
+        expected_num = 2 if status == 'Connected' else 1
+        for _ in xrange(timeout):
+            bs_list = res_ops.query_resource(res_ops.IMAGE_STORE_BACKUP_STORAGE)
+            bs_status_list = [bs.status for bs in bs_list]
+            if bs_status_list.count(status) == expected_num:
+                break
+            else:
+                time.sleep(1)
+        else:
+            test_util.test_fail('BS status was not changed to "%s" within %s seconds' % (status, timeout))
+
+    def reconnect_host(self, timeout=300):
+        test_util.test_dsc('Reconnect all Hosts')
+        host_list = res_ops.query_resource(res_ops.HOST)
+        for host in host_list:
+            host_ops.reconnect_host(host.uuid)
+
+    def reclaim_space_from_bs(self):
+        bs_list = res_ops.query_resource(res_ops.IMAGE_STORE_BACKUP_STORAGE)
+        for bs in bs_list:
+            bs_ops.reclaim_space_from_bs(bs.uuid)
+
+    def add_iso_image(self, image_name):
+        img_option = test_util.ImageOption()
+        img_option.set_name(image_name)
+        conditions = res_ops.gen_query_conditions('status', '=', 'Connected')
+        bs_uuid = res_ops.query_resource(res_ops.IMAGE_STORE_BACKUP_STORAGE, conditions)[0].uuid
+        img_option.set_backup_storage_uuid_list([bs_uuid])
+        img_option.set_url(os.environ.get('imageServer')+'/iso/iso_for_install_vm_test.iso')
+        image_inv = img_ops.add_iso_template(img_option)
+        self.image = test_image.ZstackTestImage()
+        self.image.set_image(image_inv)
+        self.image.set_creation_option(img_option)
+        self.test_obj_dict.add_image(self.image)
+
+    def delete_image(self):
+        img_ops.delete_image(self.image.uuid)
+
+    def expunge_image(self):
+        img_ops.expunge_image(self.image.uuid)
+
+    def create_vm(self, image_name):
+        self.vm = create_basic_vm(image_name=image_name)
+        self.vm.check()
+
+    def create_iso_vm(self):
+        data_volume_size = 10737418240
+        disk_offering_option = test_util.DiskOfferingOption()
+        disk_offering_option.set_name('root-disk-iso')
+        disk_offering_option.set_diskSize(data_volume_size)
+        data_volume_offering = vol_ops.create_volume_offering(disk_offering_option)
+        l3_name = os.environ.get('l3VlanNetworkName1')
+        l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+        root_disk_uuid = data_volume_offering.uuid
+        self.vm = create_vm_with_iso([l3_net_uuid], self.image.uuid, 'vm-iso', root_disk_uuid)
+        host_ip = test_lib.lib_find_host_by_vm(self.vm.get_vm()).managementIp
+        self.test_obj_dict.add_vm(self.vm)
+        vm_inv = self.vm.get_vm()
+        vm_ip = vm_inv.vmNics[0].ip
+        ssh_timeout = test_lib.SSH_TIMEOUT
+        test_lib.SSH_TIMEOUT = 3600
+        test_lib.lib_set_vm_host_l2_ip(vm_inv)
+        cmd ='[ -e /root ]'
+        if not test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host_ip, vm_ip, 'root', 'password', cmd):
+            test_lib.SSH_TIMEOUT = ssh_timeout
+            test_util.test_fail("Create VM via ISO failed!")
+
 

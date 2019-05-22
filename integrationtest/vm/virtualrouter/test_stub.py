@@ -1241,6 +1241,8 @@ class Longjob(object):
         self.vol_create_image_name = 'test-vol-crt-image'
         self.image_add_name = name if name else 'test-image-longjob'
         self.cond_name = "res_ops.gen_query_conditions('name', '=', 'name_to_replace')"
+        self.test_obj_dict = test_state.TestStateDict()
+        self.image = None
 
     def create_vm(self):
         self.vm = create_basic_vm()
@@ -1300,26 +1302,37 @@ class Longjob(object):
         assert longjob.state == "Succeeded"
         assert longjob.jobResult == "Succeeded"
         job_data_name = job_data.split('"')[3]
-        image_inv = res_ops.query_resource(res_ops.IMAGE, eval(self.cond_name.replace('name_to_replace', job_data_name)))
-        assert image_inv
-        assert image_inv[0].status == 'Ready'
+        image_inv = res_ops.query_resource(res_ops.IMAGE, eval(self.cond_name.replace('name_to_replace', job_data_name)))[0]
+        assert image_inv.status == 'Ready'
+        self.image = test_image.ZstackTestImage()
+        self.image.set_image(image_inv)
+        self.test_obj_dict.add_image(self.image)
         if job_type == 'crt_vol_image':
-            assert image_inv[0].mediaType == 'DataVolumeTemplate'
+            assert image_inv.mediaType == 'DataVolumeTemplate'
         else:
-            assert image_inv[0].mediaType == 'RootVolumeTemplate'
+            assert image_inv.mediaType == 'RootVolumeTemplate'
         self.image_uuid = image_inv[0].uuid
 
-    def add_image(self, platform="Linux"):
+    def add_image(self, platform="Linux", img_format="qcow2"):
         name = "longjob_image"
         bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)
+        bs = [_bs for _bs in bs if _bs.status == 'Connected']
         self.target_bs = bs[random.randint(0, len(bs) - 1)]
-        job_data = '{"name":"%s", "url":"%s", "mediaType"="RootVolumeTemplate", "format"="qcow2", "platform"="%s", \
-        "backupStorageUuids"=["%s"]}' % (self.image_add_name, self.url, platform, self.target_bs.uuid)
+        job_data = '{"name":"%s", "url":"%s", "mediaType"="RootVolumeTemplate", "format"="%s", "platform"="%s", \
+        "backupStorageUuids"=["%s"]}' % (self.image_add_name, self.url, img_format, platform, self.target_bs.uuid)
         self.submit_longjob(job_data, name, job_type='image')
+        self.image.check()
 
     def delete_image(self):
         try:
             img_ops.delete_image(self.image_uuid)
+#             img_ops.delete_image(self.image_uuid, backup_storage_uuid_list=[self.target_bs.uuid])
+        except:
+            pass
+
+    def expunge_image(self):
+        try:
+            img_ops.expunge_image(self.image_uuid)
 #             img_ops.delete_image(self.image_uuid, backup_storage_uuid_list=[self.target_bs.uuid])
         except:
             pass
