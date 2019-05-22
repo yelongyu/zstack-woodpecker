@@ -92,15 +92,14 @@ class MINI(E2E):
         self.get_element('button', 'tag name').click()
         self.wait_for_element(MESSAGETOAST)
         # root page
-        if not self.get_elements('ant-layout-content'):
+        if not self.wait_for_element('ant-layout-content'):
             test_util.test_fail('Fail to Login')
 
     def logout(self):
         test_util.test_logger('Log out')
         self.get_element('img', 'tag name').move_cursor_here()
         self.operate(u'退出登陆')
-        time.sleep(1)
-        if not self.get_elements('#password'):
+        if not self.wait_for_element('#password'):
             test_util.test_fail('Fail to Logout')
 
     def login_with_cleartext_password(self):
@@ -161,20 +160,20 @@ class MINI(E2E):
             time.sleep(2)
 
     def switch_view(self, view='card'):
-            test_util.test_logger('switch the view to %s' % view)
-            for elem in self.get_elements('ant-btn square___3vP_2'):
-                if elem.get_elements(VIEWDICT[view]):
-                    elem.click()
-                    break
-            time.sleep(1)
+        test_util.test_logger('switch the view to %s' % view)
+        for elem in self.get_elements('ant-btn square___3vP_2'):
+            if elem.get_elements(VIEWDICT[view]):
+                elem.click()
+                break
+        time.sleep(1)
 
     def switch_tab(self, tab_name):
-            test_util.test_logger('Switch to tab [%s]' % tab_name.encode('utf-8'))
-            for tab in self.get_elements('ant-tabs-tab'):
-                if tab_name in tab.text:
-                    tab.click()
-            self.wait_for_page_render()
-            time.sleep(1)
+        test_util.test_logger('Switch to tab [%s]' % tab_name.encode('utf-8'))
+        for tab in self.get_elements('ant-tabs-tab'):
+            if tab_name in tab.text:
+                tab.click()
+        self.wait_for_page_render()
+        time.sleep(1)
 
     def click_ok(self):
         test_util.test_logger('Click OK button')
@@ -564,59 +563,59 @@ class MINI(E2E):
         self._delete(network_name, 'network', view=view, corner_btn=corner_btn, details_page=details_page)
 
     def update_info(self, res_type, res_name, new_name, new_dsc=None, corner_btn=False, details_page=False, view='card'):
-            check_list = []
-            self.navigate(res_type)
-            self.switch_view(view)
-            _elem = self.get_res_element(res_name)
-            if corner_btn:
-                _elem.get_elements('button', 'tag name')[0].click()
-            else:
-                self.more_operate(u'修改信息', res_name=res_name, res_type=res_type, details_page=details_page)
-            if new_name is not None:
-                test_util.test_logger('Update the name of [%s] to %s' % (res_name, new_name))
-                self.input('name', new_name)
-                check_list.append(new_name)
-            if new_dsc is not None:
-                test_util.test_logger('Update the dsc of [%s] to %s' % (res_name, new_dsc))
-                self.input('description', new_dsc)
-            self.click_ok()
-            _elem = self.get_res_element(new_name)
-            checker = MINICHECKER(self, _elem)
-            if res_type == 'volume':
-                checker.volume_check(check_list)
-            elif res_type == 'vm':
-                checker.vm_check(check_list)
-            elif res_type == 'image':
-                checker.image_check(check_list)
-            else:
-                pass
+        check_list = []
+        self.navigate(res_type)
+        self.switch_view(view)
+        _elem = self.get_res_element(res_name)
+        if corner_btn:
+            _elem.get_elements('button', 'tag name')[0].click()
+        else:
+            self.more_operate(u'修改信息', res_name=res_name, res_type=res_type, details_page=details_page)
+        if new_name is not None:
+            test_util.test_logger('Update the name of [%s] to %s' % (res_name, new_name))
+            self.input('name', new_name)
+            check_list.append(new_name)
+        if new_dsc is not None:
+            test_util.test_logger('Update the dsc of [%s] to %s' % (res_name, new_dsc))
+            self.input('description', new_dsc)
+        self.click_ok()
+        _elem = self.get_res_element(new_name)
+        checker = MINICHECKER(self, _elem)
+        if res_type == 'volume':
+            checker.volume_check(check_list)
+        elif res_type == 'vm':
+            checker.vm_check(check_list)
+        elif res_type == 'image':
+            checker.image_check(check_list)
+        else:
+            pass
 
     def vm_ops(self, vm_name, action='stop', details_page=False):
-            self.navigate('vm')
-            vm_list = []
-            if isinstance(vm_name, types.ListType):
-                vm_list = vm_name
+        self.navigate('vm')
+        vm_list = []
+        if isinstance(vm_name, types.ListType):
+            vm_list = vm_name
+        else:
+            vm_list.append(vm_name)
+        test_util.test_logger('VM (%s) execute action[%s]' % (' '.join(vm_list), action))
+        if not details_page:
+            for vm in vm_list:
+                vm_elem = self.get_res_element(vm)
+                vm_elem.get_element(CHECKBOX).click()
+        if action == 'start':
+            if details_page:
+                self.more_operate(u'启动', vm_list, res_type='vm', details_page=True)
             else:
-                vm_list.append(vm_name)
-            test_util.test_logger('VM (%s) execute action[%s]' % (' '.join(vm_list), action))
-            if not details_page:
-                for vm in vm_list:
-                    vm_elem = self.get_res_element(vm)
-                    vm_elem.get_element(CHECKBOX).click()
-            if action == 'start':
-                if details_page:
-                    self.more_operate(u'启动', vm_list, res_type='vm', details_page=True)
-                else:
-                    self.click_button(u'启动')
-            elif action == 'reboot':
-                self.more_operate(u'重启', vm_list, res_type='vm', details_page=details_page)
-                self.click_ok()
-            elif action == 'stop':
-                if details_page:
-                    self.more_operate(u'停止', vm_list, res_type='vm', details_page=True)
-                else:
-                    self.click_button(u'停止')
-            self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
+                self.click_button(u'启动')
+        elif action == 'reboot':
+            self.more_operate(u'重启', vm_list, res_type='vm', details_page=details_page)
+            self.click_ok()
+        elif action == 'stop':
+            if details_page:
+                self.more_operate(u'停止', vm_list, res_type='vm', details_page=True)
+            else:
+                self.click_button(u'停止')
+        self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
 
     def set_ha_level(self, vm_name, ha=True, details_page=False):
         test_util.test_logger('Set [%s] ha leval [%s]' % (vm_name, ha))
