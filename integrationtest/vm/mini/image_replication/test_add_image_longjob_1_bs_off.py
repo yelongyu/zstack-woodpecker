@@ -20,7 +20,7 @@ img_repl = test_stub.ImageReplication()
 
 def test():
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.getenv('zstackHaVip')
-    host_vm0 = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, 0)
+    host_vm0 = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, 1)
     test_stub.stop_host(host_vm0, test_lib.all_scenario_config, 'cold')
 
     img_repl.wait_for_bs_status_change('Disconnected')
