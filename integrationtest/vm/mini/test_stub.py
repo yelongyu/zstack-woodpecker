@@ -1039,18 +1039,24 @@ class ImageReplication(object):
         for bs in bs_list:
             bs_ops.reclaim_space_from_bs(bs.uuid)
 
-    def add_iso_image(self, image_name):
+    def add_image(self, image_name, url=None, img_format='qcow2'):
+        url = url if url else os.path.join(os.getenv('imageServer'), 'iso/iso_for_install_vm_test.iso')
         img_option = test_util.ImageOption()
         img_option.set_name(image_name)
+        img_option.set_format(img_format)
         conditions = res_ops.gen_query_conditions('status', '=', 'Connected')
         bs_uuid = res_ops.query_resource(res_ops.IMAGE_STORE_BACKUP_STORAGE, conditions)[0].uuid
         img_option.set_backup_storage_uuid_list([bs_uuid])
-        img_option.set_url(os.environ.get('imageServer')+'/iso/iso_for_install_vm_test.iso')
-        image_inv = img_ops.add_iso_template(img_option)
-        self.image = test_image.ZstackTestImage()
-        self.image.set_image(image_inv)
-        self.image.set_creation_option(img_option)
-        self.test_obj_dict.add_image(self.image)
+        img_option.set_url(url)
+        if img_format == 'iso':
+            image_inv = img_ops.add_iso_template(img_option)
+        else:
+            image_inv = img_ops.add_image(img_option)
+        image = test_image.ZstackTestImage()
+        image.set_image(image_inv)
+        image.set_creation_option(img_option)
+        self.test_obj_dict.add_image(image)
+        self.image = image.get_image()
 
     def delete_image(self):
         img_ops.delete_image(self.image.uuid)
@@ -1058,9 +1064,25 @@ class ImageReplication(object):
     def expunge_image(self):
         img_ops.expunge_image(self.image.uuid)
 
-    def create_vm(self, image_name):
-        self.vm = create_basic_vm(image_name=image_name)
-        self.vm.check()
+    def create_vm(self, image_name, cpu_num=2, mem_size=2147483648):
+        l3_name = os.environ.get('l3VlanNetworkName1')
+        l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+        image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+        self.vm = create_mini_vm([l3_net_uuid], image_uuid, cpu_num=cpu_num, memory_size=mem_size)
+        vm_inv = self.vm.get_vm()
+        if vm_inv.platform == 'Windows':
+            host_inv = test_lib.lib_find_host_by_vm(vm_inv)
+            host_ip = host_inv.managementIp
+            host_username = host_inv.username
+            host_password = host_inv.password
+            cmd = "virsh domiflist %s | grep vnic | awk '{print $3}'"% (vm_inv.uuid)
+            br_eth0 = test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd, 60)
+            cmd2 = 'ip address add 10.11.251.251/8 dev %s'% br_eth0
+            test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd2, 60)
+            vm_ip = vm_inv.vmNics[0].ip
+            test_lib.lib_wait_target_up(vm_ip, '23', 1200)
+        else:
+            self.vm.check()
 
     def create_iso_vm(self):
         data_volume_size = 10737418240
