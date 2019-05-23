@@ -332,7 +332,11 @@ class TestLib(object):
             print_info("Not find test suite name, which is start with '%s'" % suiteList)
             return 
 
-        ht, wt = os.popen('stty size', 'r').read().split()
+        try:
+            ht, wt = os.popen('stty size', 'r').read().split()
+        except:
+            ht = '57'
+            wt = '237'
         print_info('Available ZStack Integration Test Cases:')
         print '='*int(wt)
         _print_head(wt)
