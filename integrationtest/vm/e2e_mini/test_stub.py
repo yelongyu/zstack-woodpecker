@@ -90,7 +90,7 @@ class MINI(E2E):
         self.get_element('#password').input('password')
         # Login button
         self.get_element('button', 'tag name').click()
-        self.wait_for_element(MESSAGETOAST)
+        self.wait_for_element(MESSAGETOAST, target='notDisappear')
         # root page
         if not self.wait_for_element('ant-layout-content'):
             test_util.test_fail('Fail to Login')
@@ -98,7 +98,7 @@ class MINI(E2E):
     def logout(self):
         test_util.test_logger('Log out')
         self.get_element('img', 'tag name').move_cursor_here()
-        self.operate(u'退出登陆')
+        self.operate(u'退出登录')
         if not self.wait_for_element('#password'):
             test_util.test_fail('Fail to Logout')
 
@@ -597,24 +597,23 @@ class MINI(E2E):
             vm_list = vm_name
         else:
             vm_list.append(vm_name)
+        ops_dic = {'start': u'启动',
+                   'stop': u'停止',
+                   'reboot': u'重启'
+                   }
         test_util.test_logger('VM (%s) execute action[%s]' % (' '.join(vm_list), action))
         if not details_page:
             for vm in vm_list:
                 vm_elem = self.get_res_element(vm)
                 vm_elem.get_element(CHECKBOX).click()
-        if action == 'start':
-            if details_page:
-                self.more_operate(u'启动', vm_list, res_type='vm', details_page=True)
-            else:
-                self.click_button(u'启动')
-        elif action == 'reboot':
-            self.more_operate(u'重启', vm_list, res_type='vm', details_page=details_page)
+        if action == 'reboot':
+            self.more_operate(ops_dic[action], vm_list, res_type='vm', details_page=details_page)
             self.click_ok()
-        elif action == 'stop':
+        else:
             if details_page:
-                self.more_operate(u'停止', vm_list, res_type='vm', details_page=True)
+                self.more_operate(ops_dic[action], vm_list, res_type='vm', details_page=True)
             else:
-                self.click_button(u'停止')
+                self.click_button(ops_dic[action])
         self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
 
     def set_ha_level(self, vm_name, ha=True, details_page=False):
@@ -836,6 +835,41 @@ class MINI(E2E):
         check_list.append(start_ip)
         check_list.append(end_ip)
         self.check_res_item(check_list, target='notDisplayed')
+
+    def host_ops(self, host_name, action, details_page=False):
+        self.navigate('minihost')
+        host_list = []
+        if isinstance(host_name, types.ListType):
+            host_list = host_name
+        else:
+            host_list.append(host_name)
+        ops_list = {'enable': u'启用',
+                    'disable': u'停用',
+                    'reconnect': u'重连',
+                    'maintenance': u'维护模式',
+                    'light': u'维修灯亮'
+        }
+        test_util.test_logger('Host (%s) execute action[%s]' % (' '.join(host_list), action))
+        for host in host_list:
+            for elem in self.get_elements('ant-row-flex-middle'):
+                if host in elem.text:
+                    if not details_page:
+                        elem.get_element(CHECKBOX).click()
+                    else:
+                        self.get_element('left-part').click()
+                        time.sleep(1)
+                        break
+        if details_page:
+            self.get_element(MOREOPERATIONBTN).move_cursor_here()
+            time.sleep(1)
+            self.operate(ops_list[action])
+        else:
+            if action in ['start', 'stop']:
+                self.click_button(ops_list[action])
+            else:
+                self.more_operate(ops_list[action], host_list)
+                self.click_ok()
+        self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
 
     def save_element_location(self, filename="location.tmpt"):
         for menu, page in MENUDICT.items():
