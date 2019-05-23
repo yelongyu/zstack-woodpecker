@@ -38,6 +38,11 @@ def test():
         test_util.test_fail('Resize Root Volume failed, size = %s' % vol_size_after)
 
     bs_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
+    cond = res_ops.gen_query_conditions('uuid', '=', bs_list[0].uuid)
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0]
+    if bs.type == 'SftpBackupStorage':
+        vm.stop()
+
     image_option = test_util.ImageOption()
     image_option.set_root_volume_uuid(volume_uuid)
     image_option.set_name('image_resize_template')

@@ -103,7 +103,13 @@ def test():
     test_lib.lib_set_vm_host_l2_ip(vm_inv)
     test_lib.lib_wait_target_up(vm.get_vm().vmNics[0].ip, 22, 1800)
 
+    
     #create image by vm root volume
+    cond = res_ops.gen_query_conditions('uuid', '=', bss[0].uuid)
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0]
+    if bs.type == 'SftpBackupStorage':
+        vm.stop()
+ 
     created_vm_img_name = "created_vm_image1"
     img_option2 = test_util.ImageOption()
     img_option2.set_backup_storage_uuid_list([bss[0].uuid])
