@@ -70,7 +70,7 @@ def test():
     cond = res_ops.gen_query_conditions('uuid', '=', bss[0].uuid)
     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0]
     if bs.type == 'SftpBackupStorage':
-        vm1.stop()
+        vm.stop()
     #create image by vm root volume
     created_vm_img_name = "created_vm_image1"
     img_option = test_util.ImageOption()
