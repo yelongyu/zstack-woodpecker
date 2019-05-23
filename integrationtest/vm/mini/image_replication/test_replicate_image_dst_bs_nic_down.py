@@ -1,12 +1,15 @@
 '''
 
 New Integration test for image replication.
+Check Image Replication after BS recovering from network unreachable,
+BS nic would be set down before adding new image 
 
 @author: Legion
 '''
 
 import os
 import time
+import random
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 
@@ -18,23 +21,27 @@ img_repl = test_stub.ImageReplication()
 
 def test():
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.getenv('zstackHaVip')
-    host_vm0 = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, 0)
-    test_stub.stop_host(host_vm0, test_lib.all_scenario_config, 'cold')
+    bs_list = img_repl.get_bs_list()
+    bs = random.choice(bs_list)
+    bs_list.remove(bs)
+    bs2 = bs_list[0]
 
+    test_stub.down_host_network(bs.hostname, test_lib.all_scenario_config, "managment_net")
     img_repl.wait_for_bs_status_change('Disconnected')
-    img_repl.add_image(image_name, url=os.getenv('imageUrl_vdbench'))
 
-    test_stub.start_host(host_vm0, test_lib.all_scenario_config)
-    test_stub.recover_vlan_in_host(host_vm0.ip_, test_lib.all_scenario_config, test_lib.deploy_config)
+    img_repl.add_image(image_name, bs_uuid=bs2.uuid, url=os.getenv('imageUrl_vdbench'))
+
+    test_stub.up_host_network(bs.hostname, test_lib.all_scenario_config, "managment_net")
+    test_stub.recover_vlan_in_host(bs.hostname, test_lib.all_scenario_config, test_lib.deploy_config)
 
     img_repl.wait_for_bs_status_change('Connected')
     img_repl.wait_for_image_replicated(image_name)
 
     img_repl.check_image_data(image_name)
-    img_repl.reconnect_host()
+    img_repl.wait_for_host_connected()
 
     img_repl.create_vm(image_name)
-    test_util.test_pass('Image Replication After Host Recovering Test Success')
+    test_util.test_pass('Image Replication After NIC Recovering Test Success')
 
 
 def env_recover():
@@ -56,3 +63,4 @@ def error_cleanup():
         img_repl.vm.destroy()
     except:
         pass
+

@@ -1311,7 +1311,7 @@ class Longjob(object):
             assert image_inv.mediaType == 'DataVolumeTemplate'
         else:
             assert image_inv.mediaType == 'RootVolumeTemplate'
-        self.image_uuid = image_inv[0].uuid
+        self.image_uuid = image_inv.uuid
 
     def add_image(self, platform="Linux", img_format="qcow2"):
         name = "longjob_image"

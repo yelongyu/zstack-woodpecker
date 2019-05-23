@@ -17,14 +17,14 @@
 	<case timeout='1800' noparallel='True'>test_life_cycle_vm.py</case>
 	<case timeout='1800' noparallel='True'>test_prometheus_vm.py</case>
 	<case timeout='1200' noparallel='True'>network/test_create_l3network.py</case>
-	<case timeout='1800' noparallel='True'>image_replication/test_add_image_1_bs_nic_down.py</case>
-	<case timeout='1800' noparallel='True'>image_replication/test_add_image_1_bs_off.py</case>
-	<case timeout='1800' noparallel='True'>image_replication/test_add_image_longjob_1_bs_nic_down.py</case>
-	<case timeout='1800' noparallel='True'>image_replication/test_add_image_longjob_1_bs_off.py</case>
-	<case timeout='1800' noparallel='True'>image_replication/test_add_iso_image_longjob.py</case>
-	<case timeout='1800' noparallel='True'>image_replication/test_add_raw_image.py</case>
-	<case timeout='1800' noparallel='True'>image_replication/test_add_windows_image.py</case>
 	<case timeout='1800' noparallel='True'>image_replication/test_del_image_replication_grp.py</case>
+	<case timeout='1800' noparallel='True'>image_replication/test_replicate_image_dst_bs_nic_down.py</case>
+	<case timeout='1800' noparallel='True'>image_replication/test_replicate_image_dst_bs_off.py</case>
+	<case timeout='1800' noparallel='True'>image_replication/test_replicate_image_src_bs_nic_down.py</case>
+	<case timeout='1800' noparallel='True'>image_replication/test_replicate_image_src_bs_off.py</case>
+	<case timeout='1800' noparallel='True'>image_replication/test_replicate_iso_image.py</case>
+	<case timeout='1800' noparallel='True'>image_replication/test_replicate_raw_image.py</case>
+	<case timeout='1800' noparallel='True'>image_replication/test_replicate_windows_image.py</case>
 	<!--<case timeout='1200' noparallel='True'>ha/test_minips_vm_ha_force_stop.py</case>
 	<case timeout='1200' noparallel='True'>ha/test_minips_both_mns_force_stop_recover.py</case>
 	<case timeout='1200' noparallel='True'>ha/test_minips_net_sep_vm_ha_mag_dis_vm_run.py</case>
