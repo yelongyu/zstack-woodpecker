@@ -1229,7 +1229,7 @@ class MulISO(object):
 
 
 class Longjob(object):
-    def __init__(self, name=None, url=None):
+    def __init__(self, name=None, url=None, image_crt_name=None):
         self.vm = None
         self.image_uuid = None
         self.image_name_net = os.getenv('imageName_net')
@@ -1237,7 +1237,7 @@ class Longjob(object):
         self.add_image_job_name = 'APIAddImageMsg'
         self.crt_vm_image_job_name = 'APICreateRootVolumeTemplateFromRootVolumeMsg'
         self.crt_vol_image_job_name = 'APICreateDataVolumeTemplateFromVolumeMsg'
-        self.vm_create_image_name = 'test-vm-crt-image'
+        self.vm_create_image_name = image_crt_name if image_crt_name else 'test-vm-crt-image'
         self.vol_create_image_name = 'test-vol-crt-image'
         self.image_add_name = name if name else 'test-image-longjob'
         self.cond_name = "res_ops.gen_query_conditions('name', '=', 'name_to_replace')"
@@ -1338,7 +1338,7 @@ class Longjob(object):
             pass
 
     def crt_vm_image(self, target_bs=None):
-        name = 'longjob_crt_vol_image'
+        name = 'longjob_crt_vm_image'
         bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)
         if not target_bs:
             self.target_bs = bs[random.randint(0, len(bs) - 1)]

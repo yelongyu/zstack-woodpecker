@@ -2,7 +2,7 @@
 
 New Integration test for image replication.
 Check Image Replication after BS recovering from network unreachable,
-BS nic would be set down before adding new image 
+Source BS NIC would be set down after adding new image 
 
 @author: Legion
 '''
@@ -24,11 +24,12 @@ def test():
     bs_list = img_repl.get_bs_list()
     bs = random.choice(bs_list)
 
-    img_repl.add_image(image_name, url=os.getenv('imageUrl_vdbench'))
+    img_repl.add_image(image_name, bs_uuid=bs.uuid, url=os.getenv('imageUrl_vdbench'))
 
     test_stub.down_host_network(bs.hostname, test_lib.all_scenario_config, "managment_net")
     img_repl.wait_for_bs_status_change('Disconnected')
 
+    time.sleep(300)
     test_stub.up_host_network(bs.hostname, test_lib.all_scenario_config, "managment_net")
     test_stub.recover_vlan_in_host(bs.hostname, test_lib.all_scenario_config, test_lib.deploy_config)
 

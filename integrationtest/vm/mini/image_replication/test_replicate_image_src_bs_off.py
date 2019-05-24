@@ -2,7 +2,7 @@
 
 New Integration test for image replication.
 Check Image Replication after BS recovering from network unreachable,
-BS nic would be set down before adding new image 
+Source BS would be powered off after adding new image 
 
 @author: Legion
 '''

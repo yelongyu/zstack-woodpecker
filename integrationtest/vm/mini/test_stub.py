@@ -619,6 +619,7 @@ def create_mini_vm(l3_uuid_list, image_uuid, vm_name = None, cpu_num = None, mem
     vm_creation_option.set_memory_size(memory_size)
     vm_creation_option.set_system_tags(system_tags)
     vm_creation_option.set_session_uuid(session_uuid)
+    vm_creation_option.set_timeout(900000)
     vm = test_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
     vm.create()
@@ -980,7 +981,7 @@ class ImageReplication(object):
                 else:
                     time.sleep(3)
 
-    def wait_for_both_downloading(self, image_name, timeout=600):
+    def wait_for_downloading(self, image_name, timeout=600):
         for _ in xrange(timeout):
             _image = self.get_image_inv(image_name)
             image_status = [bs_ref.status for bs_ref in _image.backupStorageRefs]

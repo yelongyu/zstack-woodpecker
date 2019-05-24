@@ -2,7 +2,7 @@
 
 New Integration test for image replication.
 Check Image Replication after BS recovering from network unreachable,
-Target BS would be powered off before adding new image 
+Source BS would be powered off after adding new image 
 
 @author: Legion
 '''
@@ -23,17 +23,11 @@ def test():
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.getenv('zstackHaVip')
     bs_list = img_repl.get_bs_list()
     bs = random.choice(bs_list)
-    bs_list.remove(bs)
-    bs2 = bs_list[0]
     host_vm = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, ip=bs.hostname)
 
-    test_stub.stop_host(host_vm, test_lib.all_scenario_config, 'grace')
-    img_repl.wait_for_bs_status_change('Disconnected')
+    img_repl.add_image(image_name, bs_uuid=bs.uuid, url=os.getenv('imageUrl_vdbench'))
 
-    img_repl.add_image(image_name, bs_uuid=bs2.uuid, url=os.getenv('imageUrl_vdbench'))
-
-    test_stub.start_host(host_vm, test_lib.all_scenario_config)
-    test_stub.recover_vlan_in_host(host_vm.ip_, test_lib.all_scenario_config, test_lib.deploy_config)
+    test_stub.reboot_host(host_vm, test_lib.all_scenario_config)
 
     img_repl.wait_for_bs_status_change('Connected')
     img_repl.wait_for_image_replicated(image_name)
