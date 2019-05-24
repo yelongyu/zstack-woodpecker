@@ -113,3 +113,10 @@ def get_ept_status(ip, username, password, port):
         return "enable"
     else:
         return ret2+ret1
+
+def query_host(conditions, session_uuid = None):
+    action = api_actions.QueryHostAction()
+    action.conditions = conditions
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+

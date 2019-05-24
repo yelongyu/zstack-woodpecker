@@ -6,6 +6,13 @@ import net_operations as net_ops
 import vm_operations as vm_ops
 
 
+def set_vpc_dr_vxlan(vr_uuid, stateEvent):
+    action = api_actions.SetVpcVRouterDistributedRoutingEnabledAction()
+    action.sessionUuid = None
+    action.uuid = vr_uuid
+    action.stateEvent = stateEvent
+    evt = account_operations.execute_action_with_session(action, session_uuid = None)
+    return evt.inventory
 
 def create_vrouter_ospf_area(areaId='0.0.0.0', areaType='Standard', areaAuth=None, password=None, keyId=None, session_uuid=None):
     action = api_actions.CreateVRouterOspfAreaAction()
