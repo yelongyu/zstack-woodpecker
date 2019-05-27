@@ -10,6 +10,7 @@ import os
 import time
 import types
 import random
+import xml.dom.minidom as minidom
 from os.path import join
 from zstackwoodpecker.e2e_lib import E2E
 import zstackwoodpecker.operations.resource_operations as res_ops
@@ -35,7 +36,7 @@ PRIMARYBTNNUM = 2
 MENUDICT = {'homepage': 'a[href="/web/"]',
             'monitor':  'a[href="/web/monitoringCenter"]',
             'vm':       'a[href="/web/vm"]',
-            'host':     'a[href="/web/minihost"]',
+            'minihost':     'a[href="/web/minihost"]',
             'ps':       'a[href="/web/primaryStorage"]',
             'volume':   'a[href="/web/volume"]',
             'image':    'a[href="/web/image"]',
@@ -45,6 +46,15 @@ MENUDICT = {'homepage': 'a[href="/web/"]',
 VIEWDICT = {'list': '#btn_listswitch_s',
             'card': '#btn_cardswitch_s'}
 
+
+def get_mn_ip():
+    dom_path = '/'.join(os.getcwd().split('/')[:3]) + "/scenario-file.xml"
+    dom = minidom.parse(dom_path)
+    root = dom.documentElement
+    item_list = root.getElementsByTagName('vm')
+    first_mn_ip = item_list[0].getAttribute('managementIp')
+    second_mn_ip = item_list[1].getAttribute('managementIp')
+    return first_mn_ip, second_mn_ip
 
 def get_time_postfix():
     rand_postfix = str(random.random()).split('.')[-1]
@@ -240,11 +250,6 @@ class MINI(E2E):
             self.click_cancel()
 
     def _create(self, para_dict, res_type, view, priority_dict=None):
-        # Temporarily used util http://jira.zstack.io/browse/MINI-335 is solved
-        self.navigate('image')
-        self.navigate('network')
-        self.navigate('host')
-
         self.navigate(res_type)
         self.get_elements(PRIMARYBTN)[-1].click()
         if priority_dict:
@@ -563,14 +568,29 @@ class MINI(E2E):
         self._delete(network_name, 'network', view=view, corner_btn=corner_btn, details_page=details_page)
 
     def update_info(self, res_type, res_name, new_name, new_dsc=None, corner_btn=False, details_page=False, view='card'):
+        if res_type == 'minihost' and corner_btn:
+            test_util.test_fail('Minihost do not support to update info by corner btn.')
         check_list = []
         self.navigate(res_type)
         self.switch_view(view)
-        _elem = self.get_res_element(res_name)
-        if corner_btn:
-            _elem.get_elements('button', 'tag name')[0].click()
+        if res_type == 'minihost':
+            for elem in self.get_elements('ant-row-flex-middle'):
+                if res_name in elem.text:
+                    if not details_page:
+                        elem.get_element(CHECKBOX).click()
+                    else:
+                        self.get_element('left-part').click()
+                        time.sleep(1)
+                    break
+            self.get_element(MOREOPERATIONBTN).move_cursor_here()
+            time.sleep(1)
+            self.operate(u'修改信息')
         else:
-            self.more_operate(u'修改信息', res_name=res_name, res_type=res_type, details_page=details_page)
+            _elem = self.get_res_element(res_name)
+            if corner_btn:
+                _elem.get_elements('button', 'tag name')[0].click()
+            else:
+                self.more_operate(u'修改信息', res_name=res_name, res_type=res_type, details_page=details_page)
         if new_name is not None:
             test_util.test_logger('Update the name of [%s] to %s' % (res_name, new_name))
             self.input('name', new_name)
@@ -868,7 +888,6 @@ class MINI(E2E):
                 self.click_button(ops_list[action])
             else:
                 self.more_operate(ops_list[action], host_list)
-                self.click_ok()
         self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
 
     def save_element_location(self, filename="location.tmpt"):
