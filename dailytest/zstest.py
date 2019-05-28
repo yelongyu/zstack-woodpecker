@@ -512,6 +512,30 @@ class TestLib(object):
         self.test_xml = os.path.join(self.current_dir, CONFIG_XML, "test_suite.xml")
         tree.write(self.test_xml)
 
+    def print_all_cases(self, parallel=None):
+        suites = self.suite_list
+        for suite in suites:
+            if suite == '':
+                continue
+            suite_config = None
+            suite = suite.strip()
+            real_suite = self.find_real_suite(suite)
+            suite_config = os.path.join(self.test_case_dir, real_suite, INTEGRATION_TEST_CONFIG)
+
+            if suite_config:
+                new_suite_config = os.path.join(self.current_dir, CONFIG_XML, '%s_%s' % (real_suite, INTEGRATION_TEST_CONFIG))
+                try:
+                    suite_content = etree.parse(suite_config)
+                except:
+                    continue
+                suite_item = suite_content.find('suite')
+                print real_suite, "suite_setup"
+                for case_item in suite_item.getchildren():
+		    print real_suite, case_item.text.replace('.py', '')
+                print real_suite, "suite_teardown"
+            else:
+                print('suite: %s is not found' % suite)
+
 def print_info(information):
     print '\n\033[1m - %s\033[0m\n' % information
 
@@ -646,6 +670,13 @@ def main():
             default=None, 
             action='store_true', 
             help="[Optional] list test cases and exit. For example: `zstest.py -l` will list all integration test cases; `zstest.py -l -s basic` will list case name in basic test suite; `zstest.py -l -c 1` will list case 1 description.")
+
+    parser.add_option(
+            "--list-default-cases", 
+            dest="listDefaultCases", 
+            default=None, 
+            action='store_true', 
+            help="[Optional] list default test cases and exit. For example: `zstest.py --list-default-cases` will list all integration test cases listed in integration.xml;")
 
     parser.add_option(
             "-P", "--http-proxy", 
@@ -833,6 +864,10 @@ def main():
     test_lib.set_test_dir(woodpecker_root)
     test_lib.analyze_exclude_case_list(options.excludeCaseList)
     test_lib.find_test_case()
+
+    if options.listDefaultCases:
+        test_lib.print_all_cases(parallel=options.parallel)
+        sys.exit(0)
 
     if options.listCase:
         if options.suiteList:
