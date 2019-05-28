@@ -38,6 +38,7 @@ class TestAction(object):
     resume_vm = 'resume_vm'
     reboot_vm = 'reboot_vm'
     reboot_host = 'reboot_host'
+    run_workloads = 'run_workloads'
     destroy_vm = 'destroy_vm'
     delete_vm = 'delete_vm'
     recover_vm = 'recover_vm'
