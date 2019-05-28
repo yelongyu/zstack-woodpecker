@@ -25,6 +25,7 @@ def test():
 
 def env_recover():
     global mini
+    mini.host_ops([host1, host2], action='enable')
     mini.close()
 
 #Will be called only if exception happens in test().

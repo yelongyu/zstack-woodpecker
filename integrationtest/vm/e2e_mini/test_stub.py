@@ -54,7 +54,7 @@ def get_mn_ip():
     item_list = root.getElementsByTagName('vm')
     first_mn_ip = item_list[0].getAttribute('managementIp')
     second_mn_ip = item_list[1].getAttribute('managementIp')
-    return first_mn_ip, second_mn_ip
+    return str(first_mn_ip), str(second_mn_ip)
 
 def get_time_postfix():
     rand_postfix = str(random.random()).split('.')[-1]
@@ -158,8 +158,7 @@ class MINI(E2E):
             self.get_element('#password').input('password')
         # Login button
         self.get_element('button', 'tag name').click()
-        self.wait_for_element(MESSAGETOAST, timeout=300)
-        assert 'wrong account name or password' in self.get_element('ant-notification-notice-description').text
+        assert self.get_element('logintips___2GMLw').text == u'用户名或密码错误！'
 
     def navigate(self, menu):
         current_url = self.get_url()
@@ -599,7 +598,12 @@ class MINI(E2E):
             test_util.test_logger('Update the dsc of [%s] to %s' % (res_name, new_dsc))
             self.input('description', new_dsc)
         self.click_ok()
-        _elem = self.get_res_element(new_name)
+        if res_type == 'minihost':
+            for _elem in self.get_elements('ant-row-flex-middle'):
+                if new_name in _elem.text:
+                    break
+        else:
+            _elem = self.get_res_element(new_name)
         checker = MINICHECKER(self, _elem)
         if res_type == 'volume':
             checker.volume_check(check_list)
@@ -607,6 +611,8 @@ class MINI(E2E):
             checker.vm_check(check_list)
         elif res_type == 'image':
             checker.image_check(check_list)
+        elif res_type == 'minihost':
+            checker.host_check(check_list)
         else:
             pass
 
@@ -874,7 +880,8 @@ class MINI(E2E):
             for elem in self.get_elements('ant-row-flex-middle'):
                 if host in elem.text:
                     if not details_page:
-                        elem.get_element(CHECKBOX).click()
+                        if not elem.get_element(CHECKBOX).selected:
+                            elem.get_element(CHECKBOX).click()
                     else:
                         self.get_element('left-part').click()
                         time.sleep(1)
@@ -884,10 +891,12 @@ class MINI(E2E):
             time.sleep(1)
             self.operate(ops_list[action])
         else:
-            if action in ['start', 'stop']:
+            if action in ['enable', 'disable']:
                 self.click_button(ops_list[action])
             else:
-                self.more_operate(ops_list[action], host_list)
+                self.get_element(MOREOPERATIONBTN).move_cursor_here()
+                time.sleep(1)
+                self.operate(ops_list[action])
         self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
 
     def save_element_location(self, filename="location.tmpt"):
@@ -977,6 +986,11 @@ class MINICHECKER(object):
                 test_util.test_fail("Can not find %s in image checker" % v)
 
     def network_check(self, check_list=[]):
+        for v in check_list:
+            if v not in self.elem.text:
+                test_util.test_fail("Can not find %s in network checker" % v)
+
+    def host_check(self, check_list=[]):
         for v in check_list:
             if v not in self.elem.text:
                 test_util.test_fail("Can not find %s in network checker" % v)
