@@ -164,6 +164,7 @@ class E2E(object):
         css_selector = 'label[for="%s"]' % label
         selection_rendered = 'ant-select-selection__rendered'
         radio_group = 'ant-radio-group'
+        input_row = 'ant-row ant-form-item'
         def select_opt(elem, opt_value):
             elem.get_element(selection_rendered).click()
             time.sleep(1)
@@ -183,6 +184,14 @@ class E2E(object):
             element.clear()
             element.input(content)
         title = None
+        elems = self.get_elements(input_row)
+        for _ in range(10):
+            if elems:
+                break
+            else:
+                time.sleep(0.5)
+        else:
+            test_util.test_fail('Can not find elements with selector: [%s]' % input_row)
         for elem in self.get_elements('ant-row ant-form-item'):
             title_elem = elem.get_elements(css_selector)
             if title_elem:
