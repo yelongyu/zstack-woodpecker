@@ -77,6 +77,7 @@ class robot_test_dict(object):
         self.backup = {}  # {name:{'backup':backup,'volume':volume,'md5':md5}}
         self.image = {}  # {name: image_obj}
         self.snap_tree = {}  # {vol_name: snap_tree}
+        self.volume_check = {} # {name: robot_flag}
 
     def __repr__(self):
         str = 'Dict:: \n'
@@ -102,8 +103,12 @@ class robot_test_dict(object):
             if v == vm_obj:
                 self.vm.pop(k)
 
-    def add_volume(self, name, vol_obj):
+    def add_volume(self, name, vol_obj, volume_check=True):
         self.volume[name] = vol_obj
+        if volume_check:
+            self.volume_check[name] = True
+        else:
+            self.volume_check[name] = False
 
     def remove_volume(self, vol_obj):
         for k, v in self.volume.items():
@@ -157,7 +162,12 @@ class robot_test_dict(object):
             vm.check()
         # volume.check
         for k, volume in self.volume.items():
-            volume.check()
+            if self.volume_check[k]:
+                test_util.test_logger('Need to add checker for volume %s' % k)
+                volume.check()
+            else:
+                test_util.test_logger('NO Need to add checker for volume %s' % k)
+
         # snap_tree.check
         for k, snap_tree in self.snap_tree.items():
             snap_tree.check()
@@ -682,6 +692,53 @@ def reboot_vm(robot_test_obj, args):
         volume.update()
         volume.update_volume()
 
+def run_workloads(robot_test_obj, args):
+    target_vms = []
+    target_cmd = ''
+    timeout = 600
+
+    WORKLOADS = {
+            "FIO": "fio -filename=/root/test-fio -direct=1 -iodepth 32 -thread -rw=randrw -rwmixread=70 -ioengine=libaio -bs=4k -size=90% -numjobs=8 -runtime=600 -group_reporting -name=fio_test.txt",
+            "IPERF": "iperf3 -s"}
+
+    if len(args) < 1:
+        test_util.test_fail("no resource available for next action: run_workloads")
+
+    for vm_name in args[0].split('=')[1].split(','):
+        target_vm = robot_test_obj.get_test_dict().vm[vm_name]
+        target_vms.append(target_vm)
+        if target_vm.get_state() != vm_header.RUNNING:
+            test_util.test_fail("run_workloads: Failed to run workloads due that VM %s is not in Running state" % (target_vm.get_vm().uuid))
+
+    for wkd,cmd in WORKLOADS.items():
+        if args[1] == wkd:
+            if len(args) > 2:
+                target_cmd = args[2]
+                timeout = int(args[3])
+            else:
+                target_cmd = cmd
+
+    target_cmd = "echo " + target_cmd + " \& >> /etc/rc.local"
+
+    for target_vm in target_vms:
+        host = test_lib.lib_get_vm_host(target_vm.get_vm())
+        test_lib.lib_install_testagent_to_host(host)
+        test_lib.lib_set_vm_host_l2_ip(target_vm.get_vm())
+        default_l3_uuid = target_vm.get_vm().defaultL3NetworkUuid
+        nic = target_vm.get_vm().vmNics[0]
+
+        cmd_result = test_lib.lib_ssh_vm_cmd_by_agent(host.managementIp, nic.ip, test_lib.lib_get_vm_username(target_vm.get_vm()), test_lib.lib_get_vm_password(target_vm.get_vm()), target_cmd)
+        test_util.test_logger("run_workloads - cmd result:  %s" % str(cmd_result.result))
+
+        target_vm.reboot()
+        target_vm.update()
+
+        for volume in target_vm.test_volumes:
+            volume.update()
+            volume.update_volume()
+
+    time.sleep(timeout)
+
 def reboot_host(robot_test_obj, args):
     target_host = ""
     hosts = []
@@ -1038,12 +1095,15 @@ def use_volume_backup(robot_test_obj, args):
 
 
 def create_volume(robot_test_obj, args):
+    large_flag = False
+    volume_check_flag = True
+
     if len(args) < 1:
         test_util.test_fail("no resource available for next action: create volume")
     target_volume_name = args[0]
     ps_uuid = robot_test_obj.get_default_config()['PS']
     systemtags = []
-    if len(args) == 2:
+    if len(args) > 1:
         tags = args[1].split('=')[1].split(',')
         if 'scsi' in tags:
             systemtags.append("capability::virtio-scsi")
@@ -1053,6 +1113,12 @@ def create_volume(robot_test_obj, args):
             systemtags.append("volumeProvisioningStrategy::ThinProvisioning")
         if 'thick' in tags:
             systemtags.append("volumeProvisioningStrategy::ThickProvisioning")
+
+    if len(args) == 3:
+        large_flag = args[2]
+    if len(args) == 4:
+        large_flag = args[2]
+        volume_check_flag = args[3]
 
     volume_creation_option = test_util.VolumeOption()
     volume_creation_option.set_name(target_volume_name)
@@ -1069,6 +1135,11 @@ def create_volume(robot_test_obj, args):
     if not MINI:
         new_volume = test_lib.lib_create_volume_from_offering(volume_creation_option)
     else:
+        if large_flag:
+            volume_creation_option.set_diskSize(random.choice([10, 50, 100, 200, 500]) * 1024 * 1024 * 1024)
+        else:
+            volume_creation_option.set_diskSize(random.choice([1, 2, 3, 4]) * 1024 * 1024 * 1024)
+
         volume_creation_option.set_diskSize(random.choice([1, 2, 3, 4]) * 1024 * 1024 * 1024)
         volume_inv = vol_ops.create_volume_from_diskSize(volume_creation_option)
         new_volume = zstack_vol_header.ZstackTestVolume()
@@ -1077,7 +1148,7 @@ def create_volume(robot_test_obj, args):
     snap_tree = robot_snapshot_header.ZstackSnapshotTree(new_volume)
     snap_tree.update()
     new_volume.snapshot_tree = snap_tree
-    robot_test_obj.test_dict.add_volume(target_volume_name, new_volume)
+    robot_test_obj.test_dict.add_volume(target_volume_name, new_volume, volume_check_flag)
     robot_test_obj.test_dict.add_snap_tree(target_volume_name, snap_tree)
 
 
@@ -1723,6 +1794,7 @@ action_dict = {
     'resume_vm': resume_vm,
     'reboot_vm': reboot_vm,
     'reboot_host': reboot_host,
+    'run_workloads': run_workloads,
     'destroy_vm': destroy_vm,
     'migrate_vm': migrate_vm,
     'expunge_vm': expunge_vm,
