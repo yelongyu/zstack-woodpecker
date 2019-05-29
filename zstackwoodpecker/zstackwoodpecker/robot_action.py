@@ -159,7 +159,15 @@ class robot_test_dict(object):
     def check(self):
         # vm.check
         for k, vm in self.vm.items():
-            vm.check()
+            vm_check = True
+            for volume in vm.get_vm().allVolumes:
+                if volume.type == "Root":
+                    continue
+                if not self.volume_check[volume.name]:
+                    vm_check = False
+            if vm_check:
+                vm.check()
+
         # volume.check
         for k, volume in self.volume.items():
             if self.volume_check[k]:
