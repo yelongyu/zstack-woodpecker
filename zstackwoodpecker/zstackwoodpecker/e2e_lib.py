@@ -165,34 +165,39 @@ class E2E(object):
         selection_rendered = 'ant-select-selection__rendered'
         radio_group = 'ant-radio-group'
         input_row = 'ant-row ant-form-item'
+        title = None
+
         def select_opt(elem, opt_value):
             elem.get_element(selection_rendered).click()
             time.sleep(1)
             for opt in self.get_elements('li[role="option"]'):
                 if opt.displayed() and opt_value in opt.text:
                     opt.click()
+
         def select_radio(elem, value):
             for opt in self.get_elements('input[type="radio"]'):
                 if value == opt.get_attribute('value'):
                     opt.click()
+
         def input_content(elem, content):
             element = elem.get_element('input', 'tag name')
             element.clear()
             element.input(content)
+
         def textarea_content(elem, content):
             element = elem.get_element('textarea', 'tag name')
             element.clear()
             element.input(content)
-        title = None
-        elems = self.get_elements(input_row)
+
         for _ in range(10):
+            elems = self.get_elements(input_row)
             if elems:
                 break
             else:
                 time.sleep(0.5)
         else:
             test_util.test_fail('Can not find elements with selector: [%s]' % input_row)
-        for elem in self.get_elements('ant-row ant-form-item'):
+        for elem in self.get_elements(input_row):
             title_elem = elem.get_elements(css_selector)
             if title_elem:
                 title = title_elem[0].text.encode('utf-8')

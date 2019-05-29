@@ -178,17 +178,17 @@ class MINI(E2E):
 
     def switch_tab(self, tab_name):
         test_util.test_logger('Switch to tab [%s]' % tab_name.encode('utf-8'))
+        self.wait_for_page_render()
         for tab in self.get_elements('ant-tabs-tab'):
             if tab_name in tab.text:
                 tab.click()
-        self.wait_for_page_render()
         time.sleep(1)
 
     def click_ok(self):
         test_util.test_logger('Click OK button')
+        self.wait_for_page_render()
         self.get_elements(PRIMARYBTN)[-1].click()
         self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
-        self.wait_for_page_render()
         time.sleep(1)
 
     def click_cancel(self):
@@ -368,6 +368,15 @@ class MINI(E2E):
             else:
                 test_util.test_fail('Can not find the res with name [%s]' % res)
 
+    def get_detail_info(self, res_name, res_type, info_name):
+        self.enter_details_page(res_type, res_name)
+        for elem in self.get_elements("cardField___2SE_p"):
+            if info_name in elem.text:
+                info = elem.get_element('ant-typography-ellipsis').text
+                self.go_backward()
+                return info
+        test_util.test_fail('Can not find the detail info of [%s] with info name [%s]' % (res_name, info_name))
+
     def check_res_item(self, res_list, target='displayed'):
         test_util.test_logger('Check if %s %s' % (res_list, target))
         if not isinstance(res_list, types.ListType):
@@ -390,7 +399,7 @@ class MINI(E2E):
             else:
                 test_util.test_fail('%s should to be confirmed' % res)
 
-    def check_menu_item_enabled(self, name, res_type, op_name):
+    def check_menu_item_disabled(self, name, res_type, op_name):
         self.navigate(res_type)
         elem = self.get_res_element(name)
         if not elem.get_element(CHECKBOX).selected:
@@ -425,7 +434,6 @@ class MINI(E2E):
                     return True
             else:
                 time.sleep(1)
-                return True
 
     def end_action(self, action_name):
         if action_name == 'confirm':
@@ -661,6 +669,40 @@ class MINI(E2E):
         checker = MINICHECKER(self, vm_elem)
         checker.vm_check(check_list)
 
+    def upgrade_system_capacity(self, vm_name, new_capacity, details_page=False):
+        self.navigate('vm')
+        capacity = self.get_detail_info(vm_name, 'vm', u'容量')
+        test_util.test_logger('Upgrade system capacity of [%s] from %s to %s' % (vm_name, capacity, new_capacity))
+        self.more_operate(u'系统扩容', res_type='vm', res_name=vm_name, details_page=details_page)
+        self.input('dataSize', new_capacity.split())
+        self.click_ok()
+        capacity = self.get_detail_info(vm_name, 'vm', u'容量')
+        if capacity != new_capacity:
+            test_util.test_fail("Failed to upgrade system capacity of [%s] to %s" % (vm_name, new_capacity))
+
+    def live_migrate(self, vm_name, details_page=False):
+        self.navigate('vm')
+        if u'运行中' not in self.get_res_element(vm_name).text:
+            self.check_menu_item_disabled(vm_name, 'vm', u'热迁移')
+        old_host = self.get_detail_info(vm_name, 'vm', u'所在物理机:')
+        self.more_operate(u'热迁移', res_type='vm', res_name=vm_name, details_page=details_page)
+        self.click_ok()
+        new_host = self.get_detail_info(vm_name, 'vm', u'所在物理机:')
+        test_util.test_logger('Live migrate [%s] from host[%s] to host[%s]' % (vm_name, old_host, new_host))
+
+    def create_vm_image(self, vm_name, image_name, dsc=None, platform='Linux'):
+        test_util.test_logger('Create the vm image named[%s] for vm[%s]' % (image_name, vm_name))
+        input_dict = {'name': image_name,
+                      'description': dsc,
+                      'platform': platform}
+        self.more_operate(u'创建云主机镜像', vm_name, res_type='vm', details_page=True)
+        for k, v in input_dict.iteritems():
+            if v is not None:
+                self.input(k, v)
+        self.click_ok()
+        self.navigate('image')
+        self.check_res_item(image_name)
+
     def open_vm_console(self, vm_name, details_page=False):
         test_util.test_logger('Open the console of [%s]' % vm_name)
         self.navigate('vm')
@@ -688,7 +730,7 @@ class MINI(E2E):
         self.end_action(end_action)
         # check
         if end_action == 'confirm':
-            self.check_menu_item_enabled(vm_name, 'vm', u'设置控制台密码')
+            self.check_menu_item_disabled(vm_name, 'vm', u'设置控制台密码')
 
     def cancel_console_password(self, vm_name, details_page=False, end_action='confirm'):
         test_util.test_logger('Cancel the console password of [%s]' % vm_name)
@@ -697,7 +739,7 @@ class MINI(E2E):
         self.end_action(end_action)
         # check
         if end_action == 'confirm':
-            self.check_menu_item_enabled(vm_name, 'vm', u'取消控制台密码')
+            self.check_menu_item_disabled(vm_name, 'vm', u'取消控制台密码')
 
     def vm_attach_volume(self, vm_name, volume_name, end_action='confirm'):
         volume_list = []
@@ -816,6 +858,10 @@ class MINI(E2E):
         netmask = netmask if netmask else os.getenv('noVlanIpRangeNetmask1')
         gateway = gateway if gateway else os.getenv('noVlanIpRangeGateway1')
         test_util.test_logger('Add network segment [%s] to [%s]' % (start_ip, end_ip))
+        net_segment_dict = {'startIp': start_ip,
+                            'endIp': end_ip,
+                            'netmask': netmask,
+                            'gateway': gateway}
         self.navigate('network')
         if details_page:
             self.enter_details_page('network', network)
@@ -824,17 +870,12 @@ class MINI(E2E):
             self.operate(u'添加网络段')
         else:
             self.more_operate(u'添加网络段', res_name=network)
-        self.input('startIp', start_ip)
-        self.input('endIp', end_ip)
-        self.input('netmask', netmask)
-        self.input('gateway', gateway)
+        for k, v in net_segment_dict.iteritems():
+            if v is not None:
+                self.input(k, v)
         self.end_action(end_action)
         if end_action == 'confirm':
-            check_list = []
-            check_list.append(start_ip)
-            check_list.append(end_ip)
-            check_list.append(netmask)
-            check_list.append(gateway)
+            check_list = [start_ip, end_ip, netmask, gateway]
             if not details_page:
                 self.enter_details_page('network', network)
                 self.switch_tab(u'网络段')
