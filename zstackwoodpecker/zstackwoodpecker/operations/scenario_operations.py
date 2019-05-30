@@ -2571,7 +2571,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 
                 #for Mini setup
                 if os.getenv('hostType') == 'miniHost':
-                    time.sleep(120)
+                    time.sleep(200)
                     base_url = "http://192.168.200.100/mirror/kefeng.wang/mini-server/"
                     cmd = "curl %s | grep ZStack-mini-server | awk '{print $6}' |awk -F'>' '{print $1}' | awk -F'\"' '{print $2}' | tail -n1" % base_url
                     (retcode, output, erroutput) = ssh.execute(cmd, vm_ip, 'root', 'password')
