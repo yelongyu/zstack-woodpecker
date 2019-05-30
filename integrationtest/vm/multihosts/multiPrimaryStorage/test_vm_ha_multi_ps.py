@@ -32,6 +32,10 @@ record = dict()
 @test_stub.skip_if_have_local
 @test_stub.skip_if_only_one_ps
 def test():
+    ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+    for i in ps:
+        if i.type =='SharedBlock':
+            test_util.test_skip('Skip test on SharedBlock PS.')
 
     ps_env = test_stub.PSEnvChecker()
     
