@@ -2580,9 +2580,9 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     ssh.execute(cmd, vm_ip, 'root', 'password', True, 22)
                     cmd = "bash %s" % (output)
                     ssh.execute(cmd, vm_ip, 'root', 'password', True, 22)
-                    print "Mini Host need install drbd"
-                    cmd = "yum install kmod-drbd84 drbd84-utils -y;depmod -a && modprobe drbd;systemctl enable drbd;systemctl start drbd"
-                    ssh.execute(cmd, vm_ip, 'root', 'password', True, 22)
+                    #print "Mini Host need install drbd"
+                    #cmd = "yum install kmod-drbd84 drbd84-utils -y;depmod -a && modprobe drbd;systemctl enable drbd;systemctl start drbd"
+                    #ssh.execute(cmd, vm_ip, 'root', 'password', True, 22)
 
                 if vm.dataDiskOfferingUuid__:
                     volume_option = test_util.VolumeOption()
