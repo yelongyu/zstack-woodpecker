@@ -110,22 +110,29 @@ class E2E(object):
         rsp = self._post(uri, body='{"using": "%s", "value":"%s"}' % (strategy, value))
         return (rsp, uri[:uri.index('element') + 7])
 
-    def get_element(self, value, strategy='css selector', par_uri=None):
+    def get_element(self, value, strategy='css selector', par_uri=None, check_result=False):
         '''
         strategy: 'css selector', 'tag name', 'id', 'link text', 'partial link text'
         reference: https://github.com/SeleniumHQ/selenium/wiki/JsonWireProtocol
         '''
         par_uri = par_uri if par_uri else self.uri
-        rsp, uri = self._get_element(join(par_uri, 'element'), value=value, strategy=strategy)
+        val_list = value.split('|')
+        for i in xrange(len(val_list)):
+            rsp, uri = self._get_element(join(par_uri, 'element'), value=val_list[i], strategy=strategy)
+            if rsp.value is not None:
+                break
         element = rsp.value.ELEMENT
-        return Element(join(uri, element), par_uri, strategy, value)
+        if not element and check_result:
+            test_util.test_fail('Can not find the element [strategy="%s", value="%s"]' % (strategy, value))
+        return Element(join(uri, element), par_uri, strategy, val_list[i])
 
-    def get_elements(self, value, strategy='css selector', check_result=False, par_uri=None):
+    def get_elements(self, value, strategy='css selector', par_uri=None, check_result=False):
         par_uri = par_uri if par_uri else self.uri
         val_list = value.split('|')
-        rsp, uri = self._get_element(join(self.uri, 'elements'), value=val_list[0], strategy=strategy)
-        if len(val_list) > 1 and not rsp.value:
-            rsp, uri = self._get_element(join(self.uri, 'elements'), value=val_list[1], strategy=strategy)
+        for i in xrange(len(val_list)):
+            rsp, uri = self._get_element(join(self.uri, 'elements'), value=val_list[i], strategy=strategy)
+            if rsp.value:
+                break
         element_list = []
         uri = uri.replace('elements', 'element')
         elements = rsp.value
@@ -264,8 +271,11 @@ class E2E(object):
     def operate(self, name):
         test_util.test_logger('Execute operation [%s]' % name.encode('utf-8'))
         op_selector = 'ant-dropdown-menu-item|ant-menu-item'
-        self.wait_for_element(op_selector)
-        for op in self.get_elements(op_selector):
+        _elem = self.get_element('actionsContainer___1Ce9C')
+        if _elem is not None:
+            op_selector = 'span'
+            strategy = 'tag name'
+        for op in _elem.get_elements(op_selector, strategy) if _elem else self.get_elements(op_selector):
             if op.enabled and op.text == name:
                 op.click()
                 time.sleep(1)

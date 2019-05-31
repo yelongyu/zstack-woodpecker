@@ -30,6 +30,7 @@ CHECKBOX = 'input[type="checkbox"]'
 FORMEXPLAIN = 'ant-form-explain'
 SPINCONTAINER = 'ant-spin-container'
 CONFIRMITEM = 'confirmItem___1ZEQE'
+MENUSETTING = 'ant-menu-horizontal'
 PRIMARYBTNNUM = 2
 
 
@@ -107,7 +108,7 @@ class MINI(E2E):
 
     def logout(self):
         test_util.test_logger('Log out')
-        self.get_element('img', 'tag name').move_cursor_here()
+        self.get_element(MENUSETTING).move_cursor_here()
         self.operate(u'退出登录')
         if not self.wait_for_element('#password'):
             test_util.test_fail('Fail to Logout')
@@ -202,6 +203,7 @@ class MINI(E2E):
         self.wait_for_element(MODALCONTENT, target='disappear')
 
     def more_operate(self, op_name, res_name, res_type=None, details_page=False):
+        test_util.test_logger('Start more operate')
         res_list = []
         self.wait_for_element(CARDCONTAINER)
         if isinstance(res_name, types.ListType):
@@ -215,13 +217,14 @@ class MINI(E2E):
                 test_util.test_fail('Multiple resource can not enter details page together')
         else:
             for res in res_list:
-                test_util.test_logger('Select [%s]' % res)
                 elem = self.get_res_element(res)
                 if not elem.get_element(CHECKBOX).selected:
+                    test_util.test_logger('Select [%s]' % res)
                     elem.get_element(CHECKBOX).click()
-        self.get_element(MOREOPERATIONBTN).move_cursor_here()
+        self.get_element(MOREOPERATIONBTN).click()
         time.sleep(1)
         self.operate(op_name)
+        test_util.test_logger('Finish more operate')
 
     def enter_details_page(self, res_type, name):
         inv = get_inv(name, res_type)
@@ -282,8 +285,7 @@ class MINI(E2E):
         self.navigate(res_type)
         self.switch_view(view)
         primary_btn_num = len(self.get_elements(PRIMARYBTN))
-        test_util.test_logger('%s %s [name: (%s)]' % (('Expunge' if primary_btn_num < PRIMARYBTNNUM else 'Delete'),
-                                                   res_type, ' '.join(res_list)))
+        test_util.test_logger('%s %s [name: (%s)]' % (('Expunge' if primary_btn_num < PRIMARYBTNNUM else 'Delete'), res_type, ' '.join(res_list)))
         for res in res_list:
             _elem = self.get_res_element(res)
             if corner_btn:
@@ -292,18 +294,12 @@ class MINI(E2E):
             elif expunge and (primary_btn_num < PRIMARYBTNNUM):
                 isExpunge = True
                 if details_page:
-                    self.more_operate(op_name=u'彻底删除',
-                                      res_type=res_type,
-                                      res_name=res_list,
-                                      details_page=details_page)
+                    self.more_operate(op_name=u'彻底删除', res_type=res_type, res_name=res_list, details_page=details_page)
                     break
                 else:
                     _elem.get_element(CHECKBOX).click()
             else:
-                self.more_operate(op_name=u'删除',
-                                  res_type=res_type,
-                                  res_name=res_list,
-                                  details_page=details_page)
+                self.more_operate(op_name=u'删除', res_type=res_type, res_name=res_list, details_page=details_page)
                 self.check_confirm_item(res_list)
                 break
         else:
@@ -369,13 +365,14 @@ class MINI(E2E):
                 test_util.test_fail('Can not find the res with name [%s]' % res)
 
     def get_detail_info(self, res_name, res_type, info_name):
+        test_util.test_logger('Get the detail info of [%s] with info name [%s]' % (res_name, info_name.encode('utf-8')))
         self.enter_details_page(res_type, res_name)
         for elem in self.get_elements("cardField___2SE_p"):
             if info_name in elem.text:
                 info = elem.get_element('ant-typography-ellipsis').text
                 self.go_backward()
                 return info
-        test_util.test_fail('Can not find the detail info of [%s] with info name [%s]' % (res_name, info_name))
+        test_util.test_fail('Can not find the detail info of [%s] with info name [%s]' % (res_name, info_name.encode('utf-8')))
 
     def check_res_item(self, res_list, target='displayed'):
         test_util.test_logger('Check if %s %s' % (res_list, target))
@@ -404,10 +401,13 @@ class MINI(E2E):
         elem = self.get_res_element(name)
         if not elem.get_element(CHECKBOX).selected:
             elem.get_element(CHECKBOX).click()
-        self.get_element(MOREOPERATIONBTN).move_cursor_here()
-        op_selector = 'ant-dropdown-menu-item'
-        self.wait_for_element(op_selector)
-        for op in self.get_elements(op_selector):
+        self.get_element(MOREOPERATIONBTN).click()
+        op_selector = 'ant-dropdown-menu-item|ant-menu-item'
+        _elem = self.get_element('actionsContainer___1Ce9C')
+        if _elem is not None:
+            op_selector = 'span'
+            strategy = 'tag name'
+        for op in _elem.get_elements(op_selector, strategy) if _elem else self.get_elements(op_selector):
             if op.text == op_name:
                 assert op.get_attribute('aria-disabled') == 'true'
 
@@ -589,13 +589,13 @@ class MINI(E2E):
                         self.get_element('left-part').click()
                         time.sleep(1)
                     break
-            self.get_element(MOREOPERATIONBTN).move_cursor_here()
+            self.get_element(MOREOPERATIONBTN).click()
             time.sleep(1)
             self.operate(u'修改信息')
         else:
             _elem = self.get_res_element(res_name)
             if corner_btn:
-                _elem.get_elements('button', 'tag name')[0].click()
+                _elem.get_elements('button', 'tag name')[1].click()
             else:
                 self.more_operate(u'修改信息', res_name=res_name, res_type=res_type, details_page=details_page)
         if new_name is not None:
@@ -654,7 +654,7 @@ class MINI(E2E):
         test_util.test_logger('Set [%s] ha leval [%s]' % (vm_name, ha))
         check_list = []
         self.navigate('vm')
-        self.more_operate(u'高可用级别', res_type='vm', res_name=vm_name, details_page=details_page)
+        self.more_operate(u'高可用', res_type='vm', res_name=vm_name, details_page=details_page)
         if ha:
             check_list.append('NeverStop')
         else:
@@ -681,21 +681,20 @@ class MINI(E2E):
             test_util.test_fail("Failed to upgrade system capacity of [%s] to %s" % (vm_name, new_capacity))
 
     def live_migrate(self, vm_name, details_page=False):
+        test_util.test_logger('Live migrate VM')
         self.navigate('vm')
-        if u'运行中' not in self.get_res_element(vm_name).text:
-            self.check_menu_item_disabled(vm_name, 'vm', u'热迁移')
         old_host = self.get_detail_info(vm_name, 'vm', u'所在物理机:')
-        self.more_operate(u'热迁移', res_type='vm', res_name=vm_name, details_page=details_page)
+        self.more_operate(u'迁移', res_type='vm', res_name=vm_name, details_page=details_page)
         self.click_ok()
         new_host = self.get_detail_info(vm_name, 'vm', u'所在物理机:')
-        test_util.test_logger('Live migrate [%s] from host[%s] to host[%s]' % (vm_name, old_host, new_host))
+        test_util.test_logger('Live migrate [%s] from host[%s] to host[%s] Successful' % (vm_name, old_host, new_host))
 
     def create_vm_image(self, vm_name, image_name, dsc=None, platform='Linux'):
         test_util.test_logger('Create the vm image named[%s] for vm[%s]' % (image_name, vm_name))
         input_dict = {'name': image_name,
                       'description': dsc,
                       'platform': platform}
-        self.more_operate(u'创建云主机镜像', vm_name, res_type='vm', details_page=True)
+        self.more_operate(u'创建镜像', vm_name, res_type='vm', details_page=True)
         for k, v in input_dict.iteritems():
             if v is not None:
                 self.input(k, v)
@@ -706,7 +705,12 @@ class MINI(E2E):
     def open_vm_console(self, vm_name, details_page=False):
         test_util.test_logger('Open the console of [%s]' % vm_name)
         self.navigate('vm')
-        self.more_operate(u'打开控制台', vm_name, res_type='vm', details_page=details_page)
+        if details_page:
+            self.enter_details_page('vm', vm_name)
+            self.get_elements('button', 'tag name')[0].click()
+        else:
+            _elem = self.get_res_element(vm_name)
+            _elem.get_elements('button', 'tag name')[0].click()
         while True:
             if len(self.get_window_handles()) == 1:
                 time.sleep(0.5)
@@ -914,8 +918,7 @@ class MINI(E2E):
                     'disable': u'停用',
                     'reconnect': u'重连',
                     'maintenance': u'维护模式',
-                    'light': u'维修灯亮'
-        }
+                    'light': u'维修灯亮'}
         test_util.test_logger('Host (%s) execute action[%s]' % (' '.join(host_list), action))
         for host in host_list:
             for elem in self.get_elements('ant-row-flex-middle'):
@@ -928,14 +931,14 @@ class MINI(E2E):
                         time.sleep(1)
                         break
         if details_page:
-            self.get_element(MOREOPERATIONBTN).move_cursor_here()
+            self.get_element(MOREOPERATIONBTN).click()
             time.sleep(1)
             self.operate(ops_list[action])
         else:
             if action in ['enable', 'disable']:
                 self.click_button(ops_list[action])
             else:
-                self.get_element(MOREOPERATIONBTN).move_cursor_here()
+                self.get_element(MOREOPERATIONBTN).click()
                 time.sleep(1)
                 self.operate(ops_list[action])
         self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
@@ -992,7 +995,6 @@ class MINI(E2E):
         return True
 
 
-
 class MINICHECKER(object):
     def __init__(self, obj, elem):
         self.obj = obj
@@ -1020,7 +1022,8 @@ class MINICHECKER(object):
     def image_check(self, check_list=[]):
         check_list.append(u'就绪')
         for v in check_list:
-            if u'下载中' or u'计算中' or u'解析中' in self.elem.text:
+            not_ready_list = [u'下载中', u'计算中', u'解析中']
+            if any(x in self.elem.text for x in not_ready_list):
                 time.sleep(1)
                 continue
             elif v not in self.elem.text:
