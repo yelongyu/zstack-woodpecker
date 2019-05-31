@@ -7,6 +7,7 @@ New Integration test for image replication.
 
 import os
 import time
+import random
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 
@@ -17,8 +18,10 @@ img_repl = test_stub.ImageReplication()
 
 def test():
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.getenv('zstackHaVip')
-    img_repl.add_image(image_name, img_format='iso')
+    bs_list = img_repl.get_bs_list()
+    bs = random.choice(bs_list)
 
+    img_repl.add_image(image_name, bs_uuid=bs.uuid, img_format='iso')
     img_repl.create_iso_vm()
 
     img_repl.wait_for_image_replicated(image_name)

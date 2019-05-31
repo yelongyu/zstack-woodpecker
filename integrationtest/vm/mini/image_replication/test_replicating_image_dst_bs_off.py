@@ -27,7 +27,7 @@ def test():
     bs2 = bs_list[0]
     host_vm = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, ip=bs2.hostname)
 
-    img_repl.add_image(image_name, url=os.getenv('imageUrl_raw'))
+    img_repl.add_image(image_name, bs_uuid=bs.uuid, url=os.getenv('imageUrl_raw'))
     img_repl.wait_for_downloading(image_name)
 
     test_stub.stop_host(host_vm, test_lib.all_scenario_config, 'cold')

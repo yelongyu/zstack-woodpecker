@@ -18,8 +18,8 @@ img_repl = test_stub.ImageReplication()
 
 
 def test():
-    conf_ops.change_global_config('imagestore', 'cleanOnExpunge', 'true')
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.getenv('zstackHaVip')
+    conf_ops.change_global_config('imagestore', 'cleanOnExpunge', 'true')
     bs_list = img_repl.get_bs_list()
     bs = random.choice(bs_list)
 

@@ -24,7 +24,7 @@ def test():
     bs_list = img_repl.get_bs_list()
     bs = random.choice(bs_list)
 
-    img_repl.add_image(image_name, url=os.getenv('imageUrl_raw'))
+    img_repl.add_image(image_name, bs_uuid=bs.uuid, url=os.getenv('imageUrl_raw'))
     img_repl.wait_for_downloading(image_name)
 
     test_stub.down_host_network(bs.hostname, test_lib.all_scenario_config, "managment_net")

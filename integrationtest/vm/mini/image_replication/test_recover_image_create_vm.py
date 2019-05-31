@@ -1,8 +1,6 @@
 '''
 
 New Integration test for image replication.
-Check Image Replication after BS recovering from network unreachable,
-Target BS NIC would be set down during replicating new image 
 
 @author: Legion
 '''
@@ -12,38 +10,31 @@ import time
 import random
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
+import zstackwoodpecker.operations.config_operations as conf_ops
 
-
-image_name = 'image-replication-test-' + time.strftime('%y%m%d%H%M%S', time.localtime())
+image_name = 'iso-image-replication-test-' + time.strftime('%y%m%d%H%M%S', time.localtime())
 test_stub = test_lib.lib_get_test_stub()
 img_repl = test_stub.ImageReplication()
 
 
 def test():
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.getenv('zstackHaVip')
+    conf_ops.change_global_config('imagestore', 'cleanOnExpunge', 'true')
     bs_list = img_repl.get_bs_list()
     bs = random.choice(bs_list)
-    bs_list.remove(bs)
-    bs2 = bs_list[0]
 
-    img_repl.add_image(image_name, bs_uuid=bs.uuid, url=os.getenv('imageUrl_raw'))
-    img_repl.wait_for_downloading(image_name)
+    img_repl.add_image(image_name, bs_uuid=bs.uuid, url=os.getenv('imageUrl_vdbench'))
 
-    test_stub.down_host_network(bs2.hostname, test_lib.all_scenario_config, "managment_net")
-    img_repl.wait_for_bs_status_change('Disconnected')
-
-    time.sleep(300)
-    test_stub.up_host_network(bs2.hostname, test_lib.all_scenario_config, "managment_net")
-    test_stub.recover_vlan_in_host(bs.hostname, test_lib.all_scenario_config, test_lib.deploy_config)
-
-    img_repl.wait_for_bs_status_change('Connected')
     img_repl.wait_for_image_replicated(image_name)
-
     img_repl.check_image_data(image_name)
-    img_repl.wait_for_host_connected()
+
+    img_repl.delete_image()
+    time.sleep(60)
+    img_repl.recover_image()
 
     img_repl.create_vm(image_name)
-    test_util.test_pass('Image Replication After NIC Recovering Test Success')
+
+    test_util.test_pass('ISO Image Replication Test Success')
 
 
 def env_recover():
@@ -65,4 +56,3 @@ def error_cleanup():
         img_repl.vm.destroy()
     except:
         pass
-

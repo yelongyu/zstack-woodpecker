@@ -1107,6 +1107,9 @@ class ImageReplication(object):
     def delete_image(self):
         img_ops.delete_image(self.image.uuid)
 
+    def recover_image(self):
+        img_ops.recover_image(self.image.uuid)
+
     def expunge_image(self):
         img_ops.expunge_image(self.image.uuid)
 
