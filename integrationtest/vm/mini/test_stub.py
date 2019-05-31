@@ -974,6 +974,7 @@ class ImageReplication(object):
             image_status = [bs_ref.status for bs_ref in _image.backupStorageRefs]
             if image_status.count('Ready') == 2:
                 test_util.test_logger('Image [name: %s] is ready on all BS' % image_name)
+                self.image = self.get_image_inv(image_name)
                 break
             else:
                 if r > 100 and len(image_status) != 2:
@@ -1010,25 +1011,36 @@ class ImageReplication(object):
             md5_list.add(chunk_md5)
         return md5_list
 
-    def check_image_data(self, image_name):
-        image = self.get_image_inv(image_name)
+    def check_image_data(self, image_name, expunged=False):
+        image = self.image if self.image else self.get_image_inv(image_name)
         bs_refs1, bs_refs2 = image.backupStorageRefs
         assert bs_refs1.installPath == bs_refs2.installPath
         bs1 = test_lib.lib_get_backup_storage_by_uuid(bs_refs1.backupStorageUuid)
-        bs2 = test_lib.lib_get_backup_storage_by_uuid(bs_refs1.backupStorageUuid)
+        bs2 = test_lib.lib_get_backup_storage_by_uuid(bs_refs2.backupStorageUuid)
         image_url = bs_refs1.installPath
         image_info = image_url.split('://')[1].split('/')
         mainfests_uri = 'https://%s:8000/v1/%s/manifests/%s' % (bs1.hostname, image_info[0], image_info[1])
-        blobsum = self.get_img_manifests(mainfests_uri).blobsum
+        manifests = self.get_img_manifests(mainfests_uri)
         mainfests_uri2 = 'https://%s:8000/v1/%s/manifests/%s' % (bs2.hostname, image_info[0], image_info[1])
-        blobsum2 = self.get_img_manifests(mainfests_uri2).blobsum
-        assert blobsum == blobsum2
-        md5_list1 = self.get_blobs_md5_list(bs1.hostname, image.uuid, blobsum)
-        test_util.test_logger('Image chunks md5 on bs1: %s' % md5_list1)
-        md5_list2 = self.get_blobs_md5_list(bs2.hostname, image.uuid, blobsum)
-        test_util.test_logger('Image chunks md5 on bs2: %s' % md5_list2)
-        assert len(md5_list1) == len(md5_list2), 'Image chunks check failed!'
-        assert set(md5_list1) == set(md5_list2), 'Image chunks check failed!'
+        manifests2 = self.get_img_manifests(mainfests_uri2)
+        test_util.test_logger('Response of requesting manifests from BS [hostname: %s]: %s' % \
+                                                    (bs1.hostname, jsonobject.dumps(manifests)))
+        test_util.test_logger('Response of requesting manifests from BS [hostname: %s]: %s' % \
+                                                    (bs2.hostname, jsonobject.dumps(manifests2)))
+        if expunged:
+            assert manifests.code == 404
+            assert manifests2.code == 404
+            test_util.test_logger("Iamge data has been cleanup up on all BS")
+        else:
+            blobsum = manifests.blobsum
+            blobsum2 = manifests2.blobsum
+            assert blobsum == blobsum2
+            md5_list1 = self.get_blobs_md5_list(bs1.hostname, image.uuid, blobsum)
+            test_util.test_logger('Image chunks md5 on bs1: %s' % md5_list1)
+            md5_list2 = self.get_blobs_md5_list(bs2.hostname, image.uuid, blobsum)
+            test_util.test_logger('Image chunks md5 on bs2: %s' % md5_list2)
+            assert len(md5_list1) == len(md5_list2), 'Image chunks check failed!'
+            assert set(md5_list1) == set(md5_list2), 'Image chunks check failed!'
 
     def wait_for_bs_status_change(self, status='Connected', timeout=300):
         test_util.test_dsc('Wait for BS changing to %s' % status)
@@ -1117,7 +1129,7 @@ class ImageReplication(object):
         disk_offering_option.set_name('root-disk-iso')
         disk_offering_option.set_diskSize(data_volume_size)
         data_volume_offering = vol_ops.create_volume_offering(disk_offering_option)
-        l3_name = os.environ.get('l3VlanNetworkName1')
+        l3_name = os.environ.get('l3PublicNetworkName')
         l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
         root_disk_uuid = data_volume_offering.uuid
         self.vm = create_vm_with_iso([l3_net_uuid], self.image.uuid, 'vm-iso', root_disk_uuid)
