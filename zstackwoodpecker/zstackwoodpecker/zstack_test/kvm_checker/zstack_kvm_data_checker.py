@@ -231,7 +231,7 @@ class zstack_kvm_vm_data_integrity_checker(checker_header.TestChecker):
         test_util.test_logger("partition information: %s" % cmd_res)
         #exec vdbench
         command = 'python /root/vdbench_test.py | tee result'
-        cmd_result = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, nic.ip, test_lib.lib_get_vm_username(vm), test_lib.lib_get_vm_password(vm), command, self.exp_result)
+        cmd_result = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, nic.ip, test_lib.lib_get_vm_username(vm), test_lib.lib_get_vm_password(vm), command, self.exp_result, 360)
         test_util.test_logger("czhou: %s" % cmd_result)
 
         if isinstance(cmd_result, str) and "generate successfully" in cmd_result:

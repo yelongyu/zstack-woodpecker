@@ -12,6 +12,7 @@ import traceback
 import sys
 import threading
 import uuid
+import urllib3
 
 import apibinding.api_actions as api_actions
 import zstackwoodpecker.setup_actions as setup_actions 
@@ -303,7 +304,7 @@ def lib_check_cleanup_vr_logs_by_vm(vm):
         lib_check_cleanup_vr_logs(vr_vm)
     return True
 
-def lib_ssh_vm_cmd_by_agent(test_agent_ip, vm_ip, username, password, command, timeout=SSH_TIMEOUT, retry=1):
+def lib_ssh_vm_cmd_by_agent(test_agent_ip, vm_ip, username, password, command, timeout=SSH_TIMEOUT, retry=1, post_timeout=120.0):
     cmd = vm_plugin.SshInVmCmd()
     cmd.ip = vm_ip
     cmd.username = username
@@ -311,10 +312,10 @@ def lib_ssh_vm_cmd_by_agent(test_agent_ip, vm_ip, username, password, command, t
     cmd.command = command
     cmd.timeout = timeout
     rsp = None
-    rsp = lib_try_http_cmd(testagent.build_http_path(test_agent_ip, vm_plugin.SSH_GUEST_VM_PATH), cmd, retry)
+    rsp = lib_try_http_cmd(testagent.build_http_path(test_agent_ip, vm_plugin.SSH_GUEST_VM_PATH), cmd, retry, timeout=post_timeout)
     return rsp
 
-def lib_ssh_vm_cmd_by_agent_with_retry(test_agent_ip, vm_ip, username, password, command, expected_result = True):
+def lib_ssh_vm_cmd_by_agent_with_retry(test_agent_ip, vm_ip, username, password, command, expected_result = True, post_timeout=120.0):
     '''
     retry the ssh command if ssh is failed in TIMEOUT
     Before this API, lib_set_vm_host_l2_ip() should be called to setup host
@@ -325,7 +326,7 @@ def lib_ssh_vm_cmd_by_agent_with_retry(test_agent_ip, vm_ip, username, password,
     while time.time() < timeout:
         try:
             rsp = lib_ssh_vm_cmd_by_agent(test_agent_ip, vm_ip, username, \
-                    password, command)
+                    password, command, post_timeout=post_timeout)
             if expected_result and not rsp.success:
                 time.sleep(1)
                 continue
@@ -564,7 +565,7 @@ def lib_check_vlan(vm):
     pass
 
 #consider possible connection failure on stress test. Better to repeat the same command several times.
-def lib_try_http_cmd(http_path, cmd, times=5):
+def lib_try_http_cmd(http_path, cmd, times=5, timeout=120.0):
     interval = 1
     current_round = 1
     exception = None
@@ -574,7 +575,7 @@ def lib_try_http_cmd(http_path, cmd, times=5):
     while current_round <= times and time.time() < timeout:
         try:
             current_round += 1
-            rspstr = http.json_dump_post(http_path, cmd)
+            rspstr = json_dump_post(http_path, cmd, timeout=timeout)
             rsp = jsonobject.loads(rspstr)
             test_util.test_logger('http call response result: %s' % rspstr)
             return rsp
@@ -8813,3 +8814,49 @@ def query_resource_price(uuid = None, price = None, resource_name = None, time_u
         result = bill_ops.query_resource_price(cond)
         return result
 
+def json_post(uri, body=None, headers={}, method='POST', fail_soon=False, timeout=120.0):
+    ret = []
+    def post(_):
+        try:
+            pool = urllib3.PoolManager(timeout=timeout, retries=urllib3.util.retry.Retry(15))
+            header = {'Content-Type': 'application/json', 'Connection': 'close'}
+            content = None
+            for k in headers.keys():
+                header[k] = headers[k]
+
+            if body is not None:
+                assert isinstance(body, types.StringType)
+                header['Content-Length'] = str(len(body))
+                resp = pool.urlopen(method, uri, headers=header, body=str(body))
+                content = resp.data
+                resp.close()
+            else:
+                header['Content-Length'] = '0'
+                resp = pool.urlopen(method, uri, headers=header)
+                content = resp.data
+                resp.close()
+
+            pool.clear()
+            ret.append(content)
+            return True
+        except Exception as e:
+            if fail_soon:
+                raise e
+
+            test_util.test_logger("[WARN]: %s" % (linux.get_exception_stacktrace()))
+            return False
+
+    if fail_soon:
+        post(None)
+    else:
+        if not linux.wait_callback_success(post, ignore_exception_in_callback=True):
+            raise Exception('unable to post to %s, body: %s, see before error' % (uri, body))
+
+    return ret[0]
+
+
+def json_dump_post(uri, body=None, headers={}, fail_soon=False, timeout=120.0):
+    content = None
+    if body is not None:
+        content = jsonobject.dumps(body)
+    return json_post(uri, content, headers, fail_soon=fail_soon, timeout=timeout)
