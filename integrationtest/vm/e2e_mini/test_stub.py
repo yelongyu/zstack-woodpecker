@@ -159,6 +159,7 @@ class MINI(E2E):
             self.get_element('#password').input('password')
         # Login button
         self.get_element('button', 'tag name').click()
+        self.wait_for_element('logintips___2GMLw')
         assert self.get_element('logintips___2GMLw').text == u'用户名或密码错误！'
 
     def navigate(self, menu):

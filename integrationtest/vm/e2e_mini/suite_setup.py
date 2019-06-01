@@ -973,8 +973,6 @@ def test():
         if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
             os.system("bash %s %s" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ip1))
             os.system("bash %s %s" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ip2))
-		cmd_skip = 'mysql -uroot -pzstack.mysql.password -e \"update zstack_mini.kv set value=\'Initialized\' where name=\'init.status\';select * from zstack_mini.kv\"'
-    	os.system("sshpass -p password root@%s %s" % (mn_ip1, cmd_skip))
     
         deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
         for host in testHosts:

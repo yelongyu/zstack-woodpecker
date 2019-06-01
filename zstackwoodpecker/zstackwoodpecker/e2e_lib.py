@@ -122,8 +122,11 @@ class E2E(object):
             if rsp.value is not None:
                 break
         element = rsp.value.ELEMENT
-        if not element and check_result:
-            test_util.test_fail('Can not find the element [strategy="%s", value="%s"]' % (strategy, value))
+        if element is None:
+            if check_result:
+                test_util.test_fail('Can not find the element [strategy="%s", value="%s"]' % (strategy, value))
+            else:
+                return None
         return Element(join(uri, element), par_uri, strategy, val_list[i])
 
     def get_elements(self, value, strategy='css selector', par_uri=None, check_result=False):
