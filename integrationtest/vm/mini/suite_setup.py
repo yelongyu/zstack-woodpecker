@@ -79,7 +79,7 @@ def test():
         os.system("bash %s %s %s" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ip1, 'disaster-recovery'))
         os.system("bash %s %s %s" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ip2, 'disaster-recovery'))
     cmd_skip = '''mysql -uroot -pzstack.mysql.password -e "update zstack_mini.kv set value='Initialized' where name='init.status';select * from zstack_mini.kv"'''
-    os.system("sshpass -p password root@%s %s" % (mn_ip1, cmd_skip))
+    ssh.execute(cmd_skip, mn_ip1, "root", "password", False, 22)
 
     deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
     for host in testHosts:
