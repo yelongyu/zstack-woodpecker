@@ -13,6 +13,7 @@ import sys
 import threading
 import uuid
 import urllib3
+import types
 
 import apibinding.api_actions as api_actions
 import zstackwoodpecker.setup_actions as setup_actions 
