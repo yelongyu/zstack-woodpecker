@@ -24,10 +24,10 @@ def test():
    global vm
    #set overProvisioning.primaryStorage's value as 10
    con_ops.change_global_config('mevoco','overProvisioning.primaryStorage',10)
-   test_lib.lib_create_disk_offering(diskSize=1099511627776,name="1T")
+   test_lib.lib_create_disk_offering(diskSize=107374182400,name="100G")
    l3_uuid = test_lib.lib_get_l3_by_name("l3VlanNetwork1").uuid
    image_uuid = test_lib.lib_get_image_by_name("ttylinux").uuid
-   disk_offering_uuids = [test_lib.lib_get_disk_offering_by_name("smallDiskOffering").uuid,test_lib.lib_get_disk_offering_by_name("root-disk").uuid,test_lib.lib_get_disk_offering_by_name("1T").uuid]
+   disk_offering_uuids = [test_lib.lib_get_disk_offering_by_name("smallDiskOffering").uuid,test_lib.lib_get_disk_offering_by_name("root-disk").uuid,test_lib.lib_get_disk_offering_by_name("100G").uuid]
    #choose the ps which availableCapacity >= 105G
    cond = res_ops.gen_query_conditions('availableCapacity', '>=', '112742891520')
    ps_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)[0].uuid

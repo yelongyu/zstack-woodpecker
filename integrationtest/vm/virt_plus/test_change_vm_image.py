@@ -18,8 +18,8 @@ def test():
    #set overProvisioning.primaryStorage's value as 10
    con_ops.change_global_config('mevoco','overProvisioning.primaryStorage',10)
    global vm
-   test_lib.lib_create_disk_offering(diskSize=1099511627776,name="1T")
-   disk_offering_uuids = [test_lib.lib_get_disk_offering_by_name("smallDiskOffering").uuid,test_lib.lib_get_disk_offering_by_name("root-disk").uuid,test_lib.lib_get_disk_offering_by_name("1T").uuid]
+   test_lib.lib_create_disk_offering(diskSize=107374182400,name="100G")
+   disk_offering_uuids = [test_lib.lib_get_disk_offering_by_name("smallDiskOffering").uuid,test_lib.lib_get_disk_offering_by_name("root-disk").uuid,test_lib.lib_get_disk_offering_by_name("100G").uuid]
    vm = test_stub.create_vm(image_name = "ttylinux",vm_name="test-vm",disk_offering_uuids = disk_offering_uuids)
    test_obj_dict.add_vm(vm)
    vm.check()

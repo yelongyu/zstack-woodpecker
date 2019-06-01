@@ -25,7 +25,7 @@ def test():
            test_util.test_skip('SharedBlock/AliyunEBS primary storage does not support overProvision')
    con_ops.change_global_config('mevoco','overProvisioning.primaryStorage',10)
    global vm
-   test_lib.lib_create_disk_offering(diskSize=1099511627776,name="1T")
+   test_lib.lib_create_disk_offering(diskSize=107374182400,name="100G")
    l3_uuid = test_lib.lib_get_l3_by_name("l3VlanNetwork3").uuid
    image1 = test_lib.lib_get_image_by_name("ttylinux")
    image1_uuid = image1.uuid
@@ -33,7 +33,7 @@ def test():
    cond = res_ops.gen_query_conditions('availableCapacity', '>=', '112742891520')
    ps_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)[0].uuid
    system_tag = "primaryStorageUuidForDataVolume::%s" % ps_uuid
-   disk_offering_uuids = [test_lib.lib_get_disk_offering_by_name("smallDiskOffering").uuid,test_lib.lib_get_disk_offering_by_name("root-disk").uuid,test_lib.lib_get_disk_offering_by_name("1T").uuid]
+   disk_offering_uuids = [test_lib.lib_get_disk_offering_by_name("smallDiskOffering").uuid,test_lib.lib_get_disk_offering_by_name("root-disk").uuid,test_lib.lib_get_disk_offering_by_name("100G").uuid]
    vm = test_stub.create_vm(l3_uuid_list = [l3_uuid],image_uuid = image1_uuid,vm_name="test-nxs",disk_offering_uuids = disk_offering_uuids,system_tags=[system_tag])
    test_obj_dict.add_vm(vm)
    vm.check()

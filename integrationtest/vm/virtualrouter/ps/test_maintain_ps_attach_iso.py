@@ -80,6 +80,7 @@ def test():
     test_stub.enable_all_pss()
     host_ops.reconnect_host(host_uuid)
     test_stub.ensure_hosts_connected(120)
+    test_stub.ensure_pss_connected()
     #vm_ops.reconnect_vr(vr_uuid)
     vrs = test_lib.lib_get_all_vrs()
     for vr in vrs:
