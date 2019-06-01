@@ -394,20 +394,20 @@ def add_zone(scenarioConfig, scenarioFile, deployConfig, session_uuid, zone_name
         except:
             exc_info.append(sys.exc_info())
      
-#        if xmlobject.has_element(zone, 'backupStorageRef'):
-#            for ref in xmlobject.safe_list(zone.backupStorageRef):
-#                bss = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid, name=ref.text_)
-#                bs = get_first_item_from_list(bss, 'Backup Storage', ref.text_, 'attach backup storage to zone')
+        if xmlobject.has_element(zone, 'backupStorageRef'):
+            for ref in xmlobject.safe_list(zone.backupStorageRef):
+                bss = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid, name=ref.text_)
+                bs = get_first_item_from_list(bss, 'Backup Storage', ref.text_, 'attach backup storage to zone')
 
-#                action = api_actions.AttachBackupStorageToZoneAction()
-#                action.sessionUuid = session_uuid
-#                action.backupStorageUuid = bs.uuid
-#                action.zoneUuid = zinv.uuid
-#                try:
-#                    evt = action.run()
-#                    test_util.test_logger(jsonobject.dumps(evt))
-#                except:
-#                    exc_info.append(sys.exc_info())
+                action = api_actions.AttachBackupStorageToZoneAction()
+                action.sessionUuid = session_uuid
+                action.backupStorageUuid = bs.uuid
+                action.zoneUuid = zinv.uuid
+                try:
+                    evt = action.run()
+                    test_util.test_logger(jsonobject.dumps(evt))
+                except:
+                    exc_info.append(sys.exc_info())
 
 
     if not xmlobject.has_element(deployConfig, 'zones.zone'):
@@ -2997,14 +2997,13 @@ def remove_all_simulator_agent_script():
 
 def deploy_initial_database(deploy_config, scenario_config = None, scenario_file = None, ipversion = 4):
     operations = [
+            add_backup_storage,
             add_zone,
             add_l2_network,
             add_primary_storage,
             add_iscsi_server,
             add_cluster,
             add_host,
-            add_backup_storage,
-            attach_bs_to_zone,
             add_sanlock,
             add_l3_network,
             add_image,
