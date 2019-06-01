@@ -18,7 +18,7 @@ def test():
 
 def env_recover():
     global mini
-    mini.delete_vm(corner_btn=False)
+    mini.delete_vm(corner_btn=False, del_vol=True)
     mini.close()
 
 #Will be called only if exception happens in test().

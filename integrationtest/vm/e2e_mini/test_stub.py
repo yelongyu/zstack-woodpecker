@@ -136,6 +136,7 @@ class MINI(E2E):
             self.get_element('#password').input('password')
         # Login button
         self.get_element('button', 'tag name').click()
+        time.sleep(1)
         # check
         if not with_accountName or not with_password:
             self.wait_for_element(FORMEXPLAIN)
@@ -219,6 +220,7 @@ class MINI(E2E):
         else:
             for res in res_list:
                 elem = self.get_res_element(res)
+                time.sleep(1)
                 if not elem.get_element(CHECKBOX).selected:
                     test_util.test_logger('Select [%s]' % res)
                     elem.get_element(CHECKBOX).click()
@@ -272,7 +274,7 @@ class MINI(E2E):
         elem = self.get_res_element(para_dict['name'])
         return elem
 
-    def _delete(self, res_name, res_type, view, corner_btn=False, expunge=False, details_page=False):
+    def _delete(self, res_name, res_type, view, corner_btn=False, expunge=False, details_page=False, del_vol=False):
         isExpunge = False
         res_list = []
         if isinstance(res_name, types.ListType):
@@ -306,6 +308,10 @@ class MINI(E2E):
         else:
             self.click_button(u'彻底删除')
             self.check_confirm_item(res_list)
+        if del_vol:
+            vol_check = self.get_element('#deleteVolume')
+            if vol_check:
+                vol_check.click()
         self.click_ok()
         if details_page:
             self.navigate(res_type)
@@ -344,6 +350,7 @@ class MINI(E2E):
                 _elem.get_element(CHECKBOX).click()
         else:
             self.click_button(u'恢复')
+            self.click_ok()
             self.wait_for_element(MESSAGETOAST, timeout=30, target='disappear')
         self.navigate(res_type)
         self.switch_tab(u'已有')
@@ -410,7 +417,7 @@ class MINI(E2E):
             strategy = 'tag name'
         for op in _elem.get_elements(op_selector, strategy) if _elem else self.get_elements(op_selector):
             if op.text == op_name:
-                assert op.get_attribute('aria-disabled') == 'true'
+                assert op.enabled == False
 
     def check_browser_console_log(self):
         errors = []
@@ -547,9 +554,9 @@ class MINI(E2E):
         checker = MINICHECKER(self, image_elem)
         checker.image_check(check_list)
 
-    def delete_vm(self, vm_name=None, view='card', corner_btn=True, details_page=False):
+    def delete_vm(self, vm_name=None, view='card', corner_btn=True, details_page=False, del_vol=False):
         vm_name = vm_name if vm_name else self.vm_list
-        self._delete(vm_name, 'vm', view=view, corner_btn=corner_btn, details_page=details_page)
+        self._delete(vm_name, 'vm', view=view, corner_btn=corner_btn, details_page=details_page, del_vol=del_vol)
 
     def expunge_vm(self, vm_name=None, view='card', details_page=False):
         vm_name = vm_name if vm_name else self.vm_list
@@ -692,6 +699,8 @@ class MINI(E2E):
 
     def create_vm_image(self, vm_name, image_name, dsc=None, platform='Linux'):
         test_util.test_logger('Create the vm image named[%s] for vm[%s]' % (image_name, vm_name))
+        image_list = []
+        image_list.append(image_name)
         input_dict = {'name': image_name,
                       'description': dsc,
                       'platform': platform}
@@ -701,7 +710,7 @@ class MINI(E2E):
                 self.input(k, v)
         self.click_ok()
         self.navigate('image')
-        self.check_res_item(image_name)
+        self.check_res_item(image_list)
 
     def open_vm_console(self, vm_name, details_page=False):
         test_util.test_logger('Open the console of [%s]' % vm_name)
@@ -735,6 +744,8 @@ class MINI(E2E):
         self.end_action(end_action)
         # check
         if end_action == 'confirm':
+            vm_elem = self.get_res_element(vm_name)
+            # MINICHECKER(self, vm_elem).vm_check(ops='start')
             self.check_menu_item_disabled(vm_name, 'vm', u'设置控制台密码')
 
     def cancel_console_password(self, vm_name, details_page=False, end_action='confirm'):
@@ -1010,7 +1021,11 @@ class MINICHECKER(object):
         if ops:
             check_list.append(ops_dict[ops])
         for v in check_list:
-            if v not in self.elem.text:
+            not_ready_list = [u'重启中']
+            if any(x in self.elem.text for x in not_ready_list):
+                time.sleep(1)
+                continue
+            elif v not in self.elem.text:
                 test_util.test_fail("Can not find %s in vm checker" % v)
 
     def volume_check(self, check_list=[], ops=None):
