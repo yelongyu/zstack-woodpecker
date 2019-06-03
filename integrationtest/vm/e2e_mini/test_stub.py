@@ -396,6 +396,8 @@ class MINI(E2E):
         test_util.test_logger('%s %s, check Pass' % (res_list, target))
 
     def check_confirm_item(self, res_list):
+        test_util.test_logger('Check if %s confirmed' % res_list)
+        self.wait_for_element(MODALCONTENT)
         confirm_items = self.get_elements(CONFIRMITEM)
         for res in res_list:
             for item in confirm_items:
@@ -417,7 +419,12 @@ class MINI(E2E):
             strategy = 'tag name'
         for op in _elem.get_elements(op_selector, strategy) if _elem else self.get_elements(op_selector):
             if op.text == op_name:
-                assert op.enabled == False
+                if _elem:
+                    assert op.get_attribute('class') == 'actionDisabled___1Bze5'
+                else:
+                    assert op.enabled == False
+                # recover
+                self.get_element(MOREOPERATIONBTN).click()
 
     def check_browser_console_log(self):
         errors = []
@@ -488,6 +495,7 @@ class MINI(E2E):
     def create_volume(self, name=None, dsc=None, size='2 GB', cluster=None, vm=None, provisioning=u'厚置备', view='card'):
         cluster = cluster if cluster else os.getenv('clusterName')
         self.volume_name = name if name else 'volume-' + get_time_postfix()
+        self.volume_list.append(self.volume_name)
         test_util.test_logger('Create Volume [%s]' % self.volume_name)
         volume_dict = {'name': self.volume_name,
                        'description': dsc,
@@ -744,8 +752,6 @@ class MINI(E2E):
         self.end_action(end_action)
         # check
         if end_action == 'confirm':
-            vm_elem = self.get_res_element(vm_name)
-            # MINICHECKER(self, vm_elem).vm_check(ops='start')
             self.check_menu_item_disabled(vm_name, 'vm', u'设置控制台密码')
 
     def cancel_console_password(self, vm_name, details_page=False, end_action='confirm'):

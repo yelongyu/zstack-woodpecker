@@ -22,6 +22,7 @@ def test():
 def env_recover():
     global mini
     mini.expunge_vm(vm_name)
+    mini.expunge_volume()
     mini.close()
 
 #Will be called only if exception happens in test().
@@ -29,6 +30,7 @@ def error_cleanup():
     global mini
     try:
         mini.expunge_vm(vm_name)
+        mini.expunge_volume()
         mini.close()
     except:
         pass
