@@ -35,6 +35,7 @@ def test():
     img_repl.check_image_data(image_name)
 
     test_util.test_pass('Global config cleanOnExpunge Test Success')
+    img_repl.clean_on_expunge()
 
 
 def env_recover():

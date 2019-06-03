@@ -37,6 +37,7 @@ def test():
 
     img_repl.create_vm(image_name)
     test_util.test_pass('Image Replication After Host Recovering Test Success')
+    img_repl.clean_on_expunge()
 
 
 def env_recover():

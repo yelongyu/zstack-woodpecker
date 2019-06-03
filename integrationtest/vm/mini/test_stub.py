@@ -27,6 +27,8 @@ import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
 from zstacklib.utils.http import json_post
 import zstackwoodpecker.test_state as test_state
+from cherrypy.scaffold import root
+import zstackwoodpecker.operations.config_operations as conf_ops
 
 
 def migrate_vm_to_random_host(vm):
@@ -602,7 +604,8 @@ def up_host_network(host_ip, scenarioConfig, network_type):
         test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s with username %s" %(host_inv.managementIp, host_password, host_password2, host_username))
 
 def create_mini_vm(l3_uuid_list, image_uuid, vm_name = None, cpu_num = None, memory_size = None, \
-              system_tags = None, instance_offering_uuid = None, session_uuid = None):
+              system_tags = None, instance_offering_uuid = None, \
+              rootVolume_systemTags=["volumeProvisioningStrategy::ThickProvisioning"], session_uuid = None):
     if not vm_name:
         vm_name = 'mini_vm'
     if not cpu_num:
@@ -618,6 +621,7 @@ def create_mini_vm(l3_uuid_list, image_uuid, vm_name = None, cpu_num = None, mem
     vm_creation_option.set_cpu_num(cpu_num)
     vm_creation_option.set_memory_size(memory_size)
     vm_creation_option.set_system_tags(system_tags)
+    vm_creation_option.set_rootVolume_systemTags(rootVolume_systemTags)
     vm_creation_option.set_session_uuid(session_uuid)
     vm_creation_option.set_timeout(900000)
     vm = test_vm_header.ZstackTestVm()
@@ -986,8 +990,8 @@ class ImageReplication(object):
         for _ in xrange(timeout):
             _image = self.get_image_inv(image_name)
             image_status = [bs_ref.status for bs_ref in _image.backupStorageRefs]
-            if image_status.count('Ready') == 2:
-                test_util.test_logger('Image [name: %s] is being downloaded on all BS, next to make 1 BS disconnected' % image_name)
+            if set(image_status) == set(['Ready', 'Downloading']):
+                test_util.test_logger('Image [name: %s] is being replicated, next to make 1 BS disconnected' % image_name)
                 break
             else:
                 time.sleep(1)
@@ -1065,7 +1069,7 @@ class ImageReplication(object):
         for _ in xrange(timeout):
             host_list = res_ops.query_resource(res_ops.HOST)
             host_status = [host.status for host in host_list]
-            if host_status.count('Disconnected') > 0:
+            if host_status.count('Connected') < 2:
                 time.sleep(1)
             else:
                 break
@@ -1079,7 +1083,7 @@ class ImageReplication(object):
         bs_list = res_ops.query_resource(res_ops.IMAGE_STORE_BACKUP_STORAGE)
         bs_list = [bs for bs in bs_list if bs.status == 'Connected']
         if len(bs_list) < 2:
-            test_util.test_fail('Thre is only 1 ImageStore backup storage connected')
+            test_util.test_fail('There is only 1 ImageStore backup storage connected')
         return bs_list
 
     def reclaim_space_from_bs(self):
@@ -1113,12 +1117,16 @@ class ImageReplication(object):
     def expunge_image(self):
         img_ops.expunge_image(self.image.uuid)
 
-    def create_vm(self, image_name=None, cpu_num=2, mem_size=2147483648):
+    def create_vm(self, image_name=None, provisioning='thick', cpu_num=2, mem_size=2147483648):
         image_name = image_name if image_name else os.getenv('imageName_net')
         l3_name = os.environ.get('l3PublicNetworkName')
         l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
         image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
-        self.vm = create_mini_vm([l3_net_uuid], image_uuid, cpu_num=cpu_num, memory_size=mem_size)
+        if provisioning == 'thin':
+            rootVolume_systemTags = ["volumeProvisioningStrategy::ThinProvisioning"]
+        else:
+            rootVolume_systemTags = ["volumeProvisioningStrategy::ThickProvisioning"]
+        self.vm = create_mini_vm([l3_net_uuid], image_uuid, cpu_num=cpu_num, memory_size=mem_size, rootVolume_systemTags=rootVolume_systemTags)
         vm_inv = self.vm.get_vm()
         if vm_inv.platform == 'Windows':
             vm_ip = vm_inv.vmNics[0].ip
@@ -1148,4 +1156,6 @@ class ImageReplication(object):
             test_lib.SSH_TIMEOUT = ssh_timeout
             test_util.test_fail("Create VM via ISO failed!")
 
+    def clean_on_expunge(self, value='true'):
+        conf_ops.change_global_config('imagestore', 'cleanOnExpunge', value)
 

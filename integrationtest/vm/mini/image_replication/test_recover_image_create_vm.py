@@ -34,7 +34,8 @@ def test():
 
     img_repl.create_vm(image_name)
 
-    test_util.test_pass('ISO Image Replication Test Success')
+    test_util.test_pass('Recovered Image Create VM Test Success')
+    img_repl.clean_on_expunge()
 
 
 def env_recover():

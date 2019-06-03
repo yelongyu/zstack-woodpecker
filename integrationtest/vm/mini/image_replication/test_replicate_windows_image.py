@@ -28,6 +28,7 @@ def test():
     img_repl.check_image_data(image_name)
 
     test_util.test_pass('Windows Image Replication Test Success')
+    img_repl.clean_on_expunge()
 
 
 def env_recover():
