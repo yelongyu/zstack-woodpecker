@@ -22,7 +22,7 @@ def test():
     bss = res_ops.query_resource(res_ops.BACKUP_STORAGE)
     for bs in bss:
         if bs.type == inventory.SFTP_BACKUP_STORAGE_TYPE:
-            vm.stop()
+            longjob.vm.stop()
             break
     longjob.crt_vm_image()
 
