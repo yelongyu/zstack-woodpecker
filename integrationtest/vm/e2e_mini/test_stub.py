@@ -73,7 +73,7 @@ def get_inv(name, res_type):
     if inv:
         return inv[0]
     else:
-        test_util.test_fail('Can not find the [%s] with name [%s]' % (res_type, name))
+        test_util.test_fail('Can not find the [%s] with name [%s]' % (res_type, name.encode('utf-8')))
 
 
 class MINI(E2E):
@@ -222,7 +222,7 @@ class MINI(E2E):
                 elem = self.get_res_element(res)
                 time.sleep(1)
                 if not elem.get_element(CHECKBOX).selected:
-                    test_util.test_logger('Select [%s]' % res)
+                    test_util.test_logger('Select [%s]' % res.encode('utf-8'))
                     elem.get_element(CHECKBOX).click()
         self.get_element(MOREOPERATIONBTN).click()
         time.sleep(1)
@@ -288,7 +288,7 @@ class MINI(E2E):
         self.navigate(res_type)
         self.switch_view(view)
         primary_btn_num = len(self.get_elements(PRIMARYBTN))
-        test_util.test_logger('%s %s [name: (%s)]' % (('Expunge' if primary_btn_num < PRIMARYBTNNUM else 'Delete'), res_type, ' '.join(res_list)))
+        test_util.test_logger('%s %s [name: (%s)]' % (('Expunge' if primary_btn_num < PRIMARYBTNNUM else 'Delete'), res_type, ' '.join(res_list).encode('utf-8')))
         for res in res_list:
             _elem = self.get_res_element(res)
             if corner_btn:
@@ -357,11 +357,11 @@ class MINI(E2E):
         self.check_res_item(res_list)
 
     def get_res_element(self, res_name):
-        test_util.test_logger('Get the element [%s]' % res_name)
+        test_util.test_logger('Get the element [%s]' % res_name.encode('utf-8'))
         for _elem in self.get_elements(CARDCONTAINER):
             if res_name in _elem.text:
                 return _elem
-        test_util.test_fail('Can not find [%s]' % res_name)
+        test_util.test_fail('Can not find [%s]' % res_name.encode('utf-8'))
 
     def get_table_row(self, res_list):
         for res in res_list:
@@ -446,6 +446,7 @@ class MINI(E2E):
                     test_util.test_logger('The page rendering is not finished, check again')
                     time.sleep(0.5)
                 else:
+                    time.sleep(1)
                     return True
             else:
                 time.sleep(1)
@@ -465,7 +466,7 @@ class MINI(E2E):
         cluster = cluster if cluster else os.getenv('clusterName')
         self.vm_name = name if name else 'vm-' + get_time_postfix()
         self.vm_list.append(self.vm_name)
-        test_util.test_logger('Create VM [%s]' % self.vm_name)
+        test_util.test_logger('Create VM [%s]' % self.vm_name.encode('utf-8'))
         priority_dict = {'imageUuid': image}
         vm_dict = {'name': self.vm_name,
                    'description': dsc,
@@ -639,6 +640,35 @@ class MINI(E2E):
             checker.host_check(check_list)
         else:
             pass
+
+    def search(self, value, search_by=u'名称', type='vm', tab_name=u'已有', not_null=False):
+        test_util.test_logger('Search %s by %s' % (value.encode('utf-8'), search_by.encode('utf-8')))
+        self.navigate(type)
+        self.switch_tab(tab_name)
+        self.get_element('ant-input-group-addon').click()
+        self.wait_for_element('ul[role="listbox"]')
+        time.sleep(1)
+        for op in self.get_elements('li[role="option"]'):
+            if op.text == search_by:
+                op.click()
+                break
+        else:
+            test_util.test_fail("Failed: Search by [%s] is not supported" % search_by.encode('utf-8'))
+        self.get_element('ant-input').clear()
+        # u'\ue007' means sending enter key
+        self.get_element('ant-input').input(u'\ue007')
+        self.wait_for_page_render()
+        self.get_element('ant-input').input(value + u'\ue007')
+        self.wait_for_page_render()
+        # check
+        for _elem in self.get_elements(CARDCONTAINER):
+            assert value.lower() in _elem.text.lower()
+        res_num = len(self.get_elements(CARDCONTAINER))
+        if not_null:
+            assert res_num > 0
+        for tab in self.get_elements('ant-tabs-tab'):
+            if tab_name in tab.text:
+                assert str(res_num) in tab.text
 
     def vm_ops(self, vm_name, action='stop', details_page=False):
         self.navigate('vm')
@@ -1032,7 +1062,7 @@ class MINICHECKER(object):
                 time.sleep(1)
                 continue
             elif v not in self.elem.text:
-                test_util.test_fail("Can not find %s in vm checker" % v)
+                test_util.test_fail("Can not find %s in vm checker" % v.encode('utf-8'))
 
     def volume_check(self, check_list=[], ops=None):
         if ops == 'detached':

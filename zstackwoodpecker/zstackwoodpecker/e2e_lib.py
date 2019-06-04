@@ -160,6 +160,7 @@ class E2E(object):
         else:
             test_util.test_logger('The element[strategy: "%s", value: "%s"] was not %s within [%s]s' % (strategy, value, target, timeout))
             return False
+        test_util.test_logger('The element[strategy: "%s", value: "%s"] was %s' % (strategy, value, target))
         return True
 
     def click_button(self, btn_name):
@@ -213,7 +214,7 @@ class E2E(object):
                 title = title_elem[0].text.encode('utf-8')
                 break
         if isinstance(content, types.IntType):
-                content = str(content)
+            content = str(content)
         if isinstance(content, types.ListType):
             if isinstance(content[0], types.IntType):
                 content[0] = str(content[0])
@@ -392,18 +393,27 @@ class Element(E2E):
         uri = join(self.uri, 'value')
         if isinstance(value, types.IntType):
             value = str(value)
-#         _value = [v.encode('utf-8') for v in value]
+        # _value = [v.encode('utf-8') for v in value]
+        # body='{"value": %s}' % _value
         body='{"value": ['
         for val in value:
             body += '"%s"' % val.encode('utf-8') + ','
         body = body[:-1] + ']}'
-#         body='{"value": %s}' % _value
         rsp = self._post(uri, body=body.replace("'", '"'))
         if rsp.status == 10:
             self.refresh_uri()
             return self.input(value)
         else:
             return True
+
+    def submit(self):
+        uri = join(self.uri, 'submit')
+        rsp = self._post(uri)
+        if rsp.status == 10:
+            self.refresh_uri()
+            return self.submit()
+        else:
+            return rsp.value
 
     def displayed(self):
         uri = join(self.uri, 'displayed')
