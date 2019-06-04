@@ -160,6 +160,11 @@ def test():
     image_option.set_backup_storage_uuid_list(bs_uuid_list)
     # image_option.set_mediaType('ISO')
 
+    bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, [], None)
+    for bs in bss:
+        if bs.type == 'SftpBackupStorage':
+            vm.stop()
+
     for i in range(threshold_3):
         image_option.set_name('root_volume_template_for_test_' + str(i))
         root_volume_template = zstack_image_header.ZstackTestImage()
@@ -170,6 +175,10 @@ def test():
         test_dict.add_image(iso)
     time.sleep(30)
     # before change template
+    
+    if vm.get_vm().status == 'Stopped':
+        vm.start()
+
     flag = zwt_ops.check_sns_email(pop_server, username, password, total_image_count,
                                      total_image_count_alarm_uuid)
     if flag != 1:
