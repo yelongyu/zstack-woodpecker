@@ -28,6 +28,7 @@ import zstackwoodpecker.operations.vpc_operations as vpc_ops
 import zstackwoodpecker.operations.volume_operations as volume_ops
 import zstackwoodpecker.zstack_test.zstack_test_eip as zstack_eip_header
 import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
+import hashlib
 from threading import Thread
 
 def wait_for_target_vm_retry_after_reboot(zstack_management_ip, vm_ip, vm_uuid):
@@ -143,7 +144,11 @@ def execute_action_with_session(http_server_ip, action, session_uuid, async=True
         else:
             evt = sync_call(http_server_ip, action, session_uuid)
     else:
-        session_uuid = login_as_admin(http_server_ip)
+        scen_mn_password = os.getenv('zstackAdminPassword')
+        if scen_mn_password != None and scen_mn_password != 'password':
+            session_uuid = login_by_account(http_server_ip, 'admin', hashlib.sha512(scen_mn_password).hexdigest())
+        else:
+            session_uuid = login_as_admin(http_server_ip)
         try:
             action.sessionUuid = session_uuid
             if async:
