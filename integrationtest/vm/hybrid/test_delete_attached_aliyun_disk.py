@@ -20,7 +20,7 @@ def test():
     test_obj_dict.add_hybrid_obj(hybrid)
     hybrid.create_aliyun_disk()
     hybrid.attach_aliyun_disk()
-    time.sleep(90)
+    time.sleep(300)
     hybrid.del_aliyun_disk()
     test_util.test_pass('Delete attached Aliyun Disk Test Success')
 

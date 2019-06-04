@@ -19,7 +19,7 @@ def test():
     hybrid.get_vpc()
     hybrid.create_sg()
     hybrid.create_sg_rule()
-    time.sleep(120)
+    time.sleep(300)
     hybrid.del_sg_rule()
     test_util.test_pass('Create Delete ECS Security Group Rule Test Success')
 

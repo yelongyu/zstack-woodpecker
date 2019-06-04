@@ -17,8 +17,11 @@ hybrid = test_stub.HybridObject()
 def test():
     hybrid.create_ecs_instance()
     test_obj_dict.add_hybrid_obj(hybrid)
+    time.sleep(5)
     hybrid.reboot_ecs()
+    time.sleep(5)
     hybrid.stop_ecs()
+    time.sleep(5)
     hybrid.start_ecs()
     test_util.test_pass('Start Reboot Stop Ecs Instance Test Success')
 

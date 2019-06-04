@@ -5,6 +5,7 @@ New Integration Test for hybrid.
 @author: Quarkonics
 '''
 
+import time
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
@@ -17,6 +18,7 @@ hybrid = test_stub.HybridObject()
 def test():
     hybrid.add_datacenter_iz(add_datacenter_only=True)
     hybrid.create_vpc()
+    time.sleep(90)
     hybrid.del_vpc()
     test_util.test_pass('Create Delete ECS VPC Test Success')
 

@@ -5,6 +5,7 @@ New Integration Test for hybrid.
 @author: Legion
 '''
 
+import time
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
@@ -17,6 +18,7 @@ hybrid = test_stub.HybridObject()
 def test():
     hybrid.add_datacenter_iz(region_id='cn-shanghai')
     hybrid.create_bucket(gc=True)
+    time.sleep(5)
     hybrid.create_ecs_image(check_progress=True)
     test_util.test_pass('Get Create Ecs Image Progress Test Success')
 

@@ -18,7 +18,7 @@ def test():
     hybrid.add_datacenter_iz(check_vpn_gateway=True)
     hybrid.get_vpc(has_vpn_gateway=True)
     hybrid.create_route_entry(gc=True)
-    time.sleep(90)
+    time.sleep(300)
     hybrid.del_route_entry()
     test_util.test_pass('Create Delete Vpc Route Entry Test Success')
 

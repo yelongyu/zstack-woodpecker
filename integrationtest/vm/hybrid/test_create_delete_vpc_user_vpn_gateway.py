@@ -17,7 +17,7 @@ hybrid = test_stub.HybridObject()
 def test():
     hybrid.add_datacenter_iz(add_datacenter_only=True)
     hybrid.create_user_vpn_gateway()
-    time.sleep(120)
+    time.sleep(300)
     hybrid.del_user_vpn_gateway()
     test_util.test_pass('Create Delete Vpc User Vpn Gateway Remote Test Success')
 
