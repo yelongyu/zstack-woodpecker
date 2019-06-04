@@ -392,8 +392,12 @@ class Element(E2E):
         uri = join(self.uri, 'value')
         if isinstance(value, types.IntType):
             value = str(value)
-        _value = [v for v in value]
-        body='{"value": %s}' % _value
+#         _value = [v.encode('utf-8') for v in value]
+        body='{"value": ['
+        for val in value:
+            body += '"%s"' % val.encode('utf-8') + ','
+        body = body[:-1] + ']}'
+#         body='{"value": %s}' % _value
         rsp = self._post(uri, body=body.replace("'", '"'))
         if rsp.status == 10:
             self.refresh_uri()
