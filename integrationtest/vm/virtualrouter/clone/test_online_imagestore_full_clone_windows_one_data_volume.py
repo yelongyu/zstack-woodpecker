@@ -22,6 +22,7 @@ test_obj_dict = test_state.TestStateDict()
 
 def test():
     global test_obj_dict, bs, ps
+    conf_ops.change_global_config('vm', 'deletionPolicy', 'Delay')
     #judge whether BS is imagestore
     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)
     for i in bs:
@@ -64,6 +65,7 @@ def test():
         test_util.test_logger('Find 2 volumes for [vm:] %s.' % new_vm.vm.uuid)
 
     test_lib.lib_error_cleanup(test_obj_dict)
+    conf_ops.change_global_config('vm', 'deletionPolicy', 'Direct')
     test_util.test_pass('Test clone vm with one data volume Success')
 
 #Will be called only if exception happens in test().

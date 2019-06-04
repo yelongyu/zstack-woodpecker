@@ -11,6 +11,7 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
+import zstackwoodpecker.operations.config_operations as conf_ops
 import apibinding.inventory as inventory
 import apibinding.api_actions as api_actions
 import time
@@ -22,6 +23,7 @@ test_obj_dict = test_state.TestStateDict()
 
 def test():
     global test_obj_dict, bs, ps
+    conf_ops.change_global_config('vm', 'deletionPolicy', 'Delay')
     #judge whether BS is imagestore
     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)
     for i in bs:
@@ -66,9 +68,11 @@ def test():
 
 
     test_lib.lib_error_cleanup(test_obj_dict)
+    conf_ops.change_global_config('vm', 'deletionPolicy', 'Direct')
     test_util.test_pass('Test clone vm with one data volume Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     global test_obj_dict
     test_lib.lib_error_cleanup(test_obj_dict)
+    conf_ops.change_global_config('vm', 'deletionPolicy', 'Direct')
