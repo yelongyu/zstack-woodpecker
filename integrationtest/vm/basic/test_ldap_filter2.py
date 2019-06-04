@@ -67,7 +67,7 @@ def test():
     if not get_excepted_exception:
         test_util.test_fail('should not be able to login with filter account')
 
-    cond = res_ops.gen_query_conditions('resourceUuid', '=', ldap_server_uuid)
+    cond = res_ops.gen_query_conditions('tag', 'like', '%ldapCleanBindingFilter%')
     ldap_clean_binding_filter_tag_uuid = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)[0].uuid
     #Clear filter
     tag_ops.delete_tag(ldap_clean_binding_filter_tag_uuid)

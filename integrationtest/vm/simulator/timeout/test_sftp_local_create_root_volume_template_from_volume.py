@@ -86,6 +86,7 @@ def test():
     if len(bss) == 0:
         test_util.test_skip('Required sftp bs to test')
     bs_uuid = bss[0].uuid
+    vm.stop()
 
     image_creation_option.set_uuid(image_uuid)
     image_creation_option.set_backup_storage_uuid_list([bs_uuid])
