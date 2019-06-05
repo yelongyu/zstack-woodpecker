@@ -94,14 +94,14 @@
       url="$imageUrl_s" 
       username="$imageUsername" password="$imagePassword">
       <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
-      <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+      <!-- <backupStorageRef>$cephBackupStorageName</backupStorageRef> -->
     </image>
     <image name="$imageName_net" 
       description="Test Image Template for network test" 
       mediaType="$rootMediaType" format="$rootImageFormat"
       url="$imageUrl_net" 
       username="$imageUsername" password="$imagePassword">
-      <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
+      <!--<backupStorageRef>$imageStoreBackupStorageName</backupStorageRef> -->
       <backupStorageRef>$cephBackupStorageName</backupStorageRef>
     </image>
     <image name="$virtualRouterImageName" 
@@ -117,14 +117,14 @@
       url="$imageUrl_windows" platform="Windows"
       username="$winImageUsername" password="$winImagePassword">
       <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
-      <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+      <!--<backupStorageRef>$cephBackupStorageName</backupStorageRef> -->
     </image>
     <image name="$imageName_other" 
       description="Small Test Image Template for other platform" 
       mediaType="$rootMediaType" format="$rootImageFormat"
       url="$imageUrl_s" platform="Other"
       username="$imageUsername" password="$imagePassword">
-      <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
+      <!-- <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef> -->
       <backupStorageRef>$cephBackupStorageName</backupStorageRef>
     </image>
   </images>
