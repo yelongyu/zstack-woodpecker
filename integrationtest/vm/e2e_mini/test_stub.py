@@ -35,14 +35,16 @@ PRIMARYBTNNUM = 2
 
 
 MENUDICT = {'homepage': 'a[href="/web/"]',
-            'monitor':  'a[href="/web/monitoringCenter"]',
-            'vm':       'a[href="/web/vm"]',
-            'minihost':     'a[href="/web/minihost"]',
-            'ps':       'a[href="/web/primaryStorage"]',
-            'volume':   'a[href="/web/volume"]',
-            'image':    'a[href="/web/image"]',
-            'network':  'a[href="/web/network"]',
-            'alarm':    'a[href="/web/alarmMessage"]'}
+            'monitor': 'a[href="/web/monitoringCenter"]',
+            'vm': 'a[href="/web/vm"]',
+            'minihost': 'a[href="/web/minihost"]',
+            'ps': 'a[href="/web/primaryStorage"]',
+            'volume': 'a[href="/web/volume"]',
+            'image': 'a[href="/web/image"]',
+            'network': 'a[href="/web/network"]',
+            'alarm': 'a[href="/web/alarmMessage"]',
+            'eip': 'a[href="/web/eip"]',
+            'log': 'a[href="/web/operationLog"]'}
 
 VIEWDICT = {'list': '#btn_listswitch_s',
             'card': '#btn_cardswitch_s'}
@@ -83,10 +85,12 @@ class MINI(E2E):
         self.volume_name = None
         self.image_name = None
         self.network_name = None
+        self.eip_name = None
         self.vm_list = []
         self.volume_list = []
         self.image_list = []
         self.network_list = []
+        self.eip_list = []
         if os.getenv('ZSTACK_SIMULATOR'):
             self.mini_server_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
         else:
@@ -324,7 +328,7 @@ class MINI(E2E):
         if isExpunge:
             self.check_res_item(res_list, target='notDisplayed')
             return True
-        if res_type != 'network':
+        if res_type not in ['network', 'eip']:
             # check deleted
             self.check_res_item(res_list)
         if expunge:
@@ -567,6 +571,22 @@ class MINI(E2E):
         checker = MINICHECKER(self, image_elem)
         checker.image_check(check_list)
 
+    def create_eip(self, name=None, dsc=None, network=None, required_ip=None, view='card'):
+        self.eip_name = name if name else 'EIP-' + get_time_postfix()
+        self.eip_list.append(self.eip_name)
+        network = network if network else os.getenv('l3PublicNetworkName')
+        test_util.test_logger('Create EIP[%s]' % self.eip_name)
+        priority_dict = {'l3NetworkUuid': network}
+        eip_dict = {'name': self.eip_name,
+                    'description': dsc,
+                    'requiredIp': required_ip}
+        eip_elem = self._create(eip_dict, "eip", view=view, priority_dict=priority_dict)
+        check_list = [self.eip_name]
+        if required_ip is not None:
+            check_list.append(required_ip)
+        checker = MINICHECKER(self, eip_elem)
+        checker.eip_check(check_list)
+
     def delete_vm(self, vm_name=None, view='card', corner_btn=True, details_page=False, del_vol=False):
         vm_name = vm_name if vm_name else self.vm_list
         self._delete(vm_name, 'vm', view=view, corner_btn=corner_btn, details_page=details_page, del_vol=del_vol)
@@ -594,6 +614,10 @@ class MINI(E2E):
     def delete_network(self, network_name=None, view='card', corner_btn=True, details_page=False):
         network_name = network_name if network_name else self.network_list
         self._delete(network_name, 'network', view=view, corner_btn=corner_btn, details_page=details_page)
+
+    def delete_eip(self, eip_name=None, view='card', corner_btn=True, details_page=False):
+        eip_name = eip_name if eip_name else self.eip_list
+        self._delete(eip_name, 'eip', view=view, corner_btn=corner_btn, details_page=details_page)
 
     def update_info(self, res_type, res_name, new_name, new_dsc=None, corner_btn=False, details_page=False, view='card'):
         if res_type == 'minihost' and corner_btn:
@@ -674,6 +698,20 @@ class MINI(E2E):
             if tab_name in tab.text:
                 assert str(res_num) in tab.text
 
+    def upgrade_capacity(self, name, res_type, new_capacity, details_page=False):
+        self.navigate(res_type)
+        capacity = self.get_detail_info(name, res_type, u'容量')
+        test_util.test_logger('Upgrade system capacity of [%s] from %s to %s' % (name, capacity, new_capacity))
+        if res_type == 'vm':
+            self.more_operate(u'系统扩容', res_type=res_type, res_name=name, details_page=details_page)
+        elif res_type == 'volume':
+            self.more_operate(u'数据盘扩容', res_type=res_type, res_name=name, details_page=details_page)
+        self.input('dataSize', new_capacity.split())
+        self.click_ok()
+        capacity = self.get_detail_info(name, res_type, u'容量')
+        if capacity != new_capacity:
+            test_util.test_fail("Failed to upgrade capacity of [%s] to %s" % (name, new_capacity))
+
     def vm_ops(self, vm_name, action='stop', details_page=False):
         self.navigate('vm')
         vm_list = []
@@ -718,17 +756,6 @@ class MINI(E2E):
         vm_elem = self.get_res_element(vm_name)
         checker = MINICHECKER(self, vm_elem)
         checker.vm_check(check_list)
-
-    def upgrade_system_capacity(self, vm_name, new_capacity, details_page=False):
-        self.navigate('vm')
-        capacity = self.get_detail_info(vm_name, 'vm', u'容量')
-        test_util.test_logger('Upgrade system capacity of [%s] from %s to %s' % (vm_name, capacity, new_capacity))
-        self.more_operate(u'系统扩容', res_type='vm', res_name=vm_name, details_page=details_page)
-        self.input('dataSize', new_capacity.split())
-        self.click_ok()
-        capacity = self.get_detail_info(vm_name, 'vm', u'容量')
-        if capacity != new_capacity:
-            test_util.test_fail("Failed to upgrade system capacity of [%s] to %s" % (vm_name, new_capacity))
 
     def live_migrate(self, vm_name, details_page=False):
         test_util.test_logger('Live migrate VM')
@@ -1067,15 +1094,15 @@ class MINICHECKER(object):
                 continue
             elif v not in self.elem.text:
                 test_util.test_fail("Can not find %s in vm checker" % v.encode('utf-8'))
-            test_util.test_logger("Find %s in vm checker successful" % v)
+            test_util.test_logger("Find %s in vm checker successful" % v.encode('utf-8'))
 
     def volume_check(self, check_list=[], ops=None):
         if ops == 'detached':
             check_list.append(u'未加载')
         for v in check_list:
             if v not in self.elem.text:
-                test_util.test_fail("Can not find %s in volume checker" % v)
-            test_util.test_logger("Find %s in volume checker successful" % v)
+                test_util.test_fail("Can not find %s in volume checker" % v.encode('utf-8'))
+            test_util.test_logger("Find %s in volume checker successful" % v.encode('utf-8'))
 
     def image_check(self, check_list=[]):
         check_list.append(u'就绪')
@@ -1085,17 +1112,23 @@ class MINICHECKER(object):
                 time.sleep(1)
                 continue
             elif v not in self.elem.text:
-                test_util.test_fail("Can not find %s in image checker" % v)
-            test_util.test_logger("Find %s in image checker successful" % v)
+                test_util.test_fail("Can not find %s in image checker" % v.encode('utf-8'))
+            test_util.test_logger("Find %s in image checker successful" % v.encode('utf-8'))
 
     def network_check(self, check_list=[]):
         for v in check_list:
             if v not in self.elem.text:
-                test_util.test_fail("Can not find %s in network checker" % v)
-            test_util.test_logger("Find %s in network checker successful" % v)
+                test_util.test_fail("Can not find %s in network checker" % v.encode('utf-8'))
+            test_util.test_logger("Find %s in network checker successful" % v.encode('utf-8'))
 
     def host_check(self, check_list=[]):
         for v in check_list:
             if v not in self.elem.text:
-                test_util.test_fail("Can not find %s in network checker" % v)
-            test_util.test_logger("Find %s in host checker successful" % v)
+                test_util.test_fail("Can not find %s in network checker" % v.encode('utf-8'))
+            test_util.test_logger("Find %s in host checker successful" % v.encode('utf-8'))
+
+    def eip_check(self, check_list=[]):
+        for v in check_list:
+            if v not in self.elem.text:
+                test_util.test_fail("Can not find %s in eip checker" % v.encode('utf-8'))
+            test_util.test_logger("Find %s in eip checker successful" % v.encode('utf-8'))
