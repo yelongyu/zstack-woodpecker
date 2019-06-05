@@ -1098,6 +1098,7 @@ class ImageReplication(object):
         img_option.set_format(img_format)
         img_option.set_backup_storage_uuid_list([bs_uuid])
         img_option.set_url(url)
+        img_option.set_timeout(900000)
         if img_format == 'iso':
             image_inv = img_ops.add_iso_template(img_option)
         else:
@@ -1158,4 +1159,8 @@ class ImageReplication(object):
 
     def clean_on_expunge(self, value='true'):
         conf_ops.change_global_config('imagestore', 'cleanOnExpunge', value)
+
+    def operate_bs_service(self, bs_ip, op='stop'):
+        cmd = 'service zstack-imagestorebackupstorage %s' % op
+        ssh.execute(cmd, bs_ip, "root", "password", port=22)
 
