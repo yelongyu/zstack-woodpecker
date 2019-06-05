@@ -285,6 +285,11 @@ class E2E(object):
                 time.sleep(1)
                 return True
 
+    def execute_script(self, script):
+        test_util.test_logger('Execute the script[%s]' % script)
+        uri = join(self.uri, 'execute')
+        self._post(uri, body='{"script": "%s", "args": %s}' % (script, list("")))
+
 
 class Element(E2E):
     def __init__(self, uri, par_uri=None, par_strategy=None, par_value=None):

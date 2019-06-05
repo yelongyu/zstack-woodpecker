@@ -3,24 +3,31 @@
     <case timeout='1200' noparallel='True'>account/test_login_exception.py</case>
     <case timeout='1200' noparallel='True'>account/test_login_logout.py</case>
     <case timeout='1200' noparallel='True'>account/test_login_with_cleartext_password.py</case>
+    <case timeout='1200' noparallel='True'>host/test_host_ops.py</case>
+    <case timeout='1200' noparallel='True'>host/test_host_update_info.py</case>
     <case timeout='1200' noparallel='True'>image/test_add_image.py</case>
     <case timeout='1200' noparallel='True'>image/test_delete_resume_image.py</case>
     <case timeout='1200' noparallel='True'>image/test_delete_resume_images_batch.py</case>
     <case timeout='1200' noparallel='True'>image/test_image_update_info.py</case>
     <case timeout='1200' noparallel='True'>networks/test_add_dns_to_l3.py</case>
     <case timeout='1200' noparallel='True'>networks/test_add_delete_network_segment.py</case>
+    <case timeout='1200' noparallel='True'>networks/test_create_network.py</case>
     <case timeout='1200' noparallel='True'>stress_test/test_parallel_login_logout.py</case>
     <case timeout='1200' noparallel='True'>vms/test_cancel_create_vm.py</case>
     <case timeout='1200' noparallel='True'>vms/test_cancel_vm_more_operation.py</case>
+    <case timeout='1200' noparallel='True'>vms/test_create_vm_image.py</case>
     <case timeout='1200' noparallel='True'>vms/test_create_vm_with_data_vol.py</case>
     <case timeout='1200' noparallel='True'>vms/test_create_vm_with_iso_image.py</case>
     <case timeout='1200' noparallel='True'>vms/test_create_vm.py</case>
     <case timeout='1200' noparallel='True'>vms/test_delete_resume_vm.py</case>
     <case timeout='1200' noparallel='True'>vms/test_delete_resume_vms_batch.py</case>
+    <case timeout='1200' noparallel='True'>vms/test_live_migrate.py</case>
     <case timeout='1200' noparallel='True'>vms/test_open_vm_console.py</case>
+    <case timeout='1200' noparallel='True'>vms/test_search_vm_by_name.py</case>
     <case timeout='1200' noparallel='True'>vms/test_set_and_cancel_console_password.py</case>
     <case timeout='1200' noparallel='True'>vms/test_start_stop_reboot_vm.py</case>
     <case timeout='1200' noparallel='True'>vms/test_start_stop_reboot_vms_batch.py</case>
+    <case timeout='1200' noparallel='True'>vms/test_upgrade_system_capacity.py</case>
     <case timeout='1200' noparallel='True'>vms/test_vm_ha_level.py</case>
     <case timeout='1200' noparallel='True'>vms/test_vm_update_info.py</case>
     <case timeout='1200' noparallel='True'>vms/test_vm_attach_detach_volumes.py</case>

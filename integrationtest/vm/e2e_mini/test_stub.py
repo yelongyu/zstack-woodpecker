@@ -257,6 +257,11 @@ class MINI(E2E):
     def _create(self, para_dict, res_type, view, priority_dict=None):
         self.navigate(res_type)
         self.get_elements(PRIMARYBTN)[-1].click()
+        time.sleep(1)
+        for _elem in self.get_element(MODALCONTENT).get_elements('span', 'tag name'):
+            if _elem.text == u'高级':
+                _elem.click()
+                break
         if priority_dict:
             for k, v in priority_dict.iteritems():
                 if v is not None:
@@ -513,10 +518,10 @@ class MINI(E2E):
             check_list = [self.volume_name, size]
             checker.volume_check(check_list=check_list, ops='detached')
 
-    def create_network(self, name=None, dsc=None, vlan=None, physical_interface=None,
-                       start_ip=None, end_ip=None, netmask=None, gateway=None, dhcp_server=None, dns=None, view='card'):
+    def create_network(self, name=None, dsc=None, vlan=None, physical_interface='zsn0',start_ip='192.168.53.2',
+                       end_ip='192.168.53.5', netmask='255.255.255.0', gateway='192.168.53.1', dhcp_server=None, dns=None, view='card'):
         self.network_name = name if name else 'network-' + get_time_postfix()
-        self.netwok_list.append(self.network_name)
+        self.network_list.append(self.network_name)
         test_util.test_logger('Create Network [%s]' % self.network_name)
         network_dict = {'name': self.network_name,
                         'description': dsc,
@@ -528,13 +533,12 @@ class MINI(E2E):
                         'gateway': gateway,
                         'dhcpServer': dhcp_server,
                         'dns': dns}
-        if dhcp_server or dns:
-            self.get_element('[style~=cursor]').click()
-        else:
+        if dhcp_server is None:
             network_dict.pop('dhcpServer')
+        if dns is None:
             network_dict.pop('dns')
         network_elem = self._create(network_dict, "network", view=view)
-        ip_num = int(start_ip.split('.')[-1]) - int(end_ip.split('.')[-1]) + 1
+        ip_num = abs(int(start_ip.split('.')[-1]) - int(end_ip.split('.')[-1])) + 1
         check_list = [self.network_name, physical_interface, str(ip_num)]
         if vlan:
             check_list.append(vlan)
@@ -1063,6 +1067,7 @@ class MINICHECKER(object):
                 continue
             elif v not in self.elem.text:
                 test_util.test_fail("Can not find %s in vm checker" % v.encode('utf-8'))
+            test_util.test_logger("Find %s in vm checker successful" % v)
 
     def volume_check(self, check_list=[], ops=None):
         if ops == 'detached':
@@ -1070,6 +1075,7 @@ class MINICHECKER(object):
         for v in check_list:
             if v not in self.elem.text:
                 test_util.test_fail("Can not find %s in volume checker" % v)
+            test_util.test_logger("Find %s in volume checker successful" % v)
 
     def image_check(self, check_list=[]):
         check_list.append(u'就绪')
@@ -1080,13 +1086,16 @@ class MINICHECKER(object):
                 continue
             elif v not in self.elem.text:
                 test_util.test_fail("Can not find %s in image checker" % v)
+            test_util.test_logger("Find %s in image checker successful" % v)
 
     def network_check(self, check_list=[]):
         for v in check_list:
             if v not in self.elem.text:
                 test_util.test_fail("Can not find %s in network checker" % v)
+            test_util.test_logger("Find %s in network checker successful" % v)
 
     def host_check(self, check_list=[]):
         for v in check_list:
             if v not in self.elem.text:
                 test_util.test_fail("Can not find %s in network checker" % v)
+            test_util.test_logger("Find %s in host checker successful" % v)
