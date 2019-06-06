@@ -8,6 +8,12 @@ IP[0]=$1
 IP[1]=$2
 IP[2]=$3
 
+if [[ ${IP[0]} == 172.20.* ]]; then
+	NETWORK="172.20.0.0"
+elif [[ ${IP[0]} == 172.24.* ]]; then
+	NETWORK="172.24.0.0"
+fi
+
 if [ "$2" == "" ]; then
     CEPH_ONE_NODE=yes
 fi
@@ -198,7 +204,7 @@ fi
 
 #check if the extra_probe_peers and public network are in the same network segment
 if [[ ${IP[0]} =~ "10.0" ]]; then
-        sed -i 's/172.20.0.0\/16/10.0.0.0\/8/g' ceph.conf
+        sed -i "s/${NETWORK}\/16/10.0.0.0\/8/g" ceph.conf
 fi
 
 set +e

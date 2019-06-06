@@ -8,6 +8,12 @@ IP[0]=$1
 IP[1]=$2
 IP[2]=$3
 
+if [[ ${IP[0]} == 172.20.* ]]; then
+	NETWORK="172.20.0.0"
+elif [[ ${IP[0]} == 172.24.* ]]; then
+	NETWORK="172.24.0.0"
+fi
+
 if [ "$2" == "" ]; then
     CEPH_ONE_NODE=yes
 fi
@@ -99,7 +105,7 @@ fi
 if [ "${CEPH_ONE_NODE}" != "yes" ]; then
 ceph-deploy new ceph-1 ceph-2 ceph-3
 cat >> ceph.conf << EOF
-public_network = 172.20.0.0/16
+public_network = ${NETWORK}/16
 mon_clock_drift_allowed  =  2 
 auth_cluster_required  =  cephx
 auth_service_required  =  cephx
@@ -147,7 +153,7 @@ EOF
 else
 ceph-deploy new ceph-1
 cat >> ceph.conf << EOF
-public_network = 172.20.0.0/16
+public_network = ${NETWORK}/16
 mon_clock_drift_allowed  =  2 
 auth_cluster_required  =  cephx
 auth_service_required  =  cephx
@@ -201,7 +207,7 @@ fi
 
 #check if the extra_probe_peers and public network are in the same network segment 
 if [[ ${IP[0]} =~ "10.0" ]]; then
-	sed -i 's/172.20.0.0\/16/10.0.0.0\/8/g' ceph.conf
+	sed -i "s/${NETWORK}\/16/10.0.0.0\/8/g" ceph.conf
 fi
 
 set +e
