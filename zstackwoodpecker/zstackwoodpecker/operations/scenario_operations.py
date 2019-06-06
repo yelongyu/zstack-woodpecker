@@ -2750,6 +2750,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                 ocfs2smp_shareable_volume_is_created = True
                             attach_volume(zstack_management_ip, share_volume_inv.uuid, vm_inv.uuid)
                         elif ps_ref.type_ == 'iscsiTarget':
+                            if vm_ip.find('172.24.') == 0:
+                                cmd = "sed -i 's/172.20.0.0/172.24.0.0/g' /etc/rc.local; sync; sync"
+                                ssh.execute(cmd, vm_ip, vm.imageUsername_, vm.imagePassword_, True, 22)
+
                             iscsi_disk_offering_uuid = ps_ref.disk_offering_uuid_
                             volume_option.set_disk_offering_uuid(iscsi_disk_offering_uuid)
                             iscsi_share_volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv) 
