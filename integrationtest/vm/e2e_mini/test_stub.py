@@ -758,6 +758,27 @@ class MINI(E2E):
         checker = MINICHECKER(self, vm_elem)
         checker.vm_check(check_list)
 
+    def set_qga(self, vm_name, qga=True, details_page=False):
+        test_util.test_logger('Set [%s] QGA [%s]' % (vm_name, qga))
+        self.navigate('vm')
+        self.more_operate('QGA', res_type='vm', res_name=vm_name, details_page=details_page)
+        if qga and (self.get_element('ant-switch-inner').text == u"关闭"):
+            self.get_element("button[id='qga']").click()
+        elif not qga and (self.get_element('ant-switch-inner').text == u"打开"):
+            self.get_element("button[id='qga']").click()
+        self.click_ok()
+        # check
+        if not qga:
+            self.check_menu_item_disabled(vm_name, 'vm', u'修改云主机密码')
+
+    def change_vm_password(self, vm_name, account='root', password='123456', details_page=False):
+        test_util.test_logger('Change the password of [%s] to %s' % (vm_name, password))
+        self.navigate('vm')
+        self.more_operate(u'修改云主机密码', vm_name, res_type='vm', details_page=details_page)
+        self.get_element('#account').input(account)
+        self.get_element('#password').input(password)
+        self.click_ok()
+
     def live_migrate(self, vm_name, details_page=False):
         test_util.test_logger('Live migrate VM')
         self.navigate('vm')
@@ -824,6 +845,19 @@ class MINI(E2E):
         # check
         if end_action == 'confirm':
             self.check_menu_item_disabled(vm_name, 'vm', u'取消控制台密码')
+
+    def set_boot_order(self, vm_name, cd_first=True, details_page=False):
+        test_util.test_logger('Set the boot order of [%s]' % vm_name)
+        self.navigate('vm')
+        self.more_operate(u'设置启动顺序', vm_name, res_type='vm', details_page=details_page)
+        boot_order = u'光盘，硬盘' if cd_first else u'硬盘，光盘'
+        self.input('bootOrder', boot_order)
+        self.get_elements(CHECKBOX)[-1].click()
+        self.click_ok()
+        # check
+        self.more_operate(u'设置启动顺序', vm_name, res_type='vm', details_page=details_page)
+        assert boot_order in self.get_element('ant-row ant-form-item').text
+        self.click_cancel()
 
     def vm_attach_volume(self, vm_name, volume_name, end_action='confirm'):
         volume_list = []

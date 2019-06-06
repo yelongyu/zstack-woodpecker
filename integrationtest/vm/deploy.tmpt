@@ -1,13 +1,13 @@
 zstackPkg = ~/sanitytest/zstack-offline-installer-test.bin
 zstackInstallScript = ~/sanitytest/install.sh
-#zstackInstallPath should be carefully set. The contents in this folder will be deleted permanently in testing. 
+#zstackInstallPath should be carefully set. The contents in this folder will be deleted permanently in testing.
 zstackInstallPath = /usr/local/zstacktest
 zstackPropertiesPath = ~/sanitytest/conf/zstack.properties
 zstackTestAgentPkgPath = ~/sanitytest/zstacktestagent.tar.bz
 DBServer = 10.1.101.40
 
 DBAdminUser = root
-DBAdminPassword = 
+DBAdminPassword =
 
 DBUserName = zstack
 DBPassword =
@@ -19,13 +19,13 @@ node1Name = centos1
 node1Ip = 10.1.101.40
 
 node2Name = centos5
-node2DockerImage = 
+node2DockerImage =
 node2Ip = 10.1.101.45
 nodeUserName = root
 nodePassword = 1
 
 node3Name = centos6
-node3DockerImage = 
+node3DockerImage =
 node3Ip = 10.0.101.46
 
 instanceOfferingName_s = small-vm
@@ -142,7 +142,7 @@ l2Vlan5 = 25
 l2VlanNetworkName6 = vlan-test-load-balance
 l2Vlan6 = 26
 
-#L3 network names should be same, test case will rely on name. 
+#L3 network names should be same, test case will rely on name.
 l3ManagementNetworkName = management network
 l3PublicNetworkName = public network
 l3NoVlanNetworkName1 = l3_user_defined_vlan1
@@ -260,8 +260,11 @@ vrImageUsername = root
 vrImagePassword = password
 bootOptionPicture = /home/boot.png
 
-testIsoName = testIso                                                                                                                                                                        
+testIsoName = testIso
 testIsoUrl = http://10.1.101.1/image/ttylinux-virtio_i486-16.1.iso
+
+testQGAImageName = testQGAImage
+testQGAImageUrl = http://192.168.200.100/mirror/diskimages/CentOS7.4-Cloudinit-QGA-8G.qcow2
 
 iperfUrl = https://iperf.fr/download/fedora/iperf3-3.1.3-1.fc24.x86_64.rpm
 imageServer = http://10.1.101.1/
