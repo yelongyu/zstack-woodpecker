@@ -8,6 +8,9 @@ IP[1]=$2
 IP[2]=$3
 #cd /tmp
 wget http://192.168.200.100/mirror/pengtao/cluster.json
+if [[ ${IP[0]} == 172.24.* ]]; then
+	sed -i "s/172.20.0.1/172.24.0.1/g" cluster.json
+fi
 #wget http://192.168.200.100/mirror/pengtao/sds-installer-3.2.14.3_Zstack_WithLicense.tar.gz
 # wget http://192.168.200.100/mirror/pengtao/oem-x-ebs-basic-installer-3.2.15.1_RTMVersion_ZStack_WithLicense.tar.gz
 # tar zxvf oem-x-ebs-basic-installer-3.2.15.1_RTMVersion_ZStack_WithLicense.tar.gz
