@@ -1042,6 +1042,10 @@ def setup_iscsi_initiator(zstack_management_ip, vm_inv, vm_config, deploy_config
     cmd = "sed -i 's/noop_out_timeout = 5/noop_out_timeout = 30/g' /etc/iscsi/iscsid.conf; sync; sync"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
+    if vm_ip.find('172.24.') == 0:
+        cmd = "sed -i 's/172.20.0.0/172.24.0.0/g' /etc/rc.local; sync; sync"
+        exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
     cmd = "service iscsid restart"
     exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
 
