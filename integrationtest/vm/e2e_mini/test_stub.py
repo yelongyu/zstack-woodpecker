@@ -69,7 +69,8 @@ def get_inv(name, res_type):
                 'minihost': res_ops.CLUSTER,
                 'network': res_ops.L3_NETWORK,
                 'image': res_ops.IMAGE,
-                'primaryStorage': res_ops.PRIMARY_STORAGE}
+                'primaryStorage': res_ops.PRIMARY_STORAGE,
+                'eip': res_ops.EIP}
     conditions = res_ops.gen_query_conditions('name', '=', name)
     inv = res_ops.query_resource(res_dict[res_type], conditions)
     if inv:
@@ -1021,6 +1022,27 @@ class MINI(E2E):
                 time.sleep(1)
                 self.operate(ops_list[action])
         self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
+
+    def eip_binding(self, eip_name, vm_name):
+        test_util.test_logger("Bind %s to %s" % (eip_name, vm_name))
+        vm_inv = get_inv(self.vm_name, "vm")
+        vm_nic_ip = vm_inv.vmNics[0].ip
+        self.navigate('eip')
+        self.more_operate(u'绑定', eip_name)
+        self.input('resourceUuid', vm_name)
+        self.input('vmNicUuid', vm_nic_ip)
+        self.click_ok()
+        eip_elem = self.get_res_element(eip_name)
+        checker = MINICHECKER(self, eip_elem)
+        checker.eip_check([vm_nic_ip])
+
+    def eip_unbinding(self, eip_name):
+        test_util.test_logger("Unbind %s" % eip_name)
+        self.navigate('eip')
+        self.more_operate(u'解绑', eip_name)
+        self.click_ok()
+        eip_elem = self.get_res_element(eip_name)
+        assert self.get_detail_info(eip_name, 'eip', u'私网IP:') == '-'
 
     def save_element_location(self, filename="location.tmpt"):
         for menu, page in MENUDICT.items():
