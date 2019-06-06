@@ -38,6 +38,7 @@
             <serviceType>SecurityGroup</serviceType>
           </networkService>
           <vpcvrouterRef>$scenvpcVrouterName1</vpcvrouterRef>
+          <pxeRef>$pxename</pxeRef>
         </l3BasicNetwork>
       </l3Networks>
     </l2VlanNetwork>
