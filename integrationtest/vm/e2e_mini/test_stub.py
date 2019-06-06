@@ -100,10 +100,10 @@ class MINI(E2E):
         self.window_size(1600, 900)
         self.login()
 
-    def login(self):
+    def login(self, password='password'):
         test_util.test_logger('Log in normally')
         self.get_element('#accountName').input('admin')
-        self.get_element('#password').input('password')
+        self.get_element('#password').input(password)
         # Login button
         self.get_element('button', 'tag name').click()
         self.wait_for_element(MESSAGETOAST, target='notDisappear')
@@ -117,6 +117,14 @@ class MINI(E2E):
         self.operate(u'退出登录')
         if not self.wait_for_element('#password'):
             test_util.test_fail('Fail to Logout')
+
+    def change_mini_password(self, password='123456'):
+        test_util.test_logger('Change the MINI password to [%s]' % password)
+        self.get_element(MENUSETTING).move_cursor_here()
+        self.operate(u'修改密码')
+        self.get_element('#newPassword').input(password)
+        self.get_element('#confirmPassword').input(password)
+        self.click_ok()
 
     def login_with_cleartext_password(self):
         test_util.test_logger('Log in with clear-text password')
