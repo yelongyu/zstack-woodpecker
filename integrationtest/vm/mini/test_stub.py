@@ -1034,7 +1034,7 @@ class ImageReplication(object):
         if expunged:
             assert manifests.code == 404
             assert manifests2.code == 404
-            test_util.test_logger("Iamge data has been cleanup up on all BS")
+            test_util.test_logger("Image data has been cleanup up on all BS")
         else:
             blobsum = manifests.blobsum
             blobsum2 = manifests2.blobsum
