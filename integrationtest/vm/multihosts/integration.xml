@@ -111,5 +111,6 @@
         <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_vr.py::kill_virtualrouter_agent</case>
         <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_vr.py::kill_vrouter_agent</case>
         <case timeout='600' repeat='1'>test_instance_offering_soft_hard.py</case>
+        <case timeout='1800' repeat='1'>test_iso_create_vm_root_size_not_512_multiple.py</case>
     </suite>
 </integrationTest>

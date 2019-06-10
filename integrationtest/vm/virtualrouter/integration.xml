@@ -246,5 +246,6 @@
         <case timeout='1800' repeat='1' noparallel='True'>ceph_pool_capacity/test_ceph_root_pool_cap.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_add_image_file_url.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_add_qcow2_image_file_url.py</case>
+        <case timeout='1800' repeat='1'>test_iso_create_vm_root_size_not_512_multiple.py</case>
     </suite>
 </integrationTest>
