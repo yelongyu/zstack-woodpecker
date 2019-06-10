@@ -16,6 +16,7 @@ import os
 import sys
 import traceback
 import time
+import hashlib
 import urllib2
 import xml.dom.minidom as minidom
 import zstackwoodpecker.test_util as test_util
@@ -148,7 +149,11 @@ def execute_action_with_session(http_server_ip, action, session_uuid, async=True
         else:
             evt = sync_call(http_server_ip, action, session_uuid)
     else:
-        session_uuid = login_as_admin(http_server_ip)
+        scen_mn_password = os.getenv('zstackAdminPassword')
+        if scen_mn_password != None and scen_mn_password != 'password':
+            session_uuid = login_by_account(http_server_ip, 'admin', hashlib.sha512(scen_mn_password).hexdigest())
+        else:
+            session_uuid = login_as_admin(http_server_ip)
         try:
             action.sessionUuid = session_uuid
             if async:
