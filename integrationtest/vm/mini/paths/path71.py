@@ -27,7 +27,7 @@ def path():
         [TestAction.add_image, "image2", "root", "http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2"],
         [TestAction.expunge_volume, "volume3"],
         [TestAction.create_volume_backup, "vm3", "root-backup1"],
-        [TestAction.delete_vm, "vm1"],
+        [TestAction.destroy_vm, "vm1"],
         [TestAction.recover_vm, "vm1"],
         [TestAction.start_vm, "vm1"],
         [TestAction.create_volume_backup, "volume2", "data-backup3"],

@@ -4,7 +4,7 @@ def path():
 
     return dict(initial_formation="template5", path_list=[
         [TestAction.create_vm_by_image, "iso-image", "iso", "vm1"],
-        [TestAction.delete_vm, "vm1"],
+        [TestAction.destroy_vm, "vm1"],
         [TestAction.create_mini_vm, "vm2", 'data_volume=false', 'cpu=2', 'memory=2', 'provisiong=thin'],
         [TestAction.create_volume, "volume1", "=scsi,thin"],
         [TestAction.attach_volume, "vm2", "volume1"],
@@ -38,7 +38,7 @@ def path():
         [TestAction.delete_volume, "volume4"],
         [TestAction.expunge_volume, "volume3"],
         [TestAction.expunge_volume, "volume4"],
-        [TestAction.delete_vm, "vm5"],
+        [TestAction.destroy_vm, "vm5"],
         [TestAction.create_volume_backup, "volume1", "backup5"],
         [TestAction.delete_image, "image2"],
         [TestAction.recover_image, "image2"],

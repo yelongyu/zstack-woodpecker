@@ -853,20 +853,6 @@ def reboot_host(robot_test_obj, args):
             test_util.test_logger('all the VMs are Stopped or Running after reboot')
             break
 
-def destroy_vm(robot_test_obj, args):
-    if len(args) != 1:
-        test_util.test_fail("no resource available for next action: destory vm")
-
-    target_vm = robot_test_obj.get_test_dict().vm[args[0]]
-
-    target_vm.destroy()
-    target_vm.update()
-
-    for volume in target_vm.test_volumes:
-        volume.update()
-        volume.update_volume()
-
-
 def expunge_vm(robot_test_obj, args):
     if len(args) != 1:
         test_util.test_fail("no resource available for next action: expunge vm")
@@ -879,6 +865,12 @@ def expunge_vm(robot_test_obj, args):
     robot_test_obj.test_dict.remove_vm(target_vm)
     robot_test_obj.test_dict.remove_snap_tree(args[0]+'-root')
 
+def delete_vm(robot_test_obj, args):
+    if len(args) != 1:
+        test_util.test_fail("no resource available for next action: delete vm")
+
+    destroy_vm(robot_test_obj, [args[0]])
+    expunge_vm(robot_test_obj, [args[0]])
 
 
 def reinit_vm(robot_test_obj, args):
@@ -1757,11 +1749,18 @@ def change_vm_ha(robot_test_obj, args):
         test_util.test_logger("VM: %s State: %s" % (args[0], status))
 
 
-def delete_vm(robot_test_obj, args):
+def destroy_vm(robot_test_obj, args):
     if len(args) < 1:
-        test_util.test_fail("no resource available for next action: delete_vm")
+        test_util.test_fail("no resource available for next action: destroy_vm")
     vm = robot_test_obj.get_test_dict().vm[args[0]]
+
     vm.destroy()
+    vm.update()
+
+    for volume in vm.test_volumes:
+        volume.update()
+        volume.update_volume()
+
     root_volume = robot_test_obj.get_test_dict().volume[args[0] + '-root']
     vm.test_volumes = [root_volume]
 
@@ -1788,6 +1787,23 @@ def delete_volume_backup(robot_test_obj, args):
     vol_ops.delete_volume_backup(bs_uuids, target_backup.uuid)
     robot_test_obj.test_dict.remove_backup(target_backup)
 
+def delete_vm_backup(robot_test_obj, args):
+    group_uuids = []
+
+    if len(args) < 1:
+        test_util.test_fail("no resource available for next action: delete_vm_backup")
+    backup_name = args[0]
+    backup_dict = None
+    for k, v in robot_test_obj.get_test_dict().backup.items():
+        if backup_name in k:
+            backup_dict = v
+            d_backup_name = k
+            target_backup = backup_dict['backup']
+            group_uuids.append(target_backup.groupUuid)
+            robot_test_obj.test_dict.remove_backup(target_backup)
+
+    for group_uuid in list(set(group_uuids)):
+        vol_ops.delete_vm_backup(group_uuid)
 
 action_dict = {
     'change_global_config_sp_depth': change_global_config_sp_depth,
@@ -1820,6 +1836,7 @@ action_dict = {
     'create_scsi_volume': create_scsi_volume,
     'attach_volume': attach_volume,
     'delete_volume': delete_volume,
+    'delete_vm_backup': delete_vm_backup,
     'detach_volume': detach_volume,
     'expunge_volume': expunge_volume,
     'migrate_volume': migrate_volume,

@@ -3,7 +3,7 @@ TestAction = ts_header.TestAction
 def path():
     return dict(initial_formation="template5", path_list=[
         [TestAction.create_mini_vm, "vm1", "data_volume=false", "cpu=2", "memory=2","provisiong=thick"],
-        [TestAction.delete_vm, "vm1"],
+        [TestAction.destroy_vm, "vm1"],
         [TestAction.recover_vm, "vm1"],
         [TestAction.create_volume, "volume1", "=scsi,thick"],
         [TestAction.attach_volume, "vm1", "volume1"],

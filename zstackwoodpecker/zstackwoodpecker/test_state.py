@@ -66,6 +66,7 @@ class TestAction(object):
     resize_volume = 'resize_volume'
     resize_data_volume = 'resize_data_volume'
     delete_volume_backup = 'delete_volume_backup'
+    delete_vm_backup = 'delete_vm_backup'
 
     create_data_vol_template_from_volume = \
             'create_data_volume_template_from_volume'

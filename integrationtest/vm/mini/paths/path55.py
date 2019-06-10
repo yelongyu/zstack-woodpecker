@@ -26,7 +26,7 @@ def path():
         [TestAction.create_mini_vm, "vm4", "data_volume=true", "cpu=2", "memory=random","provisiong=thick"],
         [TestAction.add_image, "image2", 'root', "http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2"],
         [TestAction.expunge_volume, "volume4"],
-        [TestAction.delete_vm, "vm4"],
+        [TestAction.destroy_vm, "vm4"],
         [TestAction.create_volume_backup, "vm3-root", "root-backup3"],
         [TestAction.delete_image, "image2"],
         [TestAction.stop_vm, "vm3"],

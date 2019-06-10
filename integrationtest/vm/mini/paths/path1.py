@@ -24,7 +24,7 @@ def path():
         [TestAction.reboot_vm, "vm3"],
         [TestAction.create_volume, "volume3", "=scsi,thin"],
         [TestAction.delete_volume, "volume3"],
-        [TestAction.delete_vm, "vm3"],
+        [TestAction.destroy_vm, "vm3"],
         [TestAction.expunge_vm, "vm3"],
         [TestAction.add_image, "image2", 'root', "http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2"],
         [TestAction.expunge_volume, "volume1"],
