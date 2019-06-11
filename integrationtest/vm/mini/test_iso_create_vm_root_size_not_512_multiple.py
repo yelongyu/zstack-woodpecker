@@ -103,7 +103,7 @@ def test():
     template.create()
 
     test_obj_dict.add_image(template)
-    template.check()
+#     template.check()
 
 
     # Create VM with root volume template
@@ -127,7 +127,7 @@ def test():
     template.delete()
     if bs_type == 'Ceph':
         time.sleep(60)
-    template.check()
+#     template.check()
 
     if bs_type == 'Ceph':
         conf_ops.change_global_config('ceph', 'imageCache.cleanup.interval', origin_interval)

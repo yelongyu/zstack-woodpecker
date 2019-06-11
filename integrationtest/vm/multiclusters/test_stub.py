@@ -408,7 +408,7 @@ class DataMigration(TestChain):
                 assert origin_meta.size == vol_size
             else:
                 assert origin_meta.size >= vol_size
-            assert 'rbd_data' in origin_meta.block_name_prefix
+            assert 'bd_data.' in origin_meta.block_name_prefix
             ps_trash = ps_ops.get_trash_on_primary_storage(self.origin_ps.uuid).storageTrashSpecs
             trash_install_path_list = [trsh.installPath for trsh in ps_trash]
             assert vol_installPath in trash_install_path_list
@@ -436,7 +436,7 @@ class DataMigration(TestChain):
         test_util.test_dsc('origin image meta: %s' % origin_meta)
         assert origin_meta.name == self.image_origin_path.split('/')[-1]
         assert origin_meta.size == self.image.size
-        assert 'rbd_data' in origin_meta.block_name_prefix
+        assert 'bd_data.' in origin_meta.block_name_prefix
         return self
 
     def clean_up_single_image_trash(self):
