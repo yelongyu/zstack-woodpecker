@@ -2511,7 +2511,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 for l3network in xmlobject.safe_list(l2network.l3Networks.l3BasicNetwork):
                     if xmlobject.has_element(l3network, 'pxeRef'):
                         print "xcy baremetal debug"
-                        shell.call('route add default gw 172.20.0.1')
+                        shell.call('route add default gw 172.24.0.1')
 #        for ip_range in ip_ranges:
 #            if last_ip_range != ip_range:
 #                shell.call('ip route del %s/24 || true' % ip_range)

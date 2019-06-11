@@ -849,6 +849,7 @@ def down_host_network(host_ip, scenarioConfig):
     host_vm_inv = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0]
     cond = res_ops.gen_query_conditions('uuid', '=', host_vm_inv.hostUuid)
     host_inv = sce_ops.query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
+    host_inv_name = host_inv.name
 
     host_vm_config = sce_ops.get_scenario_config_vm(host_vm_inv.name_, scenarioConfig)
 
@@ -857,8 +858,10 @@ def down_host_network(host_ip, scenarioConfig):
         test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, cmd)
     elif test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, "pwd"):
         test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, cmd)
+    elif test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_inv_name, "pwd"):
+        test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_inv_name, cmd)
     else:
-        test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s with username %s" %(host_inv.managementIp, host_password, host_password2, host_username))
+        test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s;%s with username %s" %(host_inv.managementIp, host_password, host_password2, host_inv_name, host_username))
 
 def up_host_network(host_ip, scenarioConfig):
     zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
@@ -866,6 +869,7 @@ def up_host_network(host_ip, scenarioConfig):
     host_vm_inv = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0]
     cond = res_ops.gen_query_conditions('uuid', '=', host_vm_inv.hostUuid)
     host_inv = sce_ops.query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
+    host_inv_name = host_inv.name
 
     host_vm_config = sce_ops.get_scenario_config_vm(host_vm_inv.name_, scenarioConfig)
 
@@ -874,8 +878,10 @@ def up_host_network(host_ip, scenarioConfig):
         test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, cmd)
     elif test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, "pwd"):
         test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, cmd)
+    elif test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_inv_name, "pwd"):
+        test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_inv_name, cmd)
     else:
-        test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s with username %s" %(host_inv.managementIp, host_password, host_password2, host_username))
+        test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s;%s with username %s" %(host_inv.managementIp, host_password, host_password2, host_inv_name, host_username))
 
 def recover_smp_nfs_server(host_ip):
     cmd = "bash /etc/rc.d/rc.local"
