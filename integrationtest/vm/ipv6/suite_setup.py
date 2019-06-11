@@ -61,6 +61,9 @@ def test():
     elif os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % (EXTRA_SUITE_SETUP_SCRIPT))
 
+    cmd = r'echo "nameserver 223.5.5.5" > /etc/resolv.conf'
+    os.system(cmd)
+
     deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
     for host in hosts:
         os.system("bash %s %s" % (EXTRA_HOST_SETUP_SCRIPT, host.managementIp_))
