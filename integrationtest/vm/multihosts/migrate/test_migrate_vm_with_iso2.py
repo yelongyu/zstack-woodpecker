@@ -21,12 +21,6 @@ vm = None
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
-
-def exec_cmd_in_vm(vm, cmd, fail_msg):
-    ret, output, stderr = ssh.execute(cmd, vm.get_vm().vmNics[0].ip, "root", "password", False, 22)
-    if ret != 0:
-        test_util.test_fail(fail_msg)
-
 def test():
     #skip ceph in c74
     cmd = "cat /etc/redhat-release | grep '7.4'"
@@ -47,6 +41,8 @@ def test():
 
     vm_inv = vm.get_vm()
     vm_uuid = vm_inv.uuid
+    vm_ip = vm_inv.vmNics[0].ip
+    host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
 
 
     test_util.test_dsc('Add ISO Image')
@@ -71,26 +67,35 @@ def test():
     iso_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
     img_ops.attach_iso(iso_uuid, vm_uuid)
     
-    time.sleep(10)
+    ssh_timeout = test_lib.SSH_TIMEOUT
+    test_lib.SSH_TIMEOUT = 3600
     cmd = "mount /dev/sr0 /mnt"
-    exec_cmd_in_vm(vm, cmd, "Failed to mount /dev/sr0 /mnt.")
+    if not test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host_ip, vm_ip, 'root', 'password', cmd):
+        test_lib.SSH_TIMEOUT = ssh_timeout
+        test_util.test_fail("Failed to mount /dev/sr0 /mnt.")
 
     test_util.test_dsc('Migrate VM')
     test_stub.migrate_vm_to_random_host(vm)
     vm.check()
 
+    host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
     cmd = "umount /mnt"
-    exec_cmd_in_vm(vm, cmd, "Failed to umount /mnt.")
+    if not test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host_ip, vm_ip, 'root', 'password', cmd):
+        test_lib.SSH_TIMEOUT = ssh_timeout
+        test_util.test_fail("Failed to umount /mnt.")
 
     img_ops.detach_iso(vm_uuid)
     img_ops.attach_iso(iso_uuid, vm_uuid)
 
-    time.sleep(10)
     cmd = "mount /dev/sr0 /mnt"
-    exec_cmd_in_vm(vm, cmd, "Failed to mount /dev/sr0 /mnt.")
+    if not test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host_ip, vm_ip, 'root', 'password', cmd):
+        test_lib.SSH_TIMEOUT = ssh_timeout
+        test_util.test_fail("Failed to mount /dev/sr0 /mnt.")
 
     cmd = "cat /mnt/Licenses.txt"
-    exec_cmd_in_vm(vm, cmd, "Licenses.txt doesn't exist.")
+    if not test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host_ip, vm_ip, 'root', 'password', cmd):
+        test_lib.SSH_TIMEOUT = ssh_timeout
+        test_util.test_fail("Licenses.txt doesn't exist.")
 
     img_ops.detach_iso(vm_uuid)
     image.delete()
