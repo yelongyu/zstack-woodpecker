@@ -1,25 +1,26 @@
 <integrationTest>
     <suite name="license test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
-        <case timeout='200' repeat='1' noparallel='True'>test_default_community_lic.py</case>
-        <case timeout='200' repeat='1' noparallel='True'>test_community_to_trialext.py</case>
-        <case timeout='200' repeat='1' noparallel='True'>test_community_to_trial.py</case>
-        <case timeout='120' repeat='1' noparallel='True'>test_community_to_prepaid.py</case>
-        <case timeout='200' repeat='1' noparallel='True'>test_community_to_hybrid.py</case>
-        <case timeout='200' repeat='1' noparallel='True'>test_community_to_trial_update_license.py</case>
-        <case timeout='200' repeat='1' noparallel='True'>test_update_license.py</case>
-        <case timeout='200' repeat='1' noparallel='True'>test_addons_license_for_baremetal.py</case>
-        <case timeout='200' repeat='1' noparallel='True'>test_addons_license_for_disaster_recovery.py</case>
-        <case timeout='200' repeat='1' noparallel='True'>test_addons_license_for_v2v.py</case>
-        <case timeout='200' repeat='1' noparallel='True'>test_update_error_license.py</case>
-        <case timeout='800' repeat='1' noparallel='True'>test_prepaid_to_community_check_imagestore.py</case>
-        <case timeout='800' repeat='1' noparallel='True'>test_addons_license.py</case>
-        <case timeout='800' repeat='1' noparallel='True'>test_addons_license_for_vmware.py</case>
+        <case timeout='300' repeat='1' noparallel='True'>test_default_community_lic.py</case>
+        <case timeout='300' repeat='1' noparallel='True'>test_community_to_trialext.py</case>
+        <case timeout='300' repeat='1' noparallel='True'>test_community_to_trial.py</case>
+        <case timeout='320' repeat='1' noparallel='True'>test_community_to_prepaid.py</case>
+        <case timeout='300' repeat='1' noparallel='True'>test_community_to_hybrid.py</case>
+        <case timeout='300' repeat='1' noparallel='True'>test_community_to_trial_update_license.py</case>
+        <case timeout='300' repeat='1' noparallel='True'>test_update_license.py</case>
+        <case timeout='300' repeat='1' noparallel='True'>test_addons_license_for_baremetal.py</case>
+        <case timeout='300' repeat='1' noparallel='True'>test_addons_license_for_disaster_recovery.py</case>
+        <case timeout='300' repeat='1' noparallel='True'>test_addons_license_for_v2v.py</case>
+        <case timeout='300' repeat='1' noparallel='True'>test_update_error_license.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>test_prepaid_to_community_check_imagestore.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>test_addons_license.py</case>
+        <case timeout='900' repeat='1' noparallel='True'>test_addons_license_for_vmware.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_community_to_hybridtrialext.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_community_to_hybridtrialext_and_add_vcenter.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_community_to_prepaid_check_vcenter.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_community_to_prepaid_addons_vmware_check_vcenter.py</case>
         <case timeout='1500' repeat='1' noparallel='True'>test_community_to_prepaid_addons_vmware_check_and_sync_vcenter.py</case>
-	<case timeout='1200' repeat='1' noparallel='True'>test_global_config.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>test_community_to_prepaid_addons_vmware_check_esx_status_and_sync_vcenter.py</case>
+	<case timeout='1600' repeat='1' noparallel='True'>test_global_config.py</case>
 	<case timeout='1800' repeat='1' noparallel='True'>test_global_config_defaultvalue_issame_value.py</case>
     </suite>
 </integrationTest>
