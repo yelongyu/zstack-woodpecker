@@ -37,7 +37,7 @@ def test():
     vm2_nic2 = vms[0].vmNics[0].usedIps[1].ip
 
     for ip in [vm1_nic1, vm1_nic2]:
-        if "172.20" in ip:
+        if r"172." in ip:
             ipv4 = ip
     for ip in [vm2_nic1, vm2_nic2]:
         if "1000:2000" in ip:

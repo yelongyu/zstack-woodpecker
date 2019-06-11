@@ -45,14 +45,14 @@ def test():
     vm1_ip2 = vm1.get_vm().vmNics[0].usedIps[1].ip
     vm2_ip1 = vm2.get_vm().vmNics[0].usedIps[0].ip
     vm2_ip2 = vm2.get_vm().vmNics[0].usedIps[1].ip
-    if "172.20" in vm1_ip1:
+    if r"172." in vm1_ip1:
         vm1_ipv4 = vm1_ip1
         vm1_ipv6 = vm1_ip2
     else:
         vm1_ipv4 = vm1_ip2
         vm1_ipv6 = vm1_ip1
 
-    if "172.20" in vm2_ip1:
+    if r"172." in vm2_ip1:
         vm2_ipv4 = vm2_ip1
         vm2_ipv6 = vm2_ip2
     else:
