@@ -31,6 +31,9 @@ FORMEXPLAIN = 'ant-form-explain'
 SPINCONTAINER = 'ant-spin-container'
 CONFIRMITEM = 'confirmItem___1ZEQE'
 MENUSETTING = 'ant-menu-horizontal'
+OPS_ONGOING = '#operationhint_ongoing'
+OPS_SUCCESS = '#operationhint_success'
+OPS_FAIL = '#operationhint_fail'
 PRIMARYBTNNUM = 2
 
 
@@ -200,10 +203,13 @@ class MINI(E2E):
                 tab.click()
         time.sleep(1)
 
-    def click_ok(self):
+    def click_ok(self, assure_success=True):
         test_util.test_logger('Click OK button')
         self.wait_for_page_render()
         self.get_elements(PRIMARYBTN)[-1].click()
+        if assure_success:
+            if not self.wait_for_element(OPS_SUCCESS):
+                test_util.test_fail("Fail: Operation Failed!")
         self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
         time.sleep(1)
 
