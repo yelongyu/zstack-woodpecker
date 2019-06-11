@@ -39,6 +39,7 @@ case_flavor = dict(snapshot_running=                dict(vm_op=['DVOL_TEST_SNAPS
                    create_img_from_backup_stopped=  dict(vm_op=['VM_TEST_BACKUP_IMAGE'], state_op=['VM_TEST_STOP']),
                    delete_snapshot_stopped=         dict(vm_op=['DVOL_DEL_SNAPSHOT'], state_op=['VM_TEST_STOP']),
                    revert_backup_stopped=           dict(vm_op=['VM_TEST_REVERT_BACKUP'], state_op=['VM_TEST_STOP']),
+                   revert_vm_backup_stopped=        dict(vm_op=['VM_TEST_REVERT_VM_BACKUP'], state_op=['VM_TEST_STOP']),
                    )
 
 
@@ -83,8 +84,10 @@ def vm_op_test(vm, dvol, op):
         "DVOL_DEL_SNAPSHOT": delete_snapshot,
         "DVOL_TEST_CREATE_IMG": create_image,
         "DVOL_TEST_RESIZE": resize_dvol,
-	"DVOL_BACKUP": back_up,
+	"DVOL_BACKUP": create_volume_backup,
+	"CREATE_VM_BACKUP": create_vm_backup,
         "VM_TEST_REVERT_BACKUP": revert_backup,
+        "VM_TEST_REVERT_VM_BACKUP": revert_vm_backup,
         "VM_TEST_BACKUP_IMAGE": backup_image
     }
     ops[op](vm, dvol)
@@ -155,7 +158,7 @@ def resize_dvol(vm_obj, dvol):
     #test_lib.lib_wait_target_up(vm_obj.get_vm().vmNics[0].ip, 22, 300)
 
 
-def back_up(vm_obj, dvol):
+def create_volume_backup(vm_obj, dvol):
     global backup
     cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0]
@@ -164,6 +167,21 @@ def back_up(vm_obj, dvol):
     backup_option.set_volume_uuid(dvol.volume.uuid)
     backup_option.set_backupStorage_uuid(bs.uuid)
     backup = vol_ops.create_backup(backup_option) 
+    backup_list.append(backup)
+
+def revert_vm_backup(vm_obj, dvol):
+    group_uuid = backup_list.pop(random.randint(0, len(backup_list)-1)).groupUuid
+    vol_ops.revert_vm_from_backup(group_uuid)
+
+def create_vm_backup(vm_obj, dvol):
+    global backup
+    cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0]
+    backup_option = test_util.BackupOption()
+    backup_option.set_name("test_compare")
+    backup_option.set_volume_uuid(test_lib.lib_get_root_volume(vm_obj.get_vm()).uuid)
+    backup_option.set_backupStorage_uuid(bs.uuid)
+    backup = vol_ops.create_vm_backup(backup_option)[0]
     backup_list.append(backup)
 
 def print_path(Path):
@@ -217,6 +235,9 @@ def test():
 
     if "VM_TEST_BACKUP_IMAGE" in DVOL_OP or "VM_TEST_REVERT_BACKUP" in DVOL_OP:
         vm_op_test(vm, dvol, "DVOL_BACKUP")
+
+    if "VM_TEST_REVERT_VM_BACKUP" in DVOL_OP:
+        vm_op_test(vm, dvol, "CREATE_VM_BACKUP")
 
     if "DVOL_DEL_SNAPSHOT" in DVOL_OP:
         vm_op_test(vm, dvol, "DVOL_TEST_SNAPSHOT")
