@@ -106,7 +106,8 @@ def attach_l3_to_vpc_vr(vpc_vr, l3_system_name_list=L3_SYSTEM_NAME_LIST):
     for l3 in l3_list:
         vpc_vr.add_nic(l3.uuid)
 
-
+def attach_l3_to_vpc_vr_by_uuid(vpc_vr, l3_uuid):
+    vpc_vr.add_nic(l3_uuid)
 
 def create_vm_with_random_offering(vm_name, image_name=None, l3_name=None, session_uuid=None,
                                    instance_offering_uuid=None, host_uuid=None, disk_offering_uuids=None,
