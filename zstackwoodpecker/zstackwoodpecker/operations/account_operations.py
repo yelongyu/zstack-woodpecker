@@ -9,6 +9,8 @@ import apibinding.inventory as inventory
 import traceback
 import sys
 import zstackwoodpecker.test_util as test_util
+import os
+import hashlib
 
 
 def login_as_admin():
@@ -51,7 +53,11 @@ def execute_action_with_session(action, session_uuid):
         action.sessionUuid = session_uuid
         evt = action.run()
     else:
-        session_uuid = login_as_admin()
+	scen_mn_password = os.getenv('zstackAdminPassword')
+        if scen_mn_password != None and scen_mn_password != 'password':
+            session_uuid = login_by_account( 'admin', hashlib.sha512(scen_mn_password).hexdigest())
+        else:
+            session_uuid = login_as_admin()
         try:
             action.sessionUuid = session_uuid
             evt = action.run()

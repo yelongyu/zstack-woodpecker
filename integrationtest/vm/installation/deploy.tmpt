@@ -1,6 +1,6 @@
 import ../deploy.tmpt
 #-----Instance Template-----
-instanceOfferingName_m = medium-vm
+instanceOfferingName_m = 4c-8g
 instanceOfferingMemory_m = 6.5G
 instanceOfferingCpuNum_m = 4
 #instanceOfferingCpuSpeed_m = 512
