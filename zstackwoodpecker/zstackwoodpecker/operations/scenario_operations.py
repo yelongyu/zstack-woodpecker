@@ -144,8 +144,9 @@ def execute_action_with_session(http_server_ip, action, session_uuid, async=True
         else:
             evt = sync_call(http_server_ip, action, session_uuid)
     else:
+        zstack_management_ip = os.getenv('zstackManagementIp')
         scen_mn_password = os.getenv('zstackAdminPassword')
-        if scen_mn_password != None and scen_mn_password != 'password':
+        if scen_mn_password != None and scen_mn_password != 'password' and http_server_ip == zstack_management_ip:
             session_uuid = login_by_account(http_server_ip, 'admin', hashlib.sha512(scen_mn_password).hexdigest())
         else:
             session_uuid = login_as_admin(http_server_ip)
