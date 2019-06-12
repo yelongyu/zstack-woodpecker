@@ -44,7 +44,7 @@ def test():
         if i == 10:
             set_size = vol_size + 21474836480 + random.randint(1,1073741824)
         else:
-            set_size = vol_size + random.randint(1,1073741824)
+            set_size = vol_size + random.randint(10485760,1073741824)
 
         test_util.test_logger('Resize Root Volume, original size = %s, target size = %s' % (vol_size, set_size))
         vol_ops.resize_volume(volume_uuid, set_size)
