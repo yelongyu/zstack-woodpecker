@@ -97,6 +97,9 @@ def test():
     bs_type = backup_storage_list[0].type
     if bs_type == 'Ceph':
         origin_interval = conf_ops.change_global_config('ceph', 'imageCache.cleanup.interval', '1')
+    if bs_type == 'SftpBackupStorage':
+        vm.stop()
+
 
     template = test_image.ZstackTestImage()
     template.set_creation_option(image_creation_option)

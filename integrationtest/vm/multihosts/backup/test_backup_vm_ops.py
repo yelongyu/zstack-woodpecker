@@ -39,6 +39,7 @@ case_flavor = dict(snapshot_running=                dict(vm_op=['VM_TEST_SNAPSHO
                    change_os_stopped=               dict(vm_op=['VM_TEST_CHANGE_OS'], state_op=['VM_TEST_STOP']),
                    reset_stopped=                   dict(vm_op=['VM_TEST_RESET'], state_op=['VM_TEST_STOP']),
                    revert_backup_stopped=           dict(vm_op=['VM_TEST_REVERT_BACKUP'], state_op=['VM_TEST_STOP']),
+                   revert_vm_backup_stopped=        dict(vm_op=['VM_TEST_REVERT_VM_BACKUP'], state_op=['VM_TEST_STOP']),
                    create_img_from_backup_stopped=  dict(vm_op=['VM_TEST_BACKUP_IMAGE'], state_op=['VM_TEST_STOP']),
                    migrate_stopped=                 dict(vm_op=['VM_TEST_MIGRATE'], state_op=['VM_TEST_STOP']),
                    change_os_snapshot_stopped=      dict(vm_op=['VM_TEST_CHANGE_OS', 'VM_TEST_SNAPSHOT'], state_op=['VM_TEST_STOP']),
@@ -66,6 +67,7 @@ VM_RUNNING_OPS = [
     "VM_TEST_RESIZE_RVOL",
     "RVOL_DEL_SNAPSHOT",
     "VM_TEST_NONE",
+    "VM_TEST_VM_BACKUP",
     "VM_TEST_BACKUP_IMAGE"
 ]
 
@@ -78,6 +80,7 @@ VM_STOPPED_OPS = [
     "VM_TEST_RESET",
     "VM_TEST_NONE",
     "VM_TEST_REVERT_BACKUP",
+    "VM_TEST_REVERT_VM_BACKUP",
     "VM_TEST_BACKUP_IMAGE"
 ]
 
@@ -102,8 +105,10 @@ def vm_op_test(vm, op):
         "RVOL_DEL_SNAPSHOT": delete_snapshot,
         "VM_TEST_CHANGE_OS": change_os,
         "VM_TEST_RESET": reset,
-        "VM_TEST_BACKUP": back_up,
+        "VM_TEST_BACKUP": create_volume_backup,
+        "VM_TEST_VM_BACKUP": create_vm_backup,
         "VM_TEST_REVERT_BACKUP": revert_backup,
+        "VM_TEST_REVERT_VM_BACKUP": revert_vm_backup,
         "VM_TEST_BACKUP_IMAGE": backup_image 
     }
     ops[op](vm)
@@ -216,20 +221,35 @@ def change_os(vm_obj):
         test_util.test_fail('Change VM Image Failed.Primarystorage has changed.')
 
 
-def back_up(vm_obj):
-     global backup
-     cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
-     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0]
-     backup_option = test_util.BackupOption()
-     backup_option.set_name("test_compare")
-     backup_option.set_volume_uuid(test_lib.lib_get_root_volume(vm_obj.get_vm()).uuid)
-     backup_option.set_backupStorage_uuid(bs.uuid)
-     backup = vol_ops.create_backup(backup_option)
-     backup_list.append(backup)
+def create_volume_backup(vm_obj):
+    global backup
+    cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0]
+    backup_option = test_util.BackupOption()
+    backup_option.set_name("test_compare")
+    backup_option.set_volume_uuid(test_lib.lib_get_root_volume(vm_obj.get_vm()).uuid)
+    backup_option.set_backupStorage_uuid(bs.uuid)
+    backup = vol_ops.create_backup(backup_option)
+    backup_list.append(backup)
 
 def revert_backup(vm_obj):
     backup_uuid = backup_list.pop(random.randint(0, len(backup_list)-1)).uuid
-    vol_ops.revert_volume_from_backup(backup_uuid) 
+    vol_ops.revert_volume_from_backup(backup_uuid)
+
+def revert_vm_backup(vm_obj):
+    group_uuid = backup_list.pop(random.randint(0, len(backup_list)-1)).groupUuid
+    vol_ops.revert_vm_from_backup(group_uuid)
+
+def create_vm_backup(vm_obj):
+    global backup
+    cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0]
+    backup_option = test_util.BackupOption()
+    backup_option.set_name("test_compare")
+    backup_option.set_volume_uuid(test_lib.lib_get_root_volume(vm_obj.get_vm()).uuid)
+    backup_option.set_backupStorage_uuid(bs.uuid)
+    backup = vol_ops.create_vm_backup(backup_option)[0]
+    backup_list.append(backup)
 
 def backup_image(vm_obj):
     cond = res_ops.gen_query_conditions("type", '=', "ImageStoreBackupStorage")
@@ -278,6 +298,9 @@ def test():
 
     if "VM_TEST_BACKUP_IMAGE" in VM_OP or "VM_TEST_REVERT_BACKUP" in VM_OP:
         vm_op_test(vm, "VM_TEST_BACKUP")
+  
+    if "VM_TEST_REVERT_VM_BACKUP" in VM_OP:
+        vm_op_test(vm, "VM_TEST_VM_BACKUP")
 
     if "RVOL_DEL_SNAPSHOT" in VM_OP:
         vm_op_test(vm, "VM_TEST_SNAPSHOT")
@@ -288,7 +311,7 @@ def test():
             if not backup_list and "VM_TEST_BACKUP_IMAGE" == i:
                 i = "VM_TEST_NONE"
         elif vm.state == "Stopped":
-            if not backup_list and ("VM_TEST_BACKUP_IMAGE" == i or "VM_TEST_REVERT_BACKUP" == i):
+            if not backup_list and ("VM_TEST_BACKUP_IMAGE" == i or "VM_TEST_REVERT_BACKUP" == i or "VM_TEST_REVERT_VM_BACKUP" == i):
                 i = "VM_TEST_NONE"
 
         vm_op_test(vm, i)
