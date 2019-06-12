@@ -17,7 +17,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 from zstackwoodpecker import test_util
 import zstacklib.utils.jsonobject as jsonobject
 
-LOCATION_FILE_PATH = '/root/.zstackwoodpecker/integrationtest/vm/e2e_mini/'
+LOG_FILE_PATH = '/root/.zstackwoodpecker/integrationtest/vm/e2e_mini/'
 MESSAGETOAST = 'ant-notification-notice-message'
 CARDCONTAINER = 'ant-card|ant-table-row'
 MODALCONTENT = 'ant-modal-content'
@@ -1092,17 +1092,42 @@ class MINI(E2E):
         eip_elem = self.get_res_element(eip_name)
         assert self.get_detail_info(eip_name, 'eip', u'私网IP:') == '-'
 
-    def save_element_location(self, filename="location.tmpt"):
+    def get_err_log(self, filename=None):
+        filename = '.'.join(['err_log-' + get_time_postfix(), 'tmpt']) if filename is None else filename
+        test_util.test_logger("Get err log")
+        self.navigate('log')
+        next_btn = self.get_elements("button", "tag name")[-1]
+        while next_btn.enabled:
+            for line in self.get_elements('ant-table-row-level-0'):
+                if u"失败" in line.text:
+                    arrow = line.get_element('anticon-down')
+                    arrow.click()
+                    for log_content in self.get_elements('ant-table-expanded-row-level-1'):
+                        if log_content.displayed():
+                            log_body = log_content.get_element('body___2c2z6')
+                            break
+                    try:
+                        with open(join(LOG_FILE_PATH, filename), 'ab') as f:
+                            f.write(line.text.encode("utf-8"))
+                            f.write("\n")
+                            f.write(log_body.text.encode("utf-8"))
+                            f.write("\n----------*----------\n")
+                    except IOError:
+                        test_util.test_fail("Fail: IOError")
+                    arrow.click()
+            next_btn.click()
+
+    def save_element_location(self, filename=None):
+        filename = '.'.join(['elem_location-' + get_time_postfix(), 'tmpt']) if filename is None else filename
         for menu, page in MENUDICT.items():
             loc = {}
             loc[menu] = self.get_element(page).location
             json_loc = jsonobject.dumps(loc)
             try:
-                with open(join(LOCATION_FILE_PATH, filename), 'ab') as f:
+                with open(join(LOG_FILE_PATH, filename), 'ab') as f:
                     f.write(json_loc)
             except IOError:
-                return False
-        return True
+                test_util.test_fail("Fail: IOError")
 
     def enabled_status_checker(self):
         self.navigate('vm')
