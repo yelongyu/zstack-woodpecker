@@ -34,6 +34,7 @@
     <case timeout='1200' noparallel='True'>vms/test_start_stop_reboot_vms_batch.py</case>
     <case timeout='1200' noparallel='True'>vms/test_upgrade_system_capacity.py</case>
     <case timeout='1200' noparallel='True'>vms/test_vm_ha_level.py</case>
+    <case timeout='1200' noparallel='True'>vms/test_vm_backup.py</case>
     <case timeout='1200' noparallel='True'>vms/test_vm_update_info.py</case>
     <case timeout='1200' noparallel='True'>vms/test_vm_attach_detach_volumes.py</case>
     <case timeout='1200' noparallel='True'>volume/test_create_volume_attached_vm.py</case>
@@ -41,6 +42,7 @@
     <case timeout='1200' noparallel='True'>volume/test_delete_resume_volume.py</case>
     <case timeout='1200' noparallel='True'>volume/test_delete_resume_volumes_batch.py</case>
     <case timeout='1200' noparallel='True'>volume/test_upgrade_volume_capacity.py</case>
+    <case timeout='1200' noparallel='True'>volume/test_volume_backup.py</case>
     <case timeout='1200' noparallel='True'>volume/test_volume_attach_detach_vm.py</case>
     <case timeout='1200' noparallel='True'>volume/test_volume_update_info.py</case>
     </suite>

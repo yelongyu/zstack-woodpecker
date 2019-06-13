@@ -73,7 +73,8 @@ def get_inv(name, res_type):
                 'network': res_ops.L3_NETWORK,
                 'image': res_ops.IMAGE,
                 'primaryStorage': res_ops.PRIMARY_STORAGE,
-                'eip': res_ops.EIP}
+                'eip': res_ops.EIP,
+                'backup': res_ops.VOLUME_BACKUP}
     conditions = res_ops.gen_query_conditions('name', '=', name)
     inv = res_ops.query_resource(res_dict[res_type], conditions)
     if inv:
@@ -906,6 +907,60 @@ class MINI(E2E):
         self.end_action(end_action)
         if end_action == 'confirm':
             self.check_res_item(volume_list, target='notDisplayed')
+
+    def create_backup(self, name, res_type, backup_name, backup_dsc=None, end_action='confirm'):
+        test_util.test_logger('%s[%s] create backup[%s]' % (res_type.upper(), name, backup_name))
+        self.navigate(res_type)
+        self.enter_details_page(res_type, name)
+        self.switch_tab(u'备份数据')
+        self.get_elements(MOREOPERATIONBTN)[-1].move_cursor_here()
+        self.operate(u'创建备份')
+        self.input('name', backup_name)
+        if backup_dsc is not None:
+            self.input('description', backup_dsc)
+        self.end_action(end_action)
+        if end_action == 'confirm':
+            backup_list = []
+            backup_list.append(backup_name)
+            self.check_res_item(backup_list)
+
+    def delete_backup(self, name, res_type, backup_name, end_action='confirm'):
+        backup_list = []
+        if isinstance(backup_name, types.ListType):
+            backup_list = backup_name
+        else:
+            backup_list.append(backup_name)
+        test_util.test_logger('%s[%s] delete backup (%s)' % (res_type.upper(), name, ' '.join(backup_list)))
+        self.navigate(res_type)
+        self.enter_details_page(res_type, name)
+        self.switch_tab(u'备份数据')
+        self.get_table_row(backup_list)
+        self.get_elements(MOREOPERATIONBTN)[-1].move_cursor_here()
+        self.operate(u'删除备份')
+        self.end_action(end_action)
+        if end_action == 'confirm':
+            self.check_res_item(backup_list, target='notDisplayed')
+
+    def restore_backup(self, name, res_type, backup_name, end_action='confirm'):
+        test_util.test_logger('%s[%s] restore backup[%s]' % (res_type.upper(), name, backup_name))
+        self.navigate(res_type)
+        checker = MINICHECKER(self, self.get_res_element(name))
+        if res_type == 'vm':
+            checker.vm_check(ops='stop')
+        self.enter_details_page(res_type, name)
+        self.switch_tab(u'备份数据')
+        backup_list = []
+        backup_list.append(backup_name)
+        self.get_table_row(backup_list)
+        self.get_elements(MOREOPERATIONBTN)[-1].move_cursor_here()
+        self.operate(u'恢复备份')
+        self.end_action(end_action)
+        image_name = 'for-recover-volume-from-backup-' + str(get_inv(backup_name, 'backup').uuid)
+        image_list = []
+        image_list.append(image_name)
+        if res_type == 'vm':
+            self.navigate('image')
+            self.check_res_item(image_list)
 
     def volume_attach_to_vm(self, volume_name=[], dest_vm=None, details_page=False):
         emptyl = []
