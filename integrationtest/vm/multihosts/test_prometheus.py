@@ -30,8 +30,14 @@ def check_host_prometheus_conf():
     mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
 #    host_list = test_stub.get_sce_hosts(test_lib.all_scenario_config, test_lib.scenario_file)
     host_list = test_lib.lib_get_all_hosts_from_plan()
-    cmd = 'yum install -y jq --nogpgcheck --disablerepo=* --enablerepo=epel'
-    test_lib.lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd, 180)
+    cmd = 'yum install -y jq --nogpgcheck'
+    cmd2 = 'yum install -y jq --nogpgcheck --disablerepo=* --enablerepo=epel'
+    if test_lib.lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd, 180):
+        test_lib.lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd, 180)
+    elif test_lib.lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd2, 180):
+        test_lib.lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd2, 180)
+    else:
+        test_util.test_fail('Fail to install jq')
 
     for host in host_list:
         host_ip = host.managementIp_
