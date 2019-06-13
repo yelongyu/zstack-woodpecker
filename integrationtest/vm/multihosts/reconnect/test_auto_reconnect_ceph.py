@@ -40,6 +40,8 @@ def test():
     bpss = res_ops.query_resource(resource_type, conditions)
     if len(bpss) == 0:
         test_util.test_skip('Skip due to no ceph storage available')
+    if len(bpss[0].mons) == 1:
+        test_util.test_skip('Skip due to only one mon in ceph storage')
 
     ceph_mon = bpss[0].mons[0]
     test_util.test_logger("kill ceph agent on one mon of ceph storage %s" % (bpss[0].uuid))

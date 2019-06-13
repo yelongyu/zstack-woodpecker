@@ -41,9 +41,13 @@ def test():
     vrs = test_lib.lib_find_vr_by_l3_uuid(l3_1.uuid)
     if not vrs:
         image_name = os.environ.get('imageName_net')
-        vm = test_stub.create_vr_vm('vm_for_vr', image_name, l3_1_name)
+        vm = test_stub.create_vr_vm('vm_for_vr', 'imageName_net', 'l3VlanNetworkName1')
         vm.destroy()
-        vr1 = test_lib.lib_find_vr_by_l3_uuid(l3_1.uuid)[0]
+        vrs = test_lib.lib_find_vr_by_l3_uuid(l3_1.uuid)
+        if len(vrs) < 1:
+            test_util.test_skip('VR is required for testing')
+        else:
+            vr1 = vrs[0]
     else:
         vr1 = vrs[0]
 
