@@ -7423,6 +7423,21 @@ def lib_create_data_vol_template_from_volume(target_vm=None, bs_list=[], vm_targ
     new_data_vol_temp.set_state(image_header.CREATED)
     return new_data_vol_temp
 
+def lib_create_root_vol_template_from_volume(target_volume, bs_list=[]):
+    import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
+    ps_uuid = target_volume.primaryStorageUuid
+    backup_storage_uuid_list = lib_get_backup_storage_uuid_list_by_zone(lib_get_primary_storage_by_uuid(ps_uuid).zoneUuid)
+
+    image_option = test_util.ImageOption()
+    image_option.set_root_volume_uuid(target_volume.uuid)
+    image_option.set_backup_storage_uuid_list(backup_storage_uuid_list)
+
+    new_root_vol_inv = img_ops.create_root_volume_template(image_option)
+    new_root_vol_temp = zstack_image_header.ZstackTestImage()
+    new_root_vol_temp.set_image(new_root_vol_inv)
+    new_root_vol_temp.set_state(image_header.CREATED)
+    return new_root_vol_temp
+
 def lib_create_volume_snapshot_from_volume(target_volume_snapshots, robot_test_obj, test_dict, cre_vm_opt=None, snapshot_name=None):
     vol_utiltiy_vm = None
     target_volume_inv = \

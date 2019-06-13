@@ -1258,7 +1258,10 @@ def resize_volume(robot_test_obj, args):
         test_util.test_fail("no resource available for next action: reisze root volume")
 
     target_vm = robot_test_obj.get_test_dict().vm[args[0]]
-    delta = args[1]
+    if args[1] == "random":
+        delta = random.randint(10485760,21474836480)
+    else:
+        delta = args[1]
 
     root_volume_uuid = test_lib.lib_get_root_volume(target_vm.get_vm()).uuid
     current_size = test_lib.lib_get_root_volume(target_vm.get_vm()).size
@@ -1267,6 +1270,7 @@ def resize_volume(robot_test_obj, args):
     vol_ops.resize_volume(root_volume_uuid, new_size)
 
     target_volume = robot_test_obj.get_test_dict().volume[args[0] + '-root']
+    target_vm.update()
     target_volume.update()
     target_volume.update_volume()
 
@@ -1276,7 +1280,10 @@ def resize_data_volume(robot_test_obj, args):
         test_util.test_fail("no resource available for next action: reisze data volume")
 
     target_volume = robot_test_obj.get_test_dict().volume[args[0]]
-    delta = args[1]
+    if args[1] == "random":
+        delta = random.randint(10485760,21474836480)
+    else:
+        delta = args[1]
 
     current_size = target_volume.get_volume().size
     new_size = current_size + int(delta)
@@ -1301,6 +1308,21 @@ def create_data_vol_template_from_volume(robot_test_obj, args):
     target_volume.update()
     target_volume.update_volume()
 
+def create_root_vol_template_from_volume(robot_test_obj, args):
+    if len(args) != 2:  # vm_name image_name
+        test_util.test_fail("no resource available for next action: create root volume image")
+
+    target_vm = robot_test_obj.get_test_dict().vm[args[0]]
+    target_volume = robot_test_obj.get_test_dict().volume[target_vm.get_vm().name + '-root']
+    image_name = args[1]
+
+    new_root_vol_temp = test_lib.lib_create_root_vol_template_from_volume(target_volume.get_volume())
+    img_ops.update_image(new_root_vol_temp.get_image().uuid, image_name, None)
+
+    robot_test_obj.get_test_dict().add_image(image_name, new_root_vol_temp)
+
+    target_volume.update()
+    target_volume.update_volume()
 
 def create_data_volume_from_image(robot_test_obj, args):
     systemtags = []
@@ -1845,6 +1867,7 @@ action_dict = {
 
     'create_data_volume_template_from_volume': create_data_vol_template_from_volume,
     'create_data_volume_from_image': create_data_volume_from_image,
+    'create_root_vol_template_from_volume': create_root_vol_template_from_volume,
 
     'create_image_from_volume': create_image_from_volume,
     'delete_image': delete_image,

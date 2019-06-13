@@ -49,6 +49,9 @@
         <case timeout='1200' repeat='1' noparallel='True'>test_prometheus.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_anti_spoofing.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_sg_anti_spoofing_reconnect_host.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_pf_and_lb_share_one_vip.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vip_delete_vrouter_net_iprange.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vip_detach_vnic.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_check_snat_state.py::vm1_l3_vlan_vm2_l3_vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_disable_snat.py::vm1_l3_vlan_vm2_l3_vxlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_disable_enable_snat_100_times.py::vm1_l3_vlan_vm2_l3_vxlan</case>
