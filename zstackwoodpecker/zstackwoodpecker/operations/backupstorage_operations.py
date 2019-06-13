@@ -49,6 +49,7 @@ def create_image_store_backup_storage(backup_storage_option, session_uuid=None):
     action.sshPort = backup_storage_option.get_sshPort()
     action.resourceUuid = backup_storage_option.get_resource_uuid()
     action.importImages = backup_storage_option.get_import_images()
+    action.systemTags = backup_storage_option.get_system_tags()
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create Sftp Backup Storage [uuid:] %s [name:] %s' % \
             (evt.inventory.uuid, action.name))
