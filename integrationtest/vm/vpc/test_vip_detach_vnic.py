@@ -28,7 +28,7 @@ def test():
         test_util.test_logger(vpc_l3_list[i])
         test_util.test_logger(test_stub.L3_SYSTEM_NAME_LIST)
         vpc_l3_uuid = test_lib.lib_get_l3_by_name(vpc_l3_list[i]).uuid
-	    test_stub.attach_l3_to_vpc_vr_by_uuid(vr_list[i], vpc_l3_uuid)
+        test_stub.attach_l3_to_vpc_vr_by_uuid(vr_list[i], vpc_l3_uuid)
         test_util.test_dsc("Create 2 vm in vpc network")
         vm_list.append(test_stub.create_vm_with_random_offering(vm_name='vpc_vm_{}'.format(i), l3_name=vpc_l3_list[i]))
         test_obj_dict.add_vm(vm_list[i])
