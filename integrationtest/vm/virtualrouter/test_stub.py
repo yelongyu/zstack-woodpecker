@@ -1276,14 +1276,16 @@ class Longjob(object):
             _job_name = self.crt_vm_image_job_name
         elif job_type == 'crt_vol_image':
             _job_name = self.crt_vol_image_job_name
+        elif job_type == 'cleanup':
+            _job_name = 'APIReclaimSpaceFromImageStoreMsg'
         long_job = longjob_ops.submit_longjob(_job_name, job_data, name)
         assert long_job.state == "Running"
         cond_longjob = res_ops.gen_query_conditions('apiId', '=', long_job.apiId)
         progress_set = set()
-        for _ in xrange(600):
+        for _ in xrange(1800):
             progress_inv = res_ops.get_task_progress(long_job.apiId).inventories
             if not progress_inv:
-                time.sleep(3)
+                time.sleep(1)
                 continue
             else:
                 progress = progress_inv[0].content
@@ -1291,7 +1293,7 @@ class Longjob(object):
                 if '100' in progress or 'image cache' in progress:
                     break
                 else:
-                    time.sleep(3)
+                    time.sleep(1)
         progress_list = [int(i) for i in progress_set if len(i) <= 3]
         progress_list.sort()
         if self.target_bs.type != inventory.SFTP_BACKUP_STORAGE_TYPE:
@@ -1302,16 +1304,17 @@ class Longjob(object):
         assert longjob.state == "Succeeded"
         assert longjob.jobResult == "Succeeded"
         job_data_name = job_data.split('"')[3]
-        image_inv = res_ops.query_resource(res_ops.IMAGE, eval(self.cond_name.replace('name_to_replace', job_data_name)))[0]
-        assert image_inv.status == 'Ready'
-        self.image = test_image.ZstackTestImage()
-        self.image.set_image(image_inv)
-        self.test_obj_dict.add_image(self.image)
-        if job_type == 'crt_vol_image':
-            assert image_inv.mediaType == 'DataVolumeTemplate'
-        else:
-            assert image_inv.mediaType == 'RootVolumeTemplate'
-        self.image_uuid = image_inv.uuid
+        if job_type != 'cleanup':
+            image_inv = res_ops.query_resource(res_ops.IMAGE, eval(self.cond_name.replace('name_to_replace', job_data_name)))[0]
+            assert image_inv.status == 'Ready'
+            self.image = test_image.ZstackTestImage()
+            self.image.set_image(image_inv)
+            self.test_obj_dict.add_image(self.image)
+            if job_type == 'crt_vol_image':
+                assert image_inv.mediaType == 'DataVolumeTemplate'
+            else:
+                assert image_inv.mediaType == 'RootVolumeTemplate'
+            self.image_uuid = image_inv.uuid
 
     def add_image(self, platform="Linux", img_format="qcow2"):
         name = "longjob_image"
@@ -1322,6 +1325,15 @@ class Longjob(object):
         "backupStorageUuids"=["%s"]}' % (self.image_add_name, self.url, img_format, platform, self.target_bs.uuid)
         self.submit_longjob(job_data, name, job_type='image')
         self.image.check()
+
+    def cleanup_bs(self):
+        avail_capacity_before = self.target_bs.availableCapacity
+        job_data = '{"uuid"="%s"}' % self.target_bs.uuid
+        self.submit_longjob(job_data, name='cleanup_bs', job_type='cleanup')
+        conditions = res_ops.gen_query_conditions('uuid', '=', self.target_bs.uuid)
+        self.target_bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, conditions)
+        avail_capacity_after = self.target_bs.availableCapacity
+        assert avail_capacity_after > avail_capacity_before
 
     def delete_image(self):
         try:
