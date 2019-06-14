@@ -1,4 +1,4 @@
-'''
+ '''
 
 Create an unified test_stub to share test operations
 
@@ -2177,8 +2177,8 @@ class MultiSharedPS(object):
         for vm in vms:
             data_volume.attach(vm)
         vol_uuid = data_volume.get_volume().uuid
-#         if from_offering:
-#             test_lib.lib_mkfs_for_volume(vol_uuid, vms[0].vm, '/mnt')
+        if from_offering:
+            test_lib.lib_mkfs_for_volume(vol_uuid, vms[0].vm, '/mnt')
         self.data_volume[vol_uuid] = data_volume
         return self
 
