@@ -1331,7 +1331,7 @@ class Longjob(object):
         job_data = '{"uuid"="%s"}' % self.target_bs.uuid
         self.submit_longjob(job_data, name='cleanup_bs', job_type='cleanup')
         conditions = res_ops.gen_query_conditions('uuid', '=', self.target_bs.uuid)
-        self.target_bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, conditions)
+        self.target_bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, conditions)[0]
         avail_capacity_after = self.target_bs.availableCapacity
         assert avail_capacity_after > avail_capacity_before
 
