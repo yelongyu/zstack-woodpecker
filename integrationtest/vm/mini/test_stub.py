@@ -1072,6 +1072,7 @@ class ImageReplication(object):
             if host_status.count('Connected') < 2:
                 time.sleep(1)
             else:
+                test_util.test_logger('All hosts are connected')
                 break
         # check again in case host status changed
         time.sleep(60)
