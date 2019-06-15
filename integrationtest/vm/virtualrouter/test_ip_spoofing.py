@@ -35,9 +35,9 @@ def test():
     vm_inv = vm.get_vm()
     vm_ip = vm_inv.vmNics[0].ip
 
-    new_vm_ip = '172.20.1.1'
+    new_vm_ip = '172.24.1.1'
     if new_vm_ip == vm_ip:
-        new_vm_ip = '172.20.1.2'
+        new_vm_ip = '172.24.1.2'
 
     test_util.test_dsc("Prepare Test File")
     cmd = "cp %s %s" % (test_file_src, test_file_des)
