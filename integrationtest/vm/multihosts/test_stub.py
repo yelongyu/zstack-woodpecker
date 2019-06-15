@@ -1,4 +1,4 @@
- '''
+'''
 
 Create an unified test_stub to share test operations
 
