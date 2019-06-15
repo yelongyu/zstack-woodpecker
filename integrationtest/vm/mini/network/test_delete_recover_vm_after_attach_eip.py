@@ -45,3 +45,7 @@ def test():
     vm.recover()
     vm.check()
     vm.start()
+
+def error_cleanup():
+    global test_obj_dict
+    test_lib.lib_error_cleanup(test_obj_dict)
