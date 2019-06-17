@@ -177,7 +177,7 @@ class DataMigration(TestChain):
 #                     vm.destroy()
             except:
                 pass
-        self.get_image()
+        self.get_image(image_name)
         self.vm = create_vm('multicluster_basic_vm', self.image.name, os.getenv('l3PublicNetworkName'))
         self.root_vol_uuid = self.vm.vm.rootVolumeUuid
         self.vm.check()
@@ -769,9 +769,12 @@ class DataMigration(TestChain):
         self.data_volume.set_volume(res_ops.query_resource(res_ops.VOLUME, cond_vol)[0])
         assert self.data_volume.get_volume().primaryStorageUuid == self.dst_ps.uuid
 
-    def longjob_migr_image(self):
+    def longjob_migr_image(self, image_name=None):
         self.dst_bs = self.get_bs_candidate()
-        self.get_image(os.getenv('imageName_windows'))
+        if not image_name:
+            image_name = os.getenv('imageName_windows')
+#         self.get_image(os.getenv('imageName_windows'))
+        self.get_image(image_name)
         name = "long_job_of_%s" % self.image.name
         job_data = '{"imageUuid": %s, "srcBackupStorageUuid": %s, "dstBackupStorageUuid": %s}' % (self.image.uuid, self.image.backupStorageRefs[0].backupStorageUuid, self.dst_bs.uuid)
         self.submit_longjob(job_data, name, job_type='image')
