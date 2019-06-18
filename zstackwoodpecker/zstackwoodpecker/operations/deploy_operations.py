@@ -3530,7 +3530,8 @@ def add_vswitch_to_host(host=None, vsname=None, hostname=None):
     tmp = os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP']
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.environ.get("zstackManagementIp")
     cond = res_ops.gen_query_conditions('name', '=', hostname)
-    vm = res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0]
+    import scenario_operations as sce_ops
+    vm = sce_ops.query_resource(os.environ.get("zstackManagementIp"), res_ops.VM_INSTANCE, cond).inventories[0]
     l3_uuid = os.environ.get("vmL3Uuid2")
     for net in vm.vmNics:
         if net.l3NetworkUuid == l3_uuid:
@@ -3552,7 +3553,8 @@ def add_host_to_dvswitch(host=None, dvswitch=None, hostname=None):
     tmp = os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP']
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.environ.get("zstackManagementIp")
     cond = res_ops.gen_query_conditions('name', '=', hostname)
-    vm = res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0]
+    import scenario_operations as sce_ops
+    vm = sce_ops.query_resource(os.environ.get("zstackManagementIp"), res_ops.VM_INSTANCE, cond).inventories[0]
     l3_uuid = os.environ.get("vmL3Uuid3")
     for net in vm.vmNics:
         if net.l3NetworkUuid == l3_uuid:
