@@ -72,7 +72,7 @@
     <virtualRouterOffering name="$virtualRouterOfferingName_s"
       memoryCapacity="$virtualRouterOfferingMemory_s" cpuNum="$virtualRouterOfferingCpuNum_s" isDefault="true">
       <zoneRef>$zoneName</zoneRef>
-      <managementL3NetworkRef>$l3ManagementNetworkName</managementL3NetworkRef>
+      <managementL3NetworkRef>$l3PublicNetworkName</managementL3NetworkRef>
       <publicL3NetworkRef>$l3PublicNetworkName</publicL3NetworkRef>
       <imageRef>$virtualRouterImageName</imageRef>
     </virtualRouterOffering>
@@ -172,7 +172,7 @@
           </l3Networks>
         </l2NoVlanNetwork>-->
 
-        <l2NoVlanNetwork name="$l2ManagementNetworkName" description="Basic L2 for management network"
+        <!--<l2NoVlanNetwork name="$l2ManagementNetworkName" description="Basic L2 for management network"
           physicalInterface="$l2ManagementNetworkInterface0">
           <l3Networks>
             <l3BasicNetwork name="$l3ManagementNetworkName" category="System" description="Management L3 Network without Vlan and no special services" system="True">
@@ -182,10 +182,10 @@
               <dns>$DNSServer</dns>
             </l3BasicNetwork>
           </l3Networks>
-        </l2NoVlanNetwork>
+        </l2NoVlanNetwork>-->
 
         <l2VlanNetwork name="$l2PublicNetworkName" description="L2 vlan for public network"
-          physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2PublicVlan">
+          physicalInterface="$l2NetworkPhysicalInterface">
           <l3Networks>
             <l3BasicNetwork name="$l3PublicNetworkName" category="Public" description = "L3 Network with Vlan for public network">
               <ipRange name="$ipRangeName" startIp="$ipRangeStartPublicIp" endIp="$ipRangeEndPublicIp"

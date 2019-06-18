@@ -958,7 +958,8 @@ class HybridObject(object):
                                                           ike_dh_group=2, ike_encryption_algorithm='3des', policy_encryption_algorithm='3des', pfs='dh-group2')
 
     def create_vpn_connection(self, auth_alg_1='sha1', auth_alg_2='sha1'):
-        vpn_ike_config = hyb_ops.create_vpn_ike_ipsec_config(name='zstack-test-vpn-ike-config', psk='ZStack.Hybrid.Test123789', local_ip=self.vpn_gateway.publicIp, remote_ip=self.user_vpn_gateway.ip, auth_alg=auth_alg_1)
+        vpn_ike_config = hyb_ops.create_vpn_ike_ipsec_config(name='zstack-test-vpn-ike-config', psk='ZStack.Hybrid.Test123789', local_ip=self.vpn_gateway.publicIp,
+                                                             remote_ip=self.user_vpn_gateway.ip, auth_alg=auth_alg_1, mode='main')
         vpn_ipsec_config = hyb_ops.create_vpn_ipsec_config(name='zstack-test-vpn-ike-config', auth_alg=auth_alg_2)
         self.vpn_connection = hyb_ops.create_vpc_vpn_connection(self.user_vpn_gateway.uuid, self.vpn_gateway.uuid, 'zstack-test-ipsec-vpn-connection', self.vswitch.cidrBlock,
                                                   self.zstack_cidrs, vpn_ike_config.uuid, vpn_ipsec_config.uuid)

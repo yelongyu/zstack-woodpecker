@@ -371,7 +371,7 @@ def create_vpn_ipsec_config(name, pfs='group2', enc_alg='3des', auth_alg='sha1',
     test_util.test_logger('[VPN IPsec Config:] %s %s %s %s is created.' % (name, pfs, enc_alg, auth_alg))
     return evt.inventory
 
-def create_vpn_ike_ipsec_config(name, psk, local_ip, remote_ip, pfs='group2', enc_alg='3des', auth_alg='sha1', version='ikev1', mode='main', session_uuid=None):
+def create_vpn_ike_ipsec_config(name, psk, local_ip, remote_ip, pfs='group2', enc_alg='3des', auth_alg='sha1', version='ikev2', mode='main', session_uuid=None):
     action = api_actions.CreateVpnIkeConfigAction()
     action.psk = psk
     action.pfs = pfs
