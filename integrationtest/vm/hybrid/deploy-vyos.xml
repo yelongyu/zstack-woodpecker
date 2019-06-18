@@ -143,9 +143,9 @@
           </hosts>
           <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
           <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
-          <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
+          <!-- <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
           <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
-          <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
+          <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>-->
           <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
           <l2NetworkRef>$l2VlanNetworkName2</l2NetworkRef>
           <l2NetworkRef>$l2VlanNetworkName3</l2NetworkRef>
@@ -184,7 +184,7 @@
           </l3Networks>
         </l2NoVlanNetwork>-->
 
-        <l2VlanNetwork name="$l2PublicNetworkName" description="L2 vlan for public network"
+        <l2NoVlanNetwork name="$l2PublicNetworkName" description="L2 NoVlan for public network"
           physicalInterface="$l2NetworkPhysicalInterface">
           <l3Networks>
             <l3BasicNetwork name="$l3PublicNetworkName" category="Public" description = "L3 Network with Vlan for public network">
@@ -200,7 +200,7 @@
               </networkService>
             </l3BasicNetwork>
           </l3Networks>
-        </l2VlanNetwork>
+        </l2NoVlanNetwork>
 
         <!--<l2NoVlanNetwork name="$l2PublicNetworkName" description="Basic L2 for public network"
           physicalInterface="$l2PublicNetworkInterface">
@@ -221,7 +221,7 @@
           </l3Networks>
         </l2NoVlanNetwork>-->
 
-        <l2NoVlanNetwork name="$l2NoVlanNetworkName1" description="guest l2 network with user defined vlan"
+        <!--<l2NoVlanNetwork name="$l2NoVlanNetworkName1" description="guest l2 network with user defined vlan"
           physicalInterface="$l2NoVlanNetworkInterface1">
           <l3Networks>
             <l3BasicNetwork name="$l3NoVlanNetworkName1" description = "guest l3 network with user defined vlan">
@@ -256,7 +256,7 @@
               </networkService>
             </l3BasicNetwork>
           </l3Networks>
-        </l2NoVlanNetwork>
+        </l2NoVlanNetwork>-->
 
         <l2VlanNetwork name="$l2VlanNetworkName1" description="guest l2 vlan network"
           physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan1">
