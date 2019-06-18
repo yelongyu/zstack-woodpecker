@@ -72,7 +72,10 @@ def test():
     #test_stub.load_license(file_path)
 
     test_util.test_logger('reload default license community')
-    test_stub.reload_default_license(vm_ip, tmp_file)
+    #test_stub.reload_default_license(vm_ip, tmp_file)
+    test_stub.clear_license(vm_ip, tmp_file)
+    #test_stub.stop_node(vm_ip, tmp_file)
+    #test_stub.start_node(vm_ip, tmp_file)
 
     test_stub.update_console_ip(vm_ip, tmp_file)
     test_stub.stop_mn(vm_ip, tmp_file)

@@ -188,6 +188,11 @@ def update_console_ip(vm_ip, tmp_file):
     cmd = '%s "zstack-ctl configure consoleProxyOverriddenIp=%s" ' % (ssh_cmd, vm_ip)
     process_result = execute_shell_in_process(cmd, tmp_file)
 
+def clear_license(vm_ip, tmp_file):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd = '%s "zstack-ctl clear_license" ' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
+
 def change_root_mysql_password(vm_ip, tmp_file):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     cmd = '%s " zstack-ctl change_mysql_password --user-name root --new-password  zstack.123 --root-password zstack.mysql.password" ' % ssh_cmd
@@ -531,9 +536,12 @@ def prepare_test_env(vm_inv, aio_target):
     vm_ip = vm_inv.vmNics[0].ip
     vm_username = test_lib.lib_get_vm_username(vm_inv)
     vm_password = test_lib.lib_get_vm_password(vm_inv)
+    #vm_username = root
+    #vm_password = password
     scp_file_to_vm(vm_ip, zstack_install_script, target_file)
 
-    all_in_one_pkg = os.environ['zstackPkg']
+    #all_in_one_pkg = os.environ['zstackPkg']
+    all_in_one_pkg = os.environ['zstackLatestInstaller']
     scp_file_to_vm(vm_ip, all_in_one_pkg, aio_target)
 
     ssh.make_ssh_no_password(vm_ip, vm_username, vm_password)
