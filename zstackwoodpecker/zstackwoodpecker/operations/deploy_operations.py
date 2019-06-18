@@ -311,11 +311,16 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
             thread.start()
 
     if xmlobject.has_element(deployConfig, 'backupStorages.aliyunEbsBackupStorage'):
-        dc_inv = hyb_ops.query_datacenter_local()
-        if dc_inv:
-            dc_inv = dc_inv[0]
-        else:
-            test_util.test_fail("No datacenter found in local")
+        dc_inv = hyb_ops.add_datacenter_from_remote(datacenter_type=os.getenv('datacenterType'),
+                                                description='dc_for_ebs_test',
+                                                region_id=os.getenv('regionId'),
+                                                end_point=os.getenv('ebsEndPoint'),
+                                                session_uuid=session_uuid)
+#         dc_inv = hyb_ops.query_datacenter_local()
+#         if dc_inv:
+#             dc_inv = dc_inv[0]
+#         else:
+#             test_util.test_fail("No datacenter found in local")
 
         # Add OSS bucket
         oss_buckt_inv = hyb_ops.add_oss_bucket_from_remote(data_center_uuid=dc_inv.uuid,
@@ -1158,12 +1163,13 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                                             sync='false',
                                             session_uuid=session_uuid)
 
-            # Add DataCenter
-            dc_inv = hyb_ops.add_datacenter_from_remote(datacenter_type=os.getenv('datacenterType'),
-                                                description='dc_for_ebs_test',
-                                                region_id=os.getenv('regionId'),
-                                                end_point=os.getenv('ebsEndPoint'),
-                                                session_uuid=session_uuid)
+            # Get DataCenter
+            dc_inv = hyb_ops.query_datacenter_local()
+#             dc_inv = hyb_ops.add_datacenter_from_remote(datacenter_type=os.getenv('datacenterType'),
+#                                                 description='dc_for_ebs_test',
+#                                                 region_id=os.getenv('regionId'),
+#                                                 end_point=os.getenv('ebsEndPoint'),
+#                                                 session_uuid=session_uuid)
 
             # Add Identity Zone
             iz_inv = hyb_ops.get_identity_zone_from_remote(datacenter_type=os.getenv('datacenterType'), dc_uuid=dc_inv.uuid)
