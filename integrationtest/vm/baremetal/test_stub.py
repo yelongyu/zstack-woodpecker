@@ -644,7 +644,7 @@ def deploy_2ha(scenarioConfig, scenarioFile):
     iptables_cmd2 = "iptables -I INPUT -d " + vip + " -j ACCEPT"
     ssh.execute(iptables_cmd2, mn_ip2, "root", "password", False, 22)
 
-    woodpecker_vm_ip = shell.call("ip r | grep src | grep '^172.20' | head -1 | awk '{print $NF}'").strip()
+    woodpecker_vm_ip = shell.call("ip r | grep src | grep '^172.24' | head -1 | awk '{print $NF}'").strip()
     zsha2_path = "/home/%s/zsha2" % woodpecker_vm_ip
     ssh.scp_file(zsha2_path, "/root/zsha2", mn_ip1, "root", "password")
     ssh.execute("chmod a+x /root/zsha2", mn_ip1, "root", "password", False, 22)
@@ -653,7 +653,7 @@ def deploy_2ha(scenarioConfig, scenarioFile):
     ssh.scp_file(zstack_hamon_path, "/root/zstack-hamon", mn_ip1, "root", "password")
     ssh.execute("chmod a+x /root/zstack-hamon", mn_ip1, "root", "password", False, 22)
 
-    cmd = '/root/zsha2 install-ha -nic br_zsn0 -gateway 172.20.0.1 -slave "root:password@' + mn_ip2 + '" -vip ' + vip + ' -time-server ' + node3_ip + ' -db-root-pw zstack.mysql.password -yes'
+    cmd = '/root/zsha2 install-ha -nic br_zsn0 -gateway 172.24.0.1 -slave "root:password@' + mn_ip2 + '" -vip ' + vip + ' -time-server ' + node3_ip + ' -db-root-pw zstack.mysql.password -yes'
     test_util.test_logger("deploy 2ha by cmd: %s" %(cmd))
     ssh_cmd = 'sshpass -p password ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null'
     if shell.run("%s %s zsha2 status" %(ssh_cmd, mn_ip1)) != 0:
