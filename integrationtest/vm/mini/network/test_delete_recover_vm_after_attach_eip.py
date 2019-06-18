@@ -24,9 +24,9 @@ def test():
 
     pub_l3_name = 'public network'
     pub_l3_uuid = test_lib.lib_get_l3_by_name(pub_l3_name).uuid
-    ip_status = net_ops.get_ip_capacity_by_l3s([pub_l3_uuid])
-    if not ip_status.availableCapacity:
-        test_util.test_fail('no available pub ip for eip test')
+    #ip_status = net_ops.get_ip_capacity_by_l3s([pub_l3_uuid])
+    #if not ip_status.availableCapacity:
+    #   test_util.test_fail('no available pub ip for eip test')
 
     vip = test_stub.create_vip('vip_for_eip', pub_l3_uuid)
     eip = test_stub.create_eip(eip_name='eip_test', vip_uuid=vip.get_vip().uuid)
