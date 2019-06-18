@@ -2567,20 +2567,20 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 #vm_creation_option.set_system_tags(system_tags)
                 #vm_creation_option.set_ps_uuid(ps_uuid)
                 #vm_creation_option.set_session_uuid(session_uuid)
-                if os.getenv('datacenterType') == 'AliyunEBS':
+#                 if os.getenv('datacenterType') == 'AliyunEBS':
 #                     vm_creation_option.set_ps_uuid(os.getenv('PSUUIDFOREBS'))
-                    cond = res_ops.gen_query_conditions('type', '=', 'SharedBlock')
-                    cond = res_ops.gen_query_conditions('status', '=', 'Connected', cond)
-                    cond = res_ops.gen_query_conditions('state', '=', 'Enabled', cond)
-                    sblk_ps_avail = query_resource(zstack_management_ip, res_ops.PRIMARY_STORAGE, cond).inventories
-                    if sblk_ps_avail:
-                        vm_creation_option.set_ps_uuid(sblk_ps_avail[0].uuid)
-                    else:
-                        test_util.test_fail('no available sblk primary storage which is enabled and connected for ebs test')
-#                 if ebs_host:
-#                     for k, v in ebs_host.items():
-#                         if int(v['cpu']) > 6 and v['mem'] > 12:
-#                             vm_creation_option.set_host_uuid(k[1])
+#                     cond = res_ops.gen_query_conditions('type', '=', 'SharedBlock')
+#                     cond = res_ops.gen_query_conditions('status', '=', 'Connected', cond)
+#                     cond = res_ops.gen_query_conditions('state', '=', 'Enabled', cond)
+#                     sblk_ps_avail = query_resource(zstack_management_ip, res_ops.PRIMARY_STORAGE, cond).inventories
+#                     if sblk_ps_avail:
+#                         vm_creation_option.set_ps_uuid(sblk_ps_avail[0].uuid)
+#                     else:
+#                         test_util.test_fail('no available sblk primary storage which is enabled and connected for ebs test')
+                if ebs_host:
+                    for k, v in ebs_host.items():
+                        if int(v['cpu']) > 12 and v['mem'] > 24:
+                            vm_creation_option.set_host_uuid(k[1])
 
                 #if iscsiClusterUuid has been set, vm will be assigned to iscsiCluster.
                 iscsi_cluster_uuid = os.environ.get('iscsiClusterUuid')
@@ -2835,29 +2835,29 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 f.write(ak_id)
             uri = 'http://' + os.getenv('apiEndPoint').split('::')[-1] + '/mntarget'
             http.json_dump_post(uri, {"ak_id": ak_id, "mn_ip": mn_ip_to_post, "nfs_ip": vm_ip_to_post})
-#         if ebs_host:
-#             target_host = None
-#             host_list= [h[1] for h in ebs_host.keys()]
-#             host_set = set(host_list)
-#             if 1 < len(host_set) < len(ebs_host.keys()):
-#                 vm_to_migr, host_to_escape, _vm_ip = [v for (v, _h) in ebs_host.keys() if host_list.count(_h) < 2]
-#                 host_set.remove(host_to_escape)
-#                 target_host = list(host_set)[0]
-#                 migrate_vm(zstack_management_ip, vm_to_migr, target_host)
-#                 stop_vm(zstack_management_ip, vm_to_migr)
-#                 start_vm(zstack_management_ip, vm_to_migr)
-#                 test_lib.lib_wait_target_up(_vm_ip, '22', 360)
-#             elif len(host_set) == len(ebs_host.keys()):
-#                 target_host = [k[1] for k, v in ebs_host.items() if int(v['cpu']) >= 16 and v['mem'] > 30]
-#                 if target_host:
-#                     for key in ebs_host.keys():
-#                         if key[1] != target_host[0]:
-#                             migrate_vm(zstack_management_ip, key[0], target_host[0])
-#                             stop_vm(zstack_management_ip, key[0])
-#                             start_vm(zstack_management_ip, key[0])
-#                             test_lib.lib_wait_target_up(key[-1], '22', 360)
-#                 else:
-#                     test_util.test_fail('Cannot migrate ebs host vm to the same real host')
+        if ebs_host:
+            target_host = None
+            host_list= [h[1] for h in ebs_host.keys()]
+            host_set = set(host_list)
+            if 1 < len(host_set) < len(ebs_host.keys()):
+                vm_to_migr, host_to_escape, _vm_ip = [v for (v, _h) in ebs_host.keys() if host_list.count(_h) < 2]
+                host_set.remove(host_to_escape)
+                target_host = list(host_set)[0]
+                stop_vm(zstack_management_ip, vm_to_migr)
+                migrate_vm(zstack_management_ip, vm_to_migr, target_host)
+                start_vm(zstack_management_ip, vm_to_migr)
+                test_lib.lib_wait_target_up(_vm_ip, '22', 360)
+            elif len(host_set) == len(ebs_host.keys()):
+                target_host = [k[1] for k, v in ebs_host.items() if int(v['cpu']) >= 16 and v['mem'] > 30]
+                if target_host:
+                    for key in ebs_host.keys():
+                        if key[1] != target_host[0]:
+                            stop_vm(zstack_management_ip, key[0])
+                            migrate_vm(zstack_management_ip, key[0], target_host[0])
+                            start_vm(zstack_management_ip, key[0])
+                            test_lib.lib_wait_target_up(key[-1], '22', 360)
+                else:
+                    test_util.test_fail('Cannot migrate ebs host vm to the same real host')
     else:
         setup_xsky_storages(scenario_config, scenario_file, deploy_config)
     #setup_zbs_primary_storages(scenario_config, scenario_file, deploy_config, vm_inv_lst, vm_cfg_lst)
