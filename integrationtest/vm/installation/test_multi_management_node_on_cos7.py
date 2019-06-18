@@ -50,8 +50,8 @@ def test():
     test_util.test_dsc('Create 3 CentOS7 vm to test multi management node installation')
 
     conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_210_mn'))
-    image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
-    
+    #image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
+    image = sce_ops.query_resource(zstack_management_ip, res_ops.IMAGE, conditions)[0]
     conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_21_ex'))
     image1 = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
 
