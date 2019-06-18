@@ -41,6 +41,7 @@ def create_vm(vm_name, l3_uuids, host_uuid = None, disk_offering_uuids=None):
 
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+    vm_creation_option.set_cluster_uuid(cluster_uuid)
     vm_creation_option.set_l3_uuids(l3_uuids)
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
@@ -62,6 +63,10 @@ def create_vip(vip_name=None, l3_uuid=None, session_uuid = None, required_ip=Non
         l3_name = os.environ.get('public network')
         l3_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
 
+    ip_status = net_ops.get_ip_capacity_by_l3s([l3_uuid])
+    if not ip_status.availableCapacity:
+        test_util.test_fail('no available pub ip left')
+    
     vip_creation_option = test_util.VipOption()
     vip_creation_option.set_name(vip_name)
     vip_creation_option.set_l3_uuid(l3_uuid)
