@@ -311,6 +311,16 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
             thread.start()
 
     if xmlobject.has_element(deployConfig, 'backupStorages.aliyunEbsBackupStorage'):
+        # Add KS
+        hyb_ops.add_hybrid_key_secret(name='ks_for_ebs_test',
+                                      description='ks_for_ebs_test',
+                                      key= 'zstack',
+                                      secret='C8yz6qLPus7VuwLtGYdxUkMg',
+                                      ks_type=os.getenv('datacenterType'),
+                                      sync='false',
+                                      session_uuid=session_uuid)
+
+        # Add DataCenter
         dc_inv = hyb_ops.add_datacenter_from_remote(datacenter_type=os.getenv('datacenterType'),
                                                 description='dc_for_ebs_test',
                                                 region_id=os.getenv('regionId'),
@@ -1154,17 +1164,21 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                     name=zone.name_)
             zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
 
-            # Add KS
-            hyb_ops.add_hybrid_key_secret(name='ks_for_ebs_test',
-                                            description='ks_for_ebs_test',
-                                            key= 'zstack',
-                                            secret='C8yz6qLPus7VuwLtGYdxUkMg',
-                                            ks_type=os.getenv('datacenterType'),
-                                            sync='false',
-                                            session_uuid=session_uuid)
+#             # Add KS
+#             hyb_ops.add_hybrid_key_secret(name='ks_for_ebs_test',
+#                                             description='ks_for_ebs_test',
+#                                             key= 'zstack',
+#                                             secret='C8yz6qLPus7VuwLtGYdxUkMg',
+#                                             ks_type=os.getenv('datacenterType'),
+#                                             sync='false',
+#                                             session_uuid=session_uuid)
 
             # Get DataCenter
             dc_inv = hyb_ops.query_datacenter_local()
+            if dc_inv:
+                dc_inv = dc_inv[0]
+            else:
+                test_util.test_fail("No datacenter found in local")
 #             dc_inv = hyb_ops.add_datacenter_from_remote(datacenter_type=os.getenv('datacenterType'),
 #                                                 description='dc_for_ebs_test',
 #                                                 region_id=os.getenv('regionId'),
