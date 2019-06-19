@@ -85,7 +85,12 @@ def test():
     # test PF
     vip_for_pf = test_stub.create_vip('create_pf_test', pub_l3_uuid,session_uuid=project_admin_session_uuid)
     test_obj_dict.add_vip(vip_for_pf)
-    vr = test_lib.lib_find_vr_by_l3_uuid(pri_l3_uuid)[0]
+    vr_list = test_lib.lib_find_vr_by_l3_uuid(pri_l3_uuid)
+    if len(vr_list) < 1:
+        error_cleanup()
+        test_util.test_skip("skip the test for no vr found in the env.")
+    else:
+        vr = vr_list[0]
     vr_pub_ip = test_lib.lib_find_vr_pub_ip(vr)
     pf_creation_opt = PfRule.generate_pf_rule_option(vr_pub_ip, protocol=inventory.TCP, vip_target_rule=Port.rule4_ports, private_target_rule=Port.rule4_ports, vip_uuid=vip_for_pf.get_vip().uuid)
     pf_creation_opt.set_session_uuid(project_admin_session_uuid)
