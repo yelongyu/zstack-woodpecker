@@ -1302,7 +1302,10 @@ class Longjob(object):
         time.sleep(10)
         longjob = res_ops.query_resource(res_ops.LONGJOB, cond_longjob)[0]
         assert longjob.state == "Succeeded"
-        assert longjob.jobResult == "Succeeded"
+        if job_type == 'cleanup':
+            assert int(longjob.jobResult.freedSpaceInBytes) > 0
+        else:
+            assert longjob.jobResult == "Succeeded"
         job_data_name = job_data.split('"')[3]
         if job_type != 'cleanup':
             image_inv = res_ops.query_resource(res_ops.IMAGE, eval(self.cond_name.replace('name_to_replace', job_data_name)))[0]
