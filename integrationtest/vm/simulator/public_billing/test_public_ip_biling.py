@@ -17,7 +17,7 @@ test_obj_dict = test_state.TestStateDict()
 
 def create_bill(price, resource_name, time_unit, resource_unit):
     test_util.test_logger('Create resource price')
-    inv = bill_ops.create_resource_price(resource_name, time_unit, price, resource_unit).dateInLong
+    inv = bill_ops.create_resource_price(resource_name, time_unit, price, resource_unit=resource_unit).dateInLong
     return inv 
 
 def query_resource_price(uuid = None, price = None, resource_name = None, time_unit = None, resource_unit = None):

@@ -1964,7 +1964,7 @@ class MemoryBilling(Billing):
 		return self.uuid
 
 	def create_resource_type(self):
-		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit)
+		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,resource_unit=self.resourceUnit)
 		self.uuid = evt.uuid
 		return evt
 	
@@ -1998,13 +1998,13 @@ class RootVolumeBilling(Billing):
                 return self.resourceUnit
 
 	def create_resource_type(self):
-		return bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit)
+		return bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,resource_unit=self.resourceUnit)
 
         def get_uuid(self):
                 return self.uuid
 
         def create_resource_type(self):
-                evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit)
+                evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,resource_unit=self.resourceUnit)
                 self.uuid = evt.uuid
                 return evt
 
@@ -2040,7 +2040,7 @@ class DataVolumeBilling(Billing):
                 return self.resourceUnit
 
 	def create_resource_type(self):
-		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit)
+		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,resource_unit=self.resourceUnit)
 		self.uuid = evt.uuid
 		return evt
 
@@ -2091,7 +2091,7 @@ class PublicIpBilling(Billing):
 		return self.resourceUnit
 
         def create_resource_type(self):
-		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit)
+		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,resource_unit=self.resourceUnit)
 		self.uuid = evt.uuid
 		return evt
 
@@ -2128,7 +2128,7 @@ class PublicIpVipInBilling(Billing):
 		return self.resourceUnit
 	
 	def create_resource_type(self):
-		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit)
+		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,resource_unit=self.resourceUnit)
 		self.uuid = evt.uuid
 		return evt
 
@@ -2152,7 +2152,7 @@ class PublicIpVipOutBilling(Billing):
 		return self.resourceUnit
 	
 	def create_resource_type(self):
-		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit)
+		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,resource_unit=self.resourceUnit)
 		self.uuid = evt.uuid
 		return evt
 
@@ -2176,7 +2176,7 @@ class PublicIpNicInBilling(Billing):
 		return self.resourceUnit
 	
 	def create_resource_type(self):
-		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit)
+		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,resource_unit=self.resourceUnit)
 		self.uuid = evt.uuid
 		return evt
 
@@ -2200,7 +2200,7 @@ class PublicIpNicOutBilling(Billing):
 		return self.resourceUnit
 	
 	def create_resource_type(self):
-		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,self.resourceUnit)
+		evt = bill_ops.create_resource_price(self.resourceName,self.timeUnit,self.price,resource_unit=self.resourceUnit)
 		self.uuid = evt.uuid
 		return evt
 
