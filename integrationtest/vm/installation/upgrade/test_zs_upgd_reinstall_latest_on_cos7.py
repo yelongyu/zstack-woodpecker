@@ -21,22 +21,22 @@ tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
 zstack_management_ip = os.environ.get('zstackManagementIp')
 vm_inv = None
 
-def create_vm(image):
-    l3_name = os.environ.get('l3PublicNetworkName')
-    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
-    image_uuid = image.uuid
-    #vm_name = 'zs_install_%s' % image.name
-    vm_name = os.environ.get('vmName')
-    vm_instrance_offering_uuid = os.environ.get('instanceOfferingUuid')
-
-    vm_creation_option = test_util.VmOption()
-    vm_creation_option.set_instance_offering_uuid(vm_instrance_offering_uuid)
-    vm_creation_option.set_l3_uuids([l3_net_uuid])
-    vm_creation_option.set_image_uuid(image_uuid)
-    vm_creation_option.set_name(vm_name)
-    vm_inv = sce_ops.create_vm(zstack_management_ip, vm_creation_option)
-
-    return vm_inv
+#def create_vm(image):
+#    l3_name = os.environ.get('l3PublicNetworkName')
+#    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+#    image_uuid = image.uuid
+#    #vm_name = 'zs_install_%s' % image.name
+#    vm_name = os.environ.get('vmName')
+#    vm_instrance_offering_uuid = os.environ.get('instanceOfferingUuid')
+#
+#    vm_creation_option = test_util.VmOption()
+#    vm_creation_option.set_instance_offering_uuid(vm_instrance_offering_uuid)
+#    vm_creation_option.set_l3_uuids([l3_net_uuid])
+#    vm_creation_option.set_image_uuid(image_uuid)
+#    vm_creation_option.set_name(vm_name)
+#    vm_inv = sce_ops.create_vm(zstack_management_ip, vm_creation_option)
+#
+#    return vm_inv
 
 def check_installtion_path(ssh_cmd, ins_path):
     cmd = '%s "/usr/bin/zstack-ctl status" | grep ^ZSTACK_HOME | awk \'{print $2}\'' % ssh_cmd
@@ -88,13 +88,26 @@ def test():
     global vm_inv
     test_util.test_dsc('Create test vm to test zstack upgrade and re-install with -r.')
 
-    conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_10'))
-    #image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
-    image = sce_ops.query_resource(zstack_management_ip, res_ops.IMAGE, conditions)[0] 
-    vm_inv = create_vm(image)
-    time.sleep(60)
+    #conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_10'))
+    ##image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
+    #image = sce_ops.query_resource(zstack_management_ip, res_ops.IMAGE, conditions)[0] 
+    #vm_inv = create_vm(image)
+    #time.sleep(60)
+    #iso_path = os.environ.get('iso_path')
+    #upgrade_script_path = os.environ.get('upgradeScript')
+
+
+    image_name = os.environ.get('imageNameBase_10')
     iso_path = os.environ.get('iso_path')
+    #iso_21_path = os.environ.get('iso_21_path')
+    zstack_latest_version = os.environ.get('zstackLatestVersion')
+    zstack_latest_path = os.environ.get('zstackLatestInstaller')
+    vm_name = os.environ.get('vmName')
     upgrade_script_path = os.environ.get('upgradeScript')
+
+    vm_inv = test_stub.create_vm_scenario(image_name, vm_name)
+    time.sleep(100)
+    #test_lib.lib_wait_target_up(vm_ip, 22)
 
     test_util.test_dsc('Install zstack with -o -r -I')
     vm_ip = vm_inv.vmNics[0].ip
@@ -102,7 +115,7 @@ def test():
     test_util.test_dsc('Upgrade master iso')   
     test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
 
-    target_file = '/root/zstack-all-in-one.tgz'
+    target_file = '/root/zstack-all-in-one.bin'
     test_stub.prepare_test_env(vm_inv, target_file)
     ssh_cmd = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     args = "-o -r /home/zstack-test -I eth0"
