@@ -1346,8 +1346,8 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
                 vm_ips += vm.ip_ + ' '
             else:
                 vm_ips += vm.ips.ip[vm_nic_id].ip_ + ' '
-        ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup-xsky-3nodes.sh'), '/root/setup-xsky-3nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host_port))
-        os.system("sshpass -p password ssh root@%s \"bash -ex /root/setup-xsky-3nodes.sh %s > /root/setup.log 2>&1 \"" %(node1_ip, vm_ips))
+        ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup-xsky-2or3nodes.sh'), '/root/setup-xsky-2or3nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host_port))
+        os.system("sshpass -p password ssh root@%s \"bash -ex /root/setup-xsky-2or3nodes.sh %s > /root/setup.log 2>&1 \"" %(node1_ip, vm_ips))
         time.sleep(2)
         cmd1 = "rados lspools"
         (retcode, output, erroutput) = ssh.execute(cmd1, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host_port))
@@ -2044,7 +2044,7 @@ def lib_get_cluster_hosts(http_server_ip, cluster_uuid = None):
     return hosts
 
 
-def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_inv, session_uuid=None, deploy_config=None, ps_ref_type=None):
+def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_inv, session_uuid=None, deploy_config=None, ps_ref_type=None,bs_ref_type=None):
 
     deploy_config = deploy_config
     action = api_actions.CreateDataVolumeAction()
@@ -2064,6 +2064,13 @@ def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_in
             action.systemTags = ["capability::virtio-scsi", "localStorage::hostUuid::%s" % vm_inv.hostUuid]
         else:
             action.systemTags = ["localStorage::hostUuid::%s" % vm_inv.hostUuid]
+
+        if bs_ref_type:
+            if bs_ref_type=="xskyceph":
+                action.systemTags = ["capability::virtio-scsi", "localStorage::hostUuid::%s" % vm_inv.hostUuid]
+            else:
+                action.systemTags = ["localStorage::hostUuid::%s" % vm_inv.hostUuid]
+
         if ps_ref_type:
             if ps_ref_type == 'xskyceph':
                 action.systemTags = ["capability::virtio-scsi", "localStorage::hostUuid::%s" % vm_inv.hostUuid]
@@ -2332,24 +2339,27 @@ def get_mn_ha_storage_type(scenario_config, scenario_file, deploy_config):
 			return ps_ref.type_
 
 def get_host_management_ip(scenario_config, scenario_file, deploy_config, vm_inv, vm_config):
-    vr_offering = None
+    vr_offerings = None
     if deploy_config.hasattr('instanceOfferings'):
         if deploy_config.instanceOfferings.hasattr('virtualRouterOffering'):
-            vr_offering = deploy_config.instanceOfferings.virtualRouterOffering
+            #vr_offerings = deploy_config.instanceOfferings.virtualRouterOffering
+            vr_offerings = xmlobject.safe_list(deploy_config.instanceOfferings.virtualRouterOffering)
+    #test_util.test_logger(vr_offerings)
     # TODO: May have multiple virtualrouter offering
-    if vr_offering != None and vr_offering.publicL3NetworkRef.text_ != vr_offering.managementL3NetworkRef.text_:
-        for zone in xmlobject.safe_list(deploy_config.zones.zone):
-            if hasattr(zone.l2Networks, 'l2NoVlanNetwork'):
-                for l2novlannetwork in xmlobject.safe_list(zone.l2Networks.l2NoVlanNetwork):
-                    for l3network in xmlobject.safe_list(l2novlannetwork.l3Networks.l3BasicNetwork):
-                        if l3network.name_ == vr_offering.managementL3NetworkRef.text_: 
-                            for vm_l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
-                                if hasattr(vm_l3network, 'l2NetworkRef'):
-                                    for vm_l2networkref in xmlobject.safe_list(vm_l3network.l2NetworkRef):
-                                        if vm_l2networkref.text_ == l2novlannetwork.name_:
-                                            return test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_l3network.uuid_).ip
-    else:
-        return test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
+    for vr_offering in vr_offerings:
+        if vr_offering != None and vr_offering.publicL3NetworkRef.text_ != vr_offering.managementL3NetworkRef.text_:
+            for zone in xmlobject.safe_list(deploy_config.zones.zone):
+                if hasattr(zone.l2Networks, 'l2NoVlanNetwork'):
+                    for l2novlannetwork in xmlobject.safe_list(zone.l2Networks.l2NoVlanNetwork):
+                        for l3network in xmlobject.safe_list(l2novlannetwork.l3Networks.l3BasicNetwork):
+                            if l3network.name_ == vr_offering.managementL3NetworkRef.text_: 
+                                for vm_l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
+                                    if hasattr(vm_l3network, 'l2NetworkRef'):
+                                        for vm_l2networkref in xmlobject.safe_list(vm_l3network.l2NetworkRef):
+                                            if vm_l2networkref.text_ == l2novlannetwork.name_:
+                                                return test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_l3network.uuid_).ip
+        else:
+            return test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
         
     return None
 
@@ -2704,7 +2714,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                 else:
                                     volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config)
                             else:
-                                volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config)
+                                volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config,bs_ref_type=bs_ref.type_)
                             attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
                             ceph_disk_created = True
                             break

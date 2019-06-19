@@ -1811,6 +1811,13 @@ def add_host(scenarioConfig, scenarioFile, deployConfig, session_uuid, host_ip =
                     thread.start()
                     if i != 1:
                         time.sleep(1)
+                if count == 1 and xmlobject.has_element(host,"addToComputationalNode") and  host.addToComputationalNode == True:
+                    thread = threading.Thread(target=_thread_for_action, args = (action, True))
+                    wait_for_thread_queue()
+                    thread.start()
+                    if i != 1:
+                        time.sleep(1)
+                        
 
     for zone in xmlobject.safe_list(deployConfig.zones.zone):
         if zone_name and zone_name != zone.name_:
