@@ -1175,6 +1175,10 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
 
             # Get DataCenter
             dc_inv = hyb_ops.query_datacenter_local()
+            if dc_inv:
+                dc_inv = dc_inv[0]
+            else:
+                test_util.test_fail("No datacenter found in local")
 #             dc_inv = hyb_ops.add_datacenter_from_remote(datacenter_type=os.getenv('datacenterType'),
 #                                                 description='dc_for_ebs_test',
 #                                                 region_id=os.getenv('regionId'),
