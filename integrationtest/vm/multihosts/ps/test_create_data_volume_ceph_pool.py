@@ -72,7 +72,7 @@ def test():
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_data_disk_uuids([disk_offering])
     vm_creation_option.set_l3_uuids([l3net_uuid])
-    vm_creation_option.set_rootVolume_systemTags(["ceph::rootPoolName::test_create_data_ssd_pool"])
+    vm_creation_option.set_rootVolume_systemTags(["ceph::rootPoolName::test_create_data_sas_pool"])
     vm_creation_option.set_dataVolume_systemTags(["ceph::pool::for_test_create_data_sas_pool"])
     vm = test_vm.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)

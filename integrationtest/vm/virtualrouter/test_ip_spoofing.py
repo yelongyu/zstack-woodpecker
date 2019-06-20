@@ -29,7 +29,8 @@ def test():
     else:
         ct_original='true'
 
-    vm = test_stub.create_basic_vm()
+    l3_name = os.environ.get('l3PublicNetworkName') 
+    vm = test_stub.create_basic_vm(l3_name=l3_name)
     test_obj_dict.add_vm(vm)
     vm.check()
     vm_inv = vm.get_vm()

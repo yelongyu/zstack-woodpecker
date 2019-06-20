@@ -78,6 +78,7 @@ def test():
     test_util.test_dsc('add DNS and IP_Range for L3_flat_network')
     sce_ops.add_dns_to_l3(zstack_management_ip, l3_uuid, l3_dns, session_uuid = project_login_uuid)
     sce_ops.add_ip_range(zstack_management_ip,'IP_range', l3_uuid, start_ip, end_ip, gateway, netmask, session_uuid = project_login_uuid)
+    sce_ops.attach_l2(zstack_management_ip, flat_l2_uuid, cluster_uuid)  
 
     test_util.test_dsc('query flat provider and attach network service to  L3_flat_network')
     provider_name = 'Flat Network Service Provider'
@@ -87,8 +88,9 @@ def test():
     sce_ops.attach_flat_network_service_to_l3network(zstack_management_ip, l3_uuid,pro_uuid, session_uuid = project_login_uuid)
 
     test_stub.share_admin_resource_1([linked_account_uuid])
-
-    vm = test_stub.create_vm(session_uuid=project_login_uuid)
+    print "xcy"
+    print "l3_uuid"
+    vm = test_stub.create_vm(l3net_uuid=l3_uuid, session_uuid=project_login_uuid)
     test_obj_dict.add_vm(vm)
 
     #create normal account
@@ -128,6 +130,7 @@ def test():
     test_util.test_dsc('add DNS and IP_Range for L3_flat_network1')
     sce_ops.add_dns_to_l3(zstack_management_ip, l3_uuid1, l3_dns, session_uuid = test_account_session)
     sce_ops.add_ip_range(zstack_management_ip,'IP_range', l3_uuid1, start_ip, end_ip, gateway, netmask, session_uuid = test_account_session)
+#    sce_ops.attach_l2(zstack_management_ip, flat_l2_uuid1, cluster_uuid)
 
     test_util.test_dsc('query flat provider and attach network service to  L3_flat_network')
     provider_name = 'Flat Network Service Provider'
@@ -136,7 +139,7 @@ def test():
     pro_uuid = net_provider_list.uuid
     sce_ops.attach_flat_network_service_to_l3network(zstack_management_ip, l3_uuid1,pro_uuid, session_uuid = test_account_session)
 
-    vm2 = test_stub.create_vm(session_uuid = test_account_session)
+    vm2 = test_stub.create_vm(l3net_uuid=l3_uuid1, session_uuid = test_account_session)
 
     test_util.test_dsc('test success normal acount create L3 by admin share L2 ')
     test_obj_dict.add_vm(vm2)
@@ -167,5 +170,4 @@ def error_cleanup():
     if l2_uuid1:
         net_ops.delete_l2(l2_uuid1)
     if test_account_uuid:
-        acc_ops.delete_account(test_account_uuid)
-            
+        acc_ops.delete_account(test_account_uuid) 

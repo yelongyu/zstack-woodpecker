@@ -25,8 +25,9 @@ def test():
     vm_inv = vm.get_vm()
     vm_ip = vm_inv.vmNics[0].ip 
 
+    host_ip = test_lib.lib_find_host_by_vm(vm_inv).managementIp
     cmd = 'touch /root/test-file-for-reinit'
-    rsp = test_lib.lib_execute_ssh_cmd(vm_ip, 'root', 'password', cmd, 180)
+    rsp = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host_ip, vm_ip, 'root', 'password', cmd)
     if rsp == False:
 	test_util.test_fail('Fail to create file in VM')
 
@@ -37,7 +38,7 @@ def test():
     vm.start()
 
     cmd = '[ -e /root/test-file-for-reinit ] && echo yes || echo no'
-    rsp = test_lib.lib_execute_ssh_cmd(vm_ip, 'root', 'password', cmd, 180)
+    rsp = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host_ip, vm_ip, 'root', 'password', cmd)
     if rsp == 'yes':
 	test_util.test_fail('VM does not be reverted to image used for creating the VM, the later file still exists')
 
