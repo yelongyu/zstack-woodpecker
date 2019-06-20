@@ -171,71 +171,6 @@ class E2E(object):
                     time.sleep(1)
                     return True
 
-    def input(self, label, content):
-        css_selector = 'label[for="%s"]' % label
-        selection_rendered = 'ant-select-selection__rendered'
-        radio_group = 'ant-radio-group'
-        input_row = 'ant-row ant-form-item'
-        title = None
-
-        def select_opt(elem, opt_value):
-            elem.get_element(selection_rendered).click()
-            time.sleep(1)
-            for opt in self.get_elements('li[role="option"]'):
-                if opt.displayed() and opt_value in opt.text:
-                    opt.click()
-
-        def select_radio(elem, value):
-            for opt in self.get_elements('input[type="radio"]'):
-                if value == opt.get_attribute('value'):
-                    opt.click()
-
-        def input_content(elem, content):
-            element = elem.get_element('input', 'tag name')
-            element.clear()
-            element.input(content)
-
-        def textarea_content(elem, content):
-            element = elem.get_element('textarea', 'tag name')
-            element.clear()
-            element.input(content)
-
-        for _ in range(10):
-            elems = self.get_elements(input_row)
-            if elems:
-                break
-            else:
-                time.sleep(0.5)
-        else:
-            test_util.test_fail('Can not find elements with selector: [%s]' % input_row)
-        for elem in self.get_elements(input_row):
-            title_elem = elem.get_elements(css_selector)
-            if title_elem:
-                title = title_elem[0].text.encode('utf-8')
-                break
-        if isinstance(content, types.IntType):
-            content = str(content)
-        if isinstance(content, types.ListType):
-            if isinstance(content[0], types.IntType):
-                content[0] = str(content[0])
-            test_util.test_logger('Input [%s] for [%s]' % (content[0].encode('utf-8'), title))
-            test_util.test_logger('Select [%s] for [%s]' % (content[1].encode('utf-8'), title))
-            input_content(elem, content[0])
-            select_opt(elem, content[1])
-        else:
-            if elem.get_elements(selection_rendered):
-                test_util.test_logger('Select [%s] for [%s]' % (content.encode('utf-8'), title))
-                select_opt(elem, content)
-            elif elem.get_elements(radio_group):
-                test_util.test_logger('Select [%s] for [%s]' % (content.encode('utf-8'), title))
-                select_radio(elem, content)
-            elif elem.get_elements('textarea[id="description"]'):
-                test_util.test_logger('Input [%s] for [%s]' % (content.encode('utf-8'), title))
-                textarea_content(elem, content)
-            else:
-                test_util.test_logger('Input [%s] for [%s]' % (content.encode('utf-8'), title))
-                input_content(elem, content)
-
     @property
     def window_handle(self):
         uri = join(self.uri, 'window_handles')
@@ -272,18 +207,11 @@ class E2E(object):
     def close(self):
         self._del(self.uri)
 
-    def operate(self, name):
-        test_util.test_logger('Execute operation [%s]' % name.encode('utf-8'))
-        op_selector = 'ant-dropdown-menu-item|ant-menu-item'
-        _elem = self.get_element('actionsContainer___1Ce9C')
-        if _elem is not None:
-            op_selector = 'span'
-            strategy = 'tag name'
-        for op in _elem.get_elements(op_selector, strategy) if _elem else self.get_elements(op_selector):
-            if op.enabled and op.text == name:
-                op.click()
-                time.sleep(1)
-                return True
+    def input(self):
+        pass
+
+    def operate(self):
+        pass
 
     def execute_script(self, script):
         test_util.test_logger('Execute the script[%s]' % script)
