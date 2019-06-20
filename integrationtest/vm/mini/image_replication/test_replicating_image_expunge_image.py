@@ -1,8 +1,7 @@
 '''
 
 New Integration test for image replication.
-Check Image Replication after BS recovering from powered off,
-Target BS would be powered off during replicating new image 
+Delete Image while it is being replicated
 
 @author: Legion
 '''
