@@ -34,6 +34,9 @@ MENUSETTING = 'ant-menu-horizontal'
 OPS_ONGOING = '#operationhint_ongoing'
 OPS_SUCCESS = '#operationhint_success'
 OPS_FAIL = '#operationhint_fail'
+ANTITEM = 'ant-dropdown-menu-item|ant-menu-item'
+VMACTIONSCONTAINER = 'actionsContainer___1Ce9C'
+INPUTROW = 'ant-row ant-form-item'
 PRIMARYBTNNUM = 2
 
 
@@ -108,7 +111,6 @@ class MINI(E2E):
         css_selector = 'label[for="%s"]' % label
         selection_rendered = 'ant-select-selection__rendered'
         radio_group = 'ant-radio-group'
-        input_row = 'ant-row ant-form-item'
         title = None
 
         def select_opt(elem, opt_value):
@@ -134,14 +136,14 @@ class MINI(E2E):
             element.input(content)
 
         for _ in range(10):
-            elems = self.get_elements(input_row)
+            elems = self.get_elements(INPUTROW)
             if elems:
                 break
             else:
                 time.sleep(0.5)
         else:
-            test_util.test_fail('Can not find elements with selector: [%s]' % input_row)
-        for elem in self.get_elements(input_row):
+            test_util.test_fail('Can not find elements with selector: [%s]' % INPUTROW)
+        for elem in self.get_elements(INPUTROW):
             title_elem = elem.get_elements(css_selector)
             if title_elem:
                 title = title_elem[0].text.encode('utf-8')
@@ -171,12 +173,8 @@ class MINI(E2E):
 
     def operate(self, name):
         test_util.test_logger('Execute operation [%s]' % name.encode('utf-8'))
-        op_selector = 'ant-dropdown-menu-item|ant-menu-item'
-        _elem = self.get_element('actionsContainer___1Ce9C')
-        if _elem is not None:
-            op_selector = 'span'
-            strategy = 'tag name'
-        for op in _elem.get_elements(op_selector, strategy) if _elem else self.get_elements(op_selector):
+        _elem = self.get_element(VMACTIONSCONTAINER)
+        for op in _elem.get_elements('span', 'tag name') if _elem else self.get_elements(ANTITEM):
             if op.enabled and op.text == name:
                 op.click()
                 time.sleep(1)
@@ -184,7 +182,7 @@ class MINI(E2E):
 
     def login(self, password='password'):
         test_util.test_logger('Log in normally')
-        self.get_element('#accountName').input('admin')
+        self.get_element('#account').input('admin')
         self.get_element('#password').input(password)
         # Login button
         self.get_element('button', 'tag name').click()
@@ -515,12 +513,8 @@ class MINI(E2E):
         if not elem.get_element(CHECKBOX).selected:
             elem.get_element(CHECKBOX).click()
         self.get_element(MOREOPERATIONBTN).click()
-        op_selector = 'ant-dropdown-menu-item|ant-menu-item'
-        _elem = self.get_element('actionsContainer___1Ce9C')
-        if _elem is not None:
-            op_selector = 'span'
-            strategy = 'tag name'
-        for op in _elem.get_elements(op_selector, strategy) if _elem else self.get_elements(op_selector):
+        _elem = self.get_element(VMACTIONSCONTAINER)
+        for op in _elem.get_elements('span', 'tag name') if _elem else self.get_elements(ANTITEM):
             if op.text == op_name:
                 if _elem:
                     assert op.get_attribute('class') == 'actionDisabled___1Bze5'
@@ -949,7 +943,7 @@ class MINI(E2E):
         self.click_ok()
         # check
         self.more_operate(u'设置启动顺序', vm_name, res_type='vm', details_page=details_page)
-        assert boot_order in self.get_element('ant-row ant-form-item').text
+        assert boot_order in self.get_element(INPUTROW).text
         self.click_cancel()
 
     def vm_attach_volume(self, vm_name, volume_name, end_action='confirm'):
