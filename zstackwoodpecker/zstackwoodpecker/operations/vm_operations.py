@@ -447,7 +447,7 @@ def get_vm_migration_candidate_hosts(vm_uuid,session_uuid=None):
     action.vmInstanceUuid = vm_uuid
     test_util.action_logger('Get candidate hosts for vm [uuid:] %s to migrate' % vm_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt
+    return evt.inventories
 
 def get_vm_starting_candidate(vm_uuid,systemtag=[],session_uuid=None):
     action = api_actions.GetVmStartingCandidateClustersHostsAction()
