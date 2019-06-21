@@ -486,7 +486,7 @@ class HybridObject(object):
 
     def check_eip_accessibility(self, eip):
 #         self.get_eip(in_use=True)
-        cmd = "sshpass -p Password123 ssh -o StrictHostKeyChecking=no root@%s 'ls /'" % eip
+        cmd = "sshpass -p ZStack_Test%ECS&Password123 ssh -o StrictHostKeyChecking=no root@%s 'ls /'" % eip
         for _ in xrange(60):
             cmd_status = commands.getstatusoutput(cmd)[0]
             if cmd_status == 0:
@@ -718,13 +718,18 @@ class HybridObject(object):
             return self.check_resource('sync', 'gatewayId', self.user_vpn_gateway.gatewayId, 'query_vpc_user_vpn_gateway_local')
 
     def get_user_vpn_gateway(self, vip):
+        nated_vip_list = os.getenv('natedPubIP').split(',')
+        if vip.ip[-1] == '1':
+            vip = nated_vip_list[0]
+        else:
+            vip = nated_vip_list[-1]
         self.sync_user_vpn_gateway()
         user_vpn_gw_local = hyb_ops.query_vpc_user_vpn_gateway_local()
-        user_vpn_gw = [gw for gw in user_vpn_gw_local if gw.ip == vip.ip]
+        user_vpn_gw = [gw for gw in user_vpn_gw_local if gw.ip == vip]
         if user_vpn_gw:
             self.user_vpn_gateway = user_vpn_gw[0]
         else:
-            self.user_gw_ip = vip.ip
+            self.user_gw_ip = vip
             self.create_user_vpn_gateway()
 
     def update_user_vpn_gateway(self, name=None, description=None):
@@ -879,11 +884,11 @@ class HybridObject(object):
         image = ecs_image_system_centos[0]
         if not allocate_eip:
 #             image = ecs_image_self[0] if ecs_image_self else ecs_image_centos_64[0]
-            self.ecs_instance = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, self.vswitch.uuid, ecs_bandwidth=1, ecs_security_group_uuid=self.sg.uuid, 
+            self.ecs_instance = hyb_ops.create_ecs_instance_from_ecs_image('ZStack_Test%ECS&Password123', image.uuid, self.vswitch.uuid, ecs_bandwidth=1, ecs_security_group_uuid=self.sg.uuid, 
                                                                  instance_type=ecs_instance_type[1].typeId, name=TEST_ECS_NAME, ecs_console_password='A1B2c3')
         else:
 #             image = ecs_image_system_64[0]
-            self.ecs_instance = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, self.vswitch.uuid, ecs_bandwidth=1, ecs_security_group_uuid=self.sg.uuid, 
+            self.ecs_instance = hyb_ops.create_ecs_instance_from_ecs_image('ZStack_Test%ECS&Password123', image.uuid, self.vswitch.uuid, ecs_bandwidth=1, ecs_security_group_uuid=self.sg.uuid, 
                                                                  instance_type=ecs_instance_type[1].typeId, allocate_public_ip='true', name=TEST_ECS_NAME, ecs_console_password='a1B2c3')
         time.sleep(10)
         self.ecs_create = True
@@ -954,14 +959,14 @@ class HybridObject(object):
         if ipsec_conntion:
             self.ipsec = ipsec_conntion[0]
         else:
-            self.ipsec = ipsec_ops.create_ipsec_connection('ipsec', pri_l3_uuid, self.vpn_gateway.publicIp, 'ZStack.Hybrid.Test123789', vip.uuid, [self.vswitch.cidrBlock],
+            self.ipsec = ipsec_ops.create_ipsec_connection('ipsec', pri_l3_uuid, self.vpn_gateway.publicIp, 'ZStack.Hybrid.Test123789', vip.uuid, [self.vpc.cidrBlock],
                                                           ike_dh_group=2, ike_encryption_algorithm='3des', policy_encryption_algorithm='3des', pfs='dh-group2')
 
     def create_vpn_connection(self, auth_alg_1='sha1', auth_alg_2='sha1'):
         vpn_ike_config = hyb_ops.create_vpn_ike_ipsec_config(name='zstack-test-vpn-ike-config', psk='ZStack.Hybrid.Test123789', local_ip=self.vpn_gateway.publicIp,
                                                              remote_ip=self.user_vpn_gateway.ip, auth_alg=auth_alg_1, mode='main')
         vpn_ipsec_config = hyb_ops.create_vpn_ipsec_config(name='zstack-test-vpn-ike-config', auth_alg=auth_alg_2)
-        self.vpn_connection = hyb_ops.create_vpc_vpn_connection(self.user_vpn_gateway.uuid, self.vpn_gateway.uuid, 'zstack-test-ipsec-vpn-connection', self.vswitch.cidrBlock,
+        self.vpn_connection = hyb_ops.create_vpc_vpn_connection(self.user_vpn_gateway.uuid, self.vpn_gateway.uuid, 'zstack-test-ipsec-vpn-connection', self.vpc.cidrBlock,
                                                   self.zstack_cidrs, vpn_ike_config.uuid, vpn_ipsec_config.uuid)
         time.sleep(10)
         self.check_resource('create', 'connectionId', self.vpn_connection.connectionId, 'query_vpc_vpn_connection_local')
@@ -1012,7 +1017,7 @@ class HybridObject(object):
             # ZStack VM ping Ecs
             ping_ecs_cmd_status = commands.getstatusoutput(ping_ecs_cmd)[0]
             assert ping_ecs_cmd_status == 0
-            ping_vm_cmd = "sshpass -p Password123 ssh -o StrictHostKeyChecking=no root@%s 'ping %s -c 5 | grep time='" % (self.eip.eipAddress, vm_ip)
+            ping_vm_cmd = "sshpass -p ZStack_Test%ECS&Password123 ssh -o StrictHostKeyChecking=no root@%s 'ping %s -c 5 | grep time='" % (self.eip.eipAddress, vm_ip)
             # Ecs ping ZStack VM
             ping_vm_cmd_status = commands.getstatusoutput(ping_vm_cmd)[0]
             assert ping_vm_cmd_status == 0
