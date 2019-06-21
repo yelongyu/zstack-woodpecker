@@ -114,6 +114,8 @@ class E2E(object):
         '''
         strategy: 'css selector', 'tag name', 'id', 'link text', 'partial link text'
         reference: https://github.com/SeleniumHQ/selenium/wiki/JsonWireProtocol
+
+        If result is empty, return error with error code no such element. Otherwise, return the first element of result.
         '''
         par_uri = par_uri if par_uri else self.uri
         val_list = value.split('|')
@@ -130,6 +132,9 @@ class E2E(object):
         return Element(join(uri, element), par_uri, strategy, val_list[i])
 
     def get_elements(self, value, strategy='css selector', par_uri=None, check_result=False):
+        '''
+        If result is empty, won't return error
+        '''
         par_uri = par_uri if par_uri else self.uri
         val_list = value.split('|')
         for i in xrange(len(val_list)):

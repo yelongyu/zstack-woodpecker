@@ -173,8 +173,8 @@ class MINI(E2E):
 
     def operate(self, name):
         test_util.test_logger('Execute operation [%s]' % name.encode('utf-8'))
-        _elem = self.get_element(VMACTIONSCONTAINER)
-        for op in _elem.get_elements('span', 'tag name') if _elem else self.get_elements(ANTITEM):
+        _elem = self.get_elements(VMACTIONSCONTAINER)
+        for op in _elem[0].get_elements('span', 'tag name') if _elem else self.get_elements(ANTITEM):
             if op.enabled and op.text == name:
                 op.click()
                 time.sleep(1)
@@ -184,12 +184,7 @@ class MINI(E2E):
         test_util.test_logger('Log in normally')
         self.get_element('#account').input('admin')
         self.get_element('#password').input(password)
-        # Login button
-        self.get_element('button', 'tag name').click()
-        self.wait_for_element(MESSAGETOAST, target='notDisappear')
-        # root page
-        if not self.wait_for_element('ant-layout-content'):
-            test_util.test_fail('Fail to Login')
+        self.click_ok()
 
     def logout(self):
         test_util.test_logger('Log out')
@@ -208,53 +203,48 @@ class MINI(E2E):
 
     def login_with_cleartext_password(self):
         test_util.test_logger('Log in with clear-text password')
-        self.get_element('#accountName').input('admin')
+        self.get_element('#account').input('admin')
         passwordInput = self.get_element('#password')
         assert passwordInput.get_attribute('type') == 'password'
         self.get_element('ant-input-suffix').click()
         passwordInput.input('password')
         assert passwordInput.get_attribute('type') == 'text'
-        # Login button
-        self.get_element('button', 'tag name').click()
-        self.wait_for_element(MESSAGETOAST)
-        assert self.get_elements(MESSAGETOAST)
-        # root page
-        assert self.get_elements('ant-layout-content')
+        self.click_ok()
 
-    def login_without_accountname_or_password(self, with_accountName=False, with_password=False):
-        test_util.test_logger('Log in without account name or password')
-        if with_accountName:
-            self.get_element('#accountName').input('admin')
+    def login_without_account_or_password(self, with_account=False, with_password=False):
+        test_util.test_logger('Log in without account or password')
+        if with_account:
+            self.get_element('#account').input('admin')
         if with_password:
             self.get_element('#password').input('password')
         # Login button
         self.get_element('button', 'tag name').click()
         time.sleep(1)
         # check
-        if not with_accountName or not with_password:
+        if not with_account or not with_password:
             self.wait_for_element(FORMEXPLAIN)
-        if not with_accountName and with_password:
-            assert self.get_element(FORMEXPLAIN).text == u'请输入用户名'
-        elif with_accountName and not with_password:
+        if not with_account and with_password:
+            assert self.get_element(FORMEXPLAIN).text == u'请输入账户名'
+        elif with_account and not with_password:
             assert self.get_element(FORMEXPLAIN).text == u'请输入密码'
-        elif not with_accountName and not with_password:
-            assert self.get_elements(FORMEXPLAIN)[0].text == u'请输入用户名'
+        elif not with_account and not with_password:
+            assert self.get_elements(FORMEXPLAIN)[0].text == u'请输入账户名'
             assert self.get_elements(FORMEXPLAIN)[1].text == u'请输入密码'
 
-    def login_with_wrong_accountname_or_password(self, waccountName=True, wpassword=True):
-        test_util.test_logger('Log in with wrong account name or password')
-        if waccountName:
-            self.get_element('#accountName').input('wrongadmin')
+    def login_with_wrong_account_or_password(self, wrong_account=True, wrong_password=True):
+        test_util.test_logger('Log in with wrong account or password')
+        if wrong_account:
+            self.get_element('#account').input('wrongadmin')
         else:
-            self.get_element('#accountName').input('admin')
-        if wpassword:
+            self.get_element('#account').input('admin')
+        if wrong_password:
             self.get_element('#password').input('wrongpassword')
         else:
             self.get_element('#password').input('password')
         # Login button
         self.get_element('button', 'tag name').click()
-        self.wait_for_element('logintips___2GMLw')
-        assert self.get_element('logintips___2GMLw').text == u'用户名或密码错误！'
+        self.wait_for_element(FORMEXPLAIN)
+        assert self.get_element(FORMEXPLAIN).text == u'账户名或密码错误'
 
     def navigate(self, menu):
         current_url = self.get_url()
@@ -513,8 +503,8 @@ class MINI(E2E):
         if not elem.get_element(CHECKBOX).selected:
             elem.get_element(CHECKBOX).click()
         self.get_element(MOREOPERATIONBTN).click()
-        _elem = self.get_element(VMACTIONSCONTAINER)
-        for op in _elem.get_elements('span', 'tag name') if _elem else self.get_elements(ANTITEM):
+        _elem = self.get_elements(VMACTIONSCONTAINER)
+        for op in _elem[0].get_elements('span', 'tag name') if _elem else self.get_elements(ANTITEM):
             if op.text == op_name:
                 if _elem:
                     assert op.get_attribute('class') == 'actionDisabled___1Bze5'
