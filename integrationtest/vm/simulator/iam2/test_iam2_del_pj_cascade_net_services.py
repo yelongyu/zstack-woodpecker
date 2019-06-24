@@ -61,7 +61,11 @@ def test():
     vm = test_stub.create_vm(session_uuid=project_admin_session_uuid)
     test_obj_dict.add_vm(vm)
     pri_l3_name = os.environ.get('l3VlanNetworkName3')
-    pri_l3_uuid = test_lib.lib_get_l3_by_name(pri_l3_name).uuid
+    if test_lib.lib_get_l3_by_name(pri_l3_name) == None:
+        error_cleanup()
+        test_util.test_skip('Skip in no private env.')
+    else:
+        pri_l3_uuid = test_lib.lib_get_l3_by_name(pri_l3_name).uuid
     pub_l3_name = os.environ.get('l3PublicNetworkName')
     pub_l3_uuid = test_lib.lib_get_l3_by_name(pub_l3_name).uuid
     vm_nic = vm.vm.vmNics[0]

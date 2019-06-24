@@ -1189,8 +1189,10 @@ def create_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None,
         cond = res_ops.gen_query_conditions('platform', '=', 'Linux', cond)
         cond = res_ops.gen_query_conditions('system','=','false',cond)
         if not l3net_uuid:
-            l3net_uuid = test_lib.lib_get_l3_by_name(
-                os.environ.get('l3VlanNetworkName3')).uuid
+            if test_lib.lib_get_l3_by_name(os.environ.get('l3VlanNetworkName3')) != None:
+                l3net_uuid = test_lib.lib_get_l3_by_name(os.environ.get('l3VlanNetworkName3')).uuid
+            elif test_lib.lib_get_l3_by_name(os.environ.get('l3PublicNetworkName')) != None:
+                l3net_uuid = test_lib.lib_get_l3_by_name(os.environ.get('l3PublicNetworkName')).uuid
 	if image_uuid:
 	    image_uuid = image_uuid
 	else:
