@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-local-vdbench-ps.xml</deployConfig>
+    <deployConfigTemplate>deploy-local-vdbench-ps.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+<basicConfig>
+  <zstackManagementIp>$zstackManagementIp</zstackManagementIp>
+  <zstackAdminPassword>$zstackAdminPassword</zstackAdminPassword>
+  <zstackPkg>$zstackPkg</zstackPkg>
+  <zstackISO>$zstackISO</zstackISO>
+</basicConfig>
+
+<deployerConfig xmlns="http://zstack.org/schema/zstack">
+  <hosts>
+    <host uuid="$hostUuid">
+      <vms>
+        <vm name="$vmName1" vmInstranceOfferingUuid="$vmInstranceOfferingUuid" 
+          imageUuid="$imageUuid" imageUsername="$imageUsername" imagePassword="$imagePassword">
+          <l3Networks>
+            <l3Network uuid="$vmL3Uuid">
+	      <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
+              <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
+              <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
+              <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
+            </l3Network>
+          </l3Networks>
+	  <nodeRef>$node1Name</nodeRef>
+          <hostRef>$hostName</hostRef>
+	  <backupStorageRef type="imagestore">$sftpBackupStorageName</backupStorageRef>
+          <primaryStorageRef type="local" url="$localPrimaryStorageUrl">$localPrimaryStorageName</primaryStorageRef>
+        </vm>
+      </vms>
+    </host>
+    <host uuid="$hostUuid2">
+      <vms>
+        <vm name="$vmName2" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
+          imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
+          <l3Networks>
+            <l3Network uuid="$vmL3Uuid">
+	      <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
+              <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
+              <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
+              <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
+            </l3Network>
+          </l3Networks>
+          <hostRef>$hostName2</hostRef>
+          <primaryStorageRef type="local" url="$localPrimaryStorageUrl">$localPrimaryStorageName</primaryStorageRef>
+        </vm>
+      </vms>
+    </host>
+    <host uuid="$hostUuid3">
+      <vms>
+        <vm name="$vmName3" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
+          imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
+          <l3Networks>
+            <l3Network uuid="$vmL3Uuid">
+	      <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
+              <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
+              <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
+              <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
+            </l3Network>
+          </l3Networks>
+          <hostRef>$hostName3</hostRef>
+          <primaryStorageRef type="local" url="$localPrimaryStorageUrl">$localPrimaryStorageName</primaryStorageRef>
+        </vm>
+      </vms>
+    </host>
+    <host uuid="$hostUuid4">
+      <vms>
+        <vm name="$vmName4" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
+          imageUuid="$imageUuid2" imageUsername="$imageUsername" imagePassword="$imagePassword">
+          <l3Networks>
+            <l3Network uuid="$vmL3Uuid">
+	      <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
+              <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
+              <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
+              <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
+            </l3Network>
+          </l3Networks>
+          <hostRef>$hostName4</hostRef>
+	  <backupStorageRef type="imagestore">$sftpBackupStorageName2</backupStorageRef>
+          <primaryStorageRef type="local" url="$localPrimaryStorageUrl">$localPrimaryStorageName</primaryStorageRef>
+        </vm>
+      </vms>
+    </host>
+  </hosts>
+</deployerConfig>
+</config>

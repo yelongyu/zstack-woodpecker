@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-local-vdbench-ps.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-local-vdbench-ps.tmpt</scenarioConfigTemplate>
+</testConfig>
