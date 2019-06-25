@@ -109,7 +109,7 @@ def test():
     vipin.start()
     vipout.start()
 
-
+    #Create vm nic qos
     net_bandwidth = 10*1024*1024
     vm = create_vm(vm_name, imageUuid, None,instanceOfferingUuid, l3NetworkUuids)
     vm_inv = vm.get_vm()
@@ -139,6 +139,7 @@ def test():
     price_ipout = query_resource_price(resource_name = "pubIpVmNicBandwidthOut")[0]
     delete_price(price_ipin.uuid)
     delete_price(price_ipout.uuid)
+    price3 = bill_ops.calculate_account_spending(admin_uuid)
 
     #make sure vm nic resource price has been deleted
     price_ipin = query_resource_price(resource_name = "pubIpVmNicBandwidthIn")
@@ -146,10 +147,10 @@ def test():
     if len(price_ipin) > 0 or len(price_ipout)> 0:
         test_util.test_fail("Fail to clean vm nic resource price. length of pubIpVmNicBandwidthIn: %d, length of pubIpVmNicBandwidthOut: %d" %(len(price_ipin), len(price_ipout)))
 
-    # price.total should be 0, after the prices are deleted
-    prices = bill_ops.calculate_account_spending(admin_uuid)
-    if prices.total != 0:
-        test_util.test_fail("test billing fail, bill is not 0. Bill is: %s" % (prices.total))
+    # price.total should not grow up, after the prices are deleted
+    price4 = bill_ops.calculate_account_spending(admin_uuid)
+    if price4.total != price3.total:
+        test_util.test_fail("test billing fail, bill still grows up after deleting prices. price4 total:%s, price3 total: %s" % (price4.total, price3.total))
 
     #create vip qos
     vip = test_stub.create_vip("test_vip_qos_price", l3NetworkUuids)
@@ -175,6 +176,7 @@ def test():
     price_vipout = query_resource_price(resource_name = "pubIpVipBandwidthOut")[0]
     delete_price(price_vipin.uuid)
     delete_price(price_vipout.uuid)
+    price3 = bill_ops.calculate_account_spending(admin_uuid)
 
     #make sure vm nic resource price has been deleted
     price_vipin = query_resource_price(resource_name = "pubIpVipBandwidthIn")
@@ -183,9 +185,9 @@ def test():
         test_util.test_fail("Fail to clean vip resource price. length of pubIpVipBandwidthIn: %d, length of pubIpVipBandwidthOut: %d" %(len(price_vipin), len(price_vipout)))
 
     # price.total should be 0, after the prices are deleted
-    prices = bill_ops.calculate_account_spending(admin_uuid)
-    if prices.total != 0:
-        test_util.test_fail("test billing fail, bill is not 0. Bill is: %s" % (prices.total))
+    price4 = bill_ops.calculate_account_spending(admin_uuid)
+    if price4.total != price3.total:
+        test_util.test_fail("test billing fail, bill is still grows up after deleting vip prices. price4 total: %s, price3 total: %s" % (price4.total, price3.total))
     test_util.test_pass("test billing pass")
 
 def error_cleanup():

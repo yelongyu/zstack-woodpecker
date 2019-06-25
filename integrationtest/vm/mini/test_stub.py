@@ -991,7 +991,7 @@ class ImageReplication(object):
             _image = self.get_image_inv(image_name)
             image_status = [bs_ref.status for bs_ref in _image.backupStorageRefs]
             if set(image_status) == set(['Ready', 'Downloading']):
-                test_util.test_logger('Image [name: %s] is being replicated, next to make 1 BS disconnected' % image_name)
+                test_util.test_logger('Image [name: %s] is being replicated' % image_name)
                 break
             else:
                 time.sleep(1)

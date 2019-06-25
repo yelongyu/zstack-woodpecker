@@ -546,11 +546,11 @@ def migrate_vm(robot_test_obj, args):
     # if not target_vm:
     #     test_util.test_fail("no resource available for next action: migrate_vm")
 
-    target_host = test_lib.lib_find_random_host(target_vm.vm)
-    if not target_host:
+    target_hosts = vm_ops.get_vm_migration_candidate_hosts(target_vm.vm.uuid)
+    if not target_hosts:
         test_util.test_fail('no avaiable host was found for doing vm migration')
     else:
-        target_vm.migrate(target_host.uuid)
+        target_vm.migrate(target_hosts[0].uuid)
 
 
 def create_vm_by_image(robot_test_obj, args):
@@ -1825,7 +1825,7 @@ def delete_vm_backup(robot_test_obj, args):
             robot_test_obj.test_dict.remove_backup(target_backup)
 
     for group_uuid in list(set(group_uuids)):
-        vol_ops.delete_vm_backup(group_uuid)
+        vol_ops.delete_vm_backup(group_uuid = group_uuid)
 
 action_dict = {
     'change_global_config_sp_depth': change_global_config_sp_depth,

@@ -106,7 +106,11 @@ def test():
 
     vm_creation_option = test_util.VmOption()
     pub_l3_uuid = test_lib.lib_get_l3_by_name(os.environ.get('l3PublicNetworkName')).uuid
-    l3_net_uuid = test_lib.lib_get_l3_by_name(os.environ.get('l3VlanNetworkName3')).uuid
+    if test_lib.lib_get_l3_by_name(os.environ.get('l3VlanNetworkName3')) == None:
+        error_cleanup()
+        test_util.test_skip('skip in no private l3 env.')
+    else:
+        l3_net_uuid = test_lib.lib_get_l3_by_name(os.environ.get('l3VlanNetworkName3')).uuid
     if flavor['target_role'] != 'system_admin':
         acc_ops.share_resources([project_linked_account_uuid], [l3_net_uuid])
     vm_creation_option.set_l3_uuids([l3_net_uuid])

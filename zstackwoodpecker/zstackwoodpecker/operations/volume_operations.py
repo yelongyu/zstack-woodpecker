@@ -233,7 +233,7 @@ def create_vm_backup(backup_option, session_uuid=None):
     backup = evt.inventories
     return backup
 
-def delete_vm_backup(bs_uuids, group_uuid, session_uuid=None):
+def delete_vm_backup(bs_uuids=None, group_uuid=None, session_uuid=None):
     action = api_actions.DeleteVmBackupAction()
     action.groupUuid = group_uuid
     action.backupStorageUuids = bs_uuids
@@ -241,7 +241,7 @@ def delete_vm_backup(bs_uuids, group_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def delete_volume_backup(bs_uuids, uuid, session_uuid=None):
+def delete_volume_backup(bs_uuids=None, uuid=None, session_uuid=None):
     action = api_actions.DeleteVolumeBackupAction()
     action.uuid = uuid
     action.backupStorageUuids = bs_uuids

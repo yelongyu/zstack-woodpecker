@@ -1,8 +1,7 @@
 '''
 
 New Integration test for image replication.
-Check Image Replication after BS recovering from network unreachable,
-Target BS NIC would be set down during replicating new image 
+Check Image Replication after All BS recovering from network unreachable
 
 @author: Legion
 '''

@@ -1,0 +1,8 @@
+import ./deploy.tmpt
+
+localPrimaryStorageName = local-ps
+localPrimaryStorageUrl = /home/local-ps
+
+instanceOfferingMemory_s = 2G
+instanceOfferingCpuNum_s = 2
+imageUrl_vdbench = http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2

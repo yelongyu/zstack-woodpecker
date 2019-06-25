@@ -3427,6 +3427,39 @@ def lib_get_ShareableVolume_Vm(volume_uuid):
     vms = res_ops.query_resource(res_ops.SHARE_VOLUME, conditions)
     return vms
 
+def lib_gen_serial_script_for_vm(vm_inv):
+    cmd = "ls /tmp/serial_log_gen.sh"
+    host = lib_find_host_by_vm(vm_inv)
+    rsp = lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), cmd)
+
+    if rsp:
+        test_util.test_logger("lib_gen_serial_script_for_vm: /tmp/serial_log_gen.sh is found in %s" % host.managementIp)
+        return True
+    else:
+        test_util.test_logger("lib_gen_serial_script_for_vm: no /tmp/serial_log_gen.sh found in %s, try to generate it" % host.managementIp)
+
+        import tempfile
+        script_file = tempfile.NamedTemporaryFile(delete=False)
+        script_file.write('''
+#!/bin/sh
+
+lsof | grep $1
+
+if [ $? -ne 0 ]; then
+    cat $2 > /tmp/$1 &
+fi
+''')
+        script_file.close()
+        ssh.scp_file(script_file.name, "/tmp/serial_log_gen.sh", host.managementIp, host.username, os.environ.get('hostPassword'), port=22)
+        os.unlink(script_file.name)
+        _rsp = lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), cmd)
+        if _rsp:
+            test_util.test_logger("lib_gen_serial_script_for_vm: /tmp/serial_log_gen.sh is generated in %s" % host.managementIp)
+            return True
+        else:
+            test_util.test_logger("lib_gen_serial_script_for_vm: failed to generate /tmp/serial_log_gen.sh in %s" % host.managementIp)
+            return False
+
 def lib_mkfs_for_volume(volume_uuid, vm_inv, mount_point=None):
     '''
     Will check if volume's 1st partition could be mountable. If not, it will try

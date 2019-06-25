@@ -1,8 +1,8 @@
 '''
 
 New Integration test for image replication.
-Check Image Replication after BS recovering from network unreachable,
-Target BS NIC would be set down during replicating new image 
+Check Image Replication after ImageStore service recovering,
+Target ImageStore service would be set down during replicating new image 
 
 @author: Legion
 '''

@@ -21,8 +21,12 @@ class zstack_kvm_vm_running_checker(checker_header.TestChecker):
         If it is stopped, return self.judge(False)'''
     def check(self):
         super(zstack_kvm_vm_running_checker, self).check()
+
         vm = self.test_obj.vm
         host = test_lib.lib_get_vm_host(vm)
+        if test_lib.lib_gen_serial_script_for_vm(vm):
+            test_util.test_logger('Check [vm:] /tmp/serial_log_gen.sh is ready on [host:] %s [uuid:] %s.' % (host.name, host.uuid))
+
         test_lib.lib_install_testagent_to_host(host)
         test_lib.lib_set_vm_host_l2_ip(vm)
         cmd = vm_plugin.VmStatusCmd()
@@ -31,9 +35,27 @@ class zstack_kvm_vm_running_checker(checker_header.TestChecker):
         rspstr = http.json_dump_post(testagent.build_http_path(host.managementIp, vm_plugin.VM_STATUS), cmd)
         rsp = jsonobject.loads(rspstr)
         check_result = rsp.vm_status[vm.uuid].strip()
+        serial_log = rsp.vm_status[vm.uuid+"_log"].strip()
         if check_result  == vm_plugin.VmAgent.VM_STATUS_RUNNING :
             test_util.test_logger('Check result: [vm:] %s is RUNNING on [host:] %s .' % (vm.uuid, host.name))
-            return self.judge(True)
+            test_util.test_logger('Check [vm:] Start to check serial log for error for [vm:] %s on [host:] %s .' % (vm.uuid, host.name))
+            _cmd = "grep -Ei 'kernel panic|call trace|BUG.*NULL|general protection fault|watchdog detected|BUG.*soft lockup|watchdog timeout|fatal exception' /tmp/%s" % (serial_log)
+            _rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), _cmd)
+
+            if _rsp:
+                test_util.test_logger('Check result: [vm:] %s is somehow panic on [host:] %s .' % (vm.uuid, host.name))
+                _cmd = "cat /tmp/%s" % (serial_log)
+                _rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), _cmd)
+                test_util.test_logger('Check result: [vm:] %s serial output: %s .' % (vm.uuid, _rsp))
+                return self.judge(False)
+            else:
+                _cmd = "if [ ! -s /tmp/%s ]; then echo 'empty'; fi" % (serial_log)
+                _rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), _cmd)
+                if _rsp and "empty" in _rsp:
+                    test_util.test_logger('Check [vm:] %s is windows or serial console is not enabled, skip the serial log check' % (vm.uuid))
+
+                test_util.test_logger('Check result: [vm:] %s serial log check is passed on [host:] %s .' % (vm.uuid, host.name))
+                return self.judge(True)
         else:
             test_util.test_logger('Check result: [vm:] %s is NOT RUNNING on [host:] %s . ; Expected status: %s ; Actual status: %s' % (vm.uuid, host.name, vm_plugin.VmAgent.VM_STATUS_RUNNING, check_result))
             return self.judge(False)

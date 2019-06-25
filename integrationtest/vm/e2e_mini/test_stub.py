@@ -34,6 +34,9 @@ MENUSETTING = 'ant-menu-horizontal'
 OPS_ONGOING = '#operationhint_ongoing'
 OPS_SUCCESS = '#operationhint_success'
 OPS_FAIL = '#operationhint_fail'
+ANTITEM = 'ant-dropdown-menu-item|ant-menu-item'
+VMACTIONSCONTAINER = 'actionsContainer___1Ce9C'
+INPUTROW = 'ant-row ant-form-item'
 PRIMARYBTNNUM = 2
 
 
@@ -104,16 +107,84 @@ class MINI(E2E):
         self.window_size(1600, 900)
         self.login()
 
+    def input(self, label, content):
+        css_selector = 'label[for="%s"]' % label
+        selection_rendered = 'ant-select-selection__rendered'
+        radio_group = 'ant-radio-group'
+        title = None
+
+        def select_opt(elem, opt_value):
+            elem.get_element(selection_rendered).click()
+            time.sleep(1)
+            for opt in self.get_elements('li[role="option"]'):
+                if opt.displayed() and opt_value in opt.text:
+                    opt.click()
+
+        def select_radio(elem, value):
+            for opt in self.get_elements('input[type="radio"]'):
+                if value == opt.get_attribute('value'):
+                    opt.click()
+
+        def input_content(elem, content):
+            element = elem.get_element('input', 'tag name')
+            element.clear()
+            element.input(content)
+
+        def textarea_content(elem, content):
+            element = elem.get_element('textarea', 'tag name')
+            element.clear()
+            element.input(content)
+
+        for _ in range(10):
+            elems = self.get_elements(INPUTROW)
+            if elems:
+                break
+            else:
+                time.sleep(0.5)
+        else:
+            test_util.test_fail('Can not find elements with selector: [%s]' % INPUTROW)
+        for elem in self.get_elements(INPUTROW):
+            title_elem = elem.get_elements(css_selector)
+            if title_elem:
+                title = title_elem[0].text.encode('utf-8')
+                break
+        if isinstance(content, types.IntType):
+            content = str(content)
+        if isinstance(content, types.ListType):
+            if isinstance(content[0], types.IntType):
+                content[0] = str(content[0])
+            test_util.test_logger('Input [%s] for [%s]' % (content[0].encode('utf-8'), title))
+            test_util.test_logger('Select [%s] for [%s]' % (content[1].encode('utf-8'), title))
+            input_content(elem, content[0])
+            select_opt(elem, content[1])
+        else:
+            if elem.get_elements(selection_rendered):
+                test_util.test_logger('Select [%s] for [%s]' % (content.encode('utf-8'), title))
+                select_opt(elem, content)
+            elif elem.get_elements(radio_group):
+                test_util.test_logger('Select [%s] for [%s]' % (content.encode('utf-8'), title))
+                select_radio(elem, content)
+            elif elem.get_elements('textarea[id="description"]'):
+                test_util.test_logger('Input [%s] for [%s]' % (content.encode('utf-8'), title))
+                textarea_content(elem, content)
+            else:
+                test_util.test_logger('Input [%s] for [%s]' % (content.encode('utf-8'), title))
+                input_content(elem, content)
+
+    def operate(self, name):
+        test_util.test_logger('Execute operation [%s]' % name.encode('utf-8'))
+        _elem = self.get_elements(VMACTIONSCONTAINER)
+        for op in _elem[0].get_elements('span', 'tag name') if _elem else self.get_elements(ANTITEM):
+            if op.enabled and op.text == name:
+                op.click()
+                time.sleep(1)
+                return True
+
     def login(self, password='password'):
         test_util.test_logger('Log in normally')
-        self.get_element('#accountName').input('admin')
+        self.get_element('#account').input('admin')
         self.get_element('#password').input(password)
-        # Login button
-        self.get_element('button', 'tag name').click()
-        self.wait_for_element(MESSAGETOAST, target='notDisappear')
-        # root page
-        if not self.wait_for_element('ant-layout-content'):
-            test_util.test_fail('Fail to Login')
+        self.click_ok()
 
     def logout(self):
         test_util.test_logger('Log out')
@@ -132,53 +203,48 @@ class MINI(E2E):
 
     def login_with_cleartext_password(self):
         test_util.test_logger('Log in with clear-text password')
-        self.get_element('#accountName').input('admin')
+        self.get_element('#account').input('admin')
         passwordInput = self.get_element('#password')
         assert passwordInput.get_attribute('type') == 'password'
         self.get_element('ant-input-suffix').click()
         passwordInput.input('password')
         assert passwordInput.get_attribute('type') == 'text'
-        # Login button
-        self.get_element('button', 'tag name').click()
-        self.wait_for_element(MESSAGETOAST)
-        assert self.get_elements(MESSAGETOAST)
-        # root page
-        assert self.get_elements('ant-layout-content')
+        self.click_ok()
 
-    def login_without_accountname_or_password(self, with_accountName=False, with_password=False):
-        test_util.test_logger('Log in without account name or password')
-        if with_accountName:
-            self.get_element('#accountName').input('admin')
+    def login_without_account_or_password(self, with_account=False, with_password=False):
+        test_util.test_logger('Log in without account or password')
+        if with_account:
+            self.get_element('#account').input('admin')
         if with_password:
             self.get_element('#password').input('password')
         # Login button
         self.get_element('button', 'tag name').click()
         time.sleep(1)
         # check
-        if not with_accountName or not with_password:
+        if not with_account or not with_password:
             self.wait_for_element(FORMEXPLAIN)
-        if not with_accountName and with_password:
-            assert self.get_element(FORMEXPLAIN).text == u'请输入用户名'
-        elif with_accountName and not with_password:
+        if not with_account and with_password:
+            assert self.get_element(FORMEXPLAIN).text == u'请输入账户名'
+        elif with_account and not with_password:
             assert self.get_element(FORMEXPLAIN).text == u'请输入密码'
-        elif not with_accountName and not with_password:
-            assert self.get_elements(FORMEXPLAIN)[0].text == u'请输入用户名'
+        elif not with_account and not with_password:
+            assert self.get_elements(FORMEXPLAIN)[0].text == u'请输入账户名'
             assert self.get_elements(FORMEXPLAIN)[1].text == u'请输入密码'
 
-    def login_with_wrong_accountname_or_password(self, waccountName=True, wpassword=True):
-        test_util.test_logger('Log in with wrong account name or password')
-        if waccountName:
-            self.get_element('#accountName').input('wrongadmin')
+    def login_with_wrong_account_or_password(self, wrong_account=True, wrong_password=True):
+        test_util.test_logger('Log in with wrong account or password')
+        if wrong_account:
+            self.get_element('#account').input('wrongadmin')
         else:
-            self.get_element('#accountName').input('admin')
-        if wpassword:
+            self.get_element('#account').input('admin')
+        if wrong_password:
             self.get_element('#password').input('wrongpassword')
         else:
             self.get_element('#password').input('password')
         # Login button
         self.get_element('button', 'tag name').click()
-        self.wait_for_element('logintips___2GMLw')
-        assert self.get_element('logintips___2GMLw').text == u'用户名或密码错误！'
+        self.wait_for_element(FORMEXPLAIN)
+        assert self.get_element(FORMEXPLAIN).text == u'账户名或密码错误'
 
     def navigate(self, menu):
         current_url = self.get_url()
@@ -437,12 +503,8 @@ class MINI(E2E):
         if not elem.get_element(CHECKBOX).selected:
             elem.get_element(CHECKBOX).click()
         self.get_element(MOREOPERATIONBTN).click()
-        op_selector = 'ant-dropdown-menu-item|ant-menu-item'
-        _elem = self.get_element('actionsContainer___1Ce9C')
-        if _elem is not None:
-            op_selector = 'span'
-            strategy = 'tag name'
-        for op in _elem.get_elements(op_selector, strategy) if _elem else self.get_elements(op_selector):
+        _elem = self.get_elements(VMACTIONSCONTAINER)
+        for op in _elem[0].get_elements('span', 'tag name') if _elem else self.get_elements(ANTITEM):
             if op.text == op_name:
                 if _elem:
                     assert op.get_attribute('class') == 'actionDisabled___1Bze5'
@@ -871,7 +933,7 @@ class MINI(E2E):
         self.click_ok()
         # check
         self.more_operate(u'设置启动顺序', vm_name, res_type='vm', details_page=details_page)
-        assert boot_order in self.get_element('ant-row ant-form-item').text
+        assert boot_order in self.get_element(INPUTROW).text
         self.click_cancel()
 
     def vm_attach_volume(self, vm_name, volume_name, end_action='confirm'):
