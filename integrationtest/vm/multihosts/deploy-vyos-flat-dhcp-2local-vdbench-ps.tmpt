@@ -1,0 +1,12 @@
+import ./deploy.tmpt
+
+localPrimaryStorageName = local-ps
+localPrimaryStorageUrl = /home/local-ps
+
+localPrimaryStorageName2 = local-ps2
+localPrimaryStorageUrl2 = /home/local-ps2
+
+instanceOfferingMemory_l = 2G
+instanceOfferingCPU_l = 2
+emptyimageUrl = http://172.20.1.28/mirror/diskimages/empty_disk.qcow2
+imageUrl_vdbench = http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2

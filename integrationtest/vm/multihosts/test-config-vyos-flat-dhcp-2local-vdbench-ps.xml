@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-vyos-flat-dhcp-2local-vdbench-ps.xml</deployConfig>
+    <deployConfigTemplate>deploy-vyos-flat-dhcp-2local-vdbench-ps.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
