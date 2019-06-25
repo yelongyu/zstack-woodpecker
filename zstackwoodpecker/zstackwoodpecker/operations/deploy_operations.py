@@ -1474,6 +1474,7 @@ def add_cluster(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluste
                     action.password = "password"
                     action.sshPort = "22"
                     hostManagementIps = vm_ip_list[0] + ',' + vm_ip_list[1]
+                    vm_ip_list = vm_ip_list[2:]
                     action.hostManagementIps = hostManagementIps.split(',')
                     print " action.hostManagementIps : %s" % action.hostManagementIps
                     thread = threading.Thread(target=_add_cluster, args=(action, zone_ref, cluster, cluster_ref, ))
