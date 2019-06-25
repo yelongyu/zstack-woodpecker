@@ -248,5 +248,6 @@
         <case timeout='600' repeat='1' noparallel='True'>test_add_image_file_url.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_add_qcow2_image_file_url.py</case>
         <case timeout='1800' repeat='1'>test_iso_create_vm_root_size_not_512_multiple.py</case>
+        <case timeout='1800' repeat='1'>test_imagestore_lock_on_gc.py</case>
     </suite>
 </integrationTest>
