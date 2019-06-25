@@ -1346,8 +1346,8 @@ def setup_ceph_storages(scenario_config, scenario_file, deploy_config):
                 vm_ips += vm.ip_ + ' '
             else:
                 vm_ips += vm.ips.ip[vm_nic_id].ip_ + ' '
-        ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup-xsky-2or3nodes.sh'), '/root/setup-xsky-2or3nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host_port))
-        os.system("sshpass -p password ssh root@%s \"bash -ex /root/setup-xsky-2or3nodes.sh %s > /root/setup.log 2>&1 \"" %(node1_ip, vm_ips))
+        ssh.scp_file("%s/%s" % (os.environ.get('woodpecker_root_path'), '/tools/setup-xsky-multi-nodes.sh'), '/root/setup-xsky-multi-nodes.sh', node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, port=int(node_host_port))
+        os.system("sshpass -p password ssh root@%s \"bash -ex /root/setup-xsky-multi-nodes.sh %s > /root/setup.log 2>&1 \"" %(node1_ip, vm_ips))
         time.sleep(2)
         cmd1 = "rados lspools"
         (retcode, output, erroutput) = ssh.execute(cmd1, node1_ip, node1_config.imageUsername_, node1_config.imagePassword_, True, int(node_host_port))
