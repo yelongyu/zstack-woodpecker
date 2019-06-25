@@ -1119,7 +1119,7 @@ class ImageReplication(object):
     def expunge_image(self):
         img_ops.expunge_image(self.image.uuid)
 
-    def create_vm(self, image_name=None, provisioning='thick', cpu_num=2, mem_size=2147483648):
+    def create_vm(self, image_name=None, vm_name=None, provisioning='thick', cpu_num=2, mem_size=2147483648):
         image_name = image_name if image_name else os.getenv('imageName_net')
         l3_name = os.environ.get('l3PublicNetworkName')
         l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
@@ -1128,13 +1128,15 @@ class ImageReplication(object):
             rootVolume_systemTags = ["volumeProvisioningStrategy::ThinProvisioning"]
         else:
             rootVolume_systemTags = ["volumeProvisioningStrategy::ThickProvisioning"]
-        self.vm = create_mini_vm([l3_net_uuid], image_uuid, cpu_num=cpu_num, memory_size=mem_size, rootVolume_systemTags=rootVolume_systemTags)
+        vm = create_mini_vm([l3_net_uuid], image_uuid, vm_name=vm_name, cpu_num=cpu_num, memory_size=mem_size, rootVolume_systemTags=rootVolume_systemTags)
+        self.vm = vm
         vm_inv = self.vm.get_vm()
         if vm_inv.platform == 'Windows':
             vm_ip = vm_inv.vmNics[0].ip
             test_lib.lib_wait_target_up(vm_ip, '23', 1200)
         else:
             self.vm.check()
+        return vm
 
     def create_iso_vm(self):
         data_volume_size = 10737418240
