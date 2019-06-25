@@ -31,7 +31,7 @@ def test():
     num = 1
     while num <= 3:
         cmd = 'touch /root/test-file-%s' % num
-        rsp = test_lib.lib_execute_ssh_cmd(vm_ip, 'root', 'password', cmd, 180)
+        rsp = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host_ip, vm_ip, 'root', 'password', cmd)
         if rsp == False:
             test_util.test_fail('Fail to create test-file-%s in VM' % num)
         num = num + 1
@@ -51,7 +51,7 @@ def test():
     num = 4
     while num <= 5:
         cmd = 'touch /root/test-file-%s' % num
-        rsp = test_lib.lib_execute_ssh_cmd(vm_ip, 'root', 'password', cmd, 180)
+        rsp = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host_ip, vm_ip, 'root', 'password', cmd)
         if rsp == False:
             test_util.test_fail('Fail to create test-file-%s in VM' % num)
         num = num + 1
