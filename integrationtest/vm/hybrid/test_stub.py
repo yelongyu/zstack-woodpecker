@@ -306,19 +306,26 @@ class HybridObject(object):
                 hyb_ops.del_oss_bucket_name_in_local(self.oss_bucket_create.uuid)
         self.check_resource('delete', 'bucketName', bucket_name, 'query_oss_bucket_file_name')
 
-    def create_aliyun_disk(self):
+    def create_aliyun_disk(self, gc=True):
+        if gc:
+            vol_remote = hyb_ops.sync_aliyun_disk_from_remote(self.iz.uuid)
+            for vol in vol_remote:
+                if vol.diskType != 'system':
+                    self.del_aliyun_disk(vol_uuid=vol.uuid, check=False)
         disk_name = 'zstack-test-aliyun-disk-%s' % _postfix
         self.disk = hyb_ops.create_aliyun_disk_remote(disk_name, self.iz.uuid, 20, disk_category='cloud_efficiency')
         self.check_resource('create', 'diskId', self.disk.diskId, 'query_aliyun_disk_local')
         time.sleep(10)
 
-    def del_aliyun_disk(self, remote=True):
+    def del_aliyun_disk(self, remote=True, vol_uuid=None, check=True):
+        disk_uuid = vol_uuid if vol_uuid else self.disk.uuid
         if remote:
-            hyb_ops.del_aliyun_disk_remote(self.disk.uuid)
+            hyb_ops.del_aliyun_disk_remote(disk_uuid)
             hyb_ops.sync_aliyun_disk_from_remote(self.iz.uuid)
         else:
             hyb_ops.del_aliyun_disk_in_local(self.disk.uuid)
-        self.check_resource('delete', 'diskId', self.disk.diskId, 'query_aliyun_disk_local')
+        if check:
+            self.check_resource('delete', 'diskId', self.disk.diskId, 'query_aliyun_disk_local')
 
     def attach_aliyun_disk(self):
         hyb_ops.attach_aliyun_disk_to_ecs(self.ecs_instance.uuid, disk_uuid=self.disk.uuid)
@@ -591,7 +598,11 @@ class HybridObject(object):
                 vswitch_attr_eq = "self.vswitch.%s == '%s'" % (k, vswitch_attr[k])
                 assert eval(vswitch_attr_eq)
 
-    def create_sg(self):
+    def create_sg(self, gc=False):
+        if gc:
+            sg_remote = hyb_ops.sync_ecs_security_group_from_remote(self.vpc.uuid)
+            for sg in sg_remote:
+                self.del_sg(sg_uuid=sg.uuid, check=False)
         sg_name = 'zstack-test-ecs-security-group-%s' % _postfix
         self.sg = hyb_ops.create_ecs_security_group_remote(sg_name, self.vpc.uuid)
         time.sleep(20)
@@ -603,13 +614,15 @@ class HybridObject(object):
         if return_val:
             return self.check_resource('sync', 'securityGroupId', self.sg.securityGroupId, 'query_ecs_security_group_local')
 
-    def del_sg(self, remote=True):
+    def del_sg(self, remote=True, sg_uuid=None, check=True):
+        sguuid = sg_uuid if sg_uuid else self.sg.uuid
         if remote:
-            self.sg = self.sync_sg(return_val=True)
-            hyb_ops.del_ecs_security_group_remote(self.sg.uuid)
+            self.sg = self.sync_sg(return_val=check)
+            hyb_ops.del_ecs_security_group_remote(sguuid)
         else:
             hyb_ops.del_ecs_security_group_in_local(self.sg.uuid)
-        self.check_resource('delete', 'securityGroupId', self.sg.securityGroupId, 'query_ecs_security_group_local')
+        if check:
+            self.check_resource('delete', 'securityGroupId', self.sg.securityGroupId, 'query_ecs_security_group_local')
 
     def get_sg(self):
         self.sync_sg()
@@ -861,12 +874,18 @@ class HybridObject(object):
                 self.del_ecs_instance(ecs_instance=ecs)
         self.get_vswitch()
         if connect:
-            self.create_sg()
+            self.create_sg(gc=True)
         else:
             self.get_sg()
         self.get_sg_rule()
         # Get ECS Instance Type
         ecs_instance_type = hyb_ops.get_ecs_instance_type_from_remote(self.iz.uuid)
+        for ecs_inst in ecs_instance_type:
+            if ecs_inst.cpu == 1 and ecs_inst.memory == 0:
+                ecs_instance = ecs_inst
+                break
+        else:
+            ecs_instance = ecs_instance_type[0]
         # Get ECS Image
         hyb_ops.sync_ecs_image_from_remote(self.datacenter.uuid)
         hyb_ops.sync_ecs_image_from_remote(self.datacenter.uuid, image_type='system')
@@ -885,11 +904,11 @@ class HybridObject(object):
         if not allocate_eip:
 #             image = ecs_image_self[0] if ecs_image_self else ecs_image_centos_64[0]
             self.ecs_instance = hyb_ops.create_ecs_instance_from_ecs_image('ZStack_Test%ECS&Password123', image.uuid, self.vswitch.uuid, ecs_bandwidth=1, ecs_security_group_uuid=self.sg.uuid, 
-                                                                 instance_type=ecs_instance_type[1].typeId, name=TEST_ECS_NAME, ecs_console_password='A1B2c3')
+                                                                 instance_type=ecs_instance.typeId, name=TEST_ECS_NAME, ecs_console_password='A1B2c3')
         else:
 #             image = ecs_image_system_64[0]
             self.ecs_instance = hyb_ops.create_ecs_instance_from_ecs_image('ZStack_Test%ECS&Password123', image.uuid, self.vswitch.uuid, ecs_bandwidth=1, ecs_security_group_uuid=self.sg.uuid, 
-                                                                 instance_type=ecs_instance_type[1].typeId, allocate_public_ip='true', name=TEST_ECS_NAME, ecs_console_password='a1B2c3')
+                                                                 instance_type=ecs_instance.typeId, allocate_public_ip='true', name=TEST_ECS_NAME, ecs_console_password='a1B2c3')
         time.sleep(10)
         self.ecs_create = True
 
