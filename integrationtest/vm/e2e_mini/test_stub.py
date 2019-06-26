@@ -7,6 +7,7 @@ Create an unified test_stub for E2E test operations
 '''
 
 import os
+import re
 import time
 import types
 import random
@@ -107,79 +108,6 @@ class MINI(E2E):
         self.window_size(1600, 900)
         self.login()
 
-    def input(self, label, content):
-        css_selector = 'label[for="%s"]' % label
-        selection_rendered = 'ant-select-selection__rendered'
-        radio_group = 'ant-radio-group'
-        title = None
-
-        def select_opt(elem, opt_value):
-            elem.get_element(selection_rendered).click()
-            time.sleep(1)
-            for opt in self.get_elements('li[role="option"]'):
-                if opt.displayed() and opt_value in opt.text:
-                    opt.click()
-
-        def select_radio(elem, value):
-            for opt in self.get_elements('input[type="radio"]'):
-                if value == opt.get_attribute('value'):
-                    opt.click()
-
-        def input_content(elem, content):
-            element = elem.get_element('input', 'tag name')
-            element.clear()
-            element.input(content)
-
-        def textarea_content(elem, content):
-            element = elem.get_element('textarea', 'tag name')
-            element.clear()
-            element.input(content)
-
-        for _ in range(10):
-            elems = self.get_elements(INPUTROW)
-            if elems:
-                break
-            else:
-                time.sleep(0.5)
-        else:
-            test_util.test_fail('Can not find elements with selector: [%s]' % INPUTROW)
-        for elem in self.get_elements(INPUTROW):
-            title_elem = elem.get_elements(css_selector)
-            if title_elem:
-                title = title_elem[0].text.encode('utf-8')
-                break
-        if isinstance(content, types.IntType):
-            content = str(content)
-        if isinstance(content, types.ListType):
-            if isinstance(content[0], types.IntType):
-                content[0] = str(content[0])
-            test_util.test_logger('Input [%s] for [%s]' % (content[0].encode('utf-8'), title))
-            test_util.test_logger('Select [%s] for [%s]' % (content[1].encode('utf-8'), title))
-            input_content(elem, content[0])
-            select_opt(elem, content[1])
-        else:
-            if elem.get_elements(selection_rendered):
-                test_util.test_logger('Select [%s] for [%s]' % (content.encode('utf-8'), title))
-                select_opt(elem, content)
-            elif elem.get_elements(radio_group):
-                test_util.test_logger('Select [%s] for [%s]' % (content.encode('utf-8'), title))
-                select_radio(elem, content)
-            elif elem.get_elements('textarea[id="description"]'):
-                test_util.test_logger('Input [%s] for [%s]' % (content.encode('utf-8'), title))
-                textarea_content(elem, content)
-            else:
-                test_util.test_logger('Input [%s] for [%s]' % (content.encode('utf-8'), title))
-                input_content(elem, content)
-
-    def operate(self, name):
-        test_util.test_logger('Execute operation [%s]' % name.encode('utf-8'))
-        _elem = self.get_elements(VMACTIONSCONTAINER)
-        for op in _elem[0].get_elements('span', 'tag name') if _elem else self.get_elements(ANTITEM):
-            if op.enabled and op.text == name:
-                op.click()
-                time.sleep(1)
-                return True
-
     def login(self, password='password'):
         test_util.test_logger('Log in normally')
         self.get_element('#account').input('admin')
@@ -253,6 +181,10 @@ class MINI(E2E):
             self.get_element(MENUDICT[menu]).click()
             self.wait_for_element(PRIMARYBTN)
             time.sleep(2)
+        if menu == "image":
+            pattern =re.compile(u'(镜像仓库剩余容量)\s\d+\.?\d*\s(GB，总容量)\s\d+\.?\d*\s(GB)')
+            if re.search(pattern, self.get_elements("ant-row-flex-space-between")[0].text) is None:
+                test_util.test_fail("Err: page image is not fully loaded")
 
     def switch_view(self, view='card'):
         test_util.test_logger('switch the view to %s' % view)
@@ -270,12 +202,21 @@ class MINI(E2E):
                 tab.click()
         time.sleep(1)
 
+    def operate(self, name):
+        test_util.test_logger('Execute operation [%s]' % name.encode('utf-8'))
+        _elem = self.get_elements(VMACTIONSCONTAINER)
+        for op in _elem[0].get_elements('span', 'tag name') if _elem else self.get_elements(ANTITEM):
+            if op.enabled and op.text == name:
+                op.click()
+                time.sleep(1)
+                return True
+
     def click_ok(self, assure_success=True):
         test_util.test_logger('Click OK button')
         self.wait_for_page_render()
         self.get_elements(PRIMARYBTN)[-1].click()
         if assure_success:
-            if not self.wait_for_element(OPS_SUCCESS):
+            if not self.wait_for_element(OPS_SUCCESS, timeout=300):
                 test_util.test_fail("Fail: Operation Failed!")
         self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
         time.sleep(1)
@@ -446,6 +387,70 @@ class MINI(E2E):
         self.navigate(res_type)
         self.switch_tab(u'已有')
         self.check_res_item(res_list)
+
+    def input(self, label, content):
+        css_selector = 'label[for="%s"]' % label
+        selection_rendered = 'ant-select-selection__rendered'
+        radio_group = 'ant-radio-group'
+        title = None
+
+        def select_opt(elem, opt_value):
+            elem.get_element(selection_rendered).click()
+            time.sleep(1)
+            for opt in self.get_elements('li[role="option"]'):
+                if opt.displayed() and opt_value in opt.text:
+                    opt.click()
+
+        def select_radio(elem, value):
+            for opt in self.get_elements('input[type="radio"]'):
+                if value == opt.get_attribute('value'):
+                    opt.click()
+
+        def input_content(elem, content):
+            element = elem.get_element('input', 'tag name')
+            element.clear()
+            element.input(content)
+
+        def textarea_content(elem, content):
+            element = elem.get_element('textarea', 'tag name')
+            element.clear()
+            element.input(content)
+
+        for _ in range(10):
+            elems = self.get_elements(INPUTROW)
+            if elems:
+                break
+            else:
+                time.sleep(0.5)
+        else:
+            test_util.test_fail('Can not find elements with selector: [%s]' % INPUTROW)
+        for elem in self.get_elements(INPUTROW):
+            title_elem = elem.get_elements(css_selector)
+            if title_elem:
+                title = title_elem[0].text.encode('utf-8')
+                break
+        if isinstance(content, types.IntType):
+            content = str(content)
+        if isinstance(content, types.ListType):
+            if isinstance(content[0], types.IntType):
+                content[0] = str(content[0])
+            test_util.test_logger('Input [%s] for [%s]' % (content[0].encode('utf-8'), title))
+            test_util.test_logger('Select [%s] for [%s]' % (content[1].encode('utf-8'), title))
+            input_content(elem, content[0])
+            select_opt(elem, content[1])
+        else:
+            if elem.get_elements(selection_rendered):
+                test_util.test_logger('Select [%s] for [%s]' % (content.encode('utf-8'), title))
+                select_opt(elem, content)
+            elif elem.get_elements(radio_group):
+                test_util.test_logger('Select [%s] for [%s]' % (content.encode('utf-8'), title))
+                select_radio(elem, content)
+            elif elem.get_elements('textarea[id="description"]'):
+                test_util.test_logger('Input [%s] for [%s]' % (content.encode('utf-8'), title))
+                textarea_content(elem, content)
+            else:
+                test_util.test_logger('Input [%s] for [%s]' % (content.encode('utf-8'), title))
+                input_content(elem, content)
 
     def get_res_element(self, res_name):
         test_util.test_logger('Get the element [%s]' % res_name.encode('utf-8'))
@@ -1233,6 +1238,31 @@ class MINI(E2E):
                         test_util.test_fail("Fail: IOError")
                     arrow.click()
             next_btn.click()
+
+    def check_about_page(self):
+        test_util.test_logger('Check about page')
+        self.get_element(MENUSETTING).move_cursor_here()
+        self.operate(u'关于')
+        mn_ip_list = []
+        mn_ip_1, mn_ip_2 = get_mn_ip()
+        mn_ip_list.append(mn_ip_1)
+        mn_ip_list.append(mn_ip_2)
+        ha_vip = os.getenv('zstackHaVip')
+        assert ha_vip == self.get_elements("ipAddress___japHh")[0].text
+        for elem in self.get_elements("ipAddress___japHh")[1:]:
+            assert elem.text in mn_ip_list
+
+    def check_config_page(self):
+        test_util.test_logger('Check config page')
+        self.get_element(MENUSETTING).move_cursor_here()
+        self.operate(u'设置')
+        self.get_elements(PRIMARYBTN)[-1].click()
+        self.wait_for_element(MODALCONTENT)
+        self.click_cancel()
+        self.switch_tab(u"邮箱服务器")
+        self.get_elements(PRIMARYBTN)[-1].click()
+        self.wait_for_element(MODALCONTENT)
+        self.click_close()
 
     def save_element_location(self, filename=None):
         filename = '.'.join(['elem_location-' + get_time_postfix(), 'tmpt']) if filename is None else filename
