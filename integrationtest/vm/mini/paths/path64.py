@@ -5,6 +5,7 @@ def path():
         [TestAction.create_mini_vm, "vm1", 'data_volume=false', 'cpu=2', 'memory=2', 'provisiong=thick'],
         [TestAction.change_vm_ha, "vm1"],
         [TestAction.create_volume_backup, "vm1-root", 'root-backup1'],
+        [TestAction.change_vm_ha, "vm1"],
         [TestAction.stop_vm, "vm1"],
         [TestAction.start_vm, "vm1"],
         [TestAction.create_volume, "volume1", "=scsi,thick"],

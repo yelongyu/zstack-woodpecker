@@ -39,7 +39,9 @@ def path():
         [TestAction.attach_volume, "vm2", "volume2"],
         [TestAction.create_volume_backup, "volume2", "backup4"],
         [TestAction.detach_volume, "volume2"],
+        [TestAction.attach_volume, "vm2", "volume2"],
         [TestAction.use_volume_backup, "backup4"],
+        [TestAction.detach_volume, "volume2"],
         [TestAction.add_image, "image3", 'root', "http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2"],
         [TestAction.create_volume, "volume4", "=scsi,thin"],
         [TestAction.attach_volume, "vm4", "volume4"]])

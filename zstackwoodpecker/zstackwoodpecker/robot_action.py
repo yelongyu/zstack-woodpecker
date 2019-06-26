@@ -1095,15 +1095,17 @@ def use_volume_backup(robot_test_obj, args):
 
 
 def create_volume(robot_test_obj, args):
+    # name systemTag size=random or number flag=[large,notCheck]
     large_flag = False
     volume_check_flag = True
+    disksize = 2*1024*1024*1024
 
     if len(args) < 1:
         test_util.test_fail("no resource available for next action: create volume")
     target_volume_name = args[0]
     ps_uuid = robot_test_obj.get_default_config()['PS']
     systemtags = []
-    if len(args) > 1:
+    if len(args) > 1 and args[1][0] == "=":
         tags = args[1].split('=')[1].split(',')
         if 'scsi' in tags:
             systemtags.append("capability::virtio-scsi")
@@ -1114,11 +1116,32 @@ def create_volume(robot_test_obj, args):
         if 'thick' in tags:
             systemtags.append("volumeProvisioningStrategy::ThickProvisioning")
 
-    if len(args) == 3:
-        large_flag = args[2]
-    if len(args) == 4:
-        large_flag = args[2]
-        volume_check_flag = args[3]
+    # parser args[3:] size flag
+    # todo: add ps_uuid, offering_uuid, if loacl_ps appoint host will be better
+    arg_dict = parser_args(args[1:])
+    if "flag" in arg_dict:
+        flag = arg_dict["flag"]
+        if "large" in flag:
+            large_flag = True
+        if "nocheck" in flag:
+            volume_check_flag = False
+        if "scsi" in flag:
+            systemtags.append("capability::virtio-scsi")
+        if "shareable" in flag:
+            systemtags.append("ephemeral::shareable")
+        if "thin" in flag:
+            systemtags.append("volumeProvisioningStrategy::ThinProvisioning")
+        if "thick" in flag:
+            systemtags.append("volumeProvisioningStrategy::ThickProvisioning")
+
+    if "size" in arg_dict:
+        if arg_dict["size"] == "random":
+            if large_flag:
+                disksize = random.choice([10, 50, 100, 200]) * 1024 * 1024 * 1024
+            else:
+                disksize = random.choice([1, 2, 3, 4]) * 1024 * 1024 * 1024
+        else:
+            disksize = arg_dict['size']
 
     volume_creation_option = test_util.VolumeOption()
     volume_creation_option.set_name(target_volume_name)
@@ -1135,12 +1158,7 @@ def create_volume(robot_test_obj, args):
     if not MINI:
         new_volume = test_lib.lib_create_volume_from_offering(volume_creation_option)
     else:
-        if large_flag:
-            volume_creation_option.set_diskSize(random.choice([10, 50, 100, 200, 500]) * 1024 * 1024 * 1024)
-        else:
-            volume_creation_option.set_diskSize(random.choice([1, 2, 3, 4]) * 1024 * 1024 * 1024)
-
-        volume_creation_option.set_diskSize(random.choice([1, 2, 3, 4]) * 1024 * 1024 * 1024)
+        volume_creation_option.set_diskSize(disksize)
         volume_inv = vol_ops.create_volume_from_diskSize(volume_creation_option)
         new_volume = zstack_vol_header.ZstackTestVolume()
         new_volume.create_from(volume_inv.uuid)
@@ -1259,7 +1277,7 @@ def resize_volume(robot_test_obj, args):
 
     target_vm = robot_test_obj.get_test_dict().vm[args[0]]
     if args[1] == "random":
-        delta = random.randint(10485760,21474836480)
+        delta = random.randint(10485760, 21474836480)
     else:
         delta = args[1]
 
@@ -1281,7 +1299,7 @@ def resize_data_volume(robot_test_obj, args):
 
     target_volume = robot_test_obj.get_test_dict().volume[args[0]]
     if args[1] == "random":
-        delta = random.randint(10485760,21474836480)
+        delta = random.randint(10485760, 21474836480)
     else:
         delta = args[1]
 
@@ -1690,22 +1708,43 @@ def create_mini_vm(robot_test_obj, args):
     cpu = 2
     memory = 2 * 1024 * 1024 * 1024
     l3_uuid = None
+    large = False
 
     arg_dict = parser_args(args[1:])
-    if arg_dict.has_key('cpu'):
+    if 'flag' in arg_dict:
+        flag = arg_dict['flag']
+        if "large" in flag:
+            large = True
+    if 'cpu' in arg_dict:
         if arg_dict['cpu'] == 'random':
-            cpu = random.randrange(1, 4, 1)
+            if large:
+                start, end = 1, 16
+            else:
+                start, end = 16, 60
+            cpu = random.randrange(start, end, 1)
         else:
             cpu = int(arg_dict['cpu'])
-    if arg_dict.has_key('memory'):
+    if 'memory' in arg_dict:
         if arg_dict['memory'] == 'random':
-            memory = (random.randrange(1, 4, 1) + round(random.random(), 2)) * 1024 * 1024 * 1024
+            if large:
+                memory = random.randrange(4, 7, 1) * 1024 * 1024 * 1024
+            else:
+                memory = random.randrange(256, 4096, 256) * 1024 * 1024
         else:
             memory = int(arg_dict['memory']) * 1024 * 1024 * 1024
-    if arg_dict.has_key('network'):
-        cond = res_ops.gen_query_conditions("system", "=", "false")
-        l3s = res_ops.query_resource(res_ops.L3_NETWORK, cond)
-        l3_uuid = random.choice(l3s).uuid
+    if 'network' in arg_dict:
+        if arg_dict['network'] == "random":
+            cond = res_ops.gen_query_conditions("system", "=", "false")
+            l3s = res_ops.query_resource(res_ops.L3_NETWORK, cond)
+            l3_uuid = random.choice(l3s).uuid
+        else:
+            network_name = arg_dict["network"]
+            cond = res_ops.gen_query_conditions("name", "=", network_name)
+            l3 = res_ops.query_resource(res_ops.L3_NETWORK, cond)
+            if not l3:
+                test_util.test_fail("Network: %s does not exist" % network_name)
+            else:
+                l3_uuid = l3[0].uuid
 
     provisiong = 'Thin' if not arg_dict.has_key('provision') else arg_dict['provision']
     rootVolumeSystemTag = "volumeProvisioningStrategy::%sProvisioning" % provisiong
@@ -1744,7 +1783,7 @@ def create_mini_vm(robot_test_obj, args):
     robot_test_obj.default_config['PS'] = root_volume.get_volume().primaryStorageUuid
     robot_test_obj.default_config['HOST'] = vm.get_vm().hostUuid
     if arg_dict.has_key('data_volume') and arg_dict['data_volume'] == 'true':
-        create_volume(robot_test_obj, ['data_volume_' + str(STEP), '=scsi,' + provisiong])
+        create_volume(robot_test_obj, ['data_volume_' + str(STEP), 'flag=scsi,' + provisiong])
         attach_volume(robot_test_obj, [name, 'data_volume_' + str(STEP)])
 
 
@@ -2058,6 +2097,9 @@ def debug(robot_test_obj):
 
 def parser_args(args):
     arg_dict = {}
+    for i in args:
+        if "=" not in i or i[0] == "=":
+            args.remove(i)
     for arg in args:
         arg_dict[arg.split('=')[0]] = arg.split('=')[1]
     return arg_dict
