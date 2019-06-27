@@ -2346,18 +2346,19 @@ def get_host_management_ip(scenario_config, scenario_file, deploy_config, vm_inv
             vr_offerings = xmlobject.safe_list(deploy_config.instanceOfferings.virtualRouterOffering)
     #test_util.test_logger(vr_offerings)
     # TODO: May have multiple virtualrouter offering
-    for vr_offering in vr_offerings:
-        if vr_offering != None and vr_offering.publicL3NetworkRef.text_ != vr_offering.managementL3NetworkRef.text_:
-            for zone in xmlobject.safe_list(deploy_config.zones.zone):
-                if hasattr(zone.l2Networks, 'l2NoVlanNetwork'):
-                    for l2novlannetwork in xmlobject.safe_list(zone.l2Networks.l2NoVlanNetwork):
-                        for l3network in xmlobject.safe_list(l2novlannetwork.l3Networks.l3BasicNetwork):
-                            if l3network.name_ == vr_offering.managementL3NetworkRef.text_: 
-                                for vm_l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
-                                    if hasattr(vm_l3network, 'l2NetworkRef'):
-                                        for vm_l2networkref in xmlobject.safe_list(vm_l3network.l2NetworkRef):
-                                            if vm_l2networkref.text_ == l2novlannetwork.name_:
-                                                return test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_l3network.uuid_).ip
+    if vr_offerings != None:
+        for vr_offering in vr_offerings:
+            if vr_offering != None and vr_offering.publicL3NetworkRef.text_ != vr_offering.managementL3NetworkRef.text_:
+                for zone in xmlobject.safe_list(deploy_config.zones.zone):
+                    if hasattr(zone.l2Networks, 'l2NoVlanNetwork'):
+                        for l2novlannetwork in xmlobject.safe_list(zone.l2Networks.l2NoVlanNetwork):
+                            for l3network in xmlobject.safe_list(l2novlannetwork.l3Networks.l3BasicNetwork):
+                                if l3network.name_ == vr_offering.managementL3NetworkRef.text_: 
+                                    for vm_l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
+                                        if hasattr(vm_l3network, 'l2NetworkRef'):
+                                            for vm_l2networkref in xmlobject.safe_list(vm_l3network.l2NetworkRef):
+                                                if vm_l2networkref.text_ == l2novlannetwork.name_:
+                                                    return test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_l3network.uuid_).ip
         else:
             return test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
         
