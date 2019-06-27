@@ -1,6 +1,6 @@
 '''
 
-Integration test for testing create thick/thick root volume backup on mini.
+Integration test for testing create thick/thick data volume backup on mini.
 
 @author: zhaohao.chen
 '''
