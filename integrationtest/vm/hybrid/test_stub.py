@@ -404,13 +404,15 @@ class HybridObject(object):
                 snapshot_attr_eq = "self.snapshot.%s == '%s'" % (k, snapshot_attr[k])
                 assert eval(snapshot_attr_eq)
 
-    def del_aliyun_snapshot(self, remote=True):
+    def del_aliyun_snapshot(self, remote=True, sp_uuid=None):
+        spuuid = sp_uuid if sp_uuid else self.snapshot.uuid
         if remote:
-            hyb_ops.del_aliyun_snapshot_remote(self.snapshot.uuid)
+            hyb_ops.del_aliyun_snapshot_remote(spuuid)
             hyb_ops.sync_aliyun_snapshot_from_remote(self.datacenter.uuid)
         else:
             hyb_ops.del_aliyun_snapshot_in_local(self.snapshot.uuid)
-        self.check_resource('delete', 'snapshotId', self.snapshot.snapshotId, 'query_aliyun_snapshot_local')
+        if not sp_uuid:
+            self.check_resource('delete', 'snapshotId', self.snapshot.snapshotId, 'query_aliyun_snapshot_local')
 
     def sync_vpn_gateway(self):
         hyb_ops.sync_vpc_vpn_gateway_from_remote(self.datacenter.uuid)
@@ -771,6 +773,12 @@ class HybridObject(object):
             ecs_img = hyb_ops.query_ecs_image_local(condition)
             for img in ecs_img:
                 hyb_ops.del_ecs_image_remote(img.uuid)
+            sp_local = hyb_ops.sync_aliyun_snapshot_from_remote(self.datacenter.uuid)
+            for sp in sp_local:
+                try:
+                    self.del_aliyun_snapshot(sp_uuid=sp.uuid)
+                except:
+                    pass
         cond_image = res_ops.gen_query_conditions('name', '=', os.getenv('imageName_s'))
         image =  res_ops.query_resource(res_ops.IMAGE, cond_image)[0]
         bs_uuid = image.backupStorageRefs[0].backupStorageUuid
