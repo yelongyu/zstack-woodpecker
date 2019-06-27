@@ -14,6 +14,7 @@ import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.tag_operations as tag_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
+import zstackwoodpecker.operations.config_operations as config_ops
 
 vm = None
 test_stub = test_lib.lib_get_test_stub()
@@ -21,7 +22,7 @@ test_obj_dict = test_state.TestStateDict()
 
 def test():
     global vm
-
+    config_ops.change_global_config('localStoragePrimaryStorage', 'liveMigrationWithStorage.allow', 'true')
     test_util.test_dsc('create instance offering')
     instance_offering_option = test_util.InstanceOfferingOption()
     instance_offering_option.set_cpuNum(1)
@@ -32,7 +33,6 @@ def test():
     instance_offering_option.set_allocatorStrategy("LastHostPreferredAllocatorStrategy")
     new_offering = vm_ops.create_instance_offering(instance_offering_option)
     test_obj_dict.add_instance_offering(new_offering)    
-    tag = tag_ops.create_system_tag(resourceType="InstanceOfferingVO",resourceUuid=new_offering.uuid,tag="minimumCPUUsageHostAllocatorStrategyMode::soft")
     image_name = os.environ.get('imageName_s')
     l3_name = os.environ.get('l3VlanNetworkName1')
     vm = test_stub.create_vm_with_instance_offering('test-vm',image_name,l3_name, new_offering)

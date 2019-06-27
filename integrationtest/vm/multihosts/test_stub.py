@@ -1915,6 +1915,18 @@ def wait_until_vm_reachable(vm, timeout=120):
         else:
             time.sleep(interval)
 
+def ensure_hosts_connected(wait_time):
+    for i in range(wait_time):
+        time.sleep(1)
+        host_list = res_ops.query_resource(res_ops.HOST)
+        for host in host_list:
+            if not "connected" in host.status.lower():
+                test_util.test_logger("found not connected ps status: %s" %(host.status))
+                break
+        else:
+            return
+    else:
+        test_util.test_fail("host status didn't change to Connected within %s, therefore, failed" % (wait_time))
 
 class MultiSharedPS(object):
     def __init__(self):
