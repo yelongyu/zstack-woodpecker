@@ -52,6 +52,7 @@
 	<case timeout='1800' noparallel='True'>image_replication/test_replicating_image_expunge_image.py</case>
 	<case timeout='1800' noparallel='True'>image_replication/test_replicating_image_demote_node.py</case>
 	<case timeout='1800' noparallel='True'>image_replication/test_replicating_image_batch_create_vm.py</case>
+	<case timeout='1800' noparallel='True'>image_replication/test_replicate_image_with_bs_almost_full.py</case>
 	<case timeout='1800' noparallel='True'>test_iso_create_vm_root_size_not_512_multiple.py</case>
 	<!--<case timeout='1200' noparallel='True'>ha/test_minips_vm_ha_force_stop.py</case>
 	<case timeout='1200' noparallel='True'>ha/test_minips_both_mns_force_stop_recover.py</case>

@@ -1138,6 +1138,14 @@ class ImageReplication(object):
             self.vm.check()
         return vm
 
+    def crt_vm_image(self, image_name):
+        image_creation_option = test_util.ImageOption()
+        image_creation_option.set_name(image_name)
+        image_creation_option.set_backup_storage_uuid_list([self.get_bs_list()[0].uuid])
+        image_creation_option.set_root_volume_uuid(self.vm.get_vm().allVolumes[0].uuid)
+        image_creation_option.set_timeout(900000)
+        img_ops.create_root_volume_template(image_creation_option)
+
     def create_iso_vm(self):
         data_volume_size = 10737418240
         disk_offering_option = test_util.DiskOfferingOption()
