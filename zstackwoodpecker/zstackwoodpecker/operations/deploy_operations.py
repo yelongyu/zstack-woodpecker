@@ -667,9 +667,45 @@ def get_primary_storage_from_scenario_file(primaryStorageRefName, scenarioConfig
                                         ip_list.append(s_vm.ip_)
     return ip_list
 
-def get_disk_uuid(scenarioFile):
+def get_disk_uuid(scenarioFile,zone = None,scenarioConfig = None):
     import scenario_operations as sce_ops
     import zstacklib.utils.ssh as ssh
+
+    if (zone != None  and scenarioConfig != None):
+        # get dict: vm_name_ip_dict
+        vm_name_ip_dict={}
+        with open(scenarioFile, 'r') as fd:
+            xmlstr = fd.read()
+            fd.close()
+            scenariofile = xmlobject.loads(xmlstr)
+            vm_name_ip_dict={vm.name_:vm.ip_ for vm in xmlobject.safe_list(scenariofile.vms.vm)}
+        # get dict: hostRef_vmObejct_dict
+        # attention: all the vm objects need to be in the same scenarioConfig.hosts.host.vm
+        hostRef_vmObject_dict={}
+        for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+            hostRef_vmObject_dict={vmObject.hostRef.text_:vmObject for vmObject in xmlobject.safe_list(host.vms.vm) if xmlobject.has_element(vmObject,"hostRef")}
+         
+        # get list: hostName
+        # attention: the iscsi server/client and sharedBlockPrimaryStorage's cluster have to be the same zone.
+        hostNameList=[]
+        for cluster in xmlobject.safe_list(zone.clusters.cluster):
+            hostNameList+=[host.name_ for host in xmlobject.safe_list(cluster.hosts.host)]
+	    
+        # get iscsiInitiator vm's ip and return the disk_uuid
+        list_index=len(hostNameList)-1
+        hostName=""
+        iscsiInitiatorNum=0
+        while(list_index >=0):
+            hostName = hostNameList[list_index]
+            if( hostRef_vmObject_dict.has_key(hostName) and hostRef_vmObject_dict[hostName].primaryStorageRef):
+                iscsiInitiatorNum= sum((1  for primaryStorageRef in xmlobject.safe_list(hostRef_vmObject_dict[hostName].primaryStorageRef) if primaryStorageRef.type_ == "iscsiInitiator"))
+                if (iscsiInitiatorNum >0):
+                    ip=vm_name_ip_dict[hostRef_vmObject_dict[hostName].name_]
+                    cmd = r"ls -l /dev/disk/by-id/ | grep wwn | awk '{print $9}'"
+                    ret, disk_uuid, stderr = ssh.execute(cmd, ip, "root", "password", True, 22)
+                    return disk_uuid.strip().split('\n')
+            list_index-=1
+					
     host_ips = sce_ops.dump_scenario_file_ips(scenarioFile)
     #Below is aim to migrate sanlock to a separated partition, don't delete!!!
     #IF separated_partition:
@@ -747,7 +783,7 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                     name=zone.name_)
             zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
             if os.environ.get('ZSTACK_SIMULATOR') != "yes":
-                disk_uuids = get_disk_uuid(scenarioFile)
+                disk_uuids = get_disk_uuid(scenarioFile,zone = zone,scenarioConfig = scenarioConfig)
             else:
                 # TODO: hardcoded right now
                 disk_uuids = ['1234567890'] * 1000
@@ -1826,7 +1862,7 @@ def add_host(scenarioConfig, scenarioFile, deployConfig, session_uuid, host_ip =
                     thread.start()
                     if i != 1:
                         time.sleep(1)
-                if count == 1 and xmlobject.has_element(host,"addToComputationalNode") and  host.addToComputationalNode == True:
+                if count == 1 and xmlobject.has_element(host,"addToComputationalNode") and  host.addToComputationalNode.text_ == "True":
                     thread = threading.Thread(target=_thread_for_action, args = (action, True))
                     wait_for_thread_queue()
                     thread.start()
