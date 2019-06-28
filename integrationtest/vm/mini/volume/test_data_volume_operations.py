@@ -90,8 +90,8 @@ def test():
     for i in range(round_num):
         volume_name = "volume_%s" % i
         volume_creation_option.set_name(volume_name)
-        max_size = (res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].availableCapacity - 1073741824)/10240
-        disk_size = random.randint(1048576, max_size) * 512
+        max_size = (res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].availableCapacity - 1073741824)/2
+        disk_size = random.randint(1048576, max_size)
         volume_creation_option.set_diskSize(disk_size)
         volume_creation_option.set_system_tags([random.choice(PROVISION)])
         volume = test_volume_header.ZstackTestVolume()
