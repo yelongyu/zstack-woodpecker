@@ -36,6 +36,7 @@ import random
 import threading
 import commands
 import MySQLdb
+from e2e_stub import ZSTACK
 
 def remove_all_vpc_vrouter():
     cond = res_ops.gen_query_conditions('applianceVmType', '=', 'vpcvrouter')

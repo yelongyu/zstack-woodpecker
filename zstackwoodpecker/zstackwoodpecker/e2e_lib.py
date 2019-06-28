@@ -22,21 +22,28 @@ HEADERS = {'charset': 'utf-8'}
 def jsonify_rsp(rsp):
     return jsonobject.loads(rsp.replace('null', '"null"'))
 
+class StaleElementException(Exception):
+    pass
+
 
 class E2E(object):
     def __init__(self):
         with open('/home/upload_test_result/test_target', 'r') as f:
-            target_browser = f.readline().strip()
+            test_browser = f.readline().strip()
+        test_browser = test_browser if test_browser in ['chrome', 'firefox'] else 'chrome'
         self.uri = 'http://%s:4444/wd/hub/session' % os.getenv('SELENIUM_SERVER')
-        body = '{"desiredCapabilities":{"browserName":"%s"}}' % target_browser
+        body = '{"desiredCapabilities":{"browserName":"%s"}}' % test_browser
         session = self._post(self.uri, body=body)
         self.session_id = session.sessionId
         self.uri = join(self.uri, self.session_id)
 
     def url(self, url):
+        test_util.test_logger('Navigate to %s' % url)
         rsp = self._post(join(self.uri, 'url'), body='{"url": "%s"}' % url)
         if rsp.status == 0:
             return True
+        else:
+            test_util.test_fail('Failed to open url "%s"' % url)
 
     def get_url(self):
         rsp = self._get(join(self.uri, 'url'))
@@ -52,11 +59,13 @@ class E2E(object):
         rsp = self._post(uri, body='{"type":"browser"}')
         return rsp.value
 
-    def _post(self, uri, body=None):
+    def _post(self, uri, body=None, exp_if_stale=False):
         _rsp = json_post(uri=uri, body=body, headers=HEADERS, fail_soon=True)
         rsp = jsonify_rsp(_rsp)
         if rsp.status != 0:
             test_util.test_logger('URL request encountered error {uri: "%s", body: %s, reason: %s}' % (uri, body, rsp.value.message))
+            if exp_if_stale:
+                raise StaleElementException
         return rsp
 
     def _get(self, uri):
@@ -100,27 +109,27 @@ class E2E(object):
         rsp = self._get(join(self.uri, 'source'))
         return rsp.value
 
-    def _get_element(self, uri, value, strategy):
+    def _get_element(self, uri, value, strategy, exp_if_stale=False):
         if strategy == 'css selector' and len(re.split('[#=]', value)) == 1:
             _value = value.split(' ')
             _value.insert(0, '')
             value = '.'.join(_value)
         if '=' in value:
             value = value.replace('"', '\\"')
-        rsp = self._post(uri, body='{"using": "%s", "value":"%s"}' % (strategy, value))
+        rsp = self._post(uri, body='{"using": "%s", "value":"%s"}' % (strategy, value), exp_if_stale=exp_if_stale)
         return (rsp, uri[:uri.index('element') + 7])
 
-    def get_element(self, value, strategy='css selector', par_uri=None, check_result=False):
+    def get_element(self, value, strategy='css selector', par_uri=None, check_result=False, exp_if_stale=False):
         '''
         strategy: 'css selector', 'tag name', 'id', 'link text', 'partial link text'
         reference: https://github.com/SeleniumHQ/selenium/wiki/JsonWireProtocol
-
         If result is empty, return error with error code no such element. Otherwise, return the first element of result.
+        DO NOT use this method to check if an element exist.
         '''
         par_uri = par_uri if par_uri else self.uri
         val_list = value.split('|')
         for i in xrange(len(val_list)):
-            rsp, uri = self._get_element(join(par_uri, 'element'), value=val_list[i], strategy=strategy)
+            rsp, uri = self._get_element(join(par_uri, 'element'), value=val_list[i], strategy=strategy, exp_if_stale=exp_if_stale)
             if rsp.value is not None:
                 break
         element = rsp.value.ELEMENT
@@ -133,7 +142,8 @@ class E2E(object):
 
     def get_elements(self, value, strategy='css selector', par_uri=None, check_result=False):
         '''
-        If result is empty, won't return error
+        If result is empty, return empty list
+        USE this method to check if an element exist.
         '''
         par_uri = par_uri if par_uri else self.uri
         val_list = value.split('|')
@@ -163,9 +173,9 @@ class E2E(object):
             else:
                 time.sleep(0.5)
         else:
-            test_util.test_logger('The element[strategy: "%s", value: "%s"] was not %s within [%s]s' % (strategy, value, target, timeout))
+            test_util.test_logger('The element[strategy: "%s", value: "%s"] is not %s within [%s]s' % (strategy, value, target, timeout))
             return False
-        test_util.test_logger('The element[strategy: "%s", value: "%s"] was %s' % (strategy, value, target))
+        test_util.test_logger('The element[strategy: "%s", value: "%s"] is %s' % (strategy, value, target))
         return True
 
     def click_button(self, btn_name):
@@ -288,7 +298,8 @@ class Element(E2E):
         return loc
 
     def refresh_uri(self):
-        self.uri = self.get_element(self.par_value, self.par_strategy, self.par_uri).uri
+        new_elem = self.get_element(self.par_value, self.par_strategy, self.par_uri, exp_if_stale=True)
+        self.uri = new_elem.uri
 
     def move_cursor_here(self):
         uri = join(self.uri.split('element')[0], 'moveto')
