@@ -2845,7 +2845,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
             with open('/home/nas_ak_id', 'w') as f:
                 f.write(ak_id)
             uri = 'http://' + os.getenv('apiEndPoint').split('::')[-1] + '/mntarget'
-            http.json_dump_post(uri, {"ak_id": ak_id, "mn_ip": mn_ip_to_post, "nfs_ip": vm_ip_to_post})
+            http.json_dump_post(uri, body={"ak_id": ak_id, "mn_ip": mn_ip_to_post, "nfs_ip": vm_ip_to_post}, fail_soon=True)
         if ebs_host:
             target_host = None
             host_list= [h[1] for h in ebs_host.keys()]
