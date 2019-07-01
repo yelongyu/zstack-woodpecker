@@ -2667,6 +2667,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 
                 if xmlobject.has_element(vm, 'nodeRef'):
                     setup_node_vm(vm_inv, vm, deploy_config)
+                    if os.getenv('zstackHaVip'):
+                        mn_ip_to_post = os.getenv('zstackHaVip')
+                    else:
+                        mn_ip_to_post = vm_inv.vm.vmNics[0].ip
                 if xmlobject.has_element(vm, 'hostRef') and not xmlobject.has_element(vm, 'vcenterRef'):
                     setup_host_vm(zstack_management_ip, vm_inv, vm, deploy_config)
                     vm_inv_lst.append(vm_inv)
