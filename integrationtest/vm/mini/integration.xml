@@ -12,6 +12,7 @@
 	<case timeout='1200' noparallel='True'>test_resize_data_volume.py</case>
 	<case timeout='1200' noparallel='True'>test_resize_data_thin_volume.py</case>
 	<case timeout='3600' noparallel='True'>test_resize_vm_create_template.py</case>
+	<case timeout='3600' noparallel='True'>test_check_root_and_data_volume_res.py</case>
 	<case timeout='1200' noparallel='True'>test_backup_vm.py</case>
 	<case timeout='3600' noparallel='True'>test_create_vm.py</case>
 	<case timeout='7200' noparallel='True'>test_create_iso_vm.py</case>
