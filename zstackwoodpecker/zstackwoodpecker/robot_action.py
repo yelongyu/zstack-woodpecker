@@ -1718,9 +1718,9 @@ def create_mini_vm(robot_test_obj, args):
     if 'cpu' in arg_dict:
         if arg_dict['cpu'] == 'random':
             if large:
-                start, end = 1, 16
-            else:
                 start, end = 16, 60
+            else:
+                start, end = 1, 16
             cpu = random.randrange(start, end, 1)
         else:
             cpu = int(arg_dict['cpu'])
