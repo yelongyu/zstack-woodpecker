@@ -59,6 +59,7 @@ def test():
         volume_thin.set_volume(vol_ops.create_volume_from_diskSize(volume_option))
         #volume_thin.attach(vm)
         volume_thin_uuid = volume_thin.volume.uuid
+        test_util.test_dsc('Successfully create data volume')
 
         vm_option.set_cpu_num(random.choice(VM_CPU))
         vm_option.set_memory_size(random.choice(VM_MEM))
@@ -68,26 +69,31 @@ def test():
         vm.create()
         test_obj_dict.add_vm(vm)
         vm.check()
+        test_util.test_dsc('Successfully create vm')
 
         vm_root_volume_uuid = vm.get_vm().rootVolumeUuid
         vm_uuid = vm.vm.uuid
 
         vol_ops.attach_volume(volume_thin_uuid, vm_uuid)
+        test_util.test_dsc('Successfully attach data volume to vm')
+
+        test_util.test_dsc('Start to check .res file in two hosts')
+        for ip in host_ip_list:
+            if test_lib.lib_execute_ssh_cmd(ip, 'root', 'password', 'test -f /etc/drbd.d/%s.res && echo "Found" || echo "Not exist"'%vm_root_volume_uuid) == 'Not exist\n':
+                test_util.test_fail('Expect to find %s.res file but not'%vm_root_volume_uuid)
+            if test_lib.lib_execute_ssh_cmd(ip, 'root', 'password', 'test -f /etc/drbd.d/%s.res && echo "Found" || echo "Not exist"'%volume_thin_uuid) == 'Not exist\n':
+                test_util.test_fail('Expect to find %s.res file but not'%volume_thin_uuid)
+
+        volume_thin.delete()
+        volume_thin.expunge()
+        vm.destroy()
+        vm.expunge()
 
         for ip in host_ip_list:
-            if test_lib.lib_execute_ssh_cmd(ip, 'root', 'password', 'test -f /etc/drbd.d/%s.res && echo "found" || echo "Not exist"'%vm_root_volume_uuid) == 'Not exist':
-                test_util.test_fail('expect to find %s.res file but not'%vm_root_volume_uuid)
-            if test_lib.lib_execute_ssh_cmd(ip, 'root', 'password', 'test -f /etc/drbd.d/%s.res && echo "found" || echo "Not exist"'%volume_thin_uuid) == 'Not exist':
-                test_util.test_fail('expect to find %s.res file but not'%volume_thin_uuid)
-
-        volume_thin.destroy()
-        vm.delete()
-
-        for ip in host_ip_list:
-            if test_lib.lib_execute_ssh_cmd(ip, 'root', 'password', 'test -f /etc/drbd.d/%s.res && echo "found" || echo "Not exist"'%vm_root_volume_uuid) == 'found':
-                test_util.test_fail('expect to find %s.res file but not'%vm_root_volume_uuid)
-            if test_lib.lib_execute_ssh_cmd(ip, 'root', 'password', 'test -f /etc/drbd.d/%s.res && echo "found" || echo "Not exist"'%volume_thin_uuid) == 'found':
-                test_util.test_fail('expect to find %s.res file but not'%volume_thin_uuid)
+            if test_lib.lib_execute_ssh_cmd(ip, 'root', 'password', 'test -f /etc/drbd.d/%s.res && echo "Found" || echo "Not exist"'%vm_root_volume_uuid) == 'Found\n':
+                test_util.test_fail('Not expect to find %s.res file'%vm_root_volume_uuid)
+            if test_lib.lib_execute_ssh_cmd(ip, 'root', 'password', 'test -f /etc/drbd.d/%s.res && echo "Found" || echo "Not exist"'%volume_thin_uuid) == 'Found\n':
+                test_util.test_fail('Not expect to find %s.res file'%volume_thin_uuid)
 
 def error_cleanup():
     global vm
