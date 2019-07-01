@@ -2,39 +2,38 @@
 
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
+import volume
 
-test_stub = test_lib.lib_get_test_stub()
-
-mini = None
-volume_name = 'volume-' + test_stub.get_time_postfix()
-backup_name = 'backup-' + test_stub.get_time_postfix()
+volume_ops = None
+volume_name = 'volume-' + volume.get_time_postfix()
+backup_name = 'backup-' + volume.get_time_postfix()
 
 def test():
-    global mini
-    mini = test_stub.MINI()
-    mini.create_vm()
-    mini.create_volume(volume_name, 'volume')
-    mini.volume_attach_to_vm()
-    mini.create_backup(volume_name, 'volume', backup_name)
-    mini.vm_ops(mini.vm_name, action='stop')
-    mini.restore_backup(volume_name, 'volume', backup_name)
-    mini.delete_backup(volume_name, 'volume', backup_name)
-    mini.check_browser_console_log()
+    global volume_ops
+    volume_ops = volume.VOLUME()
+    volume_ops.create_vm()
+    volume_ops.create_volume(volume_name, 'volume')
+    volume_ops.volume_attach_to_vm()
+    volume_ops.create_backup(volume_name, 'volume', backup_name)
+    volume_ops.vm_ops(volume_ops.vm_name, action='stop')
+    volume_ops.restore_backup(volume_name, 'volume', backup_name)
+    volume_ops.delete_backup(volume_name, 'volume', backup_name)
+    volume_ops.check_browser_console_log()
     test_util.test_pass('Test Volume Create, Restore and Delete Backups Successful')
 
 
 def env_recover():
-    global mini
-    mini.expunge_vm()
-    mini.expunge_volume(volume_name)
-    mini.close()
+    global volume_ops
+    volume_ops.expunge_vm()
+    volume_ops.expunge_volume(volume_name)
+    volume_ops.close()
 
 #Will be called only if exception happens in test().
 def error_cleanup():
-    global mini
+    global volume_ops
     try:
-        mini.expunge_vm()
-        mini.expunge_volume(volume_name)
-        mini.close()
+        volume_ops.expunge_vm()
+        volume_ops.expunge_volume(volume_name)
+        volume_ops.close()
     except:
         pass

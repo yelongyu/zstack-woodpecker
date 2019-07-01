@@ -1,27 +1,26 @@
 # -*- coding:UTF-8 -*-
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
+import eip
 
-test_stub = test_lib.lib_get_test_stub()
-
-mini = None
+eip_ops = None
 
 def test():
-    global mini
-    mini = test_stub.MINI()
-    mini.create_eip()
-    mini.check_browser_console_log()
+    global eip_ops
+    eip_ops = eip.EIP()
+    eip_ops.create_eip()
+    eip_ops.check_browser_console_log()
     test_util.test_pass('Create EIP Successful')
 
 def env_recover():
-    global mini
-    mini.delete_eip()
-    mini.close()
+    global eip_ops
+    eip_ops.delete_eip()
+    eip_ops.close()
 
 def error_cleanup():
-    global mini
+    global eip_ops
     try:
-        mini.delete_eip()
-        mini.close()
+        eip_ops.delete_eip()
+        eip_ops.close()
     except:
         pass

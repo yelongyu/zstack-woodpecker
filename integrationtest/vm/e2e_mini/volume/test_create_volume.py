@@ -2,29 +2,28 @@
 
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
+import volume
 
-test_stub = test_lib.lib_get_test_stub()
-
-mini = None
+volume_ops = None
 
 def test():
-    global mini
-    mini = test_stub.MINI()
-    mini.create_volume()
-    mini.check_browser_console_log()
+    global volume_ops
+    volume_ops = volume.VOLUME()
+    volume_ops.create_volume()
+    volume_ops.check_browser_console_log()
     test_util.test_pass('Create Volume Successful')
 
 
 def env_recover():
-    global mini
-    mini.delete_volume()
-    mini.close()
+    global volume_ops
+    volume_ops.delete_volume()
+    volume_ops.close()
 
 #Will be called only if exception happens in test().
 def error_cleanup():
-    global mini
+    global volume_ops
     try:
-        mini.delete_volume()
-        mini.close()
+        volume_ops.delete_volume()
+        volume_ops.close()
     except:
         pass

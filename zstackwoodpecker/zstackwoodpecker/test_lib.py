@@ -7405,6 +7405,22 @@ def lib_robot_pickup_action(required_path, resource_list, action_list, pre_robot
         return (action_selector(action_list, pre_robot_actions, \
             priority_actions).select(), False)
 
+def lib_get_specific_stub(suite_name=None, specific_name='test_stub'):
+    import inspect
+    import zstacklib.utils.component_loader as component_loader
+    caller_info_list = inspect.getouterframes(inspect.currentframe())[1]
+    caller_path = os.path.realpath(caller_info_list[1])
+    tc_name = caller_path.split('/')[-1].split('.')[0]
+    os.environ['TESTCASENAME'] = tc_name
+    curr_dir = os.path.dirname(caller_path)
+    if suite_name:
+        suite_path = os.path.join(curr_dir.split('vm')[0], 'vm', suite_name)
+    else:
+        suite_path = curr_dir
+    test_stub_cl = component_loader.ComponentLoader(specific_name, suite_path, 4)
+    test_stub_cl.load()
+    return test_stub_cl.module
+
 def lib_get_test_stub(suite_name=None):
     '''test_stub lib is not global test library. It is test suite level common
     lib. Test cases might be in different sub folders under test suite folder. 

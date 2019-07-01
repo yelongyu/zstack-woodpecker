@@ -2,40 +2,39 @@
 
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
+import vm
 
-test_stub = test_lib.lib_get_test_stub()
-
-mini = None
+vm_ops = None
 vm_name_list = [u'vm-一', 'vm-one', 'vm-1']
 search_value_list = ['oNe', '1', u'一', 'vm', '-']
 
 def test():
-    global mini
+    global vm_ops
 
-    mini = test_stub.MINI()
+    vm_ops = vm.VM()
     for vm_name in vm_name_list:
-        mini.create_vm(name=vm_name)
+        vm_ops.create_vm(name=vm_name)
     # search in existing vms
     for search_value in search_value_list:
-        mini.search(search_value, not_null=True)
-    mini.delete_vm(vm_name_list, corner_btn=False)
+        vm_ops.search(search_value, not_null=True)
+    vm_ops.delete_vm(vm_name_list, corner_btn=False)
     # search in deleted vms
     for search_value in search_value_list:
-        mini.search(search_value, tab_name=u'已删除', not_null=True)
-    mini.check_browser_console_log()
+        vm_ops.search(search_value, tab_name=u'已删除', not_null=True)
+    vm_ops.check_browser_console_log()
     test_util.test_pass('Test Search VM By Name Successful')
 
 
 def env_recover():
-    global mini
-    mini.expunge_vm()
-    mini.close()
+    global vm_ops
+    vm_ops.expunge_vm()
+    vm_ops.close()
 
 #Will be called only if exception happens in test().
 def error_cleanup():
-    global mini
+    global vm_ops
     try:
-        mini.expunge_vm()
-        mini.close()
+        vm_ops.expunge_vm()
+        vm_ops.close()
     except:
         pass
