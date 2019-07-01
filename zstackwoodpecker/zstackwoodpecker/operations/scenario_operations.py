@@ -2359,8 +2359,8 @@ def get_host_management_ip(scenario_config, scenario_file, deploy_config, vm_inv
                                             for vm_l2networkref in xmlobject.safe_list(vm_l3network.l2NetworkRef):
                                                 if vm_l2networkref.text_ == l2novlannetwork.name_:
                                                     return test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_l3network.uuid_).ip
-        else:
-            return test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
+    else:
+        return test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
         
     return None
 
