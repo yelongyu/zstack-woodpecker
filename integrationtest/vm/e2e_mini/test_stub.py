@@ -62,8 +62,8 @@ def get_mn_ip():
     dom = minidom.parse(dom_path)
     root = dom.documentElement
     item_list = root.getElementsByTagName('vm')
-    first_mn_ip = item_list[0].getAttribute('managementIp')
-    second_mn_ip = item_list[1].getAttribute('managementIp')
+    first_mn_ip = item_list[0].getAttribute('ip')
+    second_mn_ip = item_list[1].getAttribute('ip')
     return str(first_mn_ip), str(second_mn_ip)
 
 def get_time_postfix():
@@ -214,12 +214,14 @@ class MINI(E2E):
     def click_cancel(self):
         test_util.test_dsc('Click cancel button')
         self.get_elements(BTN)[-1].click()
-        self.wait_for_element(MODALCONTENT, target='disappear')
+        if not self.wait_for_element(MODALCONTENT, target='disappear'):
+            test_util.test_fail("Fail to click cancel btn")
 
     def click_close(self):
         test_util.test_logger('Click close button')
         self.get_element(EXITBTN).click()
-        self.wait_for_element(MODALCONTENT, target='disappear')
+        if not self.wait_for_element(MODALCONTENT, target='disappear'):
+            test_util.test_fail("Fail to click close btn")
 
     def more_operate(self, op_name, res_name, res_type=None, details_page=False):
         test_util.test_logger('Start more operate')
@@ -724,6 +726,8 @@ class MINI(E2E):
         self.switch_tab(u"邮箱服务器")
         self.get_elements(PRIMARYBTN)[-1].click()
         self.wait_for_element(MODALCONTENT)
+        # if don't wait 1s, will fail to click close btn
+        time.sleep(1)
         self.click_close()
 
     def save_element_location(self, filename=None):
