@@ -15,6 +15,7 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
+import zstackwoodpecker.zstack_test.zstack_test_volume as test_volume_header
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import time
 import os
@@ -29,6 +30,12 @@ exec_info = []
 
 test_obj_dict = test_state.TestStateDict()
 
+PROVISION = ["volumeProvisioningStrategy::ThinProvisioning","volumeProvisioningStrategy::ThickProvisioning"]
+volume_creation_option = test_util.VolumeOption()
+ps_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].uuid
+volume_creation_option.set_primary_storage_uuid(ps_uuid)
+
+
 def create_vm_wrapper(i, vm_creation_option):
     global vms, exec_info
     try:
@@ -36,6 +43,15 @@ def create_vm_wrapper(i, vm_creation_option):
         vm_creation_option.set_name("vm-%s" %(i))
         vm.set_creation_option(vm_creation_option)
         vm.create()
+        volume_name = "volume_%s" % i
+        volume_creation_option.set_name(volume_name)
+        disk_size = 536870912000 #500G
+        volume_creation_option.set_diskSize(disk_size)
+        volume_creation_option.set_system_tags([random.choice(PROVISION)])
+        volume = test_volume_header.ZstackTestVolume()
+        volume.set_volume(vol_ops.create_volume_from_diskSize(volume_creation_option))
+        volume.check()
+        volume.attach(vm)
         vms.append(vm)
     except:
         exec_info.append("vm-%s" %(i))
