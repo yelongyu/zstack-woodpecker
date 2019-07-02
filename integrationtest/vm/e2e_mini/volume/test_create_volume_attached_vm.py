@@ -2,19 +2,19 @@
 
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
-
-vm = test_lib.lib_get_specific_stub(suite_name='e2e_mini/vms', specific_name='vm')
-volume = test_lib.lib_get_specific_stub(suite_name='e2e_mini/volume', specific_name='volume')
+import volume
 
 vm_ops = None
 volume_ops = None
-vm_name = 'vm-' + vm.get_time_postfix()
+vm_name = 'vm-' + volume.get_time_postfix()
 
 def test():
     global volume_ops
     global vm_ops
     global vm_name
     volume_ops = volume.VOLUME()
+    vm = test_lib.lib_get_specific_stub(suite_name='e2e_mini/vm', specific_name='vm')
+    vm_ops = vm.VM(uri=volume_ops.uri, initialized=True)
     vm_ops.create_vm(name=vm_name)
     volume_ops.create_volume(vm=vm_name, provisioning=u'厚置备', view='list')
     volume_ops.create_volume(vm=vm_name, provisioning=u'精简置备', view='list')

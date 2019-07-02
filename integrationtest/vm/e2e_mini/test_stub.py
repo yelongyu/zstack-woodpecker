@@ -392,6 +392,7 @@ class MINI(E2E):
             for opt in self.get_elements('li[role="option"]'):
                 if opt.displayed() and opt_value in opt.text:
                     opt.click()
+                    return
 
         def select_radio(elem, value):
             for opt in self.get_elements('input[type="radio"]'):
@@ -629,7 +630,7 @@ class MINI(E2E):
         self.navigate(res_type)
         self.enter_details_page(res_type, name)
         self.switch_tab(u'备份数据')
-        self.get_elements(MOREOPERATIONBTN)[-1].move_cursor_here()
+        self.get_elements(MOREOPERATIONBTN)[-1].click()
         self.operate(u'创建备份')
         self.input('name', backup_name)
         if backup_dsc is not None:
@@ -651,7 +652,7 @@ class MINI(E2E):
         self.enter_details_page(res_type, name)
         self.switch_tab(u'备份数据')
         self.get_table_row(backup_list)
-        self.get_elements(MOREOPERATIONBTN)[-1].move_cursor_here()
+        self.get_elements(MOREOPERATIONBTN)[-1].click()
         self.operate(u'删除备份')
         self.end_action(end_action)
         if end_action == 'confirm':
@@ -668,7 +669,7 @@ class MINI(E2E):
         backup_list = []
         backup_list.append(backup_name)
         self.get_table_row(backup_list)
-        self.get_elements(MOREOPERATIONBTN)[-1].move_cursor_here()
+        self.get_elements(MOREOPERATIONBTN)[-1].click()
         self.operate(u'恢复备份')
         self.end_action(end_action)
         image_name = 'for-recover-volume-from-backup-' + str(get_inv(backup_name, 'backup').uuid)

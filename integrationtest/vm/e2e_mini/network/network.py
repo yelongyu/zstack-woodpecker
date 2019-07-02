@@ -57,7 +57,7 @@ class NETWORK(MINI):
         if details_page:
             self.enter_details_page('network', network)
             self.switch_tab('DNS')
-            self.get_elements(MOREOPERATIONBTN)[-1].move_cursor_here()
+            self.get_elements(MOREOPERATIONBTN)[-1].click()
             self.operate(u'添加DNS')
         else:
             self.more_operate(u'添加DNS', res_name=network)
@@ -85,7 +85,7 @@ class NETWORK(MINI):
         self.enter_details_page('network', network)
         self.switch_tab('DNS')
         self.get_table_row(dns_list)
-        self.get_elements(MOREOPERATIONBTN)[-1].move_cursor_here()
+        self.get_elements(MOREOPERATIONBTN)[-1].click()
         self.operate(u'删除DNS')
         self.click_ok()
         self.check_res_item(dns_list, target='notDisplayed')
@@ -105,7 +105,7 @@ class NETWORK(MINI):
         if details_page:
             self.enter_details_page('network', network)
             self.switch_tab(u'网络段')
-            self.get_elements(MOREOPERATIONBTN)[-1].move_cursor_here()
+            self.get_elements(MOREOPERATIONBTN)[-1].click()
             self.operate(u'添加网络段')
         else:
             self.more_operate(u'添加网络段', res_name=network)
@@ -134,7 +134,7 @@ class NETWORK(MINI):
                 break
         else:
             test_util.test_fail('Can not find the network segment from %s to %s' % (start_ip, end_ip))
-        self.get_elements(MOREOPERATIONBTN)[-1].move_cursor_here()
+        self.get_elements(MOREOPERATIONBTN)[-1].click()
         self.operate(u'删除网络段')
         self.click_ok()
         check_list = []
