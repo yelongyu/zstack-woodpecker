@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+# This case will fail to pass until MINI-900 is fixed.
 
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib

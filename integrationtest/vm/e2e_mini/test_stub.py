@@ -402,12 +402,14 @@ class MINI(E2E):
         def input_content(elem, content):
             element = elem.get_element('input', 'tag name')
             element.clear()
-            element.input(content)
+            if content != '':
+                element.input(content)
 
         def textarea_content(elem, content):
             element = elem.get_element('textarea', 'tag name')
             element.clear()
-            element.input(content)
+            if content != '':
+                element.input(content)
 
         for _ in range(10):
             elems = self.get_elements(INPUTROW)
