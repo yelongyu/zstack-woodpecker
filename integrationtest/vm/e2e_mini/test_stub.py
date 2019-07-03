@@ -208,7 +208,8 @@ class MINI(E2E):
         if assure_success:
             if not self.wait_for_element(OPS_SUCCESS, timeout=300):
                 test_util.test_fail("Fail: Operation Failed!")
-        self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
+        if self.wait_for_element(MESSAGETOAST):
+            self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
         time.sleep(1)
 
     def click_cancel(self):
@@ -347,7 +348,7 @@ class MINI(E2E):
             # check deleted
             self.check_res_item(res_list)
         if expunge:
-            self._delete(res_list, res_type, view=view, expunge=True, details_page=details_page)
+            self.delete(res_list, res_type, view=view, expunge=True, details_page=details_page)
 
     def resume(self, res_name, res_type, view='card', details_page=False):
         res_list = []
@@ -411,7 +412,7 @@ class MINI(E2E):
             if content != '':
                 element.input(content)
 
-        for _ in range(10):
+        for _ in range(20):
             elems = self.get_elements(INPUTROW)
             if elems:
                 break
@@ -458,7 +459,7 @@ class MINI(E2E):
         for res in res_list:
             for _row in self.get_elements(TABLEROW):
                 if res in _row.text:
-                    _row.get_element('input[type="checkbox"]').click()
+                    _row.get_element(CHECKBOX).click()
                     break
             else:
                 test_util.test_fail('Can not find the res with name [%s]' % res)

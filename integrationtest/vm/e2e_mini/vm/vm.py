@@ -215,7 +215,9 @@ class VM(MINI):
         self.navigate('vm')
         self.enter_details_page('vm', vm_name)
         self.switch_tab(u'配置信息')
-        self.get_elements(MOREOPERATIONBTN)[-1].click()
+        while not self.get_elements('ant-dropdown'):
+            self.get_elements(MOREOPERATIONBTN)[-1].click()
+            time.sleep(0.5)
         self.operate(u'加载')
         self.get_table_row(volume_list)
         self.end_action(end_action)
@@ -233,7 +235,9 @@ class VM(MINI):
         self.enter_details_page('vm', vm_name)
         self.switch_tab(u'配置信息')
         self.get_table_row(volume_list)
-        self.get_elements(MOREOPERATIONBTN)[-1].click()
+        while not self.get_elements('ant-dropdown'):
+            self.get_elements(MOREOPERATIONBTN)[-1].click()
+            time.sleep(0.5)
         self.operate(u'卸载')
         self.end_action(end_action)
         if end_action == 'confirm':
