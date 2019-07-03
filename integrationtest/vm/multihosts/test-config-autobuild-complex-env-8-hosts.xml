@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-autobuild-complex-env-8-hosts.xml</deployConfig>
+    <deployConfigTemplate>deploy-autobuild-complex-env-8-hosts.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

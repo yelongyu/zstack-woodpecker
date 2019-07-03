@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-autobuild-complex-env-8-hosts.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-autobuild-complex-env-8-hosts.tmpt</scenarioConfigTemplate>
+</testConfig>

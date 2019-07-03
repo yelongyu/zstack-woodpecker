@@ -1,0 +1,20 @@
+import ../scenario.tmpt
+import ./deploy-autobuild-complex-env-8-hosts.tmpt
+
+vmName1 = test_vm1 
+vmName2 = test_vm2
+vmName3 = test_vm3
+vmName4 = test_vm4
+vmName5 = test_vm5
+vmName6 = test_vm6
+vmName7 = test_vm7
+vmName8 = test_vm8
+vmInstranceOfferingUuid2 = 123456
+imageUuid2 = 123456 
+cephStorageOfferingUuid = 123456 
+xskyStorageOfferingUuid = 123456 
+iscsiDiskOfferingUuid = 123456
+
+hostUuid6 = 123456
+hostUuid7 = 123456
+hostUuid8 = 123456
