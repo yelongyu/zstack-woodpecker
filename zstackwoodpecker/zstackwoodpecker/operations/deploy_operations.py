@@ -716,8 +716,25 @@ def get_disk_uuid(scenarioFile,zone = None,scenarioConfig = None):
     ret, disk_uuid, stderr = ssh.execute(cmd, host_ips[-1], "root", "password", True, 22)
     return disk_uuid.strip().split('\n')
 
-def get_scsi_target_ip(scenarioFile):
+def get_scsi_target_ip(scenarioFile,scenarioConfig = None):
     import scenario_operations as sce_ops
+    if scenarioConfig!= None:
+        vm_name_ip_dict={}
+        with open(scenarioFile, 'r') as fd:
+            xmlstr = fd.read()
+            fd.close()
+            scenariofile = xmlobject.loads(xmlstr)
+            vm_name_ip_dict={vm.name_:vm.ip_ for vm in xmlobject.safe_list(scenariofile.vms.vm)}
+
+        iscsiServerList=[]
+        for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+            for vm in xmlobject.safe_list(host.vms.vm):
+                if not xmlobject.has_element(vm,"primaryStorageRef"):
+                    continue
+                if sum((1 for pr in xmlobject.safe_list(vm.primaryStorageRef) if pr.type_ =="iscsiTarget"))>=1:
+                    iscsiServerList.append(vm.name_)
+        return vm_name_ip_dict[iscsiServerList[0]]
+        
     host_ips = sce_ops.dump_scenario_file_ips(scenarioFile)
     return host_ips[0]
 
@@ -1262,10 +1279,14 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
     wait_for_thread_done()
 
 def add_iscsi_server(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluster_name = None, zone_name = None):
-    if not xmlobject.has_element(deployConfig, "zones.zone.iscsiLun"):
+    iscsiLunList=[]
+    for zone in xmlobject.safe_list(deployConfig.zones.zone):
+        if xmlobject.has_element(zone,"iscsiLun"):
+            iscsiLunList+=[lun for lun in xmlobject.safe_list(zone.iscsiLun)]
+    if(len(iscsiLunList) < 1):
         return
-    target_ip = get_scsi_target_ip(scenarioFile)
-    pr = xmlobject.safe_list(deployConfig.zones.zone.iscsiLun)[0]
+    target_ip = get_scsi_target_ip(scenarioFile,scenarioConfig = scenarioConfig)
+    pr = iscsiLunList[0]
 
     def _add_iscsi_server(target_ip):
         action = api_actions.AddIscsiServerAction()
