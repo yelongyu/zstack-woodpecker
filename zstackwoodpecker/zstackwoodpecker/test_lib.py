@@ -3450,7 +3450,11 @@ if [ $? -ne 0 ]; then
 fi
 ''')
         script_file.close()
-        ssh.scp_file(script_file.name, "/tmp/serial_log_gen.sh", host.managementIp, host.username, os.environ.get('hostPassword'), port=22)
+#        ssh.scp_file(script_file.name, "/tmp/serial_log_gen.sh", host.managementIp, host.username, os.environ.get('hostPassword'), port=22)
+        try:
+            ssh.scp_file(script_file.name, "/tmp/serial_log_gen.sh", host.managementIp, 'root', 'password', port=22)
+        except:
+            ssh.scp_file(script_file.name, "/tmp/serial_log_gen.sh", host.managementIp, 'root', 'password', port=2222
         os.unlink(script_file.name)
         _rsp = lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), cmd)
         if _rsp:
