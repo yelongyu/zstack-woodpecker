@@ -2536,6 +2536,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
     mn_ip_to_post, vm_ip_to_post = (None, None)
     if hasattr(scenario_config.deployerConfig, 'hosts'):
         ebs_host = {}
+        mini_host = {}
         ceph_disk_created = False
         for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
             for vm in xmlobject.safe_list(host.vms.vm):
@@ -2591,6 +2592,12 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 if ebs_host:
                     for k, v in ebs_host.items():
                         if int(v['cpu']) > 12 and v['mem'] > 24:
+                            vm_creation_option.set_host_uuid(k[1])
+
+                # try to create mini host vm to the same Host
+                if mini_host:
+                    for k, v in ebs_host.items():
+                        if int(v['cpu']) > 6 and v['mem'] > 12:
                             vm_creation_option.set_host_uuid(k[1])
 
                 #if iscsiClusterUuid has been set, vm will be assigned to iscsiCluster.
@@ -2826,11 +2833,16 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             host_inv = query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
                             ebs_host[(vm_inv.uuid, host_inv.uuid, vm_ip)] = {'cpu': host_inv.availableCpuCapacity, 'mem': int(host_inv.availableMemoryCapacity)/1024/1024/1024}
 #                             install_ebs_pkg_in_host(vm_ip, vm.imageUsername_, vm.imagePassword_)
+                            break
                         elif ps_ref.type_ == 'mini_ps':
                             disk_offering_uuid = ps_ref.offering_uuid_
                             volume_option.set_disk_offering_uuid(disk_offering_uuid)
                             volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config, ps_ref_type=ps_ref.type_)
                             attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
+                            # try to create mini host vm to the same Host
+                            cond = res_ops.gen_query_conditions('uuid', '=', vm_inv.hostUuid)
+                            host_inv = query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
+                            mini_host[(vm_inv.uuid, host_inv.uuid, vm_ip)] = {'cpu': host_inv.availableCpuCapacity, 'mem': int(host_inv.availableMemoryCapacity)/1024/1024/1024}
                             break
 
         xml_string = etree.tostring(root_xml, 'utf-8')
