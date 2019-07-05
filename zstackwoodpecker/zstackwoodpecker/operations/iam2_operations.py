@@ -117,11 +117,12 @@ def add_roles_to_iam2_virtual_id_group(role_uuids, group_uuid, session_uuid=None
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def add_roles_to_iam2_virtual_id(role_uuids, virtual_id_uuid, session_uuid=None):
+def add_roles_to_iam2_virtual_id(role_uuids, virtual_id_uuid, session_uuid=None, system_tags=None):
     action = api_actions.AddRolesToIAM2VirtualIDAction()
     action.timeout = 30000
     action.roleUuids = role_uuids
     action.virtualIDUuid = virtual_id_uuid
+    action.systemTags = system_tags
     test_util.action_logger('Add roles : %s to iam2 virtual id:%s' % (role_uuids, virtual_id_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
