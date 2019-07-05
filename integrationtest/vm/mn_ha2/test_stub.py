@@ -597,7 +597,12 @@ def ensure_bss_connected(exclude_host=[]):
         bs_list = res_ops.query_resource(res_ops.BACKUP_STORAGE)
         for exh in exclude_host:
             for bs in bs_list:
-                if exh.managementIp_ == bs.hostname or exh.ip_ == bs.hostname:
+                try:
+                    host_ip = exh.managementIp_
+                except:
+                    host_ip = exh.ip_
+#                if exh.managementIp_ == bs.hostname or exh.ip_ == bs.hostname:
+                if host_ip == bs.hostname:
                     bs_list.remove(bs)
 
         for bs in bs_list:
@@ -618,7 +623,12 @@ def ensure_hosts_connected(exclude_host=[]):
         host_list = res_ops.query_resource(res_ops.HOST)
         for exh in exclude_host:
             for host in host_list:
-                if exh.managementIp_ == host.managementIp or exh.ip_ == host.managementIp:
+                try:
+                    host_ip = exh.managementIp_
+                except:
+                    host_ip = exh.ip_
+#                if exh.managementIp_ == host.managementIp or exh.ip_ == host.managementIp:
+                if host_ip ==  host.managementIp:
                     host_list.remove(host)
 
         for host in host_list:
