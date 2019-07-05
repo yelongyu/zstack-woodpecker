@@ -155,7 +155,7 @@
             </hosts>
             <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
             <l2VxlanNetworkPoolRef cidr="$l2VxlanNetworkCidr">$l2VxlanNetworkPoolName</l2VxlanNetworkPoolRef>
-	    <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
+	    <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
             <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
