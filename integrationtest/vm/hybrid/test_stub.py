@@ -495,7 +495,8 @@ class HybridObject(object):
 
     def check_eip_accessibility(self, eip):
 #         self.get_eip(in_use=True)
-        cmd = "sshpass -p ZStack_Test%ECS&Password123 ssh -o StrictHostKeyChecking=no root@%s 'ls /'" % eip
+        password = 'ZStack_Test%ECS&Password123'
+        cmd = "sshpass -p '%s' ssh -o StrictHostKeyChecking=no root@%s 'ls /'" % (password, eip)
         for _ in xrange(60):
             cmd_status = commands.getstatusoutput(cmd)[0]
             if cmd_status == 0:
