@@ -2072,7 +2072,7 @@ def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_in
                 action.systemTags = ["localStorage::hostUuid::%s" % vm_inv.hostUuid]
 
         if ps_ref_type:
-            if ps_ref_type == 'xskyceph':
+            if ps_ref_type in ['xskyceph', 'mini_ps']:
                 action.systemTags = ["capability::virtio-scsi", "localStorage::hostUuid::%s" % vm_inv.hostUuid]
             else:
                 action.systemTags = ["localStorage::hostUuid::%s" % vm_inv.hostUuid]
@@ -2596,7 +2596,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 
                 # try to create mini host vm to the same Host
                 if mini_host:
-                    for k, v in ebs_host.items():
+                    for k, v in mini_host.items():
                         if int(v['cpu']) > 6 and v['mem'] > 12:
                             vm_creation_option.set_host_uuid(k[1])
 
