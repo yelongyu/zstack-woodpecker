@@ -585,9 +585,9 @@ class MINI(E2E):
             self.input('description', new_dsc)
         self.click_ok()
 
-    def search(self, value, search_by=u'名称', type='vm', tab_name=u'已有', not_null=False):
+    def search(self, value, search_by=u'名称', res_type='vm', tab_name=u'已有', not_null=False):
         test_util.test_logger('Search %s by %s' % (value.encode('utf-8'), search_by.encode('utf-8')))
-        self.navigate(type)
+        self.navigate(res_type)
         self.switch_tab(tab_name)
         self.get_element('ant-input-group-addon').click()
         self.wait_for_element('ul[role="listbox"]')
