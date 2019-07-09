@@ -839,7 +839,7 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
                                     test_util.test_fail("smp server can't be None, SMP_SERVER_IP=%s" %(str(SMP_SERVER_IP)))
                                 cmd = "mkdir -p /home/smp-ps/"
                                 ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-                                cmd = "echo 'mount %s:/home/nfs /home/smp-ps/' >> /etc/rc.local" %(SMP_SERVER_IP)
+                                cmd = "echo 'mountpoint -q /home/smp-ps/;if [ $? -ne 0 ];then mount %s:/home/nfs /home/smp-ps/;fi' >> /etc/rc.local" %(SMP_SERVER_IP)
                                 ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
                                 cmd = "chmod a+x /etc/rc.d/rc.local"
                                 ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
