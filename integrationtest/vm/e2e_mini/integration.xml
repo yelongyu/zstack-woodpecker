@@ -29,6 +29,7 @@
     <case timeout='1200' noparallel='True'>vm/test_delete_resume_vm.py</case>
     <case timeout='1200' noparallel='True'>vm/test_delete_resume_vms_batch.py</case>
     <case timeout='1200' noparallel='True'>vm/test_live_migrate.py</case>
+    <case timeout='1200' noparallel='True'>vm/test_modify_vm_config.py</case>
     <case timeout='1200' noparallel='True'>vm/test_open_vm_console.py</case>
     <case timeout='1200' noparallel='True'>vm/test_search_vm_by_name.py</case>
     <case timeout='1200' noparallel='True'>vm/test_set_and_cancel_console_password.py</case>

@@ -207,6 +207,20 @@ class VM(MINI):
         assert boot_order in self.get_element(INPUTROW).text
         self.click_cancel()
 
+    def modify_vm_config(self, vm_name, new_cpu, new_mem, details_page=False):
+        self.navigate('vm')
+        cpu = self.get_detail_info(vm_name, 'vm', 'CPU')
+        mem = self.get_detail_info(vm_name, 'vm', u'内存')
+        test_util.test_logger('Modify the cpu num and mem size of [%s] from [%s 核, %s] to [%s 核, %s]' % (vm_name, cpu, mem, new_cpu, new_mem))
+        self.more_operate(u'修改配置', res_type='vm', res_name=vm_name, details_page=details_page)
+        self.input('cpuNum', new_cpu)
+        self.input('memorySize', new_mem.split())
+        self.click_ok()
+        cpu = self.get_detail_info(vm_name, 'vm', 'CPU')
+        mem = self.get_detail_info(vm_name, 'vm', u'内存')
+        if cpu != str(new_cpu) or mem != new_mem:
+            test_util.test_fail("Failed to modify the cpu num and mem size of [%s] to [%s 核, %s]" % (vm_name, new_cpu, new_mem))
+
     def vm_attach_volume(self, vm_name, volume_name, end_action='confirm'):
         volume_list = []
         if isinstance(volume_name, types.ListType):
