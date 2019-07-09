@@ -91,7 +91,7 @@ def test():
     candidate_hosts = vm_ops.get_vm_migration_candidate_hosts(vm.get_vm().uuid)
     start = time.time()
     if candidate_hosts != None and test_lib.lib_check_vm_live_migration_cap(vm.get_vm()):
-        vm_ops.migrate_vm(vm.get_vm().uuid, candidate_hosts.inventories[0].uuid)
+        vm_ops.migrate_vm(vm.get_vm().uuid, candidate_hosts[0].uuid)
     else:
         test_util.test_skip('Required migratable host to test')
 
