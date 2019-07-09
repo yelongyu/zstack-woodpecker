@@ -1,8 +1,9 @@
 '''
 
 New Integration test for image replication.
-Check Image Replication after BS recovering from powered off,
-Source BS would be powered off during replicating new image 
+1. Add image with BS-1 off
+2. Recover BS-1
+3. Create VM with BS-2 off
 
 @author: Legion
 '''
@@ -27,25 +28,29 @@ def test():
         test_util.test_skip('Skip for 1 mini-cluster')
     bs_list = img_repl.get_bs_list()
     bs = random.choice(bs_list)
-    host_vm = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, ip=bs.hostname)
+    bs_list.remove(bs)
+    bs2 = bs_list[0]
+    host_vm1 = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, ip=bs.hostname)
+    host_vm2 = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, ip=bs2.hostname)
+
+    test_stub.stop_host(host_vm2, test_lib.all_scenario_config, 'cold')
 
     img_repl.add_image(image_name, bs_uuid=bs.uuid, url=os.getenv('imageUrl_raw'))
-    img_repl.wait_for_downloading(image_name)
-
-    test_stub.stop_host(host_vm, test_lib.all_scenario_config, 'cold')
-    img_repl.wait_for_bs_status_change('Disconnected')
 
     time.sleep(300)
-    test_stub.start_host(host_vm, test_lib.all_scenario_config)
-    test_stub.recover_vlan_in_host(bs.hostname, test_lib.all_scenario_config, test_lib.deploy_config)
+    test_stub.start_host(host_vm2, test_lib.all_scenario_config)
+    test_stub.recover_vlan_in_host(bs2.hostname, test_lib.all_scenario_config, test_lib.deploy_config)
 
     img_repl.wait_for_bs_status_change('Connected')
     img_repl.wait_for_image_replicated(image_name)
 
-    img_repl.check_image_data(image_name)
-    img_repl.wait_for_host_connected()
+    test_stub.stop_host(host_vm1, test_lib.all_scenario_config, 'cold')
 
     img_repl.create_vm(image_name)
+
+    test_stub.start_host(host_vm1, test_lib.all_scenario_config)
+    test_stub.recover_vlan_in_host(bs.hostname, test_lib.all_scenario_config, test_lib.deploy_config)
+
     test_util.test_pass('Image Replication After Host Recovering Test Success')
     img_repl.clean_on_expunge()
 

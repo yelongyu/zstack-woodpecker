@@ -608,7 +608,7 @@ def up_host_network(host_ip, scenarioConfig, network_type):
         test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s with username %s" %(host_inv.managementIp, host_password, host_password2, host_username))
 
 def create_mini_vm(l3_uuid_list, image_uuid, vm_name = None, cpu_num = None, memory_size = None, \
-              system_tags = None, instance_offering_uuid = None, \
+              system_tags = None, instance_offering_uuid = None, cluster_uuid=None, \
               rootVolume_systemTags=["volumeProvisioningStrategy::ThickProvisioning"], session_uuid = None):
     if not vm_name:
         vm_name = 'mini_vm'
@@ -626,6 +626,7 @@ def create_mini_vm(l3_uuid_list, image_uuid, vm_name = None, cpu_num = None, mem
     vm_creation_option.set_memory_size(memory_size)
     vm_creation_option.set_system_tags(system_tags)
     vm_creation_option.set_rootVolume_systemTags(rootVolume_systemTags)
+    vm_creation_option.set_cluster_uuid(cluster_uuid)
     vm_creation_option.set_session_uuid(session_uuid)
     vm_creation_option.set_timeout(900000)
     vm = test_vm_header.ZstackTestVm()
@@ -1132,7 +1133,15 @@ class ImageReplication(object):
             rootVolume_systemTags = ["volumeProvisioningStrategy::ThinProvisioning"]
         else:
             rootVolume_systemTags = ["volumeProvisioningStrategy::ThickProvisioning"]
-        vm = create_mini_vm([l3_net_uuid], image_uuid, vm_name=vm_name, cpu_num=cpu_num, memory_size=mem_size, rootVolume_systemTags=rootVolume_systemTags)
+        cluster_list = res_ops.query_resource(res_ops.CLUSTER)
+        _cluster_list = cluster_list[:]
+        for cluster in _cluster_list:
+            conditions = res_ops.gen_query_conditions('clusterUuid', '=', cluster.uuid)
+            conditions = res_ops.gen_query_conditions('status', '=', 'Disconnected', conditions)
+            if res_ops.query_resource(res_ops.HOST, conditions):
+                cluster_list.remove(cluster)
+        vm = create_mini_vm([l3_net_uuid], image_uuid, vm_name=vm_name, cpu_num=cpu_num, memory_size=mem_size, 
+                            rootVolume_systemTags=rootVolume_systemTags, cluster_uuid=cluster_list[0].uuid)
         self.vm = vm
         vm_inv = self.vm.get_vm()
         if vm_inv.platform == 'Windows':
