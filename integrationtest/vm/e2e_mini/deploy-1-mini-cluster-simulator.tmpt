@@ -4,4 +4,3 @@ miniPrimaryStorageName = mini-ps
 miniBackupStorageName = mini-bs
 l2Vlan21 = 1121
 ZSTACK_SIMULATOR = yes
-vmStorageL3Uuid = 3a21c6bf70894795829854bf8339642b
