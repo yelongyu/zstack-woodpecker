@@ -24,6 +24,7 @@
     <case timeout='1200' noparallel='True'>vm/test_create_vm_image.py</case>
     <case timeout='1200' noparallel='True'>vm/test_create_vm_with_data_vol.py</case>
     <case timeout='1200' noparallel='True'>vm/test_create_vm_with_iso_image.py</case>
+    <case timeout='1200' noparallel='True'>vm/test_create_vm_with_multi_networks.py</case>
     <case timeout='1200' noparallel='True'>vm/test_create_vm.py</case>
     <case timeout='1200' noparallel='True'>vm/test_delete_resume_vm.py</case>
     <case timeout='1200' noparallel='True'>vm/test_delete_resume_vms_batch.py</case>

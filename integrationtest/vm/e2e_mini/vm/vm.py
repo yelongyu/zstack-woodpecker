@@ -38,7 +38,9 @@ class VM(MINI):
                    'provisioning': provisioning}
         vm_elem = self.create(vm_dict, 'vm', view=view, priority_dict=priority_dict)
         vm_inv = get_inv(self.vm_name, "vm")
-        check_list = [self.vm_name, str(cpu), mem, vm_inv.vmNics[0].ip]
+        check_list = [self.vm_name, str(cpu), mem]
+        if not isinstance(network, types.ListType):
+            check_list.append(vm_inv.vmNics[0].ip)
         checker = MINICHECKER(self, vm_elem)
         checker.vm_check(vm_inv, check_list, ops='new_created')
         if data_size:

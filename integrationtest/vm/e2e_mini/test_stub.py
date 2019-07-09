@@ -201,10 +201,13 @@ class MINI(E2E):
                 time.sleep(1)
                 return True
 
-    def click_ok(self, assure_success=True):
+    def click_ok(self, assure_success=True, not_check=False):
         test_util.test_logger('Click OK button')
         self.wait_for_page_render()
         self.get_elements(PRIMARYBTN)[-1].click()
+        if not_check:
+            time.sleep(1)
+            return
         if assure_success:
             if not self.wait_for_element(OPS_SUCCESS, timeout=300):
                 test_util.test_fail("Fail: Operation Failed!")
@@ -289,13 +292,17 @@ class MINI(E2E):
         for k, v in para_dict.iteritems():
             if v is not None:
                 self.input(k, v)
-        self.click_ok()
-        if not self.wait_for_element(MODALCONTENT, target='disappear'):
-            if self.wait_for_element(FORMEXPLAIN):
+        self.click_ok(not_check=True)
+        if not self.wait_for_element(MODALCONTENT, timeout=3, target='disappear'):
+            if self.wait_for_element(FORMEXPLAIN, timeout=3):
                 for elem in self.get_elements(FORMEXPLAIN):
                     test_util.test_logger('Error:' + elem.text.encode('utf-8'))
                 test_util.test_fail('Create Error: check the previous error message')
         self.switch_view(view)
+        if not self.wait_for_element(OPS_SUCCESS, timeout=300):
+            test_util.test_fail("Fail: Operation Failed!")
+        if self.wait_for_element(MESSAGETOAST):
+            self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
         elem = self.get_res_element(para_dict['name'])
         return elem
 
@@ -388,12 +395,18 @@ class MINI(E2E):
         title = None
 
         def select_opt(elem, opt_value):
+            opt_list = []
             elem.get_element(selection_rendered).click()
             time.sleep(1)
-            for opt in self.get_elements('li[role="option"]'):
-                if opt.displayed() and opt_value in opt.text:
-                    opt.click()
-                    return
+            if not isinstance(opt_value, types.ListType):
+                opt_list.append(opt_value)
+            else:
+                opt_list = opt_value
+            for _opt in opt_list:
+                for opt in self.get_elements('li[role="option"]'):
+                    if opt.displayed() and _opt in opt.text:
+                        opt.click()
+                        break
 
         def select_radio(elem, value):
             for opt in self.get_elements('input[type="radio"]'):
@@ -427,17 +440,20 @@ class MINI(E2E):
                 break
         if isinstance(content, types.IntType):
             content = str(content)
-        if isinstance(content, types.ListType):
-            if isinstance(content[0], types.IntType):
-                content[0] = str(content[0])
+        if isinstance(content, types.ListType) and content[0].isdigit():
             test_util.test_logger('Input [%s] for [%s]' % (content[0].encode('utf-8'), title))
             test_util.test_logger('Select [%s] for [%s]' % (content[1].encode('utf-8'), title))
             input_content(elem, content[0])
             select_opt(elem, content[1])
         else:
             if elem.get_elements(selection_rendered):
-                test_util.test_logger('Select [%s] for [%s]' % (content.encode('utf-8'), title))
-                select_opt(elem, content)
+                opt_list = []
+                if not isinstance(content, types.ListType):
+                    opt_list.append(content)
+                else:
+                    opt_list = content
+                test_util.test_logger('Select [%s] for [%s]' % (', '.join(opt_list).encode('utf-8'), title))
+                select_opt(elem, opt_list)
             elif elem.get_elements(radio_group):
                 test_util.test_logger('Select [%s] for [%s]' % (content.encode('utf-8'), title))
                 select_radio(elem, content)
