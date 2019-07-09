@@ -20,6 +20,10 @@
               <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
+            <l3Network uuid="$vmStorageL3Uuid">
+                <backupStorageRef >$miniBackupStorageName</backupStorageRef>
+                <primaryStorageRef >$miniPrimaryStorageName</primaryStorageRef>
+            </l3Network>
           </l3Networks>
           <nodeRef>$node1Name</nodeRef>
           <hostRef>$hostName</hostRef>
@@ -36,6 +40,10 @@
               <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
+            </l3Network>
+            <l3Network uuid="$vmStorageL3Uuid">
+                <backupStorageRef >$miniBackupStorageName</backupStorageRef>
+                <primaryStorageRef >$miniPrimaryStorageName</primaryStorageRef>
             </l3Network>
           </l3Networks>
           <nodeRef>$node2Name</nodeRef>

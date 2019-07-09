@@ -564,7 +564,9 @@ def down_host_network(host_ip, scenarioConfig, network_type):
         test_util.test_fail("not support netwoek_type=%s" %(str(network_type)))
     #cmd = "virsh domiflist %s|sed -n '3p'|awk '{print $1}'|xargs -i virsh domif-setlink %s {} down" % (host_vm_inv.uuid, host_vm_inv.uuid)
     cmd = "virsh domiflist %s|grep %s|awk '{print $1}'|xargs -i virsh domif-setlink %s {} down" % (host_vm_inv.uuid, filter_key, host_vm_inv.uuid)
-    if test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, "pwd"):
+    if test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_inv.name, "pwd"):
+        test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_inv.name, cmd)
+    elif test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, "pwd"):
         test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, cmd)
     elif test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, "pwd"):
         test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, cmd)
@@ -596,7 +598,9 @@ def up_host_network(host_ip, scenarioConfig, network_type):
         test_util.test_fail("not support netwoek_type=%s" %(str(network_type)))
 
     cmd = "virsh domiflist %s|grep %s|awk '{print $1}'|xargs -i virsh domif-setlink %s {} up" % (host_vm_inv.uuid, filter_key, host_vm_inv.uuid)
-    if test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, "pwd"):
+    if test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_inv.name, "pwd"):
+        test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_inv.name, cmd)
+    elif test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, "pwd"):
         test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, cmd)
     elif test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, "pwd"):
         test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, cmd)
