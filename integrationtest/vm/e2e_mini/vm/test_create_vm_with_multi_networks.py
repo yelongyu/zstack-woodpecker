@@ -6,7 +6,7 @@ import os
 import vm
 
 vm_ops = None
-network_list = [os.getenv('l3PublicNetworkName'), os.getenv('l3NoVlanNetworkName1'), os.getenv('l3NoVlanNetworkName2')]
+network_list = [os.getenv('l3PublicNetworkName'), os.getenv('l3VlanNetworkName1'), os.getenv('l3VlanNetworkName2')]
 
 def test():
     global vm_ops

@@ -91,7 +91,7 @@ class NETWORK(MINI):
         self.check_res_item(dns_list, target='notDisplayed')
 
     def add_network_segment(self, network=None, start_ip=None, end_ip=None, netmask=None, gateway=None, details_page=True, end_action='confirm'):
-        network = network if network else os.getenv('l3NoVlanNetworkName1')
+        network = network if network else os.getenv('l3VlanNetworkName1')
         start_ip = start_ip if start_ip else os.getenv('noVlanIpRangeStart1')
         end_ip = end_ip if end_ip else os.getenv('noVlanIpRangeEnd1')
         netmask = netmask if netmask else os.getenv('noVlanIpRangeNetmask1')
@@ -121,7 +121,7 @@ class NETWORK(MINI):
             self.check_res_item(check_list)
 
     def del_network_segment(self, network=None, start_ip=None, end_ip=None):
-        network = network if network else os.getenv('l3NoVlanNetworkName1')
+        network = network if network else os.getenv('l3VlanNetworkName1')
         start_ip = start_ip if start_ip else os.getenv('noVlanIpRangeStart1')
         end_ip = end_ip if end_ip else os.getenv('noVlanIpRangeEnd1')
         test_util.test_logger('Delete network segment [%s] to [%s]' % (start_ip, end_ip))

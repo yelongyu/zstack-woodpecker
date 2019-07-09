@@ -5,7 +5,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import eip
 
-network_name = os.getenv('l3NoVlanNetworkName1')
+network_name = os.getenv('l3VlanNetworkName1')
 
 eip_ops = None
 vm_ops = None
