@@ -97,7 +97,7 @@
         description="Test" url="$sftpBackupStorageUrl"
         username="$sftpBackupStorageUsername"
         password="$sftpBackupStoragePassword"
-        hostname="$sftpBackupStorageHostname"
+        hostname="$sftpBackupStorageHostname2"
         local_backup_storage="local"
         id="1"
         port="$sftpBackupStoragePort"/>
