@@ -67,6 +67,14 @@ def test():
     os.system('zstack-ctl change_ip --ip %s'% management_ip)
     os.system('zstack-ctl stop')
     os.system('zstack-ctl start')
+    time.sleep(5)
+    child2 = os.popen('zstack-ctl status | grep "MN status" | awk \'{print $3}\'')
+    mn_status = child2.read()
+    if mn_status != 'Running':
+        time.sleep(30)
+        os.system('zstack-ctl start')
+    else:
+        print 'mn have been running now'
     for host in hosts:
         os.system("bash %s %s" % (EXTRA_HOST_SETUP_SCRIPT, host.managementIp_))
 
