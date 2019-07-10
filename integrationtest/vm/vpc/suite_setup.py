@@ -58,12 +58,12 @@ def test():
     conf_ops.change_global_config("applianceVm", "agent.deployOnStart", 'true')
     if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
+    deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
     child1 = os.popen('ifconfig eth1 | grep 192.168 | awk \'{print $2}\'')
     management_ip = child1.read()
     os.system('zstack-ctl change_ip --ip %s'% management_ip)
     os.system('zstack-ctl stop')
     os.system('zstack-ctl start')
-    deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
     for host in hosts:
         os.system("bash %s %s" % (EXTRA_HOST_SETUP_SCRIPT, host.managementIp_))
 
