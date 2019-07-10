@@ -87,7 +87,7 @@ def test():
         test_util.test_skip('Required smp ps to test')
     ps_uuid = pss[0].uuid
 
-    if flavor['agent_url'] == DOWNLOAD_IMAGE:
+    if flavor['agent_url'] != DOWNLOAD_IMAGE:
         vm = test_stub.create_vm(image_uuid=image_uuid, ps_uuid=ps_uuid)
         vm.destroy()
         vm.expunge()
