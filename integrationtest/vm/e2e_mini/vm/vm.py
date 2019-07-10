@@ -211,6 +211,10 @@ class VM(MINI):
         self.navigate('vm')
         cpu = self.get_detail_info(vm_name, 'vm', 'CPU')
         mem = self.get_detail_info(vm_name, 'vm', u'内存')
+        vm_elem = self.get_res_element(vm_name)
+        checker = MINICHECKER(self, vm_elem)
+        check_list = [cpu, mem]
+        checker.vm_check(check_list=check_list)
         test_util.test_logger('Modify the cpu num and mem size of [%s] from [%s 核, %s] to [%s 核, %s]' % (vm_name, cpu, mem, new_cpu, new_mem))
         self.more_operate(u'修改配置', res_type='vm', res_name=vm_name, details_page=details_page)
         self.input('cpuNum', new_cpu)
@@ -218,6 +222,8 @@ class VM(MINI):
         self.click_ok()
         cpu = self.get_detail_info(vm_name, 'vm', 'CPU')
         mem = self.get_detail_info(vm_name, 'vm', u'内存')
+        check_list = [str(new_cpu), new_mem]
+        checker.vm_check(check_list=check_list)
         if cpu != str(new_cpu) or mem != new_mem:
             test_util.test_fail("Failed to modify the cpu num and mem size of [%s] to [%s 核, %s]" % (vm_name, new_cpu, new_mem))
 
@@ -258,3 +264,12 @@ class VM(MINI):
         self.end_action(end_action)
         if end_action == 'confirm':
             self.check_res_item(volume_list, target='notDisplayed')
+
+    def check_vm_network(self, vm_name, network_list):
+        test_util.test_logger("Check if the network[%s] attached to vm[%s]" % (', '.join(network_list), vm_name))
+        self.enter_details_page('vm', vm_name)
+        self.switch_tab(u"配置信息")
+        self.switch_radio_btn(u"网卡")
+        self.get_table_row(network_list)
+        # recover
+        self.navigate('vm')

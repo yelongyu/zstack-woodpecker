@@ -53,8 +53,7 @@ MENUDICT = {'homepage': 'a[href="/web/"]',
             'eip': 'a[href="/web/eip"]',
             'log': 'a[href="/web/operationLog"]'}
 
-VIEWDICT = {'list': '#btn_listswitch_s',
-            'card': '#btn_cardswitch_s'}
+VIEWDICT = {'card': 1, 'list': 2}
 
 
 def get_mn_ip():
@@ -178,18 +177,29 @@ class MINI(E2E):
 
     def switch_view(self, view='card'):
         test_util.test_logger('switch the view to %s' % view)
-        for elem in self.get_elements('ant-btn square___3vP_2'):
-            if elem.get_elements(VIEWDICT[view]):
-                elem.click()
-                break
+        self.get_elements('square___3vP_2')[VIEWDICT[view]].click()
         time.sleep(1)
 
     def switch_tab(self, tab_name):
         test_util.test_logger('Switch to tab [%s]' % tab_name.encode('utf-8'))
         self.wait_for_page_render()
-        for tab in self.get_elements('ant-tabs-tab'):
+        for tab in self.get_elements('ant-tabs-tab|tab___3GRDV'):
             if tab_name in tab.text:
                 tab.click()
+                break
+        else:
+            test_util.test_fail("Fail to switch the tab to %s" % tab_name.encode('utf-8'))
+        time.sleep(1)
+
+    def switch_radio_btn(self, btn_name):
+        test_util.test_logger('Switch to radio btn [%s]' % btn_name.encode('utf-8'))
+        self.wait_for_page_render()
+        for btn in self.get_elements('ant-radio-button-wrapper'):
+            if btn_name in btn.text:
+                btn.click()
+                break
+        else:
+            test_util.test_fail("Fail to switch the radio btn to %s" % btn_name.encode('utf-8'))
         time.sleep(1)
 
     def operate(self, name):
@@ -474,7 +484,7 @@ class MINI(E2E):
     def get_table_row(self, res_list):
         for res in res_list:
             for _row in self.get_elements(TABLEROW):
-                if res in _row.text:
+                if res in _row.text.encode('utf-8'):
                     _row.get_element(CHECKBOX).click()
                     break
             else:
@@ -487,6 +497,7 @@ class MINI(E2E):
             if info_name in elem.text:
                 info = elem.get_element('ant-typography-ellipsis').text
                 self.go_backward()
+                self.wait_for_page_render()
                 return info
         test_util.test_fail('Can not find the detail info of [%s] with info name [%s]' % (res_name, info_name.encode('utf-8')))
 

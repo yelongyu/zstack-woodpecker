@@ -6,12 +6,13 @@ import os
 import vm
 
 vm_ops = None
-network_list = [os.getenv('l3PublicNetworkName'), os.getenv('l3VlanNetworkName1'), os.getenv('l3VlanNetworkName2')]
 
 def test():
     global vm_ops
+    network_list = [os.getenv('l3PublicNetworkName'), os.getenv('l3VlanNetworkName1'), os.getenv('l3VlanNetworkName3')]
     vm_ops = vm.VM()
     vm_ops.create_vm(network=network_list)
+    vm_ops.check_vm_network(vm_ops.vm_name, network_list)
     vm_ops.check_browser_console_log()
     test_util.test_pass('Create VM With Multi-Networks Successful')
 
