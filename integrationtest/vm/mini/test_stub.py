@@ -1115,14 +1115,20 @@ class ImageReplication(object):
         self.test_obj_dict.add_image(image)
         self.image = image.get_image()
 
-    def delete_image(self):
-        img_ops.delete_image(self.image.uuid)
+    def delete_image(self, uuid=None):
+        if not uuid:
+            uuid = self.image.uuid
+        img_ops.delete_image(uuid)
 
-    def recover_image(self):
-        img_ops.recover_image(self.image.uuid)
+    def recover_image(self, uuid=None):
+        if not uuid:
+            uuid = self.image.uuid
+        img_ops.recover_image(uuid)
 
-    def expunge_image(self):
-        img_ops.expunge_image(self.image.uuid)
+    def expunge_image(self, uuid=None):
+        if not uuid:
+            uuid = self.image.uuid
+        img_ops.expunge_image(uuid)
 
     def create_vm(self, image_name=None, vm_name=None, provisioning='thick', cpu_num=2, mem_size=2147483648):
         image_name = image_name if image_name else os.getenv('imageName_net')
@@ -1137,7 +1143,7 @@ class ImageReplication(object):
         _cluster_list = cluster_list[:]
         for cluster in _cluster_list:
             conditions = res_ops.gen_query_conditions('clusterUuid', '=', cluster.uuid)
-            conditions = res_ops.gen_query_conditions('status', '=', 'Disconnected', conditions)
+            conditions = res_ops.gen_query_conditions('status', '!=', 'Connected', conditions)
             if res_ops.query_resource(res_ops.HOST, conditions):
                 cluster_list.remove(cluster)
         vm = create_mini_vm([l3_net_uuid], image_uuid, vm_name=vm_name, cpu_num=cpu_num, memory_size=mem_size, 
@@ -1151,13 +1157,15 @@ class ImageReplication(object):
             self.vm.check()
         return vm
 
-    def crt_vm_image(self, image_name):
+    def crt_vm_image(self, image_name, bs_uuid=None):
+        bs_uuid = bs_uuid if bs_uuid else self.get_bs_list()[0].uuid
         image_creation_option = test_util.ImageOption()
         image_creation_option.set_name(image_name)
-        image_creation_option.set_backup_storage_uuid_list([self.get_bs_list()[0].uuid])
+        image_creation_option.set_backup_storage_uuid_list([bs_uuid])
         image_creation_option.set_root_volume_uuid(self.vm.get_vm().allVolumes[0].uuid)
         image_creation_option.set_timeout(900000)
-        img_ops.create_root_volume_template(image_creation_option)
+        root_template = img_ops.create_root_volume_template(image_creation_option)
+        return root_template
 
     def create_iso_vm(self):
         data_volume_size = 10737418240

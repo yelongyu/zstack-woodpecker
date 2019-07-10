@@ -42,7 +42,7 @@ def test():
     img_repl.wait_for_host_connected()
 
 
-    test_util.test_pass('Image Replication After Host Recovering Test Success')
+    test_util.test_pass('Create VM with a BS Network Down Test Success')
     img_repl.clean_on_expunge()
 
 

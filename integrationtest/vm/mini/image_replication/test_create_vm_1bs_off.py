@@ -34,7 +34,7 @@ def test():
     test_stub.stop_host(host_vm, test_lib.all_scenario_config, 'cold')
     img_repl.wait_for_bs_status_change('Disconnected')
 
-    img_repl.create_vm(image_name)
+    img_repl.create_vm(image_name, bs.uuid)
 
     test_stub.start_host(host_vm, test_lib.all_scenario_config)
     test_stub.recover_vlan_in_host(bs.hostname, test_lib.all_scenario_config, test_lib.deploy_config)
@@ -43,7 +43,7 @@ def test():
     img_repl.wait_for_host_connected()
 
 
-    test_util.test_pass('Image Replication After Host Recovering Test Success')
+    test_util.test_pass('Create VM with a BS Powered off Test Success')
     img_repl.clean_on_expunge()
 
 
