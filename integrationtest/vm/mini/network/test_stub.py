@@ -91,3 +91,8 @@ def create_eip(eip_name=None, vip_uuid=None, vnic_uuid=None, vm_obj=None, sessio
         test_util.test_fail('vm_obj can not be None in create_eip() API, when setting vm_nic_uuid.')
     eip.create(vm_obj)
     return eip
+
+def run_command_in_vm(vm_inv, command):
+    managerip = test_lib.lib_find_host_by_vm(vm_inv).managementIp
+    vm_ip = vm_inv.vmNics[0].ip
+    return test_lib.lib_ssh_vm_cmd_by_agent(managerip, vm_ip, 'root', 'password', command)
