@@ -397,11 +397,11 @@ class Volume(Resource):
     def create(self, tags):
         all_volumes.add(self, DETACHED)
         self.state = DETACHED
-        if tags:
-            if "flag" in tags[-1] and MINI:
+        if MINI:
+            if tags and "flag" in tags[-1]:
                 tags[-1] = tags[-1][:-1] + ",scsi" + "'"
-        else:
-            tags.append("'flag=scsi'")
+            elif not tags or "flag" not in tags[-1]:
+                tags.append("'flag=scsi'")
         return "[TestAction.create_volume, %s, %s]" % (self.name, ", ".join(tags))
 
     def attach(self, vm):

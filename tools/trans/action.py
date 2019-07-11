@@ -984,7 +984,7 @@ class create_volume_backup(Action):
 
     def check(self, all_volumes, tags):
         Action.check(self, all_volumes, tags)
-        if len(all_volumes.detached + all_volumes.attached + all_volumes.deleted) == 0:
+        if len(all_volumes.detached + all_volumes.attached) == 0:
             print "There is no resource volume to create_volume_backup.Must add create_volume"
             self.volume = resource.Volume()
             self.path.append(self.volume.create([]))
