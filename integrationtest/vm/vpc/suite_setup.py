@@ -60,20 +60,27 @@ def test():
     if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
     deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
+    time.sleep(60)
     os.system('zstack-ctl stop')
-    time.sleep(5)
+    child2 = os.popen('zstack-ctl status | grep "MN status" | awk \'{print $3}\'')
+    mn_status = child2.read()
+    if mn_status != 'Stopped':
+        print 'mn status not stopped and its status is : %s' % mn_status
+        time.sleep(50)
+        os.system('zstack-ctl stop')
+    time.sleep(50)
     child1 = os.popen('ifconfig br_eth1 | grep 192.168 | awk \'{print $2}\'')
     management_ip = child1.read()
     os.system('zstack-ctl change_ip --ip %s'% management_ip)
     os.system('zstack-ctl start')
-    time.sleep(30)
-    child2 = os.popen('zstack-ctl status | grep "MN status" | awk \'{print $3}\'')
-    mn_status = child2.read()
+    time.sleep(50)
+    child3 = os.popen('zstack-ctl status | grep "MN status" | awk \'{print $3}\'')
+    mn_status = child3.read()
     if mn_status != 'Running':
         os.system('zstack-ctl stop')
-        time.sleep(30)
+        time.sleep(50)
         os.system('zstack-ctl start')
-        time.sleep(30)
+        time.sleep(50)
     else:
         print 'mn have been running now'
     for host in hosts:
