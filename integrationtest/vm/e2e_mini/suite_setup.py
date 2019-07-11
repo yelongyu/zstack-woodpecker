@@ -916,6 +916,8 @@ def test():
         deploy_operations.remove_simulator_agent_script(agent_url)
         deploy_operations.deploy_simulator_agent_script(agent_url, script)
         deploy_operations.install_mini_server()
+        update_init_status = '''mysql -uroot -pzstack.mysql.password -e "update zstack_mini.kv set value='Initialized' where name='init.status';"'''
+        os.system(update_init_status)
     else:
         if test_lib.scenario_config == None or test_lib.scenario_file ==None:
             test_util.test_fail('Suite Setup Fail without scenario')
@@ -972,7 +974,7 @@ def test():
         deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
         for host in testHosts:
             os.system("bash %s %s" % (EXTRA_HOST_SETUP_SCRIPT, host.managementIp_))
-        update_init_status = '''mysql -uroot -pzstack.mysql.password -e "update zstack_mini.kv set value='Initialized' where name='init.status';select * from zstack_mini.kv"'''
+        update_init_status = '''mysql -uroot -pzstack.mysql.password -e "update zstack_mini.kv set value='Initialized' where name='init.status';"'''
         ssh.execute(update_init_status, mn_ip1, "root", "password", False, 22)
         test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
         #test_lib.lib_set_reserved_memory('1G')
