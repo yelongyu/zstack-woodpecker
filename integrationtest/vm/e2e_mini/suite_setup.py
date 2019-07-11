@@ -49,26 +49,6 @@ COPY_TO_REMOTE_BITS_PATH = "/localstorage/copytoremote"
 
 test_stub = test_lib.lib_get_test_stub('mn_ha2')
 
-def add_ps_network_gateway_sys_tag():
-    '''
-    This function currently only support 1 NFS storage separation.
-    TODO:
-        Fix for multiple ps and other type of storage network separation support
-    '''
-
-    pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
-    if len(pss) > 1:
-        test_util.test_logger("add ps gateway skip for multiple ps case.")
-        return
-
-    ps = pss[0]
-    if ps.type == "NFS":
-        test_util.test_logger("add system tag: resourceUuid=%s tag=%s" %(ps.uuid, "primaryStorage::gateway::cidr::10.0.0.1/8"))
-        tag_ops.create_system_tag('PrimaryStorageVO', ps.uuid, "primaryStorage::gateway::cidr::10.0.0.1/8")
-    else:
-        test_util.test_logger("add ps gateway skip for not other ps type case.")
-
-    
 
 USER_PATH = os.path.expanduser('~')
 EXTRA_SUITE_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_suite_setup_config.sh' % USER_PATH
@@ -78,8 +58,23 @@ def test():
     if os.environ.get('ZSTACK_SIMULATOR') == "yes":
         os.system('pkill -f ./test_rest_server.py')
         process = subprocess.Popen("./test_rest_server.py", cwd=os.environ.get('woodpecker_root_path')+'/dailytest/', universal_newlines=True, preexec_fn=os.setsid)
+        if test_lib.scenario_config != None and test_lib.scenario_file != None and not os.path.exists(test_lib.scenario_file):
+            scenario_operations.deploy_scenario(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
+            test_util.test_skip('Suite Setup Success')
+        if test_lib.scenario_config != None and test_lib.scenario_destroy != None:
+            scenario_operations.destroy_scenario(test_lib.all_scenario_config, test_lib.scenario_destroy)
+    
         test_lib.setup_plan.execute_plan_without_deploy_test_agent()
-        deploy_operations.deploy_simulator_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
+    
+        if test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
+            mn_ips = deploy_operations.get_nodes_from_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
+            if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
+                os.system("bash %s '%s' %s" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ips,'disaster-recovery'))
+        elif os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
+            os.system("bash %s '' '%s'" % (EXTRA_SUITE_SETUP_SCRIPT,'disaster-recovery'))
+    
+        if os.environ.get('ZSTACK_SIMULATOR') == "yes":
+            deploy_operations.deploy_simulator_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
         deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
     
         agent_url = CP_PATH
