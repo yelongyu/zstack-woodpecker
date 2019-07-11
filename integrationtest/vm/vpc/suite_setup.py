@@ -64,10 +64,12 @@ def test():
     os.system('zstack-ctl stop')
     child2 = os.popen('zstack-ctl status | grep "MN status" | awk \'{print $3}\'')
     mn_status = child2.read()
-    if mn_status != 'Stopped':
+    if 'Stopped' not in mn_status:
         print 'mn status not stopped and its status is : %s' % mn_status
         time.sleep(50)
         os.system('zstack-ctl stop')
+    else:
+        print 'mn have been stopped'
     time.sleep(50)
     child1 = os.popen('ifconfig br_eth1 | grep 192.168 | awk \'{print $2}\'')
     management_ip = child1.read()
@@ -76,7 +78,7 @@ def test():
     time.sleep(50)
     child3 = os.popen('zstack-ctl status | grep "MN status" | awk \'{print $3}\'')
     mn_status = child3.read()
-    if mn_status != 'Running':
+    if 'Running' not in mn_status:
         os.system('zstack-ctl stop')
         time.sleep(50)
         os.system('zstack-ctl start')
