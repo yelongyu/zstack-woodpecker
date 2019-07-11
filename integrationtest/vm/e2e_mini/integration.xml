@@ -36,9 +36,10 @@
     <case timeout='1200' noparallel='True'>vm/test_set_boot_order.py</case>
     <case timeout='1200' noparallel='True'>vm/test_start_stop_reboot_vm.py</case>
     <case timeout='1200' noparallel='True'>vm/test_start_stop_reboot_vms_batch.py</case>
+    <case timeout='1200' noparallel='True'>vm/test_running_vm_backup_ops.py</case>
+    <case timeout='1200' noparallel='True'>vm/test_stopped_vm_backup_ops.py</case>
     <case timeout='1200' noparallel='True'>vm/test_upgrade_system_capacity.py</case>
     <case timeout='1200' noparallel='True'>vm/test_vm_ha_level.py</case>
-    <case timeout='1200' noparallel='True'>vm/test_vm_backup.py</case>
     <case timeout='1200' noparallel='True'>vm/test_vm_update_info.py</case>
     <case timeout='1200' noparallel='True'>vm/test_vm_attach_detach_volumes.py</case>
     <case timeout='1200' noparallel='True'>volume/test_create_volume_attached_vm.py</case>

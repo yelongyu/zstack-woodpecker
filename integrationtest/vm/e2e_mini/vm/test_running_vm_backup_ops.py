@@ -17,6 +17,7 @@ def test():
     vm_ops.vm_ops(vm_name, action='stop')
     vm_ops.restore_backup(vm_name, 'vm', backup_list[0])
     vm_ops.restore_backup(vm_name, 'vm', backup_list[1])
+    vm_ops.vm_ops(vm_name, 'start')
     vm_ops.delete_backup(vm_name, 'vm', backup_list)
     vm_ops.check_browser_console_log()
     test_util.test_pass('Test VM Create, Restore and Delete Backups Successful')
