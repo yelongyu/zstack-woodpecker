@@ -195,7 +195,10 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
             thread.start()
 
     if xmlobject.has_element(deployConfig, 'backupStorages.miniBackupStorage'):
-        vm_ip_list = get_vm_ip_from_scenariofile(scenarioFile)
+        if os.getenv('ZSTACK_SIMULATOR') == 'yes':
+            vm_ip_list = []
+        else:
+            vm_ip_list = get_vm_ip_from_scenariofile(scenarioFile)
         bs_uuid_list = []
         for bs in xmlobject.safe_list(deployConfig.backupStorages.miniBackupStorage):
             action = api_actions.AddImageStoreBackupStorageAction()
