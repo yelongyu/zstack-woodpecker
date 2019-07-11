@@ -65,14 +65,15 @@ def test():
     child1 = os.popen('ifconfig br_eth1 | grep 192.168 | awk \'{print $2}\'')
     management_ip = child1.read()
     os.system('zstack-ctl change_ip --ip %s'% management_ip)
-    os.system('zstack-ctl stop')
     os.system('zstack-ctl start')
-    time.sleep(5)
+    time.sleep(30)
     child2 = os.popen('zstack-ctl status | grep "MN status" | awk \'{print $3}\'')
     mn_status = child2.read()
     if mn_status != 'Running':
+        os.system('zstack-ctl stop')
         time.sleep(30)
         os.system('zstack-ctl start')
+        time.sleep(30)
     else:
         print 'mn have been running now'
     for host in hosts:
