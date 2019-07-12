@@ -7,8 +7,7 @@ import os
 import host
 
 host_ops = None
-host_ip, _ = host.get_mn_ip()
-host_name = 'cluster1/' + host_ip
+host_name = None
 host_new_name = 'host-rename'
 
 def test():
@@ -16,6 +15,11 @@ def test():
     global host_name
     global host_new_name
     host_ops = host.HOST()
+    if os.getenv("ZSTACK_SIMULATOR") == "yes":
+        host_name = 'cluster1/' + os.getenv("hostIp")
+    else:
+        host_ip, _ = host.get_mn_ip()
+        host_name = 'cluster1/' + host_ip
     host_ops.update_info(res_type='host', res_name=host_name, new_name=host_new_name, new_dsc='test dsc')
     host_ops.check_browser_console_log()
     test_util.test_pass('Test Host Update Info Successful')

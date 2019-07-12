@@ -20,7 +20,7 @@ class IMAGE(MINI):
     def add_image(self, name=None, dsc=None, adding_type='url', url=None, local_file=None, platform='Linux', view='card'):
         self.image_name = name if name else 'image-' + get_time_postfix()
         self.image_list.append(self.image_name)
-        url = url if url else os.getenv('imageUrl_net')
+        url = url if url else 'http://fake_image.qcow2'
         test_util.test_logger('Add Image [%s]' % self.image_name)
         priority_dict = {'type': adding_type}
         image_dict = {'name': self.image_name,

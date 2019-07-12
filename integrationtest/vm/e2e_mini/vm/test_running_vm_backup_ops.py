@@ -20,7 +20,7 @@ def test():
     vm_ops.vm_ops(vm_name, 'start')
     vm_ops.delete_backup(vm_name, 'vm', backup_list)
     vm_ops.check_browser_console_log()
-    test_util.test_pass('Test VM Create, Restore and Delete Backups Successful')
+    test_util.test_pass('Test Running VM Create, Restore and Delete Backups Successful')
 
 
 def env_recover():

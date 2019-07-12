@@ -6,15 +6,22 @@ import os
 import host
 
 host_ops = None
-host_ip1, host_ip2 = host.get_mn_ip()
-host1 = 'cluster1/' + host_ip1
-host2 = 'cluster1/' + host_ip2
+host1 = None
+host2 = None
+
 
 def test():
     global host_ops
     global host1
     global host2
     host_ops = host.HOST()
+    if os.getenv("ZSTACK_SIMULATOR") == "yes":
+        host1 = 'cluster1/' + os.getenv('hostIp')
+        host2 = 'cluster1/' + os.getenv('hostIp2')
+    else:
+        host_ip1, host_ip2 = host.get_mn_ip()
+        host1 = 'cluster1/' + host_ip1
+        host2 = 'cluster1/' + host_ip2
     ops_list = ['disable', 'enable', 'reconnect', 'maintenance']
     for ops in ops_list:
         host_ops.host_ops(host1, action=ops)

@@ -92,10 +92,10 @@ class NETWORK(MINI):
 
     def add_network_segment(self, network=None, start_ip=None, end_ip=None, netmask=None, gateway=None, details_page=True, end_action='confirm'):
         network = network if network else os.getenv('l3VlanNetworkName1')
-        start_ip = start_ip if start_ip else os.getenv('noVlanIpRangeStart1')
-        end_ip = end_ip if end_ip else os.getenv('noVlanIpRangeEnd1')
-        netmask = netmask if netmask else os.getenv('noVlanIpRangeNetmask1')
-        gateway = gateway if gateway else os.getenv('noVlanIpRangeGateway1')
+        start_ip = start_ip if start_ip else os.getenv('vlanIpRangeStart1')
+        end_ip = end_ip if end_ip else os.getenv('vlanIpRangeEnd1')
+        netmask = netmask if netmask else os.getenv('vlanIpRangeNetmask1')
+        gateway = gateway if gateway else os.getenv('vlanIpRangeGateway1')
         test_util.test_logger('Add network segment [%s] to [%s]' % (start_ip, end_ip))
         net_segment_dict = {'startIp': start_ip,
                             'endIp': end_ip,
@@ -122,8 +122,8 @@ class NETWORK(MINI):
 
     def del_network_segment(self, network=None, start_ip=None, end_ip=None):
         network = network if network else os.getenv('l3VlanNetworkName1')
-        start_ip = start_ip if start_ip else os.getenv('noVlanIpRangeStart1')
-        end_ip = end_ip if end_ip else os.getenv('noVlanIpRangeEnd1')
+        start_ip = start_ip if start_ip else os.getenv('vlanIpRangeStart1')
+        end_ip = end_ip if end_ip else os.getenv('vlanIpRangeEnd1')
         test_util.test_logger('Delete network segment [%s] to [%s]' % (start_ip, end_ip))
         self.navigate('network')
         self.enter_details_page('network', network)

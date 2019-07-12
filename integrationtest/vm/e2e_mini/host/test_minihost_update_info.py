@@ -9,6 +9,8 @@ minihost_name = 'cluster1'
 minihost_new_name = 'cluster-rename'
 
 def test():
+    if os.getenv('ZSTACK_SIMULATOR') == "yes":
+        test_util.test_skip("Simulator env don't support to enter minihost details page")
     global host_ops
     global minihost_name
     global minihost_new_name

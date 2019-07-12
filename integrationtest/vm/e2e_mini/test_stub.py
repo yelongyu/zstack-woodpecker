@@ -11,6 +11,7 @@ import re
 import time
 import types
 import random
+import socket
 import xml.dom.minidom as minidom
 from os.path import join
 from zstackwoodpecker.e2e_lib import E2E
@@ -57,6 +58,15 @@ VIEWDICT = {'card': 1, 'list': 2}
 
 
 def get_mn_ip():
+    if os.getenv('ZSTACK_SIMULATOR') == "yes":
+        # Just get the local ip
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(('8.8.8.8', 80))
+            ip = s.getsockname()[0]
+        finally:
+            s.close()
+        return str(ip), ""
     dom_path = '/'.join(os.getcwd().split('/')[:3]) + "/scenario-file.xml"
     dom = minidom.parse(dom_path)
     root = dom.documentElement
@@ -308,11 +318,11 @@ class MINI(E2E):
                 for elem in self.get_elements(FORMEXPLAIN):
                     test_util.test_logger('Error:' + elem.text.encode('utf-8'))
                 test_util.test_fail('Create Error: check the previous error message')
-        self.switch_view(view)
         if not self.wait_for_element(OPS_SUCCESS, timeout=300):
             test_util.test_fail("Fail: Operation Failed!")
         if self.wait_for_element(MESSAGETOAST):
             self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
+        self.switch_view(view)
         elem = self.get_res_element(para_dict['name'])
         return elem
 
@@ -357,13 +367,16 @@ class MINI(E2E):
         self.click_ok()
         if details_page:
             self.navigate(res_type)
-        self.switch_tab(u'已删除')
+        if res_type not in ['network', 'eip']:
+            self.switch_tab(u'已删除')
         if isExpunge:
             self.check_res_item(res_list, target='notDisplayed')
             return True
         if res_type not in ['network', 'eip']:
             # check deleted
             self.check_res_item(res_list)
+        else:
+            self.check_res_item(res_list, target='notDisplayed')
         if expunge:
             self.delete(res_list, res_type, view=view, expunge=True, details_page=details_page)
 
