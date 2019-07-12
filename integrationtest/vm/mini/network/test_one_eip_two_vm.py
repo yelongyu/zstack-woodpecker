@@ -53,7 +53,8 @@ def test():
     # create two vm
     test_util.test_dsc('start to create vm1, vm2')
     cluster_uuid = res_ops.query_resource(res_ops.CLUSTER)[0].uuid
-    image_uuid = res_ops.query_resource(res_ops.IMAGE)[0].uuid
+    cond = res_ops.gen_query_conditions('format', '!=', 'iso')
+    image_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
 
     vm_option = test_util.VmOption()
     vm_option.set_name('vm_for_one_eip')
