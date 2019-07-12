@@ -101,5 +101,6 @@ def test():
     time.sleep(50)
     os.system('zstack-ctl start')
     time.sleep(50)
+    os.system('zstack-ctl start')
     test_util.test_pass('Suite Setup Success')
 
