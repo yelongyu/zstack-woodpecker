@@ -2628,3 +2628,17 @@ def get_security_code(secret):
     if status != 0:
         test_util.test_fail("Run command %s failed" %cmd)
     return output[-6:]
+
+def check_elaboration_properties():
+    cmd = "cat /usr/local/zstacktest/apache-tomcat/webapps/zstack/WEB-INF/classes/zstack.properties|grep '^enableElaboration.*false$'"
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    check_result = test_lib.lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd)
+    if check_result:
+        cmd = "sed -i '/enableElaboration/d' /usr/local/zstacktest/apache-tomcat/webapps/zstack/WEB-INF/classes/zstack.properties"
+        if test_lib.lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd) is not False:
+            cmd = "zstack-ctl restart_node"
+            test_lib.lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd)
+        else:
+            test_util.test_fail("enable elaboration failed")
+    else:
+        test_util.test_logger("enable elaboration success")
