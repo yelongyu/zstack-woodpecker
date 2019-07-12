@@ -74,6 +74,8 @@ def test():
     child1 = os.popen('ifconfig br_eth1 | grep 192.168 | awk \'{print $2}\'')
     management_ip = child1.read()
     os.system('zstack-ctl change_ip --ip %s'% management_ip)
+    time.sleep(50)
+    os.system('rm -rf /tmp/hsperfdata_*')
     os.system('zstack-ctl start')
     time.sleep(50)
     child3 = os.popen('zstack-ctl status | grep "MN status" | awk \'{print $3}\'')
