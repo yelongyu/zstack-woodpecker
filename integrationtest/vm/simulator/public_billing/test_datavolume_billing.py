@@ -22,6 +22,7 @@ vm = None
 count = 400
 
 def test():
+	test_stub.update_billing_symbol()
 	test_util.test_logger("start data volume billing")
 	test_util.test_logger("create many data volume  billing instantiation")
 	bill_datavolume = test_stub.DataVolumeBilling()

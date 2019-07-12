@@ -204,7 +204,7 @@ class Vm(Resource):
             all_volumes.change_state(volume, ATTACHED, DETACHED)
             volume.state = DETACHED
             volume.vm = None
-            self.volumes.remove(volume)
+        self.volumes = []
         return "[TestAction.destroy_vm, %s]" % self.name
 
     def expunge(self):
@@ -237,6 +237,12 @@ class Vm(Resource):
     def create(self, tags=None):
         all_vms.add(self, RUNNING)
         self.state = RUNNING
+        if tags and "'data_volume=true'" in tags:
+            volume = Volume("'auto-volume" + str(all_vms.len + 1) + "'")
+            self.volumes.append(volume)
+            volume.vm = self
+            all_volumes.add(volume, ATTACHED)
+            volume.state = ATTACHED
         if MINI:
             return "[TestAction.create_mini_vm, %s, %s]" % (self.name, ", ".join(tags))
         return "[TestAction.create_vm, %s, %s]" % (self.name, ", ".join(tags))

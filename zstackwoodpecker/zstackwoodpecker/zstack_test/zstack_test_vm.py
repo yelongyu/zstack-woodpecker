@@ -88,7 +88,7 @@ class ZstackTestVm(vm_header.TestVm):
     def stop(self, session_uuid = None):
         self.vm = vm_ops.stop_vm(self.vm.uuid, None, session_uuid)
         super(ZstackTestVm, self).stop()
-        if ha_ops.get_vm_instance_ha_level(self.vm.uuid):
+        if ha_ops.get_vm_instance_ha_level(self.vm.uuid) and test_lib.lib_get_ha_enable() == "true":
             status = self.vm.state
             while status != 'Running':
                 vm_inv = test_lib.lib_get_vm_by_uuid(self.vm.uuid)

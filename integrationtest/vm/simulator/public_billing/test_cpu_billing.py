@@ -21,6 +21,7 @@ vm = None
 count = 400
 
 def test():
+	test_stub.update_billing_symbol()
 	test_util.test_logger("start cpu billing")
 	test_util.test_logger("create man cpu billing instantiation")
 	bill_cpu = test_stub.CpuBilling()

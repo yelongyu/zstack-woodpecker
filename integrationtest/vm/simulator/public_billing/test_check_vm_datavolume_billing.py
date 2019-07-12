@@ -24,6 +24,7 @@ time_unit_dict=['s','m','h','d','w','mon']
 resource_unit_dict={"M":1024 * float(1024), "G":1024**2 * float(1024), "T":1024**3 * float(1024)}
 
 def test():
+	test_stub.update_billing_symbol()
 	success_round = 0
 	for i in range(0,10):
 		test_util.test_logger("clear data in DataVolumeUsageVO and PriceVO")

@@ -21,6 +21,7 @@ vm = None
 count = 400
 
 def test():
+	test_stub.update_billing_symbol()
 	test_util.test_logger("start memory billing")
 	test_util.test_logger("create man memory billing instantiation")
 	bill_memory = test_stub.MemoryBilling()
