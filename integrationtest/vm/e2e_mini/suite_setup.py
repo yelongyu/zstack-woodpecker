@@ -918,7 +918,7 @@ def test():
         deploy_operations.install_mini_server()
         update_init_status = '''mysql -uroot -pzstack.mysql.password -e "update zstack_mini.kv set value='Initialized' where name='init.status';"'''
         os.system(update_init_status)
-        os.system('zstack-ctl restart_node')
+        os.system('zstack-ctl stop_node; zstack-ctl start_node')
     else:
         if test_lib.scenario_config == None or test_lib.scenario_file ==None:
             test_util.test_fail('Suite Setup Fail without scenario')
