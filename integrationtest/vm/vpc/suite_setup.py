@@ -97,5 +97,9 @@ def test():
 #        test_lib.lib_set_ha_selffencer_maxattempts('60')
 #	test_lib.lib_set_ha_selffencer_storagechecker_timeout('60')
     test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
+    os.system('zstack-ctl stop')
+    time.sleep(50)
+    os.system('zstack-ctl start')
+    time.sleep(50)
     test_util.test_pass('Suite Setup Success')
 
