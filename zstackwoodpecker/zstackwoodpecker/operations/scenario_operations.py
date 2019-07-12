@@ -2118,6 +2118,22 @@ def detach_volume(http_server_ip, volume_uuid, vm_uuid=None, session_uuid=None):
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     return evt.inventory
 
+def delete_volume(http_server_ip, volume_uuid, session_uuid=None):
+    action = api_actions.DeleteDataVolumeAction()
+    action.uuid = volume_uuid
+    action.timeout = 240000
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    test_util.action_logger('Delete Volume [uuid:] %s' % volume_uuid)
+    return evt.inventory
+
+def expunge_volume(http_server_ip, volume_uuid, session_uuid=None):
+    action = api_actions.ExpungeDataVolumeAction()
+    action.uuid = volume_uuid
+    action.timeout = 240000
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    test_util.action_logger('Expunge Volume [uuid:] %s' % volume_uuid)
+    return evt
+
 def attach_l3(http_server_ip, l3_uuid, vm_uuid, session_uuid = None):
     action = api_actions.AttachL3NetworkToVmAction()
     action.l3NetworkUuid = l3_uuid
@@ -2279,6 +2295,24 @@ def add_dns_to_l3(http_server_ip, l3_uuid, dns, session_uuid=None):
     action.l3NetworkUuid = l3_uuid
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     return evt
+
+def create_volume_from_template(http_server_ip, image_uuid, ps_uuid, name = None, \
+        host_uuid = None, systemtags = None, session_uuid = None):
+    action = api_actions.CreateDataVolumeFromVolumeTemplateAction()
+    action.imageUuid = image_uuid
+    action.primaryStorageUuid = ps_uuid
+    action.systemTags = systemtags
+    if name:
+        action.name = name
+    else:
+        action.name = 'new volume from template %s' % image_uuid
+
+    if host_uuid:
+        action.hostUuid = host_uuid
+
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    test_util.test_logger('[Volume:] %s is created from [Volume Template:] %s on [Primary Storage:] %s.' % (evt.inventory.uuid, image_uuid, ps_uuid))
+    return evt.inventory
 
 def add_ip_range(http_server_ip, name, l3_uuid, start_ip, end_ip, gateway, netmask, session_uuid=None):
     action = api_actions.AddIpRangeAction()
