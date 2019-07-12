@@ -840,9 +840,9 @@ class use_vm_backup(Action):
                         return vm, backup
             else:
                 vm = random.choice(all_vms.stopped)
-                self.path.append(vm.stop)
+                self.path.append(vm.start())
                 self.path.append(vm.create_vm_backup())
-                self.path.append(vm.start)
+                self.path.append(vm.stop())
                 return vm, vm.backups[0]
         self.restart = True
         vm_list = all_vms.get_not_ha_resource()
@@ -1048,10 +1048,10 @@ class delete_volume_backup(Action):
             self.volume = random.choice(volume_list)
             if self.volume.state == resource.DELETED:
                 self.path.append(self.volume.recover())
-            elif self.volume.state == resource.ATTACHED and self.volume.vm.state == resource.STOPPED:
+            if self.volume.state == resource.ATTACHED and self.volume.vm.state == resource.STOPPED:
                 self.restop = True
                 self.path.append(self.volume.vm.start())
-            elif self.volume.state == resource.DETACHED:
+            if self.volume.state == resource.DETACHED:
                 self.vm = random.choice(resource.all_vms.running * 3 + resource.all_vms.stopped)
                 self.redetach = True
                 self.path.append(self.volume.attach(self.vm))
@@ -1081,6 +1081,7 @@ class use_volume_backup(Action):
         self.restart = False
         self.redetach = False
         self.restop = False
+        self.reha = False
 
     def check(self, all_volumes, tags):
         Action.check(self, all_volumes, tags)
@@ -1106,9 +1107,13 @@ class use_volume_backup(Action):
                         self.path.append(self.volume.attach(self.vm))
                     if self.volume.state == resource.ATTACHED and self.volume.vm.state == resource.RUNNING:
                         self.restart = True
+                        if self.volume.vm.haveHA:
+                            self.reha = True
+                            self.path.append(self.volume.vm.change_ha())
                         self.path.append(self.volume.vm.stop())
                     return self.volume, backup
         else:
+            self.restart = True
             self.volume = random.choice(volume_list)
             if self.volume.state == resource.DELETED:
                 self.path.append(self.volume.recover())
@@ -1117,17 +1122,21 @@ class use_volume_backup(Action):
                 self.vm = random.choice(resource.all_vms.running * 3 + resource.all_vms.stopped)
                 self.path.append(self.volume.attach(self.vm))
             if self.volume.state == resource.ATTACHED and self.volume.vm.state == resource.STOPPED:
-                self.restop = True
+                self.restart = False
                 self.path.append(self.volume.vm.start())
             self.path.append(self.volume.create_volume_backup())
-            if self.restop:
-                self.path.append(self.volume.vm.stop())
+            if self.volume.vm.haveHA:
+                self.reha = True
+                self.path.append(self.volume.vm.change_ha())
+            self.path.append(self.volume.vm.stop())
             return self.volume, self.volume.backups[-1]
 
     def run(self, tags):
         Action.run(self, tags)
         volume, backup = self.check(resource.all_volumes, tags)
         self.path.append(volume.use_volume_backup(backup))
+        if self.reha:
+            self.path.append(volume.vm.change_ha())
         if self.restart:
             self.path.append(volume.vm.start())
         if self.redetach:

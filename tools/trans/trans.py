@@ -61,18 +61,16 @@ def write_to_file(action_path, name):
     py_path = parse(_parse(action_path))
     all_resources = resource.all_vms + resource.all_volumes + resource.all_snapshots + resource.all_backups + resource.all_images
     with open(name, "w") as f:
-        try:
-            f.write(HEAD)
-            for i in py_path:
-                f.write("\t\t")
-                f.write(i)
-                f.write(",\n")
-            f.write(TAIL)
-            f.write("\n\n\n\n'''\nThe final status:\n")
-            f.write(str(all_resources))
-            f.write("\n'''")
-        except Exception as e:
-            print e
+        f.write(HEAD)
+        for i in py_path:
+            f.write("\t\t")
+            f.write(i)
+            f.write(",\n")
+        f.write(TAIL)
+        f.write("\n\n\n\n'''\nThe final status:\n")
+        f.write(str(all_resources))
+        f.write("\n'''")
+
 
 
 
