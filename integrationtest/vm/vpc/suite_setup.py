@@ -18,6 +18,7 @@ import zstackwoodpecker.operations.config_operations as config_operations
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.config_operations as conf_ops
+import zstacklib.utils.ssh as ssh
 
 USER_PATH = os.path.expanduser('~')
 EXTRA_SUITE_SETUP_SCRIPT = '%s/.zstackwoodpecker/extra_suite_setup_config.sh' % USER_PATH
@@ -60,16 +61,27 @@ def test():
     if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
     deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
-#    time.sleep(60)
-#    os.system('zstack-ctl stop')
-#    child2 = os.popen('zstack-ctl status | grep "MN status" | awk \'{print $3}\'')
-#    mn_status = child2.read()
-#    if 'Stopped' not in mn_status:
-#        print 'mn status not stopped and its status is : %s' % mn_status
-#        time.sleep(50)
-#        os.system('zstack-ctl stop')
-#    else:
-#        print 'mn have been stopped'
+    child1 = os.popen('ifconfig br_eth0 | grep 172 | awk \'{print $2}\'')
+    pub_ip = child1.read()
+    child2 = os.popen('ifconfig br_eth1 | grep 192.168 | awk \'{print $2}\'')
+    management_ip = child2.read()
+    cmd = 'zstack-ctl change_ip --ip=%s --mysql_root_password=%s' % (management_ip, os.environ.get('DBAdminPassword'))
+    ssh.execute(cmd, pub_ip, 'root', 'password')
+    time.sleep(10)
+    ssh.execute('zstack-ctl stop', pub_ip, 'root', 'password')
+    time.sleep(10)
+    ssh.execute('zstack-ctl start', pub_ip, 'root', 'password')
+    time.sleep(10)
+    child3 = os.popen('zstack-ctl status | grep "MN status" | awk \'{print $3}\'')
+    mn_status = child3.read()
+    if 'Running' not in mn_status:
+        print 'mn status not stopped and its status is : %s' % mn_status
+        time.sleep(50)
+        ssh.execute('zstack-ctl stop', pub_ip, 'root', 'password')
+        time.sleep(50)
+        ssh.execute('zstack-ctl start', pub_ip, 'root', 'password')
+    else:
+        print 'mn have been Running'
 #    time.sleep(50)
 #    child1 = os.popen('ifconfig br_eth1 | grep 192.168 | awk \'{print $2}\'')
 #    management_ip = child1.read()
