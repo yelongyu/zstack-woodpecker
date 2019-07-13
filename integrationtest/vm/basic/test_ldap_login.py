@@ -20,7 +20,7 @@ def test():
     global new_account_uuid
 
     system_tag = ["ldapUseAsLoginName::uid"]
-    ldap_server = ldp_ops.add_ldap_server('ldap1', 'ldap for test', os.environ.get('ldapServerUrl'), os.environ.get('ldapServerBase'), os.environ.get('ldapServerUsername'), os.environ.get('ldapServerPassword'), systemtags=system_tag)
+    ldap_server = ldp_ops.add_ldap_server('ldap1', 'ldap for test', os.environ.get('ldapServerUrl'), os.environ.get('ldapServerBase'), os.environ.get('ldapServerUsername'), os.environ.get('ldapServerPassword'), 'account', systemtags=system_tag)
     ldap_server_uuid = ldap_server.inventory.uuid
     conditions = res_ops.gen_query_conditions('type', '=', 'SystemAdmin')
     account = res_ops.query_resource(res_ops.ACCOUNT, conditions)[0]

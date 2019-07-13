@@ -20,7 +20,7 @@ def test():
     global new_account_uuid
 
     system_tag = ["ldapUseAsLoginName::uid"]
-    ldap_server = ldp_ops.add_ldap_server('ldap1', 'ldap for test', os.environ.get('ldapServerUrl'), os.environ.get('ldapServerBase'), os.environ.get('ldapServerUsername'), os.environ.get('ldapServerPassword'), 'TLS', systemtags=system_tag)
+    ldap_server = ldp_ops.add_ldap_server('ldap1', 'ldap for test', os.environ.get('ldapServerUrl'), os.environ.get('ldapServerBase'), os.environ.get('ldapServerUsername'), os.environ.get('ldapServerPassword'), 'account', 'TLS', systemtags=system_tag)
     ldap_server_uuid = ldap_server.inventory.uuid
     conditions = res_ops.gen_query_conditions('type', '=', 'SystemAdmin')
     account = res_ops.query_resource(res_ops.ACCOUNT, conditions)[0]
@@ -32,6 +32,7 @@ def test():
     session_uuid = acc_ops.login_by_ldap(os.environ.get('ldapUid'), os.environ.get('ldapPassword'))
     acc_ops.logout(session_uuid)
 
+    global get_expected_exception
     get_expected_exception = False
     try:
         session_uuid = acc_ops.login_by_ldap(os.environ.get('ldapUid'), os.environ.get('ldapPassword')+'1')
