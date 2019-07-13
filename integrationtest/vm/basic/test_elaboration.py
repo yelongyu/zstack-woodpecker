@@ -7,7 +7,7 @@ New Integration Test for error code elaboration
 
 import zstackwoodpecker.test_util as test_util
 import test_stub
-import zstackwoodpecker.operations.errorcode_opeartions as err_ops
+import zstackwoodpecker.operations.errorcode_operations as err_ops
 import os
 
 def check(results):
