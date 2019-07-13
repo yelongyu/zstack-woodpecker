@@ -55,7 +55,7 @@ def create_vm(name, image_uuid, host_uuid, instance_offering_uuid, l3_uuid, sess
     return vm
 
 def test():
-    test_stub.update_billing_symbol()
+    # test_stub.update_billing_symbol()
     cond = res_ops.gen_query_conditions('system', '=',  'false')
     imageUuid = res_ops.query_resource_fields(res_ops.IMAGE, cond)[0].uuid
     cond = res_ops.gen_query_conditions('type', '=',  'UserVm')

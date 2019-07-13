@@ -22,7 +22,7 @@ test_obj_dict = test_state.TestStateDict()
 vm = None
 
 def test():
-	test_stub.update_billing_symbol()
+	# test_stub.update_billing_symbol()
 	test_util.test_logger("start check vm lifecycle")
 	
 	test_util.test_logger("create root volume billing")

@@ -21,7 +21,7 @@ vm = None
 count = 400
 
 def test():
-	test_stub.update_billing_symbol()
+	# test_stub.update_billing_symbol()
 	test_util.test_logger("start root volume billing")
 	test_util.test_logger("create many root volume  billing instantiation")
 	bill_rootvolume = test_stub.RootVolumeBilling()
