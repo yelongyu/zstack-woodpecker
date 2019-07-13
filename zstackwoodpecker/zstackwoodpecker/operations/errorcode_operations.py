@@ -16,9 +16,6 @@ def get_elaborations(category = None, regex = None, systemtags = None, session_u
     action.category = category
     action.regex = regex
     action.systemTags = systemtags
-    if category == None and regex == None:
-        test_util.action_logger("'regex' or 'category' must be set")
-        os.exit(0) 
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.test_logger('[Get Elaborations:] %s %s succeed.' % (category, regex))
     return evt.contents
