@@ -38,8 +38,6 @@ def error_cleanup():
     global vm_ops
     global image_ops
     try:
-        vm_ops.expunge_vm()
-        image_ops.expunge_image()
         vm_ops.close()
     except:
         pass

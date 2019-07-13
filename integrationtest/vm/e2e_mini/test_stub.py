@@ -228,11 +228,17 @@ class MINI(E2E):
         if not_check:
             time.sleep(1)
             return
+        self.wait_for_element(MESSAGETOAST)
         if assure_success:
-            if not self.wait_for_element(OPS_SUCCESS, timeout=300):
-                test_util.test_fail("Fail: Operation Failed!")
-        if self.wait_for_element(MESSAGETOAST):
-            self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
+            if self.wait_for_element(OPS_ONGOING, timeout=300, target='disappear'):
+                while 1:
+                    if self.get_elements(OPS_FAIL):
+                        test_util.test_fail("Fail: Operation Failed!")
+                    elif self.get_elements(OPS_SUCCESS):
+                        break
+            else:
+                test_util.test_fail("Fail: Operation Timeout!")
+        self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
         time.sleep(1)
 
     def click_cancel(self):
@@ -283,6 +289,7 @@ class MINI(E2E):
         test_util.test_logger('Cancel create operation of %s' % res_type)
         self.navigate(res_type)
         self.get_elements(PRIMARYBTN)[-1].click()
+        time.sleep(1)
         if close:
             self.click_close()
         else:
@@ -318,10 +325,16 @@ class MINI(E2E):
                 for elem in self.get_elements(FORMEXPLAIN):
                     test_util.test_logger('Error:' + elem.text.encode('utf-8'))
                 test_util.test_fail('Create Error: check the previous error message')
-        if not self.wait_for_element(OPS_SUCCESS, timeout=300):
-            test_util.test_fail("Fail: Operation Failed!")
-        if self.wait_for_element(MESSAGETOAST):
-            self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
+        self.wait_for_element(MESSAGETOAST)
+        if self.wait_for_element(OPS_ONGOING, timeout=300, target='disappear'):
+            while 1:
+                if self.get_elements(OPS_FAIL):
+                    test_util.test_fail("Fail: Operation Failed!")
+                elif self.get_elements(OPS_SUCCESS):
+                    break
+        else:
+            test_util.test_fail("Fail: Operation Timeout!")
+        self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
         self.switch_view(view)
         elem = self.get_res_element(para_dict['name'])
         return elem

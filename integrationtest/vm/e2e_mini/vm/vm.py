@@ -45,11 +45,10 @@ class VM(MINI):
         checker.vm_check(vm_inv, check_list, ops='new_created')
         if data_size:
             test_util.test_logger('Create Volume [%s]' % self.volume_name)
-            self.volume_name = 'Disk-' + self.vm_name
-            self.volume_list.append(self.volume_name)
-            volume_check_list = [self.volume_name, data_size, self.vm_name]
+            volume_name = 'Disk-' + self.vm_name
+            volume_check_list = [volume_name, data_size, self.vm_name]
             self.navigate('volume')
-            elem = self.get_res_element(self.volume_name)
+            elem = self.get_res_element(volume_name)
             checker = MINICHECKER(self, elem)
             checker.volume_check(volume_check_list, ops='attached')
 
