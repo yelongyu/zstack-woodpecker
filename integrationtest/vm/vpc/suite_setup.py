@@ -10,6 +10,7 @@ import zstacklib.utils.linux as linux
 import zstacklib.utils.http as  http
 import zstacktestagent.plugins.host as host_plugin
 import zstacktestagent.testagent as testagent
+import time
 
 import zstackwoodpecker.operations.scenario_operations as scenario_operations
 import zstackwoodpecker.operations.deploy_operations as deploy_operations
@@ -59,6 +60,33 @@ def test():
     if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
     deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
+#    time.sleep(60)
+#    os.system('zstack-ctl stop')
+#    child2 = os.popen('zstack-ctl status | grep "MN status" | awk \'{print $3}\'')
+#    mn_status = child2.read()
+#    if 'Stopped' not in mn_status:
+#        print 'mn status not stopped and its status is : %s' % mn_status
+#        time.sleep(50)
+#        os.system('zstack-ctl stop')
+#    else:
+#        print 'mn have been stopped'
+#    time.sleep(50)
+#    child1 = os.popen('ifconfig br_eth1 | grep 192.168 | awk \'{print $2}\'')
+#    management_ip = child1.read()
+#    os.system('zstack-ctl change_ip --ip %s'% management_ip)
+#    time.sleep(50)
+#    os.system('rm -rf /tmp/hsperfdata_*')
+#    os.system('zstack-ctl start')
+#    time.sleep(50)
+#    child3 = os.popen('zstack-ctl status | grep "MN status" | awk \'{print $3}\'')
+#    mn_status = child3.read()
+#    if 'Running' not in mn_status:
+#        os.system('zstack-ctl stop')
+#        time.sleep(50)
+#        os.system('zstack-ctl start')
+#        time.sleep(50)
+#    else:
+#        print 'mn have been running now'
     for host in hosts:
         os.system("bash %s %s" % (EXTRA_HOST_SETUP_SCRIPT, host.managementIp_))
 

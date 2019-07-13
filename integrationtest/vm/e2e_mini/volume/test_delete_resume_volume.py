@@ -2,46 +2,45 @@
 
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
+import volume
 
-test_stub = test_lib.lib_get_test_stub()
-
-mini = None
-volume_name = 'volume-' + test_stub.get_time_postfix()
+volume_ops = None
+volume_name = 'volume-' + volume.get_time_postfix()
 
 def test():
-    global mini
-    mini = test_stub.MINI()
-    mini.create_volume(name=volume_name)
+    global volume_ops
+    volume_ops = volume.VOLUME()
+    volume_ops.create_volume(name=volume_name)
 
     for view in ['card', 'list']:
         # Delete button
-        mini.delete_volume(volume_name, view=view)
+        volume_ops.delete_volume(volume_name, view=view)
         # Resume button
-        mini.resume(volume_name, 'volume', view=view)
+        volume_ops.resume(volume_name, 'volume', view=view)
 
         # Delete via more operation
-        mini.delete_volume(volume_name, view=view, corner_btn=False)
+        volume_ops.delete_volume(volume_name, view=view, corner_btn=False)
         # Resume by more ops
-        mini.resume(volume_name, 'volume', view=view, details_page=True)
+        volume_ops.resume(volume_name, 'volume', view=view, details_page=True)
 
         # Delete via more operation in details page
-        mini.delete_volume(volume_name, view=view, corner_btn=False, details_page=True)
+        volume_ops.delete_volume(volume_name, view=view, corner_btn=False, details_page=True)
         # Resume button
-        mini.resume(volume_name, 'volume', view=view)
-    mini.check_browser_console_log()
+        volume_ops.resume(volume_name, 'volume', view=view)
+    volume_ops.check_browser_console_log()
     test_util.test_pass('Delete Resume Volume Test Successful')
 
 
 def env_recover():
-    global mini
-    mini.expunge_volume(volume_name)
-    mini.close()
+    global volume_ops
+    volume_ops.expunge_volume(volume_name)
+    volume_ops.close()
 
 #Will be called only if exception happens in test().
 def error_cleanup():
-    global mini
+    global volume_ops
     try:
-        mini.expunge_volume(volume_name)
-        mini.close()
+        volume_ops.expunge_volume(volume_name)
+        volume_ops.close()
     except:
         pass

@@ -87,9 +87,10 @@ def test():
         test_util.test_skip('Required smp ps to test')
     ps_uuid = pss[0].uuid
 
-#    vm = test_stub.create_vm(image_uuid=image_uuid, ps_uuid=ps_uuid)
-#    vm.destroy()
-#    vm.expunge()
+    if flavor['agent_url'] != DOWNLOAD_IMAGE:
+        vm = test_stub.create_vm(image_uuid=image_uuid, ps_uuid=ps_uuid)
+        vm.destroy()
+        vm.expunge()
 
     if agent_url != None:
         deploy_operations.deploy_simulator_agent_script(agent_url, script)

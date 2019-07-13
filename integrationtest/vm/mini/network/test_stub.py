@@ -37,7 +37,8 @@ import itertools
 def create_vm(vm_name, l3_uuids, host_uuid = None, disk_offering_uuids=None):
     vm_creation_option = test_util.VmOption()
     cluster_uuid = res_ops.query_resource(res_ops.CLUSTER)[0].uuid
-    image_uuid = res_ops.query_resource(res_ops.IMAGE)[0].uuid
+    cond = res_ops.gen_query_conditions('format', '!=', 'iso')
+    image_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
 
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
@@ -90,3 +91,8 @@ def create_eip(eip_name=None, vip_uuid=None, vnic_uuid=None, vm_obj=None, sessio
         test_util.test_fail('vm_obj can not be None in create_eip() API, when setting vm_nic_uuid.')
     eip.create(vm_obj)
     return eip
+
+def run_command_in_vm(vm_inv, command):
+    managerip = test_lib.lib_find_host_by_vm(vm_inv).managementIp
+    vm_ip = vm_inv.vmNics[0].ip
+    return test_lib.lib_ssh_vm_cmd_by_agent(managerip, vm_ip, 'root', 'password', command)

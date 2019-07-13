@@ -128,7 +128,10 @@ def test():
     vm_ops.start_vm(vm_uuid, session_uuid=project_login_uuid)
     candidate_hosts = vm_ops.get_vm_migration_candidate_hosts(vm_uuid)
     if candidate_hosts != None and test_lib.lib_check_vm_live_migration_cap(vm.get_vm()):
-        vm_ops.migrate_vm(vm_uuid, candidate_hosts.inventories[0].uuid, session_uuid=project_login_uuid)
+        try:
+            vm_ops.migrate_vm(vm_uuid, candidate_hosts.inventories[0].uuid, session_uuid=project_login_uuid)
+        except:
+            vm_ops.migrate_vm(vm_uuid, candidate_hosts[0].uuid, session_uuid=project_login_uuid)
     vm_ops.stop_vm(vm_uuid, force='cold', session_uuid=project_login_uuid)
     vm_ops.start_vm(vm_uuid, session_uuid=project_login_uuid)
     vm_ops.suspend_vm(vm_uuid, session_uuid=project_login_uuid)

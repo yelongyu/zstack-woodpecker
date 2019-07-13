@@ -12,9 +12,11 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.volume_operations as vol_ops
+import zstackwoodpecker.operations.scenario_operations as sce_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstacklib.utils.ssh as ssh
 
+zstack_management_ip = os.environ.get('zstackManagementIp')
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
@@ -28,7 +30,7 @@ def test():
     data_image_name = os.environ.get('data_volume_template')
 
     conditions = res_ops.gen_query_conditions('name', '=', data_image_name)
-    data_image_uuid = res_ops.query_resource(res_ops.IMAGE, conditions)[0].uuid
+    data_image_uuid = sce_ops.query_resource(zstack_management_ip, res_ops.IMAGE, conditions).inventories[0].uuid
     iso_path = os.environ.get('iso_path')
 
     zstack_latest_version = os.environ.get('zstackLatestVersion')
@@ -50,7 +52,7 @@ def test():
     test_stub.make_ssh_no_password(vm_ip, tmp_file)
     test_util.test_dsc('create data volume from template') 
     data_volume_name='Test_installation_data_volume_for_nightly'
-    data_volume_inv = vol_ops.create_volume_from_template(data_image_uuid, ps_uuid, data_volume_name, host_uuid)
+    data_volume_inv = sce_ops.create_volume_from_template(zstack_management_ip, data_image_uuid, ps_uuid, data_volume_name, host_uuid)
     data_volume_uuid = data_volume_inv.uuid
 
     #test_util.test_dsc('query data volume') 
@@ -59,7 +61,7 @@ def test():
     #data_volume_uuid = res_ops.query_resource(res_ops.VOLUME, conditions)[0].uuid
 
     test_util.test_dsc('attach the data volume to vm') 
-    vol_ops.attach_volume(data_volume_uuid, vm_uuid)
+    sce_ops.attach_volume(zstack_management_ip, data_volume_uuid, vm_uuid)
     
     test_util.test_dsc('mount the disk in vm') 
     mount_point = '/testpath'
@@ -122,9 +124,9 @@ def test():
     test_stub.check_installation(vm_ip, tmp_file)
 
     os.system('rm -f %s' % tmp_file)
-    vol_ops.detach_volume(data_volume_uuid)
-    vol_ops.delete_volume(data_volume_uuid)
-    vol_ops.expunge_volume(data_volume_uuid)
+    sce_ops.detach_volume(zstack_management_ip, data_volume_uuid, vm_uuid)
+    sce_ops.delete_volume(zstack_management_ip, data_volume_uuid)
+    sce_ops.expunge_volume(zstack_management_ip, data_volume_uuid)
     test_stub.destroy_vm_scenario(vm_inv.uuid)
     test_util.test_pass('''ZStack upgrade '2.3.1','2.3.2','2.4.0','2.5.0','2.6.0','3.0.0','3.0.1','3.1.0','3.1.3','3.2.0','3.3.0'Test Success''')
 

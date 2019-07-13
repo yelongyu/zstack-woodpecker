@@ -29,6 +29,8 @@ def path():
         [TestAction.destroy_vm, "vm2"],
         [TestAction.recover_vm, "vm2"],
         [TestAction.start_vm, "vm2"],
+        [TestAction.migrate_vm, "vm2"],
+        [TestAction.migrate_vm, "vm3"],
         [TestAction.attach_volume, "vm2", "volume4"],
         [TestAction.detach_volume, "volume4"],
         [TestAction.create_volume, "volume5", "=scsi,thin"],

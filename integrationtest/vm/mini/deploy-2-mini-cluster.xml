@@ -139,7 +139,7 @@
         <primaryStorages>
           <miniPrimaryStorage name="$miniPrimaryStorageName"
             description="Test Mini PS"
-            diskIdentifier="/dev/vdb"
+            diskIdentifier="/dev/sda"
              url="/zstack_miniPS" />
         </primaryStorages>
 

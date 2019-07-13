@@ -839,7 +839,7 @@ def setup_primarystorage_vm(vm_inv, vm_config, deploy_config):
                                     test_util.test_fail("smp server can't be None, SMP_SERVER_IP=%s" %(str(SMP_SERVER_IP)))
                                 cmd = "mkdir -p /home/smp-ps/"
                                 ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
-                                cmd = "echo 'mount %s:/home/nfs /home/smp-ps/' >> /etc/rc.local" %(SMP_SERVER_IP)
+                                cmd = "echo 'mountpoint -q /home/smp-ps/;if [ $? -ne 0 ];then mount %s:/home/nfs /home/smp-ps/;fi' >> /etc/rc.local" %(SMP_SERVER_IP)
                                 ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
                                 cmd = "chmod a+x /etc/rc.d/rc.local"
                                 ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, int(host_port))
@@ -2072,7 +2072,7 @@ def create_volume_from_offering_refer_to_vm(http_server_ip, volume_option, vm_in
                 action.systemTags = ["localStorage::hostUuid::%s" % vm_inv.hostUuid]
 
         if ps_ref_type:
-            if ps_ref_type == 'xskyceph':
+            if ps_ref_type in ['xskyceph', 'mini_ps']:
                 action.systemTags = ["capability::virtio-scsi", "localStorage::hostUuid::%s" % vm_inv.hostUuid]
             else:
                 action.systemTags = ["localStorage::hostUuid::%s" % vm_inv.hostUuid]
@@ -2117,6 +2117,22 @@ def detach_volume(http_server_ip, volume_uuid, vm_uuid=None, session_uuid=None):
     test_util.action_logger('Detach Volume [uuid:] %s' % volume_uuid)
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     return evt.inventory
+
+def delete_volume(http_server_ip, volume_uuid, session_uuid=None):
+    action = api_actions.DeleteDataVolumeAction()
+    action.uuid = volume_uuid
+    action.timeout = 240000
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    test_util.action_logger('Delete Volume [uuid:] %s' % volume_uuid)
+    return evt.inventory
+
+def expunge_volume(http_server_ip, volume_uuid, session_uuid=None):
+    action = api_actions.ExpungeDataVolumeAction()
+    action.uuid = volume_uuid
+    action.timeout = 240000
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    test_util.action_logger('Expunge Volume [uuid:] %s' % volume_uuid)
+    return evt
 
 def attach_l3(http_server_ip, l3_uuid, vm_uuid, session_uuid = None):
     action = api_actions.AttachL3NetworkToVmAction()
@@ -2280,6 +2296,24 @@ def add_dns_to_l3(http_server_ip, l3_uuid, dns, session_uuid=None):
     evt = execute_action_with_session(http_server_ip, action, session_uuid)
     return evt
 
+def create_volume_from_template(http_server_ip, image_uuid, ps_uuid, name = None, \
+        host_uuid = None, systemtags = None, session_uuid = None):
+    action = api_actions.CreateDataVolumeFromVolumeTemplateAction()
+    action.imageUuid = image_uuid
+    action.primaryStorageUuid = ps_uuid
+    action.systemTags = systemtags
+    if name:
+        action.name = name
+    else:
+        action.name = 'new volume from template %s' % image_uuid
+
+    if host_uuid:
+        action.hostUuid = host_uuid
+
+    evt = execute_action_with_session(http_server_ip, action, session_uuid)
+    test_util.test_logger('[Volume:] %s is created from [Volume Template:] %s on [Primary Storage:] %s.' % (evt.inventory.uuid, image_uuid, ps_uuid))
+    return evt.inventory
+
 def add_ip_range(http_server_ip, name, l3_uuid, start_ip, end_ip, gateway, netmask, session_uuid=None):
     action = api_actions.AddIpRangeAction()
     action.sessionUuid = session_uuid
@@ -2359,8 +2393,8 @@ def get_host_management_ip(scenario_config, scenario_file, deploy_config, vm_inv
                                             for vm_l2networkref in xmlobject.safe_list(vm_l3network.l2NetworkRef):
                                                 if vm_l2networkref.text_ == l2novlannetwork.name_:
                                                     return test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_l3network.uuid_).ip
-        else:
-            return test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
+    else:
+        return test_lib.lib_get_vm_nic_by_l3(vm_inv, vm_inv.defaultL3NetworkUuid).ip
         
     return None
 
@@ -2536,6 +2570,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
     mn_ip_to_post, vm_ip_to_post = (None, None)
     if hasattr(scenario_config.deployerConfig, 'hosts'):
         ebs_host = {}
+        mini_host = {}
         ceph_disk_created = False
         for host in xmlobject.safe_list(scenario_config.deployerConfig.hosts.host):
             for vm in xmlobject.safe_list(host.vms.vm):
@@ -2593,6 +2628,12 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                         if int(v['cpu']) > 12 and v['mem'] > 24:
                             vm_creation_option.set_host_uuid(k[1])
 
+                # try to create mini host vm to the same Host
+                if mini_host:
+                    for k, v in mini_host.items():
+                        if int(v['cpu']) > 6 and v['mem'] > 12:
+                            vm_creation_option.set_host_uuid(k[1])
+
                 #if iscsiClusterUuid has been set, vm will be assigned to iscsiCluster.
                 iscsi_cluster_uuid = os.environ.get('iscsiClusterUuid')
                 if iscsi_cluster_uuid:
@@ -2613,9 +2654,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     ssh.execute(cmd, vm_ip, 'root', 'password', True, 22)
                     cmd = "bash %s" % (output)
                     ssh.execute(cmd, vm_ip, 'root', 'password', True, 22)
-                    #print "Mini Host need install drbd"
-                    #cmd = "yum install kmod-drbd84 drbd84-utils -y;depmod -a && modprobe drbd;systemctl enable drbd;systemctl start drbd"
-                    #ssh.execute(cmd, vm_ip, 'root', 'password', True, 22)
+                    print "Mini Host need install drbd"
+                    # Uncomment below 2 lines as a temporary workaround if "http://jira.zstack.io/browse/MINI-904" was reproduced again
+#                     cmd = "yum install kmod-drbd84 ipmitool OpenIPMI-modalias MegaCli lsof drbd84-utils -y;depmod -a && modprobe drbd;systemctl enable drbd;systemctl start drbd"
+#                     ssh.execute(cmd, vm_ip, 'root', 'password', True, 22)
 
                 if vm.dataDiskOfferingUuid__:
                     volume_option = test_util.VolumeOption()
@@ -2667,6 +2709,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 
                 if xmlobject.has_element(vm, 'nodeRef'):
                     setup_node_vm(vm_inv, vm, deploy_config)
+                    if os.getenv('zstackHaVip'):
+                        mn_ip_to_post = os.getenv('zstackHaVip')
+                    else:
+                        mn_ip_to_post = vm_inv.vmNics[0].ip
                 if xmlobject.has_element(vm, 'hostRef') and not xmlobject.has_element(vm, 'vcenterRef'):
                     setup_host_vm(zstack_management_ip, vm_inv, vm, deploy_config)
                     vm_inv_lst.append(vm_inv)
@@ -2822,11 +2868,16 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             host_inv = query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
                             ebs_host[(vm_inv.uuid, host_inv.uuid, vm_ip)] = {'cpu': host_inv.availableCpuCapacity, 'mem': int(host_inv.availableMemoryCapacity)/1024/1024/1024}
 #                             install_ebs_pkg_in_host(vm_ip, vm.imageUsername_, vm.imagePassword_)
+                            break
                         elif ps_ref.type_ == 'mini_ps':
                             disk_offering_uuid = ps_ref.offering_uuid_
                             volume_option.set_disk_offering_uuid(disk_offering_uuid)
                             volume_inv = create_volume_from_offering_refer_to_vm(zstack_management_ip, volume_option, vm_inv, deploy_config=deploy_config, ps_ref_type=ps_ref.type_)
                             attach_volume(zstack_management_ip, volume_inv.uuid, vm_inv.uuid)
+                            # try to create mini host vm to the same Host
+                            cond = res_ops.gen_query_conditions('uuid', '=', vm_inv.hostUuid)
+                            host_inv = query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
+                            mini_host[(vm_inv.uuid, host_inv.uuid, vm_ip)] = {'cpu': host_inv.availableCpuCapacity, 'mem': int(host_inv.availableMemoryCapacity)/1024/1024/1024}
                             break
 
         xml_string = etree.tostring(root_xml, 'utf-8')
@@ -2845,7 +2896,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
             with open('/home/nas_ak_id', 'w') as f:
                 f.write(ak_id)
             uri = 'http://' + os.getenv('apiEndPoint').split('::')[-1] + '/mntarget'
-            http.json_dump_post(uri, {"ak_id": ak_id, "mn_ip": mn_ip_to_post, "nfs_ip": vm_ip_to_post})
+            http.json_dump_post(uri, body={"ak_id": ak_id, "mn_ip": mn_ip_to_post, "nfs_ip": vm_ip_to_post}, fail_soon=True)
         if ebs_host:
             target_host = None
             host_list= [h[1] for h in ebs_host.keys()]

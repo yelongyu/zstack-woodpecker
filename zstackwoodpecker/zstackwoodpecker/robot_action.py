@@ -1,62 +1,28 @@
-import time
 import os
-import string
 import random
-import traceback
-import sys
-import threading
-import uuid
-
-import zstackwoodpecker.setup_actions as setup_actions
-import zstackwoodpecker.test_util as test_util
-import zstackwoodpecker.test_lib as test_lib
-import zstackwoodpecker.test_state as ts_header
-import zstackwoodpecker.action_select as action_select
-import zstackwoodpecker.operations.resource_operations as res_ops
-import zstackwoodpecker.operations.deploy_operations as dep_ops
-import zstackwoodpecker.operations.vm_operations as vm_ops
-import zstackwoodpecker.operations.account_operations as acc_ops
-import zstackwoodpecker.operations.volume_operations as vol_ops
-import zstackwoodpecker.operations.net_operations as net_ops
-import zstackwoodpecker.operations.tag_operations as tag_ops
-import zstackwoodpecker.operations.image_operations as img_ops
-import zstackwoodpecker.operations.node_operations as node_ops
-import zstackwoodpecker.operations.config_operations as conf_ops
-import zstackwoodpecker.operations.console_operations as cons_ops
-import zstackwoodpecker.operations.license_operations as lic_ops
-import zstackwoodpecker.operations.primarystorage_operations as ps_ops
-import zstackwoodpecker.operations.resource_stack as resource_stack_ops
-import zstackwoodpecker.operations.stack_template as stack_template_ops
-import zstackwoodpecker.operations.datamigrate_operations as datamigr_ops
-import zstackwoodpecker.operations.ha_operations as ha_ops
-import zstackwoodpecker.zstack_test.snap as robot_snapshot_header
-
-import zstackwoodpecker.header.vm as vm_header
-import zstackwoodpecker.header.volume as vol_header
-import zstackwoodpecker.header.image as image_header
-
-import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_vol_header
-import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
-import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
-
-import apibinding.api as api
-import zstacklib.utils.http as http
-import zstacklib.utils.jsonobject as jsonobject
-import zstacklib.utils.linux as linux
-import zstacklib.utils.lock as lock
-import zstacklib.utils.shell as shell
-import zstacklib.utils.ssh as ssh
-import zstacklib.utils.filedb as filedb
-import zstacklib.utils.xmlobject as xmlobject
-import zstacklib.utils.debug as debug
+import time
+import json
 
 import apibinding.inventory as inventory
-import zstacktestagent.plugins.vm as vm_plugin
-import zstacktestagent.plugins.host as host_plugin
-import zstacktestagent.testagent as testagent
-from contextlib import contextmanager
-import functools
-from collections import defaultdict
+import zstacklib.utils.debug as debug
+import zstackwoodpecker.header.vm as vm_header
+import zstackwoodpecker.operations.config_operations as conf_ops
+import zstackwoodpecker.operations.datamigrate_operations as datamigr_ops
+import zstackwoodpecker.operations.ha_operations as ha_ops
+import zstackwoodpecker.operations.image_operations as img_ops
+import zstackwoodpecker.operations.primarystorage_operations as ps_ops
+import zstackwoodpecker.operations.resource_operations as res_ops
+import zstackwoodpecker.operations.resource_stack as resource_stack_ops
+import zstackwoodpecker.operations.stack_template as stack_template_ops
+import zstackwoodpecker.operations.vm_operations as vm_ops
+import zstackwoodpecker.operations.volume_operations as vol_ops
+import zstackwoodpecker.test_lib as test_lib
+import zstackwoodpecker.test_state as ts_header
+import zstackwoodpecker.test_util as test_util
+import zstackwoodpecker.zstack_test.snap as robot_snapshot_header
+import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
+import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
+import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_vol_header
 
 debug.install_runtime_tracedumper()
 test_stage = ts_header.TestStage
@@ -77,7 +43,7 @@ class robot_test_dict(object):
         self.backup = {}  # {name:{'backup':backup,'volume':volume,'md5':md5}}
         self.image = {}  # {name: image_obj}
         self.snap_tree = {}  # {vol_name: snap_tree}
-        self.volume_check = {} # {name: robot_flag}
+        self.volume_check = {}  # {name: robot_flag}
 
     def __repr__(self):
         str = 'Dict:: \n'
@@ -181,19 +147,23 @@ class robot_test_dict(object):
             snap_tree.check()
 
     def cleanup(self):
+
+        for k, backup_dict in self.backup.items():
+            backup = backup_dict['backup']
+            bs_uuids = [_bs.backupStorageUuid for _bs in backup.backupStorageRefs]
+            vol_ops.delete_volume_backup(bs_uuids, backup.uuid)
+
+        # image
+        for k, image in self.image.items():
+            image.clean()
         # vm.check
         for k, vm in self.vm.items():
             vm.clean()
         # volume.check
         for k, volume in self.volume.items():
             volume.clean()
-        # image
-        for k, image in self.image.items():
-            image.clean()
-        for k, backup_dict in self.backup.items():
-            backup = backup_dict['backup']
-            bs_uuids = [_bs.backupStorageUuid for _bs in backup.backupStorageRefs]
-            vol_ops.delete_volume_backup(bs_uuids, backup.uuid)
+
+
 
 class robot(object):
     def __init__(self):
@@ -533,8 +503,94 @@ def idel(robot_test_obj, args):
     else:
         test_lib.lib_vm_random_idel_time(1, 5)
 
+
 def create_vm(robot_test_obj, args):
-    pass
+    name = args[0]
+    l3_uuid = None
+    flag = None
+    disk_offering_uuid = None
+
+    arg_dict = parser_args(args[1:])
+    if 'flag' in arg_dict:
+        flag = arg_dict['flag']
+
+    if 'network' in arg_dict:
+        if arg_dict['network'] == "random":
+            cond = res_ops.gen_query_conditions("system", "=", "false")
+            l3s = res_ops.query_resource(res_ops.L3_NETWORK, cond)
+            l3_uuid = random.choice(l3s).uuid
+        else:
+            network_name = arg_dict["network"]
+            cond = res_ops.gen_query_conditions("name", "=", network_name)
+            l3 = res_ops.query_resource(res_ops.L3_NETWORK, cond)
+            if not l3:
+                test_util.test_fail("Network: %s does not exist" % network_name)
+            else:
+                l3_uuid = l3[0].uuid
+
+    if flag and "thick" in flag:
+        provisiong = "Thick"
+    else:
+        provisiong = "Thin"
+
+    if arg_dict.has_key('data_volume') and arg_dict['data_volume'] == 'true':
+        disk_offering_uuid = res_ops.query_resource(res_ops.DISK_OFFERING)[0].uuid
+        dataVolumeSystemTags = ["capability::virtio-scsi"]
+
+    rootVolumeSystemTag = "volumeProvisioningStrategy::%sProvisioning" % provisiong
+
+    vm_creation_option = test_util.VmOption()
+    image_name = os.environ.get('imageName_s')
+    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+
+    cond = res_ops.gen_query_conditions("type", "=", "UserVm")
+    instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond)[0].uuid
+
+    if l3_uuid:
+        vm_creation_option.set_l3_uuids([l3_uuid])
+    else:
+        l3_name = os.environ.get('l3VlanNetworkName1')
+        l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+        vm_creation_option.set_l3_uuids([l3_net_uuid])
+
+    if disk_offering_uuid:
+        vm_creation_option.set_data_disk_uuids([disk_offering_uuid])
+        vm_creation_option.set_dataVolume_systemTags(dataVolumeSystemTags)
+
+    vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+    vm_creation_option.set_image_uuid(image_uuid)
+    vm_creation_option.set_name(name)
+    vm_creation_option.set_rootVolume_systemTags([rootVolumeSystemTag])
+
+    vm = zstack_vm_header.ZstackTestVm()
+    vm.set_creation_option(vm_creation_option)
+    vm.create()
+
+    root_volume = zstack_vol_header.ZstackTestVolume()
+    root_volume.create_from(vm.vm.allVolumes[0].uuid)
+    vm.test_volumes.append(root_volume)
+    root_snap_tree = robot_snapshot_header.ZstackSnapshotTree(root_volume)
+    root_snap_tree.update()
+    root_volume.snapshot_tree = root_snap_tree
+    robot_test_obj.test_dict.add_vm(name, vm_obj=vm)
+    robot_test_obj.test_dict.add_volume(name=vm.vm.name + "-root", vol_obj=root_volume)
+    robot_test_obj.test_dict.add_snap_tree(name=vm.vm.name + "-root", snap_tree=root_snap_tree)
+    robot_test_obj.default_config['PS'] = root_volume.get_volume().primaryStorageUuid
+    robot_test_obj.default_config['HOST'] = vm.get_vm().hostUuid
+
+    volume = zstack_vol_header.ZstackTestVolume()
+    cond = res_ops.gen_query_conditions("name", "=", "DATA-for-%s" % name)
+    vol_inv = res_ops.query_resource(res_ops.VOLUME, cond)[0]
+    vol_ops.update_volume(vol_inv.uuid, "auto-volume" + name[-1],
+                          "change %s to auto-volume%s" % (vol_inv.name, name[-1]))
+
+    volume.create_from(vol_inv.uuid, target_vm=vm)
+    vm.test_volumes.append(volume)
+    volume_snap_tree = robot_snapshot_header.ZstackSnapshotTree(volume)
+    volume_snap_tree.update()
+    volume.snapshot_tree = volume_snap_tree
+    robot_test_obj.test_dict.add_volume("auto-volume" + name[-1], volume)
+    robot_test_obj.test_dict.add_snap_tree("auto-volume" + name[-1], volume_snap_tree)
 
 
 def migrate_vm(robot_test_obj, args):
@@ -700,14 +756,15 @@ def reboot_vm(robot_test_obj, args):
         volume.update()
         volume.update_volume()
 
+
 def run_workloads(robot_test_obj, args):
     target_vms = []
     target_cmd = ''
     timeout = 600
 
     WORKLOADS = {
-            "FIO": "fio -filename=/root/test-fio -direct=1 -iodepth 32 -thread -rw=randrw -rwmixread=70 -ioengine=libaio -bs=4k -size=90% -numjobs=8 -runtime=600 -group_reporting -name=fio_test.txt",
-            "IPERF": "iperf3 -s"}
+        "FIO": "fio -filename=/root/test-fio -direct=1 -iodepth 32 -thread -rw=randrw -rwmixread=70 -ioengine=libaio -bs=4k -size=90% -numjobs=8 -runtime=600 -group_reporting -name=fio_test.txt",
+        "IPERF": "iperf3 -s"}
 
     if len(args) < 1:
         test_util.test_fail("no resource available for next action: run_workloads")
@@ -716,9 +773,10 @@ def run_workloads(robot_test_obj, args):
         target_vm = robot_test_obj.get_test_dict().vm[vm_name]
         target_vms.append(target_vm)
         if target_vm.get_state() != vm_header.RUNNING:
-            test_util.test_fail("run_workloads: Failed to run workloads due that VM %s is not in Running state" % (target_vm.get_vm().uuid))
+            test_util.test_fail("run_workloads: Failed to run workloads due that VM %s is not in Running state" % (
+                target_vm.get_vm().uuid))
 
-    for wkd,cmd in WORKLOADS.items():
+    for wkd, cmd in WORKLOADS.items():
         if args[1] == wkd:
             if len(args) > 2:
                 target_cmd = args[2]
@@ -735,7 +793,9 @@ def run_workloads(robot_test_obj, args):
         default_l3_uuid = target_vm.get_vm().defaultL3NetworkUuid
         nic = target_vm.get_vm().vmNics[0]
 
-        cmd_result = test_lib.lib_ssh_vm_cmd_by_agent(host.managementIp, nic.ip, test_lib.lib_get_vm_username(target_vm.get_vm()), test_lib.lib_get_vm_password(target_vm.get_vm()), target_cmd)
+        cmd_result = test_lib.lib_ssh_vm_cmd_by_agent(host.managementIp, nic.ip,
+                                                      test_lib.lib_get_vm_username(target_vm.get_vm()),
+                                                      test_lib.lib_get_vm_password(target_vm.get_vm()), target_cmd)
         test_util.test_logger("run_workloads - cmd result:  %s" % str(cmd_result.result))
 
         target_vm.reboot()
@@ -747,13 +807,14 @@ def run_workloads(robot_test_obj, args):
 
     time.sleep(timeout)
 
+
 def reboot_host(robot_test_obj, args):
     target_host = ""
     hosts = []
     timeout = 1800
 
     if len(args) == 2:
-        target_host = args[0] 
+        target_host = args[0]
         action = args[1]
     else:
         test_util.test_fail("arguments invalid for next action: reboot host")
@@ -837,7 +898,8 @@ def reboot_host(robot_test_obj, args):
                 else:
                     timeout -= 15
                     if timeout == 0:
-                        test_util.test_fail('VM %s is not in Stopped or Running state in 1800 seconds after reboot' % (target_vm.get_vm().name))
+                        test_util.test_fail('VM %s is not in Stopped or Running state in 1800 seconds after reboot' % (
+                            target_vm.get_vm().name))
                     time.sleep(15)
             else:
                 if target_vm.get_vm().state == "Stopped":
@@ -847,11 +909,13 @@ def reboot_host(robot_test_obj, args):
                 else:
                     timeout -= 15
                     if timeout == 0:
-                        test_util.test_fail('VM %s is not in Stopped or Running state in 1800 seconds after reboot' % (target_vm.get_vm().name))
+                        test_util.test_fail('VM %s is not in Stopped or Running state in 1800 seconds after reboot' % (
+                            target_vm.get_vm().name))
                     time.sleep(15)
         if not target_vms:
             test_util.test_logger('all the VMs are Stopped or Running after reboot')
             break
+
 
 def expunge_vm(robot_test_obj, args):
     if len(args) != 1:
@@ -863,7 +927,8 @@ def expunge_vm(robot_test_obj, args):
 
     robot_test_obj.test_dict.remove_volume(target_vm.test_volumes[0])
     robot_test_obj.test_dict.remove_vm(target_vm)
-    robot_test_obj.test_dict.remove_snap_tree(args[0]+'-root')
+    robot_test_obj.test_dict.remove_snap_tree(args[0] + '-root')
+
 
 def delete_vm(robot_test_obj, args):
     if len(args) != 1:
@@ -1006,7 +1071,8 @@ def create_vm_from_vmbackup(robot_test_obj, args):
 
     l3_uuid = test_lib.lib_get_l3_by_name(os.environ.get('l3VlanNetworkName1')).uuid
     instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(os.environ.get('instanceOfferingName_s')).uuid
-    backup_vm = vol_ops.create_vm_from_vm_backup("vm_create_from_backup", target_backup.groupUuid,
+    vm_name = target_backup.name.split('-')[0] + "-from-" + target_backup.name.split('-')[1]
+    backup_vm = vol_ops.create_vm_from_vm_backup(vm_name, target_backup.groupUuid,
                                                  instance_offering_uuid, l3_uuid, [l3_uuid])
     new_vm = zstack_vm_header.ZstackTestVm()
     new_vm.create_from(backup_vm.uuid)
@@ -1018,6 +1084,7 @@ def create_vm_from_vmbackup(robot_test_obj, args):
     root_snap_tree = robot_snapshot_header.ZstackSnapshotTree(root_volume)
     root_snap_tree.update()
     root_volume.snapshot_tree = root_snap_tree
+    robot_test_obj.test_dict.add_vm(new_vm.vm.name, vm_obj=new_vm)
     robot_test_obj.test_dict.add_volume(name=new_vm.vm.name + "-root", vol_obj=root_volume)
     robot_test_obj.test_dict.add_snap_tree(name=new_vm.vm.name + "-root", snap_tree=root_snap_tree)
 
@@ -1025,25 +1092,29 @@ def create_vm_from_vmbackup(robot_test_obj, args):
     backups = res_ops.query_resource(res_ops.VOLUME_BACKUP, cond)
 
     for backup in backups:
-        for _, volume in test_dict.volume.items():
-            volume.update()
-            volume.update_volume()
-            if backup.volumeUuid == volume.get_volume().uuid:
-                new_volume_name = "data-volume-create-from-backup-" + backup.uuid
-                cond = res_ops.gen_query_conditions("name", '=', new_volume_name)
-                vol = res_ops.query_resource(res_ops.VOLUME, cond)[0]
-                new_volume = zstack_vol_header.ZstackTestVolume()
-                new_volume.create_from(vol.uuid, new_vm)
-                new_vm.test_volumes.append(new_volume)
-                robot_test_obj.test_dict.add_volume(new_volume_name, new_volume)
-                md5sum = test_dict.get_backup_md5sum(backup.name + '-' + backup.volumeUuid)
-                new_volume.set_md5sum(md5sum)
+        if backup.type == "Root":
+            continue
+        old_volume_name = json.loads(backup.metadata)["name"]
+        new_name = old_volume_name + "-from-" + backup.name.split("-")[1]
+        new_volume_name = "data-volume-create-from-backup-" + backup.uuid
+        cond = res_ops.gen_query_conditions("name", '=', new_volume_name)
+        vol = res_ops.query_resource(res_ops.VOLUME, cond)[0]
 
-                snap_tree = robot_snapshot_header.ZstackSnapshotTree(new_volume)
-                snap_tree.update()
-                robot_test_obj.test_dict.add_snap_tree(new_volume_name, snap_tree)
-                new_volume.update()
-                new_volume.update_volume()
+        vol_ops.update_volume(vol.uuid, new_name, "change_name")
+
+        new_volume = zstack_vol_header.ZstackTestVolume()
+        new_volume.create_from(vol.uuid, new_vm)
+        new_vm.test_volumes.append(new_volume)
+        robot_test_obj.test_dict.add_volume(new_name, new_volume)
+        md5sum = test_dict.get_backup_md5sum(backup.name + '-' + backup.volumeUuid)
+        new_volume.set_md5sum(md5sum)
+
+        snap_tree = robot_snapshot_header.ZstackSnapshotTree(new_volume)
+        new_volume.snapshot_tree = snap_tree
+        snap_tree.update()
+        robot_test_obj.test_dict.add_snap_tree(new_name, snap_tree)
+        new_volume.update()
+        new_volume.update_volume()
 
 
 def create_volume_backup(robot_test_obj, args):
@@ -1054,7 +1125,7 @@ def create_volume_backup(robot_test_obj, args):
     backup_name = args[1]
 
     zone_inv = res_ops.query_resource(res_ops.ZONE)[0]
-    cond = res_ops.gen_query_conditions("attachedZoneUuids","=", zone_inv.uuid)
+    cond = res_ops.gen_query_conditions("attachedZoneUuids", "=", zone_inv.uuid)
     bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
 
     backup_option = test_util.BackupOption()
@@ -1095,15 +1166,17 @@ def use_volume_backup(robot_test_obj, args):
 
 
 def create_volume(robot_test_obj, args):
+    # name systemTag size=random or number flag=[large,notCheck]
     large_flag = False
     volume_check_flag = True
+    disksize = 2 * 1024 * 1024 * 1024
 
     if len(args) < 1:
         test_util.test_fail("no resource available for next action: create volume")
     target_volume_name = args[0]
     ps_uuid = robot_test_obj.get_default_config()['PS']
     systemtags = []
-    if len(args) > 1:
+    if len(args) > 1 and args[1][0] == "=":
         tags = args[1].split('=')[1].split(',')
         if 'scsi' in tags:
             systemtags.append("capability::virtio-scsi")
@@ -1114,11 +1187,32 @@ def create_volume(robot_test_obj, args):
         if 'thick' in tags:
             systemtags.append("volumeProvisioningStrategy::ThickProvisioning")
 
-    if len(args) == 3:
-        large_flag = args[2]
-    if len(args) == 4:
-        large_flag = args[2]
-        volume_check_flag = args[3]
+    # parser args[3:] size flag
+    # todo: add ps_uuid, offering_uuid, if loacl_ps appoint host will be better
+    arg_dict = parser_args(args[1:])
+    if "flag" in arg_dict:
+        flag = arg_dict["flag"]
+        if "large" in flag:
+            large_flag = True
+        if "nocheck" in flag:
+            volume_check_flag = False
+        if "scsi" in flag:
+            systemtags.append("capability::virtio-scsi")
+        if "shareable" in flag:
+            systemtags.append("ephemeral::shareable")
+        if "thin" in flag:
+            systemtags.append("volumeProvisioningStrategy::ThinProvisioning")
+        if "thick" in flag:
+            systemtags.append("volumeProvisioningStrategy::ThickProvisioning")
+
+    if "size" in arg_dict:
+        if arg_dict["size"] == "random":
+            if large_flag:
+                disksize = random.choice([10, 50, 100, 200]) * 1024 * 1024 * 1024
+            else:
+                disksize = random.choice([1, 2, 3, 4]) * 1024 * 1024 * 1024
+        else:
+            disksize = arg_dict['size']
 
     volume_creation_option = test_util.VolumeOption()
     volume_creation_option.set_name(target_volume_name)
@@ -1135,12 +1229,7 @@ def create_volume(robot_test_obj, args):
     if not MINI:
         new_volume = test_lib.lib_create_volume_from_offering(volume_creation_option)
     else:
-        if large_flag:
-            volume_creation_option.set_diskSize(random.choice([10, 50, 100, 200, 500]) * 1024 * 1024 * 1024)
-        else:
-            volume_creation_option.set_diskSize(random.choice([1, 2, 3, 4]) * 1024 * 1024 * 1024)
-
-        volume_creation_option.set_diskSize(random.choice([1, 2, 3, 4]) * 1024 * 1024 * 1024)
+        volume_creation_option.set_diskSize(disksize)
         volume_inv = vol_ops.create_volume_from_diskSize(volume_creation_option)
         new_volume = zstack_vol_header.ZstackTestVolume()
         new_volume.create_from(volume_inv.uuid)
@@ -1215,6 +1304,7 @@ def recover_volume(robot_test_obj, args):
     target_volume.update_volume()
     target_volume.snapshot_tree.update()
 
+
 def detach_volume(robot_test_obj, args):
     if len(args) < 1:
         test_util.test_fail("no resource available for next action: detach volume")
@@ -1249,6 +1339,7 @@ def expunge_volume(robot_test_obj, args):
     robot_test_obj.test_dict.remove_volume(target_volume)
     robot_test_obj.test_dict.remove_snap_tree(name)
 
+
 def migrate_volume():
     pass
 
@@ -1259,7 +1350,7 @@ def resize_volume(robot_test_obj, args):
 
     target_vm = robot_test_obj.get_test_dict().vm[args[0]]
     if args[1] == "random":
-        delta = random.randint(10485760,21474836480)
+        delta = random.randint(10485760, 21474836480)
     else:
         delta = args[1]
 
@@ -1281,7 +1372,7 @@ def resize_data_volume(robot_test_obj, args):
 
     target_volume = robot_test_obj.get_test_dict().volume[args[0]]
     if args[1] == "random":
-        delta = random.randint(10485760,21474836480)
+        delta = random.randint(10485760, 21474836480)
     else:
         delta = args[1]
 
@@ -1308,6 +1399,7 @@ def create_data_vol_template_from_volume(robot_test_obj, args):
     target_volume.update()
     target_volume.update_volume()
 
+
 def create_root_vol_template_from_volume(robot_test_obj, args):
     if len(args) != 2:  # vm_name image_name
         test_util.test_fail("no resource available for next action: create root volume image")
@@ -1323,6 +1415,7 @@ def create_root_vol_template_from_volume(robot_test_obj, args):
 
     target_volume.update()
     target_volume.update_volume()
+
 
 def create_data_volume_from_image(robot_test_obj, args):
     systemtags = []
@@ -1418,6 +1511,7 @@ def recover_image(robot_test_obj, args):
     target_image.recover()
     target_image.update()
 
+
 def expunge_image(robot_test_obj, args):
     if len(args) < 1:
         test_util.test_fail("no resource available for next action: expunge image")
@@ -1462,7 +1556,7 @@ def add_image(robot_test_obj, args):
         image_inv = img_ops.add_root_volume_template(img_option)
     image = zstack_image_header.ZstackTestImage()
     image.set_image(image_inv)
-    robot_test_obj.test_dict.add_image(image_name,image_obj=image)
+    robot_test_obj.test_dict.add_image(image_name, image_obj=image)
     return image_inv
 
 
@@ -1690,24 +1784,49 @@ def create_mini_vm(robot_test_obj, args):
     cpu = 2
     memory = 2 * 1024 * 1024 * 1024
     l3_uuid = None
+    large = False
+    flag = None
 
     arg_dict = parser_args(args[1:])
-    if arg_dict.has_key('cpu'):
+    if 'flag' in arg_dict:
+        flag = arg_dict['flag']
+        if "large" in flag:
+            large = True
+    if 'cpu' in arg_dict:
         if arg_dict['cpu'] == 'random':
-            cpu = random.randrange(1, 4, 1)
+            if large:
+                start, end = 16, 60
+            else:
+                start, end = 1, 16
+            cpu = random.randrange(start, end, 1)
         else:
             cpu = int(arg_dict['cpu'])
-    if arg_dict.has_key('memory'):
+    if 'memory' in arg_dict:
         if arg_dict['memory'] == 'random':
-            memory = (random.randrange(1, 4, 1) + round(random.random(), 2)) * 1024 * 1024 * 1024
+            if large:
+                memory = random.randrange(4, 7, 1) * 1024 * 1024 * 1024
+            else:
+                memory = random.randrange(256, 4096, 256) * 1024 * 1024
         else:
             memory = int(arg_dict['memory']) * 1024 * 1024 * 1024
-    if arg_dict.has_key('network'):
-        cond = res_ops.gen_query_conditions("system", "=", "false")
-        l3s = res_ops.query_resource(res_ops.L3_NETWORK, cond)
-        l3_uuid = random.choice(l3s).uuid
+    if 'network' in arg_dict:
+        if arg_dict['network'] == "random":
+            cond = res_ops.gen_query_conditions("system", "=", "false")
+            l3s = res_ops.query_resource(res_ops.L3_NETWORK, cond)
+            l3_uuid = random.choice(l3s).uuid
+        else:
+            network_name = arg_dict["network"]
+            cond = res_ops.gen_query_conditions("name", "=", network_name)
+            l3 = res_ops.query_resource(res_ops.L3_NETWORK, cond)
+            if not l3:
+                test_util.test_fail("Network: %s does not exist" % network_name)
+            else:
+                l3_uuid = l3[0].uuid
 
     provisiong = 'Thin' if not arg_dict.has_key('provision') else arg_dict['provision']
+    if flag and "thick" in flag:
+        provisiong = "Thick"
+
     rootVolumeSystemTag = "volumeProvisioningStrategy::%sProvisioning" % provisiong
 
     cond = res_ops.gen_query_conditions('state', '=', "Enabled")
@@ -1744,8 +1863,8 @@ def create_mini_vm(robot_test_obj, args):
     robot_test_obj.default_config['PS'] = root_volume.get_volume().primaryStorageUuid
     robot_test_obj.default_config['HOST'] = vm.get_vm().hostUuid
     if arg_dict.has_key('data_volume') and arg_dict['data_volume'] == 'true':
-        create_volume(robot_test_obj, ['data_volume_' + str(STEP), '=scsi,' + provisiong])
-        attach_volume(robot_test_obj, [name, 'data_volume_' + str(STEP)])
+        create_volume(robot_test_obj, ['auto-volume' + name[-1], 'flag=scsi,' + provisiong])
+        attach_volume(robot_test_obj, [name, 'auto-volume' + name[-1]])
 
 
 def create_mini_iso_vm(robot_test_obj, args):
@@ -1809,6 +1928,7 @@ def delete_volume_backup(robot_test_obj, args):
     vol_ops.delete_volume_backup(bs_uuids, target_backup.uuid)
     robot_test_obj.test_dict.remove_backup(target_backup)
 
+
 def delete_vm_backup(robot_test_obj, args):
     group_uuids = []
 
@@ -1825,7 +1945,8 @@ def delete_vm_backup(robot_test_obj, args):
             robot_test_obj.test_dict.remove_backup(target_backup)
 
     for group_uuid in list(set(group_uuids)):
-        vol_ops.delete_vm_backup(group_uuid = group_uuid)
+        vol_ops.delete_vm_backup(group_uuid=group_uuid)
+
 
 action_dict = {
     'change_global_config_sp_depth': change_global_config_sp_depth,
@@ -2058,6 +2179,9 @@ def debug(robot_test_obj):
 
 def parser_args(args):
     arg_dict = {}
+    for i in args:
+        if "=" not in i or i[0] == "=":
+            args.remove(i)
     for arg in args:
         arg_dict[arg.split('=')[0]] = arg.split('=')[1]
     return arg_dict

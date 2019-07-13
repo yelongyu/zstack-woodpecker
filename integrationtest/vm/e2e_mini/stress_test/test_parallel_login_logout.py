@@ -4,7 +4,6 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 from threading import Thread
 import traceback
-import sys
 
 test_stub = test_lib.lib_get_test_stub()
 

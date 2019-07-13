@@ -1,6 +1,0 @@
-import ./deploy.tmpt
-
-miniPrimaryStorageName = mini-ps
-miniBackupStorageName = mini-bs
-l2Vlan21 = 1121
-ZSTACK_SIMULATOR = yes

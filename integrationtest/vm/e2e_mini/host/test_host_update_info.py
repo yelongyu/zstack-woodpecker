@@ -1,37 +1,41 @@
 # -*- coding:utf-8 -*-
+# This case will fail to pass until MINI-900 is fixed.
 
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import os
+import host
 
-test_stub = test_lib.lib_get_test_stub()
-
-mini = None
-host_ip, _ = test_stub.get_mn_ip()
-host_name = 'cluster1/' + host_ip
+host_ops = None
+host_name = None
 host_new_name = 'host-rename'
 
 def test():
-    global mini
+    global host_ops
     global host_name
     global host_new_name
-    mini = test_stub.MINI()
-    mini.update_info(res_type='minihost', res_name=host_name, new_name=host_new_name, new_dsc='test dsc')
-    mini.check_browser_console_log()
+    host_ops = host.HOST()
+    if os.getenv("ZSTACK_SIMULATOR") == "yes":
+        host_name = 'cluster1/' + os.getenv("hostIp")
+    else:
+        host_ip, _ = host.get_mn_ip()
+        host_name = 'cluster1/' + host_ip
+    host_ops.update_info(res_type='host', res_name=host_name, new_name=host_new_name, new_dsc='test dsc')
+    host_ops.check_browser_console_log()
     test_util.test_pass('Test Host Update Info Successful')
 
 
 def env_recover():
-    global mini
+    global host_ops
     global host_name
     global host_new_name
-    mini.update_info(res_type='minihost', res_name=host_new_name, new_name=host_name, new_dsc='')
-    mini.close()
+    host_ops.update_info(res_type='host', res_name=host_new_name, new_name=host_name, new_dsc='')
+    host_ops.close()
 
 #Will be called only if exception happens in test().
 def error_cleanup():
-    global mini
+    global host_ops
     try:
-        mini.close()
+        host_ops.close()
     except:
         pass

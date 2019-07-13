@@ -715,11 +715,13 @@ def detach_network_service_from_l3network(l3_uuid, service_uuid, session_uuid=No
     test_util.action_logger('Detach [Network Service]: %s from [l3]: %s' % (service_uuid, l3_uuid))
     evt = acc_ops.execute_action_with_session(action, session_uuid)
 
-def attach_pf_service_to_l3network(l3_uuid, service_uuid, session_uuid=None):
+def attach_pf_service_to_l3network(l3_uuid, service_uuid, session_uuid=None, snat=False):
     providers = {}
     action = api_actions.AttachNetworkServiceToL3NetworkAction()
     action.l3NetworkUuid = l3_uuid
     providers[service_uuid] = ['PortForwarding']
+    if snat:
+        providers[service_uuid].append('SNAT')
     action.networkServices = providers
     action.timeout = 12000
     test_util.action_logger('Attach [Network Service]: %s to [l3]: %s' % (service_uuid, l3_uuid))

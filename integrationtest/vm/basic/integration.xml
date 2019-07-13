@@ -12,21 +12,21 @@
         <case timeout="600" >test_create_windows_vm.py</case>
         <case timeout="180" >test_stop_vm.py</case>
         <case timeout="180" >test_suspend_vm.py</case>
-        <case timeout="180" >test_suspended_vm_ops.py</case>
-        <case timeout="180" >test_start_vm.py</case>
+        <case timeout="400" >test_suspended_vm_ops.py</case>
+        <case timeout="300" >test_start_vm.py</case>
         <case timeout="300" >test_support_vm_boot_option.py</case>
         <case timeout="300" >test_vm_with_volumes_boot_option.py</case>
         <case timeout="600" >test_reboot_vm.py</case>
         <case timeout="300" >test_add_volume.py</case> 
-        <case timeout="200" >test_add_vol_to_stopvm.py</case> 
-        <case timeout="200" >test_add_volume_reboot_vm.py</case> 
+        <case timeout="400" >test_add_vol_to_stopvm.py</case> 
+        <case timeout="600" >test_add_volume_reboot_vm.py</case> 
         <case timeout="700" >test_add_multi_volumes.py</case> 
         <case timeout="200" >test_add_volume_negative.py</case> 
         <case timeout="400" >test_crt_temp_from_volume.py</case> 
         <case timeout="400" >test_crt_vm_with_volume.py</case> 
         <case timeout="400" >test_vm_securitygroup.py</case> 
         <case timeout="600" >test_MN_examine_vm_state.py</case> 
-        <case timeout="180" >test_create_iso_vm.py</case>
+        <case timeout="300" >test_create_iso_vm.py</case>
         <case timeout="180" >test_iso_vm_capability.py</case>
         <case timeout="180" >test_detach_iso_vm.py</case>
         <case timeout="600" >test_online_change_cpu_mem.py</case>
@@ -37,8 +37,8 @@
         <case timeout="180" >account/test_multi_users_cli_login.py</case>
         <case timeout="180" >account/test_crt_vm_by_normal_account.py</case>
         <case timeout="180" >account/test_crt_vm_by_normal_account2.py</case>
-        <case timeout="180" >account/test_vm_ops_by_normal_account.py</case>
-        <case timeout="180" >account/test_multi_accounts_vm_ops.py</case>
+        <case timeout="600" >account/test_vm_ops_by_normal_account.py</case>
+        <case timeout="600" >account/test_multi_accounts_vm_ops.py</case>
         <case timeout="300" >account/test_normal_change_qos.py</case>
         <case timeout="300" >account/test_normal_create_eip.py</case>
         <case timeout="300" >account/test_normal_create_L3_by_admin_shared_L2.py</case>
@@ -49,7 +49,7 @@
         <case timeout="180" >test_ad_admin_login.py</case>
         <case timeout="180" >test_ad_user_login.py</case>
         <case timeout="180" >test_ad_group_login.py</case>
-        <case timeout="480" >test_get_multi_vm_console_address.py</case>
+        <case timeout="900" >test_get_multi_vm_console_address.py</case>
         <case timeout="900" >test_vm_ha_never_stop.py</case>
         <case timeout="900" >test_set_vm_console_password.py</case>
         <case timeout="900" >test_set_vm_console_password_create.py</case>
@@ -70,8 +70,8 @@
         <case timeout="220" noparallel='True'>test_vm_ha_never_stop_disable_ha.py</case>
         <case timeout="220" >test_vm_ha_never_stop_shutdown.py</case>
         <case timeout="220" noparallel='True'>test_vm_ha_never_stop_del_recover.py</case>
-        <case timeout="220" noparallel='True'>test_vm_ha_never_stop_del_ha.py</case>
-        <case timeout="220" noparallel='True'>test_vm_del_ha_never_stop_recover_auto_start.py</case>
+        <case timeout="400" noparallel='True'>test_vm_ha_never_stop_del_ha.py</case>
+        <case timeout="400" noparallel='True'>test_vm_del_ha_never_stop_recover_auto_start.py</case>
         <case timeout="220" noparallel='True'>test_cluster_config.py</case>
 		<case timeout="240">test_change_vm_image_with_limited_storage_quota.py</case>
 		

@@ -117,17 +117,22 @@ def test():
     #Check if the network is able to ping with eip
     user_name = "root"
     user_password = "password"
-    rsp_ping = os.system("sshpass -p '%s' ssh %s@%s 'ping -c 4 %s'"%(user_password, user_name, vm1_ip, eip2_pub_ip))
-    if rsp_ping != 0:
+#    rsp_ping = os.system("sshpass -p '%s' ssh %s@%s 'ping -c 4 %s'"%(user_password, user_name, vm1_ip, eip2_pub_ip))
+    cmd = 'ping -c 4 %s' % eip2_pub_ip
+    rsp_ping = test_lib.lib_execute_command_in_vm(vm1.get_vm(), cmd)
+    if not rsp_ping:
         test_util.test_fail('Exception: [vm ip:] %s ping [Eip:] %s fail. But it should ping successfully.' % (vm1_ip, eip2_pub_ip))
-    rsp_ping = os.system("sshpass -p '%s' ssh %s@%s 'ping -c 4 %s'"%(user_password, user_name, vm1_ip, eip3_pub_ip))
-    if rsp_ping != 0:
+    cmd = 'ping -c 4 %s' % eip3_pub_ip
+    rsp_ping = test_lib.lib_execute_command_in_vm(vm1.get_vm(), cmd)
+    if not rsp_ping:
         test_util.test_fail('Exception: [vm ip:] %s ping [Eip:] %s fail. But it should ping successfully.' % (vm1_ip, eip3_pub_ip))
-    rsp_ping = os.system("sshpass -p '%s' ssh %s@%s 'ping -c 4 %s'"%(user_password, user_name, vm2_ip, eip11_pub_ip))
-    if rsp_ping != 0:
+    cmd = 'ping -c 4 %s' % eip11_pub_ip
+    rsp_ping = test_lib.lib_execute_command_in_vm(vm2.get_vm(), cmd)
+    if not rsp_ping:
         test_util.test_fail('Exception: [vm ip:] %s ping [Eip:] %s fail. But it should ping successfully.' % (vm2_ip, eip11_pub_ip))
-    rsp_ping = os.system("sshpass -p '%s' ssh %s@%s 'ping -c 4 %s'"%(user_password, user_name, vm3_ip, eip12_pub_ip))
-    if rsp_ping != 0:
+    cmd = 'ping -c 4 %s' % eip12_pub_ip
+    rsp_ping = test_lib.lib_execute_command_in_vm(vm3.get_vm(), cmd)
+    if not rsp_ping:
         test_util.test_fail('Exception: [vm ip:] %s ping [Eip:] %s fail. But it should ping successfully.' % (vm3_ip, eip12_pub_ip))
 
     #Delete vips and vr offering

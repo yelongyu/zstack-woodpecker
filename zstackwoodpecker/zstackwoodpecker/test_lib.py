@@ -3450,7 +3450,11 @@ if [ $? -ne 0 ]; then
 fi
 ''')
         script_file.close()
-        ssh.scp_file(script_file.name, "/tmp/serial_log_gen.sh", host.managementIp, host.username, os.environ.get('hostPassword'), port=22)
+#        ssh.scp_file(script_file.name, "/tmp/serial_log_gen.sh", host.managementIp, host.username, os.environ.get('hostPassword'), port=22)
+        try:
+            ssh.scp_file(script_file.name, "/tmp/serial_log_gen.sh", host.managementIp, 'root', 'password', port=22)
+        except:
+            ssh.scp_file(script_file.name, "/tmp/serial_log_gen.sh", host.managementIp, 'root', 'password', port=2222)
         os.unlink(script_file.name)
         _rsp = lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), cmd)
         if _rsp:
@@ -7404,6 +7408,22 @@ def lib_robot_pickup_action(required_path, resource_list, action_list, pre_robot
     else:
         return (action_selector(action_list, pre_robot_actions, \
             priority_actions).select(), False)
+
+def lib_get_specific_stub(suite_name=None, specific_name='test_stub'):
+    import inspect
+    import zstacklib.utils.component_loader as component_loader
+    caller_info_list = inspect.getouterframes(inspect.currentframe())[1]
+    caller_path = os.path.realpath(caller_info_list[1])
+    tc_name = caller_path.split('/')[-1].split('.')[0]
+    os.environ['TESTCASENAME'] = tc_name
+    curr_dir = os.path.dirname(caller_path)
+    if suite_name:
+        suite_path = os.path.join(curr_dir.split('vm')[0], 'vm', suite_name)
+    else:
+        suite_path = curr_dir
+    test_stub_cl = component_loader.ComponentLoader(specific_name, suite_path, 4)
+    test_stub_cl.load()
+    return test_stub_cl.module
 
 def lib_get_test_stub(suite_name=None):
     '''test_stub lib is not global test library. It is test suite level common

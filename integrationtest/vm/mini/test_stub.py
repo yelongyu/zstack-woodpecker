@@ -564,7 +564,9 @@ def down_host_network(host_ip, scenarioConfig, network_type):
         test_util.test_fail("not support netwoek_type=%s" %(str(network_type)))
     #cmd = "virsh domiflist %s|sed -n '3p'|awk '{print $1}'|xargs -i virsh domif-setlink %s {} down" % (host_vm_inv.uuid, host_vm_inv.uuid)
     cmd = "virsh domiflist %s|grep %s|awk '{print $1}'|xargs -i virsh domif-setlink %s {} down" % (host_vm_inv.uuid, filter_key, host_vm_inv.uuid)
-    if test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, "pwd"):
+    if test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_inv.name, "pwd"):
+        test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_inv.name, cmd)
+    elif test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, "pwd"):
         test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, cmd)
     elif test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, "pwd"):
         test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, cmd)
@@ -596,7 +598,9 @@ def up_host_network(host_ip, scenarioConfig, network_type):
         test_util.test_fail("not support netwoek_type=%s" %(str(network_type)))
 
     cmd = "virsh domiflist %s|grep %s|awk '{print $1}'|xargs -i virsh domif-setlink %s {} up" % (host_vm_inv.uuid, filter_key, host_vm_inv.uuid)
-    if test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, "pwd"):
+    if test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_inv.name, "pwd"):
+        test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_inv.name, cmd)
+    elif test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, "pwd"):
         test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password, cmd)
     elif test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, "pwd"):
         test_lib.lib_execute_ssh_cmd(host_inv.managementIp, host_username, host_password2, cmd)
@@ -604,7 +608,7 @@ def up_host_network(host_ip, scenarioConfig, network_type):
         test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s with username %s" %(host_inv.managementIp, host_password, host_password2, host_username))
 
 def create_mini_vm(l3_uuid_list, image_uuid, vm_name = None, cpu_num = None, memory_size = None, \
-              system_tags = None, instance_offering_uuid = None, \
+              system_tags = None, instance_offering_uuid = None, cluster_uuid=None, \
               rootVolume_systemTags=["volumeProvisioningStrategy::ThickProvisioning"], session_uuid = None):
     if not vm_name:
         vm_name = 'mini_vm'
@@ -622,6 +626,7 @@ def create_mini_vm(l3_uuid_list, image_uuid, vm_name = None, cpu_num = None, mem
     vm_creation_option.set_memory_size(memory_size)
     vm_creation_option.set_system_tags(system_tags)
     vm_creation_option.set_rootVolume_systemTags(rootVolume_systemTags)
+    vm_creation_option.set_cluster_uuid(cluster_uuid)
     vm_creation_option.set_session_uuid(session_uuid)
     vm_creation_option.set_timeout(900000)
     vm = test_vm_header.ZstackTestVm()
@@ -1110,14 +1115,20 @@ class ImageReplication(object):
         self.test_obj_dict.add_image(image)
         self.image = image.get_image()
 
-    def delete_image(self):
-        img_ops.delete_image(self.image.uuid)
+    def delete_image(self, uuid=None):
+        if not uuid:
+            uuid = self.image.uuid
+        img_ops.delete_image(uuid)
 
-    def recover_image(self):
-        img_ops.recover_image(self.image.uuid)
+    def recover_image(self, uuid=None):
+        if not uuid:
+            uuid = self.image.uuid
+        img_ops.recover_image(uuid)
 
-    def expunge_image(self):
-        img_ops.expunge_image(self.image.uuid)
+    def expunge_image(self, uuid=None):
+        if not uuid:
+            uuid = self.image.uuid
+        img_ops.expunge_image(uuid)
 
     def create_vm(self, image_name=None, vm_name=None, provisioning='thick', cpu_num=2, mem_size=2147483648):
         image_name = image_name if image_name else os.getenv('imageName_net')
@@ -1128,7 +1139,15 @@ class ImageReplication(object):
             rootVolume_systemTags = ["volumeProvisioningStrategy::ThinProvisioning"]
         else:
             rootVolume_systemTags = ["volumeProvisioningStrategy::ThickProvisioning"]
-        vm = create_mini_vm([l3_net_uuid], image_uuid, vm_name=vm_name, cpu_num=cpu_num, memory_size=mem_size, rootVolume_systemTags=rootVolume_systemTags)
+        cluster_list = res_ops.query_resource(res_ops.CLUSTER)
+        _cluster_list = cluster_list[:]
+        for cluster in _cluster_list:
+            conditions = res_ops.gen_query_conditions('clusterUuid', '=', cluster.uuid)
+            conditions = res_ops.gen_query_conditions('status', '!=', 'Connected', conditions)
+            if res_ops.query_resource(res_ops.HOST, conditions):
+                cluster_list.remove(cluster)
+        vm = create_mini_vm([l3_net_uuid], image_uuid, vm_name=vm_name, cpu_num=cpu_num, memory_size=mem_size, 
+                            rootVolume_systemTags=rootVolume_systemTags, cluster_uuid=cluster_list[0].uuid)
         self.vm = vm
         vm_inv = self.vm.get_vm()
         if vm_inv.platform == 'Windows':
@@ -1138,13 +1157,15 @@ class ImageReplication(object):
             self.vm.check()
         return vm
 
-    def crt_vm_image(self, image_name):
+    def crt_vm_image(self, image_name, bs_uuid=None):
+        bs_uuid = bs_uuid if bs_uuid else self.get_bs_list()[0].uuid
         image_creation_option = test_util.ImageOption()
         image_creation_option.set_name(image_name)
-        image_creation_option.set_backup_storage_uuid_list([self.get_bs_list()[0].uuid])
+        image_creation_option.set_backup_storage_uuid_list([bs_uuid])
         image_creation_option.set_root_volume_uuid(self.vm.get_vm().allVolumes[0].uuid)
         image_creation_option.set_timeout(900000)
-        img_ops.create_root_volume_template(image_creation_option)
+        root_template = img_ops.create_root_volume_template(image_creation_option)
+        return root_template
 
     def create_iso_vm(self):
         data_volume_size = 10737418240

@@ -107,7 +107,7 @@ class ZSTACK(E2E):
             for elem in row_elems:
                 try:
                     if value in elem.text:
-                        cnt_selected = elem.get_element('checkbox').click()
+                        cnt_selected = elem.click()
                 except StaleElementException:
                     test_util.test_logger('DOM updated, get elements again')
                     self.select_content(row_elem=row_elem, name=name, value=value, click=False)

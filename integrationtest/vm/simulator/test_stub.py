@@ -27,6 +27,7 @@ import zstackwoodpecker.header.vm as vm_header
 from zstackwoodpecker.operations import vm_operations as vm_ops
 import zstackwoodpecker.operations.longjob_operations as longjob_ops
 import zstackwoodpecker.operations.billing_operations as bill_ops
+import zstackwoodpecker.operations.config_operations as cfg_ops
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header 
 import zstackwoodpecker.operations.iam2_operations as iam2_ops 
 import time
@@ -2628,3 +2629,24 @@ def get_security_code(secret):
     if status != 0:
         test_util.test_fail("Run command %s failed" %cmd)
     return output[-6:]
+
+def check_elaboration_properties():
+    cmd = "cat /usr/local/zstacktest/apache-tomcat/webapps/zstack/WEB-INF/classes/zstack.properties|grep '^enableElaboration.*false$'"
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    check_result = test_lib.lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd)
+    if check_result:
+        cmd = "sed -i '/enableElaboration/d' /usr/local/zstacktest/apache-tomcat/webapps/zstack/WEB-INF/classes/zstack.properties"
+        if test_lib.lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd) is not False:
+            cmd = "zstack-ctl restart_node"
+            test_lib.lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd)
+        else:
+            test_util.test_fail("enable elaboration failed")
+    else:
+        test_util.test_logger("enable elaboration success")
+
+def update_billing_symbol(symbol=None):
+    symbol_list = ['CNY', 'USD', 'EUR', 'GBP', 'AUD', 'HKD', 'JPY', 'CHF', 'CAD']
+    if not symbol:
+        symbol = random.choice(symbol_list)
+    cfg_ops.change_global_config("billing", "billing.currency.symbol", symbol)
+    test_util.test_logger("change billing.currency.symbol to %s" % symbol)

@@ -2,35 +2,40 @@
 
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
+import volume
 
-test_stub = test_lib.lib_get_test_stub()
-
-mini = None
-vm_name = 'vm-' + test_stub.get_time_postfix()
+vm_ops = None
+volume_ops = None
+vm_name = 'vm-' + volume.get_time_postfix()
 
 def test():
-    global mini
+    global volume_ops
+    global vm_ops
     global vm_name
-    mini = test_stub.MINI()
-    mini.create_vm(name=vm_name)
-    mini.create_volume(vm=vm_name, provisioning=u'厚置备', view='list')
-    mini.create_volume(vm=vm_name, provisioning=u'精简置备', view='list')
-    mini.check_browser_console_log()
+    volume_ops = volume.VOLUME()
+    vm = test_lib.lib_get_specific_stub(suite_name='e2e_mini/vm', specific_name='vm')
+    vm_ops = vm.VM(uri=volume_ops.uri, initialized=True)
+    vm_ops.create_vm(name=vm_name)
+    volume_ops.create_volume(vm=vm_name, provisioning=u'厚置备', view='list')
+    volume_ops.create_volume(vm=vm_name, provisioning=u'精简置备', view='list')
+    volume_ops.check_browser_console_log()
     test_util.test_pass('Create Volume Attached VM Successful')
 
 
 def env_recover():
-    global mini
-    mini.expunge_vm(vm_name)
-    mini.expunge_volume()
-    mini.close()
+    global volume_ops
+    global vm_ops
+    vm_ops.expunge_vm(vm_name)
+    volume_ops.expunge_volume()
+    volume_ops.close()
 
 #Will be called only if exception happens in test().
 def error_cleanup():
-    global mini
+    global volume_ops
+    global vm_ops
     try:
-        mini.expunge_vm(vm_name)
-        mini.expunge_volume()
-        mini.close()
+        vm_ops.expunge_vm(vm_name)
+        volume_ops.expunge_volume()
+        volume_ops.close()
     except:
         pass

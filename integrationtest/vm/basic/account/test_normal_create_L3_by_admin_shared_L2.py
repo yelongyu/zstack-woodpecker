@@ -22,7 +22,7 @@ _config_ = {
         'timeout' : 2000,
         'noparallel' : True
         }
-zstack_management_ip = os.environ.get('zstackManagementIp')
+#zstack_management_ip = os.environ.get('zstackManagementIp')
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 test_account_uuid = None
@@ -34,6 +34,8 @@ def test():
     global test_account_uuid, test_account_session
     
     test_util.test_dsc('Test normal account change the qos network and volume ')
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    zstack_management_ip = mn_ip
 
     #create normal account
     test_util.test_dsc('create normal account')

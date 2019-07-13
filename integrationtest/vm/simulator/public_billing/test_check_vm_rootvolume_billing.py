@@ -25,6 +25,7 @@ vm_max = 10
 round_max = 10
 round_sum = vm_max * round_max
 def test():
+	test_stub.update_billing_symbol()
 	success_round = 0
 	for i in range(0,vm_max):
 		test_util.test_logger("clear data in RootVolumeUsageVO and PriceVO")

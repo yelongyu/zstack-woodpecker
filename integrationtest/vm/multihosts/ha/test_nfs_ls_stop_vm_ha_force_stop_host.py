@@ -89,7 +89,12 @@ def test():
 
     host_list = test_stub.get_sce_hosts(test_lib.all_scenario_config, test_lib.scenario_file)
     for host in host_list:
-        if host.ip_ == host_ip or host.managementIp_ == host_ip:
+        try:
+            hostIp = host.ip_
+        except:
+            hostIp = host.managementIp_
+#        if host.ip_ == host_ip or host.managementIp_ == host_ip:
+        if hostIp == host_ip:
             test_host = host
             break
     if not test_host:

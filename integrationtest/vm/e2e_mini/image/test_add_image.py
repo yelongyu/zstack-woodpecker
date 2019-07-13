@@ -1,28 +1,27 @@
 # -*- coding:UTF-8 -*-
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
+import image
 
-test_stub = test_lib.lib_get_test_stub()
-
-mini = None
+image_ops = None
 
 def test():
-    global mini
-    mini = test_stub.MINI()
-    mini.add_image()
-    # mini.add_image(adding_type='file', local_file='C:\\Users\\Administrator\\Desktop\\centos7-test.qcow2')
-    mini.check_browser_console_log()
+    global image_ops
+    image_ops = image.IMAGE()
+    image_ops.add_image()
+    # image_ops.add_image(adding_type='file', local_file='C:\\Users\\Administrator\\Desktop\\centos7-test.qcow2')
+    image_ops.check_browser_console_log()
     test_util.test_pass('Add Image Successful')
 
 def env_recover():
-    global mini
-    mini.expunge_image()
-    mini.close()
+    global image_ops
+    image_ops.expunge_image()
+    image_ops.close()
 
 def error_cleanup():
-    global mini
+    global image_ops
     try:
-        mini.expunge_image()
-        mini.close()
+        image_ops.expunge_image()
+        image_ops.close()
     except:
         pass

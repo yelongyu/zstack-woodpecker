@@ -195,38 +195,44 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
             thread.start()
 
     if xmlobject.has_element(deployConfig, 'backupStorages.miniBackupStorage'):
-	vm_ip_list = get_vm_ip_from_scenariofile(scenarioFile)
+        if os.getenv('ZSTACK_SIMULATOR') == 'yes':
+            vm_ip_list = []
+        else:
+            vm_ip_list = get_vm_ip_from_scenariofile(scenarioFile)
         bs_uuid_list = []
         for bs in xmlobject.safe_list(deployConfig.backupStorages.miniBackupStorage):
-	    action = api_actions.AddImageStoreBackupStorageAction()
-	    action.sessionUuid = session_uuid
-	    action.name = bs.name_
+            action = api_actions.AddImageStoreBackupStorageAction()
+            action.sessionUuid = session_uuid
+            action.name = bs.name_
             bs_id = bs.id__
-	    action.description = bs.description__
-	    action.url = bs.url_
-	    action.username = bs.username_
-	    action.password = bs.password_
-	    action.hostname = vm_ip_list[int(bs_id)]
+            action.description = bs.description__
+            action.url = bs.url_
+            action.username = bs.username_
+            action.password = bs.password_
+            if len(vm_ip_list) == 0:
+                action.hostname = bs.hostname_
+            else:
+                action.hostname = vm_ip_list[int(bs_id)]
 
-	    if hasattr(bs, 'port_'):
-	        action.port = bs.port_
-	        action.sshport = bs.port_
-	        action.sshPort = bs.port_
-	    action.timeout = AddKVMHostTimeOut #for some platform slowly salt execution
-	    action.type = inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE
-	    thread = threading.Thread(target = _thread_for_action, args = (action, True))
-	    wait_for_thread_queue()
-	    thread.start()
+            if hasattr(bs, 'port_'):
+                action.port = bs.port_
+                action.sshport = bs.port_
+                action.sshPort = bs.port_
+                action.timeout = AddKVMHostTimeOut #for some platform slowly salt execution
+                action.type = inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE
+                thread = threading.Thread(target = _thread_for_action, args = (action, True))
+                wait_for_thread_queue()
+                thread.start()
             wait_for_thread_done()
             bs = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid, name=bs.name_)[0].uuid
             bs_uuid_list.append(bs)
 
-	action = api_actions.CreateImageReplicationGroupAction()
+        action = api_actions.CreateImageReplicationGroupAction()
         action.name = 'IRG'
-	action.sessionUuid = session_uuid
-	thread = threading.Thread(target = _thread_for_action, args = (action, True))
-	wait_for_thread_queue()
-	thread.start()
+        action.sessionUuid = session_uuid
+        thread = threading.Thread(target = _thread_for_action, args = (action, True))
+        wait_for_thread_queue()
+        thread.start()
         wait_for_thread_done()
         irg_uuid = res_ops.get_resource(res_ops.REPLICATIONGROUP)[0].uuid
 
@@ -2845,6 +2851,16 @@ def add_simulator_backup_storage(scenarioConfig, scenarioFile, deployConfig):
 
     if xmlobject.has_element(deployConfig, 'backupStorages.imageStoreBackupStorage'):
         for bs in xmlobject.safe_list(deployConfig.backupStorages.imageStoreBackupStorage):
+            data = {}
+            data['type'] = 'ImageStoreBackupStorage'
+            data['data'] = {}
+            data['data']['ip'] = bs.hostname_
+            data['data']['path'] = bs.url_
+            data['data']['id'] = bs.name_
+            resources.append(data)
+
+    if xmlobject.has_element(deployConfig, 'backupStorages.miniBackupStorage'):
+        for bs in xmlobject.safe_list(deployConfig.backupStorages.miniBackupStorage):
             data = {}
             data['type'] = 'ImageStoreBackupStorage'
             data['data'] = {}
