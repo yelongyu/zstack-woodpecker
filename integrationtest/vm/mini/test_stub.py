@@ -616,8 +616,8 @@ def create_mini_vm(l3_uuid_list, image_uuid, vm_name = None, cpu_num = None, mem
         cpu_num = 1
     if not memory_size:
         # set memory size to 1G
-        memory_size = 1073741824 
-    vm_creation_option = test_util.VmOption() 
+        memory_size = 1073741824
+    vm_creation_option = test_util.VmOption()
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     vm_creation_option.set_l3_uuids(l3_uuid_list)
     vm_creation_option.set_image_uuid(image_uuid)
@@ -634,36 +634,23 @@ def create_mini_vm(l3_uuid_list, image_uuid, vm_name = None, cpu_num = None, mem
     vm.create()
     return vm
 
-def create_basic_vm(disk_offering_uuids=None, session_uuid = None, wait_vr_running = True, image_name=None):
-    image_name = image_name if image_name else os.environ.get('imageName_net')
+def create_vm(l3_uuid_list=[], image_name=None, vm_name=None, provisioning='thick', cpu_num=None, mem_size=None):
+    if not l3_uuid_list:
+        l3_net_uuid = test_lib.lib_get_l3_by_name(os.getenv('l3PublicNetworkName')).uuid
+        l3_uuid_list.append(l3_net_uuid)
+    image_name = image_name if image_name else os.getenv('imageName_net')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
-    l3_name = os.environ.get('l3VlanNetworkName1')
-    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
-
-#     if wait_vr_running:
-#         ensure_vr_is_running_connected(l3_net_uuid)
-
-    return create_vm([l3_net_uuid], image_uuid, 'basic_no_vlan_vm', disk_offering_uuids, session_uuid = session_uuid)
-
-
-def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
-              disk_offering_uuids = None, default_l3_uuid = None, \
-              system_tags = None, instance_offering_uuid = None, session_uuid = None):
-    vm_creation_option = test_util.VmOption() 
-    conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
-    if not instance_offering_uuid:
-        instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
-        vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
-    vm_creation_option.set_l3_uuids(l3_uuid_list)
-    vm_creation_option.set_image_uuid(image_uuid)
-    vm_creation_option.set_name(vm_name)
-    vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
-    vm_creation_option.set_default_l3_uuid(default_l3_uuid)
-    vm_creation_option.set_system_tags(system_tags)
-    vm_creation_option.set_session_uuid(session_uuid)
-    vm = test_vm_header.ZstackTestVm()
-    vm.set_creation_option(vm_creation_option)
-    vm.create()
+    if provisioning == 'thin':
+        rootVolume_systemTags = ["volumeProvisioningStrategy::ThinProvisioning"]
+    else:
+        rootVolume_systemTags = ["volumeProvisioningStrategy::ThickProvisioning"]
+    vm = create_mini_vm(l3_uuid_list, image_uuid, vm_name=vm_name, cpu_num=cpu_num, memory_size=mem_size, rootVolume_systemTags=rootVolume_systemTags)
+    vm_inv = vm.get_vm()
+    if vm_inv.platform == 'Windows':
+        vm_ip = vm_inv.vmNics[0].ip
+        test_lib.lib_wait_target_up(vm_ip, '23', 1200)
+    else:
+        vm.check()
     return vm
 
 def create_ha_vm(disk_offering_uuids=None, session_uuid = None):

@@ -29,7 +29,7 @@ def test():
     test_stub.ensure_hosts_connected()
     test_stub.ensure_bss_connected()
     test_stub.ensure_pss_connected()
-    vm = test_stub.create_basic_vm()
+    vm = test_stub.create_vm()
 
     vip_s_vm_cfg_lst = test_stub.get_s_vm_cfg_lst_vip_bind(test_lib.all_scenario_config, test_lib.scenario_file)
     if len(vip_s_vm_cfg_lst) != 1:

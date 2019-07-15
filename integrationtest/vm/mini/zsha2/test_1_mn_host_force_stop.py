@@ -32,7 +32,7 @@ def test():
     test_stub.ensure_hosts_connected()
     test_stub.ensure_bss_connected()
     test_stub.ensure_pss_connected()
-    vm = test_stub.create_basic_vm()
+    vm = test_stub.create_vm()
 
     test_util.test_logger("force shutdown host [%s]" % (vip_s_vm_cfg_lst[0].ip_))
     test_stub.stop_host(vip_s_vm_cfg_lst[0], test_lib.all_scenario_config, 'cold')

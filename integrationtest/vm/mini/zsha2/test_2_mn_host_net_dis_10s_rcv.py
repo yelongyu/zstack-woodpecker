@@ -35,7 +35,7 @@ def test():
     test_stub.ensure_hosts_connected()
     test_stub.ensure_bss_connected()
     test_stub.ensure_pss_connected()
-    vm = test_stub.create_basic_vm()
+    vm = test_stub.create_vm()
 
     s_vm0 = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, 0)
     s_vm1 = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, 1)

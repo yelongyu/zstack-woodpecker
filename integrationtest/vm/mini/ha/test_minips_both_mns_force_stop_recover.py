@@ -41,7 +41,7 @@ def test():
     test_mn_host_list = random.sample(range(mn_host_num), (mn_host_num + 1) / 2)
 
 
-    vm = test_stub.create_basic_vm()
+    vm = test_stub.create_vm()
     vm.check()
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
     vm.set_state(vm_header.RUNNING)
