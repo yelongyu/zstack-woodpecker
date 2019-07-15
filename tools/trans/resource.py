@@ -250,6 +250,9 @@ class Vm(Resource):
     def reinit(self):
         return "[TestAction.reinit_vm, %s]" % self.name
 
+    def change_vm_image(self):
+        return "[TestAction.change_vm_image, %s]" % (self.name)
+
     def migrate(self):
         return "[TestAction.migrate_vm, %s]" % self.name
 
@@ -260,9 +263,10 @@ class Vm(Resource):
             return "[TestAction.resize_volume, %s, %s]" % (self.name, ", ".join(tags))
 
     def clone_vm(self):
-        new_vm = Vm()
+        name = "'clone-" + self.name[1:]
+        new_vm = Vm(name)
         all_vms.add(new_vm, RUNNING)
-        return "[TestAction.clone_volume, %s, %s]" % (self.name, new_vm.name)
+        return "[TestAction.clone_vm, %s, %s]" % (self.name, new_vm.name)
 
     def reboot(self):
         return "[TestAction.reboot_vm, %s]" % self.name
@@ -403,11 +407,10 @@ class Volume(Resource):
     def create(self, tags):
         all_volumes.add(self, DETACHED)
         self.state = DETACHED
-        if MINI:
-            if tags and "flag" in tags[-1]:
-                tags[-1] = tags[-1][:-1] + ",scsi" + "'"
-            elif not tags or "flag" not in tags[-1]:
-                tags.append("'flag=scsi'")
+        if tags and "flag" in tags[-1]:
+            tags[-1] = tags[-1][:-1] + ",scsi" + "'"
+        elif not tags or "flag" not in tags[-1]:
+            tags.append("'flag=scsi'")
         return "[TestAction.create_volume, %s, %s]" % (self.name, ", ".join(tags))
 
     def attach(self, vm):
@@ -523,6 +526,10 @@ class Snapshot(Resource):
 
     def use(self):
         return "[TestAction.use_volume_snapshot, %s]" % self.name
+
+    def detach_vm_snapshot(self):
+        all_snapshots.group.pop(self.groupId)
+        return "[TestAction.ungroup_volume_snapshot, %s]" % self.name
 
     def create_image(self):
         image_name = self.name.split('-')[0] + "'"

@@ -19,6 +19,7 @@ zh_en = {
     u"克隆": "clone",
     u"扩容": "resize",
     u"添加": "add",
+    u"解绑": "detach",
 
     u"云主机": "vm",
     u"云主机镜像": "vm_image",

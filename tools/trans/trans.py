@@ -100,7 +100,7 @@ def main():
     arg_parser.add_option(
         "-m", "--mini",
         dest="mini",
-        default="false",
+        default=False,
         action="store_true",
         help="[Optional]if env is mini must add -m"
     )

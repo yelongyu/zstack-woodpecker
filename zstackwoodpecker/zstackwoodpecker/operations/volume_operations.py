@@ -483,3 +483,51 @@ def update_snapshot(volume_uuid, name, description, session_uuid = None):
     test_util.action_logger('Update Snapshot: %s' % volume_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
+
+def check_volume_snapshot_group_availability(uuids=None, session_uuid=None):
+    action = api_actions.CheckVolumeSnapshotGroupAvailabilityAction()
+    if isinstance(uuids, list):
+        action.uuids = uuids
+    else:
+        action.uuids = [uuids]
+
+    test_util.action_logger("Check volume snapshot group availability: [%s]") % str(uuids)
+
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.results
+
+def create_volume_snapshot_group(name, rootVolumeUuid, description=None, session_uuid=None):
+    action = api_actions.CreateVolumeSnapshotGroupAction()
+    action.name = name
+    action.rootVolumeUuid = rootVolumeUuid
+    if description:
+        action.description = description
+
+    test_util.test_logger("Create volume [%s] snapshot group" % rootVolumeUuid)
+
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def revert_vm_from_snapshot_group(uuid, session_uuid=None):
+    action = api_actions.RevertVmFromSnapshotGroupAction()
+    action.uuid = uuid
+    test_util.test_logger("revert vm snapshot group [%s]" % uuid)
+
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.results
+
+def ungroup_volume_snapshot_group(uuid, session_uuid=None):
+    action = api_actions.UngroupVolumeSnapshotGroupAction()
+    action.uuid = uuid
+    test_util.test_logger("ungroup vm snapshot group [%s]" % uuid)
+
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.success
+
+def delete_volume_snapshot_group(uuid, session_uuid=None):
+    action = api_actions.DeleteVolumeSnapshotGroupAction()
+    action.uuid = uuid
+    test_util.test_logger("delete vm snapshot group [%s]" % uuid)
+
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.results

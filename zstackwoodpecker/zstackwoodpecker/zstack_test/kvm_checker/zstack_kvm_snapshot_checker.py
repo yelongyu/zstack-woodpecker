@@ -152,6 +152,7 @@ umount %s >/dev/null
             zstack_sp_header.print_snapshot_chain_checking_point(zstack_sp_header.get_all_ancestry(sp))
             result = False
 
+        volume_obj.expunge()
         return self.judge(result)
 
 class zstack_kvm_snapshot_tree_checker(checker_header.TestChecker):

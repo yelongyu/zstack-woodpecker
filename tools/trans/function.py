@@ -14,11 +14,11 @@ fun_dict = {
     "resize_vm": resize_root_volume,
     "ps_migrate_vm": ps_migrate_vm,
     "reboot_vm": reboot_vm,
-    # "change_vm_image": change_vm_image,
+    "change_vm_image": change_vm_image,
     "change_ha": change_vm_ha,
     #
     "clone_vm": clone_vm,
-    # "clone_vm_with_volume": clone_vm_with_volume,
+    "clone_vm_with_volume": clone_vm,
     #
     "resize_root_volume": resize_root_volume,
     "create_root_backup": create_root_backup,
@@ -35,6 +35,7 @@ fun_dict = {
     "create_vm_snapshot": create_vm_snapshot,
     "recover_vm_snapshot": use_vm_snapshot,
     "delete_vm_snapshot": delete_vm_snapshot,
+    "detach_vm_snapshot": detach_vm_snapshot,
     #
     "create_data_volume": create_volume,
     "delete_data_volume": delete_volume,

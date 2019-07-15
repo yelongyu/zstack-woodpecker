@@ -47,15 +47,16 @@ Options:
 |                                 |                  |                          |      |
 |                                 |                  |                          |      |
 | 创建根云盘快照                  |                  | create_volume_snapshot   | Done |
-| 创建整机快照                    |                  | create_vm_snapshot       |      |
+| 创建整机快照                    |                  | create_vm_snapshot       | Done |
 | 创建云盘快照                    |                  | create_volume_snapshot   | Done |
 | 删除根云盘快照                  |                  | delete_volume_snapshot   | Done |
-| 删除整机快照                    |                  | delete_vm_snapshot       |      |
+| 删除整机快照                    |                  | delete_vm_snapshot       | Done |
 | 删除云盘快照                    |                  | delete_volume_snapshot   | Done |
 | 恢复根云盘快照                  |                  | use_volume_snapshot      | Done |
-| 恢复整机快照                    |                  | use_vm_snapshot          |      |
+| 恢复整机快照                    |                  | use_vm_snapshot          | Done |
 | 恢复云盘快照                    |                  | use_volume_snapshpt      | Done |
 | 批量删除快照                    |                  | batch_delete_snapshots   | Done |
+| 解绑整机快照                    |                  | ungroup_vm_snaoshot      | Done |
 |                                 |                  |                          |      |
 |                                 |                  |                          |      |
 | 创建根云盘备份                  |                  | create_volume_backup     | Done |

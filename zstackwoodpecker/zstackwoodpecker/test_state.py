@@ -47,6 +47,7 @@ class TestAction(object):
     expunge_vm = 'expunge_vm'
     reinit_vm = 'reinit_vm'
     clone_vm = 'clone_vm'
+    clone_vm_with_volume = 'clone_vm_with_volume'
     change_vm_ha = 'change_vm_ha'
     change_vm_image = 'change_vm_image'
     create_vm_backup = 'create_vm_backup'
@@ -86,7 +87,7 @@ class TestAction(object):
     reconnect_bs = 'reconnect_bs'
     reclaim_space_from_bs = 'reclaim_space_from_bs'
 
-    ps_migrage_vm = 'ps_migrage_vm'
+    ps_migrate_vm = 'ps_migrate_vm'
 
     create_sg = 'create_security_group'
     delete_sg = 'delete_security_group'
@@ -104,6 +105,10 @@ class TestAction(object):
     delete_backup_volume_snapshot = 'delete_backup_volume_snapshot'
     create_volume_from_snapshot = 'create_volume_from_snapshot'
     create_image_from_snapshot = 'create_image_from_snapshot'
+    create_vm_snapshot = 'create_vm_snapshot'
+    delete_vm_snapshot = 'delete_vm_snapshot'
+    use_vm_snapshot = 'use_vm_snapshot'
+    ungroup_vm_snapshot = 'ungroup_vm_snapshot'
 
     create_zone = 'create_zone'
     delete_zone = 'delete_zone'

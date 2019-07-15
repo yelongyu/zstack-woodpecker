@@ -77,13 +77,12 @@ class ZstackSnapshot(sp_header.TestSnapshot):
         return self.depth
 
     def get_all_child_list(self):
-        all_child = []
-        temp = self.children
-        all_child.extend(temp)
-        for i in temp:
-            _t = i.get_all_child_list()
-            all_child.extend(_t)
-        return all_child
+        child_list = []
+        for i in self.children:
+            if i.children:
+                child_list.extend(self.get_all_child_list())
+            child_list.append(i)
+        return child_list
 
     def get_children_tree_list(self):
         c_tree = {}
@@ -390,7 +389,6 @@ class ZstackSnapshotTree(object):
 
         snapshot.state = sp_header.DELETED
         self.deleted.append(snapshot)
-        snapshot.remove_children()
 
         # snapshot is head, snapshot.parent == None, head will be deleted
         if snapshot in self.heads:
@@ -400,12 +398,17 @@ class ZstackSnapshotTree(object):
             # current is not in deleted-snapshot children
             self.heads.remove(snapshot)
 
-
         # snapshot is not head but is current or current is in snapshot's children
         elif snapshot == self.current_snapshot or self.current_snapshot in snapshot.get_all_child_list():
             self.current_snapshot = snapshot.parent
 
+        if snapshot.parent:
+            snapshot.parent.children.remove(snapshot)
+
         self.snapshot_list.remove(snapshot)
+        for child in snapshot.get_all_child_list():
+            self.snapshot_list.remove(child)
+        snapshot.remove_children()
 
     # when snapshot_tree is the first created and ps_migrate must update snapshot tree
     def update(self, update_utility=False):
@@ -434,8 +437,9 @@ class ZstackSnapshotTree(object):
 
         test_util.test_logger(self.snapshot_list)
 
-    def use(self, snapshot):
-        vol_ops.use_snapshot(snapshot.get_snapshot().uuid)
+    def use(self, snapshot, real=True):
+        if real:
+            vol_ops.use_snapshot(snapshot.get_snapshot().uuid)
         snapshot.target_volume.update_volume()
         self.set_current_snapshot(snapshot)
         self.checking_points = copy.deepcopy(snapshot.get_checking_points())
@@ -459,3 +463,18 @@ class ZstackSnapshotTree(object):
         self.update()
         checker = checker_factory.CheckerFactory().create_checker(self)
         checker.check()
+
+    # def update_snapshot_list(self):
+    #     def get_children(snap):
+    #         child_list = []
+    #         for i in snap.children:
+    #             if i.children:
+    #                 child_list.extend(get_children(i))
+    #             child_list.append(i)
+    #         return child_list
+    #
+    #
+    #     self.snapshot_list = []
+    #     for snap in self.heads:
+    #         self.snapshot_list.append(snap)
+    #         self.snapshot_list.extend(get_children(snap))

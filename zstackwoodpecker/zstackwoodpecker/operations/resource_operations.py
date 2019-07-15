@@ -68,6 +68,7 @@ SYSTEM_TAG = 'SystemTag'
 USER_TAG = 'UserTag'
 VOLUME_SNAPSHOT_TREE = 'VolumeSnapshotTree'
 VOLUME_SNAPSHOT = 'VolumeSnapshot'
+VOLUME_SNAPSHOT_GROUP = "VolumeSnapshotGroup"
 LOAD_BALANCER = 'LoadBalancer'
 LOAD_BALANCER_LISTENER = 'LoadBalancerListener'
 LOCAL_STORAGE_RESOURCE_REF = 'LocalStorageResourceRef'
@@ -533,6 +534,8 @@ def _gen_query_action(resource, condition=None):
         action = api_actions.QueryUserTagAction()
     elif resource == VOLUME_SNAPSHOT_TREE:
         action = api_actions.QueryVolumeSnapshotTreeAction()
+    elif resource == VOLUME_SNAPSHOT_GROUP:
+        action = api_actions.QueryVolumeSnapshotGroupAction()
     elif resource == VOLUME_SNAPSHOT:
         action = api_actions.QueryVolumeSnapshotAction()
     elif resource == USER:

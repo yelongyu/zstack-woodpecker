@@ -125,6 +125,24 @@ class change_vm_ha(Action):
         return self.path
 
 
+class change_vm_image(Action):
+    def __init__(self):
+        Action.__init__(self)
+        self.run_state = resource.STOPPED
+
+    def check(self, all_vms, tags):
+        Action.check(self, all_vms, tags)
+        if (len(all_vms.stopped + all_vms.running) - len(all_vms.ha)) == 0:
+            print "There is no resource vm to start.Must add create_vm"
+            self.path.append(resource.Vm().create([]))
+        if len(all_vms.stopped) > 0:
+            vm = random.choice(all_vms.stopped)
+            return vm
+        vm = random.choice(all_vms.get_not_ha_resource())
+        self.path.append(vm.stop())
+        return vm
+
+
 class reboot_vm(Action):
     def __init__(self):
         Action.__init__(self)
@@ -282,6 +300,7 @@ class ps_migrate_vm(Action):
     def __init__(self):
         Action.__init__(self)
         self.run_state = resource.STOPPED
+        self.restart = False
 
     def check(self, all_vms, tags):
         Action.check(self, all_vms, tags)
@@ -292,6 +311,7 @@ class ps_migrate_vm(Action):
             vm = random.choice(all_vms.stopped)
             return vm
         vm = random.choice(all_vms.get_not_ha_resource())
+        self.restart = True
         self.path.append(vm.stop())
         return vm
 
@@ -299,6 +319,8 @@ class ps_migrate_vm(Action):
         Action.run(self, tags)
         vm = self.check(resource.all_vms, tags)
         self.path.append(vm.ps_migrate())
+        if self.restart:
+            self.path.append(vm.start())
         return self.path
 
 
@@ -909,9 +931,8 @@ class delete_volume_snapshot(Action):
         random.shuffle(volume_list)
         for volume in volume_list:
             for snapshot in volume.snapshots:
-                if not snapshot.groupId:
-                    self.volume = volume
-                    return self.volume, snapshot
+                self.volume = volume
+                return self.volume, snapshot
         else:
             self.volume = random.choice(volume_list)
             if self.volume.state == resource.DELETED:
@@ -943,14 +964,13 @@ class use_volume_snapshot(Action):
         random.shuffle(volume_list)
         for volume in volume_list:
             for snapshot in volume.snapshots:
-                if not snapshot.groupId:
-                    self.volume = volume
-                    if self.volume.state == resource.ATTACHED and self.volume.vm.state == resource.RUNNING:
-                        self.restate = True
-                        self.path.append(self.volume.vm.stop())
-                    elif self.volume.state == resource.DELETED:
-                        self.path.append(self.volume.recover())
-                    return self.volume, snapshot
+                self.volume = volume
+                if self.volume.state == resource.ATTACHED and self.volume.vm.state == resource.RUNNING:
+                    self.restate = True
+                    self.path.append(self.volume.vm.stop())
+                elif self.volume.state == resource.DELETED:
+                    self.path.append(self.volume.recover())
+                return self.volume, snapshot
         else:
             self.volume = random.choice(volume_list)
             if self.volume.state == resource.DELETED:
@@ -1239,6 +1259,25 @@ class use_vm_snapshot(Action):
         self.path.append(vm.use_vm_snapshot(snapshot.groupId))
         if self.restart:
             self.path.append(vm.start())
+        return self.path
+
+
+class detach_vm_snapshot(Action):
+    def __init__(self):
+        Action.__init__(self)
+
+    def check(self, all_snapshots, tags):
+        if len(all_snapshots.group) == 0:
+            self.path.extend(create_vm_snapshot().run([]))
+        group, snapshot_list = random.choice(all_snapshots.group.items())
+        for snapshot in snapshot_list:
+            if "vm" in snapshot.name :
+                return snapshot
+
+    def run(self, tags):
+        Action.run(self, tags)
+        snapshot = self.check(resource.all_snapshots, tags)
+        self.path.append(snapshot.detach_vm_snapshot())
         return self.path
 
 
