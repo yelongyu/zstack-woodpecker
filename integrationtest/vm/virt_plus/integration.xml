@@ -2,7 +2,7 @@
     <suite name="virt plus test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
         <case timeout='600' repeat='1'>test_check_gateway_ip_conflict.py</case>
         <case timeout='600' repeat='1'>eip/test_create_eip_vm_ip_leak.py</case>
-        <case timeout='600' repeat='1'>eip/test_create_eip_vm_reattach_l3.py</case>
+        <case timeout='900' repeat='1'>eip/test_create_eip_vm_reattach_l3.py</case>
         <case timeout='600' repeat='1'>test_create_vm.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_create_vm_with_userdata.py</case>
         <case timeout='600' repeat='1' noparallel='True'>test_create_vm_with_userdata_and_sshkey.py</case>
@@ -56,7 +56,7 @@
 	<case timeout='600' repeat='1'>qos/test_del_disk_qos.py</case>
 	<case timeout='600' repeat='1'>qos/test_data_vol_qos.py</case>
 	<case timeout='600' repeat='1'>qos/test_del_data_vol_qos.py</case>
-	<case timeout='600' repeat='1'>qos/test_del_outbound_qos_reboot.py</case>
+	<case timeout='900' repeat='1'>qos/test_del_outbound_qos_reboot.py</case>
         <case timeout='600' repeat='1'>other/test_add_local_image.py</case>
         <case timeout='600' repeat='1'>other/test_add_zstore_image.py</case>
         <case timeout='600' repeat='1'>other/test_memory_allocation.py</case>
