@@ -87,6 +87,7 @@ def test():
     vm_ops.get_vm_disk_qos(test_lib.lib_get_data_volumes(new_vm_inv)[0].uuid).volumeBandwidthWrite != write_bandwidth*2:
         test_util.test_fail('Retrieved disk qos not match')
 
+    test_stub.make_ssh_no_password(new_vm_inv)
     test_stub.test_fio_bandwidth(new_vm_inv, read_bandwidth, '/dev/vda')
     test_stub.test_fio_bandwidth(new_vm_inv, read_bandwidth, '/dev/vdb')
 
