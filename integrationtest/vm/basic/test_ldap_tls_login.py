@@ -32,14 +32,13 @@ def test():
     session_uuid = acc_ops.login_by_ldap(os.environ.get('ldapUid'), os.environ.get('ldapPassword'))
     acc_ops.logout(session_uuid)
 
-    global get_expected_exception
     get_expected_exception = False
     try:
         session_uuid = acc_ops.login_by_ldap(os.environ.get('ldapUid'), os.environ.get('ldapPassword')+'1')
         acc_ops.logout(session_uuid)
     except:
-        get_excepted_exception = True
-    if not get_excepted_exception:
+        get_expected_exception = True
+    if not get_expected_exception:
         test_util.test_fail('should not be able to login with wrong password')
 
     get_expected_exception = False
@@ -47,8 +46,8 @@ def test():
         session_uuid = acc_ops.login_by_ldap(os.environ.get('ldapUid'), '')
         acc_ops.logout(session_uuid)
     except:
-        get_excepted_exception = True
-    if not get_excepted_exception:
+        get_expected_exception = True
+    if not get_expected_exception:
         test_util.test_fail('should not be able to login with blank password')
 
     get_expected_exception = False
@@ -56,8 +55,8 @@ def test():
         session_uuid = acc_ops.login_by_ldap(os.environ.get('ldapUid'), None)
         acc_ops.logout(session_uuid)
     except:
-        get_excepted_exception = True
-    if not get_excepted_exception:
+        get_expected_exception = True
+    if not get_expected_exception:
         test_util.test_fail('should not be able to login without password')
 
     ldp_ops.unbind_ldap_account(ldap_account_uuid)
