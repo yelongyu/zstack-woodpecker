@@ -645,17 +645,14 @@ def create_vm(l3_uuid_list=[], image_name=None, vm_name=None, provisioning='thic
     else:
         rootVolume_systemTags = ["volumeProvisioningStrategy::ThickProvisioning"]
     vm = create_mini_vm(l3_uuid_list, image_uuid, vm_name=vm_name, cpu_num=cpu_num, memory_size=mem_size, rootVolume_systemTags=rootVolume_systemTags)
-    vm_inv = vm.get_vm()
-    if vm_inv.platform == 'Windows':
-        vm_ip = vm_inv.vmNics[0].ip
-        test_lib.lib_wait_target_up(vm_ip, '23', 1200)
-    else:
-        vm.check()
     return vm
 
-def create_ha_vm(disk_offering_uuids=None, session_uuid = None):
-    vm = create_basic_vm(disk_offering_uuids=disk_offering_uuids, session_uuid=session_uuid)
-    ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
+def create_windows_vm():
+    l3_net_uuid = test_lib.lib_get_l3_by_name(os.getenv('l3PublicNetworkName')).uuid
+    cond = res_ops.gen_query_conditions('format', '!=', 'iso')
+    cond = res_ops.gen_query_conditions('platform', '=', 'Windows', cond)
+    image_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
+    vm = create_mini_vm([l3_net_uuid], image_uuid, cpu_num=4, memory_size=4294967296)
     return vm
 
 def skip_if_vr_not_vyos(vr_image_name):
