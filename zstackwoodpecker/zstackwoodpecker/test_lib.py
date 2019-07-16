@@ -7413,7 +7413,8 @@ def lib_get_specific_stub(suite_name=None, specific_name='test_stub'):
     import inspect
     import zstacklib.utils.component_loader as component_loader
     caller_info_list = inspect.getouterframes(inspect.currentframe())[1]
-    caller_path = os.path.realpath(caller_info_list[1])
+    # The following line use method[os.path.abspath] while lib_get_test_stub() use method[os.path.realpath]
+    caller_path = os.path.abspath(caller_info_list[1])
     tc_name = caller_path.split('/')[-1].split('.')[0]
     os.environ['TESTCASENAME'] = tc_name
     curr_dir = os.path.dirname(caller_path)
