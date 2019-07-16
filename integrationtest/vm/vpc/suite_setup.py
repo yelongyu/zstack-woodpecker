@@ -66,7 +66,6 @@ def test():
     child2 = os.popen('ifconfig br_eth1 | grep 192.168 | awk \'{print $2}\'')
     management_ip = child2.read()
     cmd = 'zstack-ctl change_ip --ip=%s' % (management_ip)
-    #cmd = 'zstack-ctl change_ip --ip=%s --mysql_root_password=%s' % (management_ip, os.environ.get('DBAdminPassword'))
     ssh.execute(cmd, pub_ip, 'root', 'password')
     time.sleep(10)
     ssh.execute('zstack-ctl stop', pub_ip, 'root', 'password')
@@ -83,23 +82,8 @@ def test():
         ssh.execute('zstack-ctl start', pub_ip, 'root', 'password')
     else:
         print 'mn have been Running'
-#    time.sleep(50)
-#    child1 = os.popen('ifconfig br_eth1 | grep 192.168 | awk \'{print $2}\'')
-#    management_ip = child1.read()
-#    os.system('zstack-ctl change_ip --ip %s'% management_ip)
-#    time.sleep(50)
-#    os.system('rm -rf /tmp/hsperfdata_*')
-#    os.system('zstack-ctl start')
-#    time.sleep(50)
-#    child3 = os.popen('zstack-ctl status | grep "MN status" | awk \'{print $3}\'')
-#    mn_status = child3.read()
-#    if 'Running' not in mn_status:
-#        os.system('zstack-ctl stop')
-#        time.sleep(50)
-#        os.system('zstack-ctl start')
-#        time.sleep(50)
-#    else:
-#        print 'mn have been running now'
+    ssh.execute('ip route del 192.168.200.100 via 172.24.0.1 dev br_eth0', pub_ip, 'root', 'password')
+
     for host in hosts:
         os.system("bash %s %s" % (EXTRA_HOST_SETUP_SCRIPT, host.managementIp_))
 
