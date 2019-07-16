@@ -19,6 +19,9 @@
               <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
+            <l3Network uuid="$vmManagementL3Uuid">
+              <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
+            </l3Network>
           </l3Networks>
           <nodeRef>$node1Name</nodeRef>
           <hostRef>$hostName</hostRef>
@@ -35,6 +38,9 @@
               <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
             </l3Network>
+            <l3Network uuid="$vmManagementL3Uuid">
+              <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
+            </l3Network>
           </l3Networks>
           <nodeRef>$node2Name</nodeRef>
           <hostRef>$hostName2</hostRef>
@@ -50,6 +56,9 @@
               <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
               <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
+            </l3Network>
+            <l3Network uuid="$vmManagementL3Uuid">
+              <l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>
             </l3Network>
           </l3Networks>
           <hostRef>$hostName3</hostRef>
