@@ -24,7 +24,6 @@ import zstackwoodpecker.operations.backupstorage_operations as bs_ops
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
-import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
 from zstacklib.utils.http import json_post
 import zstackwoodpecker.test_state as test_state
 from cherrypy.scaffold import root
@@ -141,18 +140,6 @@ def get_mn_host(scenarioConfig, scenarioFile):
                             mn_host_list.append(s_vm)
     test_util.test_logger("@@DEBUG@@: %s" %(str(mn_host_list)))
     return mn_host_list
-
-def create_volume(volume_creation_option=None, from_offering=True):
-    if not volume_creation_option:
-        disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
-        volume_creation_option = test_util.VolumeOption()
-        volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
-        volume_creation_option.set_name('vr_test_volume')
-
-    volume = zstack_volume_header.ZstackTestVolume()
-    volume.set_creation_option(volume_creation_option)
-    volume.create(from_offering)
-    return volume
 
 def exec_zsha2_version(host_ip, username, password):
     cmd = "zsha2 version"
@@ -607,9 +594,9 @@ def up_host_network(host_ip, scenarioConfig, network_type):
     else:
         test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s with username %s" %(host_inv.managementIp, host_password, host_password2, host_username))
 
-def create_mini_vm(l3_uuid_list, image_uuid, vm_name = None, cpu_num = None, memory_size = None, \
-              system_tags = None, instance_offering_uuid = None, cluster_uuid=None, \
-              rootVolume_systemTags=["volumeProvisioningStrategy::ThickProvisioning"], session_uuid = None):
+def create_mini_vm(l3_uuid_list, image_uuid, vm_name=None, cpu_num=None, memory_size=None, \
+              system_tags=None, instance_offering_uuid=None, cluster_uuid=None, \
+              rootVolume_systemTags=["volumeProvisioningStrategy::ThickProvisioning"], session_uuid=None):
     if not vm_name:
         vm_name = 'mini_vm'
     if not cpu_num:
@@ -634,6 +621,22 @@ def create_mini_vm(l3_uuid_list, image_uuid, vm_name = None, cpu_num = None, mem
     vm.create()
     return vm
 
+def create_mini_volume(volume_name=None, provisioning=None, cluster_uuid=None, vm_uuid=None, data_size=None, session_uuid=None):
+    volume_name = volume_name if volume_name else 'mini_volume'
+    data_size = data_size if data_size else 1073741824
+    volume_creation_option = test_util.VolumeOption()
+    volume_creation_option.set_name(volume_name)
+    volume_creation_option.set_provisioning(provisioning)
+    volume_creation_option.set_cluster_uuid(cluster_uuid)
+    volume_creation_option.set_vm_uuid(vm_uuid)
+    volume_creation_option.set_dataSize(data_size)
+    volume_creation_option.set_session_uuid(session_uuid)
+    volume_creation_option.set_timeout(900000)
+    volume = zstack_volume_header.ZstackTestVolume()
+    volume.set_creation_option(volume_creation_option)
+    volume.create(for_mini=True)
+    return volume
+
 def create_vm(l3_uuid_list=[], image_name=None, vm_name=None, provisioning='thick', cpu_num=None, mem_size=None):
     if not l3_uuid_list:
         l3_net_uuid = test_lib.lib_get_l3_by_name(os.getenv('l3PublicNetworkName')).uuid
@@ -646,6 +649,11 @@ def create_vm(l3_uuid_list=[], image_name=None, vm_name=None, provisioning='thic
         rootVolume_systemTags = ["volumeProvisioningStrategy::ThickProvisioning"]
     vm = create_mini_vm(l3_uuid_list, image_uuid, vm_name=vm_name, cpu_num=cpu_num, memory_size=mem_size, rootVolume_systemTags=rootVolume_systemTags)
     return vm
+
+def create_volume(volume_name=None, provisioning="ThickProvisioning", cluster_uuid=None, vm_uuid=None, data_size=None):
+    cluster_uuid = cluster_uuid if cluster_uuid else res_ops.query_resource(res_ops.CLUSTER)[0].uuid
+    volume = create_mini_volume(volume_name=volume_name, provisioning=provisioning, cluster_uuid=cluster_uuid, vm_uuid=vm_uuid, data_size=data_size)
+    return volume
 
 def create_windows_vm():
     l3_net_uuid = test_lib.lib_get_l3_by_name(os.getenv('l3PublicNetworkName')).uuid

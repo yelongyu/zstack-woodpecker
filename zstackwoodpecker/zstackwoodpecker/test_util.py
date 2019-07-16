@@ -950,7 +950,11 @@ class VolumeOption(DataOption):
         self.url = None #used when add volume from url.
         self.volume_type = None #used when add volume from url
         self.primary_storage_uuid = None #used when add volume from url
+        self.provisioning = None
         self.system_tags = None
+        self.cluster_uuid = None
+        self.vm_uuid = None
+        self.dataSize = None
         self.diskSize = None
         super(VolumeOption, self).__init__()
 
@@ -978,6 +982,12 @@ class VolumeOption(DataOption):
     def get_primary_storage_uuid(self):
         return self.primary_storage_uuid
 
+    def get_provisioning(self):
+        return self.provisioning
+
+    def set_provisioning(self, provisioning) :
+        self.provisioning = provisioning
+
     def set_url(self, url):
         self.url = url
 
@@ -996,6 +1006,23 @@ class VolumeOption(DataOption):
     def get_system_tags(self):
         return self.system_tags
 
+    def get_cluster_uuid(self):
+	    return self.cluster_uuid
+
+    def set_cluster_uuid(self, cluster_uuid) :
+        self.cluster_uuid = cluster_uuid
+
+    def get_vm_uuid(self):
+        return self.vm_uuid
+
+    def set_vm_uuid(self, vm_uuid) :
+        self.vm_uuid = vm_uuid
+
+    def get_dataSize(self):
+        return self.dataSize
+
+    def set_dataSize(self, dataSize) :
+        self.dataSize = dataSize
 
 class ImageOption(DataOption):
     def __init__(self):
