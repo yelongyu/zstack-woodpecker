@@ -4,8 +4,9 @@
 '''
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
-import test_stub
 import zstackwoodpecker.test_state as test_state
+
+test_stub = test_lib.lib_get_specific_stub()
 
 #test_obj_dict is to track test resource. They will be cleanup if there will be any exception in testing.
 test_obj_dict = test_state.TestStateDict()
@@ -45,3 +46,4 @@ def test():
 def error_cleanup():
     global test_obj_dict
     test_lib.lib_error_cleanup(test_obj_dict)
+

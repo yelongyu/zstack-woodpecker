@@ -4,9 +4,10 @@
 '''
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
-import test_stub
 import zstackwoodpecker.test_state as test_state
 import time
+
+test_stub = test_lib.lib_get_specific_stub()
 
 test_obj_dict = test_state.TestStateDict()
 vol_num = 20
@@ -15,7 +16,7 @@ volume_list = []
 def test():
     global test_obj_dict
     global vol_num
-    global volume
+    global volume_list
     vm = test_stub.create_vm()
     test_obj_dict.add_vm(vm)
     vm.check()
@@ -52,7 +53,7 @@ def test():
         additional_vol.attach(vm)
     except:
         test_util.test_logger('Catch expected exception: try to attach the 21th data [volume:] %s to [vm:] %s fail.' % (additional_vol.volume.uuid, vm.vm.uuid))
-        
+
         for i in range(vol_num):
             volume_list[i].detach()
             volume_list[i].check()
@@ -71,3 +72,4 @@ def test():
 def error_cleanup():
     global test_obj_dict
     test_lib.lib_error_cleanup(test_obj_dict)
+
