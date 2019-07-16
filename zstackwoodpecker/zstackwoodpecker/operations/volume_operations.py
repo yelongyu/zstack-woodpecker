@@ -40,7 +40,7 @@ def create_volume_for_mini(volume_option):
     action.privisioning = volume_option.get_provisioning()
     action.clusterUuid = volume_option.get_cluster_uuid()
     action.vmUuid = volume_option.get_vm_uuid()
-    action.dataSize = volume_option.get_dataSize()
+    action.diskSize = volume_option.get_dataSize()
     timeout = volume_option.get_timeout()
     if not timeout:
         action.timeout = 240000

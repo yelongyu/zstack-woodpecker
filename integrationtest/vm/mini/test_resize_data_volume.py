@@ -8,9 +8,7 @@ New Integration Test for resizing data volume.
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
-import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
-import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import time
 import os
 
@@ -20,11 +18,8 @@ test_obj_dict = test_state.TestStateDict()
 
 def test():
     global test_obj_dict
-    volume_creation_option = test_util.VolumeOption()
     test_util.test_dsc('Create volume and check')
-    disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
-    volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
-    volume = test_stub.create_volume(volume_creation_option)
+    volume = test_stub.create_volume()
     test_obj_dict.add_volume(volume)
     volume.check()
     volume_uuid = volume.volume.uuid
