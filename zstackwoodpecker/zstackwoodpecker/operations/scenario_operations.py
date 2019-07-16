@@ -629,11 +629,15 @@ def setup_mn_host_vm(scenario_config, scenario_file, deploy_config, vm_inv, vm_c
 
                 #set_default_gw_cmd = "route del default && route add default gw %s" %(vm_gateway)
                 #ssh.execute(set_default_gw_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+            elif test_lib.lib_cur_cfg_is_a_and_b(['test-config-vyos-ceph-ps.xml'], ['scenario-config-ceph-3-nodes.xml']):
+                pass
             else:
                 test_util.test_fail("not supported ceph testconfig and scenario combination")
         
 
             if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml":
+                pass
+            elif os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-ceph-3-nodes.xml":
                 pass
             elif os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-storage-separate-ceph.xml":
                 #ensure_set_ip_to_bridge(vm_ip, "zsn0", vm_inv, vm_config, scenario_config)
